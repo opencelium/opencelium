@@ -1,36 +1,43 @@
 import { buildWorkflowIndexes } from '../../api/connectionPayload';
-import { collectDescendantEdgeIds, collectDescendantNodeIds } from '../../utils/graphUtils';
-import { getBottomSourceHandle, getRightSourceHandle } from '../../utils/graph.handles';
-import type { LiveGraphNodeStatus, LiveGraphStatus } from '../../test-run/liveGraphStatus';
+import type { LiveGraphStatus } from '../../test-run/liveGraphStatus';
+import type { TestRunCurrentStep } from '../../test-run/TestRunContext';
 import type { WorkflowEdgeModel, WorkflowLoopIterationDisplay, WorkflowNodeModel } from '../../types/workflow.types';
 
 export type TestRunScope = {
-	// Nodes that get the pulsing "active" ring: every LOOP/IF operator (any
-	// nesting depth) that currently has a pending leaf structurally nested
-	// under it, plus a top-level method/leaf (no enclosing operator) while
-	// it's the one PENDING right now. Deliberately keyed off "is anything
-	// under me still going", not the operator's own status line — a loop's
-	// own PENDING/COMPLETE line toggles once per iteration on the backend, and
-	// reacting to that directly made the whole loop body flash on and off
-	// every single pass. This way the ring turns on once when the operator is
-	// entered and stays on continuously through every iteration. A method
-	// nested inside an operator is never added here even while it's the exact
-	// PENDING step — it only ever sits in scopeNodeIds (see below), so the ring
-	// doesn't hop from sibling to sibling as execution moves through the body.
+	// The SINGLE element the paced playback is showing as executing right now
+	// (execution is consecutive — see TestRunCurrentStep), plus the single edge
+	// feeding it. Sets for consumer convenience, but they hold at most one id.
 	activeNodeIds: Set<string>;
-	// The edge feeding each active node — the "data flowing" cue.
 	activeEdgeIds: Set<string>;
-	// Nodes/edges nested inside a currently-running LOOP/IF body, excluding the
-	// operator itself (which is already in activeNodeIds/activeEdgeIds).
-	scopeNodeIds: Set<string>;
-	scopeEdgeIds: Set<string>;
-	// For each LOOP currently executing, at any nesting depth and re-entered
-	// any number of times by an outer loop.
+	// Bumped on every playback transition — including a re-entry of the SAME
+	// element on the next loop iteration — so the edge's travelling-dot
+	// animation restarts once per transition.
+	activeStepNonce: number;
+	// For each LOOP the process is currently inside (any ancestor of the
+	// current step, at any nesting depth), the live iteration counter.
 	iterationByNodeId: Map<string, WorkflowLoopIterationDisplay>;
-	// Nodes where an error actually happened this run — persists after the run
-	// ends (unlike everything else above, which only means something while
-	// something is still PENDING) so the failure stays visible until the next
-	// test run starts.
+	// For each IF the process's current position relates to, which label to
+	// highlight:
+	//  - 'true' — the current step is the IF itself (result known true, and
+	//    arrived) or inside its true-branch subtree. Persists for as long as
+	//    the token stays inside that subtree.
+	//  - 'continue' — either the token is sitting on the IF itself with a
+	//    known false result (nothing to descend into), or the token is
+	//    travelling THIS INSTANT along the IF's continue edge toward its
+	//    immediate next sibling. Deliberately momentary in the second case —
+	//    it clears the instant the dot arrives, unlike 'true', because the
+	//    continue edge has no subtree of its own to keep highlighting; once
+	//    arrived, the target's own state (ring, or its own branch label if
+	//    it's another IF) takes over.
+	activeBranchByNodeId: Map<string, 'true' | 'continue'>;
+	// Nodes where an error actually happened this run — only entries that
+	// received error attribution (errorMessage set at error.originOfErrorPath,
+	// see reduceLiveGraphStatus), NOT every entry whose status is FAIL: ending a
+	// run flips every still-pending node to FAIL (failPendingGraphStatus), and
+	// stopping a test mid-loop must not paint every running loop red. Persists
+	// after the run ends (unlike everything else above, which only means
+	// something while something is still PENDING) so the failure stays visible
+	// until the next test run starts.
 	failedNodeIds: Set<string>;
 	failedNodeErrorByNodeId: Map<string, string>;
 };
@@ -38,147 +45,129 @@ export type TestRunScope = {
 export const EMPTY_TEST_RUN_SCOPE: TestRunScope = {
 	activeNodeIds: new Set(),
 	activeEdgeIds: new Set(),
-	scopeNodeIds: new Set(),
-	scopeEdgeIds: new Set(),
+	activeStepNonce: 0,
 	iterationByNodeId: new Map(),
+	activeBranchByNodeId: new Map(),
 	failedNodeIds: new Set(),
 	failedNodeErrorByNodeId: new Map(),
 };
 
-// Which nested branch of a currently-executing if/loop to treat as "in scope".
-// Unlike getOperatorBottomBranch (used for click-to-highlight, which always
-// shows the bottom/true branch regardless of anything), this picks the branch
-// that is actually running: a loop only ever has one body, but an if's result
-// (status.ifResult) says which side was taken. Falls back to the bottom/true
-// branch when the result isn't known yet (the if hasn't resolved).
-const getActiveOperatorScope = (
-	node: WorkflowNodeModel,
-	status: LiveGraphNodeStatus,
-	edges: WorkflowEdgeModel[],
-): { nodeIds: Set<string>; edgeIds: Set<string> } => {
-	const sourceHandle =
-		node.type === 'if' && status.ifResult === 'false'
-			? getRightSourceHandle('if')
-			: getBottomSourceHandle(node.type);
-
-	const rootEdge = edges.find((edge) => edge.source === node.id && edge.sourceHandle === sourceHandle);
-	if (!rootEdge) return { nodeIds: new Set(), edgeIds: new Set() };
-
-	const nodeIds = collectDescendantNodeIds(rootEdge.target, edges);
-	const edgeIds = collectDescendantEdgeIds(nodeIds, edges);
-	edgeIds.add(rootEdge.id);
-	return { nodeIds, edgeIds };
-};
-
 // While a test run is live, this derives everything the canvas animates from
-// liveGraphStatus (see liveGraphStatus.ts) — a flat, non-memory-bounded
-// per-node status, unlike LiveLogTree which only keeps a loop's first
-// iteration in memory. That matters here specifically: a loop nested inside
-// another loop re-enters (and re-emits fresh PENDING/COMPLETE lines) every
-// single time its parent advances, however many times that is, so this needs
-// a source that keeps reflecting it for the whole run, not just the first pass.
+// liveGraphStatus plus the playback's current step. The model is a single
+// travelling token: exactly one node highlighted, one edge carrying the
+// moving dot — matching the consecutive nature of the execution. Loop
+// iteration counters are the exception: they show on every loop the token is
+// currently inside (the ancestors of the current step), because they are
+// information, not focus.
 //
-// Derives:
-//  - the edge feeding whichever method/operator is currently PENDING, so the
-//    user can watch execution move through the graph;
-//  - for a currently-running LOOP/IF, its whole nested (taken) branch, so the
-//    user can see the scope's extent, not just the single active step;
-//  - the running iteration count for every LOOP currently executing, at any
-//    nesting depth, refreshed on every re-entry;
-//  - which node(s) an error actually happened at, if any — computed
-//    independent of the "anything still pending" checks below, since a
-//    failure is meant to keep marking the graph after the run has stopped.
+// Everything except the failure marking only means something while a line is
+// still PENDING — once the run's playback ends, the token disappears and only
+// the error node (if any) keeps marking the graph until the next run starts.
 export const getTestRunScope = (
 	nodes: WorkflowNodeModel[],
 	edges: WorkflowEdgeModel[],
 	liveGraphStatus: LiveGraphStatus,
+	currentStep: TestRunCurrentStep | null,
 ): TestRunScope => {
 	const entries = Object.entries(liveGraphStatus);
 	if (entries.length === 0) return EMPTY_TEST_RUN_SCOPE;
 
 	const nodeIdByIndex = new Map<string, string>();
-	const indexByNodeId = new Map<string, string>();
 	buildWorkflowIndexes(nodes, edges).forEach((index, nodeId) => {
 		nodeIdByIndex.set(index, nodeId);
-		indexByNodeId.set(nodeId, index);
 	});
 	const nodeById = new Map(nodes.map((node) => [node.id, node]));
 
 	const failedNodeIds = new Set<string>();
 	const failedNodeErrorByNodeId = new Map<string, string>();
 	for (const [indexPath, status] of entries) {
-		if (status.status !== 'FAIL') continue;
+		if (!status.errorMessage) continue;
 		const nodeId = nodeIdByIndex.get(indexPath);
 		if (!nodeId) continue;
 		failedNodeIds.add(nodeId);
-		if (status.errorMessage) failedNodeErrorByNodeId.set(nodeId, status.errorMessage);
+		failedNodeErrorByNodeId.set(nodeId, status.errorMessage);
 	}
 
-	const pendingIndexPaths = entries.filter(([, status]) => status.status === 'PENDING').map(([indexPath]) => indexPath);
-	if (pendingIndexPaths.length === 0) {
+	// The token lives exactly as long as the playback's current step is set —
+	// TestRunProvider clears it when the presentation ends. Deliberately NOT
+	// gated on "something is still PENDING": a method's own COMPLETE line lands
+	// a fraction after its PENDING, and with no enclosing loop still PENDING at
+	// that moment the token would vanish before the node's delayed ring (0.5s,
+	// see nodes.css) ever became visible.
+	if (!currentStep) {
 		return { ...EMPTY_TEST_RUN_SCOPE, failedNodeIds, failedNodeErrorByNodeId };
 	}
 
-	// Structural pass: for every currently-pending leaf, walk its index path's
-	// own prefix chain (outermost first, itself last) and mark every LOOP/IF
-	// found along the way as an "active operator" — regardless of what that
-	// operator's own status line currently says. A top-level leaf (single
-	// segment, no enclosing operator) is marked active in its own right.
-	const activeOperatorIds = new Set<string>();
-	const activeNodeIds = new Set<string>();
-	for (const indexPath of pendingIndexPaths) {
-		const segments = indexPath.split('_');
-		for (let take = 1; take <= segments.length; take += 1) {
-			const prefix = segments.slice(0, take).join('_');
-			const nodeId = nodeIdByIndex.get(prefix);
-			const node = nodeId ? nodeById.get(nodeId) : undefined;
-			if (!nodeId || !node) continue;
-			if (node.type === 'if' || node.type === 'loop') {
-				activeOperatorIds.add(nodeId);
-				activeNodeIds.add(nodeId);
-			} else if (take === segments.length && segments.length === 1) {
-				activeNodeIds.add(nodeId);
-			}
-		}
-	}
-
-	if (activeNodeIds.size === 0) {
+	const currentNodeId = nodeIdByIndex.get(currentStep.indexPath);
+	if (!currentNodeId) {
 		return { ...EMPTY_TEST_RUN_SCOPE, failedNodeIds, failedNodeErrorByNodeId };
 	}
 
-	const scopeNodeIds = new Set<string>();
-	const scopeEdgeIds = new Set<string>();
+	// The current step is deliberately NOT re-checked against its own status:
+	// between its COMPLETE line and the next element's PENDING line the token
+	// would otherwise blink off for one playback beat on every transition.
+	//
+	// Two-phase choreography: while the dot is still travelling the edge
+	// (hasArrived false, the step's first 0.5s) only the edge animates and the
+	// node stays dark; the highlight turns on the moment the dot reaches it.
+	const activeNodeIds = new Set(currentStep.hasArrived ? [currentNodeId] : []);
+	const activeEdgeIds = new Set(
+		edges.filter((edge) => edge.target === currentNodeId).map((edge) => edge.id),
+	);
+
+	// Iteration counters for every loop the token is currently inside, and the
+	// true/continue label for every if on the current step's own ancestor
+	// chain (including itself) — walk its tree-path prefixes and read the
+	// values kept fresh by reduceLiveGraphStatus regardless of each
+	// operator's own PENDING/COMPLETE toggling between iterations.
 	const iterationByNodeId = new Map<string, WorkflowLoopIterationDisplay>();
+	const activeBranchByNodeId = new Map<string, 'true' | 'continue'>();
+	const segments = currentStep.indexPath.split('_').map(Number);
+	for (let take = 1; take <= segments.length; take += 1) {
+		const isSelf = take === segments.length;
+		const prefix = segments.slice(0, take).join('_');
+		const nodeId = nodeIdByIndex.get(prefix);
+		const node = nodeId ? nodeById.get(nodeId) : undefined;
+		if (!nodeId || !node) continue;
+		const status = liveGraphStatus[prefix];
+		if (node.type === 'loop' && status?.iterationCount) {
+			iterationByNodeId.set(nodeId, { iterator: status.iterator ?? '', count: status.iterationCount });
+		}
+		if (node.type === 'if' && status?.ifResult && (!isSelf || currentStep.hasArrived)) {
+			// A strict ancestor (isSelf false) already finished its own arrival
+			// phase in an earlier step, so it's shown unconditionally; the IF
+			// currently being arrived AT waits for hasArrived like everything
+			// else, so its label doesn't appear before its ring does.
+			activeBranchByNodeId.set(nodeId, status.ifResult === 'true' ? 'true' : 'continue');
+		}
+	}
 
-	for (const nodeId of activeOperatorIds) {
-		const node = nodeById.get(nodeId);
-		const operatorIndex = indexByNodeId.get(nodeId);
-		if (!node || !operatorIndex) continue;
-		// Read straight from the flat map rather than requiring this exact line
-		// be the one that's PENDING right now — iterationCount/iterator/speed
-		// (and ifResult) persist on the entry regardless of what its `status`
-		// field currently says, so they stay correct even while this operator's
-		// own line is between PENDING/COMPLETE for the current iteration.
-		const status = liveGraphStatus[operatorIndex] ?? { status: 'PENDING' as const };
-
-		const scope = getActiveOperatorScope(node, status, edges);
-		scope.nodeIds.forEach((id) => scopeNodeIds.add(id));
-		scope.edgeIds.forEach((id) => scopeEdgeIds.add(id));
-
-		if (node.type === 'loop' && status.iterationCount && status.speed !== 'fast') {
-			// A fast loop (iterates in under a second) shows nothing at all, not
-			// even a placeholder — a live count for those would just flicker
-			// unreadably. Otherwise: already known to be a readable speed, or
-			// (this loop's very first invocation) we've just timed enough to know
-			// it isn't fast — else still on iteration 1 of the very first
-			// invocation, nothing to show yet while timing is in progress.
-			if (status.speed === 'slow' || status.iterationCount >= 2) {
-				iterationByNodeId.set(nodeId, { iterator: status.iterator ?? '', count: status.iterationCount });
+	// The momentary "continue" case: the token is travelling THIS INSTANT
+	// along some IF's continue edge — i.e. the current step's own tree
+	// position is exactly the immediately-preceding sibling's position plus
+	// one, and that preceding sibling is an IF. Gated on !hasArrived so it
+	// clears the moment the dot lands (see the field doc above for why this
+	// one doesn't persist the way the ancestor-chain cases above do).
+	if (!currentStep.hasArrived) {
+		const ownLevel = segments.length - 1;
+		const ownOrder = segments[ownLevel];
+		if (ownOrder > 0) {
+			const precedingSiblingIndex = [...segments.slice(0, ownLevel), ownOrder - 1].join('_');
+			const precedingSiblingId = nodeIdByIndex.get(precedingSiblingIndex);
+			const precedingSiblingNode = precedingSiblingId ? nodeById.get(precedingSiblingId) : undefined;
+			if (precedingSiblingId && precedingSiblingNode?.type === 'if') {
+				activeBranchByNodeId.set(precedingSiblingId, 'continue');
 			}
 		}
 	}
 
-	const activeEdgeIds = new Set(edges.filter((edge) => activeNodeIds.has(edge.target)).map((edge) => edge.id));
-
-	return { activeNodeIds, activeEdgeIds, scopeNodeIds, scopeEdgeIds, iterationByNodeId, failedNodeIds, failedNodeErrorByNodeId };
+	return {
+		activeNodeIds,
+		activeEdgeIds,
+		activeStepNonce: currentStep.nonce,
+		iterationByNodeId,
+		activeBranchByNodeId,
+		failedNodeIds,
+		failedNodeErrorByNodeId,
+	};
 };

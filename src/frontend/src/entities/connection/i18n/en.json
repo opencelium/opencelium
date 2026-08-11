@@ -67,6 +67,8 @@
     "startFailed": "Failed to start the test run",
     "stopFailed": "Failed to stop the test run",
     "terminated": "Test run terminated",
+    "locatingError": "Locating the error…",
+    "skipToLive": "Jump to live",
     "otherTestRunning": "A test for this connection is already running. Wait for it to finish or stop it first.",
     "leaveConfirm": {
       "title": "Stop the running test?",

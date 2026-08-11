@@ -50,10 +50,22 @@ textarea {
 }
 
 .canvasCard {
+  position: relative;
   width: 100%;
   max-width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+.canvasAnimationHint {
+  position: absolute;
+  top: 82px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  max-width: 480px;
+  width: max-content;
+  pointer-events: none;
 }
 
 .logsHeaderRow {
@@ -75,6 +87,37 @@ textarea {
   background: transparent;
   cursor: pointer;
   color: var(--color-text-primary);
+}
+
+.logsHeaderLiveToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+}
+
+/* Continuously blinking indicator next to the "Live" label while the toggle
+   is on — same pulsing-dot pattern as the schedules pill's "running" state
+   (wf-schedule-pulse in schedules.css), green for "live". */
+.logsHeaderLiveDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-status-success-fg);
+  animation: logsHeaderLiveDotPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes logsHeaderLiveDotPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
 }
 
 .logsHeaderIconButton {

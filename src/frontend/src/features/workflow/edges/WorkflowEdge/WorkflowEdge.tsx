@@ -1,5 +1,6 @@
 import { BaseEdge, getBezierPath, getSmoothStepPath } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
+import { useLayoutEffect, useRef } from 'react';
 import type { WorkflowEdgeModel } from '../../types/workflow.types';
 
 export function WorkflowEdge({
@@ -19,9 +20,20 @@ export function WorkflowEdge({
 	// Live test-run status takes priority over hover/path-selection highlight,
 	// but never during a drag/drop preview or an invalid-drop state.
 	const isTestRunActive = !!data?.testRunActive && !isDropInvalid && !isPreviewEdge;
-	// Softer cue for edges nested inside a currently-running loop/if body —
-	// marks the scope's extent without competing with the active/highlighted edge.
-	const isTestRunInScope = !!data?.testRunInScope && !isDropInvalid && !isPreviewEdge && !isTestRunActive && !isHighlighted;
+
+	// SMIL gotcha: an <animateMotion> inserted into an SVG that has been
+	// mounted for a while is timed against the DOCUMENT's timeline — with the
+	// default begin="0s" a one-shot animation is considered long since ended,
+	// so the dot would appear already frozen at the target instead of visibly
+	// travelling. begin="indefinite" + an explicit beginElement() on every
+	// mount/transition starts the pass at the right instant. Layout effect so
+	// it begins before paint (no one-frame flash of the dot at the SVG origin).
+	const dotAnimationRef = useRef<SVGElement | null>(null);
+	const testRunNonce = data?.testRunNonce ?? 0;
+	useLayoutEffect(() => {
+		if (!isTestRunActive) return;
+		(dotAnimationRef.current as SVGAnimationElement | null)?.beginElement();
+	}, [isTestRunActive, testRunNonce]);
 
 	const GAP = 3;
 
@@ -64,6 +76,37 @@ export function WorkflowEdge({
 				targetPosition,
 			});
 
+	// The data dot's motion path deliberately overshoots the visible edge: it
+	// continues past the connection point INTO the node's footprint, where the
+	// node body (nodes render above edges) covers it — the dot visually enters
+	// the node and parks inside it instead of stopping at the border.
+	const DOT_INTO_NODE = 30;
+	let dotTargetX = targetX;
+	let dotTargetY = targetY;
+	if (targetPosition === 'left') dotTargetX = targetX + DOT_INTO_NODE;
+	if (targetPosition === 'right') dotTargetX = targetX - DOT_INTO_NODE;
+	if (targetPosition === 'top') dotTargetY = targetY + DOT_INTO_NODE;
+	if (targetPosition === 'bottom') dotTargetY = targetY - DOT_INTO_NODE;
+	const [dotPath] = isIfBranch
+		? getSmoothStepPath({
+				sourceX,
+				sourceY,
+				targetX: dotTargetX,
+				targetY: dotTargetY,
+				sourcePosition,
+				targetPosition,
+				borderRadius: 18,
+				offset: 18,
+			})
+		: getBezierPath({
+				sourceX,
+				sourceY,
+				targetX: dotTargetX,
+				targetY: dotTargetY,
+				sourcePosition,
+				targetPosition,
+			});
+
 	return (
 		<>
 			<circle
@@ -75,8 +118,6 @@ export function WorkflowEdge({
 						? 'edgeStartPointActive'
 						: isHighlighted
 						? 'edgeStartPointHighlighted'
-						: isTestRunInScope
-						? 'edgeStartPointInScope'
 						: ''
 				}`}
 			/>
@@ -85,7 +126,7 @@ export function WorkflowEdge({
 				id={String(id)}
 				path={path}
 				markerEnd={
-					isTestRunActive || isHighlighted || isTestRunInScope
+					isTestRunActive || isHighlighted
 						? 'url(#workflow-arrow-highlighted)'
 						: 'url(#workflow-arrow)'
 				}
@@ -94,8 +135,6 @@ export function WorkflowEdge({
 						? 'workflowEdgePathActive'
 						: isHighlighted
 						? 'workflowEdgePathHighlighted'
-						: isTestRunInScope
-						? 'workflowEdgePathInScope'
 						: ''
 				}`}
 				style={
@@ -121,16 +160,24 @@ export function WorkflowEdge({
 								stroke: 'var(--color-action-primary)',
 								color: 'var(--color-action-primary)',
 							}
-						: isTestRunInScope
-						? {
-								stroke: 'var(--color-action-primary)',
-								color: 'var(--color-action-primary)',
-								opacity: 0.5,
-								strokeDasharray: '4 4',
-							}
 						: undefined
 				}
 			/>
+
+			{isTestRunActive && (
+				// The data dot's single directed pass: it leaves the previous node,
+				// travels for 0.5s along dotPath (the edge extended into the target
+				// node, where the node body covers it) and parks there (fill=freeze)
+				// exactly when the node's ring lights up — reading as the dot being
+				// absorbed into the node. On the next step transition this edge
+				// deactivates and the dot re-departs from that node along the newly
+				// active edge. Only one edge is active at a time (see TestRunScope);
+				// the key restarts the pass per transition, including re-entries of
+				// the same edge on the next loop iteration.
+				<circle key={testRunNonce} r={10} className='workflowEdgeFlowDot'>
+					<animateMotion ref={dotAnimationRef} begin='indefinite' dur='0.5s' repeatCount='1' fill='freeze' path={dotPath} />
+				</circle>
+			)}
 
 			<svg width='0' height='0'>
 				<defs>

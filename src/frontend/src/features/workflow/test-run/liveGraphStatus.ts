@@ -17,34 +17,23 @@ export type LiveGraphNodeStatus = {
 	// LOOP nodes only: iterator name and the running count for the CURRENT
 	// (active) invocation — reset to 1 whenever an enclosing loop advances to a
 	// new iteration, so a nested loop's counter starts fresh each time it reruns.
+	// Always displayed: the paced playback (see playbackQueue.ts) guarantees
+	// iterations tick at a watchable speed however fast the real run was.
 	iterator?: string;
 	iterationCount?: number;
-	// LOOP nodes only: classified once — from how long this loop's very first
-	// invocation's first iteration took — and then kept for the rest of the run,
-	// including every later re-entry (an outer loop re-running this loop must
-	// not re-measure and re-hide it each time, or the badge would blink on every
-	// outer iteration). 'fast' (< 1s) loops iterate too quickly for a live count
-	// to be readable, so the canvas shows a static "i = …" instead. Undefined
-	// only until the very first invocation reaches iteration 2.
-	speed?: 'fast' | 'slow';
 	// Set when this node is where an error actually happened (see error
 	// attribution in reduceLiveGraphStatus) — drives the canvas's red
 	// failure marking and pan-to-node reveal.
 	errorMessage?: string;
-	// Internal bookkeeping for the reset-on-new-invocation rule and the speed
-	// classification above; not meant to be read by consumers.
+	// Internal bookkeeping for the reset-on-new-invocation rule; not meant to
+	// be read by consumers.
 	iterationContext?: string;
 	lastIterationValue?: string;
-	firstIterationStartedAt?: number;
 };
 
 export type LiveGraphStatus = Record<string, LiveGraphNodeStatus>;
 
 export const EMPTY_LIVE_GRAPH_STATUS: LiveGraphStatus = {};
-
-// Below this, a loop's iterations tick over too fast for a live count to be
-// readable — see the `speed` classification in reduceLiveGraphStatus.
-const FAST_LOOP_THRESHOLD_MS = 1000;
 
 // For every node, the indexPaths of its enclosing LOOP ancestors, outermost
 // first — positionally aligned with a socket line's comma-separated
@@ -113,32 +102,20 @@ export const reduceLiveGraphStatus = (
 			if (!existing || existing.iterationContext !== context) {
 				// Fresh invocation of this loop — it is definitely running again right
 				// now, so status always resets to PENDING here, even if the previous
-				// invocation left it COMPLETE/FAIL. Only start timing iteration 1 if
-				// speed isn't already known from an earlier invocation; once
-				// classified, it stays classified for the rest of the run so a loop
-				// re-entered many times by an outer loop doesn't re-measure (and
-				// re-hide) itself every single time.
+				// invocation left it COMPLETE/FAIL.
 				next[loopPath] = {
 					...existing,
 					status: 'PENDING',
 					iterationContext: context,
 					lastIterationValue: value,
 					iterationCount: 1,
-					speed: existing?.speed,
-					firstIterationStartedAt: existing?.speed ? undefined : Date.now(),
 				};
 			} else if (existing.lastIterationValue !== value) {
-				const iterationCount = (existing.iterationCount ?? 0) + 1;
-				// Classify once, from how long iteration 1 took — never re-evaluated
-				// afterwards, so the display doesn't flip-flop mid-run.
-				const speed =
-					existing.speed ??
-					(iterationCount === 2 && existing.firstIterationStartedAt
-						? Date.now() - existing.firstIterationStartedAt < FAST_LOOP_THRESHOLD_MS
-							? 'fast'
-							: 'slow'
-						: undefined);
-				next[loopPath] = { ...existing, lastIterationValue: value, iterationCount, speed };
+				next[loopPath] = {
+					...existing,
+					lastIterationValue: value,
+					iterationCount: (existing.iterationCount ?? 0) + 1,
+				};
 			}
 		});
 	}
@@ -158,11 +135,14 @@ export const reduceLiveGraphStatus = (
 };
 
 // Once a run is over (failed, terminated, or the socket dropped) nothing is
-// in flight anymore — flip still-pending nodes to FAIL so the canvas keeps
-// showing exactly where the run stopped, the same way failPendingNodes does
-// for the log tree. Deliberately NOT cleared, unlike a normal run start: the
-// failure/interruption marker should stay on the graph until the next test
-// run begins, not vanish the instant this one ends.
+// in flight anymore — flip still-pending nodes to FAIL so the canvas's
+// "active" animation (driven off PENDING entries, see getTestRunScope) stops.
+// This does NOT paint those nodes red: the red failure marking is keyed on
+// errorMessage (error attribution above), so only the node where the error
+// actually happened stays marked — stopping a test mid-loop must not turn
+// every running loop red. Deliberately NOT cleared, unlike a normal run
+// start: the failure marker should stay on the graph until the next test run
+// begins, not vanish the instant this one ends.
 export const failPendingGraphStatus = (status: LiveGraphStatus): LiveGraphStatus => {
 	const entries = Object.entries(status);
 	if (!entries.some(([, node]) => node.status === 'PENDING')) return status;

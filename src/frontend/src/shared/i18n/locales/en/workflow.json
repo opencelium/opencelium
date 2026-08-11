@@ -216,6 +216,7 @@
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
     "versionHistory": "Version History",
+    "testRunLockedHint": "Not available while a test run is in progress",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
   },
@@ -291,7 +292,7 @@
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
-    "branchFalse": "false",
+    "branchContinue": "continue",
     "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response.",
     "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
     "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector.",

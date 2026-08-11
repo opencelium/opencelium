@@ -18,7 +18,6 @@ export function LoopOperatorNode({ id, data, selected, dragging }: NodeProps<Loo
 			id={id}
 			data={data}
 			selected={selected}
-			bottomLabel={iterationLabel}
 			rightAdd={{
 				action: { sourceNodeId: id, sourceHandle: 'right', direction: 'right' },
 				showAlways: !!data.rightLeaf,
@@ -39,6 +38,7 @@ export function LoopOperatorNode({ id, data, selected, dragging }: NodeProps<Loo
 				suppressTooltip={dragging || data.isAnyNodeDragging}
 				onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)}
 			/>
+			{iterationLabel && <div className='loopIterationLabel'>{iterationLabel}</div>}
 			<StandardNodeHandles />
 		</NodeShell>
 	);

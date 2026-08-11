@@ -18,7 +18,7 @@ type EdgeCacheEntry = {
 	src: WorkflowEdgeModel;
 	highlighted: boolean;
 	testRunActive: boolean;
-	testRunInScope: boolean;
+	testRunNonce: number;
 	out: WorkflowEdgeModel;
 };
 
@@ -75,7 +75,7 @@ const buildTopologySignature = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeM
 type Params = Pick<
 	WorkflowCanvasProps,
 	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' | 'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor'
-> & { cache?: PrepareWorkflowCache; testRunScope?: TestRunScope };
+> & { cache?: PrepareWorkflowCache; testRunScope?: TestRunScope; isEditLocked?: boolean };
 
 const getMethodInstanceData = (nodes: WorkflowNodeModel[]) => {
 	const result = new Map<string, { index: number; color: string }>();
@@ -117,6 +117,7 @@ export function prepareWorkflowElements({
 	onOpenAggregatorEditor,
 	cache,
 	testRunScope = EMPTY_TEST_RUN_SCOPE,
+	isEditLocked = false,
 }: Params) {
 	let topology = cache?.topology;
 	const topologySig = buildTopologySignature(nodes, edges);
@@ -141,29 +142,34 @@ export function prepareWorkflowElements({
 		const leaf = leafById.get(node.id) ?? computeLeafInfo(node, edges);
 
 		const selectable = node.type !== 'start' && !isPreviewNode;
-		const draggable = !isPreviewNode;
+		// Per-node `draggable` overrides ReactFlow's global `nodesDraggable`, so
+		// the test-run edit lock is applied here, not on the canvas prop. The
+		// start node is exempt: it hosts the run/stop button and stays fully
+		// interactive during a run (its position isn't part of what executes).
+		const draggable = !isPreviewNode && (!isEditLocked || node.type === 'start');
 		const isLeaf = leaf.isLeaf;
 		const nextRightLeaf = isPreviewNode ? false : leaf.rightLeaf;
 		const nextBottomLeaf = isPreviewNode ? false : leaf.bottomLeaf;
 		const duplicateMethodIndex = methodInstanceById.get(node.id)?.index;
 		const duplicateMethodColor = methodInstanceById.get(node.id)?.color;
-		const alwaysShowRightAdd = !isPreviewNode && node.type === 'start' && onlyStartNode;
+		const alwaysShowRightAdd = !isPreviewNode && !isEditLocked && node.type === 'start' && onlyStartNode;
 		const highlighted = Boolean(node.data.highlighted) || highlightedBranch.nodeIds.has(node.id);
-		const suppressHoverAddControls = isPreviewNode || activeAction?.sourceNodeId === node.id;
+		const suppressHoverAddControls = isPreviewNode || isEditLocked || activeAction?.sourceNodeId === node.id;
 		const lockVisibleAddControls = !isPreviewNode && activeAction?.sourceNodeId === node.id;
 		const testRunFailed = testRunScope.failedNodeIds.has(node.id);
 		const testRunActive = !testRunFailed && testRunScope.activeNodeIds.has(node.id);
-		const testRunInScope = !testRunFailed && !testRunActive && testRunScope.scopeNodeIds.has(node.id);
 		const testRunFailedMessage = testRunFailed ? testRunScope.failedNodeErrorByNodeId.get(node.id) : undefined;
 		const testRunIteration = testRunScope.iterationByNodeId.get(node.id);
 		const testRunIterationSig = testRunIteration
 			? `${testRunIteration.iterator}:${testRunIteration.count}`
 			: '';
+		const testRunActiveBranch = testRunScope.activeBranchByNodeId.get(node.id);
 		const sig = [
 			selectable, draggable, isLeaf, nextRightLeaf, nextBottomLeaf,
 			duplicateMethodIndex, duplicateMethodColor, alwaysShowRightAdd,
 			highlighted, suppressHoverAddControls, lockVisibleAddControls, isAnyNodeDragging,
-			testRunActive, testRunInScope, testRunIterationSig, testRunFailed, testRunFailedMessage,
+			testRunActive, testRunIterationSig, testRunActiveBranch, testRunFailed, testRunFailedMessage,
+			isEditLocked,
 		].join('|');
 
 		const cached = cache?.nodes.get(node.id);
@@ -196,14 +202,18 @@ export function prepareWorkflowElements({
 				lockVisibleAddControls,
 				isAnyNodeDragging,
 				testRunActive,
-				testRunInScope,
 				testRunIteration,
+				testRunActiveBranch,
 				testRunFailed,
 				testRunFailedMessage,
-				onAddStep: onOpenAddStep,
-				onOpenContextMenu,
-				onDeleteNode,
-				onOpenAggregatorEditor,
+				// While a test run is active the graph is read-only: withholding the
+				// mutation callbacks hides the add triggers and the delete toolbar
+				// (NodeShell renders them only when the callback is present) and makes
+				// the context menu / aggregator editor unreachable from the node.
+				onAddStep: isEditLocked ? undefined : onOpenAddStep,
+				onOpenContextMenu: isEditLocked ? undefined : onOpenContextMenu,
+				onDeleteNode: isEditLocked ? undefined : onDeleteNode,
+				onOpenAggregatorEditor: isEditLocked ? undefined : onOpenAggregatorEditor,
 			},
 		};
 		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, out });
@@ -212,14 +222,17 @@ export function prepareWorkflowElements({
 	const preparedEdges: WorkflowEdgeModel[] = edges.map((edge) => {
 		const highlighted = Boolean(edge.data?.highlighted) || highlightedBranch.edgeIds.has(edge.id);
 		const testRunActive = testRunScope.activeEdgeIds.has(edge.id);
-		const testRunInScope = !testRunActive && testRunScope.scopeEdgeIds.has(edge.id);
+		// Per-transition nonce: keys the travelling-dot animation on the active
+		// edge so it restarts once per playback step, including re-entries of the
+		// same edge on the next loop iteration. 0 whenever the edge isn't active.
+		const testRunNonce = testRunActive ? testRunScope.activeStepNonce : 0;
 		const cached = cache?.edges.get(edge.id);
 		if (
 			cached
 			&& cached.src === edge
 			&& cached.highlighted === highlighted
 			&& cached.testRunActive === testRunActive
-			&& cached.testRunInScope === testRunInScope
+			&& cached.testRunNonce === testRunNonce
 		) {
 			return cached.out;
 		}
@@ -229,10 +242,10 @@ export function prepareWorkflowElements({
 				...edge.data,
 				highlighted,
 				testRunActive,
-				testRunInScope,
+				testRunNonce,
 			},
 		};
-		cache?.edges.set(edge.id, { src: edge, highlighted, testRunActive, testRunInScope, out });
+		cache?.edges.set(edge.id, { src: edge, highlighted, testRunActive, testRunNonce, out });
 		return out;
 	});
 

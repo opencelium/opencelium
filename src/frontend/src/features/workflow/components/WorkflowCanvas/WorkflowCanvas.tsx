@@ -10,6 +10,7 @@ import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
 import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
+import { TestRunAnimationHint } from './TestRunAnimationHint';
 
 // Where the graph's top-left-most point lands in the viewport on open —
 // offset from the pane's top-left corner rather than dead center, clear of
@@ -76,10 +77,20 @@ export function WorkflowCanvas({
 
   // null outside a TestRunProvider (e.g. a canvas reused without the page wiring).
   const testRun = useTestRun();
+  // While a test run is active (starting/running/stopping) the graph must not
+  // be editable — the payload was already sent to the backend, so any edit
+  // would silently diverge from what is actually executing.
+  const isEditLocked = !!testRun && testRun.phase !== 'idle';
   const liveGraphStatus = testRun?.liveGraphStatus;
+  // In live mode there is no "currently executing" token to show at all — no
+  // dot, no node ring, no iteration counter, no branch label — only the
+  // failure marking (if any) still renders. Passing a null step reuses
+  // getTestRunScope's own "nothing is current" fallback, which already
+  // returns exactly that (see its EMPTY_TEST_RUN_SCOPE-with-failures branch).
+  const currentStep = testRun?.isLiveAnimation ? null : testRun?.currentStep ?? null;
   const testRunScope = useMemo(
-    () => (liveGraphStatus ? getTestRunScope(nodes, edges, liveGraphStatus) : EMPTY_TEST_RUN_SCOPE),
-    [nodes, edges, liveGraphStatus],
+    () => (liveGraphStatus ? getTestRunScope(nodes, edges, liveGraphStatus, currentStep) : EMPTY_TEST_RUN_SCOPE),
+    [nodes, edges, liveGraphStatus, currentStep],
   );
 
   const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor });
@@ -100,6 +111,7 @@ export function WorkflowCanvas({
     onOpenAggregatorEditor: stableOnOpenAggregatorEditor,
     cache: prepareCacheRef.current,
     testRunScope,
+    isEditLocked,
   });
 
   useEffect(() => {
@@ -151,11 +163,11 @@ export function WorkflowCanvas({
         edgeTypes={workflowEdgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onConnect={isEditLocked ? undefined : onConnect}
         onNodeDragStart={onNodeDragStart}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
-        onNodeDoubleClick={onNodeDoubleClick}
+        onNodeDoubleClick={isEditLocked ? undefined : onNodeDoubleClick}
         onPaneClick={onPaneClick}
         nodeDragThreshold={4}
         nodesDraggable
@@ -170,6 +182,7 @@ export function WorkflowCanvas({
         {children}
         <Controls position="top-left" className="workflowControls" />
       </ReactFlow>
+      <TestRunAnimationHint />
     </div>
   );
 }

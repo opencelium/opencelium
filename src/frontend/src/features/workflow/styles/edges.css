@@ -41,44 +41,25 @@
   fill: var(--color-action-primary);
 }
 
-/* Live test-run indicator: a moving dash showing data flowing along the edge
-   feeding whichever method/operator is currently executing. */
+/* Live test-run indicator: a dashed primary edge with a muted turquoise dot
+   looping along it (SVG animateMotion in WorkflowEdge.tsx) representing the
+   data flowing into whichever method/operator is currently executing. Fixed
+   (not a theme token) so it reads consistently in both light and dark. */
 .workflowEdgePathActive {
   stroke: var(--color-action-primary);
   color: var(--color-action-primary);
   stroke-dasharray: 6 4;
-  animation: workflowEdgeFlow 0.6s linear infinite;
+}
+
+.workflowEdgeFlowDot {
+  fill: #2f9e8f;
+  pointer-events: none;
 }
 
 .edgeStartPointActive {
   fill: var(--color-action-primary);
   stroke: var(--color-action-primary);
   stroke-width: 0;
-}
-
-@keyframes workflowEdgeFlow {
-  from {
-    stroke-dashoffset: 10;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-/* Softer, static cue for edges nested inside a currently-running loop/if body —
-   marks the scope's extent without competing with the animated active edge. */
-.workflowEdgePathInScope {
-  stroke: var(--color-action-primary);
-  color: var(--color-action-primary);
-  opacity: 0.5;
-  stroke-dasharray: 4 4;
-}
-
-.edgeStartPointInScope {
-  fill: var(--color-action-primary);
-  stroke: var(--color-action-primary);
-  stroke-width: 0;
-  opacity: 0.5;
 }
 
 .rightDrawerShifted {
