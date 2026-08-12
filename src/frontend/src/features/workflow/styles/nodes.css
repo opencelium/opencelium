@@ -89,6 +89,24 @@
   box-shadow: 0 0 0 4px var(--color-status-error-bg);
 }
 
+/* The node the test run actually failed on gets a pulsing ring on top of the
+   static error highlight above, mirroring nodeTestRunPulse but in the error
+   color — so the zoomed-in, red-highlighted node also draws the eye. */
+.nodeBodyTestRunFailed .startNode,
+.nodeBodyTestRunFailed .circleNode,
+.nodeBodyTestRunFailed .ifNode {
+  animation: nodeTestRunFailedPulse 1s ease-in-out infinite;
+}
+
+@keyframes nodeTestRunFailedPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-status-error-fg) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-status-error-fg) 10%, transparent);
+  }
+}
+
 .nodeBodySearchHighlighted .circleNode,
 .nodeBodySearchHighlighted .ifNode {
   border-color: var(--color-status-warning-fg);
