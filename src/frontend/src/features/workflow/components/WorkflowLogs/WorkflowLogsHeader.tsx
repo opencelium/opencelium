@@ -1,5 +1,6 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Icon } from '@shared/ui/primitives/Icon';
+import { Switch } from '@shared/ui/primitives/Switch';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { ChevronUp, Loader2, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import { useMethodViewMode } from '@features/logs';
@@ -37,6 +38,20 @@ export function WorkflowLogsHeader(props: WorkflowLogsHeaderProps) {
 					{props.isRunning && <span className='logsRunning'><Loader2 size={13} className='logsRunningSpinner' />{tLogs('live.running')}</span>}
 				</span>
 			</button>
+			{props.isExpanded && (
+				<Tooltip content={tLogs('live.liveToggleTooltip')}>
+					<span className='logsHeaderLiveToggle'>
+						{props.isLiveAnimation && <span className='logsHeaderLiveDot' aria-hidden />}
+						<Switch
+							checked={props.isLiveAnimation}
+							textPosition={'left'}
+							onChange={props.onToggleLiveAnimation}
+							text={{ on: tLogs('live.liveToggleLabel'), off: tLogs('live.liveToggleLabel') }}
+							testId='workflow-logs-live-toggle'
+						/>
+					</span>
+				</Tooltip>
+			)}
 			{props.isExpanded && props.hasLogs && <MethodViewButton />}
 			{props.isExpanded && props.hasLogs && !props.isRunning && (
 				<Tooltip content={tLogs('live.clear')}>

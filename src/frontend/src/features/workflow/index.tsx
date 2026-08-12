@@ -26,6 +26,8 @@ import { buildLegacyConnection } from './components/request-editor/legacyAdapter
 import { useWorkflowPage } from './useWorkflowPage';
 import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
 import { TestRunProvider } from './test-run/TestRunProvider';
+import { useTestRun } from './test-run/useTestRun';
+import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
 import { mapConnectionToWorkflowState, type WorkflowConnectionState } from './api/connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
@@ -246,6 +248,20 @@ const triggerJsonDownload = (filename: string, payload: unknown) => {
   URL.revokeObjectURL(url);
 };
 
+// Workflow renders TestRunProvider itself (the provider needs the payload
+// builder and graph metadata computed inside the component), so it cannot call
+// useTestRun directly. This bridge, mounted inside the provider, mirrors the
+// "a run is active" flag back up so page-level edit surfaces (delete shortcut,
+// sidebar, header, history) can be locked while a test executes.
+function TestRunEditLockSync({ onLockChange }: { onLockChange: (isLocked: boolean) => void }) {
+  const testRun = useTestRun();
+  const isLocked = !!testRun && testRun.phase !== 'idle';
+  useEffect(() => {
+    onLockChange(isLocked);
+  }, [isLocked, onLockChange]);
+  return null;
+}
+
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const navigate = useNavigate();
@@ -285,6 +301,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       confirmVariant: 'danger',
     }),
   });
+  // True while a test run is active (starting/running/stopping) — synced from
+  // inside TestRunProvider by TestRunEditLockSync. All edits are disabled for
+  // the duration: the payload was already sent to the backend, so an edit
+  // would silently diverge from what is actually executing.
+  const [isTestRunLocked, setIsTestRunLocked] = useState(false);
   const [historyVersions, setHistoryVersions] = useState<HistoryVersionItem[]>([]);
   const [selectedHistoryVersionId, setSelectedHistoryVersionId] = useState<string | null>(null);
   const [baselineSnapshot, setBaselineSnapshot] = useState<string | null>(null);
@@ -318,6 +339,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers, hydrateCacheRef.current),
     [connectors, invokers, workflow.nodes],
+  );
+  const loopAncestorsByIndexPath = useMemo(
+    () => buildLoopAncestorsByIndexPath(hydratedNodes, workflow.edges),
+    [hydratedNodes, workflow.edges],
   );
   const activeConnectionId = createdConnectionId ?? connectionId;
   const displayedHistoryVersions = useMemo(
@@ -389,6 +414,17 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       cancelled = true;
     };
   }, [connectionId]);
+
+  // When a run starts, close the non-modal edit surfaces that may already be
+  // open — the sidebar could still add a step and the history panel could
+  // still swap the whole graph out from under the executing run.
+  const { setSidebarAction, setContextMenu, setHistoryOpen } = workflow;
+  useEffect(() => {
+    if (!isTestRunLocked) return;
+    setSidebarAction(null);
+    setContextMenu(null);
+    setHistoryOpen(false);
+  }, [isTestRunLocked, setSidebarAction, setContextMenu, setHistoryOpen]);
 
   const isLoading = isConnectionLoading || isConnectorsLoading;
   const hasConnectionChanges = baselineSnapshot !== null && currentChangeSnapshot !== baselineSnapshot;
@@ -793,7 +829,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   }, [connectionId, headerState.description, headerState.title, hydratedNodes, loadedFieldBindings, tEntities, workflow]);
 
   const deleteSelectedNode = () => {
-    if (readOnly) return;
+    if (readOnly || isTestRunLocked) return;
     if (
       workflow.methodEditor ||
       workflow.conditionEditor ||
@@ -841,7 +877,14 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   return (
-    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title} buildTestPayload={buildTestPayload} onResolveStartError={resolveAndHighlightWorkflowError}>
+    <TestRunProvider
+      connectionId={connectionId}
+      connectionTitle={headerState.title}
+      buildTestPayload={buildTestPayload}
+      onResolveStartError={resolveAndHighlightWorkflowError}
+      loopAncestorsByIndexPath={loopAncestorsByIndexPath}
+    >
+    <TestRunEditLockSync onLockChange={setIsTestRunLocked} />
     <div className="page" data-testid="workflow-page">
       <WorkflowHeader
         initialName={headerState.title}
@@ -853,7 +896,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onSave={handleSave}
         saveDisabled={isLoading || !hasConnectionChanges}
         onOpenHistory={handleOpenHistory}
-        readOnly={readOnly}
+        readOnly={readOnly || isTestRunLocked}
+        testRunLocked={isTestRunLocked}
         loading={isConnectionLoading}
         hasSavedConnection={!!activeConnectionId}
         schedulesSlot={
@@ -1043,7 +1087,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           </>
         )}
       </div>
-      <WorkflowSidebar action={workflow.sidebarAction} selectedNode={selectedNode} connectionId={activeConnectionId} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
+      <WorkflowSidebar action={isTestRunLocked ? null : workflow.sidebarAction} selectedNode={selectedNode} connectionId={activeConnectionId} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
       <WorkflowSchedulesPanel
         open={schedulesOpen}
         connectionId={activeConnectionId}
@@ -1058,7 +1102,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         hasUnsavedChanges={hasManualUnsavedChanges}
         onClose={() => workflow.setHistoryOpen(false)}
         onSelectVersion={async (snapshotId) => {
-          if (!activeConnectionId) return;
+          if (!activeConnectionId || isTestRunLocked) return;
           setSelectedHistoryVersionId(snapshotId);
           const state = await loadWorkflowConnectionVersion(activeConnectionId, snapshotId);
           const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors, invokers);

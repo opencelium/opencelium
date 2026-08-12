@@ -41,6 +41,27 @@
   fill: var(--color-action-primary);
 }
 
+/* Live test-run indicator: a dashed primary edge with a muted turquoise dot
+   looping along it (SVG animateMotion in WorkflowEdge.tsx) representing the
+   data flowing into whichever method/operator is currently executing. Fixed
+   (not a theme token) so it reads consistently in both light and dark. */
+.workflowEdgePathActive {
+  stroke: var(--color-action-primary);
+  color: var(--color-action-primary);
+  stroke-dasharray: 6 4;
+}
+
+.workflowEdgeFlowDot {
+  fill: #2f9e8f;
+  pointer-events: none;
+}
+
+.edgeStartPointActive {
+  fill: var(--color-action-primary);
+  stroke: var(--color-action-primary);
+  stroke-width: 0;
+}
+
 .rightDrawerShifted {
   transform: translateX(-300px);
 }

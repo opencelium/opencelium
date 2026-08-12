@@ -67,6 +67,8 @@
     "startFailed": "Testlauf konnte nicht gestartet werden",
     "stopFailed": "Testlauf konnte nicht gestoppt werden",
     "terminated": "Testlauf abgebrochen",
+    "locatingError": "Fehlerstelle wird gesucht…",
+    "skipToLive": "Zum Live-Stand springen",
     "otherTestRunning": "Für diese Verbindung läuft bereits ein Test. Warten Sie, bis er fertig ist, oder stoppen Sie ihn zuerst.",
     "leaveConfirm": {
       "title": "Laufenden Test stoppen?",

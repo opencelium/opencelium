@@ -17,6 +17,7 @@ import { testConnectionExecution } from '../api/connectionApi';
 import {
 	TestRunContext,
 	type TestRunContextValue,
+	type TestRunCurrentStep,
 	type TestRunPhase,
 	type TestRunResult,
 } from './TestRunContext';
@@ -24,8 +25,41 @@ import { clearActiveTestRun, getActiveTestRun, saveActiveTestRun } from './testR
 import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC } from '../utils/workflowApiErrors';
 import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
 import {createId} from "@shared/lib/createId.ts";
+import { EMPTY_LIVE_GRAPH_STATUS, failPendingGraphStatus, reduceLiveGraphStatus, type LiveGraphStatus } from './liveGraphStatus';
+import { PlaybackQueue } from './playbackQueue';
+import { getNextStep, type StepMeta } from './playbackStep';
 
 const TIMEOUT_TO_COLLECT_LOGS = 3000;
+// How long the data dot travels an edge before "arriving" at the next node —
+// must match the <animateMotion dur> in WorkflowEdge.tsx. The node's
+// highlight is gated on arrival (TestRunCurrentStep.hasArrived).
+const DOT_TRAVEL_MS = 500;
+
+// Opt-in diagnostic for the test-run animation: run
+// `localStorage.setItem('oc_testrun_debug', '1')` in the console, start a
+// test, and filter the console by "[test-run". `rx` is the raw socket stream
+// as it arrives; `show` is the paced presentation stream driving the canvas.
+const isTestRunDebugEnabled = () => {
+	try {
+		return !!window.localStorage.getItem('oc_testrun_debug');
+	} catch {
+		return false;
+	}
+};
+const debugLogLine = (stage: 'rx' | 'show', log: ExecutionSocketLog) => {
+	if (!isTestRunDebugEnabled()) return;
+	console.debug(
+		`[test-run:${stage}]`,
+		log.type,
+		log.status,
+		log.indexPath ?? '-',
+		log.properties?.loopIndex ? `loopIndex=${log.properties.loopIndex}` : '',
+	);
+};
+// antd message key for the loading toast shown during the reveal pause (the
+// TIMEOUT_TO_COLLECT_LOGS window between a failure/stop and the error reveal).
+// Keyed so it can be replaced/destroyed from wherever the pause ends.
+const REVEAL_LOADING_MESSAGE_KEY = 'test-run-error-reveal';
 // Backend names every temporary test scheduler "!*test_schedule_<millis>_<title>"
 // (ConnectionController.test). The running-jobs feed lists them while they run.
 const TEST_SCHEDULE_TITLE_PREFIX = '!*test_schedule_';
@@ -78,10 +112,16 @@ type Props = {
 	// the offending node and returns a specific translated message. Returns null for
 	// errors it doesn't recognize, so the generic "failed to start" message is used.
 	onResolveStartError?: (error: unknown) => string | null;
+	// Precomputed once per graph (see buildLoopAncestorsByIndexPath) — lets
+	// liveGraphStatus attribute a socket line's loopIndex components to the
+	// right enclosing loop nodes without this provider knowing the graph shape.
+	loopAncestorsByIndexPath?: Map<string, string[]>;
 	children: ReactNode;
 };
 
-export function TestRunProvider({ connectionId, connectionTitle = '', buildTestPayload, onResolveStartError, children }: Props) {
+const EMPTY_LOOP_ANCESTORS = new Map<string, string[]>();
+
+export function TestRunProvider({ connectionId, connectionTitle = '', buildTestPayload, onResolveStartError, loopAncestorsByIndexPath = EMPTY_LOOP_ANCESTORS, children }: Props) {
 	const { client, status } = useSocket();
 	const { t: tEntities } = useI18n('entities');
 	const confirm = useConfirm();
@@ -96,8 +136,38 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const [resumedRun] = useState(() => (connectionId ? getActiveTestRun(connectionId) : null));
 	const [phase, setPhase] = useState<TestRunPhase>(resumedRun ? 'running' : 'idle');
 	const [logTree, setLogTree] = useState(EMPTY_LIVE_LOG_TREE);
+	const [liveGraphStatus, setLiveGraphStatus] = useState<LiveGraphStatus>(EMPTY_LIVE_GRAPH_STATUS);
+	// The one element the paced playback is showing as executing right now —
+	// advanced by every applied PENDING line (see TestRunCurrentStep).
+	const [currentStep, setCurrentStep] = useState<TestRunCurrentStep | null>(null);
+	// Flips the current step's hasArrived after the dot's 0.5s edge travel.
+	const arrivalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	// Monotonic step counter — gives each transition a unique nonce so a stale
+	// arrival timer can never mark a newer step as arrived.
+	const stepNonceRef = useRef(0);
+	// The step the token currently sits on, with its loop iteration context —
+	// getNextStep compares incoming lines against it (see playbackStep.ts).
+	const currentStepMetaRef = useRef<StepMeta | null>(null);
+	// Read from a ref so handleSocketLog (a stable callback) always sees the
+	// latest graph shape without needing to be recreated when it changes.
+	const loopAncestorsRef = useRef(loopAncestorsByIndexPath);
+	loopAncestorsRef.current = loopAncestorsByIndexPath;
 	const [result, setResult] = useState<TestRunResult | null>(null);
 	const [isOrphaned, setIsOrphaned] = useState(!!resumedRun);
+	// True once the run is over on the BACKEND (end line / terminated), while
+	// the paced playback below may still be animating. The header/result area
+	// quietly reflects this; phase flips to 'idle' only when playback drains.
+	const [isBackendDone, setIsBackendDone] = useState(false);
+	const backendDoneRef = useRef(false);
+	// Socket lines still buffered for paced playback — > 0 means the animation
+	// is running behind the real test (drives the "jump to live" control).
+	const [playbackPendingCount, setPlaybackPendingCount] = useState(0);
+	// User preference (see TestRunContextValue.isLiveAnimation) — read via a
+	// ref inside handleSocketLog/applyLogToPresentation (both stable callbacks)
+	// so toggling it doesn't need to recreate them.
+	const [isLiveAnimation, setIsLiveAnimationState] = useState(false);
+	const isLiveAnimationRef = useRef(isLiveAnimation);
+	isLiveAnimationRef.current = isLiveAnimation;
 	// Whether a test for THIS connection is already running elsewhere (another tab
 	// or user) — the only thing that now blocks starting here. Our own run is
 	// excluded (see ownSchedulerIdRef).
@@ -125,29 +195,159 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		setResult((current) => current ?? next);
 	}, []);
 
-	const finishRun = useCallback(() => {
+	// Applies one socket line to what the user SEES (log tree + canvas
+	// animation). Called by the playback queue, so it runs behind the real run
+	// when lines arrive faster than the pacing allows. The error reveal lives
+	// here — anchored to playback reaching the failure, not to the real failure
+	// instant — so the pan/expand lands on a graph whose animation has caught
+	// up to the failing node.
+	const applyLogToPresentation = useCallback(
+		(log: ExecutionSocketLog) => {
+			debugLogLine('show', log);
+			setLogTree((tree) => reduceLiveLog(tree, log));
+			setLiveGraphStatus((current) => reduceLiveGraphStatus(current, log, loopAncestorsRef.current));
+			// Execution is consecutive: every step line (operator PENDINGs and
+			// method COMPLETEs — methods never emit PENDING, see playbackStep.ts)
+			// IS the process departing toward that element. The nonce advances
+			// even when the indexPath repeats (same node re-entered on the next
+			// loop iteration) so the edge-dot animation restarts per transition.
+			// In live mode there is no travel phase at all — the step arrives the
+			// instant it's applied, matching "no animation, just the raw feed".
+			// Otherwise it starts un-arrived (dot travelling, node dark) and flips
+			// to arrived when the dot's travel time elapses — driven here by the
+			// provider's clock, not by a CSS animation-delay, which silently
+			// restarts (and so never fires) whenever the node re-renders mid-step.
+			const nextStep = getNextStep(log, currentStepMetaRef.current);
+			if (nextStep) {
+				currentStepMetaRef.current = nextStep;
+				const nonce = ++stepNonceRef.current;
+				if (arrivalTimerRef.current) clearTimeout(arrivalTimerRef.current);
+				if (isLiveAnimationRef.current) {
+					setCurrentStep({ indexPath: nextStep.indexPath, nonce, hasArrived: true });
+				} else {
+					setCurrentStep({ indexPath: nextStep.indexPath, nonce, hasArrived: false });
+					arrivalTimerRef.current = setTimeout(() => {
+						setCurrentStep((prev) => (prev && prev.nonce === nonce ? { ...prev, hasArrived: true } : prev));
+					}, DOT_TRAVEL_MS);
+				}
+			}
+
+			if (log.error?.message || (log.type === 'EXECUTION' && log.status === 'FAIL')) {
+				// First failure of the run drives the panel to expand to the error.
+				// Wait ~3s before revealing: the backend needs a moment to finish
+				// persisting the run, otherwise the on-demand child fetches race it.
+				if (!hasRevealedErrorRef.current) {
+					hasRevealedErrorRef.current = true;
+					setRevealPending(true);
+					// The pause has no visible effect of its own (the reveal — pan to
+					// the failed node, expand the log tree — only happens once it ends),
+					// so show a loading toast for its duration or the user is left
+					// staring at a frozen graph wondering whether anything is happening.
+					message.loading({
+						content: tEntities('connection.test.locatingError'),
+						key: REVEAL_LOADING_MESSAGE_KEY,
+						duration: 0,
+					});
+					revealTimerRef.current = setTimeout(() => {
+						message.destroy(REVEAL_LOADING_MESSAGE_KEY);
+						setRevealPending(false);
+						setErrorRevealNonce((n) => n + 1);
+					}, TIMEOUT_TO_COLLECT_LOGS);
+				}
+			}
+		},
+		[tEntities],
+	);
+	const applyLogRef = useRef(applyLogToPresentation);
+	applyLogRef.current = applyLogToPresentation;
+
+	// Presentation-side end of run: playback has shown everything there is to
+	// show. Only now does the phase go idle (releasing the edit lock), does the
+	// travelling token disappear (currentStep — the canvas keeps its highlight
+	// through momentary "nothing PENDING" gaps mid-run, so this is what
+	// actually ends it), and do leftover spinners turn into red dots marking
+	// where the run stopped.
+	const finishPresentation = useCallback(() => {
+		setPhase('idle');
+		if (arrivalTimerRef.current) clearTimeout(arrivalTimerRef.current);
+		currentStepMetaRef.current = null;
+		setCurrentStep(null);
+		setLogTree(failPendingNodes);
+		setLiveGraphStatus(failPendingGraphStatus);
+	}, []);
+	const finishPresentationRef = useRef(finishPresentation);
+	finishPresentationRef.current = finishPresentation;
+
+	// Paces the socket lines so the animation stays watchable however fast the
+	// backend executes (see playbackQueue.ts). Created once; callbacks read
+	// through refs so they always see the latest closures.
+	const playbackRef = useRef<PlaybackQueue | null>(null);
+	if (!playbackRef.current) {
+		playbackRef.current = new PlaybackQueue({
+			applyLog: (log) => applyLogRef.current(log),
+			onDrained: () => {
+				if (backendDoneRef.current) finishPresentationRef.current();
+			},
+			onQueueChange: setPlaybackPendingCount,
+		});
+	}
+
+	// Backend-side end of run, on the REAL clock: release the socket
+	// subscription, the stored resume record and the one-test-per-connection
+	// block immediately — the server is done regardless of how far the paced
+	// playback has gotten. Deliberately does NOT touch phase or the trees.
+	const finishBackend = useCallback(() => {
 		unsubscribeRef.current?.();
 		unsubscribeRef.current = null;
 		if (channelIdRef.current) clearActiveTestRun(channelIdRef.current);
 		channelIdRef.current = null;
 		schedulerIdRef.current = null;
 		setIsOrphaned(false);
-		setPhase('idle');
 		// Our run was the only test allowed for this connection, so no conflict
 		// remains now. Clear the flag immediately instead of waiting for the feed to
 		// drop our (briefly lingering) own job, which would otherwise flash "another
 		// test running". ownSchedulerIdRef stays set so that lingering entry is
 		// ignored by the snapshot/feed until the backend actually drops it.
 		setIsConflictingTestRunning(false);
-		// No more lines will arrive — turn leftover spinners into red dots so
-		// the user can see where an interrupted/failed run stopped.
-		setLogTree(failPendingNodes);
+		backendDoneRef.current = true;
+		setIsBackendDone(true);
+	}, []);
+
+	// Full immediate teardown for paths where paced playback has nothing to
+	// add: orphaned runs replay no logs, a failed start never showed anything,
+	// and leaving the page unmounts the canvas anyway.
+	const finishRunImmediately = useCallback(() => {
+		finishBackend();
+		playbackRef.current?.clear();
+		finishPresentation();
+	}, [finishBackend, finishPresentation]);
+
+	// Skip-to-live: apply everything still buffered right now. If the backend
+	// already finished, the queue's drain callback closes the presentation too.
+	const skipToLive = useCallback(() => {
+		playbackRef.current?.flush();
+	}, []);
+
+	// Toggles the live/animated preference. Switching to live mid-run flushes
+	// whatever the paced queue is still holding, so the two modes never fight
+	// over the same buffered backlog — from this point on every new line goes
+	// straight through handleSocketLog's live branch instead of the queue.
+	// Switching back to animated needs no equivalent action: there is nothing
+	// buffered to un-flush, future lines simply start being queued again.
+	const setLiveAnimation = useCallback((value: boolean) => {
+		setIsLiveAnimationState(value);
+		if (value) playbackRef.current?.flush();
 	}, []);
 
 	useEffect(
 		() => () => {
 			unsubscribeRef.current?.();
-			if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+			playbackRef.current?.dispose();
+			if (arrivalTimerRef.current) clearTimeout(arrivalTimerRef.current);
+			if (revealTimerRef.current) {
+				clearTimeout(revealTimerRef.current);
+				message.destroy(REVEAL_LOADING_MESSAGE_KEY);
+			}
 		},
 		[],
 	);
@@ -160,8 +360,13 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	// button while the socket (re)connects.
 	if (status !== 'connected' && phase !== 'idle' && !isOrphaned) {
 		setPhase('idle');
-		// The run died with the connection — mark in-flight rows as failed.
+		// The run died with the connection — drop the unplayed playback tail (it
+		// no longer reflects anything verifiable) and mark in-flight rows failed.
+		playbackRef.current?.clear();
+		currentStepMetaRef.current = null;
+		setCurrentStep(null);
 		setLogTree(failPendingNodes);
+		setLiveGraphStatus(failPendingGraphStatus);
 		settleResult({ kind: 'stopped' });
 	}
 	useEffect(() => {
@@ -175,35 +380,33 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		if (!isOrphaned) schedulerIdRef.current = null;
 	}, [status, isOrphaned]);
 
+	// Real-time side of an incoming line: presented either instantly (live
+	// mode — bypasses the queue entirely) or buffered for paced playback, and
+	// settle the run's OUTCOME immediately — the result line / header quietly
+	// show that the run is over while the animation is still catching up. The
+	// error reveal is deliberately NOT here (see applyLogToPresentation).
 	const handleSocketLog = useCallback(
 		(log: ExecutionSocketLog) => {
-			setLogTree((tree) => reduceLiveLog(tree, log));
+			debugLogLine('rx', log);
+			if (isLiveAnimationRef.current) {
+				applyLogRef.current(log);
+			} else {
+				playbackRef.current?.enqueue(log);
+			}
 
 			const isExecutionEnd =
 				log.type === 'EXECUTION' && (log.status === 'COMPLETE' || log.status === 'FAIL');
 			if (log.error?.message || (log.type === 'EXECUTION' && log.status === 'FAIL')) {
 				settleResult({ kind: 'failed' });
-				// First failure of the run drives the panel to expand to the error.
-				// Wait ~1.5s before revealing: the backend needs a moment to finish
-				// persisting the run, otherwise the on-demand child fetches race it.
-				// Show a loading state during the pause.
-				if (!hasRevealedErrorRef.current) {
-					hasRevealedErrorRef.current = true;
-					setRevealPending(true);
-					revealTimerRef.current = setTimeout(() => {
-						setRevealPending(false);
-						setErrorRevealNonce((n) => n + 1);
-					}, TIMEOUT_TO_COLLECT_LOGS);
-				}
 			} else if (log.type === 'EXECUTION' && log.status === 'COMPLETE') {
 				settleResult({
 					kind: 'finished',
 					executionTimeMs: Date.now() - startTimeRef.current,
 				});
 			}
-			if (isExecutionEnd || log.error?.message) finishRun();
+			if (isExecutionEnd || log.error?.message) finishBackend();
 		},
-		[settleResult, finishRun],
+		[settleResult, finishBackend],
 	);
 
 	// Orphaned runs can't replay the logs they already emitted, so we don't
@@ -212,9 +415,9 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		(log: ExecutionSocketLog) => {
 			const isExecutionEnd =
 				log.type === 'EXECUTION' && (log.status === 'COMPLETE' || log.status === 'FAIL');
-			if (isExecutionEnd || log.error?.message) finishRun();
+			if (isExecutionEnd || log.error?.message) finishRunImmediately();
 		},
-		[finishRun],
+		[finishRunImmediately],
 	);
 
 	// A run that finished while the page was closed leaves a stale localStorage
@@ -230,7 +433,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			const schedulerId = schedulerIdRef.current;
 			// No schedulerId means the run was never confirmed started — treat as done.
 			if (schedulerId == null) {
-				finishRun();
+				finishRunImmediately();
 				return;
 			}
 			const running = (await apiExecutor({
@@ -241,12 +444,12 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			if (cancelled) return;
 			// On a failed request, keep the stop button rather than guess.
 			if (!Array.isArray(running)) return;
-			if (!running.some((job) => job?.schedulerId === schedulerId)) finishRun();
+			if (!running.some((job) => job?.schedulerId === schedulerId)) finishRunImmediately();
 		})();
 		return () => {
 			cancelled = true;
 		};
-	}, [isOrphaned, finishRun]);
+	}, [isOrphaned, finishRunImmediately]);
 
 	// Subscribe an orphaned run once the socket is up so a still-running backend
 	// execution can clear the stop button when it finishes.
@@ -320,11 +523,20 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		const channelId = connectionId || createId();
 		channelIdRef.current = channelId;
 		const startedAt = Date.now();
+		playbackRef.current?.clear();
+		backendDoneRef.current = false;
+		setIsBackendDone(false);
 		setLogTree(EMPTY_LIVE_LOG_TREE);
+		setLiveGraphStatus(EMPTY_LIVE_GRAPH_STATUS);
+		currentStepMetaRef.current = null;
+		setCurrentStep(null);
 		setResult(null);
 		setIsOrphaned(false);
 		hasRevealedErrorRef.current = false;
-		if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+		if (revealTimerRef.current) {
+			clearTimeout(revealTimerRef.current);
+			message.destroy(REVEAL_LOADING_MESSAGE_KEY);
+		}
 		setRevealPending(false);
 		startTimeRef.current = startedAt;
 		setPhase('starting');
@@ -360,9 +572,9 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 				specificMessage ?? tEntities('connection.test.startFailed'),
 				specificMessage ? RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC : undefined,
 			);
-			finishRun();
+			finishRunImmediately();
 		}
-	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRun, tEntities, onResolveStartError]);
+	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRunImmediately, tEntities, onResolveStartError]);
 
 	const stopTest = useCallback(async () => {
 		if (phase !== 'running' && phase !== 'starting') return;
@@ -388,12 +600,17 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		}
 		message.info(tEntities('connection.test.terminated'));
 		settleResult({ kind: 'stopped' });
-		finishRun(); // unsubscribes from the socket
-	}, [phase, settleResult, finishRun, tEntities]);
+		finishBackend(); // unsubscribes from the socket
+		// A stop also snaps the animation to the run's actual final state — the
+		// flush applies whatever was still buffered, and its drain callback
+		// (backend is done by now) closes the presentation.
+		playbackRef.current?.flush();
+	}, [phase, settleResult, finishBackend, tEntities]);
 
 	const clearLogs = useCallback(() => {
 		if (phase !== 'idle') return;
 		setLogTree(EMPTY_LIVE_LOG_TREE);
+		setLiveGraphStatus(EMPTY_LIVE_GRAPH_STATUS);
 		setResult(null);
 	}, [phase]);
 
@@ -415,9 +632,9 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 				options: { ignoreError: true },
 			});
 		}
-		finishRun();
+		finishRunImmediately();
 		return true;
-	}, [confirm, tEntities, finishRun]);
+	}, [confirm, tEntities, finishRunImmediately]);
 
 	// Tab close / reload: the document is unloading and React state is gone, so
 	// fire a best-effort keepalive terminate (outlives the page) and drop the
@@ -435,27 +652,39 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		if (channelIdRef.current) clearActiveTestRun(channelIdRef.current);
 	}, []);
 
-	useTestRunLeaveGuard(phase !== 'idle', confirmLeaveDuringTest, terminateOnUnload);
+	// The leave guard protects a run that is still executing on the BACKEND.
+	// Once the backend is done, only the paced playback is still going — leaving
+	// then needs no confirmation and nothing to terminate.
+	useTestRunLeaveGuard(phase !== 'idle' && !isBackendDone, confirmLeaveDuringTest, terminateOnUnload);
 
 	// A test for this connection running elsewhere blocks us only when we have no
 	// run of our own.
 	const isOtherTestRunning = phase === 'idle' && isConflictingTestRunning;
+
+	const isPlaybackBehind = playbackPendingCount > 0;
 
 	const value = useMemo<TestRunContextValue>(
 		() => ({
 			socketStatus: status,
 			phase,
 			logTree,
+			liveGraphStatus,
+			currentStep,
 			result,
 			isOrphaned,
 			isOtherTestRunning,
+			isBackendDone,
+			isPlaybackBehind,
+			isLiveAnimation,
+			setLiveAnimation,
 			errorRevealNonce,
 			revealPending,
 			startTest,
 			stopTest,
+			skipToLive,
 			clearLogs,
 		}),
-		[status, phase, logTree, result, isOrphaned, isOtherTestRunning, errorRevealNonce, revealPending, startTest, stopTest, clearLogs],
+		[status, phase, logTree, liveGraphStatus, currentStep, result, isOrphaned, isOtherTestRunning, isBackendDone, isPlaybackBehind, isLiveAnimation, setLiveAnimation, errorRevealNonce, revealPending, startTest, stopTest, skipToLive, clearLogs],
 	);
 
 	return <TestRunContext.Provider value={value}>{children}</TestRunContext.Provider>;

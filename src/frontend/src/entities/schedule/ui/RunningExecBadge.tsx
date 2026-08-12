@@ -6,21 +6,23 @@ import {formatExecutionDate, formatExecutionTime} from './formatExecutionDate'
 const PROGRESS_TICK_MS = 200
 const EXEC_CIRCLE_SIZE = 22
 
-function computePercent(localStartTime: number, avgDuration: number, now: number): number {
+function computePercent(serverStartTime: number, avgDuration: number, now: number): number {
     if (avgDuration <= 0) return 0
-    const elapsed = now - localStartTime
+    const elapsed = now - serverStartTime
     return Math.min(95, Math.max(0, (elapsed / avgDuration) * 100))
 }
 
 type Props = {
-    localStartTime: number
     serverStartTime: number
     avgDuration: number
 }
 
-// One in-flight execution: a live progress ring + its start time. Read-only — the
-// backend has no per-execution terminate endpoint, so there is no action here.
-export function RunningExecBadge({localStartTime, serverStartTime, avgDuration}: Props) {
+// One in-flight execution: a live progress ring + its start time. Percent is derived
+// from the backend's start instant (serverStartTime) rather than when we first saw the
+// execId locally, so a page reload/reconnect shows the ring already at its correct
+// in-flight position instead of resetting to 0%. Read-only — the backend has no
+// per-execution terminate endpoint, so there is no action here.
+export function RunningExecBadge({serverStartTime, avgDuration}: Props) {
     const [now, setNow] = useState(() => Date.now())
 
     useEffect(() => {
@@ -28,7 +30,7 @@ export function RunningExecBadge({localStartTime, serverStartTime, avgDuration}:
         return () => clearInterval(handle)
     }, [])
 
-    const percent = computePercent(localStartTime, avgDuration, now)
+    const percent = computePercent(serverStartTime, avgDuration, now)
 
     return (
         <Tooltip content={formatExecutionDate(serverStartTime)}>

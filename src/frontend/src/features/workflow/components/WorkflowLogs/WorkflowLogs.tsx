@@ -49,6 +49,7 @@ export function WorkflowLogs() {
 	const isOrphaned = testRun?.isOrphaned ?? false;
 	const errorRevealNonce = testRun?.errorRevealNonce ?? 0;
 	const revealPending = testRun?.revealPending ?? false;
+	const isLiveAnimation = testRun?.isLiveAnimation ?? false;
 	const isRunning = phase !== 'idle';
 	const hasLogs = !isOrphaned && logTree.rootKeys.length > 0;
 	const isExpanded = panel !== 'minimized';
@@ -77,6 +78,8 @@ export function WorkflowLogs() {
 				isExpanded={isExpanded}
 				hasLogs={hasLogs}
 				isRunning={isRunning}
+				isLiveAnimation={isLiveAnimation}
+				onToggleLiveAnimation={(value) => testRun?.setLiveAnimation(value)}
 				onToggleMinimized={toggleMinimized}
 				onToggleFull={toggleFull}
 				onClear={() => testRun?.clearLogs()}
