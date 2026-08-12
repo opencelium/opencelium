@@ -11,6 +11,7 @@ import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
 import { TestRunAnimationHint } from './TestRunAnimationHint';
+import { TestRunSpeedControl } from './TestRunSpeedControl';
 
 // Where the graph's top-left-most point lands in the viewport on open —
 // offset from the pane's top-left corner rather than dead center, clear of
@@ -198,6 +199,7 @@ export function WorkflowCanvas({
       >
         {children}
         <Controls position="top-left" className="workflowControls" />
+        <TestRunSpeedControl />
       </ReactFlow>
       <TestRunAnimationHint />
     </div>

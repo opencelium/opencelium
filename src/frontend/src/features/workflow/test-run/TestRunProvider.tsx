@@ -29,12 +29,9 @@ import {createId} from "@shared/lib/createId.ts";
 import { EMPTY_LIVE_GRAPH_STATUS, failPendingGraphStatus, reduceLiveGraphStatus, type LiveGraphStatus } from './liveGraphStatus';
 import { PlaybackQueue, type ApplyLogOpts } from './playbackQueue';
 import { getNextStep, type StepMeta } from './playbackStep';
+import { BASE_DOT_TRAVEL_MS, DEFAULT_ANIMATION_SPEED, clampAnimationSpeed } from './animationSpeed';
 
 const TIMEOUT_TO_COLLECT_LOGS = 3000;
-// How long the data dot travels an edge before "arriving" at the next node —
-// must match the <animateMotion dur> in WorkflowEdge.tsx. The node's
-// highlight is gated on arrival (TestRunCurrentStep.hasArrived).
-const DOT_TRAVEL_MS = 500;
 
 // antd message key for the loading toast shown during the reveal pause (the
 // TIMEOUT_TO_COLLECT_LOGS window between a failure/stop and the error reveal).
@@ -160,6 +157,13 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const [isLiveAnimation, setIsLiveAnimationState] = useState(false);
 	const isLiveAnimationRef = useRef(isLiveAnimation);
 	isLiveAnimationRef.current = isLiveAnimation;
+	// User-controlled pace slider (see TestRunContextValue.animationSpeed) —
+	// same ref-mirroring reason as isLiveAnimation above: read from stable
+	// callbacks (the arrival timer, PlaybackQueue's getSpeed) without needing
+	// to recreate them on every drag tick.
+	const [animationSpeed, setAnimationSpeedState] = useState(DEFAULT_ANIMATION_SPEED);
+	const animationSpeedRef = useRef(animationSpeed);
+	animationSpeedRef.current = animationSpeed;
 	// Whether a test for THIS connection is already running elsewhere (another tab
 	// or user) — the only thing that now blocks starting here. Our own run is
 	// excluded (see ownSchedulerIdRef).
@@ -254,7 +258,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 						setCurrentStep({ indexPath: nextStep.indexPath, nonce, hasArrived: false });
 						arrivalTimerRef.current = setTimeout(() => {
 							setCurrentStep((prev) => (prev && prev.nonce === nonce ? { ...prev, hasArrived: true } : prev));
-						}, DOT_TRAVEL_MS);
+						}, BASE_DOT_TRAVEL_MS / animationSpeedRef.current);
 					}
 				}
 			}
@@ -330,13 +334,16 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	// through refs so they always see the latest closures.
 	const playbackRef = useRef<PlaybackQueue | null>(null);
 	if (!playbackRef.current) {
-		playbackRef.current = new PlaybackQueue({
-			applyLog: (log, opts) => applyLogRef.current(log, opts),
-			onDrained: () => {
-				if (backendDoneRef.current) finishPresentationRef.current();
+		playbackRef.current = new PlaybackQueue(
+			{
+				applyLog: (log, opts) => applyLogRef.current(log, opts),
+				onDrained: () => {
+					if (backendDoneRef.current) finishPresentationRef.current();
+				},
+				onQueueChange: setPlaybackPendingCount,
 			},
-			onQueueChange: setPlaybackPendingCount,
-		});
+			() => animationSpeedRef.current,
+		);
 	}
 
 	// Backend-side end of run, on the REAL clock: release the socket
@@ -390,6 +397,16 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		isLiveAnimationRef.current = value;
 		setIsLiveAnimationState(value);
 		if (value) playbackRef.current?.flush();
+	}, []);
+
+	// Update the ref before the queue reschedules below, same reasoning as
+	// setLiveAnimation above — the reschedule reads animationSpeedRef
+	// synchronously, before setAnimationSpeedState's render-phase update lands.
+	const setAnimationSpeed = useCallback((speed: number) => {
+		const clamped = clampAnimationSpeed(speed);
+		animationSpeedRef.current = clamped;
+		setAnimationSpeedState(clamped);
+		playbackRef.current?.rescheduleForSpeedChange();
 	}, []);
 
 	useEffect(
@@ -769,6 +786,8 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			isPlaybackBehind,
 			isLiveAnimation,
 			setLiveAnimation,
+			animationSpeed,
+			setAnimationSpeed,
 			errorRevealNonce,
 			revealPending,
 			startTest,
@@ -776,7 +795,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			skipToLive,
 			clearLogs,
 		}),
-		[status, phase, logTree, liveGraphStatus, currentStep, result, isOrphaned, isOtherTestRunning, isBackendDone, isPlaybackBehind, isLiveAnimation, setLiveAnimation, errorRevealNonce, revealPending, startTest, stopTest, skipToLive, clearLogs],
+		[status, phase, logTree, liveGraphStatus, currentStep, result, isOrphaned, isOtherTestRunning, isBackendDone, isPlaybackBehind, isLiveAnimation, setLiveAnimation, animationSpeed, setAnimationSpeed, errorRevealNonce, revealPending, startTest, stopTest, skipToLive, clearLogs],
 	);
 
 	return <TestRunContext.Provider value={value}>{children}</TestRunContext.Provider>;
