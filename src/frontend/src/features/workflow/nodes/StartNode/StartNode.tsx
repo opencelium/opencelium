@@ -11,9 +11,11 @@ export function StartNode({ id, data, selected, dragging }: NodeProps<StartWorkf
 	const { t: tEntities } = useI18n('entities');
 	const state = useStartNodeState();
 	// The main button knows exactly two states: start and stop. While the
-	// finished run's animation is still replaying it stays a "stop" — clicking
-	// it then ends the playback without a backend terminate (nothing is running
-	// anymore); useStartNodeState routes that internally.
+	// finished run's animation is still replaying it stays a "stop" shape —
+	// clicking it then ends the playback without a backend terminate (nothing
+	// is running anymore); useStartNodeState routes that internally. Only the
+	// label changes for that case: "Stop test" would be misleading once there
+	// is nothing left to actually terminate.
 	const icon = state.isBusy ? (
 		<Loader2 size={24} className='startNodeSpinner' />
 	) : state.isRunning ? (
@@ -21,7 +23,11 @@ export function StartNode({ id, data, selected, dragging }: NodeProps<StartWorkf
 	) : (
 		<Play size={26} />
 	);
-	const buttonLabelKey = state.isRunning ? 'connection.test.stop' : 'connection.test.start';
+	const buttonLabelKey = state.isReplaying
+		? 'connection.test.skipAnimation'
+		: state.isRunning
+			? 'connection.test.stop'
+			: 'connection.test.start';
 	const socketAlert = state.testRun && !state.isSocketConnected && (
 		<div className='startNodeAlert'>
 			<TriangleAlert size={12} />
@@ -42,7 +48,11 @@ export function StartNode({ id, data, selected, dragging }: NodeProps<StartWorkf
 	);
 	// The paced animation is running behind the real test — offer a one-click
 	// jump to the run's actual current state, right under the run/stop button.
-	const skipToLiveControl = state.testRun && state.isPlaybackBehind && (
+	// Once the backend run itself is over (isReplaying), there is no "live" to
+	// jump to anymore — only the leftover replay, which the main button above
+	// already skips (relabeled "Skip animation") — so this control disappears
+	// rather than keep dangling a "Jump to live" action that no longer applies.
+	const skipToLiveControl = state.testRun && state.isPlaybackBehind && !state.isReplaying && (
 		<button
 			type='button'
 			className='startNodeSkipLive'

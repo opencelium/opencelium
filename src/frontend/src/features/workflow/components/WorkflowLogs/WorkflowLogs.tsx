@@ -47,10 +47,18 @@ export function WorkflowLogs() {
 	const logTree = testRun?.logTree ?? EMPTY_LIVE_LOG_TREE;
 	const result = testRun?.result ?? null;
 	const isOrphaned = testRun?.isOrphaned ?? false;
+	const isBackendDone = testRun?.isBackendDone ?? false;
 	const errorRevealNonce = testRun?.errorRevealNonce ?? 0;
 	const revealPending = testRun?.revealPending ?? false;
 	const isLiveAnimation = testRun?.isLiveAnimation ?? false;
 	const isRunning = phase !== 'idle';
+	// The user already knows the run failed (an error line arrived), but the
+	// backend is still streaming the trailing lines — every enclosing loop/
+	// operator closing out on the way back up the tree — up to the final
+	// EXECUTION line the reveal cascade waits for (see TestRunProvider). A
+	// manual stop (phase 'stopping') is the same idea from the other
+	// direction. Either way "Running…" is no longer accurate.
+	const isStopping = phase === 'stopping' || (result?.kind === 'failed' && !isBackendDone);
 	const hasLogs = !isOrphaned && logTree.rootKeys.length > 0;
 	const isExpanded = panel !== 'minimized';
 
@@ -78,6 +86,7 @@ export function WorkflowLogs() {
 				isExpanded={isExpanded}
 				hasLogs={hasLogs}
 				isRunning={isRunning}
+				isStopping={isStopping}
 				isLiveAnimation={isLiveAnimation}
 				onToggleLiveAnimation={(value) => testRun?.setLiveAnimation(value)}
 				onToggleMinimized={toggleMinimized}

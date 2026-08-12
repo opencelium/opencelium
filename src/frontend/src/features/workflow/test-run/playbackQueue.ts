@@ -28,8 +28,15 @@ const baseDelayOf = (log: ExecutionSocketLog): number =>
 
 type QueueItem = { log: ExecutionSocketLog; baseDelay: number };
 
+// Whether the consumer should update its visible "current step" choreography
+// (currentStep state + arrival timer) for this line. False for every line but
+// the last one in a flush() batch — those are superseded within the same
+// synchronous burst before anything ever paints, so running that bookkeeping
+// for them is pure waste that scales with how large the buffered backlog is.
+export type ApplyLogOpts = { updateStep: boolean };
+
 export type PlaybackQueueCallbacks = {
-	applyLog: (log: ExecutionSocketLog) => void;
+	applyLog: (log: ExecutionSocketLog, opts: ApplyLogOpts) => void;
 	// Fired every time the queue becomes empty — after the natural drain of the
 	// last item and after every flush() (even a flush of an already-empty
 	// queue, so callers can anchor "presentation is caught up" logic to it).
@@ -62,7 +69,9 @@ export class PlaybackQueue {
 		while (this.queue.length > 0) {
 			const item = this.queue.shift();
 			if (!item) break;
-			this.callbacks.applyLog(item.log);
+			// Only the item that ends up last actually reaches the screen — every
+			// earlier one in this batch is overwritten before React ever commits.
+			this.callbacks.applyLog(item.log, { updateStep: this.queue.length === 0 });
 		}
 		this.lastApplyAt = Date.now();
 		this.callbacks.onQueueChange?.(0);
@@ -102,7 +111,7 @@ export class PlaybackQueue {
 		const item = this.queue.shift();
 		if (!item) return;
 		this.lastApplyAt = Date.now();
-		this.callbacks.applyLog(item.log);
+		this.callbacks.applyLog(item.log, { updateStep: true });
 		this.callbacks.onQueueChange?.(this.queue.length);
 		if (this.queue.length === 0) {
 			this.callbacks.onDrained();

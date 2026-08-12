@@ -89,35 +89,77 @@ textarea {
   color: var(--color-text-primary);
 }
 
+/* Styled after the "🔴 LIVE" broadcast badge used by streaming platforms
+   (YouTube, Twitch) — a filled pill with a pulsing dot and an uppercase
+   label reads as "this is happening right now, unfiltered" far more than a
+   plain switch does. Green rather than platforms' red, to read as "healthy/
+   active" instead of "recording/alert" in this app's palette. The pill
+   itself IS the toggle (a <button role="switch">) — no separate Switch
+   control sitting inside it. */
 .logsHeaderLiveToggle {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-background-hover);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Continuously blinking indicator next to the "Live" label while the toggle
-   is on — same pulsing-dot pattern as the schedules pill's "running" state
-   (wf-schedule-pulse in schedules.css), green for "live". */
+.logsHeaderLiveToggle:hover {
+  border-color: var(--color-border-strong);
+}
+
+.logsHeaderLiveToggle--on {
+  background: color-mix(in srgb, var(--color-status-success-fg) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-status-success-fg) 45%, transparent);
+}
+
+.logsHeaderLiveToggle--on:hover {
+  border-color: color-mix(in srgb, var(--color-status-success-fg) 65%, transparent);
+}
+
+/* Idle dot matches the schedules pill's --idle dot (schedules.css); "on"
+   turns solid green with a radiating ring — a "ping", not the opacity/scale
+   breathing used elsewhere (nodeTestRunFailedPulse) — closer to a camera's
+   recording indicator than a generic pulsing highlight. */
 .logsHeaderLiveDot {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
+  background: var(--color-text-disabled);
+  transition: background-color 0.2s ease;
+}
+
+.logsHeaderLiveDot--on {
   background: var(--color-status-success-fg);
-  animation: logsHeaderLiveDotPulse 1.2s ease-in-out infinite;
+  animation: logsHeaderLiveDotPulse 1.6s ease-out infinite;
 }
 
 @keyframes logsHeaderLiveDotPulse {
-  0%,
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-status-success-fg) 55%, transparent);
+  }
+  70%,
   100% {
-    opacity: 1;
-    transform: scale(1);
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--color-status-success-fg) 0%, transparent);
   }
-  50% {
-    opacity: 0.4;
-    transform: scale(0.7);
-  }
+}
+
+.logsHeaderLiveLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.logsHeaderLiveLabel--on {
+  color: var(--color-status-success-fg);
 }
 
 .logsHeaderIconButton {

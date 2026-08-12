@@ -27,6 +27,7 @@
     "title": "Lauf-Logs",
     "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",
     "running": "Läuft…",
+    "stopping": "Test wird gestoppt…",
     "animationSlowedHint": "Diese Animation ist zur besseren Übersicht verlangsamt — sie entspricht nicht der tatsächlichen Ausführungsgeschwindigkeit.",
     "liveToggleLabel": "Live",
     "liveToggleTooltip": "An: Logs live anzeigen, ohne Animation. Aus: Canvas-Animation und Logs zur besseren Übersicht verlangsamen.",
