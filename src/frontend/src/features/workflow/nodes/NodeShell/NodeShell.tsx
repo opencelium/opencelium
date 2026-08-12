@@ -45,8 +45,8 @@ export function NodeShell({
 			{selected && data.onDeleteNode && <NodeToolbar canDelete={data.kind !== 'start'} onDelete={() => data.onDeleteNode?.(id)} />}
 			{topLabel && <div className='nodeTopLabel'>{topLabel}</div>}
 			<div
-				className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError || data.testRunFailed ? 'nodeBodyError' : ''} ${data.testRunFailed ? 'nodeBodyTestRunFailed' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''} ${data.testRunActive ? 'nodeBodyTestRunActive' : ''}`}
-				title={data.hasError ? data.errorMessage : data.testRunFailed ? data.testRunFailedMessage : undefined}
+				className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError || data.testRunFailedVisible ? 'nodeBodyError' : ''} ${data.testRunFailedVisible ? 'nodeBodyTestRunFailed' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''} ${data.testRunActive ? 'nodeBodyTestRunActive' : ''}`}
+				title={data.hasError ? data.errorMessage : data.testRunFailedVisible ? data.testRunFailedMessage : undefined}
 			>
 				{children}
 				{showRightAddTrigger && rightAdd && onAddStep && (

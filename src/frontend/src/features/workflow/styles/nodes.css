@@ -89,21 +89,26 @@
   box-shadow: 0 0 0 4px var(--color-status-error-bg);
 }
 
-/* The node the test run actually failed on gets a pulsing ring on top of the
-   static error highlight above, mirroring nodeTestRunPulse but in the error
-   color — so the zoomed-in, red-highlighted node also draws the eye. */
+/* The node the test run actually failed on gets a breathing pulse on top of
+   the static error highlight above — same opacity/scale pattern and timing as
+   logsHeaderLiveDotPulse (base.css), so the zoomed-in, red-highlighted node
+   reads as "live attention needed" the same way the Live dot does. Scale
+   bottoms out at 0.96 rather than the dot's 0.7 — a whole node shrinking that
+   far would look broken, not "pulsing". */
 .nodeBodyTestRunFailed .startNode,
 .nodeBodyTestRunFailed .circleNode,
 .nodeBodyTestRunFailed .ifNode {
-  animation: nodeTestRunFailedPulse 1s ease-in-out infinite;
+  animation: nodeTestRunFailedPulse 1.2s ease-in-out infinite;
 }
 
 @keyframes nodeTestRunFailedPulse {
   0%, 100% {
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-status-error-fg) 35%, transparent);
+    opacity: 1;
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-status-error-fg) 10%, transparent);
+    opacity: 0.4;
+    transform: scale(0.96);
   }
 }
 

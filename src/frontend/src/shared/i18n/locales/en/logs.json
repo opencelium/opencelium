@@ -30,7 +30,6 @@
     "animationSlowedHint": "This animation is slowed down for clarity — it does not reflect the actual execution speed.",
     "liveToggleLabel": "Live",
     "liveToggleTooltip": "On: show logs live, as they happen, with no animation. Off: slow the canvas animation and logs down for clarity.",
-    "collecting": "Collecting logs…",
     "finished": "TEST FINISHED in {{time}}",
     "stopped": "TEST STOPPED",
     "failed": "TEST FAILED",

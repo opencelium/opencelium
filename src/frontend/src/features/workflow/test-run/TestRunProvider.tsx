@@ -9,6 +9,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import {
 	EMPTY_LIVE_LOG_TREE,
 	failPendingNodes,
+	prefetchErrorTracePath,
 	reduceLiveLog,
 	type ExecutionSocketLog,
 } from '@features/logs';
@@ -136,6 +137,13 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const [resumedRun] = useState(() => (connectionId ? getActiveTestRun(connectionId) : null));
 	const [phase, setPhase] = useState<TestRunPhase>(resumedRun ? 'running' : 'idle');
 	const [logTree, setLogTree] = useState(EMPTY_LIVE_LOG_TREE);
+	// Mirrors `logTree` synchronously (kept in sync at every setLogTree call
+	// site below) so applyLogToPresentation — a stable callback with `[]`
+	// deps — can read/produce the tree's brand-new value within the same
+	// synchronous call, before React has committed the state update. Needed
+	// for the error-path prefetch below, which must see the error line that
+	// was just applied, not last render's tree.
+	const logTreeRef = useRef(logTree);
 	const [liveGraphStatus, setLiveGraphStatus] = useState<LiveGraphStatus>(EMPTY_LIVE_GRAPH_STATUS);
 	// The one element the paced playback is showing as executing right now —
 	// advanced by every applied PENDING line (see TestRunCurrentStep).
@@ -175,6 +183,11 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	// Bumped once per failed run so the logs panel reveals the failing element.
 	const [errorRevealNonce, setErrorRevealNonce] = useState(0);
 	const hasRevealedErrorRef = useRef(false);
+	// Invalidates a stale in-flight prefetch (see prefetchErrorTracePath below):
+	// minted fresh each time a reveal starts, bumped on any reset/cleanup so a
+	// slow prefetch from an already-over or already-restarted run can never
+	// flip revealPending/errorRevealNonce after the fact.
+	const revealTokenRef = useRef(0);
 	// True during the short pause after a failure before the reveal starts — the
 	// backend needs a moment to finish persisting the run before we can fetch the
 	// failing element's path. The panel shows a loading state meanwhile.
@@ -204,7 +217,9 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const applyLogToPresentation = useCallback(
 		(log: ExecutionSocketLog) => {
 			debugLogLine('show', log);
-			setLogTree((tree) => reduceLiveLog(tree, log));
+			const nextTree = reduceLiveLog(logTreeRef.current, log);
+			logTreeRef.current = nextTree;
+			setLogTree(nextTree);
 			setLiveGraphStatus((current) => reduceLiveGraphStatus(current, log, loopAncestorsRef.current));
 			// Execution is consecutive: every step line (operator PENDINGs and
 			// method COMPLETEs — methods never emit PENDING, see playbackStep.ts)
@@ -234,24 +249,35 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 
 			if (log.error?.message || (log.type === 'EXECUTION' && log.status === 'FAIL')) {
 				// First failure of the run drives the panel to expand to the error.
-				// Wait ~3s before revealing: the backend needs a moment to finish
-				// persisting the run, otherwise the on-demand child fetches race it.
+				// Wait ~3s before touching the backend: it needs a moment to finish
+				// persisting the run, otherwise the child-fetches below would race it.
 				if (!hasRevealedErrorRef.current) {
 					hasRevealedErrorRef.current = true;
+					const token = ++revealTokenRef.current;
 					setRevealPending(true);
-					// The pause has no visible effect of its own (the reveal — pan to
-					// the failed node, expand the log tree — only happens once it ends),
-					// so show a loading toast for its duration or the user is left
-					// staring at a frozen graph wondering whether anything is happening.
+					// The pause (plus the prefetch below) has no visible effect of its
+					// own — the reveal only happens once both finish — so show a loading
+					// toast for its duration or the user is left wondering whether
+					// anything is happening. The logs panel also freezes the tree behind
+					// a loading overlay while revealPending is true (WorkflowLogs.tsx).
 					message.loading({
 						content: tEntities('connection.test.locatingError'),
 						key: REVEAL_LOADING_MESSAGE_KEY,
 						duration: 0,
 					});
 					revealTimerRef.current = setTimeout(() => {
-						message.destroy(REVEAL_LOADING_MESSAGE_KEY);
-						setRevealPending(false);
-						setErrorRevealNonce((n) => n + 1);
+						// Silently fetch every ElementChildren query the reveal cascade
+						// will need (see prefetchErrorTracePath) BEFORE bumping the nonce,
+						// so the cascade itself — unchanged, still nonce-gated in the log
+						// tree components — finds a warm cache and never blocks on the
+						// network mid-expand. `token` guards against a run finishing or
+						// restarting while this is still in flight.
+						void prefetchErrorTracePath(nextTree).finally(() => {
+							if (revealTokenRef.current !== token) return;
+							message.destroy(REVEAL_LOADING_MESSAGE_KEY);
+							setRevealPending(false);
+							setErrorRevealNonce((n) => n + 1);
+						});
 					}, TIMEOUT_TO_COLLECT_LOGS);
 				}
 			}
@@ -272,7 +298,8 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		if (arrivalTimerRef.current) clearTimeout(arrivalTimerRef.current);
 		currentStepMetaRef.current = null;
 		setCurrentStep(null);
-		setLogTree(failPendingNodes);
+		logTreeRef.current = failPendingNodes(logTreeRef.current);
+		setLogTree(logTreeRef.current);
 		setLiveGraphStatus(failPendingGraphStatus);
 	}, []);
 	const finishPresentationRef = useRef(finishPresentation);
@@ -348,6 +375,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 				clearTimeout(revealTimerRef.current);
 				message.destroy(REVEAL_LOADING_MESSAGE_KEY);
 			}
+			revealTokenRef.current += 1;
 		},
 		[],
 	);
@@ -365,9 +393,11 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		playbackRef.current?.clear();
 		currentStepMetaRef.current = null;
 		setCurrentStep(null);
-		setLogTree(failPendingNodes);
+		logTreeRef.current = failPendingNodes(logTreeRef.current);
+		setLogTree(logTreeRef.current);
 		setLiveGraphStatus(failPendingGraphStatus);
 		settleResult({ kind: 'stopped' });
+		revealTokenRef.current += 1;
 	}
 	useEffect(() => {
 		if (status === 'connected') return;
@@ -404,7 +434,17 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 					executionTimeMs: Date.now() - startTimeRef.current,
 				});
 			}
-			if (isExecutionEnd || log.error?.message) finishBackend();
+			if (isExecutionEnd || log.error?.message) {
+				finishBackend();
+				// In live mode lines are applied the instant they arrive (see the
+				// branch above) — there is no queued playback to catch up on, so
+				// "backend done" already means "presentation done" too. Normally
+				// this transition comes from PlaybackQueue's onDrained callback,
+				// but that queue sits permanently empty once live mode is on (even
+				// if the run STARTED paced and was switched to live mid-run), so
+				// nothing would otherwise ever flip phase back to idle here.
+				if (isLiveAnimationRef.current) finishPresentationRef.current();
+			}
 		},
 		[settleResult, finishBackend],
 	);
@@ -526,6 +566,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		playbackRef.current?.clear();
 		backendDoneRef.current = false;
 		setIsBackendDone(false);
+		logTreeRef.current = EMPTY_LIVE_LOG_TREE;
 		setLogTree(EMPTY_LIVE_LOG_TREE);
 		setLiveGraphStatus(EMPTY_LIVE_GRAPH_STATUS);
 		currentStepMetaRef.current = null;
@@ -533,6 +574,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		setResult(null);
 		setIsOrphaned(false);
 		hasRevealedErrorRef.current = false;
+		revealTokenRef.current += 1;
 		if (revealTimerRef.current) {
 			clearTimeout(revealTimerRef.current);
 			message.destroy(REVEAL_LOADING_MESSAGE_KEY);
@@ -609,6 +651,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 
 	const clearLogs = useCallback(() => {
 		if (phase !== 'idle') return;
+		logTreeRef.current = EMPTY_LIVE_LOG_TREE;
 		setLogTree(EMPTY_LIVE_LOG_TREE);
 		setLiveGraphStatus(EMPTY_LIVE_GRAPH_STATUS);
 		setResult(null);

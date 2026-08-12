@@ -75,7 +75,7 @@ const buildTopologySignature = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeM
 type Params = Pick<
 	WorkflowCanvasProps,
 	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' | 'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor'
-> & { cache?: PrepareWorkflowCache; testRunScope?: TestRunScope; isEditLocked?: boolean };
+> & { cache?: PrepareWorkflowCache; testRunScope?: TestRunScope; isEditLocked?: boolean; testRunFailureDismissed?: boolean };
 
 const getMethodInstanceData = (nodes: WorkflowNodeModel[]) => {
 	const result = new Map<string, { index: number; color: string }>();
@@ -118,6 +118,7 @@ export function prepareWorkflowElements({
 	cache,
 	testRunScope = EMPTY_TEST_RUN_SCOPE,
 	isEditLocked = false,
+	testRunFailureDismissed = false,
 }: Params) {
 	let topology = cache?.topology;
 	const topologySig = buildTopologySignature(nodes, edges);
@@ -157,6 +158,7 @@ export function prepareWorkflowElements({
 		const suppressHoverAddControls = isPreviewNode || isEditLocked || activeAction?.sourceNodeId === node.id;
 		const lockVisibleAddControls = !isPreviewNode && activeAction?.sourceNodeId === node.id;
 		const testRunFailed = testRunScope.failedNodeIds.has(node.id);
+		const testRunFailedVisible = testRunFailed && !testRunFailureDismissed;
 		const testRunActive = !testRunFailed && testRunScope.activeNodeIds.has(node.id);
 		const testRunFailedMessage = testRunFailed ? testRunScope.failedNodeErrorByNodeId.get(node.id) : undefined;
 		const testRunIteration = testRunScope.iterationByNodeId.get(node.id);
@@ -168,7 +170,7 @@ export function prepareWorkflowElements({
 			selectable, draggable, isLeaf, nextRightLeaf, nextBottomLeaf,
 			duplicateMethodIndex, duplicateMethodColor, alwaysShowRightAdd,
 			highlighted, suppressHoverAddControls, lockVisibleAddControls, isAnyNodeDragging,
-			testRunActive, testRunIterationSig, testRunActiveBranch, testRunFailed, testRunFailedMessage,
+			testRunActive, testRunIterationSig, testRunActiveBranch, testRunFailed, testRunFailedMessage, testRunFailedVisible,
 			isEditLocked,
 		].join('|');
 
@@ -206,6 +208,7 @@ export function prepareWorkflowElements({
 				testRunActiveBranch,
 				testRunFailed,
 				testRunFailedMessage,
+				testRunFailedVisible,
 				// While a test run is active the graph is read-only: withholding the
 				// mutation callbacks hides the add triggers and the delete toolbar
 				// (NodeShell renders them only when the callback is present) and makes
