@@ -311,7 +311,6 @@ export const scheduleDefinition: EntityDefinition = {
                 render: (row) =>
                     isScheduleExecRow(row) ? (
                         <RunningExecBadge
-                            localStartTime={row.execution.localStartTime}
                             serverStartTime={row.execution.serverStartTime}
                             avgDuration={row.execution.avgDuration}
                         />

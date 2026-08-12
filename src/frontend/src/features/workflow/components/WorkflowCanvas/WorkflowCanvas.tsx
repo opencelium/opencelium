@@ -1,13 +1,16 @@
 import { Controls, ReactFlow } from '@xyflow/react';
 import type { ReactFlowInstance } from '@xyflow/react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type {
   WorkflowEdgeModel,
   WorkflowNodeModel,
 } from '../../types/workflow.types';
+import { useTestRun } from '../../test-run/useTestRun';
 import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
 import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
+import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
+import { TestRunAnimationHint } from './TestRunAnimationHint';
 
 // Where the graph's top-left-most point lands in the viewport on open —
 // offset from the pane's top-left corner rather than dead center, clear of
@@ -72,6 +75,24 @@ export function WorkflowCanvas({
   const centeredStartVersion = useRef<number>(0);
   const prepareCacheRef = useRef<PrepareWorkflowCache>({ nodes: new Map(), edges: new Map() });
 
+  // null outside a TestRunProvider (e.g. a canvas reused without the page wiring).
+  const testRun = useTestRun();
+  // While a test run is active (starting/running/stopping) the graph must not
+  // be editable — the payload was already sent to the backend, so any edit
+  // would silently diverge from what is actually executing.
+  const isEditLocked = !!testRun && testRun.phase !== 'idle';
+  const liveGraphStatus = testRun?.liveGraphStatus;
+  // In live mode there is no "currently executing" token to show at all — no
+  // dot, no node ring, no iteration counter, no branch label — only the
+  // failure marking (if any) still renders. Passing a null step reuses
+  // getTestRunScope's own "nothing is current" fallback, which already
+  // returns exactly that (see its EMPTY_TEST_RUN_SCOPE-with-failures branch).
+  const currentStep = testRun?.isLiveAnimation ? null : testRun?.currentStep ?? null;
+  const testRunScope = useMemo(
+    () => (liveGraphStatus ? getTestRunScope(nodes, edges, liveGraphStatus, currentStep) : EMPTY_TEST_RUN_SCOPE),
+    [nodes, edges, liveGraphStatus, currentStep],
+  );
+
   const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor });
   callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor };
   const stableOnOpenAddStep = useCallback<NonNullable<typeof onOpenAddStep>>((...args) => callbacksRef.current.onOpenAddStep?.(...args), []);
@@ -89,6 +110,8 @@ export function WorkflowCanvas({
     onDeleteNode: stableOnDeleteNode,
     onOpenAggregatorEditor: stableOnOpenAggregatorEditor,
     cache: prepareCacheRef.current,
+    testRunScope,
+    isEditLocked,
   });
 
   useEffect(() => {
@@ -106,6 +129,21 @@ export function WorkflowCanvas({
     centeredStartVersion.current = centerStartVersion;
     positionGraphNearTopLeft(reactFlowInstance.current, nodes, restoredViewport?.zoom ?? 1);
   }, [centerStartVersion, nodes, restoredViewport?.zoom]);
+
+  // errorRevealNonce bumps once per failed run (after the same ~1.5s pause the
+  // logs panel waits out before revealing the failing element — see
+  // TestRunProvider). By then testRunScope.failedNodeIds already reflects the
+  // failure, so pan the canvas to it too. Guarded by nonce so this only fires
+  // once per failure, not on every render while the nonce stays the same.
+  const revealedFailureNonce = useRef(0);
+  useEffect(() => {
+    const nonce = testRun?.errorRevealNonce;
+    if (!nonce || revealedFailureNonce.current === nonce) return;
+    const failedNodeId = [...testRunScope.failedNodeIds][0];
+    if (!failedNodeId || !reactFlowInstance.current) return;
+    revealedFailureNonce.current = nonce;
+    reactFlowInstance.current.fitView({ nodes: [{ id: failedNodeId }], duration: 600, maxZoom: 1.5 });
+  }, [testRun?.errorRevealNonce, testRunScope]);
 
   return (
     <div className="canvasCard">
@@ -125,11 +163,11 @@ export function WorkflowCanvas({
         edgeTypes={workflowEdgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onConnect={isEditLocked ? undefined : onConnect}
         onNodeDragStart={onNodeDragStart}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
-        onNodeDoubleClick={onNodeDoubleClick}
+        onNodeDoubleClick={isEditLocked ? undefined : onNodeDoubleClick}
         onPaneClick={onPaneClick}
         nodeDragThreshold={4}
         nodesDraggable
@@ -144,6 +182,7 @@ export function WorkflowCanvas({
         {children}
         <Controls position="top-left" className="workflowControls" />
       </ReactFlow>
+      <TestRunAnimationHint />
     </div>
   );
 }

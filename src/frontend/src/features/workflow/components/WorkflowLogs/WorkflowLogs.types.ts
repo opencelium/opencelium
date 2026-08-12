@@ -5,6 +5,8 @@ export type WorkflowLogsHeaderProps = {
 	isExpanded: boolean;
 	hasLogs: boolean;
 	isRunning: boolean;
+	isLiveAnimation: boolean;
+	onToggleLiveAnimation: (value: boolean) => void;
 	onToggleMinimized: () => void;
 	onToggleFull: () => void;
 	onClear: () => void;

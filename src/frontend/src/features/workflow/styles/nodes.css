@@ -29,7 +29,7 @@
   opacity: 0.2;
 }
 
-.nodeWrapDropPlaceholder .ifFalseLabel,
+.nodeWrapDropPlaceholder .ifContinueLabel,
 .nodeWrapDropPlaceholder .ifTrueLabel {
   display: none;
 }
@@ -89,10 +89,55 @@
   box-shadow: 0 0 0 4px var(--color-status-error-bg);
 }
 
+/* The node the test run actually failed on gets a pulsing ring on top of the
+   static error highlight above, mirroring nodeTestRunPulse but in the error
+   color — so the zoomed-in, red-highlighted node also draws the eye. */
+.nodeBodyTestRunFailed .startNode,
+.nodeBodyTestRunFailed .circleNode,
+.nodeBodyTestRunFailed .ifNode {
+  animation: nodeTestRunFailedPulse 1s ease-in-out infinite;
+}
+
+@keyframes nodeTestRunFailedPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-status-error-fg) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-status-error-fg) 10%, transparent);
+  }
+}
+
 .nodeBodySearchHighlighted .circleNode,
 .nodeBodySearchHighlighted .ifNode {
   border-color: var(--color-status-warning-fg);
   box-shadow: 0 0 0 4px var(--color-status-warning-bg);
+}
+
+/* Live test-run indicators. A currently-open LOOP/IF operator (any nesting
+   depth), or a top-level method with no enclosing operator, gets a pulsing
+   ring — distinct from the static hover/path-selection highlight above.
+   Execution is consecutive and the paced playback shows one step at a time,
+   so exactly one node in the whole graph carries this ring at any moment. */
+/* The dot-then-node timing lives in React state, NOT here: the class is only
+   applied once the dot has reached the node (TestRunCurrentStep.hasArrived in
+   TestRunProvider). A CSS animation-delay was tried for this and dropped — it
+   silently restarts (and so never fires) whenever the node re-renders
+   mid-step, which made the ring unreliable per node type. */
+.nodeBodyTestRunActive .startNode,
+.nodeBodyTestRunActive .circleNode,
+.nodeBodyTestRunActive .ifNode {
+  border-color: var(--color-action-primary);
+  border-style: dashed;
+  animation: nodeTestRunPulse 1s ease-in-out infinite;
+}
+
+@keyframes nodeTestRunPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-action-primary) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-action-primary) 10%, transparent);
+  }
 }
 
 .nodeTopLabel {
@@ -269,6 +314,32 @@
   pointer-events: none;
 }
 
+/* "Jump to live" under the run/stop button — shown while the paced test-run
+   animation is behind the real execution. Same footprint as .startNodeAlert
+   but clickable and primary-tinted. */
+.startNodeSkipLive {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: 10px;
+  color: var(--color-action-primary);
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-action-primary);
+  border-radius: 6px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.startNodeSkipLive:hover {
+  background: var(--color-action-primary);
+  color: var(--color-text-on-action);
+}
+
 .systemNode {
   border-style: dashed;
 }
@@ -297,7 +368,7 @@
 }
 
 .ifTrueLabel,
-.ifFalseLabel {
+.ifContinueLabel {
   position: absolute;
   font-size: 11px;
   color: var(--color-text-secondary);
@@ -305,7 +376,7 @@
   user-select: none;
 }
 
-.ifFalseLabel {
+.ifContinueLabel {
   top: calc(50% - 20px);
   right: -34px;
   transform: translateY(-50%);
@@ -315,4 +386,28 @@
   left: calc(50% + 20px);
   bottom: -10px;
   transform: translateX(-50%);
+}
+
+/* The loop's live iteration counter ("i = N") — positioned to the right of
+   the vertical (bottom) edge, same anchor as .ifTrueLabel, instead of
+   centered below the whole node like a method's title/subtitle. */
+.loopIterationLabel {
+  position: absolute;
+  left: calc(50% + 20px);
+  bottom: -10px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* The branch label for whichever side the test-run process actually took —
+   set on the corresponding .ifTrueLabel/.ifContinueLabel once known (see
+   testRunActiveBranch). No transform here: .ifTrueLabel/.ifContinueLabel
+   already carry the centering transform this rule must not override. */
+.ifBranchLabelActive {
+  color: var(--color-action-primary);
+  font-weight: 700;
 }

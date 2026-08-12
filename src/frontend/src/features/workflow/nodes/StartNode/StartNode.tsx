@@ -1,6 +1,6 @@
 import type { NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
-import { Loader2, Play, Square, TriangleAlert } from 'lucide-react';
+import { FastForward, Loader2, Play, Square, TriangleAlert } from 'lucide-react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { StartWorkflowNode } from '../../types/workflow.types';
@@ -10,6 +10,10 @@ import { useStartNodeState } from './useStartNodeState';
 export function StartNode({ id, data, selected, dragging }: NodeProps<StartWorkflowNode>) {
 	const { t: tEntities } = useI18n('entities');
 	const state = useStartNodeState();
+	// The main button knows exactly two states: start and stop. While the
+	// finished run's animation is still replaying it stays a "stop" — clicking
+	// it then ends the playback without a backend terminate (nothing is running
+	// anymore); useStartNodeState routes that internally.
 	const icon = state.isBusy ? (
 		<Loader2 size={24} className='startNodeSpinner' />
 	) : state.isRunning ? (
@@ -17,6 +21,7 @@ export function StartNode({ id, data, selected, dragging }: NodeProps<StartWorkf
 	) : (
 		<Play size={26} />
 	);
+	const buttonLabelKey = state.isRunning ? 'connection.test.stop' : 'connection.test.start';
 	const socketAlert = state.testRun && !state.isSocketConnected && (
 		<div className='startNodeAlert'>
 			<TriangleAlert size={12} />
@@ -35,13 +40,29 @@ export function StartNode({ id, data, selected, dragging }: NodeProps<StartWorkf
 			<span>{tEntities('connection.test.otherTestRunning')}</span>
 		</div>
 	);
+	// The paced animation is running behind the real test — offer a one-click
+	// jump to the run's actual current state, right under the run/stop button.
+	const skipToLiveControl = state.testRun && state.isPlaybackBehind && (
+		<button
+			type='button'
+			className='startNodeSkipLive'
+			onClick={(event) => {
+				event.stopPropagation();
+				state.skipToLive();
+			}}
+			data-testid='workflow-test-skip-live'
+		>
+			<FastForward size={12} />
+			<span>{tEntities('connection.test.skipToLive')}</span>
+		</button>
+	);
 	const button = (
 		<button
 			type='button'
-			className={['startNode', 'startNodeButton', state.isRunning ? 'startNodeRunning' : '', state.isStartUnavailable ? 'startNodeUnavailable' : ''].join(' ')}
+			className={['startNode', 'startNodeButton', state.isRunning ? 'startNodeRunning' : '', state.isStartUnavailable && !state.isReplaying ? 'startNodeUnavailable' : ''].join(' ')}
 			onClick={state.toggleTestRun}
-			disabled={state.isStartUnavailable || state.isBusy}
-			aria-label={tEntities(state.isRunning ? 'connection.test.stop' : 'connection.test.start')}
+			disabled={state.isBusy || (state.isStartUnavailable && !state.isReplaying)}
+			aria-label={tEntities(buttonLabelKey)}
 		>
 			{icon}
 		</button>
@@ -53,13 +74,13 @@ export function StartNode({ id, data, selected, dragging }: NodeProps<StartWorkf
 			data={data}
 			selected={selected}
 			bottomLabel={data.title}
-			bottomExtra={subscriptionAlert || socketAlert || otherTestAlert || null}
+			bottomExtra={subscriptionAlert || socketAlert || otherTestAlert || skipToLiveControl || null}
 			rightAdd={{ action: { sourceNodeId: id, direction: 'right' }, showAlways: !!data.alwaysShowRightAdd, lineVisible: !!data.alwaysShowRightAdd }}
 		>
 			{!state.testRun ? (
 				<div className='startNode'><Play size={26} /></div>
 			) : state.isSocketConnected && !state.isSubscriptionBlocked && !state.isOtherTestRunning && !dragging && !data.isAnyNodeDragging ? (
-				<Tooltip content={tEntities(state.isRunning ? 'connection.test.stop' : 'connection.test.start')}>{button}</Tooltip>
+				<Tooltip content={tEntities(buttonLabelKey)}>{button}</Tooltip>
 			) : button}
 			<Handle type='source' position={Position.Right} className='handleInvisible' />
 		</NodeShell>
