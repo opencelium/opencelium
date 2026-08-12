@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
+import { Splitter } from '@shared/ui/primitives/Splitter';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { apiExecutor } from '@shared/api/apiExecutor';
 import './styles.css';
@@ -10,6 +11,7 @@ import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas/WorkflowCanvas';
 import { WorkflowHeader } from './components/WorkflowHeader/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs/WorkflowLogs';
+import type { WorkflowLogsPanelState } from './components/WorkflowLogs/WorkflowLogs.types';
 import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
 import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
 import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
@@ -335,6 +337,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [assignCategoryOpen, setAssignCategoryOpen] = useState(false);
   const [isAssigningCategory, setIsAssigningCategory] = useState(false);
+  const [logsPanel, setLogsPanel] = useState<WorkflowLogsPanelState>('minimized');
+  // Only meaningful while logsPanel === 'normal' — the Splitter pane's last
+  // dragged height (px), reused as its defaultSize the next time 'normal' is
+  // entered (the Splitter unmounts for 'minimized'/'full', so this is what
+  // survives the round trip instead of the pane's own internal state).
+  const [logsPaneHeight, setLogsPaneHeight] = useState(430);
   const hydrateCacheRef = useRef<Map<string, HydrateCacheEntry>>(new Map());
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers, hydrateCacheRef.current),
@@ -876,6 +884,53 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
   };
 
+  // Extracted so the exact same element can sit inside a Splitter pane
+  // (logsPanel === 'normal') or as a plain sibling of WorkflowLogs
+  // (minimized/full) without duplicating this whole prop list in both
+  // branches below.
+  const canvasElement = (
+    <WorkflowCanvas
+      nodes={hydratedNodes}
+      edges={workflow.edges}
+      isAnyNodeDragging={workflow.isAnyNodeDragging}
+      restoredViewport={workflow.restoredViewport}
+      viewportRestoreVersion={workflow.viewportRestoreVersion}
+      centerStartVersion={workflow.centerStartVersion}
+      onInit={workflow.setReactFlowInstance}
+      activeAction={workflow.sidebarAction}
+      onNodesChange={workflow.onNodesChange}
+      onEdgesChange={workflow.onEdgesChange}
+      onConnect={workflow.onConnect}
+      onNodeDragStart={workflow.onNodeDragStart}
+      onNodeDrag={workflow.onNodeDrag}
+      onNodeDragStop={workflow.onNodeDragStop}
+      onOpenAddStep={workflow.onOpenAddStep}
+      onOpenContextMenu={workflow.setContextMenu}
+      onNodeDoubleClick={(_, node) => {
+        workflow.setSidebarAction(null);
+        workflow.setContextMenu(null);
+        workflow.setHistoryOpen(false);
+
+        if (node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection') {
+          workflow.setConditionEditor(null);
+          workflow.setMethodEditor({ nodeId: node.id, mode: 'body' });
+          return;
+        }
+
+        if (node.type === 'if' || node.type === 'loop') {
+          workflow.setMethodEditor(null);
+          workflow.setConditionEditor({ nodeId: node.id });
+        }
+      }}
+      onDeleteNode={workflow.onDeleteNode}
+      onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
+      onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
+    >
+      <Background gap={16} size={1} />
+    </WorkflowCanvas>
+  );
+  const logsElement = <WorkflowLogs panel={logsPanel} onPanelChange={setLogsPanel} />;
+
   return (
     <TestRunProvider
       connectionId={connectionId}
@@ -1042,48 +1097,27 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Loading size="lg" />
           </div>
+        ) : logsPanel === 'normal' ? (
+          // Real split: canvas and logs are two panes sharing the container's
+          // height, so dragging the handle actually shrinks the canvas — unlike
+          // 'minimized'/'full' below, which float the logs panel over a
+          // full-size canvas via absolute positioning (see logsCard/logsCardFull
+          // in base.css). Only mounted for 'normal': the Splitter's pane sizes
+          // are uncontrolled after first mount, so switching to a fixed
+          // minimized/full size needs this to unmount rather than be resized.
+          <Splitter
+            layout="vertical"
+            className="workflowSplitter"
+            panels={[
+              { key: 'canvas', content: canvasElement, min: 160 },
+              { key: 'logs', content: logsElement, defaultSize: logsPaneHeight, min: 120, max: '80%' },
+            ]}
+            onResizeEnd={(sizes) => setLogsPaneHeight(sizes[1])}
+          />
         ) : (
           <>
-            <WorkflowCanvas
-              nodes={hydratedNodes}
-              edges={workflow.edges}
-              isAnyNodeDragging={workflow.isAnyNodeDragging}
-              restoredViewport={workflow.restoredViewport}
-              viewportRestoreVersion={workflow.viewportRestoreVersion}
-              centerStartVersion={workflow.centerStartVersion}
-              onInit={workflow.setReactFlowInstance}
-              activeAction={workflow.sidebarAction}
-              onNodesChange={workflow.onNodesChange}
-              onEdgesChange={workflow.onEdgesChange}
-              onConnect={workflow.onConnect}
-              onNodeDragStart={workflow.onNodeDragStart}
-              onNodeDrag={workflow.onNodeDrag}
-              onNodeDragStop={workflow.onNodeDragStop}
-              onOpenAddStep={workflow.onOpenAddStep}
-              onOpenContextMenu={workflow.setContextMenu}
-              onNodeDoubleClick={(_, node) => {
-                workflow.setSidebarAction(null);
-                workflow.setContextMenu(null);
-                workflow.setHistoryOpen(false);
-
-                if (node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection') {
-                  workflow.setConditionEditor(null);
-                  workflow.setMethodEditor({ nodeId: node.id, mode: 'body' });
-                  return;
-                }
-
-                if (node.type === 'if' || node.type === 'loop') {
-                  workflow.setMethodEditor(null);
-                  workflow.setConditionEditor({ nodeId: node.id });
-                }
-              }}
-              onDeleteNode={workflow.onDeleteNode}
-              onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
-              onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
-            >
-              <Background gap={16} size={1} />
-            </WorkflowCanvas>
-            <WorkflowLogs />
+            {canvasElement}
+            {logsElement}
           </>
         )}
       </div>

@@ -5,7 +5,7 @@ import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodViewModeProvider } fro
 import { useTestRun } from '../../test-run/useTestRun';
 import type { TestRunResult } from '../../test-run/TestRunContext';
 import { WorkflowLogsHeader } from './WorkflowLogsHeader';
-import type { WorkflowLogsPanelState } from './WorkflowLogs.types';
+import type { WorkflowLogsProps } from './WorkflowLogs.types';
 
 
 const formatDuration = (ms: number) => {
@@ -38,8 +38,13 @@ function TestRunResultLine({ result }: { result: TestRunResult }) {
 	}
 }
 
-export function WorkflowLogs() {
-	const [panel, setPanel] = useState<WorkflowLogsPanelState>('minimized');
+// Panel state lives in the parent page (index.tsx): while `panel === 'normal'`
+// the parent mounts this inside a Splitter pane sharing height with the
+// canvas (drag-resizable — logsCardSplitPane in base.css fills whatever
+// height the pane gives it instead of the fixed-height overlay used for
+// 'minimized'/'full'). Minimized/full stay the original absolute overlay,
+// rendered as a plain sibling of the canvas, unchanged.
+export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
 	const { t: tLogs } = useI18n('logs');
 	const testRun = useTestRun();
 
@@ -66,20 +71,18 @@ export function WorkflowLogs() {
 	const [wasActive, setWasActive] = useState(false);
 	if (isActive !== wasActive) {
 		setWasActive(isActive);
-		if (isActive && panel === 'minimized') setPanel('normal');
+		if (isActive && panel === 'minimized') onPanelChange('normal');
 	}
 
-	const toggleMinimized = () =>
-		setPanel((current) => (current === 'minimized' ? 'normal' : 'minimized'));
-	const toggleFull = () =>
-		setPanel((current) => (current === 'full' ? 'normal' : 'full'));
+	const toggleMinimized = () => onPanelChange(panel === 'minimized' ? 'normal' : 'minimized');
+	const toggleFull = () => onPanelChange(panel === 'full' ? 'normal' : 'full');
 
 	return (
 		<MethodViewModeProvider>
 		<div
 			className={`logsCard ${isExpanded ? 'logsCardExpanded' : ''} ${
 				panel === 'full' ? 'logsCardFull' : ''
-			}`}
+			} ${panel === 'normal' ? 'logsCardSplitPane' : ''}`}
 		>
 			<WorkflowLogsHeader
 				panel={panel}
