@@ -110,6 +110,11 @@ export type WorkflowNodeData = {
 	 * after the run ends, until the next run starts. */
 	testRunFailed?: boolean;
 	testRunFailedMessage?: string;
+	/** True while the failure should still render (red ring + pulse +
+	 * tooltip). `testRunFailed` itself stays true until the next run starts —
+	 * this is the one Escape clears early (WorkflowCanvas), dismissing the
+	 * whole highlight without forgetting that this run did fail here. */
+	testRunFailedVisible?: boolean;
 	onAddStep?: (action: WorkflowAction) => void;
 	onOpenContextMenu?: (menu: WorkflowContextMenu | null) => void;
 	onDeleteNode?: (nodeId: string) => void;

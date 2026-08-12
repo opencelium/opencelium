@@ -1,6 +1,6 @@
 import { Controls, ReactFlow } from '@xyflow/react';
 import type { ReactFlowInstance } from '@xyflow/react';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   WorkflowEdgeModel,
   WorkflowNodeModel,
@@ -100,6 +100,22 @@ export function WorkflowCanvas({
   const stableOnDeleteNode = useCallback<NonNullable<typeof onDeleteNode>>((...args) => callbacksRef.current.onDeleteNode?.(...args), []);
   const stableOnOpenAggregatorEditor = useCallback<NonNullable<typeof onOpenAggregatorEditor>>((...args) => callbacksRef.current.onOpenAggregatorEditor?.(...args), []);
 
+  // The failed node's red ring + pulse (testRunScope.utils.ts) otherwise stays
+  // up for the rest of the run, but the user can dismiss it early with
+  // Escape. Re-armed on the next failure (nonce bump) so a second failed run
+  // shows its own highlight even if the first was dismissed.
+  const [testRunFailureDismissed, setTestRunFailureDismissed] = useState(false);
+  useEffect(() => {
+    if (testRun?.errorRevealNonce) setTestRunFailureDismissed(false);
+  }, [testRun?.errorRevealNonce]);
+  useEffect(() => {
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setTestRunFailureDismissed(true);
+    };
+    window.addEventListener('keydown', onEscape);
+    return () => window.removeEventListener('keydown', onEscape);
+  }, []);
+
   const { preparedEdges, preparedNodes } = prepareWorkflowElements({
     nodes,
     edges,
@@ -112,6 +128,7 @@ export function WorkflowCanvas({
     cache: prepareCacheRef.current,
     testRunScope,
     isEditLocked,
+    testRunFailureDismissed,
   });
 
   useEffect(() => {
