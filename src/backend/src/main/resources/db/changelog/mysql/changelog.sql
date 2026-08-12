@@ -747,3 +747,6 @@ ALTER TABLE `connection` CHANGE COLUMN IF EXISTS `created_on` `created_at` TIMES
 ALTER TABLE `connection` CHANGE COLUMN IF EXISTS `modified_on` `modified_at` TIMESTAMP NULL DEFAULT NULL;
 ALTER TABLE `connector` CHANGE COLUMN IF EXISTS `created_on` `created_at` TIMESTAMP NULL DEFAULT NULL;
 ALTER TABLE `connector` CHANGE COLUMN IF EXISTS `modified_on` `modified_at` TIMESTAMP NULL DEFAULT NULL;
+
+--changeset 5.1:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE user MODIFY COLUMN IF EXISTS email VARCHAR(255) NULL DEFAULT NULL;
