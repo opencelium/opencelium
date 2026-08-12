@@ -1,6 +1,6 @@
-import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { LoadingOverlay } from '@shared/ui/primitives/Loading/LoadingOverlay';
 import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodViewModeProvider } from '@features/logs';
 import { useTestRun } from '../../test-run/useTestRun';
 import type { TestRunResult } from '../../test-run/TestRunContext';
@@ -90,15 +90,16 @@ export function WorkflowLogs() {
 					{isOrphaned ? (
 						<div className='logsOrphanNotice'>{tLogs('live.orphaned')}</div>
 					) : hasLogs ? (
-						<LiveExecutionLogTree tree={logTree} fill revealNonce={errorRevealNonce} />
+						// Frozen + centered loading while the reveal is pending: the tree
+						// stays visible but dimmed and non-interactive, since everything
+						// the eventual expand-down cascade needs is being silently
+						// prefetched behind the scenes (see TestRunProvider) rather than
+						// fetched live per row.
+						<LoadingOverlay loading={revealPending} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+							<LiveExecutionLogTree tree={logTree} fill revealNonce={errorRevealNonce} />
+						</LoadingOverlay>
 					) : (
 						tLogs('live.empty')
-					)}
-					{!isOrphaned && revealPending && (
-						<div className='logsRunning'>
-							<Loader2 size={13} className='logsRunningSpinner' />
-							{tLogs('live.collecting')}
-						</div>
 					)}
 					{!isOrphaned && !revealPending && result && (
 						<TestRunResultLine result={result} />

@@ -69,7 +69,9 @@ export const EMPTY_LIVE_LOG_TREE: LiveLogTree = {
   errorLocations: [],
 };
 
-const nodeKey = (indexPath: string, loopIndex: string) =>
+// Exported so prefetchErrorTracePath.ts can look up the same locally-known
+// nodes this module keys internally, instead of re-deriving the format.
+export const nodeKey = (indexPath: string, loopIndex: string) =>
   `${indexPath}@${loopIndex}`;
 
 // Extend a loop-iteration context with one more enclosing loop's iteration —
