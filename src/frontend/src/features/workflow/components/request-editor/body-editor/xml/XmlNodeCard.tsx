@@ -1,6 +1,8 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Space } from 'antd';
 import { useState } from 'react';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { XmlFieldEditor } from './XmlFieldEditor';
 import { XmlNodeDialogs } from './XmlNodeDialogs';
 import type { XmlSelection, XmlTreeNode } from './xmlTree';
@@ -43,7 +45,11 @@ export function XmlNodeCard({ node, depth = 0, readOnly, selected, onChangeNode,
         {!readOnly ? (
           <Space className="xmlNodeActions">
             <Button className="xmlAddChild" size="small" icon={<PlusOutlined />} onClick={() => onAddChild(node.id)}>{t('xmlNode.addChild')}</Button>
-            {depth > 0 ? <Button className="xmlIconButton" danger type="text" icon={<DeleteOutlined />} onClick={() => onRemove(node.id)} /> : null}
+            {depth > 0 ? (
+              <Tooltip content={t('actions.delete')}>
+                <DeleteIconButton iconSize={14} onClick={() => onRemove(node.id)} />
+              </Tooltip>
+            ) : null}
           </Space>
         ) : null}
       </div>

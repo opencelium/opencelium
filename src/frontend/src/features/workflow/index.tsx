@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
+import { Splitter } from '@shared/ui/primitives/Splitter';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { apiExecutor } from '@shared/api/apiExecutor';
 import './styles.css';
@@ -10,6 +11,7 @@ import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas/WorkflowCanvas';
 import { WorkflowHeader } from './components/WorkflowHeader/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs/WorkflowLogs';
+import type { WorkflowLogsPanelState } from './components/WorkflowLogs/WorkflowLogs.types';
 import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
 import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
 import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
@@ -26,6 +28,8 @@ import { buildLegacyConnection } from './components/request-editor/legacyAdapter
 import { useWorkflowPage } from './useWorkflowPage';
 import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
 import { TestRunProvider } from './test-run/TestRunProvider';
+import { useTestRun } from './test-run/useTestRun';
+import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
 import { mapConnectionToWorkflowState, type WorkflowConnectionState } from './api/connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
@@ -47,6 +51,7 @@ import type { AuthUser } from '@entities/auth/model/types';
 import type { HistoryVersionItem } from './types/history.types';
 import type { WorkflowEdgeModel, WorkflowHeaderMenuItem, WorkflowNodeModel } from './types/workflow.types';
 import { createEmptyMethodConfig } from './utils/requestConfig';
+import { isDirectReferenceEnhancement } from './components/request-editor/body-editor/bodyReference';
 
 const toWorkflowResponse = (nodeId: string, response: NonNullable<Connector['invoker']>['operations'][number]['response']) => ({
   responseId: `response-${nodeId}`,
@@ -245,6 +250,41 @@ const triggerJsonDownload = (filename: string, payload: unknown) => {
   URL.revokeObjectURL(url);
 };
 
+// Workflow renders TestRunProvider itself (the provider needs the payload
+// builder and graph metadata computed inside the component), so it cannot call
+// useTestRun directly. This bridge, mounted inside the provider, mirrors the
+// "a run is active" flag back up so page-level edit surfaces (delete shortcut,
+// sidebar, header, history) can be locked while a test executes.
+function TestRunEditLockSync({ onLockChange }: { onLockChange: (isLocked: boolean) => void }) {
+  const testRun = useTestRun();
+  const isLocked = !!testRun && testRun.phase !== 'idle';
+  useEffect(() => {
+    onLockChange(isLocked);
+  }, [isLocked, onLockChange]);
+  return null;
+}
+
+// Same bridge pattern as TestRunEditLockSync, for the same reason: WorkflowLogs
+// itself remounts whenever logsPanel flips between 'normal' and 'minimized'/'full'
+// (index.tsx swaps it between a Splitter pane and a plain sibling), so tracking
+// the active/idle edge with local state inside WorkflowLogs would reset on every
+// remount and immediately re-fire. Mounted directly under TestRunProvider, this
+// survives that churn. Fires on BOTH edges: idle->active (run starts) and
+// active->idle (the run, including any lagging paced-animation catch-up after
+// the backend already finished, truly stops) — covers minimizing the panel
+// while the tail animation is still playing and expecting it back once the
+// result line is ready to show.
+function TestRunAutoExpandSync({ onActiveEdge }: { onActiveEdge: () => void }) {
+  const testRun = useTestRun();
+  const isActive = (testRun?.phase ?? 'idle') !== 'idle' || (testRun?.revealPending ?? false);
+  const wasActiveRef = useRef(false);
+  useEffect(() => {
+    if (isActive !== wasActiveRef.current) onActiveEdge();
+    wasActiveRef.current = isActive;
+  }, [isActive, onActiveEdge]);
+  return null;
+}
+
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const navigate = useNavigate();
@@ -284,6 +324,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       confirmVariant: 'danger',
     }),
   });
+  // True while a test run is active (starting/running/stopping) — synced from
+  // inside TestRunProvider by TestRunEditLockSync. All edits are disabled for
+  // the duration: the payload was already sent to the backend, so an edit
+  // would silently diverge from what is actually executing.
+  const [isTestRunLocked, setIsTestRunLocked] = useState(false);
   const [historyVersions, setHistoryVersions] = useState<HistoryVersionItem[]>([]);
   const [selectedHistoryVersionId, setSelectedHistoryVersionId] = useState<string | null>(null);
   const [baselineSnapshot, setBaselineSnapshot] = useState<string | null>(null);
@@ -313,10 +358,20 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [assignCategoryOpen, setAssignCategoryOpen] = useState(false);
   const [isAssigningCategory, setIsAssigningCategory] = useState(false);
+  const [logsPanel, setLogsPanel] = useState<WorkflowLogsPanelState>('minimized');
+  // Only meaningful while logsPanel === 'normal' — the Splitter pane's last
+  // dragged height (px), reused as its defaultSize the next time 'normal' is
+  // entered (the Splitter unmounts for 'minimized'/'full', so this is what
+  // survives the round trip instead of the pane's own internal state).
+  const [logsPaneHeight, setLogsPaneHeight] = useState(430);
   const hydrateCacheRef = useRef<Map<string, HydrateCacheEntry>>(new Map());
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers, hydrateCacheRef.current),
     [connectors, invokers, workflow.nodes],
+  );
+  const loopAncestorsByIndexPath = useMemo(
+    () => buildLoopAncestorsByIndexPath(hydratedNodes, workflow.edges),
+    [hydratedNodes, workflow.edges],
   );
   const activeConnectionId = createdConnectionId ?? connectionId;
   const displayedHistoryVersions = useMemo(
@@ -389,6 +444,17 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     };
   }, [connectionId]);
 
+  // When a run starts, close the non-modal edit surfaces that may already be
+  // open — the sidebar could still add a step and the history panel could
+  // still swap the whole graph out from under the executing run.
+  const { setSidebarAction, setContextMenu, setHistoryOpen } = workflow;
+  useEffect(() => {
+    if (!isTestRunLocked) return;
+    setSidebarAction(null);
+    setContextMenu(null);
+    setHistoryOpen(false);
+  }, [isTestRunLocked, setSidebarAction, setContextMenu, setHistoryOpen]);
+
   const isLoading = isConnectionLoading || isConnectorsLoading;
   const hasConnectionChanges = baselineSnapshot !== null && currentChangeSnapshot !== baselineSnapshot;
   const hasManualUnsavedChanges = hasConnectionChanges && changeSource === 'manual';
@@ -445,6 +511,27 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     // explicit override (from the Assign Category dialog) changes it.
     const nextCategoryId = categoryIdOverride !== undefined ? categoryIdOverride : categoryId;
     const isCreate = !activeConnectionId;
+
+    let fieldBindingsToSave = loadedFieldBindings;
+    const directReferenceBindings = (loadedFieldBindings ?? []).filter((binding: any) =>
+      isDirectReferenceEnhancement(binding?.enhancement),
+    );
+    if (directReferenceBindings.length > 0) {
+      const applyOptimizations = await confirm({
+        title: t('enhancement.optimizeDirectReferences.title'),
+        message: t('enhancement.optimizeDirectReferences.message', { count: directReferenceBindings.length }),
+        confirmText: t('actions.apply'),
+        cancelText: t('actions.cancel'),
+      });
+      if (applyOptimizations) {
+        const directReferenceIds = new Set(directReferenceBindings.map((binding: any) => binding.enhancement.enhanceId));
+        fieldBindingsToSave = (loadedFieldBindings ?? []).filter(
+          (binding: any) => !directReferenceIds.has(binding?.enhancement?.enhanceId),
+        );
+        setLoadedFieldBindings(fieldBindingsToSave);
+      }
+    }
+
     let response;
     try {
       response = await saveWorkflowConnection({
@@ -455,7 +542,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         nodes: hydratedNodes,
         edges: workflow.edges,
         viewport: workflow.getViewport(),
-        fieldBindings: loadedFieldBindings,
+        fieldBindings: fieldBindingsToSave,
         categoryId: nextCategoryId,
       });
     } catch (error) {
@@ -478,7 +565,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       description: normalizedDescription,
       nodes: hydratedNodes,
       edges: workflow.edges,
-      fieldBindings: loadedFieldBindings,
+      fieldBindings: fieldBindingsToSave,
     }));
     setChangeSource('clean');
     setHistoryPreviewSnapshot(null);
@@ -771,7 +858,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   }, [connectionId, headerState.description, headerState.title, hydratedNodes, loadedFieldBindings, tEntities, workflow]);
 
   const deleteSelectedNode = () => {
-    if (readOnly) return;
+    if (readOnly || isTestRunLocked) return;
     if (
       workflow.methodEditor ||
       workflow.conditionEditor ||
@@ -818,8 +905,63 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
   };
 
+  // Extracted so the exact same element can sit inside a Splitter pane
+  // (logsPanel === 'normal') or as a plain sibling of WorkflowLogs
+  // (minimized/full) without duplicating this whole prop list in both
+  // branches below.
+  const canvasElement = (
+    <WorkflowCanvas
+      nodes={hydratedNodes}
+      edges={workflow.edges}
+      isAnyNodeDragging={workflow.isAnyNodeDragging}
+      restoredViewport={workflow.restoredViewport}
+      viewportRestoreVersion={workflow.viewportRestoreVersion}
+      centerStartVersion={workflow.centerStartVersion}
+      onInit={workflow.setReactFlowInstance}
+      activeAction={workflow.sidebarAction}
+      onNodesChange={workflow.onNodesChange}
+      onEdgesChange={workflow.onEdgesChange}
+      onConnect={workflow.onConnect}
+      onNodeDragStart={workflow.onNodeDragStart}
+      onNodeDrag={workflow.onNodeDrag}
+      onNodeDragStop={workflow.onNodeDragStop}
+      onOpenAddStep={workflow.onOpenAddStep}
+      onOpenContextMenu={workflow.setContextMenu}
+      onNodeDoubleClick={(_, node) => {
+        workflow.setSidebarAction(null);
+        workflow.setContextMenu(null);
+        workflow.setHistoryOpen(false);
+
+        if (node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection') {
+          workflow.setConditionEditor(null);
+          workflow.setMethodEditor({ nodeId: node.id, mode: 'body' });
+          return;
+        }
+
+        if (node.type === 'if' || node.type === 'loop') {
+          workflow.setMethodEditor(null);
+          workflow.setConditionEditor({ nodeId: node.id });
+        }
+      }}
+      onDeleteNode={workflow.onDeleteNode}
+      onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
+      onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
+    >
+      <Background gap={16} size={1} />
+    </WorkflowCanvas>
+  );
+  const logsElement = <WorkflowLogs panel={logsPanel} onPanelChange={setLogsPanel} />;
+
   return (
-    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title} buildTestPayload={buildTestPayload} onResolveStartError={resolveAndHighlightWorkflowError}>
+    <TestRunProvider
+      connectionId={connectionId}
+      connectionTitle={headerState.title}
+      buildTestPayload={buildTestPayload}
+      onResolveStartError={resolveAndHighlightWorkflowError}
+      loopAncestorsByIndexPath={loopAncestorsByIndexPath}
+    >
+    <TestRunEditLockSync onLockChange={setIsTestRunLocked} />
+    <TestRunAutoExpandSync onActiveEdge={() => setLogsPanel((current) => (current === 'minimized' ? 'normal' : current))} />
     <div className="page" data-testid="workflow-page">
       <WorkflowHeader
         initialName={headerState.title}
@@ -831,7 +973,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onSave={handleSave}
         saveDisabled={isLoading || !hasConnectionChanges}
         onOpenHistory={handleOpenHistory}
-        readOnly={readOnly}
+        readOnly={readOnly || isTestRunLocked}
+        testRunLocked={isTestRunLocked}
         loading={isConnectionLoading}
         hasSavedConnection={!!activeConnectionId}
         schedulesSlot={
@@ -978,50 +1121,36 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           </div>
         ) : (
           <>
-            <WorkflowCanvas
-              nodes={hydratedNodes}
-              edges={workflow.edges}
-              isAnyNodeDragging={workflow.isAnyNodeDragging}
-              restoredViewport={workflow.restoredViewport}
-              viewportRestoreVersion={workflow.viewportRestoreVersion}
-              centerStartVersion={workflow.centerStartVersion}
-              onInit={workflow.setReactFlowInstance}
-              activeAction={workflow.sidebarAction}
-              onNodesChange={workflow.onNodesChange}
-              onEdgesChange={workflow.onEdgesChange}
-              onConnect={workflow.onConnect}
-              onNodeDragStart={workflow.onNodeDragStart}
-              onNodeDrag={workflow.onNodeDrag}
-              onNodeDragStop={workflow.onNodeDragStop}
-              onOpenAddStep={workflow.onOpenAddStep}
-              onOpenContextMenu={workflow.setContextMenu}
-              onNodeDoubleClick={(_, node) => {
-                workflow.setSidebarAction(null);
-                workflow.setContextMenu(null);
-                workflow.setHistoryOpen(false);
-
-                if (node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection') {
-                  workflow.setConditionEditor(null);
-                  workflow.setMethodEditor({ nodeId: node.id, mode: 'body' });
-                  return;
-                }
-
-                if (node.type === 'if' || node.type === 'loop') {
-                  workflow.setMethodEditor(null);
-                  workflow.setConditionEditor({ nodeId: node.id });
-                }
-              }}
-              onDeleteNode={workflow.onDeleteNode}
-              onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
-              onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
-            >
-              <Background gap={16} size={1} />
-            </WorkflowCanvas>
-            <WorkflowLogs />
+            {/* The 'canvas' Splitter.Panel is present at every panel state, always
+                at this same position — only whether the 'logs' panel is included
+                changes. Splitter.Panel content is keyed by panel.key (see
+                Splitter.ant.tsx / Splitter.material.tsx), so React reuses the
+                'canvas'-keyed fiber across the transition instead of unmounting
+                it — that unmount (from switching between this Splitter and the
+                plain-sibling fragment below) was the visible canvas blink/jump
+                when toggling the logs panel. 'minimized'/'full' still render logs
+                as the original absolute-positioned overlay (logsCard/logsCardFull
+                in base.css) over the full-size canvas, just as a sibling of the
+                single-pane Splitter instead of a second pane — only 'normal' gets
+                a real 2-pane split where dragging the handle shrinks the canvas. */}
+            <Splitter
+              layout="vertical"
+              className="workflowSplitter"
+              panels={
+                logsPanel === 'normal'
+                  ? [
+                      { key: 'canvas', content: canvasElement, min: 160 },
+                      { key: 'logs', content: logsElement, defaultSize: logsPaneHeight, min: 120, max: '80%' },
+                    ]
+                  : [{ key: 'canvas', content: canvasElement, min: 160 }]
+              }
+              onResizeEnd={(sizes) => setLogsPaneHeight(sizes[1])}
+            />
+            {logsPanel !== 'normal' && logsElement}
           </>
         )}
       </div>
-      <WorkflowSidebar action={workflow.sidebarAction} selectedNode={selectedNode} connectionId={activeConnectionId} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
+      <WorkflowSidebar action={isTestRunLocked ? null : workflow.sidebarAction} selectedNode={selectedNode} connectionId={activeConnectionId} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
       <WorkflowSchedulesPanel
         open={schedulesOpen}
         connectionId={activeConnectionId}
@@ -1036,7 +1165,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         hasUnsavedChanges={hasManualUnsavedChanges}
         onClose={() => workflow.setHistoryOpen(false)}
         onSelectVersion={async (snapshotId) => {
-          if (!activeConnectionId) return;
+          if (!activeConnectionId || isTestRunLocked) return;
           setSelectedHistoryVersionId(snapshotId);
           const state = await loadWorkflowConnectionVersion(activeConnectionId, snapshotId);
           const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors, invokers);

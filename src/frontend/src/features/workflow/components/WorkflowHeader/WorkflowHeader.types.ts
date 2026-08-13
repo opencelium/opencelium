@@ -12,6 +12,10 @@ export type WorkflowHeaderProps = {
 	validateTitle?: (title: string) => Promise<string | null>;
 	saveDisabled?: boolean;
 	readOnly?: boolean;
+	/** True while a test run is active. On top of `readOnly` (which callers set
+	 * alongside it), disables the menu entries that would replace or mutate the
+	 * workflow mid-run (load template, version history, assign category). */
+	testRunLocked?: boolean;
 	loading?: boolean;
 	schedulesSlot?: ReactNode;
 	/** Whether this workflow has been saved at least once (has a persisted connectionId).

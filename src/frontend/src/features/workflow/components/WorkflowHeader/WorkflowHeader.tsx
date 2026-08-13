@@ -12,7 +12,7 @@ import { useWorkflowHeaderState } from './useWorkflowHeaderState';
 
 export function WorkflowHeader({
 	onOpenHistory, onSave, onMenuItemSelect, menuLoadingItemId,
-	saveDisabled = false, readOnly = false, loading = false, schedulesSlot, hasSavedConnection = false, ...stateProps
+	saveDisabled = false, readOnly = false, testRunLocked = false, loading = false, schedulesSlot, hasSavedConnection = false, ...stateProps
 }: WorkflowHeaderProps) {
 	const { t } = useI18n('workflow');
 	const state = useWorkflowHeaderState({
@@ -27,6 +27,13 @@ export function WorkflowHeader({
 	const [saveComment, setSaveComment] = useState('');
 	const menuItems = useMemo(
 		() => headerMenuItems.map((item) => {
+			if (testRunLocked && (item.id === 'assign-category' || item.id === 'version-history' || item.id === 'load-template')) {
+				return {
+					...item,
+					disabled: true,
+					disabledTooltipKey: 'headerMenu.testRunLockedHint',
+				};
+			}
 			if (item.id === 'download-template') {
 				return {
 					...item,
@@ -43,7 +50,7 @@ export function WorkflowHeader({
 			}
 			return item;
 		}),
-		[hasSavedConnection],
+		[hasSavedConnection, testRunLocked],
 	);
 
 	const openSaveDialog = async () => {

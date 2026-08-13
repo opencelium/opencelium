@@ -6,4 +6,5 @@ export type EnhancementProps = {
 	readOnly?: boolean;
 	directReference?: DirectReferenceInfo | null;
 	onCreateEnhancement?: () => void;
+	onDeleteEnhancement?: () => void;
 };

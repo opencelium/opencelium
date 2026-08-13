@@ -20,7 +20,9 @@
     "maximizeRequestData": "Anfragedaten maximieren",
     "minimizeRequestData": "Anfragedaten minimieren",
     "load": "Laden",
-    "createEnhancement": "Enhancement erstellen"
+    "createEnhancement": "Enhancement erstellen",
+    "deleteEnhancement": "Enhancement löschen",
+    "deleteReference": "Referenz löschen"
   },
   "confirmDelete": {
     "title": "Schritt löschen",
@@ -214,6 +216,7 @@
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
     "versionHistory": "Versionsverlauf",
+    "testRunLockedHint": "Während eines Testlaufs nicht verfügbar",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
   },
@@ -289,10 +292,11 @@
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
-    "branchFalse": "false",
+    "branchContinue": "weiter",
     "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort.",
     "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
-    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf."
+    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf.",
+    "testRunIteration": "{{iterator}} = {{count}}"
   },
   "saveDialog": {
     "title": "Version speichern",
@@ -438,10 +442,20 @@
     "language": "Sprache",
     "script": "Skript",
     "emptyState": "Bitte klicken Sie auf die Referenz, um ihr Enhancement anzuzeigen.",
+    "deleteDisabledMultipleReferences": "Dieses Feld hat mehr als eine Referenz, daher muss es in ein Enhancement eingebettet bleiben.",
+    "confirmDelete": {
+      "title": "Enhancement löschen?",
+      "message": "Dadurch werden das Enhancement und sein Skript endgültig entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+    },
     "directReference": {
       "title": "Direkte Referenz",
       "description": "Dieses Feld hat kein Enhancement — es besteht eine direkte Eins-zu-eins-Referenz zwischen den beiden unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript.",
       "descriptionMany": "Dieses Feld hat kein Enhancement — es besteht eine direkte Referenz zwischen den unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript."
+    },
+    "optimizeDirectReferences": {
+      "title": "Optimierung verfügbar",
+      "message": "Es gibt {{count}} Referenzen, die für eine bessere Leistung optimiert werden können. Möchten Sie diese Optimierung vor dem Speichern anwenden?",
+      "message_one": "Es gibt eine Referenz, die für eine bessere Leistung optimiert werden kann. Möchten Sie diese Optimierung vor dem Speichern anwenden?"
     }
   },
   "description": {
@@ -497,7 +511,11 @@
   "referenceInfo": {
     "title": "Referenzinformationen",
     "legacyTitle": "Referenzinformationen",
-    "empty": "(ist jetzt leer)"
+    "empty": "(ist jetzt leer)",
+    "confirmDelete": {
+      "title": "Referenz löschen?",
+      "message": "Dadurch wird diese Referenz endgültig entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+    }
   },
   "requestData": "Anfragedaten",
   "graphqlBody": {

@@ -7,6 +7,7 @@ import logoImage from '@assets/images/login_logo.png'
 import { useAppDispatch, useAppSelector } from '@shared/lib/storeHooks'
 import { selectIntentionalLogout } from '@entities/auth/model/authSelectors'
 import { authActions } from '@entities/auth/model/authSlice'
+import { isRegisteredPath } from '@app/router/isRegisteredPath'
 
 export default function LoginPage() {
     const { isAuthenticated } = useAuth()
@@ -14,7 +15,11 @@ export default function LoginPage() {
     const dispatch = useAppDispatch()
     const intentionalLogout = useAppSelector(selectIntentionalLogout)
     const from = (location.state as { from?: Location } | null)?.from
-    const redirectTo = from ? `${from.pathname}${from.search}${from.hash}` : '/'
+    // `from` can be stale across a version upgrade (browser history state
+    // survives a same-tab reload) — a route that existed when the session
+    // expired may have been renamed/removed since, so returning there would
+    // land on NotFoundPage instead of the app.
+    const redirectTo = from && isRegisteredPath(from.pathname) ? `${from.pathname}${from.search}${from.hash}` : '/'
 
     // The intentional-logout flag served its purpose the moment AuthGuard
     // redirected here without a `from`. Clear it so a subsequent attempt to

@@ -47,10 +47,15 @@ export function ElementChildren({
   loopIndexPath?: string;
 }) {
   const { t } = useI18n("logs");
-  const { data, isFetching, isError } = useGetElementChildrenQuery({
-    id,
-    loopIndex,
-  });
+  // A given element's children never change once logged — skip baseApi's
+  // default refetch-on-mount so a warm cache entry (whether from a previous
+  // expand or from prefetchErrorTracePath's reveal warm-up) is reused as-is
+  // instead of firing a redundant request that flips isFetching back to true
+  // and replaces the already-correct data with a spinner.
+  const { data, isFetching, isError } = useGetElementChildrenQuery(
+    { id, loopIndex },
+    { refetchOnMountOrArgChange: false },
+  );
 
   const pad: React.CSSProperties = {
     padding: `8px 0 8px ${24 + depth * INDENT_STEP}px`,
@@ -204,7 +209,7 @@ export function LogElementRow({
             }
             right={
               <Meta>
-                {response?.status ? <StatusBadge status={response.status} /> : null}
+                {response?.status && !hasError ? <StatusBadge status={response.status} /> : null}
                 {response?.duration ? (
                   <Typography variant="caption" isSubtle>
                     {response.duration}

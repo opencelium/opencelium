@@ -8,6 +8,11 @@ import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles'
 export function LoopOperatorNode({ id, data, selected, dragging }: NodeProps<LoopWorkflowNode>) {
 	const { t } = useI18n('workflow');
 
+	const iteration = data.testRunIteration;
+	const iterationLabel = iteration
+		? t('node.testRunIteration', { iterator: iteration.iterator, count: iteration.count })
+		: undefined;
+
 	return (
 		<NodeShell
 			id={id}
@@ -33,6 +38,7 @@ export function LoopOperatorNode({ id, data, selected, dragging }: NodeProps<Loo
 				suppressTooltip={dragging || data.isAnyNodeDragging}
 				onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)}
 			/>
+			{iterationLabel && <div className='loopIterationLabel'>{iterationLabel}</div>}
 			<StandardNodeHandles />
 		</NodeShell>
 	);

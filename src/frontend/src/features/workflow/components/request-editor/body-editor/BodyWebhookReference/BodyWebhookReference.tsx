@@ -1,11 +1,13 @@
-import { DeleteOutlined } from '@ant-design/icons';
-import type { MouseEvent } from 'react';
 import { useState } from 'react';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { parseWebhookValue } from '../bodyWebhook';
 import type { BodyWebhookReferenceProps } from './BodyWebhookReference.types';
 import '../bodyLegacy.css';
 
 export function BodyWebhookReference({ webhook, onRemove }: BodyWebhookReferenceProps) {
+  const { t } = useI18n('workflow');
   const [hovered, setHovered] = useState(false);
   const parsed = parseWebhookValue(webhook);
 
@@ -17,18 +19,14 @@ export function BodyWebhookReference({ webhook, onRemove }: BodyWebhookReference
         {parsed.name}
       </span>
       {hovered ? (
-        <button
-          type='button'
+        <span
           className='bodyLegacyWebhookRemove'
-          title={parsed.label}
-          onClick={(event: MouseEvent<HTMLButtonElement>) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onRemove?.(webhook);
-          }}
+          onClick={(event) => event.stopPropagation()}
         >
-          <DeleteOutlined />
-        </button>
+          <Tooltip content={t('actions.delete')}>
+            <DeleteIconButton iconSize={11} onClick={() => onRemove?.(webhook)} />
+          </Tooltip>
+        </span>
       ) : null}
     </span>
   );

@@ -16,6 +16,7 @@ import {showApiError} from "@shared/api/handleApiError.ts";
 import {masterPasswordApi, useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
 import {UserNameCell} from "@entities/user/ui/UserNameCell";
+import {userApi} from "@entities/user/api/userApi";
 import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
@@ -370,7 +371,7 @@ export const connectorDefinition: EntityDefinition = {
                 align: 'center',
                 labelKey: `${baseKey}.fields.sslCert.label`,
             },
-        },/*
+        },
         {
             // Read-only audit columns set by the backend on save — not part of any
             // section/wizard step, only surfaced as list columns.
@@ -384,8 +385,15 @@ export const connectorDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.modifiedAt.label`,
-                render: (_row, value) =>
-                    typeof value === 'number' ? <span>{new Date(value).toLocaleString(i18n.language)}</span> : null,
+                // Search matches the rendered date string, not the raw timestamp.
+                mapToValue: (_row, raw) =>
+                    typeof raw === 'number' ? new Date(raw).toLocaleString(i18n.language) : '',
+                render: (row) => {
+                    const modifiedAt = (row as Connector).modifiedAt
+                    return typeof modifiedAt === 'number'
+                        ? <span>{new Date(modifiedAt).toLocaleString(i18n.language)}</span>
+                        : null
+                },
             },
         },
         {
@@ -398,9 +406,17 @@ export const connectorDefinition: EntityDefinition = {
                 order: 7,
                 searchable: true,
                 labelKey: `${baseKey}.fields.modifiedBy.label`,
-                render: (_row, value) => <UserNameCell userId={typeof value === 'number' ? value : null} />,
+                // Search matches the rendered "name surname", not the raw user id.
+                mapToValue: (_row, raw) => {
+                    const userId = typeof raw === 'number' ? raw : null
+                    if (userId == null) return ''
+                    const users = userApi.endpoints.getUsers.select({ page: 1, limit: 1000 })(store.getState()).data ?? []
+                    const user = users.find((u) => u.userId === userId)
+                    return user ? `${user.userDetail.name} ${user.userDetail.surname}` : ''
+                },
+                render: (row) => <UserNameCell userId={(row as Connector).modifiedBy ?? null} />,
             },
-        },*/
+        },
         {
             // The icon is edited from the wizard's top-right image (ConnectorWizardImage),
             // not as a form field — so it is intentionally left out of every section.
@@ -523,6 +539,10 @@ export const connectorDefinition: EntityDefinition = {
             {
                 title: `${baseKey}.wizard.recommendations.2`,
                 link: '/workflow/create'
+            },
+            {
+                title: `${baseKey}.wizard.recommendations.3`,
+                link: '/invoker/create'
             },
             {
                 title: `${baseKey}.wizard.recommendations.4`,

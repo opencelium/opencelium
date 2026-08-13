@@ -1,7 +1,6 @@
 import {
 	ApiOutlined,
 	CopyOutlined,
-	DeleteOutlined,
 	DownOutlined,
 	LinkOutlined,
 	NumberOutlined,
@@ -50,6 +49,7 @@ import { LoopInfoPanel } from './LoopInfoPanel';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -624,12 +624,7 @@ function RuleRow({
 						/>
 					</Tooltip>
 					<Tooltip content={t('actions.delete')}>
-						<Button
-							type="text"
-							className="conditionDeleteButton"
-							icon={<DeleteOutlined />}
-							onClick={onDelete}
-						/>
+						<DeleteIconButton iconSize={14} onClick={onDelete} />
 					</Tooltip>
 				</div>
 			) : null}
@@ -726,6 +721,7 @@ function GroupEditor({
 				<div className="conditionGroupActions">
 					<Button
 						type="primary"
+						className="conditionGroupAddButton"
 						data-testid="workflow-condition-add-condition"
 						onClick={() => onChange(appendChildToGroup(group, group.id, createEmptyRule()))}
 					>
@@ -733,18 +729,16 @@ function GroupEditor({
 					</Button>
 					<Button
 						type="primary"
+						className="conditionGroupAddButton"
 						data-testid="workflow-condition-add-group"
 						onClick={() => onChange(appendChildToGroup(group, group.id, createEmptyGroup(operatorType)))}
 					>
 						{t('conditionBuilder.addGroup')}
 					</Button>
 					{onDelete ? (
-						<Button
-							type="text"
-							className="conditionGroupDeleteButton"
-							icon={<DeleteOutlined />}
-							onClick={onDelete}
-						/>
+						<Tooltip content={t('actions.delete')}>
+							<DeleteIconButton iconSize={14} onClick={onDelete} />
+						</Tooltip>
 					) : null}
 				</div>
 			</div> : null}
