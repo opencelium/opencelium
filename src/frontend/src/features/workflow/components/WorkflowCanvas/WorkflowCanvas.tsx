@@ -11,7 +11,7 @@ import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
 import { TestRunAnimationHint } from './TestRunAnimationHint';
-import { TestRunSpeedControl } from './TestRunSpeedControl';
+import { TestRunDebugControls } from './TestRunDebugControls';
 
 // Where the graph's top-left-most point lands in the viewport on open —
 // offset from the pane's top-left corner rather than dead center, clear of
@@ -78,10 +78,17 @@ export function WorkflowCanvas({
 
   // null outside a TestRunProvider (e.g. a canvas reused without the page wiring).
   const testRun = useTestRun();
-  // While a test run is active (starting/running/stopping) the graph must not
-  // be editable — the payload was already sent to the backend, so any edit
-  // would silently diverge from what is actually executing.
-  const isEditLocked = !!testRun && testRun.phase !== 'idle';
+  // While a test run is actively RUNNING (starting/running/stopping, and not
+  // paused) the graph must not be editable — the payload was already sent to
+  // the backend, so any edit would silently diverge from what is actually
+  // executing. Pausing the replay (see TestRunProvider.pauseAnimation) is
+  // treated the same as idle here: the backend keeps executing in the
+  // background regardless, but a paused debugging session is exactly when the
+  // user wants to inspect/adjust the graph again — double-click still opens
+  // MethodConfigDialog in a read-only mode for CONNECTOR/method nodes though
+  // (see index.tsx), since persisting a config edit mid-execution would still
+  // diverge from what the backend is actually running.
+  const isEditLocked = !!testRun && testRun.phase !== 'idle' && !testRun.isPaused;
   const liveGraphStatus = testRun?.liveGraphStatus;
   // In live mode there is no "currently executing" token to show at all — no
   // dot, no node ring, no iteration counter, no branch label — only the
@@ -199,13 +206,14 @@ export function WorkflowCanvas({
       >
         {children}
         {/* One top-left Panel hosts both the zoom Controls and the test-run
-            speed slider as flex siblings, so the slider docks to the right of
-            Controls instead of below them — Controls' own position:absolute
-            is neutralized (see .workflowControls in canvas-controls.css) so it
+            debug controls (pause/play + speed, see TestRunDebugControls) as
+            flex siblings, so the debug card docks to the right of Controls
+            instead of below them — Controls' own position:absolute is
+            neutralized (see .workflowControls in canvas-controls.css) so it
             participates in this flex row rather than positioning itself. */}
         <Panel position="top-left" className="canvasTopLeftPanel">
           <Controls className="workflowControls" />
-          <TestRunSpeedControl />
+          <TestRunDebugControls />
         </Panel>
       </ReactFlow>
       <TestRunAnimationHint />

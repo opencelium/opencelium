@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { parseEnhancementArg } from '../utils/parseEnhancementArg';
+import { formatLiveReferenceValue, useLiveReferenceValue } from '../utils/useLiveReferenceValue';
 import type { Connection, MethodWithId } from '../../../types/connection';
 import { LegacyBodyReferenceGenerator } from './LegacyBodyReferenceGenerator';
 import './BodyPointer.css';
@@ -27,12 +28,24 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
   const { t: tWorkflow } = useI18n('workflow');
   const parsed = useMemo(() => parseEnhancementArg(pointer), [pointer]);
   const color = parsed?.color || 'var(--color-text-disabled)';
-  const title = parsed
+  const staticTitle = parsed
     ? parsed.path
       ? `${parsed.messageProperty}.$.${parsed.path}`
       : `${parsed.messageProperty}.$`
     : pointer;
   const canEdit = !!onEdit && !!connection && !!currentMethod;
+
+  // While paused and the referenced method has already run this test, show
+  // what it actually resolved to instead of just the structural path — see
+  // useLiveReferenceValue.ts. A field with exactly one reference replaces the
+  // whole chip with the value text; a field with more keeps the chip (can't
+  // tell which reference an ambiguous multi-reference field's shown value
+  // would even belong to) and folds the value into the hover tooltip instead.
+  const { value: liveValue, hasValue: hasLiveValue } = useLiveReferenceValue(parsed, connection, currentMethod);
+  const liveValueText = hasLiveValue ? formatLiveReferenceValue(liveValue) : null;
+  const isOnlyReferenceInField = pointers.length <= 1;
+  const showInlineValue = isOnlyReferenceInField && liveValueText !== null;
+  const title = liveValueText !== null ? `${staticTitle} = ${liveValueText}` : staticTitle;
 
   useEffect(() => {
     if (!editorPos) return;
@@ -72,16 +85,37 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        position: 'relative',
-        float: 'left',
-        margin: '7px 2px',
-        width: 20,
-        height: 10,
-        background: color,
-        cursor: 'pointer',
-      }}
+      style={
+        showInlineValue
+          ? {
+              position: 'relative',
+              display: 'inline-block',
+              float: 'left',
+              margin: '2px 2px',
+              padding: '1px 5px',
+              maxWidth: 240,
+              borderRadius: 3,
+              background: color,
+              color: '#fff',
+              fontSize: 11,
+              lineHeight: '14px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              cursor: 'pointer',
+            }
+          : {
+              position: 'relative',
+              float: 'left',
+              margin: '7px 2px',
+              width: 20,
+              height: 10,
+              background: color,
+              cursor: 'pointer',
+            }
+      }
     >
+      {showInlineValue ? liveValueText : null}
       {hovered ? (
         <div className='bodyPointerMenu'>
           <div className='bodyPointerMenuList'>

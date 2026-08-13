@@ -406,7 +406,8 @@
     "body": "Body",
     "header": "Header",
     "requestUrl": "Request-URL",
-    "response": "Antwort"
+    "response": "Antwort",
+    "liveBadge": "Live-Ausführungsergebnis"
   },
   "response": {
     "success": "Erfolg",

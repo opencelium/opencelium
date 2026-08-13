@@ -1,8 +1,12 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Button, Tag } from 'antd';
+import { useSelector } from 'react-redux';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { getParsedReferences, splitReferences } from '../bodyReference';
+import { useMethodContext } from '../../../../providers/MethodContext';
+import type { RootState } from '../../../../store';
+import { formatLiveReferenceValue, normalizeParsedReference, useLiveReferenceValue } from '../../utils/useLiveReferenceValue';
 
 type Props = {
   value: string;
@@ -20,6 +24,64 @@ const getLabel = (reference: string) => {
   return parsed.field;
 };
 
+// Same reasoning as RequestReferenceTokens.tsx's ReferenceTag: one tag per
+// reference (no ambiguity about which reference a value belongs to), but the
+// single-vs-multiple split still keys off how many references share the
+// whole FIELD, so a value assembled from several sources doesn't get one
+// arbitrary source's value stamped over its structural label.
+function ReferenceTag({
+  reference,
+  isOnlyReferenceInField,
+  onClick,
+  onRemove,
+}: {
+  reference: string;
+  isOnlyReferenceInField: boolean;
+  onClick?: () => void;
+  onRemove?: () => void;
+}) {
+  const connection = useSelector((state: RootState) => state.connection.connection);
+  const { method } = useMethodContext();
+  const parsed = getParsedReferences(reference)[0];
+  const normalized = parsed ? normalizeParsedReference(parsed) : null;
+  const { value: liveValue, hasValue } = useLiveReferenceValue(normalized, connection, method);
+  const liveText = hasValue ? formatLiveReferenceValue(liveValue) : null;
+  const staticLabel = getLabel(reference);
+  const showLiveLabel = isOnlyReferenceInField && liveText !== null;
+
+  return (
+    <Tag
+      color={parsed?.color || 'blue'}
+      title={liveText !== null ? `${staticLabel} = ${liveText}` : staticLabel}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        cursor: onClick ? 'pointer' : 'default',
+        marginInlineEnd: 0,
+        maxWidth: 260,
+      }}
+      onClick={onClick}
+    >
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {showLiveLabel ? liveText : staticLabel}
+      </span>
+      {onRemove ? (
+        <Button
+          type="text"
+          size="small"
+          icon={<CloseOutlined />}
+          onClick={(event) => {
+            event.stopPropagation();
+            onRemove();
+          }}
+          style={{ width: 16, height: 16, minWidth: 16, padding: 0, color: 'inherit' }}
+        />
+      ) : null}
+    </Tag>
+  );
+}
+
 export function XmlReferenceTokens({ value, onChange, onClick, readOnly }: Props) {
   const confirm = useConfirm();
   const { t: tWorkflow } = useI18n('workflow');
@@ -28,37 +90,26 @@ export function XmlReferenceTokens({ value, onChange, onClick, readOnly }: Props
 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-      {refs.map((reference, index) => {
-        const parsed = getParsedReferences(reference)[0];
-        return (
-          <Tag
-            key={`${reference}-${index}`}
-            color={parsed?.color || 'blue'}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, cursor: onClick ? 'pointer' : 'default', marginInlineEnd: 0 }}
-            onClick={onClick}
-          >
-            <span>{getLabel(reference)}</span>
-            {!readOnly ? (
-              <Button
-                type="text"
-                size="small"
-                icon={<CloseOutlined />}
-                onClick={async (event) => {
-                  event.stopPropagation();
+      {refs.map((reference, index) => (
+        <ReferenceTag
+          key={`${reference}-${index}`}
+          reference={reference}
+          isOnlyReferenceInField={refs.length === 1}
+          onClick={onClick}
+          onRemove={
+            readOnly
+              ? undefined
+              : async () => {
                   const ok = await confirm({
                     title: tWorkflow('references.confirmDelete.title'),
                     message: tWorkflow('references.confirmDelete.message'),
                   });
                   if (!ok) return;
-                  const next = refs.filter((_, current) => current !== index).join('; ');
-                  onChange(next);
-                }}
-                style={{ width: 16, height: 16, minWidth: 16, padding: 0, color: 'inherit' }}
-              />
-            ) : null}
-          </Tag>
-        );
-      })}
+                  onChange(refs.filter((_, current) => current !== index).join('; '));
+                }
+          }
+        />
+      ))}
     </div>
   );
 }
