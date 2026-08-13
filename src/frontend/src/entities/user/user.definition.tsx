@@ -239,8 +239,7 @@ export const userDefinition: EntityDefinition = {
             },
             validation: {
                 required: true,
-                email: true,
-                max: 100,
+                max: 255,
                 remote: {
                     url: `/user/check/:email`,
                     method: 'GET', // or GET, depending on the API

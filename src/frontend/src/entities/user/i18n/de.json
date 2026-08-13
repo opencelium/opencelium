@@ -35,7 +35,7 @@
       }
     },
     "email": {
-      "label": "E-Mail",
+      "label": "E-Mail/Benutzername",
       "errors": {
         "email_already_exists": "Ein Benutzer mit dieser E-Mail existiert bereits"
       }
@@ -99,7 +99,7 @@
       },
       "credentials": {
         "header": "Zugangsdaten",
-        "subheader": "Anmeldedaten für den Zugriff auf das System. Die E-Mail dient als Benutzername."
+        "subheader": "Anmeldedaten für den Zugriff auf das System."
       },
       "role": {
         "header": "Rolle",
