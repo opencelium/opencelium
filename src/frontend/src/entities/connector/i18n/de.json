@@ -84,6 +84,7 @@
     "recommendations": {
       "1": "Weiteren Konnektor erstellen",
       "2": "Workflow erstellen",
+      "3": "Invoker erstellen",
       "4": "Invoker-Liste"
     },
     "steps": {

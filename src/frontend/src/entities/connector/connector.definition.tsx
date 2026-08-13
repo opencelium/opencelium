@@ -541,6 +541,10 @@ export const connectorDefinition: EntityDefinition = {
                 link: '/workflow/create'
             },
             {
+                title: `${baseKey}.wizard.recommendations.3`,
+                link: '/invoker/create'
+            },
+            {
                 title: `${baseKey}.wizard.recommendations.4`,
                 link: '/connector'
             },
