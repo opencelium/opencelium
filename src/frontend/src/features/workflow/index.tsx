@@ -264,6 +264,27 @@ function TestRunEditLockSync({ onLockChange }: { onLockChange: (isLocked: boolea
   return null;
 }
 
+// Same bridge pattern as TestRunEditLockSync, for the same reason: WorkflowLogs
+// itself remounts whenever logsPanel flips between 'normal' and 'minimized'/'full'
+// (index.tsx swaps it between a Splitter pane and a plain sibling), so tracking
+// the active/idle edge with local state inside WorkflowLogs would reset on every
+// remount and immediately re-fire. Mounted directly under TestRunProvider, this
+// survives that churn. Fires on BOTH edges: idle->active (run starts) and
+// active->idle (the run, including any lagging paced-animation catch-up after
+// the backend already finished, truly stops) — covers minimizing the panel
+// while the tail animation is still playing and expecting it back once the
+// result line is ready to show.
+function TestRunAutoExpandSync({ onActiveEdge }: { onActiveEdge: () => void }) {
+  const testRun = useTestRun();
+  const isActive = (testRun?.phase ?? 'idle') !== 'idle' || (testRun?.revealPending ?? false);
+  const wasActiveRef = useRef(false);
+  useEffect(() => {
+    if (isActive !== wasActiveRef.current) onActiveEdge();
+    wasActiveRef.current = isActive;
+  }, [isActive, onActiveEdge]);
+  return null;
+}
+
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const navigate = useNavigate();
@@ -940,6 +961,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       loopAncestorsByIndexPath={loopAncestorsByIndexPath}
     >
     <TestRunEditLockSync onLockChange={setIsTestRunLocked} />
+    <TestRunAutoExpandSync onActiveEdge={() => setLogsPanel((current) => (current === 'minimized' ? 'normal' : current))} />
     <div className="page" data-testid="workflow-page">
       <WorkflowHeader
         initialName={headerState.title}
@@ -1097,27 +1119,34 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Loading size="lg" />
           </div>
-        ) : logsPanel === 'normal' ? (
-          // Real split: canvas and logs are two panes sharing the container's
-          // height, so dragging the handle actually shrinks the canvas — unlike
-          // 'minimized'/'full' below, which float the logs panel over a
-          // full-size canvas via absolute positioning (see logsCard/logsCardFull
-          // in base.css). Only mounted for 'normal': the Splitter's pane sizes
-          // are uncontrolled after first mount, so switching to a fixed
-          // minimized/full size needs this to unmount rather than be resized.
-          <Splitter
-            layout="vertical"
-            className="workflowSplitter"
-            panels={[
-              { key: 'canvas', content: canvasElement, min: 160 },
-              { key: 'logs', content: logsElement, defaultSize: logsPaneHeight, min: 120, max: '80%' },
-            ]}
-            onResizeEnd={(sizes) => setLogsPaneHeight(sizes[1])}
-          />
         ) : (
           <>
-            {canvasElement}
-            {logsElement}
+            {/* The 'canvas' Splitter.Panel is present at every panel state, always
+                at this same position — only whether the 'logs' panel is included
+                changes. Splitter.Panel content is keyed by panel.key (see
+                Splitter.ant.tsx / Splitter.material.tsx), so React reuses the
+                'canvas'-keyed fiber across the transition instead of unmounting
+                it — that unmount (from switching between this Splitter and the
+                plain-sibling fragment below) was the visible canvas blink/jump
+                when toggling the logs panel. 'minimized'/'full' still render logs
+                as the original absolute-positioned overlay (logsCard/logsCardFull
+                in base.css) over the full-size canvas, just as a sibling of the
+                single-pane Splitter instead of a second pane — only 'normal' gets
+                a real 2-pane split where dragging the handle shrinks the canvas. */}
+            <Splitter
+              layout="vertical"
+              className="workflowSplitter"
+              panels={
+                logsPanel === 'normal'
+                  ? [
+                      { key: 'canvas', content: canvasElement, min: 160 },
+                      { key: 'logs', content: logsElement, defaultSize: logsPaneHeight, min: 120, max: '80%' },
+                    ]
+                  : [{ key: 'canvas', content: canvasElement, min: 160 }]
+              }
+              onResizeEnd={(sizes) => setLogsPaneHeight(sizes[1])}
+            />
+            {logsPanel !== 'normal' && logsElement}
           </>
         )}
       </div>

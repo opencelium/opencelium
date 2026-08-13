@@ -1,4 +1,4 @@
-import { Controls, ReactFlow } from '@xyflow/react';
+import { Controls, Panel, ReactFlow } from '@xyflow/react';
 import type { ReactFlowInstance } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
@@ -198,8 +198,15 @@ export function WorkflowCanvas({
         zoomOnScroll
       >
         {children}
-        <Controls position="top-left" className="workflowControls" />
-        <TestRunSpeedControl />
+        {/* One top-left Panel hosts both the zoom Controls and the test-run
+            speed slider as flex siblings, so the slider docks to the right of
+            Controls instead of below them — Controls' own position:absolute
+            is neutralized (see .workflowControls in canvas-controls.css) so it
+            participates in this flex row rather than positioning itself. */}
+        <Panel position="top-left" className="canvasTopLeftPanel">
+          <Controls className="workflowControls" />
+          <TestRunSpeedControl />
+        </Panel>
       </ReactFlow>
       <TestRunAnimationHint />
     </div>

@@ -9,9 +9,9 @@
 // as "a process happening" and becomes just slow; above the max it's too
 // quick to see anything travel at all — the whole point of the paced replay.
 export const MIN_ANIMATION_SPEED = 0.5;
-export const MAX_ANIMATION_SPEED = 2.5;
-export const DEFAULT_ANIMATION_SPEED = 1;
-export const ANIMATION_SPEED_STEP = 0.25;
+export const MAX_ANIMATION_SPEED = 5;
+export const DEFAULT_ANIMATION_SPEED = 1.5;
+export const ANIMATION_SPEED_STEP = 1;
 
 // Base (1x) dwell for a step line (operator PENDING / method COMPLETE — see
 // playbackStep.ts) — the node-switch choreography's total on-screen time.

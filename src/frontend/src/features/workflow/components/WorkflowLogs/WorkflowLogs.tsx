@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { LoadingOverlay } from '@shared/ui/primitives/Loading/LoadingOverlay';
 import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodViewModeProvider } from '@features/logs';
@@ -66,13 +65,6 @@ export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
 	const isStopping = phase === 'stopping' || (result?.kind === 'failed' && !isBackendDone);
 	const hasLogs = !isOrphaned && logTree.rootKeys.length > 0;
 	const isExpanded = panel !== 'minimized';
-
-	const isActive = isRunning || revealPending;
-	const [wasActive, setWasActive] = useState(false);
-	if (isActive !== wasActive) {
-		setWasActive(isActive);
-		if (isActive && panel === 'minimized') onPanelChange('normal');
-	}
 
 	const toggleMinimized = () => onPanelChange(panel === 'minimized' ? 'normal' : 'minimized');
 	const toggleFull = () => onPanelChange(panel === 'full' ? 'normal' : 'full');
