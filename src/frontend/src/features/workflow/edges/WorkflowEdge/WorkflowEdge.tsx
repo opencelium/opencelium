@@ -2,6 +2,8 @@ import { BaseEdge, getBezierPath, getSmoothStepPath } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 import { useLayoutEffect, useRef } from 'react';
 import type { WorkflowEdgeModel } from '../../types/workflow.types';
+import { useTestRun } from '../../test-run/useTestRun';
+import { BASE_DOT_TRAVEL_MS, DEFAULT_ANIMATION_SPEED } from '../../test-run/animationSpeed';
 
 export function WorkflowEdge({
 	id,
@@ -20,6 +22,11 @@ export function WorkflowEdge({
 	// Live test-run status takes priority over hover/path-selection highlight,
 	// but never during a drag/drop preview or an invalid-drop state.
 	const isTestRunActive = !!data?.testRunActive && !isDropInvalid && !isPreviewEdge;
+	// Speed slider (see animationSpeed.ts) — scales the dot's travel duration
+	// the same way it scales PlaybackQueue's dwell and TestRunProvider's
+	// arrival timer, so all three stay synchronized instead of drifting apart.
+	const animationSpeed = useTestRun()?.animationSpeed ?? DEFAULT_ANIMATION_SPEED;
+	const dotTravelDur = `${BASE_DOT_TRAVEL_MS / animationSpeed / 1000}s`;
 
 	// SMIL gotcha: an <animateMotion> inserted into an SVG that has been
 	// mounted for a while is timed against the DOCUMENT's timeline — with the
@@ -166,7 +173,8 @@ export function WorkflowEdge({
 
 			{isTestRunActive && (
 				// The data dot's single directed pass: it leaves the previous node,
-				// travels for 0.5s along dotPath (the edge extended into the target
+				// travels (dotTravelDur, scaled by the speed slider — see
+				// animationSpeed.ts) along dotPath (the edge extended into the target
 				// node, where the node body covers it) and parks there (fill=freeze)
 				// exactly when the node's ring lights up — reading as the dot being
 				// absorbed into the node. On the next step transition this edge
@@ -175,7 +183,7 @@ export function WorkflowEdge({
 				// the key restarts the pass per transition, including re-entries of
 				// the same edge on the next loop iteration.
 				<circle key={testRunNonce} r={10} className='workflowEdgeFlowDot'>
-					<animateMotion ref={dotAnimationRef} begin='indefinite' dur='0.5s' repeatCount='1' fill='freeze' path={dotPath} />
+					<animateMotion ref={dotAnimationRef} begin='indefinite' dur={dotTravelDur} repeatCount='1' fill='freeze' path={dotPath} />
 				</circle>
 			)}
 

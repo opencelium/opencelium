@@ -109,6 +109,7 @@
       }
     },
     "recommendations": {
+      "1": "Create another Invoker",
       "2": "Create Connector"
     },
     "steps": {

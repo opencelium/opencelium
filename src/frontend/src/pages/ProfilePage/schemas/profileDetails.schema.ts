@@ -11,7 +11,7 @@ export const profileDetailsSchema = z.object({
         .regex(/^[+]?[\d\s\-()]{6,20}$/, 'profile.fields.phoneNumber.validation1')
         .or(z.literal(''))
         .optional(),
-    email: z.string().trim().email().min(1, 'profile.validation.required').max(100),
+    email: z.string().trim().min(1, 'profile.validation.required').max(100),
 })
 
 export type ProfileDetailsValues = z.infer<typeof profileDetailsSchema>

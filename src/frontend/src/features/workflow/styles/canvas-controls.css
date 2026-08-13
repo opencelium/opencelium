@@ -4,8 +4,23 @@
   height: 8px;
 }
 
-.workflowControls {
+/* Anchors both the zoom Controls and the test-run speed slider (flex row
+   children — see WorkflowCanvas.tsx) below the WorkflowHeader, which is
+   absolutely positioned over the canvas at the same top offset used here. */
+.canvasTopLeftPanel {
   top: 65px !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Neutralize the Controls component's own position:absolute (it always
+   applies one, defaulting to bottom-left, regardless of a `position` prop)
+   so it lays out as a normal flex item inside .canvasTopLeftPanel instead of
+   positioning itself independently of its sibling speed slider. */
+.workflowControls {
+  position: static !important;
+  margin: 0 !important;
   border: 1px solid var(--color-border-subtle);
   border-radius: 6px;
   overflow: hidden;
@@ -29,6 +44,33 @@
 
 .workflowControls .react-flow__controls-button svg {
   fill: currentColor;
+}
+
+.canvasSpeedControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.canvasSpeedControlLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.canvasSpeedControlValue {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  min-width: 30px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .react-flow__handle-top {

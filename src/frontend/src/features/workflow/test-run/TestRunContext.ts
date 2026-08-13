@@ -66,6 +66,13 @@ export type TestRunContextValue = {
 	// flipping it on flushes whatever is currently buffered.
 	isLiveAnimation: boolean;
 	setLiveAnimation: (value: boolean) => void;
+	// User-controlled pace of the paced (non-live) animation — a multiplier on
+	// every dwell in the choreography (see animationSpeed.ts). 1 is the
+	// original fixed pace; takes effect immediately, including on a line
+	// already mid-wait. Meaningless while isLiveAnimation is true (no pacing
+	// to speed up).
+	animationSpeed: number;
+	setAnimationSpeed: (speed: number) => void;
 	// Bumped once per failed run so the logs panel can auto-expand and scroll to
 	// the element where the error happened. 0 means no failure to reveal yet.
 	errorRevealNonce: number;
