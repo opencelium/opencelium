@@ -7,6 +7,11 @@ export interface AuthSchema {
                 required: string
                 invalid: string
             }
+            emailOrUsername: {
+                label: string
+                placeholder: string
+                required: string
+            }
             password: {
                 label: string
                 placeholder: string

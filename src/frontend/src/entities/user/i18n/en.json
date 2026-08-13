@@ -99,7 +99,8 @@
       },
       "credentials": {
         "header": "Credentials",
-        "subheader": "Login credentials used to access the system."
+        "subheader": "Login credentials used to access the system.",
+        "subheaderUpdate": "Update the login email and the role assigned to this user."
       },
       "role": {
         "header": "Role",
