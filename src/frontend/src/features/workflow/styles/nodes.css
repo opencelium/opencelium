@@ -354,6 +354,13 @@
   max-height: 42px;
   object-fit: contain;
   display: block;
+  /* Fixed (non-theme) backdrop: connector/invoker logos are third-party artwork authored
+     for a specific background (usually white) — inheriting the theme surface color made
+     dark-on-white logos vanish in dark mode and light-on-transparent logos vanish in light mode. */
+  background-color: #ffffff;
+  border-radius: 50%;
+  padding: 4px;
+  box-sizing: border-box;
 }
 
 .ifNode {
