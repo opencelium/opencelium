@@ -1,4 +1,4 @@
-import { Controls, ReactFlow } from '@xyflow/react';
+import { Controls, Panel, ReactFlow } from '@xyflow/react';
 import type { ReactFlowInstance } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
@@ -11,6 +11,7 @@ import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
 import { TestRunAnimationHint } from './TestRunAnimationHint';
+import { TestRunSpeedControl } from './TestRunSpeedControl';
 
 // Where the graph's top-left-most point lands in the viewport on open —
 // offset from the pane's top-left corner rather than dead center, clear of
@@ -197,7 +198,15 @@ export function WorkflowCanvas({
         zoomOnScroll
       >
         {children}
-        <Controls position="top-left" className="workflowControls" />
+        {/* One top-left Panel hosts both the zoom Controls and the test-run
+            speed slider as flex siblings, so the slider docks to the right of
+            Controls instead of below them — Controls' own position:absolute
+            is neutralized (see .workflowControls in canvas-controls.css) so it
+            participates in this flex row rather than positioning itself. */}
+        <Panel position="top-left" className="canvasTopLeftPanel">
+          <Controls className="workflowControls" />
+          <TestRunSpeedControl />
+        </Panel>
       </ReactFlow>
       <TestRunAnimationHint />
     </div>

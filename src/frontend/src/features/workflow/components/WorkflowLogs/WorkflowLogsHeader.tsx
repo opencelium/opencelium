@@ -1,6 +1,5 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Icon } from '@shared/ui/primitives/Icon';
-import { Switch } from '@shared/ui/primitives/Switch';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { ChevronUp, Loader2, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import { useMethodViewMode } from '@features/logs';
@@ -35,21 +34,28 @@ export function WorkflowLogsHeader(props: WorkflowLogsHeaderProps) {
 			<button className='logsHeader' type='button' onClick={props.onToggleMinimized} aria-label={tLogs(props.isExpanded ? 'live.collapse' : 'live.expand')}>
 				<span className='logsHeaderTitle'>
 					<span>{tLogs('live.title')}</span>
-					{props.isRunning && <span className='logsRunning'><Loader2 size={13} className='logsRunningSpinner' />{tLogs('live.running')}</span>}
+					{props.isRunning && (
+						<span className='logsRunning'>
+							<Loader2 size={13} className='logsRunningSpinner' />
+							{tLogs(props.isStopping ? 'live.stopping' : 'live.running')}
+						</span>
+					)}
 				</span>
 			</button>
 			{props.isExpanded && (
 				<Tooltip content={tLogs('live.liveToggleTooltip')}>
-					<span className='logsHeaderLiveToggle'>
-						{props.isLiveAnimation && <span className='logsHeaderLiveDot' aria-hidden />}
-						<Switch
-							checked={props.isLiveAnimation}
-							textPosition={'left'}
-							onChange={props.onToggleLiveAnimation}
-							text={{ on: tLogs('live.liveToggleLabel'), off: tLogs('live.liveToggleLabel') }}
-							testId='workflow-logs-live-toggle'
-						/>
-					</span>
+					<button
+						type='button'
+						role='switch'
+						aria-checked={props.isLiveAnimation}
+						aria-label={tLogs('live.liveToggleTooltip')}
+						className={`logsHeaderLiveToggle ${props.isLiveAnimation ? 'logsHeaderLiveToggle--on' : ''}`}
+						onClick={() => props.onToggleLiveAnimation(!props.isLiveAnimation)}
+						data-testid='workflow-logs-live-toggle'
+					>
+						<span className={`logsHeaderLiveDot ${props.isLiveAnimation ? 'logsHeaderLiveDot--on' : ''}`} aria-hidden />
+						<span className={`logsHeaderLiveLabel ${props.isLiveAnimation ? 'logsHeaderLiveLabel--on' : ''}`}>{tLogs('live.liveToggleLabel')}</span>
+					</button>
 				</Tooltip>
 			)}
 			{props.isExpanded && props.hasLogs && <MethodViewButton />}

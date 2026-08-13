@@ -8,15 +8,18 @@ const pendingLine = (indexPath: string): ExecutionSocketLog =>
 const completeLine = (indexPath: string): ExecutionSocketLog =>
 	({ indexPath, status: 'COMPLETE', type: 'OPERATION', connectorName: null, properties: null, segment: null, error: null } as unknown as ExecutionSocketLog);
 
-const setup = () => {
+const setup = (speed = 1) => {
 	const applied: ExecutionSocketLog[] = [];
 	let drainedCount = 0;
-	const queue = new PlaybackQueue({
-		applyLog: (log) => applied.push(log),
-		onDrained: () => {
-			drainedCount += 1;
+	const queue = new PlaybackQueue(
+		{
+			applyLog: (log) => applied.push(log),
+			onDrained: () => {
+				drainedCount += 1;
+			},
 		},
-	});
+		() => speed,
+	);
 	return { queue, applied, drained: () => drainedCount };
 };
 
@@ -96,6 +99,38 @@ describe('PlaybackQueue', () => {
 		queue.enqueue(completeLine('0'));
 		vi.advanceTimersByTime(2000);
 		expect(drained()).toBe(1);
+	});
+
+	it('scales the dwell by the current speed — 2x halves the 1000ms base delay', () => {
+		const { queue, applied } = setup(2);
+		queue.enqueue(pendingLine('0'));
+		queue.enqueue(pendingLine('1'));
+		vi.advanceTimersByTime(0);
+		expect(applied).toHaveLength(1);
+		vi.advanceTimersByTime(499);
+		expect(applied).toHaveLength(1);
+		vi.advanceTimersByTime(1);
+		expect(applied).toHaveLength(2);
+	});
+
+	it('rescheduleForSpeedChange applies the new speed to the line already mid-wait', () => {
+		let speed = 1;
+		const applied: ExecutionSocketLog[] = [];
+		const queue = new PlaybackQueue(
+			{ applyLog: (log) => applied.push(log), onDrained: () => {} },
+			() => speed,
+		);
+		queue.enqueue(pendingLine('0'));
+		queue.enqueue(pendingLine('1'));
+		vi.advanceTimersByTime(0);
+		expect(applied).toHaveLength(1);
+		// 500ms of the 1000ms 1x dwell has elapsed; speeding up to 2x should make
+		// the remaining wait resolve in (1000/2 - 500) = 0ms once rescheduled.
+		vi.advanceTimersByTime(500);
+		speed = 2;
+		queue.rescheduleForSpeedChange();
+		vi.advanceTimersByTime(0);
+		expect(applied).toHaveLength(2);
 	});
 
 	it('clear drops buffered events without applying them and without a drain', () => {
