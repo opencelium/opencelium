@@ -20,7 +20,7 @@ import './urlMethodSelect.css';
 
 import { UrlEndpointField } from './UrlEndpointField';
 import { UrlQueryParamsTable } from './UrlQueryParamsTable';
-import { LegacyBodyReferenceGenerator } from '../body-editor/LegacyBodyReferenceGenerator';
+import { LegacyBodyReferenceGenerator } from '../body-editor/LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
 
 import {
 	buildQueryFromParams,

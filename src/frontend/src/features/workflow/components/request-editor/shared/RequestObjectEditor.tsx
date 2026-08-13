@@ -1,7 +1,7 @@
 import ReactJson from 'react-json-view';
 import { Alert, Button, Card, Space, Tag } from 'antd';
-import ReferenceEnhancement from '../enhancement/Enhancement';
-import { ReferenceInfoSection } from '../reference-info/ReferenceInfoSection';
+import ReferenceEnhancement from '../enhancement/Enhancement/Enhancement';
+import { ReferenceInfoSection } from '../reference-info/ReferenceInfoSection/ReferenceInfoSection';
 import ReferenceGenerator from '../reference-generator/ReferenceGenerator';
 import { RequestFieldInspector } from './RequestFieldInspector';
 import { useRequestObjectEditor } from './useRequestObjectEditor';

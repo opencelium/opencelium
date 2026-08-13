@@ -15,12 +15,12 @@ import type { WorkflowLogsPanelState } from './components/WorkflowLogs/WorkflowL
 import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
 import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
 import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
-import { HistoryPanel } from './components/header/HistoryPanel';
-import { ShortcutsDialog } from './components/header/ShortcutsDialog';
-import { AssignCategoryDialog } from './components/header/AssignCategoryDialog';
+import { HistoryPanel } from './components/header/HistoryPanel/HistoryPanel';
+import { ShortcutsDialog } from './components/header/ShortcutsDialog/ShortcutsDialog';
+import { AssignCategoryDialog } from './components/header/AssignCategoryDialog/AssignCategoryDialog';
 import { ConditionBuilderDialog } from './components/condition-builder/ConditionBuilder';
-import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
-import { ResponseDialog } from './components/request-editor/ResponseDialog';
+import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog/MethodConfigDialog';
+import { ResponseDialog } from './components/request-editor/ResponseDialog/ResponseDialog';
 import { AggregatorConfigDialog } from './components/aggregator/AggregatorConfigDialog';
 import { TemplateConnectorMappingDialog } from './components/template/TemplateConnectorMappingDialog';
 import { extractConnectorGroups, applyConnectorMapping, type ConnectorMappingGroup } from './components/template/templateConnectorMapping.utils';
