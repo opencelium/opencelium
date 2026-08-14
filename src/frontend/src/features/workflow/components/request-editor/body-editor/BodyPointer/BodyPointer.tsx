@@ -4,8 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { Loading } from '@shared/ui/primitives/Loading/Loading';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { parseEnhancementArg } from '../../utils/parseEnhancementArg';
 import { LegacyBodyReferenceGenerator } from '../LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
+import { useTestRun } from '../../../../test-run/useTestRun';
 import type { BodyPointerProps } from './BodyPointer.types';
 import './BodyPointer.css';
 import {
@@ -19,6 +22,10 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
   const [editorPos, setEditorPos] = useState<{ left: number; top: number } | null>(null);
   const confirm = useConfirm();
   const { t: tWorkflow } = useI18n('workflow');
+  // While a test run is paused, hovering is purely for inspecting the live
+  // value — editing/removing a reference mid-inspection isn't a supported
+  // action, so the edit/delete menu is suppressed entirely in that state.
+  const isPaused = useTestRun()?.isPaused ?? false;
   const parsed = useMemo(() => parseEnhancementArg(pointer), [pointer]);
   const color = parsed?.color || 'var(--color-text-disabled)';
   const staticTitle = parsed
@@ -30,15 +37,27 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
 
   // While paused and the referenced method has already run this test, show
   // what it actually resolved to instead of just the structural path — see
-  // useLiveReferenceValue.ts. A field with exactly one reference replaces the
-  // whole chip with the value text; a field with more keeps the chip (can't
-  // tell which reference an ambiguous multi-reference field's shown value
-  // would even belong to) and folds the value into the hover tooltip instead.
-  const { value: liveValue, hasValue: hasLiveValue } = useLiveReferenceValue(parsed, connection, currentMethod);
+  // useLiveReferenceValue.ts. Resolution only fires once the chip is
+  // actually hovered (`enabled: hovered` below), so opening a node with many
+  // reference chips doesn't fire a request per chip. The rectangle itself
+  // never changes appearance — the loading/resolved state only ever shows in
+  // the hover tooltip, kept separate from the edit/delete menu below.
+  const { value: liveValue, hasValue: hasLiveValue, isLoading: isLiveValueLoading } = useLiveReferenceValue(
+    parsed,
+    connection,
+    currentMethod,
+    hovered,
+  );
   const liveValueText = hasLiveValue ? formatLiveReferenceValue(liveValue) : null;
-  const isOnlyReferenceInField = pointers.length <= 1;
-  const showInlineValue = isOnlyReferenceInField && liveValueText !== null;
-  const title = liveValueText !== null ? `${staticTitle} = ${liveValueText}` : staticTitle;
+  const tooltipContent = isLiveValueLoading ? (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      {staticTitle} = <Loading size="xs" inline />
+    </span>
+  ) : liveValueText !== null ? (
+    `${staticTitle} = ${liveValueText}`
+  ) : (
+    staticTitle
+  );
 
   useEffect(() => {
     if (!editorPos) return;
@@ -82,42 +101,22 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
 
   return (
     <div
-      title={title}
       onClick={onClick}
       onMouseEnter={showMenu}
       onMouseLeave={() => setHovered(false)}
-      style={
-        showInlineValue
-          ? {
-              position: 'relative',
-              display: 'inline-block',
-              float: 'left',
-              margin: '2px 2px',
-              padding: '1px 5px',
-              maxWidth: 240,
-              borderRadius: 3,
-              background: color,
-              color: '#fff',
-              fontSize: 11,
-              lineHeight: '14px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              cursor: 'pointer',
-            }
-          : {
-              position: 'relative',
-              float: 'left',
-              margin: '7px 2px',
-              width: 20,
-              height: 10,
-              background: color,
-              cursor: 'pointer',
-            }
-      }
+      style={{
+        position: 'relative',
+        float: 'left',
+        margin: '7px 2px',
+        width: 20,
+        height: 10,
+        cursor: 'pointer',
+      }}
     >
-      {showInlineValue ? liveValueText : null}
-      {hovered ? (
+      <Tooltip content={tooltipContent}>
+        <div style={{ width: 20, height: 10, background: color }} />
+      </Tooltip>
+      {hovered && !isPaused ? (
         <div className={`bodyPointerMenu ${menuBelow ? 'bodyPointerMenu--below' : ''}`}>
           <div className='bodyPointerMenuList'>
             {canEdit && (

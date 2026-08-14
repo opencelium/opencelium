@@ -38,11 +38,22 @@ export function normalizeParsedReference(reference: ParsedReference): ParsedArg 
 // ancestors of its own (the common case: one call whose array response is
 // iterated by a *different* method's enclosing loop) would otherwise never
 // resolve the iterator at all.
+//
+// `enabled` gates the actual fetch: a node opened during pause can carry
+// dozens of reference chips, and resolving every one of them up front used
+// to fire a getElementChildren/getMethodDetails request per chip whether or
+// not anyone ever looked at it. Callers instead pass `enabled: true` only
+// once the user hovers the concrete chip (see BodyPointer/RequestReferenceTokens/
+// XmlReferenceTokens), so the request fires on demand. The session-key cache
+// below means toggling `enabled` off and back on (mouse leave/re-enter)
+// never refetches — only a genuinely new sessionKey (different target
+// method or loop iteration) does.
 export function useLiveReferenceValue(
 	reference: ParsedArg | null,
 	connection: Connection | null | undefined,
 	currentMethod: MethodWithId | undefined,
-): { value: unknown; hasValue: boolean } {
+	enabled: boolean,
+): { value: unknown; hasValue: boolean; isLoading: boolean } {
 	const testRun = useTestRun();
 	const isPaused = testRun?.isPaused ?? false;
 	const logTree = testRun?.logTree;
@@ -94,7 +105,7 @@ export function useLiveReferenceValue(
 	const activeSessionRef = useRef<string | null>(null);
 
 	useEffect(() => {
-		if (!sessionKey || !indexPath || !logTree) return;
+		if (!enabled || !sessionKey || !indexPath || !logTree) return;
 		if (activeSessionRef.current === sessionKey) return;
 		activeSessionRef.current = sessionKey;
 		void resolveTraceTarget(logTree, { indexPath, loopIndex }, [{ indexPath, loopIndex }])
@@ -103,17 +114,18 @@ export function useLiveReferenceValue(
 				if (activeSessionRef.current !== sessionKey) return;
 				setResolved({ sessionKey, data });
 			});
-	}, [sessionKey, indexPath, loopIndex, logTree]);
+	}, [enabled, sessionKey, indexPath, loopIndex, logTree]);
 
 	const data = resolved.sessionKey === sessionKey ? resolved.data : null;
+	const isLoading = enabled && canResolve && data === null;
 
 	if (!reference || !data || !currentIndexPath || !liveGraphStatus || !loopAncestorsByIndexPath) {
-		return { value: undefined, hasValue: false };
+		return { value: undefined, hasValue: false, isLoading };
 	}
 
 	if (reference.messageProperty === 'status') {
 		const status = data.segment?.response?.status;
-		return { value: status, hasValue: status !== undefined && status !== '' };
+		return { value: status, hasValue: status !== undefined && status !== '', isLoading: false };
 	}
 
 	const rawString =
@@ -124,11 +136,11 @@ export function useLiveReferenceValue(
 	} catch {
 		parsedBody = undefined;
 	}
-	if (parsedBody === undefined) return { value: undefined, hasValue: false };
+	if (parsedBody === undefined) return { value: undefined, hasValue: false, isLoading: false };
 
 	const resolveIteratorIndex = buildIteratorIndexResolver(currentIndexPath, loopAncestorsByIndexPath, liveGraphStatus);
 	const value = readLiveValueAtPath(parsedBody, reference.path, resolveIteratorIndex);
-	return { value, hasValue: value !== undefined };
+	return { value, hasValue: value !== undefined, isLoading: false };
 }
 
 // Shared rendering shape for every reference-chip consumer (BodyPointer,
