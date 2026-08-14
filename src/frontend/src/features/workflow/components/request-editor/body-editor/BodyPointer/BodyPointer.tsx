@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { parseEnhancementArg } from '../../utils/parseEnhancementArg';
 import { LegacyBodyReferenceGenerator } from '../LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
 import { useTestRun } from '../../../../test-run/useTestRun';
+import { LiveReferenceValuePreview } from '../../utils/LiveReferenceValuePreview';
 import type { BodyPointerProps } from './BodyPointer.types';
 import './BodyPointer.css';
 import {
@@ -49,14 +49,14 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
     hovered,
   );
   const liveValueText = hasLiveValue ? formatLiveReferenceValue(liveValue) : null;
-  const tooltipContent = isLiveValueLoading ? (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      {staticTitle} = <Loading size="xs" inline />
-    </span>
-  ) : liveValueText !== null ? (
-    `${staticTitle} = ${liveValueText}`
-  ) : (
-    staticTitle
+  const tooltipContent = (
+    <LiveReferenceValuePreview
+      label={staticTitle}
+      isLoading={isLiveValueLoading}
+      hasValue={hasLiveValue}
+      rawValue={liveValue}
+      formattedValue={liveValueText}
+    />
   );
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
         cursor: 'pointer',
       }}
     >
-      <Tooltip content={tooltipContent}>
+      <Tooltip content={tooltipContent} maxWidth={320}>
         <div style={{ width: 20, height: 10, background: color }} />
       </Tooltip>
       {hovered && !isPaused ? (

@@ -158,3 +158,13 @@ export function formatLiveReferenceValue(value: unknown): string {
 		return String(value);
 	}
 }
+
+// A resolved value can be an entire response payload — way too long for a
+// hover tooltip. Chips truncate to this length and offer an expand affordance
+// (see LiveReferenceValuePreview) that opens the full value in a dialog.
+export const LIVE_VALUE_PREVIEW_LIMIT = 100;
+
+export function truncateLiveValueText(text: string): { text: string; isTruncated: boolean } {
+	if (text.length <= LIVE_VALUE_PREVIEW_LIMIT) return { text, isTruncated: false };
+	return { text: `${text.slice(0, LIVE_VALUE_PREVIEW_LIMIT)}…`, isTruncated: true };
+}

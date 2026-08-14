@@ -484,9 +484,14 @@
     "wholeArray": "Das gesamte Array",
     "iteratorLoop": "({{iterator}}-Schleife)",
     "noVariableReferences": "Keine Variablenreferenzen",
+    "more": "mehr",
     "confirmDelete": {
       "title": "Referenz löschen",
       "message": "Möchten Sie diese Referenz wirklich löschen?"
+    },
+    "valueDialog": {
+      "copyTooltip": "Wert kopieren",
+      "copySuccess": "Wert in die Zwischenablage kopiert"
     }
   },
   "refGenerator": {

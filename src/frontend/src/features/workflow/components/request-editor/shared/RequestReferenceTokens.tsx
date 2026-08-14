@@ -2,13 +2,13 @@ import { CloseOutlined } from '@ant-design/icons';
 import { Button, Tag } from 'antd';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { getParsedReferences, splitReferences } from '../body-editor/bodyReference';
 import { getReferenceDisplayLabel } from './referenceDisplay';
 import { useMethodContext } from '../../../providers/MethodContext';
 import type { RootState } from '../../../store';
 import { formatLiveReferenceValue, normalizeParsedReference, useLiveReferenceValue } from '../utils/useLiveReferenceValue';
+import { LiveReferenceValuePreview } from '../utils/LiveReferenceValuePreview';
 
 type Props = {
   value: string;
@@ -47,18 +47,18 @@ function ReferenceTag({
   const liveText = hasValue ? formatLiveReferenceValue(liveValue) : null;
   const staticLabel = getLabel(reference);
   const showLiveLabel = isOnlyReferenceInField && liveText !== null;
-  const tooltipContent = isLoading ? (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      {staticLabel} = <Loading size="xs" inline />
-    </span>
-  ) : liveText !== null ? (
-    `${staticLabel} = ${liveText}`
-  ) : (
-    staticLabel
+  const tooltipContent = (
+    <LiveReferenceValuePreview
+      label={staticLabel}
+      isLoading={isLoading}
+      hasValue={hasValue}
+      rawValue={liveValue}
+      formattedValue={liveText}
+    />
   );
 
   return (
-    <Tooltip content={tooltipContent}>
+    <Tooltip content={tooltipContent} maxWidth={320}>
       <Tag
         color={parsed?.color || 'blue'}
         onMouseEnter={() => setHovered(true)}

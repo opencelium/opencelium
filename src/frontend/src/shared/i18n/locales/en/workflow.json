@@ -484,9 +484,14 @@
     "wholeArray": "The whole array",
     "iteratorLoop": "({{iterator}} loop)",
     "noVariableReferences": "No variable references",
+    "more": "more",
     "confirmDelete": {
       "title": "Delete reference",
       "message": "Do you really want to delete this reference?"
+    },
+    "valueDialog": {
+      "copyTooltip": "Copy value",
+      "copySuccess": "Value copied to clipboard"
     }
   },
   "refGenerator": {
