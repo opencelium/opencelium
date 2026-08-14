@@ -14,12 +14,13 @@ import {
   resolveTraceTarget,
   type LiveLogTree,
 } from '@features/logs';
-import type { WorkflowNodeModel } from '../../types/workflow.types';
-import type { MethodResponse } from '../../types/connection';
-import { useTestRun } from '../../test-run/useTestRun';
-import { resolveCurrentLoopIndex, type LiveGraphStatus } from '../../test-run/liveGraphStatus';
-import '../dialogHeader.css';
-import './response-dialog.css';
+import '../../dialogHeader.css';
+import './ResponseDialog.css';
+import type {WorkflowNodeModel} from "@features/workflow/types/workflow.types.ts";
+import type {LiveGraphStatus} from "@features/workflow/test-run/liveGraphStatus.ts";
+import {resolveCurrentLoopIndex} from "@features/workflow/test-run/liveGraphStatus.ts";
+import type {MethodResponse} from "@features/workflow/types/connection.ts";
+import {useTestRun} from "@features/workflow/test-run/useTestRun.ts";
 
 type Props = {
   open: boolean;

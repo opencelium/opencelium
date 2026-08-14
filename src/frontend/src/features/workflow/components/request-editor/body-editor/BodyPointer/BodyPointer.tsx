@@ -4,11 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { formatLiveReferenceValue, useLiveReferenceValue } from '../utils/useLiveReferenceValue';
 import { parseEnhancementArg } from '../../utils/parseEnhancementArg';
 import { LegacyBodyReferenceGenerator } from '../LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
 import type { BodyPointerProps } from './BodyPointer.types';
 import './BodyPointer.css';
+import {
+    formatLiveReferenceValue,
+    useLiveReferenceValue
+} from "@features/workflow/components/request-editor/utils/useLiveReferenceValue.ts";
 
 export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, connection, currentMethod }: BodyPointerProps) {
   const [hovered, setHovered] = useState(false);
