@@ -289,6 +289,129 @@
   top: 6px;
   right: 22px;
   z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scriptDebugTrigger {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-surface);
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.scriptDebugTrigger:hover {
+  border-color: var(--color-action-primary);
+  color: var(--color-action-primary);
+}
+
+.scriptDebugTrigger--active,
+.scriptDebugTrigger--active:hover {
+  background: var(--color-action-primary);
+  border-color: var(--color-action-primary);
+  color: var(--color-text-on-action);
+}
+
+.scriptDebugValue {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-background-surface);
+  overflow: hidden;
+}
+
+.scriptDebugValueHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-background-elevated);
+}
+
+.scriptDebugValueHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.scriptDebugValueBadge {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  border-radius: 999px;
+  padding: 1px 8px;
+  border: 1px solid;
+}
+
+.scriptDebugValueBadge--idle {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border-default);
+}
+
+.scriptDebugValueBadge--loading {
+  color: var(--color-action-primary);
+  border-color: var(--color-action-primary);
+}
+
+.scriptDebugValueBadge--value {
+  color: var(--color-status-success-fg);
+  border-color: var(--color-status-success-fg);
+}
+
+.scriptDebugValueBadge--error {
+  color: var(--color-status-error-fg);
+  border-color: var(--color-status-error-fg);
+}
+
+.scriptDebugValueBadge--stale {
+  color: var(--color-status-warning-fg);
+  border-color: var(--color-status-warning-fg);
+}
+
+.scriptDebugValueBody {
+  flex: 1;
+  min-height: 0;
+  padding: 10px 14px;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  overflow-y: auto;
+}
+
+.scriptDebugValueSection {
+  margin-bottom: 12px;
+}
+
+.scriptDebugValueSection:last-child {
+  margin-bottom: 0;
+}
+
+.scriptDebugValueSectionLabel {
+  font-family: Inter, sans-serif;
+  font-size: 11px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 5px;
+}
+
+.scriptDebugValueRefName {
+  color: var(--color-action-primary);
 }
 
 .bodyLegacyEnhancementScriptMaximized {

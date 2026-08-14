@@ -457,6 +457,27 @@
       "title": "Optimization available",
       "message": "There are {{count}} references that can be optimized for better performance. Would you like to apply this optimization before saving?",
       "message_one": "There is a reference that can be optimized for better performance. Would you like to apply this optimization before saving?"
+    },
+    "debugValue": {
+      "show": "Show value",
+      "hide": "Hide value",
+      "title": "Value",
+      "idleHint": "Not shown yet. Click the eye icon to resolve this value from the current test run.",
+      "loadingHint": "Resolving…",
+      "noReferences": "No references",
+      "references": "References",
+      "resultLabel": "RESULT_VAR · {{type}}",
+      "errorTitle": "Error",
+      "errorNotPaused": "Start a paused test run to resolve this from live execution data.",
+      "errorMethodFailed": "This method's execution failed this run — its request may be incomplete.",
+      "errorFieldNotFound": "Could not find a value for this field in the request that was actually sent.",
+      "errorNotRun": "This method hasn't run in the current test session yet. Run or continue the paused test, then check again.",
+      "status": {
+        "idle": "idle",
+        "loading": "running",
+        "error": "error",
+        "stale": "stale — script changed"
+      }
     }
   },
   "description": {

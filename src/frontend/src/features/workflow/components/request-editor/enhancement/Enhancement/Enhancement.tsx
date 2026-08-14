@@ -3,13 +3,17 @@ import { Maximize2, Minimize2 } from 'lucide-react';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import { Empty } from '@shared/ui/primitives/Empty';
+import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
+import { useMethodContext } from '../../../../providers/MethodContext';
 import { EnhancementArgs } from '../EnhancementArgs/EnhancementArgs';
 import EnhancementDescription from '../EnhancementDescription/EnhancementDescription';
 import DirectReferenceInfo from '../DirectReferenceInfo/DirectReferenceInfo';
 import ScriptLanguage from '../ScriptLanguage/ScriptLanguage';
 import EnhancementScript from '../EnhancementScript/EnhancementScript';
+import { ScriptDebugValue } from '../ScriptDebugValue/ScriptDebugValue';
+import { useScriptDebugValue } from '../ScriptDebugValue/useScriptDebugValue';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { EnhancementProps } from './Enhancement.types';
 import { useEnhancementState } from './useEnhancementState';
@@ -21,6 +25,8 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 	const { t } = useI18n('workflow');
 	const confirm = useConfirm();
 	const state = useEnhancementState(enhancement);
+	const { method: currentMethod } = useMethodContext();
+	const debug = useScriptDebugValue(enhancement, state.connection, currentMethod);
 
 	if (!state.connection) return null;
 
@@ -38,21 +44,45 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 						key: 'enhancement',
 						label: <div className='bodyLegacyEnhancementHeader'>
 							<span>{t('enhancement.title')}</span>
-							{hasEnhancement && onDeleteEnhancement && <span onClick={async (event) => {
-								event.stopPropagation();
-								const ok = await confirm({ title: t('enhancement.confirmDelete.title'),
-									message: t('enhancement.confirmDelete.message') });
-								if (ok) onDeleteEnhancement();
-							}}>
-								<Tooltip content={t(canDelete ? 'actions.deleteEnhancement'
-									: 'enhancement.deleteDisabledMultipleReferences')}>
-									<DeleteIconButton iconSize={15} disabled={readOnly || !canDelete}
-										testId='workflow-enhancement-delete' />
+							{hasEnhancement && <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+								<Tooltip content={t(debug.isOpen ? 'enhancement.debugValue.hide' : 'enhancement.debugValue.show')}>
+									<button
+										type='button'
+										className={debug.isOpen ? 'scriptDebugTrigger scriptDebugTrigger--active' : 'scriptDebugTrigger'}
+										onClick={(event) => {
+											event.stopPropagation();
+											debug.toggle();
+										}}
+										aria-label={t(debug.isOpen ? 'enhancement.debugValue.hide' : 'enhancement.debugValue.show')}
+									>
+										<Icon name={debug.isOpen ? 'eye-off' : 'eye'} size={14} />
+									</button>
 								</Tooltip>
+								{onDeleteEnhancement && <span onClick={async (event) => {
+									event.stopPropagation();
+									const ok = await confirm({ title: t('enhancement.confirmDelete.title'),
+										message: t('enhancement.confirmDelete.message') });
+									if (ok) onDeleteEnhancement();
+								}}>
+									<Tooltip content={t(canDelete ? 'actions.deleteEnhancement'
+										: 'enhancement.deleteDisabledMultipleReferences')}>
+										<DeleteIconButton iconSize={15} disabled={readOnly || !canDelete}
+											testId='workflow-enhancement-delete' />
+									</Tooltip>
+								</span>}
 							</span>}
 						</div>,
 						showArrow: false,
 						content: hasEnhancement ? (
+							debug.isOpen ? (
+								<div className='bodyLegacyEnhancementBody'>
+									<ScriptDebugValue
+										isOpen={debug.isOpen}
+										status={debug.status}
+										snapshot={debug.snapshot}
+									/>
+								</div>
+							) : (
 							<div className='bodyLegacyEnhancementBody'>
 								<div className='bodyLegacyEnhancementArgs'>
 									<Collapse
@@ -89,7 +119,10 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 												</button>
 											</Tooltip>
 										</span>
-										<EnhancementScript readOnly={readOnly} enhancement={enhancement!} onChangeScript={state.onChangeScript} />
+										<EnhancementScript readOnly={readOnly} enhancement={enhancement!} onChangeScript={(script) => {
+											state.onChangeScript(script);
+											debug.markStale();
+										}} />
 									</div>
 								</div>
 								<div className='bodyLegacyEnhancementDescription'>
@@ -100,6 +133,7 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 									/>
 								</div>
 							</div>
+							)
 						) : directReference ? (
 							<DirectReferenceInfo
 								directReference={directReference}

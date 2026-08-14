@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { fetchMethodDetails, resolveTraceTarget, type DetailedMethodLog } from '@features/logs';
+import { fetchMethodDetails, resolveTraceTarget, type LiveLogTree } from '@features/logs';
 import { useTestRun } from '../../../test-run/useTestRun';
-import { buildIteratorIndexResolver, resolveCurrentLoopIndex } from '../../../test-run/liveGraphStatus';
+import { buildIteratorIndexResolver, resolveCurrentLoopIndex, type LiveGraphStatus } from '../../../test-run/liveGraphStatus';
 import { findMethodByColor, readLiveValueAtPath } from '../body-editor/requestReferenceOptions';
 import type { Connection, MethodWithId } from '../../../types/connection';
 import type { ParsedArg } from './parseEnhancementArg';
@@ -18,17 +18,39 @@ export function normalizeParsedReference(reference: ParsedReference): ParsedArg 
 	return { color: reference.color, direction: reference.type, messageProperty, path };
 }
 
+export type TestRunLiveSnapshot = {
+	isPaused: boolean;
+	logTree: LiveLogTree | undefined;
+	liveGraphStatus: LiveGraphStatus | undefined;
+	loopAncestorsByIndexPath: Map<string, string[]> | undefined;
+};
+
+// `direction: 'request'` only ever resolves against `currentMethod` itself (an
+// Enhancement's RESULT_VAR, written into the current method's own request) —
+// there's no captured request for any *other* method's own field. `'response'`
+// resolves against whichever method the reference's color names.
+function resolveTargetMethod(
+	reference: ParsedArg | null | undefined,
+	connection: Connection | null | undefined,
+	currentMethod: MethodWithId | undefined,
+): MethodWithId | undefined {
+	if (!reference || !currentMethod) return undefined;
+	if (reference.direction === 'request') {
+		return reference.color.toLowerCase() === currentMethod.color.toLowerCase() ? currentMethod : undefined;
+	}
+	if (reference.direction === 'response' && connection) {
+		return findMethodByColor(connection.fromConnector.method, reference.color);
+	}
+	return undefined;
+}
+
 // The live-debugging counterpart to the static reference display: while a
-// test run is paused and the referenced method has already executed this
-// run, resolves the actual captured value instead of just the reference's
+// test run is paused and the target method has already executed this run,
+// resolves the actual captured value instead of just the reference's
 // structural path — via the exact same resolution chain ResponseDialog uses
 // (resolveCurrentLoopIndex -> resolveTraceTarget -> getMethodDetails), so a
 // reference nested inside one or more loops reads the value from the
 // CORRECT iteration, not always the first one.
-//
-// `direction: 'request'` references point at the CURRENT method's own
-// (static, already-known) request — never resolved live, since there is no
-// "response" to have captured yet for the thing you're still configuring.
 //
 // `currentMethod` is the method the reference is EMBEDDED in (the one being
 // edited) — needed because a `[<iterator>]` segment in the path (e.g.
@@ -39,6 +61,59 @@ export function normalizeParsedReference(reference: ParsedReference): ParsedArg 
 // iterated by a *different* method's enclosing loop) would otherwise never
 // resolve the iterator at all.
 //
+// Exported standalone (not just used internally by the hook below) so
+// one-shot, on-demand resolution — e.g. the Enhancement debug panel's
+// "evaluate" click, resolving several VAR_N references plus RESULT_VAR at
+// once — can reuse the exact same logic without being tied to a hover-driven
+// hook's cache-by-sessionKey lifecycle.
+export async function resolveLiveReferenceValue(
+	reference: ParsedArg | null,
+	connection: Connection | null | undefined,
+	currentMethod: MethodWithId | undefined,
+	snapshot: TestRunLiveSnapshot,
+): Promise<{ value: unknown; hasValue: boolean }> {
+	const { isPaused, logTree, liveGraphStatus, loopAncestorsByIndexPath } = snapshot;
+	if (!reference || !isPaused || !connection || !currentMethod || !logTree || !liveGraphStatus || !loopAncestorsByIndexPath) {
+		return { value: undefined, hasValue: false };
+	}
+
+	const isOwnRequest = reference.direction === 'request';
+	const targetMethod = resolveTargetMethod(reference, connection, currentMethod);
+	const indexPath = targetMethod?.index;
+	const currentIndexPath = currentMethod.index;
+	if (!indexPath || !currentIndexPath) return { value: undefined, hasValue: false };
+
+	const nodeStatus = liveGraphStatus[indexPath];
+	const hasRun = nodeStatus?.status === 'COMPLETE' || nodeStatus?.status === 'FAIL';
+	if (!hasRun) return { value: undefined, hasValue: false };
+
+	const loopIndex = resolveCurrentLoopIndex(indexPath, loopAncestorsByIndexPath, liveGraphStatus);
+	const leaf = await resolveTraceTarget(logTree, { indexPath, loopIndex }, [{ indexPath, loopIndex }]);
+	const data = leaf?.type === 'OPERATION' ? await fetchMethodDetails(leaf.id) : null;
+	if (!data) return { value: undefined, hasValue: false };
+
+	const segment = isOwnRequest ? data.segment?.request : data.segment?.response;
+
+	if (reference.messageProperty === 'status') {
+		if (isOwnRequest) return { value: undefined, hasValue: false };
+		const status = (segment as { status?: string } | undefined)?.status;
+		return { value: status, hasValue: status !== undefined && status !== '' };
+	}
+
+	const rawString = reference.messageProperty === 'header' ? segment?.header : segment?.payload;
+	let parsedBody: unknown;
+	try {
+		parsedBody = rawString ? JSON.parse(rawString) : undefined;
+	} catch {
+		parsedBody = undefined;
+	}
+	if (parsedBody === undefined) return { value: undefined, hasValue: false };
+
+	const resolveIteratorIndex = buildIteratorIndexResolver(currentIndexPath, loopAncestorsByIndexPath, liveGraphStatus);
+	const value = readLiveValueAtPath(parsedBody, reference.path, resolveIteratorIndex);
+	return { value, hasValue: value !== undefined };
+}
+
 // `enabled` gates the actual fetch: a node opened during pause can carry
 // dozens of reference chips, and resolving every one of them up front used
 // to fire a getElementChildren/getMethodDetails request per chip whether or
@@ -55,33 +130,28 @@ export function useLiveReferenceValue(
 	enabled: boolean,
 ): { value: unknown; hasValue: boolean; isLoading: boolean } {
 	const testRun = useTestRun();
-	const isPaused = testRun?.isPaused ?? false;
-	const logTree = testRun?.logTree;
-	const liveGraphStatus = testRun?.liveGraphStatus;
-	const loopAncestorsByIndexPath = testRun?.loopAncestorsByIndexPath;
+	const snapshot: TestRunLiveSnapshot = {
+		isPaused: testRun?.isPaused ?? false,
+		logTree: testRun?.logTree,
+		liveGraphStatus: testRun?.liveGraphStatus,
+		loopAncestorsByIndexPath: testRun?.loopAncestorsByIndexPath,
+	};
 
-	const targetMethod =
-		reference?.direction === 'response' && connection
-			? findMethodByColor(connection.fromConnector.method, reference.color)
-			: undefined;
-	const indexPath = targetMethod?.index;
-	const currentIndexPath = currentMethod?.index;
-	const nodeStatus = indexPath && liveGraphStatus ? liveGraphStatus[indexPath] : undefined;
+	const indexPath = resolveTargetMethod(reference, connection, currentMethod)?.index;
+	const nodeStatus = indexPath && snapshot.liveGraphStatus ? snapshot.liveGraphStatus[indexPath] : undefined;
 	const hasRun = nodeStatus?.status === 'COMPLETE' || nodeStatus?.status === 'FAIL';
 	const canResolve =
-		isPaused && !!reference && reference.direction === 'response' && !!indexPath && hasRun &&
-		!!logTree && !!liveGraphStatus && !!loopAncestorsByIndexPath;
+		snapshot.isPaused && !!reference && !!indexPath && hasRun &&
+		!!snapshot.logTree && !!snapshot.liveGraphStatus && !!snapshot.loopAncestorsByIndexPath;
 	const loopIndex =
-		canResolve && indexPath && liveGraphStatus && loopAncestorsByIndexPath
-			? resolveCurrentLoopIndex(indexPath, loopAncestorsByIndexPath, liveGraphStatus)
+		canResolve && indexPath && snapshot.liveGraphStatus && snapshot.loopAncestorsByIndexPath
+			? resolveCurrentLoopIndex(indexPath, snapshot.loopAncestorsByIndexPath, snapshot.liveGraphStatus)
 			: '';
 	const sessionKey = canResolve ? `${indexPath}:${loopIndex}` : null;
 
-	// Resolves the target's live execution element id (a getElementChildren
-	// REST walk once the path enters a loop's non-first iteration — see
-	// resolveTraceTarget) and then its full detail, cached per session key
-	// exactly like ResponseDialog. Both dispatch against the real app store
-	// directly (see fetchMethodDetails) rather than through RTK Query's
+	// Resolves and caches per session key exactly like ResponseDialog. Both
+	// dispatch against the real app store directly (see fetchMethodDetails,
+	// inside resolveLiveReferenceValue) rather than through RTK Query's
 	// generated hooks: this hook is called from BodyPointer/
 	// RequestReferenceTokens/XmlReferenceTokens, all rendered inside
 	// MethodConfigDialog's own nested legacy Redux <Provider> — a hook would
@@ -98,49 +168,27 @@ export function useLiveReferenceValue(
 	// promise was started for still match the current one" — activeSessionRef
 	// alone answers that; a second, separately-lifecycled flag can only
 	// disagree with it, never add information.
-	const [resolved, setResolved] = useState<{ sessionKey: string | null; data: DetailedMethodLog | null }>({
+	const [resolved, setResolved] = useState<{ sessionKey: string | null; value: unknown; hasValue: boolean }>({
 		sessionKey: null,
-		data: null,
+		value: undefined,
+		hasValue: false,
 	});
 	const activeSessionRef = useRef<string | null>(null);
 
 	useEffect(() => {
-		if (!enabled || !sessionKey || !indexPath || !logTree) return;
+		if (!enabled || !sessionKey) return;
 		if (activeSessionRef.current === sessionKey) return;
 		activeSessionRef.current = sessionKey;
-		void resolveTraceTarget(logTree, { indexPath, loopIndex }, [{ indexPath, loopIndex }])
-			.then((leaf) => (leaf?.type === 'OPERATION' ? fetchMethodDetails(leaf.id) : null))
-			.then((data) => {
-				if (activeSessionRef.current !== sessionKey) return;
-				setResolved({ sessionKey, data });
-			});
-	}, [enabled, sessionKey, indexPath, loopIndex, logTree]);
+		void resolveLiveReferenceValue(reference, connection, currentMethod, snapshot).then(({ value, hasValue }) => {
+			if (activeSessionRef.current !== sessionKey) return;
+			setResolved({ sessionKey, value, hasValue });
+		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- snapshot/reference/connection/currentMethod are re-derived every render from the same testRun context; sessionKey already captures every input that should trigger a refetch.
+	}, [enabled, sessionKey]);
 
-	const data = resolved.sessionKey === sessionKey ? resolved.data : null;
-	const isLoading = enabled && canResolve && data === null;
-
-	if (!reference || !data || !currentIndexPath || !liveGraphStatus || !loopAncestorsByIndexPath) {
-		return { value: undefined, hasValue: false, isLoading };
-	}
-
-	if (reference.messageProperty === 'status') {
-		const status = data.segment?.response?.status;
-		return { value: status, hasValue: status !== undefined && status !== '', isLoading: false };
-	}
-
-	const rawString =
-		reference.messageProperty === 'header' ? data.segment?.response?.header : data.segment?.response?.payload;
-	let parsedBody: unknown;
-	try {
-		parsedBody = rawString ? JSON.parse(rawString) : undefined;
-	} catch {
-		parsedBody = undefined;
-	}
-	if (parsedBody === undefined) return { value: undefined, hasValue: false, isLoading: false };
-
-	const resolveIteratorIndex = buildIteratorIndexResolver(currentIndexPath, loopAncestorsByIndexPath, liveGraphStatus);
-	const value = readLiveValueAtPath(parsedBody, reference.path, resolveIteratorIndex);
-	return { value, hasValue: value !== undefined, isLoading: false };
+	const isLoading = enabled && canResolve && resolved.sessionKey !== sessionKey;
+	if (resolved.sessionKey !== sessionKey) return { value: undefined, hasValue: false, isLoading };
+	return { value: resolved.value, hasValue: resolved.hasValue, isLoading: false };
 }
 
 // Shared rendering shape for every reference-chip consumer (BodyPointer,

@@ -457,6 +457,27 @@
       "title": "Optimierung verfügbar",
       "message": "Es gibt {{count}} Referenzen, die für eine bessere Leistung optimiert werden können. Möchten Sie diese Optimierung vor dem Speichern anwenden?",
       "message_one": "Es gibt eine Referenz, die für eine bessere Leistung optimiert werden kann. Möchten Sie diese Optimierung vor dem Speichern anwenden?"
+    },
+    "debugValue": {
+      "show": "Wert anzeigen",
+      "hide": "Wert ausblenden",
+      "title": "Wert",
+      "idleHint": "Noch nicht angezeigt. Klicken Sie auf das Augensymbol, um diesen Wert aus dem aktuellen Testlauf aufzulösen.",
+      "loadingHint": "Wird aufgelöst…",
+      "noReferences": "Keine Referenzen",
+      "references": "Referenzen",
+      "resultLabel": "RESULT_VAR · {{type}}",
+      "errorTitle": "Fehler",
+      "errorNotPaused": "Starten Sie einen pausierten Testlauf, um dies aus den Live-Ausführungsdaten aufzulösen.",
+      "errorMethodFailed": "Die Ausführung dieser Methode ist in diesem Lauf fehlgeschlagen — ihre Anfrage könnte unvollständig sein.",
+      "errorFieldNotFound": "Für dieses Feld konnte kein Wert in der tatsächlich gesendeten Anfrage gefunden werden.",
+      "errorNotRun": "Diese Methode wurde in der aktuellen Testsitzung noch nicht ausgeführt. Starten oder setzen Sie den pausierten Test fort und prüfen Sie danach erneut.",
+      "status": {
+        "idle": "inaktiv",
+        "loading": "läuft",
+        "error": "Fehler",
+        "stale": "veraltet — Skript geändert"
+      }
     }
   },
   "description": {
