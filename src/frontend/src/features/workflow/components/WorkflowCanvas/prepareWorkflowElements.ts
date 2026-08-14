@@ -1,107 +1,8 @@
-import { ALL_COLORS } from '../../constants/colors';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
-import { getOperatorBottomBranch, getOutgoingCount, isLeafNode } from '../../utils/graphUtils';
-import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
+import type { PrepareWorkflowParams } from './prepareWorkflowElements.types';
+import { buildWorkflowTopology, computeLeafInfo, hasSameWorkflowTopology } from './workflowTopology';
 
-type NodeCacheEntry = {
-	src: WorkflowNodeModel;
-	sig: string;
-	onAddStep: Params['onOpenAddStep'];
-	onOpenContextMenu: Params['onOpenContextMenu'];
-	onDeleteNode: Params['onDeleteNode'];
-	onOpenAggregatorEditor: Params['onOpenAggregatorEditor'];
-	out: WorkflowNodeModel;
-};
-
-type EdgeCacheEntry = {
-	src: WorkflowEdgeModel;
-	highlighted: boolean;
-	out: WorkflowEdgeModel;
-};
-
-type LeafInfo = { isLeaf: boolean; rightLeaf: boolean; bottomLeaf: boolean };
-
-type TopologyCache = {
-	sig: string;
-	onlyStartNode: boolean;
-	methodInstanceById: Map<string, { index: number; color: string }>;
-	highlightedBranch: { nodeIds: Set<string>; edgeIds: Set<string> };
-	leafById: Map<string, LeafInfo>;
-};
-
-export type PrepareWorkflowCache = {
-	nodes: Map<string, NodeCacheEntry>;
-	edges: Map<string, EdgeCacheEntry>;
-	topology?: TopologyCache;
-};
-
-const computeLeafInfo = (node: WorkflowNodeModel, edges: WorkflowEdgeModel[]): LeafInfo => {
-	const outgoingCount = getOutgoingCount(node.id, edges);
-	const rightLeaf = node.type === 'if'
-		? isLeafNode(node.id, edges, 'false')
-		: node.type === 'loop'
-			? isLeafNode(node.id, edges, 'right')
-			: outgoingCount === 0;
-	const bottomLeaf = node.type === 'if'
-		? isLeafNode(node.id, edges, 'true')
-		: node.type === 'loop' && isLeafNode(node.id, edges, 'bottom');
-	return { isLeaf: outgoingCount === 0, rightLeaf, bottomLeaf };
-};
-
-const buildTopologySignature = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[]) => {
-	const nodePart = nodes
-		.map((node) => [
-			node.id,
-			node.type,
-			node.selected ? 1 : 0,
-			node.data.dragGhost ? 1 : 0,
-			node.data.dropPlaceholder ? 1 : 0,
-			node.data.color ?? '',
-			node.data.connector?.connectorId ?? '',
-			node.data.subtitle ?? node.data.title ?? '',
-			node.data.triggerConnection?.connectionId ?? '',
-			node.data.triggerConnection?.schedulerId ?? '',
-		].join(':'))
-		.join('|');
-	const edgePart = edges
-		.map((edge) => [edge.id, edge.source, edge.target, edge.sourceHandle ?? '', edge.targetHandle ?? ''].join(':'))
-		.join('|');
-	return `${nodePart}#${edgePart}`;
-};
-
-type Params = Pick<
-	WorkflowCanvasProps,
-	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' | 'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor'
-> & { cache?: PrepareWorkflowCache };
-
-const getMethodInstanceData = (nodes: WorkflowNodeModel[]) => {
-	const result = new Map<string, { index: number; color: string }>();
-	const groups = new Map<string, WorkflowNodeModel[]>();
-	for (const node of nodes) {
-		if (node.type !== 'connector' && node.type !== 'system' && node.type !== 'trigger-connection') continue;
-		if (node.data.dragGhost || node.data.dropPlaceholder) continue;
-		const key = node.type === 'trigger-connection'
-			? `trigger-connection::${node.data.triggerConnection?.connectionId}::${node.data.triggerConnection?.schedulerId}`
-			: `${node.data.connector?.connectorId ?? 'system'}::${node.data.subtitle ?? node.data.title}`;
-		const group = groups.get(key);
-		if (group) group.push(node);
-		else groups.set(key, [node]);
-	}
-	const usedColors = new Set(nodes.map((node) => node.data.color?.toLowerCase()).filter(Boolean) as string[]);
-	for (const members of groups.values()) {
-		if (members.length < 2) continue;
-		members.forEach((member, index) => {
-			let color = member.data.color;
-			if (!color) {
-				color = ALL_COLORS.find((candidate) => !usedColors.has(candidate.toLowerCase()))
-					?? ALL_COLORS[index % ALL_COLORS.length];
-				usedColors.add(color.toLowerCase());
-			}
-			result.set(member.id, { index: index + 1, color });
-		});
-	}
-	return result;
-};
+export type { PrepareWorkflowCache } from './prepareWorkflowElements.types';
 
 export function prepareWorkflowElements({
 	nodes,
@@ -113,22 +14,10 @@ export function prepareWorkflowElements({
 	onDeleteNode,
 	onOpenAggregatorEditor,
 	cache,
-}: Params) {
+}: PrepareWorkflowParams) {
 	let topology = cache?.topology;
-	const topologySig = buildTopologySignature(nodes, edges);
-	if (!topology || topology.sig !== topologySig) {
-		const selectedOperator = nodes.find((node) => node.selected && (node.type === 'if' || node.type === 'loop'));
-		const leafById = new Map<string, LeafInfo>();
-		for (const node of nodes) leafById.set(node.id, computeLeafInfo(node, edges));
-		topology = {
-			sig: topologySig,
-			onlyStartNode: nodes.length === 1 && nodes[0]?.type === 'start',
-			methodInstanceById: getMethodInstanceData(nodes),
-			highlightedBranch: selectedOperator
-				? getOperatorBottomBranch(selectedOperator.id, nodes, edges)
-				: { nodeIds: new Set<string>(), edgeIds: new Set<string>() },
-			leafById,
-		};
+	if (!topology || !hasSameWorkflowTopology(topology, nodes, edges)) {
+		topology = buildWorkflowTopology(nodes, edges);
 		if (cache) cache.topology = topology;
 	}
 	const { onlyStartNode, methodInstanceById, highlightedBranch, leafById } = topology;

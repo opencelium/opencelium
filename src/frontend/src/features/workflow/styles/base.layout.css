@@ -1,0 +1,116 @@
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--color-text-primary);
+  background: var(--color-background-hover);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100vh;
+  width: 100%;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.page {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workflowMain {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.headerCard,
+.canvasCard,
+.logsCard {
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-lg);
+}
+
+.canvasCard {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.logsHeaderRow {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-right: 6px;
+}
+
+.logsHeader {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  min-height: 46px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-primary);
+}
+
+.logsHeaderIconButton {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-action-primary);
+  border-radius: 6px;
+}
+
+.logsHeaderIconButton:hover {
+  background: var(--color-background-hover);
+  color: var(--color-action-primary-hover);
+}
+
+.logsHeaderIconButton--active,
+.logsHeaderIconButton--active:hover {
+  background: var(--color-action-primary);
+  color: var(--color-text-on-action);
+}
+
+.logsCaret {
+  transition: transform 0.18s ease;
+}
+
+.logsCaretExpanded {
+  transform: rotate(180deg);
+}
+
+.logsBody {
+  display: block;
+  padding: 12px;
+  color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border-subtle);
+}
+

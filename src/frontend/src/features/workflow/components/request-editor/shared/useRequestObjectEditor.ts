@@ -1,15 +1,11 @@
-import type { InteractionProps, OnSelectProps } from 'react-json-view';
+import type { OnSelectProps } from 'react-json-view';
 import { useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useMethodContext } from '../../../providers/MethodContext';
 import type { RootState } from '../../../store';
-import { updateConnection, updatePayload } from '../../../store/connection/connectionSlice';
 import {
-  createDirectReferenceEnhancement,
   findRequestEnhancement,
   getDirectReferenceInfo,
-  removeDeletedRequestBindings,
-  updateRequestFieldBindings,
 } from '../body-editor/bodyBinding';
 import {
   getBodySelection,
@@ -17,31 +13,20 @@ import {
   mergeReferenceValue,
   setBodySelectionValue,
 } from '../body-editor/bodyValue';
-import { countEnhancementReferences, removeReferenceValue, resolveFieldPathAgainstSource } from '../body-editor/bodyReference';
-import { isInvalidMixedReferenceInteraction } from './requestFieldRules';
+import { removeReferenceValue, resolveFieldPathAgainstSource } from '../body-editor/bodyReference';
+import type { RequestObjectEditorProps } from './requestObjectEditor.types';
+import { useRequestEnhancementActions } from './useRequestEnhancementActions';
+import { useRequestObjectCommit } from './useRequestObjectCommit';
 
-type MessageProperty = 'body' | 'header';
-
-type Props = {
-  messageProperty: MessageProperty;
-  source: Record<string, unknown>;
-};
-
-export function useRequestObjectEditor({ messageProperty, source }: Props) {
-  const dispatch = useDispatch();
+export function useRequestObjectEditor({ messageProperty, source }: RequestObjectEditorProps) {
   const { method } = useMethodContext();
   const connection = useSelector((state: RootState) => state.connection.connection);
   const [selection, setSelection] = useState<ReturnType<typeof getBodySelection>>(null);
   const [selectedEnhanceId, setSelectedEnhanceId] = useState<string>();
   const [isReferenceOpen, setIsReferenceOpen] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
   const currentValue = getBodySelectionValue(source, selection);
 
-  // Derives the selected enhancement from the latest connection/selection on every render instead
-  // of setting it inline inside event handlers: react-json-view's edit-confirm icon doesn't stop
-  // propagation, so confirming a reference re-fires onSelect (with pre-edit, stale props) in the
-  // same event dispatch — an inline setSelectedEnhanceId there would clobber the id the edit just
-  // produced. Recomputing after the state settles avoids that race.
+  // Recompute after selection settles to avoid react-json-view's stale onSelect race.
   useEffect(() => {
     if (!selection) return;
     const enhancement = findRequestEnhancement(connection, method.color, selection.namespace, selection.name, messageProperty, currentValue);
@@ -62,37 +47,22 @@ export function useRequestObjectEditor({ messageProperty, source }: Props) {
         : null,
     [currentEnhancement, currentValue, messageProperty, selection],
   );
-
-  const getNextConnection = (updatedSource: unknown, namespace: string[], name: string | undefined, newValue: unknown) => {
-    if (!connection) return undefined;
-    const next = updateRequestFieldBindings(connection, method.color, messageProperty, { namespace, name, newValue });
-    return removeDeletedRequestBindings(next, method.color, messageProperty, updatedSource);
-  };
-
-  const commit = (payload: InteractionProps) => {
-    if (isInvalidMixedReferenceInteraction(payload)) {
-      setValidationError('The field must contain either plain text or references only. Mixed values are not allowed.');
-      return false;
-    }
-    setValidationError(null);
-    dispatch(updatePayload({ methodId: method.id, newFields: payload.updated_src, messageProperty } as never));
-    const namespace = (payload.namespace || []).filter(Boolean).map(String);
-    const name = payload.name || undefined;
-    const next = getNextConnection(payload.updated_src, namespace, name, payload.new_value);
-    if (next) dispatch(updateConnection({ fieldBindings: next.fieldBindings } as never));
-    return true;
-  };
+  const enhancementActions = useRequestEnhancementActions({ connection, method, messageProperty,
+    selection, currentValue, currentEnhancement });
+  const { commit, validationError, clearValidationError } = useRequestObjectCommit({
+    connection, method, messageProperty,
+  });
 
   const onSelect = (select: OnSelectProps) => {
     const next = getBodySelection(select);
     if (!next) return;
     setSelection(next);
-    setValidationError(null);
+    clearValidationError();
   };
 
   const selectField = (namespace: string[], name: string, value: unknown) => {
     setSelection({ namespace, name, value, pathLabel: [...namespace, name].join('.') });
-    setValidationError(null);
+    clearValidationError();
   };
 
   const updateSelectionValue = (nextValue: string) => {
@@ -109,32 +79,7 @@ export function useRequestObjectEditor({ messageProperty, source }: Props) {
     setSelection({ ...selection, value: nextValue });
   };
 
-  const createEnhancement = () => {
-    if (!connection || !selection) return;
-    const created = createDirectReferenceEnhancement(
-      connection,
-      method.color,
-      messageProperty,
-      selection.namespace,
-      selection.name,
-      currentValue,
-    );
-    if (!created) return;
-    dispatch(updateConnection({ fieldBindings: created.connection.fieldBindings } as never));
-  };
-
-  const deleteEnhancement = () => {
-    if (!connection || !currentEnhancement) return;
-    if (countEnhancementReferences(currentEnhancement) > 1) return;
-    dispatch(updateConnection({
-      fieldBindings: connection.fieldBindings.filter((binding) => binding.enhancement.enhanceId !== currentEnhancement.enhanceId),
-    } as never));
-  };
-
-  // Removes one reference token from a field's raw value (identified by its dotted resultVar
-  // path, e.g. "items.[0].name") — same mechanism BodyPointer's own remove action uses. Letting
-  // the normal commit pipeline resync afterward keeps fieldBindings/args consistent with the
-  // edited value, instead of editing args directly and leaving the raw value out of sync.
+  // Use the normal commit pipeline so raw values and field bindings remain synchronized.
   const deleteReferenceAtPath = (fieldPath: string, pointer: string) => {
     const { namespace, name } = resolveFieldPathAgainstSource(source, fieldPath);
     if (!name) return;
@@ -155,9 +100,9 @@ export function useRequestObjectEditor({ messageProperty, source }: Props) {
 
   return {
     connection,
-    createEnhancement,
+    createEnhancement: enhancementActions.createEnhancement,
     currentEnhancement,
-    deleteEnhancement,
+    deleteEnhancement: enhancementActions.deleteEnhancement,
     deleteReferenceAtPath,
     currentValue,
     directReference,

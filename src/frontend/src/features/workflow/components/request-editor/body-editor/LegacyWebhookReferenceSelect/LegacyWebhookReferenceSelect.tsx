@@ -1,16 +1,15 @@
-import { PlusOutlined, UserOutlined, FontSizeOutlined } from '@ant-design/icons';
-import { Input, Modal, Select } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { Select } from 'antd';
 import { useMemo, useState } from 'react';
-import { createWebhookOption, getWebhookOptions, type WebhookType, upsertWebhookOption, WEBHOOK_TYPES } from '../bodyWebhook';
+import { createWebhookOption, getWebhookOptions, type WebhookType } from '../bodyWebhook';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { LegacyWebhookReferenceSelectProps } from './LegacyWebhookReferenceSelect.types';
+import { CreateWebhookModal } from './CreateWebhookModal';
 import '../bodyLegacy.css';
 
 export function LegacyWebhookReferenceSelect({ value, onChange }: LegacyWebhookReferenceSelectProps) {
   const { t } = useI18n('workflow');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [type, setType] = useState<WebhookType | undefined>();
   const options = useMemo(() => getWebhookOptions(), [isModalOpen, value]);
   const selected = value
     ? options.find((item) => item.value === value) ||
@@ -47,49 +46,8 @@ export function LegacyWebhookReferenceSelect({ value, onChange }: LegacyWebhookR
           </>
         )}
       />
-      <Modal
-        open={isModalOpen}
-        title={t('actions.addWebhook')}
-        zIndex={13020}
-        rootClassName='bodyLegacyWebhookModalRoot'
-        closeIcon={null}
-        onCancel={() => {
-          setIsModalOpen(false);
-          setName('');
-          setType(undefined);
-        }}
-        onOk={() => {
-          if (!(name.trim() && type)) return;
-          const webhook = upsertWebhookOption(name.trim(), type);
-          onChange(webhook.value);
-          setIsModalOpen(false);
-          setName('');
-          setType(undefined);
-        }}
-        okButtonProps={{ disabled: !(name.trim() && type) }}
-        styles={{ body: { paddingTop: 12 } }}
-      >
-        <Input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder={t('webhook.namePlaceholder')}
-          prefix={<UserOutlined style={{ color: 'var(--color-text-disabled)' }} />}
-          variant='borderless'
-          className='bodyLegacyWebhookModalInput'
-        />
-        <Select
-          placeholder={t('webhook.typePlaceholder')}
-          value={type}
-          onChange={setType}
-          options={WEBHOOK_TYPES.map((item) => ({ label: item, value: item }))}
-          style={{ width: '100%', marginTop: 12 }}
-          prefix={<FontSizeOutlined style={{ color: 'var(--color-text-disabled)' }} />}
-          variant='borderless'
-          className='bodyLegacyWebhookModalSelect'
-          getPopupContainer={(trigger) => trigger.parentElement || document.body}
-          styles={{ popup: { root: { zIndex: 13030 } } }}
-        />
-      </Modal>
+      <CreateWebhookModal open={isModalOpen} onClose={() => setIsModalOpen(false)}
+        onCreate={onChange} />
     </>
   );
 }

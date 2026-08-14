@@ -21,3 +21,11 @@ export type WorkflowHeaderProps = {
 };
 
 export type EditField = 'name' | 'description' | null;
+
+export type WorkflowHeaderStateProps = Pick<
+	WorkflowHeaderProps,
+	'initialName' | 'initialDescription' | 'onChange' | 'validateTitle'
+> & {
+	onNameCommitted?: (title: string, description: string) => void | Promise<void>;
+	onDescriptionCommitted?: (title: string, description: string) => void | Promise<void>;
+};

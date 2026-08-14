@@ -1,0 +1,49 @@
+.handleInvisible {
+  opacity: 0;
+  width: 8px;
+  height: 8px;
+}
+
+.workflowControls {
+  top: 65px !important;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.workflowControls .react-flow__controls-button {
+  background: var(--color-background-surface);
+  border-bottom: 1px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
+}
+
+.workflowControls .react-flow__controls-button:hover {
+  background: var(--color-background-hover);
+}
+
+.workflowControls .react-flow__controls-button:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.workflowControls .react-flow__controls-button svg {
+  fill: currentColor;
+}
+
+.react-flow__handle-top {
+  top: -2px;
+}
+
+.react-flow__handle-left {
+  left: -2px;
+}
+
+.react-flow__handle-right {
+  right: -2px;
+}
+
+.react-flow__handle-bottom {
+  bottom: -2px;
+}
+

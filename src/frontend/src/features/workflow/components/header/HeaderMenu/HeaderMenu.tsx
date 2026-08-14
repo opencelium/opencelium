@@ -1,53 +1,13 @@
-import { useEffect, useRef } from 'react';
-import type { WorkflowHeaderMenuItem } from '../../../types/workflow.types';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { WorkflowMenuItem } from '../WorkflowMenuItem/WorkflowMenuItem';
 import type { HeaderMenuProps } from './HeaderMenu.types';
+import { useHeaderMenu } from './useHeaderMenu';
 
 export function HeaderMenu({ open, items, onClose, onSelect, loadingItemId }: HeaderMenuProps) {
   const { t } = useI18n('workflow');
-  const ref = useRef<HTMLDivElement | null>(null);
-  const wasLoadingRef = useRef(false);
-
-  useEffect(() => {
-    const isLoading = loadingItemId != null;
-    if (wasLoadingRef.current && !isLoading) onClose();
-    wasLoadingRef.current = isLoading;
-  }, [loadingItemId, onClose]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const onPointerDown = (event: PointerEvent) => {
-      if (!ref.current) return;
-      if (ref.current.contains(event.target as Node)) return;
-      onClose();
-    };
-
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-
-    window.addEventListener('pointerdown', onPointerDown, true);
-    window.addEventListener('keydown', onEscape);
-
-    return () => {
-      window.removeEventListener('pointerdown', onPointerDown, true);
-      window.removeEventListener('keydown', onEscape);
-    };
-  }, [open, onClose]);
+  const { ref, sections } = useHeaderMenu({ open, items, onClose, loadingItemId });
 
   if (!open) return null;
-
-  const sections = items.reduce<Record<string, WorkflowHeaderMenuItem[]>>(
-    (acc, item) => {
-      const key = item.section ?? 'default';
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(item);
-      return acc;
-    },
-    {},
-  );
 
   return (
     <div ref={ref} className="headerMenu">

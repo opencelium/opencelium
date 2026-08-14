@@ -1,0 +1,84 @@
+.logsOrphanNotice {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--color-status-warning-bg);
+  border: 1px solid var(--color-status-warning-border);
+  color: var(--color-status-warning-fg);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.logsHeaderTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logsRunning {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-action-primary);
+}
+
+.logsRunningSpinner {
+  animation: logsRunningSpin 0.9s linear infinite;
+}
+
+@keyframes logsRunningSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.logsBodyTree {
+  height: 360px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logsCardFull .logsBodyTree {
+  height: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.logsResult {
+  flex-shrink: 0;
+  padding-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.logsResult--finished {
+  color: var(--color-status-success-fg);
+}
+
+.logsResult--stopped {
+  color: var(--color-status-warning-fg);
+}
+
+.logsResult--failed {
+  color: var(--color-status-error-fg);
+}
+
+.headerCard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.headerCardWithInlineError {
+  padding-bottom: 30px;
+}
+

@@ -25,6 +25,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             success: string
             failed: string
         }
+        field: {
+            required: string
+        }
         status: {
             loading: string
             empty: string
