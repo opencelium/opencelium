@@ -201,7 +201,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             User user = userService.findByUsername(username).orElseGet(() -> {
                 User newUser = new User();
 
-                if (EmailUtility.isEmail(username)) {
+                if (EmailUtility.isValid(username)) {
                     newUser.setEmail(username);
                 }
                 newUser.setUsername(username);
