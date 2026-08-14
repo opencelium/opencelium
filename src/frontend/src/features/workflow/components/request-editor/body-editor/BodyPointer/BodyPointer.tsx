@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import { parseEnhancementArg } from '../../utils/parseEnhancementArg';
+import { formatParsedArgPath, parseEnhancementArg } from '../../utils/parseEnhancementArg';
 import { LegacyBodyReferenceGenerator } from '../LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
 import { useTestRun } from '../../../../test-run/useTestRun';
 import { LiveReferenceValuePreview } from '../../utils/LiveReferenceValuePreview';
@@ -28,11 +28,7 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
   const isPaused = useTestRun()?.isPaused ?? false;
   const parsed = useMemo(() => parseEnhancementArg(pointer), [pointer]);
   const color = parsed?.color || 'var(--color-text-disabled)';
-  const staticTitle = parsed
-    ? parsed.path
-      ? `${parsed.messageProperty}.$.${parsed.path}`
-      : `${parsed.messageProperty}.$`
-    : pointer;
+  const staticTitle = parsed ? formatParsedArgPath(parsed) : pointer;
   const canEdit = !!onEdit && !!connection && !!currentMethod;
 
   // While paused and the referenced method has already run this test, show

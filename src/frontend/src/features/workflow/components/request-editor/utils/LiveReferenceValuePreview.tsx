@@ -6,6 +6,10 @@ import { truncateLiveValueText } from './useLiveReferenceValue';
 
 type Props = {
   label: string;
+  /** Set false where the value speaks for itself (e.g. the endpoint/URL editor's
+   * inline reference pills) — renders just the value/spinner, no "label = " prefix.
+   * The label is still used as the expand dialog's title either way. */
+  showLabel?: boolean;
   isLoading: boolean;
   hasValue: boolean;
   rawValue: unknown;
@@ -13,24 +17,26 @@ type Props = {
 };
 
 // Shared tooltip-content shape for every reference-chip consumer (BodyPointer,
-// RequestReferenceTokens, XmlReferenceTokens): "label" while unresolved,
-// "label = [spinner]" while the request is in flight, "label = value" once
-// resolved — with a truncated preview plus a "more…" link opening the full
-// value (JSON rendered via react-json-view) when it's over the preview limit.
-export function LiveReferenceValuePreview({ label, isLoading, hasValue, rawValue, formattedValue }: Props) {
+// RequestReferenceTokens, XmlReferenceTokens, EndpointArgHoverTooltip): "label"
+// while unresolved, "label = [spinner]" while the request is in flight,
+// "label = value" once resolved — with a truncated preview plus a "more…" link
+// opening the full value (JSON rendered via react-json-view) when it's over
+// the preview limit.
+export function LiveReferenceValuePreview({ label, showLabel = true, isLoading, hasValue, rawValue, formattedValue }: Props) {
   const { t: tWorkflow } = useI18n('workflow');
   const [dialogOpen, setDialogOpen] = useState(false);
 
   if (isLoading) {
     return (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-        {label} = <Loading size="xs" inline />
+        {showLabel && <>{label} = </>}
+        <Loading size="xs" inline />
       </span>
     );
   }
 
   if (!hasValue || formattedValue === null) {
-    return <>{label}</>;
+    return showLabel ? <>{label}</> : null;
   }
 
   const { text, isTruncated } = truncateLiveValueText(formattedValue);
@@ -41,7 +47,8 @@ export function LiveReferenceValuePreview({ label, isLoading, hasValue, rawValue
           tooltip's max-width instead of forcing it wider — a flex row's items
           refuse to shrink below their unwrapped content size by default. */}
       <span style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-        {label} = {text}
+        {showLabel && <>{label} = </>}
+        {text}
         {isTruncated && (
           <span
             onClick={(event) => {
