@@ -175,7 +175,8 @@ export type WizardDefinition = {
     renderImage?: React.ComponentType<{ mode?: Mode }>
     overrideKey?: string
     recommendations?: Recommendation[]
-    steps: WizardStepDefinition[]
+    /** Function form lets the step list itself differ by mode (e.g. a step only relevant to create/update, or a field relocated between steps depending on mode). */
+    steps: WizardStepDefinition[] | ((mode: Mode) => WizardStepDefinition[])
     modes?: Partial<Record<Mode, WizardModeConfig>>
 }
 export type CrossFieldValidation = {

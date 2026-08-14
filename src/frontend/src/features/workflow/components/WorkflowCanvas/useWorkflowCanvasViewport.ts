@@ -58,5 +58,5 @@ export const useWorkflowCanvasViewport = ({ nodes, restoredViewport,
 		}
 	};
 
-	return { handleInit };
+	return { handleInit, instanceRef };
 };

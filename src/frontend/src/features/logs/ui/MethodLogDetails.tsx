@@ -29,7 +29,13 @@ type Props = {
 export function MethodLogDetails({ id, depth, path }: Props) {
   const { t } = useI18n("logs");
   const { tabs, setTab } = useMethodDetailViewState();
-  const { data, isFetching, isError } = useGetMethodDetailsQuery(id);
+  // A method's own detail never changes once logged — skip baseApi's default
+  // refetch-on-mount so a warm cache entry (from a previous expand, or from
+  // prefetchErrorTracePath's reveal warm-up) is reused as-is instead of a
+  // redundant request flipping isFetching back to true.
+  const { data, isFetching, isError } = useGetMethodDetailsQuery(id, {
+    refetchOnMountOrArgChange: false,
+  });
 
   const requestTabKey = `${path}/request`;
   const responseTabKey = `${path}/response`;

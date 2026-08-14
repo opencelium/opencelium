@@ -239,8 +239,7 @@ export const userDefinition: EntityDefinition = {
             },
             validation: {
                 required: true,
-                email: true,
-                max: 100,
+                max: 255,
                 remote: {
                     url: `/user/check/:email`,
                     method: 'GET', // or GET, depending on the API
@@ -304,16 +303,7 @@ export const userDefinition: EntityDefinition = {
                     { pattern: /\d/, message: `${baseKey}.fields.password.validation3` },
                     { pattern: /[^A-Za-z0-9]/, message: `${baseKey}.fields.password.validation4` }
                 ]
-            },/*
-            access: {
-                strategy: 'forbid',
-                rules: [
-                    {
-                        effect: 'deny',
-                        roles: ['viewer']
-                    }
-                ]
-            }*/
+            },
         },
         {
             name: 'repeatPassword',
@@ -326,7 +316,7 @@ export const userDefinition: EntityDefinition = {
             },
             validation: {
                 required: true,
-            }
+            },
         },
         {
             name: 'userGroup',
@@ -417,18 +407,14 @@ export const userDefinition: EntityDefinition = {
                 ]
             }*/
         },{
+            // Update mode merges role selection into the credentials step instead of a
+            // separate step (see the 'credentials' step definition below) — one section,
+            // so it renders as a single block instead of two separately-spaced sections.
+            id: 'credentials-update',
+            fields: ['email', 'userGroup'],
+        },{
             id: 'role',
-            fields: ['userGroup'],/*
-            access: {
-                strategy: 'hide',
-                rules: [
-                    {
-                        effect: 'allow',
-                        roles: ['admin']
-                    },
-
-                ]
-            }*/
+            fields: ['userGroup'],
         }
     ],
 
@@ -483,33 +469,49 @@ export const userDefinition: EntityDefinition = {
             }
         ],
 
-        steps: [{
+        // Update mode merges role selection into the credentials step (and drops
+        // password/repeatPassword, changed via a dedicated reset flow instead) rather
+        // than keeping the create flow's separate password + role steps.
+        steps: (mode) => {
+            const detailsStep = {
                 id: 'details',
                 header: `${baseKey}.wizard.steps.details.header`,
                 subheader: `${baseKey}.wizard.steps.details.subheader`,
                 sectionIds: ['details'],
                 validateFields: ['userDetail.name', 'userDetail.surname', 'userDetail.phoneNumber'],
-/*                info: [
-                    {
-                        content: `${baseKey}.wizard.steps.details.info`,
-                    }
-                ]*/
-            },
-            {
-                id: 'credentials',
-                header: `${baseKey}.wizard.steps.credentials.header`,
-                subheader: `${baseKey}.wizard.steps.credentials.subheader`,
-                sectionIds: ['credentials'],
-                validateFields: ['email', 'password', 'repeatPassword']
-            },
-            {
-                id: 'role',
-                header: `${baseKey}.wizard.steps.role.header`,
-                subheader: `${baseKey}.wizard.steps.role.subheader`,
-                sectionIds: ['role'],
-                validateFields: ['userGroup']
             }
-        ]
+
+            if (mode === 'update') {
+                return [
+                    detailsStep,
+                    {
+                        id: 'credentials',
+                        header: `${baseKey}.wizard.steps.credentials.header`,
+                        subheader: `${baseKey}.wizard.steps.credentials.subheaderUpdate`,
+                        sectionIds: ['credentials-update'],
+                        validateFields: ['email', 'userGroup'],
+                    },
+                ]
+            }
+
+            return [
+                detailsStep,
+                {
+                    id: 'credentials',
+                    header: `${baseKey}.wizard.steps.credentials.header`,
+                    subheader: `${baseKey}.wizard.steps.credentials.subheader`,
+                    sectionIds: ['credentials'],
+                    validateFields: ['email', 'password', 'repeatPassword'],
+                },
+                {
+                    id: 'role',
+                    header: `${baseKey}.wizard.steps.role.header`,
+                    subheader: `${baseKey}.wizard.steps.role.subheader`,
+                    sectionIds: ['role'],
+                    validateFields: ['userGroup'],
+                },
+            ]
+        },
     },
     commands: (def) => (
         [

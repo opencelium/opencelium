@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useMemo } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './styles.css';
 import { WorkflowPageHeader } from './components/WorkflowPageHeader/WorkflowPageHeader';
@@ -9,6 +10,7 @@ import { WorkflowPageDialogs } from './components/WorkflowPageDialogs/WorkflowPa
 import { TestRunProvider } from './test-run/TestRunProvider';
 import { useWorkflowPageState } from './hooks/useWorkflowPageState';
 import { useWorkflowActions } from './hooks/useWorkflowActions';
+import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -29,6 +31,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     hasManualChanges: hasManualUnsavedChanges } = changes;
   const { selectedNode, contextMenuNode, editorNode, conditionNode, aggregatorNode,
     conditionConnection } = derived;
+  const loopAncestorsByIndexPath = useMemo(
+    () => buildLoopAncestorsByIndexPath(hydratedNodes, workflow.edges),
+    [hydratedNodes, workflow.edges],
+  );
 
   const actions = useWorkflowActions({ connectionId, readOnly, page: {
     connection, workflow, connectors, invokers, view, changes, derived, isLoading } });
@@ -50,7 +56,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     handleConfirmConnectorMapping, handleCancelConnectorMapping } = templateActions;
 
   return (
-    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title} buildTestPayload={buildTestPayload} onResolveStartError={resolveAndHighlightWorkflowError}>
+    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title}
+      buildTestPayload={buildTestPayload}
+      onResolveStartError={resolveAndHighlightWorkflowError}
+      loopAncestorsByIndexPath={loopAncestorsByIndexPath}>
     <div className="page" data-testid="workflow-page">
       <WorkflowPageHeader connectionId={activeConnectionId} schedulesOpen={schedulesOpen}
         onToggleSchedules={() => setSchedulesOpen((open) => {

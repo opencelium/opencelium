@@ -35,7 +35,7 @@
     "tooltip": "Start execution",
     "success": "Schedule execution started",
     "error": {
-      "concurrentForbidden": "Another schedule for this connection is already running. Wait for it to finish before starting this one.",
+      "concurrentForbidden": "Another schedule for this workflow is already running. Wait for it to finish before starting this one.",
       "failed": "Could not start the schedule execution"
     }
   },

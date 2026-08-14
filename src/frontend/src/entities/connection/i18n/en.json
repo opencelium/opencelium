@@ -61,13 +61,18 @@
   "test": {
     "start": "Test run",
     "stop": "Stop test",
+    "skipAnimation": "Skip animation",
     "socketConnecting": "Connecting websocket…",
     "socketDisconnected": "WebSocket is not connected",
     "noMethods": "Add at least one method before running a test",
-    "startFailed": "Failed to start the test run",
-    "stopFailed": "Failed to stop the test run",
-    "terminated": "Test run terminated",
-    "otherTestRunning": "A test for this connection is already running. Wait for it to finish or stop it first.",
+    "startFailed": "Failed to start the test",
+    "stopFailed": "Failed to stop the test",
+    "terminated": "Test terminated",
+    "finished": "Test finished successfully",
+    "failed": "Test failed",
+    "locatingError": "Collecting error data…",
+    "skipToLive": "Jump to live",
+    "otherTestRunning": "A test for this workflow is already running. Wait for it to finish or stop it first.",
     "leaveConfirm": {
       "title": "Stop the running test?",
       "message": "Your test is running. If you leave this page, the test will be terminated. Do you want to continue?"

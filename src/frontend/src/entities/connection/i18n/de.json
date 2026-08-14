@@ -61,12 +61,17 @@
   "test": {
     "start": "Testlauf",
     "stop": "Test stoppen",
+    "skipAnimation": "Animation überspringen",
     "socketConnecting": "WebSocket wird verbunden…",
     "socketDisconnected": "WebSocket ist nicht verbunden",
     "noMethods": "Fügen Sie mindestens eine Methode hinzu, bevor Sie einen Test starten",
     "startFailed": "Testlauf konnte nicht gestartet werden",
     "stopFailed": "Testlauf konnte nicht gestoppt werden",
     "terminated": "Testlauf abgebrochen",
+    "finished": "Testlauf erfolgreich abgeschlossen",
+    "failed": "Testlauf fehlgeschlagen",
+    "locatingError": "Fehlerdaten werden gesammelt…",
+    "skipToLive": "Zum Live-Stand springen",
     "otherTestRunning": "Für diese Verbindung läuft bereits ein Test. Warten Sie, bis er fertig ist, oder stoppen Sie ihn zuerst.",
     "leaveConfirm": {
       "title": "Laufenden Test stoppen?",

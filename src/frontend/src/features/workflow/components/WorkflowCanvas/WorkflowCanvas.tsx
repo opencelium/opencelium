@@ -1,5 +1,5 @@
-import { Controls, ReactFlow } from '@xyflow/react';
-import { useRef } from 'react';
+import { Controls, Panel, ReactFlow } from '@xyflow/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   WorkflowEdgeModel,
   WorkflowNodeModel,
@@ -9,6 +9,10 @@ import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 import { useWorkflowCanvasViewport } from './useWorkflowCanvasViewport';
 import { useStableWorkflowCanvasActions } from './useStableWorkflowCanvasActions';
+import { useTestRun } from '../../test-run/useTestRun';
+import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
+import { TestRunAnimationHint } from './TestRunAnimationHint';
+import { TestRunSpeedControl } from './TestRunSpeedControl';
 
 export function WorkflowCanvas({
   nodes,
@@ -39,6 +43,24 @@ export function WorkflowCanvas({
     onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor,
   });
 
+  const testRun = useTestRun();
+  const isEditLocked = !!testRun && testRun.phase !== 'idle';
+  const currentStep = testRun?.isLiveAnimation ? null : testRun?.currentStep ?? null;
+  const testRunScope = useMemo(() => testRun?.liveGraphStatus
+    ? getTestRunScope(nodes, edges, testRun.liveGraphStatus, currentStep)
+    : EMPTY_TEST_RUN_SCOPE, [nodes, edges, testRun?.liveGraphStatus, currentStep]);
+  const [testRunFailureDismissed, setTestRunFailureDismissed] = useState(false);
+  useEffect(() => {
+    if (testRun?.errorRevealNonce) setTestRunFailureDismissed(false);
+  }, [testRun?.errorRevealNonce]);
+  useEffect(() => {
+    const dismissFailure = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setTestRunFailureDismissed(true);
+    };
+    window.addEventListener('keydown', dismissFailure);
+    return () => window.removeEventListener('keydown', dismissFailure);
+  }, []);
+
   const { preparedEdges, preparedNodes } = prepareWorkflowElements({
     nodes,
     edges,
@@ -46,9 +68,21 @@ export function WorkflowCanvas({
     isAnyNodeDragging,
     ...stableActions,
     cache: prepareCacheRef.current,
+    testRunScope,
+    isEditLocked,
+    testRunFailureDismissed,
   });
-  const { handleInit } = useWorkflowCanvasViewport({ nodes, restoredViewport,
+  const { handleInit, instanceRef } = useWorkflowCanvasViewport({ nodes, restoredViewport,
     viewportRestoreVersion, centerStartVersion, onInit });
+  const revealedFailureNonce = useRef(0);
+  useEffect(() => {
+    const nonce = testRun?.errorRevealNonce;
+    if (!nonce || revealedFailureNonce.current === nonce) return;
+    const failedNodeId = [...testRunScope.failedNodeIds][0];
+    if (!failedNodeId || !instanceRef.current) return;
+    revealedFailureNonce.current = nonce;
+    instanceRef.current.fitView({ nodes: [{ id: failedNodeId }], duration: 600, maxZoom: 1.5 });
+  }, [instanceRef, testRun?.errorRevealNonce, testRunScope]);
 
   return (
     <div className="canvasCard">
@@ -61,11 +95,11 @@ export function WorkflowCanvas({
         edgeTypes={workflowEdgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onConnect={isEditLocked ? undefined : onConnect}
         onNodeDragStart={onNodeDragStart}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
-        onNodeDoubleClick={onNodeDoubleClick}
+        onNodeDoubleClick={isEditLocked ? undefined : onNodeDoubleClick}
         onPaneClick={onPaneClick}
         nodeDragThreshold={4}
         nodesDraggable
@@ -78,8 +112,12 @@ export function WorkflowCanvas({
         zoomOnScroll
       >
         {children}
-        <Controls position="top-left" className="workflowControls" />
+        <Panel position="top-left" className="canvasTopLeftPanel">
+          <Controls className="workflowControls" />
+          <TestRunSpeedControl />
+        </Panel>
       </ReactFlow>
+      <TestRunAnimationHint />
     </div>
   );
 }

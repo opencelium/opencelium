@@ -23,7 +23,7 @@ export function ScheduleCardDetails({ item }: { item: ScheduleCardItem }) {
 	return <div className='wf-schedule-card__details'>
 		<Row label={t('schedule.list.columns.executions')} fill={executions.length > 0}>
 			{executions.length ? <div className='wf-schedule-execs'>{executions.map((execution) =>
-				<RunningExecBadge key={execution.execId} localStartTime={execution.localStartTime}
+				<RunningExecBadge key={execution.execId}
 					serverStartTime={execution.serverStartTime} avgDuration={execution.avgDuration} />)}
 			</div> : <>-</>}
 		</Row>

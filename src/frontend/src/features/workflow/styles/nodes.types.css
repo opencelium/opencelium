@@ -60,6 +60,21 @@
   pointer-events: none;
 }
 
+.startNodeSkipLive {
+	position: absolute;
+	top: calc(100% + 2px);
+	left: 50%;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	font-size: 10px;
+	color: var(--color-action-primary);
+	background: var(--color-background-surface);
+	border: 1px solid var(--color-action-primary);
+	border-radius: 6px;
+	padding: 2px 6px;
+	cursor: pointer;
+}
+
 .systemNode {
   border-style: dashed;
 }
@@ -68,7 +83,11 @@
   max-width: 42px;
   max-height: 42px;
   object-fit: contain;
-  display: block;
+	display: block;
+	background-color: #ffffff;
+	border-radius: 50%;
+	padding: 4px;
+	box-sizing: border-box;
 }
 
 .ifNode {
@@ -88,7 +107,7 @@
 }
 
 .ifTrueLabel,
-.ifFalseLabel {
+.ifContinueLabel {
   position: absolute;
   font-size: 11px;
   color: var(--color-text-secondary);
@@ -96,11 +115,23 @@
   user-select: none;
 }
 
-.ifFalseLabel {
+.ifContinueLabel {
   top: calc(50% - 20px);
   right: -34px;
   transform: translateY(-50%);
 }
+
+.loopIterationLabel {
+	position: absolute;
+	left: calc(50% + 20px);
+	bottom: -10px;
+	transform: translateX(-50%);
+	font-size: 11px;
+	color: var(--color-text-secondary);
+	white-space: nowrap;
+	pointer-events: none;
+}
+.ifBranchLabelActive { color: var(--color-action-primary); font-weight: 700; }
 
 .ifTrueLabel {
   left: calc(50% + 20px);

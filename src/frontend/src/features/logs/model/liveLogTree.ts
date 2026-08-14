@@ -69,7 +69,9 @@ export const EMPTY_LIVE_LOG_TREE: LiveLogTree = {
   errorLocations: [],
 };
 
-const nodeKey = (indexPath: string, loopIndex: string) =>
+// Exported so prefetchErrorTracePath.ts can look up the same locally-known
+// nodes this module keys internally, instead of re-deriving the format.
+export const nodeKey = (indexPath: string, loopIndex: string) =>
   `${indexPath}@${loopIndex}`;
 
 // Extend a loop-iteration context with one more enclosing loop's iteration —
@@ -202,17 +204,17 @@ const findLastKeyByIndexPath = (
   return found;
 };
 
-// Show the error on the element where it happened (`originOfErrorPath`),
-// falling back to the carrying line's own element. An errored phase never
-// completes, so a still-pending target is marked FAIL.
+// Show the error on the element where it actually happened
+// (`originOfErrorPath`) — NEVER on the carrying line's own element when the
+// two differ (e.g. a wrapping loop/operator's own COMPLETE/FAIL line as the
+// exception propagates back up the tree). If the origin can't be resolved
+// (its node was never stored — see the loop memory bound above), the error
+// is simply not attached anywhere rather than guessing at the wrong element.
+// An errored phase never completes, so a still-pending target is marked FAIL.
 const attachError = (tree: LiveLogTree, log: ExecutionSocketLog): LiveLogTree => {
   const error = log.error;
-  if (!error?.message) return tree;
-  const targetKey =
-    (error.originOfErrorPath
-      ? findLastKeyByIndexPath(tree, error.originOfErrorPath)
-      : undefined) ??
-    (log.indexPath ? findLastKeyByIndexPath(tree, log.indexPath) : undefined);
+  if (!error?.message || !error.originOfErrorPath) return tree;
+  const targetKey = findLastKeyByIndexPath(tree, error.originOfErrorPath);
   if (!targetKey) return tree;
   const target = tree.nodes[targetKey];
   return {

@@ -1,5 +1,6 @@
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
+import type { TestRunScope } from './testRunScope.utils';
 
 export type LeafInfo = { isLeaf: boolean; rightLeaf: boolean; bottomLeaf: boolean };
 
@@ -7,7 +8,12 @@ export type PrepareWorkflowParams = Pick<
 	WorkflowCanvasProps,
 	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' |
 	'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor'
-> & { cache?: PrepareWorkflowCache };
+> & {
+	cache?: PrepareWorkflowCache;
+	testRunScope?: TestRunScope;
+	isEditLocked?: boolean;
+	testRunFailureDismissed?: boolean;
+};
 
 type NodeCacheEntry = {
 	src: WorkflowNodeModel;
@@ -22,6 +28,8 @@ type NodeCacheEntry = {
 type EdgeCacheEntry = {
 	src: WorkflowEdgeModel;
 	highlighted: boolean;
+	testRunActive: boolean;
+	testRunNonce: number;
 	out: WorkflowEdgeModel;
 };
 

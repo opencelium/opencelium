@@ -14,6 +14,38 @@
   gap: 8px;
 }
 
+.logsHeaderLiveToggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 3px 10px 3px 8px;
+	border: 1px solid var(--color-border-subtle);
+	border-radius: 999px;
+	background: var(--color-background-hover);
+	cursor: pointer;
+}
+.logsHeaderLiveToggle--on {
+	background: color-mix(in srgb, var(--color-status-success-fg) 12%, transparent);
+	border-color: color-mix(in srgb, var(--color-status-success-fg) 45%, transparent);
+}
+.logsHeaderLiveDot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-text-disabled); }
+.logsHeaderLiveDot--on {
+	background: var(--color-status-success-fg);
+	animation: logsHeaderLiveDotPulse 1.6s ease-out infinite;
+}
+@keyframes logsHeaderLiveDotPulse {
+	0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-status-success-fg) 55%, transparent); }
+	70%, 100% { box-shadow: 0 0 0 7px transparent; }
+}
+.logsHeaderLiveLabel {
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--color-text-secondary);
+}
+.logsHeaderLiveLabel--on { color: var(--color-status-success-fg); }
+
 .logsRunning {
   display: flex;
   align-items: center;
@@ -43,6 +75,16 @@
   height: auto;
   flex: 1;
   min-height: 0;
+}
+
+.logsCardSplitPane .logsBodyTree { height: auto; flex: 1; min-height: 0; }
+.logsCardSplitPane {
+	position: relative;
+	inset: auto;
+	width: 100%;
+	height: 100%;
+	max-height: none;
+	min-height: 0;
 }
 
 .logsResult {
@@ -81,4 +123,3 @@
 .headerCardWithInlineError {
   padding-bottom: 30px;
 }
-
