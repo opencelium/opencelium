@@ -106,6 +106,7 @@ export const ThemeBridge = ({ children }) => {
                     colorText: theme.color.text.primary,
                     colorTextSecondary: theme.color.text.secondary,
                     colorTextDisabled: theme.color.text.disabled,
+                    colorTextPlaceholder: theme.color.text.disabled,
 
                     colorBorder: theme.color.border.default,
                     colorBorderSecondary: theme.color.border.subtle,

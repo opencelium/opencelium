@@ -2,7 +2,3 @@
     border-radius: var(--radius-md);
     color: var(--color-text-primary);
 }
-
-.ant-input-custom::placeholder {
-    color: var(--color-text-secondary);
-}
