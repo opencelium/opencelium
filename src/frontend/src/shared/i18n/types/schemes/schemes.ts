@@ -168,6 +168,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 message: string
             }
         }
+        footer: {
+            copyright: string
+        }
         topbar: {
             switchToGerman: string
             switchToEnglish: string
