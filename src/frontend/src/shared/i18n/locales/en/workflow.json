@@ -321,6 +321,10 @@
     "dialogTitleLoop": "LOOP Condition",
     "addCondition": "Add Condition",
     "addGroup": "Add Group",
+    "comparisonUnknown": "Not available yet",
+    "comparisonError": "Can't be compared",
+    "comparisonTrue": "True",
+    "comparisonFalse": "False",
     "loopInfo": {
       "iteratorLabel": "Loop variable",
       "iteratorHelp": "Use this variable inside the loop steps to read the current item:",

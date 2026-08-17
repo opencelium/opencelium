@@ -321,6 +321,10 @@
     "dialogTitleLoop": "LOOP-Bedingung",
     "addCondition": "Bedingung hinzufügen",
     "addGroup": "Gruppe hinzufügen",
+    "comparisonUnknown": "Noch nicht verfügbar",
+    "comparisonError": "Kann nicht verglichen werden",
+    "comparisonTrue": "Wahr",
+    "comparisonFalse": "Falsch",
     "loopInfo": {
       "iteratorLabel": "Schleifenvariable",
       "iteratorHelp": "Verwenden Sie diese Variable in den Schleifenschritten, um das aktuelle Element zu lesen:",

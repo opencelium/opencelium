@@ -51,9 +51,11 @@ import {
 	updateRuleProperties,
 	validateConditionTreeWithErrors,
 } from './conditionBuilder.utils';
+import { evaluateIfComparison, type ComparisonEvaluation, type OperandInput } from './conditionComparison';
 import { LoopInfoPanel } from './LoopInfoPanel';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
@@ -525,6 +527,30 @@ function ConditionValueInput({
 	);
 }
 
+function ComparisonTooltipContent({
+	evaluation,
+	isLoading,
+}: {
+	evaluation: ComparisonEvaluation | null;
+	isLoading: boolean;
+}) {
+	const { t } = useI18n('workflow');
+
+	if (isLoading) return <Loading size="xs" inline />;
+	if (!evaluation || evaluation.kind === 'unknown') return <>{t('conditionBuilder.comparisonUnknown')}</>;
+	if (evaluation.kind === 'error') return <>{t('conditionBuilder.comparisonError')}</>;
+	return (
+		<span
+			style={{
+				color: evaluation.value ? 'var(--color-status-success-fg)' : 'var(--color-status-error-fg)',
+				fontWeight: 600,
+			}}
+		>
+			{t(evaluation.value ? 'conditionBuilder.comparisonTrue' : 'conditionBuilder.comparisonFalse')}
+		</span>
+	);
+}
+
 function RuleRow({
 	rule,
 	operatorType,
@@ -558,6 +584,31 @@ function RuleRow({
 	const isSplitString = operator === LoopOperatorName.SplitString;
 	const hasBinaryRight = !!operator && !isUnary;
 
+	// Hovering the operator select resolves BOTH operands at once (independent
+	// of each ConditionValueInput's own per-field hover state) so the
+	// comparison result can be computed and shown — see conditionComparison.ts
+	// for the actual evaluation, ported from the backend's operator classes.
+	const [isOperatorHovered, setIsOperatorHovered] = useState(false);
+	const methodContext = operatorIndexPath ? { index: operatorIndexPath } : undefined;
+	const leftReference = !isLoop ? parseConditionOperand(properties.leftField) : null;
+	const rightReference = !isLoop && hasBinaryRight ? parseConditionOperand(properties.rightField) : null;
+	const leftLive = useLiveReferenceValue(leftReference, connection, methodContext, !isLoop && isOperatorHovered);
+	const rightLive = useLiveReferenceValue(rightReference, connection, methodContext, !isLoop && hasBinaryRight && isOperatorHovered);
+	const resolveOperand = (field: string | undefined, live: typeof leftLive): OperandInput => {
+		const source = getSourceFromField(field);
+		if (source === 'constant') return { known: true, value: field ?? '' };
+		if (source === 'webhook') return { known: false, value: undefined };
+		return { known: live.hasValue, value: live.value };
+	};
+	const comparisonEvaluation = !isLoop && operator
+		? evaluateIfComparison(
+			operator as IfOperatorName,
+			resolveOperand(properties.leftField, leftLive),
+			hasBinaryRight ? resolveOperand(properties.rightField, rightLive) : undefined,
+		)
+		: null;
+	const isComparisonLoading = isOperatorHovered && (leftLive.isLoading || (hasBinaryRight && rightLive.isLoading));
+
 	return (
 		<div className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''}`}>
 			{isLoop ? (
@@ -584,21 +635,31 @@ function RuleRow({
 					onChange={onChange}
 				/>
 			)}
-			{isLoop ? null : (
-				<Select
-					placeholder={t('placeholders.selectOperator')}
-					value={operator}
-					className="conditionOperatorSelect"
-					showSearch
-					optionFilterProp="label"
-					options={IF_OPERATOR_OPTIONS
-						.map((option) => ({ value: option.value, label: t(option.labelKey) }))
-						.sort((a, b) => a.label.localeCompare(b.label))}
-					onChange={(value) => onChange({ operator: value, rightField: undefined })}
-					suffixIcon={<DownOutlined />}
-					getPopupContainer={() => document.body}
-				/>
-			)}
+			{isLoop ? null : (() => {
+				const operatorSelect = (
+					<Select
+						placeholder={t('placeholders.selectOperator')}
+						value={operator}
+						className="conditionOperatorSelect"
+						showSearch
+						optionFilterProp="label"
+						options={IF_OPERATOR_OPTIONS
+							.map((option) => ({ value: option.value, label: t(option.labelKey) }))
+							.sort((a, b) => a.label.localeCompare(b.label))}
+						onChange={(value) => onChange({ operator: value, rightField: undefined })}
+						suffixIcon={<DownOutlined />}
+						getPopupContainer={() => document.body}
+					/>
+				);
+				if (!operator) return operatorSelect;
+				return (
+					<Tooltip content={<ComparisonTooltipContent evaluation={comparisonEvaluation} isLoading={isComparisonLoading} />}>
+						<div onMouseEnter={() => setIsOperatorHovered(true)} onMouseLeave={() => setIsOperatorHovered(false)}>
+							{operatorSelect}
+						</div>
+					</Tooltip>
+				);
+			})()}
 			{isLoop && operator ? (
 				<ConditionValueInput
 					side="left"
