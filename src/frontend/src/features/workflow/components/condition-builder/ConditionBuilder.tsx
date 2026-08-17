@@ -40,6 +40,12 @@ import {
 	createEmptyRule,
 	duplicateRuleById,
 	getInitialTreeFromConfig,
+	getMethodLabel,
+	getSourceFromField,
+	parseConditionOperand,
+	parseMethodFromReference,
+	parsePathFromReference,
+	parseResponseTypeFromReference,
 	removeChildById,
 	updateGroupConjunction,
 	updateRuleProperties,
@@ -52,6 +58,8 @@ import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../utils/methodColor';
+import { formatLiveReferenceValue, useLiveReferenceValue } from '../request-editor/utils/useLiveReferenceValue';
+import { LiveReferenceValuePreview } from '../request-editor/utils/LiveReferenceValuePreview';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../request-editor/body-editor/bodyLegacy.css';
 import '../dialogHeader.css';
@@ -91,51 +99,6 @@ const LOOP_OPERATOR_OPTIONS = Object.values(LoopOperatorName).map((value) => ({
 
 const normalizeSource = (source?: ConditionValueSource): ConditionValueSource => source || 'direct';
 const normalizeResponseType = (type?: ResponseType): ResponseType => type || 'body';
-
-const unwrapConditionReference = (value?: string) =>
-	value
-		?.trim()
-		.replace(/^\{%\s*/, '')
-		.replace(/\s*%}$/, '');
-
-const parseMethodFromReference = (methods: MethodWithId[], value?: string) => {
-	const reference = unwrapConditionReference(value);
-	if (!reference) return undefined;
-	const color = reference.match(/^#?([A-Fa-f0-9]{6})\.\(response\)\./)?.[1];
-	return color
-		? methods.find((method) => method.color.replace('#', '').toLowerCase() === color.toLowerCase())
-		: undefined;
-};
-
-const parseResponseTypeFromReference = (value?: string): ResponseType | undefined => {
-	const reference = unwrapConditionReference(value);
-	if (reference?.includes('.header.')) return 'header';
-	if (reference?.includes('.status')) return 'status';
-	if (reference?.includes('.body.')) return 'body';
-	return undefined;
-};
-
-const parsePathFromReference = (value?: string) => {
-	const reference = unwrapConditionReference(value);
-	if (!reference) return undefined;
-	if (reference === '$' || reference === '$.') return '$';
-	if (reference.includes('(response).status')) return 'status';
-	const match = reference.match(/\.(body|header)(?:\.\$\.?|\.)?(.*)$/);
-	if (match && match[2] === '') return '$';
-	const path = match?.[2] || reference;
-	return path.replace(/^#?[A-Fa-f0-9]{6}\.\(response\)\.(body|header)\.\$\.?/, '');
-};
-
-const getSourceFromField = (field?: string): ConditionValueSource => {
-	const reference = unwrapConditionReference(field);
-	if (!reference) return 'direct';
-	if (reference.startsWith('${') && reference.endsWith('}')) return 'webhook';
-	if (/^#?[A-Fa-f0-9]{6}\.\(response\)\./.test(reference)) return 'direct';
-	return 'constant';
-};
-
-const getMethodLabel = (method: MethodWithId) =>
-	method.label || method.name || method.index || method.id;
 
 const buildNodeBackedMethods = (
 	methods: MethodWithId[],
@@ -407,6 +370,8 @@ function ConditionValueInput({
 	methods,
 	allMethods,
 	iterators,
+	connection,
+	operatorIndexPath,
 	onChange,
 }: {
 	side: 'left' | 'right';
@@ -414,6 +379,8 @@ function ConditionValueInput({
 	methods: MethodWithId[];
 	allMethods: MethodWithId[];
 	iterators: string[];
+	connection: Connection;
+	operatorIndexPath: string | undefined;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 }) {
 	const { t } = useI18n('workflow');
@@ -428,6 +395,21 @@ function ConditionValueInput({
 	const methodId = fieldValue ? parsedMethod?.id : draftMethodId;
 	const responseType = normalizeResponseType(draftResponseType);
 	const selectedMethod = allMethods.find((method) => method.id === methodId);
+
+	// Hover-driven live value — same pattern as BodyPointer/RequestReferenceTokens:
+	// resolution only fires once the field-select itself is hovered, no eager
+	// fetch per operand. `operatorIndexPath` stands in for the "currentMethod"
+	// those consumers use, since a condition operand only ever resolves
+	// `direction: 'response'` references (never a self "request" reference).
+	const [isFieldHovered, setIsFieldHovered] = useState(false);
+	const parsedReference = parseConditionOperand(fieldValue);
+	const methodContext = operatorIndexPath ? { index: operatorIndexPath } : undefined;
+	const { value: liveValue, hasValue: hasLiveValue, isLoading: isLiveValueLoading } =
+		useLiveReferenceValue(parsedReference, connection, methodContext, isFieldHovered);
+	const fieldPath = parsePathFromReference(fieldValue);
+	const fieldLabel = selectedMethod
+		? `${getMethodLabel(selectedMethod)} · ${responseType}${fieldPath ? `.$.${fieldPath}` : ''}`
+		: '';
 
 	useEffect(() => {
 		if (!fieldValue) return;
@@ -493,25 +475,52 @@ function ConditionValueInput({
 					});
 				}}
 			/>
-			<div className="conditionFieldSelect">
-				<LegacyResponseFieldSelect
-					key={`${selectedMethod?.id ?? 'none'}-${responseType}`}
-					method={selectedMethod}
-					type={responseType}
-					value={parsePathFromReference(fieldValue)}
-					disabled={!methodId}
-					iterators={iterators}
-					onChange={(value) => {
-						const path = parsePathFromReference(value);
-						onChange({
-							[fieldKey]:
-								path && selectedMethod
-									? buildReferenceValue(selectedMethod.color, responseType, path)
-									: undefined,
-						});
-					}}
-				/>
-			</div>
+			{(() => {
+				const fieldSelect = (
+					<div
+						className="conditionFieldSelect"
+						onMouseEnter={() => setIsFieldHovered(true)}
+						onMouseLeave={() => setIsFieldHovered(false)}
+					>
+						<LegacyResponseFieldSelect
+							key={`${selectedMethod?.id ?? 'none'}-${responseType}`}
+							method={selectedMethod}
+							type={responseType}
+							value={parsePathFromReference(fieldValue)}
+							disabled={!methodId}
+							iterators={iterators}
+							onChange={(value) => {
+								const path = parsePathFromReference(value);
+								onChange({
+									[fieldKey]:
+										path && selectedMethod
+											? buildReferenceValue(selectedMethod.color, responseType, path)
+											: undefined,
+								});
+							}}
+						/>
+					</div>
+				);
+				// Nothing to preview until a method (and therefore a color to
+				// resolve against) is actually picked — an empty Tooltip would
+				// otherwise still pop an empty bubble on hover.
+				if (!selectedMethod) return fieldSelect;
+				return (
+					<Tooltip
+						content={
+							<LiveReferenceValuePreview
+								label={fieldLabel}
+								isLoading={isLiveValueLoading}
+								hasValue={hasLiveValue}
+								rawValue={liveValue}
+								formattedValue={hasLiveValue ? formatLiveReferenceValue(liveValue) : null}
+							/>
+						}
+					>
+						{fieldSelect}
+					</Tooltip>
+				);
+			})()}
 		</div>
 	);
 }
@@ -522,6 +531,8 @@ function RuleRow({
 	methods,
 	allMethods,
 	iterators,
+	connection,
+	operatorIndexPath,
 	canDelete,
 	onChange,
 	onDelete,
@@ -532,6 +543,8 @@ function RuleRow({
 	methods: MethodWithId[];
 	allMethods: MethodWithId[];
 	iterators: string[];
+	connection: Connection;
+	operatorIndexPath: string | undefined;
 	canDelete: boolean;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 	onDelete: () => void;
@@ -566,6 +579,8 @@ function RuleRow({
 					methods={methods}
 					allMethods={allMethods}
 					iterators={iterators}
+					connection={connection}
+					operatorIndexPath={operatorIndexPath}
 					onChange={onChange}
 				/>
 			)}
@@ -591,6 +606,8 @@ function RuleRow({
 					methods={methods}
 					allMethods={allMethods}
 					iterators={iterators}
+					connection={connection}
+					operatorIndexPath={operatorIndexPath}
 					onChange={onChange}
 				/>
 			) : !isLoop && hasBinaryRight ? (
@@ -600,6 +617,8 @@ function RuleRow({
 					methods={methods}
 					allMethods={allMethods}
 					iterators={iterators}
+					connection={connection}
+					operatorIndexPath={operatorIndexPath}
 					onChange={onChange}
 				/>
 			) : null}
@@ -610,6 +629,8 @@ function RuleRow({
 					methods={methods}
 					allMethods={allMethods}
 					iterators={iterators}
+					connection={connection}
+					operatorIndexPath={operatorIndexPath}
 					onChange={onChange}
 				/>
 			) : null}
@@ -638,6 +659,8 @@ function GroupEditor({
 	methods,
 	allMethods,
 	iterators,
+	connection,
+	operatorIndexPath,
 	onDelete,
 	onChange,
 }: {
@@ -646,6 +669,8 @@ function GroupEditor({
 	methods: MethodWithId[];
 	allMethods: MethodWithId[];
 	iterators: string[];
+	connection: Connection;
+	operatorIndexPath: string | undefined;
 	onDelete?: () => void;
 	onChange: (group: ConditionGroup) => void;
 }) {
@@ -752,6 +777,8 @@ function GroupEditor({
 							methods={methods}
 							allMethods={allMethods}
 							iterators={iterators}
+							connection={connection}
+							operatorIndexPath={operatorIndexPath}
 							canDelete={operatorType === 'if'}
 							onDelete={() => onChange(removeChildById(group, child.id))}
 							onDuplicate={() => onChange(duplicateRuleById(group, child.id))}
@@ -765,6 +792,8 @@ function GroupEditor({
 							methods={methods}
 							allMethods={allMethods}
 							iterators={iterators}
+							connection={connection}
+							operatorIndexPath={operatorIndexPath}
 							onDelete={() => onChange(removeChildById(group, child.id))}
 							onChange={(nextGroup) => {
 								onChange({
@@ -838,6 +867,13 @@ export function ConditionBuilderDialog({
 		setRenderKey((current) => current + 1);
 	}, [node, open, operatorType]);
 
+	// The node's own tree-path index — threaded down through GroupEditor/RuleRow
+	// to ConditionValueInput, standing in for the "currentMethod" the body
+	// editor's hover-value hooks use, so a hovered operand can resolve which
+	// loop iteration it's currently paused in (a condition operand only ever
+	// resolves `direction: 'response'`, so no method color is needed here).
+	const operatorIndexPath = getCurrentOperator(connection, node)?.index;
+
 	return (
 		<Modal
 			open={open}
@@ -874,6 +910,8 @@ export function ConditionBuilderDialog({
 					methods={methods}
 					allMethods={allMethods}
 					iterators={iterators}
+					connection={connection}
+					operatorIndexPath={operatorIndexPath}
 					onChange={setTree}
 				/>
 				{isLoop ? (

@@ -3,9 +3,18 @@ import { fetchMethodDetails, resolveTraceTarget, type LiveLogTree } from '@featu
 import { useTestRun } from '../../../test-run/useTestRun';
 import { buildIteratorIndexResolver, resolveCurrentLoopIndex, type LiveGraphStatus } from '../../../test-run/liveGraphStatus';
 import { findMethodByColor, readLiveValueAtPath } from '../body-editor/requestReferenceOptions';
-import type { Connection, MethodWithId } from '../../../types/connection';
+import type { Connection } from '../../../types/connection';
 import type { ParsedArg } from './parseEnhancementArg';
 import type { ParsedReference } from '../body-editor/bodyReference';
+
+// The only two things any consumer of this resolution chain has ever needed
+// from "the method the reference is embedded in" — `.index` for loop-iterator
+// scoping, `.color` only to match a `direction: 'request'` self-reference. A
+// full `MethodWithId` still satisfies this structurally (no call-site changes
+// needed); callers with no real method backing them (e.g. an operator node,
+// which only ever resolves `direction: 'response'` references) can pass a
+// minimal `{ index }` instead of fabricating a fake `MethodWithId`.
+export type LiveReferenceMethodContext = { index: string; color?: string };
 
 // bodyReference.ts's parser pre-joins messageProperty and path into one
 // `field` string (e.g. "body.$.items[0].name", or plain "status") — split it
@@ -32,11 +41,11 @@ export type TestRunLiveSnapshot = {
 function resolveTargetMethod(
 	reference: ParsedArg | null | undefined,
 	connection: Connection | null | undefined,
-	currentMethod: MethodWithId | undefined,
-): MethodWithId | undefined {
+	currentMethod: LiveReferenceMethodContext | undefined,
+) {
 	if (!reference || !currentMethod) return undefined;
 	if (reference.direction === 'request') {
-		return reference.color.toLowerCase() === currentMethod.color.toLowerCase() ? currentMethod : undefined;
+		return currentMethod.color && reference.color.toLowerCase() === currentMethod.color.toLowerCase() ? currentMethod : undefined;
 	}
 	if (reference.direction === 'response' && connection) {
 		return findMethodByColor(connection.fromConnector.method, reference.color);
@@ -69,7 +78,7 @@ function resolveTargetMethod(
 export async function resolveLiveReferenceValue(
 	reference: ParsedArg | null,
 	connection: Connection | null | undefined,
-	currentMethod: MethodWithId | undefined,
+	currentMethod: LiveReferenceMethodContext | undefined,
 	snapshot: TestRunLiveSnapshot,
 ): Promise<{ value: unknown; hasValue: boolean }> {
 	const { isPaused, logTree, liveGraphStatus, loopAncestorsByIndexPath } = snapshot;
@@ -126,7 +135,7 @@ export async function resolveLiveReferenceValue(
 export function useLiveReferenceValue(
 	reference: ParsedArg | null,
 	connection: Connection | null | undefined,
-	currentMethod: MethodWithId | undefined,
+	currentMethod: LiveReferenceMethodContext | undefined,
 	enabled: boolean,
 ): { value: unknown; hasValue: boolean; isLoading: boolean } {
 	const testRun = useTestRun();
