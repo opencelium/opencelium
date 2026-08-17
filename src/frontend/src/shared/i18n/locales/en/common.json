@@ -98,7 +98,8 @@
     "switchToMainMenu": "Switch to main menu (Alt+M)",
     "profile": "Profile",
     "createWorkflow": "Create Workflow",
-    "createWorkflowHint": "Create Workflow (Alt+W)"
+    "createWorkflowHint": "Create Workflow (Alt+W)",
+    "docs": "Documentation"
   },
   "user": {
     "unknown": "Unknown User"

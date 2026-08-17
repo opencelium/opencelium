@@ -80,6 +80,14 @@ export const TopBar = () => {
                         {lang.toUpperCase()}
                     </Button>
                 </Tooltip>
+                <Tooltip content={tCommon('topbar.docs')}>
+                    <IconButton
+                        size="xs"
+                        type={'text'}
+                        iconProps={{name: 'docs', color: 'primary'}}
+                        onClick={() => window.open('https://docs.opencelium.io/en/prod/', '_blank', 'noopener,noreferrer')}
+                    />
+                </Tooltip>
                {/* <Tooltip content={tCommon('topbar.notifications')}>
                     <IconButton
                         size="xs"
