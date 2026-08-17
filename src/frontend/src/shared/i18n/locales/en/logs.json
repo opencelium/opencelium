@@ -30,6 +30,7 @@
     "stopping": "Stopping test…",
     "paused": "Paused",
     "animationSlowedHint": "This animation is slowed down for clarity — it does not reflect the actual execution speed.",
+    "dontShowAgain": "Don't show this again",
     "speedLabel": "Speed",
     "speedTooltip": "Adjust how fast the test-run animation plays. Does not affect the actual execution speed.",
     "pauseTooltip": "Pause",

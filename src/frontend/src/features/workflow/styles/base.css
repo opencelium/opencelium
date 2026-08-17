@@ -75,7 +75,31 @@ textarea {
   z-index: 10;
   max-width: 480px;
   width: max-content;
-  pointer-events: none;
+}
+
+/* Compact variant of the shared Alert — this floats over the canvas as a
+   transient reminder, not a page-level notice, so it should read smaller
+   than a normal Alert. Also carries its own "don't show again" checkbox
+   (see TestRunAnimationHint.tsx) which needs real pointer-events — the
+   Alert used to be pointer-events:none to let clicks pass through to the
+   canvas underneath, but that also swallowed clicks on the checkbox itself,
+   falling through to the pane's own pan-drag handling instead. */
+.canvasAnimationHintAlert.ant-alert {
+  padding: 6px 10px;
+}
+
+.canvasAnimationHintAlert .ant-alert-icon {
+  font-size: 14px;
+}
+
+.canvasAnimationHintAlert .ant-alert-message {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.canvasAnimationHintAlert .ant-alert-description {
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .logsHeaderRow {

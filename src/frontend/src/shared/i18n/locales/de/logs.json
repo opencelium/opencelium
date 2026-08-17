@@ -30,6 +30,7 @@
     "stopping": "Test wird gestoppt…",
     "paused": "Pausiert",
     "animationSlowedHint": "Diese Animation ist zur besseren Übersicht verlangsamt — sie entspricht nicht der tatsächlichen Ausführungsgeschwindigkeit.",
+    "dontShowAgain": "Nicht mehr anzeigen",
     "speedLabel": "Geschwindigkeit",
     "speedTooltip": "Passt an, wie schnell die Testlauf-Animation abläuft. Hat keinen Einfluss auf die tatsächliche Ausführungsgeschwindigkeit.",
     "pauseTooltip": "Pausieren",
