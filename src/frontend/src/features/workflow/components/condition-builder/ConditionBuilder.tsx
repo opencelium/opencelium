@@ -62,6 +62,7 @@ import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../utils/methodColor';
 import { formatLiveReferenceValue, useLiveReferenceValue } from '../request-editor/utils/useLiveReferenceValue';
 import { LiveReferenceValuePreview } from '../request-editor/utils/LiveReferenceValuePreview';
+import { useTestRun } from '../../test-run/useTestRun';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../request-editor/body-editor/bodyLegacy.css';
 import '../dialogHeader.css';
@@ -386,6 +387,7 @@ function ConditionValueInput({
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 }) {
 	const { t } = useI18n('workflow');
+	const testRun = useTestRun();
 	const fieldKey = side === 'left' ? 'leftField' : 'rightField';
 	const fieldValue = properties[fieldKey] || '';
 	const parsedMethod = parseMethodFromReference(allMethods, fieldValue);
@@ -505,8 +507,10 @@ function ConditionValueInput({
 				);
 				// Nothing to preview until a method (and therefore a color to
 				// resolve against) is actually picked — an empty Tooltip would
-				// otherwise still pop an empty bubble on hover.
-				if (!selectedMethod) return fieldSelect;
+				// otherwise still pop an empty bubble on hover. Same while the
+				// run isn't paused: there's no live value to show at all, so
+				// skip the tooltip entirely rather than popping a label-only bubble.
+				if (!selectedMethod || !testRun?.isPaused) return fieldSelect;
 				return (
 					<Tooltip
 						content={
@@ -577,6 +581,7 @@ function RuleRow({
 	onDuplicate: () => void;
 }) {
 	const { t } = useI18n('workflow');
+	const testRun = useTestRun();
 	const properties = rule.properties || {};
 	const operator = properties.operator;
 	const isLoop = operatorType === 'loop';
@@ -651,7 +656,7 @@ function RuleRow({
 						getPopupContainer={() => document.body}
 					/>
 				);
-				if (!operator) return operatorSelect;
+				if (!operator || !testRun?.isPaused) return operatorSelect;
 				return (
 					<Tooltip content={<ComparisonTooltipContent evaluation={comparisonEvaluation} isLoading={isComparisonLoading} />}>
 						<div onMouseEnter={() => setIsOperatorHovered(true)} onMouseLeave={() => setIsOperatorHovered(false)}>

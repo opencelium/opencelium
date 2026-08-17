@@ -109,9 +109,13 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
         cursor: 'pointer',
       }}
     >
-      <Tooltip content={tooltipContent} maxWidth={320}>
+      {isPaused ? (
+        <Tooltip content={tooltipContent} maxWidth={320}>
+          <div style={{ width: 20, height: 10, background: color }} />
+        </Tooltip>
+      ) : (
         <div style={{ width: 20, height: 10, background: color }} />
-      </Tooltip>
+      )}
       {hovered && !isPaused ? (
         <div className={`bodyPointerMenu ${menuBelow ? 'bodyPointerMenu--below' : ''}`}>
           <div className='bodyPointerMenuList'>

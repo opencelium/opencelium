@@ -7,6 +7,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { getParsedReferences, splitReferences } from '../bodyReference';
 import { useMethodContext } from '../../../../providers/MethodContext';
+import { useTestRun } from '../../../../test-run/useTestRun';
 import type { RootState } from '../../../../store';
 import { formatLiveReferenceValue, normalizeParsedReference, useLiveReferenceValue } from '../../utils/useLiveReferenceValue';
 import { LiveReferenceValuePreview } from '../../utils/LiveReferenceValuePreview';
@@ -45,6 +46,7 @@ function ReferenceTag({
 }) {
   const connection = useSelector((state: RootState) => state.connection.connection);
   const { method } = useMethodContext();
+  const isPaused = useTestRun()?.isPaused ?? false;
   const [hovered, setHovered] = useState(false);
   const parsed = getParsedReferences(reference)[0];
   const normalized = parsed ? normalizeParsedReference(parsed) : null;
@@ -62,40 +64,43 @@ function ReferenceTag({
     />
   );
 
-  return (
-    <Tooltip content={tooltipContent} maxWidth={320}>
-      <Tag
-        color={parsed?.color || 'blue'}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 4,
-          cursor: onClick ? 'pointer' : 'default',
-          marginInlineEnd: 0,
-          maxWidth: 260,
-        }}
-        onClick={onClick}
-      >
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {showLiveLabel ? liveText : staticLabel}
-        </span>
-        {onRemove ? (
-          <Button
-            type="text"
-            size="small"
-            icon={<CloseOutlined />}
-            onClick={(event) => {
-              event.stopPropagation();
-              onRemove();
-            }}
-            style={{ width: 16, height: 16, minWidth: 16, padding: 0, color: 'inherit' }}
-          />
-        ) : null}
-      </Tag>
-    </Tooltip>
+  const tag = (
+    <Tag
+      color={parsed?.color || 'blue'}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        cursor: onClick ? 'pointer' : 'default',
+        marginInlineEnd: 0,
+        maxWidth: 260,
+      }}
+      onClick={onClick}
+    >
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {showLiveLabel ? liveText : staticLabel}
+      </span>
+      {onRemove ? (
+        <Button
+          type="text"
+          size="small"
+          icon={<CloseOutlined />}
+          onClick={(event) => {
+            event.stopPropagation();
+            onRemove();
+          }}
+          style={{ width: 16, height: 16, minWidth: 16, padding: 0, color: 'inherit' }}
+        />
+      ) : null}
+    </Tag>
   );
+
+  // Nothing to preview while the run isn't paused — skip the tooltip
+  // entirely instead of popping a label-only bubble on hover.
+  if (!isPaused) return tag;
+  return <Tooltip content={tooltipContent} maxWidth={320}>{tag}</Tooltip>;
 }
 
 export function XmlReferenceTokens({ value, onChange, onClick, readOnly }: Props) {
