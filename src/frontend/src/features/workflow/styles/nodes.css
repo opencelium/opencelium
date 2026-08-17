@@ -257,23 +257,13 @@
   cursor: pointer;
 }
 
-/* Mirrors .circleNodeAggregatorBadge (opposite corner) — the "jump to next
-   iteration" affordance, only rendered on a LOOP node while a test run is
-   paused and currently tracking that loop's iteration. */
-.circleNodeSkipIterationBadge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 18px;
-  height: 18px;
-  box-sizing: border-box;
-  display: flex;
+/* Inline with the "i = 3" text itself (see .loopIterationLabel below) rather
+   than a separate floating corner badge — the "jump to next iteration"
+   affordance, only rendered on a LOOP node while a test run is paused and
+   currently tracking that loop's iteration. */
+.loopSkipIterationIcon {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: var(--color-action-primary-subtle);
-  border: 2px solid var(--color-background-surface);
-  z-index: 7;
   pointer-events: auto;
   cursor: pointer;
 }
@@ -421,14 +411,18 @@
   transform: translateX(-50%);
 }
 
-/* The loop's live iteration counter ("i = N") — positioned to the right of
-   the vertical (bottom) edge, same anchor as .ifTrueLabel, instead of
-   centered below the whole node like a method's title/subtitle. */
+/* Same anchor POINT as .ifTrueLabel (left/bottom), but left-aligned from it
+   rather than centered on it: .ifTrueLabel's fixed, short "true" text barely
+   differs between the two, but this row's width varies (icon shown or not),
+   and centering a wider row on that point pulls its start back to the LEFT
+   of the vertical down-arrow/line — exactly what this must never do. */
 .loopIterationLabel {
   position: absolute;
-  left: calc(50% + 20px);
+  left: calc(50% + 10px);
   bottom: -10px;
-  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 11px;
   color: var(--color-text-secondary);
   white-space: nowrap;

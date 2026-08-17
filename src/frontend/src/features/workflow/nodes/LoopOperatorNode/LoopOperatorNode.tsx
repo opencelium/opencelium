@@ -53,18 +53,23 @@ export function LoopOperatorNode({ id, data, selected, dragging }: NodeProps<Loo
 				suppressTooltip={dragging || data.isAnyNodeDragging}
 				onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)}
 			/>
-			{canSkipIteration && (
-				<span
-					className='circleNodeSkipIterationBadge nodrag nopan'
-					data-testid={`workflow-node-skip-iteration-${id}`}
-					onClick={handleSkipIteration}
-				>
-					<Tooltip content={t('node.skipToNextIteration')} placement='top'>
-						<Icon name='skip-forward' size={11} color='primary' />
-					</Tooltip>
-				</span>
+			{iterationLabel && (
+				<div className='loopIterationLabel'>
+					<span>{iterationLabel}</span>
+					{canSkipIteration && (
+						<span
+							className='loopSkipIterationIcon nodrag nopan'
+							data-testid={`workflow-node-skip-iteration-${id}`}
+							onClick={handleSkipIteration}
+							onDoubleClick={(event) => event.stopPropagation()}
+						>
+							<Tooltip content={t('node.skipToNextIteration')} placement='top'>
+								<Icon name='skip-forward' size={12} color='primary' />
+							</Tooltip>
+						</span>
+					)}
+				</div>
 			)}
-			{iterationLabel && <div className='loopIterationLabel'>{iterationLabel}</div>}
 			<StandardNodeHandles />
 		</NodeShell>
 	);
