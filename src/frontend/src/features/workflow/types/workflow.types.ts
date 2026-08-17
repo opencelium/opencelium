@@ -12,7 +12,7 @@ export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-conne
 // classified as fast (its first iteration took under a second) — a live
 // count for those would just flicker unreadably (see
 // getTestRunScope/reduceLiveGraphStatus).
-export type WorkflowLoopIterationDisplay = { iterator: string; count: number };
+export type WorkflowLoopIterationDisplay = { iterator: string; count: number; indexPath: string };
 
 export type WorkflowAddDirection = 'right' | 'bottom';
 export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';

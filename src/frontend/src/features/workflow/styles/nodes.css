@@ -257,6 +257,27 @@
   cursor: pointer;
 }
 
+/* Mirrors .circleNodeAggregatorBadge (opposite corner) — the "jump to next
+   iteration" affordance, only rendered on a LOOP node while a test run is
+   paused and currently tracking that loop's iteration. */
+.circleNodeSkipIterationBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-action-primary-subtle);
+  border: 2px solid var(--color-background-surface);
+  z-index: 7;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
 .startNode {
   color: var(--color-text-secondary);
 }

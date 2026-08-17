@@ -100,6 +100,12 @@ export type TestRunContextValue = {
 	// and bumps pauseRevealNonce below, same as pauseAnimation, so the logs
 	// panel follows each step.
 	stepForward: () => void;
+	// The debugger's "jump to next iteration": while paused inside a LOOP,
+	// fast-forwards past the rest of the current iteration and re-pauses the
+	// instant the loop (identified by its workflow tree-path index) either
+	// advances to a new iteration or finishes — see PlaybackQueue.skipWhile.
+	// A no-op while not paused, same as stepForward.
+	skipToNextIteration: (indexPath: string) => void;
 	// Bumped once pausing has finished warming the tree structure down to the
 	// paused-on node (see prefetchPauseTracePath) — the logs panel expands its
 	// ancestors and scrolls it into view, mirroring errorRevealNonce below but

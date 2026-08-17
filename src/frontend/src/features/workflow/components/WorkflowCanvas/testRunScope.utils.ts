@@ -131,7 +131,7 @@ export const getTestRunScope = (
 		if (!nodeId || !node) continue;
 		const status = liveGraphStatus[prefix];
 		if (node.type === 'loop' && status?.iterationCount) {
-			iterationByNodeId.set(nodeId, { iterator: status.iterator ?? '', count: status.iterationCount });
+			iterationByNodeId.set(nodeId, { iterator: status.iterator ?? '', count: status.iterationCount, indexPath: prefix });
 		}
 		if (node.type === 'if' && status?.ifResult && (!isSelf || currentStep.hasArrived)) {
 			// A strict ancestor (isSelf false) already finished its own arrival

@@ -51,6 +51,14 @@ export class PlaybackQueue {
 	// lines keep enqueueing (the backend runs to completion regardless) — they
 	// just pile up until resume() lets the queue drain again.
 	private paused = false;
+	// The debugger's "jump to next iteration": while set, buffered/incoming
+	// lines are applied immediately (each with full step choreography, like a
+	// repeated stepForward()) instead of sitting buffered or waiting on the
+	// timer pacing, until the caller's predicate reports true. Sacrifices
+	// flush()'s "only the last item needs choreography" optimization —
+	// acceptable here since a single iteration's worth of lines is never the
+	// huge backlog flush() was optimized for.
+	private skipShouldStop: (() => boolean) | null = null;
 
 	// Read fresh on every schedule() call rather than captured once, so a
 	// change takes effect on the very next scheduling decision.
@@ -67,9 +75,17 @@ export class PlaybackQueue {
 		return this.paused;
 	}
 
+	get isSkipping(): boolean {
+		return this.skipShouldStop !== null;
+	}
+
 	enqueue(log: ExecutionSocketLog): void {
 		this.queue.push({ log, baseDelay: baseDelayOf(log) });
 		this.callbacks.onQueueChange?.(this.queue.length);
+		if (this.skipShouldStop) {
+			this.drainSkip();
+			return;
+		}
 		this.schedule();
 	}
 
@@ -86,7 +102,40 @@ export class PlaybackQueue {
 	resume(): void {
 		if (!this.paused) return;
 		this.paused = false;
+		this.skipShouldStop = null;
 		this.schedule();
+	}
+
+	// The debugger's "jump to next iteration": drains whatever's already
+	// buffered right now, applying each line in full (see the constructor
+	// comment); if the predicate never matches before the buffer empties,
+	// stays paused but in "skip mode" — see enqueue() — so the NEXT arriving
+	// line (the backend runs to completion regardless of pause) keeps getting
+	// checked until it matches. Only meaningful while paused, same reasoning
+	// as stepForward().
+	skipWhile(shouldStop: () => boolean): void {
+		if (!this.paused) return;
+		this.skipShouldStop = shouldStop;
+		this.drainSkip();
+	}
+
+	// Cancels a pending skip without resuming or dropping anything already
+	// buffered — e.g. the user manually steps/resumes/stops while a skip is
+	// still waiting on a line that hasn't arrived yet.
+	cancelSkip(): void {
+		this.skipShouldStop = null;
+	}
+
+	private drainSkip(): void {
+		while (this.skipShouldStop && this.queue.length > 0) {
+			const item = this.queue.shift();
+			if (!item) break;
+			this.lastApplyAt = Date.now();
+			this.callbacks.applyLog(item.log, { updateStep: true });
+			this.callbacks.onQueueChange?.(this.queue.length);
+			if (this.skipShouldStop()) this.skipShouldStop = null;
+		}
+		if (this.queue.length === 0) this.callbacks.onDrained();
 	}
 
 	// Applies exactly the next buffered line, then stays paused — the
@@ -108,6 +157,7 @@ export class PlaybackQueue {
 	// is nothing left buffered to stay paused on.
 	flush(): void {
 		this.paused = false;
+		this.skipShouldStop = null;
 		this.cancelTimer();
 		while (this.queue.length > 0) {
 			const item = this.queue.shift();
@@ -126,6 +176,7 @@ export class PlaybackQueue {
 	// starting). No onDrained.
 	clear(): void {
 		this.paused = false;
+		this.skipShouldStop = null;
 		this.cancelTimer();
 		this.queue = [];
 		this.callbacks.onQueueChange?.(0);

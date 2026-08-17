@@ -20,6 +20,7 @@ export type IconName =
     | 'pause'
     | 'stop'
     | 'step-forward'
+    | 'skip-forward'
     | 'download'
     | 'upload'
     | 'key'
