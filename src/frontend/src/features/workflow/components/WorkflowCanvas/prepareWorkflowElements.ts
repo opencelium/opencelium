@@ -2,6 +2,7 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.
 import type { PrepareWorkflowParams } from './prepareWorkflowElements.types';
 import { buildWorkflowTopology, computeLeafInfo, hasSameWorkflowTopology } from './workflowTopology';
 import { EMPTY_TEST_RUN_SCOPE } from './testRunScope.utils';
+import { buildJointEdges } from './jointEdges';
 
 export type { PrepareWorkflowCache } from './prepareWorkflowElements.types';
 
@@ -15,7 +16,7 @@ export function prepareWorkflowElements({
 	onDeleteNode,
 	onOpenAggregatorEditor,
 	jointSourceId,
-	jointTargetIds,
+	jointVerdicts,
 	onRemoveJoint,
 	cache,
 	testRunScope = EMPTY_TEST_RUN_SCOPE,
@@ -41,8 +42,19 @@ export function prepareWorkflowElements({
 		const duplicateMethodColor = methodInstanceById.get(node.id)?.color;
 		const alwaysShowRightAdd = !isPreviewNode && !isEditLocked && node.type === 'start' && onlyStartNode;
 		const highlighted = Boolean(node.data.highlighted) || highlightedBranch.nodeIds.has(node.id);
-		const jointCandidate = Boolean(jointTargetIds?.has(node.id));
+		const jointVerdict = jointVerdicts?.get(node.id);
+		const jointCandidate = Boolean(jointVerdict?.valid);
 		const jointSource = node.id === jointSourceId;
+		// Only surfaced while a joint is being drawn — an unreachable reason on an
+		// idle canvas would light every node up on hover.
+		const jointInvalidReason = jointVerdict && !jointVerdict.valid && !jointSource
+			? jointVerdict.reason : undefined;
+		const jointBlockingNodeId = jointVerdict && !jointVerdict.valid
+			? jointVerdict.blockingNodeId : undefined;
+		const jointBlockingNode = jointBlockingNodeId
+			? nodes.find((item) => item.id === jointBlockingNodeId) : undefined;
+		const jointBlockingLabel = jointBlockingNode
+			? jointBlockingNode.data.subtitle || jointBlockingNode.data.title : undefined;
 		const suppressHoverAddControls = isPreviewNode || isEditLocked || activeAction?.sourceNodeId === node.id;
 		const lockVisibleAddControls = !isPreviewNode && activeAction?.sourceNodeId === node.id;
 		const testRunFailed = testRunScope.failedNodeIds.has(node.id);
@@ -59,6 +71,7 @@ export function prepareWorkflowElements({
 			testRunActive, testRunIteration?.iterator, testRunIteration?.count,
 			testRunActiveBranch, testRunFailed, testRunFailedMessage,
 			testRunFailedVisible, isEditLocked, jointCandidate, jointSource,
+			jointInvalidReason, jointBlockingLabel,
 		].join('|');
 
 		const cached = cache?.nodes.get(node.id);
@@ -93,6 +106,8 @@ export function prepareWorkflowElements({
 				isAnyNodeDragging,
 				jointCandidate,
 				jointSource,
+				jointInvalidReason,
+				jointBlockingLabel,
 				testRunActive,
 				testRunIteration,
 				testRunActiveBranch,
@@ -131,6 +146,8 @@ export function prepareWorkflowElements({
 		return out;
 	});
 
+	const jointEdges = buildJointEdges(nodes, isEditLocked ? undefined : onRemoveJoint, cache?.jointEdges);
+
 	if (cache) {
 		const liveNodeIds = new Set(nodes.map((node) => node.id));
 		for (const key of cache.nodes.keys()) {
@@ -142,5 +159,5 @@ export function prepareWorkflowElements({
 		}
 	}
 
-	return { preparedEdges, preparedNodes };
+	return { preparedEdges: [...preparedEdges, ...jointEdges], preparedNodes };
 }

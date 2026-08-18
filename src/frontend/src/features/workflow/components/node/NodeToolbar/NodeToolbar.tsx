@@ -1,5 +1,5 @@
-import { Unlink } from 'lucide-react';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
+import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { NodeToolbarProps } from './NodeToolbar.types';
@@ -12,14 +12,13 @@ export function NodeToolbar({ canDelete, onDelete, canRemoveJoint, onRemoveJoint
 		<div className='nodeToolbar'>
 			{canRemoveJoint && (
 				<Tooltip content={t('actions.removeJoint')}>
-					<button
-						type='button'
+					<IconButton
+						type='text'
+						size='xs'
+						iconProps={{ name: 'unlink', size: 14 }}
 						onClick={onRemoveJoint}
-						data-testid='workflow-node-remove-joint'
-						style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--color-text-secondary)', padding: 2 }}
-					>
-						<Unlink size={14} />
-					</button>
+						testId='workflow-node-remove-joint'
+					/>
 				</Tooltip>
 			)}
 			{canDelete && (

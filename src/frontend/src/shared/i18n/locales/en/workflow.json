@@ -108,6 +108,17 @@
     "deleteVersionSuccess": "Version deleted",
     "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?"
   },
+  "joint": {
+    "invalid": {
+      "notAMethod": "Only a method can be the target of a joint.",
+      "differentLoopScope": "The target must be a method in the same loop scope as the selected one — both outside every loop, or both inside the same loop.",
+      "backwards": "A joint can only point forward, to a method that runs after the selected one.",
+      "skipsReferencedMethod": "This joint would skip {{method}}, whose response this method uses.",
+      "skipsReferencedMethodUnnamed": "This joint would skip a method whose response this method uses."
+    },
+    "removedAfterMove": "{{count}} joints were removed — they are no longer valid after this move",
+    "removedAfterMove_one": "The joint was removed — it is no longer valid after this move"
+  },
   "sidebar": {
     "useConnector": {
       "title": "Use Connector",

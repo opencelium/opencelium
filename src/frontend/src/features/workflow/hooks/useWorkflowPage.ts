@@ -5,6 +5,7 @@ import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
+import { message } from 'antd';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { UseWorkflowPageOptions } from '../drag-drop/workflowPage.types';
@@ -15,7 +16,7 @@ import { useWorkflowDragStart } from './useWorkflowDragStart';
 import { useWorkflowDragMove } from './useWorkflowDragMove';
 import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
-import { getValidJumpTargetIds } from '../utils/jumpValidator';
+import { evaluateJointTargets } from '../utils/jumpValidator';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
@@ -43,14 +44,17 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const handleNodeDragStop = useWorkflowDragStop({ options, setNodes, setEdges,
     setIsDragging: setIsAnyNodeDragging, reactFlowInstance, dragSnapshot,
     positionLock: draggedPositionLockRef, multiDrag: multiDragRef,
-    clearPreview: clearAllDragPreviewState, commitFreeReposition });
+    clearPreview: clearAllDragPreviewState, commitFreeReposition,
+    onJointsRemoved: (count) => message.warning(t('joint.removedAfterMove', { count })) });
   const nodeUpdates = useWorkflowNodeUpdates(setNodes,
     () => setMethodEditor(null), () => setConditionEditor(null),
     () => setAggregatorEditor(null));
 
   const [jointSourceId, setJointSourceId] = useState<string | null>(null);
-  const jointTargetIds = useMemo(
-    () => (jointSourceId ? getValidJumpTargetIds(jointSourceId, nodes, edges, options.fieldBindings ?? []) : new Set<string>()),
+  const jointVerdicts = useMemo(
+    () => (jointSourceId
+      ? evaluateJointTargets(jointSourceId, nodes, edges, options.fieldBindings ?? [])
+      : undefined),
     [jointSourceId, nodes, edges, options.fieldBindings],
   );
 
@@ -68,7 +72,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     isAnyNodeDragging,
     sidebarAction,
     jointSourceId,
-    jointTargetIds,
+    jointVerdicts,
     contextMenu,
     historyOpen,
     methodEditor,
@@ -115,7 +119,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       setJointSourceId(sourceNodeId);
     },
     onConfirmJoint: (targetNodeId: string) => {
-      if (!jointSourceId || !jointTargetIds.has(targetNodeId)) return;
+      if (!jointSourceId || !jointVerdicts?.get(targetNodeId)?.valid) return;
       setNodes((current) => current.map((item) =>
         item.id === jointSourceId ? { ...item, data: { ...item.data, jumpTo: targetNodeId } } : item,
       ));

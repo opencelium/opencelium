@@ -108,6 +108,17 @@
     "deleteVersionSuccess": "Version gelöscht",
     "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?"
   },
+  "joint": {
+    "invalid": {
+      "notAMethod": "Nur eine Methode kann Ziel eines Joints sein.",
+      "differentLoopScope": "Das Ziel muss eine Methode im selben Loop-Bereich wie die ausgewählte sein — entweder beide außerhalb jeder Schleife oder beide in derselben Schleife.",
+      "backwards": "Ein Joint kann nur nach vorne zeigen, auf eine Methode, die nach der ausgewählten läuft.",
+      "skipsReferencedMethod": "Dieser Joint würde {{method}} überspringen, deren Antwort diese Methode verwendet.",
+      "skipsReferencedMethodUnnamed": "Dieser Joint würde eine Methode überspringen, deren Antwort diese Methode verwendet."
+    },
+    "removedAfterMove": "{{count}} Joints wurden entfernt — sie sind nach dieser Verschiebung nicht mehr gültig",
+    "removedAfterMove_one": "Der Joint wurde entfernt — er ist nach dieser Verschiebung nicht mehr gültig"
+  },
   "sidebar": {
     "useConnector": {
       "title": "Konnektor verwenden",

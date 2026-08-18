@@ -15,8 +15,8 @@ export function ConnectorMethodNode({ id, data, selected, dragging }: NodeProps<
       bottomLabel={data.subtitle || data.title}
       rightAdd={{
         action: { sourceNodeId: id, direction: 'right' },
-        showAlways: !!data.isLeaf,
-        lineVisible: !!data.isLeaf,
+        showAlways: !!data.isLeaf && !data.jumpTo,
+        lineVisible: !!data.isLeaf && !data.jumpTo,
       }}
     >
       <ConnectorMethodNodeContent id={id} data={data} suppressTooltip={suppressTooltip} />
