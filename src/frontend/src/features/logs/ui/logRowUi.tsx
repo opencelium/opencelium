@@ -127,6 +127,12 @@ type LogRowProps = {
   // into view (the element the error actually happened on) — plays a red
   // pulse so the row is easy to spot once the tree has finished expanding.
   highlighted?: boolean;
+  // Same idea, for the debugger's pause reveal — a distinct neutral (not red)
+  // pulse, since a paused-on node is not an error. Mutually exclusive with
+  // `highlighted` in practice (a row is either the error target or the
+  // paused-on one), but both are accepted independently in case a run is
+  // paused exactly on its own failing node.
+  pausedHighlighted?: boolean;
 };
 
 export function LogRow({
@@ -137,10 +143,11 @@ export function LogRow({
   left,
   right,
   highlighted = false,
+  pausedHighlighted = false,
 }: LogRowProps) {
   return (
     <div
-      className={`oc-log-row${highlighted ? " oc-log-row--error-target" : ""}`}
+      className={`oc-log-row${highlighted ? " oc-log-row--error-target" : ""}${pausedHighlighted ? " oc-log-row--paused-target" : ""}`}
       onClick={expandable ? onToggle : undefined}
       style={{
         display: "flex",

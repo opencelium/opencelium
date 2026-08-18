@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useWorkflowValidation } from './useWorkflowValidation';
 import { useSaveWorkflow } from './useSaveWorkflow';
 import { useAssignWorkflowCategory } from './useAssignWorkflowCategory';
@@ -14,10 +14,15 @@ import type { useWorkflowPageState } from './useWorkflowPageState';
 type Params = {
 	connectionId?: string;
 	readOnly: boolean;
+	/** True while a test run is executing — synced up from inside TestRunProvider
+	 * by TestRunEditLockSync. Locks every edit surface for its duration. */
+	isTestRunLocked?: boolean;
 	page: ReturnType<typeof useWorkflowPageState>;
 };
 
-export const useWorkflowActions = ({ connectionId, readOnly, page }: Params) => {
+export const useWorkflowActions = ({ connectionId, readOnly,
+	isTestRunLocked = false, page }: Params) => {
+	const isEditLocked = readOnly || isTestRunLocked;
 	const { connection, workflow, connectors, invokers, view, changes } = page;
 	const { headerState, fieldBindings, categoryId } = connection;
 	const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
@@ -57,6 +62,7 @@ export const useWorkflowActions = ({ connectionId, readOnly, page }: Params) => 
 		setChangeSource: changes.setChangeSource,
 		applyGraph: (state) => workflow.setWorkflowGraph(
 			state.nodes, state.edges, state.viewport, { centerStart: true }),
+		isTestRunLocked,
 		closeEditors: () => {
 			workflow.setSidebarAction(null);
 			workflow.setContextMenu(null);
@@ -91,10 +97,22 @@ export const useWorkflowActions = ({ connectionId, readOnly, page }: Params) => 
 		templates.loadTemplateDialogOpen || templates.connectorMappingDialogOpen ||
 		isShortcutsOpen);
 
-	useDeleteSelectedNode({ readOnly, nodes: workflow.nodes,
+	useDeleteSelectedNode({ readOnly: isEditLocked, nodes: workflow.nodes,
 		onDeleteNode: workflow.onDeleteNode, disabled: isEditorDialogOpen });
-	useWorkflowUndoShortcuts({ readOnly, undo: workflow.undo, redo: workflow.redo,
+	useWorkflowUndoShortcuts({ readOnly: isEditLocked, undo: workflow.undo,
+		redo: workflow.redo,
 		disabled: isEditorDialogOpen || !!workflow.responseNodeId });
+
+	// When a run starts, close the non-modal edit surfaces that may already be
+	// open — the sidebar could still add a step and the history panel could still
+	// swap the whole graph out from under the executing run.
+	const { setSidebarAction, setContextMenu, setHistoryOpen } = workflow;
+	useEffect(() => {
+		if (!isTestRunLocked) return;
+		setSidebarAction(null);
+		setContextMenu(null);
+		setHistoryOpen(false);
+	}, [isTestRunLocked, setSidebarAction, setContextMenu, setHistoryOpen]);
 
 	return { validation, saveWorkflow, category, templates, history, canvas, header,
 		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen,

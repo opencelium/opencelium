@@ -2,3 +2,24 @@
     border-radius: var(--radius-md);
     color: var(--color-text-primary);
 }
+
+.ant-input-custom:disabled,
+.ant-input-custom.ant-input-disabled,
+.ant-input-affix-wrapper-disabled .ant-input-custom {
+    color: var(--color-text-secondary) !important;
+    -webkit-text-fill-color: var(--color-text-secondary) !important;
+    background-color: var(--color-background-disabled) !important;
+    border-color: var(--color-border-subtle) !important;
+    opacity: 1 !important;
+    cursor: default !important;
+}
+
+.ant-input-affix-wrapper-disabled {
+    background-color: var(--color-background-disabled) !important;
+    border-color: var(--color-border-subtle) !important;
+    cursor: default !important;
+}
+
+.ant-input-affix-wrapper-disabled .ant-input-custom {
+    background-color: transparent !important;
+}
