@@ -5,6 +5,7 @@ import type {
 	WorkflowNodeModel,
 } from '../types/workflow.types';
 import { sortValue } from './workflowPage.utils';
+import { toAuthoredMethodConfig } from './requestConfig';
 
 /**
  * Node-data keys that describe how the graph currently *looks* rather than what
@@ -39,6 +40,12 @@ const withoutKeys = <T extends object>(data: T | undefined, ephemeral: Set<keyof
 	!data ? data : Object.fromEntries(Object.entries(data)
 		.filter(([key, value]) => !ephemeral.has(key as keyof T) && typeof value !== 'function'));
 
+const toAuthoredNodeData = (data: WorkflowNodeData) => {
+	const authored = withoutKeys(data, EPHEMERAL_NODE_DATA_KEYS) as Record<string, unknown>;
+	if (!authored || !('methodConfig' in authored)) return authored;
+	return { ...authored, methodConfig: toAuthoredMethodConfig(data.methodConfig) };
+};
+
 const toAuthoredNode = (node: WorkflowNodeModel) => ({
 	id: node.id,
 	type: node.type,
@@ -48,7 +55,7 @@ const toAuthoredNode = (node: WorkflowNodeModel) => ({
 	draggable: node.draggable,
 	deletable: node.deletable,
 	hidden: node.hidden,
-	data: withoutKeys(node.data, EPHEMERAL_NODE_DATA_KEYS),
+	data: toAuthoredNodeData(node.data),
 });
 
 const toAuthoredEdge = (edge: WorkflowEdgeModel) => ({
@@ -60,6 +67,11 @@ const toAuthoredEdge = (edge: WorkflowEdgeModel) => ({
 	targetHandle: edge.targetHandle,
 	data: withoutKeys(edge.data, EPHEMERAL_EDGE_DATA_KEYS),
 });
+
+/** Authored identity of the edge set alone — used by the change describer to
+ * tell "connections changed" from "only node data changed". */
+export const buildWorkflowEdgeSignature = (edges: WorkflowEdgeModel[]) =>
+	JSON.stringify(sortValue(edges.map(toAuthoredEdge)));
 
 /**
  * Stable string identity of everything the user authored. Keys are deep-sorted

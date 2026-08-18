@@ -76,6 +76,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     canRedo: undoHistory.canRedo,
     undo: undoHistory.undo,
     redo: undoHistory.redo,
+    undoEntries: undoHistory.entries,
+    jumpToUndoEntry: undoHistory.jumpTo,
     getViewport: () => reactFlowInstance.current?.getViewport(),
     setReactFlowInstance: (instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>) => {
       reactFlowInstance.current = instance;

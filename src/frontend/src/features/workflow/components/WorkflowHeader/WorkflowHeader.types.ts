@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { WorkflowHeaderMenuItem } from '../../types/workflow.types';
+import type { WorkflowUndoEntry } from '../../types/undoHistory.types';
 
 /** In-session canvas undo/redo (see useWorkflowUndoHistory) — not the saved
  * version history reachable from the header menu. */
@@ -8,6 +9,10 @@ export type WorkflowUndoRedoState = {
 	canRedo: boolean;
 	onUndo: () => void;
 	onRedo: () => void;
+	/** Newest-first change list backing the dropdown; `offset` is the jump
+	 * distance from the current state (see WorkflowUndoEntry). */
+	entries: WorkflowUndoEntry[];
+	onJumpTo: (offset: number) => void;
 };
 
 export type WorkflowHeaderProps = {

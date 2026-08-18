@@ -40,7 +40,7 @@ import {
 
 import type { IconComponent } from './Icon.types';
 import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
-import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdPause, MdStop, MdSkipNext, MdFastForward, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff} from "react-icons/md";
+import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdPause, MdStop, MdSkipNext, MdFastForward, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff, MdCallSplit, MdLoop} from "react-icons/md";
 import {TbWebhook, TbReportAnalytics} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
 import {GoArrowSwitch, GoWorkflow} from "react-icons/go";
@@ -104,6 +104,8 @@ const iconMap = {
     docs: ReadOutlined,
     undo: UndoOutlined,
     redo: RedoOutlined,
+    if: MdCallSplit,
+    loop: MdLoop,
 };
 
 export const AntIcon: IconComponent = ({

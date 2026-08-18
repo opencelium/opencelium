@@ -58,6 +58,8 @@ export type IconName =
     | 'docs'
     | 'undo'
     | 'redo'
+    | 'if'
+    | 'loop'
 
 export type IconColor =
     | 'default'

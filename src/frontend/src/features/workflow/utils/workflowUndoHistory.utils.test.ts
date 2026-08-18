@@ -63,6 +63,30 @@ describe('buildWorkflowUndoSignature', () => {
 		expect(signatureOf(moved)).not.toBe(signatureOf());
 	});
 
+	it('ignores what a request-dialog round-trip normalises when nothing was edited', () => {
+		// Closing the URL/body dialog always writes the config back through the
+		// legacy adapter, which fills in `response`, remints query-row ids and
+		// appends the editor's blank template row. None of that is a user edit.
+		const roundTripped = patchMethodNode({
+			methodConfig: {
+				name: 'getAllUser', url: '/user', method: 'GET',
+				response: { responseId: 'response-method-1', success: { status: '200' } },
+				queryParams: [{ id: 'freshly-minted', key: '', value: '', enabled: false }],
+			},
+		});
+		expect(signatureOf(roundTripped)).toBe(signatureOf());
+	});
+
+	it('still registers a real query-param edit', () => {
+		const edited = patchMethodNode({
+			methodConfig: {
+				name: 'getAllUser', url: '/user', method: 'GET',
+				queryParams: [{ id: 'row-1', key: 'page', value: '2', enabled: true }],
+			},
+		});
+		expect(signatureOf(edited)).not.toBe(signatureOf());
+	});
+
 	it('registers authored changes: config, label, colour, topology and field bindings', () => {
 		expect(signatureOf(patchMethodNode({
 			methodConfig: { name: 'getAllUser', url: '/user/1', method: 'GET' },

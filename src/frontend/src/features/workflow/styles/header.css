@@ -102,3 +102,83 @@
   padding-right: 4px;
   border-right: 1px solid var(--color-border-subtle);
 }
+
+.undoHistoryMenu {
+  min-width: 260px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.undoHistoryItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--color-text-primary);
+}
+
+.undoHistoryItem:hover {
+  background: var(--color-background-hover);
+}
+
+.undoHistoryItemLabel {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* One fixed box for every icon variant — including the empty one on rows with no
+   subject node — so labels line up in a column. */
+.undoHistoryItemIcon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Rows that concern no single node — "Session start" above all — still mark the
+   icon column, with an outline instead of a glyph. */
+.undoHistoryItemIcon--empty::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 999px;
+}
+
+/* Connector logos are dark artwork drawn for a light background, so this disc is
+   deliberately white in BOTH themes: a themed surface colour would swallow them
+   in dark mode. This is the one intentional non-token colour here. */
+.undoHistoryItemIcon--logo {
+  background: #fff;
+  border-radius: 999px;
+  padding: 1px;
+  box-sizing: border-box;
+}
+
+/* primary-subtle is the same light tint in both themes (only the neutral ramp
+   is mode-aware), so it must carry a primary-scale foreground rather than
+   --color-text-primary — same pairing as .contextMenuItem:hover. */
+.undoHistoryItem--current {
+  background: var(--color-action-primary-subtle);
+  color: var(--color-action-primary-hover);
+  cursor: default;
+}
+
+/* Entries ahead of the current state — redoable, i.e. currently undone. */
+.undoHistoryItem--undone .undoHistoryItemLabel {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.undoHistoryItemTime {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}

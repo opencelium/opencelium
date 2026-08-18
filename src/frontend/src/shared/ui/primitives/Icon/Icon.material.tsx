@@ -51,6 +51,8 @@ import {
     MenuBook,
     Undo,
     Redo,
+    CallSplit,
+    Loop,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -108,6 +110,8 @@ const iconMap = {
     docs: MenuBook,
     undo: Undo,
     redo: Redo,
+    if: CallSplit,
+    loop: Loop,
 };
 
 export const MaterialIcon: IconComponent = ({

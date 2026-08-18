@@ -90,7 +90,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           loading: isConnectionLoading,
           hasSavedConnection: !!activeConnectionId,
           undoRedo: { canUndo: workflow.canUndo, canRedo: workflow.canRedo,
-            onUndo: workflow.undo, onRedo: workflow.redo } }} />
+            onUndo: workflow.undo, onRedo: workflow.redo,
+            entries: workflow.undoEntries, onJumpTo: workflow.jumpToUndoEntry } }} />
       <WorkflowPageDialogs
         templates={{
           save: { open: templateDialogOpen, name: templateName,
