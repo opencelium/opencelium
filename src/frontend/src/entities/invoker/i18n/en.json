@@ -20,7 +20,10 @@
     "name": {
       "label": "Name",
       "errors": {
-        "name_already_exists": "An invoker with this name already exists"
+        "name_already_exists": "An invoker with this name already exists",
+        "invalid_characters": "Use only letters, digits, spaces, hyphens, underscores, parentheses, and periods",
+        "invalid_period": "A period cannot be first or last, and consecutive periods are not allowed",
+        "max_length": "Name must not exceed 200 characters"
       }
     },
     "description": {
