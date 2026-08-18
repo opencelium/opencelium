@@ -5,7 +5,7 @@ import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { useGetMethodDetailsQuery } from "../api/logsApi";
 import { ResizableJsonView } from "./ResizableJsonView";
 import { useMethodDetailViewState } from "./methodDetailViewState";
-import { CopyButton } from "./CopyButton";
+import { CopyButton } from "@shared/ui/actions/CopyButton";
 import { ErrorDetail } from "./ErrorDetail";
 
 // A tab label with a copy button (for the tab's raw content) next to the text.
@@ -29,7 +29,13 @@ type Props = {
 export function MethodLogDetails({ id, depth, path }: Props) {
   const { t } = useI18n("logs");
   const { tabs, setTab } = useMethodDetailViewState();
-  const { data, isFetching, isError } = useGetMethodDetailsQuery(id);
+  // A method's own detail never changes once logged — skip baseApi's default
+  // refetch-on-mount so a warm cache entry (from a previous expand, or from
+  // prefetchErrorTracePath's reveal warm-up) is reused as-is instead of a
+  // redundant request flipping isFetching back to true.
+  const { data, isFetching, isError } = useGetMethodDetailsQuery(id, {
+    refetchOnMountOrArgChange: false,
+  });
 
   const requestTabKey = `${path}/request`;
   const responseTabKey = `${path}/response`;

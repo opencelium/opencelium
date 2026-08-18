@@ -5,15 +5,16 @@ import {CommonText} from "@shared/ui/primitives/Text";
 type HintProps = {
     children: ReactNode;
     noPrefix?: boolean;
+    type?: 'info' | 'success' | 'warning' | 'error';
 };
 
-export function Hint({children, noPrefix}: HintProps) {
+export function Hint({children, noPrefix, type = 'info'}: HintProps) {
     if (noPrefix) {
-        return <Alert type="info" message={children} />;
+        return <Alert type={type} message={children} />;
     }
     return (
         <Alert
-            type="info"
+            type={type}
             message={<CommonText i18nKey="hintLabel" typoProps={{isBold: true}} />}
             description={children}
         />

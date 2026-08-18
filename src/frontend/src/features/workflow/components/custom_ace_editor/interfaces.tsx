@@ -28,6 +28,7 @@ export interface LimitedAceEditorProps {
 	counterStyles?: {
 		top?: string;
 		right?: string;
+		bottom?: string;
 	};
 	hasDiffLang?: boolean,
 }
@@ -35,4 +36,5 @@ export interface LimitedAceEditorProps {
 export interface LimitedAceEditorCounterProps {
 	top?: string;
 	right?: string;
+	bottom?: string;
 }

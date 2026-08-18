@@ -1,5 +1,5 @@
 import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
-import type {PolicyDefinition} from "@/engine/policy";
+import type {CrudAction, PermissionComponent, PolicyDefinition} from "@/engine/policy";
 import type {CommandNode} from "@shared/command/types.ts";
 import type {FormRemoteProps, StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 import type {StepActionDefinition} from "@shared/ui/step-form/types.ts";
@@ -88,7 +88,8 @@ export type TableFieldDefinition = {
     labelKey?: string
     /** Literal fallback header. Falls back to FieldDefinition.label / .labelKey / .name. */
     label?: string
-    width?: number
+    /** Fixed pixel width (number) or a CSS width string (e.g. `'20%'`). */
+    width?: number | string
     align?: ColumnAlign
     /** Transform the raw cell value before sort / search / render. */
     mapToValue?: (row: unknown, raw: unknown) => unknown
@@ -153,6 +154,13 @@ export type WizardModeConfig = {
     info?: PartialStepProps[],
     onSubmit?: (formData: any) => void,
     getSuccessMessage?: (formData: T) => string,
+    /**
+     * Custom content rendered below the success screen's title/icon, in place of
+     * the plain translated `successMessage`. Use when the confirmation needs more
+     * than static text (e.g. an interpolated value, a live countdown, a side effect
+     * like an automatic logout) — see `updateAssistantDefinition` for the reference case.
+     */
+    getSuccessContent?: (formData: any) => React.ReactNode,
 }
 
 export type WizardDefinition = {
@@ -167,7 +175,8 @@ export type WizardDefinition = {
     renderImage?: React.ComponentType<{ mode?: Mode }>
     overrideKey?: string
     recommendations?: Recommendation[]
-    steps: WizardStepDefinition[]
+    /** Function form lets the step list itself differ by mode (e.g. a step only relevant to create/update, or a field relocated between steps depending on mode). */
+    steps: WizardStepDefinition[] | ((mode: Mode) => WizardStepDefinition[])
     modes?: Partial<Record<Mode, WizardModeConfig>>
 }
 export type CrossFieldValidation = {
@@ -314,6 +323,11 @@ export type CustomActionConfig = {
     type: 'custom'
     /** Stable key used for React reconciliation. */
     key: string
+    /**
+     * When set, the action only renders if the user has this CRUD permission on
+     * `entity.permissionComponent`. Unset = ungated (today's behavior).
+     */
+    permissionAction?: CrudAction
     render: (ctx: CustomActionContext) => React.ReactNode
 }
 
@@ -361,6 +375,14 @@ export type ListDefinition = {
      * Pass an explicit array (possibly empty) to take full control.
      */
     actions?: ListAction[]
+    /**
+     * How per-row actions are presented. `'inline'` (default) renders every
+     * action as its own icon button in a row. `'menu'` collapses them behind a
+     * "more" trigger that reveals the actions in a hover-only popover — use
+     * this when a list carries enough per-row actions that an inline row would
+     * crowd the column (see `schedule.definition.tsx`).
+     */
+    rowActionsDisplay?: 'inline' | 'menu'
     /** Field used to build view/update URLs and to identify rows. Defaults to api.primaryKey ?? 'id'. */
     rowKey?: string
     /** Page size for client-side pagination. Defaults to 15. */
@@ -416,6 +438,11 @@ export type HeaderActionContext = {
 export type HeaderAction = {
     /** Stable React key. */
     key: string
+    /**
+     * When set, the button only renders if the user has this CRUD permission on
+     * `entity.permissionComponent`. Unset = ungated (today's behavior).
+     */
+    permissionAction?: CrudAction
     render: (ctx: HeaderActionContext) => React.ReactNode
 }
 
@@ -430,6 +457,8 @@ export type BulkDeleteConfig = {
     buildPayload?: (ids: string[]) => unknown
     /** Hook called after a successful bulk delete. */
     afterDelete?: (ids: string[]) => Promise<void> | void
+    /** Override the confirm-dialog message. Receives the selected ids and their raw rows. */
+    confirmMessage?: (ids: string[], rows: unknown[], entity: EntityDefinition) => string
 }
 
 export type BulkActionContext = {
@@ -495,6 +524,11 @@ export type BulkAction = {
         titleKey: string
         messageKey: string
     }
+    /**
+     * When set, the button only renders if the user has this CRUD permission on
+     * `entity.permissionComponent`. Unset = ungated (today's behavior).
+     */
+    permissionAction?: CrudAction
     /** Action handler. Receives selected rows + ids and helpers. */
     run: (ctx: BulkActionContext) => Promise<void> | void
 }
@@ -506,6 +540,13 @@ export type EntityDefinition = {
     routes?: EntityRoute[];
 
     access?: PolicyDefinition
+    /**
+     * Backend permission component (`AuthUser.userGroup.components[].name`) this entity's
+     * CRUD affordances are gated by. Drives EntityWizard's create/update access, the list's
+     * create button and update/delete row actions, and the create/update/delete
+     * command-palette entries. Unset = ungated (today's behavior).
+     */
+    permissionComponent?: PermissionComponent
     crossValidations?: CrossFieldValidation[]
 
     api?: EntityApi,

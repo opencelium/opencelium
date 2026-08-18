@@ -7,11 +7,13 @@
     "notFound": "The requested resource was not found.",
     "default": "An unexpected error occurred. Please try again.",
     "unknownError": "Unknown Error in {{place}}",
+    "CATEGORY_NOT_FOUND": "This category was not found. It may have already been deleted.",
     "socketDisconnected": "Live connection lost. Metrics are no longer updating.",
     "login": {
       "network": "Could not reach the server. Please try again.",
       "invalidCredentials": "Invalid email or password",
-      "failed": "Login failed"
+      "failed": "Login failed",
+      "sessionLoadFailed": "You signed in, but we couldn't load your account. Please try again."
     },
     "forgotPassword": {
       "emailNotExists": "No account is registered with this email address.",

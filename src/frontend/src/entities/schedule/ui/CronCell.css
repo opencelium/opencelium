@@ -25,3 +25,12 @@
     color: var(--color-action-primary);
     border-color: var(--color-action-primary);
 }
+
+.cron-cell__chip--readonly {
+    cursor: default;
+}
+
+.cron-cell__chip--readonly:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-border-subtle);
+}

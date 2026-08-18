@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.unit.execution.logger.service;
 
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.mapper.LogDataMapper;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -34,7 +37,7 @@ import static org.mockito.Mockito.when;
  * Run with: ./gradlew test
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("UserRoleServiceImpl — unit")
+@DisplayName("LogDataServiceImp — unit")
 public class LogDataServiceImpTest {
     @Mock
     private MetaDataLogRepository repository;
@@ -111,5 +114,27 @@ public class LogDataServiceImpTest {
         // THEN
         assertNotNull(result);
         Assertions.assertEquals(1, result.size());
+    }
+
+    @Test
+    void bufferAndFlushSavesEachBlockExactlyOnceWhenExecutionCompletes() {
+        // GIVEN
+        var flowchart = LogDataMngFixture.aFlowchartPhaseLogData();
+        var operation = LogDataMngFixture.anOperationPhaseLogData();
+        var executionEnd = LogDataMngFixture.anExecutionCompletePhaseLogData();
+
+        // WHEN
+        service.bufferAndFlush(flowchart);
+        service.bufferAndFlush(operation);
+        service.bufferAndFlush(executionEnd);
+
+        // THEN: the completed execution flushes the buffer in a single batch
+        // that contains every block once, without duplicates
+        ArgumentCaptor<List<LogDataMng>> captor = ArgumentCaptor.forClass(List.class);
+        verify(repository).saveAll(captor.capture());
+
+        List<LogDataMng> saved = captor.getValue();
+        Assertions.assertEquals(3, saved.size());
+        Assertions.assertEquals(3, saved.stream().distinct().count());
     }
 }

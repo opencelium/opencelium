@@ -1,18 +1,25 @@
 import { message } from 'antd'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import type { CommandNode } from '@shared/command/types'
 import invokerWizardImage from '@assets/images/wizard/invoker-wizard.gif'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
 import en from '@entities/invoker/i18n/en.json'
 import de from '@entities/invoker/i18n/de.json'
 import { resolveInvokerNames } from '@entities/invoker/command/resolvers/resolveInvokerNames'
+import {
+    isInvokerNameCharacterSetValid,
+    isInvokerNameDotPlacementValid,
+    isInvokerNameLengthValid,
+    normalizeInvokerName,
+    normalizeInvokerNameForComparison,
+} from '@entities/invoker/lib/invokerName'
 import type { Invoker } from '@entities/invoker/model/types'
 import { InvokerUploadButton } from '@entities/invoker/components/InvokerUploadButton'
 import { pickInvokerFile, uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
 import { buildInvokerXml } from '@entities/invoker/lib/invokerXml'
 import { mapInvokerToForm } from '@entities/invoker/lib/mapInvokerToForm'
 import { downloadInvoker } from '@entities/invoker/lib/downloadInvoker'
+import { buildActionAccess } from '@/engine/policy'
 
 const baseKey = 'invoker'
 
@@ -23,6 +30,7 @@ const baseKey = 'invoker'
 export const invokerDefinition: EntityDefinition = {
     name: baseKey,
     plural: 'invokers',
+    permissionComponent: 'INVOKER',
 
     routes: [
         { type: 'create' },
@@ -34,13 +42,25 @@ export const invokerDefinition: EntityDefinition = {
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
         defaultSort: { field: 'name', direction: 'asc' },
-        bulkDelete: true,
+        bulkDelete: {
+            confirmMessage: (ids) => {
+                const t = i18n.getFixedT(i18n.language, 'entities');
+                return t(`${baseKey}.confirmation.delete.bulkMessage`, { count: ids.length });
+            },
+        },
         actions: [
             { type: 'view' },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: (value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    const name = (row as Invoker)?.name ?? value;
+                    return t(`${baseKey}.confirmation.delete.byName`, { name });
+                },
+            },
         ],
         headerActions: [
-            { key: 'upload', render: () => <InvokerUploadButton /> },
+            { key: 'upload', permissionAction: 'CREATE', render: () => <InvokerUploadButton /> },
         ],
     },
 
@@ -54,10 +74,17 @@ export const invokerDefinition: EntityDefinition = {
 
         mapToForm: (model: Invoker) => mapInvokerToForm(model),
 
-        mapToApi: ({ data }) => ({
-            name: data.name,
-            xml: buildInvokerXml(data as Record<string, unknown>),
-        }),
+        mapToApi: ({ data }) => {
+            const normalizedData = {
+                ...data,
+                name: normalizeInvokerName(data.name),
+            }
+
+            return {
+                name: normalizedData.name,
+                xml: buildInvokerXml(normalizedData as Record<string, unknown>),
+            }
+        },
     },
 
     /* ===============================
@@ -77,11 +104,26 @@ export const invokerDefinition: EntityDefinition = {
             },
             validation: {
                 required: true,
-                max: 255,
+                custom: [
+                    {
+                        validate: isInvokerNameCharacterSetValid,
+                        message: `${baseKey}.fields.name.errors.invalid_characters`,
+                    },
+                    {
+                        validate: isInvokerNameDotPlacementValid,
+                        message: `${baseKey}.fields.name.errors.invalid_period`,
+                    },
+                    {
+                        validate: isInvokerNameLengthValid,
+                        message: `${baseKey}.fields.name.errors.max_length`,
+                    },
+                ],
                 remote: {
                     url: `/invoker/exists/:name`,
                     method: 'GET',
-                    map: (fieldValue) => ({ name: fieldValue }),
+                    map: (fieldValue) => ({
+                        name: normalizeInvokerNameForComparison(fieldValue),
+                    }),
                     transKey: `${baseKey}.fields.name.errors.name_already_exists`,
                     encodeParams: false,
                     handleResponse: (data, error) => {
@@ -90,11 +132,15 @@ export const invokerDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -108,9 +154,13 @@ export const invokerDefinition: EntityDefinition = {
             },
             validation: { max: 5000 },
             table: {
+                width: '45%',
                 visible: true,
                 order: 2,
                 labelKey: `${baseKey}.fields.description.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -145,6 +195,9 @@ export const invokerDefinition: EntityDefinition = {
                 visible: true,
                 order: 3,
                 labelKey: `${baseKey}.fields.authType.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -211,6 +264,9 @@ export const invokerDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ');
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
     ],
@@ -299,13 +355,14 @@ export const invokerDefinition: EntityDefinition = {
     commands: (def) => ([
         ...createEntityCommands({
             def,
-            config: { include: ['create', 'delete', 'view'] },
+            config: { include: ['create', 'delete', 'list', 'view'] },
             dsl: {
                 delete: {
                     by: [
                         {
                             field: 'name',
                             resolve: resolveInvokerNames,
+                            customPath: true,
                             confirmMessage: (name) => {
                                 const t = i18n.getFixedT(i18n.language, 'entities')
                                 return t(`${baseKey}.confirmation.delete.byName`, { name })
@@ -330,9 +387,11 @@ export const invokerDefinition: EntityDefinition = {
                 {
                     type: 'literal',
                     value: 'invoker',
-                    aliases: ['invokers'],
                     icon: 'upload',
                     description: 'commandPalette.descriptions.uploadInvoker',
+                    // The outer "upload" literal is shared/merged with other entities'
+                    // upload commands (e.g. connectionTemplate) — access must live here.
+                    access: buildActionAccess('INVOKER', 'CREATE'),
                     execute: async (_, ctx) => {
                         const tEntities = i18n.getFixedT(i18n.language, 'entities')
                         const file = await pickInvokerFile()
@@ -350,6 +409,7 @@ export const invokerDefinition: EntityDefinition = {
                                 message.success(
                                     tEntities('invoker.list.upload.success', { name: file.name }),
                                 )
+                                ctx.setInputValue('')
                             }
                         } catch (err) {
                             console.error(err)
@@ -372,7 +432,6 @@ export const invokerDefinition: EntityDefinition = {
                 {
                     type: 'literal',
                     value: 'invoker',
-                    aliases: ['invokers'],
                     icon: 'download',
                     description: 'commandPalette.descriptions.downloadInvoker',
                     children: [

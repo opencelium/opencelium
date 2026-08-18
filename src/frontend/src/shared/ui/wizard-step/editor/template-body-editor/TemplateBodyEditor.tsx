@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo } from 'react'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-text'
-import 'ace-builds/src-noconflict/theme-github'
+import 'ace-builds/src-noconflict/theme-tomorrow'
+import 'ace-builds/src-noconflict/theme-tomorrow_night'
 import { useController, useFormContext } from 'react-hook-form'
 import { useFetchEntitiesQuery } from '@shared/api/genericApi'
 import type { Aggregator } from '@entities/notificationTemplate/model/types'
@@ -11,6 +12,7 @@ import {
     findOcArgNotExistMarkers,
 } from '@entities/notificationTemplate/lib/templateArgUtils'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
+import { useTheme } from '@shared/theme/hooks/useTheme'
 import type { Mode } from '@/engine/entity/EntityDefinition'
 import { FormControl } from '@shared/ui/form/FormControl'
 
@@ -24,6 +26,8 @@ const SERVER_ARG_RE = /\{\{\d+\}\}/
 
 export function TemplateBodyEditor({ name, label, mode }: TemplateBodyEditorProps) {
     const { t } = useI18n('entities')
+    const { themeMode } = useTheme()
+    const aceTheme = themeMode === 'dark' ? 'tomorrow_night' : 'tomorrow'
     const { control, watch, formState: { errors } } = useFormContext()
     const { field } = useController({ name, control })
     const { data: aggregators = [] } = useFetchEntitiesQuery('/aggregator/all')
@@ -72,7 +76,7 @@ export function TemplateBodyEditor({ name, label, mode }: TemplateBodyEditorProp
             <FormControl label={translatedLabel} error={error} name={name}>
                 <AceEditor
                     mode="text"
-                    theme="github"
+                    theme={aceTheme}
                     onChange={field.onChange}
                     value={field.value ?? ''}
                     name={`ace_${name}`}

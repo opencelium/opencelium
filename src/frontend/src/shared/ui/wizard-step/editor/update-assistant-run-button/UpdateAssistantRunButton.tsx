@@ -1,9 +1,5 @@
-import React, { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
-import {
-    useRunUpdateMutation,
-    useGetOfflineVersionsQuery,
-} from '@entities/updateAssistant/api/updateAssistantApi'
+import { useGetOfflineVersionsQuery } from '@entities/updateAssistant/api/updateAssistantApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import {Hint} from "@shared/ui/primitives/Hint";
 
@@ -16,8 +12,6 @@ type Props = {
 export function UpdateAssistantRunButton({ name, label, mode }: Props) {
     const { t } = useI18n('entities')
     const { watch } = useFormContext()
-    const [confirmed, setConfirmed] = useState(false)
-    const [runUpdate, { isLoading, isSuccess, isError }] = useRunUpdateMutation()
 
     const updateMode = watch('updateMode') ?? 'online'
     const selectedVersionName = watch('versionsDisplay')
@@ -30,35 +24,8 @@ export function UpdateAssistantRunButton({ name, label, mode }: Props) {
             : undefined
     const instructionHtml = selectedOfflineVersion?.instruction?.trim() || null
 
-    const handleRun = async () => {
-        if (!confirmed) {
-            setConfirmed(true)
-            return
-        }
-        await runUpdate()
-        setConfirmed(false)
-    }
-
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {confirmed && (
-                <div style={{ color: 'var(--color-status-warning-fg)', fontSize: 13 }}>
-                    {t('update-assistant.update.confirm')}
-                </div>
-            )}
-
-            {isSuccess && (
-                <div style={{ color: 'var(--color-status-success-fg)', fontSize: 13 }}>
-                    {t('update-assistant.update.success')}
-                </div>
-            )}
-
-            {isError && (
-                <div style={{ color: 'var(--color-status-error-fg)', fontSize: 13 }}>
-                    {t('update-assistant.update.error')}
-                </div>
-            )}
-
             {instructionHtml && (
                 <div
                     style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--ant-color-text)' }}
@@ -66,7 +33,7 @@ export function UpdateAssistantRunButton({ name, label, mode }: Props) {
                 />
             )}
 
-            <Hint>
+            <Hint type="warning">
                 {t('update-assistant.update.hint')}
             </Hint>
         </div>

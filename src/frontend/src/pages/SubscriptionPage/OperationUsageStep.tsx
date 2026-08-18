@@ -5,6 +5,7 @@ import {
     useReactTable,
 } from '@tanstack/react-table'
 import { Table } from '@shared/ui/primitives/Table'
+import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils'
 import { Typography } from '@shared/ui/primitives/Typography'
 import { Hint } from '@shared/ui/primitives/Hint'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
@@ -67,6 +68,7 @@ export const OperationUsageStep: React.FC<Props> = ({ onSelectOperation }) => {
     const tableInstance = useReactTable({
         data: rows,
         columns,
+        defaultColumn: tableDefaultColumn,
         enableRowSelection: false,
         manualPagination: true,
         pageCount: data?.totalPages ?? 1,

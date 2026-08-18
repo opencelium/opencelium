@@ -2,6 +2,7 @@ import { store } from '@app/store/store'
 import { selectAccessToken } from '@entities/auth/model/authSelectors'
 import { apiExecutor } from '@shared/api/apiExecutor'
 import { baseApi } from '@shared/api/baseApi'
+import { runtimeConfig } from '@shared/config/runtimeConfig'
 
 const EXISTS_URL = (name: string) => `/invoker/file/exists/${encodeURIComponent(name)}`
 const UPLOAD_URL = '/storage/invoker'
@@ -11,7 +12,7 @@ const ACCEPT = '.xml,text/xml,application/xml'
 
 async function uploadFile(file: File): Promise<{ id: string }> {
     const token = selectAccessToken(store.getState())
-    const baseUrl = (import.meta.env.VITE_API_URL as string) ?? ''
+    const baseUrl = runtimeConfig.apiUrl
     const formData = new FormData()
     formData.append('file', file)
 

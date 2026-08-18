@@ -10,11 +10,28 @@ import { apiFetchWithHeaders } from '@shared/api/apiFetch'
 import { apiExecutor } from '@shared/api/apiExecutor'
 import { decodeJwt } from '@shared/api/decodeJwt'
 import {extractNormalizedUser} from "@features/auth/utils.ts";
+import {
+    clearSessionTiming,
+    isSessionExpired,
+    markSessionStarted,
+    recordActivity,
+} from '@features/auth/session/sessionTiming'
 
 const TOKEN_KEY = 'oc_auth_token'
-const PERSISTENT_KEY = 'oc_auth_persistent'
+const USER_FETCH_RETRY_DELAY_MS = 500
 
-type LoginPayload = { email: string; password: string; rememberMe?: boolean }
+type LoginPayload = { email: string; password: string }
+
+/** Thrown when /login (or /totp-validate) succeeded but the follow-up user
+ * fetch that hydrates the session never did — the credentials/code were
+ * correct, so callers must not report this as invalid-credentials. */
+export class SessionHydrationError extends Error {
+    constructor(cause: unknown) {
+        super('Login succeeded but the account could not be loaded')
+        this.name = 'SessionHydrationError'
+        this.cause = cause
+    }
+}
 
 /**
  * A 2FA-enabled account gets a challenge body instead of a token. A bare { sessionId }
@@ -31,40 +48,34 @@ function asTotpChallenge(body: unknown): TotpChallenge | null {
     return { mode: 'verify', sessionId }
 }
 
-function readToken(): { token: string | null; persistent: boolean } {
-    const persistent = localStorage.getItem(PERSISTENT_KEY) === '1'
-    const token =
-        (persistent ? localStorage.getItem(TOKEN_KEY) : sessionStorage.getItem(TOKEN_KEY)) ??
-        // fall back to either store so legacy sessions survive the upgrade
-        localStorage.getItem(TOKEN_KEY) ??
-        sessionStorage.getItem(TOKEN_KEY)
-    return { token, persistent }
+function readToken(): string | null {
+    // Sessions are always persisted now — migrate a pre-existing "not remembered"
+    // (sessionStorage-only) token from before Remember Me was removed, so it
+    // survives across tabs/reloads too instead of quietly disappearing.
+    const legacy = sessionStorage.getItem(TOKEN_KEY)
+    if (legacy) {
+        sessionStorage.removeItem(TOKEN_KEY)
+        localStorage.setItem(TOKEN_KEY, legacy)
+    }
+    return localStorage.getItem(TOKEN_KEY)
 }
 
-function writeToken(token: string, rememberMe: boolean) {
-    // wipe both stores first so we never have stale tokens in the unused slot
-    localStorage.removeItem(TOKEN_KEY)
-    sessionStorage.removeItem(TOKEN_KEY)
-    if (rememberMe) {
-        localStorage.setItem(TOKEN_KEY, token)
-        localStorage.setItem(PERSISTENT_KEY, '1')
-    } else {
-        sessionStorage.setItem(TOKEN_KEY, token)
-        localStorage.removeItem(PERSISTENT_KEY)
-    }
+function writeToken(token: string) {
+    localStorage.setItem(TOKEN_KEY, token)
+    markSessionStarted()
 }
 
 function clearToken() {
     localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(PERSISTENT_KEY)
     sessionStorage.removeItem(TOKEN_KEY)
+    clearSessionTiming()
 }
 
 export const clearAuthTokens = clearToken
 
 export class PasswordStrategy implements AuthStrategy<LoginPayload> {
     async login(payload: LoginPayload): Promise<LoginResult> {
-        const { email, password, rememberMe = false } = payload
+        const { email, password } = payload
         const { data, headers } = await apiFetchWithHeaders('/login', {
             method: 'POST',
             body: { email, password },
@@ -72,33 +83,50 @@ export class PasswordStrategy implements AuthStrategy<LoginPayload> {
         })
         const challenge = asTotpChallenge(data)
         if (challenge) return { status: 'totp-required', challenge }
-        return { status: 'authenticated', session: await this.completeLogin(headers, rememberMe) }
+        return { status: 'authenticated', session: await this.completeLogin(headers) }
     }
 
-    async validateTotp({ code, sessionId, rememberMe = false }: TotpValidateInput): Promise<AuthSession> {
+    async validateTotp({ code, sessionId }: TotpValidateInput): Promise<AuthSession> {
         const { headers } = await apiFetchWithHeaders('/totp-validate', {
             method: 'POST',
             body: { code, sessionId },
             timeoutMs: 15_000,
         })
-        return this.completeLogin(headers, rememberMe)
+        return this.completeLogin(headers)
     }
 
     /** Shared tail of both login paths: pull the bearer token off the response and hydrate the user. */
-    private async completeLogin(headers: Headers, rememberMe: boolean): Promise<AuthSession> {
+    private async completeLogin(headers: Headers): Promise<AuthSession> {
         const accessToken = (headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
-        writeToken(accessToken, rememberMe)
-        const user = await this.fetchUser(accessToken)
+        writeToken(accessToken)
+        let user: AuthUser
+        try {
+            user = await this.fetchUser(accessToken)
+        } catch (e) {
+            // The token we just wrote is unusable without a hydrated user — drop it
+            // rather than leaving an orphaned token that doesn't correspond to a
+            // Redux session behind in storage.
+            clearToken()
+            throw new SessionHydrationError(e)
+        }
         const normalizedUser = extractNormalizedUser(user)
         return { accessToken, user, normalizedUser }
     }
 
     async refresh(): Promise<AuthSession | null> {
-        const { token: accessToken } = readToken()
+        const accessToken = readToken()
         if (!accessToken) return null
+        // Idle/absolute timeout is tracked client-side (see sessionTiming) — check it
+        // before trusting a stored token, so a tab reopened well past either window
+        // doesn't silently resume a session that should have expired.
+        if (isSessionExpired()) {
+            clearToken()
+            return null
+        }
         try {
             const user = await this.fetchUser(accessToken)
             const normalizedUser = extractNormalizedUser(user);
+            recordActivity()
             return { accessToken, user, normalizedUser }
         } catch {
             clearToken()
@@ -115,8 +143,21 @@ export class PasswordStrategy implements AuthStrategy<LoginPayload> {
         }).catch(() => null)
     }
 
+    /** One retry after a short delay — a freshly issued token can occasionally
+     * not be recognized yet by whatever service backs /user (auth/user-service
+     * eventual consistency), which would otherwise surface a spurious failure
+     * despite /login having just succeeded. */
     private async fetchUser(token: string): Promise<AuthUser> {
         const { userId } = decodeJwt<{ userId: number }>(token)
+        try {
+            return await this.fetchUserOnce(userId, token)
+        } catch {
+            await new Promise((resolve) => setTimeout(resolve, USER_FETCH_RETRY_DELAY_MS))
+            return await this.fetchUserOnce(userId, token)
+        }
+    }
+
+    private async fetchUserOnce(userId: number, token: string): Promise<AuthUser> {
         const { data } = await apiFetchWithHeaders<AuthUser>(`/user/${userId}`, { token })
         if (!data) throw new Error('Empty user response')
         return data

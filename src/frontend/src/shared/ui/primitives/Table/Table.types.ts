@@ -6,6 +6,16 @@ import type {
     Table as TanTable,
 } from '@tanstack/react-table';
 
+/**
+ * Column metadata carried outside tanstack's own `columnDef.size`, which is
+ * strictly numeric (pixels). `width` here is a raw CSS width string (e.g.
+ * `'20%'`) for columns that need percentage sizing instead of a fixed size.
+ */
+export type TableColumnMeta = {
+    align?: 'left' | 'center' | 'right';
+    width?: string;
+};
+
 export interface TableProps<TData extends RowData> {
     data: TData[];
     columns: ColumnDef<TData, any>[];

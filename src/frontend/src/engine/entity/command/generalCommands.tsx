@@ -4,6 +4,7 @@ import React from "react";
 import {GenericEntityList} from "@/engine/entity/runtime/genererics/GenericEntityList.tsx";
 import {GenericCreateWizard} from "@/engine/entity/runtime/genererics/GenericCreateWizard.tsx";
 import {useCommandPaletteUIStore} from "@widgets/CommandPalette/command-palette.store.ts";
+import {buildActionAccess} from "@/engine/policy";
 
 export const getListCommand = ({def, config, name}: GeneralCommandType): CommandNode<any> => {
     const pluralName = def.plural || `${name}s`;
@@ -19,6 +20,9 @@ export const getListCommand = ({def, config, name}: GeneralCommandType): Command
             value: pluralName,
             group: 'navigate',
             icon: 'list',
+            // The outer "list" literal is shared/merged across every entity's list
+            // command — access must live on this entity-specific child node.
+            access: def.permissionComponent ? buildActionAccess(def.permissionComponent, 'READ') : undefined,
             execute: (_, ctx) => {
                 const url = `/${def.name}`;
                 const mode = useCommandPaletteUIStore.getState().resolveMode();
@@ -50,6 +54,10 @@ export const getCreateCommand = ({ def, config, name }: GeneralCommandType): Com
             value: name,
             group: 'create',
             icon: 'plus',
+            // The outer "create" literal is shared/merged across every entity's create
+            // command (mergeCommandNodes keys by type+value) — access must live on this
+            // entity-specific child node, or gating one entity would hide "create" for all.
+            access: def.permissionComponent ? buildActionAccess(def.permissionComponent, 'CREATE') : undefined,
             execute: (_, ctx) => {
                 const url = `/${def.name}/create`;
                 const mode = useCommandPaletteUIStore.getState().resolveMode();

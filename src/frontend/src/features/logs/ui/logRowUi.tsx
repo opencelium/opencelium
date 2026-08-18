@@ -69,7 +69,7 @@ export function Url({ children, isError = false }: { children: string; isError?:
 export function OperatorLabel({ label, hint }: { label: string; hint?: string }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "baseline", gap: 6 }}>
-      <Typography variant="label" isBold>
+      <Typography variant="label-sm" isBold>
         {label}
       </Typography>
       {hint ? (
@@ -123,6 +123,16 @@ type LogRowProps = {
   onToggle?: () => void;
   left: ReactNode;
   right?: ReactNode;
+  // True for a few seconds right after the test-run reveal scrolls this row
+  // into view (the element the error actually happened on) — plays a red
+  // pulse so the row is easy to spot once the tree has finished expanding.
+  highlighted?: boolean;
+  // Same idea, for the debugger's pause reveal — a distinct neutral (not red)
+  // pulse, since a paused-on node is not an error. Mutually exclusive with
+  // `highlighted` in practice (a row is either the error target or the
+  // paused-on one), but both are accepted independently in case a run is
+  // paused exactly on its own failing node.
+  pausedHighlighted?: boolean;
 };
 
 export function LogRow({
@@ -132,10 +142,12 @@ export function LogRow({
   onToggle,
   left,
   right,
+  highlighted = false,
+  pausedHighlighted = false,
 }: LogRowProps) {
   return (
     <div
-      className="oc-log-row"
+      className={`oc-log-row${highlighted ? " oc-log-row--error-target" : ""}${pausedHighlighted ? " oc-log-row--paused-target" : ""}`}
       onClick={expandable ? onToggle : undefined}
       style={{
         display: "flex",

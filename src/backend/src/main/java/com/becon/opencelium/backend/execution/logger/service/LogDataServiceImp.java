@@ -240,26 +240,17 @@ public class LogDataServiceImp implements LogDataService {
     @Override
     public synchronized void bufferAndFlush(LogDataMng block) {
         LogDataMng toPersist = prepareForPersist(block);
-        List<LogDataMng> batchToFlush = buffer.buffer(toPersist);
-        boolean executionComplete = isExecutionComplete(toPersist);
-        if (executionComplete) {
-            // 1) put this block into the buffer first
-            List<LogDataMng> fromThreshold = buffer.buffer(toPersist);
 
-            // 2) flush everything that is still in memory (including this block)
-            List<LogDataMng> allRemaining = buffer.flushAll();
+        // buffer exactly once; a non-empty result means the size threshold was reached
+        List<LogDataMng> batchToFlush = new ArrayList<>(buffer.buffer(toPersist));
 
-            // merge both (fromThreshold is usually empty, but keep it correct)
-            if (!fromThreshold.isEmpty() || !allRemaining.isEmpty()) {
-                batchToFlush = new ArrayList<>(fromThreshold.size() + allRemaining.size());
-                batchToFlush.addAll(fromThreshold);
-                batchToFlush.addAll(allRemaining);
-            }
-        } else {
-            // normal path: only flush when threshold is reached
-            batchToFlush = buffer.buffer(toPersist);
+        if (isExecutionComplete(toPersist)) {
+            // execution is over: drain whatever is still in memory (including this block,
+            // unless the threshold flush above already carried it out)
+            batchToFlush.addAll(buffer.flushAll());
         }
-        if (!batchToFlush.isEmpty() ) {
+
+        if (!batchToFlush.isEmpty()) {
             metaDataLogRepository.saveAll(batchToFlush);
         }
     }

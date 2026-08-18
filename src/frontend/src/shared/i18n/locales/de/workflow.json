@@ -8,7 +8,9 @@
     "ok": "Ok",
     "delete": "Löschen",
     "removeJoint": "Verbindung entfernen",
+    "duplicate": "Duplizieren",
     "edit": "Bearbeiten",
+    "select": "Auswählen",
     "createNew": "Neu erstellen",
     "insertReference": "Referenz einfügen",
     "addAttribute": "Attribut hinzufügen",
@@ -16,7 +18,12 @@
     "openScriptNewWindow": "Skript in neuem Fenster öffnen",
     "maximizeScript": "Skript maximieren",
     "minimizeScript": "Skript minimieren",
-    "load": "Laden"
+    "maximizeRequestData": "Anfragedaten maximieren",
+    "minimizeRequestData": "Anfragedaten minimieren",
+    "load": "Laden",
+    "createEnhancement": "Enhancement erstellen",
+    "deleteEnhancement": "Enhancement löschen",
+    "deleteReference": "Referenz löschen"
   },
   "confirmDelete": {
     "title": "Schritt löschen",
@@ -36,22 +43,22 @@
     }
   },
   "schedules": {
-    "title": "Zeitpläne",
+    "title": "Laufpläne",
     "add": "Zeitplan hinzufügen",
     "nextRun": "Nächste Ausführung in {{duration}}",
     "manual": "Nur manuell",
     "expand": "Details anzeigen",
     "collapse": "Details ausblenden",
-    "empty": "Noch keine Zeitpläne für diesen Workflow.",
-    "saveFirst": "Speichern Sie den Workflow, um Zeitpläne hinzuzufügen.",
+    "empty": "Noch keine Laufpläne für diesen Workflow.",
+    "saveFirst": "Speichern Sie den Workflow, um Laufpläne hinzuzufügen.",
     "pill": {
-      "tooltip": "Zeitpläne für diesen Workflow"
+      "tooltip": "Laufpläne für diesen Workflow"
     },
     "aggregate": {
       "running": "Ein Zeitplan wird ausgeführt",
       "error": "Letzte Ausführung fehlgeschlagen",
-      "ok": "Alle Zeitpläne fehlerfrei",
-      "idle": "Keine kürzlichen Ausführungen"
+      "ok": "Alle Laufpläne fehlerfrei",
+      "idle": "Keine kürzlichen Läufe"
     },
     "actions": {
       "delete": "Zeitplan löschen"
@@ -148,12 +155,36 @@
     "willBeAddedAfter": "Wird hinzugefügt nach: {{name}}",
     "searchPlaceholder": "suchen",
     "triggerConnection": {
-      "title": "Workflow auslösen",
-      "description": "Führt einen anderen Workflow aus, wenn dieser Schritt erfolgreich abgeschlossen wurde."
+      "title": "Workflow anstoßen",
+      "description": "Startet den Zeitplan eines anderen Workflows über dessen Webhook, wenn dieser Schritt erfolgreich war, ohne auf dessen Abschluss zu warten."
     },
-    "connectorsLoading": {
-      "title": "Konnektoren werden geladen...",
-      "description": "Bitte warten Sie, während die Konnektoren geladen werden."
+    "triggerConnectionStep": {
+      "header": "Workflow wählen",
+      "subtitle": "Wählen Sie den Workflow, den Sie auslösen möchten",
+      "searchPlaceholder": "Workflow suchen",
+      "noSchedule": "Dieser Workflow hat noch keinen Zeitplan.",
+      "scheduleCount": "{{count}} Laufpläne",
+      "scheduleCount_one": "{{count}} Zeitplan",
+      "loadError": {
+        "title": "Workflows konnten nicht geladen werden",
+        "description": "Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut."
+      },
+      "empty": {
+        "title": "Keine Workflows gefunden",
+        "description": "Es sind keine weiteren Workflows verfügbar, die ausgelöst werden können."
+      },
+      "confirmCreateWebhook": {
+        "title": "Noch kein Webhook",
+        "message": "„{{connection}}“ hat noch keinen Webhook. Möchten Sie jetzt einen erstellen?"
+      },
+      "selectScheduleDialog": {
+        "title": "Zeitplan auswählen",
+        "description": "„{{connection}}“ hat mehrere Laufpläne. Wählen Sie, welcher durch diesen Schritt ausgelöst werden soll.",
+        "placeholder": "Zeitplan suchen",
+        "submit": "Weiter",
+        "cancel": "Abbrechen",
+        "hasWebhookTooltip": "Dieser Zeitplan hat bereits einen Webhook"
+      }
     },
     "connectorsError": {
       "title": "Konnektoren konnten nicht geladen werden",
@@ -164,8 +195,12 @@
       "description": "Es gibt keine Konnektoren, die zu dieser Suche passen."
     },
     "connectorStatus": {
-      "passed": "Verbindungsprüfung erfolgreich",
-      "failed": "Verbindungsprüfung fehlgeschlagen"
+      "up": "Verbindungstest erfolgreich — dieser Connector ist einsatzbereit.",
+      "authFailed": "Verbindungstest fehlgeschlagen — die Zugangsdaten des Connectors wurden abgelehnt.",
+      "down": "Verbindungstest fehlgeschlagen — der Connector konnte nicht erreicht werden.",
+      "unknown": "Dieser Connector wurde noch nicht getestet.",
+      "failedWithReason": "Verbindungstest fehlgeschlagen. Fehler: \"{{reason}}\".",
+      "checkedAt": "{{message}} Geprüft {{time}}."
     },
     "methodsEmpty": {
       "title": "Keine Methoden gefunden",
@@ -179,12 +214,25 @@
     "connectorMethodsFallback": "Methoden vom Invoker {{invoker}}."
   },
   "headerMenu": {
+    "assignCategory": "Kategorie zuweisen",
+    "assignCategoryDisabledHint": "Speichern Sie den Workflow zuerst, um ihm eine Kategorie zuzuweisen",
     "downloadAsTemplate": "Als Vorlage herunterladen",
+    "downloadAsTemplateDisabledHint": "Speichern Sie den Workflow zuerst, um ihn als Vorlage herunterzuladen",
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
     "versionHistory": "Versionsverlauf",
+    "testRunLockedHint": "Während eines Testlaufs nicht verfügbar",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
+  },
+  "assignCategoryDialog": {
+    "title": "Kategorie zuweisen",
+    "description": "Wählen Sie eine Kategorie, um diesen Workflow zu organisieren.",
+    "selectPlaceholder": "Kategorie auswählen...",
+    "confirmUnassign": {
+      "title": "Kategoriezuweisung entfernen",
+      "message": "Möchten Sie die Kategoriezuweisung dieses Workflows wirklich entfernen?"
+    }
   },
   "shortcutsDialog": {
     "title": "Tastatur- und Maus-Kurzbefehle",
@@ -219,7 +267,6 @@
     "changeLabel": "Bezeichnung ändern",
     "openConfiguration": "Konfiguration öffnen",
     "configureAggregator": "Aggregator konfigurieren",
-    "runThisCallOnly": "Nur diesen Aufruf ausführen",
     "request": "Anfrage",
     "editUrl": "URL bearbeiten",
     "editHeader": "Header bearbeiten",
@@ -227,15 +274,43 @@
     "showResponse": "Antwort anzeigen",
     "newLabelPlaceholder": "Neue Bezeichnung"
   },
+  "aggregatorDialog": {
+    "title": "Aggregator konfigurieren",
+    "selectPlaceholder": "Datenaggregator auswählen",
+    "createNewTooltip": "Neuen Datenaggregator erstellen",
+    "emptyState": "Wählen Sie einen vorhandenen Datenaggregator aus oder erstellen Sie einen neuen.",
+    "confirmUnassign": {
+      "title": "Zugewiesenen Datenaggregator löschen?",
+      "message": "Dadurch wird der Datenaggregator von diesem Schritt entfernt. Der Datenaggregator selbst wird nicht gelöscht und bleibt für andere Schritte verfügbar."
+    }
+  },
+  "templateConnectorMapping": {
+    "title": "Vorlagen-Connectoren zuordnen",
+    "intro": "Diese Vorlage wurde mit Connectoren aus einer anderen Umgebung erstellt. Wählen Sie für jeden Connector, welcher Connector in dieser Umgebung verwendet werden soll, bevor der Workflow geladen wird.",
+    "noInvokerHint": "Kein Invoker-Hinweis verfügbar",
+    "usedBy": "Verwendet von: {{methods}}",
+    "unknownConnector": "Connector Nr. {{id}}",
+    "selectPlaceholder": "Connector auswählen",
+    "createNewTooltip": "Neuen Connector erstellen"
+  },
   "node": {
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
-    "branchFalse": "false"
+    "branchContinue": "weiter",
+    "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort.",
+    "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
+    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf.",
+    "testRunIteration": "{{iterator}} = {{count}}",
+    "skipToNextIteration": "Zur nächsten Iteration springen"
   },
   "saveDialog": {
     "title": "Version speichern",
-    "commentPlaceholder": "Kommentar"
+    "commentPlaceholder": "Kommentar",
+    "autoNameChangeComment": "Workflow-Name wird zu {{name}} geändert",
+    "autoDescriptionChangeComment": "Workflow-Beschreibung wird zu {{description}} geändert",
+    "autoCategoryAssignedComment": "Kategorie \"{{category}}\" wird zugewiesen",
+    "autoCategoryClearedComment": "Kategoriezuweisung wird entfernt"
   },
   "placeholders": {
     "selectMethod": "Methode auswählen...",
@@ -252,6 +327,10 @@
     "dialogTitleLoop": "LOOP-Bedingung",
     "addCondition": "Bedingung hinzufügen",
     "addGroup": "Gruppe hinzufügen",
+    "comparisonUnknown": "Noch nicht verfügbar",
+    "comparisonError": "Kann nicht verglichen werden",
+    "comparisonTrue": "Wahr",
+    "comparisonFalse": "Falsch",
     "loopInfo": {
       "iteratorLabel": "Schleifenvariable",
       "iteratorHelp": "Verwenden Sie diese Variable in den Schleifenschritten, um das aktuelle Element zu lesen:",
@@ -303,14 +382,14 @@
     },
     "operators": {
       "if": {
-        "equal": "=",
-        "notEqual": "!=",
+        "equal": "Gleich",
+        "notEqual": "Ungleich",
         "like": "Ähnlich",
         "notLike": "Nicht ähnlich",
-        "greaterThan": ">",
-        "greaterOrEqual": ">=",
-        "lessThan": "<",
-        "lessOrEqual": "<=",
+        "greaterThan": "Größer als",
+        "greaterOrEqual": "Größer oder gleich",
+        "lessThan": "Kleiner als",
+        "lessOrEqual": "Kleiner oder gleich",
         "contains": "Enthält",
         "notContains": "Enthält nicht",
         "containsSubStr": "Enthält Teilzeichenfolge",
@@ -336,7 +415,14 @@
   "methodConfig": {
     "body": "Body",
     "header": "Header",
-    "requestUrl": "Request-URL"
+    "requestUrl": "Request-URL",
+    "response": "Antwort",
+    "liveBadge": "Live-Ausführungsergebnis"
+  },
+  "response": {
+    "success": "Erfolg",
+    "fail": "Fehler",
+    "status": "Status"
   },
   "xmlBody": {
     "tree": "Baum",
@@ -357,6 +443,8 @@
     "level": "Ebene {{depth}}",
     "text": "Text",
     "textValue": "Textwert",
+    "textPlaceholder": "Kein Textinhalt",
+    "addChild": "Unterelement",
     "attributePlaceholder": "Attribut {{name}}",
     "empty": "Leer"
   },
@@ -364,7 +452,43 @@
     "title": "Enhancement",
     "language": "Sprache",
     "script": "Skript",
-    "emptyState": "Bitte klicken Sie auf die Referenz, um ihr Enhancement anzuzeigen."
+    "emptyState": "Bitte klicken Sie auf die Referenz, um ihr Enhancement anzuzeigen.",
+    "deleteDisabledMultipleReferences": "Dieses Feld hat mehr als eine Referenz, daher muss es in ein Enhancement eingebettet bleiben.",
+    "confirmDelete": {
+      "title": "Enhancement löschen?",
+      "message": "Dadurch werden das Enhancement und sein Skript endgültig entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+    },
+    "directReference": {
+      "title": "Direkte Referenz",
+      "description": "Dieses Feld hat kein Enhancement — es besteht eine direkte Eins-zu-eins-Referenz zwischen den beiden unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript.",
+      "descriptionMany": "Dieses Feld hat kein Enhancement — es besteht eine direkte Referenz zwischen den unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript."
+    },
+    "optimizeDirectReferences": {
+      "title": "Optimierung verfügbar",
+      "message": "Es gibt {{count}} Referenzen, die für eine bessere Leistung optimiert werden können. Möchten Sie diese Optimierung vor dem Speichern anwenden?",
+      "message_one": "Es gibt eine Referenz, die für eine bessere Leistung optimiert werden kann. Möchten Sie diese Optimierung vor dem Speichern anwenden?"
+    },
+    "debugValue": {
+      "show": "Wert anzeigen",
+      "hide": "Wert ausblenden",
+      "title": "Wert",
+      "idleHint": "Noch nicht angezeigt. Klicken Sie auf das Augensymbol, um diesen Wert aus dem aktuellen Testlauf aufzulösen.",
+      "loadingHint": "Wird aufgelöst…",
+      "noReferences": "Keine Referenzen",
+      "references": "Referenzen",
+      "resultLabel": "RESULT_VAR · {{type}}",
+      "errorTitle": "Fehler",
+      "errorNotPaused": "Starten Sie einen pausierten Testlauf, um dies aus den Live-Ausführungsdaten aufzulösen.",
+      "errorMethodFailed": "Die Ausführung dieser Methode ist in diesem Lauf fehlgeschlagen — ihre Anfrage könnte unvollständig sein.",
+      "errorFieldNotFound": "Für dieses Feld konnte kein Wert in der tatsächlich gesendeten Anfrage gefunden werden.",
+      "errorNotRun": "Diese Methode wurde in der aktuellen Testsitzung noch nicht ausgeführt. Starten oder setzen Sie den pausierten Test fort und prüfen Sie danach erneut.",
+      "status": {
+        "idle": "inaktiv",
+        "loading": "läuft",
+        "error": "Fehler",
+        "stale": "veraltet — Skript geändert"
+      }
+    }
   },
   "description": {
     "label": "Beschreibung",
@@ -391,15 +515,21 @@
     "wholeArray": "Das gesamte Array",
     "iteratorLoop": "({{iterator}}-Schleife)",
     "noVariableReferences": "Keine Variablenreferenzen",
+    "more": "mehr",
     "confirmDelete": {
       "title": "Referenz löschen",
       "message": "Möchten Sie diese Referenz wirklich löschen?"
+    },
+    "valueDialog": {
+      "copyTooltip": "Wert kopieren",
+      "copySuccess": "Wert in die Zwischenablage kopiert"
     }
   },
   "refGenerator": {
     "connector": "Konnektor",
     "method": "Methode",
-    "field": "Feld"
+    "field": "Feld",
+    "webhookTriggerHint": "Webhook-Trigger — diese Antwort ist nur die Trigger-Bestätigung, nicht das Ergebnis des ausgelösten Workflows."
   },
   "webhook": {
     "noWebhooks": "Noch keine Webhooks",
@@ -418,7 +548,20 @@
   "referenceInfo": {
     "title": "Referenzinformationen",
     "legacyTitle": "Referenzinformationen",
-    "empty": "(ist jetzt leer)"
+    "empty": "(ist jetzt leer)",
+    "confirmDelete": {
+      "title": "Referenz löschen?",
+      "message": "Dadurch wird diese Referenz endgültig entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+    }
   },
-  "requestData": "Anfragedaten"
+  "requestData": "Anfragedaten",
+  "graphqlBody": {
+    "masterPasswordTitle": "Geben Sie das Master-Passwort ein, um auf die GraphQL-API dieses Connectors zuzugreifen",
+    "editorHint": "Strg + Leertaste für die Autovervollständigung. Nur die Abfrage des aktiven Tabs wird ausgeführt, wenn diese Methode läuft — Tabs werden nach dem Operationsnamen der Abfrage benannt (z. B. \"query MyQuery {...}\"), anonyme Abfragen bleiben daher \"<untitled>\".",
+    "connectorFailed": "Der Connector konnte nicht geladen werden. Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut.",
+    "loginFailed": "Die Authentifizierung bei der GraphQL-API dieses Connectors ist fehlgeschlagen. Überprüfen Sie dessen Zugangsdaten und versuchen Sie es erneut.",
+    "masterPasswordNotConfigured": "Es ist kein Master-Passwort konfiguriert",
+    "masterPasswordNotConfiguredDescription": "Bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten, um auf die GraphQL-API dieses Connectors zugreifen zu können.",
+    "retry": "Erneut versuchen"
+  }
 }

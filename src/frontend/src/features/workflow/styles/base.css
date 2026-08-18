@@ -41,6 +41,16 @@ textarea {
   overflow: hidden;
 }
 
+/* @xyflow/react measures its own container's bounding box, so the canvas
+   pane above it must resolve to a real pixel height, not just "flex:1" —
+   explicit width/height here (rather than relying solely on the Splitter
+   primitive's own internal sizing) is the same belt-and-suspenders sizing
+   every other panel in this stylesheet already gets (.canvasCard, .logsCard). */
+.workflowSplitter {
+  width: 100%;
+  height: 100%;
+}
+
 .headerCard,
 .canvasCard,
 .logsCard {
@@ -50,10 +60,46 @@ textarea {
 }
 
 .canvasCard {
+  position: relative;
   width: 100%;
   max-width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+.canvasAnimationHint {
+  position: absolute;
+  top: 82px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  max-width: 480px;
+  width: max-content;
+}
+
+/* Compact variant of the shared Alert — this floats over the canvas as a
+   transient reminder, not a page-level notice, so it should read smaller
+   than a normal Alert. Also carries its own "don't show again" checkbox
+   (see TestRunAnimationHint.tsx) which needs real pointer-events — the
+   Alert used to be pointer-events:none to let clicks pass through to the
+   canvas underneath, but that also swallowed clicks on the checkbox itself,
+   falling through to the pane's own pan-drag handling instead. */
+.canvasAnimationHintAlert.ant-alert {
+  padding: 6px 10px;
+}
+
+.canvasAnimationHintAlert .ant-alert-icon {
+  font-size: 14px;
+}
+
+.canvasAnimationHintAlert .ant-alert-message {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.canvasAnimationHintAlert .ant-alert-description {
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .logsHeaderRow {
@@ -75,6 +121,79 @@ textarea {
   background: transparent;
   cursor: pointer;
   color: var(--color-text-primary);
+}
+
+/* Styled after the "🔴 LIVE" broadcast badge used by streaming platforms
+   (YouTube, Twitch) — a filled pill with a pulsing dot and an uppercase
+   label reads as "this is happening right now, unfiltered" far more than a
+   plain switch does. Green rather than platforms' red, to read as "healthy/
+   active" instead of "recording/alert" in this app's palette. The pill
+   itself IS the toggle (a <button role="switch">) — no separate Switch
+   control sitting inside it. */
+.logsHeaderLiveToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-background-hover);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.logsHeaderLiveToggle:hover {
+  border-color: var(--color-border-strong);
+}
+
+.logsHeaderLiveToggle--on {
+  background: color-mix(in srgb, var(--color-status-success-fg) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-status-success-fg) 45%, transparent);
+}
+
+.logsHeaderLiveToggle--on:hover {
+  border-color: color-mix(in srgb, var(--color-status-success-fg) 65%, transparent);
+}
+
+/* Idle dot matches the schedules pill's --idle dot (schedules.css); "on"
+   turns solid green with a radiating ring — a "ping", not the opacity/scale
+   breathing used elsewhere (nodeTestRunFailedPulse) — closer to a camera's
+   recording indicator than a generic pulsing highlight. */
+.logsHeaderLiveDot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-text-disabled);
+  transition: background-color 0.2s ease;
+}
+
+.logsHeaderLiveDot--on {
+  background: var(--color-status-success-fg);
+  animation: logsHeaderLiveDotPulse 1.6s ease-out infinite;
+}
+
+@keyframes logsHeaderLiveDotPulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-status-success-fg) 55%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--color-status-success-fg) 0%, transparent);
+  }
+}
+
+.logsHeaderLiveLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.logsHeaderLiveLabel--on {
+  color: var(--color-status-success-fg);
 }
 
 .logsHeaderIconButton {
@@ -161,6 +280,15 @@ textarea {
   min-height: 0;
 }
 
+/* Same "fill whatever height is available" override as .logsCardFull above —
+   logsCardSplitPane's height comes from the Splitter pane, not a fixed CSS
+   value, so the tree must stretch to it rather than keep its own 360px. */
+.logsCardSplitPane .logsBodyTree {
+  height: auto;
+  flex: 1;
+  min-height: 0;
+}
+
 .logsResult {
   flex-shrink: 0;
   padding-top: 8px;
@@ -221,6 +349,23 @@ textarea {
   max-height: none;
 }
 
+/* 'normal' state only: rendered inside a Splitter pane (index.tsx) instead of
+   floating over the canvas, so it must fill that pane's box exactly rather
+   than absolutely-position and cap its own height — the Splitter is what
+   makes it drag-resizable, sharing real space with the canvas instead of
+   overlaying a fixed 430px on top of it. */
+.logsCardSplitPane {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  min-height: 0;
+}
+
 .headerInlineInfo {
   min-width: 0;
   flex: 1;
@@ -247,4 +392,20 @@ textarea {
   font-size: 18px;
   font-weight: 700;
   color: var(--color-text-primary);
+}
+
+/* Cap the title/description flex items at a fixed 30/70 split so a long title
+   can't crowd out the description (or vice versa) in proportion to its own
+   text length - only kicks in once either one is long enough to hit the cap.
+   Applied to wrapper divs (not the Tooltip-wrapped text elements themselves)
+   because Tooltip injects its own span between the flex item and the text,
+   which would make a percentage max-width on the text element resolve against
+   an indeterminate-width ancestor and get ignored. */
+.headerInlineNameWrap {
+  max-width: 30%;
+}
+
+.headerInlineDescriptionWrap {
+  min-width: 0;
+  max-width: 70%;
 }

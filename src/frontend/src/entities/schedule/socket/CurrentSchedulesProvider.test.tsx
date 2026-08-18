@@ -122,7 +122,6 @@ describe('CurrentSchedulesProvider', () => {
         expect(running[0].execId).toBe(26)
         expect(running[0].avgDuration).toBe(10000)
         expect(running[0].serverStartTime).toBe(Date.parse('2026-06-26T09:38:25.000+00:00'))
-        expect(typeof running[0].localStartTime).toBe('number')
     })
 
     it('groups multiple parallel executions under the same schedule, sorted by start time', () => {
@@ -142,7 +141,7 @@ describe('CurrentSchedulesProvider', () => {
         expect(running.map((r) => r.execId)).toEqual([26, 27])
     })
 
-    it('preserves localStartTime per execId across subsequent messages', () => {
+    it('keeps serverStartTime stable per execId across subsequent heartbeats', () => {
         let running: RunningExecution[] = []
         render(
             <CurrentSchedulesProvider>
@@ -150,10 +149,10 @@ describe('CurrentSchedulesProvider', () => {
             </CurrentSchedulesProvider>,
         )
         act(() => lastHandler!([exec({execId: 26, schedulerId: 1})]))
-        const firstSeen = running[0].localStartTime
+        const firstSeen = running[0].serverStartTime
         act(() => vi.advanceTimersByTime(1000))
         act(() => lastHandler!([exec({execId: 26, schedulerId: 1})]))
-        expect(running[0].localStartTime).toBe(firstSeen)
+        expect(running[0].serverStartTime).toBe(firstSeen)
     })
 
     it('drops an execution from the group when its execId disappears', () => {

@@ -15,7 +15,7 @@ export function createPolicyContext(
     partial: Partial<PolicyContext>
 ): PolicyContext {
     return {
-        user: setUserPolicyContext(),
+        user: partial.user ?? setUserPolicyContext(),
         mode: partial.mode,
         entity: partial.entity,
         record: partial.record,

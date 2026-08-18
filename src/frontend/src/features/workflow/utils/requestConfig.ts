@@ -13,15 +13,13 @@ const createTemplateRow = (): WorkflowQueryParam => ({
 });
 
 export const createEmptyMethodConfig = (): WorkflowMethodConfig => ({
-  url: '{url}/unit',
+  url: 'https://your-domain.com',
   method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
+  headers: {},
   queryParams: [createTemplateRow()],
   endpointArgs: {},
   bodyFormat: 'json',
+  bodyData: 'raw',
   body: {},
 });
 
@@ -37,6 +35,7 @@ export const createMethodConfigFromOperation = (operation?: InvokerOperation): W
     queryParams: buildQueryParamsFromEndpoint(request.endpoint || fallback.url),
     endpointArgs: {},
     bodyFormat: request.body?.format || 'json',
+    bodyData: request.body?.data || 'raw',
     body: request.body?.fields ?? {},
     response: {
       responseId: `response-${operation.name}`,
@@ -46,6 +45,12 @@ export const createMethodConfigFromOperation = (operation?: InvokerOperation): W
   };
 };
 
+export const createMethodConfigFromWebhookUrl = (url: string): WorkflowMethodConfig => ({
+  ...createEmptyMethodConfig(),
+  url,
+  queryParams: buildQueryParamsFromEndpoint(url),
+});
+
 export const ensureMethodConfig = (config?: Partial<WorkflowMethodConfig>): WorkflowMethodConfig => ({
   name: config?.name,
   url: config?.url ?? createEmptyMethodConfig().url,
@@ -54,6 +59,7 @@ export const ensureMethodConfig = (config?: Partial<WorkflowMethodConfig>): Work
   queryParams: config?.queryParams?.length ? config.queryParams : createEmptyMethodConfig().queryParams,
   endpointArgs: config?.endpointArgs ?? {},
   bodyFormat: config?.bodyFormat ?? 'json',
+  bodyData: config?.bodyData ?? 'raw',
   body: config?.body ?? {},
   response: config?.response,
 });

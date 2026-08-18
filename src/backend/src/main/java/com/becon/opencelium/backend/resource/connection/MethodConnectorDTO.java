@@ -7,6 +7,7 @@ public class MethodConnectorDTO {
 
     private Integer connectorId;
     private String title;
+    private String invoker;
 
     public Integer getConnectorId() {
         return connectorId;
@@ -22,5 +23,13 @@ public class MethodConnectorDTO {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getInvoker() {
+        return invoker;
+    }
+
+    public void setInvoker(String invoker) {
+        this.invoker = invoker;
     }
 }

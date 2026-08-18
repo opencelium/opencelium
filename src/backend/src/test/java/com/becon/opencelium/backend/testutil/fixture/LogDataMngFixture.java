@@ -70,6 +70,36 @@ public final class LogDataMngFixture {
     }
 
     /**
+     * LogDataMng for execution phase = EXECUTION and status = COMPLETE.
+     * Buffering this block marks the execution as finished and triggers
+     * a full flush of the log block buffer.
+     */
+    public static LogDataMng anExecutionCompletePhaseLogData() {
+        LogDataMng entity = new LogDataMng();
+
+        entity.setId("69fac335ee4ea82b347c51ef");
+
+        entity.setConnectionId(1L);
+        entity.setExecutionId("1");
+        // own flow id so the block never merges with buffered flowchart blocks
+        entity.setFlowId("7d3a1f42-9b0c-4e6d-8a15-0fe27ca2bf6b");
+
+        entity.setStatus(PhaseStatus.COMPLETE);
+        entity.setStartOffset(0L);
+        entity.setEndOffset(14411474L);
+
+        entity.setLogLineType(LogLineType.PHASE);
+        entity.setType(PhaseCategory.EXECUTION);
+
+        entity.setProperties(new HashMap<>());
+        entity.setSegments(new HashMap<>());
+
+        entity.setCreatedAt(Instant.parse("2026-05-06T04:31:58.000Z"));
+
+        return entity;
+    }
+
+    /**
      * LogDataMng for operation phase = OPERATION
      * and status = COMPLETE.
      */

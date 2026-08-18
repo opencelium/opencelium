@@ -14,27 +14,3 @@
   z-index: 30;
 }
 
-.nodeToolbarButton {
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: 8px;
-  background: var(--color-background-surface);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-action-primary);
-}
-
-.nodeToolbarButton:hover {
-  background: var(--color-background-hover);
-}
-
-.nodeToolbarButtonDanger {
-  color: var(--color-action-danger);
-}
-
-.nodeToolbarButtonDanger:hover {
-  background: var(--color-status-error-bg);
-}

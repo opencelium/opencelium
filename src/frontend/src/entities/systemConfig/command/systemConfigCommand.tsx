@@ -1,11 +1,12 @@
 import React from 'react'
 import type {CommandExecutionContext, CommandNode} from '@shared/command/types'
+import {buildActionAccess} from '@/engine/policy'
 import {MasterPasswordDialog, useMasterPasswordStore} from '@features/master-password'
 import {useModalStore} from '@app/layouts/AppLayout/GlobalModal/global-modal.store'
 import {isContainerNode} from '@entities/systemConfig/model/types'
 import {buildNodeByPathMap} from '@entities/systemConfig/model/helpers'
 import {ConfigLeafEditDialog} from '@entities/systemConfig/ui/ConfigLeafEditDialog'
-import {loadConfigFields, resolveSystemConfig} from './resolveSystemConfig'
+import {checkMasterPasswordExists, loadConfigFields, resolveSystemConfig} from './resolveSystemConfig'
 
 const ROOT_INPUT = 'system config '
 
@@ -18,6 +19,11 @@ function returnToSearch(ctx: CommandExecutionContext) {
 
 async function executeSystemConfig(args: {query?: string}, ctx: CommandExecutionContext) {
     if (!useMasterPasswordStore.getState().masterPassword) {
+        // Nothing to unlock when no master password is configured at all — the
+        // resolved suggestion is purely informational, so selecting it is a no-op.
+        if (!await checkMasterPasswordExists()) {
+            return
+        }
         ctx.openModal(<MasterPasswordDialog bare onUnlock={() => returnToSearch(ctx)} />)
         return
     }
@@ -53,6 +59,10 @@ export function buildSystemConfigCommand(): CommandNode<unknown> {
                 value: 'config',
                 aliases: ['system-config', 'application-config'],
                 icon: 'settings',
+                // This subtree opens ConfigLeafEditDialog directly — a mutation, so
+                // it requires UPDATE (unlike the plain-navigation "update system-config"
+                // command, which only requires READ since the page itself is read-only-aware).
+                access: buildActionAccess('APP', 'UPDATE'),
                 children: [
                     {
                         type: 'entity',

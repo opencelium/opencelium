@@ -63,7 +63,7 @@ public class ConnectorExMapper {
             Map<String, String> map = new HashMap<>();
             requestData.forEach(r -> map.put(r.getField(), r.getValue()));
 
-            connectorEx.setSslCert(connector.isSslValidation());
+            connectorEx.setSslCert(connector.isTrustCertificate());
             connectorEx.setInvoker(connector.getInvoker());
             connectorEx.setRequiredData(map);
 
@@ -117,7 +117,7 @@ public class ConnectorExMapper {
                     MethodConnectorEx mcEx = new MethodConnectorEx();
                     mcEx.setId(connector.getId());
                     mcEx.setTitle(connector.getTitle());
-                    mcEx.setSslCert(connector.isSslValidation());
+                    mcEx.setSslCert(connector.isTrustCertificate());
                     mcEx.setTimeout(connector.getTimeout());
                     mcEx.setInvoker(connector.getInvoker());
                     mcEx.setRequiredData(requiredDataMap);

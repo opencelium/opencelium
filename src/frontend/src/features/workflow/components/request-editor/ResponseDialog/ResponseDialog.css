@@ -1,0 +1,55 @@
+.responseColumns {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  height: 100%;
+  min-height: 0;
+}
+
+.responseColumn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  overflow: auto;
+}
+
+.responseColumnTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.responseStatusField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.responseStatusLabel {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.responseStatusValue {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-background-input);
+  color: var(--color-text-primary);
+  font-size: 13px;
+}
+
+.responseJsonWrap {
+  background: var(--color-background-input);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  overflow: auto;
+}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Typography } from "@shared/ui/primitives/Typography";
+import { useI18n } from "@shared/i18n/hooks/useI18n";
 import type { FlowchartLog } from "../model/types";
 import { LogRow } from "./logRowUi";
 import { ElementChildren } from "./LogElementRow";
@@ -12,6 +13,7 @@ export function ConnectorLogRow({
   path: string;
 }) {
   const [expanded, setExpanded] = useState(true);
+  const { t } = useI18n("logs");
 
   return (
     <>
@@ -21,8 +23,8 @@ export function ConnectorLogRow({
         expanded={expanded}
         onToggle={() => setExpanded((v) => !v)}
         left={
-          <Typography variant="label" isBold isUppercase>
-            {log.connectorName !== 'DEFAULT' ? log.connectorName : 'WORKFLOW'}
+          <Typography variant="label-sm" isBold isUppercase>
+            {log.connectorName !== 'DEFAULT' ? log.connectorName : t("logsLabel")}
           </Typography>
         }
       />

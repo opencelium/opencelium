@@ -13,6 +13,7 @@ import {AuthBootstrap} from "@app/providers/AuthBootstrap.tsx";
 import {UIProviders} from "@app/providers/ui/UIProviders.tsx";
 import { DialogHost } from "@/shared/ui/dialog/DialogHost";
 import {SocketProvider} from "@app/providers/SocketProvider";
+import {SessionExpiryWatcher} from "@features/auth/session/SessionExpiryWatcher";
 
 type Props = {
     children: React.ReactNode
@@ -37,6 +38,7 @@ export function AppProviders({ children }: Props) {
                                                     {children}
                                                 </SocketProvider>
                                             </AuthBootstrap>
+                                            <SessionExpiryWatcher />
                                             <DialogHost />
                                         </Auth>
                                     </ErrorBoundary>

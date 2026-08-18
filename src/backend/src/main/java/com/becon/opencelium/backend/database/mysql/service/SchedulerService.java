@@ -48,6 +48,8 @@ public interface SchedulerService {
     List<Scheduler> findAllById(ArrayList<Integer> ids);
     List<Scheduler> findAllByTitleContains(String title);
 
+    List<Scheduler> excludeTestSchedulers(List<Scheduler> schedulers);
+
     Scheduler toEntity(SchedulerRequestResource resource);
     SchedulerResource toResource(Scheduler entity);
 

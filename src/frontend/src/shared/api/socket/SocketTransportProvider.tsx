@@ -5,11 +5,9 @@ import {selectAccessToken} from "@entities/auth/model/authSelectors"
 import {createSocketClient, destroySocketClient} from "./socketClient"
 import {SocketContext} from "./SocketContext"
 import type {SocketContextValue, SocketStatus} from "./types"
+import {runtimeConfig} from "@shared/config/runtimeConfig"
 
 type Props = {children: ReactNode}
-
-const SOCKET_URL =
-    import.meta.env.VITE_SOCKET_URL ?? `${import.meta.env.VITE_API_URL}/websocket`
 
 export function SocketTransportProvider({children}: Props) {
     const token = useAppSelector(selectAccessToken)
@@ -33,7 +31,7 @@ export function SocketTransportProvider({children}: Props) {
         setError(null)
         const next = createSocketClient({
             token,
-            url: SOCKET_URL,
+            url: runtimeConfig.socketUrl ?? `${runtimeConfig.apiUrl}/ws`,
             onConnect: () => setStatus('connected'),
             onDisconnect: () => setStatus('disconnected'),
             onStompError: (message) => {

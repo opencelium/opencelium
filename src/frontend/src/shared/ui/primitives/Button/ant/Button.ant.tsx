@@ -19,8 +19,11 @@ export const AntButton: ButtonComponent = ({
     testId,
    ...rest
 }) => {
+    // `minWidth: 51px` is a default floor for text-only buttons, not a mandate —
+    // a caller's own `style` (e.g. IconButton's fixed-size icon-only override)
+    // must be able to override it, so it's applied first and merged under.
     const additionalStyles: CSSProperties = {minWidth: '51px'};
-    style = style ? {...style, ...additionalStyles} : additionalStyles;
+    style = style ? {...additionalStyles, ...style} : additionalStyles;
     // antd only understands its own variants; semantic ones (primary/secondary/
     // danger) are handled by the material/custom impls, so drop them here.
     const antVariant = variant && ANT_VARIANTS.includes(variant as AntButtonVariant)

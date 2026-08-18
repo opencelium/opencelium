@@ -16,4 +16,7 @@ public interface SocketConstant {
 
     String USER_SESSION_DESTINATION_PREFIX = "/session";
     String USER_SESSION_DESTINATION = "/session";
+
+    String CONNECTOR_DESTINATION_PREFIX = "/connector"; // Message broker prefix for connector events
+    String CONNECTOR_STATUS_DESTINATION = "/connector/status"; // WebSocket topic for connector health status
 }

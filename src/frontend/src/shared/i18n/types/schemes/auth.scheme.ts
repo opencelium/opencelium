@@ -7,13 +7,15 @@ export interface AuthSchema {
                 required: string
                 invalid: string
             }
-            password: {
+            emailOrUsername: {
                 label: string
                 placeholder: string
                 required: string
             }
-            rememberMe: {
+            password: {
                 label: string
+                placeholder: string
+                required: string
             }
         }
         actions: {
@@ -25,6 +27,7 @@ export interface AuthSchema {
             failed: string
             invalidCredentials: string
             network: string
+            sessionLoadFailed: string
         }
         forgotPassword: {
             notAvailable: string

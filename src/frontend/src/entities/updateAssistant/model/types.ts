@@ -28,6 +28,10 @@ export type UpdateVersion = {
 
 export type UpdateMode = 'online' | 'offline'
 
+export type InstallationInfo = {
+    type: string
+}
+
 export type UpdateAssistantForm = {
     systemHealth: SystemHealth | null
     updateMode: UpdateMode

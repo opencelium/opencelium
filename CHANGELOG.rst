@@ -3,6 +3,58 @@ Changelog
 *********
 
 
+Major Relase :loudspeaker:
+========
+
+
+5.0
+========
+ 
+:Date: July 30, 2026
+
+Features
+--------
+* New Workflow Editor
+* Unlimited API Requests within a Workflow
+* Support for complex and bidirectional integrations
+* Blank HTTP Request
+* Trigger Workflow
+* Live Connector Availability Monitoring
+* Completely redesigned UI based on Ant Design
+* Global Command Interface (CLI)
+* Edit application.yml directly from the UI
+* New Dashboard with Graphs
+* New Service Portal
+
+
+Fixes
+--------
+* Log offset not persisted to DB during buffered writes for long-running executions (OC-1404)
+* Preserve original connection error cause in ReferenceExtractor instead of overriding it (OC-1430)
+* Fix array emptiness check for ConfigItem in OC 4.6.1 (type mismatch error) (OC-1395)
+* Error during migration from 4.4 --> 4.5.1 (OC-1408)
+* Add support for direct references in URLs (OC-1415)
+* Test connection cleanup fails (OC-1418)
+* Loop ref is null in connection (OC-1420)
+* Connection Gone After removing Invoker (OC-1426)
+* Return a clear error message when field types do not match (OC-1427)
+* Fix missing invoker method in connector method list during connection building (OC-1428)
+* Fix incorrect array index format in fieldBinding when binding first units[] element (OC-1429)
+* Fix IF object expression missing {% %} wrapper when created from UI (OC-1431)
+* Error when using dir ref in URL (OC-1435)
+* Fix delete group in If Operator (OC-1438)
+* Fix delete conjunction in If Operator (OC-1439)
+* Fix root object reference (OC-1443)
+* Migration strategy from old to 5.0 version (OC-1461)
+* Application craches during D&D (OC-1463)
+* D&D edge zone does not work if it is long (OC-1464)
+* After uploading old template the workflow elements position is on each other (OC-1466)
+* Fix duplicated method color bug (OC-1480)
+* Fix selected nodes with ctrl are not movable together (OC-1485)
+* Plus icon from initial node disappears (OC-1496)
+* Fix an error when using template from service portal (version 2.1) (OC-1504)
+
+
 4.8.1
 ========
  

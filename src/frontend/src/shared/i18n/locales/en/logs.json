@@ -18,20 +18,26 @@
     "responseHeader": "Response Header",
     "responseBody": "Response Body"
   },
-  "copy": {
-    "tooltip": "Copy to clipboard",
-    "empty": "Nothing to copy",
-    "success": "Copied to clipboard",
-    "failed": "Failed to copy to clipboard"
-  },
   "methodView": {
     "tooltip": "Toggle URL / name"
   },
+  "testRunDetails": "TEST RUN DETAILS",
+  "logsLabel": "LOGS",
   "live": {
-    "title": "Logs",
+    "title": "Execution Logs",
     "empty": "No logs yet. Run a test to see execution logs.",
     "running": "Running…",
-    "collecting": "Collecting logs…",
+    "stopping": "Stopping test…",
+    "paused": "Paused",
+    "animationSlowedHint": "This animation is slowed down for clarity — it does not reflect the actual execution speed.",
+    "dontShowAgain": "Don't show this again",
+    "speedLabel": "Speed",
+    "speedTooltip": "Adjust how fast the test-run animation plays. Does not affect the actual execution speed.",
+    "pauseTooltip": "Pause",
+    "resumeTooltip": "Resume",
+    "stepForwardTooltip": "Step forward",
+    "liveToggleLabel": "Live",
+    "liveToggleTooltip": "On: show logs live, as they happen, with no animation.\nOff: slow the canvas animation and logs down for clarity.",
     "finished": "TEST FINISHED in {{time}}",
     "stopped": "TEST STOPPED",
     "failed": "TEST FAILED",

@@ -30,6 +30,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface ConnectionService {
@@ -47,8 +48,7 @@ public interface ConnectionService {
     List<Connection> findAll();
 
     /**
-     * @param includeTest when {@code false}, test connections (titles matching
-     *                    {@code !*test_connection_...}) are excluded from the result
+     * @param includeTest when {@code false}, test connections are excluded from the result
      */
     List<Connection> findAll(Boolean includeTest);
 
@@ -124,6 +124,8 @@ public interface ConnectionService {
     void deleteByIds(List<Long> ids, Set<Long> runningConnectionIds);
 
     List<ConnectionVersionedDTO> getConnectionVersions(Long connectionId);
+
+    Map<Long, ConnectionVersionedDTO> getLastVersions(List<Connection> connections);
 
     void deleteSnapshot(Long connectionId, String snapshotId);
 

@@ -1,0 +1,8 @@
+/* GraphiQL's own dialog (Short Keys, Settings) ships with a hardcoded z-index: 10
+   (node_modules/graphiql/dist/style.css), which sits below this app's own overlays
+   inside the request-editor dialog (already up to z-index: 13030 elsewhere in the
+   workflow editor) — so it opens behind everything, invisible and unclickable. */
+.graphiql-dialog-overlay,
+.graphiql-dialog {
+    z-index: 13050;
+}

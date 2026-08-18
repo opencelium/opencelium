@@ -79,7 +79,7 @@ export const updateAssistantHandlers = [
         return new HttpResponse(null, { status: 200 })
     }),
 
-    http.post('/assistant/oc/update', () => new HttpResponse(null, { status: 200 })),
+    http.post('/assistant/oc/migrate', () => new HttpResponse(null, { status: 200 })),
 
     http.delete('/assistant/zipfile/:version', ({ params }) => {
         const idx = mockOfflineVersions.findIndex((v) => v.name === decodeURIComponent(params.version as string))

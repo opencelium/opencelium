@@ -46,9 +46,9 @@ export const DownloadAction: React.FC<Props> = ({ row }) => {
     }
 
     return (
-        <Tooltip content={tEntities('support-file.list.download.tooltip')}>
+        <Tooltip content={tEntities('support-file.list.download.tooltip')} placement="top">
             <IconButton
-                iconProps={{ name: 'download', color: 'primary' }}
+                iconProps={{ name: 'download', color: 'primary', size: 15 }}
                 type={'text'}
                 size={'xs'}
                 loading={isLoading}

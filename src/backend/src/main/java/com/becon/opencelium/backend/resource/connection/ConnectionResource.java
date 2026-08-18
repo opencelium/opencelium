@@ -34,6 +34,12 @@ public class ConnectionResource {
     private ConnectorResource toConnector;
     private List<EnhancementDTO> enhancements;
     private Integer categoryId;
+    // ID of the user who modified the connection last.
+    private Integer modifiedBy;
+    // Timestamp of the last modification, in epoch millis.
+    private Long modifiedAt;
+    // Most recently created version (snapshot) of the connection; null when it has no snapshots yet.
+    private ConnectionVersionedDTO lastVersion;
 
     public Long getId() {
         return id;
@@ -97,5 +103,29 @@ public class ConnectionResource {
 
     public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public Integer getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(Integer modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public Long getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(Long modifiedAt) {
+        this.modifiedAt = modifiedAt;
+    }
+
+    public ConnectionVersionedDTO getLastVersion() {
+        return lastVersion;
+    }
+
+    public void setLastVersion(ConnectionVersionedDTO lastVersion) {
+        this.lastVersion = lastVersion;
     }
 }

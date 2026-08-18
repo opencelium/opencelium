@@ -45,6 +45,7 @@ function initialFields(): ConfigNode[] {
             node('token', 'opencelium.token', 'active', [
                 node('secret', 'opencelium.token.secret', 'active', '84bbce-secret-value'),
                 node('activity-time', 'opencelium.token.activity-time', 'active', 18000),
+                node('expiration-time', 'opencelium.token.expiration-time', 'active', 86400),
             ]),
             node('cors', 'opencelium.cors', 'active', [
                 node('origins', 'opencelium.cors.origins', 'active', ['http://localhost:3000']),

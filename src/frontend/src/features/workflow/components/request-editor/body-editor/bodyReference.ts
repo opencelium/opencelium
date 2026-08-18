@@ -1,4 +1,9 @@
 import { type Enhancement, Language } from '../../../types/connection';
+export {
+  buildRequestResultField,
+  parseFieldPath,
+  resolveFieldPathAgainstSource,
+} from './bodyReferencePath';
 
 export type ParsedReference = {
   color: string;
@@ -43,20 +48,7 @@ export const hasMixedReferenceValue = (value: unknown) => {
   return refs.length > 0 && refs.length !== getParsedReferences(value).length;
 };
 
-const normalizeBodySegment = (segment: string) => {
-  const value = String(segment || '').trim();
-  const indexMatch = value.match(/^\[?(\d+)]?$/);
-  return indexMatch ? `[${indexMatch[1]}]` : value;
-};
-
-export const buildRequestResultField = (
-  messageProperty: 'body' | 'header',
-  namespace: string[] = [],
-  name = '',
-) => {
-  const parts = [...namespace, name].filter(Boolean).map((item) => normalizeBodySegment(item));
-  return `${messageProperty}.$.${parts.join('.').replace(/\.\./g, '.')}`.replace(/\.$/, '');
-};
+export const DEFAULT_ENHANCEMENT_SCRIPT = 'RESULT_VAR = VAR_0';
 
 export const buildBodyEnhancement = (
   enhanceId: string,
@@ -66,11 +58,25 @@ export const buildBodyEnhancement = (
   const enhancement: Enhancement = {
     enhanceId,
     language: Language.JavaScript,
-    script: 'RESULT_VAR = VAR_0',
+    script: DEFAULT_ENHANCEMENT_SCRIPT,
     args: { RESULT_VAR: resultVar },
   };
   references.forEach((reference, index) => {
     enhancement.args[`VAR_${index}`] = `${reference.color}.(${reference.type}).${reference.field}`;
   });
   return enhancement;
+};
+
+export const countEnhancementReferences = (enhancement?: Enhancement) =>
+  Object.keys(enhancement?.args || {}).filter((key) => /^VAR_\d+$/.test(key)).length;
+
+export const isDirectReferenceEnhancement = (enhancement?: Enhancement) =>
+  countEnhancementReferences(enhancement) === 1 &&
+  String(enhancement?.script ?? '').trim().replace(/;$/, '') === DEFAULT_ENHANCEMENT_SCRIPT;
+
+export const removeReferenceValue = (current: unknown, pointer: string): string | null => {
+  if (typeof current !== 'string') return null;
+  const refs = splitReferences(current);
+  if (!refs.includes(pointer)) return null;
+  return refs.filter((item) => item !== pointer).join(';');
 };

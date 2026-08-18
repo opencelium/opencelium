@@ -7,11 +7,26 @@ import en from '@entities/dataAggregator/i18n/en.json'
 import de from '@entities/dataAggregator/i18n/de.json'
 import { resolveDataAggregatorNames } from '@entities/dataAggregator/command/resolvers/resolveDataAggregatorNames'
 import { resolveDataAggregatorIds } from '@entities/dataAggregator/command/resolvers/resolveDataAggregatorIds'
+import { findDataAggregatorIdByName } from '@entities/dataAggregator/command/dataAggregatorCache'
 import type { DataAggregator, DataAggregatorArg, DataAggregatorDto } from '@entities/dataAggregator/model/types'
 import { buildFullScript, extractSection2Content } from '@entities/dataAggregator/lib/scriptUtils'
 import { ActiveSwitchCell } from '@entities/dataAggregator/ui/ActiveSwitchCell'
 
 const baseKey = 'data-aggregator'
+
+const resolveDataAggregatorId = (value: string): string => {
+    if (/^\d+$/.test(value)) return value
+    return String(findDataAggregatorIdByName(value) ?? value)
+}
+
+const buildDataAggregatorFetchUrl = (value: string): string =>
+    `/aggregator/${encodeURIComponent(resolveDataAggregatorId(value))}`
+
+const buildDataAggregatorPageUrl = (value: string): string =>
+    `/${baseKey}/update/${encodeURIComponent(resolveDataAggregatorId(value))}`
+
+const buildDataAggregatorViewPageUrl = (value: string): string =>
+    `/${baseKey}/view/${encodeURIComponent(resolveDataAggregatorId(value))}`
 
 export const dataAggregatorDefinition: EntityDefinition = {
     name: baseKey,
@@ -31,7 +46,6 @@ export const dataAggregatorDefinition: EntityDefinition = {
             ntLink: <Link to="/notification-template" />,
         },
         defaultSort: { field: 'name', direction: 'asc' },
-        bulkDelete: true,
         actions: [
             { type: 'view' },
             { type: 'update' },
@@ -116,15 +130,20 @@ export const dataAggregatorDefinition: EntityDefinition = {
                     encodeParams: false,
                     handleResponse: (data, error) => {
                         return data.result;
-                    }
+                    },
+                    skipIfUnchanged: true
                 }
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -159,13 +178,18 @@ export const dataAggregatorDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ')
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
             name: 'active',
             type: 'boolean',
+            defaultValue: true,
             ui: { component: 'switch' },
             table: {
+                width: '10%',
                 visible: true,
                 order: 3,
                 align: 'center',
@@ -279,39 +303,40 @@ export const dataAggregatorDefinition: EntityDefinition = {
     commands: (def) => ([
         ...createEntityCommands({
             def,
-            config: {},
+            config: { exclude: ['delete'] },
             dsl: {
                 update: {
-                    by: [
-                        { field: 'name', resolve: resolveDataAggregatorNames },
-                        { field: 'id', resolve: resolveDataAggregatorIds, customPath: true },
-                    ],
-                },
-                delete: {
                     by: [
                         {
                             field: 'name',
                             resolve: resolveDataAggregatorNames,
-                            confirmMessage: (name) => {
-                                const t = i18n.getFixedT(i18n.language, 'entities')
-                                return t(`${baseKey}.confirmation.delete.byName`, { name })
-                            },
+                            buildFetchUrl: (_def, value) => buildDataAggregatorFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildDataAggregatorPageUrl(value),
                         },
                         {
                             field: 'id',
                             resolve: resolveDataAggregatorIds,
                             customPath: true,
-                            confirmMessage: (id) => {
-                                const t = i18n.getFixedT(i18n.language, 'entities')
-                                return t(`${baseKey}.confirmation.delete.byId`, { id })
-                            },
+                            buildFetchUrl: (_def, value) => buildDataAggregatorFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildDataAggregatorPageUrl(value),
                         },
                     ],
                 },
                 view: {
                     by: [
-                        { field: 'name', resolve: resolveDataAggregatorNames },
-                        { field: 'id', resolve: resolveDataAggregatorIds, customPath: true },
+                        {
+                            field: 'name',
+                            resolve: resolveDataAggregatorNames,
+                            buildFetchUrl: (_def, value) => buildDataAggregatorFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildDataAggregatorViewPageUrl(value),
+                        },
+                        {
+                            field: 'id',
+                            resolve: resolveDataAggregatorIds,
+                            customPath: true,
+                            buildFetchUrl: (_def, value) => buildDataAggregatorFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildDataAggregatorViewPageUrl(value),
+                        },
                     ],
                 },
             },

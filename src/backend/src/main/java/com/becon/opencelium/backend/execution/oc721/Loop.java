@@ -18,10 +18,14 @@ public class Loop {
     private RelationalOperator operator;
 
     public static Loop fromOperator(OperatorEx operatorEx) {
+        String expression = operatorEx.getExpression();
+        if (expression == null || expression.isBlank()) {
+            throw new RuntimeException("LOOP operator cannot have null or blank expression");
+        }
+
         Loop loop = new Loop();
         loop.setIterator(operatorEx.getIterator());
 
-        String expression = operatorEx.getExpression();
         String wrappedDirectRef = ReferenceUtility.extractReference(expression, RegExpression.wrappedDirectRef);
 
         if (expression.startsWith(FOR_IN.getName())) {

@@ -1,14 +1,18 @@
 import React, { useState } from 'react'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-json'
-import 'ace-builds/src-noconflict/theme-github'
+import 'ace-builds/src-noconflict/theme-tomorrow'
+import 'ace-builds/src-noconflict/theme-tomorrow_night'
 import { useController, useFormContext, useWatch } from 'react-hook-form'
 import { Radio } from 'antd'
+import './InvokerOperationsEditor.css'
 import { FieldArrayEditor } from '@shared/ui/wizard-step/editor/general/FieldArrayEditor'
 import { FormInput } from '@shared/ui/form/FormInput'
-import { IconButton } from '@shared/ui/primitives/IconButton'
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton'
 import { Tabs } from '@shared/ui/primitives/Tabs'
+import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
+import { useTheme } from '@shared/theme/hooks/useTheme'
 import type { Mode } from '@/engine/entity/EntityDefinition'
 import { FormControl } from '@shared/ui/form/FormControl'
 import { FormSwitch } from '@shared/ui/form/FormSwitch'
@@ -98,6 +102,7 @@ function RadioGroupField({
     return (
         <FormControl label={label} name={name}>
             <Radio.Group
+                className="readOnlyRadioGroup"
                 value={field.value}
                 onChange={(e) => !readOnly && field.onChange(e.target.value)}
                 disabled={readOnly}
@@ -124,6 +129,8 @@ function JsonEditorField({
     const { control } = useFormContext()
     const { field } = useController({ name, control })
     const [localError, setLocalError] = useState<string | undefined>()
+    const { themeMode } = useTheme()
+    const aceTheme = themeMode === 'dark' ? 'tomorrow_night' : 'tomorrow'
 
     const value = typeof field.value === 'string' ? field.value : '{}'
 
@@ -142,7 +149,7 @@ function JsonEditorField({
             <div style={{ border: '1px solid var(--color-border-default)', borderRadius: 4, overflow: 'hidden', width: '100%' }}>
                 <AceEditor
                     mode="json"
-                    theme="github"
+                    theme={aceTheme}
                     name={`ace_${name.replace(/\./g, '_')}`}
                     value={value}
                     onChange={readOnly ? undefined : handleChange}
@@ -220,6 +227,7 @@ function OperationItemHeader({
     remove: (i: number) => void
     readOnly: boolean
 }) {
+    const { t: tCommon } = useI18n('common')
     const { control } = useFormContext()
     const prefix = `operations.${index}`
     const name = useWatch({ name: `${prefix}.name`, control }) as string
@@ -277,15 +285,14 @@ function OperationItemHeader({
                     {method || 'GET'}
                 </span>
                 {!readOnly && (
-                    <IconButton
-                        size="sm"
-                        type="text"
-                        iconProps={{ name: 'delete' }}
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            remove(index)
-                        }}
-                    />
+                    <Tooltip content={tCommon('actions.delete')}>
+                        <DeleteIconButton
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                remove(index)
+                            }}
+                        />
+                    </Tooltip>
                 )}
             </div>
         </div>
@@ -304,6 +311,7 @@ const OperationItem = React.memo(function OperationItem({
     hideDeleteButton?: boolean
 }) {
     const { t } = useI18n('entities')
+    const { t: tCommon } = useI18n('common')
     const { control } = useFormContext()
     const prefix = `operations.${index}`
 
@@ -354,6 +362,9 @@ const OperationItem = React.memo(function OperationItem({
                 readOnly={readOnly}
                 rules={readOnly ? undefined : {
                     required: t('invoker.fields.operations.errors.nameRequired', { defaultValue: 'Name is required' }),
+                    validate: value =>
+                        (typeof value === 'string' && value.trim().length > 0)
+                        || t('invoker.fields.operations.errors.nameRequired', { defaultValue: 'Name is required' }),
                 }}
             />
             <FormInput
@@ -362,16 +373,16 @@ const OperationItem = React.memo(function OperationItem({
                 readOnly={readOnly}
                 rules={readOnly ? undefined : {
                     required: t('invoker.fields.operations.errors.endpointRequired', { defaultValue: 'Endpoint is required' }),
+                    validate: value =>
+                        (typeof value === 'string' && value.trim().length > 0)
+                        || t('invoker.fields.operations.errors.endpointRequired', { defaultValue: 'Endpoint is required' }),
                 }}
             />
             {!readOnly && !hideDeleteButton && (
                 <div style={{ position: 'absolute', top: 10, right: 0 }}>
-                    <IconButton
-                        size="sm"
-                        type="text"
-                        iconProps={{ name: 'delete' }}
-                        onClick={() => remove(index)}
-                    />
+                    <Tooltip content={tCommon('actions.delete')}>
+                        <DeleteIconButton onClick={() => remove(index)} />
+                    </Tooltip>
                 </div>
             )}
 

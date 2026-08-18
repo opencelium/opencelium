@@ -29,8 +29,13 @@ export const createViewExecute = ({ def, config, by }) => {
         const mode = useCommandPaletteUIStore.getState().resolveMode();
 
         try {
+            // subscribe: false — this is a one-off fetch to seed the wizard's
+            // initialRecord. A plain dispatch (no owning component/hook) never
+            // unsubscribes on its own, which would otherwise leak a permanent
+            // RTK Query subscription that keeps refetching this URL on every
+            // future entity mutation for the rest of the session.
             const result = await store.dispatch(
-                genericApi.endpoints.fetchEntities.initiate(fetchUrl)
+                genericApi.endpoints.fetchEntities.initiate(fetchUrl, { subscribe: false })
             ).unwrap();
             const wizard = (
                 <GenericViewWizard

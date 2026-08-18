@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import com.becon.opencelium.backend.enums.MethodType;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -26,6 +27,15 @@ public class MethodMng {
     private String name;
     private String color;
     private String label;
+
+    /**
+     * Persisted as the wire value ({@code "CONNECTOR"}, {@code "HTTP_REQUEST"}, {@code "WEBHOOK"})
+     * via the {@link MethodType} Mongo converters. {@code null} for documents saved before
+     * method types existed — see {@link MethodType} for the legacy fallback semantics.
+     */
+    @Field(name = "method_type")
+    private MethodType methodType;
+
     @Field(name = "data_integrator")
     private Integer dataAggregator;
     private RequestMng request;
@@ -81,6 +91,14 @@ public class MethodMng {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public MethodType getMethodType() {
+        return methodType;
+    }
+
+    public void setMethodType(MethodType methodType) {
+        this.methodType = methodType;
     }
 
     public RequestMng getRequest() {

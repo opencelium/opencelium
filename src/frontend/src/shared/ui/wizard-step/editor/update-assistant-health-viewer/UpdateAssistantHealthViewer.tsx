@@ -6,6 +6,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { HealthStatus } from '@entities/updateAssistant/model/types'
 import { Loading } from '@shared/ui/primitives/Loading/Loading'
 import { Table } from '@shared/ui/primitives/Table'
+import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils'
 import ErrorMessage from "@shared/ui/primitives/ErrorMessage/ErrorMessage.tsx";
 import HintMessage from "@shared/ui/wizard-step/editor/update-assistant-health-viewer/HintMessage.tsx";
 
@@ -59,7 +60,7 @@ export function UpdateAssistantHealthViewer({ name }: Props) {
             {
                 accessorKey: 'key',
                 enableSorting: false,
-                size: 250,
+                meta: { width: '50%' },
                 header: () => t('update-assistant.health.columns.component' as any),
                 cell: ({ row }) =>
                     t(`update-assistant.health.components.${row.original.key}` as any, {
@@ -69,6 +70,7 @@ export function UpdateAssistantHealthViewer({ name }: Props) {
             {
                 accessorKey: 'status',
                 enableSorting: false,
+                meta: { width: '50%' },
                 header: () => t('update-assistant.health.columns.status' as any),
                 cell: ({ row }) => {
                     const status = row.original.status
@@ -96,6 +98,7 @@ export function UpdateAssistantHealthViewer({ name }: Props) {
     const requiredTable = useReactTable({
         data: requiredRows,
         columns,
+        defaultColumn: tableDefaultColumn,
         enableRowSelection: false,
         getCoreRowModel: getCoreRowModel(),
     })
@@ -103,6 +106,7 @@ export function UpdateAssistantHealthViewer({ name }: Props) {
     const optionalTable = useReactTable({
         data: optionalRows,
         columns,
+        defaultColumn: tableDefaultColumn,
         enableRowSelection: false,
         getCoreRowModel: getCoreRowModel(),
     })

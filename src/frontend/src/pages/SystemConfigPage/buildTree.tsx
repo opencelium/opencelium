@@ -21,6 +21,8 @@ export type BuildTreeArgs = {
     onValueChange: (path: string, value: LeafValue) => void
     onToggleStatus: (path: string) => void
     statusLabels: {enable: string; disable: string}
+    /** When true, the tree renders every node's controls disabled. */
+    readOnly?: boolean
 }
 
 function StatusToggle({
@@ -28,11 +30,13 @@ function StatusToggle({
     path,
     onToggleStatus,
     labels,
+    readOnly,
 }: {
     isActive: boolean
     path: string
     onToggleStatus: (path: string) => void
     labels: {enable: string; disable: string}
+    readOnly?: boolean
 }) {
     return (
         <Tooltip content={isActive ? labels.disable : labels.enable} placement="top">
@@ -40,14 +44,14 @@ function StatusToggle({
                 onClick={(e) => e.stopPropagation()}
                 style={{display: 'inline-flex', alignItems: 'center', flexShrink: 0}}
             >
-                <Checkbox checked={isActive} onChange={() => onToggleStatus(path)} />
+                <Checkbox checked={isActive} disabled={readOnly} onChange={() => onToggleStatus(path)} />
             </span>
         </Tooltip>
     )
 }
 
 function buildNodeTitle(node: ConfigNode, args: BuildTreeArgs): React.ReactNode {
-    const {edits, onValueChange, onToggleStatus, statusLabels} = args
+    const {edits, onValueChange, onToggleStatus, statusLabels, readOnly} = args
     const edit = edits[node.path]
     const isActive = (edit?.status ?? node.status) === 'active'
     const isLeaf = !isContainerNode(node)
@@ -62,6 +66,7 @@ function buildNodeTitle(node: ConfigNode, args: BuildTreeArgs): React.ReactNode 
                 path={node.path}
                 onToggleStatus={onToggleStatus}
                 labels={statusLabels}
+                readOnly={readOnly}
             />
             <span
                 style={{
@@ -79,6 +84,7 @@ function buildNodeTitle(node: ConfigNode, args: BuildTreeArgs): React.ReactNode 
                         path={node.path}
                         value={value}
                         onChange={(next) => onValueChange(node.path, next)}
+                        readOnly={readOnly}
                     />
                 </span>
             )}

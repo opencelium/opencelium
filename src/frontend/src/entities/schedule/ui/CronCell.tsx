@@ -3,6 +3,7 @@ import { IconButton } from '@shared/ui/primitives/IconButton'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useDialog } from '@shared/ui/dialog/useDialog'
+import { useScheduleUpdatePermission } from '../model/useScheduleUpdatePermission'
 import type { Schedule } from '../model/types'
 import { CronEditDialogContent } from './CronEditDialogContent'
 import './CronCell.css'
@@ -15,6 +16,7 @@ type Props = {
 export const CronCell = memo(function CronCell({ schedule, tooltipPlacement }: Props) {
     const { t: tEntities } = useI18n('entities')
     const dialog = useDialog()
+    const canUpdate = useScheduleUpdatePermission()
 
     const open = () => {
         const id = dialog.open({
@@ -30,6 +32,13 @@ export const CronCell = memo(function CronCell({ schedule, tooltipPlacement }: P
     }
 
     if (schedule.cronExp) {
+        if (!canUpdate) {
+            return (
+                <span className="cron-cell">
+                    <code className="cron-cell__chip cron-cell__chip--readonly">{schedule.cronExp}</code>
+                </span>
+            )
+        }
         return (
             <span className="cron-cell">
                 <Tooltip content={tEntities('schedule.cronEdit.tooltip')} placement={tooltipPlacement}>
@@ -40,6 +49,8 @@ export const CronCell = memo(function CronCell({ schedule, tooltipPlacement }: P
             </span>
         )
     }
+
+    if (!canUpdate) return null
 
     return (
         <span className="cron-cell">

@@ -13,8 +13,11 @@ import {findConnectorIdByTitle} from "@entities/connector/command/connectorCache
 import {CONNECTOR_TAG} from "@entities/connector/api/connector.tags.ts";
 import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
-import {useMasterPasswordStore} from "@features/master-password";
+import {masterPasswordApi, useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
+import {UserNameCell} from "@entities/user/ui/UserNameCell";
+import {userApi} from "@entities/user/api/userApi";
+import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 
@@ -34,16 +37,32 @@ const buildConnectorPageUrl = (value: string): string =>
 const buildConnectorViewPageUrl = (value: string): string =>
     `/connector/view/${encodeURIComponent(resolveConnectorId(value))}`
 
+// Update mode keeps the stored credentials encrypted until the master password is
+// entered — there is nothing to test, edit, or save until then, whether or not a
+// master password is configured system-wide (with none configured, there's simply no
+// way to unlock them from this step). A create has no connectorId and always carries
+// the freshly typed credentials, so it's never gated.
+const connectorCredentialsLocked = (values?: { connectorId?: string }): boolean => {
+    const masterPassword = useMasterPasswordStore.getState().masterPassword
+    return !!values?.connectorId && !masterPassword
+}
+
 /**
- * The `/connector/check` connection test. Shared by the credentials step's submit-time gate
- * (`remote`) and its "Test connection" action button so both fire the exact same request.
+ * The shared `/connector/check` request config, minus `shouldSkip` — the credentials
+ * step's submit-time gate and its "Test connection" action button fire the exact same
+ * request, but need different `shouldSkip` behavior (see below), so each builds its own
+ * `StepRemoteProps` from this base.
  */
-const connectorCheckRemote: StepRemoteProps = {
+const connectorCheckRequestBase: Omit<StepRemoteProps, 'shouldSkip'> = {
     url: `/connector/check`,
     method: 'POST',
     transKey: `${baseKey}.wizard.steps.credentials.remote.error`,
     encodeParams: false,
     ignoreError: true,
+    // Read-only diagnostic call — it must not invalidate the 'Entity' cache tag, or the
+    // still-mounted getConnector/fetchEntities query for this connector refetches and
+    // EntityWizard's initialValues-driven form.reset wipes out unsaved credential edits.
+    skipEntityInvalidation: true,
     map: (_fieldValue, formValues) => {
         // Drop a freshly-picked icon File: the connection test doesn't need it,
         // and a File serializes to {} which the backend's String `icon` rejects (400).
@@ -53,14 +72,6 @@ const connectorCheckRemote: StepRemoteProps = {
             ...(typeof icon === 'string' ? {icon} : {}),
             invoker: {name: formValues.invoker},
         }
-    },
-    shouldSkip: (values) => {
-        // Update mode keeps the stored credentials encrypted until the master
-        // password is entered — there is nothing to test until then. A create
-        // has no connectorId and always carries the freshly typed credentials,
-        // so the test must always run there.
-        const masterPassword = useMasterPasswordStore.getState().masterPassword
-        return !!values?.connectorId && !masterPassword;
     },
     handleResponse: (data, error) => {
         if (data?.status === "200") {
@@ -75,8 +86,38 @@ const connectorCheckRemote: StepRemoteProps = {
     },
 };
 
+// The credentials step's submit-time gate: saving general-data-only changes without
+// entering the master password is a valid, expected flow (not a failed test attempt),
+// so this silently skips the connection test — no toast.
+const connectorCheckRemote: StepRemoteProps = {
+    ...connectorCheckRequestBase,
+    shouldSkip: (values) => connectorCredentialsLocked(values),
+};
+
+// The explicit "Test connection" action button: same skip condition, but tells the
+// user why the test didn't run.
+const connectorTestActionRemote: StepRemoteProps = {
+    ...connectorCheckRequestBase,
+    shouldSkip: (values) => {
+        const needsMasterPassword = connectorCredentialsLocked(values)
+        // Only warn when a master password exists but wasn't entered — when none is
+        // configured at all, the credentials step's own Hint already explains this.
+        if (needsMasterPassword) {
+            const masterPasswordExists = masterPasswordApi.endpoints.checkMasterPasswordExists.select(undefined)(store.getState()).data
+            if (masterPasswordExists !== false) {
+                showApiError({
+                    namespace: 'entities',
+                    transKey: `${baseKey}.wizard.steps.credentials.test.needsMasterPassword`,
+                })
+            }
+        }
+        return needsMasterPassword;
+    },
+};
+
 export const connectorDefinition: EntityDefinition = {
     name: baseKey,
+    permissionComponent: 'CONNECTOR',
     routes: [
         { type: 'create' },
         { type: 'view' },
@@ -86,9 +127,26 @@ export const connectorDefinition: EntityDefinition = {
     list: {
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
+        searchPlaceholderKey: `${baseKey}.list.searchPlaceholder`,
         defaultSort: { field: 'title', direction: 'asc' },
-        pageSize: 10,
-        bulkDelete: true,
+        bulkDelete: {
+            confirmMessage: (ids) => {
+                const t = i18n.getFixedT(i18n.language, 'entities');
+                return t(`${baseKey}.confirmation.delete.bulkMessage`, { count: ids.length });
+            },
+        },
+        actions: [
+            { type: 'view' },
+            { type: 'update' },
+            {
+                type: 'delete',
+                confirmMessage: (value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    const title = (row as Connector)?.title ?? value;
+                    return t(`${baseKey}.confirmation.delete.byTitle`, { title });
+                },
+            },
+        ],
     },
     i18n: {
         en,
@@ -202,6 +260,7 @@ export const connectorDefinition: EntityDefinition = {
             },
 
             table: {
+                width: '35%',
                 visible: true,
                 order: 1,
                 sortable: true,
@@ -228,6 +287,7 @@ export const connectorDefinition: EntityDefinition = {
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             }
         },
         {
@@ -250,6 +310,7 @@ export const connectorDefinition: EntityDefinition = {
                 required: true,
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 3,
                 searchable: true,
@@ -261,6 +322,9 @@ export const connectorDefinition: EntityDefinition = {
                     }
                     return undefined;
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -275,11 +339,20 @@ export const connectorDefinition: EntityDefinition = {
             validation: {
                 max: 11
             },
+            table: {
+                width: 100,
+                visible: true,
+                order: 4,
+                sortable: true,
+                searchable: true,
+                align: 'center',
+                labelKey: `${baseKey}.fields.timeout.label`,
+            },
         },
         {
             name: 'sslCert',
             type: 'boolean',
-            defaultValue: true,
+            defaultValue: false,
             ui: {
                 component: 'switch',
                 props: {
@@ -289,6 +362,59 @@ export const connectorDefinition: EntityDefinition = {
                         off: `${baseKey}.fields.sslCert.text.off`,
                     }
                 }
+            },
+            table: {
+                width: 100,
+                visible: true,
+                order: 5,
+                searchable: true,
+                align: 'center',
+                labelKey: `${baseKey}.fields.sslCert.label`,
+            },
+        },
+        {
+            // Read-only audit columns set by the backend on save — not part of any
+            // section/wizard step, only surfaced as list columns.
+            name: 'modifiedAt',
+            type: 'number',
+            ui: { component: 'input' },
+            table: {
+                width: 160,
+                visible: true,
+                order: 6,
+                sortable: true,
+                searchable: true,
+                labelKey: `${baseKey}.fields.modifiedAt.label`,
+                // Search matches the rendered date string, not the raw timestamp.
+                mapToValue: (_row, raw) =>
+                    typeof raw === 'number' ? new Date(raw).toLocaleString(i18n.language) : '',
+                render: (row) => {
+                    const modifiedAt = (row as Connector).modifiedAt
+                    return typeof modifiedAt === 'number'
+                        ? <span>{new Date(modifiedAt).toLocaleString(i18n.language)}</span>
+                        : null
+                },
+            },
+        },
+        {
+            name: 'modifiedBy',
+            type: 'number',
+            ui: { component: 'input' },
+            table: {
+                width: 160,
+                visible: true,
+                order: 7,
+                searchable: true,
+                labelKey: `${baseKey}.fields.modifiedBy.label`,
+                // Search matches the rendered "name surname", not the raw user id.
+                mapToValue: (_row, raw) => {
+                    const userId = typeof raw === 'number' ? raw : null
+                    if (userId == null) return ''
+                    const users = userApi.endpoints.getUsers.select({ page: 1, limit: 1000 })(store.getState()).data ?? []
+                    const user = users.find((u) => u.userId === userId)
+                    return user ? `${user.userDetail.name} ${user.userDetail.surname}` : ''
+                },
+                render: (row) => <UserNameCell userId={(row as Connector).modifiedBy ?? null} />,
             },
         },
         {
@@ -338,9 +464,9 @@ export const connectorDefinition: EntityDefinition = {
                                         return true;
                                     }
                                 }
-                                for (let param in value) {
+                                /*for (let param in value) {
                                     if (!value[param]) return false;
-                                }
+                                }*/
                                 return true;
                             },
 
@@ -444,7 +570,8 @@ export const connectorDefinition: EntityDefinition = {
                         label: `${baseKey}.wizard.steps.credentials.test.button`,
                         type: 'primary',
                         successMessage: `${baseKey}.wizard.steps.credentials.test.success`,
-                        remote: connectorCheckRemote,
+                        remote: connectorTestActionRemote,
+                        disabled: connectorCredentialsLocked,
                     },
                 ],
                 confirmOnRemoteFailure: {

@@ -58,7 +58,7 @@ export const attentionItems: AttentionItem[] = [
     },
     {
         id: 'a-5',
-        title: 'NetFlix sync incomplete',
+        title: 'ServiceNow sync incomplete',
         subtitle: '14 records skipped',
         severity: 'info',
         timeAgo: '1d ago',
@@ -100,7 +100,7 @@ export const recentActivity: ActivityItem[] = [
     },
     {
         id: 'r-5',
-        title: 'NetFlix sync completed',
+        title: 'ServiceNow sync completed',
         subtitle: '320 records',
         kind: 'success',
         timeAgo: '20m ago',

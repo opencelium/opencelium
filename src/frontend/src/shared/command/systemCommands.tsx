@@ -4,6 +4,7 @@ import { CommandNode } from './types';
 // import {authActions} from "@entities/auth/model/authSlice.ts";
 // import {store} from "@app/store/store.ts";
 import {EntityWizard} from "@/engine/entity/runtime/EntityWizard.tsx";
+import {CommandReferenceDialog} from "@widgets/CommandPalette/CommandReferenceDialog.tsx";
 
 export const systemCommands: CommandNode<any>[] = [
     // "login" command (role impersonation) is disabled — commented out so it no
@@ -83,5 +84,16 @@ export const systemCommands: CommandNode<any>[] = [
                 }
             }
         ]
-    }
+    },
+    {
+        type: 'literal',
+        value: 'help',
+        aliases: ['commands', '?'],
+        group: 'general',
+        icon: 'help',
+        description: 'commandPalette.descriptions.help',
+        // Same size/position as the entity form dialogs (Dialog primitive's
+        // width 1000 / top 18 — see useEntityUpdateOpener, GenericEntityList).
+        execute: (_, ctx) => ctx.openModal(<CommandReferenceDialog />, { width: 1000, top: 18 }),
+    },
 ];

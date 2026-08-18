@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.versionmanager.Wrapper;
 import com.becon.opencelium.backend.versionmanager.base.FlowIndexUtils;
 import com.becon.opencelium.backend.versionmanager.base.UpdaterVersion;
@@ -36,9 +37,11 @@ public class Connection50MngUpdater implements ConnectionMngUpdater {
     private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_5_0;
 
     private final Connection48MngUpdater connection48MngUpdater;
+    private final ConnectorService connectorService;
 
-    public Connection50MngUpdater(Connection48MngUpdater connection48MngUpdater) {
+    public Connection50MngUpdater(Connection48MngUpdater connection48MngUpdater, ConnectorService connectorService) {
         this.connection48MngUpdater = connection48MngUpdater;
+        this.connectorService = connectorService;
     }
 
     @Override
@@ -95,11 +98,14 @@ public class Connection50MngUpdater implements ConnectionMngUpdater {
                 .withNewVersion(currentVersion.getVersion());
     }
 
-    private static MethodConnectorMng refOf(ConnectorMng connector) {
+    private MethodConnectorMng refOf(ConnectorMng connector) {
         if (connector == null) return null;
         MethodConnectorMng ref = new MethodConnectorMng();
         ref.setConnectorId(connector.getConnectorId());
         ref.setTitle(connector.getTitle());
+
+        connectorService.findById(connector.getConnectorId())
+                .ifPresent(x -> ref.setInvoker(x.getInvoker()));
         return ref;
     }
 

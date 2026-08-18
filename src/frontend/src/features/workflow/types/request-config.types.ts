@@ -1,4 +1,4 @@
-import type { Language, MainResponse } from './connection';
+import type { Language, MainResponse, PayloadDataType } from './connection';
 
 export type WorkflowBodyFormat = 'json' | 'xml' | 'x-www-form-urlencoded';
 
@@ -30,6 +30,7 @@ export type WorkflowMethodConfig = {
   queryParams: WorkflowQueryParam[];
   endpointArgs: Record<string, WorkflowEndpointArg>;
   bodyFormat: WorkflowBodyFormat;
+  bodyData: PayloadDataType;
   body: unknown;
   response?: MainResponse;
 };
@@ -40,5 +41,9 @@ export type WorkflowMethodEditorState = {
 };
 
 export type WorkflowConditionEditorState = {
+  nodeId: string;
+};
+
+export type WorkflowAggregatorEditorState = {
   nodeId: string;
 };

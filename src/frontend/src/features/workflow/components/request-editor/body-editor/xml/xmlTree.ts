@@ -16,21 +16,29 @@ export type XmlSelection =
 
 const ATTR = '__oc__attributes';
 const VALUE = '__oc__value';
+const XML_JS_ATTR = '_attributes';
+const XML_JS_VALUE = '_text';
 
 const createId = () => createShortId();
 
 const normalizeObject = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
+const normalizeAttributes = (value: unknown): XmlAttributes =>
+  Object.fromEntries(
+    Object.entries(normalizeObject(value)).map(([key, item]) => [key, item == null ? '' : String(item)]),
+  );
+
 const toArray = (value: unknown) => (Array.isArray(value) ? value : [value]);
 
 const parseNode = (name: string, raw: unknown): XmlTreeNode => {
   const object = normalizeObject(raw);
-  const attributes = normalizeObject(object[ATTR]) as XmlAttributes;
-  const text = typeof object[VALUE] === 'string' ? object[VALUE] : '';
+  const attributes = normalizeAttributes(object[ATTR] ?? object[XML_JS_ATTR]);
+  const rawText = object[VALUE] ?? object[XML_JS_VALUE];
+  const text = typeof rawText === 'string' ? rawText : rawText == null ? '' : String(rawText);
   const children: XmlTreeNode[] = [];
   Object.entries(object).forEach(([key, value]) => {
-    if (key === ATTR || key === VALUE) return;
+    if (key === ATTR || key === VALUE || key === XML_JS_ATTR || key === XML_JS_VALUE) return;
     toArray(value).forEach((item) => children.push(parseNode(key, item)));
   });
   return { id: createId(), name, text, attributes, children };

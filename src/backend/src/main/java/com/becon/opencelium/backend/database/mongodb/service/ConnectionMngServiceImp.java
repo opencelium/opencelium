@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,18 +33,20 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final OpenceliumProps ocProps;
     private final ConnectionMngMapper connectionMngMapper;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
+    private final OperatorMngService operatorMngService;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
             OpenceliumProps ocProps, ConnectionMngMapper connectionMngMapper,
-            EntityVersionManager entityVersionManager
+            EntityVersionManager entityVersionManager, OperatorMngService operatorMngService
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
         this.ocProps = ocProps;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
+        this.operatorMngService = operatorMngService;
     }
 
     @Override
@@ -111,6 +114,14 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public List<ConnectionMng> getAllByConnectionIdRaw(Long id) {
         return connectionMngRepository.findAllByConnectionIdOrderByConnectionIdDesc(id);
+    }
+
+    @Override
+    public List<ConnectionMng> getVersionMetaByIds(Collection<String> snapshotIds) {
+        if (snapshotIds == null || snapshotIds.isEmpty()) {
+            return List.of();
+        }
+        return connectionMngRepository.findVersionMetaByIdIn(snapshotIds);
     }
 
     /**
@@ -201,6 +212,20 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
         if (connectionMng.getToConnector() != null && connectionMng.getToConnector().getMethods() != null) {
             validateMethods(connectionMng.getToConnector().getMethods());
+        }
+
+        if (connectionMng.getFromConnector() != null && connectionMng.getFromConnector().getOperators() != null) {
+            validateOperators(connectionMng.getFromConnector().getOperators());
+        }
+
+        if (connectionMng.getToConnector() != null && connectionMng.getToConnector().getOperators() != null) {
+            validateOperators(connectionMng.getToConnector().getOperators());
+        }
+    }
+
+    private void validateOperators(List<OperatorMng> operators) {
+        for (OperatorMng operator : operators) {
+            operatorMngService.validate(operator);
         }
     }
 

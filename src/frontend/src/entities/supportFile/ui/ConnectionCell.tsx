@@ -10,12 +10,12 @@ export function ConnectionCell({ row }: Props) {
     const { t: tEntities } = useI18n('entities')
 
     if (row.status === 'CONNECTION_FOUND' && row.connectionTitle) {
-        return <Link to={`/workflow/update/${row.connectionId}`}>{row.connectionTitle}</Link>
+        return <Link to={`/workflow/update/${row.connectionId}`} style={{ whiteSpace: 'normal' }}>{row.connectionTitle}</Link>
     }
 
     if (!row.connectionTitle) {
-        return <span style={{ color: 'var(--color-text-disabled)' }}>{tEntities('support-file.list.deletedConnection')}</span>
+        return <span style={{ color: 'var(--color-text-disabled)',  whiteSpace: 'normal'  }}>{tEntities('support-file.list.deletedConnection')}</span>
     }
 
-    return <span>{row.connectionTitle}</span>
+    return <span style={{ whiteSpace: 'normal' }}>{row.connectionTitle}</span>
 }

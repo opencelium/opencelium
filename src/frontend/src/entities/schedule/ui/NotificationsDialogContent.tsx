@@ -7,6 +7,7 @@ import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext'
 import { MultiRecordForm } from '@/engine/entity/runtime/genererics/MultiRecordForm'
 import { scheduleNotificationDefinition } from '../notification/notification.definition'
 import { useGetNotificationsQuery } from '../api/notificationApi'
+import { useScheduleUpdatePermission } from '../model/useScheduleUpdatePermission'
 import {
     emptyNotificationItem,
     fromNotification,
@@ -24,6 +25,7 @@ type Props = {
 
 export function NotificationsDialogContent({ schedulerId }: Props) {
     const { t: tEntities } = useI18n('entities')
+    const canUpdate = useScheduleUpdatePermission()
 
     const form = useForm<NotificationsFormValues>({
         resolver: zodResolver(notificationsFormSchema),
@@ -102,6 +104,7 @@ export function NotificationsDialogContent({ schedulerId }: Props) {
                             onDeleted={remove}
                         />
                     )}
+                    readOnly={!canUpdate}
                 />
             </FormConstraintsProvider>
         </FormProvider>

@@ -33,6 +33,14 @@ export interface RemoteApiProps {
     skipIfUnchanged?: boolean
     shouldSkip?: (values?: any) => boolean
     /**
+     * Skip invalidating the shared 'Entity' RTK Query cache tag for this request.
+     * Use for read-only/diagnostic requests (e.g. a connection test) that don't
+     * change stored data — invalidating would refetch the record being edited and
+     * reset the form (via EntityWizard's initialValues → form.reset effect),
+     * clobbering unsaved edits.
+     */
+    skipEntityInvalidation?: boolean
+    /**
      * response handling
      * true → ok
      * string → error

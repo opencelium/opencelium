@@ -6,12 +6,28 @@ import en from '@entities/category/i18n/en.json'
 import de from '@entities/category/i18n/de.json'
 import { resolveCategoryNames } from '@entities/category/command/resolvers/resolveCategoryNames'
 import { resolveCategoryIds } from '@entities/category/command/resolvers/resolveCategoryIds'
+import { findCategoryIdByName } from '@entities/category/command/categoryCache'
 import type {Category, CategoryDto} from "@entities/category/model/types.ts";
 
 const baseKey = 'category'
 
+const resolveCategoryId = (value: string): string => {
+    if (/^\d+$/.test(value)) return value
+    return String(findCategoryIdByName(value) ?? value)
+}
+
+const buildCategoryFetchUrl = (value: string): string =>
+    `/category/${encodeURIComponent(resolveCategoryId(value))}`
+
+const buildCategoryPageUrl = (value: string): string =>
+    `/category/update/${encodeURIComponent(resolveCategoryId(value))}`
+
+const buildCategoryViewPageUrl = (value: string): string =>
+    `/category/view/${encodeURIComponent(resolveCategoryId(value))}`
+
 export const categoryDefinition: EntityDefinition = {
     name: baseKey,
+    plural: 'categories',
 
     routes: [
         { type: 'create' },
@@ -28,7 +44,13 @@ export const categoryDefinition: EntityDefinition = {
         actions: [
             { type: 'view' },
             { type: 'update' },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities')
+                    return t(`${baseKey}.list.confirmDelete.message`, { name: (row as Category).name })
+                },
+            },
         ],
     },
 
@@ -37,6 +59,7 @@ export const categoryDefinition: EntityDefinition = {
     api: {
         baseUrl: '/category',
         identifierField: 'name',
+        primaryKey: 'id',
         resolveIdentifier: resolveCategoryNames,
         mapToForm: (categoryModel: Category): CategoryDto => {
             return {
@@ -70,6 +93,7 @@ export const categoryDefinition: EntityDefinition = {
                     map: (fieldValue) => ({ name: fieldValue }),
                     transKey: `${baseKey}.fields.name.errors.name_already_exists`,
                     encodeParams: false,
+                    skipIfUnchanged: true,
                     handleResponse: (data, error) => {
                         return data.message === 'NOT_EXISTS';
                     }
@@ -81,6 +105,9 @@ export const categoryDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -169,8 +196,19 @@ export const categoryDefinition: EntityDefinition = {
             dsl: {
                 update: {
                     by: [
-                        { field: 'name', resolve: resolveCategoryNames },
-                        { field: 'id', resolve: resolveCategoryIds, customPath: true },
+                        {
+                            field: 'name',
+                            resolve: resolveCategoryNames,
+                            buildFetchUrl: (_def, value) => buildCategoryFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildCategoryPageUrl(value),
+                        },
+                        {
+                            field: 'id',
+                            resolve: resolveCategoryIds,
+                            customPath: true,
+                            buildFetchUrl: (_def, value) => buildCategoryFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildCategoryPageUrl(value),
+                        },
                     ],
                 },
                 delete: {
@@ -178,6 +216,7 @@ export const categoryDefinition: EntityDefinition = {
                         {
                             field: 'name',
                             resolve: resolveCategoryNames,
+                            buildDeleteUrl: (_def, value) => buildCategoryFetchUrl(value),
                             confirmMessage: (name) => {
                                 const t = i18n.getFixedT(i18n.language, 'entities')
                                 return t(`${baseKey}.confirmation.delete.byName`, { name })
@@ -187,6 +226,7 @@ export const categoryDefinition: EntityDefinition = {
                             field: 'id',
                             resolve: resolveCategoryIds,
                             customPath: true,
+                            buildDeleteUrl: (_def, value) => buildCategoryFetchUrl(value),
                             confirmMessage: (id) => {
                                 const t = i18n.getFixedT(i18n.language, 'entities')
                                 return t(`${baseKey}.confirmation.delete.byId`, { id })
@@ -196,8 +236,19 @@ export const categoryDefinition: EntityDefinition = {
                 },
                 view: {
                     by: [
-                        { field: 'name', resolve: resolveCategoryNames },
-                        { field: 'id', resolve: resolveCategoryIds, customPath: true },
+                        {
+                            field: 'name',
+                            resolve: resolveCategoryNames,
+                            buildFetchUrl: (_def, value) => buildCategoryFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildCategoryViewPageUrl(value),
+                        },
+                        {
+                            field: 'id',
+                            resolve: resolveCategoryIds,
+                            customPath: true,
+                            buildFetchUrl: (_def, value) => buildCategoryFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildCategoryViewPageUrl(value),
+                        },
                     ],
                 },
             },

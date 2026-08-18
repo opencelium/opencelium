@@ -6,6 +6,7 @@ const variantMap = {
     body: 'body1',
     caption: 'caption',
     label: 'subtitle2',
+    'label-sm': 'subtitle2',
     title: 'h5',
     subtitle: 'h6',
 } as const;

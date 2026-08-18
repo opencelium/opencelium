@@ -1,7 +1,6 @@
 import React from 'react'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
 import assistantWizardImage from '@assets/images/wizard/update-assistant-wizard.gif'
-import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import en from '@entities/updateAssistant/i18n/en.json'
 import de from '@entities/updateAssistant/i18n/de.json'
 import { resolveUpdateAssistantNames } from '@entities/updateAssistant/command/resolvers/resolveUpdateAssistantNames'
@@ -9,6 +8,7 @@ import { UpdateAssistantPage } from '@pages/UpdateAssistantPage/UpdateAssistantP
 import {
     REQUIRED_COMPONENTS
 } from "@shared/ui/wizard-step/editor/update-assistant-health-viewer/UpdateAssistantHealthViewer.tsx";
+import { UpdateAssistantSuccessContent } from "@shared/ui/wizard-step/editor/update-assistant-run-button/UpdateAssistantSuccessContent.tsx";
 
 const baseKey = 'update-assistant'
 
@@ -41,10 +41,6 @@ export const updateAssistantDefinition: EntityDefinition = {
             },
             uploadOffline: {
                 url: '/assistant/zipfile',
-                method: 'POST',
-            },
-            runUpdate: {
-                url: '/assistant/oc/update',
                 method: 'POST',
             },
         },
@@ -160,6 +156,14 @@ export const updateAssistantDefinition: EntityDefinition = {
                 header: `${baseKey}.wizard.modes.view.header`,
                 subheader: `${baseKey}.wizard.modes.view.subheader`,
             },
+            create: {
+                successMessage: `${baseKey}.update.successTitle`,
+                getSuccessContent: (formData: { versionsDisplay?: unknown }) => (
+                    <UpdateAssistantSuccessContent
+                        version={typeof formData?.versionsDisplay === 'string' ? formData.versionsDisplay : undefined}
+                    />
+                ),
+            },
         },
 
         steps: [
@@ -188,20 +192,4 @@ export const updateAssistantDefinition: EntityDefinition = {
             },
         ],
     },
-
-    /* ===============================
-       COMMANDS
-    ================================ */
-
-    commands: (def) => ([
-        ...createEntityCommands({
-            def,
-            config: { include: ['view'] },
-            dsl: {
-                view: {
-                    by: [],
-                },
-            },
-        }),
-    ]),
 }

@@ -1,8 +1,8 @@
 import React from 'react';
-import { DeleteOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Input, Switch, Table, Tooltip } from 'antd';
+import { Checkbox, Input, Switch, Table, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import type { EndpointArg, QueryParam } from '../../../types/connection';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
+import type { Connection, EndpointArg, MethodWithId, QueryParam } from '../../../types/connection';
 import {
 	ARG_TOKEN_RE,
 	isTemplateRow,
@@ -16,6 +16,8 @@ type Props = {
 	readOnly?: boolean;
 	rows: QueryParam[];
 	endpointArgs: Record<string, EndpointArg>;
+	connection?: Connection | null;
+	currentMethod?: MethodWithId;
 	onToggleEnabled: (id: string, enabled: boolean) => void;
 	onChangeParam: (id: string, patch: Partial<QueryParam>) => void;
 	onRemoveParamRow: (id: string) => void;
@@ -49,6 +51,8 @@ export const UrlQueryParamsTable: React.FC<Props> = ({
 	readOnly,
 	rows,
 	endpointArgs,
+	connection,
+	currentMethod,
 	onToggleEnabled,
 	onChangeParam,
 	onRemoveParamRow,
@@ -93,6 +97,8 @@ export const UrlQueryParamsTable: React.FC<Props> = ({
 							value={key}
 							endpointArgs={endpointArgs}
 							readOnly={readOnly}
+							connection={connection}
+							currentMethod={currentMethod}
 							onChange={(key) => onChangeParam(row.id, { key })}
 							onCaretChange={(caret) =>
 								onCaretChange({ rowId: row.id, field: 'key', caret })
@@ -140,6 +146,8 @@ export const UrlQueryParamsTable: React.FC<Props> = ({
 							value={value}
 							endpointArgs={endpointArgs}
 							readOnly={readOnly}
+							connection={connection}
+							currentMethod={currentMethod}
 							onChange={(value) => onChangeParam(row.id, { value })}
 							onCaretChange={(caret) =>
 								onCaretChange({ rowId: row.id, field: 'value', caret })
@@ -194,11 +202,9 @@ export const UrlQueryParamsTable: React.FC<Props> = ({
 							/>
 						</Tooltip>
 						<Tooltip title="Delete param">
-							<Button
-								type="text"
-								size="small"
+							<DeleteIconButton
+								iconSize={14}
 								disabled={disabled}
-								icon={<DeleteOutlined />}
 								onClick={() => onRemoveParamRow(row.id)}
 							/>
 						</Tooltip>

@@ -15,6 +15,9 @@
       "tooltip": "Download",
       "success": "Template downloaded: {{name}}",
       "error": "Failed to download template."
+    },
+    "confirmDelete": {
+      "message": "Are you sure you want to delete workflow template with name \"{{name}}\"?"
     }
   },
   "fields": {
@@ -29,6 +32,12 @@
     },
     "toInvoker": {
       "label": "To Invoker"
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byId": "Delete workflow template by id \"{{templateId}}\"?",
+      "byName": "Delete workflow template by name \"{{name}}\"?"
     }
   }
 }

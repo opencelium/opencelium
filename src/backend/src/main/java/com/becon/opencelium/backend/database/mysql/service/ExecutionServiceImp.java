@@ -84,6 +84,13 @@ public class ExecutionServiceImp implements ExecutionService {
     }
 
     @Override
+    public void deleteBySchedulerId(int schedulerId) {
+        cache.remove(STATS_KEY);
+        log.debug("[Cache] '{}' evicted", STATS_KEY);
+        executionRepository.deleteBySchedulerId(schedulerId);
+    }
+
+    @Override
     public double getAvgDurationOfExecution(int schedulerId) {
         return getExecutionsBySchedulerId(schedulerId).stream()
                 .filter(this::isSuccessfulFinishedExecution)

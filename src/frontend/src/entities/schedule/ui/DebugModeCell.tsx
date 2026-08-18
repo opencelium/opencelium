@@ -3,7 +3,8 @@ import { message } from 'antd'
 import { Switch } from '@shared/ui/primitives/Switch'
 import { useGeneralRequestMutation } from '@shared/api/genericApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import type { Schedule } from '../model/types'
+import { useScheduleUpdatePermission } from '../model/useScheduleUpdatePermission'
+import type { Schedule, ScheduleUpdateDTO } from '../model/types'
 
 type Props = {
     schedule: Schedule
@@ -12,6 +13,7 @@ type Props = {
 export const DebugModeCell = memo(function DebugModeCell({ schedule }: Props) {
     const [generalRequest] = useGeneralRequestMutation()
     const { t: tEntities } = useI18n('entities')
+    const canUpdate = useScheduleUpdatePermission()
     const [pending, setPending] = useState(false)
     const [optimistic, setOptimistic] = useState<boolean | null>(null)
 
@@ -20,15 +22,20 @@ export const DebugModeCell = memo(function DebugModeCell({ schedule }: Props) {
     const handleChange = async (next: boolean) => {
         setOptimistic(next)
         setPending(true)
+        const body: ScheduleUpdateDTO = {
+            schedulerId: schedule.schedulerId,
+            title: schedule.title,
+            debugMode: next,
+            status: schedule.status,
+            cronExp: schedule.cronExp,
+            connectionId: String(schedule.connection?.connectionId),
+        }
+
         try {
             await generalRequest({
                 url: `/scheduler/${schedule.schedulerId}`,
                 method: 'PUT',
-                body: {
-                    ...schedule,
-                    debugMode: next,
-                    connectionId: schedule.connection?.connectionId,
-                },
+                body,
                 options: {},
             }).unwrap()
             message.success(
@@ -41,5 +48,5 @@ export const DebugModeCell = memo(function DebugModeCell({ schedule }: Props) {
         }
     }
 
-    return <Switch checked={checked} loading={pending} onChange={handleChange} />
+    return <Switch checked={checked} loading={pending} disabled={!canUpdate} onChange={handleChange} />
 })

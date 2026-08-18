@@ -4,6 +4,9 @@ import React from 'react';
 export interface ModalOptions {
     /** Override the modal width. Defaults to 1000. Accepts e.g. 'fit-content'. */
     width?: number | string;
+    /** Override the modal's distance (px) from the viewport top. Defaults to 50 —
+     * pass 18 to align with the entity form dialogs (see Dialog primitive's `top`). */
+    top?: number;
 }
 
 interface ModalState {
@@ -16,6 +19,7 @@ interface ModalState {
     contentKey: number;
     isOpen: boolean;
     width?: number | string;
+    top?: number;
 
     open: (node: React.ReactNode, options?: ModalOptions) => void;
     close: () => void;
@@ -26,7 +30,8 @@ export const useModalStore = create<ModalState>((set) => ({
     contentKey: 0,
     isOpen: false,
     width: undefined,
+    top: undefined,
 
-    open: (node, options) => set((state) => ({ content: node, contentKey: state.contentKey + 1, isOpen: true, width: options?.width })),
-    close: () => set({ content: null, isOpen: false, width: undefined }),
+    open: (node, options) => set((state) => ({ content: node, contentKey: state.contentKey + 1, isOpen: true, width: options?.width, top: options?.top })),
+    close: () => set({ content: null, isOpen: false, width: undefined, top: undefined }),
 }));

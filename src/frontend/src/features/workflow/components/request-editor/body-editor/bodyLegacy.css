@@ -1,12 +1,25 @@
 .bodyLegacyLayout {
+  display: flex;
   height: 100%;
   min-height: 0;
+  width: 100%;
 }
 
-.bodyLegacyLayout .ant-splitter-panel {
+.bodyLegacyLeftPane {
   display: flex;
   flex-direction: column;
+  flex: 0 0 52%;
+  max-width: 74%;
   min-height: 0;
+  min-width: 32%;
+}
+
+.bodyLegacyEnhancementPane {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
 }
 
 .bodyLegacyLeft {
@@ -53,11 +66,53 @@
 
 .bodyLegacyJsonWrap {
   position: relative;
-  min-height: 0;
+  min-height: 160px;
   overflow: auto;
   background: var(--color-background-input);
   border-radius: var(--radius-sm);
   padding: 4px 10px;
+}
+
+.bodyLegacyXmlContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+}
+
+.bodyLegacyXmlContentMaximized {
+  z-index: 1100;
+  padding: 8px;
+  background: var(--color-background-surface);
+}
+
+.bodyLegacyXmlToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bodyLegacyXmlCard {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 12px;
+}
+
+.bodyLegacyXmlCard > .ant-card-body {
+  display: grid;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.bodyLegacyXmlRaw {
+  height: 100% !important;
+  min-height: 0 !important;
+  resize: none;
 }
 
 .bodyLegacyJsonWrap .copy-to-clipboard-container,
@@ -98,6 +153,27 @@
   z-index: 20;
 }
 
+.bodyLegacyMethodOption {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bodyLegacyMethodOptionName {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bodyLegacyMethodOptionLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .bodyLegacyEnhancement {
   min-width: 0;
   flex: 1;
@@ -120,6 +196,17 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
+}
+
+.bodyLegacyEnhancementHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.bodyLegacyReferenceItem {
+  position: relative;
 }
 
 .bodyLegacyEnhancementCollapse > .ant-collapse-item {
@@ -200,8 +287,131 @@
 .bodyLegacyScriptToggle {
   position: absolute;
   top: 6px;
-  right: 8px;
+  right: 22px;
   z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scriptDebugTrigger {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-surface);
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.scriptDebugTrigger:hover {
+  border-color: var(--color-action-primary);
+  color: var(--color-action-primary);
+}
+
+.scriptDebugTrigger--active,
+.scriptDebugTrigger--active:hover {
+  background: var(--color-action-primary);
+  border-color: var(--color-action-primary);
+  color: var(--color-text-on-action);
+}
+
+.scriptDebugValue {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-background-surface);
+  overflow: hidden;
+}
+
+.scriptDebugValueHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-background-elevated);
+}
+
+.scriptDebugValueHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.scriptDebugValueBadge {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  border-radius: 999px;
+  padding: 1px 8px;
+  border: 1px solid;
+}
+
+.scriptDebugValueBadge--idle {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border-default);
+}
+
+.scriptDebugValueBadge--loading {
+  color: var(--color-action-primary);
+  border-color: var(--color-action-primary);
+}
+
+.scriptDebugValueBadge--value {
+  color: var(--color-status-success-fg);
+  border-color: var(--color-status-success-fg);
+}
+
+.scriptDebugValueBadge--error {
+  color: var(--color-status-error-fg);
+  border-color: var(--color-status-error-fg);
+}
+
+.scriptDebugValueBadge--stale {
+  color: var(--color-status-warning-fg);
+  border-color: var(--color-status-warning-fg);
+}
+
+.scriptDebugValueBody {
+  flex: 1;
+  min-height: 0;
+  padding: 10px 14px;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  overflow-y: auto;
+}
+
+.scriptDebugValueSection {
+  margin-bottom: 12px;
+}
+
+.scriptDebugValueSection:last-child {
+  margin-bottom: 0;
+}
+
+.scriptDebugValueSectionLabel {
+  font-family: Inter, sans-serif;
+  font-size: 11px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 5px;
+}
+
+.scriptDebugValueRefName {
+  color: var(--color-action-primary);
 }
 
 .bodyLegacyEnhancementScriptMaximized {
@@ -223,6 +433,73 @@
   min-height: 240px;
   padding-top: 54px;
   text-align: center;
+}
+
+.bodyLegacyDirectReference {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 4px;
+}
+
+.bodyLegacyDirectReferenceTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bodyLegacyDirectReferenceDescription {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.bodyLegacyDirectReferenceMap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  background: var(--color-background-hover);
+}
+
+.bodyLegacyDirectReferenceField {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-action-primary);
+  word-break: break-all;
+}
+
+.bodyLegacyDirectReferenceArrow {
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.bodyLegacyDirectReferenceRefs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bodyLegacyDirectReferenceRef {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bodyLegacyDirectReferenceBadge {
+  color: var(--color-text-on-action);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-weight: 600;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.bodyLegacyDirectReferenceCreateButton {
+  align-self: center;
 }
 
 .bodyLegacyGeneratorShell {
@@ -318,6 +595,41 @@
   font-size: 14px !important;
 }
 
+/* This select always displays its value through the search <input> (searchValue,
+   never a selection-item span — see LegacyResponseFieldSelect). Safari/macOS doesn't
+   vertically center text inside a native <input> via line-height the way it does for
+   a span, so pin it with flexbox instead, which is metrics-independent. */
+.bodyLegacyGeneratorSelect .ant-select-selection-search {
+  display: flex;
+  align-items: center;
+}
+
+.bodyLegacyGeneratorSelect .ant-select-selection-search-input {
+  height: 100%;
+}
+
+/* Reveals a copy-to-clipboard icon next to a select's dropdown arrow only while
+   hovering the select, mirroring the row-level oc-copy-on-hover pattern. */
+.selectCopyHost {
+  position: relative;
+}
+
+.selectCopyButton {
+  position: absolute;
+  top: 50%;
+  right: 26px;
+  transform: translateY(-50%);
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.selectCopyHost:hover .selectCopyButton {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .bodyLegacyWebhookSelect {
   width: 100%;
 }
@@ -408,17 +720,7 @@
   position: absolute;
   top: -5px;
   right: -6px;
-  width: 12px;
-  min-width: 12px;
-  height: 14px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--color-text-primary);
-  font-size: 11px;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
 }

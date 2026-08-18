@@ -34,7 +34,6 @@ import com.becon.opencelium.backend.versionmanager.backup.FileBackupManager;
 import com.becon.opencelium.backend.versionmanager.base.UpdaterVersion;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +41,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -270,16 +268,16 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public void deleteById(String templateId) {
-        Map<String, Template> templates = getAllAsMap();
-        String fileName = templates.entrySet().stream().filter(entry -> entry.getValue().getTemplateId().equals(templateId))
-                .findFirst().map(entry -> entry.getKey()).orElse(null);
-//        String path = PathConstant.TEMPLATE + templateId.concat(".json");
-        if (fileName == null) {
-            throw new RuntimeException("FILE_NOT_FOUND");
-        }
-        File file = Paths.get(PathConstant.TEMPLATE).resolve(fileName).toFile();
-        if (!file.delete()) {
-            throw new RuntimeException("FILE_NOT_DELETED");
+        Path filePath = getAllAsMap().entrySet().stream()
+                .filter(entry -> Objects.equals(entry.getValue().getTemplateId(), templateId))
+                .map(entry -> Paths.get(PathConstant.TEMPLATE).resolve(entry.getKey()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("FILE_NOT_FOUND"));
+
+        try {
+            Files.delete(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("FILE_NOT_DELETED", e);
         }
     }
 
@@ -294,8 +292,6 @@ public class TemplateServiceImp implements TemplateService {
             e.printStackTrace();
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
             applyVersionUpdater(template);
@@ -323,7 +319,6 @@ public class TemplateServiceImp implements TemplateService {
     private void save(Template template, String fileName) {
         try {
             String id = template.getTemplateId();
-            ObjectMapper objectMapper = new ObjectMapper();
             template.setTemplateId(id);
 
             Path filePath = Paths.get(PathConstant.TEMPLATE).resolve(fileName);
@@ -335,19 +330,14 @@ public class TemplateServiceImp implements TemplateService {
         }
     }
 
-    private List<Template> getAll(String folder) throws WrongEncode {
+    private List<Template> getAll(String folder) {
         try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
-            ObjectMapper objectMapper = new ObjectMapper();
             return walk.filter(Files::isRegularFile)
                     .filter(path -> FileNameUtils.getExtension(path.toString()).equals("json"))
                     .map(path -> {
-//                        if(!FilenameUtils.getExtension(path.toString()).equals("json")){
-//                            return null;
-//                        }
                         StringBuilder contentBuilder = new StringBuilder();
                         try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
                             stream.forEach(s -> contentBuilder.append(s).append("\n"));
-//                            System.out.println(Paths.get(path.toString()).getFileName().toString());
                             Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
                             applyVersionUpdater(template);
                             return template;
@@ -363,7 +353,6 @@ public class TemplateServiceImp implements TemplateService {
 
     private Map<String, Template> getAllAsMap() {
         try (Stream<Path> walk = Files.walk(Paths.get(PathConstant.TEMPLATE))) {
-            ObjectMapper objectMapper = new ObjectMapper();
             return walk
                     .filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".json"))

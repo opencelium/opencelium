@@ -73,6 +73,8 @@ export function useWizardSubmit({ entityName, mode, identifier }: Args) {
             )
 
             surfaceErrors(afterStage.errors)
+
+            return response
         },
         [entityName, mode, identifier, createTrigger, updateTrigger],
     )

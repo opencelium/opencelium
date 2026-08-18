@@ -29,7 +29,7 @@ export function NotificationEventTypeField({ field }: FieldOverrideProps) {
                 options={options}
             />
             {(value === 'pre' || value === 'alert') && (
-                <Hint noPrefix>
+                <Hint noPrefix type="warning">
                     {tEntities('schedule.notifications.aggregatorHint')}
                 </Hint>
             )}

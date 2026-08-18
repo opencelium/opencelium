@@ -48,6 +48,10 @@
       }
     }
   },
+  "scriptEditor": {
+    "maximize": "Skript maximieren",
+    "minimize": "Skript minimieren"
+  },
   "validation": {
     "scriptContainsNotExistedArgs": "Das Skript enthält nicht existierende Argumente.",
     "argNameInvalid": "Muss mit einem Buchstaben, _ oder $ beginnen und nur Buchstaben, Ziffern, _ oder $ enthalten."

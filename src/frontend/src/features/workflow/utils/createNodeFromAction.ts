@@ -4,7 +4,7 @@ import { OFFSETS, SUBTITLES, TITLES } from './graph.constants';
 import { getDefaultSourceHandle, getDefaultTargetHandle, getNodeType } from './graph.handles';
 import { getBranchMaxX, rebalanceOperatorRightChains, shiftNodesByIds } from './graph.layout';
 import { collectDescendantNodeIds } from './graph.traversal';
-import { createMethodConfigFromOperation } from './requestConfig';
+import { createMethodConfigFromOperation, createMethodConfigFromWebhookUrl } from './requestConfig';
 import { createShortId } from '@shared/lib/createId';
 import { ALL_COLORS } from '../constants/colors';
 
@@ -18,7 +18,7 @@ function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeMo
   const nodeType = getNodeType(args.action.kind!);
   const nextId = createShortId(args.action.kind);
   const usedColors = new Set(args.nodes.map((node) => node.data.color?.toLowerCase()).filter(Boolean));
-  const nextColor = nodeType === 'connector' || nodeType === 'system'
+  const nextColor = nodeType === 'connector' || nodeType === 'system' || nodeType === 'trigger-connection'
     ? ALL_COLORS.find((color) => !usedColors.has(color.toLowerCase()))
     : undefined;
   const baseX = sourceNode.type === 'if' || sourceNode.type === 'loop'
@@ -36,12 +36,21 @@ function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeMo
     data: {
       title: args.action.kind === 'connector' && args.action.connector
         ? args.action.connector.title
+        : args.action.kind === 'trigger-connection' && args.action.triggerConnection
+        ? args.action.triggerConnection.connectionTitle
         : TITLES[args.action.kind!],
-      subtitle: args.action.methodName ?? SUBTITLES[args.action.kind!],
+      subtitle: args.action.kind === 'trigger-connection' && args.action.triggerConnection
+        ? args.action.triggerConnection.scheduleTitle
+        : args.action.methodName ?? SUBTITLES[args.action.kind!],
       kind: nodeType,
       connector: args.action.connector,
+      triggerConnection: args.action.triggerConnection,
       color: nextColor,
-      methodConfig: nodeType === 'connector' || nodeType === 'system' ? createMethodConfigFromOperation(args.action.methodOperation) : undefined,
+      methodConfig: nodeType === 'trigger-connection'
+        ? createMethodConfigFromWebhookUrl(args.action.triggerConnection?.webhookUrl ?? '')
+        : nodeType === 'connector' || nodeType === 'system'
+        ? createMethodConfigFromOperation(args.action.methodOperation)
+        : undefined,
     },
   };
   const newEdge: WorkflowEdgeModel = {

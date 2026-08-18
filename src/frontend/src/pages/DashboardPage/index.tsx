@@ -1,4 +1,6 @@
 import { Typography } from '@shared/ui/primitives/Typography'
+import { Input } from '@shared/ui/primitives/Input'
+import { Icon } from '@shared/ui/primitives/Icon'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import PageWrapper from '@pages/PageWrapper/PageWrapper'
 import { MetricTiles } from './components/MetricTiles'
@@ -20,10 +22,20 @@ export default function DashboardPage() {
     return (
         <PageWrapper>
             <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div>
-                    <Typography variant="headline">{t('header.title')}</Typography>
-                    <div style={{ marginTop: 4 }}>
-                        <Typography isSubtle>{t('header.subtitle')}</Typography>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+                    <div>
+                        <Typography variant="headline">{t('header.title')}</Typography>
+                        <div style={{ marginTop: 4 }}>
+                            <Typography isSubtle>{t('header.subtitle')}</Typography>
+                        </div>
+                    </div>
+
+                    <div style={{ width: 180, flexShrink: 0 }}>
+                        <Input
+                            readOnly
+                            value={t('header.dateRangeLabel')}
+                            leftSlot={<Icon name="report-analytics" size={16} isSubtle />}
+                        />
                     </div>
                 </div>
 

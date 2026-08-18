@@ -36,6 +36,9 @@ import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJob;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
+import com.becon.opencelium.backend.utility.TestNameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
@@ -50,6 +53,8 @@ import java.util.stream.Collectors;
 @Service
 public class SchedulerServiceImp implements SchedulerService {
 
+    private static final Logger log = LoggerFactory.getLogger(SchedulerServiceImp.class);
+
     private final ConnectionService connectionService;
     private final WebhookService webhookService;
     private final ConnectorService connectorService;
@@ -60,6 +65,7 @@ public class SchedulerServiceImp implements SchedulerService {
     private final SchedulerRepository schedulerRepository;
     private final NotificationRepository notificationRepository;
     private final ExecutionService executionService;
+    private final ExecutionArgumentService executionArgumentService;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
 
 
@@ -74,6 +80,7 @@ public class SchedulerServiceImp implements SchedulerService {
             NotificationRepository notificationRepository,
             SchedulerFactoryBean schedulerFactoryBean,
             ExecutionService executionService,
+            ExecutionArgumentService executionArgumentService,
             Mapper<Connection, ConnectionDTO> connectionMapper
     ) {
         this.connectionService = connectionService;
@@ -85,6 +92,7 @@ public class SchedulerServiceImp implements SchedulerService {
         this.notificationRepository = notificationRepository;
         this.schedulerRepository = schedulerRepository;
         this.executionService = executionService;
+        this.executionArgumentService = executionArgumentService;
         this.connectionMapper = connectionMapper;
         this.connectorService = connectorService;
     }
@@ -121,9 +129,14 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
+    @Transactional
     public void deleteById(int id) {
         Scheduler scheduler = getById(id);
         schedulingStrategy.deleteJob(scheduler);
+        // Strip execution history explicitly: the execution/execution_argument FKs are
+        // ON DELETE NO ACTION, and entity-level cascade misses rows written concurrently.
+        executionArgumentService.deleteBySchedulerId(id);
+        executionService.deleteBySchedulerId(id);
         schedulerRepository.delete(scheduler);
     }
 
@@ -132,7 +145,8 @@ public class SchedulerServiceImp implements SchedulerService {
         for (Integer id : schedulerIds) {
             try {
                 deleteById(id);
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.warn("Failed to delete scheduler {}", id, e);
             }
         }
     }
@@ -145,6 +159,13 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public List<Scheduler> findAllByTitleContains(String title) {
         return schedulerRepository.findAllByTitleContains(title);
+    }
+
+    @Override
+    public List<Scheduler> excludeTestSchedulers(List<Scheduler> schedulers) {
+        return schedulers.stream()
+                .filter(s -> TestNameUtils.isNotTestScheduler(s.getTitle()))
+                .toList();
     }
 
     @Override
@@ -237,7 +258,8 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public synchronized void startNow(Scheduler scheduler) {
-        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
+        // Schedules and webhooks must be able to trigger multiple executions.
+//        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
         schedulingStrategy.runJob(scheduler);
     }
 

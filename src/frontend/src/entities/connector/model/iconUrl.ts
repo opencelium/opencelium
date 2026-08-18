@@ -1,4 +1,5 @@
 import defaultConnectorImage from '@/assets/images/default_connector.png'
+import { runtimeConfig } from '@shared/config/runtimeConfig'
 
 export { defaultConnectorImage }
 
@@ -8,7 +9,7 @@ export const resolveConnectorIconUrl = (icon?: string | null): string | null => 
 
     const normalizedIcon = icon.replace(/^\.\//, '')
     if (normalizedIcon.startsWith('storage/')) {
-        const baseUrl = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '')
+        const baseUrl = runtimeConfig.apiUrl.replace(/\/$/, '')
         return `${baseUrl}/${normalizedIcon}`
     }
 

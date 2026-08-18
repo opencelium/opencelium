@@ -20,7 +20,7 @@
       "label": "Telefonnummer",
       "validation1": "Ungültiges Telefonnummernformat"
     },
-    "email": { "label": "E-Mail" },
+    "email": { "label": "E-Mail/Benutzername" },
     "currentPassword": {
       "label": "Aktuelles Passwort",
       "wrong": "Aktuelles Passwort ist falsch"

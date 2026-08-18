@@ -1,6 +1,7 @@
 import { genericApi } from '@/shared/api/genericApi'
 import { store } from '@app/store/store.ts'
 import { selectAccessToken } from '@entities/auth/model/authSelectors'
+import { runtimeConfig } from '@shared/config/runtimeConfig'
 
 export type ApiExecutorOptions = {
     ignoreError?: boolean
@@ -13,6 +14,8 @@ export type ApiExecutorOptions = {
     responseType?: 'arraybuffer' | 'blob'
     /** Text encoding used when responseType is 'arraybuffer'. Defaults to 'utf-8'. */
     encoding?: string
+    /** Skip invalidating the shared 'Entity' RTK Query cache tag after this request. */
+    skipEntityInvalidation?: boolean
 }
 
 type ApiExecutorArgs = {
@@ -24,7 +27,7 @@ type ApiExecutorArgs = {
 
 function resolveUrl(url: string): string {
     if (url.startsWith('http')) return url
-    const baseUrl = import.meta.env.VITE_API_URL as string
+    const baseUrl = runtimeConfig.apiUrl
     const path = url.startsWith('./') ? url.slice(1) : url.startsWith('/') ? url : `/${url}`
     return `${baseUrl}${path}`
 }

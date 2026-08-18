@@ -1,7 +1,7 @@
 {
   "list": {
     "title": "Schedules",
-    "subTitle": "Schedules determine when specific workflows are executed, either on a defined timetable or based on triggers. Status legend: <blueDot/> running, <greenDot/> last run succeeded, <redDot/> last run failed, <grayDot/> no cron and no run history. The number under the circle is a countdown to the next cron trigger.",
+    "subTitle": "Schedules determine when specific workflows are executed, either on a defined timetable or based on triggers. The number under a status circle is a countdown to its next cron trigger.<legend>Status legend: <legendRunning>Running</legendRunning><legendSucceeded>Last run succeeded</legendSucceeded><legendFailed>Last run failed</legendFailed><legendNone>No cron and no run history</legendNone></legend>",
     "searchPlaceholder": "Search by connection name",
     "columns": {
       "executions": "Executions",
@@ -14,7 +14,10 @@
       "debugMode": "Debug",
       "webhook": "Webhook"
     },
-    "noExecutions": "No running executions"
+    "noExecutions": "No running executions",
+    "confirmDelete": {
+      "message": "Are you sure you want to delete this schedule?"
+    }
   },
   "webhook": {
     "copied": "Webhook URL copied to clipboard",
@@ -32,7 +35,7 @@
     "tooltip": "Start execution",
     "success": "Schedule execution started",
     "error": {
-      "concurrentForbidden": "Another schedule for this connection is already running. Wait for it to finish before starting this one.",
+      "concurrentForbidden": "Another schedule for this workflow is already running. Wait for it to finish before starting this one.",
       "failed": "Could not start the schedule execution"
     }
   },
@@ -163,7 +166,7 @@
     "modes": {
       "create": {
         "header": "Create Schedule",
-        "subheader": "Follow the simple 3 steps to complete schedule creation.",
+        "subheader": "Configure a schedule to run a workflow automatically based on a cron expression.",
         "successMessage": "Schedule for connection \"{{connectionTitle}}\" was successfully created",
         "successMessageWithCron": "Schedule for connection \"{{connectionTitle}}\" with cron \"{{cronExp}}\" was successfully created"
       },
@@ -180,7 +183,7 @@
     },
     "recommendations": {
       "1": "Create Schedule",
-      "2": "Create Connection",
+      "2": "Create Workflow",
       "3": "Create Connector"
     },
     "steps": {

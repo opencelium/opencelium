@@ -1,4 +1,4 @@
-export type SecondarySidebarMode = 'connector' | 'operator';
+export type SecondarySidebarMode = 'connector' | 'operator' | 'trigger-connection';
 
 type TFn = (key: string, values?: Record<string, unknown>) => string;
 
@@ -11,6 +11,14 @@ export const getSecondarySidebarCopy = (
       t('sidebar.operatorStep.header'),
       t('sidebar.operatorStep.subtitle'),
       t('sidebar.operatorStep.searchPlaceholder'),
+    ] as const;
+  }
+
+  if (mode === 'trigger-connection') {
+    return [
+      t('sidebar.triggerConnectionStep.header'),
+      t('sidebar.triggerConnectionStep.subtitle'),
+      t('sidebar.triggerConnectionStep.searchPlaceholder'),
     ] as const;
   }
 

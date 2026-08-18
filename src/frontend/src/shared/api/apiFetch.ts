@@ -2,6 +2,7 @@ import {store} from '@app/store/store'
 import {selectAccessToken} from '@entities/auth/model/authSelectors'
 import {errorBus} from '@shared/errors/api/errorBus'
 import {normalizeError} from '@shared/errors/api/normalizeError'
+import {runtimeConfig} from '@shared/config/runtimeConfig'
 
 type ApiFetchOptions = {
     method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -43,7 +44,7 @@ function buildTimeoutError(path: string, timeoutMs: number): Error {
 
 function resolveUrl(path: string): string {
     if (/^https?:\/\//i.test(path)) return path
-    const baseUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? ''
+    const baseUrl = runtimeConfig.apiUrl
     return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`
 }
 
