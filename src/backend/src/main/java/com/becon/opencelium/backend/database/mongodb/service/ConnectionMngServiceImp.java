@@ -312,14 +312,14 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             return;
         }
 
-        List<JumpViolation> violations = collectJumpViolations(connectionMng.getFromConnector());
+        List<JumpViolation> violations = collectJumpViolations(connectionMng.getFromConnector(), connectionMng.getFieldBindings());
 
         if (!violations.isEmpty()) {
             throw new JumpValidationException(violations);
         }
     }
 
-    private List<JumpViolation> collectJumpViolations(ConnectorMng connector) {
+    private List<JumpViolation> collectJumpViolations(ConnectorMng connector, List<FieldBindingMng> fieldBindings) {
         if (connector == null || connector.getMethods() == null) {
             return Collections.emptyList();
         }
@@ -328,7 +328,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             return Collections.emptyList();
         }
 
-        JumpGraph graph = MongoJumpGraphBuilder.build(connector);
+        JumpGraph graph = MongoJumpGraphBuilder.build(connector, fieldBindings);
 
         List<JumpViolation> jumpViolations = new ArrayList<>();
 

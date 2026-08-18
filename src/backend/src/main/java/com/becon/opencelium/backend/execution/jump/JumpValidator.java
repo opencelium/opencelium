@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.execution.jump;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
  *   <li>a method cannot jump into a loop or if body it is not part of;</li>
  *   <li>a method may escape outward through enclosing ifs, up to the nearest loop;</li>
  *   <li>the target must be at a reachable level and run strictly after the source;</li>
+ *   <li>no method that still executes may consume output of a method the jump would skip.</li>
  * </ul>
  * plus the two structural guards for an absent target and a jump to self.
  *
@@ -113,7 +116,33 @@ public final class JumpValidator {
                     source, target);
         }
 
-        return List.of();
+        // No method the jump would skip may be referenced by a method that still executes.
+        // Because a forward jump only deletes the skipped range and keeps the survivors in order,
+        // a reference breaks exactly when the method it points at falls inside that range.
+        Set<String> skippedColors = new HashSet<>();
+        for (JumpNode skipped : graph.methodsBetween(source, target)) {
+            if (skipped.color() != null) {
+                skippedColors.add(skipped.color());
+            }
+        }
+        if (skippedColors.isEmpty()) {
+            return List.of();
+        }
+        List<JumpViolation> violations = new ArrayList<>();
+        for (JumpNode consumer : graph.executablesAtOrAfter(target)) {
+            for (String referenced : consumer.referencedColors()) {
+                if (skippedColors.contains(referenced)) {
+                    violations.add(new JumpViolation(
+                            JumpValidationCode.JUMP_SKIPS_REFERENCED_METHOD,
+                            "'" + name(consumer) + "' uses data from '" + referenced
+                                    + "', which the jump '" + source.index() + "' → '"
+                                    + target.index() + "' would skip. "
+                                    + "Remove that reference or choose a different target.",
+                            source.color(), source.index(), target.color(), target.index()));
+                }
+            }
+        }
+        return violations;
     }
 
     /**
@@ -138,5 +167,9 @@ public final class JumpValidator {
                 code, message,
                 source.color(), source.index(),
                 target.color(), target.index()));
+    }
+
+    private static String name(JumpNode node) {
+        return node.color() != null ? node.color() : node.index();
     }
 }
