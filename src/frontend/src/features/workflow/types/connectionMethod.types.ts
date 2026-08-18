@@ -5,6 +5,10 @@ export interface Method {
 	name: string;
 	color: string;
 	label?: string;
+	/** The joint's target: a node id on the legacy (node-backed) connection, a
+	 * workflow index on the payload-shaped one — the two spaces never mix in one
+	 * connection object. */
+	jumpTo?: string;
 	dataAggregator?: number | null;
 	methodType: MethodType;
 	request: MethodRequest;

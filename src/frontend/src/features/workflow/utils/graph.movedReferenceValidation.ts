@@ -6,7 +6,7 @@ import {
   collectReferenceColors,
   normalizeReferenceColor,
 } from './graph.referenceColors';
-import { isWorkflowReferenceVisible } from './graph.referenceVisibility';
+import { collectWorkflowJumpLinks, isWorkflowReferenceVisible } from './graph.referenceVisibility';
 
 const isReferenceConsumer = (node: WorkflowNodeModel) =>
   node.type === 'connector'
@@ -23,6 +23,7 @@ export const findInvalidReferencesToMovedProviders = (
   providerColorOverrides = new Map<string, string>(),
 ) => {
   const indexes = buildWorkflowIndexes(nodes, edges);
+  const jumps = collectWorkflowJumpLinks(nodes, indexes);
   const providerByColor = new Map<string, WorkflowNodeModel>();
   const nodeByColor = new Map<string, WorkflowNodeModel>();
   const fieldBindingRefsByConsumer = new Map<string, Set<string>>();
@@ -72,7 +73,7 @@ export const findInvalidReferencesToMovedProviders = (
         const provider = providerByColor.get(providerColorOverrides.get(sourceColor) ?? sourceColor);
         const providerIndex = provider ? indexes.get(provider.id) : undefined;
         return provider && providerIndex
-          && isWorkflowReferenceVisible(providerIndex, indexes.get(node.id))
+          && isWorkflowReferenceVisible(providerIndex, indexes.get(node.id), jumps)
           ? []
           : [{ consumerNodeId: node.id, sourceColor }];
       });

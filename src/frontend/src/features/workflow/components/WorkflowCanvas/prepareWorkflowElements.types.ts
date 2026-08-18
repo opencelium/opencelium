@@ -8,7 +8,7 @@ export type PrepareWorkflowParams = Pick<
 	WorkflowCanvasProps,
 	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' |
 	'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor' |
-	'jointSourceId' | 'jointTargetIds' | 'onRemoveJoint'
+	'jointSourceId' | 'jointVerdicts' | 'onRemoveJoint'
 > & {
 	cache?: PrepareWorkflowCache;
 	testRunScope?: TestRunScope;
@@ -43,8 +43,11 @@ export type WorkflowTopology = {
 	leafById: Map<string, LeafInfo>;
 };
 
+export type JointEdgeCache = Map<string, { sig: string; out: WorkflowEdgeModel }>;
+
 export type PrepareWorkflowCache = {
 	nodes: Map<string, NodeCacheEntry>;
 	edges: Map<string, EdgeCacheEntry>;
+	jointEdges: JointEdgeCache;
 	topology?: WorkflowTopology;
 };

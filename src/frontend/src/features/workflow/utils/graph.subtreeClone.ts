@@ -8,6 +8,7 @@ import {
 } from './graph.referenceColors';
 import {
   compareWorkflowIndexes,
+  collectWorkflowJumpLinks,
   isWorkflowReferenceVisible,
 } from './graph.referenceVisibility';
 import { getOperatorBottomBranch } from './graph.traversal';
@@ -66,6 +67,7 @@ export const cloneWorkflowSubtree = (
   const sourceMethodNodes = sourceNodes.filter(isMethodNode);
   const methodNodes = allNodes.filter(isMethodNode);
   const indexes = buildWorkflowIndexes(allNodes, allEdges);
+  const jumps = collectWorkflowJumpLinks(allNodes, indexes);
 
   sourceNodes.forEach((node) => {
     idMap.set(node.id, createShortId(node.type));
@@ -80,7 +82,7 @@ export const cloneWorkflowSubtree = (
     const consumerIndex = indexes.get(consumer.id);
     const candidates = methodNodes
       .filter((node) => normalizeReferenceColor(node.data.color) === sourceColor)
-      .filter((node) => isWorkflowReferenceVisible(indexes.get(node.id), consumerIndex))
+      .filter((node) => isWorkflowReferenceVisible(indexes.get(node.id), consumerIndex, jumps))
       .sort((left, right) => compareWorkflowIndexes(
         indexes.get(right.id) ?? '', indexes.get(left.id) ?? '',
       ));
@@ -93,7 +95,7 @@ export const cloneWorkflowSubtree = (
 
     return sourceMethodNodes
       .filter((node) => node.data.subtitle === externalTitle || node.data.title === externalTitle)
-      .filter((node) => isWorkflowReferenceVisible(indexes.get(node.id), consumerIndex))
+      .filter((node) => isWorkflowReferenceVisible(indexes.get(node.id), consumerIndex, jumps))
       .sort((left, right) => compareWorkflowIndexes(
         indexes.get(right.id) ?? '', indexes.get(left.id) ?? '',
       ))[0] ?? externalCandidate;
@@ -126,6 +128,10 @@ export const cloneWorkflowSubtree = (
     data: replaceColors(cloneValue({
       ...node.data,
       color: isMethodNode(node) ? clonedColorBySourceId.get(node.id) : node.data.color,
+      // A joint only survives a copy when its target came along: point it at the
+      // target's clone, and drop it when the target stayed behind (a joint out of
+      // the copied subtree would break the same-scope rule anyway).
+      jumpTo: node.data.jumpTo ? idMap.get(node.data.jumpTo) : undefined,
     }), node) as WorkflowNodeModel['data'],
   }));
   const edges = sourceEdges.map((item) => ({

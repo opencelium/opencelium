@@ -1,17 +1,42 @@
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { buildWorkflowIndexes } from '../api/connectionPayload';
 
-const isOperatorNode = (node: WorkflowNodeModel) => node.type === 'if' || node.type === 'loop';
+/** Why a node cannot be the target of a joint started on another node. */
+export type JointRejectionReason =
+  | 'self'
+  | 'not-a-method'
+  | 'different-loop-scope'
+  | 'backwards'
+  | 'skips-referenced-method';
 
-const parentIndex = (index: string) => {
-  const segments = index.split('_');
-  segments.pop();
-  return segments.join('_');
+/** The parts of a field binding this module reads: which method's data flows
+ * into which. The full legacy binding shape is untyped elsewhere. */
+export type JointFieldBinding = {
+  from?: { color?: string }[];
+  to?: { color?: string }[];
 };
 
-const lastSegment = (index: string) => {
+export type JointTargetVerdict =
+  | { valid: true }
+  | { valid: false; reason: JointRejectionReason; blockingNodeId?: string };
+
+const VALID: JointTargetVerdict = { valid: true };
+
+const isMethodNode = (node: WorkflowNodeModel) =>
+  node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection';
+
+/**
+ * Index of the innermost LOOP the node at `index` runs inside, or '' when it
+ * runs outside every loop. IF operators are deliberately transparent here: they
+ * change nesting level but not the loop a method belongs to.
+ */
+const enclosingLoopIndex = (index: string, nodeByIndex: Map<string, WorkflowNodeModel>) => {
   const segments = index.split('_');
-  return Number(segments[segments.length - 1]);
+  for (let length = segments.length - 1; length >= 1; length -= 1) {
+    const prefix = segments.slice(0, length).join('_');
+    if (nodeByIndex.get(prefix)?.type === 'loop') return prefix;
+  }
+  return '';
 };
 
 const compareIndex = (left: string, right: string) => {
@@ -28,9 +53,11 @@ const compareIndex = (left: string, right: string) => {
 
 const HEX_COLOR_RE = /#[0-9A-Fa-f]{6}/g;
 
+/** Colors of the methods whose data `target` consumes — its own references plus
+ * anything mapped into it through a field binding. */
 const referencedColorsOf = (
   target: WorkflowNodeModel,
-  fieldBindings: any[],
+  fieldBindings: readonly JointFieldBinding[],
 ): Set<string> => {
   const colors = new Set<string>();
   const config = target.data.methodConfig;
@@ -47,7 +74,7 @@ const referencedColorsOf = (
   const targetColor = target.data.color?.toLowerCase();
   if (targetColor && Array.isArray(fieldBindings)) {
     for (const binding of fieldBindings) {
-      const toColors = (binding?.to ?? []).map((item: any) => item?.color?.toLowerCase()).filter(Boolean);
+      const toColors = (binding?.to ?? []).map((item) => item?.color?.toLowerCase());
       if (!toColors.includes(targetColor)) continue;
       for (const from of binding?.from ?? []) {
         if (from?.color) colors.add(String(from.color).toLowerCase());
@@ -57,67 +84,100 @@ const referencedColorsOf = (
   return colors;
 };
 
-export const getNodeIndexMap = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[]) =>
-  buildWorkflowIndexes(nodes, edges);
-
-export const getValidJumpTargetIds = (
+/**
+ * Verdict per node for a joint started on `sourceId`. A joint may only run
+ * forward between two methods that live in the same loop scope: both outside
+ * every loop, or both inside the very same loop. Nesting level does not have to
+ * match — an IF operator changes the level but not the loop, so a joint may
+ * leave or enter an IF branch — but a loop boundary is never crossed, so a
+ * method in loop1 can never reach a method inside a loop2 nested under it. A
+ * joint may also not skip over a method whose response the target consumes.
+ */
+export const evaluateJointTargets = (
   sourceId: string,
   nodes: WorkflowNodeModel[],
   edges: WorkflowEdgeModel[],
-  fieldBindings: any[] = [],
-): Set<string> => {
+  fieldBindings: readonly JointFieldBinding[] = [],
+): Map<string, JointTargetVerdict> => {
+  const verdicts = new Map<string, JointTargetVerdict>();
   const indexes = buildWorkflowIndexes(nodes, edges);
-  const nodeById = new Map(nodes.map((node) => [node.id, node]));
-  const idByIndex = new Map<string, string>();
-  indexes.forEach((index, id) => idByIndex.set(index, id));
-
-  const source = nodeById.get(sourceId);
+  const nodeByIndex = new Map<string, WorkflowNodeModel>();
+  nodes.forEach((node) => {
+    const index = indexes.get(node.id);
+    if (index != null) nodeByIndex.set(index, node);
+  });
+  const source = nodes.find((node) => node.id === sourceId);
   const sourceIndex = indexes.get(sourceId);
-  if (!source || isOperatorNode(source) || sourceIndex == null) return new Set();
+  if (!source || !isMethodNode(source) || sourceIndex == null) return verdicts;
 
-  const reachable = new Map<string, string>();
-  reachable.set(parentIndex(sourceIndex), sourceIndex);
+  const sourceLoop = enclosingLoopIndex(sourceIndex, nodeByIndex);
 
-  const segments = sourceIndex.split('_');
-  for (let length = segments.length - 1; length >= 1; length -= 1) {
-    const prefix = segments.slice(0, length).join('_');
-    const containerId = idByIndex.get(prefix);
-    const container = containerId ? nodeById.get(containerId) : undefined;
-    if (!container || !isOperatorNode(container)) continue;
-    if (container.type === 'loop') break;
-    reachable.set(parentIndex(prefix), prefix);
-  }
-
-  const validTargetIds = new Set<string>();
   for (const node of nodes) {
-    if (node.id === sourceId) continue;
-    if (isOperatorNode(node)) continue;
+    if (node.id === sourceId) {
+      verdicts.set(node.id, { valid: false, reason: 'self' });
+      continue;
+    }
+    if (!isMethodNode(node)) {
+      verdicts.set(node.id, { valid: false, reason: 'not-a-method' });
+      continue;
+    }
     const targetIndex = indexes.get(node.id);
-    if (targetIndex == null) continue;
-    const anchorIndex = reachable.get(parentIndex(targetIndex));
-    if (anchorIndex == null) continue;
-    if (lastSegment(targetIndex) <= lastSegment(anchorIndex)) continue;
-
-    const referenced = referencedColorsOf(node, fieldBindings);
-    if (referenced.size > 0) {
-      let skipsReferenced = false;
-      for (const other of nodes) {
-        if (isOperatorNode(other)) continue;
-        const otherIndex = indexes.get(other.id);
-        if (otherIndex == null) continue;
-        if (compareIndex(otherIndex, sourceIndex) <= 0) continue;
-        if (compareIndex(otherIndex, targetIndex) >= 0) continue;
-        const color = other.data.color?.toLowerCase();
-        if (color && referenced.has(color)) {
-          skipsReferenced = true;
-          break;
-        }
-      }
-      if (skipsReferenced) continue;
+    if (targetIndex == null || enclosingLoopIndex(targetIndex, nodeByIndex) !== sourceLoop) {
+      verdicts.set(node.id, { valid: false, reason: 'different-loop-scope' });
+      continue;
+    }
+    if (compareIndex(targetIndex, sourceIndex) <= 0) {
+      verdicts.set(node.id, { valid: false, reason: 'backwards' });
+      continue;
     }
 
-    validTargetIds.add(node.id);
+    const referenced = referencedColorsOf(node, fieldBindings);
+    const skipped = referenced.size > 0
+      ? nodes.find((other) => {
+        if (!isMethodNode(other)) return false;
+        const otherIndex = indexes.get(other.id);
+        if (otherIndex == null) return false;
+        if (compareIndex(otherIndex, sourceIndex) <= 0) return false;
+        if (compareIndex(otherIndex, targetIndex) >= 0) return false;
+        const color = other.data.color?.toLowerCase();
+        return !!color && referenced.has(color);
+      })
+      : undefined;
+    if (skipped) {
+      verdicts.set(node.id, {
+        valid: false,
+        reason: 'skips-referenced-method',
+        blockingNodeId: skipped.id,
+      });
+      continue;
+    }
+
+    verdicts.set(node.id, VALID);
   }
 
-  return validTargetIds;
+  return verdicts;
+};
+
+/**
+ * Drops joints that stopped being legal — the target is gone, or the graph was
+ * rearranged so source and target no longer share a loop scope. Returns the
+ * nodes unchanged (same identity) when every joint still holds.
+ */
+export const pruneInvalidJoints = (
+  nodes: WorkflowNodeModel[],
+  edges: WorkflowEdgeModel[],
+  fieldBindings: readonly JointFieldBinding[] = [],
+): { nodes: WorkflowNodeModel[]; removedSourceIds: string[] } => {
+  const removedSourceIds: string[] = [];
+  const nextNodes = nodes.map((node) => {
+    const targetId = node.data.jumpTo;
+    if (!targetId) return node;
+    const verdicts = evaluateJointTargets(node.id, nodes, edges, fieldBindings);
+    if (verdicts.get(targetId)?.valid) return node;
+    removedSourceIds.push(node.id);
+    return { ...node, data: { ...node.data, jumpTo: undefined } };
+  });
+  return removedSourceIds.length > 0
+    ? { nodes: nextNodes, removedSourceIds }
+    : { nodes, removedSourceIds };
 };

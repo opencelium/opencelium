@@ -929,11 +929,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       centerStartVersion={workflow.centerStartVersion}
       onInit={workflow.setReactFlowInstance}
       activeAction={workflow.sidebarAction}
-              jointSourceId={workflow.jointSourceId}
-              jointTargetIds={workflow.jointTargetIds}
-              onConfirmJoint={workflow.onConfirmJoint}
-              onCancelJoint={workflow.onCancelJoint}
-              onRemoveJoint={workflow.onRemoveJoint}
+      jointSourceId={workflow.jointSourceId}
+      jointVerdicts={workflow.jointVerdicts}
+      onConfirmJoint={workflow.onConfirmJoint}
+      onCancelJoint={workflow.onCancelJoint}
+      onRemoveJoint={workflow.onRemoveJoint}
       onNodesChange={workflow.onNodesChange}
       onEdgesChange={workflow.onEdgesChange}
       onConnect={workflow.onConnect}

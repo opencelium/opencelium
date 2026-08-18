@@ -1,4 +1,4 @@
-import { Controls, MarkerType, Panel, ReactFlow } from '@xyflow/react';
+import { Controls, Panel, ReactFlow } from '@xyflow/react';
 import type { ReactFlowInstance } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
@@ -51,7 +51,7 @@ export function WorkflowCanvas({
   isAnyNodeDragging = false,
   activeAction,
   jointSourceId,
-  jointTargetIds,
+  jointVerdicts,
   onConfirmJoint,
   onCancelJoint,
   onRemoveJoint,
@@ -79,7 +79,7 @@ export function WorkflowCanvas({
     : undefined;
   const appliedViewportKey = useRef<string | undefined>(undefined);
   const centeredStartVersion = useRef<number>(0);
-  const prepareCacheRef = useRef<PrepareWorkflowCache>({ nodes: new Map(), edges: new Map() });
+  const prepareCacheRef = useRef<PrepareWorkflowCache>({ nodes: new Map(), edges: new Map(), jointEdges: new Map() });
 
   // null outside a TestRunProvider (e.g. a canvas reused without the page wiring).
   const testRun = useTestRun();
@@ -129,6 +129,17 @@ export function WorkflowCanvas({
     window.addEventListener('keydown', onEscape);
     return () => window.removeEventListener('keydown', onEscape);
   }, []);
+  // Escape is also the joint picker's way out: clicking a node that cannot be
+  // the target no longer cancels (it explains itself instead — see onNodeClick),
+  // so this listener is mounted only for as long as a joint is being drawn.
+  useEffect(() => {
+    if (!jointSourceId) return;
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onCancelJoint?.();
+    };
+    window.addEventListener('keydown', onEscape);
+    return () => window.removeEventListener('keydown', onEscape);
+  }, [jointSourceId, onCancelJoint]);
 
   const { preparedEdges, preparedNodes } = prepareWorkflowElements({
     nodes,
@@ -140,35 +151,13 @@ export function WorkflowCanvas({
     onDeleteNode: stableOnDeleteNode,
     onOpenAggregatorEditor: stableOnOpenAggregatorEditor,
     jointSourceId,
-    jointTargetIds,
+    jointVerdicts,
     onRemoveJoint: stableOnRemoveJoint,
     cache: prepareCacheRef.current,
     testRunScope,
     isEditLocked,
     testRunFailureDismissed,
   });
-
-  const nodeIdSet = new Set(nodes.map((node) => node.id));
-  const jumpEdges = nodes.flatMap((node) => {
-    const targetId = node.data.jumpTo;
-    if (!targetId || targetId === node.id || !nodeIdSet.has(targetId)) return [];
-    return [{
-      id: `jump-${node.id}`,
-      source: node.id,
-      target: targetId,
-      sourceHandle: 'right',
-      targetHandle: 'left',
-      type: 'default',
-      selectable: false,
-      deletable: false,
-      focusable: false,
-      animated: false,
-      style: { stroke: 'var(--color-status-success-fg, #52c41a)', strokeWidth: 1.5, strokeDasharray: '5 4' },
-      markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-status-success-fg, #52c41a)' },
-      data: { jump: true },
-    }];
-  });
-  const renderedEdges = [...preparedEdges, ...jumpEdges] as unknown as WorkflowEdgeModel[];
 
   useEffect(() => {
     if (!restoredViewport || !reactFlowInstance.current) return;
@@ -205,7 +194,7 @@ export function WorkflowCanvas({
     <div className="canvasCard">
       <ReactFlow<WorkflowNodeModel, WorkflowEdgeModel>
         nodes={preparedNodes}
-        edges={renderedEdges}
+        edges={preparedEdges}
         proOptions={{ hideAttribution: true }}
         onInit={(instance) => {
           reactFlowInstance.current = instance;
@@ -225,8 +214,7 @@ export function WorkflowCanvas({
         onNodeDragStop={onNodeDragStop}
         onNodeClick={(_, node) => {
           if (!jointSourceId) return;
-          if (jointTargetIds?.has(node.id)) onConfirmJoint?.(node.id);
-          else onCancelJoint?.();
+          if (jointVerdicts?.get(node.id)?.valid) onConfirmJoint?.(node.id);
         }}
         onNodeDoubleClick={isEditLocked ? undefined : onNodeDoubleClick}
         onPaneClick={onPaneClick}
