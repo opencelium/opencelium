@@ -296,7 +296,8 @@
     "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response.",
     "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
     "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector.",
-    "testRunIteration": "{{iterator}} = {{count}}"
+    "testRunIteration": "{{iterator}} = {{count}}",
+    "skipToNextIteration": "Jump to next iteration"
   },
   "saveDialog": {
     "title": "Save Version",
@@ -321,6 +322,10 @@
     "dialogTitleLoop": "LOOP Condition",
     "addCondition": "Add Condition",
     "addGroup": "Add Group",
+    "comparisonUnknown": "Not available yet",
+    "comparisonError": "Can't be compared",
+    "comparisonTrue": "True",
+    "comparisonFalse": "False",
     "loopInfo": {
       "iteratorLabel": "Loop variable",
       "iteratorHelp": "Use this variable inside the loop steps to read the current item:",
@@ -406,7 +411,8 @@
     "body": "Body",
     "header": "Header",
     "requestUrl": "Request Url",
-    "response": "Response"
+    "response": "Response",
+    "liveBadge": "Live execution result"
   },
   "response": {
     "success": "Success",
@@ -456,6 +462,27 @@
       "title": "Optimization available",
       "message": "There are {{count}} references that can be optimized for better performance. Would you like to apply this optimization before saving?",
       "message_one": "There is a reference that can be optimized for better performance. Would you like to apply this optimization before saving?"
+    },
+    "debugValue": {
+      "show": "Show value",
+      "hide": "Hide value",
+      "title": "Value",
+      "idleHint": "Not shown yet. Click the eye icon to resolve this value from the current test run.",
+      "loadingHint": "Resolving…",
+      "noReferences": "No references",
+      "references": "References",
+      "resultLabel": "RESULT_VAR · {{type}}",
+      "errorTitle": "Error",
+      "errorNotPaused": "Start a paused test run to resolve this from live execution data.",
+      "errorMethodFailed": "This method's execution failed this run — its request may be incomplete.",
+      "errorFieldNotFound": "Could not find a value for this field in the request that was actually sent.",
+      "errorNotRun": "This method hasn't run in the current test session yet. Run or continue the paused test, then check again.",
+      "status": {
+        "idle": "idle",
+        "loading": "running",
+        "error": "error",
+        "stale": "stale — script changed"
+      }
     }
   },
   "description": {
@@ -483,9 +510,14 @@
     "wholeArray": "The whole array",
     "iteratorLoop": "({{iterator}} loop)",
     "noVariableReferences": "No variable references",
+    "more": "more",
     "confirmDelete": {
       "title": "Delete reference",
       "message": "Do you really want to delete this reference?"
+    },
+    "valueDialog": {
+      "copyTooltip": "Copy value",
+      "copySuccess": "Value copied to clipboard"
     }
   },
   "refGenerator": {
