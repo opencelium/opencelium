@@ -2,6 +2,7 @@ import { store } from '@app/store/store'
 import { selectAccessToken } from '@entities/auth/model/authSelectors'
 import { apiExecutor } from '@shared/api/apiExecutor'
 import { baseApi } from '@shared/api/baseApi'
+import { runtimeConfig } from '@shared/config/runtimeConfig'
 
 const CHECK_URL = (name: string) => `/template/check/${encodeURIComponent(name)}`
 const UPLOAD_URL = '/storage/template'
@@ -14,7 +15,7 @@ export const stripTemplateExtension = (fileName: string) => fileName.replace(/\.
 
 async function uploadFile(file: File): Promise<{ id: string; path: string }> {
     const token = selectAccessToken(store.getState())
-    const baseUrl = (import.meta.env.VITE_API_URL as string) ?? ''
+    const baseUrl = runtimeConfig.apiUrl
     const formData = new FormData()
     formData.append('file', file)
 

@@ -11,6 +11,7 @@ const wrapperStyle = {display: 'inline-flex', alignItems: 'center', gap: 8} as c
 export const ConnectorTitleCell = ({row, value}: Props) => (
     <span style={wrapperStyle}>
         <ConnectorIcon icon={row.icon} />
-        <span>{String(value ?? '')}</span>
+
+        <span style={{ whiteSpace: 'normal' }}>{String(value ?? '')}</span>
     </span>
 )

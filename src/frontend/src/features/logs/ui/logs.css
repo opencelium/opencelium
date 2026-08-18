@@ -7,3 +7,65 @@
 .oc-log-row:focus-within .oc-copy-on-hover {
   opacity: 1;
 }
+
+/* Plays once when the test-run reveal scrolls to the element the error
+   happened on (see LiveLogElementRow's `justRevealed`) — same ring-pulse
+   technique as oc-log-status-pulse below, as an inset border instead of a
+   background fill. */
+@keyframes oc-log-row-error-pulse {
+  0% {
+    box-shadow: inset 0 0 0 0 color-mix(in srgb, var(--color-status-error-fg) 70%, transparent);
+  }
+  30% {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-status-error-fg) 45%, transparent);
+  }
+  100% {
+    box-shadow: inset 0 0 0 0 color-mix(in srgb, var(--color-status-error-fg) 0%, transparent);
+  }
+}
+.oc-log-row--error-target {
+  animation: oc-log-row-error-pulse 1.5s ease-out;
+}
+
+/* Same technique as oc-log-row-error-pulse above, in the neutral action color
+   instead of error red — plays once when the debugger's pause reveal scrolls
+   to the paused-on element (see LiveLogElementRow's/LogElementRow's
+   `justPaused`), so pausing on a perfectly successful node never reads as a
+   failure. */
+@keyframes oc-log-row-paused-pulse {
+  0% {
+    box-shadow: inset 0 0 0 0 color-mix(in srgb, var(--color-action-primary) 70%, transparent);
+  }
+  30% {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-action-primary) 45%, transparent);
+  }
+  100% {
+    box-shadow: inset 0 0 0 0 color-mix(in srgb, var(--color-action-primary) 0%, transparent);
+  }
+}
+.oc-log-row--paused-target {
+  animation: oc-log-row-paused-pulse 1.5s ease-out;
+}
+
+/* Same ring-pulse as ConnectorStatusDot (features/workflow/connector-status),
+   played on the row's status dot when it flips live (e.g. PENDING -> FAIL). */
+.oc-log-status-dot {
+  transition: background-color 0.25s ease;
+}
+.oc-log-status-dot--changed {
+  animation: oc-log-status-pulse 1s ease-out;
+}
+@keyframes oc-log-status-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 70%, transparent);
+  }
+  30% {
+    transform: scale(1.6);
+    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 45%, transparent);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px color-mix(in srgb, currentColor 0%, transparent);
+  }
+}

@@ -45,7 +45,9 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -72,7 +74,18 @@ public class InvokerServiceImp implements InvokerService {
     @Autowired
     private InvokerSyncService invokerSyncService;
 
-    private final Path filePath = Paths.get(PathConstant.INVOKER);
+    private final Path filePath;
+
+    public InvokerServiceImp() {
+        this.filePath = Paths.get(PathConstant.INVOKER);
+    }
+
+    // Visible for testing: points the service at a temporary invoker directory.
+    public InvokerServiceImp(InvokerContainer invokerContainer, InvokerSyncService invokerSyncService, Path filePath) {
+        this.invokerContainer = invokerContainer;
+        this.invokerSyncService = invokerSyncService;
+        this.filePath = filePath;
+    }
 
     @Override
     public FunctionInvoker getTestFunction(String invokerName) {
@@ -130,20 +143,18 @@ public class InvokerServiceImp implements InvokerService {
 
     @Override
     public void deleteInvokerFile(String name) {
-        try {
-            Path file = findFileByInvokerName(name).toPath();
-            if (invokerContainer.existsByName(name)) {
-                invokerContainer.remove(name);
+        // Delete the file first: if the OS refuses (e.g. the file is locked on Windows),
+        // the container keeps the invoker so the UI stays consistent with the disk.
+        findInvokerFile(name).ifPresent(file -> {
+            try {
+                Files.deleteIfExists(file.toPath().toAbsolutePath());
+            } catch (IOException e) {
+                throw new StorageException(
+                        "Failed to delete invoker file '" + file.getName() + "': " + e.getMessage(), e);
             }
-            if (exists(file)) {
-                Files.delete(file.toAbsolutePath());
-
-                // delete invoker sync record
-                invokerSyncService.delete(name);
-            }
-        } catch (IOException e) {
-            throw new StorageException("Failed to delete stored file", e);
-        }
+        });
+        invokerContainer.remove(name);
+        invokerSyncService.delete(name);
     }
 
     @Override
@@ -428,23 +439,27 @@ public class InvokerServiceImp implements InvokerService {
         if (!FileNameUtils.getExtension(file.getName()).equals("xml")) {
             return null;
         }
+        if (!file.exists()) {
+            return null;
+        }
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return file.exists() ? dBuilder.parse(file) : null;
+        try (InputStream is = new FileInputStream(file)) {
+            return dBuilder.parse(is);
+        }
     }
 
     @Override
     public List<Document> getAllInvokerDocuments() {
-        try {
-            Stream<Path> allInvokers = Files.walk(filePath, 1)
-                    .filter(path -> !path.equals(filePath))
-                    .map(filePath::relativize);
+        try (Stream<Path> allInvokers = Files.walk(filePath, 1)
+                .filter(path -> !path.equals(filePath))
+                .map(filePath::relativize)) {
 
             return allInvokers.map(p -> new File(filePath + "/" + p.getFileName()))
                     .filter(f -> f.getName().endsWith(".xml"))
                     .map(file -> {
-                        try {
+                        try (InputStream is = new FileInputStream(file)) {
                             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                            return dBuilder.parse(file);
+                            return dBuilder.parse(is);
                         } catch (Exception e) {
                             log.error("Failed to parse Invoker[name: {}]", file.getName());
                             e.printStackTrace();
@@ -467,20 +482,28 @@ public class InvokerServiceImp implements InvokerService {
 
     @Override
     public File findFileByInvokerName(String invokerName) {
-        File directory = new File(PathConstant.INVOKER);
-        File[] files = directory.listFiles((dir, name) -> name.endsWith(".xml"));
+        return findInvokerFile(invokerName)
+                .orElseThrow(() -> new RuntimeException("Invoker '" + invokerName + "' not found."));
+    }
 
-        if (files != null) {
-            Optional<File> foundFile = Arrays.stream(files)
-                    .filter(file -> hasInvokerName(file, invokerName))
-                    .findFirst();
-
-            if (foundFile.isEmpty()) {
-                throw new RuntimeException("Invoker " + "'" + invokerName + "' not found.");
-            }
-            return foundFile.get();
+    private Optional<File> findInvokerFile(String invokerName) {
+        File[] files = filePath.toFile().listFiles((dir, name) -> name.endsWith(".xml"));
+        if (files == null) {
+            return Optional.empty();
         }
-        throw new RuntimeException("Invokers not found.");
+
+        List<File> matches = Arrays.stream(files)
+                .filter(file -> hasInvokerName(file, invokerName))
+                .sorted(Comparator.comparing(File::getName))
+                .toList();
+
+        if (matches.size() > 1) {
+            log.warn("Multiple invoker files declare the name '{}': {}. Using '{}'.",
+                    invokerName,
+                    matches.stream().map(File::getName).collect(Collectors.joining(", ")),
+                    matches.get(0).getName());
+        }
+        return matches.isEmpty() ? Optional.empty() : Optional.of(matches.get(0));
     }
 
     private Boolean hasInvokerName(File file, String nodeName) {
@@ -495,10 +518,10 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     private static String getNodeValue(File xmlFile, String xpathExpression) {
-        try {
+        try (InputStream is = new FileInputStream(xmlFile)) {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(xmlFile);
+            Document doc = builder.parse(is);
 
             XPathFactory xPathFactory = XPathFactory.newInstance();
             XPath xpath = xPathFactory.newXPath();

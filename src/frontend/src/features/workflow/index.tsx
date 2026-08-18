@@ -3,28 +3,40 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
+import { Splitter } from '@shared/ui/primitives/Splitter';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { apiExecutor } from '@shared/api/apiExecutor';
 import './styles.css';
-import { NodeContextMenu } from './components/NodeContextMenu';
-import { WorkflowCanvas } from './components/WorkflowCanvas';
-import { WorkflowHeader } from './components/WorkflowHeader';
-import { WorkflowLogs } from './components/WorkflowLogs';
-import { WorkflowSidebar } from './components/WorkflowSidebar';
-import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
-import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
-import { HistoryPanel } from './components/header/HistoryPanel';
-import { ShortcutsDialog } from './components/header/ShortcutsDialog';
+import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
+import { WorkflowCanvas } from './components/WorkflowCanvas/WorkflowCanvas';
+import { WorkflowHeader } from './components/WorkflowHeader/WorkflowHeader';
+import { WorkflowLogs } from './components/WorkflowLogs/WorkflowLogs';
+import type { WorkflowLogsPanelState } from './components/WorkflowLogs/WorkflowLogs.types';
+import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
+import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill/WorkflowSchedulesPill';
+import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel/WorkflowSchedulesPanel';
+import { HistoryPanel } from './components/header/HistoryPanel/HistoryPanel';
+import { ShortcutsDialog } from './components/header/ShortcutsDialog/ShortcutsDialog';
+import { AssignCategoryDialog } from './components/header/AssignCategoryDialog/AssignCategoryDialog';
 import { ConditionBuilderDialog } from './components/condition-builder/ConditionBuilder';
-import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
+import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog/MethodConfigDialog';
+import { ResponseDialog } from './components/request-editor/ResponseDialog/ResponseDialog';
+import { AggregatorConfigDialog } from './components/aggregator/AggregatorConfigDialog';
+import { TemplateConnectorMappingDialog } from './components/template/TemplateConnectorMappingDialog/TemplateConnectorMappingDialog';
+import { extractConnectorGroups, applyConnectorMapping, type ConnectorMappingGroup } from './components/template/templateConnectorMapping.utils';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
-import { useWorkflowPage } from './useWorkflowPage';
-import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
+import { useWorkflowPage } from './hooks/useWorkflowPage';
+import { useUnsavedChangesGuard } from './hooks/useUnsavedChangesGuard';
 import { TestRunProvider } from './test-run/TestRunProvider';
+import { useTestRun } from './test-run/useTestRun';
+import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
-import { mapConnectionToWorkflowState } from './api/connectionMapper';
-import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
+import { mapConnectionToWorkflowState, type WorkflowConnectionState } from './api/connectionMapper';
+import { buildConnectionPayload, buildFromConnectorPayload, buildWorkflowIndexes } from './api/connectionPayload';
+import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC, resolveWorkflowApiError } from './utils/workflowApiErrors';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
+import { useGetInvokersQuery } from '@entities/invoker/api/invokerApi';
+import type { Invoker } from '@entities/invoker/model/types';
 import { selectAuthUser } from '@entities/auth/model/authSelectors';
 import { store } from '@app/store/store';
 import { genericApi } from '@shared/api/genericApi';
@@ -39,6 +51,7 @@ import type { AuthUser } from '@entities/auth/model/types';
 import type { HistoryVersionItem } from './types/history.types';
 import type { WorkflowEdgeModel, WorkflowHeaderMenuItem, WorkflowNodeModel } from './types/workflow.types';
 import { createEmptyMethodConfig } from './utils/requestConfig';
+import { isDirectReferenceEnhancement } from './components/request-editor/body-editor/bodyReference';
 
 const toWorkflowResponse = (nodeId: string, response: NonNullable<Connector['invoker']>['operations'][number]['response']) => ({
   responseId: `response-${nodeId}`,
@@ -49,46 +62,86 @@ const toWorkflowResponse = (nodeId: string, response: NonNullable<Connector['inv
 const normalizeConnectorIcon = (icon: Connector['icon']) =>
   typeof icon === 'string' ? icon : null;
 
+type HydrateCacheEntry = {
+  node: WorkflowNodeModel;
+  connectors: Connector[];
+  invokers: Invoker[];
+  result: WorkflowNodeModel;
+};
+
+const hydrateNode = (
+  node: WorkflowNodeModel,
+  connectors: Connector[],
+  invokers: Invoker[],
+): WorkflowNodeModel => {
+  if (node.type !== 'connector' && node.type !== 'system') return node;
+  const connectorId = node.data.connector?.connectorId;
+  const methodName = node.data.subtitle;
+  if (!connectorId || !methodName) return node;
+
+  const connector = connectors.find((item) => item.connectorId === connectorId);
+  const operation = connector?.invoker?.operations?.find((item) => item.name.toLowerCase() === methodName.toLowerCase());
+  const invokerName = node.data.connector?.invokerName;
+  const invokerIcon = !node.data.connector?.icon && invokerName
+    ? invokers.find((item) => (item.name ?? '').toLowerCase() === invokerName.toLowerCase())?.icon ?? null
+    : null;
+  if (!connector && !operation?.response && !invokerIcon) return node;
+
+  return {
+    ...node,
+    data: {
+      ...node.data,
+      connector: connector
+        ? {
+            ...node.data.connector,
+            connectorId: connector.connectorId,
+            title: connector.title,
+            icon: normalizeConnectorIcon(connector.icon) ?? normalizeConnectorIcon(connector.invoker?.icon) ?? invokerIcon ?? node.data.connector?.icon ?? null,
+            status: connector.status,
+            lastTestError: connector.lastTestError,
+            lastCheckedAt: connector.lastCheckedAt,
+            invokerName: connector.invoker?.name ?? node.data.connector?.invokerName ?? null,
+          }
+        : invokerIcon && node.data.connector
+          ? { ...node.data.connector, icon: invokerIcon }
+          : node.data.connector,
+      methodConfig: operation?.response
+        ? {
+            ...createEmptyMethodConfig(),
+            ...node.data.methodConfig,
+            response: toWorkflowResponse(node.id, operation.response),
+          }
+        : node.data.methodConfig,
+    },
+  };
+};
+
 const hydrateNodesWithOperationResponses = (
   nodes: WorkflowNodeModel[],
   connectors: Connector[],
+  invokers: Invoker[] = [],
+  cache?: Map<string, HydrateCacheEntry>,
 ): WorkflowNodeModel[] => {
-  if (!connectors.length) return nodes;
+  if (!connectors.length && !invokers.length) return nodes;
 
-  return nodes.map((node) => {
-    if (node.type !== 'connector' && node.type !== 'system') return node;
-    const connectorId = node.data.connector?.connectorId;
-    const methodName = node.data.subtitle;
-    if (!connectorId || !methodName) return node;
-
-    const connector = connectors.find((item) => item.connectorId === connectorId);
-    const operation = connector?.invoker?.operations?.find((item) => item.name.toLowerCase() === methodName.toLowerCase());
-    if (!connector && !operation?.response) return node;
-
-    return {
-      ...node,
-      data: {
-        ...node.data,
-        connector: connector
-          ? {
-              ...node.data.connector,
-              connectorId: connector.connectorId,
-              title: connector.title,
-              icon: normalizeConnectorIcon(connector.icon),
-              lastTestPassed: connector.lastTestPassed,
-              lastTestError: connector.lastTestError,
-            }
-          : node.data.connector,
-        methodConfig: operation?.response
-          ? {
-              ...createEmptyMethodConfig(),
-              ...node.data.methodConfig,
-              response: toWorkflowResponse(node.id, operation.response),
-            }
-          : node.data.methodConfig,
-      },
-    };
+  const result = nodes.map((node) => {
+    const cached = cache?.get(node.id);
+    if (cached && cached.node === node && cached.connectors === connectors && cached.invokers === invokers) {
+      return cached.result;
+    }
+    const hydrated = hydrateNode(node, connectors, invokers);
+    cache?.set(node.id, { node, connectors, invokers, result: hydrated });
+    return hydrated;
   });
+
+  if (cache) {
+    const liveIds = new Set(nodes.map((node) => node.id));
+    for (const key of cache.keys()) {
+      if (!liveIds.has(key)) cache.delete(key);
+    }
+  }
+
+  return result;
 };
 
 type WorkflowProps = {
@@ -197,6 +250,45 @@ const triggerJsonDownload = (filename: string, payload: unknown) => {
   URL.revokeObjectURL(url);
 };
 
+// Workflow renders TestRunProvider itself (the provider needs the payload
+// builder and graph metadata computed inside the component), so it cannot call
+// useTestRun directly. This bridge, mounted inside the provider, mirrors the
+// "a run is actively executing" flag back up so page-level edit surfaces
+// (delete shortcut, sidebar, header, history) can be locked while a test
+// runs. Paused counts as unlocked, same reasoning as WorkflowCanvas's
+// isEditLocked — a paused debugging session is exactly when inspecting/
+// adjusting the graph again is wanted, even though the backend run itself
+// keeps executing in the background regardless of the client-side pause.
+function TestRunEditLockSync({ onLockChange }: { onLockChange: (isLocked: boolean) => void }) {
+  const testRun = useTestRun();
+  const isLocked = !!testRun && testRun.phase !== 'idle' && !testRun.isPaused;
+  useEffect(() => {
+    onLockChange(isLocked);
+  }, [isLocked, onLockChange]);
+  return null;
+}
+
+// Same bridge pattern as TestRunEditLockSync, for the same reason: WorkflowLogs
+// itself remounts whenever logsPanel flips between 'normal' and 'minimized'/'full'
+// (index.tsx swaps it between a Splitter pane and a plain sibling), so tracking
+// the active/idle edge with local state inside WorkflowLogs would reset on every
+// remount and immediately re-fire. Mounted directly under TestRunProvider, this
+// survives that churn. Fires on BOTH edges: idle->active (run starts) and
+// active->idle (the run, including any lagging paced-animation catch-up after
+// the backend already finished, truly stops) — covers minimizing the panel
+// while the tail animation is still playing and expecting it back once the
+// result line is ready to show.
+function TestRunAutoExpandSync({ onActiveEdge }: { onActiveEdge: () => void }) {
+  const testRun = useTestRun();
+  const isActive = (testRun?.phase ?? 'idle') !== 'idle' || (testRun?.revealPending ?? false);
+  const wasActiveRef = useRef(false);
+  useEffect(() => {
+    if (isActive !== wasActiveRef.current) onActiveEdge();
+    wasActiveRef.current = isActive;
+  }, [isActive, onActiveEdge]);
+  return null;
+}
+
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const navigate = useNavigate();
@@ -205,6 +297,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const confirm = useConfirm();
   const authUser = useAppSelector(selectAuthUser);
   const { data: connectors = [], isLoading: isConnectorsLoading } = useGetConnectorsQuery({ page: 0, limit: 1000 });
+  const { data: invokers = [] } = useGetInvokersQuery();
   const [createdConnectionId, setCreatedConnectionId] = useState<string>();
   const [headerState, setHeaderState] = useState({
     title: '[Empty Name]',
@@ -235,6 +328,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       confirmVariant: 'danger',
     }),
   });
+  // True while a test run is active (starting/running/stopping) — synced from
+  // inside TestRunProvider by TestRunEditLockSync. All edits are disabled for
+  // the duration: the payload was already sent to the backend, so an edit
+  // would silently diverge from what is actually executing.
+  const [isTestRunLocked, setIsTestRunLocked] = useState(false);
   const [historyVersions, setHistoryVersions] = useState<HistoryVersionItem[]>([]);
   const [selectedHistoryVersionId, setSelectedHistoryVersionId] = useState<string | null>(null);
   const [baselineSnapshot, setBaselineSnapshot] = useState<string | null>(null);
@@ -252,12 +350,38 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
   const [isUploadingTemplate, setIsUploadingTemplate] = useState(false);
+  const [connectorMappingDialogOpen, setConnectorMappingDialogOpen] = useState(false);
+  const [connectorMappingGroups, setConnectorMappingGroups] = useState<ConnectorMappingGroup[]>([]);
+  const [pendingTemplateApply, setPendingTemplateApply] = useState<{
+    state: WorkflowConnectionState;
+    selectedTemplate: Template;
+  } | null>(null);
   const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [schedulesOpen, setSchedulesOpen] = useState(false);
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [assignCategoryOpen, setAssignCategoryOpen] = useState(false);
+  const [isAssigningCategory, setIsAssigningCategory] = useState(false);
+  const [logsPanel, setLogsPanel] = useState<WorkflowLogsPanelState>('minimized');
+  // Only meaningful while logsPanel === 'normal' — the Splitter pane's last
+  // dragged height (px), reused as its defaultSize the next time 'normal' is
+  // entered (the Splitter unmounts for 'minimized'/'full', so this is what
+  // survives the round trip instead of the pane's own internal state).
+  const [logsPaneHeight, setLogsPaneHeight] = useState(430);
+  const hydrateCacheRef = useRef<Map<string, HydrateCacheEntry>>(new Map());
   const hydratedNodes = useMemo(
-    () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
-    [connectors, workflow.nodes],
+    () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers, hydrateCacheRef.current),
+    [connectors, invokers, workflow.nodes],
+  );
+  const loopAncestorsByIndexPath = useMemo(
+    () => buildLoopAncestorsByIndexPath(hydratedNodes, workflow.edges),
+    [hydratedNodes, workflow.edges],
+  );
+  // nodeId -> workflow tree-path index, for correlating a canvas node with its
+  // live execution element (see ResponseDialog's paused live-response lookup).
+  const nodeIndexById = useMemo(
+    () => buildWorkflowIndexes(hydratedNodes, workflow.edges),
+    [hydratedNodes, workflow.edges],
   );
   const activeConnectionId = createdConnectionId ?? connectionId;
   const displayedHistoryVersions = useMemo(
@@ -279,6 +403,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const contextMenuNode = hydratedNodes.find((node) => node.id === workflow.contextMenu?.nodeId) ?? null;
   const editorNode = hydratedNodes.find((node) => node.id === workflow.methodEditor?.nodeId) ?? null;
   const conditionNode = hydratedNodes.find((node) => node.id === workflow.conditionEditor?.nodeId) ?? null;
+  const aggregatorNode = hydratedNodes.find((node) => node.id === workflow.aggregatorEditor?.nodeId) ?? null;
   const conditionConnection = useMemo(() => {
     const legacyConnection = buildLegacyConnection(hydratedNodes);
     const fromConnector = buildFromConnectorPayload(hydratedNodes, workflow.edges) as any;
@@ -299,6 +424,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setBaselineSnapshot(null);
     setChangeSource('clean');
     setHistoryPreviewSnapshot(null);
+    setCategoryId(null);
     if (!connectionId) {
       setIsConnectionLoading(false);
       return;
@@ -312,6 +438,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         setHeaderState({ title: state.title, description: toDisplayDescription(state.description) });
         setPersistedTitle(state.title);
         setLoadedFieldBindings(state.fieldBindings);
+        setCategoryId(state.categoryId);
         setHistoryVersions(state.versions);
         setSelectedHistoryVersionId((currentSelectedId) =>
           currentSelectedId && state.versions.some((version) => version.id === currentSelectedId)
@@ -326,6 +453,17 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       cancelled = true;
     };
   }, [connectionId]);
+
+  // When a run starts, close the non-modal edit surfaces that may already be
+  // open — the sidebar could still add a step and the history panel could
+  // still swap the whole graph out from under the executing run.
+  const { setSidebarAction, setContextMenu, setHistoryOpen } = workflow;
+  useEffect(() => {
+    if (!isTestRunLocked) return;
+    setSidebarAction(null);
+    setContextMenu(null);
+    setHistoryOpen(false);
+  }, [isTestRunLocked, setSidebarAction, setContextMenu, setHistoryOpen]);
 
   const isLoading = isConnectionLoading || isConnectorsLoading;
   const hasConnectionChanges = baselineSnapshot !== null && currentChangeSnapshot !== baselineSnapshot;
@@ -354,21 +492,56 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const validateTitle = useCallback(async (title: string): Promise<string | null> => {
     const trimmed = title.trim();
     if (!trimmed || trimmed === '[Empty Name]' || trimmed === persistedTitle) return null;
-    const check = await apiExecutor({ url: `/connection/check/${encodeURIComponent(trimmed)}`, method: 'GET' });
+    const check = await apiExecutor({ url: `/connection/check?name=${encodeURIComponent(trimmed)}`, method: 'GET' });
     if (check && typeof check === 'object' && 'message' in check && (check as { message?: string }).message === 'EXISTS') {
       return t('messages.workflowNameExists');
     }
     return null;
   }, [persistedTitle, t]);
 
-  const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
+  const resolveAndHighlightWorkflowError = useCallback((error: unknown): string | null => {
+    const resolution = resolveWorkflowApiError(error, hydratedNodes, workflow.edges);
+    if (!resolution) return null;
+    const specificMessage = tEntities(resolution.messageKey, resolution.messageParams);
+    if (resolution.nodeId) {
+      workflow.onSetNodeError(resolution.nodeId, specificMessage);
+    }
+    return specificMessage;
+  }, [hydratedNodes, workflow, tEntities]);
+
+  const handleSave = async ({ title, description, comment, categoryId: categoryIdOverride }: { title: string; description: string; comment: string; categoryId?: number | null }) => {
     if (!title.trim() || title.trim() === '[Empty Name]') {
       message.error(t('messages.enterWorkflowName'));
       throw new Error('Connection name is required');
     }
 
+    workflow.onClearNodeErrors();
     const normalizedDescription = toPayloadDescription(description);
+    // Preserve the currently-assigned category on every regular save; only an
+    // explicit override (from the Assign Category dialog) changes it.
+    const nextCategoryId = categoryIdOverride !== undefined ? categoryIdOverride : categoryId;
     const isCreate = !activeConnectionId;
+
+    let fieldBindingsToSave = loadedFieldBindings;
+    const directReferenceBindings = (loadedFieldBindings ?? []).filter((binding: any) =>
+      isDirectReferenceEnhancement(binding?.enhancement),
+    );
+    if (directReferenceBindings.length > 0) {
+      const applyOptimizations = await confirm({
+        title: t('enhancement.optimizeDirectReferences.title'),
+        message: t('enhancement.optimizeDirectReferences.message', { count: directReferenceBindings.length }),
+        confirmText: t('actions.apply'),
+        cancelText: t('actions.cancel'),
+      });
+      if (applyOptimizations) {
+        const directReferenceIds = new Set(directReferenceBindings.map((binding: any) => binding.enhancement.enhanceId));
+        fieldBindingsToSave = (loadedFieldBindings ?? []).filter(
+          (binding: any) => !directReferenceIds.has(binding?.enhancement?.enhanceId),
+        );
+        setLoadedFieldBindings(fieldBindingsToSave);
+      }
+    }
+
     let response;
     try {
       response = await saveWorkflowConnection({
@@ -379,11 +552,15 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         nodes: hydratedNodes,
         edges: workflow.edges,
         viewport: workflow.getViewport(),
-        fieldBindings: loadedFieldBindings,
+        fieldBindings: fieldBindingsToSave,
+        categoryId: nextCategoryId,
       });
     } catch (error) {
+      const specificMessage = resolveAndHighlightWorkflowError(error);
       message.error(
-        tEntities(isCreate ? 'connection.messages.saveFailed.create' : 'connection.messages.saveFailed.update', { title }),
+        specificMessage ??
+          tEntities(isCreate ? 'connection.messages.saveFailed.create' : 'connection.messages.saveFailed.update', { title }),
+        specificMessage ? RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC : undefined,
       );
       throw error;
     }
@@ -391,13 +568,14 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     const nextConnectionId = activeConnectionId ?? savedId;
     setHeaderState({ title, description: toDisplayDescription(normalizedDescription) });
     setPersistedTitle(title);
+    setCategoryId(nextCategoryId);
     setBaselineSnapshot(buildWorkflowChangeSnapshot({
       connectionId: nextConnectionId ? String(nextConnectionId) : activeConnectionId,
       title,
       description: normalizedDescription,
       nodes: hydratedNodes,
       edges: workflow.edges,
-      fieldBindings: loadedFieldBindings,
+      fieldBindings: fieldBindingsToSave,
     }));
     setChangeSource('clean');
     setHistoryPreviewSnapshot(null);
@@ -464,6 +642,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         edges: workflow.edges,
         viewport: workflow.getViewport(),
         fieldBindings: loadedFieldBindings,
+        includeInvoker: true,
       });
 
       const response = await apiExecutor({
@@ -542,6 +721,33 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setSelectedTemplateId(undefined);
   };
 
+  const finishApplyTemplate = async (state: WorkflowConnectionState, selectedTemplate: Template) => {
+    workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
+    setLoadedFieldBindings(state.fieldBindings);
+    const templateName = selectedTemplate.name?.trim();
+    const templateDescription = selectedTemplate.description?.trim();
+    const applyTemplateNameAndDescription = () =>
+      setHeaderState((prev) => ({
+        title: templateName ? templateName : prev.title,
+        description: templateDescription ? toDisplayDescription(templateDescription) : prev.description,
+      }));
+
+    if (isHeaderNameEmpty(headerState.title)) {
+      applyTemplateNameAndDescription();
+    } else {
+      const shouldReplace = await confirm({
+        title: t('template.replaceConfirm.title'),
+        message: t('template.replaceConfirm.message'),
+        confirmText: t('template.replaceConfirm.replace'),
+        cancelText: t('template.replaceConfirm.keep'),
+      });
+      if (shouldReplace) applyTemplateNameAndDescription();
+    }
+    setLoadTemplateDialogOpen(false);
+    setSelectedTemplateId(undefined);
+    message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
+  };
+
   const applySelectedTemplate = async () => {
     const selectedTemplate = templates.find((template) => String(template.templateId) === selectedTemplateId);
     if (!selectedTemplate) {
@@ -560,30 +766,15 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         return;
       }
       const state = mapConnectionToWorkflowState(fullTemplate.connection);
-      workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
-      setLoadedFieldBindings(state.fieldBindings);
-      const templateName = selectedTemplate.name?.trim();
-      const templateDescription = selectedTemplate.description?.trim();
-      const applyTemplateNameAndDescription = () =>
-        setHeaderState((prev) => ({
-          title: templateName ? templateName : prev.title,
-          description: templateDescription ? toDisplayDescription(templateDescription) : prev.description,
-        }));
-
-      if (isHeaderNameEmpty(headerState.title)) {
-        applyTemplateNameAndDescription();
-      } else {
-        const shouldReplace = await confirm({
-          title: t('template.replaceConfirm.title'),
-          message: t('template.replaceConfirm.message'),
-          confirmText: t('template.replaceConfirm.replace'),
-          cancelText: t('template.replaceConfirm.keep'),
-        });
-        if (shouldReplace) applyTemplateNameAndDescription();
+      const groups = extractConnectorGroups(state.nodes);
+      if (groups.length > 0) {
+        setPendingTemplateApply({ state, selectedTemplate });
+        setConnectorMappingGroups(groups);
+        setConnectorMappingDialogOpen(true);
+        setLoadTemplateDialogOpen(false);
+        return;
       }
-      setLoadTemplateDialogOpen(false);
-      setSelectedTemplateId(undefined);
-      message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
+      await finishApplyTemplate(state, selectedTemplate);
     } catch {
       message.error(t('messages.loadTemplateFailed'));
     } finally {
@@ -591,8 +782,36 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
   };
 
+  const handleConfirmConnectorMapping = async (mapping: Record<number, number>) => {
+    if (!pendingTemplateApply) return;
+    setConnectorMappingDialogOpen(false);
+    setIsApplyingTemplate(true);
+    try {
+      const mappedNodes = applyConnectorMapping(pendingTemplateApply.state.nodes, mapping, connectors);
+      await finishApplyTemplate(
+        { ...pendingTemplateApply.state, nodes: mappedNodes },
+        pendingTemplateApply.selectedTemplate,
+      );
+    } catch {
+      message.error(t('messages.loadTemplateFailed'));
+    } finally {
+      setIsApplyingTemplate(false);
+      setPendingTemplateApply(null);
+      setConnectorMappingGroups([]);
+    }
+  };
+
+  const handleCancelConnectorMapping = () => {
+    setConnectorMappingDialogOpen(false);
+    setPendingTemplateApply(null);
+    setConnectorMappingGroups([]);
+    setSelectedTemplateId(undefined);
+  };
+
   const handleHeaderMenuSelect = (item: WorkflowHeaderMenuItem) => {
-    if (item.id === 'download-template') {
+    if (item.id === 'assign-category') {
+      setAssignCategoryOpen(true);
+    } else if (item.id === 'download-template') {
       void downloadConnectionTemplate();
     } else if (item.id === 'save-template') {
       openSaveTemplateDialog();
@@ -605,9 +824,29 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
   };
 
+  const handleAssignCategory = async (nextCategoryId: number | null, categoryName: string | null) => {
+    setIsAssigningCategory(true);
+    try {
+      await handleSave({
+        title: headerState.title,
+        description: headerState.description,
+        comment: nextCategoryId
+          ? t('saveDialog.autoCategoryAssignedComment', { category: categoryName })
+          : t('saveDialog.autoCategoryClearedComment'),
+        categoryId: nextCategoryId,
+      });
+      setAssignCategoryOpen(false);
+    } catch {
+      // handleSave already surfaces the error via message.error
+    } finally {
+      setIsAssigningCategory(false);
+    }
+  };
+
   const buildTestPayload = useCallback(() => {
+    workflow.onClearNodeErrors();
     const hasMethodNode = hydratedNodes.some(
-      (node) => node.type === 'connector' || node.type === 'system',
+      (node) => node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection',
     );
     if (!hasMethodNode) {
       message.error(tEntities('connection.test.noMethods'));
@@ -629,13 +868,15 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   }, [connectionId, headerState.description, headerState.title, hydratedNodes, loadedFieldBindings, tEntities, workflow]);
 
   const deleteSelectedNode = () => {
-    if (readOnly) return;
+    if (readOnly || isTestRunLocked) return;
     if (
       workflow.methodEditor ||
       workflow.conditionEditor ||
+      workflow.aggregatorEditor ||
       workflow.historyOpen ||
       templateDialogOpen ||
       loadTemplateDialogOpen ||
+      connectorMappingDialogOpen ||
       isShortcutsOpen
     ) return;
     const selected = workflow.nodes.find((node) => node.selected && node.type !== 'start');
@@ -649,7 +890,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     const handleDeleteShortcut = (event: KeyboardEvent) => {
       if (event.key !== 'Delete') return;
       const target = event.target as HTMLElement | null;
-      // Don't hijack Delete while the user is editing text or a code editor.
       if (target?.closest('input, textarea, select, [contenteditable="true"], .ace_editor')) return;
       deleteSelectedNodeRef.current();
     };
@@ -675,8 +915,68 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
   };
 
+  // Extracted so the exact same element can sit inside a Splitter pane
+  // (logsPanel === 'normal') or as a plain sibling of WorkflowLogs
+  // (minimized/full) without duplicating this whole prop list in both
+  // branches below.
+  const canvasElement = (
+    <WorkflowCanvas
+      nodes={hydratedNodes}
+      edges={workflow.edges}
+      isAnyNodeDragging={workflow.isAnyNodeDragging}
+      restoredViewport={workflow.restoredViewport}
+      viewportRestoreVersion={workflow.viewportRestoreVersion}
+      centerStartVersion={workflow.centerStartVersion}
+      onInit={workflow.setReactFlowInstance}
+      activeAction={workflow.sidebarAction}
+              jointSourceId={workflow.jointSourceId}
+              jointTargetIds={workflow.jointTargetIds}
+              onConfirmJoint={workflow.onConfirmJoint}
+              onCancelJoint={workflow.onCancelJoint}
+              onRemoveJoint={workflow.onRemoveJoint}
+      onNodesChange={workflow.onNodesChange}
+      onEdgesChange={workflow.onEdgesChange}
+      onConnect={workflow.onConnect}
+      onNodeDragStart={workflow.onNodeDragStart}
+      onNodeDrag={workflow.onNodeDrag}
+      onNodeDragStop={workflow.onNodeDragStop}
+      onOpenAddStep={workflow.onOpenAddStep}
+      onOpenContextMenu={workflow.setContextMenu}
+      onNodeDoubleClick={(_, node) => {
+        workflow.setSidebarAction(null);
+        workflow.setContextMenu(null);
+        workflow.setHistoryOpen(false);
+
+        if (node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection') {
+          workflow.setConditionEditor(null);
+          workflow.setMethodEditor({ nodeId: node.id, mode: 'body' });
+          return;
+        }
+
+        if (node.type === 'if' || node.type === 'loop') {
+          workflow.setMethodEditor(null);
+          workflow.setConditionEditor({ nodeId: node.id });
+        }
+      }}
+      onDeleteNode={workflow.onDeleteNode}
+      onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
+      onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); workflow.onCancelJoint(); }}
+    >
+      <Background gap={16} size={1} />
+    </WorkflowCanvas>
+  );
+  const logsElement = <WorkflowLogs panel={logsPanel} onPanelChange={setLogsPanel} />;
+
   return (
-    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title} buildTestPayload={buildTestPayload}>
+    <TestRunProvider
+      connectionId={connectionId}
+      connectionTitle={headerState.title}
+      buildTestPayload={buildTestPayload}
+      onResolveStartError={resolveAndHighlightWorkflowError}
+      loopAncestorsByIndexPath={loopAncestorsByIndexPath}
+    >
+    <TestRunEditLockSync onLockChange={setIsTestRunLocked} />
+    <TestRunAutoExpandSync onActiveEdge={() => setLogsPanel((current) => (current === 'minimized' ? 'normal' : current))} />
     <div className="page" data-testid="workflow-page">
       <WorkflowHeader
         initialName={headerState.title}
@@ -688,8 +988,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onSave={handleSave}
         saveDisabled={isLoading || !hasConnectionChanges}
         onOpenHistory={handleOpenHistory}
-        readOnly={readOnly}
+        readOnly={readOnly || isTestRunLocked}
+        testRunLocked={isTestRunLocked}
         loading={isConnectionLoading}
+        hasSavedConnection={!!activeConnectionId}
         schedulesSlot={
           activeConnectionId ? (
             <WorkflowSchedulesPill
@@ -811,7 +1113,22 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           />
         </div>
       </Modal>
+      <TemplateConnectorMappingDialog
+        open={connectorMappingDialogOpen}
+        groups={connectorMappingGroups}
+        connectors={connectors}
+        invokers={invokers}
+        onConfirm={handleConfirmConnectorMapping}
+        onCancel={handleCancelConnectorMapping}
+      />
       <ShortcutsDialog open={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+      <AssignCategoryDialog
+        open={assignCategoryOpen}
+        currentCategoryId={categoryId}
+        loading={isAssigningCategory}
+        onClose={() => setAssignCategoryOpen(false)}
+        onAssign={handleAssignCategory}
+      />
       <div className="workflowMain">
         {isLoading ? (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -819,54 +1136,36 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           </div>
         ) : (
           <>
-            <WorkflowCanvas
-              nodes={hydratedNodes}
-              edges={workflow.edges}
-              isAnyNodeDragging={workflow.isAnyNodeDragging}
-              restoredViewport={workflow.restoredViewport}
-              viewportRestoreVersion={workflow.viewportRestoreVersion}
-              centerStartVersion={workflow.centerStartVersion}
-              onInit={workflow.setReactFlowInstance}
-              activeAction={workflow.sidebarAction}
-              jointSourceId={workflow.jointSourceId}
-              jointTargetIds={workflow.jointTargetIds}
-              onConfirmJoint={workflow.onConfirmJoint}
-              onCancelJoint={workflow.onCancelJoint}
-              onRemoveJoint={workflow.onRemoveJoint}
-              onNodesChange={workflow.onNodesChange}
-              onEdgesChange={workflow.onEdgesChange}
-              onConnect={workflow.onConnect}
-              onNodeDragStart={workflow.onNodeDragStart}
-              onNodeDrag={workflow.onNodeDrag}
-              onNodeDragStop={workflow.onNodeDragStop}
-              onOpenAddStep={workflow.onOpenAddStep}
-              onOpenContextMenu={workflow.setContextMenu}
-              onNodeDoubleClick={(_, node) => {
-                workflow.setSidebarAction(null);
-                workflow.setContextMenu(null);
-                workflow.setHistoryOpen(false);
-
-                if (node.type === 'connector' || node.type === 'system') {
-                  workflow.setConditionEditor(null);
-                  workflow.setMethodEditor({ nodeId: node.id, mode: 'body' });
-                  return;
-                }
-
-                if (node.type === 'if' || node.type === 'loop') {
-                  workflow.setMethodEditor(null);
-                  workflow.setConditionEditor({ nodeId: node.id });
-                }
-              }}
-              onDeleteNode={workflow.onDeleteNode}
-              onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); workflow.onCancelJoint(); }}
-            >
-              <Background gap={16} size={1} />
-            </WorkflowCanvas>
-            <WorkflowLogs />
+            {/* The 'canvas' Splitter.Panel is present at every panel state, always
+                at this same position — only whether the 'logs' panel is included
+                changes. Splitter.Panel content is keyed by panel.key (see
+                Splitter.ant.tsx / Splitter.material.tsx), so React reuses the
+                'canvas'-keyed fiber across the transition instead of unmounting
+                it — that unmount (from switching between this Splitter and the
+                plain-sibling fragment below) was the visible canvas blink/jump
+                when toggling the logs panel. 'minimized'/'full' still render logs
+                as the original absolute-positioned overlay (logsCard/logsCardFull
+                in base.css) over the full-size canvas, just as a sibling of the
+                single-pane Splitter instead of a second pane — only 'normal' gets
+                a real 2-pane split where dragging the handle shrinks the canvas. */}
+            <Splitter
+              layout="vertical"
+              className="workflowSplitter"
+              panels={
+                logsPanel === 'normal'
+                  ? [
+                      { key: 'canvas', content: canvasElement, min: 160 },
+                      { key: 'logs', content: logsElement, defaultSize: logsPaneHeight, min: 120, max: '80%' },
+                    ]
+                  : [{ key: 'canvas', content: canvasElement, min: 160 }]
+              }
+              onResizeEnd={(sizes) => setLogsPaneHeight(sizes[1])}
+            />
+            {logsPanel !== 'normal' && logsElement}
           </>
         )}
       </div>
-      <WorkflowSidebar action={workflow.sidebarAction} selectedNode={selectedNode} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} onStartJoint={workflow.onStartJoint} />
+      <WorkflowSidebar action={isTestRunLocked ? null : workflow.sidebarAction} selectedNode={selectedNode} connectionId={activeConnectionId} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} onStartJoint={workflow.onStartJoint} />
       <WorkflowSchedulesPanel
         open={schedulesOpen}
         connectionId={activeConnectionId}
@@ -881,10 +1180,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         hasUnsavedChanges={hasManualUnsavedChanges}
         onClose={() => workflow.setHistoryOpen(false)}
         onSelectVersion={async (snapshotId) => {
-          if (!activeConnectionId) return;
+          if (!activeConnectionId || isTestRunLocked) return;
           setSelectedHistoryVersionId(snapshotId);
           const state = await loadWorkflowConnectionVersion(activeConnectionId, snapshotId);
-          const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors);
+          const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors, invokers);
           const nextSnapshot = buildWorkflowChangeSnapshot({
             connectionId: activeConnectionId,
             title: state.title,
@@ -927,7 +1226,16 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onChangeLabel={workflow.onChangeNodeLabel}
         onOpenRequestEditor={(nodeId, mode) => workflow.setMethodEditor({ nodeId, mode })}
         onOpenConditionEditor={(nodeId) => workflow.setConditionEditor({ nodeId })}
+        onShowResponse={workflow.onShowResponse}
+        onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
         onClose={() => workflow.setContextMenu(null)}
+      />
+      <ResponseDialog
+        open={!!workflow.responseNodeId}
+        node={hydratedNodes.find((node) => node.id === workflow.responseNodeId) ?? null}
+        nodeIndexById={nodeIndexById}
+        loopAncestorsByIndexPath={loopAncestorsByIndexPath}
+        onClose={workflow.onCloseResponse}
       />
       <MethodConfigDialog
         open={!!workflow.methodEditor}
@@ -953,6 +1261,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         connection={conditionConnection}
         onClose={() => workflow.setConditionEditor(null)}
         onSave={workflow.onSaveConditionConfig}
+      />
+      <AggregatorConfigDialog
+        open={!!workflow.aggregatorEditor}
+        node={aggregatorNode}
+        onClose={() => workflow.setAggregatorEditor(null)}
+        onSave={workflow.onSaveDataAggregator}
       />
     </div>
     </TestRunProvider>

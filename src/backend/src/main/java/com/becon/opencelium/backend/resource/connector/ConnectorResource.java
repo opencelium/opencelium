@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.resource.connector;
 
+import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 
@@ -33,10 +34,16 @@ public class ConnectorResource {
     private boolean sslCert;
     private int timeout;
     private Map<String, String> requestData;
-    // Result of the most recent remote-API test: null = never tested, true = passed, false = failed.
-    private Boolean lastTestPassed;
+    // Health status determined by the most recent communication check.
+    private ConnectorStatus status;
     // Remote error message from the last failed test.
     private String lastTestError;
+    // Epoch millis of the most recent health check; null = never checked.
+    private Long lastCheckedAt;
+    // ID of the user who modified the connector last.
+    private Integer modifiedBy;
+    // Timestamp of the last modification, in epoch millis.
+    private Long modifiedAt;
 
     public int getConnectorId() {
         return connectorId;
@@ -102,12 +109,20 @@ public class ConnectorResource {
         this.requestData = requestData;
     }
 
-    public Boolean getLastTestPassed() {
-        return lastTestPassed;
+    public ConnectorStatus getStatus() {
+        return status;
     }
 
-    public void setLastTestPassed(Boolean lastTestPassed) {
-        this.lastTestPassed = lastTestPassed;
+    public void setStatus(ConnectorStatus status) {
+        this.status = status;
+    }
+
+    public Long getLastCheckedAt() {
+        return lastCheckedAt;
+    }
+
+    public void setLastCheckedAt(Long lastCheckedAt) {
+        this.lastCheckedAt = lastCheckedAt;
     }
 
     public String getLastTestError() {
@@ -116,5 +131,21 @@ public class ConnectorResource {
 
     public void setLastTestError(String lastTestError) {
         this.lastTestError = lastTestError;
+    }
+
+    public Integer getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(Integer modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public Long getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(Long modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }

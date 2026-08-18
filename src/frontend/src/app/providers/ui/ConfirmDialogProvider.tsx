@@ -123,7 +123,11 @@ export const ConfirmDialogProvider: React.FC<{
                     </>
                 }
             >
-                {state.message}
+                {typeof state.message === 'string' ? (
+                    <div style={{ whiteSpace: 'pre-line' }}>{state.message}</div>
+                ) : (
+                    state.message
+                )}
             </Dialog>
         </ConfirmDialogContext.Provider>
     );

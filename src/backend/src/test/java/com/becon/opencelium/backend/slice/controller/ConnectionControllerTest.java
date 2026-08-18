@@ -42,13 +42,16 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -169,5 +172,28 @@ class ConnectionControllerTest {
         ArgumentCaptor<List<Long>> idsCaptor = ArgumentCaptor.forClass(List.class);
         verify(connectionService).deleteByIds(idsCaptor.capture(), eq(Set.of(2L)));
         assertThat(idsCaptor.getValue()).containsExactly(1L, 2L, 3L);
+    }
+
+    // ── POST /connection — malformed body ─────────────────────────────────────
+
+    @Test
+    @DisplayName("POST /connection — unknown methodType yields 400 with field path and accepted values")
+    void saveReturnsReadableBadRequestWhenMethodTypeIsUnknown() throws Exception {
+        mockMvc.perform(post("/connection")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "demo connection",
+                                  "fromConnector": {
+                                    "methods": [ { "name": "getUsers", "methodType": "WEBHOK" } ]
+                                  }
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.path").value("/connection"))
+                .andExpect(jsonPath("$.message").value(containsString("fromConnector.methods[0].methodType")))
+                .andExpect(jsonPath("$.message").value(containsString("Unknown method type 'WEBHOK'")))
+                .andExpect(jsonPath("$.message").value(containsString("CONNECTOR, HTTP_REQUEST, WEBHOOK")));
     }
 }

@@ -3,7 +3,8 @@ import { useFormContext, useWatch } from 'react-hook-form'
 import { FieldArrayEditor } from '@shared/ui/wizard-step/editor/general/FieldArrayEditor'
 import { FormInput } from '@shared/ui/form/FormInput'
 import { FormSelect } from '@shared/ui/form/FormSelect'
-import { IconButton } from '@shared/ui/primitives/IconButton'
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton'
+import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { Mode } from '@/engine/entity/EntityDefinition'
 
@@ -62,7 +63,8 @@ const VISIBILITY_OPTIONS = [
 
 export function InvokerRequiredDataEditor({ name, label, mode }: InvokerRequiredDataEditorProps) {
     const { t } = useI18n('entities')
-    const { control, formState: { errors }, setValue } = useFormContext()
+    const { t: tCommon } = useI18n('common')
+    const { control, formState: { errors }, getValues, setValue } = useFormContext()
 
     const authType = useWatch({ name: 'authType', control }) as string
     const prevAuthTypeRef = useRef<string | undefined>(undefined)
@@ -71,10 +73,17 @@ export function InvokerRequiredDataEditor({ name, label, mode }: InvokerRequired
         if (mode === 'view') return
         const prev = prevAuthTypeRef.current
         prevAuthTypeRef.current = authType
+
+        const currentData = getValues(name)
+        const isInitialMount = prev === undefined
+        if (isInitialMount && Array.isArray(currentData) && currentData.length > 0) {
+            return
+        }
+
         if (authType && authType !== prev && PREDEFINED_DATA[authType]) {
             setValue(name, PREDEFINED_DATA[authType], { shouldDirty: true })
         }
-    }, [authType])
+    }, [authType, getValues, mode, name, setValue])
 
     const emptyError = (
         (errors as any)[name]?.root?.message ?? (errors as any)[name]?.message
@@ -92,6 +101,7 @@ export function InvokerRequiredDataEditor({ name, label, mode }: InvokerRequired
             defaultItem={DEFAULT_ITEM}
             variant="compact"
             hideAddButton={readOnly}
+            stickyAddButton
             addButtonText={t('invoker.fields.requiredData.add', { defaultValue: 'Add Field' })}
             emptyText={t('invoker.fields.requiredData.empty', { defaultValue: 'No required data fields.' })}
             renderItem={({ index, remove }) => (
@@ -114,12 +124,9 @@ export function InvokerRequiredDataEditor({ name, label, mode }: InvokerRequired
                     />
                     {!readOnly && (
                         <div style={{ paddingTop: 24 }}>
-                            <IconButton
-                                size="sm"
-                                type="text"
-                                iconProps={{ name: 'delete' }}
-                                onClick={() => remove(index)}
-                            />
+                            <Tooltip content={tCommon('actions.delete')}>
+                                <DeleteIconButton onClick={() => remove(index)} />
+                            </Tooltip>
                         </div>
                     )}
                 </div>

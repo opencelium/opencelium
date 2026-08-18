@@ -29,7 +29,7 @@
   opacity: 0.2;
 }
 
-.nodeWrapDropPlaceholder .ifFalseLabel,
+.nodeWrapDropPlaceholder .ifContinueLabel,
 .nodeWrapDropPlaceholder .ifTrueLabel {
   display: none;
 }
@@ -80,6 +80,69 @@
 .nodeBodyDropInvalid .ifNode {
   border-color: var(--color-status-error-fg);
   box-shadow: 0 0 0 4px var(--color-status-error-bg);
+}
+
+.nodeBodyError .startNode,
+.nodeBodyError .circleNode,
+.nodeBodyError .ifNode {
+  border-color: var(--color-status-error-fg);
+  box-shadow: 0 0 0 4px var(--color-status-error-bg);
+}
+
+/* The node the test run actually failed on gets a breathing pulse on top of
+   the static error highlight above — same opacity/scale pattern and timing as
+   logsHeaderLiveDotPulse (base.css), so the zoomed-in, red-highlighted node
+   reads as "live attention needed" the same way the Live dot does. Scale
+   bottoms out at 0.96 rather than the dot's 0.7 — a whole node shrinking that
+   far would look broken, not "pulsing". */
+.nodeBodyTestRunFailed .startNode,
+.nodeBodyTestRunFailed .circleNode,
+.nodeBodyTestRunFailed .ifNode {
+  animation: nodeTestRunFailedPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes nodeTestRunFailedPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+}
+
+.nodeBodySearchHighlighted .circleNode,
+.nodeBodySearchHighlighted .ifNode {
+  border-color: var(--color-status-warning-fg);
+  box-shadow: 0 0 0 4px var(--color-status-warning-bg);
+}
+
+/* Live test-run indicators. A currently-open LOOP/IF operator (any nesting
+   depth), or a top-level method with no enclosing operator, gets a pulsing
+   ring — distinct from the static hover/path-selection highlight above.
+   Execution is consecutive and the paced playback shows one step at a time,
+   so exactly one node in the whole graph carries this ring at any moment. */
+/* The dot-then-node timing lives in React state, NOT here: the class is only
+   applied once the dot has reached the node (TestRunCurrentStep.hasArrived in
+   TestRunProvider). A CSS animation-delay was tried for this and dropped — it
+   silently restarts (and so never fires) whenever the node re-renders
+   mid-step, which made the ring unreliable per node type. */
+.nodeBodyTestRunActive .startNode,
+.nodeBodyTestRunActive .circleNode,
+.nodeBodyTestRunActive .ifNode {
+  border-color: var(--color-action-primary);
+  border-style: dashed;
+  animation: nodeTestRunPulse 1s ease-in-out infinite;
+}
+
+@keyframes nodeTestRunPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-action-primary) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-action-primary) 10%, transparent);
+  }
 }
 
 .nodeBodyJointCandidate .circleNode {
@@ -144,7 +207,7 @@
   font-weight: 700;
   line-height: 1;
   z-index: 7;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .circleNodeStatus {
@@ -162,6 +225,53 @@
   border: 2px solid var(--color-background-surface);
   z-index: 7;
   pointer-events: auto;
+}
+
+.circleNodeAsyncBadge {
+  position: absolute;
+  bottom: -6px;
+  left: -6px;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-status-warning-bg);
+  border: 2px solid var(--color-background-surface);
+  color: var(--color-status-warning-fg);
+  z-index: 7;
+  pointer-events: auto;
+}
+
+.circleNodeAggregatorBadge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-action-primary-subtle);
+  border: 2px solid var(--color-background-surface);
+  z-index: 7;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* Inline with the "i = 3" text itself (see .loopIterationLabel below) rather
+   than a separate floating corner badge — the "jump to next iteration"
+   affordance, only rendered on a LOOP node while a test run is paused and
+   currently tracking that loop's iteration. */
+.loopSkipIterationIcon {
+  display: inline-flex;
+  align-items: center;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .startNode {
@@ -226,6 +336,32 @@
   pointer-events: none;
 }
 
+/* "Jump to live" under the run/stop button — shown while the paced test-run
+   animation is behind the real execution. Same footprint as .startNodeAlert
+   but clickable and primary-tinted. */
+.startNodeSkipLive {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: 10px;
+  color: var(--color-action-primary);
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-action-primary);
+  border-radius: 6px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.startNodeSkipLive:hover {
+  background: var(--color-action-primary);
+  color: var(--color-text-on-action);
+}
+
 .systemNode {
   border-style: dashed;
 }
@@ -235,6 +371,13 @@
   max-height: 42px;
   object-fit: contain;
   display: block;
+  /* Fixed (non-theme) backdrop: connector/invoker logos are third-party artwork authored
+     for a specific background (usually white) — inheriting the theme surface color made
+     dark-on-white logos vanish in dark mode and light-on-transparent logos vanish in light mode. */
+  background-color: #ffffff;
+  border-radius: 50%;
+  padding: 4px;
+  box-sizing: border-box;
 }
 
 .ifNode {
@@ -254,7 +397,7 @@
 }
 
 .ifTrueLabel,
-.ifFalseLabel {
+.ifContinueLabel {
   position: absolute;
   font-size: 11px;
   color: var(--color-text-secondary);
@@ -262,7 +405,7 @@
   user-select: none;
 }
 
-.ifFalseLabel {
+.ifContinueLabel {
   top: calc(50% - 20px);
   right: -34px;
   transform: translateY(-50%);
@@ -272,4 +415,32 @@
   left: calc(50% + 20px);
   bottom: -10px;
   transform: translateX(-50%);
+}
+
+/* Same anchor POINT as .ifTrueLabel (left/bottom), but left-aligned from it
+   rather than centered on it: .ifTrueLabel's fixed, short "true" text barely
+   differs between the two, but this row's width varies (icon shown or not),
+   and centering a wider row on that point pulls its start back to the LEFT
+   of the vertical down-arrow/line — exactly what this must never do. */
+.loopIterationLabel {
+  position: absolute;
+  left: calc(50% + 10px);
+  bottom: -10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* The branch label for whichever side the test-run process actually took —
+   set on the corresponding .ifTrueLabel/.ifContinueLabel once known (see
+   testRunActiveBranch). No transform here: .ifTrueLabel/.ifContinueLabel
+   already carry the centering transform this rule must not override. */
+.ifBranchLabelActive {
+  color: var(--color-action-primary);
+  font-weight: 700;
 }

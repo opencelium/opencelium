@@ -1,7 +1,8 @@
-import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React from 'react';
 import AceEditor from 'react-ace';
 import type { LimitedAceEditorProps } from './interfaces';
 import { LimitedAceEditorContainer, LimitedAceEditorCounter } from './styles';
+import { useLimitedAceEditor } from './useLimitedAceEditor';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-ruby';
 import 'ace-builds/src-noconflict/mode-python';
@@ -37,44 +38,9 @@ const CustomAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 			onBlur,
 		} = props;
 
-		const [currentValue, setCurrentValue] = useState(value);
-		const editorRef = useRef<any>(null);
-		const [isFocused, toggleFocus] = useState<boolean>(false);
-		useImperativeHandle(ref, () => editorRef.current, []);
-
-		useEffect(() => {
-			setCurrentValue(value);
-		}, [value]);
-
-		useEffect(() => {
-			const editor = editorRef.current?.editor;
-			if (!editor || readOnly || typeof maxLength !== 'number') return;
-
-			const session = editor.getSession();
-
-			const handleSessionChange = () => {
-				const current = editor.getValue();
-
-				if (current.length > maxLength) {
-					const selection = editor.getSelectionRange();
-					const newValue = current.slice(0, maxLength);
-					editor.setValue(newValue, -1);
-					editor.moveCursorToPosition(selection.end);
-
-					setCurrentValue(newValue);
-					onChange?.(newValue);
-				} else {
-					setCurrentValue(current);
-					onChange?.(current);
-				}
-			};
-
-			session.on('change', handleSessionChange);
-
-			return () => {
-				session.off('change', handleSessionChange);
-			};
-		}, [maxLength, readOnly, onChange]);
+		const { currentValue, editorRef, isFocused, setIsFocused } = useLimitedAceEditor({
+			forwardedRef: ref, maxLength, onChange, readOnly, value,
+		});
 
 		return (
 			<LimitedAceEditorContainer style={{ height: '100%' }}>
@@ -82,13 +48,14 @@ const CustomAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 					<LimitedAceEditorCounter
 						top={counterStyles?.top}
 						right={counterStyles?.right}
+						bottom={counterStyles?.bottom}
 					>
 						{currentValue?.length || 0}/{maxLength}
 					</LimitedAceEditorCounter>
 				)}
 
 				<AceEditor
-					onFocus={() => toggleFocus(true)}
+					onFocus={() => setIsFocused(true)}
 					ref={editorRef}
 					mode={mode}
 					theme={editorTheme}
@@ -117,7 +84,7 @@ const CustomAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 					minLines={undefined}
 					maxLines={undefined}
 					onBlur={() => {
-						toggleFocus(false);
+						setIsFocused(false);
 						if (typeof onBlur === 'function') {
 							onBlur();
 						}

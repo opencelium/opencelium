@@ -9,7 +9,6 @@ import './сommandPalette.css';
 import type {ASTNode} from "@shared/command/ast.ts";
 import type {Suggestion} from "@shared/command/types.ts";
 import {CommandPalettePortal} from "@widgets/CommandPalette/CommanPalettePortal.tsx";
-import {useAuth} from "@features/auth/useAuth.ts";
 import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
 import {Empty} from "@shared/ui/primitives/Empty";
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
@@ -21,19 +20,13 @@ import HotKey from "@widgets/CommandPalette/HotKey.tsx";
 import {Icon} from "@shared/ui/primitives/Icon";
 import {useConfirm} from "@shared/ui/confirm/ConfirmDialogContext.tsx";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
-import {setUserPolicyContext} from "@/engine/policy";
+import {useCommandPolicyContext} from "@shared/command/useCommandPolicyContext.ts";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import {getRecentCommands, pushRecentCommand} from "@widgets/CommandPalette/recent.ts";
 import {PaletteFooter} from "@widgets/CommandPalette/PaletteFooter.tsx";
 import {buildTestId} from "@shared/testing/testId.ts";
-
-const GROUP_ORDER = ['recent', 'navigate', 'create', 'manage', 'system', 'general'];
-
-const orderGroups = (groups: string[]): string[] => {
-    const known = GROUP_ORDER.filter(g => groups.includes(g));
-    const unknown = groups.filter(g => !GROUP_ORDER.includes(g)).sort();
-    return [...known, ...unknown];
-};
+import {orderGroups} from "@shared/command/groupOrder.ts";
+import {IS_MAC} from "@shared/utils/platform.ts";
 
 type CommandPaletteProps = {
     /** Render as a compact icon + hotkey pill that animates open to the full
@@ -47,16 +40,26 @@ type CommandPaletteProps = {
      * The workflow editor sets this — its embedded palette's wizards shouldn't
      * surface links to unrelated top-level pages. */
     hideSuccessRecommendations?: boolean;
+    /** Called whenever the palette resets its command context entirely — the
+     * locked-scope pill (see lockAsChip) is explicitly unlocked via Backspace,
+     * or the collapsible palette blurs/closes. The workflow editor uses this
+     * to clear its search highlights once the user has left the command. */
+    onScopeExit?: () => void;
+    /** Called on Escape while no dialog is open, before the default
+     * deactivate/blur behavior. Return true to consume the press (e.g. "some
+     * transient state was cleared") so the palette stays open on this press —
+     * the workflow editor uses this to make a first Escape clear search
+     * highlights, and only a second Escape close the palette. */
+    onEscapeClearScope?: () => boolean;
 };
 
-export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessRecommendations }: CommandPaletteProps = {}) => {
+export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessRecommendations, onScopeExit, onEscapeClearScope }: CommandPaletteProps = {}) => {
     const {isMobile} = useBreakpoints();
     const { showCommandContent, toggleCommandContent } = useLayoutStore();
     const {t: tCommon} = useI18n('common');
     const navigate = useNavigate();
 
     const confirmAction = useConfirm();
-    const { user, normalizedUser } = useAuth()
     const [value, setValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -67,17 +70,22 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [recent, setRecent] = useState<string[]>(() => getRecentCommands());
     const [highlighted, setHighlighted] = useState<string>('');
+    // A literal command with `lockAsChip` locks here on selection — rendered
+    // as a readonly pill before the caret, and implicitly prepended as the
+    // first token to every subsequent parse until Backspace-on-empty clears it.
+    const [lockedScope, setLockedScope] = useState<Suggestion | null>(null);
     const requestIdRef = useRef(0);
     const changeSourceRef = useRef<'input' | 'select'>('input');
-    const policyContext = useMemo(() => ({
-        user: setUserPolicyContext(user, normalizedUser),
-        resource: 'command-palette'
-    }), [user]);
+    const policyContext = useCommandPolicyContext();
     const inputRef = useRef<HTMLInputElement | null>(null);
+    const buildTokens = (raw: string): string[] => {
+        const base = raw.trim().length === 0 ? [] : raw.trim().split(/\s+/);
+        return lockedScope ? [lockedScope.value, ...base] : base;
+    };
     const executeWithContext = async (ast: ASTNode[]) => {
         const last = ast[ast.length - 1];
         if (last?.node.execute) {
-            const next = pushRecentCommand(value);
+            const next = pushRecentCommand(buildTokens(value).join(' '));
             setRecent(next);
         }
         await executeAST(ast, {
@@ -109,9 +117,6 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                 );
             },
 
-            notify: (message) => {
-                alert(message);
-            },
             setInputValue: (v: string) => setValue(v),
             focusInput: () => inputRef.current?.focus(),
         });
@@ -128,14 +133,17 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
     }, [content]);
     useEffect(() => {
         const source = changeSourceRef.current;
+        // Reset immediately (not after execution) so a re-render triggered
+        // while `execute` is still running — e.g. a confirm dialog stealing
+        // focus, which blurs/refocuses the input and flips `isActive` — can't
+        // be mistaken for a fresh selection and replay the same command.
+        changeSourceRef.current = 'input';
         (async () => {
             try {
                 setIsLoading(true);
                 const id = ++requestIdRef.current;
 
-                const tokens = value.trim().length === 0
-                    ? []
-                    : value.trim().split(/\s+/);
+                const tokens = buildTokens(value);
                 const {suggestions, ast: newAst} = await parseTokens(tokens, policyContext);
 
                 if (id === requestIdRef.current) {
@@ -151,7 +159,20 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                 setIsLoading(false);
             }
         })()
-    }, [value]);
+        // `isActive` is included so the suggestion list is always recomputed
+        // fresh the moment the palette is opened/focused — commands can be
+        // gated on state outside this widget (e.g. the workflow editor's
+        // command-palette bridge, only registered once its own mount effects
+        // settle), so a value computed once at CommandPalette's own mount
+        // could go stale. By the time a user can actually focus/open the
+        // palette, any such external state has long since settled.
+    }, [value, lockedScope, isActive]);
+    // Kept current via ref (not a dep) so this window listener never needs to
+    // re-subscribe just because the callback identity changed on re-render.
+    const onEscapeClearScopeRef = useRef(onEscapeClearScope);
+    useEffect(() => {
+        onEscapeClearScopeRef.current = onEscapeClearScope;
+    }, [onEscapeClearScope]);
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             // Ctrl + K (Windows/Linux) or Cmd + K (Mac)
@@ -164,6 +185,19 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
 
                 inputRef.current?.focus();
                 setIsActive(true);
+                return;
+            }
+            // A window-level listener (not the input's own onKeyDown) is required
+            // here — the whole point is to clear transient scoped state (e.g. the
+            // workflow editor's search highlights) even after focus has moved away
+            // from the palette input onto the canvas, where the input's onKeyDown
+            // would never see the keystroke at all. Capture phase so this runs
+            // before the input's own Escape-to-blur handling; stopPropagation only
+            // when consumed, so an unrelated Escape (nothing to clear) still
+            // reaches the input/palette to blur/close as normal.
+            if (e.key === 'Escape' && !useModalStore.getState().isOpen && onEscapeClearScopeRef.current?.()) {
+                e.preventDefault();
+                e.stopPropagation();
             }
         };
 
@@ -182,13 +216,20 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
         return () => useCommandPaletteUIStore.getState().setModeOverride(null);
     }, [forceMode]);
 
-    const handleSelect = async (suggestion: string) => {
+    const handleSelect = async (suggestion: Suggestion) => {
         changeSourceRef.current = 'select';
+
+        if (suggestion.lockAsChip) {
+            setLockedScope(suggestion);
+            setValue('');
+            return;
+        }
+
         const rawTokens = value.trim().length === 0
             ? []
             : value.trim().split(/\s+/);
 
-        const { ast } = await parseTokens(rawTokens, policyContext);
+        const { ast } = await parseTokens(buildTokens(value), policyContext);
 
         const lastToken = rawTokens[rawTokens.length - 1];
         const lastAstNode = ast[ast.length - 1];
@@ -204,11 +245,11 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
         const tokens = [...rawTokens];
 
         if (tokens.length === 0) {
-            tokens.push(suggestion);
+            tokens.push(suggestion.value);
         } else if (isExactLiteral) {
-            tokens.push(suggestion);
+            tokens.push(suggestion.value);
         } else {
-            tokens[tokens.length - 1] = suggestion;
+            tokens[tokens.length - 1] = suggestion.value;
         }
 
         const newValue = tokens.join(' ') + ' ';
@@ -217,12 +258,15 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
 
     const handleSelectRecent = (recentValue: string) => {
         changeSourceRef.current = 'select';
+        setLockedScope(null);
         setValue(recentValue + ' ');
     };
 
     const displayGroups = useMemo(() => {
         const groups = new Map<string, Suggestion[]>();
-        const isEmpty = value.trim().length === 0;
+        // Recent commands are unrelated, standalone command strings — hide them
+        // once a scope is locked so they don't compete with the scoped list.
+        const isEmpty = value.trim().length === 0 && !lockedScope;
         if (isEmpty && recent.length > 0) {
             groups.set('recent', recent.map(r => ({ value: r, group: 'recent', icon: 'history' as const })));
         }
@@ -238,12 +282,14 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
             heading: tCommon(`commandPalette.groups.${key}` as never),
             items: groups.get(key)!,
         }));
-    }, [suggestions, recent, value, tCommon]);
+    }, [suggestions, recent, value, lockedScope, tCommon]);
 
     const hasItems = displayGroups.some(g => g.items.length > 0);
 
-    // Collapsed only while idle: focus or any typed text expands it.
-    const isCollapsed = collapsible && !isActive && value.trim().length === 0;
+    // Collapsed only while idle: focus, typed text, or a locked scope (e.g. the
+    // workflow search pill) expands it — a locked scope must stay visible even
+    // after clicking away, so its search state isn't lost from view.
+    const isCollapsed = collapsible && !isActive && value.trim().length === 0 && !lockedScope;
 
     return (
         <div className={`cmdk-palette-container${collapsible ? ' cmdk-collapsible' : ''}${isCollapsed ? ' cmdk-collapsed' : ''}`}>
@@ -253,58 +299,80 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                 onMouseDown={isCollapsed ? (e) => { e.preventDefault(); inputRef.current?.focus(); setIsActive(true); } : undefined}
             >
                 <Command shouldFilter={false} value={highlighted} onValueChange={setHighlighted} style={{position: 'relative', paddingLeft: 20, paddingRight: 80}}>
-                    <Command.Input
-                        ref={inputRef}
-                        data-testid="command-palette-input"
-                        onFocus={() => setIsActive(true)}
-                        onBlur={() => {
-                            // Switching browser tabs/windows blurs the input too; ignore
-                            // it so the typed value and open state survive returning.
-                            if (!document.hasFocus()) return;
-                            setIsActive(false);
-                            // Clicking away should close the collapsible pill even with
-                            // typed text — clear it so it collapses back to icon + hotkey.
-                            // But a command opening a modal also blurs the input: keep the
-                            // value (and the expanded pill) so it's intact when the modal
-                            // closes and focus returns.
-                            if (collapsible && !useModalStore.getState().isOpen) {
-                                changeSourceRef.current = 'input';
-                                setValue('');
-                            }
-                        }}
-                        value={value}
-                        onValueChange={(v) => {
-                            changeSourceRef.current = 'input';
-                            setValue(v);
-                            setIsActive(true);
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Escape') {
-                                e.preventDefault();
+                    <div className="cmdk-input-row">
+                        {lockedScope && (
+                            <span className="cmdk-scope-chip" data-testid="command-palette-scope-chip">
+                                <span>{lockedScope.value}</span>
+                            </span>
+                        )}
+                        <Command.Input
+                            ref={inputRef}
+                            data-testid="command-palette-input"
+                            onFocus={() => setIsActive(true)}
+                            onBlur={() => {
+                                // Switching browser tabs/windows blurs the input too; ignore
+                                // it so the typed value and open state survive returning.
+                                if (!document.hasFocus()) return;
                                 setIsActive(false);
-                                inputRef.current?.blur();
-                                return;
-                            }
-                            if (e.key === 'Tab') {
-                                const all = displayGroups.flatMap(g => g.items);
-                                const fromHighlight = all.find(
-                                    s => `${s.group ?? 'general'}:${s.value}` === highlighted,
-                                );
-                                const target = fromHighlight ?? all[0];
-                                if (target) {
-                                    e.preventDefault(); // 🚨 important — otherwise focus will be lost
-                                    if (target.group === 'recent') handleSelectRecent(target.value);
-                                    else handleSelect(target.value);
+                                // Clicking away should close the collapsible pill even with
+                                // typed text — clear it so it collapses back to icon + hotkey.
+                                // But a command opening a modal also blurs the input: keep the
+                                // value (and the expanded pill) so it's intact when the modal
+                                // closes and focus returns. Same for a locked scope (e.g. the
+                                // workflow search pill) — clicking away to look at its results
+                                // (the highlighted canvas) must not wipe out the search; only an
+                                // explicit Backspace-unlock or a second Escape should do that.
+                                if (collapsible && !useModalStore.getState().isOpen && !lockedScope) {
+                                    changeSourceRef.current = 'input';
+                                    setValue('');
+                                    setLockedScope(null);
+                                    onScopeExit?.();
                                 }
-                            }
-                        }}
-                        placeholder={tCommon('commandPalette.placeholder')}
-                    />
+                            }}
+                            value={value}
+                            onValueChange={(v) => {
+                                changeSourceRef.current = 'input';
+                                setValue(v);
+                                setIsActive(true);
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Escape') {
+                                    // The window-level listener above handles clearing scoped
+                                    // state first (capture phase, stopPropagation when consumed)
+                                    // — reaching here means there was nothing to clear, so this
+                                    // press just does the normal deactivate/blur.
+                                    e.preventDefault();
+                                    setIsActive(false);
+                                    inputRef.current?.blur();
+                                    return;
+                                }
+                                if (e.key === 'Backspace' && value === '' && lockedScope) {
+                                    e.preventDefault();
+                                    setLockedScope(null);
+                                    onScopeExit?.();
+                                    return;
+                                }
+                                if (e.key === 'Tab') {
+                                    const all = displayGroups.flatMap(g => g.items).filter(s => !s.disabled);
+                                    const fromHighlight = all.find(
+                                        s => `${s.group ?? 'general'}:${s.value}` === highlighted,
+                                    );
+                                    const target = fromHighlight ?? all[0];
+                                    if (target) {
+                                        e.preventDefault(); // 🚨 important — otherwise focus will be lost
+                                        if (target.group === 'recent') handleSelectRecent(target.value);
+                                        else handleSelect(target);
+                                    }
+                                }
+                            }}
+                            placeholder={tCommon('commandPalette.placeholder')}
+                        />
                         <div className="cmdk-loading">
                             {isLoading ? (
                                 <div style={{marginLeft: 1, marginTop: 2}}><Loading size={'sm'}/></div>
-                            ) : <Icon isSubtle name={'command'}/>}
+                            ) : <Icon isSubtle name={IS_MAC ? 'command' : 'search'}/>}
                         </div>
+                    </div>
                     <HotKey/>
 
                     {isActive && !isLoading && (hasItems || value.trim().length > 0) &&
@@ -317,9 +385,10 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                                                 <Command.Item
                                                     key={`${group.key}:${s.value}`}
                                                     value={`${group.key}:${s.value}`}
+                                                    disabled={s.disabled}
                                                     data-testid={buildTestId('command-palette-item', group.key, s.value)}
                                                     onMouseDown={(e) => e.preventDefault()}
-                                                    onSelect={() => group.key === 'recent' ? handleSelectRecent(s.value) : handleSelect(s.value)}
+                                                    onSelect={() => !s.disabled && (group.key === 'recent' ? handleSelectRecent(s.value) : handleSelect(s))}
                                                 >
                                                     <div className="cmdk-item-row">
                                                         {s.icon && (

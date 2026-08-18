@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/patch-react-json-view.cjs && vite",
-    "build": "node scripts/patch-react-json-view.cjs && node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build",
+    "build": "node scripts/patch-react-json-view.cjs && node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build && node scripts/write-production-config.cjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write src",
@@ -20,6 +20,8 @@
     "@ant-design/icons": "^6.1.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@graphiql/react": "^0.37.7",
+    "@graphiql/toolkit": "^0.12.1",
     "@hookform/resolvers": "^5.2.2",
     "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.3.7",
@@ -36,6 +38,9 @@
     "cron-parser": "^5.5.0",
     "cron-validate": "^1.5.3",
     "framer-motion": "^12.34.2",
+    "fuse.js": "^7.5.0",
+    "graphiql": "^5.2.4",
+    "graphql": "16.11.0",
     "i18next": "^25.8.0",
     "lucide-react": "^1.7.0",
     "react": "19.2.0",
@@ -79,6 +84,7 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.1",
     "vite": "^7.3.1",
+    "vite-plugin-monaco-editor": "^1.1.0",
     "vitest": "^4.1.6"
   },
   "msw": {

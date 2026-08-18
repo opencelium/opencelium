@@ -1,4 +1,5 @@
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
+import { i18n } from '@shared/i18n/config/i18n'
 import en from '@entities/supportFile/i18n/en.json'
 import de from '@entities/supportFile/i18n/de.json'
 import { StatusCell } from '@entities/supportFile/ui/StatusCell'
@@ -52,6 +53,10 @@ export const supportFileDefinition: EntityDefinition = {
                 field: 'supportFile',
                 buildDeleteUrl: (_entity, value) =>
                     `/connection/support-file/${encodeURIComponent(extractFilename(value))}`,
+                confirmMessage: (value) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities')
+                    return t(`${baseKey}.list.confirmDelete.message`, { filePath: value })
+                },
             },
         ],
     },
@@ -64,6 +69,7 @@ export const supportFileDefinition: EntityDefinition = {
             type: 'string',
             ui: { component: 'input' },
             table: {
+                width: '35%',
                 visible: true,
                 order: 1,
                 sortable: true,
@@ -88,6 +94,7 @@ export const supportFileDefinition: EntityDefinition = {
             type: 'other',
             ui: { component: 'input' },
             table: {
+                width: '15%',
                 visible: true,
                 order: 3,
                 sortable: true,

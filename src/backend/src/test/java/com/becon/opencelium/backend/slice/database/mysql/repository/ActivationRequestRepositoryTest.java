@@ -4,12 +4,12 @@ import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
 import com.becon.opencelium.backend.database.mysql.repository.ActivationRequestRepository;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.testutil.annotation.SliceTest;
+import com.becon.opencelium.backend.testutil.fixture.ActivationRequestFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -116,7 +116,7 @@ class ActivationRequestRepositoryTest {
     @Test
     void findFirstByHmacReturnsActivationRequestWhenMatchExists() {
         // GIVEN
-        ActivationRequest request = persistAndFlush(ActivReqStatus.PENDING,false);
+        ActivationRequest request = persistAndFlush(ActivReqStatus.PENDING, false);
         String id = request.getId();
         String hmac = request.getHmac();
 
@@ -198,17 +198,8 @@ class ActivationRequestRepositoryTest {
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private ActivationRequest persistAndFlush(ActivReqStatus status, boolean active) {
-        String hmac = "hmac-" + status + (active ? "-active" : "-inactive");
-
-        ActivationRequest request = new ActivationRequest();
-
-        request.setId(UUID.randomUUID().toString());
-        request.setHmac(hmac);
-        request.setStatus(status);
-        request.setActive(active);
-        request.setTtl(3600);
-        request.setCreatedAt(LocalDateTime.now());
-
-        return em.persistAndFlush(request);
+        return em.persistAndFlush(
+                ActivationRequestFixture.anActivationRequest(status, active)
+        );
     }
 }

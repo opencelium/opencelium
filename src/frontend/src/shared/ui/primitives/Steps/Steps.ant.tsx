@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import {useMemo} from 'react';
 import {Steps} from "antd";
 import './Steps.css';
 import type {StepsComponent} from "@shared/ui/primitives/Steps/Divider.types.tsx";
@@ -12,14 +12,19 @@ const AntSteps: StepsComponent =
     }) => {
         const {isTabletOrMobile} = useBreakpoints();
         const steps = useMemo(() => {
-            return items.map(i => ({title: i.header, content: isTabletOrMobile ? undefined : i.subheader, status: i.status, onClick: i?.onClick}))
+            return items.map(i => ({title: i.header, content: isTabletOrMobile ? undefined : i.subheader, status: i.status}))
         }, [items, isTabletOrMobile])
+        const handleChange = items.some(item => item.onClick)
+            ? (nextStep: number) => { void items[nextStep]?.onClick?.() }
+            : undefined;
+
         return (
             <Steps
                 current={current}
                 status={status}
                 items={steps}
                 orientation={isTabletOrMobile ? 'horizontal' : 'vertical'}
+                onChange={handleChange}
             />
         )
     };

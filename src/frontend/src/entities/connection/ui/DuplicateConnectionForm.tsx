@@ -45,7 +45,7 @@ export const DuplicateConnectionForm: React.FC<Props> = ({ row, onClose }) => {
         try {
             // Reject a duplicate title up front and surface it on the field itself.
             const check = await apiExecutor({
-                url: `/connection/check/${encodeURIComponent(title)}`,
+                url: `/connection/check?name=${encodeURIComponent(title)}`,
                 method: 'GET',
             })
             if (!check || typeof check !== 'object' || !('message' in check)) return

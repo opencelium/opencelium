@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.database.mysql.repository.projection.DailyEx
 import com.becon.opencelium.backend.database.mysql.repository.projection.ExecutionStatsProjection;
 import com.becon.opencelium.backend.database.mysql.repository.projection.TopWorkflowProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -76,8 +77,12 @@ public interface ExecutionRepository extends JpaRepository<Execution, Long> {
 //    @Transactional
 //    Optional<Execution> findTopBySchedulerIdOrderDesc(int schedulerId);
 
+    // Bulk delete: skips loading the (potentially huge) execution history into the
+    // persistence context. execution_argument rows must be removed first (NO ACTION FK).
+    @Modifying
     @Transactional
-    void deleteBySchedulerId(int schedulerId);
+    @Query("DELETE FROM Execution e WHERE e.scheduler.id = :schedulerId")
+    void deleteBySchedulerId(@Param("schedulerId") int schedulerId);
 
     @Transactional
     List<Execution> findBySchedulerId(int schedulerId);

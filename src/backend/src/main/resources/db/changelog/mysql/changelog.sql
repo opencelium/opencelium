@@ -387,7 +387,7 @@ alter table enhancement change expert_var variables text;
 alter table connection change name title varchar(128);
 
 --changeset 4.0:9 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-create table connection_history(
+create table if not exists connection_history(
     id BIGINT AUTO_INCREMENT PRIMARY KEY ,
     connection_id INT(11) NOT NULL ,
     user_id INT(11) NOT NULL,
@@ -395,21 +395,12 @@ create table connection_history(
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     json_patch JSON,
     action  VARCHAR(45),
-    FOREIGN KEY (connection_id) REFERENCES connection(id),
+    CONSTRAINT fk_connection_history_connection FOREIGN KEY (connection_id) REFERENCES connection(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --changeset 4.0:10 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 alter table enhancement change variables args text;
-
---changeset 4.0:11 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-alter table connection_history
-    drop foreign key connection_history_ibfk_1;
-
-alter table connection_history
-    add constraint connection_history_ibfk_1
-        foreign key (connection_id) references connection (id)
-            on delete cascade;
 
 --changeset 4.0:12 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 CREATE TABLE category (
@@ -732,3 +723,27 @@ ALTER TABLE `webhook` ADD CONSTRAINT `uq_webhook_uuid` UNIQUE (`uuid`);
 --changeset 5.0:4 stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE `connector` ADD COLUMN IF NOT EXISTS `last_test_passed` TINYINT(1) DEFAULT NULL;
 ALTER TABLE `connector` ADD COLUMN IF NOT EXISTS `last_test_error` TEXT DEFAULT NULL;
+--changeset 5.0:5 stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `execution_argument` DROP FOREIGN KEY IF EXISTS `execution_argument_ibfk_1`;
+ALTER TABLE `execution_argument` ADD CONSTRAINT `fk_execution_argument_execution1` FOREIGN KEY (`execution_id`) REFERENCES `execution` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE `execution` DROP FOREIGN KEY IF EXISTS `fk_execution_scheduler1`;
+ALTER TABLE `execution` ADD CONSTRAINT `fk_execution_scheduler1` FOREIGN KEY (`scheduler_id`) REFERENCES `scheduler` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+--changeset 5.0:6 stripComments:true splitStatements:true endDelimiter:;
+INSERT IGNORE INTO role_has_permission (role_id,component_id,permission_id) VALUES (2,7,1),(2,7,2),(2,7,3),(2,7,4);
+
+--changeset 5.0:7 stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connector CHANGE ssl_validation trust_certificate TINYINT(4) DEFAULT NULL;
+--changeset 5.0:8 stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `connector` ADD COLUMN IF NOT EXISTS `status` VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN';
+ALTER TABLE `connector` ADD COLUMN IF NOT EXISTS `last_checked_at` TIMESTAMP NULL DEFAULT NULL;
+UPDATE `connector` SET `status` = CASE WHEN `last_test_passed` = 1 THEN 'UP'
+                                       WHEN `last_test_passed` = 0 THEN 'DOWN'
+                                       ELSE 'UNKNOWN' END;
+ALTER TABLE `connector` DROP COLUMN IF EXISTS `last_test_passed`;
+
+--changeset 5.0:9 stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `connection` CHANGE COLUMN IF EXISTS `created_on` `created_at` TIMESTAMP NULL DEFAULT NULL;
+ALTER TABLE `connection` CHANGE COLUMN IF EXISTS `modified_on` `modified_at` TIMESTAMP NULL DEFAULT NULL;
+ALTER TABLE `connector` CHANGE COLUMN IF EXISTS `created_on` `created_at` TIMESTAMP NULL DEFAULT NULL;
+ALTER TABLE `connector` CHANGE COLUMN IF EXISTS `modified_on` `modified_at` TIMESTAMP NULL DEFAULT NULL;

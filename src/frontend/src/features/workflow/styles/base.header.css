@@ -1,0 +1,66 @@
+.logsCard {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  min-height: 46px;
+  max-height: 46px;
+  display: flex;
+  flex-direction: column;
+  transition: max-height 0.2s ease;
+  overflow: hidden;
+}
+
+.logsCardExpanded {
+  max-height: 430px;
+}
+
+.logsCardFull {
+  top: 72px;
+  max-height: none;
+}
+
+.headerInlineInfo {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.headerCardWithInlineError .headerInlineInfo {
+  overflow: visible;
+}
+
+.headerInlineName,
+.headerInlineDescription {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+}
+
+.headerInlineName {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+/* Cap the title/description flex items at a fixed 30/70 split so a long title
+   can't crowd out the description (or vice versa) in proportion to its own
+   text length - only kicks in once either one is long enough to hit the cap.
+   Applied to wrapper divs (not the Tooltip-wrapped text elements themselves)
+   because Tooltip injects its own span between the flex item and the text,
+   which would make a percentage max-width on the text element resolve against
+   an indeterminate-width ancestor and get ignored. */
+.headerInlineNameWrap {
+  max-width: 30%;
+}
+
+.headerInlineDescriptionWrap {
+  min-width: 0;
+  max-width: 70%;
+}

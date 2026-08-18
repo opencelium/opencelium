@@ -1,7 +1,10 @@
 {
   "list": {
     "title": "Users",
-    "subTitle": "This section allows administrators to manage system users, assign groups, enable two-factor authentication (2FA), and control access permissions."
+    "subTitle": "This section allows administrators to manage system users, assign groups, enable two-factor authentication (2FA), and control access permissions.",
+    "confirmDelete": {
+      "message": "Are you sure you want to delete user with email \"{{email}}\"?"
+    }
   },
   "crossValidations": {
     "repeatPassword": {
@@ -32,7 +35,7 @@
       }
     },
     "email": {
-      "label": "Email",
+      "label": "Email/Username",
       "errors": {
         "email_already_exists": "The user with such e-mail is already created"
       }
@@ -96,7 +99,8 @@
       },
       "credentials": {
         "header": "Credentials",
-        "subheader": "Login credentials used to access the system. The email serves as the username."
+        "subheader": "Login credentials used to access the system.",
+        "subheaderUpdate": "Update the login email and the role assigned to this user."
       },
       "role": {
         "header": "Role",

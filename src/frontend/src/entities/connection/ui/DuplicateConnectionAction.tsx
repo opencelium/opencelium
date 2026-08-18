@@ -14,8 +14,8 @@ export const DuplicateConnectionAction: React.FC<Props> = ({ row }) => {
     const { t: tEntities } = useI18n('entities')
     const dialog = useDialogController()
 
-    // The action lives inside the row's antd Popover, which unmounts its content
-    // on close. Host the dialog in the global stack so it survives the popover.
+    // Host the dialog in the global stack rather than local state, so it
+    // survives even if this row-action component itself unmounts.
     const open = () => {
         dialog.open({
             title: tEntities('connection.list.duplicate.dialogTitle'),
@@ -26,9 +26,9 @@ export const DuplicateConnectionAction: React.FC<Props> = ({ row }) => {
     }
 
     return (
-        <Tooltip content={tEntities('connection.list.duplicate.tooltip')} placement="right">
+        <Tooltip content={tEntities('connection.list.duplicate.tooltip')} placement="top">
             <IconButton
-                iconProps={{ name: 'content-copy', color: 'primary' }}
+                iconProps={{ name: 'content-copy', color: 'primary', size: 15 }}
                 type={'text'}
                 size={'xs'}
                 onClick={open}

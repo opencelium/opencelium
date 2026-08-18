@@ -1,19 +1,26 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { js2xml, xml2js } from 'xml-js';
 import { useMethodContext } from '../../../../providers/MethodContext';
 import type { RootState } from '../../../../store';
 import { updateConnection, updatePayload } from '../../../../store/connection/connectionSlice';
-import { findRequestEnhancement, replaceRequestBindings } from '../bodyBinding';
+import { replaceRequestBindings } from '../bodyBinding';
 import { mergeReferenceValue } from '../bodyValue';
 import {
   applySelectionValue,
   createTreeFromCompactXml,
-  findNodePath,
   getSelectedValue,
   serializeCompactXml,
   type XmlSelection,
 } from './xmlTree';
+import { useXmlEnhancementActions } from './useXmlEnhancementActions';
+import { useXmlSelectionState } from './useXmlSelectionState';
+
+const XML_JS_OPTIONS = {
+  compact: true,
+  attributesKey: '__oc__attributes',
+  textKey: '__oc__value',
+} as const;
 
 export function useXmlBodyEditor() {
   const dispatch = useDispatch();
@@ -24,7 +31,6 @@ export function useXmlBodyEditor() {
   const [tree, setTree] = useState(() => createTreeFromCompactXml(body));
   const [selection, setSelection] = useState<XmlSelection | null>(null);
   const [isReferenceOpen, setIsReferenceOpen] = useState(false);
-  const [selectedEnhanceId, setSelectedEnhanceId] = useState<string>();
   const [rawXml, setRawXml] = useState('');
   const [rawError, setRawError] = useState<string | null>(null);
 
@@ -32,40 +38,19 @@ export function useXmlBodyEditor() {
 
   useEffect(() => {
     try {
-      setRawXml(js2xml(serializeCompactXml(tree), { compact: true, spaces: 2 }));
+      setRawXml(js2xml(serializeCompactXml(tree), { ...XML_JS_OPTIONS, spaces: 2 }));
       setRawError(null);
     } catch {
       setRawXml('');
     }
   }, [tree]);
 
-  const selectionInfo = useMemo(() => {
-    if (!selection) return null;
-    const nodePath = findNodePath(tree, selection.nodeId);
-    if (!nodePath) return null;
-    const name = selection.kind === 'text' ? '__oc__value' : `__oc__attributes.${selection.attribute}`;
-    const namespace = selection.kind === 'text' ? nodePath : [...nodePath, '__oc__attributes'];
-    return {
-      label: selection.kind === 'text' ? `${nodePath.join('.')}.text` : `${nodePath.join('.')}.@${selection.attribute}`,
-      name,
-      namespace: namespace.slice(0, -1),
-      value: getSelectedValue(tree, selection),
-    };
-  }, [selection, tree]);
-
-  useEffect(() => {
-    if (!selectionInfo) return setSelectedEnhanceId(undefined);
-    const enhancement = findRequestEnhancement(connection, method.color, selectionInfo.namespace, selectionInfo.name, 'body');
-    setSelectedEnhanceId(enhancement?.enhanceId);
-  }, [connection, method.color, selectionInfo]);
-
-  const currentEnhancement = useMemo(
-    () =>
-      selectedEnhanceId
-        ? connection?.fieldBindings.find((binding) => binding.enhancement.enhanceId === selectedEnhanceId)?.enhancement
-        : undefined,
-    [connection, selectedEnhanceId],
-  );
+  const { selectionInfo, setSelectedEnhanceId,
+    currentEnhancement, directReference } = useXmlSelectionState({
+    connection, methodColor: method.color, selection, tree,
+  });
+  const enhancementActions = useXmlEnhancementActions({ connection, method, selectionInfo,
+    currentEnhancement, setSelectedEnhanceId });
 
   const syncBody = (nextTree = tree) => {
     const nextBody = serializeCompactXml(nextTree);
@@ -77,7 +62,10 @@ export function useXmlBodyEditor() {
 
   return {
     connection,
+    createEnhancement: enhancementActions.createEnhancement,
     currentEnhancement,
+    deleteEnhancement: enhancementActions.deleteEnhancement,
+    directReference,
     isReferenceOpen,
     method,
     mode,
@@ -97,7 +85,7 @@ export function useXmlBodyEditor() {
     applyRawXml: (readOnly?: boolean) => {
       if (readOnly) return;
       try {
-        const parsed = xml2js(rawXml || '<root />', { compact: true });
+        const parsed = xml2js(rawXml || '<root />', XML_JS_OPTIONS);
         const nextTree = createTreeFromCompactXml(parsed);
         setTree(nextTree);
         setRawError(null);

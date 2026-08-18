@@ -6,7 +6,10 @@
     },
     "saveFailed": {
       "create": "Failed to create workflow \"{{title}}\"",
-      "update": "Failed to update workflow \"{{title}}\""
+      "update": "Failed to update workflow \"{{title}}\"",
+      "connectorNotFound": "One of the connectors used in this workflow could not be found. It may have been deleted — please update or replace the connector node before saving again.",
+      "operatorExpressionEmpty": "The highlighted \"{{type}}\" operator has no condition set. Define its expression before saving.",
+      "titleTaken": "A workflow with this title already exists"
     },
     "history": {
       "activeDeleteBlocked": "The selected version is active and therefore cannot be deleted.",
@@ -16,10 +19,14 @@
   "list": {
     "title": "Workflows",
     "subTitle": "Workflows define how connectors interact with each other, including request flow, data mapping, and communication logic.",
-    "searchPlaceholder": "Search by title or description",
+    "searchPlaceholder": "Search",
     "columns": {
       "title": "Title",
-      "description": "Description"
+      "description": "Description",
+      "category": "Category",
+      "modifiedAt": "Modified At",
+      "modifiedBy": "Modified By",
+      "currentVersion": "Current Version"
     },
     "downloadTemplate": {
       "tooltip": "Download as template",
@@ -38,6 +45,9 @@
       "submit": "Duplicate",
       "success": "Workflow \"{{name}}\" duplicated",
       "error": "Failed to duplicate workflow"
+    },
+    "confirmDelete": {
+      "message": "Are you sure you want to delete workflow with title \"{{title}}\"?"
     }
   },
   "fields": {
@@ -51,13 +61,18 @@
   "test": {
     "start": "Test run",
     "stop": "Stop test",
+    "skipAnimation": "Skip animation",
     "socketConnecting": "Connecting websocket…",
     "socketDisconnected": "WebSocket is not connected",
     "noMethods": "Add at least one method before running a test",
-    "startFailed": "Failed to start the test run",
-    "stopFailed": "Failed to stop the test run",
-    "terminated": "Test run terminated",
-    "otherTestRunning": "A test for this connection is already running. Wait for it to finish or stop it first.",
+    "startFailed": "Failed to start the test",
+    "stopFailed": "Failed to stop the test",
+    "terminated": "Test terminated",
+    "finished": "Test finished successfully",
+    "failed": "Test failed",
+    "locatingError": "Collecting error data…",
+    "skipToLive": "Jump to live",
+    "otherTestRunning": "A test for this workflow is already running. Wait for it to finish or stop it first.",
     "leaveConfirm": {
       "title": "Stop the running test?",
       "message": "Your test is running. If you leave this page, the test will be terminated. Do you want to continue?"

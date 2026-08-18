@@ -1,53 +1,60 @@
 {
   "fields": {
-    "url": {
-      "label": "Url"
+    "urls": {
+      "label": "URL"
     },
-    "userDn": {
+    "userDN": {
       "label": "UserDN"
     },
-    "groupDn": {
+    "groupDN": {
       "label": "GroupDN"
     },
-    "readAccountDn": {
-      "label": "Read Account DN"
+    "username": {
+      "label": "Lesekonto-DN"
     },
-    "readAccountPassword": {
-      "label": "Read Account Password"
+    "password": {
+      "label": "Lesekonto-Passwort"
     },
     "userSearchFilter": {
-      "label": "User Search Filter"
+      "label": "Benutzersuchfilter"
     },
     "groupSearchFilter": {
-      "label": "Group Search Filter"
+      "label": "Gruppensuchfilter"
+    },
+    "logs": {
+      "label": "Protokolle"
     }
   },
   "sections": {
     "configurations": {
-      "title": "Configurations"
+      "title": "Konfigurationen"
     }
   },
   "wizard": {
     "modes": {
       "view": {
-        "header": "LDAP Configurations",
-        "subheader": "Test it."
+        "header": "LDAP-Konfiguration testen",
+        "subheader": "Die Konfiguration wird aus der application.yml gelesen — hier wird sie nur getestet, nicht geändert."
       }
     },
     "recommendations": {
-      "1": "Create User",
-      "2": "Create Role"
+      "1": "Benutzer erstellen",
+      "2": "Rolle erstellen"
     },
     "steps": {
       "configurations": {
-        "header": "Configurations",
-        "subheader": "Test LDAP configurations",
+        "header": "Konfigurationen",
+        "subheader": "Wird aus der application.yml unter dem Schlüssel security: geladen. Nur lesbar — zum Ändern die Datei bearbeiten und neu starten.",
         "actions": {
-          "nextLabel": "Test"
+          "nextLabel": "Testen"
         },
         "remote": {
-          "error": "Could not test ldap connection"
+          "error": "LDAP-Verbindung konnte nicht getestet werden"
         }
+      },
+      "logs": {
+        "header": "Protokolle",
+        "subheader": "Protokolle des Testergebnisses"
       }
     }
   }

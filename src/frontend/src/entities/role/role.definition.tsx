@@ -8,14 +8,30 @@ import type {Component, Role, RoleUpdateDTO} from "@entities/role/model/types.ts
 import {store} from "@app/store/store.ts";
 import {i18n} from "@shared/i18n/config/i18n.ts";
 import {resolveRoleIds} from "@entities/role/command/resolvers/resolveRoleId.ts";
+import {findRoleIdByName} from "@entities/role/command/roleCache.ts";
 import {ROLE_TAG} from "@entities/role/api/role.tags.ts";
 import {roleApi} from "@entities/role/api/roleApi.ts";
 import {selectAuthUser} from "@entities/auth/model/authSelectors.ts";
 
 const baseKey = 'role';
 
+const resolveRoleId = (value: string): string => {
+    if (/^\d+$/.test(value)) return value
+    return String(findRoleIdByName(value) ?? value)
+}
+
+const buildRoleFetchUrl = (value: string): string =>
+    `/role/${encodeURIComponent(resolveRoleId(value))}`
+
+const buildRolePageUrl = (value: string): string =>
+    `/${baseKey}/update/${encodeURIComponent(resolveRoleId(value))}`
+
+const buildRoleViewPageUrl = (value: string): string =>
+    `/${baseKey}/view/${encodeURIComponent(resolveRoleId(value))}`
+
 export const roleDefinition: EntityDefinition = {
     name: baseKey,
+    permissionComponent: 'USERGROUP',
     routes: [
         { type: 'create' },
         { type: 'view' },
@@ -31,6 +47,10 @@ export const roleDefinition: EntityDefinition = {
             { type: 'view' },
             {
                 type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    return t(`${baseKey}.list.confirmDelete.message`, { name: (row as Role).name });
+                },
                 disabledReason: (row) => {
                     const currentUser = selectAuthUser(store.getState());
                     if (!currentUser) return null;
@@ -99,11 +119,15 @@ export const roleDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: '30%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -119,10 +143,14 @@ export const roleDefinition: EntityDefinition = {
                 max: 5000,
             },
             table: {
+                width: '50%',
                 visible: true,
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
 
@@ -161,6 +189,7 @@ export const roleDefinition: EntityDefinition = {
                 required: true,
             },
             table: {
+                width: '30%',
                 visible: true,
                 order: 3,
                 searchable: true,
@@ -172,6 +201,9 @@ export const roleDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ');
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -277,11 +309,18 @@ export const roleDefinition: EntityDefinition = {
             ...createEntityCommands({def, config: {}, dsl: {
                     update: {
                         by: [
-                            { field: 'name', resolve: resolveRoleNames },
+                            {
+                                field: 'name',
+                                resolve: resolveRoleNames,
+                                buildFetchUrl: (_def, value) => buildRoleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildRolePageUrl(value),
+                            },
                             {
                                 field: 'id',
                                 resolve: resolveRoleIds,
                                 customPath: true,
+                                buildFetchUrl: (_def, value) => buildRoleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildRolePageUrl(value),
                             }
                         ]
                     },
@@ -291,6 +330,7 @@ export const roleDefinition: EntityDefinition = {
                                 field: 'id',
                                 resolve: resolveRoleIds,
                                 customPath: true,
+                                buildDeleteUrl: (_def, value) => buildRoleFetchUrl(value),
                                 afterDelete: async () => {
                                     await store.dispatch(
                                         roleApi.util.invalidateTags([
@@ -306,6 +346,7 @@ export const roleDefinition: EntityDefinition = {
                             {
                                 field: 'name',
                                 resolve: resolveRoleNames,
+                                buildDeleteUrl: (_def, value) => buildRoleFetchUrl(value),
                                 confirmMessage: (name) => {
                                     const t = i18n.getFixedT(i18n.language, 'entities');
                                     return t(`${baseKey}.confirmation.delete.byName`, {name});
@@ -319,10 +360,14 @@ export const roleDefinition: EntityDefinition = {
                                 field: 'id',
                                 resolve: resolveRoleIds,
                                 customPath: true,
+                                buildFetchUrl: (_def, value) => buildRoleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildRoleViewPageUrl(value),
                             },
                             {
                                 field: 'name',
-                                resolve: resolveRoleNames
+                                resolve: resolveRoleNames,
+                                buildFetchUrl: (_def, value) => buildRoleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildRoleViewPageUrl(value),
                             }
                         ]
                     }

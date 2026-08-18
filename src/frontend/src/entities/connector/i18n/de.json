@@ -1,14 +1,18 @@
 {
   "list": {
     "title": "Konnektoren",
-    "subTitle": "Konnektoren sind Kernkomponenten von OpenCelium. Sie repräsentieren externe oder interne Systeme, die zum Senden von Anfragen und zum Empfangen von Antworten verwendet werden."
+    "subTitle": "Konnektoren sind Kernkomponenten von OpenCelium. Sie repräsentieren externe oder interne Systeme, die zum Senden von Anfragen und zum Empfangen von Antworten verwendet werden.",
+    "searchPlaceholder": "Suchen"
   },
   "fields": {
     "title": {
-      "label": "Title"
+      "label": "Titel",
+      "errors": {
+        "title_already_exists": "Ein Konnektor mit diesem Titel wurde bereits erstellt"
+      }
     },
     "description": {
-      "label": "Description"
+      "label": "Beschreibung"
     },
     "invoker": {
       "label": "Invoker"
@@ -16,31 +20,48 @@
     "timeout": {
       "label": "Timeout"
     },
+    "modifiedAt": {
+      "label": "Geändert am"
+    },
+    "modifiedBy": {
+      "label": "Geändert von"
+    },
+    "requestData": {
+      "error": {
+        "required": "Pflichtfeld"
+      }
+    },
     "sslCert": {
-      "label": "Enable SSL Validation",
+      "label": "Jedem Zertifikat vertrauen",
       "text": {
-        "on": "SSL Validation is activated",
-        "off": "SSL Validation is deactivated"
+        "on": "Jedem Zertifikat vertrauen",
+        "off": "Jedem Zertifikat vertrauen"
       }
     },
     "icon": {
       "label": "Symbol",
-      "uploadHint": "Klicken, um ein Symbol hochzuladen (PNG oder JPG)",
-      "delete": "Symbol löschen"
+      "uploadButton": "Logo hochladen",
+      "hint": "PNG oder JPG",
+      "replace": "Symbol ersetzen",
+      "delete": "Symbol löschen",
+      "confirmDelete": {
+        "title": "Logo entfernen?",
+        "message": "Dies kann nicht widerrufen werden."
+      }
     },
     "url": {
       "label": "Url"
     },
     "password": {
-      "label": "Password"
+      "label": "Passwort"
     }
   },
   "sections": {
     "general-data": {
-      "title": "General Data"
+      "title": "Allgemeine Daten"
     },
     "credentials": {
-      "title": "Credentials"
+      "title": "Zugangsdaten"
     }
   },
   "wizard": {
@@ -56,29 +77,37 @@
         "successMessage": "Konnektor \"{{title}}\" wurde erfolgreich aktualisiert"
       },
       "view": {
-        "header": "Connector Details",
-        "subheader": "View connector information."
+        "header": "Konnektordetails",
+        "subheader": "Konnektorinformationen anzeigen."
       }
     },
     "recommendations": {
-      "1": "Create another Connector",
-      "2": "Create Connection",
-      "3": "Create Invoker"
+      "1": "Weiteren Konnektor erstellen",
+      "2": "Workflow erstellen",
+      "3": "Invoker erstellen",
+      "4": "Invoker-Liste"
     },
     "steps": {
       "general-data": {
-        "header": "General Data",
-        "subheader": "General information about connector"
+        "header": "Allgemeine Daten",
+        "subheader": "Dieser Abschnitt legt die Grundkonfiguration des Konnektors fest, einschließlich Name, Beschreibung, Ausführungseinstellungen und des ausgewählten Invokers."
       },
       "credentials": {
-        "header": "Credentials",
-        "subheader": "Authentication data",
+        "header": "Zugangsdaten",
+        "subheader": "Enthält invoker-spezifische Konfigurationsfelder, die zur Authentifizierung und Kommunikation mit dem Zielsystem erforderlich sind.",
         "test": {
           "button": "Verbindung testen",
           "success": "Verbindungstest erfolgreich",
+          "needsMasterPassword": "Geben Sie das Master-Passwort ein, um die Verbindung mit den gespeicherten Zugangsdaten zu testen.",
           "confirm": {
             "title": "Verbindungstest fehlgeschlagen",
             "message": "Der Verbindungstest ist fehlgeschlagen. Möchten Sie diesen Konnektor trotzdem speichern?"
+          }
+        },
+        "remote": {
+          "error": {
+            "default": "Unbekannter Fehler beim Testen des Konnektors",
+            "COMMUNICATION_FAILED": "Verbindung ist fehlgeschlagen"
           }
         }
       }
@@ -86,8 +115,10 @@
   },
   "confirmation": {
     "delete": {
-      "byTitle": "Konnektor mit dem Titel \"{{title}}\" löschen?",
-      "byId": "Konnektor mit der ID \"{{id}}\" löschen?"
+      "byTitle": "Warnung: Der Konnektor \"{{title}}\" wird möglicherweise in einem oder mehreren Workflows verwendet. Das Löschen kann diese Workflows beeinträchtigen.\n\nMöchten Sie fortfahren?",
+      "byId": "Warnung: Der Konnektor mit der ID \"{{id}}\" wird möglicherweise in einem oder mehreren Workflows verwendet. Das Löschen kann diese Workflows beeinträchtigen.\n\nMöchten Sie fortfahren?",
+      "bulkMessage": "Warnung: Die {{count}} ausgewählten Konnektoren werden möglicherweise in einem oder mehreren Workflows verwendet. Das Löschen kann diese Workflows beeinträchtigen.\n\nMöchten Sie fortfahren?",
+      "bulkMessage_one": "Warnung: Der ausgewählte Konnektor wird möglicherweise in einem oder mehreren Workflows verwendet. Das Löschen kann diesen Workflow beeinträchtigen.\n\nMöchten Sie fortfahren?"
     }
   },
   "lifecycle": {

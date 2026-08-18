@@ -28,15 +28,21 @@ import {
     FullscreenOutlined,
     FullscreenExitOutlined,
     ReloadOutlined,
-    ApiOutlined,
+    BranchesOutlined,
+    ThunderboltOutlined,
+    GlobalOutlined,
+    LockOutlined,
+    QuestionCircleOutlined,
+    ReadOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
 import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
-import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdStop, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff} from "react-icons/md";
-import {TbWebhook} from "react-icons/tb";
+import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdPause, MdStop, MdSkipNext, MdFastForward, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff} from "react-icons/md";
+import {TbWebhook, TbReportAnalytics} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
 import {GoArrowSwitch, GoWorkflow} from "react-icons/go";
+import {GrAggregate} from "react-icons/gr";
 
 const iconMap = {
     check: CheckOutlined,
@@ -55,7 +61,10 @@ const iconMap = {
     'content-copy': MdContentCopy,
     webhook: TbWebhook,
     play: MdPlayArrow,
+    pause: MdPause,
     stop: MdStop,
+    'step-forward': MdSkipNext,
+    'skip-forward': MdFastForward,
     download: DownloadOutlined,
     upload: UploadOutlined,
     key: KeyOutlined,
@@ -83,7 +92,14 @@ const iconMap = {
     'arrow-switch': GoArrowSwitch,
     workflow: GoWorkflow,
     refresh: ReloadOutlined,
-    api: ApiOutlined,
+    connector: BranchesOutlined,
+    flash: ThunderboltOutlined,
+    'http-request': GlobalOutlined,
+    aggregator: GrAggregate,
+    lock: LockOutlined,
+    help: QuestionCircleOutlined,
+    'report-analytics': TbReportAnalytics,
+    docs: ReadOutlined,
 };
 
 export const AntIcon: IconComponent = ({

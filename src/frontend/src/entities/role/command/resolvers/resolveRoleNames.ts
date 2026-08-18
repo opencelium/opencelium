@@ -1,25 +1,17 @@
-import {store} from "@app/store/store.ts";
-import {roleApi} from "@entities/role/api/roleApi.ts";
 import {debouncePromise} from "@shared/utils/debouncePromise.ts";
-import {_resolveUserEmails} from "@entities/user/command/resolvers/resolveUserEmails.ts";
+import {ensureRoleMetaLoaded} from "@entities/role/command/roleCache.ts";
 
+const SUGGESTION_LIMIT = 20;
 
 export async function _resolveRoleNames(
     input: string
 ): Promise<string[]> {
-
-    const result = await store.dispatch(
-        roleApi.endpoints.getRoles.initiate(
-            { page: 1, limit: 2, search: input },
-            { subscribe: false }
-        )
-    );
-
-    if ('data' in result && result.data) {
-        return result.data.map(u => u.name);
-    }
-
-    return [];
+    const list = await ensureRoleMetaLoaded();
+    const needle = (input ?? '').toLowerCase();
+    const matches = needle
+        ? list.filter((r) => r.name.toLowerCase().includes(needle))
+        : list;
+    return matches.slice(0, SUGGESTION_LIMIT).map(r => r.name);
 }
 
 export const resolveRoleNames =

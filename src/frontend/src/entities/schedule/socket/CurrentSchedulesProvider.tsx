@@ -48,20 +48,16 @@ export function CurrentSchedulesProvider({children}: Props) {
     const previousRunningRef = useRef<Map<number, RunningExecution>>(new Map())
 
     const handleMessage = useCallback((executions: CurrentExecution[]) => {
-        console.log(executions)
         const now = Date.now()
         const prev = previousRunningRef.current
         const incomingIds = new Set(executions.map((e) => e.execId))
 
         const nextRunning = new Map<number, RunningExecution>()
         for (const e of executions) {
-            const existing = prev.get(e.execId)
             const parsed = Date.parse(e.startTime)
             nextRunning.set(e.execId, {
                 execId: e.execId,
                 schedulerId: e.schedulerId,
-                // Preserve our first-seen instant so the ring doesn't reset on heartbeats.
-                localStartTime: existing?.localStartTime ?? now,
                 serverStartTime: Number.isNaN(parsed) ? now : parsed,
                 avgDuration: e.avgDuration,
             })

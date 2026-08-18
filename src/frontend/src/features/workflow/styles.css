@@ -11,6 +11,7 @@
 @import './styles/history-expand.css';
 @import './styles/history-dialog.css';
 @import './styles/nodes.css';
+@import './styles/connector-status.css';
 @import './styles/node-toolbar.css';
 @import './styles/canvas-controls.css';
 @import './styles/edges.css';

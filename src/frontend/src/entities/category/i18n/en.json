@@ -1,7 +1,10 @@
 {
   "list": {
     "title": "Categories",
-    "subTitle": "Categories are used to organize and group Workflows and Schedules for better structure and navigation."
+    "subTitle": "Categories are used to organize and group Workflows and Schedules for better structure and navigation.",
+    "confirmDelete": {
+      "message": "Are you sure you want to delete category with name \"{{name}}\"?"
+    }
   },
   "fields": {
     "name": {
@@ -38,7 +41,7 @@
     },
     "recommendations": {
       "1": "Create another Category",
-      "2": "Create Connection"
+      "2": "Create Workflow"
     },
     "steps": {
       "general-data": {

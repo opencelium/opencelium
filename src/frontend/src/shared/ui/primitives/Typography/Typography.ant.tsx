@@ -22,6 +22,7 @@ export const AntTypography: TypographyComponent = ({
         fontWeight: isBold ? '500' : 'normal',
         margin: 0,
         textTransform: isUppercase ? 'uppercase' : 'none',
+        ...(variant === 'label-sm' ? { fontSize: 14 } : {}),
     };
     if (isSubtle) {
         type = 'secondary';
@@ -42,6 +43,8 @@ export const AntTypography: TypographyComponent = ({
             return <Title type={type} style={style} level={4}>{children}</Title>;
         case 'label':
             return <Title type={type} style={style} level={5}>{children}</Title>;
+        case 'label-sm':
+            return <AntText type={type} style={style}>{children}</AntText>;
         case 'section-label':
             return <AntText type={type} style={style}>{children}</AntText>;
     }

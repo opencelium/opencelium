@@ -40,6 +40,7 @@ export function buildRemoteRequest({
         body,
         options: {
             ignoreError: remote?.ignoreError,
+            skipEntityInvalidation: remote?.skipEntityInvalidation,
         }
     }
 }

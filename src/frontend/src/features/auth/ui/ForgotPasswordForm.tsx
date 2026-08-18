@@ -108,7 +108,7 @@ export function ForgotPasswordForm() {
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                 <Typography variant="label" isBold>
-                                    {t('fields.email.label')}
+                                    {t('fields.emailOrUsername.label')}
                                 </Typography>
                                 <Controller
                                     name="email"
@@ -120,7 +120,7 @@ export function ForgotPasswordForm() {
                                             onChange={field.onChange}
                                             onBlur={field.onBlur}
                                             name={field.name}
-                                            placeholder={t('fields.email.placeholder')}
+                                            placeholder={t('fields.emailOrUsername.placeholder')}
                                             error={!!emailErrorKey}
                                             autoFocus
                                             testId="forgot-password-email"

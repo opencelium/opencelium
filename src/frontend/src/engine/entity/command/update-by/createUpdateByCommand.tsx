@@ -1,6 +1,7 @@
 import type {GeneralCommandType, UpdateByConfig} from "@/engine/entity/command/types.ts";
 import type {CommandNode} from "@shared/command/types.ts";
 import {createUpdateExecute} from "@/engine/entity/command/update-by/createUpdateExecute.tsx";
+import {buildActionAccess} from "@/engine/policy";
 
 export const createUpdateByCommand = ({
     def,
@@ -22,6 +23,9 @@ export const createUpdateByCommand = ({
             value: name,
             group: 'manage',
             icon: 'edit',
+            // The outer "update" literal is shared/merged across every entity's update
+            // command — access must live on this entity-specific child node.
+            access: def.permissionComponent ? buildActionAccess(def.permissionComponent, 'UPDATE') : undefined,
             children: [{
                 type: 'literal',
                 value: 'by',

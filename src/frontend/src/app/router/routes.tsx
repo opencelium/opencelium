@@ -1,11 +1,12 @@
 import {lazy} from 'react'
 import type { JSX } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { AuthGuard } from './guards/AuthGuard'
 import {AppLayout} from "@app/layouts/AppLayout/AppLayout.tsx";
 import {PublicLayout} from "@app/layouts/PublicLayout.tsx";
 import {Sandbox} from "@features/sandbox/ui/Sandbox.tsx";
-import Workflow from "@features/workflow";
+import {WorkflowRouteGuard} from "@features/workflow/WorkflowRouteGuard.tsx";
+import {RequireComponentRead} from "@app/router/guards/RequireComponentRead.tsx";
 import {buildEntityRoutes} from "@app/router/buildEntityRoutes.tsx";
 import ResettableRoute from "@app/router/wrappers/ResettableRoute.tsx";
 import CreateConnectorPage from "@pages/ConnectorPage/CreateConnector.tsx";
@@ -45,6 +46,8 @@ export function getRoutes(): RouteConfig[] {
                 children: [
                     {path: '/sandbox', element: <Sandbox/>},
                     ...appRoutes,
+                    // Old URL — kept so bookmarks/links from before the update-assistant path was hyphenated still work.
+                    {path: '/update_assistant', element: <Navigate to="/update-assistant" replace/>},
                     {path: '/ldap/check', element: <CheckLdapPage/>},
                     {
                         path: '/ui/config',
@@ -58,8 +61,8 @@ export function getRoutes(): RouteConfig[] {
             children: [{
                 element: <AppLayout isNotCard/>,
                 children: [
-                    {path: '/', element: <DashboardPage/>},
-                    {path: '/profile', element: <ProfilePage/>},
+                    {path: '/', element: <RequireComponentRead component="DASHBOARD"><DashboardPage/></RequireComponentRead>},
+                    {path: '/profile', element: <RequireComponentRead component="MYPROFILE"><ProfilePage/></RequireComponentRead>},
                     {path: '*', element: <NotFoundPage/>},
                 ],
             }],
@@ -67,15 +70,15 @@ export function getRoutes(): RouteConfig[] {
         {
             element: <AuthGuard/>,
             children: [{
-                element: <AppLayout isNotCard hasNoHeader/>,
+                element: <AppLayout isNotCard hasNoHeader hasNoFooter/>,
                 children: [
                     {
                         path: '/workflow/create',
-                        element: <ResettableRoute><Workflow/></ResettableRoute>
+                        element: <ResettableRoute><WorkflowRouteGuard mode="create"/></ResettableRoute>
                     },
                     {
                         path: '/workflow/update/:connectionId',
-                        element: <ResettableRoute><Workflow/></ResettableRoute>
+                        element: <ResettableRoute><WorkflowRouteGuard mode="update"/></ResettableRoute>
                     },
                 ],
             }],

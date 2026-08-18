@@ -20,7 +20,7 @@
       "label": "Phone Number",
       "validation1": "Invalid phone number format"
     },
-    "email": { "label": "Email" },
+    "email": { "label": "Email/Username" },
     "currentPassword": {
       "label": "Current Password",
       "wrong": "Wrong current password"

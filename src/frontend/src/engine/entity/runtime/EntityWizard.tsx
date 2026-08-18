@@ -9,7 +9,7 @@ import type {StepDefinition} from "@shared/ui/step-form/types.ts";
 import {SectionRenderer} from "@/engine/entity/runtime/SectionRenderer.tsx";
 import {StepFormLayout} from "@shared/ui/step-form/StepFormLayout.tsx";
 import {FormConstraintsProvider} from "@shared/form/FormConstraintsContext.tsx";
-import {createPolicyContext, policyEngine, setUserPolicyContext} from "@/engine/policy";
+import {buildEntityAccess, createPolicyContext, policyEngine, setUserPolicyContext} from "@/engine/policy";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {PolicyProvider} from "@/engine/policy/PolicyReactContext.tsx";
 import {TestScopeProvider} from "@shared/testing/TestScopeContext.tsx";
@@ -43,6 +43,11 @@ type Props<EntityFormValues> = {
     liveUpdate?: boolean
     /** Omit the success screen's recommendation tags even if the entity defines them. */
     hideRecommendations?: boolean
+    /**
+     * When true, omit the header/subheader/image block entirely — just steps and form
+     * inputs. Used when the wizard is embedded inside a host that already has its own title.
+     */
+    hideHeader?: boolean
 }
 
 export function EntityWizard<EntityFormValues>({
@@ -56,6 +61,7 @@ export function EntityWizard<EntityFormValues>({
     skipSuccessState,
     liveUpdate,
     hideRecommendations,
+    hideHeader,
 }: Props<EntityFormValues>) {
 
     const { user, normalizedUser } = useAuth()
@@ -72,9 +78,10 @@ export function EntityWizard<EntityFormValues>({
                 entity: entity.name,
                 record: initialValues
             }),
-        [user, mode, entity.name, initialValues])
+        [user, normalizedUser, mode, entity.name, initialValues])
+    const access = entity.access ?? (entity.permissionComponent ? buildEntityAccess(entity.permissionComponent) : undefined)
     const entityDecision = policyEngine.evaluate(
-        entity.access,
+        access,
         {
             ...policyContext,
             resource: `entity:${entity.name}`
@@ -119,9 +126,13 @@ export function EntityWizard<EntityFormValues>({
         mode === 'view' ||
         (!entityDecision.allowed &&
             entityDecision.strategy === 'disable')
+    const wizardSteps =
+        typeof entity.wizard?.steps === 'function'
+            ? entity.wizard.steps(mode)
+            : entity.wizard?.steps
     const steps: StepDefinition[] =
-        entity.wizard?.steps
-            .filter(step => {
+        wizardSteps
+            ?.filter(step => {
                 const hasAccessibleSection = step.sectionIds.some(sectionId => {
                     const section = entity.sections.find(s => s.id === sectionId)
 
@@ -246,11 +257,13 @@ export function EntityWizard<EntityFormValues>({
                                 ?? entity.wizard.modes?.[mode]?.successMessage
                                 ?? 'success'
                             }
+                            successContent={entity.wizard.modes?.[mode]?.getSuccessContent?.(form.getValues())}
                             recommendations={hideRecommendations ? undefined : entity.wizard?.recommendations}
                             image={wizardImage}
                             form={form}
                             skipSuccessState={skipSuccessState}
                             hideSubmit={liveUpdate}
+                            hideHeader={hideHeader}
                         />
                     </form>
                 </FormConstraintsProvider>

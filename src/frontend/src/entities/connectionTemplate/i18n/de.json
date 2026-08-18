@@ -15,6 +15,9 @@
       "tooltip": "Herunterladen",
       "success": "Vorlage heruntergeladen: {{name}}",
       "error": "Herunterladen der Vorlage fehlgeschlagen."
+    },
+    "confirmDelete": {
+      "message": "Sind Sie sicher, dass Sie die Workflowvorlage mit dem Namen \"{{name}}\" löschen möchten?"
     }
   },
   "fields": {
@@ -29,6 +32,12 @@
     },
     "toInvoker": {
       "label": "Zum Invoker"
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byId": "Workflowvorlage anhand der id \"{{templateId}}\" löschen?",
+      "byName": "Workflowvorlage anhand des Namens \"{{name}}\" löschen?"
     }
   }
 }

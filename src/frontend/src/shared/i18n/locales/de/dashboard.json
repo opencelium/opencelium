@@ -1,7 +1,8 @@
 {
   "header": {
     "title": "Dashboard",
-    "subtitle": "Betrieblicher Überblick über Ihre OpenCelium-Umgebung"
+    "subtitle": "Betrieblicher Überblick über Ihre OpenCelium-Umgebung",
+    "dateRangeLabel": "Letzte 7 Tage"
   },
   "comingSoon": "Demnächst verfügbar",
   "waitingApi": "Warten auf API",
@@ -12,7 +13,7 @@
     "statusDisconnected": "Verbindung verloren — Daten möglicherweise veraltet"
   },
   "metrics": {
-    "executions": "Ausführungen",
+    "executions": "Läufe",
     "failureRate": "Fehlerquote",
     "avgRuntime": "Ø Laufzeit",
     "runtime": "Laufzeit",
@@ -37,8 +38,8 @@
     "statusHealthy": "Gesund"
   },
   "executionsChart": {
-    "title": "Ausführungen & Fehler",
-    "executions": "Ausführungen",
+    "title": "Läufe & Fehler",
+    "executions": "Läufe",
     "failures": "Fehler"
   },
   "resourceUsage": {
@@ -49,7 +50,7 @@
   "topConnectors": {
     "title": "Top-Konnektoren",
     "name": "Konnektor",
-    "executions": "Ausführungen",
+    "executions": "Läufe",
     "failureRate": "Fehlerquote"
   }
 }

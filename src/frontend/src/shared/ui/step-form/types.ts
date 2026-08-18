@@ -1,4 +1,5 @@
 import React from "react";
+import type {ZodTypeAny} from "zod";
 import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 import type {ButtonProps} from "@shared/ui/primitives/Button/Button.types.ts";
@@ -32,11 +33,15 @@ export interface StepActionDefinition {
     successMessage?: string
     /** Validate the step's fields before firing the request. Defaults to true. */
     validateBeforeRun?: boolean
+    /** Disable the button (beyond the built-in isSubmitting/runningActionId checks) based on current form values. */
+    disabled?: (values?: any) => boolean
 }
 
 export interface StepDefinition {
     header: string
     subheader?: string
+    status?: 'wait' | 'process' | 'finish' | 'error'
+    stepSchema?: ZodTypeAny
     render: (ctx?: StepContext) => React.ReactNode
     validate?: () => Promise<boolean>
     info?: PartialStepProps[],
@@ -85,4 +90,9 @@ export interface GenericStepFormProps {
      * changes live (no explicit submit).
      */
     hideSubmit?: boolean
+    /**
+     * When true, omit the header/subheader/image block entirely. Used when the wizard
+     * is embedded inside a host that already provides its own title (e.g. a dialog).
+     */
+    hideHeader?: boolean
 }

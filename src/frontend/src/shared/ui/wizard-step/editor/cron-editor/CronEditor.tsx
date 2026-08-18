@@ -76,11 +76,21 @@ export const CronEditor: React.FC<CronEditorProps> = ({ name, label, mode, autoF
                 <div style={{ display: "flex", justifyContent: 'right' }}>
                     <Cron
                         allowEmpty={'always'}
+                        // Its built-in "Clear" button defaults to filling the expression
+                        // with "every" (`* * * * *`) instead of emptying it — make it emit
+                        // an empty value instead, so it actually clears the input below too.
+                        clearButtonAction="empty"
                         // react-js-cron is 5-field standard cron and doesn't accept Quartz
                         // tokens like `?`. Visualize `?` as `*` so existing Quartz expressions
                         // render instead of showing a red invalid state.
                         value={cronValue.replace(/\?/g, '*')}
                         setValue={(val) => {
+                            if (!val) {
+                                setFullCron('');
+                                setCronValue('');
+                                return;
+                            }
+
                             const seconds = fullCron.split(' ')[0] || '0';
                             const newFull = toQuartzDayRule(`${seconds} ${val}`);
 
