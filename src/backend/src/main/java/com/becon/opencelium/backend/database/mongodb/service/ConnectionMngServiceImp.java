@@ -9,6 +9,8 @@ import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRep
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.exception.JumpValidationException;
+import com.becon.opencelium.backend.execution.jump.*;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.mongo.ConnectionMngMapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
@@ -21,10 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ConnectionMngServiceImp implements ConnectionMngService {
@@ -230,6 +229,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         if (connectionMng.getToConnector() != null && connectionMng.getToConnector().getOperators() != null) {
             validateOperators(connectionMng.getToConnector().getOperators());
         }
+
+        validateJumps(connectionMng);
     }
 
     private void validateOperators(List<OperatorMng> operators) {
@@ -296,5 +297,52 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                     ExceptionConstant.INVALID_DATA,
                     String.format(ExceptionMessages.METHOD_INVOKER_AND_CONNECTOR_NOT_MATCH, invoker, connectorOpt.get().getInvoker(), method.getName(), method.getIndex()));
         }
+    }
+
+    /**
+     * Runs the pure {@link JumpValidator} over every user-defined jump on both connectors. Any
+     * violation aborts the save; the collected violations are surfaced as a 400 with a per-violation
+     * payload (code + message + source/target ids).
+     */
+    private void validateJumps(ConnectionMng connectionMng) {
+        if (connectionMng.getToConnector() != null) {
+            // If toConnector is not null this means connection is on old-structure(double-connector)
+            // We don't have to validate this connection
+
+            return;
+        }
+
+        List<JumpViolation> violations = collectJumpViolations(connectionMng.getFromConnector());
+
+        if (!violations.isEmpty()) {
+            throw new JumpValidationException(violations);
+        }
+    }
+
+    private List<JumpViolation> collectJumpViolations(ConnectorMng connector) {
+        if (connector == null || connector.getMethods() == null) {
+            return Collections.emptyList();
+        }
+
+        if (connector.getMethods().stream().noneMatch(m -> StringUtils.isNotBlank(m.getJump()))) {
+            return Collections.emptyList();
+        }
+
+        JumpGraph graph = MongoJumpGraphBuilder.build(connector);
+
+        List<JumpViolation> jumpViolations = new ArrayList<>();
+
+        for (MethodMng method : connector.getMethods()) {
+            if (StringUtils.isBlank(method.getJump())) {
+                continue;
+            }
+
+            JumpNode source = graph.byIndex(method.getIndex());
+            if (source != null) {
+                jumpViolations.addAll(JumpValidator.validate(source, method.getJump(), graph));
+            }
+        }
+
+        return jumpViolations;
     }
 }
