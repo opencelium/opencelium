@@ -750,3 +750,36 @@ ALTER TABLE `connector` CHANGE COLUMN IF EXISTS `modified_on` `modified_at` TIME
 
 --changeset 5.1:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE user MODIFY COLUMN IF EXISTS email VARCHAR(255) NULL DEFAULT NULL;
+
+--changeset 5.1:2 stripComments:true splitStatements:true endDelimiter:;
+-- Bring user language settings to ISO 639-1. Historically 'detail.lang' was created as
+-- varchar(3) DEFAULT 'eng', so installations still carry the non-standard three-letter code and
+-- every row inserted outside the application re-introduces it.
+UPDATE `detail` SET `lang` = 'en' WHERE LOWER(TRIM(`lang`)) IN ('eng', 'en_us', 'en-us', 'english');
+UPDATE `detail` SET `lang` = 'de' WHERE LOWER(TRIM(`lang`)) IN ('ger', 'deu', 'de_de', 'de-de', 'german');
+UPDATE `detail` SET `lang` = 'en' WHERE `lang` IS NULL OR TRIM(`lang`) = '';
+ALTER TABLE `detail` MODIFY COLUMN `lang` VARCHAR(35) NOT NULL DEFAULT 'en';
+
+--changeset 5.1:3 stripComments:true splitStatements:true endDelimiter:;
+-- Same normalization for notification template contents. Changeset 3.1:2 already mapped 'eng' to
+-- 'en' once, but it neither covered the German spellings nor guarded against a collision. A row is
+-- only renamed when the message has no content in the target language yet, so an install that
+-- carries both spellings for one message keeps both rows and an administrator resolves it in the
+-- UI - renaming here would produce two contents for the same language, of which
+-- ExecutionAspect.triggerNotifications would pick an arbitrary one.
+UPDATE `event_content` `ec`
+  LEFT JOIN `event_content` `existing`
+    ON `existing`.`event_message_id` = `ec`.`event_message_id`
+   AND `existing`.`language` = 'en'
+   AND `existing`.`id` <> `ec`.`id`
+SET `ec`.`language` = 'en'
+WHERE LOWER(TRIM(`ec`.`language`)) IN ('eng', 'en_us', 'en-us', 'english')
+  AND `existing`.`id` IS NULL;
+UPDATE `event_content` `ec`
+  LEFT JOIN `event_content` `existing`
+    ON `existing`.`event_message_id` = `ec`.`event_message_id`
+   AND `existing`.`language` = 'de'
+   AND `existing`.`id` <> `ec`.`id`
+SET `ec`.`language` = 'de'
+WHERE LOWER(TRIM(`ec`.`language`)) IN ('ger', 'deu', 'de_de', 'de-de', 'german')
+  AND `existing`.`id` IS NULL;

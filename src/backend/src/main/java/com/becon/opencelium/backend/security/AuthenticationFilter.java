@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.security;
 
+import com.becon.opencelium.backend.application.language.LanguageService;
 import com.becon.opencelium.backend.configuration.LdapProperties;
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Session;
@@ -29,7 +30,6 @@ import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.AuthMethod;
-import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.websocket.Event;
 import com.becon.opencelium.backend.websocket.constant.SocketConstant;
 import com.becon.opencelium.backend.websocket.notification.WebSocketNotificationQueue;
@@ -94,6 +94,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private LdapProperties properties;
     @Autowired
     private SubscriptionService subscriptionService;
+    @Autowired
+    private LanguageService languageService;
     @Autowired
     private WebSocketNotificationQueue notificationQueue;
     @Autowired
@@ -209,7 +211,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
                 // create details for new user
                 UserDetail userDetail = new UserDetail();
-                userDetail.setLang(LangEnum.EN.getCode());
+                userDetail.setLang(languageService.getDefault());
                 userDetail.setTutorial(false);
                 userDetail.setUser(newUser);
 

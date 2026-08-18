@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.aspect;
 
+import com.becon.opencelium.backend.application.language.LanguageService;
 import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.LogConstant;
@@ -38,7 +39,6 @@ import com.becon.opencelium.backend.database.mysql.service.LastExecutionService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
-import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.exception.ExecutionTerminatedException;
 import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.logger.pubsub.ExecutionEventPublisher;
@@ -78,6 +78,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -104,6 +105,7 @@ public class ExecutionAspect {
     private final WebSocketNotificationService notificationService;
     private final LogDataService logDataService;
     private final ConnectionService connectionService;
+    private final LanguageService languageService;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -117,7 +119,8 @@ public class ExecutionAspect {
             EmailServiceImpl emailService,
             Environment env,
             WebSocketNotificationService notificationService,
-            ConnectionService connectionService) {
+            ConnectionService connectionService,
+            LanguageService languageService) {
         this.schedulerService = schedulerService;
         this.userService = userService;
         this.incomingWebhookService = incomingWebhookService;
@@ -130,6 +133,7 @@ public class ExecutionAspect {
         this.notificationService = notificationService;
         this.logDataService = logDataService;
         this.connectionService = connectionService;
+        this.languageService = languageService;
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -274,13 +278,15 @@ public class ExecutionAspect {
             }
             for (EventRecipient er : en.getEventRecipients()) {
                 User user = userService.findByEmail(er.getDestination()).orElse(null);
-                String lang = user == null ? "en" : user.getUserDetail().getLang();
-                EventContent content = en.getEventMessage().getEventContents().stream()
-                        .filter(c -> c.getLanguage().equalsIgnoreCase(lang)).findFirst().orElse(null);
+                String lang = user == null
+                        ? languageService.getDefault()
+                        : languageService.normalize(user.getUserDetail().getLang())
+                                .orElseGet(languageService::getDefault);
+                List<EventContent> contents = en.getEventMessage().getEventContents();
+                EventContent content = findContentByLanguage(contents, lang).orElse(null);
                 if (content == null) {
-                    String defaultLang = LangEnum.EN.getCode();
-                    content = en.getEventMessage().getEventContents().stream()
-                            .filter(c -> c.getLanguage().equals(defaultLang)).findFirst()
+                    String defaultLang = languageService.getDefault();
+                    content = findContentByLanguage(contents, defaultLang)
                             .orElseThrow(() -> new RuntimeException("Default language(" + defaultLang + ") of content not found"));
                 }
 
@@ -298,6 +304,19 @@ public class ExecutionAspect {
                 }
             }
         }
+    }
+
+    /**
+     * Finds the template content written in the given language. Contents are matched on their
+     * canonical language code, so a template stored with a legacy code such as 'eng' still resolves
+     * for a user whose language is 'en'.
+     */
+    private Optional<EventContent> findContentByLanguage(List<EventContent> contents, String language) {
+        return contents.stream()
+                .filter(c -> languageService.normalize(c.getLanguage())
+                        .filter(language::equals)
+                        .isPresent())
+                .findFirst();
     }
 
     // type: email, incoming_webhook
