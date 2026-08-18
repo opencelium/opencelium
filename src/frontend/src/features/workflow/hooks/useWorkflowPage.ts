@@ -14,6 +14,7 @@ import { useWorkflowDragStart } from './useWorkflowDragStart';
 import { useWorkflowDragMove } from './useWorkflowDragMove';
 import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
+import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
@@ -42,6 +43,9 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setIsDragging: setIsAnyNodeDragging, reactFlowInstance, dragSnapshot,
     positionLock: draggedPositionLockRef, multiDrag: multiDragRef,
     clearPreview: clearAllDragPreviewState, commitFreeReposition });
+  const undoHistory = useWorkflowUndoHistory({ nodes, edges,
+    fieldBindings: options.fieldBindings, isDragging: isAnyNodeDragging,
+    setNodes, setEdges, onFieldBindingsChange: options.onFieldBindingsChange });
   const nodeUpdates = useWorkflowNodeUpdates(setNodes,
     () => setMethodEditor(null), () => setConditionEditor(null),
     () => setAggregatorEditor(null));
@@ -68,6 +72,10 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     restoredViewport,
     viewportRestoreVersion,
     centerStartVersion,
+    canUndo: undoHistory.canUndo,
+    canRedo: undoHistory.canRedo,
+    undo: undoHistory.undo,
+    redo: undoHistory.redo,
     getViewport: () => reactFlowInstance.current?.getViewport(),
     setReactFlowInstance: (instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>) => {
       reactFlowInstance.current = instance;
@@ -86,6 +94,10 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       nextViewport?: Viewport,
       options?: { centerStart?: boolean },
     ) => {
+      // A wholesale replacement (connection load, template, version rollback)
+      // is not an in-session edit — starting a fresh stack keeps undo from
+      // splicing the previous workflow into this one.
+      undoHistory.reset();
       setNodes(nextNodes);
       setEdges(nextEdges);
       setRestoredViewport(nextViewport);

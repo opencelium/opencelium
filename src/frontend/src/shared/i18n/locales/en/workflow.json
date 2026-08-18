@@ -20,6 +20,8 @@
     "maximizeRequestData": "Maximize request data",
     "minimizeRequestData": "Minimize request data",
     "load": "Load",
+    "undo": "Undo",
+    "redo": "Redo",
     "createEnhancement": "Create enhancement",
     "deleteEnhancement": "Delete enhancement",
     "deleteReference": "Delete reference"
@@ -244,6 +246,8 @@
       "ctrl": "Ctrl",
       "esc": "Esc",
       "s": "S",
+      "z": "Z",
+      "shift": "Shift",
       "delete": "Delete"
     },
     "items": {
@@ -255,6 +259,8 @@
       "multiSelect": "Select multiple nodes",
       "deleteNode": "Delete the selected node",
       "save": "Save the workflow",
+      "undo": "Undo the last canvas change",
+      "redo": "Redo the change that was undone",
       "close": "Close the open menu, dialog, or panel"
     }
   },

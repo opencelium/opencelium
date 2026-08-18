@@ -46,6 +46,8 @@ import {
     HelpOutline,
     Analytics,
     MenuBook,
+    Undo,
+    Redo,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -98,6 +100,8 @@ const iconMap = {
     help: HelpOutline,
     'report-analytics': Analytics,
     docs: MenuBook,
+    undo: Undo,
+    redo: Redo,
 };
 
 export const MaterialIcon: IconComponent = ({

@@ -20,6 +20,8 @@
     "maximizeRequestData": "Anfragedaten maximieren",
     "minimizeRequestData": "Anfragedaten minimieren",
     "load": "Laden",
+    "undo": "Rückgängig",
+    "redo": "Wiederholen",
     "createEnhancement": "Enhancement erstellen",
     "deleteEnhancement": "Enhancement löschen",
     "deleteReference": "Referenz löschen"
@@ -244,6 +246,8 @@
       "ctrl": "Strg",
       "esc": "Esc",
       "s": "S",
+      "z": "Z",
+      "shift": "Umschalt",
       "delete": "Entf"
     },
     "items": {
@@ -255,6 +259,8 @@
       "multiSelect": "Mehrere Knoten auswählen",
       "deleteNode": "Ausgewählten Knoten löschen",
       "save": "Workflow speichern",
+      "undo": "Letzte Änderung auf der Arbeitsfläche rückgängig machen",
+      "redo": "Rückgängig gemachte Änderung wiederherstellen",
       "close": "Geöffnetes Menü, Dialog oder Panel schließen"
     }
   },

@@ -8,6 +8,7 @@ import { useWorkflowCanvasActions } from './useWorkflowCanvasActions';
 import { useWorkflowHeaderActions } from './useWorkflowHeaderActions';
 import { useBuildTestPayload } from './useBuildTestPayload';
 import { useDeleteSelectedNode } from './useDeleteSelectedNode';
+import { useWorkflowUndoShortcuts } from './useWorkflowUndoShortcuts';
 import type { useWorkflowPageState } from './useWorkflowPageState';
 
 type Params = {
@@ -83,13 +84,17 @@ export const useWorkflowActions = ({ connectionId, readOnly, page }: Params) => 
 		nodes: view.hydratedNodes, edges: workflow.edges, fieldBindings,
 		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors });
 
+	// Anything hosting its own editing surface: canvas-level keyboard shortcuts
+	// must not reach past it into the graph underneath.
+	const isEditorDialogOpen = !!(workflow.methodEditor || workflow.conditionEditor ||
+		workflow.aggregatorEditor || workflow.historyOpen || templates.templateDialogOpen ||
+		templates.loadTemplateDialogOpen || templates.connectorMappingDialogOpen ||
+		isShortcutsOpen);
+
 	useDeleteSelectedNode({ readOnly, nodes: workflow.nodes,
-		onDeleteNode: workflow.onDeleteNode,
-		disabled: !!(workflow.methodEditor || workflow.conditionEditor ||
-			workflow.aggregatorEditor || workflow.historyOpen || templates.templateDialogOpen ||
-			templates.loadTemplateDialogOpen || templates.connectorMappingDialogOpen ||
-			isShortcutsOpen),
-	});
+		onDeleteNode: workflow.onDeleteNode, disabled: isEditorDialogOpen });
+	useWorkflowUndoShortcuts({ readOnly, undo: workflow.undo, redo: workflow.redo,
+		disabled: isEditorDialogOpen || !!workflow.responseNodeId });
 
 	return { validation, saveWorkflow, category, templates, history, canvas, header,
 		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen,

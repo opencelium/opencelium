@@ -1,6 +1,15 @@
 import type { ReactNode } from 'react';
 import type { WorkflowHeaderMenuItem } from '../../types/workflow.types';
 
+/** In-session canvas undo/redo (see useWorkflowUndoHistory) — not the saved
+ * version history reachable from the header menu. */
+export type WorkflowUndoRedoState = {
+	canUndo: boolean;
+	canRedo: boolean;
+	onUndo: () => void;
+	onRedo: () => void;
+};
+
 export type WorkflowHeaderProps = {
 	initialName?: string;
 	initialDescription?: string;
@@ -17,6 +26,7 @@ export type WorkflowHeaderProps = {
 	 * workflow mid-run (load template, version history, assign category). */
 	testRunLocked?: boolean;
 	loading?: boolean;
+	undoRedo?: WorkflowUndoRedoState;
 	schedulesSlot?: ReactNode;
 	/** Whether this workflow has been saved at least once (has a persisted connectionId).
 	 * "Download as Template" hits a backend endpoint keyed by connectionId, so it's

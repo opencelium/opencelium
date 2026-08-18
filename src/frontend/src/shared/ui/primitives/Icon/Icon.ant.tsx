@@ -34,6 +34,8 @@ import {
     LockOutlined,
     QuestionCircleOutlined,
     ReadOutlined,
+    UndoOutlined,
+    RedoOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -97,6 +99,8 @@ const iconMap = {
     help: QuestionCircleOutlined,
     'report-analytics': TbReportAnalytics,
     docs: ReadOutlined,
+    undo: UndoOutlined,
+    redo: RedoOutlined,
 };
 
 export const AntIcon: IconComponent = ({

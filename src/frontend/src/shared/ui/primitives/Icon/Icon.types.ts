@@ -53,6 +53,8 @@ export type IconName =
     | 'help'
     | 'report-analytics'
     | 'docs'
+    | 'undo'
+    | 'redo'
 
 export type IconColor =
     | 'default'

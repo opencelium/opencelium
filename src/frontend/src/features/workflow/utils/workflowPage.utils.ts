@@ -48,7 +48,9 @@ export const applyProfileAuthor = (versions: HistoryVersionItem[], user: AuthUse
 		? { ...version, author: profileAuthor } : version);
 };
 
-const sortValue = (value: unknown): unknown => {
+// Deep key-sort so structurally equal objects stringify identically, whatever
+// order the spread that produced them happened to use.
+export const sortValue = (value: unknown): unknown => {
 	if (Array.isArray(value)) return value.map(sortValue);
 	if (!value || typeof value !== 'object') return value;
 	return Object.fromEntries(Object.entries(value as Record<string, unknown>)

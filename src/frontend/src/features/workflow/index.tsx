@@ -73,7 +73,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           validateTitle, onSave: handleSave,
           saveDisabled: isLoading || !hasConnectionChanges,
           onOpenHistory: handleOpenHistory, readOnly, loading: isConnectionLoading,
-          hasSavedConnection: !!activeConnectionId }} />
+          hasSavedConnection: !!activeConnectionId,
+          undoRedo: { canUndo: workflow.canUndo, canRedo: workflow.canRedo,
+            onUndo: workflow.undo, onRedo: workflow.redo } }} />
       <WorkflowPageDialogs
         templates={{
           save: { open: templateDialogOpen, name: templateName,
