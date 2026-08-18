@@ -15,6 +15,8 @@ public enum JumpValidationCode {
     JUMP_ESCAPES_LOOP,
     /** The target does not run strictly after the source. */
     JUMP_BACKWARD,
+    /** The target consumes output of a method this jump would skip. */
+    JUMP_SKIPS_REFERENCED_METHOD,
     /** The target color/index is absent from the connection. */
     JUMP_TARGET_NOT_FOUND,
     /** The source equals the target. */

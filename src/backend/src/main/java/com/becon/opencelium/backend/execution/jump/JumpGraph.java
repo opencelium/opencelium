@@ -19,18 +19,23 @@ import java.util.Map;
  */
 public final class JumpGraph {
 
+    /** Nodes ordered the same way the executor walks the connector. */
+    private final List<JumpNode> ordered;
     private final Map<String, JumpNode> byIndex;
     private final Map<String, JumpNode> methodByColor;
+    private final Map<String, Integer> positionByIndex;
 
     public JumpGraph(List<JumpNode> nodes) {
-        // Ordered the same way the executor walks the connector, so structural derivations stay consistent.
-        List<JumpNode> ordered = new ArrayList<>(nodes);
-        ordered.sort(Comparator.comparing(JumpNode::index, Comparators.NUMERIC_PARTS));
+        this.ordered = new ArrayList<>(nodes);
+        this.ordered.sort(Comparator.comparing(JumpNode::index, Comparators.NUMERIC_PARTS));
 
         this.byIndex = new HashMap<>();
         this.methodByColor = new HashMap<>();
-        for (JumpNode node : ordered) {
+        this.positionByIndex = new HashMap<>();
+        for (int i = 0; i < ordered.size(); i++) {
+            JumpNode node = ordered.get(i);
             byIndex.put(node.index(), node);
+            positionByIndex.put(node.index(), i);
             if (!node.isOperator() && node.color() != null) {
                 methodByColor.put(node.color(), node);
             }
@@ -59,6 +64,51 @@ public final class JumpGraph {
         }
         JumpNode method = methodByColor.get(reference);
         return method != null ? method : byIndex.get(reference);
+    }
+
+    /** Zero-based position of a node in the executor's walk order. */
+    public int positionOf(JumpNode node) {
+        return positionByIndex.get(node.index());
+    }
+
+    /**
+     * Last position occupied by {@code node}'s subtree — for a leaf method this is its own position,
+     * for an operator the last element of its body. Mirrors {@code ConnectorExecutor.getTailPointer}.
+     */
+    public int tailPositionOf(JumpNode node) {
+        String prefix = node.index() + "_";
+        int tail = positionOf(node);
+        for (int i = tail + 1; i < ordered.size(); i++) {
+            if (ordered.get(i).index().startsWith(prefix)) {
+                tail = i;
+            } else {
+                break;
+            }
+        }
+        return tail;
+    }
+
+    /** Methods strictly between {@code source}'s tail and {@code target} in the walk order. */
+    public List<JumpNode> methodsBetween(JumpNode source, JumpNode target) {
+        int from = tailPositionOf(source);
+        int to = positionOf(target);
+        List<JumpNode> result = new ArrayList<>();
+        for (int i = from + 1; i < to && i < ordered.size(); i++) {
+            JumpNode node = ordered.get(i);
+            if (!node.isOperator()) {
+                result.add(node);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Executables that still run once the jump lands — {@code node} and everything after it in the
+     * walk order, methods and operators alike. These are the elements whose references could dangle
+     * if the jump skips a method they depend on (a loop/if expression consumes methods too).
+     */
+    public List<JumpNode> executablesAtOrAfter(JumpNode node) {
+        return new ArrayList<>(ordered.subList(positionOf(node), ordered.size()));
     }
 
     /** Container operators of {@code index}, innermost-first ({@code 1_1_1_0} -> {@code 1_1_1, 1_1, 1}). */
