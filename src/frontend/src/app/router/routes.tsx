@@ -70,7 +70,7 @@ export function getRoutes(): RouteConfig[] {
         {
             element: <AuthGuard/>,
             children: [{
-                element: <AppLayout isNotCard hasNoHeader/>,
+                element: <AppLayout isNotCard hasNoHeader hasNoFooter/>,
                 children: [
                     {
                         path: '/workflow/create',

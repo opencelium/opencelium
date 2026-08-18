@@ -45,6 +45,7 @@ import {
     Lock,
     HelpOutline,
     Analytics,
+    MenuBook,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -96,6 +97,7 @@ const iconMap = {
     lock: Lock,
     help: HelpOutline,
     'report-analytics': Analytics,
+    docs: MenuBook,
 };
 
 export const MaterialIcon: IconComponent = ({

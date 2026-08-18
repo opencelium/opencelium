@@ -52,6 +52,7 @@ export type IconName =
     | 'lock'
     | 'help'
     | 'report-analytics'
+    | 'docs'
 
 export type IconColor =
     | 'default'
