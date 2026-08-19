@@ -642,7 +642,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         edges: workflow.edges,
         viewport: workflow.getViewport(),
         fieldBindings: loadedFieldBindings,
-        includeInvoker: true,
       });
 
       const response = await apiExecutor({

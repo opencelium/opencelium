@@ -42,7 +42,7 @@ export function mapConnectionToWorkflowState(
 	const entries = methodsToEntries(methods, operators);
 	const savedUiNodes = getSavedUiNodes(connection.ui);
 	const savedViewport = isViewport(connection.ui?.viewport) ? connection.ui.viewport : fallbackViewport;
-	const savedUiEdges = getSavedUiEdges(connection.ui);
+	const savedUiEdges = getSavedUiEdges(connection.ui, savedUiNodes);
 	const shouldRestoreFromUi = entries.length > 0 && savedUiNodes.length > 0 && savedUiEdges.length > 0;
 	const restoredFromUi = shouldRestoreFromUi ? restoreNodesFromUi(entries, savedUiNodes) : undefined;
 	const builtNodes = restoredFromUi?.nodes ?? (entries.length ? [...initialNodes, ...entries.map((entry) => entry.node)] : initialNodes);
