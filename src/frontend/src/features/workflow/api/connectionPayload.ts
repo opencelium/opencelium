@@ -20,7 +20,6 @@ type BuildConnectionPayloadArgs = {
 	viewport?: { x: number; y: number; zoom: number };
 	fieldBindings?: any[];
 	categoryId?: number | null;
-	includeInvoker?: boolean;
 };
 
 const buildUiPayload = (
@@ -29,11 +28,22 @@ const buildUiPayload = (
 	viewport?: { x: number; y: number; zoom: number },
 ) => {
 	const workflowIndexes = buildWorkflowIndexes(nodes, edges);
+	// Only an edge leaving an IF carries a branch. Chain edges inside a branch used
+	// to inherit the marker (see createNodeFromAction), and on load a stale marker
+	// was promoted to a source handle that the method node does not have — which
+	// silently cut the chain there (invisible edge, missing indexes, dropped
+	// joints). Strip it at the boundary so no saved payload can carry it again.
+	const ifNodeIds = new Set(nodes.filter((node) => node.type === 'if').map((node) => node.id));
 
 	return {
 		viewport,
 		workflowNodes: nodes.map((node) => sanitizeUiNode(node, workflowIndexes.get(node.id))),
-		workflowEdges: edges.map((edge) => ({ ...edge })),
+		workflowEdges: edges.map((edge) => {
+			if (ifNodeIds.has(edge.source) || edge.data?.branch === undefined) return { ...edge };
+			const data = { ...edge.data };
+			delete data.branch;
+			return { ...edge, data };
+		}),
 		flowcharts: nodes.map((node) => ({
 			flowId: node.id,
 			x: node.position.x,
@@ -58,7 +68,6 @@ export function buildConnectionPayload({
 	viewport,
 	fieldBindings,
 	categoryId,
-	includeInvoker,
 }: BuildConnectionPayloadArgs) {
 	const connection = buildLegacyConnection(nodes);
 	return {
@@ -68,7 +77,7 @@ export function buildConnectionPayload({
 		description,
 		categoryId: categoryId ?? null,
 		fieldBinding: serializeFieldBindings(fieldBindings ?? connection.fieldBindings),
-		fromConnector: buildFromConnectorPayload(nodes, edges, { includeInvoker }),
+		fromConnector: buildFromConnectorPayload(nodes, edges),
 		toConnector: null,
 		ui: buildUiPayload(nodes, edges, viewport),
 	};

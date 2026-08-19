@@ -52,7 +52,7 @@ export const useSaveConnectionTemplate = ({ connectionId, title, description,
 		setIsSaving(true);
 		try {
 			const connection = buildConnectionPayload({ title, description, nodes, edges,
-				viewport: getViewport(), fieldBindings, includeInvoker: true });
+				viewport: getViewport(), fieldBindings });
 			const response = await apiExecutor({ url: '/template', method: 'POST', body: {
 				version: CONNECTION_TEMPLATE_VERSION,
 				name: trimmedName,

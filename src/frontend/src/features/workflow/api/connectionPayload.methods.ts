@@ -24,7 +24,6 @@ export const buildMethodPayload = (
 	index: string,
 	order: number,
 	resolvedColor?: string,
-	includeInvoker?: boolean,
 	resolvedJump?: string,
 ) => {
 	const config = node.data.methodConfig as any;
@@ -52,9 +51,19 @@ export const buildMethodPayload = (
 			ALL_COLORS[order % ALL_COLORS.length],
 		),
 		...(resolvedJump ? { jump: resolvedJump } : {}),
-		connector: connectorData && includeInvoker
-			? { ...connectorData, invoker: connectorData.invokerName ?? null }
-			: connectorData,
+		// Serialized explicitly rather than spread: node.data.connector also carries
+		// client-only connector-health fields (status/lastTestError/lastCheckedAt,
+		// hydrated from the connector list) and holds the invoker's name under
+		// `invokerName`, which is not the property the backend expects — it reads
+		// `invoker` (see the normalizer, which accepts a name or an object).
+		connector: connectorData
+			? {
+				connectorId: connectorData.connectorId,
+				title: connectorData.title,
+				icon: connectorData.icon ?? null,
+				invoker: connectorData.invokerName ?? null,
+			}
+			: null,
 		request: {
 			endpoint: serializeReferenceString(config?.url ?? '', endpointArgs),
 			method: config?.method ?? 'GET',
