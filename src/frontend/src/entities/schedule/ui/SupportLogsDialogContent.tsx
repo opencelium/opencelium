@@ -24,6 +24,7 @@ import {
 } from '../model/supportLogs'
 import { SupportLogsSection } from './SupportLogsSection'
 import { LogJsonView } from '@shared/ui/json-view/LogJsonView'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type Props = {
     connectionId: number
@@ -57,7 +58,7 @@ export function SupportLogsDialogContent({ connectionId, connectionTitle, onClos
             onClose()
         } catch (err) {
             console.error(err)
-            message.error(tEntities('schedule.supportLogs.error'))
+            notifyError(tEntities('schedule.supportLogs.error'))
         }
     }
 

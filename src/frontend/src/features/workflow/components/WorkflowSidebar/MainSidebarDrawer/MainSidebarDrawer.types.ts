@@ -18,5 +18,4 @@ export type MainSidebarDrawerProps = {
   onSelectConnector: (key: string) => void;
   onSelectOperator: (key: string) => void;
   onSelectMethod: (key: string) => void;
-  onSelectTriggerConnection: () => void;
 };

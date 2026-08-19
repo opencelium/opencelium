@@ -5,6 +5,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { apiExecutor } from '@shared/api/apiExecutor'
 import type { Connection } from '@entities/connection/model/types'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type Props = {
     row: Connection
@@ -46,7 +47,7 @@ export const DownloadAsTemplateAction: React.FC<Props> = ({ row }) => {
             message.success(tEntities('connection.list.downloadTemplate.success', { name: filename }))
         } catch (err) {
             console.error(err)
-            message.error(tEntities('connection.list.downloadTemplate.error'))
+            notifyError(tEntities('connection.list.downloadTemplate.error'))
         } finally {
             setIsLoading(false)
         }

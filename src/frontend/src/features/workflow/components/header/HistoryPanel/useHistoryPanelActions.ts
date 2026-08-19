@@ -4,6 +4,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import type { HistoryPanelProps } from './HistoryPanel.types';
 import type { useHistoryPanelState } from './useHistoryPanelState';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 type State = ReturnType<typeof useHistoryPanelState>;
 
@@ -25,7 +26,7 @@ export const useHistoryPanelActions = (state: State, props: Pick<HistoryPanelPro
 			(document.activeElement as HTMLElement | null)?.blur?.();
 			message.success(t('history.commentSaved'));
 		} catch {
-			message.error(t('history.commentSaveFailed'));
+			notifyError(t('history.commentSaveFailed'));
 		}
 	};
 	const requestDelete = async (id: string) => {
@@ -87,7 +88,7 @@ export const useHistoryPanelActions = (state: State, props: Pick<HistoryPanelPro
 			await props.onDownloadTemplate?.(snapshotId);
 			state.setMenuId(null);
 		} catch {
-			message.error(t('messages.downloadTemplateFailed'));
+			notifyError(t('messages.downloadTemplateFailed'));
 		} finally {
 			setDownloadingSnapshotId(null);
 		}

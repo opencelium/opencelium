@@ -26,6 +26,9 @@ type Params = {
 	setChangeSource: (source: WorkflowChangeSource) => void;
 	applyGraph: (state: Awaited<ReturnType<typeof loadWorkflowConnectionVersion>>) => void;
 	closeEditors: () => void;
+	/** True while a test run is executing — rolling back would swap the graph out
+	 * from under the run that is already in flight on the backend. */
+	isTestRunLocked?: boolean;
 };
 
 const selectAvailableVersion = (versions: HistoryVersionItem[], selectedId: string | null) =>
@@ -36,7 +39,7 @@ const selectAvailableVersion = (versions: HistoryVersionItem[], selectedId: stri
 export const useWorkflowHistoryActions = ({ connectionId, baselineSnapshot,
 	connectors, invokers, setHistoryVersions, setSelectedId, setHeaderState,
 	setFieldBindings, setHistoryPreviewSnapshot, setChangeSource, applyGraph,
-	closeEditors }: Params) => {
+	closeEditors, isTestRunLocked = false }: Params) => {
 	const refreshVersions = async () => {
 		if (!connectionId) return [];
 		const versions = await loadConnectionVersions(connectionId);
@@ -46,7 +49,7 @@ export const useWorkflowHistoryActions = ({ connectionId, baselineSnapshot,
 	};
 
 	const selectVersion = async (snapshotId: string) => {
-		if (!connectionId) return;
+		if (!connectionId || isTestRunLocked) return;
 		setSelectedId(snapshotId);
 		const state = await loadWorkflowConnectionVersion(connectionId, snapshotId);
 		const nodes = hydrateNodesWithOperationResponses(state.nodes, connectors, invokers);

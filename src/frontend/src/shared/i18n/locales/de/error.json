@@ -1,4 +1,5 @@
 {
+  "title": "Fehler",
   "api": {
     "unauthorized": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
     "forbidden": "Ihre Sitzung ist abgelaufen",

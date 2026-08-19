@@ -4,6 +4,7 @@ import { Button } from '@shared/ui/primitives/Button'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { uploadConnectionTemplate } from '@entities/connectionTemplate/lib/uploadConnectionTemplate'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 export const ConnectionTemplateUploadButton: React.FC = () => {
     const inputRef = useRef<HTMLInputElement>(null)
@@ -29,7 +30,7 @@ export const ConnectionTemplateUploadButton: React.FC = () => {
             }
         } catch (err) {
             console.error(err)
-            message.error(tEntities('connection-template.list.upload.error'))
+            notifyError(tEntities('connection-template.list.upload.error'))
         } finally {
             setIsLoading(false)
         }

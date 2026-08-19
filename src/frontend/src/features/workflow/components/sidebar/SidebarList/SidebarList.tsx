@@ -1,6 +1,10 @@
+import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
 import { buildTestId } from '@shared/testing/testId';
 import { ConnectorStatusDot } from '../../../connector-status/ConnectorStatusDot/ConnectorStatusDot';
 import type { SidebarListProps } from './SidebarList.types';
+
+// Fits inside the 52px .sidebarItemImage slot.
+const CONNECTOR_ICON_SIZE = 48;
 
 export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps) {
 	return (
@@ -8,7 +12,7 @@ export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps)
 			{items.map((item) => (
 				<button
 					key={item.key}
-					className={`sidebarItem${item.imageUrl ? ' sidebarItemWithImage' : ''}${item.disabled ? ' sidebarItemMuted' : ''}`}
+					className={`sidebarItem${item.connectorArtwork ? ' sidebarItemWithImage' : ''}${item.disabled ? ' sidebarItemMuted' : ''}`}
 					type='button'
 					disabled={item.disabled}
 					data-testid={buildTestId(testIdPrefix, 'item', item.key)}
@@ -29,9 +33,10 @@ export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps)
 							/>
 						</div>
 					) : null}
-					{item.imageUrl ? (
+					{item.connectorArtwork ? (
 						<div className='sidebarItemImage' aria-hidden='true'>
-							<img src={item.imageUrl} alt='' />
+							<ConnectorIcon icon={item.connectorArtwork.icon}
+								size={CONNECTOR_ICON_SIZE} isCircled />
 						</div>
 					) : null}
 				</button>

@@ -1,8 +1,7 @@
 import type { MouseEvent } from 'react';
-import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { NodeToolbar } from '../../components/node/NodeToolbar/NodeToolbar';
-import { useJointRejectionMessage } from '../../hooks/useJointRejectionMessage';
 import { AddStepTrigger } from '../AddStepTrigger/AddStepTrigger';
+import { CommentBadge } from '../CommentBadge/CommentBadge';
 import type { NodeShellProps } from './NodeShell.types';
 
 export function NodeShell({
@@ -17,7 +16,6 @@ export function NodeShell({
 	children,
 }: NodeShellProps) {
 	const onAddStep = data.onAddStep;
-	const jointRejection = useJointRejectionMessage(data.jointInvalidReason, data.jointBlockingLabel);
 	const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
 		if (data.dragGhost || data.dropPlaceholder) return;
 		if (event.ctrlKey) {
@@ -40,50 +38,51 @@ export function NodeShell({
 		(!data.hideAddControls || bottomAdd.showAlways) &&
 		!(data.suppressHoverAddControls && !bottomAdd.showAlways);
 
-	const nodeBody = (
-		<div
-			className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError || data.testRunFailedVisible ? 'nodeBodyError' : ''} ${data.testRunFailedVisible ? 'nodeBodyTestRunFailed' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''} ${data.testRunActive ? 'nodeBodyTestRunActive' : ''} ${data.jointCandidate ? 'nodeBodyJointCandidate' : ''} ${data.jointSource ? 'nodeBodyJointSource' : ''} ${jointRejection ? 'nodeBodyJointInvalid' : ''}`}
-			title={data.hasError ? data.errorMessage : data.testRunFailedVisible ? data.testRunFailedMessage : undefined}
-		>
-			{children}
-			{showRightAddTrigger && rightAdd && onAddStep && (
-				<AddStepTrigger
-					direction='right'
-					action={rightAdd.action}
-					showAlways={rightAdd.showAlways}
-					lineVisible={rightAdd.lineVisible}
-					locked={data.lockVisibleAddControls && !!rightAdd.showAlways}
-					onAdd={onAddStep}
-				/>
-			)}
-			{showBottomAddTrigger && bottomAdd && onAddStep && (
-				<AddStepTrigger
-					direction='bottom'
-					action={bottomAdd.action}
-					showAlways={bottomAdd.showAlways}
-					lineVisible={bottomAdd.lineVisible}
-					locked={data.lockVisibleAddControls && !!bottomAdd.showAlways}
-					onAdd={onAddStep}
-				/>
-			)}
-		</div>
-	);
-
 	return (
 		<div
 			className={`nodeWrap ${data.dragGhost ? 'nodeWrapDragGhost' : ''} ${data.dropPlaceholder ? 'nodeWrapDropPlaceholder' : ''} ${data.dragSourceMoving ? 'nodeWrapDragSourceMoving' : ''} ${data.dragSourceFaint ? 'nodeWrapDragSourceFaint' : ''}`}
 			onContextMenu={onContextMenu}
 		>
-			{selected && (data.onDeleteNode || data.onRemoveJoint) && (
-				<NodeToolbar
-					canDelete={data.kind !== 'start' && !!data.onDeleteNode}
-					onDelete={() => data.onDeleteNode?.(id)}
-					canRemoveJoint={Boolean(data.jump) && !!data.onRemoveJoint}
-					onRemoveJoint={() => data.onRemoveJoint?.(id)}
+			{selected && data.onDeleteNode && <NodeToolbar canDelete={data.kind !== 'start'} onDelete={() => data.onDeleteNode?.(id)} />}
+			{topLabel && <div className='nodeTopLabel'>{topLabel}</div>}
+			<div
+				className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError || data.testRunFailedVisible ? 'nodeBodyError' : ''} ${data.testRunFailedVisible ? 'nodeBodyTestRunFailed' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''} ${data.testRunActive ? 'nodeBodyTestRunActive' : ''}`}
+				title={data.hasError ? data.errorMessage : data.testRunFailedVisible ? data.testRunFailedMessage : undefined}
+			>
+				{children}
+				{showRightAddTrigger && rightAdd && onAddStep && (
+					<AddStepTrigger
+						direction='right'
+						action={rightAdd.action}
+						showAlways={rightAdd.showAlways}
+						lineVisible={rightAdd.lineVisible}
+						locked={data.lockVisibleAddControls && !!rightAdd.showAlways}
+						onAdd={onAddStep}
+					/>
+				)}
+				{showBottomAddTrigger && bottomAdd && onAddStep && (
+					<AddStepTrigger
+						direction='bottom'
+						action={bottomAdd.action}
+						showAlways={bottomAdd.showAlways}
+						lineVisible={bottomAdd.lineVisible}
+						locked={data.lockVisibleAddControls && !!bottomAdd.showAlways}
+						onAdd={onAddStep}
+					/>
+				)}
+			</div>
+			{/* Hosted here rather than per node type: the badge is the same for a
+			    method, an operator or the start node. It hangs off the outer wrap's
+			    top-right corner rather than the node body's, which keeps it clear of
+			    the duplicate-method colour badge that hugs that same corner. */}
+			{!data.dragGhost && !data.dropPlaceholder && (
+				<CommentBadge
+					anchoredComment={data.anchoredComment}
+					suppressTooltip={data.isAnyNodeDragging}
+					testId={`workflow-node-comment-toggle-${id}`}
+					onToggleComment={data.onToggleComment}
 				/>
 			)}
-			{topLabel && <div className='nodeTopLabel'>{topLabel}</div>}
-			{jointRejection ? <Tooltip content={jointRejection}>{nodeBody}</Tooltip> : nodeBody}
 			{bottomLabel && <div className='nodeBottomLabel'>{bottomLabel}</div>}
 			{bottomExtra}
 		</div>
