@@ -3,6 +3,7 @@ import type { WorkflowMethodConfig } from './request-config.types';
 import type { ConditionConfig } from '../components/condition-builder/conditionBuilder.types';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { ConnectorHealthStatus } from '@entities/connector/model/types';
+import type { JointRejectionReason } from '../utils/jumpValidator';
 
 export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';
 
@@ -12,7 +13,7 @@ export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-conne
 // classified as fast (its first iteration took under a second) — a live
 // count for those would just flicker unreadably (see
 // getTestRunScope/reduceLiveGraphStatus).
-export type WorkflowLoopIterationDisplay = { iterator: string; count: number };
+export type WorkflowLoopIterationDisplay = { iterator: string; count: number; indexPath: string };
 
 export type WorkflowAddDirection = 'right' | 'bottom';
 export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';
@@ -74,6 +75,19 @@ export type WorkflowNodeData = {
 	duplicateMethodColor?: string;
 	alwaysShowRightAdd?: boolean;
 	highlighted?: boolean;
+	/** Target node id of this node's joint — the method execution jumps to after
+	 * this one. Serialized as a workflow index (see connectionPayload.methods). */
+	jump?: string;
+	/** Joint picking state, set by prepareWorkflowElements while a joint is being
+	 * drawn: this node is a legal target / is the node the joint starts from /
+	 * cannot be the target and why (rendered as a hover-only error ring plus a
+	 * tooltip naming the reason). */
+	jointCandidate?: boolean;
+	jointSource?: boolean;
+	jointInvalidReason?: JointRejectionReason;
+	/** Method whose response the target consumes and the joint would skip over —
+	 * fills the `skips-referenced-method` tooltip. */
+	jointBlockingLabel?: string;
 	/** Set by the command-palette `workflow search <term>` fuzzy search — a
 	 * live match ring distinct from the drag-preview `highlighted` state and
 	 * the `hasError` state, so all three can coexist without visual collision. */
@@ -118,6 +132,7 @@ export type WorkflowNodeData = {
 	onAddStep?: (action: WorkflowAction) => void;
 	onOpenContextMenu?: (menu: WorkflowContextMenu | null) => void;
 	onDeleteNode?: (nodeId: string) => void;
+	onRemoveJoint?: (nodeId: string) => void;
 	onOpenAggregatorEditor?: (nodeId: string) => void;
 };
 
@@ -137,6 +152,12 @@ export type WorkflowEdgeData = {
 	 * travelling-dot animation so it restarts once per playback step, including
 	 * re-entries of the same edge on the next loop iteration. */
 	testRunNonce?: number;
+	/** A joint (see WorkflowNodeData.jump) rather than a real graph edge: same
+	 * path geometry as every other edge, drawn in the joint color, and carrying
+	 * its own hover-revealed delete control. */
+	joint?: boolean;
+	jointSourceNodeId?: string;
+	onRemoveJoint?: (nodeId: string) => void;
 };
 
 export type StartWorkflowNode = Node<WorkflowNodeData, 'start'>;

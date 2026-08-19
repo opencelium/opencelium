@@ -46,25 +46,40 @@
   fill: currentColor;
 }
 
-.canvasSpeedControl {
+/* One card housing both replay-debugging controls (pause/play + speed) — see
+   TestRunDebugControls.tsx — so they read as a single feature rather than
+   two separate floating pieces. */
+.testRunDebugPanel {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 4px 10px 4px 6px;
   border: 1px solid var(--color-border-subtle);
   border-radius: 6px;
   background: var(--color-background-surface);
   box-shadow: var(--shadow-sm);
 }
 
-.canvasSpeedControlLabel {
+.testRunDebugDivider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border-subtle);
+}
+
+.testRunDebugSpeed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.testRunDebugSpeedLabel {
   font-size: 11px;
   font-weight: 600;
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
-.canvasSpeedControlValue {
+.testRunDebugSpeedValue {
   font-size: 11px;
   font-weight: 600;
   color: var(--color-text-primary);

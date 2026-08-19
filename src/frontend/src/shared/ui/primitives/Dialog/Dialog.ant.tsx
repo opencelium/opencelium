@@ -31,6 +31,7 @@ export const AntDialog: DialogComponent = ({
   // On mobile the dialog is always fullscreen and the toggle is hidden.
   const isFullscreen = isMobile || maximized;
   const showMaximize = maximizable && !isMobile;
+  const hasViewportBoundedWizard = testId === "invoker-create-dialog";
 
   return (
     <Modal
@@ -46,7 +47,9 @@ export const AntDialog: DialogComponent = ({
       width={isFullscreen ? "100%" : width}
       zIndex={zIndex}
       style={!isFullscreen && top !== undefined ? { top } : undefined}
-      className={isFullscreen ? "ant-dialog-fullscreen" : "ant-dialog-custom"}
+      className={`${isFullscreen ? "ant-dialog-fullscreen" : "ant-dialog-custom"}${
+        hasViewportBoundedWizard ? " ant-dialog-viewport-wizard" : ""
+      }`}
     >
       <span className="ant-dialog-header-actions">
         {/* Portal target for content-contributed actions (e.g. download). */}

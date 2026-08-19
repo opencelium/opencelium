@@ -7,6 +7,7 @@
     "close": "Schließen",
     "ok": "Ok",
     "delete": "Löschen",
+    "removeJoint": "Verbindung entfernen",
     "duplicate": "Duplizieren",
     "edit": "Bearbeiten",
     "select": "Auswählen",
@@ -107,6 +108,17 @@
     "deleteVersionSuccess": "Version gelöscht",
     "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?"
   },
+  "joint": {
+    "invalid": {
+      "notAMethod": "Nur eine Methode kann Ziel eines Joints sein.",
+      "differentLoopScope": "Das Ziel muss eine Methode im selben Loop-Bereich wie die ausgewählte sein — entweder beide außerhalb jeder Schleife oder beide in derselben Schleife.",
+      "backwards": "Ein Joint kann nur nach vorne zeigen, auf eine Methode, die nach der ausgewählten läuft.",
+      "skipsReferencedMethod": "Dieser Joint würde {{method}} überspringen, deren Antwort diese Methode verwendet.",
+      "skipsReferencedMethodUnnamed": "Dieser Joint würde eine Methode überspringen, deren Antwort diese Methode verwendet."
+    },
+    "removedAfterMove": "{{count}} Joints wurden entfernt — sie sind nach dieser Verschiebung nicht mehr gültig",
+    "removedAfterMove_one": "Der Joint wurde entfernt — er ist nach dieser Verschiebung nicht mehr gültig"
+  },
   "sidebar": {
     "useConnector": {
       "title": "Konnektor verwenden",
@@ -119,6 +131,10 @@
     "addHttpRequest": {
       "title": "HTTP-Anfrage hinzufügen",
       "description": "Fügen Sie eine einfache HTTP-Anfrage hinzu und geben Sie Ihre URL ein."
+    },
+    "addJoint": {
+      "title": "Joint hinzufügen",
+      "description": "Verbindet zwei Knoten miteinander."
     },
     "operatorOption": {
       "if": {
@@ -296,7 +312,8 @@
     "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort.",
     "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
     "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf.",
-    "testRunIteration": "{{iterator}} = {{count}}"
+    "testRunIteration": "{{iterator}} = {{count}}",
+    "skipToNextIteration": "Zur nächsten Iteration springen"
   },
   "saveDialog": {
     "title": "Version speichern",
@@ -321,6 +338,10 @@
     "dialogTitleLoop": "LOOP-Bedingung",
     "addCondition": "Bedingung hinzufügen",
     "addGroup": "Gruppe hinzufügen",
+    "comparisonUnknown": "Noch nicht verfügbar",
+    "comparisonError": "Kann nicht verglichen werden",
+    "comparisonTrue": "Wahr",
+    "comparisonFalse": "Falsch",
     "loopInfo": {
       "iteratorLabel": "Schleifenvariable",
       "iteratorHelp": "Verwenden Sie diese Variable in den Schleifenschritten, um das aktuelle Element zu lesen:",
@@ -406,7 +427,8 @@
     "body": "Body",
     "header": "Header",
     "requestUrl": "Request-URL",
-    "response": "Antwort"
+    "response": "Antwort",
+    "liveBadge": "Live-Ausführungsergebnis"
   },
   "response": {
     "success": "Erfolg",
@@ -456,6 +478,27 @@
       "title": "Optimierung verfügbar",
       "message": "Es gibt {{count}} Referenzen, die für eine bessere Leistung optimiert werden können. Möchten Sie diese Optimierung vor dem Speichern anwenden?",
       "message_one": "Es gibt eine Referenz, die für eine bessere Leistung optimiert werden kann. Möchten Sie diese Optimierung vor dem Speichern anwenden?"
+    },
+    "debugValue": {
+      "show": "Wert anzeigen",
+      "hide": "Wert ausblenden",
+      "title": "Wert",
+      "idleHint": "Noch nicht angezeigt. Klicken Sie auf das Augensymbol, um diesen Wert aus dem aktuellen Testlauf aufzulösen.",
+      "loadingHint": "Wird aufgelöst…",
+      "noReferences": "Keine Referenzen",
+      "references": "Referenzen",
+      "resultLabel": "RESULT_VAR · {{type}}",
+      "errorTitle": "Fehler",
+      "errorNotPaused": "Starten Sie einen pausierten Testlauf, um dies aus den Live-Ausführungsdaten aufzulösen.",
+      "errorMethodFailed": "Die Ausführung dieser Methode ist in diesem Lauf fehlgeschlagen — ihre Anfrage könnte unvollständig sein.",
+      "errorFieldNotFound": "Für dieses Feld konnte kein Wert in der tatsächlich gesendeten Anfrage gefunden werden.",
+      "errorNotRun": "Diese Methode wurde in der aktuellen Testsitzung noch nicht ausgeführt. Starten oder setzen Sie den pausierten Test fort und prüfen Sie danach erneut.",
+      "status": {
+        "idle": "inaktiv",
+        "loading": "läuft",
+        "error": "Fehler",
+        "stale": "veraltet — Skript geändert"
+      }
     }
   },
   "description": {
@@ -483,9 +526,14 @@
     "wholeArray": "Das gesamte Array",
     "iteratorLoop": "({{iterator}}-Schleife)",
     "noVariableReferences": "Keine Variablenreferenzen",
+    "more": "mehr",
     "confirmDelete": {
       "title": "Referenz löschen",
       "message": "Möchten Sie diese Referenz wirklich löschen?"
+    },
+    "valueDialog": {
+      "copyTooltip": "Wert kopieren",
+      "copySuccess": "Wert in die Zwischenablage kopiert"
     }
   },
   "refGenerator": {

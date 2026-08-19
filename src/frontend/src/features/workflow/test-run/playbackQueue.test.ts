@@ -142,4 +142,87 @@ describe('PlaybackQueue', () => {
 		expect(applied).toHaveLength(0);
 		expect(drained()).toBe(0);
 	});
+
+	it('pause freezes the queue exactly where it is — buffered lines wait, new ones still enqueue', () => {
+		const { queue, applied } = setup();
+		queue.enqueue(pendingLine('0'));
+		vi.advanceTimersByTime(0);
+		expect(applied).toHaveLength(1);
+		queue.pause();
+		queue.enqueue(pendingLine('1'));
+		vi.advanceTimersByTime(5000);
+		expect(applied).toHaveLength(1);
+		expect(queue.pendingCount).toBe(1);
+	});
+
+	it('resume continues dequeuing from where it left off', () => {
+		const { queue, applied } = setup();
+		queue.enqueue(pendingLine('0'));
+		vi.advanceTimersByTime(0);
+		queue.pause();
+		queue.enqueue(pendingLine('1'));
+		vi.advanceTimersByTime(5000);
+		expect(applied).toHaveLength(1);
+		queue.resume();
+		vi.advanceTimersByTime(0);
+		expect(applied).toHaveLength(2);
+	});
+
+	it('flush drops an active pause — nothing is left buffered to stay paused on', () => {
+		const { queue, applied } = setup();
+		queue.enqueue(pendingLine('0'));
+		vi.advanceTimersByTime(0);
+		queue.pause();
+		queue.enqueue(pendingLine('1'));
+		queue.flush();
+		expect(applied).toHaveLength(2);
+		expect(queue.isPaused).toBe(false);
+		queue.enqueue(pendingLine('2'));
+		vi.advanceTimersByTime(1000);
+		expect(applied).toHaveLength(3);
+	});
+
+	it('clear drops an active pause too', () => {
+		const { queue, applied } = setup();
+		queue.pause();
+		queue.clear();
+		expect(queue.isPaused).toBe(false);
+		queue.enqueue(pendingLine('0'));
+		vi.advanceTimersByTime(0);
+		expect(applied).toHaveLength(1);
+	});
+
+	it('stepForward applies exactly one buffered line and stays paused', () => {
+		const { queue, applied } = setup();
+		queue.enqueue(pendingLine('0'));
+		vi.advanceTimersByTime(0);
+		queue.pause();
+		queue.enqueue(pendingLine('1'));
+		queue.enqueue(pendingLine('2'));
+		queue.stepForward();
+		expect(applied).toHaveLength(2);
+		expect(queue.pendingCount).toBe(1);
+		expect(queue.isPaused).toBe(true);
+		vi.advanceTimersByTime(5000);
+		expect(applied).toHaveLength(2);
+		queue.stepForward();
+		expect(applied).toHaveLength(3);
+		expect(queue.pendingCount).toBe(0);
+	});
+
+	it('stepForward is a no-op while not paused', () => {
+		const { queue, applied } = setup();
+		queue.enqueue(pendingLine('0'));
+		queue.enqueue(pendingLine('1'));
+		queue.stepForward();
+		vi.advanceTimersByTime(0);
+		expect(applied).toHaveLength(1);
+	});
+
+	it('stepForward is a no-op with nothing buffered', () => {
+		const { queue, applied } = setup();
+		queue.pause();
+		queue.stepForward();
+		expect(applied).toHaveLength(0);
+	});
 });

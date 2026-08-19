@@ -1,7 +1,7 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import { ChevronUp, Loader2, Maximize2, Minimize2, Trash2 } from 'lucide-react';
+import { ChevronUp, Loader2, Maximize2, Minimize2, Pause, Trash2 } from 'lucide-react';
 import { useMethodViewMode } from '@features/logs';
 import type { WorkflowLogsHeaderProps } from './WorkflowLogs.types';
 
@@ -36,8 +36,12 @@ export function WorkflowLogsHeader(props: WorkflowLogsHeaderProps) {
 					<span>{tLogs('live.title')}</span>
 					{props.isRunning && (
 						<span className='logsRunning'>
-							<Loader2 size={13} className='logsRunningSpinner' />
-							{tLogs(props.isStopping ? 'live.stopping' : 'live.running')}
+							{props.isPaused && !props.isStopping ? (
+								<Pause size={13} />
+							) : (
+								<Loader2 size={13} className='logsRunningSpinner' />
+							)}
+							{tLogs(props.isStopping ? 'live.stopping' : props.isPaused ? 'live.paused' : 'live.running')}
 						</span>
 					)}
 				</span>

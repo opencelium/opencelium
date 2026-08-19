@@ -1,42 +1,11 @@
-import { useEffect, useState } from 'react';
 import { Button, Modal, TreeSelect } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
-import { useGetCategoriesQuery } from '@entities/category/api/categoryApi';
-import { buildCategoryTree } from '@entities/category/model/buildCategoryTree';
 import type { AssignCategoryDialogProps } from './AssignCategoryDialog.types';
+import { useAssignCategoryDialog } from './useAssignCategoryDialog';
 
 export function AssignCategoryDialog({ open, currentCategoryId, loading, onClose, onAssign }: AssignCategoryDialogProps) {
   const { t } = useI18n('workflow');
-  const confirm = useConfirm();
-  const { data: categories = [], isFetching: isLoadingCategories } = useGetCategoriesQuery(undefined, { skip: !open });
-  const [selectedId, setSelectedId] = useState<number | null>(currentCategoryId);
-
-  // Re-sync to the connection's current category every time the dialog reopens,
-  // discarding whatever was left selected from a previous, cancelled visit.
-  useEffect(() => {
-    if (open) setSelectedId(currentCategoryId);
-  }, [open, currentCategoryId]);
-
-  const treeData = buildCategoryTree(categories);
-  const nameFor = (id: number | null) =>
-    id != null ? categories.find((category) => category.id === id)?.name ?? null : null;
-
-  const handleAssignClick = () => {
-    onAssign(selectedId, nameFor(selectedId));
-  };
-
-  const handleRemoveClick = async () => {
-    const confirmed = await confirm({
-      title: t('assignCategoryDialog.confirmUnassign.title'),
-      message: t('assignCategoryDialog.confirmUnassign.message'),
-      confirmText: t('actions.delete'),
-      cancelText: t('actions.cancel'),
-      confirmVariant: 'solid',
-    });
-    if (!confirmed) return;
-    onAssign(null, null);
-  };
+  const state = useAssignCategoryDialog({ open, currentCategoryId, onAssign });
 
   return (
     <Modal
@@ -48,7 +17,7 @@ export function AssignCategoryDialog({ open, currentCategoryId, loading, onClose
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {currentCategoryId != null ? (
-            <Button danger disabled={loading} onClick={handleRemoveClick} data-testid="workflow-assign-category-remove">
+            <Button danger disabled={loading} onClick={state.remove} data-testid="workflow-assign-category-remove">
               {t('actions.delete')}
             </Button>
           ) : <span />}
@@ -59,8 +28,8 @@ export function AssignCategoryDialog({ open, currentCategoryId, loading, onClose
             <Button
               type="primary"
               loading={loading}
-              disabled={selectedId === currentCategoryId}
-              onClick={handleAssignClick}
+              disabled={state.selectedId === currentCategoryId}
+              onClick={state.assign}
               data-testid="workflow-assign-category-save"
             >
               {t('actions.select')}
@@ -75,10 +44,10 @@ export function AssignCategoryDialog({ open, currentCategoryId, loading, onClose
         </div>
         <TreeSelect
           autoFocus
-          treeData={treeData}
-          value={selectedId ?? undefined}
-          onChange={(value) => setSelectedId(value ?? null)}
-          loading={isLoadingCategories}
+          treeData={state.treeData}
+          value={state.selectedId ?? undefined}
+          onChange={(value) => state.setSelectedId(value ?? null)}
+          loading={state.isLoadingCategories}
           placeholder={t('assignCategoryDialog.selectPlaceholder')}
           treeDefaultExpandAll
           allowClear

@@ -13,8 +13,8 @@ import { WorkflowHeader } from './components/WorkflowHeader/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs/WorkflowLogs';
 import type { WorkflowLogsPanelState } from './components/WorkflowLogs/WorkflowLogs.types';
 import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
-import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
-import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
+import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill/WorkflowSchedulesPill';
+import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel/WorkflowSchedulesPanel';
 import { HistoryPanel } from './components/header/HistoryPanel/HistoryPanel';
 import { ShortcutsDialog } from './components/header/ShortcutsDialog/ShortcutsDialog';
 import { AssignCategoryDialog } from './components/header/AssignCategoryDialog/AssignCategoryDialog';
@@ -22,17 +22,17 @@ import { ConditionBuilderDialog } from './components/condition-builder/Condition
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog/MethodConfigDialog';
 import { ResponseDialog } from './components/request-editor/ResponseDialog/ResponseDialog';
 import { AggregatorConfigDialog } from './components/aggregator/AggregatorConfigDialog';
-import { TemplateConnectorMappingDialog } from './components/template/TemplateConnectorMappingDialog';
+import { TemplateConnectorMappingDialog } from './components/template/TemplateConnectorMappingDialog/TemplateConnectorMappingDialog';
 import { extractConnectorGroups, applyConnectorMapping, type ConnectorMappingGroup } from './components/template/templateConnectorMapping.utils';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
-import { useWorkflowPage } from './useWorkflowPage';
-import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
+import { useWorkflowPage } from './hooks/useWorkflowPage';
+import { useUnsavedChangesGuard } from './hooks/useUnsavedChangesGuard';
 import { TestRunProvider } from './test-run/TestRunProvider';
 import { useTestRun } from './test-run/useTestRun';
 import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
 import { mapConnectionToWorkflowState, type WorkflowConnectionState } from './api/connectionMapper';
-import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
+import { buildConnectionPayload, buildFromConnectorPayload, buildWorkflowIndexes } from './api/connectionPayload';
 import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC, resolveWorkflowApiError } from './utils/workflowApiErrors';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
 import { useGetInvokersQuery } from '@entities/invoker/api/invokerApi';
@@ -253,11 +253,15 @@ const triggerJsonDownload = (filename: string, payload: unknown) => {
 // Workflow renders TestRunProvider itself (the provider needs the payload
 // builder and graph metadata computed inside the component), so it cannot call
 // useTestRun directly. This bridge, mounted inside the provider, mirrors the
-// "a run is active" flag back up so page-level edit surfaces (delete shortcut,
-// sidebar, header, history) can be locked while a test executes.
+// "a run is actively executing" flag back up so page-level edit surfaces
+// (delete shortcut, sidebar, header, history) can be locked while a test
+// runs. Paused counts as unlocked, same reasoning as WorkflowCanvas's
+// isEditLocked — a paused debugging session is exactly when inspecting/
+// adjusting the graph again is wanted, even though the backend run itself
+// keeps executing in the background regardless of the client-side pause.
 function TestRunEditLockSync({ onLockChange }: { onLockChange: (isLocked: boolean) => void }) {
   const testRun = useTestRun();
-  const isLocked = !!testRun && testRun.phase !== 'idle';
+  const isLocked = !!testRun && testRun.phase !== 'idle' && !testRun.isPaused;
   useEffect(() => {
     onLockChange(isLocked);
   }, [isLocked, onLockChange]);
@@ -371,6 +375,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   );
   const loopAncestorsByIndexPath = useMemo(
     () => buildLoopAncestorsByIndexPath(hydratedNodes, workflow.edges),
+    [hydratedNodes, workflow.edges],
+  );
+  // nodeId -> workflow tree-path index, for correlating a canvas node with its
+  // live execution element (see ResponseDialog's paused live-response lookup).
+  const nodeIndexById = useMemo(
+    () => buildWorkflowIndexes(hydratedNodes, workflow.edges),
     [hydratedNodes, workflow.edges],
   );
   const activeConnectionId = createdConnectionId ?? connectionId;
@@ -632,7 +642,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         edges: workflow.edges,
         viewport: workflow.getViewport(),
         fieldBindings: loadedFieldBindings,
-        includeInvoker: true,
       });
 
       const response = await apiExecutor({
@@ -919,6 +928,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       centerStartVersion={workflow.centerStartVersion}
       onInit={workflow.setReactFlowInstance}
       activeAction={workflow.sidebarAction}
+      jointSourceId={workflow.jointSourceId}
+      jointVerdicts={workflow.jointVerdicts}
+      onConfirmJoint={workflow.onConfirmJoint}
+      onCancelJoint={workflow.onCancelJoint}
+      onRemoveJoint={workflow.onRemoveJoint}
       onNodesChange={workflow.onNodesChange}
       onEdgesChange={workflow.onEdgesChange}
       onConnect={workflow.onConnect}
@@ -945,7 +959,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       }}
       onDeleteNode={workflow.onDeleteNode}
       onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
-      onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
+      onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); workflow.onCancelJoint(); }}
     >
       <Background gap={16} size={1} />
     </WorkflowCanvas>
@@ -1150,7 +1164,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           </>
         )}
       </div>
-      <WorkflowSidebar action={isTestRunLocked ? null : workflow.sidebarAction} selectedNode={selectedNode} connectionId={activeConnectionId} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
+      <WorkflowSidebar action={isTestRunLocked ? null : workflow.sidebarAction} selectedNode={selectedNode} connectionId={activeConnectionId} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} onStartJoint={workflow.onStartJoint} />
       <WorkflowSchedulesPanel
         open={schedulesOpen}
         connectionId={activeConnectionId}
@@ -1218,6 +1232,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       <ResponseDialog
         open={!!workflow.responseNodeId}
         node={hydratedNodes.find((node) => node.id === workflow.responseNodeId) ?? null}
+        nodeIndexById={nodeIndexById}
+        loopAncestorsByIndexPath={loopAncestorsByIndexPath}
         onClose={workflow.onCloseResponse}
       />
       <MethodConfigDialog

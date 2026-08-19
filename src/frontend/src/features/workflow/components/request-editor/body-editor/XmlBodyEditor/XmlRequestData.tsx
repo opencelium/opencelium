@@ -3,7 +3,7 @@ import { Alert, Card, Input, Segmented, Space, Tag } from 'antd';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { XmlNodeCard } from '../xml/XmlNodeCard';
+import { XmlNodeCard } from '../xml/XmlNodeCard/XmlNodeCard';
 import { addChildNode, removeNode, updateNode } from '../xml/xmlTree';
 import type { useXmlBodyEditor } from '../xml/useXmlBodyEditor';
 

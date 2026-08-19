@@ -20,7 +20,10 @@
     "name": {
       "label": "Name",
       "errors": {
-        "name_already_exists": "Ein Invoker mit diesem Namen existiert bereits"
+        "name_already_exists": "Ein Invoker mit diesem Namen existiert bereits",
+        "invalid_characters": "Nur Buchstaben, Ziffern, Leerzeichen, Bindestriche, Unterstriche, Klammern und Punkte verwenden",
+        "invalid_period": "Ein Punkt darf nicht am Anfang oder Ende stehen; aufeinanderfolgende Punkte sind nicht erlaubt",
+        "max_length": "Der Name darf höchstens 200 Zeichen lang sein"
       }
     },
     "description": {
