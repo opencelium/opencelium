@@ -64,7 +64,7 @@ const VISIBILITY_OPTIONS = [
 export function InvokerRequiredDataEditor({ name, label, mode }: InvokerRequiredDataEditorProps) {
     const { t } = useI18n('entities')
     const { t: tCommon } = useI18n('common')
-    const { control, formState: { errors }, setValue } = useFormContext()
+    const { control, formState: { errors }, getValues, setValue } = useFormContext()
 
     const authType = useWatch({ name: 'authType', control }) as string
     const prevAuthTypeRef = useRef<string | undefined>(undefined)
@@ -73,10 +73,17 @@ export function InvokerRequiredDataEditor({ name, label, mode }: InvokerRequired
         if (mode === 'view') return
         const prev = prevAuthTypeRef.current
         prevAuthTypeRef.current = authType
+
+        const currentData = getValues(name)
+        const isInitialMount = prev === undefined
+        if (isInitialMount && Array.isArray(currentData) && currentData.length > 0) {
+            return
+        }
+
         if (authType && authType !== prev && PREDEFINED_DATA[authType]) {
             setValue(name, PREDEFINED_DATA[authType], { shouldDirty: true })
         }
-    }, [authType])
+    }, [authType, getValues, mode, name, setValue])
 
     const emptyError = (
         (errors as any)[name]?.root?.message ?? (errors as any)[name]?.message
@@ -94,6 +101,7 @@ export function InvokerRequiredDataEditor({ name, label, mode }: InvokerRequired
             defaultItem={DEFAULT_ITEM}
             variant="compact"
             hideAddButton={readOnly}
+            stickyAddButton
             addButtonText={t('invoker.fields.requiredData.add', { defaultValue: 'Add Field' })}
             emptyText={t('invoker.fields.requiredData.empty', { defaultValue: 'No required data fields.' })}
             renderItem={({ index, remove }) => (

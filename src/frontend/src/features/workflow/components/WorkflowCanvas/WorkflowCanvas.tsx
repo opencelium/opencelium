@@ -11,7 +11,7 @@ import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
 import { TestRunAnimationHint } from './TestRunAnimationHint';
-import { TestRunSpeedControl } from './TestRunSpeedControl';
+import { TestRunDebugControls } from './TestRunDebugControls';
 
 // Where the graph's top-left-most point lands in the viewport on open —
 // offset from the pane's top-left corner rather than dead center, clear of
@@ -50,6 +50,11 @@ export function WorkflowCanvas({
   edges,
   isAnyNodeDragging = false,
   activeAction,
+  jointSourceId,
+  jointVerdicts,
+  onConfirmJoint,
+  onCancelJoint,
+  onRemoveJoint,
   onNodesChange,
   onEdgesChange,
   onConnect,
@@ -74,14 +79,21 @@ export function WorkflowCanvas({
     : undefined;
   const appliedViewportKey = useRef<string | undefined>(undefined);
   const centeredStartVersion = useRef<number>(0);
-  const prepareCacheRef = useRef<PrepareWorkflowCache>({ nodes: new Map(), edges: new Map() });
+  const prepareCacheRef = useRef<PrepareWorkflowCache>({ nodes: new Map(), edges: new Map(), jointEdges: new Map() });
 
   // null outside a TestRunProvider (e.g. a canvas reused without the page wiring).
   const testRun = useTestRun();
-  // While a test run is active (starting/running/stopping) the graph must not
-  // be editable — the payload was already sent to the backend, so any edit
-  // would silently diverge from what is actually executing.
-  const isEditLocked = !!testRun && testRun.phase !== 'idle';
+  // While a test run is actively RUNNING (starting/running/stopping, and not
+  // paused) the graph must not be editable — the payload was already sent to
+  // the backend, so any edit would silently diverge from what is actually
+  // executing. Pausing the replay (see TestRunProvider.pauseAnimation) is
+  // treated the same as idle here: the backend keeps executing in the
+  // background regardless, but a paused debugging session is exactly when the
+  // user wants to inspect/adjust the graph again — double-click still opens
+  // MethodConfigDialog in a read-only mode for CONNECTOR/method nodes though
+  // (see index.tsx), since persisting a config edit mid-execution would still
+  // diverge from what the backend is actually running.
+  const isEditLocked = !!testRun && testRun.phase !== 'idle' && !testRun.isPaused;
   const liveGraphStatus = testRun?.liveGraphStatus;
   // In live mode there is no "currently executing" token to show at all — no
   // dot, no node ring, no iteration counter, no branch label — only the
@@ -94,12 +106,13 @@ export function WorkflowCanvas({
     [nodes, edges, liveGraphStatus, currentStep],
   );
 
-  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor });
-  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor };
+  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onRemoveJoint });
+  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onRemoveJoint };
   const stableOnOpenAddStep = useCallback<NonNullable<typeof onOpenAddStep>>((...args) => callbacksRef.current.onOpenAddStep?.(...args), []);
   const stableOnOpenContextMenu = useCallback<NonNullable<typeof onOpenContextMenu>>((...args) => callbacksRef.current.onOpenContextMenu?.(...args), []);
   const stableOnDeleteNode = useCallback<NonNullable<typeof onDeleteNode>>((...args) => callbacksRef.current.onDeleteNode?.(...args), []);
   const stableOnOpenAggregatorEditor = useCallback<NonNullable<typeof onOpenAggregatorEditor>>((...args) => callbacksRef.current.onOpenAggregatorEditor?.(...args), []);
+  const stableOnRemoveJoint = useCallback((nodeId: string) => callbacksRef.current.onRemoveJoint?.(nodeId), []);
 
   // The failed node's red ring + pulse (testRunScope.utils.ts) otherwise stays
   // up for the rest of the run, but the user can dismiss it early with
@@ -116,6 +129,17 @@ export function WorkflowCanvas({
     window.addEventListener('keydown', onEscape);
     return () => window.removeEventListener('keydown', onEscape);
   }, []);
+  // Escape is also the joint picker's way out: clicking a node that cannot be
+  // the target no longer cancels (it explains itself instead — see onNodeClick),
+  // so this listener is mounted only for as long as a joint is being drawn.
+  useEffect(() => {
+    if (!jointSourceId) return;
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onCancelJoint?.();
+    };
+    window.addEventListener('keydown', onEscape);
+    return () => window.removeEventListener('keydown', onEscape);
+  }, [jointSourceId, onCancelJoint]);
 
   const { preparedEdges, preparedNodes } = prepareWorkflowElements({
     nodes,
@@ -126,6 +150,9 @@ export function WorkflowCanvas({
     onOpenContextMenu: stableOnOpenContextMenu,
     onDeleteNode: stableOnDeleteNode,
     onOpenAggregatorEditor: stableOnOpenAggregatorEditor,
+    jointSourceId,
+    jointVerdicts,
+    onRemoveJoint: stableOnRemoveJoint,
     cache: prepareCacheRef.current,
     testRunScope,
     isEditLocked,
@@ -185,6 +212,10 @@ export function WorkflowCanvas({
         onNodeDragStart={onNodeDragStart}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
+        onNodeClick={(_, node) => {
+          if (!jointSourceId) return;
+          if (jointVerdicts?.get(node.id)?.valid) onConfirmJoint?.(node.id);
+        }}
         onNodeDoubleClick={isEditLocked ? undefined : onNodeDoubleClick}
         onPaneClick={onPaneClick}
         nodeDragThreshold={4}
@@ -199,13 +230,14 @@ export function WorkflowCanvas({
       >
         {children}
         {/* One top-left Panel hosts both the zoom Controls and the test-run
-            speed slider as flex siblings, so the slider docks to the right of
-            Controls instead of below them — Controls' own position:absolute
-            is neutralized (see .workflowControls in canvas-controls.css) so it
+            debug controls (pause/play + speed, see TestRunDebugControls) as
+            flex siblings, so the debug card docks to the right of Controls
+            instead of below them — Controls' own position:absolute is
+            neutralized (see .workflowControls in canvas-controls.css) so it
             participates in this flex row rather than positioning itself. */}
         <Panel position="top-left" className="canvasTopLeftPanel">
           <Controls className="workflowControls" />
-          <TestRunSpeedControl />
+          <TestRunDebugControls />
         </Panel>
       </ReactFlow>
       <TestRunAnimationHint />

@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { MethodProvider } from '../../../providers/MethodContext';
 import type { RootState } from '../../../store';
-import LegacyUrlEditor from '../url-editor/UrlEditor';
+import LegacyUrlEditor from '../url-editor/UrlEditor/UrlEditor';
 import { BodyEditor } from '../body-editor/BodyEditor/BodyEditor';
 import { HeaderEditor } from '../header-editor/HeaderEditor';
 import type { MethodConfigMode } from './MethodConfigDialog.types';

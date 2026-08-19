@@ -1,5 +1,7 @@
 import type { WorkflowNodeModel } from '../../types/workflow.types';
+import type { MethodWithId } from '../../types/connection';
 import { createShortId } from '@shared/lib/createId';
+import { parseEnhancementArg, type ParsedArg } from '../request-editor/utils/parseEnhancementArg';
 import {
 	Conjunction,
 	IfOperatorName,
@@ -10,7 +12,72 @@ import {
 	type ConditionRule,
 	type ConditionRuleProperties,
 	type ConditionTree,
+	type ConditionValueSource,
 } from './conditionBuilder.types';
+import type { ResponseType } from '../request-editor/body-editor/requestReferenceOptions';
+
+// Strips the `{% ... %}` enhancement-style wrapper a condition operand's
+// reference can arrive in (round-tripped through the expression string) —
+// shared by every reader of `leftField`/`rightField` below, so the dialog's
+// own parsing (ConditionBuilder.tsx) and the live-value debug panel agree on
+// exactly the same grammar.
+export const unwrapConditionReference = (value?: string) =>
+	value
+		?.trim()
+		.replace(/^\{%\s*/, '')
+		.replace(/\s*%}$/, '');
+
+export const parseMethodFromReference = (methods: MethodWithId[], value?: string) => {
+	const reference = unwrapConditionReference(value);
+	if (!reference) return undefined;
+	const color = reference.match(/^#?([A-Fa-f0-9]{6})\.\(response\)\./)?.[1];
+	return color
+		? methods.find((method) => method.color.replace('#', '').toLowerCase() === color.toLowerCase())
+		: undefined;
+};
+
+export const parseResponseTypeFromReference = (value?: string): ResponseType | undefined => {
+	const reference = unwrapConditionReference(value);
+	if (reference?.includes('.header.')) return 'header';
+	if (reference?.includes('.status')) return 'status';
+	if (reference?.includes('.body.')) return 'body';
+	return undefined;
+};
+
+export const parsePathFromReference = (value?: string) => {
+	const reference = unwrapConditionReference(value);
+	if (!reference) return undefined;
+	if (reference === '$' || reference === '$.') return '$';
+	if (reference.includes('(response).status')) return 'status';
+	const match = reference.match(/\.(body|header)(?:\.\$\.?|\.)?(.*)$/);
+	if (match && match[2] === '') return '$';
+	const path = match?.[2] || reference;
+	return path.replace(/^#?[A-Fa-f0-9]{6}\.\(response\)\.(body|header)\.\$\.?/, '');
+};
+
+export const getSourceFromField = (field?: string): ConditionValueSource => {
+	const reference = unwrapConditionReference(field);
+	if (!reference) return 'direct';
+	if (reference.startsWith('${') && reference.endsWith('}')) return 'webhook';
+	if (/^#?[A-Fa-f0-9]{6}\.\(response\)\./.test(reference)) return 'direct';
+	return 'constant';
+};
+
+// A condition operand only ever resolves live when it's a method reference
+// (`direct`) — `constant` is already a literal (nothing to fetch), and
+// `webhook` has no existing resolution path (no captured trigger payload in
+// the execution log). `unwrapConditionReference` + `parseEnhancementArg`
+// reuses the exact same `#COLOR.(response).messageProperty.path` grammar
+// `buildReferenceValue` (requestReferenceOptions.ts) produces when the dialog
+// saves a `direct` operand — no new reference format to parse.
+export const parseConditionOperand = (value?: string): ParsedArg | null => {
+	if (getSourceFromField(value) !== 'direct') return null;
+	const reference = unwrapConditionReference(value);
+	return reference ? parseEnhancementArg(reference) : null;
+};
+
+export const getMethodLabel = (method: MethodWithId) =>
+	method.label || method.name || method.index || method.id;
 
 export const createConditionId = (prefix: string) =>
 	createShortId(prefix);

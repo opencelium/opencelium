@@ -41,6 +41,40 @@
   fill: var(--color-action-primary);
 }
 
+/* A joint (WorkflowNodeData.jump): same stroke width, bezier and arrow shape
+   as a normal edge — only the colour sets it apart — plus a delete control that
+   appears at its midpoint on hover. The toolbar is lifted above the node layer
+   (nodes.css forces z-index 6 on .react-flow__node) so it stays clickable when
+   the joint's midpoint falls behind a node it spans over. */
+.workflowEdgePathJoint {
+  stroke: var(--color-status-success-fg);
+  color: var(--color-status-success-fg);
+}
+
+.edgeStartPointJoint {
+  fill: var(--color-status-success-fg);
+  stroke: var(--color-status-success-fg);
+  stroke-width: 0;
+}
+
+.workflowArrowMarkerJoint {
+  fill: var(--color-status-success-fg);
+}
+
+.jointEdgeToolbar {
+  position: absolute;
+  z-index: 7;
+  pointer-events: all;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 999px;
+  background: var(--color-background-elevated);
+  box-shadow: var(--shadow-md);
+}
+
 /* Live test-run indicator: a dashed primary edge with a muted turquoise dot
    looping along it (SVG animateMotion in WorkflowEdge.tsx) representing the
    data flowing into whichever method/operator is currently executing. Fixed

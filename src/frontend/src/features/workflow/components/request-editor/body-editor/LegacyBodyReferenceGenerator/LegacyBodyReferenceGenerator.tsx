@@ -1,111 +1,72 @@
 import { ApiOutlined, LinkOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { useMemo, useState } from 'react';
-import { buildReferenceValue, getIteratorsForMethod, type ResponseType } from '../requestReferenceOptions';
 import { LegacyWebhookReferenceSelect } from '../LegacyWebhookReferenceSelect/LegacyWebhookReferenceSelect';
 import { LegacyResponseFieldSelect } from '../LegacyResponseFieldSelect/LegacyResponseFieldSelect';
-import { webhookSnippet } from '../bodyWebhook';
 import { Radio } from '@shared/ui/primitives/Radio';
-import { getDuplicateMethodIndexByColor } from '../../../../utils/methodColor';
-import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { LegacyBodyReferenceGeneratorProps } from './LegacyBodyReferenceGenerator.types';
-import { getReferenceMethods } from './legacyBodyReferenceGenerator.utils';
 import { ReferenceMethodSelect } from './ReferenceMethodSelect';
+import { useLegacyBodyReferenceGenerator } from './useLegacyBodyReferenceGenerator';
 import '../bodyLegacy.css';
 
 export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply, showWebhookOption = true }: LegacyBodyReferenceGeneratorProps) {
-  const { t } = useI18n('workflow');
-  const [referenceType, setReferenceType] = useState<'direct' | 'webhook'>('direct');
-  const [responseType, setResponseType] = useState<ResponseType>('body');
-  const [methodId, setMethodId] = useState<string>();
-  const [field, setField] = useState<string>();
-  const [webhookValue, setWebhookValue] = useState<string>();
-
-  const methods = useMemo(() => getReferenceMethods(connection, currentMethod), [connection, currentMethod]);
-
-  const selectedMethod = methods.find((method) => method.id === methodId);
-  const duplicateIndexByColor = useMemo(() => getDuplicateMethodIndexByColor(methods), [methods]);
-  const currentMethodIterators = useMemo(
-    () => getIteratorsForMethod(connection, currentMethod),
-    [connection, currentMethod],
-  );
-  const shellClassName = [
-    'bodyLegacyGeneratorShell',
-    referenceType === 'webhook' ? 'bodyLegacyGeneratorShellWebhook' : '',
-    !showWebhookOption ? 'bodyLegacyGeneratorShellNoToggle' : '',
-  ].filter(Boolean).join(' ');
+  const state = useLegacyBodyReferenceGenerator({
+    connection, currentMethod, onApply, showWebhookOption,
+  });
 
   return (
-    <div className={shellClassName}>
+    <div className={state.shellClassName}>
       {showWebhookOption ? (
         <div className='bodyLegacyGeneratorSwitch compactRadioGroup'>
           <Radio
-            checked={referenceType === 'direct'}
-            onChange={() => setReferenceType('direct')}
+            checked={state.referenceType === 'direct'}
+            onChange={() => state.setReferenceType('direct')}
             label={<span className='bodyLegacyRadioIcon'><ApiOutlined /></span>}
           />
           <Radio
-            checked={referenceType === 'webhook'}
-            onChange={() => setReferenceType('webhook')}
+            checked={state.referenceType === 'webhook'}
+            onChange={() => state.setReferenceType('webhook')}
             label={<span className='bodyLegacyRadioIcon'><LinkOutlined /></span>}
           />
         </div>
       ) : null}
-      {referenceType === 'direct' ? (
+      {state.referenceType === 'direct' ? (
         <>
-          <ReferenceMethodSelect methods={methods} selectedMethod={selectedMethod} methodId={methodId}
-            duplicateIndexByColor={duplicateIndexByColor}
-            onChange={(value) => { setMethodId(value); setField(undefined); }} />
+          <ReferenceMethodSelect methods={state.methods} selectedMethod={state.selectedMethod}
+            methodId={state.methodId} duplicateIndexByColor={state.duplicateIndexByColor}
+            onChange={state.selectMethod} />
           <div className='bodyLegacyGeneratorResponse compactRadioGroup'>
             <Radio
-              checked={responseType === 'body'}
-              onChange={() => { setResponseType('body'); setField(undefined); }}
+              checked={state.responseType === 'body'} onChange={() => state.selectResponseType('body')}
               label={<span className='bodyLegacyRadioIcon'>B</span>}
             />
             <Radio
-              checked={responseType === 'header'}
-              onChange={() => { setResponseType('header'); setField(undefined); }}
+              checked={state.responseType === 'header'} onChange={() => state.selectResponseType('header')}
               label={<span className='bodyLegacyRadioIcon'>H</span>}
             />
             <Radio
-              checked={responseType === 'status'}
-              onChange={() => { setResponseType('status'); setField('status'); }}
+              checked={state.responseType === 'status'} onChange={() => state.selectResponseType('status')}
               label={<span className='bodyLegacyRadioIcon'>S</span>}
             />
           </div>
           <LegacyResponseFieldSelect
-            method={selectedMethod}
-            type={responseType}
-            value={field}
-            disabled={!methodId}
-            iterators={currentMethodIterators}
-            onChange={setField}
+            method={state.selectedMethod} type={state.responseType} value={state.field}
+            disabled={!state.methodId} iterators={state.iterators} onChange={state.setField}
           />
           <Button
             type='text'
             className='bodyLegacyGeneratorAction'
             icon={<PlusOutlined />}
-            disabled={!selectedMethod || !field}
-            onClick={() => {
-              if (!(selectedMethod && field)) return;
-              onApply(buildReferenceValue(selectedMethod.color, responseType, field));
-              setField(undefined);
-            }}
+            disabled={!state.selectedMethod || !state.field} onClick={state.applyDirect}
           />
         </>
       ) : (
         <>
-          <LegacyWebhookReferenceSelect value={webhookValue} onChange={setWebhookValue} />
+          <LegacyWebhookReferenceSelect value={state.webhookValue} onChange={state.setWebhookValue} />
           <Button
             type='text'
             className='bodyLegacyGeneratorAction'
             icon={<PlusOutlined />}
-            disabled={!webhookValue}
-            onClick={() => {
-              if (!webhookValue) return;
-              onApply(webhookSnippet(webhookValue));
-              setWebhookValue(undefined);
-            }}
+            disabled={!state.webhookValue} onClick={state.applyWebhook}
           />
         </>
       )}

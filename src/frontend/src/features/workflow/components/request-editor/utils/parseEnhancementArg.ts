@@ -21,3 +21,10 @@ export function parseEnhancementArg(value: string): ParsedArg | null {
 		path: normalizedPath,
 	};
 }
+
+// Shared structural-path label for a parsed reference (e.g. "body.$.items[0].name"
+// or "status") — used as the tooltip/dialog title wherever a reference's own
+// display label isn't already provided by the caller (see BodyPointer, EndpointArgHoverTooltip).
+export function formatParsedArgPath(parsed: ParsedArg): string {
+	return parsed.path ? `${parsed.messageProperty}.$.${parsed.path}` : `${parsed.messageProperty}.$`;
+}

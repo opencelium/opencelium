@@ -5,6 +5,7 @@ import 'ace-builds/src-noconflict/theme-tomorrow'
 import 'ace-builds/src-noconflict/theme-tomorrow_night'
 import { useController, useFormContext, useWatch } from 'react-hook-form'
 import { Radio } from 'antd'
+import './InvokerOperationsEditor.css'
 import { FieldArrayEditor } from '@shared/ui/wizard-step/editor/general/FieldArrayEditor'
 import { FormInput } from '@shared/ui/form/FormInput'
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton'
@@ -101,6 +102,7 @@ function RadioGroupField({
     return (
         <FormControl label={label} name={name}>
             <Radio.Group
+                className="readOnlyRadioGroup"
                 value={field.value}
                 onChange={(e) => !readOnly && field.onChange(e.target.value)}
                 disabled={readOnly}

@@ -1,75 +1,13 @@
 import { createPortal } from 'react-dom';
-import { useEffect, useMemo, useRef, useState } from 'react';
 import { LegacyBodyReferenceGenerator } from '../LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
-import type { BodyReferenceTriggerRect, InlineBodyReferenceEditorProps } from './InlineBodyReferenceEditor.types';
+import type { InlineBodyReferenceEditorProps } from './InlineBodyReferenceEditor.types';
+import { setLastBodyReferenceTriggerRect } from './inlineBodyReferencePosition';
+import { useInlineBodyReferenceEditor } from './useInlineBodyReferenceEditor';
 
-let lastBodyReferenceTriggerRect: BodyReferenceTriggerRect | null = null;
-
-export const setLastBodyReferenceTriggerRect = (rect: BodyReferenceTriggerRect | null) => {
-  lastBodyReferenceTriggerRect = rect;
-};
+export { setLastBodyReferenceTriggerRect };
 
 export function InlineBodyReferenceEditor({ referenceId, connection, currentMethod, submitEdit, onClose }: InlineBodyReferenceEditorProps) {
-  const popupRef = useRef<HTMLDivElement | null>(null);
-  const [hidden, setHidden] = useState(false);
-
-  useEffect(() => {
-    setHidden(false);
-  }, [referenceId]);
-
-  useEffect(() => {
-    const onMouseDown = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (!target || !popupRef.current) return;
-      if (popupRef.current.contains(target)) return;
-      if (
-        target.closest('.bodyLegacyWebhookModalRoot') ||
-        target.closest('.ant-select-dropdown')
-      ) {
-        return;
-      }
-      setHidden(true);
-      onClose?.();
-    };
-
-    document.addEventListener('mousedown', onMouseDown, true);
-    return () => document.removeEventListener('mousedown', onMouseDown, true);
-  }, [onClose]);
-
-  const position = useMemo(() => {
-    const rect = lastBodyReferenceTriggerRect;
-    const width = 560;
-    const margin = 16;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    if (!rect) {
-      return {
-        left: Math.max(margin, (viewportWidth - width) / 2),
-        top: 120,
-      };
-    }
-
-    const preferredLeft = rect.left + 12;
-    const minLeft = Math.max(margin, rect.containerLeft ?? margin);
-    const maxLeft = Math.max(
-      minLeft,
-      Math.min(
-        viewportWidth - width - margin,
-        (rect.containerRight ?? viewportWidth - margin) - width - 8,
-      ),
-    );
-    const left = Math.min(
-      Math.max(minLeft, preferredLeft),
-      maxLeft,
-    );
-    const top = Math.min(
-      Math.max(margin, rect.top + rect.height + 6),
-      Math.max(margin, viewportHeight - 160),
-    );
-
-    return { left, top };
-  }, []);
+  const { hidden, popupRef, position } = useInlineBodyReferenceEditor(referenceId, onClose);
 
   if (hidden) return null;
 

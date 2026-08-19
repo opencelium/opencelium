@@ -4,10 +4,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { parseEnhancementArg } from '../../utils/parseEnhancementArg';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { formatParsedArgPath, parseEnhancementArg } from '../../utils/parseEnhancementArg';
 import { LegacyBodyReferenceGenerator } from '../LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
+import { useTestRun } from '../../../../test-run/useTestRun';
+import { LiveReferenceValuePreview } from '../../utils/LiveReferenceValuePreview';
 import type { BodyPointerProps } from './BodyPointer.types';
 import './BodyPointer.css';
+import {
+    formatLiveReferenceValue,
+    useLiveReferenceValue
+} from "@features/workflow/components/request-editor/utils/useLiveReferenceValue.ts";
 
 export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, connection, currentMethod }: BodyPointerProps) {
   const [hovered, setHovered] = useState(false);
@@ -15,14 +22,38 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
   const [editorPos, setEditorPos] = useState<{ left: number; top: number } | null>(null);
   const confirm = useConfirm();
   const { t: tWorkflow } = useI18n('workflow');
+  // While a test run is paused, hovering is purely for inspecting the live
+  // value — editing/removing a reference mid-inspection isn't a supported
+  // action, so the edit/delete menu is suppressed entirely in that state.
+  const isPaused = useTestRun()?.isPaused ?? false;
   const parsed = useMemo(() => parseEnhancementArg(pointer), [pointer]);
   const color = parsed?.color || 'var(--color-text-disabled)';
-  const title = parsed
-    ? parsed.path
-      ? `${parsed.messageProperty}.$.${parsed.path}`
-      : `${parsed.messageProperty}.$`
-    : pointer;
+  const staticTitle = parsed ? formatParsedArgPath(parsed) : pointer;
   const canEdit = !!onEdit && !!connection && !!currentMethod;
+
+  // While paused and the referenced method has already run this test, show
+  // what it actually resolved to instead of just the structural path — see
+  // useLiveReferenceValue.ts. Resolution only fires once the chip is
+  // actually hovered (`enabled: hovered` below), so opening a node with many
+  // reference chips doesn't fire a request per chip. The rectangle itself
+  // never changes appearance — the loading/resolved state only ever shows in
+  // the hover tooltip, kept separate from the edit/delete menu below.
+  const { value: liveValue, hasValue: hasLiveValue, isLoading: isLiveValueLoading } = useLiveReferenceValue(
+    parsed,
+    connection,
+    currentMethod,
+    hovered,
+  );
+  const liveValueText = hasLiveValue ? formatLiveReferenceValue(liveValue) : null;
+  const tooltipContent = (
+    <LiveReferenceValuePreview
+      label={staticTitle}
+      isLoading={isLiveValueLoading}
+      hasValue={hasLiveValue}
+      rawValue={liveValue}
+      formattedValue={liveValueText}
+    />
+  );
 
   useEffect(() => {
     if (!editorPos) return;
@@ -66,7 +97,6 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
 
   return (
     <div
-      title={title}
       onClick={onClick}
       onMouseEnter={showMenu}
       onMouseLeave={() => setHovered(false)}
@@ -76,11 +106,17 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
         margin: '7px 2px',
         width: 20,
         height: 10,
-        background: color,
         cursor: 'pointer',
       }}
     >
-      {hovered ? (
+      {isPaused ? (
+        <Tooltip content={tooltipContent} maxWidth={320}>
+          <div style={{ width: 20, height: 10, background: color }} />
+        </Tooltip>
+      ) : (
+        <div style={{ width: 20, height: 10, background: color }} />
+      )}
+      {hovered && !isPaused ? (
         <div className={`bodyPointerMenu ${menuBelow ? 'bodyPointerMenu--below' : ''}`}>
           <div className='bodyPointerMenuList'>
             {canEdit && (

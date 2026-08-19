@@ -1,5 +1,5 @@
 import { useMethodContext } from '../../../../providers/MethodContext';
-import { LegacyRequestJsonEditor } from '../../shared/LegacyRequestJsonEditor';
+import { LegacyRequestJsonEditor } from '../../shared/LegacyRequestJsonEditor/LegacyRequestJsonEditor';
 import { XmlBodyEditor } from '../XmlBodyEditor/XmlBodyEditor';
 import { GraphQlBodyEditor } from '../graphql/GraphQlBodyEditor';
 import type { BodyEditorProps } from './BodyEditor.types';

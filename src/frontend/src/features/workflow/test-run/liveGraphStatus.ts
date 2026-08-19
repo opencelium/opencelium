@@ -25,15 +25,65 @@ export type LiveGraphNodeStatus = {
 	// attribution in reduceLiveGraphStatus) — drives the canvas's red
 	// failure marking and pan-to-node reveal.
 	errorMessage?: string;
-	// Internal bookkeeping for the reset-on-new-invocation rule; not meant to
-	// be read by consumers.
+	// Internal bookkeeping for the reset-on-new-invocation rule.
 	iterationContext?: string;
+	// The loop's current iteration index (0-based, as a string — same format as
+	// LiveLogNode.loopIndex/ErrorLocation.loopIndex) — the last value seen for
+	// THIS loop's own position in an incoming line's comma-separated
+	// properties.loopIndex. Undefined until the loop has run at least once.
+	// Public: ResponseDialog reads this (for every LOOP ancestor of a node) to
+	// resolve which iteration a node inside a loop was last executed in, when
+	// looking up its live response while the run is paused.
 	lastIterationValue?: string;
 };
 
 export type LiveGraphStatus = Record<string, LiveGraphNodeStatus>;
 
 export const EMPTY_LIVE_GRAPH_STATUS: LiveGraphStatus = {};
+
+// For a node at `indexPath`, its current loop-iteration context — the
+// comma-separated CURRENT iteration index of every enclosing LOOP ancestor
+// (outermost first, from `loopAncestorsByIndexPath`), read from each
+// ancestor's `lastIterationValue`. Same shape as LiveLogNode.loopIndex /
+// ErrorLocation.loopIndex, so the result feeds directly into
+// resolveTraceTarget. Used to resolve which iteration's execution to look up
+// for a node nested inside one or more loops (see ResponseDialog) — a loop
+// that hasn't run yet (undefined lastIterationValue) contributes '0', the
+// only iteration that could possibly exist yet.
+export const resolveCurrentLoopIndex = (
+	indexPath: string,
+	loopAncestorsByIndexPath: Map<string, string[]>,
+	liveGraphStatus: LiveGraphStatus,
+): string =>
+	(loopAncestorsByIndexPath.get(indexPath) ?? [])
+		.map((loopPath) => liveGraphStatus[loopPath]?.lastIterationValue ?? '0')
+		.join(',');
+
+// For a node at `indexPath`, a lookup from an iterator NAME — as it appears
+// inside a reference path's `[name]` segment, e.g. "[i]" — to that ancestor
+// loop's current 0-based iteration index. Built from the same ancestor loops
+// resolveCurrentLoopIndex reads above, matched by each loop's own `iterator`
+// name (the live socket line's properties.iterator — the same name
+// getIteratorsForIndex in requestReferenceOptions.ts uses to build reference
+// paths in the first place, so this can never disagree with what a saved
+// reference actually means). Used by readLiveValueAtPath to resolve which
+// element of an array a `[<iterator>]` reference segment currently points
+// at. Returns null for a name that isn't any ancestor's iterator, rather
+// than guessing — the caller then bails instead of reading the wrong element.
+export const buildIteratorIndexResolver = (
+	indexPath: string,
+	loopAncestorsByIndexPath: Map<string, string[]>,
+	liveGraphStatus: LiveGraphStatus,
+): ((iteratorName: string) => number | null) => {
+	const byName = new Map<string, number>();
+	for (const loopPath of loopAncestorsByIndexPath.get(indexPath) ?? []) {
+		const status = liveGraphStatus[loopPath];
+		if (status?.iterator && status.lastIterationValue !== undefined) {
+			byName.set(status.iterator, Number(status.lastIterationValue));
+		}
+	}
+	return (iteratorName) => byName.get(iteratorName) ?? null;
+};
 
 // For every node, the indexPaths of its enclosing LOOP ancestors, outermost
 // first — positionally aligned with a socket line's comma-separated

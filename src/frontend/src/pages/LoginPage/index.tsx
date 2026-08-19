@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '@shared/lib/storeHooks'
 import { selectIntentionalLogout } from '@entities/auth/model/authSelectors'
 import { authActions } from '@entities/auth/model/authSlice'
 import { isRegisteredPath } from '@app/router/isRegisteredPath'
+import { AppFooter } from '@shared/ui/layout/AppFooter'
 
 export default function LoginPage() {
     const { isAuthenticated } = useAuth()
@@ -34,28 +35,37 @@ export default function LoginPage() {
         <div
             style={{
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                flexDirection: 'column',
                 minHeight: '100vh',
-                padding: 16,
                 background: 'var(--color-background-app)',
             }}
         >
             <div
                 style={{
+                    flex: 1,
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 24,
+                    justifyContent: 'center',
+                    padding: 16,
                 }}
             >
-                <img
-                    src={logoImage}
-                    alt="OpenCelium"
-                    style={{ height: 56, width: 'auto' }}
-                />
-                <LoginForm />
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 24,
+                    }}
+                >
+                    <img
+                        src={logoImage}
+                        alt="OpenCelium"
+                        style={{ height: 56, width: 'auto' }}
+                    />
+                    <LoginForm />
+                </div>
             </div>
+            <AppFooter hasBorder={false} />
         </div>
     )
 }

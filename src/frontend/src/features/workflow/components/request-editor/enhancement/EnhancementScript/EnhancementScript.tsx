@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import { DebounceDelay } from '../../../../constants/constants';
 import CustomAceEditor from '../../../custom_ace_editor/CustomAceEditor';
 import { useTheme } from '@shared/theme/hooks/useTheme';
 import type { EnhancementScriptProps } from './EnhancementScript.types';
+import { useEnhancementScriptValue } from './useEnhancementScriptValue';
 
 const modeMap = {
     'js': 'javascript',
@@ -12,44 +11,20 @@ const modeMap = {
 }
 const EnhancementScript = ({ enhancement, onChangeScript, readOnly }: EnhancementScriptProps) => {
     const { themeMode } = useTheme();
-    const [markers, setMarkers] = useState<any[]>([]);
-    const scriptRef: any = useRef(null);
-    const [localScript, setLocalScript] = useState(enhancement.script);
-
-    useEffect(() => {
-        setLocalScript(enhancement.script);
-    }, [enhancement.script]);
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (localScript !== enhancement.script) {
-                onChangeScript(localScript);
-            }
-        }, DebounceDelay);
-
-        return () => clearTimeout(timeout);
-    }, [localScript]);
-    useEffect(() => {
-        /*const newMarkers = getMarker(
-            scriptRef.current?.editor,
-            enhancement.script,
-            scriptRef.generateNotExistVar()
-        );
-        setMarkers(newMarkers);*/
-    }, [enhancement.script]);
+    const [localScript, setLocalScript] = useEnhancementScriptValue(
+        enhancement.script, onChangeScript,
+    );
     return (
         <CustomAceEditor
             hasDiffLang
             // maxLength={Validation.TextLength.Long}
             maxLength={65535}
             counterStyles={{ bottom: '-2px' }}
-            ref={scriptRef}
             style={{
                 marginBottom: 0,
                 width: '100%',
                 height: '100%'
             }}
-            markers={markers}
             mode={modeMap[enhancement.language]}
             editorTheme={themeMode === 'dark' ? 'tomorrow_night' : 'tomorrow'}
             name='enhancement_code'

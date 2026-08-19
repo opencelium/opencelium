@@ -6,6 +6,13 @@ import { i18n } from '@shared/i18n/config/i18n.ts'
 import en from '@entities/invoker/i18n/en.json'
 import de from '@entities/invoker/i18n/de.json'
 import { resolveInvokerNames } from '@entities/invoker/command/resolvers/resolveInvokerNames'
+import {
+    isInvokerNameCharacterSetValid,
+    isInvokerNameDotPlacementValid,
+    isInvokerNameLengthValid,
+    normalizeInvokerName,
+    normalizeInvokerNameForComparison,
+} from '@entities/invoker/lib/invokerName'
 import type { Invoker } from '@entities/invoker/model/types'
 import { InvokerUploadButton } from '@entities/invoker/components/InvokerUploadButton'
 import { pickInvokerFile, uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
@@ -67,10 +74,17 @@ export const invokerDefinition: EntityDefinition = {
 
         mapToForm: (model: Invoker) => mapInvokerToForm(model),
 
-        mapToApi: ({ data }) => ({
-            name: data.name,
-            xml: buildInvokerXml(data as Record<string, unknown>),
-        }),
+        mapToApi: ({ data }) => {
+            const normalizedData = {
+                ...data,
+                name: normalizeInvokerName(data.name),
+            }
+
+            return {
+                name: normalizedData.name,
+                xml: buildInvokerXml(normalizedData as Record<string, unknown>),
+            }
+        },
     },
 
     /* ===============================
@@ -90,11 +104,26 @@ export const invokerDefinition: EntityDefinition = {
             },
             validation: {
                 required: true,
-                max: 255,
+                custom: [
+                    {
+                        validate: isInvokerNameCharacterSetValid,
+                        message: `${baseKey}.fields.name.errors.invalid_characters`,
+                    },
+                    {
+                        validate: isInvokerNameDotPlacementValid,
+                        message: `${baseKey}.fields.name.errors.invalid_period`,
+                    },
+                    {
+                        validate: isInvokerNameLengthValid,
+                        message: `${baseKey}.fields.name.errors.max_length`,
+                    },
+                ],
                 remote: {
                     url: `/invoker/exists/:name`,
                     method: 'GET',
-                    map: (fieldValue) => ({ name: fieldValue }),
+                    map: (fieldValue) => ({
+                        name: normalizeInvokerNameForComparison(fieldValue),
+                    }),
                     transKey: `${baseKey}.fields.name.errors.name_already_exists`,
                     encodeParams: false,
                     handleResponse: (data, error) => {

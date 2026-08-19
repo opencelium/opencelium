@@ -87,6 +87,9 @@
       "message": "Are you sure you want to sign out?"
     }
   },
+  "footer": {
+    "copyright": "© Copyright {{year}} <1>becon GmbH</1> | version {{version}}"
+  },
   "topbar": {
     "switchToGerman": "Switch to German",
     "switchToEnglish": "Switch to English",
@@ -95,7 +98,8 @@
     "switchToMainMenu": "Switch to main menu (Alt+M)",
     "profile": "Profile",
     "createWorkflow": "Create Workflow",
-    "createWorkflowHint": "Create Workflow (Alt+W)"
+    "createWorkflowHint": "Create Workflow (Alt+W)",
+    "docs": "Documentation"
   },
   "user": {
     "unknown": "Unknown User"

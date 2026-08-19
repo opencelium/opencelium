@@ -4,6 +4,18 @@ export type ResponseType = 'body' | 'header' | 'status';
 
 export type ReferenceOption = { label: string; value: string };
 
+// Reverse a reference's color back to the method it points at. Case-
+// insensitive and '#'-stripped on both sides since the two reference parsers
+// in this codebase (parseEnhancementArg.ts vs body-editor/bodyReference.ts)
+// disagree on whether the leading '#' is part of the captured color.
+export const findMethodByColor = (
+  methods: MethodWithId[],
+  color: string,
+): MethodWithId | undefined => {
+  const normalized = color.replace(/^#/, '').toLowerCase();
+  return methods.find((method) => method.color?.replace(/^#/, '').toLowerCase() === normalized);
+};
+
 export const getMethodConnectorTitle = (method: MethodWithId) =>
   method.connector?.title ?? 'HTTP Request';
 
@@ -271,3 +283,42 @@ export const getIteratorsForMethod = (
   connection: Connection,
   method: MethodWithId | undefined,
 ): string[] => getIteratorsForIndex(connection, method?.index);
+
+// Walks `path` against an ACTUAL captured value (a real, already-parsed JSON
+// response — not the static sample response the picker/exactReadAtPath peek
+// at) to extract the exact value a reference resolves to while debugging a
+// paused test run (see useLiveReferenceValue.ts). Same path grammar as
+// exactReadAtPath, but different bracket semantics: that function always
+// takes element 0 (correct for shape-discovery — it only needs to know what
+// fields exist further down), whereas this one is producing a real value a
+// user will read, so `[*]` must return the WHOLE array and `[<iteratorName>]`
+// must return the element at that iterator's CURRENT iteration index, not
+// always the first one. `resolveIteratorIndex` maps an iterator name (as it
+// appears inside the path) to its current 0-based index, or null if the name
+// isn't a real, currently-known iterator (in which case the lookup bails
+// rather than guessing element 0).
+export const readLiveValueAtPath = (
+  source: unknown,
+  path: string,
+  resolveIteratorIndex: (iteratorName: string) => number | null,
+): unknown => {
+  if (!path) return source;
+  const parts = normalizePath(path).match(PATH_RE) || [];
+  let current: unknown = source;
+  for (const part of parts) {
+    if (isArrayPathPart(part)) {
+      if (!Array.isArray(current)) return undefined;
+      if (part === '[*]') continue;
+      const index = part === '[0]' ? 0 : resolveIteratorIndex(getArrayAccessIterator(part));
+      if (index === null || index === undefined) return undefined;
+      current = current[index];
+      continue;
+    }
+    if (isRecord(current)) {
+      current = current[unquotePathPart(part)];
+      continue;
+    }
+    return undefined;
+  }
+  return current;
+};

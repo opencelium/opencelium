@@ -10,6 +10,7 @@ import {
 	EMPTY_LIVE_LOG_TREE,
 	failPendingNodes,
 	prefetchErrorTracePath,
+	prefetchPauseTracePath,
 	reduceLiveLog,
 	type ExecutionSocketLog,
 } from '@features/logs';
@@ -23,6 +24,7 @@ import {
 	type TestRunResult,
 } from './TestRunContext';
 import { clearActiveTestRun, getActiveTestRun, saveActiveTestRun } from './testRunStorage';
+import { handleExecutionLogFrame } from './executionLogFrame';
 import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC } from '../utils/workflowApiErrors';
 import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
 import {createId} from "@shared/lib/createId.ts";
@@ -126,9 +128,27 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	// was just applied, not last render's tree.
 	const logTreeRef = useRef(logTree);
 	const [liveGraphStatus, setLiveGraphStatus] = useState<LiveGraphStatus>(EMPTY_LIVE_GRAPH_STATUS);
+	// Mirrors `liveGraphStatus` synchronously — same reasoning as logTreeRef
+	// above. skipToNextIteration's predicate (see below) needs to read the
+	// just-applied value the instant applyLogToPresentation returns, not
+	// wait for React's next render.
+	const liveGraphStatusRef = useRef(liveGraphStatus);
+	const updateLiveGraphStatus = useCallback(
+		(next: LiveGraphStatus | ((current: LiveGraphStatus) => LiveGraphStatus)) => {
+			const resolved = typeof next === 'function' ? next(liveGraphStatusRef.current) : next;
+			liveGraphStatusRef.current = resolved;
+			setLiveGraphStatus(resolved);
+		},
+		[],
+	);
 	// The one element the paced playback is showing as executing right now —
 	// advanced by every applied PENDING line (see TestRunCurrentStep).
 	const [currentStep, setCurrentStep] = useState<TestRunCurrentStep | null>(null);
+	// Read from a ref inside pauseAnimation (a stable callback) so it always
+	// captures the step the animation is actually frozen on, not a stale one
+	// from whichever render created the callback.
+	const currentStepRef = useRef<TestRunCurrentStep | null>(currentStep);
+	currentStepRef.current = currentStep;
 	// Flips the current step's hasArrived after the dot's 0.5s edge travel.
 	const arrivalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	// Monotonic step counter — gives each transition a unique nonce so a stale
@@ -164,6 +184,23 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const [animationSpeed, setAnimationSpeedState] = useState(DEFAULT_ANIMATION_SPEED);
 	const animationSpeedRef = useRef(animationSpeed);
 	animationSpeedRef.current = animationSpeed;
+	// The replay debugger's pause (see TestRunContextValue.isPaused).
+	const [isPaused, setIsPausedState] = useState(false);
+	// Bumped once per pause so the logs panel reveals the paused-on node; also
+	// invalidates a stale in-flight prefetch (same reasoning as revealTokenRef
+	// below) — resuming, stopping, or starting a new run must never let a slow
+	// prefetch from an earlier pause bump pauseRevealNonce after the fact.
+	const [pauseRevealNonce, setPauseRevealNonce] = useState(0);
+	const pauseTokenRef = useRef(0);
+	// Called everywhere the playback queue's own pause flag gets reset out from
+	// under us (flush/clear — see playbackQueue.ts) so the provider's public
+	// isPaused mirrors it, and any pause-reveal prefetch still in flight from
+	// before this moment is invalidated. Zero deps — safe in any callback's
+	// dependency array.
+	const resetPauseState = useCallback(() => {
+		pauseTokenRef.current += 1;
+		setIsPausedState(false);
+	}, []);
 	// Whether a test for THIS connection is already running elsewhere (another tab
 	// or user) — the only thing that now blocks starting here. Our own run is
 	// excluded (see ownSchedulerIdRef).
@@ -226,7 +263,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			const nextTree = reduceLiveLog(logTreeRef.current, log);
 			logTreeRef.current = nextTree;
 			setLogTree(nextTree);
-			setLiveGraphStatus((current) => reduceLiveGraphStatus(current, log, loopAncestorsRef.current));
+			updateLiveGraphStatus((current) => reduceLiveGraphStatus(current, log, loopAncestorsRef.current));
 			// Execution is consecutive: every step line (operator PENDINGs and
 			// method COMPLETEs — methods never emit PENDING, see playbackStep.ts)
 			// IS the process departing toward that element. currentStepMetaRef
@@ -253,9 +290,9 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 					// animation-delay, which silently restarts (and so never fires)
 					// whenever the node re-renders mid-step.
 					if (isLiveAnimationRef.current) {
-						setCurrentStep({ indexPath: nextStep.indexPath, nonce, hasArrived: true });
+						setCurrentStep({ indexPath: nextStep.indexPath, loopIndex: nextStep.loopIndex, nonce, hasArrived: true });
 					} else {
-						setCurrentStep({ indexPath: nextStep.indexPath, nonce, hasArrived: false });
+						setCurrentStep({ indexPath: nextStep.indexPath, loopIndex: nextStep.loopIndex, nonce, hasArrived: false });
 						arrivalTimerRef.current = setTimeout(() => {
 							setCurrentStep((prev) => (prev && prev.nonce === nonce ? { ...prev, hasArrived: true } : prev));
 						}, BASE_DOT_TRAVEL_MS / animationSpeedRef.current);
@@ -306,7 +343,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 				}
 			}
 		},
-		[tEntities],
+		[tEntities, updateLiveGraphStatus],
 	);
 	const applyLogRef = useRef(applyLogToPresentation);
 	applyLogRef.current = applyLogToPresentation;
@@ -324,8 +361,8 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		setCurrentStep(null);
 		logTreeRef.current = failPendingNodes(logTreeRef.current);
 		setLogTree(logTreeRef.current);
-		setLiveGraphStatus(failPendingGraphStatus);
-	}, []);
+		updateLiveGraphStatus(failPendingGraphStatus);
+	}, [updateLiveGraphStatus]);
 	const finishPresentationRef = useRef(finishPresentation);
 	finishPresentationRef.current = finishPresentation;
 
@@ -338,7 +375,13 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			{
 				applyLog: (log, opts) => applyLogRef.current(log, opts),
 				onDrained: () => {
-					if (backendDoneRef.current) finishPresentationRef.current();
+					if (!backendDoneRef.current) return;
+					// A "jump to next iteration" skip that never finds another
+					// iteration (this was the loop's last one) drains all the way to
+					// the run's real end while still paused — nothing left to stay
+					// paused ON, so drop the flag here too, same as flush()/stopTest().
+					resetPauseState();
+					finishPresentationRef.current();
 				},
 				onQueueChange: setPlaybackPendingCount,
 			},
@@ -373,14 +416,18 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const finishRunImmediately = useCallback(() => {
 		finishBackend();
 		playbackRef.current?.clear();
+		resetPauseState();
 		finishPresentation();
-	}, [finishBackend, finishPresentation]);
+	}, [finishBackend, finishPresentation, resetPauseState]);
 
 	// Skip-to-live: apply everything still buffered right now. If the backend
 	// already finished, the queue's drain callback closes the presentation too.
+	// Jumping to live also drops any pause — flush() already un-pauses the
+	// queue itself, this just keeps the provider's own isPaused in sync.
 	const skipToLive = useCallback(() => {
+		resetPauseState();
 		playbackRef.current?.flush();
-	}, []);
+	}, [resetPauseState]);
 
 	// Toggles the live/animated preference. Switching to live mid-run flushes
 	// whatever the paced queue is still holding, so the two modes never fight
@@ -396,8 +443,72 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		// clearing an arrival timer for every buffered line.
 		isLiveAnimationRef.current = value;
 		setIsLiveAnimationState(value);
-		if (value) playbackRef.current?.flush();
+		if (value) {
+			resetPauseState();
+			playbackRef.current?.flush();
+		}
+	}, [resetPauseState]);
+
+	// Shared by pauseAnimation and stepForward below: warms the tree structure
+	// down to `step` (see prefetchPauseTracePath) and bumps pauseRevealNonce
+	// once that resolves, so the logs panel expands straight down to it with
+	// no per-level network wait. Deliberately never fetches the node's own
+	// request/response detail — that stays on-demand, fetched only when the
+	// user opens its row. Reused for stepForward since "the current node"
+	// changes with every step exactly like it does on the initial pause.
+	const revealPausedStep = useCallback((step: StepMeta) => {
+		const token = ++pauseTokenRef.current;
+		void prefetchPauseTracePath(logTreeRef.current, { indexPath: step.indexPath, loopIndex: step.loopIndex }).finally(() => {
+			if (pauseTokenRef.current !== token) return;
+			setPauseRevealNonce((n) => n + 1);
+		});
 	}, []);
+
+	// Freezes the paced playback exactly where it is (see PlaybackQueue.pause).
+	const pauseAnimation = useCallback(() => {
+		if (isLiveAnimationRef.current) return;
+		playbackRef.current?.pause();
+		setIsPausedState(true);
+		const step = currentStepRef.current;
+		if (!step) return;
+		revealPausedStep(step);
+	}, [revealPausedStep]);
+
+	const resumeAnimation = useCallback(() => {
+		resetPauseState();
+		playbackRef.current?.resume();
+	}, [resetPauseState]);
+
+	// Applies exactly the next buffered line, then stays paused (see
+	// PlaybackQueue.stepForward — itself a no-op while not paused or with
+	// nothing buffered). currentStepMetaRef, not currentStepRef: applyHead()
+	// (via applyLogToPresentation) updates currentStepMetaRef synchronously,
+	// but only *schedules* the currentStep state update — reading the state
+	// ref here would still see the step from BEFORE this call.
+	const stepForward = useCallback(() => {
+		playbackRef.current?.stepForward();
+		const step = currentStepMetaRef.current;
+		if (!step) return;
+		revealPausedStep(step);
+	}, [revealPausedStep]);
+
+	// The debugger's "jump to next iteration" (see PlaybackQueue.skipWhile):
+	// captures this loop's CURRENT iteration marker as the baseline, then
+	// fast-forwards until liveGraphStatus reports either a different one (a
+	// real transition, mirroring reduceLiveGraphStatus's own lastIterationValue
+	// bookkeeping) or the loop itself finishing (no next iteration to reach).
+	const skipToNextIteration = useCallback((indexPath: string) => {
+		const baselineIteration = liveGraphStatusRef.current[indexPath]?.lastIterationValue;
+		playbackRef.current?.skipWhile(() => {
+			const current = liveGraphStatusRef.current[indexPath];
+			if (!current) return false;
+			if (current.status === 'COMPLETE' || current.status === 'FAIL') return true;
+			return current.lastIterationValue !== undefined && current.lastIterationValue !== baselineIteration;
+		});
+		const step = currentStepMetaRef.current;
+		if (!step) return;
+		revealPausedStep(step);
+	}, [revealPausedStep]);
 
 	// Update the ref before the queue reschedules below, same reasoning as
 	// setLiveAnimation above — the reschedule reads animationSpeedRef
@@ -419,6 +530,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 				message.destroy(REVEAL_LOADING_MESSAGE_KEY);
 			}
 			revealTokenRef.current += 1;
+			pauseTokenRef.current += 1;
 		},
 		[],
 	);
@@ -434,11 +546,12 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		// The run died with the connection — drop the unplayed playback tail (it
 		// no longer reflects anything verifiable) and mark in-flight rows failed.
 		playbackRef.current?.clear();
+		resetPauseState();
 		currentStepMetaRef.current = null;
 		setCurrentStep(null);
 		logTreeRef.current = failPendingNodes(logTreeRef.current);
 		setLogTree(logTreeRef.current);
-		setLiveGraphStatus(failPendingGraphStatus);
+		updateLiveGraphStatus(failPendingGraphStatus);
 		settleResult({ kind: 'stopped' });
 		revealTokenRef.current += 1;
 	}
@@ -558,15 +671,8 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		if (unsubscribeRef.current) return;
 		const channelId = channelIdRef.current;
 		if (!channelId) return;
-		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) => {
-			try {
-
-				console.log('[socket]', JSON.parse(frame.body));
-				handleOrphanLog(JSON.parse(frame.body) as ExecutionSocketLog);
-			} catch (err) {
-				console.error('[test-run] failed to parse execution log', err);
-			}
-		});
+		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) =>
+			handleExecutionLogFrame(frame, handleOrphanLog));
 		unsubscribeRef.current = () => subscription.unsubscribe();
 	}, [isOrphaned, status, client, handleOrphanLog]);
 
@@ -626,11 +732,12 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		channelIdRef.current = channelId;
 		const startedAt = Date.now();
 		playbackRef.current?.clear();
+		resetPauseState();
 		backendDoneRef.current = false;
 		setIsBackendDone(false);
 		logTreeRef.current = EMPTY_LIVE_LOG_TREE;
 		setLogTree(EMPTY_LIVE_LOG_TREE);
-		setLiveGraphStatus(EMPTY_LIVE_GRAPH_STATUS);
+		updateLiveGraphStatus(EMPTY_LIVE_GRAPH_STATUS);
 		currentStepMetaRef.current = null;
 		setCurrentStep(null);
 		setResult(null);
@@ -651,14 +758,8 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		saveActiveTestRun({ channelId, schedulerId: null, startedAt });
 
 		// Subscribe before triggering the run so the first PENDING lines are not lost.
-		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) => {
-			try {
-				console.log('[socket]', JSON.parse(frame.body));
-				handleSocketLog(JSON.parse(frame.body) as ExecutionSocketLog);
-			} catch (err) {
-				console.error('[test-run] failed to parse execution log', err);
-			}
-		});
+		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) =>
+			handleExecutionLogFrame(frame, handleSocketLog));
 		unsubscribeRef.current = () => subscription.unsubscribe();
 
 		try {
@@ -681,7 +782,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			);
 			finishRunImmediately();
 		}
-	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRunImmediately, tEntities, onResolveStartError]);
+	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRunImmediately, tEntities, onResolveStartError, resetPauseState, updateLiveGraphStatus]);
 
 	const stopTest = useCallback(async () => {
 		if (phase !== 'running' && phase !== 'starting') return;
@@ -708,20 +809,21 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		message.info(tEntities('connection.test.terminated'));
 		settleResult({ kind: 'stopped' });
 		finishBackend(); // unsubscribes from the socket
+		resetPauseState();
 		// A stop also snaps the animation to the run's actual final state — the
 		// flush applies whatever was still buffered, and its drain callback
 		// (backend is done by now) closes the presentation.
 		playbackRef.current?.flush();
-	}, [phase, settleResult, finishBackend, tEntities]);
+	}, [phase, settleResult, finishBackend, tEntities, resetPauseState]);
 
 	const clearLogs = useCallback(() => {
 		if (phase !== 'idle') return;
 		logTreeRef.current = EMPTY_LIVE_LOG_TREE;
 		setLogTree(EMPTY_LIVE_LOG_TREE);
-		setLiveGraphStatus(EMPTY_LIVE_GRAPH_STATUS);
+		updateLiveGraphStatus(EMPTY_LIVE_GRAPH_STATUS);
 		setResult(null);
 		hasSettledResultRef.current = false;
-	}, [phase]);
+	}, [phase, updateLiveGraphStatus]);
 
 	// Leaving the page mid-test: confirm, then terminate the backend run before
 	// the navigation proceeds. Returns whether the navigation should continue.
@@ -778,6 +880,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			phase,
 			logTree,
 			liveGraphStatus,
+			loopAncestorsByIndexPath,
 			currentStep,
 			result,
 			isOrphaned,
@@ -788,6 +891,12 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			setLiveAnimation,
 			animationSpeed,
 			setAnimationSpeed,
+			isPaused,
+			pauseAnimation,
+			resumeAnimation,
+			stepForward,
+			skipToNextIteration,
+			pauseRevealNonce,
 			errorRevealNonce,
 			revealPending,
 			startTest,
@@ -795,7 +904,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			skipToLive,
 			clearLogs,
 		}),
-		[status, phase, logTree, liveGraphStatus, currentStep, result, isOrphaned, isOtherTestRunning, isBackendDone, isPlaybackBehind, isLiveAnimation, setLiveAnimation, animationSpeed, setAnimationSpeed, errorRevealNonce, revealPending, startTest, stopTest, skipToLive, clearLogs],
+		[status, phase, logTree, liveGraphStatus, loopAncestorsByIndexPath, currentStep, result, isOrphaned, isOtherTestRunning, isBackendDone, isPlaybackBehind, isLiveAnimation, setLiveAnimation, animationSpeed, setAnimationSpeed, isPaused, pauseAnimation, resumeAnimation, stepForward, skipToNextIteration, pauseRevealNonce, errorRevealNonce, revealPending, startTest, stopTest, skipToLive, clearLogs],
 	);
 
 	return <TestRunContext.Provider value={value}>{children}</TestRunContext.Provider>;

@@ -47,6 +47,18 @@ export class PlaybackQueue {
 	private queue: QueueItem[] = [];
 	private timer: ReturnType<typeof setTimeout> | null = null;
 	private lastApplyAt = 0;
+	// The debugger's pause: freezes dequeuing without dropping anything. New
+	// lines keep enqueueing (the backend runs to completion regardless) — they
+	// just pile up until resume() lets the queue drain again.
+	private paused = false;
+	// The debugger's "jump to next iteration": while set, buffered/incoming
+	// lines are applied immediately (each with full step choreography, like a
+	// repeated stepForward()) instead of sitting buffered or waiting on the
+	// timer pacing, until the caller's predicate reports true. Sacrifices
+	// flush()'s "only the last item needs choreography" optimization —
+	// acceptable here since a single iteration's worth of lines is never the
+	// huge backlog flush() was optimized for.
+	private skipShouldStop: (() => boolean) | null = null;
 
 	// Read fresh on every schedule() call rather than captured once, so a
 	// change takes effect on the very next scheduling decision.
@@ -59,16 +71,93 @@ export class PlaybackQueue {
 		return this.queue.length;
 	}
 
+	get isPaused(): boolean {
+		return this.paused;
+	}
+
+	get isSkipping(): boolean {
+		return this.skipShouldStop !== null;
+	}
+
 	enqueue(log: ExecutionSocketLog): void {
 		this.queue.push({ log, baseDelay: baseDelayOf(log) });
 		this.callbacks.onQueueChange?.(this.queue.length);
+		if (this.skipShouldStop) {
+			this.drainSkip();
+			return;
+		}
 		this.schedule();
+	}
+
+	// Freeze the queue exactly where it is — the in-flight arrival timer for
+	// whatever step was already dequeued (see TestRunProvider) is untouched and
+	// finishes on its own, so the pause lands on a cleanly "arrived" node rather
+	// than a half-travelled dot. schedule() itself is what actually observes
+	// the pause (see below), so a paused queue is inert until resume().
+	pause(): void {
+		this.paused = true;
+		this.cancelTimer();
+	}
+
+	resume(): void {
+		if (!this.paused) return;
+		this.paused = false;
+		this.skipShouldStop = null;
+		this.schedule();
+	}
+
+	// The debugger's "jump to next iteration": drains whatever's already
+	// buffered right now, applying each line in full (see the constructor
+	// comment); if the predicate never matches before the buffer empties,
+	// stays paused but in "skip mode" — see enqueue() — so the NEXT arriving
+	// line (the backend runs to completion regardless of pause) keeps getting
+	// checked until it matches. Only meaningful while paused, same reasoning
+	// as stepForward().
+	skipWhile(shouldStop: () => boolean): void {
+		if (!this.paused) return;
+		this.skipShouldStop = shouldStop;
+		this.drainSkip();
+	}
+
+	// Cancels a pending skip without resuming or dropping anything already
+	// buffered — e.g. the user manually steps/resumes/stops while a skip is
+	// still waiting on a line that hasn't arrived yet.
+	cancelSkip(): void {
+		this.skipShouldStop = null;
+	}
+
+	private drainSkip(): void {
+		while (this.skipShouldStop && this.queue.length > 0) {
+			const item = this.queue.shift();
+			if (!item) break;
+			this.lastApplyAt = Date.now();
+			this.callbacks.applyLog(item.log, { updateStep: true });
+			this.callbacks.onQueueChange?.(this.queue.length);
+			if (this.skipShouldStop()) this.skipShouldStop = null;
+		}
+		if (this.queue.length === 0) this.callbacks.onDrained();
+	}
+
+	// Applies exactly the next buffered line, then stays paused — the
+	// debugger's "step forward". Only meaningful while paused: schedule()
+	// already guards on `this.paused`, so applyHead()'s own call to it below
+	// stays a no-op and the timer never gets rearmed. A no-op if nothing is
+	// buffered yet (nothing to step into) or if not currently paused (the
+	// queue is already auto-advancing on its own timer; forcing an extra step
+	// on top of that would double-apply and desync the pacing).
+	stepForward(): void {
+		if (!this.paused || this.queue.length === 0) return;
+		this.applyHead();
 	}
 
 	// Skip-to-live: apply everything still buffered synchronously, then report
 	// the drain. Also the path a stop/terminate takes, so the graph lands on
-	// the exact state the run actually reached.
+	// the exact state the run actually reached. Jumping to live is a deliberate
+	// "stop watching the replay" override, so it also drops any pause — there
+	// is nothing left buffered to stay paused on.
 	flush(): void {
+		this.paused = false;
+		this.skipShouldStop = null;
 		this.cancelTimer();
 		while (this.queue.length > 0) {
 			const item = this.queue.shift();
@@ -83,8 +172,11 @@ export class PlaybackQueue {
 	}
 
 	// Drop everything buffered without applying it (socket died mid-run — the
-	// unplayed tail no longer reflects anything verifiable). No onDrained.
+	// unplayed tail no longer reflects anything verifiable, or a fresh run is
+	// starting). No onDrained.
 	clear(): void {
+		this.paused = false;
+		this.skipShouldStop = null;
 		this.cancelTimer();
 		this.queue = [];
 		this.callbacks.onQueueChange?.(0);
@@ -98,6 +190,8 @@ export class PlaybackQueue {
 	// The slider changed while a line was already mid-wait — cancel and
 	// reschedule from the same lastApplyAt so the new speed applies to the
 	// REMAINING wait immediately, rather than only from the next line onward.
+	// A no-op while paused: there is no armed timer to reschedule, and
+	// schedule() would refuse to arm one anyway.
 	rescheduleForSpeedChange(): void {
 		if (this.timer === null) return;
 		this.cancelTimer();
@@ -112,7 +206,7 @@ export class PlaybackQueue {
 	}
 
 	private schedule(): void {
-		if (this.timer !== null || this.queue.length === 0) return;
+		if (this.paused || this.timer !== null || this.queue.length === 0) return;
 		const scaledDelay = this.queue[0].baseDelay / this.getSpeed();
 		const dueIn = Math.max(0, this.lastApplyAt + scaledDelay - Date.now());
 		this.timer = setTimeout(() => {

@@ -498,6 +498,8 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				}
 				endpointArgs={endpointArgsState}
 				endpointArgsRef={endpointArgsRef}
+				connection={connection}
+				currentMethod={method}
 				divRef={endpointDivRef}
 				lastCaretRef={lastKnownCaretPosRef}
 				lastRawCaretRef={lastKnownRawCaretPosRef}
@@ -553,6 +555,8 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				readOnly={readOnly}
 				rows={queryParams}
 				endpointArgs={endpointArgsState}
+				connection={connection}
+				currentMethod={method}
 				onToggleEnabled={onToggleEnabled}
 				onChangeParam={onChangeParam}
 				onRemoveParamRow={removeParamRow}

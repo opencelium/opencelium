@@ -14,7 +14,10 @@ import {
     SwapHoriz,
     FilterAlt,
     PlayArrow,
+    Pause,
     Stop,
+    SkipNext,
+    FastForward,
     Search,
     List as ListIcon,
     Login,
@@ -39,12 +42,14 @@ import {
     Refresh,
     AltRoute,
     Webhook,
+    LinkOff,
     Bolt,
     Public,
     Merge,
     Lock,
     HelpOutline,
     Analytics,
+    MenuBook,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -59,7 +64,10 @@ const iconMap = {
     plus: PlusOne,
     settings: Settings,
     play: PlayArrow,
+    pause: Pause,
     stop: Stop,
+    'step-forward': SkipNext,
+    'skip-forward': FastForward,
     download: Download,
     upload: Upload,
     key: Key,
@@ -90,12 +98,14 @@ const iconMap = {
     refresh: Refresh,
     connector: AltRoute,
     webhook: Webhook,
+    unlink: LinkOff,
     flash: Bolt,
     'http-request': Public,
     aggregator: Merge,
     lock: Lock,
     help: HelpOutline,
     'report-analytics': Analytics,
+    docs: MenuBook,
 };
 
 export const MaterialIcon: IconComponent = ({

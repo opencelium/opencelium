@@ -16,8 +16,12 @@ export type IconName =
     | 'profile'
     | 'content-copy'
     | 'webhook'
+    | 'unlink'
     | 'play'
+    | 'pause'
     | 'stop'
+    | 'step-forward'
+    | 'skip-forward'
     | 'download'
     | 'upload'
     | 'key'
@@ -52,6 +56,7 @@ export type IconName =
     | 'lock'
     | 'help'
     | 'report-analytics'
+    | 'docs'
 
 export type IconColor =
     | 'default'

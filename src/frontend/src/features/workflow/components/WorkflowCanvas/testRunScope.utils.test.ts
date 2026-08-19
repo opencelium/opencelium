@@ -62,7 +62,7 @@ describe('getTestRunScope', () => {
 			'1_0_0': { status: 'PENDING' },
 		};
 		const scope = getTestRunScope(nodes, edges, liveGraphStatus, { indexPath: '1_0_0', nonce: 2, hasArrived: true });
-		expect(scope.iterationByNodeId.get('loop-outer')).toEqual({ iterator: 'i', count: 3 });
+		expect(scope.iterationByNodeId.get('loop-outer')).toEqual({ iterator: 'i', count: 3, indexPath: '1' });
 	});
 
 	it('highlights the taken branch on every if the current step is on or nested inside', () => {
@@ -125,7 +125,7 @@ describe('getTestRunScope', () => {
 		};
 		const scope = getTestRunScope(nodes, edges, liveGraphStatus, { indexPath: '1', nonce: 1, hasArrived: true });
 		expect([...scope.activeNodeIds]).toEqual(['loop-outer']);
-		expect(scope.iterationByNodeId.get('loop-outer')).toEqual({ iterator: 'i', count: 1 });
+		expect(scope.iterationByNodeId.get('loop-outer')).toEqual({ iterator: 'i', count: 1, indexPath: '1' });
 	});
 
 	it('keeps the token on a completed step until the next one starts (no mid-run blink)', () => {
