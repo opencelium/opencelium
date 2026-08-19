@@ -1,4 +1,5 @@
 {
+  "title": "Error",
   "api": {
     "unauthorized": "Your session has expired. Please log in again.",
     "forbidden": "Your session is expired",

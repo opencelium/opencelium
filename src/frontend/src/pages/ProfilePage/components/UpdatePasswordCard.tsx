@@ -13,6 +13,7 @@ import { hasComponentPermission } from '@/engine/policy'
 import { useChangePasswordMutation } from '@entities/user/api/userApi'
 import { useChangePasswordForm } from '@pages/ProfilePage/hooks/useChangePasswordForm'
 import type { ChangePasswordValues } from '@pages/ProfilePage/schemas/changePassword.schema'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 export function UpdatePasswordCard() {
     const { t } = useI18n('entities')
@@ -39,7 +40,7 @@ export function UpdatePasswordCard() {
                     })
                     return
                 }
-                message.error(apiMessage ?? 'Unknown error')
+                notifyError(apiMessage ?? 'Unknown error')
                 return
             }
             message.success(t('profile.messages.passwordUpdated'))

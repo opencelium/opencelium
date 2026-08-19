@@ -8,6 +8,7 @@ import {
 	uploadConnectionTemplate,
 } from '@entities/connectionTemplate/lib/uploadConnectionTemplate';
 import type { WorkflowTemplate } from '../types/workflowTemplate.types';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 export const useLoadConnectionTemplate = () => {
 	const confirm = useConfirm();
@@ -36,7 +37,7 @@ export const useLoadConnectionTemplate = () => {
 		try {
 			await fetchTemplates();
 		} catch {
-			message.error(t('messages.loadTemplatesFailed'));
+			notifyError(t('messages.loadTemplatesFailed'));
 		} finally {
 			setIsLoading(false);
 		}
@@ -59,7 +60,7 @@ export const useLoadConnectionTemplate = () => {
 			}
 		} catch (error) {
 			console.error(error);
-			message.error(tEntities('connection-template.list.upload.error'));
+			notifyError(tEntities('connection-template.list.upload.error'));
 		} finally {
 			setIsUploading(false);
 		}

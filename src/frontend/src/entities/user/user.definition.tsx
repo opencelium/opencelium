@@ -15,6 +15,7 @@ import {TotpToggle} from "@entities/user/ui/TotpToggle.tsx";
 import {apiExecutor} from "@shared/api/apiExecutor.ts";
 import {message} from "antd";
 import {selectAuthUser} from "@entities/auth/model/authSelectors.ts";
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 const baseKey = 'user';
 
 const resolveUserId = (value: string): string => {
@@ -139,9 +140,7 @@ export const userDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.name.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             }
         },
         {
@@ -164,9 +163,7 @@ export const userDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.surname.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             }
         },
         {
@@ -262,9 +259,7 @@ export const userDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.email.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },/*
             access: {
                 strategy: 'disable',
@@ -350,9 +345,7 @@ export const userDefinition: EntityDefinition = {
                     }
                     return undefined;
                 },
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {

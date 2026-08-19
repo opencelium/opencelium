@@ -6,11 +6,11 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { HistoryVersionItem } from '../types/history.types';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { loadConnectionVersions, saveWorkflowConnection } from '../api/connectionService';
-import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC } from '../utils/workflowApiErrors';
 import { buildWorkflowChangeSnapshot, EMPTY_NAME_LABEL,
 	toDisplayDescription, toPayloadDescription } from '../utils/workflowPage.utils';
 import type { WorkflowChangeSource } from './useWorkflowChangeTracking';
 import { useDirectReferenceOptimization } from './useDirectReferenceOptimization';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 type SaveParams = {
 	title: string;
@@ -54,7 +54,7 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 	return useCallback(async ({ title, description, comment,
 		categoryId: categoryOverride }: SaveParams) => {
 		if (!title.trim() || title.trim() === EMPTY_NAME_LABEL) {
-			message.error(t('messages.enterWorkflowName'));
+			notifyError(t('messages.enterWorkflowName'));
 			throw new Error('Connection name is required');
 		}
 		clearNodeErrors();
@@ -71,10 +71,9 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 				categoryId: nextCategoryId });
 		} catch (error) {
 			const specificMessage = resolveError(error);
-			message.error(specificMessage ?? tEntities(isCreate
+			notifyError(specificMessage ?? tEntities(isCreate
 				? 'connection.messages.saveFailed.create'
-				: 'connection.messages.saveFailed.update', { title }),
-			specificMessage ? RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC : undefined);
+				: 'connection.messages.saveFailed.update', { title }));
 			throw error;
 		}
 		const savedId = (response.data as any)?.connectionId;
