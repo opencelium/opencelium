@@ -1,4 +1,5 @@
 import { buildTestId } from '@shared/testing/testId';
+import { Icon } from '@shared/ui/primitives/Icon';
 import { ConnectorStatusDot } from '../../../connector-status/ConnectorStatusDot/ConnectorStatusDot';
 import type { SidebarListProps } from './SidebarList.types';
 
@@ -8,7 +9,7 @@ export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps)
 			{items.map((item) => (
 				<button
 					key={item.key}
-					className={`sidebarItem${item.imageUrl ? ' sidebarItemWithImage' : ''}${item.disabled ? ' sidebarItemMuted' : ''}`}
+					className={`sidebarItem${item.imageUrl || item.icon ? ' sidebarItemWithImage' : ''}${item.disabled ? ' sidebarItemMuted' : ''}`}
 					type='button'
 					disabled={item.disabled}
 					data-testid={buildTestId(testIdPrefix, 'item', item.key)}
@@ -32,6 +33,10 @@ export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps)
 					{item.imageUrl ? (
 						<div className='sidebarItemImage' aria-hidden='true'>
 							<img src={item.imageUrl} alt='' />
+						</div>
+					) : item.icon ? (
+						<div className='sidebarItemImage' aria-hidden='true'>
+							<Icon name={item.icon} size={28} isSubtle />
 						</div>
 					) : null}
 				</button>

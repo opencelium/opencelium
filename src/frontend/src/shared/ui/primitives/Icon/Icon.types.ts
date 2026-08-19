@@ -56,6 +56,7 @@ export type IconName =
     | 'help'
     | 'report-analytics'
     | 'docs'
+    | 'comment'
 
 export type IconColor =
     | 'default'

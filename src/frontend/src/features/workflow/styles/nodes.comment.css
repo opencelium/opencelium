@@ -1,0 +1,82 @@
+/* Free-text canvas annotation. Deliberately not shaped like a graph node (no
+   circle, no diamond, no handles) so it reads as a note rather than a step;
+   the sticky-note tint comes from the warning status tokens, which are
+   readable in both themes. */
+.commentNodeWrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+}
+
+.commentNode {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  /* The warning *foreground* amber, not the subtle border token: the note's own
+     pale fill and the canvas background sit at nearly the same luminance in the
+     light themes, so a low-contrast border would make the note edge disappear. */
+  border: 1px dashed var(--color-status-warning-fg);
+  border-radius: 10px;
+  background: var(--color-status-warning-bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.commentNodeSelected {
+  border-style: solid;
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 3px var(--color-action-primary-subtle);
+}
+
+.commentNodeHeader {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+
+.commentNodeText {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  resize: none;
+  overflow: auto;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--typography-font-family-body);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.commentNodeText::placeholder {
+  /* The disabled token is tuned for neutral surfaces and drops to ~1.6:1 on the
+     note's tinted fill (unreadable in dark mode) — a dimmed secondary keeps the
+     placeholder legible in both themes. */
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.commentNodeText:read-only {
+  cursor: default;
+}
+
+.commentNodeResizeHandle {
+  border-color: var(--color-action-primary);
+  background: var(--color-background-surface);
+}
+
+.commentNodeResizeLine {
+  border-color: transparent;
+}

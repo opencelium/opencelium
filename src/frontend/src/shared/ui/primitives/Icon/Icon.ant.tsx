@@ -34,6 +34,7 @@ import {
     LockOutlined,
     QuestionCircleOutlined,
     ReadOutlined,
+    MessageOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -100,6 +101,7 @@ const iconMap = {
     help: QuestionCircleOutlined,
     'report-analytics': TbReportAnalytics,
     docs: ReadOutlined,
+    comment: MessageOutlined,
 };
 
 export const AntIcon: IconComponent = ({

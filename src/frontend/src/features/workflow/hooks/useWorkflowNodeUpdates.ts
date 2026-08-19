@@ -35,6 +35,10 @@ export const useWorkflowNodeUpdates = (
 		} } : node));
 		closeAggregatorEditor();
 	},
+	onChangeCommentText: (nodeId: string, text: string) => setNodes((nodes) =>
+		nodes.map((node) => node.id === nodeId ? { ...node, data: {
+			...node.data, comment: { ...node.data.comment, text },
+		} } : node)),
 	onSetNodeError: (nodeId: string, errorMessage: string) => setNodes((nodes) =>
 		nodes.map((node) => node.id === nodeId ? { ...node, data: {
 			...node.data, hasError: true, errorMessage,

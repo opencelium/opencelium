@@ -4,6 +4,7 @@ import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
+import { createCommentNode } from '../utils/createCommentNode';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { UseWorkflowPageOptions } from '../drag-drop/workflowPage.types';
@@ -107,6 +108,13 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       triggerConnection?: WorkflowAction['triggerConnection'],
     ) => {
       if (!sidebarAction || !kind) return;
+      // A comment is an annotation, not a step: it gets no edge to the node
+      // whose "+" opened the sidebar, and never enters the executed graph.
+      if (kind === 'comment') {
+        setNodes([...nodes, createCommentNode(nodes, sidebarAction.sourceNodeId)]);
+        setSidebarAction(null);
+        return;
+      }
       const result = createNodeFromAction({ action: { ...sidebarAction, kind, methodName, connector, methodOperation, triggerConnection }, nodes, edges });
       setNodes(result.nodes);
       setEdges(result.edges);

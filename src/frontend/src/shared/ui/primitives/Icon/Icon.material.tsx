@@ -49,6 +49,7 @@ import {
     HelpOutline,
     Analytics,
     MenuBook,
+    StickyNote2,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -104,6 +105,7 @@ const iconMap = {
     help: HelpOutline,
     'report-analytics': Analytics,
     docs: MenuBook,
+    comment: StickyNote2,
 };
 
 export const MaterialIcon: IconComponent = ({

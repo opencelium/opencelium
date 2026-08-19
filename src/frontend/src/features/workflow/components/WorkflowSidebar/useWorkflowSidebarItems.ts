@@ -44,6 +44,7 @@ export function useWorkflowSidebarItems(params: Params) {
 		key: item.key,
 		title: t(item.titleKey),
 		text: t(item.textKey),
+		icon: item.icon,
 	}));
 	const translatedOperatorItems = operatorItems.map((item) => ({
 		key: item.key,

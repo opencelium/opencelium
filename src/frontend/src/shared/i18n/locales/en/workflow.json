@@ -206,7 +206,11 @@
       "description": "No connectors, operators, or methods match your search."
     },
     "methodItemText": "Invoker method",
-    "connectorMethodsFallback": "Methods from {{invoker}} invoker."
+    "connectorMethodsFallback": "Methods from {{invoker}} invoker.",
+    "addComment": {
+      "title": "Add Comment",
+      "description": "Leave a free-text note on the canvas for your team."
+    }
   },
   "headerMenu": {
     "assignCategory": "Assign Category",
@@ -268,6 +272,10 @@
     "editBody": "Edit Body",
     "showResponse": "Show Response",
     "newLabelPlaceholder": "New label"
+  },
+  "comment": {
+    "badge": "Comment",
+    "placeholder": "Write a note for your team…"
   },
   "aggregatorDialog": {
     "title": "Configure Aggregator",
