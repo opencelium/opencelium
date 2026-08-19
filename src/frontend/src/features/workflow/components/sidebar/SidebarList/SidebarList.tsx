@@ -1,7 +1,11 @@
+import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
 import { buildTestId } from '@shared/testing/testId';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { ConnectorStatusDot } from '../../../connector-status/ConnectorStatusDot/ConnectorStatusDot';
 import type { SidebarListProps } from './SidebarList.types';
+
+// Fits inside the 52px .sidebarItemImage slot.
+const CONNECTOR_ICON_SIZE = 48;
 
 export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps) {
 	return (
@@ -9,7 +13,7 @@ export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps)
 			{items.map((item) => (
 				<button
 					key={item.key}
-					className={`sidebarItem${item.imageUrl || item.icon ? ' sidebarItemWithImage' : ''}${item.disabled ? ' sidebarItemMuted' : ''}`}
+					className={`sidebarItem${item.artwork ? ' sidebarItemWithImage' : ''}${item.disabled ? ' sidebarItemMuted' : ''}`}
 					type='button'
 					disabled={item.disabled}
 					data-testid={buildTestId(testIdPrefix, 'item', item.key)}
@@ -30,13 +34,13 @@ export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps)
 							/>
 						</div>
 					) : null}
-					{item.imageUrl ? (
+					{item.artwork ? (
 						<div className='sidebarItemImage' aria-hidden='true'>
-							<img src={item.imageUrl} alt='' />
-						</div>
-					) : item.icon ? (
-						<div className='sidebarItemImage' aria-hidden='true'>
-							<Icon name={item.icon} size={28} isSubtle />
+							{item.artwork.kind === 'connector' ? (
+								<ConnectorIcon icon={item.artwork.icon} size={CONNECTOR_ICON_SIZE} isCircled />
+							) : (
+								<Icon name={item.artwork.name} size={28} isSubtle />
+							)}
 						</div>
 					) : null}
 				</button>

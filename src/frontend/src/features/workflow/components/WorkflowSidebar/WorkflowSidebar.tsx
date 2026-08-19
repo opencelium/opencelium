@@ -3,8 +3,8 @@ import { TriggerConnectionScheduleDialog } from '../sidebar/TriggerConnectionSch
 import { useTriggerConnectionStep } from '../sidebar/useTriggerConnectionStep';
 import { getMethodSidebarCopy, getSecondarySidebarCopy } from '../sidebar/sidebarSecondary';
 import { matchesSidebarTitle, normalizeSidebarQuery } from '../sidebar/sidebar.helpers';
-import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
-import { normalizeConnectorIcon, useWorkflowSidebarItems } from './useWorkflowSidebarItems';
+import { resolveConnectorIcon } from '@entities/connector/model/iconUrl';
+import { useWorkflowSidebarItems } from './useWorkflowSidebarItems';
 import { MainSidebarDrawer } from './MainSidebarDrawer/MainSidebarDrawer';
 import { SecondarySidebarDrawer } from './SecondarySidebarDrawer/SecondarySidebarDrawer';
 import { MethodSidebarDrawer } from './MethodSidebarDrawer/MethodSidebarDrawer';
@@ -51,7 +51,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
   const sourceNodeLabel = selectedNode?.data.kind === 'connector'
     ? selectedNode.data.subtitle || selectedNode.data.title
     : selectedNode?.data.title || selectedNode?.id || '';
-  const selectedConnectorIconUrl = resolveConnectorIconUrl(normalizeConnectorIcon(selectedConnector?.icon));
+  const selectedConnectorIcon = selectedConnector ? resolveConnectorIcon(selectedConnector) : null;
   const selection = useWorkflowSidebarSelection({ onSelect, resetSidebar,
     mainSearchMethodItems, methodOperations, selectedConnector });
 
@@ -104,7 +104,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         open={methodOpen}
         title={methodTitle}
         subtitle={methodSubtitle}
-        iconUrl={selectedConnectorIconUrl}
+        connectorIcon={selectedConnectorIcon}
         placeholder={methodPlaceholder}
         search={methodSearch}
         items={filteredMethodItems}
