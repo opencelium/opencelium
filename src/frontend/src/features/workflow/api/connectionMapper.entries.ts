@@ -57,7 +57,10 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 			title: hasConnector ? method?.connector?.title ?? 'Connector' : TITLES[kind],
 			subtitle: method?.label ?? method?.name ?? `Method ${index + 1}`,
 			labelEdited: Boolean(method?.label), kind, color: method?.color,
-			...(method?.jumpTo ? { jumpTo: String(method.jumpTo) } : {}),
+			// The backend renamed this property from `jumpTo` to `jump`; the old name
+			// is still read so connections saved before the rename keep their joints.
+			...(method?.jump ?? method?.jumpTo
+				? { jump: String(method.jump ?? method.jumpTo) } : {}),
 			...(hasConnector ? { connector: {
 				connectorId: method?.connector?.connectorId ?? -1,
 				title: method?.connector?.title ?? 'DEFAULT', icon: method?.connector?.icon ?? null,

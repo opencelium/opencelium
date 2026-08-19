@@ -3,8 +3,8 @@ import type { WorkflowNodeModel } from '../../types/workflow.types';
 import type { JointEdgeCache } from './prepareWorkflowElements.types';
 import { buildJointEdges } from './jointEdges';
 
-const node = (id: string, jumpTo?: string) =>
-	({ id, type: 'connector', position: { x: 0, y: 0 }, data: { title: id, kind: 'connector', ...(jumpTo ? { jumpTo } : {}) } } as unknown as WorkflowNodeModel);
+const node = (id: string, jump?: string) =>
+	({ id, type: 'connector', position: { x: 0, y: 0 }, data: { title: id, kind: 'connector', ...(jump ? { jump } : {}) } } as unknown as WorkflowNodeModel);
 
 describe('buildJointEdges', () => {
 	it('builds one edge per joint, wired right-to-left as a workflow edge', () => {

@@ -16,7 +16,7 @@ import { getWorkflowEdgeLabelPoint, getWorkflowEdgePath } from '../WorkflowEdge/
 const HIDE_DELAY_MS = 160;
 
 /**
- * A joint (`node.data.jumpTo`) rendered with the exact path geometry, gap and
+ * A joint (`node.data.jump`) rendered with the exact path geometry, gap and
  * arrow marker of every other workflow edge, distinguished only by colour, and
  * carrying a hover-revealed delete button at its midpoint.
  */
@@ -36,7 +36,7 @@ export function JointEdge(props: EdgeProps<WorkflowEdgeModel>) {
 	}, []);
 	useEffect(() => () => window.clearTimeout(hideTimerRef.current), []);
 
-	const { labelX, labelY } = getWorkflowEdgeLabelPoint(props, false);
+	const { labelX, labelY } = getWorkflowEdgeLabelPoint(props);
 	const sourceNodeId = data?.jointSourceNodeId;
 	const onRemoveJoint = data?.onRemoveJoint;
 	const canRemove = !!sourceNodeId && !!onRemoveJoint;
@@ -47,7 +47,7 @@ export function JointEdge(props: EdgeProps<WorkflowEdgeModel>) {
 
 			<BaseEdge
 				id={String(id)}
-				path={getWorkflowEdgePath(props, false)}
+				path={getWorkflowEdgePath(props)}
 				markerEnd='url(#workflow-arrow-joint)'
 				className='workflowEdgePath workflowEdgePathJoint'
 				// Inline, not only via the class: xyflow paints a selected edge with

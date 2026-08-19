@@ -170,12 +170,12 @@ export const pruneInvalidJoints = (
 ): { nodes: WorkflowNodeModel[]; removedSourceIds: string[] } => {
   const removedSourceIds: string[] = [];
   const nextNodes = nodes.map((node) => {
-    const targetId = node.data.jumpTo;
+    const targetId = node.data.jump;
     if (!targetId) return node;
     const verdicts = evaluateJointTargets(node.id, nodes, edges, fieldBindings);
     if (verdicts.get(targetId)?.valid) return node;
     removedSourceIds.push(node.id);
-    return { ...node, data: { ...node.data, jumpTo: undefined } };
+    return { ...node, data: { ...node.data, jump: undefined } };
   });
   return removedSourceIds.length > 0
     ? { nodes: nextNodes, removedSourceIds }

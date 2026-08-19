@@ -49,7 +49,7 @@ export const buildFromConnectorPayload = (
 		index,
 		colorByNodeId.get(node.id),
 		options?.includeInvoker,
-		node.data.jumpTo ? indexes.get(node.data.jumpTo) : undefined,
+		node.data.jump ? indexes.get(node.data.jump) : undefined,
 	)).sort(compareIndex);
 	const operatorEntries = nodes
 		.filter((node) => ['if', 'loop'].includes(nodeKind(node)))

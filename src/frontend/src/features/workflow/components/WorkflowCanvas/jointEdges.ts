@@ -4,7 +4,7 @@ import type { JointEdgeCache } from './prepareWorkflowElements.types';
 export const jointEdgeId = (sourceNodeId: string) => `joint-${sourceNodeId}`;
 
 /**
- * One edge per joint (`node.data.jumpTo`). These are render-only: they are never
+ * One edge per joint (`node.data.jump`). These are render-only: they are never
  * part of the graph's `edges` state, so they never reach the saved `ui` payload
  * and never take part in index building — the joint itself is persisted on the
  * method (see connectionPayload.methods.ts).
@@ -19,7 +19,7 @@ export const buildJointEdges = (
 ): WorkflowEdgeModel[] => {
 	const nodeIds = new Set(nodes.map((node) => node.id));
 	const edges = nodes.flatMap((node) => {
-		const targetId = node.data.jumpTo;
+		const targetId = node.data.jump;
 		if (!targetId || targetId === node.id || !nodeIds.has(targetId)) return [];
 		const id = jointEdgeId(node.id);
 		const sig = `${targetId}|${!!onRemoveJoint}`;

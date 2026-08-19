@@ -131,7 +131,7 @@ describe('evaluateJointTargets', () => {
 describe('pruneInvalidJoints', () => {
 	it('keeps a joint that still holds and returns the same array', () => {
 		const nodes = baseNodes.map((node) => node.id === 'm-in-loop'
-			? { ...node, data: { ...node.data, jumpTo: 'm-after-inner' } } as WorkflowNodeModel
+			? { ...node, data: { ...node.data, jump: 'm-after-inner' } } as WorkflowNodeModel
 			: node);
 		const result = pruneInvalidJoints(nodes, edges);
 		expect(result.removedSourceIds).toEqual([]);
@@ -140,25 +140,25 @@ describe('pruneInvalidJoints', () => {
 
 	it('keeps a joint that crosses an IF boundary inside one loop', () => {
 		const nodes = baseNodes.map((node) => node.id === 'm-in-loop'
-			? { ...node, data: { ...node.data, jumpTo: 'm-in-if-in-loop' } } as WorkflowNodeModel
+			? { ...node, data: { ...node.data, jump: 'm-in-if-in-loop' } } as WorkflowNodeModel
 			: node);
 		expect(pruneInvalidJoints(nodes, edges).removedSourceIds).toEqual([]);
 	});
 
 	it('drops a joint whose target left the source loop scope', () => {
 		const nodes = baseNodes.map((node) => node.id === 'm-in-loop'
-			? { ...node, data: { ...node.data, jumpTo: 'm-last' } } as WorkflowNodeModel
+			? { ...node, data: { ...node.data, jump: 'm-last' } } as WorkflowNodeModel
 			: node);
 		const result = pruneInvalidJoints(nodes, edges);
 		expect(result.removedSourceIds).toEqual(['m-in-loop']);
-		expect(result.nodes.find((node) => node.id === 'm-in-loop')?.data.jumpTo).toBeUndefined();
+		expect(result.nodes.find((node) => node.id === 'm-in-loop')?.data.jump).toBeUndefined();
 	});
 
 	it('drops a joint whose target no longer exists', () => {
 		const nodes = baseNodes
 			.filter((node) => node.id !== 'm-after-inner')
 			.map((node) => node.id === 'm-in-loop'
-				? { ...node, data: { ...node.data, jumpTo: 'm-after-inner' } } as WorkflowNodeModel
+				? { ...node, data: { ...node.data, jump: 'm-after-inner' } } as WorkflowNodeModel
 				: node);
 		expect(pruneInvalidJoints(nodes, edges).removedSourceIds).toEqual(['m-in-loop']);
 	});

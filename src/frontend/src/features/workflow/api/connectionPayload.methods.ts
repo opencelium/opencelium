@@ -25,7 +25,7 @@ export const buildMethodPayload = (
 	order: number,
 	resolvedColor?: string,
 	includeInvoker?: boolean,
-	resolvedJumpTo?: string,
+	resolvedJump?: string,
 ) => {
 	const config = node.data.methodConfig as any;
 	const endpointArgs = config?.endpointArgs ?? {};
@@ -51,7 +51,7 @@ export const buildMethodPayload = (
 			resolvedColor ?? (node.data as any).color,
 			ALL_COLORS[order % ALL_COLORS.length],
 		),
-		...(resolvedJumpTo ? { jumpTo: resolvedJumpTo } : {}),
+		...(resolvedJump ? { jump: resolvedJump } : {}),
 		connector: connectorData && includeInvoker
 			? { ...connectorData, invoker: connectorData.invokerName ?? null }
 			: connectorData,

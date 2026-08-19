@@ -77,10 +77,10 @@ export function mapConnectionToWorkflowState(
 	const jumpIndexToId = new Map<string, string>();
 	buildWorkflowIndexes(normalizedNodes, edges).forEach((index, id) => jumpIndexToId.set(index, id));
 	const nodesWithJumps = normalizedNodes.map((node) => {
-		const jump = node.data.jumpTo;
+		const jump = node.data.jump;
 		if (!jump) return node;
 		const targetId = jumpIndexToId.get(jump);
-		return { ...node, data: { ...node.data, jumpTo: targetId && targetId !== node.id ? targetId : undefined } };
+		return { ...node, data: { ...node.data, jump: targetId && targetId !== node.id ? targetId : undefined } };
 	});
 
 	return {

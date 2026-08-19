@@ -5,27 +5,27 @@ import { compareWorkflowIndexes } from './graph.referenceVisibility';
 /** Minimal edge shape shared by the saved UI edges and the synthetic joint edges. */
 export type ReferenceGraphEdge = { source?: string; target?: string };
 
-type JointCarrier = { id: string; jumpTo?: string };
+type JointCarrier = { id: string; jump?: string };
 
 /**
  * Joints as reference-graph edges. A joint's target inherits the source's
  * reference visibility, which is exactly what an extra `source -> target` edge
  * expresses for an upstream walk — chained joints therefore work for free.
  *
- * Only joints pointing at another method's id are emitted: the same `jumpTo`
+ * Only joints pointing at another method's id are emitted: the same `jump`
  * field carries a workflow index rather than a node id on payload-shaped
  * connections (see connectionPayload.methods.ts), and those must not be
  * mistaken for ids.
  */
 export const collectJointReferenceEdges = (carriers: JointCarrier[]): ReferenceGraphEdge[] => {
 	const ids = new Set(carriers.map((carrier) => carrier.id));
-	return carriers.flatMap(({ id, jumpTo }) => jumpTo && ids.has(jumpTo)
-		? [{ source: id, target: jumpTo }]
+	return carriers.flatMap(({ id, jump }) => jump && ids.has(jump)
+		? [{ source: id, target: jump }]
 		: []);
 };
 
 export const collectNodeJointReferenceEdges = (nodes: WorkflowNodeModel[]): ReferenceGraphEdge[] =>
-	collectJointReferenceEdges(nodes.map((node) => ({ id: node.id, jumpTo: node.data.jumpTo })));
+	collectJointReferenceEdges(nodes.map((node) => ({ id: node.id, jump: node.data.jump })));
 
 export const getUpstreamNodeIds = (consumerNodeId: string, edges: ReferenceGraphEdge[]) => {
 	const sourcesByTarget = new Map<string, string[]>();

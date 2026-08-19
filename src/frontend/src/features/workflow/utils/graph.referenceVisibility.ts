@@ -79,7 +79,7 @@ export const collectWorkflowJumpLinks = (
 	nodes: WorkflowNodeModel[],
 	indexes: Map<string, string>,
 ): WorkflowJumpLink[] => nodes.flatMap((node) => {
-	const targetId = node.data.jumpTo;
+	const targetId = node.data.jump;
 	if (!targetId) return [];
 	const from = indexes.get(node.id);
 	const to = indexes.get(targetId);

@@ -6,8 +6,8 @@ import {
 	getUpstreamNodeIds,
 } from './referenceMethodVisibility';
 
-const method = (id: string, index: string, jumpTo?: string) =>
-	({ id, index, name: id, color: `#00000${index}`, ...(jumpTo ? { jumpTo } : {}) } as MethodWithId);
+const method = (id: string, index: string, jump?: string) =>
+	({ id, index, name: id, color: `#00000${index}`, ...(jump ? { jump } : {}) } as MethodWithId);
 
 // start -> m0 -> loop -(bottom)-> m1 (inside the loop)
 //              loop -(right)-> m2 -> m3
@@ -46,9 +46,9 @@ describe('getEligibleReferenceMethods', () => {
 });
 
 describe('collectJointReferenceEdges', () => {
-	it('ignores a jumpTo that is not another method id (payload-shaped index)', () => {
-		expect(collectJointReferenceEdges([{ id: 'm1', jumpTo: '1_2' }, { id: 'm2' }])).toEqual([]);
-		expect(collectJointReferenceEdges([{ id: 'm1', jumpTo: 'm2' }, { id: 'm2' }]))
+	it('ignores a jump that is not another method id (payload-shaped index)', () => {
+		expect(collectJointReferenceEdges([{ id: 'm1', jump: '1_2' }, { id: 'm2' }])).toEqual([]);
+		expect(collectJointReferenceEdges([{ id: 'm1', jump: 'm2' }, { id: 'm2' }]))
 			.toEqual([{ source: 'm1', target: 'm2' }]);
 	});
 });

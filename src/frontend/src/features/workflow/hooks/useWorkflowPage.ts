@@ -121,14 +121,14 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onConfirmJoint: (targetNodeId: string) => {
       if (!jointSourceId || !jointVerdicts?.get(targetNodeId)?.valid) return;
       setNodes((current) => current.map((item) =>
-        item.id === jointSourceId ? { ...item, data: { ...item.data, jumpTo: targetNodeId } } : item,
+        item.id === jointSourceId ? { ...item, data: { ...item.data, jump: targetNodeId } } : item,
       ));
       setJointSourceId(null);
     },
     onCancelJoint: () => setJointSourceId(null),
     onRemoveJoint: (nodeId: string) => {
       setNodes((current) => current.map((item) =>
-        item.id === nodeId ? { ...item, data: { ...item.data, jumpTo: undefined } } : item,
+        item.id === nodeId ? { ...item, data: { ...item.data, jump: undefined } } : item,
       ));
     },
     onAddStep: (
