@@ -57,6 +57,10 @@ export type IconName =
     | 'report-analytics'
     | 'docs'
     | 'comment'
+    | 'undo'
+    | 'redo'
+    | 'if'
+    | 'loop'
 
 export type IconColor =
     | 'default'

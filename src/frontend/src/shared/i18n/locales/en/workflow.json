@@ -20,6 +20,8 @@
     "maximizeRequestData": "Maximize request data",
     "minimizeRequestData": "Minimize request data",
     "load": "Load",
+    "undo": "Undo",
+    "redo": "Redo",
     "createEnhancement": "Create enhancement",
     "deleteEnhancement": "Delete enhancement",
     "deleteReference": "Delete reference"
@@ -233,6 +235,59 @@
       "message": "Are you sure you want to remove this workflow's category assignment?"
     }
   },
+  "undoHistory": {
+    "title": "Change history",
+    "current": "Current",
+    "operator": {
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "nodeKind": {
+      "httpRequest": "HTTP Request",
+      "webhook": "Webhook",
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "section": {
+      "header": "Header",
+      "body": "Body"
+    },
+    "change": {
+      "initial": "Session start",
+      "nodeAdded": "Added {{name}}",
+      "nodesAdded": "Added {{count}} nodes",
+      "nodeRemoved": "Deleted {{name}}",
+      "nodesRemoved": "Deleted {{count}} nodes",
+      "nodeMoved": "Moved {{name}}",
+      "nodesMoved": "Moved {{count}} nodes",
+      "changedLabel": "Changed Label to {{label}}",
+      "methodConfig": "Edited request of {{name}}",
+      "methodUrl": "Edited URL of {{name}}",
+      "methodHeader": "Edited Header of {{name}}",
+      "methodBody": "Edited Body of {{name}}",
+      "referenceAdded": "Added {{section}} Reference in {{name}}",
+      "referenceRemoved": "Deleted {{section}} Reference in {{name}}",
+      "referenceEdited": "Edited {{section}} Reference in {{name}}",
+      "enhancement": "Edited {{section}} Enhancement of {{name}}",
+      "enhancementLanguage": "Updated Enhancement Language of {{name}}",
+      "enhancementDescription": "Updated Enhancement Description of {{name}}",
+      "enhancementRemoved": "Deleted Enhancement of {{name}}",
+      "conditionConfig": "Edited condition of {{name}}",
+      "aggregatorConfigured": "Configured Aggregator of {{name}}",
+      "aggregatorRemoved": "Deleted Aggregator of {{name}}",
+      "connectorConfig": "Changed connector of {{name}}",
+      "edgesChanged": "Changed connections",
+      "references": "Changed references",
+      "conditionAdded": "Added Condition in {{operator}}",
+      "conditionRemoved": "Deleted Condition in {{operator}}",
+      "conditionEdited": "Edited Condition in {{operator}}",
+      "groupAdded": "Added Group in {{operator}}",
+      "groupRemoved": "Deleted Group in {{operator}}",
+      "groupEdited": "Edited Group in {{operator}}",
+      "operatorEdited": "Edited {{operator}}",
+      "multiple": "Multiple changes"
+    }
+  },
   "shortcutsDialog": {
     "title": "Keyboard & mouse shortcuts",
     "groups": {
@@ -248,6 +303,8 @@
       "ctrl": "Ctrl",
       "esc": "Esc",
       "s": "S",
+      "z": "Z",
+      "shift": "Shift",
       "delete": "Delete"
     },
     "items": {
@@ -259,6 +316,8 @@
       "multiSelect": "Select multiple nodes",
       "deleteNode": "Delete the selected node",
       "save": "Save the workflow",
+      "undo": "Undo the last canvas change",
+      "redo": "Redo the change that was undone",
       "close": "Close the open menu, dialog, or panel"
     }
   },

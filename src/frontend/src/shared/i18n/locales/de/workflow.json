@@ -20,6 +20,8 @@
     "maximizeRequestData": "Anfragedaten maximieren",
     "minimizeRequestData": "Anfragedaten minimieren",
     "load": "Laden",
+    "undo": "Rückgängig",
+    "redo": "Wiederholen",
     "createEnhancement": "Enhancement erstellen",
     "deleteEnhancement": "Enhancement löschen",
     "deleteReference": "Referenz löschen"
@@ -233,6 +235,59 @@
       "message": "Möchten Sie die Kategoriezuweisung dieses Workflows wirklich entfernen?"
     }
   },
+  "undoHistory": {
+    "title": "Änderungsverlauf",
+    "current": "Aktuell",
+    "operator": {
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "nodeKind": {
+      "httpRequest": "HTTP-Request",
+      "webhook": "Webhook",
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "section": {
+      "header": "Header",
+      "body": "Body"
+    },
+    "change": {
+      "initial": "Sitzungsbeginn",
+      "nodeAdded": "{{name}} hinzugefügt",
+      "nodesAdded": "{{count}} Knoten hinzugefügt",
+      "nodeRemoved": "{{name}} gelöscht",
+      "nodesRemoved": "{{count}} Knoten gelöscht",
+      "nodeMoved": "{{name}} verschoben",
+      "nodesMoved": "{{count}} Knoten verschoben",
+      "changedLabel": "Label zu {{label}} geändert",
+      "methodConfig": "Anfrage von {{name}} bearbeitet",
+      "methodUrl": "URL von {{name}} bearbeitet",
+      "methodHeader": "Header von {{name}} bearbeitet",
+      "methodBody": "Body von {{name}} bearbeitet",
+      "referenceAdded": "{{section}}-Referenz in {{name}} hinzugefügt",
+      "referenceRemoved": "{{section}}-Referenz in {{name}} gelöscht",
+      "referenceEdited": "{{section}}-Referenz in {{name}} bearbeitet",
+      "enhancement": "{{section}}-Enhancement von {{name}} bearbeitet",
+      "enhancementLanguage": "Enhancement-Sprache von {{name}} aktualisiert",
+      "enhancementDescription": "Enhancement-Beschreibung von {{name}} aktualisiert",
+      "enhancementRemoved": "Enhancement von {{name}} gelöscht",
+      "conditionConfig": "Bedingung von {{name}} bearbeitet",
+      "aggregatorConfigured": "Aggregator von {{name}} konfiguriert",
+      "aggregatorRemoved": "Aggregator von {{name}} gelöscht",
+      "connectorConfig": "Konnektor von {{name}} geändert",
+      "edgesChanged": "Verbindungen geändert",
+      "references": "Referenzen geändert",
+      "conditionAdded": "Bedingung in {{operator}} hinzugefügt",
+      "conditionRemoved": "Bedingung in {{operator}} gelöscht",
+      "conditionEdited": "Bedingung in {{operator}} bearbeitet",
+      "groupAdded": "Gruppe in {{operator}} hinzugefügt",
+      "groupRemoved": "Gruppe in {{operator}} gelöscht",
+      "groupEdited": "Gruppe in {{operator}} bearbeitet",
+      "operatorEdited": "{{operator}} bearbeitet",
+      "multiple": "Mehrere Änderungen"
+    }
+  },
   "shortcutsDialog": {
     "title": "Tastatur- und Maus-Kurzbefehle",
     "groups": {
@@ -248,6 +303,8 @@
       "ctrl": "Strg",
       "esc": "Esc",
       "s": "S",
+      "z": "Z",
+      "shift": "Umschalt",
       "delete": "Entf"
     },
     "items": {
@@ -259,6 +316,8 @@
       "multiSelect": "Mehrere Knoten auswählen",
       "deleteNode": "Ausgewählten Knoten löschen",
       "save": "Workflow speichern",
+      "undo": "Letzte Änderung auf der Arbeitsfläche rückgängig machen",
+      "redo": "Rückgängig gemachte Änderung wiederherstellen",
       "close": "Geöffnetes Menü, Dialog oder Panel schließen"
     }
   },
