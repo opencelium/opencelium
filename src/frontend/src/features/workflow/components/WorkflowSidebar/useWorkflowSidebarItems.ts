@@ -49,7 +49,6 @@ export function useWorkflowSidebarItems(params: Params) {
 		key: item.key,
 		title: t(item.titleKey),
 		text: t(item.textKey),
-		artwork: item.icon ? { kind: 'icon' as const, name: item.icon } : undefined,
 	}));
 	const translatedOperatorItems = operatorItems.map((item) => ({
 		key: item.key,
@@ -67,7 +66,7 @@ export function useWorkflowSidebarItems(params: Params) {
 				key: String(connector.connectorId),
 				title: connector.title,
 				text: t('sidebar.connectorMethodsFallback', { invoker: invokerName ?? connector.title }),
-				artwork: { kind: 'connector' as const, icon: resolveConnectorIcon(connector,
+				connectorArtwork: { icon: resolveConnectorIcon(connector,
 					invokerName ? invokerIconsByName.get(invokerName.toLowerCase()) : null) },
 				status,
 				statusError: status === 'AUTH_FAILED' || status === 'DOWN' ? connector.lastTestError : undefined,
@@ -90,7 +89,7 @@ export function useWorkflowSidebarItems(params: Params) {
 			key: `${connector.connectorId}:${index}:${operation.name}`,
 			title: operation.name,
 			text: connector.title,
-			artwork: { kind: 'connector' as const, icon: resolveConnectorIcon(connector) },
+			connectorArtwork: { icon: resolveConnectorIcon(connector) },
 			connectorId: connector.connectorId,
 			connectorIcon: resolveConnectorIcon(connector),
 			operation,

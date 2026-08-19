@@ -1,6 +1,5 @@
 import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
 import { buildTestId } from '@shared/testing/testId';
-import { Icon } from '@shared/ui/primitives/Icon';
 import { ConnectorStatusDot } from '../../../connector-status/ConnectorStatusDot/ConnectorStatusDot';
 import type { SidebarListProps } from './SidebarList.types';
 
@@ -13,7 +12,7 @@ export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps)
 			{items.map((item) => (
 				<button
 					key={item.key}
-					className={`sidebarItem${item.artwork ? ' sidebarItemWithImage' : ''}${item.disabled ? ' sidebarItemMuted' : ''}`}
+					className={`sidebarItem${item.connectorArtwork ? ' sidebarItemWithImage' : ''}${item.disabled ? ' sidebarItemMuted' : ''}`}
 					type='button'
 					disabled={item.disabled}
 					data-testid={buildTestId(testIdPrefix, 'item', item.key)}
@@ -34,13 +33,10 @@ export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps)
 							/>
 						</div>
 					) : null}
-					{item.artwork ? (
+					{item.connectorArtwork ? (
 						<div className='sidebarItemImage' aria-hidden='true'>
-							{item.artwork.kind === 'connector' ? (
-								<ConnectorIcon icon={item.artwork.icon} size={CONNECTOR_ICON_SIZE} isCircled />
-							) : (
-								<Icon name={item.artwork.name} size={28} isSubtle />
-							)}
+							<ConnectorIcon icon={item.connectorArtwork.icon}
+								size={CONNECTOR_ICON_SIZE} isCircled />
 						</div>
 					) : null}
 				</button>

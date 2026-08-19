@@ -76,7 +76,6 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         onSelectConnector={sidebar.openConnector}
         onSelectOperator={selection.selectOperator}
         onSelectMethod={selection.selectSearchMethod}
-        onSelectTriggerConnection={sidebar.openTriggerConnection}
       />
 
       <SecondarySidebarDrawer

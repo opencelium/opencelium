@@ -1,11 +1,9 @@
-import type { IconName } from '@shared/ui/primitives/Icon/Icon.types';
 import type { WorkflowOperatorKind } from '../../types/workflow.types';
 
 export const sidebarItems: {
   key: string;
   titleKey: string;
   textKey: string;
-  icon?: IconName;
 }[] = [
   {
     key: 'connector',
@@ -23,10 +21,14 @@ export const sidebarItems: {
     textKey: 'sidebar.addHttpRequest.description',
   },
   {
+    key: 'trigger-connection',
+    titleKey: 'sidebar.triggerConnection.title',
+    textKey: 'sidebar.triggerConnection.description',
+  },
+  {
     key: 'comment',
     titleKey: 'sidebar.addComment.title',
     textKey: 'sidebar.addComment.description',
-    icon: 'comment',
   },
 ];
 
