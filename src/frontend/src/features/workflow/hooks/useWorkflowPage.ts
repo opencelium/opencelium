@@ -5,6 +5,7 @@ import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
 import { createCommentNode } from '../utils/createCommentNode';
+import { findAnchoredComment } from '../utils/commentAnchor';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { UseWorkflowPageOptions } from '../drag-drop/workflowPage.types';
@@ -108,10 +109,18 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       triggerConnection?: WorkflowAction['triggerConnection'],
     ) => {
       if (!sidebarAction || !kind) return;
-      // A comment is an annotation, not a step: it gets no edge to the node
-      // whose "+" opened the sidebar, and never enters the executed graph.
+      // A comment is an annotation, not a step: it belongs to the node whose "+"
+      // opened the sidebar, gets no edge, and never enters the executed graph.
+      // A node holds at most one note, so a second request reveals the existing
+      // one (which may just be minimized) instead of stacking another on top.
       if (kind === 'comment') {
-        setNodes([...nodes, createCommentNode(nodes, sidebarAction.sourceNodeId)]);
+        const existing = findAnchoredComment(nodes, sidebarAction.sourceNodeId);
+        if (existing) {
+          if (existing.data.comment?.collapsed) nodeUpdates.onToggleComment(existing.id);
+        } else {
+          const comment = createCommentNode(nodes, sidebarAction.sourceNodeId);
+          if (comment) setNodes([...nodes, comment]);
+        }
         setSidebarAction(null);
         return;
       }

@@ -275,7 +275,12 @@
   },
   "comment": {
     "badge": "Comment",
-    "placeholder": "Write a note for your team…"
+    "placeholder": "Write a note for your team…",
+    "toggle": {
+      "show": "Show comment",
+      "hide": "Hide comment",
+      "minimize": "Minimize comment"
+    }
   },
   "aggregatorDialog": {
     "title": "Configure Aggregator",

@@ -1,4 +1,5 @@
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
+import { getNodeComment, resolveCommentPosition } from '../../utils/commentAnchor';
 import type { PrepareWorkflowParams } from './prepareWorkflowElements.types';
 import { buildWorkflowTopology, computeLeafInfo, hasSameWorkflowTopology } from './workflowTopology';
 import { EMPTY_TEST_RUN_SCOPE } from './testRunScope.utils';
@@ -15,6 +16,7 @@ export function prepareWorkflowElements({
 	onDeleteNode,
 	onOpenAggregatorEditor,
 	onChangeCommentText,
+	onToggleComment,
 	cache,
 	testRunScope = EMPTY_TEST_RUN_SCOPE,
 	isEditLocked = false,
@@ -26,7 +28,25 @@ export function prepareWorkflowElements({
 		if (cache) cache.topology = topology;
 	}
 	const { onlyStartNode, methodInstanceById, highlightedBranch, leafById } = topology;
-	const preparedNodes: WorkflowNodeModel[] = nodes.map((node) => {
+	// A note's position is derived from its anchor's, and a minimized note is not
+	// rendered at all — so this is also the one place that drops nodes from the
+	// canvas instead of only mapping them.
+	const nodeById = new Map(nodes.map((node) => [node.id, node]));
+	const commentByAnchorId = new Map<string, WorkflowNodeModel>();
+	for (const node of nodes) {
+		const anchorNodeId = getNodeComment(node)?.anchorNodeId;
+		if (anchorNodeId && !commentByAnchorId.has(anchorNodeId)) commentByAnchorId.set(anchorNodeId, node);
+	}
+	const preparedNodes: WorkflowNodeModel[] = [];
+	for (const node of nodes) {
+		const comment = getNodeComment(node);
+		const anchor = comment ? nodeById.get(comment.anchorNodeId) : undefined;
+		if (comment && (!anchor || comment.collapsed)) continue;
+		const position = comment && anchor ? resolveCommentPosition(comment, anchor.position) : node.position;
+		const anchoredCommentNode = commentByAnchorId.get(node.id);
+		const anchoredComment = anchoredCommentNode
+			? { nodeId: anchoredCommentNode.id, collapsed: !!getNodeComment(anchoredCommentNode)?.collapsed }
+			: undefined;
 		const isPreviewNode = Boolean(node.data.dragGhost || node.data.dropPlaceholder);
 		const leaf = leafById.get(node.id) ?? computeLeafInfo(node, edges);
 
@@ -55,6 +75,7 @@ export function prepareWorkflowElements({
 			testRunActive, testRunIteration?.iterator, testRunIteration?.count,
 			testRunActiveBranch, testRunFailed, testRunFailedMessage,
 			testRunFailedVisible, isEditLocked,
+			position.x, position.y, anchoredComment?.nodeId, anchoredComment?.collapsed,
 		].join('|');
 
 		const cached = cache?.nodes.get(node.id);
@@ -67,16 +88,20 @@ export function prepareWorkflowElements({
 			&& cached.onDeleteNode === onDeleteNode
 			&& cached.onOpenAggregatorEditor === onOpenAggregatorEditor
 			&& cached.onChangeCommentText === onChangeCommentText
+			&& cached.onToggleComment === onToggleComment
 		) {
-			return cached.out;
+			preparedNodes.push(cached.out);
+			continue;
 		}
 
 		const out: WorkflowNodeModel = {
 			...node,
+			position,
 			selectable,
 			draggable,
 			data: {
 				...node.data,
+				anchoredComment,
 				isLeaf,
 				rightLeaf: nextRightLeaf,
 				bottomLeaf: nextBottomLeaf,
@@ -98,11 +123,12 @@ export function prepareWorkflowElements({
 				onDeleteNode: isEditLocked ? undefined : onDeleteNode,
 				onOpenAggregatorEditor: isEditLocked ? undefined : onOpenAggregatorEditor,
 				onChangeCommentText: isEditLocked ? undefined : onChangeCommentText,
+				onToggleComment: isEditLocked ? undefined : onToggleComment,
 			},
 		};
-		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onChangeCommentText, out });
-		return out;
-	});
+		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onChangeCommentText, onToggleComment, out });
+		preparedNodes.push(out);
+	}
 	const preparedEdges: WorkflowEdgeModel[] = edges.map((edge) => {
 		const highlighted = Boolean(edge.data?.highlighted) || highlightedBranch.edgeIds.has(edge.id);
 		const testRunActive = testRunScope.activeEdgeIds.has(edge.id);

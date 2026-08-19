@@ -80,3 +80,29 @@
 .commentNodeResizeLine {
   border-color: transparent;
 }
+
+/* Show/hide toggle on the node the note belongs to — the icon alone, no chip
+   behind it. Positioned against the outer .nodeWrap (96px) instead of the
+   .nodeBody (62px) so it sits diagonally off the node's top-right corner: the
+   duplicate-method colour badge hugs the body's corner and this clears it on
+   both axes, and the right-hand "+" add trigger sits lower, at the body's
+   vertical center. The padding is a hit area, not a visible box. */
+.nodeCommentBadge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  line-height: 0;
+  z-index: 7;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.commentNodeMinimize {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+}

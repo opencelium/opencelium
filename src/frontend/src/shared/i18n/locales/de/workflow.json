@@ -275,7 +275,12 @@
   },
   "comment": {
     "badge": "Kommentar",
-    "placeholder": "Notiz für Ihr Team schreiben…"
+    "placeholder": "Notiz für Ihr Team schreiben…",
+    "toggle": {
+      "show": "Kommentar anzeigen",
+      "hide": "Kommentar ausblenden",
+      "minimize": "Kommentar minimieren"
+    }
   },
   "aggregatorDialog": {
     "title": "Aggregator konfigurieren",

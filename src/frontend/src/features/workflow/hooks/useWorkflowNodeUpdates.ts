@@ -39,6 +39,14 @@ export const useWorkflowNodeUpdates = (
 		nodes.map((node) => node.id === nodeId ? { ...node, data: {
 			...node.data, comment: { ...node.data.comment, text },
 		} } : node)),
+	/** Minimize/restore the note. The selection is cleared on the way out so a
+	 * hidden note cannot be the target of the Delete shortcut. */
+	onToggleComment: (commentNodeId: string) => setNodes((nodes) =>
+		nodes.map((node) => node.id === commentNodeId && node.data.comment ? {
+			...node,
+			selected: false,
+			data: { ...node.data, comment: { ...node.data.comment, collapsed: !node.data.comment.collapsed } },
+		} : node)),
 	onSetNodeError: (nodeId: string, errorMessage: string) => setNodes((nodes) =>
 		nodes.map((node) => node.id === nodeId ? { ...node, data: {
 			...node.data, hasError: true, errorMessage,

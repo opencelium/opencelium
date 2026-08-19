@@ -8,7 +8,7 @@ export type PrepareWorkflowParams = Pick<
 	WorkflowCanvasProps,
 	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' |
 	'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor' |
-	'onChangeCommentText'
+	'onChangeCommentText' | 'onToggleComment'
 > & {
 	cache?: PrepareWorkflowCache;
 	testRunScope?: TestRunScope;
@@ -24,6 +24,7 @@ type NodeCacheEntry = {
 	onDeleteNode: PrepareWorkflowParams['onDeleteNode'];
 	onOpenAggregatorEditor: PrepareWorkflowParams['onOpenAggregatorEditor'];
 	onChangeCommentText: PrepareWorkflowParams['onChangeCommentText'];
+	onToggleComment: PrepareWorkflowParams['onToggleComment'];
 	out: WorkflowNodeModel;
 };
 

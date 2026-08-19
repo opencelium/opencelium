@@ -2,6 +2,8 @@ import type { ChangeEvent, MouseEvent } from 'react';
 import { NodeResizer, type NodeProps } from '@xyflow/react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Icon } from '@shared/ui/primitives/Icon';
+import { IconButton } from '@shared/ui/primitives/IconButton';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { NodeToolbar } from '../../components/node/NodeToolbar/NodeToolbar';
 import type { CommentWorkflowNode } from '../../types/workflow.types';
 import { COMMENT_NODE_MIN_SIZE } from '../../utils/graph.constants';
@@ -34,6 +36,19 @@ export function CommentNode({ id, data, selected }: NodeProps<CommentWorkflowNod
 				<div className='commentNodeHeader'>
 					<Icon name='comment' size={12} isSubtle />
 					<span>{t('comment.badge')}</span>
+					{data.onToggleComment && (
+						<span className='commentNodeMinimize nodrag nopan'>
+							<Tooltip content={t('comment.toggle.minimize')} placement='top'>
+								<IconButton
+									type='text'
+									size='xs'
+									iconProps={{ name: 'minimize', size: 12, isSubtle: true }}
+									testId={`workflow-comment-minimize-${id}`}
+									onClick={() => data.onToggleComment?.(id)}
+								/>
+							</Tooltip>
+						</span>
+					)}
 				</div>
 				{/* The textarea owns the pointer inside the node: `nodrag` keeps
 				    selecting text from turning into a node drag, `nowheel` keeps
