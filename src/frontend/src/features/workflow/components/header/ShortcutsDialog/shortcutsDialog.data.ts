@@ -22,6 +22,8 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
 		titleKey: 'shortcutsDialog.groups.general',
 		items: [
 			{ keys: ['ctrl', 's'], descKey: 'shortcutsDialog.items.save' },
+			{ keys: ['ctrl', 'z'], descKey: 'shortcutsDialog.items.undo' },
+			{ keys: ['ctrl', 'shift', 'z'], descKey: 'shortcutsDialog.items.redo' },
 			{ keys: ['esc'], descKey: 'shortcutsDialog.items.close' },
 		],
 	},

@@ -1,5 +1,5 @@
-import { message } from 'antd';
 import {i18n} from "@shared/i18n/config/i18n.ts";
+import {notifyError} from "@shared/ui/feedback/notifyError";
 
 type ErrorGroup = 'api';
 
@@ -22,7 +22,7 @@ export const showApiError = (error: ApiError) => {
                 transKey = `api.${transKey}`;
                 break;
             default:
-                message.error('Unknown error group');
+                notifyError('Unknown error group');
                 return;
         }
     }
@@ -35,8 +35,8 @@ export const showApiError = (error: ApiError) => {
             : undefined,
     }) : error.message;
     if (!translated) {
-        message.error(`Unknown error: ${JSON.stringify(error)}`, error.durationSec);
+        notifyError(`Unknown error: ${JSON.stringify(error)}`, error.durationSec);
     } else {
-        message.error(translated, error.durationSec);
+        notifyError(translated, error.durationSec);
     }
 };

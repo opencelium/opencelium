@@ -5,6 +5,8 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { WorkflowHeaderMenuItem } from '../../types/workflow.types';
 import { workflowCommandBridgeStore } from '../../command/workflowCommandBridge';
 import { HeaderMenu } from '../header/HeaderMenu/HeaderMenu';
+import { WorkflowUndoRedoControls } from './WorkflowUndoRedoControls';
+import type { WorkflowUndoRedoState } from './WorkflowHeader.types';
 
 type Props = {
 	items: WorkflowHeaderMenuItem[];
@@ -15,12 +17,13 @@ type Props = {
 	readOnly: boolean;
 	saveDisabled: boolean;
 	saveDialogOpen: boolean;
+	undoRedo?: WorkflowUndoRedoState;
 	schedulesSlot?: ReactNode;
 };
 
 export function WorkflowHeaderActions({
 	items, loadingItemId, onOpenHistory, onMenuItemSelect, onSave,
-	readOnly, saveDisabled, saveDialogOpen, schedulesSlot,
+	readOnly, saveDisabled, saveDialogOpen, undoRedo, schedulesSlot,
 }: Props) {
 	const { t } = useI18n('workflow');
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -37,6 +40,7 @@ export function WorkflowHeaderActions({
 					return true;
 				}}
 			/>
+			{!readOnly && undoRedo && <WorkflowUndoRedoControls {...undoRedo} />}
 			{schedulesSlot}
 			{!readOnly && (
 				<button className='primaryButton headerPrimaryButton' type='button'

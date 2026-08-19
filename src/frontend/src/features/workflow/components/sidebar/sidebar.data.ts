@@ -1,6 +1,10 @@
 import type { WorkflowOperatorKind } from '../../types/workflow.types';
 
-export const sidebarItems = [
+export const sidebarItems: {
+  key: string;
+  titleKey: string;
+  textKey: string;
+}[] = [
   {
     key: 'connector',
     titleKey: 'sidebar.useConnector.title',
@@ -17,11 +21,16 @@ export const sidebarItems = [
     textKey: 'sidebar.addHttpRequest.description',
   },
   {
-    key: 'joint',
-    titleKey: 'sidebar.addJoint.title',
-    textKey: 'sidebar.addJoint.description',
+    key: 'trigger-connection',
+    titleKey: 'sidebar.triggerConnection.title',
+    textKey: 'sidebar.triggerConnection.description',
   },
-] as const;
+  {
+    key: 'comment',
+    titleKey: 'sidebar.addComment.title',
+    textKey: 'sidebar.addComment.description',
+  },
+];
 
 export const operatorItems: {
   key: WorkflowOperatorKind;

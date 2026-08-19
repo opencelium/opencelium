@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
-import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { buildConnectionPayload, buildFromConnectorPayload } from '../api/connectionPayload';
 import { toPayloadDescription } from '../utils/workflowPage.utils';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 type Params = {
 	connectionId?: string;
@@ -24,7 +24,7 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 		const hasMethod = nodes.some((node) => node.type === 'connector' ||
 			node.type === 'system' || node.type === 'trigger-connection');
 		if (!hasMethod) {
-			message.error(t('connection.test.noMethods'));
+			notifyError(t('connection.test.noMethods'));
 			return null;
 		}
 		return {

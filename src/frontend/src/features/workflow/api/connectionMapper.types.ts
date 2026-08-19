@@ -15,6 +15,8 @@ export type SavedUiNode = {
 	name?: string;
 	type?: WorkflowNodeModel['type'];
 	position: { x: number; y: number };
+	width?: number;
+	height?: number;
 	data?: WorkflowNodeModel['data'];
 	draggable?: boolean;
 	deletable?: boolean;

@@ -24,14 +24,13 @@ import {
 	type TestRunResult,
 } from './TestRunContext';
 import { clearActiveTestRun, getActiveTestRun, saveActiveTestRun } from './testRunStorage';
-import { handleExecutionLogFrame } from './executionLogFrame';
-import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC } from '../utils/workflowApiErrors';
 import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
 import {createId} from "@shared/lib/createId.ts";
 import { EMPTY_LIVE_GRAPH_STATUS, failPendingGraphStatus, reduceLiveGraphStatus, type LiveGraphStatus } from './liveGraphStatus';
 import { PlaybackQueue, type ApplyLogOpts } from './playbackQueue';
 import { getNextStep, type StepMeta } from './playbackStep';
 import { BASE_DOT_TRAVEL_MS, DEFAULT_ANIMATION_SPEED, clampAnimationSpeed } from './animationSpeed';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 const TIMEOUT_TO_COLLECT_LOGS = 3000;
 
@@ -587,7 +586,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 				// still working its way through the queue — settleResult's return
 				// value is exactly "did THIS call win", so it can gate the toast
 				// directly without a separate before/after ref check.
-				if (settleResult({ kind: 'failed' })) message.error(tEntities('connection.test.failed'));
+				if (settleResult({ kind: 'failed' })) notifyError(tEntities('connection.test.failed'));
 			} else if (log.type === 'EXECUTION' && log.status === 'COMPLETE') {
 				const didFinish = settleResult({
 					kind: 'finished',
@@ -671,8 +670,13 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		if (unsubscribeRef.current) return;
 		const channelId = channelIdRef.current;
 		if (!channelId) return;
-		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) =>
-			handleExecutionLogFrame(frame, handleOrphanLog));
+		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) => {
+			try {
+				handleOrphanLog(JSON.parse(frame.body) as ExecutionSocketLog);
+			} catch (err) {
+				console.error('[test-run] failed to parse execution log', err);
+			}
+		});
 		unsubscribeRef.current = () => subscription.unsubscribe();
 	}, [isOrphaned, status, client, handleOrphanLog]);
 
@@ -722,7 +726,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		// Enforce the single-test-per-connection rule (the button is also disabled,
 		// this guards against a race where a test for this connection started moments ago).
 		if (isConflictingTestRunning) {
-			message.error(tEntities('connection.test.otherTestRunning'));
+			notifyError(tEntities('connection.test.otherTestRunning'));
 			return;
 		}
 		const payload = buildTestPayload();
@@ -758,8 +762,13 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		saveActiveTestRun({ channelId, schedulerId: null, startedAt });
 
 		// Subscribe before triggering the run so the first PENDING lines are not lost.
-		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) =>
-			handleExecutionLogFrame(frame, handleSocketLog));
+		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) => {
+			try {
+				handleSocketLog(JSON.parse(frame.body) as ExecutionSocketLog);
+			} catch (err) {
+				console.error('[test-run] failed to parse execution log', err);
+			}
+		});
 		unsubscribeRef.current = () => subscription.unsubscribe();
 
 		try {
@@ -776,10 +785,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		} catch (err) {
 			console.error(err);
 			const specificMessage = onResolveStartError?.(err);
-			message.error(
-				specificMessage ?? tEntities('connection.test.startFailed'),
-				specificMessage ? RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC : undefined,
-			);
+			notifyError(specificMessage ?? tEntities('connection.test.startFailed'));
 			finishRunImmediately();
 		}
 	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRunImmediately, tEntities, onResolveStartError, resetPauseState, updateLiveGraphStatus]);
@@ -801,7 +807,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			if (isTerminateFailed) {
 				// The run is still alive on the backend — keep the subscription
 				// and the stop button so the user can retry.
-				message.error(tEntities('connection.test.stopFailed'));
+				notifyError(tEntities('connection.test.stopFailed'));
 				setPhase('running');
 				return;
 			}

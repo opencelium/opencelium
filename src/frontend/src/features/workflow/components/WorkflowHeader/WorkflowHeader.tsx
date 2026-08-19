@@ -9,7 +9,7 @@ import { useWorkflowHeaderState } from './useWorkflowHeaderState';
 
 export function WorkflowHeader({
 	onOpenHistory, onSave, onMenuItemSelect, menuLoadingItemId,
-	saveDisabled = false, readOnly = false, testRunLocked = false, loading = false, schedulesSlot, hasSavedConnection = false, ...stateProps
+	saveDisabled = false, readOnly = false, testRunLocked = false, loading = false, undoRedo, schedulesSlot, hasSavedConnection = false, ...stateProps
 }: WorkflowHeaderProps) {
 	const { t } = useI18n('workflow');
 	const state = useWorkflowHeaderState({
@@ -81,6 +81,7 @@ export function WorkflowHeader({
 					onOpenHistory={onOpenHistory} onMenuItemSelect={onMenuItemSelect}
 					onSave={openSaveDialog} readOnly={readOnly} saveDisabled={saveDisabled}
 					saveDialogOpen={saveDialogOpen} schedulesSlot={schedulesSlot}
+					undoRedo={undoRedo}
 				/>
 			</div>
 			<HeaderSaveDialog open={saveDialogOpen} value={saveComment}

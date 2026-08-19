@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
 import { addEdge } from '@xyflow/react';
 import type { Connection } from '@xyflow/react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
-import { message } from 'antd';
+import { createCommentNode } from '../utils/createCommentNode';
+import { findAnchoredComment } from '../utils/commentAnchor';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { UseWorkflowPageOptions } from '../drag-drop/workflowPage.types';
@@ -16,7 +16,7 @@ import { useWorkflowDragStart } from './useWorkflowDragStart';
 import { useWorkflowDragMove } from './useWorkflowDragMove';
 import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
-import { evaluateJointTargets } from '../utils/jumpValidator';
+import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
@@ -44,19 +44,13 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const handleNodeDragStop = useWorkflowDragStop({ options, setNodes, setEdges,
     setIsDragging: setIsAnyNodeDragging, reactFlowInstance, dragSnapshot,
     positionLock: draggedPositionLockRef, multiDrag: multiDragRef,
-    clearPreview: clearAllDragPreviewState, commitFreeReposition,
-    onJointsRemoved: (count) => message.warning(t('joint.removedAfterMove', { count })) });
+    clearPreview: clearAllDragPreviewState, commitFreeReposition });
+  const undoHistory = useWorkflowUndoHistory({ nodes, edges,
+    fieldBindings: options.fieldBindings, isDragging: isAnyNodeDragging,
+    setNodes, setEdges, onFieldBindingsChange: options.onFieldBindingsChange });
   const nodeUpdates = useWorkflowNodeUpdates(setNodes,
     () => setMethodEditor(null), () => setConditionEditor(null),
     () => setAggregatorEditor(null));
-
-  const [jointSourceId, setJointSourceId] = useState<string | null>(null);
-  const jointVerdicts = useMemo(
-    () => (jointSourceId
-      ? evaluateJointTargets(jointSourceId, nodes, edges, options.fieldBindings ?? [])
-      : undefined),
-    [jointSourceId, nodes, edges, options.fieldBindings],
-  );
 
   useWorkflowCommandBridge({
     nodes,
@@ -71,8 +65,6 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     edges,
     isAnyNodeDragging,
     sidebarAction,
-    jointSourceId,
-    jointVerdicts,
     contextMenu,
     historyOpen,
     methodEditor,
@@ -82,6 +74,12 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     restoredViewport,
     viewportRestoreVersion,
     centerStartVersion,
+    canUndo: undoHistory.canUndo,
+    canRedo: undoHistory.canRedo,
+    undo: undoHistory.undo,
+    redo: undoHistory.redo,
+    undoEntries: undoHistory.entries,
+    jumpToUndoEntry: undoHistory.jumpTo,
     getViewport: () => reactFlowInstance.current?.getViewport(),
     setReactFlowInstance: (instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>) => {
       reactFlowInstance.current = instance;
@@ -100,6 +98,10 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       nextViewport?: Viewport,
       options?: { centerStart?: boolean },
     ) => {
+      // A wholesale replacement (connection load, template, version rollback)
+      // is not an in-session edit — starting a fresh stack keeps undo from
+      // splicing the previous workflow into this one.
+      undoHistory.reset();
       setNodes(nextNodes);
       setEdges(nextEdges);
       setRestoredViewport(nextViewport);
@@ -113,24 +115,6 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
     onCloseResponse: () => setResponseNodeId(null),
     onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); },
-    onStartJoint: (sourceNodeId: string) => {
-      setSidebarAction(null);
-      setContextMenu(null);
-      setJointSourceId(sourceNodeId);
-    },
-    onConfirmJoint: (targetNodeId: string) => {
-      if (!jointSourceId || !jointVerdicts?.get(targetNodeId)?.valid) return;
-      setNodes((current) => current.map((item) =>
-        item.id === jointSourceId ? { ...item, data: { ...item.data, jump: targetNodeId } } : item,
-      ));
-      setJointSourceId(null);
-    },
-    onCancelJoint: () => setJointSourceId(null),
-    onRemoveJoint: (nodeId: string) => {
-      setNodes((current) => current.map((item) =>
-        item.id === nodeId ? { ...item, data: { ...item.data, jump: undefined } } : item,
-      ));
-    },
     onAddStep: (
       kind: WorkflowAction['kind'],
       methodName?: string,
@@ -139,6 +123,21 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       triggerConnection?: WorkflowAction['triggerConnection'],
     ) => {
       if (!sidebarAction || !kind) return;
+      // A comment is an annotation, not a step: it belongs to the node whose "+"
+      // opened the sidebar, gets no edge, and never enters the executed graph.
+      // A node holds at most one note, so a second request reveals the existing
+      // one (which may just be minimized) instead of stacking another on top.
+      if (kind === 'comment') {
+        const existing = findAnchoredComment(nodes, sidebarAction.sourceNodeId);
+        if (existing) {
+          if (existing.data.comment?.collapsed) nodeUpdates.onToggleComment(existing.id);
+        } else {
+          const comment = createCommentNode(nodes, sidebarAction.sourceNodeId);
+          if (comment) setNodes([...nodes, comment]);
+        }
+        setSidebarAction(null);
+        return;
+      }
       const result = createNodeFromAction({ action: { ...sidebarAction, kind, methodName, connector, methodOperation, triggerConnection }, nodes, edges });
       setNodes(result.nodes);
       setEdges(result.edges);

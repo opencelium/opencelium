@@ -13,7 +13,8 @@ export type AppError = {
     messageKey: string        // i18n key
     details?: unknown
     originalError?: unknown
-    // Toast lifetime in seconds. Undefined → antd default (3s). 0 → sticky.
+    // Toast lifetime in seconds. Undefined → sticky: error notifications stay until
+    // the user clicks their close icon. Set a positive value to auto-close instead.
     durationSec?: number
 }
 

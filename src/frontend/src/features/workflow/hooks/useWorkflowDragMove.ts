@@ -9,6 +9,7 @@ import { buildFreeDragNodes } from '../drag-drop/workflowDragPreview.utils';
 import { buildInsertionPreviewEdges, buildInsertionPreviewNodes } from '../drag-drop/workflowInsertionPreview.utils';
 import { buildPreviewGraphForTarget, computeGhostRootPosition } from '../drag-drop/workflowDragCalculations.utils';
 import { computeInsertionLayout } from '../drag-drop/workflowInsertionLayout';
+import { withCommentOffsetFromPosition } from '../utils/commentAnchor';
 
 type Snapshot = WorkflowDragSnapshot;
 type Params = {
@@ -29,6 +30,10 @@ export const useWorkflowDragMove = ({ fieldBindings, setNodes, reactFlowInstance
 	dragSnapshot, multiDrag, updateNodes, updateEdges, clearPreview }: Params) =>
 	(event: any, node: WorkflowNodeModel) => {
 		if (multiDrag.current) return;
+		if (node.type === 'comment') {
+			setNodes((current) => withCommentOffsetFromPosition(current, node.id, node.position));
+			return;
+		}
 		const snapshot = dragSnapshot.current;
 		if (!snapshot || node.type === 'start') return;
 		try {

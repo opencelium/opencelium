@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
-import { truncateUnbreakableText } from '@shared/ui/primitives/Table/Table.utils'
+import { truncateCellText } from '@shared/ui/primitives/Table/Table.utils'
 import type { Schedule } from '../model/types'
 
 type Props = {
@@ -10,7 +10,7 @@ type Props = {
 export const ConnectionTitleCell = memo(function ConnectionTitleCell({ schedule }: Props) {
     const connectionId = schedule.connection?.connectionId
     const title = schedule.connection?.title ?? ''
-    const displayTitle = truncateUnbreakableText(title)
+    const displayTitle = truncateCellText(title)
 
     if (connectionId == null) return <span title={title}>{displayTitle}</span>
 

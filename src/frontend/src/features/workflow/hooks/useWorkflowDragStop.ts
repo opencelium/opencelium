@@ -7,7 +7,7 @@ import { sanitizeGraphEdges, sanitizeGraphNodes } from '../drag-drop/workflowPag
 import { clearDragFlags, clearDragPreviewNodes, clearEdgeDragFlags } from '../drag-drop/workflowPageNodes.utils';
 import { computeGhostRootPosition } from '../drag-drop/workflowDragCalculations.utils';
 import { positionDragCommit, resolveDragCommit } from '../drag-drop/workflowDragCommit.utils';
-import { pruneInvalidJoints } from '../utils/jumpValidator';
+import { withCommentOffsetFromPosition } from '../utils/commentAnchor';
 
 type Params = {
 	options: UseWorkflowPageOptions;
@@ -20,17 +20,20 @@ type Params = {
 	multiDrag: MutableRefObject<boolean>;
 	clearPreview: (snapshot: WorkflowDragSnapshot) => void;
 	commitFreeReposition: (snapshot: WorkflowDragSnapshot, sourceNodeId: string) => void;
-	/** Reports joints dropped because the move made them illegal, so the caller
-	 * can tell the user (this module owns no i18n/toast). */
-	onJointsRemoved: (count: number) => void;
 };
 
 export const useWorkflowDragStop = ({ options, setNodes, setEdges, setIsDragging,
 	reactFlowInstance, dragSnapshot, positionLock, multiDrag, clearPreview,
-	commitFreeReposition, onJointsRemoved }: Params) => async (event: any, node: WorkflowNodeModel) => {
+	commitFreeReposition }: Params) => async (event: any, node: WorkflowNodeModel) => {
 	setIsDragging(false);
 	if (multiDrag.current) {
 		multiDrag.current = false;
+		positionLock.current = null;
+		return;
+	}
+	if (node.type === 'comment') {
+		setNodes((current) => withCommentOffsetFromPosition(current, node.id, node.position));
+		dragSnapshot.current = null;
 		positionLock.current = null;
 		return;
 	}
@@ -76,14 +79,8 @@ export const useWorkflowDragStop = ({ options, setNodes, setEdges, setIsDragging
 			node.id, snapshot, next.nodes, next.idMap, commitLayout,
 		);
 		const finalNodes = sanitizeGraphNodes(clearDragFlags(positioned));
-		const finalEdges = sanitizeGraphEdges(finalNodes, clearEdgeDragFlags(next.edges));
-		// The move can leave a joint's two ends in different scopes (or reverse
-		// their order), which the joint rules forbid — drop those instead of
-		// keeping a joint the picker would never have allowed.
-		const joints = pruneInvalidJoints(finalNodes, finalEdges, next.fieldBindings);
-		if (joints.removedSourceIds.length > 0) onJointsRemoved(joints.removedSourceIds.length);
-		setNodes(joints.nodes);
-		setEdges(finalEdges);
+		setNodes(finalNodes);
+		setEdges(sanitizeGraphEdges(finalNodes, clearEdgeDragFlags(next.edges)));
 		options.onFieldBindingsChange?.(next.fieldBindings);
 	} catch {
 		clearPreview(snapshot);

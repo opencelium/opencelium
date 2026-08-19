@@ -8,7 +8,7 @@ import type { MethodSidebarDrawerProps } from './MethodSidebarDrawer.types';
 export function MethodSidebarDrawer(props: MethodSidebarDrawerProps) {
   const { t } = useI18n('workflow');
   return <SidebarDrawer open={props.open} title={props.title} subtitle={props.subtitle}
-    iconUrl={props.iconUrl} onClose={props.onClose} tertiary>
+    connectorIcon={props.connectorIcon} onClose={props.onClose} tertiary>
     <SidebarSearch placeholder={props.placeholder} value={props.search}
       onChange={props.onSearchChange} testId="workflow-sidebar-search-method"
       autoFocus={props.open} />

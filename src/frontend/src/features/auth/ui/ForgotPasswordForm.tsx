@@ -58,10 +58,12 @@ export function ForgotPasswordForm() {
             if (e instanceof ApiFetchError) {
                 const code = extractErrorCode(e.body)
                 if (code) {
+                    // EMAIL_RECOVERY_FAILED used to ask for a 12s toast so its long
+                    // text could be read; errors now stay until dismissed, which
+                    // covers that on its own.
                     errorBus.emit({
                         type: ERROR_TYPE_MAP[code],
                         messageKey: ERROR_MESSAGE_KEY_MAP[code],
-                        ...(code === 'EMAIL_RECOVERY_FAILED' && { durationSec: 12 }),
                     })
                 } else {
                     errorBus.emit({ type: 'UNKNOWN', messageKey: 'forgotPassword.failed' })

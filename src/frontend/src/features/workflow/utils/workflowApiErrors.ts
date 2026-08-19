@@ -14,10 +14,6 @@ export type WorkflowApiErrorResolution = {
 	nodeId?: string;
 };
 
-// antd's message.error default duration is 3s — these resolved messages are longer and
-// name a specific node, so give the user more time to actually read them.
-export const RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC = 8;
-
 const findNodeIdByIndex = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[], index: string): string | undefined => {
 	const indexes = buildWorkflowIndexes(nodes, edges);
 	for (const [nodeId, nodeIndex] of indexes) {

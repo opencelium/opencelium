@@ -11,6 +11,7 @@ import {
 	mergeSavedNodeData,
 } from './connectionMapper.savedNodeMatching';
 import { restoreNodesFromUi } from './connectionMapper.restoreNodes';
+import { withRestoredCommentNodes } from './connectionMapper.comments';
 import { applyWorkflowLeafState as withLeafState, buildWorkflowEdges as buildEdges } from './connectionMapper.graph';
 import {
 	assignMissingMethodColors,
@@ -48,7 +49,7 @@ export function mapConnectionToWorkflowState(
 	const builtNodes = restoredFromUi?.nodes ?? (entries.length ? [...initialNodes, ...entries.map((entry) => entry.node)] : initialNodes);
 	const entryByNodeId = new Map(entries.map((entry) => [entry.node.id, entry]));
 	const usedSavedNodeIds = new Set<string>();
-	const nodes = restoredFromUi ? builtNodes : builtNodes.map((node) => {
+	const graphNodes = restoredFromUi ? builtNodes : builtNodes.map((node) => {
 		const savedNode = findSavedNode(node, entryByNodeId.get(node.id), savedUiNodes, usedSavedNodeIds);
 		if (!savedNode) return node;
 		usedSavedNodeIds.add(savedNode.id);
@@ -62,6 +63,7 @@ export function mapConnectionToWorkflowState(
 			deletable: savedNode.deletable ?? node.deletable,
 		};
 	});
+	const nodes = withRestoredCommentNodes(graphNodes, savedUiNodes);
 	const invalidSavedEdgeReason = getInvalidSavedEdgeReason(nodes, savedUiEdges);
 	const useSavedEdges = restoredFromUi
 		? savedUiEdges.length > 0

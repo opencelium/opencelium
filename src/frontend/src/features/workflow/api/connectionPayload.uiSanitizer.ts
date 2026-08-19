@@ -89,6 +89,7 @@ const sanitizeNodeData = (data: WorkflowNodeData) => Object.fromEntries(Object.e
 	connector: data.connector,
 	methodConfig: sanitizeMethodConfig(data.methodConfig),
 	conditionConfig: stripEnhancementObjects(data.conditionConfig),
+	comment: data.comment,
 	dataAggregator: data.dataAggregator,
 }).filter(([, value]) => value !== undefined));
 
@@ -96,6 +97,10 @@ export const sanitizeWorkflowUiNode = (node: WorkflowNodeModel, index?: string) 
 	id: node.id,
 	type: node.type,
 	position: node.position,
+	// Only set on nodes the user can resize (comments) — every other node type
+	// keeps its measured size in `measured`, which stays out of the payload.
+	width: node.width,
+	height: node.height,
 	index,
 	data: sanitizeNodeData(node.data as WorkflowNodeData),
 	draggable: node.draggable,

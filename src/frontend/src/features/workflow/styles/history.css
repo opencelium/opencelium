@@ -84,10 +84,6 @@
   cursor: default;
 }
 
-.sidebarItemStandalone {
-  margin-top: 8px;
-}
-
 .sidebarLoading {
   display: flex;
   justify-content: center;

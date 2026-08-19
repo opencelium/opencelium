@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { ConfigProvider } from 'antd';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
@@ -27,6 +28,12 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 	const state = useEnhancementState(enhancement);
 	const { method: currentMethod } = useMethodContext();
 	const debug = useScriptDebugValue(enhancement, state.connection, currentMethod);
+	// Stable identity: EnhancementScript debounces on this callback, and an
+	// inline arrow here re-armed that debounce on every render.
+	const handleChangeScript = useCallback((script: string) => {
+		state.onChangeScript(script);
+		debug.markStale();
+	}, [state, debug]);
 
 	if (!state.connection) return null;
 
@@ -119,10 +126,8 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 												</button>
 											</Tooltip>
 										</span>
-										<EnhancementScript readOnly={readOnly} enhancement={enhancement!} onChangeScript={(script) => {
-											state.onChangeScript(script);
-											debug.markStale();
-										}} />
+										<EnhancementScript readOnly={readOnly} enhancement={enhancement!}
+											onChangeScript={handleChangeScript} />
 									</div>
 								</div>
 								<div className='bodyLegacyEnhancementDescription'>
