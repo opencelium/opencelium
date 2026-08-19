@@ -243,7 +243,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                         .orElse(properties.getDefaultRole());
             }
 
-            UserRole role = userRoleService.findByRole(roleName)
+            UserRole role = userRoleService.findByName(roleName)
                     .orElseThrow(() -> new EntityNotFoundException("LDAP group mapped to role = '" + roleName + "', but it does not exists in OC system."));
             user.setUserRole(role);
 
