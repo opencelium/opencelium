@@ -16,6 +16,8 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.database.mysql.entity.Component;
+import com.becon.opencelium.backend.database.mysql.entity.Permission;
 import com.becon.opencelium.backend.database.mysql.entity.RoleHasPermission;
 import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
@@ -35,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class UserRoleServiceImpl implements UserRoleService {
@@ -43,20 +44,17 @@ public class UserRoleServiceImpl implements UserRoleService {
     private final UserRoleRepository userRoleRepository;
     private final PermissionService permissionService;
     private final ComponentService componentService;
-    private final RoleHasPermissionService roleHasPermissionService;
     private final StorageService storageService;
 
     public UserRoleServiceImpl(
             @Qualifier("permissionServiceImpl") PermissionService permissionService,
             @Qualifier("componentServiceImpl") ComponentService componentService,
             UserRoleRepository userRoleRepository,
-            RoleHasPermissionService roleHasPermissionService,
             StorageService storageService
     ) {
         this.userRoleRepository = userRoleRepository;
         this.permissionService = permissionService;
         this.componentService = componentService;
-        this.roleHasPermissionService = roleHasPermissionService;
         this.storageService = storageService;
     }
 
@@ -76,50 +74,44 @@ public class UserRoleServiceImpl implements UserRoleService {
     }
 
     @Override
+    @Transactional
     public UserRoleResource create(UserRoleResource resource) {
         validateRoleName(resource.getName());
 
         UserRole role = new UserRole();
-        role.setName(resource.getName());
-        role.setDescription(resource.getDescription());
-        role.setIcon(resource.getIcon());
+        updateFields(role, resource);
+        addPermissions(role, resolvePermissions(resource));
 
-        userRoleRepository.save(role);
-
-        resource.setGroupId(role.getId());
-
-        role = toEntity(resource);
-        userRoleRepository.save(role);
-
-        return new UserRoleResource(role);
+        return new UserRoleResource(userRoleRepository.save(role));
     }
 
     @Override
+    @Transactional
     public UserRoleResource updateComponents(int id, UserRoleResource resource) {
-        UserRole existing = getExistingRole(id);
+        UserRole role = getExistingRole(id);
+        List<ResolvedPermission> requested = resolvePermissions(resource);
+        Set<PermissionKey> requestedKeys = requested.stream()
+                .map(ResolvedPermission::key)
+                .collect(java.util.stream.Collectors.toSet());
 
-        validateRoleName(resource.getName(), existing);
+        role.getComponents().stream()
+                .filter(rolePermission -> !requestedKeys.contains(PermissionKey.from(rolePermission)))
+                .toList()
+                .forEach(role::removePermission);
 
-        resource.setGroupId(id);
-
-        roleHasPermissionService.deleteByUserRoleId(id);
-
-        UserRole role = toEntity(resource);
-        userRoleRepository.save(role);
+        addPermissions(role, requested);
 
         return new UserRoleResource(role);
     }
 
     @Override
+    @Transactional
     public UserRoleResource update(int id, UserRoleResource resource) {
         UserRole role = getExistingRole(id);
         validateRoleName(resource.getName(), role);
+        updateFields(role, resource);
 
-        role.setName(resource.getName());
-        role.setDescription(resource.getDescription());
-        role.setIcon(resource.getIcon());
-
-        return new UserRoleResource(userRoleRepository.save(role));
+        return new UserRoleResource(role);
     }
 
     @Override
@@ -158,6 +150,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean existsByName(String name) {
         return userRoleRepository.existsByName(name);
     }
@@ -192,28 +185,51 @@ public class UserRoleServiceImpl implements UserRoleService {
     }
 
 
-    private UserRole toEntity(UserRoleResource resource) {
-        UserRole role = new UserRole();
-
-        role.setId(resource.getGroupId());
+    private void updateFields(UserRole role, UserRoleResource resource) {
         role.setName(resource.getName());
         role.setDescription(resource.getDescription());
         role.setIcon(resource.getIcon());
+    }
 
-        Set<RoleHasPermission> components = resource.getComponents()
+    private void addPermissions(UserRole role, List<ResolvedPermission> permissions) {
+        permissions.forEach(resolved ->
+                role.addPermission(resolved.component(), resolved.permission())
+        );
+    }
+
+    private List<ResolvedPermission> resolvePermissions(UserRoleResource resource) {
+        return Optional.ofNullable(resource.getComponents())
+                .orElseGet(Collections::emptyList)
                 .stream()
-                .flatMap(c -> c.getPermissions()
-                        .stream()
-                        .map(p -> new RoleHasPermission(
-                                        role,
-                                        componentService.findById(c.getComponentId()).get(),
-                                        permissionService.findByName(p).get()
-                                )
-                        )
-                ).collect(Collectors.toSet());
-        role.setComponents(components);
+                .flatMap(componentResource -> {
+                    Component component = componentService.findById(componentResource.getComponentId())
+                            .orElseThrow();
 
-        return role;
+                    return Optional.ofNullable(componentResource.getPermissions())
+                            .orElseGet(Collections::emptySet)
+                            .stream()
+                            .map(permissionName -> new ResolvedPermission(
+                                    component,
+                                    permissionService.findByName(permissionName).orElseThrow()
+                            ));
+                })
+                .distinct()
+                .toList();
+    }
+
+    private record ResolvedPermission(Component component, Permission permission) {
+        private PermissionKey key() {
+            return new PermissionKey(component.getId(), permission.getId());
+        }
+    }
+
+    private record PermissionKey(int componentId, int permissionId) {
+        private static PermissionKey from(RoleHasPermission rolePermission) {
+            return new PermissionKey(
+                    rolePermission.getComponent().getId(),
+                    rolePermission.getPermission().getId()
+            );
+        }
     }
 
     private UserRole getExistingRole(int id) {
