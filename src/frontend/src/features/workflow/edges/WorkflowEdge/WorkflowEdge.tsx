@@ -14,7 +14,6 @@ import {
 
 export function WorkflowEdge(props: EdgeProps<WorkflowEdgeModel>) {
 	const { id, sourceX, sourceY, data } = props;
-	const isIfBranch = data?.branch === 'true' || data?.branch === 'false';
 	const isHighlighted = !!data?.highlighted;
 	const isDropInvalid = !!data?.dropInvalid;
 	const isPreviewEdge = !!data?.dragGhost || !!data?.dropPlaceholder;
@@ -62,7 +61,7 @@ export function WorkflowEdge(props: EdgeProps<WorkflowEdgeModel>) {
 
 			<BaseEdge
 				id={String(id)}
-				path={getWorkflowEdgePath(props, isIfBranch)}
+				path={getWorkflowEdgePath(props)}
 				markerEnd={
 					isTestRunActive || isHighlighted
 						? 'url(#workflow-arrow-highlighted)'
@@ -96,7 +95,7 @@ export function WorkflowEdge(props: EdgeProps<WorkflowEdgeModel>) {
 						dur={dotTravelDur}
 						repeatCount='1'
 						fill='freeze'
-						path={getWorkflowEdgeDotPath(props, isIfBranch)}
+						path={getWorkflowEdgeDotPath(props)}
 					/>
 				</circle>
 			)}

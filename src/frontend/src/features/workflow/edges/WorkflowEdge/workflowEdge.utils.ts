@@ -1,4 +1,4 @@
-import { getBezierPath, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
+import { getBezierPath, type EdgeProps } from '@xyflow/react';
 import type { CSSProperties } from 'react';
 import type { WorkflowEdgeModel } from '../../types/workflow.types';
 
@@ -20,30 +20,30 @@ const shiftTarget = (props: Geometry, distance: number) => {
 	return { x: targetX, y: targetY };
 };
 
-const buildPath = (props: Geometry, isIfBranch: boolean, targetDistance: number) => {
+// Every workflow edge is a bezier S-curve — chain edges, IF branches, loop
+// bodies and joints alike — so no edge kind stands out by its shape and a joint
+// is indistinguishable in form from the edge it runs alongside.
+const buildPath = (props: Geometry, targetDistance: number) => {
 	const { sourceX, sourceY, sourcePosition, targetPosition } = props;
 	const target = shiftTarget(props, targetDistance);
-	const pathArgs = {
+	return getBezierPath({
 		sourceX, sourceY, targetX: target.x, targetY: target.y,
 		sourcePosition, targetPosition,
-	};
-	return isIfBranch
-		? getSmoothStepPath({ ...pathArgs, borderRadius: 18, offset: 18 })
-		: getBezierPath(pathArgs);
+	});
 };
 
-export function getWorkflowEdgePath(props: Geometry, isIfBranch: boolean) {
-	return buildPath(props, isIfBranch, TARGET_GAP)[0];
+export function getWorkflowEdgePath(props: Geometry) {
+	return buildPath(props, TARGET_GAP)[0];
 }
 
 /** Midpoint of the rendered path — where an edge-hosted control is anchored. */
-export function getWorkflowEdgeLabelPoint(props: Geometry, isIfBranch: boolean) {
-	const [, labelX, labelY] = buildPath(props, isIfBranch, TARGET_GAP);
+export function getWorkflowEdgeLabelPoint(props: Geometry) {
+	const [, labelX, labelY] = buildPath(props, TARGET_GAP);
 	return { labelX, labelY };
 }
 
-export function getWorkflowEdgeDotPath(props: Geometry, isIfBranch: boolean) {
-	return buildPath(props, isIfBranch, -DOT_INTO_NODE)[0];
+export function getWorkflowEdgeDotPath(props: Geometry) {
+	return buildPath(props, -DOT_INTO_NODE)[0];
 }
 
 export function getWorkflowEdgeStyle(

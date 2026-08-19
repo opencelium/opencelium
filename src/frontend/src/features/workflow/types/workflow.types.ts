@@ -77,7 +77,7 @@ export type WorkflowNodeData = {
 	highlighted?: boolean;
 	/** Target node id of this node's joint — the method execution jumps to after
 	 * this one. Serialized as a workflow index (see connectionPayload.methods). */
-	jumpTo?: string;
+	jump?: string;
 	/** Joint picking state, set by prepareWorkflowElements while a joint is being
 	 * drawn: this node is a legal target / is the node the joint starts from /
 	 * cannot be the target and why (rendered as a hover-only error ring plus a
@@ -152,7 +152,7 @@ export type WorkflowEdgeData = {
 	 * travelling-dot animation so it restarts once per playback step, including
 	 * re-entries of the same edge on the next loop iteration. */
 	testRunNonce?: number;
-	/** A joint (see WorkflowNodeData.jumpTo) rather than a real graph edge: same
+	/** A joint (see WorkflowNodeData.jump) rather than a real graph edge: same
 	 * path geometry as every other edge, drawn in the joint color, and carrying
 	 * its own hover-revealed delete control. */
 	joint?: boolean;

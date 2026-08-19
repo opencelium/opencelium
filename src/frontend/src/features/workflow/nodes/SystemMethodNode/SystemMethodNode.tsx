@@ -25,8 +25,8 @@ export function SystemMethodNode({ id, data, selected, dragging }: NodeProps<Sys
 			bottomLabel={bottomLabel}
 			rightAdd={{
 				action: { sourceNodeId: id, direction: 'right' },
-				showAlways: !!data.isLeaf && !data.jumpTo,
-				lineVisible: !!data.isLeaf && !data.jumpTo,
+				showAlways: !!data.isLeaf && !data.jump,
+				lineVisible: !!data.isLeaf && !data.jump,
 			}}
 		>
 			<div className='circleNode systemNode'>

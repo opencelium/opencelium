@@ -41,7 +41,7 @@
   fill: var(--color-action-primary);
 }
 
-/* A joint (WorkflowNodeData.jumpTo): same stroke width, bezier and arrow shape
+/* A joint (WorkflowNodeData.jump): same stroke width, bezier and arrow shape
    as a normal edge — only the colour sets it apart — plus a delete control that
    appears at its midpoint on hover. The toolbar is lifted above the node layer
    (nodes.css forces z-index 6 on .react-flow__node) so it stays clickable when

@@ -78,7 +78,7 @@ export function NodeShell({
 				<NodeToolbar
 					canDelete={data.kind !== 'start' && !!data.onDeleteNode}
 					onDelete={() => data.onDeleteNode?.(id)}
-					canRemoveJoint={Boolean(data.jumpTo) && !!data.onRemoveJoint}
+					canRemoveJoint={Boolean(data.jump) && !!data.onRemoveJoint}
 					onRemoveJoint={() => data.onRemoveJoint?.(id)}
 				/>
 			)}

@@ -131,7 +131,7 @@ export const cloneWorkflowSubtree = (
       // A joint only survives a copy when its target came along: point it at the
       // target's clone, and drop it when the target stayed behind (a joint out of
       // the copied subtree would break the same-scope rule anyway).
-      jumpTo: node.data.jumpTo ? idMap.get(node.data.jumpTo) : undefined,
+      jump: node.data.jump ? idMap.get(node.data.jump) : undefined,
     }), node) as WorkflowNodeModel['data'],
   }));
   const edges = sourceEdges.map((item) => ({

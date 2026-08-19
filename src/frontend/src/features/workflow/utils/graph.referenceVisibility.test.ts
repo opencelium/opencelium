@@ -39,9 +39,9 @@ describe('isWorkflowReferenceVisible', () => {
 describe('collectWorkflowJumpLinks', () => {
 	it('maps node joints into index space and skips unresolvable ones', () => {
 		const nodes = [
-			{ id: 'a', data: { jumpTo: 'b' } },
+			{ id: 'a', data: { jump: 'b' } },
 			{ id: 'b', data: {} },
-			{ id: 'c', data: { jumpTo: 'gone' } },
+			{ id: 'c', data: { jump: 'gone' } },
 		] as unknown as WorkflowNodeModel[];
 		const indexes = new Map([['a', '0'], ['b', '2']]);
 		expect(collectWorkflowJumpLinks(nodes, indexes)).toEqual([{ from: '0', to: '2' }]);
