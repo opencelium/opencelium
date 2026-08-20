@@ -369,7 +369,9 @@
     "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
     "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf.",
     "testRunIteration": "{{iterator}} = {{count}}",
-    "skipToNextIteration": "Zur nächsten Iteration springen"
+    "testRunIterator": "{{iterator}} =",
+    "skipToNextIteration": "Zur nächsten Iteration springen",
+    "jumpToIteration": "Vorwärts zu einer Iteration springen"
   },
   "saveDialog": {
     "title": "Version speichern",

@@ -369,7 +369,9 @@
     "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
     "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector.",
     "testRunIteration": "{{iterator}} = {{count}}",
-    "skipToNextIteration": "Jump to next iteration"
+    "testRunIterator": "{{iterator}} =",
+    "skipToNextIteration": "Jump to next iteration",
+    "jumpToIteration": "Jump forward to an iteration"
   },
   "saveDialog": {
     "title": "Save Version",
