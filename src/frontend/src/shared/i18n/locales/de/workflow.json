@@ -208,11 +208,7 @@
       "description": "Keine Konnektoren, Operatoren oder Methoden entsprechen Ihrer Suche."
     },
     "methodItemText": "Invoker-Methode",
-    "connectorMethodsFallback": "Methoden vom Invoker {{invoker}}.",
-    "addComment": {
-      "title": "Kommentar hinzufügen",
-      "description": "Hinterlassen Sie eine freie Notiz auf der Arbeitsfläche für Ihr Team."
-    }
+    "connectorMethodsFallback": "Methoden vom Invoker {{invoker}}."
   },
   "headerMenu": {
     "assignCategory": "Kategorie zuweisen",
@@ -336,6 +332,7 @@
   },
   "comment": {
     "badge": "Kommentar",
+    "add": "Kommentar hinzufügen",
     "placeholder": "Notiz für Ihr Team schreiben…",
     "toggle": {
       "show": "Kommentar anzeigen",

@@ -129,6 +129,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
         onChangeCommentText: workflow.onChangeCommentText,
         onToggleComment: workflow.onToggleComment,
+        onAddComment: workflow.onAddComment,
         onPaneClick: closeCanvasPanels }} />
       <WorkflowPanels
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,

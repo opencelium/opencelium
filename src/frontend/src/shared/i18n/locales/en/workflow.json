@@ -208,11 +208,7 @@
       "description": "No connectors, operators, or methods match your search."
     },
     "methodItemText": "Invoker method",
-    "connectorMethodsFallback": "Methods from {{invoker}} invoker.",
-    "addComment": {
-      "title": "Add Comment",
-      "description": "Leave a free-text note on the canvas for your team."
-    }
+    "connectorMethodsFallback": "Methods from {{invoker}} invoker."
   },
   "headerMenu": {
     "assignCategory": "Assign Category",
@@ -336,6 +332,7 @@
   },
   "comment": {
     "badge": "Comment",
+    "add": "Add comment",
     "placeholder": "Write a note for your team…",
     "toggle": {
       "show": "Show comment",

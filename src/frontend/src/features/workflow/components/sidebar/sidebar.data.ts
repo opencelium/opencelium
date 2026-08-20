@@ -25,11 +25,6 @@ export const sidebarItems: {
     titleKey: 'sidebar.triggerConnection.title',
     textKey: 'sidebar.triggerConnection.description',
   },
-  {
-    key: 'comment',
-    titleKey: 'sidebar.addComment.title',
-    textKey: 'sidebar.addComment.description',
-  },
 ];
 
 export const operatorItems: {
