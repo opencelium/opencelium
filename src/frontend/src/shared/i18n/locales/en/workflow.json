@@ -583,6 +583,7 @@
     "iteratorLoop": "({{iterator}} loop)",
     "noVariableReferences": "No variable references",
     "more": "more",
+    "pausedHint": "Hover a highlighted reference to see the value it resolved to.",
     "confirmDelete": {
       "title": "Delete reference",
       "message": "Do you really want to delete this reference?"

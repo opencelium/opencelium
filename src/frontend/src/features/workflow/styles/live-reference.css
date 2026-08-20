@@ -1,0 +1,31 @@
+/*
+ * The affordance for the paused-run debugger: while a test run is paused, every
+ * reference whose value can actually be read right now wears this ring, so the
+ * hover that reveals the value is discoverable instead of folklore. Applied by
+ * useLiveReferenceValue's LIVE_INSPECTABLE_CLASS across all reference surfaces
+ * (body pointers, header/XML tags, condition operands, endpoint pills).
+ *
+ * Deliberately the same --color-action-primary as the canvas's running-node
+ * ring (nodes.states.css), so "test run is talking to you" stays one colour.
+ * Static, not pulsing: a body can hold dozens of these at once and the canvas
+ * already owns the moving highlight.
+ *
+ * Purely a paint: no cursor of its own. Every surface it lands on already owns
+ * a correct one — the body pointer and the endpoint pills are clickable, the
+ * condition operands are selects — and a help cursor over them would advertise
+ * the hover by contradicting what a click actually does.
+ */
+.wfLiveInspectable {
+	border-radius: 4px;
+	box-shadow:
+		0 0 0 2px var(--color-action-primary),
+		0 0 6px 2px color-mix(in srgb, var(--color-action-primary) 45%, transparent);
+}
+
+/* The hint itself is the shared Hint primitive (see LiveInspectHint) — this
+   only spaces it off the editor below and keeps it out of the flex stretch,
+   since it disappears entirely while no run is paused. */
+.wfLiveInspectHint {
+	flex-shrink: 0;
+	margin-bottom: 8px;
+}

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import type { Connection, EndpointArg, MethodWithId } from '../../../types/connection';
-import { ARG_TOKEN_RE, ENDPOINT_REF_CLASS } from './urlEditor.utils';
+import { ENDPOINT_REF_CLASS } from './urlEditor.utils';
+import { extractArgId, useEndpointArgInspectHighlight } from './useEndpointArgInspectHighlight';
 import { formatParsedArgPath, parseEnhancementArg } from '../utils/parseEnhancementArg';
 import { formatLiveReferenceValue, useLiveReferenceValue } from '../utils/useLiveReferenceValue';
 import { LiveReferenceValuePreview } from '../utils/LiveReferenceValuePreview';
@@ -13,13 +14,6 @@ type HoverTarget = { arg: EndpointArg; rect: DOMRect };
 // floating tooltip itself (e.g. to click "more…") without it disappearing
 // first. Mirrors what antd's own Tooltip does internally for hover+popup.
 const CLOSE_GRACE_MS = 150;
-
-function extractArgId(token: string): string | null {
-	ARG_TOKEN_RE.lastIndex = 0;
-	const match = ARG_TOKEN_RE.exec(token);
-	ARG_TOKEN_RE.lastIndex = 0;
-	return match ? match[2] : null;
-}
 
 function findPill(target: EventTarget | null, root: HTMLElement): HTMLElement | null {
 	if (!(target instanceof HTMLElement)) return null;
@@ -158,6 +152,9 @@ type Props = {
 // box instead.
 export function EndpointArgHoverTooltip({ containerRef, endpointArgs, connection, currentMethod }: Props) {
 	const { hover, cancelClose, scheduleClose } = useEndpointArgHover(containerRef, endpointArgs);
+	// Mounted unconditionally (this component renders null until something is
+	// hovered), so the pills carry their ring whether or not one is hovered.
+	useEndpointArgInspectHighlight(containerRef, endpointArgs, connection, currentMethod);
 	if (!hover?.arg.source) return null;
 
 	return (

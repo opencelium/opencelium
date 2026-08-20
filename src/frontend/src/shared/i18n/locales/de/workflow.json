@@ -583,6 +583,7 @@
     "iteratorLoop": "({{iterator}}-Schleife)",
     "noVariableReferences": "Keine Variablenreferenzen",
     "more": "mehr",
+    "pausedHint": "Bewegen Sie den Mauszeiger über eine hervorgehobene Referenz, um den ermittelten Wert zu sehen.",
     "confirmDelete": {
       "title": "Referenz löschen",
       "message": "Möchten Sie diese Referenz wirklich löschen?"
