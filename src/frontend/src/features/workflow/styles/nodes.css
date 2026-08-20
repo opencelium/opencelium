@@ -145,6 +145,35 @@
   }
 }
 
+/* Joint picking. Legal targets are highlighted for as long as the picker is
+   open; the node the joint starts from keeps a primary ring so it stays
+   identifiable; every other node only turns red while actually hovered, paired
+   with a tooltip naming the reason (see NodeShell/useJointRejectionMessage) —
+   flagging all of them at once would drown the canvas in red. */
+.nodeBodyJointCandidate .circleNode {
+  border-color: var(--color-status-success-fg);
+  box-shadow: 0 0 0 4px var(--color-status-success-bg);
+  cursor: pointer;
+}
+
+.nodeBodyJointSource .circleNode {
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 4px var(--color-action-primary-subtle);
+}
+
+.nodeBodyJointInvalid .startNode,
+.nodeBodyJointInvalid .circleNode,
+.nodeBodyJointInvalid .ifNode {
+  cursor: not-allowed;
+}
+
+.nodeBodyJointInvalid:hover .startNode,
+.nodeBodyJointInvalid:hover .circleNode,
+.nodeBodyJointInvalid:hover .ifNode {
+  border-color: var(--color-status-error-fg);
+  box-shadow: 0 0 0 4px var(--color-status-error-bg);
+}
+
 .nodeTopLabel {
   position: absolute;
   left: 50%;
@@ -266,6 +295,38 @@
   align-items: center;
   pointer-events: auto;
   cursor: pointer;
+}
+
+/* The same iteration counter, as a field the user can aim (see
+   LoopIterationInput). Sized down to the label's own 11px type so a paused
+   loop reads as "i = [3]" rather than growing a form control under the node;
+   the label itself is pointer-events: none, hence the opt-in here. */
+.loopIterationInput {
+  display: inline-flex;
+  align-items: center;
+  width: 46px;
+  pointer-events: auto;
+}
+
+.loopIterationInput input {
+  height: 18px;
+  padding: 0 4px;
+  font-size: 11px;
+  text-align: center;
+}
+
+/* Chrome/Safari reserve room for spinner arrows that would swamp a 46px field;
+   the arrow keys and the jump icon cover stepping. */
+.loopIterationInput input::-webkit-outer-spin-button,
+.loopIterationInput input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.loopIterationInput input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .startNode {

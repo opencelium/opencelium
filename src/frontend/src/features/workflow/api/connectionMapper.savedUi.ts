@@ -29,27 +29,63 @@ export const getSavedUiNodes = (ui: any): SavedUiNode[] => {
 	return [];
 };
 
-export const getSavedUiEdges = (ui: any): SavedUiEdge[] => {
+// Which source handle a saved edge may carry, per source node type. Anything
+// else is dropped rather than trusted: an edge whose sourceHandle does not exist
+// on its source node is invisible (xyflow cannot resolve the handle) AND breaks
+// buildWorkflowIndexes, which matches a chain edge by exactly this handle — so
+// every node after it loses its index, taking joints pointing at them down too.
+const SOURCE_HANDLES: Partial<Record<NonNullable<SavedUiNode['type']>, string[]>> = {
+	if: ['true', 'false'],
+	loop: ['bottom', 'right'],
+	start: ['bottom'],
+	connector: ['bottom'],
+	system: ['bottom'],
+	'trigger-connection': ['bottom'],
+};
+
+type RawSavedEdge = { sourceHandle?: unknown; data?: { branch?: unknown } | null };
+
+const resolveSourceHandle = (edge: RawSavedEdge | undefined, sourceType?: SavedUiNode['type']) => {
+	const allowed = sourceType ? SOURCE_HANDLES[sourceType] ?? [] : [];
+	if (typeof edge?.sourceHandle === 'string') {
+		return allowed.includes(edge.sourceHandle) ? edge.sourceHandle : undefined;
+	}
+	// Pre-handle payloads stored the branch only in `data.branch`, where it doubles
+	// as the IF's handle id. On any other source node type it is a stale marker
+	// inherited from the edge this one replaced (see createNodeFromAction) and must
+	// not be promoted to a handle.
+	const branch = edge?.data?.branch;
+	return sourceType === 'if' && (branch === 'true' || branch === 'false')
+		? branch as 'true' | 'false' : undefined;
+};
+
+const TARGET_HANDLES = ['left', 'top'];
+
+export const getSavedUiEdges = (ui: any, savedNodes: SavedUiNode[] = []): SavedUiEdge[] => {
 	const rawEdges = Array.isArray(ui?.workflowEdges)
 		? ui.workflowEdges
 		: Array.isArray(ui?.flowchartEdges) ? ui.flowchartEdges : [];
-	return rawEdges.map((edge: any) => ({
-		...edge,
-		id: edge?.id
-			?? `edge-${edge?.source}-${edge?.target}-${edge?.sourceHandle ?? 'default'}-${edge?.targetHandle ?? 'default'}`,
-		source: edge?.source,
-		target: edge?.target,
-		sourceHandle: edge?.sourceHandle ?? edge?.data?.branch ?? undefined,
-		targetHandle: edge?.targetHandle ?? undefined,
-		type: 'workflow-edge' as const,
-		data: {
-			...(edge?.data ?? {}),
-			...((edge?.sourceHandle ?? edge?.data?.branch) === 'true'
-				? { branch: 'true' as const } : {}),
-			...((edge?.sourceHandle ?? edge?.data?.branch) === 'false'
-				? { branch: 'false' as const } : {}),
-		},
-	})).filter((edge: SavedUiEdge) => edge.source && edge.target);
+	const typeById = new Map(savedNodes.map((node) => [node.id, node.type]));
+	return rawEdges.map((edge: any) => {
+		const sourceHandle = resolveSourceHandle(edge, typeById.get(edge?.source));
+		const restData = { ...(edge?.data ?? {}) };
+		delete restData.branch;
+		return {
+			...edge,
+			id: edge?.id
+				?? `edge-${edge?.source}-${edge?.target}-${edge?.sourceHandle ?? 'default'}-${edge?.targetHandle ?? 'default'}`,
+			source: edge?.source,
+			target: edge?.target,
+			sourceHandle,
+			targetHandle: TARGET_HANDLES.includes(edge?.targetHandle) ? edge.targetHandle : undefined,
+			type: 'workflow-edge' as const,
+			data: {
+				...restData,
+				...(sourceHandle === 'true' ? { branch: 'true' as const } : {}),
+				...(sourceHandle === 'false' ? { branch: 'false' as const } : {}),
+			},
+		};
+	}).filter((edge: SavedUiEdge) => edge.source && edge.target);
 };
 
 export const getInvalidSavedEdgeReason = (

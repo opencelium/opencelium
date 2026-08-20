@@ -6,8 +6,3 @@ export type LegacyBodyReferenceGeneratorProps = {
 	onApply: (reference: string) => void;
 	showWebhookOption?: boolean;
 };
-
-export type WorkflowEdgeLike = {
-	source?: string;
-	target?: string;
-};

@@ -30,6 +30,7 @@ const lastCall = () => notificationError.mock.calls.at(-1)?.[0] as {
     message: string
     description: string
     duration: number
+    key: string
 }
 
 beforeEach(() => {
@@ -40,7 +41,7 @@ describe('showApiError', () => {
     it('shows a dismiss-only notification by default', () => {
         showApiError({ errorSource: null, group: 'api', transKey: 'notFound' })
 
-        expect(lastCall()).toEqual({
+        expect(lastCall()).toMatchObject({
             message: 'Error',
             description: 'The requested resource was not found.',
             // 0 is antd's "never auto-close": the close icon is the only way out.
@@ -118,6 +119,19 @@ describe('showApiError', () => {
         showApiError({ errorSource: null, group: 'api', transKey: 'notFound' })
 
         expect(lastCall().message).toBe('Error')
+    })
+
+    it('keys a toast by its content, so the same failure reported twice shows once', () => {
+        // A request can genuinely fail twice (refetch after failure, two subscribers,
+        // StrictMode's double mount) — antd updates a same-key notification in place.
+        showApiError({ errorSource: null, group: 'api', transKey: 'notFound' })
+        const first = lastCall().key
+        showApiError({ errorSource: null, group: 'api', transKey: 'notFound' })
+        expect(lastCall().key).toBe(first)
+
+        showApiError({ errorSource: null, group: 'api', transKey: 'validation',
+            message: 'Something else entirely' })
+        expect(lastCall().key).not.toBe(first)
     })
 
     it('still reports an unknown error group', () => {

@@ -7,6 +7,7 @@
     "close": "Schließen",
     "ok": "Ok",
     "delete": "Löschen",
+    "removeJoint": "Verbindung entfernen",
     "duplicate": "Duplizieren",
     "edit": "Bearbeiten",
     "select": "Auswählen",
@@ -109,6 +110,17 @@
     "deleteVersionSuccess": "Version gelöscht",
     "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?"
   },
+  "joint": {
+    "invalid": {
+      "notAMethod": "Nur eine Methode kann Ziel eines Joints sein.",
+      "differentLoopScope": "Das Ziel muss eine Methode im selben Loop-Bereich wie die ausgewählte sein — entweder beide außerhalb jeder Schleife oder beide in derselben Schleife.",
+      "backwards": "Ein Joint kann nur nach vorne zeigen, auf eine Methode, die nach der ausgewählten läuft.",
+      "skipsReferencedMethod": "Dieser Joint würde {{method}} überspringen, deren Antwort diese Methode verwendet.",
+      "skipsReferencedMethodUnnamed": "Dieser Joint würde eine Methode überspringen, deren Antwort diese Methode verwendet."
+    },
+    "removedAfterMove": "{{count}} Joints wurden entfernt — sie sind nach dieser Verschiebung nicht mehr gültig",
+    "removedAfterMove_one": "Der Joint wurde entfernt — er ist nach dieser Verschiebung nicht mehr gültig"
+  },
   "sidebar": {
     "useConnector": {
       "title": "Konnektor verwenden",
@@ -121,6 +133,10 @@
     "addHttpRequest": {
       "title": "HTTP-Anfrage hinzufügen",
       "description": "Fügen Sie eine einfache HTTP-Anfrage hinzu und geben Sie Ihre URL ein."
+    },
+    "addJoint": {
+      "title": "Joint hinzufügen",
+      "description": "Verbindet zwei Knoten miteinander."
     },
     "operatorOption": {
       "if": {
@@ -369,7 +385,9 @@
     "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
     "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf.",
     "testRunIteration": "{{iterator}} = {{count}}",
-    "skipToNextIteration": "Zur nächsten Iteration springen"
+    "testRunIterator": "{{iterator}} =",
+    "skipToNextIteration": "Zur nächsten Iteration springen",
+    "jumpToIteration": "Vorwärts zu einer Iteration springen"
   },
   "saveDialog": {
     "title": "Version speichern",
@@ -583,6 +601,7 @@
     "iteratorLoop": "({{iterator}}-Schleife)",
     "noVariableReferences": "Keine Variablenreferenzen",
     "more": "mehr",
+    "pausedHint": "Bewegen Sie den Mauszeiger über eine hervorgehobene Referenz, um den ermittelten Wert zu sehen.",
     "confirmDelete": {
       "title": "Referenz löschen",
       "message": "Möchten Sie diese Referenz wirklich löschen?"

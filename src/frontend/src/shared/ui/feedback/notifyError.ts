@@ -19,8 +19,15 @@ const STICKY = 0
  * `text` reads as the reason underneath it. Also already translated.
  */
 export const notifyError = (text: string, durationSec?: number, headline?: string) => {
+    const heading = headline || i18n.getFixedT(i18n.language, 'error')('title')
     notification.error({
-        message: headline || i18n.getFixedT(i18n.language, 'error')('title'),
+        // Keyed by content so the same error reported twice updates one toast instead
+        // of stacking two identical ones. One request can genuinely fail twice — a
+        // refetch after the first failure, two components subscribed to the same
+        // endpoint, StrictMode's double mount in dev — and none of that is worth
+        // telling the user about twice. Distinct errors still stack.
+        key: `${heading}\u0000${text}`,
+        message: heading,
         description: text,
         duration: durationSec ?? STICKY,
     })

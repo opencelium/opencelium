@@ -7,6 +7,7 @@
     "close": "Close",
     "ok": "Ok",
     "delete": "Delete",
+    "removeJoint": "Remove joint",
     "duplicate": "Duplicate",
     "edit": "Edit",
     "select": "Select",
@@ -109,6 +110,17 @@
     "deleteVersionSuccess": "Version deleted",
     "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?"
   },
+  "joint": {
+    "invalid": {
+      "notAMethod": "Only a method can be the target of a joint.",
+      "differentLoopScope": "The target must be a method in the same loop scope as the selected one — both outside every loop, or both inside the same loop.",
+      "backwards": "A joint can only point forward, to a method that runs after the selected one.",
+      "skipsReferencedMethod": "This joint would skip {{method}}, whose response this method uses.",
+      "skipsReferencedMethodUnnamed": "This joint would skip a method whose response this method uses."
+    },
+    "removedAfterMove": "{{count}} joints were removed — they are no longer valid after this move",
+    "removedAfterMove_one": "The joint was removed — it is no longer valid after this move"
+  },
   "sidebar": {
     "useConnector": {
       "title": "Use Connector",
@@ -121,6 +133,10 @@
     "addHttpRequest": {
       "title": "Add HTTP Request",
       "description": "Add a simple http request and add your url."
+    },
+    "addJoint": {
+      "title": "Add Joint",
+      "description": "Brings together two nodes."
     },
     "operatorOption": {
       "if": {
@@ -369,7 +385,9 @@
     "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
     "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector.",
     "testRunIteration": "{{iterator}} = {{count}}",
-    "skipToNextIteration": "Jump to next iteration"
+    "testRunIterator": "{{iterator}} =",
+    "skipToNextIteration": "Jump to next iteration",
+    "jumpToIteration": "Jump forward to an iteration"
   },
   "saveDialog": {
     "title": "Save Version",
@@ -583,6 +601,7 @@
     "iteratorLoop": "({{iterator}} loop)",
     "noVariableReferences": "No variable references",
     "more": "more",
+    "pausedHint": "Hover a highlighted reference to see the value it resolved to.",
     "confirmDelete": {
       "title": "Delete reference",
       "message": "Do you really want to delete this reference?"

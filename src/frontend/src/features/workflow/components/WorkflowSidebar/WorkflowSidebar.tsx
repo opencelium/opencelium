@@ -13,7 +13,7 @@ import type { WorkflowSidebarProps } from './WorkflowSidebar.types';
 import { useWorkflowSidebarSelection } from './useWorkflowSidebarSelection';
 import { useConnectorUpdateAction } from './useConnectorUpdateAction';
 
-export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, onSelect }: WorkflowSidebarProps) {
+export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, onSelect, onStartJoint }: WorkflowSidebarProps) {
   const { t } = useI18n('workflow');
   const sidebar = useWorkflowSidebarState({ open: !!action, onClose,
     onSelectSystem: () => onSelect('system') });
@@ -57,6 +57,17 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
     mainSearchMethodItems, methodOperations, selectedConnector });
   const connectorUpdateAction = useConnectorUpdateAction();
 
+  const isMethodSource = selectedNode?.data.kind === 'connector' || selectedNode?.data.kind === 'system';
+  const jointFilteredItems = filteredSidebarItems.filter((item) => item.key !== 'joint' || isMethodSource);
+  const handleSelectMain = (key: string) => {
+    if (key === 'joint') {
+      resetSidebar();
+      if (selectedNode) onStartJoint?.(selectedNode.id);
+      return;
+    }
+    sidebar.onSelectMain(key);
+  };
+
   return (
     <>
       <div className={`drawerOverlay ${action ? 'drawerOverlayOpen' : ''}`} onClick={sidebar.closeSidebar} />
@@ -68,14 +79,14 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         search={mainSearch}
         hasSearch={hasMainSearch}
         isFetching={connectorsFetching}
-        defaultItems={filteredSidebarItems}
+        defaultItems={jointFilteredItems}
         connectorItems={mainSearchConnectorItems}
         connectorUpdateAction={connectorUpdateAction}
         operatorItems={mainSearchOperatorItems}
         methodItems={mainSearchMethodItems}
         onSearchChange={sidebar.setMainSearch}
         onClose={sidebar.closeSidebar}
-        onSelectMain={sidebar.onSelectMain}
+        onSelectMain={handleSelectMain}
         onSelectConnector={sidebar.openConnector}
         onSelectOperator={selection.selectOperator}
         onSelectMethod={selection.selectSearchMethod}
