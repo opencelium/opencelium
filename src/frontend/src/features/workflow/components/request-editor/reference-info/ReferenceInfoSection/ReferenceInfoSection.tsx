@@ -10,7 +10,6 @@ import type { ReferenceInfoSectionProps } from './ReferenceInfoSection.types';
 export const ReferenceInfoSection: React.FC<ReferenceInfoSectionProps> = ({
 	messageProperty,
 	data,
-	readOnly,
 	onReferenceClick,
 }) => {
 	const { t } = useI18n('workflow');
@@ -43,7 +42,6 @@ export const ReferenceInfoSection: React.FC<ReferenceInfoSectionProps> = ({
 				<ReferenceInfo
 					messageProperty={messageProperty}
 					data={data}
-					readOnly={readOnly}
 					onReferenceClick={onReferenceClick}
 				/>
 			) : null}

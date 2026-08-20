@@ -1,0 +1,16 @@
+package com.becon.opencelium.backend.websocket.controller;
+
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class WebSocketMessageController {
+
+    @MessageMapping("/scheduler")
+    @SendTo("/execution/logs")
+    public String broadcastLogs(@Payload String message) {
+        return message;
+    }
+}

@@ -9,11 +9,14 @@ import {
     getPaginationRowModel,
     getExpandedRowModel,
     type ColumnDef,
+    type ColumnSizingState,
+    type OnChangeFn,
     type PaginationState,
     type Row,
     type RowSelectionState,
     type SortingState,
 } from '@tanstack/react-table';
+import { loadColumnSizing, saveColumnSizing } from '@shared/table/columnSizingStorage';
 
 import { entityRegistry } from '@/engine/entity/EntityRegistry';
 import { useFetchEntitiesQuery } from '@shared/api/genericApi';
@@ -89,7 +92,7 @@ const resolveBulkConfig = (entity: EntityDefinition): BulkDeleteConfig | null =>
     return cfg === true ? {} : cfg;
 };
 
-const EMPTY_ROW_DECORATION = {};
+const EMPTY_ROW_DECORATION: { rowClassName?: (row: unknown, rowId: string) => string | undefined } = {};
 const emptyRowDecoration = () => EMPTY_ROW_DECORATION;
 
 const IDENTITY_SUB_ROWS = (rows: EntityRow[]) => rows;
@@ -185,6 +188,14 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
         pageSize: entity.list?.pageSize ?? 10,
     });
     const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
+    const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(() => loadColumnSizing(entityName));
+    const handleColumnSizingChange: OnChangeFn<ColumnSizingState> = (updater) => {
+        setColumnSizing((prev) => {
+            const next = typeof updater === 'function' ? updater(prev) : updater;
+            saveColumnSizing(entityName, next);
+            return next;
+        });
+    };
     const [filterState, setFilterState] = useState<ListFilterState>(() =>
         buildInitialFilterState(filters),
     );
@@ -233,7 +244,10 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
         data: tableRows,
         columns,
         defaultColumn: tableDefaultColumn,
-        state: { sorting, globalFilter, rowSelection, pagination },
+        state: { sorting, globalFilter, rowSelection, pagination, columnSizing },
+        enableColumnResizing: true,
+        columnResizeMode: 'onChange',
+        onColumnSizingChange: handleColumnSizingChange,
         // Sub-rows (depth > 0) are decorative children of their parent and never selectable.
         enableRowSelection: selectable
             ? hasSubRows

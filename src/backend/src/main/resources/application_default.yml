@@ -195,14 +195,46 @@ management:
           UP: 200
 
 opencelium:
-  version: 5.0
+  version: 5.1
   ###########################################################################
   #                                                                         #
-  #   /application-config endpoint                                          #
+  #   Interface languages                                                   #
+  #                                                                         #
+  #   Controls which languages the user interface offers and which one is   #
+  #   used for users who have none set. Codes are ISO 639-1 (two letters,   #
+  #   lowercase): en, de, fr, ...                                           #
+  #                                                                         #
+  #   default   - language applied to new users, to LDAP users on first     #
+  #               login, and as the fallback when a notification template   #
+  #               has no content in the recipient's language                #
+  #   supported - comma-separated list of languages a user may be set to,   #
+  #               and the list returned by GET /message/languages for       #
+  #               authoring notification templates; 'default' must be one   #
+  #               of them. Listing a language does not create its           #
+  #               translations - the matching frontend bundle must exist    #
+  #               too, otherwise the interface falls back to English.       #
+  #                                                                         #
+  ###########################################################################
+  language:
+    default: en
+    supported: en,de
+  ###########################################################################
+  #                                                                         #
+  #   /application-config endpoint (admin-only application.yml editor)      #
+  #                                                                         #
+  #   Powers the GET/PATCH /application-config REST endpoint, which lets    #
+  #   an admin view and edit this very configuration file from the UI       #
+  #   without shell access to the server. Before every write the current    #
+  #   file is backed up and the new content is written atomically, so a     #
+  #   bad edit can always be rolled back from a backup.                     #
   #                                                                         #
   #   file-path        — application.yml on disk to read and write          #
   #   backup.directory — where pre-write backups go (.bak.<epochMillis>)    #
   #   backup.keep      — how many recent backups to retain per target file  #
+  #                                                                         #
+  #   DO NOT modify or remove this block. The endpoint reads and writes     #
+  #   the file that file-path points at — changing these values can break   #
+  #   the config editor or make it write to the wrong file.                 #
   #                                                                         #
   ###########################################################################
   config:
