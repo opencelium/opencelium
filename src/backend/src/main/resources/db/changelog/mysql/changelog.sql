@@ -783,3 +783,16 @@ UPDATE `event_content` `ec`
 SET `ec`.`language` = 'de'
 WHERE LOWER(TRIM(`ec`.`language`)) IN ('ger', 'deu', 'de_de', 'de-de', 'german')
   AND `existing`.`id` IS NULL;
+
+--changeset 5.1:4 stripComments:true splitStatements:true endDelimiter:;
+-- Global, admin-managed settings that apply to every user (see docs/settings/system-settings.md).
+-- 'value' is an opaque JSON string owned by the consumer (first row: 'theme_colors', written by the
+-- frontend), so new settings and shape changes need no further schema migrations. 'updated_by' is a
+-- plain audit column, deliberately not a foreign key, so deleting a user never breaks a setting.
+CREATE TABLE IF NOT EXISTS `system_setting` (
+    `name`       VARCHAR(100) NOT NULL,
+    `value`      TEXT DEFAULT NULL,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL,
+    `updated_by` INT DEFAULT NULL,
+    PRIMARY KEY (`name`)
+);
