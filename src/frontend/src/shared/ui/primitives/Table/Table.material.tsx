@@ -11,7 +11,7 @@ import {
     Checkbox,
 } from '@mui/material';
 import { findStretchColumnId, isRowClickIgnored, renderTruncatedCell } from './Table.utils';
-import type { TableColumnMeta } from './Table.types';
+import type { TableColumnMeta, TableProps } from './Table.types';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
@@ -23,7 +23,7 @@ export const MaterialTable = ({
     rowClassName,
     serverTotal,
     onRowClick,
-}) => {
+}: TableProps<any>) => {
     const headerGroups = tableInstance.getHeaderGroups();
     const rows = tableInstance.getRowModel().rows;
     const hasRowSelection = tableInstance.options.enableRowSelection !== false;
