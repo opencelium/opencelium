@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { addEdge } from '@xyflow/react';
 import type { Connection } from '@xyflow/react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
@@ -6,6 +7,7 @@ import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../ty
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
 import { createCommentNode } from '../utils/createCommentNode';
 import { findAnchoredComment } from '../utils/commentAnchor';
+import { centerOnWorkflowNode } from '../utils/centerOnWorkflowNode';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { UseWorkflowPageOptions } from '../drag-drop/workflowPage.types';
@@ -52,10 +54,15 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     () => setMethodEditor(null), () => setConditionEditor(null),
     () => setAggregatorEditor(null));
 
+  // Stable: the instance is read from the ref at call time, so every consumer
+  // (command bridge, save-error highlighting) can hold on to one identity.
+  const centerOnNode = useCallback((nodeId: string) =>
+    centerOnWorkflowNode(reactFlowInstance.current, nodeId), [reactFlowInstance]);
+
   useWorkflowCommandBridge({
     nodes,
     setNodes,
-    reactFlowInstance,
+    centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
       aggregatorEditor !== null || responseNodeId !== null || historyOpen,
   });
@@ -81,6 +88,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     undoEntries: undoHistory.entries,
     jumpToUndoEntry: undoHistory.jumpTo,
     getViewport: () => reactFlowInstance.current?.getViewport(),
+    centerOnNode,
     setReactFlowInstance: (instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>) => {
       reactFlowInstance.current = instance;
     },

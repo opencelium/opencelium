@@ -30,7 +30,8 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const [changeHistoryOpen, setChangeHistoryOpen] = useState(false);
 	const validation = useWorkflowValidation({ persistedTitle: connection.persistedTitle,
 		nodes: view.hydratedNodes, edges: workflow.edges,
-		setNodeError: workflow.onSetNodeError });
+		setNodeError: workflow.onSetNodeError,
+		centerOnNode: workflow.centerOnNode });
 	const saveWorkflow = useSaveWorkflow({ connectionId: view.activeConnectionId,
 		categoryId, nodes: view.hydratedNodes, edges: workflow.edges, fieldBindings,
 		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors,

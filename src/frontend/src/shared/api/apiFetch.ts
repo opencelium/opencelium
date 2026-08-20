@@ -171,7 +171,7 @@ export async function apiFetchWithHeaders<T = unknown>(
             (res.status === 401 || res.status === 403) &&
             store.getState().auth.status !== 'unauthenticated'
         ) {
-            errorBus.emit(normalizeError({status: res.status, data: errorBody}))
+            errorBus.emit(normalizeError({status: res.status, data: errorBody}, {url: path, method}))
         }
 
         throw new ApiFetchError(message, {

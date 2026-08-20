@@ -90,7 +90,16 @@ export function WorkflowHeader({
 			<HeaderSaveDialog open={saveDialogOpen} value={saveComment}
 				onChange={setSaveComment} onClose={closeSaveDialog} saveDisabled={saveDisabled}
 				onSave={async () => {
-					await onSave({ title: state.name, description: state.description, comment: saveComment });
+					try {
+						await onSave({ title: state.name, description: state.description, comment: saveComment });
+					} catch {
+						// A rejected save reports itself on the page behind this dialog —
+						// a sticky notification, plus a red ring on the node the backend
+						// named — so the overlay has to come down for any of it to be
+						// seen. The typed comment is kept for the retry.
+						setSaveDialogOpen(false);
+						return;
+					}
 					closeSaveDialog();
 				}}
 			/>
