@@ -6,6 +6,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { stripSeconds } from '@shared/ui/wizard-step/editor/cron-editor/cron-editor.utils'
 import { useWizardSubmit } from '@/engine/entity/runtime/genererics/useWizardSubmit'
 import type { ScheduleCreateDialogContentProps, ScheduleCreateForm } from './ScheduleCreateDialogContent.types'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 export function useScheduleCreateForm({
     connectionId, connectionTitle, onSuccess,
@@ -20,7 +21,7 @@ export function useScheduleCreateForm({
 
     const handleSubmit = form.handleSubmit(async ({ title, debugMode, cronExp }) => {
         if (cronExp && !cron(stripSeconds(cronExp), { override: { useBlankDay: true } }).isValid()) {
-            message.error(tEntities('schedule.fields.cronExp.error.invalid'))
+            notifyError(tEntities('schedule.fields.cronExp.error.invalid'))
             return
         }
         setSaving(true)
@@ -32,7 +33,7 @@ export function useScheduleCreateForm({
             message.success(t('schedules.create.success', { title: connectionTitle }))
             onSuccess()
         } catch {
-            message.error(t('schedules.create.error'))
+            notifyError(t('schedules.create.error'))
         } finally {
             setSaving(false)
         }

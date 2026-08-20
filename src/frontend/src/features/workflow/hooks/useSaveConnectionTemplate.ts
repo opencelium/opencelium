@@ -8,6 +8,7 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.typ
 import type { WorkflowTemplate } from '../types/workflowTemplate.types';
 import { buildConnectionPayload } from '../api/connectionPayload';
 import { CONNECTION_TEMPLATE_VERSION, triggerJsonDownload } from '../utils/workflowPage.utils';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 type Params = {
 	connectionId?: string;
@@ -65,7 +66,7 @@ export const useSaveConnectionTemplate = ({ connectionId, title, description,
 			setDialogOpen(false);
 			message.success(`Template "${trimmedName}" saved`);
 		} catch {
-			message.error(t('messages.saveTemplateFailed'));
+			notifyError(t('messages.saveTemplateFailed'));
 		} finally {
 			setIsSaving(false);
 		}
@@ -84,7 +85,7 @@ export const useSaveConnectionTemplate = ({ connectionId, title, description,
 			message.success(tEntities('connection.list.downloadTemplate.success',
 				{ name: filename }));
 		} catch {
-			message.error(tEntities('connection.list.downloadTemplate.error'));
+			notifyError(tEntities('connection.list.downloadTemplate.error'));
 		} finally {
 			setIsDownloading(false);
 		}

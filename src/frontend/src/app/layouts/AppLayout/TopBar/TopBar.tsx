@@ -11,10 +11,11 @@ import {Tooltip} from "@shared/ui/primitives/Tooltip";
 import {MenuSwitcher} from "@app/layouts/AppLayout/Sidebar/MenuSwitcher.tsx";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {hasComponentPermission} from "@/engine/policy";
+import {useAppLanguage} from "@features/user/language/useAppLanguage";
 
 export const TopBar = () => {
     const {isTabletOrMobile, isMobile} = useBreakpoints();
-    const {setLang, lang} = useI18n();
+    const {lang, changeLanguage} = useAppLanguage();
     const {t: tCommon} = useI18n('common');
     const navigate = useNavigate();
     const {normalizedUser} = useAuth();
@@ -75,7 +76,7 @@ export const TopBar = () => {
                 <Tooltip content={tCommon(lang === 'en' ? 'topbar.switchToGerman' : 'topbar.switchToEnglish')}>
                     <Button
                         type={'text'}
-                        onClick={() => setLang(lang === 'en' ? 'de' : 'en')}
+                        onClick={() => void changeLanguage(lang === 'en' ? 'de' : 'en')}
                     >
                         {lang.toUpperCase()}
                     </Button>

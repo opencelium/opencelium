@@ -1,5 +1,5 @@
 import { Input } from 'antd';
-import type { EndpointArg, QueryParam } from '../../../../types/connection';
+import type { Connection, EndpointArg, MethodWithId, QueryParam } from '../../../../types/connection';
 import { UrlInlineValueEditor } from '../UrlInlineValueEditor/UrlInlineValueEditor';
 import type { QueryParamField, UrlQueryParamsTableProps } from './UrlQueryParamsTable.types';
 import { hasArgToken, preventInvalidQueryParamKey, queryParamInputStyle,
@@ -10,10 +10,12 @@ type Props = Pick<UrlQueryParamsTableProps, 'readOnly' | 'onChangeParam' | 'onCa
 	row: QueryParam;
 	field: QueryParamField;
 	endpointArgs: Record<string, EndpointArg>;
+	connection?: Connection | null;
+	currentMethod?: MethodWithId;
 };
 
-export function UrlQueryParamTextInput({ row, field, endpointArgs, readOnly,
-	onChangeParam, onCaretChange }: Props) {
+export function UrlQueryParamTextInput({ row, field, endpointArgs, readOnly, connection,
+	currentMethod, onChangeParam, onCaretChange }: Props) {
 	const value = row[field] || '';
 	const reportCaret = (input: HTMLInputElement | null) => onCaretChange({
 		rowId: row.id, field, caret: input?.selectionStart ?? 0,
@@ -21,6 +23,7 @@ export function UrlQueryParamTextInput({ row, field, endpointArgs, readOnly,
 
 	if (hasArgToken(value)) {
 		return <UrlInlineValueEditor value={value} endpointArgs={endpointArgs} readOnly={readOnly}
+			connection={connection} currentMethod={currentMethod}
 			onChange={(nextValue) => onChangeParam(row.id, { [field]: nextValue })}
 			onCaretChange={(caret) => onCaretChange({ rowId: row.id, field, caret })} />;
 	}

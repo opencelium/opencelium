@@ -1,6 +1,7 @@
 import { Button, Modal } from 'antd';
 import { Provider } from 'react-redux';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { LiveInspectHint } from '../utils/LiveInspectHint';
 import { MethodConfigDialogEditor } from './MethodConfigDialogEditors';
 import type { MethodConfigDialogProps } from './MethodConfigDialog.types';
 import { useMethodConfigDialogState } from './useMethodConfigDialogState';
@@ -39,11 +40,21 @@ export function MethodConfigDialog(props: MethodConfigDialogProps) {
 				</Button>,
 			]}
 		>
+			{/* Flex column rather than the editor owning the fixed height directly:
+			    the hint above it appears only while a run is paused, and the editor
+			    has to give that row its space instead of overflowing the dialog. */}
 			<div data-testid={`workflow-method-dialog-${mode}`}
-				style={{ height: !isUrlMode ? 'calc(100vh - 199px)' : undefined }}>
-				<Provider store={store}>
-					<MethodConfigDialogEditor mode={mode} nodeId={node.id} />
-				</Provider>
+				style={{
+					display: 'flex',
+					flexDirection: 'column',
+					height: !isUrlMode ? 'calc(100vh - 199px)' : undefined,
+				}}>
+				<LiveInspectHint />
+				<div style={!isUrlMode ? { flex: 1, minHeight: 0 } : undefined}>
+					<Provider store={store}>
+						<MethodConfigDialogEditor mode={mode} nodeId={node.id} />
+					</Provider>
+				</div>
 			</div>
 		</Modal>
 	);

@@ -60,8 +60,9 @@ import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../utils/methodColor';
-import { formatLiveReferenceValue, useLiveReferenceValue } from '../request-editor/utils/useLiveReferenceValue';
+import { formatLiveReferenceValue, LIVE_INSPECTABLE_CLASS, useLiveReferenceValue } from '../request-editor/utils/useLiveReferenceValue';
 import { LiveReferenceValuePreview } from '../request-editor/utils/LiveReferenceValuePreview';
+import { LiveInspectHint } from '../request-editor/utils/LiveInspectHint';
 import { useTestRun } from '../../test-run/useTestRun';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../request-editor/body-editor/bodyLegacy.css';
@@ -408,7 +409,7 @@ function ConditionValueInput({
 	const [isFieldHovered, setIsFieldHovered] = useState(false);
 	const parsedReference = parseConditionOperand(fieldValue);
 	const methodContext = operatorIndexPath ? { index: operatorIndexPath } : undefined;
-	const { value: liveValue, hasValue: hasLiveValue, isLoading: isLiveValueLoading } =
+	const { value: liveValue, hasValue: hasLiveValue, isLoading: isLiveValueLoading, canInspect } =
 		useLiveReferenceValue(parsedReference, connection, methodContext, isFieldHovered);
 	const fieldPath = parsePathFromReference(fieldValue);
 	const fieldLabel = selectedMethod
@@ -482,7 +483,7 @@ function ConditionValueInput({
 			{(() => {
 				const fieldSelect = (
 					<div
-						className="conditionFieldSelect"
+						className={`conditionFieldSelect${canInspect ? ` ${LIVE_INSPECTABLE_CLASS}` : ''}`}
 						onMouseEnter={() => setIsFieldHovered(true)}
 						onMouseLeave={() => setIsFieldHovered(false)}
 					>
@@ -657,9 +658,16 @@ function RuleRow({
 					/>
 				);
 				if (!operator || !testRun?.isPaused) return operatorSelect;
+				// Ringed only when at least one operand can actually be read this
+				// pause — the comparison tooltip has nothing to evaluate otherwise.
+				const canInspectComparison = leftLive.canInspect || rightLive.canInspect;
 				return (
 					<Tooltip content={<ComparisonTooltipContent evaluation={comparisonEvaluation} isLoading={isComparisonLoading} />}>
-						<div onMouseEnter={() => setIsOperatorHovered(true)} onMouseLeave={() => setIsOperatorHovered(false)}>
+						<div
+							className={canInspectComparison ? LIVE_INSPECTABLE_CLASS : undefined}
+							onMouseEnter={() => setIsOperatorHovered(true)}
+							onMouseLeave={() => setIsOperatorHovered(false)}
+						>
 							{operatorSelect}
 						</div>
 					</Tooltip>
@@ -970,6 +978,7 @@ export function ConditionBuilderDialog({
 			]}
 		>
 			<div key={renderKey} className="conditionBuilder" data-testid="workflow-condition-builder">
+				<LiveInspectHint />
 				<GroupEditor
 					group={tree}
 					operatorType={operatorType}

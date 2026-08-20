@@ -106,6 +106,12 @@ export type TestRunContextValue = {
 	// advances to a new iteration or finishes — see PlaybackQueue.skipWhile.
 	// A no-op while not paused, same as stepForward.
 	skipToNextIteration: (indexPath: string) => void;
+	// Same fast-forward, aimed at a specific iteration instead of the next one:
+	// re-pauses once the loop's own iteration counter reaches `targetIteration`
+	// (1-based, the number the loop node displays) or the loop finishes short of
+	// it. Forward-only — an applied line is gone, so a target at or behind the
+	// current iteration is the caller's to reject, not something this can honour.
+	skipToIteration: (indexPath: string, targetIteration: number) => void;
 	// Bumped once pausing has finished warming the tree structure down to the
 	// paused-on node (see prefetchPauseTracePath) — the logs panel expands its
 	// ancestors and scrolls it into view, mirroring errorRevealNonce below but

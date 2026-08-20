@@ -12,6 +12,7 @@ import {findRoleIdByName} from "@entities/role/command/roleCache.ts";
 import {ROLE_TAG} from "@entities/role/api/role.tags.ts";
 import {roleApi} from "@entities/role/api/roleApi.ts";
 import {selectAuthUser} from "@entities/auth/model/authSelectors.ts";
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'role';
 
@@ -125,9 +126,7 @@ export const roleDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -148,9 +147,7 @@ export const roleDefinition: EntityDefinition = {
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
 
@@ -201,9 +198,7 @@ export const roleDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ');
                 },
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {

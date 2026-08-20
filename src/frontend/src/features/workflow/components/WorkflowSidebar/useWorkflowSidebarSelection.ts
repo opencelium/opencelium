@@ -1,6 +1,7 @@
+import { resolveConnectorIcon } from '@entities/connector/model/iconUrl';
 import type { WorkflowCreateKind } from '../../types/workflow.types';
 import type { WorkflowSidebarProps } from './WorkflowSidebar.types';
-import { getMethodKey, normalizeConnectorIcon } from './useWorkflowSidebarItems';
+import { getMethodKey } from './useWorkflowSidebarItems';
 import type { useWorkflowSidebarItems } from './useWorkflowSidebarItems';
 import type { useWorkflowSidebarState } from './useWorkflowSidebarState';
 
@@ -43,7 +44,7 @@ export const useWorkflowSidebarSelection = ({
 			selectedConnector ? {
 				connectorId: selectedConnector.connectorId,
 				title: selectedConnector.title,
-				icon: normalizeConnectorIcon(selectedConnector.icon),
+				icon: resolveConnectorIcon(selectedConnector),
 			} : undefined,
 			operation,
 		);

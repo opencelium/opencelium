@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { addEdge } from '@xyflow/react';
 import type { Connection } from '@xyflow/react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
@@ -6,6 +6,9 @@ import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
 import { message } from 'antd';
+import { createCommentNode } from '../utils/createCommentNode';
+import { findAnchoredComment } from '../utils/commentAnchor';
+import { centerOnWorkflowNode } from '../utils/centerOnWorkflowNode';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { UseWorkflowPageOptions } from '../drag-drop/workflowPage.types';
@@ -17,6 +20,7 @@ import { useWorkflowDragMove } from './useWorkflowDragMove';
 import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
 import { evaluateJointTargets } from '../utils/jumpValidator';
+import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
@@ -46,6 +50,9 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     positionLock: draggedPositionLockRef, multiDrag: multiDragRef,
     clearPreview: clearAllDragPreviewState, commitFreeReposition,
     onJointsRemoved: (count) => message.warning(t('joint.removedAfterMove', { count })) });
+  const undoHistory = useWorkflowUndoHistory({ nodes, edges,
+    fieldBindings: options.fieldBindings, isDragging: isAnyNodeDragging,
+    setNodes, setEdges, onFieldBindingsChange: options.onFieldBindingsChange });
   const nodeUpdates = useWorkflowNodeUpdates(setNodes,
     () => setMethodEditor(null), () => setConditionEditor(null),
     () => setAggregatorEditor(null));
@@ -58,10 +65,15 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     [jointSourceId, nodes, edges, options.fieldBindings],
   );
 
+  // Stable: the instance is read from the ref at call time, so every consumer
+  // (command bridge, save-error highlighting) can hold on to one identity.
+  const centerOnNode = useCallback((nodeId: string) =>
+    centerOnWorkflowNode(reactFlowInstance.current, nodeId), [reactFlowInstance]);
+
   useWorkflowCommandBridge({
     nodes,
     setNodes,
-    reactFlowInstance,
+    centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
       aggregatorEditor !== null || responseNodeId !== null || historyOpen,
   });
@@ -82,7 +94,14 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     restoredViewport,
     viewportRestoreVersion,
     centerStartVersion,
+    canUndo: undoHistory.canUndo,
+    canRedo: undoHistory.canRedo,
+    undo: undoHistory.undo,
+    redo: undoHistory.redo,
+    undoEntries: undoHistory.entries,
+    jumpToUndoEntry: undoHistory.jumpTo,
     getViewport: () => reactFlowInstance.current?.getViewport(),
+    centerOnNode,
     setReactFlowInstance: (instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>) => {
       reactFlowInstance.current = instance;
     },
@@ -100,6 +119,10 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       nextViewport?: Viewport,
       options?: { centerStart?: boolean },
     ) => {
+      // A wholesale replacement (connection load, template, version rollback)
+      // is not an in-session edit — starting a fresh stack keeps undo from
+      // splicing the previous workflow into this one.
+      undoHistory.reset();
       setNodes(nextNodes);
       setEdges(nextEdges);
       setRestoredViewport(nextViewport);
@@ -143,6 +166,20 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       setNodes(result.nodes);
       setEdges(result.edges);
       setSidebarAction(null);
+    },
+    // A note is an annotation, not a step: it belongs to the node it is added
+    // from, gets no edge, and never enters the executed graph — which is why it
+    // is raised from the node's own toolbar rather than the add-step sidebar. A
+    // node holds at most one note, so a second request reveals the existing one
+    // (which may just be minimized) instead of stacking another on top.
+    onAddComment: (nodeId: string) => {
+      const existing = findAnchoredComment(nodes, nodeId);
+      if (existing) {
+        if (existing.data.comment?.collapsed) nodeUpdates.onToggleComment(existing.id);
+        return;
+      }
+      const comment = createCommentNode(nodes, nodeId);
+      if (comment) setNodes([...nodes, comment]);
     },
     onDeleteNode: async (nodeId: string) => {
       const targetNode = nodes.find((node) => node.id === nodeId);

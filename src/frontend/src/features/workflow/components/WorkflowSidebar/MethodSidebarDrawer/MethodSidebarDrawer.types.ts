@@ -5,7 +5,7 @@ export type MethodSidebarDrawerProps = {
   title: string;
   subtitle: string;
   placeholder: string;
-  iconUrl?: string | null;
+  connectorIcon?: string | null;
   search: string;
   items: readonly SidebarListItem[];
   onSearchChange: (value: string) => void;

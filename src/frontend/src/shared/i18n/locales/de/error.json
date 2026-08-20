@@ -1,4 +1,5 @@
 {
+  "title": "Fehler",
   "api": {
     "unauthorized": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
     "forbidden": "Ihre Sitzung ist abgelaufen",
@@ -26,6 +27,13 @@
       "invalidToken": "Der Zurücksetzungslink ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.",
       "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
       "failed": "Das Passwort konnte nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
+    },
+    "operation": {
+      "load": "{{resource}} konnten nicht geladen werden",
+      "create": "{{resource}} konnten nicht erstellt werden",
+      "update": "{{resource}} konnten nicht aktualisiert werden",
+      "delete": "{{resource}} konnten nicht gelöscht werden",
+      "request": "Anfrage an {{resource}} fehlgeschlagen"
     }
   },
   "field": {

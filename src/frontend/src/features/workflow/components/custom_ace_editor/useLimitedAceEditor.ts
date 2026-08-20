@@ -11,10 +11,23 @@ export function useLimitedAceEditor({
 	const [currentValue, setCurrentValue] = useState(value);
 	const [isFocused, setIsFocused] = useState(false);
 	const editorRef = useRef<any>(null);
+	// The text the editor and this hook currently agree on. Kept in step with
+	// `currentValue` but readable from the session listener without making the
+	// listener depend on a render.
+	const syncedValueRef = useRef(value);
+	const onChangeRef = useRef(onChange);
 
 	useImperativeHandle(forwardedRef, () => editorRef.current, []);
 
 	useEffect(() => {
+		onChangeRef.current = onChange;
+	}, [onChange]);
+
+	useEffect(() => {
+		// Updated before the render that hands the new value to react-ace, so the
+		// 'change' that react-ace's own setValue emits is already recognisable as
+		// an echo by the time it fires.
+		syncedValueRef.current = value;
 		setCurrentValue(value);
 	}, [value]);
 
@@ -28,19 +41,30 @@ export function useLimitedAceEditor({
 			if (current.length > maxLength) {
 				const selection = editor.getSelectionRange();
 				const nextValue = current.slice(0, maxLength);
+				// Marked as synced BEFORE setValue, because setValue emits 'change'
+				// synchronously and re-enters this handler — without that the
+				// truncation would be reported upward twice.
+				syncedValueRef.current = nextValue;
 				editor.setValue(nextValue, -1);
 				editor.moveCursorToPosition(selection.end);
 				setCurrentValue(nextValue);
-				onChange?.(nextValue);
+				onChangeRef.current?.(nextValue);
 				return;
 			}
+			// Ace emits 'change' both for real typing AND when react-ace pushes our
+			// own `value` prop back into the session. Reporting the latter as an
+			// edit let any text the editor normalises differently (line endings, a
+			// trailing newline) ping-pong between parent and editor until React
+			// gave up with "Maximum update depth exceeded".
+			if (current === syncedValueRef.current) return;
+			syncedValueRef.current = current;
 			setCurrentValue(current);
-			onChange?.(current);
+			onChangeRef.current?.(current);
 		};
 
 		session.on('change', handleSessionChange);
 		return () => session.off('change', handleSessionChange);
-	}, [maxLength, readOnly, onChange]);
+	}, [maxLength, readOnly]);
 
 	return { currentValue, editorRef, isFocused, setIsFocused };
 }

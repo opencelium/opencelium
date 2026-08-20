@@ -123,6 +123,49 @@ export async function resolveLiveReferenceValue(
 	return { value, hasValue: value !== undefined };
 }
 
+// Class marking a reference the user can actually inspect right now — the ring
+// that answers "how would I know hovering does anything?". Styling lives in
+// styles/live-reference.css; it is applied by every reference surface
+// (BodyPointer, RequestReferenceTokens, XmlReferenceTokens, the condition
+// operands, the endpoint/query-param pills) so they all read as one group.
+export const LIVE_INSPECTABLE_CLASS = 'wfLiveInspectable';
+
+// Whether the resolution chain below *could* produce something, decided
+// synchronously with no request: the run is paused, the reference names a
+// method that already executed this run, and the live trees to read it from
+// are present. This is exactly the hook's own `canResolve` precondition, split
+// out so a chip can advertise its inspectability without firing the fetch that
+// would otherwise be the only way to find out — the whole point of the
+// hover-gated `enabled` flag documented below.
+//
+// It stops one step short of "there is a value at this path": that needs the
+// fetched payload. A ringed chip therefore promises a tooltip, not a non-empty
+// one — the alternative (resolving every chip up front to be sure) is the cost
+// this hook exists to avoid.
+export function canInspectLiveReference(
+	reference: ParsedArg | null | undefined,
+	connection: Connection | null | undefined,
+	currentMethod: LiveReferenceMethodContext | undefined,
+	snapshot: TestRunLiveSnapshot,
+): boolean {
+	if (!snapshot.isPaused || !reference) return false;
+	if (!snapshot.logTree || !snapshot.liveGraphStatus || !snapshot.loopAncestorsByIndexPath) return false;
+	const indexPath = resolveTargetMethod(reference, connection, currentMethod)?.index;
+	if (!indexPath) return false;
+	const status = snapshot.liveGraphStatus[indexPath]?.status;
+	return status === 'COMPLETE' || status === 'FAIL';
+}
+
+export function useTestRunLiveSnapshot(): TestRunLiveSnapshot {
+	const testRun = useTestRun();
+	return {
+		isPaused: testRun?.isPaused ?? false,
+		logTree: testRun?.logTree,
+		liveGraphStatus: testRun?.liveGraphStatus,
+		loopAncestorsByIndexPath: testRun?.loopAncestorsByIndexPath,
+	};
+}
+
 // `enabled` gates the actual fetch: a node opened during pause can carry
 // dozens of reference chips, and resolving every one of them up front used
 // to fire a getElementChildren/getMethodDetails request per chip whether or
@@ -137,21 +180,11 @@ export function useLiveReferenceValue(
 	connection: Connection | null | undefined,
 	currentMethod: LiveReferenceMethodContext | undefined,
 	enabled: boolean,
-): { value: unknown; hasValue: boolean; isLoading: boolean } {
-	const testRun = useTestRun();
-	const snapshot: TestRunLiveSnapshot = {
-		isPaused: testRun?.isPaused ?? false,
-		logTree: testRun?.logTree,
-		liveGraphStatus: testRun?.liveGraphStatus,
-		loopAncestorsByIndexPath: testRun?.loopAncestorsByIndexPath,
-	};
+): { value: unknown; hasValue: boolean; isLoading: boolean; canInspect: boolean } {
+	const snapshot = useTestRunLiveSnapshot();
 
 	const indexPath = resolveTargetMethod(reference, connection, currentMethod)?.index;
-	const nodeStatus = indexPath && snapshot.liveGraphStatus ? snapshot.liveGraphStatus[indexPath] : undefined;
-	const hasRun = nodeStatus?.status === 'COMPLETE' || nodeStatus?.status === 'FAIL';
-	const canResolve =
-		snapshot.isPaused && !!reference && !!indexPath && hasRun &&
-		!!snapshot.logTree && !!snapshot.liveGraphStatus && !!snapshot.loopAncestorsByIndexPath;
+	const canResolve = canInspectLiveReference(reference, connection, currentMethod, snapshot);
 	const loopIndex =
 		canResolve && indexPath && snapshot.liveGraphStatus && snapshot.loopAncestorsByIndexPath
 			? resolveCurrentLoopIndex(indexPath, snapshot.loopAncestorsByIndexPath, snapshot.liveGraphStatus)
@@ -196,8 +229,8 @@ export function useLiveReferenceValue(
 	}, [enabled, sessionKey]);
 
 	const isLoading = enabled && canResolve && resolved.sessionKey !== sessionKey;
-	if (resolved.sessionKey !== sessionKey) return { value: undefined, hasValue: false, isLoading };
-	return { value: resolved.value, hasValue: resolved.hasValue, isLoading: false };
+	if (resolved.sessionKey !== sessionKey) return { value: undefined, hasValue: false, isLoading, canInspect: canResolve };
+	return { value: resolved.value, hasValue: resolved.hasValue, isLoading: false, canInspect: canResolve };
 }
 
 // Shared rendering shape for every reference-chip consumer (BodyPointer,

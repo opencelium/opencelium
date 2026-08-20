@@ -31,6 +31,14 @@ export const useWorkflowDragStart = ({ nodes, edges, setNodes, setIsDragging,
 				return;
 			}
 			multiDrag.current = false;
+			// A note is never inserted into the graph — no snapshot, no preview, no
+			// drop target; xyflow moves it and useWorkflowDragMove keeps its offset
+			// from the anchor in sync (see WorkflowCommentData.offset).
+			if (node.type === 'comment') {
+				dragSnapshot.current = null;
+				positionLock.current = null;
+				return;
+			}
 			const stableNodes = sanitizeGraphNodes(stabilizeMethodColors(nodes));
 			const stableEdges = sanitizeGraphEdges(stableNodes, edges);
 			const draggedNode = stableNodes.find((item) => item.id === node.id);

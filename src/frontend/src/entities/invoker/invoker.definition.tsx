@@ -20,6 +20,8 @@ import { buildInvokerXml } from '@entities/invoker/lib/invokerXml'
 import { mapInvokerToForm } from '@entities/invoker/lib/mapInvokerToForm'
 import { downloadInvoker } from '@entities/invoker/lib/downloadInvoker'
 import { buildActionAccess } from '@/engine/policy'
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 const baseKey = 'invoker'
 
@@ -138,9 +140,7 @@ export const invokerDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -158,9 +158,7 @@ export const invokerDefinition: EntityDefinition = {
                 visible: true,
                 order: 2,
                 labelKey: `${baseKey}.fields.description.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -195,9 +193,7 @@ export const invokerDefinition: EntityDefinition = {
                 visible: true,
                 order: 3,
                 labelKey: `${baseKey}.fields.authType.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -264,9 +260,7 @@ export const invokerDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ');
                 },
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
     ],
@@ -413,7 +407,7 @@ export const invokerDefinition: EntityDefinition = {
                             }
                         } catch (err) {
                             console.error(err)
-                            message.error(tEntities('invoker.list.upload.error'))
+                            notifyError(tEntities('invoker.list.upload.error'))
                         } finally {
                             ctx.setLoading(false)
                         }
@@ -458,7 +452,7 @@ export const invokerDefinition: EntityDefinition = {
                                                     )
                                                 } catch (err) {
                                                     console.error(err)
-                                                    message.error(tEntities('invoker.list.download.error'))
+                                                    notifyError(tEntities('invoker.list.download.error'))
                                                 } finally {
                                                     ctx.setLoading(false)
                                                 }

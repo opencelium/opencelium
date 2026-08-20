@@ -22,6 +22,7 @@ import {
     toApiPayload,
     type NotificationItemFormValues,
 } from './notificationsForm'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type Props = {
     schedulerIds: number[]
@@ -105,7 +106,7 @@ export function BulkNotificationsDialogContent({ schedulerIds, onClose, onCreate
                 )
             }
             if (failed > 0) {
-                message.error(
+                notifyError(
                     tEntities('schedule.notifications.bulk.partialError', { count: failed }),
                 )
             }

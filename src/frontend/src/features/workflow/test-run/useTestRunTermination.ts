@@ -8,6 +8,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { TestRunPhase, TestRunResult } from './TestRunContext';
 import { clearActiveTestRun } from './testRunStorage';
 import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 type Params = {
 	phase: TestRunPhase;
@@ -38,7 +39,7 @@ export const useTestRunTermination = ({ phase, setPhase, schedulerIdRef,
 			const failed = !!response && typeof response === 'object' &&
 				('status' in response || 'error' in response);
 			if (failed) {
-				message.error(t('connection.test.stopFailed'));
+				notifyError(t('connection.test.stopFailed'));
 				setPhase('running');
 				return;
 			}

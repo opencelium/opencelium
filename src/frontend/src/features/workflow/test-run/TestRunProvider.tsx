@@ -25,13 +25,13 @@ import {
 } from './TestRunContext';
 import { clearActiveTestRun, getActiveTestRun, saveActiveTestRun } from './testRunStorage';
 import { handleExecutionLogFrame } from './executionLogFrame';
-import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC } from '../utils/workflowApiErrors';
 import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
 import {createId} from "@shared/lib/createId.ts";
 import { EMPTY_LIVE_GRAPH_STATUS, failPendingGraphStatus, reduceLiveGraphStatus, type LiveGraphStatus } from './liveGraphStatus';
 import { PlaybackQueue, type ApplyLogOpts } from './playbackQueue';
 import { getNextStep, type StepMeta } from './playbackStep';
 import { BASE_DOT_TRAVEL_MS, DEFAULT_ANIMATION_SPEED, clampAnimationSpeed } from './animationSpeed';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 const TIMEOUT_TO_COLLECT_LOGS = 3000;
 
@@ -510,6 +510,24 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		revealPausedStep(step);
 	}, [revealPausedStep]);
 
+	// The editable form of the same jump (see LoopIterationInput): fast-forwards
+	// until this loop's own iteration counter reaches `targetIteration` — the
+	// 1-based number the node displays, which reduceLiveGraphStatus increments
+	// per distinct loopIndex value — or the loop ends first, which is as far as
+	// any target can be honoured. Callers own the "is it ahead of us" check:
+	// applied lines are discarded, so the replay has no way back.
+	const skipToIteration = useCallback((indexPath: string, targetIteration: number) => {
+		playbackRef.current?.skipWhile(() => {
+			const current = liveGraphStatusRef.current[indexPath];
+			if (!current) return false;
+			if (current.status === 'COMPLETE' || current.status === 'FAIL') return true;
+			return (current.iterationCount ?? 0) >= targetIteration;
+		});
+		const step = currentStepMetaRef.current;
+		if (!step) return;
+		revealPausedStep(step);
+	}, [revealPausedStep]);
+
 	// Update the ref before the queue reschedules below, same reasoning as
 	// setLiveAnimation above — the reschedule reads animationSpeedRef
 	// synchronously, before setAnimationSpeedState's render-phase update lands.
@@ -587,7 +605,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 				// still working its way through the queue — settleResult's return
 				// value is exactly "did THIS call win", so it can gate the toast
 				// directly without a separate before/after ref check.
-				if (settleResult({ kind: 'failed' })) message.error(tEntities('connection.test.failed'));
+				if (settleResult({ kind: 'failed' })) notifyError(tEntities('connection.test.failed'));
 			} else if (log.type === 'EXECUTION' && log.status === 'COMPLETE') {
 				const didFinish = settleResult({
 					kind: 'finished',
@@ -722,7 +740,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		// Enforce the single-test-per-connection rule (the button is also disabled,
 		// this guards against a race where a test for this connection started moments ago).
 		if (isConflictingTestRunning) {
-			message.error(tEntities('connection.test.otherTestRunning'));
+			notifyError(tEntities('connection.test.otherTestRunning'));
 			return;
 		}
 		const payload = buildTestPayload();
@@ -776,10 +794,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		} catch (err) {
 			console.error(err);
 			const specificMessage = onResolveStartError?.(err);
-			message.error(
-				specificMessage ?? tEntities('connection.test.startFailed'),
-				specificMessage ? RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC : undefined,
-			);
+			notifyError(specificMessage ?? tEntities('connection.test.startFailed'));
 			finishRunImmediately();
 		}
 	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRunImmediately, tEntities, onResolveStartError, resetPauseState, updateLiveGraphStatus]);
@@ -801,7 +816,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			if (isTerminateFailed) {
 				// The run is still alive on the backend — keep the subscription
 				// and the stop button so the user can retry.
-				message.error(tEntities('connection.test.stopFailed'));
+				notifyError(tEntities('connection.test.stopFailed'));
 				setPhase('running');
 				return;
 			}
@@ -896,6 +911,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			resumeAnimation,
 			stepForward,
 			skipToNextIteration,
+			skipToIteration,
 			pauseRevealNonce,
 			errorRevealNonce,
 			revealPending,
@@ -904,7 +920,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			skipToLive,
 			clearLogs,
 		}),
-		[status, phase, logTree, liveGraphStatus, loopAncestorsByIndexPath, currentStep, result, isOrphaned, isOtherTestRunning, isBackendDone, isPlaybackBehind, isLiveAnimation, setLiveAnimation, animationSpeed, setAnimationSpeed, isPaused, pauseAnimation, resumeAnimation, stepForward, skipToNextIteration, pauseRevealNonce, errorRevealNonce, revealPending, startTest, stopTest, skipToLive, clearLogs],
+		[status, phase, logTree, liveGraphStatus, loopAncestorsByIndexPath, currentStep, result, isOrphaned, isOtherTestRunning, isBackendDone, isPlaybackBehind, isLiveAnimation, setLiveAnimation, animationSpeed, setAnimationSpeed, isPaused, pauseAnimation, resumeAnimation, stepForward, skipToNextIteration, skipToIteration, pauseRevealNonce, errorRevealNonce, revealPending, startTest, stopTest, skipToLive, clearLogs],
 	);
 
 	return <TestRunContext.Provider value={value}>{children}</TestRunContext.Provider>;

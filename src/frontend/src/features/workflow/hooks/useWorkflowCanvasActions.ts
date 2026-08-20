@@ -11,15 +11,17 @@ type Params = {
 	setHistoryOpen: Dispatch<SetStateAction<boolean>>;
 	setMethodEditor: Dispatch<SetStateAction<WorkflowMethodEditorState | null>>;
 	setConditionEditor: Dispatch<SetStateAction<WorkflowConditionEditorState | null>>;
+	cancelJoint: () => void;
 };
 
 export const useWorkflowCanvasActions = ({ setSidebarAction, setContextMenu,
-	setHistoryOpen, setMethodEditor, setConditionEditor }: Params) => {
+	setHistoryOpen, setMethodEditor, setConditionEditor, cancelJoint }: Params) => {
 	const closeCanvasPanels = () => {
 		setSidebarAction(null);
 		setContextMenu(null);
 		setHistoryOpen(false);
 		setConditionEditor(null);
+		cancelJoint();
 	};
 
 	const handleNodeDoubleClick: NodeMouseHandler<WorkflowNodeModel> = (_, node) => {

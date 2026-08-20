@@ -1,4 +1,4 @@
-import type { SidebarListItem } from '../../sidebar/SidebarList/SidebarList.types';
+import type { SidebarListItem, SidebarListProps } from '../../sidebar/SidebarList/SidebarList.types';
 
 export type MainSidebarDrawerProps = {
   open: boolean;
@@ -10,6 +10,7 @@ export type MainSidebarDrawerProps = {
   isFetching: boolean;
   defaultItems: readonly SidebarListItem[];
   connectorItems: readonly SidebarListItem[];
+  connectorUpdateAction: SidebarListProps['updateAction'];
   operatorItems: readonly SidebarListItem[];
   methodItems: readonly SidebarListItem[];
   onSearchChange: (value: string) => void;
@@ -18,5 +19,4 @@ export type MainSidebarDrawerProps = {
   onSelectConnector: (key: string) => void;
   onSelectOperator: (key: string) => void;
   onSelectMethod: (key: string) => void;
-  onSelectTriggerConnection: () => void;
 };

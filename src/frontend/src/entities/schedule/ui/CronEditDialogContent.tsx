@@ -11,6 +11,7 @@ import { CronEditor } from '@shared/ui/wizard-step/editor/cron-editor/CronEditor
 import { stripSeconds } from '@shared/ui/wizard-step/editor/cron-editor/cron-editor.utils'
 import { useFetchEntitiesQuery, useUpdateEntityMutation } from '@shared/api/genericApi'
 import type { Schedule, ScheduleUpdateDTO } from '../model/types'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type Props = {
     schedulerId: number
@@ -67,7 +68,7 @@ function CronEditForm({ schedule, connectionTitle, onClose }: FormProps) {
 
     const handleSubmit = form.handleSubmit(async ({ cronExp }) => {
         if (cronExp && !cron(stripSeconds(cronExp), { override: { useBlankDay: true } }).isValid()) {
-            message.error(tEntities('schedule.fields.cronExp.error.invalid'))
+            notifyError(tEntities('schedule.fields.cronExp.error.invalid'))
             return
         }
 
@@ -86,7 +87,7 @@ function CronEditForm({ schedule, connectionTitle, onClose }: FormProps) {
             onClose()
         } catch (err) {
             console.error(err)
-            message.error(tEntities('schedule.cronEdit.error'))
+            notifyError(tEntities('schedule.cronEdit.error'))
         }
     })
 

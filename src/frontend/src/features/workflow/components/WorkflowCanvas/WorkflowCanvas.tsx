@@ -66,6 +66,9 @@ export function WorkflowCanvas({
   onNodeDoubleClick,
   onDeleteNode,
   onOpenAggregatorEditor,
+  onChangeCommentText,
+  onToggleComment,
+  onAddComment,
   onPaneClick,
   restoredViewport,
   viewportRestoreVersion = 0,
@@ -106,13 +109,16 @@ export function WorkflowCanvas({
     [nodes, edges, liveGraphStatus, currentStep],
   );
 
-  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onRemoveJoint });
-  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onRemoveJoint };
+  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment });
+  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment };
   const stableOnOpenAddStep = useCallback<NonNullable<typeof onOpenAddStep>>((...args) => callbacksRef.current.onOpenAddStep?.(...args), []);
   const stableOnOpenContextMenu = useCallback<NonNullable<typeof onOpenContextMenu>>((...args) => callbacksRef.current.onOpenContextMenu?.(...args), []);
   const stableOnDeleteNode = useCallback<NonNullable<typeof onDeleteNode>>((...args) => callbacksRef.current.onDeleteNode?.(...args), []);
   const stableOnOpenAggregatorEditor = useCallback<NonNullable<typeof onOpenAggregatorEditor>>((...args) => callbacksRef.current.onOpenAggregatorEditor?.(...args), []);
   const stableOnRemoveJoint = useCallback((nodeId: string) => callbacksRef.current.onRemoveJoint?.(nodeId), []);
+  const stableOnChangeCommentText = useCallback<NonNullable<typeof onChangeCommentText>>((...args) => callbacksRef.current.onChangeCommentText?.(...args), []);
+  const stableOnToggleComment = useCallback<NonNullable<typeof onToggleComment>>((...args) => callbacksRef.current.onToggleComment?.(...args), []);
+  const stableOnAddComment = useCallback<NonNullable<typeof onAddComment>>((...args) => callbacksRef.current.onAddComment?.(...args), []);
 
   // The failed node's red ring + pulse (testRunScope.utils.ts) otherwise stays
   // up for the rest of the run, but the user can dismiss it early with
@@ -153,6 +159,9 @@ export function WorkflowCanvas({
     jointSourceId,
     jointVerdicts,
     onRemoveJoint: stableOnRemoveJoint,
+    onChangeCommentText: stableOnChangeCommentText,
+    onToggleComment: stableOnToggleComment,
+    onAddComment: stableOnAddComment,
     cache: prepareCacheRef.current,
     testRunScope,
     isEditLocked,
@@ -172,8 +181,8 @@ export function WorkflowCanvas({
     if (!centerStartVersion || centeredStartVersion.current === centerStartVersion) return;
     if (!reactFlowInstance.current) return;
     centeredStartVersion.current = centerStartVersion;
-    positionGraphNearTopLeft(reactFlowInstance.current, nodes, restoredViewport?.zoom ?? 1);
-  }, [centerStartVersion, nodes, restoredViewport?.zoom]);
+    positionGraphNearTopLeft(reactFlowInstance.current, preparedNodes, restoredViewport?.zoom ?? 1);
+  }, [centerStartVersion, preparedNodes, restoredViewport?.zoom]);
 
   // errorRevealNonce bumps once per failed run (after the same ~1.5s pause the
   // logs panel waits out before revealing the failing element — see
@@ -201,7 +210,7 @@ export function WorkflowCanvas({
           onInit?.(instance);
           if (centerStartVersion && centeredStartVersion.current !== centerStartVersion) {
             centeredStartVersion.current = centerStartVersion;
-            positionGraphNearTopLeft(instance, nodes, restoredViewport?.zoom ?? 1);
+            positionGraphNearTopLeft(instance, preparedNodes, restoredViewport?.zoom ?? 1);
           }
         }}
         nodeTypes={workflowNodeTypes}
