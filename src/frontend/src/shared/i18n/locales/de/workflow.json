@@ -140,7 +140,8 @@
     "connectorStep": {
       "header": "Konnektor wählen",
       "subtitle": "Wählen Sie zuerst einen Konnektor",
-      "searchPlaceholder": "Konnektor suchen"
+      "searchPlaceholder": "Konnektor suchen",
+      "fixConnector": "Konnektor bearbeiten, um die Verbindung zu reparieren"
     },
     "methodStep": {
       "header": "Methode wählen",
