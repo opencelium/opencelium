@@ -1,5 +1,7 @@
 import { memo } from 'react';
 import { WorkflowEdge } from '../../edges/WorkflowEdge/WorkflowEdge';
+import { BindingCardNode } from '../../lens/BindingCardNode';
+import { BindingLensEdge } from '../../lens/BindingLensEdge';
 import type { WorkflowNodeType } from '../../types/workflow.types';
 import { CommentNode } from '../../nodes/CommentNode/CommentNode';
 import { ConnectorMethodNode } from '../../nodes/ConnectorMethodNode/ConnectorMethodNode';
@@ -23,4 +25,14 @@ export const workflowNodeTypes = {
 
 export const workflowEdgeTypes = {
 	'workflow-edge': memo(WorkflowEdge),
+};
+
+// Kept apart from workflowEdgeTypes: a lens edge is derived per render and never
+// enters the graph state, so it must not widen the models the state is typed on.
+export const lensEdgeTypes = {
+	'binding-lens-edge': memo(BindingLensEdge),
+};
+
+export const lensNodeTypes = {
+	'binding-lens-card': memo(BindingCardNode),
 };

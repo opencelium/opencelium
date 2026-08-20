@@ -130,6 +130,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onChangeCommentText: workflow.onChangeCommentText,
         onToggleComment: workflow.onToggleComment,
         onAddComment: workflow.onAddComment,
+        fieldBindings: loadedFieldBindings,
+        bindingLens: workflow.bindingLens,
         onPaneClick: closeCanvasPanels }} />
       <WorkflowPanels
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
@@ -149,6 +151,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         changeHistory={{ open: changeHistoryOpen, entries: workflow.undoEntries,
           onClose: () => setChangeHistoryOpen(false),
           onJumpTo: workflow.jumpToUndoEntry }}
+        bindingDrawer={{ selectedKey: workflow.bindingLens.view.selectedKey,
+          nodes: hydratedNodes, edges: workflow.edges, fieldBindings: loadedFieldBindings,
+          readOnly: readOnly || isTestRunLocked,
+          onFieldBindingsChange: setLoadedFieldBindings,
+          onClose: workflow.bindingLens.onClearSelection,
+          onOpenMethodEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }) }}
         contextMenu={{ menu: workflow.contextMenu, node: contextMenuNode,
           onChangeLabel: workflow.onChangeNodeLabel,
           onOpenRequestEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }),

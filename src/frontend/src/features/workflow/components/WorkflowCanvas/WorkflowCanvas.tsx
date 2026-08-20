@@ -1,13 +1,20 @@
 import { Controls, Panel, ReactFlow } from '@xyflow/react';
-import type { ReactFlowInstance } from '@xyflow/react';
+import type { EdgeChange, NodeChange, OnNodeDrag, ReactFlowInstance } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import type {
   WorkflowEdgeModel,
   WorkflowNodeModel,
 } from '../../types/workflow.types';
+import type { LensEdgeModel, LensNodeModel, LensView } from '../../lens/bindingLens.types';
+import type { LensActions } from '../../lens/buildLensElements';
+import { isLensElementId } from '../../lens/lensIds';
+import { useBindingLens } from '../../lens/useBindingLens';
+import { BindingLensLegend } from '../../lens/BindingLensLegend';
+import { BindingLensToggle } from '../../lens/BindingLensToggle';
 import { useTestRun } from '../../test-run/useTestRun';
 import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
-import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
+import { lensEdgeTypes, lensNodeTypes, workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
 import { TestRunAnimationHint } from './TestRunAnimationHint';
@@ -23,8 +30,23 @@ const GRAPH_VIEWPORT_OFFSET = { x: 200, y: 140 };
 // node off-screen above/left of the viewport. Anchor on the whole graph's
 // bounding-box corner instead — `node.position` is already each node's own
 // top-left corner, so the min across all nodes is the graph's top-left corner.
+// The canvas renders the graph's own edges plus the derived binding-lens edges.
+// Only this boundary knows about both; the graph state stays WorkflowEdgeModel.
+type CanvasEdgeModel = WorkflowEdgeModel | LensEdgeModel;
+type CanvasNodeModel = WorkflowNodeModel | LensNodeModel;
+type CanvasInstance = ReactFlowInstance<CanvasNodeModel, CanvasEdgeModel>;
+
+// Stable fallbacks: useBindingLens memoizes on these, so a fresh literal per
+// render would rebuild the lens on every render of a canvas without one.
+const NO_LENS_VIEW: LensView = { expandedNodeIds: [], selectedKey: null };
+const NO_LENS_ACTIONS: LensActions = {
+  onExpandPair: () => {},
+  onCollapseCard: () => {},
+  onSelectBinding: () => {},
+};
+
 const positionGraphNearTopLeft = (
-  instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel> | null,
+  instance: CanvasInstance | null,
   nodes: WorkflowNodeModel[],
   zoom: number,
 ) => {
@@ -65,13 +87,15 @@ export function WorkflowCanvas({
   onToggleComment,
   onAddComment,
   onPaneClick,
+  fieldBindings,
+  bindingLens,
   restoredViewport,
   viewportRestoreVersion = 0,
   centerStartVersion = 0,
   onInit,
   children,
 }: WorkflowCanvasProps) {
-  const reactFlowInstance = useRef<ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel> | null>(null);
+  const reactFlowInstance = useRef<CanvasInstance | null>(null);
   const restoredViewportKey = restoredViewport
     ? `${viewportRestoreVersion}:${restoredViewport.x}:${restoredViewport.y}:${restoredViewport.zoom}`
     : undefined;
@@ -148,6 +172,40 @@ export function WorkflowCanvas({
     testRunFailureDismissed,
   });
 
+  const isLensOpen = !!bindingLens?.open;
+  const lens = useBindingLens({
+    nodes, edges, fieldBindings, open: isLensOpen,
+    view: bindingLens?.view ?? NO_LENS_VIEW,
+    actions: bindingLens?.actions ?? NO_LENS_ACTIONS,
+  });
+  const canvasEdges = useMemo<CanvasEdgeModel[]>(
+    () => lens.edges.length ? [...preparedEdges, ...lens.edges] : preparedEdges,
+    [lens.edges, preparedEdges],
+  );
+  const canvasNodes = useMemo<CanvasNodeModel[]>(
+    () => lens.nodes.length ? [...preparedNodes, ...lens.nodes] : preparedNodes,
+    [lens.nodes, preparedNodes],
+  );
+  // Lens elements exist only for this render, so their changes (selection above
+  // all) must never reach applyNode/EdgeChanges against the graph's own state.
+  const handleEdgesChange = useCallback((changes: EdgeChange<CanvasEdgeModel>[]) => {
+    const graphChanges = changes.filter((change) =>
+      !isLensElementId('id' in change ? change.id : change.item.id));
+    if (graphChanges.length) onEdgesChange(graphChanges as EdgeChange<WorkflowEdgeModel>[]);
+  }, [onEdgesChange]);
+  const handleNodesChange = useCallback((changes: NodeChange<CanvasNodeModel>[]) => {
+    const graphChanges = changes.filter((change) =>
+      !isLensElementId('id' in change ? change.id : change.item.id));
+    if (graphChanges.length) onNodesChange(graphChanges as NodeChange<WorkflowNodeModel>[]);
+  }, [onNodesChange]);
+  // A card is not selectable or draggable, but it is still double-clickable —
+  // and double-click opens a method editor, which a card has no business doing.
+  const handleNodeDoubleClick = onNodeDoubleClick && ((event: ReactMouseEvent,
+    node: CanvasNodeModel) => {
+    if (isLensElementId(node.id)) return;
+    onNodeDoubleClick(event, node as WorkflowNodeModel);
+  });
+
   useEffect(() => {
     if (!restoredViewport || !reactFlowInstance.current) return;
     if (appliedViewportKey.current === restoredViewportKey) return;
@@ -180,28 +238,32 @@ export function WorkflowCanvas({
   }, [testRun?.errorRevealNonce, testRunScope]);
 
   return (
-    <div className="canvasCard">
-      <ReactFlow<WorkflowNodeModel, WorkflowEdgeModel>
-        nodes={preparedNodes}
-        edges={preparedEdges}
+    <div className={`canvasCard ${isLensOpen ? 'canvasCardLens' : ''}`}>
+      <ReactFlow<CanvasNodeModel, CanvasEdgeModel>
+        nodes={canvasNodes}
+        edges={canvasEdges}
         proOptions={{ hideAttribution: true }}
         onInit={(instance) => {
           reactFlowInstance.current = instance;
-          onInit?.(instance);
+          // The page holds the instance only to read the viewport and centre a
+          // node, neither of which depends on the edge type parameter.
+          onInit?.(instance as unknown as ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>);
           if (centerStartVersion && centeredStartVersion.current !== centerStartVersion) {
             centeredStartVersion.current = centerStartVersion;
             positionGraphNearTopLeft(instance, preparedNodes, restoredViewport?.zoom ?? 1);
           }
         }}
-        nodeTypes={workflowNodeTypes}
-        edgeTypes={workflowEdgeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        nodeTypes={{ ...workflowNodeTypes, ...lensNodeTypes }}
+        edgeTypes={{ ...workflowEdgeTypes, ...lensEdgeTypes }}
+        onNodesChange={handleNodesChange}
+        onEdgesChange={handleEdgesChange}
         onConnect={isEditLocked ? undefined : onConnect}
-        onNodeDragStart={onNodeDragStart}
-        onNodeDrag={onNodeDrag}
-        onNodeDragStop={onNodeDragStop}
-        onNodeDoubleClick={isEditLocked ? undefined : onNodeDoubleClick}
+        // Cards set draggable: false, so a drag handler can only ever receive a
+        // graph node — unlike double-click, which is guarded above.
+        onNodeDragStart={onNodeDragStart as OnNodeDrag<CanvasNodeModel> | undefined}
+        onNodeDrag={onNodeDrag as OnNodeDrag<CanvasNodeModel> | undefined}
+        onNodeDragStop={onNodeDragStop as OnNodeDrag<CanvasNodeModel> | undefined}
+        onNodeDoubleClick={isEditLocked ? undefined : handleNodeDoubleClick}
         onPaneClick={onPaneClick}
         nodeDragThreshold={4}
         nodesDraggable
@@ -222,8 +284,16 @@ export function WorkflowCanvas({
             participates in this flex row rather than positioning itself. */}
         <Panel position="top-left" className="canvasTopLeftPanel">
           <Controls className="workflowControls" />
+          {bindingLens && (
+            <BindingLensToggle open={bindingLens.open} onToggle={bindingLens.onToggle} />
+          )}
           <TestRunDebugControls />
         </Panel>
+        {isLensOpen && (
+          <Panel position="bottom-right">
+            <BindingLensLegend summary={lens.summary} />
+          </Panel>
+        )}
       </ReactFlow>
       <TestRunAnimationHint />
     </div>

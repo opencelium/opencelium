@@ -19,6 +19,7 @@ import { useWorkflowDragMove } from './useWorkflowDragMove';
 import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
+import { useBindingLensState } from '../lens/useBindingLensState';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
@@ -31,7 +32,13 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setMethodEditor, responseNodeId, setResponseNodeId, conditionEditor,
     setConditionEditor, aggregatorEditor, setAggregatorEditor, restoredViewport,
     setRestoredViewport, viewportRestoreVersion, setViewportRestoreVersion,
-    centerStartVersion, setCenterStartVersion } = state;
+    centerStartVersion, setCenterStartVersion, bindingLensOpen,
+    setBindingLensOpen, bindingLensExpanded, setBindingLensExpanded,
+    bindingLensSelectedKey, setBindingLensSelectedKey } = state;
+
+  const bindingLens = useBindingLensState({ open: bindingLensOpen, setOpen: setBindingLensOpen,
+    expandedNodeIds: bindingLensExpanded, setExpandedNodeIds: setBindingLensExpanded,
+    selectedKey: bindingLensSelectedKey, setSelectedKey: setBindingLensSelectedKey });
 
   const dragPreview = useWorkflowDragPreviewState(setNodes, setEdges);
   const { updateEdges: updateDragPreviewEdges, updateNodes: updateDragPreviewNodes,
@@ -81,6 +88,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     restoredViewport,
     viewportRestoreVersion,
     centerStartVersion,
+    bindingLens,
     canUndo: undoHistory.canUndo,
     canRedo: undoHistory.canRedo,
     undo: undoHistory.undo,

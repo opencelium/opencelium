@@ -1,0 +1,230 @@
+/* Control-flow edges step back while the lens is on, so the binding arcs read
+   as the foreground layer. Nodes keep full contrast — they are the anchors the
+   user is scanning between. */
+.canvasCardLens .react-flow__edge:not(.bindingLensEdge) {
+  opacity: 0.3;
+}
+
+.bindingLensToggle {
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.bindingLensEdgePath {
+  stroke-width: 2;
+  fill: none;
+}
+
+.bindingLensBadge {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 10px;
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-sm);
+  font-size: 11px;
+  line-height: 16px;
+  pointer-events: all;
+  cursor: default;
+}
+
+.bindingLensBadgeCount {
+  font-weight: 600;
+}
+
+.bindingLensBadgeScript {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.bindingLensBadgeWarning,
+.bindingLensBadgeBroken .bindingLensBadgeCount {
+  color: var(--color-status-error-fg);
+  font-weight: 600;
+}
+
+.bindingLensLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-primary);
+  font-size: 12px;
+}
+
+.bindingLensLegendTitle {
+  font-weight: 600;
+}
+
+.bindingLensLegendRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bindingLensLegendMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 0;
+  border-top: 2px solid var(--color-action-primary);
+  font-size: 10px;
+}
+
+.bindingLensLegendMarkScript {
+  height: auto;
+  border-top: none;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.bindingLensLegendMarkBroken {
+  border-top: 2px dashed var(--color-status-error-fg);
+}
+
+.bindingLensLegendEmpty,
+.bindingLensLegendNote {
+  color: var(--color-text-secondary);
+}
+
+.bindingLensBadgeExpandable {
+  cursor: pointer;
+}
+
+.bindingLensBadgeExpandable:hover {
+  background: var(--color-background-hover);
+}
+
+.bindingCard {
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  background: var(--color-background-elevated);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-primary);
+  font-size: 11px;
+  overflow: hidden;
+}
+
+.bindingCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 8px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-background-subtle);
+}
+
+.bindingCardDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex: none;
+}
+
+.bindingCardTitle {
+  flex: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bindingCardGroup {
+  padding: 3px 8px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+
+.bindingCardRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+}
+
+.bindingCardRow:hover {
+  background: var(--color-background-hover);
+}
+
+.bindingCardRowPath {
+  flex: 1;
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bindingCardRowScript {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.bindingCardRowCounterpart {
+  max-width: 84px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bindingCardRowBroken .bindingCardRowPath {
+  color: var(--color-status-error-fg);
+  text-decoration: line-through;
+}
+
+.bindingCardEmpty {
+  padding: 6px 8px;
+  color: var(--color-text-secondary);
+}
+
+.bindingLensEdgeHit {
+  stroke: transparent;
+  stroke-width: 14;
+  fill: none;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.bindingLensEdgePathSelected {
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 3px var(--color-action-primary));
+}
+
+.bindingCardRowSelected {
+  background: var(--color-action-primary-subtle);
+}
+
+.bindingDrawer {
+  width: 460px;
+}
+
+.bindingDrawerBody {
+  padding: 0;
+}
+
+.bindingDrawerEmpty {
+  padding: 16px;
+}
+
+.bindingDrawerFooter {
+  padding: 8px 16px;
+  border-top: 1px solid var(--color-border-subtle);
+}

@@ -47,6 +47,7 @@ export type IconName =
     | 'minimize'
     | 'arrow-switch'
     | 'workflow'
+    | 'bindings'
     | 'refresh'
     | 'connector'
     | 'flash'

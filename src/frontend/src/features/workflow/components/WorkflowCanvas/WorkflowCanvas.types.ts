@@ -8,6 +8,8 @@ import type {
 	Viewport,
 } from '@xyflow/react';
 import type { PropsWithChildren } from 'react';
+import type { LensView } from '../../lens/bindingLens.types';
+import type { LensActions } from '../../lens/buildLensElements';
 import type {
 	WorkflowAction,
 	WorkflowContextMenu,
@@ -35,6 +37,13 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	onToggleComment: (commentNodeId: string) => void;
 	onAddComment: (nodeId: string) => void;
 	onPaneClick?: () => void;
+	fieldBindings?: readonly unknown[];
+	bindingLens?: {
+		open: boolean;
+		view: LensView;
+		onToggle: () => void;
+		actions: LensActions;
+	};
 	restoredViewport?: Viewport;
 	viewportRestoreVersion?: number;
 	centerStartVersion?: number;

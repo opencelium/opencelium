@@ -23,14 +23,35 @@ const resolveMethodColor = (
   return color;
 };
 
+// Identity is separated from the rest of the method because consumers that only
+// need to answer "which node does this reference colour name?" (the binding
+// lens) must not pay for deserializing every method's request config.
+export type MethodIdentity = { id: string; color: string; name: string };
+
+const isMethodNode = (node: WorkflowNodeModel) =>
+  node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection';
+
+export const resolveMethodIdentities = (nodes: WorkflowNodeModel[]): MethodIdentity[] => {
+  const methodNodes = nodes.filter(isMethodNode);
+  const usedColors = new Set<string>();
+  methodNodes.forEach((node) => {
+    const color = typeof node.data.color === 'string' ? node.data.color.trim() : '';
+    if (color) usedColors.add(color.toLowerCase());
+  });
+  return methodNodes.map((node, index) => ({
+    id: node.id,
+    color: resolveMethodColor(node, index, usedColors),
+    name: node.data.subtitle || node.data.title || node.id,
+  }));
+};
+
 const buildLegacyMethod = (
   node: WorkflowNodeModel,
   index: number,
-  usedColors: Set<string>,
+  identity: MethodIdentity,
 ): MethodWithId => {
   const config = deserializeMethodConfigReferences(ensureMethodConfig(node.data.methodConfig));
-  const name = node.data.subtitle || node.data.title || node.id;
-  const color = resolveMethodColor(node, index, usedColors);
+  const { name, color } = identity;
   const isHttpRequest = node.type === 'system' || node.type === 'trigger-connection';
   const methodType = node.type === 'system'
     ? MethodType.HttpRequest
@@ -69,14 +90,10 @@ const buildLegacyMethod = (
 };
 
 export const buildLegacyConnection = (nodes: WorkflowNodeModel[]): Connection => {
-  const methodNodes = nodes.filter((node) =>
-    node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection');
-  const usedColors = new Set<string>();
-  methodNodes.forEach((node) => {
-    const color = typeof node.data.color === 'string' ? node.data.color.trim() : '';
-    if (color) usedColors.add(color.toLowerCase());
-  });
-  const methods = methodNodes.map((node, index) => buildLegacyMethod(node, index, usedColors));
+  const methodNodes = nodes.filter(isMethodNode);
+  const identities = resolveMethodIdentities(nodes);
+  const methods = methodNodes.map((node, index) =>
+    buildLegacyMethod(node, index, identities[index]));
 
   return {
     connectionId: 1,
