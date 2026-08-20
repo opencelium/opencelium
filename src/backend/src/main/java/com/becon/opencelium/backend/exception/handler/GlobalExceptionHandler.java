@@ -1,8 +1,11 @@
 package com.becon.opencelium.backend.exception.handler;
 
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
+import com.becon.opencelium.backend.exception.JumpValidationException;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.error.JumpValidationErrorResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -32,6 +35,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errorResource);
     }
 
+    @ExceptionHandler(JumpValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<JumpValidationErrorResource> handleJumpValidationException(JumpValidationException ex) {
+        return ResponseEntity.badRequest()
+                .body(new JumpValidationErrorResource(ex.getViolations()));
+    }
+
     @ExceptionHandler(GeneralServiceException.class)
     public ResponseEntity<ErrorResource> handleGeneralException(GeneralServiceException ex) {
         ErrorResource errorResource = new ErrorResource();
@@ -41,5 +51,10 @@ public class GlobalExceptionHandler {
         errorResource.setStatus(ex.getStatus());
         return ResponseEntity.status(ex.getStatus())
                 .body(errorResource);
+    }
+
+    @ExceptionHandler(StorageFileNotFoundException.class)
+    public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
+        return ResponseEntity.notFound().build();
     }
 }

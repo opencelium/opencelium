@@ -12,9 +12,11 @@ import type { UpdateMode, UpdateVersion, UpdateVersionStatus } from '@entities/u
 import { OfflinePackageUploader } from './OfflinePackageUploader'
 import { EntityText } from '@shared/ui/primitives/Text'
 import { Table } from '@shared/ui/primitives/Table'
+import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils'
 import { Button } from '@shared/ui/primitives/Button'
-import { IconButton } from '@shared/ui/primitives/IconButton'
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton'
 import { Radio } from '@shared/ui/primitives/Radio'
+import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useDialog } from '@shared/ui/dialog/useDialog'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { ChangelogDialogContent } from './ChangelogDialogContent'
@@ -50,6 +52,7 @@ type Props = {
 
 export function UpdateAssistantVersionsTable({ name, label }: Props) {
     const { t } = useI18n('entities')
+    const { t: tCommon } = useI18n('common')
     const dialog = useDialog()
     const confirm = useConfirm()
     const { watch, setValue, control } = useFormContext()
@@ -101,11 +104,20 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
         [confirm, t, selectedVersion, setSelectedVersion, deleteVersion],
     )
 
+    // "select" and "action" only ever hold a single control (a radio / an icon
+    // button), so they're pinned to a minimal fixed width, leaving the rest of
+    // the table's width to split evenly across name/status/changelog.
+    const SELECT_COLUMN_WIDTH = 48
+    const ACTION_COLUMN_WIDTH = 48
+    const equalColumnWidth = `calc((100% - ${SELECT_COLUMN_WIDTH + (isOffline ? ACTION_COLUMN_WIDTH : 0)}px) / 3)`
+
     const columns = useMemo<ColumnDef<UpdateVersion>[]>(
         () => [
             {
                 id: 'select',
-                header: () => t('update-assistant.versions.columns.select'),
+                header: () => null,
+                size: SELECT_COLUMN_WIDTH,
+                meta: { align: 'center' },
                 cell: ({ row }) => {
                     const v = row.original
                     const selectable = v.status === 'available'
@@ -125,12 +137,14 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
             {
                 accessorKey: 'name',
                 enableSorting: false,
+                meta: { width: equalColumnWidth },
                 header: () => t('update-assistant.versions.columns.name'),
             },
             {
                 accessorKey: 'status',
                 header: () => t('update-assistant.versions.columns.status'),
                 enableSorting: false,
+                meta: { width: equalColumnWidth },
                 cell: ({ getValue }) => {
                     const status = getValue<UpdateVersionStatus>()
                     return (
@@ -144,6 +158,7 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
                 accessorKey: 'changelogLink',
                 header: () => t('update-assistant.versions.columns.changelog'),
                 enableSorting: false,
+                meta: { width: equalColumnWidth },
                 cell: ({ row }) => {
                     const link = row.original.changelogLink
                     const version = row.original.name
@@ -171,29 +186,32 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
             ...(isOffline
                 ? [{
                     id: 'action',
-                    header: () => t('update-assistant.versions.columns.action'),
+                    header: () => null,
+                    size: ACTION_COLUMN_WIDTH,
+                    meta: { align: 'center' },
                     cell: ({ row }) => {
                         const isRowDeleting = deletingVersion === row.original.name
                         return (
-                            <IconButton
-                                type="text"
-                                size={'sm'}
-                                iconProps={{ name: 'delete' }}
-                                onClick={() => handleDelete(row.original.name)}
-                                loading={isRowDeleting}
-                                disabled={deletingVersion !== null && !isRowDeleting}
-                            />
+                            <Tooltip content={tCommon('actions.delete')}>
+                                <DeleteIconButton
+                                    iconSize={15}
+                                    onClick={() => handleDelete(row.original.name)}
+                                    loading={isRowDeleting}
+                                    disabled={deletingVersion !== null && !isRowDeleting}
+                                />
+                            </Tooltip>
                         )
                     },
                 } as ColumnDef<UpdateVersion>]
                 : []),
         ],
-        [t, name, selectedVersion, dialog, isOffline, handleDelete, deletingVersion],
+        [t, tCommon, name, selectedVersion, dialog, isOffline, handleDelete, deletingVersion, equalColumnWidth],
     )
 
     const tableInstance = useReactTable({
         data: versions,
         columns,
+        defaultColumn: tableDefaultColumn,
         enableRowSelection: false,
         getCoreRowModel: getCoreRowModel(),
     })

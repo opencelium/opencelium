@@ -91,12 +91,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User save(User user) {
-        if (EmailUtility.isEmail(user.getEmail())) {
-            return userRepository.save(user);
-        } else {
-            throw new IllegalArgumentException("Invalid email is supplied to User dto");
+        String email = user.getEmail();
+
+        if (email != null && !EmailUtility.isValid(email)) {
+            throw new IllegalArgumentException("Invalid email is supplied");
         }
+
+        if (user.getAuthMethod() == AuthMethod.BASIC && email == null) {
+            throw new IllegalArgumentException("Email is required for BASIC users");
+        }
+
+        return userRepository.save(user);
     }
 
     @Override

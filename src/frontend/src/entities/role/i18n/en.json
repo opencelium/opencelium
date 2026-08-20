@@ -1,7 +1,10 @@
 {
   "list": {
     "title": "Groups",
-    "subTitle": "Groups define roles and permission levels within the system. Each group controls what users are allowed to create, view, update, or delete."
+    "subTitle": "Groups define roles and permission levels within the system. Each group controls what users are allowed to create, view, update, or delete.",
+    "confirmDelete": {
+      "message": "Are you sure you want to delete role with name \"{{name}}\"?"
+    }
   },
   "actions": {
     "delete": {
@@ -58,7 +61,7 @@
     },
     "recommendations": {
       "1": "Create Connector",
-      "2": "Create Connection"
+      "2": "Create Workflow"
     },
     "steps": {
       "group-details": {

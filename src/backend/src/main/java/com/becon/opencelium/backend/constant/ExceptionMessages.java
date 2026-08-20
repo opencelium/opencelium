@@ -16,6 +16,11 @@ public interface ExceptionMessages {
     String ONLY_OWNER_CAN_PERFORM_ACTION = "Only owner can perform this action";
     String ONLY_OWNER_OR_ADMIN_CAN_PERFORM_ACTION = "Only owner or admin can perform this action";
     String FROM_CONNECTOR_IS_NULL = "fromConnector is null";
+    String OPERATOR_EXPRESSION_IS_EMPTY = "Operator (index=%s, type=%s) has null or empty expression";
     String METHOD_NAME_MUST_BE_NON_NULL = "Method name must not be null";
     String SCHEDULER_NOT_FOUND = "Scheduler not found";
+    String METHOD_CONNECTOR_NOT_FOUND = "Connector (id=%s) referenced by Method (name=%s, index=%s) does not exist. Please select an existing connector.";
+    String METHOD_INVOKER_NOT_FOUND = "Invoker '%s' referenced by Method (name=%s, index=%s) was not found. Put the invoker XML file into '%s' and restart the application.";
+    String METHOD_CONNECTOR_REQUIRED = "Method (name=%s, index=%s) MUST have connector";
+    String METHOD_INVOKER_AND_CONNECTOR_NOT_MATCH = "Invoker '%s' and Connector '%s' referenced by Method (name=%s, index=%s) don't match each other";
 }

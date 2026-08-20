@@ -7,24 +7,58 @@ import { LoopPager } from "../LoopPager";
 import { ElementChildren } from "../LogElementRow";
 import { MethodLogDetails } from "../MethodLogDetails";
 import { ErrorDetail } from "../ErrorDetail";
-import { CopyButton } from "../CopyButton";
+import { CopyButton } from "@shared/ui/actions/CopyButton";
 import { serializeLogElement } from "../serializeLogElement";
 import { useMethodViewMode } from "../methodViewMode";
 import { methodDisplayText } from "../methodView";
+import { useMethodLabelResolver } from "../methodLabels";
 import { useLogErrorTrace } from "../logErrorTrace";
 
+// How long the error-target row keeps its pulse highlight after the
+// test-run reveal scrolls it into view (see logs.css's oc-log-row-error-pulse,
+// which itself completes at 1.5s — this stays a bit longer so the class
+// removal isn't racing the animation's own end).
+const ERROR_HIGHLIGHT_MS = 1800;
+
+// Matches ConnectorStatusDot's pulse duration (features/workflow/connector-status) —
+// same ring animation, kept as a local copy since this dot lives in a different
+// feature and CSS isn't part of either feature's public API.
+const STATUS_PULSE_MS = 1000;
+
 // Mirrors the REST tree's status colors: started rows show a spinner, finished
-// rows a green/red dot.
+// rows a green/red dot. Flashes the same ring pulse ConnectorStatusDot uses
+// when a connector goes down, both when this row's own status flips live and
+// the first time a row mounts already finished — a LOOP/IF's children don't
+// exist in the DOM until the operator is expanded, so a child that already
+// finished while collapsed only gets to announce itself once the user opens
+// the operator and it mounts for the first time.
 export function LiveStatusIndicator({ status }: { status: LiveLogNode["status"] }) {
+  const previousStatusRef = useRef<LiveLogNode["status"] | null>(null);
+  const [isChanged, setIsChanged] = useState(false);
+  useEffect(() => {
+    if (previousStatusRef.current === status) return;
+    previousStatusRef.current = status;
+    if (status === "PENDING") return;
+    setIsChanged(true);
+    const timeout = setTimeout(() => setIsChanged(false), STATUS_PULSE_MS);
+    return () => clearTimeout(timeout);
+  }, [status]);
+
   if (status === "PENDING") return <Loading inline size="xs" />;
+  const color = status === "COMPLETE" ? "var(--color-status-success-fg)" : "var(--color-status-error-fg)";
+  const dotClassName = ["oc-log-status-dot", isChanged && "oc-log-status-dot--changed"]
+    .filter(Boolean)
+    .join(" ");
   return (
     <span
+      className={dotClassName}
       style={{
         width: 8,
         height: 8,
         borderRadius: "50%",
         display: "inline-block",
-        backgroundColor: status === "COMPLETE" ? "var(--color-status-success-fg)" : "var(--color-status-error-fg)",
+        backgroundColor: color,
+        color,
       }}
     />
   );
@@ -32,11 +66,22 @@ export function LiveStatusIndicator({ status }: { status: LiveLogNode["status"] 
 
 // Error routed to this node via `originOfErrorPath` — shown right under the
 // row where the error happened. The stack trace (when present) is on hover.
-function LiveErrorRow({ node, depth }: { node: LiveLogNode; depth: number }) {
+// Plays the same reveal pulse as its header row (see `highlighted`) so the
+// error text itself flashes too, not just the LOOP/IF/default row above it.
+function LiveErrorRow({
+  node,
+  depth,
+  highlighted = false,
+}: {
+  node: LiveLogNode;
+  depth: number;
+  highlighted?: boolean;
+}) {
   const error = node.error;
   if (!error?.message) return null;
   return (
     <div
+      className={highlighted ? "oc-log-row--error-target" : undefined}
       title={error.stackTrace ?? undefined}
       style={{
         padding: `6px 12px 8px ${24 + depth * 22}px`,
@@ -118,14 +163,27 @@ export function LiveLogElementRow({
   const [expandedChildren, setExpandedChildren] = useState<Record<number, boolean>>({});
 
   const { mode } = useMethodViewMode();
-  const { nonce, isOnTrace, isTarget, loopIteration } = useLogErrorTrace();
+  const resolveMethodLabel = useMethodLabelResolver();
+  const {
+    nonce,
+    isOnTrace,
+    isTarget,
+    loopIteration,
+    pauseNonce,
+    isOnPauseTrace,
+    isPauseTarget,
+    pauseLoopIteration,
+  } = useLogErrorTrace();
   const anchorRef = useRef<HTMLDivElement>(null);
+  const [justRevealed, setJustRevealed] = useState(false);
+  const [justPaused, setJustPaused] = useState(false);
 
   // Mark this row as part of the trace to an error (matched by structural
   // indexPath *and* this node's loop-iteration context), unless it already
   // shows a red FAIL dot — no double marker.
   const onTrace = isOnTrace(node.indexPath, node.loopIndex) && node.status !== "FAIL";
   const target = isTarget(node.indexPath, node.loopIndex);
+  const pausedHere = isPauseTarget(node.indexPath, node.loopIndex);
 
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
@@ -151,13 +209,41 @@ export function LiveLogElementRow({
       const iter = loopIteration(node.indexPath, node.loopIndex);
       if (iter !== null) setIterationPos(iter);
     }
-    if (target) {
-      anchorRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
-    }
+    if (!target) return;
+    anchorRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    setJustRevealed(true);
+    const timer = setTimeout(() => setJustRevealed(false), ERROR_HIGHLIGHT_MS);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
 
-  const scrollAnchor = target ? <div ref={anchorRef} aria-hidden /> : null;
+  // Debugger pause reveal: expand ancestors and page loops to the iteration
+  // the run was actually paused in, exactly like the error trail above, but
+  // deliberately does NOT expand the paused-on row ITSELF when it's an
+  // OPERATION — that would fetch and show its request/response, and the
+  // whole point is "only when the user opens it". Containers (LOOP/IF) have
+  // no such hidden detail behind `expanded`, so those are still opened even
+  // when they are themselves the paused-on element — otherwise the tree
+  // couldn't reach further down to reveal anything at all.
+  useEffect(() => {
+    if (pauseNonce === 0 || !isOnPauseTrace(node.indexPath, node.loopIndex)) return;
+    if (!(pausedHere && node.type === "OPERATION")) {
+      if (isControlled) onReveal?.();
+      else setInternalExpanded(true);
+    }
+    if (node.type === "LOOP") {
+      const iter = pauseLoopIteration(node.indexPath, node.loopIndex);
+      if (iter !== null) setIterationPos(iter);
+    }
+    if (!pausedHere) return;
+    anchorRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    setJustPaused(true);
+    const timer = setTimeout(() => setJustPaused(false), ERROR_HIGHLIGHT_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pauseNonce]);
+
+  const scrollAnchor = target || pausedHere ? <div ref={anchorRef} aria-hidden /> : null;
 
   switch (node.type) {
     case "OPERATION": {
@@ -169,7 +255,7 @@ export function LiveLogElementRow({
       const expandable = node.id !== "" || hasError;
       const displayText = methodDisplayText(mode, {
         url: request?.url,
-        label: node.properties.label,
+        label: node.properties.label ?? resolveMethodLabel(node.indexPath),
         name: node.properties.name,
       });
       return (
@@ -180,6 +266,8 @@ export function LiveLogElementRow({
             expandable={expandable}
             expanded={expanded}
             onToggle={toggle}
+            highlighted={justRevealed}
+            pausedHighlighted={justPaused}
             left={
               <>
                 {request?.http_method ? (
@@ -193,7 +281,7 @@ export function LiveLogElementRow({
             }
             right={
               <Meta>
-                {response?.status ? <StatusBadge status={response.status} /> : null}
+                {response?.status && !hasError ? <StatusBadge status={response.status} /> : null}
                 {response?.duration ? (
                   <Typography variant="caption" isSubtle>
                     {response.duration}
@@ -238,6 +326,8 @@ export function LiveLogElementRow({
             expandable
             expanded={expanded}
             onToggle={toggle}
+            highlighted={justRevealed}
+            pausedHighlighted={justPaused}
             left={
               <>
                 <OperatorLabel label="LOOP" hint={node.properties.iterator} />
@@ -254,7 +344,7 @@ export function LiveLogElementRow({
               </Meta>
             }
           />
-          <LiveErrorRow node={node} depth={depth + 1} />
+          <LiveErrorRow node={node} depth={depth + 1} highlighted={justRevealed} />
           {expanded ? (
             showStored ? (
               <LiveChildren
@@ -286,6 +376,8 @@ export function LiveLogElementRow({
             expandable
             expanded={expanded}
             onToggle={toggle}
+            highlighted={justRevealed}
+            pausedHighlighted={justPaused}
             left={
               <>
                 <OperatorLabel label="IF" />
@@ -304,7 +396,7 @@ export function LiveLogElementRow({
               </Meta>
             }
           />
-          <LiveErrorRow node={node} depth={depth + 1} />
+          <LiveErrorRow node={node} depth={depth + 1} highlighted={justRevealed} />
           {expanded ? (
             <LiveChildren tree={tree} childKeys={node.childKeys} depth={depth + 1} />
           ) : null}
@@ -317,6 +409,8 @@ export function LiveLogElementRow({
           {scrollAnchor}
           <LogRow
             depth={depth}
+            highlighted={justRevealed}
+            pausedHighlighted={justPaused}
             left={<OperatorLabel label={node.type} hint={node.properties.name} />}
             right={
               <Meta>
@@ -325,7 +419,7 @@ export function LiveLogElementRow({
               </Meta>
             }
           />
-          <LiveErrorRow node={node} depth={depth + 1} />
+          <LiveErrorRow node={node} depth={depth + 1} highlighted={justRevealed} />
         </>
       );
   }

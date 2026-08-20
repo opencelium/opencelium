@@ -9,13 +9,16 @@ import { Hint } from '@shared/ui/primitives/Hint'
 import { EntityText } from '@shared/ui/primitives/Text'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useAuth } from '@features/auth/useAuth'
+import { hasComponentPermission } from '@/engine/policy'
 import { useChangePasswordMutation } from '@entities/user/api/userApi'
 import { useChangePasswordForm } from '@pages/ProfilePage/hooks/useChangePasswordForm'
 import type { ChangePasswordValues } from '@pages/ProfilePage/schemas/changePassword.schema'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 export function UpdatePasswordCard() {
     const { t } = useI18n('entities')
-    const { logout } = useAuth()
+    const { logout, normalizedUser } = useAuth()
+    const canUpdate = hasComponentPermission(normalizedUser?.permissions ?? [], 'MYPROFILE', 'UPDATE')
     const { form, constraints } = useChangePasswordForm()
     const [changePassword, { isLoading }] = useChangePasswordMutation()
 
@@ -37,7 +40,7 @@ export function UpdatePasswordCard() {
                     })
                     return
                 }
-                message.error(apiMessage ?? 'Unknown error')
+                notifyError(apiMessage ?? 'Unknown error')
                 return
             }
             message.success(t('profile.messages.passwordUpdated'))
@@ -45,6 +48,8 @@ export function UpdatePasswordCard() {
         },
         [changePassword, form, logout, t],
     )
+
+    if (!canUpdate) return null
 
     return (
         <Card title={<EntityText i18nKey="profile.sections.updatePassword" typoProps={{ isBold: true }} />}>
@@ -69,7 +74,7 @@ export function UpdatePasswordCard() {
                             label="profile.fields.repeatNewPassword.label"
                             type="password"
                         />
-                        <Hint>
+                        <Hint type="warning">
                             <EntityText i18nKey="profile.hints.sessionWillExpire" />
                         </Hint>
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

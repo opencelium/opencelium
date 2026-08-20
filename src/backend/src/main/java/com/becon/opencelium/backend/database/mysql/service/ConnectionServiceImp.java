@@ -34,13 +34,11 @@ import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
-import com.becon.opencelium.backend.resource.connection.ConnectionVersionedDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
+import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.LogFileUtility;
+import com.becon.opencelium.backend.utility.TestNameUtils;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
@@ -50,6 +48,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -59,6 +58,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -81,6 +81,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ConnectionUpdateTracker updateTracker;
     private final MaskingRuleRepository ruleRepository;
+    private final ExecutionArgumentService executionArgumentService;
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
     private final OpenceliumProps ocProps;
@@ -102,6 +103,7 @@ public class ConnectionServiceImp implements ConnectionService {
             Mapper<Connection, ConnectionDTO> connectionMapper,
             ConnectionUpdateTracker updateTracker,
             MaskingRuleRepository ruleRepository,
+            ExecutionArgumentService executionArgumentService,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
             OwnershipSecurity ownershipSecurity
@@ -120,6 +122,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.schedulerService = schedulerService;
         this.webhookService = webhookService;
         this.ruleRepository = ruleRepository;
+        this.executionArgumentService = executionArgumentService;
         this.ocProps = ocProps;
         this.connectionMngStartupUpdater = entityVersionManager.getUpdater(ConnectionMng.class, UpdaterVersion.VERSION_4_8);
         this.ownershipSecurity = ownershipSecurity;
@@ -267,6 +270,9 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteById(Long id) {
         Connection connection = getById(id);
 
+        // Strip execution_argument rows
+        executionArgumentService.deleteByConnectionId(id);
+
         deleteSchedules(connection);
 
         connectionRepository.deleteById(id);
@@ -288,6 +294,9 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteAndTrackIt(Long id) {
         Connection connection = getById(id);
 
+        // Strip execution_argument rows
+        executionArgumentService.deleteByConnectionId(id);
+
         deleteSchedules(connection);
 
         connectionRepository.deleteById(id);
@@ -301,6 +310,10 @@ public class ConnectionServiceImp implements ConnectionService {
     @Transactional
     public void deleteOnlyConnection(Long id) {
         Connection connection = getById(id);
+
+        // Strip execution_argument rows
+        executionArgumentService.deleteByConnectionId(id);
+
         deleteSchedules(connection);
         connectionRepository.deleteById(id);
     }
@@ -380,6 +393,8 @@ public class ConnectionServiceImp implements ConnectionService {
                 connectionDTOMng.setFromConnector(connectorMapper.toDTO(connectorService.getById(connection.getFromConnector())));
                 connectionDTOMng.getFromConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
                 connectionDTOMng.getFromConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+            } else {
+                fillMethodInvoker(connectionDTOMng.getFromConnector());
             }
         }
 
@@ -397,6 +412,27 @@ public class ConnectionServiceImp implements ConnectionService {
         }
         fieldBindingMngService.detach(connectionDTOMng);
         return connectionDTOMng;
+    }
+
+    private void fillMethodInvoker(ConnectorDTO connector) {
+        if (connector == null || CollectionUtils.isEmpty(connector.getMethods())) {
+            return;
+        }
+
+        Set<Integer> ids = connector.getMethods().stream()
+                .map(x -> x.getConnector() != null && x.getConnector().getInvoker() == null ? x.getConnector().getConnectorId() : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<Integer, Connector> connectorById = connectorService.getAllById(ids).stream()
+                .collect(Collectors.toMap(Connector::getId, Function.identity()));
+
+        for (MethodDTO method : connector.getMethods()) {
+            if (method.getConnector() != null && method.getConnector().getInvoker() == null) {
+                Connector methodConnector = connectorById.get(method.getConnector().getConnectorId());
+                method.getConnector().setInvoker(methodConnector != null ? methodConnector.getInvoker() : null);
+            }
+        }
     }
 
     @Override
@@ -521,7 +557,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
         for (Long id : ids) {
             Connection connection = getById(id);
-            if (Utils.compare(targetVersion, connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
+            if (Utils.compare(targetVersion, connection.getOcVersion()) > 0 && TestNameUtils.isNotTestConnection(connection.getTitle())) {
 
                 List<ConnectionMng> connections = connectionMngService.getAllByConnectionIdRaw(connection.getId());
                 if (connections.isEmpty()) {
@@ -581,17 +617,40 @@ public class ConnectionServiceImp implements ConnectionService {
         List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connectionId);
 
         return connections.stream()
-                .map(x -> {
-                    ConnectionVersionedDTO versionedDTO = new ConnectionVersionedDTO();
-                    versionedDTO.setConnectionId(connection.getId());
-                    versionedDTO.setTitle(connection.getTitle());
-                    versionedDTO.setSnapshotId(x.getId());
-                    versionedDTO.setCreatedAt(x.getCreatedAt() != null ? x.getCreatedAt().toEpochMilli() : null);
-                    versionedDTO.setCurrent(Objects.equals(connection.getSnapshotId(), x.getId()));
-                    versionedDTO.setAuthor(x.getCreatedBy());
-                    versionedDTO.setComment(x.getComment());
-                    return versionedDTO;
-                }).toList();
+                .map(x -> toVersionedDTO(connection, x))
+                .toList();
+    }
+
+    @Override
+    public Map<Long, ConnectionVersionedDTO> getLastVersions(List<Connection> connections) {
+        if (CollectionUtils.isEmpty(connections)) {
+            return Map.of();
+        }
+
+        Map<String, Connection> connectionBySnapshotId = connections.stream()
+                .filter(c -> c.getId() != null && StringUtils.isNotBlank(c.getSnapshotId()))
+                .collect(Collectors.toMap(Connection::getSnapshotId, Function.identity(), (a, b) -> a));
+
+        Map<Long, ConnectionVersionedDTO> lastVersions = new HashMap<>();
+        for (ConnectionMng snapshot : connectionMngService.getVersionMetaByIds(connectionBySnapshotId.keySet())) {
+            Connection connection = connectionBySnapshotId.get(snapshot.getId());
+            if (connection != null) {
+                lastVersions.put(connection.getId(), toVersionedDTO(connection, snapshot));
+            }
+        }
+        return lastVersions;
+    }
+
+    private ConnectionVersionedDTO toVersionedDTO(Connection connection, ConnectionMng snapshot) {
+        ConnectionVersionedDTO versionedDTO = new ConnectionVersionedDTO();
+        versionedDTO.setConnectionId(connection.getId());
+        versionedDTO.setTitle(connection.getTitle());
+        versionedDTO.setSnapshotId(snapshot.getId());
+        versionedDTO.setCreatedAt(snapshot.getCreatedAt() != null ? snapshot.getCreatedAt().toEpochMilli() : null);
+        versionedDTO.setCurrent(Objects.equals(connection.getSnapshotId(), snapshot.getId()));
+        versionedDTO.setAuthor(snapshot.getCreatedBy());
+        versionedDTO.setComment(snapshot.getComment());
+        return versionedDTO;
     }
 
     @Override
@@ -677,15 +736,14 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     /**
-     * Returns {@code connections} as-is when {@code includeTest} is true; otherwise drops every test
-     * connection (title matching {@code !*test_connection_...}).
+     * Returns {@code connections} as-is when {@code includeTest} is true; otherwise drops every test connection
      */
     private List<Connection> excludeTestIfNeeded(List<Connection> connections, Boolean includeTest) {
         if (Boolean.TRUE.equals(includeTest) || connections == null || connections.isEmpty()) {
             return connections;
         }
         return connections.stream()
-                .filter(c -> !isTestConnection(c.getTitle()))
+                .filter(c -> TestNameUtils.isNotTestConnection(c.getTitle()))
                 .toList();
     }
 
@@ -714,7 +772,7 @@ public class ConnectionServiceImp implements ConnectionService {
                 log.info("Skipping deletion of connection id={}: already removed", id);
                 continue;
             }
-            if (running.contains(id) && isTestConnection(connection.get().getTitle())) {
+            if (running.contains(id) && TestNameUtils.isTestConnection(connection.get().getTitle())) {
                 log.info("Skipping deletion of running test connection id={}", id);
                 continue;
             }
@@ -742,10 +800,6 @@ public class ConnectionServiceImp implements ConnectionService {
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    private boolean isTestConnection(String title) {
-        return title != null && title.matches(RegExpression.TEST_CONNECTION_REGEX);
-    }
 
     private String resolveVersion(Connection connection) {
         return connection.getToConnector() == null

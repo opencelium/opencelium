@@ -8,12 +8,25 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         items: string,
         simple: string,
         actions: {
+            prev: string
+            submit: string
+            next: string
             create: string
             update: string
             delete: string
             view: string
             edit: string
             ctrlEnterHint: string
+            cmdEnterHint: string
+        }
+        copy: {
+            tooltip: string
+            empty: string
+            success: string
+            failed: string
+        }
+        field: {
+            required: string
         }
         status: {
             loading: string
@@ -21,6 +34,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         }
         credentialEditor: {
             updateWithoutMasterPassword: string
+            masterPasswordNotConfigured: string
         }
         errorBoundary: {
             retry: string
@@ -44,6 +58,10 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             subtitle: string
             goBack: string
             goHome: string
+        }
+        accessDenied: {
+            title: string
+            subtitle: string
         }
         dialog: {
             maximize: string
@@ -92,7 +110,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         }
         commandPalette: {
             placeholder: string
+            noResults: string
             groups: {
+                workflow: string
                 recent: string
                 navigate: string
                 create: string
@@ -116,12 +136,27 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 uploadInvoker: string
                 downloadInvoker: string
                 systemCheck: string
+                ldapCheck: string
+                workflow: string
+                help: string
             }
             footer: {
                 select: string
                 autocomplete: string
                 navigate: string
                 close: string
+            }
+            help: {
+                title: string
+                subtitle: string
+                keyboardTitle: string
+                empty: string
+                searchPlaceholder: string
+                noResults: string
+                shortcuts: {
+                    open: string
+                    clearScope: string
+                }
             }
         }
         sidebar: {
@@ -133,6 +168,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 message: string
             }
         }
+        footer: {
+            copyright: string
+        }
         topbar: {
             switchToGerman: string
             switchToEnglish: string
@@ -142,6 +180,10 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             profile: string
             createWorkflow: string
             createWorkflowHint: string
+            docs: string
+        }
+        user: {
+            unknown: string
         }
     },
 }

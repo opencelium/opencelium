@@ -58,10 +58,12 @@ export function ForgotPasswordForm() {
             if (e instanceof ApiFetchError) {
                 const code = extractErrorCode(e.body)
                 if (code) {
+                    // EMAIL_RECOVERY_FAILED used to ask for a 12s toast so its long
+                    // text could be read; errors now stay until dismissed, which
+                    // covers that on its own.
                     errorBus.emit({
                         type: ERROR_TYPE_MAP[code],
                         messageKey: ERROR_MESSAGE_KEY_MAP[code],
-                        ...(code === 'EMAIL_RECOVERY_FAILED' && { durationSec: 12 }),
                     })
                 } else {
                     errorBus.emit({ type: 'UNKNOWN', messageKey: 'forgotPassword.failed' })
@@ -108,7 +110,7 @@ export function ForgotPasswordForm() {
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                 <Typography variant="label" isBold>
-                                    {t('fields.email.label')}
+                                    {t('fields.emailOrUsername.label')}
                                 </Typography>
                                 <Controller
                                     name="email"
@@ -120,7 +122,7 @@ export function ForgotPasswordForm() {
                                             onChange={field.onChange}
                                             onBlur={field.onBlur}
                                             name={field.name}
-                                            placeholder={t('fields.email.placeholder')}
+                                            placeholder={t('fields.emailOrUsername.placeholder')}
                                             error={!!emailErrorKey}
                                             autoFocus
                                             testId="forgot-password-email"

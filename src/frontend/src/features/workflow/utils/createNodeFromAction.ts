@@ -4,7 +4,7 @@ import { OFFSETS, SUBTITLES, TITLES } from './graph.constants';
 import { getDefaultSourceHandle, getDefaultTargetHandle, getNodeType } from './graph.handles';
 import { getBranchMaxX, rebalanceOperatorRightChains, shiftNodesByIds } from './graph.layout';
 import { collectDescendantNodeIds } from './graph.traversal';
-import { createMethodConfigFromOperation } from './requestConfig';
+import { createMethodConfigFromOperation, createMethodConfigFromWebhookUrl } from './requestConfig';
 import { createShortId } from '@shared/lib/createId';
 import { ALL_COLORS } from '../constants/colors';
 
@@ -14,11 +14,11 @@ function findOutgoingEdgeForAction(sourceNodeId: string, action: CreateNodeFromA
   );
 }
 
-function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeModel, interceptedTargetNode?: WorkflowNodeModel) {
+function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeModel) {
   const nodeType = getNodeType(args.action.kind!);
   const nextId = createShortId(args.action.kind);
   const usedColors = new Set(args.nodes.map((node) => node.data.color?.toLowerCase()).filter(Boolean));
-  const nextColor = nodeType === 'connector' || nodeType === 'system'
+  const nextColor = nodeType === 'connector' || nodeType === 'system' || nodeType === 'trigger-connection'
     ? ALL_COLORS.find((color) => !usedColors.has(color.toLowerCase()))
     : undefined;
   const baseX = sourceNode.type === 'if' || sourceNode.type === 'loop'
@@ -36,12 +36,21 @@ function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeMo
     data: {
       title: args.action.kind === 'connector' && args.action.connector
         ? args.action.connector.title
+        : args.action.kind === 'trigger-connection' && args.action.triggerConnection
+        ? args.action.triggerConnection.connectionTitle
         : TITLES[args.action.kind!],
-      subtitle: args.action.methodName ?? SUBTITLES[args.action.kind!],
+      subtitle: args.action.kind === 'trigger-connection' && args.action.triggerConnection
+        ? args.action.triggerConnection.scheduleTitle
+        : args.action.methodName ?? SUBTITLES[args.action.kind!],
       kind: nodeType,
       connector: args.action.connector,
+      triggerConnection: args.action.triggerConnection,
       color: nextColor,
-      methodConfig: nodeType === 'connector' || nodeType === 'system' ? createMethodConfigFromOperation(args.action.methodOperation) : undefined,
+      methodConfig: nodeType === 'trigger-connection'
+        ? createMethodConfigFromWebhookUrl(args.action.triggerConnection?.webhookUrl ?? '')
+        : nodeType === 'connector' || nodeType === 'system'
+        ? createMethodConfigFromOperation(args.action.methodOperation)
+        : undefined,
     },
   };
   const newEdge: WorkflowEdgeModel = {
@@ -74,7 +83,16 @@ function reconnectExistingBranch(
     targetHandle: asRow ? getDefaultTargetHandle('right') : interceptedEdge.targetHandle ?? getDefaultTargetHandle(args.action.direction),
     type: 'workflow-edge',
     markerEnd: { type: MarkerType.ArrowClosed },
-    data: { branch: asRow ? undefined : args.action.direction === 'right' && built.nodeType === 'if' ? 'false' : interceptedEdge.data?.branch },
+    // A branch marker belongs to edges leaving an IF only — inheriting the
+    // intercepted edge's marker onto a method-sourced edge produced data that the
+    // loader later mistook for a source handle (see getSavedUiEdges).
+    data: {
+      branch: asRow
+        ? undefined
+        : built.nodeType === 'if' && args.action.direction === 'right'
+          ? 'false'
+          : undefined,
+    },
   };
   const nextEdges = [...args.edges.filter((edge) => edge.id !== interceptedEdge.id), built.newEdge, bridgedEdge];
   return { nodes: rebalanceOperatorRightChains([...shiftedNodes, built.newNode], nextEdges), edges: nextEdges };
@@ -85,7 +103,7 @@ export function createNodeFromAction(args: CreateNodeFromActionArgs) {
   if (!sourceNode || !args.action.kind) return { nodes: args.nodes, edges: args.edges };
   const interceptedEdge = findOutgoingEdgeForAction(sourceNode.id, args.action, args.edges);
   const interceptedTargetNode = args.nodes.find((node) => node.id === interceptedEdge?.target);
-  const built = buildNewNode(args, sourceNode, interceptedTargetNode);
+  const built = buildNewNode(args, sourceNode);
   if (interceptedEdge && interceptedTargetNode) {
     return reconnectExistingBranch(args, sourceNode, interceptedEdge, interceptedTargetNode, built);
   }

@@ -6,13 +6,15 @@ import {AnimatePresence, motion} from "framer-motion";
 import React, {useEffect} from "react";
 import {ErrorBoundary} from "@shared/errors/boundary/ErrorBoundary.tsx";
 import {PageCrash} from "@shared/ui/feedback/crash/PageCrash.tsx";
+import {AppFooter} from "@shared/ui/layout/AppFooter.tsx";
 
 const { Content } = Layout;
 
 type LayoutContentProps = {
     isNotCard?: boolean;
+    hasNoFooter?: boolean;
 }
-export const LayoutContent = ({isNotCard}: LayoutContentProps) => {
+export const LayoutContent = ({isNotCard, hasNoFooter}: LayoutContentProps) => {
     const location = useLocation();
 
     const { toggleCommandContent, showCommandContent } = useLayoutStore();
@@ -85,6 +87,7 @@ export const LayoutContent = ({isNotCard}: LayoutContentProps) => {
                     </motion.div>
                 </AnimatePresence>
             }
+            {!showCommandContent && !hasNoFooter && <AppFooter />}
         </Content>
     );
 };

@@ -7,7 +7,10 @@
     "close": "Close",
     "ok": "Ok",
     "delete": "Delete",
+    "removeJoint": "Remove joint",
+    "duplicate": "Duplicate",
     "edit": "Edit",
+    "select": "Select",
     "createNew": "Create new",
     "insertReference": "Insert reference",
     "addAttribute": "Add attribute",
@@ -15,7 +18,14 @@
     "openScriptNewWindow": "Open script in new window",
     "maximizeScript": "Maximize script",
     "minimizeScript": "Minimize script",
-    "load": "Load"
+    "maximizeRequestData": "Maximize request data",
+    "minimizeRequestData": "Minimize request data",
+    "load": "Load",
+    "undo": "Undo",
+    "redo": "Redo",
+    "createEnhancement": "Create enhancement",
+    "deleteEnhancement": "Delete enhancement",
+    "deleteReference": "Delete reference"
   },
   "confirmDelete": {
     "title": "Delete step",
@@ -32,6 +42,41 @@
       "message": "Do you want to replace also the name and description?",
       "replace": "Yes",
       "keep": "No"
+    }
+  },
+  "schedules": {
+    "title": "Schedules",
+    "add": "Add schedule",
+    "nextRun": "Next run in {{duration}}",
+    "manual": "Manual only",
+    "expand": "Show details",
+    "collapse": "Hide details",
+    "empty": "No schedules for this workflow yet.",
+    "saveFirst": "Save the workflow to attach schedules.",
+    "pill": {
+      "tooltip": "Schedules for this workflow"
+    },
+    "aggregate": {
+      "running": "A schedule is running",
+      "error": "Last run failed",
+      "ok": "All schedules healthy",
+      "idle": "No recent runs"
+    },
+    "actions": {
+      "delete": "Delete schedule"
+    },
+    "create": {
+      "title": "New schedule",
+      "subtitle": "Create a schedule for \"{{title}}\".",
+      "submit": "Create",
+      "cancel": "Cancel",
+      "success": "Schedule for \"{{title}}\" created.",
+      "error": "Could not create the schedule."
+    },
+    "delete": {
+      "title": "Delete schedule",
+      "message": "Are you sure you want to delete the schedule \"{{title}}\"?",
+      "success": "Schedule \"{{title}}\" deleted."
     }
   },
   "history": {
@@ -65,6 +110,17 @@
     "deleteVersionSuccess": "Version deleted",
     "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?"
   },
+  "joint": {
+    "invalid": {
+      "notAMethod": "Only a method can be the target of a joint.",
+      "differentLoopScope": "The target must be a method in the same loop scope as the selected one — both outside every loop, or both inside the same loop.",
+      "backwards": "A joint can only point forward, to a method that runs after the selected one.",
+      "skipsReferencedMethod": "This joint would skip {{method}}, whose response this method uses.",
+      "skipsReferencedMethodUnnamed": "This joint would skip a method whose response this method uses."
+    },
+    "removedAfterMove": "{{count}} joints were removed — they are no longer valid after this move",
+    "removedAfterMove_one": "The joint was removed — it is no longer valid after this move"
+  },
   "sidebar": {
     "useConnector": {
       "title": "Use Connector",
@@ -77,6 +133,10 @@
     "addHttpRequest": {
       "title": "Add HTTP Request",
       "description": "Add a simple http request and add your url."
+    },
+    "addJoint": {
+      "title": "Add Joint",
+      "description": "Brings together two nodes."
     },
     "operatorOption": {
       "if": {
@@ -96,7 +156,8 @@
     "connectorStep": {
       "header": "Choose connector",
       "subtitle": "Select a connector first",
-      "searchPlaceholder": "search connector"
+      "searchPlaceholder": "search connector",
+      "fixConnector": "Update connector to fix the connection"
     },
     "methodStep": {
       "header": "Choose method",
@@ -108,12 +169,36 @@
     "willBeAddedAfter": "It will be added after: {{name}}",
     "searchPlaceholder": "search",
     "triggerConnection": {
-      "title": "Trigger Connection",
-      "description": "Runs another connection if this step is successfully finished."
+      "title": "Trigger Workflow",
+      "description": "Starts another workflow's schedule via its webhook when this step succeeds, without waiting for it to finish."
     },
-    "connectorsLoading": {
-      "title": "Loading connectors...",
-      "description": "Please wait while connectors are loaded."
+    "triggerConnectionStep": {
+      "header": "Choose workflow",
+      "subtitle": "Select the workflow you want to trigger",
+      "searchPlaceholder": "search workflow",
+      "noSchedule": "This workflow doesn't have a schedule yet.",
+      "scheduleCount": "{{count}} schedules",
+      "scheduleCount_one": "{{count}} schedule",
+      "loadError": {
+        "title": "Failed to load workflows",
+        "description": "Check the backend connection and try again."
+      },
+      "empty": {
+        "title": "No workflows found",
+        "description": "There are no other workflows available to trigger."
+      },
+      "confirmCreateWebhook": {
+        "title": "No webhook yet",
+        "message": "\"{{connection}}\" doesn't have a webhook yet. Do you want to create one now?"
+      },
+      "selectScheduleDialog": {
+        "title": "Select a schedule",
+        "description": "\"{{connection}}\" has multiple schedules. Choose which one this step should trigger.",
+        "placeholder": "search schedule",
+        "submit": "Continue",
+        "cancel": "Cancel",
+        "hasWebhookTooltip": "This schedule already has a webhook"
+      }
     },
     "connectorsError": {
       "title": "Failed to load connectors",
@@ -124,8 +209,12 @@
       "description": "There are no connectors matching this search."
     },
     "connectorStatus": {
-      "passed": "Connection check passed",
-      "failed": "Connection check failed"
+      "up": "Connection test passed — this connector is ready to use.",
+      "authFailed": "Connection test failed — the connector's credentials were rejected.",
+      "down": "Connection test failed — the connector could not be reached.",
+      "unknown": "This connector hasn't been tested yet.",
+      "failedWithReason": "Connection test failed. Error: \"{{reason}}\".",
+      "checkedAt": "{{message}} Checked {{time}}."
     },
     "methodsEmpty": {
       "title": "No methods found",
@@ -139,13 +228,80 @@
     "connectorMethodsFallback": "Methods from {{invoker}} invoker."
   },
   "headerMenu": {
+    "assignCategory": "Assign Category",
+    "assignCategoryDisabledHint": "Save the workflow first to assign it a category",
     "downloadAsTemplate": "Download as Template",
+    "downloadAsTemplateDisabledHint": "Save the workflow first to download it as a template",
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
-    "editorAppearance": "Editor Appearance",
-    "inDevelopment": "In development",
+    "versionHistory": "Version History",
+    "changeHistory": "Change History",
+    "testRunLockedHint": "Not available while a test run is in progress",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
+  },
+  "assignCategoryDialog": {
+    "title": "Assign Category",
+    "description": "Choose a category to organize this workflow under.",
+    "selectPlaceholder": "Select category...",
+    "confirmUnassign": {
+      "title": "Remove category assignment",
+      "message": "Are you sure you want to remove this workflow's category assignment?"
+    }
+  },
+  "undoHistory": {
+    "title": "Change history",
+    "current": "Current",
+    "empty": "No changes in this session yet",
+    "operator": {
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "nodeKind": {
+      "httpRequest": "HTTP Request",
+      "webhook": "Webhook",
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "section": {
+      "header": "Header",
+      "body": "Body"
+    },
+    "change": {
+      "initial": "Session start",
+      "nodeAdded": "Added {{name}}",
+      "nodesAdded": "Added {{count}} nodes",
+      "nodeRemoved": "Deleted {{name}}",
+      "nodesRemoved": "Deleted {{count}} nodes",
+      "nodeMoved": "Moved {{name}}",
+      "nodesMoved": "Moved {{count}} nodes",
+      "changedLabel": "Changed Label to {{label}}",
+      "methodConfig": "Edited request of {{name}}",
+      "methodUrl": "Edited URL of {{name}}",
+      "methodHeader": "Edited Header of {{name}}",
+      "methodBody": "Edited Body of {{name}}",
+      "referenceAdded": "Added {{section}} Reference in {{name}}",
+      "referenceRemoved": "Deleted {{section}} Reference in {{name}}",
+      "referenceEdited": "Edited {{section}} Reference in {{name}}",
+      "enhancement": "Edited {{section}} Enhancement of {{name}}",
+      "enhancementLanguage": "Updated Enhancement Language of {{name}}",
+      "enhancementDescription": "Updated Enhancement Description of {{name}}",
+      "enhancementRemoved": "Deleted Enhancement of {{name}}",
+      "conditionConfig": "Edited condition of {{name}}",
+      "aggregatorConfigured": "Configured Aggregator of {{name}}",
+      "aggregatorRemoved": "Deleted Aggregator of {{name}}",
+      "connectorConfig": "Changed connector of {{name}}",
+      "edgesChanged": "Changed connections",
+      "references": "Changed references",
+      "conditionAdded": "Added Condition in {{operator}}",
+      "conditionRemoved": "Deleted Condition in {{operator}}",
+      "conditionEdited": "Edited Condition in {{operator}}",
+      "groupAdded": "Added Group in {{operator}}",
+      "groupRemoved": "Deleted Group in {{operator}}",
+      "groupEdited": "Edited Group in {{operator}}",
+      "operatorEdited": "Edited {{operator}}",
+      "multiple": "Multiple changes"
+    }
   },
   "shortcutsDialog": {
     "title": "Keyboard & mouse shortcuts",
@@ -162,6 +318,8 @@
       "ctrl": "Ctrl",
       "esc": "Esc",
       "s": "S",
+      "z": "Z",
+      "shift": "Shift",
       "delete": "Delete"
     },
     "items": {
@@ -173,6 +331,8 @@
       "multiSelect": "Select multiple nodes",
       "deleteNode": "Delete the selected node",
       "save": "Save the workflow",
+      "undo": "Undo the last canvas change",
+      "redo": "Redo the change that was undone",
       "close": "Close the open menu, dialog, or panel"
     }
   },
@@ -180,7 +340,6 @@
     "changeLabel": "Change Label",
     "openConfiguration": "Open Configuration",
     "configureAggregator": "Configure Aggregator",
-    "runThisCallOnly": "Run This Call Only",
     "request": "Request",
     "editUrl": "Edit URL",
     "editHeader": "Edit Header",
@@ -188,15 +347,55 @@
     "showResponse": "Show Response",
     "newLabelPlaceholder": "New label"
   },
+  "comment": {
+    "badge": "Comment",
+    "add": "Add comment",
+    "placeholder": "Write a note for your team…",
+    "toggle": {
+      "show": "Show comment",
+      "hide": "Hide comment",
+      "minimize": "Minimize comment"
+    }
+  },
+  "aggregatorDialog": {
+    "title": "Configure Aggregator",
+    "selectPlaceholder": "Select a data aggregator",
+    "createNewTooltip": "Create new data aggregator",
+    "emptyState": "Select an existing data aggregator or create a new one.",
+    "confirmUnassign": {
+      "title": "Delete the assigned data aggregator?",
+      "message": "This removes the data aggregator from this step. The data aggregator entry itself will not be deleted and remains available for other steps."
+    }
+  },
+  "templateConnectorMapping": {
+    "title": "Map template connectors",
+    "intro": "This template was created with connectors from another environment. Choose which connector in this environment each one should use before the workflow is loaded.",
+    "noInvokerHint": "No invoker hint available",
+    "usedBy": "Used by: {{methods}}",
+    "unknownConnector": "Connector #{{id}}",
+    "selectPlaceholder": "Select a connector",
+    "createNewTooltip": "Create new connector"
+  },
   "node": {
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
-    "branchFalse": "false"
+    "branchContinue": "continue",
+    "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response.",
+    "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
+    "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector.",
+    "testRunIteration": "{{iterator}} = {{count}}",
+    "testRunIterator": "{{iterator}} =",
+    "skipToNextIteration": "Jump to next iteration",
+    "jumpToIteration": "Jump forward to an iteration"
   },
   "saveDialog": {
     "title": "Save Version",
-    "commentPlaceholder": "Comment"
+    "commentPlaceholder": "Comment",
+    "autoNameChangeComment": "Changing Workflow Name to {{name}}",
+    "autoDescriptionChangeComment": "Changing Workflow Description to {{description}}",
+    "autoCategoryAssignedComment": "Assigning category \"{{category}}\"",
+    "autoCategoryClearedComment": "Removing category assignment"
   },
   "placeholders": {
     "selectMethod": "Select Method...",
@@ -213,6 +412,10 @@
     "dialogTitleLoop": "LOOP Condition",
     "addCondition": "Add Condition",
     "addGroup": "Add Group",
+    "comparisonUnknown": "Not available yet",
+    "comparisonError": "Can't be compared",
+    "comparisonTrue": "True",
+    "comparisonFalse": "False",
     "loopInfo": {
       "iteratorLabel": "Loop variable",
       "iteratorHelp": "Use this variable inside the loop steps to read the current item:",
@@ -264,14 +467,14 @@
     },
     "operators": {
       "if": {
-        "equal": "=",
-        "notEqual": "!=",
+        "equal": "Equal",
+        "notEqual": "Not Equal",
         "like": "Like",
         "notLike": "Not Like",
-        "greaterThan": ">",
-        "greaterOrEqual": ">=",
-        "lessThan": "<",
-        "lessOrEqual": "<=",
+        "greaterThan": "Greater Than",
+        "greaterOrEqual": "Greater Or Equal",
+        "lessThan": "Less Than",
+        "lessOrEqual": "Less Or Equal",
         "contains": "Contains",
         "notContains": "Not Contains",
         "containsSubStr": "Contains Substring",
@@ -297,7 +500,14 @@
   "methodConfig": {
     "body": "Body",
     "header": "Header",
-    "requestUrl": "Request Url"
+    "requestUrl": "Request Url",
+    "response": "Response",
+    "liveBadge": "Live execution result"
+  },
+  "response": {
+    "success": "Success",
+    "fail": "Fail",
+    "status": "Status"
   },
   "xmlBody": {
     "tree": "Tree",
@@ -318,6 +528,8 @@
     "level": "level {{depth}}",
     "text": "Text",
     "textValue": "Text value",
+    "textPlaceholder": "No text content",
+    "addChild": "Child",
     "attributePlaceholder": "Attribute {{name}}",
     "empty": "Empty"
   },
@@ -325,7 +537,43 @@
     "title": "Enhancement",
     "language": "Language",
     "script": "Script",
-    "emptyState": "Please, click on the reference to see its enhancement."
+    "emptyState": "Please, click on the reference to see its enhancement.",
+    "deleteDisabledMultipleReferences": "This field has more than one reference, so it must stay wrapped in an enhancement.",
+    "confirmDelete": {
+      "title": "Delete enhancement?",
+      "message": "This will permanently remove the enhancement and its script. This action cannot be undone."
+    },
+    "directReference": {
+      "title": "Direct reference",
+      "description": "This field has no enhancement — it is a direct, one-to-one reference between the two fields below, with no script running in between. Direct references execute faster than a scripted enhancement.",
+      "descriptionMany": "This field has no enhancement — it is a direct reference between the fields below, with no script running in between. Direct references execute faster than a scripted enhancement."
+    },
+    "optimizeDirectReferences": {
+      "title": "Optimization available",
+      "message": "There are {{count}} references that can be optimized for better performance. Would you like to apply this optimization before saving?",
+      "message_one": "There is a reference that can be optimized for better performance. Would you like to apply this optimization before saving?"
+    },
+    "debugValue": {
+      "show": "Show value",
+      "hide": "Hide value",
+      "title": "Value",
+      "idleHint": "Not shown yet. Click the eye icon to resolve this value from the current test run.",
+      "loadingHint": "Resolving…",
+      "noReferences": "No references",
+      "references": "References",
+      "resultLabel": "RESULT_VAR · {{type}}",
+      "errorTitle": "Error",
+      "errorNotPaused": "Start a paused test run to resolve this from live execution data.",
+      "errorMethodFailed": "This method's execution failed this run — its request may be incomplete.",
+      "errorFieldNotFound": "Could not find a value for this field in the request that was actually sent.",
+      "errorNotRun": "This method hasn't run in the current test session yet. Run or continue the paused test, then check again.",
+      "status": {
+        "idle": "idle",
+        "loading": "running",
+        "error": "error",
+        "stale": "stale — script changed"
+      }
+    }
   },
   "description": {
     "label": "Description",
@@ -352,15 +600,22 @@
     "wholeArray": "The whole array",
     "iteratorLoop": "({{iterator}} loop)",
     "noVariableReferences": "No variable references",
+    "more": "more",
+    "pausedHint": "Hover a highlighted reference to see the value it resolved to.",
     "confirmDelete": {
       "title": "Delete reference",
       "message": "Do you really want to delete this reference?"
+    },
+    "valueDialog": {
+      "copyTooltip": "Copy value",
+      "copySuccess": "Value copied to clipboard"
     }
   },
   "refGenerator": {
     "connector": "Connector",
     "method": "Method",
-    "field": "Field"
+    "field": "Field",
+    "webhookTriggerHint": "Webhook trigger — this response is only the trigger acknowledgement, not the result of the triggered workflow."
   },
   "webhook": {
     "noWebhooks": "No webhooks yet",
@@ -379,7 +634,20 @@
   "referenceInfo": {
     "title": "Reference Information",
     "legacyTitle": "Reference information",
-    "empty": "(is empty now)"
+    "empty": "(is empty now)",
+    "confirmDelete": {
+      "title": "Delete reference?",
+      "message": "This will permanently remove this reference. This action cannot be undone."
+    }
   },
-  "requestData": "Request data"
+  "requestData": "Request data",
+  "graphqlBody": {
+    "masterPasswordTitle": "Enter the master password to access this connector's GraphQL API",
+    "editorHint": "Ctrl + Space for autocomplete. Only the active tab's query runs when this method executes — tabs are named after the query's operation name (e.g. \"query MyQuery {...}\"), so anonymous queries stay \"<untitled>\".",
+    "connectorFailed": "Could not load the connector. Check the backend connection and try again.",
+    "loginFailed": "Could not authenticate with this connector's GraphQL API. Check its credentials and try again.",
+    "masterPasswordNotConfigured": "No master password is configured",
+    "masterPasswordNotConfiguredDescription": "Ask an administrator to set opencelium.connector.master-password in /backend/src/main/resources/application.yml and restart the backend to enable browsing this connector's GraphQL API.",
+    "retry": "Try again"
+  }
 }

@@ -9,8 +9,8 @@ import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistoryD
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.execution.socket.WebSocketNotificationQueue;
+import com.becon.opencelium.backend.websocket.constant.SocketConstant;
+import com.becon.opencelium.backend.websocket.notification.WebSocketNotificationQueue;
 import com.becon.opencelium.backend.quartz.DeactivateExpiredSubscriptionJob;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
@@ -77,7 +77,27 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public boolean isValid(Subscription sub) {
-        return true;
+        if (sub == null) {
+            logger.warn("No active subscription found. Please activate a free license or upload your license");
+            return false;
+        }
+        LicenseKey licenseKey = LicenseKeyUtility.decrypt(sub.getLicenseKey());
+        boolean isValid = LicenseKeyUtility.verify(licenseKey, sub.getActivationRequest());
+        if (!isCurrentUsageIsValid(sub)) {
+            logger.warn("Usage number of operation has been changed manually.");
+            return false;
+        }
+        if (licenseKey.getOperationUsage() != 0 && sub.getCurrentUsage() >= licenseKey.getOperationUsage()) {
+            if (!hasExtra(sub)) {
+                logger.warn("You have reached limit of operation usage: {}", licenseKey.getOperationUsage());
+                return false;
+            }
+            if (!hasExtraUsage(sub.getExtraOpsList())) {
+                logger.warn("You have reached limit of Extra Ops usage: {}", licenseKey.getOperationUsage());
+                return false;
+            }
+        }
+        return isValid;
     }
 
     private boolean hasExtraUsage(List<ExtraOps> extraOpsList) {

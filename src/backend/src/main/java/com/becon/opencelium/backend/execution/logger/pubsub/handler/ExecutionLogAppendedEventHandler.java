@@ -4,7 +4,7 @@ import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.pubsub.Execution2MetadataMapping;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionEvent;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionLogAppendedEvent;
-import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
+import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -40,6 +40,13 @@ public class ExecutionLogAppendedEventHandler implements ExecutionEventHandler {
 
         long executionId = e.executionId();
 
+        if (!metadata.exists(executionId)) {
+            // e.g. a line published after the execution finished and its metadata was
+            // removed — nothing to route it to, but it must not poison the consumer
+            logger.warn("Skipping log line for unknown executionId = {}", executionId);
+            return;
+        }
+
         String line = readLine(executionId, e.startOffset(), e.endOffset());
 
         Optional<LogDataDTO> logData = metadata.getDispatcher(executionId).dispatch(line, e.startOffset(), e.endOffset());
@@ -63,8 +70,10 @@ public class ExecutionLogAppendedEventHandler implements ExecutionEventHandler {
 
             return StandardCharsets.UTF_8.decode(buffer).toString();
         } catch (IOException e) {
-            logger.warn("Failed to read log line: executionId: {}, startOffset: {}, endOffset: {}", executionId, startOffset, endOffset);
-            throw new RuntimeException("Failed to read log line", e);
+            // an unreadable line (file moved, channel closed concurrently) costs one
+            // log entry; rethrowing would cost the whole event pipeline
+            logger.warn("Failed to read log line: executionId: {}, startOffset: {}, endOffset: {}", executionId, startOffset, endOffset, e);
+            return "";
         }
     }
 }

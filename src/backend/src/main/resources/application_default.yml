@@ -11,7 +11,7 @@ server:
   address: 127.0.0.1
   forward-headers-strategy: native
 websocket:
-  endpoint: /websocket
+  endpoint: /ws
 #  ssl:
 #    enabled: true
 #    key-store-type: PKCS12
@@ -119,9 +119,10 @@ spring:
   #                                                                    #
   #   LDAP configuration section.                                      #
   #   LDAP DEBUG mode can be enabled with the                          #
-  #   logging.level.org.springframework.data.ldap: DEBUG settings      #
+  #   logging.level.org.springframework.security.ldap: DEBUG settings      #
   #                                                                    #
   ######################################################################
+#  security:
 #    ldap:
 #      # LDAP server URL
 #      urls: ldap://localhost:7389
@@ -176,7 +177,7 @@ logging:
   level:
     org:
       springframework:
-        data:
+        security:
           # Activate or deactivate logs during LDAP authentication
           ldap: OFF # OFF or DEBUG;
 
@@ -194,14 +195,46 @@ management:
           UP: 200
 
 opencelium:
-  version: 5.0
+  version: 5.1
   ###########################################################################
   #                                                                         #
-  #   /application-config endpoint                                          #
+  #   Interface languages                                                   #
+  #                                                                         #
+  #   Controls which languages the user interface offers and which one is   #
+  #   used for users who have none set. Codes are ISO 639-1 (two letters,   #
+  #   lowercase): en, de, fr, ...                                           #
+  #                                                                         #
+  #   default   - language applied to new users, to LDAP users on first     #
+  #               login, and as the fallback when a notification template   #
+  #               has no content in the recipient's language                #
+  #   supported - comma-separated list of languages a user may be set to,   #
+  #               and the list returned by GET /message/languages for       #
+  #               authoring notification templates; 'default' must be one   #
+  #               of them. Listing a language does not create its           #
+  #               translations - the matching frontend bundle must exist    #
+  #               too, otherwise the interface falls back to English.       #
+  #                                                                         #
+  ###########################################################################
+  language:
+    default: en
+    supported: en,de
+  ###########################################################################
+  #                                                                         #
+  #   /application-config endpoint (admin-only application.yml editor)      #
+  #                                                                         #
+  #   Powers the GET/PATCH /application-config REST endpoint, which lets    #
+  #   an admin view and edit this very configuration file from the UI       #
+  #   without shell access to the server. Before every write the current    #
+  #   file is backed up and the new content is written atomically, so a     #
+  #   bad edit can always be rolled back from a backup.                     #
   #                                                                         #
   #   file-path        — application.yml on disk to read and write          #
   #   backup.directory — where pre-write backups go (.bak.<epochMillis>)    #
   #   backup.keep      — how many recent backups to retain per target file  #
+  #                                                                         #
+  #   DO NOT modify or remove this block. The endpoint reads and writes     #
+  #   the file that file-path points at — changing these values can break   #
+  #   the config editor or make it write to the wrong file.                 #
   #                                                                         #
   ###########################################################################
   config:
@@ -209,6 +242,46 @@ opencelium:
     backup:
       directory: runtime/backup/application
       keep: 10
+  ###########################################################################
+  #                                                                         #
+  #   Sweepers                                                              #
+  #                                                                         #
+  #   test-connection — permanently removes leftover test connections       #
+  #     enabled       — turn the sweeper on/off (default: true)             #
+  #     fixed-delay   — ms between runs, non-overlapping (default: 1h)      #
+  #     initial-delay — ms before the first run; 0 also cleans at startup   #
+  #                                                                         #
+  ###########################################################################
+  sweeper:
+    test-connection:
+      enabled: true
+      fixed-delay: 900000
+      initial-delay: 0
+  ###########################################################################
+  #                                                                         #
+  #   Background connector health monitor                                   #
+  #                                                                         #
+  #   enabled           — master switch for the periodic sweep              #
+  #   interval          — delay between two sweeps in milliseconds          #
+  #   initial-delay     — delay before the first sweep after startup (ms)   #
+  #   failure-threshold — consecutive failed checks before a connector's    #
+  #                       status transitions to DOWN/AUTH_FAILED            #
+  #                       (flap damping); recovery needs a single success   #
+  #   parallelism       — how many connectors are checked concurrently      #
+  #   request-logging   — INFO-log each check's request (method + endpoint  #
+  #                       template, never resolved credentials) and its     #
+  #                       response (status, latency, truncated body)        #
+  #                                                                         #
+  ###########################################################################
+  connector-health:
+    enabled: true
+    interval: 60000
+    initial-delay: 10000
+    failure-threshold: 3
+    parallelism: 4
+    request-logging:
+      enabled: false
+      max-body-length: 500
   ###########################################################################
   #                                                                         #
   #   Is customizable                                                       #

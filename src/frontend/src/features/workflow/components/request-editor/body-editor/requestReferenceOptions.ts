@@ -1,8 +1,20 @@
-import { OperatorType, type Connection, type LoopOperatorWithId, type MethodWithId, type OperatorWithId } from '../../../types/connection';
+import { MethodType, OperatorType, type Connection, type LoopOperatorWithId, type MethodWithId, type OperatorWithId } from '../../../types/connection';
 
 export type ResponseType = 'body' | 'header' | 'status';
 
 export type ReferenceOption = { label: string; value: string };
+
+// Reverse a reference's color back to the method it points at. Case-
+// insensitive and '#'-stripped on both sides since the two reference parsers
+// in this codebase (parseEnhancementArg.ts vs body-editor/bodyReference.ts)
+// disagree on whether the leading '#' is part of the captured color.
+export const findMethodByColor = (
+  methods: MethodWithId[],
+  color: string,
+): MethodWithId | undefined => {
+  const normalized = color.replace(/^#/, '').toLowerCase();
+  return methods.find((method) => method.color?.replace(/^#/, '').toLowerCase() === normalized);
+};
 
 export const getMethodConnectorTitle = (method: MethodWithId) =>
   method.connector?.title ?? 'HTTP Request';
@@ -10,7 +22,32 @@ export const getMethodConnectorTitle = (method: MethodWithId) =>
 export const getMethodConnectorIcon = (method: MethodWithId) =>
   method.connector?.icon ?? null;
 
-const PATH_RE = /[^.[\]]+|\[\*]|\[\d+]|\[\w+]/g;
+// Method pickers show a "which connector/source is this method from" chip. A `WEBHOOK`
+// (trigger-connection) method has no connector — its chip shows a generic "Webhook" label
+// and the webhook icon, plus a hint that the response is only the trigger acknowledgement,
+// not the result of the workflow it triggers (referencing the ack's own status/body is
+// still valid, so it isn't filtered out of the picker).
+export type MethodConnectorChipInfo =
+  | { kind: 'connector'; title: string; iconUrl: string | null }
+  | { kind: 'http-request'; title: string }
+  | { kind: 'webhook'; title: string };
+
+export const getMethodConnectorChipInfo = (method: MethodWithId): MethodConnectorChipInfo => {
+  switch (method.methodType) {
+    case MethodType.Webhook:
+      return { kind: 'webhook', title: 'Webhook' };
+    case MethodType.HttpRequest:
+      return { kind: 'http-request', title: getMethodConnectorTitle(method) };
+    case MethodType.Connector:
+      return { kind: 'connector', title: getMethodConnectorTitle(method), iconUrl: getMethodConnectorIcon(method) };
+    default: {
+      const _exhaustive: never = method.methodType;
+      return _exhaustive;
+    }
+  }
+};
+
+const PATH_RE = /\['(?:\\'|[^'])*']|\["(?:\\"|[^"])*"]|\[[^\]]+]|[^.[\]]+/g;
 
 export const ITERATOR_NAMES = [
   'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
@@ -30,8 +67,26 @@ const normalizePath = (path: string) => path.replace(/^\$\.?/, '');
 
 const isRootPath = (path: string) => path === '$' || path === '$.';
 
+const unquotePathPart = (part: string) => {
+  const singleQuoted = part.match(/^\['((?:\\'|[^'])*)']$/);
+  if (singleQuoted) return singleQuoted[1].replace(/\\'/g, "'");
+  const doubleQuoted = part.match(/^\["((?:\\"|[^"])*)"]$/);
+  if (doubleQuoted) return doubleQuoted[1].replace(/\\"/g, '"');
+  return part;
+};
+
+const isBracketPathPart = (part: string) => part.startsWith('[') && part.endsWith(']');
+
+const isArrayPathPart = (part: string) =>
+  isBracketPathPart(part) && !part.startsWith("['") && !part.startsWith('["');
+
+const serializeObjectKey = (key: string) =>
+  /^[A-Za-z_][A-Za-z0-9_-]*$/.test(key)
+    ? key
+    : `['${key.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}']`;
+
 const getArrayAccessIterator = (part: string) =>
-  part.startsWith('[') && part.endsWith(']') ? part.slice(1, -1) : '';
+  isArrayPathPart(part) ? part.slice(1, -1) : '';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && !Array.isArray(value);
@@ -59,7 +114,7 @@ const exactReadAtPath = (source: unknown, path: string, iterators: string[] = []
       continue;
     }
     if (isRecord(current)) {
-      current = current[part];
+      current = current[unquotePathPart(part)];
       continue;
     }
     return undefined;
@@ -68,8 +123,9 @@ const exactReadAtPath = (source: unknown, path: string, iterators: string[] = []
 };
 
 const appendPath = (base: string, part: string) => {
-  if (base === '$') return part.startsWith('[') ? `$.${part}` : `$.${part}`;
-  return base ? `${base}${part.startsWith('[') ? '' : '.'}${part}` : part;
+  const serializedPart = isArrayPathPart(part) ? part : serializeObjectKey(unquotePathPart(part));
+  if (base === '$') return `$.${serializedPart}`;
+  return base ? `${base}${isArrayPathPart(serializedPart) ? '' : '.'}${serializedPart}` : serializedPart;
 };
 
 const normalizeRootArrayPath = (path: string) => {
@@ -97,9 +153,10 @@ const getContext = (
       lastValidPath = appendPath(lastValidPath, part);
       continue;
     }
-    if (isRecord(current) && part in current) {
-      current = current[part];
-      lastValidPath = appendPath(lastValidPath, part);
+    const objectKey = unquotePathPart(part);
+    if (isRecord(current) && objectKey in current) {
+      current = current[objectKey];
+      lastValidPath = appendPath(lastValidPath, objectKey);
       continue;
     }
     break;
@@ -226,3 +283,42 @@ export const getIteratorsForMethod = (
   connection: Connection,
   method: MethodWithId | undefined,
 ): string[] => getIteratorsForIndex(connection, method?.index);
+
+// Walks `path` against an ACTUAL captured value (a real, already-parsed JSON
+// response — not the static sample response the picker/exactReadAtPath peek
+// at) to extract the exact value a reference resolves to while debugging a
+// paused test run (see useLiveReferenceValue.ts). Same path grammar as
+// exactReadAtPath, but different bracket semantics: that function always
+// takes element 0 (correct for shape-discovery — it only needs to know what
+// fields exist further down), whereas this one is producing a real value a
+// user will read, so `[*]` must return the WHOLE array and `[<iteratorName>]`
+// must return the element at that iterator's CURRENT iteration index, not
+// always the first one. `resolveIteratorIndex` maps an iterator name (as it
+// appears inside the path) to its current 0-based index, or null if the name
+// isn't a real, currently-known iterator (in which case the lookup bails
+// rather than guessing element 0).
+export const readLiveValueAtPath = (
+  source: unknown,
+  path: string,
+  resolveIteratorIndex: (iteratorName: string) => number | null,
+): unknown => {
+  if (!path) return source;
+  const parts = normalizePath(path).match(PATH_RE) || [];
+  let current: unknown = source;
+  for (const part of parts) {
+    if (isArrayPathPart(part)) {
+      if (!Array.isArray(current)) return undefined;
+      if (part === '[*]') continue;
+      const index = part === '[0]' ? 0 : resolveIteratorIndex(getArrayAccessIterator(part));
+      if (index === null || index === undefined) return undefined;
+      current = current[index];
+      continue;
+    }
+    if (isRecord(current)) {
+      current = current[unquotePathPart(part)];
+      continue;
+    }
+    return undefined;
+  }
+  return current;
+};

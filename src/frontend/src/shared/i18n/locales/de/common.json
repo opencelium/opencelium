@@ -8,15 +8,15 @@
     "dashboard": "Dashboard",
     "connectors": "Konnektoren",
     "connections": "Workflows",
-    "schedules": "Zeitpläne",
+    "schedules": "Laufpläne",
     "usersAccess": "Benutzer & Zugriff",
     "users": "Benutzer",
     "groups": "Gruppen",
     "ldapCheck": "LDAP-Prüfung",
     "configurations": "Konfigurationen",
-    "invokers": "Aufrufer",
+    "invokers": "Invoker",
     "connectionTemplates": "Workflow Templates",
-    "dataAggregator": "Daten-Aggregator",
+    "dataAggregator": "Datensammler",
     "notificationTemplates": "Benachrichtigungsvorlagen",
     "categories": "Kategorien",
     "supportFiles": "Support-Dateien",
@@ -29,7 +29,9 @@
   },
   "commandPalette": {
     "placeholder": "Befehl eingeben...",
+    "noResults": "Keine Ergebnisse gefunden",
     "groups": {
+      "workflow": "Workflow",
       "recent": "Zuletzt verwendet",
       "navigate": "Navigieren",
       "create": "Erstellen",
@@ -52,13 +54,28 @@
       "downloadTemplate": "Workflow-Vorlagendatei herunterladen",
       "uploadInvoker": "Invoker-Datei hochladen",
       "downloadInvoker": "Invoker-Datei herunterladen",
-      "systemCheck": "Systemprüfungsseite öffnen"
+      "systemCheck": "Systemprüfungsseite öffnen",
+      "ldapCheck": "LDAP-Verbindungsprüfungsseite öffnen",
+      "workflow": "Den aktuellen Workflow durchsuchen",
+      "help": "Alle Befehle anzeigen"
     },
     "footer": {
       "select": "Auswählen",
       "autocomplete": "Vervollständigen",
       "navigate": "Navigieren",
       "close": "Schließen"
+    },
+    "help": {
+      "title": "Befehlsübersicht",
+      "subtitle": "Alles, was Sie über die Befehlspalette tun können.",
+      "keyboardTitle": "Tastatur",
+      "empty": "Keine Befehle verfügbar",
+      "searchPlaceholder": "Befehle suchen...",
+      "noResults": "Keine Befehle entsprechen \"{{query}}\"",
+      "shortcuts": {
+        "open": "Befehlspalette öffnen",
+        "clearScope": "Gesperrten Bereich verlassen (leere Eingabe)"
+      }
     }
   },
   "sidebar": {
@@ -70,6 +87,9 @@
       "message": "Möchten Sie sich wirklich abmelden?"
     }
   },
+  "footer": {
+    "copyright": "© Copyright {{year}} <1>becon GmbH</1> | Version {{version}}"
+  },
   "topbar": {
     "switchToGerman": "Auf Deutsch umschalten",
     "switchToEnglish": "Auf Englisch umschalten",
@@ -78,23 +98,35 @@
     "switchToMainMenu": "Zum Hauptmenü wechseln (Alt+M)",
     "profile": "Profil",
     "createWorkflow": "Workflow erstellen",
-    "createWorkflowHint": "Workflow erstellen (Alt+W)"
+    "createWorkflowHint": "Workflow erstellen (Alt+W)",
+    "docs": "Dokumentation"
+  },
+  "user": {
+    "unknown": "Unbekannter Benutzer"
   },
   "actions": {
     "prev": "Zurück",
     "submit": "Absenden",
     "next": "Weiter",
     "ctrlEnterHint": "Tastenkombination: Strg+Enter",
+    "cmdEnterHint": "Tastenkombination: ⌘+Enter",
     "create": "Erstellen",
     "view": "Ansehen",
     "edit": "Bearbeiten",
     "delete": "Löschen"
   },
+  "copy": {
+    "tooltip": "In die Zwischenablage kopieren",
+    "empty": "Nichts zu kopieren",
+    "success": "In die Zwischenablage kopiert",
+    "failed": "Kopieren in die Zwischenablage fehlgeschlagen"
+  },
   "field": {
     "required": "Pflichtfeld"
   },
   "credentialEditor": {
-    "updateWithoutMasterPassword": "Sie können auch ohne Master-Passwort speichern – es werden dann nur die allgemeinen Daten aktualisiert. Um die erforderlichen Anmeldedaten zu ändern, geben Sie zuerst das Master-Passwort ein."
+    "updateWithoutMasterPassword": "Sie können auch ohne Master-Passwort speichern – es werden dann nur die allgemeinen Daten aktualisiert. Um die erforderlichen Anmeldedaten zu ändern, geben Sie zuerst das Master-Passwort ein.",
+    "masterPasswordNotConfigured": "Sie können auch ohne Master-Passwort speichern – es werden dann nur die allgemeinen Daten aktualisiert. Um die erforderlichen Anmeldedaten zu ändern, bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten."
   },
   "hintLabel": "Hinweis",
   "errorBoundary": {
@@ -120,6 +152,10 @@
     "goBack": "Zurück",
     "goHome": "Zum Dashboard"
   },
+  "accessDenied": {
+    "title": "Zugriff verweigert",
+    "subtitle": "Sie haben keine Berechtigung, diese Aktion auszuführen."
+  },
   "dialog": {
     "maximize": "Maximieren",
     "restore": "Wiederherstellen"
@@ -133,8 +169,8 @@
     "deleteSelectedSuccess": "{{count}} Einträge erfolgreich gelöscht",
     "deleteSelectedSuccess_one": "{{count}} Eintrag erfolgreich gelöscht",
     "filtersTooltip": "Filter",
-    "expandRow": "Ausführungen anzeigen",
-    "collapseRow": "Ausführungen ausblenden",
+    "expandRow": "Läufe anzeigen",
+    "collapseRow": "Läufe ausblenden",
     "confirmDelete": {
       "title": "Löschen",
       "message": "Möchten Sie dieses {{name}} wirklich löschen?",

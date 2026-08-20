@@ -11,10 +11,10 @@
     "operationUsage": {
       "header": "Nutzung pro Workflow",
       "subheader": "API-Aufrufe summiert pro Workflow.",
-      "rowHint": "Klicken Sie auf eine Zeile, um die Ausführungen anzuzeigen."
+      "rowHint": "Klicken Sie auf eine Zeile, um die Läufe anzuzeigen."
     },
     "operationDetails": {
-      "header": "Ausführungen der Workflow",
+      "header": "Läufe der Workflow",
       "subheader": "Verbrauch pro Ausführung für die gewählte Workflow."
     }
   },
@@ -81,6 +81,6 @@
   },
   "empty": {
     "operations": "Für diesen Zeitraum wurden keine API-Aufrufe erfasst.",
-    "details": "Keine Ausführungen gefunden."
+    "details": "Keine Läufe gefunden."
   }
 }

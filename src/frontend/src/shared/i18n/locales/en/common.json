@@ -29,7 +29,9 @@
   },
   "commandPalette": {
     "placeholder": "Type a command...",
+    "noResults": "No results found",
     "groups": {
+      "workflow": "Workflow",
       "recent": "Recent",
       "navigate": "Navigate",
       "create": "Create",
@@ -52,13 +54,28 @@
       "downloadTemplate": "Download a workflow template file",
       "uploadInvoker": "Upload an invoker file",
       "downloadInvoker": "Download an invoker file",
-      "systemCheck": "Open the system check page"
+      "systemCheck": "Open the system check page",
+      "ldapCheck": "Open the LDAP connectivity check page",
+      "workflow": "Search the current workflow",
+      "help": "View all commands"
     },
     "footer": {
       "select": "Select",
       "autocomplete": "Autocomplete",
       "navigate": "Navigate",
       "close": "Close"
+    },
+    "help": {
+      "title": "Command reference",
+      "subtitle": "Everything you can do from the command palette.",
+      "keyboardTitle": "Keyboard",
+      "empty": "No commands available",
+      "searchPlaceholder": "Search commands...",
+      "noResults": "No commands match \"{{query}}\"",
+      "shortcuts": {
+        "open": "Open the command palette",
+        "clearScope": "Exit a locked scope (empty input)"
+      }
     }
   },
   "sidebar": {
@@ -70,6 +87,9 @@
       "message": "Are you sure you want to sign out?"
     }
   },
+  "footer": {
+    "copyright": "© Copyright {{year}} <1>becon GmbH</1> | version {{version}}"
+  },
   "topbar": {
     "switchToGerman": "Switch to German",
     "switchToEnglish": "Switch to English",
@@ -78,23 +98,35 @@
     "switchToMainMenu": "Switch to main menu (Alt+M)",
     "profile": "Profile",
     "createWorkflow": "Create Workflow",
-    "createWorkflowHint": "Create Workflow (Alt+W)"
+    "createWorkflowHint": "Create Workflow (Alt+W)",
+    "docs": "Documentation"
+  },
+  "user": {
+    "unknown": "Unknown User"
   },
   "actions": {
     "prev": "Back",
     "submit": "Submit",
     "next": "Next",
     "ctrlEnterHint": "Shortcut: Ctrl+Enter",
+    "cmdEnterHint": "Shortcut: ⌘+Enter",
     "create": "Create",
     "view": "View",
     "edit": "Edit",
     "delete": "Delete"
   },
+  "copy": {
+    "tooltip": "Copy to clipboard",
+    "empty": "Nothing to copy",
+    "success": "Copied to clipboard",
+    "failed": "Failed to copy to clipboard"
+  },
   "field": {
     "required": "Required field"
   },
   "credentialEditor": {
-    "updateWithoutMasterPassword": "You can save without entering the master password — only the general data will be updated. To change the required credentials, enter the master password first."
+    "updateWithoutMasterPassword": "You can save without entering the master password — only the general data will be updated. To change the required credentials, enter the master password first.",
+    "masterPasswordNotConfigured": "You can save without a master password — only the general data will be updated. To change the required credentials, ask an administrator to set opencelium.connector.master-password in /backend/src/main/resources/application.yml and restart the backend."
   },
   "hintLabel": "Hint",
   "errorBoundary": {
@@ -119,6 +151,10 @@
     "subtitle": "The page you're looking for doesn't exist or may have been moved.",
     "goBack": "Go back",
     "goHome": "Go to Dashboard"
+  },
+  "accessDenied": {
+    "title": "Access denied",
+    "subtitle": "You don't have permission to perform this action."
   },
   "dialog": {
     "maximize": "Maximize",

@@ -8,6 +8,7 @@ export type TypographyVariant =
     | 'body'
     | 'caption'
     | 'label'
+    | 'label-sm'
     | 'overline'
     | 'section-label';
 

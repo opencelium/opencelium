@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
 import scheduleWizardImage from '@/assets/images/wizard/schedule.gif'
 import {createEntityCommands} from "@/engine/entity/command/createEntityCommands.tsx";
@@ -32,6 +33,23 @@ import {BulkNotificationsDialogContent} from "@entities/schedule/ui/BulkNotifica
 
 const baseKey = 'schedule';
 
+// resolveScheduleConnectionTitles suggests "{connection title} [{schedulerId}]" —
+// the id rides along in brackets since the connection title alone isn't unique/fetchable.
+const resolveScheduleId = (value: string): string => {
+    if (/^\d+$/.test(value)) return value
+    const match = value.match(/\[(\d+)]\s*$/)
+    return match ? match[1] : value
+}
+
+const buildScheduleFetchUrl = (value: string): string =>
+    `/scheduler/${encodeURIComponent(resolveScheduleId(value))}`
+
+const buildSchedulePageUrl = (value: string): string =>
+    `/schedule/update/${encodeURIComponent(resolveScheduleId(value))}`
+
+const buildScheduleViewPageUrl = (value: string): string =>
+    `/schedule/view/${encodeURIComponent(resolveScheduleId(value))}`
+
 const Dot = ({color}: {color: string}) => (
     <span
         style={{
@@ -40,10 +58,27 @@ const Dot = ({color}: {color: string}) => (
             height: 10,
             borderRadius: '50%',
             backgroundColor: color,
-            marginRight: 4,
-            verticalAlign: 'middle',
+            flexShrink: 0,
         }}
     />
+)
+
+// Groups a dot with its label as one unbreakable chip, so wrapping never
+// splits a status color from the text explaining what it means.
+const LegendChip = ({color, children}: {color: string; children?: ReactNode}) => (
+    <span style={{display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap'}}>
+        <Dot color={color} />
+        {children}
+    </span>
+)
+
+// `display: flex` on a span still blockifies (CSS outer-display rules), so this
+// wraps onto its own line below the description sentence without needing a <div>
+// (which would be invalid nested inside the subtitle's inline Typography wrapper).
+const LegendRow = ({children}: {children?: ReactNode}) => (
+    <span style={{display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 16px', marginTop: 6}}>
+        {children}
+    </span>
 )
 
 type ConnectionMeta = { id: number; title: string }
@@ -68,6 +103,7 @@ function buildScheduleSuccessMessage(mode: 'create' | 'update', formData: Schedu
 
 export const scheduleDefinition: EntityDefinition = {
     name: baseKey,
+    permissionComponent: 'SCHEDULE',
     api: {
         baseUrl: '/scheduler',
         identifierField: 'id',
@@ -90,18 +126,24 @@ export const scheduleDefinition: EntityDefinition = {
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
         subtitleComponents: {
-            blueDot: <Dot color="var(--color-status-info-fg)" />,
-            greenDot: <Dot color="var(--color-status-success-fg)" />,
-            redDot: <Dot color="var(--color-status-error-fg)" />,
-            grayDot: <Dot color="var(--color-text-disabled)" />,
+            legend: <LegendRow />,
+            legendRunning: <LegendChip color="var(--color-status-info-fg)" />,
+            legendSucceeded: <LegendChip color="var(--color-status-success-fg)" />,
+            legendFailed: <LegendChip color="var(--color-status-error-fg)" />,
+            legendNone: <LegendChip color="var(--color-text-disabled)" />,
         },
         searchPlaceholderKey: `${baseKey}.list.searchPlaceholder`,
         defaultSort: { field: 'connectionTitle', direction: 'asc' },
+        // This list carries more row actions (support logs, notifications, delete)
+        // than most — collapse them behind a hover "more" menu instead of an
+        // inline row.
+        rowActionsDisplay: 'menu',
         bulkDelete: true,
         bulkActions: [
             {
                 key: 'notifications',
                 labelKey: `${baseKey}.notifications.bulk.button`,
+                permissionAction: 'CREATE',
                 run: ({ ids, dialog, clearSelection }) => {
                     const schedulerIds = ids
                         .map(Number)
@@ -138,14 +180,20 @@ export const scheduleDefinition: EntityDefinition = {
             {
                 type: 'custom',
                 key: 'support-logs',
-                render: ({ row }) => <SupportLogsAction schedule={row as Schedule} />,
+                render: ({ row }) => <SupportLogsAction schedule={row as Schedule} tooltipPlacement="right" />,
             },
             {
                 type: 'custom',
                 key: 'notifications',
-                render: ({ row }) => <NotificationsAction schedule={row as Schedule} />,
+                render: ({ row }) => <NotificationsAction schedule={row as Schedule} tooltipPlacement="right" />,
             },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: () => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    return t(`${baseKey}.list.confirmDelete.message`);
+                },
+            },
         ],
     },
 
@@ -263,7 +311,6 @@ export const scheduleDefinition: EntityDefinition = {
                 render: (row) =>
                     isScheduleExecRow(row) ? (
                         <RunningExecBadge
-                            localStartTime={row.execution.localStartTime}
                             serverStartTime={row.execution.serverStartTime}
                             avgDuration={row.execution.avgDuration}
                         />
@@ -446,11 +493,18 @@ export const scheduleDefinition: EntityDefinition = {
             ...createEntityCommands({def, config: {}, dsl: {
                     update: {
                         by: [
-                            { field: 'connection.title', resolve: resolveScheduleConnectionTitles },
+                            {
+                                field: 'workflow.title',
+                                resolve: resolveScheduleConnectionTitles,
+                                buildFetchUrl: (_def, value) => buildScheduleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildSchedulePageUrl(value),
+                            },
                             {
                                 field: 'id',
                                 resolve: resolveScheduleIds,
                                 customPath: true,
+                                buildFetchUrl: (_def, value) => buildScheduleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildSchedulePageUrl(value),
                             }
                         ]
                     },
@@ -460,6 +514,7 @@ export const scheduleDefinition: EntityDefinition = {
                                 field: 'id',
                                 resolve: resolveScheduleIds,
                                 customPath: true,
+                                buildDeleteUrl: (_def, value) => buildScheduleFetchUrl(value),
                                 afterDelete: async () => {
                                     await store.dispatch(
                                         scheduleApi.util.invalidateTags([
@@ -473,8 +528,9 @@ export const scheduleDefinition: EntityDefinition = {
                                 }
                             },
                             {
-                                field: 'connection.title',
+                                field: 'workflow.title',
                                 resolve: resolveScheduleConnectionTitles,
+                                buildDeleteUrl: (_def, value) => buildScheduleFetchUrl(value),
                                 confirmMessage: (connectionTitle) => {
                                     const t = i18n.getFixedT(i18n.language, 'entities');
                                     return t(`${baseKey}.confirmation.delete.byConnectionTitle`, {connectionTitle});
@@ -488,10 +544,14 @@ export const scheduleDefinition: EntityDefinition = {
                                 field: 'id',
                                 resolve: resolveScheduleIds,
                                 customPath: true,
+                                buildFetchUrl: (_def, value) => buildScheduleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildScheduleViewPageUrl(value),
                             },
                             {
-                                field: 'connection.title',
-                                resolve: resolveScheduleConnectionTitles
+                                field: 'workflow.title',
+                                resolve: resolveScheduleConnectionTitles,
+                                buildFetchUrl: (_def, value) => buildScheduleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildScheduleViewPageUrl(value),
                             }
                         ]
                     }

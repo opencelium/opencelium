@@ -6,9 +6,12 @@ import { Icon } from '@shared/ui/primitives/Icon'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { Typography } from '@shared/ui/primitives/Typography'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import { useCheckMasterPasswordMutation } from '@features/master-password/api/masterPasswordApi'
+import { apiExecutor } from '@shared/api/apiExecutor'
 import { useMasterPasswordStore } from '@features/master-password/model/masterPasswordStore'
 import { AsciiError } from '@features/master-password/ui/AsciiError'
+
+const isApiExecutorError = (response: unknown): response is { data?: { error?: string } } =>
+    !!response && typeof response === 'object' && ('status' in response || 'error' in response)
 
 type MasterPasswordInfo = { title: string; content: string }
 
@@ -27,7 +30,7 @@ export const MasterPasswordDialog: React.FC<MasterPasswordDialogProps> = ({ labe
     const { t: commonT } = useI18n('common')
     const [localPassword, setLocalPassword] = useState('')
     const [error, setError] = useState<React.ReactNode>(null)
-    const [checkMasterPassword, { isLoading }] = useCheckMasterPasswordMutation()
+    const [isLoading, setIsLoading] = useState(false)
     const { setMasterPassword } = useMasterPasswordStore()
 
     const resolvedLabel = label ?? widgetT('masterPassword.input.label')
@@ -46,18 +49,27 @@ export const MasterPasswordDialog: React.FC<MasterPasswordDialogProps> = ({ labe
             return
         }
         setError(null)
-        try {
-            await checkMasterPassword({ masterPassword: localPassword }).unwrap()
-            setMasterPassword(localPassword)
-            onUnlock?.(localPassword)
-        } catch (e) {
-            const err = e as { data?: { error?: string } }
+        setIsLoading(true)
+        // Routed through apiExecutor (not the RTK Query hook) because this dialog can be
+        // rendered inside the workflow editor's isolated legacy redux <Provider>, which
+        // doesn't mount the baseApi reducer — a hook-bound dispatch would silently fail
+        // there. apiExecutor dispatches against the real app store directly.
+        const response = await apiExecutor({
+            url: '/connector/master-password/status',
+            method: 'GET',
+            options: { headers: { 'x-master-password': localPassword }, ignoreError: true },
+        })
+        setIsLoading(false)
+        if (isApiExecutorError(response)) {
             setError(
-                widgetT(`masterPassword.error.${err.data?.error}`, {
+                widgetT(`masterPassword.error.${response.data?.error}`, {
                     defaultValue: widgetT('masterPassword.error.default'),
                 }),
             )
+            return
         }
+        setMasterPassword(localPassword)
+        onUnlock?.(localPassword)
     }
 
     const onChange = (value: string) => {

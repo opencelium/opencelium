@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.resource.connection;
 
+import com.becon.opencelium.backend.enums.MethodType;
 import com.becon.opencelium.backend.resource.connector.RequestDTO;
 import com.becon.opencelium.backend.resource.connector.ResponseDTO;
 import jakarta.annotation.Resource;
@@ -28,10 +29,12 @@ public class MethodDTO {
     private String name;
     private String color;
     private String label;
+    private MethodType methodType;
     private Integer dataAggregator;
     private RequestDTO request;
     private ResponseDTO response;
     private MethodConnectorDTO connector;
+    private String jump;
 
     public String getId() {
         return id;
@@ -73,6 +76,14 @@ public class MethodDTO {
         this.label = label;
     }
 
+    public MethodType getMethodType() {
+        return methodType;
+    }
+
+    public void setMethodType(MethodType methodType) {
+        this.methodType = methodType;
+    }
+
     public RequestDTO getRequest() {
         return request;
     }
@@ -103,6 +114,14 @@ public class MethodDTO {
 
     public void setConnector(MethodConnectorDTO connector) {
         this.connector = connector;
+    }
+
+    public String getJump() {
+        return jump;
+    }
+
+    public void setJump(String jump) {
+        this.jump = jump;
     }
 
     @Override

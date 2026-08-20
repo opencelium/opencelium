@@ -1,7 +1,44 @@
 import type { ReactNode } from 'react';
 import type { Cell, RowData } from '@tanstack/react-table';
+import type { TableColumnMeta } from './Table.types';
 
-const MAX_CELL_TEXT_LENGTH = 150;
+/**
+ * Tanstack's `ColumnSizing` feature unconditionally merges a `size: 150`
+ * default into every column's resolved `columnDef` (see
+ * `defaultColumnSizing` in `@tanstack/table-core`), so `column.columnDef.size`
+ * is never actually `undefined` unless a table instance opts out. That
+ * defeats the `size === undefined` sentinel `findStretchColumnId` and the
+ * Ant/Material adapters rely on to tell "no explicit width" apart from "sized
+ * to 150" — the last-column stretch never triggers and percentage
+ * `meta.width` columns are always shadowed by the phantom 150. Spread this
+ * into every `useReactTable({ defaultColumn: ... })` call that feeds the
+ * shared `Table` primitive to keep unset sizes genuinely `undefined`.
+ */
+export const tableDefaultColumn = { size: undefined } as const;
+
+// A single token (no whitespace) longer than this can't wrap, so it stretches the column —
+// and with it the whole table — regardless of table-layout/overflow CSS. Truncating the
+// actual string is the only fix that's guaranteed to work independent of table CSS.
+const MAX_WORD_LENGTH = 50;
+// Cap on the whole cell, wrappable or not: a description field allows thousands of
+// characters, and one such row would otherwise be as tall as the viewport.
+const MAX_TEXT_LENGTH = 150;
+
+/**
+ * Shortens `text` to what a table cell can carry: every over-long token is cut to
+ * `MAX_WORD_LENGTH` where it sits (so the readable words around it survive), then the
+ * result is capped at `MAX_TEXT_LENGTH`. Safe to call on any string; text within both
+ * limits is returned unchanged, which is how callers detect that nothing was cut and
+ * skip the "full value" tooltip.
+ */
+export const truncateCellText = (text: string): string => {
+    const wordsCut = text.replace(/\S+/g, (word) =>
+        word.length > MAX_WORD_LENGTH ? `${word.slice(0, MAX_WORD_LENGTH)}…` : word,
+    );
+    return wordsCut.length > MAX_TEXT_LENGTH
+        ? `${wordsCut.slice(0, MAX_TEXT_LENGTH)}…`
+        : wordsCut;
+};
 
 /**
  * True when a row click originated from an interactive element (action buttons,
@@ -14,15 +51,33 @@ export const isRowClickIgnored = (target: EventTarget | null): boolean => {
     return !!el?.closest?.('button, a, input, select, textarea, label, [data-row-click-ignore]');
 };
 
+/**
+ * The last column without an explicit size (either tanstack's numeric
+ * `columnDef.size` or a percentage `meta.width`) stretches to fill whatever
+ * width the fixed-size columns (checkbox, expander, row-actions) leave behind,
+ * instead of every unsized column competing for space based on raw content
+ * width. Returns null when every column has an explicit size.
+ */
+export const findStretchColumnId = (
+    columns: { id: string; columnDef: { size?: number; meta?: TableColumnMeta } }[],
+): string | null => {
+    for (let i = columns.length - 1; i >= 0; i--) {
+        const { size, meta } = columns[i].columnDef;
+        if (size === undefined && meta?.width === undefined) return columns[i].id;
+    }
+    return null;
+};
+
 export const truncateCellNode = (node: ReactNode): ReactNode => {
     if (typeof node !== 'string' && typeof node !== 'number') return node;
     const text = String(node);
-    if (text.length <= MAX_CELL_TEXT_LENGTH) return node;
-    return <span title={text}>{text.slice(0, MAX_CELL_TEXT_LENGTH) + '…'}</span>;
+    const shortened = truncateCellText(text);
+    if (shortened !== text) return <span title={text}>{shortened}</span>;
+    return node;
 };
 
 /**
- * Render a tanstack cell with the 150-char truncation applied.
+ * Render a tanstack cell with truncation applied.
  *
  * `flexRender` always wraps a function-form `cell` in `<Comp {...props}/>`, so
  * the rendered output is a React element — `truncateCellNode` only sees a
@@ -32,7 +87,9 @@ export const truncateCellNode = (node: ReactNode): ReactNode => {
  *
  * Cell renderers in this codebase are pure (no hooks), so calling them
  * outside React's render tree is safe. Cells that return JSX pass through
- * unchanged.
+ * unchanged — a custom cell renderer with free-text content (e.g. a name/title
+ * column) must call `truncateCellText` itself (or render <TruncatedTextCell/>), since this can't safely
+ * rewrite arbitrary JSX.
  */
 export const renderTruncatedCell = <TData extends RowData>(
     cell: Cell<TData, unknown> | undefined,

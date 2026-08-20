@@ -17,6 +17,8 @@ const muiPlacement: Record<TooltipPlacement, MuiTooltipProps['placement']> = {
 export const MaterialTooltip: TooltipComponent = ({
     content,
     placement = 'top',
+    zIndex,
+    maxWidth,
     children,
 }) => {
     return (
@@ -31,11 +33,13 @@ export const MaterialTooltip: TooltipComponent = ({
                         color: 'var(--color-text-primary)',
                         borderRadius: 'var(--radius-md)',
                         fontSize: 12,
+                        ...(maxWidth && { maxWidth }),
                     },
                 },
+                popper: zIndex ? { style: { zIndex } } : undefined,
             }}
         >
-            <span>{children}</span>
+            <span style={{ display: 'inline-flex', minWidth: 0 }}>{children}</span>
         </MuiTooltip>
     );
 };

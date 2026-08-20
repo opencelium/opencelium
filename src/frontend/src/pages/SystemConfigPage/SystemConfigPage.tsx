@@ -10,6 +10,8 @@ import {Tree} from '@shared/ui/primitives/Tree'
 import {Tooltip} from '@shared/ui/primitives/Tooltip'
 import {Icon} from '@shared/ui/primitives/Icon'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
+import {useAuth} from '@features/auth/useAuth'
+import {hasComponentPermission} from '@/engine/policy'
 import {
     useGetApplicationConfigQuery,
     useUpdateApplicationConfigMutation,
@@ -28,13 +30,19 @@ import {
     hasAnyNodeComment,
 } from './buildTree'
 import {CommentTooltipBody} from './CommentInfo'
-import {MasterPasswordGate, useMasterPasswordStore} from '@features/master-password'
+import {MasterPasswordGate, useCheckMasterPasswordExistsQuery, useMasterPasswordStore} from '@features/master-password'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type LeafValue = ConfigScalar | ConfigScalar[]
 
 export function SystemConfigPage() {
     const {t, lang} = useI18n('entities')
+    const {normalizedUser} = useAuth()
+    const canUpdate = hasComponentPermission(normalizedUser?.permissions ?? [], 'APP', 'UPDATE')
     const {masterPassword} = useMasterPasswordStore()
+    // With no master password configured at all, the config can never be unlocked from
+    // here — the page shows a notConfigured message instead of fetching or rendering it.
+    const {data: masterPasswordExists} = useCheckMasterPasswordExistsQuery()
     const {data, isLoading, isFetching, isError, refetch} = useGetApplicationConfigQuery(undefined, {
         skip: !masterPassword,
     })
@@ -102,8 +110,9 @@ export function SystemConfigPage() {
             onValueChange: handleValueChange,
             onToggleStatus: handleToggleStatus,
             statusLabels,
+            readOnly: !canUpdate,
         })
-    }, [fields, edits, handleValueChange, handleToggleStatus, statusLabels])
+    }, [fields, edits, handleValueChange, handleToggleStatus, statusLabels, canUpdate])
 
     const allExpandableKeys = useMemo(
         () => collectExpandableKeys(treeData),
@@ -182,7 +191,7 @@ export function SystemConfigPage() {
         setRestartRequired(false)
         const res = await refetch()
         if ('error' in res && res.error) {
-            message.error(t('system-config.messages.loadFailed'))
+            notifyError(t('system-config.messages.loadFailed'))
             return
         }
         message.success(t('system-config.messages.reset'))
@@ -209,7 +218,7 @@ export function SystemConfigPage() {
         const res = await updateConfig({fields: patchFields})
         if ('error' in res && res.error) {
             const err = res.error as {data?: {message?: string}}
-            message.error(err.data?.message ?? t('system-config.messages.saveFailed'))
+            notifyError(err.data?.message ?? t('system-config.messages.saveFailed'))
             return
         }
         const payload = res.data
@@ -242,6 +251,17 @@ export function SystemConfigPage() {
                         content: t('system-config.masterPassword.info.content'),
                     }}
                 >
+                {masterPasswordExists === false ? (
+                    <div style={{marginTop: 16}}>
+                        <Alert
+                            type="warning"
+                            showIcon
+                            message={t('system-config.masterPassword.notConfigured.message')}
+                            description={t('system-config.masterPassword.notConfigured.description')}
+                        />
+                    </div>
+                ) : (
+                <>
                 <div style={{marginTop: 16}}>
                     {isLoading && (
                         <div
@@ -367,25 +387,29 @@ export function SystemConfigPage() {
                         </div>
                     )}
 
-                    <div style={{display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end'}}>
-                        <Button
-                            type="primary"
-                            onClick={handleReset}
-                            loading={isFetching}
-                            disabled={isSaving}
-                        >
-                            {t('system-config.actions.reset')}
-                        </Button>
-                        <Button
-                            type="primary"
-                            onClick={handleSave}
-                            loading={isSaving}
-                            disabled={!isDirty}
-                        >
-                            {t('system-config.actions.save')}
-                        </Button>
-                    </div>
+                    {canUpdate && (
+                        <div style={{display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end'}}>
+                            <Button
+                                type="primary"
+                                onClick={handleReset}
+                                loading={isFetching}
+                                disabled={isSaving}
+                            >
+                                {t('system-config.actions.reset')}
+                            </Button>
+                            <Button
+                                type="primary"
+                                onClick={handleSave}
+                                loading={isSaving}
+                                disabled={!isDirty}
+                            >
+                                {t('system-config.actions.save')}
+                            </Button>
+                        </div>
+                    )}
                 </div>
+                </>
+                )}
                 </MasterPasswordGate>
             </div>
         </PageWrapper>

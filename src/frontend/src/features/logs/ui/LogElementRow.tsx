@@ -8,10 +8,11 @@ import type { FlowchartChildLog } from "../model/types";
 import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, TraceDot, Url } from "./logRowUi";
 import { MethodLogDetails } from "./MethodLogDetails";
 import { LoopPager } from "./LoopPager";
-import { CopyButton } from "./CopyButton";
+import { CopyButton } from "@shared/ui/actions/CopyButton";
 import { serializeLogElement } from "./serializeLogElement";
 import { useMethodViewMode } from "./methodViewMode";
 import { methodDisplayText } from "./methodView";
+import { useMethodLabelResolver } from "./methodLabels";
 import { useLogErrorTrace } from "./logErrorTrace";
 
 const INDENT_STEP = 22;
@@ -47,10 +48,15 @@ export function ElementChildren({
   loopIndexPath?: string;
 }) {
   const { t } = useI18n("logs");
-  const { data, isFetching, isError } = useGetElementChildrenQuery({
-    id,
-    loopIndex,
-  });
+  // A given element's children never change once logged — skip baseApi's
+  // default refetch-on-mount so a warm cache entry (whether from a previous
+  // expand or from prefetchErrorTracePath's reveal warm-up) is reused as-is
+  // instead of firing a redundant request that flips isFetching back to true
+  // and replaces the already-correct data with a spinner.
+  const { data, isFetching, isError } = useGetElementChildrenQuery(
+    { id, loopIndex },
+    { refetchOnMountOrArgChange: false },
+  );
 
   const pad: React.CSSProperties = {
     padding: `8px 0 8px ${24 + depth * INDENT_STEP}px`,
@@ -132,13 +138,24 @@ export function LogElementRow({
   >({});
 
   const { mode } = useMethodViewMode();
-  const { nonce, isOnTrace, isTarget, loopIteration } = useLogErrorTrace();
+  const resolveMethodLabel = useMethodLabelResolver();
+  const {
+    nonce,
+    isOnTrace,
+    isTarget,
+    loopIteration,
+    pauseNonce,
+    isOnPauseTrace,
+    isPauseTarget,
+    pauseLoopIteration,
+  } = useLogErrorTrace();
   const anchorRef = useRef<HTMLDivElement>(null);
   // REST rows carry no status dot, so the trace marker is shown on every row on
   // the path to the error (the failing element and its ancestors), matched by
   // indexPath *and* this row's loop-iteration context.
   const onTrace = isOnTrace(log.indexPath, loopIndexPath);
   const target = isTarget(log.indexPath, loopIndexPath);
+  const pausedHere = isPauseTarget(log.indexPath, loopIndexPath);
 
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
@@ -169,7 +186,29 @@ export function LogElementRow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
 
-  const scrollAnchor = target ? <div ref={anchorRef} aria-hidden /> : null;
+  // Debugger pause reveal, same mechanics as the error trail above but for the
+  // paused-on location — continues the cascade into this (REST-fetched)
+  // iteration. Deliberately does not expand the paused-on row ITSELF when
+  // it's an OPERATION (that would fetch and show its request/response); LOOP/
+  // IF containers still open even as the target, or the trail couldn't reach
+  // any further down.
+  useEffect(() => {
+    if (pauseNonce === 0 || !isOnPauseTrace(log.indexPath, loopIndexPath)) return;
+    if (!(pausedHere && log.type === "OPERATION")) {
+      if (isControlled) onReveal?.();
+      else setInternalExpanded(true);
+    }
+    if (log.type === "LOOP") {
+      const iter = pauseLoopIteration(log.indexPath, loopIndexPath);
+      if (iter !== null) setLoopIndex(iter);
+    }
+    if (pausedHere) {
+      anchorRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pauseNonce]);
+
+  const scrollAnchor = target || pausedHere ? <div ref={anchorRef} aria-hidden /> : null;
 
   switch (log.type) {
     case "OPERATION": {
@@ -180,7 +219,7 @@ export function LogElementRow({
       const hasError = !!log.error?.message;
       const displayText = methodDisplayText(mode, {
         url: request?.url,
-        label: log.properties?.label,
+        label: log.properties?.label ?? resolveMethodLabel(log.indexPath),
         name: log.properties?.name,
       });
       return (
@@ -204,7 +243,7 @@ export function LogElementRow({
             }
             right={
               <Meta>
-                {response?.status ? <StatusBadge status={response.status} /> : null}
+                {response?.status && !hasError ? <StatusBadge status={response.status} /> : null}
                 {response?.duration ? (
                   <Typography variant="caption" isSubtle>
                     {response.duration}

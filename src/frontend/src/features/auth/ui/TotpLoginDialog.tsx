@@ -1,6 +1,7 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '@features/auth/useAuth'
+import { SessionHydrationError } from '@features/auth/strategies/PasswordStrategy'
 import { API_TIMEOUT_ERROR_NAME, ApiFetchError } from '@shared/api/apiFetch'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext'
@@ -16,7 +17,6 @@ import { Typography } from '@shared/ui/primitives/Typography'
 type Props = {
     open: boolean
     challenge: TotpChallenge | null
-    rememberMe: boolean
     onClose: () => void
 }
 
@@ -29,7 +29,7 @@ function formatSecret(secret: string): string {
 
 const constraints = { code: getStringConstraints(totpCodeSchema, 'code') }
 
-export function TotpLoginDialog({ open, challenge, rememberMe, onClose }: Props) {
+export function TotpLoginDialog({ open, challenge, onClose }: Props) {
     const { validateTotp } = useAuth()
     const { t } = useI18n('auth')
     const form = useForm<TotpCodeValues>({
@@ -46,18 +46,23 @@ export function TotpLoginDialog({ open, challenge, rememberMe, onClose }: Props)
         try {
             // On success the session lands in Redux and LoginPage redirects away — the
             // dialog unmounts with the rest of the login screen, so there is nothing to close.
-            await validateTotp({ code: code.trim(), sessionId: challenge.sessionId, rememberMe })
+            await validateTotp({ code: code.trim(), sessionId: challenge.sessionId })
         } catch (e) {
             // Only a genuine fetch failure ("Failed to fetch") is a network error;
             // other TypeErrors are programming bugs and must not be hidden as such.
             const isNetworkError =
                 (e instanceof Error && e.name === API_TIMEOUT_ERROR_NAME) ||
                 (e instanceof TypeError && e.message === 'Failed to fetch')
+            // The code was correct — /totp-validate already succeeded — this is a
+            // separate failure to load the account, so don't report it as an
+            // invalid code (see PasswordStrategy.completeLogin).
             const messageKey: AuthKey = isNetworkError
                 ? 'errors.network'
-                : e instanceof ApiFetchError && e.status === 401
-                  ? 'totp.errors.invalidCode'
-                  : 'errors.failed'
+                : e instanceof SessionHydrationError
+                  ? 'errors.sessionLoadFailed'
+                  : e instanceof ApiFetchError && e.status === 401
+                    ? 'totp.errors.invalidCode'
+                    : 'errors.failed'
             form.setError('code', { type: 'server', message: messageKey })
         }
     }

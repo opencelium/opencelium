@@ -1,7 +1,10 @@
 {
   "list": {
     "title": "Rollen",
-    "subTitle": "Verwalten Sie Rollen, zugewiesene Komponenten und Berechtigungsstufen für Systembenutzer."
+    "subTitle": "Verwalten Sie Rollen, zugewiesene Komponenten und Berechtigungsstufen für Systembenutzer.",
+    "confirmDelete": {
+      "message": "Sind Sie sicher, dass Sie die Rolle mit dem Namen \"{{name}}\" löschen möchten?"
+    }
   },
   "actions": {
     "delete": {

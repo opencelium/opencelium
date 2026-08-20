@@ -1,25 +1,15 @@
-import {store} from "@app/store/store.ts";
-import {userApi} from "@entities/user/api/userApi.ts";
-import {debouncePromise} from "@shared/utils/debouncePromise.ts";
+import { debouncePromise } from '@shared/utils/debouncePromise'
+import { ensureUserMetaLoaded } from '@entities/user/command/userCache'
 
+const SUGGESTION_LIMIT = 20
 
-export async function _resolveUserIds(
-    input: string
-): Promise<string[]> {
-
-    const result = await store.dispatch(
-        userApi.endpoints.getUsers.initiate(
-            { page: 1, limit: 2, search: input },
-            { subscribe: false, forceRefetch: true }
-        )
-    );
-
-    if ('data' in result && result.data) {
-        return result.data.map(u => u.userId);
-    }
-
-    return [];
+async function _resolveUserIds(input: string): Promise<string[]> {
+    const list = await ensureUserMetaLoaded()
+    const needle = (input ?? '').trim()
+    const matches = needle
+        ? list.filter((u) => String(u.userId).includes(needle))
+        : list
+    return matches.slice(0, SUGGESTION_LIMIT).map((u) => String(u.userId))
 }
 
-export const resolveUserIds =
-    debouncePromise(_resolveUserIds, 300);
+export const resolveUserIds = debouncePromise(_resolveUserIds, 300)

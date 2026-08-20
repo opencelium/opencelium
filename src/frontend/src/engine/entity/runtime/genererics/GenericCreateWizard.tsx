@@ -6,9 +6,10 @@ interface Props {
     entityName: string
     onSuccess?: () => void
     skipSuccessState?: boolean
+    hideRecommendations?: boolean
 }
 
-export const GenericCreateWizard: React.FC<Props> = ({ entityName, onSuccess, skipSuccessState }) => {
+export const GenericCreateWizard: React.FC<Props> = ({ entityName, onSuccess, skipSuccessState, hideRecommendations }) => {
     const submit = useWizardSubmit({ entityName, mode: 'create' })
 
     const handleSubmit = async (data: unknown) => {
@@ -16,5 +17,5 @@ export const GenericCreateWizard: React.FC<Props> = ({ entityName, onSuccess, sk
         onSuccess?.()
     }
 
-    return <EntityWizard entityName={entityName} mode="create" onSubmit={handleSubmit} skipSuccessState={skipSuccessState} />
+    return <EntityWizard entityName={entityName} mode="create" onSubmit={handleSubmit} skipSuccessState={skipSuccessState} hideRecommendations={hideRecommendations} />
 }

@@ -1,4 +1,5 @@
 {
+  "title": "Fehler",
   "api": {
     "unauthorized": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
     "forbidden": "Ihre Sitzung ist abgelaufen",
@@ -7,11 +8,13 @@
     "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
     "default": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     "unknownError": "Unbekannter Fehler in {{place}}",
+    "CATEGORY_NOT_FOUND": "Diese Kategorie wurde nicht gefunden. Sie wurde möglicherweise bereits gelöscht.",
     "socketDisconnected": "Live-Verbindung verloren. Metriken werden nicht mehr aktualisiert.",
     "login": {
       "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
       "invalidCredentials": "Ungültige E-Mail oder Passwort",
-      "failed": "Anmeldung fehlgeschlagen"
+      "failed": "Anmeldung fehlgeschlagen",
+      "sessionLoadFailed": "Sie wurden angemeldet, aber Ihr Konto konnte nicht geladen werden. Bitte versuchen Sie es erneut."
     },
     "forgotPassword": {
       "emailNotExists": "Für diese E-Mail-Adresse ist kein Konto registriert.",
@@ -24,6 +27,13 @@
       "invalidToken": "Der Zurücksetzungslink ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.",
       "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
       "failed": "Das Passwort konnte nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
+    },
+    "operation": {
+      "load": "{{resource}} konnten nicht geladen werden",
+      "create": "{{resource}} konnten nicht erstellt werden",
+      "update": "{{resource}} konnten nicht aktualisiert werden",
+      "delete": "{{resource}} konnten nicht gelöscht werden",
+      "request": "Anfrage an {{resource}} fehlgeschlagen"
     }
   },
   "field": {

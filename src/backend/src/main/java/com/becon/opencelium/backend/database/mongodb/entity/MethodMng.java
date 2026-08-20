@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import com.becon.opencelium.backend.enums.MethodType;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -26,8 +27,25 @@ public class MethodMng {
     private String name;
     private String color;
     private String label;
+
+    /**
+     * Persisted as the wire value ({@code "CONNECTOR"}, {@code "HTTP_REQUEST"}, {@code "WEBHOOK"})
+     * via the {@link MethodType} Mongo converters. {@code null} for documents saved before
+     * method types existed — see {@link MethodType} for the legacy fallback semantics.
+     */
+    @Field(name = "method_type")
+    private MethodType methodType;
+
     @Field(name = "data_integrator")
     private Integer dataAggregator;
+
+    /**
+     * User-defined jump target: the color (or index) of the regular method this method redirects
+     * execution to instead of its natural successor. {@code null} means the natural next element is
+     * taken. The jump lives on the method only — never on {@link OperatorMng} (an operator can be
+     * neither a jump source nor a jump target).
+     */
+    private String jump;
     private RequestMng request;
     private ResponseMng response;
 
@@ -83,6 +101,14 @@ public class MethodMng {
         this.label = label;
     }
 
+    public MethodType getMethodType() {
+        return methodType;
+    }
+
+    public void setMethodType(MethodType methodType) {
+        this.methodType = methodType;
+    }
+
     public RequestMng getRequest() {
         return request;
     }
@@ -118,5 +144,13 @@ public class MethodMng {
 
     public void setConnector(MethodConnectorMng connector) {
         this.connector = connector;
+    }
+
+    public String getJump() {
+        return jump;
+    }
+
+    public void setJump(String jump) {
+        this.jump = jump;
     }
 }

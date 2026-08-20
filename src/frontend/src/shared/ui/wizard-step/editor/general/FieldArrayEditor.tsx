@@ -43,6 +43,7 @@ interface FieldArrayEditorProps<T> {
     hideAddButton?: boolean;
 
     addButtonPosition?: 'bottom' | 'top';
+    stickyAddButton?: boolean;
 
     gap?: number;
 
@@ -68,6 +69,7 @@ export const FieldArrayEditor = <T,>({
     hideAddButton,
 
     addButtonPosition = 'bottom',
+    stickyAddButton = false,
     gap = 14,
     rules,
 }: FieldArrayEditorProps<T>) => {
@@ -137,10 +139,18 @@ export const FieldArrayEditor = <T,>({
     const renderAddButton = (isEmpty = false) => {
         if (hideAddButton) return null;
         return (
-            <div style={{ display: 'flex', justifyContent: isEmpty ? 'center' : 'left', padding: isCompact ? 8 : '8px 0' }}>
+            <div style={{
+                display: 'flex',
+                justifyContent: isEmpty ? 'center' : 'left',
+                padding: isCompact ? 8 : '8px 0',
+                ...(stickyAddButton && !isEmpty ? {
+                    flexShrink: 0,
+                    background: 'var(--color-background-surface)',
+                } : {}),
+            }}>
                 <Button
                     size={'md'}
-                    onClick={() => append(defaultItem)}
+                    onClick={() => append(defaultItem, { shouldFocus: !stickyAddButton })}
                 >
                     {addButtonText}
                 </Button>
@@ -167,6 +177,29 @@ export const FieldArrayEditor = <T,>({
                     />
                     {AddButton}
                 </>
+            );
+        }
+
+        if (isCompact && stickyAddButton) {
+            return (
+                <FormFieldContainer
+                    fieldContainerProps={{
+                        style: {
+                            display: 'flex',
+                            flexDirection: 'column',
+                            maxHeight: 'clamp(220px, calc(100dvh - 500px), 600px)',
+                            overflow: 'hidden',
+                        },
+                    }}
+                    error={error}
+                >
+                    <div style={{ ...listStyle, overflowY: 'auto', minHeight: 0 }}>
+                        {fields.map((item, index) =>
+                            wrapItem(renderItem({ item, index, remove }), item.id)
+                        )}
+                    </div>
+                    {AddButton}
+                </FormFieldContainer>
             );
         }
 

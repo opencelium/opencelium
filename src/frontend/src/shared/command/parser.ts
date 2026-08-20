@@ -36,6 +36,7 @@ export async function parseTokens(tokens: string[], policyContext: PolicyContext
                     group: n.group ?? inheritedGroup,
                     description: n.description,
                     shortcut: n.shortcut,
+                    lockAsChip: n.lockAsChip,
                 });
             });
         });
@@ -53,6 +54,7 @@ export async function parseTokens(tokens: string[], policyContext: PolicyContext
         group: node.group ?? inheritedGroup,
         description: node.description,
         shortcut: node.shortcut,
+        disabled: typeof v === 'string' ? undefined : v.disabled,
     }));
 
     if (tokens.length === 0) {

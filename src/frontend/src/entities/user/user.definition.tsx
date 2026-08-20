@@ -4,6 +4,7 @@ import {createEntityCommands} from "@/engine/entity/command/createEntityCommands
 import {resolveUserEmails} from "@entities/user/command/resolvers/resolveUserEmails.ts";
 import {store} from "@app/store/store.ts";
 import {resolveUserIds} from "@entities/user/command/resolvers/resolveUserId.ts";
+import {findUserIdByEmail} from "@entities/user/command/userCache.ts";
 import {userApi} from "@entities/user/api/userApi.ts";
 import type {User, UserUpdateDto} from "@entities/user/model/types.ts";
 import {i18n} from "@shared/i18n/config/i18n.ts";
@@ -14,10 +15,26 @@ import {TotpToggle} from "@entities/user/ui/TotpToggle.tsx";
 import {apiExecutor} from "@shared/api/apiExecutor.ts";
 import {message} from "antd";
 import {selectAuthUser} from "@entities/auth/model/authSelectors.ts";
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 const baseKey = 'user';
+
+const resolveUserId = (value: string): string => {
+    if (/^\d+$/.test(value)) return value
+    return String(findUserIdByEmail(value) ?? value)
+}
+
+const buildUserFetchUrl = (value: string): string =>
+    `/user/${encodeURIComponent(resolveUserId(value))}`
+
+const buildUserPageUrl = (value: string): string =>
+    `/user/update/${encodeURIComponent(resolveUserId(value))}`
+
+const buildUserViewPageUrl = (value: string): string =>
+    `/user/view/${encodeURIComponent(resolveUserId(value))}`
 
 export const userDefinition: EntityDefinition = {
     name: baseKey,
+    permissionComponent: 'USER',
     routes: [
         { type: 'create' },
         { type: 'view' },
@@ -34,6 +51,10 @@ export const userDefinition: EntityDefinition = {
             { type: 'update' },
             {
                 type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    return t(`${baseKey}.list.confirmDelete.message`, { email: (row as User).email });
+                },
                 disabledReason: (row) => {
                     const currentUser = selectAuthUser(store.getState());
                     if (!currentUser) return null;
@@ -49,6 +70,7 @@ export const userDefinition: EntityDefinition = {
                 key: 'enableTotp',
                 labelKey: `${baseKey}.totp.bulkEnable.label`,
                 field: 'userId',
+                permissionAction: 'UPDATE',
                 run: async ({ ids, clearSelection }) => {
                     await apiExecutor({
                         url: '/user/list/totp/enable',
@@ -112,11 +134,13 @@ export const userDefinition: EntityDefinition = {
                 max: 255
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 2,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.name.label`,
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             }
         },
         {
@@ -133,11 +157,13 @@ export const userDefinition: EntityDefinition = {
                 max: 255
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 3,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.surname.label`,
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             }
         },
         {
@@ -210,8 +236,7 @@ export const userDefinition: EntityDefinition = {
             },
             validation: {
                 required: true,
-                email: true,
-                max: 100,
+                max: 255,
                 remote: {
                     url: `/user/check/:email`,
                     method: 'GET', // or GET, depending on the API
@@ -228,11 +253,13 @@ export const userDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.email.label`,
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },/*
             access: {
                 strategy: 'disable',
@@ -271,16 +298,7 @@ export const userDefinition: EntityDefinition = {
                     { pattern: /\d/, message: `${baseKey}.fields.password.validation3` },
                     { pattern: /[^A-Za-z0-9]/, message: `${baseKey}.fields.password.validation4` }
                 ]
-            },/*
-            access: {
-                strategy: 'forbid',
-                rules: [
-                    {
-                        effect: 'deny',
-                        roles: ['viewer']
-                    }
-                ]
-            }*/
+            },
         },
         {
             name: 'repeatPassword',
@@ -293,7 +311,7 @@ export const userDefinition: EntityDefinition = {
             },
             validation: {
                 required: true,
-            }
+            },
         },
         {
             name: 'userGroup',
@@ -327,6 +345,7 @@ export const userDefinition: EntityDefinition = {
                     }
                     return undefined;
                 },
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -381,18 +400,14 @@ export const userDefinition: EntityDefinition = {
                 ]
             }*/
         },{
+            // Update mode merges role selection into the credentials step instead of a
+            // separate step (see the 'credentials' step definition below) — one section,
+            // so it renders as a single block instead of two separately-spaced sections.
+            id: 'credentials-update',
+            fields: ['email', 'userGroup'],
+        },{
             id: 'role',
-            fields: ['userGroup'],/*
-            access: {
-                strategy: 'hide',
-                rules: [
-                    {
-                        effect: 'allow',
-                        roles: ['admin']
-                    },
-
-                ]
-            }*/
+            fields: ['userGroup'],
         }
     ],
 
@@ -447,44 +462,67 @@ export const userDefinition: EntityDefinition = {
             }
         ],
 
-        steps: [{
+        // Update mode merges role selection into the credentials step (and drops
+        // password/repeatPassword, changed via a dedicated reset flow instead) rather
+        // than keeping the create flow's separate password + role steps.
+        steps: (mode) => {
+            const detailsStep = {
                 id: 'details',
                 header: `${baseKey}.wizard.steps.details.header`,
                 subheader: `${baseKey}.wizard.steps.details.subheader`,
                 sectionIds: ['details'],
                 validateFields: ['userDetail.name', 'userDetail.surname', 'userDetail.phoneNumber'],
-/*                info: [
-                    {
-                        content: `${baseKey}.wizard.steps.details.info`,
-                    }
-                ]*/
-            },
-            {
-                id: 'credentials',
-                header: `${baseKey}.wizard.steps.credentials.header`,
-                subheader: `${baseKey}.wizard.steps.credentials.subheader`,
-                sectionIds: ['credentials'],
-                validateFields: ['email', 'password', 'repeatPassword']
-            },
-            {
-                id: 'role',
-                header: `${baseKey}.wizard.steps.role.header`,
-                subheader: `${baseKey}.wizard.steps.role.subheader`,
-                sectionIds: ['role'],
-                validateFields: ['userGroup']
             }
-        ]
+
+            if (mode === 'update') {
+                return [
+                    detailsStep,
+                    {
+                        id: 'credentials',
+                        header: `${baseKey}.wizard.steps.credentials.header`,
+                        subheader: `${baseKey}.wizard.steps.credentials.subheaderUpdate`,
+                        sectionIds: ['credentials-update'],
+                        validateFields: ['email', 'userGroup'],
+                    },
+                ]
+            }
+
+            return [
+                detailsStep,
+                {
+                    id: 'credentials',
+                    header: `${baseKey}.wizard.steps.credentials.header`,
+                    subheader: `${baseKey}.wizard.steps.credentials.subheader`,
+                    sectionIds: ['credentials'],
+                    validateFields: ['email', 'password', 'repeatPassword'],
+                },
+                {
+                    id: 'role',
+                    header: `${baseKey}.wizard.steps.role.header`,
+                    subheader: `${baseKey}.wizard.steps.role.subheader`,
+                    sectionIds: ['role'],
+                    validateFields: ['userGroup'],
+                },
+            ]
+        },
     },
     commands: (def) => (
         [
             ...createEntityCommands({def, config: {}, dsl: {
                 update: {
                     by: [
-                        { field: 'email', resolve: resolveUserEmails },
+                        {
+                            field: 'email',
+                            resolve: resolveUserEmails,
+                            buildFetchUrl: (_def, value) => buildUserFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildUserPageUrl(value),
+                        },
                         {
                             field: 'id',
                             resolve: resolveUserIds,
                             customPath: true,
+                            buildFetchUrl: (_def, value) => buildUserFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildUserPageUrl(value),
                         }
                     ]
                 },
@@ -494,6 +532,7 @@ export const userDefinition: EntityDefinition = {
                             field: 'id',
                             resolve: resolveUserIds,
                             customPath: true,
+                            buildDeleteUrl: (_def, value) => buildUserFetchUrl(value),
                             afterDelete: async () => {
                                 await store.dispatch(
                                     userApi.util.invalidateTags([
@@ -509,6 +548,7 @@ export const userDefinition: EntityDefinition = {
                         {
                             field: 'email',
                             resolve: resolveUserEmails,
+                            buildDeleteUrl: (_def, value) => buildUserFetchUrl(value),
                             confirmMessage: (email) => {
                                 const t = i18n.getFixedT(i18n.language, 'entities');
                                 return t(`${baseKey}.confirmation.delete.byEmail`, {email});
@@ -522,10 +562,14 @@ export const userDefinition: EntityDefinition = {
                             field: 'id',
                             resolve: resolveUserIds,
                             customPath: true,
+                            buildFetchUrl: (_def, value) => buildUserFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildUserViewPageUrl(value),
                         },
                         {
                             field: 'email',
-                            resolve: resolveUserEmails
+                            resolve: resolveUserEmails,
+                            buildFetchUrl: (_def, value) => buildUserFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildUserViewPageUrl(value),
                         }
                     ]
                 }

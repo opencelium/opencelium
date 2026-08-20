@@ -1,6 +1,17 @@
 import { MarkerType } from '@xyflow/react';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { collectDescendantNodeIds, getOperatorBottomBranch } from './graph.traversal';
+import { getNodeComment } from './commentAnchor';
+
+/** A note cannot outlive the node it belongs to. Applied after the deletion so it
+ * also covers the recursive operator-branch case. */
+const dropOrphanedComments = (nodes: WorkflowNodeModel[]) => {
+  const presentIds = new Set(nodes.map((node) => node.id));
+  return nodes.filter((node) => {
+    const anchorNodeId = getNodeComment(node)?.anchorNodeId;
+    return !anchorNodeId || presentIds.has(anchorNodeId);
+  });
+};
 
 function getEdgeShift(
   deletedNode: WorkflowNodeModel,
@@ -67,5 +78,8 @@ export function deleteNodeGraph(
     }),
   );
 
-  return { nodes: nextNodes, edges: [...filteredEdges, ...reconnectedEdges] };
+  return {
+    nodes: dropOrphanedComments(nextNodes),
+    edges: [...filteredEdges, ...reconnectedEdges],
+  };
 }

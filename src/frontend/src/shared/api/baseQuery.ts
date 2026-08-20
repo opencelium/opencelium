@@ -4,9 +4,12 @@ import { normalizeError } from '@shared/errors/api/normalizeError.ts'
 import { errorBus } from '@shared/errors/api/errorBus.ts'
 import { selectAccessToken } from '@entities/auth/model/authSelectors'
 import type { RootState } from '@app/store/types'
+import { runtimeConfig } from '@shared/config/runtimeConfig'
 
+// No `baseUrl` here — it's resolved per-request below via runtimeConfig.apiUrl, since
+// that value isn't known yet at module-eval time (it's fetched async in main.tsx,
+// which runs after this module's top-level code has already executed).
 const rawBaseQuery = fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
     credentials: 'include',
     prepareHeaders: (headers, { getState, extra, arg }) => {
         const isMultipart =
@@ -49,6 +52,12 @@ type ExtraOptions = {
     headers?: Record<string, string>
 }
 
+const resolveAbsoluteUrl = (url: string): string =>
+    /^https?:\/\//i.test(url) ? url : `${runtimeConfig.apiUrl}${url.startsWith('/') ? url : `/${url}`}`
+
+const withAbsoluteUrl = (args: string | CustomFetchArgs): string | CustomFetchArgs =>
+    typeof args === 'string' ? resolveAbsoluteUrl(args) : { ...args, url: resolveAbsoluteUrl(args.url) }
+
 export const baseQuery: BaseQueryFn<
     string | CustomFetchArgs,
     unknown,
@@ -56,7 +65,7 @@ export const baseQuery: BaseQueryFn<
     ExtraOptions
 > = async (args, api, extraOptions) => {
     const result = await rawBaseQuery(
-        args,
+        withAbsoluteUrl(args),
         {
             ...api,
             extra: {
@@ -71,7 +80,9 @@ export const baseQuery: BaseQueryFn<
         typeof args !== 'string' && args.customOptions?.ignoreError
 
     if (!extraOptions?.ignoreError && !ignoreErrorFromArgs && result.error) {
-        const appError = normalizeError(result.error)
+        const appError = normalizeError(result.error, typeof args === 'string'
+            ? { url: args }
+            : { url: args.url, method: args.method })
         errorBus.emit(appError)
     }
 

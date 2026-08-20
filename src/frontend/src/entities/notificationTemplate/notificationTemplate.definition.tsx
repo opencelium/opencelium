@@ -6,15 +6,31 @@ import en from '@entities/notificationTemplate/i18n/en.json'
 import de from '@entities/notificationTemplate/i18n/de.json'
 import { resolveNotificationTemplateNames } from '@entities/notificationTemplate/command/resolvers/resolveNotificationTemplateNames'
 import { resolveNotificationTemplateIds } from '@entities/notificationTemplate/command/resolvers/resolveNotificationTemplateIds'
+import { findNotificationTemplateIdByName } from '@entities/notificationTemplate/command/notificationTemplateCache'
 import type { NotificationTemplate, NotificationTemplateDto } from '@entities/notificationTemplate/model/types'
 import { toDisplayFormat, toServerFormat, replaceInactiveArgs } from '@entities/notificationTemplate/lib/templateArgUtils'
 import { getAggregatorsFromCache } from '@entities/notificationTemplate/lib/getAggregatorsFromCache'
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'notification-template'
 
+const resolveNotificationTemplateId = (value: string): string => {
+    if (/^\d+$/.test(value)) return value
+    return String(findNotificationTemplateIdByName(value) ?? value)
+}
+
+const buildNotificationTemplateFetchUrl = (value: string): string =>
+    `/message/${encodeURIComponent(resolveNotificationTemplateId(value))}`
+
+const buildNotificationTemplatePageUrl = (value: string): string =>
+    `/${baseKey}/update/${encodeURIComponent(resolveNotificationTemplateId(value))}`
+
+const buildNotificationTemplateViewPageUrl = (value: string): string =>
+    `/${baseKey}/view/${encodeURIComponent(resolveNotificationTemplateId(value))}`
+
 export const notificationTemplateDefinition: EntityDefinition = {
     name: baseKey,
-    plural: 'notificationTemplates',
+    plural: 'notification-templates',
 
     routes: [
         { type: 'create' },
@@ -31,7 +47,13 @@ export const notificationTemplateDefinition: EntityDefinition = {
         actions: [
             { type: 'view' },
             { type: 'update' },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities')
+                    return t(`${baseKey}.list.confirmDelete.message`, { name: (row as NotificationTemplate).name })
+                },
+            },
         ],
     },
 
@@ -112,11 +134,13 @@ export const notificationTemplateDefinition: EntityDefinition = {
                 max: 255,
             },
             table: {
+                width: '60%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -134,10 +158,12 @@ export const notificationTemplateDefinition: EntityDefinition = {
             },
             validation: { required: true },
             table: {
+                width: '20%',
                 visible: true,
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.type.label`,
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -257,8 +283,19 @@ export const notificationTemplateDefinition: EntityDefinition = {
             dsl: {
                 update: {
                     by: [
-                        { field: 'name', resolve: resolveNotificationTemplateNames },
-                        { field: 'id', resolve: resolveNotificationTemplateIds, customPath: true },
+                        {
+                            field: 'name',
+                            resolve: resolveNotificationTemplateNames,
+                            buildFetchUrl: (_def, value) => buildNotificationTemplateFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildNotificationTemplatePageUrl(value),
+                        },
+                        {
+                            field: 'id',
+                            resolve: resolveNotificationTemplateIds,
+                            customPath: true,
+                            buildFetchUrl: (_def, value) => buildNotificationTemplateFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildNotificationTemplatePageUrl(value),
+                        },
                     ],
                 },
                 delete: {
@@ -266,6 +303,7 @@ export const notificationTemplateDefinition: EntityDefinition = {
                         {
                             field: 'name',
                             resolve: resolveNotificationTemplateNames,
+                            buildDeleteUrl: (_def, value) => buildNotificationTemplateFetchUrl(value),
                             confirmMessage: (name) => {
                                 const t = i18n.getFixedT(i18n.language, 'entities')
                                 return t(`${baseKey}.confirmation.delete.byName`, { name })
@@ -275,6 +313,7 @@ export const notificationTemplateDefinition: EntityDefinition = {
                             field: 'id',
                             resolve: resolveNotificationTemplateIds,
                             customPath: true,
+                            buildDeleteUrl: (_def, value) => buildNotificationTemplateFetchUrl(value),
                             confirmMessage: (id) => {
                                 const t = i18n.getFixedT(i18n.language, 'entities')
                                 return t(`${baseKey}.confirmation.delete.byId`, { id })
@@ -284,8 +323,19 @@ export const notificationTemplateDefinition: EntityDefinition = {
                 },
                 view: {
                     by: [
-                        { field: 'name', resolve: resolveNotificationTemplateNames },
-                        { field: 'id', resolve: resolveNotificationTemplateIds, customPath: true },
+                        {
+                            field: 'name',
+                            resolve: resolveNotificationTemplateNames,
+                            buildFetchUrl: (_def, value) => buildNotificationTemplateFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildNotificationTemplateViewPageUrl(value),
+                        },
+                        {
+                            field: 'id',
+                            resolve: resolveNotificationTemplateIds,
+                            customPath: true,
+                            buildFetchUrl: (_def, value) => buildNotificationTemplateFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildNotificationTemplateViewPageUrl(value),
+                        },
                     ],
                 },
             },

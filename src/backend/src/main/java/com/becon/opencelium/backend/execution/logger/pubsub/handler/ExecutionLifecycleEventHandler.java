@@ -8,7 +8,7 @@ import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionEvent
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionFinishedEvent;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionStartedEvent;
 import com.becon.opencelium.backend.execution.logger.service.LogDataService;
-import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
+import com.becon.opencelium.backend.websocket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.execution.supportfile.SupportFileService;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.slf4j.Logger;
@@ -68,36 +68,57 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
         if (event instanceof ExecutionStartedEvent e) {
             metadata.create(e.executionId(), e.connectionId(), e.schedulerId(), e.timestamp());
         } else if (event instanceof ExecutionFinishedEvent e) {
-            handleFinish(e);
-            metadata.remove(e.executionId());
+            try {
+                handleFinish(e);
+            } finally {
+                // the mapping entry and its open file channel must be released even
+                // when finish handling fails, otherwise they leak until restart
+                metadata.remove(e.executionId());
+            }
         }
     }
 
 
     private void handleFinish(ExecutionFinishedEvent event) {
         long executionId = event.executionId();
+        if (!metadata.exists(executionId)) {
+            logger.warn("Skipping finish handling for unknown executionId = {}", executionId);
+            return;
+        }
+
         long connectionId = metadata.getConnectionId(executionId);
         int schedulerId = metadata.getSchedulerId(executionId);
         String timestamp = metadata.getTimestamp(executionId);
         String result = event.result();
 
         boolean logExists = hasLogFile(executionId, connectionId, timestamp) && hasDbRecords(executionId);
-        if (!logExists) {
-            return;
-        }
 
         if (EXECUTION_TEST == event.type()) {
-            schedulerService.deleteById(schedulerId);
-            connectionService.deleteById(connectionId);
+            // temporary test artifacts are removed unconditionally — leaving them behind
+            // because the log is missing would leak the connection, scheduler and mapping
+            runQuietly(() -> schedulerService.deleteById(schedulerId), "delete test scheduler " + schedulerId);
+            runQuietly(() -> connectionService.deleteById(connectionId), "delete test connection " + connectionId);
             connection2ChannelMapping.remove(connectionId);
 
-            moveLogFile(connectionId, executionId, timestamp, result);
+            if (logExists) {
+                moveLogFile(connectionId, executionId, timestamp, result);
+            }
         } else if (SUPPORT_FILE == event.type()) {
-            schedulerService.deleteById(schedulerId);
+            runQuietly(() -> schedulerService.deleteById(schedulerId), "delete support-file scheduler " + schedulerId);
 
-            supportFileService.collectFiles(connectionId, executionId, timestamp, result);
-        } else {
+            if (logExists) {
+                supportFileService.collectFiles(connectionId, executionId, timestamp, result);
+            }
+        } else if (logExists) {
             moveLogFile(connectionId, executionId, timestamp, result);
+        }
+    }
+
+    private void runQuietly(Runnable action, String description) {
+        try {
+            action.run();
+        } catch (RuntimeException e) {
+            logger.warn("Failed to {}", description, e);
         }
     }
 
