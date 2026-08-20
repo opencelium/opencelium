@@ -162,9 +162,9 @@ public class UserController {
             throw new EmailAlreadyExistException(userRequestResource.getEmail());
         }
 
-        if (!userRoleService.existsById(userRequestResource.getUserGroup())) {
-            throw new RoleNotFoundException(userRequestResource.getUserGroup());
-        }
+//        if (!userRoleService.existsById(userRequestResource.getUserGroup())) {
+//            throw new RoleNotFoundException(userRequestResource.getUserGroup());
+//        }
 
         UserDetailResource userDetailResource = userRequestResource.getUserDetail();
         applyLanguage(userDetailResource);
