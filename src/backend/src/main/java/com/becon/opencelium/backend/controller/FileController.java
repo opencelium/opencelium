@@ -16,8 +16,11 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
 import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl;
@@ -25,10 +28,6 @@ import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
-import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.FileDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
@@ -190,36 +189,7 @@ public class FileController {
     @PostMapping(path = "/groupIcon", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> groupPictureUpload(@RequestParam("file") MultipartFile file,
                                                 @RequestParam("userGroupId") int userGroupId) {
-
-        // Get extension of file
-        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
-        Objects.requireNonNull(extension);
-        // Check image extension. It should be JPEG, PNG or JPG
-        if (!FileNameUtils.isSupportedImageExtension(extension)){
-            throw new StorageException("File should be jpg or png");
-        }
-
-        // Get userGroup data from database
-        UserRole userRole = userRoleService.findById(userGroupId)
-                .orElseThrow(() -> new RuntimeException("Role doesn't exist"));
-
-        //Generate new file name
-        String newFilename = UUID.randomUUID() + "." + extension;
-
-        // If user group has an old image, delete the picture from files
-        if (userRole.getIcon() != null){
-            storageService.delete(userRole.getIcon());
-        }
-
-        // Set new image name
-        userRole.setIcon(newFilename);
-
-        // Save in database the name of image
-        userRoleService.save(userRole);
-
-        // Save image in storage
-        storageService.store(file, newFilename);
-
+        userRoleService.uploadIcon(userGroupId, file);
         return ResponseEntity.ok().build();
     }
 
