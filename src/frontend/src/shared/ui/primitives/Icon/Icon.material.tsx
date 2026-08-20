@@ -50,6 +50,11 @@ import {
     HelpOutline,
     Analytics,
     MenuBook,
+    StickyNote2,
+    Undo,
+    Redo,
+    CallSplit,
+    Loop,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -106,6 +111,11 @@ const iconMap = {
     help: HelpOutline,
     'report-analytics': Analytics,
     docs: MenuBook,
+    comment: StickyNote2,
+    undo: Undo,
+    redo: Redo,
+    if: CallSplit,
+    loop: Loop,
 };
 
 export const MaterialIcon: IconComponent = ({

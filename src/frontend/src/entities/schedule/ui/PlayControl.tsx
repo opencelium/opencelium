@@ -7,13 +7,13 @@ import {Icon} from '@shared/ui/primitives/Icon'
 import {useGeneralRequestMutation} from '@shared/api/genericApi'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
 import type {Schedule} from '../model/types'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 export type RingStatus = 'success' | 'exception'
 export type PlayVariant = 'bare' | 'neutral' | RingStatus
 
 const NEUTRAL_STROKE = 'var(--color-border-strong)'
 const NEUTRAL_TRAIL = 'var(--color-border-subtle)'
-const START_ERROR_DURATION_SEC = 8
 const CIRCLE_SIZE = 28
 
 // The backend rejects a manual trigger while the schedule is already running
@@ -62,7 +62,7 @@ export function PlayControl({schedule, variant, blockedHint}: Props) {
             const key = isConcurrentTestForbidden(error)
                 ? 'schedule.start.error.concurrentForbidden'
                 : 'schedule.start.error.failed'
-            message.error(tEntities(key), START_ERROR_DURATION_SEC)
+            notifyError(tEntities(key))
         } finally {
             setPending(false)
         }

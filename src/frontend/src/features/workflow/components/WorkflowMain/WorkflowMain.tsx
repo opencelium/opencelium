@@ -7,6 +7,7 @@ import { WorkflowLogs } from '../WorkflowLogs/WorkflowLogs';
 import type { WorkflowMainProps } from './WorkflowMain.types';
 import type { WorkflowLogsPanelState } from '../WorkflowLogs/WorkflowLogs.types';
 import { useTestRun } from '../../test-run/useTestRun';
+import { useMethodLabels } from '../WorkflowLogs/useMethodLabels';
 
 export const WorkflowMain = ({ loading, canvas }: WorkflowMainProps) => {
 	const testRun = useTestRun();
@@ -21,10 +22,15 @@ export const WorkflowMain = ({ loading, canvas }: WorkflowMainProps) => {
 		wasActiveRef.current = isActive;
 	}, [isActive]);
 
+	// The log panel names methods the way the canvas does, so a renamed step reads
+	// the same in both places.
+	const resolveMethodLabel = useMethodLabels(canvas.nodes, canvas.edges);
+
 	const canvasElement = <WorkflowCanvas {...canvas}>
 		<Background gap={16} size={1} />
 	</WorkflowCanvas>;
-	const logsElement = <WorkflowLogs panel={logsPanel} onPanelChange={setLogsPanel} />;
+	const logsElement = <WorkflowLogs panel={logsPanel} onPanelChange={setLogsPanel}
+		resolveMethodLabel={resolveMethodLabel} />;
 
 	return <div className='workflowMain'>
 		{loading ? <div style={{ width: '100%', height: '100%', display: 'flex',

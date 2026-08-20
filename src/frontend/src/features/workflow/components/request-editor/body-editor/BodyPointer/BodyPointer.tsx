@@ -13,6 +13,7 @@ import type { BodyPointerProps } from './BodyPointer.types';
 import './BodyPointer.css';
 import {
     formatLiveReferenceValue,
+    LIVE_INSPECTABLE_CLASS,
     useLiveReferenceValue
 } from "@features/workflow/components/request-editor/utils/useLiveReferenceValue.ts";
 
@@ -35,10 +36,12 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
   // what it actually resolved to instead of just the structural path — see
   // useLiveReferenceValue.ts. Resolution only fires once the chip is
   // actually hovered (`enabled: hovered` below), so opening a node with many
-  // reference chips doesn't fire a request per chip. The rectangle itself
-  // never changes appearance — the loading/resolved state only ever shows in
-  // the hover tooltip, kept separate from the edit/delete menu below.
-  const { value: liveValue, hasValue: hasLiveValue, isLoading: isLiveValueLoading } = useLiveReferenceValue(
+  // reference chips doesn't fire a request per chip. The rectangle carries
+  // the inspectable ring (canInspect, resolved with no request) so the hover
+  // is discoverable, but never shows the value itself — the loading/resolved
+  // state only ever shows in the hover tooltip, kept separate from the
+  // edit/delete menu below.
+  const { value: liveValue, hasValue: hasLiveValue, isLoading: isLiveValueLoading, canInspect } = useLiveReferenceValue(
     parsed,
     connection,
     currentMethod,
@@ -111,7 +114,10 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
     >
       {isPaused ? (
         <Tooltip content={tooltipContent} maxWidth={320}>
-          <div style={{ width: 20, height: 10, background: color }} />
+          <div
+            className={canInspect ? LIVE_INSPECTABLE_CLASS : undefined}
+            style={{ width: 20, height: 10, background: color }}
+          />
         </Tooltip>
       ) : (
         <div style={{ width: 20, height: 10, background: color }} />

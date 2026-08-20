@@ -1,4 +1,4 @@
-import type { SidebarListItem } from '../../sidebar/SidebarList/SidebarList.types';
+import type { SidebarListItem, SidebarListProps } from '../../sidebar/SidebarList/SidebarList.types';
 import type { TriggerConnectionPanelItem } from '../../sidebar/TriggerConnectionPanel/TriggerConnectionPanel.types';
 import type { SecondarySidebarMode } from '../../sidebar/sidebarSecondary';
 
@@ -12,6 +12,7 @@ export type SecondarySidebarDrawerProps = {
   connectorsFetching: boolean;
   connectorsError: boolean;
   connectorItems: readonly SidebarListItem[];
+  connectorUpdateAction: SidebarListProps['updateAction'];
   operatorItems: readonly SidebarListItem[];
   triggerItems: TriggerConnectionPanelItem[];
   triggerFetching: boolean;

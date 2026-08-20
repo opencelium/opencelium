@@ -18,19 +18,26 @@ export const tableDefaultColumn = { size: undefined } as const;
 
 // A single token (no whitespace) longer than this can't wrap, so it stretches the column —
 // and with it the whole table — regardless of table-layout/overflow CSS. Truncating the
-// actual string is the only fix that's guaranteed to work independent of table CSS. Text
-// that contains a space is left untouched, however long, since it can wrap normally.
-const LONG_WORD_LENGTH = 150;
+// actual string is the only fix that's guaranteed to work independent of table CSS.
+const MAX_WORD_LENGTH = 50;
+// Cap on the whole cell, wrappable or not: a description field allows thousands of
+// characters, and one such row would otherwise be as tall as the viewport.
+const MAX_TEXT_LENGTH = 150;
 
 /**
- * Hard-truncates `text` when it contains a word (whitespace-delimited token) longer than
- * `LONG_WORD_LENGTH` — e.g. a slug or filename with no spaces. Safe to call on any string;
- * normal multi-word text is returned unchanged.
+ * Shortens `text` to what a table cell can carry: every over-long token is cut to
+ * `MAX_WORD_LENGTH` where it sits (so the readable words around it survive), then the
+ * result is capped at `MAX_TEXT_LENGTH`. Safe to call on any string; text within both
+ * limits is returned unchanged, which is how callers detect that nothing was cut and
+ * skip the "full value" tooltip.
  */
-export const truncateUnbreakableText = (text: string): string => {
-    const hasUnbreakableWord = text.split(/\s+/).some((word) => word.length > LONG_WORD_LENGTH);
-    if (!hasUnbreakableWord) return text;
-    return text.length > LONG_WORD_LENGTH ? `${text.slice(0, LONG_WORD_LENGTH)}…` : text;
+export const truncateCellText = (text: string): string => {
+    const wordsCut = text.replace(/\S+/g, (word) =>
+        word.length > MAX_WORD_LENGTH ? `${word.slice(0, MAX_WORD_LENGTH)}…` : word,
+    );
+    return wordsCut.length > MAX_TEXT_LENGTH
+        ? `${wordsCut.slice(0, MAX_TEXT_LENGTH)}…`
+        : wordsCut;
 };
 
 /**
@@ -64,7 +71,7 @@ export const findStretchColumnId = (
 export const truncateCellNode = (node: ReactNode): ReactNode => {
     if (typeof node !== 'string' && typeof node !== 'number') return node;
     const text = String(node);
-    const shortened = truncateUnbreakableText(text);
+    const shortened = truncateCellText(text);
     if (shortened !== text) return <span title={text}>{shortened}</span>;
     return node;
 };
@@ -81,7 +88,7 @@ export const truncateCellNode = (node: ReactNode): ReactNode => {
  * Cell renderers in this codebase are pure (no hooks), so calling them
  * outside React's render tree is safe. Cells that return JSX pass through
  * unchanged — a custom cell renderer with free-text content (e.g. a name/title
- * column) must call `truncateUnbreakableText` itself, since this can't safely
+ * column) must call `truncateCellText` itself (or render <TruncatedTextCell/>), since this can't safely
  * rewrite arbitrary JSX.
  */
 export const renderTruncatedCell = <TData extends RowData>(

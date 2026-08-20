@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
-import type { ReactFlowInstance } from '@xyflow/react';
-import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
+import type { Dispatch, SetStateAction } from 'react';
+import type { WorkflowNodeModel } from '../types/workflow.types';
 import {
 	deactivateWorkflowCommandBridge,
 	workflowCommandBridgeStore,
@@ -10,14 +9,14 @@ import {
 type Params = {
 	nodes: WorkflowNodeModel[];
 	setNodes: Dispatch<SetStateAction<WorkflowNodeModel[]>>;
-	reactFlowInstance: MutableRefObject<ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel> | null>;
+	centerOnNode: (nodeId: string) => void;
 	hasOpenDialog: boolean;
 };
 
 export const useWorkflowCommandBridge = ({
 	nodes,
 	setNodes,
-	reactFlowInstance,
+	centerOnNode,
 	hasOpenDialog,
 }: Params) => {
 	const nodesRef = useRef(nodes);
@@ -33,17 +32,6 @@ export const useWorkflowCommandBridge = ({
 				? node
 				: { ...node, data: { ...node.data, searchHighlighted: highlighted } };
 		}));
-	};
-
-	const centerOnNode = (nodeId: string) => {
-		const instance = reactFlowInstance.current;
-		const node = instance?.getNode(nodeId);
-		if (!instance || !node) return;
-		requestAnimationFrame(() => instance.setCenter(
-			node.position.x + (node.measured?.width ?? 0) / 2,
-			node.position.y + (node.measured?.height ?? 0) / 2,
-			{ zoom: instance.getZoom(), duration: 200 },
-		));
 	};
 
 	useEffect(() => {

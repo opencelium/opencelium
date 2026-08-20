@@ -21,6 +21,8 @@
     "maximizeRequestData": "Anfragedaten maximieren",
     "minimizeRequestData": "Anfragedaten minimieren",
     "load": "Laden",
+    "undo": "Rückgängig",
+    "redo": "Wiederholen",
     "createEnhancement": "Enhancement erstellen",
     "deleteEnhancement": "Enhancement löschen",
     "deleteReference": "Referenz löschen"
@@ -154,7 +156,8 @@
     "connectorStep": {
       "header": "Konnektor wählen",
       "subtitle": "Wählen Sie zuerst einen Konnektor",
-      "searchPlaceholder": "Konnektor suchen"
+      "searchPlaceholder": "Konnektor suchen",
+      "fixConnector": "Konnektor bearbeiten, um die Verbindung zu reparieren"
     },
     "methodStep": {
       "header": "Methode wählen",
@@ -232,6 +235,7 @@
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
     "versionHistory": "Versionsverlauf",
+    "changeHistory": "Änderungsverlauf",
     "testRunLockedHint": "Während eines Testlaufs nicht verfügbar",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
@@ -243,6 +247,60 @@
     "confirmUnassign": {
       "title": "Kategoriezuweisung entfernen",
       "message": "Möchten Sie die Kategoriezuweisung dieses Workflows wirklich entfernen?"
+    }
+  },
+  "undoHistory": {
+    "title": "Änderungsverlauf",
+    "current": "Aktuell",
+    "empty": "Noch keine Änderungen in dieser Sitzung",
+    "operator": {
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "nodeKind": {
+      "httpRequest": "HTTP-Request",
+      "webhook": "Webhook",
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "section": {
+      "header": "Header",
+      "body": "Body"
+    },
+    "change": {
+      "initial": "Sitzungsbeginn",
+      "nodeAdded": "{{name}} hinzugefügt",
+      "nodesAdded": "{{count}} Knoten hinzugefügt",
+      "nodeRemoved": "{{name}} gelöscht",
+      "nodesRemoved": "{{count}} Knoten gelöscht",
+      "nodeMoved": "{{name}} verschoben",
+      "nodesMoved": "{{count}} Knoten verschoben",
+      "changedLabel": "Label zu {{label}} geändert",
+      "methodConfig": "Anfrage von {{name}} bearbeitet",
+      "methodUrl": "URL von {{name}} bearbeitet",
+      "methodHeader": "Header von {{name}} bearbeitet",
+      "methodBody": "Body von {{name}} bearbeitet",
+      "referenceAdded": "{{section}}-Referenz in {{name}} hinzugefügt",
+      "referenceRemoved": "{{section}}-Referenz in {{name}} gelöscht",
+      "referenceEdited": "{{section}}-Referenz in {{name}} bearbeitet",
+      "enhancement": "{{section}}-Enhancement von {{name}} bearbeitet",
+      "enhancementLanguage": "Enhancement-Sprache von {{name}} aktualisiert",
+      "enhancementDescription": "Enhancement-Beschreibung von {{name}} aktualisiert",
+      "enhancementRemoved": "Enhancement von {{name}} gelöscht",
+      "conditionConfig": "Bedingung von {{name}} bearbeitet",
+      "aggregatorConfigured": "Aggregator von {{name}} konfiguriert",
+      "aggregatorRemoved": "Aggregator von {{name}} gelöscht",
+      "connectorConfig": "Konnektor von {{name}} geändert",
+      "edgesChanged": "Verbindungen geändert",
+      "references": "Referenzen geändert",
+      "conditionAdded": "Bedingung in {{operator}} hinzugefügt",
+      "conditionRemoved": "Bedingung in {{operator}} gelöscht",
+      "conditionEdited": "Bedingung in {{operator}} bearbeitet",
+      "groupAdded": "Gruppe in {{operator}} hinzugefügt",
+      "groupRemoved": "Gruppe in {{operator}} gelöscht",
+      "groupEdited": "Gruppe in {{operator}} bearbeitet",
+      "operatorEdited": "{{operator}} bearbeitet",
+      "multiple": "Mehrere Änderungen"
     }
   },
   "shortcutsDialog": {
@@ -260,6 +318,8 @@
       "ctrl": "Strg",
       "esc": "Esc",
       "s": "S",
+      "z": "Z",
+      "shift": "Umschalt",
       "delete": "Entf"
     },
     "items": {
@@ -271,6 +331,8 @@
       "multiSelect": "Mehrere Knoten auswählen",
       "deleteNode": "Ausgewählten Knoten löschen",
       "save": "Workflow speichern",
+      "undo": "Letzte Änderung auf der Arbeitsfläche rückgängig machen",
+      "redo": "Rückgängig gemachte Änderung wiederherstellen",
       "close": "Geöffnetes Menü, Dialog oder Panel schließen"
     }
   },
@@ -284,6 +346,16 @@
     "editBody": "Body bearbeiten",
     "showResponse": "Antwort anzeigen",
     "newLabelPlaceholder": "Neue Bezeichnung"
+  },
+  "comment": {
+    "badge": "Kommentar",
+    "add": "Kommentar hinzufügen",
+    "placeholder": "Notiz für Ihr Team schreiben…",
+    "toggle": {
+      "show": "Kommentar anzeigen",
+      "hide": "Kommentar ausblenden",
+      "minimize": "Kommentar minimieren"
+    }
   },
   "aggregatorDialog": {
     "title": "Aggregator konfigurieren",
@@ -313,7 +385,9 @@
     "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
     "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf.",
     "testRunIteration": "{{iterator}} = {{count}}",
-    "skipToNextIteration": "Zur nächsten Iteration springen"
+    "testRunIterator": "{{iterator}} =",
+    "skipToNextIteration": "Zur nächsten Iteration springen",
+    "jumpToIteration": "Vorwärts zu einer Iteration springen"
   },
   "saveDialog": {
     "title": "Version speichern",
@@ -527,6 +601,7 @@
     "iteratorLoop": "({{iterator}}-Schleife)",
     "noVariableReferences": "Keine Variablenreferenzen",
     "more": "mehr",
+    "pausedHint": "Bewegen Sie den Mauszeiger über eine hervorgehobene Referenz, um den ermittelten Wert zu sehen.",
     "confirmDelete": {
       "title": "Referenz löschen",
       "message": "Möchten Sie diese Referenz wirklich löschen?"

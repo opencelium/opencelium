@@ -90,8 +90,13 @@ export const userHandlers = [
         const { identifier } = params as { identifier: string };
         const body = (await request.json()) as { email?: string; userDetail?: Record<string, unknown> };
 
+        // The real controller keys on the numeric id; the profile card still sends an
+        // email, so accept either here rather than 404-ing one of the two callers.
+        const matches = (u: (typeof users)[number]) =>
+            String(u.userId) === identifier || u.email === identifier;
+
         users = users.map((u) =>
-            u.email === identifier
+            matches(u)
                 ? {
                     ...u,
                     ...(body.email ? { email: body.email } : {}),
@@ -100,7 +105,7 @@ export const userHandlers = [
                 : u,
         );
 
-        const updated = users.find((u) => u.email === (body.email ?? identifier));
+        const updated = users.find((u) => matches(u) || u.email === body.email);
         if (!updated) {
             return HttpResponse.json({ message: 'User not found' }, { status: 404 });
         }

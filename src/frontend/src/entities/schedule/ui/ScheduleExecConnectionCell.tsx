@@ -1,4 +1,4 @@
-import { truncateUnbreakableText } from '@shared/ui/primitives/Table/Table.utils'
+import { truncateCellText } from '@shared/ui/primitives/Table/Table.utils'
 
 // Dimmed, indented connection label that signals the exec row belongs to the
 // schedule above it.
@@ -16,7 +16,7 @@ export function ScheduleExecConnectionCell({title}: {title?: string}) {
             }}
         >
             <span aria-hidden style={{opacity: 0.7}}>↳</span>
-            {truncateUnbreakableText(title ?? '')}
+            {truncateCellText(title ?? '')}
         </span>
     )
 }

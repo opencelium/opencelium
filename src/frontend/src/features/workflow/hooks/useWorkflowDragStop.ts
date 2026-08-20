@@ -8,6 +8,7 @@ import { clearDragFlags, clearDragPreviewNodes, clearEdgeDragFlags } from '../dr
 import { computeGhostRootPosition } from '../drag-drop/workflowDragCalculations.utils';
 import { positionDragCommit, resolveDragCommit } from '../drag-drop/workflowDragCommit.utils';
 import { pruneInvalidJoints } from '../utils/jumpValidator';
+import { withCommentOffsetFromPosition } from '../utils/commentAnchor';
 
 type Params = {
 	options: UseWorkflowPageOptions;
@@ -31,6 +32,12 @@ export const useWorkflowDragStop = ({ options, setNodes, setEdges, setIsDragging
 	setIsDragging(false);
 	if (multiDrag.current) {
 		multiDrag.current = false;
+		positionLock.current = null;
+		return;
+	}
+	if (node.type === 'comment') {
+		setNodes((current) => withCommentOffsetFromPosition(current, node.id, node.position));
+		dragSnapshot.current = null;
 		positionLock.current = null;
 		return;
 	}

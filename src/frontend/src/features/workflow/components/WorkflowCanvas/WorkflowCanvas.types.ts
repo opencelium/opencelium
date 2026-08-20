@@ -39,6 +39,9 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	onNodeDoubleClick?: NodeMouseHandler<WorkflowNodeModel>;
 	onDeleteNode: (nodeId: string) => void;
 	onOpenAggregatorEditor: (nodeId: string) => void;
+	onChangeCommentText: (nodeId: string, text: string) => void;
+	onToggleComment: (commentNodeId: string) => void;
+	onAddComment: (nodeId: string) => void;
 	onPaneClick?: () => void;
 	restoredViewport?: Viewport;
 	viewportRestoreVersion?: number;

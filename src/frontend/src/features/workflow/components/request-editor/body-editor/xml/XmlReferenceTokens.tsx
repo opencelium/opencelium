@@ -9,7 +9,7 @@ import { getParsedReferences, splitReferences } from '../bodyReference';
 import { useMethodContext } from '../../../../providers/MethodContext';
 import { useTestRun } from '../../../../test-run/useTestRun';
 import type { RootState } from '../../../../store';
-import { formatLiveReferenceValue, normalizeParsedReference, useLiveReferenceValue } from '../../utils/useLiveReferenceValue';
+import { formatLiveReferenceValue, LIVE_INSPECTABLE_CLASS, normalizeParsedReference, useLiveReferenceValue } from '../../utils/useLiveReferenceValue';
 import { LiveReferenceValuePreview } from '../../utils/LiveReferenceValuePreview';
 
 type Props = {
@@ -50,7 +50,7 @@ function ReferenceTag({
   const [hovered, setHovered] = useState(false);
   const parsed = getParsedReferences(reference)[0];
   const normalized = parsed ? normalizeParsedReference(parsed) : null;
-  const { value: liveValue, hasValue, isLoading } = useLiveReferenceValue(normalized, connection, method, hovered);
+  const { value: liveValue, hasValue, isLoading, canInspect } = useLiveReferenceValue(normalized, connection, method, hovered);
   const liveText = hasValue ? formatLiveReferenceValue(liveValue) : null;
   const staticLabel = getLabel(reference);
   const showLiveLabel = isOnlyReferenceInField && liveText !== null;
@@ -67,6 +67,7 @@ function ReferenceTag({
   const tag = (
     <Tag
       color={parsed?.color || 'blue'}
+      className={canInspect ? LIVE_INSPECTABLE_CLASS : undefined}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{

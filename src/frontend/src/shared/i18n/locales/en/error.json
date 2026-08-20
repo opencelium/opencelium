@@ -1,4 +1,5 @@
 {
+  "title": "Error",
   "api": {
     "unauthorized": "Your session has expired. Please log in again.",
     "forbidden": "Your session is expired",
@@ -26,6 +27,13 @@
       "invalidToken": "The reset link is invalid or has expired. Please request a new one.",
       "network": "Could not reach the server. Please try again.",
       "failed": "Could not reset password. Please try again."
+    },
+    "operation": {
+      "load": "Could not load {{resource}}",
+      "create": "Could not create {{resource}}",
+      "update": "Could not update {{resource}}",
+      "delete": "Could not delete {{resource}}",
+      "request": "Request to {{resource}} failed"
     }
   },
   "field": {

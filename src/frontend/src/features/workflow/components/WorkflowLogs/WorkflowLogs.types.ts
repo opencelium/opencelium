@@ -1,3 +1,5 @@
+import type { MethodLabelResolver } from '@features/logs';
+
 export type WorkflowLogsPanelState = 'minimized' | 'normal' | 'full';
 
 // Panel state is owned by the parent page (index.tsx), not WorkflowLogs itself:
@@ -8,6 +10,8 @@ export type WorkflowLogsPanelState = 'minimized' | 'normal' | 'full';
 export type WorkflowLogsProps = {
 	panel: WorkflowLogsPanelState;
 	onPanelChange: (panel: WorkflowLogsPanelState) => void;
+	/** Names the user gave the graph's steps, for the method rows' name view. */
+	resolveMethodLabel: MethodLabelResolver;
 };
 
 export type WorkflowLogsHeaderProps = {

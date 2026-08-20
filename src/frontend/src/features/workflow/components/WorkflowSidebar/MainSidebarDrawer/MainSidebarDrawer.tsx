@@ -19,18 +19,13 @@ export function MainSidebarDrawer(props: MainSidebarDrawerProps) {
       : !hasResults ? <SidebarMessage title={t('sidebar.searchEmpty.title')}
         description={t('sidebar.searchEmpty.description')} />
       : <>{props.connectorItems.length > 0 && <SidebarList items={props.connectorItems}
-          testIdPrefix="workflow-sidebar-search-connector" onSelect={props.onSelectConnector} />}
+          testIdPrefix="workflow-sidebar-search-connector" onSelect={props.onSelectConnector}
+          updateAction={props.connectorUpdateAction} />}
         {props.operatorItems.length > 0 && <SidebarList items={props.operatorItems}
           testIdPrefix="workflow-sidebar-search-operator" onSelect={props.onSelectOperator} />}
         {props.methodItems.length > 0 && <SidebarList items={props.methodItems}
           testIdPrefix="workflow-sidebar-search-method" onSelect={props.onSelectMethod} />}</>
-      : <><SidebarList items={props.defaultItems} onSelect={props.onSelectMain}
-          testIdPrefix="workflow-sidebar-main" />
-        <button className="sidebarItem sidebarItemStandalone" type="button"
-          data-testid="workflow-sidebar-main-item-trigger-connection"
-          onClick={props.onSelectTriggerConnection}>
-          <strong>{t('sidebar.triggerConnection.title')}</strong>
-          <span>{t('sidebar.triggerConnection.description')}</span>
-        </button></>}
+      : <SidebarList items={props.defaultItems} onSelect={props.onSelectMain}
+          testIdPrefix="workflow-sidebar-main" />}
   </SidebarDrawer>;
 }

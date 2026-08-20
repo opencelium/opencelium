@@ -80,7 +80,9 @@ export const baseQuery: BaseQueryFn<
         typeof args !== 'string' && args.customOptions?.ignoreError
 
     if (!extraOptions?.ignoreError && !ignoreErrorFromArgs && result.error) {
-        const appError = normalizeError(result.error)
+        const appError = normalizeError(result.error, typeof args === 'string'
+            ? { url: args }
+            : { url: args.url, method: args.method })
         errorBus.emit(appError)
     }
 

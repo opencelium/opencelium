@@ -3,6 +3,7 @@ import type { UrlEndpointFieldProps } from './UrlEndpointField.types';
 import { useUrlEndpointCaret } from './useUrlEndpointCaret';
 import { useUrlEndpointInput } from './useUrlEndpointInput';
 import { useUrlEndpointRender } from './useUrlEndpointRender';
+import { EndpointArgHoverTooltip } from '../EndpointArgHoverTooltip';
 import './UrlEndpointField.css';
 
 export function UrlEndpointField(props: UrlEndpointFieldProps) {
@@ -23,6 +24,8 @@ export function UrlEndpointField(props: UrlEndpointFieldProps) {
 			onKeyUp={caret.captureSelection} onKeyDown={input.onKeyDown}
 			onMouseDownCapture={input.onMouseDownCapture} onBlur={input.onBlur}
 			onPaste={input.onPaste} />
+		<EndpointArgHoverTooltip containerRef={props.divRef} endpointArgs={props.endpointArgs}
+			connection={props.connection} currentMethod={props.currentMethod} />
 		{props.afterNode && <div>{props.afterNode}</div>}
 	</div>;
 }

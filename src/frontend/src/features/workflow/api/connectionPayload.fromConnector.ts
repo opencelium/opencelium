@@ -9,6 +9,7 @@ const isMethodNode = (node: WorkflowNodeModel) => {
 	const kind = nodeKind(node);
 	return kind === 'connector' || kind === 'system' || kind === 'trigger-connection';
 };
+const isOperatorNode = (node: WorkflowNodeModel) => ['if', 'loop'].includes(nodeKind(node));
 const parseIndex = (value: unknown) => String(value ?? '')
 	.split('_')
 	.map(Number)
@@ -22,6 +23,24 @@ const compareIndex = (left: { index?: unknown }, right: { index?: unknown }) => 
 		if (difference) return difference;
 	}
 	return leftPath.length - rightPath.length;
+};
+
+/**
+ * Payload index per operator node — the value the backend echoes back in
+ * validation errors (`Operator (index=1, type=loop) ...`), so resolving such an
+ * error to a node has to invert *this* map rather than the whole-graph one:
+ * an operator the walk never reaches falls back to a synthetic index that can
+ * collide with a method node's real one.
+ */
+export const buildOperatorIndexes = (
+	nodes: WorkflowNodeModel[],
+	edges: WorkflowEdgeModel[],
+) => {
+	const indexes = buildWorkflowIndexes(nodes, edges);
+	const methodCount = nodes.filter(isMethodNode).length;
+	return new Map(nodes
+		.filter(isOperatorNode)
+		.map((node, index) => [node.id, indexes.get(node.id) ?? String(methodCount + index)]));
 };
 
 export const buildFromConnectorPayload = (
@@ -49,12 +68,10 @@ export const buildFromConnectorPayload = (
 		colorByNodeId.get(node.id),
 		node.data.jump ? indexes.get(node.data.jump) : undefined,
 	)).sort(compareIndex);
+	const operatorIndexes = buildOperatorIndexes(nodes, edges);
 	const operatorEntries = nodes
-		.filter((node) => ['if', 'loop'].includes(nodeKind(node)))
-		.map((node, index) => ({
-			node,
-			index: indexes.get(node.id) ?? String(methods.length + index),
-		}))
+		.filter(isOperatorNode)
+		.map((node) => ({ node, index: operatorIndexes.get(node.id)! }))
 		.sort(compareIndex);
 	const builtOperators: Array<{ index: string; type: string; iterator?: string }> = [];
 	const operators = operatorEntries.map(({ node, index }) => {

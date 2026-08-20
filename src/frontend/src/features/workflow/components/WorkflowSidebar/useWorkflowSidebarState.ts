@@ -29,6 +29,10 @@ export function useWorkflowSidebarState({ open, onClose, onSelectSystem }: Param
 		resetSidebar();
 		onClose();
 	};
+	const openTriggerConnection = () => {
+		setSelectedConnectorKey(null);
+		setActiveSecondaryPanel('trigger-connection');
+	};
 	const onSelectMain = (key: string) => {
 		setSecondarySearch('');
 		setMethodSearch('');
@@ -38,6 +42,7 @@ export function useWorkflowSidebarState({ open, onClose, onSelectSystem }: Param
 			resetSidebar();
 			return onSelectSystem();
 		}
+		if (key === 'trigger-connection') return openTriggerConnection();
 		setActiveSecondaryPanel('connector');
 	};
 	const openConnector = (connectorKey: string) => {
@@ -45,10 +50,6 @@ export function useWorkflowSidebarState({ open, onClose, onSelectSystem }: Param
 		setActiveSecondaryPanel('connector');
 		setSecondarySearch('');
 		setMethodSearch('');
-	};
-	const openTriggerConnection = () => {
-		setSelectedConnectorKey(null);
-		setActiveSecondaryPanel('trigger-connection');
 	};
 	const closeSecondary = () => {
 		setActiveSecondaryPanel(null);
@@ -74,7 +75,6 @@ export function useWorkflowSidebarState({ open, onClose, onSelectSystem }: Param
 		methodSearch,
 		onSelectMain,
 		openConnector,
-		openTriggerConnection,
 		resetSidebar,
 		secondarySearch,
 		selectConnector,
