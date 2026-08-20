@@ -5,11 +5,9 @@ type Params = {
 	open: boolean;
 	onClose: () => void;
 	onSelectSystem: () => void;
-	onSelectComment: () => void;
 };
 
-export function useWorkflowSidebarState({ open, onClose, onSelectSystem,
-	onSelectComment }: Params) {
+export function useWorkflowSidebarState({ open, onClose, onSelectSystem }: Params) {
 	const [activeSecondaryPanel, setActiveSecondaryPanel] = useState<SecondarySidebarMode | null>(null);
 	const [selectedConnectorKey, setSelectedConnectorKey] = useState<string | null>(null);
 	const [mainSearch, setMainSearch] = useState('');
@@ -43,10 +41,6 @@ export function useWorkflowSidebarState({ open, onClose, onSelectSystem,
 		if (key === 'system') {
 			resetSidebar();
 			return onSelectSystem();
-		}
-		if (key === 'comment') {
-			resetSidebar();
-			return onSelectComment();
 		}
 		if (key === 'trigger-connection') return openTriggerConnection();
 		setActiveSecondaryPanel('connector');

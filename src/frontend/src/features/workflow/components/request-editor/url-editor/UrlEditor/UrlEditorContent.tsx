@@ -25,6 +25,7 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 				{selectedMethod}
 			</div>}
 			endpointArgs={editor.endpointArgs} endpointArgsRef={editor.endpointArgsRef}
+			connection={editor.connection} currentMethod={editor.method}
 			divRef={editor.endpointDivRef} lastCaretRef={editor.lastCaretRef}
 			lastRawCaretRef={editor.lastRawCaretRef}
 			selectedTokenIndexRef={editor.selectedTokenRef}
@@ -43,7 +44,8 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 				showWebhookOption={false} onApply={editor.applyReference} />
 		)}
 		<UrlQueryParamsTable readOnly={readOnly} rows={editor.queryParams}
-			endpointArgs={editor.endpointArgs} onToggleEnabled={editor.query.onToggleEnabled}
+			endpointArgs={editor.endpointArgs} connection={editor.connection}
+			currentMethod={editor.method} onToggleEnabled={editor.query.onToggleEnabled}
 			onChangeParam={editor.query.onChangeParam} onRemoveParamRow={editor.query.removeParamRow}
 			onCaretChange={(target) => { editor.queryCaretTargetRef.current = target; }} />
 	</div>;

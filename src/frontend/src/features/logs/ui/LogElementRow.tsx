@@ -12,6 +12,7 @@ import { CopyButton } from "@shared/ui/actions/CopyButton";
 import { serializeLogElement } from "./serializeLogElement";
 import { useMethodViewMode } from "./methodViewMode";
 import { methodDisplayText } from "./methodView";
+import { useMethodLabelResolver } from "./methodLabels";
 import { useLogErrorTrace } from "./logErrorTrace";
 
 const INDENT_STEP = 22;
@@ -137,6 +138,7 @@ export function LogElementRow({
   >({});
 
   const { mode } = useMethodViewMode();
+  const resolveMethodLabel = useMethodLabelResolver();
   const {
     nonce,
     isOnTrace,
@@ -217,7 +219,7 @@ export function LogElementRow({
       const hasError = !!log.error?.message;
       const displayText = methodDisplayText(mode, {
         url: request?.url,
-        label: log.properties?.label,
+        label: log.properties?.label ?? resolveMethodLabel(log.indexPath),
         name: log.properties?.name,
       });
       return (

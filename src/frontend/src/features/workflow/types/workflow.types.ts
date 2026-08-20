@@ -163,6 +163,9 @@ export type WorkflowNodeData = {
 	/** Minimize/restore the note. Called with the *comment* node's id, from both
 	 * the anchor node's badge and the note's own minimize button. */
 	onToggleComment?: (commentNodeId: string) => void;
+	/** Attaches a note to this node, from the selected node's toolbar. Called
+	 * with the *anchor* node's id — the comment node does not exist yet. */
+	onAddComment?: (nodeId: string) => void;
 };
 
 export type WorkflowEdgeData = {

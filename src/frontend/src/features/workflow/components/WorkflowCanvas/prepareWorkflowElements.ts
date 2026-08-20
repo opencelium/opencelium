@@ -17,6 +17,7 @@ export function prepareWorkflowElements({
 	onOpenAggregatorEditor,
 	onChangeCommentText,
 	onToggleComment,
+	onAddComment,
 	cache,
 	testRunScope = EMPTY_TEST_RUN_SCOPE,
 	isEditLocked = false,
@@ -89,6 +90,7 @@ export function prepareWorkflowElements({
 			&& cached.onOpenAggregatorEditor === onOpenAggregatorEditor
 			&& cached.onChangeCommentText === onChangeCommentText
 			&& cached.onToggleComment === onToggleComment
+			&& cached.onAddComment === onAddComment
 		) {
 			preparedNodes.push(cached.out);
 			continue;
@@ -124,9 +126,10 @@ export function prepareWorkflowElements({
 				onOpenAggregatorEditor: isEditLocked ? undefined : onOpenAggregatorEditor,
 				onChangeCommentText: isEditLocked ? undefined : onChangeCommentText,
 				onToggleComment: isEditLocked ? undefined : onToggleComment,
+				onAddComment: isEditLocked ? undefined : onAddComment,
 			},
 		};
-		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onChangeCommentText, onToggleComment, out });
+		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onChangeCommentText, onToggleComment, onAddComment, out });
 		preparedNodes.push(out);
 	}
 	const preparedEdges: WorkflowEdgeModel[] = edges.map((edge) => {

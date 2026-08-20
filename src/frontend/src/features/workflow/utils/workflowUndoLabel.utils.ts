@@ -120,3 +120,43 @@ export const undoChangeLabel = (change: WorkflowUndoChange): {
 		}
 	}
 };
+
+/**
+ * Whether a change removed something, so the history can mark it. Exhaustive by
+ * kind rather than by a `removed`-shaped test: several kinds carry their own
+ * `operation`/`aspect` wording, and a new variant should force a decision here.
+ */
+export const isUndoChangeDeletion = (change: WorkflowUndoChange): boolean => {
+	switch (change.kind) {
+		case 'nodes-removed':
+			return true;
+		case 'method-reference':
+			return change.operation === 'removed';
+		case 'method-enhancement':
+			return change.aspect === 'removed';
+		case 'aggregator-config':
+			return change.operation === 'removed';
+		case 'condition-rule':
+		case 'condition-group':
+			return change.operation === 'removed';
+		case 'initial':
+		case 'nodes-added':
+		case 'nodes-moved':
+		case 'node-renamed':
+		case 'method-config':
+		case 'method-url':
+		case 'method-header':
+		case 'method-body':
+		case 'condition-config':
+		case 'connector-config':
+		case 'operator-edited':
+		case 'edges-changed':
+		case 'references':
+		case 'multiple':
+			return false;
+		default: {
+			const _exhaustive: never = change;
+			return _exhaustive;
+		}
+	}
+};

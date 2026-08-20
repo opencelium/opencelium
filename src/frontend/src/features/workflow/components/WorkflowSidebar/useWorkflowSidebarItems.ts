@@ -1,4 +1,5 @@
 import { useGetConnectorsMetaQuery, useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
+import { isConnectorConnectionError } from '@entities/connector/model/connectorHealth';
 import { resolveConnectorIcon } from '@entities/connector/model/iconUrl';
 import { useGetInvokersQuery } from '@entities/invoker/api/invokerApi';
 import type { InvokerOperation } from '@entities/invoker/model/types';
@@ -61,6 +62,7 @@ export function useWorkflowSidebarItems(params: Params) {
 	const connectorItems = useMemo(
 		() => connectorsMeta.map((connector) => {
 			const status = connector.status;
+			const hasConnectionError = isConnectorConnectionError(status);
 			const invokerName = connector.invoker?.name;
 			return {
 				key: String(connector.connectorId),
@@ -69,7 +71,8 @@ export function useWorkflowSidebarItems(params: Params) {
 				connectorArtwork: { icon: resolveConnectorIcon(connector,
 					invokerName ? invokerIconsByName.get(invokerName.toLowerCase()) : null) },
 				status,
-				statusError: status === 'AUTH_FAILED' || status === 'DOWN' ? connector.lastTestError : undefined,
+				statusError: hasConnectionError ? connector.lastTestError : undefined,
+				hasConnectionError,
 				lastCheckedAt: connector.lastCheckedAt,
 			};
 		}),

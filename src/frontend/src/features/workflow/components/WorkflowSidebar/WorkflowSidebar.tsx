@@ -11,11 +11,12 @@ import { MethodSidebarDrawer } from './MethodSidebarDrawer/MethodSidebarDrawer';
 import { useWorkflowSidebarState } from './useWorkflowSidebarState';
 import type { WorkflowSidebarProps } from './WorkflowSidebar.types';
 import { useWorkflowSidebarSelection } from './useWorkflowSidebarSelection';
+import { useConnectorUpdateAction } from './useConnectorUpdateAction';
 
 export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, onSelect, onStartJoint }: WorkflowSidebarProps) {
   const { t } = useI18n('workflow');
   const sidebar = useWorkflowSidebarState({ open: !!action, onClose,
-    onSelectSystem: () => onSelect('system'), onSelectComment: () => onSelect('comment') });
+    onSelectSystem: () => onSelect('system') });
   const { activeSecondaryPanel, selectedConnectorKey, mainSearch, secondarySearch, methodSearch, resetSidebar } = sidebar;
 
   const {
@@ -54,6 +55,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
   const selectedConnectorIcon = selectedConnector ? resolveConnectorIcon(selectedConnector) : null;
   const selection = useWorkflowSidebarSelection({ onSelect, resetSidebar,
     mainSearchMethodItems, methodOperations, selectedConnector });
+  const connectorUpdateAction = useConnectorUpdateAction();
 
   const isMethodSource = selectedNode?.data.kind === 'connector' || selectedNode?.data.kind === 'system';
   const jointFilteredItems = filteredSidebarItems.filter((item) => item.key !== 'joint' || isMethodSource);
@@ -79,6 +81,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         isFetching={connectorsFetching}
         defaultItems={jointFilteredItems}
         connectorItems={mainSearchConnectorItems}
+        connectorUpdateAction={connectorUpdateAction}
         operatorItems={mainSearchOperatorItems}
         methodItems={mainSearchMethodItems}
         onSearchChange={sidebar.setMainSearch}
@@ -99,6 +102,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         connectorsFetching={connectorsFetching}
         connectorsError={connectorsError}
         connectorItems={filteredConnectorItems}
+        connectorUpdateAction={connectorUpdateAction}
         operatorItems={filteredOperatorItems}
         triggerItems={filteredTriggerConnectionItems}
         triggerFetching={triggerConnectionStep.isFetching}

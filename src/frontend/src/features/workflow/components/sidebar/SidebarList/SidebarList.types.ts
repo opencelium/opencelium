@@ -11,6 +11,8 @@ export type SidebarListItem = {
 	connectorArtwork?: { icon: string | null };
 	status?: ConnectorStatus;
 	statusError?: string | null;
+	/** The connector behind this item can't be reached, so offer the fix. */
+	hasConnectionError?: boolean;
 	lastCheckedAt?: number | null;
 	disabled?: boolean;
 };
@@ -19,4 +21,11 @@ export type SidebarListProps = {
 	items: readonly SidebarListItem[];
 	onSelect: (key: string) => void;
 	testIdPrefix?: string;
+	/** Shown only on items flagged `hasConnectionError`: picking a connector that
+	 * can't connect is a dead end, so the row offers a way to go fix it without
+	 * leaving the workflow. One object so copy and handler can't arrive apart. */
+	updateAction?: {
+		tooltip: string;
+		onUpdate: (key: string) => void;
+	};
 };

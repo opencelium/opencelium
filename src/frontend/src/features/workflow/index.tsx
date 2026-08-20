@@ -52,7 +52,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       isLoading } });
   const { validation, saveWorkflow: handleSave, category, templates: templateActions,
     history: historyActions, canvas, header, buildTestPayload, isShortcutsOpen,
-    setIsShortcutsOpen, schedulesOpen, setSchedulesOpen } = actions;
+    setIsShortcutsOpen, schedulesOpen, setSchedulesOpen, changeHistoryOpen,
+    setChangeHistoryOpen } = actions;
   const { validateTitle, resolveAndHighlightError: resolveAndHighlightWorkflowError } = validation;
   const { closeCanvasPanels, handleNodeDoubleClick } = canvas;
   const { selectMenuItem: handleHeaderMenuSelect, showHistory: handleOpenHistory } = header;
@@ -76,7 +77,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     <div className="page" data-testid="workflow-page">
       <WorkflowPageHeader connectionId={activeConnectionId} schedulesOpen={schedulesOpen}
         onToggleSchedules={() => setSchedulesOpen((open) => {
-          if (!open) workflow.setHistoryOpen(false);
+          if (!open) {
+            workflow.setHistoryOpen(false);
+            setChangeHistoryOpen(false);
+          }
           return !open;
         })}
         header={{ initialName: headerState.title,
@@ -88,10 +92,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onOpenHistory: handleOpenHistory,
           readOnly: readOnly || isTestRunLocked, testRunLocked: isTestRunLocked,
           loading: isConnectionLoading,
-          hasSavedConnection: !!activeConnectionId,
-          undoRedo: { canUndo: workflow.canUndo, canRedo: workflow.canRedo,
-            onUndo: workflow.undo, onRedo: workflow.redo,
-            entries: workflow.undoEntries, onJumpTo: workflow.jumpToUndoEntry } }} />
+          hasSavedConnection: !!activeConnectionId }} />
       <WorkflowPageDialogs
         templates={{
           save: { open: templateDialogOpen, name: templateName,
@@ -128,6 +129,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
         onChangeCommentText: workflow.onChangeCommentText,
         onToggleComment: workflow.onToggleComment,
+        onAddComment: workflow.onAddComment,
         onPaneClick: closeCanvasPanels }} />
       <WorkflowPanels
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
@@ -144,6 +146,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onSaveComment: historyActions.saveComment,
           onDeleteVersion: historyActions.deleteVersion,
           onDownloadTemplate: downloadConnectionTemplate }}
+        changeHistory={{ open: changeHistoryOpen, entries: workflow.undoEntries,
+          onClose: () => setChangeHistoryOpen(false),
+          onJumpTo: workflow.jumpToUndoEntry }}
         contextMenu={{ menu: workflow.contextMenu, node: contextMenuNode,
           onChangeLabel: workflow.onChangeNodeLabel,
           onOpenRequestEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }),
