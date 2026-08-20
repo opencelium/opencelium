@@ -10,9 +10,11 @@
 @import './styles/history-card.css';
 @import './styles/history-expand.css';
 @import './styles/history-dialog.css';
+@import './styles/change-history.css';
 @import './styles/nodes.css';
 @import './styles/nodes.comment.css';
 @import './styles/connector-status.css';
 @import './styles/node-toolbar.css';
 @import './styles/canvas-controls.css';
 @import './styles/edges.css';
+@import './styles/live-reference.css';

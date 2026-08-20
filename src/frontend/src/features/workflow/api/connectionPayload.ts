@@ -7,7 +7,7 @@ import {
 import { buildWorkflowIndexes } from './connectionPayload.indexes';
 import { buildFromConnectorPayload } from './connectionPayload.fromConnector';
 export { buildWorkflowIndexes } from './connectionPayload.indexes';
-export { buildFromConnectorPayload } from './connectionPayload.fromConnector';
+export { buildFromConnectorPayload, buildOperatorIndexes } from './connectionPayload.fromConnector';
 export { normalizeConnectionPayload } from './connectionPayload.normalizer';
 
 type BuildConnectionPayloadArgs = {

@@ -6,8 +6,8 @@ import { UrlQueryParamActions } from './UrlQueryParamActions';
 import { UrlQueryParamTextInput } from './UrlQueryParamTextInput';
 import type { UrlQueryParamsTableProps } from './UrlQueryParamsTable.types';
 
-export function UrlQueryParamsTable({ readOnly, rows, endpointArgs, onToggleEnabled,
-	onChangeParam, onRemoveParamRow, onCaretChange }: UrlQueryParamsTableProps) {
+export function UrlQueryParamsTable({ readOnly, rows, endpointArgs, connection, currentMethod,
+	onToggleEnabled, onChangeParam, onRemoveParamRow, onCaretChange }: UrlQueryParamsTableProps) {
 	const columns: ColumnsType<QueryParam> = [
 		{
 			title: 'On', dataIndex: 'enabled', width: 64,
@@ -18,13 +18,15 @@ export function UrlQueryParamsTable({ readOnly, rows, endpointArgs, onToggleEnab
 		{
 			title: 'Key', dataIndex: 'key',
 			render: (_, row) => <UrlQueryParamTextInput row={row} field='key'
-				endpointArgs={endpointArgs} readOnly={readOnly}
+				endpointArgs={endpointArgs} readOnly={readOnly} connection={connection}
+				currentMethod={currentMethod}
 				onChangeParam={onChangeParam} onCaretChange={onCaretChange} />,
 		},
 		{
 			title: 'Value', dataIndex: 'value',
 			render: (_, row) => <UrlQueryParamTextInput row={row} field='value'
-				endpointArgs={endpointArgs} readOnly={readOnly}
+				endpointArgs={endpointArgs} readOnly={readOnly} connection={connection}
+				currentMethod={currentMethod}
 				onChangeParam={onChangeParam} onCaretChange={onCaretChange} />,
 		},
 		{

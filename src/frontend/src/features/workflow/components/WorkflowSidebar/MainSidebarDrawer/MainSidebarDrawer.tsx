@@ -19,7 +19,8 @@ export function MainSidebarDrawer(props: MainSidebarDrawerProps) {
       : !hasResults ? <SidebarMessage title={t('sidebar.searchEmpty.title')}
         description={t('sidebar.searchEmpty.description')} />
       : <>{props.connectorItems.length > 0 && <SidebarList items={props.connectorItems}
-          testIdPrefix="workflow-sidebar-search-connector" onSelect={props.onSelectConnector} />}
+          testIdPrefix="workflow-sidebar-search-connector" onSelect={props.onSelectConnector}
+          updateAction={props.connectorUpdateAction} />}
         {props.operatorItems.length > 0 && <SidebarList items={props.operatorItems}
           testIdPrefix="workflow-sidebar-search-operator" onSelect={props.onSelectOperator} />}
         {props.methodItems.length > 0 && <SidebarList items={props.methodItems}

@@ -43,7 +43,16 @@ export function NodeShell({
 			className={`nodeWrap ${data.dragGhost ? 'nodeWrapDragGhost' : ''} ${data.dropPlaceholder ? 'nodeWrapDropPlaceholder' : ''} ${data.dragSourceMoving ? 'nodeWrapDragSourceMoving' : ''} ${data.dragSourceFaint ? 'nodeWrapDragSourceFaint' : ''}`}
 			onContextMenu={onContextMenu}
 		>
-			{selected && data.onDeleteNode && <NodeToolbar canDelete={data.kind !== 'start'} onDelete={() => data.onDeleteNode?.(id)} />}
+			{selected && (
+				<NodeToolbar
+					canDelete={data.kind !== 'start' && !!data.onDeleteNode}
+					/* Only offered while the node has no note: an existing one is shown or
+					   hidden from its own badge, so this action never no-ops. */
+					canComment={!data.anchoredComment && !!data.onAddComment}
+					onDelete={() => data.onDeleteNode?.(id)}
+					onComment={() => data.onAddComment?.(id)}
+				/>
+			)}
 			{topLabel && <div className='nodeTopLabel'>{topLabel}</div>}
 			<div
 				className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError || data.testRunFailedVisible ? 'nodeBodyError' : ''} ${data.testRunFailedVisible ? 'nodeBodyTestRunFailed' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''} ${data.testRunActive ? 'nodeBodyTestRunActive' : ''}`}

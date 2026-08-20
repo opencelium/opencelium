@@ -49,10 +49,14 @@ export function getConnectionVersion(connectionId: string | number, snapshotId: 
 	return apiFetchWithHeaders(connectionEndpoints.version(connectionId, snapshotId));
 }
 
+// ignoreAuthError: this endpoint is ownership-gated (OwnershipSecurity.checkOwnerOrAdmin),
+// so its 403 means "not your workflow" — letting the error bus see it would clear the
+// session and drop the user on the login page mid-save. The caller reports it instead.
 export function updateConnectionVersion(connectionId: string | number, snapshotId: string, body: { comment: string }) {
-	return apiFetchWithHeaders(connectionEndpoints.version(connectionId, snapshotId), { method: 'PUT', body });
+	return apiFetchWithHeaders(connectionEndpoints.version(connectionId, snapshotId), { method: 'PUT', body, ignoreAuthError: true });
 }
 
+// Same ownership gate as the update above.
 export function deleteConnectionVersion(connectionId: string | number, snapshotId: string) {
-	return apiFetchWithHeaders(connectionEndpoints.version(connectionId, snapshotId), { method: 'DELETE' });
+	return apiFetchWithHeaders(connectionEndpoints.version(connectionId, snapshotId), { method: 'DELETE', ignoreAuthError: true });
 }

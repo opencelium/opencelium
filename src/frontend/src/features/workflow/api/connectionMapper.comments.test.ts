@@ -86,6 +86,7 @@ const prepare = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[]) =>
 		onOpenAggregatorEditor: () => {},
 		onChangeCommentText: () => {},
 		onToggleComment: () => {},
+		onAddComment: () => {},
 	}).preparedNodes;
 
 describe('comment nodes round trip', () => {

@@ -22,7 +22,7 @@ export function CommentBadge({ anchoredComment, suppressTooltip, testId, onToggl
 	// primary while the note is on the canvas, muted while it is minimized. Both
 	// read against the canvas background in either theme, which an amber glyph
 	// (the note's own colour) does not in the light themes.
-	const icon = <Icon name='comment' size={14} color={collapsed ? 'default' : 'primary'} isSubtle={collapsed} />;
+	const icon = <Icon name='comment' size={17} color={collapsed ? 'default' : 'primary'} isSubtle={collapsed} />;
 
 	const handleClick = (event: MouseEvent<HTMLSpanElement>) => {
 		event.stopPropagation();

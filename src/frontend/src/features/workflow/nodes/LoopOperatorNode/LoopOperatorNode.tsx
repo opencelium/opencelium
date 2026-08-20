@@ -6,6 +6,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { LoopWorkflowNode } from '../../types/workflow.types';
 import { useTestRun } from '../../test-run/useTestRun';
 import { AggregatorBadge } from '../AggregatorBadge/AggregatorBadge';
+import { LoopIterationInput } from './LoopIterationInput';
 import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 
@@ -55,7 +56,20 @@ export function LoopOperatorNode({ id, data, selected, dragging }: NodeProps<Loo
 			/>
 			{iterationLabel && (
 				<div className='loopIterationLabel'>
-					<span>{iterationLabel}</span>
+					{/* Paused, the counter becomes the way to aim the replay: the name
+					    stays text and the number itself turns into a field. */}
+					{canSkipIteration && iteration ? (
+						<>
+							<span>{t('node.testRunIterator', { iterator: iteration.iterator })}</span>
+							<LoopIterationInput
+								value={iteration.count}
+								onJump={(target) => testRun?.skipToIteration(iteration.indexPath, target)}
+								testId={`workflow-node-iteration-input-${id}`}
+							/>
+						</>
+					) : (
+						<span>{iterationLabel}</span>
+					)}
 					{canSkipIteration && (
 						<span
 							className='loopSkipIterationIcon nodrag nopan'

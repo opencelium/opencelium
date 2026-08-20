@@ -1,6 +1,6 @@
 export type NodeToolbarProps = {
 	canDelete?: boolean;
+	canComment?: boolean;
 	onDelete?: () => void;
-	canRemoveJoint?: boolean;
-	onRemoveJoint?: () => void;
+	onComment?: () => void;
 };

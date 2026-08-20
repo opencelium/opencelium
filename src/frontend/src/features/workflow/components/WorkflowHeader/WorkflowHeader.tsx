@@ -9,7 +9,7 @@ import { useWorkflowHeaderState } from './useWorkflowHeaderState';
 
 export function WorkflowHeader({
 	onOpenHistory, onSave, onMenuItemSelect, menuLoadingItemId,
-	saveDisabled = false, readOnly = false, testRunLocked = false, loading = false, undoRedo, schedulesSlot, hasSavedConnection = false, ...stateProps
+	saveDisabled = false, readOnly = false, testRunLocked = false, loading = false, schedulesSlot, hasSavedConnection = false, ...stateProps
 }: WorkflowHeaderProps) {
 	const { t } = useI18n('workflow');
 	const state = useWorkflowHeaderState({
@@ -22,31 +22,35 @@ export function WorkflowHeader({
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [saveComment, setSaveComment] = useState('');
 	const menuItems = useMemo(
-		() => headerMenuItems.map((item) => {
-			if (testRunLocked && (item.id === 'assign-category' || item.id === 'version-history' || item.id === 'load-template')) {
-				return {
-					...item,
-					disabled: true,
-					disabledTooltipKey: 'headerMenu.testRunLockedHint',
-				};
-			}
-			if (item.id === 'download-template') {
-				return {
-					...item,
-					disabled: !hasSavedConnection,
-					disabledTooltipKey: 'headerMenu.downloadAsTemplateDisabledHint',
-				};
-			}
-			if (item.id === 'assign-category') {
-				return {
-					...item,
-					disabled: !hasSavedConnection,
-					disabledTooltipKey: 'headerMenu.assignCategoryDisabledHint',
-				};
-			}
-			return item;
-		}),
-		[hasSavedConnection, testRunLocked],
+		// The change history walks the in-session undo stack, so it only exists
+		// where editing does.
+		() => headerMenuItems
+			.filter((item) => !(readOnly && item.id === 'change-history'))
+			.map((item) => {
+				if (testRunLocked && (item.id === 'assign-category' || item.id === 'version-history' || item.id === 'load-template')) {
+					return {
+						...item,
+						disabled: true,
+						disabledTooltipKey: 'headerMenu.testRunLockedHint',
+					};
+				}
+				if (item.id === 'download-template') {
+					return {
+						...item,
+						disabled: !hasSavedConnection,
+						disabledTooltipKey: 'headerMenu.downloadAsTemplateDisabledHint',
+					};
+				}
+				if (item.id === 'assign-category') {
+					return {
+						...item,
+						disabled: !hasSavedConnection,
+						disabledTooltipKey: 'headerMenu.assignCategoryDisabledHint',
+					};
+				}
+				return item;
+			}),
+		[hasSavedConnection, readOnly, testRunLocked],
 	);
 
 	const openSaveDialog = async () => {
@@ -81,13 +85,21 @@ export function WorkflowHeader({
 					onOpenHistory={onOpenHistory} onMenuItemSelect={onMenuItemSelect}
 					onSave={openSaveDialog} readOnly={readOnly} saveDisabled={saveDisabled}
 					saveDialogOpen={saveDialogOpen} schedulesSlot={schedulesSlot}
-					undoRedo={undoRedo}
 				/>
 			</div>
 			<HeaderSaveDialog open={saveDialogOpen} value={saveComment}
 				onChange={setSaveComment} onClose={closeSaveDialog} saveDisabled={saveDisabled}
 				onSave={async () => {
-					await onSave({ title: state.name, description: state.description, comment: saveComment });
+					try {
+						await onSave({ title: state.name, description: state.description, comment: saveComment });
+					} catch {
+						// A rejected save reports itself on the page behind this dialog —
+						// a sticky notification, plus a red ring on the node the backend
+						// named — so the overlay has to come down for any of it to be
+						// seen. The typed comment is kept for the retry.
+						setSaveDialogOpen(false);
+						return;
+					}
 					closeSaveDialog();
 				}}
 			/>

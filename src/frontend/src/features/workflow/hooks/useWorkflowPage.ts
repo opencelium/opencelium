@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { addEdge } from '@xyflow/react';
 import type { Connection } from '@xyflow/react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
@@ -6,6 +7,7 @@ import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../ty
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
 import { createCommentNode } from '../utils/createCommentNode';
 import { findAnchoredComment } from '../utils/commentAnchor';
+import { centerOnWorkflowNode } from '../utils/centerOnWorkflowNode';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { UseWorkflowPageOptions } from '../drag-drop/workflowPage.types';
@@ -52,10 +54,15 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     () => setMethodEditor(null), () => setConditionEditor(null),
     () => setAggregatorEditor(null));
 
+  // Stable: the instance is read from the ref at call time, so every consumer
+  // (command bridge, save-error highlighting) can hold on to one identity.
+  const centerOnNode = useCallback((nodeId: string) =>
+    centerOnWorkflowNode(reactFlowInstance.current, nodeId), [reactFlowInstance]);
+
   useWorkflowCommandBridge({
     nodes,
     setNodes,
-    reactFlowInstance,
+    centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
       aggregatorEditor !== null || responseNodeId !== null || historyOpen,
   });
@@ -81,6 +88,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     undoEntries: undoHistory.entries,
     jumpToUndoEntry: undoHistory.jumpTo,
     getViewport: () => reactFlowInstance.current?.getViewport(),
+    centerOnNode,
     setReactFlowInstance: (instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>) => {
       reactFlowInstance.current = instance;
     },
@@ -123,25 +131,24 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       triggerConnection?: WorkflowAction['triggerConnection'],
     ) => {
       if (!sidebarAction || !kind) return;
-      // A comment is an annotation, not a step: it belongs to the node whose "+"
-      // opened the sidebar, gets no edge, and never enters the executed graph.
-      // A node holds at most one note, so a second request reveals the existing
-      // one (which may just be minimized) instead of stacking another on top.
-      if (kind === 'comment') {
-        const existing = findAnchoredComment(nodes, sidebarAction.sourceNodeId);
-        if (existing) {
-          if (existing.data.comment?.collapsed) nodeUpdates.onToggleComment(existing.id);
-        } else {
-          const comment = createCommentNode(nodes, sidebarAction.sourceNodeId);
-          if (comment) setNodes([...nodes, comment]);
-        }
-        setSidebarAction(null);
-        return;
-      }
       const result = createNodeFromAction({ action: { ...sidebarAction, kind, methodName, connector, methodOperation, triggerConnection }, nodes, edges });
       setNodes(result.nodes);
       setEdges(result.edges);
       setSidebarAction(null);
+    },
+    // A note is an annotation, not a step: it belongs to the node it is added
+    // from, gets no edge, and never enters the executed graph — which is why it
+    // is raised from the node's own toolbar rather than the add-step sidebar. A
+    // node holds at most one note, so a second request reveals the existing one
+    // (which may just be minimized) instead of stacking another on top.
+    onAddComment: (nodeId: string) => {
+      const existing = findAnchoredComment(nodes, nodeId);
+      if (existing) {
+        if (existing.data.comment?.collapsed) nodeUpdates.onToggleComment(existing.id);
+        return;
+      }
+      const comment = createCommentNode(nodes, nodeId);
+      if (comment) setNodes([...nodes, comment]);
     },
     onDeleteNode: async (nodeId: string) => {
       const targetNode = nodes.find((node) => node.id === nodeId);

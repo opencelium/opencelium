@@ -14,7 +14,8 @@ export function SecondarySidebarDrawer(props: SecondarySidebarDrawerProps) {
       : props.connectorsError ? <SidebarMessage title={t('sidebar.connectorsError.title')}
         description={t('sidebar.connectorsError.description')} />
       : props.connectorItems.length ? <SidebarList items={props.connectorItems}
-        testIdPrefix="workflow-sidebar-connector" onSelect={props.onSelectConnector} />
+        testIdPrefix="workflow-sidebar-connector" onSelect={props.onSelectConnector}
+        updateAction={props.connectorUpdateAction} />
       : <SidebarMessage title={t('sidebar.connectorsEmpty.title')}
         description={t('sidebar.connectorsEmpty.description')} />
     : props.mode === 'trigger-connection'
