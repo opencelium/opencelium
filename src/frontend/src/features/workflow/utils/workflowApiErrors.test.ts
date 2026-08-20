@@ -89,6 +89,50 @@ describe('resolveWorkflowApiError', () => {
 		});
 	});
 
+	it('recognizes the codes that arrive as the message rather than as `error`', () => {
+		// All three are thrown as plain RuntimeExceptions, so the code is the message.
+		const cases = [
+			['TITLE_HAS_ALREADY_TAKEN', 'titleTaken'],
+			['CONNECTOR_NOT_FOUND', 'connectorNotFound'],
+			['CATEGORY_NOT_FOUND', 'categoryNotFound'],
+			['CONNECTION_NOT_FOUND', 'connectionNotFound'],
+		] as const;
+		for (const [code, key] of cases) {
+			const error = new ApiFetchError(code, {
+				status: 500,
+				body: { status: 500, error: 'INTERNAL_SERVER_ERROR', message: code },
+			});
+			expect(resolveWorkflowApiError(error, nodes, edges)).toEqual({
+				source: 'translated',
+				messageKey: `connection.messages.saveFailed.${key}`,
+			});
+		}
+	});
+
+	it('matches a code that carries a suffix', () => {
+		// ConnectionNotFoundException appends the id to the code.
+		const message = 'CONNECTION_NOT_FOUND ; Connection - 42';
+		const error = new ApiFetchError(message, {
+			status: 500, body: { status: 500, error: 'INTERNAL_SERVER_ERROR', message },
+		});
+		expect(resolveWorkflowApiError(error, nodes, edges))
+			.toEqual({ source: 'translated', messageKey: 'connection.messages.saveFailed.connectionNotFound' });
+	});
+
+	it('reads an ownership refusal as its own message, not as a generic failure', () => {
+		const message = 'Only owner or admin can perform this action';
+		const asForbidden = new ApiFetchError(message, {
+			status: 403, body: { status: 403, error: 'FORBIDDEN', message },
+		});
+		// And when it degrades to a 500 with only the prose to go on.
+		const asServerError = new ApiFetchError(message, {
+			status: 500, body: { status: 500, error: 'INTERNAL_SERVER_ERROR', message },
+		});
+		const expected = { source: 'translated', messageKey: 'connection.messages.saveFailed.notOwner' };
+		expect(resolveWorkflowApiError(asForbidden, nodes, edges)).toEqual(expected);
+		expect(resolveWorkflowApiError(asServerError, nodes, edges)).toEqual(expected);
+	});
+
 	it('passes on the backend\'s own message when the code is not one we have copy for', () => {
 		const error = new ApiFetchError('Connection has no methods', {
 			status: 400,

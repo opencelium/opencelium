@@ -28,6 +28,26 @@ export type WorkflowApiErrorResolution =
 		message: string;
 	};
 
+/**
+ * Backend codes that reach us as the message rather than as `error`: they are thrown
+ * as plain RuntimeExceptions (ConnectionServiceImp, CategoryServiceImp), and even the
+ * typed ones degrade to this shape because the catch-all @ExceptionHandler(Exception)
+ * advice can win over the GeneralServiceException one — neither advice declares an
+ * @Order, so which handler runs is not fixed. Matched by prefix because some carry a
+ * suffix ("CONNECTION_NOT_FOUND ; Connection - 42").
+ */
+const MESSAGE_CODE_KEYS: ReadonlyArray<readonly [code: string, messageKey: string]> = [
+	['TITLE_HAS_ALREADY_TAKEN', 'titleTaken'],
+	['CONNECTOR_NOT_FOUND', 'connectorNotFound'],
+	['CATEGORY_NOT_FOUND', 'categoryNotFound'],
+	['CONNECTION_NOT_FOUND', 'connectionNotFound'],
+];
+
+// GeneralServiceException(FORBIDDEN, ONLY_OWNER_OR_ADMIN_CAN_PERFORM_ACTION) from
+// OwnershipSecurity — an authorization refusal, not an expired session. Recognized by
+// its prose too, for when it degrades to a 500 like the codes above.
+const NOT_OWNER_MESSAGE = 'Only owner or admin can perform this action';
+
 const findOperatorNodeIdByIndex = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[], index: string): string | undefined => {
 	for (const [nodeId, operatorIndex] of buildOperatorIndexes(nodes, edges)) {
 		if (operatorIndex === index) return nodeId;
@@ -53,16 +73,18 @@ export const resolveWorkflowApiError = (
 ): WorkflowApiErrorResolution | null => {
 	const body = error instanceof ApiFetchError ? (error.body as WorkflowErrorBody | undefined) : undefined;
 
-	// Thrown as a plain RuntimeException (ConnectionServiceImp.save/update), so it falls
-	// through to the generic 500 handler: `error` stays "INTERNAL_SERVER_ERROR" and the
-	// actual code lands in `message` instead of `error`, unlike the GeneralServiceException
-	// cases below.
-	if (body?.message === 'TITLE_HAS_ALREADY_TAKEN') {
-		return { source: 'translated', messageKey: 'connection.messages.saveFailed.titleTaken' };
+	const message = body?.message?.trim();
+
+	// A refusal to act on someone else's workflow. Its own message, so the user is not
+	// told the save failed for a reason that sounds like their fault.
+	if (body?.error === 'FORBIDDEN' || message === NOT_OWNER_MESSAGE) {
+		return { source: 'translated', messageKey: 'connection.messages.saveFailed.notOwner' };
 	}
 
-	if (body?.error === 'CONNECTOR_NOT_FOUND') {
-		return { source: 'translated', messageKey: 'connection.messages.saveFailed.connectorNotFound' };
+	const codeMatch = MESSAGE_CODE_KEYS.find(([code]) =>
+		body?.error === code || message === code || !!message?.startsWith(`${code} `));
+	if (codeMatch) {
+		return { source: 'translated', messageKey: `connection.messages.saveFailed.${codeMatch[1]}` };
 	}
 
 	// Recognized by its message as well as by its code: the same failure also arrives
