@@ -222,6 +222,7 @@
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
     "versionHistory": "Versionsverlauf",
+    "changeHistory": "Änderungsverlauf",
     "testRunLockedHint": "Während eines Testlaufs nicht verfügbar",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
@@ -238,6 +239,7 @@
   "undoHistory": {
     "title": "Änderungsverlauf",
     "current": "Aktuell",
+    "empty": "Noch keine Änderungen in dieser Sitzung",
     "operator": {
       "if": "IF",
       "loop": "LOOP"

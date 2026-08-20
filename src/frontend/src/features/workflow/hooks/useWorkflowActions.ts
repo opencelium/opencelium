@@ -27,6 +27,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const { headerState, fieldBindings, categoryId } = connection;
 	const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 	const [schedulesOpen, setSchedulesOpen] = useState(false);
+	const [changeHistoryOpen, setChangeHistoryOpen] = useState(false);
 	const validation = useWorkflowValidation({ persistedTitle: connection.persistedTitle,
 		nodes: view.hydratedNodes, edges: workflow.edges,
 		setNodeError: workflow.onSetNodeError });
@@ -81,6 +82,13 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		openLoadTemplate: templates.openLoadTemplateDialog,
 		openShortcuts: () => setIsShortcutsOpen(true),
 		openHistory: () => workflow.setHistoryOpen(true),
+		openChangeHistory: () => {
+			setSchedulesOpen(false);
+			workflow.setHistoryOpen(false);
+			canvas.closeCanvasPanels();
+			setChangeHistoryOpen(true);
+		},
+		closeChangeHistory: () => setChangeHistoryOpen(false),
 		closeSchedules: () => setSchedulesOpen(false),
 		closeCanvasPanels: canvas.closeCanvasPanels,
 		refreshHistory: history.refreshVersions,
@@ -112,9 +120,10 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		setSidebarAction(null);
 		setContextMenu(null);
 		setHistoryOpen(false);
+		setChangeHistoryOpen(false);
 	}, [isTestRunLocked, setSidebarAction, setContextMenu, setHistoryOpen]);
 
 	return { validation, saveWorkflow, category, templates, history, canvas, header,
 		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen,
-		schedulesOpen, setSchedulesOpen };
+		schedulesOpen, setSchedulesOpen, changeHistoryOpen, setChangeHistoryOpen };
 };

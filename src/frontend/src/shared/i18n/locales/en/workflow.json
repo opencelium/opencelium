@@ -222,6 +222,7 @@
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
     "versionHistory": "Version History",
+    "changeHistory": "Change History",
     "testRunLockedHint": "Not available while a test run is in progress",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
@@ -238,6 +239,7 @@
   "undoHistory": {
     "title": "Change history",
     "current": "Current",
+    "empty": "No changes in this session yet",
     "operator": {
       "if": "IF",
       "loop": "LOOP"
