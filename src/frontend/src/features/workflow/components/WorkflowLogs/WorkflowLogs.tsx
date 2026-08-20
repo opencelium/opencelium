@@ -1,6 +1,6 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { LoadingOverlay } from '@shared/ui/primitives/Loading/LoadingOverlay';
-import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodViewModeProvider } from '@features/logs';
+import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodLabelProvider, MethodViewModeProvider } from '@features/logs';
 import { useTestRun } from '../../test-run/useTestRun';
 import type { TestRunResult } from '../../test-run/TestRunContext';
 import { WorkflowLogsHeader } from './WorkflowLogsHeader';
@@ -43,7 +43,7 @@ function TestRunResultLine({ result }: { result: TestRunResult }) {
 // height the pane gives it instead of the fixed-height overlay used for
 // 'minimized'/'full'). Minimized/full stay the original absolute overlay,
 // rendered as a plain sibling of the canvas, unchanged.
-export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
+export function WorkflowLogs({ panel, onPanelChange, resolveMethodLabel }: WorkflowLogsProps) {
 	const { t: tLogs } = useI18n('logs');
 	const testRun = useTestRun();
 
@@ -78,6 +78,7 @@ export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
 
 	return (
 		<MethodViewModeProvider>
+		<MethodLabelProvider resolve={resolveMethodLabel}>
 		<div
 			className={`logsCard ${isExpanded ? 'logsCardExpanded' : ''} ${
 				panel === 'full' ? 'logsCardFull' : ''
@@ -125,6 +126,7 @@ export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
 				</div>
 			)}
 		</div>
+		</MethodLabelProvider>
 		</MethodViewModeProvider>
 	);
 }

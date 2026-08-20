@@ -11,6 +11,7 @@ import { CopyButton } from "@shared/ui/actions/CopyButton";
 import { serializeLogElement } from "../serializeLogElement";
 import { useMethodViewMode } from "../methodViewMode";
 import { methodDisplayText } from "../methodView";
+import { useMethodLabelResolver } from "../methodLabels";
 import { useLogErrorTrace } from "../logErrorTrace";
 
 // How long the error-target row keeps its pulse highlight after the
@@ -162,6 +163,7 @@ export function LiveLogElementRow({
   const [expandedChildren, setExpandedChildren] = useState<Record<number, boolean>>({});
 
   const { mode } = useMethodViewMode();
+  const resolveMethodLabel = useMethodLabelResolver();
   const {
     nonce,
     isOnTrace,
@@ -253,7 +255,7 @@ export function LiveLogElementRow({
       const expandable = node.id !== "" || hasError;
       const displayText = methodDisplayText(mode, {
         url: request?.url,
-        label: node.properties.label,
+        label: node.properties.label ?? resolveMethodLabel(node.indexPath),
         name: node.properties.name,
       });
       return (
