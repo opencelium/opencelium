@@ -19,6 +19,7 @@ import { resolveConnectionTemplateIds } from '@entities/connectionTemplate/comma
 import { resolveConnectionTemplateNames } from '@entities/connectionTemplate/command/resolvers/resolveConnectionTemplateNames'
 import { extractTemplateIdFromSuggestion } from '@entities/connectionTemplate/command/connectionTemplateCache'
 import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 const baseKey = 'connection-template'
 
@@ -80,9 +81,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -113,9 +112,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 order: 3,
                 searchable: true,
                 labelKey: `${baseKey}.fields.fromInvoker.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -131,9 +128,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 order: 4,
                 searchable: true,
                 labelKey: `${baseKey}.fields.toInvoker.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
     ],
@@ -249,7 +244,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                             }
                         } catch (err) {
                             console.error(err)
-                            message.error(tEntities('connection-template.list.upload.error'))
+                            notifyError(tEntities('connection-template.list.upload.error'))
                         } finally {
                             ctx.setLoading(false)
                         }
@@ -296,7 +291,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                                                     )
                                                 } catch (err) {
                                                     console.error(err)
-                                                    message.error(
+                                                    notifyError(
                                                         tEntities('connection-template.list.download.error'),
                                                     )
                                                 } finally {
@@ -331,7 +326,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                                                     )
                                                 } catch (err) {
                                                     console.error(err)
-                                                    message.error(
+                                                    notifyError(
                                                         tEntities('connection-template.list.download.error'),
                                                     )
                                                 } finally {

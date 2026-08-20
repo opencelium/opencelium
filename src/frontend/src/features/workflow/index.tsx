@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './styles.css';
 import { WorkflowPageHeader } from './components/WorkflowPageHeader/WorkflowPageHeader';
@@ -8,9 +8,11 @@ import { WorkflowPanels } from './components/WorkflowPanels/WorkflowPanels';
 import { WorkflowMain } from './components/WorkflowMain/WorkflowMain';
 import { WorkflowPageDialogs } from './components/WorkflowPageDialogs/WorkflowPageDialogs';
 import { TestRunProvider } from './test-run/TestRunProvider';
+import { TestRunEditLockSync } from './test-run/TestRunEditLockSync';
 import { useWorkflowPageState } from './hooks/useWorkflowPageState';
 import { useWorkflowActions } from './hooks/useWorkflowActions';
 import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
+import { buildWorkflowIndexes } from './api/connectionPayload';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -19,6 +21,9 @@ type WorkflowProps = {
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const { t } = useI18n('workflow');
+  // Mirrored up from inside TestRunProvider by TestRunEditLockSync — see there
+  // for why paused does not count as locked.
+  const [isTestRunLocked, setIsTestRunLocked] = useState(false);
   const { connection, workflow, connectors, invokers, view, changes, derived,
     isLoading } = useWorkflowPageState({ connectionId, readOnly,
       leaveConfirmMessage: t('messages.unsavedLeaveConfirm') });
@@ -35,12 +40,20 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     () => buildLoopAncestorsByIndexPath(hydratedNodes, workflow.edges),
     [hydratedNodes, workflow.edges],
   );
+  // nodeId -> workflow tree-path index, for correlating a canvas node with its
+  // live execution element (see ResponseDialog's paused live-response lookup).
+  const nodeIndexById = useMemo(
+    () => buildWorkflowIndexes(hydratedNodes, workflow.edges),
+    [hydratedNodes, workflow.edges],
+  );
 
-  const actions = useWorkflowActions({ connectionId, readOnly, page: {
-    connection, workflow, connectors, invokers, view, changes, derived, isLoading } });
+  const actions = useWorkflowActions({ connectionId, readOnly, isTestRunLocked,
+    page: { connection, workflow, connectors, invokers, view, changes, derived,
+      isLoading } });
   const { validation, saveWorkflow: handleSave, category, templates: templateActions,
     history: historyActions, canvas, header, buildTestPayload, isShortcutsOpen,
-    setIsShortcutsOpen, schedulesOpen, setSchedulesOpen } = actions;
+    setIsShortcutsOpen, schedulesOpen, setSchedulesOpen, changeHistoryOpen,
+    setChangeHistoryOpen } = actions;
   const { validateTitle, resolveAndHighlightError: resolveAndHighlightWorkflowError } = validation;
   const { closeCanvasPanels, handleNodeDoubleClick } = canvas;
   const { selectMenuItem: handleHeaderMenuSelect, showHistory: handleOpenHistory } = header;
@@ -60,10 +73,14 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       buildTestPayload={buildTestPayload}
       onResolveStartError={resolveAndHighlightWorkflowError}
       loopAncestorsByIndexPath={loopAncestorsByIndexPath}>
+    <TestRunEditLockSync onLockChange={setIsTestRunLocked} />
     <div className="page" data-testid="workflow-page">
       <WorkflowPageHeader connectionId={activeConnectionId} schedulesOpen={schedulesOpen}
         onToggleSchedules={() => setSchedulesOpen((open) => {
-          if (!open) workflow.setHistoryOpen(false);
+          if (!open) {
+            workflow.setHistoryOpen(false);
+            setChangeHistoryOpen(false);
+          }
           return !open;
         })}
         header={{ initialName: headerState.title,
@@ -72,7 +89,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           menuLoadingItemId: isDownloadingTemplate ? 'download-template' : null,
           validateTitle, onSave: handleSave,
           saveDisabled: isLoading || !hasConnectionChanges,
-          onOpenHistory: handleOpenHistory, readOnly, loading: isConnectionLoading,
+          onOpenHistory: handleOpenHistory,
+          readOnly: readOnly || isTestRunLocked, testRunLocked: isTestRunLocked,
+          loading: isConnectionLoading,
           hasSavedConnection: !!activeConnectionId }} />
       <WorkflowPageDialogs
         templates={{
@@ -108,9 +127,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onOpenAddStep: workflow.onOpenAddStep, onOpenContextMenu: workflow.setContextMenu,
         onNodeDoubleClick: handleNodeDoubleClick, onDeleteNode: workflow.onDeleteNode,
         onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
+        onChangeCommentText: workflow.onChangeCommentText,
+        onToggleComment: workflow.onToggleComment,
+        onAddComment: workflow.onAddComment,
         onPaneClick: closeCanvasPanels }} />
       <WorkflowPanels
-        sidebar={{ action: workflow.sidebarAction, selectedNode,
+        sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
           connectionId: activeConnectionId, onClose: () => workflow.setSidebarAction(null),
           onSelect: workflow.onAddStep }}
         schedules={{ open: schedulesOpen, connectionId: activeConnectionId,
@@ -124,6 +146,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onSaveComment: historyActions.saveComment,
           onDeleteVersion: historyActions.deleteVersion,
           onDownloadTemplate: downloadConnectionTemplate }}
+        changeHistory={{ open: changeHistoryOpen, entries: workflow.undoEntries,
+          onClose: () => setChangeHistoryOpen(false),
+          onJumpTo: workflow.jumpToUndoEntry }}
         contextMenu={{ menu: workflow.contextMenu, node: contextMenuNode,
           onChangeLabel: workflow.onChangeNodeLabel,
           onOpenRequestEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }),
@@ -134,6 +159,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       <WorkflowNodeEditors
         response={{ open: !!workflow.responseNodeId,
           node: hydratedNodes.find((node) => node.id === workflow.responseNodeId) ?? null,
+          nodeIndexById, loopAncestorsByIndexPath,
           onClose: workflow.onCloseResponse }}
         method={{ open: !!workflow.methodEditor, node: editorNode,
           mode: workflow.methodEditor?.mode ?? null, nodes: hydratedNodes,

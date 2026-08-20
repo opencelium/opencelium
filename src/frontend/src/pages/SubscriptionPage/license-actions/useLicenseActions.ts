@@ -6,6 +6,7 @@ import { useAppDispatch } from '@shared/lib/storeHooks'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { SUBSCRIPTION_TAG } from '@entities/subscription/api/subscription.tags'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 export type LicenseActionKind =
     | 'generateRequest'
@@ -60,7 +61,7 @@ export function useLicenseActions() {
         } catch (err) {
             // API failures are surfaced by errorBus; this covers download/transport errors.
             console.error(err)
-            message.error(t('subscription.manage.error' as never))
+            notifyError(t('subscription.manage.error' as never))
             return false
         } finally {
             setPendingAction(null)

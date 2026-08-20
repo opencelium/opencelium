@@ -1,14 +1,13 @@
 import { useCallback } from 'react';
 import type { RefObject } from 'react';
-import { message } from 'antd';
 import type { Client, IMessage } from '@stomp/stompjs';
 import type { SocketStatus } from '@shared/api/socket/types';
 import { createId } from '@shared/lib/createId';
 import type { ExecutionSocketLog } from '@features/logs';
 import { testConnectionExecution } from '../api/connectionApi';
-import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC } from '../utils/workflowApiErrors';
 import type { TestRunPhase } from './TestRunContext';
 import { saveActiveTestRun } from './testRunStorage';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 type Params = {
 	phase: TestRunPhase;
@@ -39,7 +38,7 @@ export const useStartTestRun = ({ phase, client, status, isConflicting,
 	prepareRun, markRunning, handleLog, finishRun }: Params) => useCallback(async () => {
 	if (phase !== 'idle' || !client || status !== 'connected') return;
 	if (isConflicting) {
-		message.error(conflictMessage);
+		notifyError(conflictMessage);
 		return;
 	}
 	const payload = buildPayload();
@@ -71,10 +70,7 @@ export const useStartTestRun = ({ phase, client, status, isConflicting,
 	} catch (error) {
 		console.error(error);
 		const specificMessage = resolveError?.(error);
-		message.error(
-			specificMessage ?? startFailedMessage,
-			specificMessage ? RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC : undefined,
-		);
+		notifyError(specificMessage ?? startFailedMessage);
 		finishRun();
 	}
 }, [phase, client, status, isConflicting, connectionId, buildPayload, resolveError,

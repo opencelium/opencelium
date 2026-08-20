@@ -3,18 +3,20 @@ import { TriggerConnectionScheduleDialog } from '../sidebar/TriggerConnectionSch
 import { useTriggerConnectionStep } from '../sidebar/useTriggerConnectionStep';
 import { getMethodSidebarCopy, getSecondarySidebarCopy } from '../sidebar/sidebarSecondary';
 import { matchesSidebarTitle, normalizeSidebarQuery } from '../sidebar/sidebar.helpers';
-import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
-import { normalizeConnectorIcon, useWorkflowSidebarItems } from './useWorkflowSidebarItems';
+import { resolveConnectorIcon } from '@entities/connector/model/iconUrl';
+import { useWorkflowSidebarItems } from './useWorkflowSidebarItems';
 import { MainSidebarDrawer } from './MainSidebarDrawer/MainSidebarDrawer';
 import { SecondarySidebarDrawer } from './SecondarySidebarDrawer/SecondarySidebarDrawer';
 import { MethodSidebarDrawer } from './MethodSidebarDrawer/MethodSidebarDrawer';
 import { useWorkflowSidebarState } from './useWorkflowSidebarState';
 import type { WorkflowSidebarProps } from './WorkflowSidebar.types';
 import { useWorkflowSidebarSelection } from './useWorkflowSidebarSelection';
+import { useConnectorUpdateAction } from './useConnectorUpdateAction';
 
 export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, onSelect }: WorkflowSidebarProps) {
   const { t } = useI18n('workflow');
-  const sidebar = useWorkflowSidebarState({ open: !!action, onClose, onSelectSystem: () => onSelect('system') });
+  const sidebar = useWorkflowSidebarState({ open: !!action, onClose,
+    onSelectSystem: () => onSelect('system') });
   const { activeSecondaryPanel, selectedConnectorKey, mainSearch, secondarySearch, methodSearch, resetSidebar } = sidebar;
 
   const {
@@ -50,9 +52,10 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
   const sourceNodeLabel = selectedNode?.data.kind === 'connector'
     ? selectedNode.data.subtitle || selectedNode.data.title
     : selectedNode?.data.title || selectedNode?.id || '';
-  const selectedConnectorIconUrl = resolveConnectorIconUrl(normalizeConnectorIcon(selectedConnector?.icon));
+  const selectedConnectorIcon = selectedConnector ? resolveConnectorIcon(selectedConnector) : null;
   const selection = useWorkflowSidebarSelection({ onSelect, resetSidebar,
     mainSearchMethodItems, methodOperations, selectedConnector });
+  const connectorUpdateAction = useConnectorUpdateAction();
 
   return (
     <>
@@ -67,6 +70,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         isFetching={connectorsFetching}
         defaultItems={filteredSidebarItems}
         connectorItems={mainSearchConnectorItems}
+        connectorUpdateAction={connectorUpdateAction}
         operatorItems={mainSearchOperatorItems}
         methodItems={mainSearchMethodItems}
         onSearchChange={sidebar.setMainSearch}
@@ -75,7 +79,6 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         onSelectConnector={sidebar.openConnector}
         onSelectOperator={selection.selectOperator}
         onSelectMethod={selection.selectSearchMethod}
-        onSelectTriggerConnection={sidebar.openTriggerConnection}
       />
 
       <SecondarySidebarDrawer
@@ -88,6 +91,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         connectorsFetching={connectorsFetching}
         connectorsError={connectorsError}
         connectorItems={filteredConnectorItems}
+        connectorUpdateAction={connectorUpdateAction}
         operatorItems={filteredOperatorItems}
         triggerItems={filteredTriggerConnectionItems}
         triggerFetching={triggerConnectionStep.isFetching}
@@ -103,7 +107,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         open={methodOpen}
         title={methodTitle}
         subtitle={methodSubtitle}
-        iconUrl={selectedConnectorIconUrl}
+        connectorIcon={selectedConnectorIcon}
         placeholder={methodPlaceholder}
         search={methodSearch}
         items={filteredMethodItems}

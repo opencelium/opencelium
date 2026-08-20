@@ -10,10 +10,11 @@ type Params = {
 	nodes: WorkflowNodeModel[];
 	edges: WorkflowEdgeModel[];
 	setNodeError: (nodeId: string, message: string) => void;
+	centerOnNode: (nodeId: string) => void;
 };
 
 export const useWorkflowValidation = ({ persistedTitle, nodes, edges,
-	setNodeError }: Params) => {
+	setNodeError, centerOnNode }: Params) => {
 	const { t } = useI18n('workflow');
 	const { t: tEntities } = useI18n('entities');
 
@@ -34,10 +35,25 @@ export const useWorkflowValidation = ({ persistedTitle, nodes, edges,
 	const resolveAndHighlightError = useCallback((error: unknown): string | null => {
 		const resolution = resolveWorkflowApiError(error, nodes, edges);
 		if (!resolution) return null;
-		const message = tEntities(resolution.messageKey, resolution.messageParams);
-		if (resolution.nodeId) setNodeError(resolution.nodeId, message);
-		return message;
-	}, [nodes, edges, setNodeError, tEntities]);
+		switch (resolution.source) {
+			case 'backend':
+				return resolution.message;
+			case 'translated': {
+				const message = tEntities(resolution.messageKey, resolution.messageParams);
+				// A red ring the user has to hunt for is no better than none: the
+				// flagged node can sit anywhere on the canvas, so pan to it as well.
+				if (resolution.nodeId) {
+					setNodeError(resolution.nodeId, message);
+					centerOnNode(resolution.nodeId);
+				}
+				return message;
+			}
+			default: {
+				const _exhaustive: never = resolution;
+				return _exhaustive;
+			}
+		}
+	}, [nodes, edges, setNodeError, centerOnNode, tEntities]);
 
 	return { validateTitle, resolveAndHighlightError };
 };

@@ -11,6 +11,7 @@ import { CopyButton } from "@shared/ui/actions/CopyButton";
 import { serializeLogElement } from "../serializeLogElement";
 import { useMethodViewMode } from "../methodViewMode";
 import { methodDisplayText } from "../methodView";
+import { useMethodLabelResolver } from "../methodLabels";
 import { useLogErrorTrace } from "../logErrorTrace";
 
 // How long the error-target row keeps its pulse highlight after the
@@ -162,15 +163,27 @@ export function LiveLogElementRow({
   const [expandedChildren, setExpandedChildren] = useState<Record<number, boolean>>({});
 
   const { mode } = useMethodViewMode();
-  const { nonce, isOnTrace, isTarget, loopIteration } = useLogErrorTrace();
+  const resolveMethodLabel = useMethodLabelResolver();
+  const {
+    nonce,
+    isOnTrace,
+    isTarget,
+    loopIteration,
+    pauseNonce,
+    isOnPauseTrace,
+    isPauseTarget,
+    pauseLoopIteration,
+  } = useLogErrorTrace();
   const anchorRef = useRef<HTMLDivElement>(null);
   const [justRevealed, setJustRevealed] = useState(false);
+  const [justPaused, setJustPaused] = useState(false);
 
   // Mark this row as part of the trace to an error (matched by structural
   // indexPath *and* this node's loop-iteration context), unless it already
   // shows a red FAIL dot — no double marker.
   const onTrace = isOnTrace(node.indexPath, node.loopIndex) && node.status !== "FAIL";
   const target = isTarget(node.indexPath, node.loopIndex);
+  const pausedHere = isPauseTarget(node.indexPath, node.loopIndex);
 
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
@@ -204,7 +217,33 @@ export function LiveLogElementRow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
 
-  const scrollAnchor = target ? <div ref={anchorRef} aria-hidden /> : null;
+  // Debugger pause reveal: expand ancestors and page loops to the iteration
+  // the run was actually paused in, exactly like the error trail above, but
+  // deliberately does NOT expand the paused-on row ITSELF when it's an
+  // OPERATION — that would fetch and show its request/response, and the
+  // whole point is "only when the user opens it". Containers (LOOP/IF) have
+  // no such hidden detail behind `expanded`, so those are still opened even
+  // when they are themselves the paused-on element — otherwise the tree
+  // couldn't reach further down to reveal anything at all.
+  useEffect(() => {
+    if (pauseNonce === 0 || !isOnPauseTrace(node.indexPath, node.loopIndex)) return;
+    if (!(pausedHere && node.type === "OPERATION")) {
+      if (isControlled) onReveal?.();
+      else setInternalExpanded(true);
+    }
+    if (node.type === "LOOP") {
+      const iter = pauseLoopIteration(node.indexPath, node.loopIndex);
+      if (iter !== null) setIterationPos(iter);
+    }
+    if (!pausedHere) return;
+    anchorRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    setJustPaused(true);
+    const timer = setTimeout(() => setJustPaused(false), ERROR_HIGHLIGHT_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pauseNonce]);
+
+  const scrollAnchor = target || pausedHere ? <div ref={anchorRef} aria-hidden /> : null;
 
   switch (node.type) {
     case "OPERATION": {
@@ -216,7 +255,7 @@ export function LiveLogElementRow({
       const expandable = node.id !== "" || hasError;
       const displayText = methodDisplayText(mode, {
         url: request?.url,
-        label: node.properties.label,
+        label: node.properties.label ?? resolveMethodLabel(node.indexPath),
         name: node.properties.name,
       });
       return (
@@ -228,6 +267,7 @@ export function LiveLogElementRow({
             expanded={expanded}
             onToggle={toggle}
             highlighted={justRevealed}
+            pausedHighlighted={justPaused}
             left={
               <>
                 {request?.http_method ? (
@@ -287,6 +327,7 @@ export function LiveLogElementRow({
             expanded={expanded}
             onToggle={toggle}
             highlighted={justRevealed}
+            pausedHighlighted={justPaused}
             left={
               <>
                 <OperatorLabel label="LOOP" hint={node.properties.iterator} />
@@ -336,6 +377,7 @@ export function LiveLogElementRow({
             expanded={expanded}
             onToggle={toggle}
             highlighted={justRevealed}
+            pausedHighlighted={justPaused}
             left={
               <>
                 <OperatorLabel label="IF" />
@@ -368,6 +410,7 @@ export function LiveLogElementRow({
           <LogRow
             depth={depth}
             highlighted={justRevealed}
+            pausedHighlighted={justPaused}
             left={<OperatorLabel label={node.type} hint={node.properties.name} />}
             right={
               <Meta>

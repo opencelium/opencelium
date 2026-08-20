@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { message } from 'antd';
 import { apiExecutor } from '@shared/api/apiExecutor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { Connector } from '@entities/connector/model/types';
@@ -7,6 +6,7 @@ import { mapConnectionToWorkflowState, type WorkflowConnectionState } from '../a
 import { applyConnectorMapping, extractConnectorGroups,
 	type ConnectorMappingGroup } from '../components/template/templateConnectorMapping.utils';
 import type { WorkflowTemplate } from '../types/workflowTemplate.types';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 type PendingApply = { state: WorkflowConnectionState; template: WorkflowTemplate };
 
@@ -31,7 +31,7 @@ export const useApplyConnectionTemplate = ({ templates, selectedTemplateId,
 		const template = templates.find((item) =>
 			String(item.templateId) === selectedTemplateId);
 		if (!template) {
-			message.error(t('messages.selectTemplate'));
+			notifyError(t('messages.selectTemplate'));
 			return;
 		}
 		setIsApplying(true);
@@ -41,7 +41,7 @@ export const useApplyConnectionTemplate = ({ templates, selectedTemplateId,
 				method: 'GET',
 			});
 			if (!fullTemplate?.connection) {
-				message.error(t('messages.loadTemplateFailed'));
+				notifyError(t('messages.loadTemplateFailed'));
 				return;
 			}
 			const state = mapConnectionToWorkflowState(fullTemplate.connection);
@@ -55,7 +55,7 @@ export const useApplyConnectionTemplate = ({ templates, selectedTemplateId,
 			}
 			await finishApply(state, template);
 		} catch {
-			message.error(t('messages.loadTemplateFailed'));
+			notifyError(t('messages.loadTemplateFailed'));
 		} finally {
 			setIsApplying(false);
 		}
@@ -69,7 +69,7 @@ export const useApplyConnectionTemplate = ({ templates, selectedTemplateId,
 			const nodes = applyConnectorMapping(pendingApply.state.nodes, mapping, connectors);
 			await finishApply({ ...pendingApply.state, nodes }, pendingApply.template);
 		} catch {
-			message.error(t('messages.loadTemplateFailed'));
+			notifyError(t('messages.loadTemplateFailed'));
 		} finally {
 			setIsApplying(false);
 			setPendingApply(null);

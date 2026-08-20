@@ -21,6 +21,9 @@ export const findWorkflowDropTarget = (
 	const point = instance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
 	const nodeById = new Map(nodes.map((node) => [node.id, node]));
 	const source = nodeById.get(sourceNodeId);
+	// A comment is never wired into the graph: dragging one only repositions it,
+	// and nothing can be attached to one either.
+	if (source?.type === 'comment') return undefined;
 	const sourceBranch = source && (source.type === 'if' || source.type === 'loop')
 		? getOperatorBottomBranch(source.id, nodes, edges)
 		: { nodeIds: new Set<string>() };
@@ -53,7 +56,9 @@ export const findWorkflowDropTarget = (
 		.sort((left, right) => left.distance - right.distance)[0];
 	if (closestEdge && closestEdge.distance <= DROP_EDGE_MAX_DISTANCE) return closestEdge;
 
-	return nodes.filter((node) => node.type !== 'start' && !movedNodeIds.has(node.id))
+	return nodes
+		.filter((node) => node.type !== 'start' && node.type !== 'comment'
+			&& !movedNodeIds.has(node.id))
 		.map((node): DragDropTarget => {
 			const width = node.measured?.width ?? node.width ?? 80;
 			const height = node.measured?.height ?? node.height ?? 80;

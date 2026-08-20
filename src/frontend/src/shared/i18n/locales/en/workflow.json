@@ -20,6 +20,8 @@
     "maximizeRequestData": "Maximize request data",
     "minimizeRequestData": "Minimize request data",
     "load": "Load",
+    "undo": "Undo",
+    "redo": "Redo",
     "createEnhancement": "Create enhancement",
     "deleteEnhancement": "Delete enhancement",
     "deleteReference": "Delete reference"
@@ -138,7 +140,8 @@
     "connectorStep": {
       "header": "Choose connector",
       "subtitle": "Select a connector first",
-      "searchPlaceholder": "search connector"
+      "searchPlaceholder": "search connector",
+      "fixConnector": "Update connector to fix the connection"
     },
     "methodStep": {
       "header": "Choose method",
@@ -216,6 +219,7 @@
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
     "versionHistory": "Version History",
+    "changeHistory": "Change History",
     "testRunLockedHint": "Not available while a test run is in progress",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
@@ -227,6 +231,60 @@
     "confirmUnassign": {
       "title": "Remove category assignment",
       "message": "Are you sure you want to remove this workflow's category assignment?"
+    }
+  },
+  "undoHistory": {
+    "title": "Change history",
+    "current": "Current",
+    "empty": "No changes in this session yet",
+    "operator": {
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "nodeKind": {
+      "httpRequest": "HTTP Request",
+      "webhook": "Webhook",
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "section": {
+      "header": "Header",
+      "body": "Body"
+    },
+    "change": {
+      "initial": "Session start",
+      "nodeAdded": "Added {{name}}",
+      "nodesAdded": "Added {{count}} nodes",
+      "nodeRemoved": "Deleted {{name}}",
+      "nodesRemoved": "Deleted {{count}} nodes",
+      "nodeMoved": "Moved {{name}}",
+      "nodesMoved": "Moved {{count}} nodes",
+      "changedLabel": "Changed Label to {{label}}",
+      "methodConfig": "Edited request of {{name}}",
+      "methodUrl": "Edited URL of {{name}}",
+      "methodHeader": "Edited Header of {{name}}",
+      "methodBody": "Edited Body of {{name}}",
+      "referenceAdded": "Added {{section}} Reference in {{name}}",
+      "referenceRemoved": "Deleted {{section}} Reference in {{name}}",
+      "referenceEdited": "Edited {{section}} Reference in {{name}}",
+      "enhancement": "Edited {{section}} Enhancement of {{name}}",
+      "enhancementLanguage": "Updated Enhancement Language of {{name}}",
+      "enhancementDescription": "Updated Enhancement Description of {{name}}",
+      "enhancementRemoved": "Deleted Enhancement of {{name}}",
+      "conditionConfig": "Edited condition of {{name}}",
+      "aggregatorConfigured": "Configured Aggregator of {{name}}",
+      "aggregatorRemoved": "Deleted Aggregator of {{name}}",
+      "connectorConfig": "Changed connector of {{name}}",
+      "edgesChanged": "Changed connections",
+      "references": "Changed references",
+      "conditionAdded": "Added Condition in {{operator}}",
+      "conditionRemoved": "Deleted Condition in {{operator}}",
+      "conditionEdited": "Edited Condition in {{operator}}",
+      "groupAdded": "Added Group in {{operator}}",
+      "groupRemoved": "Deleted Group in {{operator}}",
+      "groupEdited": "Edited Group in {{operator}}",
+      "operatorEdited": "Edited {{operator}}",
+      "multiple": "Multiple changes"
     }
   },
   "shortcutsDialog": {
@@ -244,6 +302,8 @@
       "ctrl": "Ctrl",
       "esc": "Esc",
       "s": "S",
+      "z": "Z",
+      "shift": "Shift",
       "delete": "Delete"
     },
     "items": {
@@ -255,6 +315,8 @@
       "multiSelect": "Select multiple nodes",
       "deleteNode": "Delete the selected node",
       "save": "Save the workflow",
+      "undo": "Undo the last canvas change",
+      "redo": "Redo the change that was undone",
       "close": "Close the open menu, dialog, or panel"
     }
   },
@@ -268,6 +330,16 @@
     "editBody": "Edit Body",
     "showResponse": "Show Response",
     "newLabelPlaceholder": "New label"
+  },
+  "comment": {
+    "badge": "Comment",
+    "add": "Add comment",
+    "placeholder": "Write a note for your team…",
+    "toggle": {
+      "show": "Show comment",
+      "hide": "Hide comment",
+      "minimize": "Minimize comment"
+    }
   },
   "aggregatorDialog": {
     "title": "Configure Aggregator",
@@ -296,7 +368,10 @@
     "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response.",
     "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
     "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector.",
-    "testRunIteration": "{{iterator}} = {{count}}"
+    "testRunIteration": "{{iterator}} = {{count}}",
+    "testRunIterator": "{{iterator}} =",
+    "skipToNextIteration": "Jump to next iteration",
+    "jumpToIteration": "Jump forward to an iteration"
   },
   "saveDialog": {
     "title": "Save Version",
@@ -321,6 +396,10 @@
     "dialogTitleLoop": "LOOP Condition",
     "addCondition": "Add Condition",
     "addGroup": "Add Group",
+    "comparisonUnknown": "Not available yet",
+    "comparisonError": "Can't be compared",
+    "comparisonTrue": "True",
+    "comparisonFalse": "False",
     "loopInfo": {
       "iteratorLabel": "Loop variable",
       "iteratorHelp": "Use this variable inside the loop steps to read the current item:",
@@ -406,7 +485,8 @@
     "body": "Body",
     "header": "Header",
     "requestUrl": "Request Url",
-    "response": "Response"
+    "response": "Response",
+    "liveBadge": "Live execution result"
   },
   "response": {
     "success": "Success",
@@ -456,6 +536,27 @@
       "title": "Optimization available",
       "message": "There are {{count}} references that can be optimized for better performance. Would you like to apply this optimization before saving?",
       "message_one": "There is a reference that can be optimized for better performance. Would you like to apply this optimization before saving?"
+    },
+    "debugValue": {
+      "show": "Show value",
+      "hide": "Hide value",
+      "title": "Value",
+      "idleHint": "Not shown yet. Click the eye icon to resolve this value from the current test run.",
+      "loadingHint": "Resolving…",
+      "noReferences": "No references",
+      "references": "References",
+      "resultLabel": "RESULT_VAR · {{type}}",
+      "errorTitle": "Error",
+      "errorNotPaused": "Start a paused test run to resolve this from live execution data.",
+      "errorMethodFailed": "This method's execution failed this run — its request may be incomplete.",
+      "errorFieldNotFound": "Could not find a value for this field in the request that was actually sent.",
+      "errorNotRun": "This method hasn't run in the current test session yet. Run or continue the paused test, then check again.",
+      "status": {
+        "idle": "idle",
+        "loading": "running",
+        "error": "error",
+        "stale": "stale — script changed"
+      }
     }
   },
   "description": {
@@ -483,9 +584,15 @@
     "wholeArray": "The whole array",
     "iteratorLoop": "({{iterator}} loop)",
     "noVariableReferences": "No variable references",
+    "more": "more",
+    "pausedHint": "Hover a highlighted reference to see the value it resolved to.",
     "confirmDelete": {
       "title": "Delete reference",
       "message": "Do you really want to delete this reference?"
+    },
+    "valueDialog": {
+      "copyTooltip": "Copy value",
+      "copySuccess": "Value copied to clipboard"
     }
   },
   "refGenerator": {

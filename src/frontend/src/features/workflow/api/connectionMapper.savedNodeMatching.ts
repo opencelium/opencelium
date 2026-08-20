@@ -7,7 +7,7 @@ export const mergeSavedNodeData = (
 ): WorkflowNodeModel['data'] => {
 	if (!savedData) return builtData;
 	const {
-		title, subtitle, kind, connector, methodConfig, conditionConfig,
+		title, subtitle, kind, connector, methodConfig, conditionConfig, comment,
 		isLeaf, rightLeaf, bottomLeaf, highlighted,
 		suppressHoverAddControls, lockVisibleAddControls,
 	} = savedData;
@@ -19,6 +19,7 @@ export const mergeSavedNodeData = (
 		...(connector !== undefined ? { connector } : {}),
 		...(methodConfig !== undefined ? { methodConfig } : {}),
 		...(conditionConfig !== undefined ? { conditionConfig } : {}),
+		...(comment !== undefined ? { comment } : {}),
 		...(isLeaf !== undefined ? { isLeaf } : {}),
 		...(rightLeaf !== undefined ? { rightLeaf } : {}),
 		...(bottomLeaf !== undefined ? { bottomLeaf } : {}),

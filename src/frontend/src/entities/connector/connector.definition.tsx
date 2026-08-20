@@ -322,9 +322,7 @@ export const connectorDefinition: EntityDefinition = {
                     }
                     return undefined;
                 },
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {

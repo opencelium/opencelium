@@ -1,6 +1,6 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { LoadingOverlay } from '@shared/ui/primitives/Loading/LoadingOverlay';
-import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodViewModeProvider } from '@features/logs';
+import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodLabelProvider, MethodViewModeProvider } from '@features/logs';
 import { useTestRun } from '../../test-run/useTestRun';
 import type { TestRunResult } from '../../test-run/TestRunContext';
 import { WorkflowLogsHeader } from './WorkflowLogsHeader';
@@ -43,7 +43,7 @@ function TestRunResultLine({ result }: { result: TestRunResult }) {
 // height the pane gives it instead of the fixed-height overlay used for
 // 'minimized'/'full'). Minimized/full stay the original absolute overlay,
 // rendered as a plain sibling of the canvas, unchanged.
-export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
+export function WorkflowLogs({ panel, onPanelChange, resolveMethodLabel }: WorkflowLogsProps) {
 	const { t: tLogs } = useI18n('logs');
 	const testRun = useTestRun();
 
@@ -55,6 +55,13 @@ export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
 	const errorRevealNonce = testRun?.errorRevealNonce ?? 0;
 	const revealPending = testRun?.revealPending ?? false;
 	const isLiveAnimation = testRun?.isLiveAnimation ?? false;
+	const isPaused = testRun?.isPaused ?? false;
+	const pauseRevealNonce = testRun?.pauseRevealNonce ?? 0;
+	const currentStep = testRun?.currentStep ?? null;
+	// The debugger's pause target is external to logTree (it comes from
+	// currentStep, not the socket stream) — only meaningful while actually
+	// paused, since currentStep otherwise keeps moving.
+	const pauseTarget = isPaused && currentStep ? { indexPath: currentStep.indexPath, loopIndex: currentStep.loopIndex } : null;
 	const isRunning = phase !== 'idle';
 	// The user already knows the run failed (an error line arrived), but the
 	// backend is still streaming the trailing lines — every enclosing loop/
@@ -71,6 +78,7 @@ export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
 
 	return (
 		<MethodViewModeProvider>
+		<MethodLabelProvider resolve={resolveMethodLabel}>
 		<div
 			className={`logsCard ${isExpanded ? 'logsCardExpanded' : ''} ${
 				panel === 'full' ? 'logsCardFull' : ''
@@ -82,6 +90,7 @@ export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
 				hasLogs={hasLogs}
 				isRunning={isRunning}
 				isStopping={isStopping}
+				isPaused={isPaused}
 				isLiveAnimation={isLiveAnimation}
 				onToggleLiveAnimation={(value) => testRun?.setLiveAnimation(value)}
 				onToggleMinimized={toggleMinimized}
@@ -100,7 +109,13 @@ export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
 						// prefetched behind the scenes (see TestRunProvider) rather than
 						// fetched live per row.
 						<LoadingOverlay loading={revealPending} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-							<LiveExecutionLogTree tree={logTree} fill revealNonce={errorRevealNonce} />
+							<LiveExecutionLogTree
+								tree={logTree}
+								fill
+								revealNonce={errorRevealNonce}
+								pauseTarget={pauseTarget}
+								pauseRevealNonce={pauseRevealNonce}
+							/>
 						</LoadingOverlay>
 					) : (
 						tLogs('live.empty')
@@ -111,6 +126,7 @@ export function WorkflowLogs({ panel, onPanelChange }: WorkflowLogsProps) {
 				</div>
 			)}
 		</div>
+		</MethodLabelProvider>
 		</MethodViewModeProvider>
 	);
 }

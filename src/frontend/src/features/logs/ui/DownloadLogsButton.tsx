@@ -1,16 +1,13 @@
 import { useState } from "react";
-import { message } from "antd";
 import { IconButton } from "@shared/ui/primitives/IconButton";
 import { Tooltip } from "@shared/ui/primitives/Tooltip";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { apiExecutor } from "@shared/api/apiExecutor";
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 // Files at/above this size aren't streamed to the browser; the user is pointed
 // to the server-side path instead (mirrors the legacy behaviour).
 const MAX_DOWNLOAD_MB = 500;
-// The "too big" message carries a server path worth reading, so keep it up
-// longer than antd's 3s default.
-const TOO_BIG_MESSAGE_DURATION_SEC = 10;
 
 export function DownloadLogsButton({ executionId }: { executionId: string }) {
   const { t } = useI18n("logs");
@@ -26,10 +23,7 @@ export function DownloadLogsButton({ executionId }: { executionId: string }) {
       })) as Blob;
 
       if (blob.size / (1024 * 1024) >= MAX_DOWNLOAD_MB) {
-        message.error(
-          t("download.tooBig", { path: `src/backend/${executionId}` }),
-          TOO_BIG_MESSAGE_DURATION_SEC,
-        );
+        notifyError(t("download.tooBig", { path: `src/backend/${executionId}` }));
         return;
       }
 
@@ -42,7 +36,7 @@ export function DownloadLogsButton({ executionId }: { executionId: string }) {
       link.remove();
       URL.revokeObjectURL(url);
     } catch {
-      message.error(t("download.error"));
+      notifyError(t("download.error"));
     } finally {
       setLoading(false);
     }

@@ -1,13 +1,23 @@
-import {ConfigProvider, message, theme as antdTheme} from 'antd'
+import {ConfigProvider, message, notification, theme as antdTheme} from 'antd'
+import type {ThemeConfig} from 'antd'
 import {useTheme} from "@shared/theme/hooks/useTheme.tsx";
 import {createTheme, ThemeProvider} from "@mui/material";
-import {useMemo} from "react";
+import {useEffect, useMemo} from "react";
 
 message.config({
     top: 50,
     duration: 3,
     maxCount: 3,
 });
+
+// Error notifications stack below the 50px top bar instead of over it. Their lifetime
+// is decided per call (see showApiError), not here.
+notification.config({
+    placement: 'topRight',
+    top: 60,
+    maxCount: 3,
+});
+
 export const ThemeBridge = ({ children }) => {
     const { theme, themeMode } = useTheme()
     const isDark = themeMode === 'dark';
@@ -75,57 +85,63 @@ export const ThemeBridge = ({ children }) => {
         },
     }), [theme, themeMode]);
 
-    // Form controls share colorBgContainer with cards/dialogs by default, so an
-    // input nested in a surface becomes invisible. Override the fill per control
-    // so fields render on background.input (white in light mode) instead.
-    // colorBgElevated drives the popup/options panel, so the dropdown list matches
-    // the field background too.
-    const controlBg = {
-        colorBgContainer: theme.color.background.input,
-        colorBgElevated: theme.color.background.input,
-    };
+    const antdThemeConfig = useMemo<ThemeConfig>(() => {
+        // Form controls share colorBgContainer with cards/dialogs by default, so an
+        // input nested in a surface becomes invisible. Override the fill per control
+        // so fields render on background.input (white in light mode) instead.
+        // colorBgElevated drives the popup/options panel, so the dropdown list matches
+        // the field background too.
+        const controlBg = {
+            colorBgContainer: theme.color.background.input,
+            colorBgElevated: theme.color.background.input,
+        };
+
+        return {
+            algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+            token: {
+                colorPrimary: theme.color.action.primary,
+                colorSuccess: theme.color.status.success.fg,
+                colorWarning: theme.color.status.warning.fg,
+                colorError: theme.color.status.error.fg,
+                colorInfo: theme.color.status.info.fg,
+                colorLink: theme.color.action.primary,
+
+                colorBgLayout: theme.color.background.app,
+                colorBgContainer: theme.color.background.surface,
+                colorBgElevated: theme.color.background.elevated,
+
+                colorText: theme.color.text.primary,
+                colorTextSecondary: theme.color.text.secondary,
+                colorTextDisabled: theme.color.text.secondary,
+                colorTextPlaceholder: theme.color.text.disabled,
+
+                colorBorder: theme.color.border.default,
+                colorBorderSecondary: theme.color.border.subtle,
+
+                fontFamily: theme.typography.fontFamily.body,
+                borderRadius: theme.radius.md,
+            },
+            components: {
+                Input: controlBg,
+                InputNumber: controlBg,
+                Select: controlBg,
+                DatePicker: controlBg,
+                Cascader: controlBg,
+                TreeSelect: controlBg,
+                Mentions: controlBg,
+            },
+        };
+    }, [isDark, theme]);
+
+    // antd's static message/notification render in their own root and can't read this
+    // ConfigProvider, so they'd stay light while the app is dark. The global config is
+    // the only channel that reaches them — keep it in step with the active theme.
+    useEffect(() => {
+        ConfigProvider.config({ theme: antdThemeConfig });
+    }, [antdThemeConfig]);
 
     return (
-        <ConfigProvider
-            theme={{
-                algorithm: isDark
-                    ? antdTheme.darkAlgorithm
-                    : antdTheme.defaultAlgorithm,
-                token: {
-                    colorPrimary: theme.color.action.primary,
-                    colorSuccess: theme.color.status.success.fg,
-                    colorWarning: theme.color.status.warning.fg,
-                    colorError: theme.color.status.error.fg,
-                    colorInfo: theme.color.status.info.fg,
-                    colorLink: theme.color.action.primary,
-
-                    colorBgLayout: theme.color.background.app,
-                    colorBgContainer: theme.color.background.surface,
-                    colorBgElevated: theme.color.background.elevated,
-
-                    colorText: theme.color.text.primary,
-                    colorTextSecondary: theme.color.text.secondary,
-                    colorTextDisabled: theme.color.text.disabled,
-                    colorTextPlaceholder: theme.color.text.disabled,
-
-                    colorBorder: theme.color.border.default,
-                    colorBorderSecondary: theme.color.border.subtle,
-
-                    fontFamily: theme.typography.fontFamily.body,
-                    borderRadius: theme.radius.md,
-                },
-                components: {
-                    Input: controlBg,
-                    InputNumber: controlBg,
-                    Select: controlBg,
-                    DatePicker: controlBg,
-                    TimePicker: controlBg,
-                    Cascader: controlBg,
-                    TreeSelect: controlBg,
-                    Mentions: controlBg,
-                },
-            }}
-        >
+        <ConfigProvider theme={antdThemeConfig}>
             <ThemeProvider theme={muiTheme}>
                 {children}
             </ThemeProvider>

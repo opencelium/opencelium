@@ -17,6 +17,12 @@ export type TestRunPhase = 'idle' | 'starting' | 'running' | 'stopping';
 // moment the dot reaches the node — only then does the node highlight.
 export type TestRunCurrentStep = {
 	indexPath: string;
+	// The step's comma-separated enclosing-loop iteration context (outermost
+	// first), same shape as a LiveLogNode's loopIndex — already computed by
+	// getNextStep (see playbackStep.ts) for every step, just threaded through
+	// here too. Lets the debugger pause target identify exactly which loop
+	// iteration it paused in, not just which structural node.
+	loopIndex: string;
 	nonce: number;
 	hasArrived: boolean;
 };
@@ -39,6 +45,13 @@ export type TestRunContextValue = {
 	// liveGraphStatus.ts) driving the canvas's live edge/node/iteration
 	// animation, keyed by workflow tree-path index.
 	liveGraphStatus: LiveGraphStatus;
+	// Every indexPath's enclosing-LOOP-ancestor indexPaths (outermost first) —
+	// the same map the provider already uses internally to reduce socket
+	// lines into liveGraphStatus, exposed so any descendant can resolve a
+	// node's current loop-iteration context (see
+	// liveGraphStatus.resolveCurrentLoopIndex) without needing it threaded
+	// through as a prop from index.tsx. Empty map outside a real graph.
+	loopAncestorsByIndexPath: Map<string, string[]>;
 	// The one element the paced playback is currently showing as executing.
 	currentStep: TestRunCurrentStep | null;
 	result: TestRunResult | null;
@@ -73,6 +86,38 @@ export type TestRunContextValue = {
 	// to speed up).
 	animationSpeed: number;
 	setAnimationSpeed: (speed: number) => void;
+	// The replay debugger's pause: freezes the paced playback (see
+	// PlaybackQueue.pause) exactly where it is — the backend keeps running to
+	// completion regardless, lines just keep buffering. Meaningless while
+	// isLiveAnimation is true (nothing is ever queued in live mode) or while
+	// idle (nothing playing to pause).
+	isPaused: boolean;
+	pauseAnimation: () => void;
+	resumeAnimation: () => void;
+	// Applies exactly the next buffered line, then stays paused (see
+	// PlaybackQueue.stepForward) — a no-op while not paused or with nothing
+	// buffered yet. Re-warms the tree structure down to the new current node
+	// and bumps pauseRevealNonce below, same as pauseAnimation, so the logs
+	// panel follows each step.
+	stepForward: () => void;
+	// The debugger's "jump to next iteration": while paused inside a LOOP,
+	// fast-forwards past the rest of the current iteration and re-pauses the
+	// instant the loop (identified by its workflow tree-path index) either
+	// advances to a new iteration or finishes — see PlaybackQueue.skipWhile.
+	// A no-op while not paused, same as stepForward.
+	skipToNextIteration: (indexPath: string) => void;
+	// Same fast-forward, aimed at a specific iteration instead of the next one:
+	// re-pauses once the loop's own iteration counter reaches `targetIteration`
+	// (1-based, the number the loop node displays) or the loop finishes short of
+	// it. Forward-only — an applied line is gone, so a target at or behind the
+	// current iteration is the caller's to reject, not something this can honour.
+	skipToIteration: (indexPath: string, targetIteration: number) => void;
+	// Bumped once pausing has finished warming the tree structure down to the
+	// paused-on node (see prefetchPauseTracePath) — the logs panel expands its
+	// ancestors and scrolls it into view, mirroring errorRevealNonce below but
+	// without touching the paused node's own (collapsed) detail: that's still
+	// fetched only when the user opens it.
+	pauseRevealNonce: number;
 	// Bumped once per failed run so the logs panel can auto-expand and scroll to
 	// the element where the error happened. 0 means no failure to reveal yet.
 	errorRevealNonce: number;

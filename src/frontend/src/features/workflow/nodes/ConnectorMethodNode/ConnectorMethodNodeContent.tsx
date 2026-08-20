@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { isConnectorConnectionError } from '@entities/connector/model/connectorHealth';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import { useLiveConnectorStatus } from '@entities/connector/socket/useLiveConnectorStatus';
 import { Icon } from '@shared/ui/primitives/Icon';
@@ -37,7 +38,7 @@ export function ConnectorMethodNodeContent({ id, data, suppressTooltip }: {
       onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)} />
     {status && <div className="circleNodeStatus">
       <ConnectorStatusDot status={status} testId={`workflow-node-connector-status-${id}`}
-        tooltipOverride={status === 'AUTH_FAILED' || status === 'DOWN' ? lastError : undefined}
+        tooltipOverride={isConnectorConnectionError(status) ? lastError : undefined}
         suppressTooltip={suppressTooltip} lastCheckedAt={lastCheckedAt} />
     </div>}
   </div>;

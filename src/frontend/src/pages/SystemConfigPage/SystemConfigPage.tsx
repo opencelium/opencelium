@@ -31,6 +31,7 @@ import {
 } from './buildTree'
 import {CommentTooltipBody} from './CommentInfo'
 import {MasterPasswordGate, useCheckMasterPasswordExistsQuery, useMasterPasswordStore} from '@features/master-password'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type LeafValue = ConfigScalar | ConfigScalar[]
 
@@ -190,7 +191,7 @@ export function SystemConfigPage() {
         setRestartRequired(false)
         const res = await refetch()
         if ('error' in res && res.error) {
-            message.error(t('system-config.messages.loadFailed'))
+            notifyError(t('system-config.messages.loadFailed'))
             return
         }
         message.success(t('system-config.messages.reset'))
@@ -217,7 +218,7 @@ export function SystemConfigPage() {
         const res = await updateConfig({fields: patchFields})
         if ('error' in res && res.error) {
             const err = res.error as {data?: {message?: string}}
-            message.error(err.data?.message ?? t('system-config.messages.saveFailed'))
+            notifyError(err.data?.message ?? t('system-config.messages.saveFailed'))
             return
         }
         const payload = res.data

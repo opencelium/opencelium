@@ -20,8 +20,10 @@ export const assignMissingMethodColors = (nodes: WorkflowNodeModel[]) => {
 	});
 };
 
+// Comments are positioned by hand and may deliberately sit on top of the graph,
+// so they must never be the reason the whole graph gets re-laid out on load.
 export const hasStackedNodes = (nodes: WorkflowNodeModel[]) => {
-	const placed = nodes.filter((node) => node.type !== 'start');
+	const placed = nodes.filter((node) => node.type !== 'start' && node.type !== 'comment');
 	for (let left = 0; left < placed.length; left += 1) {
 		for (let right = left + 1; right < placed.length; right += 1) {
 			if (Math.abs(placed[left].position.x - placed[right].position.x) < 40

@@ -17,7 +17,10 @@ export type IconName =
     | 'content-copy'
     | 'webhook'
     | 'play'
+    | 'pause'
     | 'stop'
+    | 'step-forward'
+    | 'skip-forward'
     | 'download'
     | 'upload'
     | 'key'
@@ -53,6 +56,11 @@ export type IconName =
     | 'help'
     | 'report-analytics'
     | 'docs'
+    | 'comment'
+    | 'undo'
+    | 'redo'
+    | 'if'
+    | 'loop'
 
 export type IconColor =
     | 'default'

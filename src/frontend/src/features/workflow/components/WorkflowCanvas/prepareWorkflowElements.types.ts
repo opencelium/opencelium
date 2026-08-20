@@ -7,7 +7,8 @@ export type LeafInfo = { isLeaf: boolean; rightLeaf: boolean; bottomLeaf: boolea
 export type PrepareWorkflowParams = Pick<
 	WorkflowCanvasProps,
 	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' |
-	'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor'
+	'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor' |
+	'onChangeCommentText' | 'onToggleComment' | 'onAddComment'
 > & {
 	cache?: PrepareWorkflowCache;
 	testRunScope?: TestRunScope;
@@ -22,6 +23,9 @@ type NodeCacheEntry = {
 	onOpenContextMenu: PrepareWorkflowParams['onOpenContextMenu'];
 	onDeleteNode: PrepareWorkflowParams['onDeleteNode'];
 	onOpenAggregatorEditor: PrepareWorkflowParams['onOpenAggregatorEditor'];
+	onChangeCommentText: PrepareWorkflowParams['onChangeCommentText'];
+	onToggleComment: PrepareWorkflowParams['onToggleComment'];
+	onAddComment: PrepareWorkflowParams['onAddComment'];
 	out: WorkflowNodeModel;
 };
 

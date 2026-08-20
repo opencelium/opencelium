@@ -4,7 +4,7 @@ import type { ConditionConfig } from '../components/condition-builder/conditionB
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { ConnectorHealthStatus } from '@entities/connector/model/types';
 
-export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';
+export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
 
 // What a LOOP node shows while running, set by WorkflowCanvas — a live count
 // ("i = 3"), refreshed on every iteration. Nothing is shown at all before
@@ -12,11 +12,29 @@ export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-conne
 // classified as fast (its first iteration took under a second) — a live
 // count for those would just flicker unreadably (see
 // getTestRunScope/reduceLiveGraphStatus).
-export type WorkflowLoopIterationDisplay = { iterator: string; count: number };
+export type WorkflowLoopIterationDisplay = { iterator: string; count: number; indexPath: string };
 
 export type WorkflowAddDirection = 'right' | 'bottom';
-export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';
+export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
 export type WorkflowOperatorKind = 'if' | 'loop';
+
+/** A free-text annotation belonging to one node. Carried in the connection's
+ * schema-less `ui.workflowNodes` blob only — a comment is never a method or an
+ * operator, so it never reaches `fromConnector` and never executes. */
+export type WorkflowCommentData = {
+	text: string;
+	/** The node this note belongs to. It is toggled from that node's badge and
+	 * deleted together with it, so a comment without a live anchor cannot exist. */
+	anchorNodeId: string;
+	/** Where the note sits relative to its anchor's position. The note's own
+	 * `position` is *derived* from this on every render (prepareWorkflowElements),
+	 * which is what makes it follow the anchor through drags, insertions and
+	 * auto-layout without any of that code having to know comments exist. */
+	offset: { x: number; y: number };
+	/** Minimized into the anchor node's comment badge — the note is not rendered
+	 * at all, but its text/size/offset are kept and saved. */
+	collapsed?: boolean;
+};
 
 export type WorkflowTriggerConnectionRef = {
 	connectionId: number;
@@ -65,6 +83,11 @@ export type WorkflowNodeData = {
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;
 	triggerConnection?: WorkflowTriggerConnectionRef;
+	/** Only on a 'comment' node — the note itself. */
+	comment?: WorkflowCommentData;
+	/** Set by prepareWorkflowElements on a node that *has* a note, so NodeShell
+	 * can render its show/hide badge. The note itself lives on the comment node. */
+	anchoredComment?: { nodeId: string; collapsed: boolean };
 	dataAggregator?: number | null;
 	labelEdited?: boolean;
 	isLeaf?: boolean;
@@ -119,6 +142,15 @@ export type WorkflowNodeData = {
 	onOpenContextMenu?: (menu: WorkflowContextMenu | null) => void;
 	onDeleteNode?: (nodeId: string) => void;
 	onOpenAggregatorEditor?: (nodeId: string) => void;
+	/** Absent while the graph is not editable (test run in progress, read-only
+	 * page) — CommentNode renders its text as read-only then. */
+	onChangeCommentText?: (nodeId: string, text: string) => void;
+	/** Minimize/restore the note. Called with the *comment* node's id, from both
+	 * the anchor node's badge and the note's own minimize button. */
+	onToggleComment?: (commentNodeId: string) => void;
+	/** Attaches a note to this node, from the selected node's toolbar. Called
+	 * with the *anchor* node's id — the comment node does not exist yet. */
+	onAddComment?: (nodeId: string) => void;
 };
 
 export type WorkflowEdgeData = {
@@ -145,6 +177,7 @@ export type SystemWorkflowNode = Node<WorkflowNodeData, 'system'>;
 export type TriggerConnectionWorkflowNode = Node<WorkflowNodeData, 'trigger-connection'>;
 export type IfWorkflowNode = Node<WorkflowNodeData, 'if'>;
 export type LoopWorkflowNode = Node<WorkflowNodeData, 'loop'>;
+export type CommentWorkflowNode = Node<WorkflowNodeData, 'comment'>;
 
 export type WorkflowNodeModel =
 	| StartWorkflowNode
@@ -152,7 +185,8 @@ export type WorkflowNodeModel =
 	| SystemWorkflowNode
 	| TriggerConnectionWorkflowNode
 	| IfWorkflowNode
-	| LoopWorkflowNode;
+	| LoopWorkflowNode
+	| CommentWorkflowNode;
 
 export type WorkflowEdgeModel = Edge<WorkflowEdgeData, 'workflow-edge'>;
 
