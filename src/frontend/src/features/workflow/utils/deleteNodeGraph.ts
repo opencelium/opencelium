@@ -78,8 +78,15 @@ export function deleteNodeGraph(
     }),
   );
 
-  return {
-    nodes: dropOrphanedComments(nextNodes),
-    edges: [...filteredEdges, ...reconnectedEdges],
-  };
+  const remainingNodes = dropOrphanedComments(nextNodes);
+
+  // A joint pointing at the node just removed would be a dangling id — the
+  // canvas hides it and the save payload silently drops it, so clear it here
+  // instead and let the source node's leaf/"+" state update with it.
+  const survivingIds = new Set(remainingNodes.map((node) => node.id));
+  const nodesWithLiveJoints = remainingNodes.map((node) => node.data.jump && !survivingIds.has(node.data.jump)
+    ? { ...node, data: { ...node.data, jump: undefined } }
+    : node);
+
+  return { nodes: nodesWithLiveJoints, edges: [...filteredEdges, ...reconnectedEdges] };
 }

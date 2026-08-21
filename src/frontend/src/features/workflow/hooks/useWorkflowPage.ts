@@ -1,10 +1,11 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { addEdge } from '@xyflow/react';
 import type { Connection } from '@xyflow/react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
+import { message } from 'antd';
 import { createCommentNode } from '../utils/createCommentNode';
 import { findAnchoredComment } from '../utils/commentAnchor';
 import { centerOnWorkflowNode } from '../utils/centerOnWorkflowNode';
@@ -18,6 +19,7 @@ import { useWorkflowDragStart } from './useWorkflowDragStart';
 import { useWorkflowDragMove } from './useWorkflowDragMove';
 import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
+import { evaluateJointTargets } from '../utils/jumpValidator';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
@@ -46,13 +48,22 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const handleNodeDragStop = useWorkflowDragStop({ options, setNodes, setEdges,
     setIsDragging: setIsAnyNodeDragging, reactFlowInstance, dragSnapshot,
     positionLock: draggedPositionLockRef, multiDrag: multiDragRef,
-    clearPreview: clearAllDragPreviewState, commitFreeReposition });
+    clearPreview: clearAllDragPreviewState, commitFreeReposition,
+    onJointsRemoved: (count) => message.warning(t('joint.removedAfterMove', { count })) });
   const undoHistory = useWorkflowUndoHistory({ nodes, edges,
     fieldBindings: options.fieldBindings, isDragging: isAnyNodeDragging,
     setNodes, setEdges, onFieldBindingsChange: options.onFieldBindingsChange });
   const nodeUpdates = useWorkflowNodeUpdates(setNodes,
     () => setMethodEditor(null), () => setConditionEditor(null),
     () => setAggregatorEditor(null));
+
+  const [jointSourceId, setJointSourceId] = useState<string | null>(null);
+  const jointVerdicts = useMemo(
+    () => (jointSourceId
+      ? evaluateJointTargets(jointSourceId, nodes, edges, options.fieldBindings ?? [])
+      : undefined),
+    [jointSourceId, nodes, edges, options.fieldBindings],
+  );
 
   // Stable: the instance is read from the ref at call time, so every consumer
   // (command bridge, save-error highlighting) can hold on to one identity.
@@ -72,6 +83,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     edges,
     isAnyNodeDragging,
     sidebarAction,
+    jointSourceId,
+    jointVerdicts,
     contextMenu,
     historyOpen,
     methodEditor,
@@ -123,6 +136,24 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
     onCloseResponse: () => setResponseNodeId(null),
     onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); },
+    onStartJoint: (sourceNodeId: string) => {
+      setSidebarAction(null);
+      setContextMenu(null);
+      setJointSourceId(sourceNodeId);
+    },
+    onConfirmJoint: (targetNodeId: string) => {
+      if (!jointSourceId || !jointVerdicts?.get(targetNodeId)?.valid) return;
+      setNodes((current) => current.map((item) =>
+        item.id === jointSourceId ? { ...item, data: { ...item.data, jump: targetNodeId } } : item,
+      ));
+      setJointSourceId(null);
+    },
+    onCancelJoint: () => setJointSourceId(null),
+    onRemoveJoint: (nodeId: string) => {
+      setNodes((current) => current.map((item) =>
+        item.id === nodeId ? { ...item, data: { ...item.data, jump: undefined } } : item,
+      ));
+    },
     onAddStep: (
       kind: WorkflowAction['kind'],
       methodName?: string,

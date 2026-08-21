@@ -1,3 +1,4 @@
+import { theme as antdTheme } from 'antd';
 import { NavigationMenu } from './NavigationMenu';
 import {LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined} from "@ant-design/icons";
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
@@ -7,10 +8,15 @@ import {useTheme} from "@shared/theme/hooks/useTheme.tsx";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {useConfirm} from "@shared/ui/confirm/ConfirmDialogContext";
+import {AppLogo} from "@features/branding/AppLogo";
 
 export const Sidebar = () => {
     const { collapsed, toggleCollapsed } = useLayoutStore();
     const { theme } = useTheme();
+    // antd positions a submenu's expand arrow at `margin` from the item's right edge
+    // (`insetInlineEnd: token.margin` in its Menu style). Reading the same token keeps
+    // the logo on that gutter instead of a copied constant that could drift from it.
+    const { token: antdToken } = antdTheme.useToken();
     const { t: tCommon } = useI18n('common');
     const { logout } = useAuth();
     const confirm = useConfirm();
@@ -38,7 +44,7 @@ export const Sidebar = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: collapsed ? 'center' : 'flex-start',
-                padding: `0 ${collapsed ? '0' : '5px'} 0 ${collapsed ? 0 : '12px'}`,
+                padding: `0 ${collapsed ? 0 : antdToken.margin}px 0 ${collapsed ? 0 : 12}px`,
                 borderBottom: `1px solid ${theme.color.sidebar.border}`,
                 boxSizing: 'border-box',
             }}>
@@ -53,6 +59,18 @@ export const Sidebar = () => {
                         }
                     </Button>
                 </Tooltip>
+
+                {/* Only while expanded: the 50px collapsed rail has no room for a
+                    wordmark, and the toggle has to stay reachable. The header's right
+                    padding puts its right edge on the submenu arrows' gutter below. */}
+                {!collapsed && (
+                    <AppLogo
+                        height={24}
+                        surfaceColor={theme.color.sidebar.bg}
+                        style={{marginLeft: 'auto', maxWidth: 150}}
+                        testId="sidebar-logo"
+                    />
+                )}
             </div>
 
             {/* SCROLLABLE MENU */}
