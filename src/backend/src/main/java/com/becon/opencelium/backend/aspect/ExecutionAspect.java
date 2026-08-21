@@ -241,7 +241,7 @@ public class ExecutionAspect {
         execution.setEndTime(new Date());
         execution.setStatus(success ? "S" : "F");
         executionService.save(execution);
-        boolean hasLog = LogFileUtility.logFileExistForExecId(execId) && logDataService.findRootByExecutionId(execId).isPresent();
+        boolean hasLog = LogFileUtility.logFileExistForExecId(execId) && logDataService.hasDbRecords(execId);
         LastExecution le;
         if (lastExecutionService.existsBySchedulerId(execution.getScheduler().getId())) {
             le = lastExecutionService.findBySchedulerId(execution.getScheduler().getId());

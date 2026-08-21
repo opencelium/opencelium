@@ -23,7 +23,7 @@ public interface LogDataService {
 
     void bufferAndFlush(LogDataMng logDataMng);
 
-    Optional<LogDataMng> findRootByExecutionId(Long execId);
-
     Optional<LogDataDTO> toDto(LogDataMng metaData);
+
+    boolean hasDbRecords(long execId);
 }
