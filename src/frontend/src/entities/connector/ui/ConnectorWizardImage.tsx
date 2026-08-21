@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef, type ChangeEvent} from 'react'
+import {useEffect, useMemo, useRef, useState, type ChangeEvent} from 'react'
 import {useFormContext, useWatch} from 'react-hook-form'
 import type {Mode} from '@/engine/entity/EntityDefinition'
 import {resolveConnectorIconUrl} from '@entities/connector/model/iconUrl'
@@ -6,6 +6,7 @@ import {Icon} from '@shared/ui/primitives/Icon'
 import {Tooltip} from '@shared/ui/primitives/Tooltip'
 import {useConfirm} from '@shared/ui/confirm/ConfirmDialogContext'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
+import {ConnectorIconCropModal} from './ConnectorIconCropModal/ConnectorIconCropModal'
 
 const ACCEPT = 'image/png,image/jpeg'
 
@@ -115,6 +116,7 @@ export const ConnectorWizardImage = ({mode}: Props) => {
     const {t} = useI18n('entities')
     const confirm = useConfirm()
     const inputRef = useRef<HTMLInputElement>(null)
+    const [cropFile, setCropFile] = useState<File | null>(null)
 
     const iconValue = useWatch({name: 'icon'})
     const selected = Array.isArray(iconValue) ? iconValue[0] : iconValue
@@ -137,12 +139,17 @@ export const ConnectorWizardImage = ({mode}: Props) => {
 
     const handlePick = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0] ?? null
-        if (file) setValue('icon', file, {shouldDirty: true})
+        if (file) setCropFile(file)
         // Reset so picking the same file again still fires onChange.
         event.target.value = ''
     }
 
     const openPicker = () => inputRef.current?.click()
+
+    const handleCropConfirm = (file: File) => {
+        setValue('icon', file, {shouldDirty: true})
+        setCropFile(null)
+    }
 
     const handleDelete = async () => {
         const ok = await confirm({
@@ -221,6 +228,18 @@ export const ConnectorWizardImage = ({mode}: Props) => {
                     data-testid="connector-icon-input"
                 />
             )}
+
+            <ConnectorIconCropModal
+                key={cropFile ? `${cropFile.name}-${cropFile.lastModified}` : 'closed'}
+                file={cropFile}
+                onCancel={() => setCropFile(null)}
+                onConfirm={handleCropConfirm}
+                title={t('connector.fields.icon.crop.title')}
+                zoomLabel={t('connector.fields.icon.crop.zoom')}
+                cancelLabel={t('connector.fields.icon.crop.cancel')}
+                confirmLabel={t('connector.fields.icon.crop.apply')}
+                instruction={t('connector.fields.icon.crop.instruction')}
+            />
 
             <style>{`
                 .oc-connector-icon-tile--empty:hover,
