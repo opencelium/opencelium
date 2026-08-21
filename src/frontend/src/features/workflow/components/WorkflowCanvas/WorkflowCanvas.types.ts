@@ -27,6 +27,7 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	jointVerdicts?: Map<string, JointTargetVerdict>;
 	onConfirmJoint?: (targetNodeId: string) => void;
 	onCancelJoint?: () => void;
+	onAddJoint?: (nodeId: string) => void;
 	onRemoveJoint?: (nodeId: string) => void;
 	onNodesChange: OnNodesChange<WorkflowNodeModel>;
 	onEdgesChange: OnEdgesChange<WorkflowEdgeModel>;

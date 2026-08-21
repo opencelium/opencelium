@@ -18,5 +18,4 @@ export type WorkflowSidebarProps = {
 		methodOperation?: InvokerOperation,
 		triggerConnection?: WorkflowTriggerConnectionRef,
 	) => void;
-	onStartJoint?: (sourceNodeId: string) => void;
 };
