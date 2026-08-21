@@ -45,5 +45,7 @@
     "mustFile": "Muss eine Datei sein",
     "fileTooLarge": "Datei ist zu groß (max. {{max}} Bytes)",
     "failedAsyncOptions": "Optionen konnten nicht geladen werden"
-  }
+  },
+  "showMore": "Mehr anzeigen",
+  "showLess": "Weniger anzeigen"
 }

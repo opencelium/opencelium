@@ -28,10 +28,14 @@ import { showApiError } from './handleApiError'
 
 const lastCall = () => notificationError.mock.calls.at(-1)?.[0] as {
     message: string
-    description: string
+    description: { props: { text: string } }
     duration: number
     key: string
 }
+
+// The reason line is rendered by ErrorNotificationText (clamped, expandable) rather
+// than handed to antd as a string, so the text under test lives in its props.
+const lastDescription = () => lastCall().description.props.text
 
 beforeEach(() => {
     notificationError.mockClear()
@@ -43,7 +47,7 @@ describe('showApiError', () => {
 
         expect(lastCall()).toMatchObject({
             message: 'Error',
-            description: 'The requested resource was not found.',
+            description: { props: { text: 'The requested resource was not found.' } },
             // 0 is antd's "never auto-close": the close icon is the only way out.
             duration: 0,
         })
@@ -58,7 +62,7 @@ describe('showApiError', () => {
     it('falls back to the namespace default message', () => {
         showApiError({ errorSource: null, group: 'api', transKey: 'somethingUnmapped' })
 
-        expect(lastCall().description).toBe('An unexpected error occurred.')
+        expect(lastDescription()).toBe('An unexpected error occurred.')
         expect(lastCall().duration).toBe(0)
     })
 
@@ -68,7 +72,7 @@ describe('showApiError', () => {
             message: 'Connector name must be unique',
         })
 
-        expect(lastCall().description).toBe('Connector name must be unique')
+        expect(lastDescription()).toBe('Connector name must be unique')
     })
 
     it('prefers copy written for a backend code over echoing the bare code', () => {
@@ -77,21 +81,21 @@ describe('showApiError', () => {
             message: 'CATEGORY_NOT_FOUND',
         })
 
-        expect(lastCall().description).toBe('This category was not found.')
+        expect(lastDescription()).toBe('This category was not found.')
     })
 
     it('shows the API message when no copy exists for it at all', () => {
         showApiError({ errorSource: null, namespace: 'error', transKey: 'no.copy.at.all',
             message: 'Operator (index=1, type=loop) has null or empty expression' })
 
-        expect(lastCall().description)
+        expect(lastDescription())
             .toBe('Operator (index=1, type=loop) has null or empty expression')
     })
 
     it('keeps translated copy when the response explained nothing', () => {
         showApiError({ errorSource: null, group: 'api', transKey: 'notFound' })
 
-        expect(lastCall().description).toBe('The requested resource was not found.')
+        expect(lastDescription()).toBe('The requested resource was not found.')
     })
 
     it('leads with the operation that failed and keeps the reason underneath', () => {
@@ -102,7 +106,7 @@ describe('showApiError', () => {
         })
 
         expect(lastCall().message).toBe('Could not load Connectors')
-        expect(lastCall().description).toBe('Connector name must be unique')
+        expect(lastDescription()).toBe('Connector name must be unique')
     })
 
     it('names a path with no entity behind it by its own segment', () => {
@@ -137,6 +141,6 @@ describe('showApiError', () => {
     it('still reports an unknown error group', () => {
         showApiError({ errorSource: null, group: 'nope' as 'api', transKey: 'x' })
 
-        expect(lastCall().description).toBe('Unknown error group')
+        expect(lastDescription()).toBe('Unknown error group')
     })
 })
