@@ -2,14 +2,14 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.enums.RelationalOperator;
-import com.becon.opencelium.backend.execution.oc721.Enhancement;
 import com.becon.opencelium.backend.execution.oc721.Extractor;
-import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.reference.ReferenceScanner;
+import com.becon.opencelium.backend.resource.execution.EnhancementEx;
+import com.becon.opencelium.backend.resource.execution.FieldBindEx;
 import com.becon.opencelium.backend.scriptengine.LanguageType;
 import com.becon.opencelium.backend.scriptengine.ScriptEngine;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
@@ -30,7 +30,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<Integer, Pagination> pagination;
     private final Extractor refExtractor;
     private final List<Loop> loops = new ArrayList<>();
-    private final List<FieldBind> fieldBind;
+    private final List<FieldBindEx> fieldBind;
     private final List<Operation> operations = new ArrayList<>();
     private final ScriptExecutionManager scriptExecutionManager;
     private Integer currentConnectorId;
@@ -38,7 +38,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
     public ExecutionManagerImpl(
             Map<String, Object> webhookVars,
-            List<FieldBind> fieldBind,
+            List<FieldBindEx> fieldBind,
             Map<Integer, Map<String, String>> requestData,
             Map<Integer, RestTemplate> restTemplate,
             Map<Integer, Pagination> pagination
@@ -111,9 +111,9 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
     @Override
     public Object executeScript(String bindId) {
-        Enhancement enhancement = fieldBind.stream()
+        EnhancementEx enhancement = fieldBind.stream()
                 .filter(fb -> Objects.equals(bindId, fb.getBindId()))
-                .map(FieldBind::getEnhance).findFirst()
+                .map(FieldBindEx::getEnhance).findFirst()
                 .orElseThrow(() -> new RuntimeException("Non existing fieldBind id 'bindId' = " + bindId));
 
         ScriptEngine scriptEngine = scriptExecutionManager.resolveEngine(LanguageType.getByCode(enhancement.getLang()))
