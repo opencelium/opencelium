@@ -7,6 +7,7 @@
     "close": "Schließen",
     "ok": "Ok",
     "delete": "Löschen",
+    "addJoint": "Verbindung hinzufügen",
     "removeJoint": "Verbindung entfernen",
     "duplicate": "Duplizieren",
     "edit": "Bearbeiten",
@@ -133,10 +134,6 @@
     "addHttpRequest": {
       "title": "HTTP-Anfrage hinzufügen",
       "description": "Fügen Sie eine einfache HTTP-Anfrage hinzu und geben Sie Ihre URL ein."
-    },
-    "addJoint": {
-      "title": "Joint hinzufügen",
-      "description": "Verbindet zwei Knoten miteinander."
     },
     "operatorOption": {
       "if": {
@@ -425,32 +422,75 @@
       "operators": {
         "for": {
           "description": "Iteriert durch ein Array.",
-          "args": [{ "code": "o1", "text": "Ein Array, durch das iteriert wird." }],
+          "args": [
+            {
+              "code": "o1",
+              "text": "Ein Array, durch das iteriert wird."
+            }
+          ],
           "examples": [
-            { "code": "o1 = [\"a\", \"b\", \"c\"]", "result": "Iteriert durch \"a\", \"b\", \"c\"" },
-            { "code": "o1 = [1, 2, 3]", "result": "Iteriert durch 1, 2, 3" },
-            { "code": "o1 = []", "result": "Führt keine Iterationen aus" }
+            {
+              "code": "o1 = [\"a\", \"b\", \"c\"]",
+              "result": "Iteriert durch \"a\", \"b\", \"c\""
+            },
+            {
+              "code": "o1 = [1, 2, 3]",
+              "result": "Iteriert durch 1, 2, 3"
+            },
+            {
+              "code": "o1 = []",
+              "result": "Führt keine Iterationen aus"
+            }
           ]
         },
         "forin": {
           "description": "Iteriert durch die Eigenschaften eines Objekts.",
-          "args": [{ "code": "o1", "text": "Ein Objekt, dessen Eigenschaften iteriert werden sollen." }],
+          "args": [
+            {
+              "code": "o1",
+              "text": "Ein Objekt, dessen Eigenschaften iteriert werden sollen."
+            }
+          ],
           "examples": [
-            { "code": "o1 = {\"name\":\"Hob\",\"age\":123}", "result": "Iteriert durch die Eigenschaften \"name\", \"age\"" },
-            { "code": "o1 = {\"a\":1,\"b\":2}", "result": "Iteriert durch die Eigenschaften \"a\", \"b\"" },
-            { "code": "o1 = {}", "result": "Führt keine Iterationen aus" }
+            {
+              "code": "o1 = {\"name\":\"Hob\",\"age\":123}",
+              "result": "Iteriert durch die Eigenschaften \"name\", \"age\""
+            },
+            {
+              "code": "o1 = {\"a\":1,\"b\":2}",
+              "result": "Iteriert durch die Eigenschaften \"a\", \"b\""
+            },
+            {
+              "code": "o1 = {}",
+              "result": "Führt keine Iterationen aus"
+            }
           ]
         },
         "SplitString": {
           "description": "Teilt eine Zeichenkette anhand eines Trennzeichens und iteriert durch das resultierende Array.",
           "args": [
-            { "code": "o1", "text": "Eine zu teilende Zeichenkette." },
-            { "code": "o2", "text": "Ein Trennzeichen." }
+            {
+              "code": "o1",
+              "text": "Eine zu teilende Zeichenkette."
+            },
+            {
+              "code": "o2",
+              "text": "Ein Trennzeichen."
+            }
           ],
           "examples": [
-            { "code": "o1 = \"a,b,c\", o2 = \",\"", "result": "Iteriert durch \"a\", \"b\", \"c\"" },
-            { "code": "o1 = \"one|two|three\", o2 = \"|\"", "result": "Iteriert durch \"one\", \"two\", \"three\"" },
-            { "code": "o1 = \"abc\", o2 = \",\"", "result": "Iteriert einmal durch \"abc\"" }
+            {
+              "code": "o1 = \"a,b,c\", o2 = \",\"",
+              "result": "Iteriert durch \"a\", \"b\", \"c\""
+            },
+            {
+              "code": "o1 = \"one|two|three\", o2 = \"|\"",
+              "result": "Iteriert durch \"one\", \"two\", \"three\""
+            },
+            {
+              "code": "o1 = \"abc\", o2 = \",\"",
+              "result": "Iteriert einmal durch \"abc\""
+            }
           ]
         }
       }

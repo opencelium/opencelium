@@ -18,6 +18,7 @@ export function NodeShell({
 	children,
 }: NodeShellProps) {
 	const onAddStep = data.onAddStep;
+	const isMethodNode = data.kind === 'connector' || data.kind === 'system';
 	const jointRejection = useJointRejectionMessage(data.jointInvalidReason, data.jointBlockingLabel);
 	const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
 		if (data.dragGhost || data.dropPlaceholder) return;
@@ -81,9 +82,14 @@ export function NodeShell({
 					/* Only offered while the node has no note: an existing one is shown or
 					   hidden from its own badge, so this action never no-ops. */
 					canComment={!data.anchoredComment && !!data.onAddComment}
+					/* Only a method can be a joint's source, and only one joint per
+					   node — an existing one is replaced from its own remove action,
+					   so these two are never offered together. */
+					canAddJoint={isMethodNode && !data.jump && !!data.onAddJoint}
 					canRemoveJoint={Boolean(data.jump) && !!data.onRemoveJoint}
 					onDelete={() => data.onDeleteNode?.(id)}
 					onComment={() => data.onAddComment?.(id)}
+					onAddJoint={() => data.onAddJoint?.(id)}
 					onRemoveJoint={() => data.onRemoveJoint?.(id)}
 				/>
 			)}

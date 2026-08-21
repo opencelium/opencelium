@@ -44,6 +44,13 @@
       "hint": "PNG oder JPG",
       "replace": "Symbol ersetzen",
       "delete": "Symbol löschen",
+      "crop": {
+        "title": "Konnektor-Symbol zuschneiden",
+        "zoom": "Zoom",
+        "cancel": "Abbrechen",
+        "apply": "Zuschnitt anwenden",
+        "instruction": "Verschieben Sie das Quadrat, um den Symbolbereich auszuwählen"
+      },
       "confirmDelete": {
         "title": "Logo entfernen?",
         "message": "Dies kann nicht widerrufen werden."

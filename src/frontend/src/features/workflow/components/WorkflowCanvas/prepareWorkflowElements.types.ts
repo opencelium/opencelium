@@ -8,7 +8,7 @@ export type PrepareWorkflowParams = Pick<
 	WorkflowCanvasProps,
 	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' |
 	'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor' |
-	'jointSourceId' | 'jointVerdicts' | 'onRemoveJoint' |
+	'jointSourceId' | 'jointVerdicts' | 'onAddJoint' | 'onRemoveJoint' |
 	'onChangeCommentText' | 'onToggleComment' | 'onAddComment'
 > & {
 	cache?: PrepareWorkflowCache;
@@ -24,6 +24,7 @@ type NodeCacheEntry = {
 	onOpenContextMenu: PrepareWorkflowParams['onOpenContextMenu'];
 	onDeleteNode: PrepareWorkflowParams['onDeleteNode'];
 	onOpenAggregatorEditor: PrepareWorkflowParams['onOpenAggregatorEditor'];
+	onAddJoint: PrepareWorkflowParams['onAddJoint'];
 	onRemoveJoint: PrepareWorkflowParams['onRemoveJoint'];
 	onChangeCommentText: PrepareWorkflowParams['onChangeCommentText'];
 	onToggleComment: PrepareWorkflowParams['onToggleComment'];

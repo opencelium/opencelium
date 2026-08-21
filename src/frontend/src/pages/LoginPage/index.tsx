@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import type { Location } from 'react-router-dom'
 import { useAuth } from '@features/auth/useAuth'
 import { LoginForm } from '@features/auth/ui/LoginForm'
-import logoImage from '@assets/images/login_logo.png'
+import { AppLogo } from '@features/branding/AppLogo'
 import { useAppDispatch, useAppSelector } from '@shared/lib/storeHooks'
 import { selectIntentionalLogout } from '@entities/auth/model/authSelectors'
 import { authActions } from '@entities/auth/model/authSlice'
@@ -57,11 +57,7 @@ export default function LoginPage() {
                         gap: 24,
                     }}
                 >
-                    <img
-                        src={logoImage}
-                        alt="OpenCelium"
-                        style={{ height: 56, width: 'auto' }}
-                    />
+                    <AppLogo />
                     <LoginForm />
                 </div>
             </div>
