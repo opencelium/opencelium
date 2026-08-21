@@ -32,19 +32,16 @@
   },
   "customTheme": {
     "title": "Custom theme",
-    "description": "Pick your four main colors — primary, accent, neutral tone and sidebar. A full light and dark theme is generated from them and added to the theme list.",
+    "description": "Pick your four main colors — primary, accent, neutral tone and sidebar. A full light and dark theme is generated from them and applied for every user; anyone who picked a theme of their own keeps it.",
     "primary": "Primary color",
     "accent": "Accent color",
     "neutral": "Neutral tone",
     "sidebar": "Sidebar color",
-    "apply": "Apply custom theme",
     "remove": "Remove custom theme",
-    "applied": "Custom theme applied",
     "removed": "Custom theme removed"
   },
   "systemTheme": {
-    "description": "Save these colors as the system theme so every user gets them by default. Anyone who picked a theme of their own keeps it.",
-    "save": "Save for all users",
+    "save": "Apply for all users",
     "reset": "Reset system theme",
     "use": "Use system theme",
     "saved": "System theme saved for all users",
@@ -55,6 +52,32 @@
     "confirmReset": {
       "title": "Reset system theme?",
       "message": "The saved colors are deleted and every user falls back to the default theme. Users with a theme of their own are not affected."
+    }
+  },
+  "systemLogo": {
+    "title": "Application logo",
+    "description": "Replace the OpenCelium logo with your own for every user. It is shown in the navigation menu and on the login screen, so users see it before they sign in.",
+    "hint": "PNG or JPG, up to 5 MB. A wide logo on a transparent background works best — the same file is shown on both the light and the dark theme.",
+    "usingDefault": "No logo uploaded — every user sees the default OpenCelium logo.",
+    "upload": "Upload logo",
+    "replace": "Replace logo",
+    "remove": "Reset to default logo",
+    "saved": "Logo saved for all users",
+    "saveFailed": "The logo could not be uploaded",
+    "removed": "Logo reset to the default",
+    "removeFailed": "The logo could not be reset",
+    "invalidType": "The logo must be a PNG or JPG file",
+    "tooLarge": "The logo must be smaller than 5 MB",
+    "confirmRemove": {
+      "title": "Reset to the default logo?",
+      "message": "The uploaded logo is deleted and every user sees the OpenCelium logo again."
+    },
+    "crop": {
+      "title": "Crop logo",
+      "zoom": "Zoom",
+      "cancel": "Cancel",
+      "apply": "Apply crop",
+      "instruction": "Move the frame to trim the area around your logo"
     }
   }
 }

@@ -1,4 +1,4 @@
-.connectorIconCropViewport {
+.imageCropViewport {
     position: relative;
     width: 320px;
     height: 320px;
@@ -14,13 +14,13 @@
     background-position: 0 0, 0 10px, 10px -10px, -10px 0;
 }
 
-.connectorIconCropViewport img {
+.imageCropViewport img {
     max-width: none;
     user-select: none;
     pointer-events: none;
 }
 
-.connectorIconCropSelection {
+.imageCropSelection {
     border: 2px solid #fff;
     box-sizing: border-box;
     box-shadow: 0 0 0 999px rgb(0 0 0 / 58%);
@@ -28,34 +28,34 @@
     touch-action: none;
 }
 
-.connectorIconCropGrid {
+.imageCropGrid {
     position: absolute;
     border-color: rgb(255 255 255 / 55%);
 }
 
-.connectorIconCropGridVertical {
+.imageCropGridVertical {
     top: 0;
     bottom: 0;
     border-left: 1px solid;
 }
 
-.connectorIconCropGridHorizontal {
+.imageCropGridHorizontal {
     left: 0;
     right: 0;
     border-top: 1px solid;
 }
 
-.connectorIconCropGridVertical.connectorIconCropGridFirst { left: 33.33%; }
-.connectorIconCropGridVertical.connectorIconCropGridSecond { left: 66.66%; }
-.connectorIconCropGridHorizontal.connectorIconCropGridFirst { top: 33.33%; }
-.connectorIconCropGridHorizontal.connectorIconCropGridSecond { top: 66.66%; }
+.imageCropGridVertical.imageCropGridFirst { left: 33.33%; }
+.imageCropGridVertical.imageCropGridSecond { left: 66.66%; }
+.imageCropGridHorizontal.imageCropGridFirst { top: 33.33%; }
+.imageCropGridHorizontal.imageCropGridSecond { top: 66.66%; }
 
-.connectorIconCropInstruction {
+.imageCropInstruction {
     margin-bottom: 12px;
     color: var(--color-text-secondary);
     font-size: 13px;
     text-align: center;
 }
 
-.connectorIconCropZoom { display: block; }
-.connectorIconCropZoom > span { display: block; margin-bottom: 4px; }
+.imageCropZoom { display: block; }
+.imageCropZoom > span { display: block; margin-bottom: 4px; }

@@ -1,5 +1,5 @@
 import { baseApi } from '@shared/api/baseApi'
-import type { SystemSettingDTO, SystemSettingName } from '@entities/systemSetting/model/types'
+import type { AppLogoValue, SystemSettingDTO, SystemSettingName } from '@entities/systemSetting/model/types'
 
 /**
  * No cache tags here: `baseApi` declares no `tagTypes`, so RTK Query would ignore them
@@ -24,6 +24,31 @@ export const systemSettingApi = baseApi.injectEndpoints({
                 body: { value },
             }),
         }),
+        /**
+         * `app_logo` is written as a file, not JSON — a PUT of that name is rejected by
+         * the backend (RESERVED_SYSTEM_SETTING) so its row and its stored file cannot
+         * drift apart. Content-Type is left unset on purpose: `baseQuery` detects the
+         * FormData body and lets the browser add the multipart boundary.
+         *
+         * `ignoreError` because the caller reports the failure itself, naming the file
+         * rules the backend rejected on; the error bus would toast a generic one beside it.
+         */
+        uploadSystemLogo: b.mutation<SystemSettingDTO<AppLogoValue>, File>({
+            query: file => {
+                const body = new FormData()
+                body.append('file', file)
+                return { url: '/system-setting/app_logo', method: 'POST', body }
+            },
+            extraOptions: { ignoreError: true },
+        }),
+        /**
+         * Its own endpoint rather than `deleteSystemSetting('app_logo')`: this one also
+         * deletes the stored file, and it reports its failure through the caller.
+         */
+        deleteSystemLogo: b.mutation<void, void>({
+            query: () => ({ url: '/system-setting/app_logo', method: 'DELETE' }),
+            extraOptions: { ignoreError: true },
+        }),
         deleteSystemSetting: b.mutation<void, SystemSettingName>({
             query: name => ({
                 url: `/system-setting/${name}`,
@@ -36,5 +61,7 @@ export const systemSettingApi = baseApi.injectEndpoints({
 export const {
     useGetSystemSettingQuery,
     useSaveSystemSettingMutation,
+    useUploadSystemLogoMutation,
+    useDeleteSystemLogoMutation,
     useDeleteSystemSettingMutation,
 } = systemSettingApi

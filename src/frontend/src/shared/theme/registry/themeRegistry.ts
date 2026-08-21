@@ -1,5 +1,4 @@
 import type { SidebarSeed, ThemeFontFamily } from '@shared/theme/buildTheme'
-import { createAntPalette } from '@shared/theme/palette/antPalette'
 import { CI_SEEDS, createCiPalette } from '@shared/theme/palette/ciPalette'
 import { createCustomPalette } from '@shared/theme/palette/customPalette'
 import type { Palette } from '@shared/theme/palette/types'
@@ -95,21 +94,6 @@ themeRegistry.register({
     palette: createCiPalette('dark'),
     fontFamily: CI_FONT,
     sidebar: CI_SIDEBAR,
-})
-
-themeRegistry.register({
-    id: 'ant-light',
-    label: 'Light',
-    family: 'ant',
-    mode: 'light',
-    palette: createAntPalette('light'),
-})
-themeRegistry.register({
-    id: 'ant-dark',
-    label: 'Dark',
-    family: 'ant',
-    mode: 'dark',
-    palette: createAntPalette('dark'),
 })
 
 // A previously saved user theme re-registers itself on startup so it shows up

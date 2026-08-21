@@ -1,35 +1,26 @@
 import {useMemo, useRef, useState, type PointerEvent as ReactPointerEvent} from 'react'
 import {Button, Modal, Slider} from 'antd'
-import type {ConnectorIconCropModalProps} from './ConnectorIconCropModal.types'
-import './ConnectorIconCropModal.css'
+import type {ImageCropDialogProps} from './ImageCropDialog.types'
+import {
+    constrainPosition,
+    getCropRect,
+    getInitialPosition,
+    getLayout,
+    resolveRatio,
+    type Position,
+    type Size,
+} from './imageCropGeometry'
+import './ImageCropDialog.css'
 
-const CROP_SIZE = 320
-const OUTPUT_SIZE = 512
-
-type Size = {width: number; height: number}
-type Position = {x: number; y: number}
-
-const getLayout = (image: Size, zoom: number) => {
-    const displayScale = Math.min(CROP_SIZE / image.width, CROP_SIZE / image.height)
-    const width = image.width * displayScale
-    const height = image.height * displayScale
-    const left = (CROP_SIZE - width) / 2
-    const top = (CROP_SIZE - height) / 2
-    const cropSize = Math.min(width, height) / zoom
-    return {displayScale, width, height, left, top, cropSize}
-}
-
-const constrainPosition = (position: Position, image: Size, zoom: number): Position => {
-    const layout = getLayout(image, zoom)
-    return {
-        x: Math.max(layout.left, Math.min(layout.left + layout.width - layout.cropSize, position.x)),
-        y: Math.max(layout.top, Math.min(layout.top + layout.height - layout.cropSize, position.y)),
-    }
-}
-
-export const ConnectorIconCropModal = ({
-    file, onCancel, onConfirm, title, zoomLabel, cancelLabel, confirmLabel, instruction,
-}: ConnectorIconCropModalProps) => {
+/**
+ * Drag-and-zoom crop over a picked image file, resolving to a new `File` of the selected
+ * area. Shared by the connector icon (square) and the application logo (`aspect: 'image'`).
+ * Copy is passed in already translated so the dialog stays i18n-free; the geometry lives
+ * in `imageCropGeometry` so the part worth testing is testable.
+ */
+export const ImageCropDialog = ({
+    file, aspect = 1, onCancel, onConfirm, title, zoomLabel, cancelLabel, confirmLabel, instruction,
+}: ImageCropDialogProps) => {
     const imageRef = useRef<HTMLImageElement>(null)
     const dragRef = useRef<{pointerX: number; pointerY: number; position: Position} | null>(null)
     const [imageSize, setImageSize] = useState<Size | null>(null)
@@ -37,20 +28,21 @@ export const ConnectorIconCropModal = ({
     const [cropPosition, setCropPosition] = useState<Position>({x: 0, y: 0})
     const [saving, setSaving] = useState(false)
     const objectUrl = useMemo(() => file ? URL.createObjectURL(file) : null, [file])
-    const layout = imageSize ? getLayout(imageSize, zoom) : null
+    const ratio = imageSize ? resolveRatio(imageSize, aspect) : 1
+    const layout = imageSize ? getLayout(imageSize, zoom, ratio) : null
 
     const handleZoom = (value: number) => {
         if (imageSize) {
-            const oldLayout = getLayout(imageSize, zoom)
-            const newLayout = getLayout(imageSize, value)
+            const oldLayout = getLayout(imageSize, zoom, ratio)
+            const newLayout = getLayout(imageSize, value, ratio)
             const center = {
-                x: cropPosition.x + oldLayout.cropSize / 2,
-                y: cropPosition.y + oldLayout.cropSize / 2,
+                x: cropPosition.x + oldLayout.cropWidth / 2,
+                y: cropPosition.y + oldLayout.cropHeight / 2,
             }
             setCropPosition(constrainPosition({
-                x: center.x - newLayout.cropSize / 2,
-                y: center.y - newLayout.cropSize / 2,
-            }, imageSize, value))
+                x: center.x - newLayout.cropWidth / 2,
+                y: center.y - newLayout.cropHeight / 2,
+            }, imageSize, value, ratio))
         }
         setZoom(value)
     }
@@ -65,7 +57,7 @@ export const ConnectorIconCropModal = ({
         setCropPosition(constrainPosition({
             x: dragRef.current.position.x + event.clientX - dragRef.current.pointerX,
             y: dragRef.current.position.y + event.clientY - dragRef.current.pointerY,
-        }, imageSize, zoom))
+        }, imageSize, zoom, ratio))
     }
 
     const handleConfirm = async () => {
@@ -73,17 +65,17 @@ export const ConnectorIconCropModal = ({
         if (!file || !image || !imageSize) return
         setSaving(true)
         try {
+            const rect = getCropRect(imageSize, zoom, ratio, cropPosition)
             const canvas = document.createElement('canvas')
-            canvas.width = OUTPUT_SIZE
-            canvas.height = OUTPUT_SIZE
+            canvas.width = rect.outputWidth
+            canvas.height = rect.outputHeight
             const context = canvas.getContext('2d')
             if (!context) return
 
-            const currentLayout = getLayout(imageSize, zoom)
-            const sourceSize = currentLayout.cropSize / currentLayout.displayScale
-            const sourceX = (cropPosition.x - currentLayout.left) / currentLayout.displayScale
-            const sourceY = (cropPosition.y - currentLayout.top) / currentLayout.displayScale
-            context.drawImage(image, sourceX, sourceY, sourceSize, sourceSize, 0, 0, OUTPUT_SIZE, OUTPUT_SIZE)
+            context.drawImage(
+                image, rect.sourceX, rect.sourceY, rect.sourceWidth, rect.sourceHeight,
+                0, 0, canvas.width, canvas.height,
+            )
 
             const type = file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png'
             const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, type, 0.92))
@@ -102,7 +94,7 @@ export const ConnectorIconCropModal = ({
                     {confirmLabel}
                 </Button>,
             ]}>
-            <div className="connectorIconCropViewport">
+            <div className="imageCropViewport">
                 {objectUrl && (
                     <img ref={imageRef} src={objectUrl} alt="" draggable={false}
                         onLoad={event => {
@@ -110,12 +102,8 @@ export const ConnectorIconCropModal = ({
                                 width: event.currentTarget.naturalWidth,
                                 height: event.currentTarget.naturalHeight,
                             }
-                            const initialLayout = getLayout(size, 1)
                             setImageSize(size)
-                            setCropPosition({
-                                x: initialLayout.left + (initialLayout.width - initialLayout.cropSize) / 2,
-                                y: initialLayout.top + (initialLayout.height - initialLayout.cropSize) / 2,
-                            })
+                            setCropPosition(getInitialPosition(size, resolveRatio(size, aspect)))
                             URL.revokeObjectURL(event.currentTarget.src)
                         }}
                         style={{
@@ -131,19 +119,19 @@ export const ConnectorIconCropModal = ({
                         onPointerCancel={() => { dragRef.current = null }}
                         style={{
                             position: 'absolute', left: cropPosition.x, top: cropPosition.y,
-                            width: layout.cropSize, height: layout.cropSize,
+                            width: layout.cropWidth, height: layout.cropHeight,
                         }}
-                        className="connectorIconCropSelection"
+                        className="imageCropSelection"
                     >
-                        <span className="connectorIconCropGrid connectorIconCropGridVertical connectorIconCropGridFirst" />
-                        <span className="connectorIconCropGrid connectorIconCropGridVertical connectorIconCropGridSecond" />
-                        <span className="connectorIconCropGrid connectorIconCropGridHorizontal connectorIconCropGridFirst" />
-                        <span className="connectorIconCropGrid connectorIconCropGridHorizontal connectorIconCropGridSecond" />
+                        <span className="imageCropGrid imageCropGridVertical imageCropGridFirst" />
+                        <span className="imageCropGrid imageCropGridVertical imageCropGridSecond" />
+                        <span className="imageCropGrid imageCropGridHorizontal imageCropGridFirst" />
+                        <span className="imageCropGrid imageCropGridHorizontal imageCropGridSecond" />
                     </div>
                 )}
             </div>
-            <div className="connectorIconCropInstruction">{instruction}</div>
-            <label className="connectorIconCropZoom">
+            <div className="imageCropInstruction">{instruction}</div>
+            <label className="imageCropZoom">
                 <span>{zoomLabel}</span>
                 <Slider min={1} max={3} step={0.01} value={zoom} onChange={handleZoom} />
             </label>

@@ -21,10 +21,13 @@ import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 
 /**
- * The admin half of the theme editor: writes the edited seeds to `theme_colors` so every
- * user picks them up, or deletes the setting so everyone falls back to the built-in
- * default. Both apply locally on success, which is visible immediately unless this admin
- * has a personal theme of their own (see `isPersonalThemeActive`).
+ * The theme editor's actions: writes the edited seeds to `theme_colors` so every user
+ * picks them up, or deletes the setting so everyone falls back to the built-in default.
+ *
+ * A save also switches this admin onto the saved theme, which is what lets one button
+ * both apply the colors and publish them — without it, an admin holding a personal theme
+ * would save and see nothing change (the case `isPersonalThemeActive` still describes for
+ * a theme picked *after* a save).
  */
 export function useSystemThemeAdmin(seeds: CustomThemeSeeds) {
     const { t: tEntities } = useI18n('entities')
@@ -48,6 +51,7 @@ export function useSystemThemeAdmin(seeds: CustomThemeSeeds) {
             await saveSetting({ name: 'theme_colors', value: seeds }).unwrap()
             applySystemThemeSeeds(seeds)
             setIsConfigured(true)
+            setTheme(SYSTEM_THEME_IDS[themeMode])
             message.success(tEntities('ui.systemTheme.saved'))
         } catch {
             notifyError(tEntities('ui.systemTheme.saveFailed'))

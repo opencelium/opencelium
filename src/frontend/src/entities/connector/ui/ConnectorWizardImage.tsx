@@ -6,7 +6,7 @@ import {Icon} from '@shared/ui/primitives/Icon'
 import {Tooltip} from '@shared/ui/primitives/Tooltip'
 import {useConfirm} from '@shared/ui/confirm/ConfirmDialogContext'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
-import {ConnectorIconCropModal} from './ConnectorIconCropModal/ConnectorIconCropModal'
+import {ImageCropDialog} from '@shared/ui/image-crop/ImageCropDialog'
 
 const ACCEPT = 'image/png,image/jpeg'
 
@@ -229,7 +229,8 @@ export const ConnectorWizardImage = ({mode}: Props) => {
                 />
             )}
 
-            <ConnectorIconCropModal
+            {/* Square: the icon is drawn on a disc everywhere it appears. */}
+            <ImageCropDialog
                 key={cropFile ? `${cropFile.name}-${cropFile.lastModified}` : 'closed'}
                 file={cropFile}
                 onCancel={() => setCropFile(null)}

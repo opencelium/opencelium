@@ -13,3 +13,19 @@ export type SystemSettingDTO<TValue = unknown> = {
     value: TValue
     updatedAt: string
 }
+
+/**
+ * Value of the `app_logo` setting. `filename` is the backend's internal storage key and
+ * of no use to a client; `url` is the public `./storage/files/<uuid>.<ext>` path to put
+ * in an `<img src>`. Validated on read like every other opaque setting value.
+ */
+export type AppLogoValue = {
+    filename: string
+    url: string
+}
+
+export const isAppLogoValue = (value: unknown): value is AppLogoValue => {
+    if (typeof value !== 'object' || value === null) return false
+    const { url } = value as { url?: unknown }
+    return typeof url === 'string' && url.trim().length > 0
+}

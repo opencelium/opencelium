@@ -7,11 +7,14 @@ const CUSTOM_SEEDS_STORAGE_KEY = 'oc_custom_theme_seeds'
 // and on the login screen, where the endpoint needs a token nobody has yet.
 const SYSTEM_SEEDS_STORAGE_KEY = 'oc_system_theme_seeds'
 
-// Values stored before the theme registry existed (binary light/dark switch).
-// They map to the product-default (CI) family, keeping the mode preference.
+// Ids that no longer resolve: the pre-registry binary light/dark switch, and the
+// retired Ant Design themes. Both map onto the product-default (CI) family so a stored
+// choice keeps its light/dark intent instead of silently falling back to 'device'.
 const LEGACY_IDS: Record<string, string> = {
     light: 'ci-light',
     dark: 'ci-dark',
+    'ant-light': 'ci-light',
+    'ant-dark': 'ci-dark',
 }
 
 export function readStoredThemeId(): string | null {
@@ -37,10 +40,6 @@ function readSeeds(key: string): CustomThemeSeeds | null {
 
 export function readCustomThemeSeeds(): CustomThemeSeeds | null {
     return readSeeds(CUSTOM_SEEDS_STORAGE_KEY)
-}
-
-export function storeCustomThemeSeeds(seeds: CustomThemeSeeds) {
-    localStorage.setItem(CUSTOM_SEEDS_STORAGE_KEY, JSON.stringify(seeds))
 }
 
 export function clearCustomThemeSeeds() {
