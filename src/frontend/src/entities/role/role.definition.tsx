@@ -92,13 +92,23 @@ export const roleDefinition: EntityDefinition = {
                 components: mappedComponents,
             }
         },
-        operations: {
-            // PUT /role/{id} only touches name/description/icon — permissions live behind
-            // PUT /role/{id}/component, which rewrites the whole role (name, description and
-            // the component/permission matrix). The wizard edits both in one submit, so the
-            // narrower endpoint would drop every permission change silently.
+        // The wizard edits two things the backend splits across two endpoints, so a
+        // submit is two writes: PUT /role/{id} owns name/description/icon, and
+        // PUT /role/{id}/component owns the component/permission matrix. Details go
+        // first as the main mutation, so a rejected name (RoleExistsException) stops
+        // the submit before any permission is rewritten.
+        actions: {
+            saveComponents: {
+                url: (ctx) => `/role/${ctx.identifier}/component`,
+                method: 'PUT',
+                // The same payload both times: each endpoint reads the part of the
+                // UserRoleResource it owns and ignores the rest.
+                mapBody: (ctx) => ctx.payload,
+            },
+        },
+        lifecycle: {
             update: {
-                buildUrl: (baseUrl, identifier) => `${baseUrl}/${identifier}/component`,
+                after: ['saveComponents'],
             },
         },
     },
