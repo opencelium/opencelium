@@ -24,6 +24,7 @@ import {
 	type TestRunResult,
 } from './TestRunContext';
 import { clearActiveTestRun, getActiveTestRun, saveActiveTestRun } from './testRunStorage';
+import { handleExecutionLogFrame } from './executionLogFrame';
 import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
 import {createId} from "@shared/lib/createId.ts";
 import { EMPTY_LIVE_GRAPH_STATUS, failPendingGraphStatus, reduceLiveGraphStatus, type LiveGraphStatus } from './liveGraphStatus';
@@ -688,13 +689,8 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		if (unsubscribeRef.current) return;
 		const channelId = channelIdRef.current;
 		if (!channelId) return;
-		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) => {
-			try {
-				handleOrphanLog(JSON.parse(frame.body) as ExecutionSocketLog);
-			} catch (err) {
-				console.error('[test-run] failed to parse execution log', err);
-			}
-		});
+		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) =>
+			handleExecutionLogFrame(frame, handleOrphanLog));
 		unsubscribeRef.current = () => subscription.unsubscribe();
 	}, [isOrphaned, status, client, handleOrphanLog]);
 
@@ -780,13 +776,8 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		saveActiveTestRun({ channelId, schedulerId: null, startedAt });
 
 		// Subscribe before triggering the run so the first PENDING lines are not lost.
-		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) => {
-			try {
-				handleSocketLog(JSON.parse(frame.body) as ExecutionSocketLog);
-			} catch (err) {
-				console.error('[test-run] failed to parse execution log', err);
-			}
-		});
+		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) =>
+			handleExecutionLogFrame(frame, handleSocketLog));
 		unsubscribeRef.current = () => subscription.unsubscribe();
 
 		try {
