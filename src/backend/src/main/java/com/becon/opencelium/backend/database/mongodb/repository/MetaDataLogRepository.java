@@ -67,5 +67,7 @@ public interface MetaDataLogRepository extends MongoRepository<LogDataMng, Strin
     Optional<LogDataMng> findByExecutionIdAndType(String executionId, String type);
     Optional<LogDataMng> findByFlowIdAndType(String executionId, String type);
 
+    boolean existsByExecutionIdAndType(String executionId, String type);
+
     long deleteAllByConnectionId(Long connectionId);
 }
