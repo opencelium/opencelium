@@ -1,5 +1,6 @@
 import { notification } from 'antd'
 import { i18n } from '@shared/i18n/config/i18n'
+import { ErrorNotificationText } from '@shared/ui/feedback/ErrorNotificationText'
 
 // Errors stay on screen until the user closes them. antd's `message` has no close
 // affordance, and a toast that expires on a timer is regularly missed — while its text
@@ -28,7 +29,9 @@ export const notifyError = (text: string, durationSec?: number, headline?: strin
         // telling the user about twice. Distinct errors still stack.
         key: `${heading}\u0000${text}`,
         message: heading,
-        description: text,
+        // Rendered rather than passed as a string so a long reply can be clamped and
+        // expanded in place — the whole message is often only useful at its tail.
+        description: <ErrorNotificationText text={text} />,
         duration: durationSec ?? STICKY,
     })
 }

@@ -47,7 +47,7 @@
   },
   "schedules": {
     "title": "Schedules",
-    "add": "Add schedule",
+    "add": "Create schedule",
     "nextRun": "Next run in {{duration}}",
     "manual": "Manual only",
     "expand": "Show details",
@@ -154,7 +154,8 @@
       "header": "Choose connector",
       "subtitle": "Select a connector first",
       "searchPlaceholder": "search connector",
-      "fixConnector": "Update connector to fix the connection"
+      "fixConnector": "Update connector to fix the connection",
+      "createConnector": "Create connector"
     },
     "methodStep": {
       "header": "Choose method",

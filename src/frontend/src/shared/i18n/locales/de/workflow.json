@@ -47,7 +47,7 @@
   },
   "schedules": {
     "title": "Laufpläne",
-    "add": "Zeitplan hinzufügen",
+    "add": "Zeitplan erstellen",
     "nextRun": "Nächste Ausführung in {{duration}}",
     "manual": "Nur manuell",
     "expand": "Details anzeigen",
@@ -154,7 +154,8 @@
       "header": "Konnektor wählen",
       "subtitle": "Wählen Sie zuerst einen Konnektor",
       "searchPlaceholder": "Konnektor suchen",
-      "fixConnector": "Konnektor bearbeiten, um die Verbindung zu reparieren"
+      "fixConnector": "Konnektor bearbeiten, um die Verbindung zu reparieren",
+      "createConnector": "Konnektor erstellen"
     },
     "methodStep": {
       "header": "Methode wählen",
