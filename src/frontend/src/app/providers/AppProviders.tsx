@@ -15,6 +15,7 @@ import { DialogHost } from "@/shared/ui/dialog/DialogHost";
 import {SocketProvider} from "@app/providers/SocketProvider";
 import {SessionExpiryWatcher} from "@features/auth/session/SessionExpiryWatcher";
 import {UserLanguageSync} from "@features/user/language/UserLanguageSync";
+import {SystemThemeSync} from "@features/theme/SystemThemeSync";
 
 type Props = {
     children: React.ReactNode
@@ -41,6 +42,7 @@ export function AppProviders({ children }: Props) {
                                             </AuthBootstrap>
                                             <SessionExpiryWatcher />
                                             <UserLanguageSync />
+                                            <SystemThemeSync />
                                             <DialogHost />
                                         </Auth>
                                     </ErrorBoundary>

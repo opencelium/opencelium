@@ -41,5 +41,20 @@
     "remove": "Eigenes Design entfernen",
     "applied": "Eigenes Design angewendet",
     "removed": "Eigenes Design entfernt"
+  },
+  "systemTheme": {
+    "description": "Speichern Sie diese Farben als Systemdesign, damit alle Benutzer sie standardmäßig erhalten. Wer ein eigenes Design gewählt hat, behält es.",
+    "save": "Für alle Benutzer speichern",
+    "reset": "Systemdesign zurücksetzen",
+    "use": "Systemdesign verwenden",
+    "saved": "Systemdesign für alle Benutzer gespeichert",
+    "saveFailed": "Das Systemdesign konnte nicht gespeichert werden",
+    "removed": "Systemdesign zurückgesetzt",
+    "resetFailed": "Das Systemdesign konnte nicht zurückgesetzt werden",
+    "personalOverride": "Sie sehen ein eigenes Design, das das Systemdesign auf diesem Bildschirm verdeckt. Andere Benutzer sehen weiterhin das Systemdesign.",
+    "confirmReset": {
+      "title": "Systemdesign zurücksetzen?",
+      "message": "Die gespeicherten Farben werden gelöscht und alle Benutzer fallen auf das Standarddesign zurück. Benutzer mit einem eigenen Design sind nicht betroffen."
+    }
   }
 }

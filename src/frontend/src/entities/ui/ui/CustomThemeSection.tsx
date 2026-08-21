@@ -14,6 +14,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { Button } from '@shared/ui/primitives/Button'
 import { FormControl } from '@shared/ui/form/FormControl'
 import { Typography } from '@shared/ui/primitives/Typography'
+import { SystemThemeControls } from '@entities/ui/ui/SystemThemeControls'
 
 const DEFAULT_SEEDS: Required<CustomThemeSeeds> = {
     primary: '#1677ff',
@@ -94,6 +95,8 @@ export const CustomThemeSection = () => {
                         </Button>
                     )}
                 </div>
+
+                <SystemThemeControls seeds={seeds} />
             </div>
         </FormControl>
     )
