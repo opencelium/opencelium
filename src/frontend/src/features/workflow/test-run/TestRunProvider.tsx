@@ -276,6 +276,10 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			// those is pure waste that scales with how large the backlog is.
 			const nextStep = getNextStep(log, currentStepMetaRef.current);
 			if (nextStep) {
+				// Read before the ref advances: during a flush() burst the ref keeps
+				// moving while `updateStep` is false, so this is the step actually
+				// left behind even when the intermediate ones never rendered.
+				const fromIndexPath = currentStepMetaRef.current?.indexPath;
 				currentStepMetaRef.current = nextStep;
 				if (updateStep) {
 					const nonce = ++stepNonceRef.current;
@@ -290,9 +294,9 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 					// animation-delay, which silently restarts (and so never fires)
 					// whenever the node re-renders mid-step.
 					if (isLiveAnimationRef.current) {
-						setCurrentStep({ indexPath: nextStep.indexPath, loopIndex: nextStep.loopIndex, nonce, hasArrived: true });
+						setCurrentStep({ indexPath: nextStep.indexPath, loopIndex: nextStep.loopIndex, fromIndexPath, nonce, hasArrived: true });
 					} else {
-						setCurrentStep({ indexPath: nextStep.indexPath, loopIndex: nextStep.loopIndex, nonce, hasArrived: false });
+						setCurrentStep({ indexPath: nextStep.indexPath, loopIndex: nextStep.loopIndex, fromIndexPath, nonce, hasArrived: false });
 						arrivalTimerRef.current = setTimeout(() => {
 							setCurrentStep((prev) => (prev && prev.nonce === nonce ? { ...prev, hasArrived: true } : prev));
 						}, BASE_DOT_TRAVEL_MS / animationSpeedRef.current);
