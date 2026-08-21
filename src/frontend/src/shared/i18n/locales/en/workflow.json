@@ -47,7 +47,7 @@
   },
   "schedules": {
     "title": "Schedules",
-    "add": "Add schedule",
+    "add": "Create schedule",
     "nextRun": "Next run in {{duration}}",
     "manual": "Manual only",
     "expand": "Show details",

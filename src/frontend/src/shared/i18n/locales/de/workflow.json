@@ -47,7 +47,7 @@
   },
   "schedules": {
     "title": "Laufpläne",
-    "add": "Zeitplan hinzufügen",
+    "add": "Zeitplan erstellen",
     "nextRun": "Nächste Ausführung in {{duration}}",
     "manual": "Nur manuell",
     "expand": "Details anzeigen",
