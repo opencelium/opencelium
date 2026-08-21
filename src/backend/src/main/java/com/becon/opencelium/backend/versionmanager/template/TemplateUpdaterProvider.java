@@ -23,7 +23,7 @@ public class TemplateUpdaterProvider {
         return switch (version) {
             case VERSION_4_0 -> templateUpdaters.get(lowerFirstChar(Template40Updater.class.getSimpleName()));
             case VERSION_4_4, VERSION_4_5, VERSION_4_6, VERSION_4_8 -> templateUpdaters.get(lowerFirstChar(Template44Updater.class.getSimpleName()));
-            case VERSION_5_0 -> templateUpdaters.get(lowerFirstChar(Template50Updater.class.getSimpleName()));
+            case VERSION_5_0, VERSION_5_1 -> templateUpdaters.get(lowerFirstChar(Template50Updater.class.getSimpleName()));
             default -> new DefaultUpdater<>();
         };
     }

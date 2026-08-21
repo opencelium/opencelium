@@ -2,7 +2,7 @@ import { createShortId } from '@shared/lib/createId';
 import { buildWorkflowIndexes } from '../api/connectionPayload';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { collectReferenceColors, normalizeReferenceColor } from './graph.referenceColors';
-import { compareWorkflowIndexes, isWorkflowReferenceVisible } from './graph.referenceVisibility';
+import { collectWorkflowJumpLinks, compareWorkflowIndexes, isWorkflowReferenceVisible } from './graph.referenceVisibility';
 
 const isMethodNode = (node: WorkflowNodeModel) =>
   node.type === 'connector' || node.type === 'system';
@@ -25,6 +25,7 @@ export const cloneWorkflowFieldBindings = (
   if (!Array.isArray(fieldBindings) || colorMap.size === 0) return fieldBindings;
   const sourceNodeIds = new Set(sourceNodes.map((node) => node.id));
   const indexes = buildWorkflowIndexes(allNodes, allEdges);
+  const jumps = collectWorkflowJumpLinks(allNodes, indexes);
   const methodNodes = allNodes.filter(isMethodNode);
   const sourceMethodNodes = sourceNodes.filter(isMethodNode);
 
@@ -33,7 +34,7 @@ export const cloneWorkflowFieldBindings = (
     const consumerIndex = indexes.get(consumer.id);
     const candidates = methodNodes
       .filter((node) => normalizeReferenceColor(node.data.color) === sourceColor)
-      .filter((node) => isWorkflowReferenceVisible(indexes.get(node.id), consumerIndex))
+      .filter((node) => isWorkflowReferenceVisible(indexes.get(node.id), consumerIndex, jumps))
       .sort((left, right) => compareWorkflowIndexes(
         indexes.get(right.id) ?? '', indexes.get(left.id) ?? '',
       ));
@@ -44,7 +45,7 @@ export const cloneWorkflowFieldBindings = (
     if (!title) return externalCandidate;
     return sourceMethodNodes
       .filter((node) => node.data.subtitle === title || node.data.title === title)
-      .filter((node) => isWorkflowReferenceVisible(indexes.get(node.id), consumerIndex))
+      .filter((node) => isWorkflowReferenceVisible(indexes.get(node.id), consumerIndex, jumps))
       .sort((left, right) => compareWorkflowIndexes(
         indexes.get(right.id) ?? '', indexes.get(left.id) ?? '',
       ))[0] ?? externalCandidate;

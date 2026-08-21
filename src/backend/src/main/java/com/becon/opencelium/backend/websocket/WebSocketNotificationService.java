@@ -1,0 +1,32 @@
+package com.becon.opencelium.backend.websocket;
+
+import com.becon.opencelium.backend.websocket.constant.SocketConstant;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Component;
+
+@Component
+public class WebSocketNotificationService {
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final Connection2WebSocketChannelMapping connection2ChannelMapping;
+
+    public WebSocketNotificationService(
+            SimpMessagingTemplate simpMessagingTemplate,
+            Connection2WebSocketChannelMapping connection2ChannelMapping
+    ) {
+        this.simpMessagingTemplate = simpMessagingTemplate;
+        this.connection2ChannelMapping = connection2ChannelMapping;
+    }
+
+    public <E> void send(String destination, E message) {
+        simpMessagingTemplate.convertAndSend(destination, message);
+    }
+
+    public <E> void send(long connectionId, E message) {
+        String channelId = connection2ChannelMapping.getChannelId(connectionId);
+
+        if (channelId != null) {
+            // channelId exists if websocket connection is established and open
+            simpMessagingTemplate.convertAndSend(SocketConstant.LOGS_DESTINATION + "/" + channelId, message);
+        }
+    }
+}

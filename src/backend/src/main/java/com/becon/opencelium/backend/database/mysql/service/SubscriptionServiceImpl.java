@@ -9,8 +9,8 @@ import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistoryD
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.execution.socket.WebSocketNotificationQueue;
+import com.becon.opencelium.backend.websocket.constant.SocketConstant;
+import com.becon.opencelium.backend.websocket.notification.WebSocketNotificationQueue;
 import com.becon.opencelium.backend.quartz.DeactivateExpiredSubscriptionJob;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
