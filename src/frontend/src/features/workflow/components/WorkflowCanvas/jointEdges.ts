@@ -15,6 +15,8 @@ export const jointEdgeId = (sourceNodeId: string) => `joint-${sourceNodeId}`;
 export const buildJointEdges = (
 	nodes: WorkflowNodeModel[],
 	onRemoveJoint: ((nodeId: string) => void) | undefined,
+	/** The live test run's travelling token, when it is on a joint this render. */
+	testRun: { activeEdgeIds: Set<string>; activeStepNonce: number },
 	cache?: JointEdgeCache,
 ): WorkflowEdgeModel[] => {
 	const nodeIds = new Set(nodes.map((node) => node.id));
@@ -22,7 +24,9 @@ export const buildJointEdges = (
 		const targetId = node.data.jump;
 		if (!targetId || targetId === node.id || !nodeIds.has(targetId)) return [];
 		const id = jointEdgeId(node.id);
-		const sig = `${targetId}|${!!onRemoveJoint}`;
+		const testRunActive = testRun.activeEdgeIds.has(id);
+		const testRunNonce = testRunActive ? testRun.activeStepNonce : 0;
+		const sig = `${targetId}|${!!onRemoveJoint}|${testRunActive}|${testRunNonce}`;
 		const cached = cache?.get(id);
 		if (cached && cached.sig === sig) return [cached.out];
 		const out: WorkflowEdgeModel = {
@@ -38,7 +42,7 @@ export const buildJointEdges = (
 			selectable: true,
 			deletable: false,
 			focusable: false,
-			data: { joint: true, jointSourceNodeId: node.id, onRemoveJoint },
+			data: { joint: true, jointSourceNodeId: node.id, onRemoveJoint, testRunActive, testRunNonce },
 		};
 		cache?.set(id, { sig, out });
 		return [out];
