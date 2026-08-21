@@ -46,6 +46,7 @@ export const roleDefinition: EntityDefinition = {
         bulkDelete: true,
         actions: [
             { type: 'view' },
+            { type: 'update' },
             {
                 type: 'delete',
                 confirmMessage: (_value, _entity, row) => {
@@ -80,12 +81,26 @@ export const roleDefinition: EntityDefinition = {
                 mappedComponents: roleModel.components,
             }
         },
-        mapToApi: ({data: {mappedComponents, ...formData}}: {data: RoleUpdateDTO}): Role => {
+        mapToApi: ({data: {mappedComponents, icon, ...formData}}: {data: RoleUpdateDTO}): Role => {
             return {
                 ...formData,
+                // The API reads `icon` back as a storage path ("./storage/files/<file>") but
+                // persists the bare filename, so echoing the fetched value straight back would
+                // nest the prefix on every save. The wizard never edits the icon — it only has
+                // to survive the round trip.
+                icon: icon ? icon.split('/').pop() ?? null : null,
                 components: mappedComponents,
             }
-        }
+        },
+        operations: {
+            // PUT /role/{id} only touches name/description/icon — permissions live behind
+            // PUT /role/{id}/component, which rewrites the whole role (name, description and
+            // the component/permission matrix). The wizard edits both in one submit, so the
+            // narrower endpoint would drop every permission change silently.
+            update: {
+                buildUrl: (baseUrl, identifier) => `${baseUrl}/${identifier}/component`,
+            },
+        },
     },
 
     /* ===============================
@@ -114,6 +129,9 @@ export const roleDefinition: EntityDefinition = {
                     map: (fieldValue) => ({ name: fieldValue }),
                     transKey: `${baseKey}.fields.name.errors.name_already_exists`,
                     encodeParams: false,
+                    // On update the role's own name already exists — only re-check
+                    // uniqueness when the value actually changed from the loaded record.
+                    skipIfUnchanged: true,
                     handleResponse: (data, error) => {
                         return !data.result;
                     }

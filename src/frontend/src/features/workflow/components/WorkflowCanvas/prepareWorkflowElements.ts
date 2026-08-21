@@ -18,6 +18,7 @@ export function prepareWorkflowElements({
 	onOpenAggregatorEditor,
 	jointSourceId,
 	jointVerdicts,
+	onAddJoint,
 	onRemoveJoint,
 	onChangeCommentText,
 	onToggleComment,
@@ -106,6 +107,7 @@ export function prepareWorkflowElements({
 			&& cached.onOpenContextMenu === onOpenContextMenu
 			&& cached.onDeleteNode === onDeleteNode
 			&& cached.onOpenAggregatorEditor === onOpenAggregatorEditor
+			&& cached.onAddJoint === onAddJoint
 			&& cached.onRemoveJoint === onRemoveJoint
 			&& cached.onChangeCommentText === onChangeCommentText
 			&& cached.onToggleComment === onToggleComment
@@ -147,13 +149,14 @@ export function prepareWorkflowElements({
 				onOpenContextMenu: isEditLocked ? undefined : onOpenContextMenu,
 				onDeleteNode: isEditLocked ? undefined : onDeleteNode,
 				onOpenAggregatorEditor: isEditLocked ? undefined : onOpenAggregatorEditor,
+				onAddJoint: isEditLocked ? undefined : onAddJoint,
 				onRemoveJoint: isEditLocked ? undefined : onRemoveJoint,
 				onChangeCommentText: isEditLocked ? undefined : onChangeCommentText,
 				onToggleComment: isEditLocked ? undefined : onToggleComment,
 				onAddComment: isEditLocked ? undefined : onAddComment,
 			},
 		};
-		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment, out });
+		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onAddJoint, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment, out });
 		preparedNodes.push(out);
 	}
 	const preparedEdges: WorkflowEdgeModel[] = edges.map((edge) => {

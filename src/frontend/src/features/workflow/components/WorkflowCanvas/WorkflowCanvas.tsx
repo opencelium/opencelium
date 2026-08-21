@@ -54,6 +54,7 @@ export function WorkflowCanvas({
   jointVerdicts,
   onConfirmJoint,
   onCancelJoint,
+  onAddJoint,
   onRemoveJoint,
   onNodesChange,
   onEdgesChange,
@@ -109,12 +110,13 @@ export function WorkflowCanvas({
     [nodes, edges, liveGraphStatus, currentStep],
   );
 
-  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment });
-  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment };
+  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onAddJoint, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment });
+  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onAddJoint, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment };
   const stableOnOpenAddStep = useCallback<NonNullable<typeof onOpenAddStep>>((...args) => callbacksRef.current.onOpenAddStep?.(...args), []);
   const stableOnOpenContextMenu = useCallback<NonNullable<typeof onOpenContextMenu>>((...args) => callbacksRef.current.onOpenContextMenu?.(...args), []);
   const stableOnDeleteNode = useCallback<NonNullable<typeof onDeleteNode>>((...args) => callbacksRef.current.onDeleteNode?.(...args), []);
   const stableOnOpenAggregatorEditor = useCallback<NonNullable<typeof onOpenAggregatorEditor>>((...args) => callbacksRef.current.onOpenAggregatorEditor?.(...args), []);
+  const stableOnAddJoint = useCallback((nodeId: string) => callbacksRef.current.onAddJoint?.(nodeId), []);
   const stableOnRemoveJoint = useCallback((nodeId: string) => callbacksRef.current.onRemoveJoint?.(nodeId), []);
   const stableOnChangeCommentText = useCallback<NonNullable<typeof onChangeCommentText>>((...args) => callbacksRef.current.onChangeCommentText?.(...args), []);
   const stableOnToggleComment = useCallback<NonNullable<typeof onToggleComment>>((...args) => callbacksRef.current.onToggleComment?.(...args), []);
@@ -158,6 +160,7 @@ export function WorkflowCanvas({
     onOpenAggregatorEditor: stableOnOpenAggregatorEditor,
     jointSourceId,
     jointVerdicts,
+    onAddJoint: stableOnAddJoint,
     onRemoveJoint: stableOnRemoveJoint,
     onChangeCommentText: stableOnChangeCommentText,
     onToggleComment: stableOnToggleComment,

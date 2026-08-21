@@ -123,6 +123,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onInit: workflow.setReactFlowInstance, activeAction: workflow.sidebarAction,
         jointSourceId: workflow.jointSourceId, jointVerdicts: workflow.jointVerdicts,
         onConfirmJoint: workflow.onConfirmJoint, onCancelJoint: workflow.onCancelJoint,
+        onAddJoint: workflow.onStartJoint,
         onRemoveJoint: workflow.onRemoveJoint,
         onNodesChange: workflow.onNodesChange, onEdgesChange: workflow.onEdgesChange,
         onConnect: workflow.onConnect, onNodeDragStart: workflow.onNodeDragStart,
@@ -137,7 +138,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       <WorkflowPanels
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
           connectionId: activeConnectionId, onClose: () => workflow.setSidebarAction(null),
-          onSelect: workflow.onAddStep, onStartJoint: workflow.onStartJoint }}
+          onSelect: workflow.onAddStep }}
         schedules={{ open: schedulesOpen, connectionId: activeConnectionId,
           connectionTitle: headerState.title, onClose: () => setSchedulesOpen(false) }}
         history={{ open: workflow.historyOpen, items: displayedHistoryVersions,

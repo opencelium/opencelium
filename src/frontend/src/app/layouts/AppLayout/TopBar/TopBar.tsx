@@ -2,7 +2,6 @@ import {CommandPalette} from "@widgets/CommandPalette/CommandPalette.tsx";
 import React from "react";
 import {useNavigate} from "react-router-dom";
 import {DesktopOutlined, NotificationOutlined, PieChartOutlined, UserOutlined,} from "@ant-design/icons";
-import logoImage from "@assets/images/logo_oc_white.png";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
 import {Button} from "@shared/ui/primitives/Button";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";

@@ -1,20 +1,10 @@
 import defaultConnectorImage from '@/assets/images/default_connector.png'
-import { runtimeConfig } from '@shared/config/runtimeConfig'
+import { resolveStorageUrl } from '@shared/utils/storageUrl'
 
 export { defaultConnectorImage }
 
-export const resolveConnectorIconUrl = (icon?: string | null): string | null => {
-    if (!icon?.trim()) return null
-    if (/^(blob:|data:|https?:\/\/)/i.test(icon)) return icon
-
-    const normalizedIcon = icon.replace(/^\.\//, '')
-    if (normalizedIcon.startsWith('storage/')) {
-        const baseUrl = runtimeConfig.apiUrl.replace(/\/$/, '')
-        return `${baseUrl}/${normalizedIcon}`
-    }
-
-    return icon
-}
+export const resolveConnectorIconUrl = (icon?: string | null): string | null =>
+    resolveStorageUrl(icon)
 
 const asIconPath = (icon: unknown): string | null =>
     typeof icon === 'string' && icon.trim() ? icon : null
