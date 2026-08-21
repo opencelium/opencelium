@@ -5,8 +5,13 @@ import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { WorkflowEdgeModel } from '../../types/workflow.types';
+import { WorkflowEdgeFlowDot } from '../WorkflowEdge/WorkflowEdgeFlowDot';
 import { WorkflowEdgeMarkers } from '../WorkflowEdge/WorkflowEdgeMarkers';
-import { getWorkflowEdgeLabelPoint, getWorkflowEdgePath } from '../WorkflowEdge/workflowEdge.utils';
+import {
+	getWorkflowEdgeDotPath,
+	getWorkflowEdgeLabelPoint,
+	getWorkflowEdgePath,
+} from '../WorkflowEdge/workflowEdge.utils';
 
 // The delete control lives in the edge-label layer, i.e. outside this edge's own
 // <g>, so moving the pointer from the line onto the button fires the line's
@@ -19,6 +24,11 @@ const HIDE_DELAY_MS = 160;
  * A joint (`node.data.jump`) rendered with the exact path geometry, gap and
  * arrow marker of every other workflow edge, distinguished only by colour, and
  * carrying a hover-revealed delete button at its midpoint.
+ *
+ * During a test run it carries the travelling dot like any other edge, on the
+ * transitions where the engine actually took the jump (see getTestRunScope) —
+ * the log never says a jump happened, the skipped method simply goes missing,
+ * so this is the only place the jump becomes visible.
  */
 export function JointEdge(props: EdgeProps<WorkflowEdgeModel>) {
 	const { id, sourceX, sourceY, data } = props;
@@ -37,6 +47,7 @@ export function JointEdge(props: EdgeProps<WorkflowEdgeModel>) {
 	useEffect(() => () => window.clearTimeout(hideTimerRef.current), []);
 
 	const { labelX, labelY } = getWorkflowEdgeLabelPoint(props);
+	const isTestRunActive = !!data?.testRunActive;
 	const sourceNodeId = data?.jointSourceNodeId;
 	const onRemoveJoint = data?.onRemoveJoint;
 	const canRemove = !!sourceNodeId && !!onRemoveJoint;
@@ -55,6 +66,14 @@ export function JointEdge(props: EdgeProps<WorkflowEdgeModel>) {
 				// would otherwise win once the joint has been clicked.
 				style={{ stroke: 'var(--color-status-success-fg)' }}
 				interactionWidth={24}
+			/>
+
+			{/* Keeps the joint's own colour while active: which edge the dot is on is
+			    the information here, and recolouring it would hide that it is a joint. */}
+			<WorkflowEdgeFlowDot
+				isActive={isTestRunActive}
+				nonce={data?.testRunNonce ?? 0}
+				path={getWorkflowEdgeDotPath(props)}
 			/>
 
 			{canRemove && isHovered && (

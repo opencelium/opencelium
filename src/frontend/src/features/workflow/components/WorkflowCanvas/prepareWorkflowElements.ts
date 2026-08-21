@@ -181,7 +181,9 @@ export function prepareWorkflowElements({
 		return out;
 	});
 
-	const jointEdges = buildJointEdges(nodes, isEditLocked ? undefined : onRemoveJoint, cache?.jointEdges);
+	const jointEdges = buildJointEdges(
+		nodes, isEditLocked ? undefined : onRemoveJoint, testRunScope, cache?.jointEdges,
+	);
 
 	if (cache) {
 		const liveNodeIds = new Set(nodes.map((node) => node.id));
