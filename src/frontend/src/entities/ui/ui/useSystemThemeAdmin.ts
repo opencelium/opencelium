@@ -4,7 +4,7 @@ import {
     useDeleteSystemSettingMutation,
     useSaveSystemSettingMutation,
 } from '@entities/systemSetting/api/systemSettingApi'
-import { useAuth } from '@features/auth/useAuth'
+import { useIsAdmin } from '@features/auth/useIsAdmin'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { CustomThemeSeeds } from '@shared/theme/palette/customPalette'
 import {
@@ -20,11 +20,6 @@ import { DEVICE_THEME_ID, type ThemeMode } from '@shared/theme/types'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 
-// PUT/DELETE /system-setting require the 'Admin' authority, which the backend derives
-// from the user group's name (UserPrincipals.getAuthorities). Non-admins are rejected
-// with 403 regardless — this only keeps the controls out of their way.
-const isAdminRole = (roles: string[]) => roles.some(role => role.toLowerCase() === 'admin')
-
 /**
  * The admin half of the theme editor: writes the edited seeds to `theme_colors` so every
  * user picks them up, or deletes the setting so everyone falls back to the built-in
@@ -33,7 +28,6 @@ const isAdminRole = (roles: string[]) => roles.some(role => role.toLowerCase() =
  */
 export function useSystemThemeAdmin(seeds: CustomThemeSeeds) {
     const { t: tEntities } = useI18n('entities')
-    const { normalizedUser } = useAuth()
     const { themeId, themeMode, setTheme } = useTheme()
     const confirm = useConfirm()
     const [saveSetting, { isLoading: isSaving }] = useSaveSystemSettingMutation()
@@ -41,7 +35,9 @@ export function useSystemThemeAdmin(seeds: CustomThemeSeeds) {
     // hasSystemTheme() reads the registry, which mutations change without a re-render.
     const [isConfigured, setIsConfigured] = useState(hasSystemTheme)
 
-    const isAdmin = isAdminRole(normalizedUser?.roles ?? [])
+    // PUT/DELETE /system-setting require the 'Admin' authority; non-admins are rejected
+    // with 403 regardless — this only keeps the controls out of their way.
+    const isAdmin = useIsAdmin()
 
     // A personal choice (custom theme or any explicitly picked built-in) shadows the
     // system theme on this screen only, so a save can look like it did nothing.
