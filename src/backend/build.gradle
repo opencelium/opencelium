@@ -23,7 +23,15 @@ plugins {
 
 group = 'com.becon'
 version = '5.0'
-sourceCompatibility = '17'
+java {
+	toolchain {
+		// Pins BOTH compilation and the test JVM to Java 17. Without this,
+		// Gradle runs tests on whatever JDK is on PATH; on a newer JDK the
+		// ByteBuddy/ASM bundled with Mockito cannot parse java.lang.Object,
+		// and every @MockBean of a concrete class fails the context load.
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
 
 repositories {
 	mavenCentral()

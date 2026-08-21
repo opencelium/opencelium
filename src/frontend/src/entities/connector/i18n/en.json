@@ -44,6 +44,13 @@
       "hint": "PNG or JPG",
       "replace": "Replace icon",
       "delete": "Delete icon",
+      "crop": {
+        "title": "Crop connector icon",
+        "zoom": "Zoom",
+        "cancel": "Cancel",
+        "apply": "Apply crop",
+        "instruction": "Move the square to select the icon area"
+      },
       "confirmDelete": {
         "title": "Remove logo?",
         "message": "This can't be undone."

@@ -16,7 +16,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
-import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
+import com.becon.opencelium.backend.websocket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;

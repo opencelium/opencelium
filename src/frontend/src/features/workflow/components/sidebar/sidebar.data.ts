@@ -21,11 +21,6 @@ export const sidebarItems: {
     textKey: 'sidebar.addHttpRequest.description',
   },
   {
-    key: 'joint',
-    titleKey: 'sidebar.addJoint.title',
-    textKey: 'sidebar.addJoint.description',
-  },
-  {
     key: 'trigger-connection',
     titleKey: 'sidebar.triggerConnection.title',
     textKey: 'sidebar.triggerConnection.description',

@@ -17,12 +17,15 @@
 package com.becon.opencelium.backend.resource.request;
 
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
+import jakarta.validation.Valid;
 
 public class UserRequestResource {
     private int userId;
     private String email;
     private String password;
     private int userGroup; // TODO: should be userRoleId
+
+    @Valid
     private UserDetailResource userDetail;
 
     public int getUserId() {

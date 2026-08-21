@@ -42,7 +42,7 @@ import {
 import type { IconComponent } from './Icon.types';
 import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
 import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdPause, MdStop, MdSkipNext, MdFastForward, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff, MdCallSplit, MdLoop} from "react-icons/md";
-import {TbWebhook, TbReportAnalytics, TbUnlink} from "react-icons/tb";
+import {TbWebhook, TbReportAnalytics, TbLink, TbUnlink} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
 import {GoArrowSwitch, GoWorkflow} from "react-icons/go";
 import {GrAggregate} from "react-icons/gr";
@@ -63,6 +63,7 @@ const iconMap = {
     profile: UserOutlined,
     'content-copy': MdContentCopy,
     webhook: TbWebhook,
+    link: TbLink,
     unlink: TbUnlink,
     play: MdPlayArrow,
     pause: MdPause,
