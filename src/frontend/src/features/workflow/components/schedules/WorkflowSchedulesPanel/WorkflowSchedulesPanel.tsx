@@ -29,6 +29,9 @@ export function WorkflowSchedulesPanel({ open, connectionId, connectionTitle,
                 <button className="iconButton" type="button" onClick={onClose}><CloseOutlined /></button>
             </div>
             {connectionId && <div className="wf-schedules-toolbar">
+                {/* Same affordance as the connector picker's create button (primary,
+                    full width): both are "add one to this list", and reading as one
+                    control instead of two is what makes them recognisable. */}
                 <Button type="primary" iconLeft="plus" onClick={openCreate}
                     testId="workflow-schedules-add">{t('schedules.add')}</Button>
             </div>}
