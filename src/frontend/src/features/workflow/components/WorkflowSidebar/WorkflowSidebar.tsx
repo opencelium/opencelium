@@ -11,6 +11,7 @@ import { MethodSidebarDrawer } from './MethodSidebarDrawer/MethodSidebarDrawer';
 import { useWorkflowSidebarState } from './useWorkflowSidebarState';
 import type { WorkflowSidebarProps } from './WorkflowSidebar.types';
 import { useWorkflowSidebarSelection } from './useWorkflowSidebarSelection';
+import { useConnectorCreateAction } from './useConnectorCreateAction';
 import { useConnectorUpdateAction } from './useConnectorUpdateAction';
 
 export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, onSelect }: WorkflowSidebarProps) {
@@ -56,6 +57,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
   const selection = useWorkflowSidebarSelection({ onSelect, resetSidebar,
     mainSearchMethodItems, methodOperations, selectedConnector });
   const connectorUpdateAction = useConnectorUpdateAction();
+  const openConnectorCreate = useConnectorCreateAction();
 
   return (
     <>
@@ -92,6 +94,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         connectorsError={connectorsError}
         connectorItems={filteredConnectorItems}
         connectorUpdateAction={connectorUpdateAction}
+        onCreateConnector={openConnectorCreate}
         operatorItems={filteredOperatorItems}
         triggerItems={filteredTriggerConnectionItems}
         triggerFetching={triggerConnectionStep.isFetching}

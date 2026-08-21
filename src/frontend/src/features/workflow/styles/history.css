@@ -105,6 +105,19 @@
   cursor: default;
 }
 
+/* The create affordance above the picker list: full width so it reads as an action
+   on the list rather than one more row in it, and placed above so the empty state
+   ("no connectors found") still offers a way forward. Matches the schedules panel's
+   own create button (see .wf-schedules-toolbar). */
+.sidebarCreateAction {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.sidebarCreateAction > button {
+  width: 100%;
+}
+
 .sidebarLoading {
   display: flex;
   justify-content: center;

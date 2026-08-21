@@ -13,6 +13,9 @@ export type SecondarySidebarDrawerProps = {
   connectorsError: boolean;
   connectorItems: readonly SidebarListItem[];
   connectorUpdateAction: SidebarListProps['updateAction'];
+  /** Opens the connector create form; offered above the list, so it is reachable
+   * from the empty state too. */
+  onCreateConnector: () => void;
   operatorItems: readonly SidebarListItem[];
   triggerItems: TriggerConnectionPanelItem[];
   triggerFetching: boolean;

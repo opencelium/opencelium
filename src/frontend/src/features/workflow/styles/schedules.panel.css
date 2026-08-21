@@ -67,6 +67,12 @@
   gap: 12px;
 }
 
+/* Stretches the add button across the drawer, matching .sidebarCreateAction in the
+   connector picker; flex rather than width so a second control could still join it. */
+.wf-schedules-toolbar > button {
+  flex: 1;
+}
+
 .wf-schedule-list {
   display: flex;
   flex-direction: column;
