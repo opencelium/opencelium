@@ -154,7 +154,8 @@
       "header": "Konnektor wählen",
       "subtitle": "Wählen Sie zuerst einen Konnektor",
       "searchPlaceholder": "Konnektor suchen",
-      "fixConnector": "Konnektor bearbeiten, um die Verbindung zu reparieren"
+      "fixConnector": "Konnektor bearbeiten, um die Verbindung zu reparieren",
+      "createConnector": "Konnektor erstellen"
     },
     "methodStep": {
       "header": "Methode wählen",

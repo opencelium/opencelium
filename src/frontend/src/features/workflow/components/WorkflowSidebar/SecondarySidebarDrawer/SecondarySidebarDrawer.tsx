@@ -1,4 +1,5 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { Button } from '@shared/ui/primitives/Button';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { SidebarDrawer } from '../../sidebar/SidebarDrawer/SidebarDrawer';
 import { SidebarList } from '../../sidebar/SidebarList/SidebarList';
@@ -29,6 +30,14 @@ export function SecondarySidebarDrawer(props: SecondarySidebarDrawerProps) {
     <SidebarSearch placeholder={props.placeholder} value={props.search}
       onChange={props.onSearchChange} testId="workflow-sidebar-search-secondary"
       autoFocus={Boolean(props.mode)} />
+    {props.mode === 'connector' && (
+      <div className="sidebarCreateAction">
+        <Button type="primary" iconLeft="plus" onClick={props.onCreateConnector}
+          testId="workflow-sidebar-connector-create">
+          {t('sidebar.connectorStep.createConnector')}
+        </Button>
+      </div>
+    )}
     {content}
   </SidebarDrawer>;
 }
