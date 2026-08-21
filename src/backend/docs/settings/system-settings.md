@@ -38,8 +38,10 @@ CREATE TABLE system_setting (
 | Endpoint | Behavior | Access |
 |---|---|---|
 | `GET /system-setting/{name}` | 200 with the setting, 404 if absent | admin, **or** any authenticated user if the name is whitelisted |
-| `PUT /system-setting/{name}` | upsert; body `{"value": { ... }}` — a real JSON value, not an encoded string | `@PreAuthorize("hasAuthority('Admin')")` |
+| `PUT /system-setting/{name}` | upsert; body `{"value": { ... }}` — a real JSON value, not an encoded string. Rejected 400 `RESERVED_SYSTEM_SETTING` for `app_logo` (see below) | `@PreAuthorize("hasAuthority('Admin')")` |
 | `DELETE /system-setting/{name}` | remove; clients fall back to their defaults; 204 (idempotent) | `@PreAuthorize("hasAuthority('Admin')")` |
+| `POST /system-setting/app_logo` | multipart param `file`: upload or replace the system icon; 200 with the setting; 400 on empty/>5 MB/non-jpg-jpeg-png | `@PreAuthorize("hasAuthority('Admin')")` |
+| `DELETE /system-setting/app_logo` | remove icon file + row; 204 (idempotent). Literal mapping beats the `/{name}` template (PathPatternParser) | `@PreAuthorize("hasAuthority('Admin')")` |
 
 Pieces: entity `SystemSetting`, repository `SystemSettingRepository`, service
 `SystemSettingServiceImp`, DTO `SystemSettingDTO`, controller `SystemSettingController`, read
@@ -79,6 +81,37 @@ admin typo can flip, plus a DB read inside the authorization check) and a `publi
 (access welded into the key forever). Both rejected; settings are introduced by code changes
 anyway, so the whitelist update rides the same PR. Known cosmetic trade-off: a non-admin probing a
 non-whitelisted name gets 403, which confirms the name exists; map to 404 later if that matters.
+
+### The system icon (`app_logo`) is a setting that owns a file
+
+The admin-uploaded application icon (shown in the UI instead of the OpenCelium logo) is one
+`system_setting` row whose value references a stored file:
+
+```json
+{"filename": "3f1c…b2.png", "url": "./storage/files/3f1c…b2.png"}
+```
+
+The file itself goes through the existing `StorageService` into `upload-dir/`, named
+`UUID.<ext>`, and is served by the already-public `GET /storage/files/{filename}` route — so the
+logo renders even on the login page, with no security-config change. That route's
+`Content-Disposition: attachment` / missing `Content-Type` is harmless for `<img src>` rendering
+(role icons and profile pictures already prove it); inline disposition and cache headers remain
+future work. Extension whitelist is jpg/jpeg/png via `FileNameUtils.isSupportedImageExtension` —
+**no SVG** (script-capable, and the file is served unauthenticated). Size is capped at 5 MB by
+`@FileValidator` on the controller param (class-level `@Validated` makes it fire), and rejections
+use `GeneralServiceException` (400 `INVALID_SYSTEM_SETTING_ICON`) — never `StorageException`,
+which has no handler and would surface as 500.
+
+Because the row and the file must never drift apart, the generic write path refuses the name:
+`save("app_logo", …)` throws 400 `RESERVED_SYSTEM_SETTING` (the guard lives in the **service**,
+so no future internal caller can bypass it either), and the literal `DELETE /app_logo` mapping
+shadows the generic `DELETE /{name}` for exactly this name. Operation ordering follows the
+`UserRoleServiceImpl.uploadIcon` precedent, arranged so every failure mode degrades to an
+**orphaned file** (harmless) rather than a **dangling reference** (broken logo): upload = store
+new file → save row → delete old file last (a delete failure rolls back the `@Transactional` row
+write to the still-existing old file); removal = delete row first → delete file (an IO failure
+rolls the row back). A corrupt row value is parsed leniently and never blocks re-upload or
+removal — it just orphans one file.
 
 Note the authority string: authorities are the **raw role name** from the `role` table
 (`UserPrincipals#getAuthorities`), so it must be exactly `hasAuthority('Admin')` —
@@ -122,12 +155,10 @@ is a convention, not a constraint.
 
 ## Future work
 
-1. **`app_logo`** (already whitelisted): admin uploads via the `StorageService`/`upload-dir`
-   machinery following the transactional `UserRoleServiceImpl.uploadIcon` pattern (store → update
-   → delete old); the row holds the filename; serving needs inline `Content-Disposition`, a real
-   `Content-Type`, and cache headers (the current `/storage/files/{filename}` sends `attachment`
-   with neither). Extension whitelist stays jpg/jpeg/png — no SVG (script-capable, and the file is
-   served unauthenticated).
+1. **Inline serving for the logo:** `GET /storage/files/{filename}` sends
+   `Content-Disposition: attachment`, no `Content-Type`, and no cache headers. Fine for
+   `<img src>`, but direct navigation downloads instead of displaying, and every page load
+   re-fetches; worth fixing when it starts to matter.
 2. **Per-user `ui_setting` table** when the per-user-in-DB request actually arrives (see above).
 3. **Incremental yml migration:** move `opencelium.*` parameters here one at a time when there's a
    reason — seed the current value as a row, switch the consumer from its `@ConfigurationProperties`

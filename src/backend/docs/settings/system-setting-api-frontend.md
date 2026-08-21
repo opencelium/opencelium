@@ -90,7 +90,9 @@ await api.put(`/system-setting/theme_colors`, { value: seeds });
 - `value` is missing or JSON `null` (`error: "INVALID_SYSTEM_SETTING_VALUE"`),
 - `value` is longer than **1024 characters** once serialized,
 - the request body itself is not well-formed JSON (rejected by request parsing),
-- `{name}` is blank or longer than 100 characters (`error: "INVALID_SYSTEM_SETTING_NAME"`).
+- `{name}` is blank or longer than 100 characters (`error: "INVALID_SYSTEM_SETTING_NAME"`),
+- `{name}` is `app_logo` (`error: "RESERVED_SYSTEM_SETTING"`) — the icon is managed only through
+  its own endpoints below, so its row and its stored file can't drift apart.
 
 The backend does **not** understand colors — `value` can be any JSON shape. All
 semantic validation (6-digit hex `^#[0-9a-fA-F]{6}$`, required keys) stays in the frontend, on
@@ -136,10 +138,72 @@ enforces regardless — a non-admin PUT gets 403). Save with the PUT above; rese
 `custom-light` and `custom-dark` variants client-side; the active mode remains a separate,
 per-user choice.
 
+## System icon — `app_logo`
+
+The admin-uploaded application icon shown in the UI instead of the OpenCelium logo. It is a
+regular system setting for **reading**, but it is **written via file upload**, not JSON.
+
+### Read (any authenticated user)
+
+```
+GET /system-setting/app_logo
+```
+
+**200 OK**
+
+```json
+{
+  "name": "app_logo",
+  "value": {
+    "filename": "3f1c9b2e-....png",
+    "url": "./storage/files/3f1c9b2e-....png"
+  },
+  "updatedAt": "2026-08-21T10:12:00.000+00:00"
+}
+```
+
+Put `value.url` straight into `<img src>` — the `/storage/files/**` route is public (no auth
+header needed), so the logo also works on the **login page**. **404** means no icon is set → show
+the default OpenCelium logo. Ignore `value.filename`; it's the backend's internal storage key.
+
+### Upload / change (admin only)
+
+```
+POST /system-setting/app_logo
+Content-Type: multipart/form-data
+```
+
+One part named `file` — jpg, jpeg, or png, at most **5 MB** (SVG is deliberately not accepted):
+
+```ts
+const form = new FormData();
+form.append('file', selectedFile);
+await api.post('/system-setting/app_logo', form);
+```
+
+**200 OK** with the same shape as GET (grab the fresh `value.url` — it changes on every upload).
+Re-uploading replaces the previous icon; the old file is cleaned up server-side.
+
+**400 Bad Request** (`error: "INVALID_SYSTEM_SETTING_ICON"` or a validation message) when the
+file is missing, empty, larger than 5 MB, or not jpg/jpeg/png. **403** for non-admins.
+
+### Remove (admin only)
+
+```
+DELETE /system-setting/app_logo
+```
+
+**204 No Content** — always, idempotent. Afterwards GET returns 404 and every client falls back
+to the default logo. Use this for the admin's "reset to default logo" action.
+
+Note: because each upload gets a new UUID filename, a changed logo shows up without cache-busting
+tricks — the URL itself changes. Re-fetch `GET /system-setting/app_logo` (or use the POST
+response) after an admin changes it.
+
 ## Adding future settings
 
 The endpoint is generic — a new global setting is just a new `{name}` with its own JSON shape.
 But **read access is default-deny**: a new setting readable by non-admins must be added to the
 backend whitelist (`SystemSettingSecurity`) first; until then, regular users receive 403 for it.
-Coordinate the name and readability with the backend team. Already reserved: `theme_colors`
-(user-readable), `app_logo` (user-readable, upload flow not implemented yet).
+Coordinate the name and readability with the backend team. Already in use: `theme_colors`
+(user-readable, JSON write) and `app_logo` (user-readable, file upload — see above).
