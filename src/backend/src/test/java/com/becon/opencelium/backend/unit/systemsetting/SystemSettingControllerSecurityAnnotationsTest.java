@@ -13,6 +13,7 @@ import com.becon.opencelium.backend.resource.SystemSettingDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Method;
 
@@ -54,6 +55,27 @@ class SystemSettingControllerSecurityAnnotationsTest {
         Method deleteMethod = SystemSettingController.class.getDeclaredMethod("delete", String.class);
 
         PreAuthorize preAuthorize = deleteMethod.getAnnotation(PreAuthorize.class);
+
+        assertThat(preAuthorize).isNotNull();
+        assertThat(preAuthorize.value()).isEqualTo("hasAuthority('Admin')");
+    }
+
+    @Test
+    void uploadLogoEndpointRequiresAdminRole() throws NoSuchMethodException {
+        Method uploadMethod = SystemSettingController.class.getDeclaredMethod(
+                "uploadLogo", MultipartFile.class);
+
+        PreAuthorize preAuthorize = uploadMethod.getAnnotation(PreAuthorize.class);
+
+        assertThat(preAuthorize).isNotNull();
+        assertThat(preAuthorize.value()).isEqualTo("hasAuthority('Admin')");
+    }
+
+    @Test
+    void deleteLogoEndpointRequiresAdminRole() throws NoSuchMethodException {
+        Method deleteLogoMethod = SystemSettingController.class.getDeclaredMethod("deleteLogo");
+
+        PreAuthorize preAuthorize = deleteLogoMethod.getAnnotation(PreAuthorize.class);
 
         assertThat(preAuthorize).isNotNull();
         assertThat(preAuthorize.value()).isEqualTo("hasAuthority('Admin')");

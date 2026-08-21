@@ -48,6 +48,7 @@ import com.becon.opencelium.backend.execution.logger.service.LogDataService;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.utility.EmailUtility;
 import com.becon.opencelium.backend.websocket.constant.SocketConstant;
 import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
@@ -158,8 +159,7 @@ public class ExecutionAspect {
         jobDataMap.put("timestamp", timestamp);
         jobDataMap.put("debugMode", scheduler.getDebugMode());
 
-        List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
-        triggerNotifications(eventNotifications, "pre", null);
+        triggerNotifications(schedulerId, "pre", null);
 
         sendRunningJobsNotification();
 
@@ -187,8 +187,7 @@ public class ExecutionAspect {
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
-        triggerNotifications(en, "post", null);
+        triggerNotifications(schedulerId, "post", null);
 
         sendRunningJobsNotification(schedulerId);
 
@@ -215,8 +214,7 @@ public class ExecutionAspect {
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
-        triggerNotifications(en, "alert", ex);
+        triggerNotifications(schedulerId, "alert", ex);
 
         sendRunningJobsNotification(schedulerId);
 
@@ -241,7 +239,7 @@ public class ExecutionAspect {
         execution.setEndTime(new Date());
         execution.setStatus(success ? "S" : "F");
         executionService.save(execution);
-        boolean hasLog = LogFileUtility.logFileExistForExecId(execId) && logDataService.findRootByExecutionId(execId).isPresent();
+        boolean hasLog = LogFileUtility.logFileExistForExecId(execId) && logDataService.hasDbRecords(execId);
         LastExecution le;
         if (lastExecutionService.existsBySchedulerId(execution.getScheduler().getId())) {
             le = lastExecutionService.findBySchedulerId(execution.getScheduler().getId());
@@ -267,16 +265,26 @@ public class ExecutionAspect {
         lastExecutionService.save(le);
     }
 
-    private void triggerNotifications(List<EventNotification> eventNotifications, String eventType, Exception ex) {
-        String to, subject, message;
+    private void triggerNotifications(int schedulerId, String eventType, Exception ex) {
+        List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
+
         for (EventNotification en : eventNotifications) {
+            Set<EventRecipient> recipients = en.getEventRecipients();
+
             if (!en.getEventType().equals(eventType)) {
                 continue;
             }
-            if (en.getEventRecipients().isEmpty()) {
-                fillDefaultRecipients(en.getEventRecipients(), en.getEventMessage().getType());
+
+            if (recipients.isEmpty()) {
+                fillDefaultRecipients(recipients, en.getEventMessage().getType());
             }
-            for (EventRecipient er : en.getEventRecipients()) {
+
+            if (recipients.isEmpty()) {
+                logger.warn("No recipient is configured for type = {} and schedulerId = {}", eventType, schedulerId);
+                continue;
+            }
+
+            for (EventRecipient er : recipients) {
                 User user = userService.findByEmail(er.getDestination()).orElse(null);
                 String lang = user == null
                         ? languageService.getDefault()
@@ -290,9 +298,9 @@ public class ExecutionAspect {
                             .orElseThrow(() -> new RuntimeException("Default language(" + defaultLang + ") of content not found"));
                 }
 
-                message = replaceConstants(content.getBody(), user, ex, en);
-                subject = replaceConstants(content.getSubject(), user, ex, en);
-                to = er.getDestination();
+                String message = replaceConstants(content.getBody(), user, ex, en);
+                String subject = replaceConstants(content.getSubject(), user, ex, en);
+                String to = er.getDestination();
                 String type = en.getEventMessage().getType();// email, incoming_webhook
                 try {
                     switch (type) {
@@ -300,7 +308,7 @@ public class ExecutionAspect {
                         case "email" -> emailService.sendMessage(to, subject, message);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.warn("Failed to send notification", e);
                 }
             }
         }
@@ -325,7 +333,9 @@ public class ExecutionAspect {
         switch (type) {
             case "email" -> {
                 destination = SecurityContextHolder.getContext().getAuthentication().getName();
-                recipients.add(new EventRecipient(destination));
+                if (EmailUtility.isValid(destination)) {
+                    recipients.add(new EventRecipient(destination));
+                }
             }
             case "incoming_webhook" -> {
                 String[] webhooks = env.getProperty(AppYamlPath.INCOMING_WEBHOOK, String[].class);

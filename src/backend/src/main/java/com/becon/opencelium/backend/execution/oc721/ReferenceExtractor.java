@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.execution.oc721;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.enums.execution.DataType;
+import com.becon.opencelium.backend.exception.ReferenceNotFoundException;
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.reference.ReferenceParser;
 import com.becon.opencelium.backend.reference.enums.ExchangeType;
@@ -40,6 +41,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -67,6 +69,7 @@ public class ReferenceExtractor implements Extractor {
      *   <li>{@code null} input → {@code null}</li>
      *   <li>Valid reference → resolved value</li>
      *   <li>Non-reference input → {@link IllegalArgumentException}</li>
+     *   <li>Reference to data that was never produced → {@link ReferenceNotFoundException}</li>
      * </ul>
      *
      * <p>This method is on a hot path. Parsing and dispatch are optimized
@@ -80,6 +83,9 @@ public class ReferenceExtractor implements Extractor {
 
         try {
             return doExtract(rawReference);
+        } catch (ReferenceNotFoundException e) {
+            // recoverable: the caller reports it and substitutes an empty value
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to resolve reference = %s. Reason = %s".formatted(rawReference, e.getMessage()), e);
         }
@@ -155,7 +161,9 @@ public class ReferenceExtractor implements Extractor {
     private Object extractFromOperation(DirectReference ref) {
         // find operation by color
         Operation operation = executionManager.findOperationByColor(ref.getColor())
-                .orElseThrow(() -> new RuntimeException("There is no Operation with '" + ref.getColor() + "'"));
+                .orElseThrow(() -> new ReferenceNotFoundException(
+                        "There is no Operation with '%s': it has not been executed. Reference = %s"
+                                .formatted(ref.getColor(), ref.getRaw())));
 
         final String path = ref.getPath();
 
@@ -204,18 +212,19 @@ public class ReferenceExtractor implements Extractor {
 
         // CASE 2: '#ababab.(response).status'         - return 'status' code of ResponseEntity
         if (ref.getPart() == DirectReference.Part.STATUS) {
-            return operation.getResponses().get(key).getStatusCode().value();
+            return requireStored(operation.getResponses().get(key), ExchangeType.RESPONSE, ref, key)
+                    .getStatusCode().value();
         }
 
         final HttpEntity<?> entity;
         if (ref.getExchangeType() == ExchangeType.RESPONSE) {
-            entity = operation.getResponses().get(key);
+            entity = requireStored(operation.getResponses().get(key), ExchangeType.RESPONSE, ref, key);
 
             if (isErrorResponse(entity)) {
                 throw new RuntimeException((String) entity.getBody());
             }
         } else {
-            entity = operation.getRequests().get(key);
+            entity = requireStored(operation.getRequests().get(key), ExchangeType.REQUEST, ref, key);
         }
 
         // CASE 3: return 'header' value of HttpEntity
@@ -241,6 +250,28 @@ public class ReferenceExtractor implements Extractor {
         } else {
             return bodyToString(body);
         }
+    }
+
+    /**
+     * Guards a reference against data that the container never received: the operation has not
+     * been executed at all, or not in the current loop iteration.
+     *
+     * @return the stored entity, never {@code null}
+     * @throws ReferenceNotFoundException if nothing is stored under {@code key}
+     */
+    private static <T extends HttpEntity<?>> T requireStored(
+            T entity,
+            ExchangeType exchangeType,
+            DirectReference ref,
+            String key
+    ) {
+        if (entity == null) {
+            throw new ReferenceNotFoundException(
+                    "There is no %s of Operation '%s' stored under key '%s': it has not been executed. Reference = %s"
+                            .formatted(exchangeType.name().toLowerCase(Locale.ROOT), ref.getColor(), key, ref.getRaw()));
+        }
+
+        return entity;
     }
 
     public static String bodyToString(Object body) {
