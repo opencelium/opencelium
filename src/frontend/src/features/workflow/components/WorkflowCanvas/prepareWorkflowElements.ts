@@ -3,6 +3,7 @@ import { getNodeComment, resolveCommentPosition } from '../../utils/commentAncho
 import type { PrepareWorkflowParams } from './prepareWorkflowElements.types';
 import { buildWorkflowTopology, computeLeafInfo, hasSameWorkflowTopology } from './workflowTopology';
 import { EMPTY_TEST_RUN_SCOPE } from './testRunScope.utils';
+import { buildJointEdges } from './jointEdges';
 
 export type { PrepareWorkflowCache } from './prepareWorkflowElements.types';
 
@@ -15,6 +16,10 @@ export function prepareWorkflowElements({
 	onOpenContextMenu,
 	onDeleteNode,
 	onOpenAggregatorEditor,
+	jointSourceId,
+	jointVerdicts,
+	onAddJoint,
+	onRemoveJoint,
 	onChangeCommentText,
 	onToggleComment,
 	onAddComment,
@@ -60,6 +65,19 @@ export function prepareWorkflowElements({
 		const duplicateMethodColor = methodInstanceById.get(node.id)?.color;
 		const alwaysShowRightAdd = !isPreviewNode && !isEditLocked && node.type === 'start' && onlyStartNode;
 		const highlighted = Boolean(node.data.highlighted) || highlightedBranch.nodeIds.has(node.id);
+		const jointVerdict = jointVerdicts?.get(node.id);
+		const jointCandidate = Boolean(jointVerdict?.valid);
+		const jointSource = node.id === jointSourceId;
+		// Only surfaced while a joint is being drawn — an unreachable reason on an
+		// idle canvas would light every node up on hover.
+		const jointInvalidReason = jointVerdict && !jointVerdict.valid && !jointSource
+			? jointVerdict.reason : undefined;
+		const jointBlockingNodeId = jointVerdict && !jointVerdict.valid
+			? jointVerdict.blockingNodeId : undefined;
+		const jointBlockingNode = jointBlockingNodeId
+			? nodes.find((item) => item.id === jointBlockingNodeId) : undefined;
+		const jointBlockingLabel = jointBlockingNode
+			? jointBlockingNode.data.subtitle || jointBlockingNode.data.title : undefined;
 		const suppressHoverAddControls = isPreviewNode || isEditLocked || activeAction?.sourceNodeId === node.id;
 		const lockVisibleAddControls = !isPreviewNode && activeAction?.sourceNodeId === node.id;
 		const testRunFailed = testRunScope.failedNodeIds.has(node.id);
@@ -75,7 +93,8 @@ export function prepareWorkflowElements({
 			highlighted, suppressHoverAddControls, lockVisibleAddControls, isAnyNodeDragging,
 			testRunActive, testRunIteration?.iterator, testRunIteration?.count,
 			testRunActiveBranch, testRunFailed, testRunFailedMessage,
-			testRunFailedVisible, isEditLocked,
+			testRunFailedVisible, isEditLocked, jointCandidate, jointSource,
+			jointInvalidReason, jointBlockingLabel,
 			position.x, position.y, anchoredComment?.nodeId, anchoredComment?.collapsed,
 		].join('|');
 
@@ -88,6 +107,8 @@ export function prepareWorkflowElements({
 			&& cached.onOpenContextMenu === onOpenContextMenu
 			&& cached.onDeleteNode === onDeleteNode
 			&& cached.onOpenAggregatorEditor === onOpenAggregatorEditor
+			&& cached.onAddJoint === onAddJoint
+			&& cached.onRemoveJoint === onRemoveJoint
 			&& cached.onChangeCommentText === onChangeCommentText
 			&& cached.onToggleComment === onToggleComment
 			&& cached.onAddComment === onAddComment
@@ -114,6 +135,10 @@ export function prepareWorkflowElements({
 				suppressHoverAddControls,
 				lockVisibleAddControls,
 				isAnyNodeDragging,
+				jointCandidate,
+				jointSource,
+				jointInvalidReason,
+				jointBlockingLabel,
 				testRunActive,
 				testRunIteration,
 				testRunActiveBranch,
@@ -124,12 +149,14 @@ export function prepareWorkflowElements({
 				onOpenContextMenu: isEditLocked ? undefined : onOpenContextMenu,
 				onDeleteNode: isEditLocked ? undefined : onDeleteNode,
 				onOpenAggregatorEditor: isEditLocked ? undefined : onOpenAggregatorEditor,
+				onAddJoint: isEditLocked ? undefined : onAddJoint,
+				onRemoveJoint: isEditLocked ? undefined : onRemoveJoint,
 				onChangeCommentText: isEditLocked ? undefined : onChangeCommentText,
 				onToggleComment: isEditLocked ? undefined : onToggleComment,
 				onAddComment: isEditLocked ? undefined : onAddComment,
 			},
 		};
-		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onChangeCommentText, onToggleComment, onAddComment, out });
+		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onAddJoint, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment, out });
 		preparedNodes.push(out);
 	}
 	const preparedEdges: WorkflowEdgeModel[] = edges.map((edge) => {
@@ -154,6 +181,10 @@ export function prepareWorkflowElements({
 		return out;
 	});
 
+	const jointEdges = buildJointEdges(
+		nodes, isEditLocked ? undefined : onRemoveJoint, testRunScope, cache?.jointEdges,
+	);
+
 	if (cache) {
 		const liveNodeIds = new Set(nodes.map((node) => node.id));
 		for (const key of cache.nodes.keys()) {
@@ -165,5 +196,5 @@ export function prepareWorkflowElements({
 		}
 	}
 
-	return { preparedEdges, preparedNodes };
+	return { preparedEdges: [...preparedEdges, ...jointEdges], preparedNodes };
 }

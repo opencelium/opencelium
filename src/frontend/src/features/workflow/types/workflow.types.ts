@@ -155,6 +155,9 @@ export type WorkflowNodeData = {
 	onAddStep?: (action: WorkflowAction) => void;
 	onOpenContextMenu?: (menu: WorkflowContextMenu | null) => void;
 	onDeleteNode?: (nodeId: string) => void;
+	/** Starts joint picking from this node — the node toolbar's own entry point,
+	 * which is why it lives on the node rather than in the add-step sidebar. */
+	onAddJoint?: (nodeId: string) => void;
 	onRemoveJoint?: (nodeId: string) => void;
 	onOpenAggregatorEditor?: (nodeId: string) => void;
 	/** Absent while the graph is not editable (test run in progress, read-only
