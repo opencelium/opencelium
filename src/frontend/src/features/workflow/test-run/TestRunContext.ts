@@ -23,6 +23,12 @@ export type TestRunCurrentStep = {
 	// here too. Lets the debugger pause target identify exactly which loop
 	// iteration it paused in, not just which structural node.
 	loopIndex: string;
+	// Index path of the step the token is leaving, i.e. where this transition
+	// departed from. Undefined for the run's first step. Only the graph knows
+	// whether a transition is a jump, so this is what lets the canvas tell one:
+	// arriving at a joint's target FROM the joint's own source means the engine
+	// took the joint rather than the edge below it (see getTestRunScope).
+	fromIndexPath?: string;
 	nonce: number;
 	hasArrived: boolean;
 };
