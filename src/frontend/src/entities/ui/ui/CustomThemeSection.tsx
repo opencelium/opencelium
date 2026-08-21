@@ -10,10 +10,12 @@ import {
 import { themeRegistry } from '@shared/theme/registry/themeRegistry'
 import { readCustomThemeSeeds } from '@shared/theme/themeStorage'
 import { useTheme } from '@shared/theme/hooks/useTheme'
+import { useIsAdmin } from '@features/auth/useIsAdmin'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { Button } from '@shared/ui/primitives/Button'
 import { FormControl } from '@shared/ui/form/FormControl'
 import { Typography } from '@shared/ui/primitives/Typography'
+import { SystemThemeControls } from '@entities/ui/ui/SystemThemeControls'
 
 const DEFAULT_SEEDS: Required<CustomThemeSeeds> = {
     primary: '#1677ff',
@@ -29,7 +31,13 @@ const SEED_FIELDS: { key: keyof CustomThemeSeeds; labelKey: string }[] = [
     { key: 'sidebar', labelKey: 'ui.customTheme.sidebar' },
 ]
 
+/**
+ * Theme colour editor. Admin-only: the seeds it edits are what the admin footer stores as
+ * the system theme, and letting a regular user repaint their own copy of the app is not
+ * what the branding feature is for.
+ */
 export const CustomThemeSection = () => {
+    const isAdmin = useIsAdmin()
     const { t: tEntities } = useI18n('entities')
     const { themeId, themeMode, setTheme } = useTheme()
     // Spread over defaults so seeds stored before the sidebar color existed
@@ -58,6 +66,8 @@ export const CustomThemeSection = () => {
         }
         message.success(tEntities('ui.customTheme.removed'))
     }
+
+    if (!isAdmin) return null
 
     return (
         // FormControl gives the block the exact label styling of the
@@ -94,6 +104,8 @@ export const CustomThemeSection = () => {
                         </Button>
                     )}
                 </div>
+
+                <SystemThemeControls seeds={seeds} />
             </div>
         </FormControl>
     )

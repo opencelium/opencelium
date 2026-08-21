@@ -41,5 +41,20 @@
     "remove": "Remove custom theme",
     "applied": "Custom theme applied",
     "removed": "Custom theme removed"
+  },
+  "systemTheme": {
+    "description": "Save these colors as the system theme so every user gets them by default. Anyone who picked a theme of their own keeps it.",
+    "save": "Save for all users",
+    "reset": "Reset system theme",
+    "use": "Use system theme",
+    "saved": "System theme saved for all users",
+    "saveFailed": "The system theme could not be saved",
+    "removed": "System theme reset",
+    "resetFailed": "The system theme could not be reset",
+    "personalOverride": "You are viewing a theme of your own, which hides the system theme on this screen. Other users still see the system theme.",
+    "confirmReset": {
+      "title": "Reset system theme?",
+      "message": "The saved colors are deleted and every user falls back to the default theme. Users with a theme of their own are not affected."
+    }
   }
 }

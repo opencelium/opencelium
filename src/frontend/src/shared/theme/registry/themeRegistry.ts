@@ -3,7 +3,7 @@ import { createAntPalette } from '@shared/theme/palette/antPalette'
 import { CI_SEEDS, createCiPalette } from '@shared/theme/palette/ciPalette'
 import { createCustomPalette } from '@shared/theme/palette/customPalette'
 import type { Palette } from '@shared/theme/palette/types'
-import { readCustomThemeSeeds } from '@shared/theme/themeStorage'
+import { readCustomThemeSeeds, readSystemThemeSeeds } from '@shared/theme/themeStorage'
 import type { ThemeMode } from '@shared/theme/types'
 
 export type ThemeDefinition = {
@@ -21,6 +21,10 @@ export type ThemeDefinition = {
 
 export class ThemeRegistry {
     private themes = new Map<string, ThemeDefinition>()
+    // Overrides "first registered wins" for getDefault(). The org-wide theme claims it
+    // when one is configured, so users who never picked a theme follow the org brand
+    // instead of the built-in product default.
+    private defaultId: string | null = null
 
     register(def: ThemeDefinition) {
         this.themes.set(def.id, def)
@@ -28,6 +32,11 @@ export class ThemeRegistry {
 
     unregister(id: string) {
         this.themes.delete(id)
+        if (this.defaultId === id) this.defaultId = null
+    }
+
+    setDefault(id: string) {
+        if (this.themes.has(id)) this.defaultId = id
     }
 
     get(id: string): ThemeDefinition | undefined {
@@ -43,6 +52,8 @@ export class ThemeRegistry {
     }
 
     getDefault(): ThemeDefinition {
+        const preferred = this.defaultId ? this.themes.get(this.defaultId) : undefined
+        if (preferred) return preferred
         const first = this.getAll()[0]
         if (!first) throw new Error('No themes registered')
         return first
@@ -122,4 +133,29 @@ if (storedSeeds) {
         palette: createCustomPalette(storedSeeds, 'dark'),
         sidebar: customSidebar,
     })
+}
+
+// The org-wide theme (GET /system-setting/theme_colors, cached locally) registers from
+// the cache at module load for the same reason as the personal one — and takes over as
+// the default so 'device' and every other implicit fallback resolve to it.
+const systemSeeds = readSystemThemeSeeds()
+if (systemSeeds) {
+    const systemSidebar = systemSeeds.sidebar ? { bg: systemSeeds.sidebar } : undefined
+    themeRegistry.register({
+        id: 'system-light',
+        label: 'System Light',
+        family: 'system',
+        mode: 'light',
+        palette: createCustomPalette(systemSeeds, 'light'),
+        sidebar: systemSidebar,
+    })
+    themeRegistry.register({
+        id: 'system-dark',
+        label: 'System Dark',
+        family: 'system',
+        mode: 'dark',
+        palette: createCustomPalette(systemSeeds, 'dark'),
+        sidebar: systemSidebar,
+    })
+    themeRegistry.setDefault('system-light')
 }
