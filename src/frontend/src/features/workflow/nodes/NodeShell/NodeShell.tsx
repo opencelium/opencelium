@@ -49,37 +49,14 @@ export function NodeShell({
 					/* Only offered while the node has no note: an existing one is shown or
 					   hidden from its own badge, so this action never no-ops. */
 					canComment={!data.anchoredComment && !!data.onAddComment}
+					canRemoveJoint={Boolean(data.jump) && !!data.onRemoveJoint}
 					onDelete={() => data.onDeleteNode?.(id)}
 					onComment={() => data.onAddComment?.(id)}
+					onRemoveJoint={() => data.onRemoveJoint?.(id)}
 				/>
 			)}
 			{topLabel && <div className='nodeTopLabel'>{topLabel}</div>}
-			<div
-				className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError || data.testRunFailedVisible ? 'nodeBodyError' : ''} ${data.testRunFailedVisible ? 'nodeBodyTestRunFailed' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''} ${data.testRunActive ? 'nodeBodyTestRunActive' : ''}`}
-				title={data.hasError ? data.errorMessage : data.testRunFailedVisible ? data.testRunFailedMessage : undefined}
-			>
-				{children}
-				{showRightAddTrigger && rightAdd && onAddStep && (
-					<AddStepTrigger
-						direction='right'
-						action={rightAdd.action}
-						showAlways={rightAdd.showAlways}
-						lineVisible={rightAdd.lineVisible}
-						locked={data.lockVisibleAddControls && !!rightAdd.showAlways}
-						onAdd={onAddStep}
-					/>
-				)}
-				{showBottomAddTrigger && bottomAdd && onAddStep && (
-					<AddStepTrigger
-						direction='bottom'
-						action={bottomAdd.action}
-						showAlways={bottomAdd.showAlways}
-						lineVisible={bottomAdd.lineVisible}
-						locked={data.lockVisibleAddControls && !!bottomAdd.showAlways}
-						onAdd={onAddStep}
-					/>
-				)}
-			</div>
+			{jointRejection ? <Tooltip content={jointRejection}>{nodeBody}</Tooltip> : nodeBody}
 			{/* Hosted here rather than per node type: the badge is the same for a
 			    method, an operator or the start node. It hangs off the outer wrap's
 			    top-right corner rather than the node body's, which keeps it clear of

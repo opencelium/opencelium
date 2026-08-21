@@ -8,6 +8,7 @@ import { testConnectionExecution } from '../api/connectionApi';
 import type { TestRunPhase } from './TestRunContext';
 import { saveActiveTestRun } from './testRunStorage';
 import { notifyError } from '@shared/ui/feedback/notifyError';
+import { handleExecutionLogFrame } from './executionLogFrame';
 
 type Params = {
 	phase: TestRunPhase;
@@ -50,13 +51,8 @@ export const useStartTestRun = ({ phase, client, status, isConflicting,
 	prepareRun(startedAt);
 	saveActiveTestRun({ channelId, schedulerId: null, startedAt });
 
-	const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) => {
-		try {
-			handleLog(JSON.parse(frame.body) as ExecutionSocketLog);
-		} catch (error) {
-			console.error('[test-run] failed to parse execution log', error);
-		}
-	});
+	const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) =>
+		handleExecutionLogFrame(frame, handleLog));
 	unsubscribeRef.current = () => subscription.unsubscribe();
 
 	try {

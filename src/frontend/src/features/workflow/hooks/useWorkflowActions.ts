@@ -75,7 +75,8 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const canvas = useWorkflowCanvasActions({ setSidebarAction: workflow.setSidebarAction,
 		setContextMenu: workflow.setContextMenu, setHistoryOpen: workflow.setHistoryOpen,
 		setMethodEditor: workflow.setMethodEditor,
-		setConditionEditor: workflow.setConditionEditor });
+		setConditionEditor: workflow.setConditionEditor,
+		cancelJoint: workflow.onCancelJoint });
 	const header = useWorkflowHeaderActions({
 		openAssignCategory: () => category.setOpen(true),
 		downloadTemplate: templates.downloadConnectionTemplate,
