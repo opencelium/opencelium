@@ -17,9 +17,11 @@
 package com.becon.opencelium.backend.invoker;
 
 import com.becon.opencelium.backend.invoker.entity.Invoker;
+import com.becon.opencelium.backend.utility.InvokerNameUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class InvokerContainer {
@@ -35,19 +37,31 @@ public class InvokerContainer {
     }
 
     public Invoker getByName(String name) {
-        if (!invokers.containsKey(name)) {
-            for (Invoker invoker : invokers.values()) {
-                if (invoker.getName().equals(name)) {
-                    return invoker;
-                }
-            }
-            throw new RuntimeException("Invoker " + name + " from DB not found in invoker folder");
-        }
-        return invokers.get(name);
+        return findByName(name)
+                .orElseThrow(() -> new RuntimeException("Invoker " + name + " from DB not found in invoker folder"));
     }
 
     public boolean existsByName(String name) {
-        return invokers.get(name) != null;
+        return findByName(name).isPresent();
+    }
+
+    /**
+     * Looks the invoker up by its exact name first and falls back to a case-insensitive match,
+     * because the name may come from a database or a file system that does not preserve case.
+     */
+    public Optional<Invoker> findByName(String name) {
+        if (name == null) {
+            return Optional.empty();
+        }
+        Invoker exact = invokers.get(name);
+        if (exact != null) {
+            return Optional.of(exact);
+        }
+        return invokers.entrySet().stream()
+                .filter(e -> InvokerNameUtils.sameName(e.getKey(), name)
+                        || (e.getValue() != null && InvokerNameUtils.sameName(e.getValue().getName(), name)))
+                .map(Map.Entry::getValue)
+                .findFirst();
     }
 
     public void updateAll(Map<String, Invoker> invokers) {
@@ -59,6 +73,15 @@ public class InvokerContainer {
     }
 
     public void remove(String name) {
-        invokers.remove(name);
+        if (name == null) {
+            return;
+        }
+        if (invokers.remove(name) != null) {
+            return;
+        }
+        invokers.keySet().stream()
+                .filter(key -> InvokerNameUtils.sameName(key, name))
+                .findFirst()
+                .ifPresent(invokers::remove);
     }
 }

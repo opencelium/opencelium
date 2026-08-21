@@ -91,7 +91,7 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
         String timestamp = metadata.getTimestamp(executionId);
         String result = event.result();
 
-        boolean logExists = hasLogFile(executionId, connectionId, timestamp) && hasDbRecords(executionId);
+        boolean logExists = hasLogFile(executionId, connectionId, timestamp) && logDataService.hasDbRecords(executionId);
 
         if (EXECUTION_TEST == event.type()) {
             // temporary test artifacts are removed unconditionally — leaving them behind
@@ -125,10 +125,6 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
     private boolean hasLogFile(long executionId, long connectionId, String timestamp) {
         Path logFilePath = buildUncategorizedLogFilePath(timestamp, connectionId, executionId);
         return Files.isRegularFile(logFilePath);
-    }
-
-    private boolean hasDbRecords(long executionId) {
-        return logDataService.findRootByExecutionId(executionId).isPresent();
     }
 
     public void moveLogFile(Long connectionId, long executionId, String timestamp, String result) {

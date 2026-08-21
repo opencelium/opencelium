@@ -263,10 +263,23 @@ public class LogDataServiceImp implements LogDataService {
         }
     }
 
-
     @Override
-    public Optional<LogDataMng> findRootByExecutionId(Long execId) {
-        return metaDataLogRepository.findByExecutionIdAndType(Long.toString(execId), EXECUTION.name());
+    public boolean hasDbRecords(long execId) {
+        String executionId = Long.toString(execId);
+
+        boolean existsInBuffer = buffer.findAllByExecutionId(executionId).stream()
+                .anyMatch(this::isExecutionEnd);
+
+        boolean existsInDB = metaDataLogRepository.findByExecutionIdAndType(executionId, EXECUTION.name())
+                .filter(this::isExecutionEnd)
+                .isPresent();
+
+        return existsInBuffer || existsInDB;
+    }
+
+    private boolean isExecutionEnd(LogDataMng block) {
+        return block.getType() == EXECUTION
+                && (block.getStatus() == PhaseStatus.COMPLETE || block.getStatus() == PhaseStatus.FAIL);
     }
 
     @Override

@@ -26,24 +26,32 @@ import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.enums.execution.DataType;
-import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.reference.utility.ReferenceUtility;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.utility.FileNameUtils;
+import com.becon.opencelium.backend.utility.InvokerNameUtils;
+import com.becon.opencelium.backend.utility.Xml;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -63,20 +71,14 @@ public class InvokerServiceImp implements InvokerService {
 
     private static final Logger log = LoggerFactory.getLogger(InvokerServiceImp.class);
 
-    @Autowired
-    @Lazy
-    private InvokerContainer invokerContainer;
-
-    @Autowired
-    private StorageService storageService;
-
-    @Lazy
-    @Autowired
-    private InvokerSyncService invokerSyncService;
-
+    private final InvokerContainer invokerContainer;
+    private final InvokerSyncService invokerSyncService;
     private final Path filePath;
 
-    public InvokerServiceImp() {
+    @Autowired
+    public InvokerServiceImp(@Lazy InvokerContainer invokerContainer, @Lazy @Qualifier("invokerSyncServiceImp") InvokerSyncService invokerSyncService) {
+        this.invokerContainer = invokerContainer;
+        this.invokerSyncService = invokerSyncService;
         this.filePath = Paths.get(PathConstant.INVOKER);
     }
 
@@ -117,14 +119,21 @@ public class InvokerServiceImp implements InvokerService {
         return invokerContainer.existsByName(name);
     }
 
+    /**
+     * An invoker is always stored as '<name>.xml', so the file name is matched as given -
+     * only case-insensitively, because on a case-insensitive file system (APFS, NTFS) writing
+     * 'Jira.xml' next to an existing 'jira.xml' silently overwrites it.
+     */
     @Override
     public boolean existsByFileName(String fileName) {
-        String ext = FileNameUtils.getExtension(fileName);
-        if (ext == null || ext.isEmpty()) {
-            fileName += ".xml";
+        if (fileName == null || fileName.isBlank()) {
+            return false;
         }
-        Path path = Path.of(PathConstant.INVOKER + fileName);
-        return exists(path);
+        File[] files = filePath.toFile().listFiles();
+        if (files == null) {
+            return false;
+        }
+        return Arrays.stream(files).anyMatch(file -> file.getName().equalsIgnoreCase(fileName));
     }
 
     @Override
@@ -212,6 +221,13 @@ public class InvokerServiceImp implements InvokerService {
 //            invoker = invoker.replace("%20", " ");
             Invoker invoker =  parser.parse();
             String invokerName = invoker.getName();
+            container.keySet().stream()
+                    .filter(existing -> InvokerNameUtils.sameName(existing, invokerName))
+                    .findFirst()
+                    .ifPresent(existing -> log.warn(
+                            "Invokers '{}' and '{}' differ only in case or in whitespace. "
+                                    + "They are treated as one invoker, so only one of them stays reachable.",
+                            existing, invokerName));
             container.put(invokerName, invoker);
         });
         return container;
@@ -481,6 +497,149 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     @Override
+    public String createInvokerFile(Document document) {
+        String name = applyNamePolicy(document);
+        String fileName = name + ".xml";
+
+        // The container is keyed by the name each file declares, so a file could still be
+        // sitting under this name without the container knowing it.
+        if (existsByName(name) || existsByFileName(fileName)) {
+            throw new GeneralServiceException(HttpStatus.CONFLICT, "INVOKER_ALREADY_EXISTS",
+                    "Invoker '" + name + "' already exists. Invoker names are compared without regard to case.");
+        }
+
+        write(document, fileName);
+        return name;
+    }
+
+    @Override
+    public String storeInvokerFile(InputStream inputStream, String fileName) {
+        Document document = parse(inputStream, fileName);
+
+        // The name is validated and normalized before the file is written, so that a rejected
+        // invoker never leaves a file behind.
+        String name = applyNamePolicy(document);
+        assertNotStoredInAnotherFile(name, fileName);
+
+        write(document, fileName);
+        return name;
+    }
+
+    @Override
+    public String toStoredFileName(String fileName) {
+        Objects.requireNonNull(fileName);
+        String baseName = fileName.replace('\\', '/');
+        baseName = baseName.substring(baseName.lastIndexOf('/') + 1).trim();
+
+        if (baseName.isEmpty() || baseName.equals(".") || baseName.equals("..")) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, "INVALID_FILE_NAME",
+                    "Cannot store invoker file '" + fileName + "': the file name is empty or points outside "
+                            + "the invoker folder.");
+        }
+        if (!"xml".equalsIgnoreCase(FileNameUtils.getExtension(baseName))) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, "INVALID_FILE_NAME",
+                    "Invoker file '" + fileName + "' must have the '.xml' extension.");
+        }
+        return baseName;
+    }
+
+    @Override
+    public void deleteQuietly(String name) {
+        if (name == null) {
+            return;
+        }
+        try {
+            delete(name);
+        } catch (Exception e) {
+            log.warn("Failed to roll back invoker '{}'", name, e);
+        }
+    }
+
+    /**
+     * Validates the name declared in '/invoker/name' against the naming policy and writes the
+     * normalized form back, so that the stored file, the name node and the container key all
+     * carry the very same value.
+     *
+     * @return the normalized invoker name
+     */
+    private String applyNamePolicy(Document document) {
+        Node nameNode = findNameNode(document);
+
+        // a document without the node carries no name, which validate() rejects - so once it
+        // returns, the node is there to write the normalized name back into
+        String name = InvokerNameUtils.validate(nameNode == null ? null : nameNode.getTextContent());
+        nameNode.setTextContent(name);
+        return name;
+    }
+
+    private static Node findNameNode(Document document) {
+        try {
+            return (Node) XPathFactory.newInstance().newXPath()
+                    .compile("/invoker/name").evaluate(document, XPathConstants.NODE);
+        } catch (XPathExpressionException e) {
+            throw new StorageException("Failed to read the invoker name", e);
+        }
+    }
+
+    /**
+     * Two files declaring the same invoker name would shadow each other in the invoker
+     * container, so a file may only be overwritten by the invoker it already carries.
+     */
+    private void assertNotStoredInAnotherFile(String name, String fileName) {
+        if (!existsByName(name)) {
+            return;
+        }
+
+        String existingFileName;
+        try {
+            existingFileName = findFileByInvokerName(name).getName();
+        } catch (RuntimeException e) {
+            // the container knows the invoker but no file declares it any more - nothing to shadow
+            log.warn("No file found for invoker '{}' while storing '{}'", name, fileName, e);
+            return;
+        }
+
+        if (!existingFileName.equalsIgnoreCase(fileName)) {
+            throw new GeneralServiceException(HttpStatus.CONFLICT, "INVOKER_ALREADY_EXISTS",
+                    "Invoker '" + name + "' is already stored in '" + existingFileName
+                            + "'. Invoker names are compared without regard to case.");
+        }
+    }
+
+    private Document parse(InputStream inputStream, String fileName) {
+        try {
+            // The stream may be a ZipInputStream sitting on an entry: read the entry's bytes
+            // first so that the parser cannot close the archive they belong to.
+            byte[] content = inputStream.readAllBytes();
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            return builder.parse(new ByteArrayInputStream(content));
+        } catch (Exception e) {
+            throw new StorageException("Failed to read invoker file " + fileName, e);
+        }
+    }
+
+    /**
+     * Serializes the document into the invoker folder and registers the invoker in the container.
+     *
+     * <p>Serializing goes through {@link Xml#writeTo(Path)} - the same call the upload path uses,
+     * so both write invoker files the same way. It wraps the plain identity transformer and owns
+     * the output stream, because a handle the transformer leaves open keeps the file locked on
+     * Windows until GC. The single-argument {@link Xml} constructor is deliberate: the two-argument
+     * one reads the {@code type} attribute off the {@code <invoker>} element and fails on a
+     * document that omits it.
+     */
+    private void write(Document document, String fileName) {
+        Path target = filePath.resolve(fileName);
+        try {
+            document.setDocumentURI(target.toString());
+            new Xml(document).writeTo(target);
+            save(document);
+        } catch (Exception e) {
+            throw new StorageException("Failed to store invoker file " + fileName, e);
+        }
+    }
+
+    @Override
     public File findFileByInvokerName(String invokerName) {
         return findInvokerFile(invokerName)
                 .orElseThrow(() -> new RuntimeException("Invoker '" + invokerName + "' not found."));
@@ -511,7 +670,7 @@ public class InvokerServiceImp implements InvokerService {
             String xPathExpr = "/invoker/name";
             String nodeValue = getNodeValue(file, xPathExpr);
             Objects.requireNonNull(nodeValue);
-            return nodeValue.equals(nodeName);
+            return InvokerNameUtils.sameName(nodeValue, nodeName);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
