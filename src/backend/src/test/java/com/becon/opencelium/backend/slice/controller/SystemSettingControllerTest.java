@@ -18,6 +18,8 @@ import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +37,12 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -151,6 +155,63 @@ class SystemSettingControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(service).delete("theme_colors");
+    }
+
+    // ── POST /system-setting/app_logo ─────────────────────────────────────────
+
+    @Test
+    void uploadLogoReturnsSavedSettingWhenFileIsValid() throws Exception {
+        String logoJson = "{\"filename\":\"abc.png\",\"url\":\"./storage/files/abc.png\"}";
+        SystemSetting saved = settingOf("app_logo", logoJson);
+        when(service.saveIcon(any(MultipartFile.class))).thenReturn(saved);
+        when(service.toJson(saved)).thenReturn(json.readTree(logoJson));
+
+        mockMvc.perform(multipart("/system-setting/app_logo").file(pngFile(new byte[] {1, 2, 3})))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("app_logo"))
+                .andExpect(jsonPath("$.value.url").value("./storage/files/abc.png"));
+    }
+
+    @Test
+    void uploadLogoReturns400WhenServiceRejectsFile() throws Exception {
+        when(service.saveIcon(any(MultipartFile.class))).thenThrow(new GeneralServiceException(
+                HttpStatus.BAD_REQUEST, "INVALID_SYSTEM_SETTING_ICON", "bad extension"));
+
+        mockMvc.perform(multipart("/system-setting/app_logo").file(pngFile(new byte[] {1})))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void uploadLogoReturns400WhenFileExceedsMaxSize() throws Exception {
+        byte[] oversized = new byte[5 * 1024 * 1024 + 1];
+
+        mockMvc.perform(multipart("/system-setting/app_logo").file(pngFile(oversized)))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).saveIcon(any());
+    }
+
+    @Test
+    void uploadLogoReturns400WhenFilePartIsMissing() throws Exception {
+        mockMvc.perform(multipart("/system-setting/app_logo"))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).saveIcon(any());
+    }
+
+    // ── DELETE /system-setting/app_logo ───────────────────────────────────────
+
+    @Test
+    void deleteLogoRoutesToIconDeletionInsteadOfGenericDelete() throws Exception {
+        mockMvc.perform(delete("/system-setting/app_logo"))
+                .andExpect(status().isNoContent());
+
+        verify(service).deleteIcon();
+        verify(service, never()).delete(anyString());
+    }
+
+    private static MockMultipartFile pngFile(byte[] content) {
+        return new MockMultipartFile("file", "logo.png", "image/png", content);
     }
 
     private static SystemSetting settingOf(String name, String value) {
