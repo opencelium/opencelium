@@ -1,19 +1,9 @@
 package com.becon.opencelium.backend.execution.supportfile;
 
 import com.becon.opencelium.backend.constant.AppYamlPath;
-import com.becon.opencelium.backend.constant.ConnectionConstants;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
-import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.enums.SupportFileStatus;
-import com.becon.opencelium.backend.websocket.constant.SocketConstant;
-import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
-import com.becon.opencelium.backend.invoker.service.InvokerService;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.template.TemplateResource;
-import com.becon.opencelium.backend.template.service.TemplateService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,59 +12,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
-import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_EXTENSION;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
-import static com.becon.opencelium.backend.constant.LogConstant.SUCCESS;
-import static com.becon.opencelium.backend.constant.LogConstant.UNCATEGORIZED;
 import static com.becon.opencelium.backend.utility.LogFileUtility.create;
 import static com.becon.opencelium.backend.utility.LogFileUtility.delete;
-import static com.becon.opencelium.backend.utility.LogFileUtility.enforceLimit;
-import static com.becon.opencelium.backend.utility.LogFileUtility.toFilename;
 import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
 
 @Service
 public class SupportFileServiceImp implements SupportFileService {
     private final ConnectionService connectionSqlService;
-    private final TemplateService templateService;
-    private final ConnectorService connectorSqlService;
-    private final InvokerService invokerService;
-    private final WebSocketNotificationService notificationService;
     private final String base;
-    private final int supportFileSuccessLimit;
-    private final int supportFileFailLimit;
 
     public static final String GET_URL = "/connection/support-file/%d/%s";
     private static final Logger logger = LoggerFactory.getLogger(SupportFileServiceImp.class);
 
-    public SupportFileServiceImp (
-            ConnectionService connectionSqlService, TemplateService templateService,
-            ConnectorService connectorSqlService, InvokerService invokerService,
-            WebSocketNotificationService notificationService, Environment env
-    ) {
+    public SupportFileServiceImp(ConnectionService connectionSqlService, Environment env) {
         this.connectionSqlService = connectionSqlService;
-        this.templateService = templateService;
-        this.connectorSqlService = connectorSqlService;
-        this.invokerService = invokerService;
-        this.notificationService = notificationService;
-
-        // initialize application property related variables
         this.base = env.getProperty(AppYamlPath.SUPPORT_FILE_BASE_DIRECTORY, String.class, "src/main/resources/support-files");
-        this.supportFileSuccessLimit = env.getProperty(AppYamlPath.SUPPORT_FILE_SUCCESS_LIMIT, Integer.class, 1);
-        this.supportFileFailLimit = env.getProperty(AppYamlPath.SUPPORT_FILE_FAIL_LIMIT, Integer.class, 5);
     }
 
     @PostConstruct
@@ -179,7 +140,7 @@ public class SupportFileServiceImp implements SupportFileService {
     @Override
     public File getSupportFile(Long connectionId) {
         // try to find successful execution support file by pattern
-        String filePattern =  "*_" + connectionId + "_s_*.zip";
+        String filePattern = "*_" + connectionId + "_s_*.zip";
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(toPath(base, connectionId.toString()), filePattern)) {
             for (Path path : stream) {
@@ -193,78 +154,10 @@ public class SupportFileServiceImp implements SupportFileService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public void collectFiles(Long connectionId, long executionId, String timestamp, String type) {
-        // create temporary file collection directory:
-        String zipFilename = toFilename(timestamp, connectionId, type, executionId, "zip");
-        Path zipFilePath = toPath(base, connectionId.toString(), zipFilename);
-
-        // create parent directories if not exists:
-        try {
-            Files.createDirectories(zipFilePath.getParent());
-        } catch (IOException e) {
-            logger.error("Failed to create support file directory connectionId = '" + connectionId + "'");
-            throw new RuntimeException(e);
-        }
-
-        String connectionTitle = null;
-        try (
-                FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
-                ZipOutputStream zipOutputStream = new ZipOutputStream(fos)
-        ) {
-            ConnectionDTO dto = connectionSqlService.getFullConnection(connectionId);
-
-            // Add Connection resource template as a JSON file:
-            TemplateResource template = templateService.getByConnectionId(connectionId);
-            connectionTitle = template.getName(); // Connection.title == Template.name
-            addToZip(zipOutputStream, template, "connection_template.json");
-
-            // Add invoker files:
-            Integer fromConnectorId = dto.getFromConnector().getConnectorId();
-            if(!Objects.equals(fromConnectorId, ConnectionConstants.DEFAULT_CONNECTOR_ID)){
-                Connector fromConnector = connectorSqlService.getById(fromConnectorId);
-                File fromInvoker = invokerService.findFileByInvokerName(fromConnector.getInvoker());
-                addToZip(zipOutputStream, fromInvoker, fromConnector.getInvoker() + ".xml");
-            }
-
-            if (dto.getToConnector() != null) {
-                int toConnectorId = dto.getToConnector().getConnectorId();
-                if (fromConnectorId != toConnectorId) {
-                    Connector toConnector = connectorSqlService.getById(toConnectorId);
-                    File toInvoker = invokerService.findFileByInvokerName(toConnector.getInvoker());
-                    addToZip(zipOutputStream, toInvoker, toConnector.getInvoker() + ".xml");
-                }
-            }
-
-            // copy temporary uncategorized log file into zip, then delete it:
-            Path filePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, LOG_FILE_EXTENSION));
-            addToZip(zipOutputStream, filePath.toFile(), toFilename(timestamp, connectionId, type, executionId, LOG_FILE_EXTENSION));
-            delete(filePath);
-
-            // send success notification vie websocket
-            String filename = toFilename(timestamp, connectionId, type, executionId, "zip");
-            String message = "Support file successfully generated.";
-            SupportFile notification = new SupportFile(connectionId, connectionTitle, filename, SupportFileStatus.SUPPORT_FILE_GENERATED, message);
-            notificationService.send(SocketConstant.SUPPORT_FILE_DESTINATION, notification);
-        } catch (Exception e) {
-            // send fail notification vie websocket
-            String message = "Support file generation failed: " + e.getMessage();
-            SupportFile notification = new SupportFile(connectionId, connectionTitle, null, SupportFileStatus.SUPPORT_FILE_FAILED, message);
-            notificationService.send(SocketConstant.SUPPORT_FILE_DESTINATION, notification);
-
-            logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
-            throw new RuntimeException(e);
-        } finally {
-            int fileLimit = SUCCESS.equals(type) ? supportFileSuccessLimit : supportFileFailLimit;
-            enforceLimit(base, connectionId, type, fileLimit);
-        }
-    }
-
-    @Override
     public void deleteSupportFile(String zipFilename) {
         String dateRemoved = zipFilename.substring(17);
         String connectionId = dateRemoved.substring(0, dateRemoved.indexOf('_'));
-        Path zipPath =  toPath(base, connectionId, zipFilename);
+        Path zipPath = toPath(base, connectionId, zipFilename);
 
         try {
             delete(zipPath);
@@ -287,36 +180,6 @@ public class SupportFileServiceImp implements SupportFileService {
             return names;
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private void addToZip(ZipOutputStream zipOutputStream, Object object, String zipEntryName) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        byte[] jsonBytes = objectMapper.writeValueAsBytes(object);
-
-        ZipEntry zipEntry = new ZipEntry(zipEntryName);
-        zipOutputStream.putNextEntry(zipEntry);
-        zipOutputStream.write(jsonBytes);
-
-        zipOutputStream.closeEntry();
-    }
-
-    private void addToZip(ZipOutputStream zipOutputStream, File file, String zipEntryName) throws IOException {
-        if (file == null || !file.exists()) {
-            return;
-        }
-
-        try (FileInputStream fis = new FileInputStream(file)) {
-            ZipEntry zipEntry = new ZipEntry(zipEntryName);
-            zipOutputStream.putNextEntry(zipEntry);
-
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = fis.read(buffer)) > 0) {
-                zipOutputStream.write(buffer, 0, length);
-            }
-
-            zipOutputStream.closeEntry();
         }
     }
 }

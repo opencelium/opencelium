@@ -20,13 +20,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.becon.opencelium.backend.constant.LogConstant.DATE_TIME_FORMATTER;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_EXTENSION;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_NAME_RGX;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
@@ -58,28 +56,6 @@ public class LogFileUtility {
 
         if (!Files.exists(directory)) {
             Files.createDirectories(directory);
-        }
-    }
-
-    public static void enforceLimit(String base, Long connectionId, String type, int limit) {
-        Path connectionFilesFolder = toPath(base, connectionId.toString());
-
-        try (Stream<Path> stream = Files.list(connectionFilesFolder)) {
-            List<Path> matchingDirs = stream
-                    .filter(path -> Files.isRegularFile(path) && path.getFileName().toString().contains(connectionId + NAME_PARTS_SEPARATOR + type))
-                    .sorted((p1, p2) -> {
-                        LocalDateTime time1 = extractTime(p1);
-                        LocalDateTime time2 = extractTime(p2);
-
-                        return time1.compareTo(time2);
-                    })
-                    .toList();
-
-            for (int i = 0; i < matchingDirs.size() - limit; i++) {
-                delete(matchingDirs.get(i));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -121,7 +97,8 @@ public class LogFileUtility {
                     .forEach(p -> {
                         try {
                             Files.deleteIfExists(p);
-                        } catch (IOException ignored) {}
+                        } catch (IOException ignored) {
+                        }
                     });
         } catch (IOException e) {
             logger.warn("Failed to delete old log files by executionId", e);
@@ -218,17 +195,6 @@ public class LogFileUtility {
                     ExceptionConstant.INTERNAL_ERROR,
                     ExceptionMessages.UNKNOWN_ERROR
             );
-        }
-    }
-
-    private static LocalDateTime extractTime(Path path) {
-        String filename = path.getFileName().toString();
-
-        try {
-            String timestamp = filename.substring(0, 16);
-            return LocalDateTime.parse(timestamp, DATE_TIME_FORMATTER);
-        } catch (Exception e) {
-            return LocalDateTime.MIN;
         }
     }
 
