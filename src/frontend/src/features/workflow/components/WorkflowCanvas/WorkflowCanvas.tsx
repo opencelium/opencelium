@@ -72,6 +72,12 @@ export function WorkflowCanvas({
   edges,
   isAnyNodeDragging = false,
   activeAction,
+  jointSourceId,
+  jointVerdicts,
+  onConfirmJoint,
+  onCancelJoint,
+  onAddJoint,
+  onRemoveJoint,
   onNodesChange,
   onEdgesChange,
   onConnect,
@@ -101,7 +107,7 @@ export function WorkflowCanvas({
     : undefined;
   const appliedViewportKey = useRef<string | undefined>(undefined);
   const centeredStartVersion = useRef<number>(0);
-  const prepareCacheRef = useRef<PrepareWorkflowCache>({ nodes: new Map(), edges: new Map() });
+  const prepareCacheRef = useRef<PrepareWorkflowCache>({ nodes: new Map(), edges: new Map(), jointEdges: new Map() });
 
   // null outside a TestRunProvider (e.g. a canvas reused without the page wiring).
   const testRun = useTestRun();
@@ -128,12 +134,14 @@ export function WorkflowCanvas({
     [nodes, edges, liveGraphStatus, currentStep],
   );
 
-  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onChangeCommentText, onToggleComment, onAddComment });
-  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onChangeCommentText, onToggleComment, onAddComment };
+  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onAddJoint, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment });
+  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, onAddJoint, onRemoveJoint, onChangeCommentText, onToggleComment, onAddComment };
   const stableOnOpenAddStep = useCallback<NonNullable<typeof onOpenAddStep>>((...args) => callbacksRef.current.onOpenAddStep?.(...args), []);
   const stableOnOpenContextMenu = useCallback<NonNullable<typeof onOpenContextMenu>>((...args) => callbacksRef.current.onOpenContextMenu?.(...args), []);
   const stableOnDeleteNode = useCallback<NonNullable<typeof onDeleteNode>>((...args) => callbacksRef.current.onDeleteNode?.(...args), []);
   const stableOnOpenAggregatorEditor = useCallback<NonNullable<typeof onOpenAggregatorEditor>>((...args) => callbacksRef.current.onOpenAggregatorEditor?.(...args), []);
+  const stableOnAddJoint = useCallback((nodeId: string) => callbacksRef.current.onAddJoint?.(nodeId), []);
+  const stableOnRemoveJoint = useCallback((nodeId: string) => callbacksRef.current.onRemoveJoint?.(nodeId), []);
   const stableOnChangeCommentText = useCallback<NonNullable<typeof onChangeCommentText>>((...args) => callbacksRef.current.onChangeCommentText?.(...args), []);
   const stableOnToggleComment = useCallback<NonNullable<typeof onToggleComment>>((...args) => callbacksRef.current.onToggleComment?.(...args), []);
   const stableOnAddComment = useCallback<NonNullable<typeof onAddComment>>((...args) => callbacksRef.current.onAddComment?.(...args), []);
@@ -153,6 +161,17 @@ export function WorkflowCanvas({
     window.addEventListener('keydown', onEscape);
     return () => window.removeEventListener('keydown', onEscape);
   }, []);
+  // Escape is also the joint picker's way out: clicking a node that cannot be
+  // the target no longer cancels (it explains itself instead — see onNodeClick),
+  // so this listener is mounted only for as long as a joint is being drawn.
+  useEffect(() => {
+    if (!jointSourceId) return;
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onCancelJoint?.();
+    };
+    window.addEventListener('keydown', onEscape);
+    return () => window.removeEventListener('keydown', onEscape);
+  }, [jointSourceId, onCancelJoint]);
 
   const { preparedEdges, preparedNodes } = prepareWorkflowElements({
     nodes,
@@ -163,6 +182,10 @@ export function WorkflowCanvas({
     onOpenContextMenu: stableOnOpenContextMenu,
     onDeleteNode: stableOnDeleteNode,
     onOpenAggregatorEditor: stableOnOpenAggregatorEditor,
+    jointSourceId,
+    jointVerdicts,
+    onAddJoint: stableOnAddJoint,
+    onRemoveJoint: stableOnRemoveJoint,
     onChangeCommentText: stableOnChangeCommentText,
     onToggleComment: stableOnToggleComment,
     onAddComment: stableOnAddComment,
@@ -263,6 +286,10 @@ export function WorkflowCanvas({
         onNodeDragStart={onNodeDragStart as OnNodeDrag<CanvasNodeModel> | undefined}
         onNodeDrag={onNodeDrag as OnNodeDrag<CanvasNodeModel> | undefined}
         onNodeDragStop={onNodeDragStop as OnNodeDrag<CanvasNodeModel> | undefined}
+        onNodeClick={(_, node) => {
+          if (!jointSourceId) return;
+          if (jointVerdicts?.get(node.id)?.valid) onConfirmJoint?.(node.id);
+        }}
         onNodeDoubleClick={isEditLocked ? undefined : handleNodeDoubleClick}
         onPaneClick={onPaneClick}
         nodeDragThreshold={4}

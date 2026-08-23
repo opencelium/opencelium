@@ -46,7 +46,6 @@ export const buildOperatorIndexes = (
 export const buildFromConnectorPayload = (
 	nodes: WorkflowNodeModel[],
 	edges: WorkflowEdgeModel[],
-	options?: { includeInvoker?: boolean },
 ) => {
 	const indexes = buildWorkflowIndexes(nodes, edges);
 	const methodNodes = nodes.filter(isMethodNode);
@@ -67,7 +66,7 @@ export const buildFromConnectorPayload = (
 		typeof indexes.get(node.id) === 'string' ? indexes.get(node.id)! : String(index),
 		index,
 		colorByNodeId.get(node.id),
-		options?.includeInvoker,
+		node.data.jump ? indexes.get(node.data.jump) : undefined,
 	)).sort(compareIndex);
 	const operatorIndexes = buildOperatorIndexes(nodes, edges);
 	const operatorEntries = nodes

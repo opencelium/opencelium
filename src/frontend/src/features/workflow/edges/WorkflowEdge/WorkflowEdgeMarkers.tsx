@@ -10,6 +10,10 @@ export function WorkflowEdgeMarkers() {
                     refX='10' refY='3' orient='auto' markerUnits='userSpaceOnUse'>
                     <path d='M0,0 L0,6 L10,3 z' className='workflowArrowMarkerHighlighted' />
                 </marker>
+                <marker id='workflow-arrow-joint' markerWidth='10' markerHeight='10'
+                    refX='10' refY='3' orient='auto' markerUnits='userSpaceOnUse'>
+                    <path d='M0,0 L0,6 L10,3 z' className='workflowArrowMarkerJoint' />
+                </marker>
             </defs>
         </svg>
     );

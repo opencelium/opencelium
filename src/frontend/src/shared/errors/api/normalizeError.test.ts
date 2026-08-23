@@ -22,9 +22,15 @@ describe('normalizeError', () => {
         expect(normalizeError({ status: 400, data: { message: '   ' } }).serverMessage).toBeUndefined()
     })
 
-    it('caps a runaway body so the toast cannot become a wall of text', () => {
+    it('keeps a long reply whole — the toast clamps it and expands on demand', () => {
         const serverMessage = normalizeError({ status: 500, data: 'x'.repeat(1000) }).serverMessage
-        expect(serverMessage).toHaveLength(301)
+        expect(serverMessage).toHaveLength(1000)
+        expect(serverMessage?.endsWith('…')).toBe(false)
+    })
+
+    it('still bounds a runaway body, so an HTML error page cannot sit in the error state', () => {
+        const serverMessage = normalizeError({ status: 500, data: 'x'.repeat(9000) }).serverMessage
+        expect(serverMessage).toHaveLength(4001)
         expect(serverMessage?.endsWith('…')).toBe(true)
     })
 

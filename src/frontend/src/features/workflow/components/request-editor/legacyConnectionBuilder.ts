@@ -62,6 +62,7 @@ const buildLegacyMethod = (
     index: String(index),
     name,
     color,
+    ...(node.data.jump ? { jump: node.data.jump } : {}),
     label: name,
     methodType,
     connector: !isHttpRequest && node.data.connector ? {

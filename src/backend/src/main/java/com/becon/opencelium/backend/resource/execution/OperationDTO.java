@@ -32,6 +32,8 @@ public class OperationDTO {
      */
     private Integer connectorId;
 
+    private String jump;
+
     public String getPath() {
         return path;
     }
@@ -134,5 +136,13 @@ public class OperationDTO {
 
     public void setConnectorId(Integer connectorId) {
         this.connectorId = connectorId;
+    }
+
+    public String getJump() {
+        return jump;
+    }
+
+    public void setJump(String jump) {
+        this.jump = jump;
     }
 }

@@ -9,7 +9,7 @@ import {i18n} from "@shared/i18n/config/i18n";
 import {themeRegistry} from "@shared/theme/registry/themeRegistry.ts";
 import {setGlobalTheme} from "@shared/theme/themeController.ts";
 import {readStoredThemeId} from "@shared/theme/themeStorage.ts";
-import {DEVICE_THEME_ID} from "@shared/theme/types.ts";
+import {DEVICE_THEME_ID, DEVICE_THEME_LABEL} from "@shared/theme/types.ts";
 
 const baseKey = 'ui';
 
@@ -30,7 +30,7 @@ export const uiDefinition: EntityDefinition = {
                 props: {
                     labelKey: `${baseKey}.fields.theme.label`,
                     options: [
-                        {value: DEVICE_THEME_ID, label: 'Device'},
+                        {value: DEVICE_THEME_ID, label: DEVICE_THEME_LABEL},
                         ...themeRegistry.getAll().map(def => ({value: def.id, label: def.label})),
                     ],
                 }
@@ -144,16 +144,19 @@ export const uiDefinition: EntityDefinition = {
                         type: 'entity',
                         name: 'theme',
                         resolve: async (input) => {
+                            // Suggestions carry the same display labels as the theme select in
+                            // /ui/config ("OpenCelium Light"), with the id kept as the value the
+                            // executor resolves against the registry.
                             const all = [
-                                DEVICE_THEME_ID,
-                                ...themeRegistry.getAll().map(t => t.id),
+                                {value: DEVICE_THEME_ID, label: DEVICE_THEME_LABEL},
+                                ...themeRegistry.getAll().map(t => ({value: t.id, label: t.label})),
                             ];
                             const query = typeof input === 'string' ? input.trim().toLowerCase() : '';
                             if (!query) return all;
-                            // match ids and display labels ("opencelium" finds ci-light/ci-dark)
-                            return all.filter(id =>
-                                id.toLowerCase().includes(query) ||
-                                themeRegistry.get(id)?.label.toLowerCase().includes(query)
+                            // match ids and labels ("opencelium" finds ci-light/ci-dark)
+                            return all.filter(option =>
+                                option.value.toLowerCase().includes(query) ||
+                                option.label.toLowerCase().includes(query)
                             );
                         },
                         execute: ({ theme }) => {

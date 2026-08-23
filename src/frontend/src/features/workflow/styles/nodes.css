@@ -145,6 +145,35 @@
   }
 }
 
+/* Joint picking. Legal targets are highlighted for as long as the picker is
+   open; the node the joint starts from keeps a primary ring so it stays
+   identifiable; every other node only turns red while actually hovered, paired
+   with a tooltip naming the reason (see NodeShell/useJointRejectionMessage) —
+   flagging all of them at once would drown the canvas in red. */
+.nodeBodyJointCandidate .circleNode {
+  border-color: var(--color-status-success-fg);
+  box-shadow: 0 0 0 4px var(--color-status-success-bg);
+  cursor: pointer;
+}
+
+.nodeBodyJointSource .circleNode {
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 4px var(--color-action-primary-subtle);
+}
+
+.nodeBodyJointInvalid .startNode,
+.nodeBodyJointInvalid .circleNode,
+.nodeBodyJointInvalid .ifNode {
+  cursor: not-allowed;
+}
+
+.nodeBodyJointInvalid:hover .startNode,
+.nodeBodyJointInvalid:hover .circleNode,
+.nodeBodyJointInvalid:hover .ifNode {
+  border-color: var(--color-status-error-fg);
+  box-shadow: 0 0 0 4px var(--color-status-error-bg);
+}
+
 .nodeTopLabel {
   position: absolute;
   left: 50%;

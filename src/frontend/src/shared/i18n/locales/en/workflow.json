@@ -7,6 +7,8 @@
     "close": "Close",
     "ok": "Ok",
     "delete": "Delete",
+    "addJoint": "Add joint",
+    "removeJoint": "Remove joint",
     "duplicate": "Duplicate",
     "edit": "Edit",
     "select": "Select",
@@ -45,7 +47,7 @@
   },
   "schedules": {
     "title": "Schedules",
-    "add": "Add schedule",
+    "add": "Create schedule",
     "nextRun": "Next run in {{duration}}",
     "manual": "Manual only",
     "expand": "Show details",
@@ -109,6 +111,17 @@
     "deleteVersionSuccess": "Version deleted",
     "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?"
   },
+  "joint": {
+    "invalid": {
+      "notAMethod": "Only a method can be the target of a joint.",
+      "differentLoopScope": "The target must be a method in the same loop scope as the selected one — both outside every loop, or both inside the same loop.",
+      "backwards": "A joint can only point forward, to a method that runs after the selected one.",
+      "skipsReferencedMethod": "This joint would skip {{method}}, whose response this method uses.",
+      "skipsReferencedMethodUnnamed": "This joint would skip a method whose response this method uses."
+    },
+    "removedAfterMove": "{{count}} joints were removed — they are no longer valid after this move",
+    "removedAfterMove_one": "The joint was removed — it is no longer valid after this move"
+  },
   "sidebar": {
     "useConnector": {
       "title": "Use Connector",
@@ -141,7 +154,8 @@
       "header": "Choose connector",
       "subtitle": "Select a connector first",
       "searchPlaceholder": "search connector",
-      "fixConnector": "Update connector to fix the connection"
+      "fixConnector": "Update connector to fix the connection",
+      "createConnector": "Create connector"
     },
     "methodStep": {
       "header": "Choose method",
@@ -409,32 +423,75 @@
       "operators": {
         "for": {
           "description": "Iterates through an array.",
-          "args": [{ "code": "o1", "text": "An array to iterate through." }],
+          "args": [
+            {
+              "code": "o1",
+              "text": "An array to iterate through."
+            }
+          ],
           "examples": [
-            { "code": "o1 = [\"a\", \"b\", \"c\"]", "result": "Iterates through \"a\", \"b\", \"c\"" },
-            { "code": "o1 = [1, 2, 3]", "result": "Iterates through 1, 2, 3" },
-            { "code": "o1 = []", "result": "Performs no iterations" }
+            {
+              "code": "o1 = [\"a\", \"b\", \"c\"]",
+              "result": "Iterates through \"a\", \"b\", \"c\""
+            },
+            {
+              "code": "o1 = [1, 2, 3]",
+              "result": "Iterates through 1, 2, 3"
+            },
+            {
+              "code": "o1 = []",
+              "result": "Performs no iterations"
+            }
           ]
         },
         "forin": {
           "description": "Iterates through the properties of an object.",
-          "args": [{ "code": "o1", "text": "An object whose properties should be iterated." }],
+          "args": [
+            {
+              "code": "o1",
+              "text": "An object whose properties should be iterated."
+            }
+          ],
           "examples": [
-            { "code": "o1 = {\"name\":\"Hob\",\"age\":123}", "result": "Iterates through properties \"name\", \"age\"" },
-            { "code": "o1 = {\"a\":1,\"b\":2}", "result": "Iterates through properties \"a\", \"b\"" },
-            { "code": "o1 = {}", "result": "Performs no iterations" }
+            {
+              "code": "o1 = {\"name\":\"Hob\",\"age\":123}",
+              "result": "Iterates through properties \"name\", \"age\""
+            },
+            {
+              "code": "o1 = {\"a\":1,\"b\":2}",
+              "result": "Iterates through properties \"a\", \"b\""
+            },
+            {
+              "code": "o1 = {}",
+              "result": "Performs no iterations"
+            }
           ]
         },
         "SplitString": {
           "description": "Splits a string using a delimiter and iterates through the resulting array.",
           "args": [
-            { "code": "o1", "text": "A string to split." },
-            { "code": "o2", "text": "A delimiter string." }
+            {
+              "code": "o1",
+              "text": "A string to split."
+            },
+            {
+              "code": "o2",
+              "text": "A delimiter string."
+            }
           ],
           "examples": [
-            { "code": "o1 = \"a,b,c\", o2 = \",\"", "result": "Iterates through \"a\", \"b\", \"c\"" },
-            { "code": "o1 = \"one|two|three\", o2 = \"|\"", "result": "Iterates through \"one\", \"two\", \"three\"" },
-            { "code": "o1 = \"abc\", o2 = \",\"", "result": "Iterates once through \"abc\"" }
+            {
+              "code": "o1 = \"a,b,c\", o2 = \",\"",
+              "result": "Iterates through \"a\", \"b\", \"c\""
+            },
+            {
+              "code": "o1 = \"one|two|three\", o2 = \"|\"",
+              "result": "Iterates through \"one\", \"two\", \"three\""
+            },
+            {
+              "code": "o1 = \"abc\", o2 = \",\"",
+              "result": "Iterates once through \"abc\""
+            }
           ]
         }
       }
