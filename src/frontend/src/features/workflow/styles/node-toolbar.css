@@ -1,3 +1,12 @@
+/* Every node is pinned to the same z-index (see edges.css), so DOM order alone
+   decides which one paints over which — and this toolbar hangs 44px above its own
+   node, inside the box of whatever node is rendered after it. Lift the selected
+   node, the only one that can own a toolbar, so the node being acted on is on top.
+   React Flow puts `selected` on the node wrapper itself. */
+.react-flow__node.selected {
+  z-index: 10 !important;
+}
+
 .nodeToolbar {
   position: absolute;
   top: -44px;
@@ -14,3 +23,13 @@
   z-index: 30;
 }
 
+
+/* Separates the destructive action from the editing ones. Sized off the icon
+   buttons beside it rather than the toolbar's full height, so it reads as a
+   divider between controls and not as a border. */
+.nodeToolbarDivider {
+  width: 1px;
+  height: 16px;
+  flex-shrink: 0;
+  background: var(--color-border-default);
+}

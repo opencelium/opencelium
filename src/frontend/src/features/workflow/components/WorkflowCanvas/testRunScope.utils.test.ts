@@ -181,4 +181,56 @@ describe('getTestRunScope', () => {
 		expect(scope.failedNodeErrorByNodeId.size).toBe(0);
 		expect(scope.activeNodeIds.size).toBe(0);
 	});
+
+	// The reported log: inside the loop's second iteration the IF's true branch
+	// runs 1_0_0, then execution resumes at 1_1 — the method between them never
+	// appears, because a joint on 1_0_0 skipped straight there.
+	describe('a joint the engine took', () => {
+		const nodesWithJoint = nodes.map((node) => (node.id === 'method-inner'
+			? { ...node, data: { ...node.data, jump: 'method-after' } }
+			: node)) as unknown as WorkflowNodeModel[];
+		const liveGraphStatus: LiveGraphStatus = {
+			'1': { status: 'PENDING', iterator: 'i', iterationCount: 2 },
+			'1_0': { status: 'COMPLETE', ifResult: 'true' },
+			'1_0_0': { status: 'COMPLETE' },
+			'1_1': { status: 'COMPLETE' },
+		};
+
+		it('animates the joint instead of the edge into the target', () => {
+			const scope = getTestRunScope(nodesWithJoint, edges, liveGraphStatus,
+				{ indexPath: '1_1', loopIndex: '1', fromIndexPath: '1_0_0', nonce: 9, hasArrived: false });
+
+			expect([...scope.activeEdgeIds]).toEqual(['joint-method-inner']);
+			// The natural edge into that same target stays dark — one token, one edge.
+			expect(scope.activeEdgeIds.has('e5')).toBe(false);
+			expect(scope.activeStepNonce).toBe(9);
+		});
+
+		it('animates the ordinary edge when the same target is reached without jumping', () => {
+			// Same node entered from the IF above it (the false/continue edge), as in
+			// the iteration where the branch that owns the joint never ran.
+			const scope = getTestRunScope(nodesWithJoint, edges, liveGraphStatus,
+				{ indexPath: '1_1', loopIndex: '0', fromIndexPath: '1_0', nonce: 4, hasArrived: false });
+
+			expect([...scope.activeEdgeIds]).toEqual(['e5']);
+		});
+
+		it('ignores a joint that does not point at the node being entered', () => {
+			const elsewhere = nodes.map((node) => (node.id === 'method-inner'
+				? { ...node, data: { ...node.data, jump: 'method-top' } }
+				: node)) as unknown as WorkflowNodeModel[];
+
+			const scope = getTestRunScope(elsewhere, edges, liveGraphStatus,
+				{ indexPath: '1_1', loopIndex: '1', fromIndexPath: '1_0_0', nonce: 5, hasArrived: false });
+
+			expect([...scope.activeEdgeIds]).toEqual(['e5']);
+		});
+
+		it('falls back to the ordinary edge on the first step, which departed from nowhere', () => {
+			const scope = getTestRunScope(nodesWithJoint, edges, liveGraphStatus,
+				{ indexPath: '1_1', loopIndex: '1', nonce: 1, hasArrived: false });
+
+			expect([...scope.activeEdgeIds]).toEqual(['e5']);
+		});
+	});
 });

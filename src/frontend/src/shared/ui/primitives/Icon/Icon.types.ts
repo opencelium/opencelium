@@ -16,6 +16,8 @@ export type IconName =
     | 'profile'
     | 'content-copy'
     | 'webhook'
+    | 'link'
+    | 'unlink'
     | 'play'
     | 'pause'
     | 'stop'

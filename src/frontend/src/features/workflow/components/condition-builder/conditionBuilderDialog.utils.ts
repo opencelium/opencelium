@@ -1,6 +1,10 @@
 import type { Connection, MethodWithId } from '../../types/connection';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import { ITERATOR_NAMES } from '../request-editor/body-editor/requestReferenceOptions';
+import {
+	collectNodeJointReferenceEdges,
+	getUpstreamNodeIds,
+} from '../../utils/referenceMethodVisibility';
 import type { ConditionGroup } from './conditionBuilder.types';
 
 export const buildNodeBackedMethods = (
@@ -49,21 +53,13 @@ export const getSourceMethods = (
 	const methods = connection.fromConnector.method;
 	if (!node) return methods;
 	if (edges.length > 0) {
-		const canReach = (fromId: string, targetId: string) => {
-			const visited = new Set<string>();
-			const stack = [fromId];
-			while (stack.length) {
-				const current = stack.pop();
-				if (!current || visited.has(current)) continue;
-				if (current === targetId) return true;
-				visited.add(current);
-				edges.forEach((edge) => {
-					if (edge.source === current && !visited.has(edge.target)) stack.push(edge.target);
-				});
-			}
-			return false;
-		};
-		return methods.filter((method) => canReach(method.id, node.id));
+		// A joint hands its target the source's own reference visibility, so it
+		// walks here as an extra upstream edge (see referenceMethodVisibility).
+		const upstream = getUpstreamNodeIds(node.id, [
+			...edges,
+			...collectNodeJointReferenceEdges(nodes),
+		]);
+		return methods.filter((method) => upstream.has(method.id));
 	}
 	const operator = connection.fromConnector.operator.find((item) => item.id === node.id);
 	if (operator?.index !== undefined) {

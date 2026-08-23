@@ -272,3 +272,17 @@ versions:
         operation: add
         value: 500
         path: opencelium.connector-health.request-logging.max-body-length
+  - version: 5.1
+    changes:
+      - changeset: 1
+        operation: add
+        value: 5.1
+        path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: en
+        path: opencelium.language.default
+      - changeset: 3
+        operation: add
+        value: en,de
+        path: opencelium.language.supported

@@ -32,6 +32,10 @@ public class MethodOldDTO {
     private String label;
     private MethodType methodType;
     private Integer dataAggregator;
+    /**
+     * optional field
+     */
+    private String jump;
     private RequestDTO request;
     private ResponseDTO response;
     private MethodConnectorDTO connector;
@@ -119,5 +123,13 @@ public class MethodOldDTO {
 
     public void setConnector(MethodConnectorDTO connector) {
         this.connector = connector;
+    }
+
+    public String getJump() {
+        return jump;
+    }
+
+    public void setJump(String jump) {
+        this.jump = jump;
     }
 }

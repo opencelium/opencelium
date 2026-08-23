@@ -4,6 +4,7 @@ import type { Client, IMessage } from '@stomp/stompjs';
 import { apiExecutor } from '@shared/api/apiExecutor';
 import type { SocketStatus } from '@shared/api/socket/types';
 import type { ExecutionSocketLog } from '@features/logs';
+import { handleExecutionLogFrame } from './executionLogFrame';
 
 type Params = {
 	isOrphaned: boolean;
@@ -44,13 +45,8 @@ export const useOrphanedTestRun = ({ isOrphaned, status, client,
 		if (!isOrphaned || status !== 'connected' || !client || unsubscribeRef.current) return;
 		const channelId = channelIdRef.current;
 		if (!channelId) return;
-		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) => {
-			try {
-				handleOrphanLog(JSON.parse(frame.body) as ExecutionSocketLog);
-			} catch (error) {
-				console.error('[test-run] failed to parse execution log', error);
-			}
-		});
+		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) =>
+			handleExecutionLogFrame(frame, handleOrphanLog));
 		unsubscribeRef.current = () => subscription.unsubscribe();
 	}, [isOrphaned, status, client, channelIdRef, unsubscribeRef, handleOrphanLog]);
 };

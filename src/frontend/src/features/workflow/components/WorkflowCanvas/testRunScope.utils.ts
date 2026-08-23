@@ -1,4 +1,5 @@
 import { buildWorkflowIndexes } from '../../api/connectionPayload';
+import { jointEdgeId } from './jointEdges';
 import type { LiveGraphStatus } from '../../test-run/liveGraphStatus';
 import type { TestRunCurrentStep } from '../../test-run/TestRunContext';
 import type { WorkflowEdgeModel, WorkflowLoopIterationDisplay, WorkflowNodeModel } from '../../types/workflow.types';
@@ -52,6 +53,23 @@ export const EMPTY_TEST_RUN_SCOPE: TestRunScope = {
 	failedNodeErrorByNodeId: new Map(),
 };
 
+/**
+ * The node whose joint the token just travelled, or undefined when this
+ * transition was an ordinary edge: the step left behind must BE a node with a
+ * joint, and that joint must point at the node now being entered.
+ */
+const resolveJointSource = (
+	nodes: WorkflowNodeModel[],
+	indexByNodeId: Map<string, string>,
+	fromIndexPath: string | undefined,
+	currentNodeId: string,
+): string | undefined => {
+	if (!fromIndexPath) return undefined;
+	const source = nodes.find((node) => node.data.jump === currentNodeId
+		&& indexByNodeId.get(node.id) === fromIndexPath);
+	return source?.id;
+};
+
 // While a test run is live, this derives everything the canvas animates from
 // liveGraphStatus plus the playback's current step. The model is a single
 // travelling token: exactly one node highlighted, one edge carrying the
@@ -73,7 +91,8 @@ export const getTestRunScope = (
 	if (entries.length === 0) return EMPTY_TEST_RUN_SCOPE;
 
 	const nodeIdByIndex = new Map<string, string>();
-	buildWorkflowIndexes(nodes, edges).forEach((index, nodeId) => {
+	const indexByNodeId = buildWorkflowIndexes(nodes, edges);
+	indexByNodeId.forEach((index, nodeId) => {
 		nodeIdByIndex.set(index, nodeId);
 	});
 	const nodeById = new Map(nodes.map((node) => [node.id, node]));
@@ -111,8 +130,17 @@ export const getTestRunScope = (
 	// (hasArrived false, the step's first 0.5s) only the edge animates and the
 	// node stays dark; the highlight turns on the moment the dot reaches it.
 	const activeNodeIds = new Set(currentStep.hasArrived ? [currentNodeId] : []);
+	// A joint's target has no graph edge from the joint's source, so the natural
+	// incoming edge is the wrong thing to animate when the engine jumped: the
+	// dot has to travel the joint itself. The jump was taken exactly when this
+	// transition departed from the joint's own source — the step the token left
+	// (`fromIndexPath`). Nothing in the log says "I jumped"; a method that was
+	// skipped simply never appears, so this is the graph answering the question.
+	const jumpedFromNodeId = resolveJointSource(nodes, indexByNodeId, currentStep.fromIndexPath, currentNodeId);
 	const activeEdgeIds = new Set(
-		edges.filter((edge) => edge.target === currentNodeId).map((edge) => edge.id),
+		jumpedFromNodeId
+			? [jointEdgeId(jumpedFromNodeId)]
+			: edges.filter((edge) => edge.target === currentNodeId).map((edge) => edge.id),
 	);
 
 	// Iteration counters for every loop the token is currently inside, and the

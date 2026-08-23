@@ -1,8 +1,11 @@
 import type { ApiRequestDescriptor, AppError } from '../types'
 
-// Long enough for a real backend sentence, short enough that an HTML error page
-// or a stack trace landing in the body can't turn the toast into a wall of text.
-const MAX_SERVER_MESSAGE_LENGTH = 300
+// A sanity bound, not a display limit: the toast clamps what it shows and lets the
+// user expand the rest (see ErrorNotificationText), so cutting here would only throw
+// away the tail — which is where a validation list or a stack trace says what failed.
+// This still keeps a runaway body (an HTML error page, a megabyte of JSON) out of the
+// error state that every subscriber holds on to.
+const MAX_SERVER_MESSAGE_LENGTH = 4000
 
 const asNonEmptyString = (value: unknown): string | undefined =>
     typeof value === 'string' && value.trim() ? value.trim() : undefined
