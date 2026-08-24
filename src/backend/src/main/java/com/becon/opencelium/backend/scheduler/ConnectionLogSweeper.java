@@ -3,7 +3,6 @@ package com.becon.opencelium.backend.scheduler;
 import com.becon.opencelium.backend.constant.props.LogProperties;
 import com.becon.opencelium.backend.constant.props.SupportFileProperties;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.Execution;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ExecutionService;
 import com.becon.opencelium.backend.execution.logger.service.LogDataService;
@@ -91,21 +90,16 @@ public class ConnectionLogSweeper {
     }
 
     private void removeLogDataForDeletedFiles() {
-        List<Long> allExecutions = executionService.findAll().stream()
-                .map(Execution::getId)
-                .toList();
-
-        List<Long> executionsWithLogFile = collectConnectionArtifactPaths().values()
+        List<String> executionsWithLogFile = collectConnectionArtifactPaths().values()
                 .stream()
                 .flatMap(List::stream)
-                .filter(path -> !Files.exists(path))
-                .map(LogFileUtility::extractExecutionId)
+                .map(LogFileUtility::extractExecutionIdAsString)
                 .toList();
 
-        allExecutions.stream()
+        logDataService.findDistinctExecutionIds().stream()
                 .filter(executionId -> !executionsWithLogFile.contains(executionId))
                 .forEach(executionId -> {
-                    logDataService.deleteAllByExecutionId(executionId.toString());
+                    logDataService.deleteAllByExecutionId(executionId);
 
                     logger.info(
                             "Deleted orphan log_data for execution {}",

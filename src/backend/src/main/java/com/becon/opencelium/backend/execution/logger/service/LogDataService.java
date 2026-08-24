@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface LogDataService {
     List<LogDataDTO> getChildrenById(String elementId, String loopIndex);
@@ -26,6 +27,8 @@ public interface LogDataService {
     Optional<LogDataDTO> toDto(LogDataMng metaData);
 
     boolean hasDbRecords(long execId);
+
+    Set<String> findDistinctExecutionIds();
 
     void deleteAllByExecutionId(String executionId);
 }
