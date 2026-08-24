@@ -22,6 +22,14 @@
 
 .bindingLensBadge {
   position: absolute;
+  /* Anchored to the edge-label renderer's origin (flow 0,0) rather than left to
+     its static position: the Tooltip primitive wraps its child in a full-width
+     flex span, and an absolutely positioned flex child with left/top auto is laid
+     out where that span's justify/align put it — which pushed the badge half a
+     pane to the right of the arc it belongs to. The transform must start from the
+     containing block, not from wherever the wrapper happens to place it. */
+  left: 0;
+  top: 0;
   display: flex;
   align-items: center;
   gap: 4px;
