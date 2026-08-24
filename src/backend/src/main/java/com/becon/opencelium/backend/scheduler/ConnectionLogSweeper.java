@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,8 +78,11 @@ public class ConnectionLogSweeper {
         }
 
         Set<Long> existingConnectionIds = findPersistedConnectionIds();
-        LocalDateTime expirationThreshold = LocalDateTime.now()
-                .minus(logProperties.getRetention().getTestConnection().getMaxAge());
+
+        LocalDateTime expirationThreshold = LocalDateTime.now().minus(
+                logProperties.getRetention().getTestConnection().getMaxAge(),
+                ChronoUnit.MILLIS
+        );
 
         pathsByConnectionId.forEach((connectionId, paths) -> {
             if (existingConnectionIds.contains(connectionId)) {

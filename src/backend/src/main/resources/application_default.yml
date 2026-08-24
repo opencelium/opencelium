@@ -387,6 +387,12 @@ opencelium:
 #      per-connection:
 #        success: 2
 #        fail: 3
+#      test-connection:
+#        enabled: true
+#        max-age: 240000
+#        initial-delay: 60000
+#        sweep-interval: 600000
+#
 #  rest-template:
 #    proxy:
 #      host: 127.0.0.1

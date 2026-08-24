@@ -87,14 +87,14 @@ public class LogProperties {
 
         private boolean enabled = true;
 
-        @NotNull
-        private Duration maxAge = Duration.ofMinutes(10);
+        @Min(0)
+        private long maxAge = 240_000L; // 4 minutes
 
-        @NotNull
-        private Duration sweepInterval = Duration.ofMinutes(10);
+        @Min(0)
+        private long sweepInterval = 600_000L; // 10 minutes
 
-        @NotNull
-        private Duration initialDelay = Duration.ofMinutes(1);
+        @Min(0)
+        private long initialDelay = 60_000L; // 1 minute
 
         public boolean isEnabled() {
             return enabled;
@@ -104,27 +104,27 @@ public class LogProperties {
             this.enabled = enabled;
         }
 
-        public Duration getMaxAge() {
+        public long getMaxAge() {
             return maxAge;
         }
 
-        public void setMaxAge(Duration maxAge) {
+        public void setMaxAge(long maxAge) {
             this.maxAge = maxAge;
         }
 
-        public Duration getSweepInterval() {
+        public long getSweepInterval() {
             return sweepInterval;
         }
 
-        public void setSweepInterval(Duration sweepInterval) {
+        public void setSweepInterval(long sweepInterval) {
             this.sweepInterval = sweepInterval;
         }
 
-        public Duration getInitialDelay() {
+        public long getInitialDelay() {
             return initialDelay;
         }
 
-        public void setInitialDelay(Duration initialDelay) {
+        public void setInitialDelay(long initialDelay) {
             this.initialDelay = initialDelay;
         }
     }
