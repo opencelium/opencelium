@@ -20,11 +20,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.becon.opencelium.backend.constant.LogConstant.DATE_TIME_FORMATTER;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_EXTENSION;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_NAME_RGX;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
@@ -49,6 +51,17 @@ public class LogFileUtility {
                 LOG_LOCATION,
                 toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, LOG_FILE_EXTENSION)
         );
+    }
+
+    public static LocalDateTime extractTime(Path path) {
+        String filename = path.getFileName().toString();
+
+        try {
+            String timestamp = filename.substring(0, 16);
+            return LocalDateTime.parse(timestamp, DATE_TIME_FORMATTER);
+        } catch (Exception e) {
+            return LocalDateTime.MIN;
+        }
     }
 
     public static void create(String base) throws IOException {
@@ -182,22 +195,6 @@ public class LogFileUtility {
         return Collections.emptyList();
     }
 
-    private static FileDescriptor readFile(Path path) {
-        try (InputStream in = new FileInputStream(path.toFile())) {
-            return FileDescriptor.of(
-                    in.readAllBytes(),
-                    path.getFileName().toString(),
-                    MediaType.APPLICATION_OCTET_STREAM_VALUE
-            );
-        } catch (IOException e) {
-            throw new GeneralServiceException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ExceptionConstant.INTERNAL_ERROR,
-                    ExceptionMessages.UNKNOWN_ERROR
-            );
-        }
-    }
-
     public static String extractExecutionId(String fileName) {
         if (fileName == null || !fileName.endsWith(".log")) {
             throw new IllegalArgumentException("Invalid log file name: " + fileName);
@@ -221,6 +218,22 @@ public class LogFileUtility {
             return firstLine != null && firstLine.contains(token);
         } catch (IOException e) {
             return false;
+        }
+    }
+
+    private static FileDescriptor readFile(Path path) {
+        try (InputStream in = new FileInputStream(path.toFile())) {
+            return FileDescriptor.of(
+                    in.readAllBytes(),
+                    path.getFileName().toString(),
+                    MediaType.APPLICATION_OCTET_STREAM_VALUE
+            );
+        } catch (IOException e) {
+            throw new GeneralServiceException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ExceptionConstant.INTERNAL_ERROR,
+                    ExceptionMessages.UNKNOWN_ERROR
+            );
         }
     }
 }

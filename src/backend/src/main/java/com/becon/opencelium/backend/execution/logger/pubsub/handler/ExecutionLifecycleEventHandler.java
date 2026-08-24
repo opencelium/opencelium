@@ -40,7 +40,6 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static com.becon.opencelium.backend.constant.LogConstant.DATE_TIME_FORMATTER;
 import static com.becon.opencelium.backend.constant.LogConstant.FAIL;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_EXTENSION;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
@@ -51,6 +50,7 @@ import static com.becon.opencelium.backend.quartz.QuartzJobScheduler.TriggerType
 import static com.becon.opencelium.backend.quartz.QuartzJobScheduler.TriggerType.SUPPORT_FILE;
 import static com.becon.opencelium.backend.utility.LogFileUtility.buildUncategorizedLogFilePath;
 import static com.becon.opencelium.backend.utility.LogFileUtility.delete;
+import static com.becon.opencelium.backend.utility.LogFileUtility.extractTime;
 import static com.becon.opencelium.backend.utility.LogFileUtility.toFilename;
 import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
 
@@ -306,17 +306,6 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private static LocalDateTime extractTime(Path path) {
-        String filename = path.getFileName().toString();
-
-        try {
-            String timestamp = filename.substring(0, 16);
-            return LocalDateTime.parse(timestamp, DATE_TIME_FORMATTER);
-        } catch (Exception e) {
-            return LocalDateTime.MIN;
         }
     }
 }
