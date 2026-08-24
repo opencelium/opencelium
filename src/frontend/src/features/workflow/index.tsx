@@ -134,6 +134,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onChangeCommentText: workflow.onChangeCommentText,
         onToggleComment: workflow.onToggleComment,
         onAddComment: workflow.onAddComment,
+        onClearNodeErrors: workflow.onClearNodeErrors,
         onPaneClick: closeCanvasPanels }} />
       <WorkflowPanels
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
