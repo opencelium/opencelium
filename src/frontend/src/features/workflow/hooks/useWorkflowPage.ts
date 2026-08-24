@@ -36,9 +36,14 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setRestoredViewport, viewportRestoreVersion, setViewportRestoreVersion,
     centerStartVersion, setCenterStartVersion, bindingLensOpen,
     setBindingLensOpen, bindingLensExpanded, setBindingLensExpanded,
-    bindingLensSelectedKey, setBindingLensSelectedKey } = state;
+    bindingLensSelectedKey, setBindingLensSelectedKey, bindingLensPinnedNodeId,
+    setBindingLensPinnedNodeId, bindingLensHoveredNodeId,
+    setBindingLensHoveredNodeId, bindingTableOpen, setBindingTableOpen } = state;
 
   const bindingLens = useBindingLensState({ open: bindingLensOpen, setOpen: setBindingLensOpen,
+    pinnedNodeId: bindingLensPinnedNodeId, setPinnedNodeId: setBindingLensPinnedNodeId,
+    hoveredNodeId: bindingLensHoveredNodeId, setHoveredNodeId: setBindingLensHoveredNodeId,
+    tableOpen: bindingTableOpen, setTableOpen: setBindingTableOpen,
     expandedNodeIds: bindingLensExpanded, setExpandedNodeIds: setBindingLensExpanded,
     selectedKey: bindingLensSelectedKey, setSelectedKey: setBindingLensSelectedKey });
 

@@ -1,8 +1,10 @@
 import type { MouseEvent } from 'react';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { NodeToolbar } from '../../components/node/NodeToolbar/NodeToolbar';
+import { useBindingLensNode } from '../../lens/BindingLensNodeContext';
 import { useJointRejectionMessage } from '../../hooks/useJointRejectionMessage';
 import { AddStepTrigger } from '../AddStepTrigger/AddStepTrigger';
+import { BindingBadge } from '../BindingBadge/BindingBadge';
 import { CommentBadge } from '../CommentBadge/CommentBadge';
 import type { NodeShellProps } from './NodeShell.types';
 
@@ -19,6 +21,13 @@ export function NodeShell({
 }: NodeShellProps) {
 	const onAddStep = data.onAddStep;
 	const isMethodNode = data.kind === 'connector' || data.kind === 'system';
+	const bindingLens = useBindingLensNode();
+	const isPreview = !!data.dragGhost || !!data.dropPlaceholder;
+	// While one method's bindings are being read, every method outside them steps
+	// back: the focused view exists because all of them at once cannot be read.
+	const lensDimmed = !!bindingLens?.focusNodeId
+		&& bindingLens.focusNodeId !== id
+		&& !bindingLens.relatedNodeIds.has(id);
 	const jointRejection = useJointRejectionMessage(data.jointInvalidReason, data.jointBlockingLabel);
 	const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
 		if (data.dragGhost || data.dropPlaceholder) return;
@@ -48,6 +57,11 @@ export function NodeShell({
 			title={data.hasError ? data.errorMessage : data.testRunFailedVisible ? data.testRunFailedMessage : undefined}
 		>
 			{children}
+			{/* Not gated on the node's kind: the badge is there for whatever the
+			    binding graph found bindings on — a webhook step counts as a method
+			    to the reference layer too (see resolveMethodIdentities) — and
+			    BindingBadge renders nothing without them. */}
+			{!isPreview && <BindingBadge nodeId={id} suppressTooltip={data.isAnyNodeDragging} />}
 			{showRightAddTrigger && rightAdd && onAddStep && (
 				<AddStepTrigger
 					direction='right'
@@ -73,7 +87,7 @@ export function NodeShell({
 
 	return (
 		<div
-			className={`nodeWrap ${data.dragGhost ? 'nodeWrapDragGhost' : ''} ${data.dropPlaceholder ? 'nodeWrapDropPlaceholder' : ''} ${data.dragSourceMoving ? 'nodeWrapDragSourceMoving' : ''} ${data.dragSourceFaint ? 'nodeWrapDragSourceFaint' : ''}`}
+			className={`nodeWrap ${lensDimmed ? 'nodeWrapLensDimmed' : ''} ${data.dragGhost ? 'nodeWrapDragGhost' : ''} ${data.dropPlaceholder ? 'nodeWrapDropPlaceholder' : ''} ${data.dragSourceMoving ? 'nodeWrapDragSourceMoving' : ''} ${data.dragSourceFaint ? 'nodeWrapDragSourceFaint' : ''}`}
 			onContextMenu={onContextMenu}
 		>
 			{selected && (
@@ -99,7 +113,7 @@ export function NodeShell({
 			    method, an operator or the start node. It hangs off the outer wrap's
 			    top-right corner rather than the node body's, which keeps it clear of
 			    the duplicate-method colour badge that hugs that same corner. */}
-			{!data.dragGhost && !data.dropPlaceholder && (
+			{!isPreview && (
 				<CommentBadge
 					anchoredComment={data.anchoredComment}
 					suppressTooltip={data.isAnyNodeDragging}

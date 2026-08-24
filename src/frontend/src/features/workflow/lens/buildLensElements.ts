@@ -1,6 +1,7 @@
 import { resolveMethodIdentities } from '../components/request-editor/legacyConnectionBuilder';
 import type { WorkflowNodeModel } from '../types/workflow.types';
 import type { LensBinding, LensBindingGraph, LensElements, LensView } from './bindingLens.types';
+import { isBindingInFocus } from './bindingFocus';
 import { buildLensCards } from './buildLensCards';
 import { buildLensPairEdges } from './buildLensEdges';
 import { buildLensFieldEdges } from './buildLensFieldEdges';
@@ -31,17 +32,26 @@ export const buildLensElements = (
 	view: LensView,
 	actions: LensActions,
 ): LensElements => {
+	// The legend states the whole workflow's tally whatever is in focus: it is the
+	// overview the focused view is a slice of, not a description of the slice.
 	const summary = buildLensSummary(graph);
+	if (!view.focusNodeId) return { nodes: [], edges: [], summary };
+
+	const focusNodeId = view.focusNodeId;
+	const inFocus = graph.bindings.filter((binding) => isBindingInFocus(binding, focusNodeId));
 	const expanded = new Set(view.expandedNodeIds);
-	const drawable = graph.bindings.filter((binding) =>
+	// An arc needs both ends; a card row needs only its own, which is how a
+	// reference to a method that is no longer there still shows up as a broken row
+	// on the method that wanted it (buildLensCards checks each end itself).
+	const drawable = inFocus.filter((binding) =>
 		!!bindingAnchorNodeId(binding) && !!binding.consumer.nodeId);
 	const touchesExpanded = (binding: LensBinding) =>
 		expanded.has(bindingAnchorNodeId(binding) as string)
 		|| expanded.has(binding.consumer.nodeId as string);
 
 	return {
-		nodes: buildLensCards(drawable, expanded, buildAnchors(nodes, expanded),
-			view.selectedKey, actions.onCollapseCard),
+		nodes: buildLensCards(inFocus, expanded, buildAnchors(nodes, expanded),
+			view.selectedKey, actions.onCollapseCard, actions.onSelectBinding),
 		edges: [
 			...buildLensPairEdges(drawable.filter((binding) => !touchesExpanded(binding)),
 				view.selectedKey, actions),

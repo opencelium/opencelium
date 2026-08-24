@@ -1,4 +1,4 @@
-import { readableTextColor } from '../../utils/methodColor';
+import { readableTextColor, swatchRingColor } from '../../utils/methodColor';
 import type { MethodColorDotProps } from './MethodColorDot.types';
 
 export function MethodColorDot({ color, index, size = 16 }: MethodColorDotProps) {
@@ -15,6 +15,9 @@ export function MethodColorDot({ color, index, size = 16 }: MethodColorDotProps)
 				borderRadius: '50%',
 				backgroundColor: color,
 				color: readableTextColor(color),
+				// Without it a near-surface colour (the palette still holds greys)
+				// reads as no swatch at all rather than as a pale one.
+				boxShadow: `inset 0 0 0 1px ${swatchRingColor(color)}`,
 				fontSize: 10,
 				fontWeight: 700,
 				lineHeight: 1,

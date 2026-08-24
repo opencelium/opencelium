@@ -155,6 +155,22 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         changeHistory={{ open: changeHistoryOpen, entries: workflow.undoEntries,
           onClose: () => setChangeHistoryOpen(false),
           onJumpTo: workflow.jumpToUndoEntry }}
+        bindingTable={{ open: workflow.bindingLens.tableOpen,
+          nodes: hydratedNodes, edges: workflow.edges, fieldBindings: loadedFieldBindings,
+          selectedKey: workflow.bindingLens.view.selectedKey,
+          isDetailOpen: !!workflow.bindingLens.view.selectedKey,
+          onClose: workflow.bindingLens.onCloseTable,
+          onSelectBinding: (binding) => {
+            workflow.bindingLens.onSelectBinding(binding.key);
+            // The row's own method on the canvas behind: focused so the lens draws
+            // its arcs, and centred because a binding picked from a list is as
+            // likely as not to belong to a method that is currently off screen.
+            const consumerNodeId = binding.consumer.nodeId;
+            if (consumerNodeId) {
+              workflow.bindingLens.onFocusNode(consumerNodeId);
+              workflow.centerOnNode(consumerNodeId);
+            }
+          } }}
         bindingDrawer={{ selectedKey: workflow.bindingLens.view.selectedKey,
           nodes: hydratedNodes, edges: workflow.edges, fieldBindings: loadedFieldBindings,
           readOnly: readOnly || isTestRunLocked,

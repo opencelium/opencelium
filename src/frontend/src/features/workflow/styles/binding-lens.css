@@ -5,14 +5,12 @@
   opacity: 0.3;
 }
 
-.bindingLensToggle {
-  display: flex;
-  align-items: center;
-  padding: 2px;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: 6px;
-  background: var(--color-background-surface);
-  box-shadow: var(--shadow-sm);
+/* A binding view that is currently open, in the flow's control strip (see
+   BindingLensControls). Tints the glyph through currentColor, which
+   .workflowControls already forwards to the svg's fill. */
+.workflowControls .react-flow__controls-button.workflowControlsButtonActive {
+  background: var(--color-action-primary-subtle);
+  color: var(--color-action-primary);
 }
 
 .bindingLensEdgePath {
@@ -138,13 +136,6 @@
   background: var(--color-background-subtle);
 }
 
-.bindingCardDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  flex: none;
-}
-
 .bindingCardTitle {
   flex: 1;
   font-weight: 600;
@@ -167,10 +158,36 @@
   align-items: center;
   gap: 6px;
   padding: 3px 8px;
+  /* A row that opens its binding is a <button>; these neutralize the control so
+     both tags render identically (see BindingCardNode). */
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
 
-.bindingCardRow:hover {
+/* Only an actionable row reacts to the pointer — a row standing for several
+   different enhancements has nothing to open, and offering hover feedback for it
+   would promise a click that does nothing. Declared above .bindingCardRowSelected
+   so a selected row keeps its own background while hovered. */
+.bindingCardRowAction {
+  cursor: pointer;
+}
+
+.bindingCardRowAction:hover {
   background: var(--color-background-hover);
+}
+
+.bindingCardRowAction:focus-visible {
+  outline: 2px solid var(--color-action-primary);
+  outline-offset: -2px;
+}
+
+.bindingCardRowCount {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .bindingCardRowPath {
@@ -187,7 +204,14 @@
 }
 
 .bindingCardRowCounterpart {
-  max-width: 84px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 96px;
+  color: var(--color-text-secondary);
+}
+
+.bindingCardRowCounterpartName {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -235,4 +259,161 @@
 .bindingDrawerFooter {
   padding: 8px 16px;
   border-top: 1px solid var(--color-border-subtle);
+}
+
+/* The lens's at-rest state: one chip per method saying how many of its request
+   fields are filled from elsewhere (↓) and how many of its response fields other
+   methods read (↑). It hangs off the circle's lower left and grows leftward
+   (hence the right-edge anchor rather than a left offset, so its width can vary
+   with the counts): the top corners already carry the aggregator, colour and
+   comment badges, the node's name sits below, and this band is under both the
+   incoming edge and the previous node's add-step trigger. */
+.nodeBindingBadge {
+  position: absolute;
+  right: calc(100% - 2px);
+  bottom: 2px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  height: 16px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 11;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.nodeBindingBadge:hover {
+  background: var(--color-background-hover);
+}
+
+.nodeBindingBadgePinned {
+  border-color: var(--color-action-primary);
+  color: var(--color-action-primary);
+}
+
+.nodeBindingBadgeCounts {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nodeBindingBadgeBroken {
+  color: var(--color-status-error-fg);
+}
+
+/* A method outside the focused one's bindings — still legible enough to keep the
+   graph's shape readable, quiet enough that the arcs are what the eye follows. */
+.nodeWrapLensDimmed {
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+}
+
+/* The binding list. Wider than the default right drawer (a table of two method
+   names and two field paths needs it) and, unlike every other panel here, it
+   renders no backdrop: the canvas stays live behind it so hovering a method
+   still lights up its bindings while the list is open. */
+.bindingTableDrawer {
+  width: 640px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Steps aside for the editor drawer that a row opens (460px — .bindingDrawer).
+   Two classes so it outranks .rightDrawerOpen's own transform. */
+.rightDrawerOpen.bindingTableDrawerAside {
+  transform: translateX(-460px);
+}
+
+.bindingTableFilters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.bindingTableBody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.bindingTableEndpoint {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bindingTableMethod {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bindingTableMethodName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bindingTableMethodUnknown {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.bindingTablePath {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.bindingTablePathBroken {
+  color: var(--color-status-error-fg);
+  text-decoration: line-through;
+}
+
+.bindingTableKind {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.bindingTableReason {
+  color: var(--color-status-error-fg);
+  font-size: 11px;
+}
+
+.bindingTableRowSelected > * {
+  background: var(--color-action-primary-subtle);
+}
+
+.bindingTableNote {
+  padding: 8px 16px;
+  border-top: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.bindingDrawerMethod {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bindingDrawerNote {
+  padding: 16px;
 }

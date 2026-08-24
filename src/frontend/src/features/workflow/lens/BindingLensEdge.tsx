@@ -82,9 +82,11 @@ export function BindingLensEdge({
 							onClick={data?.onActivate}
 							data-testid={`workflow-binding-lens-edge-${data?.bindingKeys[0] ?? id}`}
 						>
-							{isPair && (
-								<span className='bindingLensBadgeCount' style={{ color: stroke }}>{count}</span>
-							)}
+							{/* The count is not coloured with the arc: the pale end of the
+							    palette disappears against the badge's own surface. The arc it
+							    sits on, and the badge's border, carry the colour instead —
+							    neither of which has to be read. */}
+							{isPair && <span className='bindingLensBadgeCount'>{count}</span>}
 							{data?.hasScript && <span className='bindingLensBadgeScript'>ƒx</span>}
 							{invalidCount > 0 && (isPair ? !isBroken : true) && (
 								<span className='bindingLensBadgeWarning'>

@@ -9,7 +9,18 @@ const CARD_OFFSET_Y = 64;
 
 type AnchorNode = { id: string; position: { x: number; y: number }; label: string; color: string };
 
-const addRow = (rows: Map<string, LensCardRow>, row: LensCardRow) => {
+/** What clicking each of a row's bindings would open. One enhancement is one
+ *  editor however many references it pulls together; a reference living in the
+ *  field's own value is its own target. The row can only be a control when every
+ *  binding behind it leads to the same place — the builder's own bookkeeping, not
+ *  part of the row the card renders. */
+type RowDraft = LensCardRow & { editorKeys: Set<string> };
+
+const editorKey = (binding: LensBinding) => binding.source.kind === 'enhancement'
+	? `enhancement:${binding.source.enhanceId}`
+	: binding.key;
+
+const addRow = (rows: Map<string, RowDraft>, row: RowDraft) => {
 	const key = `${row.role}:${row.path}`;
 	const existing = rows.get(key);
 	if (!existing) {
@@ -20,6 +31,7 @@ const addRow = (rows: Map<string, LensCardRow>, row: LensCardRow) => {
 	// or one response field read by several methods): the row is the field, and
 	// it carries every binding behind it.
 	existing.bindingKeys.push(...row.bindingKeys);
+	row.editorKeys.forEach((key) => existing.editorKeys.add(key));
 	existing.hasScript = existing.hasScript || row.hasScript;
 	existing.isBroken = existing.isBroken || row.isBroken;
 	existing.isSelected = existing.isSelected || row.isSelected;
@@ -32,10 +44,11 @@ export const buildLensCards = (
 	anchorsById: Map<string, AnchorNode>,
 	selectedKey: string | null,
 	onCollapse: (nodeId: string) => void,
+	onSelectBinding: (bindingKey: string) => void,
 ): LensNodeModel[] => {
-	const rowsByNode = new Map<string, Map<string, LensCardRow>>();
+	const rowsByNode = new Map<string, Map<string, RowDraft>>();
 	const rowsFor = (nodeId: string) => {
-		const rows = rowsByNode.get(nodeId) ?? new Map<string, LensCardRow>();
+		const rows = rowsByNode.get(nodeId) ?? new Map<string, RowDraft>();
 		rowsByNode.set(nodeId, rows);
 		return rows;
 	};
@@ -52,6 +65,7 @@ export const buildLensCards = (
 				role: 'source', path: binding.provider.path,
 				counterpartLabel: binding.consumer.label, color: binding.provider.color,
 				hasScript: binding.isScript, isBroken, isSelected, bindingKeys: [binding.key],
+				editorKeys: new Set([editorKey(binding)]),
 			});
 		}
 		if (targetNodeId && expandedNodeIds.has(targetNodeId)) {
@@ -59,8 +73,16 @@ export const buildLensCards = (
 				role: 'target', path: binding.consumer.path,
 				counterpartLabel: binding.provider.label, color: binding.provider.color,
 				hasScript: binding.isScript, isBroken, isSelected, bindingKeys: [binding.key],
+				editorKeys: new Set([editorKey(binding)]),
 			});
 		}
+	});
+
+	const toRow = ({ editorKeys, ...row }: RowDraft): LensCardRow => ({
+		...row,
+		onActivate: editorKeys.size === 1
+			? () => onSelectBinding(row.bindingKeys[0])
+			: undefined,
 	});
 
 	return [...rowsByNode.entries()].flatMap(([nodeId, rows]) => {
@@ -70,7 +92,7 @@ export const buildLensCards = (
 			anchorNodeId: nodeId,
 			label: anchor.label,
 			color: anchor.color,
-			rows: [...rows.values()],
+			rows: [...rows.values()].map(toRow),
 			onCollapse: () => onCollapse(nodeId),
 		};
 		return [{
