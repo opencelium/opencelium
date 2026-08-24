@@ -3,9 +3,10 @@ import type { BindingLensSummary } from './bindingLens.types';
 
 type BindingLensLegendProps = {
 	summary: BindingLensSummary;
+	isFocused: boolean;
 };
 
-export function BindingLensLegend({ summary }: BindingLensLegendProps) {
+export function BindingLensLegend({ summary, isFocused }: BindingLensLegendProps) {
 	const { t } = useI18n('workflow');
 
 	return (
@@ -28,6 +29,11 @@ export function BindingLensLegend({ summary }: BindingLensLegendProps) {
 						{t('bindingLens.legendBroken', { count: summary.invalid })}
 					</div>
 				</>
+			)}
+			{/* The counts describe the whole workflow; the arcs only ever describe one
+			    method, so an unfocused lens has to say how to ask for them. */}
+			{summary.total > 0 && !isFocused && (
+				<div className='bindingLensLegendNote'>{t('bindingLens.focusHint')}</div>
 			)}
 			{summary.notShown > 0 && (
 				<div className='bindingLensLegendNote'>

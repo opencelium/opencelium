@@ -19,11 +19,20 @@ export type LensEndpoint = {
 
 export type LensInvalidReason = 'out-of-scope' | 'missing-method';
 
+/**
+ * Where the reference behind a binding actually lives. An enhancement is a row in
+ * the connection's `fieldBindings` and has an editor of its own; a 'value'
+ * reference is written straight into the field it fills (what the body and header
+ * pickers produce) and has nothing to edit but the field itself.
+ */
+export type LensBindingSource =
+	| { kind: 'enhancement'; enhanceId: string; varKey: string }
+	| { kind: 'value' };
+
 export type LensBinding = {
 	/** Stable identity for a lens edge and for drawer selection. */
 	key: string;
-	enhanceId: string;
-	varKey: string;
+	source: LensBindingSource;
 	consumer: LensEndpoint;
 	provider: LensEndpoint;
 	/** false for a plain wire (one reference, untouched default script). */
@@ -86,6 +95,11 @@ export type LensCardRow = {
 	isBroken: boolean;
 	isSelected: boolean;
 	bindingKeys: string[];
+	/** Opens this field's binding in the drawer. Absent when the row stands for
+	 *  several *different* enhancements — one response field read by two methods
+	 *  is two editors, and the row cannot pick between them; the per-consumer arcs
+	 *  it fans out into can. */
+	onActivate?: () => void;
 };
 
 export type LensCardData = {
@@ -99,8 +113,23 @@ export type LensCardData = {
 export type LensNodeModel = Node<LensCardData, 'binding-lens-card'>;
 
 export type LensView = {
+	/** The method the lens is currently drawing. Nothing is drawn without one:
+	 *  every arc at once is unreadable on a real workflow, so the at-rest state
+	 *  is the per-node badges and an arc appears only for the method in focus. */
+	focusNodeId: string | null;
 	expandedNodeIds: readonly string[];
 	selectedKey: string | null;
+};
+
+/** What a method node's badge states while the lens is open. Counts are distinct
+ *  field paths, so they match the rows the node's card shows one-for-one — a
+ *  script pulling three references into one target field is one received field,
+ *  not three. `broken` counts references rather than fields: it mirrors the
+ *  legend's own total, and a field can be broken more than one way. */
+export type NodeBindingSummary = {
+	receives: number;
+	provides: number;
+	broken: number;
 };
 
 export type LensElements = {

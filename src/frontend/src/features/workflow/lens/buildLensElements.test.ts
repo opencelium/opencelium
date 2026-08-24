@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { WorkflowNodeModel } from '../types/workflow.types';
-import type { LensBinding, LensBindingGraph } from './bindingLens.types';
+import type { LensBinding, LensBindingGraph, LensBindingSource } from './bindingLens.types';
 import { buildLensElements } from './buildLensElements';
 
 const node = (id: string, name: string, color: string, x = 0) => ({
@@ -21,10 +21,12 @@ const endpoint = (nodeId: string | null, color: string, path: string) => ({
 	path: `body.$.${path}`,
 });
 
+const enhancement = (enhanceId: string, varKey = 'VAR_0'): LensBindingSource =>
+	({ kind: 'enhancement', enhanceId, varKey });
+
 const lensBinding = (overrides: Partial<LensBinding> = {}): LensBinding => ({
 	key: 'en-1:VAR_0',
-	enhanceId: 'en-1',
-	varKey: 'VAR_0',
+	source: { kind: 'enhancement', enhanceId: 'en-1', varKey: 'VAR_0' },
 	consumer: { ...endpoint('m2', '#f5a623', 'userId'), direction: 'request' },
 	provider: endpoint('m1', '#3fa9f5', 'id'),
 	isScript: false,
@@ -40,14 +42,16 @@ const graph = (bindings: LensBinding[],
 const actions = () => ({ onExpandPair: vi.fn(), onCollapseCard: vi.fn(),
 	onSelectBinding: vi.fn() });
 
-const view = (expandedNodeIds: string[] = [], selectedKey: string | null = null) =>
-	({ expandedNodeIds, selectedKey });
+// Every binding in this fixture is consumed by m2, so focusing it is the
+// equivalent of the lens's old draw-everything default.
+const view = (expandedNodeIds: string[] = [], selectedKey: string | null = null,
+	focusNodeId: string | null = 'm2') => ({ focusNodeId, expandedNodeIds, selectedKey });
 
 describe('buildLensElements', () => {
 	it('collapses a pair into one arc while both ends are collapsed', () => {
 		const { nodes: cards, edges } = buildLensElements(graph([
 			lensBinding(),
-			lensBinding({ key: 'en-2:VAR_0', enhanceId: 'en-2', isScript: true }),
+			lensBinding({ key: 'en-2:VAR_0', source: enhancement('en-2'), isScript: true }),
 		]), nodes, view(), actions());
 		expect(cards).toHaveLength(0);
 		expect(edges).toHaveLength(1);
@@ -91,7 +95,7 @@ describe('buildLensElements', () => {
 	it('merges several bindings into one row per field, keeping every key', () => {
 		const { nodes: cards } = buildLensElements(graph([
 			lensBinding(),
-			lensBinding({ key: 'en-3:VAR_0', enhanceId: 'en-3', isScript: true,
+			lensBinding({ key: 'en-3:VAR_0', source: enhancement('en-3'), isScript: true,
 				provider: endpoint('m3', '#7ed321', 'x') }),
 		]), nodes, view(['m2']), actions());
 		const rows = cards.find((card) => card.id === 'lens:card:m2')?.data.rows ?? [];
@@ -101,6 +105,34 @@ describe('buildLensElements', () => {
 			// two different providers feed this field, so no single counterpart
 			counterpartLabel: null,
 		});
+	});
+
+	it('opens a row backed by one enhancement, whichever reference feeds it', () => {
+		const handlers = actions();
+		const { nodes: cards } = buildLensElements(graph([
+			lensBinding({ isScript: true }),
+			lensBinding({ key: 'en-1:VAR_1', source: enhancement('en-1', 'VAR_1'), isScript: true,
+				provider: endpoint('m3', '#7ed321', 'x') }),
+		]), nodes, view(['m2']), handlers);
+		const rows = cards[0]?.data.rows ?? [];
+		expect(rows).toHaveLength(1);
+		rows[0].onActivate?.();
+		// Both references are the same enhancement, so both open the same editor.
+		expect(handlers.onSelectBinding).toHaveBeenCalledWith('en-1:VAR_0');
+	});
+
+	it('leaves a row spanning several enhancements without an action', () => {
+		const { nodes: cards } = buildLensElements(graph([
+			lensBinding(),
+			lensBinding({ key: 'en-4:VAR_0', source: enhancement('en-4'),
+				consumer: { ...endpoint('m3', '#7ed321', 'ref'), direction: 'request' } }),
+		]), nodes, view(['m1'], null, 'm1'), actions());
+		// One response field read by two methods is two editors: the row cannot
+		// pick between them, its two arcs can.
+		const rows = cards[0]?.data.rows ?? [];
+		expect(rows).toHaveLength(1);
+		expect(rows[0].bindingKeys).toHaveLength(2);
+		expect(rows[0].onActivate).toBeUndefined();
 	});
 
 	it('anchors a broken reference on the method it names and marks the row', () => {
@@ -117,7 +149,7 @@ describe('buildLensElements', () => {
 		const handlers = actions();
 		const { edges } = buildLensElements(graph([
 			lensBinding(),
-			lensBinding({ key: 'en-9:VAR_0', enhanceId: 'en-9' }),
+			lensBinding({ key: 'en-9:VAR_0', source: enhancement('en-9') }),
 		]), nodes, view(), handlers);
 		expect(edges[0].data?.activates).toBe('expand');
 		edges[0].data?.onActivate?.();
@@ -147,7 +179,7 @@ describe('buildLensElements', () => {
 	it('marks the selected binding on both its arc and its field rows', () => {
 		const { nodes: cards, edges } = buildLensElements(graph([
 			lensBinding(),
-			lensBinding({ key: 'en-8:VAR_0', enhanceId: 'en-8',
+			lensBinding({ key: 'en-8:VAR_0', source: enhancement('en-8'),
 				provider: endpoint('m3', '#7ed321', 'other') }),
 		]), nodes, view(['m1', 'm2'], 'en-1:VAR_0'), actions());
 		expect(edges.find((edge) => edge.id === 'lens:ref:en-1:VAR_0')?.data?.isSelected).toBe(true);
@@ -164,6 +196,35 @@ describe('buildLensElements', () => {
 				invalidReason: 'missing-method' }),
 		], { malformed: 1, outsideScope: 2, unanchored: 0 }), nodes, view(['m1']), actions());
 		expect(summary).toEqual({ total: 3, direct: 2, script: 1, invalid: 1, notShown: 4 });
+	});
+
+	it('draws nothing until a method is focused', () => {
+		const unfocused = buildLensElements(graph([lensBinding()]), nodes,
+			view([], null, null), actions());
+		expect(unfocused).toMatchObject({ nodes: [], edges: [], summary: { total: 1 } });
+	});
+
+	it('draws only the bindings the focused method takes part in', () => {
+		const { edges } = buildLensElements(graph([
+			lensBinding(),
+			lensBinding({ key: 'en-7:VAR_0', source: enhancement('en-7'),
+				provider: endpoint('m3', '#7ed321', 'ref') }),
+		]), nodes, view([], null, 'm1'), actions());
+		expect(edges).toHaveLength(1);
+		expect(edges[0]).toMatchObject({ id: 'lens:pair:m1:m2' });
+	});
+
+	it('gives a reference whose method is gone a row on the method that wanted it', () => {
+		const { nodes: cards, edges } = buildLensElements(graph([
+			lensBinding({ provider: endpoint(null, '#000001', 'ticketId'),
+				invalidReason: 'missing-method' }),
+		]), nodes, view(['m2']), actions());
+		// No arc — there is no second end to draw one to — but the field it fills
+		// still says so, which is the only place this binding is visible at all.
+		expect(edges).toHaveLength(0);
+		expect(cards[0]?.data.rows).toMatchObject([
+			{ role: 'target', path: 'body.$.userId', isBroken: true, counterpartLabel: null },
+		]);
 	});
 
 	it('draws nothing for a workflow with no bindings', () => {

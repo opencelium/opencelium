@@ -31,7 +31,7 @@ const enhancement = (script = 'RESULT_VAR = VAR_0'): Enhancement => ({
 const fieldBindings = [{ enhancement: enhancement() }];
 
 const binding = {
-	key: 'e1:VAR_0', enhanceId: 'e1', varKey: 'VAR_0',
+	key: 'e1:VAR_0', source: { kind: 'enhancement', enhanceId: 'e1', varKey: 'VAR_0' },
 	consumer: { nodeId: 'm2', label: 'createTicket', color: '#f5a623', direction: 'request',
 		messageProperty: 'body', field: 'userId', path: 'body.$.userId' },
 	provider: { nodeId: 'm1', label: 'getUsers', color: '#3fa9f5', direction: 'response',
@@ -97,7 +97,10 @@ describe('useBindingDrawerStore', () => {
 
 		// Selecting another arc keeps the drawer mounted, so the edit made to the
 		// first binding has to leave before the store is reseeded under it.
-		act(() => { rerender({ binding: { ...binding, key: 'e1:VAR_1', varKey: 'VAR_1' } }); });
+		act(() => {
+			rerender({ binding: { ...binding, key: 'e1:VAR_1',
+				source: { kind: 'enhancement', enhanceId: 'e1', varKey: 'VAR_1' } } });
+		});
 		expect(onFieldBindingsChange).toHaveBeenCalledTimes(1);
 		expect(onFieldBindingsChange.mock.calls[0][0])
 			.toMatchObject([{ enhancement: { script: 'RESULT_VAR = 1' } }]);

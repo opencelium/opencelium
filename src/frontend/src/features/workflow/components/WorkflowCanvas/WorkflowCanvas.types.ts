@@ -50,7 +50,15 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	bindingLens?: {
 		open: boolean;
 		view: LensView;
+		/** Set only while the focused method is pinned rather than hovered. */
+		pinnedNodeId: string | null;
+		/** The binding list panel — the canvas only hosts its toggle. */
+		tableOpen: boolean;
+		onToggleTable: () => void;
 		onToggle: () => void;
+		onHoverNode: (nodeId: string | null) => void;
+		onToggleFocus: (nodeId: string) => void;
+		onClearFocus: () => void;
 		actions: LensActions;
 	};
 	restoredViewport?: Viewport;

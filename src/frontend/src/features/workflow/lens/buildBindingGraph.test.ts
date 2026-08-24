@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
+import type { LensBinding } from './bindingLens.types';
 import { buildBindingGraph } from './buildBindingGraph';
 
-const method = (id: string, name: string, color: string) => ({
+const enhancementOf = (binding: LensBinding) =>
+	binding.source.kind === 'enhancement' ? binding.source : null;
+
+const method = (id: string, name: string, color: string, methodConfig?: unknown) => ({
 	id, type: 'connector', position: { x: 0, y: 0 },
-	data: { title: 'Method', subtitle: name, kind: 'connector', color },
+	data: { title: 'Method', subtitle: name, kind: 'connector', color, methodConfig },
 }) as unknown as WorkflowNodeModel;
 
 const operator = (id: string, type: 'loop' | 'if') => ({
@@ -51,6 +55,14 @@ const binding = (enhanceId: string, resultVar: string, vars: string[],
 
 const build = (fieldBindings: unknown[]) => buildBindingGraph(nodes, edges, fieldBindings);
 
+/** The same graph, with m2 filling a body field straight from m1's response —
+ *  a plain direct reference, which never reaches `fieldBindings`. */
+const withValueReference = (value: unknown, id = 'm2') => nodes.map((node) => node.id === id
+	? method(id, node.data.subtitle as string, node.data.color as string,
+		{ url: '', headers: {}, queryParams: [], endpointArgs: {},
+			bodyFormat: 'json', bodyData: 'json', body: value })
+	: node);
+
 describe('buildBindingGraph', () => {
 	it('describes a direct wire as one row with both ends resolved', () => {
 		const graph = build([
@@ -60,8 +72,7 @@ describe('buildBindingGraph', () => {
 		expect(graph.bindings).toHaveLength(1);
 		expect(graph.bindings[0]).toMatchObject({
 			key: 'en-1:VAR_0',
-			enhanceId: 'en-1',
-			varKey: 'VAR_0',
+			source: { kind: 'enhancement', enhanceId: 'en-1', varKey: 'VAR_0' },
 			isScript: false,
 			invalidReason: null,
 			consumer: { nodeId: 'm2', label: 'CreateTicket', color: '#f5a623',
@@ -69,6 +80,54 @@ describe('buildBindingGraph', () => {
 			provider: { nodeId: 'm1', label: 'GetUsers', color: '#3fa9f5',
 				direction: 'response', messageProperty: 'body', field: 'id', path: 'body.$.id' },
 		});
+	});
+
+	it('describes a reference living in a field value, which no field binding mentions', () => {
+		const graph = buildBindingGraph(
+			withValueReference({ userId: '#3fa9f5.(response).body.$.id' }), edges, []);
+		expect(graph.bindings).toHaveLength(1);
+		expect(graph.bindings[0]).toMatchObject({
+			source: { kind: 'value' },
+			isScript: false,
+			invalidReason: null,
+			consumer: { nodeId: 'm2', label: 'CreateTicket', direction: 'request',
+				messageProperty: 'body', field: 'userId', path: 'body.$.userId' },
+			provider: { nodeId: 'm1', label: 'GetUsers', path: 'body.$.id' },
+		});
+	});
+
+	it('describes a field value reference once, not twice, when it also has an enhancement', () => {
+		// Creating an enhancement leaves the reference in the field value, so both
+		// halves of the derivation see the same binding.
+		const graph = buildBindingGraph(
+			withValueReference({ userId: '#3fa9f5.(response).body.$.id' }), edges,
+			[binding('en-1', '#f5a623.(request).body.$.userId',
+				['#3fa9f5.(response).body.$.id'])]);
+		expect(graph.bindings).toHaveLength(1);
+		expect(graph.bindings[0].source).toMatchObject({ kind: 'enhancement' });
+	});
+
+	it('breaks a field value reference on the same rules as an enhancement one', () => {
+		// m2 runs inside the loop, so m4 (after it) cannot read m2's response.
+		const graph = buildBindingGraph(
+			withValueReference({ ticket: '#f5a623.(response).body.$.id' }, 'm4'), edges, []);
+		expect(graph.bindings).toHaveLength(1);
+		expect(graph.bindings[0]).toMatchObject({
+			source: { kind: 'value' },
+			invalidReason: 'out-of-scope',
+			unreadableProviderNodeId: 'm2',
+		});
+	});
+
+	it('counts a url reference as out of scope rather than describing it', () => {
+		const graph = buildBindingGraph(nodes.map((node) => node.id === 'm2'
+			? method('m2', 'CreateTicket', '#f5a623', { url: '/x/{id}', headers: {},
+				queryParams: [], endpointArgs: { id: { id: 'id',
+					source: '#3fa9f5.(response).body.$.id' } },
+				bodyFormat: 'json', bodyData: 'json', body: {} })
+			: node), edges, []);
+		expect(graph.bindings).toEqual([]);
+		expect(graph.skipped.outsideScope).toBe(1);
 	});
 
 	it('emits one row per reference and marks a real script', () => {
@@ -80,9 +139,11 @@ describe('buildBindingGraph', () => {
 		]);
 		expect(graph.bindings).toHaveLength(2);
 		expect(graph.bindings.every((item) => item.isScript)).toBe(true);
-		expect(graph.bindings.map((item) => item.varKey)).toEqual(['VAR_0', 'VAR_1']);
+		expect(graph.bindings.map((item) => enhancementOf(item)?.varKey))
+			.toEqual(['VAR_0', 'VAR_1']);
 		expect(graph.bindings.map((item) => item.provider.nodeId)).toEqual(['m1', 'm3']);
-		expect(new Set(graph.bindings.map((item) => item.enhanceId))).toEqual(new Set(['en-2']));
+		expect(new Set(graph.bindings.map((item) => enhancementOf(item)?.enhanceId)))
+			.toEqual(new Set(['en-2']));
 	});
 
 	it('keeps a reference whose provider is out of scope, describing it as broken', () => {

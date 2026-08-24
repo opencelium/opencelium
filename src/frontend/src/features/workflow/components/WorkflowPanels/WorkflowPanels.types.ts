@@ -5,6 +5,7 @@ import type { HistoryPanel } from '../header/HistoryPanel/HistoryPanel';
 import type { ChangeHistoryPanel } from '../header/ChangeHistoryPanel/ChangeHistoryPanel';
 import type { NodeContextMenu } from '../NodeContextMenu/NodeContextMenu';
 import type { BindingDrawer } from '../../lens/BindingDrawer/BindingDrawer';
+import type { BindingTablePanel } from '../../lens/BindingTable/BindingTablePanel';
 
 export type WorkflowPanelsProps = {
 	sidebar: ComponentProps<typeof WorkflowSidebar>;
@@ -13,4 +14,5 @@ export type WorkflowPanelsProps = {
 	changeHistory: ComponentProps<typeof ChangeHistoryPanel>;
 	contextMenu: ComponentProps<typeof NodeContextMenu>;
 	bindingDrawer: ComponentProps<typeof BindingDrawer>;
+	bindingTable: ComponentProps<typeof BindingTablePanel>;
 };

@@ -79,9 +79,11 @@ export function useBindingDrawerStore({ nodes, edges, fieldBindings, binding,
 		// Same semantics as the body editor's own delete (see
 		// useRequestEnhancementActions): the binding goes, the reference in the
 		// field value stays and reads as a plain direct reference again.
+		if (binding.source.kind !== 'enhancement') return;
+		const { enhanceId } = binding.source;
 		store.dispatch(updateConnection({
 			fieldBindings: current.fieldBindings.filter((item) =>
-				item.enhancement?.enhanceId !== binding.enhanceId),
+				item.enhancement?.enhanceId !== enhanceId),
 		}));
 		persistRef.current();
 	}, [binding, store]);

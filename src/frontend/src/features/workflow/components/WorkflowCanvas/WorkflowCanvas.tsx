@@ -9,9 +9,11 @@ import type {
 import type { LensEdgeModel, LensNodeModel, LensView } from '../../lens/bindingLens.types';
 import type { LensActions } from '../../lens/buildLensElements';
 import { isLensElementId } from '../../lens/lensIds';
-import { useBindingLens } from '../../lens/useBindingLens';
+import { useBindingGraph, useBindingLens } from '../../lens/useBindingLens';
+import { buildNodeBindingSummaries, resolveFocusRelatedNodeIds } from '../../lens/bindingFocus';
+import { BindingLensNodeProvider, type BindingLensNodeState } from '../../lens/BindingLensNodeContext';
 import { BindingLensLegend } from '../../lens/BindingLensLegend';
-import { BindingLensToggle } from '../../lens/BindingLensToggle';
+import { BindingLensControls } from '../../lens/BindingLensControls';
 import { useTestRun } from '../../test-run/useTestRun';
 import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
 import { lensEdgeTypes, lensNodeTypes, workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
@@ -38,7 +40,7 @@ type CanvasInstance = ReactFlowInstance<CanvasNodeModel, CanvasEdgeModel>;
 
 // Stable fallbacks: useBindingLens memoizes on these, so a fresh literal per
 // render would rebuild the lens on every render of a canvas without one.
-const NO_LENS_VIEW: LensView = { expandedNodeIds: [], selectedKey: null };
+const NO_LENS_VIEW: LensView = { focusNodeId: null, expandedNodeIds: [], selectedKey: null };
 const NO_LENS_ACTIONS: LensActions = {
   onExpandPair: () => {},
   onCollapseCard: () => {},
@@ -196,11 +198,40 @@ export function WorkflowCanvas({
   });
 
   const isLensOpen = !!bindingLens?.open;
+  const bindingGraph = useBindingGraph({ nodes, edges, fieldBindings, open: isLensOpen });
+  const lensView = bindingLens?.view ?? NO_LENS_VIEW;
   const lens = useBindingLens({
-    nodes, edges, fieldBindings, open: isLensOpen,
-    view: bindingLens?.view ?? NO_LENS_VIEW,
+    graph: bindingGraph, nodes, view: lensView,
     actions: bindingLens?.actions ?? NO_LENS_ACTIONS,
   });
+  // The badges and the dimming reach the nodes through context rather than node
+  // data: a focus change then re-renders the nodes that read it instead of
+  // rebuilding every node object (prepareWorkflowElements' cache stays intact),
+  // and no lens state can leak into the graph the page saves.
+  const onToggleLensFocus = bindingLens?.onToggleFocus;
+  const lensNodeState = useMemo<BindingLensNodeState | null>(() => {
+    if (!isLensOpen || !onToggleLensFocus) return null;
+    return {
+      summaryByNodeId: buildNodeBindingSummaries(bindingGraph),
+      focusNodeId: lensView.focusNodeId,
+      pinnedNodeId: bindingLens?.pinnedNodeId ?? null,
+      relatedNodeIds: resolveFocusRelatedNodeIds(bindingGraph, lensView.focusNodeId),
+      onToggleFocus: onToggleLensFocus,
+    };
+  }, [bindingGraph, bindingLens?.pinnedNodeId, isLensOpen, lensView.focusNodeId, onToggleLensFocus]);
+  // Hover previews a method's bindings; a node with none of its own clears the
+  // preview rather than dimming the whole canvas to say so.
+  const onHoverLensNode = bindingLens?.onHoverNode;
+  const handleNodeMouseEnter = useCallback((_: ReactMouseEvent, node: CanvasNodeModel) => {
+    if (!onHoverLensNode || !lensNodeState) return;
+    onHoverLensNode(lensNodeState.summaryByNodeId.has(node.id) ? node.id : null);
+  }, [lensNodeState, onHoverLensNode]);
+  const handleNodeMouseLeave = useCallback(() => onHoverLensNode?.(null), [onHoverLensNode]);
+  const onClearLensFocus = bindingLens?.onClearFocus;
+  const handlePaneClick = useCallback(() => {
+    onClearLensFocus?.();
+    onPaneClick?.();
+  }, [onClearLensFocus, onPaneClick]);
   const canvasEdges = useMemo<CanvasEdgeModel[]>(
     () => lens.edges.length ? [...preparedEdges, ...lens.edges] : preparedEdges,
     [lens.edges, preparedEdges],
@@ -262,66 +293,80 @@ export function WorkflowCanvas({
 
   return (
     <div className={`canvasCard ${isLensOpen ? 'canvasCardLens' : ''}`}>
-      <ReactFlow<CanvasNodeModel, CanvasEdgeModel>
-        nodes={canvasNodes}
-        edges={canvasEdges}
-        proOptions={{ hideAttribution: true }}
-        onInit={(instance) => {
-          reactFlowInstance.current = instance;
-          // The page holds the instance only to read the viewport and centre a
-          // node, neither of which depends on the edge type parameter.
-          onInit?.(instance as unknown as ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>);
-          if (centerStartVersion && centeredStartVersion.current !== centerStartVersion) {
-            centeredStartVersion.current = centerStartVersion;
-            positionGraphNearTopLeft(instance, preparedNodes, restoredViewport?.zoom ?? 1);
-          }
-        }}
-        nodeTypes={{ ...workflowNodeTypes, ...lensNodeTypes }}
-        edgeTypes={{ ...workflowEdgeTypes, ...lensEdgeTypes }}
-        onNodesChange={handleNodesChange}
-        onEdgesChange={handleEdgesChange}
-        onConnect={isEditLocked ? undefined : onConnect}
-        // Cards set draggable: false, so a drag handler can only ever receive a
-        // graph node — unlike double-click, which is guarded above.
-        onNodeDragStart={onNodeDragStart as OnNodeDrag<CanvasNodeModel> | undefined}
-        onNodeDrag={onNodeDrag as OnNodeDrag<CanvasNodeModel> | undefined}
-        onNodeDragStop={onNodeDragStop as OnNodeDrag<CanvasNodeModel> | undefined}
-        onNodeClick={(_, node) => {
-          if (!jointSourceId) return;
-          if (jointVerdicts?.get(node.id)?.valid) onConfirmJoint?.(node.id);
-        }}
-        onNodeDoubleClick={isEditLocked ? undefined : handleNodeDoubleClick}
-        onPaneClick={onPaneClick}
-        nodeDragThreshold={4}
-        nodesDraggable
-        nodesConnectable={false}
-        elementsSelectable
-        selectionOnDrag={false}
-        selectionKeyCode={null}
-        deleteKeyCode={null}
-        panOnDrag
-        zoomOnScroll
-      >
-        {children}
-        {/* One top-left Panel hosts both the zoom Controls and the test-run
-            debug controls (pause/play + speed, see TestRunDebugControls) as
-            flex siblings, so the debug card docks to the right of Controls
-            instead of below them — Controls' own position:absolute is
-            neutralized (see .workflowControls in canvas-controls.css) so it
-            participates in this flex row rather than positioning itself. */}
-        <Panel position="top-left" className="canvasTopLeftPanel">
-          <Controls className="workflowControls" />
-          {bindingLens && (
-            <BindingLensToggle open={bindingLens.open} onToggle={bindingLens.onToggle} />
-          )}
-          <TestRunDebugControls />
-        </Panel>
-        {isLensOpen && (
-          <Panel position="bottom-right">
-            <BindingLensLegend summary={lens.summary} />
+      <BindingLensNodeProvider value={lensNodeState}>
+        <ReactFlow<CanvasNodeModel, CanvasEdgeModel>
+          nodes={canvasNodes}
+          edges={canvasEdges}
+          proOptions={{ hideAttribution: true }}
+          onInit={(instance) => {
+            reactFlowInstance.current = instance;
+            // The page holds the instance only to read the viewport and centre a
+            // node, neither of which depends on the edge type parameter.
+            onInit?.(instance as unknown as ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>);
+            if (centerStartVersion && centeredStartVersion.current !== centerStartVersion) {
+              centeredStartVersion.current = centerStartVersion;
+              positionGraphNearTopLeft(instance, preparedNodes, restoredViewport?.zoom ?? 1);
+            }
+          }}
+          nodeTypes={{ ...workflowNodeTypes, ...lensNodeTypes }}
+          edgeTypes={{ ...workflowEdgeTypes, ...lensEdgeTypes }}
+          onNodesChange={handleNodesChange}
+          onEdgesChange={handleEdgesChange}
+          onConnect={isEditLocked ? undefined : onConnect}
+          // Cards set draggable: false, so a drag handler can only ever receive a
+          // graph node — unlike double-click, which is guarded above.
+          onNodeDragStart={onNodeDragStart as OnNodeDrag<CanvasNodeModel> | undefined}
+          onNodeDrag={onNodeDrag as OnNodeDrag<CanvasNodeModel> | undefined}
+          onNodeDragStop={onNodeDragStop as OnNodeDrag<CanvasNodeModel> | undefined}
+          onNodeClick={(_, node) => {
+            if (!jointSourceId) return;
+            if (jointVerdicts?.get(node.id)?.valid) onConfirmJoint?.(node.id);
+          }}
+          onNodeDoubleClick={isEditLocked ? undefined : handleNodeDoubleClick}
+          onNodeMouseEnter={isLensOpen ? handleNodeMouseEnter : undefined}
+          onNodeMouseLeave={isLensOpen ? handleNodeMouseLeave : undefined}
+          onPaneClick={handlePaneClick}
+          nodeDragThreshold={4}
+          nodesDraggable
+          nodesConnectable={false}
+          elementsSelectable
+          selectionOnDrag={false}
+          selectionKeyCode={null}
+          deleteKeyCode={null}
+          panOnDrag
+          zoomOnScroll
+        >
+          {children}
+          {/* One top-left Panel hosts both the zoom Controls and the test-run
+              debug controls (pause/play + speed, see TestRunDebugControls) as
+              flex siblings, so the debug card docks to the right of Controls
+              instead of below them — Controls' own position:absolute is
+              neutralized (see .workflowControls in canvas-controls.css) so it
+              participates in this flex row rather than positioning itself. */}
+          <Panel position="top-left" className="canvasTopLeftPanel">
+            {/* The binding views join the flow's own control strip in place of fit
+                view and the interactivity lock: they are canvas-wide view toggles
+                like the zoom buttons, and a second floating group of icons beside
+                them read as a separate feature. */}
+            <Controls className="workflowControls" showFitView={false} showInteractive={false}>
+              {bindingLens && (
+                <BindingLensControls
+                  lensOpen={bindingLens.open}
+                  tableOpen={bindingLens.tableOpen}
+                  onToggleLens={bindingLens.onToggle}
+                  onToggleTable={bindingLens.onToggleTable}
+                />
+              )}
+            </Controls>
+            <TestRunDebugControls />
           </Panel>
-        )}
-      </ReactFlow>
+          {isLensOpen && (
+            <Panel position="bottom-right">
+              <BindingLensLegend summary={lens.summary} isFocused={!!lensView.focusNodeId} />
+            </Panel>
+          )}
+        </ReactFlow>
+      </BindingLensNodeProvider>
       <TestRunAnimationHint />
     </div>
   );
