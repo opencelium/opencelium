@@ -1,33 +1,30 @@
-import { BaseEdge, EdgeLabelRenderer } from '@xyflow/react';
+import { BaseEdge, EdgeLabelRenderer, getBezierPath } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { buildDippedArc } from './bindingLensArc';
 import type { LensEdgeModel } from './bindingLens.types';
 
-// The arc deliberately does not trace the flow edge between the same two nodes:
-// it leaves the provider's bottom handle, dips below the row and arrives at the
-// consumer's left handle, so a binding never hides behind the control-flow edge
-// it runs alongside.
-const ARC_MIN_DIP = 40;
-const ARC_MAX_DIP = 160;
-
 export function BindingLensEdge({
-	id, sourceX, sourceY, targetX, targetY, data,
+	id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data,
 }: EdgeProps<LensEdgeModel>) {
 	const { t } = useI18n('workflow');
-	const dip = Math.min(ARC_MAX_DIP,
-		Math.max(ARC_MIN_DIP, Math.hypot(targetX - sourceX, targetY - sourceY) * 0.28));
-	const controlX = (sourceX + targetX) / 2;
-	const controlY = Math.max(sourceY, targetY) + dip;
-	const path = `M ${sourceX},${sourceY} Q ${controlX},${controlY} ${targetX},${targetY}`;
-	// Quadratic curve at t = 0.5 — the arc's apex, where the badge belongs.
-	const labelX = (sourceX + 2 * controlX + targetX) / 4;
-	const labelY = (sourceY + 2 * controlY + targetY) / 4;
-
 	const count = data?.count ?? 0;
 	const invalidCount = data?.invalidCount ?? 0;
 	const isBroken = count > 0 && invalidCount === count;
 	const isPair = data?.variant !== 'reference';
+
+	// A pair arc has to dodge the control-flow edge between the same two nodes, so
+	// it bows below the row. A field arc lands on a card's own row handles, where
+	// nothing else runs — there the ordinary bezier between those two handle sides
+	// is both shorter and stable, instead of a hook sized from the whole span.
+	const [bezierPath, bezierLabelX, bezierLabelY] = getBezierPath({
+		sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition,
+	});
+	const dipped = buildDippedArc(sourceX, sourceY, targetX, targetY);
+	const path = isPair ? dipped.path : bezierPath;
+	const labelX = isPair ? dipped.labelX : bezierLabelX;
+	const labelY = isPair ? dipped.labelY : bezierLabelY;
 	const stroke = isBroken
 		? 'var(--color-status-error-fg)'
 		: data?.color || 'var(--color-action-primary)';
