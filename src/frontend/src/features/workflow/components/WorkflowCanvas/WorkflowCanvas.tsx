@@ -19,6 +19,7 @@ import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
 import { lensEdgeTypes, lensNodeTypes, workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
+import { useEscapeKey } from './useEscapeKey';
 import { TestRunAnimationHint } from './TestRunAnimationHint';
 import { TestRunDebugControls } from './TestRunDebugControls';
 
@@ -95,6 +96,7 @@ export function WorkflowCanvas({
   onToggleComment,
   onAddComment,
   onPaneClick,
+  onClearNodeErrors,
   fieldBindings,
   bindingLens,
   restoredViewport,
@@ -156,24 +158,17 @@ export function WorkflowCanvas({
   useEffect(() => {
     if (testRun?.errorRevealNonce) setTestRunFailureDismissed(false);
   }, [testRun?.errorRevealNonce]);
-  useEffect(() => {
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setTestRunFailureDismissed(true);
-    };
-    window.addEventListener('keydown', onEscape);
-    return () => window.removeEventListener('keydown', onEscape);
-  }, []);
+  const dismissTestRunFailure = useCallback(() => setTestRunFailureDismissed(true), []);
+  useEscapeKey(true, dismissTestRunFailure);
   // Escape is also the joint picker's way out: clicking a node that cannot be
   // the target no longer cancels (it explains itself instead — see onNodeClick),
   // so this listener is mounted only for as long as a joint is being drawn.
-  useEffect(() => {
-    if (!jointSourceId) return;
-    const onEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onCancelJoint?.();
-    };
-    window.addEventListener('keydown', onEscape);
-    return () => window.removeEventListener('keydown', onEscape);
-  }, [jointSourceId, onCancelJoint]);
+  useEscapeKey(!!jointSourceId, onCancelJoint);
+  // And it clears the red ring a rejected save or test run left on a node. That
+  // ring otherwise stays until the next attempt, which is one attempt too long
+  // once the user has read what it says.
+  const hasNodeErrors = nodes.some((node) => node.data.hasError);
+  useEscapeKey(hasNodeErrors, onClearNodeErrors);
 
   const { preparedEdges, preparedNodes } = prepareWorkflowElements({
     nodes,

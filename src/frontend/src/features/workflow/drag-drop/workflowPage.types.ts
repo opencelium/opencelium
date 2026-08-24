@@ -3,7 +3,6 @@ import type { InvalidReference, WorkflowDropMode } from '../utils/graph.dragDrop
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 
 export type UseWorkflowPageOptions = {
-	onDeleteNodes?: (deletedNodeIds: string[], previousNodes: WorkflowNodeModel[]) => void;
 	fieldBindings?: any[];
 	onFieldBindingsChange?: (fieldBindings: any[] | undefined) => void;
 	confirmDependencyDrop?: (invalidReferences: InvalidReference[]) => Promise<boolean>;

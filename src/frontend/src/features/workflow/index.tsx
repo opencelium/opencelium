@@ -134,6 +134,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onChangeCommentText: workflow.onChangeCommentText,
         onToggleComment: workflow.onToggleComment,
         onAddComment: workflow.onAddComment,
+        onClearNodeErrors: workflow.onClearNodeErrors,
         fieldBindings: loadedFieldBindings,
         bindingLens: workflow.bindingLens,
         onPaneClick: closeCanvasPanels }} />

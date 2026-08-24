@@ -46,6 +46,8 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	onToggleComment: (commentNodeId: string) => void;
 	onAddComment: (nodeId: string) => void;
 	onPaneClick?: () => void;
+	/** Clears the red rings a rejected save or test run left behind — Escape. */
+	onClearNodeErrors?: () => void;
 	fieldBindings?: readonly unknown[];
 	bindingLens?: {
 		open: boolean;
