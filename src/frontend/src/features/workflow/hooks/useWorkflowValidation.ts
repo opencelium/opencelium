@@ -2,6 +2,8 @@ import { useCallback } from 'react';
 import { apiExecutor } from '@shared/api/apiExecutor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
+import { NOT_EXIST_ARG } from '../utils/enhancementArgs';
+import { findBrokenEnhancementScripts } from '../utils/graph.brokenScriptValidation';
 import { resolveWorkflowApiError } from '../utils/workflowApiErrors';
 import { EMPTY_NAME_LABEL } from '../utils/workflowPage.utils';
 
@@ -32,6 +34,27 @@ export const useWorkflowValidation = ({ persistedTitle, nodes, edges,
 		return null;
 	}, [persistedTitle, t]);
 
+	/**
+	 * Refuses a save whose enhancement scripts still name an input that is gone.
+	 * Every offending method is ringed and the first is panned to, the same
+	 * treatment a rejected save gets from the backend — the difference being that
+	 * this one is answerable here, before anything is sent.
+	 */
+	const validateEnhancementScripts = useCallback(
+		(fieldBindings?: readonly unknown[]): string | null => {
+			const broken = findBrokenEnhancementScripts(nodes, fieldBindings);
+			if (broken.length === 0) return null;
+			const named = broken.length === 1 ? broken[0].label : null;
+			const message = named
+				? t('messages.enhancementScriptBrokenIn', { method: named, marker: NOT_EXIST_ARG })
+				: t('messages.enhancementScriptBroken',
+					{ count: broken.length, marker: NOT_EXIST_ARG });
+			broken.forEach((item) => item.nodeId && setNodeError(item.nodeId, message));
+			const firstNodeId = broken.find((item) => !!item.nodeId)?.nodeId;
+			if (firstNodeId) centerOnNode(firstNodeId);
+			return message;
+		}, [nodes, setNodeError, centerOnNode, t]);
+
 	const resolveAndHighlightError = useCallback((error: unknown): string | null => {
 		const resolution = resolveWorkflowApiError(error, nodes, edges);
 		if (!resolution) return null;
@@ -55,5 +78,5 @@ export const useWorkflowValidation = ({ persistedTitle, nodes, edges,
 		}
 	}, [nodes, edges, setNodeError, centerOnNode, tEntities]);
 
-	return { validateTitle, resolveAndHighlightError };
+	return { validateTitle, validateEnhancementScripts, resolveAndHighlightError };
 };

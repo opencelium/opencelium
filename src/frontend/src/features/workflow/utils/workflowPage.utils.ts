@@ -16,23 +16,6 @@ export const toDisplayDescription = (description?: string) =>
 export const toPayloadDescription = (description?: string) =>
 	description?.trim() === EMPTY_DESCRIPTION_LABEL ? '' : description ?? '';
 
-const FIELD_BINDING_COLOR_RE = /#[A-Fa-f0-9]{6}/g;
-
-const getFieldBindingColors = (binding: any) =>
-	Object.values(binding?.enhancement?.args || {})
-		.flatMap((value) => typeof value === 'string'
-			? value.match(FIELD_BINDING_COLOR_RE) || [] : [])
-		.map((color) => color.toLowerCase());
-
-export const removeFieldBindingsByMethodColors = (
-	fieldBindings: any[] | undefined,
-	methodColors: Set<string>,
-) => {
-	if (!Array.isArray(fieldBindings) || methodColors.size === 0) return fieldBindings;
-	return fieldBindings.filter((binding) =>
-		getFieldBindingColors(binding).every((color) => !methodColors.has(color)));
-};
-
 const getProfileAuthorName = (user: AuthUser | null) => {
 	const fullName = [user?.userDetail?.name, user?.userDetail?.surname]
 		.map((part) => part?.trim())
