@@ -206,6 +206,19 @@ public class LogFileUtility {
         return parts[parts.length - 1];
     }
 
+    public static long extractExecutionId(Path path) {
+        String filename = path.getFileName().toString();
+
+        int separatorIndex = filename.lastIndexOf('_');
+        int extensionIndex = filename.lastIndexOf('.');
+
+        if (separatorIndex < 0 || extensionIndex <= separatorIndex + 1) {
+            throw new IllegalArgumentException("Invalid artifact filename: " + filename);
+        }
+
+        return Long.parseLong(filename.substring(separatorIndex + 1, extensionIndex));
+    }
+
     private static boolean executedByScheduler(Path path, int schedulerId) {
         if (schedulerId == -1) {
             // if 'schedulerId' has default value then skip this filter

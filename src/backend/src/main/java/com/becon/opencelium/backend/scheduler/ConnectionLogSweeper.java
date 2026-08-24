@@ -3,7 +3,11 @@ package com.becon.opencelium.backend.scheduler;
 import com.becon.opencelium.backend.constant.props.LogProperties;
 import com.becon.opencelium.backend.constant.props.SupportFileProperties;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Execution;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.database.mysql.service.ExecutionService;
+import com.becon.opencelium.backend.execution.logger.service.LogDataService;
+import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,15 +35,21 @@ public class ConnectionLogSweeper {
     private static final Logger logger = LoggerFactory.getLogger(ConnectionLogSweeper.class);
 
     private final ConnectionService connectionService;
+    private final ExecutionService executionService;
+    private final LogDataService logDataService;
     private final LogProperties logProperties;
     private final SupportFileProperties supportFileProperties;
 
     public ConnectionLogSweeper(
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
+            ExecutionService executionService,
+            LogDataService logDataService,
             LogProperties logProperties,
             SupportFileProperties supportFileProperties
     ) {
         this.connectionService = connectionService;
+        this.executionService = executionService;
+        this.logDataService = logDataService;
         this.logProperties = logProperties;
         this.supportFileProperties = supportFileProperties;
     }
@@ -53,14 +63,15 @@ public class ConnectionLogSweeper {
             return;
         }
 
-        removeConnectionLogFiles();
+        // Phase 1
+        removeLogFiles();
+
+        // Phase 2
+        removeLogDataForDeletedFiles();
     }
 
-    /**
-     * Phase 1: removes expired log and support-file artifacts whose connection
-     * no longer exists. Mongo cleanup is performed in phase 2.
-     */
-    private void removeConnectionLogFiles() {
+
+    private void removeLogFiles() {
         Map<Long, List<Path>> pathsByConnectionId = collectConnectionArtifactPaths();
         if (pathsByConnectionId.isEmpty()) {
             return;
@@ -79,39 +90,28 @@ public class ConnectionLogSweeper {
         });
     }
 
-    private void deleteFileIfExpired(long connectionId, Path path, LocalDateTime expirationThreshold) {
-        LocalDateTime artifactTime = extractTime(path);
-        if (artifactTime.equals(LocalDateTime.MIN) || !artifactTime.isBefore(expirationThreshold)) {
-            return;
-        }
+    private void removeLogDataForDeletedFiles() {
+        List<Long> allExecutions = executionService.findAll().stream()
+                .map(Execution::getId)
+                .toList();
 
-        try {
-            if (!Files.deleteIfExists(path)) {
-                return;
-            }
+        List<Long> executionsWithLogFile = collectConnectionArtifactPaths().values()
+                .stream()
+                .flatMap(List::stream)
+                .filter(path -> !Files.exists(path))
+                .map(LogFileUtility::extractExecutionId)
+                .toList();
 
-            logger.info("Deleted expired artifact '{}' for missing connection {}", path, connectionId);
-            deleteDirectoryIfEmpty(path.getParent());
-        } catch (IOException e) {
-            logger.warn("Failed to delete expired artifact '{}' for missing connection {}", path, connectionId, e);
-        }
-    }
+        allExecutions.stream()
+                .filter(executionId -> !executionsWithLogFile.contains(executionId))
+                .forEach(executionId -> {
+                    logDataService.deleteAllByExecutionId(executionId.toString());
 
-    private void deleteDirectoryIfEmpty(Path directory) {
-        try (Stream<Path> children = Files.list(directory)) {
-            if (children.findAny().isPresent()) {
-                return;
-            }
-        } catch (IOException e) {
-            logger.warn("Failed to inspect artifact directory '{}'", directory, e);
-            return;
-        }
-
-        try {
-            Files.deleteIfExists(directory);
-        } catch (IOException e) {
-            logger.warn("Failed to delete empty artifact directory '{}'", directory, e);
-        }
+                    logger.info(
+                            "Deleted orphan log_data for execution {}",
+                            executionId
+                    );
+                });
     }
 
     private Map<Long, List<Path>> collectConnectionArtifactPaths() {
@@ -174,6 +174,41 @@ public class ConnectionLogSweeper {
             return Long.parseLong(value) >= 0;
         } catch (NumberFormatException e) {
             return false;
+        }
+    }
+
+    private void deleteFileIfExpired(long connectionId, Path path, LocalDateTime expirationThreshold) {
+        LocalDateTime artifactTime = extractTime(path);
+        if (artifactTime.equals(LocalDateTime.MIN) || !artifactTime.isBefore(expirationThreshold)) {
+            return;
+        }
+
+        try {
+            if (!Files.deleteIfExists(path)) {
+                return;
+            }
+
+            logger.info("Deleted expired artifact '{}' for missing connection {}", path, connectionId);
+            deleteDirectoryIfEmpty(path.getParent());
+        } catch (IOException e) {
+            logger.warn("Failed to delete expired artifact '{}' for missing connection {}", path, connectionId, e);
+        }
+    }
+
+    private void deleteDirectoryIfEmpty(Path directory) {
+        try (Stream<Path> children = Files.list(directory)) {
+            if (children.findAny().isPresent()) {
+                return;
+            }
+        } catch (IOException e) {
+            logger.warn("Failed to inspect artifact directory '{}'", directory, e);
+            return;
+        }
+
+        try {
+            Files.deleteIfExists(directory);
+        } catch (IOException e) {
+            logger.warn("Failed to delete empty artifact directory '{}'", directory, e);
         }
     }
 }

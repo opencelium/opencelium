@@ -315,6 +315,11 @@ public class LogDataServiceImp implements LogDataService {
         return doc;
     }
 
+    @Override
+    public void deleteAllByExecutionId(String executionId) {
+        metaDataLogRepository.deleteAllByExecutionId(executionId);
+    }
+
     // --------------------------------------- Private Functions ----------------------------------------------
 //    private Optional<LogDataMng> findExistingBlock(LogDataMng block) {
 //        if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX.getSrcName())) {

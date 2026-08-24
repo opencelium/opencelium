@@ -26,4 +26,6 @@ public interface LogDataService {
     Optional<LogDataDTO> toDto(LogDataMng metaData);
 
     boolean hasDbRecords(long execId);
+
+    void deleteAllByExecutionId(String executionId);
 }
