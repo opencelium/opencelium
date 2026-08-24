@@ -1,13 +1,9 @@
 package com.becon.opencelium.backend.execution.supportfile;
 
-import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.props.SupportFileProperties;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.enums.SupportFileStatus;
-import jakarta.annotation.PostConstruct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
-import static com.becon.opencelium.backend.utility.LogFileUtility.create;
 import static com.becon.opencelium.backend.utility.LogFileUtility.delete;
 import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
 
@@ -31,26 +25,10 @@ public class SupportFileServiceImp implements SupportFileService {
     private final String base;
 
     public static final String GET_URL = "/connection/support-file/%d/%s";
-    private static final Logger logger = LoggerFactory.getLogger(SupportFileServiceImp.class);
 
-    public SupportFileServiceImp(ConnectionService connectionSqlService, Environment env) {
+    public SupportFileServiceImp(ConnectionService connectionSqlService, SupportFileProperties supportFileProperties) {
         this.connectionSqlService = connectionSqlService;
-        this.base = env.getProperty(AppYamlPath.SUPPORT_FILE_BASE_DIRECTORY, String.class, "src/main/resources/support-files");
-    }
-
-    @PostConstruct
-    public void setup() {
-        try {
-            // Create base directory to store support files:
-            create(base);
-
-            // Create base directory to store log files:
-            create(LOG_LOCATION);
-
-            logger.info("Base folders have been setup for support and log files.");
-        } catch (IOException e) {
-            logger.error("Failed to setup base folder for support and log files.");
-        }
+        this.base = supportFileProperties.getDirectory();
     }
 
     @Override

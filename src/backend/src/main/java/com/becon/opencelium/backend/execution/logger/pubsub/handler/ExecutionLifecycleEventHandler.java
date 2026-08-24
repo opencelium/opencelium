@@ -1,7 +1,8 @@
 package com.becon.opencelium.backend.execution.logger.pubsub.handler;
 
-import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.ConnectionConstants;
+import com.becon.opencelium.backend.constant.props.LogProperties;
+import com.becon.opencelium.backend.constant.props.SupportFileProperties;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
@@ -23,7 +24,6 @@ import com.becon.opencelium.backend.websocket.constant.SocketConstant;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -84,7 +84,8 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
             ConnectorService connectorService,
             InvokerService invokerService,
             WebSocketNotificationService notificationService,
-            Environment env
+            LogProperties logProperties,
+            SupportFileProperties supportFileProperties
     ) {
         this.schedulerService = schedulerService;
         this.connectionService = connectionService;
@@ -96,11 +97,11 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
         this.invokerService = invokerService;
         this.notificationService = notificationService;
 
-        this.logFileSuccessLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
-        this.logFileFailLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
-        this.supportFileBaseFolder = env.getProperty(AppYamlPath.SUPPORT_FILE_BASE_DIRECTORY, String.class, "src/main/resources/support-files");
-        this.supportFileSuccessLimit = env.getProperty(AppYamlPath.SUPPORT_FILE_SUCCESS_LIMIT, Integer.class, 1);
-        this.supportFileFailLimit = env.getProperty(AppYamlPath.SUPPORT_FILE_FAIL_LIMIT, Integer.class, 5);
+        this.logFileSuccessLimit = logProperties.getRetention().getPerConnection().getSuccess();
+        this.logFileFailLimit = logProperties.getRetention().getPerConnection().getFail();
+        this.supportFileBaseFolder = supportFileProperties.getDirectory();
+        this.supportFileSuccessLimit = supportFileProperties.getLimit().getSuccess();
+        this.supportFileFailLimit = supportFileProperties.getLimit().getFail();
     }
 
     @Override
@@ -286,7 +287,7 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
         }
     }
 
-    public static void enforceLimit(String base, Long connectionId, String type, int limit) {
+    private static void enforceLimit(String base, Long connectionId, String type, int limit) {
         Path connectionFilesFolder = toPath(base, connectionId.toString());
 
         try (Stream<Path> stream = Files.list(connectionFilesFolder)) {
