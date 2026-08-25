@@ -15,6 +15,7 @@ import {
 } from '@entities/invoker/lib/invokerName'
 import type { Invoker } from '@entities/invoker/model/types'
 import { InvokerUploadButton } from '@entities/invoker/components/InvokerUploadButton'
+import { InvokerDownloadAction } from '@entities/invoker/components/InvokerDownloadAction'
 import { pickInvokerFile, uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
 import { buildInvokerXml } from '@entities/invoker/lib/invokerXml'
 import { mapInvokerToForm } from '@entities/invoker/lib/mapInvokerToForm'
@@ -52,6 +53,12 @@ export const invokerDefinition: EntityDefinition = {
         },
         actions: [
             { type: 'view' },
+            {
+                type: 'custom',
+                key: 'download',
+                permissionAction: 'READ',
+                render: (ctx) => <InvokerDownloadAction {...ctx} />,
+            },
             {
                 type: 'delete',
                 confirmMessage: (value, _entity, row) => {
