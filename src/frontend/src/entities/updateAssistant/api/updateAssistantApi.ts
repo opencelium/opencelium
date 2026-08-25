@@ -1,5 +1,5 @@
 import { baseApi } from '@shared/api/baseApi'
-import type { InstallationInfo, SystemHealth, UpdateVersion } from '../model/types'
+import type { AppVersion, InstallationInfo, SystemHealth, UpdateVersion } from '../model/types'
 import { UPDATE_ASSISTANT_TAG } from './updateAssistant.tags'
 
 export const updateAssistantApi = baseApi.injectEndpoints({
@@ -7,6 +7,16 @@ export const updateAssistantApi = baseApi.injectEndpoints({
         getInstallationInfo: b.query<InstallationInfo, void>({
             query: () => '/assistant/oc/installation',
             providesTags: [{ type: UPDATE_ASSISTANT_TAG as any, id: 'INSTALLATION' }],
+        }),
+
+        getAppVersion: b.query<AppVersion, void>({
+            query: () => '/assistant/oc/version',
+            // The footer is decoration: a version that can't be read should leave the
+            // build-time fallback standing, not raise a toast on every page it renders on.
+            extraOptions: { ignoreError: true },
+            // No tag: the running backend's version cannot change under a live
+            // session — the update that changes it restarts the server and logs
+            // everyone out — so nothing exists to invalidate this with.
         }),
 
         getSystemHealth: b.query<SystemHealth, void>({
@@ -44,6 +54,7 @@ export const updateAssistantApi = baseApi.injectEndpoints({
 })
 
 export const {
+    useGetAppVersionQuery,
     useGetInstallationInfoQuery,
     useGetSystemHealthQuery,
     useGetOnlineVersionsQuery,
