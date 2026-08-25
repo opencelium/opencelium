@@ -28,6 +28,7 @@ type Params = {
 	getViewport: () => { x: number; y: number; zoom: number } | undefined;
 	clearNodeErrors: () => void;
 	resolveError: (error: unknown) => string | null;
+	validateEnhancementScripts: (fieldBindings?: readonly unknown[]) => string | null;
 	setFieldBindings: (bindings: any[] | undefined) => void;
 	setHeaderState: (state: { title: string; description: string }) => void;
 	setPersistedTitle: (title: string) => void;
@@ -41,7 +42,8 @@ type Params = {
 };
 
 export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
-	fieldBindings, getViewport, clearNodeErrors, resolveError, setFieldBindings,
+	fieldBindings, getViewport, clearNodeErrors, resolveError, validateEnhancementScripts,
+	setFieldBindings,
 	setHeaderState, setPersistedTitle, setCategoryId, setBaselineSnapshot,
 	setChangeSource, setHistoryPreviewSnapshot, setHistoryVersions,
 	setSelectedHistoryVersionId, setCreatedConnectionId }: Params) => {
@@ -58,6 +60,14 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 			throw new Error('Connection name is required');
 		}
 		clearNodeErrors();
+		// Before anything else with a side effect: a script naming a variable that
+		// no longer exists cannot run, and nothing after this point should happen
+		// for a workflow that is not savable.
+		const brokenScriptMessage = validateEnhancementScripts(fieldBindings);
+		if (brokenScriptMessage) {
+			notifyError(brokenScriptMessage);
+			throw new Error('Enhancement script references a variable that no longer exists');
+		}
 		const normalizedDescription = toPayloadDescription(description);
 		const nextCategoryId = categoryOverride !== undefined ? categoryOverride : categoryId;
 		const isCreate = !connectionId;
@@ -103,7 +113,7 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 			window.history.replaceState(window.history.state, '', `/workflow/update/${id}`);
 		}
 	}, [connectionId, categoryId, nodes, edges, fieldBindings, getViewport,
-		clearNodeErrors, resolveError, setFieldBindings, setHeaderState,
+		clearNodeErrors, resolveError, validateEnhancementScripts, setFieldBindings, setHeaderState,
 		setPersistedTitle, setCategoryId, setBaselineSnapshot, setChangeSource,
 		setHistoryPreviewSnapshot, setHistoryVersions, setSelectedHistoryVersionId,
 		setCreatedConnectionId, optimizeDirectReferences, t, tEntities]);

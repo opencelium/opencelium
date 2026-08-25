@@ -25,6 +25,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
 			{ keys: ['ctrl', 'z'], descKey: 'shortcutsDialog.items.undo' },
 			{ keys: ['ctrl', 'shift', 'z'], descKey: 'shortcutsDialog.items.redo' },
 			{ keys: ['esc'], descKey: 'shortcutsDialog.items.close' },
+			{ keys: ['esc'], descKey: 'shortcutsDialog.items.dismissError' },
 		],
 	},
 ];
