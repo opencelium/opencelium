@@ -12,7 +12,11 @@ import {
 } from './connectionMapper.savedNodeMatching';
 import { restoreNodesFromUi } from './connectionMapper.restoreNodes';
 import { withRestoredCommentNodes } from './connectionMapper.comments';
-import { applyWorkflowLeafState as withLeafState, buildWorkflowEdges as buildEdges } from './connectionMapper.graph';
+import {
+	applyWorkflowLeafState as withLeafState,
+	buildWorkflowEdges as buildEdges,
+	remapEdgeEndpoints,
+} from './connectionMapper.graph';
 import {
 	assignMissingMethodColors,
 	backfillMissingInvokerNames,
@@ -49,10 +53,12 @@ export function mapConnectionToWorkflowState(
 	const builtNodes = restoredFromUi?.nodes ?? (entries.length ? [...initialNodes, ...entries.map((entry) => entry.node)] : initialNodes);
 	const entryByNodeId = new Map(entries.map((entry) => [entry.node.id, entry]));
 	const usedSavedNodeIds = new Set<string>();
+	const nodeIdByEntryId = restoredFromUi?.nodeIdByEntryId ?? new Map<string, string>();
 	const graphNodes = restoredFromUi ? builtNodes : builtNodes.map((node) => {
 		const savedNode = findSavedNode(node, entryByNodeId.get(node.id), savedUiNodes, usedSavedNodeIds);
 		if (!savedNode) return node;
 		usedSavedNodeIds.add(savedNode.id);
+		if (node.type !== 'start') nodeIdByEntryId.set(node.id, savedNode.id);
 
 		return {
 			...node,
@@ -64,11 +70,21 @@ export function mapConnectionToWorkflowState(
 		};
 	});
 	const nodes = withRestoredCommentNodes(graphNodes, savedUiNodes);
+	// A saved edge set that cannot exist on the canvas — two edges leaving one
+	// handle, a node with two parents — is not a layout the user made: it comes from
+	// a generator that wired the graph from something other than the indexes (an
+	// automation whose two IF operators both name the same predecessor writes both
+	// of them onto that method). The indexes are what actually runs, so the chain is
+	// rebuilt from them rather than drawn as saved. Restoring from the ui is no
+	// reason to skip the check: the rebuilt edges are simply retargeted onto the
+	// restored nodes, which is the only thing that used to stand in the way.
 	const invalidSavedEdgeReason = getInvalidSavedEdgeReason(nodes, savedUiEdges);
-	const useSavedEdges = restoredFromUi
-		? savedUiEdges.length > 0
-		: entries.length > 0 && savedUiEdges.length > 0 && !invalidSavedEdgeReason;
-	const edges = useSavedEdges ? savedUiEdges : entries.length ? buildEdges(entries) : initialEdges;
+	const useSavedEdges = entries.length > 0 && savedUiEdges.length > 0 && !invalidSavedEdgeReason;
+	const edges = useSavedEdges
+		? savedUiEdges
+		: entries.length
+			? remapEdgeEndpoints(buildEdges(entries), nodeIdByEntryId)
+			: initialEdges;
 	const shouldAutoLayout = entries.length > 0
 		&& ((!restoredFromUi && savedUiNodes.length === 0) || hasStackedNodes(nodes));
 	const positionedNodes = shouldAutoLayout ? normalizeWorkflowPositions(nodes, edges) : nodes;

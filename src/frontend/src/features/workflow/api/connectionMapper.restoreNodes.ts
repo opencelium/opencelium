@@ -8,8 +8,13 @@ export const restoreNodesFromUi = (
 	savedUiNodes: SavedUiNode[],
 ) => {
 	const usedEntryIds = new Set<string>();
+	// Which restored node an entry ended up as. The edges rebuilt from the payload
+	// indexes speak in entry ids, while the restored nodes keep the ids the saved ui
+	// gave them, so a rebuilt chain has to be translated before it can attach.
+	const nodeIdByEntryId = new Map<string, string>();
 	const restoredNodes = savedUiNodes.map((savedNode) => {
 		if (savedNode.type === 'start') {
+			nodeIdByEntryId.set(initialNodes[0].id, savedNode.id);
 			return {
 				...initialNodes[0],
 				id: savedNode.id,
@@ -31,6 +36,7 @@ export const restoreNodesFromUi = (
 			} as WorkflowNodeModel;
 		}
 		usedEntryIds.add(entry.node.id);
+		nodeIdByEntryId.set(entry.node.id, savedNode.id);
 		return {
 			...entry.node,
 			id: savedNode.id,
@@ -49,5 +55,6 @@ export const restoreNodesFromUi = (
 		nodes: restoredNodes.some((node) => node.type === 'start')
 			? restoredNodes : [initialNodes[0], ...restoredNodes],
 		usedEntryIds,
+		nodeIdByEntryId,
 	};
 };
