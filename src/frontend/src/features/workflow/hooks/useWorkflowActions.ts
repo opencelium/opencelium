@@ -54,7 +54,8 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		headerState, setHeaderState: connection.setHeaderState, nodes: view.hydratedNodes,
 		edges: workflow.edges, fieldBindings,
 		setFieldBindings: connection.setFieldBindings, connectors,
-		getViewport: workflow.getViewport, setWorkflowGraph: workflow.setWorkflowGraph });
+		getViewport: workflow.getViewport, setWorkflowGraph: workflow.setWorkflowGraph,
+		markDirty: changes.markDirty });
 	const history = useWorkflowHistoryActions({ connectionId: view.activeConnectionId,
 		baselineSnapshot: changes.baselineSnapshot, connectors, invokers,
 		setHistoryVersions: connection.setHistoryVersions,

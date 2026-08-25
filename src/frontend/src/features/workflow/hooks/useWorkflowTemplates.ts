@@ -22,11 +22,12 @@ type Params = {
 	setWorkflowGraph: (nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[],
 		viewport?: WorkflowConnectionState['viewport'],
 		options?: { centerStart?: boolean }) => void;
+	markDirty: () => void;
 };
 
 export const useWorkflowTemplates = ({ connectionId, headerState, setHeaderState,
 	nodes, edges, fieldBindings, setFieldBindings, connectors, getViewport,
-	setWorkflowGraph }: Params) => {
+	setWorkflowGraph, markDirty }: Params) => {
 	const save = useSaveConnectionTemplate({ connectionId, title: headerState.title,
 		description: headerState.description, nodes, edges, fieldBindings, getViewport });
 	const load = useLoadConnectionTemplate();
@@ -34,6 +35,7 @@ export const useWorkflowTemplates = ({ connectionId, headerState, setHeaderState
 		setHeaderState, setFieldBindings, setWorkflowGraph,
 		closeDialog: () => load.setDialogOpen(false),
 		clearSelection: () => load.setSelectedTemplateId(undefined),
+		markDirty,
 	});
 	const apply = useApplyConnectionTemplate({ templates: load.templates,
 		selectedTemplateId: load.selectedTemplateId, connectors, finishApply,
