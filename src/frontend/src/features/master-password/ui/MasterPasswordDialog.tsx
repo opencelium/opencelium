@@ -8,9 +8,13 @@ import { Typography } from '@shared/ui/primitives/Typography'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { apiExecutor } from '@shared/api/apiExecutor'
 import { useMasterPasswordStore } from '@features/master-password/model/masterPasswordStore'
+import {
+    resolveMasterPasswordErrorKey,
+    type MasterPasswordErrorBody,
+} from '@features/master-password/model/resolveMasterPasswordErrorKey'
 import { AsciiError } from '@features/master-password/ui/AsciiError'
 
-const isApiExecutorError = (response: unknown): response is { data?: { error?: string } } =>
+const isApiExecutorError = (response: unknown): response is { data?: MasterPasswordErrorBody } =>
     !!response && typeof response === 'object' && ('status' in response || 'error' in response)
 
 type MasterPasswordInfo = { title: string; content: string }
@@ -61,11 +65,7 @@ export const MasterPasswordDialog: React.FC<MasterPasswordDialogProps> = ({ labe
         })
         setIsLoading(false)
         if (isApiExecutorError(response)) {
-            setError(
-                widgetT(`masterPassword.error.${response.data?.error}`, {
-                    defaultValue: widgetT('masterPassword.error.default'),
-                }),
-            )
+            setError(widgetT(resolveMasterPasswordErrorKey(response.data)))
             return
         }
         setMasterPassword(localPassword)
