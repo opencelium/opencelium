@@ -17,7 +17,14 @@ export type LensEndpoint = {
 	path: string;
 };
 
-export type LensInvalidReason = 'out-of-scope' | 'missing-method';
+/**
+ * Why a binding cannot be satisfied. The first two are about the provider — it
+ * cannot be read from here, or nothing carries that colour any more. The third is
+ * about the consumer's own script: it still names an input that is no longer
+ * passed to it (VARIABLE_NOT_EXIST), so the enhancement cannot run whether or not
+ * its remaining references resolve.
+ */
+export type LensInvalidReason = 'out-of-scope' | 'missing-method' | 'missing-variable';
 
 /**
  * Where the reference behind a binding actually lives. An enhancement is a row in
@@ -26,7 +33,13 @@ export type LensInvalidReason = 'out-of-scope' | 'missing-method';
  * pickers produce) and has nothing to edit but the field itself.
  */
 export type LensBindingSource =
-	| { kind: 'enhancement'; enhanceId: string; varKey: string }
+	| {
+		kind: 'enhancement';
+		enhanceId: string;
+		/** null for the enhancement itself rather than one of its references —
+		 *  a script whose every input is gone still has a field it fills. */
+		varKey: string | null;
+	}
 	| { kind: 'value' };
 
 export type LensBinding = {

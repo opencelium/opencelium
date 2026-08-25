@@ -7,6 +7,7 @@ type Translate = (key: string, values?: Record<string, unknown>) => string;
 const REASON_KEYS: Record<LensInvalidReason, string> = {
 	'out-of-scope': 'bindingLens.reasonOutOfScope',
 	'missing-method': 'bindingLens.reasonMissingMethod',
+	'missing-variable': 'bindingLens.reasonMissingVariable',
 };
 
 /** Columns over `LensBinding` itself — it is already the flat row this table

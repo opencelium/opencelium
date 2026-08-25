@@ -9,6 +9,10 @@ export type BindingLensNodeState = {
 	pinnedNodeId: string | null;
 	/** The methods at the other end of the focused method's bindings. */
 	relatedNodeIds: ReadonlySet<string>;
+	/** The methods whose card is on the canvas right now. That card carries the
+	 *  method's name and its own counts, so the node underneath drops its label and
+	 *  its badge rather than repeating them behind it. */
+	cardNodeIds: ReadonlySet<string>;
 	onToggleFocus: (nodeId: string) => void;
 };
 

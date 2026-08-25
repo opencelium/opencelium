@@ -79,3 +79,14 @@ describe('resolveFocusRelatedNodeIds', () => {
 		expect(resolveFocusRelatedNodeIds(graph([lensBinding()]), null).size).toBe(0);
 	});
 });
+
+describe('buildNodeBindingSummaries — a break the provider is not to blame for', () => {
+	it('badges only the consumer when it is the consumer script that is broken', () => {
+		const summaries = buildNodeBindingSummaries(graph([
+			lensBinding({ isScript: true, invalidReason: 'missing-variable' }),
+		]));
+		// m1 still provides that field perfectly well; m2's script cannot run.
+		expect(summaries.get('m1')).toEqual({ receives: 0, provides: 1, broken: 0 });
+		expect(summaries.get('m2')).toEqual({ receives: 1, provides: 0, broken: 1 });
+	});
+});

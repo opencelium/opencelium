@@ -28,6 +28,9 @@ export function NodeShell({
 	const lensDimmed = !!bindingLens?.focusNodeId
 		&& bindingLens.focusNodeId !== id
 		&& !bindingLens.relatedNodeIds.has(id);
+	// The card sits directly under the node and names the method in its own header,
+	// so the label would be the same text twice, half of it behind the card.
+	const hasBindingCard = !!bindingLens?.cardNodeIds.has(id);
 	const jointRejection = useJointRejectionMessage(data.jointInvalidReason, data.jointBlockingLabel);
 	const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
 		if (data.dragGhost || data.dropPlaceholder) return;
@@ -121,7 +124,9 @@ export function NodeShell({
 					onToggleComment={data.onToggleComment}
 				/>
 			)}
-			{bottomLabel && <div className='nodeBottomLabel'>{bottomLabel}</div>}
+			{bottomLabel && !hasBindingCard && (
+				<div className='nodeBottomLabel'>{bottomLabel}</div>
+			)}
 			{bottomExtra}
 		</div>
 	);

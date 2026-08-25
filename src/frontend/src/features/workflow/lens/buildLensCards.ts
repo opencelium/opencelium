@@ -106,7 +106,10 @@ export const buildLensCards = (
 			selectable: false,
 			focusable: false,
 			deletable: false,
-			zIndex: 2,
+			// Above the node layer (.nodeWrap is z-index 6, its badges 7): a card is
+			// the thing being read, and it hangs under a node close enough to be
+			// clipped by the next one down — and its rows have to be clickable.
+			zIndex: 10,
 			data,
 		} satisfies LensNodeModel];
 	});

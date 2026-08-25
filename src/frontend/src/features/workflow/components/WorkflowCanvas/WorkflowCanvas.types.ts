@@ -60,6 +60,9 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 		onToggle: () => void;
 		onHoverNode: (nodeId: string | null) => void;
 		onToggleFocus: (nodeId: string) => void;
+		/** Focus a method outright — selecting it on the canvas, rather than
+		 *  toggling it from its own badge. */
+		onFocusNode: (nodeId: string) => void;
 		onClearFocus: () => void;
 		actions: LensActions;
 	};

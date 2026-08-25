@@ -211,18 +211,46 @@ export function WorkflowCanvas({
       focusNodeId: lensView.focusNodeId,
       pinnedNodeId: bindingLens?.pinnedNodeId ?? null,
       relatedNodeIds: resolveFocusRelatedNodeIds(bindingGraph, lensView.focusNodeId),
+      // The cards actually built, not merely the expanded ids: a node only stands
+      // down for a card that is really there.
+      cardNodeIds: new Set(lens.nodes.map((card) => card.data.anchorNodeId)),
       onToggleFocus: onToggleLensFocus,
     };
-  }, [bindingGraph, bindingLens?.pinnedNodeId, isLensOpen, lensView.focusNodeId, onToggleLensFocus]);
+  }, [bindingGraph, bindingLens?.pinnedNodeId, isLensOpen, lens.nodes, lensView.focusNodeId,
+    onToggleLensFocus]);
   // Hover previews a method's bindings; a node with none of its own clears the
   // preview rather than dimming the whole canvas to say so.
   const onHoverLensNode = bindingLens?.onHoverNode;
+  // The lens's own cards are xyflow nodes, so the pointer entering one arrives
+  // here as a node hover. Ignored on both edges: a card exists *because* of the
+  // current focus, so touching the focus from it fed the derivation that produced
+  // the card the pointer was already inside — which is what made it flicker.
   const handleNodeMouseEnter = useCallback((_: ReactMouseEvent, node: CanvasNodeModel) => {
-    if (!onHoverLensNode || !lensNodeState) return;
+    if (!onHoverLensNode || !lensNodeState || isLensElementId(node.id)) return;
     onHoverLensNode(lensNodeState.summaryByNodeId.has(node.id) ? node.id : null);
   }, [lensNodeState, onHoverLensNode]);
-  const handleNodeMouseLeave = useCallback(() => onHoverLensNode?.(null), [onHoverLensNode]);
+  const handleNodeMouseLeave = useCallback((_: ReactMouseEvent, node: CanvasNodeModel) => {
+    if (isLensElementId(node.id)) return;
+    onHoverLensNode?.(null);
+  }, [onHoverLensNode]);
+  const onFocusLensNode = bindingLens?.onFocusNode;
   const onClearLensFocus = bindingLens?.onClearFocus;
+  // Selecting a method is the other way to ask what it is bound to, so it shows
+  // the same card the badge does — while the lens is open, and only then. A
+  // selected method with no bindings clears the focus rather than leaving another
+  // method's card up: the selection is what the lens is describing.
+  const handleNodeClick = useCallback((_: ReactMouseEvent, node: CanvasNodeModel) => {
+    if (jointSourceId) {
+      if (jointVerdicts?.get(node.id)?.valid) onConfirmJoint?.(node.id);
+      return;
+    }
+    if (!isLensOpen || isLensElementId(node.id)) return;
+    // The badge stops its own click here, so it keeps toggling rather than being
+    // re-pinned by the selection it also makes.
+    if (lensNodeState?.summaryByNodeId.has(node.id)) onFocusLensNode?.(node.id);
+    else onClearLensFocus?.();
+  }, [isLensOpen, jointSourceId, jointVerdicts, lensNodeState, onClearLensFocus,
+    onConfirmJoint, onFocusLensNode]);
   const handlePaneClick = useCallback(() => {
     onClearLensFocus?.();
     onPaneClick?.();
@@ -313,10 +341,7 @@ export function WorkflowCanvas({
           onNodeDragStart={onNodeDragStart as OnNodeDrag<CanvasNodeModel> | undefined}
           onNodeDrag={onNodeDrag as OnNodeDrag<CanvasNodeModel> | undefined}
           onNodeDragStop={onNodeDragStop as OnNodeDrag<CanvasNodeModel> | undefined}
-          onNodeClick={(_, node) => {
-            if (!jointSourceId) return;
-            if (jointVerdicts?.get(node.id)?.valid) onConfirmJoint?.(node.id);
-          }}
+          onNodeClick={handleNodeClick}
           onNodeDoubleClick={isEditLocked ? undefined : handleNodeDoubleClick}
           onNodeMouseEnter={isLensOpen ? handleNodeMouseEnter : undefined}
           onNodeMouseLeave={isLensOpen ? handleNodeMouseLeave : undefined}

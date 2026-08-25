@@ -71,6 +71,16 @@ export function useBindingDrawerStore({ nodes, edges, fieldBindings, binding,
 			store.getState().connection.connection?.fieldBindings);
 	}, [connection, sessionKey, store]);
 
+	// Published as it is typed, not only on the way out: the page's dirty flag and
+	// the save payload both read the field bindings from there, so a script edited
+	// with the drawer still open used to be missing from a Ctrl+S. persist() is a
+	// no-op when nothing changed, and the writes reaching it are already debounced
+	// by the editors themselves (see useEnhancementScriptValue).
+	useEffect(() => {
+		if (!sessionKey) return;
+		return store.subscribe(() => persistRef.current());
+	}, [sessionKey, store]);
+
 	useEffect(() => () => { persistRef.current(); }, []);
 
 	const deleteEnhancement = useCallback(() => {
