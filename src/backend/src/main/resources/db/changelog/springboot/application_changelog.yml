@@ -286,3 +286,19 @@ versions:
         operation: add
         value: en,de
         path: opencelium.language.supported
+      - changeset: 4
+        operation: add
+        value: false
+        path: opencelium.log.retention.test-connection.enabled
+      - changeset: 5
+        operation: add
+        value: 240000
+        path: opencelium.log.retention.test-connection.max-age
+      - changeset: 6
+        operation: add
+        value: 600000
+        path: opencelium.log.retention.test-connection.initial-delay
+      - changeset: 7
+        operation: add
+        value: 600000
+        path: opencelium.log.retention.test-connection.sweep-interval

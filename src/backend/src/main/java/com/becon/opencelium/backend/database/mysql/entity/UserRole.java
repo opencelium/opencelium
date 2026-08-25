@@ -17,8 +17,18 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
-import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,8 +53,8 @@ public class UserRole {
     @OneToOne(mappedBy = "userRole")
     private User user;
 
-    @OneToMany(mappedBy = "userRole", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<RoleHasPermission> components = new HashSet<RoleHasPermission>();
+    @OneToMany(mappedBy = "userRole", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<RoleHasPermission> components = new HashSet<>();
 
     public UserRole() {
     }
@@ -54,10 +64,6 @@ public class UserRole {
         this.name = userRoleResource.getName();
         this.description = userRoleResource.getDescription();
         this.icon = userRoleResource.getIcon();
-        // TODO: need to finish component when client wants to convert from resource to entity
-//        this.components = userRoleResource.getComponents()
-//                .stream()
-//                .map(c -> c.getPermissions().stream().map(p -> new RoleHasPermission(this.id, c.getComponentId(), p)));
     }
 
     public int getId() {
@@ -106,5 +112,27 @@ public class UserRole {
 
     public void setComponents(Set<RoleHasPermission> components) {
         this.components = components;
+    }
+
+    public boolean hasPermission(int componentId, int permissionId) {
+        return components.stream().anyMatch(rolePermission ->
+                rolePermission.getComponent().getId() == componentId
+                        && rolePermission.getPermission().getId() == permissionId
+        );
+    }
+
+    public void addPermission(Component component, Permission permission) {
+        if (hasPermission(component.getId(), permission.getId())) {
+            return;
+        }
+
+        RoleHasPermission rolePermission = new RoleHasPermission(this, component, permission);
+        components.add(rolePermission);
+        component.getPermissions().add(rolePermission);
+    }
+
+    public void removePermission(RoleHasPermission rolePermission) {
+        components.remove(rolePermission);
+        rolePermission.getComponent().getPermissions().remove(rolePermission);
     }
 }

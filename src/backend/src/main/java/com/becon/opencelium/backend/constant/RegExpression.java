@@ -4,6 +4,13 @@ public interface RegExpression {
     // Invoker
     String requiredData = "\\{(.*?)\\}";
 
+    /**
+     * Invoker name policy: letters, digits, spaces, '-', '_', '(' and ')'.
+     * A dot is allowed only inside the name: it can neither open nor close the
+     * name and two dots may not follow each other.
+     */
+    String INVOKER_NAME_REGEX = "[\\p{L}\\p{N} _()\\-]+(?:\\.[\\p{L}\\p{N} _()\\-]+)*";
+
     // Reference
     String directRef = "#[a-zA-Z0-9]{6}\\.(\\(response\\)|\\(request\\))\\..+";
     String wrappedDirectRef = "\\{%#[a-zA-Z0-9]{6}\\.(\\(response\\)|\\(request\\))\\..+\\%}";
