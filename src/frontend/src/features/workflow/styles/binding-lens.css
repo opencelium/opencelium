@@ -57,10 +57,16 @@
   font-weight: 600;
 }
 
+/* Fixed width, because a flex column takes its width from its widest child and
+   the focus hint is a whole sentence: an unfocused legend stretched to ~375px
+   and snapped back to ~155px the moment a method was picked, which read as two
+   different legends. The hint wraps within this width instead. */
 .bindingLensLegend {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  box-sizing: border-box;
+  width: 220px;
   padding: 8px 10px;
   border: 1px solid var(--color-border-subtle);
   border-radius: 6px;
@@ -104,6 +110,7 @@
 .bindingLensLegendEmpty,
 .bindingLensLegendNote {
   color: var(--color-text-secondary);
+  line-height: 1.35;
 }
 
 .bindingLensBadgeExpandable {
