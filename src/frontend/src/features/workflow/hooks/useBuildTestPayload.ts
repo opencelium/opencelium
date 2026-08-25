@@ -14,10 +14,12 @@ type Params = {
 	fieldBindings?: any[];
 	getViewport: () => { x: number; y: number; zoom: number } | undefined;
 	clearNodeErrors: () => void;
+	validateEnhancementScripts: (fieldBindings?: readonly unknown[]) => string | null;
 };
 
 export const useBuildTestPayload = ({ connectionId, title, description, nodes,
-	edges, fieldBindings, getViewport, clearNodeErrors }: Params) => {
+	edges, fieldBindings, getViewport, clearNodeErrors,
+	validateEnhancementScripts }: Params) => {
 	const { t } = useI18n('entities');
 	return useCallback(() => {
 		clearNodeErrors();
@@ -25,6 +27,14 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 			node.type === 'system' || node.type === 'trigger-connection');
 		if (!hasMethod) {
 			notifyError(t('connection.test.noMethods'));
+			return null;
+		}
+		// A script naming a variable that no longer exists fails the same way here
+		// as on save, only mid-run and with the reason buried in the execution log —
+		// so the run is refused for it too, flagging the same nodes.
+		const brokenScriptMessage = validateEnhancementScripts(fieldBindings);
+		if (brokenScriptMessage) {
+			notifyError(brokenScriptMessage);
 			return null;
 		}
 		return {
@@ -35,5 +45,5 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 			toConnector: null,
 		};
 	}, [connectionId, title, description, nodes, edges, fieldBindings,
-		getViewport, clearNodeErrors, t]);
+		getViewport, clearNodeErrors, validateEnhancementScripts, t]);
 };

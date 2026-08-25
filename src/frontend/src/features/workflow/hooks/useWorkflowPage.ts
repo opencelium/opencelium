@@ -5,6 +5,7 @@ import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
+import { cleanBrokenWorkflowReferences } from '../utils/graph.brokenReferenceCleanup';
 import { message } from 'antd';
 import { createCommentNode } from '../utils/createCommentNode';
 import { findAnchoredComment } from '../utils/commentAnchor';
@@ -149,10 +150,27 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       setJointSourceId(null);
     },
     onCancelJoint: () => setJointSourceId(null),
-    onRemoveJoint: (nodeId: string) => {
-      setNodes((current) => current.map((item) =>
+    onRemoveJoint: async (nodeId: string) => {
+      const withoutJoint = nodes.map((item) =>
         item.id === nodeId ? { ...item, data: { ...item.data, jump: undefined } } : item,
-      ));
+      );
+      // A joint widens what its target can read, so removing one can put a
+      // reference out of scope — the same cost a drop asks about, so it is asked
+      // about here too rather than silently leaving an unreadable reference.
+      const cleanup = cleanBrokenWorkflowReferences(withoutJoint, edges, options.fieldBindings);
+      if (cleanup.brokenCount > 0) {
+        const confirmed = await confirm({
+          title: t('confirmRemoveJoint.title'),
+          message: t('confirmRemoveJoint.message',
+            { count: cleanup.affectedNodeIds.length }),
+          confirmText: t('actions.removeJoint'),
+          cancelText: t('actions.cancel'),
+          confirmVariant: 'danger',
+        });
+        if (!confirmed) return;
+        options.onFieldBindingsChange?.(cleanup.fieldBindings);
+      }
+      setNodes(cleanup.nodes);
     },
     onAddStep: (
       kind: WorkflowAction['kind'],
@@ -184,24 +202,27 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onDeleteNode: async (nodeId: string) => {
       const targetNode = nodes.find((node) => node.id === nodeId);
       if (!targetNode || targetNode.type === 'start') return;
+      const result = deleteNodeGraph(nodeId, nodes, edges);
+      // What the deletion costs elsewhere, resolved before it is confirmed: every
+      // reference to the method being deleted, plus anything the smaller graph can
+      // no longer reach. Leaving them behind was the old behaviour and it left
+      // methods reading a method that is not there any more.
+      const cleanup = cleanBrokenWorkflowReferences(
+        result.nodes, result.edges, options.fieldBindings);
       const confirmed = await confirm({
         title: t('confirmDelete.title'),
-        message: t('confirmDelete.message'),
+        message: cleanup.affectedNodeIds.length > 0
+          ? `${t('confirmDelete.message')} ${t('confirmDelete.clearsReferences',
+            { count: cleanup.affectedNodeIds.length })}`
+          : t('confirmDelete.message'),
         confirmText: t('actions.delete'),
         cancelText: t('actions.cancel'),
         confirmVariant: 'solid',
       });
       if (!confirmed) return;
-      const result = deleteNodeGraph(nodeId, nodes, edges);
-      const nextNodeIds = new Set(result.nodes.map((node) => node.id));
-      const deletedNodeIds = nodes
-        .filter((node) => !nextNodeIds.has(node.id))
-        .map((node) => node.id);
-      if (deletedNodeIds.length > 0) {
-        options.onDeleteNodes?.(deletedNodeIds, nodes);
-      }
-      setNodes(result.nodes);
+      setNodes(cleanup.nodes);
       setEdges(result.edges);
+      if (cleanup.brokenCount > 0) options.onFieldBindingsChange?.(cleanup.fieldBindings);
       setContextMenu(null);
     },
     ...nodeUpdates,

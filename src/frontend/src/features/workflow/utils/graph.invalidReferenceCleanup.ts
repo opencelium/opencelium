@@ -6,6 +6,8 @@ import {
   normalizeReferenceColor,
 } from './graph.referenceColors';
 import { removeNodeDataReferenceColors } from './graph.referenceCleanup';
+import { dropEnhancementArgs, hasEnhancementArgs } from './enhancementArgs';
+import { isDirectReferenceEnhancement } from '../components/request-editor/body-editor/bodyReference';
 
 const cloneValue = <T,>(value: T): T =>
   value === undefined ? value : JSON.parse(JSON.stringify(value));
@@ -37,14 +39,17 @@ export const cleanInvalidWorkflowReferences = (
     if (!invalidColors) return binding;
 
     const next = cloneValue(binding);
+    // A script that loses an input must say so: the dead VAR_n is dropped and
+    // every use of it in the script becomes VARIABLE_NOT_EXIST, the same thing
+    // deleting the variable by hand does (see Reference). Filtering the argument
+    // out on its own left the script naming a variable nothing passes any more.
+    const wasPassthrough = isDirectReferenceEnhancement(next?.enhancement);
     if (next?.enhancement?.args && typeof next.enhancement.args === 'object') {
-      next.enhancement.args = Object.fromEntries(
-        Object.entries(next.enhancement.args).filter(([key, value]) => {
-          if (key === 'RESULT_VAR') return true;
-          return ![...collectReferenceColors(value)]
-            .some((color) => invalidColors.has(color));
-        }),
-      );
+      const deadArgs = Object.entries(next.enhancement.args)
+        .filter(([key, value]) => key !== 'RESULT_VAR'
+          && [...collectReferenceColors(value)].some((color) => invalidColors.has(color)))
+        .map(([key]) => key);
+      next.enhancement = dropEnhancementArgs(next.enhancement, deadArgs);
     }
     if (Array.isArray(next?.from)) {
       next.from = next.from
@@ -58,11 +63,14 @@ export const cleanInvalidWorkflowReferences = (
         .join('\n');
     }
 
-    const sourceArgs = Object.entries(next?.enhancement?.args ?? {})
-      .filter(([key]) => key !== 'RESULT_VAR');
-    return sourceArgs.length > 0 || (Array.isArray(next?.from) && next.from.length > 0)
-      ? next
-      : null;
+    if (hasEnhancementArgs(next?.enhancement ?? { args: {} })) return next;
+    if (Array.isArray(next?.from) && next.from.length > 0) return next;
+    // Nothing left to compute from. A passthrough enhancement only ever mirrored
+    // the reference in the field's own value — which this pass has just cleared —
+    // so it goes with it; an authored script stays, carrying VARIABLE_NOT_EXIST
+    // where its input was, because discarding someone's script silently is how
+    // this breakage became invisible in the first place.
+    return wasPassthrough ? null : next;
   };
 
   return {
