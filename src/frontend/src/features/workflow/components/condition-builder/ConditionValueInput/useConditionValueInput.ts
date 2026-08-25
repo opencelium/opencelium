@@ -3,7 +3,7 @@ import type { ResponseType } from '../../request-editor/body-editor/requestRefer
 import type { ConditionValueSource } from '../conditionBuilder.types';
 import type { ConditionValueInputProps } from './ConditionValueInput.types';
 import { getSourceFromField, parseMethodFromReference,
-  parseResponseTypeFromReference } from './conditionValueReference.utils';
+  parseResponseTypeFromReference } from '../conditionBuilder.utils';
 
 export function useConditionValueInput({
   side, properties, allMethods, onChange,

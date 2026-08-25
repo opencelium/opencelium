@@ -36,23 +36,25 @@ export const parseMethodFromReference = (methods: MethodWithId[], value?: string
 		: undefined;
 };
 
-export const parseResponseTypeFromReference = (value?: string): ResponseType | undefined => {
-	const reference = unwrapConditionReference(value);
-	if (reference?.includes('.header.')) return 'header';
-	if (reference?.includes('.status')) return 'status';
-	if (reference?.includes('.body.')) return 'body';
-	return undefined;
-};
+// Anchored at the head of the reference, because the message property is only
+// ever the segment right after `(response)` — a substring test reads the
+// `status` leaf of a body path (`…body.$.issues[i].fields.status`) as a status
+// reference and flips the dialog's B/H/S switcher. The path tail is matched by
+// the same expression so a bare path (what LegacyResponseFieldSelect emits)
+// falls through untouched instead of being cut at its own `.body.`/`.header.`.
+const REFERENCE_HEAD = /^#?[A-Fa-f0-9]{6}\.\(response\)\.(body|header|status)\b\.?(.*)$/;
+
+export const parseResponseTypeFromReference = (value?: string): ResponseType | undefined =>
+	unwrapConditionReference(value)?.match(REFERENCE_HEAD)?.[1] as ResponseType | undefined;
 
 export const parsePathFromReference = (value?: string) => {
 	const reference = unwrapConditionReference(value);
 	if (!reference) return undefined;
 	if (reference === '$' || reference === '$.') return '$';
-	if (reference.includes('(response).status')) return 'status';
-	const match = reference.match(/\.(body|header)(?:\.\$\.?|\.)?(.*)$/);
-	if (match && match[2] === '') return '$';
-	const path = match?.[2] || reference;
-	return path.replace(/^#?[A-Fa-f0-9]{6}\.\(response\)\.(body|header)\.\$\.?/, '');
+	const match = reference.match(REFERENCE_HEAD);
+	if (!match) return reference;
+	if (match[1] === 'status') return 'status';
+	return match[2].replace(/^\$\.?/, '') || '$';
 };
 
 export const getSourceFromField = (field?: string): ConditionValueSource => {
