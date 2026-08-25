@@ -8,6 +8,7 @@ import {
 } from '../components/request-editor/utils/parseEnhancementArg';
 import type { Enhancement } from '../types/connection';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
+import { NOT_EXIST_ARG } from '../utils/enhancementArgs';
 import { normalizeReferenceColor } from '../utils/graph.referenceColors';
 import { pickNearestVisibleProvider } from '../utils/graph.referenceProvider';
 import { compareWorkflowIndexes } from '../utils/graph.referenceVisibility';
@@ -127,9 +128,31 @@ export const buildBindingGraph = (
 			}
 			const consumer = toEndpoint(target, consumerMethod);
 			const isScript = !isDirectReferenceEnhancement(enhancement);
+			// A script still naming an input that is no longer passed to it cannot
+			// run, so every binding it stands for is broken — whether or not the
+			// references it does still have resolve.
+			const hasMissingVariable = String(enhancement.script ?? '').includes(NOT_EXIST_ARG);
 			const references = Object.entries(enhancement.args).filter(([key]) => isVarKey(key));
 			if (references.length === 0) {
-				skipped.malformed += 1;
+				// Nothing left to draw an arc from, but the field it fills is real and
+				// the break is the whole point of showing it: without this the case
+				// where a script lost *every* input was visible nowhere.
+				if (!hasMissingVariable) {
+					skipped.malformed += 1;
+					return;
+				}
+				bindings.push({
+					key: `${enhancement.enhanceId}:script`,
+					source: { kind: 'enhancement', enhanceId: enhancement.enhanceId, varKey: null },
+					consumer,
+					provider: {
+						nodeId: null, label: null, color: '', direction: 'response',
+						messageProperty: '', field: '', path: NOT_EXIST_ARG,
+					},
+					isScript,
+					invalidReason: 'missing-variable',
+					unreadableProviderNodeId: null,
+				});
 				return;
 			}
 
@@ -147,7 +170,11 @@ export const buildBindingGraph = (
 					consumer,
 					provider: toEndpoint(parsed, resolved.provider),
 					isScript,
-					invalidReason: resolved.invalidReason,
+					// A provider-side break is the more specific fact about this
+					// reference, so it wins; the script's own break is what the
+					// otherwise-fine references of that enhancement report.
+					invalidReason: resolved.invalidReason
+						?? (hasMissingVariable ? 'missing-variable' : null),
 					unreadableProviderNodeId: resolved.unreadableProviderNodeId,
 				});
 			});

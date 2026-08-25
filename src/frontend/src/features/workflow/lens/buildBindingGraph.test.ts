@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import type { LensBinding } from './bindingLens.types';
+import { NOT_EXIST_ARG } from '../utils/enhancementArgs';
 import { buildBindingGraph } from './buildBindingGraph';
 
 const enhancementOf = (binding: LensBinding) =>
@@ -231,5 +232,55 @@ describe('buildBindingGraph', () => {
 		expect(buildBindingGraph(nodes, edges, undefined)).toEqual({
 			bindings: [], skipped: { malformed: 0, outsideScope: 0, unanchored: 0 },
 		});
+	});
+});
+
+describe('buildBindingGraph — a script naming an input it no longer receives', () => {
+	it('marks every reference of that enhancement broken, provider or not', () => {
+		const graph = build([
+			binding('en-1', '#f5a623.(request).body.$.total',
+				['#3fa9f5.(response).body.$.net'], `RESULT_VAR = VAR_0 + ${NOT_EXIST_ARG}`),
+		]);
+		expect(graph.bindings).toHaveLength(1);
+		expect(graph.bindings[0]).toMatchObject({
+			invalidReason: 'missing-variable',
+			isScript: true,
+			// The reference it does still have resolves — it is the script that cannot run.
+			provider: { nodeId: 'm1' },
+		});
+	});
+
+	it('keeps a provider-side break as the more specific reason', () => {
+		const graph = build([
+			binding('en-2', '#7ed321.(request).body.$.ticket',
+				['#f5a623.(response).body.$.id'], `RESULT_VAR = VAR_0 + ${NOT_EXIST_ARG}`),
+		]);
+		// m2 runs inside the loop, so m3 cannot read it whatever the script says.
+		expect(graph.bindings[0].invalidReason).toBe('out-of-scope');
+	});
+
+	it('describes a script whose every input is gone, which nothing else showed', () => {
+		const graph = build([
+			binding('en-3', '#f5a623.(request).body.$.name', [],
+				`RESULT_VAR = ${NOT_EXIST_ARG}.toUpperCase()`),
+		]);
+		expect(graph.skipped.malformed).toBe(0);
+		expect(graph.bindings).toHaveLength(1);
+		expect(graph.bindings[0]).toMatchObject({
+			key: 'en-3:script',
+			source: { kind: 'enhancement', enhanceId: 'en-3', varKey: null },
+			invalidReason: 'missing-variable',
+			consumer: { nodeId: 'm2', path: 'body.$.name' },
+			// Nothing to anchor an arc on; the marker itself is what the row shows.
+			provider: { nodeId: null, label: null, path: NOT_EXIST_ARG },
+		});
+	});
+
+	it('still counts an argless enhancement with a clean script as malformed', () => {
+		const graph = build([
+			binding('en-4', '#f5a623.(request).body.$.name', [], 'RESULT_VAR = 1'),
+		]);
+		expect(graph.bindings).toEqual([]);
+		expect(graph.skipped.malformed).toBe(1);
 	});
 });

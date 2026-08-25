@@ -80,7 +80,7 @@ describe('useBindingDrawerStore', () => {
 		expect(onFieldBindingsChange).toHaveBeenCalledTimes(1);
 	});
 
-	it('publishes the previous binding before reseeding onto another one', () => {
+	it('publishes an edit as it is made, and not twice when reseeding', () => {
 		const onFieldBindingsChange = vi.fn();
 		const { result, rerender } = renderHook(
 			(props: { binding: LensBinding | null }) => useBindingDrawerStore({
@@ -93,17 +93,18 @@ describe('useBindingDrawerStore', () => {
 				fieldBindings: [{ enhancement: enhancement('RESULT_VAR = 1') }],
 			}));
 		});
-		expect(onFieldBindingsChange).not.toHaveBeenCalled();
+		// Published as it is typed, so a save with the drawer still open includes it.
+		expect(onFieldBindingsChange).toHaveBeenCalledTimes(1);
+		expect(onFieldBindingsChange.mock.calls[0][0])
+			.toMatchObject([{ enhancement: { script: 'RESULT_VAR = 1' } }]);
 
-		// Selecting another arc keeps the drawer mounted, so the edit made to the
-		// first binding has to leave before the store is reseeded under it.
+		// Selecting another arc keeps the drawer mounted; the edit is already out,
+		// so reseeding under it must not publish the same thing again.
 		act(() => {
 			rerender({ binding: { ...binding, key: 'e1:VAR_1',
 				source: { kind: 'enhancement', enhanceId: 'e1', varKey: 'VAR_1' } } });
 		});
 		expect(onFieldBindingsChange).toHaveBeenCalledTimes(1);
-		expect(onFieldBindingsChange.mock.calls[0][0])
-			.toMatchObject([{ enhancement: { script: 'RESULT_VAR = 1' } }]);
 		// ...and the reseed put the page's own bindings back in the store.
 		expect(result.current.store.getState().connection.connection?.fieldBindings)
 			.toMatchObject([{ enhancement: { script: 'RESULT_VAR = VAR_0' } }]);

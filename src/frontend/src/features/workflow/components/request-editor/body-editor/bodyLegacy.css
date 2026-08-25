@@ -184,11 +184,16 @@
   overflow: hidden;
 }
 
+/* The enhancement view carries its own sizing: it grows to fill a host that
+   offers bounded space (the method dialog's row), and still has a workable
+   height in one that does not (the field-binding drawer, whose body scrolls and
+   so hands its children no height to divide). Depending on the host for this is
+   what left the script editor 0px tall — and invisible — in the drawer. */
 .bodyLegacyEnhancementContent {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: 0;
+  min-height: 420px;
 }
 
 .bodyLegacyEnhancementCollapse {
@@ -257,25 +262,40 @@
 
 .bodyLegacyEnhancementScript {
   flex: 1;
-  min-height: 0;
+  /* A floor rather than 0: `flex: 1` alone resolves to nothing when no ancestor
+     has a definite height, and Ace then measures a zero-height container. */
+  min-height: 240px;
   position: relative;
   display: flex;
   flex-direction: column;
 }
 
 .bodyLegacyEnhancementScriptEditor {
+  display: flex;
   position: relative;
   flex: 1;
-  min-height: 0;
+  /* This box is the containing block the Ace element resolves `inset: 0` against,
+     so it is the one that must never be zero — a floor here is what decides
+     whether the editor has any height to render into. */
+  min-height: 220px;
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   overflow: hidden;
+}
+.bodyLegacyEnhancementScriptEditor > div {
+  display: flex;
+  flex: 1;
+  height: auto !important;
 }
 
 .bodyLegacyEnhancementScriptEditor > :not(.bodyLegacyScriptToggle) {
   position: absolute;
   inset: 0;
   width: auto !important;
+  /* Belt and braces on the element Ace itself measures: `inset: 0` already gives
+     it the box's height, and this keeps it non-zero even in a host that
+     content-sizes the box. */
+  min-height: 220px;
 }
 
 /* Light-gray active line so it reads as selected without blending into the enhancement container. */

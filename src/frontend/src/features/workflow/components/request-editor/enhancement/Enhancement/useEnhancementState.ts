@@ -17,7 +17,11 @@ export function useEnhancementState(enhancement?: Enhancement) {
 		setIsScriptMaximized((current) => {
 			const next = !current;
 			if (next) {
-				const body = scriptBoxRef.current?.closest('.ant-modal-body') as HTMLElement | null;
+				// Whichever surface the enhancement is hosted in: the method dialog's
+				// modal body, or the field-binding drawer, which is not a modal at all
+				// and used to leave the maximized script with no geometry.
+				const body = scriptBoxRef.current
+					?.closest('.ant-modal-body, .bindingDrawer') as HTMLElement | null;
 				const rect = body?.getBoundingClientRect();
 				setMaximizedStyle(rect ? {
 					position: 'fixed', top: rect.top, left: rect.left,
@@ -26,7 +30,6 @@ export function useEnhancementState(enhancement?: Enhancement) {
 			}
 			return next;
 		});
-		setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
 	};
 
 	const updateEnhancement = (nextEnhancement: Enhancement) => {

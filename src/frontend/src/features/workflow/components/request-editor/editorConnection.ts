@@ -2,6 +2,7 @@ import { buildFromConnectorPayload } from '../../api/connectionPayload';
 import type { Connection, FieldBinding, OperatorWithId } from '../../types/connection';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import { buildLegacyConnection } from './legacyAdapter';
+import { describeBinding, logFieldBinding } from '../../utils/fieldBindingDebug';
 
 /**
  * The connection shape the per-modal legacy store is seeded with: the editors'
@@ -17,6 +18,13 @@ export const buildEditorConnection = (
 	fieldBindings?: readonly unknown[],
 ): Connection => {
 	const legacyConnection = buildLegacyConnection(nodes);
+	logFieldBinding('3. seeding the editor store', {
+		pageBindings: Array.isArray(fieldBindings) ? fieldBindings.length : 'not an array',
+		collectedFromNodes: legacyConnection.fieldBindings?.length ?? 0,
+		usingPageBindings: Array.isArray(fieldBindings),
+		bindings: (Array.isArray(fieldBindings) ? fieldBindings : [])
+			.map((binding) => describeBinding(binding)),
+	});
 	const payload = buildFromConnectorPayload(nodes, edges);
 	const indexById = new Map(payload.methods.map((method) => [method.id, method.index]));
 

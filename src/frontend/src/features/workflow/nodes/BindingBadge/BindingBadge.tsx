@@ -18,6 +18,9 @@ export function BindingBadge({ nodeId, suppressTooltip }: Props) {
 	const lens = useBindingLensNode();
 	const summary = lens?.summaryByNodeId.get(nodeId);
 	if (!lens || !summary) return null;
+	// The card lists these bindings in full, so the chip counting them is noise
+	// underneath it.
+	if (lens.cardNodeIds.has(nodeId)) return null;
 
 	const isPinned = lens.pinnedNodeId === nodeId;
 	const tooltip = [
@@ -57,7 +60,7 @@ export function BindingBadge({ nodeId, suppressTooltip }: Props) {
 			onDoubleClick={(event) => event.stopPropagation()}
 		>
 			{suppressTooltip ? counts : (
-				<Tooltip content={tooltip} placement='bottom'>{counts}</Tooltip>
+				<Tooltip content={tooltip} placement='top'>{counts}</Tooltip>
 			)}
 		</span>
 	);

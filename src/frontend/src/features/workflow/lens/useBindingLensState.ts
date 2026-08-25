@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 
 type Params = {
@@ -56,9 +56,18 @@ export const useBindingLensState = ({ open, setOpen, pinnedNodeId, setPinnedNode
 	// arc can be on screen because the pointer is on the method it belongs to — so
 	// both pin what is merely being previewed, or the click's own result would
 	// vanish as the pointer left the node.
+	// Read through a ref rather than a dependency: these actions are what the lens
+	// elements are built with, so taking `hoveredNodeId` as a dep rebuilt every arc
+	// and card on each hover transition — needless work, and enough to disturb an
+	// element the pointer was sitting on.
+	const hoveredNodeIdRef = useRef(hoveredNodeId);
+	useEffect(() => {
+		hoveredNodeIdRef.current = hoveredNodeId;
+	}, [hoveredNodeId]);
+
 	const pinPreview = useCallback(() =>
-		setPinnedNodeId((current) => current ?? hoveredNodeId),
-	[hoveredNodeId, setPinnedNodeId]);
+		setPinnedNodeId((current) => current ?? hoveredNodeIdRef.current),
+	[setPinnedNodeId]);
 
 	const onExpandPair = useCallback((nodeIds: string[]) => {
 		setExpandedNodeIds((current) => [...new Set([...current, ...nodeIds])]);
