@@ -22,7 +22,7 @@ plugins {
 }
 
 group = 'com.becon'
-version = '5.0'
+version = '5.1'
 java {
 	toolchain {
 		// Pins BOTH compilation and the test JVM to Java 17. Without this,
