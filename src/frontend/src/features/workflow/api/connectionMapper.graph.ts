@@ -58,6 +58,29 @@ export const buildWorkflowEdges = (entries: IndexedWorkflowEntry[]): WorkflowEdg
 	return edges;
 };
 
+/**
+ * Retargets edges rebuilt from the payload indexes onto the nodes the saved ui
+ * restored, which carry their own ids. Without the translation the rebuilt chain
+ * would point at entry ids no node on the canvas has, and nothing would connect.
+ */
+export const remapEdgeEndpoints = (
+	edges: WorkflowEdgeModel[],
+	nodeIdByEntryId?: Map<string, string>,
+): WorkflowEdgeModel[] => {
+	if (!nodeIdByEntryId?.size) return edges;
+	return edges.map((edge) => {
+		const source = nodeIdByEntryId.get(edge.source) ?? edge.source;
+		const target = nodeIdByEntryId.get(edge.target) ?? edge.target;
+		if (source === edge.source && target === edge.target) return edge;
+		return {
+			...edge,
+			id: `edge-${source}-${target}-${edge.sourceHandle ?? 'default'}-${edge.targetHandle}`,
+			source,
+			target,
+		};
+	});
+};
+
 export const applyWorkflowLeafState = (
 	nodes: WorkflowNodeModel[],
 	edges: WorkflowEdgeModel[],
