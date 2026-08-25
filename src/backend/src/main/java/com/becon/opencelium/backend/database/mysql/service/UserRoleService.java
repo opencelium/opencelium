@@ -18,29 +18,32 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserRoleService {
 
-    boolean existsById(int id);
+    UserRoleResource getById(int id);
 
-    void save(UserRole userRole);
+    List<UserRoleResource> getAll();
 
-    Optional<UserRole> findById(int id);
+    UserRoleResource create(UserRoleResource resource);
 
-    List<UserRole> findAll();
+    UserRoleResource updateComponents(int id, UserRoleResource resource);
 
-    UserRole getOne(int id);
+    UserRoleResource update(int id, UserRoleResource resource);
 
-    boolean existsByRole(String role);
+    void delete(int id);
 
-    Optional<UserRole> findByRole(String role);
+    void deleteAllByIds(List<Integer> ids);
 
-    void deleteById(int id);
+    void deleteIcon(int id);
 
-    UserRole toEntity(UserRoleResource resource);
+    boolean existsByName(String name);
 
-    UserRoleResource toResource(UserRole entity);
+    Optional<UserRole> findByName(String role);
+
+    void uploadIcon(int id, MultipartFile file);
 }
