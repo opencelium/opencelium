@@ -32,6 +32,11 @@ export type InstallationInfo = {
     type: string
 }
 
+/** `GET /assistant/oc/version` — the running backend's own version. */
+export type AppVersion = {
+    version: string
+}
+
 export type UpdateAssistantForm = {
     systemHealth: SystemHealth | null
     updateMode: UpdateMode
