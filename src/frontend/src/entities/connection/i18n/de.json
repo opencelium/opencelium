@@ -76,6 +76,16 @@
     "locatingError": "Fehlerdaten werden gesammelt…",
     "skipToLive": "Zum Live-Stand springen",
     "otherTestRunning": "Für diese Verbindung läuft bereits ein Test. Warten Sie, bis er fertig ist, oder stoppen Sie ihn zuerst.",
+    "modeDialog": {
+      "title": "Test-Run im Debug-Modus",
+      "intro": "Der Workflow wird im Debug-Modus gestartet. Die Ausführung wird in der Oberfläche verlangsamt, damit Sie die einzelnen Schritte und Schnittstellenaufrufe besser verfolgen können.",
+      "backendSpeed": "Die tatsächliche Ausführung im Backend bleibt unverändert schnell.",
+      "speedAdjustable": "Die Geschwindigkeit kann während des Tests angepasst werden.",
+      "switchToLive": "Sie können jederzeit in den Live-Modus wechseln, um den Workflow ohne Verzögerung auszuführen.",
+      "dontShowAgain": "Diese Nachricht nicht mehr anzeigen",
+      "startDebug": "Debug-Modus starten",
+      "startLive": "Live-Modus starten"
+    },
     "leaveConfirm": {
       "title": "Laufenden Test stoppen?",
       "message": "Ihr Test läuft. Wenn Sie diese Seite verlassen, wird der Test abgebrochen. Möchten Sie fortfahren?"

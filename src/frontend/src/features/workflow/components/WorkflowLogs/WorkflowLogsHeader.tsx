@@ -53,7 +53,7 @@ export function WorkflowLogsHeader(props: WorkflowLogsHeaderProps) {
 						role='switch'
 						aria-checked={props.isLiveAnimation}
 						aria-label={tLogs('live.liveToggleTooltip')}
-						className={`logsHeaderLiveToggle ${props.isLiveAnimation ? 'logsHeaderLiveToggle--on' : ''}`}
+						className={`logsHeaderLiveToggle ${props.isLiveAnimation ? 'logsHeaderLiveToggle--on' : ''} ${props.isLiveToggleHighlighted ? 'logsHeaderLiveToggle--highlighted' : ''}`}
 						onClick={() => props.onToggleLiveAnimation(!props.isLiveAnimation)}
 						data-testid='workflow-logs-live-toggle'
 					>

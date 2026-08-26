@@ -11,7 +11,6 @@ import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
 import { useEscapeKey } from './useEscapeKey';
-import { TestRunAnimationHint } from './TestRunAnimationHint';
 import { TestRunDebugControls } from './TestRunDebugControls';
 
 // Where the graph's top-left-most point lands in the viewport on open —
@@ -247,7 +246,6 @@ export function WorkflowCanvas({
           <TestRunDebugControls />
         </Panel>
       </ReactFlow>
-      <TestRunAnimationHint />
     </div>
   );
 }
