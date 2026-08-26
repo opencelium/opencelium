@@ -50,6 +50,7 @@
   },
   "messages": {
     "detailsUpdated": "Profildaten aktualisiert",
+    "detailsUpdateFailed": "Profildaten konnten nicht gespeichert werden.",
     "passwordUpdated": "Passwort aktualisiert. Sie werden abgemeldet."
   },
   "validation": {
