@@ -354,38 +354,6 @@ class UserServiceImplTest {
         assertThat(result.getUsername()).isEqualTo("carla");
     }
 
-    @Test
-    void toEntityMapsWidgetSettingsWhenResourceHasSettings() {
-        WidgetSettingResource wsr1 = new WidgetSettingResource();
-        wsr1.setWidgetId(101);
-        WidgetSettingResource wsr2 = new WidgetSettingResource();
-        wsr2.setWidgetId(102);
-
-        WidgetSetting ws1 = new WidgetSetting();
-        WidgetSetting ws2 = new WidgetSetting();
-
-        UserResource resource = new UserResource();
-        resource.setUserId(5);
-        resource.setEmail("c@d.com");
-        resource.setUsername("carla");
-        resource.setUserDetail(new UserDetailResource());
-        resource.setUserGroup(new UserRoleResource(7));
-        resource.setWidgetSettings(List.of(wsr1, wsr2));
-
-        when(widgetSettingServiceImp.toEntity(wsr1, 5)).thenReturn(ws1);
-        when(widgetSettingServiceImp.toEntity(wsr2, 5)).thenReturn(ws2);
-
-        User result = userService.toEntity(resource);
-
-        assertThat(result.getId()).isEqualTo(5);
-        assertThat(result.getEmail()).isEqualTo("c@d.com");
-        assertThat(result.getUsername()).isEqualTo("carla");
-        assertThat(result.getWidgetSettings()).containsExactly(ws1, ws2);
-        verify(widgetSettingServiceImp).toEntity(wsr1, 5);
-        verify(widgetSettingServiceImp).toEntity(wsr2, 5);
-        verifyNoMoreInteractions(widgetSettingServiceImp);
-    }
-
     // ── requestToEntity ───────────────────────────────────────────────────────
 
     @Test

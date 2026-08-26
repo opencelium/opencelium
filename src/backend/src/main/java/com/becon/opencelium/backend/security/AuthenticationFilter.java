@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.AuthMethod;
+import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.websocket.Event;
 import com.becon.opencelium.backend.websocket.constant.SocketConstant;
 import com.becon.opencelium.backend.websocket.notification.WebSocketNotificationQueue;
@@ -115,11 +116,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
         try {
-            User user = new ObjectMapper()
-                    .readValue(request.getInputStream(), User.class);
+            UserRequestResource user = new ObjectMapper()
+                    .readValue(request.getInputStream(), UserRequestResource.class);
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            user.getPrincipal(),
+                            user.getLogin(),
                             user.getPassword(),
                             new ArrayList<>()));
         } catch (IOException e) {

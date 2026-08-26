@@ -30,6 +30,8 @@ public interface UserService {
 
     Optional<User> findByUsername(String username);
 
+    Optional<User> findByPrincipal(String principal);
+
     Optional<User> findById(int id);
 
     User getById(Integer userId);
@@ -44,13 +46,9 @@ public interface UserService {
 
     List<User> findAll();
 
-    User fromResource(UserResource userResource);
-
     User requestToEntity(UserRequestResource userRequestResource);
 
     UserResource toResource(User entity);
-
-    User toEntity(UserResource resource);
 
     String encodePassword(String password);
 

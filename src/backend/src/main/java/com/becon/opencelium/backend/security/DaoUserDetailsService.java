@@ -16,9 +16,8 @@
 
 package com.becon.opencelium.backend.security;
 
-import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.becon.opencelium.backend.enums.AuthMethod;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,19 +27,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DaoUserDetailsService implements UserDetailsService {
 
-    @Autowired
-    private UserServiceImpl userService;
+    private final UserServiceImpl userService;
+
+    public DaoUserDetailsService(UserServiceImpl userService) {
+        this.userService = userService;
+    }
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userService.findByEmail(email).orElse(null);
-        if (user == null || user.getPassword() == null) {
-            // 1. user == null          - there is no user with this 'email'
-            // 2. user.password == null - there is a clone of LDAP user, and setup is not finished to authenticate via OC
-            throw new UsernameNotFoundException(email);
-        }
-
-        return new UserPrincipals(user);
+    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        return userService.findByPrincipal(login)
+                .filter(user -> user.getAuthMethod() != AuthMethod.LDAP)
+                .map(UserPrincipals::new)
+                .orElseThrow(() -> new UsernameNotFoundException(login));
     }
 }

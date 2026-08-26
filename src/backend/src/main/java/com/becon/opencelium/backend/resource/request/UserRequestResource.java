@@ -53,6 +53,10 @@ public class UserRequestResource {
         this.username = username;
     }
 
+    public String getLogin() {
+        return email != null ? email : username;
+    }
+
     public String getPassword() {
         return password;
     }
