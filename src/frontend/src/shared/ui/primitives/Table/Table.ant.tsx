@@ -171,6 +171,7 @@ export const AntTable = ({
 
                 const resizedWidth = columnSizing[column.id];
                 const isStretchColumn = column.id === stretchColumnId;
+                const isResizable = meta?.resizable !== false;
 
                 return {
                     key: column.id,
@@ -185,9 +186,12 @@ export const AntTable = ({
                                     ? { width: '100%' }
                                     : {}),
                     onHeaderCell: () => ({
-                        resizeColumnId: !frozen && isStretchColumn ? undefined : column.id,
+                        resizeColumnId: !isResizable || (!frozen && isStretchColumn)
+                            ? undefined
+                            : column.id,
                         currentWidth: resizedWidth,
                         'data-col-id': column.id,
+                        className: !isResizable ? 'tableNonResizableHeaderCell' : undefined,
                         setColumnSizing,
                     }),
                     ...(align ? { align } : {}),

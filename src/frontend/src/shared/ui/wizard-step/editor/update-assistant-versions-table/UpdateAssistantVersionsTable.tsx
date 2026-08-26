@@ -188,7 +188,7 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
                     id: 'action',
                     header: () => null,
                     size: ACTION_COLUMN_WIDTH,
-                    meta: { align: 'center' },
+                    meta: { align: 'center', resizable: false },
                     cell: ({ row }) => {
                         const isRowDeleting = deletingVersion === row.original.name
                         return (
