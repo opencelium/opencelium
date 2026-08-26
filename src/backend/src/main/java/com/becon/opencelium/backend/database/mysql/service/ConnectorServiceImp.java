@@ -93,13 +93,16 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public Optional<Connector> findById(int id) {
         Optional<Connector> optional = connectorRepository.findById(id);
-        try {
-            optional.ifPresent(this::decrypt);
+        if (optional.isEmpty()) {
             return optional;
-        } catch (RuntimeException e) {
-            Connector saved = save(optional.get());
-            return Optional.of(saved);
         }
+        Connector connector = optional.get();
+        try {
+            decrypt(connector);
+        } catch (RuntimeException e) {
+            repairRequestData(connector);
+        }
+        return optional;
     }
 
     @Override
@@ -441,6 +444,38 @@ public class ConnectorServiceImp implements ConnectorService {
 
     private void decrypt(Connector connector) {
         List<RequestData> requestData = connector.getRequestData();
-        requestData.forEach(e -> e.setValue(encoder.decrypt(e.getValue())));
+        if (requestData == null) {
+            return;
+        }
+        List<String> decrypted = new ArrayList<>(requestData.size());
+        requestData.forEach(e -> decrypted.add(encoder.decrypt(e.getValue())));
+        for (int i = 0; i < requestData.size(); i++) {
+            requestData.get(i).setValue(decrypted.get(i));
+        }
+    }
+
+    private void repairRequestData(Connector connector) {
+        List<RequestData> requestData = connector.getRequestData();
+        if (requestData == null) {
+            return;
+        }
+        List<String> plaintext = new ArrayList<>(requestData.size());
+        List<RequestData> repaired = new ArrayList<>();
+        for (RequestData entry : requestData) {
+            String stored = entry.getValue();
+            try {
+                plaintext.add(encoder.decrypt(stored));
+            } catch (RuntimeException e) {
+                plaintext.add(stored);
+                entry.setValue(encoder.encrypt(stored));
+                repaired.add(entry);
+            }
+        }
+        if (!repaired.isEmpty()) {
+            requestDataService.saveAll(repaired);
+        }
+        for (int i = 0; i < requestData.size(); i++) {
+            requestData.get(i).setValue(plaintext.get(i));
+        }
     }
 }
