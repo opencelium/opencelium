@@ -147,12 +147,14 @@ public class ConnectionServiceImp implements ConnectionService {
         if (Objects.equals(connection.getFromConnector(), ConnectionConstants.DEFAULT_CONNECTOR_ID)) {
             connectionMng.getFromConnector().setTitle(ConnectionConstants.DEFAULT_CONNECTOR_NAME);
         } else {
-            Connector from = connectorService.getById(connection.getFromConnector());
+            // Raw read: only the title is needed, and inside this read-write transaction the
+            // decrypting getById would flush plaintext credentials back to request_data.
+            Connector from = connectorService.getByIdRaw(connection.getFromConnector());
             connectionMng.getFromConnector().setTitle(from.getTitle());
         }
 
         if (connection.getToConnector() != null) {
-            Connector to = connectorService.getById(connection.getToConnector());
+            Connector to = connectorService.getByIdRaw(connection.getToConnector());
             connectionMng.getToConnector().setTitle(to.getTitle());
             connectionMng.getToConnector().setFlowId(UUID.randomUUID().toString());
         }
@@ -199,12 +201,13 @@ public class ConnectionServiceImp implements ConnectionService {
         if (Objects.equals(connection.getFromConnector(), ConnectionConstants.DEFAULT_CONNECTOR_ID)) {
             connectionMng.getFromConnector().setTitle(ConnectionConstants.DEFAULT_CONNECTOR_NAME);
         } else {
-            Connector from = connectorService.getById(connection.getFromConnector());
+            // Raw read: only the title is needed — see save() above.
+            Connector from = connectorService.getByIdRaw(connection.getFromConnector());
             connectionMng.getFromConnector().setTitle(from.getTitle());
         }
 
         if (connection.getToConnector() != null) {
-            Connector to = connectorService.getById(connection.getToConnector());
+            Connector to = connectorService.getByIdRaw(connection.getToConnector());
             connectionMng.getToConnector().setTitle(to.getTitle());
             connectionMng.getToConnector().setFlowId(oldMng.getToConnector().getFlowId());
         }

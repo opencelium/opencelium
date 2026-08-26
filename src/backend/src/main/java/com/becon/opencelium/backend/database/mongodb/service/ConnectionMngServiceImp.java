@@ -271,7 +271,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                     String.format(ExceptionMessages.METHOD_CONNECTOR_REQUIRED, method.getName(), method.getIndex()));
         }
 
-        Optional<Connector> connectorOpt = connectorService.findById(connector.getConnectorId());
+        // Raw read on purpose: only existence and the invoker name are checked here, and this
+        // runs inside the connection save's read-write transaction — the decrypting findById
+        // would leave managed request_data entities holding plaintext, which dirty-checking
+        // flushes back to the table at commit.
+        Optional<Connector> connectorOpt = connectorService.findByIdRaw(connector.getConnectorId());
 
         // The referenced connector id does not exist locally.
         if (connectorOpt.isEmpty()) {

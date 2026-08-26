@@ -43,6 +43,7 @@ import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.StringUtility;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
@@ -68,6 +69,7 @@ public class ConnectorServiceImp implements ConnectorService {
     private final StorageService storageService;
     private final ConnectorHealthService connectorHealthService;
     private final SecurityAuditorAware securityAuditorAware;
+    private final EntityManager entityManager;
 
     public ConnectorServiceImp(
             ConnectorProps connectorProps, ConnectorRepository connectorRepository,
@@ -78,7 +80,8 @@ public class ConnectorServiceImp implements ConnectorService {
             StorageService storageService,
             // @Lazy breaks the constructor cycle: the health service itself depends on this service.
             @Lazy ConnectorHealthService connectorHealthService,
-            SecurityAuditorAware securityAuditorAware
+            SecurityAuditorAware securityAuditorAware,
+            EntityManager entityManager
     ) {
         this.connectorProps = connectorProps;
         this.connectorRepository = connectorRepository;
@@ -89,6 +92,7 @@ public class ConnectorServiceImp implements ConnectorService {
         this.storageService = storageService;
         this.connectorHealthService = connectorHealthService;
         this.securityAuditorAware = securityAuditorAware;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -189,8 +193,13 @@ public class ConnectorServiceImp implements ConnectorService {
 
     @Override
     public Connector getByIdRaw(int id) {
-        return connectorRepository.findById(id)
+        return findByIdRaw(id)
                 .orElseThrow(() -> new ConnectorNotFoundException(id));
+    }
+
+    @Override
+    public Optional<Connector> findByIdRaw(int id) {
+        return connectorRepository.findById(id);
     }
 
     @Override
@@ -460,9 +469,28 @@ public class ConnectorServiceImp implements ConnectorService {
                                 .formatted(entry.getField(), connector.getId()), e);
             }
         }
+        // Detach before the plaintext touches the entities: inside a caller's read-write
+        // transaction the connector and its request data are managed, and dirty-checking would
+        // flush the decrypted values back to the request_data table at commit (this is how
+        // saving a connection used to leak plaintext credentials via the per-method connector
+        // validation).
+        detach(connector);
         for (int i = 0; i < requestData.size(); i++) {
             requestData.get(i).setValue(decrypted.get(i));
         }
+    }
+
+    /**
+     * Evicts the connector (and, via {@code cascade = ALL}, its request data) from the
+     * persistence context so subsequent in-memory mutations can never be flushed to the
+     * database. Pending inserts/updates are flushed first — detaching would discard them.
+     * Outside a transaction the entities are already detached and this is a no-op.
+     */
+    private void detach(Connector connector) {
+        if (entityManager.isJoinedToTransaction()) {
+            entityManager.flush();
+        }
+        entityManager.detach(connector);
     }
 
     private void repairRequestData(Connector connector) {
@@ -485,6 +513,8 @@ public class ConnectorServiceImp implements ConnectorService {
         if (!repaired.isEmpty()) {
             requestDataService.saveAll(repaired);
         }
+        // Same hazard as decrypt(): the write-back below must never reach the database.
+        detach(connector);
         for (int i = 0; i < requestData.size(); i++) {
             requestData.get(i).setValue(plaintext.get(i));
         }

@@ -70,6 +70,12 @@ public interface ConnectorService {
      */
     Connector getByIdRaw(int id);
 
+    /**
+     * One connector without decrypting request data — for credential-free reads (existence
+     * checks, titles, invoker names) that must not touch stored credentials.
+     */
+    Optional<Connector> findByIdRaw(int id);
+
     ResponseEntity<?> checkCommunication(Connector connector) throws JsonProcessingException;
 
     /**

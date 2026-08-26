@@ -12,6 +12,7 @@ import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.security.SecurityAuditorAware;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +57,7 @@ class ConnectorServiceImpIconTest {
     @Mock private StorageService storageService;
     @Mock private ConnectorHealthService connectorHealthService;
     @Mock private SecurityAuditorAware securityAuditorAware;
+    @Mock private EntityManager entityManager;
 
     private ConnectorServiceImp service;
 
@@ -63,7 +65,7 @@ class ConnectorServiceImpIconTest {
         return new ConnectorServiceImp(
                 connectorProps, connectorRepository, invokerService,
                 requestDataService, encoder, env, storageService, connectorHealthService,
-                securityAuditorAware);
+                securityAuditorAware, entityManager);
     }
 
     private Connector aConnector(int id, String icon) {

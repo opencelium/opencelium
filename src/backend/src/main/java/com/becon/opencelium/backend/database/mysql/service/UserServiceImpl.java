@@ -174,13 +174,15 @@ public class UserServiceImpl implements UserService {
             user.setAuthMethod(userDb.getAuthMethod());
             user.setTotpProcessCompleted(userDb.isTotpProcessCompleted());
             user.setTotpSecretKey(userDb.getTotpSecretKey());
-//            user.setUsername(userDb.getUsername());
         }
 
-        if (!user.getAuthMethod().equals(AuthMethod.LDAP)) {
+        if (user.getAuthMethod() != AuthMethod.LDAP) {
             user.setUsername(userRequestResource.getUsername());
         } else {
-            logger.warn("Ldap user detected. Username {} can't be modified.", user.getUsername());
+            // LDAP owns the username: ignore the request's value and keep the stored one.
+            // userDb is never null here — a user can only be LDAP once persisted as such.
+            user.setUsername(userDb.getUsername());
+            logger.warn("Ldap user detected. Username {} can't be modified.", userDb.getUsername());
         }
 
         userDetail.setId(userRequestResource.getUserId());
