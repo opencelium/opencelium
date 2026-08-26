@@ -9,7 +9,7 @@ export type ChangePasswordPayload = {
   confirmPassword: string
 }
 
-export type UpdateProfilePayload = Pick<AuthUser, 'email'> & {
+export type UpdateProfilePayload = Pick<AuthUser, 'email' | 'username'> & {
   userDetail: Partial<AuthUser['userDetail']>
 }
 
@@ -20,7 +20,7 @@ export type UpdateProfilePayload = Pick<AuthUser, 'email'> & {
  * `password` is the one safe omission (the service keeps the stored hash when it
  * is absent or empty).
  */
-export type UserUpdateRequestDTO = Pick<AuthUser, 'userId' | 'email'> & {
+export type UserUpdateRequestDTO = Pick<AuthUser, 'userId' | 'email' | 'username'> & {
   userGroup: number
   userDetail: AuthUser['userDetail']
 }

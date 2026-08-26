@@ -33,6 +33,7 @@ export interface AuthSchema {
             notAvailable: string
             title: string
             description: string
+            noEmailHint: string
             submit: string
             backToLogin: string
             success: string

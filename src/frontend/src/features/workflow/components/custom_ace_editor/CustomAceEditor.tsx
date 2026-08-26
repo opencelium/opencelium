@@ -38,9 +38,8 @@ const CustomAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 			onBlur,
 		} = props;
 
-		const { currentValue, editorRef, isFocused, setIsFocused } = useLimitedAceEditor({
-			forwardedRef: ref, maxLength, onChange, readOnly, value,
-		});
+		const { currentValue, editorRef, isFocused, onEditorChange, setIsFocused } =
+			useLimitedAceEditor({ forwardedRef: ref, maxLength, onChange, readOnly, value });
 
 		return (
 			<LimitedAceEditorContainer style={{ height: '100%' }}>
@@ -56,6 +55,7 @@ const CustomAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 
 				<AceEditor
 					onFocus={() => setIsFocused(true)}
+					onChange={onEditorChange}
 					ref={editorRef}
 					mode={mode}
 					theme={editorTheme}
