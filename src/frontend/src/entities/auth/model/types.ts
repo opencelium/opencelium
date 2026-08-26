@@ -82,7 +82,7 @@ export type TotpValidateInput = {
 // --- Main Auth User ---
 export interface AuthUser {
     userId: number;
-    email: string;
+    email: string | null;
     username: string | null;
     totpEnabled: boolean;
 

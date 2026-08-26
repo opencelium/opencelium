@@ -2,6 +2,7 @@ export default [
     {
         "userId": 1,
         "email": "admin@opencelium.io",
+        "username": "admin",
         "userGroup": {
             "groupId": 1,
             "name": "Admin",
@@ -17,6 +18,7 @@ export default [
     {
         "userId": 2,
         "email": "test@user.com",
+        "username": null,
         "userGroup": {
             "groupId": 2,
             "name": "User",
@@ -32,7 +34,8 @@ export default [
     },
     {
         "userId": 3,
-        "email": "test2@user.com",
+        "email": null,
+        "username": "test2",
         "userGroup": {
             "groupId": 2,
             "name": "User",

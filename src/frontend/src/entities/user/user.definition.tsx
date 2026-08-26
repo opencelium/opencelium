@@ -32,6 +32,11 @@ const buildUserPageUrl = (value: string): string =>
 const buildUserViewPageUrl = (value: string): string =>
     `/user/view/${encodeURIComponent(resolveUserId(value))}`
 
+const hasEmailOrUsername = (data: unknown): boolean => {
+    const { email, username } = (data ?? {}) as { email?: string | null; username?: string | null }
+    return Boolean(email?.trim() || username?.trim())
+}
+
 export const userDefinition: EntityDefinition = {
     name: baseKey,
     permissionComponent: 'USER',
@@ -53,7 +58,8 @@ export const userDefinition: EntityDefinition = {
                 type: 'delete',
                 confirmMessage: (_value, _entity, row) => {
                     const t = i18n.getFixedT(i18n.language, 'entities');
-                    return t(`${baseKey}.list.confirmDelete.message`, { email: (row as User).email });
+                    const user = row as User;
+                    return t(`${baseKey}.list.confirmDelete.message`, { user: user.email ?? user.username ?? '' });
                 },
                 disabledReason: (row) => {
                     const currentUser = selectAuthUser(store.getState());
@@ -95,6 +101,22 @@ export const userDefinition: EntityDefinition = {
                 data.password === data.repeatPassword,
             message: `${baseKey}.crossValidations.repeatPassword.message`,
             path: 'repeatPassword'
+        },
+        // A user signs in with either credential, so neither field can be required on
+        // its own — the rule is reported on both so the error shows wherever the user
+        // is looking. It only runs when both fields are validated together, which the
+        // credentials step guarantees via validateFields.
+        {
+            fields: ['email', 'username'],
+            validate: hasEmailOrUsername,
+            message: `${baseKey}.crossValidations.emailOrUsername.message`,
+            path: 'email'
+        },
+        {
+            fields: ['email', 'username'],
+            validate: hasEmailOrUsername,
+            message: `${baseKey}.crossValidations.emailOrUsername.message`,
+            path: 'username'
         }
     ],
     api: {
@@ -134,9 +156,9 @@ export const userDefinition: EntityDefinition = {
                 max: 255
             },
             table: {
-                width: '25%',
+                width: '20%',
                 visible: true,
-                order: 2,
+                order: 3,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.name.label`,
@@ -157,9 +179,9 @@ export const userDefinition: EntityDefinition = {
                 max: 255
             },
             table: {
-                width: '25%',
+                width: '20%',
                 visible: true,
-                order: 3,
+                order: 4,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.surname.label`,
@@ -235,7 +257,8 @@ export const userDefinition: EntityDefinition = {
                 }
             },
             validation: {
-                required: true,
+                required: false,
+                email: true,
                 max: 255,
                 remote: {
                     url: `/user/check/:email`,
@@ -253,7 +276,7 @@ export const userDefinition: EntityDefinition = {
                 }
             },
             table: {
-                width: '25%',
+                width: '20%',
                 visible: true,
                 order: 1,
                 sortable: true,
@@ -274,6 +297,29 @@ export const userDefinition: EntityDefinition = {
                     }
                 ]
             }*/
+        },
+        {
+            name: 'username',
+            type: 'string',
+            ui: {
+                component: 'input',
+                props: {
+                    labelKey: `${baseKey}.fields.username.label`,
+                }
+            },
+            validation: {
+                required: false,
+                max: 255,
+            },
+            table: {
+                width: '20%',
+                visible: true,
+                order: 2,
+                sortable: true,
+                searchable: true,
+                labelKey: `${baseKey}.fields.username.label`,
+                render: (_row, value) => <TruncatedTextCell value={value} />,
+            },
         },
         {
             name: 'password',
@@ -335,7 +381,7 @@ export const userDefinition: EntityDefinition = {
             },
             table: {
                 visible: true,
-                order: 4,
+                order: 5,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userGroup.label`,
                 mapToValue: (_row, raw) => {
@@ -354,7 +400,7 @@ export const userDefinition: EntityDefinition = {
             ui: { component: 'switch' },
             table: {
                 visible: true,
-                order: 5,
+                order: 6,
                 width: 1,
                 align: 'center',
                 labelKey: `${baseKey}.fields.totpEnabled.label`,
@@ -387,7 +433,7 @@ export const userDefinition: EntityDefinition = {
             ]
         },{
             id: 'credentials',
-            fields: ['email', 'password', 'repeatPassword'],/*
+            fields: ['email', 'username', 'password', 'repeatPassword'],/*
             access: {
                 strategy: 'disable',
                 rules: [
@@ -404,7 +450,7 @@ export const userDefinition: EntityDefinition = {
             // separate step (see the 'credentials' step definition below) — one section,
             // so it renders as a single block instead of two separately-spaced sections.
             id: 'credentials-update',
-            fields: ['email', 'userGroup'],
+            fields: ['email', 'username', 'userGroup'],
         },{
             id: 'role',
             fields: ['userGroup'],
@@ -426,7 +472,7 @@ export const userDefinition: EntityDefinition = {
                 getSuccessMessage: (formData: UserUpdateDto) => {
                     const t = i18n.getFixedT(i18n.language, 'entities');
                     const fullName = [formData.userDetail?.name, formData.userDetail?.surname].filter(Boolean).join(' ');
-                    return t(`${baseKey}.wizard.modes.create.successMessage`, { name: fullName || formData.email });
+                    return t(`${baseKey}.wizard.modes.create.successMessage`, { name: fullName || formData.email || formData.username });
                 },
 /*                info: [
                     {
@@ -442,7 +488,7 @@ export const userDefinition: EntityDefinition = {
                 getSuccessMessage: (formData: UserUpdateDto) => {
                     const t = i18n.getFixedT(i18n.language, 'entities');
                     const fullName = [formData.userDetail?.name, formData.userDetail?.surname].filter(Boolean).join(' ');
-                    return t(`${baseKey}.wizard.modes.update.successMessage`, { name: fullName || formData.email });
+                    return t(`${baseKey}.wizard.modes.update.successMessage`, { name: fullName || formData.email || formData.username });
                 },
             },
             view: {
@@ -482,7 +528,7 @@ export const userDefinition: EntityDefinition = {
                         header: `${baseKey}.wizard.steps.credentials.header`,
                         subheader: `${baseKey}.wizard.steps.credentials.subheaderUpdate`,
                         sectionIds: ['credentials-update'],
-                        validateFields: ['email', 'userGroup'],
+                        validateFields: ['email', 'username', 'userGroup'],
                     },
                 ]
             }
@@ -494,7 +540,7 @@ export const userDefinition: EntityDefinition = {
                     header: `${baseKey}.wizard.steps.credentials.header`,
                     subheader: `${baseKey}.wizard.steps.credentials.subheader`,
                     sectionIds: ['credentials'],
-                    validateFields: ['email', 'password', 'repeatPassword'],
+                    validateFields: ['email', 'username', 'password', 'repeatPassword'],
                 },
                 {
                     id: 'role',
