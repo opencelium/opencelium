@@ -80,7 +80,13 @@ export function buildRowActionsColumn<T extends Record<string, unknown>>(
         size: display === 'menu' ? MENU_TRIGGER_WIDTH : actions.length * ACTION_BUTTON_WIDTH + 16,
         enableSorting: false,
         enableGlobalFilter: false,
-        meta: { align: 'center' },
+        // Last column on the row and the one that soaks up the width the others
+        // leave over, so the actions land at the table's right edge instead of
+        // immediately after the last data column with the surplus parked beyond
+        // them (see TableColumnMeta.fillTrailingSpace). `size` still applies
+        // before widths are frozen, keeping the initial layout from stretching
+        // the icons across the whole table.
+        meta: { align: 'center', resizable: false, fillTrailingSpace: true },
         cell: ({ row }) => {
             // Sub-rows (depth > 0) are decorative children — they carry no actions.
             if (row.depth > 0) return null;
