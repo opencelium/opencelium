@@ -105,8 +105,8 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Invalid email is supplied");
         }
 
-        if (user.getAuthMethod() == AuthMethod.BASIC && email == null) {
-            throw new IllegalArgumentException("Email is required for BASIC users");
+        if (user.getAuthMethod() == AuthMethod.BASIC && email == null && user.getUsername() == null) {
+            throw new IllegalArgumentException("email or username required for BASIC users");
         }
 
         return userRepository.save(user);
