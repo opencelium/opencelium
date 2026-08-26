@@ -10,7 +10,7 @@ import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.token.Token;
 import com.becon.opencelium.backend.ocel.token.TokenType;
 import com.becon.opencelium.backend.ocel.token.Tokenizer;
-import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
+import com.becon.opencelium.backend.reference.ReferenceMatchers;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 import org.apache.commons.lang3.StringUtils;
 
@@ -63,7 +63,7 @@ public class PostfixExpressionProcessor implements ExpressionProcessor {
                 if (lexeme == null) {
                     continue;
                 }
-                if (ReferenceUtils.isDirectReference(lexeme)) {
+                if (ReferenceMatchers.isWrappedDirect(lexeme)) {
                     references.add(lexeme);
                 } else {
                     // direct references embedded inside a larger literal

@@ -42,6 +42,11 @@ public final class WrappedDirectReference implements Reference {
         return raw;
     }
 
+    @Override
+    public String getName() {
+        return raw.substring(2, raw.length() - 2);
+    }
+
     /**
      * Returns the unwrapped direct reference.
      */
