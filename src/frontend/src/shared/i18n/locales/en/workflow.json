@@ -332,6 +332,7 @@
       "esc": "Esc",
       "s": "S",
       "z": "Z",
+      "redo": "(Shift + Z / Y)",
       "shift": "Shift",
       "delete": "Delete"
     },
