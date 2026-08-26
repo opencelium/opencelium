@@ -36,6 +36,8 @@ let mockOfflineVersions: UpdateVersion[] = [
 ]
 
 export const updateAssistantHandlers = [
+    http.get('/assistant/oc/version', () => HttpResponse.json({ version: '5.1' })),
+
     http.get('/actuator/health', () => HttpResponse.json(mockHealth)),
 
     http.get('/assistant/oc/online/version/all', () => HttpResponse.json(mockOnlineVersions)),

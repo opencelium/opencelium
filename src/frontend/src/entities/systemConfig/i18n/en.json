@@ -17,7 +17,7 @@
   },
   "actions": {
     "save": "Save",
-    "reset": "Reset",
+    "reset": "Discard changes",
     "expandAll": "Expand all",
     "collapseAll": "Collapse all"
   },

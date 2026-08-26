@@ -48,7 +48,16 @@ const renderAction = (
         case 'custom':
             return (
                 <React.Fragment key={`custom-${action.key}`}>
-                    {action.render({ entity, row, rowId })}
+                    {action.render({
+                        entity,
+                        row,
+                        rowId,
+                        iconSize,
+                        tooltipPlacement,
+                        // Keyed by `action.key`, not the shared 'custom' type — a row
+                        // with two custom actions must not hand both the same selector.
+                        testId: buildTestId(entity.name, 'row-action', action.key, rowId),
+                    })}
                 </React.Fragment>
             );
         default: {

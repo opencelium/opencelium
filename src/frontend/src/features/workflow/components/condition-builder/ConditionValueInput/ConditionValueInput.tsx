@@ -10,7 +10,7 @@ import { SourceSwitcher } from '../SourceSwitcher/SourceSwitcher';
 import type { ConditionValueInputProps } from './ConditionValueInput.types';
 import {
 	parsePathFromReference,
-} from './conditionValueReference.utils';
+} from '../conditionBuilder.utils';
 import { useConditionValueInput } from './useConditionValueInput';
 
 export function ConditionValueInput({ side, properties, methods, allMethods,
