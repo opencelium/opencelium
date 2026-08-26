@@ -21,7 +21,9 @@ import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.entity.Webhook;
 import com.becon.opencelium.backend.database.mysql.repository.WebhookRepository;
+import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.reference.model.WebhookReference;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
@@ -167,18 +169,11 @@ public class WebhookServiceImp implements WebhookService {
     }
 
     @Override
-    public WebhookParamDTO toParamResource(String param) { // param = val:type; type = [string, int, double, boolean, array]
+    public WebhookParamDTO toParamResource(WebhookReference reference) { // param = val:type; type = [string, int, double, boolean, array]
         WebhookParamDTO webhookParamDTO = new WebhookParamDTO();
-        String[] var = param.split(":");
-        if (var.length == 0) {
-            throw new RuntimeException("One of webhook parameters is empty");
-        }
-        webhookParamDTO.setName(var[0]);
-        if (var.length == 1) {
-            webhookParamDTO.setType("string");
-        } else {
-            webhookParamDTO.setType(var[1]);
-        }
+        webhookParamDTO.setName(reference.getPath());
+        DataType dataType = reference.getDataType();
+        webhookParamDTO.setType(dataType == DataType.UNDEFINED ? DataType.STRING.getType() : dataType.getType());
         return webhookParamDTO;
     }
 

@@ -45,6 +45,11 @@ public final class WebhookReference implements Reference {
         return raw;
     }
 
+    @Override
+    public String getName() {
+        return raw.substring(2, raw.length() - 1);
+    }
+
     public String getPath() {
         return path;
     }
