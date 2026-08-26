@@ -20,12 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +80,9 @@ public class LogDataServiceImp implements LogDataService {
 
     @Autowired
     private ParsedLogLineBuilder parsedLogLineBuilder;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     private final LogBlockBuffer buffer = new InMemoryLogBlockBuffer(
             BATCH_SIZE,
@@ -313,6 +318,21 @@ public class LogDataServiceImp implements LogDataService {
         doc.setProperties(props);
         doc.setCreatedAt(Instant.now());
         return doc;
+    }
+
+    @Override
+    public Set<String> findDistinctExecutionIds() {
+        return new HashSet<>(
+                mongoTemplate.query(LogDataMng.class)
+                        .distinct("executionId")
+                        .as(String.class)
+                        .all()
+        );
+    }
+
+    @Override
+    public void deleteAllByExecutionId(String executionId) {
+        metaDataLogRepository.deleteAllByExecutionId(executionId);
     }
 
     // --------------------------------------- Private Functions ----------------------------------------------
