@@ -28,6 +28,7 @@ import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
+import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
@@ -448,7 +449,17 @@ public class ConnectorServiceImp implements ConnectorService {
             return;
         }
         List<String> decrypted = new ArrayList<>(requestData.size());
-        requestData.forEach(e -> decrypted.add(encoder.decrypt(e.getValue())));
+        for (RequestData entry : requestData) {
+            try {
+                decrypted.add(encoder.decrypt(entry.getValue()));
+            } catch (RuntimeException e) {
+                // Which row blocked the read is the whole question during an incident: without it
+                // the offending value has to be found by scanning the table by hand.
+                throw new WrongDecryptException(
+                        ExceptionMessages.REQUEST_DATA_DECRYPTION_FAILED
+                                .formatted(entry.getField(), connector.getId()), e);
+            }
+        }
         for (int i = 0; i < requestData.size(); i++) {
             requestData.get(i).setValue(decrypted.get(i));
         }
