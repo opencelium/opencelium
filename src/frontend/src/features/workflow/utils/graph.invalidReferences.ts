@@ -20,6 +20,21 @@ const isMethodNode = (node: WorkflowNodeModel) =>
 const isOperatorNode = (node: WorkflowNodeModel) =>
   node.type === 'if' || node.type === 'loop';
 
+/** Every colour some method on the graph still answers for. A reference naming a
+ *  colour outside this set has no provider at all, which is a different failure
+ *  from a provider that is merely out of scope. */
+export const collectProviderColors = (nodes: WorkflowNodeModel[]) => {
+  const colors = new Set(nodes.filter(isMethodNode)
+    .map((node) => normalizeReferenceColor(node.data.color))
+    .filter(Boolean));
+  buildLegacyConnection(nodes).fromConnector.method.forEach((method) => {
+    if (!nodes.some((item) => item.id === method.id)) return;
+    const color = normalizeReferenceColor(method.color);
+    if (color) colors.add(color);
+  });
+  return colors;
+};
+
 export const findInvalidWorkflowReferences = (
   nodes: WorkflowNodeModel[],
   edges: WorkflowEdgeModel[],
