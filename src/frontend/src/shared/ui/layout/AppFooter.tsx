@@ -5,7 +5,7 @@ import { useTheme } from '@shared/theme/hooks/useTheme.tsx';
 import { useAuth } from '@features/auth/useAuth';
 import { useGetAppVersionQuery } from '@entities/updateAssistant/api/updateAssistantApi';
 
-const BECON_URL = 'https://www.becon.de/';
+const OPENCELIUM_URL = 'https://www.opencelium.io/';
 // Stands in only where the running version can't be asked for: the login page,
 // which renders this footer while `/assistant/oc/version` still requires auth.
 const FALLBACK_APP_VERSION = '5.1';
@@ -26,8 +26,8 @@ export const AppFooter = ({ hasBorder = true }: AppFooterProps) => {
             <Typography variant="caption" isSubtle>
                 <Trans t={t} i18nKey="footer.copyright" values={{ year, version }}>
                     {'© Copyright {{year}} '}
-                    <a href={BECON_URL} target="_blank" rel="noopener noreferrer">
-                        becon GmbH
+                    <a href={OPENCELIUM_URL} target="_blank" rel="noopener noreferrer">
+                        OpenCelium GmbH
                     </a>
                     {' | version {{version}}'}
                 </Trans>
