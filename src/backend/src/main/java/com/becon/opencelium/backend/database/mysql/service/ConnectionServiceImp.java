@@ -575,7 +575,7 @@ public class ConnectionServiceImp implements ConnectionService {
                         connectionMngService.save(connectionMng);
                     }
 
-                    log.info("Connection[id={}, name={}, version={}] successfully updated to {} version", connection.getId(), connection.getTitle(), connection.getOcVersion(), targetVersion);
+                    log.info("Connection[id={}, name={}, version={}] successfully updated to current version", connection.getId(), connection.getTitle(), connection.getOcVersion());
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}, version={}]", connection.getId(), connection.getTitle(), connection.getOcVersion(), e);
                     continue;
