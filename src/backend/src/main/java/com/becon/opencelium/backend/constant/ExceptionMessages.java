@@ -5,6 +5,7 @@ package com.becon.opencelium.backend.constant;
  */
 public interface ExceptionMessages {
     String REQUIRED_DATA_NOT_FOUND = "'%s' required data not found";
+    String REQUEST_DATA_DECRYPTION_FAILED = "Failed to decrypt request data '%s' of connector (id=%s)";
     String MASTER_PASSWORD_IS_MISSING_IN_HEADER = "master_password is missing or empty";
     String MASTER_PASSWORD_WRONG = "Invalid master password";
     String LOG_NOT_FOUND = "Log not found for execution: %d";
