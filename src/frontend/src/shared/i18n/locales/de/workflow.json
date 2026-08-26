@@ -333,6 +333,7 @@
       "esc": "Esc",
       "s": "S",
       "z": "Z",
+      "redo": "(Umschalt + Z / Y)",
       "shift": "Umschalt",
       "delete": "Entf"
     },
