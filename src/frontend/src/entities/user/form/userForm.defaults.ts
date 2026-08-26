@@ -2,6 +2,7 @@ import type {UserFormValues} from "@entities/user/form/userForm.types.ts";
 
 export const EMPTY_USER_FORM: UserFormValues = {
     email: 'new@user.com',
+    username: '',
     password: '1234qwerQ!',
     repeatPassword: '1234qwerQ!',
     userDetail: {

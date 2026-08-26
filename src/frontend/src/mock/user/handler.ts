@@ -25,7 +25,7 @@ export const userHandlers = [
         // 🔍 search
         if (search) {
             filtered = users.filter((u) =>
-                u.email.toLowerCase().includes(search)
+                (u.email ?? u.username ?? '').toLowerCase().includes(search)
             );
         }
 

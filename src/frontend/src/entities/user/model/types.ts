@@ -1,7 +1,8 @@
 
 export type User = {
   userId: number
-  email: string
+  email: string | null
+  username: string | null
   userDetail: UserDetail
   userGroup: UserGroup
   totpEnabled?: boolean
