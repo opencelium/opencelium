@@ -60,7 +60,16 @@ function buildNodeTitle(node: ConfigNode, args: BuildTreeArgs): React.ReactNode 
     const hasComments = !!node.comments && node.comments.length > 0
 
     return (
-        <div style={{display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', width: '100%', height: 32}}>
+        // Focus events are kept off rc-tree: it treats a focus it did not see a mousedown
+        // for as keyboard entry, activates the *first* node and scrolls the virtual list to
+        // it. Chrome fires exactly that when an input's `type` flips — clicking the reveal
+        // icon on a password row swaps `password`→`text`, the browser re-focuses the input,
+        // and the whole tree jumped back to the top.
+        <div
+            onFocus={(e) => e.stopPropagation()}
+            onBlur={(e) => e.stopPropagation()}
+            style={{display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', width: '100%', height: 32}}
+        >
             <StatusToggle
                 isActive={isActive}
                 path={node.path}

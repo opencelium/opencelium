@@ -7,7 +7,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {updateEnhancementInConnection} from "../../../../store/connection/utils";
 import type { RootState } from "../../../../store";
 import {updateConnection} from "../../../../store/connection/connectionSlice";
-import {EnhancementReference} from "../../strategies/EnhancementReference";
+import { dropEnhancementArgs } from "../../../../utils/enhancementArgs";
 import {Button} from "antd";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 
@@ -31,13 +31,7 @@ export const Reference: React.FC<ReferenceProps> = ({
     const variableEntries = Object.entries(args).filter(([key]) => key !== "RESULT_VAR");
     const onDelete = (argKey: string) => {
         if (connection) {
-            const newArgs = { ...enhancement.args };
-            delete newArgs[argKey];
-
-            const regex = new RegExp(`\\b${argKey}\\b`, "g");
-            const newScript = enhancement.script.replace(regex, EnhancementReference.NotExistArg);
-
-            const updatedEnhancement = { ...enhancement, args: newArgs, script: newScript };
+            const updatedEnhancement = dropEnhancementArgs(enhancement, [argKey]);
 
             const updatedConnection = updateEnhancementInConnection(connection, updatedEnhancement, clearValue);
 

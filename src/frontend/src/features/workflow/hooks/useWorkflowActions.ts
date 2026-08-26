@@ -36,6 +36,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		categoryId, nodes: view.hydratedNodes, edges: workflow.edges, fieldBindings,
 		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors,
 		resolveError: validation.resolveAndHighlightError,
+		validateEnhancementScripts: validation.validateEnhancementScripts,
 		setFieldBindings: connection.setFieldBindings,
 		setHeaderState: connection.setHeaderState,
 		setPersistedTitle: connection.setPersistedTitle,
@@ -53,7 +54,8 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		headerState, setHeaderState: connection.setHeaderState, nodes: view.hydratedNodes,
 		edges: workflow.edges, fieldBindings,
 		setFieldBindings: connection.setFieldBindings, connectors,
-		getViewport: workflow.getViewport, setWorkflowGraph: workflow.setWorkflowGraph });
+		getViewport: workflow.getViewport, setWorkflowGraph: workflow.setWorkflowGraph,
+		markDirty: changes.markDirty });
 	const history = useWorkflowHistoryActions({ connectionId: view.activeConnectionId,
 		baselineSnapshot: changes.baselineSnapshot, connectors, invokers,
 		setHistoryVersions: connection.setHistoryVersions,
@@ -98,7 +100,8 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const buildTestPayload = useBuildTestPayload({ connectionId,
 		title: headerState.title, description: headerState.description,
 		nodes: view.hydratedNodes, edges: workflow.edges, fieldBindings,
-		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors });
+		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors,
+		validateEnhancementScripts: validation.validateEnhancementScripts });
 
 	// Anything hosting its own editing surface: canvas-level keyboard shortcuts
 	// must not reach past it into the graph underneath.

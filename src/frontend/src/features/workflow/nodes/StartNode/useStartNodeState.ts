@@ -1,8 +1,10 @@
 import { useSubscriptionIssue } from '@entities/subscription/model/useSubscriptionIssue';
 import { useTestRun } from '../../test-run/useTestRun';
+import { useTestRunStartPrompt } from '../../test-run/useTestRunStartPrompt';
 
 export function useStartNodeState() {
 	const testRun = useTestRun();
+	const promptStart = useTestRunStartPrompt();
 	const { issue: subscriptionIssue } = useSubscriptionIssue();
 	const socketStatus = testRun?.socketStatus ?? 'idle';
 	const phase = testRun?.phase ?? 'idle';
@@ -30,7 +32,7 @@ export function useStartNodeState() {
 		}
 		if (isStartUnavailable) return;
 		if (isRunning) void testRun.stopTest();
-		else void testRun.startTest();
+		else promptStart();
 	};
 
 	return {

@@ -30,7 +30,19 @@
   },
   "confirmDelete": {
     "title": "Schritt löschen",
-    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "clearsReferences": "Verweise darauf aus {{count}} anderen Schritten werden entfernt.",
+    "clearsReferences_one": "Verweise darauf aus {{count}} anderen Schritt werden entfernt."
+  },
+  "confirmRemoveJoint": {
+    "title": "Verbindung entfernen?",
+    "message": "Ohne diese Verbindung können {{count}} Schritte die von ihnen verwendeten Verweise nicht mehr lesen; diese Verweise werden entfernt.",
+    "message_one": "Ohne diese Verbindung kann {{count}} Schritt die von ihm verwendeten Verweise nicht mehr lesen; diese Verweise werden entfernt."
+  },
+  "confirmDependencyDrop": {
+    "title": "Abhängigkeitskonflikt",
+    "message": "Dieser Vorgang beschädigt Verweise, die von {{count}} Schritten verwendet werden. Wenn Sie fortfahren, werden sie entfernt.",
+    "message_one": "Dieser Vorgang beschädigt Verweise, die von {{count}} Schritt verwendet werden. Wenn Sie fortfahren, werden sie entfernt."
   },
   "template": {
     "addTitle": "Vorlage hinzufügen",
@@ -109,12 +121,16 @@
     "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden.",
     "copySnapshotIdSuccess": "Snapshot-ID in die Zwischenablage kopiert",
     "deleteVersionSuccess": "Version gelöscht",
-    "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?"
+    "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?",
+    "enhancementScriptBrokenIn": "„{{method}}“ hat eine Anreicherung, deren Skript noch {{marker}} verwendet — der gelesene Verweis wurde mit dem Schritt entfernt, auf den er zeigte. Korrigieren Sie das Skript vor dem Speichern.",
+    "enhancementScriptBroken": "{{count}} Schritte haben eine Anreicherung, deren Skript noch {{marker}} verwendet — die gelesenen Verweise wurden mit den Schritten entfernt, auf die sie zeigten. Korrigieren Sie die Skripte vor dem Speichern.",
+    "enhancementScriptBroken_one": "{{count}} Schritt hat eine Anreicherung, deren Skript noch {{marker}} verwendet — der gelesene Verweis wurde mit dem Schritt entfernt, auf den er zeigte. Korrigieren Sie das Skript vor dem Speichern."
   },
   "joint": {
     "invalid": {
       "notAMethod": "Nur eine Methode kann Ziel eines Joints sein.",
       "differentLoopScope": "Das Ziel muss eine Methode im selben Loop-Bereich wie die ausgewählte sein — entweder beide außerhalb jeder Schleife oder beide in derselben Schleife.",
+      "entersIfScope": "Eine Verbindung kann nicht in eine Bedingung springen, in der die ausgewählte Methode nicht selbst liegt. Sie darf die umgebenden Bedingungen verlassen, aber keine andere betreten.",
       "backwards": "Ein Joint kann nur nach vorne zeigen, auf eine Methode, die nach der ausgewählten läuft.",
       "skipsReferencedMethod": "Dieser Joint würde {{method}} überspringen, deren Antwort diese Methode verwendet.",
       "skipsReferencedMethodUnnamed": "Dieser Joint würde eine Methode überspringen, deren Antwort diese Methode verwendet."
@@ -317,6 +333,7 @@
       "esc": "Esc",
       "s": "S",
       "z": "Z",
+      "redo": "(Umschalt + Z / Y)",
       "shift": "Umschalt",
       "delete": "Entf"
     },
@@ -331,7 +348,8 @@
       "save": "Workflow speichern",
       "undo": "Letzte Änderung auf der Arbeitsfläche rückgängig machen",
       "redo": "Rückgängig gemachte Änderung wiederherstellen",
-      "close": "Geöffnetes Menü, Dialog oder Panel schließen"
+      "close": "Geöffnetes Menü, Dialog oder Panel schließen",
+      "dismissError": "Fehlermarkierung an einem Schritt ausblenden"
     }
   },
   "contextMenu": {
