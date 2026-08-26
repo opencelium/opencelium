@@ -22,6 +22,8 @@ export type WorkflowLogsHeaderProps = {
 	isStopping: boolean;
 	isPaused: boolean;
 	isLiveAnimation: boolean;
+	/** Draws attention to the Live toggle while the test-run mode dialog explains it. */
+	isLiveToggleHighlighted: boolean;
 	onToggleLiveAnimation: (value: boolean) => void;
 	onToggleMinimized: () => void;
 	onToggleFull: () => void;

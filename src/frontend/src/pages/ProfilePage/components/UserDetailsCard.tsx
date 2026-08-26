@@ -30,7 +30,8 @@ function toFormValues(user: AuthUser): ProfileDetailsValues {
         department: user.userDetail?.department ?? '',
         organization: user.userDetail?.organization ?? '',
         phoneNumber: user.userDetail?.phoneNumber ?? '',
-        email: user.email,
+        email: user.email ?? '',
+        username: user.username ?? '',
     }
 }
 
@@ -53,7 +54,8 @@ export function UserDetailsCard({ style }: { style?: React.CSSProperties }) {
         async (values: ProfileDetailsValues) => {
             if (!user || !session) return
             const payload: UpdateProfilePayload = {
-                email: values.email,
+                email: values.email.trim() || null,
+                username: values.username.trim() || null,
                 userDetail: {
                     ...user.userDetail,
                     userTitle: values.userTitle,
@@ -65,7 +67,7 @@ export function UserDetailsCard({ style }: { style?: React.CSSProperties }) {
                 },
             }
             const updated = await updateProfile({
-                identifier: user.email,
+                identifier: String(user.userId),
                 body: payload,
             }).unwrap()
 
@@ -97,6 +99,7 @@ export function UserDetailsCard({ style }: { style?: React.CSSProperties }) {
                         <FormInput name="organization" label="profile.fields.organization.label" readOnly={!canUpdate} />
                         <FormInput name="phoneNumber" label="profile.fields.phoneNumber.label" readOnly={!canUpdate} />
                         <FormInput name="email" label="profile.fields.email.label" readOnly={!canUpdate} />
+                        <FormInput name="username" label="profile.fields.username.label" readOnly={!canUpdate} />
                         {canUpdate && (
                             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                                 <Button htmlType="submit" type="primary" loading={isLoading}>

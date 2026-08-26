@@ -20,7 +20,11 @@
       "label": "Telefonnummer",
       "validation1": "Ungültiges Telefonnummernformat"
     },
-    "email": { "label": "E-Mail/Benutzername" },
+    "email": {
+      "label": "E-Mail",
+      "invalid": "Ungültiges E-Mail-Format"
+    },
+    "username": { "label": "Benutzername" },
     "currentPassword": {
       "label": "Aktuelles Passwort",
       "wrong": "Aktuelles Passwort ist falsch"
@@ -49,7 +53,8 @@
     "passwordUpdated": "Passwort aktualisiert. Sie werden abgemeldet."
   },
   "validation": {
-    "required": "Pflichtfeld"
+    "required": "Pflichtfeld",
+    "emailOrUsername": "Geben Sie entweder eine E-Mail-Adresse oder einen Benutzernamen an"
   },
   "title": "Profil"
 }

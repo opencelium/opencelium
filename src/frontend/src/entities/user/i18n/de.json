@@ -3,12 +3,15 @@
     "title": "Benutzer",
     "subTitle": "In diesem Bereich können Administratoren Systembenutzer verwalten, Gruppen zuweisen, die Zwei-Faktor-Authentifizierung (2FA) aktivieren und Zugriffsberechtigungen steuern.",
     "confirmDelete": {
-      "message": "Sind Sie sicher, dass Sie den Benutzer mit der E-Mail \"{{email}}\" löschen möchten?"
+      "message": "Sind Sie sicher, dass Sie den Benutzer \"{{user}}\" löschen möchten?"
     }
   },
   "crossValidations": {
     "repeatPassword": {
       "message": "Passwörter stimmen nicht überein"
+    },
+    "emailOrUsername": {
+      "message": "Geben Sie entweder eine E-Mail-Adresse oder einen Benutzernamen an"
     }
   },
   "fields": {
@@ -35,10 +38,13 @@
       }
     },
     "email": {
-      "label": "E-Mail/Benutzername",
+      "label": "E-Mail",
       "errors": {
         "email_already_exists": "Ein Benutzer mit dieser E-Mail existiert bereits"
       }
+    },
+    "username": {
+      "label": "Benutzername"
     },
     "password": {
       "label": "Passwort",
@@ -99,8 +105,8 @@
       },
       "credentials": {
         "header": "Zugangsdaten",
-        "subheader": "Anmeldedaten für den Zugriff auf das System.",
-        "subheaderUpdate": "Aktualisieren Sie die Anmelde-E-Mail und die diesem Benutzer zugewiesene Rolle."
+        "subheader": "Anmeldedaten für den Zugriff auf das System. Es können eine E-Mail-Adresse, ein Benutzername oder beides hinterlegt werden — mindestens eines davon wird für die Anmeldung benötigt.",
+        "subheaderUpdate": "Aktualisieren Sie die Anmelde-E-Mail, den Benutzernamen und die diesem Benutzer zugewiesene Rolle."
       },
       "role": {
         "header": "Rolle",
