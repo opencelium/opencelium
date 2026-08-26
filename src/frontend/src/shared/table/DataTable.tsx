@@ -32,6 +32,7 @@ export function DataTable<T>({
                 {
                     id: 'actions',
                     header: 'Actions',
+                    meta: { resizable: false },
                     cell: ({ row }) => (
                         <div style={{ display: 'flex', gap: 8 }}>
                             {rowActions?.map((action, i) =>

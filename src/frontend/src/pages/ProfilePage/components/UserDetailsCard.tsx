@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback } from 'react'
 import { FormProvider } from 'react-hook-form'
 import { message } from 'antd'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 import { Card } from '@shared/ui/primitives/Card'
 import { Button } from '@shared/ui/primitives/Button'
 import { FormInput } from '@shared/ui/form/FormInput'
@@ -13,8 +14,8 @@ import { useAppDispatch, useAppSelector } from '@/shared/lib/storeHooks'
 import { authActions } from '@entities/auth/model/authSlice'
 import { selectAuthSession } from '@entities/auth/model/authSelectors'
 import {
-    useUpdateProfileMutation,
-    type UpdateProfilePayload,
+    useUpdateUserMutation,
+    type UserUpdateRequestDTO,
 } from '@entities/user/api/userApi'
 import type { AuthUser } from '@entities/auth/model/types'
 import { useProfileDetailsForm } from '@pages/ProfilePage/hooks/useProfileDetailsForm'
@@ -41,7 +42,7 @@ export function UserDetailsCard({ style }: { style?: React.CSSProperties }) {
     const session = useAppSelector(selectAuthSession)
     const dispatch = useAppDispatch()
     const { t } = useI18n('entities')
-    const [updateProfile, { isLoading }] = useUpdateProfileMutation()
+    const [updateUser, { isLoading }] = useUpdateUserMutation()
 
     const initialValues = useMemo<ProfileDetailsValues>(
         () => (user ? toFormValues(user) : ({} as ProfileDetailsValues)),
@@ -53,33 +54,50 @@ export function UserDetailsCard({ style }: { style?: React.CSSProperties }) {
     const onSubmit = useCallback(
         async (values: ProfileDetailsValues) => {
             if (!user || !session) return
-            const payload: UpdateProfilePayload = {
+            const groupId = user.userGroup?.groupId
+            // PUT /user/{id} rebuilds the record from the body and reads userGroup as
+            // an int, so a missing one deserializes to 0, matches no role and strips
+            // the user's group. Without a hydrated group there is no safe body to
+            // send, and this is a Save the user pressed — so it says so rather than
+            // quietly doing nothing (the language switch, which nobody asked for,
+            // does bail silently).
+            if (typeof groupId !== 'number') {
+                notifyError(t('profile.messages.detailsUpdateFailed'))
+                return
+            }
+
+            const userDetail = {
+                ...user.userDetail,
+                userTitle: values.userTitle,
+                name: values.name,
+                surname: values.surname,
+                department: values.department || null,
+                organization: values.organization || null,
+                phoneNumber: values.phoneNumber || null,
+            }
+            // The whole fetched record with the edited fields laid over it, never a
+            // patch of the changed ones.
+            const body: UserUpdateRequestDTO = {
+                userId: user.userId,
                 email: values.email.trim() || null,
                 username: values.username.trim() || null,
-                userDetail: {
-                    ...user.userDetail,
-                    userTitle: values.userTitle,
-                    name: values.name,
-                    surname: values.surname,
-                    department: values.department || null,
-                    organization: values.organization || null,
-                    phoneNumber: values.phoneNumber || null,
-                },
+                userGroup: groupId,
+                userDetail,
             }
-            const updated = await updateProfile({
-                identifier: String(user.userId),
-                body: payload,
-            }).unwrap()
+            await updateUser({ userId: user.userId, body }).unwrap()
 
+            // The response echoes the request resource back — flat userGroup, no
+            // widgetSettings — so the session takes the local merge instead, keeping
+            // the group and widget settings this form never touched.
             dispatch(
                 authActions.setSession({
                     ...session,
-                    user: updated ?? { ...user, ...payload, userDetail: { ...user.userDetail, ...payload.userDetail } },
+                    user: { ...user, email: body.email, username: body.username, userDetail },
                 }),
             )
             message.success(t('profile.messages.detailsUpdated'))
         },
-        [user, session, updateProfile, dispatch, t],
+        [user, session, updateUser, dispatch, t],
     )
 
     if (!user) return null
