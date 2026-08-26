@@ -393,7 +393,7 @@ export function SystemConfigPage() {
                                 type="primary"
                                 onClick={handleReset}
                                 loading={isFetching}
-                                disabled={isSaving}
+                                disabled={!isDirty || isSaving}
                             >
                                 {t('system-config.actions.reset')}
                             </Button>
