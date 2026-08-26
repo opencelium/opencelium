@@ -358,7 +358,8 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public void updateRequestData(Integer connectorId, Map<String, String> newRequestDataMap) {
 
-        Connector connector = getById(connectorId);
+        // Read the connector WITHOUT decrypting
+        Connector connector = getByIdRaw(connectorId);
 
         // Create a map of existing RequestData for quick lookup by field
         Map<String, RequestData> existingMap = connector.getRequestData().stream()
@@ -368,6 +369,8 @@ public class ConnectorServiceImp implements ConnectorService {
         Invoker invoker = invokerService.findByName(connector.getInvoker());
         Map<String, RequiredData> invokerFields = invoker.getRequiredData().stream()
                 .collect(Collectors.toMap(RequiredData::getName, rd -> rd));
+
+        List<RequestData> toSave = new ArrayList<>();
 
         // Handle updates and inserts
         for (Map.Entry<String, String> entry : newRequestDataMap.entrySet()) {
@@ -383,14 +386,14 @@ public class ConnectorServiceImp implements ConnectorService {
                 RequestData newRequestData = new RequestData(field, encoder.encrypt(value));
                 newRequestData.setConnector(connector);
                 newRequestData.setVisibility(invokerField.getVisibility());
-                existingMap.put(field, newRequestData);
+                toSave.add(newRequestData);
             } else {
                 existing.setValue(encoder.encrypt(value));
-                existingMap.put(field, existing);
+                toSave.add(existing);
             }
         }
 
-        requestDataService.saveAll(new ArrayList<>(existingMap.values()));
+        requestDataService.saveAll(toSave);
 
         // Editing request data only dirties child rows, so the connector entity itself stays
         // clean and JPA auditing never fires — stamp the audit columns explicitly.
