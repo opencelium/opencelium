@@ -28,6 +28,7 @@ import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
+import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
@@ -93,13 +94,16 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public Optional<Connector> findById(int id) {
         Optional<Connector> optional = connectorRepository.findById(id);
-        try {
-            optional.ifPresent(this::decrypt);
+        if (optional.isEmpty()) {
             return optional;
-        } catch (RuntimeException e) {
-            Connector saved = save(optional.get());
-            return Optional.of(saved);
         }
+        Connector connector = optional.get();
+        try {
+            decrypt(connector);
+        } catch (RuntimeException e) {
+            repairRequestData(connector);
+        }
+        return optional;
     }
 
     @Override
@@ -358,7 +362,8 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public void updateRequestData(Integer connectorId, Map<String, String> newRequestDataMap) {
 
-        Connector connector = getById(connectorId);
+        // Read the connector WITHOUT decrypting
+        Connector connector = getByIdRaw(connectorId);
 
         // Create a map of existing RequestData for quick lookup by field
         Map<String, RequestData> existingMap = connector.getRequestData().stream()
@@ -368,6 +373,8 @@ public class ConnectorServiceImp implements ConnectorService {
         Invoker invoker = invokerService.findByName(connector.getInvoker());
         Map<String, RequiredData> invokerFields = invoker.getRequiredData().stream()
                 .collect(Collectors.toMap(RequiredData::getName, rd -> rd));
+
+        List<RequestData> toSave = new ArrayList<>();
 
         // Handle updates and inserts
         for (Map.Entry<String, String> entry : newRequestDataMap.entrySet()) {
@@ -383,14 +390,14 @@ public class ConnectorServiceImp implements ConnectorService {
                 RequestData newRequestData = new RequestData(field, encoder.encrypt(value));
                 newRequestData.setConnector(connector);
                 newRequestData.setVisibility(invokerField.getVisibility());
-                existingMap.put(field, newRequestData);
+                toSave.add(newRequestData);
             } else {
                 existing.setValue(encoder.encrypt(value));
-                existingMap.put(field, existing);
+                toSave.add(existing);
             }
         }
 
-        requestDataService.saveAll(new ArrayList<>(existingMap.values()));
+        requestDataService.saveAll(toSave);
 
         // Editing request data only dirties child rows, so the connector entity itself stays
         // clean and JPA auditing never fires — stamp the audit columns explicitly.
@@ -438,6 +445,48 @@ public class ConnectorServiceImp implements ConnectorService {
 
     private void decrypt(Connector connector) {
         List<RequestData> requestData = connector.getRequestData();
-        requestData.forEach(e -> e.setValue(encoder.decrypt(e.getValue())));
+        if (requestData == null) {
+            return;
+        }
+        List<String> decrypted = new ArrayList<>(requestData.size());
+        for (RequestData entry : requestData) {
+            try {
+                decrypted.add(encoder.decrypt(entry.getValue()));
+            } catch (RuntimeException e) {
+                // Which row blocked the read is the whole question during an incident: without it
+                // the offending value has to be found by scanning the table by hand.
+                throw new WrongDecryptException(
+                        ExceptionMessages.REQUEST_DATA_DECRYPTION_FAILED
+                                .formatted(entry.getField(), connector.getId()), e);
+            }
+        }
+        for (int i = 0; i < requestData.size(); i++) {
+            requestData.get(i).setValue(decrypted.get(i));
+        }
+    }
+
+    private void repairRequestData(Connector connector) {
+        List<RequestData> requestData = connector.getRequestData();
+        if (requestData == null) {
+            return;
+        }
+        List<String> plaintext = new ArrayList<>(requestData.size());
+        List<RequestData> repaired = new ArrayList<>();
+        for (RequestData entry : requestData) {
+            String stored = entry.getValue();
+            try {
+                plaintext.add(encoder.decrypt(stored));
+            } catch (RuntimeException e) {
+                plaintext.add(stored);
+                entry.setValue(encoder.encrypt(stored));
+                repaired.add(entry);
+            }
+        }
+        if (!repaired.isEmpty()) {
+            requestDataService.saveAll(repaired);
+        }
+        for (int i = 0; i < requestData.size(); i++) {
+            requestData.get(i).setValue(plaintext.get(i));
+        }
     }
 }

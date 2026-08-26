@@ -70,7 +70,7 @@ public class ConnectorHealthMonitor {
             // decrypted the sweep is skipped entirely and statuses stay as they are.
             connectors = new ArrayList<>(connectorService.findAll());
         } catch (RuntimeException e) {
-            log.warn("Connector health sweep skipped: connectors could not be loaded", e);
+            log.warn("Connector health sweep skipped: connectors could not be loaded - {}", e.getMessage(), e);
             return;
         }
         Collections.shuffle(connectors);
