@@ -50,6 +50,7 @@
   },
   "messages": {
     "detailsUpdated": "Profile details updated",
+    "detailsUpdateFailed": "Profile details could not be saved.",
     "passwordUpdated": "Password updated. You will be logged out."
   },
   "validation": {

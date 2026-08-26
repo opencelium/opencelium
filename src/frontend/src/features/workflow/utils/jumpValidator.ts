@@ -6,6 +6,7 @@ export type JointRejectionReason =
   | 'self'
   | 'not-a-method'
   | 'different-loop-scope'
+  | 'enters-if-scope'
   | 'backwards'
   | 'skips-referenced-method';
 
@@ -37,6 +38,28 @@ const enclosingLoopIndex = (index: string, nodeByIndex: Map<string, WorkflowNode
     if (nodeByIndex.get(prefix)?.type === 'loop') return prefix;
   }
   return '';
+};
+
+/**
+ * Whether the target sits inside an IF body the source is not part of.
+ *
+ * IFs are transparent outward — a method may escape through the ones enclosing
+ * it to an ancestor level — but not inward: landing inside a branch would run a
+ * method whose guarding condition the jump never evaluated. Prefix match needs
+ * the trailing underscore, or '1_20' would read as a child of '1_2'.
+ */
+const entersForeignIf = (
+  sourceIndex: string,
+  targetIndex: string,
+  nodeByIndex: Map<string, WorkflowNodeModel>,
+) => {
+  const segments = targetIndex.split('_');
+  for (let length = 1; length < segments.length; length += 1) {
+    const prefix = segments.slice(0, length).join('_');
+    if (nodeByIndex.get(prefix)?.type !== 'if') continue;
+    if (!sourceIndex.startsWith(`${prefix}_`)) return true;
+  }
+  return false;
 };
 
 const compareIndex = (left: string, right: string) => {
@@ -85,13 +108,21 @@ const referencedColorsOf = (
 };
 
 /**
- * Verdict per node for a joint started on `sourceId`. A joint may only run
- * forward between two methods that live in the same loop scope: both outside
- * every loop, or both inside the very same loop. Nesting level does not have to
- * match — an IF operator changes the level but not the loop, so a joint may
- * leave or enter an IF branch — but a loop boundary is never crossed, so a
- * method in loop1 can never reach a method inside a loop2 nested under it. A
- * joint may also not skip over a method whose response the target consumes.
+ * Verdict per node for a joint started on `sourceId`, matching the rules the
+ * server applies:
+ *
+ *  - both ends must be methods; an operator is never a source nor a target;
+ *  - the target must run strictly after the source;
+ *  - both must share a loop scope — outside every loop, or inside the very same
+ *    one. A loop is a ceiling in both directions: a method inside it cannot
+ *    escape outward, and nothing outside can jump in, so a method in loop1
+ *    never reaches a method inside a loop2 nested under it;
+ *  - IFs are transparent outward only. A method may escape through the IFs
+ *    enclosing it to an ancestor level, up to that loop ceiling, but may not
+ *    jump into an IF body it is not itself part of.
+ *
+ * Plus one rule of our own, which the server does not check: a joint may not
+ * skip over a method whose response the target consumes.
  */
 export const evaluateJointTargets = (
   sourceId: string,
@@ -128,6 +159,10 @@ export const evaluateJointTargets = (
     }
     if (compareIndex(targetIndex, sourceIndex) <= 0) {
       verdicts.set(node.id, { valid: false, reason: 'backwards' });
+      continue;
+    }
+    if (entersForeignIf(sourceIndex, targetIndex, nodeByIndex)) {
+      verdicts.set(node.id, { valid: false, reason: 'enters-if-scope' });
       continue;
     }
 

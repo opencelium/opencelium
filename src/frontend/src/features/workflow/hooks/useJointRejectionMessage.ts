@@ -18,6 +18,8 @@ export const useJointRejectionMessage = (
 			return t('joint.invalid.notAMethod');
 		case 'different-loop-scope':
 			return t('joint.invalid.differentLoopScope');
+		case 'enters-if-scope':
+			return t('joint.invalid.entersIfScope');
 		case 'backwards':
 			return t('joint.invalid.backwards');
 		case 'skips-referenced-method':

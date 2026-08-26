@@ -8,6 +8,7 @@ import { evaluateJointTargets, pruneInvalidJoints } from './jumpValidator';
 //                                          -> if-in-loop "1_3"
 //     loop-inner (bottom) -> m-in-inner-loop "1_1_0"
 //     if-in-loop (true)   -> m-in-if-in-loop "1_3_0"
+//     if-in-loop (false)  -> m-loop-tail "1_4"
 //   if-top (true) -> m-in-if "3_0"
 const method = (id: string, color: string): WorkflowNodeModel => ({
 	id,
@@ -34,6 +35,7 @@ const baseNodes: WorkflowNodeModel[] = [
 	method('m-in-inner-loop', '#eeeeee'),
 	operator('if-in-loop', 'if'),
 	method('m-in-if-in-loop', '#ffaaaa'),
+	method('m-loop-tail', '#ffdddd'),
 	operator('if-top', 'if'),
 	method('m-in-if', '#ffbbbb'),
 	method('m-tail', '#ffcccc'),
@@ -48,6 +50,7 @@ const edges = [
 	{ id: 'e5', source: 'loop-inner', target: 'm-after-inner', sourceHandle: 'right' },
 	{ id: 'e6', source: 'm-after-inner', target: 'if-in-loop' },
 	{ id: 'e7', source: 'if-in-loop', target: 'm-in-if-in-loop', sourceHandle: 'true' },
+	{ id: 'e7b', source: 'if-in-loop', target: 'm-loop-tail', sourceHandle: 'false' },
 	{ id: 'e8', source: 'loop-outer', target: 'm-last', sourceHandle: 'right' },
 	{ id: 'e9', source: 'm-last', target: 'if-top' },
 	{ id: 'e10', source: 'if-top', target: 'm-in-if', sourceHandle: 'true' },
@@ -65,13 +68,30 @@ describe('evaluateJointTargets', () => {
 		expect(reasonFor('m-first', 'm-last')).toBe('valid');
 	});
 
-	it('accepts a target on another level as long as the loop scope matches', () => {
-		// Into an IF branch, both outside every loop.
-		expect(reasonFor('m-first', 'm-in-if')).toBe('valid');
-		// Out of an IF branch, both outside every loop.
+	it('accepts an escape outward through the IFs around the source', () => {
+		// Out of an IF branch to its own level, both outside every loop.
 		expect(reasonFor('m-in-if', 'm-tail')).toBe('valid');
-		// Into an IF branch, both inside loop-outer.
-		expect(reasonFor('m-in-loop', 'm-in-if-in-loop')).toBe('valid');
+		// Out of an IF branch to its own level, both inside loop-outer: the loop
+		// is the ceiling, and this stops short of it.
+		expect(reasonFor('m-in-if-in-loop', 'm-loop-tail')).toBe('valid');
+	});
+
+	it('rejects jumping into an IF body the source is not part of', () => {
+		// Both outside every loop, but m-in-if is guarded by if-top and m-first
+		// never evaluates it.
+		expect(reasonFor('m-first', 'm-in-if')).toBe('enters-if-scope');
+		// Same one level down, both inside loop-outer.
+		expect(reasonFor('m-in-loop', 'm-in-if-in-loop')).toBe('enters-if-scope');
+	});
+
+	it('accepts a later sibling inside the same IF body', () => {
+		// Two methods under one IF are same-level siblings like any other, so the
+		// enclosing IF is not a barrier between them.
+		const nodes = [...baseNodes, method('m-in-if-second', '#ff9999')];
+		const withSecond = [...edges,
+			{ id: 'e10b', source: 'm-in-if', target: 'm-in-if-second' }] as WorkflowEdgeModel[];
+		const verdict = evaluateJointTargets('m-in-if', nodes, withSecond).get('m-in-if-second');
+		expect(verdict).toEqual({ valid: true });
 	});
 
 	it('rejects a method nested in a loop inside the source loop scope', () => {
@@ -124,7 +144,7 @@ describe('evaluateJointTargets', () => {
 		const valid = [...evaluateJointTargets('m-in-loop', baseNodes, edges)]
 			.filter(([, verdict]) => verdict.valid)
 			.map(([nodeId]) => nodeId);
-		expect(valid).toEqual(['m-after-inner', 'm-in-if-in-loop']);
+		expect(valid).toEqual(['m-after-inner', 'm-loop-tail']);
 	});
 });
 
@@ -138,11 +158,20 @@ describe('pruneInvalidJoints', () => {
 		expect(result.nodes).toBe(nodes);
 	});
 
-	it('keeps a joint that crosses an IF boundary inside one loop', () => {
+	it('keeps a joint that escapes an IF outward inside one loop', () => {
+		const nodes = baseNodes.map((node) => node.id === 'm-in-if-in-loop'
+			? { ...node, data: { ...node.data, jump: 'm-loop-tail' } } as WorkflowNodeModel
+			: node);
+		expect(pruneInvalidJoints(nodes, edges).removedSourceIds).toEqual([]);
+	});
+
+	it('drops a joint that points into an IF the source is not part of', () => {
 		const nodes = baseNodes.map((node) => node.id === 'm-in-loop'
 			? { ...node, data: { ...node.data, jump: 'm-in-if-in-loop' } } as WorkflowNodeModel
 			: node);
-		expect(pruneInvalidJoints(nodes, edges).removedSourceIds).toEqual([]);
+		const result = pruneInvalidJoints(nodes, edges);
+		expect(result.removedSourceIds).toEqual(['m-in-loop']);
+		expect(result.nodes.find((node) => node.id === 'm-in-loop')?.data.jump).toBeUndefined();
 	});
 
 	it('drops a joint whose target left the source loop scope', () => {

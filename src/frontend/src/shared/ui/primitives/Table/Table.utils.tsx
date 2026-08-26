@@ -52,15 +52,22 @@ export const isRowClickIgnored = (target: EventTarget | null): boolean => {
 };
 
 /**
- * The last column without an explicit size (either tanstack's numeric
- * `columnDef.size` or a percentage `meta.width`) stretches to fill whatever
- * width the fixed-size columns (checkbox, expander, row-actions) leave behind,
- * instead of every unsized column competing for space based on raw content
- * width. Returns null when every column has an explicit size.
+ * The column that fills whatever width the sized ones (checkbox, expander,
+ * row-actions) leave behind, instead of every unsized column competing for space
+ * based on raw content width.
+ *
+ * A column that sets `meta.fillTrailingSpace` claims the job outright, size and
+ * all — that is how a trailing row-actions column ends up flush against the
+ * right edge rather than parked just after the last data column. Otherwise it is
+ * the last column with no explicit size (tanstack's numeric `columnDef.size` or
+ * a percentage `meta.width`), and null when every column has one.
  */
 export const findStretchColumnId = (
     columns: { id: string; columnDef: { size?: number; meta?: TableColumnMeta } }[],
 ): string | null => {
+    for (let i = columns.length - 1; i >= 0; i--) {
+        if (columns[i].columnDef.meta?.fillTrailingSpace) return columns[i].id;
+    }
     for (let i = columns.length - 1; i >= 0; i--) {
         const { size, meta } = columns[i].columnDef;
         if (size === undefined && meta?.width === undefined) return columns[i].id;
