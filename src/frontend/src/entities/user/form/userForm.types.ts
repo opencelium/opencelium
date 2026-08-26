@@ -3,6 +3,7 @@ import type {Path} from "react-hook-form";
 
 export type UserFormValues = {
     email: string
+    username: string
     password: string
     repeatPassword: string
     userDetail: UserDetail

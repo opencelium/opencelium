@@ -308,3 +308,102 @@ describe('cleanBrokenWorkflowReferences — a reference that only a joint made r
 		expect(result.fieldBindings).toEqual([]);
 	});
 });
+
+describe('cleanBrokenWorkflowReferences — a reference the change did not break', () => {
+	// start → m1 → LOOP ─bottom→ inner              (inner is 1_0)
+	//                    └─right→ src ──→ dst        (src is 2, dst is 3)
+	// dst reads inner, which neither dst nor src can see: a joint src → dst hands
+	// dst what src sees, and src cannot see into the loop either. So the reference
+	// is unreadable with the joint and without it — the shape a legacy connection
+	// arrives in, since nothing clears references on load.
+	const graphWithJoint = (withJoint: boolean) => {
+		const src = method('src', '#bd10e0');
+		return {
+			nodes: [
+				startNode,
+				method('m1', '#3fa9f5'),
+				operator('loop-1', 'loop', [rule('r1', '#3fa9f5.(response).body.$.items')]),
+				method('inner', '#7ed321'),
+				{ ...src, data: { ...src.data, jump: withJoint ? 'dst' : undefined } },
+				method('dst', '#f5a623', { ticket: '#7ed321.(response).body.$.id' }),
+			] as WorkflowNodeModel[],
+			edges: [
+				edge('e1', 'start-1', 'm1'),
+				edge('e2', 'm1', 'loop-1'),
+				{ ...edge('e3', 'loop-1', 'inner'), sourceHandle: 'bottom', targetHandle: 'top' },
+				{ ...edge('e4', 'loop-1', 'src'), sourceHandle: 'right', targetHandle: 'left' },
+				edge('e5', 'src', 'dst'),
+			] as WorkflowEdgeModel[],
+		};
+	};
+
+	it('keeps a reference that was already unreadable before the joint was removed', () => {
+		const before = graphWithJoint(true);
+		const after = graphWithJoint(false);
+		const result = cleanBrokenWorkflowReferences(after.nodes, after.edges, [], before);
+		expect(result.brokenCount).toBe(0);
+		expect(result.affectedNodeIds).toEqual([]);
+		expect(result.nodes.find((node) => node.id === 'dst')?.data.methodConfig?.body)
+			.toEqual({ ticket: '#7ed321.(response).body.$.id' });
+	});
+
+	it('charges the same reference to the removal when no baseline is given', () => {
+		const after = graphWithJoint(false);
+		const result = cleanBrokenWorkflowReferences(after.nodes, after.edges, []);
+		expect(result.brokenCount).toBe(1);
+		expect(result.affectedNodeIds).toEqual(['dst']);
+	});
+
+	it('removes only what the joint made readable, and clears nothing else', () => {
+		// This time the joint runs inner → dst, so it is what makes inner readable.
+		// dst also reads m1 (readable on its own) and a colour no method on the
+		// graph carries. Removing the joint is answerable for the first alone.
+		const NO_PROVIDER = '#417505';
+		const withMixedReferences = (withJoint: boolean) => {
+			const inner = method('inner', '#7ed321');
+			return {
+				nodes: [
+					startNode,
+					method('m1', '#3fa9f5'),
+					operator('loop-1', 'loop', [rule('r1', '#3fa9f5.(response).body.$.items')]),
+					{ ...inner, data: { ...inner.data, jump: withJoint ? 'dst' : undefined } },
+					method('dst', '#f5a623', {
+						viaJoint: '#7ed321.(response).body.$.id',
+						onItsOwn: '#3fa9f5.(response).body.$.id',
+						noProvider: `${NO_PROVIDER}.(response).body.$.id`,
+					}),
+				] as WorkflowNodeModel[],
+				edges: [
+					edge('e1', 'start-1', 'm1'),
+					edge('e2', 'm1', 'loop-1'),
+					{ ...edge('e3', 'loop-1', 'inner'), sourceHandle: 'bottom', targetHandle: 'top' },
+					{ ...edge('e4', 'loop-1', 'dst'), sourceHandle: 'right', targetHandle: 'left' },
+				] as WorkflowEdgeModel[],
+			};
+		};
+		const before = withMixedReferences(true);
+		const after = withMixedReferences(false);
+		const result = cleanBrokenWorkflowReferences(after.nodes, after.edges, [], before);
+		expect(result.brokenCount).toBe(1);
+		expect(result.affectedNodeIds).toEqual(['dst']);
+		expect(result.nodes.find((node) => node.id === 'dst')?.data.methodConfig?.body)
+			.toEqual({
+				viaJoint: '',
+				onItsOwn: '#3fa9f5.(response).body.$.id',
+				noProvider: `${NO_PROVIDER}.(response).body.$.id`,
+			});
+	});
+
+	it('still clears an already-unreadable reference once its provider is deleted', () => {
+		const before = graphWithJoint(false);
+		const after = deleteNodeGraph('inner', before.nodes, before.edges);
+		const result = cleanBrokenWorkflowReferences(
+			after.nodes, after.edges, [], before);
+		// Out of scope is one thing; naming a method that is not on the graph at
+		// all is another, and the baseline does not excuse it.
+		expect(result.brokenCount).toBe(1);
+		expect(result.affectedNodeIds).toEqual(['dst']);
+		expect(result.nodes.find((node) => node.id === 'dst')?.data.methodConfig?.body)
+			.toEqual({ ticket: '' });
+	});
+});

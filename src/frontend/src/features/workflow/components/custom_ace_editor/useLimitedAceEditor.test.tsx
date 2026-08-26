@@ -1,92 +1,105 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
+import { useEffect, useState } from 'react';
 import { useLimitedAceEditor } from './useLimitedAceEditor';
 
-// Minimal stand-in for an Ace editor + session: `setValue` mutates the text and
-// notifies listeners exactly like the real one, which is what makes the
-// parent <-> editor echo reproducible here.
-const createFakeEditor = (initialText: string) => {
+/**
+ * Stand-in for an ace editor wrapped by react-ace, faithful in the two ways that
+ * caused the loop this hook exists to avoid:
+ *
+ *  - ace's `Document.setValue` is a remove followed by an insert, so it signals
+ *    'change' twice, with an EMPTY document in between;
+ *  - react-ace hides the echo of its own programmatic push behind a `silent`
+ *    flag, and calls its `onChange` prop for everything else.
+ */
+const createFakeAce = (initialText: string) => {
 	let text = initialText;
-	const listeners: (() => void)[] = [];
-	const session = {
-		on: (_event: string, fn: () => void) => { listeners.push(fn); },
-		off: (_event: string, fn: () => void) => {
-			const index = listeners.indexOf(fn);
-			if (index >= 0) listeners.splice(index, 1);
-		},
-	};
+	let silent = false;
+	let reportChange: ((value: string) => void) | undefined;
+	const signalChange = () => { if (!silent) reportChange?.(text); };
 	const editor = {
 		getValue: () => text,
-		setValue: (next: string) => { text = next; listeners.forEach((fn) => fn()); },
-		getSession: () => session,
+		setValue: (next: string) => {
+			text = '';
+			signalChange();
+			text = next;
+			signalChange();
+		},
+		getSession: () => ({ on: () => {}, off: () => {} }),
 		getSelectionRange: () => ({ end: 0 }),
 		moveCursorToPosition: () => {},
 	};
 	return {
 		editor,
-		listenerCount: () => listeners.length,
-		emitChange: (next: string) => {
-			text = next;
-			listeners.forEach((fn) => fn());
-		},
 		text: () => text,
+		attach: (handler: (value: string) => void) => { reportChange = handler; },
+		/** The user typing: ace mutates the document and react-ace reports it. */
+		type: (next: string) => { text = next; signalChange(); },
+		/** react-ace's componentDidUpdate pushing the `value` prop back in. */
+		pushProp: (next: string) => {
+			if (text === next) return;
+			silent = true;
+			editor.setValue(next);
+			silent = false;
+		},
 	};
 };
 
 type Options = { value?: string; maxLength?: number; onChange?: (value: string) => void };
 
-// The hook subscribes in an effect keyed on [maxLength, readOnly], so the fake
-// editor is attached first and picked up by bumping maxLength.
-const mountWithEditor = (fake: ReturnType<typeof createFakeEditor>, options: Options = {}) => {
+const mountWithEditor = (fake: ReturnType<typeof createFakeAce>, options: Options = {}) => {
 	const onChange = options.onChange ?? vi.fn();
 	const rendered = renderHook(
-		({ maxLength, value }: { maxLength: number; value: string }) =>
+		({ maxLength, value }: { maxLength?: number; value: string }) =>
 			useLimitedAceEditor({ forwardedRef: null, maxLength, onChange, readOnly: false, value }),
-		{ initialProps: { maxLength: (options.maxLength ?? 100) - 1, value: options.value ?? '' } },
+		{ initialProps: { maxLength: options.maxLength, value: options.value ?? '' } },
 	);
-	act(() => { rendered.result.current.editorRef.current = { editor: fake.editor }; });
-	rendered.rerender({ maxLength: options.maxLength ?? 100, value: options.value ?? '' });
+	act(() => {
+		rendered.result.current.editorRef.current = { editor: fake.editor };
+		fake.attach((next) => rendered.result.current.onEditorChange(next));
+	});
 	return { ...rendered, onChange };
 };
 
 describe('useLimitedAceEditor', () => {
 	it('reports a real edit upward', () => {
-		const fake = createFakeEditor('a');
+		const fake = createFakeAce('a');
 		const { onChange, result } = mountWithEditor(fake, { value: 'a' });
 
-		act(() => fake.emitChange('ab'));
+		act(() => fake.type('ab'));
 
 		expect(onChange).toHaveBeenCalledWith('ab');
 		expect(result.current.currentValue).toBe('ab');
 	});
 
-	it('does not report the change react-ace emits when it re-applies our own value', () => {
-		const fake = createFakeEditor('a');
-		const { onChange } = mountWithEditor(fake, { value: 'a' });
-
-		// react-ace pushing the same text back into the session still fires
-		// 'change'; treating that as an edit is what looped until React threw
-		// "Maximum update depth exceeded".
-		act(() => fake.emitChange('a'));
-
-		expect(onChange).not.toHaveBeenCalled();
-	});
-
-	it('treats a value pushed down from the parent as synced, not as an edit', () => {
-		const fake = createFakeEditor('a');
+	it('says nothing when react-ace re-applies the value the parent pushed down', () => {
+		const fake = createFakeAce('a');
 		const { onChange, rerender } = mountWithEditor(fake, { value: 'a' });
 
 		rerender({ maxLength: 100, value: 'from-parent' });
-		act(() => fake.emitChange('from-parent'));
+		act(() => fake.pushProp('from-parent'));
 
 		expect(onChange).not.toHaveBeenCalled();
+		expect(fake.text()).toBe('from-parent');
+	});
+
+	it('never reports the empty document a programmatic write passes through', () => {
+		const fake = createFakeAce('abcdefg');
+		const { onChange } = mountWithEditor(fake, { value: 'abcdefg', maxLength: 4 });
+
+		// The truncating setValue below signals 'change' with an empty document
+		// first. Reporting that upward is what the parent stored, pushed back
+		// down, and bounced until React threw "Maximum update depth exceeded".
+		act(() => fake.type('abcdefg'));
+
+		expect(onChange).not.toHaveBeenCalledWith('');
 	});
 
 	it('still truncates past maxLength and reports the truncated text once', () => {
-		const fake = createFakeEditor('');
+		const fake = createFakeAce('');
 		const { onChange, result } = mountWithEditor(fake, { value: '', maxLength: 4 });
 
-		act(() => fake.emitChange('abcdefg'));
+		act(() => fake.type('abcdefg'));
 
 		expect(fake.text()).toBe('abcd');
 		expect(onChange).toHaveBeenCalledWith('abcd');
@@ -94,19 +107,38 @@ describe('useLimitedAceEditor', () => {
 		expect(result.current.currentValue).toBe('abcd');
 	});
 
-	it('keeps a single listener when the onChange identity changes every render', () => {
-		const fake = createFakeEditor('a');
-		const rendered = renderHook(
-			({ maxLength, value }: { maxLength: number; value: string }) =>
-				useLimitedAceEditor({ forwardedRef: null, maxLength,
-					onChange: () => {}, readOnly: false, value }),
-			{ initialProps: { maxLength: 99, value: 'a' } },
-		);
-		act(() => { rendered.result.current.editorRef.current = { editor: fake.editor }; });
-		rendered.rerender({ maxLength: 100, value: 'a' });
+	it('settles instead of looping when the parent mirrors every reported value', () => {
+		const fake = createFakeAce('a');
+		const seen: string[] = [];
+		const rendered = renderHook(({ maxLength }: { maxLength: number }) => {
+			const [parentValue, setParentValue] = useState('a');
+			const hook = useLimitedAceEditor({
+				forwardedRef: null, maxLength, readOnly: false, value: parentValue,
+				onChange: (next) => { seen.push(next); setParentValue(next); },
+			});
+			// What react-ace's componentDidUpdate does with the value it is given.
+			useEffect(() => { fake.pushProp(hook.currentValue ?? ''); });
+			return hook;
+		}, { initialProps: { maxLength: 4 } });
+		act(() => {
+			rendered.result.current.editorRef.current = { editor: fake.editor };
+			fake.attach((next) => rendered.result.current.onEditorChange(next));
+		});
 
-		for (let index = 0; index < 5; index += 1) rendered.rerender({ maxLength: 100, value: 'a' });
+		act(() => fake.type('abcdefg'));
 
-		expect(fake.listenerCount()).toBe(1);
+		expect(seen).toEqual(['abcd']);
+		expect(fake.text()).toBe('abcd');
+		expect(rendered.result.current.currentValue).toBe('abcd');
+	});
+
+	it('leaves the text alone when there is no length limit', () => {
+		const fake = createFakeAce('');
+		const { onChange } = mountWithEditor(fake, { value: '' });
+
+		act(() => fake.type('a'.repeat(500)));
+
+		expect(fake.text()).toBe('a'.repeat(500));
+		expect(onChange).toHaveBeenCalledWith('a'.repeat(500));
 	});
 });

@@ -20,7 +20,11 @@
       "label": "Phone Number",
       "validation1": "Invalid phone number format"
     },
-    "email": { "label": "Email/Username" },
+    "email": {
+      "label": "Email",
+      "invalid": "Invalid email format"
+    },
+    "username": { "label": "Username" },
     "currentPassword": {
       "label": "Current Password",
       "wrong": "Wrong current password"
@@ -49,7 +53,8 @@
     "passwordUpdated": "Password updated. You will be logged out."
   },
   "validation": {
-    "required": "Required field"
+    "required": "Required field",
+    "emailOrUsername": "Provide either an email or a username"
   },
   "title": "Profile"
 }
