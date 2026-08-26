@@ -67,41 +67,6 @@ textarea {
   overflow: hidden;
 }
 
-.canvasAnimationHint {
-  position: absolute;
-  top: 82px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  max-width: 480px;
-  width: max-content;
-}
-
-/* Compact variant of the shared Alert — this floats over the canvas as a
-   transient reminder, not a page-level notice, so it should read smaller
-   than a normal Alert. Also carries its own "don't show again" checkbox
-   (see TestRunAnimationHint.tsx) which needs real pointer-events — the
-   Alert used to be pointer-events:none to let clicks pass through to the
-   canvas underneath, but that also swallowed clicks on the checkbox itself,
-   falling through to the pane's own pan-drag handling instead. */
-.canvasAnimationHintAlert.ant-alert {
-  padding: 6px 10px;
-}
-
-.canvasAnimationHintAlert .ant-alert-icon {
-  font-size: 14px;
-}
-
-.canvasAnimationHintAlert .ant-alert-message {
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.canvasAnimationHintAlert .ant-alert-description {
-  font-size: 12px;
-  margin-top: 4px;
-}
-
 .logsHeaderRow {
   display: flex;
   align-items: center;
@@ -153,6 +118,41 @@ textarea {
 
 .logsHeaderLiveToggle--on:hover {
   border-color: color-mix(in srgb, var(--color-status-success-fg) 65%, transparent);
+}
+
+/* The mode dialog (TestRunModeDialogContent) tells the user they can switch to
+   live mode at any time — this ring points at the control it is talking about
+   while that dialog is up, and stops the moment it closes. Deliberately the
+   action-primary accent and not the pill's own green: it has to read as "this
+   is the thing I mean", not as "live mode is currently on". */
+.logsHeaderLiveToggle--highlighted {
+  border-color: var(--color-action-primary);
+  animation: logsHeaderLiveToggleHighlight 1.6s ease-out infinite;
+  /* Above an antd modal's backdrop — the level the body editor's reference
+     dropdowns already use. Non-interactive up there: the pill is being pointed
+     at, not offered, and the dialog's own buttons are what pick the mode. */
+  position: relative;
+  z-index: 1100;
+  pointer-events: none;
+}
+
+/* The "on" pill's fill is a translucent green wash, which above the dialog's
+   backdrop lets the dim show straight through it and reads as still being
+   behind — so while highlighted the same wash is composited over the panel's
+   own surface colour instead of over transparent. The off state needs no
+   equivalent: --color-background-hover is already opaque. */
+.logsHeaderLiveToggle--on.logsHeaderLiveToggle--highlighted {
+  background: color-mix(in srgb, var(--color-status-success-fg) 12%, var(--color-background-surface));
+}
+
+@keyframes logsHeaderLiveToggleHighlight {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-action-primary) 45%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-action-primary) 0%, transparent);
+  }
 }
 
 /* Idle dot matches the schedules pill's --idle dot (schedules.css); "on"
@@ -342,6 +342,20 @@ textarea {
 
 .logsCardExpanded {
   max-height: 430px;
+}
+
+/* Only the Live pill is meant to clear the test-run mode dialog's backdrop, but
+   .logsCard's own z-index makes it a stacking context that traps every child
+   below that backdrop — so the card gives its z-index up for as long as the
+   dialog is on screen, and the pill's own z-index then counts against the page
+   instead of against the card (see .logsHeaderLiveToggle--highlighted). The
+   rest of the panel stays dimmed under the backdrop, which is the point. Only
+   safe because the panel is in its split-pane state while the dialog is up: the
+   canvas sits in its own Splitter pane there, so nothing relies on this card
+   outranking it. Never applied to the 'full' panel, which is back to being an
+   overlay over the canvas. */
+.logsCardLiftLiveToggle {
+  z-index: auto;
 }
 
 .logsCardFull {
