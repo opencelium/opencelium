@@ -30,3 +30,7 @@
 .tableColResizeHandle--active::after {
     background: var(--color-border-strong, var(--color-border-default));
 }
+
+.ocTableFixedLayout .ant-table-thead .tableNonResizableHeaderCell::before {
+    display: none;
+}
