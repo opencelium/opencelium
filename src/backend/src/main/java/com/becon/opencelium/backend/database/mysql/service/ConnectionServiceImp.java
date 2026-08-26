@@ -32,6 +32,9 @@ import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.reference.ReferenceScanner;
+import com.becon.opencelium.backend.reference.enums.ReferenceType;
+import com.becon.opencelium.backend.reference.model.WebhookReference;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.*;
@@ -59,8 +62,6 @@ import org.springframework.util.CollectionUtils;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -469,7 +470,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public List<WebhookParamDTO> extractVarsFromJson(String json) throws IOException {
-        ArrayList<String> webhookVarList = new ArrayList<>();
+        List<WebhookReference> webhookVarList = new ArrayList<>();
         extractVars(json, webhookVarList);
         return webhookVarList.stream()
                 .map(webhookService::toParamResource)
@@ -807,7 +808,7 @@ public class ConnectionServiceImp implements ConnectionService {
                 : UpdaterVersion.VERSION_4_8.getVersion();
     }
 
-    private void extractVars(Object json, List<String> varList) {
+    private void extractVars(Object json, List<WebhookReference> varList) {
         if (json instanceof JSONObject jsonObject) {
             for (String key : jsonObject.keySet()) {
                 extractVars(jsonObject.get(key), varList);
@@ -817,11 +818,9 @@ public class ConnectionServiceImp implements ConnectionService {
                 extractVars(o, varList);
             }
         } else if (json instanceof String str) {
-            Pattern pattern = Pattern.compile(RegExpression.webhook);
-            Matcher matcher = pattern.matcher(str);
-            while (matcher.find()) {
-                varList.add(matcher.group(1));
-            }
+            ReferenceScanner.extract(str, ReferenceType.WEBHOOK).stream()
+                    .map(WebhookReference::parse)
+                    .forEach(varList::add);
         }
     }
 
