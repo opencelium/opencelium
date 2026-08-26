@@ -20,10 +20,8 @@ import com.becon.opencelium.backend.application.language.LanguageService;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.TotpService;
-import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
-import com.becon.opencelium.backend.exception.RoleNotFoundException;
 import com.becon.opencelium.backend.exception.SessionNotFoundException;
 import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
@@ -33,7 +31,6 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
-import com.becon.opencelium.backend.security.UserPrincipals;
 import com.becon.opencelium.backend.storage.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -44,10 +41,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,9 +66,6 @@ public class UserController {
 
     @Autowired
     private UserServiceImpl userService;
-
-    @Autowired
-    private UserRoleServiceImpl userRoleService;
 
     @Autowired
     private SessionServiceImpl sessionService;
@@ -158,7 +150,7 @@ public class UserController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> post(@Valid @RequestBody UserRequestResource userRequestResource) throws IOException {
 
-        if (userService.existsByEmail(userRequestResource.getEmail())) {
+        if (userService.findByPrincipal(userRequestResource.getLogin()).isPresent()) {
             throw new EmailAlreadyExistException(userRequestResource.getEmail());
         }
 
@@ -345,8 +337,7 @@ public class UserController {
     @GetMapping("/totp-qr/exists")
     public ResponseEntity<?> isQRCodeExists() {
         // totp related actions should be done only by users themselves
-        int userId = getCurrentUserId();
-        User user = userService.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userService.getCurrentUser();
         ResultDTO<Boolean> resultDTO = new ResultDTO<>();
         resultDTO.setResult(false);
         if (user.getTotpSecretKey() != null) {
@@ -386,15 +377,5 @@ public class UserController {
                 .filter(languageService::isSupported)
                 .orElseGet(languageService::getDefault);
         userDetail.setLang(language);
-    }
-
-    /*
-    Returns request sending users id
-    */
-    private int getCurrentUserId() {
-        UserPrincipals userPrincipals = (UserPrincipals) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
-
-        return userPrincipals.getUser().getId();
     }
 }

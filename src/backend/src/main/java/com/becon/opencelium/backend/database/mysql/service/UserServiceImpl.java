@@ -21,7 +21,6 @@ import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.database.mysql.entity.UserRole;
-import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
 import com.becon.opencelium.backend.enums.AuthMethod;
@@ -30,6 +29,7 @@ import com.becon.opencelium.backend.exception.ServiceUnavailableException;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.security.UserPrincipals;
 import com.becon.opencelium.backend.utility.EmailUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,14 +38,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -66,10 +64,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SessionServiceImpl sessionService;
 
-    @Autowired
-    private WidgetSettingServiceImp widgetSettingServiceImp;
-
-    private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     public Optional<User> findByEmail(String email) {
@@ -79,6 +74,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsernameAndAuthMethod(username, AuthMethod.LDAP);
+    }
+
+    @Override
+    public Optional<User> findByPrincipal(String principal) {
+        return findByEmail(principal)
+                .or(() -> userRepository.findByUsernameAndAuthMethod(principal, AuthMethod.BASIC))
+                .or(() -> userRepository.findByUsernameAndAuthMethod(principal, AuthMethod.LDAP));
     }
 
     @Override
@@ -103,8 +105,8 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Invalid email is supplied");
         }
 
-        if (user.getAuthMethod() == AuthMethod.BASIC && email == null) {
-            throw new IllegalArgumentException("Email is required for BASIC users");
+        if (user.getAuthMethod() == AuthMethod.BASIC && email == null && user.getUsername() == null) {
+            throw new IllegalArgumentException("email or username required for BASIC users");
         }
 
         return userRepository.save(user);
@@ -128,11 +130,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
-    }
-
-    @Override
-    public User fromResource(UserResource userResource) {
-        return null;
     }
 
     @Override
@@ -174,7 +171,7 @@ public class UserServiceImpl implements UserService {
             user.setAuthMethod(userDb.getAuthMethod());
             user.setTotpProcessCompleted(userDb.isTotpProcessCompleted());
             user.setTotpSecretKey(userDb.getTotpSecretKey());
-//            user.setUsername(userDb.getUsername());
+            user.setUsername(userDb.getUsername());
         }
 
         if (!user.getAuthMethod().equals(AuthMethod.LDAP)) {
@@ -195,14 +192,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User toEntity(UserResource resource) {
-
-        List<WidgetSetting> widgetSettings = resource.getWidgetSettings().stream()
-                .map(wsr -> widgetSettingServiceImp.toEntity(wsr, resource.getUserId())).collect(Collectors.toList());
-        return new User(resource, widgetSettings);
-    }
-
-    @Override
     public String encodePassword(String password) {
         return bCryptPasswordEncoder.encode(password);
     }
@@ -210,9 +199,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            return findByEmail(userDetails.getUsername()).get();
+        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipals userPrincipals) {
+            return userPrincipals.getUser();
         }
+
         return null;
     }
 
