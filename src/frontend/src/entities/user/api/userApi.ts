@@ -9,10 +9,6 @@ export type ChangePasswordPayload = {
   confirmPassword: string
 }
 
-export type UpdateProfilePayload = Pick<AuthUser, 'email'> & {
-  userDetail: Partial<AuthUser['userDetail']>
-}
-
 /**
  * PUT /user/{id} is a full replace, not a patch: the backend rebuilds the record
  * from the body, so every field has to be sent. `userGroup` is an int there — a
@@ -20,7 +16,7 @@ export type UpdateProfilePayload = Pick<AuthUser, 'email'> & {
  * `password` is the one safe omission (the service keeps the stored hash when it
  * is absent or empty).
  */
-export type UserUpdateRequestDTO = Pick<AuthUser, 'userId' | 'email'> & {
+export type UserUpdateRequestDTO = Pick<AuthUser, 'userId' | 'email' | 'username'> & {
   userGroup: number
   userDetail: AuthUser['userDetail']
 }
@@ -41,17 +37,6 @@ export const userApi = baseApi.injectEndpoints({
                 ...result.map((u) => ({ type: USER_TAG, id: u.userId })),
               ]
               : [{ type: USER_TAG, id: 'LIST' }],
-    }),
-    updateProfile: b.mutation<AuthUser, { identifier: string; body: UpdateProfilePayload }>({
-      query: ({ identifier, body }) => ({
-        url: `/user/${identifier}`,
-        method: 'PUT',
-        body,
-      }),
-      invalidatesTags: (_r, _e, arg) => [
-        { type: USER_TAG, id: 'LIST' },
-        { type: USER_TAG, id: arg.identifier },
-      ],
     }),
     /** The response echoes the *request* resource back (flat `userGroup`, no
      * widgetSettings), so it must not be fed into the auth session — callers
@@ -80,7 +65,6 @@ export const userApi = baseApi.injectEndpoints({
 
 export const {
   useGetUsersQuery,
-  useUpdateProfileMutation,
   useUpdateUserMutation,
   useChangePasswordMutation,
 } = userApi

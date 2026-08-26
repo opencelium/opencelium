@@ -76,6 +76,16 @@
     "locatingError": "Collecting error data…",
     "skipToLive": "Jump to live",
     "otherTestRunning": "A test for this workflow is already running. Wait for it to finish or stop it first.",
+    "modeDialog": {
+      "title": "Test run in debug mode",
+      "intro": "The workflow will be started in debug mode. Its execution is slowed down in the interface so you can follow the individual steps and interface calls more easily.",
+      "backendSpeed": "The actual execution in the backend stays just as fast as always.",
+      "speedAdjustable": "The speed can be adjusted while the test is running.",
+      "switchToLive": "You can switch to live mode at any time to run the workflow without any delay.",
+      "dontShowAgain": "Don't show this message again",
+      "startDebug": "Start debug mode",
+      "startLive": "Start live mode"
+    },
     "leaveConfirm": {
       "title": "Stop the running test?",
       "message": "Your test is running. If you leave this page, the test will be terminated. Do you want to continue?"

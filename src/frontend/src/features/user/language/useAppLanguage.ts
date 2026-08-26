@@ -58,6 +58,7 @@ export function useAppLanguage(): {
                     body: {
                         userId: user.userId,
                         email: user.email,
+                        username: user.username,
                         userGroup: groupId,
                         userDetail: { ...user.userDetail, lang: next },
                     },

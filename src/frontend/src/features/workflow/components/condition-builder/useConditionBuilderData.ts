@@ -14,7 +14,7 @@ import {
 import {
 	parseMethodFromReference,
 	parseResponseTypeFromReference,
-} from './ConditionValueInput/conditionValueReference.utils';
+} from './conditionBuilder.utils';
 
 export const useConditionBuilderData = (
 	connection: Connection,

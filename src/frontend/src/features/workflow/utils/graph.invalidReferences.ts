@@ -9,11 +9,31 @@ import {
 } from './graph.referenceColors';
 import { collectWorkflowJumpLinks, isWorkflowReferenceVisible } from './graph.referenceVisibility';
 
+// A webhook step carries a request config of its own (buildLegacyMethod treats
+// 'trigger-connection' as an HTTP request), so it consumes references like any
+// other method. Leaving it out meant its references were never validated: they
+// survived a delete, a joint removal and a drop alike.
 const isMethodNode = (node: WorkflowNodeModel) =>
-  node.type === 'connector' || node.type === 'system';
+  node.type === 'connector' || node.type === 'system'
+  || node.type === 'trigger-connection';
 
 const isOperatorNode = (node: WorkflowNodeModel) =>
   node.type === 'if' || node.type === 'loop';
+
+/** Every colour some method on the graph still answers for. A reference naming a
+ *  colour outside this set has no provider at all, which is a different failure
+ *  from a provider that is merely out of scope. */
+export const collectProviderColors = (nodes: WorkflowNodeModel[]) => {
+  const colors = new Set(nodes.filter(isMethodNode)
+    .map((node) => normalizeReferenceColor(node.data.color))
+    .filter(Boolean));
+  buildLegacyConnection(nodes).fromConnector.method.forEach((method) => {
+    if (!nodes.some((item) => item.id === method.id)) return;
+    const color = normalizeReferenceColor(method.color);
+    if (color) colors.add(color);
+  });
+  return colors;
+};
 
 export const findInvalidWorkflowReferences = (
   nodes: WorkflowNodeModel[],

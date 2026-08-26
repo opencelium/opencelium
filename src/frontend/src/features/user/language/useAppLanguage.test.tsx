@@ -107,6 +107,7 @@ describe('useAppLanguage', () => {
             body: {
                 userId: 7,
                 email: 'user@opencelium.io',
+                username: null,
                 userGroup: 3,
                 userDetail: { ...session!.user.userDetail, lang: 'de' },
             },

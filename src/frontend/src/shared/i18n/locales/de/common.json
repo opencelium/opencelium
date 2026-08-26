@@ -88,7 +88,7 @@
     }
   },
   "footer": {
-    "copyright": "© Copyright {{year}} <1>becon GmbH</1> | Version {{version}}"
+    "copyright": "© Copyright {{year}} <1>OpenCelium GmbH</1> | Version {{version}}"
   },
   "topbar": {
     "switchToGerman": "Auf Deutsch umschalten",
@@ -112,6 +112,7 @@
     "cmdEnterHint": "Tastenkombination: ⌘+Enter",
     "create": "Erstellen",
     "view": "Ansehen",
+    "download": "Herunterladen",
     "edit": "Bearbeiten",
     "delete": "Löschen"
   },

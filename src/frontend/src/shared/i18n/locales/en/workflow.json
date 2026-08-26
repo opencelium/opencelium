@@ -30,7 +30,19 @@
   },
   "confirmDelete": {
     "title": "Delete step",
-    "message": "Are you sure you want to delete this step? Any steps nested inside it will be removed as well. This action cannot be undone."
+    "message": "Are you sure you want to delete this step? Any steps nested inside it will be removed as well. This action cannot be undone.",
+    "clearsReferences": "References into it from {{count}} other steps will be cleared.",
+    "clearsReferences_one": "References into it from {{count}} other step will be cleared."
+  },
+  "confirmRemoveJoint": {
+    "title": "Remove joint?",
+    "message": "Without this joint, {{count}} steps can no longer read references they use, and those references will be cleared.",
+    "message_one": "Without this joint, {{count}} step can no longer read references it uses, and those references will be cleared."
+  },
+  "confirmDependencyDrop": {
+    "title": "Dependency conflict",
+    "message": "This drop breaks references used by {{count}} steps. If you continue, they will be cleared.",
+    "message_one": "This drop breaks references used by {{count}} step. If you continue, they will be cleared."
   },
   "template": {
     "addTitle": "Add Template",
@@ -109,12 +121,16 @@
     "downloadTemplateFailed": "Failed to download template.",
     "copySnapshotIdSuccess": "Snapshot ID copied to clipboard",
     "deleteVersionSuccess": "Version deleted",
-    "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?"
+    "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?",
+    "enhancementScriptBrokenIn": "“{{method}}” has an enhancement whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
+    "enhancementScriptBroken": "{{count}} steps have an enhancement whose script still uses {{marker}} — the references they read were removed with the steps they pointed at. Fix the scripts before saving.",
+    "enhancementScriptBroken_one": "{{count}} step has an enhancement whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving."
   },
   "joint": {
     "invalid": {
       "notAMethod": "Only a method can be the target of a joint.",
       "differentLoopScope": "The target must be a method in the same loop scope as the selected one — both outside every loop, or both inside the same loop.",
+      "entersIfScope": "A joint cannot jump into a condition the selected method is not itself inside. It may leave the conditions around it, but not enter another one.",
       "backwards": "A joint can only point forward, to a method that runs after the selected one.",
       "skipsReferencedMethod": "This joint would skip {{method}}, whose response this method uses.",
       "skipsReferencedMethodUnnamed": "This joint would skip a method whose response this method uses."
@@ -317,6 +333,7 @@
       "esc": "Esc",
       "s": "S",
       "z": "Z",
+      "redo": "(Shift + Z / Y)",
       "shift": "Shift",
       "delete": "Delete"
     },
@@ -331,7 +348,8 @@
       "save": "Save the workflow",
       "undo": "Undo the last canvas change",
       "redo": "Redo the change that was undone",
-      "close": "Close the open menu, dialog, or panel"
+      "close": "Close the open menu, dialog, or panel",
+      "dismissError": "Dismiss the error highlight on a node"
     }
   },
   "contextMenu": {
