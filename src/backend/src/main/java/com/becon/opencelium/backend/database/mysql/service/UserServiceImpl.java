@@ -31,6 +31,8 @@ import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.utility.EmailUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -66,6 +68,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private WidgetSettingServiceImp widgetSettingServiceImp;
+
+    private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     public Optional<User> findByEmail(String email) {
@@ -170,7 +174,13 @@ public class UserServiceImpl implements UserService {
             user.setAuthMethod(userDb.getAuthMethod());
             user.setTotpProcessCompleted(userDb.isTotpProcessCompleted());
             user.setTotpSecretKey(userDb.getTotpSecretKey());
-            user.setUsername(userDb.getUsername());
+//            user.setUsername(userDb.getUsername());
+        }
+
+        if (!user.getAuthMethod().equals(AuthMethod.LDAP)) {
+            user.setUsername(userRequestResource.getUsername());
+        } else {
+            logger.warn("Ldap user detected. Username {} can't be modified.", user.getUsername());
         }
 
         userDetail.setId(userRequestResource.getUserId());
