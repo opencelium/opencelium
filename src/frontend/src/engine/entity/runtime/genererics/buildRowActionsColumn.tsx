@@ -80,7 +80,7 @@ export function buildRowActionsColumn<T extends Record<string, unknown>>(
         size: display === 'menu' ? MENU_TRIGGER_WIDTH : actions.length * ACTION_BUTTON_WIDTH + 16,
         enableSorting: false,
         enableGlobalFilter: false,
-        meta: { align: 'center' },
+        meta: { align: 'center', resizable: false },
         cell: ({ row }) => {
             // Sub-rows (depth > 0) are decorative children — they carry no actions.
             if (row.depth > 0) return null;

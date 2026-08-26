@@ -14,6 +14,7 @@ import type {
 export type TableColumnMeta = {
     align?: 'left' | 'center' | 'right';
     width?: string;
+    resizable?: boolean;
 };
 
 export interface TableProps<TData extends RowData> {
