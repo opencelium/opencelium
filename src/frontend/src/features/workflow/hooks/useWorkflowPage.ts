@@ -170,7 +170,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       // A joint widens what its target can read, so removing one can put a
       // reference out of scope — the same cost a drop asks about, so it is asked
       // about here too rather than silently leaving an unreadable reference.
-      const cleanup = cleanBrokenWorkflowReferences(withoutJoint, edges, options.fieldBindings);
+      const cleanup = cleanBrokenWorkflowReferences(
+        withoutJoint, edges, options.fieldBindings, { nodes, edges });
       if (cleanup.brokenCount > 0) {
         const confirmed = await confirm({
           title: t('confirmRemoveJoint.title'),
@@ -221,7 +222,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       // no longer reach. Leaving them behind was the old behaviour and it left
       // methods reading a method that is not there any more.
       const cleanup = cleanBrokenWorkflowReferences(
-        result.nodes, result.edges, options.fieldBindings);
+        result.nodes, result.edges, options.fieldBindings, { nodes, edges });
       const confirmed = await confirm({
         title: t('confirmDelete.title'),
         message: cleanup.affectedNodeIds.length > 0

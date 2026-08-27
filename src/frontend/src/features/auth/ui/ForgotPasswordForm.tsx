@@ -10,6 +10,7 @@ import { useForgotPasswordForm } from '../model/useForgotPasswordForm'
 import type { ForgotPasswordFormValues } from '../model/forgotPassword.schema'
 import { Button } from '@shared/ui/primitives/Button'
 import { Card } from '@shared/ui/primitives/Card'
+import { Hint } from '@shared/ui/primitives/Hint'
 import { Input } from '@shared/ui/primitives/Input'
 import { Typography } from '@shared/ui/primitives/Typography'
 
@@ -106,11 +107,12 @@ export function ForgotPasswordForm() {
                                 <Typography variant="body" isSubtle>
                                     {t('forgotPassword.description')}
                                 </Typography>
+                                <Hint noPrefix>{t('forgotPassword.noEmailHint')}</Hint>
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                 <Typography variant="label" isBold>
-                                    {t('fields.emailOrUsername.label')}
+                                    {t('fields.email.label')}
                                 </Typography>
                                 <Controller
                                     name="email"
@@ -122,7 +124,7 @@ export function ForgotPasswordForm() {
                                             onChange={field.onChange}
                                             onBlur={field.onBlur}
                                             name={field.name}
-                                            placeholder={t('fields.emailOrUsername.placeholder')}
+                                            placeholder={t('fields.email.placeholder')}
                                             error={!!emailErrorKey}
                                             autoFocus
                                             testId="forgot-password-email"

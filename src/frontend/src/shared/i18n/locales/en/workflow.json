@@ -130,6 +130,7 @@
     "invalid": {
       "notAMethod": "Only a method can be the target of a joint.",
       "differentLoopScope": "The target must be a method in the same loop scope as the selected one — both outside every loop, or both inside the same loop.",
+      "entersIfScope": "A joint cannot jump into a condition the selected method is not itself inside. It may leave the conditions around it, but not enter another one.",
       "backwards": "A joint can only point forward, to a method that runs after the selected one.",
       "skipsReferencedMethod": "This joint would skip {{method}}, whose response this method uses.",
       "skipsReferencedMethodUnnamed": "This joint would skip a method whose response this method uses."
@@ -332,6 +333,7 @@
       "esc": "Esc",
       "s": "S",
       "z": "Z",
+      "redo": "(Shift + Z / Y)",
       "shift": "Shift",
       "delete": "Delete"
     },

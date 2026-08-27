@@ -7,6 +7,7 @@ import { WorkflowLogs } from '../WorkflowLogs/WorkflowLogs';
 import type { WorkflowMainProps } from './WorkflowMain.types';
 import type { WorkflowLogsPanelState } from '../WorkflowLogs/WorkflowLogs.types';
 import { useTestRun } from '../../test-run/useTestRun';
+import { useTestRunModePromptStore } from '../../test-run/testRunModePromptStore';
 import { useMethodLabels } from '../WorkflowLogs/useMethodLabels';
 
 export const WorkflowMain = ({ loading, canvas }: WorkflowMainProps) => {
@@ -22,6 +23,15 @@ export const WorkflowMain = ({ loading, canvas }: WorkflowMainProps) => {
 		wasActiveRef.current = isActive;
 	}, [isActive]);
 
+	// The mode dialog shown before a run points at the logs header's Live toggle,
+	// which only exists while the panel is open — so the dialog forces the panel
+	// open for as long as it is up (the run it is about to start would open it a
+	// moment later anyway, via the isActive effect above). Derived rather than
+	// pushed into logsPanel so dismissing the dialog without starting anything
+	// puts the panel back on its own.
+	const isModePromptOpen = useTestRunModePromptStore((state) => state.isOpen);
+	const panel = logsPanel === 'minimized' && isModePromptOpen ? 'normal' : logsPanel;
+
 	// The log panel names methods the way the canvas does, so a renamed step reads
 	// the same in both places.
 	const resolveMethodLabel = useMethodLabels(canvas.nodes, canvas.edges);
@@ -29,7 +39,7 @@ export const WorkflowMain = ({ loading, canvas }: WorkflowMainProps) => {
 	const canvasElement = <WorkflowCanvas {...canvas}>
 		<Background gap={16} size={1} />
 	</WorkflowCanvas>;
-	const logsElement = <WorkflowLogs panel={logsPanel} onPanelChange={setLogsPanel}
+	const logsElement = <WorkflowLogs panel={panel} onPanelChange={setLogsPanel}
 		resolveMethodLabel={resolveMethodLabel} />;
 
 	return <div className='workflowMain'>
@@ -38,13 +48,13 @@ export const WorkflowMain = ({ loading, canvas }: WorkflowMainProps) => {
 			<Loading size='lg' />
 		</div> : <>
 			<Splitter layout='vertical' className='workflowSplitter'
-				panels={logsPanel === 'normal' ? [
+				panels={panel === 'normal' ? [
 					{ key: 'canvas', content: canvasElement, min: 160 },
 					{ key: 'logs', content: logsElement, defaultSize: logsPaneHeight,
 						min: 120, max: '80%' },
 				] : [{ key: 'canvas', content: canvasElement, min: 160 }]}
 				onResizeEnd={(sizes) => setLogsPaneHeight(sizes[1] ?? logsPaneHeight)} />
-			{logsPanel !== 'normal' && logsElement}
+			{panel !== 'normal' && logsElement}
 		</>}
 	</div>;
 };

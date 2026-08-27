@@ -15,6 +15,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             update: string
             delete: string
             view: string
+            download: string
             edit: string
             ctrlEnterHint: string
             cmdEnterHint: string
