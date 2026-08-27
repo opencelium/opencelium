@@ -2,7 +2,6 @@ import type { LensBinding, LensBindingGraph } from '../bindingLens.types';
 
 export type BindingTableFilters = {
 	search: string;
-	brokenOnly: boolean;
 };
 
 const matches = (binding: LensBinding, needle: string) =>
@@ -22,12 +21,11 @@ const compare = (left: LensBinding, right: LensBinding) => {
 
 export const selectBindingTableRows = (
 	graph: LensBindingGraph,
-	{ search, brokenOnly }: BindingTableFilters,
+	{ search }: BindingTableFilters,
 ): LensBinding[] => {
 	const needle = search.trim().toLowerCase();
 	return graph.bindings
-		.filter((binding) => (!brokenOnly || !!binding.invalidReason)
-			&& (!needle || matches(binding, needle)))
+		.filter((binding) => !needle || matches(binding, needle))
 		.sort(compare);
 };
 

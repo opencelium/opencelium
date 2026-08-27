@@ -98,6 +98,7 @@ export function WorkflowCanvas({
   onClearNodeErrors,
   fieldBindings,
   bindingLens,
+  hasOverlaidLogsBar = false,
   restoredViewport,
   viewportRestoreVersion = 0,
   centerStartVersion = 0,
@@ -380,7 +381,8 @@ export function WorkflowCanvas({
             <TestRunDebugControls />
           </Panel>
           {isLensOpen && (
-            <Panel position="bottom-right">
+            <Panel position="bottom-right"
+              className={hasOverlaidLogsBar ? 'bindingLensLegendPanelAboveLogs' : undefined}>
               <BindingLensLegend summary={lens.summary} isFocused={!!lensView.focusNodeId} />
             </Panel>
           )}

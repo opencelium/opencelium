@@ -58,7 +58,7 @@ describe('buildLensElements', () => {
 		expect(edges[0]).toMatchObject({ id: 'lens:pair:m1:m2', source: 'm1', target: 'm2',
 			sourceHandle: 'bottom', targetHandle: 'left', selectable: false });
 		expect(edges[0].data).toMatchObject({ variant: 'pair', count: 2, invalidCount: 0,
-			hasScript: true, color: '#3fa9f5', bindingKeys: ['en-1:VAR_0', 'en-2:VAR_0'] });
+			hasScript: true, bindingKeys: ['en-1:VAR_0', 'en-2:VAR_0'] });
 	});
 
 	it('expands both ends into cards and splits the arc onto field rows', () => {

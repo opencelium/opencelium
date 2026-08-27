@@ -37,7 +37,6 @@ export const buildLensPairEdges = (
 		const isSingle = pair.length === 1;
 		const data: LensEdgeData = {
 			variant: 'pair',
-			color: pair[0].provider.color,
 			providerLabel: pair.find((binding) => binding.provider.label)?.provider.label ?? null,
 			consumerLabel: pair[0].consumer.label,
 			count: pair.length,

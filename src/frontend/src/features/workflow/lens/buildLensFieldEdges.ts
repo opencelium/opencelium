@@ -20,7 +20,6 @@ export const buildLensFieldEdges = (
 	const isBroken = !!binding.invalidReason;
 	const data: LensEdgeData = {
 		variant: 'reference',
-		color: binding.provider.color,
 		providerLabel: binding.provider.label,
 		consumerLabel: binding.consumer.label,
 		count: 1,

@@ -66,6 +66,10 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 		onClearFocus: () => void;
 		actions: LensActions;
 	};
+	/** True while the logs card is the 46px bar overlaying the canvas' bottom
+	 *  edge rather than a splitter pane beside it — the bottom-right legend has
+	 *  to clear it. */
+	hasOverlaidLogsBar?: boolean;
 	restoredViewport?: Viewport;
 	viewportRestoreVersion?: number;
 	centerStartVersion?: number;
