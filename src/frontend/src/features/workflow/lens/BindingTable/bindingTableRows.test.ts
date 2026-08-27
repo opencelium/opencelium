@@ -30,30 +30,24 @@ describe('selectBindingTableRows', () => {
 
 	it('puts anything broken first, then orders by the method being filled', () => {
 		const rows = selectBindingTableRows(graph([notify, lensBinding(), broken]),
-			{ search: '', brokenOnly: false });
+			{ search: '' });
 		expect(rows.map((row) => row.key))
 			.toEqual(['en-3:VAR_0', 'en-1:VAR_0', 'en-2:VAR_0']);
 	});
 
-	it('keeps only broken rows when asked', () => {
-		const rows = selectBindingTableRows(graph([notify, broken]),
-			{ search: '', brokenOnly: true });
-		expect(rows.map((row) => row.key)).toEqual(['en-3:VAR_0']);
-	});
-
 	it('searches both ends, method and field alike, case-insensitively', () => {
 		const bindings = graph([notify, lensBinding()]);
-		expect(selectBindingTableRows(bindings, { search: 'getusers', brokenOnly: false })
+		expect(selectBindingTableRows(bindings, { search: 'getusers' })
 			.map((row) => row.key)).toEqual(['en-1:VAR_0']);
-		expect(selectBindingTableRows(bindings, { search: 'userId', brokenOnly: false })
+		expect(selectBindingTableRows(bindings, { search: 'userId' })
 			.map((row) => row.key)).toEqual(['en-1:VAR_0']);
-		expect(selectBindingTableRows(bindings, { search: 'nope', brokenOnly: false }))
+		expect(selectBindingTableRows(bindings, { search: 'nope' }))
 			.toEqual([]);
 	});
 
 	it('leaves the graph it was given untouched', () => {
 		const bindings = [notify, broken];
-		selectBindingTableRows(graph(bindings), { search: '', brokenOnly: false });
+		selectBindingTableRows(graph(bindings), { search: '' });
 		expect(bindings.map((row) => row.key)).toEqual(['en-2:VAR_0', 'en-3:VAR_0']);
 	});
 });

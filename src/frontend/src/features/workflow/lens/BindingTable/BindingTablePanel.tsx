@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { CloseOutlined } from '@ant-design/icons';
 import { getCoreRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
-import { Checkbox } from '@shared/ui/primitives/Checkbox';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Input } from '@shared/ui/primitives/Input';
 import { Table } from '@shared/ui/primitives/Table';
@@ -10,6 +9,7 @@ import type { LensBinding } from '../bindingLens.types';
 import { useBindingGraph } from '../useBindingLens';
 import { buildBindingTableColumns } from './bindingTableColumns';
 import { countBroken, selectBindingTableRows } from './bindingTableRows';
+import { useDismissOnOutsideClick } from './useDismissOnOutsideClick';
 import type { BindingTablePanelProps } from './BindingTablePanel.types';
 
 /**
@@ -17,16 +17,16 @@ import type { BindingTablePanelProps } from './BindingTablePanel.types';
  * cannot give: complete (including the references no arc can be drawn for),
  * filterable, and sorted so anything broken is already at the top. Deliberately
  * without a backdrop: the canvas stays live behind it, so hovering a method
- * still lights up its bindings while the list is open.
+ * still lights up its bindings while the list is open — the dismissal a
+ * backdrop would have given it comes from useDismissOnOutsideClick instead.
  */
 export function BindingTablePanel({ open, nodes, edges, fieldBindings, selectedKey,
 	isDetailOpen, onClose, onSelectBinding }: BindingTablePanelProps) {
 	const { t } = useI18n('workflow');
+	const panelRef = useRef<HTMLElement | null>(null);
 	const [search, setSearch] = useState('');
-	const [brokenOnly, setBrokenOnly] = useState(false);
 	const graph = useBindingGraph({ nodes, edges, fieldBindings, open });
-	const rows = useMemo(() => selectBindingTableRows(graph, { search, brokenOnly }),
-		[brokenOnly, graph, search]);
+	const rows = useMemo(() => selectBindingTableRows(graph, { search }), [graph, search]);
 	const columns = useMemo(() => buildBindingTableColumns(t), [t]);
 
 	const tableInstance = useReactTable({
@@ -39,14 +39,7 @@ export function BindingTablePanel({ open, nodes, edges, fieldBindings, selectedK
 		getPaginationRowModel: getPaginationRowModel(),
 	});
 
-	useEffect(() => {
-		if (!open) return;
-		const onEscape = (event: KeyboardEvent) => {
-			if (event.key === 'Escape') onClose();
-		};
-		window.addEventListener('keydown', onEscape);
-		return () => window.removeEventListener('keydown', onEscape);
-	}, [open, onClose]);
+	useDismissOnOutsideClick({ open, panelRef, onClose });
 
 	const total = graph.bindings.length;
 	const broken = countBroken(graph.bindings);
@@ -55,6 +48,7 @@ export function BindingTablePanel({ open, nodes, edges, fieldBindings, selectedK
 
 	return (
 		<aside
+			ref={panelRef}
 			data-testid='workflow-binding-table-panel'
 			// Steps aside rather than sitting under the editor drawer: the list is
 			// what a binding is picked from, so it has to stay readable while one of
@@ -87,12 +81,6 @@ export function BindingTablePanel({ open, nodes, edges, fieldBindings, selectedK
 					placeholder={t('bindingLens.tableSearch')}
 					leftSlot={<Icon name='search' size={14} isSubtle />}
 					testId='workflow-binding-table-search'
-				/>
-				<Checkbox
-					checked={brokenOnly}
-					onChange={setBrokenOnly}
-					label={t('bindingLens.tableBrokenOnly')}
-					testId='workflow-binding-table-broken-only'
 				/>
 			</div>
 			<div className='drawerBody bindingTableBody'>

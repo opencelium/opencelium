@@ -3,6 +3,7 @@ import type { EdgeProps } from '@xyflow/react';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { buildDippedArc } from './bindingLensArc';
+import { lensEdgeStroke } from './lensEdgeStroke';
 import type { LensEdgeModel } from './bindingLens.types';
 
 export function BindingLensEdge({
@@ -25,9 +26,7 @@ export function BindingLensEdge({
 	const path = isPair ? dipped.path : bezierPath;
 	const labelX = isPair ? dipped.labelX : bezierLabelX;
 	const labelY = isPair ? dipped.labelY : bezierLabelY;
-	const stroke = isBroken
-		? 'var(--color-status-error-fg)'
-		: data?.color || 'var(--color-action-primary)';
+	const stroke = lensEdgeStroke({ isBroken, hasScript: !!data?.hasScript });
 
 	const tooltip = [
 		t('bindingLens.pairTooltip', {
@@ -42,9 +41,10 @@ export function BindingLensEdge({
 	].filter(Boolean).join(' · ');
 
 	// An expanded arc already says everything on its two field rows; only a
-	// collapsed pair (how many, any script, any break) or a broken reference has
-	// something left to badge.
-	const showBadge = isPair || isBroken || !!data?.hasScript;
+	// collapsed pair (how many, any break) or a broken reference has something
+	// left to badge. Carrying a script no longer does: the arc's own colour says
+	// that, and a badge holding nothing but a ƒx was a second mark for one fact.
+	const showBadge = isPair || invalidCount > 0;
 
 	return (
 		<>
@@ -82,12 +82,10 @@ export function BindingLensEdge({
 							onClick={data?.onActivate}
 							data-testid={`workflow-binding-lens-edge-${data?.bindingKeys[0] ?? id}`}
 						>
-							{/* The count is not coloured with the arc: the pale end of the
-							    palette disappears against the badge's own surface. The arc it
-							    sits on, and the badge's border, carry the colour instead —
-							    neither of which has to be read. */}
+							{/* The count stays plain text: the arc it sits on and the badge's
+							    border already carry the kind's colour, and neither of those has
+							    to be read to be seen. */}
 							{isPair && <span className='bindingLensBadgeCount'>{count}</span>}
-							{data?.hasScript && <span className='bindingLensBadgeScript'>ƒx</span>}
 							{invalidCount > 0 && (isPair ? !isBroken : true) && (
 								<span className='bindingLensBadgeWarning'>
 									{isPair ? `!${invalidCount}` : '!'}

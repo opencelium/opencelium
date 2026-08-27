@@ -77,8 +77,6 @@ export type LensEdgeData = {
 	/** 'pair' collapses every binding between two methods into one arc; a
 	 *  'reference' arc is one binding, drawn once an endpoint is expanded. */
 	variant: 'pair' | 'reference';
-	/** The provider colour, or the danger colour when every reference is broken. */
-	color: string;
 	providerLabel: string | null;
 	consumerLabel: string | null;
 	count: number;

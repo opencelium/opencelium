@@ -21,8 +21,8 @@ export function BindingLensLegend({ summary, isFocused }: BindingLensLegendProps
 						{t('bindingLens.legendDirect', { count: summary.direct })}
 					</div>
 					<div className='bindingLensLegendRow'>
-						<span className='bindingLensLegendMark bindingLensLegendMarkScript'>ƒx</span>
-						{t('bindingLens.legendScript', { count: summary.script })}
+						<span className='bindingLensLegendMark bindingLensLegendMarkEnhancement' />
+						{t('bindingLens.legendEnhancement', { count: summary.script })}
 					</div>
 					<div className='bindingLensLegendRow'>
 						<span className='bindingLensLegendMark bindingLensLegendMarkBroken' />

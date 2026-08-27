@@ -46,15 +46,19 @@
   font-weight: 600;
 }
 
-.bindingLensBadgeScript {
-  color: var(--color-text-secondary);
-  font-style: italic;
-}
-
 .bindingLensBadgeWarning,
 .bindingLensBadgeBroken .bindingLensBadgeCount {
   color: var(--color-status-error-fg);
   font-weight: 600;
+}
+
+/* The minimized logs card is a 46px bar pinned to the canvas' bottom edge at
+   z-index 20 (.logsCard), so a bottom-right Panel — 15px off the bottom by
+   xyflow's own margin — put the legend's last rows behind it. Clears the bar
+   plus the same 15px gap. Two classes so it outranks .react-flow__panel's
+   margin whichever stylesheet lands first. */
+.react-flow__panel.bindingLensLegendPanelAboveLogs {
+  margin-bottom: 61px;
 }
 
 /* Fixed width, because a flex column takes its width from its widest child and
@@ -96,11 +100,11 @@
   font-size: 10px;
 }
 
-.bindingLensLegendMarkScript {
-  height: auto;
-  border-top: none;
-  color: var(--color-text-secondary);
-  font-style: italic;
+/* One sample per arc colour, and the samples are the arcs: the base mark is
+   already the direct stroke (--color-action-primary), so only the other two
+   kinds restate theirs. See lensEdgeStroke for what the three colours mean. */
+.bindingLensLegendMarkEnhancement {
+  border-top-color: var(--color-status-warning-fg);
 }
 
 .bindingLensLegendMarkBroken {
@@ -205,8 +209,11 @@
   white-space: nowrap;
 }
 
+/* The one ƒx left: a card row names a single binding, where the row's own text
+   is the arc and there is no stroke to carry the kind. Coloured with the
+   enhancement arcs it belongs to. */
 .bindingCardRowScript {
-  color: var(--color-text-secondary);
+  color: var(--color-status-warning-fg);
   font-style: italic;
 }
 
