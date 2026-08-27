@@ -31,8 +31,9 @@
   "confirmDelete": {
     "title": "Delete step",
     "message": "Are you sure you want to delete this step? Any steps nested inside it will be removed as well. This action cannot be undone.",
-    "clearsReferences": "References into it from {{count}} other steps will be cleared.",
-    "clearsReferences_one": "References into it from {{count}} other step will be cleared."
+    "clearsReferences": "References into it from {{count}} other steps will be cleared: {{steps}}.",
+    "clearsReferences_one": "References into it from {{count}} other step will be cleared: {{steps}}.",
+    "andMore": "and {{count}} more"
   },
   "confirmRemoveJoint": {
     "title": "Remove joint?",

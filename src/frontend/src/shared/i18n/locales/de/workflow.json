@@ -31,8 +31,9 @@
   "confirmDelete": {
     "title": "Schritt löschen",
     "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
-    "clearsReferences": "Verweise darauf aus {{count}} anderen Schritten werden entfernt.",
-    "clearsReferences_one": "Verweise darauf aus {{count}} anderen Schritt werden entfernt."
+    "clearsReferences": "Verweise darauf aus {{count}} anderen Schritten werden entfernt: {{steps}}.",
+    "clearsReferences_one": "Verweise darauf aus {{count}} anderen Schritt werden entfernt: {{steps}}.",
+    "andMore": "und {{count}} weitere"
   },
   "confirmRemoveJoint": {
     "title": "Verbindung entfernen?",

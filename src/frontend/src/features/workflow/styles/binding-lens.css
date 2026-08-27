@@ -100,10 +100,13 @@
   font-size: 10px;
 }
 
-/* One sample per arc colour, and the samples are the arcs: the base mark is
-   already the direct stroke (--color-action-primary), so only the other two
-   kinds restate theirs. See lensEdgeStroke for what the three colours mean. */
+/* One sample per kind of arc, and the samples are the arcs — colour and stroke
+   pattern both, so the key still separates the three in greyscale or to a
+   reader who cannot tell the blue from the orange. The base mark is already the
+   direct stroke (solid, --color-action-primary), so only the other two restate
+   theirs. See lensEdgeStyle for what each pair means. */
 .bindingLensLegendMarkEnhancement {
+  border-top-style: dotted;
   border-top-color: var(--color-status-warning-fg);
 }
 

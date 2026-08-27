@@ -6,6 +6,7 @@ import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
 import { cleanBrokenWorkflowReferences } from '../utils/graph.brokenReferenceCleanup';
+import { describeAffectedSteps } from '../utils/affectedStepLabels';
 import { message } from 'antd';
 import { createCommentNode } from '../utils/createCommentNode';
 import { findAnchoredComment } from '../utils/commentAnchor';
@@ -223,11 +224,19 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       // methods reading a method that is not there any more.
       const cleanup = cleanBrokenWorkflowReferences(
         result.nodes, result.edges, options.fieldBindings, { nodes, edges });
+      // Named, not just counted: the count says how big the damage is, the names
+      // say where it is — which is the half the user needs once the dialog is
+      // gone and the references are already cleared.
+      const affected = describeAffectedSteps(result.nodes, cleanup.affectedNodeIds);
+      const affectedList = [
+        ...affected.names,
+        affected.more > 0 ? t('confirmDelete.andMore', { count: affected.more }) : '',
+      ].filter(Boolean).join(', ');
       const confirmed = await confirm({
         title: t('confirmDelete.title'),
         message: cleanup.affectedNodeIds.length > 0
           ? `${t('confirmDelete.message')} ${t('confirmDelete.clearsReferences',
-            { count: cleanup.affectedNodeIds.length })}`
+            { count: cleanup.affectedNodeIds.length, steps: affectedList })}`
           : t('confirmDelete.message'),
         confirmText: t('actions.delete'),
         cancelText: t('actions.cancel'),
