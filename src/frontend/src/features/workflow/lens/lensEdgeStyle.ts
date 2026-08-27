@@ -18,7 +18,22 @@ export const LENS_STROKE = {
 	broken: 'var(--color-status-error-fg)',
 } as const;
 
-type StrokeInput = {
+/**
+ * The same three kinds again, in a channel that is not colour: solid, finely
+ * dotted, long-dashed. Hue alone cannot carry this — roughly one reader in
+ * twelve cannot separate the blue from the orange, and neither survives a
+ * greyscale screenshot in a ticket. The dotted pattern is deliberately far from
+ * the broken one so the two are not read as versions of each other.
+ */
+export const LENS_DASH = {
+	direct: undefined,
+	enhancement: '2 3',
+	broken: '6 5',
+} as const;
+
+export type LensEdgeKind = keyof typeof LENS_STROKE;
+
+type StyleInput = {
 	isBroken: boolean;
 	hasScript: boolean;
 };
@@ -29,7 +44,12 @@ type StrokeInput = {
  * with anything broken under it is a fault before it is anything else, and one
  * carrying a script is not a plain wire even if some of its bindings are.
  */
-export const lensEdgeStroke = ({ isBroken, hasScript }: StrokeInput) => {
-	if (isBroken) return LENS_STROKE.broken;
-	return hasScript ? LENS_STROKE.enhancement : LENS_STROKE.direct;
+export const lensEdgeKind = ({ isBroken, hasScript }: StyleInput): LensEdgeKind => {
+	if (isBroken) return 'broken';
+	return hasScript ? 'enhancement' : 'direct';
+};
+
+export const lensEdgeStyle = (input: StyleInput) => {
+	const kind = lensEdgeKind(input);
+	return { kind, stroke: LENS_STROKE[kind], strokeDasharray: LENS_DASH[kind] };
 };
