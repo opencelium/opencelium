@@ -116,7 +116,7 @@
   "update": {
     "confirmRun": {
       "title": "Run Update",
-      "message": "Are you sure you want to update OpenCelium to version {{version}}? The system will restart and you will be logged out automatically once the update starts.",
+      "message": "Are you sure you want to update OpenCelium to version {{version}}? The application will be restarted and you will be logged out automatically once the update starts.",
       "confirm": "Run Update",
       "cancel": "Cancel"
     },

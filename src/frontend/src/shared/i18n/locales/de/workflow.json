@@ -130,6 +130,7 @@
     "invalid": {
       "notAMethod": "Nur eine Methode kann Ziel eines Joints sein.",
       "differentLoopScope": "Das Ziel muss eine Methode im selben Loop-Bereich wie die ausgewählte sein — entweder beide außerhalb jeder Schleife oder beide in derselben Schleife.",
+      "entersIfScope": "Eine Verbindung kann nicht in eine Bedingung springen, in der die ausgewählte Methode nicht selbst liegt. Sie darf die umgebenden Bedingungen verlassen, aber keine andere betreten.",
       "backwards": "Ein Joint kann nur nach vorne zeigen, auf eine Methode, die nach der ausgewählten läuft.",
       "skipsReferencedMethod": "Dieser Joint würde {{method}} überspringen, deren Antwort diese Methode verwendet.",
       "skipsReferencedMethodUnnamed": "Dieser Joint würde eine Methode überspringen, deren Antwort diese Methode verwendet."
@@ -332,6 +333,7 @@
       "esc": "Esc",
       "s": "S",
       "z": "Z",
+      "redo": "(Umschalt + Z / Y)",
       "shift": "Umschalt",
       "delete": "Entf"
     },

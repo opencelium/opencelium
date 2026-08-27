@@ -137,9 +137,24 @@ export const AntTable = ({
         () => findStretchColumnId(flatHeaders.map((header) => header.column)),
         [flatHeaders],
     );
+    // A column that asked to be the sink for the leftover width. With one, the
+    // trailing filler column is not appended and this column carries no width of
+    // its own, so it ends up flush against the table's right edge rather than
+    // sitting wherever its content measured.
+    // A plain scan, not a useMemo: the result is a string or null, so the memo
+    // deps below compare it by value either way, and flatHeaders is rebuilt on
+    // every render anyway.
+    const fillColumnId = flatHeaders.reduce<string | null>((found, header) =>
+        (header.column.columnDef.meta as TableColumnMeta | undefined)?.fillTrailingSpace
+            ? header.column.id
+            : found, null);
 
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [frozen, setFrozen] = useState(false);
+    // The empty trailing column exists only to soak up the surplus once widths are
+    // frozen, so it is redundant the moment a real column volunteers for the job.
+    const hasFillerColumn = frozen && fillColumnId === null;
+
     useLayoutEffect(() => {
         if (frozen) return;
         if (rows.length === 0) return;
@@ -148,6 +163,9 @@ export const AntTable = ({
         const measured: Record<string, number> = {};
         flatHeaders.forEach((header: any) => {
             const id = header.column.id;
+            // Measuring the sink would pin it and hand the surplus back to the
+            // browser to spread across everything.
+            if (id === fillColumnId) return;
             if (columnSizing[id] !== undefined) return;
             const th = container.querySelector<HTMLElement>(`thead th[data-col-id="${CSS.escape(id)}"]`);
             if (th) measured[id] = Math.round(th.getBoundingClientRect().width);
@@ -156,7 +174,7 @@ export const AntTable = ({
             setColumnSizing((prev) => ({ ...measured, ...prev }));
         }
         setFrozen(true);
-    }, [rows.length, flatHeaders, stretchColumnId, columnSizing, setColumnSizing, frozen]);
+    }, [rows.length, flatHeaders, stretchColumnId, fillColumnId, columnSizing, setColumnSizing, frozen]);
 
     const columns = useMemo(
         () =>
@@ -169,25 +187,35 @@ export const AntTable = ({
                 const align = meta?.align;
                 const isFirstColumn = colIndex === 0;
 
-                const resizedWidth = columnSizing[column.id];
+                const isFillColumn = column.id === fillColumnId;
+                const resizedWidth = isFillColumn ? undefined : columnSizing[column.id];
+                // findStretchColumnId already hands the stretch to a volunteering
+                // column, which is what keeps the freeze from measuring a data
+                // column at `width: 100%` and leaving the sink no surplus to take.
                 const isStretchColumn = column.id === stretchColumnId;
+                const isResizable = meta?.resizable !== false;
 
                 return {
                     key: column.id,
                     dataIndex: column.id,
-                    ...(resizedWidth !== undefined
-                        ? { width: resizedWidth }
-                        : explicitSize !== undefined
-                            ? { width: explicitSize }
-                            : meta?.width !== undefined
-                                ? { width: meta.width }
-                                : isStretchColumn && !frozen
-                                    ? { width: '100%' }
-                                    : {}),
+                    ...(isFillColumn
+                        ? {}
+                        : resizedWidth !== undefined
+                            ? { width: resizedWidth }
+                            : explicitSize !== undefined
+                                ? { width: explicitSize }
+                                : meta?.width !== undefined
+                                    ? { width: meta.width }
+                                    : isStretchColumn && !frozen
+                                        ? { width: '100%' }
+                                        : {}),
                     onHeaderCell: () => ({
-                        resizeColumnId: !frozen && isStretchColumn ? undefined : column.id,
+                        resizeColumnId: !isResizable || (!frozen && isStretchColumn)
+                            ? undefined
+                            : column.id,
                         currentWidth: resizedWidth,
                         'data-col-id': column.id,
+                        className: !isResizable ? 'tableNonResizableHeaderCell' : undefined,
                         setColumnSizing,
                     }),
                     ...(align ? { align } : {}),
@@ -195,7 +223,9 @@ export const AntTable = ({
                     // parent) collapse all data columns into one spanning cell.
                     onCell: (record: { __fullWidth?: boolean }) => {
                         if (!record?.__fullWidth) return {};
-                        return isFirstColumn ? { colSpan: columnCount + (frozen ? 1 : 0) } : { colSpan: 0 };
+                        return isFirstColumn
+                            ? { colSpan: columnCount + (hasFillerColumn ? 1 : 0) }
+                            : { colSpan: 0 };
                     },
                     title: (
                         <div
@@ -234,11 +264,12 @@ export const AntTable = ({
                     },
                 };
             }),
-        [flatHeaders, rows, columnCount, stretchColumnId, columnSizing, setColumnSizing, frozen],
+        [flatHeaders, rows, columnCount, stretchColumnId, fillColumnId, hasFillerColumn,
+            columnSizing, setColumnSizing, frozen],
     );
 
     const displayColumns = useMemo(() => {
-        if (!frozen) return columns;
+        if (!hasFillerColumn) return columns;
         return [
             ...columns,
             {
@@ -250,7 +281,7 @@ export const AntTable = ({
                 render: () => null,
             },
         ];
-    }, [columns, frozen]);
+    }, [columns, hasFillerColumn]);
 
     const dataSource = useMemo(
         () => rows.map((r) => ({ ...r.original, key: r.id })),

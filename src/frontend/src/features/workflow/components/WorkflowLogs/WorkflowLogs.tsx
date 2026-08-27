@@ -2,6 +2,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { LoadingOverlay } from '@shared/ui/primitives/Loading/LoadingOverlay';
 import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodLabelProvider, MethodViewModeProvider } from '@features/logs';
 import { useTestRun } from '../../test-run/useTestRun';
+import { useTestRunModePromptStore } from '../../test-run/testRunModePromptStore';
 import type { TestRunResult } from '../../test-run/TestRunContext';
 import { WorkflowLogsHeader } from './WorkflowLogsHeader';
 import type { WorkflowLogsProps } from './WorkflowLogs.types';
@@ -46,6 +47,7 @@ function TestRunResultLine({ result }: { result: TestRunResult }) {
 export function WorkflowLogs({ panel, onPanelChange, resolveMethodLabel }: WorkflowLogsProps) {
 	const { t: tLogs } = useI18n('logs');
 	const testRun = useTestRun();
+	const isModePromptOpen = useTestRunModePromptStore((state) => state.isOpen);
 
 	const phase = testRun?.phase ?? 'idle';
 	const logTree = testRun?.logTree ?? EMPTY_LIVE_LOG_TREE;
@@ -82,7 +84,9 @@ export function WorkflowLogs({ panel, onPanelChange, resolveMethodLabel }: Workf
 		<div
 			className={`logsCard ${isExpanded ? 'logsCardExpanded' : ''} ${
 				panel === 'full' ? 'logsCardFull' : ''
-			} ${panel === 'normal' ? 'logsCardSplitPane' : ''}`}
+			} ${panel === 'normal' ? 'logsCardSplitPane' : ''} ${
+				isModePromptOpen && panel !== 'full' ? 'logsCardLiftLiveToggle' : ''
+			}`}
 		>
 			<WorkflowLogsHeader
 				panel={panel}
@@ -92,6 +96,7 @@ export function WorkflowLogs({ panel, onPanelChange, resolveMethodLabel }: Workf
 				isStopping={isStopping}
 				isPaused={isPaused}
 				isLiveAnimation={isLiveAnimation}
+				isLiveToggleHighlighted={isModePromptOpen}
 				onToggleLiveAnimation={(value) => testRun?.setLiveAnimation(value)}
 				onToggleMinimized={toggleMinimized}
 				onToggleFull={toggleFull}

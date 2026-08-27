@@ -114,7 +114,7 @@
   "update": {
     "confirmRun": {
       "title": "Update ausführen",
-      "message": "Möchten Sie OpenCelium wirklich auf Version {{version}} aktualisieren? Das System wird neu gestartet und Sie werden automatisch abgemeldet, sobald das Update beginnt.",
+      "message": "Möchten Sie OpenCelium wirklich auf Version {{version}} aktualisieren? Die Applikation wird neu gestartet und Sie werden automatisch abgemeldet, sobald das Update beginnt.",
       "confirm": "Update ausführen",
       "cancel": "Abbrechen"
     },

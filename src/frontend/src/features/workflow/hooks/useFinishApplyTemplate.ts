@@ -19,10 +19,12 @@ type Params = {
 		viewport?: Viewport, options?: { centerStart?: boolean }) => void;
 	closeDialog: () => void;
 	clearSelection: () => void;
+	markDirty: () => void;
 };
 
 export const useFinishApplyTemplate = ({ headerTitle, setHeaderState,
-	setFieldBindings, setWorkflowGraph, closeDialog, clearSelection }: Params) => {
+	setFieldBindings, setWorkflowGraph, closeDialog, clearSelection,
+	markDirty }: Params) => {
 	const confirm = useConfirm();
 	const { t } = useI18n('workflow');
 
@@ -30,6 +32,9 @@ export const useFinishApplyTemplate = ({ headerTitle, setHeaderState,
 		template: WorkflowTemplate) => {
 		setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
 		setFieldBindings(state.fieldBindings);
+		// A template is unsaved work the moment it lands, whatever the snapshot
+		// comparison makes of it — see useWorkflowChangeTracking.markDirty.
+		markDirty();
 		const templateName = template.name?.trim();
 		const templateDescription = template.description?.trim();
 		const applyMetadata = () => setHeaderState((current) => ({
@@ -53,5 +58,5 @@ export const useFinishApplyTemplate = ({ headerTitle, setHeaderState,
 		clearSelection();
 		message.success(`Template "${template.name ?? template.templateId}" loaded`);
 	}, [headerTitle, setHeaderState, setFieldBindings, setWorkflowGraph,
-		closeDialog, clearSelection, confirm, t]);
+		closeDialog, clearSelection, markDirty, confirm, t]);
 };
