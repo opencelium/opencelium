@@ -168,6 +168,90 @@ describe('remapWorkflowReferenceColors', () => {
 		});
 	});
 
+	// Per-field remapping means one binding's inputs can end up on different
+	// methods, and `from` is positional against VAR_n — so it is restated from
+	// the arguments rather than moved as a block.
+	it('restates each provider from the argument it belongs to', () => {
+		const other = '#bd10e0';
+		const fieldBindings = [{
+			enhancement: {
+				enhanceId: 'en-1', language: 'js', script: 'return VAR_0 + VAR_1;',
+				args: {
+					VAR_0: `${OLD}.(response).body.$.id`,
+					VAR_1: `${OLD}.(response).body.$.name`,
+					RESULT_VAR: '#f5a623.(request).body.$.total',
+				},
+			},
+			from: [{ color: OLD, path: 'body.$.id' }, { color: OLD, path: 'body.$.name' }],
+		}];
+		const plan = {
+			colors: new Map<string, string>(),
+			references: new Map([
+				[`${OLD}.(response).body.$.id`, `${NEW}.(response).body.$.id`],
+				[`${OLD}.(response).body.$.name`, `${other}.(response).body.$.label`],
+			]),
+		};
+
+		const binding = remapWorkflowReferences([], fieldBindings, plan).fieldBindings?.[0] as any;
+
+		expect(binding.from).toEqual([
+			{ color: NEW, path: 'body.$.id' },
+			{ color: other, path: 'body.$.name' },
+		]);
+	});
+
+	it('leaves a provider whose colour only differs in case as it was written', () => {
+		const fieldBindings = [{
+			enhancement: { args: { VAR_0: `${NEW}.(response).body.$.id` } },
+			from: [{ color: NEW.toUpperCase() }],
+		}];
+
+		const binding = remapWorkflowReferences([], fieldBindings,
+			{ colors: new Map([[OLD, NEW]]), references: new Map() }).fieldBindings?.[0] as any;
+
+		expect(binding.from[0].color).toBe(NEW.toUpperCase());
+	});
+
+	// A condition somebody rewrote by hand is the more specific answer, the same
+	// way a field's own answer outranks the method-wide one — so it lands after
+	// the substitution rather than through it.
+	it('applies a hand-written condition over the substitution', () => {
+		const operator = {
+			id: 'if-1', type: 'if', position: { x: 0, y: 0 },
+			data: { title: 'IF', kind: 'if', conditionConfig: { operatorType: 'if',
+				expression: `{%${OLD}.(response).body.$.id%} = '1'`, tree: null } },
+		} as unknown as WorkflowNodeModel;
+		const rewritten = { operatorType: 'if' as const,
+			expression: `{%${NEW}.(response).body.$.user.id%} != '0'`,
+			tree: { id: 'root', type: 'group' as const, items: [] } };
+
+		const result = remapWorkflowReferences([operator], undefined, {
+			colors: new Map([[OLD, NEW]]),
+			references: new Map(),
+			conditionConfigs: new Map([['if-1', rewritten]]),
+		});
+
+		expect(result.nodes[0].data.conditionConfig).toEqual(rewritten);
+	});
+
+	it('leaves operators nobody rewrote to the substitution', () => {
+		const operator = {
+			id: 'if-2', type: 'if', position: { x: 0, y: 0 },
+			data: { title: 'IF', kind: 'if', conditionConfig: { operatorType: 'if',
+				expression: `{%${OLD}.(response).body.$.id%} = '1'`, tree: null } },
+		} as unknown as WorkflowNodeModel;
+
+		const result = remapWorkflowReferences([operator], undefined, {
+			colors: new Map([[OLD, NEW]]),
+			references: new Map(),
+			conditionConfigs: new Map([['if-1', { operatorType: 'if' as const, expression: 'x',
+				tree: { id: 'root', type: 'group' as const, items: [] } }]]),
+		});
+
+		expect((result.nodes[0].data.conditionConfig as { expression: string }).expression)
+			.toBe(`{%${NEW}.(response).body.$.id%} = '1'`);
+	});
+
 	// The order the delete flow relies on: re-point first, and the pass that
 	// clears what is left reads the remapped reference as satisfied.
 	it('survives the cleanup that would otherwise have cleared it', () => {

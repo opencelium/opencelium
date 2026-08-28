@@ -1,5 +1,6 @@
 import type { ParsedArg } from '../components/request-editor/utils/parseEnhancementArg';
 import { parseEnhancementArg } from '../components/request-editor/utils/parseEnhancementArg';
+import type { ConditionConfig } from '../components/condition-builder/conditionBuilder.types';
 import type { WorkflowNodeModel } from '../types/workflow.types';
 import { normalizeReferenceColor } from './graph.referenceColors';
 
@@ -20,15 +21,23 @@ import { normalizeReferenceColor } from './graph.referenceColors';
 export type ReferenceRemapPlan = {
 	colors: ReadonlyMap<string, string>;
 	references: ReadonlyMap<string, string>;
+	/** Conditions rewritten by hand, by operator node id. Some conditions cannot
+	 *  be answered by substitution at all — a rule whose left side stops meaning
+	 *  anything once its method is gone has to be rewritten, not re-pointed — so
+	 *  the dialog lets the operator's own editor produce one, and stages it here
+	 *  until the deletion is confirmed. */
+	conditionConfigs?: ReadonlyMap<string, ConditionConfig>;
 };
 
 export const EMPTY_REMAP_PLAN: ReferenceRemapPlan = {
 	colors: new Map(),
 	references: new Map(),
+	conditionConfigs: new Map(),
 };
 
 export const isEmptyRemapPlan = (plan: ReferenceRemapPlan) =>
-	plan.colors.size === 0 && plan.references.size === 0;
+	plan.colors.size === 0 && plan.references.size === 0
+	&& (plan.conditionConfigs?.size ?? 0) === 0;
 
 /** The canonical form of one reference, so a key written `#7ED321` matches a
  *  reference stored as `#7ed321`. */
@@ -95,21 +104,37 @@ const remapValue = <T>(value: T, plan: ReferenceRemapPlan): T => {
 	return value;
 };
 
-/** `from` carries the provider as a bare colour beside the reference strings, so
- *  it is the one place no token rewrite can reach. `to` is the consumer and is
- *  never remapped: nothing about which field is being filled changes. */
-const remapBindingProviders = (binding: unknown, plan: ReferenceRemapPlan) => {
+/**
+ * `from` carries each provider as a bare colour beside the reference strings, so
+ * it is the one place no token rewrite can reach. It is positional — `from[N]`
+ * is the provider of `VAR_N` (see graph.fieldBindingClone) — so it is restated
+ * from the arguments as they now read rather than remapped on its own: with
+ * every reference free to name a different method, there is no longer one
+ * colour a whole binding moves to. `to` is the consumer and never moves;
+ * nothing about which field is being filled changes.
+ *
+ * Called on the already-remapped binding, which is what makes the arguments the
+ * source of truth here.
+ */
+const restateBindingProviders = (binding: unknown) => {
 	if (!binding || typeof binding !== 'object') return binding;
 	const from = (binding as { from?: unknown }).from;
 	if (!Array.isArray(from)) return binding;
+	const args = (binding as { enhancement?: { args?: Record<string, unknown> } })
+		.enhancement?.args ?? {};
 	return {
 		...(binding as Record<string, unknown>),
-		from: from.map((item) => {
-			const color = (item as { color?: unknown } | null)?.color;
-			const next = typeof color === 'string'
-				? plan.colors.get(normalizeReferenceColor(color))
-				: undefined;
-			return next ? { ...(item as Record<string, unknown>), color: next } : item;
+		from: from.map((item, index) => {
+			const arg = args[`VAR_${index}`];
+			const parsed = typeof arg === 'string' ? parseEnhancementArg(arg) : null;
+			const current = (item as { color?: unknown } | null)?.color;
+			// Untouched when it already names the same method: a colour stored in
+			// another case is not a change worth writing into someone's connection.
+			if (!parsed || (typeof current === 'string'
+				&& normalizeReferenceColor(current) === normalizeReferenceColor(parsed.color))) {
+				return item;
+			}
+			return { ...(item as Record<string, unknown>), color: parsed.color };
 		}),
 	};
 };
@@ -135,9 +160,17 @@ export const remapWorkflowReferences = (
 ) => {
 	if (isEmptyRemapPlan(plan)) return { nodes, fieldBindings };
 	return {
-		nodes: nodes.map((node) => ({ ...node, data: remapNodeDataReferences(node.data, plan) })),
+		// The hand-written condition is applied after the substitution rather than
+		// through it: it is the more specific answer, the same way a field's own
+		// answer outranks the method-wide one. Rewriting it again would edit
+		// something the user just wrote.
+		nodes: nodes.map((node) => {
+			const data = remapNodeDataReferences(node.data, plan);
+			const rewritten = plan.conditionConfigs?.get(node.id);
+			return { ...node, data: rewritten ? { ...data, conditionConfig: rewritten } : data };
+		}),
 		fieldBindings: Array.isArray(fieldBindings)
-			? fieldBindings.map((binding) => remapBindingProviders(remapValue(binding, plan), plan))
+			? fieldBindings.map((binding) => restateBindingProviders(remapValue(binding, plan)))
 			: fieldBindings,
 	};
 };

@@ -1,78 +1,99 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { ConditionBuilderDialog } from '../condition-builder/ConditionBuilder';
+import type { ConditionConfig } from '../condition-builder/conditionBuilder.types';
 import type { ReferenceRemapPlan } from '../../utils/graph.referenceRemap';
-import { buildReference } from '../../utils/graph.referenceRemap';
 import type { ReferenceRemapTarget } from '../../utils/graph.referenceRemapTargets';
-import { CLEAR, ReferenceRemapRow } from './ReferenceRemapRow';
-
-type Choice = {
-	replacement: string;
-	/** Source reference key → path on the replacement method. */
-	paths: Record<string, string>;
-};
+import { buildRemapConnection } from '../../utils/graph.referenceRemapTargets';
+import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
+import { ReferenceRemapRow } from './ReferenceRemapRow';
+import type { ReferenceRemapChoice } from './referenceRemapChoice';
+import { buildRemapPlan, emptyChoice } from './referenceRemapChoice';
+import { CONFIRM_POPUP_Z_INDEX } from './referenceRemap.constants';
 
 type Props = {
 	targets: ReferenceRemapTarget[];
+	/** The graph as it will be once the deletion goes through — what the field
+	 *  pickers must offer references from. */
+	after: { nodes: WorkflowNodeModel[]; edges: WorkflowEdgeModel[] };
+	/** And as it still is: the only place the method being deleted can be named,
+	 *  which the reference being replaced has to do. */
+	before: { nodes: WorkflowNodeModel[]; edges: WorkflowEdgeModel[] };
 	/** Reported on each change rather than read on submit: the confirm dialog
 	 *  owns the buttons, so this content has no submit of its own. */
 	onChange: (plan: ReferenceRemapPlan) => void;
 };
 
-/** Only what the user actually chose. A method with no replacement contributes
- *  nothing, and a field keeping its own path needs no override — the colour
- *  substitution alone already reads it from the new method. */
-const buildPlan = (targets: ReferenceRemapTarget[], choices: Record<string, Choice>):
-ReferenceRemapPlan => {
-	const colors = new Map<string, string>();
-	const references = new Map<string, string>();
-	targets.forEach((target) => {
-		const choice = choices[target.color];
-		if (!choice || choice.replacement === CLEAR) return;
-		colors.set(target.color, choice.replacement);
-		target.sources.forEach((source) => {
-			const path = choice.paths[source.key];
-			if (path === undefined || path === source.path) return;
-			references.set(source.key, buildReference({
-				color: choice.replacement,
-				direction: 'response',
-				messageProperty: source.messageProperty,
-				path,
-			}));
-		});
-	});
-	return { colors, references };
-};
-
-export function ReferenceRemapChoices({ targets, onChange }: Props) {
+export function ReferenceRemapChoices({ targets, after, before, onChange }: Props) {
 	const { t } = useI18n('workflow');
-	const [choices, setChoices] = useState<Record<string, Choice>>({});
+	const [choices, setChoices] = useState<Record<string, ReferenceRemapChoice>>({});
+	// Conditions rewritten by hand, held here until the deletion is confirmed —
+	// the operator's editor writes into this, not into the graph, so Cancel
+	// really does cancel.
+	const [conditions, setConditions] = useState<Record<string, ConditionConfig>>({});
+	const [editingOperatorId, setEditingOperatorId] = useState<string>();
+	// One legacy connection for the whole dialog: building it deserializes every
+	// method's request config, and each field row only needs it cut down, which
+	// is cheap.
+	const connection = useMemo(() => buildRemapConnection(after), [after]);
+	const previousConnection = useMemo(() => buildRemapConnection(before), [before]);
+	// Conditions are read off the nodes themselves: an operator is not a method
+	// and has nothing in the legacy connection to read them from.
+	const operators = useMemo(() => new Map(after.nodes
+		.filter((node) => node.type === 'if' || node.type === 'loop')
+		.map((node) => [node.id, node])), [after.nodes]);
 
-	const update = (color: string, choice: Choice) => {
+	const update = (color: string, choice: ReferenceRemapChoice) => {
 		const next = { ...choices, [color]: choice };
 		setChoices(next);
-		onChange(buildPlan(targets, next));
+		onChange(buildRemapPlan(targets, next, conditions));
 	};
+
+	const rewriteCondition = (nodeId: string, config: ConditionConfig) => {
+		const next = { ...conditions, [nodeId]: config };
+		setConditions(next);
+		setEditingOperatorId(undefined);
+		onChange(buildRemapPlan(targets, choices, next));
+	};
+
+	// What the editor opens on: the staged rewrite where there is one, so
+	// reopening continues from the last edit rather than from the graph.
+	const editingOperator = editingOperatorId ? operators.get(editingOperatorId) : undefined;
+	const editingNode = editingOperator && conditions[editingOperator.id]
+		? { ...editingOperator,
+			data: { ...editingOperator.data, conditionConfig: conditions[editingOperator.id] } }
+		: editingOperator;
 
 	return (
 		<div className='referenceRemap' data-testid='workflow-reference-remap'>
 			<div className='referenceRemapIntro'>{t('referenceRemap.intro')}</div>
-			{targets.map((target) => {
-				const choice = choices[target.color] ?? { replacement: CLEAR, paths: {} };
-				return (
-					<ReferenceRemapRow
-						key={target.color}
-						target={target}
-						replacement={choice.replacement}
-						paths={choice.paths}
-						// A different method has a different response, so the paths chosen
-						// against the old one cannot be carried over to it.
-						onReplacementChange={(replacement) =>
-							update(target.color, { replacement, paths: {} })}
-						onPathChange={(sourceKey, path) =>
-							update(target.color, { ...choice, paths: { ...choice.paths, [sourceKey]: path } })}
-					/>
-				);
-			})}
+			{targets.map((target) => (
+				<ReferenceRemapRow
+					key={target.color}
+					target={target}
+					choice={choices[target.color] ?? emptyChoice()}
+					connection={connection}
+					previousConnection={previousConnection}
+					operators={operators}
+					rewrittenConditions={conditions}
+					onEditCondition={setEditingOperatorId}
+					onChange={(choice) => update(target.color, choice)}
+				/>
+			))}
+			{/* The operator's own editor, opened on a copy and answering into this
+			    dialog's plan. Its pickers read the graph as it will be, so it cannot
+			    offer the method being deleted — the trap this dialog exists to
+			    avoid, and the one thing an editor opened as-is would walk into. */}
+			<ConditionBuilderDialog
+				open={!!editingNode}
+				node={editingNode ?? null}
+				nodes={after.nodes}
+				edges={after.edges}
+				connection={connection}
+				zIndex={CONFIRM_POPUP_Z_INDEX}
+				onClose={() => setEditingOperatorId(undefined)}
+				onSave={rewriteCondition}
+			/>
 		</div>
 	);
 }

@@ -1,86 +1,129 @@
-import { Select } from '@shared/ui/primitives/Select';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
-import { LegacyResponseFieldSelect } from '../request-editor/body-editor/LegacyResponseFieldSelect/LegacyResponseFieldSelect';
-import type { ResponseType } from '../request-editor/body-editor/requestReferenceOptions';
+import { ReferenceMethodSelect } from '../method-select/ReferenceMethodSelect';
+import type { Connection } from '../../types/connection';
+import type { WorkflowNodeModel } from '../../types/workflow.types';
+import type { ConditionConfig } from '../condition-builder/conditionBuilder.types';
 import type { ReferenceRemapTarget } from '../../utils/graph.referenceRemapTargets';
-
-/* The confirm dialog hosting this row is at 20000 (ConfirmDialogProvider), and
-   the field picker's popup is rendered on document.body — so it has to be told
-   to stack above it or it opens behind the dialog it was opened from. */
-const CONFIRM_POPUP_Z_INDEX = 20010;
-
-/** The value standing for "no replacement" — the old behaviour, and the default:
- *  a deletion must never quietly re-point someone's reference at a method they
- *  did not choose. */
-export const CLEAR = '';
+import { restrictRemapConnection } from '../../utils/graph.referenceRemapTargets';
+import { normalizeReferenceColor } from '../../utils/graph.referenceColors';
+import { CLEAR, CONFIRM_POPUP_Z_INDEX } from './referenceRemap.constants';
+import { ReferenceRemapSourceRow } from './ReferenceRemapSourceRow';
+import type { ReferenceRemapChoice } from './referenceRemapChoice';
 
 type Props = {
 	target: ReferenceRemapTarget;
-	replacement: string;
-	/** Source reference key → the path chosen on the replacement method. Absent
-	 *  means the field keeps the path it reads today. */
-	paths: Record<string, string>;
-	onReplacementChange: (color: string) => void;
-	onPathChange: (sourceKey: string, path: string) => void;
+	choice: ReferenceRemapChoice;
+	/** The graph as it will be, in the generator's own shape. Each field row
+	 *  narrows it to what that field may be read from. */
+	connection: Connection;
+	/** The graph as it still is, where the method being deleted can still be
+	 *  named — what the reference being replaced is drawn from. */
+	previousConnection: Connection;
+	/** Operators by id, for reading a condition a reference sits in. */
+	operators: Map<string, WorkflowNodeModel>;
+	/** Conditions already rewritten in this dialog, so a row shows what will be
+	 *  saved rather than what is still on the graph. */
+	rewrittenConditions: Record<string, ConditionConfig>;
+	onEditCondition: (nodeId: string) => void;
+	onChange: (choice: ReferenceRemapChoice) => void;
 };
 
-export function ReferenceRemapRow({ target, replacement, paths,
-	onReplacementChange, onPathChange }: Props) {
+export function ReferenceRemapRow({ target, choice, connection, previousConnection,
+	operators, rewrittenConditions, onEditCondition, onChange }: Props) {
 	const { t } = useI18n('workflow');
-	const chosen = target.candidates.find((candidate) => candidate.color === replacement);
+	const hasCandidates = target.candidates.length > 0;
+	// The row answers in colours; a method picker speaks ids. The candidates are
+	// the translation between the two, and the methods themselves come from the
+	// connection so the picker can draw each one the way it always does.
+	const replacementMethodId = target.candidates
+		.find((candidate) => candidate.color === choice.replacement)?.nodeId;
+	// The method being deleted, still on the graph the dialog was opened from.
+	const doomedMethod = previousConnection.fromConnector.method
+		.find((method) => normalizeReferenceColor(method.color) === target.color);
+	const candidateIds = new Set(target.candidates.map((candidate) => candidate.nodeId));
+	const candidateMethods = connection.fromConnector.method
+		.filter((method) => candidateIds.has(method.id));
+	const answer = (methodId: string) => target.candidates
+		.find((candidate) => candidate.nodeId === methodId)?.color ?? CLEAR;
 
 	return (
 		<div className='referenceRemapRow'>
 			<div className='referenceRemapSubject'>
 				<MethodColorDot color={target.color} size={8} />
-				<span className='referenceRemapName'>{target.label}</span>
+				<span className='referenceRemapName' title={target.label}>{target.label}</span>
 				<span className='referenceRemapReadBy'>
 					{t('referenceRemap.readBy', { count: target.consumerNodeIds.length })}
 				</span>
 			</div>
-			{target.candidates.length === 0 ? (
-				<div className='referenceRemapEmpty'>{t('referenceRemap.noCandidates')}</div>
-			) : (
-				<Select
-					value={replacement}
-					onChange={onReplacementChange}
-					// Graph order, not alphabetical: the list is upstream methods and the
-					// nearest one is both the likeliest replacement and the one whose
-					// response is most likely to carry the same field.
-					sortOptions={false}
-					options={[
-						{ value: CLEAR, label: t('referenceRemap.clear') },
-						...target.candidates.map((candidate) => ({
-							value: candidate.color, label: candidate.label,
-						})),
-					]}
+			{hasCandidates ? (
+				/* The whole method in one answer, which is the common case: the fields
+				   keep their paths and are read from somewhere else. Anything the new
+				   method cannot serve is then corrected field by field below. */
+				<ReferenceMethodSelect
+					methods={candidateMethods}
+					methodId={replacementMethodId ?? CLEAR}
+					selectedMethod={candidateMethods
+						.find((method) => method.id === replacementMethodId)}
+					leadingOption={{ value: CLEAR, label: t('referenceRemap.clear') }}
+					popupZIndex={CONFIRM_POPUP_Z_INDEX}
+					onChange={(methodId) => onChange({ ...choice, replacement: answer(methodId) })}
+					// onSelect as well as onChange, so re-picking the method already
+					// chosen still starts the field rows below over: the user answered
+					// the question again, whether or not the answer moved.
+					onSelect={(methodId) => onChange({ ...choice, replacement: answer(methodId),
+						seedVersion: choice.seedVersion + 1 })}
 					testId={`workflow-reference-remap-${target.color.replace('#', '')}`}
 				/>
+			) : (
+				<div className='referenceRemapEmpty'>{t('referenceRemap.noCandidates')}</div>
 			)}
-			{/* The fields only become a question once there is a method to read them
-			    from, and each is asked separately: a replacement's response rarely
-			    has the same shape, and keeping `body.$.id` on a method that has no
-			    such field leaves a reference that looks valid and resolves to
-			    nothing. Pre-filled with the path it reads today, which is right
-			    whenever the two methods do agree. */}
-			{chosen && target.sources.length > 0 && (
+			{target.sources.length > 0 && (
 				<div className='referenceRemapSources'>
-					{target.sources.map((source) => (
-						<div className='referenceRemapSource' key={source.key}>
-							<span className='referenceRemapSourcePath'>{source.label}</span>
-							<span className='referenceRemapSourceArrow' aria-hidden='true'>→</span>
-							<div className='referenceRemapSourceField'>
-								<LegacyResponseFieldSelect
-									method={chosen.method}
-									type={source.messageProperty as ResponseType}
-									value={paths[source.key] ?? source.path}
-									popupZIndex={CONFIRM_POPUP_Z_INDEX}
-									onChange={(next) => onPathChange(source.key, next ?? '')}
+					<div className='referenceRemapSourcesHint'>{t('referenceRemap.perFieldHint')}</div>
+					{/* A table, because that is what these rows are: one field of the
+					    deleted method per row, and what it should read instead. */}
+					<table className='referenceRemapTable'>
+						<thead>
+							<tr>
+								<th>{t('referenceRemap.columnCurrent')}</th>
+								<th>{t('referenceRemap.columnHeld')}</th>
+								<th>{t('referenceRemap.columnNew')}</th>
+							</tr>
+						</thead>
+						<tbody>
+							{target.sources.map((source) => (
+								<ReferenceRemapSourceRow
+									key={source.key}
+									source={source}
+									connection={connection}
+									operators={operators}
+									rewrittenConditions={rewrittenConditions}
+									onEditCondition={onEditCondition}
+									// Read-only, and drawn from the graph as it still is: the
+									// method this reference names is the one being deleted, and
+									// is already gone from the graph the row's other controls
+									// are built from.
+									current={doomedMethod ? restrictRemapConnection(previousConnection,
+										[{ nodeId: doomedMethod.id, color: target.color,
+											label: target.label }], source.consumerNodeIds) : null}
+									// Its own scope, not the method's: this field is only read
+									// by some of the steps that read the method above it.
+									generator={restrictRemapConnection(connection, source.candidates,
+										source.consumerNodeIds)}
+									reference={choice.fields[source.key]}
+									defaultMethodId={replacementMethodId}
+									resetKey={choice.seedVersion}
+									onChange={(reference) => {
+										const fields = { ...choice.fields };
+										if (reference) fields[source.key] = reference;
+										else delete fields[source.key];
+										onChange({ ...choice, fields });
+									}}
 								/>
-							</div>
-						</div>
-					))}
+							))}
+						</tbody>
+					</table>
 				</div>
 			)}
 		</div>

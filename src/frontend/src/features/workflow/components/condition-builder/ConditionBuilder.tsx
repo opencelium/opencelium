@@ -75,6 +75,10 @@ type Props = {
 	nodes: WorkflowNodeModel[];
 	edges: WorkflowEdgeModel[];
 	connection: Connection;
+	/** Stacking, for a host that is itself a dialog — the delete dialog opens
+	 *  this one over its own confirm at 20000. Left to antd's default
+	 *  otherwise, which is what every other caller wants. */
+	zIndex?: number;
 	onClose: () => void;
 	onSave: (nodeId: string, config: ConditionConfig) => void;
 };
@@ -891,6 +895,7 @@ export function ConditionBuilderDialog({
 	nodes,
 	edges,
 	connection,
+	zIndex,
 	onClose,
 	onSave,
 }: Props) {
@@ -951,6 +956,7 @@ export function ConditionBuilderDialog({
 	return (
 		<Modal
 			open={open}
+			zIndex={zIndex}
 			destroyOnHidden
 			focusable={{ focusTriggerAfterClose: false }}
 			title={t(isLoop ? 'conditionBuilder.dialogTitleLoop' : 'conditionBuilder.dialogTitleIf')}

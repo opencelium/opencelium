@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { deleteNodeGraph } from './deleteNodeGraph';
-import { buildReferenceRemapTargets } from './graph.referenceRemapTargets';
+import { buildReferenceRemapTargets, buildRemapConnection, restrictRemapConnection }
+	from './graph.referenceRemapTargets';
 
 const config = (overrides: Record<string, unknown> = {}) => ({
 	url: '', headers: {}, queryParams: [], endpointArgs: {},
@@ -22,12 +23,14 @@ const startNode = {
 const edge = (id: string, source: string, target: string) =>
 	({ id, type: 'workflow-edge', source, target }) as unknown as WorkflowEdgeModel;
 
-const reads = (color: string) => ({ userId: `${color}.(response).body.$.id` });
+const reads = (color: string, field = 'id') =>
+	({ userId: `${color}.(response).body.$.${field}` });
 
 const M1 = '#3fa9f5';
 const M2 = '#7ed321';
 const M3 = '#f5a623';
 const M4 = '#bd10e0';
+const M5 = '#50e3c2';
 
 // start → m1 → m2 → m3, where m3 reads m2.
 const chain = () => ({
@@ -127,9 +130,34 @@ describe('buildReferenceRemapTargets', () => {
 		expect(target.sources.map((source) => source.messageProperty)).toEqual(['body', 'body']);
 	});
 
-	it('carries the replacement method itself, for the field picker to read', () => {
-		const [target] = deleting(chain(), 'm2');
-		expect(target.candidates[0].method.id).toBe('m1');
+	it('hands each field a method list cut to its own candidates', () => {
+		const before = chain();
+		const after = deleteNodeGraph('m2', before.nodes, before.edges);
+		const [target] = buildReferenceRemapTargets(before, after, undefined);
+		const [source] = target.sources;
+
+		const generator = restrictRemapConnection(buildRemapConnection(after),
+			source.candidates, source.consumerNodeIds);
+
+		expect(generator?.consumerMethod.id).toBe('m3');
+		expect(generator?.connection.fromConnector.method.map((method) => method.id).sort())
+			.toEqual(['m1', 'm3']);
+		expect(generator?.connection.ui.flowchartEdges.map((edge) => edge.id))
+			.toEqual(after.edges.map((edge) => String(edge.id)));
+	});
+
+	it('has nothing to offer a field when nothing can be read from where it sits', () => {
+		const before = {
+			nodes: [startNode, method('m1', M1), method('m2', M2, reads(M1))],
+			edges: [edge('e1', 'start-1', 'm1'), edge('e2', 'm1', 'm2')],
+		};
+		const after = deleteNodeGraph('m1', before.nodes, before.edges);
+		const [target] = buildReferenceRemapTargets(before, after, undefined);
+		const [source] = target.sources;
+
+		expect(source.candidates).toEqual([]);
+		expect(restrictRemapConnection(buildRemapConnection(after),
+			source.candidates, source.consumerNodeIds)).toBeNull();
 	});
 
 	it('sees the field a script reads, not just the ones in a field value', () => {
@@ -148,5 +176,40 @@ describe('buildReferenceRemapTargets', () => {
 		// The RESULT_VAR names the field being *filled* — the consumer's own, and
 		// not something a replacement provider changes.
 		expect(target.sources.map((source) => source.label)).toEqual(['body.$.items[0].id']);
+	});
+
+	/* start → m1 → doomed → m2 → m3 → m4, where m2 and m4 read different fields
+	   of the doomed method from different depths of the flow. */
+	const twoReaders = () => ({
+		nodes: [startNode, method('m1', M1), method('doomed', M5),
+			method('m2', M2, reads(M5, 'early')), method('m3', M3),
+			method('m4', M4, reads(M5, 'late'))],
+		edges: [edge('e1', 'start-1', 'm1'), edge('e2', 'm1', 'doomed'),
+			edge('e3', 'doomed', 'm2'), edge('e4', 'm2', 'm3'), edge('e5', 'm3', 'm4')],
+	});
+
+	// Scope belongs to the step holding the reference, not to the method every
+	// reference of it happens to name.
+	it('scopes each field to the steps that hold it, not to the method', () => {
+		const [target] = deleting(twoReaders(), 'doomed');
+
+		const early = target.sources.find((source) => source.path === 'early');
+		const late = target.sources.find((source) => source.path === 'late');
+
+		expect(early?.consumerNodeIds).toEqual(['m2']);
+		expect(late?.consumerNodeIds).toEqual(['m4']);
+		// m2 sits right after the deleted step: only m1 is behind it.
+		expect(early?.candidates.map((candidate) => candidate.nodeId)).toEqual(['m1']);
+		// m4 sits at the end and may read everything before it.
+		expect(late?.candidates.map((candidate) => candidate.nodeId).sort())
+			.toEqual(['m1', 'm2', 'm3']);
+	});
+
+	// The shortcut above the fields must not hide what a field could have taken.
+	it('offers the union of its fields at the method level', () => {
+		const [target] = deleting(twoReaders(), 'doomed');
+
+		expect(target.candidates.map((candidate) => candidate.nodeId).sort())
+			.toEqual(['m1', 'm2', 'm3']);
 	});
 });

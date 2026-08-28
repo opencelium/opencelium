@@ -217,7 +217,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       // method that is not there any more; clearing them is now the fallback
       // rather than the only outcome.
       const targets = buildReferenceRemapTargets({ nodes, edges }, result, options.fieldBindings);
-      const { confirmed, plan } = await askAboutReferences(targets);
+      const { confirmed, plan } = await askAboutReferences(targets,
+        { before: { nodes, edges }, after: result });
       if (!confirmed) return;
       // Re-pointed first, then cleaned: a reference the user gave a new provider
       // reads as satisfied by the time the cleanup pass looks at it, so only the
