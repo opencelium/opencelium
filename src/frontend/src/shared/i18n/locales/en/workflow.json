@@ -120,6 +120,9 @@
     "loadTemplateFailed": "Failed to load template",
     "downloadTemplateFailed": "Failed to download template.",
     "copySnapshotIdSuccess": "Snapshot ID copied to clipboard",
+    "nodeCopied": "Node copied",
+    "nodePasted": "Node pasted",
+    "nodeDuplicated": "Node duplicated",
     "deleteVersionSuccess": "Version deleted",
     "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?",
     "enhancementScriptBrokenIn": "“{{method}}” has an enhancement whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
@@ -330,6 +333,10 @@
       "click": "Click",
       "doubleClick": "Double-click",
       "ctrl": "Ctrl",
+      "c": "C",
+      "d": "D",
+      "f": "F",
+      "v": "V",
       "esc": "Esc",
       "s": "S",
       "z": "Z",
@@ -344,6 +351,10 @@
       "moveNode": "Move a node",
       "duplicate": "Duplicate a node instead of moving it",
       "multiSelect": "Select multiple nodes",
+      "copyNode": "Copy the selected node",
+      "pasteNode": "Paste the copied node",
+      "duplicateNode": "Duplicate the selected node",
+      "searchNode": "Search workflow nodes",
       "deleteNode": "Delete the selected node",
       "save": "Save the workflow",
       "undo": "Undo the last canvas change",
@@ -351,6 +362,12 @@
       "close": "Close the open menu, dialog, or panel",
       "dismissError": "Dismiss the error highlight on a node"
     }
+  },
+  "pasteOperator": {
+    "title": "Where should the node be pasted?",
+    "message": "Choose whether to paste the copied node inside the selected operator's scope or after the operator and its scope.",
+    "inScope": "In scope",
+    "after": "After operator"
   },
   "contextMenu": {
     "changeLabel": "Change Label",

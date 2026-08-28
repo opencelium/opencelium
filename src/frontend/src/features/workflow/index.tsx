@@ -53,7 +53,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { validation, saveWorkflow: handleSave, category, templates: templateActions,
     history: historyActions, canvas, header, buildTestPayload, isShortcutsOpen,
     setIsShortcutsOpen, schedulesOpen, setSchedulesOpen, changeHistoryOpen,
-    setChangeHistoryOpen } = actions;
+    setChangeHistoryOpen, pasteOperatorTarget, cancelPasteOperator,
+    pasteOperatorInScope, pasteOperatorAfter } = actions;
   const { validateTitle, resolveAndHighlightError: resolveAndHighlightWorkflowError } = validation;
   const { closeCanvasPanels, handleNodeDoubleClick } = canvas;
   const { selectMenuItem: handleHeaderMenuSelect, showHistory: handleOpenHistory } = header;
@@ -112,6 +113,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             onCancel: handleCancelConnectorMapping },
         }}
         shortcuts={{ open: isShortcutsOpen, onClose: () => setIsShortcutsOpen(false) }}
+        pasteOperator={{ open: !!pasteOperatorTarget, onCancel: cancelPasteOperator,
+          onPasteInScope: pasteOperatorInScope, onPasteAfter: pasteOperatorAfter }}
         category={{ open: assignCategoryOpen, currentCategoryId: categoryId,
           loading: isAssigningCategory, onClose: () => setAssignCategoryOpen(false),
           onAssign: handleAssignCategory }} />

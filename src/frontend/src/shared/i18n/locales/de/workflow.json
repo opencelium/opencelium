@@ -120,6 +120,9 @@
     "loadTemplateFailed": "Vorlage konnte nicht geladen werden",
     "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden.",
     "copySnapshotIdSuccess": "Snapshot-ID in die Zwischenablage kopiert",
+    "nodeCopied": "Knoten kopiert",
+    "nodePasted": "Knoten eingefügt",
+    "nodeDuplicated": "Knoten dupliziert",
     "deleteVersionSuccess": "Version gelöscht",
     "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?",
     "enhancementScriptBrokenIn": "„{{method}}“ hat eine Anreicherung, deren Skript noch {{marker}} verwendet — der gelesene Verweis wurde mit dem Schritt entfernt, auf den er zeigte. Korrigieren Sie das Skript vor dem Speichern.",
@@ -330,6 +333,10 @@
       "click": "Klick",
       "doubleClick": "Doppelklick",
       "ctrl": "Strg",
+      "c": "C",
+      "d": "D",
+      "f": "F",
+      "v": "V",
       "esc": "Esc",
       "s": "S",
       "z": "Z",
@@ -344,6 +351,10 @@
       "moveNode": "Knoten verschieben",
       "duplicate": "Knoten duplizieren statt verschieben",
       "multiSelect": "Mehrere Knoten auswählen",
+      "copyNode": "Ausgewählten Knoten kopieren",
+      "pasteNode": "Kopierten Knoten einfügen",
+      "duplicateNode": "Ausgewählten Knoten duplizieren",
+      "searchNode": "Workflow-Knoten suchen",
       "deleteNode": "Ausgewählten Knoten löschen",
       "save": "Workflow speichern",
       "undo": "Letzte Änderung auf der Arbeitsfläche rückgängig machen",
@@ -351,6 +362,12 @@
       "close": "Geöffnetes Menü, Dialog oder Panel schließen",
       "dismissError": "Fehlermarkierung an einem Schritt ausblenden"
     }
+  },
+  "pasteOperator": {
+    "title": "Wo soll der Knoten eingefügt werden?",
+    "message": "Wählen Sie, ob der kopierte Knoten innerhalb des Bereichs des ausgewählten Operators oder nach dem Operator und seinem Bereich eingefügt werden soll.",
+    "inScope": "Im Bereich",
+    "after": "Nach dem Operator"
   },
   "contextMenu": {
     "changeLabel": "Bezeichnung ändern",
