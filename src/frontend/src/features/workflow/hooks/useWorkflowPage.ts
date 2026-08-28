@@ -22,6 +22,7 @@ import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
 import { evaluateJointTargets } from '../utils/jumpValidator';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
+import { moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
@@ -199,6 +200,35 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       }
       const comment = createCommentNode(nodes, nodeId);
       if (comment) setNodes([...nodes, comment]);
+    },
+    onPasteNode: async (sourceNodeId: string, targetNodeId: string,
+      direction: 'right' | 'bottom') => {
+      const source = nodes.find((node) => node.id === sourceNodeId);
+      const target = nodes.find((node) => node.id === targetNodeId);
+      if (!source || !target || source.type === 'start' || source.type === 'comment' ||
+        target.type === 'comment') return false;
+      const args = {
+        sourceNodeId,
+        target: { nodeId: targetNodeId, direction },
+        mode: 'copy' as const,
+        nodes,
+        edges,
+        fieldBindings: options.fieldBindings,
+      };
+      let result = moveOrCopyWorkflowNodes(args);
+      if (result.invalidReferences.length > 0) {
+        const accepted = await options.confirmDependencyDrop?.(result.invalidReferences);
+        if (!accepted) return false;
+        result = moveOrCopyWorkflowNodes({ ...args, cleanInvalid: true });
+      }
+      const pastedRootId = result.idMap?.get(sourceNodeId);
+      setNodes(result.nodes.map((node) => ({
+        ...node,
+        selected: node.id === pastedRootId,
+      })));
+      setEdges(result.edges);
+      options.onFieldBindingsChange?.(result.fieldBindings);
+      return true;
     },
     onDeleteNode: async (nodeId: string) => {
       const targetNode = nodes.find((node) => node.id === nodeId);

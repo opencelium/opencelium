@@ -1,10 +1,11 @@
 import { MoreHorizontal } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { CommandPalette } from '@widgets/CommandPalette/CommandPalette';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { WorkflowHeaderMenuItem } from '../../types/workflow.types';
 import { workflowCommandBridgeStore } from '../../command/workflowCommandBridge';
 import { HeaderMenu } from '../header/HeaderMenu/HeaderMenu';
+import { useWorkflowSearchShortcut } from '../../hooks/useWorkflowSearchShortcut';
 
 type Props = {
 	items: WorkflowHeaderMenuItem[];
@@ -24,10 +25,21 @@ export function WorkflowHeaderActions({
 }: Props) {
 	const { t } = useI18n('workflow');
 	const [menuOpen, setMenuOpen] = useState(false);
+	const [searchRequestId, setSearchRequestId] = useState(0);
+	useWorkflowSearchShortcut({
+		disabled: saveDialogOpen || workflowCommandBridgeStore.getState().hasOpenDialog(),
+		onOpenSearch: () => setSearchRequestId((current) => current + 1),
+	});
+	const scopeActivation = useMemo(() => ({
+		requestId: searchRequestId,
+		scope: 'workflow',
+		inputValue: 'search ',
+	}), [searchRequestId]);
 
 	return (
 		<div className='headerActions'>
 			<CommandPalette collapsible forceMode='modal' hideSuccessRecommendations
+				scopeActivation={scopeActivation}
 				onScopeExit={() => workflowCommandBridgeStore.getState().clearSearchHighlights()}
 				onEscapeClearScope={() => {
 					const bridge = workflowCommandBridgeStore.getState();

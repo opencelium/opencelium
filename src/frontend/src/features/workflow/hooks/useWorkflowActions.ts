@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { message } from 'antd';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useWorkflowValidation } from './useWorkflowValidation';
 import { useSaveWorkflow } from './useSaveWorkflow';
 import { useAssignWorkflowCategory } from './useAssignWorkflowCategory';
@@ -9,6 +11,9 @@ import { useWorkflowHeaderActions } from './useWorkflowHeaderActions';
 import { useBuildTestPayload } from './useBuildTestPayload';
 import { useDeleteSelectedNode } from './useDeleteSelectedNode';
 import { useWorkflowUndoShortcuts } from './useWorkflowUndoShortcuts';
+import { useCopySelectedNodeShortcut } from './useCopySelectedNodeShortcut';
+import { usePasteCopiedNodeShortcut } from './usePasteCopiedNodeShortcut';
+import { useDuplicateSelectedNodeShortcut } from './useDuplicateSelectedNodeShortcut';
 import type { useWorkflowPageState } from './useWorkflowPageState';
 
 type Params = {
@@ -22,12 +27,18 @@ type Params = {
 
 export const useWorkflowActions = ({ connectionId, readOnly,
 	isTestRunLocked = false, page }: Params) => {
+	const { t } = useI18n('workflow');
 	const isEditLocked = readOnly || isTestRunLocked;
 	const { connection, workflow, connectors, invokers, view, changes } = page;
 	const { headerState, fieldBindings, categoryId } = connection;
 	const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 	const [schedulesOpen, setSchedulesOpen] = useState(false);
 	const [changeHistoryOpen, setChangeHistoryOpen] = useState(false);
+	const [copiedNodeId, setCopiedNodeId] = useState<string | null>(null);
+	const [pasteOperatorTarget, setPasteOperatorTarget] = useState<{
+		sourceNodeId: string;
+		targetNodeId: string;
+	} | null>(null);
 	const validation = useWorkflowValidation({ persistedTitle: connection.persistedTitle,
 		nodes: view.hydratedNodes, edges: workflow.edges,
 		setNodeError: workflow.onSetNodeError,
@@ -108,13 +119,44 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const isEditorDialogOpen = !!(workflow.methodEditor || workflow.conditionEditor ||
 		workflow.aggregatorEditor || workflow.historyOpen || templates.templateDialogOpen ||
 		templates.loadTemplateDialogOpen || templates.connectorMappingDialogOpen ||
-		isShortcutsOpen);
+		isShortcutsOpen || pasteOperatorTarget);
 
 	useDeleteSelectedNode({ readOnly: isEditLocked, nodes: workflow.nodes,
 		onDeleteNode: workflow.onDeleteNode, disabled: isEditorDialogOpen });
 	useWorkflowUndoShortcuts({ readOnly: isEditLocked, undo: workflow.undo,
 		redo: workflow.redo,
 		disabled: isEditorDialogOpen || !!workflow.responseNodeId });
+	useCopySelectedNodeShortcut({
+		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
+		nodes: workflow.nodes,
+		onCopyNode: (nodeId) => {
+			setCopiedNodeId(nodeId);
+			message.success(t('messages.nodeCopied'));
+		},
+	});
+	const pasteNode = async (sourceNodeId: string, targetNodeId: string,
+		direction: 'right' | 'bottom') => {
+		const pasted = await workflow.onPasteNode(sourceNodeId, targetNodeId, direction);
+		if (pasted) message.success(t('messages.nodePasted'));
+	};
+	usePasteCopiedNodeShortcut({
+		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
+		copiedNodeId,
+		nodes: workflow.nodes,
+		onPasteNode: (sourceNodeId, targetNodeId) => {
+			void pasteNode(sourceNodeId, targetNodeId, 'right');
+		},
+		onChooseOperatorPlacement: (sourceNodeId, targetNodeId) =>
+			setPasteOperatorTarget({ sourceNodeId, targetNodeId }),
+	});
+	useDuplicateSelectedNodeShortcut({
+		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
+		nodes: workflow.nodes,
+		onDuplicateNode: async (nodeId) => {
+			const duplicated = await workflow.onPasteNode(nodeId, nodeId, 'right');
+			if (duplicated) message.success(t('messages.nodeDuplicated'));
+		},
+	});
 
 	// When a run starts, close the non-modal edit surfaces that may already be
 	// open — the sidebar could still add a step and the history panel could still
@@ -130,5 +172,17 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 
 	return { validation, saveWorkflow, category, templates, history, canvas, header,
 		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen,
-		schedulesOpen, setSchedulesOpen, changeHistoryOpen, setChangeHistoryOpen };
+		schedulesOpen, setSchedulesOpen, changeHistoryOpen, setChangeHistoryOpen,
+		copiedNodeId, pasteOperatorTarget,
+		cancelPasteOperator: () => setPasteOperatorTarget(null),
+		pasteOperatorInScope: () => {
+			if (pasteOperatorTarget) void pasteNode(pasteOperatorTarget.sourceNodeId,
+				pasteOperatorTarget.targetNodeId, 'bottom');
+			setPasteOperatorTarget(null);
+		},
+		pasteOperatorAfter: () => {
+			if (pasteOperatorTarget) void pasteNode(pasteOperatorTarget.sourceNodeId,
+				pasteOperatorTarget.targetNodeId, 'right');
+			setPasteOperatorTarget(null);
+		} };
 };
