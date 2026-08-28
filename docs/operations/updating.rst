@@ -57,7 +57,7 @@ Compatibility Matrix
 
 .. note::
         | The matrix lists the upgrade paths that have actually been tested.
-        | The 5.0 target rows are added once the release tests for the
+        | New target rows are added once the release tests for the
         | individual source versions have been completed.
 
 .. warning::
