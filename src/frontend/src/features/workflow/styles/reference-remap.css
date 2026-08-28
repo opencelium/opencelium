@@ -1,0 +1,82 @@
+.referenceRemap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.referenceRemapIntro {
+  color: var(--color-text-secondary);
+}
+
+/* One row per method going away. The subject sits above its picker rather than
+   beside it: a method name and a select side by side inside a confirm dialog
+   left both too narrow to read at the widths this dialog actually gets. */
+.referenceRemapRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  background: var(--color-background-app);
+}
+
+.referenceRemapSubject {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.referenceRemapName {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.referenceRemapReadBy,
+.referenceRemapEmpty {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+/* The fields read from the method above, indented under it: each is a question
+   about that method's replacement, and reads as a follow-up rather than as
+   another method. */
+.referenceRemapSources {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 14px;
+  border-left: 2px solid var(--color-border-subtle);
+}
+
+.referenceRemapSource {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.referenceRemapSourcePath {
+  flex: 0 0 auto;
+  max-width: 45%;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-family: monospace;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.referenceRemapSourceArrow {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+}
+
+/* The field picker is the body editor's own, which sizes itself from its host. */
+.referenceRemapSourceField {
+  flex: 1 1 auto;
+  min-width: 0;
+}

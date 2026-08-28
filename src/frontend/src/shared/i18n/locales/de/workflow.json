@@ -28,11 +28,21 @@
     "deleteEnhancement": "Enhancement löschen",
     "deleteReference": "Referenz löschen"
   },
+  "referenceRemap": {
+    "intro": "Einige Schritte lesen den Schritt, den Sie löschen. Wählen Sie, was sie stattdessen lesen sollen:",
+    "readBy": "von {{count}} Schritten gelesen",
+    "readBy_one": "von {{count}} Schritt gelesen",
+    "clear": "Diese Verweise entfernen",
+    "noCandidates": "Von hier aus kann nichts anderes im Workflow gelesen werden — diese Verweise werden entfernt."
+  },
   "confirmDelete": {
     "title": "Schritt löschen",
     "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
-    "clearsReferences": "Verweise darauf aus {{count}} anderen Schritten werden entfernt.",
-    "clearsReferences_one": "Verweise darauf aus {{count}} anderen Schritt werden entfernt."
+    "referencesClearedTitle": "Verweise entfernt",
+    "referencesCleared": "{{count}} andere Schritte haben „{{name}}“ gelesen. Diese Verweise sind entfernt.",
+    "referencesCleared_one": "{{count}} anderer Schritt hat „{{name}}“ gelesen. Diese Verweise sind entfernt.",
+    "referencesClearedUnnamed": "{{count}} andere Schritte haben den gelöschten Schritt gelesen. Diese Verweise sind entfernt.",
+    "referencesClearedUnnamed_one": "{{count}} anderer Schritt hat den gelöschten Schritt gelesen. Diese Verweise sind entfernt."
   },
   "confirmRemoveJoint": {
     "title": "Verbindung entfernen?",

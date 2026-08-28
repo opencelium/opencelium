@@ -4,7 +4,11 @@ import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect
 import { useLegacyResponseFieldSelect } from './useLegacyResponseFieldSelect';
 import '../bodyLegacy.css';
 
-export function LegacyResponseFieldSelect({ method, type, value, disabled, iterators = [], onChange }: LegacyResponseFieldSelectProps) {
+/** Above the method dialog the picker was written for, and below the confirm
+ *  dialog at 20000 that can also host it. */
+const DEFAULT_POPUP_Z_INDEX = 13010;
+
+export function LegacyResponseFieldSelect({ method, type, value, disabled, iterators = [], popupZIndex, onChange }: LegacyResponseFieldSelectProps) {
   const state = useLegacyResponseFieldSelect({ method, type, value, disabled, iterators, onChange });
 
   return (
@@ -29,7 +33,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
         showSearch
         filterOption={false}
         getPopupContainer={() => document.body}
-        styles={{ popup: { root: { zIndex: 13010 } } }}
+        styles={{ popup: { root: { zIndex: popupZIndex ?? DEFAULT_POPUP_Z_INDEX } } }}
         options={state.options}
         notFoundContent={state.notFoundContent}
         open={state.open}
