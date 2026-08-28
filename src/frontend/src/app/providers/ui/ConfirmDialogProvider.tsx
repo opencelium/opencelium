@@ -101,6 +101,7 @@ export const ConfirmDialogProvider: React.FC<{
                 closable={!loading}
                 testId="confirm-dialog"
                 zIndex={20000}
+                width={state.width}
                 footer={
                     <>
                         <Button

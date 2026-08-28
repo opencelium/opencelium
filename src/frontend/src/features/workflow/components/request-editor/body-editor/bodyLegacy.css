@@ -525,9 +525,24 @@
   width: 100%;
 }
 
+/* No method select: the response-part switch and the field are all that is
+   left, and the field takes the width the method would have had. */
+.bodyLegacyGeneratorShellNoToggle.bodyLegacyGeneratorShellNoMethod {
+  grid-template-columns: auto minmax(160px, 1fr);
+}
+
 .bodyLegacyGeneratorResponse {
   margin-left: 9px;
   width: 40px;
+}
+
+/* The response part where it is read rather than chosen: the switch's own
+   letter, in the switch's own place, minus the radio nobody can press. Muted,
+   because it is a fact of the row rather than something to act on — the full
+   word is on hover. */
+.bodyLegacyGeneratorResponseText {
+  margin-inline: 9px 0;
+  color: var(--color-text-secondary);
 }
 
 .bodyLegacyGeneratorResponse .ant-radio-wrapper > span:last-child {

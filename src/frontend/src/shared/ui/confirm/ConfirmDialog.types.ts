@@ -11,6 +11,10 @@ export interface ConfirmOptions {
     confirmVariant?: ButtonVariant;
     autoFocusConfirm?: boolean;
 
+    /** Overrides the dialog's default width, for content that is a task rather
+     *  than a sentence — a list of choices needs room the default does not give. */
+    width?: number | string;
+
     /**
      * Action to run when the user confirms. While it is in flight the confirm
      * button shows a spinner and the dialog stays open (cancel/close disabled).
