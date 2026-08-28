@@ -6,6 +6,10 @@ import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
 import { cleanBrokenWorkflowReferences } from '../utils/graph.brokenReferenceCleanup';
+import { buildReferenceRemapTargets } from '../utils/graph.referenceRemapTargets';
+import { isEmptyRemapPlan, remapWorkflowReferences } from '../utils/graph.referenceRemap';
+import { workflowNodeLabel } from '../utils/workflowUndoMethodChange.utils';
+import { notifyReferencesCleared } from '../components/feedback/notifyReferencesCleared';
 import { message } from 'antd';
 import { createCommentNode } from '../utils/createCommentNode';
 import { findAnchoredComment } from '../utils/commentAnchor';
@@ -22,9 +26,11 @@ import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
 import { evaluateJointTargets } from '../utils/jumpValidator';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
+import { useReferenceRemapConfirm } from './useReferenceRemapConfirm';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
+  const askAboutReferences = useReferenceRemapConfirm();
   const { t } = useI18n('workflow');
   const state = useWorkflowGraphState();
   const { reactFlowInstance, dragSnapshot, draggedPositionLockRef, multiDragRef,
@@ -206,24 +212,50 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       const result = deleteNodeGraph(nodeId, nodes, edges);
       // What the deletion costs elsewhere, resolved before it is confirmed: every
       // reference to the method being deleted, plus anything the smaller graph can
-      // no longer reach. Leaving them behind was the old behaviour and it left
-      // methods reading a method that is not there any more.
-      const cleanup = cleanBrokenWorkflowReferences(
-        result.nodes, result.edges, options.fieldBindings, { nodes, edges });
-      const confirmed = await confirm({
-        title: t('confirmDelete.title'),
-        message: cleanup.affectedNodeIds.length > 0
-          ? `${t('confirmDelete.message')} ${t('confirmDelete.clearsReferences',
-            { count: cleanup.affectedNodeIds.length })}`
-          : t('confirmDelete.message'),
-        confirmText: t('actions.delete'),
-        cancelText: t('actions.cancel'),
-        confirmVariant: 'solid',
-      });
+      // no longer reach — each one offered a method to be read from instead.
+      // Leaving them behind was the old behaviour and it left methods reading a
+      // method that is not there any more; clearing them is now the fallback
+      // rather than the only outcome.
+      const targets = buildReferenceRemapTargets({ nodes, edges }, result, options.fieldBindings);
+      const { confirmed, plan } = await askAboutReferences(targets);
       if (!confirmed) return;
+      // Re-pointed first, then cleaned: a reference the user gave a new provider
+      // reads as satisfied by the time the cleanup pass looks at it, so only the
+      // ones left to clear are cleared.
+      const remapped = remapWorkflowReferences(result.nodes, options.fieldBindings, plan);
+      const cleanup = cleanBrokenWorkflowReferences(
+        remapped.nodes, result.edges, remapped.fieldBindings, { nodes, edges });
+      // The state to come back to, captured rather than left to the undo stack:
+      // that records on a 350ms quiet period, so an undo pressed straight after
+      // the delete would land on whatever came *before* it. Restoring this
+      // explicitly is the same result at any speed, and a fast one leaves no
+      // entry behind at all — the graph hashes back to what was already there.
+      const beforeDelete = { nodes, edges, fieldBindings: options.fieldBindings };
       setNodes(cleanup.nodes);
       setEdges(result.edges);
-      if (cleanup.brokenCount > 0) options.onFieldBindingsChange?.(cleanup.fieldBindings);
+      if (!isEmptyRemapPlan(plan) && cleanup.brokenCount === 0) {
+        options.onFieldBindingsChange?.(remapped.fieldBindings);
+      }
+      if (cleanup.brokenCount > 0) {
+        options.onFieldBindingsChange?.(cleanup.fieldBindings);
+        // The confirm said this would happen, but it is gone by the time the
+        // canvas shows the result, and a cleared reference leaves no mark on
+        // screen — the steps that read it simply have one field fewer.
+        const deletedName = workflowNodeLabel(targetNode);
+        notifyReferencesCleared({
+          title: t('confirmDelete.referencesClearedTitle'),
+          description: t(deletedName
+            ? 'confirmDelete.referencesCleared'
+            : 'confirmDelete.referencesClearedUnnamed',
+          { count: cleanup.affectedNodeIds.length, name: deletedName }),
+          undoLabel: t('actions.undo'),
+          onUndo: () => {
+            setNodes(beforeDelete.nodes);
+            setEdges(beforeDelete.edges);
+            options.onFieldBindingsChange?.(beforeDelete.fieldBindings);
+          },
+        });
+      }
       setContextMenu(null);
     },
     ...nodeUpdates,
