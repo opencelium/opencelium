@@ -305,11 +305,13 @@ function MethodSelect({
 	methods,
 	selectedMethod,
 	value,
+	popupZIndex,
 	onChange,
 }: {
 	methods: MethodWithId[];
 	selectedMethod?: MethodWithId;
 	value?: string;
+	popupZIndex?: number;
 	onChange: (value?: string) => void;
 }) {
 	const { t } = useI18n('workflow');
@@ -366,7 +368,7 @@ function MethodSelect({
 				}}
 				getPopupContainer={() => document.body}
 				popupMatchSelectWidth={420}
-				styles={{ popup: { root: { zIndex: 13010 } } }}
+				styles={{ popup: { root: { zIndex: popupZIndex ?? 13010 } } }}
 			/>
 		</div>
 	);
@@ -380,6 +382,7 @@ function ConditionValueInput({
 	iterators,
 	connection,
 	operatorIndexPath,
+	popupZIndex,
 	onChange,
 }: {
 	side: 'left' | 'right';
@@ -389,6 +392,7 @@ function ConditionValueInput({
 	iterators: string[];
 	connection: Connection;
 	operatorIndexPath: string | undefined;
+	popupZIndex?: number;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 }) {
 	const { t } = useI18n('workflow');
@@ -455,6 +459,7 @@ function ConditionValueInput({
 				<SourceSwitcher value={source} onChange={setSource} />
 				<LegacyWebhookReferenceSelect
 					value={extractWebhookValue(fieldValue) || undefined}
+					popupZIndex={popupZIndex}
 					onChange={(value) => onChange({ [fieldKey]: value ? webhookSnippet(value) : undefined })}
 				/>
 			</div>
@@ -468,6 +473,7 @@ function ConditionValueInput({
 				methods={methods}
 				selectedMethod={selectedMethod}
 				value={methodId}
+				popupZIndex={popupZIndex}
 				onChange={(value) => {
 					setDraftMethodId(value);
 					onChange({ [fieldKey]: undefined });
@@ -498,6 +504,7 @@ function ConditionValueInput({
 							value={parsePathFromReference(fieldValue)}
 							disabled={!methodId}
 							iterators={iterators}
+							popupZIndex={popupZIndex}
 							onChange={(value) => {
 								const path = parsePathFromReference(value);
 								onChange({
@@ -568,6 +575,7 @@ function RuleRow({
 	iterators,
 	connection,
 	operatorIndexPath,
+	popupZIndex,
 	canDelete,
 	onChange,
 	onDelete,
@@ -580,6 +588,7 @@ function RuleRow({
 	iterators: string[];
 	connection: Connection;
 	operatorIndexPath: string | undefined;
+	popupZIndex?: number;
 	canDelete: boolean;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 	onDelete: () => void;
@@ -632,6 +641,7 @@ function RuleRow({
 					onChange={(value) => onChange({ operator: value, leftField: undefined, rightField: undefined })}
 					suffixIcon={<DownOutlined />}
 					getPopupContainer={() => document.body}
+					styles={{ popup: { root: { zIndex: popupZIndex ?? 13010 } } }}
 				/>
 			) : (
 				<ConditionValueInput
@@ -642,6 +652,7 @@ function RuleRow({
 					iterators={iterators}
 					connection={connection}
 					operatorIndexPath={operatorIndexPath}
+					popupZIndex={popupZIndex}
 					onChange={onChange}
 				/>
 			)}
@@ -659,6 +670,7 @@ function RuleRow({
 						onChange={(value) => onChange({ operator: value, rightField: undefined })}
 						suffixIcon={<DownOutlined />}
 						getPopupContainer={() => document.body}
+						styles={{ popup: { root: { zIndex: popupZIndex ?? 13010 } } }}
 					/>
 				);
 				if (!operator || !testRun?.isPaused) return operatorSelect;
@@ -686,6 +698,7 @@ function RuleRow({
 					iterators={iterators}
 					connection={connection}
 					operatorIndexPath={operatorIndexPath}
+					popupZIndex={popupZIndex}
 					onChange={onChange}
 				/>
 			) : !isLoop && hasBinaryRight ? (
@@ -697,6 +710,7 @@ function RuleRow({
 					iterators={iterators}
 					connection={connection}
 					operatorIndexPath={operatorIndexPath}
+					popupZIndex={popupZIndex}
 					onChange={onChange}
 				/>
 			) : null}
@@ -709,6 +723,7 @@ function RuleRow({
 					iterators={iterators}
 					connection={connection}
 					operatorIndexPath={operatorIndexPath}
+					popupZIndex={popupZIndex}
 					onChange={onChange}
 				/>
 			) : null}
@@ -739,6 +754,7 @@ function GroupEditor({
 	iterators,
 	connection,
 	operatorIndexPath,
+	popupZIndex,
 	onDelete,
 	onChange,
 }: {
@@ -749,6 +765,7 @@ function GroupEditor({
 	iterators: string[];
 	connection: Connection;
 	operatorIndexPath: string | undefined;
+	popupZIndex?: number;
 	onDelete?: () => void;
 	onChange: (group: ConditionGroup) => void;
 }) {
@@ -857,6 +874,7 @@ function GroupEditor({
 							iterators={iterators}
 							connection={connection}
 							operatorIndexPath={operatorIndexPath}
+							popupZIndex={popupZIndex}
 							canDelete={operatorType === 'if'}
 							onDelete={() => onChange(removeChildById(group, child.id))}
 							onDuplicate={() => onChange(duplicateRuleById(group, child.id))}
@@ -872,6 +890,7 @@ function GroupEditor({
 							iterators={iterators}
 							connection={connection}
 							operatorIndexPath={operatorIndexPath}
+							popupZIndex={popupZIndex}
 							onDelete={() => onChange(removeChildById(group, child.id))}
 							onChange={(nextGroup) => {
 								onChange({
@@ -993,6 +1012,7 @@ export function ConditionBuilderDialog({
 					iterators={iterators}
 					connection={connection}
 					operatorIndexPath={operatorIndexPath}
+					popupZIndex={zIndex}
 					onChange={setTree}
 				/>
 				{isLoop ? (

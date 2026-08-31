@@ -1,4 +1,4 @@
-import { buildWorkflowIndexes } from '../api/connectionPayload';
+import { buildFromConnectorPayload, buildWorkflowIndexes } from '../api/connectionPayload';
 import { buildLegacyConnection } from '../components/request-editor/legacyAdapter';
 import { formatParsedArgPath } from '../components/request-editor/utils/parseEnhancementArg';
 import type { Connection, MethodWithId } from '../types/connection';
@@ -207,13 +207,33 @@ export const buildReferenceRemapTargets = (
  */
 export const buildRemapConnection = (after: GraphState): Connection => {
 	const connection = buildLegacyConnection(after.nodes);
+	// buildLegacyConnection always answers with a flat ordinal `method.index` and
+	// an empty `operator` array — fine for the field-reading half of this dialog,
+	// but the operator's own editor (opened for a condition that needs
+	// restructuring) reads `connection.fromConnector.operator` to place itself in
+	// the tree: which loops it is nested in, and so which iterators and which
+	// upstream methods are actually in scope. Without this graft every operator
+	// looks like it has no ancestors, same as MethodConfigDialog has to graft it
+	// on for the body editor (see useMethodConfigDialogState.ts).
+	const fromConnectorPayload = buildFromConnectorPayload(after.nodes, after.edges) as any;
+	const indexById = new Map<string, string>(
+		(fromConnectorPayload.methods ?? []).map((method: any) => [method.id, method.index]),
+	);
 	return {
 		...connection,
+		fromConnector: {
+			...connection.fromConnector,
+			method: connection.fromConnector.method.map((method) => ({
+				...method,
+				index: indexById.get(method.id) ?? method.index,
+			})),
+			operator: fromConnectorPayload.operators ?? [],
+		},
 		// Reference visibility is read off the graph's own edges; without them the
 		// walk falls back to a flat ordinal that operators make meaningless.
-		ui: { ...connection.ui, flowchartEdges: after.edges.map((edge) => ({
+		ui: { ...connection.ui, workflowEdges: after.edges, flowchartEdges: after.edges.map((edge) => ({
 			id: String(edge.id), source: String(edge.source), target: String(edge.target),
-		})) },
+		})) } as any,
 	};
 };
 
@@ -252,3 +272,23 @@ export const restrictRemapConnection = (
 		},
 	};
 };
+
+/**
+ * What the "Current reference" column draws the doomed reference from — the
+ * method being deleted, still nameable on the graph as it still is, with
+ * nothing narrowed away.
+ *
+ * Deliberately not `restrictRemapConnection`: that one requires a *method*
+ * among `consumerNodeIds` to anchor an eligibility walk that answers "what
+ * else could this reader see" — the right question for the "New reference"
+ * picker, and one an operator's own condition can never answer, since an
+ * operator is not a method and has no request of its own to walk from. The
+ * current-reference column asks the opposite question — "what does this
+ * already say" — which doesn't need a reader at all, only the method the
+ * reference names.
+ */
+export const currentRemapConnection = (
+	previousConnection: Connection,
+	doomedMethod: MethodWithId | undefined,
+): { connection: Connection; consumerMethod: MethodWithId } | null =>
+	doomedMethod ? { connection: previousConnection, consumerMethod: doomedMethod } : null;

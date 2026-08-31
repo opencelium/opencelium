@@ -607,28 +607,36 @@ describe('ReferenceRemapChoices', () => {
 		expect((part as HTMLElement).title).toBe('body');
 	});
 
-	// An operator's name is the same answer for every rule that mentions the
-	// method; the rules themselves are what says which.
-	it('reveals an operator’s rules, marking the ones that hold the reference', () => {
+	// An operator's condition can only be answered by rewriting it — there is no
+	// preview toggle any more, and the action lives in the "New reference"
+	// column, the same place every other row's answer lives, rather than as a
+	// lone icon next to "where is it used".
+	it('answers an operator-held reference with a "rewrite the condition" button in the New reference column', () => {
 		renderChoices([target({ sources: [{ ...target().sources[0],
 			locations: [{ kind: 'operator', value: 'Only new ones', nodeId: 'if-1' }] }] })]);
 
-		fireEvent.click(screen.getByTestId(
-			`workflow-reference-remap-condition-${DOOMED}.(response).body.$.id`));
-
-		const terms = document.querySelectorAll('.referenceRemapConditionTerm');
-		expect(terms).toHaveLength(2);
-		expect(terms[0].textContent).toBe(`${READ} = new`);
-		expect(terms[0].className).toContain('Holds');
-		// The other rule is context, not the answer.
-		expect(terms[1].className).not.toContain('Holds');
+		const held = document.querySelector('.referenceRemapSourceHeld') as HTMLElement;
+		const value = document.querySelector('.referenceRemapSourceValue') as HTMLElement;
+		expect(held.textContent).toBe('Only new ones');
+		const rewriteButton = screen.getByTestId(
+			`workflow-reference-remap-edit-condition-${DOOMED}.(response).body.$.id`);
+		expect(value.contains(rewriteButton)).toBe(true);
+		// The old preview toggle is gone, and so is the boilerplate "nothing else
+		// can be read from here" message this row always used to fall back to.
+		expect(screen.queryByTestId(
+			`workflow-reference-remap-condition-${DOOMED}.(response).body.$.id`)).toBeNull();
+		expect(value.textContent).not.toContain('referenceRemap.noCandidates');
 	});
 
-	it('keeps the condition closed until it is asked for', () => {
+	// The reference an operator's condition holds still names the method being
+	// deleted, so the "Current reference" column reads it the same way a
+	// method-held reference does — not as a bare string fallback.
+	it('draws the current reference for an operator-held field with the same controls as a method-held one', () => {
 		renderChoices([target({ sources: [{ ...target().sources[0],
 			locations: [{ kind: 'operator', value: 'Only new ones', nodeId: 'if-1' }] }] })]);
 
-		expect(document.querySelectorAll('.referenceRemapConditionTerm')).toHaveLength(0);
+		const current = document.querySelector('.referenceRemapSourceCurrent') as HTMLElement;
+		expect(current.querySelectorAll('[role="combobox"][disabled]').length).toBeGreaterThan(0);
 	});
 
 	// The crux of "applied only on Delete": the editor writes into this dialog's

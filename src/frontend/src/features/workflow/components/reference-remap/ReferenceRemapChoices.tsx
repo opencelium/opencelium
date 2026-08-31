@@ -74,8 +74,6 @@ export function ReferenceRemapChoices({ targets, after, before, onChange }: Prop
 					choice={choices[target.color] ?? emptyChoice()}
 					connection={connection}
 					previousConnection={previousConnection}
-					operators={operators}
-					rewrittenConditions={conditions}
 					onEditCondition={setEditingOperatorId}
 					onChange={(choice) => update(target.color, choice)}
 				/>
