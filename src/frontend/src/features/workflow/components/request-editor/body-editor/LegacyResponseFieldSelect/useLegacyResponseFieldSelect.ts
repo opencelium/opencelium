@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { getReferenceOptions, isExpandableReferencePath } from '../requestReferenceOptions';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
+import { getReferenceFilterTerm } from '../../reference-generator/referenceGenerator.utils';
 
 const normalizePath = (value?: string) => value === '$.' ? '$' : value || '';
 
@@ -14,6 +15,7 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
   const userInteractionRef = useRef(false);
   const [path, setPath] = useState(normalizePath(value));
   const [optionsBase, setOptionsBase] = useState('');
+  const [filterTerm, setFilterTerm] = useState('');
   const [open, setOpen] = useState(false);
   const displayPath = path === '$' ? t('references.rootObject') : path;
 
@@ -21,11 +23,13 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
     const nextPath = normalizePath(value);
     setPath(nextPath);
     setOptionsBase(nextPath);
+    if (!nextPath) setFilterTerm('');
   }, [iterators, method, type, value]);
 
   const options = useMemo(() => getReferenceOptions(method, type, optionsBase, iterators, t)
+    .filter(({ label }) => !filterTerm || label.toLowerCase().startsWith(filterTerm))
     .map(({ label, value: optionValue }) => ({ label, value: optionValue })),
-  [iterators, method, optionsBase, type, t]);
+  [filterTerm, iterators, method, optionsBase, type, t]);
 
   const focusInputToEnd = () => requestAnimationFrame(() => {
     const input = wrapperRef.current?.querySelector('input');
@@ -47,18 +51,20 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
       : method ? t('placeholders.selectField') : t('placeholders.selectMethod'),
     searchValue: type === 'status' ? 'status' : displayPath,
     isDisabled: disabled || type === 'status',
-    open: disabled || type === 'status' || (open && path && options.length === 0) ? false : open,
-    notFoundContent: path ? null : undefined,
+    open: disabled || type === 'status' ? false : open,
+    notFoundContent: undefined,
     onSearch: (nextValue: string) => {
       if (!userInteractionRef.current) return;
       if (selectingRef.current) return void (selectingRef.current = false);
       const nextPath = updatePath(nextValue);
       setOptionsBase(nextPath);
+      setFilterTerm(getReferenceFilterTerm(nextPath));
       setOpen(userInteractionRef.current);
     },
     onSelect: (nextValue: unknown) => {
       selectingRef.current = true;
       const nextPath = updatePath(String(nextValue || ''));
+      setFilterTerm('');
       if (isExpandableReferencePath(method, type, nextPath, iterators)) {
         setOptionsBase(nextPath);
         setOpen(true);
@@ -79,6 +85,7 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
     onClear: () => {
       setPath('');
       setOptionsBase('');
+      setFilterTerm('');
       onChange(undefined);
     },
   };
