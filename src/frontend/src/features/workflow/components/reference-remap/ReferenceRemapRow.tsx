@@ -2,10 +2,8 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
 import { ReferenceMethodSelect } from '../method-select/ReferenceMethodSelect';
 import type { Connection } from '../../types/connection';
-import type { WorkflowNodeModel } from '../../types/workflow.types';
-import type { ConditionConfig } from '../condition-builder/conditionBuilder.types';
 import type { ReferenceRemapTarget } from '../../utils/graph.referenceRemapTargets';
-import { restrictRemapConnection } from '../../utils/graph.referenceRemapTargets';
+import { currentRemapConnection, restrictRemapConnection } from '../../utils/graph.referenceRemapTargets';
 import { normalizeReferenceColor } from '../../utils/graph.referenceColors';
 import { CLEAR, CONFIRM_POPUP_Z_INDEX } from './referenceRemap.constants';
 import { ReferenceRemapSourceRow } from './ReferenceRemapSourceRow';
@@ -20,17 +18,12 @@ type Props = {
 	/** The graph as it still is, where the method being deleted can still be
 	 *  named — what the reference being replaced is drawn from. */
 	previousConnection: Connection;
-	/** Operators by id, for reading a condition a reference sits in. */
-	operators: Map<string, WorkflowNodeModel>;
-	/** Conditions already rewritten in this dialog, so a row shows what will be
-	 *  saved rather than what is still on the graph. */
-	rewrittenConditions: Record<string, ConditionConfig>;
 	onEditCondition: (nodeId: string) => void;
 	onChange: (choice: ReferenceRemapChoice) => void;
 };
 
 export function ReferenceRemapRow({ target, choice, connection, previousConnection,
-	operators, rewrittenConditions, onEditCondition, onChange }: Props) {
+	onEditCondition, onChange }: Props) {
 	const { t } = useI18n('workflow');
 	const hasCandidates = target.candidates.length > 0;
 	// The row answers in colours; a method picker speaks ids. The candidates are
@@ -97,16 +90,14 @@ export function ReferenceRemapRow({ target, choice, connection, previousConnecti
 									key={source.key}
 									source={source}
 									connection={connection}
-									operators={operators}
-									rewrittenConditions={rewrittenConditions}
 									onEditCondition={onEditCondition}
 									// Read-only, and drawn from the graph as it still is: the
 									// method this reference names is the one being deleted, and
 									// is already gone from the graph the row's other controls
-									// are built from.
-									current={doomedMethod ? restrictRemapConnection(previousConnection,
-										[{ nodeId: doomedMethod.id, color: target.color,
-											label: target.label }], source.consumerNodeIds) : null}
+									// are built from. Not restricted to what source.consumerNodeIds
+									// can see — an operator-held reference has no method there to
+									// anchor that walk on, and the display doesn't need one.
+									current={currentRemapConnection(previousConnection, doomedMethod)}
 									// Its own scope, not the method's: this field is only read
 									// by some of the steps that read the method above it.
 									generator={restrictRemapConnection(connection, source.candidates,

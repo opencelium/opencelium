@@ -146,6 +146,49 @@ describe('buildReferenceRemapTargets', () => {
 			.toEqual(after.edges.map((edge) => String(edge.id)));
 	});
 
+	// buildLegacyConnection alone always answers with operator: [] and a flat
+	// ordinal method.index — fine for reading fields, but the "rewrite the
+	// condition by hand" editor places itself in the tree by looking up its own
+	// node in fromConnector.operator, so without this graft it can never find
+	// its loop ancestors or its own index, whatever the graph actually nests it
+	// under.
+	it('gives the remap connection real tree indices and operators, not the flat legacy ones', () => {
+		const loop = {
+			id: 'loop-1', type: 'loop', position: { x: 0, y: 0 },
+			data: { title: 'Loop', kind: 'loop' },
+		} as unknown as WorkflowNodeModel;
+		const ifNode = {
+			id: 'if-1', type: 'if', position: { x: 0, y: 0 },
+			data: { title: 'If', kind: 'if' },
+		} as unknown as WorkflowNodeModel;
+		// start → m1 → loop-1 → (bottom) m2 → if-1, where if-1 reads m1: deleting m1
+		// breaks a condition that sits two levels of nesting below it.
+		const before = {
+			nodes: [startNode, method('m1', M1), loop, method('m2', M2), ifNode],
+			edges: [
+				edge('e1', 'start-1', 'm1'),
+				edge('e2', 'm1', 'loop-1'),
+				{ id: 'e3', source: 'loop-1', target: 'm2', sourceHandle: 'bottom' } as unknown as WorkflowEdgeModel,
+				edge('e4', 'm2', 'if-1'),
+			],
+		};
+		const after = deleteNodeGraph('m1', before.nodes, before.edges);
+
+		const connection = buildRemapConnection(after);
+
+		const loopEntry = connection.fromConnector.operator.find((operator) => operator.id === 'loop-1');
+		const ifEntry = connection.fromConnector.operator.find((operator) => operator.id === 'if-1');
+		expect(loopEntry?.type).toBe('loop');
+		expect(loopEntry?.index).toBeTruthy();
+		// if-1 must read as nested inside the loop, not as a sibling at the top
+		// level — that's the "scope of the operator regarding its index" the
+		// condition editor's iterator suggestions and upstream-method filter both
+		// depend on.
+		expect(ifEntry?.index?.startsWith(`${loopEntry?.index}_`)).toBe(true);
+		const m2Entry = connection.fromConnector.method.find((entry) => entry.id === 'm2');
+		expect(m2Entry?.index?.startsWith(`${loopEntry?.index}_`)).toBe(true);
+	});
+
 	it('has nothing to offer a field when nothing can be read from where it sits', () => {
 		const before = {
 			nodes: [startNode, method('m1', M1), method('m2', M2, reads(M1))],

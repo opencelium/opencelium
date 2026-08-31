@@ -102,9 +102,35 @@
   overflow: hidden;
 }
 
+/* Flex lives on this inner div, never on the <td> itself — a table cell with
+   its own `display: flex` stops being a table cell (it blockifies out of the
+   row, dragging every cell after it onto a line of its own). The control this
+   row draws and the "and N more" count beside it used to stack instead of
+   sitting together, which made this the one row in the table that grew taller
+   than its neighbours the moment a reference was held in more than one place.
+   On one line they cost nothing extra; the full list is still on the cell's
+   own hover title. */
+.referenceRemapSourceHeldRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* The one flexible item in the row: it gives up width to the count beside it
+   rather than pushing the count out or forcing the row wider than its column. */
+.referenceRemapSourceHeldRow > .bodyLegacyGeneratorShell,
+.referenceRemapSourceHeldRow > .referenceRemapSourcePath {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 /* Held in more than one place: re-pointing moves all of them, so the rest are
-   counted rather than listed into a cell that has no room for them. */
+   counted rather than listed into a cell that has no room for them. Never the
+   one that gives way when space is short — the control beside it already
+   shrinks on its own, and a squeezed-down count would be unreadable. */
 .referenceRemapSourceMore {
+  flex-shrink: 0;
   color: var(--color-text-secondary);
   font-size: 12px;
   white-space: nowrap;
@@ -121,7 +147,10 @@
   vertical-align: middle;
 }
 
-.referenceRemapSourceValue {
+/* Flex lives on the inner div (.referenceRemapSourceValueRow), not this <td> —
+   see the comment on .referenceRemapSourceHeldRow for why a flexed table cell
+   is unsafe here. */
+.referenceRemapSourceValueRow {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -185,34 +214,4 @@
 .referenceRemap .bodyLegacyGeneratorSelect.ant-select {
   padding-inline: 8px !important;
   font-size: 14px !important;
-}
-
-/* The operator's rules, revealed under the row they belong to. Numbered,
-   because "the third rule" is how a condition is talked about. */
-.referenceRemapCondition {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 2px 0 6px;
-  padding-left: 28px;
-}
-
-.referenceRemapConditionTerm {
-  color: var(--color-text-secondary);
-  font-family: monospace;
-  font-size: 12px;
-  list-style: decimal;
-}
-
-/* The rules this row is actually about. The others are context: which rule a
-   reference sits in is the whole reason for opening this. */
-.referenceRemapConditionTermHolds {
-  color: var(--color-text-primary);
-  font-weight: 600;
-}
-
-.referenceRemapConditionEmpty {
-  padding-left: 28px;
-  color: var(--color-text-secondary);
-  font-size: 12px;
 }
