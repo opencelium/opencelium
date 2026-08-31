@@ -52,7 +52,7 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 						label: <div className='bodyLegacyEnhancementHeader'>
 							<span>{t('enhancement.title')}</span>
 							{hasEnhancement && <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-								<Tooltip content={t(debug.isOpen ? 'enhancement.debugValue.hide' : 'enhancement.debugValue.show')}>
+								{debug.isAvailable && <Tooltip content={t(debug.isOpen ? 'enhancement.debugValue.hide' : 'enhancement.debugValue.show')}>
 									<button
 										type='button'
 										className={debug.isOpen ? 'scriptDebugTrigger scriptDebugTrigger--active' : 'scriptDebugTrigger'}
@@ -64,7 +64,7 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 									>
 										<Icon name={debug.isOpen ? 'eye-off' : 'eye'} size={14} />
 									</button>
-								</Tooltip>
+								</Tooltip>}
 								{onDeleteEnhancement && <span onClick={async (event) => {
 									event.stopPropagation();
 									const ok = await confirm({ title: t('enhancement.confirmDelete.title'),
