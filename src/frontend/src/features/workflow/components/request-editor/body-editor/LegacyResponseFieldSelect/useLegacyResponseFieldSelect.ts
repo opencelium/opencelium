@@ -55,7 +55,10 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
     notFoundContent: undefined,
     onSearch: (nextValue: string) => {
       if (!userInteractionRef.current) return;
-      if (selectingRef.current) return void (selectingRef.current = false);
+      if (selectingRef.current) {
+        selectingRef.current = false;
+        if (!nextValue) return;
+      }
       const nextPath = updatePath(nextValue);
       setOptionsBase(nextPath);
       setFilterTerm(getReferenceFilterTerm(nextPath));
