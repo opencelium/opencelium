@@ -8,7 +8,7 @@
   {"source":"4.2","target":"4.6.1","status":"SUPPORTED","notes":"Add websocket and master password in application.yml & add websocket and api in nginx.conf"},
   {"source":"4.2","target":"5.1","status":"NOT SUPPORTED","notes":"First update to version 4.6.1"},
   
-  {"source":"4.3","target":"4.6.1","status":"SUPPORTED","notes":"Add websocket and master password in application.yml & add websocket and "client_max_body_size 200M;" in nginx.conf"},
+  {"source":"4.3","target":"4.6.1","status":"SUPPORTED","notes":"Add websocket and master password in application.yml & add websocket and 'client_max_body_size 200M;' in nginx.conf"},
   {"source":"4.3","target":"5.1","status":"NOT SUPPORTED","notes":"First update to version 4.6.1"},
   
   {"source":"4.4","target":"4.6.1","status":"SUPPORTED","notes":"Add websocket in application.yml and add websocket in nginx.conf"},
