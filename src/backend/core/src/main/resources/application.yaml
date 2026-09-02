@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: opencelium-core
+
+server:
+  port: 9090
+
+opencelium:
+  execution:
+    # embedded: workflows run inside this process (single-jar deployment)
+    # remote: workflows are dispatched to standalone worker instances
+    mode: embedded

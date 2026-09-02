@@ -1,0 +1,17 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot'
+}
+
+dependencies {
+	implementation project(':common')
+	implementation project(':execution')
+
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-restclient'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-restclient-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

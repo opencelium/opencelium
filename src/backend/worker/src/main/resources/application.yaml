@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: opencelium-worker
+
+server:
+  port: 9091

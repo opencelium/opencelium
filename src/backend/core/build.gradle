@@ -1,0 +1,25 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot'
+}
+
+dependencies {
+	implementation project(':common')
+	implementation project(':execution')
+
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-ldap'
+	implementation 'org.springframework.boot:spring-boot-starter-mongodb'
+	implementation 'org.springframework.boot:spring-boot-starter-restclient'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.security:spring-security-ldap'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-mongodb-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-restclient-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-ldap-test'
+	testImplementation 'com.unboundid:unboundid-ldapsdk'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

@@ -1,1 +1,6 @@
-rootProject.name = 'backend'
+rootProject.name = 'opencelium-backend'
+
+include 'common'
+include 'execution'
+include 'core'
+include 'worker'

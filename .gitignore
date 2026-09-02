@@ -1,8 +1,19 @@
+# Claude Code
+CLAUDE.md
+
+# OS
+.DS_Store
+
+# IDE
+/.idea
+/.vscode
+*.iml
+
+# Runtime
 /services
 /logs
-/.idea
-src/backend/src/main/resources/invoker/baramundi.xml
-/.vscode
-src/backend/src/main/resources/invoker/fake_invoker.xml
-src/backend/src/main/resources/invoker/page_test.xml
-src/backend/upload-dir/
+
+# Gradle (backend)
+src/backend/.gradle/
+src/backend/build/
+src/backend/*/build/
