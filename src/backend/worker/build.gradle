@@ -3,6 +3,10 @@ plugins {
 	id 'org.springframework.boot'
 }
 
+tasks.named('bootJar') {
+	archiveBaseName = 'oc-worker'
+}
+
 dependencies {
 	implementation project(':common')
 	implementation project(':execution')
