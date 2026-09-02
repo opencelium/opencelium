@@ -62,7 +62,7 @@ Flow: branch off `next` → open a PR into `next` → review + green CI → squa
 We follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/):
 
 ```
-<type>(<optional scope>): <description> (OC-NNNN)
+<type>(<optional scope>): (OC-NNNN) <description>
 
 [optional body]
 
@@ -93,7 +93,7 @@ We follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/):
 feat(execution): add LOOP operator for iterating over collections (OC-1501)
 fix(core): reject workflow definitions with cyclic connections (OC-1489)
 build: bump Spring Boot to 4.1.2
-refactor(common)!: rename Connector to NodeType
+refactor(common)!: split credentials out of Connector into CredentialRef
 
 BREAKING CHANGE: public API renamed; update stored workflow definitions.
 ```
@@ -223,7 +223,7 @@ Why the backend is shaped this way — modules, deployment shapes, recorded desi
   - workflow execution logic (nodes, IF, LOOP) → `execution`
   - REST API, persistence, auth, scheduling → `core`
   - `worker` stays a thin wrapper around `execution`
-- Both deployment shapes must keep working: single jar (`:core:bootJar`, embedded execution) and two jars (`:core:bootJar` + `:worker:bootJar`, remote execution).
+- Both deployment shapes must keep working: monolith (`oc-app.jar`, in-process `local` transport) and distributed (`oc-app.jar` + `oc-worker.jar`, broker transport via the SPI).
 - New code comes with tests — see below.
 
 ## 9. Testing

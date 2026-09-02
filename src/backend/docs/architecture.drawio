@@ -1,0 +1,264 @@
+<mxfile host="app.diagrams.net" agent="Claude">
+  <diagram id="oc-exec-rework" name="Execution Architecture">
+    <mxGraphModel dx="3365" dy="1576" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1520" pageHeight="1160" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=16;fontStyle=1;align=left;verticalAlign=middle;" value="OpenCelium — Workflow execution rework: Core / Worker split, security &amp; pluggable transport (SPI)" vertex="1">
+          <mxGeometry height="30" width="1000" x="300" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="coreC" parent="1" style="rounded=1;arcSize=6;fillColor=none;strokeColor=#666666;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontStyle=1;fontSize=12;html=1;" value="oc-app.jar — CORE (bundles the executor too in monolith mode) · Gradle: core + execution" vertex="1">
+          <mxGeometry height="400" width="880" x="240" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="workerC" parent="1" style="rounded=1;arcSize=6;fillColor=none;strokeColor=#666666;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontStyle=1;fontSize=12;html=1;" value="oc-worker.jar — EXECUTION WORKER (stateless · scale horizontally · N instances) · Gradle: worker + execution" vertex="1">
+          <mxGeometry height="280" width="880" x="240" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="client" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;" value="🖥️ React Frontend&#xa;(admin UI)" vertex="1">
+          <mxGeometry height="60" width="150" x="40" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="idpC" parent="1" style="rounded=1;arcSize=10;fillColor=none;strokeColor=#666666;dashed=1;html=1;" value="" vertex="1">
+          <mxGeometry height="140" width="170" x="30" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="idpCloud" parent="1" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="" vertex="1">
+          <mxGeometry height="65" width="110" x="55" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="idpTxt" parent="1" style="text;html=1;fontStyle=1;fontSize=10;align=center;verticalAlign=middle;" value="🌍 Identity Providers&#xa;(OIDC · LDAP)" vertex="1">
+          <mxGeometry height="44" width="150" x="40" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="sec" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" value="🔐 Security Filter Chain&#xa;(JWT · OIDC · LDAP · 2FA/TOTP)" vertex="1">
+          <mxGeometry height="60" width="220" x="280" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="rest" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" value="🌐 REST API&#xa;(workflows, schedulers, logs)" vertex="1">
+          <mxGeometry height="60" width="180" x="560" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="wsgw" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" value="🔊 WebSocket Gateway&#xa;(STOMP · JWT handshake · live streams)" vertex="1">
+          <mxGeometry height="60" width="180" x="800" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="acl" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" value="🛡️ ACL / Permissions&#xa;(RBAC + per-resource ACL)" vertex="1">
+          <mxGeometry height="60" width="220" x="280" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="trig" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;" value="⏰ Quartz + Webhooks + Manual + Test&lt;br&gt;(execution triggers)" vertex="1">
+          <mxGeometry height="60" width="240" x="810" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="gp" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" value="🧩 Global Params&#xa;(shared variables for workflows)" vertex="1">
+          <mxGeometry height="60" width="220" x="280" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="logagg" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;fontSize=11;" value="📊 Log Aggregation&lt;br&gt;(parse, metadata, live status, debug)" vertex="1">
+          <mxGeometry height="60" width="200" x="560" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="disp" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=11;" value="🔀 Execution Dispatcher&#xa;(SPI: local | amqp | custom)" vertex="1">
+          <mxGeometry height="60" width="200" x="830" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="mongoC" parent="1" style="rounded=1;arcSize=10;fillColor=none;strokeColor=#d79b00;dashed=1;html=1;" value="" vertex="1">
+          <mxGeometry height="110" width="280" x="60" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="mongoCyl" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
+          <mxGeometry height="80" width="60" x="80" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="mongoTxt" parent="1" style="text;html=1;fontStyle=1;fontSize=10;align=left;verticalAlign=middle;whiteSpace=wrap;" value="MongoDB (central)&#xa;(workflows, schedulers, credentials, users/roles, global params, snapshots, logs)" vertex="1">
+          <mxGeometry height="94" width="185" x="150" y="528" as="geometry" />
+        </mxCell>
+        <mxCell id="bus" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;" value="🐰 Message Broker&#xa;(RabbitMQ / any AMQP)" vertex="1">
+          <mxGeometry height="70" width="220" x="740" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="custom" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=11;" value="🔌 Custom Transport&#xa;(user SPI impl: Kafka, SQS…)" vertex="1">
+          <mxGeometry height="70" width="220" x="1180" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="endpoint" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" value="📥 Transport Endpoint&#xa;(job consumer / event publisher)" vertex="1">
+          <mxGeometry height="60" width="170" x="280" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="dag" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" value="🕸️ DAG Scheduler&#xa;(data + control deps · parallel branches)" vertex="1">
+          <mxGeometry height="60" width="170" x="485" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="exec" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" value="⚙️ Workflow Executor&#xa;(nodes, operators, loops)" vertex="1">
+          <mxGeometry height="60" width="180" x="690" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="invk" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" value="🔧 Request Builder&lt;br&gt;(HTTP + OCEL evaluation)" vertex="1">
+          <mxGeometry height="60" width="195" x="905" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="oclog" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;fontSize=11;" value="📝 OcLogger&#xa;(per-execution log stream)" vertex="1">
+          <mxGeometry height="60" width="180" x="620" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="docfile" parent="1" style="shape=mxgraph.basic.document;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;fontSize=11;" value="🗂️ Local Log Files&#xa;(spool / buffer)" vertex="1">
+          <mxGeometry height="70" width="175" x="905" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="extC" parent="1" style="rounded=1;arcSize=10;fillColor=none;strokeColor=#666666;dashed=1;html=1;" value="" vertex="1">
+          <mxGeometry height="160" width="300" x="1200" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="cloud" parent="1" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="" vertex="1">
+          <mxGeometry height="80" width="120" x="1230" y="765" as="geometry" />
+        </mxCell>
+        <mxCell id="extTxt" parent="1" style="text;html=1;fontStyle=1;fontSize=11;align=left;verticalAlign=middle;" value="🌍 External APIs&#xa;(customer systems)" vertex="1">
+          <mxGeometry height="60" width="140" x="1355" y="775" as="geometry" />
+        </mxCell>
+        <mxCell id="gradle" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;" value="🐘 Gradle Build&#xa;(multi-module · single version)" vertex="1">
+          <mxGeometry height="60" width="170" x="40" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="jarApp" parent="1" style="shape=mxgraph.basic.document;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;" value="📦 oc-app.jar&#xa;(monolith: core + executor)" vertex="1">
+          <mxGeometry height="60" width="170" x="40" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="jarWorker" parent="1" style="shape=mxgraph.basic.document;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;" value="📦 oc-worker.jar&#xa;(optional: worker only)" vertex="1">
+          <mxGeometry height="60" width="170" x="40" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="buildNote" parent="1" style="text;html=1;fontSize=9;fontStyle=2;align=left;verticalAlign=top;whiteSpace=wrap;fontColor=#666666;" value="one ./gradlew build → monolith jar alone, or both jars for distributed — same commit, same version" vertex="1">
+          <mxGeometry height="50" width="185" x="40" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="eB1" edge="1" parent="1" source="gradle" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#666666;dashed=1;dashPattern=1 3;fontSize=10;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="jarApp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eB2" edge="1" parent="1" source="gradle" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#666666;dashed=1;dashPattern=1 3;fontSize=10;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" target="jarWorker">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="25" y="730" />
+              <mxPoint x="25" y="910" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="note" parent="1" style="text;html=1;fontSize=11;align=left;verticalAlign=top;whiteSpace=wrap;fontColor=#333333;" value="ℹ️ Monolith mode: oc-app.jar bundles Core + Executor — the Dispatcher calls the executor in-process, no broker needed. Distributed mode: the same code ships as oc-worker.jar; workers are FULLY ISOLATED — no MongoDB access, no persistent state: the job message carries everything (workflow snapshot, credentials, global params — encrypted on the broker) and all results leave as events. Only Core touches MongoDB; raw log files on a worker are a transient spool, not state. DAG Scheduler: data + control dependencies decide order — independent nodes and loop iterations run concurrently (bounded per external system); same-connector writes stay ordered unless the user marks a branch parallel-safe. Security: JWT, LDAP and TOTP 2FA exist today — OIDC is new in the rework; ACL: role-based RBAC (component × action) PLUS per-resource ACLs — platform-wide requirement, applied to workflows first: each workflow document carries its ACL, enforced in Mongo queries, REST and WebSocket topic subscriptions; execution logs inherit the workflow&#39;s ACL. WebSocket sessions live only in Core — live-run streams are fed from broker events, never from worker memory." vertex="1">
+          <mxGeometry height="90" width="800" x="240" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="text;html=1;fontSize=11;align=left;verticalAlign=top;whiteSpace=wrap;fontColor=#333333;" value="LEGEND&#xa;— solid black: synchronous call&#xa;-- dashed gray: async job delivery (broker)&#xa;-- dashed orange: async log / status events&#xa;-- dashed purple: pluggable transport (SPI)&#xa;·· dotted gray: build-time (Gradle artifacts)" vertex="1">
+          <mxGeometry height="135" width="320" x="1160" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="modmap" parent="1" style="text;html=1;fontSize=10;align=left;verticalAlign=top;whiteSpace=wrap;fontColor=#666666;" value="GRADLE MODULES&#xa;common — shared contracts: workflow model, DTOs, transport SPI, ACL model&#xa;execution — engine library: DAG Scheduler, Workflow Executor, Request Builder, OcLogger&#xa;core → oc-app.jar · worker → oc-worker.jar" vertex="1">
+          <mxGeometry height="90" width="320" x="1160" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0;entryY=0.5;" target="sec">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="115" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eS1" edge="1" parent="1" source="sec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="rest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eS2" edge="1" parent="1" source="sec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="acl" value="authorizes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eS3" edge="1" parent="1" source="sec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0;exitY=0.8;entryX=1;entryY=0.5;" target="idpC" value="OIDC / LDAP verification">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="215" y="168" />
+              <mxPoint x="215" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eACL" edge="1" parent="1" source="acl" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=0.607;entryY=0;" target="mongoC" value="roles + permissions">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eGP" edge="1" parent="1" source="gp" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=1;entryY=0.227;" target="mongoC" value="params">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="545" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="rest" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.278;exitY=0;entryX=0;entryY=0.36;" target="mongoC" value="CRUD + log queries">
+          <mxGeometry relative="1" x="-0.0616" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="610" y="90" />
+              <mxPoint x="20" y="90" />
+              <mxPoint x="20" y="559.6" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="trig" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="disp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="endpoint" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="dag">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eDAG" edge="1" parent="1" source="dag" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="exec">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="exec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="invk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="invk" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.31;" target="extC" value="HTTP(S) calls">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eDISP" edge="1" parent="1" source="disp" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.2;exitY=1;entryX=1;entryY=0.773;" target="mongoC" value="builds self-contained job payload">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="870" y="445" />
+              <mxPoint x="660" y="445" />
+              <mxPoint x="660" y="605" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="disp" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#666666;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.864;entryY=0;" target="bus" value="publishes self-contained jobs (snapshot + credentials + params, encrypted)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="bus" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#666666;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="endpoint" value="delivers jobs (at-least-once)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="675" />
+              <mxPoint x="365" y="675" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="endpoint" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.833;exitY=0;entryX=0.818;entryY=1;" target="bus" value="publishes logs + status events">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="420" y="705" />
+              <mxPoint x="920" y="705" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="bus" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.227;exitY=0;entryX=0.7;entryY=1;" target="logagg" value="consumes events">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="790" y="480" />
+              <mxPoint x="700" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="logagg" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.3;exitY=1;entryX=1;entryY=0.5;" target="mongoC" value="writes log metadata">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="575" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eLIVE" edge="1" parent="1" source="logagg" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" target="wsgw" value="live run status">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="218" />
+              <mxPoint x="890" y="218" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eWS" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.42;entryX=0;entryY=0.5;" target="wsgw" value="subscribes · receives live run stream">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="770" y="205" />
+              <mxPoint x="770" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="exec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="oclog" value="log lines">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="oclog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.58;entryX=0;entryY=0.5;" target="docfile" value="appends raw lines">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="oclog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=0.5;entryY=1;" target="endpoint" value="buffered log events">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="365" y="900" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="custom" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#9673a6;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="bus" value="plugs in via transport SPI">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
