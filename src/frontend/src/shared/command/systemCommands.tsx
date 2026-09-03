@@ -1,4 +1,4 @@
-import { CommandNode } from './types';
+import type { CommandNode } from './types';
 // Imports below are only used by the disabled "login" command — re-enable with it.
 // import {MockAuthStrategy} from "@features/auth/strategies/MockAuthStrategy.ts";
 // import {authActions} from "@entities/auth/model/authSlice.ts";
@@ -95,5 +95,19 @@ export const systemCommands: CommandNode<any>[] = [
         // Same size/position as the entity form dialogs (Dialog primitive's
         // width 1000 / top 18 — see useEntityUpdateOpener, GenericEntityList).
         execute: (_, ctx) => ctx.openModal(<CommandReferenceDialog />, { width: 1000, top: 18 }),
+        children: [
+            {
+                type: 'literal',
+                value: 'onboarding',
+                group: 'general',
+                icon: 'help',
+                description: 'commandPalette.descriptions.onboarding',
+                execute: (_, ctx) => {
+                    ctx.setInputValue('')
+                    ctx.navigate('/')
+                    window.dispatchEvent(new Event('opencelium:onboarding:restart'))
+                },
+            },
+        ],
     },
 ];

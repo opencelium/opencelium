@@ -1,0 +1,56 @@
+{
+  "actions": {
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "skipTour": "Skip tour",
+    "resume": "Resume tour",
+    "restart": "Restart tour",
+    "dismiss": "Dismiss forever",
+    "keep": "Keep it",
+    "hide": "Hide it",
+    "skipForNow": "Skip for now",
+    "showAnyway": "Show me anyway",
+    "later": "I'll do this later",
+    "skipStep": "Skip this step",
+    "dashboard": "Back to dashboard",
+    "saveAnyway": "Save anyway",
+    "retrySave": "Retry save",
+    "buildWorkflow": "Build the workflow",
+    "showAround": "Show me around",
+    "continue": "Continue"
+  },
+  "badges": { "skipped": "Skipped", "yourTurn": "Your turn" },
+  "notes": { "restart": "Restart any time with <code>help onboarding</code>" },
+  "steps": {
+    "welcome": { "kicker": "Welcome to Opencelium", "title": "Welcome, {{name}}. Let's set up your first integration." },
+    "theme": { "kicker": "Choose your theme", "title": "Pick how Opencelium should look", "note": "Change it later in /ui/config or with Ctrl + K → ui theme" },
+    "palette": { "kicker": "The command palette", "title": "That box in the top bar gets you anywhere", "note": "→ Next · Esc exit" },
+    "layers": { "kicker": "How an integration is built", "title": "Three things, in this order", "note": "Nothing runs without at least one invoker" },
+    "invoker": { "kicker": "Your first invoker", "emptyTitle": "You have no invokers yet", "existingTitle_one": "You already have {{count}} invoker", "existingTitle_other": "You already have {{count}} invokers", "note": "The tour continues and the checklist keeps this open", "skippedNote": "The step keeps its number in the count" },
+    "connectorGeneral": { "kicker": "Your first connector", "title": "Your turn: name it and pick its invoker", "note": "Fill both to continue" },
+    "credentials": { "kicker": "Your first connector", "title": "Your turn: prove the credentials work", "note": "Test the connection to continue", "saveFailedNote": "The connector was not saved. Your entries are preserved." },
+    "created": { "kicker": "Setup complete", "title": "{{name}} is connected" }
+  },
+  "content": {
+    "welcome": { "lead": "Opencelium connects the systems you already run — Jira, Zendesk, SAP, HubSpot — and keeps their data in step.", "body": "You describe an API once, then wire methods together on a canvas. This tour walks the shortest path from nothing to a running workflow.", "theme": "Theme", "palette": "Palette", "invoker": "Invoker", "connector": "Connector", "hidden": "Welcome, {{name}}" },
+    "theme": { "body": "The choice applies immediately. You can change it later in /ui/config, or with Ctrl + K → ui theme.", "light": "Light", "lightDescription": "Best in bright rooms and on projectors.", "dark": "Dark", "darkDescription": "Easier on the eyes for long log sessions.", "device": "Match device", "deviceDescription": "Follows your system setting, including its schedule." },
+    "palette": { "body": "It is highlighted behind this dialog. Press <strong>Ctrl + K</strong> from any screen to open it — you never have to reach for it with the mouse.", "tokens": "It takes tokens, not sentences", "help": "One token lists everything" },
+    "layers": { "body": "Opencelium builds an integration in three layers, and each one needs the one before it. The next two steps set up the first layer.", "step": "Step {{count}}", "invoker": "Describes an API: its endpoints, auth and request shapes. One file, reusable.", "connector": "One real system: that invoker plus a base URL and credentials.", "workflow": "The integration itself: methods of as many connectors as you need, wired on a canvas." },
+    "invoker": { "body": "An invoker describes one API. Pick the quicker path unless your system is unusual.", "recommended": "Recommended", "uploadTitle": "Upload an invoker file", "uploadBody": "Start from a template we ship, or a file your team already has. Jira, Zendesk, SAP and HubSpot are included.", "manualTitle": "Create one manually", "manualBody": "For an API we don't cover yet. You describe endpoints, auth and response shapes by hand — it takes longer.", "manualAction": "Open the invoker editor", "existingBody": "Your API descriptions are already available, so the upload task can be skipped.", "methods_one": "{{count}} method", "methods_other": "{{count}} methods", "commandHint": "invoker upload — add an API description at any time" },
+    "connector": { "generalBody": "Two fields are required. The title is how you will recognise this system later; the invoker is the API description it speaks.", "general": "General Data", "credentials": "Credentials", "title": "Title", "titlePlaceholder": "e.g. Jira Production", "selectInvoker": "Select an invoker", "description": "Description", "optional": "Optional", "timeout": "Timeout", "credentialsBody": "Fill the fields, then press Test connection. Opencelium calls the system once and tells you what came back.", "username": "Username", "password": "Password", "test": "Test connection", "connected": "Connected · 42 methods available", "testFailed": "Connection test failed. Check the credentials and try again.", "saveFailed": "Connector could not be saved. Try again.", "warning": "Credentials are encrypted at rest. If your install has a master password, the test asks for it once per session.", "sampleConnected": "Jira Production is connected", "available": "42 methods available · tested now", "createdConnected": "{{name}} is connected", "createdAvailable_one": "{{count}} method available", "createdAvailable_other": "{{count}} methods available", "nextTitle": "Now connect it to something", "nextBody": "Systems your Jira data usually flows to:" }
+  },
+  "checklist": {
+    "title": "Setup",
+    "done": "{{count}} of 5 done",
+    "pill": "Setup {{count}}/5",
+    "paused": "Tour paused · resume",
+    "dismissTitle": "Hide the setup checklist?",
+    "dismissBody": "It will not come back. You can still restart the tour from the palette with help onboarding, or turn it back on in /ui/config.",
+    "theme": { "title": "Choose a theme", "detail": "Light, dark or match device." },
+    "palette": { "title": "Learn the command palette", "detail": "Ctrl + K reaches every screen." },
+    "invoker": { "title": "Add your first invoker", "detail": "Upload a description or write one." },
+    "connector": { "title": "Create a connector", "detail": "Invoker, URL and credentials." },
+    "integration": { "title": "Finish the first integration", "detail": "Connect two systems and schedule it." }
+  }
+}

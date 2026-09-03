@@ -8,6 +8,7 @@ import success from './success.json'
 import logs from './logs.json'
 import workflow from './workflow.json'
 import widget from './widget.json'
+import onboarding from './onboarding.json'
 
 export default {
     common,
@@ -20,4 +21,5 @@ export default {
     logs,
     workflow,
     widget,
+    onboarding,
 }

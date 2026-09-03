@@ -57,7 +57,8 @@
       "systemCheck": "Systemprüfungsseite öffnen",
       "ldapCheck": "LDAP-Verbindungsprüfungsseite öffnen",
       "workflow": "Den aktuellen Workflow durchsuchen",
-      "help": "Alle Befehle anzeigen"
+      "help": "Alle Befehle anzeigen",
+      "onboarding": "Einrichtungstour neu starten"
     },
     "footer": {
       "select": "Auswählen",

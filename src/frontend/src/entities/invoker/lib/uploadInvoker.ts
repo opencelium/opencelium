@@ -51,7 +51,7 @@ export function pickInvokerFile(): Promise<File | null> {
 export async function uploadInvoker(
     file: File,
     confirmReplace: () => Promise<boolean>,
-): Promise<boolean> {
+): Promise<false | { methodCount: number; authType?: string; version?: string }> {
     const existsRes = (await apiExecutor({
         url: EXISTS_URL(file.name),
         method: 'GET',
@@ -63,7 +63,16 @@ export async function uploadInvoker(
     }
 
     const { id } = await uploadFile(file)
-    await apiExecutor({ url: FETCH_URL(id), method: 'GET' })
-    store.dispatch(baseApi.util.invalidateTags([{ type: 'Entity' as any, id: '/invoker/all' }]))
-    return true
+    const invoker = (await apiExecutor({ url: FETCH_URL(id), method: 'GET' })) as {
+        authType?: string
+        operations?: unknown[]
+    }
+    const xml = new DOMParser().parseFromString(await file.text(), 'application/xml')
+    const rawVersion = xml.documentElement.getAttribute('version') ?? undefined
+    store.dispatch(baseApi.util.invalidateTags([{ type: 'Entity', id: '/invoker/all' }] as never))
+    return {
+        methodCount: invoker.operations?.length ?? 0,
+        authType: invoker.authType,
+        version: rawVersion ? (rawVersion.startsWith('v') ? rawVersion : `v${rawVersion}`) : undefined,
+    }
 }
