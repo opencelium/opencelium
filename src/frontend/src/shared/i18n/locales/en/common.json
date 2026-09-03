@@ -57,7 +57,8 @@
       "systemCheck": "Open the system check page",
       "ldapCheck": "Open the LDAP connectivity check page",
       "workflow": "Search the current workflow",
-      "help": "View all commands"
+      "help": "View all commands",
+      "onboarding": "Restart the setup tour"
     },
     "footer": {
       "select": "Select",

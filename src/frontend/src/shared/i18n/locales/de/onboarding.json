@@ -1,0 +1,56 @@
+{
+  "actions": {
+    "back": "Zurück",
+    "next": "Weiter",
+    "finish": "Abschließen",
+    "skipTour": "Tour überspringen",
+    "resume": "Tour fortsetzen",
+    "restart": "Tour neu starten",
+    "dismiss": "Dauerhaft ausblenden",
+    "keep": "Behalten",
+    "hide": "Ausblenden",
+    "skipForNow": "Vorerst überspringen",
+    "showAnyway": "Trotzdem anzeigen",
+    "later": "Das mache ich später",
+    "skipStep": "Diesen Schritt überspringen",
+    "dashboard": "Zurück zum Dashboard",
+    "saveAnyway": "Trotzdem speichern",
+    "retrySave": "Speichern wiederholen",
+    "buildWorkflow": "Workflow erstellen",
+    "showAround": "Tour starten",
+    "continue": "Weiter"
+  },
+  "badges": { "skipped": "Übersprungen", "yourTurn": "Sie sind dran" },
+  "notes": { "restart": "Jederzeit mit <code>help onboarding</code> neu starten" },
+  "steps": {
+    "welcome": { "kicker": "Willkommen bei Opencelium", "title": "Willkommen, {{name}}. Richten wir Ihre erste Integration ein." },
+    "theme": { "kicker": "Design auswählen", "title": "Wählen Sie das Aussehen von Opencelium", "note": "Die Auswahl wird sofort angewendet" },
+    "palette": { "kicker": "Die Befehlspalette", "title": "Dieses Feld in der oberen Leiste bringt Sie überall hin", "note": "→ Weiter · Esc beendet" },
+    "layers": { "kicker": "So entsteht eine Integration", "title": "Drei Dinge, in dieser Reihenfolge", "note": "Ohne mindestens einen Invoker wird nichts ausgeführt" },
+    "invoker": { "kicker": "Ihr erster Invoker", "emptyTitle": "Sie haben noch keine Invoker", "existingTitle_one": "Sie haben bereits {{count}} Invoker", "existingTitle_other": "Sie haben bereits {{count}} Invoker", "note": "Die Tour wird fortgesetzt und die Checkliste bleibt offen", "skippedNote": "Die Schrittnummer bleibt erhalten" },
+    "connectorGeneral": { "kicker": "Ihr erster Connector", "title": "Sie sind dran: Benennen und Invoker auswählen", "note": "Füllen Sie beide Felder aus" },
+    "credentials": { "kicker": "Ihr erster Connector", "title": "Sie sind dran: Zugangsdaten testen", "note": "Testen Sie die Verbindung, um fortzufahren", "saveFailedNote": "Der Connector wurde nicht gespeichert. Ihre Eingaben bleiben erhalten." },
+    "created": { "kicker": "Einrichtung abgeschlossen", "title": "{{name}} ist verbunden" }
+  },
+  "content": {
+    "welcome": { "lead": "Opencelium verbindet Ihre bestehenden Systeme und hält deren Daten synchron.", "body": "Beschreiben Sie eine API einmal und verbinden Sie dann Methoden auf einer Arbeitsfläche. Diese Tour zeigt den kürzesten Weg zu einem laufenden Workflow.", "theme": "Design", "palette": "Palette", "invoker": "Invoker", "connector": "Connector", "hidden": "Willkommen, {{name}}" },
+    "theme": { "body": "Die Auswahl gilt sofort. Sie können sie später unter /ui/config oder mit Ctrl + K → ui theme ändern.", "light": "Hell", "lightDescription": "Ideal für helle Räume und Projektoren.", "dark": "Dunkel", "darkDescription": "Angenehmer für die Augen bei langen Sitzungen.", "device": "Geräteeinstellung", "deviceDescription": "Folgt der Systemeinstellung Ihres Geräts." },
+    "palette": { "body": "Drücken Sie auf jedem Bildschirm <strong>Strg + K</strong>. Die Palette verwendet kurze Begriffe statt Sätze.", "tokens": "Begriffe statt Sätze", "help": "Ein Begriff zeigt alles" },
+    "layers": { "body": "Opencelium erstellt eine Integration in drei Schichten; jede benötigt die vorherige.", "step": "Schritt {{count}}", "invoker": "Beschreibt eine API: Endpunkte, Authentifizierung und Anfragen.", "connector": "Ein reales System mit diesem Invoker und seinen Zugangsdaten.", "workflow": "Auf einer Arbeitsfläche verbundene Methoden." },
+    "invoker": { "body": "Ein Invoker beschreibt eine API. Wählen Sie den schnelleren Weg, sofern Ihr System nicht ungewöhnlich ist.", "recommended": "Empfohlen", "uploadTitle": "Invoker-Datei hochladen", "uploadBody": "Beginnen Sie mit einer Vorlage oder einer vorhandenen Datei Ihres Teams.", "manualTitle": "Manuell erstellen", "manualBody": "Benennen Sie die API und definieren Sie Authentifizierung und Endpunkte.", "manualAction": "Invoker-Editor öffnen", "existingBody": "Ihre API-Beschreibungen sind bereits verfügbar; der Upload kann übersprungen werden.", "methods_one": "{{count}} Methode", "methods_other": "{{count}} Methoden", "commandHint": "invoker upload — jederzeit eine API-Beschreibung hinzufügen" },
+    "connector": { "generalBody": "Zwei Felder sind erforderlich. Der Titel bezeichnet das System, der Invoker seine API-Beschreibung.", "general": "Allgemeine Daten", "credentials": "Zugangsdaten", "title": "Titel", "titlePlaceholder": "z. B. Jira Production", "selectInvoker": "Invoker auswählen", "description": "Beschreibung", "optional": "Optional", "timeout": "Zeitlimit", "credentialsBody": "Füllen Sie die Felder aus und testen Sie die Verbindung. Opencelium zeigt die Antwort an.", "username": "Benutzername", "password": "Passwort", "test": "Verbindung testen", "connected": "Verbunden · 42 Methoden verfügbar", "testFailed": "Verbindungstest fehlgeschlagen. Prüfen Sie die Zugangsdaten.", "saveFailed": "Connector konnte nicht gespeichert werden. Versuchen Sie es erneut.", "warning": "Zugangsdaten werden verschlüsselt gespeichert. Nach einem fehlgeschlagenen Test kann trotzdem gespeichert werden.", "sampleConnected": "Jira Production ist verbunden", "available": "42 Methoden verfügbar · gerade getestet", "createdConnected": "{{name}} ist verbunden", "createdAvailable_one": "{{count}} Methode verfügbar", "createdAvailable_other": "{{count}} Methoden verfügbar", "nextTitle": "Jetzt mit einem System verbinden", "nextBody": "Systeme, zu denen Ihre Jira-Daten normalerweise fließen:" }
+  },
+  "checklist": {
+    "title": "Einrichtung",
+    "done": "{{count}} von 5 erledigt",
+    "pill": "Einrichtung {{count}}/5",
+    "paused": "Tour pausiert · fortsetzen",
+    "dismissTitle": "Einrichtungscheckliste ausblenden?",
+    "dismissBody": "Sie wird nicht erneut angezeigt. Starten Sie die Tour mit help onboarding neu oder aktivieren Sie sie unter /ui/config.",
+    "theme": { "title": "Design auswählen", "detail": "Hell, dunkel oder Geräteeinstellung." },
+    "palette": { "title": "Befehlspalette kennenlernen", "detail": "Strg + K ist überall verfügbar." },
+    "invoker": { "title": "Ersten Invoker hinzufügen", "detail": "Beschreibung hochladen oder erstellen." },
+    "connector": { "title": "Connector erstellen", "detail": "Invoker, URL und Zugangsdaten." },
+    "integration": { "title": "Erste Integration abschließen", "detail": "Zwei Systeme verbinden und planen." }
+  }
+}

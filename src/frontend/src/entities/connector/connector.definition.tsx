@@ -20,6 +20,7 @@ import {userApi} from "@entities/user/api/userApi";
 import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
+import {connectorRecommendations} from "@entities/connector/connector.recommendations";
 
 const baseKey = 'connector';
 
@@ -529,24 +530,7 @@ export const connectorDefinition: EntityDefinition = {
             }
         },
 
-        recommendations: [
-            {
-                title: `${baseKey}.wizard.recommendations.1`,
-                link: '/connector/create'
-            },
-            {
-                title: `${baseKey}.wizard.recommendations.2`,
-                link: '/workflow/create'
-            },
-            {
-                title: `${baseKey}.wizard.recommendations.3`,
-                link: '/invoker/create'
-            },
-            {
-                title: `${baseKey}.wizard.recommendations.4`,
-                link: '/connector'
-            },
-        ],
+        recommendations: [...connectorRecommendations],
 
         steps: [
             {
