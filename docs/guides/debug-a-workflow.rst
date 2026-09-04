@@ -58,7 +58,12 @@ actual state.
 The debug panel
 ---------------
 
-While a run is playing, a small panel on the canvas carries the controls:
+While a run is playing, a small panel in the top-left of the canvas carries the
+controls:
+
+.. image:: ../img/workflow/OC5_debug-controls.png
+   :align: center
+   :width: 560
 
 .. list-table::
    :header-rows: 1
@@ -81,6 +86,12 @@ is there a paced replay to control.
 
 While the replay is paused, the logs panel expands down to the step you paused on
 and scrolls it into view, so pausing and reading the tree are the same gesture.
+The logs header shows **Paused**, and the Start node turns into a stop button for
+as long as the run is alive.
+
+.. image:: ../img/workflow/OC5_debug-run.png
+   :align: center
+   :width: 720
 
 Stepping through a loop
 -----------------------
