@@ -15,6 +15,10 @@ node capture.mjs
 # 5.1 shots -> out51/. Needs a workflow with three methods outside every loop
 # and something skippable between two of them.
 OC_WORKFLOW='Fetching all WATO folders from CheckMK' node capture-51.mjs
+
+# The debug controls, which only exist while a run is playing. This one EXECUTES
+# the workflow, so only ever point it at one that is safe to run for real.
+OC_WORKFLOW='GetSwitches fast (static if-condition)' node capture-51-debug.mjs
 ```
 
 Then copy `out/*.png` and `out51/*.png` over the files in
@@ -63,10 +67,18 @@ not open reliably under automation; the notifications dialog is captured through
 the bulk action instead. Support-log masking levels are still documented in text
 only.
 
-The **debug controls** (pause / step forward / speed) and the loop node's
-*jump to iteration* input only exist while a test run is actually playing, so
-they cannot be shot without executing a workflow — which on this instance means
-calling the real i-doit and CheckMK systems. They are documented in text only.
-To capture them, point the instance at a workflow that is safe to run (a single
-HTTP Request step against a harmless URL), start it in debug mode, pause, and
-shoot `[data-testid=workflow-test-debug-panel]`.
+The loop node's **jump to iteration** input, and the *Jump to next iteration*
+control beside it, only appear while the replay is paused *inside a loop that is
+actually iterating*. `capture-51-debug.mjs` tries for them and reports
+`replay never paused inside a loop` when it cannot get there.
+
+On this instance it cannot: the only workflow that is safe to execute
+(`GetSwitches fast`, whose single call is a read) fails at that first call,
+because its i-doit endpoint — `dg-service.westeurope.cloudapp.azure.com:8080` —
+is not reachable from here. The loop therefore never receives a list to iterate
+over. Nothing is written anywhere; the run simply ends as `TEST FAILED`.
+
+To capture those two controls you need an instance where a **safe** workflow
+both succeeds and loops: a step returning a JSON array, a `Loop` over it, and no
+write anywhere. Then pause inside the loop and shoot
+`[data-testid^=workflow-node-iteration-input-]`.
