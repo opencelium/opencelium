@@ -45,10 +45,19 @@ The pieces
 The shortest possible path: create connectors for the two systems, build a
 workflow between them, attach a schedule.
 
+What is new in 5.1
+==================
+
+5.1 is an editor release: **joints** to skip steps without an operator, a
+**debug mode** that replays a test run step by step, **undo/redo** and a
+**change history** for the canvas, and **comment boxes** to annotate a workflow
+for the next person who opens it. The model of 5.0 is unchanged, so nothing you
+built needs converting. See :doc:`whats-new-5-1`.
+
 What is new in 5.0
 ==================
 
-If you have used OpenCelium before, these are the changes that matter.
+If you are coming from 4.x, these are the changes that matter.
 
 **Connections became Workflows, and the two-connector limit is gone.** Previously
 an integration had exactly one source and one target connector; touching a third
