@@ -1,0 +1,75 @@
+[
+  {"source":"4.0","target":"4.6.1","status":"SUPPORTED","notes":"Supported only as intermediate step! Don't run or edit any data! Only add service portal and websocket in application.yml & add websocket and api in nginx.conf"},
+  {"source":"4.0","target":"5.1","status":"NOT SUPPORTED","notes":"First update to version 4.6.1"},
+  
+  {"source":"4.1","target":"4.6.1","status":"SUPPORTED","notes":"Add service portal, websocket and master password in application.yml & add websocket and api in nginx.conf"},
+  {"source":"4.1","target":"5.1","status":"NOT SUPPORTED","notes":"First update to version 4.6.1"},
+  
+  {"source":"4.2","target":"4.6.1","status":"SUPPORTED","notes":"Add websocket and master password in application.yml & add websocket and api in nginx.conf"},
+  {"source":"4.2","target":"5.1","status":"NOT SUPPORTED","notes":"First update to version 4.6.1"},
+  
+  {"source":"4.3","target":"4.6.1","status":"SUPPORTED","notes":"Add websocket and master password in application.yml & add websocket and 'client_max_body_size 200M;' in nginx.conf"},
+  {"source":"4.3","target":"5.1","status":"NOT SUPPORTED","notes":"First update to version 4.6.1"},
+  
+  {"source":"4.4","target":"4.6.1","status":"SUPPORTED","notes":"Add websocket in application.yml and add websocket in nginx.conf"},
+  {"source":"4.4","target":"5.1","status":"NOT SUPPORTED","notes":"First update to version 4.6.1"},
+  
+  {"source":"4.5","target":"5.1","status":"SUPPORTED","notes":"Check websocket config in application.yml and nginx.conf"},
+  
+  {"source":"4.5.1","target":"4.6.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.5.1","target":"5.1","status":"NOT SUPPORTED","notes":"First update to version 4.6.1"},
+  
+  {"source":"4.6","target":"4.6.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.6","target":"5.1","status":"NOT SUPPORTED","notes":"First update to version 4.6.1"},
+  
+  {"source":"4.6.1","target":"4.7","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.7.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.8","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.8.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.8.2","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.8.3","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.8.5","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"5.0","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"5.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  
+  {"source":"4.7","target":"4.7.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7","target":"4.8","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7","target":"4.8.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7","target":"4.8.2","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7","target":"4.8.3","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7","target":"5.0","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7","target":"5.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  
+  {"source":"4.7.1","target":"4.8","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7.1","target":"4.8.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7.1","target":"4.8.2","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7.1","target":"4.8.3","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7.1","target":"4.8.5","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7.1","target":"5.0","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.7.1","target":"5.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  
+  {"source":"4.8","target":"4.8.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8","target":"4.8.2","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8","target":"4.8.3","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8","target":"4.8.5","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8","target":"5.0","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8","target":"5.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  
+  {"source":"4.8.1","target":"4.8.2","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8.1","target":"4.8.3","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8.1","target":"4.8.5","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8.1","target":"5.0","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8.1","target":"5.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+ 
+  {"source":"4.8.2","target":"4.8.3","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8.2","target":"4.8.5","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8.2","target":"5.0","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8.3","target":"4.8.5","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8.3","target":"5.0","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8.3","target":"5.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+  
+  {"source":"4.8.5","target":"5.0","status":"SUPPORTED","notes":"Clean Upgrade"},
+  {"source":"4.8.5","target":"5.1","status":"SUPPORTED","notes":"Clean Upgrade"},
+
+  {"source":"5.0","target":"5.1","status":"SUPPORTED","notes":"Clean Upgrade"}
+]
