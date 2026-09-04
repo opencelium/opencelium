@@ -26,8 +26,7 @@ OpenCelium keeps state in three places, and a usable backup needs all of them:
    * - **MongoDB**
      - The workflow documents — the integrations themselves.
    * - **Filesystem**
-     - ``application.yml``, the ``invoker`` and ``templates`` directories, and
-       ``upload-dir`` (icons, support bundles).
+     - All programm files, invokers and templates.
 
 Restoring only the SQL database leaves you with connectors and schedules pointing
 at workflows that no longer exist.
@@ -93,7 +92,7 @@ A partial restore of OpenCelium allows you to selectively recover specific compo
 	tar xf /var/backups/opencelium/<backup filename>.tar.gz -C /var/backups/opencelium/restore
 
 
-**Restore MySQL database: (Connectors, Workflows and Schedules)**
+**Restore MySQL database: (Users, groups, connectors, schedules, categories, license tracking)**
 
 .. note::
 	Please change the password (secret1234) in the following command line!
