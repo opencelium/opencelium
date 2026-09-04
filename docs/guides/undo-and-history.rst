@@ -78,8 +78,13 @@ Change History
 ==============
 
 **Header menu → Change History** opens a panel listing every recorded change of
-the current session, newest first. Each row names what changed and shows the icon
-of the step it concerns — for a connector method, the connector's own logo.
+the current session, newest first. Each row names what changed, when, and shows
+the icon of the step it concerns — for a connector method, the connector's own
+logo.
+
+.. image:: ../img/workflow/OC5_change-history.png
+   :align: center
+   :width: 560
 
 Rows read like the edits themselves:
 
