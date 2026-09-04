@@ -28,6 +28,10 @@ Constraints, all deliberate:
    Live is deliberately kept a per-run decision: use the **Live** toggle in the
    logs panel, which also works mid-run.
 
+.. image:: ../img/workflow/OC5_test-run-mode-dialog.png
+   :align: center
+   :width: 560
+
 .. _guide-debug-mode:
 
 Debug mode

@@ -2,7 +2,8 @@
 
 `capture.mjs` regenerates the 5.0 UI screenshots from a running OpenCelium
 instance, so they can be refreshed after a UI change instead of being re-shot by
-hand.
+hand. `capture-51.mjs` does the same for the 5.1 editor features — joints,
+comment boxes, the change-history panel and the test-run mode dialog.
 
 ```sh
 npm i playwright-core
@@ -10,9 +11,14 @@ BASE=http://127.0.0.1 \
 OC_USER=admin@opencelium.io OC_PASS=1234 \
 OC_MASTER=<master-password> \
 node capture.mjs
+
+# 5.1 shots -> out51/. Needs a workflow with three methods outside every loop
+# and something skippable between two of them.
+OC_WORKFLOW='Fetching all WATO folders from CheckMK' node capture-51.mjs
 ```
 
-Then copy `out/*.png` over the files in `docs/img/*/OC5_*.png`.
+Then copy `out/*.png` and `out51/*.png` over the files in
+`docs/img/*/OC5_*.png`.
 
 ## Things that will bite you
 
@@ -37,9 +43,30 @@ Then copy `out/*.png` over the files in `docs/img/*/OC5_*.png`.
 * **The dashboard needs ~9 s** before the socket delivers metrics, and its
   bottom row of cards is *Coming soon* placeholder content, so it is cropped off.
 
+## Things that will bite you in capture-51.mjs
+
+* **A note is created above its step**, so on the canvas's top row it lands
+  off-screen and cannot be typed into. `panDown()` moves the graph first.
+* **Park the pointer after selecting a node.** Leaving it on the node raises that
+  node's connector tooltip right in the middle of the shot.
+* **Fast automation collapses the change history.** Edits inside the 350 ms
+  coalescing window become one `Multiple changes` row. Renaming nodes, one at a
+  time, is what produces a legible list.
+* **Never press either button in the test-run mode dialog.** Opening it is safe —
+  the run starts only on a start button — and the script asserts afterwards that
+  no debug panel appeared.
+
 ## What is deliberately not automated
 
 The schedule row kebab menu (per-schedule *Notifications*, *Support logs*) does
 not open reliably under automation; the notifications dialog is captured through
 the bulk action instead. Support-log masking levels are still documented in text
 only.
+
+The **debug controls** (pause / step forward / speed) and the loop node's
+*jump to iteration* input only exist while a test run is actually playing, so
+they cannot be shot without executing a workflow — which on this instance means
+calling the real i-doit and CheckMK systems. They are documented in text only.
+To capture them, point the instance at a workflow that is safe to run (a single
+HTTP Request step against a harmless URL), start it in debug mode, pause, and
+shoot `[data-testid=workflow-test-debug-panel]`.
