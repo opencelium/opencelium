@@ -43,6 +43,40 @@ Two more node types control the flow rather than calling anything:
 
 And every workflow begins at a **Start** node.
 
+Joints
+======
+
+.. note::
+   **New in 5.1.**
+
+A **joint** is a forward link from one step to a later one. Reaching the source
+step, the engine runs it and then continues at the joint's target; the steps in
+between do not run.
+
+A joint is not an edge. It does not change any step's ``index``, does not affect
+where a new step lands when you add one, and carries no condition of its own —
+the decision to draw it is a structural one, made when you build the workflow.
+Where the choice has to be made per run, that is still an ``If``.
+
+The rules are enforced identically by the editor and the server: both ends must
+be methods, the target must run after the source, both must sit in the same loop
+scope, and a joint may leave an ``If`` but never enter one. A step carries at
+most one joint, stored on the method as ``jump``.
+
+:doc:`../guides/skip-steps-with-joints` covers all of this in working terms.
+
+Notes
+=====
+
+.. note::
+   **New in 5.1.**
+
+A **comment box** is a note anchored to a step. It is part of the workflow
+document and travels with it, including into a template, but it lives in the
+saved ``ui`` blob rather than among the methods — the engine never sees it, and
+adding one changes nothing about execution. See
+:doc:`../guides/annotate-a-workflow`.
+
 Every step carries its own connector
 ====================================
 
@@ -130,6 +164,11 @@ history is per workflow: you can open an older version, download it as a
 template, or switch the active version back. Renaming a workflow or editing its
 description saves automatically with a generated comment.
 
+Since 5.1 the editor also keeps an in-session **change history** — every edit
+made since you opened it, undoable with ``Ctrl+Z`` or from a panel. The two are
+different things and are compared side by side in
+:doc:`../guides/undo-and-history`.
+
 Where to go next
 ================
 
@@ -137,3 +176,4 @@ Where to go next
 * :doc:`data-mapping` — how a value gets from one step into the next.
 * :doc:`execution` — what happens when a workflow runs.
 * :doc:`../guides/build-a-workflow` — build one.
+* :doc:`../guides/skip-steps-with-joints` — skip steps without an operator.
