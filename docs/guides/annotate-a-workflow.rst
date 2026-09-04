@@ -28,6 +28,13 @@ The note appears above its step, stepping further up if that spot is already
 taken so it never lands on top of another node. Each step carries **at most one**
 note; the comment icon disappears from the toolbar once the step has one.
 
+.. image:: ../img/workflow/OC5_comment-node.png
+   :align: center
+   :width: 900
+
+The step the note belongs to carries a **comment badge** — the blue speech
+bubble above ``getAllFolders``. Clicking it hides and shows the note again.
+
 Work with a note
 ================
 

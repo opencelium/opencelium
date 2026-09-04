@@ -24,9 +24,17 @@ A **joint** connects one step directly to a later one, so the steps in between
 are skipped when the joint is taken. Until now the only way to skip work was an
 ``If`` operator around every step you wanted to pass over.
 
-Select a method node, click the link icon in its toolbar, and pick the target.
-Legal targets highlight; illegal ones tell you why. The joint is drawn in green
-and stays visible on the canvas.
+Select a method node — the toolbar with the new canvas actions appears on it —
+click the link icon, and pick the target. Legal targets highlight; illegal ones
+tell you why. The joint is drawn in green and stays visible on the canvas.
+
+.. image:: ../img/workflow/OC5_node-toolbar.png
+   :align: center
+   :width: 620
+
+.. image:: ../img/workflow/OC5_joint-edge.png
+   :align: center
+   :width: 1000
 
 See :doc:`../guides/skip-steps-with-joints`.
 
@@ -44,6 +52,10 @@ logs as fast as they arrive.
 
 Starting a test asks which mode to use; dismissing that dialog permanently leaves
 debug mode as the standing choice, with the Live toggle available per run.
+
+.. image:: ../img/workflow/OC5_test-run-mode-dialog.png
+   :align: center
+   :width: 560
 
 See :doc:`../guides/debug-a-workflow`.
 
@@ -64,6 +76,10 @@ Change history
 session, newest first, each with what it changed and when. Click any row to jump
 the canvas straight to that point — an undo of arbitrary depth in one move.
 
+.. image:: ../img/workflow/OC5_change-history.png
+   :align: center
+   :width: 560
+
 It is separate from **Version History**, which restores states that were *saved*
 on the server. :doc:`../guides/undo-and-history` explains when to reach for
 which.
@@ -74,6 +90,10 @@ Comment boxes
 Notes on the canvas, anchored to a step. They travel with the node when you move
 it, can be resized and minimised to a badge, and are stored with the workflow, so
 the next person to open it reads what you meant rather than guessing.
+
+.. image:: ../img/workflow/OC5_comment-node.png
+   :align: center
+   :width: 900
 
 See :doc:`../guides/annotate-a-workflow`.
 

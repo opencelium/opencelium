@@ -119,6 +119,11 @@ The node toolbar
 
 Selecting a node shows a small toolbar on it:
 
+.. image:: ../img/workflow/OC5_node-toolbar.png
+   :align: center
+   :width: 620
+
+
 .. list-table::
    :header-rows: 1
    :widths: 24 76
