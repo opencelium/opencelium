@@ -102,11 +102,53 @@ Read the canvas
 * **Colour + number badge** — steps sharing them call the same method on the same
   connector.
 * **Aggregator badge** — a data aggregator is attached; click it to configure.
+* **Comment badge** — the step has a note; click to show or hide it. *(5.1)*
 * **Asynchronous badge** — a Trigger Workflow step, which does not wait.
 * **Status dot** — the connector's health, see
   :doc:`../concepts/connectors-and-invokers`.
 * **Red outline** — a validation error from the last save or test start. It clears
-  on the next attempt or when you edit the node.
+  on the next attempt, when you edit the node, or with ``Esc``.
+* **Green line** — a joint: this step continues at a later one, skipping what is
+  between them. *(5.1)* See :doc:`skip-steps-with-joints`.
+
+The node toolbar
+================
+
+.. note::
+   **New in 5.1.**
+
+Selecting a node shows a small toolbar on it:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - Icon
+     - Action
+   * - **Link**
+     - Add a joint from this step to a later one. See
+       :doc:`skip-steps-with-joints`.
+   * - **Unlink**
+     - Remove the joint this step carries.
+   * - **Comment**
+     - Attach a note to this step. See :doc:`annotate-a-workflow`. The icon is
+       gone once the step has one.
+   * - **Delete**
+     - Delete the step, and everything nested inside it.
+
+Take back a change
+==================
+
+.. note::
+   **New in 5.1.**
+
+``Ctrl+Z`` undoes the last canvas change and ``Ctrl+Shift+Z`` (or ``Ctrl+Y``)
+redoes it — covering node edits, request configuration, references, conditions
+and edges, not just node placement. **Header menu → Change History** lists every
+change of the session and jumps the canvas to any of them.
+
+See :doc:`undo-and-history`, which also explains how this differs from Version
+History.
 
 Find things in a large workflow
 ===============================
@@ -127,5 +169,8 @@ Where to go next
 ================
 
 * :doc:`debug-a-workflow` — run it and read the logs.
+* :doc:`skip-steps-with-joints` — skip steps without an operator.
+* :doc:`annotate-a-workflow` — leave notes for whoever opens it next.
+* :doc:`undo-and-history` — undo, change history, version history.
 * :doc:`schedule-and-notify` — run it regularly.
 * :doc:`reuse-with-templates` — reuse it elsewhere.
