@@ -92,12 +92,43 @@ Its own header replaces the application header. See
 :doc:`../guides/build-a-workflow` for the areas and
 :ref:`ref-shortcuts` for the canvas shortcuts.
 
-Header menu entries: Version History, Download as Template, Save as Template, Load
-Template, Shortcuts, Exit.
+Header menu entries: Assign Category, Version History, **Change History**,
+Download as Template, Save as Template, Load Template, Shortcuts, Exit.
 
 .. image:: ../img/workflow/OC5_workflow-header-menu.png
    :align: center
    :width: 500
+
+Panels and overlays, and what opens each:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Surface
+     - Opened by
+   * - **Step drawer** (right)
+     - The **+** handle on a node.
+   * - **Execution Logs** (bottom)
+     - A test run; collapsed until there is output.
+   * - **Version History** (right)
+     - Header menu → Version History.
+   * - **Change History** (right)
+     - Header menu → Change History. *(5.1)*
+   * - **Schedules** (right)
+     - The schedules pill in the header.
+   * - **Node toolbar**
+     - Selecting a node. Carries *add joint*, *remove joint*, *add comment* and
+       *delete*. *(5.1)*
+   * - **Debug controls** (on canvas)
+     - A test run in debug mode: pause, step forward, speed. *(5.1)*
+
+.. note::
+   **New in 5.1.** The canvas gained two things that are not steps: **joints**,
+   drawn in green between two method nodes
+   (:doc:`../guides/skip-steps-with-joints`), and **comment boxes**, anchored
+   notes that minimise to a badge on their step
+   (:doc:`../guides/annotate-a-workflow`).
 
 Messages
 ========

@@ -72,7 +72,16 @@ Workflow editor
      - Delete the selected node.
    * - ``Ctrl+S``
      - Save the workflow.
+   * - ``Ctrl+Z`` / ``⌘+Z``
+     - Undo the last canvas change. *(5.1)*
+   * - ``Ctrl+Shift+Z`` / ``Ctrl+Y``
+     - Redo the change that was undone. *(5.1)*
    * - ``Esc``
-     - Close the open menu, dialog or panel.
+     - Close the open menu, dialog or panel; dismiss the error highlight on a
+       node; leave joint target-picking mode.
 
 The same list is available in the editor under **Shortcuts** in the header menu.
+
+.. note::
+   ``Ctrl+Z`` inside a text field — a URL, a body, a script — is the browser's own
+   undo for that field, not the canvas undo. See :doc:`../guides/undo-and-history`.
