@@ -37,7 +37,7 @@ at workflows that no longer exist.
    whenever it is written through the UI — see :ref:`ref-config-file`. Those are
    convenience snapshots, not a backup strategy.
 
-Procedure
+Backup
 =========
 
 To create a local backup of your OpenCelium installation, please execute the following command as root.
@@ -55,11 +55,29 @@ Old backups will be removed after 14 days.
 | - MongoDB database dump
 | - backup of the installation directory /opt/opencelium/
 
-Restore
+Full Restore
 =======
 
-We decided not to provide an automatic functionallity for the restore process, because it's mostly not needed to restore everything
-at once.
+To restore a local backup of your OpenCelium installation, please execute the following command as root.
+
+.. note::
+	Please change the password (secret1234) in the following command line!
+
+.. code-block:: sh
+
+	oc restore -d /var/backups/opencelium -u opencelium -p secret1234 -n <backup filename>
+
+| This will include:
+| - MySQL database restore
+| - MongoDB database restore
+| - restore of the installation directory /opt/opencelium/
+
+
+Partitial Restore
+=======
+
+Mostly it is not needed to restore everything at once.
+A partial restore of OpenCelium allows you to selectively recover specific components such as databases or files.
 
 **Extract the backup:**
 
@@ -70,10 +88,9 @@ at once.
 
 .. note::
 	Please change the <backup filename> in the following command line!
-
 .. code-block:: sh	
 	
-	tar xf /var/backups/opencelium/<backup filename>.tar.gz -C /var/backups/opencelium/restore/ --strip-components=4
+	tar xf /var/backups/opencelium/<backup filename>.tar.gz -C /var/backups/opencelium/restore
 
 
 **Restore MySQL database: (Connectors, Workflows and Schedules)**
