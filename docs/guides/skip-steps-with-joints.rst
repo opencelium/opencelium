@@ -28,11 +28,28 @@ Add a joint
    hovering an illegal one explains why it cannot be used.
 #. Click the target.
 
+.. image:: ../img/workflow/OC5_joint-picking.png
+   :align: center
+   :width: 1000
+
+*Target-picking mode.* The source is ringed blue; the two methods that may
+receive the joint are ringed green. The steps inside the loop, the operators and
+the Start node are not candidates and stay unmarked.
+
 ``Esc`` leaves target-picking mode without creating anything.
 
 The joint is drawn as a green line with an arrow head, using the same geometry as
 every other edge. Hover it to reveal a delete button at its midpoint, or select
 the source node again and use the **unlink** icon in its toolbar.
+
+.. image:: ../img/workflow/OC5_joint-edge.png
+   :align: center
+   :width: 1000
+
+*The finished joint.* The green line leaves ``getFolderList`` and runs past
+``getAllFolders`` and the loop straight into the second ``getAllFolders``: when
+the joint is taken, everything it passes is skipped. Because a sequence is laid
+out on one row, the joint follows the same line as the edges it overtakes.
 
 A method carries **at most one** joint. To point it somewhere else, remove the
 existing one first.
@@ -69,7 +86,13 @@ accepts is a joint that will save and run.
        loop ceiling. Landing inside a branch it is not part of would run a step
        whose guarding condition was never evaluated.
 
-When you pick an illegal target the editor tells you which rule it broke:
+Hovering an illegal target outlines it in red and names the rule it breaks:
+
+.. image:: ../img/workflow/OC5_joint-invalid.png
+   :align: center
+   :width: 1000
+
+The full set of messages:
 
 .. list-table::
    :header-rows: 1
