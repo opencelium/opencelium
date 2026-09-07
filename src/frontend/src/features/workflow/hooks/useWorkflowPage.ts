@@ -28,6 +28,7 @@ import { evaluateJointTargets } from '../utils/jumpValidator';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
 import { moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
 import { useReferenceRemapConfirm } from './useReferenceRemapConfirm';
+import { useBindingLensState } from '../lens/useBindingLensState';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
@@ -41,7 +42,18 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setMethodEditor, responseNodeId, setResponseNodeId, conditionEditor,
     setConditionEditor, aggregatorEditor, setAggregatorEditor, restoredViewport,
     setRestoredViewport, viewportRestoreVersion, setViewportRestoreVersion,
-    centerStartVersion, setCenterStartVersion } = state;
+    centerStartVersion, setCenterStartVersion, bindingLensOpen,
+    setBindingLensOpen, bindingLensExpanded, setBindingLensExpanded,
+    bindingLensSelectedKey, setBindingLensSelectedKey, bindingLensPinnedNodeId,
+    setBindingLensPinnedNodeId, bindingLensHoveredNodeId,
+    setBindingLensHoveredNodeId, bindingTableOpen, setBindingTableOpen } = state;
+
+  const bindingLens = useBindingLensState({ open: bindingLensOpen, setOpen: setBindingLensOpen,
+    pinnedNodeId: bindingLensPinnedNodeId, setPinnedNodeId: setBindingLensPinnedNodeId,
+    hoveredNodeId: bindingLensHoveredNodeId, setHoveredNodeId: setBindingLensHoveredNodeId,
+    tableOpen: bindingTableOpen, setTableOpen: setBindingTableOpen,
+    expandedNodeIds: bindingLensExpanded, setExpandedNodeIds: setBindingLensExpanded,
+    selectedKey: bindingLensSelectedKey, setSelectedKey: setBindingLensSelectedKey });
 
   const dragPreview = useWorkflowDragPreviewState(setNodes, setEdges);
   const { updateEdges: updateDragPreviewEdges, updateNodes: updateDragPreviewNodes,
@@ -102,6 +114,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     restoredViewport,
     viewportRestoreVersion,
     centerStartVersion,
+    bindingLens,
     canUndo: undoHistory.canUndo,
     canRedo: undoHistory.canRedo,
     undo: undoHistory.undo,
