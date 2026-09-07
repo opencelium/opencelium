@@ -29,13 +29,13 @@
     "deleteReference": "Delete reference"
   },
   "referenceRemap": {
-    "intro": "Some steps read the step you are deleting. Choose what each of them should read instead:",
-    "perFieldHint": "Or re-point a single field — at another method, or at a header or status instead:",
+    "intro": "Some steps read the step you are deleting. Pick a replacement method for each, or clear the reference — then fine-tune individual fields below if needed:",
+    "replaceWith": "Replace with:",
+    "perFieldHint": "Optional — override only the fields that need to read from somewhere else. Anything you leave alone follows the method picked above, or is cleared if none was:",
     "resetField": "Undo this field",
     "editCondition": "Rewrite the condition",
     "columnCurrent": "Current reference",
     "columnHeld": "Used in",
-    "alsoHeld": "and {{count}} more",
     "columnNew": "New reference",
     "readBy": "read by {{count}} steps",
     "readBy_one": "read by {{count}} step",
