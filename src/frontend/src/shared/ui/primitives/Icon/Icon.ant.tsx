@@ -45,6 +45,7 @@ import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdPause, MdStop, MdSki
 import {TbWebhook, TbReportAnalytics, TbLink, TbUnlink} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
 import {GoArrowSwitch, GoWorkflow} from "react-icons/go";
+import { Waypoints } from "lucide-react";
 import {GrAggregate} from "react-icons/gr";
 
 const iconMap = {
@@ -96,6 +97,7 @@ const iconMap = {
     minimize: FullscreenExitOutlined,
     'arrow-switch': GoArrowSwitch,
     workflow: GoWorkflow,
+    bindings: Waypoints,
     refresh: ReloadOutlined,
     connector: BranchesOutlined,
     flash: ThunderboltOutlined,

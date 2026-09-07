@@ -33,6 +33,12 @@ export const useWorkflowGraphState = () => {
 	const [restoredViewport, setRestoredViewport] = useState<Viewport | undefined>();
 	const [viewportRestoreVersion, setViewportRestoreVersion] = useState(0);
 	const [centerStartVersion, setCenterStartVersion] = useState(1);
+	const [bindingLensOpen, setBindingLensOpen] = useState(false);
+	const [bindingLensPinnedNodeId, setBindingLensPinnedNodeId] = useState<string | null>(null);
+	const [bindingLensHoveredNodeId, setBindingLensHoveredNodeId] = useState<string | null>(null);
+	const [bindingLensExpanded, setBindingLensExpanded] = useState<string[]>([]);
+	const [bindingTableOpen, setBindingTableOpen] = useState(false);
+	const [bindingLensSelectedKey, setBindingLensSelectedKey] = useState<string | null>(null);
 	const handleNodesChange: typeof onNodesChange = (changes) => {
 		const locked = draggedPositionLockRef.current;
 		onNodesChange(!locked?.size ? changes : changes.filter((change) =>
@@ -48,6 +54,11 @@ export const useWorkflowGraphState = () => {
 		responseNodeId, setResponseNodeId, conditionEditor, setConditionEditor,
 		aggregatorEditor, setAggregatorEditor, restoredViewport, setRestoredViewport,
 		viewportRestoreVersion, setViewportRestoreVersion,
+		bindingLensOpen, setBindingLensOpen, bindingLensExpanded, setBindingLensExpanded,
+		bindingLensPinnedNodeId, setBindingLensPinnedNodeId,
+		bindingLensHoveredNodeId, setBindingLensHoveredNodeId,
+		bindingTableOpen, setBindingTableOpen,
+		bindingLensSelectedKey, setBindingLensSelectedKey,
 		centerStartVersion, setCenterStartVersion,
 	};
 };
