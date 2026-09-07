@@ -62,8 +62,9 @@
 	color: var(--color-text-primary);
 	font: inherit;
 }
-.onboarding-form-grid input:required,
-.onboarding-form-grid select:required {
+.onboarding-form-grid input:user-invalid,
+.onboarding-form-grid select:user-invalid,
+.onboarding-form-grid.has-validation-errors input:required {
 	border-width: 2px;
 	border-color: var(--color-status-error, #f04438);
 }
