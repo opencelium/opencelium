@@ -1,0 +1,217 @@
+/* A deletion can break more references than fit on a screen, and the dialog is
+   a decision with two buttons at the end of it — so the list scrolls inside the
+   dialog rather than growing it past the viewport and taking the buttons with
+   it. The pickers are unaffected: every popup here is rendered on document.body
+   (getPopupContainer), so none of them is clipped by this container. */
+.referenceRemap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  max-height: 58vh;
+  overflow-y: auto;
+  /* Clear of the scrollbar, so the last column is not sitting under it. */
+  padding-right: 6px;
+}
+
+.referenceRemapIntro {
+  color: var(--color-text-secondary);
+}
+
+/* One row per method going away. The subject sits above its picker rather than
+   beside it: a method name and a select side by side inside a confirm dialog
+   left both too narrow to read at the widths this dialog actually gets. */
+.referenceRemapRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  background: var(--color-background-app);
+}
+
+.referenceRemapSubject {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.referenceRemapName {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.referenceRemapReadBy,
+.referenceRemapEmpty {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+/* The fields read from the method above, indented under it: each is a question
+   about that method's replacement, and reads as a follow-up rather than as
+   another method. */
+.referenceRemapSources {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 14px;
+  border-left: 2px solid var(--color-border-subtle);
+}
+
+/* Two columns: the field of the deleted method, and what it should read
+   instead. Fixed layout so the left column keeps its width whatever path it
+   holds — the right one carries the controls and needs the rest. */
+.referenceRemapTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* The columns are three references read against each other, which stops meaning
+   anything the moment the headers scroll away. */
+.referenceRemapTable th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  /* The row's own fill, not the surface: these sit inside .referenceRemapRow. */
+  background: var(--color-background-app);
+  padding: 0 8px 4px 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+}
+
+/* Three references read left to right: the one being replaced, the field it
+   fills, and the one that will take its place. The first has no method select —
+   it is always the method being deleted — so it needs the least room; the other
+   two carry one each. */
+.referenceRemapTable th:first-child {
+  width: 20%;
+}
+
+.referenceRemapTable th:nth-child(2) {
+  width: 36%;
+}
+
+.referenceRemapSourceHeld {
+  overflow: hidden;
+}
+
+/* Flex lives on this inner div, never on the <td> itself — a table cell with
+   its own `display: flex` stops being a table cell (it blockifies out of the
+   row, dragging every cell after it onto a line of its own). The control this
+   row draws and the "and N more" count beside it used to stack instead of
+   sitting together, which made this the one row in the table that grew taller
+   than its neighbours the moment a reference was held in more than one place.
+   On one line they cost nothing extra; the full list is still on the cell's
+   own hover title. */
+.referenceRemapSourceHeldRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* The one flexible item in the row: it gives up width to the count beside it
+   rather than pushing the count out or forcing the row wider than its column. */
+.referenceRemapSourceHeldRow > .bodyLegacyGeneratorShell,
+.referenceRemapSourceHeldRow > .referenceRemapSourcePath {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Held in more than one place: re-pointing moves all of them, so the rest are
+   counted rather than listed into a cell that has no room for them. Never the
+   one that gives way when space is short — the control beside it already
+   shrinks on its own, and a squeezed-down count would be unreadable. */
+.referenceRemapSourceMore {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Disabled throughout, so it reads as the row's subject rather than as a
+   control someone forgot to enable. */
+.referenceRemapSourceCurrent {
+  opacity: 0.85;
+}
+
+.referenceRemapTable td {
+  padding: 4px 8px 4px 0;
+  vertical-align: middle;
+}
+
+/* Flex lives on the inner div (.referenceRemapSourceValueRow), not this <td> —
+   see the comment on .referenceRemapSourceHeldRow for why a flexed table cell
+   is unsafe here. */
+.referenceRemapSourceValueRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.referenceRemapSourcePath {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font-family: monospace;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+
+.referenceRemapSourcesHint {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+/* The reference generator carries its own card — elevated fill, border, shadow —
+   because it normally floats over the body editor. Inside these rows it is
+   already inside one, so the card reads as a box in a box; here it is only a row
+   of controls. Restated in the dialog rather than changed in the generator,
+   which is right as it is everywhere else it appears. */
+.referenceRemap .bodyLegacyGeneratorShell {
+  min-height: 0;
+  padding: 0;
+  gap: 8px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* The generator reserves a track for its apply button, which this dialog does
+   not render (a whole reference lands as it is picked), and sizes its selects
+   for a popup it can be wider than. Reclaiming both is what lets three
+   references sit on one row. */
+.referenceRemap .bodyLegacyGeneratorShellNoToggle {
+  grid-template-columns: minmax(110px, 1fr) auto minmax(110px, 1fr);
+}
+
+.referenceRemap .bodyLegacyGeneratorShellNoToggle.bodyLegacyGeneratorShellNoMethod {
+  grid-template-columns: auto minmax(110px, 1fr);
+  /* The part is a word here, not a stack of three radios, so the row no longer
+     needs the height that stack forced. */
+  align-items: center;
+}
+
+/* One height for every control in the dialog. The generator's selects are a size
+   larger than the row's own (`size='large'`, 40px against 32px), which put two
+   selects of different heights on top of each other in the same column. */
+.referenceRemap .ant-select-single,
+.referenceRemap .ant-select-single .ant-select-selector {
+  height: 32px;
+  min-height: 32px;
+}
+
+.referenceRemap .bodyLegacyGeneratorSelect.ant-select {
+  padding-inline: 8px !important;
+  font-size: 14px !important;
+}
