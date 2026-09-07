@@ -62,6 +62,12 @@ export function OnboardingPreview() {
         setStepIndex(previousIndex)
         goTo(activeStepIds[previousIndex])
     }, [activeStepIds, goTo, stepIndex])
+    const skipConnector = useCallback(() => {
+        const finalIndex = activeStepIds.indexOf('connector-created')
+        if (finalIndex < 0) return
+        setStepIndex(finalIndex)
+        goTo(activeStepIds[finalIndex])
+    }, [activeStepIds, goTo])
 
     const steps = useMemo(() => buildIntroJoyrideSteps({
         t,
@@ -75,6 +81,7 @@ export function OnboardingPreview() {
         onSkipInvoker: advanceWithoutCompleting,
         onShowInvokerAnyway: () => setShowInvokerAnyway(true),
         onSkipTask: finishTour,
+        onSkipConnector: skipConnector,
         connectorDraft,
         onConnectorTitleChange: title => setConnectorDraft(current => ({ ...current, title, testStatus: 'idle', saveStatus: 'idle' })),
         onConnectorInvokerChange: invokerName => {
@@ -120,7 +127,7 @@ export function OnboardingPreview() {
             pause()
             void navigate('/invoker/create')
         },
-    }), [advanceWithoutCompleting, canCreateInvoker, checkConnector, connectorDraft, connectorSaving, createConnector, finishTour, goBackWithoutCompleting, includeConnectorSteps, invokerSummaries, invokers, name, navigate, paletteTargetMissing, pause, showInvokerAnyway, t])
+    }), [advanceWithoutCompleting, canCreateInvoker, checkConnector, connectorDraft, connectorSaving, createConnector, finishTour, goBackWithoutCompleting, includeConnectorSteps, invokerSummaries, invokers, name, navigate, paletteTargetMissing, pause, showInvokerAnyway, skipConnector, t])
 
     useEffect(() => {
         if (!user?.userId) return

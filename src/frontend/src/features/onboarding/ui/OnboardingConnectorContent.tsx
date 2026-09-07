@@ -50,7 +50,7 @@ export function ConnectorCredentialsContent({ title, invoker, requestData, testS
         <div>
             <p>{t('content.connector.credentialsBody')}</p>
             <div className="onboarding-wizard-progress"><b className="is-complete">✓</b><span><strong>{t('content.connector.general')}</strong><small>{title} · invoker {invoker}</small></span><i /><b>2</b><span><strong>{t('content.connector.credentials')}</strong><small>Invoker-specific fields.</small></span></div>
-            <div className="onboarding-form-grid">
+            <div className={`onboarding-form-grid${testStatus === 'error' ? ' has-validation-errors' : ''}`}>
                 {Object.entries(requestData).map(([key, value]) => (
                     <label key={key} className={/url/i.test(key) ? 'is-wide' : undefined}>{key} *<input autoFocus={key === Object.keys(requestData)[0]} required autoComplete="off" type={SENSITIVE_CREDENTIAL.test(key) ? 'password' : 'text'} value={value} onChange={event => onCredentialChange(key, event.target.value)} /></label>
                 ))}
@@ -58,7 +58,7 @@ export function ConnectorCredentialsContent({ title, invoker, requestData, testS
             <div className="onboarding-test-row">
                 <Button type="default" onClick={onBack}>{t('actions.back')}</Button>
                 <Button type="primary" loading={testStatus === 'loading'} onClick={() => void onTest()}>{t('content.connector.test')}</Button>
-                <Button type="primary" loading={saving} disabled={testStatus !== 'success' || saveStatus === 'error'} onClick={() => void onSubmit()}>Submit</Button>
+                <Button type="primary" loading={saving} disabled={!['success', 'error'].includes(testStatus) || saveStatus === 'error'} onClick={() => void onSubmit()}>{testStatus === 'error' ? t('actions.saveAnyway') : 'Submit'}</Button>
             </div>
             {saveStatus === 'error' ? (
                 <div className="onboarding-test-message is-error">{t('content.connector.saveFailed')}</div>

@@ -44,8 +44,8 @@ export function OnboardingTooltip({ backProps, closeProps, continuous, index, pr
             <footer className="onboarding-tooltip__footer">
                 <span className="onboarding-tooltip__note">{data.footerNote}</span>
                 <div className="onboarding-tooltip__actions">
-                    {index > 0 && !data.hideBack && (
-                        <button {...backProps} type="button" className="onboarding-tooltip__button">
+                    {!data.hideBack && (
+                        <button {...backProps} type="button" disabled={index === 0} className="onboarding-tooltip__button">
                             {t('actions.back')}
                         </button>
                     )}
