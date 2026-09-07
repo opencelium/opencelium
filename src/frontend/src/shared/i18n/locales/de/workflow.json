@@ -29,13 +29,13 @@
     "deleteReference": "Referenz löschen"
   },
   "referenceRemap": {
-    "intro": "Einige Schritte lesen den Schritt, den Sie löschen. Wählen Sie, was sie stattdessen lesen sollen:",
-    "perFieldHint": "Oder einzelne Felder umlenken — auf eine andere Methode oder auf Header bzw. Status:",
+    "intro": "Einige Schritte lesen den Schritt, den Sie löschen. Wählen Sie für jeden eine Ersatzmethode oder entfernen Sie den Verweis — einzelne Felder können Sie unten bei Bedarf noch anpassen:",
+    "replaceWith": "Ersetzen durch:",
+    "perFieldHint": "Optional — passen Sie nur die Felder an, die etwas anderes lesen sollen. Unverändert gelassene Felder folgen der oben gewählten Methode oder werden entfernt, falls keine gewählt wurde:",
     "resetField": "Feld zurücksetzen",
     "editCondition": "Bedingung bearbeiten",
     "columnCurrent": "Aktueller Verweis",
     "columnHeld": "Verwendet in",
-    "alsoHeld": "und {{count}} weitere",
     "columnNew": "Neuer Verweis",
     "readBy": "von {{count}} Schritten gelesen",
     "readBy_one": "von {{count}} Schritt gelesen",
