@@ -44,6 +44,8 @@ export const ONBOARDING_Z_INDEX = {
     backdrop: 20199,
     tooltip: 20200,
     checklist: 20300,
+    /** The connector form docked beside the tour: above the tooltip, below dialogs. */
+    sidePanel: 20350,
     overlay: 20400,
 } as const
 

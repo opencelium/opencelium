@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride'
 import type { CallBackProps } from 'react-joyride'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -13,12 +13,15 @@ import { useResumeAfterEntityCreated } from '../model/useResumeAfterEntityCreate
 import { ONBOARDING_Z_INDEX, PALETTE_TOUR_TARGET } from '../model/types'
 import { OnboardingTooltip } from './OnboardingTooltip'
 import { OnboardingChecklist } from './OnboardingChecklist'
+import { ConnectorFormPanel } from './ConnectorFormPanel'
 import './onboardingTooltip.css'
 
 /** ?onboarding=1 replays the tour even after it has been completed. */
 const PREVIEW_PARAM = 'onboarding'
 /** The checklist would sit on top of the workflow canvas' own controls. */
 const CHECKLIST_HIDDEN_ROUTE = '/workflow/'
+/** Narrows and shifts the tooltip while the connector form is docked beside it. */
+const SIDE_OPEN_CLASS = 'onboarding-side-open'
 const DASHBOARD_ROUTE = '/'
 /** Ring drawn around the spotlit palette, in px. */
 const SPOTLIGHT_PADDING = 8
@@ -40,7 +43,7 @@ export function OnboardingPreview() {
         ? document.querySelector(PALETTE_TOUR_TARGET)?.getBoundingClientRect()
         : undefined
 
-    const { steps, stepIndex, setStepIndex, activeStepIds, advance, goToIndex, invokerCount, invokersLoaded, connectorCount, connectorsLoaded, stepAfterLicense, licenseActive, licenseLoaded, reset } = useIntroSteps({
+    const { steps, stepIndex, setStepIndex, activeStepIds, advance, goToIndex, invokerCount, invokersLoaded, connectorCount, connectorsLoaded, connectorFormInvoker, closeConnectorForm, stepAfterLicense, licenseActive, licenseLoaded, reset } = useIntroSteps({
         isAdmin,
         canCreateInvoker: hasComponentPermission(normalizedUser?.permissions ?? [], 'INVOKER', 'CREATE'),
         canCreateConnector: hasComponentPermission(normalizedUser?.permissions ?? [], 'CONNECTOR', 'CREATE'),
@@ -85,6 +88,12 @@ export function OnboardingPreview() {
         resumeOnStep: stepAfterLicense,
         onResume: start,
     })
+
+    useEffect(() => {
+        const root = document.documentElement
+        root.classList.toggle(SIDE_OPEN_CLASS, connectorFormInvoker !== null)
+        return () => root.classList.remove(SIDE_OPEN_CLASS)
+    }, [connectorFormInvoker])
 
     const handleRestartRequested = useCallback(() => {
         allowNextRouteChangeRef.current = true
@@ -177,6 +186,11 @@ export function OnboardingPreview() {
                         transition: 'none',
                     },
                 }}
+            />
+            <ConnectorFormPanel
+                invokerName={connectorFormInvoker}
+                onClose={closeConnectorForm}
+                onCreated={closeConnectorForm}
             />
             {showChecklist && (
                 <OnboardingChecklist
