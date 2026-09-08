@@ -4,7 +4,7 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="title" parent="1" style="text;html=1;fontSize=16;fontStyle=1;align=left;verticalAlign=middle;" value="OpenCelium — Workflow execution rework: Core / Worker split, security &amp; pluggable transport (SPI)" vertex="1">
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=16;fontStyle=1;align=left;verticalAlign=middle;" value="OpenCelium — Workflow execution rework: Core / Worker split, security, multi-tenant cloud &amp; pluggable transport (SPI)" vertex="1">
           <mxGeometry height="30" width="1000" x="300" y="10" as="geometry" />
         </mxCell>
         <mxCell id="coreC" parent="1" style="rounded=1;arcSize=6;fillColor=none;strokeColor=#666666;dashed=1;verticalAlign=top;align=left;spacingLeft=12;spacingTop=6;fontStyle=1;fontSize=12;html=1;" value="oc-app.jar — CORE (bundles the executor too in monolith mode) · Gradle: core + execution" vertex="1">
@@ -22,10 +22,10 @@
         <mxCell id="idpCloud" parent="1" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" value="" vertex="1">
           <mxGeometry height="65" width="110" x="55" y="350" as="geometry" />
         </mxCell>
-        <mxCell id="idpTxt" parent="1" style="text;html=1;fontStyle=1;fontSize=10;align=center;verticalAlign=middle;" value="🌍 Identity Providers&#xa;(OIDC · LDAP)" vertex="1">
+        <mxCell id="idpTxt" parent="1" style="text;html=1;fontStyle=1;fontSize=10;align=center;verticalAlign=middle;" value="🌍 Identity Providers&#xa;(OIDC · LDAP · Service Portal)" vertex="1">
           <mxGeometry height="44" width="150" x="40" y="420" as="geometry" />
         </mxCell>
-        <mxCell id="sec" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" value="🔐 Security Filter Chain&#xa;(JWT · OIDC · LDAP · 2FA/TOTP)" vertex="1">
+        <mxCell id="sec" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" value="🔐 Security Filter Chain — pluggable strategies per deployment mode&#xa;(JWT · OIDC · LDAP · Service Portal · 2FA/TOTP)" vertex="1">
           <mxGeometry height="60" width="220" x="280" y="120" as="geometry" />
         </mxCell>
         <mxCell id="rest" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" value="🌐 REST API&#xa;(workflows, schedulers, logs)" vertex="1">
@@ -55,7 +55,7 @@
         <mxCell id="mongoCyl" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
           <mxGeometry height="80" width="60" x="80" y="535" as="geometry" />
         </mxCell>
-        <mxCell id="mongoTxt" parent="1" style="text;html=1;fontStyle=1;fontSize=10;align=left;verticalAlign=middle;whiteSpace=wrap;" value="MongoDB (central)&#xa;(workflows, schedulers, credentials, users/roles, global params, snapshots, logs)" vertex="1">
+        <mxCell id="mongoTxt" parent="1" style="text;html=1;fontStyle=1;fontSize=10;align=left;verticalAlign=middle;whiteSpace=wrap;" value="MongoDB — static in self-hosted mode, per-tenant routing in cloud mode&#xa;(workflows, schedulers, credentials, users/roles, global params, snapshots, checkpoints, audit, logs — all tenant-keyed)" vertex="1">
           <mxGeometry height="94" width="185" x="150" y="528" as="geometry" />
         </mxCell>
         <mxCell id="bus" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;" value="🐰 Message Broker&#xa;(RabbitMQ / any AMQP)" vertex="1">
@@ -81,6 +81,37 @@
         </mxCell>
         <mxCell id="docfile" parent="1" style="shape=mxgraph.basic.document;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;fontSize=11;" value="🗂️ Local Log Files&#xa;(spool / buffer)" vertex="1">
           <mxGeometry height="70" width="175" x="905" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" value="🏢 Tenant Context&#xa;(cloud: starts without DB · portal login → tenant ID → dynamic per-tenant Mongo routing)" vertex="1">
+          <mxGeometry height="60" width="210" x="560" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="statebox" parent="1" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" value="💾 Execution State Machine&#xa;(RUNNING → PAUSED | WAITING | COMPLETED | FAILED · checkpoints · resume from frontier)" vertex="1">
+          <mxGeometry height="70" width="205" x="390" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="eTEN1" edge="1" parent="1" source="sec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=1;exitY=0.8;entryX=0.5;entryY=0;" target="tenant" value="tenant ID from principal">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="665" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eTEN2" edge="1" parent="1" source="tenant" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0;exitY=0.5;entryX=0.4;entryY=0;" target="mongoC" value="opens per-tenant connections post-login">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="300" />
+              <mxPoint x="172" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eST1" edge="1" parent="1" source="exec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.2;exitY=1;entryX=1;entryY=0.3;" target="statebox" value="state transitions + checkpoints">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="726" y="891" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eST2" edge="1" parent="1" source="statebox" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.3;exitY=0;entryX=0.7;entryY=1;" target="endpoint" value="state + checkpoint events">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="extC" parent="1" style="rounded=1;arcSize=10;fillColor=none;strokeColor=#666666;dashed=1;html=1;" value="" vertex="1">
           <mxGeometry height="160" width="300" x="1200" y="740" as="geometry" />
@@ -114,13 +145,13 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="note" parent="1" style="text;html=1;fontSize=11;align=left;verticalAlign=top;whiteSpace=wrap;fontColor=#333333;" value="ℹ️ Monolith mode: oc-app.jar bundles Core + Executor — the Dispatcher calls the executor in-process, no broker needed. Distributed mode: the same code ships as oc-worker.jar; workers are FULLY ISOLATED — no MongoDB access, no persistent state: the job message carries everything (workflow snapshot, credentials, global params — encrypted on the broker) and all results leave as events. Only Core touches MongoDB; raw log files on a worker are a transient spool, not state. DAG Scheduler: data + control dependencies decide order — independent nodes and loop iterations run concurrently (bounded per external system); same-connector writes stay ordered unless the user marks a branch parallel-safe. Security: JWT, LDAP and TOTP 2FA exist today — OIDC is new in the rework; ACL: role-based RBAC (component × action) PLUS per-resource ACLs — platform-wide requirement, applied to workflows first: each workflow document carries its ACL, enforced in Mongo queries, REST and WebSocket topic subscriptions; execution logs inherit the workflow&#39;s ACL. WebSocket sessions live only in Core — live-run streams are fed from broker events, never from worker memory." vertex="1">
-          <mxGeometry height="90" width="800" x="240" y="1010" as="geometry" />
+        <mxCell id="note" parent="1" style="text;html=1;fontSize=11;align=left;verticalAlign=top;whiteSpace=wrap;fontColor=#333333;" value="ℹ️ Monolith mode: oc-app.jar bundles Core + Executor — the Dispatcher calls the executor in-process, no broker needed. Distributed mode: the same code ships as oc-worker.jar; workers are FULLY ISOLATED — no MongoDB access, no persistent state: the job message carries everything (workflow snapshot, credentials, global params — encrypted on the broker) and all results leave as events. Only Core touches MongoDB; raw log files on a worker are a transient spool, not state. DAG Scheduler: data + control dependencies decide order — independent nodes and loop iterations run concurrently (bounded per external system); same-connector writes stay ordered unless the user marks a branch parallel-safe. Security: JWT, LDAP and TOTP 2FA exist today — OIDC is new in the rework; ACL: role-based RBAC (component × action) PLUS per-resource ACLs — platform-wide requirement, applied to workflows first: each workflow document carries its ACL, enforced in Mongo queries, REST and WebSocket topic subscriptions; execution logs inherit the workflow&#39;s ACL. WebSocket sessions live only in Core — live-run streams are fed from broker events, never from worker memory. REDESIGN ROADMAP ADDITIONS (decisions #10–12): authentication is a pluggable strategy per deployment mode (Service Portal in cloud) and separate from authorization; tenant context is first-class — cloud mode starts without a DB, the portal login supplies tenant ID + database info, Core routes MongoClients per tenant, and the tenant ID travels inside job messages and events (tenancy is orthogonal to deployment shape); executions are checkpointable — an execution-level state machine (RUNNING → PAUSED | WAITING | COMPLETED | FAILED) checkpoints at node-completion granularity so workflows pause for human input, survive restarts, and resume on a different worker; the Execution Debugger drives the same mechanism interactively on the local transport (checkpoint/resume design lives in the debugger story, ST-07)." vertex="1">
+          <mxGeometry height="140" width="800" x="240" y="1010" as="geometry" />
         </mxCell>
         <mxCell id="legend" parent="1" style="text;html=1;fontSize=11;align=left;verticalAlign=top;whiteSpace=wrap;fontColor=#333333;" value="LEGEND&#xa;— solid black: synchronous call&#xa;-- dashed gray: async job delivery (broker)&#xa;-- dashed orange: async log / status events&#xa;-- dashed purple: pluggable transport (SPI)&#xa;·· dotted gray: build-time (Gradle artifacts)" vertex="1">
           <mxGeometry height="135" width="320" x="1160" y="920" as="geometry" />
         </mxCell>
-        <mxCell id="modmap" parent="1" style="text;html=1;fontSize=10;align=left;verticalAlign=top;whiteSpace=wrap;fontColor=#666666;" value="GRADLE MODULES&#xa;common — shared contracts: workflow model, DTOs, transport SPI, ACL model&#xa;execution — engine library: DAG Scheduler, Workflow Executor, Request Builder, OcLogger&#xa;core → oc-app.jar · worker → oc-worker.jar" vertex="1">
+        <mxCell id="modmap" parent="1" style="text;html=1;fontSize=10;align=left;verticalAlign=top;whiteSpace=wrap;fontColor=#666666;" value="GRADLE MODULES&#xa;common — shared contracts: workflow model, DTOs, transport SPI, ACL model, tenant context&#xa;execution — engine library: DAG Scheduler, Workflow Executor, Request Builder, OcLogger&#xa;core → oc-app.jar · worker → oc-worker.jar" vertex="1">
           <mxGeometry height="90" width="320" x="1160" y="1060" as="geometry" />
         </mxCell>
         <mxCell id="e1" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0;entryY=0.5;" target="sec">
@@ -136,7 +167,7 @@
         <mxCell id="eS2" edge="1" parent="1" source="sec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="acl" value="authorizes">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="eS3" edge="1" parent="1" source="sec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0;exitY=0.8;entryX=1;entryY=0.5;" target="idpC" value="OIDC / LDAP verification">
+        <mxCell id="eS3" edge="1" parent="1" source="sec" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#000000;fontSize=10;labelBackgroundColor=#ffffff;exitX=0;exitY=0.8;entryX=1;entryY=0.5;" target="idpC" value="OIDC / LDAP / Service Portal verification (cloud: login returns tenant ID + DB info)">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="215" y="168" />
@@ -203,7 +234,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="e12" edge="1" parent="1" source="endpoint" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.833;exitY=0;entryX=0.818;entryY=1;" target="bus" value="publishes logs + status events">
+        <mxCell id="e12" edge="1" parent="1" source="endpoint" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=1.5;strokeColor=#d79b00;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;exitX=0.833;exitY=0;entryX=0.818;entryY=1;" target="bus" value="publishes events: results · logs · state transitions · variable updates · heartbeats">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="420" y="705" />
