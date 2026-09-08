@@ -2,6 +2,12 @@ import { baseApi } from '@shared/api/baseApi'
 import { connectorApi } from '@entities/connector/api/connectorApi'
 import type { Connector } from '@entities/connector/model/types'
 
+/** Backend default when the user doesn't touch the timeout field. */
+export const DEFAULT_CONNECTOR_TIMEOUT = 30
+
+/** Shown when the chosen invoker declares no `requiredData` of its own. */
+export const DEFAULT_CREDENTIAL_FIELDS: Record<string, string> = { Url: '', Username: '', Password: '' }
+
 export type OnboardingConnectorPayload = {
     title: string
     description: string

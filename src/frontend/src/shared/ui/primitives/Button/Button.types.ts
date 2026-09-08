@@ -23,9 +23,6 @@ export interface ButtonProps {
 	/** Stable selector for e2e tests; emitted as `data-testid`. */
 	testId?: string;
 	className?: string;
-	role?: React.AriaRole;
-	'aria-checked'?: boolean;
-	tabIndex?: number;
 }
 export type ButtonComponent = React.ForwardRefExoticComponent<
 	ButtonProps & React.RefAttributes<HTMLButtonElement>

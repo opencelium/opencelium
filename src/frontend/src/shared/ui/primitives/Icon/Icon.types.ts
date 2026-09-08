@@ -63,6 +63,7 @@ export type IconName =
     | 'redo'
     | 'if'
     | 'loop'
+    | 'circle'
 
 export type IconColor =
     | 'default'

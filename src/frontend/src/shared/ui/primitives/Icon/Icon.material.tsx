@@ -56,6 +56,7 @@ import {
     Redo,
     CallSplit,
     Loop,
+    RadioButtonUnchecked,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -118,6 +119,7 @@ const iconMap = {
     redo: Redo,
     if: CallSplit,
     loop: Loop,
+    circle: RadioButtonUnchecked,
 };
 
 export const MaterialIcon: IconComponent = ({
