@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride'
 import type { CallBackProps } from 'react-joyride'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { hasComponentPermission } from '@/engine/policy'
 import { useAuth } from '@features/auth/useAuth'
 import { useIsAdmin } from '@features/auth/useIsAdmin'
@@ -9,6 +9,7 @@ import { useTheme } from '@shared/theme/hooks/useTheme'
 import { useOnboardingStore } from '../model/onboarding.store'
 import { useIntroSteps } from '../model/useIntroSteps'
 import { useTourLifecycle } from '../model/useTourLifecycle'
+import { useResumeAfterEntityCreated } from '../model/useResumeAfterEntityCreated'
 import { ONBOARDING_Z_INDEX, PALETTE_TOUR_TARGET } from '../model/types'
 import { OnboardingTooltip } from './OnboardingTooltip'
 import { OnboardingChecklist } from './OnboardingChecklist'
@@ -18,6 +19,7 @@ import './onboardingTooltip.css'
 const PREVIEW_PARAM = 'onboarding'
 /** The checklist would sit on top of the workflow canvas' own controls. */
 const CHECKLIST_HIDDEN_ROUTE = '/workflow/'
+const DASHBOARD_ROUTE = '/'
 /** Ring drawn around the spotlit palette, in px. */
 const SPOTLIGHT_PADDING = 8
 
@@ -26,6 +28,7 @@ export function OnboardingPreview() {
     const isAdmin = useIsAdmin()
     const { themeMode } = useTheme()
     const location = useLocation()
+    const navigate = useNavigate()
     const previousPathRef = useRef(location.pathname)
     const allowNextRouteChangeRef = useRef(false)
     const [paletteTargetMissing, setPaletteTargetMissing] = useState(false)
@@ -37,11 +40,50 @@ export function OnboardingPreview() {
         ? document.querySelector(PALETTE_TOUR_TARGET)?.getBoundingClientRect()
         : undefined
 
-    const { steps, stepIndex, setStepIndex, activeStepIds, advance, goToIndex, invokerCount, reset } = useIntroSteps({
+    const { steps, stepIndex, setStepIndex, activeStepIds, advance, goToIndex, invokerCount, invokersLoaded, connectorCount, connectorsLoaded, stepAfterLicense, licenseActive, licenseLoaded, reset } = useIntroSteps({
         isAdmin,
         canCreateInvoker: hasComponentPermission(normalizedUser?.permissions ?? [], 'INVOKER', 'CREATE'),
         canCreateConnector: hasComponentPermission(normalizedUser?.permissions ?? [], 'CONNECTOR', 'CREATE'),
         paletteTargetMissing,
+    })
+
+    // Both handoff steps resume in place rather than navigating home, so the
+    // wizard's own success screen stays visible behind the tooltip and no route
+    // change re-pauses the tour.
+    useResumeAfterEntityCreated({
+        count: invokerCount,
+        loaded: invokersLoaded,
+        status,
+        stepId,
+        resumeOnStep: 'invoker',
+        onResume: advance,
+    })
+    // Back to the connector step rather than onward, so another connector is one
+    // click away. Routing home first is deliberate: the create form is still
+    // mounted, and navigating it to a new ?invoker= would not re-read the default.
+    const returnToConnectorStep = useCallback(() => {
+        allowNextRouteChangeRef.current = true
+        void navigate(DASHBOARD_ROUTE)
+        start()
+    }, [navigate, start])
+    useResumeAfterEntityCreated({
+        count: connectorCount,
+        loaded: connectorsLoaded,
+        status,
+        stepId,
+        resumeOnStep: 'connector',
+        onResume: returnToConnectorStep,
+    })
+    // The licence step advances on its way out, so the tour is already parked on
+    // the step after it — activating a licence only has to un-pause. `active`
+    // false -> true is the same monotonic signal a growing list gives.
+    useResumeAfterEntityCreated({
+        count: licenseActive ? 1 : 0,
+        loaded: licenseLoaded,
+        status,
+        stepId,
+        resumeOnStep: stepAfterLicense,
+        onResume: start,
     })
 
     const handleRestartRequested = useCallback(() => {

@@ -111,7 +111,3 @@ export function ThemeChoiceContent() {
     )
 }
 
-export function ThemeFooterNote() {
-    const { t } = useI18n('onboarding')
-    return <span>{t('content.theme.changeLater')} <code>/ui/config</code> {t('content.theme.orWith')} <kbd>Ctrl</kbd> <kbd>K</kbd> <code>ui theme</code></span>
-}

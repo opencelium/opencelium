@@ -125,7 +125,11 @@ export function FirstInvokerContent({ onCreateManually, onUploaded, onGitDownloa
                         testId="onboarding-invoker-git"
                         onClick={() => {
                             setGitLoading(true)
-                            window.setTimeout(() => { setGitLoading(false); onGitDownloaded() }, FAKE_GIT_FETCH_MS)
+                            window.setTimeout(() => {
+                                setGitLoading(false)
+                                message.success(t('content.invoker.gitSuccess'))
+                                onGitDownloaded()
+                            }, FAKE_GIT_FETCH_MS)
                         }}
                     >
                         {t('content.invoker.gitAction')}
