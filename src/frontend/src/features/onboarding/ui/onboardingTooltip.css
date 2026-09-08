@@ -10,6 +10,7 @@
     background: var(--color-background-surface);
     color: var(--color-text-primary);
     box-shadow: var(--shadow-lg);
+	font-family: var(--typography-font-family-body);
 }
 
 .onboarding-tooltip__accent { height: 3px; background: var(--color-action-primary); }
@@ -93,6 +94,9 @@
 }
 
 .onboarding-tooltip__actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.onboarding-tooltip__actions > button,
+.onboarding-test-row > button,
+.onboarding-license__actions > button { min-height: 40px; font-family: var(--typography-font-family-body); }
 .onboarding-tooltip__button {
     min-height: 34px;
     border: 0;
@@ -110,6 +114,9 @@
 .onboarding-tooltip__button--primary:hover { background: var(--color-action-primary-hover); color: var(--color-text-inverted); }
 .onboarding-tooltip__button:disabled { cursor: not-allowed; opacity: .45; }
 .onboarding-tooltip__button:disabled:hover { background: var(--color-action-primary); color: var(--color-text-inverted); }
+
+/* Joyride appends an inline opacity transition after merged step styles. */
+.react-joyride__spotlight { transition: none !important; }
 
 @media (max-width: 900px) {
     .onboarding-tooltip { width: min(520px, calc(100vw - 32px)); }
@@ -134,4 +141,16 @@
     .onboarding-tooltip--theme .onboarding-tooltip__content { padding-right: 18px; padding-left: 18px; }
     .onboarding-tooltip--theme .onboarding-tooltip__title,
     .onboarding-tooltip--theme .onboarding-tooltip__footer { margin-right: 18px; margin-left: 18px; }
+}
+.onboarding-backdrop {
+    position: fixed;
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 20199;
+}
+
+html.onboarding-tour-active,
+html.onboarding-tour-active body {
+    overflow: hidden;
+    scrollbar-gutter: stable;
 }

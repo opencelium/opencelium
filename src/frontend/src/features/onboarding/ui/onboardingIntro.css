@@ -9,14 +9,15 @@
 
 .onboarding-theme-lead { margin: 0 0 18px; }
 .onboarding-theme-grid { display: grid; grid-template-columns: 1fr 1fr 2.25fr; gap: 14px; }
-.onboarding-theme-card { display: flex; min-height: 252px; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid var(--color-border-subtle); border-radius: 10px; background: transparent; color: var(--color-text-primary); text-align: left; cursor: pointer; }
+.onboarding-theme-card { display: block; min-height: 252px; padding: 14px; border: 1px solid var(--color-border-subtle); border-radius: 10px; background: transparent; color: var(--color-text-primary); text-align: left; text-transform: none; cursor: pointer; }
+.onboarding-theme-card__content { display: flex; width: 100%; height: 100%; flex-direction: column; gap: 8px; white-space: normal; }
 .onboarding-theme-card:focus-visible { outline: 2px solid var(--color-action-primary); outline-offset: 3px; }
 .onboarding-theme-card.is-selected { border-color: var(--color-action-primary); box-shadow: inset 0 0 0 1px var(--color-action-primary); background: color-mix(in srgb, var(--color-action-primary) 6%, transparent); }
-.onboarding-theme-card > strong { display: flex; align-items: center; gap: 3px; }
+.onboarding-theme-card__content > strong { display: flex; align-items: center; gap: 3px; }
 .onboarding-theme-icon { width: 19px; flex: none; font-size: 16px; line-height: 1; }
 .onboarding-theme-state { display: grid; width: 18px; height: 18px; margin-left: auto; place-items: center; border: 1px solid var(--color-border-strong); border-radius: 50%; color: var(--color-text-inverted); font-size: 11px; font-style: normal; }
 .is-selected .onboarding-theme-state { border-color: var(--color-action-primary); background: var(--color-action-primary); }
-.onboarding-theme-card > span:last-child { color: var(--color-text-secondary); font-size: 13px; }
+.onboarding-theme-description { color: var(--color-text-secondary); font-size: 13px; line-height: 1.45; }
 .onboarding-theme-preview { display: flex; height: 150px; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: 7px; background: #f8fafc; }
 .onboarding-theme-preview__nav { display: flex; width: 24px; flex: none; flex-direction: column; align-items: center; gap: 6px; padding-top: 9px; background: #172033; }
 .onboarding-theme-preview__nav i { width: 7px; height: 7px; border-radius: 50%; background: #465264; }
@@ -89,9 +90,19 @@
 .onboarding-invoker-grid li::before { display: grid; width: 22px; height: 22px; flex: none; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--color-action-primary) 12%, transparent); color: var(--color-action-primary); font-weight: 700; content: counter(invoker-step); }
 .onboarding-invoker-grid section:not(.is-recommended) > button { width: 100%; border-color: var(--color-action-primary); color: var(--color-action-primary); font-weight: 600; }
 .onboarding-manual-time { color: var(--color-text-secondary); }
+.onboarding-invoker-options { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+.onboarding-invoker-options > section { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; border: 1px solid var(--color-border-subtle); border-radius: 10px; padding: 14px 16px; background: var(--color-background-elevated); }
+.onboarding-invoker-options > section.is-recommended { border: 2px solid var(--color-action-primary); }
+.onboarding-invoker-options h3, .onboarding-invoker-options p { margin: 0; }
+.onboarding-invoker-options p { margin-top: 3px; font-size: 13px; }
+.onboarding-invoker-options code { color: var(--color-text-secondary); font-size: 11px; }
+.onboarding-invoker-options .onboarding-dropzone { width: 260px; min-height: 42px; flex-direction: row; padding: 0 12px; }
+.onboarding-invoker-options .onboarding-dropzone > button { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
 
 @media (max-width: 760px) {
     .onboarding-theme-grid, .onboarding-copy-grid, .onboarding-invoker-grid { grid-template-columns: 1fr; }
+    .onboarding-invoker-options > section { grid-template-columns: 1fr; }
+    .onboarding-invoker-options .onboarding-dropzone { width: auto; }
     .onboarding-layer-grid { grid-template-columns: 1fr; }
     .onboarding-layer-grid > b { display: none; }
     .onboarding-theme-card, .onboarding-invoker-grid section { min-height: auto; }

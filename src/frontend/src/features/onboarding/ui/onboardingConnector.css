@@ -64,7 +64,7 @@
 }
 .onboarding-form-grid input:user-invalid,
 .onboarding-form-grid select:user-invalid,
-.onboarding-form-grid.has-validation-errors input:required {
+.onboarding-form-grid input.is-validation-error {
 	border-width: 2px;
 	border-color: var(--color-status-error, #f04438);
 }
@@ -85,7 +85,8 @@
 	margin-top: 14px;
 }
 .onboarding-test-row > button:last-child { margin-left: auto; }
-.onboarding-test-message { margin-top: 12px; border-left: 3px solid currentColor; padding: 9px 12px; font-size: 13px; font-weight: 600; }
+.onboarding-test-message-slot { height: 50px; overflow: hidden; }
+.onboarding-test-message { box-sizing: border-box; height: 38px; margin-top: 12px; border-left: 3px solid currentColor; padding: 9px 12px; font-size: 13px; font-weight: 600; line-height: 20px; }
 .onboarding-test-message.is-success { background: color-mix(in srgb, var(--color-status-success, #237804) 8%, transparent); color: var(--color-status-success, #237804); }
 .onboarding-test-message.is-error { background: color-mix(in srgb, var(--color-status-error, #f04438) 8%, transparent); color: var(--color-status-error, #f04438); }
 .onboarding-test-success {
