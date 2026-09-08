@@ -33,6 +33,7 @@ export function StepFormLayout({
     skipSuccessState,
     hideSubmit,
     hideHeader,
+    compact,
 }: GenericStepFormProps) {
     const {isTabletOrMobile} = useBreakpoints();
     const {t: tEntities} = useI18n('entities')
@@ -208,10 +209,10 @@ export function StepFormLayout({
                 <div
                     className="step-form-main"
                     style={{
-                        display: isTabletOrMobile ? "grid" : "flex",
+                        display: compact || isTabletOrMobile ? "grid" : "flex",
                     }}
                 >
-                    {!isSuccess && <div style={{flex: 1, minWidth: 0, marginBottom: isTabletOrMobile ? 30 : 0}}>
+                    {!isSuccess && <div style={{flex: 1, minWidth: 0, marginBottom: compact || isTabletOrMobile ? 30 : 0}}>
                         <div
                             style={{
                                 overflow: 'hidden',
@@ -222,6 +223,7 @@ export function StepFormLayout({
                                 items={items}
                                 status="process"
                                 current={currentStep}
+                                compact={compact}
                             />
                         </div>
                     </div>}

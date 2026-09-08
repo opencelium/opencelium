@@ -9,7 +9,6 @@ import { useOnboardingStore } from './onboarding.store'
 import { useGetConnectorsMetaQuery } from '@entities/connector/api/connectorApi'
 import { useGetActiveSubscriptionQuery } from '@entities/subscription/api/subscriptionApi'
 import { ONBOARDING_STEP_ORDER, type OnboardingStepId } from './types'
-import { buildConnectorCreateLink } from '@entities/connector/lib/connectorCreateLink'
 
 // STUB: "download from git" is not implemented. FirstInvokerContent fakes the
 // fetch with a timer and this splices a placeholder invoker into the tour's own
@@ -42,6 +41,7 @@ export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, p
     const [stepIndex, setStepIndex] = useState(0)
     const [showInvokerAnyway, setShowInvokerAnyway] = useState(false)
     const [mockGitInvokerLoaded, setMockGitInvokerLoaded] = useState(false)
+    const [connectorFormInvoker, setConnectorFormInvoker] = useState<string | null>(null)
     const { data: invokerList } = useGetInvokersQuery(undefined, { skip: !isAdmin })
     const { data: connectorList } = useGetConnectorsMetaQuery(undefined, { skip: !isAdmin })
     const { data: subscription } = useGetActiveSubscriptionQuery(undefined, { skip: !isAdmin })
@@ -108,10 +108,8 @@ export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, p
         onSkipInvoker: advance,
         onShowInvokerAnyway: () => setShowInvokerAnyway(true),
         onSkipTask: finishTour,
-        onCreateConnectorFor: invokerName => {
-            pause()
-            void navigate(buildConnectorCreateLink(invokerName))
-        },
+        // No navigation: the form opens docked beside the tour, so the step stays put.
+        onCreateConnectorFor: setConnectorFormInvoker,
         // Completing first means the route change below cannot re-pause the tour,
         // and the checklist shows every milestone done rather than "paused".
         onCreateWorkflow: () => {
@@ -132,14 +130,19 @@ export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, p
         },
     }), [advance, canCreateInvoker, complete, finishTour, includeConnectorSteps, invokerSummaries, navigate, paletteTargetMissing, pause, showInvokerAnyway, t, userName])
 
+    const closeConnectorForm = useCallback(() => setConnectorFormInvoker(null), [])
+
     const reset = useCallback(() => {
         setStepIndex(0)
         setShowInvokerAnyway(false)
         setMockGitInvokerLoaded(false)
+        setConnectorFormInvoker(null)
     }, [])
 
     return {
         steps, stepIndex, setStepIndex, activeStepIds, advance, goToIndex, reset,
+        connectorFormInvoker,
+        closeConnectorForm,
         stepAfterLicense: activeStepIds[activeStepIds.indexOf('license') + 1],
         licenseActive: subscription?.active === true,
         licenseLoaded: subscription !== undefined,
