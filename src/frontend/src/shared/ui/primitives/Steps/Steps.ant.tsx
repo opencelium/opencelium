@@ -12,7 +12,7 @@ const AntSteps: StepsComponent =
     }) => {
         const {isTabletOrMobile} = useBreakpoints();
         const steps = useMemo(() => {
-            return items.map(i => ({title: i.header, content: isTabletOrMobile ? undefined : i.subheader, status: i.status}))
+            return items.map(i => ({title: i.header, content: isTabletOrMobile ? undefined : i.subheader, status: i.status, disabled: i.disabled}))
         }, [items, isTabletOrMobile])
         const handleChange = items.some(item => item.onClick)
             ? (nextStep: number) => { void items[nextStep]?.onClick?.() }
