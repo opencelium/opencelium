@@ -5,6 +5,7 @@ import type { CommandNode } from './types';
 // import {store} from "@app/store/store.ts";
 import {EntityWizard} from "@/engine/entity/runtime/EntityWizard.tsx";
 import {CommandReferenceDialog} from "@widgets/CommandPalette/CommandReferenceDialog.tsx";
+import { ONBOARDING_RESTART_EVENT } from '@features/onboarding/model/types'
 
 export const systemCommands: CommandNode<any>[] = [
     // "login" command (role impersonation) is disabled — commented out so it no
@@ -105,7 +106,7 @@ export const systemCommands: CommandNode<any>[] = [
                 execute: (_, ctx) => {
                     ctx.setInputValue('')
                     ctx.navigate('/')
-                    window.dispatchEvent(new Event('opencelium:onboarding:restart'))
+                    window.dispatchEvent(new Event(ONBOARDING_RESTART_EVENT))
                 },
             },
         ],

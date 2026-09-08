@@ -8,7 +8,7 @@ import { Button } from '@shared/ui/primitives/Button'
 export type OnboardingTooltipData = {
     kicker: string
     kind?: OnboardingStepKind
-    total?: number
+    total: number
     badge?: string
     footerNote?: ReactNode
     secondaryLabel?: string
@@ -39,7 +39,7 @@ export function OnboardingTooltip({ backProps, closeProps, continuous, index, pr
                     <span>{data.kicker}</span>
                     {data.badge && <span className="onboarding-tooltip__badge">{data.badge}</span>}
                 </div>
-                <span className="onboarding-tooltip__counter">{index + 1} of {data.total ?? 8}</span>
+                <span className="onboarding-tooltip__counter">{t('progress.counter', { current: index + 1, total: data.total })}</span>
             </header>}
             {step.title && <h2 className="onboarding-tooltip__title">{step.title}</h2>}
             <div className="onboarding-tooltip__content">{step.content}</div>
