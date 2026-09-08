@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { OnboardingStepKind } from '../model/types'
 import './onboardingTooltip.css'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
+import { Button } from '@shared/ui/primitives/Button'
 
 export type OnboardingTooltipData = {
     kicker: string
@@ -17,6 +18,7 @@ export type OnboardingTooltipData = {
     primaryAction?: () => void | Promise<void>
     hideBack?: boolean
     hideSecondary?: boolean
+    hidePrimary?: boolean
     brand?: boolean
     hideHeader?: boolean
     hideAccent?: boolean
@@ -45,24 +47,22 @@ export function OnboardingTooltip({ backProps, closeProps, continuous, index, pr
                 <span className="onboarding-tooltip__note">{data.footerNote}</span>
                 <div className="onboarding-tooltip__actions">
                     {!data.hideBack && (
-                        <button {...backProps} type="button" disabled={index === 0} className="onboarding-tooltip__button">
+                        <Button type="default" onClick={backProps.onClick as unknown as () => void} disabled={index === 0}>
                             {t('actions.back')}
-                        </button>
+                        </Button>
                     )}
                     {!data.hideSecondary && (
-                        <button
-                            {...closeProps}
-                            type="button"
-                            className="onboarding-tooltip__button"
-                            onClick={data.secondaryAction ?? closeProps.onClick}
+                        <Button
+                            type="default"
+                            onClick={data.secondaryAction ?? (closeProps.onClick as unknown as () => void)}
                         >
                             {data.secondaryLabel ?? t('actions.skipTour')}
-                        </button>
+                        </Button>
                     )}
-                    {continuous && (
-                        <button {...primaryProps} type="button" autoFocus={index === 0} disabled={data.primaryDisabled} onClick={data.primaryAction ?? primaryProps.onClick} className="onboarding-tooltip__button onboarding-tooltip__button--primary">
+                    {continuous && !data.hidePrimary && (
+                        <Button type="primary" disabled={data.primaryDisabled} onClick={data.primaryAction ?? (primaryProps.onClick as unknown as () => void)}>
                             {data.primaryLabel ?? (primaryProps.title === 'Last' ? t('actions.finish') : t('actions.next'))}
-                        </button>
+                        </Button>
                     )}
                 </div>
             </footer>

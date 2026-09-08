@@ -12,6 +12,7 @@ import {
 import type { OnboardingTooltipData } from '../ui/OnboardingTooltip'
 import { ConnectorCreatedContent, ConnectorCredentialsContent, ConnectorGeneralContent } from '../ui/OnboardingConnectorContent'
 import type { useI18n } from '@shared/i18n/hooks/useI18n'
+import { OnboardingLicenseContent } from '../ui/OnboardingLicenseContent'
 
 type BuildIntroStepsOptions = {
     t: ReturnType<typeof useI18n<'onboarding'>>['t']
@@ -22,6 +23,7 @@ type BuildIntroStepsOptions = {
     paletteTargetMissing: boolean
     onCreateInvoker: () => void
     onInvokerUploaded: () => void
+    onGitInvokersDownloaded: () => void
     onSkipInvoker: () => void
     invokers: Array<{ name: string; methodCount: number; requiredData: Record<string, string> }>
     onShowInvokerAnyway: () => void
@@ -32,18 +34,19 @@ type BuildIntroStepsOptions = {
     onConnectorInvokerChange: (value: string) => void
     onConnectorCredentialChange: (key: string, value: string) => void
     onConnectorBack: () => void
-    onTestConnector: () => Promise<void>
+    onTestConnector: () => Promise<'success' | 'error'>
     onSaveConnector: () => Promise<void>
     connectorSaving: boolean
-    onBuildWorkflow: () => void
     onFinishDashboard: () => void
+    onRemindLicense: () => void
+    onFinishLicense: () => void
 }
 
 function data(value: OnboardingTooltipData): OnboardingTooltipData {
-    return { total: 8, ...value }
+    return { total: 9, ...value }
 }
 
-export function buildIntroJoyrideSteps({ t, userName, includeInvokerStep, includeConnectorSteps, showInvokerTask, paletteTargetMissing, onCreateInvoker, onInvokerUploaded, onSkipInvoker, invokers, onShowInvokerAnyway, onSkipTask, onSkipConnector, connectorDraft, onConnectorTitleChange, onConnectorInvokerChange, onConnectorCredentialChange, onConnectorBack, onTestConnector, onSaveConnector, connectorSaving, onBuildWorkflow, onFinishDashboard }: BuildIntroStepsOptions): Step[] {
+export function buildIntroJoyrideSteps({ t, userName, includeInvokerStep, includeConnectorSteps, showInvokerTask, paletteTargetMissing, onCreateInvoker, onInvokerUploaded, onGitInvokersDownloaded, onSkipInvoker, invokers, onShowInvokerAnyway, onSkipTask, onSkipConnector, connectorDraft, onConnectorTitleChange, onConnectorInvokerChange, onConnectorCredentialChange, onConnectorBack, onTestConnector, onSaveConnector, connectorSaving, onFinishDashboard, onRemindLicense, onFinishLicense }: BuildIntroStepsOptions): Step[] {
     const restartNote = <Trans ns="onboarding" i18nKey="notes.restart" components={{ code: <code /> }} />
     const steps: Step[] = [
         {
@@ -88,10 +91,10 @@ export function buildIntroJoyrideSteps({ t, userName, includeInvokerStep, includ
             placement: 'center',
             disableBeacon: true,
             title: hasInvokers ? t('steps.invoker.existingTitle', { count: invokers.length }) : t('steps.invoker.emptyTitle'),
-            content: hasInvokers ? <ExistingInvokersContent invokers={invokers} /> : <FirstInvokerContent onCreateManually={onCreateInvoker} onUploaded={onInvokerUploaded} />,
+            content: hasInvokers ? <ExistingInvokersContent invokers={invokers} /> : <FirstInvokerContent onCreateManually={onCreateInvoker} onUploaded={onInvokerUploaded} onGitDownloaded={onGitInvokersDownloaded} />,
             data: data(hasInvokers
                 ? { kicker: t('steps.invoker.kicker'), kind: 'skipped', badge: t('badges.skipped'), secondaryLabel: t('actions.showAnyway'), secondaryAction: onShowInvokerAnyway, primaryLabel: t('actions.continue'), footerNote: t('steps.invoker.skippedNote') }
-                : { kicker: t('steps.invoker.kicker'), kind: 'blocking', variant: 'invoker', hideAccent: true, secondaryLabel: t('actions.later'), secondaryAction: onSkipInvoker, footerNote: <>Not now? {t('steps.invoker.note')}</> }),
+                : { kicker: t('steps.invoker.kicker'), kind: 'blocking', variant: 'invoker', hideAccent: true, secondaryLabel: t('actions.later'), secondaryAction: onSkipInvoker, footerNote: t('steps.invoker.note') }),
         })
     }
 
@@ -107,15 +110,22 @@ export function buildIntroJoyrideSteps({ t, userName, includeInvokerStep, includ
                 target: 'body', placement: 'center', disableBeacon: true, disableOverlay: true,
                 title: t('steps.credentials.title'),
                 content: <ConnectorCredentialsContent title={connectorDraft.title} invoker={connectorDraft.invoker} requestData={connectorDraft.requestData} testStatus={connectorDraft.testStatus} saveStatus={connectorDraft.saveStatus} onCredentialChange={onConnectorCredentialChange} onBack={onConnectorBack} onTest={onTestConnector} onSubmit={onSaveConnector} saving={connectorSaving} />,
-                data: data({ kicker: t('steps.credentials.kicker'), kind: connectorDraft.testStatus === 'error' || connectorDraft.saveStatus === 'error' ? 'error' : 'blocking', hideBack: true, secondaryLabel: t('actions.skipStep'), secondaryAction: onSkipConnector, footerNote: connectorDraft.saveStatus === 'error' ? t('steps.credentials.saveFailedNote') : 'A failed test still lets you save', primaryDisabled: connectorSaving || !['success', 'error'].includes(connectorDraft.testStatus), primaryLabel: connectorDraft.saveStatus === 'error' ? t('actions.retrySave') : connectorDraft.testStatus === 'error' ? t('actions.saveAnyway') : t('actions.next'), primaryAction: onSaveConnector }),
+                data: data({ kicker: t('steps.credentials.kicker'), kind: connectorDraft.saveStatus === 'error' ? 'error' : 'blocking', hideBack: true, hidePrimary: true, secondaryLabel: t('actions.skipStep'), secondaryAction: onSkipConnector, footerNote: connectorDraft.saveStatus === 'error' ? t('steps.credentials.saveFailedNote') : t('steps.credentials.failedTestNote') }),
             },
             {
                 target: 'body', placement: 'center', disableBeacon: true,
                 content: <ConnectorCreatedContent title={connectorDraft.title} methodCount={invokers.find(item => item.name === connectorDraft.invoker)?.methodCount ?? 0} />,
-                data: data({ kicker: t('steps.created.kicker'), kind: 'done', variant: 'created', hideHeader: true, hideAccent: true, secondaryLabel: t('actions.dashboard'), secondaryAction: onFinishDashboard, primaryLabel: t('actions.buildWorkflow'), primaryAction: onBuildWorkflow }),
+                data: data({ kicker: t('steps.created.kicker'), kind: 'done', variant: 'created', hideHeader: true, hideAccent: true, secondaryLabel: t('actions.dashboard'), secondaryAction: onFinishDashboard, primaryLabel: t('actions.next') }),
             },
         )
     }
+
+    steps.push({
+        target: 'body', placement: 'center', disableBeacon: true,
+        title: t('steps.license.title'),
+        content: <OnboardingLicenseContent />,
+        data: data({ kicker: t('steps.license.kicker'), kind: 'info', secondaryLabel: t('actions.remindLater'), secondaryAction: onRemindLicense, primaryLabel: t('actions.finish'), primaryAction: onFinishLicense }),
+    })
 
     return steps
 }

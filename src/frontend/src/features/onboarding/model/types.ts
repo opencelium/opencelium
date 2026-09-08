@@ -7,6 +7,7 @@ export type OnboardingStepId =
     | 'connector-general'
     | 'connector-credentials'
     | 'connector-created'
+    | 'license'
 
 export type OnboardingStatus = 'idle' | 'running' | 'paused' | 'tour-complete' | 'completed'
 

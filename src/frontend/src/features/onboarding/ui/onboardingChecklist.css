@@ -3,20 +3,15 @@
 	right: 20px;
 	bottom: 20px;
 	z-index: 20300;
+	font-family: var(--typography-font-family-body);
+}
+.onboarding-checklist-pill > button {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	border: 0;
 	border-radius: 999px;
-	padding: 10px 16px;
-	background: #14181f;
-	color: #fff;
-	font: inherit;
-	font-weight: 700;
-	cursor: pointer;
-	box-shadow: var(--shadow-md);
 }
-.onboarding-checklist-pill > span {
+.onboarding-checklist-pill__progress {
 	width: 42px;
 	height: 4px;
 	overflow: hidden;
@@ -46,23 +41,25 @@
 	background: var(--color-background-surface);
 	color: var(--color-text-primary);
 	box-shadow: var(--shadow-lg);
-}
-.onboarding-checklist button {
-	border: 0;
-	background: transparent;
-	color: inherit;
-	font: inherit;
-	cursor: pointer;
+	font-family: var(--typography-font-family-body);
 }
 .onboarding-checklist__header {
+	padding: 16px 18px;
+}
+.onboarding-checklist__header > button {
 	display: flex;
 	width: 100%;
 	align-items: center;
 	justify-content: space-between;
-	padding: 16px 18px;
 	text-align: left;
 }
-.onboarding-checklist__header > span:first-child,
+.onboarding-checklist__header > button:hover,
+.onboarding-checklist__header > button:active {
+	background: transparent !important;
+}
+.onboarding-checklist__header > button > span:first-child,
+.onboarding-checklist__header .custom-btn-content > span:first-child,
+.onboarding-checklist__header .button-content > span:first-child,
 .onboarding-checklist__item > span:last-child {
 	display: flex;
 	flex-direction: column;
@@ -95,7 +92,8 @@
 	opacity: 1;
 }
 .onboarding-checklist__item.is-done .onboarding-checklist__state {
-	color: var(--color-status-success, #237804);
+	background: var(--color-status-success, #237804);
+	color: var(--color-text-inverted);
 }
 .onboarding-checklist__state {
 	display: grid;
@@ -108,23 +106,27 @@
 .onboarding-checklist__item.is-current .onboarding-checklist__state {
 	color: var(--color-action-primary);
 }
-.onboarding-checklist__item:not(.is-current):not(.is-done) .onboarding-checklist__state {
+.onboarding-checklist__item.is-current.is-done .onboarding-checklist__state {
+	color: var(--color-text-inverted);
+}
+.onboarding-checklist__item:not(.is-current):not(.is-done)
+	.onboarding-checklist__state {
 	border: 1px solid var(--color-border-strong);
 }
 .onboarding-checklist__item button {
 	align-self: flex-start;
 	margin-top: 7px;
-	border-radius: 6px;
-	padding: 7px 10px;
-	background: var(--color-action-primary);
-	color: var(--color-text-inverted);
-	font-weight: 600;
 }
 .onboarding-checklist footer {
 	display: flex;
 	justify-content: space-between;
 	border-top: 1px solid var(--color-border-subtle);
 	padding: 12px 18px;
+}
+.onboarding-checklist footer button:first-child {
+	color: var(--color-text-secondary);
+}
+.onboarding-checklist footer button:last-child {
 	color: var(--color-action-primary);
 }
 .onboarding-checklist__confirm {
@@ -140,15 +142,6 @@
 	display: flex;
 	justify-content: flex-end;
 	gap: 8px;
-}
-.onboarding-checklist__confirm button {
-	padding: 7px 10px;
-	font-weight: 600;
-}
-.onboarding-checklist__confirm .is-danger {
-	border-radius: 6px;
-	background: #14181f;
-	color: #fff;
 }
 @media (max-width: 600px) {
 	.onboarding-checklist,
