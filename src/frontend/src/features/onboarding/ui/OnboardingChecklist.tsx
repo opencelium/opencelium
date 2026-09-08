@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ONBOARDING_STEP_ORDER, ONBOARDING_Z_INDEX, type OnboardingStatus, type OnboardingStepId } from '../model/types'
+import { ONBOARDING_MILESTONES, ONBOARDING_STEP_ORDER, ONBOARDING_Z_INDEX, type OnboardingStatus, type OnboardingStepId } from '../model/types'
 import './onboardingChecklist.css'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { Icon } from '@shared/ui/primitives/Icon'
@@ -15,16 +15,7 @@ type ChecklistProps = {
     hasInvokers: boolean
 }
 
-const MILESTONES = [
-    { id: 'theme', key: 'theme' },
-    { id: 'palette', key: 'palette' },
-    { id: 'invoker', key: 'invoker' },
-    { id: 'connector-general', key: 'connector' },
-    { id: 'connector-created', key: 'integration' },
-    { id: 'license', key: 'license' },
-] as const
-
-type MilestoneId = (typeof MILESTONES)[number]['id']
+type MilestoneId = (typeof ONBOARDING_MILESTONES)[number]['id']
 
 function MilestoneIcon({ done, current }: { done: boolean; current: boolean }) {
     if (done) return <Icon name="check" size={13} color="inherit" />
@@ -42,16 +33,17 @@ export function OnboardingChecklist({ stepId, status, onResume, onRestart, onDis
         if (id === 'invoker' && hasInvokers && currentStep >= ONBOARDING_STEP_ORDER.indexOf('invoker')) return true
         return ONBOARDING_STEP_ORDER.indexOf(id) < currentStep
     }
-    const doneCount = MILESTONES.filter(item => isMilestoneDone(item.id)).length
+    const doneCount = ONBOARDING_MILESTONES.filter(item => isMilestoneDone(item.id)).length
     const currentMilestone = stepId === 'invoker-explainer' || stepId === 'invoker'
         ? 'invoker'
-        : stepId === 'connector-credentials'
-            ? 'connector-general'
-            : MILESTONES.some(item => item.id === stepId)
-                ? stepId
-                : undefined
-    const progress = `${(doneCount / MILESTONES.length) * 100}%`
-    const handleResume = () => {
+        : ONBOARDING_MILESTONES.some(item => item.id === stepId)
+            ? stepId
+            : undefined
+    const progress = `${(doneCount / ONBOARDING_MILESTONES.length) * 100}%`
+    // 'tour-complete' is a tour the user closed or skipped, not a finished one —
+    // that is exactly the case where continuing beats restarting from scratch.
+    const canContinue = status === 'paused' || status === 'tour-complete'
+    const handleContinue = () => {
         setExpanded(false)
         onResume()
     }
@@ -70,7 +62,7 @@ export function OnboardingChecklist({ stepId, status, onResume, onRestart, onDis
         return (
             <div className={`onboarding-checklist-pill${status === 'paused' ? ' is-paused' : ''}`} style={{ zIndex: ONBOARDING_Z_INDEX.checklist }}>
                 <Button color="default" variant="solid" onClick={() => setExpanded(true)} testId="onboarding-checklist-open">
-                    {status === 'paused' ? t('checklist.paused') : t('checklist.pill', { count: doneCount })}
+                    {status === 'paused' ? t('checklist.paused') : t('checklist.pill', { count: doneCount, total: ONBOARDING_MILESTONES.length })}
                     <span className="onboarding-checklist-pill__progress"><i style={{ width: progress }} /></span>
                 </Button>
             </div>
@@ -81,13 +73,13 @@ export function OnboardingChecklist({ stepId, status, onResume, onRestart, onDis
         <aside className="onboarding-checklist" aria-label={t('checklist.title')} style={{ zIndex: ONBOARDING_Z_INDEX.checklist }}>
             <div className="onboarding-checklist__header">
                 <Button type="text" onClick={() => setExpanded(false)} testId="onboarding-checklist-collapse">
-                    <span><strong>{t('checklist.title')}</strong><small>{t('checklist.done', { count: doneCount })}</small></span>
+                    <span><strong>{t('checklist.title')}</strong><small>{t('checklist.done', { count: doneCount, total: ONBOARDING_MILESTONES.length })}</small></span>
                     <Icon name="chevron-down" size={15} color="inherit" />
                 </Button>
             </div>
             <div className="onboarding-checklist__progress"><i style={{ width: progress }} /></div>
             <div className="onboarding-checklist__items">
-                {MILESTONES.map(item => {
+                {ONBOARDING_MILESTONES.map(item => {
                     const done = isMilestoneDone(item.id)
                     const current = item.id === currentMilestone
                     return (
@@ -96,15 +88,25 @@ export function OnboardingChecklist({ stepId, status, onResume, onRestart, onDis
                             <span>
                                 <strong>{t(`checklist.${item.key}.title`)}</strong>
                                 <small>{t(`checklist.${item.key}.detail`)}</small>
-                                {current && status === 'paused' && <Button type="primary" onClick={handleResume} testId="onboarding-checklist-resume">{t('actions.resume')}</Button>}
                             </span>
                         </div>
                     )
                 })}
             </div>
             <footer>
-                <Button type="text" onClick={() => void handleDismiss()} testId="onboarding-checklist-dismiss">{t('actions.dismiss')}</Button>
-                <Button type="link" onClick={onRestart} testId="onboarding-checklist-restart">{t('actions.restart')}</Button>
+                <Button type="text" className="onboarding-checklist__dismiss" onClick={() => void handleDismiss()} testId="onboarding-checklist-dismiss">
+                    {t('actions.dismiss')}
+                </Button>
+                <span className="onboarding-checklist__footer-actions">
+                    {canContinue && (
+                        <Button type="primary" onClick={handleContinue} testId="onboarding-checklist-continue">
+                            {t('actions.resume')}
+                        </Button>
+                    )}
+                    <Button type="link" className="onboarding-checklist__restart" onClick={onRestart} testId="onboarding-checklist-restart">
+                        {t('actions.restart')}
+                    </Button>
+                </span>
             </footer>
         </aside>
     )

@@ -4,26 +4,48 @@
 export const ONBOARDING_STEP_ORDER = [
     'welcome',
     'theme',
+    'license',
     'palette',
     'invoker-explainer',
     'invoker',
-    'connector-general',
-    'connector-credentials',
-    'connector-created',
-    'license',
+    'connector',
 ] as const
 
 export type OnboardingStepId = (typeof ONBOARDING_STEP_ORDER)[number]
+
+/**
+ * The steps the tour presents as real setup work, in tour order. Shared so the
+ * welcome step's phase list and the checklist cannot disagree about how many
+ * there are — `welcome` and `invoker-explainer` are framing, not milestones.
+ * `key` addresses both `content.welcome.<key>` and `checklist.<key>.*`.
+ */
+export const ONBOARDING_MILESTONES = [
+    { id: 'theme', key: 'theme' },
+    { id: 'license', key: 'license' },
+    { id: 'palette', key: 'palette' },
+    { id: 'invoker', key: 'invoker' },
+    { id: 'connector', key: 'connector' },
+] as const satisfies readonly { id: OnboardingStepId; key: string }[]
 
 /** Cross-module contract: systemCommands dispatches this to restart the tour. */
 export const ONBOARDING_RESTART_EVENT = 'opencelium:onboarding:restart'
 
 /**
  * The tour paints over everything, including globally-hosted dialogs. One ladder,
- * kept here so the three layers can't drift apart: cut-out backdrop sits just under
+ * kept here so the layers can't drift apart: the cut-out backdrop sits just under
  * Joyride's own tooltip, and the checklist stays clickable above both.
+ *
+ * `overlay` is the exception that has to sit *above* the tour: antd portals its
+ * message (2010), notification (2050) and modal (1000) layers nowhere near these
+ * values, so while the tour runs they are lifted to this one — see the
+ * `.onboarding-tour-active` rules in onboardingTooltip.css.
  */
-export const ONBOARDING_Z_INDEX = { backdrop: 20199, tooltip: 20200, checklist: 20300 } as const
+export const ONBOARDING_Z_INDEX = {
+    backdrop: 20199,
+    tooltip: 20200,
+    checklist: 20300,
+    overlay: 20400,
+} as const
 
 /** Selector of the element the palette step spotlights, owned by CommandPalette. */
 export const PALETTE_TOUR_TARGET = '[data-testid="command-palette-tour-target"]'

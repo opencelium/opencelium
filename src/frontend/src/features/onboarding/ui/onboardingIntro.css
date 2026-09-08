@@ -1,8 +1,5 @@
 .onboarding-duration-row { display: flex; align-items: center; gap: 10px; margin-top: 18px; }
 .onboarding-duration { color: var(--color-text-primary); font-size: var(--typography-font-size-sm); }
-.onboarding-phase-dots { display: inline-flex; align-items: center; gap: 6px; }
-.onboarding-phase-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--color-border-strong); }
-.onboarding-phase-dots .is-current { background: var(--color-action-primary); }
 .onboarding-phases { display: flex; gap: 16px; margin-top: 10px; font-size: var(--typography-font-size-sm); }
 .onboarding-phases span { color: var(--color-text-secondary); }
 .onboarding-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
@@ -75,10 +72,8 @@
 
 .onboarding-copy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
 .onboarding-copy-grid > div { display: flex; flex-direction: column; gap: 10px; padding: 18px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-background-elevated); }
-.onboarding-copy-grid code { display: block; color: var(--color-text-primary); }
-.onboarding-copy-grid .onboarding-help-token { align-self: flex-start; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); padding: 5px 8px; background: var(--color-background-surface); }
 .onboarding-copy-grid span { font-size: var(--typography-font-size-md); line-height: 1.45; }
-.onboarding-copy-grid kbd { border: 1px solid var(--color-border-subtle); border-radius: var(--radius-sm); padding: 2px 5px; background: var(--color-background-elevated); }
+.onboarding-copy-grid .onboarding-code-token { align-self: flex-start; }
 
 .onboarding-layer-grid { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch; gap: 12px; margin-top: 20px; }
 .onboarding-layer-grid > b { align-self: center; }
@@ -90,8 +85,24 @@
 .onboarding-layer-grid code { margin-top: auto; color: var(--color-text-secondary); font-size: var(--typography-font-size-sm); }
 .onboarding-recommended { display: inline-block; margin-left: 6px; padding: 3px 7px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--color-action-primary) 12%, transparent); color: var(--color-action-primary); font-size: var(--typography-font-size-sm); font-weight: 700; text-transform: uppercase; vertical-align: middle; }
 .onboarding-invoker-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 16px; }
-.onboarding-invoker-tags span { border: 1px solid var(--color-border-subtle); border-radius: 999px; padding: 6px 10px; color: var(--color-text-primary); }
-.onboarding-command-hint { display: block; border-radius: var(--radius-md); padding: 10px 12px; background: color-mix(in srgb, var(--color-text-primary) 4%, var(--color-background-surface)); color: var(--color-text-primary); }
+.onboarding-invoker-tags > span { border: 1px solid var(--color-border-subtle); border-radius: 999px; padding: 6px 10px; color: var(--color-text-primary); }
+/* Identical to the tags beside it — it is a real button, so the explicit
+   height/padding override the kit's own metrics to line it up, and the kit's
+   text-button hover supplies the only affordance it needs. */
+.onboarding-connector-pick { margin: 18px 0 10px; color: var(--color-text-primary); font-size: var(--typography-font-size-md); }
+/* No overflow of its own: Table's Ant adapter already owns the scroll container,
+   and nesting a second one here just produced a scrollbar the table did not need. */
+.onboarding-connector-table { min-width: 0; }
+.onboarding-invoker-tags .onboarding-invoker-tags__more {
+    height: auto;
+    min-height: 0;
+    min-width: 0;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 999px;
+    padding: 6px 10px;
+    color: var(--color-text-primary);
+    font-size: inherit;
+}
 .onboarding-invoker-upload { display: flex; width: 300px; flex-direction: column; gap: 8px; }
 .onboarding-invoker-upload__status { display: flex; align-items: center; gap: 8px; color: var(--color-text-secondary); font-size: var(--typography-font-size-sm); }
 .onboarding-invoker-options { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }

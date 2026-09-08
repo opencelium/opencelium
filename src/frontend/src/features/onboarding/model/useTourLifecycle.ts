@@ -1,6 +1,6 @@
 import { useEffect, type MutableRefObject } from 'react'
 import type { OnboardingStatus, OnboardingStepId } from './types'
-import { ONBOARDING_RESTART_EVENT } from './types'
+import { ONBOARDING_RESTART_EVENT, ONBOARDING_Z_INDEX } from './types'
 
 const TOUR_ACTIVE_CLASS = 'onboarding-tour-active'
 /** Keys typed into a control belong to that control, not to the tour. */
@@ -55,8 +55,11 @@ export function useTourLifecycle({
     }, [activeStepIds, hydrated, onStepRestored, stepId])
 
     useEffect(() => {
-        document.documentElement.classList.toggle(TOUR_ACTIVE_CLASS, status === 'running')
-        return () => document.documentElement.classList.remove(TOUR_ACTIVE_CLASS)
+        const root = document.documentElement
+        root.classList.toggle(TOUR_ACTIVE_CLASS, status === 'running')
+        // Read by the .onboarding-tour-active rules that lift antd's portals.
+        root.style.setProperty('--onboarding-z-overlay', String(ONBOARDING_Z_INDEX.overlay))
+        return () => root.classList.remove(TOUR_ACTIVE_CLASS)
     }, [status])
 
     useEffect(() => {

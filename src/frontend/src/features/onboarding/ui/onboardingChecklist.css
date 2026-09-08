@@ -1,7 +1,16 @@
+/*
+ * Docked clear of AppFooter (12px padding either side of a caption line, plus its
+ * border ~= 45px), so the pill and the panel never sit on top of the copyright.
+ */
+.onboarding-checklist-pill,
+.onboarding-checklist {
+	--onboarding-dock-bottom: 64px;
+}
+
 .onboarding-checklist-pill {
 	position: fixed;
 	right: 20px;
-	bottom: 20px;
+	bottom: var(--onboarding-dock-bottom);
 	/* z-index set from ONBOARDING_Z_INDEX (model/types.ts) */
 	font-family: var(--typography-font-family-body);
 }
@@ -30,10 +39,10 @@
 .onboarding-checklist {
 	position: fixed;
 	right: 20px;
-	bottom: 20px;
+	bottom: var(--onboarding-dock-bottom);
 	/* z-index set from ONBOARDING_Z_INDEX (model/types.ts) */
 	width: min(360px, calc(100vw - 40px));
-	max-height: calc(100vh - 40px);
+	max-height: calc(100vh - var(--onboarding-dock-bottom) - 20px);
 	overflow: auto;
 	overscroll-behavior: contain;
 	border: 1px solid var(--color-border-subtle);
@@ -113,31 +122,22 @@
 	.onboarding-checklist__state {
 	border: 1px solid var(--color-border-strong);
 }
-.onboarding-checklist__item button {
-	align-self: flex-start;
-	margin-top: 7px;
-}
 .onboarding-checklist footer {
 	display: flex;
+	align-items: center;
+	gap: 8px;
 	justify-content: space-between;
 	border-top: 1px solid var(--color-border-subtle);
 	padding: 12px 18px;
-}
-.onboarding-checklist footer button:first-child {
-	color: var(--color-text-secondary);
-}
-.onboarding-checklist footer button:last-child {
-	color: var(--color-action-primary);
 }
 @media (max-width: 600px) {
 	.onboarding-checklist,
 	.onboarding-checklist-pill {
 		right: 12px;
-		bottom: 12px;
 	}
 	.onboarding-checklist {
 		width: calc(100vw - 24px);
-		max-height: calc(100vh - 24px);
+		max-height: calc(100vh - var(--onboarding-dock-bottom) - 12px);
 	}
 	.onboarding-checklist-pill {
 		max-width: calc(100vw - 24px);
@@ -147,3 +147,6 @@
 		padding-bottom: 9px;
 	}
 }
+.onboarding-checklist__footer-actions { display: flex; align-items: center; gap: 8px; }
+.onboarding-checklist__dismiss { color: var(--color-text-secondary); }
+.onboarding-checklist__restart { color: var(--color-action-primary); }

@@ -21,14 +21,6 @@
 	font-family: var(--typography-font-family-body);
 }
 
-.onboarding-tooltip__accent { height: 3px; background: var(--color-action-primary); }
-.onboarding-tooltip--welcome .onboarding-tooltip__accent { display: none; }
-.onboarding-tooltip--theme .onboarding-tooltip__accent { display: none; }
-.onboarding-tooltip--blocking .onboarding-tooltip__accent,
-.onboarding-tooltip--error .onboarding-tooltip__accent { background: var(--color-status-error-fg); }
-.onboarding-tooltip--skipped .onboarding-tooltip__accent { background: var(--color-text-secondary); }
-.onboarding-tooltip--done .onboarding-tooltip__accent { background: var(--color-status-success-fg); }
-
 .onboarding-tooltip__header {
     display: flex;
     align-items: center;
@@ -81,13 +73,12 @@
 .onboarding-tooltip--invoker .onboarding-tooltip__title { margin: 14px 36px 0; font-size: var(--onboarding-title); }
 .onboarding-tooltip--invoker .onboarding-tooltip__content { padding: 10px 36px 20px; }
 .onboarding-tooltip--invoker .onboarding-tooltip__footer { margin: 0 36px; }
-.onboarding-tooltip--created .onboarding-tooltip__content { width: 626px; box-sizing: border-box; padding: 24px 27px 16px; }
-.onboarding-tooltip--created .onboarding-tooltip__footer { width: 571px; margin: 0 0 0 27px; }
 
+.onboarding-tooltip__header-end { display: flex; align-items: center; gap: 6px; flex: none; }
 .onboarding-tooltip__counter,
-.onboarding-tooltip__note { color: var(--color-text-secondary); font-size: var(--typography-font-size-sm); }
+.onboarding-tooltip__note { min-width: 0; color: var(--color-text-secondary); font-size: var(--typography-font-size-sm); line-height: 1.5; }
 .onboarding-tooltip__note code { color: var(--color-text-primary); font-family: var(--typography-font-family-mono); }
-.onboarding-tooltip__note kbd { display: inline-flex; min-width: 22px; height: 20px; align-items: center; justify-content: center; margin-left: 4px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); padding: 0 5px; background: var(--color-background-elevated); color: var(--color-text-primary); font: 11px var(--typography-font-family-mono); box-shadow: 0 1px 0 color-mix(in srgb, var(--color-border-strong) 55%, transparent); }
+.onboarding-tooltip__note kbd { display: inline-flex; min-width: 22px; height: 20px; align-items: center; justify-content: center; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); padding: 0 5px; background: var(--color-background-elevated); color: var(--color-text-primary); font: 11px var(--typography-font-family-mono); box-shadow: 0 1px 0 color-mix(in srgb, var(--color-border-strong) 55%, transparent); }
 .onboarding-tooltip__title { margin: 14px 28px 0; font-size: var(--onboarding-title); font-weight: 600; line-height: 1.3; }
 .onboarding-tooltip__content { min-height: 0; overflow-y: auto; padding: 14px 28px 24px; color: var(--color-text-secondary); font-size: var(--typography-font-size-md); line-height: 1.5; overscroll-behavior: contain; }
 
@@ -103,7 +94,6 @@
 
 .onboarding-tooltip__actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .onboarding-tooltip__actions > button,
-.onboarding-test-row > button,
 .onboarding-license__actions > button { min-height: 40px; font-family: var(--typography-font-family-body); }
 
 /* Joyride appends an inline opacity transition after merged step styles. */
@@ -121,7 +111,6 @@
     .onboarding-tooltip__content { padding-left: 18px; padding-right: 18px; }
     .onboarding-tooltip__title { margin-left: 18px; margin-right: 18px; }
     .onboarding-tooltip__footer { align-items: stretch; flex-direction: column; gap: 10px; margin: 0 18px; padding: 12px 0; }
-    .onboarding-tooltip__note { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .onboarding-tooltip__actions { width: 100%; justify-content: flex-end; }
     .onboarding-tooltip--welcome .onboarding-tooltip__header,
     .onboarding-tooltip--welcome .onboarding-tooltip__content { padding-right: 18px; padding-left: 18px; }
@@ -143,4 +132,23 @@ html.onboarding-tour-active,
 html.onboarding-tour-active body {
     overflow: hidden;
     scrollbar-gutter: stable;
+}
+
+/*
+ * antd portals its overlays well below the tour (message 2010, notification 2050,
+ * tooltip 2070, modal 1000), so while the tour runs a toast would be hidden behind
+ * the backdrop, a tooltip on a step's own controls would never be seen at all, and
+ * — worse — the invoker "replace this file?" confirm would be invisible, making the
+ * tour look frozen. Lift them over the tour for as long as it is running. MUI's
+ * Modal (1300) and Tooltip are covered too, since the primitives swap kit.
+ */
+/* !important because these z-indexes come from the kit's own CSS-in-JS, whose
+   injection order relative to this file is not something we control; antd offers
+   no zIndex escape hatch on message.config in v6. */
+html.onboarding-tour-active :is(.ant-message, .ant-notification, .ant-tooltip, .MuiTooltip-popper) {
+    z-index: var(--onboarding-z-overlay) !important;
+}
+
+html.onboarding-tour-active :is(.ant-modal-mask, .ant-modal-wrap, .MuiModal-root) {
+    z-index: var(--onboarding-z-overlay) !important;
 }

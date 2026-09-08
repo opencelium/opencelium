@@ -21,6 +21,7 @@ import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 import {connectorRecommendations} from "@entities/connector/connector.recommendations";
+import {readPreselectedInvoker} from "@entities/connector/lib/connectorCreateLink";
 
 const baseKey = 'connector';
 
@@ -294,6 +295,9 @@ export const connectorDefinition: EntityDefinition = {
         {
             name: 'invoker',
             type: 'string',
+            // Lets callers deep-link straight to a connector for a chosen invoker
+            // (the onboarding tour's connector step does).
+            getDefaultValue: () => readPreselectedInvoker(),
             ui: {
                 component: 'select',
                 props: {
