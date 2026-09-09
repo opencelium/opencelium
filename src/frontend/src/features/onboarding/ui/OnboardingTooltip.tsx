@@ -11,7 +11,6 @@ export type OnboardingTooltipData = {
     kicker: string
     kind?: OnboardingStepKind
     total: number
-    badge?: string
     footerNote?: ReactNode
     /** The secondary button renders only when a step gives it a label of its own. */
     secondaryLabel?: string
@@ -40,7 +39,6 @@ export function OnboardingTooltip({ backProps, closeProps, continuous, index, pr
                 <div className="onboarding-tooltip__eyebrow">
                     {data.brand && <span className="onboarding-tooltip__brand" aria-hidden>OC</span>}
                     <span>{data.kicker}</span>
-                    {data.badge && <span className="onboarding-tooltip__badge">{data.badge}</span>}
                 </div>
                 <div className="onboarding-tooltip__header-end">
                     <span className="onboarding-tooltip__counter">{t('progress.counter', { current: index + 1, total: data.total })}</span>

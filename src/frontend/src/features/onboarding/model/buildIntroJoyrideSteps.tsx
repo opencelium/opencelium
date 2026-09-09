@@ -107,7 +107,7 @@ export function buildIntroJoyrideSteps({ t, userName, includeInvokerStep, includ
             title: hasInvokers ? t('steps.invoker.existingTitle', { count: invokers.length }) : t('steps.invoker.emptyTitle'),
             content: hasInvokers ? <ExistingInvokersContent invokers={invokers} /> : <FirstInvokerContent onCreateManually={onCreateInvoker} onUploaded={onInvokerUploaded} onGitDownloaded={onGitInvokersDownloaded} />,
             data: data(hasInvokers
-                ? { kicker: t('steps.invoker.kicker'), kind: 'skipped', badge: t('badges.skipped'), secondaryLabel: t('actions.addAnotherInvoker'), secondaryAction: onShowInvokerAnyway, footerNote: <CommandHint command={COMMANDS.invoker} /> }
+                ? { kicker: t('steps.invoker.kicker'), kind: 'skipped', secondaryLabel: t('actions.addAnotherInvoker'), secondaryAction: onShowInvokerAnyway, footerNote: <CommandHint command={COMMANDS.invoker} /> }
                 : { kicker: t('steps.invoker.kicker'), kind: 'blocking', variant: 'invoker', secondaryLabel: t('actions.later'), secondaryAction: onSkipInvoker, footerNote: <CommandHint command={COMMANDS.invoker} /> }),
         })
     }
