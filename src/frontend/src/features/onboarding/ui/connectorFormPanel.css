@@ -51,11 +51,10 @@
 }
 
 .onboarding-connector-panel__body {
-    /* Basis `auto`, never `0%`: when the panel has no matched height a `flex-basis:
-       0%` body has a hypothetical size of zero, collapsing the panel to its header
-       with the form scrolling inside nothing. Grow still fills the leftover space
-       once a height IS matched — with auto height there is no free space to take,
-       so the panel keeps hugging its content. */
+    /* Basis `auto`, never `0%`: a `flex-basis: 0%` body has a hypothetical size of
+       zero, which would collapse the panel to its header and scroll the form inside
+       nothing. Grow fills the slack when the dialog's height floor exceeds the
+       form; shrink + overflow only engage against the viewport cap. */
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
