@@ -1,0 +1,9 @@
+/*
+ * The graph is built from invented connectors, so saving it would post ids that do
+ * not exist. Suppressing the button is blunt but honest: the tutorial is a sketch,
+ * and "help workflow" reopens it once the user has real connectors to use.
+ */
+html.workflow-tutorial-active [data-testid='workflow-save'] {
+    pointer-events: none;
+    opacity: .45;
+}

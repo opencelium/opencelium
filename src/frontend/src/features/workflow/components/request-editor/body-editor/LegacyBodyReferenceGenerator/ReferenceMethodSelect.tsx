@@ -7,21 +7,33 @@ import type { MethodWithId } from '../../../../types/connection';
 import { getMethodConnectorChipInfo } from '../requestReferenceOptions';
 import { MethodConnectorChip } from '../MethodConnectorChip/MethodConnectorChip';
 
+/** Also matched by the workflow tutorial's spotlight — keep the two in step. */
+export const REFERENCE_POPUP_CLASS = 'referenceMethodPopup';
+
 type Props = {
 	methods: MethodWithId[];
 	selectedMethod?: MethodWithId;
 	methodId?: string;
 	duplicateIndexByColor: Map<string, number>;
 	onChange: (methodId: string) => void;
+	/**
+	 * Focus this picker and open its list. Both, because a focused combobox looks no
+	 * different from an idle one — on its own the focus is invisible, and it is the
+	 * open list that shows the section is ready to be typed into.
+	 */
+	autoFocus?: boolean;
 };
 
 export function ReferenceMethodSelect({ methods, selectedMethod, methodId,
-	duplicateIndexByColor, onChange }: Props) {
+	duplicateIndexByColor, onChange, autoFocus }: Props) {
 	const { t } = useI18n('workflow');
 	return (
 		<div className='selectCopyHost'>
 			<CopyButton value={selectedMethod?.label || selectedMethod?.name || ''} className='selectCopyButton' />
 			<Select
+				autoFocus={autoFocus}
+				defaultOpen={autoFocus}
+				data-testid='workflow-reference-method-select'
 				placeholder={t('placeholders.selectMethod')}
 				value={methodId}
 				className='bodyLegacyGeneratorSelect'
@@ -59,6 +71,9 @@ export function ReferenceMethodSelect({ methods, selectedMethod, methodId,
 						placement='right' zIndex={13020}>{row}</Tooltip> : row;
 				}}
 				getPopupContainer={() => document.body}
+				// Portalled out of the generator, so it needs its own hook to be
+				// found again — the tour has to undim the list along with the row.
+				classNames={{ popup: { root: REFERENCE_POPUP_CLASS } }}
 				popupMatchSelectWidth={420}
 				styles={{ popup: { root: { zIndex: 13010 } } }}
 			/>

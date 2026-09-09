@@ -59,6 +59,7 @@ import {
     RadioButtonUnchecked,
 } from '@mui/icons-material';
 
+import MouseOutlined from '@mui/icons-material/MouseOutlined';
 import type { IconComponent } from './Icon.types';
 
 const iconMap = {
@@ -75,6 +76,7 @@ const iconMap = {
     stop: Stop,
     'step-forward': SkipNext,
     'skip-forward': FastForward,
+    mouse: MouseOutlined,
     download: Download,
     upload: Upload,
     key: Key,

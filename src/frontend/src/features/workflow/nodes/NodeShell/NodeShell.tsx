@@ -15,6 +15,7 @@ export function NodeShell({
 	bottomExtra,
 	rightAdd,
 	bottomAdd,
+	testId,
 	children,
 }: NodeShellProps) {
 	const onAddStep = data.onAddStep;
@@ -74,6 +75,7 @@ export function NodeShell({
 	return (
 		<div
 			className={`nodeWrap ${data.dragGhost ? 'nodeWrapDragGhost' : ''} ${data.dropPlaceholder ? 'nodeWrapDropPlaceholder' : ''} ${data.dragSourceMoving ? 'nodeWrapDragSourceMoving' : ''} ${data.dragSourceFaint ? 'nodeWrapDragSourceFaint' : ''}`}
+			data-testid={testId}
 			onContextMenu={onContextMenu}
 		>
 			{selected && (

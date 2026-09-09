@@ -55,6 +55,7 @@ export const MaterialCollapse: CollapseComponent = ({
                         }}
                     >
                         <AccordionSummary
+                            data-testid={item.testId}
                             expandIcon={isStatic ? null : <ExpandMoreIcon />}
                             sx={{ fontWeight: 500, ...(isStatic ? { cursor: 'default' } : {}) }}
                         >

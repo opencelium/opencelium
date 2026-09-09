@@ -1,0 +1,88 @@
+/*
+ * Bottom-left: the canvas centre stays clear for the graph, and the sidebar drawers
+ * all slide in from the right, so this corner is the one that never fights them.
+ */
+.workflow-tutorial-pill {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    width: min(340px, calc(100vw - 48px));
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    background: var(--color-background-surface);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-lg);
+    font-family: var(--typography-font-family-body);
+}
+
+.workflow-tutorial-pill header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.workflow-tutorial-pill__eyebrow {
+    flex: 1;
+    color: var(--color-action-primary);
+    font-size: var(--typography-font-size-sm);
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.workflow-tutorial-pill__counter {
+    color: var(--color-text-secondary);
+    font-size: var(--typography-font-size-sm);
+}
+
+.workflow-tutorial-pill strong {
+    display: block;
+    margin-top: 8px;
+    font-size: var(--typography-font-size-md);
+}
+
+.workflow-tutorial-pill p {
+    margin: 4px 0 0;
+    color: var(--color-text-secondary);
+    font-size: var(--typography-font-size-sm);
+    line-height: 1.5;
+}
+
+.workflow-tutorial-pill footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+/* Holds the row's height whether or not the hint is showing, so the pill does not
+   jump the moment a step becomes completable. */
+.workflow-tutorial-pill__hint {
+    flex: 1;
+    min-height: 20px;
+    color: var(--color-text-secondary);
+    font-size: var(--typography-font-size-sm);
+    line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+    .workflow-tutorial-pill {
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
+        width: auto;
+    }
+}
+
+/*
+ * Reuses the tour's snippet chip, but these are long reference paths rather than short
+ * palette commands: given a line of their own and allowed to wrap, so a path cannot
+ * push the pill wider than the corner it sits in.
+ */
+.workflow-tutorial-pill__example {
+    display: block;
+    margin-top: 8px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}

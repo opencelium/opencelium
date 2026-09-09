@@ -8,13 +8,13 @@ import { ReferenceMethodSelect } from './ReferenceMethodSelect';
 import { useLegacyBodyReferenceGenerator } from './useLegacyBodyReferenceGenerator';
 import '../bodyLegacy.css';
 
-export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply, showWebhookOption = true }: LegacyBodyReferenceGeneratorProps) {
+export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply, showWebhookOption = true, autoFocus }: LegacyBodyReferenceGeneratorProps) {
   const state = useLegacyBodyReferenceGenerator({
     connection, currentMethod, onApply, showWebhookOption,
   });
 
   return (
-    <div className={state.shellClassName}>
+    <div className={state.shellClassName} data-testid='workflow-reference-generator'>
       {showWebhookOption ? (
         <div className='bodyLegacyGeneratorSwitch compactRadioGroup'>
           <Radio
@@ -33,7 +33,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
         <>
           <ReferenceMethodSelect methods={state.methods} selectedMethod={state.selectedMethod}
             methodId={state.methodId} duplicateIndexByColor={state.duplicateIndexByColor}
-            onChange={state.selectMethod} />
+            onChange={state.selectMethod} autoFocus={autoFocus} />
           <div className='bodyLegacyGeneratorResponse compactRadioGroup'>
             <Radio
               checked={state.responseType === 'body'} onChange={() => state.selectResponseType('body')}

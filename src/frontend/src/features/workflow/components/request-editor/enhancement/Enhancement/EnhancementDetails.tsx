@@ -22,6 +22,7 @@ export function EnhancementDetails({ enhancement, readOnly, state }: Props) {
 		<div className='bodyLegacyEnhancementArgs'>
 			<Collapse defaultActiveKeys={[]} items={[{
 				key: 'variableInfo', label: t('args.sectionTitle'),
+				testId: 'workflow-enhancement-variables-toggle',
 				content: <EnhancementArgs enhancement={enhancement} />,
 			}]} />
 		</div>
