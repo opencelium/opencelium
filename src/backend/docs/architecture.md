@@ -94,7 +94,8 @@ io.opencelium.core              package-per-feature-module (modular monolith, de
 ├── auth                        pluggable strategies: local · LDAP · OIDC · Service Portal (decision #10)
 ├── authz                       RBAC + ACL enforcement, one authorization manager
 ├── tenant                      cloud bootstrap, dynamic per-tenant Mongo routing (new — decision #11)
-├── workflow · connector · invoker   management CRUD
+├── workflow · connector · invoker   management CRUD; invoker XML parser/importer (improved schema, XML retained)
+├── subscription                execution quota: total usage from Service Portal (cloud) or license file (self-hosted); current usage stored encoded in Mongo; browse/build always free — every execution enforced at the Dispatcher (test runs and debugger sessions count too)
 ├── trigger                     Quartz, webhook, manual, test
 ├── dispatch                    Execution Dispatcher over the transport SPI
 ├── variables                   Global Params store + resolution
