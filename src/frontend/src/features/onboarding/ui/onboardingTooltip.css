@@ -40,14 +40,6 @@
     text-transform: uppercase;
 }
 
-.onboarding-tooltip__badge {
-    border-radius: var(--radius-sm);
-    padding: 3px 7px;
-    background: var(--color-background-elevated);
-    color: var(--color-text-secondary);
-    letter-spacing: .04em;
-}
-
 .onboarding-tooltip__brand {
     display: grid;
     width: 30px;

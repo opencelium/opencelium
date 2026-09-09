@@ -1,8 +1,6 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import { IS_MAC } from '@shared/utils/platform'
+import { usePaletteKeyLabel } from './usePaletteKeyLabel'
 import './onboardingCode.css'
-
-const MAC_COMMAND_GLYPH = '⌘'
 
 /**
  * Points a step at the palette command that repeats or continues its task, e.g.
@@ -12,10 +10,11 @@ const MAC_COMMAND_GLYPH = '⌘'
  */
 export function CommandHint({ command }: { command: string }) {
     const { t } = useI18n('onboarding')
+    const keyLabel = usePaletteKeyLabel()
     return (
         <span className="onboarding-command-note">
             <span>{t('notes.commandLabel')}:</span>
-            <kbd>{IS_MAC ? MAC_COMMAND_GLYPH : t('notes.ctrlKey')}</kbd>
+            <kbd>{keyLabel}</kbd>
             <span aria-hidden>+</span>
             <kbd>K</kbd>
             <span aria-hidden>&rarr;</span>
