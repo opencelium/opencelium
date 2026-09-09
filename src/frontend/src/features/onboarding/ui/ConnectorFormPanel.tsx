@@ -1,9 +1,10 @@
+import { useRef } from 'react'
 import { GenericCreateWizard } from '@/engine/entity/runtime/genererics/GenericCreateWizard'
 import { IconButton } from '@shared/ui/primitives/IconButton'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { ONBOARDING_Z_INDEX } from '../model/types'
-import { useTourDialogHeight } from './useTourDialogHeight'
+import { useSyncTourDialogHeight } from './useSyncTourDialogHeight'
 import './connectorFormPanel.css'
 
 const CONNECTOR_HIDDEN_FIELDS = ['invoker']
@@ -23,14 +24,16 @@ type ConnectorFormPanelProps = {
  */
 export function ConnectorFormPanel({ invokerName, onClose, onCreated }: ConnectorFormPanelProps) {
     const { t } = useI18n('onboarding')
+    const panelRef = useRef<HTMLElement | null>(null)
     // Hooks run unconditionally; the panel bails out below.
-    const matchedHeight = useTourDialogHeight(invokerName !== null)
+    useSyncTourDialogHeight(panelRef, invokerName !== null)
     if (invokerName === null) return null
 
     return (
         <aside
+            ref={panelRef}
             className="onboarding-connector-panel"
-            style={{ zIndex: ONBOARDING_Z_INDEX.sidePanel, height: matchedHeight ?? undefined }}
+            style={{ zIndex: ONBOARDING_Z_INDEX.sidePanel }}
             aria-label={t('content.connector.panelTitle', { name: invokerName })}
         >
             <header className="onboarding-connector-panel__header">

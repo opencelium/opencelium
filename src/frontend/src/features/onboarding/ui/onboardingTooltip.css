@@ -141,8 +141,18 @@ html.onboarding-side-open {
 
 html.onboarding-side-open .onboarding-tooltip {
     width: min(760px, calc(100vw - var(--onboarding-side-width) - 72px));
+    /* Matches the docked panel, which publishes its own height (see
+       useSyncTourDialogHeight). A floor rather than a fixed height so a long
+       invoker table is never forced to scroll to fit the form beside it. */
+    min-height: var(--onboarding-side-height, auto);
     transform: translateX(calc(var(--onboarding-side-width) / -2));
     transition: transform .2s ease, width .2s ease;
+}
+
+/* Absorb the slack from that floor, so the footer stays on the matched bottom edge
+   instead of sitting halfway up with a gap beneath it. */
+html.onboarding-side-open .onboarding-tooltip__content {
+    flex: 1 1 auto;
 }
 
 /* No room for both: the panel goes full-width and the tooltip stands down. */
