@@ -16,6 +16,8 @@ export type OnboardingTooltipData = {
     secondaryLabel?: string
     secondaryAction?: () => void
     primaryLabel?: string
+    /** Holds the primary until the step's task is actually done. */
+    primaryDisabled?: boolean
     /** Replaces Joyride's own advance, for a step whose primary leaves the tour. */
     primaryAction?: () => void
     brand?: boolean
@@ -71,7 +73,7 @@ export function OnboardingTooltip({ backProps, closeProps, continuous, index, pr
                         </Button>
                     )}
                     {continuous && (
-                        <Button type="primary" onClick={data.primaryAction ?? (primaryProps.onClick as unknown as () => void)} testId="onboarding-tour-primary">
+                        <Button type="primary" disabled={data.primaryDisabled} onClick={data.primaryAction ?? (primaryProps.onClick as unknown as () => void)} testId="onboarding-tour-primary">
                             {data.primaryLabel ?? (isLast ? t('actions.finish') : t('actions.next'))}
                         </Button>
                     )}

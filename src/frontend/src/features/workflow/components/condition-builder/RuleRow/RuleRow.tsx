@@ -32,7 +32,8 @@ export function RuleRow({ rule, operatorType, methods, allMethods, iterators,
 		properties={properties} methods={methods} allMethods={allMethods}
 		iterators={iterators} onChange={onChange} />;
 
-	return <div className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''}`}>
+	return <div className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''}`}
+		data-testid='workflow-condition-rule'>
 		{isLoop ? <Select placeholder={t('placeholders.selectOperator')} value={operator}
 			className="conditionOperatorSelect conditionLoopOperatorSelect" showSearch
 			optionFilterProp="label" options={LOOP_OPTIONS.map((option) => ({

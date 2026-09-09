@@ -616,7 +616,8 @@ function RuleRow({
 	const isComparisonLoading = isOperatorHovered && (leftLive.isLoading || (hasBinaryRight && rightLive.isLoading));
 
 	return (
-		<div className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''}`}>
+		<div className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''}`}
+			data-testid="workflow-condition-rule">
 			{isLoop ? (
 				<Select
 					placeholder={t('placeholders.selectOperator')}

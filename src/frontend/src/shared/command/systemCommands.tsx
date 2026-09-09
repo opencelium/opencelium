@@ -6,6 +6,7 @@ import type { CommandNode } from './types';
 import {EntityWizard} from "@/engine/entity/runtime/EntityWizard.tsx";
 import {CommandReferenceDialog} from "@widgets/CommandPalette/CommandReferenceDialog.tsx";
 import { ONBOARDING_RESTART_EVENT } from '@features/onboarding/model/types'
+import { useWorkflowTutorialStore } from '@features/onboarding/workflow-tutorial/model/workflowTutorial.store'
 
 export const systemCommands: CommandNode<any>[] = [
     // "login" command (role impersonation) is disabled — commented out so it no
@@ -107,6 +108,18 @@ export const systemCommands: CommandNode<any>[] = [
                     ctx.setInputValue('')
                     ctx.navigate('/')
                     window.dispatchEvent(new Event(ONBOARDING_RESTART_EVENT))
+                },
+            },
+            {
+                type: 'literal',
+                value: 'workflow',
+                group: 'general',
+                icon: 'workflow',
+                description: 'commandPalette.descriptions.workflowTutorial',
+                execute: (_, ctx) => {
+                    ctx.setInputValue('')
+                    useWorkflowTutorialStore.getState().request()
+                    ctx.navigate('/workflow/create')
                 },
             },
         ],

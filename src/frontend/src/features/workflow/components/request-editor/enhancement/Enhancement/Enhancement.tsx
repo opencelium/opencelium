@@ -98,6 +98,7 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 											{
 												key: 'variableInfo',
 												label: t('args.sectionTitle'),
+												testId: 'workflow-enhancement-variables-toggle',
 												content: <EnhancementArgs enhancement={enhancement!} />,
 											},
 										]}
