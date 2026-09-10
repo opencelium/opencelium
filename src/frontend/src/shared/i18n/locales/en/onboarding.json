@@ -36,6 +36,60 @@
     "connector": { "body": "A connector is one invoker plus the base URL and credentials of a system you actually run. The wizard walks you through it and tests the connection before saving.", "pickInvoker": "Pick the invoker to build it from", "panelEyebrow": "New connector", "panelTitle": "Connector from {{name}}", "noInvokers": "Add an invoker first — every connector is built from one.", "tableTitle": "Title", "tableDescription": "Description", "tableConnectors": "Connectors", "tableActionTooltip": "Create a connector from {{name}}" },
     "license": { "body": "Every call a workflow makes to a connected system counts as one operation. Activate a license when you need more.", "information": "License Information", "status": "Status", "valid": "Valid", "free": "Free", "type": "Type", "operations": "Amount of API Operations", "expiration": "Expiration Date", "more": "Need more operations?", "actionsBody": "Activation, extra operations and offline requests all live on the licence page. Whichever applies to this install is offered there.", "openPage": "Go to licence page", "thisMonth": "This month", "usage": "{{used}} of {{total}} operations" }
   },
+  "dashboard": {
+    "kicker": "Dashboard",
+    "steps": {
+      "header": {
+        "title": "What this page tells you",
+        "body": "A live operational view of this OpenCelium instance: how much is running, how much of it fails, what the machine is spending on it, and which workflows are doing the work. The range beside the title applies to the timeline widgets; the live counters are running totals."
+      },
+      "tiles": {
+        "title": "Live counters",
+        "body": "These five arrive over the websocket rather than a REST call, so they move while you watch: total executions, the share that failed, average and total run time, and the size of the execution logs on disk. The dot in each corner is the state of that live connection — spinners mean it is still connecting."
+      },
+      "executions": {
+        "title": "Executions and failures",
+        "body": "Two series over the same seven days: every execution, and the failures among them. Hover a day to read the exact counts and that day's failure rate.",
+        "note": "Refresh re-reads this widget alone."
+      },
+      "resources": {
+        "title": "What it costs the machine",
+        "body": "CPU load and memory in use, as a share of what this instance has available. Both gauges shift from teal toward red past 60%, so a system under pressure is visible without reading the numbers."
+      },
+      "connectors": {
+        "title": "Which workflows are busiest",
+        "body": "The five workflows with the most executions in the window, each with its own failure rate. The quickest way to find the one worth opening after a bad night."
+      },
+      "comingSoon": {
+        "title": "Not wired up yet",
+        "body": "These three are greyed out on purpose: the layout is settled but the endpoints behind them are still being built. Nothing here is broken — the cards fill in once the API lands."
+      },
+      "createWorkflow": {
+        "title": "Start a new workflow",
+        "body": "Opens the visual editor on an empty canvas, where connector methods and if/loop operators are composed into an integration. It is hidden on narrow screens and for roles that may not create connections."
+      },
+      "palette": {
+        "title": "The command palette",
+        "body": "Every action in the app is reachable from here — press {{key}} + K from anywhere to focus it. Commands read verb first (create connector, list schedules), and typing help lists the whole tree."
+      },
+      "language": {
+        "title": "English or German",
+        "body": "Switches the interface language straight away. The choice is saved onto your account as well as this browser, so it follows you to another machine."
+      },
+      "help": {
+        "title": "Help, and this tour",
+        "body": "Two entries behind this icon: the OpenCelium documentation at docs.opencelium.io, which opens in a new tab, and Start tour — which is how you get back to this walkthrough later."
+      },
+      "menuSwitch": {
+        "title": "Main and admin menus",
+        "body": "The sidebar has two: the main menu for day-to-day work, and the admin menu for users, roles and system settings. Switching lands you on the page you last had open in that menu."
+      },
+      "profile": {
+        "title": "Your account",
+        "body": "Your own details, the permissions your roles grant you, and a password change."
+      }
+    }
+  },
   "workflow": {
     "kicker": "Workflow",
     "actions": { "done": "Exit" },

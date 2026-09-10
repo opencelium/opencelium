@@ -17,9 +17,11 @@ export const MaterialCard: CardComponent = ({
     className = '',
     children,
     style,
+    testId,
 }) => {
     return (
         <MuiCard
+            data-testid={testId}
             style={style}
             className={className}
             elevation={elevated ? 3 : 0}

@@ -7,6 +7,7 @@ import {SubscriptionAlert} from "@widgets/SubscriptionAlert/SubscriptionAlert.ts
 import {useGlobalHotkeys} from "@app/hooks/useGlobalHotkeys.ts";
 import {OnboardingPreview} from "@features/onboarding";
 import {WorkflowTutorial} from "@features/onboarding/workflow-tutorial/ui/WorkflowTutorial";
+import {DashboardTour} from "@features/onboarding/dashboard-tour/ui/DashboardTour";
 
 type AppLayoutProps = {
     isNotCard?: boolean;
@@ -29,6 +30,7 @@ export const AppLayout = ({isNotCard, hasNoHeader, hasNoFooter}: AppLayoutProps)
             <GlobalModal />
             <OnboardingPreview />
             <WorkflowTutorial />
+            <DashboardTour />
         </Layout>
     );
 };
