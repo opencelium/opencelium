@@ -16,34 +16,35 @@ type DashboardStepDefinition = {
 }
 
 /**
- * Tour order: the page first, then the chrome above it that follows the user
- * everywhere. Every target is an element some component owns as a stable test id,
- * so a renamed widget internal cannot break the tour.
+ * Tour order: the chrome that follows the user everywhere, then the page itself.
+ * Every target is an element some component owns as a stable test id, so a renamed
+ * widget internal cannot break the tour.
  *
- * The top-bar steps end `-end`/`-start`-placed because the bar spans the whole
+ * The top-bar steps are `-start`/`-end`-placed because the bar spans the whole
  * width — a centred tooltip on the profile icon would hang off the viewport.
  */
 export const DASHBOARD_TOUR_STEPS = [
-    { id: 'header', placement: 'bottom', hasNote: false },
-    { id: 'tiles', placement: 'bottom', hasNote: false },
-    { id: 'executions', placement: 'auto', hasNote: true },
-    { id: 'resources', placement: 'auto', hasNote: false },
-    { id: 'connectors', placement: 'auto', hasNote: false },
-    { id: 'comingSoon', placement: 'top', hasNote: false },
     { id: 'createWorkflow', placement: 'bottom-start', hasNote: false },
     { id: 'palette', placement: 'bottom', hasNote: false },
     { id: 'language', placement: 'bottom-end', hasNote: false },
     { id: 'help', placement: 'bottom-end', hasNote: false },
     { id: 'menuSwitch', placement: 'bottom-end', hasNote: false },
     { id: 'profile', placement: 'bottom-end', hasNote: false },
+    { id: 'header', placement: 'bottom', hasNote: false },
+    { id: 'tiles', placement: 'bottom', hasNote: false },
+    { id: 'executions', placement: 'auto', hasNote: true },
+    { id: 'resources', placement: 'auto', hasNote: false },
+    { id: 'connectors', placement: 'auto', hasNote: false },
+    { id: 'comingSoon', placement: 'top', hasNote: false },
 ] as const satisfies readonly DashboardStepDefinition[]
 
 export type DashboardTourStepId = (typeof DASHBOARD_TOUR_STEPS)[number]['id']
 
 /**
- * The anchor that says the dashboard itself has rendered. The top bar is mounted
- * by the layout and is therefore on screen *before* the page is, so resolving
- * targets on the first anchor found would snapshot a chrome-only tour.
+ * The anchor that says the dashboard itself has rendered — the page's own header,
+ * wherever it sits in the order above. The top bar is mounted by the layout and is
+ * therefore on screen *before* the page is, so resolving targets on the first
+ * anchor found would snapshot a chrome-only tour.
  */
 export const READY_STEP_ID: DashboardTourStepId = 'header'
 
