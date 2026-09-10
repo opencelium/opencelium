@@ -13,21 +13,21 @@ const build = (presentIds: readonly DashboardTourStepId[], onDismiss = vi.fn()) 
 const dataOf = (step: {data?: unknown}) => step.data as OnboardingTooltipData
 
 describe('buildDashboardTourSteps', () => {
-    it('walks the page first, then the top bar', () => {
+    it('walks the top bar first, then the page', () => {
         const steps = build(ALL_IDS)
         expect(steps.map((step) => step.target)).toEqual([
-            targetFor('header'),
-            targetFor('tiles'),
-            targetFor('executions'),
-            targetFor('resources'),
-            targetFor('connectors'),
-            targetFor('comingSoon'),
             targetFor('createWorkflow'),
             targetFor('palette'),
             targetFor('language'),
             targetFor('help'),
             targetFor('menuSwitch'),
             targetFor('profile'),
+            targetFor('header'),
+            targetFor('tiles'),
+            targetFor('executions'),
+            targetFor('resources'),
+            targetFor('connectors'),
+            targetFor('comingSoon'),
         ])
         expect(steps.map((step) => step.title)).toEqual(
             ALL_IDS.map((id) => `dashboard.steps.${id}.title`),
@@ -51,12 +51,12 @@ describe('buildDashboardTourSteps', () => {
     })
 
     it('keeps the requested order regardless of how presentIds is ordered', () => {
-        const steps = build(['comingSoon', 'header'])
-        expect(steps.map((step) => step.target)).toEqual([targetFor('header'), targetFor('comingSoon')])
+        const steps = build(['comingSoon', 'palette'])
+        expect(steps.map((step) => step.target)).toEqual([targetFor('palette'), targetFor('comingSoon')])
     })
 
     it('drops absent widgets and counts only what is left', () => {
-        const steps = build(['header', 'tiles', 'executions'])
+        const steps = build(['palette', 'header', 'tiles'])
         expect(steps).toHaveLength(3)
         expect(steps.every((step) => dataOf(step).total === 3)).toBe(true)
     })
@@ -80,11 +80,14 @@ describe('buildDashboardTourSteps', () => {
 
     it('carries the palette hint first, then a note only where a step declares one', () => {
         const steps = build(ALL_IDS)
+        const footerOf = (id: DashboardTourStepId) =>
+            dataOf(steps.find((step) => step.target === targetFor(id))!).footerNote
+
         // The first footer is the CommandHint element; the rest are plain strings.
         expect(typeof dataOf(steps[0]).footerNote).toBe('object')
-        expect(dataOf(steps[2]).footerNote).toBe('dashboard.steps.executions.note')
-        expect(dataOf(steps[1]).footerNote).toBeUndefined()
-        expect(dataOf(steps[7]).footerNote).toBeUndefined()
+        expect(footerOf('executions')).toBe('dashboard.steps.executions.note')
+        expect(footerOf('tiles')).toBeUndefined()
+        expect(footerOf('profile')).toBeUndefined()
     })
 
     it('opts every step out of the beacon so it opens on the widget directly', () => {
