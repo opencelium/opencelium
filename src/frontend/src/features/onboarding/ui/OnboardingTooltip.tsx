@@ -21,7 +21,7 @@ export type OnboardingTooltipData = {
     /** Replaces Joyride's own advance, for a step whose primary leaves the tour. */
     primaryAction?: () => void
     brand?: boolean
-    variant?: 'invoker'
+    variant?: 'invoker' | 'dashboard'
 }
 
 export function OnboardingTooltip({ backProps, closeProps, continuous, index, primaryProps, step, tooltipProps }: TooltipRenderProps) {

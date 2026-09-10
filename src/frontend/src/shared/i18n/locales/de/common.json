@@ -59,7 +59,8 @@
       "workflow": "Den aktuellen Workflow durchsuchen",
       "help": "Alle Befehle anzeigen",
       "onboarding": "Einrichtungstour neu starten",
-      "workflowTutorial": "Workflow-Tutorial erneut ansehen"
+      "workflowTutorial": "Workflow-Tutorial erneut ansehen",
+      "dashboardTour": "Dashboard-Tour erneut ansehen"
     },
     "footer": {
       "select": "Auswählen",
@@ -101,7 +102,9 @@
     "profile": "Profil",
     "createWorkflow": "Workflow erstellen",
     "createWorkflowHint": "Workflow erstellen (Alt+W)",
-    "docs": "Dokumentation"
+    "docs": "Dokumentation",
+      "help": "Hilfe",
+      "startTour": "Tour starten"
   },
   "user": {
     "unknown": "Unbekannter Benutzer"

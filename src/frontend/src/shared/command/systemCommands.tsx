@@ -7,6 +7,7 @@ import {EntityWizard} from "@/engine/entity/runtime/EntityWizard.tsx";
 import {CommandReferenceDialog} from "@widgets/CommandPalette/CommandReferenceDialog.tsx";
 import { ONBOARDING_RESTART_EVENT } from '@features/onboarding/model/types'
 import { useWorkflowTutorialStore } from '@features/onboarding/workflow-tutorial/model/workflowTutorial.store'
+import { useDashboardTourStore } from '@features/onboarding/dashboard-tour/model/dashboardTour.store'
 
 export const systemCommands: CommandNode<any>[] = [
     // "login" command (role impersonation) is disabled — commented out so it no
@@ -108,6 +109,20 @@ export const systemCommands: CommandNode<any>[] = [
                     ctx.setInputValue('')
                     ctx.navigate('/')
                     window.dispatchEvent(new Event(ONBOARDING_RESTART_EVENT))
+                },
+            },
+            {
+                type: 'literal',
+                value: 'dashboard',
+                group: 'general',
+                icon: 'report-analytics',
+                description: 'commandPalette.descriptions.dashboardTour',
+                execute: (_, ctx) => {
+                    ctx.setInputValue('')
+                    // Navigate first: the tour resolves its anchors off the page,
+                    // and dismisses itself if it is somehow started elsewhere.
+                    ctx.navigate('/')
+                    useDashboardTourStore.getState().request()
                 },
             },
             {
