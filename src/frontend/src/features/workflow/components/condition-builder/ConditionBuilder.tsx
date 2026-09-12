@@ -970,7 +970,8 @@ export function ConditionBuilderDialog({
 						const result = validateConditionTreeWithErrors(tree, operatorType);
 						setTree(result.tree);
 						if (!result.isValid) return;
-						onSave(node.id, buildConditionConfig(operatorType, result.tree, loopIterator));
+						onSave(node.id, buildConditionConfig(operatorType, result.tree, loopIterator,
+							node.data.conditionConfig?.expression));
 					}}
 				>
 					{t('actions.save')}
