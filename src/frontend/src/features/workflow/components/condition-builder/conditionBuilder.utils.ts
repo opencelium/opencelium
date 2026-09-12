@@ -1,4 +1,3 @@
-import type { WorkflowNodeModel } from '../../types/workflow.types';
 import type { MethodWithId } from '../../types/connection';
 import { createShortId } from '@shared/lib/createId';
 import { parseEnhancementArg, type ParsedArg } from '../request-editor/utils/parseEnhancementArg';
@@ -15,6 +14,7 @@ import {
 	type ConditionValueSource,
 } from './conditionBuilder.types';
 import type { ResponseType } from '../request-editor/body-editor/requestReferenceOptions';
+export { generateTreeByExpression, getInitialTreeFromConfig } from './conditionExpressionParser';
 
 // Strips the `{% ... %}` enhancement-style wrapper a condition operand's
 // reference can arrive in (round-tripped through the expression string) —
@@ -30,7 +30,7 @@ export const unwrapConditionReference = (value?: string) =>
 export const parseMethodFromReference = (methods: MethodWithId[], value?: string) => {
 	const reference = unwrapConditionReference(value);
 	if (!reference) return undefined;
-	const color = reference.match(/^#?([A-Fa-f0-9]{6})\.\(response\)\./)?.[1];
+	const color = reference.match(/^#?([A-Fa-f0-9]{6})\.\((?:response|request)\)\./)?.[1];
 	return color
 		? methods.find((method) => method.color.replace('#', '').toLowerCase() === color.toLowerCase())
 		: undefined;
@@ -42,7 +42,7 @@ export const parseMethodFromReference = (methods: MethodWithId[], value?: string
 // reference and flips the dialog's B/H/S switcher. The path tail is matched by
 // the same expression so a bare path (what LegacyResponseFieldSelect emits)
 // falls through untouched instead of being cut at its own `.body.`/`.header.`.
-const REFERENCE_HEAD = /^#?[A-Fa-f0-9]{6}\.\(response\)\.(body|header|status)\b\.?(.*)$/;
+const REFERENCE_HEAD = /^#?[A-Fa-f0-9]{6}\.\((?:response|request)\)\.(body|header|status)\b\.?(.*)$/;
 
 export const parseResponseTypeFromReference = (value?: string): ResponseType | undefined =>
 	unwrapConditionReference(value)?.match(REFERENCE_HEAD)?.[1] as ResponseType | undefined;
@@ -61,7 +61,7 @@ export const getSourceFromField = (field?: string): ConditionValueSource => {
 	const reference = unwrapConditionReference(field);
 	if (!reference) return 'direct';
 	if (reference.startsWith('${') && reference.endsWith('}')) return 'webhook';
-	if (/^#?[A-Fa-f0-9]{6}\.\(response\)\./.test(reference)) return 'direct';
+	if (/^#?[A-Fa-f0-9]{6}\.\((?:response|request)\)\./.test(reference)) return 'direct';
 	return 'constant';
 };
 
@@ -98,104 +98,6 @@ export const createEmptyGroup = (operatorType: 'if' | 'loop'): ConditionGroup =>
 	items: operatorType === 'loop' ? [createEmptyRule()] : undefined,
 });
 
-const GENERATED_DIRECT_REFERENCE_TOKEN = /^\{%(#?[A-Fa-f0-9]{6}\.\(response\)\.[^%]*)%}$/;
-const GENERATED_WEBHOOK_TOKEN = /^\$\{[^{}]*}$/;
-const GENERATED_FIELD_SOURCE = String.raw`(?:\{%#?[A-Fa-f0-9]{6}\.\(response\)\.[^%]*%\}|\$\{[^{}]*\}|'[^']*')`;
-
-const parseGeneratedField = (raw: string): string => {
-	const direct = raw.match(GENERATED_DIRECT_REFERENCE_TOKEN);
-	if (direct) return direct[1];
-	if (GENERATED_WEBHOOK_TOKEN.test(raw)) return raw;
-	if (raw.startsWith(`'`) && raw.endsWith(`'`)) return raw.slice(1, -1);
-	return raw;
-};
-
-// 'if' expressions are always saved wrapped in a single outer paren pair (see wrapIfExpression
-// in connectionPayload.ts) — strip it before matching the flat left/operator/right shape below.
-const stripOuterParens = (expression: string): string => {
-	const trimmed = expression.trim();
-	if (!trimmed.startsWith('(') || !trimmed.endsWith(')')) return trimmed;
-	let depth = 0;
-	for (let index = 0; index < trimmed.length; index += 1) {
-		if (trimmed[index] === '(') depth += 1;
-		else if (trimmed[index] === ')') {
-			depth -= 1;
-			if (depth === 0) return index === trimmed.length - 1 ? trimmed.slice(1, -1).trim() : trimmed;
-		}
-	}
-	return trimmed;
-};
-
-const wrapGeneratedRule = (properties: ConditionRuleProperties): ConditionGroup => ({
-	id: createConditionId('group'),
-	type: 'group',
-	properties: { not: false },
-	items: [{ id: createConditionId('rule'), type: 'rule', properties }],
-});
-
-// Reconstructs a flat single-rule tree from an operator's raw expression string, mirroring
-// OperatorsConfigGenerator.generateTreeByExpression from src/old_condition_builder. Only used
-// as a fallback when no UI tree was persisted for this operator (no matching ui.workflowNodes
-// entry, the equivalent of the old "operator.uiId missing" case) — nested AND/OR groups built
-// through the tree UI are never round-tripped through here, same limitation as the old version.
-const generateIfTreeByExpression = (expression: string): ConditionGroup | null => {
-	const operators = Object.values(IfOperatorName).join('|');
-	const regex = new RegExp(`^(${GENERATED_FIELD_SOURCE})\\s+(${operators})(?:\\s+(${GENERATED_FIELD_SOURCE}))?$`);
-	const match = stripOuterParens(expression).match(regex);
-	if (!match) return null;
-	const properties: ConditionRuleProperties = {
-		leftField: parseGeneratedField(match[1]),
-		operator: match[2] as IfOperatorName,
-	};
-	if (match[3]) properties.rightField = parseGeneratedField(match[3]);
-	return wrapGeneratedRule(properties);
-};
-
-const generateLoopTreeByExpression = (expression: string): ConditionGroup | null => {
-	const trimmed = expression.trim();
-	const binaryRegex = new RegExp(
-		`^(${GENERATED_FIELD_SOURCE})\\s+(${LoopOperatorName.SplitString})\\s+(${GENERATED_FIELD_SOURCE})$`,
-	);
-	const binaryMatch = trimmed.match(binaryRegex);
-	if (binaryMatch) {
-		return wrapGeneratedRule({
-			leftField: parseGeneratedField(binaryMatch[1]),
-			operator: LoopOperatorName.SplitString,
-			rightField: parseGeneratedField(binaryMatch[3]),
-		});
-	}
-	const unaryRegex = new RegExp(
-		`^(${LoopOperatorName.For}|${LoopOperatorName.ForIn})\\s+(${GENERATED_FIELD_SOURCE})(?:\\s+(${GENERATED_FIELD_SOURCE}))?$`,
-	);
-	const unaryMatch = trimmed.match(unaryRegex);
-	if (!unaryMatch) return null;
-	const properties: ConditionRuleProperties = {
-		operator: unaryMatch[1] as LoopOperatorName,
-		leftField: parseGeneratedField(unaryMatch[2]),
-	};
-	if (unaryMatch[3]) properties.rightField = parseGeneratedField(unaryMatch[3]);
-	return wrapGeneratedRule(properties);
-};
-
-export const generateTreeByExpression = (
-	expression: string | undefined,
-	operatorType: 'if' | 'loop',
-): ConditionGroup | null => {
-	if (!expression?.trim()) return null;
-	return operatorType === 'loop'
-		? generateLoopTreeByExpression(expression)
-		: generateIfTreeByExpression(expression);
-};
-
-export const getInitialTreeFromConfig = (
-	node: WorkflowNodeModel | null,
-	operatorType: 'if' | 'loop',
-): ConditionTree => {
-	const config = node?.data.conditionConfig;
-	const hasSavedTree = config?.tree?.type === 'group' && (config.tree.items?.length ?? 0) > 0;
-	if (hasSavedTree) return config.tree;
-	return generateTreeByExpression(config?.expression, operatorType) ?? createEmptyGroup(operatorType);
-};
 
 export const updateRuleProperties = (
 	group: ConditionGroup,
@@ -266,8 +168,8 @@ export const duplicateRuleById = (group: ConditionGroup, ruleId: string): Condit
 	}),
 });
 
-const DIRECT_REFERENCE_PATTERN = /^#?[A-Fa-f0-9]{6}\.\(response\)\./;
-const WRAPPED_DIRECT_REFERENCE_PATTERN = /^\{%#?[A-Fa-f0-9]{6}\.\(response\)\..*%}$/;
+const DIRECT_REFERENCE_PATTERN = /^#?[A-Fa-f0-9]{6}\.\((?:response|request)\)\./;
+const WRAPPED_DIRECT_REFERENCE_PATTERN = /^\{%#?[A-Fa-f0-9]{6}\.\((?:response|request)\)\..*%}$/;
 
 const isDirectReference = (value?: string) =>
 	!!value && DIRECT_REFERENCE_PATTERN.test(value);
@@ -310,7 +212,9 @@ export const conditionTreeToExpression = (
 		.map((item) => conditionTreeToExpression(item, operatorType))
 		.filter(Boolean)
 		.join(` ${conjunction || ''} `);
-	return operatorType === 'if' ? `(${expression})` : expression;
+	return operatorType === 'if'
+		? `${child.properties?.not ? '!' : ''}(${expression})`
+		: expression;
 };
 
 const isRuleValid = (rule: ConditionRule, operatorType: 'if' | 'loop') => {
@@ -386,9 +290,13 @@ export const buildConditionConfig = (
 	operatorType: 'if' | 'loop',
 	tree: ConditionTree,
 	iterator?: string,
-): ConditionConfig => ({
-	operatorType,
-	tree,
-	expression: conditionTreeToExpression(tree, operatorType),
-	...(operatorType === 'loop' && iterator ? { iterator } : {}),
-});
+	originalExpression?: string,
+): ConditionConfig => {
+	const hasRules = (tree.items?.length ?? 0) > 0;
+	return {
+		operatorType,
+		tree,
+		expression: hasRules ? conditionTreeToExpression(tree, operatorType) : originalExpression || '',
+		...(operatorType === 'loop' && iterator ? { iterator } : {}),
+	};
+};

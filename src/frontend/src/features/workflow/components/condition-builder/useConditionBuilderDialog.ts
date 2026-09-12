@@ -24,7 +24,8 @@ export function useConditionBuilderDialog(props: ConditionBuilderDialogProps) {
     const result = validateConditionTreeWithErrors(tree, operatorType);
     setTree(result.tree);
     if (!result.isValid) return;
-    onSave(node.id, buildConditionConfig(operatorType, result.tree, data.loopIterator));
+    onSave(node.id, buildConditionConfig(operatorType, result.tree, data.loopIterator,
+      node.data.conditionConfig?.expression));
   };
 
   return { operatorType, tree, setTree, renderKey, isLoop, save, ...data };
