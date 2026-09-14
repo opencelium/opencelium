@@ -8,6 +8,7 @@ import { useRequestObjectEditor } from '../useRequestObjectEditor';
 import ReferenceEnhancement from '../../enhancement/Enhancement/Enhancement';
 import { ReferenceInfo } from '../../reference-info/ReferenceInfo/ReferenceInfo';
 import { LegacyRequestData } from './LegacyRequestData';
+import { SuggestedBindings } from '../../suggestions/SuggestedBindings';
 import { useLegacyJsonComponents } from './useLegacyJsonComponents';
 import type { LegacyRequestJsonEditorProps } from './LegacyRequestJsonEditor.types';
 import '../../body-editor/bodyLegacy.css';
@@ -24,6 +25,11 @@ export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 			&& result.startsWith(`${method.color}.(request).${messageProperty}.$`);
 	});
 	const items: CollapseItem[] = [
+		// Body only: header mapping is a flat key/value space with its own rules, and the
+		// suggester's schema walk has nothing to work with there.
+		...(messageProperty === 'body' ? [{ key: 'suggestions',
+			label: t('suggestions.title'),
+			content: <SuggestedBindings source={source} editor={editor} readOnly={readOnly} /> }] : []),
 		{ key: 'referenceInfo', label: t('referenceInfo.legacyTitle'),
 			content: hasReferences ? <ReferenceInfo messageProperty={messageProperty} data={{}}
 				readOnly={readOnly} onReferenceClick={editor.setSelectedEnhanceId}

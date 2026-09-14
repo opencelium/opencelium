@@ -22,6 +22,12 @@ await loadRuntimeConfig();
 if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS !== 'false') {
 	const { worker } = await import('@/mock/server');
 	await worker.start();
+} else if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_AI_MOCK !== 'false') {
+	// The AI suggester has no backend endpoint yet. Mocking it on its own keeps the rest of
+	// the app pointed at the real API — turning the full mock server on to reach one route
+	// would shadow every other endpoint with fixtures.
+	const { aiOnlyWorker } = await import('@/mock/server');
+	await aiOnlyWorker.start({ onUnhandledRequest: 'bypass' });
 }
 
 createRoot(document.getElementById('root')!).render(

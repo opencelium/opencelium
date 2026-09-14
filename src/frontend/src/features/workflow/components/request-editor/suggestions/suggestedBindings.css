@@ -1,0 +1,112 @@
+.wfSuggestions {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 4px 2px 8px;
+}
+
+.wfSuggestionsHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.wfSuggestionsActions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* Matches the height an empty state occupies, so the panel does not jump between the
+   spinner and whatever replaces it. */
+.wfSuggestionsLoading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 96px;
+}
+
+.wfSuggestionList {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.wfSuggestionRow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	padding: 6px 8px;
+	border: 1px solid var(--color-border-subtle);
+	border-radius: 6px;
+	background: var(--color-background-surface);
+}
+
+.wfSuggestionRowMain,
+.wfSuggestionSource,
+.wfSuggestionMeta {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.wfSuggestionRowMain {
+	gap: 8px;
+	flex: 1 1 260px;
+	overflow: hidden;
+}
+
+.wfSuggestionRowMain > * {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* Circular so a colour fill reads as the method's swatch rather than a card edge. */
+.wfSuggestionSourceIcon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+
+/* Field paths are code, not prose. Plain spans rather than Typography's `label`, which
+   renders an antd <Title level={5}> — a heading, sized and weighted for section headers. */
+.wfSuggestionPath {
+	font-size: 12px;
+	line-height: 18px;
+	color: var(--color-text-primary);
+}
+
+.wfSuggestionPath--target {
+	font-weight: 500;
+}
+
+.wfSuggestionArrow {
+	flex-shrink: 0;
+}
+
+.wfSuggestionOrigin {
+	padding: 1px 8px;
+	border-radius: 10px;
+	font-size: 11px;
+	line-height: 18px;
+	white-space: nowrap;
+	/* currentColor-derived so each origin needs one token, not a fg/bg/border trio. */
+	border: 1px solid currentColor;
+}
+
+.wfSuggestionOrigin--precedent { color: var(--color-status-success-fg); }
+.wfSuggestionOrigin--deterministic { color: var(--color-action-primary); }
+.wfSuggestionOrigin--model { color: var(--color-status-warning-fg); }
