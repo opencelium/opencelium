@@ -1,4 +1,5 @@
 import { MethodType, OperatorType, type Connection, type LoopOperatorWithId, type MethodWithId, type OperatorWithId } from '../../../types/connection';
+import type { SchemaFieldKind } from '../../../ai/fieldBindingSuggestion.types';
 
 export type ResponseType = 'body' | 'header' | 'status';
 
@@ -322,3 +323,56 @@ export const readLiveValueAtPath = (
   }
   return current;
 };
+
+/** A single addressable leaf of a request/response schema. */
+export type ReferencePathEntry = {
+  /** Reference-grammar path (`$.items[0].sku`) — feeds buildReferenceValue unchanged. */
+  path: string;
+  /** The same leaf as react-json-view addresses it, so a caller writing into the */
+  /** request body never has to re-parse the path it was just handed. */
+  namespace: string[];
+  name: string;
+  kind: SchemaFieldKind;
+};
+
+const SCHEMA_WALK_MAX_DEPTH = 8;
+
+const leafKind = (value: unknown): SchemaFieldKind => {
+  if (typeof value === 'string') return 'string';
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'boolean') return 'boolean';
+  return 'unknown';
+};
+
+/**
+ * Every scalar leaf of a schema, in the same path grammar the reference pickers emit.
+ * Containers are skipped — a mapping targets a leaf — and an array contributes its first
+ * element's shape under `[0]`, matching what the picker offers for the same node.
+ */
+export const flattenReferencePaths = (root: unknown): ReferencePathEntry[] => {
+  const entries: ReferencePathEntry[] = [];
+
+  const visit = (node: unknown, path: string, namespace: string[], name: string, depth: number) => {
+    if (depth > SCHEMA_WALK_MAX_DEPTH) return;
+    const childNamespace = name ? [...namespace, name] : namespace;
+
+    if (isArrayNode(node)) {
+      visit(getArrayItem(node), `${path}[0]`, childNamespace, '0', depth + 1);
+      return;
+    }
+    if (isRecord(node)) {
+      Object.entries(node).forEach(([key, value]) =>
+        visit(value, appendPath(path, key), childNamespace, key, depth + 1));
+      return;
+    }
+    if (!name) return;
+    entries.push({ path, namespace, name, kind: leafKind(node) });
+  };
+
+  visit(root, '$', [], '', 0);
+  return entries;
+};
+
+/** The node a response reference is resolved against, with the array-body wrapping applied. */
+export const getResponseSchemaRoot = (method: MethodWithId | undefined, type: ResponseType) =>
+  getSource(method, type);

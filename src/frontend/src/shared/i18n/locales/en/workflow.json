@@ -797,5 +797,26 @@
     "masterPasswordNotConfigured": "No master password is configured",
     "masterPasswordNotConfiguredDescription": "Ask an administrator to set opencelium.connector.master-password in /backend/src/main/resources/application.yml and restart the backend to enable browsing this connector's GraphQL API.",
     "retry": "Try again"
+  },
+  "suggestions": {
+    "title": "Suggested mappings",
+    "intro": "Match this request's fields against the responses of earlier methods, and review each proposal before it is applied.",
+    "reviewHint": "Every suggestion is a proposal — nothing is written until you apply it.",
+    "generate": "Suggest mappings",
+    "regenerate": "Suggest again",
+    "apply": "Apply",
+    "dismiss": "Dismiss suggestion",
+    "applied": "Mapping applied",
+    "confidence": "{{percent}}%",
+    "empty": "No mapping could be proposed: none of the {{sourceFieldCount}} response fields from {{sourceMethodCount}} upstream method(s) resembles any of the {{openFieldCount}} open field(s) here.",
+    "noSources": "No upstream method offers a response schema to map from.",
+    "noFields": "This request has no body fields to map into.",
+    "noOpenFields": "Every field of this request already has a reference.",
+    "failed": "Mapping suggestions could not be loaded.",
+    "origin": {
+      "precedent": "Used before",
+      "deterministic": "Name match",
+      "model": "Semantic match"
+    }
   }
 }

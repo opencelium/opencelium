@@ -797,5 +797,26 @@
     "masterPasswordNotConfigured": "Es ist kein Master-Passwort konfiguriert",
     "masterPasswordNotConfiguredDescription": "Bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten, um auf die GraphQL-API dieses Connectors zugreifen zu können.",
     "retry": "Erneut versuchen"
+  },
+  "suggestions": {
+    "title": "Vorgeschlagene Zuordnungen",
+    "intro": "Gleicht die Felder dieses Requests mit den Responses vorheriger Methoden ab. Jeder Vorschlag wird vor der Übernahme geprüft.",
+    "reviewHint": "Jeder Vorschlag ist nur ein Vorschlag — übernommen wird erst, was Sie bestätigen.",
+    "generate": "Zuordnungen vorschlagen",
+    "regenerate": "Erneut vorschlagen",
+    "apply": "Übernehmen",
+    "dismiss": "Vorschlag verwerfen",
+    "applied": "Zuordnung übernommen",
+    "confidence": "{{percent}} %",
+    "empty": "Keine Zuordnung möglich: Keines der {{sourceFieldCount}} Response-Felder aus {{sourceMethodCount}} vorgelagerten Methode(n) ähnelt einem der {{openFieldCount}} offenen Felder.",
+    "noSources": "Keine vorgelagerte Methode bietet ein Response-Schema zur Zuordnung an.",
+    "noFields": "Dieser Request hat keine Body-Felder, in die zugeordnet werden könnte.",
+    "noOpenFields": "Alle Felder dieses Requests haben bereits eine Referenz.",
+    "failed": "Die Zuordnungsvorschläge konnten nicht geladen werden.",
+    "origin": {
+      "precedent": "Bereits verwendet",
+      "deterministic": "Namenstreffer",
+      "model": "Semantischer Treffer"
+    }
   }
 }
