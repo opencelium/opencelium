@@ -2,10 +2,43 @@ spring:
   application:
     name: opencelium-core
 
+  # The customer's MongoDB. A self-hosted installation points this at the customer's own database,
+  # and startup fails if it is missing rather than silently using mongodb://localhost:27017:
+  #   SPRING_MONGODB_URI=mongodb://user:password@host:27017/opencelium
+  # In cloud mode leave it unset: each client's database arrives with the Service Portal login.
+  mongodb:
+    # Local development default. Real installations override it with SPRING_MONGODB_URI.
+    uri: ${SPRING_MONGODB_URI:mongodb://localhost:27017/opencelium}
+
 server:
   port: 9090
 
 opencelium:
+  tenancy:
+    # self-hosted — one customer, their MongoDB configured above (today's behaviour)
+    # cloud       — many clients, each database supplied by the Service Portal after login
+    mode: ${OC_TENANCY_MODE:self-hosted}
+    self-hosted:
+      # Ping the database while starting, so a wrong URI or password fails immediately instead of
+      # on the first query.
+      verify-connection-on-startup: true
+    cloud:
+      client-cache:
+        # How many client databases core keeps open, and when an unused one is closed.
+        max-size: 50
+        idle-timeout: 30m
+      pool:
+        max-size-per-tenant: 20
+      # How long to wait for a client's database before failing that client's request.
+      connect-timeout: 10s
+      # How long portal-supplied connection details are reused before they are fetched again.
+      db-info-refresh: 15m
+
+  service-portal:
+    base-url: ${OC_SERVICE_PORTAL_URL:https://service.opencelium.io}
+    # Core's own credential towards the portal; optional for installations that use no portal service.
+    api-token: ${OC_SERVICE_PORTAL_TOKEN:}
+
   execution:
     # Transport SPI selection:
     #   local  — workflows run inside this process (monolith deployment, default)
