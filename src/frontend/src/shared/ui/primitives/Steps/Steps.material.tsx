@@ -10,7 +10,7 @@ const MaterialSteps: StepsComponent =
         return (
             <Stepper activeStep={current} orientation="vertical">
                 {items.map((step, index) => (
-                    <Step key={index}>
+                    <Step key={index} disabled={step.disabled}>
                         <StepLabel
                             optional={
                                 index === items.length - 1 ? (
