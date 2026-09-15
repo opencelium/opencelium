@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './styles.css';
 import { WorkflowPageHeader } from './components/WorkflowPageHeader/WorkflowPageHeader';
@@ -13,6 +14,7 @@ import { useWorkflowPageState } from './hooks/useWorkflowPageState';
 import { useWorkflowActions } from './hooks/useWorkflowActions';
 import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { buildWorkflowIndexes } from './api/connectionPayload';
+import { mapConnectionToWorkflowState } from './api/connectionMapper';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -53,6 +55,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { validation, saveWorkflow: handleSave, category, templates: templateActions,
     history: historyActions, canvas, header, buildTestPayload, isShortcutsOpen,
     setIsShortcutsOpen, schedulesOpen, setSchedulesOpen, changeHistoryOpen,
+    jsonEditorOpen, setJsonEditorOpen, jsonEditorValue,
     setChangeHistoryOpen, pasteOperatorTarget, cancelPasteOperator,
     pasteOperatorInScope, pasteOperatorAfter } = actions;
   const { validateTitle, resolveAndHighlightError: resolveAndHighlightWorkflowError } = validation;
@@ -113,6 +116,19 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             onCancel: handleCancelConnectorMapping },
         }}
         shortcuts={{ open: isShortcutsOpen, onClose: () => setIsShortcutsOpen(false) }}
+		jsonEditor={{ open: jsonEditorOpen, readOnly: readOnly || isTestRunLocked,
+          value: jsonEditorValue ?? {},
+          onApply: (payload) => {
+            const state = mapConnectionToWorkflowState(payload);
+            workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
+            setLoadedFieldBindings(state.fieldBindings);
+            setHeaderState({ title: state.title, description: state.description });
+            setCategoryId(state.categoryId);
+            changes.markDirty();
+            setJsonEditorOpen(false);
+            message.success(t('json.applied'));
+          },
+          onClose: () => setJsonEditorOpen(false) }}
         pasteOperator={{ open: !!pasteOperatorTarget, onCancel: cancelPasteOperator,
           onPasteInScope: pasteOperatorInScope, onPasteAfter: pasteOperatorAfter }}
         category={{ open: assignCategoryOpen, currentCategoryId: categoryId,
