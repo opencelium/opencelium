@@ -3,6 +3,7 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../../types/workfl
 import { buildConnectionPayload, buildWorkflowIndexes } from '../../../api/connectionPayload';
 import { mapConnectionToWorkflowState } from '../../../api/connectionMapper';
 import { initialNodes } from '../../../data/initialGraph';
+import { mapWorkflowJsonToWorkflowState, validateWorkflowJson } from './workflowJson.validate';
 
 describe('workflow JSON round trip', () => {
 	it('preserves node ids, edges, indexes, and field bindings', () => {
@@ -74,5 +75,37 @@ describe('workflow JSON round trip', () => {
 		expect(restored.nodes.find((node) => node.id === webhook.id)?.type).toBe('trigger-connection');
 		expect(restored.nodes.filter((node) => node.type === 'if' || node.type === 'loop')
 			.map((node) => node.id).sort()).toEqual([condition.id, loop.id].sort());
+	});
+
+	it('applies edited method and operator data instead of stale UI copies', () => {
+		const method: WorkflowNodeModel = {
+			id: 'method-1', type: 'system', position: { x: 420, y: 220 },
+			data: { title: 'HTTP Request', subtitle: 'Fetch', kind: 'system', color: '#6477AB',
+				methodConfig: { name: 'Fetch', url: '{url}/unit', method: 'GET', headers: {},
+					queryParams: [], endpointArgs: {}, body: {}, bodyFormat: 'json', bodyData: 'raw' } },
+		};
+		const condition: WorkflowNodeModel = {
+			id: 'if-1', type: 'if', position: { x: 680, y: 220 },
+			data: { title: 'If', kind: 'if', conditionConfig: { operatorType: 'if',
+				expression: "'old' = 'old'",
+				tree: { id: 'group', type: 'group', properties: {}, items: [] } } },
+		};
+		const edges: WorkflowEdgeModel[] = [
+			{ id: 'e1', source: 'start-1', target: method.id, type: 'workflow-edge' },
+			{ id: 'e2', source: method.id, target: condition.id, type: 'workflow-edge' },
+		];
+		const payload = buildConnectionPayload({ title: 'Workflow', description: '',
+			nodes: [...initialNodes, method, condition], edges });
+		payload.fromConnector.methods[0].request.endpoint = '{url}/unit/test';
+		payload.fromConnector.operators[0].expression = "('new' = 'new')";
+
+		const validation = validateWorkflowJson(payload);
+		expect(validation.success).toBe(true);
+		if (!validation.success) throw new Error('Expected edited workflow JSON to be valid');
+		const edited = mapWorkflowJsonToWorkflowState(validation.data);
+		expect(edited.nodes.find((node) => node.id === method.id)?.data.methodConfig?.url)
+			.toBe('{url}/unit/test');
+		expect(edited.nodes.find((node) => node.id === condition.id)?.data.conditionConfig?.expression)
+			.toBe("('new' = 'new')");
 	});
 });

@@ -14,7 +14,7 @@ import { useWorkflowPageState } from './hooks/useWorkflowPageState';
 import { useWorkflowActions } from './hooks/useWorkflowActions';
 import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { buildWorkflowIndexes } from './api/connectionPayload';
-import { mapConnectionToWorkflowState } from './api/connectionMapper';
+import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJsonDialog/workflowJson.validate';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -119,7 +119,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 		jsonEditor={{ open: jsonEditorOpen, readOnly: readOnly || isTestRunLocked,
           value: jsonEditorValue ?? {},
           onApply: (payload) => {
-            const state = mapConnectionToWorkflowState(payload);
+            const state = mapWorkflowJsonToWorkflowState(payload);
             workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
             setLoadedFieldBindings(state.fieldBindings);
             setHeaderState({ title: state.title, description: state.description });
