@@ -11,8 +11,9 @@ import com.becon.opencelium.backend.ocel.operator.operators.OperatorFactory;
 import com.becon.opencelium.backend.ocel.token.Token;
 import com.becon.opencelium.backend.ocel.token.TokenType;
 import com.becon.opencelium.backend.ocel.token.Tokenizer;
-import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
 import com.becon.opencelium.backend.ocel.utils.ValueUtils;
+import com.becon.opencelium.backend.reference.ReferenceMatchers;
+import com.becon.opencelium.backend.reference.enums.ReferenceGroup;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 import io.micrometer.common.util.StringUtils;
 
@@ -68,7 +69,7 @@ public class OCExpressionHelper {
             if (tokens.get(0).getType() == TokenType.OPERATOR && tokens.get(1).getType() == TokenType.OPERAND) {
                 OperatorEnum operatorEnum = OperatorEnum.fromName(tokens.get(0).getLexeme());
                 if (!(operatorEnum == OperatorEnum.FOR || operatorEnum == OperatorEnum.FOR_IN)) {
-                    if (ReferenceUtils.isReference(tokens.get(1).getLexeme()) || ValueUtils.isArray(tokens.get(1).getLexeme())) {
+                    if (ReferenceMatchers.isReference(tokens.get(1).getLexeme(), ReferenceGroup.WRAPPED) || ValueUtils.isArray(tokens.get(1).getLexeme())) {
                         throw new InvalidExpressionException(
                                 ErrorCode.INVALID_LOOP_TYPE,
                                 "Loop type is incorrect. Did you mean 'for %s'?".formatted(tokens.get(1).getLexeme())
@@ -83,8 +84,8 @@ public class OCExpressionHelper {
             // SPLIT_STRING
             OperatorEnum operatorEnum = OperatorEnum.fromName(tokens.get(1).getLexeme());
             if (operatorEnum != OperatorEnum.SPLIT_STRING) {
-                if ((ReferenceUtils.isReference(tokens.get(0).getLexeme()) || ValueUtils.isString(tokens.get(0).getLexeme()))
-                        && (ReferenceUtils.isReference(tokens.get(2).getLexeme()) || ValueUtils.isString(tokens.get(2).getLexeme()))) {
+                if ((ReferenceMatchers.isReference(tokens.get(0).getLexeme(), ReferenceGroup.WRAPPED) || ValueUtils.isString(tokens.get(0).getLexeme()))
+                        && (ReferenceMatchers.isReference(tokens.get(2).getLexeme(), ReferenceGroup.WRAPPED) || ValueUtils.isString(tokens.get(2).getLexeme()))) {
                     throw new InvalidExpressionException(
                             ErrorCode.INVALID_LOOP_TYPE,
                             "Loop type is incorrect. Did you mean '%s SplitString %s'?".formatted(tokens.get(0).getLexeme(), tokens.get(2).getLexeme())
@@ -92,13 +93,13 @@ public class OCExpressionHelper {
                 }
                 throw InvalidExpressionException.invalidLoopExpression(exp);
             } else {
-                if (!(ReferenceUtils.isReference(tokens.get(0).getLexeme()) || ValueUtils.isString(tokens.get(0).getLexeme()))) {
+                if (!(ReferenceMatchers.isReference(tokens.get(0).getLexeme(), ReferenceGroup.WRAPPED) || ValueUtils.isString(tokens.get(0).getLexeme()))) {
                     throw new InvalidExpressionException(
                             ErrorCode.INVALID_TOKEN_FOUND,
                             "'%s' is not valid left operand for SplitString".formatted(tokens.get(0).getLexeme())
                     );
                 }
-                if (!(ReferenceUtils.isReference(tokens.get(2).getLexeme()) || ValueUtils.isString(tokens.get(2).getLexeme()))) {
+                if (!(ReferenceMatchers.isReference(tokens.get(2).getLexeme(), ReferenceGroup.WRAPPED) || ValueUtils.isString(tokens.get(2).getLexeme()))) {
                     throw new InvalidExpressionException(
                             ErrorCode.INVALID_TOKEN_FOUND,
                             "'%s' is not valid right operand for SplitString".formatted(tokens.get(2).getLexeme())

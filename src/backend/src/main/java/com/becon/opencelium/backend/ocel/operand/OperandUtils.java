@@ -1,7 +1,8 @@
 package com.becon.opencelium.backend.ocel.operand;
 
-import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
 import com.becon.opencelium.backend.ocel.utils.ValueUtils;
+import com.becon.opencelium.backend.reference.ReferenceMatchers;
+import com.becon.opencelium.backend.reference.enums.ReferenceGroup;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public class OperandUtils {
         return "null".equals(token)
                 || "true".equals(token)
                 || "false".equals(token)
-                || ReferenceUtils.isReference(token)
+                || ReferenceMatchers.isReference(token, ReferenceGroup.WRAPPED)
                 || ValueUtils.isString(token)
                 || ValueUtils.isNumberStr(token)
                 || ValueUtils.isArray(token)
