@@ -11,6 +11,22 @@ export type WorkflowJsonValidation =
 
 const INDEX_RE = /^\d+(?:_\d+)*$/;
 
+const withoutDerivedUiConfig = (payload: WorkflowJsonPayload): WorkflowJsonPayload => ({
+	...payload,
+	ui: {
+		...payload.ui,
+		workflowNodes: payload.ui.workflowNodes.map((node) => {
+			const data = { ...node.data };
+			delete data.methodConfig;
+			delete data.conditionConfig;
+			return { ...node, data };
+		}),
+	},
+});
+
+export const mapWorkflowJsonToWorkflowState = (payload: WorkflowJsonPayload) =>
+	mapConnectionToWorkflowState(withoutDerivedUiConfig(payload));
+
 export function validateWorkflowJson(value: unknown): WorkflowJsonValidation {
 	const parsed = workflowJsonSchema.safeParse(value);
 	if (!parsed.success) {
@@ -57,7 +73,7 @@ export function validateWorkflowJson(value: unknown): WorkflowJsonValidation {
 			errors: [{ key: 'json.errors.edgeTarget', path: `ui.workflowEdges.${edge.id}.target` }] };
 	}
 	try {
-		const state = mapConnectionToWorkflowState(parsed.data);
+		const state = mapWorkflowJsonToWorkflowState(parsed.data);
 		const nonStartNodes = state.nodes.filter((node) => node.type !== 'start');
 		if (methods.length > 0 && nonStartNodes.length === 0) return { success: false,
 			errors: [{ key: 'json.errors.mapperDroppedMethods' }] };
