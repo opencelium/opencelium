@@ -223,7 +223,7 @@ public class UserServiceImpl implements UserService {
     public void changePassword(ChangePasswordDTO dto) {
         User user = getCurrentUser();
 
-        if (user.getAuthMethod() == AuthMethod.LDAP) {
+        if (user.getAuthMethod().isPasswordManagedExternally()) {
             throw new ServiceUnavailableException(ExceptionConstant.PASSWORD_MANAGED_EXTERNALLY, "Password is managed externally.");
         }
 

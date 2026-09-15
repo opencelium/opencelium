@@ -151,6 +151,52 @@ spring:
 #      default-role: User
 #      # Timeout for LDAP authentication (in milliseconds)
 #      timeout: 30000
+  ######################################################################
+  #                                                                    #
+  #   OpenID Connect (SSO) configuration section.                      #
+  #   OIDC DEBUG mode can be enabled with the                          #
+  #   logging.level.org.springframework.security.oauth2: DEBUG setting #
+  #                                                                    #
+  ######################################################################
+#    oidc:
+#      # Activates single sign-on; while false the login page hides the SSO button
+#      enabled: false
+#      # Label of the SSO button on the login page
+#      display-name: OpenID Connect
+#      # Issuer used for OIDC discovery (/.well-known/openid-configuration)
+#      issuer-uri: https://idp.example.com/realms/opencelium
+#      # Endpoints can be given manually instead of using discovery
+#      authorization-uri: https://idp.example.com/realms/opencelium/protocol/openid-connect/auth
+#      token-uri: https://idp.example.com/realms/opencelium/protocol/openid-connect/token
+#      jwk-set-uri: https://idp.example.com/realms/opencelium/protocol/openid-connect/certs
+#      # Optional, by default the userinfo_endpoint of the discovery document is used
+#      user-info-uri: https://idp.example.com/realms/opencelium/protocol/openid-connect/userinfo
+#      client-id: opencelium
+#      client-secret: SECRET
+#      # Must match the redirect URI registered at the identity provider
+#      redirect-uri: http://localhost:9090/oidc/callback
+#      # Page of the frontend the browser returns to after the callback
+#      frontend-redirect-uri: http://localhost:5173/oidc/callback
+#      scopes:
+#        - openid
+#        - profile
+#        - email
+#      # Claim holding the email address of the user
+#      email-claim: email
+#      # Claim holding the groups used for the role mapping
+#      group-claim: groups
+#      # Creates users that do not exist in OpenCelium yet
+#      jit-provisioning: true
+#      # Maps groups of the identity provider to roles of the application
+#      group-role-mapping:
+#        - group: oc-admins
+#          oc-role: Admin
+#        - group: oc-users
+#          oc-role: User
+#      # Default role if no mapping is found between the identity provider and the application
+#      default-role: User
+#      # Timeout for calls to the identity provider (in milliseconds)
+#      timeout: 10000
 
 springdoc:
   swagger-ui:
@@ -180,6 +226,8 @@ logging:
         security:
           # Activate or deactivate logs during LDAP authentication
           ldap: OFF # OFF or DEBUG;
+          # Activate or deactivate logs during OpenID Connect authentication
+          oauth2: OFF # OFF or DEBUG;
 
 management:
   health:

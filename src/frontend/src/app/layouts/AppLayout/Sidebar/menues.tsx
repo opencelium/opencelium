@@ -25,6 +25,9 @@ const MENU_ITEM_COMPONENT: Partial<Record<string, PermissionComponent>> = {
     '/workflow': 'CONNECTION',
     '/user': 'USER',
     '/role': 'USERGROUP',
+    // Admin-only on the backend (/oidc/config requires the Admin authority), so gate it like the
+    // application configuration rather than like the user/group screens.
+    '/oidc/config': 'APP',
     '/invoker': 'INVOKER',
     '/system-config': 'APP',
 };
@@ -64,6 +67,7 @@ export const useAdminMenu = (): any[] => {
                 {key: '/user', icon: <UserAddOutlined/>, label: link('/user', t('menu.users'))},
                 {key: '/role', icon: <GrGroup/>, label: link('/role', t('menu.groups'))},
                 {key: '/ldap/check', icon: <PiTreeStructureLight/>, label: link('/ldap/check', t('menu.ldapCheck'))},
+                {key: '/oidc/config', icon: <LuFileCog/>, label: link('/oidc/config', t('menu.oidcConfig'))},
             ],
         },
         {

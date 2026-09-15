@@ -25,7 +25,8 @@
     "updateAssistant": "Update Assistant",
     "systemCheck": "System Check",
     "config": "Configurations",
-    "ui": "UI"
+    "ui": "UI",
+    "oidcConfig": "OpenID Connect"
   },
   "commandPalette": {
     "placeholder": "Type a command...",
