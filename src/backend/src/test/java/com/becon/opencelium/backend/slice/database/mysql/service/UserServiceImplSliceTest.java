@@ -14,6 +14,7 @@ import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.WidgetSettingServiceImp;
 import com.becon.opencelium.backend.enums.AuthMethod;
+import com.becon.opencelium.backend.exception.ServiceUnavailableException;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.testutil.annotation.SliceTest;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
@@ -35,6 +36,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Slice test for {@link UserServiceImpl#changePassword}.
@@ -102,6 +104,24 @@ class UserServiceImplSliceTest {
                 .as("changePassword must persist the new password via dirty checking — no explicit save() is performed in production")
                 .isTrue();
         assertThat(encoder.matches("oldPass", refetched.getPassword())).isFalse();
+    }
+
+    @Test
+    void changePasswordThrowsWhenPasswordIsManagedByTheIdentityProvider() {
+        User persisted = UserFixture.anEmptyUser();
+        persisted.setEmail("bob@example.com");
+        persisted.setAuthMethod(AuthMethod.OIDC);
+        em.persistAndFlush(persisted);
+
+        UserDetails principal = new org.springframework.security.core.userdetails.User(
+                "bob@example.com", "irrelevant", List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, "irrelevant", principal.getAuthorities()));
+
+        // Federated accounts have no local password — setting one here would create a second
+        // credential that DaoAuthenticationProvider would happily accept.
+        assertThatThrownBy(() -> userService.changePassword(new ChangePasswordDTO("oldPass", "newPass", "newPass")))
+                .isInstanceOf(ServiceUnavailableException.class);
     }
 
     @TestConfiguration

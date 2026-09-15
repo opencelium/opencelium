@@ -97,6 +97,91 @@ and see the logs on the right side.
 
 |image1|
 
+OpenID Connect (Single Sign-On)
+"""""""""""""""""""""""""""""""
+
+The app can delegate authentication to an external identity provider (Keycloak, Microsoft Entra ID,
+Okta, Authentik, ...) with OpenID Connect. The Authorization Code flow with PKCE is used: the code is
+exchanged for tokens on the server, the ID token is validated against the JWKS of the provider, and
+the access token never reaches the browser.
+
+Configure the provider in the *application.yml* file, under *spring* -> *security*:
+
+.. code-block:: yaml
+
+   oidc:
+      # Activates single sign-on; while false the login page hides the SSO button
+      enabled: true
+
+      # Label of the SSO button on the login page
+      display-name: OpenID Connect
+
+      # Issuer used for OIDC discovery (/.well-known/openid-configuration)
+      issuer-uri: https://idp.example.com/realms/opencelium
+
+      client-id: opencelium
+      client-secret: SECRET
+
+      # Must match the redirect URI registered at the identity provider
+      redirect-uri: http://localhost:9090/oidc/callback
+
+      # Page of the frontend the browser returns to after the callback
+      frontend-redirect-uri: http://localhost:5173/oidc/callback
+
+      scopes:
+        - openid
+        - profile
+        - email
+
+      # Claim holding the groups used for the role mapping
+      group-claim: groups
+
+      # Maps groups of the identity provider to roles of the application
+      group-role-mapping:
+        - group: oc-admins
+          oc-role: Admin
+        - group: oc-users
+          oc-role: User
+
+      # Default role if no mapping is found
+      default-role: User
+
+      # Creates users that do not exist in OpenCelium yet
+      jit-provisioning: true
+
+At the identity provider the client has to be registered as a confidential client with the
+Authorization Code flow, and the value of *redirect-uri* has to be allowed as redirect URI.
+
+.. warning::
+    After updating the application.yml file, please restart the opencelium service.
+
+.. note::
+    Providers without a discovery document can be configured with *authorization-uri*, *token-uri*
+    and *jwk-set-uri* instead of *issuer-uri*.
+
+Users and roles
+>>>>>>>>>>>>>>>
+
+- Users are matched by the claim configured in *email-claim* ("email" by default). A user whose
+  email address changes at the provider is therefore a different user as far as OpenCelium is concerned.
+- The groups of *group-claim* are mapped to roles through *group-role-mapping*. If none of the groups
+  matches, *default-role* is used.
+- With *jit-provisioning* enabled (the default) a user seen for the first time is created
+  automatically. While it is disabled, only users that already exist in OpenCelium can sign in.
+
+Two-factor authentication
+>>>>>>>>>>>>>>>>>>>>>>>>>
+
+TOTP is enforced for single sign-on users in the same way as for local and LDAP users: if the user
+has 2FA activated, the SSO login stops at the code prompt.
+
+.. note::
+    Passwords of single sign-on users are managed by the identity provider, therefore
+    *Forgot password* and *Change password* are not available for them.
+
+The current configuration can be inspected in *Admin Panel* -> *Users & Access* -> *OpenID Connect*.
+The client secret is never shown there.
+
 For login using LDAP credentials, please have a look into OpenCelium Logs for troubleshooting:
 
 .. code-block:: sh
