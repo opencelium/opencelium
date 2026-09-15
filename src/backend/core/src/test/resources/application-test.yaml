@@ -1,0 +1,14 @@
+# Settings for tests. Secrets are never configured here: tests generate throwaway keys at runtime
+# and register them with @DynamicPropertySource.
+opencelium:
+  tenancy:
+    mode: self-hosted
+    self-hosted:
+      # Tests must not need a running MongoDB.
+      verify-connection-on-startup: false
+  service-portal:
+    base-url: https://service.opencelium.io
+
+spring:
+  mongodb:
+    uri: mongodb://localhost:27017/opencelium-test
