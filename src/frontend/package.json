@@ -43,6 +43,8 @@
     "graphql": "16.11.0",
     "i18next": "^25.8.0",
     "lucide-react": "^1.7.0",
+    "monaco-editor": "^0.52.2",
+    "monaco-graphql": "^1.9.0",
     "react": "19.2.0",
     "react-ace": "^14.0.1",
     "react-dom": "19.2.0",
