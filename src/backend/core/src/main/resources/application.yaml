@@ -34,6 +34,15 @@ opencelium:
       # How long portal-supplied connection details are reused before they are fetched again.
       db-info-refresh: 15m
 
+  security:
+    # REQUIRED. Encrypts every stored credential. Generate with: openssl rand -base64 32
+    # Keep it out of this file and out of the repository:
+    #   OC_MASTER_KEY=<base64 of 32 bytes>
+    # Losing it makes every stored secret unreadable; leaking it makes them all readable.
+    master-key: ${OC_MASTER_KEY:}
+    # Where secrets are stored. Only 'mongo' is implemented; vault and kms are reserved.
+    secret-provider: mongo
+
   service-portal:
     base-url: ${OC_SERVICE_PORTAL_URL:https://service.opencelium.io}
     # Core's own credential towards the portal; optional for installations that use no portal service.
