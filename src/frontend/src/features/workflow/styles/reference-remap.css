@@ -73,7 +73,11 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  border: 1px solid var(--color-border-subtle);
+  /* --color-border-default, not -subtle: in the light theme, subtle (n[3])
+     sits one step from this row's own background (n[2]) and the grid lines
+     all but disappear. The grid is the point of this table (see the comment
+     below), so it needs the stronger of the two border tokens. */
+  border: 1px solid var(--color-border-default);
 }
 
 /* The columns are three references read against each other, which stops meaning
@@ -85,7 +89,7 @@
   /* The row's own fill, not the surface: these sit inside .referenceRemapRow. */
   background: var(--color-background-app);
   padding: 4px 8px;
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--color-border-default);
   color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 500;
@@ -139,7 +143,7 @@
 
 .referenceRemapTable td {
   padding: 6px 8px;
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--color-border-default);
   vertical-align: middle;
 }
 
