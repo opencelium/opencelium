@@ -666,6 +666,15 @@
         "error": "error",
         "stale": "stale — script changed"
       }
+    },
+    "assistant": {
+      "brokenScript": "This script still names an input that no longer exists. It cannot be saved until that is fixed.",
+      "repair": "Repair script",
+      "placeholder": "Describe what this script should do, e.g. join first and last name",
+      "generate": "Write script",
+      "apply": "Use this script",
+      "discard": "Discard",
+      "failed": "The script could not be written. Please try again."
     }
   },
   "description": {

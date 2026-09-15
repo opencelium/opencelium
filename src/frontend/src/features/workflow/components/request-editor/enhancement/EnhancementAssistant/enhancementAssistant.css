@@ -1,0 +1,47 @@
+.wfAssistant {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-bottom: 10px;
+}
+
+.wfAssistantPrompt {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.wfAssistantPrompt > :first-child {
+	flex: 1;
+	min-width: 0;
+}
+
+.wfAssistantProposal {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 10px;
+	border: 1px solid var(--color-border-subtle);
+	border-radius: 6px;
+	background: var(--color-background-surface);
+}
+
+.wfAssistantScript {
+	margin: 0;
+	padding: 8px 10px;
+	border-radius: 4px;
+	background: var(--color-background-elevated);
+	color: var(--color-text-primary);
+	font-family: var(--typography-font-family-mono);
+	font-size: 12px;
+	line-height: 18px;
+	white-space: pre-wrap;
+	word-break: break-word;
+	overflow-x: auto;
+}
+
+.wfAssistantProposalActions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
