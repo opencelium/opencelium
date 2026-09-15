@@ -9,6 +9,7 @@ export interface StepsProps {
         subheader?: React.ReactNode,
         content?: React.ReactNode,
         status?: 'wait' | 'process' | 'finish' | 'error';
+        disabled?: boolean;
         onClick?: () => void | Promise<void>;
     }[]
 }
