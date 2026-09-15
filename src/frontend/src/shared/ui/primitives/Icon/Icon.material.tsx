@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    AutoAwesome,
     Check,
     Close,
     Person,
@@ -120,6 +121,7 @@ const iconMap = {
     redo: Redo,
     if: CallSplit,
     loop: Loop,
+    ai: AutoAwesome,
 };
 
 export const MaterialIcon: IconComponent = ({

@@ -64,6 +64,7 @@ export type IconName =
     | 'redo'
     | 'if'
     | 'loop'
+    | 'ai'
 
 export type IconColor =
     | 'default'

@@ -345,11 +345,23 @@ const leafKind = (value: unknown): SchemaFieldKind => {
 };
 
 /**
- * Every scalar leaf of a schema, in the same path grammar the reference pickers emit.
- * Containers are skipped — a mapping targets a leaf — and an array contributes its first
- * element's shape under `[0]`, matching what the picker offers for the same node.
+ * Decides the subscript an array at `path` is walked with. Defaults to the first element,
+ * which is what the picker offers when nothing else is known; a caller that knows the array
+ * is iterated by an enclosing loop returns that loop's iterator instead.
  */
-export const flattenReferencePaths = (root: unknown): ReferencePathEntry[] => {
+export type ArrayAccessor = (path: string) => string;
+
+const FIRST_ELEMENT: ArrayAccessor = () => '0';
+
+/**
+ * Every scalar leaf of a schema, in the same path grammar the reference pickers emit.
+ * Containers are skipped — a mapping targets a leaf — and an array contributes its
+ * element's shape under the subscript `arrayAccessor` chooses.
+ */
+export const flattenReferencePaths = (
+  root: unknown,
+  arrayAccessor: ArrayAccessor = FIRST_ELEMENT,
+): ReferencePathEntry[] => {
   const entries: ReferencePathEntry[] = [];
 
   const visit = (node: unknown, path: string, namespace: string[], name: string, depth: number) => {
@@ -357,7 +369,8 @@ export const flattenReferencePaths = (root: unknown): ReferencePathEntry[] => {
     const childNamespace = name ? [...namespace, name] : namespace;
 
     if (isArrayNode(node)) {
-      visit(getArrayItem(node), `${path}[0]`, childNamespace, '0', depth + 1);
+      const subscript = arrayAccessor(path);
+      visit(getArrayItem(node), `${path}[${subscript}]`, childNamespace, subscript, depth + 1);
       return;
     }
     if (isRecord(node)) {
