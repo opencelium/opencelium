@@ -268,11 +268,53 @@
     "downloadAsTemplateDisabledHint": "Save the workflow first to download it as a template",
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
+    "editJson": "Edit as JSON",
     "versionHistory": "Version History",
     "changeHistory": "Change History",
     "testRunLockedHint": "Not available while a test run is in progress",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
+  },
+  "json": {
+    "title": "Edit workflow as JSON",
+    "reset": "Reset",
+    "applied": "Workflow JSON applied.",
+    "discard": {
+      "title": "Discard JSON changes?",
+      "message": "Your unsaved JSON changes will be lost."
+    },
+    "applyConfirm": {
+      "title": "Replace the workflow?",
+      "message": "Applying will replace the whole workflow and clear the in-session undo history."
+    },
+    "mode": {
+      "tree": "Tree",
+      "raw": "Raw"
+    },
+    "errors": {
+      "syntax": "Invalid JSON: {{reason}}",
+      "schema": "{{path}}: {{reason}}",
+      "indexShape": "{{path}}: index must contain numbers separated by underscores.",
+      "duplicateIndex": "{{path}}: this workflow index is duplicated.",
+      "missingParent": "{{path}}: the parent operator does not exist.",
+      "duplicateNode": "{{path}}: this node ID is duplicated.",
+      "startCount": "The workflow must contain exactly one start node (found {{reason}}).",
+      "edgeSource": "{{path}}: the source node does not exist.",
+      "edgeTarget": "{{path}}: the target node does not exist.",
+      "mapperFailed": "The workflow could not be rebuilt: {{reason}}",
+      "mapperDroppedMethods": "The workflow mapper dropped all declared methods.",
+      "brokenReference": "{{path}} contains an unresolved reference to {{reason}}.",
+      "brokenScript": "{{path}} contains a broken enhancement script.",
+      "illegalJoint": {
+        "self": "{{path}} contains a joint targeting itself.",
+        "not-a-method": "{{path}} contains a joint targeting a non-method node.",
+        "different-loop-scope": "{{path}} contains a joint crossing loop scopes.",
+        "enters-if-scope": "{{path}} contains a joint entering an IF scope.",
+        "backwards": "{{path}} contains a backwards joint.",
+        "skips-referenced-method": "{{path}} contains a joint skipping a referenced method.",
+        "missingTarget": "{{path}} contains a joint with a missing target."
+      }
+    }
   },
   "assignCategoryDialog": {
     "title": "Assign Category",

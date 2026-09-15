@@ -268,11 +268,53 @@
     "downloadAsTemplateDisabledHint": "Speichern Sie den Workflow zuerst, um ihn als Vorlage herunterzuladen",
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
+    "editJson": "Als JSON bearbeiten",
     "versionHistory": "Versionsverlauf",
     "changeHistory": "Änderungsverlauf",
     "testRunLockedHint": "Während eines Testlaufs nicht verfügbar",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
+  },
+  "json": {
+    "title": "Workflow als JSON bearbeiten",
+    "reset": "Zurücksetzen",
+    "applied": "Workflow-JSON wurde übernommen.",
+    "discard": {
+      "title": "JSON-Änderungen verwerfen?",
+      "message": "Ihre nicht gespeicherten JSON-Änderungen gehen verloren."
+    },
+    "applyConfirm": {
+      "title": "Workflow ersetzen?",
+      "message": "Beim Übernehmen wird der gesamte Workflow ersetzt und der Rückgängig-Verlauf dieser Sitzung gelöscht."
+    },
+    "mode": {
+      "tree": "Baum",
+      "raw": "Rohtext"
+    },
+    "errors": {
+      "syntax": "Ungültiges JSON: {{reason}}",
+      "schema": "{{path}}: {{reason}}",
+      "indexShape": "{{path}}: Der Index muss durch Unterstriche getrennte Zahlen enthalten.",
+      "duplicateIndex": "{{path}}: Dieser Workflow-Index ist doppelt vorhanden.",
+      "missingParent": "{{path}}: Der übergeordnete Operator existiert nicht.",
+      "duplicateNode": "{{path}}: Diese Knoten-ID ist doppelt vorhanden.",
+      "startCount": "Der Workflow muss genau einen Startknoten enthalten (gefunden: {{reason}}).",
+      "edgeSource": "{{path}}: Der Quellknoten existiert nicht.",
+      "edgeTarget": "{{path}}: Der Zielknoten existiert nicht.",
+      "mapperFailed": "Der Workflow konnte nicht neu erstellt werden: {{reason}}",
+      "mapperDroppedMethods": "Der Workflow-Mapper hat alle angegebenen Methoden verworfen.",
+      "brokenReference": "{{path}} enthält einen nicht auflösbaren Verweis auf {{reason}}.",
+      "brokenScript": "{{path}} enthält ein fehlerhaftes Enhancement-Skript.",
+      "illegalJoint": {
+        "self": "{{path}} enthält eine Verbindung zu sich selbst.",
+        "not-a-method": "{{path}} enthält eine Verbindung zu einem Knoten, der keine Methode ist.",
+        "different-loop-scope": "{{path}} enthält eine Verbindung über verschiedene Schleifenbereiche hinweg.",
+        "enters-if-scope": "{{path}} enthält eine Verbindung in einen IF-Bereich hinein.",
+        "backwards": "{{path}} enthält eine rückwärts gerichtete Verbindung.",
+        "skips-referenced-method": "{{path}} enthält eine Verbindung, die eine referenzierte Methode überspringt.",
+        "missingTarget": "{{path}} enthält eine Verbindung mit fehlendem Ziel."
+      }
+    }
   },
   "assignCategoryDialog": {
     "title": "Kategorie zuweisen",
