@@ -1,8 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk'
-import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { z } from 'zod'
 import type { ServerResponse } from 'node:http'
 import { loadEnv, type Connect, type Plugin } from 'vite'
+import { resolveProvider } from './ai/provider'
+import { suggestFieldBindings } from '../src/mock/ai/suggestFieldBindings'
 
 /**
  * Dev-only bridge between the AI panels and a real model.
@@ -14,17 +14,15 @@ import { loadEnv, type Connect, type Plugin } from 'vite'
  * can serve them unchanged — the frontend already speaks this contract.
  *
  * Enable by putting an un-prefixed key in .env.local — un-prefixed so Vite never bundles
- * it into the client, and .env.local rather than .env because only the former is ignored:
+ * it into the client, and .env.local rather than .env because only the former is ignored.
+ * Either vendor works; see ai/provider.ts for how one is chosen:
  *
- *   ANTHROPIC_API_KEY=sk-ant-...
+ *   GEMINI_API_KEY=...                 # or ANTHROPIC_API_KEY=sk-ant-...
  *   VITE_ENABLE_AI_MOCK=false          # stand the MSW mock down
  *   VITE_AI_PROXY_URL=http://localhost:5173
  *
  * With no key present the plugin does nothing and the MSW mock keeps answering.
  */
-
-const MODEL = 'claude-opus-5'
-const MAX_TOKENS = 8000
 
 /* ------------------------------------------------------------------ mapping */
 
@@ -50,6 +48,11 @@ Rules:
 - Only ever use a sourcePath and sourceColor exactly as they appear in the input. Never
   invent, correct, complete or reformat a path. A path that is not in the input is a
   failure, not a near miss.
+- Array subscripts are meaningful and already correct. \`[0]\` is the first element;
+  \`[i]\`, \`[j]\` and similar are loop iterators, meaning the target method runs once per
+  element and this reference reads the element of the current iteration. Never rewrite one
+  subscript into another — a path with \`[i]\` changed to \`[0]\` silently reads the first
+  element on every iteration.
 - At most one source per target field. One source may fill several target fields.
 - Leave a target field out entirely when nothing plausibly matches. A short, correct set
   is worth far more than a complete one — a wrong mapping silently corrupts live data.
@@ -135,6 +138,27 @@ const send = (res: ServerResponse, status: number, body: unknown) => {
 	res.end(JSON.stringify(body))
 }
 
+/**
+ * Vendors report a busy model as a 503/429 wrapped in their own JSON envelope. Passing that
+ * envelope through puts a raw error blob in front of the user, so the cases worth acting on
+ * are given a sentence that says what to do instead.
+ */
+const describeFailure = (error: unknown) => {
+	const raw = error instanceof Error ? error.message : String(error)
+	if (/503|UNAVAILABLE|overload|high demand/i.test(raw)) {
+		return 'The model is busy right now. This is temporary — try again in a moment,'
+			+ ' or set GEMINI_MODEL / ANTHROPIC_MODEL to a less contended model.'
+	}
+	if (/429|RESOURCE_EXHAUSTED|rate.?limit|quota/i.test(raw)) {
+		return 'Rate limit or quota reached for this API key. Wait a moment, or check the'
+			+ " key's quota with your provider."
+	}
+	if (/401|403|API key|PERMISSION_DENIED|UNAUTHENTICATED/i.test(raw)) {
+		return 'The API key was rejected. Check the key in .env.local and restart the dev server.'
+	}
+	return raw
+}
+
 const route = (
 	handler: (body: unknown) => Promise<unknown>,
 ): Connect.NextHandleFunction => async (req, res, next) => {
@@ -143,7 +167,7 @@ const route = (
 		send(res, 200, await handler(await readJsonBody(req)))
 	} catch (error) {
 		console.error('[ai-proxy]', error)
-		send(res, 502, { message: error instanceof Error ? error.message : 'AI request failed' })
+		send(res, 502, { message: describeFailure(error) })
 	}
 }
 
@@ -155,58 +179,69 @@ export function aiProxy(): Plugin {
 			// Read here rather than in vite.config.ts: that file must stay a plain object
 			// export, because vitest.config.ts merges it and mergeConfig cannot merge a
 			// callback. The '' prefix loads un-prefixed vars, which VITE_ ones never are.
-			const { ANTHROPIC_API_KEY: apiKey } =
-				loadEnv(server.config.mode, server.config.root, '')
-			if (!apiKey) {
+			const provider = resolveProvider(loadEnv(server.config.mode, server.config.root, ''))
+			if (!provider) {
 				server.config.logger.info(
-					'[ai-proxy] ANTHROPIC_API_KEY not set — leaving /ai/* to the MSW mock',
+					'[ai-proxy] no GEMINI_API_KEY or ANTHROPIC_API_KEY — leaving /ai/* to the MSW mock',
 				)
 				return
 			}
-			const client = new Anthropic({ apiKey })
-			server.config.logger.info(`[ai-proxy] /ai/* → ${MODEL}`)
+			server.config.logger.info(`[ai-proxy] /ai/* → ${provider.label}`)
 
 			server.middlewares.use('/ai/field-binding-suggestions', route(async (body) => {
 				const payload = body as MappingPayload
-				const result = await client.messages.parse({
-					model: MODEL,
-					max_tokens: MAX_TOKENS,
-					// The instructions are byte-identical on every call, so they are the one
-					// piece worth caching here. Caching the schemas themselves needs them
-					// hoisted ahead of the varying half — a backend concern, not a dev bridge's.
-					system: [{ type: 'text', text: MAPPING_SYSTEM, cache_control: { type: 'ephemeral' } }],
-					messages: [{ role: 'user', content: JSON.stringify(payload) }],
-					output_config: { format: zodOutputFormat(MappingResult) },
+
+				// Tier one and two first. Precedent and an identical field name are facts, not
+				// judgements — a model asked to confirm `id -> id` costs money, adds latency and
+				// can only get it wrong. Whatever they settle never reaches the model at all.
+				const settled = suggestFieldBindings(payload as never)
+					.filter((suggestion) => suggestion.origin !== 'model')
+				const claimed = new Set(settled.map((suggestion) => suggestion.targetPath))
+				const open = payload.target.fields.filter((field) => !claimed.has(field.path))
+
+				if (open.length === 0) {
+					console.info(`[ai-proxy] ${settled.length} settled without a model call`)
+					return { suggestions: settled }
+				}
+
+				const written = await provider.complete({
+					system: MAPPING_SYSTEM,
+					user: JSON.stringify({ ...payload, target: { ...payload.target, fields: open } }),
+					schema: MappingResult,
 				})
 
-				const proposed = result.parsed_output?.suggestions ?? []
+				const proposed = written.suggestions
 				const real = keepRealPaths(payload, proposed)
+					.filter((suggestion) => !claimed.has(suggestion.targetPath))
 				if (real.length !== proposed.length) {
 					console.warn(`[ai-proxy] dropped ${proposed.length - real.length}`
-						+ ' suggestion(s) naming a path that is not in the request')
+						+ ' model suggestion(s) naming a path that is not in the request'
+						+ ' or a field already settled')
 				}
+				console.info(`[ai-proxy] ${settled.length} settled locally,`
+					+ ` ${open.length} field(s) sent to the model, ${real.length} returned`)
+
 				return {
-					suggestions: real.map((suggestion) => ({
-						...suggestion,
-						id: `${suggestion.sourceColor}:${suggestion.sourcePath}->${suggestion.targetPath}`,
-						origin: 'model' as const,
-						confidence: Number(suggestion.confidence.toFixed(2)),
-					})),
+					suggestions: [
+						...settled,
+						...real.map((suggestion) => ({
+							...suggestion,
+							id: `${suggestion.sourceColor}:${suggestion.sourcePath}->${suggestion.targetPath}`,
+							origin: 'model' as const,
+							confidence: Number(suggestion.confidence.toFixed(2)),
+						})),
+					],
 				}
 			}))
 
 			server.middlewares.use('/ai/enhancement-script', route(async (body) => {
 				const payload = body as ScriptPayload
-				const result = await client.messages.parse({
-					model: MODEL,
-					max_tokens: MAX_TOKENS,
-					system: [{ type: 'text', text: SCRIPT_SYSTEM, cache_control: { type: 'ephemeral' } }],
-					messages: [{ role: 'user', content: JSON.stringify(payload) }],
-					output_config: { format: zodOutputFormat(ScriptResult) },
+				const written = await provider.complete({
+					system: SCRIPT_SYSTEM,
+					user: JSON.stringify(payload),
+					schema: ScriptResult,
 				})
 
-				const written = result.parsed_output
-				if (!written) throw new Error('The model returned no script')
 				// Markdown fences shouldn't survive structured output, but a script carrying
 				// them would land in the editor as a syntax error the user has to hunt down.
 				const script = written.script

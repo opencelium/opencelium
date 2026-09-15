@@ -98,6 +98,14 @@ describe('suggestFieldBindings', () => {
         expect(suggestion).toMatchObject({ sourcePath: '$[0].units[0]', origin: 'deterministic' })
     })
 
+    it('reads a field name through a loop-iterator subscript', () => {
+        const [suggestion] = suggestFieldBindings(
+            request([field('$.name')], [field('$.users[i].name')]),
+        )
+
+        expect(suggestion).toMatchObject({ sourcePath: '$.users[i].name', origin: 'deterministic' })
+    })
+
     it('proposes nothing when no name is related', () => {
         expect(suggestFieldBindings(request([field('$.sku')], [field('$.latitude')]))).toEqual([])
     })

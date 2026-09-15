@@ -52,7 +52,7 @@ function SuggestedBindingsContent({ source, editor, readOnly }: Props) {
 			<div className='wfSuggestionsHeader'>
 				<Typography variant='caption' isSubtle>{t('suggestions.reviewHint')}</Typography>
 				<div className='wfSuggestionsActions'>
-					<Button type='primary' iconLeft='flash' loading={isFetching}
+					<Button type='primary' iconLeft='ai' loading={isFetching}
 						disabled={readOnly || !hasTargets} onClick={suggester.generate}
 						testId='workflow-suggestions-generate'>
 						{t(hasRun ? 'suggestions.regenerate' : 'suggestions.generate')}

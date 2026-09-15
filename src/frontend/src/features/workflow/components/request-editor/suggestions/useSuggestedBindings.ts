@@ -4,7 +4,8 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { FieldBindingSuggestion } from '../../../ai/fieldBindingSuggestion.types';
 import { useLazyGetFieldBindingSuggestionsQuery } from '../../../ai/fieldBindingSuggestionApi';
 import { buildSuggestionRequest, buildTargetPathIndex } from '../../../ai/buildSuggestionRequest';
-import { logSuggestionRequest, logSuggestionResponse } from '../../../ai/suggestionDebug';
+import { logIteratorScope, logSuggestionRequest, logSuggestionResponse }
+	from '../../../ai/suggestionDebug';
 import { getEligibleReferenceMethods } from '../reference-generator/referenceGenerator.utils';
 import { buildReferenceValue } from '../body-editor/requestReferenceOptions';
 import { buildRequestResultField } from '../body-editor/bodyReference';
@@ -70,12 +71,13 @@ export function useSuggestedBindings({ source, editor }: Params) {
 	const generate = useCallback(async () => {
 		setDismissed([]);
 		setHasRun(true);
+		logIteratorScope(connection, method);
 		logSuggestionRequest(suggestionRequest);
 		if (stats.openFieldCount === 0 || stats.sourceFieldCount === 0) return;
 		// No toast on failure: RTK Query errors already reach the user through errorBus's
 		// notifySubscriber, and the panel renders its own inline message.
 		logSuggestionResponse(await trigger(suggestionRequest));
-	}, [stats, suggestionRequest, trigger]);
+	}, [connection, method, stats, suggestionRequest, trigger]);
 
 	/**
 	 * Writes the reference through the editor's own commit pipeline rather than touching the

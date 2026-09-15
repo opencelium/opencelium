@@ -49,7 +49,7 @@ function EnhancementAssistantContent({ enhancement, connection, readOnly, onAppl
 						disabled={readOnly}
 						testId='workflow-enhancement-assistant-input'
 					/>
-					<Button type='primary' iconLeft='flash' loading={isLoading}
+					<Button type='primary' iconLeft='ai' loading={isLoading}
 						disabled={readOnly || !assistant.instruction.trim()}
 						onClick={assistant.generate}
 						testId='workflow-enhancement-assistant-generate'>

@@ -28,9 +28,9 @@ const method = (over: {
 	},
 } as MethodWithId);
 
-const connectionOf = (methods: MethodWithId[]): Connection => ({
+const connectionOf = (methods: MethodWithId[], operators: unknown[] = []): Connection => ({
 	connectionId: 1, name: 'c', description: '', fieldBindings: [],
-	fromConnector: { connectorId: 1, title: 'Jira', method: methods, operator: [] },
+	fromConnector: { connectorId: 1, title: 'Jira', method: methods, operator: operators },
 	toConnector: null,
 	ui: {},
 } as unknown as Connection);
@@ -87,5 +87,60 @@ describe('buildSuggestionRequest', () => {
 				color: suggestion.sourceColor, type: 'response',
 			});
 		});
+	});
+});
+
+describe('buildSuggestionRequest — inside a loop', () => {
+	const reader = method({
+		id: 'a', index: '0', color: '#aabbcc', name: 'GetAllUser',
+		responseFields: { users: [{ name: '', email: '' }], total: 0 },
+	});
+	const writer = method({
+		id: 'b', index: '1_0', color: '#ddeeff', name: 'AddUser',
+		requestFields: { name: '', email: '' },
+	});
+	const loopOver = (path: string) => ([{
+		id: 'op-1', index: '1', type: 'loop', iterator: 'i',
+		expression: `{%#AABBCC.(response).body.${path}%}`,
+	}]);
+
+	/**
+	 * The method runs once per element, so a reference into the collection being walked has
+	 * to read the current iteration. `[0]` would compile and write the first user every time.
+	 */
+	it('references the iterated collection through the loop iterator, not [0]', () => {
+		const payload = buildSuggestionRequest(
+			connectionOf([reader, writer], loopOver('$.users')), writer, buildTargetPathIndex(writer));
+
+		expect(payload.sources[0].fields.map((field) => field.path))
+			.toEqual(['$.users[i].name', '$.users[i].email', '$.total']);
+	});
+
+	it('leaves arrays the loop does not walk on their first element', () => {
+		const payload = buildSuggestionRequest(
+			connectionOf([reader, writer], loopOver('$.groups')), writer, buildTargetPathIndex(writer));
+
+		expect(payload.sources[0].fields.map((field) => field.path))
+			.toEqual(['$.users[0].name', '$.users[0].email', '$.total']);
+	});
+
+	it('still reads the first element when the method is in no loop', () => {
+		const outside = method({
+			id: 'c', index: '1', color: '#ddeeff', name: 'AddUser',
+			requestFields: { name: '' },
+		});
+		const payload = buildSuggestionRequest(
+			connectionOf([reader, outside], loopOver('$.users')), outside, buildTargetPathIndex(outside));
+
+		expect(payload.sources[0].fields.map((field) => field.path))
+			.toEqual(['$.users[0].name', '$.users[0].email', '$.total']);
+	});
+
+	it('produces a reference the parser accepts', () => {
+		const payload = buildSuggestionRequest(
+			connectionOf([reader, writer], loopOver('$.users')), writer, buildTargetPathIndex(writer));
+
+		expect(parseReference(buildReferenceValue('#aabbcc', 'body', payload.sources[0].fields[0].path)))
+			.toMatchObject({ color: '#aabbcc', type: 'response', field: 'body.$.users[i].name' });
 	});
 });

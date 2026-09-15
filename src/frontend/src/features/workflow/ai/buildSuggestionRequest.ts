@@ -3,8 +3,10 @@ import {
 	flattenReferencePaths,
 	getMethodConnectorTitle,
 	getResponseSchemaRoot,
+	type ArrayAccessor,
 	type ReferencePathEntry,
 } from '../components/request-editor/body-editor/requestReferenceOptions';
+import { buildIteratorAccessors, iteratorKey } from './loopIterators';
 import { getEligibleReferenceMethods, getReferenceMethodLabel }
 	from '../components/request-editor/reference-generator/referenceGenerator.utils';
 import type { FieldBindingSuggestionRequest, SchemaField } from './fieldBindingSuggestion.types';
@@ -13,6 +15,15 @@ import type { FieldBindingSuggestionRequest, SchemaField } from './fieldBindingS
 export type TargetPathIndex = Map<string, ReferencePathEntry>;
 
 const toWireField = ({ path, kind }: ReferencePathEntry): SchemaField => ({ path, kind });
+
+/**
+ * An array walked by an enclosing loop is referenced through that loop's iterator, so the
+ * suggestion reads the element of the current iteration rather than always the first.
+ */
+const iteratorAccessorFor = (
+	accessors: Map<string, string>,
+	sourceColor: string,
+): ArrayAccessor => (path) => accessors.get(iteratorKey(sourceColor, path)) ?? '0';
 
 export const buildTargetPathIndex = (method: MethodWithId): TargetPathIndex =>
 	new Map(flattenReferencePaths(method.request.body?.fields).map((entry) => [entry.path, entry]));
@@ -37,6 +48,9 @@ export const buildSuggestionRequest = (
 		color: source.color,
 		label: getReferenceMethodLabel(source),
 		connectorTitle: getMethodConnectorTitle(source),
-		fields: flattenReferencePaths(getResponseSchemaRoot(source, 'body')).map(toWireField),
+		fields: flattenReferencePaths(
+			getResponseSchemaRoot(source, 'body'),
+			iteratorAccessorFor(buildIteratorAccessors(connection, method), source.color),
+		).map(toWireField),
 	})).filter((source) => source.fields.length > 0),
 });
