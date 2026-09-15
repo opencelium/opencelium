@@ -1,4 +1,5 @@
 import { baseApi } from '@shared/api/baseApi';
+import { aiUrl } from './aiEndpoint';
 import type {
 	FieldBindingSuggestionRequest,
 	FieldBindingSuggestionResponse,
@@ -12,7 +13,7 @@ import type {
 export const fieldBindingSuggestionApi = baseApi.injectEndpoints({
 	endpoints: (b) => ({
 		getFieldBindingSuggestions: b.query<FieldBindingSuggestionResponse, FieldBindingSuggestionRequest>({
-			query: (body) => ({ url: '/ai/field-binding-suggestions', method: 'POST', body }),
+			query: (body) => ({ url: aiUrl('/ai/field-binding-suggestions'), method: 'POST', body }),
 		}),
 	}),
 });

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import * as path from "node:path";
 import _monacoEditorPlugin from 'vite-plugin-monaco-editor';
+import { aiProxy } from './vite/aiProxy';
 
 // Extract the hidden default constructor safely for ESM/CJS interop
 const monacoEditorPlugin = (_monacoEditorPlugin as any).default || _monacoEditorPlugin;
@@ -20,6 +21,8 @@ const alias = {
 export default defineConfig({
   plugins: [
     react(),
+    // Dev-only; reads ANTHROPIC_API_KEY itself. Inert without one, leaving /ai/* to MSW.
+    aiProxy(),
     monacoEditorPlugin({
       languageWorkers: ['editorWorkerService', 'json'],
       customWorkers: [

@@ -1,5 +1,4 @@
-import { Provider } from 'react-redux';
-import { store as appStore } from '@app/store/store';
+import { AppStoreBoundary } from '../../../ai/AppStoreBoundary';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import { Empty } from '@shared/ui/primitives/Empty';
@@ -65,17 +64,10 @@ function SuggestedBindingsContent({ source, editor, readOnly }: Props) {
 	);
 }
 
-/**
- * The body editor renders under its own per-modal store (createLegacyStore), which holds
- * only the connection reducer — no RTK Query reducer, no middleware — so a query hook
- * dispatched there silently never runs. Re-entering the app store for this subtree is what
- * keeps the suggester a normal cached RTK Query endpoint; `editor` reaches the content as a
- * prop, so it still commits into the legacy store it was built against.
- */
 export function SuggestedBindings(props: Props) {
 	return (
-		<Provider store={appStore}>
+		<AppStoreBoundary>
 			<SuggestedBindingsContent {...props} />
-		</Provider>
+		</AppStoreBoundary>
 	);
 }

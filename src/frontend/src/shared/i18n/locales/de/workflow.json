@@ -666,6 +666,15 @@
         "error": "Fehler",
         "stale": "veraltet — Skript geändert"
       }
+    },
+    "assistant": {
+      "brokenScript": "Dieses Skript verweist noch auf einen Eingabewert, den es nicht mehr gibt. Es kann erst nach der Korrektur gespeichert werden.",
+      "repair": "Skript reparieren",
+      "placeholder": "Beschreiben Sie, was das Skript tun soll, z. B. Vor- und Nachname verbinden",
+      "generate": "Skript schreiben",
+      "apply": "Dieses Skript übernehmen",
+      "discard": "Verwerfen",
+      "failed": "Das Skript konnte nicht erstellt werden. Bitte erneut versuchen."
     }
   },
   "description": {

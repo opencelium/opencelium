@@ -13,6 +13,7 @@ import EnhancementDescription from '../EnhancementDescription/EnhancementDescrip
 import DirectReferenceInfo from '../DirectReferenceInfo/DirectReferenceInfo';
 import ScriptLanguage from '../ScriptLanguage/ScriptLanguage';
 import EnhancementScript from '../EnhancementScript/EnhancementScript';
+import { EnhancementAssistant } from '../EnhancementAssistant/EnhancementAssistant';
 import { ScriptDebugValue } from '../ScriptDebugValue/ScriptDebugValue';
 import { useScriptDebugValue } from '../ScriptDebugValue/useScriptDebugValue';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -103,6 +104,9 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 										]}
 									/>
 								</div>
+								<EnhancementAssistant enhancement={enhancement!}
+									connection={state.connection} readOnly={readOnly}
+									onApplyScript={handleChangeScript} />
 								<div className='bodyLegacyEnhancementLabel'>{t('enhancement.language')}</div>
 								<div className='bodyLegacyEnhancementLanguage'>
 									<ScriptLanguage readOnly={readOnly} language={enhancement!.language} onChangeLanguage={state.onChangeLanguage} />
