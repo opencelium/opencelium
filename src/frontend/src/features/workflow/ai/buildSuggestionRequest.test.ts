@@ -116,6 +116,39 @@ describe('buildSuggestionRequest — inside a loop', () => {
 			.toEqual(['$.users[i].name', '$.users[i].email', '$.total']);
 	});
 
+	/**
+	 * getReferenceOptions offers an array node only `[0]`, `[*]` and `[<iterator>]`, so a
+	 * loop's collection always reaches us carrying one of them. Matching the bare path alone
+	 * meant matching a form the UI cannot author, and every suggestion fell back to `[0]`.
+	 */
+	it.each(['$.users', '$.users[*]', '$.users[0]'])(
+		'resolves the iterator when the collection is authored as %s', (authored) => {
+			const payload = buildSuggestionRequest(
+				connectionOf([reader, writer], loopOver(authored)), writer, buildTargetPathIndex(writer));
+
+			expect(payload.sources[0].fields.map((field) => field.path))
+				.toEqual(['$.users[i].name', '$.users[i].email', '$.total']);
+		});
+
+	/** A response whose body *is* the array — the shape a "get all" method returns. */
+	it.each(['$', '$[*]', '$[0]', '$.[0]'])(
+		'resolves the iterator over a root-array response authored as %s', (authored) => {
+			const rootArrayReader = {
+				...reader,
+				response: {
+					...reader.response,
+					success: { status: '200', header: {},
+						body: { type: 'array', format: 'json', data: 'raw', fields: { name: '', email: '' } } },
+				},
+			} as MethodWithId;
+			const payload = buildSuggestionRequest(
+				connectionOf([rootArrayReader, writer], loopOver(authored)), writer,
+				buildTargetPathIndex(writer));
+
+			expect(payload.sources[0].fields.map((field) => field.path))
+				.toEqual(['$[i].name', '$[i].email']);
+		});
+
 	it('leaves arrays the loop does not walk on their first element', () => {
 		const payload = buildSuggestionRequest(
 			connectionOf([reader, writer], loopOver('$.groups')), writer, buildTargetPathIndex(writer));

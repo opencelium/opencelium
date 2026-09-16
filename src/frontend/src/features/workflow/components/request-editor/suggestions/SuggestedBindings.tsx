@@ -50,7 +50,7 @@ function SuggestedBindingsContent({ source, editor, readOnly }: Props) {
 	return (
 		<div className='wfSuggestions' data-testid='workflow-suggestions'>
 			<div className='wfSuggestionsHeader'>
-				<Typography variant='caption' isSubtle>{t('suggestions.reviewHint')}</Typography>
+				<Typography variant='caption'>{t('suggestions.reviewHint')}</Typography>
 				<div className='wfSuggestionsActions'>
 					<Button type='primary' iconLeft='ai' loading={isFetching}
 						disabled={readOnly || !hasTargets} onClick={suggester.generate}
