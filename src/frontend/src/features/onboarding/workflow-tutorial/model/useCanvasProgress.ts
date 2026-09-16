@@ -25,6 +25,18 @@ const ENHANCEMENT_DELETE = '[data-testid="workflow-enhancement-delete"]'
 const ENDPOINT_REFERENCE = `[data-testid="workflow-url-editor"] .${ENDPOINT_REFERENCE_CLASS}`
 /** The outermost loop's variable, as the pill's label spells it: `B:customers[i].email`. */
 const LOOP_SCOPED = `[${ITERATOR_NAMES[0]}]`
+/**
+ * The start button while a run is on. Taken from the button's own running shape
+ * rather than from the debug panel, which a run started in live mode never renders —
+ * "a test run happened" has to be true in both modes.
+ */
+const RUNNING_START = '.startNodeRunning'
+/** The replay debugger's controls. Clicking them is the only evidence they were used:
+ *  a resumed replay looks exactly like one that was never paused. */
+const PAUSE_BUTTON = '[data-testid="workflow-test-pause-button"]'
+const STEP_BUTTON = '[data-testid="workflow-test-step-forward-button"]'
+/** A loop node's "jump past the rest of this iteration" control; prefixed with its id. */
+const SKIP_ITERATION = '[data-testid^="workflow-node-skip-iteration-"]'
 
 export type CanvasProgress = {
     /** Connector-method nodes the user has placed. */
@@ -62,6 +74,21 @@ export type CanvasProgress = {
     bodyReferencesPaired: boolean
     /** ...and the request editor was closed with them in place. */
     bodyReferencesClosed: boolean
+    /**
+     * Whether a test run has been started. Latched from the start button's running
+     * shape rather than read live: the run ends on its own, and a step that asked for
+     * one would otherwise un-complete itself the moment the replay drained.
+     */
+    testRunStarted: boolean
+    /**
+     * The replay debugger's three gestures, each taken from the click. None of them
+     * leaves a trace to read afterwards — a resumed replay is indistinguishable from
+     * one that was never paused, and an iteration jumped to looks like one reached
+     * by waiting.
+     */
+    testRunPaused: boolean
+    testRunStepped: boolean
+    testRunIterationSkipped: boolean
 }
 
 const INACTIVE: CanvasProgress = {
@@ -69,6 +96,8 @@ const INACTIVE: CanvasProgress = {
     loopConditionSaved: false, ifConditionSaved: false,
     endpointReference: false, endpointReferenceClosed: false,
     bodyReferencesPaired: false, bodyReferencesClosed: false,
+    testRunStarted: false, testRunPaused: false,
+    testRunStepped: false, testRunIterationSkipped: false,
 }
 
 let loopConditionSaved = false
@@ -77,6 +106,10 @@ let endpointReference = false
 let endpointReferenceClosed = false
 let bodyReferencesPaired = false
 let bodyReferencesClosed = false
+let testRunStarted = false
+let testRunPaused = false
+let testRunStepped = false
+let testRunIterationSkipped = false
 
 const readPairedReferences = () => {
     const remove = findVisible(ENHANCEMENT_DELETE)
@@ -114,11 +147,16 @@ const getSnapshot = (): CanvasProgress => {
         || endpointReference !== snapshot.endpointReference
         || endpointReferenceClosed !== snapshot.endpointReferenceClosed
         || bodyReferencesPaired !== snapshot.bodyReferencesPaired
-        || bodyReferencesClosed !== snapshot.bodyReferencesClosed) {
+        || bodyReferencesClosed !== snapshot.bodyReferencesClosed
+        || testRunStarted !== snapshot.testRunStarted
+        || testRunPaused !== snapshot.testRunPaused
+        || testRunStepped !== snapshot.testRunStepped
+        || testRunIterationSkipped !== snapshot.testRunIterationSkipped) {
         snapshot = {
             methods, hasLoop, hasIf, loopConditionSaved, ifConditionSaved,
             endpointReference, endpointReferenceClosed,
             bodyReferencesPaired, bodyReferencesClosed,
+            testRunStarted, testRunPaused, testRunStepped, testRunIterationSkipped,
         }
     }
     return snapshot
@@ -142,6 +180,7 @@ const subscribe = (onChange: () => void) => {
     const observer = new MutationObserver(() => {
         if (!endpointReference && readEndpointReference()) endpointReference = true
         if (!bodyReferencesPaired && readPairedReferences()) bodyReferencesPaired = true
+        if (!testRunStarted && findVisible(RUNNING_START)) testRunStarted = true
         onChange()
     })
     observer.observe(document.body, { childList: true, subtree: true })
@@ -149,6 +188,25 @@ const subscribe = (onChange: () => void) => {
     const onClick = (event: MouseEvent) => {
         const target = event.target
         if (!(target instanceof Element)) return
+        if (target.closest(PAUSE_BUTTON)) {
+            // Pause and resume share one button, so this latches on either — the step
+            // asks the user to freeze the replay, and the freeze is what they saw.
+            testRunPaused = true
+            onChange()
+            return
+        }
+        // A disabled button emits no click, so reaching here means a line really was
+        // applied rather than the user pressing a greyed-out control.
+        if (target.closest(STEP_BUTTON)) {
+            testRunStepped = true
+            onChange()
+            return
+        }
+        if (target.closest(SKIP_ITERATION)) {
+            testRunIterationSkipped = true
+            onChange()
+            return
+        }
         if (target.closest(CONDITION_SAVE)) {
             // Which operator's condition this is decided by the row on screen behind
             // the button, not by how many saves have happened.
@@ -191,6 +249,10 @@ export function resetCanvasProgress(): void {
     endpointReferenceClosed = false
     bodyReferencesPaired = false
     bodyReferencesClosed = false
+    testRunStarted = false
+    testRunPaused = false
+    testRunStepped = false
+    testRunIterationSkipped = false
 }
 
 /**

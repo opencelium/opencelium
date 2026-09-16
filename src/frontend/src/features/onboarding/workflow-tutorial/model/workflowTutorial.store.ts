@@ -1,5 +1,7 @@
 import { create } from 'zustand'
+import { setSimulatedTestRun } from '@features/workflow/test-run/simulatedTestRun'
 import { clearTutorialData, seedTutorialData } from './tutorialData'
+import { createTutorialTestRun } from './tutorialTestRun'
 import { resetCanvasProgress } from './useCanvasProgress'
 
 type WorkflowTutorialState = {
@@ -23,11 +25,16 @@ export const useWorkflowTutorialStore = create<WorkflowTutorialState>(set => ({
     // set, so a second run opened with steps already satisfied and skipped past them.
     request: () => {
         seedTutorialData()
+        // Registered alongside the fixtures, and for the same reason: the editor's
+        // test run must answer from the invented systems too, or the last steps
+        // would point at a debugger that only ever renders for a real execution.
+        setSimulatedTestRun(createTutorialTestRun)
         resetCanvasProgress()
         set({ requested: true })
     },
     dismiss: () => {
         clearTutorialData()
+        setSimulatedTestRun(null)
         resetCanvasProgress()
         set({ requested: false })
     },

@@ -23,7 +23,20 @@ const node = (type: string, testId?: string) =>
     row('workflow-add-step-right') + row('workflow-add-step-bottom') + '</div>'
 
 const progress = (over: Partial<CanvasProgress> = {}): CanvasProgress =>
-    ({ methods: 0, hasLoop: false, hasIf: false, loopConditionSaved: false, ifConditionSaved: false, endpointReference: false, endpointReferenceClosed: false, bodyReferencesPaired: false, bodyReferencesClosed: false, ...over })
+    ({ methods: 0, hasLoop: false, hasIf: false, loopConditionSaved: false, ifConditionSaved: false, endpointReference: false, endpointReferenceClosed: false, bodyReferencesPaired: false, bodyReferencesClosed: false, testRunStarted: false, testRunPaused: false, testRunStepped: false, testRunIterationSkipped: false, ...over })
+
+/** Everything the graph-building half of the tutorial asks for. */
+const BUILT: Partial<CanvasProgress> = {
+    methods: 3, hasLoop: true, hasIf: true, loopConditionSaved: true, ifConditionSaved: true,
+    endpointReference: true, endpointReferenceClosed: true,
+    bodyReferencesPaired: true, bodyReferencesClosed: true,
+}
+
+/** ...and everything the test-run half asks for on top of it. */
+const RUN: Partial<CanvasProgress> = {
+    testRunStarted: true, testRunPaused: true,
+    testRunStepped: true, testRunIterationSkipped: true,
+}
 
 /** One link of a step's chain, addressed by what it points at rather than by index. */
 const link = (stepId: string, testId: string) => {
@@ -436,23 +449,43 @@ describe('workflow tutorial steps', () => {
         })
 
         it('settles on the closing step instead of running off the end', () => {
-            const finished = progress({
-                methods: 3, hasLoop: true, hasIf: true, loopConditionSaved: true, ifConditionSaved: true,
-                endpointReference: true, endpointReferenceClosed: true,
-                bodyReferencesPaired: true, bodyReferencesClosed: true,
-            })
+            const finished = progress({ ...BUILT, ...RUN })
             const last = TUTORIAL_STEPS.length - 1
-            expect(resolveStepIndex(finished, 0)).toBe(last)
-            // and stays there however many times it is acknowledged
+            // Unacknowledged, it holds on the first step there is nothing to detect
+            // for — the pace — rather than skipping to the end.
+            expect(resolveStepIndex(finished, 0)).toBe(at('speed'))
+            // and once those are passed it stays on the last, however many times it
+            // is acknowledged.
             expect(resolveStepIndex(finished, TUTORIAL_STEPS.length)).toBe(last)
         })
 
         it('steps back when the user removes what an earlier step asked for', () => {
-            expect(resolveStepIndex(progress({
-                hasLoop: true, hasIf: true, loopConditionSaved: true, ifConditionSaved: true,
-                endpointReference: true, endpointReferenceClosed: true,
-                bodyReferencesPaired: true, bodyReferencesClosed: true,
-            }), TUTORIAL_STEPS.length)).toBe(at('customers'))
+            expect(resolveStepIndex(progress({ ...BUILT, ...RUN, methods: 0 }),
+                TUTORIAL_STEPS.length)).toBe(at('customers'))
+        })
+
+        // The graph is what the first half is read from; the run over it is not part
+        // of the graph, so the test-run steps have to hold the tutorial on their own.
+        it('asks for the run once the graph is finished', () => {
+            const built = progress(BUILT)
+            expect(resolveStepIndex(built, 0)).toBe(at('testrun'))
+            expect(resolveStepIndex({ ...built, testRunStarted: true }, 0)).toBe(at('pause'))
+            expect(resolveStepIndex({ ...built, testRunStarted: true, testRunPaused: true }, 0))
+                .toBe(at('step'))
+            expect(resolveStepIndex({
+                ...built, testRunStarted: true, testRunPaused: true, testRunStepped: true,
+            }, 0)).toBe(at('iteration'))
+            // no acknowledgement can skip a step the canvas can still detect
+            expect(resolveStepIndex(built, TUTORIAL_STEPS.length)).toBe(at('testrun'))
+        })
+
+        // The pace and the log tree are preferences and reading, not results.
+        it('leaves the pace and the tree for the user to confirm', () => {
+            expect(byId('speed').isDone).toBeUndefined()
+            expect(byId('logs').isDone).toBeUndefined()
+            const ready = progress({ ...BUILT, ...RUN })
+            expect(resolveStepIndex(ready, at('speed'))).toBe(at('speed'))
+            expect(resolveStepIndex(ready, at('logs'))).toBe(at('logs'))
         })
     })
 })

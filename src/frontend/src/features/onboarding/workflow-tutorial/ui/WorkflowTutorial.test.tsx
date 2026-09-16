@@ -90,6 +90,38 @@ const insertEndpointReference = () => {
     document.body.appendChild(editor)
 }
 
+/**
+ * The start button while a run is on — the signal the tutorial reads for "a test run
+ * happened". Laid out, because a 0x0 box is how jsdom reports everything and the
+ * latch rightly treats that as not on screen.
+ */
+const startRun = () => {
+    const button = document.createElement('button')
+    button.className = 'startNode startNodeButton startNodeRunning'
+    button.getBoundingClientRect = () => ({
+        width: 48, height: 48, top: 0, left: 0, right: 48, bottom: 48, x: 0, y: 0,
+        toJSON: () => ({}),
+    })
+    document.body.appendChild(button)
+}
+
+/** One press of a replay-debugger control; each is read from the click alone. */
+const pressDebugControl = (testId: string) => {
+    const button = document.createElement('button')
+    button.setAttribute('data-testid', testId)
+    document.body.appendChild(button)
+    button.click()
+    button.remove()
+}
+
+/** The whole test-run half: start it, freeze it, walk one line, jump an iteration. */
+const debugRun = () => {
+    startRun()
+    pressDebugControl('workflow-test-pause-button')
+    pressDebugControl('workflow-test-step-forward-button')
+    pressDebugControl('workflow-node-skip-iteration-loop-1')
+}
+
 /** Real nodes render inside the canvas, so the fixture puts them there too. */
 const addNode = (type: string) => {
     const node = document.createElement('div')
@@ -173,6 +205,24 @@ describe('WorkflowTutorial', () => {
         await new Promise(resolve => setTimeout(resolve, 30))
         expect(view.getByTestId('step').textContent).toBe(at('username'))
         closeMethodDialog()
+
+        // The graph is finished; from here the run over it is the subject.
+        await showing('testrun')
+        expect(view.queryByTestId('next')).toBeNull()
+        startRun()
+        await showing('pause')
+        pressDebugControl('workflow-test-pause-button')
+        await showing('step')
+        pressDebugControl('workflow-test-step-forward-button')
+        await showing('iteration')
+        pressDebugControl('workflow-node-skip-iteration-loop-1')
+
+        // A pace and a read of the tree leave nothing behind to detect, so these two
+        // are the only test-run steps the user confirms by hand.
+        await showing('speed')
+        fireEvent.click(view.getByTestId('next'))
+        await showing('logs')
+        fireEvent.click(view.getByTestId('next'))
         await showing('summary')
         view.unmount()
     })
@@ -199,6 +249,12 @@ describe('WorkflowTutorial', () => {
         insertEndpointReference()
         showEnhancement()
         closeMethodDialog()
+        debugRun()
+        // The pace and the tree have nothing to detect, so they are acknowledged.
+        await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
+        fireEvent.click(view.getByTestId('next'))
+        await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
+        fireEvent.click(view.getByTestId('next'))
 
         await waitFor(() => expect(view.getByTestId('step').textContent).toBe(String(TUTORIAL_STEPS.length - 1)))
         // The last step has nothing to detect, so auto-advance must not run off the end
@@ -281,6 +337,11 @@ describe('WorkflowTutorial', () => {
         insertEndpointReference()
         showEnhancement()
         closeMethodDialog()
+        debugRun()
+        await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
+        fireEvent.click(view.getByTestId('next'))
+        await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
+        fireEvent.click(view.getByTestId('next'))
         await waitFor(() => expect(view.getByTestId('is-last')).toBeTruthy())
         const before = view.getByTestId('location-key').textContent
 

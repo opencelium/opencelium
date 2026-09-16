@@ -96,6 +96,31 @@ const OPEN_DROPDOWN = '.ant-select-dropdown'
  */
 const ENHANCEMENT_SCRIPT = '#enhancement_code'
 
+/**
+ * The start node's own button — the one control on the canvas that is not an
+ * insertion point. Every test-run step opens on it, so a step the user reaches with
+ * no run playing points at the way to start one rather than at nothing: the debug
+ * controls below exist only while a run is on, and `resolveHighlight` takes the
+ * deepest link that is actually rendered.
+ */
+const START_BUTTON = '.startNodeButton'
+/** The mode dialog the start button raises. Skipped when the user has silenced it. */
+const TEST_MODE_DEBUG = sel('workflow-test-run-mode-start-debug')
+const TEST_MODE_LIVE = sel('workflow-test-run-mode-start-live')
+/** The replay debugger, docked beside the zoom controls; absent in live mode. */
+const PAUSE_BUTTON = sel('workflow-test-pause-button')
+const STEP_BUTTON = sel('workflow-test-step-forward-button')
+const SPEED_CONTROL = sel('workflow-test-speed-control')
+const LIVE_TOGGLE = sel('workflow-logs-live-toggle')
+/**
+ * A loop node's replay controls, which appear on it only while the run is paused
+ * inside that loop. Addressed by prefix: both carry the node's generated id.
+ */
+const SKIP_ITERATION = '[data-testid^="workflow-node-skip-iteration-"]'
+const ITERATION_INPUT = '[data-testid^="workflow-node-iteration-input-"]'
+/** The log panel's tree, which only has the class once it has rows to show. */
+const LOG_TREE = '.logsBodyTree'
+
 const [CRM, SUPPORT] = [0, 1]
 
 /** One link of a chain: the control to click, plus anything to undim alongside it. */
@@ -127,6 +152,13 @@ export type TutorialTarget = {
 
 export type TutorialStep = {
     id: string
+    /**
+     * Which corner the copy sits in. Bottom-left by default, which is clear for as
+     * long as the work happens in dialogs and the right-hand drawer — but a test run
+     * opens the log panel across the bottom of the page, and the pill would then
+     * cover the tree it is describing.
+     */
+    anchor?: 'top-right'
     /**
      * A snippet shown under the copy. Lives here rather than in the locale files
      * because it is a code sample, not prose — both languages had it identical, and
@@ -321,6 +353,85 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
             },
         ],
         isDone: progress => progress.bodyReferencesClosed,
+    },
+    /*
+     * From here the graph stops changing and the run over it becomes the subject.
+     * Every one of these chains opens on the start button: the debug controls exist
+     * only while a run is playing, so a user who let the replay drain — it lasts
+     * about as long as the graph has steps — is pointed back at the way to start
+     * another rather than at a control that is no longer on screen.
+     */
+    {
+        id: 'testrun',
+        copy: 'testrun',
+        anchor: 'top-right',
+        chain: [
+            { target: START_BUTTON, include: [START_NODE] },
+            // Live is undimmed beside it so the choice reads as a choice, but debug
+            // is the one to take: it is the mode the next four steps are about.
+            { target: TEST_MODE_DEBUG, include: [TEST_MODE_LIVE] },
+        ],
+        isDone: progress => progress.testRunStarted,
+    },
+    {
+        id: 'pause',
+        copy: 'pause',
+        anchor: 'top-right',
+        chain: [
+            { target: START_BUTTON, include: [START_NODE] },
+            { target: PAUSE_BUTTON, include: [SPEED_CONTROL] },
+        ],
+        isDone: progress => progress.testRunPaused,
+    },
+    {
+        id: 'step',
+        copy: 'step',
+        anchor: 'top-right',
+        chain: [
+            { target: START_BUTTON, include: [START_NODE] },
+            { target: PAUSE_BUTTON },
+            // Only once frozen: the button is disabled while the replay runs, and a
+            // disabled control is not something to point a user at.
+            { target: STEP_BUTTON, when: progress => progress.testRunPaused },
+        ],
+        isDone: progress => progress.testRunStepped,
+    },
+    {
+        // The loop's own controls, which it grows only while the replay is paused
+        // somewhere inside it — so this step cannot be reached from a drained run
+        // without starting and pausing one again, which the chain above allows for.
+        id: 'iteration',
+        copy: 'iteration',
+        anchor: 'top-right',
+        chain: [
+            { target: START_BUTTON, include: [START_NODE] },
+            // Paused before the loop was reached, the controls to use are the replay's
+            // own: resume or step until the run is inside it and the icon appears.
+            { target: PAUSE_BUTTON, include: [STEP_BUTTON] },
+            { target: SKIP_ITERATION, include: [LOOP_NODE, ITERATION_INPUT] },
+        ],
+        isDone: progress => progress.testRunIterationSkipped,
+    },
+    {
+        // Nothing to detect: a pace is a preference, not a result.
+        id: 'speed',
+        copy: 'speed',
+        anchor: 'top-right',
+        chain: [
+            { target: START_BUTTON, include: [START_NODE] },
+            { target: SPEED_CONTROL, include: [PAUSE_BUTTON, LIVE_TOGGLE] },
+        ],
+    },
+    {
+        // The tree outlives the run, so this one keeps its target after the replay
+        // has drained — the only test-run step that does.
+        id: 'logs',
+        copy: 'logs',
+        anchor: 'top-right',
+        chain: [
+            { target: START_BUTTON, include: [START_NODE] },
+            { target: LOG_TREE },
+        ],
     },
     {
         // Nothing to point at: the graph is finished and this is the read-back.
