@@ -101,6 +101,8 @@ describe('useCanvasProgress', () => {
             loopConditionSaved: false, ifConditionSaved: false,
             endpointReference: false, endpointReferenceClosed: false,
             bodyReferencesPaired: false, bodyReferencesClosed: false,
+            testRunStarted: false, testRunPaused: false,
+            testRunStepped: false, testRunIterationSkipped: false,
         })
     })
 

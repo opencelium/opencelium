@@ -86,3 +86,24 @@
     line-height: 1.5;
     overflow-wrap: anywhere;
 }
+
+/*
+ * Top-right, for the steps about the test run: starting one opens the log panel
+ * across the bottom of the page, and the default corner would then sit on top of the
+ * tree the copy is describing. Below the workflow header, and clear of the debug
+ * controls, which dock top-left beside the zoom buttons.
+ */
+.workflow-tutorial-pill--top-right {
+    top: 76px;
+    right: 24px;
+    bottom: auto;
+    left: auto;
+}
+
+@media (max-width: 600px) {
+    .workflow-tutorial-pill--top-right {
+        right: 12px;
+        left: 12px;
+        width: auto;
+    }
+}

@@ -92,6 +92,7 @@ export function WorkflowTutorial() {
                 cue={highlight?.cue} text={highlight?.text} />
             <TutorialPill
                 copy={step.copy}
+                anchor={step.anchor}
                 example={step.example}
                 index={index}
                 total={TUTORIAL_STEPS.length}

@@ -1,11 +1,14 @@
 import { Button } from '@shared/ui/primitives/Button'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { ONBOARDING_Z_INDEX } from '../../model/types'
+import type { TutorialStep } from '../model/tutorialSteps'
 import '../../ui/onboardingCode.css'
 import './tutorialPill.css'
 
 type TutorialPillProps = {
     copy: string
+    /** Which corner to sit in — see TutorialStep.anchor for when it moves. */
+    anchor?: TutorialStep['anchor']
     /** A code sample for this step, if it has one. Not translated — it is code. */
     example?: string
     index: number
@@ -20,13 +23,13 @@ type TutorialPillProps = {
  * whole editor, so a dialog in the middle would sit on top of the very thing it is
  * asking the user to click.
  */
-export function TutorialPill({ copy, example, index, total, onNext, onClose }: TutorialPillProps) {
+export function TutorialPill({ copy, anchor, example, index, total, onNext, onClose }: TutorialPillProps) {
     const { t } = useI18n('onboarding')
     const base = `workflow.steps.${copy}`
 
     return (
         <aside
-            className="workflow-tutorial-pill"
+            className={`workflow-tutorial-pill${anchor ? ` workflow-tutorial-pill--${anchor}` : ''}`}
             style={{ zIndex: ONBOARDING_Z_INDEX.checklist }}
             aria-label={t('workflow.kicker')}
         >
