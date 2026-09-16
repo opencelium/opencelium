@@ -2,8 +2,7 @@ import { Layout } from 'antd';
 import {Outlet, useLocation} from 'react-router-dom';
 import {Card} from "@shared/ui/primitives/Card";
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
-import {AnimatePresence, motion} from "framer-motion";
-import React, {useEffect} from "react";
+import {useEffect} from "react";
 import {ErrorBoundary} from "@shared/errors/boundary/ErrorBoundary.tsx";
 import {PageCrash} from "@shared/ui/feedback/crash/PageCrash.tsx";
 import {AppFooter} from "@shared/ui/layout/AppFooter.tsx";
@@ -24,7 +23,7 @@ export const LayoutContent = ({isNotCard, hasNoFooter}: LayoutContentProps) => {
         if (showCommandContent) {
             toggleCommandContent(false);
         }
-    }, [location.pathname])
+    }, [location.pathname, showCommandContent, toggleCommandContent])
     const pageContent = (
         <ErrorBoundary scope="page" resetKeys={[location.pathname]} fallback={(props) => <PageCrash {...props} />}>
             <Outlet/>
@@ -47,46 +46,18 @@ export const LayoutContent = ({isNotCard, hasNoFooter}: LayoutContentProps) => {
             }}>
                 <div id={'command-palette-content'}/>
 
-            {!showCommandContent &&
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={location.pathname}
-                        initial={{
-                            opacity: 0,
-                            y: 8,
-                            scale: 0.96,
-                        }}
-                        animate={{
-                            opacity: 1,
-                            y: 0,
-                            scale: 1,
-                        }}
-                        exit={{
-                            opacity: 0,
-                            y: 8,
-                            scale: 0.95,
-                        }}
-                        transition={{
-                            duration: 0.25,
-                            ease: [0.22, 1, 0.36, 1], // "liquid" easing
-                            rotate: {
-                                duration: 0.6,
-                                ease: "easeInOut"
-                            }
-                        }}
-                        style={{
-                            originX: 0.5,
-                            originY: 0.5,
-                            width: '100%',
-                            flex: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}
-                    >
-                        {OutletComponent}
-                    </motion.div>
-                </AnimatePresence>
-            }
+            {!showCommandContent && (
+                <div
+                    style={{
+                        width: '100%',
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                    }}
+                >
+                    {OutletComponent}
+                </div>
+            )}
             {!showCommandContent && !hasNoFooter && <AppFooter />}
         </Content>
     );

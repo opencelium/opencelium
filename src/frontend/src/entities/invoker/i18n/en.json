@@ -23,7 +23,8 @@
         "name_already_exists": "An invoker with this name already exists",
         "invalid_characters": "Use only letters, digits, spaces, hyphens, underscores, parentheses, and periods",
         "invalid_period": "A period cannot be first or last, and consecutive periods are not allowed",
-        "max_length": "Name must not exceed 200 characters"
+        "max_length": "Name must not exceed 200 characters",
+        "meaningful": "Name must contain at least one letter or digit"
       }
     },
     "description": {
@@ -56,7 +57,8 @@
       "add": "Add Field",
       "empty": "No required data fields.",
       "errors": {
-        "required": "At least one required data field must be defined"
+        "required": "At least one required data field must be defined",
+        "meaningfulName": "Each required data field name must contain at least one letter or digit"
       }
     },
     "operations": {
@@ -83,6 +85,7 @@
         "nameRequired": "Name is required",
         "endpointRequired": "Endpoint is required",
         "incompleteOperations": "All operations must have a name and endpoint defined",
+        "meaningfulValues": "Operation names and endpoints must contain at least one letter or digit",
         "noTestOperation": "At least one operation must have Test Operation enabled",
         "invalidJson": "Invalid JSON"
       }
@@ -109,6 +112,11 @@
       "view": {
         "header": "Invoker Details",
         "subheader": "View invoker configuration."
+      },
+      "update": {
+        "header": "Edit Invoker",
+        "subheader": "Update invoker configuration.",
+        "successMessage": "Invoker updated successfully."
       }
     },
     "recommendations": {

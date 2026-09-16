@@ -7,6 +7,9 @@ import {
 } from '@entities/subscription/api/subscriptionApi'
 import { useLicenseActions } from '@pages/SubscriptionPage/license-actions/useLicenseActions'
 import { ActivateSubscriptionDialog } from '@pages/SubscriptionPage/license-actions/ActivateSubscriptionDialog'
+import { notifyError } from '@shared/ui/feedback/notifyError'
+
+const MAX_LICENSE_FILE_SIZE = 10 * 1024 * 1024
 
 const panelStyle: React.CSSProperties = {
     display: 'flex',
@@ -50,6 +53,21 @@ export const LicenseActionsPanel: React.FC = () => {
             await handler(file)
         }
 
+    const pickLicenseFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        event.target.value = ''
+        if (!file) return
+        if (!file.name.toLowerCase().endsWith('.txt')) {
+            notifyError(t('subscription.manage.importLicense.invalidType' as never))
+            return
+        }
+        if (file.size > MAX_LICENSE_FILE_SIZE) {
+            notifyError(t('subscription.manage.importLicense.tooLarge' as never))
+            return
+        }
+        await importLicense(file)
+    }
+
     return (
         <div style={panelStyle}>
             <input
@@ -57,7 +75,7 @@ export const LicenseActionsPanel: React.FC = () => {
                 type="file"
                 accept=".txt,text/plain"
                 style={{ display: 'none' }}
-                onChange={pickFile(importLicense)}
+                onChange={pickLicenseFile}
             />
             <input
                 ref={extraOpsInputRef}

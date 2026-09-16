@@ -10,6 +10,7 @@ import {
     isInvokerNameCharacterSetValid,
     isInvokerNameDotPlacementValid,
     isInvokerNameLengthValid,
+    hasMeaningfulInvokerText,
     normalizeInvokerName,
     normalizeInvokerNameForComparison,
 } from '@entities/invoker/lib/invokerName'
@@ -38,6 +39,7 @@ export const invokerDefinition: EntityDefinition = {
     routes: [
         { type: 'create' },
         { type: 'view' },
+        { type: 'edit' },
         { type: 'list' },
     ],
 
@@ -53,6 +55,7 @@ export const invokerDefinition: EntityDefinition = {
         },
         actions: [
             { type: 'view' },
+            { type: 'update' },
             {
                 type: 'custom',
                 key: 'download',
@@ -94,6 +97,21 @@ export const invokerDefinition: EntityDefinition = {
                 xml: buildInvokerXml(normalizedData as Record<string, unknown>),
             }
         },
+        operations: {
+            update: {
+                method: 'POST',
+                buildUrl: () => '/storage/invoker',
+                buildBody: (payload, identifier) => {
+                    const { xml } = payload as { xml: string }
+                    const body = new FormData()
+                    body.append(
+                        'file',
+                        new File([xml], `${identifier}.xml`, { type: 'application/xml' }),
+                    )
+                    return body
+                },
+            },
+        },
     },
 
     /* ===============================
@@ -104,6 +122,7 @@ export const invokerDefinition: EntityDefinition = {
         {
             name: 'name',
             type: 'string',
+            readOnlyInModes: ['update'],
             ui: {
                 component: 'input',
                 props: {
@@ -126,6 +145,11 @@ export const invokerDefinition: EntityDefinition = {
                         validate: isInvokerNameLengthValid,
                         message: `${baseKey}.fields.name.errors.max_length`,
                     },
+                    {
+                        validate: (value: unknown) =>
+                            normalizeInvokerName(value).length === 0 || hasMeaningfulInvokerText(value),
+                        message: `${baseKey}.fields.name.errors.meaningful`,
+                    },
                 ],
                 remote: {
                     url: `/invoker/exists/:name`,
@@ -135,6 +159,7 @@ export const invokerDefinition: EntityDefinition = {
                     }),
                     transKey: `${baseKey}.fields.name.errors.name_already_exists`,
                     encodeParams: false,
+                    skipIfUnchanged: true,
                     handleResponse: (data, error) => {
                         return !data.result;
                     }
@@ -219,6 +244,16 @@ export const invokerDefinition: EntityDefinition = {
                         validate: (value: unknown[]) => Array.isArray(value) && value.length > 0,
                         message: `${baseKey}.fields.requiredData.errors.required`,
                     },
+                    {
+                        validate: (value: unknown[]) =>
+                            !Array.isArray(value) || value.every((item) => {
+                                if (!item || typeof item !== 'object') return false
+                                return hasMeaningfulInvokerText(
+                                    (item as { name?: unknown }).name,
+                                )
+                            }),
+                        message: `${baseKey}.fields.requiredData.errors.meaningfulName`,
+                    },
                 ],
             },
         },
@@ -247,6 +282,19 @@ export const invokerDefinition: EntityDefinition = {
                                     typeof op?.endpoint === 'string' && op.endpoint.trim().length > 0
                             ),
                         message: `${baseKey}.fields.operations.errors.incompleteOperations`,
+                    },
+                    {
+                        validate: (value: unknown[]) =>
+                            !Array.isArray(value) || value.every((item) => {
+                                if (!item || typeof item !== 'object') return false
+                                const operation = item as {
+                                    name?: unknown
+                                    endpoint?: unknown
+                                }
+                                return hasMeaningfulInvokerText(operation.name) &&
+                                    hasMeaningfulInvokerText(operation.endpoint)
+                            }),
+                        message: `${baseKey}.fields.operations.errors.meaningfulValues`,
                     },
                     {
                         validate: (value: unknown[]) =>
@@ -310,6 +358,11 @@ export const invokerDefinition: EntityDefinition = {
             view: {
                 header: `${baseKey}.wizard.modes.view.header`,
                 subheader: `${baseKey}.wizard.modes.view.subheader`,
+            },
+            update: {
+                header: `${baseKey}.wizard.modes.update.header`,
+                subheader: `${baseKey}.wizard.modes.update.subheader`,
+                successMessage: `${baseKey}.wizard.modes.update.successMessage`,
             },
         },
 

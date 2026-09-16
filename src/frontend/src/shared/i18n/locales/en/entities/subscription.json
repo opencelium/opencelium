@@ -45,7 +45,9 @@
     },
     "importLicense": {
       "button": "Import License",
-      "success": "License imported."
+      "success": "License imported.",
+      "invalidType": "Select a license file in .txt format.",
+      "tooLarge": "The license file must not exceed 10 MB."
     },
     "activate": {
       "button": "Activate",
