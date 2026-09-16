@@ -260,6 +260,13 @@
   margin-bottom: 10px;
 }
 
+/* Language sharing the assistant's row instead of owning a label + full-width
+   row of its own — three options never needed 750px. */
+.bodyLegacyEnhancementLanguageInline {
+  flex: 0 0 auto;
+  width: 132px;
+}
+
 .bodyLegacyEnhancementScript {
   flex: 1;
   /* A floor rather than 0: `flex: 1` alone resolves to nothing when no ancestor

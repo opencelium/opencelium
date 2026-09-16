@@ -13,10 +13,29 @@ import { OperatorType, type Connection, type MethodWithId } from '../types/conne
 const REFERENCE_IN_EXPRESSION =
 	/(#[A-Fa-f0-9]{6})\.\((?:request|response)\)\.(?:header|body|status)(?:\.(\$[^\s%})'"]*|\$))?/;
 
+/** `[0]`, `[*]`, `[7]` — the accessors that still denote the array, not one element. */
+const TRAILING_COLLECTION_ACCESSOR = /\[(?:\*|\d+)]$/;
+
+/**
+ * The loop's collection as the schema walk names it.
+ *
+ * getReferenceOptions offers an array node only `[0]`, `[*]` and `[<iterator>]` — there is
+ * no "the array itself" entry — so a loop's collection is always authored *with* a trailing
+ * accessor, while the walk names that same array by its bare path. Without dropping the
+ * accessor the two can never meet, and every reference falls back to `[0]`.
+ *
+ * A trailing iterator subscript is left alone: it names one element of an enclosing loop's
+ * collection, and stripping it would map that outer collection to the inner iterator.
+ */
+const toCollectionPath = (path: string) => {
+	const bare = path.replace(TRAILING_COLLECTION_ACCESSOR, '').replace(/\.$/, '');
+	return bare || '$';
+};
+
 const parseCollectionReference = (expression: string | undefined) => {
 	const match = String(expression ?? '').match(REFERENCE_IN_EXPRESSION);
 	if (!match) return null;
-	return { color: match[1].toLowerCase(), path: match[2] || '$' };
+	return { color: match[1].toLowerCase(), path: toCollectionPath(match[2] || '$') };
 };
 
 /** Operator indices that enclose this method: "1_2_0" is inside "1_2", which is inside "1". */

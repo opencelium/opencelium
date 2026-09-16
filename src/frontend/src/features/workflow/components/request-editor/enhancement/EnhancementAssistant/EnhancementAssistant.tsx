@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Alert } from '@shared/ui/primitives/Alert';
 import { Button } from '@shared/ui/primitives/Button';
@@ -13,9 +14,12 @@ type Props = {
 	connection: Connection | null;
 	readOnly?: boolean;
 	onApplyScript: (script: string) => void;
+	/** Shares the prompt row — the language picker, so it costs no row of its own. */
+	leadingControl?: ReactNode;
 };
 
-function EnhancementAssistantContent({ enhancement, connection, readOnly, onApplyScript }: Props) {
+function EnhancementAssistantContent({ enhancement, connection, readOnly, onApplyScript,
+	leadingControl }: Props) {
 	const { t } = useI18n('workflow');
 	const assistant = useEnhancementAssistant({ enhancement, connection });
 	const { isBroken, isLoading, proposal } = assistant;
@@ -40,8 +44,12 @@ function EnhancementAssistantContent({ enhancement, connection, readOnly, onAppl
 				/>
 			)}
 
-			{!proposal && (
-				<div className='wfAssistantPrompt'>
+			{/* Always rendered, unlike the proposal below it: the language picker rides
+			    this row, and hiding a form field while a proposal is on screen would
+			    take the language with it. */}
+			<div className='wfAssistantPrompt'>
+				{leadingControl}
+				<div className='wfAssistantPromptInput'>
 					<Input
 						value={assistant.instruction}
 						onChange={(event) => assistant.setInstruction(event.target.value)}
@@ -49,14 +57,14 @@ function EnhancementAssistantContent({ enhancement, connection, readOnly, onAppl
 						disabled={readOnly}
 						testId='workflow-enhancement-assistant-input'
 					/>
-					<Button type='primary' iconLeft='ai' loading={isLoading}
-						disabled={readOnly || !assistant.instruction.trim()}
-						onClick={assistant.generate}
-						testId='workflow-enhancement-assistant-generate'>
-						{t('enhancement.assistant.generate')}
-					</Button>
 				</div>
-			)}
+				<Button type='primary' iconLeft='ai' loading={isLoading}
+					disabled={readOnly || !assistant.instruction.trim()}
+					onClick={assistant.generate}
+					testId='workflow-enhancement-assistant-generate'>
+					{t('enhancement.assistant.generate')}
+				</Button>
+			</div>
 
 			{assistant.isError && !proposal && (
 				<Typography variant='caption' isDanger>{t('enhancement.assistant.failed')}</Typography>

@@ -106,11 +106,13 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference,
 								</div>
 								<EnhancementAssistant enhancement={enhancement!}
 									connection={state.connection} readOnly={readOnly}
-									onApplyScript={handleChangeScript} />
-								<div className='bodyLegacyEnhancementLabel'>{t('enhancement.language')}</div>
-								<div className='bodyLegacyEnhancementLanguage'>
-									<ScriptLanguage readOnly={readOnly} language={enhancement!.language} onChangeLanguage={state.onChangeLanguage} />
-								</div>
+									onApplyScript={handleChangeScript}
+									leadingControl={
+										<div className='bodyLegacyEnhancementLanguageInline'>
+											<ScriptLanguage readOnly={readOnly} language={enhancement!.language}
+												onChangeLanguage={state.onChangeLanguage} />
+										</div>
+									} />
 								<div
 									ref={state.scriptBoxRef}
 									className={state.isScriptMaximized ? 'bodyLegacyEnhancementScript bodyLegacyEnhancementScriptMaximized' : 'bodyLegacyEnhancementScript'}
