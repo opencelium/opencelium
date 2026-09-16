@@ -3,6 +3,7 @@ import { mapConnectionToWorkflowState } from '../../../api/connectionMapper';
 import { findInvalidWorkflowReferences } from '../../../utils/graph.invalidReferences';
 import { findBrokenEnhancementScripts } from '../../../utils/graph.brokenScriptValidation';
 import { evaluateJointTargets } from '../../../utils/jumpValidator';
+import { buildQueryParamsFromEndpoint } from '../../request-editor/url-editor/urlEditor.utils';
 
 export type WorkflowJsonError = { key: string; path?: string; reason?: string };
 export type WorkflowJsonValidation =
@@ -11,21 +12,38 @@ export type WorkflowJsonValidation =
 
 const INDEX_RE = /^\d+(?:_\d+)*$/;
 
-const withoutDerivedUiConfig = (payload: WorkflowJsonPayload): WorkflowJsonPayload => ({
-	...payload,
-	ui: {
-		...payload.ui,
+const withoutDerivedUiConfig = (payload: WorkflowJsonPayload): WorkflowJsonPayload => {
+	const entryIds = new Set([
+		...payload.fromConnector.methods.map((method) => method.id),
+		...payload.fromConnector.operators.map((operator) => operator.id),
+	]);
+	return { ...payload, ui: { ...payload.ui,
 		workflowNodes: payload.ui.workflowNodes.map((node) => {
+			if (!entryIds.has(node.id)) return node;
 			const data = { ...node.data };
-			delete data.methodConfig;
-			delete data.conditionConfig;
+			['title', 'subtitle', 'kind', 'connector', 'methodConfig', 'conditionConfig']
+				.forEach((key) => delete data[key]);
 			return { ...node, data };
 		}),
-	},
-});
+	} };
+};
 
-export const mapWorkflowJsonToWorkflowState = (payload: WorkflowJsonPayload) =>
-	mapConnectionToWorkflowState(withoutDerivedUiConfig(payload));
+export const mapWorkflowJsonToWorkflowState = (payload: WorkflowJsonPayload) => {
+	const state = mapConnectionToWorkflowState(withoutDerivedUiConfig(payload));
+	return {
+		...state,
+		nodes: state.nodes.map((node) => {
+			const methodConfig = node.data.methodConfig;
+			if (!methodConfig) return node;
+			return { ...node, data: { ...node.data, methodConfig: {
+				...methodConfig,
+				queryParams: buildQueryParamsFromEndpoint(
+					methodConfig.url, methodConfig.queryParams,
+				),
+			} } };
+		}),
+	};
+};
 
 export function validateWorkflowJson(value: unknown): WorkflowJsonValidation {
 	const parsed = workflowJsonSchema.safeParse(value);

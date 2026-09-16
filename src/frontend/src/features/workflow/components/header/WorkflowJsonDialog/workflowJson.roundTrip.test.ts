@@ -79,8 +79,9 @@ describe('workflow JSON round trip', () => {
 
 	it('applies edited method and operator data instead of stale UI copies', () => {
 		const method: WorkflowNodeModel = {
-			id: 'method-1', type: 'system', position: { x: 420, y: 220 },
-			data: { title: 'HTTP Request', subtitle: 'Fetch', kind: 'system', color: '#6477AB',
+			id: 'method-1', type: 'connector', position: { x: 420, y: 220 },
+			data: { title: 'Old connector', subtitle: 'Fetch', kind: 'connector', color: '#6477AB',
+				connector: { connectorId: 1, title: 'Old connector', invokerName: 'old_api' },
 				methodConfig: { name: 'Fetch', url: '{url}/unit', method: 'GET', headers: {},
 					queryParams: [], endpointArgs: {}, body: {}, bodyFormat: 'json', bodyData: 'raw' } },
 		};
@@ -96,15 +97,52 @@ describe('workflow JSON round trip', () => {
 		];
 		const payload = buildConnectionPayload({ title: 'Workflow', description: '',
 			nodes: [...initialNodes, method, condition], edges });
-		payload.fromConnector.methods[0].request.endpoint = '{url}/unit/test';
+		payload.title = 'Edited workflow';
+		payload.name = 'Edited workflow';
+		payload.description = 'Edited description';
+		payload.categoryId = 7;
+		payload.ui.viewport = { x: 20, y: 30, zoom: 1.2 };
+		const savedMethodNode = payload.ui.workflowNodes.find((node) => node.id === method.id);
+		if (savedMethodNode) savedMethodNode.position = { x: 555, y: 333 };
+		const editedMethod = payload.fromConnector.methods[0];
+		editedMethod.name = 'Edited method';
+		editedMethod.label = 'Edited label';
+		editedMethod.connector = { connectorId: 2, title: 'Edited connector',
+			icon: null, invoker: 'edited_api' };
+		editedMethod.request.endpoint = '{url}/unit/test?key="value"';
+		editedMethod.request.method = 'POST';
+		editedMethod.request.header = { Authorization: 'edited' };
+		editedMethod.request.body = { type: 'object', format: 'json', data: 'raw',
+			fields: { changed: true } };
+		editedMethod.response = {
+			success: { status: '201', header: {}, body: { type: 'object', format: 'json',
+				data: 'raw', fields: { saved: true } } },
+			fail: { status: '400', header: null, body: null },
+		};
 		payload.fromConnector.operators[0].expression = "('new' = 'new')";
 
 		const validation = validateWorkflowJson(payload);
 		expect(validation.success).toBe(true);
 		if (!validation.success) throw new Error('Expected edited workflow JSON to be valid');
 		const edited = mapWorkflowJsonToWorkflowState(validation.data);
+		expect(edited).toMatchObject({ title: 'Edited workflow',
+			description: 'Edited description', categoryId: 7,
+			viewport: { x: 20, y: 30, zoom: 1.2 } });
+		expect(edited.nodes.find((node) => node.id === method.id)?.position)
+			.toEqual({ x: 555, y: 333 });
 		expect(edited.nodes.find((node) => node.id === method.id)?.data.methodConfig?.url)
-			.toBe('{url}/unit/test');
+			.toBe('{url}/unit/test?key="value"');
+		expect(edited.nodes.find((node) => node.id === method.id)?.data).toMatchObject({
+			title: 'Edited connector', subtitle: 'Edited label',
+			connector: { connectorId: 2, title: 'Edited connector', invokerName: 'edited_api' },
+			methodConfig: { name: 'Edited method', method: 'POST',
+				headers: { Authorization: 'edited' }, body: { changed: true },
+				response: { success: { status: '201' } } },
+		});
+		expect(edited.nodes.find((node) => node.id === method.id)?.data.methodConfig?.queryParams)
+			.toEqual(expect.arrayContaining([expect.objectContaining({
+				key: 'key', value: '"value"', enabled: true,
+			})]));
 		expect(edited.nodes.find((node) => node.id === condition.id)?.data.conditionConfig?.expression)
 			.toBe("('new' = 'new')");
 	});
