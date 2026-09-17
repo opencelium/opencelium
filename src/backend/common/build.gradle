@@ -5,6 +5,12 @@ plugins {
 dependencies {
 	api 'com.fasterxml.jackson.core:jackson-databind'
 
+	// Nullness contract for the public API. Annotations only, no runtime behaviour;
+	// the same standard Spring Framework 7 uses. Version managed by the Boot BOM.
+	api 'org.jspecify:jspecify'
+
 	testImplementation 'org.junit.jupiter:junit-jupiter'
+	// common uses no Spring starter, so AssertJ is not brought in transitively (CONTRIBUTING §9.6).
+	testImplementation 'org.assertj:assertj-core'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
