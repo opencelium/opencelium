@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A v6 invoker using every construct of the format. Fictional API. -->
+<invoker version="6.0" id="example-service-desk">
+    <name>Example Service Desk</name>
+    <description>Reference invoker using every construct.</description>
+    <hint>Enter your instance URL.</hint>
+    <icon>service-desk.png</icon>
+    <category_tags>
+        <item>Ticketing</item>
+        <item>Service Desk</item>
+    </category_tags>
+    <authType>token</authType>
+    <requiredData>
+        <item name="url">https://acme.example.com</item>
+        <item name="username"/>
+        <item name="password" visibility="protected"/>
+        <item name="retries" type="integer">3</item>
+        <item name="sessionToken" visibility="private" source="%{login.body.result.session-id}"/>
+        <item name="basicAuth" visibility="private" source="{username:password}"/>
+    </requiredData>
+    <operations>
+        <operation operationId="login" name="login" summary="Exchange credentials for a session token" roles="test auth">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/session</endpoint>
+                <header>
+                    <item name="X-Auth-User">{username}</item>
+                </header>
+                <body contentType="application/json">
+                    <schema type="object">
+                        <field name="language" type="string">en</field>
+                    </schema>
+                </body>
+            </request>
+            <responses>
+                <response status="200">
+                    <condition success="body.error == null"/>
+                    <body contentType="application/json">
+                        <schema type="object">
+                            <field name="result" type="object">
+                                <field name="session-id" type="string"/>
+                            </field>
+                            <field name="error" type="object">
+                                <field name="message" type="string"/>
+                            </field>
+                        </schema>
+                    </body>
+                </response>
+                <response status="5XX">
+                    <body contentType="text/plain">
+                        <schema type="string"/>
+                    </body>
+                </response>
+            </responses>
+        </operation>
+        <operation operationId="listTickets" name="List tickets">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/tickets</endpoint>
+                <header>
+                    <item name="Authorization" type="string">Bearer {sessionToken}</item>
+                </header>
+                <parameters>
+                    <parameter name="limit" type="integer">50</parameter>
+                    <parameter name="status" type="array" explode="false">
+                        <items type="string"/>
+                        <value>open</value>
+                        <value>pending</value>
+                    </parameter>
+                    <parameter name="ids" type="array" style="pipeDelimited">
+                        <items type="integer"/>
+                    </parameter>
+                    <parameter name="filter" type="object" style="deepObject">
+                        <field name="owner" type="string">{username}</field>
+                    </parameter>
+                </parameters>
+            </request>
+            <pagination>
+                <limit action="write">50</limit>
+                <offset action="increment">0</offset>
+                <size action="read" ref="response.body.$.meta.total"/>
+                <result action="collect" ref="response.body.$.items"/>
+            </pagination>
+            <responses>
+                <response status="200">
+                    <body contentType="application/json">
+                        <schema type="object">
+                            <field name="items" type="array">
+                                <items type="object">
+                                    <field name="id" type="integer"/>
+                                    <field name="labels" type="array">
+                                        <items type="string"/>
+                                    </field>
+                                    <field name="custom" type="array">
+                                        <items type="undefined"/>
+                                    </field>
+                                </items>
+                            </field>
+                        </schema>
+                    </body>
+                </response>
+                <response status="default"/>
+            </responses>
+        </operation>
+        <operation operationId="createTicket" name="Create ticket">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/tickets</endpoint>
+                <body contentType="application/json">
+                    <schema type="object">
+                        <field name="subject" type="string"/>
+                        <field name="watchers" type="array">
+                            <items type="object">
+                                <field name="email" type="string"/>
+                                <field name="notify" type="boolean"/>
+                            </items>
+                            <value>
+                                <field name="email">ops@acme.com</field>
+                                <field name="notify">true</field>
+                            </value>
+                        </field>
+                    </schema>
+                </body>
+            </request>
+            <responses>
+                <response status="201">
+                    <header>
+                        <item name="Location"/>
+                    </header>
+                </response>
+                <response status="4xx"/>
+            </responses>
+        </operation>
+        <operation operationId="cmdb.objects.update" name="Update object (XML)">
+            <request>
+                <method>PATCH</method>
+                <endpoint>{url}/objects/{objectId}</endpoint>
+                <body contentType="application/xml">
+                    <schema type="object" targetNamespace="http://acme.com/cmdb/v1" prefix="cmdb">
+                        <field name="object" type="object">
+                            <attribute name="id" type="integer">{objectId}</attribute>
+                            <field name="status" type="string">active</field>
+                        </field>
+                    </schema>
+                </body>
+            </request>
+            <responses>
+                <response status="204"/>
+            </responses>
+        </operation>
+        <operation operationId="search" name="Search (GraphQL)">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/graphql</endpoint>
+                <body contentType="application/json" envelope="graphql">
+                    <schema type="object">
+                        <field name="query" type="string"/>
+                        <field name="variables" type="object"/>
+                    </schema>
+                </body>
+            </request>
+            <responses>
+                <response status="200">
+                    <condition success="body.errors == null"/>
+                    <body contentType="application/json">
+                        <schema type="object">
+                            <field name="data" type="undefined"/>
+                        </schema>
+                    </body>
+                </response>
+            </responses>
+        </operation>
+        <operation operationId="downloadReport" name="Download report">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/reports/{reportId}</endpoint>
+            </request>
+            <responses>
+                <response status="200">
+                    <body contentType="application/pdf"/>
+                </response>
+            </responses>
+        </operation>
+    </operations>
+</invoker>
