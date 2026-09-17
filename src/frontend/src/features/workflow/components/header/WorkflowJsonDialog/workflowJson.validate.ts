@@ -13,17 +13,21 @@ export type WorkflowJsonValidation =
 const INDEX_RE = /^\d+(?:_\d+)*$/;
 
 const withoutDerivedUiConfig = (payload: WorkflowJsonPayload): WorkflowJsonPayload => {
-	const entryIds = new Set([
-		...payload.fromConnector.methods.map((method) => method.id),
-		...payload.fromConnector.operators.map((operator) => operator.id),
+	const entryTypes = new Map<string, string>([
+		...payload.fromConnector.methods.map((method) => [method.id,
+			method.methodType === 'HTTP_REQUEST' ? 'system'
+				: method.methodType === 'WEBHOOK' ? 'trigger-connection' : 'connector'] as const),
+		...payload.fromConnector.operators.map((operator) => [operator.id,
+			operator.type.toLowerCase() === 'loop' ? 'loop' : 'if'] as const),
 	]);
 	return { ...payload, ui: { ...payload.ui,
 		workflowNodes: payload.ui.workflowNodes.map((node) => {
-			if (!entryIds.has(node.id)) return node;
+			const entryType = entryTypes.get(node.id);
+			if (!entryType) return node;
 			const data = { ...node.data };
 			['title', 'subtitle', 'kind', 'connector', 'methodConfig', 'conditionConfig']
 				.forEach((key) => delete data[key]);
-			return { ...node, data };
+			return { ...node, type: entryType, data };
 		}),
 	} };
 };

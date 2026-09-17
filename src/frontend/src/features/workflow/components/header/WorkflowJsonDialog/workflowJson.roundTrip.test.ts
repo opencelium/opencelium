@@ -75,6 +75,9 @@ describe('workflow JSON round trip', () => {
 		expect(restored.nodes.find((node) => node.id === webhook.id)?.type).toBe('trigger-connection');
 		expect(restored.nodes.filter((node) => node.type === 'if' || node.type === 'loop')
 			.map((node) => node.id).sort()).toEqual([condition.id, loop.id].sort());
+		expect(restored.nodes.find((node) => node.id === loop.id)?.data.conditionConfig)
+			.toMatchObject({ operatorType: 'loop', iterator: 'i',
+				expression: 'for {%#FFCFB5.(response).body.items%}' });
 	});
 
 	it('applies edited method and operator data instead of stale UI copies', () => {
@@ -107,6 +110,8 @@ describe('workflow JSON round trip', () => {
 		const editedMethod = payload.fromConnector.methods[0];
 		editedMethod.name = 'Edited method';
 		editedMethod.label = 'Edited label';
+		editedMethod.color = '#ABCDEF';
+		editedMethod.dataAggregator = 3;
 		editedMethod.connector = { connectorId: 2, title: 'Edited connector',
 			icon: null, invoker: 'edited_api' };
 		editedMethod.request.endpoint = '{url}/unit/test?key="value"';
@@ -120,6 +125,7 @@ describe('workflow JSON round trip', () => {
 			fail: { status: '400', header: null, body: null },
 		};
 		payload.fromConnector.operators[0].expression = "('new' = 'new')";
+		payload.fromConnector.operators[0].dataAggregator = 4;
 
 		const validation = validateWorkflowJson(payload);
 		expect(validation.success).toBe(true);
@@ -133,7 +139,7 @@ describe('workflow JSON round trip', () => {
 		expect(edited.nodes.find((node) => node.id === method.id)?.data.methodConfig?.url)
 			.toBe('{url}/unit/test?key="value"');
 		expect(edited.nodes.find((node) => node.id === method.id)?.data).toMatchObject({
-			title: 'Edited connector', subtitle: 'Edited label',
+			title: 'Edited connector', subtitle: 'Edited label', color: '#ABCDEF', dataAggregator: 3,
 			connector: { connectorId: 2, title: 'Edited connector', invokerName: 'edited_api' },
 			methodConfig: { name: 'Edited method', method: 'POST',
 				headers: { Authorization: 'edited' }, body: { changed: true },
@@ -143,7 +149,48 @@ describe('workflow JSON round trip', () => {
 			.toEqual(expect.arrayContaining([expect.objectContaining({
 				key: 'key', value: '"value"', enabled: true,
 			})]));
-		expect(edited.nodes.find((node) => node.id === condition.id)?.data.conditionConfig?.expression)
-			.toBe("('new' = 'new')");
+		expect(edited.nodes.find((node) => node.id === condition.id)?.data).toMatchObject({
+			dataAggregator: 4,
+			conditionConfig: { expression: "('new' = 'new')" },
+		});
+	});
+
+	it('applies method and operator type changes despite stale UI node types', () => {
+		const method: WorkflowNodeModel = {
+			id: 'method-1', type: 'connector', position: { x: 420, y: 220 },
+			data: { title: 'Connector', subtitle: 'Fetch', kind: 'connector', color: '#6477AB',
+				connector: { connectorId: 1, title: 'Connector', invokerName: 'connector_api' },
+				methodConfig: { name: 'Fetch', url: '{url}/unit', method: 'GET', headers: {},
+					queryParams: [], endpointArgs: {}, body: {}, bodyFormat: 'json', bodyData: 'raw' } },
+		};
+		const condition: WorkflowNodeModel = {
+			id: 'operator-1', type: 'if', position: { x: 680, y: 220 },
+			data: { title: 'If', kind: 'if', conditionConfig: { operatorType: 'if',
+				expression: "'a' = 'a'",
+				tree: { id: 'group', type: 'group', properties: {}, items: [] } } },
+		};
+		const edges: WorkflowEdgeModel[] = [
+			{ id: 'e1', source: 'start-1', target: method.id, type: 'workflow-edge' },
+			{ id: 'e2', source: method.id, target: condition.id, type: 'workflow-edge' },
+		];
+		const payload = buildConnectionPayload({ title: 'Workflow', description: '',
+			nodes: [...initialNodes, method, condition], edges });
+		payload.fromConnector.methods[0].methodType = 'HTTP_REQUEST';
+		payload.fromConnector.methods[0].connector = null;
+		payload.fromConnector.operators[0].type = 'loop';
+		payload.fromConnector.operators[0].expression = 'for items';
+		payload.fromConnector.operators[0].iterator = 'j';
+
+		const validation = validateWorkflowJson(payload);
+		expect(validation.success).toBe(true);
+		if (!validation.success) throw new Error('Expected type-edited workflow JSON to be valid');
+		const edited = mapWorkflowJsonToWorkflowState(validation.data);
+		expect(edited.nodes.find((node) => node.id === method.id)).toMatchObject({
+			type: 'system', data: { kind: 'system', connector: undefined },
+		});
+		expect(edited.nodes.find((node) => node.id === condition.id)).toMatchObject({
+			type: 'loop', data: { kind: 'loop',
+				conditionConfig: { operatorType: 'loop', expression: 'for items', iterator: 'j' } },
+		});
 	});
 });
