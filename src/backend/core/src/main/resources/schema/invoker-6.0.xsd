@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    OpenCelium invoker file format, version 6.
+
+    What this schema checks and what it leaves out:
+      * Structure, element order and the fixed vocabularies (methods, types, visibilities, actions)
+        are checked here, so tools and editors can validate a file on their own.
+      * Rules about values and about how parts relate (id formats, a private setting needing a
+        source, response statuses being unique) are checked by the invoker model when the file is
+        read. Those checks name the offending element and explain the fix, which a schema
+        violation message cannot.
+      * Setting sources such as %{login.body.token} are expressions the execution engine resolves
+        when a workflow runs, so they are stored as written and not checked at all.
+
+    Invoker files use no XML namespace. The root element's version attribute names the format
+    version: 5.x files have none, and a 6.x file keeps this schema. A future major version gets its
+    own schema, and readers reject versions they do not know.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="6.0">
+
+    <xs:element name="invoker" type="Invoker"/>
+
+    <!-- ================================================================ invoker -->
+
+    <xs:complexType name="Invoker">
+        <xs:sequence>
+            <xs:element name="name" type="Text"/>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="hint" type="xs:string" minOccurs="0"/>
+            <xs:element name="icon" type="xs:string" minOccurs="0"/>
+            <xs:element name="category_tags" type="CategoryTags" minOccurs="0"/>
+            <xs:element name="authType" type="xs:string" minOccurs="0"/>
+            <xs:element name="requiredData" type="RequiredData" minOccurs="0"/>
+            <xs:element name="operations" type="Operations"/>
+        </xs:sequence>
+        <xs:attribute name="version" use="required" type="FormatVersion"/>
+        <xs:attribute name="id" use="required" type="Text"/>
+    </xs:complexType>
+
+    <xs:complexType name="CategoryTags">
+        <xs:sequence>
+            <xs:element name="item" type="Text" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ================================================================ settings -->
+
+    <xs:complexType name="RequiredData">
+        <xs:sequence>
+            <xs:element name="item" type="Setting" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Element text is the default value of a public or protected setting. -->
+    <xs:complexType name="Setting">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="name" use="required" type="Text"/>
+                <xs:attribute name="type" type="ScalarType" default="string"/>
+                <xs:attribute name="visibility" type="Visibility" default="public"/>
+                <xs:attribute name="source" type="Text"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- ================================================================ operations -->
+
+    <xs:complexType name="Operations">
+        <xs:sequence>
+            <xs:element name="operation" type="Operation" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Operation">
+        <xs:sequence>
+            <xs:element name="request" type="Request"/>
+            <xs:element name="pagination" type="Pagination" minOccurs="0"/>
+            <xs:element name="responses" type="Responses"/>
+        </xs:sequence>
+        <xs:attribute name="operationId" use="required" type="Text"/>
+        <xs:attribute name="name" use="required" type="Text"/>
+        <xs:attribute name="summary" type="xs:string"/>
+        <xs:attribute name="roles" type="Roles"/>
+    </xs:complexType>
+
+    <xs:complexType name="Request">
+        <xs:sequence>
+            <xs:element name="method" type="HttpMethod"/>
+            <xs:element name="endpoint" type="Text"/>
+            <xs:element name="header" type="Headers" minOccurs="0"/>
+            <xs:element name="parameters" type="Parameters" minOccurs="0"/>
+            <xs:element name="body" type="Body" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Headers">
+        <xs:sequence>
+            <xs:element name="item" type="Header" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Element text is the header value. Header values are always text, so a type may be omitted. -->
+    <xs:complexType name="Header">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="name" use="required" type="Text"/>
+                <xs:attribute name="type" type="StringOnly"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="Parameters">
+        <xs:sequence>
+            <xs:element name="parameter" type="Parameter" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Parameter" mixed="true">
+        <xs:complexContent>
+            <xs:extension base="SchemaNode">
+                <xs:attribute name="name" use="required" type="Text"/>
+                <xs:attribute name="style" type="QueryStyle"/>
+                <xs:attribute name="explode" type="xs:boolean"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Body">
+        <xs:sequence>
+            <xs:element name="schema" type="Schema" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="contentType" use="required" type="Text"/>
+        <xs:attribute name="envelope" type="Envelope"/>
+    </xs:complexType>
+
+    <xs:complexType name="Responses">
+        <xs:sequence>
+            <xs:element name="response" type="Response" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Response">
+        <xs:sequence>
+            <xs:element name="condition" type="Condition" minOccurs="0"/>
+            <xs:element name="header" type="Headers" minOccurs="0"/>
+            <xs:element name="body" type="Body" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="status" use="required" type="ResponseStatus"/>
+    </xs:complexType>
+
+    <xs:complexType name="Condition">
+        <xs:attribute name="success" use="required" type="Text"/>
+    </xs:complexType>
+
+    <!-- ================================================================ schema nodes -->
+
+    <!--
+        A schema node describes one value. What it may contain depends on its type, which the reader
+        checks: an object holds <field> and <attribute>; an array holds exactly one <items> plus any
+        number of <value> defaults; a scalar holds only its default as text; undefined holds nothing.
+    -->
+    <xs:complexType name="SchemaNode" mixed="true">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="field" type="Field"/>
+            <xs:element name="attribute" type="XmlAttribute"/>
+            <xs:element name="items" type="SchemaNode"/>
+            <xs:element name="value" type="Value"/>
+        </xs:choice>
+        <xs:attribute name="type" use="required" type="DataType"/>
+    </xs:complexType>
+
+    <xs:complexType name="Schema" mixed="true">
+        <xs:complexContent>
+            <xs:extension base="SchemaNode">
+                <xs:attribute name="targetNamespace" type="xs:anyURI"/>
+                <xs:attribute name="prefix" type="xs:NCName"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="Field" mixed="true">
+        <xs:complexContent>
+            <xs:extension base="SchemaNode">
+                <xs:attribute name="name" use="required" type="Text"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- An XML attribute of the element described by the enclosing object. Text is its default. -->
+    <xs:complexType name="XmlAttribute">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="name" use="required" type="Text"/>
+                <xs:attribute name="type" use="required" type="ScalarType"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- A default element: text, named <field> children for an object, or <value> children for a list. -->
+    <xs:complexType name="Value" mixed="true">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="field" type="ValueField"/>
+            <xs:element name="value" type="Value"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="ValueField" mixed="true">
+        <xs:complexContent>
+            <xs:extension base="Value">
+                <xs:attribute name="name" use="required" type="Text"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- ================================================================ pagination -->
+
+    <xs:complexType name="Pagination">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="limit" type="PageRule"/>
+            <xs:element name="offset" type="PageRule"/>
+            <xs:element name="page" type="PageRule"/>
+            <xs:element name="size" type="PageRule"/>
+            <xs:element name="result" type="PageRule"/>
+            <xs:element name="sort" type="PageRule"/>
+            <xs:element name="order" type="PageRule"/>
+            <xs:element name="category" type="PageRule"/>
+            <xs:element name="next" type="PageRule"/>
+            <xs:element name="prev" type="PageRule"/>
+            <xs:element name="link" type="PageRule"/>
+            <xs:element name="has_more" type="PageRule"/>
+            <xs:element name="cursor" type="PageRule"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <!-- Element text is a literal value; ref points into the response. -->
+    <xs:complexType name="PageRule">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="action" use="required" type="PageAction"/>
+                <xs:attribute name="ref" type="Text"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- ================================================================ simple types -->
+
+    <!-- Text containing at least one non-whitespace character. -->
+    <xs:simpleType name="Text">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[\s\S]*\S[\s\S]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="FormatVersion">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="6\.[0-9]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Visibility">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="public"/>
+            <xs:enumeration value="protected"/>
+            <xs:enumeration value="private"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Role">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="test"/>
+            <xs:enumeration value="auth"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Roles">
+        <xs:list itemType="Role"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="HttpMethod">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="GET"/>
+            <xs:enumeration value="HEAD"/>
+            <xs:enumeration value="POST"/>
+            <xs:enumeration value="PUT"/>
+            <xs:enumeration value="PATCH"/>
+            <xs:enumeration value="DELETE"/>
+            <xs:enumeration value="OPTIONS"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="StringOnly">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="string"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="QueryStyle">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="form"/>
+            <xs:enumeration value="spaceDelimited"/>
+            <xs:enumeration value="pipeDelimited"/>
+            <xs:enumeration value="deepObject"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Envelope">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="graphql"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ResponseStatus">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[1-5][0-9][0-9]|[1-5][Xx][Xx]|default"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ScalarType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="string"/>
+            <xs:enumeration value="number"/>
+            <xs:enumeration value="integer"/>
+            <xs:enumeration value="boolean"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="DataType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="object"/>
+            <xs:enumeration value="array"/>
+            <xs:enumeration value="string"/>
+            <xs:enumeration value="number"/>
+            <xs:enumeration value="integer"/>
+            <xs:enumeration value="boolean"/>
+            <xs:enumeration value="undefined"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="PageAction">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="read"/>
+            <xs:enumeration value="write"/>
+            <xs:enumeration value="increment"/>
+            <xs:enumeration value="collect"/>
+            <xs:enumeration value="fetch"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>
