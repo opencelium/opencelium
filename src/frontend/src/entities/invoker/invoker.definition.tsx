@@ -24,6 +24,7 @@ import { downloadInvoker } from '@entities/invoker/lib/downloadInvoker'
 import { buildActionAccess } from '@/engine/policy'
 import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 import { notifyError } from '@shared/ui/feedback/notifyError'
+import { areInvokerOperationBodyTypesValid } from '@entities/invoker/lib/invokerOperationValidation'
 
 const baseKey = 'invoker'
 
@@ -301,6 +302,10 @@ export const invokerDefinition: EntityDefinition = {
                             !Array.isArray(value) ||
                             value.some((op: any) => op?.testConnection === true),
                         message: `${baseKey}.fields.operations.errors.noTestOperation`,
+                    },
+                    {
+                        validate: areInvokerOperationBodyTypesValid,
+                        message: `${baseKey}.fields.operations.errors.bodyTypeMismatch`,
                     },
                 ],
             },

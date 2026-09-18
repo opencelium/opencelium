@@ -58,13 +58,23 @@ const TYPE_OPTIONS: RadioOption[] = [
 const getStructuredValueError = (
     value: string,
     format: 'json' | 'xml',
+    type?: 'object' | 'array',
 ): string | undefined => {
     try {
         if (format === 'xml') {
             const document = new DOMParser().parseFromString(value, 'application/xml')
             if (document.querySelector('parsererror')) throw new Error('Invalid XML')
         } else {
-            JSON.parse(value)
+            const parsed = JSON.parse(value)
+            if (type === 'array' && !Array.isArray(parsed)) {
+                return 'Body must be a JSON array'
+            }
+            if (
+                type === 'object' &&
+                (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed))
+            ) {
+                return 'Body must be a JSON object'
+            }
         }
         return undefined
     } catch {
@@ -138,12 +148,14 @@ function StructuredEditorField({
     label,
     readOnly,
     format = 'json',
+    type,
     height = '120px',
 }: {
     name: string
     label: string
     readOnly: boolean
     format?: 'json' | 'xml'
+    type?: 'object' | 'array'
     height?: string
 }) {
     const { control } = useFormContext()
@@ -152,7 +164,7 @@ function StructuredEditorField({
     const aceTheme = themeMode === 'dark' ? 'tomorrow_night' : 'tomorrow'
 
     const value = typeof field.value === 'string' ? field.value : '{}'
-    const localError = getStructuredValueError(value, format)
+    const localError = getStructuredValueError(value, format, type)
 
     const handleChange = (val: string) => {
         field.onChange(val)
@@ -190,6 +202,7 @@ function OperationSection({
     const { t } = useI18n('entities')
     const { control } = useFormContext()
     const format = useWatch({ name: `${prefix}.format`, control }) as 'json' | 'xml'
+    const type = useWatch({ name: `${prefix}.type`, control }) as 'object' | 'array'
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0, width: '100%' }}>
             {withStatus && (
@@ -229,6 +242,7 @@ function OperationSection({
                 label={t('invoker.fields.operations.item.body', { defaultValue: 'Body' })}
                 readOnly={readOnly}
                 format={format}
+                type={type}
                 height="160px"
             />
         </div>

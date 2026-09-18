@@ -86,6 +86,7 @@
         "endpointRequired": "Endpoint is required",
         "incompleteOperations": "All operations must have a name and endpoint defined",
         "meaningfulValues": "Operation names and endpoints must contain at least one letter or digit",
+        "bodyTypeMismatch": "JSON Body must match the selected Type (object or array)",
         "noTestOperation": "At least one operation must have Test Operation enabled",
         "invalidJson": "Invalid JSON"
       }

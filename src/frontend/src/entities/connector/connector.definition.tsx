@@ -246,6 +246,12 @@ export const connectorDefinition: EntityDefinition = {
             validation: {
                 required: true,
                 max: 255,
+                custom: [
+                    {
+                        validate: (value: unknown) => !/[<>]/.test(String(value ?? '')),
+                        message: `${baseKey}.fields.title.errors.markup_not_allowed`,
+                    },
+                ],
                 remote: {
                     url: `/connector/exists/:title`,
                     method: 'GET',
@@ -335,7 +341,17 @@ export const connectorDefinition: EntityDefinition = {
                 }
             },
             validation: {
-                max: 11
+                max: 10,
+                custom: [
+                    {
+                        validate: (value: unknown) => {
+                            const timeout = String(value ?? '')
+                            if (timeout === '') return true
+                            return /^\d+$/.test(timeout) && Number(timeout) <= 2_147_483_647
+                        },
+                        message: `${baseKey}.fields.timeout.errors.invalid`,
+                    },
+                ],
             },
             table: {
                 width: 100,
