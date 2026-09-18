@@ -8,7 +8,8 @@
     "title": {
       "label": "Title",
       "errors": {
-        "title_already_exists": "The connector with this title is already created"
+        "title_already_exists": "The connector with this title is already created",
+        "markup_not_allowed": "Title must not contain HTML or markup."
       }
     },
     "description": {
@@ -18,7 +19,10 @@
       "label": "Invoker"
     },
     "timeout": {
-      "label": "Timeout"
+      "label": "Timeout",
+      "errors": {
+        "invalid": "Timeout must be a whole number between 0 and 2147483647."
+      }
     },
     "modifiedAt": {
       "label": "Modified At"

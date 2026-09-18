@@ -63,6 +63,9 @@
       }
     }
   },
+  "validation": {
+    "meaningfulText": "Enter at least one letter or number."
+  },
   "confirmation": {
     "delete": {
       "byName": "Delete notification template by name \"{{name}}\"?",
