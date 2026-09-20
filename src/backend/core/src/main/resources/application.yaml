@@ -4,11 +4,3 @@ spring:
 
 server:
   port: 9090
-
-opencelium:
-  execution:
-    # Transport SPI selection:
-    #   local  — workflows run inside this process (monolith deployment, default)
-    #   amqp   — self-contained jobs are published to a message broker for worker instances
-    #   custom — a user-provided transport SPI implementation (Kafka, SQS, ...)
-    transport: local
