@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (C) <2019>  <becon GmbH>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, version 3 of the License.
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+<invoker type="RESTful">
+    <name>SAP Business One</name>
+    <description>This is a SAP Business One Connector for a Sales Order and Delivery Note process</description>
+    <hint>hint text</hint>
+    <icon>otrs.png</icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="UserLogin" type="string" visibility="public"/>
+        <item name="Password" type="string" visibility="protected"/>
+        <item name="Company" type="string" visibility="public"/>
+        <item name="token" type="string" visibility="private">%{login.body.SessionId}</item>
+    </requiredData>
+    <authType>token</authType>
+    <category_tags>
+        <item>ERP</item>
+    </category_tags>
+    <operations>
+        <operation name="login" type="test">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/b1s/v1/Login</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                    <field name="UserName" type="string">{UserLogin}</field>
+                    <field name="Password" type="string">{Password}</field>
+                    <field name="CompanyDB" type="string">{Company}</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="odata.metadata" type="string"/>
+                        <field name="SessionId" type="string"/>
+                        <field name="Version" type="string"/>
+                        <field name="SessionTimeout" type=""/>
+                    </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                </success>
+                <fail status="401">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type=""/>
+                            <field name="message" type="object">
+                                <field name="lang" type="string"/>
+                                <field name="value" type="string">Login failed</field>
+                            </field>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="logout" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/b1s/v1/Logout</endpoint>
+                <header>
+                    <item name="Cookie" type="string">B1SESSION={token}</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+                <body type="object" format="json" data="raw">
+                </body>
+            </request>
+            <response>
+                <success status="204">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                </success>
+                <fail status="401">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type=""/>
+                            <field name="message" type="object">
+                                <field name="lang" type="string"/>
+                                <field name="value" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getSalesOrdersByID" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/b1s/v1/Orders(1269)</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Cookie" type="string">B1SESSION={token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="DocEntry" type="string"/>
+                        <field name="CardName" type="string"/>
+                        <field name="CardCode" type="string"/>
+                        <field name="ContactPersonCode" type="string"/>
+                        <field name="DocumentStatus" type="string"/>
+                        <field name="DocDate" type="string"/>
+                        <field name="DocumentStatus" type="string"/>
+                        <field name="U_OTRS_based" type="string"/>
+                        <field name="U_Queue" type="string"/>
+                        <field name="DocumentLines" type="array">
+                            <field name="LineNum" type="string"/>
+                            <field name="ItemDescription" type="string"/>
+                            <field name="Quantity" type="string"/>
+                            <field name="Price" type="string"/>
+                            <field name="CostingCode" type="string"/>
+                            <field name="ItemDetails" type="string"/>
+                            <field name="DocEntry" type="string"/>
+                            <field name="RemainingOpenQuantity" type="string"/>
+                            <field name="CountryOrg" type="string"/>
+                            <field name="U_CommitmentDate" type="string"/>
+                            <field name="U_CommitmentText" type="string"/>
+                        </field>
+                        <field name="DocumentSpecialLines" type="array">
+                            <field name="LineText" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="404">
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type=""/>
+                            <field name="message" type="object">
+                                <field name="lang" type="string"/>
+                                <field name="value" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getAllSalesOrdersFilteredByDate" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/b1s/v1/Orders?$filter=DocDate ge '2021-07-20'</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Cookie" type="string">B1SESSION={token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Prefer" type="string">odata.maxpagesize=50</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="value" type="array">
+                            <field name="DocEntry" type="string"/>
+                            <field name="CardName" type="string"/>
+                            <field name="ContactPersonCode" type="string"/>
+                            <field name="DocDate" type="string"/>
+                            <field name="DocumentStatus" type="string"/>
+                            <field name="JournalMemo" type="string"/>
+                            <field name="ClosingRemarks" type="string"/>
+                            <field name="U_Queue" type="string"/>
+                            <field name="DocumentLines" type="array">
+                                <field name="LineNum" type="string"/>
+                                <field name="ItemDescription" type="string"/>
+                                <field name="Quantity" type="string"/>
+                                <field name="Price" type="string"/>
+                                <field name="CostingCode" type="string"/>
+                                <field name="FreeText" type="string"/>
+                                <field name="DocEntry" type="string"/>
+                                <field name="RemainingOpenQuantity" type="string"/>
+                                <field name="U_Overbookable" type="string"/>
+                                <field name="U_Overbookable_Text" type="string"/>
+                                <field name="CountryOrg" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="404">
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type=""/>
+                            <field name="message" type="object">
+                                <field name="lang" type="string"/>
+                                <field name="value" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getOpenSalesOrders" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/b1s/v1/Orders?$filter=DocumentStatus ge 'O'</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Cookie" type="string">B1SESSION={token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Prefer" type="string">odata.maxpagesize=50</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="value" type="array">
+                            <field name="DocEntry" type="string"/>
+                            <field name="CardName" type="string"/>
+                            <field name="ContactPersonCode" type="string"/>
+                            <field name="DocDate" type="string"/>
+                            <field name="DocumentStatus" type="string"/>
+                            <field name="DocumentLines" type="array">
+                                <field name="LineNum" type="string"/>
+                                <field name="ItemDescription" type="string"/>
+                                <field name="Quantity" type="string"/>
+                                <field name="Price" type="string"/>
+                                <field name="CostingCode" type="string"/>
+                                <field name="FreeText" type="string"/>
+                                <field name="DocEntry" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="404">
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type=""/>
+                            <field name="message" type="object">
+                                <field name="lang" type="string"/>
+                                <field name="value" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+                <operation name="editOpenSalesOrders" type="">
+            <request>
+                <method>PATCH</method>
+                <endpoint>{url}/b1s/v1/Orders(ID)</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="U_OTRS_based" type="object"/>
+                </body>
+                <header>
+                    <item name="Cookie" type="string">B1SESSION={token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="204">
+                    <body data="raw" format="json" type="object">
+                    </body>
+                </success>
+                <fail status="404">
+                    <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type=""/>
+                            <field name="message" type="object">
+                                <field name="lang" type="string"/>
+                                <field name="value" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getBusinessPartnersByID" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/b1s/v1/BusinessPartners(ID)</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Cookie" type="string">B1SESSION={token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="ContactEmployees" type="array">
+                            <field name="InternalCode" type="string"/>
+                            <field name="FirstName" type="string"/>
+                            <field name="LastName" type="string"/>
+                            <field name="E_Mail" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="404">
+                    <field name="error" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="object">
+                            <field name="lang" type="string"/>
+                            <field name="value" type="string"/>
+                        </field>
+                    </field>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getOpenDeliveryNotes" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/b1s/v1/DeliveryNotes?$filter=DocumentStatus ge 'O'</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Cookie" type="string">B1SESSION={token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Prefer" type="string">odata.maxpagesize=500</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="value" type="array">
+                            <field name="DocEntry" type="string"/>
+                            <field name="U_ArticleID" type="string"/>
+                            <field name="U_TicketID" type="string"/>
+                            <field name="U_Period" type="string"/>
+                            <field name="Reference1" type="string"/>
+                            <field name="DocumentStatus" type="string"/>
+                            <field name="DocumentLines" type="array">
+                                <field name="Quantity" type="string"/>
+                                <field name="FreeText" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="404">
+                    <field name="error" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="object">
+                            <field name="lang" type="string"/>
+                            <field name="value" type="string"/>
+                        </field>
+                    </field>
+                </fail>
+            </response>
+        </operation>
+        <operation name="getClosedDeliveryNotesInterval" type="">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/b1s/v1/DeliveryNotes?$filter=DocDate ge '2021-07-20'</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Cookie" type="string">B1SESSION={token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="Prefer" type="string">odata.maxpagesize=500</item>
+                </header>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="value" type="array">
+                            <field name="DocEntry" type="string"/>
+                            <field name="U_ArticleID" type="string"/>
+                            <field name="U_TicketID" type="string"/>
+                            <field name="U_Period" type="string"/>
+                            <field name="DocumentStatus" type="string"/>
+                            <field name="DocumentLines" type="array">
+                                <field name="Quantity" type="string"/>
+                                <field name="FreeText" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="404">
+                    <field name="error" type="object">
+                        <field name="code" type="string"/>
+                        <field name="message" type="object">
+                            <field name="lang" type="string"/>
+                            <field name="value" type="string"/>
+                        </field>
+                    </field>
+                </fail>
+            </response>
+        </operation>
+        <operation name="addDeliveryNotes" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/b1s/v1/DeliveryNotes</endpoint>
+                <body data="raw" format="json" type="object">
+                    <field name="U_ArticleID" type="string"/>
+                    <field name="U_TicketID" type="string"/>
+                    <field name="U_Period" type="string"/>
+                    <field name="U_OTRS_based" type="string"/>
+                    <field name="DocumentLines" type="array">
+                        <field name="Quantity" type="string"/>
+                        <field name="BaseType" type="string"/>
+                        <field name="BaseEntry" type="string"/>
+                        <field name="BaseLine" type="string"/>
+                        <field name="FreeText" type="string"/>
+                        <field name="U_Employee" type="string"/>
+                    </field>
+                </body>
+                <header>
+                    <item name="Cookie" type="string">B1SESSION={token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="201">
+                    <body data="raw" format="json" type="object">
+                        <field name="DocEntry" type=""/>
+                    </body>
+                </success>
+                <fail status="400">
+                <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type=""/>
+                            <field name="message" type="object">
+                                <field name="lang" type="string"/>
+                                <field name="value" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="deleteDeliveryNotesByID" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}/b1s/v1/DeliveryNotes(id)/Cancel</endpoint>
+                <body data="raw" format="json" type="object">
+                </body>
+                <header>
+                    <item name="Cookie" type="string">B1SESSION={token}</item>
+                    <item name="Accept" type="string">application/json</item>
+                    <item name="Content-Type" type="string">application/json</item>
+                </header>
+            </request>
+            <response>
+                <success status="204">
+                    <body data="raw" format="json" type="object">
+                        <field name="DocEntry" type=""/>
+                    </body>
+                </success>
+                <fail status="400">
+                <body type="object" format="json" data="raw">
+                        <field name="error" type="object">
+                            <field name="code"  type=""/>
+                            <field name="message" type="object">
+                                <field name="lang" type="string"/>
+                                <field name="value" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>

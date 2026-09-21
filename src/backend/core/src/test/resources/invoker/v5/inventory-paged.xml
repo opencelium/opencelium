@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A 5.x paged inventory invoker with invoker-level and operation-level pagination. Fictional API. -->
+<invoker type="openapi">
+    <name>Démo Inventory</name>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="token" type="string" visibility="protected"/>
+        <item name="grant" type="string" visibility="private">client_credentials</item>
+    </requiredData>
+    <pagination>
+        <limit action="write">100</limit>
+        <offset action="increment"/>
+        <result ref="response.body.$.Body" action="collect"/>
+    </pagination>
+    <operations>
+        <operation name="Get All Computers" type="page">
+            <request>
+                <method>GET</method>
+                <endpoint>{url}/computers</endpoint>
+            </request>
+            <pagination>
+                <page action="increment"/>
+                <cursor ref="response.body.$.next" action="write"></cursor>
+                <size ref="response.body.$.Meta[3].Value" action="read"/>
+                <bogus action="read">1</bogus>
+                <sort>name</sort>
+            </pagination>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="array">
+                        <field name="Id" type="integer"/>
+                        <field name="Name" type="string"/>
+                    </body>
+                </success>
+            </response>
+        </operation>
+        <operation name="GetApplications" type="">
+            <request>
+                <method>get</method>
+                <endpoint>{url}/applications</endpoint>
+            </request>
+            <response>
+                <success status="200">
+                    <body data="raw" format="json" type="object">
+                        <field name="Body" type="array"/>
+                    </body>
+                </success>
+            </response>
+        </operation>
+    </operations>
+</invoker>

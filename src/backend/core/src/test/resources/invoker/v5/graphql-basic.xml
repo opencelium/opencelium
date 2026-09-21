@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A 5.x GraphQL invoker using HTTP Basic credentials. Fictional API. -->
+<invoker type="RESTful">
+    <name>fake api</name>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+        <item name="token" type="string" visibility="private">Basic {username:password}</item>
+    </requiredData>
+    <authType>basic</authType>
+    <operations>
+        <operation name="Query" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Authorization" type="string">{token}</item>
+                </header>
+                <body data="graphql" format="json" type="object">
+                    <field name="query" type="object"/>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header/>
+                    <body data="graphql" format="json" type="object">
+                        <field name="data" type="object">
+                            <field name="site" type="object"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="401">
+                    <header/>
+                    <body/>
+                </fail>
+            </response>
+        </operation>
+        <operation name="Ticket" type="">
+            <request>
+                <method>PUT</method>
+                <endpoint>{url}/ticket</endpoint>
+                <body data="raw" format="xml" type="object">
+                    <field name="ticket" type="object">
+                        <field name="__oc__attributes" type="object">
+                            <field name="id" type="string">7</field>
+                        </field>
+                        <field name="__oc__value" type="string">text</field>
+                        <field name="subject" type="date"/>
+                    </field>
+                </body>
+            </request>
+            <response>
+                <success status="204"/>
+            </response>
+        </operation>
+    </operations>
+</invoker>
