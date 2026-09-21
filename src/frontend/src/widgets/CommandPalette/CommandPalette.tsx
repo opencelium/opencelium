@@ -311,7 +311,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                 style={{justifyContent: collapsible ? 'flex-start' : isMobile ? 'left' : 'center'}}
                 onMouseDown={isCollapsed ? (e) => { e.preventDefault(); inputRef.current?.focus(); setIsActive(true); } : undefined}
             >
-                <Command shouldFilter={false} value={highlighted} onValueChange={setHighlighted} style={{position: 'relative', paddingLeft: 20, paddingRight: 80}}>
+                <Command data-testid="command-palette-tour-target" shouldFilter={false} value={highlighted} onValueChange={setHighlighted} style={{position: 'relative', paddingLeft: 20, paddingRight: 80}}>
                     <div className="cmdk-input-row">
                         {lockedScope && (
                             <span className="cmdk-scope-chip" data-testid="command-palette-scope-chip">

@@ -1,0 +1,16 @@
+.onboarding-license__grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; margin-top: 20px; }
+/* Same bordered/elevated box the palette and invoker steps use, so the license
+   step reads as one of them rather than as a card layout of its own. */
+.onboarding-license__grid section { display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); padding: 18px; background: var(--color-background-elevated); }
+.onboarding-license h3 { margin: 0; color: var(--color-text-primary); font-size: var(--typography-font-size-md); }
+.onboarding-license dl { display: grid; grid-template-columns: 1fr auto; margin: 0; }
+.onboarding-license dt, .onboarding-license dd { margin: 0; border-bottom: 1px solid var(--color-border-subtle); padding: 8px 0; }
+.onboarding-license dd { color: var(--color-text-primary); font-weight: 600; text-align: right; }
+.onboarding-license__actions p { margin: 0; }
+/* The single hand-off button sits at the foot of the box, whatever the copy height. */
+.onboarding-license__actions button { margin-top: auto; align-self: stretch; }
+.onboarding-license__usage { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 20px; color: var(--color-text-primary); font-weight: 600; }
+.onboarding-license__usage small { color: var(--color-text-secondary); font-weight: 400; }
+.onboarding-license__usage > i { grid-column: 1 / -1; height: 7px; overflow: hidden; border-radius: 999px; background: var(--color-border-subtle); }
+.onboarding-license__usage b { display: block; height: 100%; background: var(--color-action-primary); }
+@media (max-width: 700px) { .onboarding-license__grid { grid-template-columns: 1fr; } }

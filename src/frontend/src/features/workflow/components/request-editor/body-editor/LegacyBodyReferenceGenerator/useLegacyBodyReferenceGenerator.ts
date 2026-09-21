@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { buildReferenceValue, getIteratorsForMethod, isExpandableReferencePath,
   type ResponseType } from '../requestReferenceOptions';
 import { webhookSnippet } from '../bodyWebhook';
-import { getDuplicateMethodIndexByColor } from '../../../../utils/methodColor';
 import type { LegacyBodyReferenceGeneratorProps } from './LegacyBodyReferenceGenerator.types';
 import { getReferenceMethods } from './legacyBodyReferenceGenerator.utils';
 import { parseEnhancementArg } from '../../utils/parseEnhancementArg';
@@ -63,7 +62,6 @@ export function useLegacyBodyReferenceGenerator({
     }
   }
   const selectedMethod = methods.find((method) => method.id === methodId);
-  const duplicateIndexByColor = useMemo(() => getDuplicateMethodIndexByColor(methods), [methods]);
   const iterators = useMemo(() => getIteratorsForMethod(connection, currentMethod),
     [connection, currentMethod]);
   const shellClassName = ['bodyLegacyGeneratorShell',
@@ -115,7 +113,7 @@ export function useLegacyBodyReferenceGenerator({
      *  replaces them instead of asking them to clear themselves. */
     resetSeed: appliedSeed,
     referenceType, setReferenceType, responseType, methodId, field, setField: chooseField,
-    webhookValue, setWebhookValue, methods, selectedMethod, duplicateIndexByColor,
+    webhookValue, setWebhookValue, methods, selectedMethod,
     iterators, shellClassName, selectMethod, selectResponseType, applyDirect, applyWebhook,
   };
 }

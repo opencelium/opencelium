@@ -1,0 +1,22 @@
+/*
+ * One snippet style for every palette command the tour prints, wherever it
+ * appears — the footer hints and the palette step's examples. It carries no
+ * `align-self`: that depends on the parent, so each consumer sets its own.
+ */
+.onboarding-code-token {
+    display: inline-block;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 2px 6px;
+    background: var(--color-background-elevated);
+    color: var(--color-text-primary);
+    font-family: var(--typography-font-family-mono);
+    font-size: var(--typography-font-size-sm);
+}
+
+.onboarding-command-note {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}

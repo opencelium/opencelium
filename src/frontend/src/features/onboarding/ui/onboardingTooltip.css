@@ -1,0 +1,182 @@
+/*
+ * The tour's type scale and chrome mirror the app's existing Joyride tooltip
+ * (@shared/ui/tour/style.css): 14px content, token radius/shadow/border.
+ * Titles use antd's heading scale (fontSizeHeading3/4) so nothing here
+ * introduces a size the rest of the app doesn't already use.
+ */
+.onboarding-tooltip {
+    --onboarding-title-hero: 24px;
+    --onboarding-title: 20px;
+    position: relative;
+    display: flex;
+    width: min(840px, calc(100vw - 48px));
+    max-height: calc(100vh - 32px);
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--color-background-surface);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-lg);
+	font-family: var(--typography-font-family-body);
+}
+
+.onboarding-tooltip__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 28px 0;
+}
+
+.onboarding-tooltip__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-action-primary);
+    font-size: var(--typography-font-size-sm);
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.onboarding-tooltip__brand {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border-radius: var(--radius-md);
+    background: var(--color-action-primary);
+    color: var(--color-text-inverted);
+    font-size: var(--typography-font-size-sm);
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.onboarding-tooltip--welcome .onboarding-tooltip__header { padding: 38px 44px 0; }
+.onboarding-tooltip--welcome .onboarding-tooltip__title { margin-right: 44px; margin-left: 44px; font-size: var(--onboarding-title-hero); }
+.onboarding-tooltip--welcome .onboarding-tooltip__content { padding-right: 44px; padding-left: 44px; }
+.onboarding-tooltip--welcome .onboarding-tooltip__footer { margin-right: 44px; margin-left: 44px; }
+.onboarding-tooltip--theme .onboarding-tooltip__header { padding: 38px 40px 0; }
+.onboarding-tooltip--theme .onboarding-tooltip__title { margin: 14px 40px 0; font-size: var(--onboarding-title-hero); }
+.onboarding-tooltip--theme .onboarding-tooltip__content { padding: 8px 40px 24px; }
+.onboarding-tooltip--theme .onboarding-tooltip__footer { margin: 0 40px; }
+.onboarding-tooltip--invoker .onboarding-tooltip__header { padding: 36px 36px 0; }
+.onboarding-tooltip--invoker .onboarding-tooltip__title { margin: 14px 36px 0; font-size: var(--onboarding-title); }
+.onboarding-tooltip--invoker .onboarding-tooltip__content { padding: 10px 36px 20px; }
+.onboarding-tooltip--invoker .onboarding-tooltip__footer { margin: 0 36px; }
+
+.onboarding-tooltip__header-end { display: flex; align-items: center; gap: 6px; flex: none; }
+.onboarding-tooltip__counter,
+.onboarding-tooltip__note { min-width: 0; color: var(--color-text-secondary); font-size: var(--typography-font-size-sm); line-height: 1.5; }
+.onboarding-tooltip__note code { color: var(--color-text-primary); font-family: var(--typography-font-family-mono); }
+.onboarding-tooltip__note kbd { display: inline-flex; min-width: 22px; height: 20px; align-items: center; justify-content: center; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); padding: 0 5px; background: var(--color-background-elevated); color: var(--color-text-primary); font: 11px var(--typography-font-family-mono); box-shadow: 0 1px 0 color-mix(in srgb, var(--color-border-strong) 55%, transparent); }
+.onboarding-tooltip__title { margin: 14px 28px 0; font-size: var(--onboarding-title); font-weight: 600; line-height: 1.3; }
+.onboarding-tooltip__content { min-height: 0; overflow-y: auto; padding: 14px 28px 24px; color: var(--color-text-secondary); font-size: var(--typography-font-size-md); line-height: 1.5; overscroll-behavior: contain; }
+
+.onboarding-tooltip__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 72px;
+    margin: 0 28px;
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+.onboarding-tooltip__actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.onboarding-tooltip__actions > button,
+.onboarding-license__actions > button { min-height: 40px; font-family: var(--typography-font-family-body); }
+
+/* Joyride appends an inline opacity transition after merged step styles. */
+.react-joyride__spotlight { transition: none !important; }
+
+@media (max-width: 900px) {
+    .onboarding-tooltip { width: min(520px, calc(100vw - 32px)); }
+    .onboarding-tooltip__title { font-size: var(--onboarding-title); }
+    .onboarding-tooltip__header { padding-top: 18px; }
+}
+
+@media (max-width: 600px) {
+    .onboarding-tooltip { width: calc(100vw - 24px); }
+    .onboarding-tooltip__header,
+    .onboarding-tooltip__content { padding-left: 18px; padding-right: 18px; }
+    .onboarding-tooltip__title { margin-left: 18px; margin-right: 18px; }
+    .onboarding-tooltip__footer { align-items: stretch; flex-direction: column; gap: 10px; margin: 0 18px; padding: 12px 0; }
+    .onboarding-tooltip__actions { width: 100%; justify-content: flex-end; }
+    .onboarding-tooltip--welcome .onboarding-tooltip__header,
+    .onboarding-tooltip--welcome .onboarding-tooltip__content { padding-right: 18px; padding-left: 18px; }
+    .onboarding-tooltip--welcome .onboarding-tooltip__title,
+    .onboarding-tooltip--welcome .onboarding-tooltip__footer { margin-right: 18px; margin-left: 18px; }
+    .onboarding-tooltip--theme .onboarding-tooltip__header,
+    .onboarding-tooltip--theme .onboarding-tooltip__content { padding-right: 18px; padding-left: 18px; }
+    .onboarding-tooltip--theme .onboarding-tooltip__title,
+    .onboarding-tooltip--theme .onboarding-tooltip__footer { margin-right: 18px; margin-left: 18px; }
+}
+.onboarding-backdrop {
+    position: fixed;
+    box-sizing: border-box;
+    pointer-events: none;
+    /* z-index set from ONBOARDING_Z_INDEX (model/types.ts) */
+}
+
+/*
+ * While the connector form is docked on the right, the tooltip narrows and slides
+ * into the space that is left. The transform goes on the tooltip, not the floater
+ * Joyride positions with inline styles — touching that fights the library.
+ */
+html.onboarding-side-open {
+    /* Defined here, on the common ancestor, so the panel and the tooltip work from
+       one number instead of each hardcoding its own half of the layout. */
+    --onboarding-side-width: 620px;
+}
+
+html.onboarding-side-open .onboarding-tooltip {
+    width: min(760px, calc(100vw - var(--onboarding-side-width) - 72px));
+    /* Matches the docked panel, which publishes its own height (see
+       useSyncTourDialogHeight). A floor rather than a fixed height so a long
+       invoker table is never forced to scroll to fit the form beside it. */
+    min-height: var(--onboarding-side-height, auto);
+    transform: translateX(calc(var(--onboarding-side-width) / -2));
+    transition: transform .2s ease, width .2s ease;
+}
+
+/* Absorb the slack from that floor, so the footer stays on the matched bottom edge
+   instead of sitting halfway up with a gap beneath it. */
+html.onboarding-side-open .onboarding-tooltip__content {
+    flex: 1 1 auto;
+}
+
+/* No room for both: the panel goes full-width and the tooltip stands down. */
+@media (max-width: 1180px) {
+    html.onboarding-side-open .onboarding-tooltip,
+    html.onboarding-side-open .react-joyride__spotlight,
+    html.onboarding-side-open .onboarding-backdrop {
+        display: none;
+    }
+}
+
+html.onboarding-tour-active,
+html.onboarding-tour-active body {
+    overflow: hidden;
+    scrollbar-gutter: stable;
+}
+
+/*
+ * antd portals its overlays well below the tour (message 2010, notification 2050,
+ * tooltip 2070, modal 1000), so while the tour runs a toast would be hidden behind
+ * the backdrop, a tooltip on a step's own controls would never be seen at all, and
+ * — worse — the invoker "replace this file?" confirm would be invisible, making the
+ * tour look frozen. Lift them over the tour for as long as it is running. MUI's
+ * Modal (1300) and Tooltip are covered too, since the primitives swap kit.
+ */
+/* !important because these z-indexes come from the kit's own CSS-in-JS, whose
+   injection order relative to this file is not something we control; antd offers
+   no zIndex escape hatch on message.config in v6. */
+html.onboarding-tour-active :is(.ant-message, .ant-notification, .ant-tooltip, .MuiTooltip-popper) {
+    z-index: var(--onboarding-z-overlay) !important;
+}
+
+html.onboarding-tour-active :is(.ant-modal-mask, .ant-modal-wrap, .MuiModal-root) {
+    z-index: var(--onboarding-z-overlay) !important;
+}

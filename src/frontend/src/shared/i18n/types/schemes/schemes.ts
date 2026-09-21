@@ -140,6 +140,8 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 ldapCheck: string
                 workflow: string
                 help: string
+                onboarding: string
+                workflowTutorial: string
             }
             footer: {
                 select: string

@@ -1,0 +1,152 @@
+/*
+ * Docked clear of AppFooter (12px padding either side of a caption line, plus its
+ * border ~= 45px), so the pill and the panel never sit on top of the copyright.
+ */
+.onboarding-checklist-pill,
+.onboarding-checklist {
+	--onboarding-dock-bottom: 64px;
+}
+
+.onboarding-checklist-pill {
+	position: fixed;
+	right: 20px;
+	bottom: var(--onboarding-dock-bottom);
+	/* z-index set from ONBOARDING_Z_INDEX (model/types.ts) */
+	font-family: var(--typography-font-family-body);
+}
+.onboarding-checklist-pill > button {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	border-radius: 999px;
+}
+.onboarding-checklist-pill__progress {
+	width: 42px;
+	height: 4px;
+	overflow: hidden;
+	border-radius: 999px;
+	background: var(--color-border-subtle);
+}
+.onboarding-checklist-pill i,
+.onboarding-checklist__progress i {
+	display: block;
+	height: 100%;
+	background: var(--color-action-primary);
+}
+.onboarding-checklist-pill.is-paused {
+	outline: 2px solid var(--color-action-primary);
+}
+.onboarding-checklist {
+	position: fixed;
+	right: 20px;
+	bottom: var(--onboarding-dock-bottom);
+	/* z-index set from ONBOARDING_Z_INDEX (model/types.ts) */
+	width: min(360px, calc(100vw - 40px));
+	max-height: calc(100vh - var(--onboarding-dock-bottom) - 20px);
+	overflow: auto;
+	overscroll-behavior: contain;
+	border: 1px solid var(--color-border-subtle);
+	border-radius: var(--radius-lg);
+	background: var(--color-background-surface);
+	color: var(--color-text-primary);
+	box-shadow: var(--shadow-lg);
+	font-family: var(--typography-font-family-body);
+}
+.onboarding-checklist__header {
+	padding: 16px 18px;
+}
+.onboarding-checklist__header > button {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	justify-content: space-between;
+	text-align: left;
+}
+.onboarding-checklist__header > button:hover,
+.onboarding-checklist__header > button:active {
+	background: transparent !important;
+}
+.onboarding-checklist__header > button > span:first-child,
+.onboarding-checklist__header .custom-btn-content > span:first-child,
+.onboarding-checklist__header .button-content > span:first-child,
+.onboarding-checklist__item > span:last-child {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+.onboarding-checklist small {
+	color: var(--color-text-secondary);
+}
+.onboarding-checklist__progress {
+	height: 4px;
+	background: var(--color-border-subtle);
+}
+.onboarding-checklist__items {
+	padding: 8px 0;
+}
+.onboarding-checklist__item {
+	display: grid;
+	grid-template-columns: 26px 1fr;
+	gap: 8px;
+	padding: 12px 18px;
+	opacity: 0.55;
+}
+.onboarding-checklist__item.is-current {
+	border-left: 3px solid var(--color-action-primary);
+	padding-left: 15px;
+	background: color-mix(in srgb, var(--color-action-primary) 7%, transparent);
+	opacity: 1;
+}
+.onboarding-checklist__item.is-done {
+	opacity: 1;
+}
+.onboarding-checklist__item.is-done .onboarding-checklist__state {
+	background: var(--color-status-success-fg);
+	color: var(--color-text-inverted);
+}
+.onboarding-checklist__state {
+	display: grid;
+	width: 20px;
+	height: 20px;
+	place-items: center;
+	border-radius: 50%;
+	color: var(--color-text-secondary);
+}
+.onboarding-checklist__item.is-current .onboarding-checklist__state {
+	color: var(--color-action-primary);
+}
+.onboarding-checklist__item.is-current.is-done .onboarding-checklist__state {
+	color: var(--color-text-inverted);
+}
+.onboarding-checklist__item:not(.is-current):not(.is-done)
+	.onboarding-checklist__state {
+	border: 1px solid var(--color-border-strong);
+}
+.onboarding-checklist footer {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	justify-content: space-between;
+	border-top: 1px solid var(--color-border-subtle);
+	padding: 12px 18px;
+}
+@media (max-width: 600px) {
+	.onboarding-checklist,
+	.onboarding-checklist-pill {
+		right: 12px;
+	}
+	.onboarding-checklist {
+		width: calc(100vw - 24px);
+		max-height: calc(100vh - var(--onboarding-dock-bottom) - 12px);
+	}
+	.onboarding-checklist-pill {
+		max-width: calc(100vw - 24px);
+	}
+	.onboarding-checklist__item {
+		padding-top: 9px;
+		padding-bottom: 9px;
+	}
+}
+.onboarding-checklist__footer-actions { display: flex; align-items: center; gap: 8px; }
+.onboarding-checklist__dismiss { color: var(--color-text-secondary); }
+.onboarding-checklist__restart { color: var(--color-action-primary); }

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef } from 'react';
 import { UNSAFE_NavigationContext } from 'react-router-dom';
 import type { Navigator } from 'react-router-dom';
+import { isUnsavedChangesGuardSuppressed } from './unsavedChangesGuard';
 
 export function useUnsavedChangesGuard(when: boolean, message: string): void {
     const { navigator } = useContext(UNSAFE_NavigationContext);
@@ -24,12 +25,15 @@ export function useUnsavedChangesGuard(when: boolean, message: string): void {
         const originalPush = target.push;
         const originalReplace = target.replace;
 
+        // A caller that owns the change itself can opt out — see unsavedChangesGuard.
+        const shouldAsk = () => whenRef.current && !isUnsavedChangesGuardSuppressed();
+
         target.push = (to, state, opts) => {
-            if (whenRef.current && !window.confirm(messageRef.current)) return;
+            if (shouldAsk() && !window.confirm(messageRef.current)) return;
             originalPush.call(target, to, state, opts);
         };
         target.replace = (to, state, opts) => {
-            if (whenRef.current && !window.confirm(messageRef.current)) return;
+            if (shouldAsk() && !window.confirm(messageRef.current)) return;
             originalReplace.call(target, to, state, opts);
         };
 
