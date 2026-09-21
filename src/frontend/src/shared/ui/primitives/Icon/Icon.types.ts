@@ -66,6 +66,8 @@ export type IconName =
     | 'if'
     | 'loop'
     | 'circle'
+    | 'git'
+    | 'globe'
 
 export type IconColor =
     | 'default'
