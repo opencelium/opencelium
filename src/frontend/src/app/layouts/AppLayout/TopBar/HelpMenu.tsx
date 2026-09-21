@@ -8,6 +8,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useIsAdmin } from '@features/auth/useIsAdmin'
 import { useDashboardTourStore } from '@features/onboarding/dashboard-tour/model/dashboardTour.store'
+import { ONBOARDING_RESTART_EVENT } from '@features/onboarding/model/types'
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types'
 import './helpMenu.css'
 
@@ -15,11 +16,12 @@ const DOCS_URL = 'https://docs.opencelium.io/en/prod/'
 const DASHBOARD_ROUTE = '/'
 
 /**
- * The top bar's help affordance: the manual, and a replay of the dashboard tour.
+ * The top bar's help affordance: the manual, and a replay of the onboarding
+ * and dashboard tours.
  *
- * Controlled `open` rather than antd's own trigger handling, because both entries
- * take the user somewhere — a popover left standing would sit over the tour it
- * just started.
+ * Controlled `open` rather than antd's own trigger handling, because every
+ * entry takes the user somewhere — a popover left standing would sit over the
+ * tour it just started.
  */
 export function HelpMenu() {
     const { t: tCommon } = useI18n('common')
@@ -32,9 +34,17 @@ export function HelpMenu() {
         window.open(DOCS_URL, '_blank', 'noopener,noreferrer')
     }
 
+    // Same order as the palette's `help onboarding`: home first, so the tour finds
+    // its anchors on the page rather than resolving against the previous route.
+    const startOnboardingTour = () => {
+        setIsOpen(false)
+        void navigate(DASHBOARD_ROUTE)
+        window.dispatchEvent(new Event(ONBOARDING_RESTART_EVENT))
+    }
+
     // Same order as the palette's `help dashboard`: home first, so the tour finds
     // its anchors on the page rather than resolving against the previous route.
-    const startTour = () => {
+    const startDashboardTour = () => {
         setIsOpen(false)
         void navigate(DASHBOARD_ROUTE)
         useDashboardTourStore.getState().request()
@@ -58,15 +68,23 @@ export function HelpMenu() {
                         onClick={openDocs}
                         testId="topbar-docs"
                     />
-                    {/* The tour itself is admin-only, so for anyone else this entry
-                        would open a menu item that quietly does nothing. */}
+                    {/* Both tours are admin-only, so for anyone else these entries
+                        would open menu items that quietly do nothing. */}
                     {isAdmin && (
-                        <MenuEntry
-                            icon="play"
-                            label={tCommon('topbar.startTour')}
-                            onClick={startTour}
-                            testId="topbar-start-tour"
-                        />
+                        <>
+                            <MenuEntry
+                                icon="mouse"
+                                label={tCommon('topbar.startOnboardingTour')}
+                                onClick={startOnboardingTour}
+                                testId="topbar-start-onboarding-tour"
+                            />
+                            <MenuEntry
+                                icon="report-analytics"
+                                label={tCommon('topbar.startDashboardTour')}
+                                onClick={startDashboardTour}
+                                testId="topbar-start-dashboard-tour"
+                            />
+                        </>
                     )}
                 </div>
             }
