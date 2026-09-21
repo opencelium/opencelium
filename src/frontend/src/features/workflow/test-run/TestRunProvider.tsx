@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { message } from 'antd';
 import type { IMessage } from '@stomp/stompjs';
 import { useSocket } from '@shared/api/socket/useSocket';
@@ -24,7 +24,7 @@ import {
 	type TestRunResult,
 } from './TestRunContext';
 import { clearActiveTestRun, getActiveTestRun, saveActiveTestRun } from './testRunStorage';
-import { handleExecutionLogFrame } from './executionLogFrame';
+import { handleExecutionLogFrame, traceExecutionLog } from './executionLogFrame';
 import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
 import {createId} from "@shared/lib/createId.ts";
 import { EMPTY_LIVE_GRAPH_STATUS, failPendingGraphStatus, reduceLiveGraphStatus, type LiveGraphStatus } from './liveGraphStatus';
@@ -32,6 +32,7 @@ import { PlaybackQueue, type ApplyLogOpts } from './playbackQueue';
 import { getNextStep, type StepMeta } from './playbackStep';
 import { BASE_DOT_TRAVEL_MS, DEFAULT_ANIMATION_SPEED, clampAnimationSpeed } from './animationSpeed';
 import { notifyError } from '@shared/ui/feedback/notifyError';
+import { getSimulatedTestRun, subscribeSimulatedTestRun, type SimulatedTestRunFactory } from './simulatedTestRun';
 
 const TIMEOUT_TO_COLLECT_LOGS = 3000;
 
@@ -107,6 +108,14 @@ const EMPTY_LOOP_ANCESTORS = new Map<string, string[]>();
 
 export function TestRunProvider({ connectionId, connectionTitle = '', buildTestPayload, onResolveStartError, loopAncestorsByIndexPath = EMPTY_LOOP_ANCESTORS, children }: Props) {
 	const { client, status } = useSocket();
+	// A registered stand-in for the backend half of a run (see simulatedTestRun.ts).
+	// Subscribed rather than read once: the tutorial registers it before navigating
+	// here, but a dismissal has to put the real start button back without a reload.
+	const simulatedFactory = useSyncExternalStore(subscribeSimulatedTestRun, getSimulatedTestRun);
+	const isSimulated = simulatedFactory !== null;
+	// Stops the stand-in mid-script and discards the rest — set for the duration of a
+	// simulated run, null otherwise, so it doubles as "is this run a simulated one".
+	const simulatedStopRef = useRef<(() => void) | null>(null);
 	const { t: tEntities } = useI18n('entities');
 	const confirm = useConfirm();
 	// Read from a ref inside the feed/snapshot callbacks so editing the title
@@ -400,6 +409,11 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const finishBackend = useCallback(() => {
 		unsubscribeRef.current?.();
 		unsubscribeRef.current = null;
+		// The stand-in's own end-of-run line is what usually gets us here, so its
+		// script is already exhausted — but a stop arrives mid-script, and an
+		// interval nobody cancels would keep feeding a finished run.
+		simulatedStopRef.current?.();
+		simulatedStopRef.current = null;
 		if (channelIdRef.current) clearActiveTestRun(channelIdRef.current);
 		channelIdRef.current = null;
 		schedulerIdRef.current = null;
@@ -563,7 +577,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	// an effect because it touches the external STOMP client. Orphaned runs are
 	// exempt: their backend run outlives this page session, so we keep the stop
 	// button while the socket (re)connects.
-	if (status !== 'connected' && phase !== 'idle' && !isOrphaned) {
+	if (status !== 'connected' && phase !== 'idle' && !isOrphaned && !isSimulated) {
 		setPhase('idle');
 		// The run died with the connection — drop the unplayed playback tail (it
 		// no longer reflects anything verifiable) and mark in-flight rows failed.
@@ -721,7 +735,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		handleRunningJobs,
 	);
 	useEffect(() => {
-		if (status !== 'connected' || phase !== 'idle') return;
+		if (status !== 'connected' || phase !== 'idle' || isSimulated) return;
 		let cancelled = false;
 		void (async () => {
 			const jobs = await apiExecutor({
@@ -737,22 +751,15 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		return () => {
 			cancelled = true;
 		};
-	}, [status, phase]);
+	}, [status, phase, isSimulated]);
 
-	const startTest = useCallback(async () => {
-		if (phase !== 'idle' || !client || status !== 'connected') return;
-		// Enforce the single-test-per-connection rule (the button is also disabled,
-		// this guards against a race where a test for this connection started moments ago).
-		if (isConflictingTestRunning) {
-			notifyError(tEntities('connection.test.otherTestRunning'));
-			return;
-		}
-		const payload = buildTestPayload();
-		if (!payload) return;
-
-		const channelId = connectionId || createId();
-		channelIdRef.current = channelId;
-		const startedAt = Date.now();
+	/**
+	 * Everything a starting run clears, shared by the real and the simulated path:
+	 * the unplayed playback tail, both trees, the previous outcome and the pending
+	 * error reveal. Leaves the transport and the stored resume record alone — those
+	 * differ between the two paths and are each caller's own business.
+	 */
+	const resetForNewRun = useCallback((startedAt: number) => {
 		playbackRef.current?.clear();
 		resetPauseState();
 		backendDoneRef.current = false;
@@ -775,6 +782,51 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		setRevealPending(false);
 		startTimeRef.current = startedAt;
 		setPhase('starting');
+	}, [resetPauseState, updateLiveGraphStatus]);
+
+	/**
+	 * A run played from the registered stand-in (see simulatedTestRun.ts). Separate
+	 * from startTest rather than a branch inside it: it shares none of that path's
+	 * preconditions — no transport, no channel to subscribe to, no scheduler slot to
+	 * contend for — and nothing it starts is resumable, so there is no record to save.
+	 */
+	const startSimulatedTest = useCallback((factory: SimulatedTestRunFactory) => {
+		const payload = buildTestPayload();
+		if (!payload) return;
+		// Asked before anything is reset, so a stand-in that declines this graph
+		// leaves the previous run's logs on screen rather than blanking them.
+		const simulated = factory(payload);
+		if (!simulated) return;
+		channelIdRef.current = null;
+		resetForNewRun(Date.now());
+		simulatedStopRef.current = simulated.start((log) => {
+			traceExecutionLog(log);
+			handleSocketLog(log);
+		});
+		setPhase('running');
+	}, [buildTestPayload, resetForNewRun, handleSocketLog]);
+
+	const startTest = useCallback(async () => {
+		if (phase !== 'idle') return;
+		if (simulatedFactory) {
+			startSimulatedTest(simulatedFactory);
+			return;
+		}
+		if (!client || status !== 'connected') return;
+		// Enforce the single-test-per-connection rule (the button is also disabled,
+		// this guards against a race where a test for this connection started moments ago).
+		if (isConflictingTestRunning) {
+			notifyError(tEntities('connection.test.otherTestRunning'));
+			return;
+		}
+		const payload = buildTestPayload();
+		if (!payload) return;
+
+		const channelId = connectionId || createId();
+		channelIdRef.current = channelId;
+		const startedAt = Date.now();
+		resetForNewRun(startedAt);
+
 		// Persist before the run is triggered so a page reload mid-test can still
 		// detect the active run. The schedulerId is filled in once the POST returns.
 		saveActiveTestRun({ channelId, schedulerId: null, startedAt });
@@ -801,10 +853,22 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			notifyError(specificMessage ?? tEntities('connection.test.startFailed'));
 			finishRunImmediately();
 		}
-	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRunImmediately, tEntities, onResolveStartError, resetPauseState, updateLiveGraphStatus]);
+	}, [phase, client, status, simulatedFactory, startSimulatedTest, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRunImmediately, tEntities, onResolveStartError, resetForNewRun]);
 
 	const stopTest = useCallback(async () => {
 		if (phase !== 'running' && phase !== 'starting') return;
+		// A simulated run has no scheduler to terminate, so stopping it is purely
+		// local: silence the stand-in (finishBackend does that), then snap the
+		// animation to what it had actually played, exactly as the real path ends.
+		if (simulatedStopRef.current) {
+			setPhase('stopping');
+			message.info(tEntities('connection.test.terminated'));
+			settleResult({ kind: 'stopped' });
+			finishBackend();
+			resetPauseState();
+			playbackRef.current?.flush();
+			return;
+		}
 		const schedulerId = schedulerIdRef.current;
 		setPhase('stopping');
 		if (schedulerId != null) {
@@ -882,10 +946,18 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		if (channelIdRef.current) clearActiveTestRun(channelIdRef.current);
 	}, []);
 
+	// Leaving the page unmounts the provider; a stand-in driving itself on an
+	// interval would otherwise keep emitting into a torn-down tree.
+	useEffect(() => () => {
+		simulatedStopRef.current?.();
+		simulatedStopRef.current = null;
+	}, []);
+
 	// The leave guard protects a run that is still executing on the BACKEND.
 	// Once the backend is done, only the paced playback is still going — leaving
-	// then needs no confirmation and nothing to terminate.
-	useTestRunLeaveGuard(phase !== 'idle' && !isBackendDone, confirmLeaveDuringTest, terminateOnUnload);
+	// then needs no confirmation and nothing to terminate. A simulated run has no
+	// backend at all, so there is never anything to confirm or terminate for it.
+	useTestRunLeaveGuard(phase !== 'idle' && !isBackendDone && !isSimulated, confirmLeaveDuringTest, terminateOnUnload);
 
 	// A test for this connection running elsewhere blocks us only when we have no
 	// run of our own.
@@ -896,6 +968,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const value = useMemo<TestRunContextValue>(
 		() => ({
 			socketStatus: status,
+			isSimulated,
 			phase,
 			logTree,
 			liveGraphStatus,
@@ -924,7 +997,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			skipToLive,
 			clearLogs,
 		}),
-		[status, phase, logTree, liveGraphStatus, loopAncestorsByIndexPath, currentStep, result, isOrphaned, isOtherTestRunning, isBackendDone, isPlaybackBehind, isLiveAnimation, setLiveAnimation, animationSpeed, setAnimationSpeed, isPaused, pauseAnimation, resumeAnimation, stepForward, skipToNextIteration, skipToIteration, pauseRevealNonce, errorRevealNonce, revealPending, startTest, stopTest, skipToLive, clearLogs],
+		[status, isSimulated, phase, logTree, liveGraphStatus, loopAncestorsByIndexPath, currentStep, result, isOrphaned, isOtherTestRunning, isBackendDone, isPlaybackBehind, isLiveAnimation, setLiveAnimation, animationSpeed, setAnimationSpeed, isPaused, pauseAnimation, resumeAnimation, stepForward, skipToNextIteration, skipToIteration, pauseRevealNonce, errorRevealNonce, revealPending, startTest, stopTest, skipToLive, clearLogs],
 	);
 
 	return <TestRunContext.Provider value={value}>{children}</TestRunContext.Provider>;

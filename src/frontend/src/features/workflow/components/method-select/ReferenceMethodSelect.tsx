@@ -18,6 +18,9 @@ import '../request-editor/body-editor/bodyLegacy.css';
  *  behind whatever opened it. */
 const DEFAULT_POPUP_Z_INDEX = 13010;
 
+/** Also matched by the workflow tutorial's spotlight — keep the two in step. */
+export const REFERENCE_POPUP_CLASS = 'referenceMethodPopup';
+
 type Props = {
 	methods: MethodWithId[];
 	selectedMethod?: MethodWithId;
@@ -33,6 +36,12 @@ type Props = {
 	/** Fires on every pick, including of the option already selected, which
 	 *  `onChange` cannot report. */
 	onSelect?: (methodId: string) => void;
+	/**
+	 * Focus this picker and open its list. Both, because a focused combobox looks no
+	 * different from an idle one — on its own the focus is invisible, and it is the
+	 * open list that shows the section is ready to be typed into.
+	 */
+	autoFocus?: boolean;
 };
 
 /**
@@ -45,7 +54,7 @@ type Props = {
  */
 
 export function ReferenceMethodSelect({ methods, selectedMethod, methodId,
-	popupZIndex, leadingOption, testId, disabled, onChange, onSelect }: Props) {
+	popupZIndex, leadingOption, testId, disabled, onChange, onSelect, autoFocus }: Props) {
 	const { t } = useI18n('workflow');
 	// Derived here rather than taken as a prop: it is a fact about the list this
 	// select was handed, and every caller would compute it the same way.
@@ -57,6 +66,8 @@ export function ReferenceMethodSelect({ methods, selectedMethod, methodId,
 		<div className='selectCopyHost'>
 			<CopyButton value={selectedMethod?.label || selectedMethod?.name || ''} className='selectCopyButton' />
 			<Select
+				autoFocus={autoFocus}
+				defaultOpen={autoFocus}
 				data-testid={testId}
 				disabled={disabled}
 				placeholder={t('placeholders.selectMethod')}
@@ -103,6 +114,9 @@ export function ReferenceMethodSelect({ methods, selectedMethod, methodId,
 						placement='right' zIndex={tooltipZ}>{row}</Tooltip> : row;
 				}}
 				getPopupContainer={() => document.body}
+				// Portalled out of the generator, so it needs its own hook to be
+				// found again — the tour has to undim the list along with the row.
+				classNames={{ popup: { root: REFERENCE_POPUP_CLASS } }}
 				popupMatchSelectWidth={420}
 				styles={{ popup: { root: { zIndex: popupZ } } }}
 			/>

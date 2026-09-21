@@ -1,10 +1,12 @@
-import { CommandNode } from './types';
+import type { CommandNode } from './types';
 // Imports below are only used by the disabled "login" command — re-enable with it.
 // import {MockAuthStrategy} from "@features/auth/strategies/MockAuthStrategy.ts";
 // import {authActions} from "@entities/auth/model/authSlice.ts";
 // import {store} from "@app/store/store.ts";
 import {EntityWizard} from "@/engine/entity/runtime/EntityWizard.tsx";
 import {CommandReferenceDialog} from "@widgets/CommandPalette/CommandReferenceDialog.tsx";
+import { ONBOARDING_RESTART_EVENT } from '@features/onboarding/model/types'
+import { useWorkflowTutorialStore } from '@features/onboarding/workflow-tutorial/model/workflowTutorial.store'
 
 export const systemCommands: CommandNode<any>[] = [
     // "login" command (role impersonation) is disabled — commented out so it no
@@ -95,5 +97,31 @@ export const systemCommands: CommandNode<any>[] = [
         // Same size/position as the entity form dialogs (Dialog primitive's
         // width 1000 / top 18 — see useEntityUpdateOpener, GenericEntityList).
         execute: (_, ctx) => ctx.openModal(<CommandReferenceDialog />, { width: 1000, top: 18 }),
+        children: [
+            {
+                type: 'literal',
+                value: 'onboarding',
+                group: 'general',
+                icon: 'help',
+                description: 'commandPalette.descriptions.onboarding',
+                execute: (_, ctx) => {
+                    ctx.setInputValue('')
+                    ctx.navigate('/')
+                    window.dispatchEvent(new Event(ONBOARDING_RESTART_EVENT))
+                },
+            },
+            {
+                type: 'literal',
+                value: 'workflow',
+                group: 'general',
+                icon: 'workflow',
+                description: 'commandPalette.descriptions.workflowTutorial',
+                execute: (_, ctx) => {
+                    ctx.setInputValue('')
+                    useWorkflowTutorialStore.getState().request()
+                    ctx.navigate('/workflow/create')
+                },
+            },
+        ],
     },
 ];

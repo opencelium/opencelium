@@ -41,8 +41,8 @@ import {
 
 import type { IconComponent } from './Icon.types';
 import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
-import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdPause, MdStop, MdSkipNext, MdFastForward, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff, MdCallSplit, MdLoop} from "react-icons/md";
-import {TbWebhook, TbReportAnalytics, TbLink, TbUnlink} from "react-icons/tb";
+import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdPause, MdStop, MdSkipNext, MdFastForward, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff, MdCallSplit, MdLoop, MdRadioButtonUnchecked} from "react-icons/md";
+import {TbWebhook, TbReportAnalytics, TbLink, TbUnlink, TbMouse} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
 import {GoArrowSwitch, GoWorkflow} from "react-icons/go";
 import { Waypoints } from "lucide-react";
@@ -71,6 +71,7 @@ const iconMap = {
     stop: MdStop,
     'step-forward': MdSkipNext,
     'skip-forward': MdFastForward,
+    mouse: TbMouse,
     download: DownloadOutlined,
     upload: UploadOutlined,
     key: KeyOutlined,
@@ -112,6 +113,7 @@ const iconMap = {
     redo: RedoOutlined,
     if: MdCallSplit,
     loop: MdLoop,
+    circle: MdRadioButtonUnchecked,
 };
 
 export const AntIcon: IconComponent = ({

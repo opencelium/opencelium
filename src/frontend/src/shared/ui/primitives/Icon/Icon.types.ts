@@ -23,6 +23,7 @@ export type IconName =
     | 'stop'
     | 'step-forward'
     | 'skip-forward'
+    | 'mouse'
     | 'download'
     | 'upload'
     | 'key'
@@ -64,6 +65,7 @@ export type IconName =
     | 'redo'
     | 'if'
     | 'loop'
+    | 'circle'
 
 export type IconColor =
     | 'default'
