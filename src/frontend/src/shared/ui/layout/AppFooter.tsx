@@ -6,6 +6,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useTheme } from '@shared/theme/hooks/useTheme.tsx';
 import { useAuth } from '@features/auth/useAuth';
 import { useGetAppVersionQuery } from '@entities/updateAssistant/api/updateAssistantApi';
+import { useBreakpoints } from '@app/hooks/useBreakpoints.tsx';
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types';
 
 const OPENCELIUM_URL = 'https://www.opencelium.io/';
@@ -27,6 +28,7 @@ export const AppFooter = ({ hasBorder = true }: AppFooterProps) => {
     const { t } = useI18n('common');
     const { theme } = useTheme();
     const { isAuthenticated } = useAuth();
+    const { isMobile } = useBreakpoints();
     const { data: appVersion } = useGetAppVersionQuery(undefined, { skip: !isAuthenticated });
     const year = new Date().getFullYear();
     const version = appVersion?.version?.trim() || FALLBACK_APP_VERSION;
@@ -36,6 +38,45 @@ export const AppFooter = ({ hasBorder = true }: AppFooterProps) => {
         { icon: 'git', url: GIT_URL, label: t('footer.gitLink'), testId: 'footer-git-link' },
         { icon: 'globe', url: OPENCELIUM_URL, label: t('footer.landingPageLink'), testId: 'footer-landing-page-link' },
     ];
+
+    const linkIcons = (
+        <div style={{ display: 'flex', gap: 4 }}>
+            {links.map(({ icon, url, label, testId }) => (
+                <Tooltip key={icon} content={label} zIndex={FOOTER_TOOLTIP_Z_INDEX}>
+                    <IconButton
+                        size="xs"
+                        type="text"
+                        iconProps={{ name: icon, isSubtle: true }}
+                        onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+                        testId={testId}
+                    />
+                </Tooltip>
+            ))}
+        </div>
+    );
+
+    // Mobile drops the "OpenCelium GmbH" link text — there isn't room beside the
+    // icons — and stacks the icons under it instead of right-aligning them, so
+    // neither ever competes for width on a narrow screen.
+    if (isMobile) {
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '12px 16px',
+                    borderTop: hasBorder ? `1px solid ${theme.color.border.default}` : 'none',
+                }}
+            >
+                <Typography variant="caption" isSubtle>
+                    {t('footer.copyrightMobile', { year, version })}
+                </Typography>
+                {linkIcons}
+            </div>
+        );
+    }
 
     return (
         <div
@@ -57,19 +98,7 @@ export const AppFooter = ({ hasBorder = true }: AppFooterProps) => {
                     {' | version {{version}}'}
                 </Trans>
             </Typography>
-            <div style={{ display: 'flex', gap: 4, position: 'absolute', right: 16 }}>
-                {links.map(({ icon, url, label, testId }) => (
-                    <Tooltip key={icon} content={label} zIndex={FOOTER_TOOLTIP_Z_INDEX}>
-                        <IconButton
-                            size="xs"
-                            type="text"
-                            iconProps={{ name: icon, isSubtle: true }}
-                            onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
-                            testId={testId}
-                        />
-                    </Tooltip>
-                ))}
-            </div>
+            <div style={{ position: 'absolute', right: 16 }}>{linkIcons}</div>
         </div>
     );
 };
