@@ -26,7 +26,7 @@ public final class XmlInvokerReader implements InvokerReader {
     public static final int MAX_CONTENT_BYTES = 10 * 1024 * 1024;
 
     /** The classpath location of the schema for the current format. */
-    public static final String SCHEMA_RESOURCE = "/schema/invoker-6.0.xsd";
+    public static final String SCHEMA_RESOURCE = "/invoker-6.0.xsd";
 
     private final InvokerV6Reader v6Reader;
     private final LegacyInvokerReader legacyReader;
