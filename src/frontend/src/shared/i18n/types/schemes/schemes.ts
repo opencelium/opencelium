@@ -174,6 +174,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         }
         footer: {
             copyright: string
+            docsLink: string
+            gitLink: string
+            landingPageLink: string
         }
         topbar: {
             switchToGerman: string

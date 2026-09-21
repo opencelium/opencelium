@@ -91,7 +91,10 @@
     }
   },
   "footer": {
-    "copyright": "© Copyright {{year}} <1>OpenCelium GmbH</1> | Version {{version}}"
+    "copyright": "© Copyright {{year}} <1>OpenCelium GmbH</1> | Version {{version}}",
+    "docsLink": "Dokumentation",
+    "gitLink": "GitHub",
+    "landingPageLink": "OpenCelium Webseite"
   },
   "topbar": {
     "switchToGerman": "Auf Deutsch umschalten",

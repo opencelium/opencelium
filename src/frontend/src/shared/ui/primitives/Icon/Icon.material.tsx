@@ -58,6 +58,7 @@ import {
     CallSplit,
     Loop,
     RadioButtonUnchecked,
+    GitHub,
 } from '@mui/icons-material';
 
 import MouseOutlined from '@mui/icons-material/MouseOutlined';
@@ -124,6 +125,8 @@ const iconMap = {
     if: CallSplit,
     loop: Loop,
     circle: RadioButtonUnchecked,
+    git: GitHub,
+    globe: Public,
 };
 
 export const MaterialIcon: IconComponent = ({
