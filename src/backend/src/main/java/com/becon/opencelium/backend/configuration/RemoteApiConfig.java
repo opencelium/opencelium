@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -30,6 +31,13 @@ public class RemoteApiConfig {
                     request.getHeaders().add("x-access-token", props.token());
                     return execution.execute(request, body);
                 })
+                .build();
+    }
+
+    @Bean("invokerRepositoryRestTemplate")
+    public RestTemplate invokerRepositoryRestTemplate(RestTemplateBuilder builder) {
+        return builder
+                .defaultHeader(HttpHeaders.ACCEPT, "application/vnd.github+json")
                 .build();
     }
 }
