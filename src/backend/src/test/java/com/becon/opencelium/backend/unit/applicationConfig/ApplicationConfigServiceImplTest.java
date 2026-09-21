@@ -21,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -399,6 +401,104 @@ class ApplicationConfigServiceImplTest {
     }
 
     @Test
+    void patchWritesSeparatingSpaceWhenTargetKeyHasNoValueOnDisk(@TempDir Path tempDir) throws IOException {
+        // Regression: the empty scalar's marks collapse to a point right after
+        // the `:`, so the old in-line splice wrote `url:https://…` and the file
+        // stopped parsing. `url: ` (trailing space) is the shipped form.
+        Path target = tempDir.resolve("application.yml");
+        Files.writeString(target, "opencelium:\n"
+                + "  notification:\n"
+                + "    tools:\n"
+                + "      incoming-webhook:\n"
+                + "        url: \n"
+                + "        enabled: true\n", StandardCharsets.UTF_8);
+
+        JsonNode fields = json.readTree("""
+                [ { "path": "opencelium.notification.tools.incoming-webhook.url",
+                    "status": "active", "value": "https://hooks.example.com/abc" } ]
+                """);
+        service(target, tempDir).patch(fields);
+
+        String after = Files.readString(target);
+        assertThat(after).contains("        url: https://hooks.example.com/abc");
+        assertThat(after).doesNotContain("url:https");
+        assertThat(parse(after)).isNotNull();
+    }
+
+    @Test
+    void patchWritesParseableYamlWhenCommentedMailBlockIsActivatedWithCredentials(@TempDir Path tempDir)
+            throws IOException {
+        // The SMTP GUI save flow end to end: uncomment the bundled mail block,
+        // then write username/password into its empty keys.
+        Path target = tempDir.resolve("application.yml");
+        Files.writeString(target, """
+                spring:
+                  application:
+                    name: opencelium
+                #  mail:
+                #    host: smtp.gmail.com
+                #    port: 587
+                #    username:
+                #    password:
+                """, StandardCharsets.UTF_8);
+
+        JsonNode fields = json.readTree("""
+                [ { "path": "spring.mail", "status": "active" },
+                  { "path": "spring.mail.username", "status": "active", "value": "user@example.com" },
+                  { "path": "spring.mail.password", "status": "active", "value": "Test123" } ]
+                """);
+        service(target, tempDir).patch(fields);
+
+        String after = Files.readString(target);
+        assertThat(after).doesNotContain("username:user");
+        assertThat(after).doesNotContain("password:Test123");
+        assertThat(parse(after)).isNotNull();
+        assertThat(leaf(after, "spring", "mail", "username")).isEqualTo("user@example.com");
+        assertThat(leaf(after, "spring", "mail", "password")).isEqualTo("Test123");
+        assertThat(leaf(after, "spring", "mail", "port")).isEqualTo(587);
+        assertThat(leaf(after, "spring", "application", "name")).isEqualTo("opencelium");
+    }
+
+    @Test
+    void patchLeavesFileUntouchedAndThrowsWhenMergeWouldProduceInvalidYaml(@TempDir Path tempDir)
+            throws IOException {
+        // A corrupt application.yml stops the app from booting, which takes the
+        // GUI down with it — so an unparseable merge must never reach disk.
+        Path target = tempDir.resolve("application.yml");
+        String original = """
+                spring:
+                  mail:
+                    host: smtp.gmail.com
+                    username:
+                """;
+        Files.writeString(target, original, StandardCharsets.UTF_8);
+
+        // Exactly what the old splice emitted: no space after the colon, so the
+        // line reads as a bare scalar among sibling keys and the file stops
+        // parsing. The stub stands in for any future splicing defect.
+        YamlConfigWriter corrupting = new YamlConfigWriter() {
+            @Override
+            public String merge(String originalYaml, JsonNode patch) {
+                return "spring:\n  mail:\n    host: smtp.gmail.com\n    username:Test123\n";
+            }
+        };
+        ApplicationConfigServiceImpl service = new ApplicationConfigServiceImpl(
+                new YamlConfigReader(), corrupting,
+                new AtomicFileWriter(tempDir.resolve("backups"), 10), target.toString());
+
+        JsonNode fields = json.readTree("""
+                [ { "path": "spring.mail.username", "status": "active", "value": "Test123" } ]
+                """);
+
+        assertThatThrownBy(() -> service.patch(fields))
+                .isInstanceOf(ApplicationConfigWriteException.class)
+                .hasMessageContaining("Refusing to save")
+                .hasMessageContaining("unchanged");
+
+        assertThat(Files.readString(target)).isEqualTo(original);
+    }
+
+    @Test
     void patchThrowsWhenFieldsIsNotArray(@TempDir Path tempDir) throws IOException {
         Path target = tempDir.resolve("application.yml");
         Files.writeString(target, "key: value\n", StandardCharsets.UTF_8);
@@ -423,5 +523,20 @@ class ApplicationConfigServiceImplTest {
             }
         }
         return null;
+    }
+
+    /** Parses the file the way Spring's config loader would; throws on invalid YAML. */
+    private static Object parse(String yaml) {
+        return new Load(LoadSettings.builder().build()).loadFromString(yaml);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object leaf(String yaml, String... path) {
+        Object current = parse(yaml);
+        for (String segment : path) {
+            assertThat(current).isInstanceOf(java.util.Map.class);
+            current = ((java.util.Map<String, Object>) current).get(segment);
+        }
+        return current;
     }
 }
