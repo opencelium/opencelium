@@ -33,9 +33,6 @@
 	height: 100%;
 	background: var(--color-action-primary);
 }
-.onboarding-checklist-pill.is-paused {
-	outline: 2px solid var(--color-action-primary);
-}
 .onboarding-checklist {
 	position: fixed;
 	right: 20px;

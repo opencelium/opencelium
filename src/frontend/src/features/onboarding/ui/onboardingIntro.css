@@ -103,7 +103,13 @@
     color: var(--color-text-primary);
     font-size: inherit;
 }
-.onboarding-invoker-upload { display: flex; width: 300px; flex-direction: column; gap: 8px; }
+.onboarding-invoker-upload { display: flex; width: 240px; flex-direction: column; gap: 8px; }
+/* The dropzone primitive sizes itself for full-page upload flows; shrink it here
+   so it doesn't dominate a single row in the onboarding options list. */
+.onboarding-invoker-dropzone .ant-upload.ant-upload-drag .ant-upload { padding: 8px; }
+.onboarding-invoker-dropzone .ant-upload-drag-icon { margin-bottom: 2px !important; }
+.onboarding-invoker-dropzone .ant-upload-drag-icon span { font-size: 18px !important; }
+.onboarding-invoker-dropzone .ant-upload-text { margin: 0 !important; font-size: var(--typography-font-size-sm) !important; }
 .onboarding-invoker-upload__status { display: flex; align-items: center; gap: 8px; color: var(--color-text-secondary); font-size: var(--typography-font-size-sm); }
 .onboarding-invoker-options { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
 .onboarding-invoker-options > section { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); padding: 14px 16px; background: var(--color-background-elevated); }

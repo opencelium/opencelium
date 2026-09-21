@@ -9,7 +9,9 @@
         "message": "Ein Invoker mit diesem Dateinamen existiert bereits. Er wird ersetzt. Sind Sie sicher?"
       },
       "success": "Invoker erfolgreich hochgeladen: {{name}}",
-      "error": "Hochladen der Invoker-Datei fehlgeschlagen."
+      "error": "Hochladen der Invoker-Datei fehlgeschlagen.",
+      "invalidType": "Invoker-Dateien müssen das .xml-Format verwenden.",
+      "tooLarge": "Die Invoker-Datei darf 1 GB nicht überschreiten."
     },
     "download": {
       "success": "Invoker heruntergeladen: {{name}}",

@@ -32,6 +32,7 @@ export function FirstInvokerContent({ onCreateManually, onUploaded, onGitDownloa
     const [isUploading, setIsUploading] = useState(false)
     const [result, setResult] = useState<UploadResult | null>(null)
     const [failedFile, setFailedFile] = useState<string | null>(null)
+    const [failReason, setFailReason] = useState<'invalidType' | 'tooLarge' | null>(null)
     const [gitLoading, setGitLoading] = useState(false)
     const advanceTimerRef = useRef<number | null>(null)
 
@@ -42,20 +43,34 @@ export function FirstInvokerContent({ onCreateManually, onUploaded, onGitDownloa
     const handleFile = async (file: File) => {
         setResult(null)
         setFailedFile(null)
-        if (!file.name.toLowerCase().endsWith('.xml')) {
-            setFailedFile(file.name)
-            return
-        }
+        setFailReason(null)
         setIsUploading(true)
         try {
             const uploaded = await uploadInvoker(file, () => confirm({
                 title: tEntities('invoker.list.upload.confirmReplace.title'),
                 message: tEntities('invoker.list.upload.confirmReplace.message'),
             }))
-            if (!uploaded) return
-            message.success(tEntities('invoker.list.upload.success', { name: file.name }))
-            setResult({ fileName: file.name, ...uploaded })
-            advanceTimerRef.current = window.setTimeout(onUploaded, UPLOAD_SUCCESS_ADVANCE_MS)
+            switch (uploaded.status) {
+                case 'uploaded':
+                    message.success(tEntities('invoker.list.upload.success', { name: file.name }))
+                    setResult({ fileName: file.name, ...uploaded })
+                    advanceTimerRef.current = window.setTimeout(onUploaded, UPLOAD_SUCCESS_ADVANCE_MS)
+                    break
+                case 'cancelled':
+                    break
+                case 'invalidType':
+                    setFailedFile(file.name)
+                    setFailReason('invalidType')
+                    break
+                case 'tooLarge':
+                    setFailedFile(file.name)
+                    setFailReason('tooLarge')
+                    break
+                default: {
+                    const _exhaustive: never = uploaded
+                    return _exhaustive
+                }
+            }
         } catch (error) {
             console.error(error)
             notifyError(tEntities('invoker.list.upload.error'))
@@ -75,44 +90,7 @@ export function FirstInvokerContent({ onCreateManually, onUploaded, onGitDownloa
             <div className="onboarding-invoker-options">
                 <section className="is-recommended">
                     <div>
-                        <h3>{t('content.invoker.uploadTitle')} <span className="onboarding-recommended">{t('content.invoker.recommended')}</span></h3>
-                        <p>{t('content.invoker.uploadBody')}</p>
-                    </div>
-                    <div className="onboarding-invoker-upload">
-                        <Dropzone
-                            accept={INVOKER_ACCEPT}
-                            label={t('content.invoker.drop')}
-                            hint={t('content.invoker.fileFormat')}
-                            disabled={isUploading}
-                            onFiles={files => { if (files[0]) void handleFile(files[0]) }}
-                            testId="onboarding-invoker-dropzone"
-                        />
-                        {isUploading && (
-                            <span className="onboarding-invoker-upload__status">
-                                <Loading size="sm" inline /> {t('content.invoker.parsing')}
-                            </span>
-                        )}
-                    </div>
-                </section>
-                {result && (
-                    <Alert
-                        type="success"
-                        showIcon
-                        message={t('content.invoker.fileAdded', { name: result.fileName })}
-                        description={`${resultMeta} · ${t('content.invoker.ready')}`}
-                    />
-                )}
-                {failedFile && (
-                    <Alert
-                        type="error"
-                        showIcon
-                        message={t('content.invoker.fileError', { name: failedFile })}
-                        description={t('content.invoker.chooseAnother')}
-                    />
-                )}
-                <section>
-                    <div>
-                        <h3>{t('content.invoker.gitTitle')}</h3>
+                        <h3>{t('content.invoker.gitTitle')} <span className="onboarding-recommended">{t('content.invoker.recommended')}</span></h3>
                         <p>{t('content.invoker.gitBody')}</p>
                         <code>{GIT_INVOKER_REPO}</code>
                     </div>
@@ -135,6 +113,49 @@ export function FirstInvokerContent({ onCreateManually, onUploaded, onGitDownloa
                         {t('content.invoker.gitAction')}
                     </Button>
                 </section>
+                <section>
+                    <div>
+                        <h3>{t('content.invoker.uploadTitle')}</h3>
+                        <p>{t('content.invoker.uploadBody')}</p>
+                    </div>
+                    <div className="onboarding-invoker-upload">
+                        <Dropzone
+                            accept={INVOKER_ACCEPT}
+                            label={t('content.invoker.drop')}
+                            disabled={isUploading}
+                            onFiles={files => { if (files[0]) void handleFile(files[0]) }}
+                            testId="onboarding-invoker-dropzone"
+                            className="onboarding-invoker-dropzone"
+                        />
+                        {isUploading && (
+                            <span className="onboarding-invoker-upload__status">
+                                <Loading size="sm" inline /> {t('content.invoker.parsing')}
+                            </span>
+                        )}
+                    </div>
+                </section>
+                {result && (
+                    <Alert
+                        type="success"
+                        showIcon
+                        message={t('content.invoker.fileAdded', { name: result.fileName })}
+                        description={`${resultMeta} · ${t('content.invoker.ready')}`}
+                    />
+                )}
+                {failedFile && (
+                    <Alert
+                        type="error"
+                        showIcon
+                        message={t('content.invoker.fileError', { name: failedFile })}
+                        description={
+                            failReason === 'tooLarge'
+                                ? t('content.invoker.tooLarge')
+                                : failReason === 'invalidType'
+                                    ? t('content.invoker.invalidType')
+                                    : t('content.invoker.chooseAnother')
+                        }
+                    />
+                )}
                 <section>
                     <div><h3>{t('content.invoker.manualTitle')}</h3><p>{t('content.invoker.manualBody')}</p></div>
                     <Button type="default" onClick={onCreateManually} testId="onboarding-invoker-manual">{t('content.invoker.manualAction')}</Button>

@@ -25,17 +25,32 @@ export const InvokerUploadButton = forwardRef<InvokerUploadButtonHandle, Invoker
         setIsLoading(true)
         onLoadingChange?.(true, file)
         try {
-            const uploaded = await uploadInvoker(file, () =>
+            const result = await uploadInvoker(file, () =>
                 confirm({
                     title: tEntities('invoker.list.upload.confirmReplace.title'),
                     message: tEntities('invoker.list.upload.confirmReplace.message'),
                 }),
             )
-            if (uploaded) {
-                message.success(tEntities('invoker.list.upload.success', { name: file.name }))
-                onUploadResult?.('success', file, uploaded)
-            } else {
-                onUploadResult?.('cancelled', file)
+            switch (result.status) {
+                case 'uploaded':
+                    message.success(tEntities('invoker.list.upload.success', { name: file.name }))
+                    onUploadResult?.('success', file, result)
+                    break
+                case 'cancelled':
+                    onUploadResult?.('cancelled', file)
+                    break
+                case 'invalidType':
+                    notifyError(tEntities('invoker.list.upload.invalidType'))
+                    onUploadResult?.('error', file)
+                    break
+                case 'tooLarge':
+                    notifyError(tEntities('invoker.list.upload.tooLarge'))
+                    onUploadResult?.('error', file)
+                    break
+                default: {
+                    const _exhaustive: never = result
+                    return _exhaustive
+                }
             }
         } catch (err) {
             console.error(err)
