@@ -92,6 +92,7 @@
   },
   "footer": {
     "copyright": "© Copyright {{year}} <1>OpenCelium GmbH</1> | version {{version}}",
+    "copyrightMobile": "© {{year}} | version {{version}}",
     "docsLink": "Documentation",
     "gitLink": "GitHub",
     "landingPageLink": "OpenCelium website"
