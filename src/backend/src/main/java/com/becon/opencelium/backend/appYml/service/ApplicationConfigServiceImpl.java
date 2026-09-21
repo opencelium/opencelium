@@ -24,6 +24,9 @@ import com.becon.opencelium.backend.exception.ApplicationConfigWriteException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.api.lowlevel.Compose;
+import org.snakeyaml.engine.v2.nodes.Node;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -98,7 +101,31 @@ public class ApplicationConfigServiceImpl implements ApplicationConfigService {
         if (!effective.disablePaths.isEmpty()) {
             merged = writer.commentOut(merged, effective.disablePaths);
         }
+
+        verifyParseable(merged);
+
         fileWriter.write(target, merged);
+    }
+
+    /**
+     * Re-parses the merged text exactly as the Spring config loader would, and
+     * refuses the patch if it no longer forms valid YAML.
+     */
+    private void verifyParseable(String merged) {
+        LoadSettings settings = LoadSettings.builder().build();
+        try {
+            // composeAllFromString is lazy: it parses only as the Iterable is
+            // advanced. The loop below is what performs the parse — without it
+            // this method silently accepts anything.
+            for (Node ignored : new Compose(settings).composeAllFromString(merged)) {
+                // no-op: parsing is the assertion
+            }
+        } catch (Exception e) {
+            throw new ApplicationConfigWriteException(
+                    "Refusing to save: applying this change would produce an invalid "
+                            + "application.yml, so it was not written and the file on disk is "
+                            + "unchanged. " + YamlShadow.describeParseFailure(merged, e), e);
+        }
     }
 
     // ── Patch payload parsing ────────────────────────────────────────────────
