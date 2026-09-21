@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -85,7 +86,8 @@ final class LegacyInvokerReader {
 
         private final Element root;
         private final List<InvokerIssue> issues = new ArrayList<>();
-        private final Map<String, String> operationIds = new LinkedHashMap<>();
+        private final Map<Element, String> operationIds = new IdentityHashMap<>();
+        private final Map<String, String> idsByName = new LinkedHashMap<>();
         private final Set<String> onceNotes = new HashSet<>();
 
         Conversion(Element root) {
@@ -100,7 +102,7 @@ final class LegacyInvokerReader {
             String id = deriveInvokerId(name);
 
             List<Element> operationElements = children(child(root, "operations"), "operation");
-            operationElements.forEach(this::registerOperationId);
+            registerOperationIds(operationElements);
 
             Pagination sharedPagination = child(root, "pagination").map(this::pagination).orElse(null);
             List<ConnectorSetting> settings = convertAll(children(child(root, "requiredData"), "item"), this::setting);
@@ -150,27 +152,61 @@ final class LegacyInvokerReader {
         }
 
 
-        private void registerOperationId(Element element) {
-            String name = attribute(element, "name");
-            if (name == null || name.isBlank()) {
-                issues.add(InvokerIssue.error(location(element), "the operation has no name"));
-                return;
+        /**
+         * Gives every operation an id. 5.x looked operations up by name and ran the first match, so the
+         * first operation with a name keeps the id derived from it. A later operation with the same name,
+         * which 5.x could never run, is given that id suffixed with its method.
+         */
+        private void registerOperationIds(List<Element> elements) {
+            Set<String> used = new HashSet<>();
+            List<Element> repeated = new ArrayList<>();
+            for (Element element : elements) {
+                String name = attribute(element, "name");
+                if (name == null || name.isBlank()) {
+                    issues.add(InvokerIssue.error(location(element), "the operation has no name"));
+                } else if (idsByName.containsKey(name)) {
+                    repeated.add(element);
+                } else {
+                    String id = operationIdFrom(element, name);
+                    if (id == null) {
+                        continue;
+                    }
+                    if (!used.add(id)) {
+                        issues.add(InvokerIssue.error(location(element), "another operation already has the id '" + id + "'"));
+                        continue;
+                    }
+                    idsByName.put(name, id);
+                    operationIds.put(element, id);
+                }
             }
+            for (Element element : repeated) {
+                String name = attribute(element, "name");
+                String method = child(element, "request").flatMap(request -> child(request, "method"))
+                        .map(XmlElements::text).orElse("").toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "");
+                String stem = method.isEmpty() ? idsByName.get(name) : idsByName.get(name) + "-" + method;
+                String id = stem;
+                for (int n = 2; used.contains(id); n++) {
+                    id = stem + "-" + n;
+                }
+                used.add(id);
+                operationIds.put(element, id);
+                issues.add(InvokerIssue.warning(location(element), "another operation is also named '" + name
+                        + "'; 5.x could only run the first of them, so this one was given the id '" + id + "'"));
+            }
+        }
+
+        private @Nullable String operationIdFrom(Element element, String name) {
             String id = name.trim().replaceAll("[^A-Za-z0-9_.\\-]+", "-").replaceAll("^-+|-+$", "");
             if (id.isEmpty()) {
                 issues.add(InvokerIssue.error(location(element),
                         "the operation name '" + name + "' has no letters or digits to derive an operation id from"));
-                return;
+                return null;
             }
             if (!id.equals(name)) {
                 issues.add(InvokerIssue.warning(location(element), "the operation name '" + name
                         + "' is not a valid operation id; it was given the id '" + id + "'"));
             }
-            if (operationIds.containsValue(id)) {
-                issues.add(InvokerIssue.error(location(element), "another operation already has the id '" + id + "'"));
-                return;
-            }
-            operationIds.put(name, id);
+            return id;
         }
 
         // ── settings ─────────────────────────────────────
@@ -180,7 +216,7 @@ final class LegacyInvokerReader {
             ScalarType type = settingType(item);
             String visibility = visibility(item);
             String value = textOrNull(item);
-            if ("private".equals(visibility)) {
+            if (!"private".equals(visibility)) {
                 return attempt(item, () -> new ConnectorSetting(name, type, visibility, value, null));
             }
             if (value == null) {
@@ -219,7 +255,7 @@ final class LegacyInvokerReader {
          */
         private String withRenamedOperations(Element item, String value) {
             String source = value;
-            List<Map.Entry<String, String>> renamed = operationIds.entrySet().stream()
+            List<Map.Entry<String, String>> renamed = idsByName.entrySet().stream()
                     .filter(entry -> !entry.getKey().equals(entry.getValue()))
                     .sorted(Comparator.comparingInt((Map.Entry<String, String> entry) -> entry.getKey().length())
                             .reversed())
@@ -239,7 +275,7 @@ final class LegacyInvokerReader {
 
         private Operation operation(Element element, Pagination shared) {
             String name = attribute(element, "name");
-            String id = operationIds.get(name);
+            String id = operationIds.get(element);
             if (id == null) {
                 throw new XmlElements.ElementProblem(location(element), "the operation has no usable id");
             }
@@ -284,16 +320,7 @@ final class LegacyInvokerReader {
             if (query >= 0) {
                 String queryString = endpoint.substring(query + 1);
                 endpoint = endpoint.substring(0, query);
-                for (String pair : queryString.split("&")) {
-                    if (pair.isBlank()) {
-                        continue;
-                    }
-                    int equals = pair.indexOf('=');
-                    String name = equals < 0 ? pair : pair.substring(0, equals);
-                    String value = equals < 0 ? null : pair.substring(equals + 1);
-                    parameters.add(attempt(element, () ->
-                            QueryParameter.of(name, new ScalarSchema(ScalarType.STRING, value))));
-                }
+                parameters.addAll(queryParameters(element, queryString));
                 issues.add(InvokerIssue.warning(location(element), "moved the query string '" + queryString
                         + "' out of the endpoint into query parameters; check their types"));
             }
@@ -309,6 +336,38 @@ final class LegacyInvokerReader {
                             method, finalEndpoint, headers.headers(), parameters, body
                     )
             );
+        }
+
+        /**
+         * The pairs of a 5.x query string. A name given more than once, as in {@code filter=a&filter=b},
+         * becomes one list parameter holding every value; the default {@code form} style, exploded, writes
+         * it back as the same query string.
+         */
+        private List<QueryParameter> queryParameters(Element element, String queryString) {
+            Map<String, List<@Nullable String>> values = new LinkedHashMap<>();
+            for (String pair : queryString.split("&")) {
+                if (pair.isBlank()) {
+                    continue;
+                }
+                int equals = pair.indexOf('=');
+                String name = equals < 0 ? pair : pair.substring(0, equals);
+                values.computeIfAbsent(name, key -> new ArrayList<>()).add(equals < 0 ? null : pair.substring(equals + 1));
+            }
+            List<QueryParameter> parameters = new ArrayList<>();
+            values.forEach((name, given) -> {
+                if (given.size() == 1) {
+                    parameters.add(attempt(element, () ->
+                            QueryParameter.of(name, new ScalarSchema(ScalarType.STRING, given.getFirst()))));
+                    return;
+                }
+                List<Value> defaults = given.stream()
+                        .<Value>map(value -> new Value.TextValue(value == null ? "" : value)).toList();
+                parameters.add(attempt(element, () ->
+                        QueryParameter.of(name, new ArraySchema(Schema.string(), defaults))));
+                issues.add(InvokerIssue.warning(location(element), "the query parameter '" + name + "' is given "
+                        + given.size() + " times; it became one list parameter holding every value"));
+            });
+            return parameters;
         }
 
         /**
@@ -450,7 +509,7 @@ final class LegacyInvokerReader {
 
         /**
          * The media type, from the most explicit source available: a Content-Type header, a media type in
-         * {@code data}, then {@code format}.
+         * {@code data}, then {@code format="xml"}; anything else is {@code application/json}, as in 5.x.
          */
         private ContentType contentType(Element element, @Nullable String header, @Nullable String data,
                                         @Nullable String format, boolean graphql) {
@@ -469,22 +528,7 @@ final class LegacyInvokerReader {
                     issues.add(InvokerIssue.warning(location(element), "ignored the unreadable data '" + data + "'"));
                 }
             }
-            if (graphql) {
-                return ContentType.APPLICATION_JSON;
-            }
-            ContentType fromFormat = switch (format == null ? "" : format.toLowerCase(Locale.ROOT)) {
-                case "json" -> ContentType.APPLICATION_JSON;
-                case "xml" -> ContentType.APPLICATION_XML;
-                case "text" -> ContentType.TEXT_PLAIN;
-                case "x-www-form-urlencoded" -> ContentType.APPLICATION_FORM_URLENCODED;
-                default -> null;
-            };
-            if (fromFormat != null) {
-                return fromFormat;
-            }
-            issues.add(InvokerIssue.warning(location(element), "the body states no recognisable media type "
-                    + "(format='" + format + "'); assumed application/json"));
-            return ContentType.APPLICATION_JSON;
+            return !graphql && "xml".equalsIgnoreCase(format) ? ContentType.APPLICATION_XML : ContentType.APPLICATION_JSON;
         }
 
         private ObjectSchema objectSchema(Element parent, List<Element> fieldElements, boolean request) {
@@ -506,10 +550,27 @@ final class LegacyInvokerReader {
                     issues.add(InvokerIssue.warning(location(element), "the text of an XML element that also has "
                             + "attributes cannot be described in the current format and was dropped"));
                 } else {
-                    fields.add(attempt(element, () -> Field.of(name, fieldSchema(element, request))));
+                    Field field = attempt(element, () -> Field.of(name, fieldSchema(element, request)));
+                    int earlier = indexOf(fields, name);
+                    if (earlier < 0) {
+                        fields.add(field);
+                    } else {
+                        fields.set(earlier, field);
+                        issues.add(InvokerIssue.warning(location(element), "the field '" + name
+                                + "' is declared more than once; kept the last declaration, as 5.x did"));
+                    }
                 }
             }
             return attempt(parent, () -> new ObjectSchema(fields, attributes));
+        }
+
+        private static int indexOf(List<Field> fields, String name) {
+            for (int i = 0; i < fields.size(); i++) {
+                if (fields.get(i).name().equals(name)) {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         private Schema fieldSchema(Element element, boolean request) {
