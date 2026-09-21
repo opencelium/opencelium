@@ -458,17 +458,31 @@ export const invokerDefinition: EntityDefinition = {
 
                         ctx.setLoading(true)
                         try {
-                            const uploaded = await uploadInvoker(file, () =>
+                            const result = await uploadInvoker(file, () =>
                                 ctx.confirm({
                                     title: tEntities('invoker.list.upload.confirmReplace.title'),
                                     message: tEntities('invoker.list.upload.confirmReplace.message'),
                                 }),
                             )
-                            if (uploaded) {
-                                message.success(
-                                    tEntities('invoker.list.upload.success', { name: file.name }),
-                                )
-                                ctx.setInputValue('')
+                            switch (result.status) {
+                                case 'uploaded':
+                                    message.success(
+                                        tEntities('invoker.list.upload.success', { name: file.name }),
+                                    )
+                                    ctx.setInputValue('')
+                                    break
+                                case 'cancelled':
+                                    break
+                                case 'invalidType':
+                                    notifyError(tEntities('invoker.list.upload.invalidType'))
+                                    break
+                                case 'tooLarge':
+                                    notifyError(tEntities('invoker.list.upload.tooLarge'))
+                                    break
+                                default: {
+                                    const _exhaustive: never = result
+                                    return _exhaustive
+                                }
                             }
                         } catch (err) {
                             console.error(err)
