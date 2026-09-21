@@ -36,6 +36,60 @@
     "connector": { "body": "Ein Connector besteht aus einem Invoker sowie der Basis-URL und den Zugangsdaten eines Systems, das Sie tatsächlich betreiben. Der Assistent führt Sie durch die Einrichtung und testet die Verbindung vor dem Speichern.", "pickInvoker": "Wählen Sie den Invoker, aus dem er entstehen soll", "panelEyebrow": "Neuer Connector", "panelTitle": "Connector aus {{name}}", "noInvokers": "Fügen Sie zuerst einen Invoker hinzu — jeder Connector basiert auf einem.", "tableTitle": "Titel", "tableDescription": "Beschreibung", "tableConnectors": "Connectors", "tableActionTooltip": "Connector aus {{name}} erstellen" },
     "license": { "body": "Jeder Aufruf eines verbundenen Systems zählt als eine Operation. Aktivieren Sie bei Bedarf eine Lizenz.", "information": "Lizenzinformationen", "status": "Status", "valid": "Gültig", "free": "Kostenlos", "type": "Typ", "operations": "Anzahl der API-Operationen", "expiration": "Ablaufdatum", "more": "Mehr Operationen benötigt?", "actionsBody": "Aktivierung, zusätzliche Operationen und Offline-Anfragen befinden sich alle auf der Lizenzseite. Dort wird angeboten, was für diese Installation zutrifft.", "openPage": "Zur Lizenzseite", "thisMonth": "Dieser Monat", "usage": "{{used}} von {{total}} Operationen" }
   },
+  "dashboard": {
+    "kicker": "Dashboard",
+    "steps": {
+      "header": {
+        "title": "Was diese Seite zeigt",
+        "body": "Ein Live-Betriebsbild dieser OpenCelium-Instanz: wie viel läuft, wie viel davon fehlschlägt, was die Maschine dafür aufwendet und welche Workflows die Arbeit erledigen. Der Zeitraum neben dem Titel gilt für die Verlaufs-Widgets; die Live-Zähler sind laufende Gesamtwerte."
+      },
+      "tiles": {
+        "title": "Live-Zähler",
+        "body": "Diese fünf Werte kommen über den Websocket statt über einen REST-Aufruf und ändern sich daher live: Gesamtzahl der Läufe, Anteil der Fehlschläge, durchschnittliche und gesamte Laufzeit sowie die Größe der Ausführungsprotokolle auf der Festplatte. Der Punkt in jeder Ecke zeigt den Zustand dieser Live-Verbindung — Spinner bedeuten, dass sie noch aufgebaut wird."
+      },
+      "executions": {
+        "title": "Läufe und Fehlschläge",
+        "body": "Zwei Reihen über dieselben sieben Tage: alle Läufe und die Fehlschläge darunter. Fahren Sie über einen Tag, um die genauen Zahlen und die Fehlerquote dieses Tages zu lesen.",
+        "note": "Aktualisieren lädt nur dieses Widget neu."
+      },
+      "resources": {
+        "title": "Was es die Maschine kostet",
+        "body": "CPU-Last und belegter Speicher, jeweils als Anteil des in dieser Instanz Verfügbaren. Beide Anzeigen wechseln oberhalb von 60 % von Türkis nach Rot — ein System unter Last erkennt man also ohne die Zahlen zu lesen."
+      },
+      "connectors": {
+        "title": "Welche Workflows am meisten laufen",
+        "body": "Die fünf Workflows mit den meisten Läufen im Zeitraum, jeder mit seiner eigenen Fehlerquote. Der schnellste Weg zu dem Workflow, den man sich nach einer schlechten Nacht ansehen sollte."
+      },
+      "comingSoon": {
+        "title": "Noch nicht angebunden",
+        "body": "Diese drei sind absichtlich ausgegraut: Das Layout steht, die dahinterliegenden Endpunkte werden aber noch gebaut. Hier ist nichts defekt — die Karten füllen sich, sobald die API verfügbar ist."
+      },
+      "createWorkflow": {
+        "title": "Neuen Workflow beginnen",
+        "body": "Öffnet den visuellen Editor mit einer leeren Arbeitsfläche, auf der Konnektor-Methoden und IF-/Loop-Operatoren zu einer Integration zusammengesetzt werden. Auf schmalen Bildschirmen und für Rollen ohne das Recht, Verbindungen zu erstellen, ist die Schaltfläche ausgeblendet."
+      },
+      "palette": {
+        "title": "Die Befehlspalette",
+        "body": "Jede Aktion der Anwendung ist von hier aus erreichbar — mit {{key}} + K landet der Fokus von überall im Feld. Befehle beginnen mit dem Verb (create connector, list schedules), und help zeigt den gesamten Befehlsbaum."
+      },
+      "language": {
+        "title": "Englisch oder Deutsch",
+        "body": "Wechselt die Sprache der Oberfläche unmittelbar. Die Auswahl wird sowohl in diesem Browser als auch in Ihrem Konto gespeichert und gilt damit auch an einem anderen Rechner."
+      },
+      "help": {
+        "title": "Hilfe — und diese Tour",
+        "body": "Hinter diesem Symbol liegen zwei Einträge: die OpenCelium-Dokumentation unter docs.opencelium.io, die sich in einem neuen Tab öffnet, und „Tour starten“ — damit finden Sie später zu dieser Führung zurück."
+      },
+      "menuSwitch": {
+        "title": "Haupt- und Administrationsmenü",
+        "body": "Die Seitenleiste hat zwei Menüs: das Hauptmenü für die tägliche Arbeit und das Administrationsmenü für Benutzer, Rollen und Systemeinstellungen. Beim Wechsel landen Sie auf der Seite, die Sie in diesem Menü zuletzt geöffnet hatten."
+      },
+      "profile": {
+        "title": "Ihr Konto",
+        "body": "Ihre eigenen Angaben, die Berechtigungen aus Ihren Rollen und die Änderung des Passworts."
+      }
+    }
+  },
   "workflow": {
     "kicker": "Workflow",
     "actions": { "done": "Beenden" },

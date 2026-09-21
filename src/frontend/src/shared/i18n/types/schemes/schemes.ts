@@ -142,6 +142,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 help: string
                 onboarding: string
                 workflowTutorial: string
+                dashboardTour: string
             }
             footer: {
                 select: string
@@ -184,6 +185,8 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             createWorkflow: string
             createWorkflowHint: string
             docs: string
+            help: string
+            startTour: string
         }
         user: {
             unknown: string

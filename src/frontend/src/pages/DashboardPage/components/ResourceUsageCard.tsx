@@ -38,7 +38,12 @@ export function ResourceUsageCard() {
             : 0
 
     return (
-        <Card title={t('resourceUsage.title')} className="resource-usage-card" extra={<SocketStatusDot />}>
+        <Card
+            testId="dashboard-resource-usage-card"
+            title={t('resourceUsage.title')}
+            className="resource-usage-card"
+            extra={<SocketStatusDot />}
+        >
             <div
                 style={{
                     display: 'flex',
