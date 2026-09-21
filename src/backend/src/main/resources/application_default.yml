@@ -94,8 +94,8 @@ spring:
     open-in-view: false
   servlet:
     multipart:
-      max-file-size: 1000000KB
-      max-request-size: 1000000KB
+      max-file-size: 1GB
+      max-request-size: 1GB
   http:
     multipart:
       enabled: false

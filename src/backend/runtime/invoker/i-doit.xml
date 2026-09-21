@@ -1,0 +1,2337 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<invoker type="RESTful">
+    <name>i-doit</name>
+    <description>The IT-documentation solution i-doit is based on a complete open source configuration management and database. Using i-doit as a CMDB you can manage your IT according to ITIL best practices and configurate the significant components of your IT environment. You can visualize the relationships between these components and keep track of software and hardware assets and their relations.</description>
+    <hint>This interface provides a apikey auth. Read the api documentation here https://kb.i-doit.com/display/de/API+Methoden</hint>
+    <icon>i-doit.png</icon>
+    <requiredData>
+        <item name="url" type="string" visibility="public"/>
+        <item name="apikey" type="string" visibility="public"/>
+        <item name="username" type="string" visibility="public"/>
+        <item name="password" type="string" visibility="protected"/>
+    </requiredData>
+    <authType>apikey</authType>
+    <operations>
+        <operation name="idoit.version" type="test">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">idoit.version</field>
+                    <field name="params" type="object">
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string">de</field>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="result" type="object">
+                            <field name="version" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+                <operation name="idoit.search" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">idoit.search</field>
+                    <field name="params" type="object">
+                        <field name="q" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="result" type="array">
+                            <field name="documentId" type="string"/>
+                            <field name="key" type="string"/>
+                            <field name="value" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="idoit.license" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">idoit.license</field>
+                    <field name="params" type="object">
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string">de</field>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                     <field name="id" type="string"/>
+                     <field name="jsonrpc" type="string"/>
+                     <field name="result" type="object">
+                       <field name="objectCapacity" type="object">
+                         <field name="total" type="string"/>
+                         <field name="inUse" type="string"/>
+                       </field>
+                       <field name="addons" type="object">
+                         <field name="iso27001" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="viva" type="object">
+                           <field name="label" type="string"/>
+                           <field name="licensed" type="string"/>
+                         </field>
+                         <field name="viva2" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="cmk2" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="document" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="rfc" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="analytics" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="forms" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="sectornord_ocs" type="object">
+                           <field name="label" type="string"/>
+                           <field name="licensed" type="string"/>
+                         </field>
+                         <field name="scanit" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="nagios" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="cabling" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="workflow" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="swapci" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="relocate_ci" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="maintenance" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="floorplan" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="events" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="check_mk" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="api" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="packager" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="privacy" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="syneticsgmbh_reportspecial" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="syneticsgmbh_idoit" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="syneticsgmbh_homeoffice" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="becon_trigger" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                         <field name="med_tec" type="object">
+                           <field name="licensed" type="string"/>
+                           <field name="label" type="string"/>
+                         </field>
+                       </field>
+                       <field name="licenses" type="array">
+                           <field name="id" type="string"/>
+                           <field name="label" type="string"/>
+                           <field name="licenseType" type="string"/>
+                           <field name="registrationDate" type="string"/>
+                           <field name="validUntil" type="string"/>
+                           <field name="objects" type="string"/>
+                           <field name="tenants" type="string"/>
+                           <field name="environment" type="string"/>
+                           <field name="valid" type="string"/>
+                       </field>
+                     </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="idoit.constants" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">idoit.constants</field>
+                    <field name="params" type="object">
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string">de</field>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                     <field name="id" type="string"/>
+                     <field name="jsonrpc" type="string"/>
+                     <field name="result" type="object">
+                       <field name="objectTypes" type="object">
+                         <field name="C__OBJTYPE__SERVICE" type="string"/>
+                         <field name="C__OBJTYPE__APPLICATION" type="string"/>
+                         <field name="C__OBJTYPE__BUILDING" type="string"/>
+                         <field name="C__OBJTYPE__ENCLOSURE" type="string"/>
+                         <field name="C__OBJTYPE__SERVER" type="string"/>
+                         <field name="C__OBJTYPE__SWITCH" type="string"/>
+                         <field name="C__OBJTYPE__ROUTER" type="string"/>
+                         <field name="C__OBJTYPE__FC_SWITCH" type="string"/>
+                         <field name="C__OBJTYPE__SAN" type="string"/>
+                         <field name="C__OBJTYPE__CLIENT" type="string"/>
+                         <field name="C__OBJTYPE__PRINTER" type="string"/>
+                         <field name="C__OBJTYPE__AIR_CONDITION_SYSTEM" type="string"/>
+                         <field name="C__OBJTYPE__WAN" type="string"/>
+                         <field name="C__OBJTYPE__EMERGENCY_PLAN" type="string"/>
+                         <field name="C__OBJTYPE__KVM_SWITCH" type="string"/>
+                         <field name="C__OBJTYPE__MONITOR" type="string"/>
+                         <field name="C__OBJTYPE__APPLIANCE" type="string"/>
+                         <field name="C__OBJTYPE__TELEPHONE_SYSTEM" type="string"/>
+                         <field name="C__OBJTYPE__PRINTBOX" type="string"/>
+                         <field name="C__OBJTYPE__ROOM" type="string"/>
+                         <field name="C__OBJTYPE__ACCESS_POINT" type="string"/>
+                         <field name="C__OBJTYPE__MAINTENANCE" type="string"/>
+                         <field name="C__OBJTYPE__FILE" type="string"/>
+                         <field name="C__OBJTYPE__LOCATION_GENERIC" type="string"/>
+                         <field name="C__OBJTYPE__LAYER3_NET" type="string"/>
+                         <field name="C__OBJTYPE__CELL_PHONE_CONTRACT" type="string"/>
+                         <field name="C__OBJTYPE__LICENCE" type="string"/>
+                         <field name="C__OBJTYPE__CONTAINER" type="string"/>
+                         <field name="C__OBJTYPE__OPERATING_SYSTEM" type="string"/>
+                         <field name="C__OBJECT_TYPE__GROUP" type="string"/>
+                         <field name="C__OBJTYPE__GENERIC_TEMPLATE" type="string"/>
+                         <field name="C__OBJTYPE__PHONE" type="string"/>
+                         <field name="C__OBJTYPE__HOST" type="string"/>
+                         <field name="C__OBJTYPE__CABLE" type="string"/>
+                         <field name="C__OBJTYPE__CONVERTER" type="string"/>
+                         <field name="C__OBJTYPE__WIRING_SYSTEM" type="string"/>
+                         <field name="C__OBJTYPE__PATCH_PANEL" type="string"/>
+                         <field name="C__OBJTYPE__AMPLIFIER" type="string"/>
+                         <field name="C__OBJTYPE__IT_SERVICE" type="string"/>
+                         <field name="C__OBJTYPE__ESC" type="string"/>
+                         <field name="C__OBJTYPE__EPS" type="string"/>
+                         <field name="C__OBJTYPE__DISTRIBUTION_BOX" type="string"/>
+                         <field name="C__OBJTYPE__PDU" type="string"/>
+                         <field name="C__OBJTYPE__UPS" type="string"/>
+                         <field name="C__OBJTYPE__SAN_ZONING" type="string"/>
+                         <field name="C__OBJTYPE__ORGANIZATION" type="string"/>
+                         <field name="C__OBJTYPE__PERSON" type="string"/>
+                         <field name="C__OBJTYPE__PERSON_GROUP" type="string"/>
+                         <field name="C__OBJTYPE__CLUSTER" type="string"/>
+                         <field name="C__OBJTYPE__CLUSTER_SERVICE" type="string"/>
+                         <field name="C__OBJTYPE__VIRTUAL_CLIENT" type="string"/>
+                         <field name="C__OBJTYPE__VIRTUAL_HOST" type="string"/>
+                         <field name="C__OBJTYPE__VIRTUAL_SERVER" type="string"/>
+                         <field name="C__OBJTYPE__RELATION" type="string"/>
+                         <field name="C__OBJTYPE__DBMS" type="string"/>
+                         <field name="C__OBJTYPE__DATABASE_SCHEMA" type="string"/>
+                         <field name="C__OBJTYPE__PARALLEL_RELATION" type="string"/>
+                         <field name="C__OBJTYPE__REPLICATION" type="string"/>
+                         <field name="C__OBJTYPE__DATABASE_INSTANCE" type="string"/>
+                         <field name="C__OBJTYPE__MIDDLEWARE" type="string"/>
+                         <field name="C__OBJTYPE__SOA_STACK" type="string"/>
+                         <field name="C__OBJTYPE__KRYPTO_CARD" type="string"/>
+                         <field name="C__OBJTYPE__SIM_CARD" type="string"/>
+                         <field name="C__OBJTYPE__LAYER2_NET" type="string"/>
+                         <field name="C__OBJTYPE__WORKSTATION" type="string"/>
+                         <field name="C__OBJTYPE__MIGRATION_OBJECT" type="string"/>
+                         <field name="C__OBJTYPE__SWITCH_CHASSIS" type="string"/>
+                         <field name="C__OBJTYPE__BLADE_CHASSIS" type="string"/>
+                         <field name="C__OBJTYPE__BLADE_SERVER" type="string"/>
+                         <field name="C__OBJTYPE__VOIP_PHONE" type="string"/>
+                         <field name="C__OBJTYPE__SUPERNET" type="string"/>
+                         <field name="C__OBJTYPE__NAGIOS_SERVICE" type="string"/>
+                         <field name="C__OBJTYPE__NAGIOS_SERVICE_TPL" type="string"/>
+                         <field name="C__OBJTYPE__NAGIOS_HOST_TPL" type="string"/>
+                         <field name="C__OBJTYPE__VEHICLE" type="string"/>
+                         <field name="C__OBJTYPE__AIRCRAFT" type="string"/>
+                         <field name="C__OBJTYPE__CLUSTER_VRRP_HSRP" type="string"/>
+                         <field name="C__OBJTYPE__COUNTRY" type="string"/>
+                         <field name="C__OBJTYPE__CITY" type="string"/>
+                         <field name="C__CMDB__OBJTYPE__CABLE_TRAY" type="string"/>
+                         <field name="C__CMDB__OBJTYPE__CONDUIT" type="string"/>
+                         <field name="C__OBJTYPE__RM_CONTROLLER" type="string"/>
+                         <field name="C__OBJTYPE__VRRP" type="string"/>
+                         <field name="C__OBJTYPE__STACKING" type="string"/>
+                         <field name="C__OBJTYPE__NET_ZONE" type="string"/>
+                         <field name="C__OBJTYPE__RACK_SEGMENT" type="string"/>
+                         <field name="C__NEUER_OBJEKTTYP_06_09_2017_10_05" type="string"/>
+                         <field name="C__OBJTYPE__INFORMATION_DOMAIN" type="string"/>
+                         <field name="C__NEUER_OBJEKTTYP_05_01_2018_13_16" type="string"/>
+                         <field name="C__OBJTYPE__ISO27001_THREATS" type="string"/>
+                         <field name="C__OBJTYPE__ISO27001_VULNERABILITIES" type="string"/>
+                         <field name="C__OBJTYPE__ISO27001_CONTROLS" type="string"/>
+                         <field name="C__OBJTYPE__ISO27001_INCIDENT_SCENARIOS" type="string"/>
+                         <field name="C__OBJTYPE__ISO27001_PROTECTION_CATEGORIES" type="string"/>
+                         <field name="C__OBJTYPE__PRIVACY_PROCESSING" type="string"/>
+                         <field name="C__OBJTYPE__PRIVACY_DATA_CATAGORIES" type="string"/>
+                         <field name="C__OBJTYPE__PRIVACY_DATA_PROTECTION_POLICIES" type="string"/>
+                         <field name="C__OBJTYPE__PRIVACY_DATA_TRANSFER" type="string"/>
+                         <field name="C__OBJTYPE__PRIVACY_IT_COMPOSITE" type="string"/>
+                         <field name="C__OBJTYPE__PRIVACY_IT_CONTROLL" type="string"/>
+                         <field name="C__OBJTYPE__PRIVACY_CONTRACT" type="string"/>
+                         <field name="C__OBJTYPE__MEDICAL_DEVICE" type="string"/>
+                         <field name="C__NEUER_OBJEKTTYP_STATION" type="string"/>
+                         <field name="C__OBJTYPE__VIVA2_SCOPE" type="string"/>
+                         <field name="C__OBJTYPE__VIVA2_MODULE" type="string"/>
+                         <field name="C__OBJTYPE__VIVA2_REQUIREMENT" type="string"/>
+                         <field name="C__OBJTYPE__VIVA2_TARGET_GROUP" type="string"/>
+                         <field name="C__OBJTYPE__VIVA2_THREAT" type="string"/>
+                         <field name="C__OBJTYPE__ISO27001_CONTROLS_ANNEX_A" type="string"/>
+                         <field name="C__OBJTYPE__VIVA2_COMMUNICATION_LINK" type="string"/>
+                         <field name="C__OBJTYPE__AZURE_SUBSCRIPTION" type="string"/>
+                         <field name="C__OBJTYPE__AZURE_RESOURCE_GROUP" type="string"/>
+                         <field name="C__OBJTYPE__AZURE_VIRTUAL_SERVER" type="string"/>
+                         <field name="C__OBJTYPE__ISO27001_VIRTUAL_LOCATION" type="string"/>
+                         <field name="C__OBJTYPE__DOCUSNAP" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC__STATION" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC__BRIEFING" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WHD" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJP" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJS" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJI" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WAC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WAJ" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WAL" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WBC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WAA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WAB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WBD" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WBE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCD" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCF" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCH" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCJ" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCK" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCL" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCM" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCP" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCQ" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCR" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDD" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDJ" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDK" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDL" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDM" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WEA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WEB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WEC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WED" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WEE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WEF" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WEG" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WEH" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFD" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFG" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFH" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFJ" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFK" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFL" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFP" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFR" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WGA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WGB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WGD" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WHA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WHB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJF" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJG" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJH" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJR" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKF" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKG" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKH" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKI" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKK" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKL" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKM" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKP" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKT" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKV" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKZ" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WNA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WNB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WNC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WOA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WOB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WAH" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WBG" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDF" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJO" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDO" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WGF" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKW" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKR" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WEK" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WHC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJJ" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKS" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKQ" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKU" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJT" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WBH" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCS" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WND" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJQ" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCN" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFM" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WNN" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WGH" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJU" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJV" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WBF" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJW" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJX" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJY" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WBT" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WEI" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WBM" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCW" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCT" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDG" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFN" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WOC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WHE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKD" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKO" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WCO" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WDC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKJ" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WKN" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WZA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WAG" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WAK" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WBA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFB" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFC" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WFF" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJD" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJK" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WJN" type="string"/>
+                         <field name="C__OBJTYPE__ISO27001_EVENT" type="string"/>
+                         <field name="C__OBJTYPE__ISO27001_AUDIT" type="string"/>
+                         <field name="C__OBJTYPE__ISO27001_STANDARD_REQUIREMENT" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_ABSORPTIOMETER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_ALARM_DEVICE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_ANALYZER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_APHERESIS" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_RESPIRATOR" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_COMPUTER_TOMOGRAPHY" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_DEFIBRILLATOR" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_DILUTER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_DISPENSER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_ELECTROENCEPHALOGRAPH" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_ELECTROCARDIOGRAPH" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_FLOWMETER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_HEMODIALYZER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_INFORMATION_SYSTEM" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_CAMERA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_LASER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_AIR_CLEANING_DEVICE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_MICROSCOPE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_MONITOR" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_SURFACE_DISPLAY_SYSTEM" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_SURFACE_COIL" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_PUMP" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_RESUSCITATION_DEVICE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_RECORDER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_RESCUE_HELICOPTER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_XRAY_DEVICE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_PACEMAKER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_SIMULATOR" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_SONDE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_PECTROPHOTOMETER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_STERILIZER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_STIMULATOR" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_ULTRASOUND_MACHINE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_COMPRESSOR" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_LIBRA" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_WASHING_MACHINE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_HEATER" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_HEAT_EXCHANGERS" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_XENON_CLEARANCE" type="string"/>
+                         <field name="C__OBJTYPE__MED_TEC_CENTRIFUGE" type="string"/>
+                         <field name="C__OBJTYPE_B3S_KRANKENHAUS" type="string"/>
+                         <field name="C__OBJTYPE__SD_DIENSTE" type="string"/>
+                         <field name="C__OBJTYPE_GESCHAEFTSPROZESS" type="string"/>
+                         <field name="C__NEUER_OBJEKTTYP_13_03_2023" type="string"/>
+                         <field name="C__OBJTYPE_DATENKATEGORIE" type="string"/>
+                         <field name="C__OBJETYPE_SERVERLOSE_FUNKTION" type="string"/>
+                         <field name="C__OBJTYPE__WLAN" type="string"/>
+                       </field>
+                       <field name="categories" type="object">
+                         <field name="g" type="object">
+                           <field name="C__CATG__GLOBAL" type="string"/>
+                           <field name="C__CATG__MODEL" type="string"/>
+                           <field name="C__CATG__FORMFACTOR" type="string"/>
+                           <field name="C__CATG__CPU" type="string"/>
+                           <field name="C__CATG__MEMORY" type="string"/>
+                           <field name="C__CATG__NETWORK" type="string"/>
+                           <field name="C__CATG__STORAGE" type="string"/>
+                           <field name="C__CATG__POWER_CONSUMER" type="string"/>
+                           <field name="C__CATG__UNIVERSAL_INTERFACE" type="string"/>
+                           <field name="C__CATG__APPLICATION" type="string"/>
+                           <field name="C__CATG__ACCESS" type="string"/>
+                           <field name="C__CATG__BACKUP" type="string"/>
+                           <field name="C__CATG__EMERGENCY_PLAN" type="string"/>
+                           <field name="C__CATG__FILE" type="string"/>
+                           <field name="C__CATG__CONTACT" type="string"/>
+                           <field name="C__CATG__LOGBOOK" type="string"/>
+                           <field name="C__CATG__CONTROLLER" type="string"/>
+                           <field name="C__CATG__LOCATION" type="string"/>
+                           <field name="C__CATG__IMAGE" type="string"/>
+                           <field name="C__CATG__MANUAL" type="string"/>
+                           <field name="C__CATG__OVERVIEW" type="string"/>
+                           <field name="C__CATG__WORKFLOW" type="string"/>
+                           <field name="C__CATG__SOUND" type="string"/>
+                           <field name="C__CATG__OBJECT" type="string"/>
+                           <field name="C__CATG__GRAPHIC" type="string"/>
+                           <field name="C__CATG__VIRTUAL_MACHINE" type="string"/>
+                           <field name="C__CATG__ACCOUNTING" type="string"/>
+                           <field name="C__CATG__NETWORK_PORT" type="string"/>
+                           <field name="C__CATG__NETWORK_INTERFACE" type="string"/>
+                           <field name="C__CATG__NETWORK_LOG_PORT" type="string"/>
+                           <field name="C__CATG__DRIVE" type="string"/>
+                           <field name="C__CATG__STORAGE_DEVICE" type="string"/>
+                           <field name="C__CATG__CONTROLLER_FC_PORT" type="string"/>
+                           <field name="C__CATG__SANPOOL" type="string"/>
+                           <field name="C__CATG__IP" type="string"/>
+                           <field name="C__CATG__VERSION" type="string"/>
+                           <field name="C__CATG__CABLING" type="string"/>
+                           <field name="C__CATG__CONNECTOR" type="string"/>
+                           <field name="C__CATG__INVOICE" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS" type="string"/>
+                           <field name="C__CATG__POWER_SUPPLIER" type="string"/>
+                           <field name="C__CATG__RAID" type="string"/>
+                           <field name="C__CATG__LDEV_SERVER" type="string"/>
+                           <field name="C__CATG__LDEV_CLIENT" type="string"/>
+                           <field name="C__CATG__HBA" type="string"/>
+                           <field name="C__CATG__CLUSTER_ROOT" type="string"/>
+                           <field name="C__CATG__CLUSTER" type="string"/>
+                           <field name="C__CATG__SHARES" type="string"/>
+                           <field name="C__CATG__CLUSTER_SERVICE" type="string"/>
+                           <field name="C__CATG__CLUSTER_MEMBERS" type="string"/>
+                           <field name="C__CATG__CLUSTER_SHARED_STORAGE" type="string"/>
+                           <field name="C__CATG__CLUSTER_MEMBERSHIPS" type="string"/>
+                           <field name="C__CATG__COMPUTING_RESOURCES" type="string"/>
+                           <field name="C__CATG__CLUSTER_VITALITY" type="string"/>
+                           <field name="C__CATG__SNMP" type="string"/>
+                           <field name="C__CATG__VIRTUAL_HOST_ROOT" type="string"/>
+                           <field name="C__CATG__VIRTUAL_HOST" type="string"/>
+                           <field name="C__CATG__GUEST_SYSTEMS" type="string"/>
+                           <field name="C__CATG__VIRTUAL_MACHINE__ROOT" type="string"/>
+                           <field name="C__CATG__VIRTUAL_SWITCH" type="string"/>
+                           <field name="C__CATG__VIRTUAL_DEVICE" type="string"/>
+                           <field name="C__CATG__CLUSTER_SHARED_VIRTUAL_SWITCH" type="string"/>
+                           <field name="C__CATG__BACKUP__ASSIGNED_OBJECTS" type="string"/>
+                           <field name="C__CATG__GROUP_MEMBERSHIPS" type="string"/>
+                           <field name="C__CATG__IT_SERVICE_COMPONENTS" type="string"/>
+                           <field name="C__CATG__ITS_LOGBOOK" type="string"/>
+                           <field name="C__CATG__IT_SERVICE" type="string"/>
+                           <field name="C__CATG__OBJECT_VITALITY" type="string"/>
+                           <field name="C__CATG__RELATION" type="string"/>
+                           <field name="C__CATG__IT_SERVICE_RELATIONS" type="string"/>
+                           <field name="C__CATG__DATABASE_ASSIGNMENT" type="string"/>
+                           <field name="C__CATG__ITS_TYPE" type="string"/>
+                           <field name="C__CATG__PASSWD" type="string"/>
+                           <field name="C__CATG__SOA_STACKS" type="string"/>
+                           <field name="C__CATG__PLANNING" type="string"/>
+                           <field name="C__CATG__ASSIGNED_CARDS" type="string"/>
+                           <field name="C__CATG__SIM_CARD" type="string"/>
+                           <field name="C__CATG__TSI_SERVICE" type="string"/>
+                           <field name="C__CATG__AUDIT" type="string"/>
+                           <field name="C__CATG__NETWORK_PORT_OVERVIEW" type="string"/>
+                           <field name="C__CATG__LOGICAL_UNIT" type="string"/>
+                           <field name="C__CATG__ASSIGNED_LOGICAL_UNIT" type="string"/>
+                           <field name="C__CATG__ASSIGNED_WORKSTATION" type="string"/>
+                           <field name="C__CATG__VIRTUAL_TICKETS" type="string"/>
+                           <field name="C__CATG__PERSON_ASSIGNED_WORKSTATION" type="string"/>
+                           <field name="C__CATG__CONTRACT_ASSIGNMENT" type="string"/>
+                           <field name="C__CATG__RACK_VIEW" type="string"/>
+                           <field name="C__CATG__MAIL_ADDRESSES" type="string"/>
+                           <field name="C__CATG__VOIP_PHONE" type="string"/>
+                           <field name="C__CATG__VOIP_PHONE_LINE" type="string"/>
+                           <field name="C__CATG__TELEPHONE_FAX" type="string"/>
+                           <field name="C__CATG__SMARTCARD_CERTIFICATE" type="string"/>
+                           <field name="C__CATG__SHARE_ACCESS" type="string"/>
+                           <field name="C__CATG__VIRTUAL_SUPERNET" type="string"/>
+                           <field name="C__CATG__CERTIFICATE" type="string"/>
+                           <field name="C__CATG__SLA" type="string"/>
+                           <field name="C__CATG__LDAP_DN" type="string"/>
+                           <field name="C__CATG__VIRTUAL_AUTH" type="string"/>
+                           <field name="C__CATG__NAGIOS" type="string"/>
+                           <field name="C__CATG__NAGIOS_GROUP" type="string"/>
+                           <field name="C__CATG__NAGIOS_SERVICE_FOLDER" type="string"/>
+                           <field name="C__CATG__NAGIOS_SERVICE_TPL_FOLDER" type="string"/>
+                           <field name="C__CATG__NAGIOS_SERVICE_DEF" type="string"/>
+                           <field name="C__CATG__NAGIOS_REFS_SERVICES_BACKWARDS" type="string"/>
+                           <field name="C__CATG__NAGIOS_SERVICE_TPL_DEF" type="string"/>
+                           <field name="C__CATG__NAGIOS_SERVICE_REFS_TPL_BACKWARDS" type="string"/>
+                           <field name="C__CATG__NAGIOS_HOST_TPL_FOLDER" type="string"/>
+                           <field name="C__CATG__NAGIOS_HOST_TPL_DEF" type="string"/>
+                           <field name="C__CATG__NAGIOS_HOST_FOLDER" type="string"/>
+                           <field name="C__CATG__NAGIOS_HOST_TPL_ASSIGNED_OBJECTS" type="string"/>
+                           <field name="C__CATG__NAGIOS_REFS_SERVICES" type="string"/>
+                           <field name="C__CATG__NAGIOS_APPLICATION_FOLDER" type="string"/>
+                           <field name="C__CATG__NAGIOS_APPLICATION_REFS_NAGIOS_SERVICE" type="string"/>
+                           <field name="C__CATG__NAGIOS_SERVICE_DEP" type="string"/>
+                           <field name="C__CATG__ADDRESS" type="string"/>
+                           <field name="C__CATG__MONITORING" type="string"/>
+                           <field name="C__CATG__LIVESTATUS" type="string"/>
+                           <field name="C__CATG__VEHICLE" type="string"/>
+                           <field name="C__CATG__AIRCRAFT" type="string"/>
+                           <field name="C__CATG__NET_CONNECTIONS_FOLDER" type="string"/>
+                           <field name="C__CATG__NET_LISTENER" type="string"/>
+                           <field name="C__CATG__NET_CONNECTOR" type="string"/>
+                           <field name="C__CATG__CLUSTER_ADM_SERVICE" type="string"/>
+                           <field name="C__CATG__JDISC_CA" type="string"/>
+                           <field name="C__CATG__CMK" type="string"/>
+                           <field name="C__CATG__CMK_TAG" type="string"/>
+                           <field name="C__CATG__CMK_HOST_SERVICE" type="string"/>
+                           <field name="C__CATG__CMK_SERVICE" type="string"/>
+                           <field name="C__CATG__CMK_DEF" type="string"/>
+                           <field name="C__CATG__NDO" type="string"/>
+                           <field name="C__CATG__CABLE" type="string"/>
+                           <field name="C__CATG__IDENTIFIER" type="string"/>
+                           <field name="C__CATG__SERVICE" type="string"/>
+                           <field name="C__CATG__OPERATING_SYSTEM" type="string"/>
+                           <field name="C__CATG__JDISC_DISCOVERY" type="string"/>
+                           <field name="C__CATG__QINQ_SP" type="string"/>
+                           <field name="C__CATG__FIBER_LEAD" type="string"/>
+                           <field name="C__CATG__QINQ_CE" type="string"/>
+                           <field name="C__CATG__IMAGES" type="string"/>
+                           <field name="C__CATG__WAN" type="string"/>
+                           <field name="C__CATG__RM_CONTROLLER" type="string"/>
+                           <field name="C__CATG__VIRTUAL_MAINTENANCE" type="string"/>
+                           <field name="C__CATG__RM_CONTROLLER_BACKWARD" type="string"/>
+                           <field name="C__CATG__MANAGED_OBJECTS" type="string"/>
+                           <field name="C__CATG__VRRP" type="string"/>
+                           <field name="C__CATG__VRRP_MEMBER" type="string"/>
+                           <field name="C__CATG__VRRP_VIEW" type="string"/>
+                           <field name="C__CATG__STACK_MEMBER" type="string"/>
+                           <field name="C__CATG__STACK_MEMBERSHIP" type="string"/>
+                           <field name="C__CATG__LAST_LOGIN_USER" type="string"/>
+                           <field name="C__CATG__NET_ZONE" type="string"/>
+                           <field name="C__CATG__NET_ZONE_OPTIONS" type="string"/>
+                           <field name="C__CATG__NET_ZONE_SCOPES" type="string"/>
+                           <field name="C__CATG__STACK_PORT_OVERVIEW" type="string"/>
+                           <field name="C__CATG__DOCUMENT" type="string"/>
+                           <field name="C__CATG__FLOORPLAN" type="string"/>
+                           <field name="C__CATG__VIRTUAL_VIVA" type="string"/>
+                           <field name="C__CATG__CABLE_CONNECTION" type="string"/>
+                           <field name="C__CATG__VIRTUAL_RELOCATE_CI" type="string"/>
+                           <field name="C__CATG__RISK_ASSESSMENT" type="string"/>
+                           <field name="C__CATG__USAGES" type="string"/>
+                           <field name="C__CATG__ISO27001_ISMS" type="string"/>
+                           <field name="C__CATG__ISO27001_PROTECTION_REQUIREMENTS" type="string"/>
+                           <field name="C__CATG__ISO27001_THREAT" type="string"/>
+                           <field name="C__CATG__ISO27001_VULNERABILITY" type="string"/>
+                           <field name="C__CATG__ISO27001_CONTROL" type="string"/>
+                           <field name="C__CATG__ISO27001_INCIDENT_SCENARIO" type="string"/>
+                           <field name="C__CATG__ISO27001_PROTECTION_CATEGORY" type="string"/>
+                           <field name="C__CATG__ISO27001_STANDARD_VULNERABILITIES" type="string"/>
+                           <field name="C__CATG__ISO27001_ASSIGNED_CONTROLS" type="string"/>
+                           <field name="C__CATG__ISO27001_RECOMMENDATIONS" type="string"/>
+                           <field name="C__CATG__MULTIEDIT" type="string"/>
+                           <field name="C__CATG__CMK2" type="string"/>
+                           <field name="C__CATG__CMK2_TAG" type="string"/>
+                           <field name="C__CATG__VIVA2_MODULE" type="string"/>
+                           <field name="C__CATG__VIVA2_THREAT" type="string"/>
+                           <field name="C__CATG__VIVA2_REQUIREMENT" type="string"/>
+                           <field name="C__CATG__VIVA2_PROTECTION_REQ" type="string"/>
+                           <field name="C__CATG__VIVA2_MODULES" type="string"/>
+                           <field name="C__CATG__VIVA2_ASGN_MODULES" type="string"/>
+                           <field name="C__CATG__VIVA2_TARGETS_GROUPS" type="string"/>
+                           <field name="C__CATG__VIVA2_SCOPE" type="string"/>
+                           <field name="C__CATG__VIVA2_ASGN_SCOPES" type="string"/>
+                           <field name="C__CATG__VIVA2_SCOPE_ANALYSE" type="string"/>
+                           <field name="C__CATG__VIVA2_THREATS" type="string"/>
+                           <field name="C__CATG__VIVA2_REQUIREMENTS" type="string"/>
+                           <field name="C__CATG__VIVA2_ITGS_CHECK" type="string"/>
+                           <field name="C__CATG__VIVA2_CLASSIFICATION" type="string"/>
+                           <field name="C__CATG__VIVA2_IT_BASELINE_PROTECTION_FOLDER" type="string"/>
+                           <field name="C__CATG__VIVA2_ASGN_REQUIREMENTS_VIEW" type="string"/>
+                           <field name="C__CATG__VIVA2_ASGN_THREATS_VIEW" type="string"/>
+                           <field name="C__CATG__VIVA2_REALIZATIONPLAN" type="string"/>
+                           <field name="C__CATG__DATABASE_FOLDER" type="string"/>
+                           <field name="C__CATG__DATABASE" type="string"/>
+                           <field name="C__CATG__DATABASE_TABLE" type="string"/>
+                           <field name="C__CATG__DATABASE_SA" type="string"/>
+                           <field name="C__CATG__ISO27001_CONTROL_ANNEX_A" type="string"/>
+                           <field name="C__CATG__ISO27001_APPLICABILITY" type="string"/>
+                           <field name="C__CATG__SIM" type="string"/>
+                           <field name="C__CATG__CARDS" type="string"/>
+                           <field name="C__CATG__ASSIGNED_SIM_CARDS" type="string"/>
+                           <field name="C__CATG__VIVA2_IT_GS_CHECK" type="string"/>
+                           <field name="C__CATG__VIVA2_IT_BASELINE_PROTECTION_FOLDER_SCOPE" type="string"/>
+                           <field name="C__CATG__VIVA2_ASGN_PROCESS_MODULES" type="string"/>
+                           <field name="C__CATG__VIVA2_IT_GS_CHECK_SCOPE" type="string"/>
+                           <field name="C__CATG__VIVA2_COMMUNICATION_LINK" type="string"/>
+                           <field name="C__CATG__CLOUD_SUBSCRIPTIONS" type="string"/>
+                           <field name="C__CATG__ASSIGNED_SUBSCRIPTIONS" type="string"/>
+                           <field name="C__CATG__ASSIGNED_USERS" type="string"/>
+                           <field name="C__CATG__VIRTUAL__RFC" type="string"/>
+                           <field name="C__CATG__MED_TEC_BRIEFING" type="string"/>
+                           <field name="C__CATG__MED_TEC_DEADLINE" type="string"/>
+                           <field name="C__CATG__SUPPORT_ENTITLEMENT" type="string"/>
+                           <field name="C__CATG__CONNECTION_ENDPOINT" type="string"/>
+                           <field name="C__CATG__MED_TEC" type="string"/>
+                           <field name="C__CATG__RISK_ASSESSMENT_EVENT" type="string"/>
+                           <field name="C__CATG__ISO27001_AUDIT" type="string"/>
+                           <field name="C__CATG__ISO27001_RESULTS" type="string"/>
+                           <field name="C__CATG__ISO27001_STANDARD_REQUIREMENT" type="string"/>
+                           <field name="C__CATG__JDISC_DEVICE_INFORMATION" type="string"/>
+                           <field name="C__CATG__ISO27001_ATTRIBUTES" type="string"/>
+                         </field>
+                         <field name="s" type="object">
+                           <field name="C__CATS__ENCLOSURE" type="string"/>
+                           <field name="C__CATS__ROOM" type="string"/>
+                           <field name="C__CATS__SERVICE" type="string"/>
+                           <field name="C__CATS__SWITCH_NET" type="string"/>
+                           <field name="C__CATS__WAN" type="string"/>
+                           <field name="C__CATS__EMERGENCY_PLAN" type="string"/>
+                           <field name="C__CATS__AC" type="string"/>
+                           <field name="C__CATS__ACCESS_POINT" type="string"/>
+                           <field name="C__CATS__MONITOR" type="string"/>
+                           <field name="C__CATS__CLIENT" type="string"/>
+                           <field name="C__CATS__SWITCH_FC" type="string"/>
+                           <field name="C__CATS__ROUTER" type="string"/>
+                           <field name="C__CATS__PRT" type="string"/>
+                           <field name="C__CATS__FILE" type="string"/>
+                           <field name="C__CATS__APPLICATION" type="string"/>
+                           <field name="C__CATS__NET" type="string"/>
+                           <field name="C__CATS__CELL_PHONE_CONTRACT" type="string"/>
+                           <field name="C__CATS__LICENCE" type="string"/>
+                           <field name="C__CATS__GROUP" type="string"/>
+                           <field name="C__CATS__LICENCE_LIST" type="string"/>
+                           <field name="C__CATS__LICENCE_OVERVIEW" type="string"/>
+                           <field name="C__CATS__FILE_ACTUAL" type="string"/>
+                           <field name="C__CATS__FILE_VERSIONS" type="string"/>
+                           <field name="C__CATS__FILE_OBJECTS" type="string"/>
+                           <field name="C__CATS__EMERGENCY_PLAN_ATTRIBUTE" type="string"/>
+                           <field name="C__CATS__EMERGENCY_PLAN_LINKED_OBJECTS" type="string"/>
+                           <field name="C__CATS__WS_NET_TYPE" type="string"/>
+                           <field name="C__CATS__WS_ASSIGNMENT" type="string"/>
+                           <field name="C__CATS__WS" type="string"/>
+                           <field name="C__CATS__UPS" type="string"/>
+                           <field name="C__CATS__EPS" type="string"/>
+                           <field name="C__CATS__SAN_ZONING" type="string"/>
+                           <field name="C__CATS__ORGANIZATION" type="string"/>
+                           <field name="C__CATS__ORGANIZATION_MASTER_DATA" type="string"/>
+                           <field name="C__CATS__ORGANIZATION_PERSONS" type="string"/>
+                           <field name="C__CATS__PERSON" type="string"/>
+                           <field name="C__CATS__PERSON_MASTER" type="string"/>
+                           <field name="C__CATS__PERSON_LOGIN" type="string"/>
+                           <field name="C__CATS__PERSON_ASSIGNED_GROUPS" type="string"/>
+                           <field name="C__CATS__PERSON_GROUP" type="string"/>
+                           <field name="C__CATS__PERSON_GROUP_MASTER" type="string"/>
+                           <field name="C__CATS__PERSON_GROUP_MEMBERS" type="string"/>
+                           <field name="C__CATS__ORGANIZATION_CONTACT_ASSIGNMENT" type="string"/>
+                           <field name="C__CATS__PERSON_CONTACT_ASSIGNMENT" type="string"/>
+                           <field name="C__CATS__PERSON_GROUP_CONTACT_ASSIGNMENT" type="string"/>
+                           <field name="C__CATS__CLUSTER_SERVICE" type="string"/>
+                           <field name="C__CATS__RELATION_DETAILS" type="string"/>
+                           <field name="C__CATS__DATABASE_SCHEMA" type="string"/>
+                           <field name="C__CATS__DATABASE_LINKS" type="string"/>
+                           <field name="C__CATS__DBMS" type="string"/>
+                           <field name="C__CATS__DATABASE_INSTANCE" type="string"/>
+                           <field name="C__CATS__PDU" type="string"/>
+                           <field name="C__CATS__PDU_BRANCH" type="string"/>
+                           <field name="C__CATS__PDU_OVERVIEW" type="string"/>
+                           <field name="C__CATS__PARALLEL_RELATION" type="string"/>
+                           <field name="C__CATS__DATABASE_OBJECTS" type="string"/>
+                           <field name="C__CATS__DATABASE_ACCESS" type="string"/>
+                           <field name="C__CATS__DATABASE_GATEWAY" type="string"/>
+                           <field name="C__CATS__REPLICATION" type="string"/>
+                           <field name="C__CATS__REPLICATION_PARTNER" type="string"/>
+                           <field name="C__CATS__APPLICATION_ASSIGNED_OBJ" type="string"/>
+                           <field name="C__CATS__CLUSTER_SERVICE_ASSIGNED_OBJ" type="string"/>
+                           <field name="C__CATS__MIDDLEWARE" type="string"/>
+                           <field name="C__CATS__KRYPTO_CARD" type="string"/>
+                           <field name="C__CATS__NET_IP_ADDRESSES" type="string"/>
+                           <field name="C__CATS__NET_DHCP" type="string"/>
+                           <field name="C__CATS__LAYER2_NET" type="string"/>
+                           <field name="C__CATS__LAYER2_NET_ASSIGNED_PORTS" type="string"/>
+                           <field name="C__CATS__CONTRACT" type="string"/>
+                           <field name="C__CATS__CONTRACT_INFORMATION" type="string"/>
+                           <field name="C__CATS__CONTRACT_ALLOCATION" type="string"/>
+                           <field name="C__CATS__CHASSIS" type="string"/>
+                           <field name="C__CATS__CHASSIS_SLOT" type="string"/>
+                           <field name="C__CATS__CHASSIS_DEVICES" type="string"/>
+                           <field name="C__CATS__CHASSIS_VIEW" type="string"/>
+                           <field name="C__CATS__CHASSIS_CABLING" type="string"/>
+                           <field name="C__CATS__APPLICATION_VARIANT" type="string"/>
+                           <field name="C__CATS__BASIC_AUTH" type="string"/>
+                           <field name="C__CATS__PERSON_NAGIOS" type="string"/>
+                           <field name="C__CATS__PERSON_GROUP_NAGIOS" type="string"/>
+                           <field name="C__CATS__GROUP_TYPE" type="string"/>
+                           <field name="C__CATS__LAYER2_NET_ASSIGNED_LOGICAL_PORTS" type="string"/>
+                           <field name="C__CATS__APPLICATION_SERVICE_ASSIGNED_OBJ" type="string"/>
+                           <field name="C__CATS__APPLICATION_DBMS_ASSIGNED_OBJ" type="string"/>
+                           <field name="C__CATS__NET_ZONE" type="string"/>
+                           <field name="C__CATS__OPERATING_SYSTEM" type="string"/>
+                           <field name="C__CATS__DATABASE_INSTALLATION" type="string"/>
+                           <field name="C__CATS__DBMS_APPLICATION" type="string"/>
+                         </field>
+                         <field name="g_custom" type="object">
+                           <field name="C__CATG__CUSTOM_FIELDS_INVENTUR_TEST" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_ANGABENZUMVERFAHREN" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_RISIKOMANAGEMENT" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_INFORMATIONSVERBUNG" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_DATENKATEGORIE" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_DATENKATEGORIEZUWEISUNG" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_DATENSCHUTZFOLGENABSCHTZUNG" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_DATENSCHUTZVERTRAG" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_1509700012" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_DATENBERMITTLUNG" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_INHERIT_RISK_ASSESSMENT" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_REPORT_VOM_INFORMATIONSVERBUND_ABGEDECKT" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_REPORT_PHYSISCHE_HARDWARE_OHNE_STANDORT" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_RAEUME_OHNE_RAUMNUMMER" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_RAEUME_OHNE_GEBAEUDE" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_ITGRUNDSCHUTZCHECK" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_ANWENDUNGEN_OHNE_INSTALLATION" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_RESOURCE_GROUPS" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_RESOURCES" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_MED_TEC__SPAREPARTS" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_MED_TEC_MALFUNCTIONS_2" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_MED_TEC__BOOK" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_MED_TEC__ASSOC_BRIEFING" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_VRF" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_REPORT_BERARBEITEN" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_INFORMATIONS" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_LEIHLISTE" type="string"/>
+                           <field name="YOUR STRING" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_VOM_INFORMATIONSVERBUND_ABGEDECKT_ANZAHL" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_VERLEIH" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS__RFC_INVENTORY" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_LINK_MONITORING" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_DIARY" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_EIGENEKATEGORIE" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_COLORED_DIALOG" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_BCM" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_PROCESSINGS_OF_ORGANISATION" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_MED_TEC__MALFUNCTIONS" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_BEISPIEL" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_WLAN_TEST" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_AUSGESTRAHLTE_WLANS" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_AUSSTRAHLENDE_ACCESSPOINTS" type="string"/>
+                           <field name="C__CATG__CUSTOM_FIELDS_CHECKMK" type="string"/>
+                         </field>
+                       </field>
+                       <field name="recordStates" type="object">
+                         <field name="C__RECORD_STATUS__NORMAL" type="string"/>
+                         <field name="C__RECORD_STATUS__ARCHIVED" type="string"/>
+                         <field name="C__RECORD_STATUS__DELETED" type="string"/>
+                         <field name="C__RECORD_STATUS__PURGE" type="string"/>
+                       </field>
+                       <field name="relationTypes" type="object">
+                         <field name="C__RELATION_TYPE__SOFTWARE" type="string"/>
+                         <field name="C__RELATION_TYPE__CLUSTER_SERVICE" type="string"/>
+                         <field name="C__RELATION_TYPE__BACKUP" type="string"/>
+                         <field name="C__RELATION_TYPE__ADMIN" type="string"/>
+                         <field name="C__RELATION_TYPE__USER" type="string"/>
+                         <field name="C__RELATION_TYPE__CLUSTER_MEMBERSHIPS" type="string"/>
+                         <field name="C__RELATION_TYPE__POWER_CONSUMER" type="string"/>
+                         <field name="C__RELATION_TYPE__NETWORK_PORT" type="string"/>
+                         <field name="C__RELATION_TYPE__VIRTUAL_MACHINE" type="string"/>
+                         <field name="C__RELATION_TYPE__LOCATION" type="string"/>
+                         <field name="C__RELATION_TYPE__UNIVERSAL_INTERFACE" type="string"/>
+                         <field name="C__RELATION_TYPE__IP_ADDRESS" type="string"/>
+                         <field name="C__RELATION_TYPE__CONTROLLER_FC_PORT" type="string"/>
+                         <field name="C__RELATION_TYPE__CONNECTORS" type="string"/>
+                         <field name="C__RELATION_TYPE__LDEV_CLIENT" type="string"/>
+                         <field name="C__RELATION_TYPE__GROUP_MEMBERSHIPS" type="string"/>
+                         <field name="C__RELATION_TYPE__PERSON_ASSIGNED_GROUPS" type="string"/>
+                         <field name="C__RELATION_TYPE__DEFAULT" type="string"/>
+                         <field name="C__RELATION_TYPE__DATABASE_ACCESS" type="string"/>
+                         <field name="C__RELATION_TYPE__DATABASE_LINK" type="string"/>
+                         <field name="C__RELATION_TYPE__DATABASE_GATEWAY" type="string"/>
+                         <field name="C__RELATION_TYPE__DATABASE_INSTANCE" type="string"/>
+                         <field name="C__RELATION_TYPE__IT_SERVICE_COMPONENT" type="string"/>
+                         <field name="C__RELATION_TYPE__REPLICATION_PARTNER" type="string"/>
+                         <field name="C__RELATION_TYPE__SOA_COMPONENTS" type="string"/>
+                         <field name="C__RELATION_TYPE__SOA_STACKS" type="string"/>
+                         <field name="C__RELATION_TYPE__DBMS" type="string"/>
+                         <field name="C__RELATION_TYPE__MOBILE_PHONE" type="string"/>
+                         <field name="C__RELATION_TYPE__ORGANIZATION" type="string"/>
+                         <field name="C__RELATION_TYPE__LOGICAL_UNIT" type="string"/>
+                         <field name="C__RELATION_TYPE__CONTRACT" type="string"/>
+                         <field name="C__RELATION_TYPE__CHASSIS" type="string"/>
+                         <field name="C__RELATION_TYPE__STACKING" type="string"/>
+                         <field name="C__RELATION_TYPE__SHARE_ACCESS" type="string"/>
+                         <field name="C__RELATION_TYPE__NAGIOS_REFS_SERVICE" type="string"/>
+                         <field name="C__RELATION_TYPE__NET_CONNECTIONS" type="string"/>
+                         <field name="C__RELATION_TYPE__CLUSTER_ADM_SERVICE" type="string"/>
+                         <field name="C__RELATION_TYPE__OPERATION_SYSTEM" type="string"/>
+                         <field name="C__RELATION_TYPE__LAYER2_TRANSPORT" type="string"/>
+                         <field name="C__RELATION_TYPE__RM_CONTROLLER" type="string"/>
+                         <field name="C__RELATION_TYPE__FILE" type="string"/>
+                         <field name="C__RELATION_TYPE__ORGANIZATION_HEADQUARTER" type="string"/>
+                         <field name="C__RELATION_TYPE__VHOST_ADMIN_SERVICE" type="string"/>
+                         <field name="C__RELATION_TYPE__VRRP" type="string"/>
+                         <field name="C__RELATION_TYPE_CUSTOM__LC_OBJTYPE_PRIVACY_IT_COMPOSITE" type="string"/>
+                         <field name="C__RELATION_TYPE_CUSTOM__LC_OBJTYPE_PRIVACY_IT_CONTROLL" type="string"/>
+                         <field name="C__RELATION_TYPE_CUSTOM__LC_OBJTYPE_IT_SERVICE" type="string"/>
+                         <field name="C__RELATION_TYPE__ISMS_RISK_ASSESSMENT__THREAT" type="string"/>
+                         <field name="C__RELATION_TYPE__ISMS_RISK_ASSESSMENT__VULNERABILITY" type="string"/>
+                         <field name="C__RELATION_TYPE__ISMS_RISK_ASSESSMENT__CONTROL" type="string"/>
+                         <field name="C__RELATION_TYPE__MANUAL" type="string"/>
+                         <field name="C__RELATION_TYPE__EMERGENCY_PLAN" type="string"/>
+                         <field name="C__RELATION_TYPE__VIVA2_MODULES" type="string"/>
+                         <field name="C__RELATION_TYPE__VIVA2_ASGN_MODULES" type="string"/>
+                         <field name="C__RELATION_TYPE__VIVA2_SCOPE" type="string"/>
+                         <field name="C__RELATION_TYPE__VIVA2_ASGN_SCOPES" type="string"/>
+                         <field name="C__RELATION_TYPE_CUSTOM__VERANTWORTLICHER_NACH_5_MPG" type="string"/>
+                         <field name="C__RELATION_TYPE__WAN_CONNECTION" type="string"/>
+                         <field name="C__RELATION_TYPE__ISMS_APPLICABILITY__CONTROL" type="string"/>
+                         <field name="C__RELATION_TYPE__VIVA2_COMMUNICATION_LINK" type="string"/>
+                         <field name="C__RELATION_TYPE__LAYER3_2_LAYER2" type="string"/>
+                         <field name="C__RELATION_TYPE_CUSTOM__AZURE_SUBSCRIPTION_LINK" type="string"/>
+                         <field name="C__RELATION_TYPE_CUSTOM__AZURE_RESOURCE_GROUP_LINK" type="string"/>
+                         <field name="C__RELATION_TYPE__ASSIGNED_SIM_CARDS" type="string"/>
+                         <field name="C__RELATION_TYPE__CONNECTION_ENDPOINT" type="string"/>
+                         <field name="C__RELATION_TYPE__ISO27001_RESULTS__CONTROL" type="string"/>
+                         <field name="C__RELATION_TYPE__MED_TEC_BRIEFING__WRITTEN_EVIDENCE" type="string"/>
+                         <field name="C__RELATION_TYPE__MED_TEC_DEADLINE__RESULT" type="string"/>
+                         <field name="C__RELATION_TYPE__MED_TEC_DEADLINE__REPORT" type="string"/>
+                         <field name="C__RELATION_TYPE__MED_TEC__FUNCTEST" type="string"/>
+                         <field name="C__RELATION_TYPE_CUSTOM__AUSGESTRAHLTES_WLAN" type="string"/>
+                       </field>
+                       <field name="staticObjects" type="object">
+                         <field name="C__OBJ__NET_GLOBAL_IPV4" type="string"/>
+                         <field name="C__OBJ__NET_GLOBAL_IPV6" type="string"/>
+                         <field name="C__OBJ__PERSON_ADMIN" type="string"/>
+                         <field name="C__OBJ__PERSON_API_SYSTEM" type="string"/>
+                         <field name="C__OBJ__PERSON_AUTHOR" type="string"/>
+                         <field name="C__OBJ__PERSON_EDITOR" type="string"/>
+                         <field name="C__OBJ__PERSON_GROUP_ADMIN" type="string"/>
+                         <field name="C__OBJ__PERSON_GROUP_ARCHIVAR" type="string"/>
+                         <field name="C__OBJ__PERSON_GROUP_AUTHOR" type="string"/>
+                         <field name="C__OBJ__PERSON_GROUP_EDITOR" type="string"/>
+                         <field name="C__OBJ__PERSON_GROUP_READER" type="string"/>
+                         <field name="C__OBJ__PERSON_READER" type="string"/>
+                         <field name="C__OBJ__RACK_SEGMENT__2SLOT" type="string"/>
+                         <field name="C__OBJ__RACK_SEGMENT__4SLOT" type="string"/>
+                         <field name="C__OBJ__RACK_SEGMENT__8SLOT" type="string"/>
+                         <field name="C__OBJ__ROOT_LOCATION" type="string"/>
+                       </field>
+                     </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="idoit.addons" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">idoit.addons</field>
+                    <field name="params" type="object">
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string">de</field>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                         <field name="id" type="string"/>
+                         <field name="jsonrpc" type="string"/>
+                         <field name="result" type="object">
+                           <field name="result" type="array">
+                               <field name="active" type="string"/>
+                               <field name="author" type="object">
+                                 <field name="name" type="string"/>
+                               </field>
+                               <field name="installed" type="string"/>
+                               <field name="key" type="string"/>
+                               <field name="licensed" type="string"/>
+                               <field name="title" type="string"/>
+                               <field name="version" type="string"/>
+                           </field>
+                           <field name="success" type="string"/>
+                         </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object_type_groups.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object_type_groups.read</field>
+                    <field name="params" type="object">
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string">de</field>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                     <field name="id" type="string"/>
+                     <field name="jsonrpc" type="string"/>
+                     <field name="result" type="array">
+                         <field name="id" type="string"/>
+                         <field name="title" type="string"/>
+                         <field name="const" type="string"/>
+                         <field name="status" type="string"/>
+                     </field>
+                     <field name="success" type="string"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object_types" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object_types</field>
+                    <field name="params" type="object">
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string">de</field>
+                        <field name="countobjects" type="string">true</field>
+                        <field name="filter" type="object">
+                            <field name="id" type="string"/>
+                        </field>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                     <field name="id" type="string"/>
+                     <field name="jsonrpc" type="string"/>
+                     <field name="result" type="array">
+                         <field name="id" type="string"/>
+                         <field name="title" type="string"/>
+                         <field name="const" type="string"/>
+                         <field name="container" type="string"/>
+                         <field name="color" type="string"/>
+                         <field name="objectcount" type="string"/>
+                     </field>
+                     <field name="success" type="string"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object_type_categories" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object_type_categories</field>
+                    <field name="params" type="object">
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string">de</field>
+                        <field name="type" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                     <field name="id" type="string"/>
+                     <field name="jsonrpc" type="string"/>
+                     <field name="result" type="array">
+                         <field name="id" type="string"/>
+                         <field name="title" type="string"/>
+                         <field name="const" type="string"/>
+                         <field name="multi_value" type="string"/>
+                         <field name="source_table" type="string"/>
+                     </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.objects.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.objects.read</field>
+                    <field name="params" type="object">
+                        <field name="filter" type="object">
+                            <field name="ids" type="array"/>
+                            <field name="type" type="array"/>
+                            <field name="title" type="string"/>
+                            <field name="type_title" type="string"/>
+                            <field name="sysid" type="string"/>
+                            <field name="first_name" type="string"/>
+                            <field name="last_name" type="string"/>
+                            <field name="email" type="string"/>
+                        </field>
+                        <field name="limit" type="string"/>
+                        <field name="order_by" type="string"/>
+                        <field name="sort" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" required="true" type="number"/>
+                        <field name="jsonrpc" required="true" type="string"/>
+                        <field name="result" type="array">
+                            <field name="id" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="sysid" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="created" type="string"/>
+                            <field name="updated" type="string"/>
+                            <field name="type_title" type="string"/>
+                            <field name="type_group_title" type="string"/>
+                            <field name="status" type="string"/>
+                            <field name="cmdb_status" type="string"/>
+                            <field name="cmdb_status_title" type="string"/>
+                            <field name="image" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.read</field>
+                    <field name="params" type="object">
+                        <field name="id" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="id" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="sysid" type="string"/>
+                            <field name="objecttyp" type="string"/>
+                            <field name="type_title" type="string"/>
+                            <field name="type_icon" type="string"/>
+                            <field name="status" type="string"/>
+                            <field name="cmdb_status" type="string"/>
+                            <field name="cmdb_status_title" type="string"/>
+                            <field name="created" type="string"/>
+                            <field name="updated" type="string"/>
+                            <field name="image" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.create" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.create</field>
+                    <field name="params" type="object">
+                        <field name="type" type="string"/>
+                        <field name="title" type="string"/>
+                        <field name="cmdb_status" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="id" type="string"/>
+                            <field name="message" type="string"/>
+                            <field name="status" type="boolean"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.archive" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.archive</field>
+                    <field name="params" type="object">
+                        <field name="object" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.recycle" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.recycle</field>
+                    <field name="params" type="object">
+                        <field name="object" type="string"/>
+                        <field name="status" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.delete" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.delete</field>
+                    <field name="params" type="object">
+                        <field name="id" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.purge" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.purge</field>
+                    <field name="params" type="object">
+                        <field name="object" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.object.quickpurge" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.object.quickpurge</field>
+                    <field name="params" type="object">
+                        <field name="id" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category_info.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category_info.read</field>
+                    <field name="params" type="object">
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string">de</field>
+                        <field name="category" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="result" type="object"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.read</field>
+                    <field name="params" type="object">
+                        <field name="objID" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <!-- for empty or not need to ask a user -->
+                        <field name="result" type="array">
+                            <field name="id" type="string"/>
+                            <field name="objID" type="string"/>
+                            <field name="hostname" type="string"/>
+                            <field name="parent" type="object">
+                                  <field name="location_path" type="string"/>
+                            </field>
+                            <field name="contact" type="object">
+                                 <field name="first_name" type="string"/>
+                                 <field name="last_name" type="string"/>
+                                 <field name="mail" type="string"/>
+                                 <field name="login" type="string"/>
+                            </field>
+                            <field name="role" type="object">
+                                 <field name="id" type="string"/>
+                                 <field name="title" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.update" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.update</field>
+                    <field name="params" type="object">
+                        <field name="objID" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="data" type="object"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <!-- for empty or not need to ask a user -->
+                        <field name="result" type="array">
+                            <field name="id" type="string"/>
+                            <field name="objID" type="string"/>
+                            <field name="hostname" type="string"/>
+                            <field name="parent" type="object">
+                                 <field name="location_path" type="string"/>
+                            </field>
+                            <field name="contact" type="object">
+                                 <field name="first_name" type="string"/>
+                                 <field name="last_name" type="string"/>
+                                 <field name="mail" type="string"/>
+                                 <field name="login" type="string"/>
+                            </field>
+                            <field name="role" type="object">
+                                 <field name="id" type="string"/>
+                                 <field name="title" type="string"/>
+                            </field>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.save" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.update</field>
+                    <field name="params" type="object">
+                        <field name="object" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="data" type="object"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <!-- for empty or not need to ask a user -->
+                        <field name="result" type="object">
+                            <field name="id" type="string"/>
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.create" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.create</field>
+                    <field name="params" type="object">
+                        <field name="objID" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="data" type="object">
+                            <field name="manufacturer" type="string"/>
+                            <field name="title" type="string"/>
+                        </field>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <!-- for empty or not need to ask a user -->
+                        <field name="result" type="object">
+                            <field name="id" type="string"/>
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+         </operation>
+        <operation name="cmdb.category.delete" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.delete</field>
+                    <field name="params" type="object">
+                        <field name="objID" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="cateID" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.purge" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.purge</field>
+                    <field name="params" type="object">
+                        <field name="object" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="entry" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="success" type="string"/>
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.quickpurge" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.quickpurge</field>
+                    <field name="params" type="object">
+                        <field name="objID" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="cateID" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="success" type="string"/>
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.recycle" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.recycle</field>
+                    <field name="params" type="object">
+                        <field name="object" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="entry" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="success" type="string"/>
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.category.archive" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.category.archive</field>
+                    <field name="params" type="object">
+                        <field name="object" type="string"/>
+                        <field name="category" type="string"/>
+                        <field name="entry" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" required="true" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" type="number"/>
+                        <field name="jsonrpc" type="string"/>
+                        <field name="result" type="object">
+                            <field name="success" type="string"/>
+                            <field name="message" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.condition.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.condition.read</field>
+                    <field name="params" type="object">
+                        <field name="conditions" type="array">
+                            <field name="property" type="array"/>
+                            <field name="comparison" type="array"/>
+                            <field name="value" type="string"/>
+                        </field>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="id" required="true" type="number"/>
+                        <field name="jsonrpc" required="true" type="string"/>
+                        <field name="result" type="array">
+                            <field name="id" type="string"/>
+                            <field name="title" type="string"/>
+                            <field name="sysid" type="string"/>
+                            <field name="type" type="string"/>
+                            <field name="created" type="string"/>
+                            <field name="updated" type="string"/>
+                            <field name="type_title" type="string"/>
+                            <field name="type_icon" type="string"/>
+                        </field>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+        <operation name="cmdb.reports.read" type="">
+            <request>
+                <method>POST</method>
+                <endpoint>{url}</endpoint>
+                <header>
+                    <item name="Content-Type" type="string">application/json</item>
+                    <item name="X-RPC-Auth-Username" type="string">{username}</item>
+                    <item name="X-RPC-Auth-Password" type="string">{password}</item>
+                </header>
+                <body data="raw" format="json" type="object">
+                    <field name="version" type="string">2.0</field>
+                    <field name="method" type="string">cmdb.reports.read</field>
+                    <field name="params" type="object">
+                        <field name="objID" type="string"/>
+                        <field name="id" type="string"/>
+                        <field name="apikey" type="string">{apikey}</field>
+                        <field name="language" type="string"/>
+                    </field>
+                    <field name="id" type="string">1</field>
+                </body>
+            </request>
+            <response>
+                <success status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <!-- for empty or not need to ask a user -->
+            <field name="result" type="array"/>
+                    </body>
+                </success>
+                <fail status="200">
+                    <header>
+                        <item name="Content-Type" type="string">application/json</item>
+                    </header>
+                    <body data="raw" format="json" type="object">
+                        <field name="error" type="object">
+                            <field name="code" type="number"/>
+                            <field name="message" type="string"/>
+                            <field name="data" type="string"/>
+                        </field>
+                    </body>
+                </fail>
+            </response>
+        </operation>
+    </operations>
+</invoker>
