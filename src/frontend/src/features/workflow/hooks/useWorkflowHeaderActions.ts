@@ -6,6 +6,7 @@ type Params = {
 	downloadTemplate: () => Promise<void> | void;
 	openSaveTemplate: () => void;
 	openLoadTemplate: () => Promise<void> | void;
+	openJsonEditor: () => void;
 	openShortcuts: () => void;
 	openHistory: () => void;
 	openChangeHistory: () => void;
@@ -16,7 +17,7 @@ type Params = {
 };
 
 export const useWorkflowHeaderActions = ({ openAssignCategory, downloadTemplate,
-	openSaveTemplate, openLoadTemplate, openShortcuts, openHistory, openChangeHistory,
+	openSaveTemplate, openLoadTemplate, openJsonEditor, openShortcuts, openHistory, openChangeHistory,
 	closeChangeHistory, closeSchedules, closeCanvasPanels, refreshHistory }: Params) => {
 	const navigate = useNavigate();
 
@@ -26,6 +27,7 @@ export const useWorkflowHeaderActions = ({ openAssignCategory, downloadTemplate,
 			case 'download-template': void downloadTemplate(); break;
 			case 'save-template': openSaveTemplate(); break;
 			case 'load-template': void openLoadTemplate(); break;
+			case 'edit-json': openJsonEditor(); break;
 			case 'change-history': openChangeHistory(); break;
 			case 'shortcuts': openShortcuts(); break;
 			case 'exit': navigate('/workflow'); break;
