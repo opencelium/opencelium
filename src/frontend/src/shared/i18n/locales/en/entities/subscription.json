@@ -1,7 +1,7 @@
 {
   "wizard": {
     "header": "Subscription",
-    "subheader": "Review your license, monthly API operation usage, and per-connection execution history."
+    "subheader": "Review your license, monthly API operation usage, and per-connection execution history. Upgrades, extra operations and support tickets are handled on the OpenCelium Service Portal."
   },
   "steps": {
     "license": {
@@ -70,6 +70,9 @@
     "activateFree": {
       "button": "Activate Free License",
       "success": "Free license activated."
+    },
+    "servicePortal": {
+      "button": "Service Portal"
     }
   },
   "columns": {

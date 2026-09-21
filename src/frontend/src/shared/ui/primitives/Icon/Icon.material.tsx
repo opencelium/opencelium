@@ -59,6 +59,7 @@ import {
     Loop,
     RadioButtonUnchecked,
     GitHub,
+    Apps,
 } from '@mui/icons-material';
 
 import MouseOutlined from '@mui/icons-material/MouseOutlined';
@@ -127,6 +128,7 @@ const iconMap = {
     circle: RadioButtonUnchecked,
     git: GitHub,
     globe: Public,
+    portal: Apps,
 };
 
 export const MaterialIcon: IconComponent = ({

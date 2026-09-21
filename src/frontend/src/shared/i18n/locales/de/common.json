@@ -95,7 +95,8 @@
     "copyrightMobile": "© {{year}} | Version {{version}}",
     "docsLink": "Dokumentation",
     "gitLink": "GitHub",
-    "landingPageLink": "OpenCelium Webseite"
+    "landingPageLink": "OpenCelium Webseite",
+    "servicePortalLink": "Service-Portal"
   },
   "topbar": {
     "switchToGerman": "Auf Deutsch umschalten",
@@ -109,7 +110,8 @@
     "docs": "Dokumentation",
       "help": "Hilfe",
       "startOnboardingTour": "Onboarding-Tour starten",
-      "startDashboardTour": "Dashboard-Tour starten"
+      "startDashboardTour": "Dashboard-Tour starten",
+      "servicePortal": "Service-Portal"
   },
   "user": {
     "unknown": "Unbekannter Benutzer"

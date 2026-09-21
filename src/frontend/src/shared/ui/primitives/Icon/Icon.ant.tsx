@@ -38,6 +38,7 @@ import {
     UndoOutlined,
     RedoOutlined,
     GithubOutlined,
+    AppstoreOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -117,6 +118,7 @@ const iconMap = {
     circle: MdRadioButtonUnchecked,
     git: GithubOutlined,
     globe: GlobalOutlined,
+    portal: AppstoreOutlined,
 };
 
 export const AntIcon: IconComponent = ({

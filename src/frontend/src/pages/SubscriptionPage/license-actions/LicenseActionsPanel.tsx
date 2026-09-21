@@ -10,6 +10,7 @@ import { ActivateSubscriptionDialog } from '@pages/SubscriptionPage/license-acti
 import { notifyError } from '@shared/ui/feedback/notifyError'
 
 const MAX_LICENSE_FILE_SIZE = 10 * 1024 * 1024
+const SERVICE_PORTAL_URL = 'https://service.opencelium.io/login'
 
 const panelStyle: React.CSSProperties = {
     display: 'flex',
@@ -138,6 +139,14 @@ export const LicenseActionsPanel: React.FC = () => {
                     {t('subscription.manage.deleteLicense.button' as never)}
                 </Button>
             )}
+
+            <Button
+                iconLeft="portal"
+                style={{ marginLeft: 'auto' }}
+                onClick={() => window.open(SERVICE_PORTAL_URL, '_blank', 'noopener,noreferrer')}
+            >
+                {t('subscription.manage.servicePortal.button' as never)}
+            </Button>
 
             <ActivateSubscriptionDialog
                 open={isActivateDialogOpen}
