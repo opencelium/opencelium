@@ -9,6 +9,7 @@
 .onboarding-license__actions p { margin: 0; }
 /* The single hand-off button sits at the foot of the box, whatever the copy height. */
 .onboarding-license__actions button { margin-top: auto; align-self: stretch; }
+p.onboarding-license__portal-hint { margin: 8px 0 0; font-size: var(--typography-font-size-sm); color: var(--color-text-secondary); }
 .onboarding-license__usage { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 20px; color: var(--color-text-primary); font-weight: 600; }
 .onboarding-license__usage small { color: var(--color-text-secondary); font-weight: 400; }
 .onboarding-license__usage > i { grid-column: 1 / -1; height: 7px; overflow: hidden; border-radius: 999px; background: var(--color-border-subtle); }

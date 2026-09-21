@@ -13,6 +13,7 @@ import type { IconName } from '@shared/ui/primitives/Icon/Icon.types'
 import './helpMenu.css'
 
 const DOCS_URL = 'https://docs.opencelium.io/en/prod/'
+const SERVICE_PORTAL_URL = 'https://service.opencelium.io/login'
 const DASHBOARD_ROUTE = '/'
 
 /**
@@ -32,6 +33,11 @@ export function HelpMenu() {
     const openDocs = () => {
         setIsOpen(false)
         window.open(DOCS_URL, '_blank', 'noopener,noreferrer')
+    }
+
+    const openServicePortal = () => {
+        setIsOpen(false)
+        window.open(SERVICE_PORTAL_URL, '_blank', 'noopener,noreferrer')
     }
 
     // Same order as the palette's `help onboarding`: home first, so the tour finds
@@ -67,6 +73,12 @@ export function HelpMenu() {
                         label={tCommon('topbar.docs')}
                         onClick={openDocs}
                         testId="topbar-docs"
+                    />
+                    <MenuEntry
+                        icon="portal"
+                        label={tCommon('topbar.servicePortal')}
+                        onClick={openServicePortal}
+                        testId="topbar-service-portal"
                     />
                     {/* Both tours are admin-only, so for anyone else these entries
                         would open menu items that quietly do nothing. */}

@@ -1,7 +1,10 @@
+import { Trans } from 'react-i18next'
 import { Button } from '@shared/ui/primitives/Button'
 import { useGetActiveSubscriptionQuery } from '@entities/subscription/api/subscriptionApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import './onboardingLicense.css'
+
+const SERVICE_PORTAL_URL = 'https://service.opencelium.io/login'
 
 /**
  * Free-plan allowance, shown until the subscription endpoint answers. Mirrors the
@@ -44,6 +47,15 @@ export function OnboardingLicenseContent({ onOpenLicensePage }: { onOpenLicenseP
                     <Button type="primary" onClick={onOpenLicensePage} testId="onboarding-license-open-page">
                         {t('content.license.openPage')}
                     </Button>
+                    <p className="onboarding-license__portal-hint">
+                        <Trans t={t} i18nKey="content.license.servicePortalHint">
+                            {'Need to buy extra operations or manage your license online? Visit the '}
+                            <a href={SERVICE_PORTAL_URL} target="_blank" rel="noopener noreferrer">
+                                OpenCelium Service Portal
+                            </a>
+                            {'.'}
+                        </Trans>
+                    </p>
                 </section>
             </div>
             <div className="onboarding-license__usage">

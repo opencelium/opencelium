@@ -178,6 +178,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             docsLink: string
             gitLink: string
             landingPageLink: string
+            servicePortalLink: string
         }
         topbar: {
             switchToGerman: string
@@ -192,6 +193,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             help: string
             startOnboardingTour: string
             startDashboardTour: string
+            servicePortal: string
         }
         user: {
             unknown: string

@@ -68,6 +68,7 @@ export type IconName =
     | 'circle'
     | 'git'
     | 'globe'
+    | 'portal'
 
 export type IconColor =
     | 'default'

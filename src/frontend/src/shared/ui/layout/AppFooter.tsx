@@ -12,6 +12,7 @@ import type { IconName } from '@shared/ui/primitives/Icon/Icon.types';
 const OPENCELIUM_URL = 'https://www.opencelium.io/';
 const DOCS_URL = 'https://docs.opencelium.io/en/prod/';
 const GIT_URL = 'https://github.com/opencelium';
+const SERVICE_PORTAL_URL = 'https://service.opencelium.io/login';
 // Stands in only where the running version can't be asked for: the login page,
 // which renders this footer while `/assistant/oc/version` still requires auth.
 const FALLBACK_APP_VERSION = '5.1';
@@ -37,6 +38,7 @@ export const AppFooter = ({ hasBorder = true }: AppFooterProps) => {
         { icon: 'docs', url: DOCS_URL, label: t('footer.docsLink'), testId: 'footer-docs-link' },
         { icon: 'git', url: GIT_URL, label: t('footer.gitLink'), testId: 'footer-git-link' },
         { icon: 'globe', url: OPENCELIUM_URL, label: t('footer.landingPageLink'), testId: 'footer-landing-page-link' },
+        { icon: 'portal', url: SERVICE_PORTAL_URL, label: t('footer.servicePortalLink'), testId: 'footer-service-portal-link' },
     ];
 
     const linkIcons = (

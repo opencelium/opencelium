@@ -1,7 +1,7 @@
 {
   "wizard": {
     "header": "Abonnement",
-    "subheader": "Überprüfen Sie Ihre Lizenz, die monatliche API-Nutzung und die Ausführungshistorie pro Workflow."
+    "subheader": "Überprüfen Sie Ihre Lizenz, die monatliche API-Nutzung und die Ausführungshistorie pro Workflow. Upgrades, zusätzliche Operationen und Support-Tickets werden über das OpenCelium Service-Portal abgewickelt."
   },
   "steps": {
     "license": {
@@ -70,6 +70,9 @@
     "activateFree": {
       "button": "Kostenlose Lizenz aktivieren",
       "success": "Kostenlose Lizenz wurde aktiviert."
+    },
+    "servicePortal": {
+      "button": "Service-Portal"
     }
   },
   "columns": {
