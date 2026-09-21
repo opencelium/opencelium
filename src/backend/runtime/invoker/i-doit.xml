@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<invoker type="RESTful">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><invoker type="RESTful">
     <name>i-doit</name>
     <description>The IT-documentation solution i-doit is based on a complete open source configuration management and database. Using i-doit as a CMDB you can manage your IT according to ITIL best practices and configurate the significant components of your IT environment. You can visualize the relationships between these components and keep track of software and hardware assets and their relations.</description>
     <hint>This interface provides a apikey auth. Read the api documentation here https://kb.i-doit.com/display/de/API+Methoden</hint>

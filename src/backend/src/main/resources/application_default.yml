@@ -323,6 +323,21 @@ opencelium:
     token: your-token-heren
   ###########################################################################
   #                                                                         #
+  #   Remote invoker repository                                             #
+  #                                                                         #
+  #   Source the invoker files are downloaded from by                       #
+  #   POST /invoker/remote (/api/invoker/remote behind the proxy).          #
+  #                                                                         #
+  #   url    - GitHub Contents API url of the folder that holds the         #
+  #            invoker xml files                                            #
+  #   branch - git ref (branch, tag or commit) the files are read from      #
+  #                                                                         #
+  ###########################################################################
+  invoker-repository:
+    url: https://api.github.com/repos/opencelium/opencelium/contents/src/backend/runtime/invoker
+    branch: dev
+  ###########################################################################
+  #                                                                         #
   #   Polyglot Engine Configuration                                         #
   #   You can enable Python 3, Ruby, or GraalVM JS                          #
   #   using this configuration.                                             #
