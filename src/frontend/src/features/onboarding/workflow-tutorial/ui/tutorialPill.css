@@ -56,6 +56,13 @@
     margin-top: 12px;
 }
 
+/* Scoped to the pill: the same class is also the onboarding tour's own footer
+   note, which sets its own spacing from its own layout. */
+.workflow-tutorial-pill .onboarding-command-note {
+    margin-top: 8px;
+    font-size: var(--typography-font-size-sm);
+}
+
 /* Holds the row's height whether or not the hint is showing, so the pill does not
    jump the moment a step becomes completable. */
 .workflow-tutorial-pill__hint {
@@ -104,6 +111,29 @@
     .workflow-tutorial-pill--top-right {
         right: 12px;
         left: 12px;
+        width: auto;
+    }
+}
+
+/*
+ * Centre, for the introduction alone: the graph is empty at that point, so there is
+ * nothing behind the pill for a middle placement to cover.
+ */
+.workflow-tutorial-pill--center {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+}
+
+@media (max-width: 600px) {
+    .workflow-tutorial-pill--center {
+        top: 50%;
+        left: 12px;
+        right: 12px;
+        bottom: auto;
+        transform: translateY(-50%);
         width: auto;
     }
 }

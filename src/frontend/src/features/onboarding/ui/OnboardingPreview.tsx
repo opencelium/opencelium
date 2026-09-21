@@ -146,6 +146,13 @@ export function OnboardingPreview() {
             {isRunning && (
                 <div
                     aria-hidden
+                    className="onboarding-click-guard"
+                    style={{ zIndex: ONBOARDING_Z_INDEX.backdrop }}
+                />
+            )}
+            {isRunning && (
+                <div
+                    aria-hidden
                     className="onboarding-backdrop"
                     style={paletteTargetRect ? {
                         zIndex: ONBOARDING_Z_INDEX.backdrop,

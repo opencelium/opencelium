@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { ONBOARDING_MILESTONES, ONBOARDING_STEP_ORDER, ONBOARDING_Z_INDEX, type OnboardingStatus, type OnboardingStepId } from '../model/types'
+import { useEffect, useState } from 'react'
+import { ONBOARDING_MILESTONES, ONBOARDING_RESTART_EVENT, ONBOARDING_STEP_ORDER, ONBOARDING_Z_INDEX, type OnboardingStatus, type OnboardingStepId } from '../model/types'
 import './onboardingChecklist.css'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { Icon } from '@shared/ui/primitives/Icon'
@@ -47,6 +47,18 @@ export function OnboardingChecklist({ stepId, status, onResume, onRestart, onDis
         setExpanded(false)
         onResume()
     }
+    const handleRestart = () => {
+        setExpanded(false)
+        onRestart()
+    }
+    // Restart can also come from the command palette's "help onboarding", not just
+    // this panel's own button — the pill collapses either way, so a restarted tour
+    // is never fought over screen space by an already-open checklist.
+    useEffect(() => {
+        const collapse = () => setExpanded(false)
+        window.addEventListener(ONBOARDING_RESTART_EVENT, collapse)
+        return () => window.removeEventListener(ONBOARDING_RESTART_EVENT, collapse)
+    }, [])
     const handleDismiss = async () => {
         const ok = await confirm({
             title: t('checklist.dismissTitle'),
@@ -103,7 +115,7 @@ export function OnboardingChecklist({ stepId, status, onResume, onRestart, onDis
                             {t('actions.resume')}
                         </Button>
                     )}
-                    <Button type="link" className="onboarding-checklist__restart" onClick={onRestart} testId="onboarding-checklist-restart">
+                    <Button type="link" className="onboarding-checklist__restart" onClick={handleRestart} testId="onboarding-checklist-restart">
                         {t('actions.restart')}
                     </Button>
                 </span>

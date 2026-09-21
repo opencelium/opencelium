@@ -121,6 +121,21 @@
 }
 
 /*
+ * A second, fully transparent layer beneath the backdrop, present for every running
+ * step. `.onboarding-backdrop` above only draws the dimming and — for the palette
+ * step — the spotlight cutout, deliberately `pointer-events: none` so its shape
+ * never has to double as a hit-test area. This one is a plain full-viewport
+ * rectangle instead, and takes pointer events itself, so the page behind the tour
+ * cannot be clicked into until the tooltip's own controls end the step — including
+ * the area the palette step highlights, which is shown for reference and told to
+ * open with Ctrl + K, not clicked.
+ */
+.onboarding-click-guard {
+    position: fixed;
+    inset: 0;
+}
+
+/*
  * While the connector form is docked on the right, the tooltip narrows and slides
  * into the space that is left. The transform goes on the tooltip, not the floater
  * Joyride positions with inline styles — touching that fights the library.

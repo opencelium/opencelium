@@ -7,3 +7,20 @@ html.workflow-tutorial-active [data-testid='workflow-save'] {
     pointer-events: none;
     opacity: .45;
 }
+
+/*
+ * The introduction's backdrop: full coverage rather than the spotlight's cut-out
+ * mask, and left to take pointer events rather than passing them through — the
+ * canvas underneath is empty at that point anyway, so the only thing this blocks is
+ * whatever else is on the page (sidebar, top bar) until the pill is dismissed.
+ */
+.workflow-tutorial-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgb(12 16 22 / 60%);
+}
+
+:root:not([data-theme='light']) .workflow-tutorial-backdrop,
+:root[data-theme='dark'] .workflow-tutorial-backdrop {
+    background: rgb(2 4 8 / 72%);
+}

@@ -95,6 +95,7 @@
     "actions": { "done": "Exit" },
     "cues": { "reference": "Reference", "doubleClick": "Double-click", "rightClick": "Right-click" },
     "steps": {
+      "intro": { "title": "Build a working workflow, step by step", "body": "This short, hands-on tutorial walks the whole editor — methods, a loop, a condition, references and a live test run — built against two invented systems, so nothing you do here is saved. Each step tells you exactly what to do next; follow the pill.", "note": "" },
       "customers": { "title": "List the customers", "body": "Add getCustomers from Tutorial CRM. It returns every customer with their email, first name and last name. Both systems here are invented — nothing you build is saved.", "note": "Add the method to continue" },
       "loop": { "title": "Repeat per customer", "body": "getCustomers returns a list, so the rest of the workflow has to run once per entry. Use the + after it to add a loop operator.", "note": "Add a loop operator to continue" },
       "iterate": { "title": "Tell the loop what to iterate", "body": "A loop on its own does not know what it is walking. Right-click it, open Configuration, and choose the for operator — it iterates an array. Then set its argument to a reference: getCustomers, then customers, then The whole array. Save it, and the loop variable i becomes the customer of the current iteration.", "note": "Save the configuration to continue" },

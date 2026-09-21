@@ -156,9 +156,12 @@ export type TutorialStep = {
      * Which corner the copy sits in. Bottom-left by default, which is clear for as
      * long as the work happens in dialogs and the right-hand drawer — but a test run
      * opens the log panel across the bottom of the page, and the pill would then
-     * cover the tree it is describing.
+     * cover the tree it is describing. `center` is for the introduction alone: the
+     * canvas is empty at that point, so there is nothing behind it for a middle
+     * placement to cover, and centred reads as "start here" rather than a hint
+     * about one particular control.
      */
-    anchor?: 'top-right'
+    anchor?: 'top-right' | 'center'
     /**
      * A snippet shown under the copy. Lives here rather than in the locale files
      * because it is a code sample, not prose — both languages had it identical, and
@@ -213,6 +216,15 @@ const USERNAME_EXAMPLE = 'RESULT_VAR = VAR_0 + " " + VAR_1'
 const FROM_START: TutorialTarget = { target: ADD_FROM(START_NODE, 'right'), include: [START_NODE] }
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
+    {
+        // Nothing to point at: the graph is still empty, so there is no chain and
+        // the pill takes the centre instead of a corner. Same "hold until acknowledged"
+        // mechanism as `speed`/`logs` below — no `isDone`, so it waits for Next.
+        id: 'intro',
+        copy: 'intro',
+        anchor: 'center',
+        chain: [],
+    },
     {
         id: 'customers',
         copy: 'customers',

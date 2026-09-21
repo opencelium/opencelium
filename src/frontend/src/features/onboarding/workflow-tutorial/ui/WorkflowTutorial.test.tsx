@@ -139,6 +139,17 @@ const renderTutorial = () =>
         </MemoryRouter>,
     )
 
+/**
+ * Every scenario below is about the graph-building and test-run steps; the
+ * hand-advanced introduction ahead of them has nothing on the canvas to detect, so
+ * clearing it here keeps those scenarios' step-index assertions unchanged.
+ */
+const renderPastIntro = () => {
+    const view = renderTutorial()
+    fireEvent.click(view.getByTestId('next'))
+    return view
+}
+
 describe('WorkflowTutorial', () => {
     beforeEach(() => {
         // Set directly: `request()` also seeds the fake API fixtures, which this is not about.
@@ -151,18 +162,44 @@ describe('WorkflowTutorial', () => {
         document.body.innerHTML = ''
     })
 
-    it('opens the second step as soon as the first method lands on the canvas', async () => {
+    it('opens on the introduction, centred, before anything else', async () => {
         const view = renderTutorial()
-        expect(view.getByTestId('step').textContent).toBe('0')
+        const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
+        expect(view.getByTestId('step').textContent).toBe(at('intro'))
+        expect(view.getByTestId('next')).toBeTruthy()
+
+        fireEvent.click(view.getByTestId('next'))
+
+        expect(view.getByTestId('step').textContent).toBe(at('customers'))
+        view.unmount()
+    })
+
+    it('blocks the page behind the introduction, and only the introduction', async () => {
+        const view = renderTutorial()
+        expect(view.container.querySelector('.workflow-tutorial-backdrop')).not.toBeNull()
+
+        fireEvent.click(view.getByTestId('next'))
+        addNode('connector')
+        const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
+        await waitFor(() => expect(view.getByTestId('step').textContent).toBe(at('loop')))
+
+        expect(view.container.querySelector('.workflow-tutorial-backdrop')).toBeNull()
+        view.unmount()
+    })
+
+    it('opens the second step as soon as the first method lands on the canvas', async () => {
+        const view = renderPastIntro()
+        const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
+        expect(view.getByTestId('step').textContent).toBe(at('customers'))
 
         addNode('connector')
 
-        await waitFor(() => expect(view.getByTestId('step').textContent).toBe('1'))
+        await waitFor(() => expect(view.getByTestId('step').textContent).toBe(at('loop')))
         view.unmount()
     })
 
     it('walks the whole scenario, waiting on the canvas and on the dialog steps', async () => {
-        const view = renderTutorial()
+        const view = renderPastIntro()
         const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
         const showing = (id: string) =>
             waitFor(() => expect(view.getByTestId('step').textContent).toBe(at(id)))
@@ -228,17 +265,19 @@ describe('WorkflowTutorial', () => {
     })
 
     it('offers a Next only on the steps the canvas cannot detect', async () => {
-        const view = renderTutorial()
+        const view = renderPastIntro()
+        const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
+        expect(view.getByTestId('step').textContent).toBe(at('customers'))
         expect(view.queryByTestId('next')).toBeNull()
 
         addNode('connector')
-        await waitFor(() => expect(view.getByTestId('step').textContent).toBe('1'))
+        await waitFor(() => expect(view.getByTestId('step').textContent).toBe(at('loop')))
         expect(view.queryByTestId('next')).toBeNull()
         view.unmount()
     })
 
     it('settles on the last step rather than finishing by itself', async () => {
-        const view = renderTutorial()
+        const view = renderPastIntro()
         addNode('connector')
         addNode('connector')
         addNode('connector')
@@ -265,20 +304,21 @@ describe('WorkflowTutorial', () => {
     })
 
     it('steps back when the user removes what a step asked for', async () => {
-        const view = renderTutorial()
+        const view = renderPastIntro()
+        const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
         const node = addNode('connector')
-        await waitFor(() => expect(view.getByTestId('step').textContent).toBe('1'))
+        await waitFor(() => expect(view.getByTestId('step').textContent).toBe(at('loop')))
 
         node.remove()
 
-        await waitFor(() => expect(view.getByTestId('step').textContent).toBe('0'))
+        await waitFor(() => expect(view.getByTestId('step').textContent).toBe(at('customers')))
         view.unmount()
     })
 
     // The bug: latched progress outlived the run, so a second one opened with the
     // loop already "configured" and skipped the step that cues the right-click.
     it('starts a second run from the beginning, however the first one ended', async () => {
-        const first = renderTutorial()
+        const first = renderPastIntro()
         addNode('connector')
         addNode('loop')
         saveCondition('loop')
@@ -291,7 +331,7 @@ describe('WorkflowTutorial', () => {
         useWorkflowTutorialStore.getState().dismiss()
         useWorkflowTutorialStore.getState().request()
         canvas()
-        const second = renderTutorial()
+        const second = renderPastIntro()
         const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
 
         // Rebuilding the graph is what exposes it: with the save still latched, the
@@ -305,11 +345,16 @@ describe('WorkflowTutorial', () => {
 
     it('offers a way out on every step, not only the last', async () => {
         const view = renderTutorial()
+        const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
+        // Including the introduction itself — a sandbox the user should be able to
+        // leave before ever touching the canvas, not only once they are mid-way in.
+        expect(view.getByTestId('step').textContent).toBe(at('intro'))
         expect(view.getByTestId('exit')).toBeTruthy()
         expect(view.queryByTestId('is-last')).toBeNull()
 
+        fireEvent.click(view.getByTestId('next'))
         addNode('connector')
-        await waitFor(() => expect(view.getByTestId('step').textContent).toBe('1'))
+        await waitFor(() => expect(view.getByTestId('step').textContent).toBe(at('loop')))
         expect(view.getByTestId('exit')).toBeTruthy()
         view.unmount()
     })
@@ -326,7 +371,7 @@ describe('WorkflowTutorial', () => {
     })
 
     it('resets the route when the last step is finished', async () => {
-        const view = renderTutorial()
+        const view = renderPastIntro()
         addNode('connector')
         addNode('connector')
         addNode('connector')
