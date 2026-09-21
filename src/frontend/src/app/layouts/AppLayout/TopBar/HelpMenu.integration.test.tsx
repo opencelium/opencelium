@@ -49,20 +49,32 @@ beforeEach(() => {
 describe('HelpMenu against the real antd Popover', () => {
     it('opens the menu when the help icon is clicked', async () => {
         render(<HelpMenu />)
-        expect(screen.queryByTestId('topbar-start-tour')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('topbar-start-onboarding-tour')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('topbar-start-dashboard-tour')).not.toBeInTheDocument()
 
         fireEvent.click(screen.getByTestId('topbar-help'))
 
         expect(await screen.findByTestId('topbar-docs')).toBeInTheDocument()
-        expect(screen.getByTestId('topbar-start-tour')).toBeInTheDocument()
+        expect(screen.getByTestId('topbar-start-onboarding-tour')).toBeInTheDocument()
+        expect(screen.getByTestId('topbar-start-dashboard-tour')).toBeInTheDocument()
     })
 
-    it('starts the tour from the menu', async () => {
+    it('starts the dashboard tour from the menu', async () => {
         render(<HelpMenu />)
         fireEvent.click(screen.getByTestId('topbar-help'))
-        fireEvent.click(await screen.findByTestId('topbar-start-tour'))
+        fireEvent.click(await screen.findByTestId('topbar-start-dashboard-tour'))
 
         expect(mocks.navigate).toHaveBeenCalledWith('/')
         expect(useDashboardTourStore.getState().requested).toBe(true)
+    })
+
+    it('restarts the onboarding tour from the menu', async () => {
+        const dispatchEvent = vi.spyOn(window, 'dispatchEvent')
+        render(<HelpMenu />)
+        fireEvent.click(screen.getByTestId('topbar-help'))
+        fireEvent.click(await screen.findByTestId('topbar-start-onboarding-tour'))
+
+        expect(mocks.navigate).toHaveBeenCalledWith('/')
+        expect(dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type: 'opencelium:onboarding:restart'}))
     })
 })

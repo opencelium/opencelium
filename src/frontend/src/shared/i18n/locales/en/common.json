@@ -104,7 +104,8 @@
     "createWorkflowHint": "Create Workflow (Alt+W)",
     "docs": "Documentation",
       "help": "Help",
-      "startTour": "Start tour"
+      "startOnboardingTour": "Start onboarding tour",
+      "startDashboardTour": "Start dashboard tour"
   },
   "user": {
     "unknown": "Unknown User"

@@ -88,25 +88,27 @@ describe('HelpMenu', () => {
         expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
     })
 
-    it('offers the docs and the tour once opened', () => {
+    it('offers the docs, the onboarding tour, and the dashboard tour once opened', () => {
         render(<HelpMenu />)
         openMenu()
         expect(screen.getByTestId('topbar-docs')).toHaveTextContent('topbar.docs')
-        expect(screen.getByTestId('topbar-start-tour')).toHaveTextContent('topbar.startTour')
+        expect(screen.getByTestId('topbar-start-onboarding-tour')).toHaveTextContent('topbar.startOnboardingTour')
+        expect(screen.getByTestId('topbar-start-dashboard-tour')).toHaveTextContent('topbar.startDashboardTour')
     })
 
-    it('lays both entries out on the same icon/label grid', () => {
+    it('lays all entries out on the same icon/label grid', () => {
         render(<HelpMenu />)
         openMenu()
 
-        for (const testId of ['topbar-docs', 'topbar-start-tour']) {
+        for (const testId of ['topbar-docs', 'topbar-start-onboarding-tour', 'topbar-start-dashboard-tour']) {
             const row = screen.getByTestId(testId).querySelector('.topbar-help-menu__item')
             expect(row).not.toBeNull()
             // Icon first, then the label — the order the two-column grid expects.
             expect(row?.children).toHaveLength(2)
         }
         expect(screen.getByTestId('icon-docs')).toBeInTheDocument()
-        expect(screen.getByTestId('icon-play')).toBeInTheDocument()
+        expect(screen.getByTestId('icon-mouse')).toBeInTheDocument()
+        expect(screen.getByTestId('icon-report-analytics')).toBeInTheDocument()
     })
 
     it('opens the documentation in a new tab and closes the menu', () => {
@@ -124,23 +126,36 @@ describe('HelpMenu', () => {
         expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
     })
 
-    it('sends the user home and requests the tour, with the menu out of the way', () => {
+    it('sends the user home and requests the dashboard tour, with the menu out of the way', () => {
         render(<HelpMenu />)
         openMenu()
 
-        fireEvent.click(screen.getByTestId('topbar-start-tour'))
+        fireEvent.click(screen.getByTestId('topbar-start-dashboard-tour'))
 
         expect(mocks.navigate).toHaveBeenCalledWith('/')
         expect(useDashboardTourStore.getState().requested).toBe(true)
         expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
     })
 
-    it('hides the tour entry from a non-admin, who cannot run it', () => {
+    it('sends the user home and restarts the onboarding tour, with the menu out of the way', () => {
+        const dispatchEvent = vi.spyOn(window, 'dispatchEvent')
+        render(<HelpMenu />)
+        openMenu()
+
+        fireEvent.click(screen.getByTestId('topbar-start-onboarding-tour'))
+
+        expect(mocks.navigate).toHaveBeenCalledWith('/')
+        expect(dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type: 'opencelium:onboarding:restart'}))
+        expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
+    })
+
+    it('hides both tour entries from a non-admin, who cannot run them', () => {
         mocks.isAdmin = false
         render(<HelpMenu />)
         openMenu()
 
         expect(screen.getByTestId('topbar-docs')).toBeInTheDocument()
-        expect(screen.queryByTestId('topbar-start-tour')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('topbar-start-onboarding-tour')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('topbar-start-dashboard-tour')).not.toBeInTheDocument()
     })
 })

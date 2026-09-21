@@ -186,7 +186,8 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             createWorkflowHint: string
             docs: string
             help: string
-            startTour: string
+            startOnboardingTour: string
+            startDashboardTour: string
         }
         user: {
             unknown: string
