@@ -8,6 +8,7 @@ import { buildIntroJoyrideSteps } from './buildIntroJoyrideSteps'
 import { useOnboardingStore } from './onboarding.store'
 import { useGetConnectorsMetaQuery } from '@entities/connector/api/connectorApi'
 import { useGetActiveSubscriptionQuery } from '@entities/subscription/api/subscriptionApi'
+import { useWorkflowTutorialStore } from '@features/onboarding/workflow-tutorial/model/workflowTutorial.store'
 import { ONBOARDING_STEP_ORDER, type OnboardingStepId } from './types'
 
 // STUB: "download from git" is not implemented. FirstInvokerContent fakes the
@@ -112,8 +113,12 @@ export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, p
         onCreateConnectorFor: setConnectorFormInvoker,
         // Completing first means the route change below cannot re-pause the tour,
         // and the checklist shows every milestone done rather than "paused".
+        // Requesting the workflow tutorial here is the same call the command palette's
+        // "help workflow" entry makes — arriving at the editor straight from the intro
+        // tour should not require a second, separate ask to see it.
         onCreateWorkflow: () => {
             complete()
+            useWorkflowTutorialStore.getState().request()
             void navigate(WORKFLOW_CREATE_ROUTE)
         },
         // Reaching the licence page is all this step asks for, so it advances on

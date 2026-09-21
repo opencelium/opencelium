@@ -54,14 +54,22 @@ const byId = (id: string) => {
 describe('workflow tutorial steps', () => {
     afterEach(() => { document.body.innerHTML = '' })
 
-    it('walks every clickable step from the + to the method', () => {
+    it('opens on a centred introduction with nothing to point at', () => {
         const [first] = TUTORIAL_STEPS
+        expect(first.id).toBe('intro')
+        expect(first.anchor).toBe('center')
+        expect(first.chain).toEqual([])
+        expect(first.isDone).toBeUndefined()
+    })
+
+    it('walks every clickable step from the + to the method', () => {
+        const first = byId('customers')
         expect(first.chain).toHaveLength(4)
         expect(first.chain[0].target).toContain('workflow-add-step')
     })
 
     it('undims the start node together with its +, so a lone icon is not left floating', () => {
-        const [first] = TUTORIAL_STEPS
+        const first = byId('customers')
         expect(first.chain[0].include).toEqual(['.react-flow__node-start'])
         // only the first link needs the context; the rest are rows in a drawer
         expect(first.chain.slice(1).every(link => link.include === undefined)).toBe(true)
@@ -69,7 +77,7 @@ describe('workflow tutorial steps', () => {
 
     it('builds method selectors from the fixtures, so a rename cannot orphan them', () => {
         const method = TUTORIAL_CONNECTORS[0].invoker.operations[0].name.toLowerCase()
-        expect(TUTORIAL_STEPS[0].chain[3].target).toContain(method)
+        expect(byId('customers').chain[3].target).toContain(method)
     })
 
     it('sends the two lookups at the second connector, not the first', () => {
@@ -216,7 +224,7 @@ describe('workflow tutorial steps', () => {
     })
 
     it('highlights nothing rather than guessing when the chain is absent', () => {
-        expect(resolveHighlight(TUTORIAL_STEPS[0].chain, progress())).toBeNull()
+        expect(resolveHighlight(byId('customers').chain, progress())).toBeNull()
         expect(resolveHighlight([], progress())).toBeNull()
     })
 
@@ -410,24 +418,32 @@ describe('workflow tutorial steps', () => {
 
     describe('resolveStepIndex', () => {
         const at = (id: string) => TUTORIAL_STEPS.findIndex(s => s.id === id)
+        /** Acknowledged just past the introduction — the baseline every graph-building
+         *  assertion below means by "nothing acknowledged yet". */
+        const PAST_INTRO = at('intro') + 1
+
+        it('holds on the introduction before anything else, however built the graph already is', () => {
+            expect(resolveStepIndex(progress(), 0)).toBe(at('intro'))
+            expect(resolveStepIndex(progress({ ...BUILT, ...RUN }), 0)).toBe(at('intro'))
+        })
 
         it('asks for the first thing the canvas is missing', () => {
-            expect(resolveStepIndex(progress(), 0)).toBe(at('customers'))
-            expect(resolveStepIndex(progress({ methods: 1 }), 0)).toBe(at('loop'))
+            expect(resolveStepIndex(progress(), PAST_INTRO)).toBe(at('customers'))
+            expect(resolveStepIndex(progress({ methods: 1 }), PAST_INTRO)).toBe(at('loop'))
             // the loop exists but has not been configured, so it stops there
-            expect(resolveStepIndex(progress({ methods: 1, hasLoop: true }), 0)).toBe(at('iterate'))
-            expect(resolveStepIndex(progress({ methods: 1, hasLoop: true, loopConditionSaved: true }), 0))
+            expect(resolveStepIndex(progress({ methods: 1, hasLoop: true }), PAST_INTRO)).toBe(at('iterate'))
+            expect(resolveStepIndex(progress({ methods: 1, hasLoop: true, loopConditionSaved: true }), PAST_INTRO))
                 .toBe(at('lookup'))
         })
 
         it('holds on the endpoint step until the editor is closed', () => {
             const built = progress({ methods: 2, hasLoop: true, loopConditionSaved: true })
-            expect(resolveStepIndex(built, 0)).toBe(at('endpoint'))
+            expect(resolveStepIndex(built, PAST_INTRO)).toBe(at('endpoint'))
             // no acknowledgement can skip it
             expect(resolveStepIndex(built, TUTORIAL_STEPS.length)).toBe(at('endpoint'))
             // nor does the reference alone, while the dialog still covers the canvas
-            expect(resolveStepIndex({ ...built, endpointReference: true }, 0)).toBe(at('endpoint'))
-            expect(resolveStepIndex({ ...built, endpointReference: true, endpointReferenceClosed: true }, 0))
+            expect(resolveStepIndex({ ...built, endpointReference: true }, PAST_INTRO)).toBe(at('endpoint'))
+            expect(resolveStepIndex({ ...built, endpointReference: true, endpointReferenceClosed: true }, PAST_INTRO))
                 .toBe(at('branch'))
         })
 
@@ -441,19 +457,20 @@ describe('workflow tutorial steps', () => {
 
         it('holds on the loop step until its condition is saved', () => {
             const looped = progress({ methods: 1, hasLoop: true })
-            expect(resolveStepIndex(looped, 0)).toBe(at('iterate'))
+            expect(resolveStepIndex(looped, PAST_INTRO)).toBe(at('iterate'))
             // no acknowledgement can skip it — only the save does
             expect(resolveStepIndex(looped, TUTORIAL_STEPS.length)).toBe(at('iterate'))
-            expect(resolveStepIndex(progress({ methods: 1, hasLoop: true, loopConditionSaved: true }), 0))
+            expect(resolveStepIndex(progress({ methods: 1, hasLoop: true, loopConditionSaved: true }), PAST_INTRO))
                 .toBe(at('lookup'))
         })
 
         it('settles on the closing step instead of running off the end', () => {
             const finished = progress({ ...BUILT, ...RUN })
             const last = TUTORIAL_STEPS.length - 1
-            // Unacknowledged, it holds on the first step there is nothing to detect
-            // for — the pace — rather than skipping to the end.
-            expect(resolveStepIndex(finished, 0)).toBe(at('speed'))
+            // Acknowledged only past the introduction, it holds on the first built
+            // step there is nothing to detect for — the pace — rather than skipping
+            // to the end.
+            expect(resolveStepIndex(finished, PAST_INTRO)).toBe(at('speed'))
             // and once those are passed it stays on the last, however many times it
             // is acknowledged.
             expect(resolveStepIndex(finished, TUTORIAL_STEPS.length)).toBe(last)
@@ -468,13 +485,13 @@ describe('workflow tutorial steps', () => {
         // of the graph, so the test-run steps have to hold the tutorial on their own.
         it('asks for the run once the graph is finished', () => {
             const built = progress(BUILT)
-            expect(resolveStepIndex(built, 0)).toBe(at('testrun'))
-            expect(resolveStepIndex({ ...built, testRunStarted: true }, 0)).toBe(at('pause'))
-            expect(resolveStepIndex({ ...built, testRunStarted: true, testRunPaused: true }, 0))
+            expect(resolveStepIndex(built, PAST_INTRO)).toBe(at('testrun'))
+            expect(resolveStepIndex({ ...built, testRunStarted: true }, PAST_INTRO)).toBe(at('pause'))
+            expect(resolveStepIndex({ ...built, testRunStarted: true, testRunPaused: true }, PAST_INTRO))
                 .toBe(at('step'))
             expect(resolveStepIndex({
                 ...built, testRunStarted: true, testRunPaused: true, testRunStepped: true,
-            }, 0)).toBe(at('iteration'))
+            }, PAST_INTRO)).toBe(at('iteration'))
             // no acknowledgement can skip a step the canvas can still detect
             expect(resolveStepIndex(built, TUTORIAL_STEPS.length)).toBe(at('testrun'))
         })

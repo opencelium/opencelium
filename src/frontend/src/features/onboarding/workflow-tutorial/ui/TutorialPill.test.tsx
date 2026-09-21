@@ -5,9 +5,9 @@ import { describe, expect, it, vi } from 'vitest'
 // Provider-free stand-in; the real Button needs SystemProvider and contributes
 // nothing to which actions the pill offers.
 vi.mock('@shared/ui/primitives/Button', () => ({
-    Button: ({ children, onClick, testId, type }: {
-        children?: ReactNode; onClick?: () => void; testId?: string; type?: string
-    }) => <button data-testid={testId} data-type={type} onClick={onClick}>{children}</button>,
+    Button: ({ children, onClick, testId, color, variant }: {
+        children?: ReactNode; onClick?: () => void; testId?: string; color?: string; variant?: string
+    }) => <button data-testid={testId} data-color={color} data-variant={variant} onClick={onClick}>{children}</button>,
 }))
 
 import { TutorialPill } from './TutorialPill'
@@ -36,9 +36,9 @@ describe('TutorialPill', () => {
         expect(onClose).toHaveBeenCalledOnce()
     })
 
-    it('offers it as the primary action, on every step', () => {
-        expect(exit(renderPill().view)!.dataset.type).toBe('primary')
-        expect(exit(renderPill({ index: 9, copy: 'summary' }).view)!.dataset.type).toBe('primary')
+    it('offers it as a red action, on every step — leaving a sandbox reads as a destructive step', () => {
+        expect(exit(renderPill().view)!.dataset.color).toBe('danger')
+        expect(exit(renderPill({ index: 9, copy: 'summary' }).view)!.dataset.color).toBe('danger')
     })
 
     it('shows no Next button unless the step needs one', () => {
@@ -56,6 +56,31 @@ describe('TutorialPill', () => {
         expect(onNext).toHaveBeenCalledOnce()
         // and Exit stays available alongside it
         expect(exit(view)).not.toBeNull()
+    })
+
+    it('takes the centre anchor only when told to, the corner otherwise', () => {
+        const { view } = renderPill({ anchor: 'center' })
+        expect(view.container.querySelector('aside')!.className).toContain('workflow-tutorial-pill--center')
+        expect(renderPill().view.container.querySelector('aside')!.className)
+            .not.toContain('workflow-tutorial-pill--center')
+    })
+
+    it('puts Exit on the left and Next on the right, only on the centred introduction', () => {
+        const onNext = vi.fn()
+        const centred = renderPill({ anchor: 'center', onNext }).view.container.querySelector('footer')!
+        const order = Array.from(centred.children).map(el => el.getAttribute('data-testid'))
+        expect(order[0]).toBe('workflow-tutorial-exit')
+        expect(order[order.length - 1]).toBe('workflow-tutorial-next')
+
+        // every other step keeps them stacked together on the right, Next before Exit
+        const corner = renderPill({ onNext }).view.container.querySelector('footer')!
+        const cornerOrder = Array.from(corner.children).map(el => el.getAttribute('data-testid'))
+        expect(cornerOrder.indexOf('workflow-tutorial-next')).toBeLessThan(cornerOrder.indexOf('workflow-tutorial-exit'))
+    })
+
+    it('points at "help workflow" only on the centred introduction', () => {
+        expect(renderPill({ anchor: 'center' }).view.container.textContent).toContain('help workflow')
+        expect(renderPill().view.container.textContent).not.toContain('help workflow')
     })
 
     it('prints a step snippet only when the step has one', () => {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useIsAdmin } from '@features/auth/useIsAdmin'
 import { runWithoutUnsavedChangesGuard } from '@features/workflow/hooks/unsavedChangesGuard'
+import { ONBOARDING_Z_INDEX } from '../../model/types'
 import { useCanvasProgress } from '../model/useCanvasProgress'
 import { resolveHighlight, resolveStepIndex, TUTORIAL_STEPS, type TutorialTarget } from '../model/tutorialSteps'
 import { useWorkflowTutorialStore } from '../model/workflowTutorial.store'
@@ -88,6 +89,17 @@ export function WorkflowTutorial() {
     const isLast = index === TUTORIAL_STEPS.length - 1
     return (
         <>
+            {/*
+              * The centred step has no chain, so the spotlight below never draws a mask
+              * for it — nothing to cut a hole around. It still needs to block the canvas,
+              * or a click behind the pill would start the graph before the tutorial has
+              * said anything: full coverage, no cut-out, and real pointer events so it
+              * actually catches the click rather than passing it through like the mask.
+              */}
+            {step.anchor === 'center' && (
+                <div aria-hidden className="workflow-tutorial-backdrop"
+                    style={{ zIndex: ONBOARDING_Z_INDEX.backdrop }} />
+            )}
             <TutorialSpotlight target={highlight?.target ?? null} include={highlight?.include}
                 cue={highlight?.cue} text={highlight?.text} />
             <TutorialPill
