@@ -15,6 +15,7 @@ import { useCopySelectedNodeShortcut } from './useCopySelectedNodeShortcut';
 import { usePasteCopiedNodeShortcut } from './usePasteCopiedNodeShortcut';
 import { useDuplicateSelectedNodeShortcut } from './useDuplicateSelectedNodeShortcut';
 import type { useWorkflowPageState } from './useWorkflowPageState';
+import { buildConnectionPayload } from '../api/connectionPayload';
 
 type Params = {
 	connectionId?: string;
@@ -34,6 +35,8 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 	const [schedulesOpen, setSchedulesOpen] = useState(false);
 	const [changeHistoryOpen, setChangeHistoryOpen] = useState(false);
+	const [jsonEditorOpen, setJsonEditorOpen] = useState(false);
+	const [jsonEditorValue, setJsonEditorValue] = useState<Record<string, unknown> | null>(null);
 	const [copiedNodeId, setCopiedNodeId] = useState<string | null>(null);
 	const [pasteOperatorTarget, setPasteOperatorTarget] = useState<{
 		sourceNodeId: string;
@@ -95,6 +98,19 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		downloadTemplate: templates.downloadConnectionTemplate,
 		openSaveTemplate: templates.openSaveTemplateDialog,
 		openLoadTemplate: templates.openLoadTemplateDialog,
+		openJsonEditor: () => {
+			setJsonEditorValue(buildConnectionPayload({
+				connectionId: view.activeConnectionId,
+				title: headerState.title,
+				description: headerState.description,
+				nodes: view.hydratedNodes,
+				edges: workflow.edges,
+				viewport: workflow.getViewport(),
+				fieldBindings,
+				categoryId,
+			}));
+			setJsonEditorOpen(true);
+		},
 		openShortcuts: () => setIsShortcutsOpen(true),
 		openHistory: () => workflow.setHistoryOpen(true),
 		openChangeHistory: () => {
@@ -119,7 +135,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const isEditorDialogOpen = !!(workflow.methodEditor || workflow.conditionEditor ||
 		workflow.aggregatorEditor || workflow.historyOpen || templates.templateDialogOpen ||
 		templates.loadTemplateDialogOpen || templates.connectorMappingDialogOpen ||
-		isShortcutsOpen || pasteOperatorTarget);
+		isShortcutsOpen || jsonEditorOpen || pasteOperatorTarget);
 
 	useDeleteSelectedNode({ readOnly: isEditLocked, nodes: workflow.nodes,
 		onDeleteNode: workflow.onDeleteNode, disabled: isEditorDialogOpen });
@@ -172,6 +188,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 
 	return { validation, saveWorkflow, category, templates, history, canvas, header,
 		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen,
+		jsonEditorOpen, setJsonEditorOpen, jsonEditorValue,
 		schedulesOpen, setSchedulesOpen, changeHistoryOpen, setChangeHistoryOpen,
 		copiedNodeId, pasteOperatorTarget,
 		cancelPasteOperator: () => setPasteOperatorTarget(null),
