@@ -414,6 +414,22 @@ opencelium:
 #      port: 8082
 #      username: ####
 #      password: ####
+  ###########################################################################
+  #                                                                         #
+  #   Online services                                                       #
+  #                                                                         #
+  #   'active' is the master switch for every feature that calls a remote   #
+  #   OpenCelium service: Service Portal (subscriptions, invoker/template   #
+  #   sync, usage reports), the remote invoker repository and the online    #
+  #   update assistant. When the key is commented out or removed, online    #
+  #   services are ENABLED (default: true). With 'active: false' the        #
+  #   affected endpoints do not call the internet and instead return a      #
+  #   message explaining how to re-enable them.                             #
+  #                                                                         #
+  #   'invoker-sync' / 'template-sync' schedule the automatic Service       #
+  #   Portal sync jobs (both default to inactive).                          #
+  #                                                                         #
+  ###########################################################################
 #  online-services:
 #    invoker-sync:
 #      time: 0 0 0 * * *
@@ -421,4 +437,4 @@ opencelium:
 #    template-sync:
 #      time: 0 0 0 * * *
 #      active: false
-#    active: false
+#    active: true

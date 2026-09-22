@@ -1,50 +1,46 @@
 package com.becon.opencelium.backend.configuration;
 
-import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
 import com.becon.opencelium.backend.api.TemplateSyncService;
-import org.springframework.beans.factory.annotation.Value;
+import com.becon.opencelium.backend.constant.props.OnlineServicesProps;
+import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 @Configuration
 public class OnlineServicesSchedulerConfiguration implements SchedulingConfigurer {
-    @Value("${opencelium.online-services.active:false}")
-    private boolean active;
 
-    @Value("${opencelium.online-services.invoker-sync.active:false}")
-    private boolean invokerSyncActive;
-
-    @Value("${opencelium.online-services.invoker-sync.time:-}")
-    private String invokerSyncTime;
-
-    @Value("${opencelium.online-services.template-sync.active:false}")
-    private boolean templateSyncActive;
-
-    @Value("${opencelium.online-services.template-sync.time:-}")
-    private String templateSyncTime;
-
+    private final OnlineServicesProps onlineServicesProps;
     private final InvokerSyncService invokerSyncService;
     private final TemplateSyncService templateSyncService;
 
     public OnlineServicesSchedulerConfiguration(
+            OnlineServicesProps onlineServicesProps,
             InvokerSyncService invokerSyncService,
             TemplateSyncService templateSyncService
     ) {
+        this.onlineServicesProps = onlineServicesProps;
         this.invokerSyncService = invokerSyncService;
         this.templateSyncService = templateSyncService;
     }
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar registrar) {
-        if (active) {
-            scheduleIfEnabled(registrar, invokerSyncActive, invokerSyncTime, invokerSyncService::syncInvokers);
-            scheduleIfEnabled(registrar, templateSyncActive, templateSyncTime, templateSyncService::syncTemplates);
+        if (!onlineServicesProps.isServiceActive()) {
+            return;
+        }
+        OnlineServicesProps.InvokerSync invokerSync = onlineServicesProps.getInvokerSync();
+        if (invokerSync != null) {
+            scheduleIfEnabled(registrar, invokerSync.getActive(), invokerSync.getTime(), invokerSyncService::syncInvokers);
+        }
+        OnlineServicesProps.TemplateSync templateSync = onlineServicesProps.getTemplateSync();
+        if (templateSync != null) {
+            scheduleIfEnabled(registrar, templateSync.getActive(), templateSync.getTime(), templateSyncService::syncTemplates);
         }
     }
 
-    private void scheduleIfEnabled(ScheduledTaskRegistrar registrar, boolean enabled, String cron, Runnable task) {
-        if (enabled && cron != null && !"-".equals(cron)) {
+    private void scheduleIfEnabled(ScheduledTaskRegistrar registrar, Boolean enabled, String cron, Runnable task) {
+        if (Boolean.TRUE.equals(enabled) && cron != null && !"-".equals(cron)) {
             registrar.addCronTask(task, cron);
         }
     }
