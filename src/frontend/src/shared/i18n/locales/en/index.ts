@@ -8,6 +8,7 @@ import dashboard from "./dashboard.json";
 import auth from "./auth.json";
 import logs from "./logs.json";
 import workflow from "./workflow.json";
+import onboarding from "./onboarding.json";
 
 export default {
     common,
@@ -20,4 +21,5 @@ export default {
     auth,
     logs,
     workflow,
+    onboarding,
 }

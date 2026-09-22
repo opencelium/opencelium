@@ -583,14 +583,17 @@ describe('ReferenceRemapChoices', () => {
 	});
 
 	// Re-pointing moves every copy at once, so there is nothing to answer per
-	// place — the rest are counted.
-	it('counts the other places one reference is held', () => {
+	// place — only the first is drawn, and the rest stay off screen rather than
+	// as a count nobody can act on. The full list is still on the cell's hover
+	// title (see the "carries the whole value as a hover hint" test below).
+	it('shows only the first place a reference is held, not the others', () => {
 		renderChoices([target({ sources: [{ ...target().sources[0], locations: [
 			{ kind: 'reference', value: '#f5a623.(request).body.$.total' },
 			{ kind: 'label', value: 'url' },
 		] }] })]);
 
-		expect(screen.getByText('referenceRemap.alsoHeld')).toBeTruthy();
+		const held = document.querySelector('.referenceRemapSourceHeld') as HTMLElement;
+		expect(held.textContent).not.toContain('url');
 	});
 
 	// The part of the response is a fact there, not a choice: one word rather

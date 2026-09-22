@@ -29,13 +29,13 @@
     "deleteReference": "Referenz löschen"
   },
   "referenceRemap": {
-    "intro": "Einige Schritte lesen den Schritt, den Sie löschen. Wählen Sie, was sie stattdessen lesen sollen:",
-    "perFieldHint": "Oder einzelne Felder umlenken — auf eine andere Methode oder auf Header bzw. Status:",
+    "intro": "Einige Schritte lesen den Schritt, den Sie löschen. Wählen Sie für jeden eine Ersatzmethode oder entfernen Sie den Verweis — einzelne Felder können Sie unten bei Bedarf noch anpassen:",
+    "replaceWith": "Ersetzen durch:",
+    "perFieldHint": "Optional — passen Sie nur die Felder an, die etwas anderes lesen sollen. Unverändert gelassene Felder folgen der oben gewählten Methode oder werden entfernt, falls keine gewählt wurde:",
     "resetField": "Feld zurücksetzen",
     "editCondition": "Bedingung bearbeiten",
     "columnCurrent": "Aktueller Verweis",
     "columnHeld": "Verwendet in",
-    "alsoHeld": "und {{count}} weitere",
     "columnNew": "Neuer Verweis",
     "readBy": "von {{count}} Schritten gelesen",
     "readBy_one": "von {{count}} Schritt gelesen",
@@ -44,7 +44,7 @@
   },
   "confirmDelete": {
     "title": "Schritt löschen",
-    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt.",
     "referencesClearedTitle": "Verweise entfernt",
     "referencesCleared": "{{count}} andere Schritte haben „{{name}}“ gelesen. Diese Verweise sind entfernt.",
     "referencesCleared_one": "{{count}} anderer Schritt hat „{{name}}“ gelesen. Diese Verweise sind entfernt.",
@@ -268,11 +268,53 @@
     "downloadAsTemplateDisabledHint": "Speichern Sie den Workflow zuerst, um ihn als Vorlage herunterzuladen",
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
+    "editJson": "Als JSON bearbeiten",
     "versionHistory": "Versionsverlauf",
     "changeHistory": "Änderungsverlauf",
     "testRunLockedHint": "Während eines Testlaufs nicht verfügbar",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
+  },
+  "json": {
+    "title": "Workflow als JSON bearbeiten",
+    "reset": "Zurücksetzen",
+    "applied": "Workflow-JSON wurde übernommen.",
+    "discard": {
+      "title": "JSON-Änderungen verwerfen?",
+      "message": "Ihre nicht gespeicherten JSON-Änderungen gehen verloren."
+    },
+    "applyConfirm": {
+      "title": "Workflow ersetzen?",
+      "message": "Beim Übernehmen wird der gesamte Workflow ersetzt und der Rückgängig-Verlauf dieser Sitzung gelöscht."
+    },
+    "mode": {
+      "tree": "Baum",
+      "raw": "Rohtext"
+    },
+    "errors": {
+      "syntax": "Ungültiges JSON: {{reason}}",
+      "schema": "{{path}}: {{reason}}",
+      "indexShape": "{{path}}: Der Index muss durch Unterstriche getrennte Zahlen enthalten.",
+      "duplicateIndex": "{{path}}: Dieser Workflow-Index ist doppelt vorhanden.",
+      "missingParent": "{{path}}: Der übergeordnete Operator existiert nicht.",
+      "duplicateNode": "{{path}}: Diese Knoten-ID ist doppelt vorhanden.",
+      "startCount": "Der Workflow muss genau einen Startknoten enthalten (gefunden: {{reason}}).",
+      "edgeSource": "{{path}}: Der Quellknoten existiert nicht.",
+      "edgeTarget": "{{path}}: Der Zielknoten existiert nicht.",
+      "mapperFailed": "Der Workflow konnte nicht neu erstellt werden: {{reason}}",
+      "mapperDroppedMethods": "Der Workflow-Mapper hat alle angegebenen Methoden verworfen.",
+      "brokenReference": "{{path}} enthält einen nicht auflösbaren Verweis auf {{reason}}.",
+      "brokenScript": "{{path}} enthält ein fehlerhaftes Enhancement-Skript.",
+      "illegalJoint": {
+        "self": "{{path}} enthält eine Verbindung zu sich selbst.",
+        "not-a-method": "{{path}} enthält eine Verbindung zu einem Knoten, der keine Methode ist.",
+        "different-loop-scope": "{{path}} enthält eine Verbindung über verschiedene Schleifenbereiche hinweg.",
+        "enters-if-scope": "{{path}} enthält eine Verbindung in einen IF-Bereich hinein.",
+        "backwards": "{{path}} enthält eine rückwärts gerichtete Verbindung.",
+        "skips-referenced-method": "{{path}} enthält eine Verbindung, die eine referenzierte Methode überspringt.",
+        "missingTarget": "{{path}} enthält eine Verbindung mit fehlendem Ziel."
+      }
+    }
   },
   "assignCategoryDialog": {
     "title": "Kategorie zuweisen",
@@ -757,7 +799,7 @@
     "drawerGone": "Diese Bindung existiert nicht mehr.",
     "drawerValueReference": "Dieser Verweis steht direkt im Wert des Feldes, es gibt hier also keine Anreicherung zu bearbeiten. Öffnen Sie den Methoden-Editor, um ihn zu ändern oder zu entfernen.",
     "drawerSimpleCode": "Diese Anreicherung wurde im alten einfachen Modus erstellt; ihre Logik ist kein Skript und kann hier nicht angezeigt werden. Was Sie unten eingeben, ersetzt sie.",
-    "openInMethodEditor": "Im Methoden-Editor öffnen",
+    "openInBodyEditor": "Im Body-Editor öffnen",
     "collapseCard": "Einklappen",
     "cardEmpty": "Keine Bindungen für diese Methode.",
     "rowEditHint": "Klicken, um diese Bindung zu bearbeiten",

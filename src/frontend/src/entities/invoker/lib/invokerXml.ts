@@ -35,6 +35,10 @@ function buildBodySection(section: Record<string, unknown>, indent: string): str
     const data = String(section.data ?? 'raw')
     const format = String(section.format ?? 'json')
     const type = String(section.type ?? 'object')
+    if (format === 'xml') {
+        const body = String(section.bodyJson ?? '').trim()
+        return `<body data="${data}" format="${format}" type="${type}">${body}</body>`
+    }
     const body = parseJsonSafe(section.bodyJson)
     const fieldsXml = objectToXmlFields(body, indent + '    ')
     const innerContent = fieldsXml ? `\n${fieldsXml}\n${indent}` : ''

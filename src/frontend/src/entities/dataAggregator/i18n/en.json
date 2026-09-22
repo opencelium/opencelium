@@ -59,7 +59,8 @@
   },
   "validation": {
     "scriptContainsNotExistedArgs": "Script contains not existed arguments.",
-    "argNameInvalid": "Must start with a letter, _ or $ and contain only letters, digits, _ or $."
+    "argNameInvalid": "Must start with a letter, _ or $ and contain only letters, digits, _ or $.",
+    "nameMeaningful": "Name must contain at least one letter or number."
   },
   "confirmation": {
     "delete": {

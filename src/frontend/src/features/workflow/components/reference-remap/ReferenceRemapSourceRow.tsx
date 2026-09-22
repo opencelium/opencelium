@@ -38,10 +38,10 @@ export function ReferenceRemapSourceRow({ source, current, connection,
 	onEditCondition, generator, reference, defaultMethodId, resetKey,
 	onChange }: Props) {
 	const { t } = useI18n('workflow');
-	// One reference can be held in several places; the first is shown and the
-	// rest counted, because re-pointing it moves all of them together and there
-	// is nothing to answer per place.
-	const [held, ...alsoHeld] = source.locations;
+	// One reference can be held in several places; re-pointing it moves all of
+	// them together, so only the first is shown — there is nothing to answer
+	// per place. The full list still sits on this cell's hover title below.
+	const [held] = source.locations;
 
 	return (
 		<tr className='referenceRemapSource'>
@@ -94,11 +94,6 @@ export function ReferenceRemapSourceRow({ source, current, connection,
 						/>
 					) : (
 						<span className='referenceRemapSourcePath'>{held?.value ?? ''}</span>
-					)}
-					{alsoHeld.length > 0 && (
-						<span className='referenceRemapSourceMore'>
-							{t('referenceRemap.alsoHeld', { count: alsoHeld.length })}
-						</span>
 					)}
 				</div>
 			</td>

@@ -46,7 +46,8 @@
 }
 
 .referenceRemapReadBy,
-.referenceRemapEmpty {
+.referenceRemapEmpty,
+.referenceRemapReplaceLabel {
   color: var(--color-text-secondary);
   font-size: 12px;
 }
@@ -64,11 +65,19 @@
 
 /* Two columns: the field of the deleted method, and what it should read
    instead. Fixed layout so the left column keeps its width whatever path it
-   holds — the right one carries the controls and needs the rest. */
+   holds — the right one carries the controls and needs the rest. Bordered
+   throughout: three references read against each other is exactly the case a
+   grid is for — the lines are what say "this new reference belongs to this
+   field", not just proximity. */
 .referenceRemapTable {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+  /* --color-border-default, not -subtle: in the light theme, subtle (n[3])
+     sits one step from this row's own background (n[2]) and the grid lines
+     all but disappear. The grid is the point of this table (see the comment
+     below), so it needs the stronger of the two border tokens. */
+  border: 1px solid var(--color-border-default);
 }
 
 /* The columns are three references read against each other, which stops meaning
@@ -79,7 +88,8 @@
   z-index: 1;
   /* The row's own fill, not the surface: these sit inside .referenceRemapRow. */
   background: var(--color-background-app);
-  padding: 0 8px 4px 0;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border-default);
   color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 500;
@@ -125,17 +135,6 @@
   min-width: 0;
 }
 
-/* Held in more than one place: re-pointing moves all of them, so the rest are
-   counted rather than listed into a cell that has no room for them. Never the
-   one that gives way when space is short — the control beside it already
-   shrinks on its own, and a squeezed-down count would be unreadable. */
-.referenceRemapSourceMore {
-  flex-shrink: 0;
-  color: var(--color-text-secondary);
-  font-size: 12px;
-  white-space: nowrap;
-}
-
 /* Disabled throughout, so it reads as the row's subject rather than as a
    control someone forgot to enable. */
 .referenceRemapSourceCurrent {
@@ -143,7 +142,8 @@
 }
 
 .referenceRemapTable td {
-  padding: 4px 8px 4px 0;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border-default);
   vertical-align: middle;
 }
 

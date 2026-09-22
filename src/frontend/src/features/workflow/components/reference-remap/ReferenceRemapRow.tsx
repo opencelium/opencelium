@@ -50,24 +50,31 @@ export function ReferenceRemapRow({ target, choice, connection, previousConnecti
 				</span>
 			</div>
 			{hasCandidates ? (
-				/* The whole method in one answer, which is the common case: the fields
-				   keep their paths and are read from somewhere else. Anything the new
-				   method cannot serve is then corrected field by field below. */
-				<ReferenceMethodSelect
-					methods={candidateMethods}
-					methodId={replacementMethodId ?? CLEAR}
-					selectedMethod={candidateMethods
-						.find((method) => method.id === replacementMethodId)}
-					leadingOption={{ value: CLEAR, label: t('referenceRemap.clear') }}
-					popupZIndex={CONFIRM_POPUP_Z_INDEX}
-					onChange={(methodId) => onChange({ ...choice, replacement: answer(methodId) })}
-					// onSelect as well as onChange, so re-picking the method already
-					// chosen still starts the field rows below over: the user answered
-					// the question again, whether or not the answer moved.
-					onSelect={(methodId) => onChange({ ...choice, replacement: answer(methodId),
-						seedVersion: choice.seedVersion + 1 })}
-					testId={`workflow-reference-remap-${target.color.replace('#', '')}`}
-				/>
+				<>
+					{/* Names what the select below actually does: pick one method and
+					    every field of the deleted one moves to it in one answer, unless
+					    a field says otherwise below. Without this line the select reads
+					    as "pick a method" with no hint of what picking one accomplishes. */}
+					<div className='referenceRemapReplaceLabel'>{t('referenceRemap.replaceWith')}</div>
+					{/* The whole method in one answer, which is the common case: the fields
+					    keep their paths and are read from somewhere else. Anything the new
+					    method cannot serve is then corrected field by field below. */}
+					<ReferenceMethodSelect
+						methods={candidateMethods}
+						methodId={replacementMethodId ?? CLEAR}
+						selectedMethod={candidateMethods
+							.find((method) => method.id === replacementMethodId)}
+						leadingOption={{ value: CLEAR, label: t('referenceRemap.clear') }}
+						popupZIndex={CONFIRM_POPUP_Z_INDEX}
+						onChange={(methodId) => onChange({ ...choice, replacement: answer(methodId) })}
+						// onSelect as well as onChange, so re-picking the method already
+						// chosen still starts the field rows below over: the user answered
+						// the question again, whether or not the answer moved.
+						onSelect={(methodId) => onChange({ ...choice, replacement: answer(methodId),
+							seedVersion: choice.seedVersion + 1 })}
+						testId={`workflow-reference-remap-${target.color.replace('#', '')}`}
+					/>
+				</>
 			) : (
 				<div className='referenceRemapEmpty'>{t('referenceRemap.noCandidates')}</div>
 			)}

@@ -95,6 +95,8 @@ export const entityResolver =
                 const field = entity.fields.find(f => f.name === fieldName)
                 if (!field) continue
 
+                if (getValueByPath(errors, fieldName)) continue
+
                 const remote = field.validation?.remote
                 if (!remote) continue
 

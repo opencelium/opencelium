@@ -1,7 +1,7 @@
 {
   "wizard": {
-    "header": "Abonnement",
-    "subheader": "Überprüfen Sie Ihre Lizenz, die monatliche API-Nutzung und die Ausführungshistorie pro Workflow."
+    "header": "Lizenzverwaltung",
+    "subheader": "Überprüfen Sie Ihre Lizenz, die monatliche API-Nutzung und die Ausführungshistorie pro Workflow. Upgrades, zusätzliche Operationen und Support-Tickets werden über das OpenCelium Service-Portal abgewickelt."
   },
   "steps": {
     "license": {
@@ -45,7 +45,9 @@
     },
     "importLicense": {
       "button": "Lizenz importieren",
-      "success": "Lizenz wurde importiert."
+      "success": "Lizenz wurde importiert.",
+      "invalidType": "Wählen Sie eine Lizenzdatei im .txt-Format aus.",
+      "tooLarge": "Die Lizenzdatei darf nicht größer als 10 MB sein."
     },
     "activate": {
       "button": "Aktivieren",
@@ -68,6 +70,9 @@
     "activateFree": {
       "button": "Kostenlose Lizenz aktivieren",
       "success": "Kostenlose Lizenz wurde aktiviert."
+    },
+    "servicePortal": {
+      "button": "Service-Portal"
     }
   },
   "columns": {

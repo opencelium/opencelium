@@ -43,6 +43,12 @@ export type TestRunResult =
 
 export type TestRunContextValue = {
 	socketStatus: SocketStatus;
+	// True while the run is played from a registered stand-in instead of the
+	// backend (see simulatedTestRun.ts — the workflow tutorial is the only
+	// caller). Nothing downstream changes: the lines, the pacing and the
+	// debugger are the real ones. It exists so the start button stops
+	// demanding a socket and a subscription that a simulated run never uses.
+	isSimulated: boolean;
 	phase: TestRunPhase;
 	// Log tree of the current (or last finished) test run, assembled entirely
 	// from the socket stream — no REST requests happen during a run.

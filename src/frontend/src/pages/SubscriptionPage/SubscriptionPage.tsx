@@ -19,10 +19,12 @@ export function SubscriptionPage() {
     const [currentStep, setCurrentStep] = useState<StepIndex>(0)
     const [selectedOperationId, setSelectedOperationId] = useState<number | null>(null)
 
-    const { data: subscription, isLoading } = useGetActiveSubscriptionQuery()
+    const { data: subscription } = useGetActiveSubscriptionQuery()
     // Usage data only exists for an activated license; keep the steps enabled while
     // the query is in flight so they don't flash disabled on page open.
-    const isUsageLocked = !isLoading && !subscription?.subId
+    const isUsageLocked =
+        !subscription?.subId ||
+        subscription.active !== true
     const activeStep: StepIndex = isUsageLocked ? 0 : currentStep
     const activeOperationId = isUsageLocked ? null : selectedOperationId
 

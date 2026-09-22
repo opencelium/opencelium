@@ -17,7 +17,7 @@ import { ReferenceMethodSelect } from '../../../method-select/ReferenceMethodSel
 import { useLegacyBodyReferenceGenerator } from './useLegacyBodyReferenceGenerator';
 import '../bodyLegacy.css';
 
-export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply, showWebhookOption = true, popupZIndex, defaultMethodId, resetKey,
+export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply, showWebhookOption = true, autoFocus, popupZIndex, defaultMethodId, resetKey,
   applyOnSelect, value, readOnly, showMethod = true,
   responsePartAsText }: LegacyBodyReferenceGeneratorProps) {
   const state = useLegacyBodyReferenceGenerator({
@@ -26,7 +26,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
   });
 
   return (
-    <div className={state.shellClassName}>
+    <div className={state.shellClassName} data-testid='workflow-reference-generator'>
       {showWebhookOption ? (
         <div className='bodyLegacyGeneratorSwitch compactRadioGroup'>
           <Radio
@@ -51,7 +51,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
           {showMethod && (
             <ReferenceMethodSelect key={`method-${state.resetSeed}`}
               methods={state.methods} selectedMethod={state.selectedMethod}
-              methodId={state.methodId} disabled={readOnly}
+              methodId={state.methodId} disabled={readOnly} autoFocus={autoFocus}
               popupZIndex={popupZIndex} onChange={state.selectMethod} />
           )}
           {responsePartAsText ? (
@@ -92,6 +92,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
             <Button
               type='text'
               className='bodyLegacyGeneratorAction'
+              data-testid='workflow-reference-apply'
               icon={<PlusOutlined />}
               disabled={!state.selectedMethod || !state.field} onClick={state.applyDirect}
             />
@@ -103,6 +104,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
           <Button
             type='text'
             className='bodyLegacyGeneratorAction'
+            data-testid='workflow-reference-apply'
             icon={<PlusOutlined />}
             disabled={!state.webhookValue} onClick={state.applyWebhook}
           />

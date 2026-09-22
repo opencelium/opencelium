@@ -8,6 +8,7 @@ import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import {IconButton} from "@shared/ui/primitives/IconButton";
 import {Tooltip} from "@shared/ui/primitives/Tooltip";
 import {MenuSwitcher} from "@app/layouts/AppLayout/Sidebar/MenuSwitcher.tsx";
+import {HelpMenu} from "@app/layouts/AppLayout/TopBar/HelpMenu.tsx";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {hasComponentPermission} from "@/engine/policy";
 import {useAppLanguage} from "@features/user/language/useAppLanguage";
@@ -39,6 +40,7 @@ export const TopBar = () => {
                             type="primary"
                             iconLeft="workflow"
                             onClick={() => navigate('/workflow/create')}
+                            testId="topbar-create-workflow"
                         >
                             {tCommon('topbar.createWorkflow')}
                         </Button>
@@ -76,18 +78,12 @@ export const TopBar = () => {
                     <Button
                         type={'text'}
                         onClick={() => void changeLanguage(lang === 'en' ? 'de' : 'en')}
+                        testId="topbar-language"
                     >
                         {lang.toUpperCase()}
                     </Button>
                 </Tooltip>
-                <Tooltip content={tCommon('topbar.docs')}>
-                    <IconButton
-                        size="xs"
-                        type={'text'}
-                        iconProps={{name: 'docs', color: 'primary'}}
-                        onClick={() => window.open('https://docs.opencelium.io/en/prod/', '_blank', 'noopener,noreferrer')}
-                    />
-                </Tooltip>
+                <HelpMenu/>
                {/* <Tooltip content={tCommon('topbar.notifications')}>
                     <IconButton
                         size="xs"
@@ -104,6 +100,7 @@ export const TopBar = () => {
                             type={'text'}
                             iconProps={{name: 'profile', color: 'primary'}}
                             onClick={() => navigate('/profile')}
+                            testId="topbar-profile"
                         />
                     </Tooltip>
                 )}

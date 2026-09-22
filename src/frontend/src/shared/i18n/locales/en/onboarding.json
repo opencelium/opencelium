@@ -1,0 +1,357 @@
+{
+  "progress": {
+    "counter": "{{current}} of {{total}}"
+  },
+  "actions": {
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "createWorkflow": "Create workflow",
+    "close": "Close tour",
+    "resume": "Resume",
+    "restart": "Restart",
+    "dismiss": "Dismiss",
+    "keep": "Keep it",
+    "hide": "Hide it",
+    "skipForNow": "Skip for now",
+    "addAnotherInvoker": "Add another invoker",
+    "later": "I'll do this later",
+    "retrySave": "Retry save",
+    "buildWorkflow": "Build the workflow",
+    "showAround": "Show me around"
+  },
+  "notes": {
+    "commandLabel": "Command",
+    "ctrlKey": "Ctrl"
+  },
+  "steps": {
+    "welcome": {
+      "kicker": "Welcome to OpenCelium",
+      "title": "Welcome, {{name}}. Let's set up your first integration."
+    },
+    "theme": {
+      "kicker": "Choose your theme",
+      "title": "Pick how OpenCelium should look",
+      "note": "Change it later in /ui/config or with Ctrl + K → ui theme"
+    },
+    "palette": {
+      "kicker": "The command palette",
+      "title": "That box in the top bar gets you anywhere"
+    },
+    "layers": {
+      "kicker": "How an integration is built",
+      "title": "Three things, in this order",
+      "note": "Nothing runs without at least one invoker"
+    },
+    "invoker": {
+      "kicker": "Your first invoker",
+      "existingKicker": "Your invokers",
+      "emptyTitle": "You have no invokers yet",
+      "anotherTitle": "Add another invoker",
+      "existingTitle_one": "You already have {{count}} invoker",
+      "existingTitle_other": "You already have {{count}} invokers"
+    },
+    "connector": {
+      "kicker": "Connectors",
+      "title": "Now point an invoker at a real system"
+    },
+    "license": {
+      "kicker": "Your license",
+      "title": "You are on the free plan: 25,000 API operations per month"
+    }
+  },
+  "content": {
+    "welcome": {
+      "lead": "OpenCelium connects the systems you already run — Jira, Zendesk, SAP and HubSpot — and keeps their data in sync.",
+      "body": "Describe an API once, then connect its methods on a canvas. This tour shows the shortest path from setup to a running workflow.",
+      "duration": "~2 minutes, {{phases}} phases",
+      "phasesLabel": "Onboarding phases",
+      "theme": "Theme",
+      "license": "Licence",
+      "palette": "Palette",
+      "invoker": "Invoker",
+      "connector": "Connector",
+      "anonymous": "there",
+      "hidden": "Welcome, {{name}}"
+    },
+    "theme": {
+      "body": "Your choice applies immediately.",
+      "groupLabel": "Theme",
+      "lightDescription": "Best in bright rooms and on projectors.",
+      "darkDescription": "Easier on the eyes during long sessions.",
+      "deviceDescription": "Follows your system theme setting."
+    },
+    "palette": {
+      "body": "It is highlighted behind this dialog. Press <strong>{{key}} + K</strong> from any screen to open it — you never have to reach for it with the mouse.",
+      "tokens": "It takes tokens, not sentences",
+      "tokensBody": "Enter an action, then what it applies to. Start by typing what you want to do.",
+      "help": "One token lists everything",
+      "helpBody": "If you forget a command, this is the only one you need to remember."
+    },
+    "layers": {
+      "body": "OpenCelium builds an integration in three layers, and each one needs the one before it. The next two steps set up the first layer.",
+      "step": "Step {{count}}",
+      "invoker": "Describes an API: its endpoints, auth and request shapes. One file, reusable.",
+      "connector": "One real system: that invoker plus a base URL and credentials.",
+      "workflow": "The integration itself: methods of as many connectors as you need, wired on a canvas."
+    },
+    "invoker": {
+      "body": "An invoker describes one API. Choose the quicker path unless your system requires a custom setup.",
+      "recommended": "Recommended",
+      "uploadTitle": "Upload an invoker file",
+      "uploadBody": "Upload an existing .xml file. Maximum size: 1 GB.",
+      "gitTitle": "Download invokers",
+      "gitBody": "Download the current community library from the OpenCelium repository.",
+      "gitAction": "Download from Git",
+      "gitSuccess_one": "{{count}} invoker installed from Git",
+      "gitSuccess_other": "{{count}} invokers installed from Git",
+      "gitEmpty": "The repository had no invokers to install.",
+      "gitFailed_one": "{{count}} file could not be installed",
+      "gitFailed_other": "{{count}} files could not be installed",
+      "gitError": "The invoker repository could not be reached. Please try again in a few minutes.",
+      "manualTitle": "Create one manually",
+      "manualBody": "For an API we do not support yet, define its endpoints, authentication and response formats manually.",
+      "manualAction": "Open the editor",
+      "existingBody": "Your API descriptions are already available, so you can skip the upload task.",
+      "existingList": "They are configured and ready, so the upload step will be skipped. You can add more at any time.",
+      "showMore": "Show more…",
+      "fileAdded": "{{name}} added",
+      "ready": "Ready to use in a connector.",
+      "fileError": "Could not read {{name}}",
+      "invalidType": "Invoker files must use the .xml format.",
+      "tooLarge": "The file exceeds the 1 GB limit.",
+      "chooseAnother": "Choose another file",
+      "parsing": "Parsing endpoints…",
+      "drop": "Drop an xml file here",
+      "methods_one": "{{count}} method",
+      "methods_other": "{{count}} methods"
+    },
+    "connector": {
+      "body": "A connector is one invoker plus the base URL and credentials of a system you actually run. The wizard walks you through it and tests the connection before saving.",
+      "pickInvoker": "Pick the invoker to build it from",
+      "panelEyebrow": "New connector",
+      "panelTitle": "Connector from {{name}}",
+      "noInvokers": "Add an invoker first — every connector is built from one.",
+      "tableTitle": "Title",
+      "tableDescription": "Description",
+      "tableConnectors": "Connectors",
+      "tableActionTooltip": "Create a connector from {{name}}"
+    },
+    "license": {
+      "body": "Every call a workflow makes to a connected system counts as one operation. Activate a license when you need more.",
+      "information": "License Information",
+      "status": "Status",
+      "valid": "Valid",
+      "free": "Free",
+      "type": "Type",
+      "operations": "Amount of API Operations",
+      "expiration": "Expiration Date",
+      "more": "Need more operations?",
+      "actionsBody": "Activation, extra operations and offline requests all live on the licence page. Whichever applies to this install is offered there.",
+      "openPage": "Go to licence page",
+      "servicePortalHint": "Need to buy extra operations or manage your license online? Visit the <1>OpenCelium Service Portal</1>.",
+      "thisMonth": "This month",
+      "usage": "{{used}} of {{total}} operations"
+    }
+  },
+  "dashboard": {
+    "kicker": "Dashboard",
+    "steps": {
+      "header": {
+        "title": "What this page tells you",
+        "body": "A live operational view of this OpenCelium instance: how much is running, how much of it fails, what the machine is spending on it, and which workflows are doing the work. The range beside the title applies to the timeline widgets; the live counters are running totals."
+      },
+      "tiles": {
+        "title": "Live counters",
+        "body": "These five arrive over the websocket rather than a REST call, so they move while you watch: total executions, the share that failed, average and total run time, and the size of the execution logs on disk. The dot in each corner is the state of that live connection — spinners mean it is still connecting."
+      },
+      "executions": {
+        "title": "Executions and failures",
+        "body": "Two series over the same seven days: every execution, and the failures among them. Hover a day to read the exact counts and that day's failure rate.",
+        "note": "Refresh re-reads this widget alone."
+      },
+      "resources": {
+        "title": "What it costs the machine",
+        "body": "CPU load and memory in use, as a share of what this instance has available. Both gauges shift from teal toward red past 60%, so a system under pressure is visible without reading the numbers."
+      },
+      "connectors": {
+        "title": "Which workflows are busiest",
+        "body": "The five workflows with the most executions in the window, each with its own failure rate. The quickest way to find the one worth opening after a bad night."
+      },
+      "comingSoon": {
+        "title": "Not wired up yet",
+        "body": "These three are greyed out on purpose: the layout is settled but the endpoints behind them are still being built. Nothing here is broken — the cards fill in once the API lands."
+      },
+      "createWorkflow": {
+        "title": "Start a new workflow",
+        "body": "Opens the visual editor on an empty canvas, where connector methods and if/loop operators are composed into an integration. It is hidden on narrow screens and for roles that may not create connections."
+      },
+      "palette": {
+        "title": "The command palette",
+        "body": "Every action in the app is reachable from here — press {{key}} + K from anywhere to focus it. Commands read verb first (create connector, list schedules), and typing help lists the whole tree."
+      },
+      "language": {
+        "title": "English or German",
+        "body": "Switches the interface language straight away. The choice is saved onto your account as well as this browser, so it follows you to another machine."
+      },
+      "help": {
+        "title": "Help, and this tour",
+        "body": "Two entries behind this icon: the OpenCelium documentation at docs.opencelium.io, which opens in a new tab, and Start tour — which is how you get back to this walkthrough later."
+      },
+      "menuSwitch": {
+        "title": "Main and admin menus",
+        "body": "The sidebar has two: the main menu for day-to-day work, and the admin menu for users, roles and system settings. Switching lands you on the page you last had open in that menu."
+      },
+      "profile": {
+        "title": "Your account",
+        "body": "Your own details, the permissions your roles grant you, and a password change."
+      }
+    }
+  },
+  "workflow": {
+    "kicker": "Workflow",
+    "actions": {
+      "done": "Exit"
+    },
+    "cues": {
+      "reference": "Reference",
+      "doubleClick": "Double-click",
+      "rightClick": "Right-click"
+    },
+    "steps": {
+      "intro": {
+        "title": "Build a working workflow, step by step",
+        "body": "This short, hands-on tutorial walks the whole editor — methods, a loop, a condition, references and a live test run — built against two invented systems, so nothing you do here is saved. Each step tells you exactly what to do next; follow the pill.",
+        "note": ""
+      },
+      "customers": {
+        "title": "List the customers",
+        "body": "Add getCustomers from Tutorial CRM. It returns every customer with their email, first name and last name. Both systems here are invented — nothing you build is saved.",
+        "note": "Add the method to continue"
+      },
+      "loop": {
+        "title": "Repeat per customer",
+        "body": "getCustomers returns a list, so the rest of the workflow has to run once per entry. Use the + after it to add a loop operator.",
+        "note": "Add a loop operator to continue"
+      },
+      "iterate": {
+        "title": "Tell the loop what to iterate",
+        "body": "A loop on its own does not know what it is walking. Right-click it and open Configuration. The operator decides how it walks — For iterates an array — and its argument is a reference to the array to walk. Save it, and the loop variable i becomes the customer of the current iteration. Pick, in this order:",
+        "note": "Save the configuration to continue"
+      },
+      "lookup": {
+        "title": "Look each one up, inside the loop",
+        "body": "Use the + below the loop, not the one after it — below puts the step inside the loop's scope, at index 1_0, where each iteration has a customer to work with. After the loop it would be step 2 and run just once. Add getClientByEmail from Tutorial Support Desk.",
+        "note": "Add the method under the loop to continue"
+      },
+      "endpoint": {
+        "title": "A reference in the endpoint",
+        "body": "Right-click getClientByEmail, choose Edit URL, then Insert Reference. The method comes first, then the field path, one segment at a time. Taking (i loop) rather than a fixed element is what ties the reference to the loop, so it resolves to a different customer on each iteration. Pick, in this order:",
+        "note": "Insert the reference, then close the dialog"
+      },
+      "branch": {
+        "title": "Only when it is missing",
+        "body": "Use the + after getClientByEmail to add an IF operator — still inside the loop — and set its condition on the lookup's response: found is false.",
+        "note": "Add an IF operator to continue"
+      },
+      "condition": {
+        "title": "Compare the two emails",
+        "body": "Double-click the IF to open its condition, then Add Condition. Both sides are references: on the left take getClientByEmail's client.email, on the right getCustomers' customers[i].email — the same loop-scoped path as the endpoint. Set the operator to Not equal, so the true branch means this customer has no account yet. Save it.",
+        "note": "Save the condition to continue"
+      },
+      "create": {
+        "title": "Create the missing client",
+        "body": "Use the + below the IF: that is its true branch. Add createClient from Tutorial Support Desk, so it runs once for every customer that was not found — and never for one that was.",
+        "note": "Add the method under the IF to continue"
+      },
+      "username": {
+        "title": "Two references, one field",
+        "body": "Open createClient's body and find username. Hover its row and press the reference icon, then pick getCustomers, customers, (i loop), firstName. Do it again for lastName. Two references in one field are wrapped in an enhancement automatically — unfold Variable Information to see them listed as VAR_0 and VAR_1, in that order. Join them with a space in the script, then close the dialog.",
+        "note": "Add both references, unfold the variables, edit the script, then close"
+      },
+      "testrun": {
+        "title": "Run it, without running it",
+        "body": "Press play on the start node and choose Debug mode. The run streams its log lines as fast as the engine produces them, and the canvas replays them at a pace you can follow — a dot travels the edge, then the step it feeds lights up. Nothing leaves the browser: the two invented systems answer from fixtures.",
+        "note": "Start the run to continue"
+      },
+      "pause": {
+        "title": "Freeze the replay",
+        "body": "The debug controls sit top left, beside the zoom buttons. Pause stops the replay exactly where it is — the run itself carries on in the background, its lines just queue up behind the pause. The log panel opens the tree down to the element you stopped on, so you can read how far the run had got.",
+        "note": "Pause the replay to continue"
+      },
+      "step": {
+        "title": "One line at a time",
+        "body": "Stepping applies exactly the next queued line and stays paused. Walk the loop entry, the lookup, the IF's verdict and the create one press at a time: each step moves the token to a single element, so you see the order the engine really took rather than the order the graph is drawn in.",
+        "note": "Step forward once to continue"
+      },
+      "iteration": {
+        "title": "Jump to another pass",
+        "body": "Paused inside a loop, the loop node shows which iteration it is on. The skip icon fast-forwards past the rest of the current one and re-pauses as the next begins; typing a number in the counter aims at that iteration instead. Watch the IF change its verdict — one of these customers already has an account.",
+        "note": "Skip to the next iteration to continue"
+      },
+      "speed": {
+        "title": "Set the pace",
+        "body": "The slider scales every dwell in the replay, including one already mid-wait. The Live toggle in the log panel's header drops the pacing altogether and shows each line the instant it arrives — right for a long run you only want the outcome of, and the reason the debug controls disappear while it is on.",
+        "note": "Try the slider, then continue"
+      },
+      "logs": {
+        "title": "Read the run",
+        "body": "This is the same tree stored runs are shown in. A method row opens to its request and response, a loop row pages through its iterations, an IF row names the branch it took. All of it came from the graph you built — compare createClient's payload against the script you wrote for it.",
+        "note": "Open a row, then continue"
+      },
+      "schedules": {
+        "title": "Where a workflow gets its trigger",
+        "body": "The graph is proven; now it needs a reason to run. That reason is a schedule, and the calendar icon in the header is this workflow's list of them — no page to leave the editor for. The number beside it counts them, and the dot is their combined state: a run in progress, the last run failed, all healthy, or never run. Open it — it is empty, because this workflow has none yet.",
+        "note": "Open the schedules panel to continue"
+      },
+      "schedule": {
+        "title": "Add a schedule",
+        "body": "Press Create schedule and fill in three things. Title names the run wherever it turns up later — the schedule list, notification mails, the logs. Debug mode keeps the full request and response of every method, which is what makes the log tree you just read worth opening; leave it off for something that fires every minute. Cron expression is when it runs: type it, or build it with the pickers under the field and watch the expression follow. Leave it empty and the schedule is manual only — it runs when you press play on it, and never by itself.",
+        "note": "Create the schedule to continue"
+      },
+      "scheduleCard": {
+        "title": "The schedule, from here on",
+        "body": "One card per schedule, and everything about it without leaving the canvas. The ring on the left is the last run's outcome and doubles as a manual start; beside it is the countdown to the next firing. Unfold it for the cron expression, the last success and the last failure each linking into their logs, how long a run usually takes, and the webhook URL that triggers it from outside. Behind the ⋯ menu sit notification recipients, support logs and delete.",
+        "note": "Unfold the card, then continue"
+      },
+      "scheduleList": {
+        "title": "The same list, for every workflow",
+        "body": "Schedules in the sidebar is the whole picture: every schedule on this instance, not only this workflow's. The same cards, plus what only makes sense across workflows — search and sorting, bulk delete, notification recipients set on several at once, and each one's running executions as they happen. The panel you just used is that page narrowed to a single workflow, so nothing set in one has to be set again in the other. Don't follow it now: that leaves the editor, and the tutorial with it.",
+        "note": "Nothing to click here — continue"
+      },
+      "summary": {
+        "title": "That is a working workflow",
+        "body": "getCustomers lists everyone, the loop walks them one at a time, getClientByEmail asks the second system about the current customer by reference, the IF lets only the unknown ones through, and createClient fills its fields from the customer being walked. Methods, scope, references, enhancements — every real integration is these four ideas; the test run is how you check them, and the schedule is what runs them when nobody is watching. Nothing here was saved, neither the graph nor the schedule; build the same shape with your own connectors.",
+        "note": "Invented connectors, so there is nothing to keep"
+      }
+    }
+  },
+  "checklist": {
+    "title": "Setup",
+    "done": "{{count}} of {{total}} done",
+    "pill": "Setup {{count}}/{{total}}",
+    "paused": "Tour paused · resume",
+    "dismissTitle": "Hide the setup checklist?",
+    "dismissBody": "It will not come back. You can still restart the tour from the palette with help onboarding, or turn it back on in /ui/config.",
+    "theme": {
+      "title": "Choose a theme",
+      "detail": "Light, dark or match device."
+    },
+    "palette": {
+      "title": "Learn the command palette",
+      "detail": "Ctrl + K reaches every screen."
+    },
+    "invoker": {
+      "title": "Add your first invoker",
+      "detail": "Upload a description or write one."
+    },
+    "connector": {
+      "title": "Create a connector",
+      "detail": "Invoker, URL and credentials."
+    },
+    "license": {
+      "title": "Activate a license",
+      "detail": "Optional — raises your monthly limit."
+    }
+  }
+}

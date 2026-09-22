@@ -15,13 +15,20 @@ type Props = {
     entity: EntityDefinition
     mode: Mode
     forcedReadonly?: boolean
+    /**
+     * Field names to leave unrendered. The value still submits, so only hide a
+     * required field when something else supplies it (e.g. the wizard's
+     * `defaultValuesOverride`) — otherwise submit fails on an invisible error.
+     */
+    hiddenFields?: string[]
 }
 
 export function SectionRenderer({
     section,
     entity,
     mode,
-    forcedReadonly
+    forcedReadonly,
+    hiddenFields
 }: Props) {
 
     const policyContext = usePolicyContext()
@@ -54,6 +61,7 @@ export function SectionRenderer({
 
     const fields: FieldDefinition[] =
         entity.fields.filter(field =>
+            !hiddenFields?.includes(field.name) &&
             section.fields.includes(field.name)
         )
 

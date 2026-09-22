@@ -42,3 +42,21 @@ export type OperationBody = {
     format: 'xml' | 'json' | 'x-www-form-urlencoded'
     type: 'object' | 'array' | 'string'
 }
+
+/**
+ * What `POST /invoker/remote` reports back. The installed entries carry the same
+ * metadata as `GET /invoker/all?opsIncluded=false`, so `operations` is absent —
+ * fetch the invoker by name when the operations are actually needed.
+ */
+export type InvokerMeta = Omit<Invoker, 'operations'>
+
+export type InvokerRepositoryFailure = {
+    fileName: string
+    /** Backend-authored, already user-readable sentence. Not an i18n key. */
+    reason: string
+}
+
+export type InvokerRepositoryDownload = {
+    installed: InvokerMeta[]
+    failed: InvokerRepositoryFailure[]
+}

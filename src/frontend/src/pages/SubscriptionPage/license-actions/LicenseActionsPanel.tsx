@@ -1,12 +1,20 @@
 import React, { useRef, useState } from 'react'
 import { Button } from '@shared/ui/primitives/Button'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
+import { useGetActiveSubscriptionQuery } from '@entities/subscription/api/subscriptionApi'
+import { useOnlineSyncStatus } from '@entities/subscription/model/useOnlineSyncStatus'
 import {
-    useGetActiveSubscriptionQuery,
-    useGetSyncStatusQuery,
-} from '@entities/subscription/api/subscriptionApi'
+    ONLINE_FEATURE_REASON_KEY,
+    useServicePortalFeature,
+} from '@entities/subscription/model/useOnlineFeature'
+import { useOnlineStatus } from '@shared/network/useOnlineStatus'
+import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useLicenseActions } from '@pages/SubscriptionPage/license-actions/useLicenseActions'
 import { ActivateSubscriptionDialog } from '@pages/SubscriptionPage/license-actions/ActivateSubscriptionDialog'
+import { notifyError } from '@shared/ui/feedback/notifyError'
+
+const MAX_LICENSE_FILE_SIZE = 10 * 1024 * 1024
+const SERVICE_PORTAL_URL = 'https://service.opencelium.io/login'
 
 const panelStyle: React.CSSProperties = {
     display: 'flex',
@@ -17,7 +25,17 @@ const panelStyle: React.CSSProperties = {
 
 export const LicenseActionsPanel: React.FC = () => {
     const { t } = useI18n('entities')
-    const { data: syncStatus, isLoading: isSyncLoading } = useGetSyncStatusQuery()
+    const { t: tCommon } = useI18n('common')
+    const { isActive: isOnlineSync, isLoading: isSyncLoading } = useOnlineSyncStatus()
+    // Activation is `POST /subs/{subId}`, which the backend answers by asking the
+    // Service Portal for a license key — so it needs the portal reachable, not just
+    // a connected browser. Every other action on this panel is served locally.
+    const portal = useServicePortalFeature()
+    const portalBlockReason = portal.state === 'unavailable' ? portal.reason : null
+    // Opening the portal in a new tab is the browser's own request to the public
+    // site — it needs connectivity, but none of the backend-side portal plumbing
+    // `useServicePortalFeature` checks.
+    const isOnline = useOnlineStatus()
     const { data: activeSubscription, isLoading: isSubscriptionLoading } =
         useGetActiveSubscriptionQuery()
 
@@ -38,7 +56,6 @@ export const LicenseActionsPanel: React.FC = () => {
     if (isSyncLoading || isSubscriptionLoading) return null
 
     const currentSubscription = activeSubscription?.subId ? activeSubscription : undefined
-    const isOnlineSync = syncStatus?.active === true
     const isFree = currentSubscription?.type === 'free'
 
     const pickFile =
@@ -50,6 +67,21 @@ export const LicenseActionsPanel: React.FC = () => {
             await handler(file)
         }
 
+    const pickLicenseFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        event.target.value = ''
+        if (!file) return
+        if (!file.name.toLowerCase().endsWith('.txt')) {
+            notifyError(t('subscription.manage.importLicense.invalidType' as never))
+            return
+        }
+        if (file.size > MAX_LICENSE_FILE_SIZE) {
+            notifyError(t('subscription.manage.importLicense.tooLarge' as never))
+            return
+        }
+        await importLicense(file)
+    }
+
     return (
         <div style={panelStyle}>
             <input
@@ -57,7 +89,7 @@ export const LicenseActionsPanel: React.FC = () => {
                 type="file"
                 accept=".txt,text/plain"
                 style={{ display: 'none' }}
-                onChange={pickFile(importLicense)}
+                onChange={pickLicenseFile}
             />
             <input
                 ref={extraOpsInputRef}
@@ -88,9 +120,18 @@ export const LicenseActionsPanel: React.FC = () => {
             )}
 
             {isOnlineSync && (!currentSubscription || isFree) && (
-                <Button type="primary" iconLeft="key" onClick={() => setIsActivateDialogOpen(true)}>
-                    {t('subscription.manage.activate.button' as never)}
-                </Button>
+                <Tooltip content={portalBlockReason ? tCommon(ONLINE_FEATURE_REASON_KEY[portalBlockReason]) : ''}>
+                    <Button
+                        type="primary"
+                        iconLeft="key"
+                        loading={portal.state === 'checking'}
+                        disabled={portal.state !== 'available'}
+                        testId="license-activate"
+                        onClick={() => setIsActivateDialogOpen(true)}
+                    >
+                        {t('subscription.manage.activate.button' as never)}
+                    </Button>
+                </Tooltip>
             )}
 
             <Button
@@ -120,6 +161,21 @@ export const LicenseActionsPanel: React.FC = () => {
                     {t('subscription.manage.deleteLicense.button' as never)}
                 </Button>
             )}
+
+            {/* Tooltip renders its own wrapper span, so the auto margin that right-aligns
+                this button has to sit outside it — that wrapper is the panel's flex item. */}
+            <div style={{ marginLeft: 'auto' }}>
+                <Tooltip content={isOnline ? '' : tCommon(ONLINE_FEATURE_REASON_KEY.offline)}>
+                    <Button
+                        iconLeft="portal"
+                        disabled={!isOnline}
+                        testId="license-service-portal"
+                        onClick={() => window.open(SERVICE_PORTAL_URL, '_blank', 'noopener,noreferrer')}
+                    >
+                        {t('subscription.manage.servicePortal.button' as never)}
+                    </Button>
+                </Tooltip>
+            </div>
 
             <ActivateSubscriptionDialog
                 open={isActivateDialogOpen}

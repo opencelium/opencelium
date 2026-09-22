@@ -21,7 +21,9 @@ export const AntCollapse: CollapseComponent = ({
             style={style}
             items={items.map((item) => ({
                 key: item.key,
-                label: item.label,
+                label: item.testId
+                    ? <span data-testid={item.testId}>{item.label}</span>
+                    : item.label,
                 children: item.content,
                 disabled: item.disabled,
                 showArrow: item.showArrow,
