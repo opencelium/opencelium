@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.ocel.postfix;
 
 import com.becon.opencelium.backend.ocel.ShallowEvaluator;
-import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
 import com.becon.opencelium.backend.ocel.exception.ApplyFunctionException;
 import com.becon.opencelium.backend.ocel.function.FunctionFactory;
 import com.becon.opencelium.backend.ocel.operand.Operand;
@@ -15,6 +14,8 @@ import com.becon.opencelium.backend.ocel.operator.Operator;
 import com.becon.opencelium.backend.ocel.utils.RawValueParser;
 import com.becon.opencelium.backend.ocel.token.Token;
 import com.becon.opencelium.backend.ocel.token.TokenType;
+import com.becon.opencelium.backend.reference.ReferenceMatchers;
+import com.becon.opencelium.backend.reference.enums.ReferenceGroup;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 
 import java.util.*;
@@ -125,7 +126,7 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                     }
                 } else if (Objects.equals(token.getType(), TokenType.OPERAND)) {
                     String rawValue = token.getLexeme();
-                    if (ReferenceUtils.isReference(rawValue)) {
+                    if (ReferenceMatchers.isReference(rawValue, ReferenceGroup.WRAPPED)) {
                         operandStack.push(dummy);
                     } else {
                         List<int[]> ints = PathAndReferenceUtility.extractReferenceIndexes(rawValue);

@@ -6,8 +6,9 @@ import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.exception.ValueParseException;
 import com.becon.opencelium.backend.ocel.utils.RawValueParser;
-import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
 import com.becon.opencelium.backend.ocel.utils.ValueUtils;
+import com.becon.opencelium.backend.reference.ReferenceMatchers;
+import com.becon.opencelium.backend.reference.enums.ReferenceGroup;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 
 import java.util.List;
@@ -43,7 +44,7 @@ class ValueNode implements ASTNode {
     }
 
     private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor, OcLogger<ExecutionLog> logger, MaskingService masking) throws ValueParseException, InvalidExpressionException {
-        if (ReferenceUtils.isReference(rawValue)) {
+        if (ReferenceMatchers.isReference(rawValue, ReferenceGroup.WRAPPED)) {
             if (referenceExtractor == null)
                 throw InvalidExpressionException.referenceExtractorNotFound(rawValue);
 

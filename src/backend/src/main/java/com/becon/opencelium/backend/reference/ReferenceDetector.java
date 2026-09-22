@@ -1,25 +1,9 @@
 package com.becon.opencelium.backend.reference;
 
-import java.util.regex.Pattern;
-
-import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-import static com.becon.opencelium.backend.constant.RegExpression.requestData;
-import static com.becon.opencelium.backend.constant.RegExpression.webhook;
-import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
+import com.becon.opencelium.backend.reference.enums.ReferenceGroup;
+import com.becon.opencelium.backend.reference.enums.ReferenceType;
 
 public class ReferenceDetector {
-    private static final Pattern CONTAINS_PATTERN =
-            Pattern.compile(
-                    directRef + "|" +
-                            wrappedDirectRef + "|" +
-                            enhancement + "|" +
-                            webhook + "|" +
-                            pageRef + "|" +
-                            requestData
-            );
-
     private ReferenceDetector() {
     }
 
@@ -32,9 +16,38 @@ public class ReferenceDetector {
             return false;
         }
 
-        return CONTAINS_PATTERN.matcher(expression).find();
+        return Patterns.ALL_CONTAINS_PATTERN.matcher(expression).find();
     }
 
+    public static boolean containsReference(String expression, ReferenceType referenceType) {
+        if (expression == null) {
+            return false;
+        }
+
+        if (!mayContainReference(expression)) {
+            return false;
+        }
+
+        return Patterns.of(referenceType).matcher(expression).find();
+    }
+
+    public static boolean containsReference(String expression, ReferenceGroup group) {
+        if (expression == null) {
+            return false;
+        }
+
+        if (!mayContainReference(expression)) {
+            return false;
+        }
+
+        for (ReferenceType reference : group.getReferences()) {
+            if (containsReference(expression, reference)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Fast pre-check for possible references.

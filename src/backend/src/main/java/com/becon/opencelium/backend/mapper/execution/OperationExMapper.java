@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.mapper.execution;
 
-import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.enums.execution.DataType;
@@ -8,6 +7,12 @@ import com.becon.opencelium.backend.enums.execution.ParamLocation;
 import com.becon.opencelium.backend.enums.execution.ParamStyle;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
+import com.becon.opencelium.backend.reference.ReferenceDetector;
+import com.becon.opencelium.backend.reference.ReferenceMatchers;
+import com.becon.opencelium.backend.reference.ReferenceParser;
+import com.becon.opencelium.backend.reference.enums.ReferenceGroup;
+import com.becon.opencelium.backend.reference.enums.ReferenceType;
+import com.becon.opencelium.backend.reference.model.Reference;
 import com.becon.opencelium.backend.resource.execution.*;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -632,10 +637,7 @@ public class OperationExMapper {
     }
 
     private DataType findTypeOfReference(String value) {
-        if (value.matches(RegExpression.requiredData)
-                || value.matches(RegExpression.enhancement)
-                || value.matches(RegExpression.directRef)
-                || value.matches(RegExpression.webhook)) {
+        if (ReferenceDetector.containsReference(value, ReferenceGroup.DIRECT_WITHOUT_PAGE)) {
             return DataType.UNDEFINED;
         } else {
             return DataType.STRING;
@@ -744,16 +746,15 @@ public class OperationExMapper {
     }
 
     private String extractNameOfRef(String param) {
-        if (param.matches(RegExpression.wrappedDirectRef)) {
-            return param.substring(2, param.length() - 2);
-        } else if (("#" + param).matches(RegExpression.enhancement)) {
-            return param.substring(2, param.length() - 2);
-        } else if (param.matches(RegExpression.requestData)) {
-            return param.substring(1, param.length() - 1);
-        } else if (param.matches(RegExpression.webhook)) {
-            return param.substring(2, param.length() - 1);
+        if (ReferenceMatchers.isEnhancement("#" + param)) {
+            return ReferenceParser.parse(param, ReferenceType.ENHANCEMENT).getName();
         }
-        return param;
+
+        try {
+            return ReferenceParser.parse(param).getName();
+        } catch (Exception e) {
+            return param;
+        }
     }
 
     private static class Tree {
