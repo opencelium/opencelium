@@ -9,6 +9,11 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 import { uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
 import { useDownloadInvokersFromRepositoryMutation } from '@entities/invoker/api/invokerApi'
+import {
+    ONLINE_FEATURE_REASON_KEY,
+    useOnlineFeature,
+} from '@entities/subscription/model/useOnlineFeature'
+import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import '../onboardingIntro.css'
 
 const INVOKER_ACCEPT = '.xml,text/xml,application/xml'
@@ -26,12 +31,21 @@ type FirstInvokerProps = {
 export function FirstInvokerContent({ onCreateManually, onUploaded }: FirstInvokerProps) {
     const { t } = useI18n('onboarding')
     const { t: tEntities } = useI18n('entities')
+    const { t: tCommon } = useI18n('common')
     const confirm = useConfirm()
     const [isUploading, setIsUploading] = useState(false)
     const [result, setResult] = useState<UploadResult | null>(null)
     const [failedFile, setFailedFile] = useState<string | null>(null)
     const [failReason, setFailReason] = useState<'invalidType' | 'tooLarge' | null>(null)
     const [downloadFromRepository, { isLoading: isDownloadingFromGit }] = useDownloadInvokersFromRepositoryMutation()
+    /**
+     * The pull reaches github.com/opencelium/invoker, so it needs a connection — but
+     * deliberately not the `invoker` scope: that flag governs Service Portal sync
+     * (`/invoker/{name}/sync-force`), a different server. Only the master switch,
+     * which turns off outbound traffic install-wide, applies here.
+     */
+    const gitSync = useOnlineFeature()
+    const syncBlockReason = gitSync.state === 'unavailable' ? gitSync.reason : null
     const advanceTimerRef = useRef<number | null>(null)
 
     useEffect(() => () => {
@@ -120,15 +134,17 @@ export function FirstInvokerContent({ onCreateManually, onUploaded }: FirstInvok
                         <p>{t('content.invoker.gitBody')}</p>
                         <code>{GIT_INVOKER_REPO}</code>
                     </div>
-                    <Button
-                        type="default"
-                        loading={isDownloadingFromGit}
-                        disabled={isDownloadingFromGit}
-                        testId="onboarding-invoker-git"
-                        onClick={handleDownloadFromGit}
-                    >
-                        {t('content.invoker.gitAction')}
-                    </Button>
+                    <Tooltip content={syncBlockReason ? tCommon(ONLINE_FEATURE_REASON_KEY[syncBlockReason]) : ''}>
+                        <Button
+                            type="default"
+                            loading={isDownloadingFromGit}
+                            disabled={isDownloadingFromGit || gitSync.state !== 'available'}
+                            testId="onboarding-invoker-git"
+                            onClick={handleDownloadFromGit}
+                        >
+                            {t('content.invoker.gitAction')}
+                        </Button>
+                    </Tooltip>
                 </section>
                 <section>
                     <div>

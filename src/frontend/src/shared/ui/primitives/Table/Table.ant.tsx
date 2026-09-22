@@ -342,11 +342,24 @@ export const AntTable = ({
                 keeps row height fixed: without it, the browser's only way to shrink
                 a column below its content's natural width is to wrap the text,
                 which grows the row taller instead of scrolling horizontally — so a
-                column only ever falls back to the scrollbar below, never to wrapping. */}
+                column only ever falls back to the scrollbar below, never to wrapping.
+
+                With no rows there is nothing to scroll *to* — only the header and the
+                empty placeholder — yet this is exactly the state that overflows by a
+                few pixels: the freeze effect bails out on an empty table, so neither
+                the fixed layout nor the trailing filler column that normally absorbs
+                the last header's resize handle is in place. That produced a scrollbar
+                under an empty table that vanished as soon as rows arrived, so the
+                empty state clips instead. The Material adapter drops the table
+                outright when empty, so it never had this. */}
             <div
                 ref={containerRef}
                 className={frozen ? 'ocTableFixedLayout' : undefined}
-                style={{ overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap' }}
+                style={{
+                    overflowX: rows.length === 0 ? 'hidden' : 'auto',
+                    overflowY: 'hidden',
+                    whiteSpace: 'nowrap',
+                }}
             >
                 <Table<any>
                     loading={isLoading}
