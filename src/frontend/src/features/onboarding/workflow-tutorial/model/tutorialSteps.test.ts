@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { resolveHighlight, resolveStepIndex, TUTORIAL_STEPS } from './tutorialSteps'
-import { buildReferenceValue, ITERATOR_NAMES } from '@features/workflow/components/request-editor/body-editor/requestReferenceOptions'
+import { resolveHighlight, resolveStepFloor, resolveStepIndex, TUTORIAL_STEPS } from './tutorialSteps'
+import { ITERATOR_NAMES } from '@features/workflow/components/request-editor/body-editor/requestReferenceOptions'
 import { TUTORIAL_CONNECTORS } from './tutorialFixtures'
 import type { CanvasProgress } from './useCanvasProgress'
 
@@ -23,7 +23,7 @@ const node = (type: string, testId?: string) =>
     row('workflow-add-step-right') + row('workflow-add-step-bottom') + '</div>'
 
 const progress = (over: Partial<CanvasProgress> = {}): CanvasProgress =>
-    ({ methods: 0, hasLoop: false, hasIf: false, loopConditionSaved: false, ifConditionSaved: false, endpointReference: false, endpointReferenceClosed: false, bodyReferencesPaired: false, bodyReferencesClosed: false, testRunStarted: false, testRunPaused: false, testRunStepped: false, testRunIterationSkipped: false, ...over })
+    ({ methods: 0, hasLoop: false, hasIf: false, loopConditionSaved: false, ifConditionSaved: false, endpointReference: false, endpointReferenceClosed: false, bodyReferencesPaired: false, bodyReferencesClosed: false, testRunStarted: false, testRunPaused: false, testRunStepped: false, testRunIterationSkipped: false, schedulesOpened: false, scheduleCreated: false, ...over })
 
 /** Everything the graph-building half of the tutorial asks for. */
 const BUILT: Partial<CanvasProgress> = {
@@ -36,6 +36,11 @@ const BUILT: Partial<CanvasProgress> = {
 const RUN: Partial<CanvasProgress> = {
     testRunStarted: true, testRunPaused: true,
     testRunStepped: true, testRunIterationSkipped: true,
+}
+
+/** ...and the scheduling half after that. */
+const SCHEDULED: Partial<CanvasProgress> = {
+    schedulesOpened: true, scheduleCreated: true,
 }
 
 /** One link of a step's chain, addressed by what it points at rather than by index. */
@@ -181,6 +186,7 @@ describe('workflow tutorial steps', () => {
             '[data-testid="workflow-context-menu-edit-url"]',
             '[data-testid="workflow-url-insert-reference"]',
             '[data-testid="workflow-reference-generator"]',
+            '[data-testid="workflow-reference-apply"]:not(:disabled)',
             '[data-testid="workflow-method-dialog-close"]',
         ])
         // Every list is portalled out of the row it belongs to, so it is undimmed
@@ -252,14 +258,28 @@ describe('workflow tutorial steps', () => {
         expect(byId('iterate').chain[1].target).toBe('[data-testid="workflow-context-menu-open-config"]')
     })
 
-    it('shows the loop the whole array, not an element and not an iterator', () => {
-        const example = byId('iterate').example!
-        expect(example).toBe(`#${buildReferenceValue('a1b2c3', 'body', 'customers[*]')}`)
-        expect(example).toContain('customers[*]')
-        // the iterator is what the loop hands out, not part of its own input
-        expect(example).not.toContain(`[${ITERATOR_NAMES[0]}]`)
-        // and [0] would pin every iteration to the first customer
-        expect(example).not.toContain('[0]')
+    // Configuring a loop is taught as the picks that do it rather than as the
+    // reference they produce: the order is what matters, and each choice is what
+    // narrows the list the next one comes from.
+    it('configures the loop in four picks, in the order the dialog asks', () => {
+        const picks = byId('iterate').picks!
+        expect(picks).toHaveLength(4)
+        // the operator first — the editor's own label, not a copy of it
+        expect(picks[0]).toEqual({ labelKey: 'conditionBuilder.operators.loop.for' })
+        // then the method, taken from the fixture so a rename cannot leave this
+        // describing something that is not in the list
+        expect(picks[1]).toEqual({ label: TUTORIAL_CONNECTORS[0].invoker.operations[0].name })
+        expect(picks[2]).toEqual({ label: 'customers' })
+        // and the editor's label for `[*]` — the whole array, not an iterator (that is
+        // what the loop hands out) and not a fixed element
+        expect(picks[3]).toEqual({ labelKey: 'references.wholeArray' })
+    })
+
+    // Both of these once printed the reference their picks produce. A snippet the user
+    // never types is a result, not an instruction — the picks are the instruction.
+    it('spells a reference out in picks rather than in a snippet', () => {
+        expect(byId('iterate').example).toBeUndefined()
+        expect(byId('endpoint').example).toBeUndefined()
     })
 
     // Saving the condition is the only evidence a loop was configured, so it is what
@@ -270,26 +290,34 @@ describe('workflow tutorial steps', () => {
         expect(configured(progress({ methods: 1, hasLoop: true, loopConditionSaved: true }))).toBe(true)
     })
 
-    // The step tells the user to pick customers, then the loop, then email. The
-    // snippet under it has to be what that actually produces — built by the same
-    // function the generator applies, so the two cannot drift apart.
-    it('shows the reference the described picks really produce', () => {
-        const iterator = ITERATOR_NAMES[0]
-        const reference = buildReferenceValue('a1b2c3', 'body', `customers[${iterator}].email`)
+    // The endpoint's reference is taught the same way as the loop's: the method, then
+    // the field path one segment at a time, in the order the pickers ask for them.
+    it('builds the endpoint reference from the method and then the path', () => {
+        const picks = byId('endpoint').picks!
 
-        expect(byId('endpoint').example).toBe(`/clients?email=#${reference}`)
-        // the loop iterator is in the path, not a fixed element
-        expect(byId('endpoint').example).toContain(`customers[${iterator}]`)
-        expect(byId('endpoint').example).not.toContain('[0]')
+        expect(picks[0]).toEqual({ label: TUTORIAL_CONNECTORS[0].invoker.operations[0].name })
+        expect(picks[1]).toEqual({ label: 'customers' })
+        // the loop's own entry, carrying the iterator the editor interpolates into it —
+        // not a fixed element, which would pin every iteration to the first customer
+        expect(picks[2]).toEqual({
+            labelKey: 'references.iteratorLoop',
+            values: { iterator: ITERATOR_NAMES[0] },
+        })
+        expect(picks[3]).toEqual({ label: 'email' })
     })
 
     it('joins the two references in the closing script', () => {
         expect(byId('username').example).toBe('RESULT_VAR = VAR_0 + " " + VAR_1')
     })
 
+    it('lists picks only where a sequence of choices is the task', () => {
+        const withPicks = TUTORIAL_STEPS.filter(step => step.picks).map(step => step.id)
+        expect(withPicks).toEqual(['iterate', 'endpoint'])
+    })
+
     it('gives a snippet only to the steps that describe one', () => {
         const withExample = TUTORIAL_STEPS.filter(step => step.example).map(step => step.id)
-        expect(withExample).toEqual(['iterate', 'endpoint', 'condition', 'username'])
+        expect(withExample).toEqual(['condition', 'username', 'schedule'])
     })
 
     // Double-click is what opens an operator's condition; the loop's own step uses the
@@ -332,6 +360,42 @@ describe('workflow tutorial steps', () => {
             .toContain('[data-testid="workflow-method-dialog-close"]')
         expect(byId('endpoint').chain.at(-1)!.target)
             .toBe('[data-testid="workflow-method-dialog-close"]')
+    })
+
+    /*
+     * The `+` that commits the reference is a borderless glyph at the end of the
+     * generator's row, and the step used to leave the whole row lit right through it —
+     * so a user who had built the reference correctly had nothing telling them what
+     * closes the deal. It is disabled until both picks are made, which is what the
+     * chain narrows on.
+     */
+    it('narrows onto the apply action once the reference is the one being taught', () => {
+        const chain = byId('endpoint').chain
+        const generator = '[data-testid="workflow-reference-generator"]'
+        // The field picker shows the path it has built through the select's search
+        // input, never as text — see LegacyResponseFieldSelect.
+        const showing = (path: string, applyEnabled: boolean) =>
+            `<div data-testid="workflow-reference-generator"><input value="${path}">`
+            + `<button data-testid="workflow-reference-apply" ${applyEnabled ? '' : 'disabled'}>`
+            + '</button></div>'
+
+        // nothing picked: the row is the instruction
+        mount(showing('', false))
+        expect(resolveHighlight(chain, progress())?.target).toBe(generator)
+
+        // one segment in. The apply action is already live — `customers` on its own is
+        // a perfectly applicable reference — but it is not the one the step describes,
+        // and lighting the `+` here would send the user off two picks early.
+        mount(showing('customers', true))
+        expect(resolveHighlight(chain, progress())?.target).toBe(generator)
+
+        // the whole path, so the glyph becomes the thing to press
+        mount(showing(`customers[${ITERATOR_NAMES[0]}].email`, true))
+        const ready = resolveHighlight(chain, progress())
+        expect(ready?.target).toBe('[data-testid="workflow-reference-apply"]:not(:disabled)')
+        // and nothing undimmed with it: including the row would put the cut-out back
+        // around the whole generator, which is the state this link exists to leave
+        expect(ready?.include).toBeUndefined()
     })
 
     // The generator closes itself once the reference is applied, so without a gate the
@@ -395,9 +459,76 @@ describe('workflow tutorial steps', () => {
         expect(loop({ ...built, ifConditionSaved: true })).toBe(false)
     })
 
+    // Every scheduling chain opens on the pill, for the same reason the test-run ones
+    // open on the start button: the drawer is something the user closes to get the
+    // canvas back, and the way in again is the pill, not what was inside it.
+    it('reaches every scheduling step through the header pill', () => {
+        for (const id of ['schedules', 'schedule', 'scheduleCard']) {
+            expect(byId(id).chain[0].target).toBe('[data-testid="workflow-schedules-pill"]')
+        }
+    })
+
+    // The one step that points outside the editor, and the only target the tutorial
+    // does not own: the sidebar derives it from the route, in `menues.tsx` (`leaf`).
+    // Pinned literally rather than rebuilt with buildTestId, which would pass whatever
+    // the source did — if that entry is renamed or loses its id, this is what says so.
+    it('points at the sidebar entry the menu actually renders', () => {
+        const [entry] = byId('scheduleList').chain
+        expect(entry.target).toBe('[data-testid="sidebar-menu-schedule"]')
+        // No cue and no isDone: following the link would leave /workflow/create and
+        // take the tutorial with it, so this step is looked at, not acted on.
+        expect(entry.cue).toBeUndefined()
+        expect(byId('scheduleList').isDone).toBeUndefined()
+    })
+
+    it('hands the create dialog the whole form, not one field at a time', () => {
+        const dialog = link('schedule', 'workflow-schedule-title')
+        expect(dialog.include).toEqual([
+            '[data-testid="workflow-schedule-debug"]',
+            '[data-testid="workflow-schedule-cron"]',
+            '[data-testid="workflow-schedule-submit"]',
+        ])
+    })
+
+    // The drawer is mounted from the first render, parked at translateX(100%) — so a
+    // highlight resolved off a bare presence check would point off-screen.
+    it('reaches into the drawer only once it is out', () => {
+        mount(`<aside data-testid="workflow-schedules-panel" style="visibility:hidden">`
+            + row('workflow-schedules-add') + '</aside>'
+            + row('workflow-schedules-pill'))
+
+        expect(resolveHighlight(byId('schedule').chain, progress())?.target)
+            .toBe('[data-testid="workflow-schedules-pill"]')
+    })
+
+    describe('resolveStepFloor', () => {
+        it('reads the step named in the query string', () => {
+            expect(resolveStepFloor('?tutorialStep=schedules'))
+                .toBe(TUTORIAL_STEPS.findIndex(step => step.id === 'schedules'))
+            expect(resolveStepFloor('?foo=1&tutorialStep=summary'))
+                .toBe(TUTORIAL_STEPS.length - 1)
+        })
+
+        // The fallback is the tutorial opening at the beginning, which is where it
+        // opens anyway — so a typo is not worth refusing over.
+        it('ignores an absent or unknown name', () => {
+            expect(resolveStepFloor('')).toBeNull()
+            expect(resolveStepFloor('?foo=1')).toBeNull()
+            expect(resolveStepFloor('?tutorialStep=')).toBeNull()
+            expect(resolveStepFloor('?tutorialStep=nope')).toBeNull()
+        })
+    })
+
     it('leaves only the closing step for the user to confirm', () => {
         expect(byId('summary').isDone).toBeUndefined()
         expect(byId('summary').chain).toEqual([])
+    })
+
+    // The two that book-end it, and only those: everything between them points at a
+    // control, which a pill in the middle of the screen would sit on top of.
+    it('centres the opening and closing steps alone', () => {
+        const centred = TUTORIAL_STEPS.filter(step => step.anchor === 'center').map(step => step.id)
+        expect(centred).toEqual(['intro', 'summary'])
     })
 
     it('gates each detectable step on its own piece of the canvas', () => {
@@ -465,7 +596,7 @@ describe('workflow tutorial steps', () => {
         })
 
         it('settles on the closing step instead of running off the end', () => {
-            const finished = progress({ ...BUILT, ...RUN })
+            const finished = progress({ ...BUILT, ...RUN, ...SCHEDULED })
             const last = TUTORIAL_STEPS.length - 1
             // Acknowledged only past the introduction, it holds on the first built
             // step there is nothing to detect for — the pace — rather than skipping
@@ -496,13 +627,45 @@ describe('workflow tutorial steps', () => {
             expect(resolveStepIndex(built, TUTORIAL_STEPS.length)).toBe(at('testrun'))
         })
 
-        // The pace and the log tree are preferences and reading, not results.
-        it('leaves the pace and the tree for the user to confirm', () => {
+        // The jump exists so a late step can be tried without building the graph and
+        // sitting through a replay first, which is eleven actions away.
+        it('opens on the step a URL names, with nothing on the canvas', () => {
+            const floor = at('schedules')
+            expect(resolveStepIndex(progress(), 0, floor)).toBe(floor)
+            // and an empty canvas cannot drag it back to the step that wants a method
+            expect(resolveStepIndex(progress(), TUTORIAL_STEPS.length, floor)).toBe(floor)
+        })
+
+        it('carries on normally from the step it jumped to', () => {
+            const floor = at('schedules')
+            expect(resolveStepIndex(progress({ schedulesOpened: true }), 0, floor))
+                .toBe(at('schedule'))
+            expect(resolveStepIndex(progress(SCHEDULED), 0, floor)).toBe(at('scheduleCard'))
+        })
+
+        // The pace, the log tree and a created schedule's card are preferences and
+        // reading, not results.
+        it('leaves the pace, the tree and the card for the user to confirm', () => {
             expect(byId('speed').isDone).toBeUndefined()
             expect(byId('logs').isDone).toBeUndefined()
-            const ready = progress({ ...BUILT, ...RUN })
+            expect(byId('scheduleCard').isDone).toBeUndefined()
+            const ready = progress({ ...BUILT, ...RUN, ...SCHEDULED })
             expect(resolveStepIndex(ready, at('speed'))).toBe(at('speed'))
             expect(resolveStepIndex(ready, at('logs'))).toBe(at('logs'))
+            expect(resolveStepIndex(ready, at('scheduleCard'))).toBe(at('scheduleCard'))
+        })
+
+        // Scheduling comes after the run for a reason: the tutorial's own argument is
+        // that you prove a workflow before you let it run unattended.
+        it('asks for a schedule once the run has been read', () => {
+            const ran = progress({ ...BUILT, ...RUN })
+            expect(resolveStepIndex(ran, at('schedules'))).toBe(at('schedules'))
+            expect(resolveStepIndex({ ...ran, schedulesOpened: true }, at('schedules')))
+                .toBe(at('schedule'))
+            expect(resolveStepIndex({ ...ran, ...SCHEDULED }, at('schedules')))
+                .toBe(at('scheduleCard'))
+            // and no acknowledgement can skip either of them
+            expect(resolveStepIndex(ran, TUTORIAL_STEPS.length)).toBe(at('schedules'))
         })
     })
 })

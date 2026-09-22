@@ -92,6 +92,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
             <Button
               type='text'
               className='bodyLegacyGeneratorAction'
+              data-testid='workflow-reference-apply'
               icon={<PlusOutlined />}
               disabled={!state.selectedMethod || !state.field} onClick={state.applyDirect}
             />
@@ -103,6 +104,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
           <Button
             type='text'
             className='bodyLegacyGeneratorAction'
+            data-testid='workflow-reference-apply'
             icon={<PlusOutlined />}
             disabled={!state.webhookValue} onClick={state.applyWebhook}
           />

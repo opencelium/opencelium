@@ -66,10 +66,11 @@ export const baseQuery: BaseQueryFn<
     ExtraOptions
 > = async (args, api, extraOptions) => {
     // Canned responses first (see requestOverrides): the workflow tutorial answers a
-    // few GETs with invented data, and this is the only layer a refetch cannot undo.
+    // few requests with invented data, and this is the only layer a refetch cannot undo.
     const requestUrl = typeof args === 'string' ? args : args.url
     const requestMethod = typeof args === 'string' ? 'GET' : args.method
-    const override = findRequestOverride(requestUrl, requestMethod)
+    const requestBody = typeof args === 'string' ? undefined : args.body
+    const override = findRequestOverride(requestUrl, requestMethod, requestBody)
     if (override !== undefined) return { data: override }
 
     const result = await rawBaseQuery(

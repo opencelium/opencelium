@@ -1,7 +1,9 @@
 import { create } from 'zustand'
 import { setSimulatedTestRun } from '@features/workflow/test-run/simulatedTestRun'
+import { setSimulatedSchedulesConnection } from '@features/workflow/components/schedules/simulatedSchedulesConnection'
 import { clearTutorialData, seedTutorialData } from './tutorialData'
 import { createTutorialTestRun } from './tutorialTestRun'
+import { TUTORIAL_CONNECTION_ID } from './tutorialSchedules'
 import { resetCanvasProgress } from './useCanvasProgress'
 
 type WorkflowTutorialState = {
@@ -29,12 +31,17 @@ export const useWorkflowTutorialStore = create<WorkflowTutorialState>(set => ({
         // test run must answer from the invented systems too, or the last steps
         // would point at a debugger that only ever renders for a real execution.
         setSimulatedTestRun(createTutorialTestRun)
+        // And for the same reason again: the schedules pill renders only for a saved
+        // connection, so without a stand-in the last steps would point at a header
+        // that has no schedules control on it at all.
+        setSimulatedSchedulesConnection(String(TUTORIAL_CONNECTION_ID))
         resetCanvasProgress()
         set({ requested: true })
     },
     dismiss: () => {
         clearTutorialData()
         setSimulatedTestRun(null)
+        setSimulatedSchedulesConnection(null)
         resetCanvasProgress()
         set({ requested: false })
     },

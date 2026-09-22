@@ -37,6 +37,14 @@ const PAUSE_BUTTON = '[data-testid="workflow-test-pause-button"]'
 const STEP_BUTTON = '[data-testid="workflow-test-step-forward-button"]'
 /** A loop node's "jump past the rest of this iteration" control; prefixed with its id. */
 const SKIP_ITERATION = '[data-testid^="workflow-node-skip-iteration-"]'
+/**
+ * The schedules drawer while it is out. The open class is part of the selector
+ * because the drawer is mounted either way, parked at `translateX(100%)` — a plain
+ * presence check would read as open from the moment the editor renders.
+ */
+const SCHEDULES_PANEL_OPEN = '[data-testid="workflow-schedules-panel"].rightDrawerOpen'
+/** One schedule in that drawer. */
+const SCHEDULE_CARD = '.wf-schedule-card'
 
 export type CanvasProgress = {
     /** Connector-method nodes the user has placed. */
@@ -89,6 +97,15 @@ export type CanvasProgress = {
     testRunPaused: boolean
     testRunStepped: boolean
     testRunIterationSkipped: boolean
+    /**
+     * The schedules drawer was opened. Latched like the rest: the panel is a drawer
+     * the user closes again to get at the canvas, and a step that un-completed itself
+     * on the way out would send them straight back into it.
+     */
+    schedulesOpened: boolean
+    /** A schedule exists for this workflow. Read from the drawer's contents, which
+     *  unmount with it — hence latched too. */
+    scheduleCreated: boolean
 }
 
 const INACTIVE: CanvasProgress = {
@@ -98,6 +115,7 @@ const INACTIVE: CanvasProgress = {
     bodyReferencesPaired: false, bodyReferencesClosed: false,
     testRunStarted: false, testRunPaused: false,
     testRunStepped: false, testRunIterationSkipped: false,
+    schedulesOpened: false, scheduleCreated: false,
 }
 
 let loopConditionSaved = false
@@ -110,6 +128,8 @@ let testRunStarted = false
 let testRunPaused = false
 let testRunStepped = false
 let testRunIterationSkipped = false
+let schedulesOpened = false
+let scheduleCreated = false
 
 const readPairedReferences = () => {
     const remove = findVisible(ENHANCEMENT_DELETE)
@@ -151,12 +171,15 @@ const getSnapshot = (): CanvasProgress => {
         || testRunStarted !== snapshot.testRunStarted
         || testRunPaused !== snapshot.testRunPaused
         || testRunStepped !== snapshot.testRunStepped
-        || testRunIterationSkipped !== snapshot.testRunIterationSkipped) {
+        || testRunIterationSkipped !== snapshot.testRunIterationSkipped
+        || schedulesOpened !== snapshot.schedulesOpened
+        || scheduleCreated !== snapshot.scheduleCreated) {
         snapshot = {
             methods, hasLoop, hasIf, loopConditionSaved, ifConditionSaved,
             endpointReference, endpointReferenceClosed,
             bodyReferencesPaired, bodyReferencesClosed,
             testRunStarted, testRunPaused, testRunStepped, testRunIterationSkipped,
+            schedulesOpened, scheduleCreated,
         }
     }
     return snapshot
@@ -173,17 +196,38 @@ const getInactiveSnapshot = () => INACTIVE
  *
  * The click listener is capture-phase and on the document, so it sees the save before
  * the dialog closes and takes the button with it.
+ *
+ * Attributes are watched as well as children, because several of these signals are a
+ * class or a disabled flag flipping on an element that is already mounted and does not
+ * otherwise change: the schedules drawer slides in on `rightDrawerOpen` alone, the
+ * start button gains `startNodeRunning`, and the enhancement's delete action goes
+ * disabled on the second reference. Those three used to be caught only by whatever
+ * children happened to change alongside them — which for the drawer is nothing, since
+ * it is mounted and rendered from the first paint and merely parked off-screen.
  */
 const subscribe = (onChange: () => void) => {
     // Latched here rather than in getSnapshot, which has to stay a plain read: the
     // pill is written with innerHTML, so its arrival is always a mutation.
     const observer = new MutationObserver(() => {
+        // Cheap enough to re-read on every batch: the tutorial already resolves its
+        // highlight on an animation frame, which queries the document far more often.
         if (!endpointReference && readEndpointReference()) endpointReference = true
         if (!bodyReferencesPaired && readPairedReferences()) bodyReferencesPaired = true
         if (!testRunStarted && findVisible(RUNNING_START)) testRunStarted = true
+        // The drawer is a class away from open, and its cards arrive with the refetch
+        // the create triggers — neither has a click of its own to latch on.
+        if (!schedulesOpened && findVisible(SCHEDULES_PANEL_OPEN)) schedulesOpened = true
+        if (!scheduleCreated && findVisible(SCHEDULE_CARD)) scheduleCreated = true
         onChange()
     })
-    observer.observe(document.body, { childList: true, subtree: true })
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        // Only what the latches above actually read. Left unfiltered this would also
+        // fire on every `style` React Flow writes while a node is being dragged.
+        attributeFilter: ['class', 'disabled'],
+    })
 
     const onClick = (event: MouseEvent) => {
         const target = event.target
@@ -253,6 +297,8 @@ export function resetCanvasProgress(): void {
     testRunPaused = false
     testRunStepped = false
     testRunIterationSkipped = false
+    schedulesOpened = false
+    scheduleCreated = false
 }
 
 /**

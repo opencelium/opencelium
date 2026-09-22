@@ -8,17 +8,19 @@ import { TUTORIAL_OVERRIDE_PATHS } from './tutorialData'
  *
  * Pinned literally rather than read from the api source: this file is typechecked
  * with the app's tsconfig, which has no node types. If one of these endpoints moves,
- * this test fails and points at the three to re-check:
+ * this test fails and points at the four to re-check:
  *   connectorApi.getConnectors      -> /connector/all
  *   connectorApi.getConnectorsMeta  -> /connector/meta/all   (the browsable list)
  *   invokerApi.getInvokers          -> /invoker/all
+ *   useWorkflowSchedules            -> /scheduler/all        (the schedules panel)
  */
 describe('workflow tutorial overrides', () => {
-    it('covers the three lists the editor and its sidebar read', () => {
+    it('covers the lists the editor, its sidebar and its schedules panel read', () => {
         expect(TUTORIAL_OVERRIDE_PATHS).toEqual([
             '/connector/all',
             '/connector/meta/all',
             '/invoker/all',
+            '/scheduler/all',
         ])
     })
 
