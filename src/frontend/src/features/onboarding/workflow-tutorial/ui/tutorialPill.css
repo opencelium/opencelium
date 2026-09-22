@@ -95,6 +95,27 @@
 }
 
 /*
+ * A sequence of picks. Numbered because the order is the lesson — each choice is what
+ * narrows the list the next one comes from — and set in the primary colour so the list
+ * reads as things to click rather than as a continuation of the sentence above it.
+ * `list-position: inside` keeps a wrapped label under its own number instead of
+ * indenting the pill's already narrow column further.
+ */
+.workflow-tutorial-pill__picks {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style-position: inside;
+    color: var(--color-text-primary);
+    font-size: var(--typography-font-size-sm);
+    line-height: 1.7;
+}
+
+.workflow-tutorial-pill__picks li::marker {
+    color: var(--color-action-primary);
+    font-weight: 700;
+}
+
+/*
  * Top-right, for the steps about the test run: starting one opens the log panel
  * across the bottom of the page, and the default corner would then sit on top of the
  * tree the copy is describing. Below the workflow header, and clear of the debug
@@ -116,8 +137,9 @@
 }
 
 /*
- * Centre, for the introduction alone: the graph is empty at that point, so there is
- * nothing behind the pill for a middle placement to cover.
+ * Centre, for the two steps that book-end the tutorial. Neither points at a control,
+ * so there is nothing behind the pill that a middle placement covers — and the same
+ * placement is what makes the closing step read as an answer to the opening one.
  */
 .workflow-tutorial-pill--center {
     top: 50%;

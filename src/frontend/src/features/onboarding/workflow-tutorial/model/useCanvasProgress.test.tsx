@@ -82,6 +82,22 @@ const showEnhancement = ({ paired }: { paired: boolean }) => {
     return button
 }
 
+/**
+ * The schedules drawer, mounted and laid out but parked off to the right — which is how
+ * the editor renders it from the first paint, open or not.
+ */
+const mountSchedulesDrawer = () => {
+    const panel = document.createElement('aside')
+    panel.setAttribute('data-testid', 'workflow-schedules-panel')
+    panel.className = 'rightDrawer wf-schedules-drawer'
+    panel.getBoundingClientRect = () => ({
+        width: 300, height: 600, top: 0, left: 0, right: 300, bottom: 600, x: 0, y: 0,
+        toJSON: () => ({}),
+    })
+    document.body.appendChild(panel)
+    return panel
+}
+
 const iterator = ITERATOR_NAMES[0]
 const LOOP_SCOPED_REFERENCE = `#a1b2c3.(response).body.$.customers[${iterator}].email`
 const FIXED_REFERENCE = '#a1b2c3.(response).body.$.customers[0].email'
@@ -103,7 +119,56 @@ describe('useCanvasProgress', () => {
             bodyReferencesPaired: false, bodyReferencesClosed: false,
             testRunStarted: false, testRunPaused: false,
             testRunStepped: false, testRunIterationSkipped: false,
+            schedulesOpened: false, scheduleCreated: false,
         })
+    })
+
+    /*
+     * The regression: opening the drawer changes nothing but a class on an element that
+     * was already mounted, so an observer watching children alone never fired and the
+     * step asking for it could not be completed — the mask sat on the pill the drawer
+     * had just covered up.
+     */
+    it('sees the schedules drawer open, which is only a class away', async () => {
+        mountCanvas()
+        const panel = mountSchedulesDrawer()
+        const { result } = renderHook(() => useCanvasProgress(true))
+        expect(result.current.schedulesOpened).toBe(false)
+
+        panel.classList.add('rightDrawerOpen')
+
+        await waitFor(() => expect(result.current.schedulesOpened).toBe(true))
+    })
+
+    // Latched, because the drawer is something the user closes again to get at the
+    // canvas — a step that un-completed itself there would send them straight back in.
+    it('keeps the drawer counted as opened after it is closed again', async () => {
+        mountCanvas()
+        const panel = mountSchedulesDrawer()
+        const { result } = renderHook(() => useCanvasProgress(true))
+
+        panel.classList.add('rightDrawerOpen')
+        await waitFor(() => expect(result.current.schedulesOpened).toBe(true))
+
+        panel.classList.remove('rightDrawerOpen')
+        await waitFor(() => expect(result.current.schedulesOpened).toBe(true))
+    })
+
+    it('counts a schedule once its card is in the drawer', async () => {
+        mountCanvas()
+        const panel = mountSchedulesDrawer()
+        const { result } = renderHook(() => useCanvasProgress(true))
+        expect(result.current.scheduleCreated).toBe(false)
+
+        const card = document.createElement('div')
+        card.className = 'wf-schedule-card'
+        card.getBoundingClientRect = () => ({
+            width: 268, height: 40, top: 0, left: 0, right: 268, bottom: 40, x: 0, y: 0,
+            toJSON: () => ({}),
+        })
+        panel.appendChild(card)
+
+        await waitFor(() => expect(result.current.scheduleCreated).toBe(true))
     })
 
     it('reads what is already on the canvas on the first render', () => {

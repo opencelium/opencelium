@@ -15,6 +15,7 @@ import { useWorkflowActions } from './hooks/useWorkflowActions';
 import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { buildWorkflowIndexes } from './api/connectionPayload';
 import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJsonDialog/workflowJson.validate';
+import { useSchedulesConnectionId } from './components/schedules/simulatedSchedulesConnection';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -34,6 +35,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     selectedHistoryVersionId, setSelectedHistoryVersionId, categoryId, setCategoryId,
     isLoading: isConnectionLoading } = connection;
   const { hydratedNodes, activeConnectionId, displayedHistoryVersions } = view;
+  // Not activeConnectionId: the tutorial teaches the schedules panel on an unsaved
+  // graph, and only the pill and the panel may see its stand-in connection.
+  const schedulesConnectionId = useSchedulesConnectionId(activeConnectionId);
   const { hasChanges: hasConnectionChanges,
     hasManualChanges: hasManualUnsavedChanges } = changes;
   const { selectedNode, contextMenuNode, editorNode, conditionNode, aggregatorNode,
@@ -79,7 +83,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       loopAncestorsByIndexPath={loopAncestorsByIndexPath}>
     <TestRunEditLockSync onLockChange={setIsTestRunLocked} />
     <div className="page" data-testid="workflow-page">
-      <WorkflowPageHeader connectionId={activeConnectionId} schedulesOpen={schedulesOpen}
+      <WorkflowPageHeader connectionId={schedulesConnectionId} schedulesOpen={schedulesOpen}
         onToggleSchedules={() => setSchedulesOpen((open) => {
           if (!open) {
             workflow.setHistoryOpen(false);
@@ -161,7 +165,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
           connectionId: activeConnectionId, onClose: () => workflow.setSidebarAction(null),
           onSelect: workflow.onAddStep }}
-        schedules={{ open: schedulesOpen, connectionId: activeConnectionId,
+        schedules={{ open: schedulesOpen, connectionId: schedulesConnectionId,
           connectionTitle: headerState.title, onClose: () => setSchedulesOpen(false) }}
         history={{ open: workflow.historyOpen, items: displayedHistoryVersions,
           selectedId: selectedHistoryVersionId,

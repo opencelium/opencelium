@@ -4,6 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useUnsavedChangesGuard } from '@features/workflow/hooks/useUnsavedChangesGuard'
 
 vi.mock('@features/auth/useIsAdmin', () => ({ useIsAdmin: () => true }))
+// The dim picks its colour from the active theme; the provider is not what this
+// scenario is about.
+vi.mock('@shared/theme/hooks/useTheme', () => ({ useTheme: () => ({ themeMode: 'light' }) }))
 vi.mock('./TutorialSpotlight', () => ({ TutorialSpotlight: () => null }))
 vi.mock('./TutorialPill', () => ({
     TutorialPill: ({ onClose }: { onClose: () => void }) =>

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useIsAdmin } from '@features/auth/useIsAdmin'
+import { useTheme } from '@shared/theme/hooks/useTheme'
 import { runWithoutUnsavedChangesGuard } from '@features/workflow/hooks/unsavedChangesGuard'
 import { ONBOARDING_Z_INDEX } from '../../model/types'
 import { useCanvasProgress } from '../model/useCanvasProgress'
-import { resolveHighlight, resolveStepIndex, TUTORIAL_STEPS, type TutorialTarget } from '../model/tutorialSteps'
+import { resolveHighlight, resolveStepFloor, resolveStepIndex, TUTORIAL_STEPS,
+    type TutorialTarget } from '../model/tutorialSteps'
 import { useWorkflowTutorialStore } from '../model/workflowTutorial.store'
 import { TutorialPill } from './TutorialPill'
 import { TutorialSpotlight } from './TutorialSpotlight'
@@ -14,6 +16,13 @@ import './workflowTutorial.css'
 const TUTORIAL_ROUTE = '/workflow/create'
 /** Suppresses save while the graph is built from invented systems. */
 const ACTIVE_CLASS = 'workflow-tutorial-active'
+/**
+ * Picks the darker overlay for the dim. Carried on <html> rather than read from a
+ * theme attribute, because this app has none — `applyTheme` swaps CSS custom properties
+ * and leaves the document unmarked — and carried here rather than in the spotlight so
+ * that component keeps working without a ThemeProvider above it.
+ */
+const DARK_CLASS = 'workflow-tutorial-dark'
 
 /**
  * Teaches the real editor on invented data. Not built on Joyride, unlike the
@@ -27,25 +36,41 @@ const ACTIVE_CLASS = 'workflow-tutorial-active'
  */
 export function WorkflowTutorial() {
     const isAdmin = useIsAdmin()
+    const { themeMode } = useTheme()
     const location = useLocation()
     const navigate = useNavigate()
-    const { requested, dismiss } = useWorkflowTutorialStore()
+    const { requested, request, dismiss } = useWorkflowTutorialStore()
     /** How far the user has clicked through the steps the canvas cannot detect. */
     const [acknowledged, setAcknowledged] = useState(0)
 
-    const active = isAdmin && requested && location.pathname.startsWith(TUTORIAL_ROUTE)
+    const onRoute = location.pathname.startsWith(TUTORIAL_ROUTE)
+    /** A step named in the query string to open on — see resolveStepFloor. */
+    const floor = resolveStepFloor(location.search)
+    const active = isAdmin && requested && onRoute
     const progress = useCanvasProgress(active)
     // Read off the canvas, so finishing a step's task opens the next one immediately.
-    const index = resolveStepIndex(progress, acknowledged)
+    const index = resolveStepIndex(progress, acknowledged, floor ?? 0)
     const step = TUTORIAL_STEPS[index]
 
     const [highlight, setHighlight] = useState<TutorialTarget | null>(null)
 
+    // A URL naming a step starts the tutorial as well as jumping into it, so the
+    // address bar is enough to reach one — the palette command would otherwise have to
+    // be run first, and it navigates here without the parameter. `close()` drops the
+    // query along with the route, so dismissing cannot re-trigger this.
+    useEffect(() => {
+        if (isAdmin && onRoute && floor !== null && !requested) request()
+    }, [isAdmin, onRoute, floor, requested, request])
+
     useEffect(() => {
         const root = document.documentElement
         root.classList.toggle(ACTIVE_CLASS, active)
-        return () => root.classList.remove(ACTIVE_CLASS)
-    }, [active])
+        root.classList.toggle(DARK_CLASS, active && themeMode === 'dark')
+        return () => {
+            root.classList.remove(ACTIVE_CLASS)
+            root.classList.remove(DARK_CLASS)
+        }
+    }, [active, themeMode])
 
     // Which link of the chain to point at depends on what is currently rendered, so
     // it is polled rather than derived: opening a drawer is not a React update here.
@@ -90,11 +115,13 @@ export function WorkflowTutorial() {
     return (
         <>
             {/*
-              * The centred step has no chain, so the spotlight below never draws a mask
-              * for it — nothing to cut a hole around. It still needs to block the canvas,
-              * or a click behind the pill would start the graph before the tutorial has
-              * said anything: full coverage, no cut-out, and real pointer events so it
-              * actually catches the click rather than passing it through like the mask.
+              * A centred step has no chain, so the spotlight below never draws a mask
+              * for it — nothing to cut a hole around. It still needs to block the canvas:
+              * full coverage, no cut-out, and real pointer events so it actually catches
+              * the click rather than passing it through like the mask. Ahead of the
+              * tutorial that stops the graph being started before anything has been
+              * said; at the end of it, a stray click would delete a node and send the
+              * pill back to the step that asks for it.
               */}
             {step.anchor === 'center' && (
                 <div aria-hidden className="workflow-tutorial-backdrop"
@@ -106,6 +133,7 @@ export function WorkflowTutorial() {
                 copy={step.copy}
                 anchor={step.anchor}
                 example={step.example}
+                picks={step.picks}
                 index={index}
                 total={TUTORIAL_STEPS.length}
                 // Only the undetectable steps get a Next; the rest advance on their own.

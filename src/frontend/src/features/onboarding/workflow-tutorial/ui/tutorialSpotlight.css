@@ -11,8 +11,13 @@
     box-shadow: 0 0 0 9999px rgb(12 16 22 / 60%);
 }
 
-:root:not([data-theme='light']) .workflow-tutorial-mask,
-:root[data-theme='dark'] .workflow-tutorial-mask {
+/*
+ * Keyed off the class WorkflowTutorial puts on <html>, not off `data-theme`: this app
+ * switches theme by rewriting CSS custom properties (see applyTheme) and sets no theme
+ * attribute at all, so `:root:not([data-theme='light'])` matched permanently and a
+ * light-themed editor was dimmed with the dark overlay.
+ */
+html.workflow-tutorial-dark .workflow-tutorial-mask {
     box-shadow: 0 0 0 9999px rgb(2 4 8 / 72%);
 }
 

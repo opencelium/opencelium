@@ -20,11 +20,23 @@ const isOffscreen = (rect: DOMRect) =>
  *   `resolveHighlight` walks a chain from the deepest link back, so a phantom match
  *   silently outranks the `+` the user is actually meant to click.
  */
+/**
+ * What an element is showing, which is not always its `textContent`: a control can
+ * display its value through an `<input>`, where the text is a DOM property and not a
+ * child node. The reference generator's field picker is exactly that — it renders the
+ * chosen path as the select's search value and never as a selection item (see
+ * bodyLegacy.css) — so a match on text alone would never see the path the user built.
+ */
+const shownText = (element: HTMLElement): string => {
+    const fields = Array.from(element.querySelectorAll<HTMLInputElement>('input, textarea'))
+    return [element.textContent ?? '', ...fields.map(field => field.value)].join(' ')
+}
+
 export function findVisibleTarget(selector: string, text?: string): HTMLElement | null {
     const candidates = Array.from(document.querySelectorAll<HTMLElement>(selector))
         // Some rows are only distinguishable by what they say: the request body is a
         // JSON tree whose rows carry no identity of their own beyond the key they show.
-        .filter(element => !text || (element.textContent ?? '').includes(text))
+        .filter(element => !text || shownText(element).includes(text))
     let transparent: HTMLElement | null = null
 
     for (const element of candidates) {

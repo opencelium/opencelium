@@ -1,6 +1,6 @@
 import { buildTestId } from '@shared/testing/testId'
 import { REFERENCE_POPUP_CLASS } from '@features/workflow/components/method-select/ReferenceMethodSelect'
-import { buildReferenceValue, ITERATOR_NAMES } from '@features/workflow/components/request-editor/body-editor/requestReferenceOptions'
+import { ITERATOR_NAMES } from '@features/workflow/components/request-editor/body-editor/requestReferenceOptions'
 import { getMethodKey } from '@features/workflow/components/WorkflowSidebar/useWorkflowSidebarItems'
 import { TUTORIAL_CONNECTORS } from './tutorialFixtures'
 import type { CanvasProgress } from './useCanvasProgress'
@@ -47,6 +47,26 @@ const METHOD_NODE = (connectorIndex: number, methodIndex: number) =>
 const CONTEXT = (action: string) => sel(buildTestId('workflow-context-menu', action))
 const URL_INSERT_REFERENCE = sel('workflow-url-insert-reference')
 const REFERENCE_GENERATOR = sel('workflow-reference-generator')
+/**
+ * The generator's apply action — the `+` that puts the built reference where it is
+ * going. Matched only while it is enabled, which the generator does exactly when a
+ * method *and* a field have been chosen: the `:not(:disabled)` is the condition, so
+ * the chain narrows onto it by itself and falls back to the whole generator the moment
+ * either pick is cleared. No progress flag, because this is a live state rather than
+ * something that happened.
+ */
+const GENERATOR_APPLY = `${sel('workflow-reference-apply')}:not(:disabled)`
+/**
+ * The path the endpoint step asks for, spelled as the field picker prints it back.
+ * Built from the app's own iterator name, so a rename cannot leave the tutorial waiting
+ * on a string the picker never produces.
+ *
+ * Needed because `enabled` is not the same as `finished`: the apply action goes live as
+ * soon as *any* field is chosen, and `customers` on its own is a perfectly applicable
+ * reference — just not the one being taught. The picker builds the path a segment at a
+ * time, so without this the `+` lights up two picks early.
+ */
+const ENDPOINT_FIELD_PATH = `customers[${ITERATOR_NAMES[0]}].email`
 const CONDITION_BUILDER = sel('workflow-condition-builder')
 const CONDITION_ADD = sel('workflow-condition-add-condition')
 /**
@@ -120,6 +140,33 @@ const SKIP_ITERATION = '[data-testid^="workflow-node-skip-iteration-"]'
 const ITERATION_INPUT = '[data-testid^="workflow-node-iteration-input-"]'
 /** The log panel's tree, which only has the class once it has rows to show. */
 const LOG_TREE = '.logsBodyTree'
+/**
+ * The header's schedules control and the drawer it raises. The pill renders only for
+ * a connection that exists, which on /workflow/create is none — the tutorial supplies
+ * a stand-in, see simulatedSchedulesConnection.
+ */
+const SCHEDULES_PILL = sel('workflow-schedules-pill')
+const SCHEDULES_PANEL = sel('workflow-schedules-panel')
+const SCHEDULES_ADD = sel('workflow-schedules-add')
+/**
+ * The create dialog. The title field is what to fill first; the rest of the form is
+ * undimmed with it, since the copy explains all three at once and a mask that walked
+ * them one by one would spend three steps inside one small dialog.
+ */
+const SCHEDULE_TITLE = sel(buildTestId('workflow-schedule-title', 'control'))
+const SCHEDULE_DEBUG = sel('workflow-schedule-debug')
+const SCHEDULE_CRON = sel('workflow-schedule-cron')
+const SCHEDULE_SUBMIT = sel('workflow-schedule-submit')
+/** A created schedule: the card, the fold on it, and what the fold reveals. */
+const SCHEDULE_CARD = '.wf-schedule-card'
+const SCHEDULE_CARD_TOGGLE = '[data-testid^="workflow-schedule-toggle-"]'
+const SCHEDULE_CARD_DETAILS = '.wf-schedule-card__details'
+/**
+ * The sidebar's Schedules entry — the same list, across every workflow. Pointed at
+ * but never asked for: following it would leave /workflow/create, and the tutorial
+ * with it. See the step's own note.
+ */
+const SCHEDULE_MENU = sel(buildTestId('sidebar-menu', '/schedule'))
 
 const [CRM, SUPPORT] = [0, 1]
 
@@ -141,6 +188,12 @@ export type TutorialTarget = {
      */
     text?: string
     /**
+     * Only eligible while something else is on screen showing `text` — a second
+     * element the link depends on but does not point at. `when` cannot express this:
+     * it reads what has happened, and this is a state the user is still moving through.
+     */
+    requires?: { target: string; text?: string }
+    /**
      * Only eligible while this holds. Visibility alone cannot express a control that
      * becomes the task partway through a step: the request editor's close button is on
      * screen from the moment it opens, but is only what to press once the reference is
@@ -150,16 +203,28 @@ export type TutorialTarget = {
     when?: (progress: CanvasProgress) => boolean
 }
 
+/**
+ * One choice in a sequence the step asks the user to make, in the picker's own words.
+ * Two sources, because the options come from two places: a `label` is data — a method
+ * or field name out of the fixtures, which is not translated — while a `labelKey`
+ * names an option the editor itself renders, resolved against the `workflow` namespace
+ * so the pill spells it exactly as the dropdown does, in either language. `values` is
+ * for the keys that interpolate, the loop entry's iterator among them.
+ */
+export type TutorialPick =
+    | { label: string; labelKey?: never; values?: never }
+    | { labelKey: string; label?: never; values?: Record<string, string> }
+
 export type TutorialStep = {
     id: string
     /**
      * Which corner the copy sits in. Bottom-left by default, which is clear for as
      * long as the work happens in dialogs and the right-hand drawer — but a test run
      * opens the log panel across the bottom of the page, and the pill would then
-     * cover the tree it is describing. `center` is for the introduction alone: the
-     * canvas is empty at that point, so there is nothing behind it for a middle
-     * placement to cover, and centred reads as "start here" rather than a hint
-     * about one particular control.
+     * cover the tree it is describing. `center` is for the two steps that book-end
+     * the tutorial: neither points at a control, so a middle placement covers nothing
+     * either of them is talking about, and centred reads as "this one is about the
+     * whole thing" rather than as a hint about something on screen.
      */
     anchor?: 'top-right' | 'center'
     /**
@@ -168,6 +233,13 @@ export type TutorialStep = {
      * the endpoint one is generated so it cannot drift from what the app produces.
      */
     example?: string
+    /**
+     * A sequence of choices, listed under the copy in the order the pickers ask for
+     * them. Preferred over spelling them out mid-sentence where the order is the
+     * lesson: each pick is what narrows the list the next one is chosen from, and a
+     * numbered list says that where "then ... then ..." only implies it.
+     */
+    picks?: TutorialPick[]
 
     /** Suffix under `workflow.steps.*` for this step's title/body/hint copy. */
     copy: string
@@ -187,21 +259,31 @@ export type TutorialStep = {
 }
 
 /**
- * What the endpoint step's reference ends up looking like, composed by the same
- * function the reference generator applies — so a change to the reference format
- * shows up in the tutorial's own example instead of quietly contradicting it.
- * `ITERATOR_NAMES[0]` is the outermost loop's iterator, which is the one on offer
- * here, and the leading `#` is what normalizeReference prepends on insertion.
+ * The reference in the lookup's endpoint, as the picks that build it: the method, then
+ * the field path one segment at a time. `ITERATOR_NAMES[0]` is the outermost loop's
+ * iterator, which is the one on offer here — taking it rather than `[0]` is what ties
+ * the reference to the loop instead of pinning it to the first customer.
  */
-const EXAMPLE_METHOD_COLOR = 'a1b2c3'
-const ENDPOINT_EXAMPLE =
-    `/clients?email=#${buildReferenceValue(EXAMPLE_METHOD_COLOR, 'body', `customers[${ITERATOR_NAMES[0]}].email`)}`
+const ENDPOINT_PICKS: TutorialPick[] = [
+    { label: TUTORIAL_CONNECTORS[CRM].invoker.operations[0].name },
+    { label: 'customers' },
+    { labelKey: 'references.iteratorLoop', values: { iterator: ITERATOR_NAMES[0] } },
+    { label: 'email' },
+]
 /**
- * What the loop iterates: the whole array, which is the `[*]` option in the field
- * picker. Not an iterator — that is what the loop hands to the steps inside it — and
- * not `[0]`, which would pin every iteration to the first customer.
+ * How a loop is configured, as the four choices that do it: the operator first, then
+ * the reference its argument is built from. The method name comes from the fixture, so
+ * a rename cannot leave the step describing something that is not in the list; the
+ * other two are the editor's own labels — `For`, which is the operator that iterates an
+ * array, and the whole array rather than an iterator (that is what the loop hands to
+ * the steps inside it) or `[0]`, which would pin every iteration to the first customer.
  */
-const LOOP_EXAMPLE = `#${buildReferenceValue(EXAMPLE_METHOD_COLOR, 'body', 'customers[*]')}`
+const LOOP_PICKS: TutorialPick[] = [
+    { labelKey: 'conditionBuilder.operators.loop.for' },
+    { label: TUTORIAL_CONNECTORS[CRM].invoker.operations[0].name },
+    { label: 'customers' },
+    { labelKey: 'references.wholeArray' },
+]
 /**
  * The IF's comparison, written as the two field paths rather than whole references:
  * that is how the dialog's own selects read them back, and the full form would be
@@ -211,6 +293,13 @@ const LOOP_EXAMPLE = `#${buildReferenceValue(EXAMPLE_METHOD_COLOR, 'body', 'cust
 const CONDITION_EXAMPLE = `client.email ≠ customers[${ITERATOR_NAMES[0]}].email`
 /** The enhancement's script: two references in, one joined value out. */
 const USERNAME_EXAMPLE = 'RESULT_VAR = VAR_0 + " " + VAR_1'
+/**
+ * A cron expression in the form the editor stores: six fields, seconds first, and one
+ * of the two day fields blanked to `?` as Quartz requires. That last part is what
+ * `toQuartzDayRule` does to whatever the visual picker emits, so an example without it
+ * would be an expression the app never actually writes.
+ */
+const CRON_EXAMPLE = '0 0 * * * ?'
 
 /** The first `+` sits on the start node, which is undimmed with it for context. */
 const FROM_START: TutorialTarget = { target: ADD_FROM(START_NODE, 'right'), include: [START_NODE] }
@@ -246,7 +335,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
         // its context menu, so there is no second control to undim alongside it.
         id: 'iterate',
         copy: 'iterate',
-        example: LOOP_EXAMPLE,
+        picks: LOOP_PICKS,
         chain: [
             { target: LOOP_NODE, cue: 'right-click' },
             { target: CONTEXT('open-config') },
@@ -272,7 +361,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     {
         id: 'endpoint',
         copy: 'endpoint',
-        example: ENDPOINT_EXAMPLE,
+        picks: ENDPOINT_PICKS,
         chain: [
             { target: METHOD_NODE(SUPPORT, 0), cue: 'right-click' },
             { target: CONTEXT('edit-url') },
@@ -285,8 +374,23 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
                 target: REFERENCE_GENERATOR,
                 include: [REFERENCE_POPUP, OPEN_DROPDOWN, METHOD_DIALOG_CLOSE],
             },
+            // Both picks made, so the reference exists but is not anywhere yet: the
+            // whole row stops being the instruction and the `+` that commits it starts.
+            // It is a borderless text-weight glyph at the end of the row, which is
+            // exactly the thing a user reads past — the step stalls there otherwise.
+            //
+            // Nothing undimmed alongside it, deliberately: the row is what the previous
+            // link lights, and carrying it over here would put the cut-out back around
+            // the whole thing and say nothing about where to press. The picks have been
+            // made and read by this point; the one glyph left is the instruction.
+            {
+                target: GENERATOR_APPLY,
+                requires: { target: REFERENCE_GENERATOR, text: ENDPOINT_FIELD_PATH },
+            },
             // With the reference in, closing the editor is the only thing left. Shown
-            // with the endpoint it went into, so the user can read it before shutting.
+            // with the endpoint it went into, so the user can read it before shutting —
+            // and the generator has closed itself by now, so this is also what takes
+            // over from the `+` above.
             {
                 target: METHOD_DIALOG_CLOSE,
                 include: [URL_EDITOR],
@@ -445,29 +549,110 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
             { target: LOG_TREE },
         ],
     },
+    /*
+     * A test run proves the graph; a schedule is what makes it run without anyone
+     * watching. These three stay on the header's schedules pill as their first link,
+     * for the same reason the test-run steps stay on the start button: the drawer is
+     * something the user closes to see the canvas again, and the way back in is the
+     * pill rather than whatever was inside it.
+     */
     {
-        // Nothing to point at: the graph is finished and this is the read-back.
+        id: 'schedules',
+        copy: 'schedules',
+        chain: [{ target: SCHEDULES_PILL }],
+        isDone: progress => progress.schedulesOpened,
+    },
+    {
+        id: 'schedule',
+        copy: 'schedule',
+        example: CRON_EXAMPLE,
+        chain: [
+            { target: SCHEDULES_PILL },
+            { target: SCHEDULES_ADD, include: [SCHEDULES_PANEL] },
+            // The dialog supersedes the button that opened it, or the mask would keep
+            // pointing back into the drawer behind it.
+            { target: SCHEDULE_TITLE, include: [SCHEDULE_DEBUG, SCHEDULE_CRON, SCHEDULE_SUBMIT] },
+        ],
+        isDone: progress => progress.scheduleCreated,
+    },
+    {
+        // Nothing to detect past the fold: reading a card is not a result.
+        id: 'scheduleCard',
+        copy: 'scheduleCard',
+        chain: [
+            { target: SCHEDULES_PILL },
+            { target: SCHEDULE_CARD_TOGGLE, include: [SCHEDULE_CARD] },
+            // Only once open — before that the fold above is still the thing to press,
+            // and this link resolves to nothing anyway.
+            { target: SCHEDULE_CARD_DETAILS, include: [SCHEDULE_CARD] },
+        ],
+    },
+    {
+        // The one step that points outside the editor. No `isDone`, and deliberately
+        // no cue: taking this link would navigate away from /workflow/create and end
+        // the tutorial, so the copy and the note both say to look rather than click.
+        id: 'scheduleList',
+        copy: 'scheduleList',
+        chain: [{ target: SCHEDULE_MENU }],
+    },
+    {
+        // Nothing to point at: the graph is finished and this is the read-back. Centred
+        // like the introduction it answers, and blocking for the same reason — with no
+        // chain there is no cut-out, and a stray click on the canvas behind would delete
+        // a node and send the pill back to the step that asks for it.
         id: 'summary',
         copy: 'summary',
+        anchor: 'center',
         chain: [],
     },
 ]
 
 /**
- * The step the canvas is asking for: the first one whose result is not on the canvas
- * yet. Derived rather than stored, so placing a node advances the pill by itself —
- * the action *is* the confirmation, and there is no second copy of "where we are" to
- * fall out of step with the graph.
+ * The step the canvas is asking for: the first one at or after `floor` whose result is
+ * not on the canvas yet. Derived rather than stored, so placing a node advances the
+ * pill by itself — the action *is* the confirmation, and there is no second copy of
+ * "where we are" to fall out of step with the graph.
  *
  * Deleting a node therefore steps back, which is intended: the pill always states
  * what is actually missing. The steps that teach dialog configuration have nothing to
  * detect, so they count as done once `acknowledged` has passed them — which is also
  * why the last step is where a finished tutorial settles and waits to be dismissed.
+ *
+ * `floor` is how the query-string jump works (see `resolveStepFloor`): the steps
+ * before it are skipped rather than faked, so no progress has to be invented for a
+ * graph that was never built, and everything from the floor on behaves exactly as it
+ * does in a full run.
  */
-export function resolveStepIndex(progress: CanvasProgress, acknowledged: number): number {
+export function resolveStepIndex(
+    progress: CanvasProgress,
+    acknowledged: number,
+    floor = 0,
+): number {
     const pending = TUTORIAL_STEPS.findIndex((step, index) =>
-        step.isDone ? !step.isDone(progress) : index >= acknowledged)
+        index >= floor && (step.isDone ? !step.isDone(progress) : index >= acknowledged))
     return pending === -1 ? TUTORIAL_STEPS.length - 1 : pending
+}
+
+/** Names the step to open on: `/workflow/create?tutorialStep=schedules`. */
+export const TUTORIAL_STEP_PARAM = 'tutorialStep'
+
+/**
+ * The step a URL asks the tutorial to open on, or null for a normal run from the top.
+ *
+ * Exists for trying a late step without building the whole graph and sitting through a
+ * replay first — the scheduling steps are eleven actions in. Not gated to development:
+ * the tutorial is an admin-only sandbox over invented systems that saves nothing, so
+ * the worst this can do is show a different paragraph in it, and QA runs against a
+ * production build.
+ *
+ * An unknown name is ignored rather than refused. The fallback is the tutorial opening
+ * at the beginning, which is where it opens anyway.
+ */
+export function resolveStepFloor(search: string): number | null {
+    const id = new URLSearchParams(search).get(TUTORIAL_STEP_PARAM)
+    if (!id) return null
+    const index = TUTORIAL_STEPS.findIndex(step => step.id === id)
+    return index === -1 ? null : index
 }
 
 /**
@@ -482,6 +667,7 @@ export function resolveHighlight(
     for (let i = chain.length - 1; i >= 0; i -= 1) {
         const link = chain[i]
         if (link.when && !link.when(progress)) continue
+        if (link.requires && !findVisibleTarget(link.requires.target, link.requires.text)) continue
         if (findVisibleTarget(link.target, link.text)) return link
     }
     return null

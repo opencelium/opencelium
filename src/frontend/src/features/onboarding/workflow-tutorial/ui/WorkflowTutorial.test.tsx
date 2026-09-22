@@ -3,6 +3,9 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@features/auth/useIsAdmin', () => ({ useIsAdmin: () => true }))
+// The dim picks its colour from the active theme; the provider is not what these
+// scenarios are about.
+vi.mock('@shared/theme/hooks/useTheme', () => ({ useTheme: () => ({ themeMode: 'light' }) }))
 vi.mock('./TutorialSpotlight', () => ({ TutorialSpotlight: () => null }))
 // The real pill pulls in i18n and the primitive adapters; what matters here is which
 // step it is showing and whether it offers a way out.
@@ -122,6 +125,42 @@ const debugRun = () => {
     pressDebugControl('workflow-node-skip-iteration-loop-1')
 }
 
+/** Laid out, because the latches rightly read a 0x0 box as not on screen. */
+const laidOut = (element: HTMLElement) => {
+    element.getBoundingClientRect = () => ({
+        width: 300, height: 120, top: 0, left: 0, right: 300, bottom: 120, x: 0, y: 0,
+        toJSON: () => ({}),
+    })
+    return element
+}
+
+/**
+ * The schedules drawer, slid out. The open class is what the latch reads: the drawer
+ * is mounted from the first render, parked off to the right.
+ */
+const openSchedules = () => {
+    const panel = document.createElement('aside')
+    panel.setAttribute('data-testid', 'workflow-schedules-panel')
+    panel.className = 'rightDrawer rightDrawerOpen'
+    document.body.appendChild(laidOut(panel))
+    return panel
+}
+
+/** A schedule's card inside it, as the panel renders one per schedule. */
+const createSchedule = () => {
+    const panel = document.querySelector('[data-testid="workflow-schedules-panel"]') ?? document.body
+    const card = document.createElement('div')
+    card.className = 'wf-schedule-card'
+    panel.appendChild(laidOut(card))
+    return card
+}
+
+/** The whole scheduling half: open the drawer, then put a schedule in it. */
+const scheduleIt = () => {
+    openSchedules()
+    createSchedule()
+}
+
 /** Real nodes render inside the canvas, so the fixture puts them there too. */
 const addNode = (type: string) => {
     const node = document.createElement('div')
@@ -130,9 +169,9 @@ const addNode = (type: string) => {
     return node
 }
 
-const renderTutorial = () =>
+const renderTutorial = (entry = '/workflow/create') =>
     render(
-        <MemoryRouter initialEntries={['/workflow/create']}>
+        <MemoryRouter initialEntries={[entry]}>
             <Routes>
                 <Route path="/workflow/create" element={<><WorkflowTutorial /><KeyProbe /></>} />
             </Routes>
@@ -157,7 +196,10 @@ describe('WorkflowTutorial', () => {
         canvas()
     })
     afterEach(() => {
-        useWorkflowTutorialStore.setState({ requested: false })
+        // Through the store rather than setState: some scenarios below start the
+        // tutorial for real (the query-string jump does), which registers the fake API
+        // — and that has to come back off between tests.
+        useWorkflowTutorialStore.getState().dismiss()
         resetCanvasProgress()
         document.body.innerHTML = ''
     })
@@ -174,7 +216,7 @@ describe('WorkflowTutorial', () => {
         view.unmount()
     })
 
-    it('blocks the page behind the introduction, and only the introduction', async () => {
+    it('stops blocking the page as soon as a step points at a control', async () => {
         const view = renderTutorial()
         expect(view.container.querySelector('.workflow-tutorial-backdrop')).not.toBeNull()
 
@@ -260,6 +302,21 @@ describe('WorkflowTutorial', () => {
         fireEvent.click(view.getByTestId('next'))
         await showing('logs')
         fireEvent.click(view.getByTestId('next'))
+
+        // And from there the schedule that will run it unattended.
+        await showing('schedules')
+        expect(view.queryByTestId('next')).toBeNull()
+        openSchedules()
+        await showing('schedule')
+        expect(view.queryByTestId('next')).toBeNull()
+        createSchedule()
+
+        // Reading the card leaves nothing behind either, so it is confirmed by hand —
+        // as is the sidebar entry after it, which is pointed at rather than followed.
+        await showing('scheduleCard')
+        fireEvent.click(view.getByTestId('next'))
+        await showing('scheduleList')
+        fireEvent.click(view.getByTestId('next'))
         await showing('summary')
         view.unmount()
     })
@@ -289,17 +346,23 @@ describe('WorkflowTutorial', () => {
         showEnhancement()
         closeMethodDialog()
         debugRun()
-        // The pace and the tree have nothing to detect, so they are acknowledged.
-        await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
-        fireEvent.click(view.getByTestId('next'))
-        await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
-        fireEvent.click(view.getByTestId('next'))
+        scheduleIt()
+        // The pace, the tree, the card and the sidebar entry have nothing to detect,
+        // so they are acknowledged one at a time.
+        for (let step = 0; step < 4; step += 1) {
+            await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
+            fireEvent.click(view.getByTestId('next'))
+        }
 
         await waitFor(() => expect(view.getByTestId('step').textContent).toBe(String(TUTORIAL_STEPS.length - 1)))
         // The last step has nothing to detect, so auto-advance must not run off the end
         // and dismiss the tutorial — and with it the canvas — behind the user's back.
         expect(useWorkflowTutorialStore.getState().requested).toBe(true)
         expect(view.getByTestId('is-last')).toBeTruthy()
+        // Centred like the introduction, so the page is blocked again: it points at
+        // nothing, and a stray click on the canvas would delete a node and send the
+        // pill back to the step that asks for it.
+        expect(view.container.querySelector('.workflow-tutorial-backdrop')).not.toBeNull()
         view.unmount()
     })
 
@@ -359,6 +422,50 @@ describe('WorkflowTutorial', () => {
         view.unmount()
     })
 
+    // The scheduling steps are eleven actions in, so trying one meant building the
+    // whole graph and sitting through a replay first.
+    describe('the query-string jump', () => {
+        it('opens on the step the URL names, with nothing built', async () => {
+            const view = renderTutorial('/workflow/create?tutorialStep=schedules')
+            const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
+
+            await waitFor(() => expect(view.getByTestId('step').textContent).toBe(at('schedules')))
+            view.unmount()
+        })
+
+        it('carries on normally from there', async () => {
+            const view = renderTutorial('/workflow/create?tutorialStep=schedules')
+            const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
+            await waitFor(() => expect(view.getByTestId('step').textContent).toBe(at('schedules')))
+
+            openSchedules()
+            await waitFor(() => expect(view.getByTestId('step').textContent).toBe(at('schedule')))
+            createSchedule()
+            await waitFor(() => expect(view.getByTestId('step').textContent).toBe(at('scheduleCard')))
+            view.unmount()
+        })
+
+        // Otherwise reaching a step by URL would mean running the palette command
+        // first — which navigates here without the parameter.
+        it('starts the tutorial when it was not running', async () => {
+            useWorkflowTutorialStore.setState({ requested: false })
+
+            const view = renderTutorial('/workflow/create?tutorialStep=schedules')
+
+            await waitFor(() => expect(useWorkflowTutorialStore.getState().requested).toBe(true))
+            expect(view.getByTestId('step')).toBeTruthy()
+            view.unmount()
+        })
+
+        it('leaves an unknown name to open at the beginning', async () => {
+            const view = renderTutorial('/workflow/create?tutorialStep=nope')
+            const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
+
+            expect(view.getByTestId('step').textContent).toBe(at('intro'))
+            view.unmount()
+        })
+    })
+
     it('resets the route when the tutorial is closed, so the invented graph goes with it', async () => {
         const view = renderTutorial()
         const before = view.getByTestId('location-key').textContent
@@ -383,10 +490,11 @@ describe('WorkflowTutorial', () => {
         showEnhancement()
         closeMethodDialog()
         debugRun()
-        await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
-        fireEvent.click(view.getByTestId('next'))
-        await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
-        fireEvent.click(view.getByTestId('next'))
+        scheduleIt()
+        for (let step = 0; step < 4; step += 1) {
+            await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
+            fireEvent.click(view.getByTestId('next'))
+        }
         await waitFor(() => expect(view.getByTestId('is-last')).toBeTruthy())
         const before = view.getByTestId('location-key').textContent
 

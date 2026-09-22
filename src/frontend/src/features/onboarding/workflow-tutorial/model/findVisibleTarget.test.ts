@@ -72,4 +72,16 @@ describe('findVisibleTarget', () => {
         document.querySelectorAll<HTMLElement>('.t').forEach(element => withRect(element))
         expect(findVisibleTarget('.t')).toBeNull()
     })
+
+    // A control can show its value through an <input>, where the text is a DOM property
+    // rather than a child node: the reference generator's field picker renders the path
+    // it has built as the select's search value, so textContent alone never sees it.
+    it('reads the text a control shows through an input, not only its children', () => {
+        html('<div class="picker"><input value="customers[i].email"></div>'
+            + '<div class="picker"><input value="customers"></div>')
+        document.querySelectorAll<HTMLElement>('.picker').forEach(element => withRect(element))
+
+        expect(findVisibleTarget('.picker', 'customers[i].email')).not.toBeNull()
+        expect(findVisibleTarget('.picker', 'customers[i].nope')).toBeNull()
+    })
 })
