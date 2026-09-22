@@ -174,7 +174,18 @@ html.onboarding-side-open .onboarding-tooltip__content {
 html.onboarding-tour-active,
 html.onboarding-tour-active body {
     overflow: hidden;
-    scrollbar-gutter: stable;
+}
+
+/*
+ * `scrollbar-gutter: stable` reserved the lock's lost scrollbar width here, but it
+ * paints that space as an empty scrollbar track — a grey strip down the right of
+ * every step, even though the document rarely scrolls at all (the app scrolls inside
+ * LayoutContent). This gives the same space back as padding instead, and only as
+ * much as was actually taken: useTourLifecycle measures it before the lock applies,
+ * so it is 0px with overlay scrollbars or no document scrollbar, and nothing shows.
+ */
+html.onboarding-tour-active {
+    padding-right: var(--onboarding-scrollbar-width, 0px);
 }
 
 /*

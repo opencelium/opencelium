@@ -11,13 +11,6 @@ import { useGetActiveSubscriptionQuery } from '@entities/subscription/api/subscr
 import { useWorkflowTutorialStore } from '@features/onboarding/workflow-tutorial/model/workflowTutorial.store'
 import { ONBOARDING_STEP_ORDER, type OnboardingStepId } from './types'
 
-// STUB: "download from git" is not implemented. FirstInvokerContent fakes the
-// fetch with a timer and this splices a placeholder invoker into the tour's own
-// view of the list, so the step can move on. It is display-only — nothing submits
-// it, and the connector form reads the real list — but the user is shown an
-// invoker that does not exist. Replace both halves with a real repository fetch.
-const STUB_GIT_INVOKER = { name: 'jira.xml', description: '', methodCount: 42, connectorCount: 0, requiredData: { Url: '', Username: '', Password: '' } }
-
 const LICENSE_ROUTE = '/license'
 const INVOKER_CREATE_ROUTE = '/invoker/create'
 const WORKFLOW_CREATE_ROUTE = '/workflow/create'
@@ -32,7 +25,7 @@ type IntroStepsOptions = {
 /**
  * Assembles the Joyride step list and owns the state those steps read from: which
  * steps the user's permissions allow, the position in that list, the connector
- * draft, and the two "act as if it worked" flags for the skipped/stubbed paths.
+ * draft, and the "show the task anyway" flag for the skipped path.
  */
 export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, paletteTargetMissing }: IntroStepsOptions) {
     const { t } = useI18n('onboarding')
@@ -41,7 +34,6 @@ export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, p
     const { complete, finishTour, goTo, pause } = useOnboardingStore()
     const [stepIndex, setStepIndex] = useState(0)
     const [showInvokerAnyway, setShowInvokerAnyway] = useState(false)
-    const [mockGitInvokerLoaded, setMockGitInvokerLoaded] = useState(false)
     const [connectorFormInvoker, setConnectorFormInvoker] = useState<string | null>(null)
     const { data: invokerList } = useGetInvokersQuery(undefined, { skip: !isAdmin })
     const { data: connectorList } = useGetConnectorsMetaQuery(undefined, { skip: !isAdmin })
@@ -60,17 +52,14 @@ export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, p
     }, [connectorList])
 
     const invokerSummaries = useMemo(
-        () => [
-            ...invokers.map(invoker => ({
-                name: invoker.name,
-                description: invoker.description ?? '',
-                methodCount: invoker.operations?.length ?? 0,
-                connectorCount: connectorsPerInvoker.get(invoker.name) ?? 0,
-                requiredData: invoker.requiredData ?? {},
-            })),
-            ...(mockGitInvokerLoaded ? [STUB_GIT_INVOKER] : []),
-        ],
-        [connectorsPerInvoker, invokers, mockGitInvokerLoaded],
+        () => invokers.map(invoker => ({
+            name: invoker.name,
+            description: invoker.description ?? '',
+            methodCount: invoker.operations?.length ?? 0,
+            connectorCount: connectorsPerInvoker.get(invoker.name) ?? 0,
+            requiredData: invoker.requiredData ?? {},
+        })),
+        [connectorsPerInvoker, invokers],
     )
     const includeConnectorSteps = canCreateConnector && (canCreateInvoker || invokers.length > 0)
     const activeStepIds: OnboardingStepId[] = useMemo(() => ONBOARDING_STEP_ORDER.filter(id => {
@@ -102,10 +91,6 @@ export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, p
         paletteTargetMissing,
         invokers: invokerSummaries,
         onInvokerUploaded: advance,
-        // Deliberately does not advance: the sync reports itself with a toast and
-        // the user moves on when ready. The step re-renders as the "you already
-        // have invokers" variant, which carries the Continue button.
-        onGitInvokersDownloaded: () => setMockGitInvokerLoaded(true),
         onSkipInvoker: advance,
         onShowInvokerAnyway: () => setShowInvokerAnyway(true),
         onSkipTask: finishTour,
@@ -140,7 +125,6 @@ export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, p
     const reset = useCallback(() => {
         setStepIndex(0)
         setShowInvokerAnyway(false)
-        setMockGitInvokerLoaded(false)
         setConnectorFormInvoker(null)
     }, [])
 

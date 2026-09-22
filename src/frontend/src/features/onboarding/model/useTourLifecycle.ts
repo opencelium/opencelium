@@ -56,10 +56,18 @@ export function useTourLifecycle({
 
     useEffect(() => {
         const root = document.documentElement
-        root.classList.toggle(TOUR_ACTIVE_CLASS, status === 'running')
+        const isRunning = status === 'running'
+        // Measured before the class lands: the rule it feeds hides the document's
+        // overflow, after which this difference always reads zero.
+        const scrollbarWidth = isRunning ? window.innerWidth - root.clientWidth : 0
+        root.style.setProperty('--onboarding-scrollbar-width', `${scrollbarWidth}px`)
+        root.classList.toggle(TOUR_ACTIVE_CLASS, isRunning)
         // Read by the .onboarding-tour-active rules that lift antd's portals.
         root.style.setProperty('--onboarding-z-overlay', String(ONBOARDING_Z_INDEX.overlay))
-        return () => root.classList.remove(TOUR_ACTIVE_CLASS)
+        return () => {
+            root.classList.remove(TOUR_ACTIVE_CLASS)
+            root.style.removeProperty('--onboarding-scrollbar-width')
+        }
     }, [status])
 
     useEffect(() => {

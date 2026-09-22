@@ -80,6 +80,9 @@ export function ConnectorStepContent({ invokers, onCreateConnectorFor }: Connect
         // Without this both adapters prepend their own selection checkbox column.
         enableRowSelection: false,
         getRowId: row => row.name,
+        // The list arrives in whatever order the API returned it, which reads as
+        // random; title ascending is the order the user can predict.
+        initialState: { sorting: [{ id: 'name', desc: false }] },
         getCoreRowModel: getCoreRowModel(),
         // The adapter renders a sorter for any column tanstack reports as sortable,
         // so without this the title's sorter appeared but did nothing.
