@@ -44,7 +44,7 @@
   },
   "confirmDelete": {
     "title": "Schritt löschen",
-    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt.",
     "referencesClearedTitle": "Verweise entfernt",
     "referencesCleared": "{{count}} andere Schritte haben „{{name}}“ gelesen. Diese Verweise sind entfernt.",
     "referencesCleared_one": "{{count}} anderer Schritt hat „{{name}}“ gelesen. Diese Verweise sind entfernt.",
@@ -790,7 +790,7 @@
     "drawerGone": "Diese Bindung existiert nicht mehr.",
     "drawerValueReference": "Dieser Verweis steht direkt im Wert des Feldes, es gibt hier also keine Anreicherung zu bearbeiten. Öffnen Sie den Methoden-Editor, um ihn zu ändern oder zu entfernen.",
     "drawerSimpleCode": "Diese Anreicherung wurde im alten einfachen Modus erstellt; ihre Logik ist kein Skript und kann hier nicht angezeigt werden. Was Sie unten eingeben, ersetzt sie.",
-    "openInMethodEditor": "Im Methoden-Editor öffnen",
+    "openInBodyEditor": "Im Body-Editor öffnen",
     "collapseCard": "Einklappen",
     "cardEmpty": "Keine Bindungen für diese Methode.",
     "rowEditHint": "Klicken, um diese Bindung zu bearbeiten",
