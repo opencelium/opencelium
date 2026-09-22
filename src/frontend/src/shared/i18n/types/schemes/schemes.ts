@@ -60,6 +60,11 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             goBack: string
             goHome: string
         }
+        onlineFeature: {
+            offline: string
+            syncDisabled: string
+            portalUnreachable: string
+        }
         accessDenied: {
             title: string
             subtitle: string

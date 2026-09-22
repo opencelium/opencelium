@@ -1,6 +1,6 @@
 {
   "wizard": {
-    "header": "Subscription",
+    "header": "License Management",
     "subheader": "Review your license, monthly API operation usage, and per-connection execution history. Upgrades, extra operations and support tickets are handled on the OpenCelium Service Portal."
   },
   "steps": {

@@ -111,6 +111,10 @@
       "error": "Failed to upload package",
       "uploading": "Uploading {{fileName}} — {{progress}}%",
       "cancel": "Cancel"
+    },
+    "onlineUnavailable": {
+      "title": "Online updates are not available",
+      "switchToOffline": "Use an offline package"
     }
   },
   "update": {

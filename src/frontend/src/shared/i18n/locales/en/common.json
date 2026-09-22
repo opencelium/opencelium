@@ -108,10 +108,10 @@
     "createWorkflow": "Create Workflow",
     "createWorkflowHint": "Create Workflow (Alt+W)",
     "docs": "Documentation",
-      "help": "Help",
-      "startOnboardingTour": "Start onboarding tour",
-      "startDashboardTour": "Start dashboard tour",
-      "servicePortal": "Service Portal"
+    "help": "Help",
+    "startOnboardingTour": "Start onboarding tour",
+    "startDashboardTour": "Start dashboard tour",
+    "servicePortal": "Service Portal"
   },
   "user": {
     "unknown": "Unknown User"
@@ -190,5 +190,10 @@
       "bulkMessage": "Delete {{count}} selected entries?",
       "bulkMessage_one": "Delete {{count}} selected entry?"
     }
+  },
+  "onlineFeature": {
+    "offline": "No internet connection. Reconnect to use online services.",
+    "syncDisabled": "Online services are disabled in the system configuration.",
+    "portalUnreachable": "The Service Portal cannot be reached from this server. Check the portal settings and its access token."
   }
 }

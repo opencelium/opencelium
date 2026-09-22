@@ -108,10 +108,10 @@
     "createWorkflow": "Workflow erstellen",
     "createWorkflowHint": "Workflow erstellen (Alt+W)",
     "docs": "Dokumentation",
-      "help": "Hilfe",
-      "startOnboardingTour": "Onboarding-Tour starten",
-      "startDashboardTour": "Dashboard-Tour starten",
-      "servicePortal": "Service-Portal"
+    "help": "Hilfe",
+    "startOnboardingTour": "Onboarding-Tour starten",
+    "startDashboardTour": "Dashboard-Tour starten",
+    "servicePortal": "Service-Portal"
   },
   "user": {
     "unknown": "Unbekannter Benutzer"
@@ -190,5 +190,10 @@
       "bulkMessage": "{{count}} ausgewählte Einträge löschen?",
       "bulkMessage_one": "{{count}} ausgewählten Eintrag löschen?"
     }
+  },
+  "onlineFeature": {
+    "offline": "Keine Internetverbindung. Stellen Sie die Verbindung wieder her, um Online-Dienste zu nutzen.",
+    "syncDisabled": "Online-Dienste sind in der Systemkonfiguration deaktiviert.",
+    "portalUnreachable": "Das Service Portal ist von diesem Server aus nicht erreichbar. Prüfen Sie die Portal-Einstellungen und das Zugriffstoken."
   }
 }
