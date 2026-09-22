@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.constant.props.OnlineServicesProps;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
@@ -72,6 +73,7 @@ public class InvokerController {
     private final ConnectionService connectionService;
     private final Mapper<Invoker, InvokerDTO> invokerMapper;
     private final Mapper<FunctionInvoker, FunctionDTO> functionMapper;
+    private final OnlineServicesProps onlineServicesProps;
 
     public InvokerController(
             @Qualifier("invokerServiceImp") InvokerService invokerService,
@@ -80,7 +82,8 @@ public class InvokerController {
             InvokerSyncService invokerSyncService,
             InvokerRepositoryService invokerRepositoryService,
             Mapper<Invoker, InvokerDTO> invokerMapper,
-            Mapper<FunctionInvoker, FunctionDTO> functionMapper
+            Mapper<FunctionInvoker, FunctionDTO> functionMapper,
+            OnlineServicesProps onlineServicesProps
     ) {
         this.invokerService = invokerService;
         this.invokerSyncService = invokerSyncService;
@@ -89,6 +92,7 @@ public class InvokerController {
         this.connectionService = connectionService;
         this.invokerMapper = invokerMapper;
         this.functionMapper = functionMapper;
+        this.onlineServicesProps = onlineServicesProps;
     }
 
     @Operation(summary = "Retrieves an 'invoker' based on the provided invoker 'name'")
@@ -151,7 +155,8 @@ public class InvokerController {
             + "(without operations) plus the files that were rejected.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Invokers have been downloaded and installed",
+                    description = "Invokers have been downloaded and installed. If online services are disabled,"
+                            + " property 'result' contains a message explaining how to enable them",
                     content = @Content(schema = @Schema(implementation = InvokerBulkInstallDTO.class))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
@@ -164,7 +169,10 @@ public class InvokerController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping("/remote")
-    public ResponseEntity<InvokerBulkInstallDTO> downloadInvokersFromRepository() {
+    public ResponseEntity<?> downloadInvokersFromRepository() {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         InvokerRepositoryService.DownloadResult result = invokerRepositoryService.downloadAll();
 
         InvokerMapper mapper = (InvokerMapper) invokerMapper;
@@ -438,6 +446,9 @@ public class InvokerController {
     })
     @PutMapping("/{invokerName}/sync-force")
     public ResponseEntity<?> syncForce(@PathVariable String invokerName) {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         invokerSyncService.forceSync(invokerName);
         return ResponseEntity.noContent().build();
     }
@@ -455,6 +466,9 @@ public class InvokerController {
     })
     @PutMapping(path = "list/sync-force", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> syncForceByNames(@RequestBody IdentifiersDTO<String> invokerNames) {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         invokerNames.getIdentifiers().forEach(invokerSyncService::forceSync);
         return ResponseEntity.noContent().build();
     }
