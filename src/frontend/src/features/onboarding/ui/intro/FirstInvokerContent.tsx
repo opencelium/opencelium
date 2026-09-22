@@ -8,12 +8,11 @@ import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 import { uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
+import { useDownloadInvokersFromRepositoryMutation } from '@entities/invoker/api/invokerApi'
 import '../onboardingIntro.css'
 
 const INVOKER_ACCEPT = '.xml,text/xml,application/xml'
-const GIT_INVOKER_REPO = 'github.com/opencelium/invokers · branch main'
-/** Fake latency for the not-yet-implemented git fetch, so the spinner registers. */
-const FAKE_GIT_FETCH_MS = 700
+const GIT_INVOKER_REPO = 'github.com/opencelium/invoker · branch main'
 /** Lets the success alert read before the tour moves on. */
 const UPLOAD_SUCCESS_ADVANCE_MS = 900
 
@@ -22,10 +21,9 @@ type UploadResult = { fileName: string; methodCount: number; authType?: string; 
 type FirstInvokerProps = {
     onCreateManually: () => void
     onUploaded: () => void
-    onGitDownloaded: () => void
 }
 
-export function FirstInvokerContent({ onCreateManually, onUploaded, onGitDownloaded }: FirstInvokerProps) {
+export function FirstInvokerContent({ onCreateManually, onUploaded }: FirstInvokerProps) {
     const { t } = useI18n('onboarding')
     const { t: tEntities } = useI18n('entities')
     const confirm = useConfirm()
@@ -33,7 +31,7 @@ export function FirstInvokerContent({ onCreateManually, onUploaded, onGitDownloa
     const [result, setResult] = useState<UploadResult | null>(null)
     const [failedFile, setFailedFile] = useState<string | null>(null)
     const [failReason, setFailReason] = useState<'invalidType' | 'tooLarge' | null>(null)
-    const [gitLoading, setGitLoading] = useState(false)
+    const [downloadFromRepository, { isLoading: isDownloadingFromGit }] = useDownloadInvokersFromRepositoryMutation()
     const advanceTimerRef = useRef<number | null>(null)
 
     useEffect(() => () => {
@@ -80,6 +78,34 @@ export function FirstInvokerContent({ onCreateManually, onUploaded, onGitDownloa
         }
     }
 
+    /**
+     * Reports the outcome with toasts rather than inline alerts: a run that installs
+     * anything refetches the invoker list, and the tour then swaps this step for its
+     * "you already have invokers" variant — an alert rendered here would vanish with
+     * it. The `reason` strings are backend-authored sentences, so they are shown as
+     * they arrive rather than mapped to keys.
+     */
+    const handleDownloadFromGit = async () => {
+        try {
+            const { installed, failed } = await downloadFromRepository().unwrap()
+            if (installed.length > 0) {
+                message.success(t('content.invoker.gitSuccess', { count: installed.length }))
+            } else if (failed.length === 0) {
+                message.info(t('content.invoker.gitEmpty'))
+            }
+            if (failed.length > 0) {
+                notifyError(
+                    failed.map(failure => `${failure.fileName}: ${failure.reason}`).join('\n'),
+                    undefined,
+                    t('content.invoker.gitFailed', { count: failed.length }),
+                )
+            }
+        } catch (error) {
+            console.error(error)
+            notifyError(t('content.invoker.gitError'))
+        }
+    }
+
     const resultMeta = result
         ? [t('content.invoker.methods', { count: result.methodCount }), result.authType, result.version].filter(Boolean).join(' · ')
         : ''
@@ -94,21 +120,12 @@ export function FirstInvokerContent({ onCreateManually, onUploaded, onGitDownloa
                         <p>{t('content.invoker.gitBody')}</p>
                         <code>{GIT_INVOKER_REPO}</code>
                     </div>
-                    {/* STUB: nothing is downloaded. The timer only fakes latency so the
-                        spinner registers; OnboardingPreview then splices in a placeholder
-                        invoker (STUB_GIT_INVOKER). Swap for the real repository fetch. */}
                     <Button
                         type="default"
-                        loading={gitLoading}
+                        loading={isDownloadingFromGit}
+                        disabled={isDownloadingFromGit}
                         testId="onboarding-invoker-git"
-                        onClick={() => {
-                            setGitLoading(true)
-                            window.setTimeout(() => {
-                                setGitLoading(false)
-                                message.success(t('content.invoker.gitSuccess'))
-                                onGitDownloaded()
-                            }, FAKE_GIT_FETCH_MS)
-                        }}
+                        onClick={handleDownloadFromGit}
                     >
                         {t('content.invoker.gitAction')}
                     </Button>

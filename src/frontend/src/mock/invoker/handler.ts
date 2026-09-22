@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import type { Invoker } from '@entities/invoker/model/types'
+import type { Invoker, InvokerMeta } from '@entities/invoker/model/types'
 
 export let invokers: Invoker[] = [
     {
@@ -43,7 +43,46 @@ export let invokers: Invoker[] = [
     },
 ]
 
+/** What the mocked invoker repository holds, mirroring the real catalog's shape. */
+const REPOSITORY_INVOKERS: Invoker[] = [
+    {
+        name: 'jira',
+        description: 'Atlassian Jira REST API',
+        hint: 'Set url, username and api token',
+        icon: '/assets/images/invoker/jira.png',
+        authType: 'basic',
+        hasManualSync: false,
+        requiredData: { url: '', username: '', password: '' },
+        operations: [],
+    },
+    {
+        name: 'zabbix',
+        description: 'Zabbix monitoring API',
+        hint: 'Set url and api token',
+        icon: '/assets/images/invoker/zabbix.png',
+        authType: 'token',
+        hasManualSync: false,
+        requiredData: { url: '', token: '' },
+        operations: [],
+    },
+]
+
 export const invokerHandlers = [
+    // Overwrites by name, exactly as the backend does; `operations` is stripped
+    // from the reply because the real endpoint answers with metadata only.
+    http.post('/invoker/remote', () => {
+        const installed: InvokerMeta[] = REPOSITORY_INVOKERS.map((repo) => {
+            const meta = { ...repo } as Partial<Invoker>
+            delete meta.operations
+            return meta as InvokerMeta
+        })
+        invokers = [
+            ...invokers.filter((inv) => !REPOSITORY_INVOKERS.some((repo) => repo.name === inv.name)),
+            ...REPOSITORY_INVOKERS,
+        ]
+        return HttpResponse.json({ installed, failed: [] })
+    }),
+
     http.get('/invoker/all', () => {
         return HttpResponse.json(invokers)
     }),

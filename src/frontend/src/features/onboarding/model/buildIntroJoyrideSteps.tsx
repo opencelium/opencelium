@@ -21,7 +21,6 @@ type BuildIntroStepsOptions = {
     paletteTargetMissing: boolean
     onCreateInvoker: () => void
     onInvokerUploaded: () => void
-    onGitInvokersDownloaded: () => void
     onSkipInvoker: () => void
     invokers: Array<{ name: string; description: string; methodCount: number; connectorCount: number; requiredData: Record<string, string> }>
     onShowInvokerAnyway: () => void
@@ -53,7 +52,7 @@ function data(value: PartialTooltipData): PartialTooltipData {
     return value
 }
 
-export function buildIntroJoyrideSteps({ t, userName, includeInvokerStep, includeConnectorSteps, showInvokerTask, paletteTargetMissing, onCreateInvoker, onInvokerUploaded, onGitInvokersDownloaded, onSkipInvoker, invokers, onShowInvokerAnyway, onSkipTask, onCreateConnectorFor, onCreateWorkflow, onOpenLicensePage }: BuildIntroStepsOptions): Step[] {
+export function buildIntroJoyrideSteps({ t, userName, includeInvokerStep, includeConnectorSteps, showInvokerTask, paletteTargetMissing, onCreateInvoker, onInvokerUploaded, onSkipInvoker, invokers, onShowInvokerAnyway, onSkipTask, onCreateConnectorFor, onCreateWorkflow, onOpenLicensePage }: BuildIntroStepsOptions): Step[] {
     const steps: Step[] = [
         {
             target: 'body',
@@ -99,16 +98,28 @@ export function buildIntroJoyrideSteps({ t, userName, includeInvokerStep, includ
     ]
 
     if (includeInvokerStep) {
-        const hasInvokers = invokers.length > 0 && !showInvokerTask
+        // Two independent facts: whether the user has invokers, and whether the
+        // add-an-invoker task is on screen. "Add another invoker" shows the task to
+        // someone who already has some, so only the first may describe their situation
+        // — deriving both from one flag is what titled that case "no invokers yet".
+        const hasInvokers = invokers.length > 0
+        const showInvokerForm = !hasInvokers || showInvokerTask
+        const formTitle = hasInvokers ? t('steps.invoker.anotherTitle') : t('steps.invoker.emptyTitle')
         steps.push({
             target: 'body',
             placement: 'center',
             disableBeacon: true,
-            title: hasInvokers ? t('steps.invoker.existingTitle', { count: invokers.length }) : t('steps.invoker.emptyTitle'),
-            content: hasInvokers ? <ExistingInvokersContent invokers={invokers} /> : <FirstInvokerContent onCreateManually={onCreateInvoker} onUploaded={onInvokerUploaded} onGitDownloaded={onGitInvokersDownloaded} />,
-            data: data(hasInvokers
-                ? { kicker: t('steps.invoker.kicker'), kind: 'skipped', secondaryLabel: t('actions.addAnotherInvoker'), secondaryAction: onShowInvokerAnyway, footerNote: <CommandHint command={COMMANDS.invoker} /> }
-                : { kicker: t('steps.invoker.kicker'), kind: 'blocking', variant: 'invoker', secondaryLabel: t('actions.later'), secondaryAction: onSkipInvoker, footerNote: <CommandHint command={COMMANDS.invoker} /> }),
+            title: showInvokerForm ? formTitle : t('steps.invoker.existingTitle', { count: invokers.length }),
+            content: showInvokerForm
+                ? <FirstInvokerContent onCreateManually={onCreateInvoker} onUploaded={onInvokerUploaded} />
+                : <ExistingInvokersContent invokers={invokers} />,
+            data: data({
+                kicker: hasInvokers ? t('steps.invoker.existingKicker') : t('steps.invoker.kicker'),
+                footerNote: <CommandHint command={COMMANDS.invoker} />,
+                ...(showInvokerForm
+                    ? { kind: 'blocking', variant: 'invoker', secondaryLabel: t('actions.later'), secondaryAction: onSkipInvoker }
+                    : { kind: 'skipped', secondaryLabel: t('actions.addAnotherInvoker'), secondaryAction: onShowInvokerAnyway }),
+            }),
         })
     }
 
