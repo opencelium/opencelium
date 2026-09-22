@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './styles.css';
 import { WorkflowPageHeader } from './components/WorkflowPageHeader/WorkflowPageHeader';
@@ -13,6 +14,8 @@ import { useWorkflowPageState } from './hooks/useWorkflowPageState';
 import { useWorkflowActions } from './hooks/useWorkflowActions';
 import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { buildWorkflowIndexes } from './api/connectionPayload';
+import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJsonDialog/workflowJson.validate';
+import { useSchedulesConnectionId } from './components/schedules/simulatedSchedulesConnection';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -32,6 +35,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     selectedHistoryVersionId, setSelectedHistoryVersionId, categoryId, setCategoryId,
     isLoading: isConnectionLoading } = connection;
   const { hydratedNodes, activeConnectionId, displayedHistoryVersions } = view;
+  // Not activeConnectionId: the tutorial teaches the schedules panel on an unsaved
+  // graph, and only the pill and the panel may see its stand-in connection.
+  const schedulesConnectionId = useSchedulesConnectionId(activeConnectionId);
   const { hasChanges: hasConnectionChanges,
     hasManualChanges: hasManualUnsavedChanges } = changes;
   const { selectedNode, contextMenuNode, editorNode, conditionNode, aggregatorNode,
@@ -53,6 +59,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { validation, saveWorkflow: handleSave, category, templates: templateActions,
     history: historyActions, canvas, header, buildTestPayload, isShortcutsOpen,
     setIsShortcutsOpen, schedulesOpen, setSchedulesOpen, changeHistoryOpen,
+    jsonEditorOpen, setJsonEditorOpen, jsonEditorValue,
     setChangeHistoryOpen, pasteOperatorTarget, cancelPasteOperator,
     pasteOperatorInScope, pasteOperatorAfter } = actions;
   const { validateTitle, resolveAndHighlightError: resolveAndHighlightWorkflowError } = validation;
@@ -76,7 +83,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       loopAncestorsByIndexPath={loopAncestorsByIndexPath}>
     <TestRunEditLockSync onLockChange={setIsTestRunLocked} />
     <div className="page" data-testid="workflow-page">
-      <WorkflowPageHeader connectionId={activeConnectionId} schedulesOpen={schedulesOpen}
+      <WorkflowPageHeader connectionId={schedulesConnectionId} schedulesOpen={schedulesOpen}
         onToggleSchedules={() => setSchedulesOpen((open) => {
           if (!open) {
             workflow.setHistoryOpen(false);
@@ -113,6 +120,19 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             onCancel: handleCancelConnectorMapping },
         }}
         shortcuts={{ open: isShortcutsOpen, onClose: () => setIsShortcutsOpen(false) }}
+		jsonEditor={{ open: jsonEditorOpen, readOnly: readOnly || isTestRunLocked,
+          value: jsonEditorValue ?? {},
+          onApply: (payload) => {
+            const state = mapWorkflowJsonToWorkflowState(payload);
+            workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
+            setLoadedFieldBindings(state.fieldBindings);
+            setHeaderState({ title: state.title, description: state.description });
+            setCategoryId(state.categoryId);
+            changes.markDirty();
+            setJsonEditorOpen(false);
+            message.success(t('json.applied'));
+          },
+          onClose: () => setJsonEditorOpen(false) }}
         pasteOperator={{ open: !!pasteOperatorTarget, onCancel: cancelPasteOperator,
           onPasteInScope: pasteOperatorInScope, onPasteAfter: pasteOperatorAfter }}
         category={{ open: assignCategoryOpen, currentCategoryId: categoryId,
@@ -145,7 +165,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
           connectionId: activeConnectionId, onClose: () => workflow.setSidebarAction(null),
           onSelect: workflow.onAddStep }}
-        schedules={{ open: schedulesOpen, connectionId: activeConnectionId,
+        schedules={{ open: schedulesOpen, connectionId: schedulesConnectionId,
           connectionTitle: headerState.title, onClose: () => setSchedulesOpen(false) }}
         history={{ open: workflow.historyOpen, items: displayedHistoryVersions,
           selectedId: selectedHistoryVersionId,

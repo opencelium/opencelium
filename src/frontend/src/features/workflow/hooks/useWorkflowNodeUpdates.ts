@@ -26,6 +26,12 @@ export const useWorkflowNodeUpdates = (
 	onSaveConditionConfig: (nodeId: string, conditionConfig: ConditionConfig) => {
 		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? { ...node, data: {
 			...node.data, conditionConfig, hasError: false, errorMessage: undefined,
+			// Mirrors the expression like connectionMapper.entries does on load,
+			// unless the user gave the node its own label: without this, an edit
+			// that moves the condition off a colour leaves that colour quoted in
+			// data.subtitle, which collectNodeReferenceColors reads as a live
+			// reference and flags as broken the moment that method is deleted.
+			...(node.data.labelEdited ? {} : { subtitle: conditionConfig.expression }),
 		} } : node));
 		closeConditionEditor();
 	},

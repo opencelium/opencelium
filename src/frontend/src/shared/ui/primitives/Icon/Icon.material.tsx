@@ -58,8 +58,12 @@ import {
     Redo,
     CallSplit,
     Loop,
+    RadioButtonUnchecked,
+    GitHub,
+    Apps,
 } from '@mui/icons-material';
 
+import MouseOutlined from '@mui/icons-material/MouseOutlined';
 import type { IconComponent } from './Icon.types';
 
 const iconMap = {
@@ -76,6 +80,7 @@ const iconMap = {
     stop: Stop,
     'step-forward': SkipNext,
     'skip-forward': FastForward,
+    mouse: MouseOutlined,
     download: Download,
     upload: Upload,
     key: Key,
@@ -122,6 +127,10 @@ const iconMap = {
     if: CallSplit,
     loop: Loop,
     ai: AutoAwesome,
+    circle: RadioButtonUnchecked,
+    git: GitHub,
+    globe: Public,
+    portal: Apps,
 };
 
 export const MaterialIcon: IconComponent = ({

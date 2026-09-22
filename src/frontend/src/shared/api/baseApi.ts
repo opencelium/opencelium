@@ -7,6 +7,6 @@ export const baseApi = createApi({
     // Refetch on every mount/arg change so navigating back to a page always
     // revalidates against the server. The cached data still renders instantly
     // while the refetch runs in the background.
-    refetchOnMountOrArgChange: true,
+    refetchOnMountOrArgChange: 1,
     endpoints: () => ({}),
 })

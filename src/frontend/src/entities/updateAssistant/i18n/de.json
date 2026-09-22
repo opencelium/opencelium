@@ -109,6 +109,10 @@
       "error": "Fehler beim Hochladen des Pakets",
       "uploading": "Lade {{fileName}} hoch — {{progress}}%",
       "cancel": "Abbrechen"
+    },
+    "onlineUnavailable": {
+      "title": "Online-Updates sind nicht verfügbar",
+      "switchToOffline": "Offline-Paket verwenden"
     }
   },
   "update": {

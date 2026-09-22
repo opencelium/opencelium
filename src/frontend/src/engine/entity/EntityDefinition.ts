@@ -50,7 +50,12 @@ export type FieldDefinition = {
     type: 'string' | 'number' | 'boolean' | 'date' | 'enum' | 'other' | 'array' | 'file'
     placeholder?: string
     defaultValue?: string | number | boolean | Date | unknown
-    getDefaultValue?: () => Promise<string | number | boolean | Date | unknown>,
+    /**
+     * Evaluated once per wizard mount by `buildDefaultValues`, which assigns the
+     * return value as-is — so a Promise lands in the form unresolved. Return a
+     * plain value unless the field can cope with a pending one.
+     */
+    getDefaultValue?: () => string | number | boolean | Date | undefined | Promise<unknown>,
 
     ui: {
         component: FieldComponentType
@@ -60,6 +65,8 @@ export type FieldDefinition = {
 
     /** When true the field stays editable even in view mode or when forcedReadOnly is set. */
     interactive?: boolean
+
+    readOnlyInModes?: Mode[]
 
     validation?: ValidationConfig
 
@@ -257,6 +264,8 @@ export type OperationConfig = {
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     /** Override the request URL. Receives baseUrl and (for update/delete) the identifier. */
     buildUrl?: (baseUrl: string, identifier?: string) => string;
+    /** Transform the mapped payload before it is sent. */
+    buildBody?: (payload: unknown, identifier?: string) => unknown;
 };
 
 type EntityApi<TCtx = any> = {

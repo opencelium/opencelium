@@ -9,7 +9,9 @@
         "message": "Ein Invoker mit diesem Dateinamen existiert bereits. Er wird ersetzt. Sind Sie sicher?"
       },
       "success": "Invoker erfolgreich hochgeladen: {{name}}",
-      "error": "Hochladen der Invoker-Datei fehlgeschlagen."
+      "error": "Hochladen der Invoker-Datei fehlgeschlagen.",
+      "invalidType": "Invoker-Dateien müssen das .xml-Format verwenden.",
+      "tooLarge": "Die Invoker-Datei darf 1 GB nicht überschreiten."
     },
     "download": {
       "success": "Invoker heruntergeladen: {{name}}",
@@ -23,7 +25,8 @@
         "name_already_exists": "Ein Invoker mit diesem Namen existiert bereits",
         "invalid_characters": "Nur Buchstaben, Ziffern, Leerzeichen, Bindestriche, Unterstriche, Klammern und Punkte verwenden",
         "invalid_period": "Ein Punkt darf nicht am Anfang oder Ende stehen; aufeinanderfolgende Punkte sind nicht erlaubt",
-        "max_length": "Der Name darf höchstens 200 Zeichen lang sein"
+        "max_length": "Der Name darf höchstens 200 Zeichen lang sein",
+        "meaningful": "Der Name muss mindestens einen Buchstaben oder eine Ziffer enthalten"
       }
     },
     "description": {
@@ -56,7 +59,8 @@
       "add": "Feld hinzufügen",
       "empty": "Keine erforderlichen Datenfelder.",
       "errors": {
-        "required": "Mindestens ein erforderliches Datenfeld muss definiert werden"
+        "required": "Mindestens ein erforderliches Datenfeld muss definiert werden",
+        "meaningfulName": "Jeder Feldname muss mindestens einen Buchstaben oder eine Ziffer enthalten"
       }
     },
     "operations": {
@@ -83,6 +87,8 @@
         "nameRequired": "Operationsname ist erforderlich",
         "endpointRequired": "Endpunkt ist erforderlich",
         "incompleteOperations": "Alle Operationen müssen einen Namen und einen Endpunkt haben",
+        "meaningfulValues": "Operationsnamen und Endpunkte müssen mindestens einen Buchstaben oder eine Ziffer enthalten",
+        "bodyTypeMismatch": "Der JSON-Inhalt muss dem ausgewählten Typ (Objekt oder Array) entsprechen",
         "noTestOperation": "Mindestens eine Operation muss den Verbindungstest aktiviert haben",
         "invalidJson": "Ungültiges JSON"
       }
@@ -109,6 +115,11 @@
       "view": {
         "header": "Invoker-Details",
         "subheader": "Invoker-Konfiguration anzeigen."
+      },
+      "update": {
+        "header": "Invoker bearbeiten",
+        "subheader": "Invoker-Konfiguration aktualisieren.",
+        "successMessage": "Invoker erfolgreich aktualisiert."
       }
     },
     "recommendations": {

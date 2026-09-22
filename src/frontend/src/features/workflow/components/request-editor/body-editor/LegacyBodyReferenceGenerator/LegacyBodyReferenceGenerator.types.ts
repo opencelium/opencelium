@@ -5,6 +5,14 @@ export type LegacyBodyReferenceGeneratorProps = {
 	currentMethod: MethodWithId;
 	onApply: (reference: string) => void;
 	showWebhookOption?: boolean;
+	/**
+	 * Move focus to the method picker as soon as this appears. For a generator that a
+	 * button reveals — the endpoint editor's "Insert Reference" — where the click that
+	 * opened it should land the caret in the first thing to fill in. Left off for the
+	 * body editor, which renders generators inline and would otherwise have several
+	 * of them competing for focus on mount.
+	 */
+	autoFocus?: boolean;
 	/** Preselects the method to read from, and re-selects it whenever it changes
 	 *  — for a host that has already asked which method it is (the delete
 	 *  dialog's "read them all from one method"), so the question is not put a

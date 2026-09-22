@@ -20,6 +20,8 @@ import {userApi} from "@entities/user/api/userApi";
 import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
+import {connectorRecommendations} from "@entities/connector/connector.recommendations";
+import {readPreselectedInvoker} from "@entities/connector/lib/connectorCreateLink";
 
 const baseKey = 'connector';
 
@@ -246,6 +248,12 @@ export const connectorDefinition: EntityDefinition = {
             validation: {
                 required: true,
                 max: 255,
+                custom: [
+                    {
+                        validate: (value: unknown) => !/[<>]/.test(String(value ?? '')),
+                        message: `${baseKey}.fields.title.errors.markup_not_allowed`,
+                    },
+                ],
                 remote: {
                     url: `/connector/exists/:title`,
                     method: 'GET',
@@ -293,6 +301,9 @@ export const connectorDefinition: EntityDefinition = {
         {
             name: 'invoker',
             type: 'string',
+            // Lets callers deep-link straight to a connector for a chosen invoker
+            // (the onboarding tour's connector step does).
+            getDefaultValue: () => readPreselectedInvoker(),
             ui: {
                 component: 'select',
                 props: {
@@ -335,7 +346,17 @@ export const connectorDefinition: EntityDefinition = {
                 }
             },
             validation: {
-                max: 11
+                max: 10,
+                custom: [
+                    {
+                        validate: (value: unknown) => {
+                            const timeout = String(value ?? '')
+                            if (timeout === '') return true
+                            return /^\d+$/.test(timeout) && Number(timeout) <= 2_147_483_647
+                        },
+                        message: `${baseKey}.fields.timeout.errors.invalid`,
+                    },
+                ],
             },
             table: {
                 width: 100,
@@ -529,24 +550,7 @@ export const connectorDefinition: EntityDefinition = {
             }
         },
 
-        recommendations: [
-            {
-                title: `${baseKey}.wizard.recommendations.1`,
-                link: '/connector/create'
-            },
-            {
-                title: `${baseKey}.wizard.recommendations.2`,
-                link: '/workflow/create'
-            },
-            {
-                title: `${baseKey}.wizard.recommendations.3`,
-                link: '/invoker/create'
-            },
-            {
-                title: `${baseKey}.wizard.recommendations.4`,
-                link: '/connector'
-            },
-        ],
+        recommendations: [...connectorRecommendations],
 
         steps: [
             {

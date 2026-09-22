@@ -1,0 +1,73 @@
+/*
+ * Docked beside the tour rather than over it: no mask of its own, and the tooltip
+ * is narrowed and shifted left to match. `--onboarding-side-width` comes from
+ * `html.onboarding-side-open` in onboardingTooltip.css, so one number drives both
+ * halves of the layout; the fallback only matters if the class is ever absent.
+ */
+.onboarding-connector-panel {
+    position: fixed;
+    top: 50%;
+    right: 24px;
+    /* Height follows the form, capped to the viewport — pinning `bottom` as well
+       stretched it to full height and left the wizard floating in empty space.
+       Centred on the same axis as the tour dialog so the two read as a pair. */
+    transform: translateY(-50%);
+    display: flex;
+    width: var(--onboarding-side-width, 620px);
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 48px);
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--color-background-surface);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-lg);
+    font-family: var(--typography-font-family-body);
+}
+
+.onboarding-connector-panel__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--color-border-subtle);
+    padding: 18px 20px;
+}
+
+.onboarding-connector-panel__eyebrow {
+    display: block;
+    color: var(--color-action-primary);
+    font-size: var(--typography-font-size-sm);
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.onboarding-connector-panel__header h2 {
+    margin: 6px 0 0;
+    font-size: var(--typography-font-size-lg);
+    font-weight: 600;
+}
+
+.onboarding-connector-panel__body {
+    /* Basis `auto`, never `0%`: a `flex-basis: 0%` body has a hypothetical size of
+       zero, which would collapse the panel to its header and scroll the form inside
+       nothing. Grow fills the slack when the dialog's height floor exceeds the
+       form; shrink + overflow only engage against the viewport cap. */
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 18px 20px;
+}
+
+/* Too narrow to sit beside the tour: take the screen and let the tooltip hide. */
+@media (max-width: 1180px) {
+    .onboarding-connector-panel {
+        right: 12px;
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+        max-height: calc(100vh - 24px);
+    }
+}

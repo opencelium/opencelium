@@ -9,11 +9,13 @@ const AntSteps: StepsComponent =
         current,
         status,
         items,
+        compact,
     }) => {
         const {isTabletOrMobile} = useBreakpoints();
+        const isHorizontal = compact || isTabletOrMobile;
         const steps = useMemo(() => {
-            return items.map(i => ({title: i.header, content: isTabletOrMobile ? undefined : i.subheader, status: i.status, disabled: i.disabled}))
-        }, [items, isTabletOrMobile])
+            return items.map(i => ({title: i.header, content: isHorizontal ? undefined : i.subheader, status: i.status, disabled: i.disabled}))
+        }, [items, isHorizontal])
         const handleChange = items.some(item => item.onClick)
             ? (nextStep: number) => { void items[nextStep]?.onClick?.() }
             : undefined;
@@ -23,7 +25,7 @@ const AntSteps: StepsComponent =
                 current={current}
                 status={status}
                 items={steps}
-                orientation={isTabletOrMobile ? 'horizontal' : 'vertical'}
+                orientation={isHorizontal ? 'horizontal' : 'vertical'}
                 onChange={handleChange}
             />
         )

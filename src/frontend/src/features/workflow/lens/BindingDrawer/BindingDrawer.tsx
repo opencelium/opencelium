@@ -99,7 +99,7 @@ export function BindingDrawer({ selectedKey, nodes, edges, fieldBindings, readOn
 								}}
 								testId='workflow-binding-drawer-open-editor'
 							>
-								{t('bindingLens.openInMethodEditor')}
+								{t('bindingLens.openInBodyEditor')}
 							</Button>
 						</div>
 					</>
