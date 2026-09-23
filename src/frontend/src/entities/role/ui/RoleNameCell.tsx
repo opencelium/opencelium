@@ -1,6 +1,6 @@
 import type {Role} from '@entities/role/model/types'
 import {TruncatedTextCell} from '@shared/table/TruncatedTextCell'
-import {RoleIcon} from './RoleIcon'
+import {EntityAvatar} from '@shared/ui/entity-avatar/EntityAvatar'
 
 type Props = {
     row: Role
@@ -11,7 +11,7 @@ const wrapperStyle = {display: 'inline-flex', alignItems: 'center', gap: 8} as c
 
 export const RoleNameCell = ({row, value}: Props) => (
     <span style={wrapperStyle}>
-        <RoleIcon icon={row.icon} />
+        <EntityAvatar path={row.icon} fallbackIcon="team" />
 
         <TruncatedTextCell value={value} />
     </span>

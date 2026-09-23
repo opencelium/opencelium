@@ -123,3 +123,13 @@ export const hoverCss = `
         background: rgba(35, 40, 48, 0.95) !important;
     }
 `
+
+export const loadingStyle = {
+    position: 'absolute',
+    inset: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'var(--color-background-surface)',
+    opacity: 0.8,
+} as const
