@@ -5,6 +5,7 @@ import { Button } from '@shared/ui/primitives/Button';
 import { Input } from '@shared/ui/primitives/Input';
 import { Typography } from '@shared/ui/primitives/Typography';
 import { AppStoreBoundary } from '../../../../ai/AppStoreBoundary';
+import { useAiAvailability } from '../../../../ai/useAiAvailability';
 import type { Connection, Enhancement } from '../../../../types/connection';
 import { useEnhancementAssistant } from './useEnhancementAssistant';
 import './enhancementAssistant.css';
@@ -22,7 +23,15 @@ function EnhancementAssistantContent({ enhancement, connection, readOnly, onAppl
 	leadingControl }: Props) {
 	const { t } = useI18n('workflow');
 	const assistant = useEnhancementAssistant({ enhancement, connection });
+	const { canWriteScript, isUnavailable } = useAiAvailability();
 	const { isBroken, isLoading, proposal } = assistant;
+	// Unlike the mapping suggester there is no reduced mode to fall back to, so the actions
+	// go down with the model rather than failing on submit. They are gated on the capability,
+	// which is false while the probe is still out, so nothing is sent to a route that may not
+	// be there. The prompt is gated on the settled answer instead: locking the field for the
+	// length of the probe silently swallows whatever was typed into it in that window.
+	const canAct = !readOnly && canWriteScript;
+	const isPromptDisabled = readOnly || isUnavailable;
 
 	const apply = () => {
 		if (!proposal) return;
@@ -32,12 +41,16 @@ function EnhancementAssistantContent({ enhancement, connection, readOnly, onAppl
 
 	return (
 		<div className='wfAssistant' data-testid='workflow-enhancement-assistant'>
+			{isUnavailable && (
+				<Alert type='warning' showIcon message={t('enhancement.assistant.unavailable')} />
+			)}
+
 			{isBroken && !proposal && (
 				<Alert
 					type='warning'
 					showIcon
 					message={t('enhancement.assistant.brokenScript')}
-					action={<Button type='default' loading={isLoading} disabled={readOnly}
+					action={<Button type='default' loading={isLoading} disabled={!canAct}
 						onClick={assistant.repair} testId='workflow-enhancement-assistant-repair'>
 						{t('enhancement.assistant.repair')}
 					</Button>}
@@ -54,12 +67,12 @@ function EnhancementAssistantContent({ enhancement, connection, readOnly, onAppl
 						value={assistant.instruction}
 						onChange={(event) => assistant.setInstruction(event.target.value)}
 						placeholder={t('enhancement.assistant.placeholder')}
-						disabled={readOnly}
+						disabled={isPromptDisabled}
 						testId='workflow-enhancement-assistant-input'
 					/>
 				</div>
 				<Button type='primary' iconLeft='ai' loading={isLoading}
-					disabled={readOnly || !assistant.instruction.trim()}
+					disabled={!canAct || !assistant.instruction.trim()}
 					onClick={assistant.generate}
 					testId='workflow-enhancement-assistant-generate'>
 					{t('enhancement.assistant.generate')}

@@ -7,12 +7,14 @@ import type {
     EnhancementScriptRequest,
     EnhancementScriptResponse,
 } from '@features/workflow/ai/enhancementScript.types'
+import type { AiAvailabilityResponse } from '@features/workflow/ai/aiAvailability.types'
 import { suggestFieldBindings } from './suggestFieldBindings'
 import { generateEnhancementScript } from './generateEnhancementScript'
 
 // Wildcard origin: baseQuery prefixes every relative path with runtimeConfig.apiUrl, so the
 // request leaves as http://<backend>/ai/... while a bare '/ai/...' pattern would only match
 // the dev server's own origin.
+const AVAILABILITY_ROUTE = '*/ai/availability'
 const SUGGESTION_ROUTE = '*/ai/field-binding-suggestions'
 const ENHANCEMENT_SCRIPT_ROUTE = '*/ai/enhancement-script'
 
@@ -20,6 +22,11 @@ const ENHANCEMENT_SCRIPT_ROUTE = '*/ai/enhancement-script'
 const SIMULATED_LATENCY_MS = 900
 
 export const aiHandlers = [
+    // Reports available: the mock answers both routes itself, so from the UI's point of
+    // view a model is behind them. Nothing here should render its degraded state.
+    http.get(AVAILABILITY_ROUTE, () =>
+        HttpResponse.json<AiAvailabilityResponse>({ available: true, provider: 'mock' })),
+
     http.post(SUGGESTION_ROUTE, async ({ request }) => {
         const body = (await request.json()) as FieldBindingSuggestionRequest
         await delay(SIMULATED_LATENCY_MS)

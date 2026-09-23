@@ -28,6 +28,16 @@ const connection = {
 	toConnector: null, ui: {},
 } as unknown as Connection;
 
+/**
+ * The assistant's controls stay inert until /ai/availability answers, so a click issued in
+ * that window is dropped. Only the first render of the session waits — the availability
+ * query is cached from then on — which would otherwise make these tests order-dependent.
+ */
+const clickWhenReady = async (testId: string) => {
+	await waitFor(() => expect(screen.getByTestId(testId)).toBeEnabled());
+	await userEvent.click(screen.getByTestId(testId));
+};
+
 /** The editors' own per-modal store: connection reducer only, no RTK Query middleware. */
 const renderInLegacyStore = (ui: ReactNode) =>
 	render(
@@ -48,7 +58,7 @@ describe('EnhancementAssistant', () => {
 
 		await userEvent.type(screen.getByTestId('workflow-enhancement-assistant-input'),
 			'join first and last name');
-		await userEvent.click(screen.getByTestId('workflow-enhancement-assistant-generate'));
+		await clickWhenReady('workflow-enhancement-assistant-generate');
 
 		await waitFor(() => expect(
 			screen.getByTestId('workflow-enhancement-assistant-proposal')).toBeVisible(),
@@ -69,7 +79,7 @@ describe('EnhancementAssistant', () => {
 			onApplyScript={onApplyScript} />);
 
 		await userEvent.type(screen.getByTestId('workflow-enhancement-assistant-input'), 'trim it');
-		await userEvent.click(screen.getByTestId('workflow-enhancement-assistant-generate'));
+		await clickWhenReady('workflow-enhancement-assistant-generate');
 		await waitFor(() => expect(
 			screen.getByTestId('workflow-enhancement-assistant-proposal')).toBeVisible(),
 		{ timeout: 5000 });
@@ -95,7 +105,7 @@ describe('EnhancementAssistant', () => {
 				{ VAR_0: '#AABBCC.(response).body.$.name' })}
 			onApplyScript={onApplyScript} />);
 
-		await userEvent.click(screen.getByTestId('workflow-enhancement-assistant-repair'));
+		await clickWhenReady('workflow-enhancement-assistant-repair');
 		await waitFor(() => expect(
 			screen.getByText('RESULT_VAR = VAR_0.trim()')).toBeVisible(), { timeout: 5000 });
 

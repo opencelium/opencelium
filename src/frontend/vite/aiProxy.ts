@@ -180,13 +180,20 @@ export function aiProxy(): Plugin {
 			// export, because vitest.config.ts merges it and mergeConfig cannot merge a
 			// callback. The '' prefix loads un-prefixed vars, which VITE_ ones never are.
 			const provider = resolveProvider(loadEnv(server.config.mode, server.config.root, ''))
-			if (!provider) {
-				server.config.logger.info(
-					'[ai-proxy] no GEMINI_API_KEY or ANTHROPIC_API_KEY — leaving /ai/* to the MSW mock',
-				)
-				return
-			}
-			server.config.logger.info(`[ai-proxy] /ai/* → ${provider.label}`)
+			server.config.logger.info(provider
+				? `[ai-proxy] /ai/* → ${provider.label}`
+				: '[ai-proxy] no GEMINI_API_KEY or ANTHROPIC_API_KEY — mapping suggestions will'
+					+ ' come from the local tiers only and the script assistant is unavailable')
+
+			// Mounted whether or not a model is configured, because "this install has no model"
+			// and "this install has no AI routes at all" are different answers and the panels
+			// degrade differently for each. Left unmounted, both look like a 404.
+			server.middlewares.use('/ai/availability', (req, res, next) => {
+				if (req.method !== 'GET') return next()
+				send(res, 200, provider
+					? { available: true, provider: provider.label }
+					: { available: false })
+			})
 
 			server.middlewares.use('/ai/field-binding-suggestions', route(async (body) => {
 				const payload = body as MappingPayload
@@ -199,8 +206,11 @@ export function aiProxy(): Plugin {
 				const claimed = new Set(settled.map((suggestion) => suggestion.targetPath))
 				const open = payload.target.fields.filter((field) => !claimed.has(field.path))
 
-				if (open.length === 0) {
-					console.info(`[ai-proxy] ${settled.length} settled without a model call`)
+				// The local tiers are the reason this route still answers without a model: a
+				// name match and a recorded precedent are computed here, not asked for.
+				if (!provider || open.length === 0) {
+					console.info(`[ai-proxy] ${settled.length} settled without a model call`
+						+ (provider ? '' : ' (no model configured)'))
 					return { suggestions: settled }
 				}
 
@@ -233,6 +243,17 @@ export function aiProxy(): Plugin {
 					],
 				}
 			}))
+
+			// Writing a script has no non-model path — there is nothing to fall back to — so
+			// without a provider the route answers 503 rather than going unmounted. The panel
+			// disables itself off /ai/availability; this is the backstop if it is asked anyway.
+			if (!provider) {
+				server.middlewares.use('/ai/enhancement-script', (req, res, next) => {
+					if (req.method !== 'POST') return next()
+					send(res, 503, { message: 'No AI model is configured on this server.' })
+				})
+				return
+			}
 
 			server.middlewares.use('/ai/enhancement-script', route(async (body) => {
 				const payload = body as ScriptPayload
