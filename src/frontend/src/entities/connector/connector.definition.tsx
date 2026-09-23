@@ -22,6 +22,7 @@ import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, up
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 import {connectorRecommendations} from "@entities/connector/connector.recommendations";
 import {readPreselectedInvoker} from "@entities/connector/lib/connectorCreateLink";
+import {IMAGE_UPLOAD_ACCEPT} from "@shared/utils/imageUploadRules";
 
 const baseKey = 'connector';
 
@@ -447,7 +448,7 @@ export const connectorDefinition: EntityDefinition = {
                 component: 'file-dropzone',
                 props: {
                     multiple: false,
-                    accept: "image/png, image/jpeg",
+                    accept: IMAGE_UPLOAD_ACCEPT,
                     labelKey: `${baseKey}.fields.icon.label`,
                 }
             },

@@ -7,8 +7,8 @@ import {Tooltip} from '@shared/ui/primitives/Tooltip'
 import {useConfirm} from '@shared/ui/confirm/ConfirmDialogContext'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
 import {ImageCropDialog} from '@shared/ui/image-crop/ImageCropDialog'
-
-const ACCEPT = 'image/png,image/jpeg'
+import {notifyError} from '@shared/ui/feedback/notifyError'
+import {IMAGE_UPLOAD_ACCEPT, validateImageUpload} from '@shared/utils/imageUploadRules'
 
 const isFileValue = (value: unknown): value is File =>
     typeof File !== 'undefined' && value instanceof File
@@ -139,9 +139,15 @@ export const ConnectorWizardImage = ({mode}: Props) => {
 
     const handlePick = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0] ?? null
-        if (file) setCropFile(file)
         // Reset so picking the same file again still fires onChange.
         event.target.value = ''
+        if (!file) return
+        const rejection = validateImageUpload(file)
+        if (rejection) {
+            notifyError(t(`connector.fields.icon.${rejection}`))
+            return
+        }
+        setCropFile(file)
     }
 
     const openPicker = () => inputRef.current?.click()
@@ -222,7 +228,7 @@ export const ConnectorWizardImage = ({mode}: Props) => {
                 <input
                     ref={inputRef}
                     type="file"
-                    accept={ACCEPT}
+                    accept={IMAGE_UPLOAD_ACCEPT}
                     style={{display: 'none'}}
                     onChange={handlePick}
                     data-testid="connector-icon-input"

@@ -10,14 +10,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 
-/** The backend's own cap; rejected there with 400, checked here to say so without a round trip. */
-const MAX_LOGO_BYTES = 5 * 1024 * 1024
-// SVG is deliberately not accepted by the backend, so don't offer it in the file dialog.
-export const LOGO_ACCEPT = 'image/png,image/jpeg'
-const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg']
-
-const hasAllowedExtension = (name: string) =>
-    ALLOWED_EXTENSIONS.includes(name.split('.').pop()?.toLowerCase() ?? '')
+import { validateImageUpload } from '@shared/utils/imageUploadRules'
 
 /**
  * The admin half of the logo editor: uploads the file to `app_logo` so every user gets it
@@ -36,13 +29,9 @@ export function useSystemLogoAdmin() {
     const clearLogo = useAppLogoStore(state => state.clearLogo)
 
     const upload = async (file: File) => {
-        // The extension is what the backend validates on, not the browser's MIME guess.
-        if (!hasAllowedExtension(file.name)) {
-            notifyError(tEntities('ui.systemLogo.invalidType'))
-            return
-        }
-        if (file.size > MAX_LOGO_BYTES) {
-            notifyError(tEntities('ui.systemLogo.tooLarge'))
+        const rejection = validateImageUpload(file)
+        if (rejection) {
+            notifyError(tEntities(`ui.systemLogo.${rejection}`))
             return
         }
         try {

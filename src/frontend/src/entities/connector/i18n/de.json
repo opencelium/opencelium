@@ -45,7 +45,7 @@
     "icon": {
       "label": "Symbol",
       "uploadButton": "Logo hochladen",
-      "hint": "PNG oder JPG",
+      "hint": "PNG oder JPG, maximal 10 MB",
       "replace": "Symbol ersetzen",
       "delete": "Symbol löschen",
       "crop": {
@@ -58,7 +58,9 @@
       "confirmDelete": {
         "title": "Logo entfernen?",
         "message": "Dies kann nicht widerrufen werden."
-      }
+      },
+      "invalidType": "Das Logo muss eine PNG- oder JPG-Datei sein (.png, .jpg, .jpeg)",
+      "tooLarge": "Das Logo muss kleiner als 10 MB sein"
     },
     "url": {
       "label": "Url"

@@ -59,7 +59,9 @@
     },
     "extraOps": {
       "button": "Extra Ops",
-      "success": "Extra operations imported."
+      "success": "Extra operations imported.",
+      "invalidType": "Select an extra operations file in .txt format.",
+      "tooLarge": "The extra operations file must not be larger than 10 MB."
     },
     "deleteLicense": {
       "button": "Delete License",
