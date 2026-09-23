@@ -21,8 +21,25 @@
     "description": {
       "label": "Beschreibung"
     },
-    "groupIcon": {
-      "label": "Bild"
+    "icon": {
+      "label": "Symbol",
+      "uploadButton": "Symbol hochladen",
+      "hint": "PNG oder JPG, maximal 10 MB",
+      "replace": "Symbol ersetzen",
+      "delete": "Symbol löschen",
+      "crop": {
+        "title": "Gruppensymbol zuschneiden",
+        "zoom": "Zoom",
+        "cancel": "Abbrechen",
+        "apply": "Zuschnitt anwenden",
+        "instruction": "Verschieben Sie das Quadrat, um den Symbolbereich auszuwählen"
+      },
+      "confirmDelete": {
+        "title": "Symbol entfernen?",
+        "message": "Dies kann nicht widerrufen werden."
+      },
+      "invalidType": "Das Symbol muss eine PNG- oder JPG-Datei sein (.png, .jpg, .jpeg)",
+      "tooLarge": "Das Symbol muss kleiner als 10 MB sein"
     },
     "components": {
       "label": "Komponenten"
@@ -78,6 +95,14 @@
     "delete": {
       "byName": "Rolle mit dem Namen „{{name}}“ löschen?",
       "byId": "Rolle mit der ID „{{id}}“ löschen?"
+    }
+  },
+  "lifecycle": {
+    "uploadIcon": {
+      "failed": "Gruppe gespeichert, aber das Hochladen des Symbols ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
+    },
+    "deleteIcon": {
+      "failed": "Gruppe gespeichert, aber das Entfernen des Symbols ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
     }
   }
 }

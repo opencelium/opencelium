@@ -4,6 +4,7 @@ export type IconName =
     | 'check'
     | 'close'
     | 'user'
+    | 'team'
     | 'delete'
     | 'edit'
     | 'info'
