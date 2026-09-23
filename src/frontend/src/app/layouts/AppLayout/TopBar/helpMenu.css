@@ -20,3 +20,9 @@
     gap: 8px;
     text-align: left;
 }
+
+/* Both kits give a divider generous page-level margins; inside a compact menu
+   that reads as a gap rather than a separator. */
+.topbar-help-menu .topbar-help-menu__divider > * {
+    margin: 4px 0;
+}

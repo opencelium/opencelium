@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Popover } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@shared/ui/primitives/Button'
+import { Divider } from '@shared/ui/primitives/Divider'
 import { Icon } from '@shared/ui/primitives/Icon'
 import { IconButton } from '@shared/ui/primitives/IconButton'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
@@ -68,18 +69,6 @@ export function HelpMenu() {
             styles={{ container: { padding: 4 } }}
             content={
                 <div className="topbar-help-menu">
-                    <MenuEntry
-                        icon="docs"
-                        label={tCommon('topbar.docs')}
-                        onClick={openDocs}
-                        testId="topbar-docs"
-                    />
-                    <MenuEntry
-                        icon="portal"
-                        label={tCommon('topbar.servicePortal')}
-                        onClick={openServicePortal}
-                        testId="topbar-service-portal"
-                    />
                     {/* Both tours are admin-only, so for anyone else these entries
                         would open menu items that quietly do nothing. */}
                     {isAdmin && (
@@ -96,8 +85,23 @@ export function HelpMenu() {
                                 onClick={startDashboardTour}
                                 testId="topbar-start-dashboard-tour"
                             />
+                            <div className="topbar-help-menu__divider">
+                                <Divider />
+                            </div>
                         </>
                     )}
+                    <MenuEntry
+                        icon="docs"
+                        label={tCommon('topbar.docs')}
+                        onClick={openDocs}
+                        testId="topbar-docs"
+                    />
+                    <MenuEntry
+                        icon="portal"
+                        label={tCommon('topbar.servicePortal')}
+                        onClick={openServicePortal}
+                        testId="topbar-service-portal"
+                    />
                 </div>
             }
         >
