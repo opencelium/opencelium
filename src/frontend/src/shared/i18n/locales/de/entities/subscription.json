@@ -59,7 +59,9 @@
     },
     "extraOps": {
       "button": "Extra Ops",
-      "success": "Zusätzliche Aufrufe wurden importiert."
+      "success": "Zusätzliche Aufrufe wurden importiert.",
+      "invalidType": "Wählen Sie eine Datei für zusätzliche Aufrufe im .txt-Format aus.",
+      "tooLarge": "Die Datei für zusätzliche Aufrufe darf nicht größer als 10 MB sein."
     },
     "deleteLicense": {
       "button": "Lizenz löschen",

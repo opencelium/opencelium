@@ -30,7 +30,7 @@
     "modifiedBy": {
       "label": "Modified By"
     },
-    "requestData":  {
+    "requestData": {
       "error": {
         "required": "Required field"
       }
@@ -45,7 +45,7 @@
     "icon": {
       "label": "Icon",
       "uploadButton": "Upload logo",
-      "hint": "PNG or JPG",
+      "hint": "PNG or JPG, up to 10 MB",
       "replace": "Replace icon",
       "delete": "Delete icon",
       "crop": {
@@ -58,7 +58,9 @@
       "confirmDelete": {
         "title": "Remove logo?",
         "message": "This can't be undone."
-      }
+      },
+      "invalidType": "The logo must be a PNG or JPG file (.png, .jpg, .jpeg)",
+      "tooLarge": "The logo must be smaller than 10 MB"
     },
     "url": {
       "label": "Url"
