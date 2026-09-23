@@ -716,7 +716,8 @@
       "generate": "Write script",
       "apply": "Use this script",
       "discard": "Discard",
-      "failed": "The script could not be written. Please try again."
+      "failed": "The script could not be written. Please try again.",
+      "unavailable": "Writing a script needs an AI model, which is not available right now."
     }
   },
   "description": {
@@ -864,6 +865,8 @@
     "noFields": "This request has no body fields to map into.",
     "noOpenFields": "Every field of this request already has a reference.",
     "failed": "Mapping suggestions could not be loaded.",
+    "noModel": "Name matches and mappings used before are still proposed; semantic matches are not because AI model is not available.",
+    "unavailable": "Mapping suggestions are unavailable: the AI service could not be reached.",
     "origin": {
       "precedent": "Used before",
       "deterministic": "Name match",

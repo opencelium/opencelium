@@ -4,6 +4,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import type { CollapseItem } from '@shared/ui/primitives/Collapse/Collapse.types';
 import { Empty } from '@shared/ui/primitives/Empty';
+import { Icon } from '@shared/ui/primitives/Icon';
 import { useRequestObjectEditor } from '../useRequestObjectEditor';
 import ReferenceEnhancement from '../../enhancement/Enhancement/Enhancement';
 import { ReferenceInfo } from '../../reference-info/ReferenceInfo/ReferenceInfo';
@@ -28,7 +29,10 @@ export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 		// Body only: header mapping is a flat key/value space with its own rules, and the
 		// suggester's schema walk has nothing to work with there.
 		...(messageProperty === 'body' ? [{ key: 'suggestions',
-			label: t('suggestions.title'),
+			label: <span className='bodyLegacyPanelLabel'>
+				{t('suggestions.title')}
+				<Icon name='ai' size={14} color='primary' />
+			</span>,
 			content: <SuggestedBindings source={source} editor={editor} readOnly={readOnly} /> }] : []),
 		{ key: 'referenceInfo', label: t('referenceInfo.legacyTitle'),
 			content: hasReferences ? <ReferenceInfo messageProperty={messageProperty} data={{}}

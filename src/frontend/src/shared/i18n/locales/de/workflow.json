@@ -716,7 +716,8 @@
       "generate": "Skript schreiben",
       "apply": "Dieses Skript übernehmen",
       "discard": "Verwerfen",
-      "failed": "Das Skript konnte nicht erstellt werden. Bitte erneut versuchen."
+      "failed": "Das Skript konnte nicht erstellt werden. Bitte erneut versuchen.",
+      "unavailable": "Zum Schreiben eines Skripts wird ein KI-Modell benötigt, das derzeit nicht verfügbar ist."
     }
   },
   "description": {
@@ -864,6 +865,8 @@
     "noFields": "Dieser Request hat keine Body-Felder, in die zugeordnet werden könnte.",
     "noOpenFields": "Alle Felder dieses Requests haben bereits eine Referenz.",
     "failed": "Die Zuordnungsvorschläge konnten nicht geladen werden.",
+    "noModel": "Namenstreffer und bereits verwendete Zuordnungen werden weiterhin vorgeschlagen; semantische Treffer nicht, da kein KI-Modell verfügbar ist.",
+    "unavailable": "Zuordnungsvorschläge sind nicht verfügbar: Der KI-Dienst ist nicht erreichbar.",
     "origin": {
       "precedent": "Bereits verwendet",
       "deterministic": "Namenstreffer",

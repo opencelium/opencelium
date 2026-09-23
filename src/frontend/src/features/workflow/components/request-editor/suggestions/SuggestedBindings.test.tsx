@@ -52,6 +52,16 @@ const connection = {
 	toConnector: null, ui: {},
 } as unknown as Connection;
 
+/**
+ * The generate button stays inert until /ai/availability answers, so a click issued in that
+ * window is dropped. Only the first render of the session actually waits — the availability
+ * query is cached after that — which would otherwise make these tests order-dependent.
+ */
+const clickWhenReady = async (testId: string) => {
+	await waitFor(() => expect(screen.getByTestId(testId)).toBeEnabled());
+	await userEvent.click(screen.getByTestId(testId));
+};
+
 /** The dialog's own per-modal store: only a connection reducer, no RTK Query middleware. */
 const renderInLegacyStore = (ui: ReactNode) =>
 	render(
@@ -68,7 +78,7 @@ describe('SuggestedBindings', () => {
 		renderInLegacyStore(<SuggestedBindings source={source}
 			editor={{ connection, method: consumer, syncSource } as never} />);
 
-		await userEvent.click(screen.getByTestId('workflow-suggestions-generate'));
+		await clickWhenReady('workflow-suggestions-generate');
 
 		// A suggestion row only appears if the request actually left — which it does not
 		// when an RTK Query hook is dispatched into a store that has no api reducer.
@@ -84,7 +94,7 @@ describe('SuggestedBindings', () => {
 		renderInLegacyStore(<SuggestedBindings source={source}
 			editor={{ connection, method: consumer, syncSource } as never} />);
 
-		await userEvent.click(screen.getByTestId('workflow-suggestions-generate'));
+		await clickWhenReady('workflow-suggestions-generate');
 		await waitFor(() => expect(screen.getByTestId('workflow-suggestion-apply-$.role')).toBeVisible(),
 			{ timeout: 5000 });
 		await userEvent.click(screen.getByTestId('workflow-suggestion-apply-$.role'));
