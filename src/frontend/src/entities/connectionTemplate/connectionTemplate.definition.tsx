@@ -224,7 +224,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
 
                         ctx.setLoading(true)
                         try {
-                            const uploaded = await uploadConnectionTemplate(file, () =>
+                            const result = await uploadConnectionTemplate(file, () =>
                                 ctx.confirm({
                                     title: tEntities(
                                         'connection-template.list.upload.confirmReplace.title',
@@ -234,13 +234,42 @@ export const connectionTemplateDefinition: EntityDefinition = {
                                     ),
                                 }),
                             )
-                            if (uploaded) {
-                                message.success(
-                                    tEntities('connection-template.list.upload.success', {
-                                        name: file.name,
-                                    }),
-                                )
-                                ctx.setInputValue('')
+                            switch (result.status) {
+                                case 'uploaded':
+                                    message.success(
+                                        tEntities('connection-template.list.upload.success', {
+                                            name: file.name,
+                                        }),
+                                    )
+                                    ctx.setInputValue('')
+                                    break
+                                case 'uploadedArchive':
+                                    message.success(
+                                        tEntities('connection-template.list.upload.successArchive', {
+                                            name: file.name,
+                                            count: result.ids.length,
+                                        }),
+                                    )
+                                    ctx.setInputValue('')
+                                    break
+                                case 'emptyArchive':
+                                    notifyError(tEntities('connection-template.list.upload.emptyArchive'))
+                                    break
+                                case 'cancelled':
+                                    break
+                                case 'invalidType':
+                                    notifyError(tEntities('connection-template.list.upload.invalidType'))
+                                    break
+                                case 'tooLarge':
+                                    notifyError(tEntities('connection-template.list.upload.tooLarge'))
+                                    break
+                                case 'archiveTooLarge':
+                                    notifyError(tEntities('connection-template.list.upload.archiveTooLarge'))
+                                    break
+                                default: {
+                                    const _exhaustive: never = result
+                                    return _exhaustive
+                                }
                             }
                         } catch (err) {
                             console.error(err)

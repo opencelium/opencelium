@@ -3,7 +3,7 @@ import { message } from 'antd'
 import { Button } from '@shared/ui/primitives/Button'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import { uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
+import { INVOKER_FILE_ACCEPT, uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 
 export type InvokerUploadButtonHandle = {
@@ -36,6 +36,15 @@ export const InvokerUploadButton = forwardRef<InvokerUploadButtonHandle, Invoker
                     message.success(tEntities('invoker.list.upload.success', { name: file.name }))
                     onUploadResult?.('success', file, result)
                     break
+                case 'uploadedArchive':
+                    message.success(tEntities('invoker.list.upload.successArchive',
+                        { name: file.name, count: result.ids.length }))
+                    onUploadResult?.('success', file)
+                    break
+                case 'emptyArchive':
+                    notifyError(tEntities('invoker.list.upload.emptyArchive'))
+                    onUploadResult?.('error', file)
+                    break
                 case 'cancelled':
                     onUploadResult?.('cancelled', file)
                     break
@@ -45,6 +54,10 @@ export const InvokerUploadButton = forwardRef<InvokerUploadButtonHandle, Invoker
                     break
                 case 'tooLarge':
                     notifyError(tEntities('invoker.list.upload.tooLarge'))
+                    onUploadResult?.('error', file)
+                    break
+                case 'archiveTooLarge':
+                    notifyError(tEntities('invoker.list.upload.archiveTooLarge'))
                     onUploadResult?.('error', file)
                     break
                 default: {
@@ -75,7 +88,7 @@ export const InvokerUploadButton = forwardRef<InvokerUploadButtonHandle, Invoker
             <input
                 ref={inputRef}
                 type="file"
-                accept=".xml,text/xml,application/xml"
+                accept={INVOKER_FILE_ACCEPT}
                 style={{ display: 'none' }}
                 onChange={handleFileChosen}
             />
