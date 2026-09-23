@@ -1,113 +1,79 @@
+import {useEffect, useMemo} from 'react'
+import {useFormContext, useWatch} from 'react-hook-form'
 import type {Mode} from '@/engine/entity/EntityDefinition'
-import {Icon} from '@shared/ui/primitives/Icon'
-import {Tooltip} from '@shared/ui/primitives/Tooltip'
-import {ImageCropDialog} from '@shared/ui/image-crop/ImageCropDialog'
-import {IMAGE_UPLOAD_ACCEPT} from '@shared/utils/imageUploadRules'
-import {useWizardImageEditor} from './useWizardImageEditor'
-import * as s from './WizardImageEditor.styles'
+import {useConfirm} from '@shared/ui/confirm/ConfirmDialogContext'
+import {useI18n} from '@shared/i18n/hooks/useI18n'
+import {ImageTileEditor} from './ImageTileEditor'
+import {wrapperStyle} from './WizardImageEditor.styles'
 
 type Props = {
     mode?: Mode
     /** Form field holding the image: File = upload/replace, null = delete, string = unchanged. */
     fieldName?: string
-    /**
-     * Entities-namespace prefix for the copy. Expects `uploadButton`, `hint`, `replace`,
-     * `delete`, `invalidType`, `tooLarge`, `confirmDelete.{title,message}` and
-     * `crop.{title,zoom,cancel,apply,instruction}` under it.
-     */
+    /** See ImageTileEditor; `confirmDelete.{title,message}` is also needed when `canDelete`. */
     i18nPrefix: string
     resolveUrl: (path: string) => string | null
     testIdPrefix: string
+    canDelete?: boolean
+}
+
+const isFileValue = (value: unknown): value is File =>
+    typeof File !== 'undefined' && value instanceof File
+
+const displayNameFor = (selected: unknown): string => {
+    if (isFileValue(selected)) return selected.name
+    if (typeof selected === 'string' && selected.trim()) {
+        return selected.split('/').pop() || selected
+    }
+    return ''
 }
 
 /**
- * The wizard's top-right image as an editor: pick (with crop), replace, or delete an
- * entity's image. Plugged in through `wizard.renderImage`.
+ * The wizard's top-right image as an editor, plugged in through `wizard.renderImage`.
+ * It only stages the change in the form field; the entity's after-save actions turn
+ * it into the actual upload/delete requests.
  */
-export const WizardImageEditor = ({mode, fieldName = 'icon', i18nPrefix, resolveUrl, testIdPrefix}: Props) => {
-    const {
-        t, inputRef, cropFile, src, fileName, openPicker, cancelCrop,
-        handlePick, handleCropConfirm, handleDelete,
-    } = useWizardImageEditor({fieldName, i18nPrefix, resolveUrl})
-    const isInteractive = mode !== 'view'
+export const WizardImageEditor = ({
+    mode, fieldName = 'icon', i18nPrefix, resolveUrl, testIdPrefix, canDelete = true,
+}: Props) => {
+    const {setValue} = useFormContext()
+    const {t} = useI18n('entities')
+    const confirm = useConfirm()
+
+    const fieldValue = useWatch({name: fieldName})
+    const selected = Array.isArray(fieldValue) ? fieldValue[0] : fieldValue
+
+    const objectUrl = useMemo(
+        () => (isFileValue(selected) ? URL.createObjectURL(selected) : null),
+        [selected],
+    )
+    useEffect(() => {
+        if (!objectUrl) return
+        return () => URL.revokeObjectURL(objectUrl)
+    }, [objectUrl])
+
+    const storedPath = typeof selected === 'string' && selected.trim() ? selected : null
+
+    const handleDelete = async () => {
+        const ok = await confirm({
+            title: t(`${i18nPrefix}.confirmDelete.title`),
+            message: t(`${i18nPrefix}.confirmDelete.message`),
+        })
+        if (!ok) return
+        setValue(fieldName, null, {shouldDirty: true})
+    }
 
     return (
-        <div style={s.wrapperStyle}>
-            {src ? (
-                <div className="oc-wizard-image-tile" style={{...s.tileStyle, ...s.filledTileStyle}}>
-                    <img className="oc-wizard-image-image" src={src} alt={fileName} style={s.imgStyle} />
-
-                    {fileName && <span style={s.filenameStyle}>{fileName}</span>}
-
-                    {isInteractive && (
-                        <div className="oc-wizard-image-overlay" style={s.overlayStyle}>
-                            <Tooltip content={t(`${i18nPrefix}.replace`)}>
-                                <button
-                                    type="button"
-                                    className="oc-wizard-image-action"
-                                    style={s.actionChipStyle}
-                                    onClick={openPicker}
-                                    data-testid={`${testIdPrefix}-upload`}
-                                >
-                                    <Icon name="upload" size={18} color="inherit" />
-                                </button>
-                            </Tooltip>
-                            <Tooltip content={t(`${i18nPrefix}.delete`)}>
-                                <button
-                                    type="button"
-                                    className="oc-wizard-image-action"
-                                    style={s.actionChipDangerStyle}
-                                    onClick={handleDelete}
-                                    data-testid={`${testIdPrefix}-delete`}
-                                >
-                                    <Icon name="delete" size={18} color="inherit" />
-                                </button>
-                            </Tooltip>
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <button
-                    type="button"
-                    className="oc-wizard-image-tile oc-wizard-image-tile--empty"
-                    style={{...s.tileStyle, ...s.emptyTileStyle, cursor: isInteractive ? 'pointer' : 'default'}}
-                    onClick={isInteractive ? openPicker : undefined}
-                    disabled={!isInteractive}
-                    data-testid={`${testIdPrefix}-upload`}
-                >
-                    <div style={s.emptyContentStyle}>
-                        <Icon name="upload" size={20} color="primary" />
-                        <span style={s.emptyLabelStyle}>{t(`${i18nPrefix}.uploadButton`)}</span>
-                        <span style={s.emptyHintStyle}>{t(`${i18nPrefix}.hint`)}</span>
-                    </div>
-                </button>
-            )}
-
-            {isInteractive && (
-                <input
-                    ref={inputRef}
-                    type="file"
-                    accept={IMAGE_UPLOAD_ACCEPT}
-                    style={{display: 'none'}}
-                    onChange={handlePick}
-                    data-testid={`${testIdPrefix}-input`}
-                />
-            )}
-
-            {/* Square: the image is drawn on a disc everywhere it appears. */}
-            <ImageCropDialog
-                key={cropFile ? `${cropFile.name}-${cropFile.lastModified}` : 'closed'}
-                file={cropFile}
-                onCancel={cancelCrop}
-                onConfirm={handleCropConfirm}
-                title={t(`${i18nPrefix}.crop.title`)}
-                zoomLabel={t(`${i18nPrefix}.crop.zoom`)}
-                cancelLabel={t(`${i18nPrefix}.crop.cancel`)}
-                confirmLabel={t(`${i18nPrefix}.crop.apply`)}
-                instruction={t(`${i18nPrefix}.crop.instruction`)}
+        <div style={wrapperStyle}>
+            <ImageTileEditor
+                src={objectUrl ?? (storedPath ? resolveUrl(storedPath) : null)}
+                fileName={displayNameFor(selected)}
+                isInteractive={mode !== 'view'}
+                i18nPrefix={i18nPrefix}
+                testIdPrefix={testIdPrefix}
+                onPicked={file => setValue(fieldName, file, {shouldDirty: true})}
+                onDelete={canDelete ? handleDelete : undefined}
             />
-
-            <style>{s.hoverCss}</style>
         </div>
     )
 }

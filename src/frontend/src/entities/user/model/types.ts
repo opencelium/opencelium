@@ -14,6 +14,7 @@ export type UserDetail = {
   department: string,
   organization: string,
   phoneNumber: string,
+  profilePicture?: string | null,
 }
 
 export type UserGroup = {
@@ -24,4 +25,8 @@ export type UserGroup = {
 export type UserCreateDto = Omit<User, 'id' | 'userGroup'> & {
   userGroup: number,
 }
-export type UserUpdateDto = Partial<UserCreateDto>
+export type UserUpdateDto = Partial<UserCreateDto> & {
+  // The wizard image's pending pick. Kept apart from `userDetail.profilePicture`,
+  // which the backend parses as a stored path, and uploaded by an after-save action.
+  profilePicture?: string | File | null,
+}

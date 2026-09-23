@@ -62,6 +62,21 @@
     },
     "totpEnabled": {
       "label": "2FA"
+    },
+    "profilePicture": {
+      "label": "Profilbild",
+      "uploadButton": "Bild hochladen",
+      "hint": "PNG oder JPG, maximal 10 MB",
+      "replace": "Bild ersetzen",
+      "crop": {
+        "title": "Profilbild zuschneiden",
+        "zoom": "Zoom",
+        "cancel": "Abbrechen",
+        "apply": "Zuschnitt anwenden",
+        "instruction": "Verschieben Sie das Quadrat, um den Bildbereich auszuwählen"
+      },
+      "invalidType": "Das Bild muss eine PNG- oder JPG-Datei sein (.png, .jpg, .jpeg)",
+      "tooLarge": "Das Bild muss kleiner als 10 MB sein"
     }
   },
   "sections": {
@@ -135,6 +150,11 @@
     "bulkEnable": {
       "label": "2FA aktivieren",
       "success": "Zwei-Faktor-Authentifizierung für {{count}} Benutzer aktiviert"
+    }
+  },
+  "lifecycle": {
+    "uploadProfilePicture": {
+      "failed": "Benutzer gespeichert, aber das Hochladen des Profilbilds ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
     }
   }
 }

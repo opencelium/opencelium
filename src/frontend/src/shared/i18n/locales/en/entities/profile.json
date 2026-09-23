@@ -12,10 +12,18 @@
         "mrs": "Mrs"
       }
     },
-    "name": { "label": "Name" },
-    "surname": { "label": "Surname" },
-    "department": { "label": "Department" },
-    "organization": { "label": "Organization" },
+    "name": {
+      "label": "Name"
+    },
+    "surname": {
+      "label": "Surname"
+    },
+    "department": {
+      "label": "Department"
+    },
+    "organization": {
+      "label": "Organization"
+    },
     "phoneNumber": {
       "label": "Phone Number",
       "validation1": "Invalid phone number format"
@@ -24,7 +32,9 @@
       "label": "Email",
       "invalid": "Invalid email format"
     },
-    "username": { "label": "Username" },
+    "username": {
+      "label": "Username"
+    },
     "currentPassword": {
       "label": "Current Password",
       "wrong": "Wrong current password"
@@ -51,7 +61,9 @@
   "messages": {
     "detailsUpdated": "Profile details updated",
     "detailsUpdateFailed": "Profile details could not be saved.",
-    "passwordUpdated": "Password updated. You will be logged out."
+    "passwordUpdated": "Password updated. You will be logged out.",
+    "pictureUpdated": "Profile picture updated",
+    "pictureUpdateFailed": "The profile picture could not be uploaded."
   },
   "validation": {
     "required": "Required field",
