@@ -7,7 +7,7 @@ import { Loading } from '@shared/ui/primitives/Loading/Loading'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { notifyError } from '@shared/ui/feedback/notifyError'
-import { uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
+import { INVOKER_FILE_ACCEPT, uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
 import { useDownloadInvokersFromRepositoryMutation } from '@entities/invoker/api/invokerApi'
 import {
     ONLINE_FEATURE_REASON_KEY,
@@ -16,12 +16,15 @@ import {
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import '../onboardingIntro.css'
 
-const INVOKER_ACCEPT = '.xml,text/xml,application/xml'
 const GIT_INVOKER_REPO = 'github.com/opencelium/invoker · branch main'
 /** Lets the success alert read before the tour moves on. */
 const UPLOAD_SUCCESS_ADVANCE_MS = 900
 
-type UploadResult = { fileName: string; methodCount: number; authType?: string; version?: string }
+type UploadResult = { fileName: string } & (
+    | { kind: 'single'; methodCount: number; authType?: string; version?: string }
+    | { kind: 'archive'; invokerCount: number }
+)
+type FailReason = 'invalidType' | 'tooLarge' | 'archiveTooLarge' | 'emptyArchive'
 
 type FirstInvokerProps = {
     onCreateManually: () => void
@@ -36,7 +39,7 @@ export function FirstInvokerContent({ onCreateManually, onUploaded }: FirstInvok
     const [isUploading, setIsUploading] = useState(false)
     const [result, setResult] = useState<UploadResult | null>(null)
     const [failedFile, setFailedFile] = useState<string | null>(null)
-    const [failReason, setFailReason] = useState<'invalidType' | 'tooLarge' | null>(null)
+    const [failReason, setFailReason] = useState<FailReason | null>(null)
     const [downloadFromRepository, { isLoading: isDownloadingFromGit }] = useDownloadInvokersFromRepositoryMutation()
     /**
      * The pull reaches github.com/opencelium/invoker, so it needs a connection — but
@@ -65,18 +68,22 @@ export function FirstInvokerContent({ onCreateManually, onUploaded }: FirstInvok
             switch (uploaded.status) {
                 case 'uploaded':
                     message.success(tEntities('invoker.list.upload.success', { name: file.name }))
-                    setResult({ fileName: file.name, ...uploaded })
+                    setResult({ fileName: file.name, kind: 'single', ...uploaded })
+                    advanceTimerRef.current = window.setTimeout(onUploaded, UPLOAD_SUCCESS_ADVANCE_MS)
+                    break
+                case 'uploadedArchive':
+                    message.success(tEntities('invoker.list.upload.successArchive', { name: file.name, count: uploaded.ids.length }))
+                    setResult({ fileName: file.name, kind: 'archive', invokerCount: uploaded.ids.length })
                     advanceTimerRef.current = window.setTimeout(onUploaded, UPLOAD_SUCCESS_ADVANCE_MS)
                     break
                 case 'cancelled':
                     break
                 case 'invalidType':
-                    setFailedFile(file.name)
-                    setFailReason('invalidType')
-                    break
                 case 'tooLarge':
+                case 'archiveTooLarge':
+                case 'emptyArchive':
                     setFailedFile(file.name)
-                    setFailReason('tooLarge')
+                    setFailReason(uploaded.status)
                     break
                 default: {
                     const _exhaustive: never = uploaded
@@ -120,9 +127,11 @@ export function FirstInvokerContent({ onCreateManually, onUploaded }: FirstInvok
         }
     }
 
-    const resultMeta = result
-        ? [t('content.invoker.methods', { count: result.methodCount }), result.authType, result.version].filter(Boolean).join(' · ')
-        : ''
+    const resultMeta = !result
+        ? ''
+        : result.kind === 'archive'
+            ? t('content.invoker.invokers', { count: result.invokerCount })
+            : [t('content.invoker.methods', { count: result.methodCount }), result.authType, result.version].filter(Boolean).join(' · ')
 
     return (
         <div>
@@ -153,7 +162,7 @@ export function FirstInvokerContent({ onCreateManually, onUploaded }: FirstInvok
                     </div>
                     <div className="onboarding-invoker-upload">
                         <Dropzone
-                            accept={INVOKER_ACCEPT}
+                            accept={INVOKER_FILE_ACCEPT}
                             label={t('content.invoker.drop')}
                             disabled={isUploading}
                             onFiles={files => { if (files[0]) void handleFile(files[0]) }}
@@ -180,13 +189,7 @@ export function FirstInvokerContent({ onCreateManually, onUploaded }: FirstInvok
                         type="error"
                         showIcon
                         message={t('content.invoker.fileError', { name: failedFile })}
-                        description={
-                            failReason === 'tooLarge'
-                                ? t('content.invoker.tooLarge')
-                                : failReason === 'invalidType'
-                                    ? t('content.invoker.invalidType')
-                                    : t('content.invoker.chooseAnother')
-                        }
+                        description={t(failReason ? `content.invoker.${failReason}` : 'content.invoker.chooseAnother')}
                     />
                 )}
                 <section>

@@ -471,6 +471,18 @@ export const invokerDefinition: EntityDefinition = {
                                     )
                                     ctx.setInputValue('')
                                     break
+                                case 'uploadedArchive':
+                                    message.success(
+                                        tEntities('invoker.list.upload.successArchive', {
+                                            name: file.name,
+                                            count: result.ids.length,
+                                        }),
+                                    )
+                                    ctx.setInputValue('')
+                                    break
+                                case 'emptyArchive':
+                                    notifyError(tEntities('invoker.list.upload.emptyArchive'))
+                                    break
                                 case 'cancelled':
                                     break
                                 case 'invalidType':
@@ -478,6 +490,9 @@ export const invokerDefinition: EntityDefinition = {
                                     break
                                 case 'tooLarge':
                                     notifyError(tEntities('invoker.list.upload.tooLarge'))
+                                    break
+                                case 'archiveTooLarge':
+                                    notifyError(tEntities('invoker.list.upload.archiveTooLarge'))
                                     break
                                 default: {
                                     const _exhaustive: never = result
