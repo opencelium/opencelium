@@ -116,6 +116,20 @@
 }
 
 /*
+ * Sample rows of a list the step describes. Set like the picks so the two read as one
+ * family, but bulleted and in the secondary text colour: these illustrate what a panel
+ * holds rather than asking for a click.
+ */
+.workflow-tutorial-pill__entries {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style-position: inside;
+    color: var(--color-text-secondary);
+    font-size: var(--typography-font-size-sm);
+    line-height: 1.7;
+}
+
+/*
  * Top-right, for the steps about the test run: starting one opens the log panel
  * across the bottom of the page, and the default corner would then sit on top of the
  * tree the copy is describing. Below the workflow header, and clear of the debug
@@ -158,4 +172,14 @@
         transform: translateY(-50%);
         width: auto;
     }
+}
+
+/* Keyboard shortcuts, one per row, in the keycaps CommandHint uses. */
+.workflow-tutorial-pill__shortcuts {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    color: var(--color-text-secondary);
+    font-size: var(--typography-font-size-sm);
 }
