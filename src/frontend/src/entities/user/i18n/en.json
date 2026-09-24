@@ -68,6 +68,11 @@
       "uploadButton": "Upload picture",
       "hint": "PNG or JPG, up to 10 MB",
       "replace": "Replace picture",
+      "delete": "Delete picture",
+      "confirmDelete": {
+        "title": "Remove profile picture?",
+        "message": "This can't be undone."
+      },
       "crop": {
         "title": "Crop profile picture",
         "zoom": "Zoom",
@@ -80,7 +85,10 @@
       "gravatar": {
         "title": "Use Gravatar picture?",
         "message": "A Gravatar picture is linked to this email. Do you want to use it as the profile picture?",
-        "messageReplace": "A Gravatar picture is linked to this email. Do you want to use it instead of the current profile picture? The current picture will be deleted when you save."
+        "messageReplace": "A Gravatar picture is linked to this email. Do you want to use it instead of the current profile picture? The current picture will be deleted when you save.",
+        "refresh": "Refresh from Gravatar",
+        "notFound": "Could not load a Gravatar picture for this email.",
+        "staged": "Picture loaded from Gravatar. Save the user to apply it."
       }
     }
   },
@@ -160,6 +168,9 @@
   "lifecycle": {
     "uploadProfilePicture": {
       "failed": "User saved, but the profile picture upload failed. You can retry from edit."
+    },
+    "deleteProfilePicture": {
+      "failed": "User saved, but removing the profile picture failed. You can retry from edit."
     }
   }
 }

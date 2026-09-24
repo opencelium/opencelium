@@ -63,7 +63,9 @@
     "detailsUpdateFailed": "Profildaten konnten nicht gespeichert werden.",
     "passwordUpdated": "Passwort aktualisiert. Sie werden abgemeldet.",
     "pictureUpdated": "Profilbild aktualisiert",
-    "pictureUpdateFailed": "Das Profilbild konnte nicht hochgeladen werden."
+    "pictureUpdateFailed": "Das Profilbild konnte nicht hochgeladen werden.",
+    "pictureDeleted": "Profilbild entfernt",
+    "pictureDeleteFailed": "Das Profilbild konnte nicht entfernt werden."
   },
   "validation": {
     "required": "Pflichtfeld",

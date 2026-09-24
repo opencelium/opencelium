@@ -3,7 +3,7 @@ import {useFormContext, useWatch} from 'react-hook-form'
 import type {Mode} from '@/engine/entity/EntityDefinition'
 import {useConfirm} from '@shared/ui/confirm/ConfirmDialogContext'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
-import {ImageTileEditor} from './ImageTileEditor'
+import {ImageTileEditor, type ImageTileAction} from './ImageTileEditor'
 import {wrapperStyle} from './WizardImageEditor.styles'
 
 type Props = {
@@ -15,6 +15,8 @@ type Props = {
     resolveUrl: (path: string) => string | null
     testIdPrefix: string
     canDelete?: boolean
+    isLoading?: boolean
+    extraActions?: ImageTileAction[]
 }
 
 const isFileValue = (value: unknown): value is File =>
@@ -35,6 +37,7 @@ const displayNameFor = (selected: unknown): string => {
  */
 export const WizardImageEditor = ({
     mode, fieldName = 'icon', i18nPrefix, resolveUrl, testIdPrefix, canDelete = true,
+    isLoading, extraActions,
 }: Props) => {
     const {setValue} = useFormContext()
     const {t} = useI18n('entities')
@@ -69,10 +72,12 @@ export const WizardImageEditor = ({
                 src={objectUrl ?? (storedPath ? resolveUrl(storedPath) : null)}
                 fileName={displayNameFor(selected)}
                 isInteractive={mode !== 'view'}
+                isLoading={isLoading}
                 i18nPrefix={i18nPrefix}
                 testIdPrefix={testIdPrefix}
                 onPicked={file => setValue(fieldName, file, {shouldDirty: true})}
                 onDelete={canDelete ? handleDelete : undefined}
+                extraActions={extraActions}
             />
         </div>
     )
