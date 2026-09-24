@@ -58,6 +58,8 @@ type Props<EntityFormValues> = {
     compact?: boolean
     /** Field names to leave unrendered; see SectionRenderer's own note. */
     hiddenFields?: string[]
+    /** Id of the wizard step to open on, e.g. jump straight to a connector's credentials. */
+    initialStepId?: string
 }
 
 export function EntityWizard<EntityFormValues>({
@@ -75,6 +77,7 @@ export function EntityWizard<EntityFormValues>({
     liveUpdate,
     hideRecommendations,
     hideHeader,
+    initialStepId,
 }: Props<EntityFormValues>) {
 
     const { user, normalizedUser } = useAuth()
@@ -143,7 +146,7 @@ export function EntityWizard<EntityFormValues>({
         typeof entity.wizard?.steps === 'function'
             ? entity.wizard.steps(mode)
             : entity.wizard?.steps
-    const steps: StepDefinition[] =
+    const visibleWizardSteps =
         wizardSteps
             ?.filter(step => {
                 const hasAccessibleSection = step.sectionIds.some(sectionId => {
@@ -164,6 +167,10 @@ export function EntityWizard<EntityFormValues>({
 
                 return hasAccessibleSection
             })
+        ?? []
+    const initialStep = Math.max(0, visibleWizardSteps.findIndex(step => step.id === initialStepId))
+    const steps: StepDefinition[] =
+        visibleWizardSteps
             .map(step => ({
                 header: step.header,
                 subheader: step.subheader,
@@ -219,7 +226,6 @@ export function EntityWizard<EntityFormValues>({
                     return result;
                 }
             }))
-        ?? []
     const modeConfig =
         entity.wizard.modes?.[mode]
     if (!entityDecision.allowed) {
@@ -279,6 +285,7 @@ export function EntityWizard<EntityFormValues>({
                             hideSubmit={liveUpdate}
                             hideHeader={hideHeader}
                             compact={compact}
+                            initialStep={initialStep}
                         />
                     </form>
                 </FormConstraintsProvider>
