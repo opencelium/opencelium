@@ -20,7 +20,8 @@ const buildEdge = (
 	direction: 'right' | 'bottom',
 ): WorkflowEdgeModel => {
 	const sourceHandle = direction === 'bottom'
-		? getBottomSourceHandle(source.type) : getRightSourceHandle(source.type);
+		? getBottomSourceHandle(source.type) ?? (source.type === 'start' ? undefined : 'bottom')
+		: getRightSourceHandle(source.type) ?? (source.type === 'start' ? undefined : 'right');
 	const targetHandle = direction === 'bottom' ? 'top' : 'left';
 	const branch = source.type === 'if'
 		? sourceHandle === 'true' ? 'true' as const
