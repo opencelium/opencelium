@@ -20,11 +20,13 @@ import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.WidgetSettingServiceImp;
 import com.becon.opencelium.backend.enums.AuthMethod;
+import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
 import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
+import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import com.becon.opencelium.backend.testutil.fixture.UserRoleFixture;
 import org.junit.jupiter.api.Test;
@@ -76,6 +78,9 @@ class UserServiceImplTest {
 
     @Mock
     WidgetSettingServiceImp widgetSettingServiceImp;
+
+    @Mock
+    StorageService storageService;
 
     @InjectMocks
     UserServiceImpl userService;
@@ -431,7 +436,7 @@ class UserServiceImplTest {
         UserDetail mappedDetail = new UserDetail();
         UserRole role = UserRoleFixture.aStandardUserRole();
 
-        when(userRepository.findById(5)).thenReturn(Optional.of(userDb));
+        when(userRepository.findOneById(5)).thenReturn(Optional.of(userDb));
         when(userRoleRepository.findById(7)).thenReturn(Optional.of(role));
         when(bCryptPasswordEncoder.encode("newPw")).thenReturn("$2a$new");
         when(detailService.toEntity(any(UserDetailResource.class))).thenReturn(mappedDetail);
@@ -464,7 +469,7 @@ class UserServiceImplTest {
         UserRole role = UserRoleFixture.aStandardUserRole();
         UserDetail mappedDetail = new UserDetail();
 
-        when(userRepository.findById(5)).thenReturn(Optional.of(userDb));
+        when(userRepository.findOneById(5)).thenReturn(Optional.of(userDb));
         when(userRoleRepository.findById(7)).thenReturn(Optional.of(role));
         when(detailService.toEntity(any(UserDetailResource.class))).thenReturn(mappedDetail);
         when(sessionService.findByUserId(5)).thenReturn(Optional.empty());
@@ -500,6 +505,56 @@ class UserServiceImplTest {
         verifyNoInteractions(bCryptPasswordEncoder);
         verify(detailService, never()).toEntity(any());
         verify(sessionService, never()).findByUserId(anyInt());
+    }
+
+    // ── deleteProfilePicture ──────────────────────────────────────────────────
+
+    @Test
+    void deleteProfilePictureClearsColumnAndDeletesFileWhenPictureExists() {
+        User user = UserFixture.anEmptyUser();
+        UserDetail detail = new UserDetail();
+        detail.setProfilePicture("7c09171b.png");
+        user.setUserDetail(detail);
+        when(userRepository.findOneById(5)).thenReturn(Optional.of(user));
+
+        userService.deleteProfilePicture(5);
+
+        assertThat(detail.getProfilePicture()).isNull();
+        verify(detailService).save(detail);
+        verify(storageService).delete("7c09171b.png");
+    }
+
+    @Test
+    void deleteProfilePictureDoesNothingWhenUserHasNoPicture() {
+        User user = UserFixture.anEmptyUser();
+        user.setUserDetail(new UserDetail());
+        when(userRepository.findOneById(5)).thenReturn(Optional.of(user));
+
+        userService.deleteProfilePicture(5);
+
+        verifyNoInteractions(detailService, storageService);
+    }
+
+    @Test
+    void deleteProfilePictureDoesNothingWhenUserHasNoDetail() {
+        User user = UserFixture.anEmptyUser();
+        user.setUserDetail(null);
+        when(userRepository.findOneById(5)).thenReturn(Optional.of(user));
+
+        userService.deleteProfilePicture(5);
+
+        verifyNoInteractions(detailService, storageService);
+    }
+
+    @Test
+    void deleteProfilePictureThrowsWhenUserNotFound() {
+        when(userRepository.findOneById(99)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.deleteProfilePicture(99))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage(ExceptionConstant.USER_NOT_EXIST);
+
+        verifyNoInteractions(detailService, storageService);
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
