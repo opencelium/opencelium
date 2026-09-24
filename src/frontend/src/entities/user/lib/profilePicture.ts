@@ -1,6 +1,7 @@
 import {store} from '@app/store/store'
 import {apiExecutor} from '@shared/api/apiExecutor'
 import {isImageFile} from '@shared/utils/fileTypeGuards'
+import type {Mode} from '@/engine/entity/EntityDefinition'
 import {authActions} from '@entities/auth/model/authSlice'
 import {selectAuthSession} from '@entities/auth/model/authSelectors'
 import type {User, UserUpdateDto} from '@entities/user/model/types'
@@ -24,6 +25,12 @@ export async function uploadProfilePicture(file: File, email: string): Promise<v
     if (isErrorResult(result)) throw new Error('Profile picture upload failed')
 }
 
+/** Clears the stored picture; the backend answers 204 even when none was set. */
+export async function deleteProfilePicture(userId: number): Promise<void> {
+    const result = await apiExecutor({url: `/user/${userId}/profilePicture`, method: 'DELETE'})
+    if (isErrorResult(result)) throw new Error('Profile picture deletion failed')
+}
+
 /**
  * The upload answers with an empty body, so the new stored path is read back from the
  * user. Only the signed-in user's own picture is mirrored into the session (top bar).
@@ -44,6 +51,7 @@ export async function syncOwnProfilePicture(userId: number): Promise<void> {
 }
 
 type UploadCtx = {
+    mode?: Mode
     formData?: UserUpdateDto
     payload?: UserUpdateDto & {userId?: number}
     response?: Partial<User>
@@ -52,6 +60,16 @@ type UploadCtx = {
 /** Fires when the user staged a freshly picked picture in the wizard. */
 export const hasProfilePictureFile = (ctx: UploadCtx) => isImageFile(ctx.formData?.profilePicture)
 
+/** Fires only on update when the user cleared a picture that the user actually had. */
+export const shouldDeleteProfilePicture = (ctx: UploadCtx) =>
+    ctx.mode === 'update' &&
+    ctx.formData?.profilePicture == null &&
+    typeof ctx.formData?.profilePictureOriginal === 'string' &&
+    ctx.formData.profilePictureOriginal.trim().length > 0
+
+const resolveUserId = (ctx: UploadCtx): number | undefined =>
+    ctx.response?.userId ?? ctx.payload?.userId
+
 /** Wizard after-save action; runs after the user PUT/POST so a changed email is already stored. */
 export async function uploadUserProfilePicture(ctx: UploadCtx): Promise<void> {
     const file = ctx.formData?.profilePicture
@@ -59,6 +77,15 @@ export async function uploadUserProfilePicture(ctx: UploadCtx): Promise<void> {
     if (!isImageFile(file) || !email) return
 
     await uploadProfilePicture(file, email)
-    const userId = ctx.response?.userId ?? ctx.payload?.userId
+    const userId = resolveUserId(ctx)
     if (typeof userId === 'number') await syncOwnProfilePicture(userId)
+}
+
+/** Wizard after-save action for a picture removed in the wizard image. */
+export async function deleteUserProfilePicture(ctx: UploadCtx): Promise<void> {
+    const userId = resolveUserId(ctx)
+    if (typeof userId !== 'number') return
+
+    await deleteProfilePicture(userId)
+    await syncOwnProfilePicture(userId)
 }

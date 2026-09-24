@@ -63,7 +63,9 @@
     "detailsUpdateFailed": "Profile details could not be saved.",
     "passwordUpdated": "Password updated. You will be logged out.",
     "pictureUpdated": "Profile picture updated",
-    "pictureUpdateFailed": "The profile picture could not be uploaded."
+    "pictureUpdateFailed": "The profile picture could not be uploaded.",
+    "pictureDeleted": "Profile picture removed",
+    "pictureDeleteFailed": "The profile picture could not be removed."
   },
   "validation": {
     "required": "Required field",

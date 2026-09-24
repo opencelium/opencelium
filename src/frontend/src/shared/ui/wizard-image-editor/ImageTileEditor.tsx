@@ -1,10 +1,21 @@
 import {Icon} from '@shared/ui/primitives/Icon'
+import type {IconName} from '@shared/ui/primitives/Icon/Icon.types'
 import {Tooltip} from '@shared/ui/primitives/Tooltip'
 import {Loading} from '@shared/ui/primitives/Loading/Loading'
 import {ImageCropDialog} from '@shared/ui/image-crop/ImageCropDialog'
 import {IMAGE_UPLOAD_ACCEPT} from '@shared/utils/imageUploadRules'
 import {useImagePicker} from './useImagePicker'
 import * as s from './WizardImageEditor.styles'
+
+/** An extra hover action on a filled tile, rendered between replace and delete. */
+export type ImageTileAction = {
+    key: string
+    iconName: IconName
+    /** Already translated; shown as the tooltip. */
+    label: string
+    testId: string
+    onClick: () => void
+}
 
 type Props = {
     src: string | null
@@ -21,11 +32,13 @@ type Props = {
     onPicked: (file: File) => void
     /** Omit to hide the delete action (e.g. when the backend has no delete endpoint). */
     onDelete?: () => void
+    extraActions?: ImageTileAction[]
 }
 
 /** A 114px image tile: pick (with crop) when empty; replace or delete on hover when filled. */
 export const ImageTileEditor = ({
     src, fileName, isInteractive, isLoading, i18nPrefix, testIdPrefix, onPicked, onDelete,
+    extraActions = [],
 }: Props) => {
     const {t, inputRef, cropFile, openPicker, cancelCrop, handlePick, handleCropConfirm} =
         useImagePicker({i18nPrefix, onPicked})
@@ -36,8 +49,6 @@ export const ImageTileEditor = ({
             {src ? (
                 <div className="oc-wizard-image-tile" style={{...s.tileStyle, ...s.filledTileStyle}}>
                     <img className="oc-wizard-image-image" src={src} alt={fileName ?? ''} style={s.imgStyle} />
-
-                    {fileName && <span style={s.filenameStyle}>{fileName}</span>}
 
                     {canEdit && (
                         <div className="oc-wizard-image-overlay" style={s.overlayStyle}>
@@ -52,6 +63,19 @@ export const ImageTileEditor = ({
                                     <Icon name="upload" size={18} color="inherit" />
                                 </button>
                             </Tooltip>
+                            {extraActions.map(action => (
+                                <Tooltip key={action.key} content={action.label}>
+                                    <button
+                                        type="button"
+                                        className="oc-wizard-image-action"
+                                        style={s.actionChipStyle}
+                                        onClick={action.onClick}
+                                        data-testid={action.testId}
+                                    >
+                                        <Icon name={action.iconName} size={18} color="inherit" />
+                                    </button>
+                                </Tooltip>
+                            ))}
                             {onDelete && (
                                 <Tooltip content={t(`${i18nPrefix}.delete`)}>
                                     <button
