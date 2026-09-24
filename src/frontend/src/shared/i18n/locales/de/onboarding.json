@@ -273,6 +273,16 @@
         "body": "Öffnen Sie den Body von createClient und suchen Sie username. Fahren Sie über die Zeile, klicken Sie auf das Referenz-Symbol und wählen Sie getCustomers, customers, (i-Schleife), firstName. Wiederholen Sie das für lastName. Zwei Referenzen in einem Feld werden automatisch in ein Enhancement gepackt — klappen Sie Variableninformationen auf, um sie in dieser Reihenfolge als VAR_0 und VAR_1 zu sehen. Verbinden Sie sie im Skript mit einem Leerzeichen und schließen Sie den Dialog.",
         "note": "Beide Referenzen setzen, Variablen aufklappen, Skript anpassen, dann schließen"
       },
+      "changeHistory": {
+        "title": "Jede Änderung, der Reihe nach",
+        "body": "Öffnen Sie ⋯ in der Kopfzeile und dann Änderungsverlauf: jede Änderung dieser Sitzung, die neueste oben. Ein Klick auf eine Zeile setzt die Arbeitsfläche auf diesen Moment zurück; die neueren Zeilen bleiben bis zur nächsten Änderung grau, sodass Sie wieder nach vorn springen können. Die Tastatur macht dasselbe Schritt für Schritt. Die Liste wird nicht mit dem Workflow gespeichert. Schauen Sie vorerst nur – ein Schritt zurück würde hier die Schritte des Tutorials rückgängig machen.",
+        "note": "Öffnen Sie den Änderungsverlauf und fahren Sie dann fort"
+      },
+      "versionHistory": {
+        "title": "Jede Speicherung, aufbewahrt",
+        "body": "Der Änderungsverlauf endet, wenn Sie den Editor verlassen; der Versionsverlauf nicht. Öffnen Sie ⋯ und dann Versionsverlauf. Jedes Speichern legt auf dem Server eine Version ab – wann, von wem und mit dem Kommentar aus dem Speichern-Dialog. Die hier aufgeführten Versionen sind Beispiele dafür, wie dieser Workflow gewachsen sein könnte; das Tutorial selbst speichert nie. Bei einem echten Workflow lädt ein Klick auf eine Version sie auf die Arbeitsfläche, ohne den Server zu berühren, bis Sie erneut speichern – hier markiert er nur die Zeile. Den Kommentar bearbeiten Sie direkt in der Zeile, und über ihr ⋯-Menü kopieren Sie die Snapshot-ID, laden die Version als Vorlage herunter oder löschen sie.",
+        "note": "Öffnen Sie den Versionsverlauf und fahren Sie dann fort"
+      },
       "testrun": {
         "title": "Ausführen, ohne auszuführen",
         "body": "Klicken Sie am Startknoten auf Play und wählen Sie den Debug-Modus. Der Lauf sendet seine Log-Zeilen so schnell, wie die Engine sie erzeugt, und der Canvas spielt sie in einem Tempo ab, dem Sie folgen können — ein Punkt wandert über die Kante, dann leuchtet der Schritt auf, zu dem sie führt. Nichts verlässt den Browser: Die beiden erfundenen Systeme antworten aus Fixtures.",
@@ -327,6 +337,14 @@
         "title": "Das ist ein funktionierender Workflow",
         "body": "getCustomers listet alle auf, der Loop geht sie einzeln durch, getClientByEmail fragt das zweite System per Referenz nach dem aktuellen Kunden, das IF lässt nur die unbekannten durch, und createClient füllt seine Felder aus dem gerade durchlaufenen Kunden. Methoden, Geltungsbereich, Referenzen, Enhancements — jede echte Integration besteht aus diesen vier Ideen; der Testlauf ist, womit Sie sie prüfen, und der Zeitplan ist, was sie laufen lässt, wenn niemand zusieht. Nichts davon wurde gespeichert, weder der Graph noch der Zeitplan; bauen Sie dieselbe Struktur mit Ihren eigenen Connectors.",
         "note": "Erfundene Connectors, es gibt also nichts zu behalten"
+      }
+    },
+    "versionHistory": {
+      "samples": {
+        "username": "Vor- und Nachname zum Benutzernamen des neuen Clients zusammenführen",
+        "condition": "Nur Clients anlegen, die noch nicht existieren",
+        "lookup": "Jeden Kunden im Support-System nachschlagen",
+        "customers": "Alle Kunden aus dem CRM lesen"
       }
     }
   },

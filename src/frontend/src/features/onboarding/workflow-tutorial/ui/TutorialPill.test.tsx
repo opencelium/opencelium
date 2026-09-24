@@ -24,6 +24,21 @@ const exit = (view: ReturnType<typeof render>) =>
     view.container.querySelector<HTMLElement>('[data-testid="workflow-tutorial-exit"]')
 
 describe('TutorialPill', () => {
+    // Same keycaps as the introduction's command hint, so shortcuts look alike everywhere
+    // the tutorial prints one.
+    it('renders shortcuts as keycaps in the command-hint style', () => {
+        const { view } = renderPill({ shortcuts: [
+            { combos: [['mod', 'z']], labelKey: 'actions.undo' },
+            { combos: [['mod', 'shift', 'z'], ['mod', 'y']], labelKey: 'actions.redo' },
+        ] })
+        const rows = view.container.querySelectorAll('.workflow-tutorial-pill__shortcuts .onboarding-command-note')
+        expect(rows).toHaveLength(2)
+        expect(rows[0].querySelectorAll('kbd')).toHaveLength(2)
+        expect(Array.from(rows[1].querySelectorAll('kbd')).map(kbd => kbd.textContent).slice(-3))
+            .toEqual(['Z', expect.any(String), 'Y'])
+        expect(rows[1].querySelectorAll('kbd')).toHaveLength(5)
+    })
+
     // The pill is mocked out of every other test in this feature, so this is the only
     // place that sees what it actually renders — a gap that once let the close icon be
     // removed without its replacement landing, leaving no way out mid-tutorial.

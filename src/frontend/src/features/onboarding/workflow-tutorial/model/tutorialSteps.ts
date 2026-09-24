@@ -5,6 +5,7 @@ import { getMethodKey } from '@features/workflow/components/WorkflowSidebar/useW
 import { TUTORIAL_CONNECTORS } from './tutorialFixtures'
 import type { CanvasProgress } from './useCanvasProgress'
 import { findVisibleTarget } from './findVisibleTarget'
+import type { Shortcut } from '../../ui/ShortcutHint'
 
 /**
  * `buildTestId` returns undefined when every part is empty, which cannot happen for
@@ -167,6 +168,19 @@ const SCHEDULE_CARD_DETAILS = '.wf-schedule-card__details'
  * with it. See the step's own note.
  */
 const SCHEDULE_MENU = sel(buildTestId('sidebar-menu', '/schedule'))
+/**
+ * The header's ⋯ menu, one of its entries, and the drawers two of those entries open.
+ * The drawers are mounted from the first paint and parked off-screen, which
+ * `findVisibleTarget` already treats as absent — so a panel link resolves exactly
+ * while that panel is out.
+ */
+const HEADER_MENU_BUTTON = sel('workflow-menu')
+const HEADER_MENU = '.headerMenu'
+const HEADER_MENU_ITEM = (id: 'change-history' | 'version-history') =>
+    sel(buildTestId('workflow-menu-item', id))
+const CHANGE_HISTORY_PANEL = sel('workflow-change-history-panel')
+const CHANGE_HISTORY_CLOSE = sel('workflow-change-history-close')
+const VERSION_HISTORY_PANEL = sel('workflow-history-panel')
 
 const [CRM, SUPPORT] = [0, 1]
 
@@ -240,6 +254,15 @@ export type TutorialStep = {
      * numbered list says that where "then ... then ..." only implies it.
      */
     picks?: TutorialPick[]
+    /**
+     * Sample rows of a list the step is describing, in the list's own words. Same shape
+     * as `picks`, so a `labelKey` is rendered from the key the editor renders the real
+     * row with; bulleted rather than numbered, because these are an illustration of
+     * what the list holds, not choices to make in order.
+     */
+    entries?: TutorialPick[]
+    /** Keyboard shortcuts for what the step teaches, shown as keycaps under the copy. */
+    shortcuts?: Shortcut[]
 
     /** Suffix under `workflow.steps.*` for this step's title/body/hint copy. */
     copy: string
@@ -292,7 +315,7 @@ const LOOP_PICKS: TutorialPick[] = [
  */
 const CONDITION_EXAMPLE = `client.email ≠ customers[${ITERATOR_NAMES[0]}].email`
 /** The enhancement's script: two references in, one joined value out. */
-const USERNAME_EXAMPLE = 'RESULT_VAR = VAR_0 + " " + VAR_1'
+export const USERNAME_EXAMPLE = 'RESULT_VAR = VAR_0 + " " + VAR_1'
 /**
  * A cron expression in the form the editor stores: six fields, seconds first, and one
  * of the two day fields blanked to `?` as Quartz requires. That last part is what
@@ -300,6 +323,27 @@ const USERNAME_EXAMPLE = 'RESULT_VAR = VAR_0 + " " + VAR_1'
  * would be an expression the app never actually writes.
  */
 const CRON_EXAMPLE = '0 0 * * * ?'
+/**
+ * What the change history holds by the end of the tutorial, newest first as the panel
+ * lists it: a sample, not a transcript — the real list has a row for every edit. The
+ * method names come from the fixtures, the wording from the panel's own keys.
+ */
+const CHANGE_HISTORY_ENTRIES: TutorialPick[] = [
+    {
+        labelKey: 'undoHistory.change.nodeAdded',
+        values: { name: TUTORIAL_CONNECTORS[SUPPORT].invoker.operations[1].name },
+    },
+    {
+        labelKey: 'undoHistory.change.methodUrl',
+        values: { name: TUTORIAL_CONNECTORS[SUPPORT].invoker.operations[0].name },
+    },
+    { labelKey: 'undoHistory.change.initial' },
+]
+/** The editor's undo bindings — see useWorkflowUndoShortcuts. */
+const UNDO_SHORTCUTS: Shortcut[] = [
+    { combos: [['mod', 'z']], labelKey: 'actions.undo' },
+    { combos: [['mod', 'shift', 'z'], ['mod', 'y']], labelKey: 'actions.redo' },
+]
 
 /** The first `+` sits on the start node, which is undimmed with it for context. */
 const FROM_START: TutorialTarget = { target: ADD_FROM(START_NODE, 'right'), include: [START_NODE] }
@@ -471,6 +515,38 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
         isDone: progress => progress.bodyReferencesClosed,
     },
     /*
+     * The two ways back, taught once the graph is finished and before the run over it:
+     * this is the point where there is a session's worth of edits to look through.
+     * Both are read rather than used — a jump in the change history takes nodes off
+     * the canvas, which the steps above are counting, and would send the tutorial back
+     * to the step that built what went missing. The version history lists samples
+     * (see tutorialVersions), which select but never load.
+     */
+    {
+        id: 'changeHistory',
+        copy: 'changeHistory',
+        entries: CHANGE_HISTORY_ENTRIES,
+        shortcuts: UNDO_SHORTCUTS,
+        chain: [
+            { target: HEADER_MENU_BUTTON },
+            { target: HEADER_MENU_ITEM('change-history'), include: [HEADER_MENU] },
+            { target: CHANGE_HISTORY_PANEL },
+        ],
+    },
+    {
+        id: 'versionHistory',
+        copy: 'versionHistory',
+        chain: [
+            { target: HEADER_MENU_BUTTON },
+            { target: HEADER_MENU_ITEM('version-history'), include: [HEADER_MENU] },
+            // Still open from the step before, the change history's overlay would take
+            // the click meant for the menu button — so its close comes first. Placed
+            // deeper than the menu entry, which cannot be on screen at the same time.
+            { target: CHANGE_HISTORY_CLOSE, include: [CHANGE_HISTORY_PANEL] },
+            { target: VERSION_HISTORY_PANEL },
+        ],
+    },
+    /*
      * From here the graph stops changing and the run over it becomes the subject.
      * Every one of these chains opens on the start button: the debug controls exist
      * only while a run is playing, so a user who let the replay drain — it lasts
@@ -633,25 +709,35 @@ export function resolveStepIndex(
     return pending === -1 ? TUTORIAL_STEPS.length - 1 : pending
 }
 
-/** Names the step to open on: `/workflow/create?tutorialStep=schedules`. */
+/**
+ * Names the step to open on, by id or by the number the pill's counter shows:
+ * `/workflow/create?tutorialStep=schedules`, `/workflow/create?tutorialStep=10`.
+ */
 export const TUTORIAL_STEP_PARAM = 'tutorialStep'
 
 /**
  * The step a URL asks the tutorial to open on, or null for a normal run from the top.
  *
  * Exists for trying a late step without building the whole graph and sitting through a
- * replay first — the scheduling steps are eleven actions in. Not gated to development:
- * the tutorial is an admin-only sandbox over invented systems that saves nothing, so
- * the worst this can do is show a different paragraph in it, and QA runs against a
- * production build.
+ * replay first — the scheduling steps are eleven actions in. Development only: the
+ * caller (WorkflowTutorial) skips it outside `import.meta.env.DEV`, so a production
+ * build never reads the parameter.
  *
- * An unknown name is ignored rather than refused. The fallback is the tutorial opening
- * at the beginning, which is where it opens anyway.
+ * A number is read 1-based, as the counter prints it, so the step a tester sees as
+ * "10 / 23" is `?tutorialStep=10`. Ids stay the stable form: numbers shift whenever a
+ * step is added before them.
+ *
+ * An unknown name or an out-of-range number is ignored rather than refused. The
+ * fallback is the tutorial opening at the beginning, which is where it opens anyway.
  */
 export function resolveStepFloor(search: string): number | null {
-    const id = new URLSearchParams(search).get(TUTORIAL_STEP_PARAM)
-    if (!id) return null
-    const index = TUTORIAL_STEPS.findIndex(step => step.id === id)
+    const value = new URLSearchParams(search).get(TUTORIAL_STEP_PARAM)
+    if (!value) return null
+    if (/^\d+$/.test(value)) {
+        const position = Number(value)
+        return position >= 1 && position <= TUTORIAL_STEPS.length ? position - 1 : null
+    }
+    const index = TUTORIAL_STEPS.findIndex(step => step.id === value)
     return index === -1 ? null : index
 }
 
