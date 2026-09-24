@@ -117,6 +117,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         }}
         shortcuts={{ open: isShortcutsOpen, onClose: () => setIsShortcutsOpen(false) }}
 		jsonEditor={{ open: jsonEditorOpen, readOnly: readOnly || isTestRunLocked,
+          connectors,
           value: jsonEditorValue ?? {},
           onApply: (payload) => {
             const state = mapWorkflowJsonToWorkflowState(payload);

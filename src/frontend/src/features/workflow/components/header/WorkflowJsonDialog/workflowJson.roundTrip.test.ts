@@ -155,6 +155,43 @@ describe('workflow JSON round trip', () => {
 		});
 	});
 
+	it('rebuilds graph order and positions when workflow indexes change', () => {
+		const method: WorkflowNodeModel = {
+			id: 'method-1', type: 'system', position: { x: 320, y: 220 },
+			data: { title: 'HTTP Request', subtitle: 'Fetch', kind: 'system', color: '#6477AB',
+				methodConfig: { name: 'Fetch', url: '/users', method: 'GET', headers: {},
+					queryParams: [], endpointArgs: {}, body: {}, bodyFormat: 'json', bodyData: 'raw' } },
+		};
+		const condition: WorkflowNodeModel = {
+			id: 'if-1', type: 'if', position: { x: 540, y: 220 },
+			data: { title: 'If', kind: 'if', conditionConfig: { operatorType: 'if',
+				expression: "'a' = 'a'",
+				tree: { id: 'group', type: 'group', properties: {}, items: [] } } },
+		};
+		const payload = buildConnectionPayload({ title: 'Workflow', description: '',
+			nodes: [...initialNodes, method, condition], edges: [
+				{ id: 'e1', source: 'start-1', target: method.id, type: 'workflow-edge' },
+				{ id: 'e2', source: method.id, target: condition.id, type: 'workflow-edge' },
+			] });
+		payload.fromConnector.methods[0].index = '1';
+		payload.fromConnector.operators[0].index = '0';
+
+		const validation = validateWorkflowJson(payload);
+		expect(validation.success).toBe(true);
+		if (!validation.success) throw new Error('Expected index-edited workflow JSON to be valid');
+		const edited = mapWorkflowJsonToWorkflowState(validation.data);
+
+		expect(edited.edges).toEqual(expect.arrayContaining([
+			expect.objectContaining({ source: 'start-1', target: condition.id }),
+			expect.objectContaining({ source: condition.id, target: method.id }),
+		]));
+		expect(buildWorkflowIndexes(edited.nodes, edited.edges)).toEqual(new Map([
+			[condition.id, '0'], [method.id, '1'],
+		]));
+		expect(edited.nodes.find((node) => node.id === condition.id)?.position.x)
+			.toBeLessThan(edited.nodes.find((node) => node.id === method.id)?.position.x ?? 0);
+	});
+
 	it('applies method and operator type changes despite stale UI node types', () => {
 		const method: WorkflowNodeModel = {
 			id: 'method-1', type: 'connector', position: { x: 420, y: 220 },
@@ -177,6 +214,12 @@ describe('workflow JSON round trip', () => {
 			nodes: [...initialNodes, method, condition], edges });
 		payload.fromConnector.methods[0].methodType = 'HTTP_REQUEST';
 		payload.fromConnector.methods[0].connector = null;
+		payload.fromConnector.methods[0].response = {
+			success: { status: '200', header: {}, body: { type: 'object', format: 'json',
+				data: 'raw', fields: {} } },
+			fail: { status: '500', header: {}, body: { type: 'object', format: 'json',
+				data: 'raw', fields: {} } },
+		};
 		payload.fromConnector.operators[0].type = 'loop';
 		payload.fromConnector.operators[0].expression = 'for items';
 		payload.fromConnector.operators[0].iterator = 'j';
