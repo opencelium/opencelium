@@ -76,7 +76,12 @@
         "instruction": "Move the square to select the picture area"
       },
       "invalidType": "The picture must be a PNG or JPG file (.png, .jpg, .jpeg)",
-      "tooLarge": "The picture must be smaller than 10 MB"
+      "tooLarge": "The picture must be smaller than 10 MB",
+      "gravatar": {
+        "title": "Use Gravatar picture?",
+        "message": "A Gravatar picture is linked to this email. Do you want to use it as the profile picture?",
+        "messageReplace": "A Gravatar picture is linked to this email. Do you want to use it instead of the current profile picture? The current picture will be deleted when you save."
+      }
     }
   },
   "sections": {

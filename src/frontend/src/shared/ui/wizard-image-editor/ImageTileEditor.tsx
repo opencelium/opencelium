@@ -37,8 +37,6 @@ export const ImageTileEditor = ({
                 <div className="oc-wizard-image-tile" style={{...s.tileStyle, ...s.filledTileStyle}}>
                     <img className="oc-wizard-image-image" src={src} alt={fileName ?? ''} style={s.imgStyle} />
 
-                    {fileName && <span style={s.filenameStyle}>{fileName}</span>}
-
                     {canEdit && (
                         <div className="oc-wizard-image-overlay" style={s.overlayStyle}>
                             <Tooltip content={t(`${i18nPrefix}.replace`)}>
