@@ -76,7 +76,12 @@
         "instruction": "Verschieben Sie das Quadrat, um den Bildbereich auszuwählen"
       },
       "invalidType": "Das Bild muss eine PNG- oder JPG-Datei sein (.png, .jpg, .jpeg)",
-      "tooLarge": "Das Bild muss kleiner als 10 MB sein"
+      "tooLarge": "Das Bild muss kleiner als 10 MB sein",
+      "gravatar": {
+        "title": "Gravatar-Bild verwenden?",
+        "message": "Mit dieser E-Mail ist ein Gravatar-Bild verknüpft. Möchten Sie es als Profilbild verwenden?",
+        "messageReplace": "Mit dieser E-Mail ist ein Gravatar-Bild verknüpft. Möchten Sie es anstelle des aktuellen Profilbilds verwenden? Das aktuelle Bild wird beim Speichern gelöscht."
+      }
     }
   },
   "sections": {

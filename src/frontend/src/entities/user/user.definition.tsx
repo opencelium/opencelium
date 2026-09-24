@@ -284,6 +284,7 @@ export const userDefinition: EntityDefinition = {
             defaultValue: 'admin@opencelium.io',
             ui: {
                 component: 'input',
+                overrideKey: 'userEmailGravatar',
                 props: {
                     autoFocus: true,
                     labelKey: `${baseKey}.fields.email.label`,

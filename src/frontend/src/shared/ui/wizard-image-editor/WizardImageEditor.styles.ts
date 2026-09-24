@@ -69,21 +69,6 @@ export const actionChipDangerStyle = {
     color: '#f0808a',
 } as const
 
-export const filenameStyle = {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: '10px 8px 5px',
-    fontSize: 10.5,
-    color: '#fff',
-    background: 'linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0))',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    textAlign: 'center',
-} as const
-
 export const emptyContentStyle = {
     display: 'flex',
     flexDirection: 'column',
