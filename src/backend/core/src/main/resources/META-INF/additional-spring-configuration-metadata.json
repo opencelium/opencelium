@@ -1,0 +1,29 @@
+{
+  "properties": [
+    {
+      "name": "opencelium.deployment-mode",
+      "type": "java.lang.String",
+      "description": "How this installation is operated: self (self-hosted, one customer, MongoDB from spring.mongodb.uri) or saas (operated for many tenants, spring.mongodb.uri names the system database and is required).",
+      "defaultValue": "self"
+    },
+    {
+      "name": "opencelium.data-dir",
+      "type": "java.lang.String",
+      "description": "Directory for local state such as master.key. Created at startup when missing. Default: /var/lib/opencelium on Linux when it exists and is writable, otherwise ./data in the working directory."
+    },
+    {
+      "name": "opencelium.master-key-file",
+      "type": "java.lang.String",
+      "description": "File holding the base64 master key. Must not be combined with the OC_MASTER_KEY environment variable. Default: <data-dir>/master.key."
+    }
+  ],
+  "hints": [
+    {
+      "name": "opencelium.deployment-mode",
+      "values": [
+        { "value": "self", "description": "Self-hosted: one customer, database configured in application.yml." },
+        { "value": "saas", "description": "Operated for many tenants; application.yml names only the system database." }
+      ]
+    }
+  ]
+}

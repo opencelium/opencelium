@@ -1,6 +1,17 @@
+# Bootstrap settings. Every commented line is optional: a missing value gets its documented default, and startup
+# logs one "(default)" line for each default it applied. Put overrides in an application.yml next to the jar
+# or in environment variables (OPENCELIUM_DEPLOYMENTMODE, OPENCELIUM_DATADIR, SPRING_MONGODB_URI, ...).
+
 spring:
   application:
     name: opencelium-core
+#  mongodb:
+#    uri: mongodb://localhost:27017/opencelium   # the default in self mode; required in saas mode
 
 server:
   port: 9090
+
+#opencelium:
+#  deployment-mode: self            # self (self-hosted) | saas
+#  data-dir: ./data                 # Linux: /var/lib/opencelium when it exists and is writable
+#  master-key-file: /etc/opencelium/master.key   # default <data-dir>/master.key; never together with OC_MASTER_KEY
