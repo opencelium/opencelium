@@ -1,0 +1,5 @@
+.ace_marker-layer .ace_error-line {
+	background: rgb(255 77 79 / 16%);
+	border-bottom: 1px solid rgb(255 77 79 / 55%);
+	position: absolute;
+}

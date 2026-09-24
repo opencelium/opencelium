@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { validateWorkflowJson } from './workflowJson.validate';
+import { validateWorkflowJson, type WorkflowJsonValidationContext } from './workflowJson.validate';
 
 export type WorkflowJsonMode = 'tree' | 'raw';
 
 const stringify = (value: Record<string, unknown>) => JSON.stringify(value, null, 2);
 
-export function useWorkflowJsonEditor(open: boolean, value: Record<string, unknown>) {
+export function useWorkflowJsonEditor(open: boolean, value: Record<string, unknown>,
+	validationContext?: WorkflowJsonValidationContext) {
 	const sourceRef = useRef(value);
 	const wasOpenRef = useRef(false);
 	const [sourceText, setSourceText] = useState(() => stringify(value));
@@ -45,7 +46,7 @@ export function useWorkflowJsonEditor(open: boolean, value: Record<string, unkno
 	const reset = () => setTreeDraft(sourceRef.current);
 	const dirty = raw !== sourceText;
 
-	const validation = syntaxError ? null : validateWorkflowJson(draft);
+	const validation = syntaxError ? null : validateWorkflowJson(draft, validationContext);
 	return { draft, raw, updateRaw, mode, setMode, setTreeDraft, reset, dirty,
 		syntaxError, validation };
 }
