@@ -1,17 +1,14 @@
 import {useRef} from 'react'
 import {useFormContext} from 'react-hook-form'
-import {z} from 'zod'
 import type {Mode} from '@/engine/entity/EntityDefinition'
 import {useConfirm} from '@shared/ui/confirm/ConfirmDialogContext'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
 import {isImageFile} from '@shared/utils/fileTypeGuards'
-import {fetchGravatarFile, normalizeEmail} from '@entities/user/lib/gravatar'
+import {isValidEmail, lookupGravatarFile, normalizeEmail} from '@entities/user/lib/gravatar'
 import {useOnlineFeature} from '@entities/subscription/model/useOnlineFeature'
 
 const PICTURE_FIELD = 'profilePicture'
 const I18N_PREFIX = 'user.fields.profilePicture.gravatar'
-
-const emailSchema = z.email()
 
 const hasPicture = (value: unknown) =>
     isImageFile(value) || (typeof value === 'string' && value.trim() !== '')
@@ -40,7 +37,7 @@ export function useGravatarSuggestion({emailField, mode}: Params) {
     const handleBlur = async () => {
         if (mode === 'view' || !isOnlineAllowed) return
         const email = normalizeEmail(getValues(emailField))
-        if (!emailSchema.safeParse(email).success || email === lastCheckedRef.current) return
+        if (!isValidEmail(email) || email === lastCheckedRef.current) return
 
         const currentPicture = getValues(PICTURE_FIELD)
         const isPictureSet = hasPicture(currentPicture)
@@ -49,7 +46,7 @@ export function useGravatarSuggestion({emailField, mode}: Params) {
         if (isPictureSet && !getFieldState(emailField).isDirty) return
 
         lastCheckedRef.current = email
-        const file = await fetchGravatarFile(email)
+        const file = await lookupGravatarFile(email)
         if (!file || normalizeEmail(getValues(emailField)) !== email) return
 
         const previewUrl = URL.createObjectURL(file)

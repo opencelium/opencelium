@@ -1,3 +1,5 @@
+import {z} from 'zod'
+
 const GRAVATAR_SIZE = 256
 
 const EXTENSION_BY_MIME: Record<string, string> = {
@@ -7,6 +9,10 @@ const EXTENSION_BY_MIME: Record<string, string> = {
 
 export const normalizeEmail = (value: unknown): string =>
     typeof value === 'string' ? value.trim().toLowerCase() : ''
+
+const emailSchema = z.email()
+
+export const isValidEmail = (email: string): boolean => emailSchema.safeParse(email).success
 
 // crypto.subtle only exists in secure contexts (https / localhost); on a plain-http
 // deployment the Gravatar suggestion is silently unavailable.
@@ -40,4 +46,28 @@ export async function fetchGravatarFile(email: string): Promise<File | null> {
     } catch {
         return null
     }
+}
+
+const lookupCache = new Map<string, Promise<File | null>>()
+
+/**
+ * Cached `fetchGravatarFile` for "does this email have a Gravatar?" questions, so the
+ * refresh action's availability check and the email-blur suggestion share one request
+ * per email per page load. `refreshGravatarFile` bypasses it for an explicit refresh.
+ */
+export function lookupGravatarFile(email: string): Promise<File | null> {
+    const key = normalizeEmail(email)
+    let lookup = lookupCache.get(key)
+    if (!lookup) {
+        lookup = fetchGravatarFile(key)
+        lookupCache.set(key, lookup)
+    }
+    return lookup
+}
+
+export async function refreshGravatarFile(email: string): Promise<File | null> {
+    const key = normalizeEmail(email)
+    const file = await fetchGravatarFile(key)
+    lookupCache.set(key, Promise.resolve(file))
+    return file
 }

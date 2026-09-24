@@ -29,4 +29,7 @@ export type UserUpdateDto = Partial<UserCreateDto> & {
   // The wizard image's pending pick. Kept apart from `userDetail.profilePicture`,
   // which the backend parses as a stored path, and uploaded by an after-save action.
   profilePicture?: string | File | null,
+  // Snapshot of the stored path, so the delete after-action can tell a cleared picture
+  // from one that never existed.
+  profilePictureOriginal?: string | null,
 }
