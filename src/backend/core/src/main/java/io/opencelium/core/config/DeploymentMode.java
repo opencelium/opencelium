@@ -11,15 +11,16 @@ import java.util.stream.Collectors;
 public enum DeploymentMode {
 
 	/**
-	 * Self-hosted: one customer, whose MongoDB is configured in application.yml. {@code spring.mongodb.uri} defaults
-	 * to {@code mongodb://localhost:27017/opencelium}.
+	 * Self-hosted: one customer, whose MongoDB is configured in application.yml. When neither {@code spring.mongodb.uri}
+	 * nor any host-style {@code spring.mongodb.*} property is set, the URI defaults to
+	 * {@code mongodb://localhost:27017/opencelium}.
 	 */
 	SELF("self", true),
 
 	/**
-	 * Operated by us for many tenants; application.yml names only the system database. {@code spring.mongodb.uri} has
-	 * no default and is required. Not enforced yet: the check belongs to the MongoDB connection resolver (increment 0,
-	 * slice 2), which also replaces Boot's own Mongo auto-configuration and its {@code localhost/test} fallback.
+	 * Operated by us for many tenants; application.yml names only the system database. There is no default:
+	 * {@code StaticMongoConnectionResolver} stops startup unless {@code spring.mongodb.uri} or
+	 * {@code spring.mongodb.host} is set.
 	 */
 	SAAS("saas", false);
 

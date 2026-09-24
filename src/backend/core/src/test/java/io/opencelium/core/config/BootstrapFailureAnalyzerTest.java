@@ -35,6 +35,13 @@ class BootstrapFailureAnalyzerTest {
 	}
 
 	@Test
+	void exceptionSpecificActionReplacesTheDefault() {
+		var failure = new BootstrapPropertyException("spring.mongodb.username", "conflict", "Remove it.", null);
+
+		assertThat(new BootstrapFailureAnalyzer().analyze(failure).getAction()).isEqualTo("Remove it.");
+	}
+
+	@Test
 	void environmentVariableFollowsSpringRelaxedBinding() {
 		assertThat(BootstrapFailureAnalyzer.environmentVariable("spring.mongodb.uri")).isEqualTo("SPRING_MONGODB_URI");
 		assertThat(BootstrapFailureAnalyzer.environmentVariable("opencelium.master-key-file"))

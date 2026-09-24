@@ -6,7 +6,7 @@ spring:
   application:
     name: opencelium-core
 #  mongodb:
-#    uri: mongodb://localhost:27017/opencelium   # the default in self mode; required in saas mode
+#    uri: mongodb://localhost:27017/opencelium   # default in self mode; saas needs this (or spring.mongodb.host)
 
 server:
   port: 9090

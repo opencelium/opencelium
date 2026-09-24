@@ -17,3 +17,7 @@ CLAUDE.md
 src/backend/.gradle/
 src/backend/build/
 src/backend/*/build/
+
+# Backend runtime data dir (opencelium.data-dir default ./data), holds master.key — never commit
+src/backend/data/
+src/backend/*/data/

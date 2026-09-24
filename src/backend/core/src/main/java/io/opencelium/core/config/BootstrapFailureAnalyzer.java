@@ -19,8 +19,8 @@ final class BootstrapFailureAnalyzer extends AbstractFailureAnalyzer<BootstrapPr
 	protected FailureAnalysis analyze(Throwable rootFailure, BootstrapPropertyException cause) {
 		String property = cause.propertyName();
 		String description = cause.getMessage() + "\n\n  Property: " + property;
-		String action = "Set " + property + " in application.yml, or the environment variable "
-				+ environmentVariable(property) + ", then start again.";
+		String action = cause.action().orElseGet(() -> "Set " + property
+				+ " in application.yml, or the environment variable " + environmentVariable(property) + ", then start again.");
 		return new FailureAnalysis(description, action, cause);
 	}
 

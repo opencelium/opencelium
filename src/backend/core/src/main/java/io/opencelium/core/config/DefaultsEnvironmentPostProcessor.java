@@ -9,6 +9,7 @@ import org.springframework.boot.EnvironmentPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.logging.DeferredLogFactory;
+import org.springframework.boot.mongodb.autoconfigure.MongoProperties;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
@@ -25,11 +26,7 @@ public final class DefaultsEnvironmentPostProcessor implements EnvironmentPostPr
 
 	public static final String PROPERTY_SOURCE_NAME = "openceliumDefaults";
 
-	static final String MONGODB_URI = "spring.mongodb.uri";
-
 	static final String DEFAULT_MONGODB_URI = "mongodb://localhost:27017/opencelium";
-
-	private static final String MONGODB_HOST = "spring.mongodb.host";
 
 	private static final String BOOT3_MONGODB_URI = "spring.data.mongodb.uri";
 
@@ -60,16 +57,17 @@ public final class DefaultsEnvironmentPostProcessor implements EnvironmentPostPr
 		}
 
 		if (BootstrapProperties.read(binder, BOOT3_MONGODB_URI).isPresent()) {
-			log.warn(BOOT3_MONGODB_URI + " is set but ignored; Spring Boot 4 reads " + MONGODB_URI
-					+ " (did you mean " + MONGODB_URI + "?)");
+			log.warn(BOOT3_MONGODB_URI + " is set but ignored; Spring Boot 4 reads " + BootstrapProperties.MONGODB_URI
+					+ " (did you mean " + BootstrapProperties.MONGODB_URI + "?)");
 		}
 		// An unknown mode gets no Mongo default: the mode error is then the only one reported.
 		Optional<DeploymentMode> mode = configuredMode.isEmpty() ? Optional.of(DeploymentMode.DEFAULT)
 				: DeploymentMode.parse(configuredMode.get());
-		if (mode.map(DeploymentMode::mongoUriHasDefault).orElse(false)
-				&& BootstrapProperties.read(binder, MONGODB_URI).isEmpty()
-				&& BootstrapProperties.read(binder, MONGODB_HOST).isEmpty()) {
-			defaults.put(MONGODB_URI, DEFAULT_MONGODB_URI);
+		// Any host-style setting (host, username, ...) means the operator describes the server without a URI.
+		MongoProperties mongo = binder.bindOrCreate("spring.mongodb", MongoProperties.class);
+		if (mode.map(DeploymentMode::mongoUriHasDefault).orElse(false) && mongo.getUri() == null
+				&& BootstrapProperties.mongoAddressPropertiesSet(mongo).isEmpty()) {
+			defaults.put(BootstrapProperties.MONGODB_URI, DEFAULT_MONGODB_URI);
 		}
 
 		if (defaults.isEmpty()) {

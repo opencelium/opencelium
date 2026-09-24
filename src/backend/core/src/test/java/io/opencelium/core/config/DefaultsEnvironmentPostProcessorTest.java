@@ -92,6 +92,15 @@ class DefaultsEnvironmentPostProcessorTest {
 	}
 
 	@Test
+	void anyHostStyleMongoPropertySuppressesTheUriDefault() {
+		environment.setProperty("spring.mongodb.username", "oc");
+
+		postProcess();
+
+		assertThat(environment.containsProperty("spring.mongodb.uri")).isFalse();
+	}
+
+	@Test
 	void relaxedEnvironmentVariableNameCountsAsSet() {
 		environment.getPropertySources().addFirst(new SystemEnvironmentPropertySource(
 				"systemEnvironment", Map.of("OPENCELIUM_DEPLOYMENTMODE", "saas")));
