@@ -32,6 +32,12 @@ spring:
     password: secret1234
     initialization-mode: always
     driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      # MariaDB 11.6+ enables innodb_snapshot_isolation by default: a REPEATABLE READ transaction
+      # that locks or deletes a row changed after its read view opened fails with error 1020
+      # "Record has changed since last read". Quartz's JDBC job store and the concurrent
+      # scheduler/connection cleanup rely on the READ COMMITTED semantics instead.
+      transaction-isolation: TRANSACTION_READ_COMMITTED
   data:
     mongodb:
       uri: mongodb://oc_admin:secretsecret@localhost:27017/opencelium
@@ -195,7 +201,7 @@ management:
           UP: 200
 
 opencelium:
-  version: 5.1
+  version: 5.2
   ###########################################################################
   #                                                                         #
   #   Interface languages                                                   #
@@ -334,8 +340,8 @@ opencelium:
   #                                                                         #
   ###########################################################################
   invoker-repository:
-    url: https://api.github.com/repos/opencelium/opencelium/contents/src/backend/runtime/invoker
-    branch: dev
+    url: https://api.github.com/repos/opencelium/invoker/contents
+    branch: main
   ###########################################################################
   #                                                                         #
   #   Polyglot Engine Configuration                                         #

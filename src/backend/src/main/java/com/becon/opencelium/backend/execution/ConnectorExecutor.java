@@ -296,17 +296,20 @@ public class ConnectorExecutor {
 
             return ResponseEntity
                     .status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .contentType(MediaType.TEXT_PLAIN)
                     .body("Connection error: " + (root != null ? root.getMessage() : rae.getMessage()));
         }
 
         if (e instanceof RestClientException rce) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.TEXT_PLAIN)
                     .body("Client error: " + rce.getMessage());
         }
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.TEXT_PLAIN)
                 .body("Unexpected error: " + e.getMessage());
     }
 

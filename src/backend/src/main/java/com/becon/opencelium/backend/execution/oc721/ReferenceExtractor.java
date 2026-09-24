@@ -219,10 +219,6 @@ public class ReferenceExtractor implements Extractor {
         final HttpEntity<?> entity;
         if (ref.getExchangeType() == ExchangeType.RESPONSE) {
             entity = requireStored(operation.getResponses().get(key), ExchangeType.RESPONSE, ref, key);
-
-            if (isErrorResponse(entity)) {
-                throw new RuntimeException((String) entity.getBody());
-            }
         } else {
             entity = requireStored(operation.getRequests().get(key), ExchangeType.REQUEST, ref, key);
         }
@@ -232,6 +228,12 @@ public class ReferenceExtractor implements Extractor {
         // ex.2) '#ababab.(request).header.$.Content-Type',
         if (ref.getPart() == DirectReference.Part.HEADER) {
             return getFromHeader(entity.getHeaders(), path);
+        }
+
+        // A transport-level failure is stored as a plain-text error response: no path can be
+        // resolved against it, so its message is surfaced as the reason instead of a parse error.
+        if (isUnparsableErrorResponse(entity)) {
+            throw new RuntimeException(bodyToString(entity.getBody()));
         }
 
         // CASE 4: has 4 sub-cases
@@ -610,8 +612,22 @@ public class ReferenceExtractor implements Extractor {
         return input;
     }
 
-    private boolean isErrorResponse(HttpEntity<?> entity) {
-        return entity instanceof ResponseEntity<?> responseEntity && responseEntity.getStatusCode().isError();
+    /**
+     * Tells whether {@code entity} is an error response whose body cannot be navigated by a path.
+     *
+     * <p>{@code ConnectorExecutor} stores transport-level failures (unreachable host, client error)
+     * as {@code text/plain} {@code 5xx} responses; those are the only bodies rejected here. A JSON
+     * or XML error payload returned by the remote API stays addressable, so a user can reference,
+     * for example, its error message from a following method or enhancement.
+     */
+    private boolean isUnparsableErrorResponse(HttpEntity<?> entity) {
+        if (!(entity instanceof ResponseEntity<?> response) || !response.getStatusCode().isError()) {
+            return false;
+        }
+
+        MediaType mediaType = entity.getHeaders().getContentType();
+
+        return !MediaTypeUtility.isJsonCompatible(mediaType) && !MediaTypeUtility.isXmlCompatible(mediaType);
     }
 
     private Loop getLoopByIterator(String iterator) {
