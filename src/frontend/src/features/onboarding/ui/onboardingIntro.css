@@ -1,0 +1,135 @@
+.onboarding-duration-row { display: flex; align-items: center; gap: 10px; margin-top: 18px; }
+.onboarding-duration { color: var(--color-text-primary); font-size: var(--typography-font-size-sm); }
+.onboarding-phases { display: flex; gap: 16px; margin-top: 10px; font-size: var(--typography-font-size-sm); }
+.onboarding-phases span { color: var(--color-text-secondary); }
+.onboarding-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+.onboarding-theme-lead { margin: 0 0 18px; }
+.onboarding-theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
+.onboarding-theme-card { display: flex; min-height: 252px; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: transparent; color: var(--color-text-primary); font: inherit; text-align: left; cursor: pointer; }
+.onboarding-theme-card:focus-visible { outline: 2px solid var(--color-action-primary); outline-offset: 3px; }
+.onboarding-theme-card.is-selected { border-color: var(--color-action-primary); box-shadow: inset 0 0 0 1px var(--color-action-primary); background: color-mix(in srgb, var(--color-action-primary) 6%, transparent); }
+.onboarding-theme-card > strong { display: flex; align-items: center; gap: 6px; }
+.onboarding-theme-state { display: grid; width: 18px; height: 18px; margin-left: auto; place-items: center; border: 1px solid var(--color-border-strong); border-radius: 50%; color: var(--color-text-inverted); font-size: var(--typography-font-size-sm); font-style: normal; }
+.is-selected .onboarding-theme-state { border-color: var(--color-action-primary); background: var(--color-action-primary); }
+.onboarding-theme-description { color: var(--color-text-secondary); font-size: var(--typography-font-size-md); line-height: 1.45; }
+/*
+ * Theme-preview swatches. These are deliberately NOT theme tokens: each card is
+ * a picture OF a theme, so the light card must stay light while the dark card
+ * stays dark regardless of which theme is currently active. Named here so the
+ * set is auditable in one place instead of inlined across 30 rules.
+ * Values approximate --color-background-{page,surface}, --color-border-subtle
+ * and --color-sidebar-bg for each mode; the brand blue is the real token, since
+ * the accent is the same in both themes.
+ */
+.onboarding-theme-preview {
+    --swatch-light-page: #f8fafc;
+    --swatch-light-surface: #fff;
+    --swatch-light-border: #dce1e7;
+    --swatch-light-fill: #d7dde4;
+    --swatch-light-rail: #172033;
+    --swatch-light-rail-dot: #465264;
+    --swatch-dark-page: #151a22;
+    --swatch-dark-surface: #1b222c;
+    --swatch-dark-main: #171c24;
+    --swatch-dark-border: #303b4a;
+    --swatch-dark-outline: #293342;
+    --swatch-dark-fill: #354050;
+    --swatch-dark-rail: #0f1725;
+}
+
+.onboarding-theme-preview { display: flex; height: 150px; overflow: hidden; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); background: var(--swatch-light-page); }
+.onboarding-theme-preview__nav { display: flex; width: 24px; flex: none; flex-direction: column; align-items: center; gap: 6px; padding-top: 9px; background: var(--swatch-light-rail); }
+.onboarding-theme-preview__nav i { width: 7px; height: 7px; border-radius: 50%; background: var(--swatch-light-rail-dot); }
+.onboarding-theme-preview__nav i:first-child { width: 13px; height: 13px; margin-bottom: 2px; border-radius: var(--radius-sm); background: var(--color-action-primary); }
+.onboarding-theme-preview__main { position: relative; display: flex; min-width: 0; flex: 1; flex-direction: column; padding: 10px 8px 8px; background: var(--swatch-light-page); }
+.onboarding-theme-preview__top { display: flex; align-items: center; gap: 5px; }
+.onboarding-theme-preview__top i { width: 19%; height: 8px; border-radius: 1px; background: var(--swatch-light-fill); }
+.onboarding-theme-preview__top i:first-child { width: 31%; background: var(--color-action-primary); }
+.onboarding-theme-preview__top i:last-child { width: 10%; }
+.onboarding-theme-preview__label { width: 38%; height: 10px; margin-top: 10px; background: var(--swatch-light-fill); }
+.onboarding-theme-preview__cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 8px; }
+.onboarding-theme-preview__cards i { height: 21px; border: 1px solid var(--swatch-light-border); background: var(--swatch-light-surface); }
+.onboarding-theme-preview__panel { flex: 1; margin-top: 8px; border: 1px solid var(--swatch-light-border); background: var(--swatch-light-surface); }
+.onboarding-theme-preview--dark { border-color: var(--swatch-dark-outline); background: var(--swatch-dark-page); }
+.onboarding-theme-preview--dark .onboarding-theme-preview__nav { background: var(--swatch-dark-rail); }
+.onboarding-theme-preview--dark .onboarding-theme-preview__main { background: var(--swatch-dark-main); }
+.onboarding-theme-preview--dark .onboarding-theme-preview__top i,
+.onboarding-theme-preview--dark .onboarding-theme-preview__label { background: var(--swatch-dark-fill); }
+.onboarding-theme-preview--dark .onboarding-theme-preview__top i:first-child { background: var(--color-action-primary); }
+.onboarding-theme-preview--dark .onboarding-theme-preview__cards i,
+.onboarding-theme-preview--dark .onboarding-theme-preview__panel { border-color: var(--swatch-dark-border); background: var(--swatch-dark-surface); }
+.onboarding-theme-preview--device .onboarding-theme-preview__main { background: linear-gradient(90deg, var(--swatch-light-page) 42.7%, var(--swatch-dark-main) 42.7%); }
+.onboarding-theme-preview--device .onboarding-theme-preview__top { margin-right: 0; }
+.onboarding-theme-preview--device .onboarding-theme-preview__top i:first-child { width: 24%; }
+.onboarding-theme-preview--device .onboarding-theme-preview__label { width: 26%; }
+.onboarding-theme-preview--device .onboarding-theme-preview__cards { grid-template-columns: 1.5fr 1fr 1fr; }
+.onboarding-theme-preview--device .onboarding-theme-preview__cards i { border-color: var(--swatch-light-border); background: transparent; }
+.onboarding-theme-preview--device .onboarding-theme-preview__cards i:nth-child(n+2) { border-color: var(--swatch-dark-border); }
+.onboarding-theme-preview--device .onboarding-theme-preview__panel { display: flex; gap: 5px; border: 0; background: transparent; }
+.onboarding-theme-preview--device .onboarding-theme-preview__panel::before { flex: 1.5; border: 1px solid var(--swatch-light-border); content: ''; }
+.onboarding-theme-preview--device .onboarding-theme-preview__panel::after { flex: 2; border: 1px solid var(--swatch-dark-border); content: ''; }
+
+.onboarding-copy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+.onboarding-copy-grid > div { display: flex; flex-direction: column; gap: 10px; padding: 18px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); background: var(--color-background-elevated); }
+.onboarding-copy-grid span { font-size: var(--typography-font-size-md); line-height: 1.45; }
+.onboarding-copy-grid .onboarding-code-token { align-self: flex-start; }
+
+.onboarding-layer-grid { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch; gap: 12px; margin-top: 20px; }
+.onboarding-layer-grid > b { align-self: center; }
+.onboarding-layer-grid article { display: flex; min-height: 150px; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--color-border-subtle); border-top: 3px solid var(--color-action-primary); border-radius: var(--radius-lg); }
+.onboarding-layer-grid article:first-of-type { border-top-color: var(--color-border-strong); }
+.onboarding-layer-grid article:nth-of-type(2) { border-top-color: var(--color-action-secondary); }
+.onboarding-layer-grid small, .onboarding-layer-grid span { color: var(--color-text-secondary); }
+.onboarding-layer-grid small { text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; font-size: var(--typography-font-size-sm); }
+.onboarding-layer-grid code { margin-top: auto; color: var(--color-text-secondary); font-size: var(--typography-font-size-sm); }
+.onboarding-recommended { display: inline-block; margin-left: 6px; padding: 3px 7px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--color-action-primary) 12%, transparent); color: var(--color-action-primary); font-size: var(--typography-font-size-sm); font-weight: 700; text-transform: uppercase; vertical-align: middle; }
+.onboarding-invoker-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 16px; }
+.onboarding-invoker-tags > span { border: 1px solid var(--color-border-subtle); border-radius: 999px; padding: 6px 10px; color: var(--color-text-primary); }
+/* Identical to the tags beside it — it is a real button, so the explicit
+   height/padding override the kit's own metrics to line it up, and the kit's
+   text-button hover supplies the only affordance it needs. */
+.onboarding-connector-pick { margin: 18px 0 10px; color: var(--color-text-primary); font-size: var(--typography-font-size-md); }
+/* No overflow of its own: Table's Ant adapter already owns the scroll container,
+   and nesting a second one here just produced a scrollbar the table did not need. */
+.onboarding-connector-table { min-width: 0; }
+.onboarding-invoker-tags .onboarding-invoker-tags__more {
+    height: auto;
+    min-height: 0;
+    min-width: 0;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 999px;
+    padding: 6px 10px;
+    color: var(--color-text-primary);
+    font-size: inherit;
+}
+.onboarding-invoker-upload { display: flex; width: 240px; flex-direction: column; gap: 8px; }
+/* The dropzone primitive sizes itself for full-page upload flows; shrink it here
+   so it doesn't dominate a single row in the onboarding options list. */
+.onboarding-invoker-dropzone .ant-upload.ant-upload-drag .ant-upload { padding: 8px; }
+.onboarding-invoker-dropzone .ant-upload-drag-icon { margin-bottom: 2px !important; }
+.onboarding-invoker-dropzone .ant-upload-drag-icon span { font-size: 18px !important; }
+.onboarding-invoker-dropzone .ant-upload-text { margin: 0 !important; font-size: var(--typography-font-size-sm) !important; }
+.onboarding-invoker-upload__status { display: flex; align-items: center; gap: 8px; color: var(--color-text-secondary); font-size: var(--typography-font-size-sm); }
+.onboarding-invoker-options { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+.onboarding-invoker-options > section { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); padding: 14px 16px; background: var(--color-background-elevated); }
+.onboarding-invoker-options > section.is-recommended { border: 2px solid var(--color-action-primary); }
+.onboarding-invoker-options h3, .onboarding-invoker-options p { margin: 0; }
+.onboarding-invoker-options p { margin-top: 3px; font-size: var(--typography-font-size-md); }
+.onboarding-invoker-options code { color: var(--color-text-secondary); font-size: var(--typography-font-size-sm); }
+
+@media (max-width: 760px) {
+    .onboarding-copy-grid { grid-template-columns: 1fr; }
+    .onboarding-invoker-options > section { grid-template-columns: 1fr; }
+    .onboarding-invoker-upload { width: auto; }
+    .onboarding-layer-grid { grid-template-columns: 1fr; }
+    .onboarding-layer-grid > b { display: none; }
+    .onboarding-theme-card { min-height: auto; }
+    .onboarding-theme-preview { height: 80px; }
+    .onboarding-phases { gap: 12px; justify-content: space-between; }
+}
+
+@media (max-width: 420px) {
+    .onboarding-copy-grid > div { padding: 13px; }
+    .onboarding-phases { font-size: var(--typography-font-size-sm); }
+}

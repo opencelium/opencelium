@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
 import type { AuthUser } from '@entities/auth/model/types';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { Connector } from '@entities/connector/model/types';
 import type { Invoker } from '@entities/invoker/model/types';
 import type { HistoryVersionItem } from '../types/history.types';
@@ -8,6 +9,7 @@ import { applyProfileAuthor, buildWorkflowChangeSnapshot,
 	toPayloadDescription } from '../utils/workflowPage.utils';
 import { hydrateNodesWithOperationResponses,
 	type HydrateCacheEntry } from '../utils/workflowNodeHydration';
+import { useSimulatedHistoryVersions } from '../components/header/HistoryPanel/simulatedHistoryVersions';
 
 type Params = {
 	connectionId?: string;
@@ -31,10 +33,17 @@ export const useWorkflowViewData = ({ connectionId, createdConnectionId, title,
 		nodes, connectors, invokers, cacheRef.current,
 	), [nodes, connectors, invokers]);
 	const activeConnectionId = createdConnectionId ?? connectionId;
-	const displayedHistoryVersions = useMemo(
+	const { lang } = useI18n('workflow');
+	const simulatedHistoryVersions = useSimulatedHistoryVersions(lang);
+	// A saved connection always shows its own versions; the tutorial's samples only
+	// fill the panel where there is nothing real to list.
+	const isSimulatedHistory = !activeConnectionId && simulatedHistoryVersions !== null;
+	const realHistoryVersions = useMemo(
 		() => applyProfileAuthor(historyVersions, authUser),
 		[historyVersions, authUser],
 	);
+	const displayedHistoryVersions = isSimulatedHistory && simulatedHistoryVersions
+		? simulatedHistoryVersions : realHistoryVersions;
 	const currentSnapshot = useMemo(() => buildWorkflowChangeSnapshot({
 		connectionId: activeConnectionId,
 		title,
@@ -44,5 +53,6 @@ export const useWorkflowViewData = ({ connectionId, createdConnectionId, title,
 		fieldBindings,
 	}), [activeConnectionId, title, description, hydratedNodes, edges, fieldBindings]);
 
-	return { hydratedNodes, activeConnectionId, displayedHistoryVersions, currentSnapshot };
+	return { hydratedNodes, activeConnectionId, displayedHistoryVersions,
+		isSimulatedHistory, currentSnapshot };
 };

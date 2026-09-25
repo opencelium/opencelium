@@ -40,7 +40,7 @@ export function moveOrCopyWorkflowNodes({
   fieldBindings?: unknown[];
   cleanInvalid?: boolean;
 }): WorkflowDropResult {
-  if (sourceNodeId === target.nodeId) {
+  if (sourceNodeId === target.nodeId && mode === 'move') {
     return { nodes, edges, fieldBindings, invalidReferences: [] };
   }
 
@@ -51,7 +51,8 @@ export function moveOrCopyWorkflowNodes({
   }
 
   const subtree = subtreeForNode(sourceNodeId, nodes, edges);
-  if (subtree.nodes.some((node) => node.id === target.nodeId)) {
+  if (subtree.nodes.some((node) => node.id === target.nodeId) &&
+    !(mode === 'copy' && sourceNodeId === target.nodeId)) {
     return { nodes, edges, fieldBindings, invalidReferences: [] };
   }
 
@@ -114,4 +115,33 @@ export function moveOrCopyWorkflowNodes({
     invalidReferences: [],
     idMap: prepared.idMap,
   };
+}
+
+export function moveWorkflowNodeGroup({
+  sourceNodeIds,
+  target,
+  nodes,
+  edges,
+  fieldBindings,
+  cleanInvalid = false,
+}: {
+  sourceNodeIds: string[];
+  target: DropTarget;
+  nodes: WorkflowNodeModel[];
+  edges: WorkflowEdgeModel[];
+  fieldBindings?: unknown[];
+  cleanInvalid?: boolean;
+}): WorkflowDropResult {
+  let result: WorkflowDropResult = { nodes, edges, fieldBindings, invalidReferences: [] };
+  sourceNodeIds.forEach((sourceNodeId, index) => {
+    result = moveOrCopyWorkflowNodes({
+      sourceNodeId,
+      target: index === 0
+        ? target
+        : { nodeId: sourceNodeIds[index - 1], direction: 'right' },
+      mode: 'move', nodes: result.nodes, edges: result.edges,
+      fieldBindings: result.fieldBindings, cleanInvalid,
+    });
+  });
+  return result;
 }

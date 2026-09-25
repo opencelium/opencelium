@@ -51,9 +51,11 @@ type CommandPaletteProps = {
      * the workflow editor uses this to make a first Escape clear search
      * highlights, and only a second Escape close the palette. */
     onEscapeClearScope?: () => boolean;
+    scopeActivation?: { requestId: number; scope: string; inputValue: string };
 };
 
-export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessRecommendations, onScopeExit, onEscapeClearScope }: CommandPaletteProps = {}) => {
+export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessRecommendations,
+    onScopeExit, onEscapeClearScope, scopeActivation }: CommandPaletteProps = {}) => {
     const {isMobile} = useBreakpoints();
     const { showCommandContent, toggleCommandContent } = useLayoutStore();
     const {t: tCommon} = useI18n('common');
@@ -121,6 +123,17 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
             focusInput: () => inputRef.current?.focus(),
         });
     };
+    useEffect(() => {
+        if (!scopeActivation?.requestId) return;
+        const frame = requestAnimationFrame(() => {
+            changeSourceRef.current = 'input';
+            setLockedScope({ value: scopeActivation.scope, lockAsChip: true });
+            setValue(scopeActivation.inputValue);
+            setIsActive(true);
+            inputRef.current?.focus();
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [scopeActivation]);
     useEffect(() => {
         if (!showCommandContent && content !== null) {
             setContent(null);
@@ -298,7 +311,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                 style={{justifyContent: collapsible ? 'flex-start' : isMobile ? 'left' : 'center'}}
                 onMouseDown={isCollapsed ? (e) => { e.preventDefault(); inputRef.current?.focus(); setIsActive(true); } : undefined}
             >
-                <Command shouldFilter={false} value={highlighted} onValueChange={setHighlighted} style={{position: 'relative', paddingLeft: 20, paddingRight: 80}}>
+                <Command data-testid="command-palette-tour-target" shouldFilter={false} value={highlighted} onValueChange={setHighlighted} style={{position: 'relative', paddingLeft: 20, paddingRight: 80}}>
                     <div className="cmdk-input-row">
                         {lockedScope && (
                             <span className="cmdk-scope-chip" data-testid="command-palette-scope-chip">

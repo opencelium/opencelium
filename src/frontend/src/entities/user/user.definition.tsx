@@ -16,6 +16,14 @@ import {apiExecutor} from "@shared/api/apiExecutor.ts";
 import {message} from "antd";
 import {selectAuthUser} from "@entities/auth/model/authSelectors.ts";
 import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
+import { UserEmailCell } from '@entities/user/ui/UserEmailCell'
+import { UserWizardImage } from '@entities/user/ui/UserWizardImage'
+import {
+    deleteUserProfilePicture,
+    hasProfilePictureFile,
+    shouldDeleteProfilePicture,
+    uploadUserProfilePicture,
+} from '@entities/user/lib/profilePicture'
 const baseKey = 'user';
 
 const resolveUserId = (value: string): string => {
@@ -128,8 +136,39 @@ export const userDefinition: EntityDefinition = {
             return {
                 ...userModel,
                 userGroup: userModel?.userGroup?.groupId,
+                profilePicture: userModel?.userDetail?.profilePicture ?? null,
+                profilePictureOriginal: userModel?.userDetail?.profilePicture ?? null,
             }
-        }
+        },
+        // The wizard's picture fields only stage the after-save upload/delete;
+        // undefined drops them from the JSON body.
+        mapToApi: ({data}: {data: UserUpdateDto}) => ({
+            ...data,
+            profilePicture: undefined,
+            profilePictureOriginal: undefined,
+        }),
+        actions: {
+            uploadProfilePicture: {
+                execute: uploadUserProfilePicture,
+                condition: hasProfilePictureFile,
+                bestEffort: true,
+                errorMessageKey: `${baseKey}.lifecycle.uploadProfilePicture.failed`,
+            },
+            deleteProfilePicture: {
+                execute: deleteUserProfilePicture,
+                condition: shouldDeleteProfilePicture,
+                bestEffort: true,
+                errorMessageKey: `${baseKey}.lifecycle.deleteProfilePicture.failed`,
+            },
+        },
+        lifecycle: {
+            create: {
+                after: ['uploadProfilePicture'],
+            },
+            update: {
+                after: ['uploadProfilePicture', 'deleteProfilePicture'],
+            },
+        },
     },
 
     /* ===============================
@@ -244,6 +283,26 @@ export const userDefinition: EntityDefinition = {
                 ]
             }
         },
+        {
+            // Edited from the wizard's top-right image (UserWizardImage), not as a form
+            // field — so it is intentionally left out of every section.
+            name: 'profilePicture',
+            type: 'file',
+            defaultValue: null,
+            ui: {
+                component: 'file-dropzone',
+            },
+        },
+        {
+            // Hidden companion holding the stored picture path; carried in form state so
+            // the delete after-action can tell whether there was a picture to remove.
+            name: 'profilePictureOriginal',
+            type: 'file',
+            defaultValue: null,
+            ui: {
+                component: 'input',
+            },
+        },
         //credentials
         {
             name: 'email',
@@ -251,6 +310,7 @@ export const userDefinition: EntityDefinition = {
             defaultValue: 'admin@opencelium.io',
             ui: {
                 component: 'input',
+                overrideKey: 'userEmailGravatar',
                 props: {
                     autoFocus: true,
                     labelKey: `${baseKey}.fields.email.label`,
@@ -282,7 +342,7 @@ export const userDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.email.label`,
-                render: (_row, value) => <TruncatedTextCell value={value} />,
+                render: (row, value) => <UserEmailCell row={row as User} value={value} />,
             },/*
             access: {
                 strategy: 'disable',
@@ -463,6 +523,8 @@ export const userDefinition: EntityDefinition = {
 
     wizard: {
         image: userWizardImage as string,
+        imageField: 'profilePicture',
+        renderImage: UserWizardImage,
 
         modes: {
             create: {

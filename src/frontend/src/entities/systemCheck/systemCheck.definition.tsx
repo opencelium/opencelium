@@ -7,6 +7,7 @@ import { i18n } from '@shared/i18n/config/i18n'
 import en from '@entities/systemCheck/i18n/en.json'
 import de from '@entities/systemCheck/i18n/de.json'
 import type { HealthStatus, SystemHealth } from '@entities/updateAssistant/model/types'
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'system-check'
 const SYSTEM_CHECK_URL = `/${baseKey}`
@@ -174,6 +175,11 @@ export const systemCheckDefinition: EntityDefinition = {
                 visible: true,
                 order: 4,
                 labelKey: `${baseKey}.list.columns.error`,
+                // Backend errors arrive as whole sentences with a URL embedded (SMTP
+                // auth failures are the worst offender). On the table's default
+                // single-line cell that is a guaranteed horizontal scrollbar, so this
+                // column wraps and breaks mid-token instead.
+                render: (_row, value) => <TruncatedTextCell value={value} breakAnywhere />,
             },
         },
     ],
