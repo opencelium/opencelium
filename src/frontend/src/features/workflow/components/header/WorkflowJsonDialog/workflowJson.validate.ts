@@ -32,7 +32,7 @@ const withoutDerivedUiConfig = (payload: WorkflowJsonPayload): unknown => {
 		...payload.fromConnector.operators.map((operator) => [operator.id,
 			operator.type.toLowerCase() === 'loop' ? 'loop' : 'if'] as const),
 	]);
-	return { ...payload, ui: { ...payload.ui,
+	return { ...payload, name: payload.title, ui: { ...payload.ui,
 		workflowNodes: payload.ui.workflowNodes.map((node) => {
 			const entryType = entryTypes.get(node.id);
 			if (!entryType) return node;
@@ -86,9 +86,6 @@ export function validateWorkflowJson(value: unknown,
 	}
 
 	const { methods, operators } = parsed.data.fromConnector;
-	if (parsed.data.title !== parsed.data.name) return { success: false, errors: [{
-		key: 'json.errors.titleNameMismatch', path: 'name',
-	}] };
 	if (context.connectionsLoaded === false) return { success: false, errors: [{
 		key: 'json.errors.connectionNamesUnavailable', path: 'title',
 	}] };

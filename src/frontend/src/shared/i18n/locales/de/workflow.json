@@ -278,6 +278,7 @@
   "json": {
     "title": "Workflow als JSON bearbeiten",
     "reset": "Zurücksetzen",
+    "forceApply": "Erzwungen anwenden",
     "applied": "Workflow-JSON wurde übernommen.",
     "discard": {
       "title": "JSON-Änderungen verwerfen?",
@@ -286,6 +287,10 @@
     "applyConfirm": {
       "title": "Workflow ersetzen?",
       "message": "Beim Übernehmen wird der gesamte Workflow ersetzt und der Rückgängig-Verlauf dieser Sitzung gelöscht."
+    },
+    "forceApplyConfirm": {
+      "title": "Ungültiges Workflow-JSON erzwingen?",
+      "message": "Validierungsfehler werden ignoriert. Dadurch kann der Workflow ungültig werden. Fortfahren?"
     },
     "mode": {
       "tree": "Baum",
@@ -303,7 +308,6 @@
       "edgeTarget": "{{path}}: Der Zielknoten existiert nicht.",
       "unknownConnector": "{{path}}: Der Connector existiert nicht.",
       "invalidInvoker": "{{path}}: Der Invoker muss zum ausgewählten Connector passen (erwartet: {{reason}}).",
-      "titleNameMismatch": "{{path}}: Der Name muss dem Workflow-Titel entsprechen.",
       "titleTaken": "{{path}}: Ein Workflow mit diesem Titel existiert bereits.",
       "connectionNamesUnavailable": "{{path}}: Workflow-Namen werden noch geladen oder sind nicht verfügbar.",
       "unknownCategory": "{{path}}: Diese Kategorie existiert nicht.",

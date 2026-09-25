@@ -278,6 +278,7 @@
   "json": {
     "title": "Edit workflow as JSON",
     "reset": "Reset",
+    "forceApply": "Force Apply",
     "applied": "Workflow JSON applied.",
     "discard": {
       "title": "Discard JSON changes?",
@@ -286,6 +287,10 @@
     "applyConfirm": {
       "title": "Replace the workflow?",
       "message": "Applying will replace the whole workflow and clear the in-session undo history."
+    },
+    "forceApplyConfirm": {
+      "title": "Force apply invalid workflow JSON?",
+      "message": "Validation errors will be ignored. This may leave the workflow in an invalid state. Continue?"
     },
     "mode": {
       "tree": "Tree",
@@ -303,7 +308,6 @@
       "edgeTarget": "{{path}}: the target node does not exist.",
       "unknownConnector": "{{path}}: the connector does not exist.",
       "invalidInvoker": "{{path}}: the invoker must match the selected connector (expected {{reason}}).",
-      "titleNameMismatch": "{{path}}: name must match the workflow title.",
       "titleTaken": "{{path}}: a workflow with this title already exists.",
       "connectionNamesUnavailable": "{{path}}: workflow names are still loading or unavailable.",
       "unknownCategory": "{{path}}: this category does not exist.",
