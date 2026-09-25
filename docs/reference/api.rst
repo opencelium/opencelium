@@ -81,6 +81,42 @@ document and hardcoded on the UI side.
      - Legacy data. Keeps the pre-type behaviour: the invoker is inferred from
        the enclosing or own connector, falling back to a plain HTTP request.
 
+Joints (5.1)
+------------
+
+A method may carry a **joint**: after it runs, execution continues at another
+method instead of at the next one.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 20 55
+
+   * - Field
+     - Type
+     - Description
+   * - ``jump``
+     - string
+     - The ``index`` of the target method. Absent when the method has no joint.
+       A method carries at most one.
+
+The server validates every joint on save and again before execution, rejecting
+it with one of the ``JUMP_*`` codes listed in
+:doc:`../guides/debug-a-workflow`. The rules — methods only, forward only, same
+loop scope, may leave an ``If`` but not enter one — are described in
+:doc:`../guides/skip-steps-with-joints`.
+
+.. note::
+   The field was named ``jumpTo`` in pre-release builds and documents using the
+   old name are still read, but new documents should be written with ``jump``.
+
+Canvas annotations (5.1)
+------------------------
+
+**Comment boxes** are stored in the workflow's ``ui`` object, alongside node
+positions, not among the methods. Each records its text, its anchor node, its
+offset from that node, its size and whether it is minimised. They are ignored by
+the execution engine and are carried along by templates.
+
 Example
 -------
 
