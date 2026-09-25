@@ -1,6 +1,6 @@
 import { Dialog } from '@shared/ui/primitives/Dialog';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { Alert, Button, Segmented } from 'antd';
+import { Alert, Segmented } from 'antd';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-tomorrow';
@@ -17,6 +17,8 @@ import type { Ace } from 'ace-builds';
 import { findJsonPathPositions, findJsonSyntaxErrorPosition } from './workflowJson.locations';
 import './WorkflowJsonDialog.css';
 import { useFetchEntitiesQuery } from '@shared/api/genericApi';
+import type { WorkflowJsonPayload } from './workflowJson.schema';
+import { Button } from '@shared/ui/primitives/Button';
 
 type ConnectionMeta = { id: number; title: string };
 
@@ -74,16 +76,33 @@ export function WorkflowJsonDialog({ open, readOnly, value, connectors,
 		if (!approved) return;
 		onApply(editor.validation.data);
 	};
-	const footer = <>
-		<Button data-testid="workflow-json-cancel" onClick={() => void close()}>{t('actions.cancel')}</Button>
-		{!readOnly && <>
-			<Button data-testid="workflow-json-reset" disabled={!editor.dirty}
+	const forcePayload = editor.syntaxError ? null : editor.draft as WorkflowJsonPayload;
+	const forceApply = async () => {
+		if (!forcePayload) return;
+		const approved = await confirm({ title: t('json.forceApplyConfirm.title'),
+			message: t('json.forceApplyConfirm.message'), confirmVariant: 'danger' });
+		if (!approved) return;
+		onApply(forcePayload);
+	};
+	const footer = <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+		{!readOnly
+			? <Button variant="danger" color="danger" type="primary"
+				testId="workflow-json-force-apply"
+				disabled={!editor.dirty || !forcePayload || !error}
+				onClick={() => void forceApply()}>{t('json.forceApply')}</Button>
+			: <span />}
+		<div style={{ display: 'flex', gap: 8 }}>
+			<Button testId="workflow-json-cancel"
+				onClick={() => void close()}>{t('actions.cancel')}</Button>
+			{!readOnly && <>
+			<Button testId="workflow-json-reset" disabled={!editor.dirty}
 				onClick={editor.reset}>{t('json.reset')}</Button>
-			<Button type="primary" data-testid="workflow-json-apply"
+			<Button type="primary" testId="workflow-json-apply"
 				disabled={!editor.dirty || !!error}
 				onClick={() => void apply()}>{t('actions.apply')}</Button>
-		</>}
-	</>;
+			</>}
+		</div>
+	</div>;
 
 	return (
 		<Dialog open={open} onClose={() => void close()} title={t('json.title')}
