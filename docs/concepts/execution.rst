@@ -25,6 +25,17 @@ Operators change the walk rather than issuing calls:
 * a **Loop** operator repeats its nested steps, exposing the current item as its
   iterator.
 
+A **joint** (new in 5.1) changes the walk too, without a node of its own: after
+running a step that carries one, the engine continues at the joint's target
+instead of at the next step, so everything in between is skipped. Joints point
+forward only and cannot cross a loop boundary, so they can never produce a cycle.
+The server validates them on save and again before execution — see
+:doc:`../guides/skip-steps-with-joints`.
+
+A reference to a step that did not run — because a joint skipped it, or because
+it sits on the branch the ``If`` did not take — resolves to an **empty value**
+and is reported. It does not fail the run.
+
 If an invoker declares pagination for the operation, the engine fetches all pages
 before the step is considered finished, so the workflow sees one complete result.
 
@@ -58,6 +69,12 @@ have to save first. It exists to debug, so it is deliberately constrained:
 * a run **survives a page reload** and is resumed when you come back,
 * leaving the editor asks for confirmation and then terminates the run,
 * the workflow needs at least one step.
+
+Since 5.1 a test run is presented in one of two modes. In **debug** mode the
+canvas and the log panel replay the run at a pace you can follow, and can be
+paused, stepped and sped up; in **live** mode everything appears as it arrives.
+The choice is presentation only — the engine executes at full speed either way.
+See :ref:`guide-debug-mode`.
 
 Under the hood a test run creates a temporary connection and scheduler. Those are
 cleaned up automatically; a background **sweeper** removes any that were left

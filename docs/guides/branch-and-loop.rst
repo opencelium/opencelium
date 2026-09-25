@@ -92,3 +92,23 @@ dialog is not a formality.
 
 In the execution log, nested loop iterations are grouped and paginated, so you can
 page to a specific iteration — see :doc:`debug-a-workflow`.
+
+Skipping steps without an operator
+==================================
+
+.. note::
+   **New in 5.1.**
+
+An ``If`` decides *per run* which path to take. When the decision is structural —
+"once we are here, these three steps are not needed" — a **joint** says so
+directly, as one line on the canvas, instead of an operator around every step you
+want to pass over.
+
+Joints point forward only and cannot cross a loop boundary, so they complement
+operators rather than replacing them. See :doc:`skip-steps-with-joints`.
+
+Debugging a loop
+================
+
+Pausing a test run inside a loop lets you fast-forward to the next iteration, or
+to a numbered one, instead of watching every pass. See :ref:`guide-debug-mode`.
