@@ -37,9 +37,9 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const [changeHistoryOpen, setChangeHistoryOpen] = useState(false);
 	const [jsonEditorOpen, setJsonEditorOpen] = useState(false);
 	const [jsonEditorValue, setJsonEditorValue] = useState<Record<string, unknown> | null>(null);
-	const [copiedNodeId, setCopiedNodeId] = useState<string | null>(null);
+	const [copiedNodeIds, setCopiedNodeIds] = useState<string[]>([]);
 	const [pasteOperatorTarget, setPasteOperatorTarget] = useState<{
-		sourceNodeId: string;
+		sourceNodeIds: string[];
 		targetNodeId: string;
 	} | null>(null);
 	const validation = useWorkflowValidation({ persistedTitle: connection.persistedTitle,
@@ -145,25 +145,26 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	useCopySelectedNodeShortcut({
 		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
 		nodes: workflow.nodes,
-		onCopyNode: (nodeId) => {
-			setCopiedNodeId(nodeId);
+		edges: workflow.edges,
+		onCopyNodes: (nodeIds) => {
+			setCopiedNodeIds(nodeIds);
 			message.success(t('messages.nodeCopied'));
 		},
 	});
-	const pasteNode = async (sourceNodeId: string, targetNodeId: string,
+	const pasteNodes = async (sourceNodeIds: string[], targetNodeId: string,
 		direction: 'right' | 'bottom') => {
-		const pasted = await workflow.onPasteNode(sourceNodeId, targetNodeId, direction);
+		const pasted = await workflow.onPasteNodes(sourceNodeIds, targetNodeId, direction);
 		if (pasted) message.success(t('messages.nodePasted'));
 	};
 	usePasteCopiedNodeShortcut({
 		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
-		copiedNodeId,
+		copiedNodeIds,
 		nodes: workflow.nodes,
-		onPasteNode: (sourceNodeId, targetNodeId) => {
-			void pasteNode(sourceNodeId, targetNodeId, 'right');
+		onPasteNodes: (sourceNodeIds, targetNodeId) => {
+			void pasteNodes(sourceNodeIds, targetNodeId, 'right');
 		},
-		onChooseOperatorPlacement: (sourceNodeId, targetNodeId) =>
-			setPasteOperatorTarget({ sourceNodeId, targetNodeId }),
+		onChooseOperatorPlacement: (sourceNodeIds, targetNodeId) =>
+			setPasteOperatorTarget({ sourceNodeIds, targetNodeId }),
 	});
 	useDuplicateSelectedNodeShortcut({
 		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
@@ -190,15 +191,15 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen,
 		jsonEditorOpen, setJsonEditorOpen, jsonEditorValue,
 		schedulesOpen, setSchedulesOpen, changeHistoryOpen, setChangeHistoryOpen,
-		copiedNodeId, pasteOperatorTarget,
+		copiedNodeIds, pasteOperatorTarget,
 		cancelPasteOperator: () => setPasteOperatorTarget(null),
 		pasteOperatorInScope: () => {
-			if (pasteOperatorTarget) void pasteNode(pasteOperatorTarget.sourceNodeId,
+			if (pasteOperatorTarget) void pasteNodes(pasteOperatorTarget.sourceNodeIds,
 				pasteOperatorTarget.targetNodeId, 'bottom');
 			setPasteOperatorTarget(null);
 		},
 		pasteOperatorAfter: () => {
-			if (pasteOperatorTarget) void pasteNode(pasteOperatorTarget.sourceNodeId,
+			if (pasteOperatorTarget) void pasteNodes(pasteOperatorTarget.sourceNodeIds,
 				pasteOperatorTarget.targetNodeId, 'right');
 			setPasteOperatorTarget(null);
 		} };
