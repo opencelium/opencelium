@@ -1,5 +1,5 @@
 ######################
-OpenCelium 5.0
+OpenCelium 5.1
 ######################
 
 OpenCelium is an integration platform: you connect APIs, move and enrich data
@@ -9,6 +9,9 @@ This documentation is organised by what you are trying to do.
 
 **New here?** Start with :doc:`start/introduction` for the ideas, then
 :doc:`start/first-workflow` builds a working integration end to end.
+
+**Coming from 5.0?** :doc:`start/whats-new-5-1` covers the new editor features —
+joints, debug mode, undo/redo, change history and comment boxes.
 
 **Upgrading from 4.x?** Read :doc:`start/upgrade-to-5` first — workflows replaced
 connections, and two ``application.yml`` keys moved.
@@ -30,6 +33,7 @@ for example :doc:`reference/configuration` and :doc:`reference/api`.
    start/introduction
    start/install
    start/first-workflow
+   start/whats-new-5-1
    start/upgrade-to-5
 
 .. toctree::
@@ -47,8 +51,11 @@ for example :doc:`reference/configuration` and :doc:`reference/api`.
 
    guides/build-a-workflow
    guides/branch-and-loop
+   guides/skip-steps-with-joints
    guides/call-any-api
    guides/chain-workflows
+   guides/annotate-a-workflow
+   guides/undo-and-history
    guides/schedule-and-notify
    guides/debug-a-workflow
    guides/reuse-with-templates
