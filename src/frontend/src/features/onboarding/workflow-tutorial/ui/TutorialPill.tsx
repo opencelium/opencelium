@@ -2,6 +2,7 @@ import { Button } from '@shared/ui/primitives/Button'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { ONBOARDING_Z_INDEX } from '../../model/types'
 import { CommandHint } from '../../ui/CommandHint'
+import { ShortcutHint, type Shortcut } from '../../ui/ShortcutHint'
 import type { TutorialPick, TutorialStep } from '../model/tutorialSteps'
 import '../../ui/onboardingCode.css'
 import './tutorialPill.css'
@@ -20,6 +21,10 @@ type TutorialPillProps = {
     example?: string
     /** Choices to make, in order, if the step is a sequence of picks. */
     picks?: TutorialPick[]
+    /** Sample rows of a list the step describes — see TutorialStep.entries. */
+    entries?: TutorialPick[]
+    /** Keyboard shortcuts for the step — see TutorialStep.shortcuts. */
+    shortcuts?: Shortcut[]
     index: number
     total: number
     /** Set only for a step the canvas cannot detect, which the user closes by hand. */
@@ -34,7 +39,9 @@ type TutorialPillProps = {
  * introduction and the closing read-back — which point at nothing and take the
  * `center` anchor.
  */
-export function TutorialPill({ copy, anchor, example, picks, index, total, onNext, onClose }: TutorialPillProps) {
+export function TutorialPill({
+    copy, anchor, example, picks, entries, shortcuts, index, total, onNext, onClose,
+}: TutorialPillProps) {
     const { t } = useI18n('onboarding')
     // The editor's own namespace: a pick that names one of its options is rendered
     // from the very key the dropdown renders, rather than from a copy of the label.
@@ -56,6 +63,8 @@ export function TutorialPill({ copy, anchor, example, picks, index, total, onNex
             {t('actions.next')}
         </Button>
     )
+    const renderPick = (pick: TutorialPick) =>
+        pick.labelKey ? tWorkflow(pick.labelKey, pick.values) : pick.label
     const hint = <span className="workflow-tutorial-pill__hint">{t(`${base}.note`)}</span>
 
     return (
@@ -78,11 +87,21 @@ export function TutorialPill({ copy, anchor, example, picks, index, total, onNex
             {picks ? (
                 <ol className="workflow-tutorial-pill__picks">
                     {picks.map(pick => (
-                        <li key={pick.label ?? pick.labelKey}>
-                            {pick.labelKey ? tWorkflow(pick.labelKey, pick.values) : pick.label}
-                        </li>
+                        <li key={pick.label ?? pick.labelKey}>{renderPick(pick)}</li>
                     ))}
                 </ol>
+            ) : null}
+            {entries ? (
+                <ul className="workflow-tutorial-pill__entries">
+                    {entries.map(entry => (
+                        <li key={entry.label ?? entry.labelKey}>{renderPick(entry)}</li>
+                    ))}
+                </ul>
+            ) : null}
+            {shortcuts ? (
+                <div className="workflow-tutorial-pill__shortcuts">
+                    {shortcuts.map(shortcut => <ShortcutHint key={shortcut.labelKey} {...shortcut} />)}
+                </div>
             ) : null}
             {example ? <code className="onboarding-code-token workflow-tutorial-pill__example">{example}</code> : null}
             {/*

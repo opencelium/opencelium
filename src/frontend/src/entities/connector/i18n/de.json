@@ -109,12 +109,12 @@
         "header": "Zugangsdaten",
         "subheader": "Enthält invoker-spezifische Konfigurationsfelder, die zur Authentifizierung und Kommunikation mit dem Zielsystem erforderlich sind.",
         "test": {
-          "button": "Verbindung testen",
-          "success": "Verbindungstest erfolgreich",
-          "needsMasterPassword": "Geben Sie das Master-Passwort ein, um die Verbindung mit den gespeicherten Zugangsdaten zu testen.",
+          "button": "Konnektor testen",
+          "success": "Konnektortest erfolgreich",
+          "needsMasterPassword": "Geben Sie das Master-Passwort ein, um den Konnektortest mit den gespeicherten Zugangsdaten auszuführen.",
           "confirm": {
-            "title": "Verbindungstest fehlgeschlagen",
-            "message": "Der Verbindungstest ist fehlgeschlagen. Möchten Sie diesen Konnektor trotzdem speichern?"
+            "title": "Konnektortest fehlgeschlagen",
+            "message": "Der Konnektortest ist fehlgeschlagen. Möchten Sie diesen Konnektor trotzdem speichern?"
           }
         },
         "remote": {

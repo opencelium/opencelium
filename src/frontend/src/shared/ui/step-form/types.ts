@@ -97,4 +97,6 @@ export interface GenericStepFormProps {
     hideHeader?: boolean
     /** Force the horizontal, description-less step rail and stack the columns. */
     compact?: boolean
+    /** 0-based step to open on instead of the first one. */
+    initialStep?: number
 }

@@ -34,7 +34,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setFieldBindings: setLoadedFieldBindings,
     selectedHistoryVersionId, setSelectedHistoryVersionId, categoryId, setCategoryId,
     isLoading: isConnectionLoading } = connection;
-  const { hydratedNodes, activeConnectionId, displayedHistoryVersions } = view;
+  const { hydratedNodes, activeConnectionId, displayedHistoryVersions, isSimulatedHistory } = view;
   // Not activeConnectionId: the tutorial teaches the schedules panel on an unsaved
   // graph, and only the pill and the panel may see its stand-in connection.
   const schedulesConnectionId = useSchedulesConnectionId(activeConnectionId);
@@ -171,7 +171,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         history={{ open: workflow.historyOpen, items: displayedHistoryVersions,
           selectedId: selectedHistoryVersionId,
           onSelectedIdChange: setSelectedHistoryVersionId,
-          hasUnsavedChanges: hasManualUnsavedChanges,
+          // A sample version never loads, so warning that it would replace the
+          // unsaved canvas would ask the user to confirm something that won't happen.
+          hasUnsavedChanges: hasManualUnsavedChanges && !isSimulatedHistory,
           onClose: () => workflow.setHistoryOpen(false),
           onSelectVersion: historyActions.selectVersion,
           onSaveComment: historyActions.saveComment,

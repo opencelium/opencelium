@@ -1,4 +1,5 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { buildTestId } from '@shared/testing/testId';
 import { WorkflowMenuItem } from '../WorkflowMenuItem/WorkflowMenuItem';
 import type { HeaderMenuProps } from './HeaderMenu.types';
 import { useHeaderMenu } from './useHeaderMenu';
@@ -19,6 +20,7 @@ export function HeaderMenu({ open, items, onClose, onSelect, loadingItemId }: He
               <WorkflowMenuItem
                 key={item.id}
                 className="headerMenuItem"
+                testId={buildTestId('workflow-menu-item', item.id)}
                 label={t(item.labelKey)}
                 loading={isLoading}
                 disabled={item.disabled}
