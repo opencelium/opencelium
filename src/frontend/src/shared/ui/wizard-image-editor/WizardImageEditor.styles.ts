@@ -13,7 +13,7 @@ export const tileStyle = {
     position: 'relative',
     width: 114,
     height: 114,
-    borderRadius: 16,
+    borderRadius: '50%',
     overflow: 'hidden',
     flexShrink: 0,
     display: 'flex',
@@ -91,6 +91,9 @@ export const emptyHintStyle = {
 } as const
 
 export const hoverCss = `
+    .oc-wizard-image-image {
+        border-radius: 50%;
+    }
     .oc-wizard-image-tile--empty:hover,
     .oc-wizard-image-tile--empty:focus-visible {
         border-color: var(--color-action-primary);

@@ -123,10 +123,11 @@ export const ImageTileEditor = ({
                 />
             )}
 
-            {/* Square: the image is drawn on a disc everywhere it appears. */}
+            {/* Circle: the image is drawn on a disc everywhere it appears. */}
             <ImageCropDialog
                 key={cropFile ? `${cropFile.name}-${cropFile.lastModified}` : 'closed'}
                 file={cropFile}
+                shape="circle"
                 onCancel={cancelCrop}
                 onConfirm={handleCropConfirm}
                 title={t(`${i18nPrefix}.crop.title`)}
