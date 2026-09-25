@@ -19,7 +19,7 @@ import './ImageCropDialog.css'
  * in `imageCropGeometry` so the part worth testing is testable.
  */
 export const ImageCropDialog = ({
-    file, aspect = 1, onCancel, onConfirm, title, zoomLabel, cancelLabel, confirmLabel, instruction,
+    file, aspect = 1, shape = 'square', onCancel, onConfirm, title, zoomLabel, cancelLabel, confirmLabel, instruction,
 }: ImageCropDialogProps) => {
     const imageRef = useRef<HTMLImageElement>(null)
     const dragRef = useRef<{pointerX: number; pointerY: number; position: Position} | null>(null)
@@ -121,12 +121,16 @@ export const ImageCropDialog = ({
                             position: 'absolute', left: cropPosition.x, top: cropPosition.y,
                             width: layout.cropWidth, height: layout.cropHeight,
                         }}
-                        className="imageCropSelection"
+                        className={`imageCropSelection${shape === 'circle' ? ' imageCropSelectionCircle' : ''}`}
                     >
-                        <span className="imageCropGrid imageCropGridVertical imageCropGridFirst" />
-                        <span className="imageCropGrid imageCropGridVertical imageCropGridSecond" />
-                        <span className="imageCropGrid imageCropGridHorizontal imageCropGridFirst" />
-                        <span className="imageCropGrid imageCropGridHorizontal imageCropGridSecond" />
+                        {shape === 'square' && (
+                            <>
+                                <span className="imageCropGrid imageCropGridVertical imageCropGridFirst" />
+                                <span className="imageCropGrid imageCropGridVertical imageCropGridSecond" />
+                                <span className="imageCropGrid imageCropGridHorizontal imageCropGridFirst" />
+                                <span className="imageCropGrid imageCropGridHorizontal imageCropGridSecond" />
+                            </>
+                        )}
                     </div>
                 )}
             </div>

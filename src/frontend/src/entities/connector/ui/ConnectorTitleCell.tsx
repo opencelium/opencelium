@@ -12,7 +12,7 @@ const wrapperStyle = {display: 'inline-flex', alignItems: 'center', gap: 8} as c
 
 export const ConnectorTitleCell = ({row, value}: Props) => (
     <span style={wrapperStyle}>
-        <ConnectorIcon icon={resolveConnectorIcon(row)} isCircled />
+        <ConnectorIcon icon={resolveConnectorIcon(row)} isCircled style={{width: 20, height: 20}} />
 
         <TruncatedTextCell value={value} />
     </span>

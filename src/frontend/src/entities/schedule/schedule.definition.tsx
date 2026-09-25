@@ -4,7 +4,6 @@ import scheduleWizardImage from '@/assets/images/wizard/schedule.gif'
 import {createEntityCommands} from "@/engine/entity/command/createEntityCommands.tsx";
 import en from "@entities/schedule/i18n/en.json";
 import de from "@entities/schedule/i18n/de.json";
-import cron from "cron-validate";
 import {resolveScheduleConnectionTitles} from "@entities/schedule/command/resolvers/resolveScheduleNames.ts";
 import {store} from "@app/store/store.ts";
 import {i18n} from "@shared/i18n/config/i18n.ts";
@@ -13,7 +12,6 @@ import {scheduleApi} from "@entities/schedule/api/scheduleApi.ts";
 import {SCHEDULE_TAG} from "@entities/schedule/api/schedule.tags.ts";
 import {genericApi} from "@shared/api/genericApi.ts";
 import type {Schedule, ScheduleUpdateDTO} from "@entities/schedule/model/types.ts";
-import {stripSeconds} from "@shared/ui/wizard-step/editor/cron-editor/cron-editor.utils.ts";
 import {StatusCell} from "@entities/schedule/ui/StatusCell.tsx";
 import {RunningExecBadge} from "@entities/schedule/ui/RunningExecBadge.tsx";
 import {RunningDurationCell} from "@entities/schedule/ui/RunningDurationCell.tsx";
@@ -273,20 +271,7 @@ export const scheduleDefinition: EntityDefinition = {
                 component: 'input',
                 overrideKey: 'cronEditor',
             },
-            validation: {
-                custom: [
-                    {
-                        validate: (value) =>
-                        {
-                            if (!value) {
-                                return true;
-                            }
-                            return cron(stripSeconds(value), { override: { useBlankDay: true } }).isValid();
-                        },
-                        message: `${baseKey}.fields.cronExp.error.invalid`,
-                    }
-                ]
-            },
+            // Cron syntax is validated by the server on save, not client-side.
             table: {
                 visible: true,
                 order: 3,
