@@ -8,7 +8,8 @@ vi.mock('@shared/api/apiExecutor', () => ({
 }));
 
 import { apiFetchWithHeaders } from '@shared/api/apiFetch';
-import { PasswordStrategy, SessionHydrationError } from './PasswordStrategy';
+import { PasswordStrategy } from './PasswordStrategy';
+import { SessionHydrationError } from '@features/auth/session/completeLogin';
 
 // Regression coverage for a bug where /login succeeded but the UI stayed on
 // the login page showing "invalid credentials" — caused by the follow-up

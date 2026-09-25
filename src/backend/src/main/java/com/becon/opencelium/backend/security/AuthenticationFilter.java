@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.security;
 
 import com.becon.opencelium.backend.application.language.LanguageService;
 import com.becon.opencelium.backend.configuration.LdapProperties;
+import com.becon.opencelium.backend.configuration.OidcProperties;
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
@@ -37,6 +38,7 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.resource.user.TotpResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.security.oidc.OidcUserDetails;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.EmailUtility;
@@ -92,6 +94,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Autowired
     private LdapProperties properties;
+    @Autowired
+    private OidcProperties oidcProperties;
     @Autowired
     private SubscriptionService subscriptionService;
     @Autowired
@@ -251,6 +255,58 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
             result = userService.save(user);
             authType = "LDAP server";
+        } else if (principal instanceof OidcUserDetails oidcUserDetails) {
+            String email = oidcUserDetails.getEmail();
+
+            User user = userService.findByEmail(email).orElseGet(() -> {
+                User newUser = new User();
+
+                newUser.setEmail(email);
+                newUser.setUsername(email);
+                newUser.setAuthMethod(AuthMethod.OIDC);
+
+                // create details for new user
+                UserDetail userDetail = new UserDetail();
+                userDetail.setLang(languageService.getDefault());
+                userDetail.setTutorial(false);
+                userDetail.setUser(newUser);
+
+                newUser.setUserDetail(userDetail);
+
+                return newUser;
+            });
+
+            Collection<? extends GrantedAuthority> authorities = oidcUserDetails.getAuthorities();
+            String roleName;
+
+            if (authorities.isEmpty()) {
+                logInfo("User is not a member of any group of claim '" + oidcProperties.getGroupClaim() + "'");
+
+                roleName = oidcProperties.getDefaultRole();
+            } else {
+                List<String> groups = oidcProperties.getGroups();
+
+                roleName = authorities.stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .filter(group -> {
+                            if (groups.contains(group)) {
+                                logInfo("Match found for OIDC group = '" + group + "'");
+                                return true;
+                            }
+                            logInfo("No match found for OIDC group = '" + group + "' in OC mappings " + groups.stream().collect(Collectors.joining("; ", "[", "]")));
+                            return false;
+                        })
+                        .map(oidcProperties::getRoleByGroup)
+                        .findFirst()
+                        .orElse(oidcProperties.getDefaultRole());
+            }
+
+            UserRole role = userRoleService.findByName(roleName)
+                    .orElseThrow(() -> new EntityNotFoundException("OIDC group mapped to role = '" + roleName + "', but it does not exists in OC system."));
+            user.setUserRole(role);
+
+            result = userService.save(user);
+            authType = "OIDC provider";
         } else {
             result = ((UserPrincipals) authentication.getPrincipal()).getUser();
             authType = "OC system";
@@ -268,7 +324,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
 
     private void logInfo(String message) {
-        if (properties.isShowLogs().equals("OFF")) {
+        if (properties.isShowLogs().equals("OFF") && oidcProperties.isShowLogs().equals("OFF")) {
             return;
         }
 

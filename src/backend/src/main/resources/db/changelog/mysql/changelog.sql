@@ -796,3 +796,21 @@ CREATE TABLE IF NOT EXISTS `system_setting` (
     `updated_by` INT DEFAULT NULL,
     PRIMARY KEY (`name`)
 );
+
+--changeset 5.1:5 stripComments:true splitStatements:true endDelimiter:;
+-- OpenID Connect single sign-on. 'auth_method' is a SQL ENUM, so the new value has to be added
+-- explicitly - Hibernate writes it as a string and would otherwise fail on insert.
+ALTER TABLE user
+  MODIFY COLUMN auth_method ENUM('LDAP', 'BASIC', 'OIDC') NOT NULL DEFAULT 'BASIC';
+
+-- Single-use hand-off between the OIDC callback endpoint (browser navigation) and /oidc/exchange
+-- (called by the frontend), which is where the JWT is issued. 'identity' holds the verified claims
+-- as JSON, so new claims need no further migrations.
+CREATE TABLE IF NOT EXISTS `oidc_login_ticket` (
+    `ticket`     VARCHAR(128) NOT NULL,
+    `identity`   TEXT DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `expires_at` TIMESTAMP NULL DEFAULT NULL,
+    `used_at`    TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`ticket`)
+);

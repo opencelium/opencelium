@@ -95,6 +95,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             users: string
             groups: string
             ldapCheck: string
+            oidcConfig: string
             configurations: string
             invokers: string
             connectionTemplates: string

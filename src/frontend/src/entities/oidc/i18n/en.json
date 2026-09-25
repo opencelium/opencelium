@@ -1,0 +1,57 @@
+{
+  "header": "OpenID Connect",
+  "subheader": "Configuration is read from application.yml - this page only shows it, it doesn't change it.",
+  "fields": {
+    "enabled": {
+      "label": "Single sign-on"
+    },
+    "displayName": {
+      "label": "Button label"
+    },
+    "issuerUri": {
+      "label": "Issuer URI"
+    },
+    "clientId": {
+      "label": "Client ID"
+    },
+    "clientSecret": {
+      "label": "Client secret"
+    },
+    "scopes": {
+      "label": "Scopes"
+    },
+    "redirectUri": {
+      "label": "Redirect URI"
+    },
+    "frontendRedirectUri": {
+      "label": "Frontend redirect URI"
+    },
+    "userInfoUri": {
+      "label": "UserInfo endpoint"
+    },
+    "emailClaim": {
+      "label": "Email claim"
+    },
+    "groupClaim": {
+      "label": "Group claim"
+    },
+    "defaultRole": {
+      "label": "Default role"
+    },
+    "jitProvisioning": {
+      "label": "JIT provisioning"
+    },
+    "groupRoleMapping": {
+      "label": "Group role mapping"
+    }
+  },
+  "values": {
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "configured": "Configured",
+    "notConfigured": "Not configured"
+  },
+  "empty": "Single sign-on is not configured. Add the 'spring.security.oidc' section to application.yml to enable it.",
+  "groupMappingRow": "{{group}} -> {{role}}",
+  "loadFailed": "The OpenID Connect configuration could not be loaded."
+}
