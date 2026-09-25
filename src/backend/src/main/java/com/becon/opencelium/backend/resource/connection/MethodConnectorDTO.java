@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.resource.connection;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.annotation.Resource;
 
 @Resource
@@ -7,6 +8,7 @@ public class MethodConnectorDTO {
 
     private Integer connectorId;
     private String title;
+    @JsonAlias("invokerName")
     private String invoker;
 
     public Integer getConnectorId() {

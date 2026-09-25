@@ -31,8 +31,8 @@ export function TriggerConnectionNode({ id, data, selected, dragging }: NodeProp
 			bottomLabel={data.subtitle || data.title}
 			rightAdd={{
 				action: { sourceNodeId: id, direction: 'right' },
-				showAlways: !!data.isLeaf,
-				lineVisible: !!data.isLeaf,
+				showAlways: !!data.isLeaf && !data.jump,
+				lineVisible: !!data.isLeaf && !data.jump,
 			}}
 		>
 			<div className='circleNode systemNode'>

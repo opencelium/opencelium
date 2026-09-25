@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.resource.notification;
 
 import com.becon.opencelium.backend.database.mysql.entity.EventMessage;
+import jakarta.validation.Valid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ public class MessageResource {
     private int templateId;
     private String name;
     private String type;
+    @Valid
     private List<ContentResource> content = new ArrayList<>();
 
 

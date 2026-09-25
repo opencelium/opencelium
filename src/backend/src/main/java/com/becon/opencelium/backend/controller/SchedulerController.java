@@ -20,8 +20,8 @@ import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.WebhookServiceImp;
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
+import com.becon.opencelium.backend.websocket.constant.SocketConstant;
+import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
@@ -45,7 +45,6 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController

@@ -7,6 +7,8 @@
     "close": "Close",
     "ok": "Ok",
     "delete": "Delete",
+    "addJoint": "Add joint",
+    "removeJoint": "Remove joint",
     "duplicate": "Duplicate",
     "edit": "Edit",
     "select": "Select",
@@ -20,11 +22,27 @@
     "maximizeRequestData": "Maximize request data",
     "minimizeRequestData": "Minimize request data",
     "load": "Load",
-    "createEnhancement": "Create enhancement"
+    "undo": "Undo",
+    "redo": "Redo",
+    "createEnhancement": "Create enhancement",
+    "deleteEnhancement": "Delete enhancement",
+    "deleteReference": "Delete reference"
   },
   "confirmDelete": {
     "title": "Delete step",
-    "message": "Are you sure you want to delete this step? Any steps nested inside it will be removed as well. This action cannot be undone."
+    "message": "Are you sure you want to delete this step? Any steps nested inside it will be removed as well. This action cannot be undone.",
+    "clearsReferences": "References into it from {{count}} other steps will be cleared.",
+    "clearsReferences_one": "References into it from {{count}} other step will be cleared."
+  },
+  "confirmRemoveJoint": {
+    "title": "Remove joint?",
+    "message": "Without this joint, {{count}} steps can no longer read references they use, and those references will be cleared.",
+    "message_one": "Without this joint, {{count}} step can no longer read references it uses, and those references will be cleared."
+  },
+  "confirmDependencyDrop": {
+    "title": "Dependency conflict",
+    "message": "This drop breaks references used by {{count}} steps. If you continue, they will be cleared.",
+    "message_one": "This drop breaks references used by {{count}} step. If you continue, they will be cleared."
   },
   "template": {
     "addTitle": "Add Template",
@@ -41,7 +59,7 @@
   },
   "schedules": {
     "title": "Schedules",
-    "add": "Add schedule",
+    "add": "Create schedule",
     "nextRun": "Next run in {{duration}}",
     "manual": "Manual only",
     "expand": "Show details",
@@ -103,7 +121,22 @@
     "downloadTemplateFailed": "Failed to download template.",
     "copySnapshotIdSuccess": "Snapshot ID copied to clipboard",
     "deleteVersionSuccess": "Version deleted",
-    "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?"
+    "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?",
+    "enhancementScriptBrokenIn": "“{{method}}” has an enhancement whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
+    "enhancementScriptBroken": "{{count}} steps have an enhancement whose script still uses {{marker}} — the references they read were removed with the steps they pointed at. Fix the scripts before saving.",
+    "enhancementScriptBroken_one": "{{count}} step has an enhancement whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving."
+  },
+  "joint": {
+    "invalid": {
+      "notAMethod": "Only a method can be the target of a joint.",
+      "differentLoopScope": "The target must be a method in the same loop scope as the selected one — both outside every loop, or both inside the same loop.",
+      "entersIfScope": "A joint cannot jump into a condition the selected method is not itself inside. It may leave the conditions around it, but not enter another one.",
+      "backwards": "A joint can only point forward, to a method that runs after the selected one.",
+      "skipsReferencedMethod": "This joint would skip {{method}}, whose response this method uses.",
+      "skipsReferencedMethodUnnamed": "This joint would skip a method whose response this method uses."
+    },
+    "removedAfterMove": "{{count}} joints were removed — they are no longer valid after this move",
+    "removedAfterMove_one": "The joint was removed — it is no longer valid after this move"
   },
   "sidebar": {
     "useConnector": {
@@ -136,7 +169,9 @@
     "connectorStep": {
       "header": "Choose connector",
       "subtitle": "Select a connector first",
-      "searchPlaceholder": "search connector"
+      "searchPlaceholder": "search connector",
+      "fixConnector": "Update connector to fix the connection",
+      "createConnector": "Create connector"
     },
     "methodStep": {
       "header": "Choose method",
@@ -214,6 +249,8 @@
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
     "versionHistory": "Version History",
+    "changeHistory": "Change History",
+    "testRunLockedHint": "Not available while a test run is in progress",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
   },
@@ -224,6 +261,60 @@
     "confirmUnassign": {
       "title": "Remove category assignment",
       "message": "Are you sure you want to remove this workflow's category assignment?"
+    }
+  },
+  "undoHistory": {
+    "title": "Change history",
+    "current": "Current",
+    "empty": "No changes in this session yet",
+    "operator": {
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "nodeKind": {
+      "httpRequest": "HTTP Request",
+      "webhook": "Webhook",
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "section": {
+      "header": "Header",
+      "body": "Body"
+    },
+    "change": {
+      "initial": "Session start",
+      "nodeAdded": "Added {{name}}",
+      "nodesAdded": "Added {{count}} nodes",
+      "nodeRemoved": "Deleted {{name}}",
+      "nodesRemoved": "Deleted {{count}} nodes",
+      "nodeMoved": "Moved {{name}}",
+      "nodesMoved": "Moved {{count}} nodes",
+      "changedLabel": "Changed Label to {{label}}",
+      "methodConfig": "Edited request of {{name}}",
+      "methodUrl": "Edited URL of {{name}}",
+      "methodHeader": "Edited Header of {{name}}",
+      "methodBody": "Edited Body of {{name}}",
+      "referenceAdded": "Added {{section}} Reference in {{name}}",
+      "referenceRemoved": "Deleted {{section}} Reference in {{name}}",
+      "referenceEdited": "Edited {{section}} Reference in {{name}}",
+      "enhancement": "Edited {{section}} Enhancement of {{name}}",
+      "enhancementLanguage": "Updated Enhancement Language of {{name}}",
+      "enhancementDescription": "Updated Enhancement Description of {{name}}",
+      "enhancementRemoved": "Deleted Enhancement of {{name}}",
+      "conditionConfig": "Edited condition of {{name}}",
+      "aggregatorConfigured": "Configured Aggregator of {{name}}",
+      "aggregatorRemoved": "Deleted Aggregator of {{name}}",
+      "connectorConfig": "Changed connector of {{name}}",
+      "edgesChanged": "Changed connections",
+      "references": "Changed references",
+      "conditionAdded": "Added Condition in {{operator}}",
+      "conditionRemoved": "Deleted Condition in {{operator}}",
+      "conditionEdited": "Edited Condition in {{operator}}",
+      "groupAdded": "Added Group in {{operator}}",
+      "groupRemoved": "Deleted Group in {{operator}}",
+      "groupEdited": "Edited Group in {{operator}}",
+      "operatorEdited": "Edited {{operator}}",
+      "multiple": "Multiple changes"
     }
   },
   "shortcutsDialog": {
@@ -241,6 +332,9 @@
       "ctrl": "Ctrl",
       "esc": "Esc",
       "s": "S",
+      "z": "Z",
+      "redo": "(Shift + Z / Y)",
+      "shift": "Shift",
       "delete": "Delete"
     },
     "items": {
@@ -252,7 +346,10 @@
       "multiSelect": "Select multiple nodes",
       "deleteNode": "Delete the selected node",
       "save": "Save the workflow",
-      "close": "Close the open menu, dialog, or panel"
+      "undo": "Undo the last canvas change",
+      "redo": "Redo the change that was undone",
+      "close": "Close the open menu, dialog, or panel",
+      "dismissError": "Dismiss the error highlight on a node"
     }
   },
   "contextMenu": {
@@ -265,6 +362,16 @@
     "editBody": "Edit Body",
     "showResponse": "Show Response",
     "newLabelPlaceholder": "New label"
+  },
+  "comment": {
+    "badge": "Comment",
+    "add": "Add comment",
+    "placeholder": "Write a note for your team…",
+    "toggle": {
+      "show": "Show comment",
+      "hide": "Hide comment",
+      "minimize": "Minimize comment"
+    }
   },
   "aggregatorDialog": {
     "title": "Configure Aggregator",
@@ -289,10 +396,14 @@
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
-    "branchFalse": "false",
+    "branchContinue": "continue",
     "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response.",
     "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
-    "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector."
+    "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector.",
+    "testRunIteration": "{{iterator}} = {{count}}",
+    "testRunIterator": "{{iterator}} =",
+    "skipToNextIteration": "Jump to next iteration",
+    "jumpToIteration": "Jump forward to an iteration"
   },
   "saveDialog": {
     "title": "Save Version",
@@ -317,6 +428,10 @@
     "dialogTitleLoop": "LOOP Condition",
     "addCondition": "Add Condition",
     "addGroup": "Add Group",
+    "comparisonUnknown": "Not available yet",
+    "comparisonError": "Can't be compared",
+    "comparisonTrue": "True",
+    "comparisonFalse": "False",
     "loopInfo": {
       "iteratorLabel": "Loop variable",
       "iteratorHelp": "Use this variable inside the loop steps to read the current item:",
@@ -326,32 +441,75 @@
       "operators": {
         "for": {
           "description": "Iterates through an array.",
-          "args": [{ "code": "o1", "text": "An array to iterate through." }],
+          "args": [
+            {
+              "code": "o1",
+              "text": "An array to iterate through."
+            }
+          ],
           "examples": [
-            { "code": "o1 = [\"a\", \"b\", \"c\"]", "result": "Iterates through \"a\", \"b\", \"c\"" },
-            { "code": "o1 = [1, 2, 3]", "result": "Iterates through 1, 2, 3" },
-            { "code": "o1 = []", "result": "Performs no iterations" }
+            {
+              "code": "o1 = [\"a\", \"b\", \"c\"]",
+              "result": "Iterates through \"a\", \"b\", \"c\""
+            },
+            {
+              "code": "o1 = [1, 2, 3]",
+              "result": "Iterates through 1, 2, 3"
+            },
+            {
+              "code": "o1 = []",
+              "result": "Performs no iterations"
+            }
           ]
         },
         "forin": {
           "description": "Iterates through the properties of an object.",
-          "args": [{ "code": "o1", "text": "An object whose properties should be iterated." }],
+          "args": [
+            {
+              "code": "o1",
+              "text": "An object whose properties should be iterated."
+            }
+          ],
           "examples": [
-            { "code": "o1 = {\"name\":\"Hob\",\"age\":123}", "result": "Iterates through properties \"name\", \"age\"" },
-            { "code": "o1 = {\"a\":1,\"b\":2}", "result": "Iterates through properties \"a\", \"b\"" },
-            { "code": "o1 = {}", "result": "Performs no iterations" }
+            {
+              "code": "o1 = {\"name\":\"Hob\",\"age\":123}",
+              "result": "Iterates through properties \"name\", \"age\""
+            },
+            {
+              "code": "o1 = {\"a\":1,\"b\":2}",
+              "result": "Iterates through properties \"a\", \"b\""
+            },
+            {
+              "code": "o1 = {}",
+              "result": "Performs no iterations"
+            }
           ]
         },
         "SplitString": {
           "description": "Splits a string using a delimiter and iterates through the resulting array.",
           "args": [
-            { "code": "o1", "text": "A string to split." },
-            { "code": "o2", "text": "A delimiter string." }
+            {
+              "code": "o1",
+              "text": "A string to split."
+            },
+            {
+              "code": "o2",
+              "text": "A delimiter string."
+            }
           ],
           "examples": [
-            { "code": "o1 = \"a,b,c\", o2 = \",\"", "result": "Iterates through \"a\", \"b\", \"c\"" },
-            { "code": "o1 = \"one|two|three\", o2 = \"|\"", "result": "Iterates through \"one\", \"two\", \"three\"" },
-            { "code": "o1 = \"abc\", o2 = \",\"", "result": "Iterates once through \"abc\"" }
+            {
+              "code": "o1 = \"a,b,c\", o2 = \",\"",
+              "result": "Iterates through \"a\", \"b\", \"c\""
+            },
+            {
+              "code": "o1 = \"one|two|three\", o2 = \"|\"",
+              "result": "Iterates through \"one\", \"two\", \"three\""
+            },
+            {
+              "code": "o1 = \"abc\", o2 = \",\"",
+              "result": "Iterates once through \"abc\""
+            }
           ]
         }
       }
@@ -402,7 +560,8 @@
     "body": "Body",
     "header": "Header",
     "requestUrl": "Request Url",
-    "response": "Response"
+    "response": "Response",
+    "liveBadge": "Live execution result"
   },
   "response": {
     "success": "Success",
@@ -438,10 +597,41 @@
     "language": "Language",
     "script": "Script",
     "emptyState": "Please, click on the reference to see its enhancement.",
+    "deleteDisabledMultipleReferences": "This field has more than one reference, so it must stay wrapped in an enhancement.",
+    "confirmDelete": {
+      "title": "Delete enhancement?",
+      "message": "This will permanently remove the enhancement and its script. This action cannot be undone."
+    },
     "directReference": {
       "title": "Direct reference",
       "description": "This field has no enhancement — it is a direct, one-to-one reference between the two fields below, with no script running in between. Direct references execute faster than a scripted enhancement.",
       "descriptionMany": "This field has no enhancement — it is a direct reference between the fields below, with no script running in between. Direct references execute faster than a scripted enhancement."
+    },
+    "optimizeDirectReferences": {
+      "title": "Optimization available",
+      "message": "There are {{count}} references that can be optimized for better performance. Would you like to apply this optimization before saving?",
+      "message_one": "There is a reference that can be optimized for better performance. Would you like to apply this optimization before saving?"
+    },
+    "debugValue": {
+      "show": "Show value",
+      "hide": "Hide value",
+      "title": "Value",
+      "idleHint": "Not shown yet. Click the eye icon to resolve this value from the current test run.",
+      "loadingHint": "Resolving…",
+      "noReferences": "No references",
+      "references": "References",
+      "resultLabel": "RESULT_VAR · {{type}}",
+      "errorTitle": "Error",
+      "errorNotPaused": "Start a paused test run to resolve this from live execution data.",
+      "errorMethodFailed": "This method's execution failed this run — its request may be incomplete.",
+      "errorFieldNotFound": "Could not find a value for this field in the request that was actually sent.",
+      "errorNotRun": "This method hasn't run in the current test session yet. Run or continue the paused test, then check again.",
+      "status": {
+        "idle": "idle",
+        "loading": "running",
+        "error": "error",
+        "stale": "stale — script changed"
+      }
     }
   },
   "description": {
@@ -469,9 +659,15 @@
     "wholeArray": "The whole array",
     "iteratorLoop": "({{iterator}} loop)",
     "noVariableReferences": "No variable references",
+    "more": "more",
+    "pausedHint": "Hover a highlighted reference to see the value it resolved to.",
     "confirmDelete": {
       "title": "Delete reference",
       "message": "Do you really want to delete this reference?"
+    },
+    "valueDialog": {
+      "copyTooltip": "Copy value",
+      "copySuccess": "Value copied to clipboard"
     }
   },
   "refGenerator": {
@@ -497,7 +693,11 @@
   "referenceInfo": {
     "title": "Reference Information",
     "legacyTitle": "Reference information",
-    "empty": "(is empty now)"
+    "empty": "(is empty now)",
+    "confirmDelete": {
+      "title": "Delete reference?",
+      "message": "This will permanently remove this reference. This action cannot be undone."
+    }
   },
   "requestData": "Request data",
   "graphqlBody": {

@@ -1,11 +1,15 @@
+import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
 import { X } from 'lucide-react';
 import type { SidebarDrawerProps } from './SidebarDrawer.types';
+
+// Matches the 32px .drawerHeaderIcon slot.
+const HEADER_ICON_SIZE = 32;
 
 export function SidebarDrawer({
 	open,
 	title,
 	subtitle,
-	iconUrl,
+	connectorIcon,
 	onClose,
 	shifted,
 	shiftedFar,
@@ -19,9 +23,9 @@ export function SidebarDrawer({
 		>
 			<div className='drawerHeader'>
 				<div className='drawerHeaderContent'>
-					{iconUrl ? (
+					{connectorIcon !== undefined ? (
 						<div className='drawerHeaderIcon' aria-hidden='true'>
-							<img src={iconUrl} alt='' />
+							<ConnectorIcon icon={connectorIcon} size={HEADER_ICON_SIZE} isCircled />
 						</div>
 					) : null}
 					<div>

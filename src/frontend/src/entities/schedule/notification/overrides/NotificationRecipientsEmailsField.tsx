@@ -33,8 +33,12 @@ export function NotificationRecipientsEmailsField({ field }: FieldOverrideProps)
             multiple
             asyncOptions={{
                 url: '/user/all',
+                // A user without an email cannot receive one — those accounts sign in
+                // with a username only and have nothing to address the notification to.
                 map: (data: User[]) =>
-                    (data ?? []).map((u) => ({ value: u.email, label: u.email })),
+                    (data ?? [])
+                        .filter((u): u is User & { email: string } => Boolean(u.email))
+                        .map((u) => ({ value: u.email, label: u.email })),
                 refreshable: true,
             }}
         />

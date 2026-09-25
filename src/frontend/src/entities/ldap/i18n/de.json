@@ -33,8 +33,8 @@
   "wizard": {
     "modes": {
       "view": {
-        "header": "LDAP-Konfigurationen",
-        "subheader": "Testen Sie es."
+        "header": "LDAP-Konfiguration testen",
+        "subheader": "Die Konfiguration wird aus der application.yml gelesen — hier wird sie nur getestet, nicht geändert."
       }
     },
     "recommendations": {
@@ -44,7 +44,7 @@
     "steps": {
       "configurations": {
         "header": "Konfigurationen",
-        "subheader": "LDAP-Konfiguration. Sie können die Einstellungen in der Datei application.yml festlegen",
+        "subheader": "Wird aus der application.yml unter dem Schlüssel security: geladen. Nur lesbar — zum Ändern die Datei bearbeiten und neu starten.",
         "actions": {
           "nextLabel": "Testen"
         },

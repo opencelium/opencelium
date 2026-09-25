@@ -4,6 +4,7 @@ import { Button } from '@shared/ui/primitives/Button'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 export const InvokerUploadButton: React.FC = () => {
     const inputRef = useRef<HTMLInputElement>(null)
@@ -29,7 +30,7 @@ export const InvokerUploadButton: React.FC = () => {
             }
         } catch (err) {
             console.error(err)
-            message.error(tEntities('invoker.list.upload.error'))
+            notifyError(tEntities('invoker.list.upload.error'))
         } finally {
             setIsLoading(false)
         }

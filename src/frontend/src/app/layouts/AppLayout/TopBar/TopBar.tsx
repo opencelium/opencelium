@@ -2,7 +2,6 @@ import {CommandPalette} from "@widgets/CommandPalette/CommandPalette.tsx";
 import React from "react";
 import {useNavigate} from "react-router-dom";
 import {DesktopOutlined, NotificationOutlined, PieChartOutlined, UserOutlined,} from "@ant-design/icons";
-import logoImage from "@assets/images/logo_oc_white.png";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
 import {Button} from "@shared/ui/primitives/Button";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
@@ -11,10 +10,11 @@ import {Tooltip} from "@shared/ui/primitives/Tooltip";
 import {MenuSwitcher} from "@app/layouts/AppLayout/Sidebar/MenuSwitcher.tsx";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {hasComponentPermission} from "@/engine/policy";
+import {useAppLanguage} from "@features/user/language/useAppLanguage";
 
 export const TopBar = () => {
     const {isTabletOrMobile, isMobile} = useBreakpoints();
-    const {setLang, lang} = useI18n();
+    const {lang, changeLanguage} = useAppLanguage();
     const {t: tCommon} = useI18n('common');
     const navigate = useNavigate();
     const {normalizedUser} = useAuth();
@@ -75,10 +75,18 @@ export const TopBar = () => {
                 <Tooltip content={tCommon(lang === 'en' ? 'topbar.switchToGerman' : 'topbar.switchToEnglish')}>
                     <Button
                         type={'text'}
-                        onClick={() => setLang(lang === 'en' ? 'de' : 'en')}
+                        onClick={() => void changeLanguage(lang === 'en' ? 'de' : 'en')}
                     >
                         {lang.toUpperCase()}
                     </Button>
+                </Tooltip>
+                <Tooltip content={tCommon('topbar.docs')}>
+                    <IconButton
+                        size="xs"
+                        type={'text'}
+                        iconProps={{name: 'docs', color: 'primary'}}
+                        onClick={() => window.open('https://docs.opencelium.io/en/prod/', '_blank', 'noopener,noreferrer')}
+                    />
                 </Tooltip>
                {/* <Tooltip content={tCommon('topbar.notifications')}>
                     <IconButton

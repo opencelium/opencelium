@@ -34,6 +34,7 @@ public class MethodDTO {
     private RequestDTO request;
     private ResponseDTO response;
     private MethodConnectorDTO connector;
+    private String jump;
 
     public String getId() {
         return id;
@@ -113,6 +114,14 @@ public class MethodDTO {
 
     public void setConnector(MethodConnectorDTO connector) {
         this.connector = connector;
+    }
+
+    public String getJump() {
+        return jump;
+    }
+
+    public void setJump(String jump) {
+        this.jump = jump;
     }
 
     @Override

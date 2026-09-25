@@ -4,7 +4,7 @@ import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.pubsub.Execution2MetadataMapping;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionEvent;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionLogAppendedEvent;
-import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
+import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

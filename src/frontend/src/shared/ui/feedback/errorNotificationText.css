@@ -1,0 +1,37 @@
+/* Clamped by default: a backend that replies with a stack trace or an HTML page
+   must not turn one toast into a wall of text. The full message is still there —
+   the toggle below it opens the rest. */
+.ocErrorToastText {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.ocErrorToastTextExpanded {
+    display: block;
+    /* Bounded so a very long reply scrolls inside the toast instead of growing
+       past the viewport, taking its own close button off screen with it. */
+    max-height: 40vh;
+    overflow: auto;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+/* Styled as the link button it stands in for, without importing the primitive. */
+.ocErrorToastToggle {
+    margin-top: 4px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-action-primary);
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.ocErrorToastToggle:hover {
+    text-decoration: underline;
+}

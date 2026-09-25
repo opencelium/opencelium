@@ -12,6 +12,7 @@ import {
 import type {ConfigNode, ConfigScalar, ConfigStatus} from '@entities/systemConfig/model/types'
 import {buildNodeByPathMap} from '@entities/systemConfig/model/helpers'
 import {ConfigLeafEditor} from '@entities/systemConfig/ui/ConfigLeafEditor'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type LeafValue = ConfigScalar | ConfigScalar[]
 
@@ -50,7 +51,7 @@ const LeafEditForm: React.FC<{node: ConfigNode; onSaved: () => void}> = ({node, 
         const res = await updateConfig({fields: [{path: node.path, status, value}]})
         if ('error' in res && res.error) {
             const err = res.error as {data?: {message?: string}}
-            message.error(err.data?.message ?? t('system-config.messages.saveFailed'))
+            notifyError(err.data?.message ?? t('system-config.messages.saveFailed'))
             return
         }
         message.success(t('system-config.messages.saved'))

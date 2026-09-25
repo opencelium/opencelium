@@ -1,0 +1,91 @@
+.conditionConstantInput {
+	width: 390px;
+	height: 34px;
+	border-radius: 4px;
+}
+
+.conditionMethodOption {
+	display: flex;
+	width: 100%;
+	min-width: 0;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.conditionMethodLeft {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.conditionMethodName {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.conditionMethodConnector {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	flex: 0 0 auto;
+	max-width: 50%;
+	color: var(--color-text-secondary);
+	font-size: 11px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.conditionMethodConnectorName {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.conditionBuilder .ant-select-selector {
+	min-height: 34px !important;
+	border-radius: 4px !important;
+}
+
+.conditionBuilder .ant-select-selection-item,
+.conditionBuilder .ant-select-selection-placeholder,
+.conditionBuilder .ant-select-selection-search-input {
+	line-height: 32px !important;
+}
+
+.conditionBuilder .bodyLegacyWebhookSelect {
+	width: 390px;
+}
+
+.conditionBuilder .bodyLegacyWebhookSelect .ant-select-selector {
+	min-height: 34px !important;
+}
+
+.conditionBuilder .bodyLegacyWebhookSelect .ant-select-selection-search-input,
+.conditionBuilder .bodyLegacyWebhookSelect .ant-select-selection-placeholder,
+.conditionBuilder .bodyLegacyWebhookSelect .ant-select-selection-item {
+	line-height: 32px !important;
+}
+
+.conditionRuleActions {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.conditionDuplicateButton {
+	width: 24px;
+	min-width: 24px;
+	height: 24px;
+	padding: 0;
+	color: var(--color-action-primary);
+}
+
+.conditionDuplicateButton.ant-btn:not(:disabled):hover,
+.conditionDuplicateButton.ant-btn:not(:disabled):focus {
+	color: var(--color-action-primary-hover) !important;
+}

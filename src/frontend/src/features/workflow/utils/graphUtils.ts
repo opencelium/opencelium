@@ -1,7 +1,7 @@
 import type { WorkflowEdgeModel } from '../types/workflow.types';
 export { createNodeFromAction } from './createNodeFromAction';
 export { deleteNodeGraph } from './deleteNodeGraph';
-export { getOperatorBottomBranch } from './graph.traversal';
+export { getOperatorBottomBranch, collectDescendantNodeIds, collectDescendantEdgeIds } from './graph.traversal';
 
 export function isLeafNode(
   nodeId: string,

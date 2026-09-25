@@ -1,0 +1,18 @@
+.readOnlyRadioGroup .ant-radio-button-wrapper-disabled {
+    color: var(--color-text-secondary) !important;
+    background-color: var(--color-background-disabled) !important;
+    border-color: var(--color-border-subtle) !important;
+    opacity: 1 !important;
+    cursor: default !important;
+}
+
+.readOnlyRadioGroup .ant-radio-button-wrapper-disabled:hover {
+    color: var(--color-text-secondary) !important;
+    background-color: var(--color-background-disabled) !important;
+}
+
+.readOnlyRadioGroup .ant-radio-button-wrapper-disabled.ant-radio-button-wrapper-checked {
+    color: var(--color-text-primary) !important;
+    background-color: var(--color-background-elevated) !important;
+    border-color: var(--color-border-default) !important;
+}

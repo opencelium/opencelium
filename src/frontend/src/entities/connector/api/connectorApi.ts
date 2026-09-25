@@ -43,6 +43,32 @@ export const connectorApi = baseApi.injectEndpoints({
                 { type: CONNECTOR_TAG, id: 'META_LIST' },
               ],
     }),
+    // Runs the health check for one connector now, instead of waiting for the
+    // backend's sweep (every 5 min by default, after a 60s initial delay) to reach it.
+    // `ignoreError`: a check that cannot reach the connector is not a failed action —
+    // the status it writes (DOWN / AUTH_FAILED) is the answer, and the dot reports it.
+    refreshConnectorStatus: b.mutation<ConnectorMetaDTO, number>({
+      query: (connectorId) => ({
+        url: `/connector/${connectorId}/status/refresh`,
+        method: 'POST',
+      }),
+      extraOptions: { ignoreError: true },
+      // The response IS the fresh snapshot row, so it is patched straight into the
+      // shared meta cache — the same write ConnectorStatusSocketProvider makes when
+      // the backend broadcasts a transition, so the dot updates either way round.
+      async onQueryStarted(_connectorId, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(connectorApi.util.updateQueryData('getConnectorsMeta', undefined, (draft) => {
+            const index = draft.findIndex((connector) => connector.connectorId === data.connectorId);
+            if (index >= 0) draft[index] = data;
+            else draft.push(data);
+          }));
+        } catch {
+          // A check that could not run leaves the status as it was; nothing to patch.
+        }
+      },
+    }),
     getConnector: b.mutation<
       Connector,
       { id: string, masterPassword: string }
@@ -71,5 +97,6 @@ export const {
     useGetConnectorsQuery,
     useGetConnectorsMetaQuery,
     useGetConnectorMutation,
+    useRefreshConnectorStatusMutation,
     useSaveRequestDataMutation,
 } = connectorApi

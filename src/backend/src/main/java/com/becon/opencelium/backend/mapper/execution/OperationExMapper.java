@@ -98,6 +98,7 @@ public class OperationExMapper {
         operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), requestMediaType));
         operationDTO.setResponses(getResponses(method.getResponse(), responseMediaType));
         operationDTO.setParameters(getParameters(method.getRequest(), requestMediaType));
+        operationDTO.setJump(method.getJump());
         return operationDTO;
     }
 

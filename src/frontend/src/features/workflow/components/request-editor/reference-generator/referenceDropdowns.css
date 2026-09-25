@@ -1,0 +1,29 @@
+.referenceDropdown {
+	position: absolute;
+	z-index: 4000;
+	margin-top: 2px;
+	overflow-y: auto;
+	border: 1px solid var(--color-border-default);
+	border-radius: 4px;
+	background: var(--color-background-elevated);
+	box-shadow: var(--shadow-md);
+	font-size: 12px;
+}
+.referenceFieldDropdown {
+	max-height: 180px;
+}
+.referenceConnectorDropdown {
+	max-height: 220px;
+}
+.referenceDropdownOption {
+	padding: 4px 6px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+.referenceConnectorDropdownOption {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

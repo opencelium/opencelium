@@ -1,18 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import type { EditField, WorkflowHeaderProps } from './WorkflowHeader.types';
+import { useState } from 'react';
+import type { WorkflowHeaderStateProps } from './WorkflowHeader.types';
+import { useWorkflowHeaderFields } from './useWorkflowHeaderFields';
 
 export const EMPTY_NAME_LABEL = '[Empty Name]';
-
-type StateProps = Pick<
-	WorkflowHeaderProps,
-	'initialName' | 'initialDescription' | 'onChange' | 'validateTitle'
-> & {
-	/** Called after an inline name edit commits to an actual new name, so the workflow
-	 * is saved immediately instead of waiting for the explicit Save button. */
-	onNameCommitted?: (title: string, description: string) => void | Promise<void>;
-	/** Same as onNameCommitted, but for description edits. */
-	onDescriptionCommitted?: (title: string, description: string) => void | Promise<void>;
-};
 
 export function useWorkflowHeaderState({
 	initialName = 'i-doit 2 Znuny example',
@@ -21,41 +11,16 @@ export function useWorkflowHeaderState({
 	validateTitle,
 	onNameCommitted,
 	onDescriptionCommitted,
-}: StateProps) {
-	const [name, setName] = useState(initialName);
-	const [description, setDescription] = useState(initialDescription);
-	const [draftName, setDraftName] = useState(name);
-	const [draftDescription, setDraftDescription] = useState(description);
-	const [editing, setEditing] = useState<EditField>(null);
+}: WorkflowHeaderStateProps) {
+	const {
+		name, setName, description, setDescription, draftName, setDraftName,
+		draftDescription, setDraftDescription, editing, setEditing,
+		nameInputRef, descriptionInputRef,
+	} = useWorkflowHeaderFields(initialName, initialDescription);
 	const [nameError, setNameError] = useState('');
 	const [isCheckingName, setIsCheckingName] = useState(false);
 	const [isSavingName, setIsSavingName] = useState(false);
 	const [isSavingDescription, setIsSavingDescription] = useState(false);
-	const nameInputRef = useRef<HTMLInputElement | null>(null);
-	const descriptionInputRef = useRef<HTMLInputElement | null>(null);
-
-	useEffect(() => {
-		setName(initialName);
-		setDraftName(initialName);
-	}, [initialName]);
-
-	useEffect(() => {
-		setDescription(initialDescription);
-		setDraftDescription(initialDescription);
-	}, [initialDescription]);
-
-	useEffect(() => {
-		if (editing === 'name') {
-			setDraftName(name);
-			nameInputRef.current?.focus();
-			nameInputRef.current?.select();
-		}
-		if (editing === 'description') {
-			setDraftDescription(description);
-			descriptionInputRef.current?.focus();
-			descriptionInputRef.current?.select();
-		}
-	}, [description, editing, name]);
 
 	const cancelEdit = () => {
 		setDraftName(name);

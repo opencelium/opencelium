@@ -6,6 +6,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { apiExecutor } from '@shared/api/apiExecutor'
 import { extractFilename } from '../model/supportFile.utils'
 import type { SupportFile } from '../model/types'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type Props = {
     row: SupportFile
@@ -39,7 +40,7 @@ export const DownloadAction: React.FC<Props> = ({ row }) => {
             message.success(tEntities('support-file.list.download.success'))
         } catch (err) {
             console.error(err)
-            message.error(tEntities('support-file.list.download.error'))
+            notifyError(tEntities('support-file.list.download.error'))
         } finally {
             setIsLoading(false)
         }

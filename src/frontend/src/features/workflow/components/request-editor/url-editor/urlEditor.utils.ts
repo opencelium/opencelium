@@ -8,6 +8,10 @@ const URL_FORBIDDEN_INPUT_SINGLE_RE = /[\u0000-\u001F\u007F"<>`|\\^[\]]/;
 const CARET_BOUNDARY = '\u200B';
 
 export const ARG_TOKEN_RE = /(#{%\s*([A-Za-z0-9_-]+)\s*%})/g;
+// Class stamped on every rendered reference pill's <span> (see buildTokenSpanHtml) —
+// shared so hover-tooltip detection (EndpointArgHoverTooltip) targets the same
+// elements the endpoint field and inline value editors render.
+export const ENDPOINT_REF_CLASS = 'oc-endpoint-ref';
 const BACKEND_REFERENCE_RE =
 	/\{%\s*(#[A-Fa-f0-9]{6}\.\((?:request|response)\)\.(?:body|header|status)(?:\.[^%{}]*)?)\s*%}/g;
 
@@ -129,7 +133,7 @@ export function buildInlineHtml(
 	const s = raw || '';
 	if (!s) return '';
 
-	const className = opts?.className || 'oc-endpoint-ref';
+	const className = opts?.className || ENDPOINT_REF_CLASS;
 	const cursorPointer = !!opts?.cursorPointer;
 
 	let idx = 0;

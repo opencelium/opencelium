@@ -126,9 +126,13 @@ export function EntityWizard<EntityFormValues>({
         mode === 'view' ||
         (!entityDecision.allowed &&
             entityDecision.strategy === 'disable')
+    const wizardSteps =
+        typeof entity.wizard?.steps === 'function'
+            ? entity.wizard.steps(mode)
+            : entity.wizard?.steps
     const steps: StepDefinition[] =
-        entity.wizard?.steps
-            .filter(step => {
+        wizardSteps
+            ?.filter(step => {
                 const hasAccessibleSection = step.sectionIds.some(sectionId => {
                     const section = entity.sections.find(s => s.id === sectionId)
 

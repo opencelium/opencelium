@@ -1,11 +1,18 @@
-import type { WorkflowNodeType } from '../types/workflow.types';
+import type { WorkflowCreateKind, WorkflowNodeType } from '../types/workflow.types';
 
-export function getNodeType(kind: string): WorkflowNodeType {
-  if (kind === 'connector') return 'connector';
-  if (kind === 'system') return 'system';
-  if (kind === 'trigger-connection') return 'trigger-connection';
-  if (kind === 'loop') return 'loop';
-  return 'if';
+export function getNodeType(kind: WorkflowCreateKind): WorkflowNodeType {
+  switch (kind) {
+    case 'connector': return 'connector';
+    case 'system': return 'system';
+    case 'trigger-connection': return 'trigger-connection';
+    case 'loop': return 'loop';
+    case 'if': return 'if';
+    case 'comment': return 'comment';
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
 }
 
 export function getDefaultSourceHandle(

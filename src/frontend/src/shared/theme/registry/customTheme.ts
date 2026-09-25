@@ -1,33 +1,16 @@
-import { createCustomPalette, type CustomThemeSeeds } from '@shared/theme/palette/customPalette'
 import { themeRegistry } from '@shared/theme/registry/themeRegistry'
-import { clearCustomThemeSeeds, storeCustomThemeSeeds } from '@shared/theme/themeStorage'
+import { clearCustomThemeSeeds } from '@shared/theme/themeStorage'
 
+/**
+ * A personal, browser-local theme. Nothing creates one any more — the seed editor is
+ * admin-only and publishes to the system theme instead — so what is left here serves
+ * browsers that still carry one from before: `themeRegistry` re-registers it from
+ * localStorage at module load, and these two let the user get rid of it.
+ */
 export const CUSTOM_THEME_IDS = {
     light: 'custom-light',
     dark: 'custom-dark',
 } as const
-
-/** Persists the seeds and (re)registers both custom theme variants. */
-export function applyCustomThemeSeeds(seeds: CustomThemeSeeds) {
-    storeCustomThemeSeeds(seeds)
-    const sidebar = seeds.sidebar ? { bg: seeds.sidebar } : undefined
-    themeRegistry.register({
-        id: CUSTOM_THEME_IDS.light,
-        label: 'Custom Light',
-        family: 'custom',
-        mode: 'light',
-        palette: createCustomPalette(seeds, 'light'),
-        sidebar,
-    })
-    themeRegistry.register({
-        id: CUSTOM_THEME_IDS.dark,
-        label: 'Custom Dark',
-        family: 'custom',
-        mode: 'dark',
-        palette: createCustomPalette(seeds, 'dark'),
-        sidebar,
-    })
-}
 
 /** Removes the stored seeds and unregisters both custom theme variants. */
 export function removeCustomTheme() {

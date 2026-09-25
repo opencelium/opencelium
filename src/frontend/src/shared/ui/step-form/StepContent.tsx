@@ -63,8 +63,8 @@ export function StepContent({
         nextStep();
     }
     return (
-        <div style={{ flex: 1, paddingLeft: isTabletOrMobile ? 0 : 48 }} ref={containerRef}>
-            <div style={{display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 15}}>
+        <div className="step-form-content-shell" style={{ flex: 1, paddingLeft: isTabletOrMobile ? 0 : 48 }} ref={containerRef}>
+            <div className="step-form-scroll-region" style={{display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 15}}>
                 {step.render({
                     currentStep,
                     next,
@@ -73,6 +73,7 @@ export function StepContent({
                 })}
             </div>
             <div
+                className="step-form-actions"
                 style={{
                     marginTop: 48,
                     display: "flex",

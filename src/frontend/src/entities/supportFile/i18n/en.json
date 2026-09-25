@@ -14,6 +14,9 @@
       "tooltip": "Download support file",
       "success": "Support file downloaded",
       "error": "Failed to download support file"
+    },
+    "confirmDelete": {
+      "message": "Are you sure you want to delete support-file \"{{filePath}}\"?"
     }
   },
   "events": {

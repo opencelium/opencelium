@@ -35,6 +35,7 @@ export function AggregatorBadge({ dataAggregator, suppressTooltip, testId, onOpe
 			className='circleNodeAggregatorBadge nodrag nopan'
 			data-testid={testId}
 			onClick={handleClick}
+			onDoubleClick={(event) => event.stopPropagation()}
 		>
 			{suppressTooltip ? icon : (
 				<Tooltip content={t('node.aggregatorBadge', { name })} placement='top'>

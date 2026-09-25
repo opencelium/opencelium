@@ -52,12 +52,20 @@ export type LiveLogNode = {
 // tree dropping the failing loop iteration's subtree.
 export type ErrorLocation = { indexPath: string; loopIndex: string };
 
+// Same shape, used wherever a "reveal to this structural position" target
+// comes from somewhere other than a run's errors — e.g. the debugger's pause
+// target (see prefetchPauseTracePath.ts). Kept as a distinct alias, not a
+// rename of ErrorLocation, since LiveLogTree.errorLocations genuinely is
+// error-specific; the matching primitives below just happen to be generic
+// enough to serve both.
+export type RevealLocation = ErrorLocation;
+
 export type LiveLogTree = {
   rootKeys: string[];
   nodes: Record<string, LiveLogNode>;
   executionStatus: LogStatus | null;
   // Origins of every error seen this run. The trace markers are derived from
-  // this (see `makeErrorTraceMatcher`) so they light up the exact path —
+  // this (see `makeTraceMatcher`) so they light up the exact path —
   // including the specific loop iterations — that led to the failure.
   errorLocations: ErrorLocation[];
 };
@@ -69,7 +77,9 @@ export const EMPTY_LIVE_LOG_TREE: LiveLogTree = {
   errorLocations: [],
 };
 
-const nodeKey = (indexPath: string, loopIndex: string) =>
+// Exported so prefetchErrorTracePath.ts can look up the same locally-known
+// nodes this module keys internally, instead of re-deriving the format.
+export const nodeKey = (indexPath: string, loopIndex: string) =>
   `${indexPath}@${loopIndex}`;
 
 // Extend a loop-iteration context with one more enclosing loop's iteration —
@@ -202,17 +212,17 @@ const findLastKeyByIndexPath = (
   return found;
 };
 
-// Show the error on the element where it happened (`originOfErrorPath`),
-// falling back to the carrying line's own element. An errored phase never
-// completes, so a still-pending target is marked FAIL.
+// Show the error on the element where it actually happened
+// (`originOfErrorPath`) — NEVER on the carrying line's own element when the
+// two differ (e.g. a wrapping loop/operator's own COMPLETE/FAIL line as the
+// exception propagates back up the tree). If the origin can't be resolved
+// (its node was never stored — see the loop memory bound above), the error
+// is simply not attached anywhere rather than guessing at the wrong element.
+// An errored phase never completes, so a still-pending target is marked FAIL.
 const attachError = (tree: LiveLogTree, log: ExecutionSocketLog): LiveLogTree => {
   const error = log.error;
-  if (!error?.message) return tree;
-  const targetKey =
-    (error.originOfErrorPath
-      ? findLastKeyByIndexPath(tree, error.originOfErrorPath)
-      : undefined) ??
-    (log.indexPath ? findLastKeyByIndexPath(tree, log.indexPath) : undefined);
+  if (!error?.message || !error.originOfErrorPath) return tree;
+  const targetKey = findLastKeyByIndexPath(tree, error.originOfErrorPath);
   if (!targetKey) return tree;
   const target = tree.nodes[targetKey];
   return {
@@ -248,29 +258,32 @@ export function failPendingNodes(tree: LiveLogTree): LiveLogTree {
   };
 }
 
-// Whether a row is the failing element itself (exact indexPath + iteration
-// context) — used by auto-reveal to open its detail and scroll to it.
-export function isErrorTarget(
-  errorLocations: ErrorLocation[],
+// Whether a row is exactly the target location (exact indexPath + iteration
+// context) — used by auto-reveal to open its detail and scroll to it. Generic
+// over the location list: fed `tree.errorLocations` for the error-reveal
+// cascade, or a single-item debugger pause target for the pause-reveal one.
+export function isLocationTarget(
+  locations: RevealLocation[],
   indexPath: string,
   loopIndexPath: string,
 ): boolean {
-  return errorLocations.some(
+  return locations.some(
     (e) => e.indexPath === indexPath && e.loopIndex === loopIndexPath,
   );
 }
 
 // For a loop on the trace, the iteration its pager must move to so the trail
-// continues toward the error — the loop-index component right after this loop's
-// own iteration context. Null when no captured error runs through this loop.
-// This is what makes auto-reveal page nested loops to the failing iterations
-// (e.g. i, then j, then k) before fetching the next level over REST.
+// continues toward the target — the loop-index component right after this
+// loop's own iteration context. Null when no location in the list runs
+// through this loop. This is what makes auto-reveal page nested loops to the
+// right iterations (e.g. i, then j, then k) before fetching the next level
+// over REST — for both the error trail and the debugger's pause target.
 export function loopRevealIteration(
-  errorLocations: ErrorLocation[],
+  locations: RevealLocation[],
   indexPath: string,
   loopIndexPath: string,
 ): number | null {
-  for (const err of errorLocations) {
+  for (const err of locations) {
     const indexMatch =
       err.indexPath === indexPath || err.indexPath.startsWith(`${indexPath}_`);
     if (!indexMatch) continue;
@@ -287,19 +300,22 @@ export function loopRevealIteration(
 
 // Build a predicate that tells whether a row (identified by its structural
 // indexPath and the loop-iteration context it is rendered in) lies on a path to
-// an error — i.e. it is the failing element or one of its ancestors, *in the
-// matching loop iterations*. A row qualifies when, for some captured error:
-//   - the error's indexPath is the row's indexPath or a descendant of it, AND
-//   - the row's loop-iteration context is a prefix of the error's (so paging a
-//     loop away from the failing iteration hides that branch's markers).
+// one of the given locations — i.e. it is that location or one of its
+// ancestors, *in the matching loop iterations*. A row qualifies when, for some
+// location in the list:
+//   - the location's indexPath is the row's indexPath or a descendant of it, AND
+//   - the row's loop-iteration context is a prefix of the location's (so paging
+//     a loop away from the target iteration hides that branch's markers).
 // Index-path + loop-index based (not node-key based) so it works for non-stored
-// loop iterations, whose rows are re-fetched over REST.
-export function makeErrorTraceMatcher(
-  errorLocations: ErrorLocation[],
+// loop iterations, whose rows are re-fetched over REST. Fed `tree.errorLocations`
+// for the error trail, or a single-item debugger pause target for the
+// pause-reveal cascade.
+export function makeTraceMatcher(
+  locations: RevealLocation[],
 ): (indexPath: string, loopIndexPath: string) => boolean {
   return (indexPath, loopIndexPath) => {
     if (!indexPath) return false;
-    return errorLocations.some((err) => {
+    return locations.some((err) => {
       const indexMatch =
         err.indexPath === indexPath || err.indexPath.startsWith(`${indexPath}_`);
       if (!indexMatch) return false;

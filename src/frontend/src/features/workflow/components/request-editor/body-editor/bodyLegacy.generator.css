@@ -1,0 +1,122 @@
+.bodyLegacyGeneratorShell {
+  display: grid;
+  grid-template-columns: 40px 214px auto 214px 22px;
+  gap: 0;
+  align-items: center;
+  min-height: 52px;
+  padding: 6px 10px;
+  background: var(--color-background-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: 2px;
+  box-shadow: var(--shadow-md);
+}
+
+.bodyLegacyGeneratorShellWebhook {
+  grid-template-columns: 28px 1fr 26px;
+  min-width: 452px;
+}
+
+.bodyLegacyGeneratorShellNoToggle {
+  grid-template-columns: minmax(160px, 1fr) auto minmax(160px, 1fr) 22px;
+  width: 100%;
+}
+
+.bodyLegacyGeneratorResponse {
+  margin-left: 9px;
+  width: 40px;
+}
+
+.bodyLegacyGeneratorResponse .ant-radio-wrapper > span:last-child {
+  padding-inline-end: 0;
+}
+
+.compactRadioGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.compactRadioGroup .ant-radio-wrapper {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1;
+  align-items: center;
+  color: var(--color-text-primary);
+}
+
+.compactRadioGroup .ant-radio-wrapper > span:last-child {
+  padding-inline-start: 5px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.compactRadioGroup .ant-radio,
+.compactRadioGroup .ant-radio-inner {
+  width: 12px;
+  height: 12px;
+}
+
+.compactRadioGroup .ant-radio-inner::after {
+  width: 12px;
+  height: 12px;
+  margin-block-start: -6px;
+  margin-inline-start: -6px;
+}
+
+.bodyLegacyRadioIcon {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--color-text-primary);
+}
+
+.bodyLegacyGeneratorAction {
+  justify-self: center;
+  color: var(--color-text-primary);
+  width: 22px;
+  min-width: 22px;
+  height: 24px;
+  padding: 0;
+}
+
+.bodyLegacyGeneratorSelect {
+  width: 100%;
+}
+
+.bodyLegacyGeneratorSelect.ant-select {
+  border-radius: 2px !important;
+  padding-inline: 10px !important;
+  font-size: 14px !important;
+}
+
+.bodyLegacyGeneratorSelect .ant-select-selection-search {
+  display: flex;
+  align-items: center;
+}
+
+.bodyLegacyGeneratorSelect .ant-select-selection-search-input {
+  height: 100%;
+}
+
+.selectCopyHost {
+  position: relative;
+}
+
+.selectCopyButton {
+  position: absolute;
+  top: 50%;
+  right: 26px;
+  transform: translateY(-50%);
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.selectCopyHost:hover .selectCopyButton {
+  opacity: 1;
+  pointer-events: auto;
+}
+

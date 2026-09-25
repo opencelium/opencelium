@@ -17,6 +17,7 @@ const passwordSchema = z
 export const userCredentialsSchema = z
     .object({
         email: z.email('Invalid email'),
+        username: z.string().max(255, 'Maximum 255 characters'),
         password: passwordSchema,
         repeatPassword: z.string('Repeat password is a required field'),
     })

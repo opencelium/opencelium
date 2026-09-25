@@ -4,9 +4,14 @@ import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
 export const LoadingOverlay: React.FC<{
     loading: boolean;
     children: React.ReactNode;
-}> = ({ loading, children }) => {
+    // Merged onto the wrapper's own `position: relative` — lets a caller keep
+    // a flex-item chain intact (e.g. `{ flex: 1, minHeight: 0 }`) instead of
+    // the wrapper defaulting to content-sized, which would otherwise break
+    // layouts where the wrapped content expects to fill its parent.
+    style?: React.CSSProperties;
+}> = ({ loading, children, style }) => {
     return (
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', ...style }}>
             {loading && (
                 <div
                     style={{

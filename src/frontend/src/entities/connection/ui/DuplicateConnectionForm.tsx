@@ -15,6 +15,7 @@ import {
     type ConnectionDuplicateValues,
 } from '@entities/connection/model/connectionDuplicate.schema'
 import type { Connection } from '@entities/connection/model/types'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type Props = {
     row: Connection
@@ -69,7 +70,7 @@ export const DuplicateConnectionForm: React.FC<Props> = ({ row, onClose }) => {
             onClose()
         } catch (err) {
             console.error(err)
-            message.error(tEntities('connection.list.duplicate.error'))
+            notifyError(tEntities('connection.list.duplicate.error'))
         } finally {
             setIsLoading(false)
         }

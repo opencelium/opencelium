@@ -8,7 +8,9 @@ import {
     type ProfileDetailsValues,
 } from '@pages/ProfilePage/schemas/profileDetails.schema'
 
-const REQUIRED_FIELDS: Array<keyof ProfileDetailsValues> = ['name', 'surname', 'phoneNumber', 'email']
+// email/username are deliberately absent: each is optional as long as the other is
+// filled in, which the schema enforces across the pair instead of per field.
+const REQUIRED_FIELDS: Array<keyof ProfileDetailsValues> = ['name', 'surname', 'phoneNumber']
 
 export function useProfileDetailsForm(initialValues: ProfileDetailsValues) {
     const form = useForm<ProfileDetailsValues>({
@@ -29,6 +31,7 @@ export function useProfileDetailsForm(initialValues: ProfileDetailsValues) {
                 'organization',
                 'phoneNumber',
                 'email',
+                'username',
             ] as const
         ).map((path) => {
             const c: StringConstraints = buildStringConstraints(profileDetailsSchema, path)

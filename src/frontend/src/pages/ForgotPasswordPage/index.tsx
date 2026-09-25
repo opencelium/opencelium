@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@features/auth/useAuth'
 import { ForgotPasswordForm } from '@features/auth/ui/ForgotPasswordForm'
-import logoImage from '@assets/images/login_logo.png'
+import { AppLogo } from '@features/branding/AppLogo'
 
 export default function ForgotPasswordPage() {
     const { isAuthenticated } = useAuth()
@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
                     gap: 24,
                 }}
             >
-                <img src={logoImage} alt="OpenCelium" style={{ height: 56, width: 'auto' }} />
+                <AppLogo />
                 <ForgotPasswordForm />
             </div>
         </div>

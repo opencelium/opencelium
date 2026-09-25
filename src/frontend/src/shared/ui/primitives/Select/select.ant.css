@@ -1,3 +1,37 @@
 .ant-select-custom .ant-select-selector {
     border-radius: var(--radius-md);
 }
+
+.ant-select-custom.ant-select-disabled .ant-select-selector {
+    background-color: var(--color-background-disabled) !important;
+    border-color: var(--color-border-subtle) !important;
+    cursor: default !important;
+}
+
+.ant-select-custom.ant-select-disabled .ant-select-selector,
+.ant-select-custom.ant-select-disabled .ant-select-selection-item,
+.ant-select-custom.ant-select-disabled .ant-select-selection-placeholder {
+    color: var(--color-text-secondary) !important;
+    -webkit-text-fill-color: var(--color-text-secondary) !important;
+    opacity: 1 !important;
+}
+
+.ant-select-custom.ant-select-disabled .ant-select-arrow {
+    color: var(--color-text-secondary) !important;
+}
+
+.ant-select-disabled .ant-select-selection-item,
+.ant-select-disabled .ant-select-selection-placeholder {
+    color: var(--color-text-secondary) !important;
+    -webkit-text-fill-color: var(--color-text-secondary) !important;
+    opacity: 1 !important;
+}
+
+.ant-select-custom.ant-select-disabled .ant-select-selector,
+.ant-select-custom.ant-select-disabled .ant-select-selector *,
+.ant-select-custom.ant-select-disabled .ant-select-selection-search-input,
+.ant-select-custom.ant-select-disabled input {
+    color: var(--color-text-secondary) !important;
+    -webkit-text-fill-color: var(--color-text-secondary) !important;
+    opacity: 1 !important;
+}

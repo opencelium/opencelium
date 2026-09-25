@@ -1,7 +1,10 @@
 {
   "list": {
     "title": "Notification Templates",
-    "subTitle": "Manage reusable templates used for notifications in Schedules."
+    "subTitle": "Manage reusable templates used for notifications in Schedules.",
+    "confirmDelete": {
+      "message": "Are you sure you want to delete notification template with name \"{{name}}\"?"
+    }
   },
   "fields": {
     "name": {

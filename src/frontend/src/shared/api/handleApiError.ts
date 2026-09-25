@@ -1,5 +1,7 @@
-import { message } from 'antd';
-import {i18n} from "@shared/i18n/config/i18n.ts";
+import {i18n} from "@shared/i18n/config/i18n";
+import {notifyError} from "@shared/ui/feedback/notifyError";
+import {describeApiRequest} from "@shared/api/describeApiRequest";
+import type {ApiRequestDescriptor} from "@shared/errors/types";
 
 type ErrorGroup = 'api';
 
@@ -8,7 +10,10 @@ type ApiError = {
     group?: ErrorGroup,
     namespace?: string,
     transKey?: string;
+    /** Untranslated text the API replied with; the toast's reason line. */
     message?: string;
+    /** The call that failed, when there was one; becomes the toast's heading. */
+    request?: ApiRequestDescriptor;
     durationSec?: number;
 };
 
@@ -22,21 +27,32 @@ export const showApiError = (error: ApiError) => {
                 transKey = `api.${transKey}`;
                 break;
             default:
-                message.error('Unknown error group');
+                notifyError('Unknown error group');
                 return;
         }
     }
     const t = i18n.getFixedT(i18n.language, namespace);
     const defaultKey = transKey.replace(/[^.]+$/, "default");
-
     const translated = transKey ? t(transKey, {
         defaultValue: i18n.exists(defaultKey, { ns: namespace })
             ? t(defaultKey)
             : undefined,
-    }) : error.message;
-    if (!translated) {
-        message.error(`Unknown error: ${JSON.stringify(error)}`, error.durationSec);
-    } else {
-        message.error(translated, error.durationSec);
-    }
+    }) : undefined;
+
+    // The reason line: what the API replied, since per-status copy ("An unexpected
+    // error occurred") never says why. A backend code can double as a translation key
+    // (see normalizeError's 500 branch) — where this project has copy for that code,
+    // the copy is what the bare code means, so it wins over echoing the code. With no
+    // reply to show, the translated copy is the only reason available.
+    const codeHasOwnCopy = !!error.message
+        && transKey.endsWith(`.${error.message}`)
+        && i18n.exists(transKey, { ns: namespace });
+    const text = codeHasOwnCopy ? translated : error.message ?? translated;
+
+    // Heading = what we were doing, reason = what came back. Without a request to
+    // name (hand-emitted errors, direct callers) the reason stands on its own under
+    // the generic "Error" heading, as before.
+    const headline = error.request ? describeApiRequest(error.request) : undefined;
+
+    notifyError(text || `Unknown error: ${JSON.stringify(error)}`, error.durationSec, headline);
 };

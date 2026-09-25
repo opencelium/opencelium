@@ -2,72 +2,69 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
-<<<<<<< HEAD
-import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
-import com.becon.opencelium.backend.execution.oc721.Connector;
-import com.becon.opencelium.backend.execution.oc721.FieldBind;
-import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.exception.JumpValidationException;
+import com.becon.opencelium.backend.execution.jump.ExecutionJumpGraphBuilder;
+import com.becon.opencelium.backend.execution.jump.JumpGraph;
+import com.becon.opencelium.backend.execution.jump.JumpNode;
+import com.becon.opencelium.backend.execution.jump.JumpValidator;
+import com.becon.opencelium.backend.execution.jump.JumpViolation;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.masking.MaskingServiceImp;
-import com.becon.opencelium.backend.execution.logger.OcLogger;
-=======
-import com.becon.opencelium.backend.execution.masking.MaskingService;
-import com.becon.opencelium.backend.execution.masking.MaskingServiceImp;
-import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
->>>>>>> origin/version5.0
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
+import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionConnector;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
+import com.becon.opencelium.backend.resource.execution.FieldBindEx;
+import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 public class ConnectionExecutor {
     private final Map<String, Object> webhookVars;
     private final ConnectionEx connection;
-    private final OcLogger<ExecutionLog> executionLogger;
     private final MaskingService masking;
     private final ProxyEx proxy;
     private ExecutionManager executionManager;
 
-    public ConnectionExecutor(ExecutionObj executionObj, OcLogger<ExecutionLog> executionLogger, List<MaskingRule> rules) {
+    private static final Logger log = LoggerFactory.getLogger(ConnectionExecutor.class);
+
+    public ConnectionExecutor(ExecutionObj executionObj, List<MaskingRule> rules) {
         this.webhookVars = executionObj.getWebhookVars();
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
 
-        this.executionLogger = executionLogger;
         this.masking = new MaskingServiceImp(rules);
     }
 
     public void start() {
+        validateJumps();
+
         executionManager = new ExecutionManagerImpl(
                 webhookVars,
-                getFieldBind(),
+                connection.getFieldBind(),
                 getRequestData(),
                 getRestTemplate(),
                 getPagination()
         );
 
-<<<<<<< HEAD
-        executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
-
-        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), executionLogger, masking, "source");
-        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), executionLogger, masking, "target");
-=======
         if (connection.getSource() != null) {
             ConnectorExecutor source = new ConnectorExecutor(connection.getSource(), executionManager, masking, "source");
             source.start();
         }
->>>>>>> origin/version5.0
 
         if (connection.getTarget() != null) {
             ConnectorExecutor target = new ConnectorExecutor(connection.getTarget(), executionManager, masking, "target");
@@ -82,11 +79,42 @@ public class ConnectionExecutor {
         return executionManager.getAllOperations();
     }
 
+    private void validateJumps() {
+        if (connection.getTarget() != null) {
+            // We don't have to validate old-structure(double-connector) connection
+            return;
+        }
 
-    private List<FieldBind> getFieldBind() {
-        return connection.getFieldBind().stream()
-                .map(FieldBind::fromEx)
-                .collect(Collectors.toList());
+        List<JumpViolation> violations = collectJumpViolations(connection.getSource(), connection.getFieldBind());
+
+        violations.forEach(violation -> log.warn(violation.toString()));
+    }
+
+    private List<JumpViolation> collectJumpViolations(ConnectorEx connector, List<FieldBindEx> fieldBindings) {
+        if (connector == null || connector.getMethods() == null) {
+            return Collections.emptyList();
+        }
+
+        if (connector.getMethods().stream().noneMatch(m -> StringUtils.isNotBlank(m.getJump()))) {
+            return Collections.emptyList();
+        }
+
+        JumpGraph graph = ExecutionJumpGraphBuilder.build(connector, fieldBindings);
+
+        List<JumpViolation> jumpViolations = new ArrayList<>();
+
+        for (OperationDTO operation : connector.getMethods()) {
+            if (StringUtils.isBlank(operation.getJump())) {
+                continue;
+            }
+
+            JumpNode source = graph.byIndex(operation.getExecOrder());
+            if (source != null) {
+                jumpViolations.addAll(JumpValidator.validate(source, operation.getJump(), graph));
+            }
+        }
+
+        return jumpViolations;
     }
 
     private Map<Integer, RestTemplate> getRestTemplate() {

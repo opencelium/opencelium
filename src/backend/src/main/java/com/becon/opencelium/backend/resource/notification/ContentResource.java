@@ -1,12 +1,15 @@
 package com.becon.opencelium.backend.resource.notification;
 
 import com.becon.opencelium.backend.database.mysql.entity.EventContent;
+import com.becon.opencelium.backend.validation.language.ValidLanguage;
 
 public class ContentResource {
 
     private int contentId;
     private String subject;
     private String body;
+
+    @ValidLanguage
     private String language;
 
     public ContentResource(EventContent eventContent){

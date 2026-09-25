@@ -1,0 +1,143 @@
+.nodeWrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  z-index: 6;
+}
+
+.nodeWrapDragGhost,
+.nodeWrapDropPlaceholder,
+.nodeWrapDragSourceMoving {
+  pointer-events: none;
+}
+
+.nodeWrapDragGhost {
+  opacity: 0.45;
+  z-index: 20;
+}
+
+.nodeWrapDropPlaceholder {
+  opacity: 0.55;
+  z-index: 5;
+}
+
+.nodeWrapDragSourceMoving {
+  opacity: 0.4;
+}
+
+.nodeWrapDragSourceFaint {
+  opacity: 0.2;
+}
+
+.nodeWrapDropPlaceholder .ifContinueLabel,
+.nodeWrapDropPlaceholder .ifTrueLabel {
+  display: none;
+}
+
+.nodeWrapDropPlaceholder .startNode,
+.nodeWrapDropPlaceholder .circleNode,
+.nodeWrapDropPlaceholder .ifNode {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 4px var(--color-action-primary-subtle);
+}
+
+.nodeBody {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 62px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+}
+
+.nodeBodySelected .startNode,
+.nodeBodySelected .circleNode,
+.nodeBodySelected .ifNode {
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 4px var(--color-action-primary-subtle);
+}
+
+.nodeBodyHighlighted .circleNode,
+.nodeBodyHighlighted .ifNode {
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 4px var(--color-action-primary-subtle);
+}
+
+.nodeBodyDropTarget .startNode,
+.nodeBodyDropTarget .circleNode,
+.nodeBodyDropTarget .ifNode {
+  border-color: var(--color-status-success-fg);
+  box-shadow: 0 0 0 4px var(--color-status-success-bg);
+}
+
+.nodeBodyDropInvalid .startNode,
+.nodeBodyDropInvalid .circleNode,
+.nodeBodyDropInvalid .ifNode {
+  border-color: var(--color-status-error-fg);
+  box-shadow: 0 0 0 4px var(--color-status-error-bg);
+}
+
+.nodeBodyError .startNode,
+.nodeBodyError .circleNode,
+.nodeBodyError .ifNode {
+  border-color: var(--color-status-error-fg);
+  box-shadow: 0 0 0 4px var(--color-status-error-bg);
+}
+
+.nodeBodyTestRunFailed .startNode,
+.nodeBodyTestRunFailed .circleNode,
+.nodeBodyTestRunFailed .ifNode {
+	animation: nodeTestRunFailedPulse 1.2s ease-in-out infinite;
+}
+@keyframes nodeTestRunFailedPulse {
+	0%, 100% { opacity: 1; transform: scale(1); }
+	50% { opacity: 0.4; transform: scale(0.96); }
+}
+.nodeBodyTestRunActive .startNode,
+.nodeBodyTestRunActive .circleNode,
+.nodeBodyTestRunActive .ifNode {
+	border-color: var(--color-action-primary);
+	border-style: dashed;
+	animation: nodeTestRunPulse 1s ease-in-out infinite;
+}
+@keyframes nodeTestRunPulse {
+	0%, 100% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-action-primary) 35%, transparent); }
+	50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-action-primary) 10%, transparent); }
+}
+
+.nodeBodySearchHighlighted .circleNode,
+.nodeBodySearchHighlighted .ifNode {
+  border-color: var(--color-status-warning-fg);
+  box-shadow: 0 0 0 4px var(--color-status-warning-bg);
+}
+
+.nodeTopLabel {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  transform: translateX(-50%);
+  width: 130px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+.nodeBottomLabel {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 130px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+  pointer-events: none;
+}

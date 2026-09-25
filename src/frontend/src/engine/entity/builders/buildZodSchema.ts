@@ -65,6 +65,7 @@ export function buildFieldSchema(
         schema = schema.refine(
             val => {
                 if (Array.isArray(val)) return val.length > 0;
+                if (typeof val === 'string') return val.trim().length > 0;
                 return val !== undefined && val !== null && val !== '';
             },
             { message: t('field.required') }

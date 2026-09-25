@@ -3,10 +3,13 @@ import type { ReferenceStrategy } from "../ReferenceStrategy";
 import type { Reference } from "../ReferenceTypes";
 import type { Enhancement } from "../../../types/connection";
 import { Reference as ReferenceComponent } from '../components/enhancemen/Reference';
+import { NOT_EXIST_ARG } from '../../../utils/enhancementArgs';
 
 export class EnhancementReference implements ReferenceStrategy {
 
-    static NotExistArg = 'VARIABLE_NOT_EXIST';
+    /** Kept for its existing consumers; the literal lives with the helper that
+     *  writes it into a script (see dropEnhancementArgs). */
+    static NotExistArg = NOT_EXIST_ARG;
     match(value: string) {
         return /^#\{.*\}$/.test(value);
     }

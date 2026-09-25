@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.aspect;
 
+import com.becon.opencelium.backend.application.language.LanguageService;
 import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.LogConstant;
@@ -31,24 +32,25 @@ import com.becon.opencelium.backend.database.mysql.entity.LastExecution;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.DataAggregatorService;
 import com.becon.opencelium.backend.database.mysql.service.ExecutionService;
 import com.becon.opencelium.backend.database.mysql.service.LastExecutionService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
-import com.becon.opencelium.backend.enums.LangEnum;
+import com.becon.opencelium.backend.exception.ExecutionTerminatedException;
 import com.becon.opencelium.backend.execution.JSHttpObject;
+import com.becon.opencelium.backend.execution.logger.pubsub.ExecutionEventPublisher;
+import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionFinishedEvent;
+import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionStartedEvent;
 import com.becon.opencelium.backend.execution.logger.service.LogDataService;
-import com.becon.opencelium.backend.execution.logger.service.LogDataServiceImp;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
-import com.becon.opencelium.backend.execution.supportfile.SupportFileService;
+import com.becon.opencelium.backend.utility.EmailUtility;
+import com.becon.opencelium.backend.websocket.constant.SocketConstant;
+import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
@@ -63,7 +65,6 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -78,6 +79,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,6 +87,7 @@ import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.constant.LogConstant.FAIL;
 import static com.becon.opencelium.backend.constant.LogConstant.SUCCESS;
+import static com.becon.opencelium.backend.constant.LogConstant.TERMINATED;
 
 @Aspect
 @Component
@@ -99,11 +102,11 @@ public class ExecutionAspect {
     private final Environment env;
     private final LastExecutionService lastExecutionService;
     private final DataAggregatorService dataAggregatorService;
-    private final SupportFileService supportFileService;
-    private final Connection2WebSocketChannelMapping connection2ChannelMapping;
     private final SubscriptionService subscriptionService;
     private final WebSocketNotificationService notificationService;
     private final LogDataService logDataService;
+    private final ConnectionService connectionService;
+    private final LanguageService languageService;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -116,9 +119,9 @@ public class ExecutionAspect {
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
             Environment env,
-            SupportFileService supportFileService,
-            Connection2WebSocketChannelMapping connection2ChannelMapping,
-            WebSocketNotificationService notificationService) {
+            WebSocketNotificationService notificationService,
+            ConnectionService connectionService,
+            LanguageService languageService) {
         this.schedulerService = schedulerService;
         this.userService = userService;
         this.incomingWebhookService = incomingWebhookService;
@@ -127,11 +130,11 @@ public class ExecutionAspect {
         this.env = env;
         this.lastExecutionService = lastExecutionService;
         this.dataAggregatorService = dataAggregatorService;
-        this.supportFileService = supportFileService;
         this.subscriptionService = subscriptionService;
-        this.connection2ChannelMapping = connection2ChannelMapping;
         this.notificationService = notificationService;
         this.logDataService = logDataService;
+        this.connectionService = connectionService;
+        this.languageService = languageService;
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -146,19 +149,26 @@ public class ExecutionAspect {
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data != null ? data.getScheduleId() : jobDataMap.getIntValue("schedulerId");
         long execId = initExecutionObj(schedulerId);
-        jobDataMap.put("execId", execId);
-
         Scheduler scheduler = schedulerService.getById(schedulerId);
-        jobDataMap.put("connectionId", scheduler.getConnection().getId());
+        long connectionId = scheduler.getConnection().getId();
+        String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
+
+        // save required data on job execution context
+        jobDataMap.put("execId", execId);
+        jobDataMap.put("connectionId", connectionId);
+        jobDataMap.put("timestamp", timestamp);
         jobDataMap.put("debugMode", scheduler.getDebugMode());
 
-        List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
-        triggerNotifications(eventNotifications, "pre", null);
+        triggerNotifications(schedulerId, "pre", null);
 
         sendRunningJobsNotification();
 
-        String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
-        jobDataMap.put("timestamp", timestamp);
+        // delete existing log files with the same 'executionId'
+        LogFileUtility.deleteByExecutionId(execId);
+
+        ExecutionEventPublisher.publish(
+                new ExecutionStartedEvent(execId, connectionId, schedulerId, timestamp)
+        );
     }
 
     @AfterReturning("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -170,40 +180,21 @@ public class ExecutionAspect {
         }
 
         long execId = jobDataMap.getLong("execId");
-        long connectionId = jobDataMap.getLong("connectionId");
-        boolean debugMode = jobDataMap.getBoolean("debugMode");
-        String timestamp = jobDataMap.getString("timestamp");
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
-        updateExecutionObj(execId, true, debugMode);
+        updateExecutionObj(execId, true);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
-            // delete temporarily created scheduler
-            schedulerService.deleteById(schedulerId);
-            // delete temporarily created connection
-            connectionServiceImp.deleteById(connectionId);
-            // remove mapping
-            connection2ChannelMapping.remove(connectionId);
-
-            // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, SUCCESS, debugMode);
-        } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
-            supportFileService.collectFiles(connectionId, execId, timestamp, SUCCESS);
-
-            // delete temporarily created scheduler
-            schedulerService.deleteById(schedulerId);
-        } else {
-            // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, SUCCESS, debugMode);
-        }
-
-        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
-        triggerNotifications(en, "post", null);
+        triggerNotifications(schedulerId, "post", null);
 
         sendRunningJobsNotification(schedulerId);
+
+
+        ExecutionEventPublisher.publish(
+                new ExecutionFinishedEvent(execId, data.getExecType(), SUCCESS)
+        );
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
@@ -216,40 +207,21 @@ public class ExecutionAspect {
         }
 
         long execId = jobDataMap.getLong("execId");
-        long connectionId = jobDataMap.getLong("connectionId");
-        boolean debugMode = jobDataMap.getBoolean("debugMode");
-        String timestamp = jobDataMap.getString("timestamp");
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
-        updateExecutionObj(execId, false, debugMode);
+        updateExecutionObj(execId, false);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
-            // delete temporarily created scheduler
-            schedulerService.deleteById(schedulerId);
-            // delete temporarily created connection
-            connectionServiceImp.deleteById(connectionId);
-            // remove mapping
-            connection2ChannelMapping.remove(connectionId);
-
-            // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, FAIL, debugMode);
-        } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
-            supportFileService.collectFiles(connectionId, execId, timestamp, FAIL);
-
-            // delete temporarily created scheduler
-            schedulerService.deleteById(schedulerId);
-        } else {
-            // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, FAIL, debugMode);
-        }
-
-        List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
-        triggerNotifications(en, "alert", ex);
+        triggerNotifications(schedulerId, "alert", ex);
 
         sendRunningJobsNotification(schedulerId);
+
+        final String result = ex instanceof ExecutionTerminatedException ? TERMINATED : FAIL;
+        ExecutionEventPublisher.publish(
+                new ExecutionFinishedEvent(execId, data.getExecType(), result)
+        );
     }
 
     private long initExecutionObj(int schedulerId) {
@@ -262,12 +234,12 @@ public class ExecutionAspect {
                 .getId();
     }
 
-    private void updateExecutionObj(long execId, boolean success, boolean hasLog) {
+    private void updateExecutionObj(long execId, boolean success) {
         Execution execution = executionService.getById(execId);
         execution.setEndTime(new Date());
         execution.setStatus(success ? "S" : "F");
         executionService.save(execution);
-        hasLog = LogFileUtility.logFileExistForExecId(execId) && logDataService.findRootByExecutionId(execId).isPresent();
+        boolean hasLog = LogFileUtility.logFileExistForExecId(execId) && logDataService.hasDbRecords(execId);
         LastExecution le;
         if (lastExecutionService.existsBySchedulerId(execution.getScheduler().getId())) {
             le = lastExecutionService.findBySchedulerId(execution.getScheduler().getId());
@@ -293,30 +265,42 @@ public class ExecutionAspect {
         lastExecutionService.save(le);
     }
 
-    private void triggerNotifications(List<EventNotification> eventNotifications, String eventType, Exception ex) {
-        String to, subject, message;
+    private void triggerNotifications(int schedulerId, String eventType, Exception ex) {
+        List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
+
         for (EventNotification en : eventNotifications) {
+            Set<EventRecipient> recipients = en.getEventRecipients();
+
             if (!en.getEventType().equals(eventType)) {
                 continue;
             }
-            if (en.getEventRecipients().isEmpty()) {
-                fillDefaultRecipients(en.getEventRecipients(), en.getEventMessage().getType());
+
+            if (recipients.isEmpty()) {
+                fillDefaultRecipients(recipients, en.getEventMessage().getType());
             }
-            for (EventRecipient er : en.getEventRecipients()) {
+
+            if (recipients.isEmpty()) {
+                logger.warn("No recipient is configured for type = {} and schedulerId = {}", eventType, schedulerId);
+                continue;
+            }
+
+            for (EventRecipient er : recipients) {
                 User user = userService.findByEmail(er.getDestination()).orElse(null);
-                String lang = user == null ? "en" : user.getUserDetail().getLang();
-                EventContent content = en.getEventMessage().getEventContents().stream()
-                        .filter(c -> c.getLanguage().equalsIgnoreCase(lang)).findFirst().orElse(null);
+                String lang = user == null
+                        ? languageService.getDefault()
+                        : languageService.normalize(user.getUserDetail().getLang())
+                                .orElseGet(languageService::getDefault);
+                List<EventContent> contents = en.getEventMessage().getEventContents();
+                EventContent content = findContentByLanguage(contents, lang).orElse(null);
                 if (content == null) {
-                    String defaultLang = LangEnum.EN.getCode();
-                    content = en.getEventMessage().getEventContents().stream()
-                            .filter(c -> c.getLanguage().equals(defaultLang)).findFirst()
+                    String defaultLang = languageService.getDefault();
+                    content = findContentByLanguage(contents, defaultLang)
                             .orElseThrow(() -> new RuntimeException("Default language(" + defaultLang + ") of content not found"));
                 }
 
-                message = replaceConstants(content.getBody(), user, ex, en);
-                subject = replaceConstants(content.getSubject(), user, ex, en);
-                to = er.getDestination();
+                String message = replaceConstants(content.getBody(), user, ex, en);
+                String subject = replaceConstants(content.getSubject(), user, ex, en);
+                String to = er.getDestination();
                 String type = en.getEventMessage().getType();// email, incoming_webhook
                 try {
                     switch (type) {
@@ -324,10 +308,23 @@ public class ExecutionAspect {
                         case "email" -> emailService.sendMessage(to, subject, message);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.warn("Failed to send notification", e);
                 }
             }
         }
+    }
+
+    /**
+     * Finds the template content written in the given language. Contents are matched on their
+     * canonical language code, so a template stored with a legacy code such as 'eng' still resolves
+     * for a user whose language is 'en'.
+     */
+    private Optional<EventContent> findContentByLanguage(List<EventContent> contents, String language) {
+        return contents.stream()
+                .filter(c -> languageService.normalize(c.getLanguage())
+                        .filter(language::equals)
+                        .isPresent())
+                .findFirst();
     }
 
     // type: email, incoming_webhook
@@ -336,7 +333,9 @@ public class ExecutionAspect {
         switch (type) {
             case "email" -> {
                 destination = SecurityContextHolder.getContext().getAuthentication().getName();
-                recipients.add(new EventRecipient(destination));
+                if (EmailUtility.isValid(destination)) {
+                    recipients.add(new EventRecipient(destination));
+                }
             }
             case "incoming_webhook" -> {
                 String[] webhooks = env.getProperty(AppYamlPath.INCOMING_WEBHOOK, String[].class);
@@ -425,16 +424,13 @@ public class ExecutionAspect {
         return constants;
     }
 
-    @Autowired
-    private ConnectionServiceImp connectionServiceImp;
-
     private Map<String, String> getConstantValues(List<String> constants, User user, Exception ex, EventNotification en) {
         if (constants == null || constants.isEmpty()) {
             return null;
         }
         Scheduler scheduler = schedulerService.findById(en.getScheduler()
                 .getId()).orElseThrow(() -> new RuntimeException("SCHEDULER_NOT_FOUND"));
-        Connection connection = connectionServiceImp.getById(scheduler.getConnection().getId());
+        Connection connection = connectionService.getById(scheduler.getConnection().getId());
         Map<String, String> cValues = new HashMap<>();
         constants.forEach(c -> {
             switch (c) {
@@ -543,17 +539,5 @@ public class ExecutionAspect {
     private void sendRunningJobsNotification(int schedulerId) {
         List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobsExcludingOne(schedulerId);
         notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
-    }
-
-    private void move(Long connectionId, long execId, String timestamp, String type, boolean debugMode) {
-        if (debugMode) {
-            int fileLimit;
-            if (SUCCESS.equals(type)) {
-                fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
-            } else {
-                fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
-            }
-            LogFileUtility.move(connectionId, execId, timestamp, type, fileLimit);
-        }
     }
 }

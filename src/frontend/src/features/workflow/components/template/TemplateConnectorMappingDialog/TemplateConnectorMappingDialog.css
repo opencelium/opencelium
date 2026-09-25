@@ -1,0 +1,32 @@
+.templateConnectorMappingIntro {
+  margin: 0 0 16px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.templateConnectorMappingRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.templateConnectorMappingRowInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.templateConnectorMappingRowTitle { font-weight: 500; }
+
+.templateConnectorMappingRowMeta {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.templateConnectorMappingRowSelect {
+  flex: 1;
+  min-width: 0;
+}

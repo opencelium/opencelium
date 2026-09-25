@@ -10,6 +10,7 @@ import { findNotificationTemplateIdByName } from '@entities/notificationTemplate
 import type { NotificationTemplate, NotificationTemplateDto } from '@entities/notificationTemplate/model/types'
 import { toDisplayFormat, toServerFormat, replaceInactiveArgs } from '@entities/notificationTemplate/lib/templateArgUtils'
 import { getAggregatorsFromCache } from '@entities/notificationTemplate/lib/getAggregatorsFromCache'
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'notification-template'
 
@@ -46,7 +47,13 @@ export const notificationTemplateDefinition: EntityDefinition = {
         actions: [
             { type: 'view' },
             { type: 'update' },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities')
+                    return t(`${baseKey}.list.confirmDelete.message`, { name: (row as NotificationTemplate).name })
+                },
+            },
         ],
     },
 
@@ -133,9 +140,7 @@ export const notificationTemplateDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -158,9 +163,7 @@ export const notificationTemplateDefinition: EntityDefinition = {
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.type.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {

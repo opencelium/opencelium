@@ -38,23 +38,6 @@ public interface AppYamlPath {
     // Default initial delay is 100 seconds. This means the gc starts to run after 100 seconds from application is ready
     String GC_CONNECTION_INITIAL_DELAY = "opencelium.gc.connection.initialDelay";
 
-    // Support file variables:
-    // Default base directory is 'src/main/resources/support-files'
-    String SUPPORT_FILE_BASE_DIRECTORY = "opencelium.support.file.directory";
-
-    // Default support (*.zip) files limit for successful execution per connection is 1
-    String SUPPORT_FILE_SUCCESS_LIMIT = "opencelium.support.file.limit.success";
-
-    // Default support (*.zip) files limit for failed execution per connection is 5
-    String SUPPORT_FILE_FAIL_LIMIT = "opencelium.support.file.limit.fail";
-
-    // Log file variables:
-    // Default log (*.log) files limit for successful execution per connection is 2
-    String LOG_FILE_SUCCESS_LIMIT = "opencelium.log.retention.per-connection.success";
-
-    // Default log (*.log) files limit for failed execution per connection is 3
-    String LOG_FILE_FAIL_LIMIT = "opencelium.log.retention.per-connection.fail";
-
     // Connector health monitor variables:
     // Master switch for the periodic background health sweep. Default: true
     String CONNECTOR_HEALTH_ENABLED = "opencelium.connector-health.enabled";

@@ -15,6 +15,7 @@ import {TotpToggle} from "@entities/user/ui/TotpToggle.tsx";
 import {apiExecutor} from "@shared/api/apiExecutor.ts";
 import {message} from "antd";
 import {selectAuthUser} from "@entities/auth/model/authSelectors.ts";
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 const baseKey = 'user';
 
 const resolveUserId = (value: string): string => {
@@ -30,6 +31,11 @@ const buildUserPageUrl = (value: string): string =>
 
 const buildUserViewPageUrl = (value: string): string =>
     `/user/view/${encodeURIComponent(resolveUserId(value))}`
+
+const hasEmailOrUsername = (data: unknown): boolean => {
+    const { email, username } = (data ?? {}) as { email?: string | null; username?: string | null }
+    return Boolean(email?.trim() || username?.trim())
+}
 
 export const userDefinition: EntityDefinition = {
     name: baseKey,
@@ -50,6 +56,11 @@ export const userDefinition: EntityDefinition = {
             { type: 'update' },
             {
                 type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    const user = row as User;
+                    return t(`${baseKey}.list.confirmDelete.message`, { user: user.email ?? user.username ?? '' });
+                },
                 disabledReason: (row) => {
                     const currentUser = selectAuthUser(store.getState());
                     if (!currentUser) return null;
@@ -90,6 +101,22 @@ export const userDefinition: EntityDefinition = {
                 data.password === data.repeatPassword,
             message: `${baseKey}.crossValidations.repeatPassword.message`,
             path: 'repeatPassword'
+        },
+        // A user signs in with either credential, so neither field can be required on
+        // its own — the rule is reported on both so the error shows wherever the user
+        // is looking. It only runs when both fields are validated together, which the
+        // credentials step guarantees via validateFields.
+        {
+            fields: ['email', 'username'],
+            validate: hasEmailOrUsername,
+            message: `${baseKey}.crossValidations.emailOrUsername.message`,
+            path: 'email'
+        },
+        {
+            fields: ['email', 'username'],
+            validate: hasEmailOrUsername,
+            message: `${baseKey}.crossValidations.emailOrUsername.message`,
+            path: 'username'
         }
     ],
     api: {
@@ -129,15 +156,13 @@ export const userDefinition: EntityDefinition = {
                 max: 255
             },
             table: {
-                width: '25%',
+                width: '20%',
                 visible: true,
-                order: 2,
+                order: 3,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.name.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             }
         },
         {
@@ -154,15 +179,13 @@ export const userDefinition: EntityDefinition = {
                 max: 255
             },
             table: {
-                width: '25%',
+                width: '20%',
                 visible: true,
-                order: 3,
+                order: 4,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.surname.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             }
         },
         {
@@ -234,9 +257,9 @@ export const userDefinition: EntityDefinition = {
                 }
             },
             validation: {
-                required: true,
+                required: false,
                 email: true,
-                max: 100,
+                max: 255,
                 remote: {
                     url: `/user/check/:email`,
                     method: 'GET', // or GET, depending on the API
@@ -253,15 +276,13 @@ export const userDefinition: EntityDefinition = {
                 }
             },
             table: {
-                width: '25%',
+                width: '20%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.email.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },/*
             access: {
                 strategy: 'disable',
@@ -276,6 +297,29 @@ export const userDefinition: EntityDefinition = {
                     }
                 ]
             }*/
+        },
+        {
+            name: 'username',
+            type: 'string',
+            ui: {
+                component: 'input',
+                props: {
+                    labelKey: `${baseKey}.fields.username.label`,
+                }
+            },
+            validation: {
+                required: false,
+                max: 255,
+            },
+            table: {
+                width: '20%',
+                visible: true,
+                order: 2,
+                sortable: true,
+                searchable: true,
+                labelKey: `${baseKey}.fields.username.label`,
+                render: (_row, value) => <TruncatedTextCell value={value} />,
+            },
         },
         {
             name: 'password',
@@ -300,16 +344,7 @@ export const userDefinition: EntityDefinition = {
                     { pattern: /\d/, message: `${baseKey}.fields.password.validation3` },
                     { pattern: /[^A-Za-z0-9]/, message: `${baseKey}.fields.password.validation4` }
                 ]
-            },/*
-            access: {
-                strategy: 'forbid',
-                rules: [
-                    {
-                        effect: 'deny',
-                        roles: ['viewer']
-                    }
-                ]
-            }*/
+            },
         },
         {
             name: 'repeatPassword',
@@ -322,7 +357,7 @@ export const userDefinition: EntityDefinition = {
             },
             validation: {
                 required: true,
-            }
+            },
         },
         {
             name: 'userGroup',
@@ -346,7 +381,7 @@ export const userDefinition: EntityDefinition = {
             },
             table: {
                 visible: true,
-                order: 4,
+                order: 5,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userGroup.label`,
                 mapToValue: (_row, raw) => {
@@ -356,9 +391,7 @@ export const userDefinition: EntityDefinition = {
                     }
                     return undefined;
                 },
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -367,7 +400,7 @@ export const userDefinition: EntityDefinition = {
             ui: { component: 'switch' },
             table: {
                 visible: true,
-                order: 5,
+                order: 6,
                 width: 1,
                 align: 'center',
                 labelKey: `${baseKey}.fields.totpEnabled.label`,
@@ -400,7 +433,7 @@ export const userDefinition: EntityDefinition = {
             ]
         },{
             id: 'credentials',
-            fields: ['email', 'password', 'repeatPassword'],/*
+            fields: ['email', 'username', 'password', 'repeatPassword'],/*
             access: {
                 strategy: 'disable',
                 rules: [
@@ -413,18 +446,14 @@ export const userDefinition: EntityDefinition = {
                 ]
             }*/
         },{
+            // Update mode merges role selection into the credentials step instead of a
+            // separate step (see the 'credentials' step definition below) — one section,
+            // so it renders as a single block instead of two separately-spaced sections.
+            id: 'credentials-update',
+            fields: ['email', 'username', 'userGroup'],
+        },{
             id: 'role',
-            fields: ['userGroup'],/*
-            access: {
-                strategy: 'hide',
-                rules: [
-                    {
-                        effect: 'allow',
-                        roles: ['admin']
-                    },
-
-                ]
-            }*/
+            fields: ['userGroup'],
         }
     ],
 
@@ -443,7 +472,7 @@ export const userDefinition: EntityDefinition = {
                 getSuccessMessage: (formData: UserUpdateDto) => {
                     const t = i18n.getFixedT(i18n.language, 'entities');
                     const fullName = [formData.userDetail?.name, formData.userDetail?.surname].filter(Boolean).join(' ');
-                    return t(`${baseKey}.wizard.modes.create.successMessage`, { name: fullName || formData.email });
+                    return t(`${baseKey}.wizard.modes.create.successMessage`, { name: fullName || formData.email || formData.username });
                 },
 /*                info: [
                     {
@@ -459,7 +488,7 @@ export const userDefinition: EntityDefinition = {
                 getSuccessMessage: (formData: UserUpdateDto) => {
                     const t = i18n.getFixedT(i18n.language, 'entities');
                     const fullName = [formData.userDetail?.name, formData.userDetail?.surname].filter(Boolean).join(' ');
-                    return t(`${baseKey}.wizard.modes.update.successMessage`, { name: fullName || formData.email });
+                    return t(`${baseKey}.wizard.modes.update.successMessage`, { name: fullName || formData.email || formData.username });
                 },
             },
             view: {
@@ -479,33 +508,49 @@ export const userDefinition: EntityDefinition = {
             }
         ],
 
-        steps: [{
+        // Update mode merges role selection into the credentials step (and drops
+        // password/repeatPassword, changed via a dedicated reset flow instead) rather
+        // than keeping the create flow's separate password + role steps.
+        steps: (mode) => {
+            const detailsStep = {
                 id: 'details',
                 header: `${baseKey}.wizard.steps.details.header`,
                 subheader: `${baseKey}.wizard.steps.details.subheader`,
                 sectionIds: ['details'],
                 validateFields: ['userDetail.name', 'userDetail.surname', 'userDetail.phoneNumber'],
-/*                info: [
-                    {
-                        content: `${baseKey}.wizard.steps.details.info`,
-                    }
-                ]*/
-            },
-            {
-                id: 'credentials',
-                header: `${baseKey}.wizard.steps.credentials.header`,
-                subheader: `${baseKey}.wizard.steps.credentials.subheader`,
-                sectionIds: ['credentials'],
-                validateFields: ['email', 'password', 'repeatPassword']
-            },
-            {
-                id: 'role',
-                header: `${baseKey}.wizard.steps.role.header`,
-                subheader: `${baseKey}.wizard.steps.role.subheader`,
-                sectionIds: ['role'],
-                validateFields: ['userGroup']
             }
-        ]
+
+            if (mode === 'update') {
+                return [
+                    detailsStep,
+                    {
+                        id: 'credentials',
+                        header: `${baseKey}.wizard.steps.credentials.header`,
+                        subheader: `${baseKey}.wizard.steps.credentials.subheaderUpdate`,
+                        sectionIds: ['credentials-update'],
+                        validateFields: ['email', 'username', 'userGroup'],
+                    },
+                ]
+            }
+
+            return [
+                detailsStep,
+                {
+                    id: 'credentials',
+                    header: `${baseKey}.wizard.steps.credentials.header`,
+                    subheader: `${baseKey}.wizard.steps.credentials.subheader`,
+                    sectionIds: ['credentials'],
+                    validateFields: ['email', 'username', 'password', 'repeatPassword'],
+                },
+                {
+                    id: 'role',
+                    header: `${baseKey}.wizard.steps.role.header`,
+                    subheader: `${baseKey}.wizard.steps.role.subheader`,
+                    sectionIds: ['role'],
+                    validateFields: ['userGroup'],
+                },
+            ]
+        },
     },
     commands: (def) => (
         [

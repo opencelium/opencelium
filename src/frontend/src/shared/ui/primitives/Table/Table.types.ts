@@ -14,6 +14,17 @@ import type {
 export type TableColumnMeta = {
     align?: 'left' | 'center' | 'right';
     width?: string;
+    resizable?: boolean;
+    /**
+     * Let this column swallow whatever width the others leave over, instead of a
+     * trailing filler column doing it. The Ant adapter freezes every column at
+     * its measured width and needs *something* unsized to absorb the surplus, or
+     * `table-layout: fixed` spreads it back across all columns and undoes the
+     * freeze — by default that sink is an empty column appended at the end, which
+     * parks a trailing actions column mid-table. Set this on the column that
+     * should sit at the right edge instead; only the last one that asks wins.
+     */
+    fillTrailingSpace?: boolean;
 };
 
 export interface TableProps<TData extends RowData> {

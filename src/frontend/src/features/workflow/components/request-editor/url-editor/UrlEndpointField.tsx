@@ -7,9 +7,10 @@ import {
 	isCaretReportedAtEditableRootStart,
 	setFocusByCaretPositionInDivEditable,
 } from './utils/contentEditable';
-import type { EndpointArg } from '../../../types/connection';
+import type { Connection, EndpointArg, MethodWithId } from '../../../types/connection';
 import {
 	PROHIBITED_ENDPOINT_CHARACTERS,
+	ENDPOINT_REF_CLASS,
 	isSelectionInside,
 	getInlineVisualLength,
 	buildInlineHtml,
@@ -20,6 +21,7 @@ import {
 	sanitizeUrlInputValue,
 	shouldBlockUrlKeyInput,
 } from './urlEditor.utils';
+import { EndpointArgHoverTooltip } from './EndpointArgHoverTooltip';
 
 type Props = {
 	readOnly?: boolean;
@@ -29,6 +31,8 @@ type Props = {
 
 	endpointArgs: Record<string, EndpointArg>;
 	endpointArgsRef: React.RefObject<Record<string, EndpointArg>>;
+	connection?: Connection | null;
+	currentMethod?: MethodWithId;
 
 	divRef: React.RefObject<HTMLDivElement | null>;
 	lastCaretRef: React.RefObject<number>;
@@ -40,7 +44,7 @@ type Props = {
 	onRawCaretChange?: (rawCaret: number, visualCaret: number) => void;
 };
 
-const CLS = 'oc-endpoint-ref';
+const CLS = ENDPOINT_REF_CLASS;
 
 const getCaretFromRawChange = (
 	prevRaw: string,
@@ -74,6 +78,8 @@ export const UrlEndpointField: React.FC<Props> = ({
 	afterNode,
 	endpointArgs,
 	endpointArgsRef,
+	connection,
+	currentMethod,
 	divRef,
 	lastCaretRef,
 	lastRawCaretRef,
@@ -420,6 +426,12 @@ export const UrlEndpointField: React.FC<Props> = ({
 			{afterNode ? (
 				<div>{afterNode}</div>
 			) : null}
+			<EndpointArgHoverTooltip
+				containerRef={divRef}
+				endpointArgs={endpointArgs}
+				connection={connection}
+				currentMethod={currentMethod}
+			/>
 		</div>
 	);
 };

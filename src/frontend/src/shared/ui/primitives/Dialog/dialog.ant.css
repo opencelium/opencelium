@@ -12,6 +12,62 @@
     outline-offset: 0;
 }
 
+.ant-dialog-viewport-wizard .ant-modal-container {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 58px);
+    overflow: hidden;
+}
+
+.ant-dialog-viewport-wizard .ant-modal-body {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.ant-dialog-viewport-wizard .ant-modal-body form,
+.ant-dialog-viewport-wizard .step-form-layout,
+.ant-dialog-viewport-wizard .ant-modal-body form,
+.ant-dialog-viewport-wizard .step-form-layout,
+.ant-dialog-viewport-wizard .step-form-main,
+.ant-dialog-viewport-wizard .step-form-content-column,
+.ant-dialog-viewport-wizard .step-form-content-shell {
+    min-height: 0;
+}
+
+.ant-dialog-viewport-wizard .ant-modal-body form,
+.ant-dialog-viewport-wizard .step-form-layout,
+.ant-dialog-viewport-wizard .step-form-content-column,
+.ant-dialog-viewport-wizard .step-form-content-shell {
+    display: flex;
+    flex-direction: column;
+}
+
+.ant-dialog-viewport-wizard .step-form-main,
+.ant-dialog-viewport-wizard .step-form-content-column,
+.ant-dialog-viewport-wizard .step-form-content-shell,
+.ant-dialog-viewport-wizard .step-form-scroll-region {
+    flex: 1 1 auto;
+}
+
+.ant-dialog-viewport-wizard .step-form-main {
+    overflow: hidden;
+}
+
+.ant-dialog-viewport-wizard .step-form-scroll-region {
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.ant-dialog-viewport-wizard .step-form-actions {
+    flex-shrink: 0;
+    margin-top: 24px !important;
+    padding-top: 16px;
+}
+
 .ant-dialog-fullscreen {
     top: 0 !important;
     /* Override antd's default centering + max-width that otherwise leave a gap,
@@ -35,6 +91,10 @@
     flex: 1 1 auto !important;
     min-height: 0;
     overflow: auto;
+}
+
+.ant-dialog-fullscreen.ant-dialog-viewport-wizard .ant-modal-body {
+    overflow: hidden;
 }
 
 /* Header action icons (content-contributed actions + maximize/restore) sit

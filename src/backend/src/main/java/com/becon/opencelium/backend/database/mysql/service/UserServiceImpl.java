@@ -31,6 +31,8 @@ import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.utility.EmailUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -67,6 +69,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private WidgetSettingServiceImp widgetSettingServiceImp;
 
+    private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
     @Override
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -91,12 +95,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User save(User user) {
-        if (EmailUtility.isEmail(user.getEmail())) {
-            return userRepository.save(user);
-        } else {
-            throw new IllegalArgumentException("Invalid email is supplied to User dto");
+        String email = user.getEmail();
+
+        if (email != null && !EmailUtility.isValid(email)) {
+            throw new IllegalArgumentException("Invalid email is supplied");
         }
+
+        if (user.getAuthMethod() == AuthMethod.BASIC && email == null) {
+            throw new IllegalArgumentException("Email is required for BASIC users");
+        }
+
+        return userRepository.save(user);
     }
 
     @Override
@@ -163,7 +174,15 @@ public class UserServiceImpl implements UserService {
             user.setAuthMethod(userDb.getAuthMethod());
             user.setTotpProcessCompleted(userDb.isTotpProcessCompleted());
             user.setTotpSecretKey(userDb.getTotpSecretKey());
+        }
+
+        if (user.getAuthMethod() != AuthMethod.LDAP) {
+            user.setUsername(userRequestResource.getUsername());
+        } else {
+            // LDAP owns the username: ignore the request's value and keep the stored one.
+            // userDb is never null here — a user can only be LDAP once persisted as such.
             user.setUsername(userDb.getUsername());
+            logger.warn("Ldap user detected. Username {} can't be modified.", userDb.getUsername());
         }
 
         userDetail.setId(userRequestResource.getUserId());

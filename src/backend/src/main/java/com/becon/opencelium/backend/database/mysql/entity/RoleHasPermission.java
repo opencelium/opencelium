@@ -16,7 +16,15 @@
 
 package com.becon.opencelium.backend.database.mysql.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.Table;
+
 import java.io.Serializable;
 
 @Entity
@@ -27,33 +35,29 @@ public class RoleHasPermission {
     private RoleHasPermissionId id;
 
     @ManyToOne
-    @JoinColumn(name = "role_id", insertable = false, updatable = false)
+    @MapsId("roleId")
+    @JoinColumn(name = "role_id")
     private UserRole userRole;
 
     @ManyToOne
-    @JoinColumn(name="component_id", insertable = false, updatable = false)
+    @MapsId("componentId")
+    @JoinColumn(name = "component_id")
     private Component component;
 
     @ManyToOne
-    @JoinColumn(name="permission_id", insertable = false, updatable = false)
+    @MapsId("permissionId")
+    @JoinColumn(name = "permission_id")
     private Permission permission;
 
-    public RoleHasPermission(){
+    public RoleHasPermission() {
 
     }
 
     public RoleHasPermission(UserRole userRole, Component component, Permission permission) {
-        // create primary key
-        this.id = new RoleHasPermissionId(userRole.getId(), component.getId(), permission.getId());
-
-        // initialize attributes
+        this.id = new RoleHasPermissionId(null, component.getId(), permission.getId());
         this.userRole = userRole;
         this.component = component;
         this.permission = permission;
-
-        // update relationships to assure referential integrity
-        userRole.getComponents().add(this);
-        component.getPermissions().add(this);
     }
 
     public RoleHasPermissionId getId() {

@@ -1,0 +1,140 @@
+.startNode {
+  color: var(--color-text-secondary);
+}
+
+.startNodeButton {
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.startNodeButton::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 999px;
+}
+
+.startNodeButton:not(:disabled):hover {
+  border-color: var(--color-action-primary);
+  color: var(--color-action-primary);
+}
+
+.startNodeRunning,
+.startNodeRunning:not(:disabled):hover {
+  border-color: var(--color-action-danger);
+  color: var(--color-action-danger);
+}
+
+.startNodeUnavailable {
+  cursor: not-allowed;
+  color: var(--color-text-disabled);
+}
+
+.startNodeSpinner {
+  animation: startNodeSpin 0.9s linear infinite;
+}
+
+@keyframes startNodeSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.startNodeAlert {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-size: 10px;
+  color: var(--color-status-warning-fg);
+  background: var(--color-status-warning-bg);
+  border: 1px solid var(--color-status-warning-border);
+  border-radius: 6px;
+  padding: 2px 6px;
+  pointer-events: none;
+}
+
+.startNodeSkipLive {
+	position: absolute;
+	top: calc(100% + 2px);
+	left: 50%;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	font-size: 10px;
+	color: var(--color-action-primary);
+	background: var(--color-background-surface);
+	border: 1px solid var(--color-action-primary);
+	border-radius: 6px;
+	padding: 2px 6px;
+	cursor: pointer;
+}
+
+.systemNode {
+  border-style: dashed;
+}
+
+.circleNodeImage {
+  max-width: 42px;
+  max-height: 42px;
+  object-fit: contain;
+	display: block;
+	background-color: #ffffff;
+	border-radius: 50%;
+	padding: 4px;
+	box-sizing: border-box;
+}
+
+.ifNode {
+  width: 42px;
+  height: 42px;
+  background: var(--color-background-surface);
+  border: 2px solid var(--color-border-default);
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.ifNode svg {
+  transform: rotate(-45deg);
+}
+
+.ifTrueLabel,
+.ifContinueLabel {
+  position: absolute;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  user-select: none;
+}
+
+.ifContinueLabel {
+  top: calc(50% - 20px);
+  right: -34px;
+  transform: translateY(-50%);
+}
+
+.loopIterationLabel {
+	position: absolute;
+	left: calc(50% + 20px);
+	bottom: -10px;
+	transform: translateX(-50%);
+	font-size: 11px;
+	color: var(--color-text-secondary);
+	white-space: nowrap;
+	pointer-events: none;
+}
+.ifBranchLabelActive { color: var(--color-action-primary); font-weight: 700; }
+
+.ifTrueLabel {
+  left: calc(50% + 20px);
+  bottom: -10px;
+  transform: translateX(-50%);
+}

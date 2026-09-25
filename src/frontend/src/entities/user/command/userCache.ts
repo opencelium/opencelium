@@ -1,7 +1,7 @@
 import { store } from '@app/store/store'
 import { genericApi } from '@shared/api/genericApi'
 
-export type UserMeta = { userId: number; email: string }
+export type UserMeta = { userId: number; email: string | null }
 
 const META_URL = '/user/all'
 

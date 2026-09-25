@@ -172,8 +172,9 @@ class UserServiceImplTest {
     // ── save ──────────────────────────────────────────────────────────────────
 
     @Test
-    void saveReturnsSavedUserWhenEmailIsValid() {
+    void saveReturnsSavedBasicUserWhenEmailIsValid() {
         User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.BASIC);
         input.setEmail("bob@example.com");
 
         User saved = UserFixture.anEmptyUser();
@@ -191,13 +192,85 @@ class UserServiceImplTest {
     }
 
     @Test
-    void saveThrowsIllegalArgumentExceptionWhenEmailIsInvalid() {
+    void saveThrowsWhenBasicUserEmailIsNull() {
         User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.BASIC);
+        input.setEmail(null);
+
+        assertThatThrownBy(() -> userService.save(input))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Email is required for BASIC users");
+
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void saveThrowsWhenBasicUserEmailIsInvalid() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.BASIC);
         input.setEmail("not-an-email");
 
         assertThatThrownBy(() -> userService.save(input))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Invalid email is supplied to User dto");
+                .hasMessage("Invalid email is supplied");
+
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void saveReturnsSavedLdapUserWhenEmailIsValid() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.LDAP);
+        input.setUsername("ldap-user@example.com");
+        input.setEmail("ldap-user@example.com");
+
+        User saved = UserFixture.anEmptyUser();
+        saved.setId(17);
+        saved.setUsername("ldap-user@example.com");
+        saved.setEmail("ldap-user@example.com");
+
+        when(userRepository.save(input)).thenReturn(saved);
+
+        User result = userService.save(input);
+
+        assertThat(result.getId()).isEqualTo(17);
+        assertThat(result.getUsername()).isEqualTo("ldap-user@example.com");
+        assertThat(result.getEmail()).isEqualTo("ldap-user@example.com");
+        verify(userRepository).save(input);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void saveReturnsSavedLdapUserWhenEmailIsNull() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.LDAP);
+        input.setUsername("ldap-user");
+        input.setEmail(null);
+
+        User saved = UserFixture.anEmptyUser();
+        saved.setId(17);
+        saved.setUsername("ldap-user");
+
+        when(userRepository.save(input)).thenReturn(saved);
+
+        User result = userService.save(input);
+
+        assertThat(result.getId()).isEqualTo(17);
+        assertThat(result.getUsername()).isEqualTo("ldap-user");
+        assertThat(result.getEmail()).isNull();
+        verify(userRepository).save(input);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void saveThrowsWhenLdapUserEmailIsInvalid() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.LDAP);
+        input.setEmail("not-an-email");
+
+        assertThatThrownBy(() -> userService.save(input))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid email is supplied");
 
         verifyNoInteractions(userRepository);
     }
