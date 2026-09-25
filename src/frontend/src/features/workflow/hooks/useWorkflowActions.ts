@@ -99,7 +99,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		openSaveTemplate: templates.openSaveTemplateDialog,
 		openLoadTemplate: templates.openLoadTemplateDialog,
 		openJsonEditor: () => {
-			setJsonEditorValue(buildConnectionPayload({
+			const jsonValue: Record<string, unknown> = buildConnectionPayload({
 				connectionId: view.activeConnectionId,
 				title: headerState.title,
 				description: headerState.description,
@@ -108,7 +108,9 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 				viewport: workflow.getViewport(),
 				fieldBindings,
 				categoryId,
-			}));
+			});
+			delete jsonValue.name;
+			setJsonEditorValue(jsonValue);
 			setJsonEditorOpen(true);
 		},
 		openShortcuts: () => setIsShortcutsOpen(true),

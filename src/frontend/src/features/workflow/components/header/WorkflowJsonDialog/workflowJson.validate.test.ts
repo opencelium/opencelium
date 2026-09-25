@@ -6,9 +6,22 @@ import * as jumpValidator from '../../../utils/jumpValidator';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../../types/workflow.types';
 import { initialNodes } from '../../../data/initialGraph';
 
-const validPayload = () => ({
+type TestPayload = {
+	connectionId?: number;
+	title: string;
+	description: string;
+	categoryId: number | null;
+	fieldBinding: unknown[];
+	fromConnector: { connectorId: number; title: string;
+		methods: Array<Record<string, unknown>>; operators: Array<Record<string, unknown>> };
+	toConnector: null;
+	ui: { workflowNodes: Array<{ id: string; type: string;
+		position: { x: number; y: number }; data: Record<string, unknown> }>;
+		workflowEdges: Array<Record<string, unknown>> };
+};
+
+const validPayload = (): TestPayload => ({
 	title: 'Workflow',
-	name: 'Workflow',
 	description: '',
 	categoryId: null,
 	fieldBinding: [],
@@ -116,20 +129,10 @@ describe('validateWorkflowJson', () => {
 		});
 	});
 
-	it('requires name to match title', () => {
-		const payload = validPayload();
-		payload.name = 'Different';
-		const result = validateWorkflowJson(payload);
-		expect(result.success).toBe(false);
-		if (!result.success) expect(result.errors[0].key)
-			.toBe('json.errors.titleNameMismatch');
-	});
-
 	it('rejects the title of another existing workflow', () => {
 		const payload = validPayload();
 		payload.connectionId = 1;
 		payload.title = ' Existing workflow ';
-		payload.name = payload.title;
 		const result = validateWorkflowJson(payload, { connections: [
 			{ id: 1, title: 'Original workflow' },
 			{ id: 2, title: 'existing WORKFLOW' },
