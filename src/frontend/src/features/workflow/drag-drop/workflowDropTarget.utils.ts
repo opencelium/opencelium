@@ -60,18 +60,26 @@ export const findWorkflowDropTarget = (
 	return nodes
 		.filter((node) => node.type !== 'start' && node.type !== 'comment'
 			&& !movedNodeIds.has(node.id))
-		.map((node): DragDropTarget => {
+		.map((node): DragDropTarget | undefined => {
 			const width = node.measured?.width ?? node.width ?? 80;
 			const height = node.measured?.height ?? node.height ?? 80;
 			const center = { x: node.position.x + width / 2, y: node.position.y + height / 2 };
 			const direction = (node.type === 'if' || node.type === 'loop') &&
 				Math.abs(point.x - center.x) < width && point.y > center.y ? 'bottom' : 'right';
+			const alreadyContainsGroup = edges.some((edge) => {
+				if (edge.source !== node.id || !movedNodeIds.has(edge.target)) return false;
+				const edgeDirection = edge.targetHandle === 'top' || edge.sourceHandle === 'true'
+					|| edge.sourceHandle === 'bottom' ? 'bottom' : 'right';
+				return edgeDirection === direction;
+			});
+			if (alreadyContainsGroup) return undefined;
 			const anchor = direction === 'bottom'
 				? { x: center.x, y: node.position.y + height + 30 }
 				: { x: node.position.x + width + 30, y: center.y };
 			return { target: { nodeId: node.id, direction },
 				distance: Math.hypot(point.x - anchor.x, point.y - anchor.y) };
 		})
+		.filter((target): target is DragDropTarget => target !== undefined)
 		.sort((left, right) => left.distance - right.distance)
 		.find((target) => target.distance <= DROP_LEAF_MAX_DISTANCE);
 };

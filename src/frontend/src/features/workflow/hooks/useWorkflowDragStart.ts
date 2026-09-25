@@ -71,9 +71,9 @@ export const useWorkflowDragStart = ({ nodes, edges, setNodes, setIsDragging,
 				highlightedEdgeIds: new Set<string>(),
 				pointerOffsetFromRoot,
 				lastGhostRootPosition: { ...draggedNode.position },
+				draggedNodeIds: draggedIds,
 				...(isMultiDrag ? {
 					multiRootIds: selectedGroup.rootIds,
-					draggedNodeIds: selectedGroup.nodeIds,
 				} : {}),
 			};
 			setNodes((current) => current.map((item) => ({
