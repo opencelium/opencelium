@@ -1,9 +1,8 @@
-import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import { formatRelativeTime } from '@shared/utils/formatRelativeTime';
 import type { ConnectorStatusDotProps } from './ConnectorStatusDot.types';
-import { extractConnectorErrorReason, getConnectorStatusAppearance } from './connectorStatusDot.utils';
+import { getConnectorStatusAppearance } from './connectorStatusDot.utils';
 import { useConnectorStatusPulse } from './useConnectorStatusPulse';
+import { useConnectorStatusTooltip } from './useConnectorStatusTooltip';
 
 export function ConnectorStatusDot({
 	status,
@@ -15,14 +14,8 @@ export function ConnectorStatusDot({
 	lastCheckedAt,
 	tooltipPlacement = 'top',
 }: ConnectorStatusDotProps) {
-	const { t, lang } = useI18n('workflow');
-	const { color, tooltipKey } = getConnectorStatusAppearance(status);
-	const statusMessage = tooltipOverride
-		? t('sidebar.connectorStatus.failedWithReason', { reason: extractConnectorErrorReason(tooltipOverride) })
-		: t(`sidebar.connectorStatus.${tooltipKey}`);
-	const tooltipContent = lastCheckedAt != null
-		? t('sidebar.connectorStatus.checkedAt', { time: formatRelativeTime(lastCheckedAt, lang), message: statusMessage })
-		: statusMessage;
+	const { color } = getConnectorStatusAppearance(status);
+	const tooltipContent = useConnectorStatusTooltip({ status, tooltipOverride, lastCheckedAt });
 
 	const isChanged = useConnectorStatusPulse(status);
 

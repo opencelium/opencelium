@@ -62,6 +62,34 @@
     },
     "totpEnabled": {
       "label": "2FA"
+    },
+    "profilePicture": {
+      "label": "Profilbild",
+      "uploadButton": "Bild hochladen",
+      "hint": "PNG oder JPG, maximal 10 MB",
+      "replace": "Bild ersetzen",
+      "delete": "Bild löschen",
+      "confirmDelete": {
+        "title": "Profilbild entfernen?",
+        "message": "Dies kann nicht widerrufen werden."
+      },
+      "crop": {
+        "title": "Profilbild zuschneiden",
+        "zoom": "Zoom",
+        "cancel": "Abbrechen",
+        "apply": "Zuschnitt anwenden",
+        "instruction": "Verschieben Sie das Quadrat, um den Bildbereich auszuwählen"
+      },
+      "invalidType": "Das Bild muss eine PNG- oder JPG-Datei sein (.png, .jpg, .jpeg)",
+      "tooLarge": "Das Bild muss kleiner als 10 MB sein",
+      "gravatar": {
+        "title": "Gravatar-Bild verwenden?",
+        "message": "Mit dieser E-Mail ist ein Gravatar-Bild verknüpft. Möchten Sie es als Profilbild verwenden?",
+        "messageReplace": "Mit dieser E-Mail ist ein Gravatar-Bild verknüpft. Möchten Sie es anstelle des aktuellen Profilbilds verwenden? Das aktuelle Bild wird beim Speichern gelöscht.",
+        "refresh": "Von Gravatar aktualisieren",
+        "notFound": "Für diese E-Mail konnte kein Gravatar-Bild geladen werden.",
+        "staged": "Bild von Gravatar geladen. Speichern Sie den Benutzer, um es zu übernehmen."
+      }
     }
   },
   "sections": {
@@ -135,6 +163,14 @@
     "bulkEnable": {
       "label": "2FA aktivieren",
       "success": "Zwei-Faktor-Authentifizierung für {{count}} Benutzer aktiviert"
+    }
+  },
+  "lifecycle": {
+    "uploadProfilePicture": {
+      "failed": "Benutzer gespeichert, aber das Hochladen des Profilbilds ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
+    },
+    "deleteProfilePicture": {
+      "failed": "Benutzer gespeichert, aber das Entfernen des Profilbilds ist fehlgeschlagen. Sie können es über Bearbeiten erneut versuchen."
     }
   }
 }

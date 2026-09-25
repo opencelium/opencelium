@@ -7,6 +7,7 @@ import { useBreakpoints } from '@app/hooks/useBreakpoints'
 import { LicenseInformationStep } from '@pages/SubscriptionPage/LicenseInformationStep'
 import { OperationUsageStep } from '@pages/SubscriptionPage/OperationUsageStep'
 import { OperationDetailsStep } from '@pages/SubscriptionPage/OperationDetailsStep'
+import { useGetActiveSubscriptionQuery } from '@entities/subscription/api/subscriptionApi'
 import subscriptionWizardImage from '@assets/images/wizard/subscription.gif'
 
 type StepIndex = 0 | 1 | 2
@@ -18,6 +19,15 @@ export function SubscriptionPage() {
     const [currentStep, setCurrentStep] = useState<StepIndex>(0)
     const [selectedOperationId, setSelectedOperationId] = useState<number | null>(null)
 
+    const { data: subscription } = useGetActiveSubscriptionQuery()
+    // Usage data only exists for an activated license; keep the steps enabled while
+    // the query is in flight so they don't flash disabled on page open.
+    const isUsageLocked =
+        !subscription?.subId ||
+        subscription.active !== true
+    const activeStep: StepIndex = isUsageLocked ? 0 : currentStep
+    const activeOperationId = isUsageLocked ? null : selectedOperationId
+
     const handleSelectOperation = useCallback((id: number) => {
         setSelectedOperationId(id)
         setCurrentStep(2)
@@ -28,9 +38,9 @@ export function SubscriptionPage() {
     }, [])
 
     const detailsStepStatus: 'wait' | 'process' | 'finish' =
-        selectedOperationId === null
+        activeOperationId === null
             ? 'wait'
-            : currentStep === 2
+            : activeStep === 2
               ? 'process'
               : 'finish'
 
@@ -39,27 +49,30 @@ export function SubscriptionPage() {
             header: t('subscription.steps.license.header' as never),
             subheader: t('subscription.steps.license.subheader' as never),
             content: <LicenseInformationStep />,
-            onClick: currentStep === 0 ? undefined : () => setCurrentStep(0),
+            onClick: activeStep === 0 ? undefined : () => setCurrentStep(0),
         },
         {
             header: t('subscription.steps.operationUsage.header' as never),
             subheader: t('subscription.steps.operationUsage.subheader' as never),
             content: <OperationUsageStep onSelectOperation={handleSelectOperation} />,
-            onClick: currentStep === 1 ? undefined : () => setCurrentStep(1),
+            disabled: isUsageLocked,
+            onClick:
+                isUsageLocked || activeStep === 1 ? undefined : () => setCurrentStep(1),
         },
         {
             header: t('subscription.steps.operationDetails.header' as never),
             subheader: t('subscription.steps.operationDetails.subheader' as never),
             content:
-                selectedOperationId !== null ? (
+                activeOperationId !== null ? (
                     <OperationDetailsStep
-                        operationId={selectedOperationId}
+                        operationId={activeOperationId}
                         onBack={handleBack}
                     />
                 ) : null,
             status: detailsStepStatus,
+            disabled: isUsageLocked,
             onClick:
-                selectedOperationId !== null && currentStep !== 2
+                !isUsageLocked && activeOperationId !== null && activeStep !== 2
                     ? () => setCurrentStep(2)
                     : undefined,
         },
@@ -84,12 +97,12 @@ export function SubscriptionPage() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                         <Steps
                             items={stepItems}
-                            current={currentStep}
+                            current={activeStep}
                             status="process"
                         />
                     </div>
                     <div style={{ flex: 3, minWidth: 0 }}>
-                        {stepItems[currentStep]?.content}
+                        {stepItems[activeStep]?.content}
                     </div>
                 </div>
             </div>

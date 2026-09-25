@@ -1,4 +1,4 @@
-import { buildLegacyConnection } from '../components/request-editor/legacyAdapter';
+import { resolveMethodIdentities } from '../components/request-editor/legacyConnectionBuilder';
 import { parseEnhancementArg } from '../components/request-editor/utils/parseEnhancementArg';
 import type { WorkflowNodeModel } from '../types/workflow.types';
 import { NOT_EXIST_ARG } from './enhancementArgs';
@@ -36,11 +36,11 @@ export const findBrokenEnhancementScripts = (
 ): BrokenEnhancementScript[] => {
 	if (!Array.isArray(fieldBindings) || fieldBindings.length === 0) return [];
 
-	// The same resolution graph.invalidReferences uses: a method's colour is
-	// assigned here when the node does not carry one of its own, and that
-	// assignment is what the stored RESULT_VAR was written against. Once per save
-	// is well within what this can cost.
-	const methodByColor = new Map(buildLegacyConnection(nodes).fromConnector.method
+	// A method's colour is assigned here when the node does not carry one of its
+	// own, and that assignment is what the stored RESULT_VAR was written against.
+	// The identities alone, not a whole legacy connection: this needs the colour
+	// and the name, not every method's deserialized request config.
+	const methodByColor = new Map(resolveMethodIdentities(nodes)
 		.map((method) => [normalizeReferenceColor(method.color), method]));
 
 	return fieldBindings.flatMap((binding) => {

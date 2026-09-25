@@ -5,7 +5,7 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.typ
 import type { WorkflowDragSnapshot } from '../drag-drop/workflowPage.types';
 import { sanitizeGraphEdges, sanitizeGraphNodes } from '../drag-drop/workflowPageGraph.utils';
 import { stabilizeMethodColors } from '../drag-drop/workflowPageNodes.utils';
-import { getDragSubtreeNodeIds } from '../drag-drop/workflowDropTarget.utils';
+import { getDragSubtreeNodeIds, getSelectedDragGroup } from '../drag-drop/workflowDropTarget.utils';
 
 type Params = {
 	nodes: WorkflowNodeModel[];
@@ -23,14 +23,6 @@ export const useWorkflowDragStart = ({ nodes, edges, setNodes, setIsDragging,
 	(event: any, node: WorkflowNodeModel) => {
 		setIsDragging(true);
 		try {
-			const selected = nodes.filter((item) => item.selected && item.type !== 'start');
-			if (selected.length > 1 && selected.some((item) => item.id === node.id)) {
-				multiDrag.current = true;
-				dragSnapshot.current = null;
-				positionLock.current = null;
-				return;
-			}
-			multiDrag.current = false;
 			// A note is never inserted into the graph — no snapshot, no preview, no
 			// drop target; xyflow moves it and useWorkflowDragMove keeps its offset
 			// from the anchor in sync (see WorkflowCommentData.offset).
@@ -47,8 +39,15 @@ export const useWorkflowDragStart = ({ nodes, edges, setNodes, setIsDragging,
 				positionLock.current = null;
 				return;
 			}
-			const draggedIds = getDragSubtreeNodeIds(node.id, stableNodes, stableEdges);
-			positionLock.current = new Set(draggedIds);
+			const selectedGroup = getSelectedDragGroup(stableNodes, stableEdges);
+			const isMultiDrag = selectedGroup.rootIds.length > 1
+				&& selectedGroup.nodeIds.has(node.id);
+			multiDrag.current = isMultiDrag;
+			const draggedIds = isMultiDrag
+				? selectedGroup.nodeIds
+				: getDragSubtreeNodeIds(node.id, stableNodes, stableEdges);
+
+			positionLock.current = isMultiDrag ? null : new Set(draggedIds);
 			const instance = reactFlowInstance.current;
 			const pointerOffsetFromRoot = instance
 				&& typeof event?.clientX === 'number' && typeof event?.clientY === 'number'
@@ -72,6 +71,10 @@ export const useWorkflowDragStart = ({ nodes, edges, setNodes, setIsDragging,
 				highlightedEdgeIds: new Set<string>(),
 				pointerOffsetFromRoot,
 				lastGhostRootPosition: { ...draggedNode.position },
+				...(isMultiDrag ? {
+					multiRootIds: selectedGroup.rootIds,
+					draggedNodeIds: selectedGroup.nodeIds,
+				} : {}),
 			};
 			setNodes((current) => current.map((item) => ({
 				...item,

@@ -57,7 +57,10 @@
       "systemCheck": "Systemprüfungsseite öffnen",
       "ldapCheck": "LDAP-Verbindungsprüfungsseite öffnen",
       "workflow": "Den aktuellen Workflow durchsuchen",
-      "help": "Alle Befehle anzeigen"
+      "help": "Alle Befehle anzeigen",
+      "onboarding": "Einrichtungstour neu starten",
+      "workflowTutorial": "Workflow-Tutorial erneut ansehen",
+      "dashboardTour": "Dashboard-Tour erneut ansehen"
     },
     "footer": {
       "select": "Auswählen",
@@ -88,7 +91,12 @@
     }
   },
   "footer": {
-    "copyright": "© Copyright {{year}} <1>OpenCelium GmbH</1> | Version {{version}}"
+    "copyright": "© Copyright {{year}} <1>OpenCelium GmbH</1> | Version {{version}}",
+    "copyrightMobile": "© {{year}} | Version {{version}}",
+    "docsLink": "Dokumentation",
+    "gitLink": "GitHub",
+    "landingPageLink": "OpenCelium Webseite",
+    "servicePortalLink": "Service-Portal"
   },
   "topbar": {
     "switchToGerman": "Auf Deutsch umschalten",
@@ -99,7 +107,11 @@
     "profile": "Profil",
     "createWorkflow": "Workflow erstellen",
     "createWorkflowHint": "Workflow erstellen (Alt+W)",
-    "docs": "Dokumentation"
+    "docs": "Dokumentation",
+    "help": "Hilfe",
+    "startOnboardingTour": "Onboarding-Tour starten",
+    "startDashboardTour": "Dashboard-Tour starten",
+    "servicePortal": "Service-Portal"
   },
   "user": {
     "unknown": "Unbekannter Benutzer"
@@ -178,5 +190,10 @@
       "bulkMessage": "{{count}} ausgewählte Einträge löschen?",
       "bulkMessage_one": "{{count}} ausgewählten Eintrag löschen?"
     }
+  },
+  "onlineFeature": {
+    "offline": "Keine Internetverbindung. Stellen Sie die Verbindung wieder her, um Online-Dienste zu nutzen.",
+    "syncDisabled": "Online-Dienste sind in der Systemkonfiguration deaktiviert.",
+    "portalUnreachable": "Das Service Portal ist von diesem Server aus nicht erreichbar. Prüfen Sie die Portal-Einstellungen und das Zugriffstoken."
   }
 }

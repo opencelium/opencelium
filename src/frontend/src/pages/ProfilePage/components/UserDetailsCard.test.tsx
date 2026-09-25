@@ -70,6 +70,9 @@ vi.mock('@shared/ui/form/FormInput', () => ({
 vi.mock('@pages/ProfilePage/components/UserTitleField', () => ({
     UserTitleField: () => null,
 }))
+vi.mock('@pages/ProfilePage/components/ProfilePictureEditor', () => ({
+    ProfilePictureEditor: () => null,
+}))
 
 import { UserDetailsCard } from './UserDetailsCard'
 

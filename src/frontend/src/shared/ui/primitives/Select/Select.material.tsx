@@ -17,6 +17,7 @@ export const MaterialSelect: SelectComponent = ({
     options,
     placeholder,
     onChange,
+    onSelect,
     readOnly,
     multiple,
     creatable,
@@ -68,6 +69,7 @@ export const MaterialSelect: SelectComponent = ({
             }
 
             onChange?.(newValue?.value ?? null);
+            onSelect?.(newValue?.value ?? null);
         }
     };
 

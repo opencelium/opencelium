@@ -8,7 +8,8 @@
     "title": {
       "label": "Title",
       "errors": {
-        "title_already_exists": "The connector with this title is already created"
+        "title_already_exists": "The connector with this title is already created",
+        "markup_not_allowed": "Title must not contain HTML or markup."
       }
     },
     "description": {
@@ -18,7 +19,10 @@
       "label": "Invoker"
     },
     "timeout": {
-      "label": "Timeout"
+      "label": "Timeout",
+      "errors": {
+        "invalid": "Timeout must be a whole number between 0 and 2147483647."
+      }
     },
     "modifiedAt": {
       "label": "Modified At"
@@ -26,7 +30,7 @@
     "modifiedBy": {
       "label": "Modified By"
     },
-    "requestData":  {
+    "requestData": {
       "error": {
         "required": "Required field"
       }
@@ -41,7 +45,7 @@
     "icon": {
       "label": "Icon",
       "uploadButton": "Upload logo",
-      "hint": "PNG or JPG",
+      "hint": "PNG or JPG, up to 10 MB",
       "replace": "Replace icon",
       "delete": "Delete icon",
       "crop": {
@@ -54,7 +58,9 @@
       "confirmDelete": {
         "title": "Remove logo?",
         "message": "This can't be undone."
-      }
+      },
+      "invalidType": "The logo must be a PNG or JPG file (.png, .jpg, .jpeg)",
+      "tooLarge": "The logo must be smaller than 10 MB"
     },
     "url": {
       "label": "Url"
@@ -103,12 +109,12 @@
         "header": "Credentials",
         "subheader": "It contains invoker-specific configuration fields required to authenticate and communicate with the target system.",
         "test": {
-          "button": "Test connection",
-          "success": "Connection test succeeded",
-          "needsMasterPassword": "Enter the master password to test the connection with the stored credentials.",
+          "button": "Test connector",
+          "success": "Connector test succeeded",
+          "needsMasterPassword": "Enter the master password to run the connector test with the stored credentials.",
           "confirm": {
-            "title": "Connection test failed",
-            "message": "The connection test failed. Do you still want to save this connector?"
+            "title": "Connector test failed",
+            "message": "The connector test failed. Do you still want to save this connector?"
           }
         },
         "remote": {

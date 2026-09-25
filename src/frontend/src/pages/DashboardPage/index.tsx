@@ -22,7 +22,10 @@ export default function DashboardPage() {
     return (
         <PageWrapper>
             <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+                <div
+                    data-testid="dashboard-header"
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}
+                >
                     <div>
                         <Typography variant="headline">{t('header.title')}</Typography>
                         <div style={{ marginTop: 4 }}>
@@ -60,6 +63,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div
+                    data-testid="dashboard-coming-soon"
                     style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',

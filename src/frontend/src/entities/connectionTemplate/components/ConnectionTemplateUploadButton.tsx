@@ -3,7 +3,7 @@ import { message } from 'antd'
 import { Button } from '@shared/ui/primitives/Button'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import { uploadConnectionTemplate } from '@entities/connectionTemplate/lib/uploadConnectionTemplate'
+import { TEMPLATE_FILE_ACCEPT, uploadConnectionTemplate } from '@entities/connectionTemplate/lib/uploadConnectionTemplate'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 
 export const ConnectionTemplateUploadButton: React.FC = () => {
@@ -19,14 +19,38 @@ export const ConnectionTemplateUploadButton: React.FC = () => {
 
         setIsLoading(true)
         try {
-            const uploaded = await uploadConnectionTemplate(file, () =>
+            const result = await uploadConnectionTemplate(file, () =>
                 confirm({
                     title: tEntities('connection-template.list.upload.confirmReplace.title'),
                     message: tEntities('connection-template.list.upload.confirmReplace.message'),
                 }),
             )
-            if (uploaded) {
-                message.success(tEntities('connection-template.list.upload.success', { name: file.name }))
+            switch (result.status) {
+                case 'uploaded':
+                    message.success(tEntities('connection-template.list.upload.success', { name: file.name }))
+                    break
+                case 'uploadedArchive':
+                    message.success(tEntities('connection-template.list.upload.successArchive',
+                        { name: file.name, count: result.ids.length }))
+                    break
+                case 'emptyArchive':
+                    notifyError(tEntities('connection-template.list.upload.emptyArchive'))
+                    break
+                case 'cancelled':
+                    break
+                case 'invalidType':
+                    notifyError(tEntities('connection-template.list.upload.invalidType'))
+                    break
+                case 'tooLarge':
+                    notifyError(tEntities('connection-template.list.upload.tooLarge'))
+                    break
+                case 'archiveTooLarge':
+                    notifyError(tEntities('connection-template.list.upload.archiveTooLarge'))
+                    break
+                default: {
+                    const _exhaustive: never = result
+                    return _exhaustive
+                }
             }
         } catch (err) {
             console.error(err)
@@ -41,7 +65,7 @@ export const ConnectionTemplateUploadButton: React.FC = () => {
             <input
                 ref={inputRef}
                 type="file"
-                accept=".json,.zip,application/json,application/zip"
+                accept={TEMPLATE_FILE_ACCEPT}
                 style={{ display: 'none' }}
                 onChange={handleFileChosen}
             />

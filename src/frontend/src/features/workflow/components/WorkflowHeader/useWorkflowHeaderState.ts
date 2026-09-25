@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { WorkflowHeaderStateProps } from './WorkflowHeader.types';
 import { useWorkflowHeaderFields } from './useWorkflowHeaderFields';
 
@@ -21,6 +21,13 @@ export function useWorkflowHeaderState({
 	const [isCheckingName, setIsCheckingName] = useState(false);
 	const [isSavingName, setIsSavingName] = useState(false);
 	const [isSavingDescription, setIsSavingDescription] = useState(false);
+	// A commit spans two awaits (title check, then the save), and the field can
+	// hand us a second one before the first has settled — the confirm button
+	// disables itself mid-commit, and a focused element that becomes disabled
+	// fires blur. Both would still read the pre-commit `name`, so a brand-new
+	// workflow got created twice and the loser came back as "a workflow with
+	// this title already exists".
+	const isCommittingRef = useRef(false);
 
 	const cancelEdit = () => {
 		setDraftName(name);
@@ -45,7 +52,17 @@ export function useWorkflowHeaderState({
 		}
 	};
 
-	const commitName = async () => {
+	const runExclusively = async <T,>(operation: () => Promise<T>, whenBusy: T): Promise<T> => {
+		if (isCommittingRef.current) return whenBusy;
+		isCommittingRef.current = true;
+		try {
+			return await operation();
+		} finally {
+			isCommittingRef.current = false;
+		}
+	};
+
+	const runNameCommit = async () => {
 		const nextName = draftName.trim();
 		if (!nextName) {
 			setName(nextName);
@@ -73,7 +90,7 @@ export function useWorkflowHeaderState({
 		setEditing(null);
 	};
 
-	const commitDescription = async () => {
+	const runDescriptionCommit = async () => {
 		const nextDescription = draftDescription.trim();
 		const didChangeDescription = nextDescription !== description;
 		setDescription(nextDescription);
@@ -91,7 +108,7 @@ export function useWorkflowHeaderState({
 		setEditing(null);
 	};
 
-	const prepareSave = async (emptyNameError: string) => {
+	const runPrepareSave = async (emptyNameError: string) => {
 		const nextName = editing === 'name' ? draftName.trim() : name;
 		const nextDescription = editing === 'description' ? draftDescription.trim() : description;
 		if (!nextName.trim() || nextName.trim() === EMPTY_NAME_LABEL) {
@@ -110,6 +127,11 @@ export function useWorkflowHeaderState({
 		setEditing(null);
 		return true;
 	};
+
+	const commitName = () => runExclusively(runNameCommit, undefined);
+	const commitDescription = () => runExclusively(runDescriptionCommit, undefined);
+	const prepareSave = (emptyNameError: string) =>
+		runExclusively(() => runPrepareSave(emptyNameError), false);
 
 	return {
 		name, description, draftName, draftDescription, editing, nameError, isCheckingName, isSavingName,

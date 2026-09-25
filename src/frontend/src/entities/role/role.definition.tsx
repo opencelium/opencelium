@@ -13,6 +13,9 @@ import {ROLE_TAG} from "@entities/role/api/role.tags.ts";
 import {roleApi} from "@entities/role/api/roleApi.ts";
 import {selectAuthUser} from "@entities/auth/model/authSelectors.ts";
 import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
+import { RoleNameCell } from '@entities/role/ui/RoleNameCell'
+import { RoleWizardImage } from '@entities/role/ui/RoleWizardImage'
+import { deleteRoleIcon, hasRoleIconFile, shouldDeleteRoleIcon, uploadRoleIcon } from '@entities/role/model/roleIconUpload'
 
 const baseKey = 'role';
 
@@ -79,16 +82,19 @@ export const roleDefinition: EntityDefinition = {
                 ...roleModel,
                 components: roleModel.components.map(c => c.componentId),
                 mappedComponents: roleModel.components,
+                // Snapshot the saved icon so the PUT can echo it back unchanged; the
+                // wizard image's `icon` field then carries the user's pending change.
+                iconOriginal: roleModel.icon,
             }
         },
-        mapToApi: ({data: {mappedComponents, icon, ...formData}}: {data: RoleUpdateDTO}): Role => {
+        mapToApi: ({data: {mappedComponents, iconOriginal, ...formData}}: {data: RoleUpdateDTO}): Role => {
             return {
                 ...formData,
                 // The API reads `icon` back as a storage path ("./storage/files/<file>") but
                 // persists the bare filename, so echoing the fetched value straight back would
-                // nest the prefix on every save. The wizard never edits the icon — it only has
-                // to survive the round trip.
-                icon: icon ? icon.split('/').pop() ?? null : null,
+                // nest the prefix on every save. Icon changes run as after-actions against the
+                // dedicated icon endpoints; the PUT only has to preserve the saved one.
+                icon: iconOriginal ? iconOriginal.split('/').pop() ?? null : null,
                 components: mappedComponents,
             }
         },
@@ -105,10 +111,25 @@ export const roleDefinition: EntityDefinition = {
                 // UserRoleResource it owns and ignores the rest.
                 mapBody: (ctx) => ctx.payload,
             },
+            uploadIcon: {
+                execute: uploadRoleIcon,
+                condition: hasRoleIconFile,
+                bestEffort: true,
+                errorMessageKey: `${baseKey}.lifecycle.uploadIcon.failed`,
+            },
+            deleteIcon: {
+                execute: deleteRoleIcon,
+                condition: shouldDeleteRoleIcon,
+                bestEffort: true,
+                errorMessageKey: `${baseKey}.lifecycle.deleteIcon.failed`,
+            },
         },
         lifecycle: {
+            create: {
+                after: ['uploadIcon'],
+            },
             update: {
-                after: ['saveComponents'],
+                after: ['saveComponents', 'uploadIcon', 'deleteIcon'],
             },
         },
     },
@@ -154,7 +175,7 @@ export const roleDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
-                render: (_row, value) => <TruncatedTextCell value={value} />,
+                render: (row, value) => <RoleNameCell row={row as Role} value={value} />,
             },
         },
         {
@@ -180,15 +201,24 @@ export const roleDefinition: EntityDefinition = {
         },
 
         {
-            name: 'groupIcon',
-            type: 'other',
+            // Edited from the wizard's top-right image (RoleWizardImage), not as a form
+            // field — so it is intentionally left out of every section.
+            name: 'icon',
+            type: 'file',
+            defaultValue: null,
             ui: {
                 component: 'file-dropzone',
-                props: {
-                    multiple: true,
-                    accept: "image/png, image/jpeg",
-                    labelKey: `${baseKey}.fields.groupIcon.label`,
-                }
+            },
+        },
+        {
+            // Hidden companion holding the saved icon path; carried in form state so
+            // mapToApi can preserve it and the delete after-action can tell whether
+            // there was an icon to remove.
+            name: 'iconOriginal',
+            type: 'file',
+            defaultValue: null,
+            ui: {
+                component: 'input',
             },
         },
 
@@ -274,6 +304,8 @@ export const roleDefinition: EntityDefinition = {
 
     wizard: {
         image: roleWizardImage as string,
+        imageField: 'icon',
+        renderImage: RoleWizardImage,
 
         modes: {
             create: {

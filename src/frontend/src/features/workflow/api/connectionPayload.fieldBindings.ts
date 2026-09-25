@@ -1,4 +1,5 @@
 import { DEFAULT_ENHANCEMENT_SCRIPT } from '../components/request-editor/body-editor/bodyReference';
+import { describeBinding, logFieldBinding } from '../utils/fieldBindingDebug';
 
 const parseBindingReference = (reference: unknown) => {
 	const match = String(reference ?? '')
@@ -71,11 +72,21 @@ const stableBindingId = (value: string) => {
 
 const normalizeFieldBinding = (binding: any) => {
 	const enhancement = binding?.enhancement;
+	logFieldBinding('1. loaded from the server', describeBinding(binding));
 	if (!enhancement) return binding;
+	// Already carrying the editors' own shape — but "has enhanceId and args" does
+	// not mean "has a script": a binding can arrive with those and still keep its
+	// code under the backend's `expertCode`, and every editor reads `script`. That
+	// is how a saved script opened blank in the field-binding drawer.
 	if (enhancement.enhanceId && enhancement.args) {
 		return {
 			...binding,
-			enhancement: { ...enhancement, enhanceId: String(enhancement.enhanceId) },
+			enhancement: {
+				...enhancement,
+				enhanceId: String(enhancement.enhanceId),
+				script: enhancement.script ?? enhancement.expertCode
+					?? `${DEFAULT_ENHANCEMENT_SCRIPT};`,
+			},
 		};
 	}
 
@@ -99,5 +110,10 @@ const normalizeFieldBinding = (binding: any) => {
 	};
 };
 
-export const normalizeWorkflowFieldBindings = (fieldBindings: any) =>
-	Array.isArray(fieldBindings) ? fieldBindings.map(normalizeFieldBinding) : [];
+export const normalizeWorkflowFieldBindings = (fieldBindings: any) => {
+	if (!Array.isArray(fieldBindings)) return [];
+	const normalized = fieldBindings.map(normalizeFieldBinding);
+	normalized.forEach((binding) =>
+		logFieldBinding('2. after normalization', describeBinding(binding)));
+	return normalized;
+};

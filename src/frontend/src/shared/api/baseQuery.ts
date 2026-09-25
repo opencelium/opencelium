@@ -5,6 +5,7 @@ import { errorBus } from '@shared/errors/api/errorBus.ts'
 import { selectAccessToken } from '@entities/auth/model/authSelectors'
 import type { RootState } from '@app/store/types'
 import { runtimeConfig } from '@shared/config/runtimeConfig'
+import { findRequestOverride } from '@shared/api/requestOverrides'
 
 // No `baseUrl` here — it's resolved per-request below via runtimeConfig.apiUrl, since
 // that value isn't known yet at module-eval time (it's fetched async in main.tsx,
@@ -64,6 +65,14 @@ export const baseQuery: BaseQueryFn<
     FetchBaseQueryError,
     ExtraOptions
 > = async (args, api, extraOptions) => {
+    // Canned responses first (see requestOverrides): the workflow tutorial answers a
+    // few requests with invented data, and this is the only layer a refetch cannot undo.
+    const requestUrl = typeof args === 'string' ? args : args.url
+    const requestMethod = typeof args === 'string' ? 'GET' : args.method
+    const requestBody = typeof args === 'string' ? undefined : args.body
+    const override = findRequestOverride(requestUrl, requestMethod, requestBody)
+    if (override !== undefined) return { data: override }
+
     const result = await rawBaseQuery(
         withAbsoluteUrl(args),
         {

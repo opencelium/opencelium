@@ -1,0 +1,379 @@
+{
+  "progress": {
+    "counter": "{{current}} von {{total}}"
+  },
+  "actions": {
+    "back": "Zurück",
+    "next": "Weiter",
+    "finish": "Abschließen",
+    "createWorkflow": "Workflow erstellen",
+    "close": "Tour schließen",
+    "resume": "Fortsetzen",
+    "restart": "Neu starten",
+    "dismiss": "Ausblenden",
+    "keep": "Behalten",
+    "hide": "Ausblenden",
+    "skipForNow": "Vorerst überspringen",
+    "addAnotherInvoker": "Weiteren Invoker hinzufügen",
+    "later": "Das mache ich später",
+    "retrySave": "Speichern wiederholen",
+    "buildWorkflow": "Workflow erstellen",
+    "showAround": "Tour starten"
+  },
+  "notes": {
+    "commandLabel": "Befehl",
+    "ctrlKey": "Strg"
+  },
+  "steps": {
+    "welcome": {
+      "kicker": "Willkommen bei OpenCelium",
+      "title": "Willkommen, {{name}}. Richten wir Ihre erste Integration ein."
+    },
+    "theme": {
+      "kicker": "Design auswählen",
+      "title": "Wählen Sie das Aussehen von OpenCelium",
+      "note": "Die Auswahl wird sofort angewendet"
+    },
+    "palette": {
+      "kicker": "Die Befehlspalette",
+      "title": "Dieses Feld in der oberen Leiste bringt Sie überall hin"
+    },
+    "layers": {
+      "kicker": "So entsteht eine Integration",
+      "title": "Drei Dinge, in dieser Reihenfolge",
+      "note": "Ohne mindestens einen Invoker wird nichts ausgeführt"
+    },
+    "invoker": {
+      "kicker": "Ihr erster Invoker",
+      "existingKicker": "Ihre Invoker",
+      "emptyTitle": "Sie haben noch keine Invoker",
+      "anotherTitle": "Weiteren Invoker hinzufügen",
+      "existingTitle_one": "Sie haben bereits {{count}} Invoker",
+      "existingTitle_other": "Sie haben bereits {{count}} Invoker"
+    },
+    "connector": {
+      "kicker": "Connectors",
+      "title": "Richten Sie einen Invoker auf ein echtes System aus"
+    },
+    "license": {
+      "kicker": "Ihre Lizenz",
+      "title": "Sie nutzen den kostenlosen Tarif: 25.000 API-Operationen pro Monat"
+    }
+  },
+  "content": {
+    "welcome": {
+      "lead": "OpenCelium verbindet Ihre bestehenden Systeme und hält deren Daten synchron.",
+      "body": "Beschreiben Sie eine API einmal und verbinden Sie anschließend ihre Methoden auf einer Arbeitsfläche. Diese Tour zeigt den kürzesten Weg von der Einrichtung bis zu einem laufenden Workflow.",
+      "duration": "~2 Minuten, {{phases}} Phasen",
+      "phasesLabel": "Onboarding-Phasen",
+      "theme": "Design",
+      "license": "Lizenz",
+      "palette": "Palette",
+      "invoker": "Invoker",
+      "connector": "Connector",
+      "anonymous": "da",
+      "hidden": "Willkommen, {{name}}"
+    },
+    "theme": {
+      "body": "Ihre Auswahl wird sofort übernommen.",
+      "groupLabel": "Design",
+      "lightDescription": "Ideal für helle Räume und Projektoren.",
+      "darkDescription": "Angenehmer für die Augen bei längeren Sitzungen.",
+      "deviceDescription": "Folgt der Systemeinstellung Ihres Geräts."
+    },
+    "palette": {
+      "body": "Das Feld ist hinter diesem Dialog hervorgehoben. Drücken Sie auf jeder Seite <strong>{{key}} + K</strong>, um es zu öffnen.",
+      "tokens": "Begriffe statt Sätze",
+      "tokensBody": "Geben Sie zuerst eine Aktion und dann das Ziel ein. Beginnen Sie mit dem, was Sie tun möchten.",
+      "help": "Ein Begriff zeigt alles",
+      "helpBody": "Wenn Sie einen Befehl vergessen, müssen Sie sich nur diesen merken."
+    },
+    "layers": {
+      "body": "OpenCelium erstellt eine Integration in drei Schichten; jede benötigt die vorherige.",
+      "step": "Schritt {{count}}",
+      "invoker": "Beschreibt eine API: Endpunkte, Authentifizierung und Anfragen.",
+      "connector": "Ein reales System mit diesem Invoker und seinen Zugangsdaten.",
+      "workflow": "Auf einer Arbeitsfläche verbundene Methoden."
+    },
+    "invoker": {
+      "body": "Ein Invoker beschreibt eine API. Wählen Sie den schnelleren Weg, sofern Ihr System keine benutzerdefinierte Einrichtung erfordert.",
+      "recommended": "Empfohlen",
+      "uploadTitle": "Invoker-Datei hochladen",
+      "uploadBody": "Laden Sie eine vorhandene .xml-Datei oder ein .zip-Archiv mit .xml-Dateien hoch. Maximale Größe: 1 GB.",
+      "gitTitle": "Invoker herunterladen",
+      "gitBody": "Laden Sie die aktuelle Community-Bibliothek aus dem OpenCelium-Repository herunter.",
+      "gitAction": "Aus Git herunterladen",
+      "gitSuccess_one": "{{count}} Invoker aus Git installiert",
+      "gitSuccess_other": "{{count}} Invoker aus Git installiert",
+      "gitEmpty": "Das Repository enthielt keine Invoker zur Installation.",
+      "gitFailed_one": "{{count}} Datei konnte nicht installiert werden",
+      "gitFailed_other": "{{count}} Dateien konnten nicht installiert werden",
+      "gitError": "Das Invoker-Repository konnte nicht erreicht werden. Bitte versuchen Sie es in einigen Minuten erneut.",
+      "manualTitle": "Manuell erstellen",
+      "manualBody": "Definieren Sie Endpunkte, Authentifizierung und Antwortformate für eine noch nicht unterstützte API manuell.",
+      "manualAction": "Editor öffnen",
+      "existingBody": "Ihre API-Beschreibungen sind bereits verfügbar, daher können Sie den Upload überspringen.",
+      "existingList": "Sie sind konfiguriert und einsatzbereit, daher wird der Upload-Schritt übersprungen. Sie können jederzeit weitere hinzufügen.",
+      "showMore": "Mehr anzeigen…",
+      "fileAdded": "{{name}} hinzugefügt",
+      "ready": "Bereit zur Verwendung in einem Connector.",
+      "fileError": "{{name}} konnte nicht gelesen werden",
+      "invalidType": "Invoker-Dateien müssen das .xml- oder .zip-Format verwenden.",
+      "tooLarge": "Die Datei überschreitet das 1-GB-Limit.",
+      "chooseAnother": "Andere Datei auswählen",
+      "parsing": "Endpunkte werden analysiert…",
+      "drop": "xml- oder zip-Datei hier ablegen",
+      "methods_one": "{{count}} Methode",
+      "methods_other": "{{count}} Methoden",
+      "archiveTooLarge": "Das Archiv überschreitet das 1-GB-Limit.",
+      "emptyArchive": "Das Archiv enthält keine Invoker.",
+      "invokers_one": "{{count}} Invoker",
+      "invokers_other": "{{count}} Invoker"
+    },
+    "connector": {
+      "body": "Ein Connector besteht aus einem Invoker sowie der Basis-URL und den Zugangsdaten eines Systems, das Sie tatsächlich betreiben. Der Assistent führt Sie durch die Einrichtung und testet die Verbindung vor dem Speichern.",
+      "pickInvoker": "Wählen Sie den Invoker, aus dem er entstehen soll",
+      "panelEyebrow": "Neuer Connector",
+      "panelTitle": "Connector aus {{name}}",
+      "noInvokers": "Fügen Sie zuerst einen Invoker hinzu — jeder Connector basiert auf einem.",
+      "tableTitle": "Titel",
+      "tableDescription": "Beschreibung",
+      "tableConnectors": "Connectors",
+      "tableActionTooltip": "Connector aus {{name}} erstellen"
+    },
+    "license": {
+      "body": "Jeder Aufruf eines verbundenen Systems zählt als eine Operation. Aktivieren Sie bei Bedarf eine Lizenz.",
+      "information": "Lizenzinformationen",
+      "status": "Status",
+      "valid": "Gültig",
+      "free": "Kostenlos",
+      "type": "Typ",
+      "operations": "Anzahl der API-Operationen",
+      "expiration": "Ablaufdatum",
+      "more": "Mehr Operationen benötigt?",
+      "actionsBody": "Aktivierung, zusätzliche Operationen und Offline-Anfragen befinden sich alle auf der Lizenzseite. Dort wird angeboten, was für diese Installation zutrifft.",
+      "openPage": "Zur Lizenzseite",
+      "servicePortalHint": "Möchten Sie zusätzliche Operationen kaufen oder Ihre Lizenz online verwalten? Besuchen Sie das <1>OpenCelium Service-Portal</1>.",
+      "thisMonth": "Dieser Monat",
+      "usage": "{{used}} von {{total}} Operationen"
+    }
+  },
+  "dashboard": {
+    "kicker": "Dashboard",
+    "steps": {
+      "header": {
+        "title": "Was diese Seite zeigt",
+        "body": "Ein Live-Betriebsbild dieser OpenCelium-Instanz: wie viel läuft, wie viel davon fehlschlägt, was die Maschine dafür aufwendet und welche Workflows die Arbeit erledigen. Der Zeitraum neben dem Titel gilt für die Verlaufs-Widgets; die Live-Zähler sind laufende Gesamtwerte."
+      },
+      "tiles": {
+        "title": "Live-Zähler",
+        "body": "Diese fünf Werte kommen über den Websocket statt über einen REST-Aufruf und ändern sich daher live: Gesamtzahl der Läufe, Anteil der Fehlschläge, durchschnittliche und gesamte Laufzeit sowie die Größe der Ausführungsprotokolle auf der Festplatte. Der Punkt in jeder Ecke zeigt den Zustand dieser Live-Verbindung — Spinner bedeuten, dass sie noch aufgebaut wird."
+      },
+      "executions": {
+        "title": "Läufe und Fehlschläge",
+        "body": "Zwei Reihen über dieselben sieben Tage: alle Läufe und die Fehlschläge darunter. Fahren Sie über einen Tag, um die genauen Zahlen und die Fehlerquote dieses Tages zu lesen.",
+        "note": "Aktualisieren lädt nur dieses Widget neu."
+      },
+      "resources": {
+        "title": "Was es die Maschine kostet",
+        "body": "CPU-Last und belegter Speicher, jeweils als Anteil des in dieser Instanz Verfügbaren. Beide Anzeigen wechseln oberhalb von 60 % von Türkis nach Rot — ein System unter Last erkennt man also ohne die Zahlen zu lesen."
+      },
+      "connectors": {
+        "title": "Welche Workflows am meisten laufen",
+        "body": "Die fünf Workflows mit den meisten Läufen im Zeitraum, jeder mit seiner eigenen Fehlerquote. Der schnellste Weg zu dem Workflow, den man sich nach einer schlechten Nacht ansehen sollte."
+      },
+      "comingSoon": {
+        "title": "Noch nicht angebunden",
+        "body": "Diese drei sind absichtlich ausgegraut: Das Layout steht, die dahinterliegenden Endpunkte werden aber noch gebaut. Hier ist nichts defekt — die Karten füllen sich, sobald die API verfügbar ist."
+      },
+      "createWorkflow": {
+        "title": "Neuen Workflow beginnen",
+        "body": "Öffnet den visuellen Editor mit einer leeren Arbeitsfläche, auf der Konnektor-Methoden und IF-/Loop-Operatoren zu einer Integration zusammengesetzt werden. Auf schmalen Bildschirmen und für Rollen ohne das Recht, Verbindungen zu erstellen, ist die Schaltfläche ausgeblendet."
+      },
+      "palette": {
+        "title": "Die Befehlspalette",
+        "body": "Jede Aktion der Anwendung ist von hier aus erreichbar — mit {{key}} + K landet der Fokus von überall im Feld. Befehle beginnen mit dem Verb (create connector, list schedules), und help zeigt den gesamten Befehlsbaum."
+      },
+      "language": {
+        "title": "Englisch oder Deutsch",
+        "body": "Wechselt die Sprache der Oberfläche unmittelbar. Die Auswahl wird sowohl in diesem Browser als auch in Ihrem Konto gespeichert und gilt damit auch an einem anderen Rechner."
+      },
+      "help": {
+        "title": "Hilfe — und diese Tour",
+        "body": "Hinter diesem Symbol liegen zwei Einträge: die OpenCelium-Dokumentation unter docs.opencelium.io, die sich in einem neuen Tab öffnet, und „Tour starten“ — damit finden Sie später zu dieser Führung zurück."
+      },
+      "menuSwitch": {
+        "title": "Haupt- und Administrationsmenü",
+        "body": "Die Seitenleiste hat zwei Menüs: das Hauptmenü für die tägliche Arbeit und das Administrationsmenü für Benutzer, Rollen und Systemeinstellungen. Beim Wechsel landen Sie auf der Seite, die Sie in diesem Menü zuletzt geöffnet hatten."
+      },
+      "profile": {
+        "title": "Ihr Konto",
+        "body": "Ihre eigenen Angaben, die Berechtigungen aus Ihren Rollen und die Änderung des Passworts."
+      }
+    }
+  },
+  "workflow": {
+    "kicker": "Workflow",
+    "actions": {
+      "done": "Beenden"
+    },
+    "cues": {
+      "reference": "Referenz",
+      "doubleClick": "Doppelklick",
+      "rightClick": "Rechtsklick"
+    },
+    "steps": {
+      "intro": {
+        "title": "Schritt für Schritt zu einem funktionierenden Workflow",
+        "body": "Dieses kurze, praktische Tutorial führt durch den gesamten Editor — Methoden, einen Loop, eine Bedingung, Referenzen und einen Live-Testlauf — gebaut mit zwei erfundenen Systemen, sodass nichts davon gespeichert wird. Jeder Schritt sagt genau, was als Nächstes zu tun ist; folgen Sie der Pille.",
+        "note": "Bereit, wenn Sie es sind"
+      },
+      "customers": {
+        "title": "Kunden auflisten",
+        "body": "Fügen Sie getCustomers von Tutorial CRM hinzu. Die Methode liefert alle Kunden mit E-Mail, Vor- und Nachnamen. Beide Systeme hier sind erfunden — nichts, was Sie bauen, wird gespeichert.",
+        "note": "Methode hinzufügen, um fortzufahren"
+      },
+      "loop": {
+        "title": "Pro Kunde wiederholen",
+        "body": "getCustomers liefert eine Liste, der Rest des Workflows muss also einmal pro Eintrag laufen. Fügen Sie über das + dahinter einen Loop-Operator hinzu.",
+        "note": "Loop-Operator hinzufügen, um fortzufahren"
+      },
+      "iterate": {
+        "title": "Dem Loop sagen, was er durchläuft",
+        "body": "Ein Loop weiß von sich aus nicht, was er durchläuft. Klicken Sie ihn mit der rechten Maustaste an und öffnen Sie Konfiguration. Der Operator legt fest, wie er durchläuft — For iteriert ein Array — und sein Argument ist eine Referenz auf das zu durchlaufende Array. Speichern Sie, und die Loop-Variable i wird zum Kunden des aktuellen Durchlaufs. Wählen Sie in dieser Reihenfolge:",
+        "note": "Konfiguration speichern, um fortzufahren"
+      },
+      "lookup": {
+        "title": "Jeden Kunden nachschlagen — im Loop",
+        "body": "Nutzen Sie das + unter dem Loop, nicht das dahinter: unten landet der Schritt im Geltungsbereich des Loops, auf Index 1_0, wo jeder Durchlauf einen Kunden zur Verfügung hat. Hinter dem Loop wäre es Schritt 2 und liefe nur einmal. Fügen Sie getClientByEmail von Tutorial Support Desk hinzu.",
+        "note": "Methode unter dem Loop hinzufügen, um fortzufahren"
+      },
+      "endpoint": {
+        "title": "Eine Referenz im Endpunkt",
+        "body": "Klicken Sie getClientByEmail mit der rechten Maustaste an, wählen Sie URL bearbeiten und dann Referenz einfügen. Zuerst kommt die Methode, dann der Feldpfad, Segment für Segment. Die Auswahl von (i-Schleife) statt eines festen Elements bindet die Referenz an den Loop, sodass sie in jedem Durchlauf einen anderen Kunden auflöst. Wählen Sie in dieser Reihenfolge:",
+        "note": "Referenz einfügen, dann den Dialog schließen"
+      },
+      "branch": {
+        "title": "Nur wenn er fehlt",
+        "body": "Fügen Sie über das + hinter getClientByEmail einen IF-Operator hinzu — weiterhin innerhalb des Loops — und setzen Sie seine Bedingung auf die Antwort des Nachschlagens: found ist false.",
+        "note": "IF-Operator hinzufügen, um fortzufahren"
+      },
+      "condition": {
+        "title": "Die beiden E-Mails vergleichen",
+        "body": "Doppelklicken Sie auf das IF, um seine Bedingung zu öffnen, dann Bedingung hinzufügen. Beide Seiten sind Referenzen: links client.email von getClientByEmail, rechts customers[i].email von getCustomers — derselbe Loop-Pfad wie im Endpunkt. Setzen Sie den Operator auf Nicht gleich, damit der true-Zweig bedeutet: dieser Kunde hat noch kein Konto. Speichern Sie.",
+        "note": "Bedingung speichern, um fortzufahren"
+      },
+      "create": {
+        "title": "Den fehlenden Client anlegen",
+        "body": "Nutzen Sie das + unter dem IF: das ist sein true-Zweig. Fügen Sie createClient von Tutorial Support Desk hinzu, damit es einmal für jeden nicht gefundenen Kunden läuft — und nie für einen gefundenen.",
+        "note": "Methode unter dem IF hinzufügen, um fortzufahren"
+      },
+      "username": {
+        "title": "Zwei Referenzen, ein Feld",
+        "body": "Öffnen Sie den Body von createClient und suchen Sie username. Fahren Sie über die Zeile, klicken Sie auf das Referenz-Symbol und wählen Sie getCustomers, customers, (i-Schleife), firstName. Wiederholen Sie das für lastName. Zwei Referenzen in einem Feld werden automatisch in ein Enhancement gepackt — klappen Sie Variableninformationen auf, um sie in dieser Reihenfolge als VAR_0 und VAR_1 zu sehen. Verbinden Sie sie im Skript mit einem Leerzeichen und schließen Sie den Dialog.",
+        "note": "Beide Referenzen setzen, Variablen aufklappen, Skript anpassen, dann schließen"
+      },
+      "changeHistory": {
+        "title": "Jede Änderung, der Reihe nach",
+        "body": "Öffnen Sie ⋯ in der Kopfzeile und dann Änderungsverlauf: jede Änderung dieser Sitzung, die neueste oben. Ein Klick auf eine Zeile setzt die Arbeitsfläche auf diesen Moment zurück; die neueren Zeilen bleiben bis zur nächsten Änderung grau, sodass Sie wieder nach vorn springen können. Die Tastatur macht dasselbe Schritt für Schritt. Die Liste wird nicht mit dem Workflow gespeichert. Schauen Sie vorerst nur – ein Schritt zurück würde hier die Schritte des Tutorials rückgängig machen.",
+        "note": "Öffnen Sie den Änderungsverlauf und fahren Sie dann fort"
+      },
+      "versionHistory": {
+        "title": "Jede Speicherung, aufbewahrt",
+        "body": "Der Änderungsverlauf endet, wenn Sie den Editor verlassen; der Versionsverlauf nicht. Öffnen Sie ⋯ und dann Versionsverlauf. Jedes Speichern legt auf dem Server eine Version ab – wann, von wem und mit dem Kommentar aus dem Speichern-Dialog. Die hier aufgeführten Versionen sind Beispiele dafür, wie dieser Workflow gewachsen sein könnte; das Tutorial selbst speichert nie. Bei einem echten Workflow lädt ein Klick auf eine Version sie auf die Arbeitsfläche, ohne den Server zu berühren, bis Sie erneut speichern – hier markiert er nur die Zeile. Den Kommentar bearbeiten Sie direkt in der Zeile, und über ihr ⋯-Menü kopieren Sie die Snapshot-ID, laden die Version als Vorlage herunter oder löschen sie.",
+        "note": "Öffnen Sie den Versionsverlauf und fahren Sie dann fort"
+      },
+      "testrun": {
+        "title": "Ausführen, ohne auszuführen",
+        "body": "Klicken Sie am Startknoten auf Play und wählen Sie den Debug-Modus. Der Lauf sendet seine Log-Zeilen so schnell, wie die Engine sie erzeugt, und der Canvas spielt sie in einem Tempo ab, dem Sie folgen können — ein Punkt wandert über die Kante, dann leuchtet der Schritt auf, zu dem sie führt. Nichts verlässt den Browser: Die beiden erfundenen Systeme antworten aus Fixtures.",
+        "note": "Starten Sie den Lauf, um fortzufahren"
+      },
+      "pause": {
+        "title": "Die Wiedergabe einfrieren",
+        "body": "Die Debug-Steuerung sitzt oben links neben den Zoom-Schaltflächen. Pause hält die Wiedergabe genau dort an, wo sie ist — der Lauf selbst läuft im Hintergrund weiter, seine Zeilen sammeln sich nur hinter der Pause an. Das Log-Panel klappt den Baum bis zu dem Element auf, an dem Sie angehalten haben.",
+        "note": "Halten Sie die Wiedergabe an, um fortzufahren"
+      },
+      "step": {
+        "title": "Zeile für Zeile",
+        "body": "Ein Schritt wendet genau die nächste wartende Zeile an und bleibt danach angehalten. Gehen Sie den Eintritt in den Loop, die Suche, das Urteil des IF und das Anlegen einzeln durch: Jeder Schritt setzt den Token auf genau ein Element, sodass Sie die Reihenfolge sehen, die die Engine wirklich genommen hat, und nicht die, in der der Graph gezeichnet ist.",
+        "note": "Gehen Sie einen Schritt weiter, um fortzufahren"
+      },
+      "iteration": {
+        "title": "Zu einem anderen Durchlauf springen",
+        "body": "Während die Wiedergabe in einem Loop angehalten ist, zeigt der Loop-Knoten, in welcher Iteration er steht. Das Sprung-Symbol spult den Rest der aktuellen Iteration vor und hält zu Beginn der nächsten wieder an; eine Zahl im Zähler zielt stattdessen genau auf diese Iteration. Achten Sie darauf, wie das IF sein Urteil ändert — einer dieser Kunden hat bereits ein Konto.",
+        "note": "Springen Sie zur nächsten Iteration, um fortzufahren"
+      },
+      "speed": {
+        "title": "Das Tempo bestimmen",
+        "body": "Der Regler skaliert jede Wartezeit der Wiedergabe, auch eine bereits laufende. Der Live-Schalter in der Kopfzeile des Log-Panels verzichtet ganz auf die Taktung und zeigt jede Zeile in dem Moment, in dem sie eintrifft — richtig für einen langen Lauf, von dem Sie nur das Ergebnis brauchen, und der Grund, warum die Debug-Steuerung dann verschwindet.",
+        "note": "Probieren Sie den Regler, dann weiter"
+      },
+      "logs": {
+        "title": "Den Lauf nachlesen",
+        "body": "Das ist derselbe Baum, in dem auch gespeicherte Läufe angezeigt werden. Eine Methodenzeile öffnet sich zu Anfrage und Antwort, eine Loop-Zeile blättert durch ihre Iterationen, eine IF-Zeile nennt den genommenen Zweig. Alles darin stammt aus dem Graphen, den Sie gebaut haben — vergleichen Sie die Nutzdaten von createClient mit dem Skript, das Sie dafür geschrieben haben.",
+        "note": "Öffnen Sie eine Zeile, dann weiter"
+      },
+      "schedules": {
+        "title": "Woher ein Workflow seinen Auslöser bekommt",
+        "body": "Der Graph ist geprüft; jetzt braucht er einen Grund zu laufen. Dieser Grund ist ein Zeitplan, und das Kalendersymbol in der Kopfzeile ist die Zeitplanliste dieses Workflows — ohne dass Sie den Editor verlassen müssen. Die Zahl daneben zählt sie, der Punkt zeigt ihren gemeinsamen Zustand: ein Lauf läuft gerade, der letzte Lauf ist fehlgeschlagen, alles in Ordnung, oder noch nie gelaufen. Öffnen Sie die Liste — sie ist leer, denn dieser Workflow hat noch keinen Zeitplan.",
+        "note": "Öffnen Sie das Zeitplan-Panel, um fortzufahren"
+      },
+      "schedule": {
+        "title": "Einen Zeitplan anlegen",
+        "body": "Klicken Sie auf Zeitplan erstellen und füllen Sie drei Dinge aus. Der Titel benennt den Lauf überall dort, wo er später auftaucht — in der Zeitplanliste, in Benachrichtigungen, in den Logs. Der Debug-Modus bewahrt Anfrage und Antwort jeder Methode vollständig auf; genau das macht den Log-Baum, den Sie eben gelesen haben, lohnend — für etwas, das jede Minute auslöst, lassen Sie ihn besser aus. Der Cron-Ausdruck legt fest, wann gelaufen wird: tippen Sie ihn ein oder bauen Sie ihn mit den Auswahlfeldern unter dem Feld und sehen Sie zu, wie der Ausdruck folgt. Bleibt er leer, ist der Zeitplan nur manuell — er läuft, wenn Sie ihn per Play starten, und sonst nie.",
+        "note": "Legen Sie den Zeitplan an, um fortzufahren"
+      },
+      "scheduleCard": {
+        "title": "Der Zeitplan, ab jetzt",
+        "body": "Eine Karte je Zeitplan, mit allem Wichtigen, ohne den Canvas zu verlassen. Der Ring links zeigt das Ergebnis des letzten Laufs und ist zugleich der manuelle Start; daneben steht die Zeit bis zur nächsten Auslösung. Aufgeklappt sehen Sie den Cron-Ausdruck, den letzten Erfolg und den letzten Fehlschlag mit Link in deren Logs, die übliche Laufzeit und die Webhook-URL, mit der sich der Lauf von außen auslösen lässt. Hinter dem Menü ⋯ liegen Benachrichtigungsempfänger, Support-Logs und Löschen.",
+        "note": "Klappen Sie die Karte auf, dann weiter"
+      },
+      "scheduleList": {
+        "title": "Dieselbe Liste, für jeden Workflow",
+        "body": "Zeitpläne in der Seitenleiste zeigt das ganze Bild: alle Zeitpläne dieser Instanz, nicht nur die dieses Workflows. Dieselben Karten, dazu das, was erst über Workflows hinweg Sinn ergibt — Suche und Sortierung, Sammellöschung, Benachrichtigungsempfänger für mehrere auf einmal und die laufenden Ausführungen jedes einzelnen in Echtzeit. Das Panel, das Sie eben benutzt haben, ist genau diese Seite, eingeschränkt auf einen einzigen Workflow — nichts, was hier eingestellt ist, muss dort erneut eingestellt werden. Folgen Sie dem Eintrag jetzt nicht: das verlässt den Editor und beendet damit das Tutorial.",
+        "note": "Hier gibt es nichts zu klicken — weiter"
+      },
+      "summary": {
+        "title": "Das ist ein funktionierender Workflow",
+        "body": "getCustomers listet alle auf, der Loop geht sie einzeln durch, getClientByEmail fragt das zweite System per Referenz nach dem aktuellen Kunden, das IF lässt nur die unbekannten durch, und createClient füllt seine Felder aus dem gerade durchlaufenen Kunden. Methoden, Geltungsbereich, Referenzen, Enhancements — jede echte Integration besteht aus diesen vier Ideen; der Testlauf ist, womit Sie sie prüfen, und der Zeitplan ist, was sie laufen lässt, wenn niemand zusieht. Nichts davon wurde gespeichert, weder der Graph noch der Zeitplan; bauen Sie dieselbe Struktur mit Ihren eigenen Connectors.",
+        "note": "Erfundene Connectors, es gibt also nichts zu behalten"
+      }
+    },
+    "versionHistory": {
+      "samples": {
+        "username": "Vor- und Nachname zum Benutzernamen des neuen Clients zusammenführen",
+        "condition": "Nur Clients anlegen, die noch nicht existieren",
+        "lookup": "Jeden Kunden im Support-System nachschlagen",
+        "customers": "Alle Kunden aus dem CRM lesen"
+      }
+    }
+  },
+  "checklist": {
+    "title": "Einrichtung",
+    "done": "{{count}} von {{total}} erledigt",
+    "pill": "Einrichtung {{count}}/{{total}}",
+    "paused": "Tour pausiert · fortsetzen",
+    "dismissTitle": "Einrichtungscheckliste ausblenden?",
+    "dismissBody": "Sie wird nicht erneut angezeigt. Starten Sie die Tour mit help onboarding neu oder aktivieren Sie sie unter /ui/config.",
+    "theme": {
+      "title": "Design auswählen",
+      "detail": "Hell, dunkel oder Geräteeinstellung."
+    },
+    "palette": {
+      "title": "Befehlspalette kennenlernen",
+      "detail": "Strg + K ist überall verfügbar."
+    },
+    "invoker": {
+      "title": "Ersten Invoker hinzufügen",
+      "detail": "Beschreibung hochladen oder erstellen."
+    },
+    "connector": {
+      "title": "Connector erstellen",
+      "detail": "Invoker, URL und Zugangsdaten."
+    },
+    "license": {
+      "title": "Lizenz aktivieren",
+      "detail": "Optional — erhöht Ihr monatliches Limit."
+    }
+  }
+}

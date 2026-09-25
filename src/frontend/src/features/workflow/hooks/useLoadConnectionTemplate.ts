@@ -48,15 +48,41 @@ export const useLoadConnectionTemplate = () => {
 		if (!file) return;
 		setIsUploading(true);
 		try {
-			const uploadedId = await uploadConnectionTemplate(file, () => confirm({
+			const result = await uploadConnectionTemplate(file, () => confirm({
 				title: tEntities('connection-template.list.upload.confirmReplace.title'),
 				message: tEntities('connection-template.list.upload.confirmReplace.message'),
 			}));
-			if (uploadedId) {
-				message.success(tEntities('connection-template.list.upload.success',
-					{ name: file.name }));
-				await fetchTemplates();
-				setSelectedTemplateId(String(uploadedId));
+			switch (result.status) {
+				case 'uploaded':
+					message.success(tEntities('connection-template.list.upload.success',
+						{ name: file.name }));
+					await fetchTemplates();
+					setSelectedTemplateId(String(result.id));
+					break;
+				case 'uploadedArchive':
+					message.success(tEntities('connection-template.list.upload.successArchive',
+						{ name: file.name, count: result.ids.length }));
+					await fetchTemplates();
+					setSelectedTemplateId(String(result.ids[0]));
+					break;
+				case 'emptyArchive':
+					notifyError(tEntities('connection-template.list.upload.emptyArchive'));
+					break;
+				case 'cancelled':
+					break;
+				case 'invalidType':
+					notifyError(tEntities('connection-template.list.upload.invalidType'));
+					break;
+				case 'tooLarge':
+					notifyError(tEntities('connection-template.list.upload.tooLarge'));
+					break;
+				case 'archiveTooLarge':
+					notifyError(tEntities('connection-template.list.upload.archiveTooLarge'));
+					break;
+				default: {
+					const _exhaustive: never = result;
+					return _exhaustive;
+				}
 			}
 		} catch (error) {
 			console.error(error);

@@ -7,6 +7,7 @@ export const headerMenuItems: WorkflowHeaderMenuItem[] = [
   { id: 'download-template', labelKey: 'headerMenu.downloadAsTemplate', section: 'template', keepOpenOnSelect: true },
   { id: 'save-template', labelKey: 'headerMenu.saveAsTemplate', section: 'template' },
   { id: 'load-template', labelKey: 'headerMenu.loadTemplate', section: 'template' },
+  { id: 'edit-json', labelKey: 'headerMenu.editJson', section: 'template' },
   { id: 'shortcuts', labelKey: 'headerMenu.shortcuts', section: 'shortcuts' },
   { id: 'exit', labelKey: 'headerMenu.exit', section: 'exit' },
 ];
