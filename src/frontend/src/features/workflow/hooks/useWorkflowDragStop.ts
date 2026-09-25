@@ -2,11 +2,12 @@ import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type { ReactFlowInstance } from '@xyflow/react';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import type { UseWorkflowPageOptions, WorkflowDragSnapshot } from '../drag-drop/workflowPage.types';
-import { moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
+import { moveOrCopyWorkflowNodes, moveWorkflowNodeGroup } from '../utils/graph.dragDrop';
 import { sanitizeGraphEdges, sanitizeGraphNodes } from '../drag-drop/workflowPageGraph.utils';
 import { clearDragFlags, clearDragPreviewNodes, clearEdgeDragFlags } from '../drag-drop/workflowPageNodes.utils';
 import { computeGhostRootPosition } from '../drag-drop/workflowDragCalculations.utils';
 import { positionDragCommit, resolveDragCommit } from '../drag-drop/workflowDragCommit.utils';
+import { findWorkflowDropTarget } from '../drag-drop/workflowDropTarget.utils';
 import { pruneInvalidJoints } from '../utils/jumpValidator';
 import { withCommentOffsetFromPosition } from '../utils/commentAnchor';
 
@@ -32,7 +33,39 @@ export const useWorkflowDragStop = ({ options, setNodes, setEdges, setIsDragging
 	setIsDragging(false);
 	if (multiDrag.current) {
 		multiDrag.current = false;
-		positionLock.current = null;
+		const snapshot = dragSnapshot.current;
+		dragSnapshot.current = null;
+		try {
+			const rootIds = snapshot?.multiRootIds ?? [];
+			const target = snapshot && findWorkflowDropTarget(
+				reactFlowInstance.current, event, node.id, snapshot.nodes, snapshot.edges,
+				snapshot.draggedNodeIds,
+			)?.target;
+			if (!snapshot || !target || rootIds.length < 2) return;
+			const moveGroup = (cleanInvalid = false) => moveWorkflowNodeGroup({
+				sourceNodeIds: rootIds, target, nodes: snapshot.nodes, edges: snapshot.edges,
+				fieldBindings: options.fieldBindings, cleanInvalid,
+			});
+			let next = moveGroup();
+			if (next.invalidReferences.length > 0) {
+				const accepted = await options.confirmDependencyDrop?.(next.invalidReferences);
+				if (!accepted) {
+					setNodes(snapshot.nodes);
+					setEdges(snapshot.edges);
+					return;
+				}
+				next = moveGroup(true);
+			}
+			const finalNodes = sanitizeGraphNodes(clearDragFlags(next.nodes));
+			const finalEdges = sanitizeGraphEdges(finalNodes, clearEdgeDragFlags(next.edges));
+			const joints = pruneInvalidJoints(finalNodes, finalEdges, next.fieldBindings);
+			if (joints.removedSourceIds.length > 0) onJointsRemoved(joints.removedSourceIds.length);
+			setNodes(joints.nodes);
+			setEdges(finalEdges);
+			options.onFieldBindingsChange?.(next.fieldBindings);
+		} finally {
+			positionLock.current = null;
+		}
 		return;
 	}
 	if (node.type === 'comment') {

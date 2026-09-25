@@ -38,6 +38,8 @@ export type WorkflowDragSnapshot = {
 	activeDropTarget?: DragDropTarget;
 	pointerOffsetFromRoot?: WorkflowPosition;
 	lastGhostRootPosition?: WorkflowPosition;
+	multiRootIds?: string[];
+	draggedNodeIds?: Set<string>;
 	lastInsertionPreview?: {
 		sourceNodeId: string;
 		targetNodeId: string;

@@ -21,6 +21,7 @@ import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWor
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
 import { useEscapeKey } from './useEscapeKey';
 import { TestRunDebugControls } from './TestRunDebugControls';
+import { getDragSubtreeNodeIds } from '../../drag-drop/workflowDropTarget.utils';
 
 // Where the graph's top-left-most point lands in the viewport on open —
 // offset from the pane's top-left corner rather than dead center, clear of
@@ -239,18 +240,23 @@ export function WorkflowCanvas({
   // the same card the badge does — while the lens is open, and only then. A
   // selected method with no bindings clears the focus rather than leaving another
   // method's card up: the selection is what the lens is describing.
-  const handleNodeClick = useCallback((_: ReactMouseEvent, node: CanvasNodeModel) => {
+  const handleNodeClick = useCallback((event: ReactMouseEvent, node: CanvasNodeModel) => {
     if (jointSourceId) {
       if (jointVerdicts?.get(node.id)?.valid) onConfirmJoint?.(node.id);
       return;
     }
-    if (!isLensOpen || isLensElementId(node.id)) return;
+    if (isLensElementId(node.id)) return;
+    if ((event.metaKey || event.ctrlKey) && (node.type === 'if' || node.type === 'loop')) {
+      const subtreeIds = getDragSubtreeNodeIds(node.id, nodes, edges);
+      onNodesChange([...subtreeIds].map((id) => ({ id, type: 'select', selected: true })));
+    }
+    if (!isLensOpen) return;
     // The badge stops its own click here, so it keeps toggling rather than being
     // re-pinned by the selection it also makes.
     if (lensNodeState?.summaryByNodeId.has(node.id)) onFocusLensNode?.(node.id);
     else onClearLensFocus?.();
-  }, [isLensOpen, jointSourceId, jointVerdicts, lensNodeState, onClearLensFocus,
-    onConfirmJoint, onFocusLensNode]);
+  }, [edges, isLensOpen, jointSourceId, jointVerdicts, lensNodeState, nodes,
+    onClearLensFocus, onConfirmJoint, onFocusLensNode, onNodesChange]);
   const handlePaneClick = useCallback(() => {
     onClearLensFocus?.();
     onPaneClick?.();
@@ -352,6 +358,7 @@ export function WorkflowCanvas({
           elementsSelectable
           selectionOnDrag={false}
           selectionKeyCode={null}
+          multiSelectionKeyCode={['Meta', 'Control']}
           deleteKeyCode={null}
           panOnDrag
           zoomOnScroll
