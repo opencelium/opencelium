@@ -1,6 +1,6 @@
 import React from 'react';
 import { message } from 'antd';
-import { IconButton } from '@shared/ui/primitives/IconButton';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useDeleteEntityMutation } from '@shared/api/genericApi';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
@@ -48,13 +48,11 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, 
     };
 
     const button = (
-        <IconButton
-            iconProps={{ name: 'delete', color: 'danger', size: iconSize }}
+        <DeleteIconButton
+            iconSize={iconSize}
             loading={isLoading}
             disabled={!!disabledReason}
             onClick={handleClick}
-            type={'text'}
-            size={'xs'}
             testId={testId}
         />
     );

@@ -3,7 +3,8 @@ import type {UserFormValues} from "@entities/user/form/userForm.types.ts";
 
 export function mapUserToForm(user: User): UserFormValues {
     return {
-        email: user.email,
+        email: user.email ?? '',
+        username: user.username ?? '',
         userDetail: user.userDetail,
         userGroup: user.userGroup?.groupId,
     };

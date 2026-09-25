@@ -6,15 +6,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 
 public class SchemaDTOUtil {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public static SchemaDTO copy(SchemaDTO schema) {
         if (schema == null) {
@@ -56,11 +62,53 @@ public class SchemaDTOUtil {
             return null;
         }
 
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonString = mapper.writeValueAsString(value);
+        if (value instanceof JsonNode jsonNode) {
+            return fromJSONNode(jsonNode);
+        }
 
-            return fromJSONNode(mapper.readTree(jsonString));
+        // Handle most frequently resolved reference types without
+        // serialization or an intermediate JsonNode tree.
+        if (value instanceof String string) {
+            return primitive(DataType.STRING, string);
+        }
+
+        if (value instanceof Character character) {
+            return primitive(DataType.STRING, character.toString());
+        }
+
+        if (value instanceof Boolean bool) {
+            return primitive(DataType.BOOLEAN, bool.toString());
+        }
+
+        if (isIntegralNumber(value)) {
+            return primitive(DataType.INTEGER, value.toString());
+        }
+
+        if (value instanceof BigDecimal decimal) {
+            return fromBigDecimal(decimal);
+        }
+
+        if (isDecimalNumber(value)) {
+            return primitive(DataType.NUMBER, value.toString());
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            return fromMap(map);
+        }
+
+        if (value instanceof Collection<?> collection) {
+            return fromCollection(collection);
+        }
+
+        if (value.getClass().isArray()) {
+            return fromArray(value);
+        }
+
+        // Fallback
+        try {
+            String jsonString = OBJECT_MAPPER.writeValueAsString(value);
+
+            return fromJSONNode(OBJECT_MAPPER.readTree(jsonString));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Supplied Object could not be converted to SchemaDTO", e);
         }
@@ -147,6 +195,7 @@ public class SchemaDTOUtil {
 
         return result.toString();
     }
+
 
     private static void writeTag(StringBuilder collector, String name, SchemaDTO value) {
         String tagName = getName(name, value);
@@ -263,17 +312,19 @@ public class SchemaDTOUtil {
     }
 
     private static SchemaDTO fromJSONNode(JsonNode jsonNode) {
+        if (jsonNode == null || jsonNode.isNull() || jsonNode.isMissingNode()) {
+            return null;
+        }
+
         JsonNodeType nodeType = jsonNode.getNodeType();
 
-        SchemaDTO result = new SchemaDTO();
-
         if (nodeType == JsonNodeType.OBJECT) {
+            SchemaDTO result = new SchemaDTO();
             result.setType(DataType.OBJECT);
 
-            Map<String, SchemaDTO> properties = new HashMap<>();
+            Map<String, SchemaDTO> properties = new LinkedHashMap<>();
 
             Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
-
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
 
@@ -281,7 +332,12 @@ public class SchemaDTOUtil {
             }
 
             result.setProperties(properties);
-        } else if (nodeType == JsonNodeType.ARRAY) {
+
+            return result;
+        }
+
+        if (nodeType == JsonNodeType.ARRAY) {
+            SchemaDTO result = new SchemaDTO();
             result.setType(DataType.ARRAY);
 
             List<SchemaDTO> items = new ArrayList<>();
@@ -295,26 +351,111 @@ public class SchemaDTOUtil {
             }
 
             result.setItems(items);
-        } else if (nodeType == JsonNodeType.BOOLEAN) {
-            result.setType(DataType.BOOLEAN);
-            result.setValue(jsonNode.asText());
-        } else if (nodeType == JsonNodeType.STRING) {
-            result.setType(DataType.STRING);
-            result.setValue(jsonNode.asText());
-        } else if (nodeType == JsonNodeType.NUMBER) {
-            String value = jsonNode.asText();
 
-            if (value.contains(".")) {
-                result.setType(DataType.NUMBER);
-            } else {
-                result.setType(DataType.INTEGER);
-            }
-
-            result.setValue(value);
-        } else {
-            // for BINARY, MISSING, NULL, POJO JsonNodeType types
-            result = null;
+            return result;
         }
+
+        if (nodeType == JsonNodeType.STRING) {
+            return primitive(DataType.STRING, jsonNode.asText());
+        }
+
+        if (nodeType == JsonNodeType.BOOLEAN) {
+            return primitive(DataType.BOOLEAN, jsonNode.asText());
+        }
+
+        if (nodeType == JsonNodeType.NUMBER) {
+            DataType type = jsonNode.isIntegralNumber()
+                    ? DataType.INTEGER
+                    : DataType.NUMBER;
+
+            return primitive(type, jsonNode.asText());
+        }
+
+        if (nodeType == JsonNodeType.BINARY) {
+            return primitive(DataType.STRING, jsonNode.asText());
+        }
+
+        // for BINARY, MISSING, NULL, POJO JsonNodeType types
+        return null;
+    }
+
+    private static boolean isIntegralNumber(Object value) {
+        return value instanceof Byte
+                || value instanceof Short
+                || value instanceof Integer
+                || value instanceof Long
+                || value instanceof BigInteger;
+    }
+
+    private static boolean isDecimalNumber(Object value) {
+        return value instanceof Float || value instanceof Double;
+    }
+
+    private static SchemaDTO fromBigDecimal(BigDecimal value) {
+        try {
+            String normalized = OBJECT_MAPPER
+                    .readTree(value.toString())
+                    .asText();
+
+            return primitive(DataType.NUMBER, normalized);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Supplied Object could not be converted to SchemaDTO", e);
+        }
+    }
+
+    private static SchemaDTO fromMap(Map<?, ?> map) {
+        SchemaDTO result = new SchemaDTO();
+        result.setType(DataType.OBJECT);
+
+        Map<String, SchemaDTO> properties = new LinkedHashMap<>(map.size());
+
+        map.forEach((key, value) ->
+                properties.put(
+                        String.valueOf(key),
+                        fromObject(value)
+                )
+        );
+
+        result.setProperties(properties);
+
+        return result;
+    }
+
+    private static SchemaDTO fromCollection(Collection<?> collection) {
+        SchemaDTO result = new SchemaDTO();
+        result.setType(DataType.ARRAY);
+
+        List<SchemaDTO> items = new ArrayList<>(collection.size());
+
+        for (Object element : collection) {
+            items.add(fromObject(element));
+        }
+
+        result.setItems(items);
+
+        return result;
+    }
+
+    private static SchemaDTO fromArray(Object array) {
+        SchemaDTO result = new SchemaDTO();
+        result.setType(DataType.ARRAY);
+
+        int length = Array.getLength(array);
+        List<SchemaDTO> items = new ArrayList<>(length);
+
+        for (int i = 0; i < length; i++) {
+            items.add(fromObject(Array.get(array, i)));
+        }
+
+        result.setItems(items);
+
+        return result;
+    }
+
+    private static SchemaDTO primitive(DataType type, String value) {
+        SchemaDTO result = new SchemaDTO();
+        result.setType(type);
+        result.setValue(value);
 
         return result;
     }

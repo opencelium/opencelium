@@ -1,0 +1,74 @@
+.headerMenuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.25;
+  color: var(--color-text-primary);
+}
+
+.headerMenuItem:hover:not(:disabled),
+.contextMenuItem:hover {
+  background: var(--color-background-hover);
+}
+
+.headerMenuItem:disabled {
+  cursor: default;
+}
+
+.headerMenuItem:disabled > span:first-child {
+  opacity: 0.5;
+}
+
+.headerMenuBadge {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-background-hover);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.contextMenuHeader {
+  margin-bottom: 16px;
+}
+
+.contextMenuTitle {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.contextMenuDescription {
+  margin-top: 14px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.contextMenuSections {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.contextMenuSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contextMenuGroupLabel {
+  padding: 10px 12px 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  cursor: default;
+}

@@ -83,7 +83,16 @@ function reconnectExistingBranch(
     targetHandle: asRow ? getDefaultTargetHandle('right') : interceptedEdge.targetHandle ?? getDefaultTargetHandle(args.action.direction),
     type: 'workflow-edge',
     markerEnd: { type: MarkerType.ArrowClosed },
-    data: { branch: asRow ? undefined : args.action.direction === 'right' && built.nodeType === 'if' ? 'false' : interceptedEdge.data?.branch },
+    // A branch marker belongs to edges leaving an IF only — inheriting the
+    // intercepted edge's marker onto a method-sourced edge produced data that the
+    // loader later mistook for a source handle (see getSavedUiEdges).
+    data: {
+      branch: asRow
+        ? undefined
+        : built.nodeType === 'if' && args.action.direction === 'right'
+          ? 'false'
+          : undefined,
+    },
   };
   const nextEdges = [...args.edges.filter((edge) => edge.id !== interceptedEdge.id), built.newEdge, bridgedEdge];
   return { nodes: rebalanceOperatorRightChains([...shiftedNodes, built.newNode], nextEdges), edges: nextEdges };

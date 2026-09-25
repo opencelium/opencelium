@@ -49,6 +49,7 @@ public interface ExceptionConstant {
 
     String CONNECTOR_NOT_FOUND = "CONNECTOR_NOT_FOUND";
     String CONNECTOR_ALREADY_EXISTS = "CONNECTOR_ALREADY_EXISTS";
+    String DECRYPTION_FAILED = "DECRYPTION_FAILED";
 
     // ----------------------------------------- Connection ----------------------------------------------- //
     String CONNECTION_NOT_FOUND = "CONNECTION_NOT_FOUND";

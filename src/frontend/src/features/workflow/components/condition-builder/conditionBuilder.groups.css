@@ -1,0 +1,131 @@
+.loopInfoList {
+	margin: 4px 0 0;
+	padding-left: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.loopInfoInlineCode {
+	padding: 1px 5px;
+	border-radius: 3px;
+	background: var(--color-background-surface);
+	border: 1px solid var(--color-border-default);
+	font-family: monospace;
+	color: var(--color-text-primary);
+}
+
+.conditionGroup {
+	position: relative;
+	display: grid;
+	gap: 10px;
+	padding-bottom: 10px;
+	overflow-x: visible;
+	border: 1px solid var(--color-border-default);
+	border-radius: 5px;
+	background: transparent;
+}
+
+.conditionGroupInvalid {
+	border-color: var(--color-status-error-border);
+	background: var(--color-status-error-bg);
+}
+
+.conditionLoopGroup {
+	position: relative;
+	width: 100%;
+}
+
+.conditionGroupHeader {
+	position: relative;
+	display: flex;
+	align-items: stretch;
+	justify-content: space-between;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding-right: 10px;
+	padding-left: 10px;
+}
+
+.conditionGroupToggle {
+	z-index: 1;
+	display: flex;
+}
+
+.conditionGroupStatus {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+}
+
+.conditionGroupToggle button {
+	min-width: 34px;
+	height: 24px;
+	border: 1px solid var(--color-border-default);
+	background: var(--color-background-disabled);
+	color: var(--color-text-primary);
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.conditionGroupToggle button:first-child {
+	border-radius: 5px 0 0 5px;
+}
+
+.conditionGroupToggle button:last-child {
+	border-radius: 0 5px 5px 0;
+}
+
+.conditionGroupToggle button.active {
+	border-color: var(--color-action-primary);
+	background: var(--color-action-primary);
+	color: var(--color-text-on-action);
+}
+
+.conditionGroupToggle button:disabled {
+	border-color: var(--color-border-default);
+	background: var(--color-background-disabled);
+	color: var(--color-text-disabled);
+	cursor: default;
+}
+
+.conditionGroupInvalid .conditionGroupToggle button {
+	border-color: var(--color-status-error-fg);
+	background: var(--color-status-error-fg);
+	color: var(--color-text-on-action);
+}
+
+.conditionGroupInvalid .conditionGroupToggle button.active {
+	border-color: var(--color-status-error-fg);
+	background: var(--color-status-error-fg);
+	color: var(--color-text-on-action);
+}
+
+.conditionGroupError {
+	margin-left: 8px;
+	color: var(--color-status-error-fg);
+	font-size: 12px;
+	line-height: 1.2;
+}
+
+.conditionGroupActions {
+	display: flex;
+	gap: 20px;
+}
+
+.conditionGroupActions .conditionGroupAddButton {
+	height: 30px;
+	border-radius: 4px;
+	background: var(--color-action-primary);
+	font-size: 14px;
+}
+
+.conditionGroupBody {
+	position: relative;
+	display: grid;
+	gap: 10px;
+	padding-right: 10px;
+	padding-left: 24px;
+}
+

@@ -11,6 +11,7 @@ import { findDataAggregatorIdByName } from '@entities/dataAggregator/command/dat
 import type { DataAggregator, DataAggregatorArg, DataAggregatorDto } from '@entities/dataAggregator/model/types'
 import { buildFullScript, extractSection2Content } from '@entities/dataAggregator/lib/scriptUtils'
 import { ActiveSwitchCell } from '@entities/dataAggregator/ui/ActiveSwitchCell'
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'data-aggregator'
 
@@ -141,9 +142,7 @@ export const dataAggregatorDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -178,9 +177,7 @@ export const dataAggregatorDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ')
                 },
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {

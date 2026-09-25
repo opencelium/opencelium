@@ -14,7 +14,7 @@ export const UserNameCell: React.FC<Props> = ({ userId }) => {
     if (!user) return <span>{t('user.unknown')}</span>
 
     return (
-        <a href={`/user/update/${userId}`} target="_blank" rel="noopener noreferrer" title={user.email}>
+        <a href={`/user/update/${userId}`} target="_blank" rel="noopener noreferrer" title={user.email ?? user.username ?? undefined}>
             {user.userDetail.name} {user.userDetail.surname}
         </a>
     )

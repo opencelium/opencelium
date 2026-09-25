@@ -17,7 +17,7 @@
   },
   "actions": {
     "save": "Speichern",
-    "reset": "Zurücksetzen",
+    "reset": "Änderungen verwerfen",
     "expandAll": "Alle aufklappen",
     "collapseAll": "Alle einklappen"
   },

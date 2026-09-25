@@ -10,11 +10,26 @@ import { createContext, useContext } from "react";
 //    the trail continues (its REST children are fetched on demand).
 //  - `nonce`      — bumped once per failed run; rows apply the reveal once.
 // All matchers take a row's structural indexPath and its loop-iteration context.
+//
+// The `pause*` fields are the exact same shape, fed the debugger's single
+// paused-on location instead of the run's error locations — a parallel
+// concept, not a reuse of the error one, so pausing on a perfectly successful
+// node never gets painted as a failure:
+//  - `isOnPauseTrace` — row is the paused-on element or an ancestor; drives
+//    auto-expanding ancestors down to it (no visual trace marker, unlike
+//    isOnTrace — there is no "trail" to show for a pause).
+//  - `isPauseTarget`  — row IS the paused-on element itself. Unlike isTarget,
+//    this deliberately does NOT auto-open the row's own detail — the paused
+//    node's request/response is fetched only when the user opens it.
 export type LogErrorTrace = {
   nonce: number;
   isOnTrace: (indexPath: string, loopIndexPath: string) => boolean;
   isTarget: (indexPath: string, loopIndexPath: string) => boolean;
   loopIteration: (indexPath: string, loopIndexPath: string) => number | null;
+  pauseNonce: number;
+  isOnPauseTrace: (indexPath: string, loopIndexPath: string) => boolean;
+  isPauseTarget: (indexPath: string, loopIndexPath: string) => boolean;
+  pauseLoopIteration: (indexPath: string, loopIndexPath: string) => number | null;
 };
 
 const EMPTY_TRACE: LogErrorTrace = {
@@ -22,6 +37,10 @@ const EMPTY_TRACE: LogErrorTrace = {
   isOnTrace: () => false,
   isTarget: () => false,
   loopIteration: () => null,
+  pauseNonce: 0,
+  isOnPauseTrace: () => false,
+  isPauseTarget: () => false,
+  pauseLoopIteration: () => null,
 };
 
 export const LogErrorTraceContext = createContext<LogErrorTrace>(EMPTY_TRACE);

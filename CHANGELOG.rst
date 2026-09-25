@@ -2,10 +2,123 @@
 Changelog
 *********
 
+5.1
+========
+ 
+:Date: August 28, 2026
+
+Features
+--------
+* Joint Element for connecting workflow paths
+* Debugger mode for Test Run
+* Undo/Redo in the Workflow Editor
+* Change History in the Workflow Editor
+* Comment Boxes in the Workflow Editor
+
+Fixes
+--------
+ 
+* Fix NullPointerException in ExecutionAspect.fillDefaultRecipients on scheduled runs (OC-1560)
+* Author test templates for workflow integration cases (OC-1475)
+* Investigate missing initial snapshot for /scheduler/running/all WebSocket topic (OC-1527)
+* Implement Secure Change Password API Endpoint (OC-1334)
+* Implement Forgot Password functionality in the backend (OC-1328)
+* Enhance webhook variables (OC-411)
+* Add customizable data masking in logs (OC-950)
+* Add Undo functionality for partial update/save operations (OC-774)
+* Replace templates during import (OC-694)
+* Support multiple fail and success responses (OC-893)
+* Persist connection editor settings in the database (OC-905)
+* Fix LDAP first-login failure for users without an email address (OC-1541)
+* Add validation to ensure methods contain a connector (OC-1503)
+* Rename audit columns to *_at and expose list-view fields for Connector and Connection (OC-1512)
+* Refactor getAllRunningJobs to return every concurrent execution with startTime (OC-1409)
+* Refactor log-files endpoint (OC-1222)
+* Refactor WebSocket handling (OC-1067)
+* Support header, status and body in direct references (OC-909)
+* Support new array structures from jsonPath (OC-912)
+* Fix category filter when using the paginator (OC-916)
+* Remove obsolete ZIP and JAR files (OC-871)
+* Support new and old structures in Operators (OC-1030)
+* Add UI object to Connection (OC-1029)
+* Support enabling/disabling debug mode and improve UI feedback for missing logs (OC-1135)
+* Enhance support file handling and WebSocket notifications (OC-1039)
+* Validate YAML changelog (OC-1061)
+* Improve template migration (OC-1066)
+* Add master password support for connectors (OC-1108)
+* Add partial update support for connectors (OC-1109)
+* Create endpoint for retrieving logs (OC-1116)
+* Update log structure (OC-1117)
+* Add sorting to Connections and Schedules (OC-1216)
+* Move Polyglot to an external service JAR (OC-1223)
+* Delete obsolete log_data documents when log files or connections are removed (OC-1536)
+* Improve Connection Editor (OC-1260)
+* Improve the Overview panel in the Dashboard (OC-1329)
+* Improve Login Page (OC-1273)
+* Implement general UI and usability improvements (OC-1282)
+* Remove obsolete JAR files manually (OC-1287)
+* Show the correct error during Invoker synchronization (OC-1301)
+* Fix Webhook support in SplitString (OC-1305)
+* Fix LIKE operator behavior (OC-1307)
+* Implement Connection Versioning (OC-1317)
+* Implement Connection Versioning in the backend (OC-1322)
+* Add timeline for Connection Versioning (OC-1326)
+* Integrate log downloads into LogsView (OC-1327)
+* Add Overview data to the backend (OC-1331)
+* Integrate Forgot Password functionality (OC-1333)
+* Allow users to set their password in the profile (OC-1336)
+* Integrate the Create Connection dialog (OC-1338)
+* Integrate header and status information (OC-1340)
+* Add inline editing for connection titles (OC-1341)
+* Save widget settings when adding a user (OC-1342)
+* Integrate Connection Versioning into the UI (OC-1361)
+* Integrate Logs into the UI (OC-1362)
+* Implement Start Node for workflows (OC-1363)
+* Implement Connector Method Node for workflows (OC-1364)
+* Implement Operator Nodes for IF and Loop operations (OC-1365)
+* Implement HTTP Request Node (OC-1366)
+* Implement workflow edges (OC-1367)
+* Support multiple API methods in a Connection (OC-1406)
+* Add endpoints to view and update application.yml properties (OC-1419)
+* Clean up orphaned test connections (OC-1436)
+* Improve workflow saving (OC-1437)
+* Integrate query parameter table for endpoints (OC-1445)
+* Add drag-and-drop support for workflow nodes (OC-1459)
+* Integrate scheduling into workflows (OC-1462)
+* Add keyboard shortcuts (OC-1469)
+* Add HTTP Method configuration to HTTP Request Node (OC-1472)
+* Improve delete functionality (OC-1508)
+* Improve confirmation text when removing entities (OC-1521)
+* Highlight execution log entries containing errors (OC-1529)
+* Add modifiedAt and modifiedBy fields to the connector list (OC-1530)
+* Make delete icons consistent across the UI (OC-1525)
+* Optimize the workflow before saving (OC-1531)
+* Update LDAP form headers (OC-1533)
+* Redirect to the home page after login if the redirect URL does not exist (OC-1534)
+* Refactor and optimize code (OC-1520)
+* Add animation for Test Run execution (OC-1532)
+* Add Debugger to the workflow editor (OC-1542)
+* Improve user update functionality without requiring password fields (OC-1522)
+* Add validation for Invoker names (OC-1550)
+* Add footer to the application (OC-1551)
+* Add documentation navigation icon to the top bar (OC-1552)
+* Add resizable columns to tables (OC-1559)
+* Save theme settings and logo on the server (OC-1555)
+* Add Invoker functionality (OC-1554)
+* Save language preferences in user settings (OC-1564)
+* Add close icon to error messages (OC-1565)
+* Make connector and invoker images consistent (OC-1566)
+* Add Undo/Redo functionality to the workflow editor (OC-1562)
+* Add Note element to the workflow editor (OC-1563)
+* Add image cropping when uploading connector icons (OC-1567)
+* Add UserGroup update functionality (OC-1568)
+* Report the connector and field associated with an undecryptable credential (OC-1572)
+* Improve the Test Run alert message (OC-1574)
+* Separate email and username into distinct user fields in forms, lists and profiles (OC-1575)
+
 
 Major Relase :loudspeaker:
 ========
-
 
 5.0
 ========

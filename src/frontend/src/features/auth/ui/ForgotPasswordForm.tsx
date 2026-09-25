@@ -10,6 +10,7 @@ import { useForgotPasswordForm } from '../model/useForgotPasswordForm'
 import type { ForgotPasswordFormValues } from '../model/forgotPassword.schema'
 import { Button } from '@shared/ui/primitives/Button'
 import { Card } from '@shared/ui/primitives/Card'
+import { Hint } from '@shared/ui/primitives/Hint'
 import { Input } from '@shared/ui/primitives/Input'
 import { Typography } from '@shared/ui/primitives/Typography'
 
@@ -58,10 +59,12 @@ export function ForgotPasswordForm() {
             if (e instanceof ApiFetchError) {
                 const code = extractErrorCode(e.body)
                 if (code) {
+                    // EMAIL_RECOVERY_FAILED used to ask for a 12s toast so its long
+                    // text could be read; errors now stay until dismissed, which
+                    // covers that on its own.
                     errorBus.emit({
                         type: ERROR_TYPE_MAP[code],
                         messageKey: ERROR_MESSAGE_KEY_MAP[code],
-                        ...(code === 'EMAIL_RECOVERY_FAILED' && { durationSec: 12 }),
                     })
                 } else {
                     errorBus.emit({ type: 'UNKNOWN', messageKey: 'forgotPassword.failed' })
@@ -104,6 +107,7 @@ export function ForgotPasswordForm() {
                                 <Typography variant="body" isSubtle>
                                     {t('forgotPassword.description')}
                                 </Typography>
+                                <Hint noPrefix>{t('forgotPassword.noEmailHint')}</Hint>
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>

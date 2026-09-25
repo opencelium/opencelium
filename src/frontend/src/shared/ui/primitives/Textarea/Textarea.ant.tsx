@@ -6,6 +6,8 @@ import './textarea.ant.css';
 export const AntTextarea: TextareaComponent = ({
     textareaRef,
     error,
+    disabled,
+    readOnly,
     testId,
     ...props
 }) => {
@@ -14,9 +16,18 @@ export const AntTextarea: TextareaComponent = ({
             {...props}
             data-testid={testId}
             rows={4}
-            ref={textareaRef}
+            ref={(node) => {
+                const textarea = node?.resizableTextArea?.textArea ?? null;
+
+                if (typeof textareaRef === 'function') {
+                    textareaRef(textarea);
+                } else if (textareaRef) {
+                    textareaRef.current = textarea;
+                }
+            }}
             status={error ? 'error' : undefined}
             className="ant-textarea-custom"
+            disabled={disabled || readOnly}
         />
     );
 };

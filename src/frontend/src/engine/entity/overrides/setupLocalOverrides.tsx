@@ -16,6 +16,7 @@ import {UpdateAssistantHealthViewer} from "@shared/ui/wizard-step/editor/update-
 import {UpdateAssistantVersionsTable} from "@shared/ui/wizard-step/editor/update-assistant-versions-table/UpdateAssistantVersionsTable.tsx";
 import {UpdateAssistantRunButton} from "@shared/ui/wizard-step/editor/update-assistant-run-button/UpdateAssistantRunButton.tsx";
 import {CustomThemeSection} from "@entities/ui/ui/CustomThemeSection";
+import {SystemLogoSection} from "@entities/ui/ui/SystemLogoSection";
 import {NotificationEventTypeField} from "@entities/schedule/notification/overrides/NotificationEventTypeField";
 import {NotificationTemplateField} from "@entities/schedule/notification/overrides/NotificationTemplateField";
 import {NotificationRecipientsEmailsField} from "@entities/schedule/notification/overrides/NotificationRecipientsEmailsField";
@@ -75,6 +76,7 @@ export function setupLocalOverrides() {
                 <FieldRenderer key={field.name} field={field} mode={mode} />
             ))}
             <CustomThemeSection />
+            <SystemLogoSection />
         </div>
     ));
     overrideRegistry.registerField('scheduleNotificationEventType', NotificationEventTypeField);

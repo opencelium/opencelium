@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.utility.crypto;
 
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.exception.WrongDecryptException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -62,12 +63,15 @@ public class Encoder {
             decryptCipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivspec);
             byte[] decryptedText = decryptCipher.doFinal(encryptedData, 16, encryptedData.length - 16);  // Decrypt data after IV
             return new String(decryptedText, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            throw new WrongDecryptException(
+                    "Decryption failed: the value is not valid Base64 ciphertext.", e);
         } catch (BadPaddingException e) {
-            throw new RuntimeException("Decryption failed due to bad padding. Check if the key is correct.");
+            throw new WrongDecryptException("Decryption failed due to bad padding. Check if the key is correct.");
         } catch (IllegalBlockSizeException e) {
-            throw new RuntimeException("Decryption failed due to illegal block size. Data may be corrupted.", e);
+            throw new WrongDecryptException("Decryption failed due to illegal block size. Data may be corrupted.", e);
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException e) {
-            throw new RuntimeException("Error during decryption", e);
+            throw new WrongDecryptException("Error during decryption", e);
         }
     }
 

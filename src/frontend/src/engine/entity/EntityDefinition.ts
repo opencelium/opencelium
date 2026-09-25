@@ -4,6 +4,7 @@ import type {CommandNode} from "@shared/command/types.ts";
 import type {FormRemoteProps, StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 import type {StepActionDefinition} from "@shared/ui/step-form/types.ts";
 import type {DialogController} from "@shared/ui/dialog/DialogContext.tsx";
+import type {TooltipPlacement} from "@shared/ui/primitives/Tooltip/Tooltip.types.ts";
 import React from "react";
 
 export type Mode = 'create' | 'update' | 'view'
@@ -175,7 +176,8 @@ export type WizardDefinition = {
     renderImage?: React.ComponentType<{ mode?: Mode }>
     overrideKey?: string
     recommendations?: Recommendation[]
-    steps: WizardStepDefinition[]
+    /** Function form lets the step list itself differ by mode (e.g. a step only relevant to create/update, or a field relocated between steps depending on mode). */
+    steps: WizardStepDefinition[] | ((mode: Mode) => WizardStepDefinition[])
     modes?: Partial<Record<Mode, WizardModeConfig>>
 }
 export type CrossFieldValidation = {
@@ -334,6 +336,16 @@ export type CustomActionContext = {
     entity: EntityDefinition
     row: unknown
     rowId: string
+    /**
+     * The icon size and tooltip placement the built-in actions in this row were
+     * given — they differ between the inline and menu displays. Forward both to
+     * the rendered button so a custom action doesn't sit a few pixels off from
+     * the View/Delete icons beside it.
+     */
+    iconSize?: number
+    tooltipPlacement?: TooltipPlacement
+    /** Stable e2e selector for the rendered button, keyed by the action's `key`. */
+    testId?: string
 }
 
 export type ListAction =

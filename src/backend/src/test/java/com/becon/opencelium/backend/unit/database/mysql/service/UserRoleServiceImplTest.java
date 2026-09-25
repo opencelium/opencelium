@@ -16,33 +16,43 @@ import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository
 import com.becon.opencelium.backend.database.mysql.service.ComponentServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.PermissionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
+import com.becon.opencelium.backend.exception.RoleExistsException;
+import com.becon.opencelium.backend.exception.RoleNotFoundException;
+import com.becon.opencelium.backend.resource.user.ComponentResource;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
-import com.becon.opencelium.backend.testutil.assertion.UserRoleAssertions;
+import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.testutil.fixture.UserRoleFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.NoSuchElementException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link UserRoleServiceImpl}.
  *
- * No Spring context is loaded. The repository is mocked with Mockito.
+ * No Spring context is loaded. Repositories and collaborating services are
+ * mocked with Mockito. Transaction boundaries and JPA orphan removal belong
+ * in integration tests; these tests verify how the managed aggregate is
+ * mutated inside those boundaries.
+ *
  * Run with: ./gradlew test
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("UserRoleServiceImpl — unit")
+@DisplayName("UserRoleServiceImpl - unit")
 class UserRoleServiceImplTest {
 
     @Mock
@@ -54,204 +64,278 @@ class UserRoleServiceImplTest {
     @Mock
     private ComponentServiceImpl componentService;
 
+    @Mock
+    private StorageService storageService;
+
     @InjectMocks
     private UserRoleServiceImpl userRoleService;
 
-    // ── existsById ────────────────────────────────────────────────────────────
+    // ── getById ───────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("existsByIdReturnsTrueWhenRoleExistsInRepository")
-    void existsByIdReturnsTrueWhenRoleExistsInRepository() {
-        when(userRoleRepository.existsById(1)).thenReturn(true);
+    @DisplayName("getById returns resource when role exists")
+    void getByIdReturnsResourceWhenRoleExists() {
+        // GIVEN
+        UserRole role = UserRoleFixture.aStandardUserRole();
 
-        boolean result = userRoleService.existsById(1);
+        when(userRoleRepository.findById(role.getId()))
+                .thenReturn(Optional.of(role));
 
-        assertThat(result).isTrue();
-        verify(userRoleRepository).existsById(1);
+        // WHEN
+        UserRoleResource result = userRoleService.getById(role.getId());
+
+        // THEN
+        assertThat(result.getGroupId()).isEqualTo(role.getId());
+        assertThat(result.getName()).isEqualTo(role.getName());
+        assertThat(result.getDescription()).isEqualTo(role.getDescription());
     }
 
     @Test
-    @DisplayName("existsByIdReturnsFalseWhenRoleDoesNotExistInRepository")
-    void existsByIdReturnsFalseWhenRoleDoesNotExistInRepository() {
-        when(userRoleRepository.existsById(99)).thenReturn(false);
-
-        assertThat(userRoleService.existsById(99)).isFalse();
-    }
-
-    // ── findById ──────────────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("findByIdReturnsRoleWhenIdExists")
-    void findByIdReturnsRoleWhenIdExists() {
-        UserRole expected = UserRoleFixture.aStandardUserRole();
-        when(userRoleRepository.findById(1)).thenReturn(Optional.of(expected));
-
-        Optional<UserRole> result = userRoleService.findById(1);
-
-        assertThat(result).isPresent();
-        assertThat(result.get().getName()).isEqualTo("ROLE_USER");
-    }
-
-    @Test
-    @DisplayName("findByIdReturnsEmptyWhenIdDoesNotExist")
-    void findByIdReturnsEmptyWhenIdDoesNotExist() {
+    @DisplayName("getById throws RoleNotFoundException when role does not exist")
+    void getByIdThrowsWhenRoleDoesNotExist() {
+        // GIVEN
         when(userRoleRepository.findById(99)).thenReturn(Optional.empty());
 
-        assertThat(userRoleService.findById(99)).isEmpty();
+        // WHEN-THEN
+        assertThatThrownBy(() -> userRoleService.getById(99))
+                .isInstanceOf(RoleNotFoundException.class);
     }
 
-    // ── existsByRole ──────────────────────────────────────────────────────────
+    // ── getAll ────────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("existsByRoleReturnsTrueWhenRoleNameExists")
-    void existsByRoleReturnsTrueWhenRoleNameExists() {
+    @DisplayName("getAll maps repository entities to resources")
+    void getAllMapsEntitiesToResources() {
+        // GIVEN
+        UserRole user = UserRoleFixture.aStandardUserRole();
+        UserRole admin = UserRoleFixture.anAdminRole();
+        when(userRoleRepository.findAll()).thenReturn(List.of(user, admin));
+
+        // WHEN
+        List<UserRoleResource> result = userRoleService.getAll();
+
+        // THEN
+        assertThat(result)
+                .extracting(UserRoleResource::getName)
+                .containsExactly(user.getName(), admin.getName());
+    }
+
+    // ── existsByName / findByName ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("existsByName delegates to repository")
+    void existsByNameDelegatesToRepository() {
+        // GIVEN
         when(userRoleRepository.existsByName("ROLE_ADMIN")).thenReturn(true);
 
-        assertThat(userRoleService.existsByRole("ROLE_ADMIN")).isTrue();
+        // WHEN-THEN
+        assertThat(userRoleService.existsByName("ROLE_ADMIN")).isTrue();
+        verify(userRoleRepository).existsByName("ROLE_ADMIN");
     }
 
     @Test
-    @DisplayName("existsByRoleReturnsFalseWhenRoleNameDoesNotExist")
-    void existsByRoleReturnsFalseWhenRoleNameDoesNotExist() {
-        when(userRoleRepository.existsByName("ROLE_UNKNOWN")).thenReturn(false);
-
-        assertThat(userRoleService.existsByRole("ROLE_UNKNOWN")).isFalse();
-    }
-
-    // ── getOne ────────────────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("getOneReturnsRoleReferenceFromRepository")
-    void getOneReturnsRoleWhenRepositoryHasEntry() {
-        UserRole expected = UserRoleFixture.aStandardUserRole();
-        when(userRoleRepository.getReferenceById(1)).thenReturn(expected);
-
-        UserRole result = userRoleService.getOne(1);
-
-        assertThat(result).isSameAs(expected);
-        verify(userRoleRepository).getReferenceById(1);
-    }
-
-    // ── findByRole ────────────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("findByRoleReturnsRoleWhenNameExists")
-    void findByRoleReturnsRoleWhenNameExists() {
+    @DisplayName("findByName returns repository result")
+    void findByNameReturnsRepositoryResult() {
+        // GIVEN
         UserRole expected = UserRoleFixture.anAdminRole();
+
         when(userRoleRepository.findByName("ROLE_ADMIN")).thenReturn(Optional.of(expected));
 
-        Optional<UserRole> result = userRoleService.findByRole("ROLE_ADMIN");
-
-        assertThat(result).isPresent().containsSame(expected);
+        // WHEN-THEN
+        assertThat(userRoleService.findByName("ROLE_ADMIN"))
+                .containsSame(expected);
     }
 
-    @Test
-    @DisplayName("findByRoleReturnsEmptyWhenNameDoesNotExist")
-    void findByRoleReturnsEmptyWhenNameDoesNotExist() {
-        when(userRoleRepository.findByName("ROLE_UNKNOWN")).thenReturn(Optional.empty());
-
-        assertThat(userRoleService.findByRole("ROLE_UNKNOWN")).isEmpty();
-    }
-
-    // ── toEntity ──────────────────────────────────────────────────────────────
+    // ── create ────────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("toEntityCopiesScalarFieldsWhenResourceHasNoComponents")
-    void toEntityCopiesScalarFieldsWhenResourceHasNoComponents() {
-        UserRoleResource resource = UserRoleFixture.anAdminRoleResource();
+    @DisplayName("create saves one aggregate with scalar fields and permissions")
+    void createSavesOneAggregate() {
+        // GIVEN
+        UserRoleResource resource = roleResource("ROLE_USER", "User role", "user.png");
+        resource.setComponents(List.of(componentResource(10, Set.of("READ", "WRITE"))));
 
-        UserRole entity = userRoleService.toEntity(resource);
-
-        UserRoleAssertions.assertThat(entity)
-                .isAdmin()
-                .hasDescription("Administrator role")
-                .hasIcon("admin-icon.png")
-                .hasNoComponents();
-        assertThat(entity.getId()).isEqualTo(2);
-    }
-
-    @Test
-    @DisplayName("toEntityFlattensComponentsAndPermissionsIntoRoleHasPermission")
-    void toEntityFlattensComponentsAndPermissionsWhenResourceHasComponents() {
-        UserRoleResource resource = UserRoleFixture.aResourceWithTwoComponentsTwoPermissionsEach();
-
-        Component moduleA = UserRoleFixture.aComponent(10, "Module-A");
-        Component moduleB = UserRoleFixture.aComponent(20, "Module-B");
-        Permission read  = UserRoleFixture.aPermission(100, "READ");
+        Component component = UserRoleFixture.aComponent(10, "CONNECTION");
+        Permission read = UserRoleFixture.aPermission(100, "READ");
         Permission write = UserRoleFixture.aPermission(101, "WRITE");
 
-        when(componentService.findById(10)).thenReturn(Optional.of(moduleA));
-        when(componentService.findById(20)).thenReturn(Optional.of(moduleB));
+        when(userRoleRepository.existsByName("ROLE_USER")).thenReturn(false);
+        when(componentService.findById(10)).thenReturn(Optional.of(component));
+        when(permissionService.findByName("READ")).thenReturn(Optional.of(read));
+        when(permissionService.findByName("WRITE")).thenReturn(Optional.of(write));
+        when(userRoleRepository.save(any(UserRole.class))).thenAnswer(invocation -> {
+            UserRole saved = invocation.getArgument(0);
+            saved.setId(4);
+            return saved;
+        });
+
+        // WHEN
+        UserRoleResource result = userRoleService.create(resource);
+
+        // THEN
+        ArgumentCaptor<UserRole> captor = ArgumentCaptor.forClass(UserRole.class);
+        verify(userRoleRepository).save(captor.capture());
+
+        UserRole saved = captor.getValue();
+        assertThat(saved.getName()).isEqualTo("ROLE_USER");
+        assertThat(saved.getDescription()).isEqualTo("User role");
+        assertThat(saved.getIcon()).isEqualTo("user.png");
+        assertThat(saved.getComponents()).hasSize(2);
+        assertThat(saved.getComponents())
+                .extracting(RoleHasPermission::getPermission)
+                .containsExactlyInAnyOrder(read, write);
+        assertThat(saved.getComponents())
+                .extracting(RoleHasPermission::getUserRole)
+                .containsOnly(saved);
+        assertThat(result.getGroupId()).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("create throws RoleExistsException without saving when name exists")
+    void createThrowsWhenNameExists() {
+        // GIVEN
+        UserRoleResource resource = roleResource("ROLE_ADMIN", "Administrator", null);
+        when(userRoleRepository.existsByName("ROLE_ADMIN")).thenReturn(true);
+
+        // WHEN-THEN
+        assertThatThrownBy(() -> userRoleService.create(resource))
+                .isInstanceOf(RoleExistsException.class);
+
+        verify(userRoleRepository, never()).save(any(UserRole.class));
+    }
+
+    // ── update ────────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("update mutates managed scalar fields without explicitly saving")
+    void updateMutatesManagedScalarFields() {
+        // GIVEN
+        UserRole role = UserRoleFixture.aStandardUserRole();
+        UserRoleResource resource = roleResource("ROLE_MEMBER", "Member role", "member.png");
+
+        when(userRoleRepository.findById(role.getId())).thenReturn(Optional.of(role));
+        when(userRoleRepository.existsByName("ROLE_MEMBER")).thenReturn(false);
+
+        // WHEN
+        UserRoleResource result = userRoleService.update(role.getId(), resource);
+
+        // THEN
+        assertThat(role.getName()).isEqualTo("ROLE_MEMBER");
+        assertThat(role.getDescription()).isEqualTo("Member role");
+        assertThat(role.getIcon()).isEqualTo("member.png");
+        assertThat(result.getName()).isEqualTo("ROLE_MEMBER");
+
+        // The entity is managed by the transaction; JPA dirty checking persists it.
+        verify(userRoleRepository, never()).save(any(UserRole.class));
+    }
+
+    @Test
+    @DisplayName("update throws RoleExistsException when another role has requested name")
+    void updateThrowsWhenAnotherRoleHasRequestedName() {
+        // GIVEN
+        UserRole role = UserRoleFixture.aStandardUserRole();
+        UserRoleResource resource = roleResource("ROLE_ADMIN", "Administrator", null);
+
+        when(userRoleRepository.findById(role.getId())).thenReturn(Optional.of(role));
+        when(userRoleRepository.existsByName("ROLE_ADMIN")).thenReturn(true);
+
+        // WHEN-THEN
+        assertThatThrownBy(() -> userRoleService.update(role.getId(), resource))
+                .isInstanceOf(RoleExistsException.class);
+    }
+
+    // ── updateComponents ──────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("updateComponents keeps requested links, removes obsolete links and adds new links")
+    void updateComponentsReconcilesManagedCollection() {
+        // GIVEN
+        UserRole role = UserRoleFixture.aStandardUserRole();
+        Component component = UserRoleFixture.aComponent(10, "CONNECTION");
+        Permission read = UserRoleFixture.aPermission(100, "READ");
+        Permission delete = UserRoleFixture.aPermission(101, "DELETE");
+        Permission write = UserRoleFixture.aPermission(102, "WRITE");
+
+        role.addPermission(component, read);
+        role.addPermission(component, delete);
+
+        UserRoleResource resource = new UserRoleResource();
+        resource.setComponents(List.of(componentResource(10, Set.of("READ", "WRITE"))));
+
+        when(userRoleRepository.findById(role.getId())).thenReturn(Optional.of(role));
+        when(componentService.findById(10)).thenReturn(Optional.of(component));
         when(permissionService.findByName("READ")).thenReturn(Optional.of(read));
         when(permissionService.findByName("WRITE")).thenReturn(Optional.of(write));
 
-        UserRole entity = userRoleService.toEntity(resource);
+        // WHEN
+        userRoleService.updateComponents(role.getId(), resource);
 
-        // 2 components × 2 permissions = 4 RoleHasPermission entries.
-        // RoleHasPermission has no equals/hashCode override, so identity-based Set
-        // preserves every distinct (role, component, permission) tuple.
-        assertThat(entity.getComponents()).hasSize(4);
-        assertThat(entity.getComponents())
-                .extracting(RoleHasPermission::getComponent)
-                .containsOnly(moduleA, moduleB);
-        assertThat(entity.getComponents())
+        // THEN
+        assertThat(role.getComponents()).hasSize(2);
+        assertThat(role.getComponents())
                 .extracting(RoleHasPermission::getPermission)
-                .containsOnly(read, write);
-        assertThat(entity.getComponents())
-                .extracting(RoleHasPermission::getUserRole)
-                .containsOnly(entity);
+                .containsExactlyInAnyOrder(read, write);
+        assertThat(component.getPermissions())
+                .extracting(RoleHasPermission::getPermission)
+                .containsExactlyInAnyOrder(read, write);
+
+        // orphanRemoval deletes the obsolete DELETE link at transaction flush.
+        verify(userRoleRepository, never()).save(any(UserRole.class));
     }
 
     @Test
-    @DisplayName("toEntityReturnsEmptyComponentSetWhenResourceHasNoComponents")
-    void toEntityReturnsEmptyComponentSetWhenResourceHasNoComponents() {
-        UserRoleResource resource = UserRoleFixture.aStandardUserRoleResource();
+    @DisplayName("updateComponents removes all links when components are omitted")
+    void updateComponentsRemovesAllLinksWhenComponentsAreOmitted() {
+        // GIVEN
+        UserRole role = UserRoleFixture.aStandardUserRole();
+        Component component = UserRoleFixture.aComponent(10, "CONNECTION");
+        Permission read = UserRoleFixture.aPermission(100, "READ");
+        role.addPermission(component, read);
 
-        UserRole entity = userRoleService.toEntity(resource);
+        UserRoleResource resource = new UserRoleResource();
+        resource.setComponents(null);
 
-        assertThat(entity.getComponents()).isEmpty();
+        when(userRoleRepository.findById(role.getId())).thenReturn(Optional.of(role));
+
+        // WHEN
+        userRoleService.updateComponents(role.getId(), resource);
+
+        // THEN
+        assertThat(role.getComponents()).isEmpty();
+        assertThat(component.getPermissions()).isEmpty();
     }
 
     @Test
-    @DisplayName("toEntityPropagatesNoSuchElementWhenComponentLookupMissing")
-    void toEntityPropagatesNoSuchElementWhenComponentLookupMissing() {
-        UserRoleResource resource = UserRoleFixture.aResourceWithSingleComponent(99, Set.of("READ"));
+    @DisplayName("updateComponents propagates missing component lookup")
+    void updateComponentsThrowsWhenComponentDoesNotExist() {
+        // GIVEN
+        UserRole role = UserRoleFixture.aStandardUserRole();
+        UserRoleResource resource = new UserRoleResource();
+        resource.setComponents(List.of(componentResource(99, Set.of("READ"))));
+
+        when(userRoleRepository.findById(role.getId())).thenReturn(Optional.of(role));
         when(componentService.findById(99)).thenReturn(Optional.empty());
 
-        // Pins current behaviour: impl calls Optional.get() on the lookup result,
-        // so a missing component surfaces as NoSuchElementException.
-        assertThatThrownBy(() -> userRoleService.toEntity(resource))
-                .isInstanceOf(NoSuchElementException.class);
+        // WHEN-THEN
+        assertThatThrownBy(() -> userRoleService.updateComponents(role.getId(), resource))
+                .isInstanceOf(java.util.NoSuchElementException.class);
     }
 
-    // ── toResource ────────────────────────────────────────────────────────────
+    // ── helpers ───────────────────────────────────────────────────────────────
 
-    @Test
-    @DisplayName("toResourceCopiesScalarFieldsWhenRoleHasNoComponents")
-    void toResourceCopiesScalarFieldsWhenRoleHasNoComponents() {
-        UserRole role = UserRoleFixture.aStandardUserRole();
-
-        UserRoleResource resource = userRoleService.toResource(role);
-
-        assertThat(resource.getGroupId()).isEqualTo(role.getId());
-        assertThat(resource.getName()).isEqualTo(role.getName());
-        assertThat(resource.getDescription()).isEqualTo(role.getDescription());
-        assertThat(resource.getIcon()).isNull();
-        assertThat(resource.getComponents()).isEmpty();
+    private UserRoleResource roleResource(String name, String description, String icon) {
+        UserRoleResource resource = new UserRoleResource();
+        resource.setName(name);
+        resource.setDescription(description);
+        resource.setIcon(icon);
+        resource.setComponents(List.of());
+        return resource;
     }
 
-    @Test
-    @DisplayName("toResourceDedupesComponentsAcrossRoleHasPermission")
-    void toResourceDedupesComponentsWhenSameComponentRepeats() {
-        UserRole role = UserRoleFixture.aRoleWithSharedComponent();
-
-        UserRoleResource resource = userRoleService.toResource(role);
-
-        // Two RoleHasPermission entries point at the same Component.
-        // UserRoleResource constructor dedupes via Set<Component> before mapping,
-        // so the produced resource should expose exactly one ComponentResource.
-        assertThat(resource.getComponents()).hasSize(1);
-        assertThat(resource.getComponents().get(0).getPermissions())
-                .containsExactlyInAnyOrder("READ", "WRITE");
+    private ComponentResource componentResource(int componentId, Set<String> permissions) {
+        ComponentResource resource = new ComponentResource();
+        resource.setComponentId(componentId);
+        resource.setPermissions(permissions);
+        return resource;
     }
 }

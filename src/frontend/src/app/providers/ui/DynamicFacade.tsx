@@ -54,6 +54,8 @@ import {EmptyFactory} from "@shared/ui/primitives/Empty/Empty.factory.ts";
 import type {EmptyComponent} from "@shared/ui/primitives/Empty/Empty.types.ts";
 import {SplitterFactory} from "@shared/ui/primitives/Splitter/Splitter.factory.ts";
 import type {SplitterComponent} from "@shared/ui/primitives/Splitter/Splitter.types.ts";
+import {SliderFactory} from "@shared/ui/primitives/Slider/Slider.factory.ts";
+import type {SliderComponent} from "@shared/ui/primitives/Slider/Slider.types.ts";
 
 export interface DynamicUI {
     Button: ButtonComponent;
@@ -82,6 +84,7 @@ export interface DynamicUI {
     Tree: TreeComponent,
     Empty: EmptyComponent,
     Splitter: SplitterComponent,
+    Slider: SliderComponent,
 }
 const systemCapabilities = {
     custom: {
@@ -111,6 +114,7 @@ const systemCapabilities = {
         Tree: true,
         Empty: false,
         Splitter: false,
+        Slider: false,
     },
     material: {
         Button: true,
@@ -139,6 +143,7 @@ const systemCapabilities = {
         Tree: true,
         Empty: true,
         Splitter: true,
+        Slider: true,
     },
 };
 function resolveComponent<T>(
@@ -190,6 +195,7 @@ export function useDynamicUI(): DynamicUI {
         Tree: resolveComponent(TreeFactory, system, 'Tree'),
         Empty: resolveComponent(EmptyFactory, system, 'Empty'),
         Splitter: resolveComponent(SplitterFactory, system, 'Splitter'),
+        Slider: resolveComponent(SliderFactory, system, 'Slider'),
     }), [system]);
 }
 

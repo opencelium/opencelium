@@ -15,6 +15,9 @@
       "tooltip": "Download",
       "success": "Template downloaded: {{name}}",
       "error": "Failed to download template."
+    },
+    "confirmDelete": {
+      "message": "Are you sure you want to delete workflow template with name \"{{name}}\"?"
     }
   },
   "fields": {

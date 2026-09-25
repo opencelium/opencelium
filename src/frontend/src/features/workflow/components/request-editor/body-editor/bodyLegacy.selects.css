@@ -1,0 +1,94 @@
+.bodyLegacyWebhookSelect {
+  width: 100%;
+}
+
+.bodyLegacyWebhookSelect .ant-select-selector {
+  border-radius: 2px !important;
+  min-height: 38px !important;
+  padding-inline: 10px !important;
+}
+
+.bodyLegacyWebhookSelect .ant-select-selection-search-input,
+.bodyLegacyWebhookSelect .ant-select-selection-placeholder,
+.bodyLegacyWebhookSelect .ant-select-selection-item {
+  line-height: 36px !important;
+}
+
+.bodyLegacyWebhookCreate {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-background-surface);
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bodyLegacyWebhookCreate:hover {
+  background: var(--color-background-hover);
+}
+
+.bodyLegacyWebhookCreatePlus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--color-action-primary);
+  color: var(--color-text-on-action);
+  font-size: 12px;
+}
+
+.bodyLegacyWebhookModalInput,
+.bodyLegacyWebhookModalSelect {
+  border-bottom: 1px solid var(--color-border-default);
+  border-radius: 0 !important;
+}
+
+.bodyLegacyWebhookModalInput .ant-input,
+.bodyLegacyWebhookModalSelect .ant-select-selector {
+  padding-left: 0 !important;
+}
+
+.bodyLegacyWebhookModalSelect .ant-select-selector {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.bodyLegacyWebhookWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+
+.bodyLegacyWebhookBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 10px;
+  border-radius: 0;
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 22px;
+  white-space: nowrap;
+}
+
+.bodyLegacyWebhookRemove {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,5 +1,5 @@
 import { useMethodContext } from '../../../providers/MethodContext';
-import { LegacyRequestJsonEditor } from '../shared/LegacyRequestJsonEditor';
+import { LegacyRequestJsonEditor } from '../shared/LegacyRequestJsonEditor/LegacyRequestJsonEditor';
 
 type Props = { readOnly?: boolean };
 

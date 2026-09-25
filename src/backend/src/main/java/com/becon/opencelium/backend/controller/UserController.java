@@ -16,12 +16,12 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.application.language.LanguageService;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
-import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
 import com.becon.opencelium.backend.exception.SessionNotFoundException;
@@ -62,7 +62,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @RestController
@@ -84,6 +83,9 @@ public class UserController {
 
     @Autowired
     private TotpService totpService;
+
+    @Autowired
+    private LanguageService languageService;
 
 
     @Operation(summary = "Retrieves user data from the database based on the provided user 'id'")
@@ -154,23 +156,19 @@ public class UserController {
                       content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> post(@RequestBody UserRequestResource userRequestResource) throws IOException {
+    public ResponseEntity<?> post(@Valid @RequestBody UserRequestResource userRequestResource) throws IOException {
 
         if (userService.existsByEmail(userRequestResource.getEmail())) {
             throw new EmailAlreadyExistException(userRequestResource.getEmail());
         }
 
-        if (!userRoleService.existsById(userRequestResource.getUserGroup())) {
-            throw new RoleNotFoundException(userRequestResource.getUserGroup());
-        }
+//        if (!userRoleService.existsById(userRequestResource.getUserGroup())) {
+//            throw new RoleNotFoundException(userRequestResource.getUserGroup());
+//        }
 
         UserDetailResource userDetailResource = userRequestResource.getUserDetail();
-        if (userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()) {
-            userDetailResource.setLang(LangEnum.EN.getCode());
-            userRequestResource.setUserDetail(userDetailResource);
-        } else {
-            LangEnum.valueOf(userDetailResource.getLang().toUpperCase(Locale.ROOT));
-        }
+        applyLanguage(userDetailResource);
+        userRequestResource.setUserDetail(userDetailResource);
 
         User user = userService.requestToEntity(userRequestResource);
         userService.save(user);
@@ -200,17 +198,15 @@ public class UserController {
     // save empty values
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable("id") int id,
-                                    @RequestBody UserRequestResource userRequestResource) throws IOException {
+                                    @Valid @RequestBody UserRequestResource userRequestResource) throws IOException {
 
         if (!userService.existsById(id)) {
             throw new UserNotFoundException(id);
         }
         userRequestResource.setUserId(id);
         UserDetailResource userDetailResource = userRequestResource.getUserDetail();
-        if (userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()) {
-            userDetailResource.setLang("en");
-            userRequestResource.setUserDetail(userDetailResource);
-        }
+        applyLanguage(userDetailResource);
+        userRequestResource.setUserDetail(userDetailResource);
 
         User user = userService.requestToEntity(userRequestResource);
         userService.save(user);
@@ -378,6 +374,18 @@ public class UserController {
     public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordDTO dto) {
         userService.changePassword(dto);
         return ResponseEntity.noContent().build();
+    }
+
+    /*
+    Stores the language as a canonical ISO 639-1 code, falling back to the configured default when
+    the request carries none. An unsupported language is already rejected by @ValidLanguage, so the
+    fallback only applies to an absent value.
+    */
+    private void applyLanguage(UserDetailResource userDetail) {
+        String language = languageService.normalize(userDetail.getLang())
+                .filter(languageService::isSupported)
+                .orElseGet(languageService::getDefault);
+        userDetail.setLang(language);
     }
 
     /*

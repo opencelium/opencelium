@@ -1,0 +1,18 @@
+.urlInlineValueEditor {
+	min-height: 40px;
+	display: flex;
+	align-items: center;
+	border: 1px solid var(--color-border-default);
+	border-radius: 8px;
+	padding: 0 11px;
+	background: var(--color-background-surface);
+	cursor: text;
+	outline: none;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.urlInlineValueEditor--readOnly {
+	background: var(--color-background-disabled);
+	cursor: default;
+}

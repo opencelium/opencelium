@@ -3,6 +3,7 @@ import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { copyToClipboard } from '@shared/utils/copyToClipboard';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 
 type Props = {
     value: string;
@@ -23,7 +24,7 @@ export function CopyButton({ value, className }: Props) {
         if (await copyToClipboard(value)) {
             message.success(t('copy.success'));
         } else {
-            message.error(t('copy.failed'));
+            notifyError(t('copy.failed'));
         }
     };
 

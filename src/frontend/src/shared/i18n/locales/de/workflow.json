@@ -7,6 +7,8 @@
     "close": "Schließen",
     "ok": "Ok",
     "delete": "Löschen",
+    "addJoint": "Verbindung hinzufügen",
+    "removeJoint": "Verbindung entfernen",
     "duplicate": "Duplizieren",
     "edit": "Bearbeiten",
     "select": "Auswählen",
@@ -20,11 +22,27 @@
     "maximizeRequestData": "Anfragedaten maximieren",
     "minimizeRequestData": "Anfragedaten minimieren",
     "load": "Laden",
-    "createEnhancement": "Enhancement erstellen"
+    "undo": "Rückgängig",
+    "redo": "Wiederholen",
+    "createEnhancement": "Enhancement erstellen",
+    "deleteEnhancement": "Enhancement löschen",
+    "deleteReference": "Referenz löschen"
   },
   "confirmDelete": {
     "title": "Schritt löschen",
-    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "clearsReferences": "Verweise darauf aus {{count}} anderen Schritten werden entfernt.",
+    "clearsReferences_one": "Verweise darauf aus {{count}} anderen Schritt werden entfernt."
+  },
+  "confirmRemoveJoint": {
+    "title": "Verbindung entfernen?",
+    "message": "Ohne diese Verbindung können {{count}} Schritte die von ihnen verwendeten Verweise nicht mehr lesen; diese Verweise werden entfernt.",
+    "message_one": "Ohne diese Verbindung kann {{count}} Schritt die von ihm verwendeten Verweise nicht mehr lesen; diese Verweise werden entfernt."
+  },
+  "confirmDependencyDrop": {
+    "title": "Abhängigkeitskonflikt",
+    "message": "Dieser Vorgang beschädigt Verweise, die von {{count}} Schritten verwendet werden. Wenn Sie fortfahren, werden sie entfernt.",
+    "message_one": "Dieser Vorgang beschädigt Verweise, die von {{count}} Schritt verwendet werden. Wenn Sie fortfahren, werden sie entfernt."
   },
   "template": {
     "addTitle": "Vorlage hinzufügen",
@@ -41,7 +59,7 @@
   },
   "schedules": {
     "title": "Laufpläne",
-    "add": "Zeitplan hinzufügen",
+    "add": "Zeitplan erstellen",
     "nextRun": "Nächste Ausführung in {{duration}}",
     "manual": "Nur manuell",
     "expand": "Details anzeigen",
@@ -103,7 +121,22 @@
     "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden.",
     "copySnapshotIdSuccess": "Snapshot-ID in die Zwischenablage kopiert",
     "deleteVersionSuccess": "Version gelöscht",
-    "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?"
+    "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?",
+    "enhancementScriptBrokenIn": "„{{method}}“ hat eine Anreicherung, deren Skript noch {{marker}} verwendet — der gelesene Verweis wurde mit dem Schritt entfernt, auf den er zeigte. Korrigieren Sie das Skript vor dem Speichern.",
+    "enhancementScriptBroken": "{{count}} Schritte haben eine Anreicherung, deren Skript noch {{marker}} verwendet — die gelesenen Verweise wurden mit den Schritten entfernt, auf die sie zeigten. Korrigieren Sie die Skripte vor dem Speichern.",
+    "enhancementScriptBroken_one": "{{count}} Schritt hat eine Anreicherung, deren Skript noch {{marker}} verwendet — der gelesene Verweis wurde mit dem Schritt entfernt, auf den er zeigte. Korrigieren Sie das Skript vor dem Speichern."
+  },
+  "joint": {
+    "invalid": {
+      "notAMethod": "Nur eine Methode kann Ziel eines Joints sein.",
+      "differentLoopScope": "Das Ziel muss eine Methode im selben Loop-Bereich wie die ausgewählte sein — entweder beide außerhalb jeder Schleife oder beide in derselben Schleife.",
+      "entersIfScope": "Eine Verbindung kann nicht in eine Bedingung springen, in der die ausgewählte Methode nicht selbst liegt. Sie darf die umgebenden Bedingungen verlassen, aber keine andere betreten.",
+      "backwards": "Ein Joint kann nur nach vorne zeigen, auf eine Methode, die nach der ausgewählten läuft.",
+      "skipsReferencedMethod": "Dieser Joint würde {{method}} überspringen, deren Antwort diese Methode verwendet.",
+      "skipsReferencedMethodUnnamed": "Dieser Joint würde eine Methode überspringen, deren Antwort diese Methode verwendet."
+    },
+    "removedAfterMove": "{{count}} Joints wurden entfernt — sie sind nach dieser Verschiebung nicht mehr gültig",
+    "removedAfterMove_one": "Der Joint wurde entfernt — er ist nach dieser Verschiebung nicht mehr gültig"
   },
   "sidebar": {
     "useConnector": {
@@ -136,7 +169,9 @@
     "connectorStep": {
       "header": "Konnektor wählen",
       "subtitle": "Wählen Sie zuerst einen Konnektor",
-      "searchPlaceholder": "Konnektor suchen"
+      "searchPlaceholder": "Konnektor suchen",
+      "fixConnector": "Konnektor bearbeiten, um die Verbindung zu reparieren",
+      "createConnector": "Konnektor erstellen"
     },
     "methodStep": {
       "header": "Methode wählen",
@@ -214,6 +249,8 @@
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
     "versionHistory": "Versionsverlauf",
+    "changeHistory": "Änderungsverlauf",
+    "testRunLockedHint": "Während eines Testlaufs nicht verfügbar",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
   },
@@ -224,6 +261,60 @@
     "confirmUnassign": {
       "title": "Kategoriezuweisung entfernen",
       "message": "Möchten Sie die Kategoriezuweisung dieses Workflows wirklich entfernen?"
+    }
+  },
+  "undoHistory": {
+    "title": "Änderungsverlauf",
+    "current": "Aktuell",
+    "empty": "Noch keine Änderungen in dieser Sitzung",
+    "operator": {
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "nodeKind": {
+      "httpRequest": "HTTP-Request",
+      "webhook": "Webhook",
+      "if": "IF",
+      "loop": "LOOP"
+    },
+    "section": {
+      "header": "Header",
+      "body": "Body"
+    },
+    "change": {
+      "initial": "Sitzungsbeginn",
+      "nodeAdded": "{{name}} hinzugefügt",
+      "nodesAdded": "{{count}} Knoten hinzugefügt",
+      "nodeRemoved": "{{name}} gelöscht",
+      "nodesRemoved": "{{count}} Knoten gelöscht",
+      "nodeMoved": "{{name}} verschoben",
+      "nodesMoved": "{{count}} Knoten verschoben",
+      "changedLabel": "Label zu {{label}} geändert",
+      "methodConfig": "Anfrage von {{name}} bearbeitet",
+      "methodUrl": "URL von {{name}} bearbeitet",
+      "methodHeader": "Header von {{name}} bearbeitet",
+      "methodBody": "Body von {{name}} bearbeitet",
+      "referenceAdded": "{{section}}-Referenz in {{name}} hinzugefügt",
+      "referenceRemoved": "{{section}}-Referenz in {{name}} gelöscht",
+      "referenceEdited": "{{section}}-Referenz in {{name}} bearbeitet",
+      "enhancement": "{{section}}-Enhancement von {{name}} bearbeitet",
+      "enhancementLanguage": "Enhancement-Sprache von {{name}} aktualisiert",
+      "enhancementDescription": "Enhancement-Beschreibung von {{name}} aktualisiert",
+      "enhancementRemoved": "Enhancement von {{name}} gelöscht",
+      "conditionConfig": "Bedingung von {{name}} bearbeitet",
+      "aggregatorConfigured": "Aggregator von {{name}} konfiguriert",
+      "aggregatorRemoved": "Aggregator von {{name}} gelöscht",
+      "connectorConfig": "Konnektor von {{name}} geändert",
+      "edgesChanged": "Verbindungen geändert",
+      "references": "Referenzen geändert",
+      "conditionAdded": "Bedingung in {{operator}} hinzugefügt",
+      "conditionRemoved": "Bedingung in {{operator}} gelöscht",
+      "conditionEdited": "Bedingung in {{operator}} bearbeitet",
+      "groupAdded": "Gruppe in {{operator}} hinzugefügt",
+      "groupRemoved": "Gruppe in {{operator}} gelöscht",
+      "groupEdited": "Gruppe in {{operator}} bearbeitet",
+      "operatorEdited": "{{operator}} bearbeitet",
+      "multiple": "Mehrere Änderungen"
     }
   },
   "shortcutsDialog": {
@@ -241,6 +332,9 @@
       "ctrl": "Strg",
       "esc": "Esc",
       "s": "S",
+      "z": "Z",
+      "redo": "(Umschalt + Z / Y)",
+      "shift": "Umschalt",
       "delete": "Entf"
     },
     "items": {
@@ -252,7 +346,10 @@
       "multiSelect": "Mehrere Knoten auswählen",
       "deleteNode": "Ausgewählten Knoten löschen",
       "save": "Workflow speichern",
-      "close": "Geöffnetes Menü, Dialog oder Panel schließen"
+      "undo": "Letzte Änderung auf der Arbeitsfläche rückgängig machen",
+      "redo": "Rückgängig gemachte Änderung wiederherstellen",
+      "close": "Geöffnetes Menü, Dialog oder Panel schließen",
+      "dismissError": "Fehlermarkierung an einem Schritt ausblenden"
     }
   },
   "contextMenu": {
@@ -265,6 +362,16 @@
     "editBody": "Body bearbeiten",
     "showResponse": "Antwort anzeigen",
     "newLabelPlaceholder": "Neue Bezeichnung"
+  },
+  "comment": {
+    "badge": "Kommentar",
+    "add": "Kommentar hinzufügen",
+    "placeholder": "Notiz für Ihr Team schreiben…",
+    "toggle": {
+      "show": "Kommentar anzeigen",
+      "hide": "Kommentar ausblenden",
+      "minimize": "Kommentar minimieren"
+    }
   },
   "aggregatorDialog": {
     "title": "Aggregator konfigurieren",
@@ -289,10 +396,14 @@
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
-    "branchFalse": "false",
+    "branchContinue": "weiter",
     "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort.",
     "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
-    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf."
+    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf.",
+    "testRunIteration": "{{iterator}} = {{count}}",
+    "testRunIterator": "{{iterator}} =",
+    "skipToNextIteration": "Zur nächsten Iteration springen",
+    "jumpToIteration": "Vorwärts zu einer Iteration springen"
   },
   "saveDialog": {
     "title": "Version speichern",
@@ -317,6 +428,10 @@
     "dialogTitleLoop": "LOOP-Bedingung",
     "addCondition": "Bedingung hinzufügen",
     "addGroup": "Gruppe hinzufügen",
+    "comparisonUnknown": "Noch nicht verfügbar",
+    "comparisonError": "Kann nicht verglichen werden",
+    "comparisonTrue": "Wahr",
+    "comparisonFalse": "Falsch",
     "loopInfo": {
       "iteratorLabel": "Schleifenvariable",
       "iteratorHelp": "Verwenden Sie diese Variable in den Schleifenschritten, um das aktuelle Element zu lesen:",
@@ -326,32 +441,75 @@
       "operators": {
         "for": {
           "description": "Iteriert durch ein Array.",
-          "args": [{ "code": "o1", "text": "Ein Array, durch das iteriert wird." }],
+          "args": [
+            {
+              "code": "o1",
+              "text": "Ein Array, durch das iteriert wird."
+            }
+          ],
           "examples": [
-            { "code": "o1 = [\"a\", \"b\", \"c\"]", "result": "Iteriert durch \"a\", \"b\", \"c\"" },
-            { "code": "o1 = [1, 2, 3]", "result": "Iteriert durch 1, 2, 3" },
-            { "code": "o1 = []", "result": "Führt keine Iterationen aus" }
+            {
+              "code": "o1 = [\"a\", \"b\", \"c\"]",
+              "result": "Iteriert durch \"a\", \"b\", \"c\""
+            },
+            {
+              "code": "o1 = [1, 2, 3]",
+              "result": "Iteriert durch 1, 2, 3"
+            },
+            {
+              "code": "o1 = []",
+              "result": "Führt keine Iterationen aus"
+            }
           ]
         },
         "forin": {
           "description": "Iteriert durch die Eigenschaften eines Objekts.",
-          "args": [{ "code": "o1", "text": "Ein Objekt, dessen Eigenschaften iteriert werden sollen." }],
+          "args": [
+            {
+              "code": "o1",
+              "text": "Ein Objekt, dessen Eigenschaften iteriert werden sollen."
+            }
+          ],
           "examples": [
-            { "code": "o1 = {\"name\":\"Hob\",\"age\":123}", "result": "Iteriert durch die Eigenschaften \"name\", \"age\"" },
-            { "code": "o1 = {\"a\":1,\"b\":2}", "result": "Iteriert durch die Eigenschaften \"a\", \"b\"" },
-            { "code": "o1 = {}", "result": "Führt keine Iterationen aus" }
+            {
+              "code": "o1 = {\"name\":\"Hob\",\"age\":123}",
+              "result": "Iteriert durch die Eigenschaften \"name\", \"age\""
+            },
+            {
+              "code": "o1 = {\"a\":1,\"b\":2}",
+              "result": "Iteriert durch die Eigenschaften \"a\", \"b\""
+            },
+            {
+              "code": "o1 = {}",
+              "result": "Führt keine Iterationen aus"
+            }
           ]
         },
         "SplitString": {
           "description": "Teilt eine Zeichenkette anhand eines Trennzeichens und iteriert durch das resultierende Array.",
           "args": [
-            { "code": "o1", "text": "Eine zu teilende Zeichenkette." },
-            { "code": "o2", "text": "Ein Trennzeichen." }
+            {
+              "code": "o1",
+              "text": "Eine zu teilende Zeichenkette."
+            },
+            {
+              "code": "o2",
+              "text": "Ein Trennzeichen."
+            }
           ],
           "examples": [
-            { "code": "o1 = \"a,b,c\", o2 = \",\"", "result": "Iteriert durch \"a\", \"b\", \"c\"" },
-            { "code": "o1 = \"one|two|three\", o2 = \"|\"", "result": "Iteriert durch \"one\", \"two\", \"three\"" },
-            { "code": "o1 = \"abc\", o2 = \",\"", "result": "Iteriert einmal durch \"abc\"" }
+            {
+              "code": "o1 = \"a,b,c\", o2 = \",\"",
+              "result": "Iteriert durch \"a\", \"b\", \"c\""
+            },
+            {
+              "code": "o1 = \"one|two|three\", o2 = \"|\"",
+              "result": "Iteriert durch \"one\", \"two\", \"three\""
+            },
+            {
+              "code": "o1 = \"abc\", o2 = \",\"",
+              "result": "Iteriert einmal durch \"abc\""
+            }
           ]
         }
       }
@@ -402,7 +560,8 @@
     "body": "Body",
     "header": "Header",
     "requestUrl": "Request-URL",
-    "response": "Antwort"
+    "response": "Antwort",
+    "liveBadge": "Live-Ausführungsergebnis"
   },
   "response": {
     "success": "Erfolg",
@@ -438,10 +597,41 @@
     "language": "Sprache",
     "script": "Skript",
     "emptyState": "Bitte klicken Sie auf die Referenz, um ihr Enhancement anzuzeigen.",
+    "deleteDisabledMultipleReferences": "Dieses Feld hat mehr als eine Referenz, daher muss es in ein Enhancement eingebettet bleiben.",
+    "confirmDelete": {
+      "title": "Enhancement löschen?",
+      "message": "Dadurch werden das Enhancement und sein Skript endgültig entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+    },
     "directReference": {
       "title": "Direkte Referenz",
       "description": "Dieses Feld hat kein Enhancement — es besteht eine direkte Eins-zu-eins-Referenz zwischen den beiden unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript.",
       "descriptionMany": "Dieses Feld hat kein Enhancement — es besteht eine direkte Referenz zwischen den unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript."
+    },
+    "optimizeDirectReferences": {
+      "title": "Optimierung verfügbar",
+      "message": "Es gibt {{count}} Referenzen, die für eine bessere Leistung optimiert werden können. Möchten Sie diese Optimierung vor dem Speichern anwenden?",
+      "message_one": "Es gibt eine Referenz, die für eine bessere Leistung optimiert werden kann. Möchten Sie diese Optimierung vor dem Speichern anwenden?"
+    },
+    "debugValue": {
+      "show": "Wert anzeigen",
+      "hide": "Wert ausblenden",
+      "title": "Wert",
+      "idleHint": "Noch nicht angezeigt. Klicken Sie auf das Augensymbol, um diesen Wert aus dem aktuellen Testlauf aufzulösen.",
+      "loadingHint": "Wird aufgelöst…",
+      "noReferences": "Keine Referenzen",
+      "references": "Referenzen",
+      "resultLabel": "RESULT_VAR · {{type}}",
+      "errorTitle": "Fehler",
+      "errorNotPaused": "Starten Sie einen pausierten Testlauf, um dies aus den Live-Ausführungsdaten aufzulösen.",
+      "errorMethodFailed": "Die Ausführung dieser Methode ist in diesem Lauf fehlgeschlagen — ihre Anfrage könnte unvollständig sein.",
+      "errorFieldNotFound": "Für dieses Feld konnte kein Wert in der tatsächlich gesendeten Anfrage gefunden werden.",
+      "errorNotRun": "Diese Methode wurde in der aktuellen Testsitzung noch nicht ausgeführt. Starten oder setzen Sie den pausierten Test fort und prüfen Sie danach erneut.",
+      "status": {
+        "idle": "inaktiv",
+        "loading": "läuft",
+        "error": "Fehler",
+        "stale": "veraltet — Skript geändert"
+      }
     }
   },
   "description": {
@@ -469,9 +659,15 @@
     "wholeArray": "Das gesamte Array",
     "iteratorLoop": "({{iterator}}-Schleife)",
     "noVariableReferences": "Keine Variablenreferenzen",
+    "more": "mehr",
+    "pausedHint": "Bewegen Sie den Mauszeiger über eine hervorgehobene Referenz, um den ermittelten Wert zu sehen.",
     "confirmDelete": {
       "title": "Referenz löschen",
       "message": "Möchten Sie diese Referenz wirklich löschen?"
+    },
+    "valueDialog": {
+      "copyTooltip": "Wert kopieren",
+      "copySuccess": "Wert in die Zwischenablage kopiert"
     }
   },
   "refGenerator": {
@@ -497,7 +693,11 @@
   "referenceInfo": {
     "title": "Referenzinformationen",
     "legacyTitle": "Referenzinformationen",
-    "empty": "(ist jetzt leer)"
+    "empty": "(ist jetzt leer)",
+    "confirmDelete": {
+      "title": "Referenz löschen?",
+      "message": "Dadurch wird diese Referenz endgültig entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+    }
   },
   "requestData": "Anfragedaten",
   "graphqlBody": {

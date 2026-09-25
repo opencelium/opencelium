@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import type { EndpointArg } from '../../../types/connection';
+import type { Connection, EndpointArg, MethodWithId } from '../../../types/connection';
 import {
 	buildInlineHtml,
 	getInlineVisualLength,
@@ -8,21 +8,25 @@ import {
 	sanitizeUrlInputValue,
 	shouldBlockUrlKeyInput,
 	computeRawInsertAtFromVisualCaret,
+	ENDPOINT_REF_CLASS,
 } from './urlEditor.utils';
 import {
 	getCaretPositionOfDivEditable,
 	setFocusByCaretPositionInDivEditable,
 } from './utils/contentEditable';
+import { EndpointArgHoverTooltip } from './EndpointArgHoverTooltip';
 
 type Props = {
 	value: string;
 	endpointArgs: Record<string, EndpointArg>;
 	readOnly?: boolean;
+	connection?: Connection | null;
+	currentMethod?: MethodWithId;
 	onChange: (value: string) => void;
 	onCaretChange?: (rawCaret: number) => void;
 };
 
-const CLS = 'oc-endpoint-ref';
+const CLS = ENDPOINT_REF_CLASS;
 
 const getContentRightEdge = (root: HTMLElement) => {
 	const rects: DOMRect[] = [];
@@ -51,6 +55,8 @@ export const UrlInlineValueEditor: React.FC<Props> = ({
 	value,
 	endpointArgs,
 	readOnly,
+	connection,
+	currentMethod,
 	onChange,
 	onCaretChange,
 }) => {
@@ -145,6 +151,7 @@ export const UrlInlineValueEditor: React.FC<Props> = ({
 	};
 
 	return (
+		<>
 		<div
 			ref={rootRef}
 			contentEditable={!readOnly}
@@ -212,5 +219,12 @@ export const UrlInlineValueEditor: React.FC<Props> = ({
 				whiteSpace: 'nowrap',
 			}}
 		/>
+		<EndpointArgHoverTooltip
+			containerRef={rootRef}
+			endpointArgs={endpointArgs}
+			connection={connection}
+			currentMethod={currentMethod}
+		/>
+		</>
 	);
 };

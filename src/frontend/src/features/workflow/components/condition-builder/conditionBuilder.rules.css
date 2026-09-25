@@ -1,0 +1,132 @@
+.conditionGroupBody::before {
+	position: absolute;
+	top: -22px;
+	bottom: var(--condition-tree-bottom, 24px);
+	left: 11px;
+	box-sizing: border-box;
+	border-color: var(--color-border-strong);
+	border-style: solid;
+	border-width: 0 0 0 2px;
+	content: '';
+}
+
+.conditionGroupBody:empty::before {
+	display: none;
+}
+
+.conditionGroupBody > .conditionGroup::before {
+	position: absolute;
+	top: 23px;
+	left: -13px;
+	z-index: 0;
+	box-sizing: border-box;
+	width: 13px;
+	height: 0;
+	border-color: var(--color-border-strong);
+	border-style: solid;
+	border-width: 0 0 2px;
+	content: '';
+}
+
+.conditionLoopGroup .conditionGroupBody {
+	padding: 0;
+	width: 100%;
+}
+
+.conditionLoopGroup .conditionGroupBody::before {
+	display: none;
+}
+
+.conditionRule {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 48px;
+	padding: 10px;
+	border-radius: 5px;
+	background: var(--color-background-surface);
+}
+
+.conditionRule:not(.conditionRuleLoop) {
+	border: 1px solid var(--color-border-default);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.conditionRule:not(.conditionRuleLoop)::before {
+	position: absolute;
+	top: calc(50% - 1px);
+	left: -13px;
+	z-index: 0;
+	box-sizing: border-box;
+	width: 13px;
+	height: 0;
+	border-color: var(--color-border-strong);
+	border-style: solid;
+	border-width: 0 0 2px;
+	content: '';
+}
+
+.conditionRuleLoop {
+	justify-content: flex-start;
+	width: 100%;
+	min-height: 48px;
+	padding: 10px 0;
+}
+
+.conditionValueInput {
+	display: flex;
+	align-items: center;
+	gap: 0;
+}
+
+.conditionValueInputWebhook {
+	min-width: 430px;
+}
+
+.conditionSourceSwitcher,
+.conditionResponseTypeSwitcher {
+	flex: 0 0 auto;
+	justify-content: center;
+}
+
+.conditionResponseTypeSwitcher {
+	margin-left: 8px;
+}
+
+.conditionRadioIcon {
+	display: inline-flex;
+	width: 14px;
+	height: 14px;
+	align-items: center;
+	justify-content: center;
+	color: var(--color-text-primary);
+	font-size: 12px;
+}
+
+.conditionResponseTypeIcon {
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.conditionMethodSelect {
+	width: 180px;
+}
+
+.conditionFieldSelect {
+	width: 170px;
+}
+
+.conditionFieldSelect > div,
+.conditionFieldSelect .bodyLegacyGeneratorSelect {
+	width: 100%;
+}
+
+.conditionOperatorSelect {
+	width: 170px;
+}
+
+.conditionLoopOperatorSelect {
+	width: 180px;
+}
+

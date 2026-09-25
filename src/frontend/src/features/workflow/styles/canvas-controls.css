@@ -4,8 +4,23 @@
   height: 8px;
 }
 
-.workflowControls {
+/* Anchors both the zoom Controls and the test-run speed slider (flex row
+   children — see WorkflowCanvas.tsx) below the WorkflowHeader, which is
+   absolutely positioned over the canvas at the same top offset used here. */
+.canvasTopLeftPanel {
   top: 65px !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Neutralize the Controls component's own position:absolute (it always
+   applies one, defaulting to bottom-left, regardless of a `position` prop)
+   so it lays out as a normal flex item inside .canvasTopLeftPanel instead of
+   positioning itself independently of its sibling speed slider. */
+.workflowControls {
+  position: static !important;
+  margin: 0 !important;
   border: 1px solid var(--color-border-subtle);
   border-radius: 6px;
   overflow: hidden;
@@ -29,6 +44,48 @@
 
 .workflowControls .react-flow__controls-button svg {
   fill: currentColor;
+}
+
+/* One card housing both replay-debugging controls (pause/play + speed) — see
+   TestRunDebugControls.tsx — so they read as a single feature rather than
+   two separate floating pieces. */
+.testRunDebugPanel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 6px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.testRunDebugDivider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border-subtle);
+}
+
+.testRunDebugSpeed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.testRunDebugSpeedLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.testRunDebugSpeedValue {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  min-width: 30px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .react-flow__handle-top {

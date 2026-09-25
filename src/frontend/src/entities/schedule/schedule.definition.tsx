@@ -187,7 +187,13 @@ export const scheduleDefinition: EntityDefinition = {
                 key: 'notifications',
                 render: ({ row }) => <NotificationsAction schedule={row as Schedule} tooltipPlacement="right" />,
             },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: () => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    return t(`${baseKey}.list.confirmDelete.message`);
+                },
+            },
         ],
     },
 
@@ -305,7 +311,6 @@ export const scheduleDefinition: EntityDefinition = {
                 render: (row) =>
                     isScheduleExecRow(row) ? (
                         <RunningExecBadge
-                            localStartTime={row.execution.localStartTime}
                             serverStartTime={row.execution.serverStartTime}
                             avgDuration={row.execution.avgDuration}
                         />

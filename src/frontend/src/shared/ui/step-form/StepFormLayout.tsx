@@ -188,6 +188,7 @@ export function StepFormLayout({
     return (
         <StepFormContext.Provider value={ctx}>
             <div
+                className="step-form-layout"
                 style={{
                     padding: 18,
                     borderRadius: 12,
@@ -205,6 +206,7 @@ export function StepFormLayout({
                 )}
 
                 <div
+                    className="step-form-main"
                     style={{
                         display: isTabletOrMobile ? "grid" : "flex",
                     }}
@@ -223,7 +225,7 @@ export function StepFormLayout({
                             />
                         </div>
                     </div>}
-                    <div style={{flex: 3, minWidth: 0}}>
+                    <div className="step-form-content-column" style={{flex: 3, minWidth: 0}}>
 
                         {isSuccess ? (
                             <SuccessState

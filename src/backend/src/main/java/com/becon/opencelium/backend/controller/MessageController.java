@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.application.language.LanguageService;
 import com.becon.opencelium.backend.constant.AppYamlPath;
-import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.enums.execution.NotifyTool;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.*;
@@ -22,11 +22,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @Tag(name = "Event Message", description = "Manages operations related to Event Messages management")
@@ -41,6 +41,9 @@ public class MessageController {
 
     @Autowired
     private Environment env;
+
+    @Autowired
+    private LanguageService languageService;
 
     @Operation(summary = "Retrieves all event messages from database")
     @ApiResponses(value = {
@@ -97,14 +100,12 @@ public class MessageController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createMessage(@RequestBody MessageResource messageResource) throws Exception{
+    public ResponseEntity<?> createMessage(@Valid @RequestBody MessageResource messageResource) throws Exception{
         EventMessage eventMessage = messageService.toEntity(messageResource);
         messageService.save(eventMessage);
 
         List<EventContent> eventContents = eventMessage.getEventContents();
-        eventContents.forEach(ec -> {
-            LangEnum.valueOf(ec.getLanguage().toUpperCase(Locale.ROOT));
-        });
+        eventContents.forEach(this::applyLanguage);
         for (int i = 0; i < eventContents.size(); i++) {
             contentService.save(eventContents.get(i));
         }
@@ -162,13 +163,14 @@ public class MessageController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateMessage(@PathVariable int id, @RequestBody MessageResource messageResource) throws Exception{
+    public ResponseEntity<?> updateMessage(@PathVariable int id, @Valid @RequestBody MessageResource messageResource) throws Exception{
         messageResource.setTemplateId(id);
         EventMessage eventMessage = messageService.toEntity(messageResource);
         eventMessage.setId(id);
         messageService.save(eventMessage);
 
         List<EventContent> eventContents = eventMessage.getEventContents();
+        eventContents.forEach(this::applyLanguage);
         for (int i = 0; i < eventContents.size(); i++) {
             contentService.save(eventContents.get(i));
         }
@@ -212,8 +214,8 @@ public class MessageController {
     })
     @GetMapping("/languages")
     public ResponseEntity<?> getSupportedLanguages() {
-        List<LanguageDTO> languages = Stream.of(LangEnum.values())
-                .map(e -> new LanguageDTO(e.getName(), e.getCode())).toList();
+        List<LanguageDTO> languages = languageService.getSupported().stream()
+                .map(code -> new LanguageDTO(languageService.displayName(code), code)).toList();
         Map<String, Object> body = new HashMap<>();
         body.put("languages", languages);
         return ResponseEntity.ok().body(body);
@@ -255,5 +257,13 @@ public class MessageController {
         String webhook = env.getProperty(AppYamlPath.INCOMING_WEBHOOK);
         ResultDTO<String> webhookDto = new ResultDTO<>(webhook);
         return ResponseEntity.ok(webhookDto);
+    }
+
+    /*
+    Stores the content language as a canonical ISO 639-1 code so that a template is always found by
+    the language a user actually has. @ValidLanguage has already rejected unsupported languages.
+    */
+    private void applyLanguage(EventContent eventContent) {
+        languageService.normalize(eventContent.getLanguage()).ifPresent(eventContent::setLanguage);
     }
 }

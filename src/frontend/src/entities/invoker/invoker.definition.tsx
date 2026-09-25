@@ -6,13 +6,23 @@ import { i18n } from '@shared/i18n/config/i18n.ts'
 import en from '@entities/invoker/i18n/en.json'
 import de from '@entities/invoker/i18n/de.json'
 import { resolveInvokerNames } from '@entities/invoker/command/resolvers/resolveInvokerNames'
+import {
+    isInvokerNameCharacterSetValid,
+    isInvokerNameDotPlacementValid,
+    isInvokerNameLengthValid,
+    normalizeInvokerName,
+    normalizeInvokerNameForComparison,
+} from '@entities/invoker/lib/invokerName'
 import type { Invoker } from '@entities/invoker/model/types'
 import { InvokerUploadButton } from '@entities/invoker/components/InvokerUploadButton'
+import { InvokerDownloadAction } from '@entities/invoker/components/InvokerDownloadAction'
 import { pickInvokerFile, uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
 import { buildInvokerXml } from '@entities/invoker/lib/invokerXml'
 import { mapInvokerToForm } from '@entities/invoker/lib/mapInvokerToForm'
 import { downloadInvoker } from '@entities/invoker/lib/downloadInvoker'
 import { buildActionAccess } from '@/engine/policy'
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 
 const baseKey = 'invoker'
 
@@ -26,6 +36,7 @@ export const invokerDefinition: EntityDefinition = {
     permissionComponent: 'INVOKER',
 
     routes: [
+        { type: 'create' },
         { type: 'view' },
         { type: 'list' },
     ],
@@ -42,6 +53,12 @@ export const invokerDefinition: EntityDefinition = {
         },
         actions: [
             { type: 'view' },
+            {
+                type: 'custom',
+                key: 'download',
+                permissionAction: 'READ',
+                render: (ctx) => <InvokerDownloadAction {...ctx} />,
+            },
             {
                 type: 'delete',
                 confirmMessage: (value, _entity, row) => {
@@ -66,10 +83,17 @@ export const invokerDefinition: EntityDefinition = {
 
         mapToForm: (model: Invoker) => mapInvokerToForm(model),
 
-        mapToApi: ({ data }) => ({
-            name: data.name,
-            xml: buildInvokerXml(data as Record<string, unknown>),
-        }),
+        mapToApi: ({ data }) => {
+            const normalizedData = {
+                ...data,
+                name: normalizeInvokerName(data.name),
+            }
+
+            return {
+                name: normalizedData.name,
+                xml: buildInvokerXml(normalizedData as Record<string, unknown>),
+            }
+        },
     },
 
     /* ===============================
@@ -89,11 +113,26 @@ export const invokerDefinition: EntityDefinition = {
             },
             validation: {
                 required: true,
-                max: 255,
+                custom: [
+                    {
+                        validate: isInvokerNameCharacterSetValid,
+                        message: `${baseKey}.fields.name.errors.invalid_characters`,
+                    },
+                    {
+                        validate: isInvokerNameDotPlacementValid,
+                        message: `${baseKey}.fields.name.errors.invalid_period`,
+                    },
+                    {
+                        validate: isInvokerNameLengthValid,
+                        message: `${baseKey}.fields.name.errors.max_length`,
+                    },
+                ],
                 remote: {
                     url: `/invoker/exists/:name`,
                     method: 'GET',
-                    map: (fieldValue) => ({ name: fieldValue }),
+                    map: (fieldValue) => ({
+                        name: normalizeInvokerNameForComparison(fieldValue),
+                    }),
                     transKey: `${baseKey}.fields.name.errors.name_already_exists`,
                     encodeParams: false,
                     handleResponse: (data, error) => {
@@ -108,9 +147,7 @@ export const invokerDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -128,9 +165,7 @@ export const invokerDefinition: EntityDefinition = {
                 visible: true,
                 order: 2,
                 labelKey: `${baseKey}.fields.description.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -165,9 +200,7 @@ export const invokerDefinition: EntityDefinition = {
                 visible: true,
                 order: 3,
                 labelKey: `${baseKey}.fields.authType.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -234,9 +267,7 @@ export const invokerDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ');
                 },
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
     ],
@@ -284,6 +315,10 @@ export const invokerDefinition: EntityDefinition = {
 
         recommendations: [
             {
+                title: `${baseKey}.wizard.recommendations.1`,
+                link: '/invoker/create',
+            },
+            {
                 title: `${baseKey}.wizard.recommendations.2`,
                 link: '/connector/create',
             },
@@ -321,7 +356,7 @@ export const invokerDefinition: EntityDefinition = {
     commands: (def) => ([
         ...createEntityCommands({
             def,
-            config: { include: ['delete', 'list', 'view'] },
+            config: { include: ['create', 'delete', 'list', 'view'] },
             dsl: {
                 delete: {
                     by: [
@@ -379,7 +414,7 @@ export const invokerDefinition: EntityDefinition = {
                             }
                         } catch (err) {
                             console.error(err)
-                            message.error(tEntities('invoker.list.upload.error'))
+                            notifyError(tEntities('invoker.list.upload.error'))
                         } finally {
                             ctx.setLoading(false)
                         }
@@ -424,7 +459,7 @@ export const invokerDefinition: EntityDefinition = {
                                                     )
                                                 } catch (err) {
                                                     console.error(err)
-                                                    message.error(tEntities('invoker.list.download.error'))
+                                                    notifyError(tEntities('invoker.list.download.error'))
                                                 } finally {
                                                     ctx.setLoading(false)
                                                 }

@@ -7,7 +7,7 @@ import { GenericViewWizard } from './GenericViewWizard';
 import { GenericUpdateWizard } from './GenericUpdateWizard';
 
 type Props =
-    | { entityName: string; mode: 'create'; identifier?: undefined; onSuccess: () => void }
+    | { entityName: string; mode: 'create'; identifier?: undefined; onSuccess: (created?: unknown) => void }
     | { entityName: string; mode: 'view'; identifier: string; onSuccess: () => void }
     | { entityName: string; mode: 'update'; identifier: string; onSuccess: () => void };
 

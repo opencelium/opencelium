@@ -218,16 +218,6 @@ versions:
     changes:
       - changeset: 1
         operation: add
-<<<<<<< HEAD
-        value: 4.8.3
-        path: opencelium.version
-  - version: 4.8.4
-    changes:
-      - changeset: 1
-        operation: add
-        value: 4.8.4
-        path: opencelium.version
-=======
         value: 5.0
         path: opencelium.version
       - changeset: 2
@@ -282,4 +272,33 @@ versions:
         operation: add
         value: 500
         path: opencelium.connector-health.request-logging.max-body-length
->>>>>>> origin/version5.0
+  - version: 5.1
+    changes:
+      - changeset: 1
+        operation: add
+        value: 5.1
+        path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: en
+        path: opencelium.language.default
+      - changeset: 3
+        operation: add
+        value: en,de
+        path: opencelium.language.supported
+      - changeset: 4
+        operation: add
+        value: false
+        path: opencelium.log.retention.test-connection.enabled
+      - changeset: 5
+        operation: add
+        value: 240000
+        path: opencelium.log.retention.test-connection.max-age
+      - changeset: 6
+        operation: add
+        value: 600000
+        path: opencelium.log.retention.test-connection.initial-delay
+      - changeset: 7
+        operation: add
+        value: 600000
+        path: opencelium.log.retention.test-connection.sweep-interval

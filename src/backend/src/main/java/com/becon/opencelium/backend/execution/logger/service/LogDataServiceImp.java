@@ -17,13 +17,17 @@ import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine
 import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTracker;
 import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTrackerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +56,12 @@ public class LogDataServiceImp implements LogDataService {
             LogLineKey.FLOWCHART_ID
     );
     private static final Sort SORT_ASCENDING = Sort.by(Sort.Direction.ASC, "createdAt");
-    private static final Sort SORT_DESCENDING = Sort.by(Sort.Direction.DESC, "createdAt");
+
+    /** Selects the child that opens first, and the one that closes last, of a single block. */
+    private static final Pageable FIRST_BY_START_OFFSET =
+            PageRequest.of(0, 1, Sort.by(Sort.Direction.ASC, "startOffset"));
+    private static final Pageable LAST_BY_END_OFFSET =
+            PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "endOffset"));
 
     private static final int BATCH_SIZE = 10000;
     // buffer of blocks waiting to be flushed
@@ -71,6 +80,9 @@ public class LogDataServiceImp implements LogDataService {
 
     @Autowired
     private ParsedLogLineBuilder parsedLogLineBuilder;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     private final LogBlockBuffer buffer = new InMemoryLogBlockBuffer(
             BATCH_SIZE,
@@ -145,33 +157,15 @@ public class LogDataServiceImp implements LogDataService {
         long startOffset = entity.getStartOffset();
         long endOffset = entity.getEndOffset();
 
-        List<String> lines = new ArrayList<>();
         if (type == FLOWCHART) {
             return logDataMapper.toDto(entity);
-        } else if (type == OPERATION) {
-            lines.addAll(flexiblePatternLogParser.readLines(executionId, startOffset, endOffset));
-        } else {
-            // for IF and LOOP remove its children before parsing
-            String indexPath = entity.getIndexPath();
-            String safeParent = Pattern.quote(indexPath);
-            String regex = "^" + safeParent + "_[0-9]+(_[0-9]+)*$"; // filters all-level children
-
-            Optional<LogDataMng> firstChild = metaDataLogRepository.findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
-                    executionId, flowchartId, regex, SORT_ASCENDING
-            );
-            Optional<LogDataMng> lastChild = metaDataLogRepository.findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
-                    executionId, flowchartId, regex, SORT_DESCENDING
-            );
-            if (firstChild.isPresent() && lastChild.isPresent()) {
-                long firstChildStartOffset = firstChild.get().getStartOffset();
-                long lastChildEndOffset = lastChild.get().getEndOffset();
-
-                lines.addAll(flexiblePatternLogParser.readLines(executionId, startOffset, firstChildStartOffset));
-                lines.addAll(flexiblePatternLogParser.readLines(executionId, lastChildEndOffset, endOffset));
-            } else {
-                lines.addAll(flexiblePatternLogParser.readLines(executionId, startOffset, endOffset));
-            }
         }
+
+        List<String> lines = type == OPERATION
+                // an OPERATION owns no children, its whole block belongs to it
+                ? flexiblePatternLogParser.readLines(executionId, startOffset, endOffset)
+                // for EXECUTION, IF and LOOP read the block around its children
+                : readAroundChildren(entity, executionId, flowchartId, startOffset, endOffset);
 
         LogDataMng collected = collect(lines, executionId, connectionId, flowchartId);
 
@@ -263,10 +257,23 @@ public class LogDataServiceImp implements LogDataService {
         }
     }
 
-
     @Override
-    public Optional<LogDataMng> findRootByExecutionId(Long execId) {
-        return metaDataLogRepository.findByExecutionIdAndType(Long.toString(execId), EXECUTION.name());
+    public boolean hasDbRecords(long execId) {
+        String executionId = Long.toString(execId);
+
+        boolean existsInBuffer = buffer.findAllByExecutionId(executionId).stream()
+                .anyMatch(this::isExecutionEnd);
+
+        boolean existsInDB = metaDataLogRepository.findByExecutionIdAndType(executionId, EXECUTION.name())
+                .filter(this::isExecutionEnd)
+                .isPresent();
+
+        return existsInBuffer || existsInDB;
+    }
+
+    private boolean isExecutionEnd(LogDataMng block) {
+        return block.getType() == EXECUTION
+                && (block.getStatus() == PhaseStatus.COMPLETE || block.getStatus() == PhaseStatus.FAIL);
     }
 
     @Override
@@ -313,6 +320,21 @@ public class LogDataServiceImp implements LogDataService {
         return doc;
     }
 
+    @Override
+    public Set<String> findDistinctExecutionIds() {
+        return new HashSet<>(
+                mongoTemplate.query(LogDataMng.class)
+                        .distinct("executionId")
+                        .as(String.class)
+                        .all()
+        );
+    }
+
+    @Override
+    public void deleteAllByExecutionId(String executionId) {
+        metaDataLogRepository.deleteAllByExecutionId(executionId);
+    }
+
     // --------------------------------------- Private Functions ----------------------------------------------
 //    private Optional<LogDataMng> findExistingBlock(LogDataMng block) {
 //        if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX.getSrcName())) {
@@ -340,12 +362,75 @@ public class LogDataServiceImp implements LogDataService {
                 .orElseThrow(() -> new RuntimeException("LogData element not found with specified id = " + phaseId));
     }
 
+    /**
+     * Reads the part of a block that belongs to the block itself: everything before its first child
+     * starts and everything after its last child ends. A block with no children is read whole.
+     * <p>
+     * Children are located by byte range rather than by creation time, because a child document can
+     * reach MongoDB before its own parent, and because the index path of an IF or LOOP child matches
+     * every loop iteration — only the parent's byte range tells the iterations apart.
+     */
+    private List<String> readAroundChildren(LogDataMng entity, String executionId, String flowchartId,
+                                            long startOffset, long endOffset) {
+        Optional<LogDataMng> firstChild = findChild(entity, executionId, flowchartId, FIRST_BY_START_OFFSET);
+        Optional<LogDataMng> lastChild = findChild(entity, executionId, flowchartId, LAST_BY_END_OFFSET);
+
+        if (firstChild.isEmpty() || lastChild.isEmpty()) {
+            return flexiblePatternLogParser.readLines(executionId, startOffset, endOffset);
+        }
+
+        long firstChildStartOffset = firstChild.get().getStartOffset();
+        long lastChildEndOffset = lastChild.get().getEndOffset();
+
+        List<String> lines = new ArrayList<>();
+        if (startOffset < firstChildStartOffset) {
+            lines.addAll(flexiblePatternLogParser.readLines(executionId, startOffset, firstChildStartOffset));
+        }
+        if (lastChildEndOffset < endOffset) {
+            lines.addAll(flexiblePatternLogParser.readLines(executionId, lastChildEndOffset, endOffset));
+        }
+        return lines;
+    }
+
+    /**
+     * Finds the first child of a block within the block's own byte range, in the order given by
+     * {@code pageable}. An EXECUTION block owns FLOWCHART blocks, which carry no index path;
+     * every other block owns the descendants whose index path extends its own.
+     */
+    private Optional<LogDataMng> findChild(LogDataMng entity, String executionId, String flowchartId,
+                                           Pageable pageable) {
+        long startOffset = entity.getStartOffset();
+        long endOffset = entity.getEndOffset();
+
+        if (entity.getType() == EXECUTION) {
+            return metaDataLogRepository
+                    .findChildrenInOffsetRange(executionId, FLOWCHART.name(), startOffset, endOffset, pageable)
+                    .stream()
+                    .findFirst();
+        }
+
+        String indexPath = entity.getIndexPath();
+        if (indexPath == null || indexPath.isBlank()) {
+            return Optional.empty();
+        }
+        String regex = "^" + Pattern.quote(indexPath) + "_[0-9]+(_[0-9]+)*$"; // filters all-level children
+
+        return metaDataLogRepository
+                .findDescendantsInOffsetRange(executionId, flowchartId, regex, startOffset, endOffset, pageable)
+                .stream()
+                .findFirst();
+    }
+
     private LogDataMng collect(List<String> lines, String executionId, Long connectionId, String flowchartId) {
         ExecutionTracker tracker = new ExecutionTrackerImpl(executionId, connectionId.toString(), flowchartId, LogDetailLevel.DETAILED);
 
         ParsedLogLine parsed;
         Optional<LogDataMng> result = Optional.empty();
         for (String line : lines) {
+            // a line the parser cannot place — a blank line, a stack trace — carries no phase or segment
+            if (!parsedLogLineBuilder.supports(line)) {
+                continue;
+            }
             parsed = parsedLogLineBuilder.build(line);
             result = tracker.buildLogData(parsed);
 

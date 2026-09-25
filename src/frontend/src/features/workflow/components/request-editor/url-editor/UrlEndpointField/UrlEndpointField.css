@@ -1,0 +1,35 @@
+.urlEndpointField {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 48px;
+	padding: 11px 14px;
+	border: 1px solid var(--color-border-default);
+	border-radius: 8px;
+	background: var(--color-background-surface);
+}
+.urlEndpointField--readOnly {
+	background: var(--color-background-disabled);
+}
+.urlEndpointFieldBefore {
+	flex-shrink: 0;
+}
+.urlEndpointFieldInput {
+	min-height: 24px;
+	font-family:
+		ui-monospace,
+		SFMono-Regular,
+		SF Mono,
+		Menlo,
+		monospace;
+	white-space: pre-wrap;
+	word-break: break-all;
+	outline: none;
+	cursor: text;
+	flex: 1;
+	background: transparent;
+	box-shadow: none;
+}
+.urlEndpointFieldInput--readOnly {
+	cursor: default;
+}

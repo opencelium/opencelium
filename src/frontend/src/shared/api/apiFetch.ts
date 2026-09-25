@@ -16,6 +16,14 @@ type ApiFetchOptions = {
     headers?: Record<string, string>
     /** Let the request outlive the page (for fire-and-forget calls during unload). */
     keepalive?: boolean
+    /**
+     * Keep a 401/403 off the error bus, leaving it to the caller. For endpoints whose
+     * 403 means "you may not do this" rather than "your session is gone": the bus's
+     * auth subscriber treats every 403 as a dead session and logs the user out, which
+     * is wrong for an authorization denial (see the connection version endpoints,
+     * gated by OwnershipSecurity.checkOwnerOrAdmin).
+     */
+    ignoreAuthError?: boolean
 }
 
 const DEFAULT_TIMEOUT_MS = 30_000
@@ -95,6 +103,7 @@ export async function apiFetchWithHeaders<T = unknown>(
         signal: externalSignal,
         headers: extraHeaders,
         keepalive,
+        ignoreAuthError,
     }: ApiFetchOptions = {},
 ): Promise<{data: T | null; headers: Headers; status: number}> {
     const accessToken = token ?? selectAccessToken(store.getState())
@@ -168,10 +177,11 @@ export async function apiFetchWithHeaders<T = unknown>(
         // the initial-refresh path (status === 'loading'), where we DO want the
         // pendingError to land for the LoginForm Alert.
         if (
+            !ignoreAuthError &&
             (res.status === 401 || res.status === 403) &&
             store.getState().auth.status !== 'unauthenticated'
         ) {
-            errorBus.emit(normalizeError({status: res.status, data: errorBody}))
+            errorBus.emit(normalizeError({status: res.status, data: errorBody}, {url: path, method}))
         }
 
         throw new ApiFetchError(message, {

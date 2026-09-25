@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.resource.user;
 
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
+import com.becon.opencelium.backend.validation.language.ValidLanguage;
 import jakarta.annotation.Resource;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -37,6 +38,8 @@ public class UserDetailResource {
     private boolean appTour;
     private String theme;
     private boolean themeSync;
+
+    @ValidLanguage
     private String lang;
     private String bitbucketUser;
     private String bitbucketPassword;

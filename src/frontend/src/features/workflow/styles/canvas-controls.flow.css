@@ -1,0 +1,74 @@
+.handleInvisible {
+  opacity: 0;
+  width: 8px;
+  height: 8px;
+}
+
+.canvasTopLeftPanel {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	top: 65px !important;
+}
+
+.workflowControls {
+	position: static !important;
+	margin: 0 !important;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.canvasSpeedControl {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 10px;
+	border: 1px solid var(--color-border-subtle);
+	border-radius: 6px;
+	background: var(--color-background-surface);
+	box-shadow: var(--shadow-sm);
+}
+.canvasSpeedControlLabel, .canvasSpeedControlValue {
+	font-size: 11px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+.canvasSpeedControlLabel { color: var(--color-text-secondary); }
+.canvasSpeedControlValue { color: var(--color-text-primary); min-width: 30px; text-align: right; }
+
+.workflowControls .react-flow__controls-button {
+  background: var(--color-background-surface);
+  border-bottom: 1px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
+}
+
+.workflowControls .react-flow__controls-button:hover {
+  background: var(--color-background-hover);
+}
+
+.workflowControls .react-flow__controls-button:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.workflowControls .react-flow__controls-button svg {
+  fill: currentColor;
+}
+
+.react-flow__handle-top {
+  top: -2px;
+}
+
+.react-flow__handle-left {
+  left: -2px;
+}
+
+.react-flow__handle-right {
+  right: -2px;
+}
+
+.react-flow__handle-bottom {
+  bottom: -2px;
+}

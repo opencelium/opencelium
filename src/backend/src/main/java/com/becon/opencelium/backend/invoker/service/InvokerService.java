@@ -24,6 +24,7 @@ import org.w3c.dom.Document;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,15 @@ public interface InvokerService {
     Document getDocument(String name) throws Exception;
     List<Document> getAllInvokerDocuments();
     void save(Document document);
+
+    String createInvokerFile(Document document);
+
+    String storeInvokerFile(InputStream inputStream, String fileName);
+
+    String toStoredFileName(String fileName);
+
+    /** Best-effort removal used to roll back a failed upload. Never throws. */
+    void deleteQuietly(String name);
     Map<String, String> findAllByPathAsString(String path);
     UpdateInvokerResource toUpdateInvokerResource(Map.Entry<String, String> entry) throws XPathExpressionException;
     Map<String, Invoker> findAllAsMap();

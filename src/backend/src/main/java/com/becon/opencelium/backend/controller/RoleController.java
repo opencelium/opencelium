@@ -16,16 +16,11 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.exception.RoleExistsException;
-import com.becon.opencelium.backend.exception.RoleNotFoundException;
-import com.becon.opencelium.backend.database.mysql.entity.UserRole;
-import com.becon.opencelium.backend.database.mysql.service.PermissionServiceImpl;
-import com.becon.opencelium.backend.database.mysql.service.RoleHasPermissionServiceImp;
-import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.UserRoleService;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
-import com.becon.opencelium.backend.storage.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,284 +28,203 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-import com.becon.opencelium.backend.resource.application.ResultDTO;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @Tag(name = "User Role(Group)", description = "Manages operations related to User Roles management")
 @RequestMapping(value = "/role", produces = "application/json")
 public class RoleController {
 
-    @Autowired
-    private UserRoleServiceImpl userRoleService;
+    private final UserRoleService userRoleService;
 
-    @Autowired
-    private RoleHasPermissionServiceImp roleHasPermissionServiceImp;
+    public RoleController(UserRoleService userRoleService) {
+        this.userRoleService = userRoleService;
+    }
 
-    @Autowired
-    private PermissionServiceImpl permissionService;
-
-    @Autowired
-    private StorageService storageService;
 
     @Operation(summary = "Retrieves a user role by provided role ID")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "User Role has been successfully retrieved",
-                content = @Content(schema = @Schema(implementation = UserRoleResource.class))),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "User Role has been successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = UserRoleResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable("id") int id){
-
-        return userRoleService.findById(id)
-                .map(p -> ResponseEntity.ok(new UserRoleResource(p)))
-                .orElseThrow(() -> new RoleNotFoundException(id));
+    public ResponseEntity<?> get(@PathVariable("id") int id) {
+        return ResponseEntity.ok(userRoleService.getById(id));
     }
 
     @Operation(summary = "Retrieves all User Roles")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "User Role has been successfully retrieved",
-                content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserRoleResource.class)))),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "User Role has been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserRoleResource.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<List<UserRoleResource>> all(){
-        final List<UserRoleResource> collection =
-                userRoleService.findAll().stream().map(UserRoleResource::new).collect(Collectors.toList());
-        return ResponseEntity.ok(collection);
+    public ResponseEntity<List<UserRoleResource>> all() {
+        return ResponseEntity.ok(userRoleService.getAll());
     }
 
     @Operation(summary = "Creates new User Role")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
+            @ApiResponse(responseCode = "200",
                     description = "User Role has been successfully created",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserRoleResource.class)))),
-            @ApiResponse( responseCode = "401",
+            @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
+            @ApiResponse(responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserRoleResource> post(@RequestBody UserRoleResource userRoleResource){
+    public ResponseEntity<UserRoleResource> post(@RequestBody UserRoleResource userRoleResource) {
+        UserRoleResource created = userRoleService.create(userRoleResource);
 
-        if (userRoleService.existsByRole(userRoleResource.getName())){
-            throw new RoleExistsException(userRoleResource.getName());
-        }
-
-        // Creating new UserGroup object. The object will be saved in db
-        // Saving in db
-        UserRole role = new UserRole(userRoleResource);
-        UserRole userRole;
-        try {
-            userRoleService.save(role);
-            userRoleResource.setGroupId(role.getId());
-            userRole = userRoleService.toEntity(userRoleResource);
-            userRoleService.save(userRole);
-        }
-        catch (Exception e){
-            userRoleService.deleteById(role.getId());
-            throw new RuntimeException(e);
-        }
-
-        UserRoleResource resource = userRoleService.toResource(userRole);
-        final URI uri = MvcUriComponentsBuilder
+        URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .path("/{id}")
-                .buildAndExpand(userRole.getId()).toUri();
+                .buildAndExpand(created.getGroupId())
+                .toUri();
 
-        return ResponseEntity.created(uri).body(resource);
+        return ResponseEntity.created(uri).body(created);
     }
 
     @Operation(summary = "Modifies components on an existed User Role by provided Role ID and relevant information in the request body")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "Components of User Role has been successfully modified",
-                content = @Content(schema = @Schema(implementation = UserRoleResource.class))),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "Components of User Role has been successfully modified",
+                    content = @Content(schema = @Schema(implementation = UserRoleResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(value = "{id}/component", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional
-    public ResponseEntity<UserRoleResource> changeComponent(@PathVariable("id") int id,
-                                                             @RequestBody UserRoleResource userRoleResource) throws IOException {
-
-        UserRole existing = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
-        boolean isIdenticalName = existing.getName().equals(userRoleResource.getName());
-        if (!isIdenticalName && userRoleService.existsByRole(userRoleResource.getName())){
-            throw new RoleExistsException(userRoleResource.getName());
-        }
-        userRoleResource.setGroupId(id);
-
-        roleHasPermissionServiceImp.deleteByUserRoleId(existing.getId());
-        UserRole uRole = userRoleService.toEntity(userRoleResource);
-        userRoleService.save(uRole);
-
-        return userRoleService.findById(id)
-                .map(p -> ResponseEntity.ok(new UserRoleResource(p)))
-                .orElseThrow(() -> new RoleNotFoundException(id));
+    public ResponseEntity<UserRoleResource> changeComponents(@PathVariable("id") int id, @RequestBody UserRoleResource userRoleResource) {
+        return ResponseEntity.ok(userRoleService.updateComponents(id, userRoleResource));
     }
 
     @Operation(summary = "Modifies existed User Role by provided Role ID and relevant information in the request body")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "User Role has been successfully modified",
-                content = @Content(schema = @Schema(implementation = UserRoleResource.class))),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "User Role has been successfully modified",
+                    content = @Content(schema = @Schema(implementation = UserRoleResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserRoleResource> put(@PathVariable("id") int id,
-                                                @RequestBody UserRoleResource roleResource) throws IOException{
+    public ResponseEntity<UserRoleResource> put(@PathVariable("id") int id, @RequestBody UserRoleResource userRoleResource) throws IOException {
+        UserRoleResource updated = userRoleService.update(id, userRoleResource);
 
-        UserRole userRole = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
-        boolean isIdenticalName = userRole.getName().equals(roleResource.getName());
-        if (!isIdenticalName && userRoleService.existsByRole(roleResource.getName())){
-            throw new RoleExistsException(roleResource.getName());
-        }
-        roleResource.setGroupId(id);
-
-        UserRole role = userRoleService.findById(id).orElseThrow(() -> new RoleNotFoundException(id));
-        UserRoleResource resource = userRoleService.toResource(role);
-
-        userRoleService.save(role);
-        final URI uri = MvcUriComponentsBuilder
+        URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .path("/{id}")
-                .buildAndExpand(role.getId()).toUri();
+                .buildAndExpand(updated.getGroupId())
+                .toUri();
 
-        return ResponseEntity.created(uri).body(resource);
+        return ResponseEntity.created(uri).body(updated);
     }
 
     @Operation(summary = "Checks whether a role with the given name exists in the system")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "Returns true if the role exists, false otherwise",
-                content = @Content(schema = @Schema(implementation = ResultDTO.class))),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "200",
+                    description = "Returns true if the role exists, false otherwise",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/exists/{role}")
     public ResponseEntity<ResultDTO<Boolean>> roleExists(@PathVariable("role") String role) {
-        return ResponseEntity.ok(ResultDTO.of(userRoleService.existsByRole(role)));
+        return ResponseEntity.ok(ResultDTO.of(userRoleService.existsByName(role)));
     }
 
     @Operation(summary = "Deletes an User Role from system by provided role ID")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "204",
-                description = "User Role has been successfully deleted.",
-                content = @Content),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "204",
+                    description = "User Role has been successfully deleted.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") int id) {
-        return userRoleService
-                .findById(id)
-                .map(
-                        p -> {
-
-                            if (p.getIcon() != null){
-                                storageService.delete(p.getIcon());
-                            }
-
-                            userRoleService.deleteById(id);
-                            return ResponseEntity.noContent().build();
-                        })
-                .orElseThrow(() -> new RoleNotFoundException(id));
+        userRoleService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Deletes a collection of User Roles based on the provided list of their corresponding IDs.")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "204",
-                description = "List of User Roles have been successfully deleted.",
-                content = @Content),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "204",
+                    description = "List of User Roles have been successfully deleted.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "list/delete", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteRoleByIdIn(@RequestBody IdentifiersDTO<Integer> ids) {
-
-        ids.getIdentifiers().forEach(id -> {
-            UserRole p = userRoleService.findById(id).get();
-            if (p.getIcon() != null){
-                storageService.delete(p.getIcon());
-            }
-
-            userRoleService.deleteById(id);
-        });
+        userRoleService.deleteAllByIds(ids.getIdentifiers());
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Deletes an icon of User Roles based on the provided role ID.")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "204",
-                description = "Icon of User Role has been successfully deleted.",
-                content = @Content),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "204",
+                    description = "Icon of User Role has been successfully deleted.",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @DeleteMapping("/{id}/icon")
     public ResponseEntity<?> deleteIcon(@PathVariable("id") int id) {
-        return userRoleService
-                .findById(id)
-                .map(
-                        p -> {
-                            if (p.getIcon() != null){
-                                storageService.delete(p.getIcon());
-                                p.setIcon(null);
-                                userRoleService.save(p);
-                            }
-                            return ResponseEntity.noContent().build();
-                        })
-                .orElseThrow(() -> new RoleNotFoundException(id));
+        userRoleService.deleteIcon(id);
+        return ResponseEntity.noContent().build();
     }
 }

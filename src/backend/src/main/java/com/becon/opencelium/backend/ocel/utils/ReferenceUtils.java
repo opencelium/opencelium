@@ -28,4 +28,8 @@ public class ReferenceUtils {
                 || token.matches(RegExpression.requestData)
                 || token.matches(RegExpression.webhook);
     }
+
+    public static boolean isDirectReference(String token) {
+        return token.matches(RegExpression.wrappedDirectRef);
+    }
 }

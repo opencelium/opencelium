@@ -1,0 +1,52 @@
+/* Bottom edge touches the pill (bottom: 100%, no gap) and the 6px visual gap to the
+   visible menu is real padding, not empty space — so moving the cursor from the pill
+   up into the menu never crosses a dead zone that would end the hover early. */
+.bodyPointerMenu {
+  position: absolute;
+  bottom: 100%;
+  left: -4px;
+  padding-bottom: 6px;
+  z-index: 20;
+}
+
+.bodyPointerMenu--below {
+  top: 100%;
+  bottom: auto;
+  padding-top: 6px;
+  padding-bottom: 0;
+}
+
+.bodyPointerMenuList {
+  display: flex;
+  flex-direction: column;
+  min-width: 112px;
+  background: var(--color-background-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  padding: 4px;
+}
+
+.bodyPointerMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.bodyPointerMenuItem:hover {
+  background: var(--color-background-hover);
+}
+
+.bodyPointerMenuItem--danger {
+  color: var(--color-status-error-fg);
+}

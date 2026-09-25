@@ -32,14 +32,52 @@
   },
   "customTheme": {
     "title": "Eigenes Design",
-    "description": "Wählen Sie Ihre vier Hauptfarben — Primärfarbe, Akzentfarbe, Neutralton und Seitenleistenfarbe. Daraus wird ein vollständiges helles und dunkles Design erzeugt und der Designliste hinzugefügt.",
+    "description": "Wählen Sie Ihre vier Hauptfarben – Primärfarbe, Akzentfarbe, Neutralton und Seitenleiste. Daraus wird ein vollständiges helles und dunkles Design erzeugt und für alle Benutzer übernommen; wer ein eigenes Design gewählt hat, behält es.",
     "primary": "Primärfarbe",
     "accent": "Akzentfarbe",
     "neutral": "Neutralton",
     "sidebar": "Seitenleistenfarbe",
-    "apply": "Eigenes Design anwenden",
     "remove": "Eigenes Design entfernen",
-    "applied": "Eigenes Design angewendet",
     "removed": "Eigenes Design entfernt"
+  },
+  "systemTheme": {
+    "save": "Für alle Benutzer übernehmen",
+    "reset": "Systemdesign zurücksetzen",
+    "use": "Systemdesign verwenden",
+    "saved": "Systemdesign für alle Benutzer gespeichert",
+    "saveFailed": "Das Systemdesign konnte nicht gespeichert werden",
+    "removed": "Systemdesign zurückgesetzt",
+    "resetFailed": "Das Systemdesign konnte nicht zurückgesetzt werden",
+    "personalOverride": "Sie sehen ein eigenes Design, das das Systemdesign auf diesem Bildschirm verdeckt. Andere Benutzer sehen weiterhin das Systemdesign.",
+    "confirmReset": {
+      "title": "Systemdesign zurücksetzen?",
+      "message": "Die gespeicherten Farben werden gelöscht und alle Benutzer fallen auf das Standarddesign zurück. Benutzer mit einem eigenen Design sind nicht betroffen."
+    }
+  },
+  "systemLogo": {
+    "title": "Anwendungslogo",
+    "description": "Ersetzen Sie das OpenCelium-Logo für alle Benutzer durch Ihr eigenes. Es wird im Navigationsmenü und auf der Anmeldeseite angezeigt, also noch vor der Anmeldung.",
+    "hint": "PNG oder JPG, maximal 5 MB. Am besten geeignet ist ein breites Logo mit transparentem Hintergrund – dieselbe Datei wird im hellen und im dunklen Design angezeigt.",
+    "usingDefault": "Kein Logo hochgeladen – alle Benutzer sehen das Standard-Logo von OpenCelium.",
+    "upload": "Logo hochladen",
+    "replace": "Logo ersetzen",
+    "remove": "Standard-Logo wiederherstellen",
+    "saved": "Logo für alle Benutzer gespeichert",
+    "saveFailed": "Das Logo konnte nicht hochgeladen werden",
+    "removed": "Standard-Logo wiederhergestellt",
+    "removeFailed": "Das Logo konnte nicht zurückgesetzt werden",
+    "invalidType": "Das Logo muss eine PNG- oder JPG-Datei sein",
+    "tooLarge": "Das Logo muss kleiner als 5 MB sein",
+    "confirmRemove": {
+      "title": "Standard-Logo wiederherstellen?",
+      "message": "Das hochgeladene Logo wird gelöscht und alle Benutzer sehen wieder das OpenCelium-Logo."
+    },
+    "crop": {
+      "title": "Logo zuschneiden",
+      "zoom": "Zoom",
+      "cancel": "Abbrechen",
+      "apply": "Zuschnitt anwenden",
+      "instruction": "Verschieben Sie den Rahmen, um den Bereich um Ihr Logo zu beschneiden"
+    }
   }
 }

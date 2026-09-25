@@ -1,0 +1,112 @@
+.addTrigger {
+  position: absolute;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  z-index: 10;
+  outline: 0;
+  box-shadow: none;
+}
+
+.addTrigger:focus,
+.addTrigger:focus-visible,
+.addTrigger:active {
+  outline: 0;
+  box-shadow: none;
+}
+
+.addTriggerLocked {
+  opacity: 1;
+  transition: none;
+  pointer-events: none;
+}
+
+.nodeWrap:hover .addTrigger.hoverOnly,
+.addTrigger.always {
+  opacity: 1;
+}
+
+.addTriggerRight {
+  right: -59px;
+  top: 20px;
+  width: 61px;
+  height: 20px;
+}
+
+.addTriggerBottom {
+  left: 20px;
+  bottom: -59px;
+  width: 20px;
+  height: 61px;
+}
+
+.addTrigger.circleOnly {
+  width: 22px;
+  height: 22px;
+}
+
+.addTriggerRight.circleOnly {
+  right: -29px;
+  top: 20px;
+}
+
+.addTriggerBottom.circleOnly {
+  left: 20px;
+  bottom: -29px;
+}
+
+.addLine {
+  position: absolute;
+  background: var(--color-border-strong);
+}
+
+.addTriggerRight .addLine {
+  left: 0;
+  top: 10px;
+  width: 39px;
+  height: 1px;
+}
+
+.addTriggerBottom .addLine {
+  top: 0;
+  left: 10px;
+  width: 1px;
+  height: 39px;
+}
+
+.addCircle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+.addTrigger:focus .addCircle,
+.addTrigger:focus-visible .addCircle,
+.addTrigger:active .addCircle {
+  outline: 0;
+  box-shadow: none;
+}
+
+.addTriggerRight .addCircle {
+  right: 0;
+  top: -1px;
+}
+
+.addTriggerBottom .addCircle {
+  bottom: 0;
+  left: -1px;
+}
+
+.addTrigger.circleOnly .addCircle {
+  position: static;
+}

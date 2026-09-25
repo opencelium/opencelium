@@ -14,12 +14,21 @@ import type {
 	WorkflowEdgeModel,
 	WorkflowNodeModel,
 } from '../../types/workflow.types';
+import type { JointTargetVerdict } from '../../utils/jumpValidator';
 
 export type WorkflowCanvasProps = PropsWithChildren<{
 	nodes: WorkflowNodeModel[];
 	edges: WorkflowEdgeModel[];
 	isAnyNodeDragging?: boolean;
 	activeAction: WorkflowAction | null;
+	jointSourceId?: string | null;
+	/** Verdict per node while a joint is being drawn from `jointSourceId` — legal
+	 * targets light up, the rest carry the reason they cannot be picked. */
+	jointVerdicts?: Map<string, JointTargetVerdict>;
+	onConfirmJoint?: (targetNodeId: string) => void;
+	onCancelJoint?: () => void;
+	onAddJoint?: (nodeId: string) => void;
+	onRemoveJoint?: (nodeId: string) => void;
 	onNodesChange: OnNodesChange<WorkflowNodeModel>;
 	onEdgesChange: OnEdgesChange<WorkflowEdgeModel>;
 	onConnect: OnConnect;
@@ -31,7 +40,12 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	onNodeDoubleClick?: NodeMouseHandler<WorkflowNodeModel>;
 	onDeleteNode: (nodeId: string) => void;
 	onOpenAggregatorEditor: (nodeId: string) => void;
+	onChangeCommentText: (nodeId: string, text: string) => void;
+	onToggleComment: (commentNodeId: string) => void;
+	onAddComment: (nodeId: string) => void;
 	onPaneClick?: () => void;
+	/** Clears the red rings a rejected save or test run left behind — Escape. */
+	onClearNodeErrors?: () => void;
 	restoredViewport?: Viewport;
 	viewportRestoreVersion?: number;
 	centerStartVersion?: number;

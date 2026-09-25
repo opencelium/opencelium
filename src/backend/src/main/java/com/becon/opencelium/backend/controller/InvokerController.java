@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
@@ -55,15 +54,6 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-import java.io.File;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Objects;
@@ -203,26 +193,13 @@ public class InvokerController {
     public ResponseEntity<?> save(@RequestBody InvokerXMLResource invokerXMLResource) throws Exception {
         Document doc = convertStringToXMLDocument(invokerXMLResource.getXml());
         Objects.requireNonNull(doc);
-        XPathFactory xPathFactory = XPathFactory.newInstance();
-        XPath xpath = xPathFactory.newXPath();
-        XPathExpression expression = xpath.compile("/invoker/name");
-        String filename = expression.evaluate(doc);
-        if (invokerService.existsByName(filename)) {
-            throw new RuntimeException("INVOKER_ALREADY_EXISTS");
-        }
 
-        try {
-            TransformerFactory tFactory = TransformerFactory.newInstance();
-            Transformer transformer = tFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File(PathConstant.INVOKER + "/" + filename + ".xml"));
-            transformer.transform(source, result);
+        // The name becomes a file name ('<name>.xml') and the key connectors refer to, so the
+        // service validates and normalizes it before anything is written to disk.
+        String filename = invokerService.createInvokerFile(doc);
 
-            // update sync information for new invoker file
-            invokerSyncService.updateSync(filename);
-        } catch (TransformerException ex) {
-            throw new RuntimeException(ex);
-        }
+        // update sync information for new invoker file
+        invokerSyncService.updateSync(filename);
 
         try {
             invokerService.refresh();

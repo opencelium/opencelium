@@ -3,3 +3,13 @@
     border-radius: var(--radius-md);
     color: var(--color-text-primary);
 }
+
+.ant-textarea-custom:disabled,
+.ant-textarea-custom.ant-input-disabled {
+    color: var(--color-text-secondary) !important;
+    -webkit-text-fill-color: var(--color-text-secondary) !important;
+    background-color: var(--color-background-disabled) !important;
+    border-color: var(--color-border-subtle) !important;
+    opacity: 1 !important;
+    cursor: default !important;
+}

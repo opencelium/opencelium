@@ -3,7 +3,7 @@ import ThemeContext from "@shared/theme/context/ThemeContext.tsx";
 import {applyTheme} from "@shared/theme/applyTheme.ts";
 import {buildTheme} from "@shared/theme/buildTheme.ts";
 import {themeRegistry, type ThemeDefinition} from "@shared/theme/registry/themeRegistry.ts";
-import {registerThemeSetter} from "@shared/theme/themeController.ts";
+import {registerThemeRefresher, registerThemeSetter} from "@shared/theme/themeController.ts";
 import {readStoredThemeId, storeThemeId, THEME_STORAGE_KEY} from "@shared/theme/themeStorage.ts";
 import {DEVICE_THEME_ID, type ThemeMode} from "@shared/theme/types.ts";
 
@@ -56,6 +56,10 @@ export const ThemeProvider: React.FC<{
 
     // Expose setTheme to non-React call sites (command palette executors).
     useEffect(() => registerThemeSetter(setTheme), [setTheme]);
+
+    // Same bridge for a re-registered definition (org theme arriving from the server):
+    // the id is unchanged, so only the version bump can pick up the new palette.
+    useEffect(() => registerThemeRefresher(() => setVersion(v => v + 1)), []);
 
     // Sync the theme across tabs: the `storage` event fires only in *other*
     // tabs/windows, so picking up the new id here mirrors a change made

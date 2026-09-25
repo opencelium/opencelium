@@ -5,6 +5,8 @@ import type { TextareaComponent } from './Textarea.types';
 export const MaterialTextarea: TextareaComponent = ({
     textareaRef,
     error,
+    disabled,
+    readOnly,
     testId,
     ...props
 }) => {
@@ -13,6 +15,7 @@ export const MaterialTextarea: TextareaComponent = ({
             {...props}
             multiline
             minRows={3}
+            disabled={disabled || readOnly}
             inputRef={textareaRef}
             error={error}
             inputProps={{ 'data-testid': testId }}

@@ -5,6 +5,8 @@ import com.becon.opencelium.backend.exception.ApplicationConfigValidationExcepti
 import com.becon.opencelium.backend.exception.ApplicationConfigWriteException;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -56,6 +58,25 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         String uri = ((ServletWebRequest) req).getRequest().getRequestURI();
         return ResponseEntity.internalServerError()
                 .body(new ErrorResource(ex, HttpStatus.INTERNAL_SERVER_ERROR, uri));
+    }
+
+    /**
+     * Handles constraint violations raised on method parameters of {@code @Validated} controllers
+     * (e.g. an uploaded file exceeding the size allowed by {@code @FileValidator}).
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> constraintViolationHandler(ConstraintViolationException ex, WebRequest req) {
+        String uri = ((ServletWebRequest) req).getRequest().getRequestURI();
+        ErrorResource errorResource = new ErrorResource();
+        errorResource.setStatus(HttpStatus.BAD_REQUEST);
+        errorResource.setError(HttpStatus.BAD_REQUEST.name());
+        errorResource.setMessage(ex.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining("; ")));
+        errorResource.setTimestamp(new Date());
+        errorResource.setPath(uri);
+        return ResponseEntity.badRequest().body(errorResource);
     }
 
     /**

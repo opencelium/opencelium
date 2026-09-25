@@ -90,7 +90,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String sessionId = jwtTokenUtil.extractSessionId(token);
 
         Optional<User> optionalUser;
-        if (EmailUtility.isEmail(principal)) {
+        if (EmailUtility.isValid(principal)) {
             optionalUser = userService.findByEmail(principal);
         } else {
             optionalUser = userService.findByUsername(principal);

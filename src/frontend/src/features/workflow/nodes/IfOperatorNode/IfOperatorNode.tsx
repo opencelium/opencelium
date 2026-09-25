@@ -33,8 +33,8 @@ export function IfOperatorNode({ id, data, selected, dragging }: NodeProps<IfWor
 				suppressTooltip={dragging || data.isAnyNodeDragging}
 				onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)}
 			/>
-			<div className='ifFalseLabel'>{t('node.branchFalse')}</div>
-			<div className='ifTrueLabel'>{t('node.branchTrue')}</div>
+			<div className={`ifContinueLabel ${data.testRunActiveBranch === 'continue' ? 'ifBranchLabelActive' : ''}`}>{t('node.branchContinue')}</div>
+			<div className={`ifTrueLabel ${data.testRunActiveBranch === 'true' ? 'ifBranchLabelActive' : ''}`}>{t('node.branchTrue')}</div>
 
 			<Handle id='left' type='target' position={Position.Left} className='handleInvisible' />
 			<Handle id='top' type='target' position={Position.Top} className='handleInvisible' />
