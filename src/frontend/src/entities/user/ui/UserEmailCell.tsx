@@ -11,7 +11,7 @@ const wrapperStyle = {display: 'inline-flex', alignItems: 'center', gap: 8} as c
 
 export const UserEmailCell = ({row, value}: Props) => (
     <span style={wrapperStyle}>
-        <EntityAvatar path={row.userDetail?.profilePicture} fallbackIcon="user" fit="cover" />
+        <EntityAvatar path={row.userDetail?.profilePicture} fallbackIcon="user" fit="cover" imageSize={20} />
 
         <TruncatedTextCell value={value} />
     </span>

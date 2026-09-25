@@ -10,6 +10,8 @@ type Props = {
     size?: number
     /** `contain` insets a logo inside the disc; `cover` fills it (photos). */
     fit?: 'contain' | 'cover'
+    /** Overrides the derived `<img>` size, decoupling it from the disc's `size`. */
+    imageSize?: number
 }
 
 // Inset so a contained logo doesn't touch the disc edge.
@@ -31,11 +33,11 @@ const circleStyle = (size: number, hasImage: boolean): CSSProperties => ({
 })
 
 /** An entity's stored image on a disc, falling back to a generic glyph when it has none. */
-export const EntityAvatar = ({path, fallbackIcon, size = 28, fit = 'contain'}: Props) => {
+export const EntityAvatar = ({path, fallbackIcon, size = 25, fit = 'contain', imageSize}: Props) => {
     const resolved = resolveStorageUrl(path)
     const [failedSrc, setFailedSrc] = useState<string | null>(null)
     const hasImage = resolved !== null && resolved !== failedSrc
-    const imageSize = fit === 'cover' ? size : size - CIRCLE_PADDING * 2
+    const resolvedImageSize = imageSize ?? (fit === 'cover' ? size : size - CIRCLE_PADDING * 2)
 
     return (
         <span style={circleStyle(size, hasImage)}>
@@ -45,7 +47,7 @@ export const EntityAvatar = ({path, fallbackIcon, size = 28, fit = 'contain'}: P
                     alt=""
                     loading="lazy"
                     onError={() => setFailedSrc(resolved)}
-                    style={{objectFit: fit, display: 'block', width: imageSize, height: imageSize}}
+                    style={{objectFit: fit, display: 'block', width: resolvedImageSize, height: resolvedImageSize, borderRadius: '50%'}}
                 />
             ) : (
                 <Icon name={fallbackIcon} size={Math.round(size / 2)} color="secondary" />
