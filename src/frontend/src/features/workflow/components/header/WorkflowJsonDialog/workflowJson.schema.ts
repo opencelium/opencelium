@@ -159,7 +159,8 @@ const flowchartEdgeSchema = z.strictObject({
 });
 
 export const workflowJsonSchema = z.strictObject({
-	connectionId: positiveIdSchema.optional(), title: z.string().min(1), name: z.string().min(1),
+	connectionId: positiveIdSchema.optional(), title: z.string().min(1),
+	name: z.string().min(1).optional(),
 	description: z.string(), categoryId: positiveIdSchema.nullable(),
 	fieldBinding: z.array(fieldBindingSchema),
 	fromConnector: z.strictObject({
