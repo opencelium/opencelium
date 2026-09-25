@@ -243,11 +243,11 @@
       "description": "Es gibt keine Konnektoren, die zu dieser Suche passen."
     },
     "connectorStatus": {
-      "up": "Verbindungstest erfolgreich — dieser Connector ist einsatzbereit.",
-      "authFailed": "Verbindungstest fehlgeschlagen — die Zugangsdaten des Connectors wurden abgelehnt.",
-      "down": "Verbindungstest fehlgeschlagen — der Connector konnte nicht erreicht werden.",
+      "up": "Connector-Test erfolgreich — dieser Connector ist einsatzbereit.",
+      "authFailed": "Connector-Test fehlgeschlagen — die Zugangsdaten des Connectors wurden abgelehnt.",
+      "down": "Connector-Test fehlgeschlagen — der Connector konnte nicht erreicht werden.",
       "unknown": "Dieser Connector wurde noch nicht getestet.",
-      "failedWithReason": "Verbindungstest fehlgeschlagen. Fehler: \"{{reason}}\".",
+      "failedWithReason": "Connector-Test fehlgeschlagen. Fehler: \"{{reason}}\".",
       "checkedAt": "{{message}} Geprüft {{time}}."
     },
     "methodsEmpty": {

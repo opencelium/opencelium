@@ -34,12 +34,13 @@ export function StepFormLayout({
     hideSubmit,
     hideHeader,
     compact,
+    initialStep = 0,
 }: GenericStepFormProps) {
     const {isTabletOrMobile} = useBreakpoints();
     const {t: tEntities} = useI18n('entities')
     const confirm = useConfirm()
     const ref = useRef(null);
-    const [currentStep, setCurrentStep] = useState(0)
+    const [currentStep, setCurrentStep] = useState(initialStep)
 
     const [isSuccess, setIsSuccess] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)

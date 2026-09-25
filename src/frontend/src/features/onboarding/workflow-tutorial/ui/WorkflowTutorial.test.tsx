@@ -285,7 +285,12 @@ describe('WorkflowTutorial', () => {
         expect(view.getByTestId('step').textContent).toBe(at('username'))
         closeMethodDialog()
 
-        // The graph is finished; from here the run over it is the subject.
+        // The graph is finished. The two histories are read rather than used, so both
+        // are confirmed by hand before the run over it becomes the subject.
+        await showing('changeHistory')
+        fireEvent.click(view.getByTestId('next'))
+        await showing('versionHistory')
+        fireEvent.click(view.getByTestId('next'))
         await showing('testrun')
         expect(view.queryByTestId('next')).toBeNull()
         startRun()
@@ -347,9 +352,9 @@ describe('WorkflowTutorial', () => {
         closeMethodDialog()
         debugRun()
         scheduleIt()
-        // The pace, the tree, the card and the sidebar entry have nothing to detect,
-        // so they are acknowledged one at a time.
-        for (let step = 0; step < 4; step += 1) {
+        // The two histories, the pace, the tree, the card and the sidebar entry have
+        // nothing to detect, so they are acknowledged one at a time.
+        for (let step = 0; step < 6; step += 1) {
             await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
             fireEvent.click(view.getByTestId('next'))
         }
@@ -457,6 +462,36 @@ describe('WorkflowTutorial', () => {
             view.unmount()
         })
 
+        // Exit dismisses at once but drops the query in a router transition, so for one
+        // render the tutorial is dismissed with the parameter still in the URL — which
+        // used to start it straight back up.
+        it('stays closed when exited after being started from the URL', async () => {
+            useWorkflowTutorialStore.setState({ requested: false })
+            const view = renderTutorial('/workflow/create?tutorialStep=schedules')
+            await waitFor(() => expect(useWorkflowTutorialStore.getState().requested).toBe(true))
+
+            fireEvent.click(view.getByTestId('exit'))
+
+            await new Promise(resolve => setTimeout(resolve, 30))
+            expect(useWorkflowTutorialStore.getState().requested).toBe(false)
+            expect(view.queryByTestId('step')).toBeNull()
+            view.unmount()
+        })
+
+        // A testing aid: a production build must not let a URL start or skip the tutorial.
+        it('is ignored outside development', async () => {
+            vi.stubEnv('DEV', false)
+            try {
+                useWorkflowTutorialStore.setState({ requested: false })
+                const view = renderTutorial('/workflow/create?tutorialStep=schedules')
+                await new Promise(resolve => setTimeout(resolve, 30))
+                expect(useWorkflowTutorialStore.getState().requested).toBe(false)
+                view.unmount()
+            } finally {
+                vi.unstubAllEnvs()
+            }
+        })
+
         it('leaves an unknown name to open at the beginning', async () => {
             const view = renderTutorial('/workflow/create?tutorialStep=nope')
             const at = (id: string) => String(TUTORIAL_STEPS.findIndex(step => step.id === id))
@@ -491,7 +526,7 @@ describe('WorkflowTutorial', () => {
         closeMethodDialog()
         debugRun()
         scheduleIt()
-        for (let step = 0; step < 4; step += 1) {
+        for (let step = 0; step < 6; step += 1) {
             await waitFor(() => expect(view.getByTestId('next')).toBeTruthy())
             fireEvent.click(view.getByTestId('next'))
         }

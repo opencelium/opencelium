@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useIsAdmin } from '@features/auth/useIsAdmin'
 import { useTheme } from '@shared/theme/hooks/useTheme'
@@ -44,8 +44,12 @@ export function WorkflowTutorial() {
     const [acknowledged, setAcknowledged] = useState(0)
 
     const onRoute = location.pathname.startsWith(TUTORIAL_ROUTE)
-    /** A step named in the query string to open on — see resolveStepFloor. */
-    const floor = resolveStepFloor(location.search)
+    /**
+     * A step named in the query string to open on — see resolveStepFloor. A testing
+     * aid for development only: a production build ignores the parameter, and Vite
+     * compiles the check down to `null` there.
+     */
+    const floor = import.meta.env.DEV ? resolveStepFloor(location.search) : null
     const active = isAdmin && requested && onRoute
     const progress = useCanvasProgress(active)
     // Read off the canvas, so finishing a step's task opens the next one immediately.
@@ -56,11 +60,19 @@ export function WorkflowTutorial() {
 
     // A URL naming a step starts the tutorial as well as jumping into it, so the
     // address bar is enough to reach one — the palette command would otherwise have to
-    // be run first, and it navigates here without the parameter. `close()` drops the
-    // query along with the route, so dismissing cannot re-trigger this.
+    // be run first, and it navigates here without the parameter.
+    //
+    // Once per visit, keyed on `location.key`: `close()` dismisses and then navigates
+    // away from the query, but React Router applies the navigation in a transition
+    // while the store's dismiss renders at once — so for one render the tutorial is
+    // dismissed with the query still in the URL, and without this it would restart.
+    const autoStartedKeyRef = useRef<string | null>(null)
     useEffect(() => {
-        if (isAdmin && onRoute && floor !== null && !requested) request()
-    }, [isAdmin, onRoute, floor, requested, request])
+        if (!isAdmin || !onRoute || floor === null || requested) return
+        if (autoStartedKeyRef.current === location.key) return
+        autoStartedKeyRef.current = location.key
+        request(floor)
+    }, [isAdmin, onRoute, floor, requested, request, location.key])
 
     useEffect(() => {
         const root = document.documentElement
@@ -134,6 +146,8 @@ export function WorkflowTutorial() {
                 anchor={step.anchor}
                 example={step.example}
                 picks={step.picks}
+                entries={step.entries}
+                shortcuts={step.shortcuts}
                 index={index}
                 total={TUTORIAL_STEPS.length}
                 // Only the undetectable steps get a Next; the rest advance on their own.

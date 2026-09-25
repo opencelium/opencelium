@@ -109,12 +109,12 @@
         "header": "Credentials",
         "subheader": "It contains invoker-specific configuration fields required to authenticate and communicate with the target system.",
         "test": {
-          "button": "Test connection",
-          "success": "Connection test succeeded",
-          "needsMasterPassword": "Enter the master password to test the connection with the stored credentials.",
+          "button": "Test connector",
+          "success": "Connector test succeeded",
+          "needsMasterPassword": "Enter the master password to run the connector test with the stored credentials.",
           "confirm": {
-            "title": "Connection test failed",
-            "message": "The connection test failed. Do you still want to save this connector?"
+            "title": "Connector test failed",
+            "message": "The connector test failed. Do you still want to save this connector?"
           }
         },
         "remote": {

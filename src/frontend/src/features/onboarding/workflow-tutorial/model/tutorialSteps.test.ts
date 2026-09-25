@@ -501,12 +501,82 @@ describe('workflow tutorial steps', () => {
             .toBe('[data-testid="workflow-schedules-pill"]')
     })
 
+    // Read, not used: a jump or a restored version would take nodes off the canvas the
+    // earlier steps are counting, so both wait for Next like the other reading steps.
+    it('walks to each history drawer through the header menu, and waits for Next', () => {
+        expect(byId('changeHistory').chain.map(item => item.target)).toEqual([
+            '[data-testid="workflow-menu"]',
+            '[data-testid="workflow-menu-item-change-history"]',
+            '[data-testid="workflow-change-history-panel"]',
+        ])
+        expect(byId('versionHistory').chain.at(-1)!.target).toBe('[data-testid="workflow-history-panel"]')
+        expect(link('versionHistory', 'workflow-menu-item-version-history').include).toEqual(['.headerMenu'])
+        expect(byId('changeHistory').isDone).toBeUndefined()
+        expect(byId('versionHistory').isDone).toBeUndefined()
+    })
+
+    // Once the graph is finished, and before the run over it.
+    it('sits between the finished graph and the test run', () => {
+        const ids = TUTORIAL_STEPS.map(step => step.id)
+        expect(ids.slice(ids.indexOf('username'), ids.indexOf('testrun') + 1)).toEqual(
+            ['username', 'changeHistory', 'versionHistory', 'testrun'])
+    })
+
+    // Left open from the step before, the change history's overlay would swallow the
+    // click on the menu button, so its close is what the version step points at first.
+    it('closes a still-open change history before pointing at the menu', () => {
+        mount(`<aside data-testid="workflow-change-history-panel">`
+            + row('workflow-change-history-close') + '</aside>'
+            + row('workflow-menu'))
+        expect(resolveHighlight(byId('versionHistory').chain, progress())?.target)
+            .toBe('[data-testid="workflow-change-history-close"]')
+
+        mount(row('workflow-menu'))
+        expect(resolveHighlight(byId('versionHistory').chain, progress())?.target)
+            .toBe('[data-testid="workflow-menu"]')
+    })
+
+    it('samples the change history in the panel\'s own words, with the fixtures\' methods', () => {
+        const entries = byId('changeHistory').entries!
+        const [lookup, create] = TUTORIAL_CONNECTORS[1].invoker.operations
+        expect(entries).toEqual([
+            { labelKey: 'undoHistory.change.nodeAdded', values: { name: create.name } },
+            { labelKey: 'undoHistory.change.methodUrl', values: { name: lookup.name } },
+            { labelKey: 'undoHistory.change.initial' },
+        ])
+        expect(TUTORIAL_STEPS.filter(step => step.entries).map(step => step.id)).toEqual(['changeHistory'])
+    })
+
+    it('shows the editor\'s undo and redo bindings on the change history step', () => {
+        expect(byId('changeHistory').shortcuts).toEqual([
+            { combos: [['mod', 'z']], labelKey: 'actions.undo' },
+            { combos: [['mod', 'shift', 'z'], ['mod', 'y']], labelKey: 'actions.redo' },
+        ])
+        expect(TUTORIAL_STEPS.filter(step => step.shortcuts).map(step => step.id)).toEqual(['changeHistory'])
+    })
+
     describe('resolveStepFloor', () => {
         it('reads the step named in the query string', () => {
             expect(resolveStepFloor('?tutorialStep=schedules'))
                 .toBe(TUTORIAL_STEPS.findIndex(step => step.id === 'schedules'))
             expect(resolveStepFloor('?foo=1&tutorialStep=summary'))
                 .toBe(TUTORIAL_STEPS.length - 1)
+        })
+
+        // 1-based, as the pill's counter prints it.
+        it('reads a step number as the counter shows it', () => {
+            expect(resolveStepFloor('?tutorialStep=1')).toBe(0)
+            expect(resolveStepFloor('?tutorialStep=10'))
+                .toBe(TUTORIAL_STEPS.findIndex(step => step.id === 'username'))
+            expect(resolveStepFloor(`?tutorialStep=${TUTORIAL_STEPS.length}`))
+                .toBe(TUTORIAL_STEPS.length - 1)
+        })
+
+        it('ignores a number outside the steps', () => {
+            expect(resolveStepFloor('?tutorialStep=0')).toBeNull()
+            expect(resolveStepFloor(`?tutorialStep=${TUTORIAL_STEPS.length + 1}`)).toBeNull()
+            expect(resolveStepFloor('?tutorialStep=-3')).toBeNull()
+            expect(resolveStepFloor('?tutorialStep=2.5')).toBeNull()
         })
 
         // The fallback is the tutorial opening at the beginning, which is where it
@@ -599,9 +669,9 @@ describe('workflow tutorial steps', () => {
             const finished = progress({ ...BUILT, ...RUN, ...SCHEDULED })
             const last = TUTORIAL_STEPS.length - 1
             // Acknowledged only past the introduction, it holds on the first built
-            // step there is nothing to detect for — the pace — rather than skipping
-            // to the end.
-            expect(resolveStepIndex(finished, PAST_INTRO)).toBe(at('speed'))
+            // step there is nothing to detect for — the change history — rather than
+            // skipping to the end.
+            expect(resolveStepIndex(finished, PAST_INTRO)).toBe(at('changeHistory'))
             // and once those are passed it stays on the last, however many times it
             // is acknowledged.
             expect(resolveStepIndex(finished, TUTORIAL_STEPS.length)).toBe(last)
@@ -614,15 +684,19 @@ describe('workflow tutorial steps', () => {
 
         // The graph is what the first half is read from; the run over it is not part
         // of the graph, so the test-run steps have to hold the tutorial on their own.
-        it('asks for the run once the graph is finished', () => {
+        it('asks for the run once the graph is finished and both histories are read', () => {
             const built = progress(BUILT)
-            expect(resolveStepIndex(built, PAST_INTRO)).toBe(at('testrun'))
-            expect(resolveStepIndex({ ...built, testRunStarted: true }, PAST_INTRO)).toBe(at('pause'))
-            expect(resolveStepIndex({ ...built, testRunStarted: true, testRunPaused: true }, PAST_INTRO))
+            // the histories come first, and hold until acknowledged
+            expect(resolveStepIndex(built, PAST_INTRO)).toBe(at('changeHistory'))
+            expect(resolveStepIndex(built, at('versionHistory'))).toBe(at('versionHistory'))
+            const READ = at('testrun')
+            expect(resolveStepIndex(built, READ)).toBe(at('testrun'))
+            expect(resolveStepIndex({ ...built, testRunStarted: true }, READ)).toBe(at('pause'))
+            expect(resolveStepIndex({ ...built, testRunStarted: true, testRunPaused: true }, READ))
                 .toBe(at('step'))
             expect(resolveStepIndex({
                 ...built, testRunStarted: true, testRunPaused: true, testRunStepped: true,
-            }, PAST_INTRO)).toBe(at('iteration'))
+            }, READ)).toBe(at('iteration'))
             // no acknowledgement can skip a step the canvas can still detect
             expect(resolveStepIndex(built, TUTORIAL_STEPS.length)).toBe(at('testrun'))
         })

@@ -273,6 +273,16 @@
         "body": "Open createClient's body and find username. Hover its row and press the reference icon, then pick getCustomers, customers, (i loop), firstName. Do it again for lastName. Two references in one field are wrapped in an enhancement automatically — unfold Variable Information to see them listed as VAR_0 and VAR_1, in that order. Join them with a space in the script, then close the dialog.",
         "note": "Add both references, unfold the variables, edit the script, then close"
       },
+      "changeHistory": {
+        "title": "Every edit, in order",
+        "body": "Open ⋯ in the header, then Change History: every edit of this session, newest first. Click a row and the canvas jumps back to that moment; the newer rows stay in grey until your next edit, so you can jump forward again. The keyboard does the same one step at a time. The list is not saved with the workflow. Just look for now — going back here would undo the tutorial's own steps.",
+        "note": "Open the change history, then continue"
+      },
+      "versionHistory": {
+        "title": "Every save, kept",
+        "body": "The change history ends when you leave the editor; the version history does not. Open ⋯, then Version History. Every Save stores a version on the server — when, by whom, and the comment typed in the save dialog. The versions listed here are examples of how this workflow could have grown; the tutorial itself never saves. On a real workflow, clicking a version loads it onto the canvas without touching the server until you save again — here it only marks the row. The comment can be edited right on the row, and its ⋯ menu copies the snapshot id, downloads the version as a template or deletes it.",
+        "note": "Open the version history, then continue"
+      },
       "testrun": {
         "title": "Run it, without running it",
         "body": "Press play on the start node and choose Debug mode. The run streams its log lines as fast as the engine produces them, and the canvas replays them at a pace you can follow — a dot travels the edge, then the step it feeds lights up. Nothing leaves the browser: the two invented systems answer from fixtures.",
@@ -327,6 +337,14 @@
         "title": "That is a working workflow",
         "body": "getCustomers lists everyone, the loop walks them one at a time, getClientByEmail asks the second system about the current customer by reference, the IF lets only the unknown ones through, and createClient fills its fields from the customer being walked. Methods, scope, references, enhancements — every real integration is these four ideas; the test run is how you check them, and the schedule is what runs them when nobody is watching. Nothing here was saved, neither the graph nor the schedule; build the same shape with your own connectors.",
         "note": "Invented connectors, so there is nothing to keep"
+      }
+    },
+    "versionHistory": {
+      "samples": {
+        "username": "Join first and last name into the new client's username",
+        "condition": "Only create clients that do not exist yet",
+        "lookup": "Look up every customer in the support system",
+        "customers": "Read all customers from the CRM"
       }
     }
   },
