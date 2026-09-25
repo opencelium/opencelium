@@ -28,6 +28,7 @@ import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
+import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
@@ -42,6 +43,7 @@ import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.StringUtility;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
@@ -67,6 +69,7 @@ public class ConnectorServiceImp implements ConnectorService {
     private final StorageService storageService;
     private final ConnectorHealthService connectorHealthService;
     private final SecurityAuditorAware securityAuditorAware;
+    private final EntityManager entityManager;
 
     public ConnectorServiceImp(
             ConnectorProps connectorProps, ConnectorRepository connectorRepository,
@@ -77,7 +80,8 @@ public class ConnectorServiceImp implements ConnectorService {
             StorageService storageService,
             // @Lazy breaks the constructor cycle: the health service itself depends on this service.
             @Lazy ConnectorHealthService connectorHealthService,
-            SecurityAuditorAware securityAuditorAware
+            SecurityAuditorAware securityAuditorAware,
+            EntityManager entityManager
     ) {
         this.connectorProps = connectorProps;
         this.connectorRepository = connectorRepository;
@@ -88,18 +92,22 @@ public class ConnectorServiceImp implements ConnectorService {
         this.storageService = storageService;
         this.connectorHealthService = connectorHealthService;
         this.securityAuditorAware = securityAuditorAware;
+        this.entityManager = entityManager;
     }
 
     @Override
     public Optional<Connector> findById(int id) {
         Optional<Connector> optional = connectorRepository.findById(id);
-        try {
-            optional.ifPresent(this::decrypt);
+        if (optional.isEmpty()) {
             return optional;
-        } catch (RuntimeException e) {
-            Connector saved = save(optional.get());
-            return Optional.of(saved);
         }
+        Connector connector = optional.get();
+        try {
+            decrypt(connector);
+        } catch (RuntimeException e) {
+            repairRequestData(connector);
+        }
+        return optional;
     }
 
     @Override
@@ -185,8 +193,13 @@ public class ConnectorServiceImp implements ConnectorService {
 
     @Override
     public Connector getByIdRaw(int id) {
-        return connectorRepository.findById(id)
+        return findByIdRaw(id)
                 .orElseThrow(() -> new ConnectorNotFoundException(id));
+    }
+
+    @Override
+    public Optional<Connector> findByIdRaw(int id) {
+        return connectorRepository.findById(id);
     }
 
     @Override
@@ -358,7 +371,8 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public void updateRequestData(Integer connectorId, Map<String, String> newRequestDataMap) {
 
-        Connector connector = getById(connectorId);
+        // Read the connector WITHOUT decrypting
+        Connector connector = getByIdRaw(connectorId);
 
         // Create a map of existing RequestData for quick lookup by field
         Map<String, RequestData> existingMap = connector.getRequestData().stream()
@@ -368,6 +382,8 @@ public class ConnectorServiceImp implements ConnectorService {
         Invoker invoker = invokerService.findByName(connector.getInvoker());
         Map<String, RequiredData> invokerFields = invoker.getRequiredData().stream()
                 .collect(Collectors.toMap(RequiredData::getName, rd -> rd));
+
+        List<RequestData> toSave = new ArrayList<>();
 
         // Handle updates and inserts
         for (Map.Entry<String, String> entry : newRequestDataMap.entrySet()) {
@@ -383,14 +399,14 @@ public class ConnectorServiceImp implements ConnectorService {
                 RequestData newRequestData = new RequestData(field, encoder.encrypt(value));
                 newRequestData.setConnector(connector);
                 newRequestData.setVisibility(invokerField.getVisibility());
-                existingMap.put(field, newRequestData);
+                toSave.add(newRequestData);
             } else {
                 existing.setValue(encoder.encrypt(value));
-                existingMap.put(field, existing);
+                toSave.add(existing);
             }
         }
 
-        requestDataService.saveAll(new ArrayList<>(existingMap.values()));
+        requestDataService.saveAll(toSave);
 
         // Editing request data only dirties child rows, so the connector entity itself stays
         // clean and JPA auditing never fires — stamp the audit columns explicitly.
@@ -438,6 +454,69 @@ public class ConnectorServiceImp implements ConnectorService {
 
     private void decrypt(Connector connector) {
         List<RequestData> requestData = connector.getRequestData();
-        requestData.forEach(e -> e.setValue(encoder.decrypt(e.getValue())));
+        if (requestData == null) {
+            return;
+        }
+        List<String> decrypted = new ArrayList<>(requestData.size());
+        for (RequestData entry : requestData) {
+            try {
+                decrypted.add(encoder.decrypt(entry.getValue()));
+            } catch (RuntimeException e) {
+                // Which row blocked the read is the whole question during an incident: without it
+                // the offending value has to be found by scanning the table by hand.
+                throw new WrongDecryptException(
+                        ExceptionMessages.REQUEST_DATA_DECRYPTION_FAILED
+                                .formatted(entry.getField(), connector.getId()), e);
+            }
+        }
+        // Detach before the plaintext touches the entities: inside a caller's read-write
+        // transaction the connector and its request data are managed, and dirty-checking would
+        // flush the decrypted values back to the request_data table at commit (this is how
+        // saving a connection used to leak plaintext credentials via the per-method connector
+        // validation).
+        detach(connector);
+        for (int i = 0; i < requestData.size(); i++) {
+            requestData.get(i).setValue(decrypted.get(i));
+        }
+    }
+
+    /**
+     * Evicts the connector (and, via {@code cascade = ALL}, its request data) from the
+     * persistence context so subsequent in-memory mutations can never be flushed to the
+     * database. Pending inserts/updates are flushed first — detaching would discard them.
+     * Outside a transaction the entities are already detached and this is a no-op.
+     */
+    private void detach(Connector connector) {
+        if (entityManager.isJoinedToTransaction()) {
+            entityManager.flush();
+        }
+        entityManager.detach(connector);
+    }
+
+    private void repairRequestData(Connector connector) {
+        List<RequestData> requestData = connector.getRequestData();
+        if (requestData == null) {
+            return;
+        }
+        List<String> plaintext = new ArrayList<>(requestData.size());
+        List<RequestData> repaired = new ArrayList<>();
+        for (RequestData entry : requestData) {
+            String stored = entry.getValue();
+            try {
+                plaintext.add(encoder.decrypt(stored));
+            } catch (RuntimeException e) {
+                plaintext.add(stored);
+                entry.setValue(encoder.encrypt(stored));
+                repaired.add(entry);
+            }
+        }
+        if (!repaired.isEmpty()) {
+            requestDataService.saveAll(repaired);
+        }
+        // Same hazard as decrypt(): the write-back below must never reach the database.
+        detach(connector);
+        for (int i = 0; i < requestData.size(); i++) {
+            requestData.get(i).setValue(plaintext.get(i));
+        }
     }
 }

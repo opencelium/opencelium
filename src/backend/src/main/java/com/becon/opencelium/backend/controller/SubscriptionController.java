@@ -18,6 +18,7 @@ import com.becon.opencelium.backend.api.ApiType;
 import com.becon.opencelium.backend.api.module.SubscriptionModule;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.crypto.Base64Utility;
+import com.becon.opencelium.backend.validation.file.FileValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +44,7 @@ import java.time.ZoneId;
 @RestController
 @RequestMapping(value = "/subs")
 @Tag(name = "Subscription")
+@Validated
 public class SubscriptionController {
 
     private final ApiClient<ServicePortal> servicePortal;
@@ -143,7 +146,9 @@ public class SubscriptionController {
     }
 
     @PostMapping(value = "/activate/license", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> activateLicense(@RequestParam("file") MultipartFile licenseKey) {
+    public ResponseEntity<?> activateLicense(
+            @FileValidator(maxSize = 10L * 1024 * 1024) @RequestParam("file") MultipartFile licenseKey
+    ) {
         String content;
         try {
             content = new String(licenseKey.getBytes(), StandardCharsets.UTF_8);

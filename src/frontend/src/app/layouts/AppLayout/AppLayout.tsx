@@ -9,8 +9,9 @@ import {useGlobalHotkeys} from "@app/hooks/useGlobalHotkeys.ts";
 type AppLayoutProps = {
     isNotCard?: boolean;
     hasNoHeader?: boolean;
+    hasNoFooter?: boolean;
 }
-export const AppLayout = ({isNotCard, hasNoHeader}: AppLayoutProps) => {
+export const AppLayout = ({isNotCard, hasNoHeader, hasNoFooter}: AppLayoutProps) => {
     useGlobalHotkeys();
 
     return (
@@ -20,7 +21,7 @@ export const AppLayout = ({isNotCard, hasNoHeader}: AppLayoutProps) => {
             <Layout style={{ height: '100vh', overflow: 'hidden' }}>
                 {!hasNoHeader && <LayoutHeader />}
                 <SubscriptionAlert />
-                <LayoutContent isNotCard={isNotCard}/>
+                <LayoutContent isNotCard={isNotCard} hasNoFooter={hasNoFooter}/>
             </Layout>
 
             <GlobalModal />

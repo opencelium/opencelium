@@ -83,7 +83,13 @@ export const connectionDefinition: EntityDefinition = {
                 type: 'update',
                 buildNavigationUrl: (_entity, value) => `/workflow/update/${encodeURIComponent(value)}`,
             },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities')
+                    return t(`${baseKey}.list.confirmDelete.message`, { title: (row as Connection).title })
+                },
+            },
         ],
     },
 
@@ -101,11 +107,9 @@ export const connectionDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.list.columns.title`,
-                // Override the list's default single-line/ellipsis cell behavior —
-                // title wraps across multiple lines instead of truncating.
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                // Override the list's default single-line cell — the title wraps
+                // across lines, still within the shared cell length limits.
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {

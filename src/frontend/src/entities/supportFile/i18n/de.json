@@ -14,6 +14,9 @@
       "tooltip": "Support-Datei herunterladen",
       "success": "Support-Datei heruntergeladen",
       "error": "Support-Datei konnte nicht heruntergeladen werden"
+    },
+    "confirmDelete": {
+      "message": "Sind Sie sicher, dass Sie die Support-Datei \"{{filePath}}\" löschen möchten?"
     }
   },
   "events": {

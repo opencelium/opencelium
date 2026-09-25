@@ -8,6 +8,7 @@ import { resolveCategoryNames } from '@entities/category/command/resolvers/resol
 import { resolveCategoryIds } from '@entities/category/command/resolvers/resolveCategoryIds'
 import { findCategoryIdByName } from '@entities/category/command/categoryCache'
 import type {Category, CategoryDto} from "@entities/category/model/types.ts";
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'category'
 
@@ -44,7 +45,13 @@ export const categoryDefinition: EntityDefinition = {
         actions: [
             { type: 'view' },
             { type: 'update' },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities')
+                    return t(`${baseKey}.list.confirmDelete.message`, { name: (row as Category).name })
+                },
+            },
         ],
     },
 
@@ -99,9 +106,7 @@ export const categoryDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {

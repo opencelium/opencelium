@@ -1,0 +1,148 @@
+.bodyLegacyLayout {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+
+.bodyLegacyLeftPane {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 52%;
+  max-width: 74%;
+  min-height: 0;
+  min-width: 32%;
+}
+
+.bodyLegacyEnhancementPane {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.bodyLegacyLeft {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding-right: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bodyLegacyLeftCollapse {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyLeftCollapse .ant-collapse-item {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.bodyLegacyLeftCollapse .ant-collapse-item .ant-collapse-panel{
+  overflow-y: auto;
+}
+
+.bodyLegacyLeftCollapse .ant-collapse-item-active {
+  flex: 1;
+}
+
+.bodyLegacyLeftCollapse .ant-collapse-item-active > .ant-collapse-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyLeftCollapse .ant-collapse-item-active > .ant-collapse-panel > .ant-collapse-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.bodyLegacyJsonWrap {
+  position: relative;
+  min-height: 160px;
+  overflow: auto;
+  background: var(--color-background-input);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+}
+
+.bodyLegacyXmlContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+}
+
+.bodyLegacyXmlContentMaximized {
+  z-index: 1100;
+  padding: 8px;
+  background: var(--color-background-surface);
+}
+
+.bodyLegacyXmlToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bodyLegacyXmlCard {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 12px;
+}
+
+.bodyLegacyXmlCard > .ant-card-body {
+  display: grid;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.bodyLegacyXmlRaw {
+  height: 100% !important;
+  min-height: 0 !important;
+  resize: none;
+}
+
+.bodyLegacyJsonWrap .copy-to-clipboard-container,
+.bodyLegacyJsonWrap .click-to-edit,
+.bodyLegacyJsonWrap .click-to-reference {
+  align-items: center;
+  margin-top: -1px !important;
+  margin-left: 2px !important;
+  margin-right: 4px !important;
+  vertical-align: middle;
+}
+
+.bodyLegacyJsonWrap .click-to-remove {
+  align-items: center;
+  margin-top: -1px !important;
+  margin-left: 0 !important;
+  margin-right: 2px !important;
+  vertical-align: middle;
+}
+
+.bodyLegacyJsonWrap .click-to-reference {
+  transform: rotate(-30deg);
+}
+
+.bodyLegacyJsonWrap .copy-to-clipboard-icon,
+.bodyLegacyJsonWrap .click-to-edit-icon,
+.bodyLegacyJsonWrap .click-to-reference-icon,
+.bodyLegacyJsonWrap .click-to-remove-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+

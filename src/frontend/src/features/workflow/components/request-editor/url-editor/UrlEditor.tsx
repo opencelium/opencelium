@@ -20,7 +20,7 @@ import './urlMethodSelect.css';
 
 import { UrlEndpointField } from './UrlEndpointField';
 import { UrlQueryParamsTable } from './UrlQueryParamsTable';
-import { LegacyBodyReferenceGenerator } from '../body-editor/LegacyBodyReferenceGenerator';
+import { LegacyBodyReferenceGenerator } from '../body-editor/LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
 
 import {
 	buildQueryFromParams,
@@ -498,6 +498,8 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				}
 				endpointArgs={endpointArgsState}
 				endpointArgsRef={endpointArgsRef}
+				connection={connection}
+				currentMethod={method}
 				divRef={endpointDivRef}
 				lastCaretRef={lastKnownCaretPosRef}
 				lastRawCaretRef={lastKnownRawCaretPosRef}
@@ -553,6 +555,8 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				readOnly={readOnly}
 				rows={queryParams}
 				endpointArgs={endpointArgsState}
+				connection={connection}
+				currentMethod={method}
 				onToggleEnabled={onToggleEnabled}
 				onChangeParam={onChangeParam}
 				onRemoveParamRow={removeParamRow}

@@ -15,6 +15,9 @@
       "tooltip": "Herunterladen",
       "success": "Vorlage heruntergeladen: {{name}}",
       "error": "Herunterladen der Vorlage fehlgeschlagen."
+    },
+    "confirmDelete": {
+      "message": "Sind Sie sicher, dass Sie die Workflowvorlage mit dem Namen \"{{name}}\" löschen möchten?"
     }
   },
   "fields": {

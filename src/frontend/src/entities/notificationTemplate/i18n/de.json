@@ -1,7 +1,10 @@
 {
   "list": {
     "title": "Benachrichtigungsvorlagen",
-    "subTitle": "Verwalten Sie wiederverwendbare Vorlagen, die für Benachrichtigungen in Laufplänen verwendet werden."
+    "subTitle": "Verwalten Sie wiederverwendbare Vorlagen, die für Benachrichtigungen in Laufplänen verwendet werden.",
+    "confirmDelete": {
+      "message": "Sind Sie sicher, dass Sie die Benachrichtigungsvorlage mit dem Namen \"{{name}}\" löschen möchten?"
+    }
   },
   "fields": {
     "name": {

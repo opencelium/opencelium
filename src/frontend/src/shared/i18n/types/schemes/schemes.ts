@@ -15,6 +15,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             update: string
             delete: string
             view: string
+            download: string
             edit: string
             ctrlEnterHint: string
             cmdEnterHint: string
@@ -24,6 +25,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             empty: string
             success: string
             failed: string
+        }
+        field: {
+            required: string
         }
         status: {
             loading: string
@@ -165,6 +169,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 message: string
             }
         }
+        footer: {
+            copyright: string
+        }
         topbar: {
             switchToGerman: string
             switchToEnglish: string
@@ -174,6 +181,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             profile: string
             createWorkflow: string
             createWorkflowHint: string
+            docs: string
         }
         user: {
             unknown: string

@@ -25,7 +25,7 @@ export function collectDescendantNodeIds(
   return visited;
 }
 
-function collectDescendantEdgeIds(
+export function collectDescendantEdgeIds(
   nodeIds: Set<string>,
   edges: WorkflowEdgeModel[],
 ): Set<string> {

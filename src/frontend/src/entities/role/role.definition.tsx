@@ -12,6 +12,7 @@ import {findRoleIdByName} from "@entities/role/command/roleCache.ts";
 import {ROLE_TAG} from "@entities/role/api/role.tags.ts";
 import {roleApi} from "@entities/role/api/roleApi.ts";
 import {selectAuthUser} from "@entities/auth/model/authSelectors.ts";
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'role';
 
@@ -45,8 +46,13 @@ export const roleDefinition: EntityDefinition = {
         bulkDelete: true,
         actions: [
             { type: 'view' },
+            { type: 'update' },
             {
                 type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    return t(`${baseKey}.list.confirmDelete.message`, { name: (row as Role).name });
+                },
                 disabledReason: (row) => {
                     const currentUser = selectAuthUser(store.getState());
                     if (!currentUser) return null;
@@ -75,12 +81,36 @@ export const roleDefinition: EntityDefinition = {
                 mappedComponents: roleModel.components,
             }
         },
-        mapToApi: ({data: {mappedComponents, ...formData}}: {data: RoleUpdateDTO}): Role => {
+        mapToApi: ({data: {mappedComponents, icon, ...formData}}: {data: RoleUpdateDTO}): Role => {
             return {
                 ...formData,
+                // The API reads `icon` back as a storage path ("./storage/files/<file>") but
+                // persists the bare filename, so echoing the fetched value straight back would
+                // nest the prefix on every save. The wizard never edits the icon — it only has
+                // to survive the round trip.
+                icon: icon ? icon.split('/').pop() ?? null : null,
                 components: mappedComponents,
             }
-        }
+        },
+        // The wizard edits two things the backend splits across two endpoints, so a
+        // submit is two writes: PUT /role/{id} owns name/description/icon, and
+        // PUT /role/{id}/component owns the component/permission matrix. Details go
+        // first as the main mutation, so a rejected name (RoleExistsException) stops
+        // the submit before any permission is rewritten.
+        actions: {
+            saveComponents: {
+                url: (ctx) => `/role/${ctx.identifier}/component`,
+                method: 'PUT',
+                // The same payload both times: each endpoint reads the part of the
+                // UserRoleResource it owns and ignores the rest.
+                mapBody: (ctx) => ctx.payload,
+            },
+        },
+        lifecycle: {
+            update: {
+                after: ['saveComponents'],
+            },
+        },
     },
 
     /* ===============================
@@ -109,6 +139,9 @@ export const roleDefinition: EntityDefinition = {
                     map: (fieldValue) => ({ name: fieldValue }),
                     transKey: `${baseKey}.fields.name.errors.name_already_exists`,
                     encodeParams: false,
+                    // On update the role's own name already exists — only re-check
+                    // uniqueness when the value actually changed from the loaded record.
+                    skipIfUnchanged: true,
                     handleResponse: (data, error) => {
                         return !data.result;
                     }
@@ -121,9 +154,7 @@ export const roleDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -144,9 +175,7 @@ export const roleDefinition: EntityDefinition = {
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
 
@@ -197,9 +226,7 @@ export const roleDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ');
                 },
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {

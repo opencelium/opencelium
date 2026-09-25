@@ -18,13 +18,17 @@ public class Loop {
     private RelationalOperator operator;
 
     public static Loop fromOperator(OperatorEx operatorEx) {
-        String expression = operatorEx.getExpression();
-        if (expression == null || expression.isBlank()) {
-            throw new RuntimeException("LOOP operator cannot have null or blank expression");
-        }
-
-        Loop loop = new Loop();
+        Loop loop = fromExpression(operatorEx.getExpression());
         loop.setIterator(operatorEx.getIterator());
+        return loop;
+    }
+
+    /**
+     * Builds a {@link Loop} from a loop {@code expression} alone (no iterator). Useful where only the
+     * iterated reference is needed — e.g. save-time validation — without an {@link OperatorEx}.
+     */
+    public static Loop fromExpression(String expression) {
+        Loop loop = new Loop();
 
         String wrappedDirectRef = ReferenceUtility.extractReference(expression, RegExpression.wrappedDirectRef);
 

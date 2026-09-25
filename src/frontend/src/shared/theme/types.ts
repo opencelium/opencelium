@@ -9,6 +9,13 @@ export type ThemeMode = 'light' | 'dark';
  */
 export const DEVICE_THEME_ID = 'device';
 
+/**
+ * Display name of that sentinel, shared by every theme picker so the wizard select and
+ * the command palette name it identically. Left untranslated like the registry's own
+ * theme labels, which are the strings it sits beside.
+ */
+export const DEVICE_THEME_LABEL = 'Device';
+
 export type UISystem = 'material' | 'ant' | 'custom';
 
 export interface SystemContextValue {

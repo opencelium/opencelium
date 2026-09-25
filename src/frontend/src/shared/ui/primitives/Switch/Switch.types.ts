@@ -20,6 +20,9 @@ export interface SwitchProps {
         on: ReactNode,
         off: ReactNode,
     };
+    /** Where the label (text/textKey) renders relative to the switch knob.
+     * Defaults to 'right'. */
+    textPosition?: 'left' | 'right';
     /** Stable selector for e2e tests; emitted as `data-testid`. */
     testId?: string;
 }

@@ -1,18 +1,15 @@
-import { MoreHorizontal } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CommandPalette } from '@widgets/CommandPalette/CommandPalette';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { workflowCommandBridgeStore } from '../../command/workflowCommandBridge';
-import { HeaderMenu } from '../header/HeaderMenu';
-import { HeaderSaveDialog } from '../header/HeaderSaveDialog';
-import { headerMenuItems } from '../header/headerMenuItems';
+import { HeaderSaveDialog } from '../header/HeaderSaveDialog/HeaderSaveDialog';
+import { headerMenuItems } from '../header/HeaderMenu/headerMenuItems';
+import { WorkflowHeaderActions } from './WorkflowHeaderActions';
 import { WorkflowHeaderInfo } from './WorkflowHeaderInfo';
 import type { WorkflowHeaderProps } from './WorkflowHeader.types';
 import { useWorkflowHeaderState } from './useWorkflowHeaderState';
 
 export function WorkflowHeader({
 	onOpenHistory, onSave, onMenuItemSelect, menuLoadingItemId,
-	saveDisabled = false, readOnly = false, loading = false, schedulesSlot, hasSavedConnection = false, ...stateProps
+	saveDisabled = false, readOnly = false, testRunLocked = false, loading = false, schedulesSlot, hasSavedConnection = false, ...stateProps
 }: WorkflowHeaderProps) {
 	const { t } = useI18n('workflow');
 	const state = useWorkflowHeaderState({
@@ -22,28 +19,38 @@ export function WorkflowHeader({
 		onDescriptionCommitted: (title, description) =>
 			onSave({ title, description, comment: t('saveDialog.autoDescriptionChangeComment', { description }) }),
 	});
-	const [menuOpen, setMenuOpen] = useState(false);
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [saveComment, setSaveComment] = useState('');
 	const menuItems = useMemo(
-		() => headerMenuItems.map((item) => {
-			if (item.id === 'download-template') {
-				return {
-					...item,
-					disabled: !hasSavedConnection,
-					disabledTooltipKey: 'headerMenu.downloadAsTemplateDisabledHint',
-				};
-			}
-			if (item.id === 'assign-category') {
-				return {
-					...item,
-					disabled: !hasSavedConnection,
-					disabledTooltipKey: 'headerMenu.assignCategoryDisabledHint',
-				};
-			}
-			return item;
-		}),
-		[hasSavedConnection],
+		// The change history walks the in-session undo stack, so it only exists
+		// where editing does.
+		() => headerMenuItems
+			.filter((item) => !(readOnly && item.id === 'change-history'))
+			.map((item) => {
+				if (testRunLocked && (item.id === 'assign-category' || item.id === 'version-history' || item.id === 'load-template')) {
+					return {
+						...item,
+						disabled: true,
+						disabledTooltipKey: 'headerMenu.testRunLockedHint',
+					};
+				}
+				if (item.id === 'download-template') {
+					return {
+						...item,
+						disabled: !hasSavedConnection,
+						disabledTooltipKey: 'headerMenu.downloadAsTemplateDisabledHint',
+					};
+				}
+				if (item.id === 'assign-category') {
+					return {
+						...item,
+						disabled: !hasSavedConnection,
+						disabledTooltipKey: 'headerMenu.assignCategoryDisabledHint',
+					};
+				}
+				return item;
+			}),
+		[hasSavedConnection, readOnly, testRunLocked],
 	);
 
 	const openSaveDialog = async () => {
@@ -74,45 +81,25 @@ export function WorkflowHeader({
 				<div className='headerInlineInfo'>
 					<WorkflowHeaderInfo loading={loading} readOnly={readOnly} state={state} />
 				</div>
-				<div className='headerActions'>
-					<CommandPalette
-						collapsible
-						forceMode='modal'
-						hideSuccessRecommendations
-						onScopeExit={() => workflowCommandBridgeStore.getState().clearSearchHighlights()}
-						onEscapeClearScope={() => {
-							const bridge = workflowCommandBridgeStore.getState();
-							if (saveDialogOpen || bridge.hasOpenDialog()) return false;
-							if (!bridge.hasSearchHighlights()) return false;
-							bridge.clearSearchHighlights();
-							return true;
-						}}
-					/>
-					{schedulesSlot}
-					{!readOnly && (
-						<button className='primaryButton headerPrimaryButton' type='button'
-							disabled={saveDisabled} onClick={openSaveDialog} data-testid='workflow-save'>
-							{t('actions.save')}
-						</button>
-					)}
-					<div className='headerActionWrap'>
-						<button className='iconButton' type='button' data-testid='workflow-menu'
-							onClick={() => setMenuOpen((open) => !open)}>
-							<MoreHorizontal size={16} />
-						</button>
-						<HeaderMenu open={menuOpen} items={menuItems}
-							onClose={() => setMenuOpen(false)}
-							onSelect={(item) => item.id === 'version-history'
-								? onOpenHistory() : onMenuItemSelect?.(item)}
-							loadingItemId={menuLoadingItemId}
-						/>
-					</div>
-				</div>
+				<WorkflowHeaderActions items={menuItems} loadingItemId={menuLoadingItemId}
+					onOpenHistory={onOpenHistory} onMenuItemSelect={onMenuItemSelect}
+					onSave={openSaveDialog} readOnly={readOnly} saveDisabled={saveDisabled}
+					saveDialogOpen={saveDialogOpen} schedulesSlot={schedulesSlot}
+				/>
 			</div>
 			<HeaderSaveDialog open={saveDialogOpen} value={saveComment}
 				onChange={setSaveComment} onClose={closeSaveDialog} saveDisabled={saveDisabled}
 				onSave={async () => {
-					await onSave({ title: state.name, description: state.description, comment: saveComment });
+					try {
+						await onSave({ title: state.name, description: state.description, comment: saveComment });
+					} catch {
+						// A rejected save reports itself on the page behind this dialog —
+						// a sticky notification, plus a red ring on the node the backend
+						// named — so the overlay has to come down for any of it to be
+						// seen. The typed comment is kept for the retry.
+						setSaveDialogOpen(false);
+						return;
+					}
 					closeSaveDialog();
 				}}
 			/>

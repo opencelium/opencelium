@@ -1,11 +1,61 @@
 // Table.ant.tsx
 import { Table, Pagination } from 'antd';
 import { flexRender } from '@tanstack/react-table';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { findStretchColumnId, isRowClickIgnored, renderTruncatedCell } from './Table.utils';
-import type { TableColumnMeta } from './Table.types';
+import type { TableColumnMeta, TableProps } from './Table.types';
+import './tableResize.css';
 
 const PAGE_SIZE_OPTIONS = ['10', '20', '50', '100'];
+const MIN_COLUMN_WIDTH = 60;
+
+type ColumnSizingSetter = (updater: (prev: Record<string, number>) => Record<string, number>) => void;
+
+const ResizableHeaderCell: React.FC<any> = ({ resizeColumnId, currentWidth, setColumnSizing, style, children, ...rest }) => {
+    const startResize = (event: React.MouseEvent<HTMLSpanElement>) => {
+        if (!resizeColumnId || !setColumnSizing) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const handleEl = event.currentTarget;
+        const th = handleEl.closest('th');
+        const startX = event.clientX;
+        const startWidth =
+            typeof currentWidth === 'number'
+                ? currentWidth
+                : th
+                    ? Math.round(th.getBoundingClientRect().width)
+                    : MIN_COLUMN_WIDTH;
+        handleEl.classList.add('tableColResizeHandle--active');
+        const onMove = (moveEvent: MouseEvent) => {
+            const next = Math.max(MIN_COLUMN_WIDTH, startWidth + (moveEvent.clientX - startX));
+            setColumnSizing((prev: Record<string, number>) => ({ ...prev, [resizeColumnId]: next }));
+        };
+        const onUp = () => {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            document.body.style.userSelect = '';
+            handleEl.classList.remove('tableColResizeHandle--active');
+        };
+        document.body.style.userSelect = 'none';
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+    };
+
+    return (
+        <th {...rest} style={{ ...style, position: 'relative' }}>
+            {children}
+            {resizeColumnId && setColumnSizing && (
+                <span
+                    className="tableColResizeHandle"
+                    onMouseDown={startResize}
+                    onClick={(e) => e.stopPropagation()}
+                />
+            )}
+        </th>
+    );
+};
+
+const tableComponents = { header: { cell: ResizableHeaderCell } };
 
 export const AntTable = ({
     tableInstance,
@@ -15,9 +65,11 @@ export const AntTable = ({
     rowClassName,
     serverTotal,
     onRowClick,
-}) => {
+}: TableProps<any>) => {
     const rows = tableInstance.getRowModel().rows;
     const flatHeaders = tableInstance.getHeaderGroups()[0]?.headers ?? [];
+    const columnSizing = tableInstance.getState().columnSizing ?? {};
+    const setColumnSizing = tableInstance.setColumnSizing as ColumnSizingSetter;
     const rowsByKey = useMemo(() => {
         const map = new Map<string, typeof rows[number]>();
         rows.forEach((row) => map.set(row.id, row));
@@ -85,10 +137,48 @@ export const AntTable = ({
         () => findStretchColumnId(flatHeaders.map((header) => header.column)),
         [flatHeaders],
     );
+    // A column that asked to be the sink for the leftover width. With one, the
+    // trailing filler column is not appended and this column carries no width of
+    // its own, so it ends up flush against the table's right edge rather than
+    // sitting wherever its content measured.
+    // A plain scan, not a useMemo: the result is a string or null, so the memo
+    // deps below compare it by value either way, and flatHeaders is rebuilt on
+    // every render anyway.
+    const fillColumnId = flatHeaders.reduce<string | null>((found, header) =>
+        (header.column.columnDef.meta as TableColumnMeta | undefined)?.fillTrailingSpace
+            ? header.column.id
+            : found, null);
+
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const [frozen, setFrozen] = useState(false);
+    // The empty trailing column exists only to soak up the surplus once widths are
+    // frozen, so it is redundant the moment a real column volunteers for the job.
+    const hasFillerColumn = frozen && fillColumnId === null;
+
+    useLayoutEffect(() => {
+        if (frozen) return;
+        if (rows.length === 0) return;
+        const container = containerRef.current;
+        if (!container) return;
+        const measured: Record<string, number> = {};
+        flatHeaders.forEach((header: any) => {
+            const id = header.column.id;
+            // Measuring the sink would pin it and hand the surplus back to the
+            // browser to spread across everything.
+            if (id === fillColumnId) return;
+            if (columnSizing[id] !== undefined) return;
+            const th = container.querySelector<HTMLElement>(`thead th[data-col-id="${CSS.escape(id)}"]`);
+            if (th) measured[id] = Math.round(th.getBoundingClientRect().width);
+        });
+        if (Object.keys(measured).length > 0) {
+            setColumnSizing((prev) => ({ ...measured, ...prev }));
+        }
+        setFrozen(true);
+    }, [rows.length, flatHeaders, stretchColumnId, fillColumnId, columnSizing, setColumnSizing, frozen]);
 
     const columns = useMemo(
         () =>
-            flatHeaders.map((header, colIndex) => {
+            flatHeaders.map((header: any, colIndex: number) => {
                 const column = header.column;
                 const sorted = column.getIsSorted();
                 const canSort = column.getCanSort();
@@ -97,22 +187,45 @@ export const AntTable = ({
                 const align = meta?.align;
                 const isFirstColumn = colIndex === 0;
 
+                const isFillColumn = column.id === fillColumnId;
+                const resizedWidth = isFillColumn ? undefined : columnSizing[column.id];
+                // findStretchColumnId already hands the stretch to a volunteering
+                // column, which is what keeps the freeze from measuring a data
+                // column at `width: 100%` and leaving the sink no surplus to take.
+                const isStretchColumn = column.id === stretchColumnId;
+                const isResizable = meta?.resizable !== false;
+
                 return {
                     key: column.id,
                     dataIndex: column.id,
-                    ...(explicitSize !== undefined
-                        ? { width: explicitSize }
-                        : meta?.width !== undefined
-                            ? { width: meta.width }
-                            : column.id === stretchColumnId
-                                ? { width: '100%' }
-                                : {}),
+                    ...(isFillColumn
+                        ? {}
+                        : resizedWidth !== undefined
+                            ? { width: resizedWidth }
+                            : explicitSize !== undefined
+                                ? { width: explicitSize }
+                                : meta?.width !== undefined
+                                    ? { width: meta.width }
+                                    : isStretchColumn && !frozen
+                                        ? { width: '100%' }
+                                        : {}),
+                    onHeaderCell: () => ({
+                        resizeColumnId: !isResizable || (!frozen && isStretchColumn)
+                            ? undefined
+                            : column.id,
+                        currentWidth: resizedWidth,
+                        'data-col-id': column.id,
+                        className: !isResizable ? 'tableNonResizableHeaderCell' : undefined,
+                        setColumnSizing,
+                    }),
                     ...(align ? { align } : {}),
                     // Full-width rows (e.g. an empty-state placeholder under an expanded
                     // parent) collapse all data columns into one spanning cell.
                     onCell: (record: { __fullWidth?: boolean }) => {
                         if (!record?.__fullWidth) return {};
-                        return isFirstColumn ? { colSpan: columnCount } : { colSpan: 0 };
+                        return isFirstColumn
+                            ? { colSpan: columnCount + (hasFillerColumn ? 1 : 0) }
+                            : { colSpan: 0 };
                     },
                     title: (
                         <div
@@ -151,8 +264,24 @@ export const AntTable = ({
                     },
                 };
             }),
-        [flatHeaders, rows, columnCount, stretchColumnId],
+        [flatHeaders, rows, columnCount, stretchColumnId, fillColumnId, hasFillerColumn,
+            columnSizing, setColumnSizing, frozen],
     );
+
+    const displayColumns = useMemo(() => {
+        if (!hasFillerColumn) return columns;
+        return [
+            ...columns,
+            {
+                key: '__oc_spacer',
+                dataIndex: '__oc_spacer',
+                title: '',
+                onHeaderCell: () => ({}),
+                onCell: (record: { __fullWidth?: boolean }) => (record?.__fullWidth ? { colSpan: 0 } : {}),
+                render: () => null,
+            },
+        ];
+    }, [columns, hasFillerColumn]);
 
     const dataSource = useMemo(
         () => rows.map((r) => ({ ...r.original, key: r.id })),
@@ -214,11 +343,16 @@ export const AntTable = ({
                 a column below its content's natural width is to wrap the text,
                 which grows the row taller instead of scrolling horizontally — so a
                 column only ever falls back to the scrollbar below, never to wrapping. */}
-            <div style={{ overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap' }}>
-                <Table
+            <div
+                ref={containerRef}
+                className={frozen ? 'ocTableFixedLayout' : undefined}
+                style={{ overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap' }}
+            >
+                <Table<any>
                     loading={isLoading}
                     dataSource={dataSource}
-                    columns={columns}
+                    columns={displayColumns as any}
+                    components={tableComponents}
                     rowSelection={rowSelection}
                     onRow={onRow}
                     pagination={false}

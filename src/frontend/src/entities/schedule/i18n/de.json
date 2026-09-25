@@ -14,7 +14,10 @@
       "debugMode": "Debug",
       "webhook": "Webhook"
     },
-    "noExecutions": "Keine aktuellen Läufe"
+    "noExecutions": "Keine aktuellen Läufe",
+    "confirmDelete": {
+      "message": "Sind Sie sicher, dass Sie den Zeitplan löschen möchten?"
+    }
   },
   "webhook": {
     "copied": "Webhook-URL in die Zwischenablage kopiert",
