@@ -173,7 +173,7 @@ describe('cleanBrokenWorkflowReferences — every place a method can be referenc
 		const result = cleanBrokenWorkflowReferences(nodes, edges, []);
 		expect(result.brokenCount).toBe(1);
 		// A loop with no rule at all cannot be edited back into shape, so the
-		// cleanup re-seeds an empty one (see removeConditionReferenceColors).
+		// cleanup re-seeds an empty one (see removeConditionReferences).
 		const items = result.nodes[2].data.conditionConfig?.tree?.items ?? [];
 		expect(items).toHaveLength(1);
 		expect(items[0]).toMatchObject({ type: 'rule' });

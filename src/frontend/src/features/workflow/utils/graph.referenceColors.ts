@@ -31,10 +31,40 @@ const collectColors = (value: unknown, skipEnhancement: boolean) => {
 export const collectReferenceColors = (value: unknown) => collectColors(value, false);
 export const collectNodeReferenceColors = (value: unknown) => collectColors(value, true);
 
+const FULL_REFERENCE_RE = /#[A-Fa-f0-9]{6}\.\((?:request|response)\)[^\s'"{}%;]*/g;
+
+export const collectFullReferences = (value: unknown, skipEnhancement = false): string[] => {
+	if (typeof value === 'string') return value.match(FULL_REFERENCE_RE) ?? [];
+	if (Array.isArray(value)) return value.flatMap((item) => collectFullReferences(item, skipEnhancement));
+	if (value && typeof value === 'object') {
+		return Object.entries(value as Record<string, unknown>)
+			.filter(([key]) => !skipEnhancement || key !== 'enhancement')
+			.flatMap(([, nested]) => collectFullReferences(nested, skipEnhancement));
+	}
+	return [];
+};
+
+export const referenceColorOf = (reference: string) => normalizeReferenceColor(reference.split('.')[0]);
+
+/** True when `value` holds at least one reference the matcher was built to remove. */
+export type ReferenceMatcher = (value: unknown) => boolean;
+
+export const buildReferenceMatcher = (
+	refs: Pick<InvalidReference, 'sourceColor' | 'iterator'>[],
+): ReferenceMatcher => {
+	const wholeColors = new Set(refs.filter((ref) => !ref.iterator).map((ref) => ref.sourceColor));
+	const iteratorRefs = refs.filter((ref) => ref.iterator);
+	return (value) => collectFullReferences(value).some((reference) => {
+		const color = referenceColorOf(reference);
+		return wholeColors.has(color) || iteratorRefs.some((ref) =>
+			ref.sourceColor === color && reference.includes(`[${ref.iterator}]`));
+	});
+};
+
 export const uniqueReferences = (refs: InvalidReference[]) => {
 	const seen = new Set<string>();
 	return refs.filter((ref) => {
-		const key = `${ref.consumerNodeId}:${ref.sourceColor}`;
+		const key = `${ref.consumerNodeId}:${ref.sourceColor}:${ref.iterator ?? ''}`;
 		if (seen.has(key)) return false;
 		seen.add(key);
 		return true;

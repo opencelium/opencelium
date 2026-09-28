@@ -22,6 +22,7 @@ import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
 import { useEscapeKey } from './useEscapeKey';
 import { TestRunDebugControls } from './TestRunDebugControls';
 import { useBoxSelection } from './useBoxSelection';
+import { useCtrlClickContextMenu } from './useCtrlClickContextMenu';
 import { getDragSubtreeNodeIds } from '../../drag-drop/workflowDropTarget.utils';
 
 // Where the graph's top-left-most point lands in the viewport on open —
@@ -283,6 +284,7 @@ export function WorkflowCanvas({
       !isLensElementId('id' in change ? change.id : change.item.id));
     if (graphChanges.length) onNodesChange(graphChanges as NodeChange<WorkflowNodeModel>[]);
   }, [onNodesChange]);
+  const handleNodeContextMenu = useCtrlClickContextMenu(handleNodesChange, handleNodeClick);
   // A card is not selectable or draggable, but it is still double-clickable —
   // and double-click opens a method editor, which a card has no business doing.
   const handleNodeDoubleClick = onNodeDoubleClick && ((event: ReactMouseEvent,
@@ -350,6 +352,7 @@ export function WorkflowCanvas({
           onNodeDrag={onNodeDrag as OnNodeDrag<CanvasNodeModel> | undefined}
           onNodeDragStop={onNodeDragStop as OnNodeDrag<CanvasNodeModel> | undefined}
           onNodeClick={handleNodeClick}
+          onNodeContextMenu={handleNodeContextMenu}
           onNodeDoubleClick={isEditLocked ? undefined : handleNodeDoubleClick}
           onNodeMouseEnter={isLensOpen ? handleNodeMouseEnter : undefined}
           onNodeMouseLeave={isLensOpen ? handleNodeMouseLeave : undefined}
