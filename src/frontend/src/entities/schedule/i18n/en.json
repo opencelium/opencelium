@@ -133,8 +133,7 @@
     "subtitle": "Change when this schedule runs. Saving updates the schedule with the new cron expression.",
     "submit": "Save",
     "cancel": "Cancel",
-    "success": "Cron expression for connection \"{{connectionTitle}}\" was successfully updated to \"{{cronExp}}\"",
-    "error": "Failed to update cron expression"
+    "success": "Cron expression for connection \"{{connectionTitle}}\" was successfully updated to \"{{cronExp}}\""
   },
   "fields": {
     "title": {
