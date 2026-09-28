@@ -3,6 +3,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { NodeToolbar } from '../../components/node/NodeToolbar/NodeToolbar';
 import { useBindingLensNode } from '../../lens/BindingLensNodeContext';
 import { useJointRejectionMessage } from '../../hooks/useJointRejectionMessage';
+import { useIsMultiNodeSelection } from '../../hooks/useIsMultiNodeSelection';
 import { AddStepTrigger } from '../AddStepTrigger/AddStepTrigger';
 import { BindingBadge } from '../BindingBadge/BindingBadge';
 import { CommentBadge } from '../CommentBadge/CommentBadge';
@@ -23,6 +24,7 @@ export function NodeShell({
 	const onAddStep = data.onAddStep;
 	const isMethodNode = data.kind === 'connector' || data.kind === 'system';
 	const bindingLens = useBindingLensNode();
+	const isMultiSelection = useIsMultiNodeSelection();
 	const isPreview = !!data.dragGhost || !!data.dropPlaceholder;
 	// While one method's bindings are being read, every method outside them steps
 	// back: the focused view exists because all of them at once cannot be read.
@@ -95,7 +97,7 @@ export function NodeShell({
 			data-testid={testId}
 			onContextMenu={onContextMenu}
 		>
-			{selected && (
+			{selected && !isMultiSelection && (
 				<NodeToolbar
 					canDelete={data.kind !== 'start' && !!data.onDeleteNode}
 					/* Only offered while the node has no note: an existing one is shown or

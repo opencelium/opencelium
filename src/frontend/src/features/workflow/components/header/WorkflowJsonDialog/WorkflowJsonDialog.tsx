@@ -88,7 +88,7 @@ export function WorkflowJsonDialog({ open, readOnly, value, connectors,
 		{!readOnly
 			? <Button variant="danger" color="danger" type="primary"
 				testId="workflow-json-force-apply"
-				disabled={!editor.dirty || !forcePayload || !error}
+				disabled={!editor.dirty || !forcePayload}
 				onClick={() => void forceApply()}>{t('json.forceApply')}</Button>
 			: <span />}
 		<div style={{ display: 'flex', gap: 8 }}>
