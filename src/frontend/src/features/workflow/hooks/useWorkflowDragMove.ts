@@ -11,7 +11,7 @@ import { buildInsertionPreviewEdges, buildInsertionPreviewNodes } from '../drag-
 import { buildPreviewGraphForTarget, computeGhostRootPosition } from '../drag-drop/workflowDragCalculations.utils';
 import { computeInsertionLayout } from '../drag-drop/workflowInsertionLayout';
 import { withCommentOffsetFromPosition } from '../utils/commentAnchor';
-import { moveWorkflowNodeGroup } from '../utils/graph.dragDrop';
+import { dropWorkflowNodeGroup } from '../utils/graph.dragDrop';
 
 type Snapshot = WorkflowDragSnapshot;
 type Params = {
@@ -61,35 +61,40 @@ export const useWorkflowDragMove = ({ fieldBindings, setNodes, reactFlowInstance
 				return;
 			}
 			const draggedIds = snapshot.draggedNodeIds ?? new Set<string>();
-			const preview = moveWorkflowNodeGroup({
+			const isCopy = snapshot.mode === 'copy';
+			const preview = dropWorkflowNodeGroup({
 				sourceNodeIds: snapshot.multiRootIds ?? [],
 				target: dropTarget.target,
+				mode: snapshot.mode,
 				nodes: snapshot.nodes,
 				edges: snapshot.edges,
 				fieldBindings,
 			});
 			const invalid = preview.invalidReferences.length > 0;
+			// A copy leaves the originals in the graph, so they render as ordinary
+			// nodes and only the clones become placeholders.
+			const placeholderIds = isCopy ? new Set(preview.idMap?.values()) : draggedIds;
 			const previewById = new Map(preview.nodes.map((item) => [item.id, item]));
 			const previewNodes = [
-				...snapshot.nodes.filter((item) => !draggedIds.has(item.id)).map((item) => ({
+				...snapshot.nodes.filter((item) => isCopy || !draggedIds.has(item.id)).map((item) => ({
 					...item,
 					position: previewById.get(item.id)?.position ?? item.position,
 					data: { ...item.data, highlighted: false, dropTarget: false,
 						dropInvalid: false, dragGhost: false, dropPlaceholder: false },
 				})),
-				...buildSourceDimmedNodes(snapshot.nodes, draggedIds, true),
-				...buildPlaceholderNodes(preview.nodes, draggedIds, invalid),
+				...(isCopy ? [] : buildSourceDimmedNodes(snapshot.nodes, draggedIds, true)),
+				...buildPlaceholderNodes(preview.nodes, placeholderIds, invalid),
 			];
 			const previewEdges = [
-				...preview.edges.filter((edge) => !draggedIds.has(edge.source)
-					&& !draggedIds.has(edge.target)).map((edge) => ({
+				...preview.edges.filter((edge) => !placeholderIds.has(edge.source)
+					&& !placeholderIds.has(edge.target)).map((edge) => ({
 						...edge,
 						data: { ...edge.data, highlighted: false, dropTarget: false,
 							dropInvalid: false, dragGhost: false, dropPlaceholder: false },
 					})),
-				...buildPlaceholderEdges(preview.edges, draggedIds, invalid),
+				...buildPlaceholderEdges(preview.edges, placeholderIds, invalid),
 			];
-			const key = `multi:${dropTarget.target.nodeId}:${dropTarget.target.direction}:${invalid}`;
+			const key = `multi:${snapshot.mode}:${dropTarget.target.nodeId}:${dropTarget.target.direction}:${invalid}`;
 			updateNodes(snapshot, key, () => sanitizeGraphNodes(previewNodes));
 			updateEdges(snapshot, key, sanitizeGraphEdges(previewNodes, previewEdges));
 			return;
