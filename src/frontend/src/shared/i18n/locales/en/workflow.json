@@ -545,6 +545,7 @@
     "dialogTitleLoop": "LOOP Condition",
     "addCondition": "Add Condition",
     "addGroup": "Add Group",
+    "dragToReorder": "Drag to reorder",
     "comparisonUnknown": "Not available yet",
     "comparisonError": "Can't be compared",
     "comparisonTrue": "True",

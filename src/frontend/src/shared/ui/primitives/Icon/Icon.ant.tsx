@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    HolderOutlined,
     CheckOutlined,
     CloseOutlined,
     UserOutlined,
@@ -121,6 +122,7 @@ const iconMap = {
     git: GithubOutlined,
     globe: GlobalOutlined,
     portal: AppstoreOutlined,
+    'drag-handle': HolderOutlined,
 };
 
 export const AntIcon: IconComponent = ({
