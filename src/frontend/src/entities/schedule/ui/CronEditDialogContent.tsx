@@ -9,7 +9,6 @@ import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext'
 import { CronEditor } from '@shared/ui/wizard-step/editor/cron-editor/CronEditor'
 import { useFetchEntitiesQuery, useUpdateEntityMutation } from '@shared/api/genericApi'
 import type { Schedule, ScheduleUpdateDTO } from '../model/types'
-import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type Props = {
     schedulerId: number
@@ -78,9 +77,8 @@ function CronEditForm({ schedule, connectionTitle, onClose }: FormProps) {
             await updateEntity({ url: `/scheduler/${schedule.schedulerId}`, body }).unwrap()
             message.success(tEntities('schedule.cronEdit.success', { connectionTitle, cronExp }))
             onClose()
-        } catch (err) {
-            console.error(err)
-            notifyError(tEntities('schedule.cronEdit.error'))
+        } catch {
+            // baseQuery already emits the failure on errorBus, which shows the backend message.
         }
     })
 

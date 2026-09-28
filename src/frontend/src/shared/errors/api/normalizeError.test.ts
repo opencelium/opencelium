@@ -17,6 +17,19 @@ describe('normalizeError', () => {
         expect(normalizeError({ status: 502, data: 'Bad Gateway' }).serverMessage).toBe('Bad Gateway')
     })
 
+    it('drops Java exception class names and nested causes from the server text', () => {
+        expect(normalizeError({ status: 500, data: { message: 'java.text.ParseException: Unexpected end of expression.' } }).serverMessage)
+            .toBe('Unexpected end of expression.')
+        expect(normalizeError({
+            status: 500,
+            data: { message: 'java.text.ParseException: Illegal cron expression format (java.lang.StringIndexOutOfBoundsException: begin 0, end 3, length 1).' },
+        }).serverMessage).toBe('Illegal cron expression format.')
+        expect(normalizeError({ status: 400, data: { message: 'Connector (id 7) not found' } }).serverMessage)
+            .toBe('Connector (id 7) not found')
+        expect(normalizeError({ status: 500, data: { message: 'java.lang.NullPointerException: ' } }).serverMessage)
+            .toBe('java.lang.NullPointerException:')
+    })
+
     it('leaves serverMessage unset when the response explained nothing', () => {
         expect(normalizeError({ status: 404 }).serverMessage).toBeUndefined()
         expect(normalizeError({ status: 400, data: { message: '   ' } }).serverMessage).toBeUndefined()
