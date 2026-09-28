@@ -31,10 +31,10 @@ const DuplicateConnectorWizard: React.FC<Props & {onClose: () => void}> = ({row,
             mode="create"
             initialValues={initialValues}
             onSubmit={handleSubmit}
+            header="connector.list.duplicate.header"
+            subheader="connector.list.duplicate.subheader"
             skipSuccessState
             hideRecommendations
-            hideHeader
-            compact
         />
     )
 }
@@ -44,8 +44,8 @@ export const DuplicateConnectorAction: React.FC<Props> = ({row}) => {
     const dialog = useDialogController()
 
     const open = () => dialog.open({
-        title: t('connector.list.duplicate.dialogTitle'),
-        width: 760,
+        width: 1000,
+        top: 18,
         testId: 'connector-duplicate-dialog',
         content: <DuplicateConnectorWizard row={row} onClose={dialog.close}/>,
     })

@@ -5,7 +5,8 @@
     "searchPlaceholder": "Suchen",
     "duplicate": {
       "tooltip": "Konnektor duplizieren",
-      "dialogTitle": "Konnektor duplizieren",
+      "header": "Konnektor duplizieren",
+      "subheader": "Erstellen Sie eine Kopie des Konnektors und passen Sie die Einstellungen vor dem Speichern an.",
       "success": "Konnektor \"{{title}}\" wurde erfolgreich dupliziert"
     }
   },
