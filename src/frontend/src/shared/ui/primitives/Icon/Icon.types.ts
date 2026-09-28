@@ -70,6 +70,7 @@ export type IconName =
     | 'git'
     | 'globe'
     | 'portal'
+    | 'drag-handle'
 
 export type IconColor =
     | 'default'

@@ -45,11 +45,15 @@
   "confirmDelete": {
     "title": "Schritt löschen",
     "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt.",
+    "titleSeveral": "{{count}} Schritte löschen",
+    "messageSeveral": "Möchten Sie diese {{count}} Schritte wirklich löschen? Darin verschachtelte Schritte werden ebenfalls entfernt.",
     "referencesClearedTitle": "Verweise entfernt",
     "referencesCleared": "{{count}} andere Schritte haben „{{name}}“ gelesen. Diese Verweise sind entfernt.",
     "referencesCleared_one": "{{count}} anderer Schritt hat „{{name}}“ gelesen. Diese Verweise sind entfernt.",
     "referencesClearedUnnamed": "{{count}} andere Schritte haben den gelöschten Schritt gelesen. Diese Verweise sind entfernt.",
-    "referencesClearedUnnamed_one": "{{count}} anderer Schritt hat den gelöschten Schritt gelesen. Diese Verweise sind entfernt."
+    "referencesClearedUnnamed_one": "{{count}} anderer Schritt hat den gelöschten Schritt gelesen. Diese Verweise sind entfernt.",
+    "referencesClearedSeveral": "{{count}} andere Schritte haben die gelöschten Schritte gelesen. Diese Verweise sind entfernt.",
+    "referencesClearedSeveral_one": "{{count}} anderer Schritt hat die gelöschten Schritte gelesen. Diese Verweise sind entfernt."
   },
   "confirmRemoveJoint": {
     "title": "Verbindung entfernen?",
@@ -435,25 +439,28 @@
       "z": "Z",
       "redo": "(Umschalt + Z / Y)",
       "shift": "Umschalt",
-      "delete": "Entf"
+      "delete": "Entf / Rücktaste"
     },
     "items": {
       "pan": "Arbeitsfläche verschieben",
       "zoom": "Vergrößern und verkleinern",
+      "boxSelect": "Alle Knoten im aufgezogenen Rahmen auswählen",
       "openConfig": "Knotenkonfiguration öffnen",
-      "moveNode": "Knoten verschieben",
-      "duplicate": "Knoten duplizieren statt verschieben",
-      "multiSelect": "Mehrere Knoten auswählen",
-      "copyNode": "Ausgewählten Knoten kopieren",
-      "pasteNode": "Kopierten Knoten einfügen",
+      "moveNode": "Einen Knoten oder alle ausgewählten Knoten verschieben",
+      "duplicate": "Den gezogenen Knoten oder alle ausgewählten Knoten kopieren statt verschieben",
+      "multiSelect": "Knoten zur Auswahl hinzufügen oder daraus entfernen",
+      "selectScope": "Bei IF oder Schleife: zusammen mit ihrem gesamten Bereich auswählen",
+      "copyNode": "Ausgewählte Knoten kopieren",
+      "pasteNode": "Kopierte Knoten nach dem ausgewählten Knoten einfügen (bei IF oder Schleife wählen Sie: innerhalb ihres Bereichs oder danach)",
       "duplicateNode": "Ausgewählten Knoten duplizieren",
       "searchNode": "Workflow-Knoten suchen",
-      "deleteNode": "Ausgewählten Knoten löschen",
+      "deleteNode": "Ausgewählte Knoten löschen",
       "save": "Workflow speichern",
       "undo": "Letzte Änderung auf der Arbeitsfläche rückgängig machen",
       "redo": "Rückgängig gemachte Änderung wiederherstellen",
       "close": "Geöffnetes Menü, Dialog oder Panel schließen",
-      "dismissError": "Fehlermarkierung an einem Schritt ausblenden"
+      "dismissError": "Fehlermarkierung an einem Schritt ausblenden",
+      "cancelJoint": "Erstellen einer Verbindung abbrechen"
     }
   },
   "pasteOperator": {
@@ -464,6 +471,7 @@
   },
   "contextMenu": {
     "changeLabel": "Bezeichnung ändern",
+    "changeConnector": "Connector ändern",
     "openConfiguration": "Konfiguration öffnen",
     "configureAggregator": "Aggregator konfigurieren",
     "request": "Anfrage",
@@ -482,6 +490,12 @@
       "hide": "Kommentar ausblenden",
       "minimize": "Kommentar minimieren"
     }
+  },
+  "changeConnectorDialog": {
+    "title": "Connector ändern",
+    "intro": "Wählen Sie einen anderen Connector des Invokers \"{{invoker}}\" für diesen Schritt.",
+    "selectPlaceholder": "Connector auswählen",
+    "change": "Ändern"
   },
   "aggregatorDialog": {
     "title": "Aggregator konfigurieren",
@@ -538,6 +552,7 @@
     "dialogTitleLoop": "LOOP-Bedingung",
     "addCondition": "Bedingung hinzufügen",
     "addGroup": "Gruppe hinzufügen",
+    "dragToReorder": "Ziehen zum Neuordnen",
     "comparisonUnknown": "Noch nicht verfügbar",
     "comparisonError": "Kann nicht verglichen werden",
     "comparisonTrue": "Wahr",

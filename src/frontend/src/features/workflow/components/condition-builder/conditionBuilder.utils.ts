@@ -164,6 +164,52 @@ export const removeChildById = (group: ConditionGroup, childId: string): Conditi
 		.map((child) => (child.type === 'group' ? removeChildById(child, childId) : child)),
 });
 
+export type DropPlacement = 'before' | 'after' | 'inside';
+
+export type ConditionDropTarget = { id: string; placement: DropPlacement };
+
+export const findConditionChild = (group: ConditionGroup, id: string): ConditionChild | undefined => {
+	for (const child of group.items || []) {
+		if (child.id === id) return child;
+		if (child.type === 'group') {
+			const found = findConditionChild(child, id);
+			if (found) return found;
+		}
+	}
+	return undefined;
+};
+
+export const containsConditionId = (child: ConditionChild, id: string): boolean =>
+	child.id === id || (child.type === 'group' && findConditionChild(child, id) !== undefined);
+
+const insertConditionChild = (
+	group: ConditionGroup,
+	target: ConditionDropTarget,
+	node: ConditionChild,
+): ConditionGroup => {
+	if (target.placement === 'inside' && group.id === target.id) {
+		return { ...group, items: [...(group.items || []), node] };
+	}
+	return {
+		...group,
+		items: (group.items || []).flatMap((child): ConditionChild[] => {
+			if (child.id === target.id && target.placement === 'before') return [node, child];
+			if (child.id === target.id && target.placement === 'after') return [child, node];
+			return [child.type === 'group' ? insertConditionChild(child, target, node) : child];
+		}),
+	};
+};
+
+export const moveConditionChild = (
+	tree: ConditionGroup,
+	draggedId: string,
+	target: ConditionDropTarget,
+): ConditionGroup => {
+	const dragged = findConditionChild(tree, draggedId);
+	if (!dragged || containsConditionId(dragged, target.id)) return tree;
+	return insertConditionChild(removeChildById(tree, draggedId), target, dragged);
+};
+
 const cloneConditionRule = (rule: ConditionRule): ConditionRule => ({
 	...rule,
 	id: createConditionId('rule'),
