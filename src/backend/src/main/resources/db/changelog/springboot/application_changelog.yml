@@ -302,3 +302,29 @@ versions:
         operation: add
         value: 600000
         path: opencelium.log.retention.test-connection.sweep-interval
+      - changeset: 8
+        operation: add
+        value: https://api.github.com/repos/opencelium/opencelium/contents/src/backend/runtime/invoker
+        path: opencelium.invoker-repository.url
+      - changeset: 9
+        operation: add
+        value: dev
+        path: opencelium.invoker-repository.branch
+      - changeset: 10
+        operation: modify
+        value: 1GB
+        path: spring.servlet.multipart.max-file-size
+      - changeset: 11
+        operation: modify
+        value: 1GB
+        path: spring.servlet.multipart.max-request-size
+  - version: 5.2
+    changes:
+      - changeset: 1
+        operation: add
+        value: 5.2
+        path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: TRANSACTION_READ_COMMITTED
+        path: spring.datasource.hikari.transaction-isolation
