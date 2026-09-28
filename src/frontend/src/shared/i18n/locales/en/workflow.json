@@ -141,6 +141,7 @@
     "nodePasted": "Node pasted",
     "nodeDuplicated": "Node duplicated",
     "deleteVersionSuccess": "Version deleted",
+    "duplicatedTitleHint": "Workflow \"{{name}}\" duplicated. We recommend changing its title.",
     "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?",
     "enhancementScriptBrokenIn": "“{{method}}” has an enhancement whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
     "enhancementScriptBroken": "{{count}} steps have an enhancement whose script still uses {{marker}} — the references they read were removed with the steps they pointed at. Fix the scripts before saving.",
