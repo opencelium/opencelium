@@ -140,7 +140,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		isShortcutsOpen || jsonEditorOpen || pasteOperatorTarget);
 
 	useDeleteSelectedNode({ readOnly: isEditLocked, nodes: workflow.nodes,
-		onDeleteNode: workflow.onDeleteNode, disabled: isEditorDialogOpen });
+		onDeleteNodes: workflow.onDeleteNodes, disabled: isEditorDialogOpen });
 	useWorkflowUndoShortcuts({ readOnly: isEditLocked, undo: workflow.undo,
 		redo: workflow.redo,
 		disabled: isEditorDialogOpen || !!workflow.responseNodeId });
