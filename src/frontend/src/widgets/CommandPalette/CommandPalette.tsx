@@ -411,7 +411,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                                                         )}
                                                         <span className="cmdk-item-value" title={s.label ?? s.value}>{s.label ?? s.value}</span>
                                                         {s.description && (
-                                                            <span className="cmdk-item-description">
+                                                            <span className="cmdk-item-description" title={tCommon(s.description as never)}>
                                                                 {tCommon(s.description as never)}
                                                             </span>
                                                         )}
