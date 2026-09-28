@@ -84,6 +84,7 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
     const error = rhfError?.message;
     const invokerName: string = watch('invoker') || '';
     const connectorId = String(watch('connectorId') ?? routeId ?? '').trim();
+    const isDuplicate = mode === 'create' && !!connectorId;
     const [requestData, setRequestData] = useState<Record<string, string>>(null);
     const { data = [] ,  isLoading = false } = useGetInvokersQuery();
     const allInvokers: Invoker[] = data ?? [];
@@ -96,10 +97,10 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
         setValue('requestData', result.data.requestData, {shouldDirty: true});
     }, [connectorId, getConnector, masterPassword, masterPasswordExists, setValue]);
     useEffect(() => {
-        if (mode === 'create') {
+        if (mode === 'create' && !isDuplicate) {
             toggleHasAccess(true)
         }
-    }, [mode]);
+    }, [isDuplicate, mode]);
     useEffect(() => {
         if (masterPassword) {
             toggleHasAccess(true);

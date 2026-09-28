@@ -23,6 +23,7 @@ import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type
 import {connectorRecommendations} from "@entities/connector/connector.recommendations";
 import {readPreselectedInvoker} from "@entities/connector/lib/connectorCreateLink";
 import {IMAGE_UPLOAD_ACCEPT} from "@shared/utils/imageUploadRules";
+import {DuplicateConnectorAction} from "@entities/connector/ui/DuplicateConnectorAction";
 
 const baseKey = 'connector';
 
@@ -140,6 +141,12 @@ export const connectorDefinition: EntityDefinition = {
         },
         actions: [
             { type: 'view' },
+            {
+                type: 'custom',
+                key: 'duplicate-connector',
+                permissionAction: 'CREATE',
+                render: ({row}) => <DuplicateConnectorAction row={row as Connector}/>,
+            },
             { type: 'update' },
             {
                 type: 'delete',
@@ -171,8 +178,10 @@ export const connectorDefinition: EntityDefinition = {
             }
         },
         mapToApi: ({data: {invoker, timeout, requestData, icon, iconOriginal, ...formData}, mode}: {data: ConnectorUpdateDto, mode: Mode}): Connector => {
+            const payloadFormData = {...formData}
+            if (mode === 'create') Reflect.deleteProperty(payloadFormData, 'connectorId')
             const payload: Connector = {
-                ...formData,
+                ...payloadFormData,
                 timeout: +timeout,
                 invoker: {
                     name: invoker,
@@ -478,6 +487,10 @@ export const connectorDefinition: EntityDefinition = {
                     {
                         validate: (value, values, mode) =>
                             {
+                                if (mode === 'create' && values?.connectorId
+                                    && !useMasterPasswordStore.getState().masterPassword) {
+                                    return false;
+                                }
                                 if (mode === 'update') {
                                     const masterPassword = useMasterPasswordStore.getState().masterPassword
                                     if (!masterPassword) {
