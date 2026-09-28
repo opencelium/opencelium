@@ -62,7 +62,7 @@ export const useWorkflowDragStart = ({ nodes, edges, setNodes, setIsDragging,
 			dragSnapshot.current = {
 				nodes: stableNodes,
 				edges: stableEdges,
-				mode: event?.ctrlKey ? 'copy' : 'move',
+				mode: event?.ctrlKey || event?.metaKey ? 'copy' : 'move',
 				operatorConfigs: new Map(stableNodes
 					.filter((item) => ['if', 'loop'].includes(item.type ?? '')
 						&& item.data.conditionConfig)
