@@ -5,12 +5,12 @@ import { buildContextMenuEntries, filterEntriesForSection } from '../context-men
 import type { NodeContextMenuProps } from './NodeContextMenu.types';
 
 type Props = Pick<NodeContextMenuProps, 'menu' | 'node' | 'onClose' | 'onOpenRequestEditor'
-  | 'onOpenConditionEditor' | 'onShowResponse' | 'onOpenAggregatorEditor'> & {
+  | 'onOpenConditionEditor' | 'onShowResponse' | 'onOpenAggregatorEditor' | 'onOpenConnectorEditor'> & {
   onEditLabel: () => void;
 };
 
 export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
-  onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onOpenAggregatorEditor }: Props) {
+  onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onOpenAggregatorEditor, onOpenConnectorEditor }: Props) {
   const { t } = useI18n('workflow');
   if (!menu) return null;
   const sections = menuByType[menu.kind] || [];
@@ -26,6 +26,7 @@ export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
     if (id === 'edit-body') onOpenRequestEditor(menu.nodeId, 'body');
     if (id === 'show-response') onShowResponse(menu.nodeId);
     if (id === 'configure-aggregator') onOpenAggregatorEditor(menu.nodeId);
+    if (id === 'change-connector') onOpenConnectorEditor(menu.nodeId);
     onClose();
   };
 

@@ -40,7 +40,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     isAnyNodeDragging, setIsAnyNodeDragging, sidebarAction, setSidebarAction,
     contextMenu, setContextMenu, historyOpen, setHistoryOpen, methodEditor,
     setMethodEditor, responseNodeId, setResponseNodeId, conditionEditor,
-    setConditionEditor, aggregatorEditor, setAggregatorEditor, restoredViewport,
+    setConditionEditor, aggregatorEditor, setAggregatorEditor, connectorEditor,
+    setConnectorEditor, restoredViewport,
     setRestoredViewport, viewportRestoreVersion, setViewportRestoreVersion,
     centerStartVersion, setCenterStartVersion, bindingLensOpen,
     setBindingLensOpen, bindingLensExpanded, setBindingLensExpanded,
@@ -75,7 +76,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes, setEdges, onFieldBindingsChange: options.onFieldBindingsChange });
   const nodeUpdates = useWorkflowNodeUpdates(setNodes,
     () => setMethodEditor(null), () => setConditionEditor(null),
-    () => setAggregatorEditor(null));
+    () => setAggregatorEditor(null), () => setConnectorEditor(null));
 
   const [jointSourceId, setJointSourceId] = useState<string | null>(null);
   const jointVerdicts = useMemo(
@@ -95,7 +96,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes,
     centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
-      aggregatorEditor !== null || responseNodeId !== null || historyOpen,
+      aggregatorEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
   });
 
   return {
@@ -111,6 +112,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     responseNodeId,
     conditionEditor,
     aggregatorEditor,
+    connectorEditor,
     restoredViewport,
     viewportRestoreVersion,
     centerStartVersion,
@@ -134,6 +136,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setMethodEditor,
     setConditionEditor,
     setAggregatorEditor,
+    setConnectorEditor,
     setWorkflowGraph: (
       nextNodes: WorkflowNodeModel[],
       nextEdges: WorkflowEdgeModel[],
@@ -156,7 +159,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onNodeDragStop: handleNodeDragStop,
     onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
     onCloseResponse: () => setResponseNodeId(null),
-    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); },
+    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setConnectorEditor(null); },
     onStartJoint: (sourceNodeId: string) => {
       setSidebarAction(null);
       setContextMenu(null);
