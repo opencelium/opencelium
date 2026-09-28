@@ -135,7 +135,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	// Anything hosting its own editing surface: canvas-level keyboard shortcuts
 	// must not reach past it into the graph underneath.
 	const isEditorDialogOpen = !!(workflow.methodEditor || workflow.conditionEditor ||
-		workflow.aggregatorEditor || workflow.historyOpen || templates.templateDialogOpen ||
+		workflow.aggregatorEditor || workflow.connectorEditor || workflow.historyOpen || templates.templateDialogOpen ||
 		templates.loadTemplateDialogOpen || templates.connectorMappingDialogOpen ||
 		isShortcutsOpen || jsonEditorOpen || pasteOperatorTarget);
 

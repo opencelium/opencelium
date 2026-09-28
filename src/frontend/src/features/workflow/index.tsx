@@ -212,6 +212,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onOpenConditionEditor: (nodeId) => workflow.setConditionEditor({ nodeId }),
           onShowResponse: workflow.onShowResponse,
           onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
+          onOpenConnectorEditor: (nodeId) => workflow.setConnectorEditor({ nodeId }),
           onClose: () => workflow.setContextMenu(null) }} />
       <WorkflowNodeEditors
         response={{ open: !!workflow.responseNodeId,
@@ -233,7 +234,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onSave: workflow.onSaveConditionConfig }}
         aggregator={{ open: !!workflow.aggregatorEditor, node: aggregatorNode,
           onClose: () => workflow.setAggregatorEditor(null),
-          onSave: workflow.onSaveDataAggregator }} />
+          onSave: workflow.onSaveDataAggregator }}
+        connector={{ open: !!workflow.connectorEditor, connectors,
+          node: hydratedNodes.find((node) => node.id === workflow.connectorEditor?.nodeId) ?? null,
+          onClose: () => workflow.setConnectorEditor(null),
+          onChange: workflow.onChangeNodeConnector }} />
     </div>
     </TestRunProvider>
   );
