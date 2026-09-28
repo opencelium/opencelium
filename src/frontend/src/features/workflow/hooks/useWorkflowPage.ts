@@ -4,12 +4,8 @@ import type { Connection } from '@xyflow/react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
-import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
+import { createNodeFromAction } from '../utils/graphUtils';
 import { cleanBrokenWorkflowReferences } from '../utils/graph.brokenReferenceCleanup';
-import { buildReferenceRemapTargets } from '../utils/graph.referenceRemapTargets';
-import { isEmptyRemapPlan, remapWorkflowReferences } from '../utils/graph.referenceRemap';
-import { workflowNodeLabel } from '../utils/workflowUndoMethodChange.utils';
-import { notifyReferencesCleared } from '../components/feedback/notifyReferencesCleared';
 import { message } from 'antd';
 import { createCommentNode } from '../utils/createCommentNode';
 import { findAnchoredComment } from '../utils/commentAnchor';
@@ -27,12 +23,11 @@ import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
 import { evaluateJointTargets } from '../utils/jumpValidator';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
 import { copyWorkflowNodeGroup, moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
-import { useReferenceRemapConfirm } from './useReferenceRemapConfirm';
+import { useDeleteWorkflowNodes } from './useDeleteWorkflowNodes';
 import { useBindingLensState } from '../lens/useBindingLensState';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
-  const askAboutReferences = useReferenceRemapConfirm();
   const { t } = useI18n('workflow');
   const state = useWorkflowGraphState();
   const { reactFlowInstance, dragSnapshot, draggedPositionLockRef, multiDragRef,
@@ -98,6 +93,9 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
       aggregatorEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
   });
+
+  const deleteNodes = useDeleteWorkflowNodes({ nodes, edges, options, setNodes, setEdges,
+    onDeleted: () => setContextMenu(null) });
 
   return {
     nodes,
@@ -275,59 +273,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       options.onFieldBindingsChange?.(result.fieldBindings);
       return true;
     },
-    onDeleteNode: async (nodeId: string) => {
-      const targetNode = nodes.find((node) => node.id === nodeId);
-      if (!targetNode || targetNode.type === 'start') return;
-      const result = deleteNodeGraph(nodeId, nodes, edges);
-      // What the deletion costs elsewhere, resolved before it is confirmed: every
-      // reference to the method being deleted, plus anything the smaller graph can
-      // no longer reach — each one offered a method to be read from instead.
-      // Leaving them behind was the old behaviour and it left methods reading a
-      // method that is not there any more; clearing them is now the fallback
-      // rather than the only outcome.
-      const targets = buildReferenceRemapTargets({ nodes, edges }, result, options.fieldBindings);
-      const { confirmed, plan } = await askAboutReferences(targets,
-        { before: { nodes, edges }, after: result });
-      if (!confirmed) return;
-      // Re-pointed first, then cleaned: a reference the user gave a new provider
-      // reads as satisfied by the time the cleanup pass looks at it, so only the
-      // ones left to clear are cleared.
-      const remapped = remapWorkflowReferences(result.nodes, options.fieldBindings, plan);
-      const cleanup = cleanBrokenWorkflowReferences(
-        remapped.nodes, result.edges, remapped.fieldBindings, { nodes, edges });
-      // The state to come back to, captured rather than left to the undo stack:
-      // that records on a 350ms quiet period, so an undo pressed straight after
-      // the delete would land on whatever came *before* it. Restoring this
-      // explicitly is the same result at any speed, and a fast one leaves no
-      // entry behind at all — the graph hashes back to what was already there.
-      const beforeDelete = { nodes, edges, fieldBindings: options.fieldBindings };
-      setNodes(cleanup.nodes);
-      setEdges(result.edges);
-      if (!isEmptyRemapPlan(plan) && cleanup.brokenCount === 0) {
-        options.onFieldBindingsChange?.(remapped.fieldBindings);
-      }
-      if (cleanup.brokenCount > 0) {
-        options.onFieldBindingsChange?.(cleanup.fieldBindings);
-        // The confirm said this would happen, but it is gone by the time the
-        // canvas shows the result, and a cleared reference leaves no mark on
-        // screen — the steps that read it simply have one field fewer.
-        const deletedName = workflowNodeLabel(targetNode);
-        notifyReferencesCleared({
-          title: t('confirmDelete.referencesClearedTitle'),
-          description: t(deletedName
-            ? 'confirmDelete.referencesCleared'
-            : 'confirmDelete.referencesClearedUnnamed',
-          { count: cleanup.affectedNodeIds.length, name: deletedName }),
-          undoLabel: t('actions.undo'),
-          onUndo: () => {
-            setNodes(beforeDelete.nodes);
-            setEdges(beforeDelete.edges);
-            options.onFieldBindingsChange?.(beforeDelete.fieldBindings);
-          },
-        });
-      }
-      setContextMenu(null);
-    },
+    onDeleteNode: (nodeId: string) => deleteNodes([nodeId]),
+    onDeleteNodes: deleteNodes,
     ...nodeUpdates,
   };
 }
