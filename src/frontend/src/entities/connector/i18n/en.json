@@ -5,7 +5,8 @@
     "searchPlaceholder": "Search",
     "duplicate": {
       "tooltip": "Duplicate connector",
-      "dialogTitle": "Duplicate connector",
+      "header": "Duplicate Connector",
+      "subheader": "Create a copy of the connector and adjust its settings before saving.",
       "success": "Connector \"{{title}}\" was successfully duplicated"
     }
   },
