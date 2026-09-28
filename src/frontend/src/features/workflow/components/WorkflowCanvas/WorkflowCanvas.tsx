@@ -1,4 +1,4 @@
-import { Controls, Panel, ReactFlow } from '@xyflow/react';
+import { Controls, Panel, ReactFlow, SelectionMode } from '@xyflow/react';
 import type { EdgeChange, NodeChange, OnNodeDrag, ReactFlowInstance } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
@@ -21,6 +21,7 @@ import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWor
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
 import { useEscapeKey } from './useEscapeKey';
 import { TestRunDebugControls } from './TestRunDebugControls';
+import { useBoxSelection } from './useBoxSelection';
 import { getDragSubtreeNodeIds } from '../../drag-drop/workflowDropTarget.utils';
 
 // Where the graph's top-left-most point lands in the viewport on open —
@@ -257,6 +258,7 @@ export function WorkflowCanvas({
     else onClearLensFocus?.();
   }, [edges, isLensOpen, jointSourceId, jointVerdicts, lensNodeState, nodes,
     onClearLensFocus, onConfirmJoint, onFocusLensNode, onNodesChange]);
+  const { onSelectionEnd } = useBoxSelection(edges, onNodesChange);
   const handlePaneClick = useCallback(() => {
     onClearLensFocus?.();
     onPaneClick?.();
@@ -357,7 +359,9 @@ export function WorkflowCanvas({
           nodesConnectable={false}
           elementsSelectable
           selectionOnDrag={false}
-          selectionKeyCode={null}
+          selectionKeyCode='Shift'
+          selectionMode={SelectionMode.Partial}
+          onSelectionEnd={onSelectionEnd}
           multiSelectionKeyCode={['Meta', 'Control']}
           deleteKeyCode={null}
           panOnDrag
