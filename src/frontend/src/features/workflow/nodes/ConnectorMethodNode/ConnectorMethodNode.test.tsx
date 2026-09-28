@@ -6,6 +6,7 @@ vi.mock('./ConnectorMethodNodeContent', () => ({ ConnectorMethodNodeContent: () 
 vi.mock('@xyflow/react', () => ({
     Handle: () => null,
     Position: { Top: 'top', Right: 'right', Bottom: 'bottom', Left: 'left' },
+    useStore: () => false,
 }))
 
 import { ConnectorMethodNode } from './ConnectorMethodNode'

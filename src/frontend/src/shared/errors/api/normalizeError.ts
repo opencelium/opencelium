@@ -10,6 +10,24 @@ const MAX_SERVER_MESSAGE_LENGTH = 4000
 const asNonEmptyString = (value: unknown): string | undefined =>
     typeof value === 'string' && value.trim() ? value.trim() : undefined
 
+const JAVA_EXCEPTION_CLASS = String.raw`(?:[a-z_$][\w$]*\.)+[A-Z][\w$]*(?:Exception|Error)`
+const LEADING_JAVA_EXCEPTION = new RegExp(`^${JAVA_EXCEPTION_CLASS}:\\s*`)
+const NESTED_JAVA_EXCEPTION = new RegExp(`\\s*\\(${JAVA_EXCEPTION_CLASS}\\b[^()]*\\)`, 'g')
+
+/**
+ * The backend forwards some exceptions verbatim ("java.text.ParseException: Illegal
+ * cron expression format (java.lang.StringIndexOutOfBoundsException: …)."). The class
+ * names and the nested cause mean nothing to the user, so drop them and keep the
+ * sentence. Falls back to the original if nothing readable is left.
+ */
+const stripJavaExceptionNoise = (message: string): string => {
+    const cleaned = message
+        .replace(LEADING_JAVA_EXCEPTION, '')
+        .replace(NESTED_JAVA_EXCEPTION, '')
+        .trim()
+    return cleaned || message
+}
+
 /**
  * The explanation the API sent with the failure, if any: the `message` (or
  * `error` code) of a JSON error body, or a plain-text body. Never an i18n key —
@@ -18,10 +36,11 @@ const asNonEmptyString = (value: unknown): string | undefined =>
 const extractServerMessage = (error: unknown): string | undefined => {
     const data = (error as { data?: unknown } | null)?.data
     const body = data as { message?: unknown; error?: unknown } | null | undefined
-    const message = typeof data === 'string'
+    const rawMessage = typeof data === 'string'
         ? asNonEmptyString(data)
         : asNonEmptyString(body?.message) ?? asNonEmptyString(body?.error)
-    if (!message) return undefined
+    if (!rawMessage) return undefined
+    const message = stripJavaExceptionNoise(rawMessage)
     return message.length > MAX_SERVER_MESSAGE_LENGTH
         ? `${message.slice(0, MAX_SERVER_MESSAGE_LENGTH)}…`
         : message
