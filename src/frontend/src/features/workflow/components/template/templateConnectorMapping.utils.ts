@@ -53,23 +53,25 @@ export function applyConnectorMapping(
     if (targetConnectorId == null) return node;
 
     const targetConnector = connectors.find((item) => item.connectorId === targetConnectorId);
-    if (!targetConnector) return node;
-
-    return {
-      ...node,
-      data: {
-        ...node.data,
-        connector: {
-          ...connector,
-          connectorId: targetConnector.connectorId,
-          title: targetConnector.title,
-          icon: typeof targetConnector.icon === 'string' ? targetConnector.icon : null,
-          invokerName: targetConnector.invoker?.name ?? null,
-          status: targetConnector.status,
-          lastTestError: targetConnector.lastTestError ?? null,
-          lastCheckedAt: targetConnector.lastCheckedAt ?? null,
-        },
-      },
-    } as WorkflowNodeModel;
+    return targetConnector ? assignConnectorToNode(node, targetConnector) : node;
   });
+}
+
+export function assignConnectorToNode(node: WorkflowNodeModel, targetConnector: Connector): WorkflowNodeModel {
+  return {
+    ...node,
+    data: {
+      ...node.data,
+      connector: {
+        ...node.data.connector,
+        connectorId: targetConnector.connectorId,
+        title: targetConnector.title,
+        icon: typeof targetConnector.icon === 'string' ? targetConnector.icon : null,
+        invokerName: targetConnector.invoker?.name ?? null,
+        status: targetConnector.status,
+        lastTestError: targetConnector.lastTestError ?? null,
+        lastCheckedAt: targetConnector.lastCheckedAt ?? null,
+      },
+    },
+  } as WorkflowNodeModel;
 }

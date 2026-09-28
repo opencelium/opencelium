@@ -1,13 +1,16 @@
 import type { Dispatch, SetStateAction } from 'react';
+import type { Connector } from '@entities/connector/model/types';
 import type { ConditionConfig } from '../components/condition-builder/conditionBuilder.types';
 import type { WorkflowNodeModel } from '../types/workflow.types';
 import type { WorkflowMethodConfig } from '../types/request-config.types';
+import { assignConnectorToNode } from '../components/template/templateConnectorMapping.utils';
 
 export const useWorkflowNodeUpdates = (
 	setNodes: Dispatch<SetStateAction<WorkflowNodeModel[]>>,
 	closeMethodEditor: () => void,
 	closeConditionEditor: () => void,
 	closeAggregatorEditor: () => void,
+	closeConnectorEditor: () => void,
 ) => ({
 	onChangeNodeLabel: (nodeId: string, label: string) => setNodes((nodes) =>
 		nodes.map((node) => node.id === nodeId ? { ...node, data: {
@@ -40,6 +43,10 @@ export const useWorkflowNodeUpdates = (
 			...node.data, dataAggregator, hasError: false, errorMessage: undefined,
 		} } : node));
 		closeAggregatorEditor();
+	},
+	onChangeNodeConnector: (nodeId: string, connector: Connector) => {
+		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? assignConnectorToNode(node, connector) : node));
+		closeConnectorEditor();
 	},
 	onChangeCommentText: (nodeId: string, text: string) => setNodes((nodes) =>
 		nodes.map((node) => node.id === nodeId ? { ...node, data: {

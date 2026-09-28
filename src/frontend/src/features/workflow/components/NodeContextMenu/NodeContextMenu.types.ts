@@ -9,4 +9,5 @@ export type NodeContextMenuProps = {
 	onOpenConditionEditor: (nodeId: string) => void;
 	onShowResponse: (nodeId: string) => void;
 	onOpenAggregatorEditor: (nodeId: string) => void;
+	onOpenConnectorEditor: (nodeId: string) => void;
 };

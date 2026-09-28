@@ -464,6 +464,7 @@
   },
   "contextMenu": {
     "changeLabel": "Bezeichnung ändern",
+    "changeConnector": "Connector ändern",
     "openConfiguration": "Konfiguration öffnen",
     "configureAggregator": "Aggregator konfigurieren",
     "request": "Anfrage",
@@ -482,6 +483,12 @@
       "hide": "Kommentar ausblenden",
       "minimize": "Kommentar minimieren"
     }
+  },
+  "changeConnectorDialog": {
+    "title": "Connector ändern",
+    "intro": "Wählen Sie einen anderen Connector des Invokers \"{{invoker}}\" für diesen Schritt.",
+    "selectPlaceholder": "Connector auswählen",
+    "change": "Ändern"
   },
   "aggregatorDialog": {
     "title": "Aggregator konfigurieren",
