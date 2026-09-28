@@ -464,6 +464,7 @@
   },
   "contextMenu": {
     "changeLabel": "Change Label",
+    "changeConnector": "Change Connector",
     "openConfiguration": "Open Configuration",
     "configureAggregator": "Configure Aggregator",
     "request": "Request",
@@ -482,6 +483,12 @@
       "hide": "Hide comment",
       "minimize": "Minimize comment"
     }
+  },
+  "changeConnectorDialog": {
+    "title": "Change Connector",
+    "intro": "Select another connector of the invoker \"{{invoker}}\" for this step.",
+    "selectPlaceholder": "Select a connector",
+    "change": "Change"
   },
   "aggregatorDialog": {
     "title": "Configure Aggregator",
