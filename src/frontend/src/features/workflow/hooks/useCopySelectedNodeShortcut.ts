@@ -1,14 +1,16 @@
 import { useEffect } from 'react';
-import type { WorkflowNodeModel } from '../types/workflow.types';
+import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { EDITABLE_TARGET_SELECTOR } from '../constants/keyboard';
+import { getSelectedDragGroup } from '../drag-drop/workflowDropTarget.utils';
 
 type Params = {
 	disabled: boolean;
 	nodes: WorkflowNodeModel[];
-	onCopyNode: (nodeId: string) => void;
+	edges: WorkflowEdgeModel[];
+	onCopyNodes: (nodeIds: string[]) => void;
 };
 
-export const useCopySelectedNodeShortcut = ({ disabled, nodes, onCopyNode }: Params) => {
+export const useCopySelectedNodeShortcut = ({ disabled, nodes, edges, onCopyNodes }: Params) => {
 	useEffect(() => {
 		const handleCopy = (event: KeyboardEvent) => {
 			if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey ||
@@ -16,13 +18,12 @@ export const useCopySelectedNodeShortcut = ({ disabled, nodes, onCopyNode }: Par
 			const target = event.target as Element | null;
 			if (target?.closest?.(EDITABLE_TARGET_SELECTOR)) return;
 			if (disabled) return;
-			const selected = nodes.find((node) =>
-				node.selected && node.type !== 'start' && node.type !== 'comment');
-			if (!selected) return;
+			const selected = getSelectedDragGroup(nodes, edges).rootIds;
+			if (selected.length === 0) return;
 			event.preventDefault();
-			onCopyNode(selected.id);
+			onCopyNodes(selected);
 		};
 		window.addEventListener('keydown', handleCopy);
 		return () => window.removeEventListener('keydown', handleCopy);
-	}, [disabled, nodes, onCopyNode]);
+	}, [disabled, nodes, edges, onCopyNodes]);
 };
