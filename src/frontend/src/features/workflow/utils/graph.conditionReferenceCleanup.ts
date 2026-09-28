@@ -3,32 +3,28 @@ import type { WorkflowNodeModel } from '../types/workflow.types';
 import { buildConditionConfig } from '../components/condition-builder/conditionBuilder.utils';
 import type { ConditionChild,
 	ConditionGroup } from '../components/condition-builder/conditionBuilder.types';
-import { collectReferenceColors } from './graph.referenceColors';
+import type { ReferenceMatcher } from './graph.referenceColors';
 
-const removeRulesWithColors = (
+const removeMatchingRules = (
 	group: ConditionGroup,
-	colors: Set<string>,
+	matches: ReferenceMatcher,
 ): ConditionGroup => ({
 	...group,
 	items: (group.items ?? []).flatMap<ConditionChild>((item) => {
 		if (item.type === 'rule') {
-			const references = collectReferenceColors({
-				leftField: item.properties?.leftField,
-				rightField: item.properties?.rightField,
-			});
-			return [...references].some((color) => colors.has(color)) ? [] : [item];
+			return matches([item.properties?.leftField, item.properties?.rightField]) ? [] : [item];
 		}
-		const nested = removeRulesWithColors(item, colors);
+		const nested = removeMatchingRules(item, matches);
 		return (nested.items ?? []).length ? [nested] : [];
 	}),
 });
 
-export const removeConditionReferenceColors = (
+export const removeConditionReferences = (
 	conditionConfig: WorkflowNodeModel['data']['conditionConfig'],
-	colors: Set<string>,
+	matches: ReferenceMatcher,
 ) => {
 	if (!conditionConfig?.tree) return conditionConfig;
-	const cleanedTree = removeRulesWithColors(conditionConfig.tree, colors);
+	const cleanedTree = removeMatchingRules(conditionConfig.tree, matches);
 	const tree = conditionConfig.operatorType === 'loop' && !cleanedTree.items?.length
 		? { ...cleanedTree, items: [{ id: createShortId('rule'), type: 'rule' as const }] }
 		: cleanedTree;
