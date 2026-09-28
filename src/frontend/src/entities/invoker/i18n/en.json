@@ -19,6 +19,13 @@
     "download": {
       "success": "Invoker downloaded: {{name}}",
       "error": "Failed to download invoker file."
+    },
+    "repository": {
+      "success_one": "{{count}} invoker installed from the online repository",
+      "success_other": "{{count}} invokers installed from the online repository",
+      "empty": "The online repository had no invokers to install.",
+      "failed_one": "{{count}} file could not be installed",
+      "failed_other": "{{count}} files could not be installed"
     }
   },
   "fields": {

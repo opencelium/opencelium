@@ -34,6 +34,12 @@
       "update": "{{resource}} konnten nicht aktualisiert werden",
       "delete": "{{resource}} konnten nicht gelöscht werden",
       "request": "Anfrage an {{resource}} fehlgeschlagen"
+    },
+    "invokerRepository": {
+      "offline": "Keine Internetverbindung. Stellen Sie die Verbindung wieder her, um Invoker aus dem Online-Repository zu installieren.",
+      "syncDisabled": "Online-Dienste sind in der Systemkonfiguration deaktiviert, daher können keine Invoker aus dem Online-Repository installiert werden.",
+      "unavailable": "Der OpenCelium-Server konnte das Online-Invoker-Repository nicht erreichen. Prüfen Sie die Internetverbindung des Servers und versuchen Sie es erneut.",
+      "serverUnreachable": "Der OpenCelium-Server ist nicht erreichbar. Bitte versuchen Sie es erneut."
     }
   },
   "field": {

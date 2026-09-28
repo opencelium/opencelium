@@ -34,6 +34,12 @@
       "update": "Could not update {{resource}}",
       "delete": "Could not delete {{resource}}",
       "request": "Request to {{resource}} failed"
+    },
+    "invokerRepository": {
+      "offline": "No internet connection. Reconnect to install invokers from the online repository.",
+      "syncDisabled": "Online services are disabled in the system configuration, so invokers cannot be installed from the online repository.",
+      "unavailable": "The OpenCelium server could not reach the online invoker repository. Check the server's internet connection and try again.",
+      "serverUnreachable": "Could not reach the OpenCelium server. Please try again."
     }
   },
   "field": {
