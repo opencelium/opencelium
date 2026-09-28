@@ -145,3 +145,41 @@ export function moveWorkflowNodeGroup({
   });
   return result;
 }
+
+export function copyWorkflowNodeGroup({
+  sourceNodeIds,
+  target,
+  nodes,
+  edges,
+  fieldBindings,
+  cleanInvalid = false,
+}: {
+  sourceNodeIds: string[];
+  target: DropTarget;
+  nodes: WorkflowNodeModel[];
+  edges: WorkflowEdgeModel[];
+  fieldBindings?: unknown[];
+  cleanInvalid?: boolean;
+}): WorkflowDropResult {
+  let result: WorkflowDropResult = { nodes, edges, fieldBindings, invalidReferences: [] };
+  const idMap = new Map<string, string>();
+  const invalidReferences = [] as WorkflowDropResult['invalidReferences'];
+  let previousRootId: string | undefined;
+
+  sourceNodeIds.forEach((sourceNodeId, index) => {
+    const next = moveOrCopyWorkflowNodes({
+      sourceNodeId,
+      target: index === 0 || !previousRootId
+        ? target
+        : { nodeId: previousRootId, direction: 'right' },
+      mode: 'copy', nodes: result.nodes, edges: result.edges,
+      fieldBindings: result.fieldBindings, cleanInvalid,
+    });
+    next.idMap?.forEach((clonedId, originalId) => idMap.set(originalId, clonedId));
+    previousRootId = next.idMap?.get(sourceNodeId) ?? previousRootId;
+    invalidReferences.push(...next.invalidReferences);
+    result = next;
+  });
+
+  return { ...result, idMap, invalidReferences: uniqueReferences(invalidReferences) };
+}
