@@ -64,6 +64,7 @@ import {
 } from '@mui/icons-material';
 
 import MouseOutlined from '@mui/icons-material/MouseOutlined';
+import DragIndicator from '@mui/icons-material/DragIndicator';
 import type { IconComponent } from './Icon.types';
 
 const iconMap = {
@@ -131,6 +132,7 @@ const iconMap = {
     git: GitHub,
     globe: Public,
     portal: Apps,
+    'drag-handle': DragIndicator,
 };
 
 export const MaterialIcon: IconComponent = ({

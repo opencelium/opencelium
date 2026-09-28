@@ -1,11 +1,13 @@
 import type { WorkflowNodeModel } from '../types/workflow.types';
 import type { InvalidReference } from './graph.dragDrop.types';
-import { removeConditionReferenceColors } from './graph.conditionReferenceCleanup';
+import { removeConditionReferences } from './graph.conditionReferenceCleanup';
 import {
+  buildReferenceMatcher,
   collectReferenceColors,
   normalizeReferenceColor,
+  type ReferenceMatcher,
 } from './graph.referenceColors';
-import { removeNodeDataReferenceColors } from './graph.referenceCleanup';
+import { removeNodeDataReferences } from './graph.referenceCleanup';
 import { dropEnhancementArgs, hasEnhancementArgs } from './enhancementArgs';
 import { isDirectReferenceEnhancement } from '../components/request-editor/body-editor/bodyReference';
 
@@ -17,26 +19,28 @@ export const cleanInvalidWorkflowReferences = (
   invalidReferences: InvalidReference[],
   fieldBindings?: any[],
 ) => {
-  const invalidByNode = new Map<string, Set<string>>();
-  invalidReferences.forEach((reference) => {
-    invalidByNode.set(reference.consumerNodeId, new Set([
-      ...(invalidByNode.get(reference.consumerNodeId) ?? []),
-      reference.sourceColor,
-    ]));
-  });
-  const invalidByConsumerColor = new Map<string, Set<string>>();
+  const referencesByNode = new Map<string, InvalidReference[]>();
+  invalidReferences.forEach((reference) => referencesByNode.set(reference.consumerNodeId,
+    [...(referencesByNode.get(reference.consumerNodeId) ?? []), reference]));
+  const matcherByNode = new Map([...referencesByNode]
+    .map(([nodeId, references]) => [nodeId, buildReferenceMatcher(references)]));
+  const matcherByConsumerColor = new Map<string, ReferenceMatcher>();
   nodes.forEach((node) => {
-    const colors = invalidByNode.get(node.id);
+    const matcher = matcherByNode.get(node.id);
     const consumerColor = normalizeReferenceColor(node.data.color);
-    if (colors && consumerColor) invalidByConsumerColor.set(consumerColor, colors);
+    if (matcher && consumerColor) matcherByConsumerColor.set(consumerColor, matcher);
   });
+  // A `from` entry is a reference split into parts; rejoin it so it is matched
+  // exactly like the same reference written into a field.
+  const fromReference = (item: { color?: string; type?: string; field?: string } | undefined) =>
+    `${normalizeReferenceColor(item?.color)}.(${item?.type === 'request' ? 'request' : 'response'}).${item?.field ?? ''}`;
 
   const cleanBinding = (binding: any) => {
     const resultColors = collectReferenceColors(binding?.enhancement?.args?.RESULT_VAR ?? '');
     const consumerColor = [...resultColors][0]
       ?? (Array.isArray(binding?.to) ? normalizeReferenceColor(binding.to[0]?.color) : '');
-    const invalidColors = consumerColor ? invalidByConsumerColor.get(consumerColor) : undefined;
-    if (!invalidColors) return binding;
+    const matches = consumerColor ? matcherByConsumerColor.get(consumerColor) : undefined;
+    if (!matches) return binding;
 
     const next = cloneValue(binding);
     // A script that loses an input must say so: the dead VAR_n is dropped and
@@ -46,20 +50,18 @@ export const cleanInvalidWorkflowReferences = (
     const wasPassthrough = isDirectReferenceEnhancement(next?.enhancement);
     if (next?.enhancement?.args && typeof next.enhancement.args === 'object') {
       const deadArgs = Object.entries(next.enhancement.args)
-        .filter(([key, value]) => key !== 'RESULT_VAR'
-          && [...collectReferenceColors(value)].some((color) => invalidColors.has(color)))
+        .filter(([key, value]) => key !== 'RESULT_VAR' && matches(value))
         .map(([key]) => key);
       next.enhancement = dropEnhancementArgs(next.enhancement, deadArgs);
     }
     if (Array.isArray(next?.from)) {
       next.from = next.from
-        .filter((item: any) => !invalidColors.has(normalizeReferenceColor(item?.color)));
+        .filter((item: any) => !matches(fromReference(item)));
     }
     if (typeof next?.enhancement?.expertVar === 'string') {
       next.enhancement.expertVar = next.enhancement.expertVar
         .split('\n')
-        .filter((line: string) => ![...collectReferenceColors(line)]
-          .some((color) => invalidColors.has(color)))
+        .filter((line: string) => !matches(line))
         .join('\n');
     }
 
@@ -75,18 +77,18 @@ export const cleanInvalidWorkflowReferences = (
 
   return {
     nodes: nodes.map((node) => {
-      const colors = invalidByNode.get(node.id);
-      if (!colors) return node;
+      const matches = matcherByNode.get(node.id);
+      if (!matches) return node;
       if (node.type === 'if' || node.type === 'loop') {
         return {
           ...node,
           data: {
             ...node.data,
-            conditionConfig: removeConditionReferenceColors(node.data.conditionConfig, colors),
+            conditionConfig: removeConditionReferences(node.data.conditionConfig, matches),
           },
         };
       }
-      return { ...node, data: removeNodeDataReferenceColors(node.data, colors) };
+      return { ...node, data: removeNodeDataReferences(node.data, matches) };
     }),
     fieldBindings: Array.isArray(fieldBindings)
       ? fieldBindings.map(cleanBinding).filter(Boolean)

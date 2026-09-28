@@ -36,16 +36,21 @@ export const useReferenceRemapConfirm = () => {
 			before: { nodes: WorkflowNodeModel[]; edges: WorkflowEdgeModel[] };
 			after: { nodes: WorkflowNodeModel[]; edges: WorkflowEdgeModel[] };
 		},
+		stepCount = 1,
 	): Promise<ReferenceRemapAnswer> => {
 		let plan: ReferenceRemapPlan = EMPTY_REMAP_PLAN;
+		const text = stepCount > 1
+			? { title: t('confirmDelete.titleSeveral', { count: stepCount }),
+				message: t('confirmDelete.messageSeveral', { count: stepCount }) }
+			: { title: t('confirmDelete.title'), message: t('confirmDelete.message') };
 		const confirmed = await confirm({
-			title: t('confirmDelete.title'),
+			title: text.title,
 			// Wide only when it has to be: a confirm with nothing but a sentence in
 			// it should stay the size every other confirm is.
 			width: targets.length === 0 ? undefined : REMAP_DIALOG_WIDTH,
-			message: targets.length === 0 ? t('confirmDelete.message') : (
+			message: targets.length === 0 ? text.message : (
 				<>
-					{t('confirmDelete.message')}
+					{text.message}
 					<ReferenceRemapChoices
 						targets={targets}
 						after={graphs.after}

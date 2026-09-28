@@ -53,6 +53,8 @@ import {
 } from './conditionBuilder.utils';
 import { evaluateIfComparison, type ComparisonEvaluation, type OperandInput } from './conditionComparison';
 import { LoopInfoPanel } from './LoopInfoPanel/LoopInfoPanel';
+import { useConditionDragItem } from './ConditionReorder/useConditionDragItem';
+import { ConditionReorderProvider } from './ConditionReorder/ConditionReorderProvider';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
@@ -602,6 +604,7 @@ function RuleRow({
 	const isUnary = operator && UNARY_IF_OPERATORS.has(operator as IfOperatorName);
 	const isSplitString = operator === LoopOperatorName.SplitString;
 	const hasBinaryRight = !!operator && !isUnary;
+	const reorderItem = useConditionDragItem({ kind: 'rule', id: rule.id });
 
 	// Hovering the operator select resolves BOTH operands at once (independent
 	// of each ConditionValueInput's own per-field hover state) so the
@@ -629,7 +632,11 @@ function RuleRow({
 	const isComparisonLoading = isOperatorHovered && (leftLive.isLoading || (hasBinaryRight && rightLive.isLoading));
 
 	return (
-		<div className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''}`}>
+		<div
+			className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''} ${reorderItem?.className ?? ''}`}
+			{...reorderItem?.itemProps}
+		>
+			{reorderItem?.handle}
 			{isLoop ? (
 				<Select
 					placeholder={t('placeholders.selectOperator')}
@@ -776,6 +783,7 @@ function GroupEditor({
 	const isConjunctionDisabled = items.length <= 1;
 	const conjunction = group.properties?.conjunction;
 	const activeConjunction = conjunction;
+	const reorderItem = useConditionDragItem({ kind: 'group', id: group.id });
 	const groupClassName = operatorType === 'loop'
 		? 'conditionLoopGroup'
 		: `conditionGroup${group.error ? ' conditionGroupInvalid' : ''}`;
@@ -815,8 +823,10 @@ function GroupEditor({
 	}, [conjunction, group, items.length, onChange, operatorType]);
 
 	return (
-		<div className={groupClassName}>
+		<div className={`${groupClassName} ${reorderItem?.className ?? ''}`} {...reorderItem?.itemProps}>
 			{operatorType === 'if' ? <div className="conditionGroupHeader">
+				<div className="conditionGroupLead">
+				{reorderItem?.handle}
 				<div className="conditionGroupStatus">
 					<div className="conditionGroupToggle">
 						<button
@@ -837,6 +847,7 @@ function GroupEditor({
 						</button>
 					</div>
 					{group.error ? <div className="conditionGroupError">{group.error}</div> : null}
+				</div>
 				</div>
 				<div className="conditionGroupActions">
 					<Button
@@ -1004,17 +1015,19 @@ export function ConditionBuilderDialog({
 		>
 			<div key={renderKey} className="conditionBuilder" data-testid="workflow-condition-builder">
 				<LiveInspectHint />
-				<GroupEditor
-					group={tree}
-					operatorType={operatorType}
-					methods={methods}
-					allMethods={allMethods}
-					iterators={iterators}
-					connection={connection}
-					operatorIndexPath={operatorIndexPath}
-					popupZIndex={zIndex}
-					onChange={setTree}
-				/>
+				<ConditionReorderProvider tree={tree} isEnabled={operatorType === 'if'} onChange={setTree}>
+					<GroupEditor
+						group={tree}
+						operatorType={operatorType}
+						methods={methods}
+						allMethods={allMethods}
+						iterators={iterators}
+						connection={connection}
+						operatorIndexPath={operatorIndexPath}
+						popupZIndex={zIndex}
+						onChange={setTree}
+					/>
+				</ConditionReorderProvider>
 				{isLoop ? (
 					<LoopInfoPanel
 						iterator={loopIterator}

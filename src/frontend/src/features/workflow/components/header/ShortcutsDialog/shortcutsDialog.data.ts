@@ -6,6 +6,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
 		items: [
 			{ keys: ['drag'], descKey: 'shortcutsDialog.items.pan' },
 			{ keys: ['scroll'], descKey: 'shortcutsDialog.items.zoom' },
+			{ keys: ['shift', 'drag'], descKey: 'shortcutsDialog.items.boxSelect' },
 		],
 	},
 	{
@@ -15,6 +16,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
 			{ keys: ['drag'], descKey: 'shortcutsDialog.items.moveNode' },
 			{ keys: ['ctrl', 'drag'], descKey: 'shortcutsDialog.items.duplicate' },
 			{ keys: ['ctrl', 'click'], descKey: 'shortcutsDialog.items.multiSelect' },
+			{ keys: ['ctrl', 'click'], descKey: 'shortcutsDialog.items.selectScope' },
 			{ keys: ['ctrl', 'c'], descKey: 'shortcutsDialog.items.copyNode' },
 			{ keys: ['ctrl', 'v'], descKey: 'shortcutsDialog.items.pasteNode' },
 			{ keys: ['ctrl', 'd'], descKey: 'shortcutsDialog.items.duplicateNode' },
@@ -30,6 +32,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
 			{ keys: ['ctrl', 'redo'], descKey: 'shortcutsDialog.items.redo' },
 			{ keys: ['esc'], descKey: 'shortcutsDialog.items.close' },
 			{ keys: ['esc'], descKey: 'shortcutsDialog.items.dismissError' },
+			{ keys: ['esc'], descKey: 'shortcutsDialog.items.cancelJoint' },
 		],
 	},
 ];

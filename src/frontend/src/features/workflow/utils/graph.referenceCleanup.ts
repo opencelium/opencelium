@@ -1,32 +1,27 @@
 import type { WorkflowNodeModel } from '../types/workflow.types';
-import { collectReferenceColors } from './graph.referenceColors';
+import type { ReferenceMatcher } from './graph.referenceColors';
 
 const ENDPOINT_ARG_TOKEN_RE = /#\{%\s*([A-Za-z0-9_-]+)\s*%}/g;
 
-const removeColors = (value: unknown, colors: Set<string>): unknown => {
+const removeMatching = (value: unknown, matches: ReferenceMatcher): unknown => {
 	if (typeof value === 'string') return value.split(';')
 		.map((part) => part.trim())
-		.filter((part) => {
-			const references = collectReferenceColors(part);
-			return references.size === 0 ||
-				![...references].some((color) => colors.has(color));
-		})
+		.filter((part) => !matches(part))
 		.join(';');
-	if (Array.isArray(value)) return value.map((item) => removeColors(item, colors));
+	if (Array.isArray(value)) return value.map((item) => removeMatching(item, matches));
 	if (value && typeof value === 'object') return Object.fromEntries(
 		Object.entries(value as Record<string, unknown>).map(([key, nested]) =>
-			[key, removeColors(nested, colors)]),
+			[key, removeMatching(nested, matches)]),
 	);
 	return value;
 };
 
-const endpointArgIdsForColors = (methodConfig: unknown, colors: Set<string>) => {
+const endpointArgIdsMatching = (methodConfig: unknown, matches: ReferenceMatcher) => {
 	if (!methodConfig || typeof methodConfig !== 'object') return new Set<string>();
 	const endpointArgs = (methodConfig as Record<string, any>).endpointArgs;
 	if (!endpointArgs || typeof endpointArgs !== 'object') return new Set<string>();
 	return new Set(Object.entries(endpointArgs)
-		.filter(([, argument]: [string, any]) =>
-			[...collectReferenceColors(argument?.source)].some((color) => colors.has(color)))
+		.filter(([, argument]: [string, any]) => matches(argument?.source))
 		.map(([id]) => id));
 };
 
@@ -34,11 +29,11 @@ const removeEndpointArgTokens = (value: string, argumentIds: Set<string>) =>
 	value.replace(ENDPOINT_ARG_TOKEN_RE,
 		(token, argumentId: string) => argumentIds.has(argumentId) ? '' : token);
 
-const removeEndpointArgReferences = (methodConfig: unknown, colors: Set<string>) => {
-	const argumentIds = endpointArgIdsForColors(methodConfig, colors);
+const removeEndpointArgReferences = (methodConfig: unknown, matches: ReferenceMatcher) => {
+	const argumentIds = endpointArgIdsMatching(methodConfig, matches);
 	if (!methodConfig || typeof methodConfig !== 'object') return methodConfig;
 	const config = methodConfig as Record<string, any>;
-	const cleaned = removeColors(config, colors) as Record<string, any>;
+	const cleaned = removeMatching(config, matches) as Record<string, any>;
 	if (!argumentIds.size) return cleaned;
 	return { ...cleaned,
 		url: typeof config.url === 'string'
@@ -55,15 +50,15 @@ const removeEndpointArgReferences = (methodConfig: unknown, colors: Set<string>)
 	};
 };
 
-export const removeNodeDataReferenceColors = (
+export const removeNodeDataReferences = (
 	data: WorkflowNodeModel['data'],
-	colors: Set<string>,
+	matches: ReferenceMatcher,
 ): WorkflowNodeModel['data'] => {
 	const { methodConfig, ...restData } = data;
-	const cleaned = removeColors(restData, colors) as
+	const cleaned = removeMatching(restData, matches) as
 		Omit<WorkflowNodeModel['data'], 'methodConfig'>;
 	return methodConfig ? { ...cleaned,
-		methodConfig: removeEndpointArgReferences(methodConfig, colors) as
+		methodConfig: removeEndpointArgReferences(methodConfig, matches) as
 			WorkflowNodeModel['data']['methodConfig'],
 	} : cleaned as WorkflowNodeModel['data'];
 };
