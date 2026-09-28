@@ -12,6 +12,7 @@ import { TestRunProvider } from './test-run/TestRunProvider';
 import { TestRunEditLockSync } from './test-run/TestRunEditLockSync';
 import { useWorkflowPageState } from './hooks/useWorkflowPageState';
 import { useWorkflowActions } from './hooks/useWorkflowActions';
+import { useDuplicatedWorkflowHint } from './hooks/useDuplicatedWorkflowHint';
 import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { buildWorkflowIndexes } from './api/connectionPayload';
 import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJsonDialog/workflowJson.validate';
@@ -24,6 +25,7 @@ type WorkflowProps = {
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const { t } = useI18n('workflow');
+  useDuplicatedWorkflowHint();
   // Mirrored up from inside TestRunProvider by TestRunEditLockSync — see there
   // for why paused does not count as locked.
   const [isTestRunLocked, setIsTestRunLocked] = useState(false);
