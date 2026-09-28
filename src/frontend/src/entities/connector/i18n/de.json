@@ -2,7 +2,13 @@
   "list": {
     "title": "Konnektoren",
     "subTitle": "Konnektoren sind Kernkomponenten von OpenCelium. Sie repräsentieren externe oder interne Systeme, die zum Senden von Anfragen und zum Empfangen von Antworten verwendet werden.",
-    "searchPlaceholder": "Suchen"
+    "searchPlaceholder": "Suchen",
+    "duplicate": {
+      "tooltip": "Konnektor duplizieren",
+      "header": "Konnektor duplizieren",
+      "subheader": "Erstellen Sie eine Kopie des Konnektors und passen Sie die Einstellungen vor dem Speichern an.",
+      "success": "Konnektor \"{{title}}\" wurde erfolgreich dupliziert"
+    }
   },
   "fields": {
     "title": {
