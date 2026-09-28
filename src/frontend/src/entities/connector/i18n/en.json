@@ -2,7 +2,12 @@
   "list": {
     "title": "Connectors",
     "subTitle": "Connectors are core components of OpenCelium. They represent external or internal systems used to send requests and receive responses.",
-    "searchPlaceholder": "Search"
+    "searchPlaceholder": "Search",
+    "duplicate": {
+      "tooltip": "Duplicate connector",
+      "dialogTitle": "Duplicate connector",
+      "success": "Connector \"{{title}}\" was successfully duplicated"
+    }
   },
   "fields": {
     "title": {
