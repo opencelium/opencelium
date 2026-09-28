@@ -76,12 +76,10 @@
 
 .conditionValueInput {
 	display: flex;
+	flex: 0 1 auto;
 	align-items: center;
 	gap: 0;
-}
-
-.conditionValueInputWebhook {
-	min-width: 430px;
+	min-width: 0;
 }
 
 .conditionSourceSwitcher,
@@ -130,3 +128,38 @@
 	width: 180px;
 }
 
+
+.conditionDragHandle {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 24px;
+	border-radius: 3px;
+	color: var(--color-text-secondary);
+	cursor: grab;
+}
+
+.conditionDragHandle:hover {
+	background: var(--color-background-disabled);
+	color: var(--color-text-primary);
+}
+
+.conditionDragHandle:active {
+	cursor: grabbing;
+}
+
+.conditionDragging {
+	opacity: 0.5;
+}
+
+.conditionRule.conditionDrop-before,
+.conditionGroup.conditionDrop-before {
+	box-shadow: 0 -5px 0 -2px var(--color-action-primary);
+}
+
+.conditionRule.conditionDrop-after,
+.conditionGroup.conditionDrop-after {
+	box-shadow: 0 5px 0 -2px var(--color-action-primary);
+}
