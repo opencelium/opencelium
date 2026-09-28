@@ -45,11 +45,15 @@
   "confirmDelete": {
     "title": "Delete step",
     "message": "Are you sure you want to delete this step? Any steps nested inside it will be removed as well.",
+    "titleSeveral": "Delete {{count}} steps",
+    "messageSeveral": "Are you sure you want to delete these {{count}} steps? Any steps nested inside them will be removed as well.",
     "referencesClearedTitle": "References cleared",
     "referencesCleared": "{{count}} other steps were reading “{{name}}”. Those references are gone.",
     "referencesCleared_one": "{{count}} other step was reading “{{name}}”. Those references are gone.",
     "referencesClearedUnnamed": "{{count}} other steps were reading the deleted step. Those references are gone.",
-    "referencesClearedUnnamed_one": "{{count}} other step was reading the deleted step. Those references are gone."
+    "referencesClearedUnnamed_one": "{{count}} other step was reading the deleted step. Those references are gone.",
+    "referencesClearedSeveral": "{{count}} other steps were reading the deleted steps. Those references are gone.",
+    "referencesClearedSeveral_one": "{{count}} other step was reading the deleted steps. Those references are gone."
   },
   "confirmRemoveJoint": {
     "title": "Remove joint?",
@@ -435,25 +439,28 @@
       "z": "Z",
       "redo": "(Shift + Z / Y)",
       "shift": "Shift",
-      "delete": "Delete"
+      "delete": "Delete / Backspace"
     },
     "items": {
       "pan": "Pan the canvas",
       "zoom": "Zoom in and out",
+      "boxSelect": "Select every node inside the drawn box",
       "openConfig": "Open node configuration",
-      "moveNode": "Move a node",
-      "duplicate": "Duplicate a node instead of moving it",
-      "multiSelect": "Select multiple nodes",
-      "copyNode": "Copy the selected node",
-      "pasteNode": "Paste the copied node",
+      "moveNode": "Move a node, or all selected nodes",
+      "duplicate": "Copy the dragged node, or all selected nodes, instead of moving",
+      "multiSelect": "Add a node to the selection, or remove it",
+      "selectScope": "On an IF or loop: select it together with everything in its scope",
+      "copyNode": "Copy the selected nodes",
+      "pasteNode": "Paste the copied nodes after the selected node (on an IF or loop you choose: inside its scope or after it)",
       "duplicateNode": "Duplicate the selected node",
       "searchNode": "Search workflow nodes",
-      "deleteNode": "Delete the selected node",
+      "deleteNode": "Delete the selected nodes",
       "save": "Save the workflow",
       "undo": "Undo the last canvas change",
       "redo": "Redo the change that was undone",
       "close": "Close the open menu, dialog, or panel",
-      "dismissError": "Dismiss the error highlight on a node"
+      "dismissError": "Dismiss the error highlight on a node",
+      "cancelJoint": "Cancel creating a joint"
     }
   },
   "pasteOperator": {
