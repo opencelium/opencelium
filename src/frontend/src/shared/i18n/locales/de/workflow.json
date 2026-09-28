@@ -141,6 +141,7 @@
     "nodePasted": "Knoten eingefügt",
     "nodeDuplicated": "Knoten dupliziert",
     "deleteVersionSuccess": "Version gelöscht",
+    "duplicatedTitleHint": "Workflow \"{{name}}\" dupliziert. Wir empfehlen, den Titel zu ändern.",
     "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?",
     "enhancementScriptBrokenIn": "„{{method}}“ hat eine Anreicherung, deren Skript noch {{marker}} verwendet — der gelesene Verweis wurde mit dem Schritt entfernt, auf den er zeigte. Korrigieren Sie das Skript vor dem Speichern.",
     "enhancementScriptBroken": "{{count}} Schritte haben eine Anreicherung, deren Skript noch {{marker}} verwendet — die gelesenen Verweise wurden mit den Schritten entfernt, auf die sie zeigten. Korrigieren Sie die Skripte vor dem Speichern.",
