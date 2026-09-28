@@ -1,6 +1,6 @@
 import { initialNodes } from '../data/initialGraph';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
-import { getBottomSourceHandle, getRightSourceHandle } from '../utils/graph.handles';
+import { getBottomSourceHandle, getDefaultSourceHandle, getRightSourceHandle } from '../utils/graph.handles';
 import type { IndexedWorkflowEntry } from './connectionMapper.types';
 
 const comparePath = (left: number[], right: number[]) => {
@@ -19,9 +19,10 @@ const buildEdge = (
 	target: WorkflowNodeModel,
 	direction: 'right' | 'bottom',
 ): WorkflowEdgeModel => {
-	const sourceHandle = direction === 'bottom'
-		? getBottomSourceHandle(source.type) ?? (source.type === 'start' ? undefined : 'bottom')
-		: getRightSourceHandle(source.type) ?? (source.type === 'start' ? undefined : 'right');
+	// Same handles an edge drawn in the editor gets: a method continues right
+	// with no source handle, and buildWorkflowIndexes only follows that shape —
+	// a 'right' handle here cut every method after the first out of the index.
+	const sourceHandle = getDefaultSourceHandle(source.type, direction);
 	const targetHandle = direction === 'bottom' ? 'top' : 'left';
 	const branch = source.type === 'if'
 		? sourceHandle === 'true' ? 'true' as const
