@@ -53,6 +53,7 @@
       "uploadTemplate": "Upload a workflow template file",
       "downloadTemplate": "Download a workflow template file",
       "uploadInvoker": "Upload an invoker file",
+      "installOnlineInvokers": "Install invokers from the OpenCelium online repository",
       "downloadInvoker": "Download an invoker file",
       "systemCheck": "Open the system check page",
       "ldapCheck": "Open the LDAP connectivity check page",

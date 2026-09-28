@@ -21,6 +21,9 @@ import { pickInvokerFile, uploadInvoker } from '@entities/invoker/lib/uploadInvo
 import { buildInvokerXml } from '@entities/invoker/lib/invokerXml'
 import { mapInvokerToForm } from '@entities/invoker/lib/mapInvokerToForm'
 import { downloadInvoker } from '@entities/invoker/lib/downloadInvoker'
+import { installInvokersFromRepository } from '@entities/invoker/lib/installInvokersFromRepository'
+import { notifyInstalledInvokers } from '@entities/invoker/lib/notifyInstalledInvokers'
+import { errorBus } from '@shared/errors/api/errorBus'
 import { buildActionAccess } from '@/engine/policy'
 import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 import { notifyError } from '@shared/ui/feedback/notifyError'
@@ -502,6 +505,37 @@ export const invokerDefinition: EntityDefinition = {
                         } catch (err) {
                             console.error(err)
                             notifyError(tEntities('invoker.list.upload.error'))
+                        } finally {
+                            ctx.setLoading(false)
+                        }
+                    },
+                },
+            ],
+        },
+        {
+            type: 'literal',
+            value: 'install',
+            group: 'create',
+            icon: 'download',
+            description: 'commandPalette.descriptions.installOnlineInvokers',
+            children: [
+                {
+                    type: 'literal',
+                    value: 'online-invokers',
+                    aliases: ['invokers', 'remote-invokers'],
+                    icon: 'download',
+                    description: 'commandPalette.descriptions.installOnlineInvokers',
+                    access: buildActionAccess('INVOKER', 'CREATE'),
+                    execute: async (_, ctx) => {
+                        ctx.setLoading(true)
+                        try {
+                            const outcome = await installInvokersFromRepository()
+                            if (outcome.status === 'error') {
+                                errorBus.emit(outcome.error)
+                                return
+                            }
+                            notifyInstalledInvokers(outcome.result)
+                            ctx.setInputValue('')
                         } finally {
                             ctx.setLoading(false)
                         }
