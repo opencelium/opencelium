@@ -21,9 +21,11 @@ import com.becon.opencelium.backend.application.assistant.UpdatePackageServiceIm
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.constant.props.OnlineServicesProps;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.application.MigrateDataResource;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.updateassistant.InstallationDTO;
 import com.becon.opencelium.backend.resource.updateassistant.JarFileDescriptor;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
@@ -85,6 +87,9 @@ public class UpdateAssistantController {
 
     @Autowired
     private UpdatePackageServiceImp updatePackageServiceImp;
+
+    @Autowired
+    private OnlineServicesProps onlineServicesProps;
 
     @GetMapping("/all")
     public List<String> getAll() {
@@ -196,6 +201,9 @@ public class UpdateAssistantController {
     })
     @GetMapping(value = "/oc/online/version/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getOnlineVersion() {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         List<AvailableUpdate> onVersions_json = packageServiceImp.getOnVersions();
         List<AvailableUpdateResource> versions = onVersions_json.stream()
                 .map(t -> updatePackageServiceImp.toResource(t)).toList();
@@ -215,6 +223,9 @@ public class UpdateAssistantController {
     })
     @GetMapping(value = "/oc/online/version/{version}/download", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> downloadVersion(@PathVariable String version) {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         try {
             packageServiceImp.downloadPackage(version);
             AvailableUpdate availableUpdate = updatePackageServiceImp.getAvailableUpdate(version);
