@@ -19,6 +19,13 @@
     "download": {
       "success": "Invoker heruntergeladen: {{name}}",
       "error": "Herunterladen der Invoker-Datei fehlgeschlagen."
+    },
+    "repository": {
+      "success_one": "{{count}} Invoker aus dem Online-Repository installiert",
+      "success_other": "{{count}} Invoker aus dem Online-Repository installiert",
+      "empty": "Das Online-Repository enthielt keine Invoker zur Installation.",
+      "failed_one": "{{count}} Datei konnte nicht installiert werden",
+      "failed_other": "{{count}} Dateien konnten nicht installiert werden"
     }
   },
   "fields": {

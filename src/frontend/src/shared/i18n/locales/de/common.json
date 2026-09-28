@@ -53,6 +53,7 @@
       "uploadTemplate": "Workflow-Vorlagendatei hochladen",
       "downloadTemplate": "Workflow-Vorlagendatei herunterladen",
       "uploadInvoker": "Invoker-Datei hochladen",
+      "installOnlineInvokers": "Invoker aus dem OpenCelium-Online-Repository installieren",
       "downloadInvoker": "Invoker-Datei herunterladen",
       "systemCheck": "Systemprüfungsseite öffnen",
       "ldapCheck": "LDAP-Verbindungsprüfungsseite öffnen",

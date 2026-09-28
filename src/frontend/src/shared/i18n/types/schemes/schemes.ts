@@ -140,6 +140,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 uploadTemplate: string
                 downloadTemplate: string
                 uploadInvoker: string
+                installOnlineInvokers: string
                 downloadInvoker: string
                 systemCheck: string
                 ldapCheck: string
