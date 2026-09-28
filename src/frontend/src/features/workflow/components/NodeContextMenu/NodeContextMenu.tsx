@@ -5,7 +5,7 @@ import { ContextMenuEditor } from '../context-menu/ContextMenuEditor/ContextMenu
 import type { NodeContextMenuProps } from './NodeContextMenu.types';
 import { NodeContextMenuSections } from './NodeContextMenuSections';
 
-export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onOpenAggregatorEditor }: NodeContextMenuProps) {
+export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onOpenAggregatorEditor, onOpenConnectorEditor }: NodeContextMenuProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingLabel, setIsEditingLabel] = useState(false);
@@ -55,7 +55,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
         <NodeContextMenuSections menu={menu} node={node} onClose={onClose}
           onEditLabel={() => setIsEditingLabel(true)} onOpenRequestEditor={onOpenRequestEditor}
           onOpenConditionEditor={onOpenConditionEditor} onShowResponse={onShowResponse}
-          onOpenAggregatorEditor={onOpenAggregatorEditor} />
+          onOpenAggregatorEditor={onOpenAggregatorEditor} onOpenConnectorEditor={onOpenConnectorEditor} />
       )}
     </div>,
     document.body,

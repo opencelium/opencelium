@@ -39,7 +39,9 @@ export function NodeShell({
 		if (data.dragGhost || data.dropPlaceholder) return;
 		if (event.ctrlKey) {
 			event.preventDefault();
-			event.stopPropagation();
+			// A left-button one is macOS's Ctrl+click; the canvas turns it back
+			// into a selection click (see useCtrlClickContextMenu).
+			if (event.button !== 0) event.stopPropagation();
 			return;
 		}
 		if (data.kind === 'start') return;
