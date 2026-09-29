@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from 'react'
+import { ChartTooltip } from './ChartTooltip'
 
 export type Series = {
     key: string
@@ -10,14 +11,18 @@ type Props = {
     series: Series[]
     height?: number
     yFormat?: (value: number) => string
+    /** Hover tooltip content for the point at `index`; omit to disable hovering. */
+    renderTooltip?: (index: number) => ReactNode
+    testId?: string
 }
 
 const PADDING = { top: 16, right: 12, bottom: 28, left: 40 }
 const Y_TICKS = 4
 
-export function MiniLineChart({ series, height = 220, yFormat }: Props) {
+export function MiniLineChart({ series, height = 220, yFormat, renderTooltip, testId }: Props) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const [width, setWidth] = useState(480)
+    const [hoverIndex, setHoverIndex] = useState<number | null>(null)
 
     useEffect(() => {
         const el = containerRef.current
@@ -44,8 +49,31 @@ export function MiniLineChart({ series, height = 220, yFormat }: Props) {
 
     const yTicks = Array.from({ length: Y_TICKS + 1 }, (_, i) => (maxValue * i) / Y_TICKS)
 
+    const isHoverable = Boolean(renderTooltip) && labels.length > 0
+
+    const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+        if (!isHoverable) return
+        const relativeX = event.clientX - event.currentTarget.getBoundingClientRect().left
+        const step = labels.length <= 1 ? innerW : innerW / (labels.length - 1)
+        const nearest = Math.round((relativeX - PADDING.left) / step)
+        setHoverIndex(Math.min(labels.length - 1, Math.max(0, nearest)))
+    }
+
+    const activeIndex = isHoverable ? hoverIndex : null
+    const activePoints =
+        activeIndex === null
+            ? []
+            : series
+                  .map((s) => ({ series: s, point: s.points[activeIndex] }))
+                  .filter((entry) => entry.point !== undefined)
+
     return (
-        <div ref={containerRef} style={{ width: '100%' }}>
+        <div
+            ref={containerRef}
+            style={{ width: '100%', position: 'relative' }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setHoverIndex(null)}
+        >
             <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
                 {yTicks.map((tick, i) => {
                     const y = yFor(tick)
@@ -103,6 +131,32 @@ export function MiniLineChart({ series, height = 220, yFormat }: Props) {
                     )
                 })}
 
+                {activeIndex !== null && (
+                    <g pointerEvents="none">
+                        <line
+                            x1={xFor(activeIndex, labels.length)}
+                            x2={xFor(activeIndex, labels.length)}
+                            y1={PADDING.top}
+                            y2={PADDING.top + innerH}
+                            style={{ stroke: 'var(--color-border-strong)' }}
+                            strokeDasharray="3 3"
+                        />
+                        {activePoints.map(({ series: s, point }) => (
+                            <circle
+                                key={s.key}
+                                cx={xFor(activeIndex, labels.length)}
+                                cy={yFor(point.value)}
+                                r={4.5}
+                                style={{
+                                    fill: s.color,
+                                    stroke: 'var(--color-background-surface)',
+                                }}
+                                strokeWidth={2}
+                            />
+                        ))}
+                    </g>
+                )}
+
                 {labels.map((label, i) => (
                     <text
                         key={`${label}-${i}`}
@@ -116,6 +170,17 @@ export function MiniLineChart({ series, height = 220, yFormat }: Props) {
                     </text>
                 ))}
             </svg>
+
+            {activeIndex !== null && activePoints.length > 0 && (
+                <ChartTooltip
+                    x={xFor(activeIndex, labels.length)}
+                    y={Math.min(...activePoints.map(({ point }) => yFor(point.value)))}
+                    containerWidth={width}
+                    testId={testId ? `${testId}-tooltip` : undefined}
+                >
+                    {renderTooltip?.(activeIndex)}
+                </ChartTooltip>
+            )}
         </div>
     )
 }

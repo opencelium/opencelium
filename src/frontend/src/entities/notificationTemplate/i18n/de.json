@@ -63,6 +63,9 @@
       }
     }
   },
+  "validation": {
+    "meaningfulText": "Geben Sie mindestens einen Buchstaben oder eine Zahl ein."
+  },
   "confirmation": {
     "delete": {
       "byName": "Benachrichtigungsvorlage mit Name \"{{name}}\" löschen?",

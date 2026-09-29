@@ -1,0 +1,436 @@
+/* Control-flow edges step back while the lens is on, so the binding arcs read
+   as the foreground layer. Nodes keep full contrast — they are the anchors the
+   user is scanning between. */
+.canvasCardLens .react-flow__edge:not(.bindingLensEdge) {
+  opacity: 0.3;
+}
+
+/* A binding view that is currently open, in the flow's control strip (see
+   BindingLensControls). Tints the glyph through currentColor, which
+   .workflowControls already forwards to the svg's fill. */
+.workflowControls .react-flow__controls-button.workflowControlsButtonActive {
+  background: var(--color-action-primary-subtle);
+  color: var(--color-action-primary);
+}
+
+.bindingLensEdgePath {
+  stroke-width: 2;
+  fill: none;
+}
+
+.bindingLensBadge {
+  position: absolute;
+  /* Anchored to the edge-label renderer's origin (flow 0,0) rather than left to
+     its static position: the Tooltip primitive wraps its child in a full-width
+     flex span, and an absolutely positioned flex child with left/top auto is laid
+     out where that span's justify/align put it — which pushed the badge half a
+     pane to the right of the arc it belongs to. The transform must start from the
+     containing block, not from wherever the wrapper happens to place it. */
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 10px;
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-sm);
+  font-size: 11px;
+  line-height: 16px;
+  pointer-events: all;
+  cursor: default;
+}
+
+.bindingLensBadgeCount {
+  font-weight: 600;
+}
+
+.bindingLensBadgeWarning,
+.bindingLensBadgeBroken .bindingLensBadgeCount {
+  color: var(--color-status-error-fg);
+  font-weight: 600;
+}
+
+/* The minimized logs card is a 46px bar pinned to the canvas' bottom edge at
+   z-index 20 (.logsCard), so a bottom-right Panel — 15px off the bottom by
+   xyflow's own margin — put the legend's last rows behind it. Clears the bar
+   plus the same 15px gap. Two classes so it outranks .react-flow__panel's
+   margin whichever stylesheet lands first. */
+.react-flow__panel.bindingLensLegendPanelAboveLogs {
+  margin-bottom: 61px;
+}
+
+/* Fixed width, because a flex column takes its width from its widest child and
+   the focus hint is a whole sentence: an unfocused legend stretched to ~375px
+   and snapped back to ~155px the moment a method was picked, which read as two
+   different legends. The hint wraps within this width instead. */
+.bindingLensLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-sizing: border-box;
+  width: 220px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-primary);
+  font-size: 12px;
+}
+
+.bindingLensLegendTitle {
+  font-weight: 600;
+}
+
+.bindingLensLegendRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bindingLensLegendMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 0;
+  border-top: 2px solid var(--color-action-primary);
+  font-size: 10px;
+}
+
+/* One sample per kind of arc, and the samples are the arcs — colour and stroke
+   pattern both, so the key still separates the three in greyscale or to a
+   reader who cannot tell the blue from the orange. The base mark is already the
+   direct stroke (solid, --color-action-primary), so only the other two restate
+   theirs. See lensEdgeStyle for what each pair means. */
+.bindingLensLegendMarkEnhancement {
+  border-top-style: dotted;
+  border-top-color: var(--color-status-warning-fg);
+}
+
+.bindingLensLegendMarkBroken {
+  border-top: 2px dashed var(--color-status-error-fg);
+}
+
+.bindingLensLegendEmpty,
+.bindingLensLegendNote {
+  color: var(--color-text-secondary);
+  line-height: 1.35;
+}
+
+.bindingLensBadgeExpandable {
+  cursor: pointer;
+}
+
+.bindingLensBadgeExpandable:hover {
+  background: var(--color-background-hover);
+}
+
+.bindingCard {
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  background: var(--color-background-elevated);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-primary);
+  font-size: 11px;
+  overflow: hidden;
+}
+
+.bindingCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 8px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-background-subtle);
+}
+
+.bindingCardTitle {
+  flex: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bindingCardGroup {
+  padding: 3px 8px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+
+.bindingCardRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  /* A row that opens its binding is a <button>; these neutralize the control so
+     both tags render identically (see BindingCardNode). */
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+/* Only an actionable row reacts to the pointer — a row standing for several
+   different enhancements has nothing to open, and offering hover feedback for it
+   would promise a click that does nothing. Declared above .bindingCardRowSelected
+   so a selected row keeps its own background while hovered. */
+.bindingCardRowAction {
+  cursor: pointer;
+}
+
+.bindingCardRowAction:hover {
+  background: var(--color-background-hover);
+}
+
+.bindingCardRowAction:focus-visible {
+  outline: 2px solid var(--color-action-primary);
+  outline-offset: -2px;
+}
+
+.bindingCardRowCount {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.bindingCardRowPath {
+  flex: 1;
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The one ƒx left: a card row names a single binding, where the row's own text
+   is the arc and there is no stroke to carry the kind. Coloured with the
+   enhancement arcs it belongs to. */
+.bindingCardRowScript {
+  color: var(--color-status-warning-fg);
+  font-style: italic;
+}
+
+.bindingCardRowCounterpart {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 96px;
+  color: var(--color-text-secondary);
+}
+
+.bindingCardRowCounterpartName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bindingCardRowBroken .bindingCardRowPath {
+  color: var(--color-status-error-fg);
+  text-decoration: line-through;
+}
+
+.bindingCardEmpty {
+  padding: 6px 8px;
+  color: var(--color-text-secondary);
+}
+
+.bindingLensEdgeHit {
+  stroke: transparent;
+  stroke-width: 14;
+  fill: none;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.bindingLensEdgePathSelected {
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 3px var(--color-action-primary));
+}
+
+.bindingCardRowSelected {
+  background: var(--color-action-primary-subtle);
+}
+
+.bindingDrawer {
+  width: 460px;
+}
+
+.bindingDrawerBody {
+  padding: 0;
+}
+
+.bindingDrawerEmpty {
+  padding: 16px;
+}
+
+.bindingDrawerFooter {
+  padding: 8px 16px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+/* The lens's at-rest state: one chip per method saying how many of its request
+   fields are filled from elsewhere (↓) and how many of its response fields other
+   methods read (↑). It hangs off the circle's lower left and grows leftward
+   (hence the right-edge anchor rather than a left offset, so its width can vary
+   with the counts): the top corners already carry the aggregator, colour and
+   comment badges, the node's name sits below, and this band is under both the
+   incoming edge and the previous node's add-step trigger. */
+.nodeBindingBadge {
+  position: absolute;
+  right: calc(100% - 2px);
+  bottom: 2px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  height: 16px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 11;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.nodeBindingBadge:hover {
+  background: var(--color-background-hover);
+}
+
+.nodeBindingBadgePinned {
+  border-color: var(--color-action-primary);
+  color: var(--color-action-primary);
+}
+
+.nodeBindingBadgeCounts {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nodeBindingBadgeBroken {
+  color: var(--color-status-error-fg);
+}
+
+/* A method outside the focused one's bindings — still legible enough to keep the
+   graph's shape readable, quiet enough that the arcs are what the eye follows. */
+.nodeWrapLensDimmed {
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+}
+
+/* The binding list. Wider than the default right drawer (a table of two method
+   names and two field paths needs it) and, unlike every other panel here, it
+   renders no backdrop: the canvas stays live behind it so hovering a method
+   still lights up its bindings while the list is open. */
+.bindingTableDrawer {
+  width: 640px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Steps aside for the editor drawer that a row opens (460px — .bindingDrawer).
+   Two classes so it outranks .rightDrawerOpen's own transform. */
+.rightDrawerOpen.bindingTableDrawerAside {
+  transform: translateX(-460px);
+}
+
+.bindingTableFilters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.bindingTableBody {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.bindingTableEndpoint {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bindingTableMethod {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bindingTableMethodName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bindingTableMethodUnknown {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.bindingTablePath {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.bindingTablePathBroken {
+  color: var(--color-status-error-fg);
+  text-decoration: line-through;
+}
+
+.bindingTableKind {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.bindingTableReason {
+  color: var(--color-status-error-fg);
+  font-size: 11px;
+}
+
+.bindingTableRowSelected > * {
+  background: var(--color-action-primary-subtle);
+}
+
+.bindingTableNote {
+  padding: 8px 16px;
+  border-top: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.bindingDrawerMethod {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bindingDrawerNote {
+  padding: 16px;
+}

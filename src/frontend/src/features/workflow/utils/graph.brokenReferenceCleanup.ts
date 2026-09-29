@@ -57,12 +57,19 @@ const setDifference = (left: Set<string>, right: Set<string>) =>
  *    any more is what this pass was written for. A provider already missing
  *    before the change is not the change's doing, so it stays.
  */
-export const cleanBrokenWorkflowReferences = (
+/**
+ * The references this change is answerable for, by the rules the doc above
+ * describes — the decision `cleanBrokenWorkflowReferences` acts on, exposed on
+ * its own because clearing them is no longer the only thing a caller can do
+ * with them (see buildReferenceRemapTargets, which offers each one a new
+ * provider instead).
+ */
+export const findReferencesBrokenByChange = (
 	nodes: WorkflowNodeModel[],
 	edges: WorkflowEdgeModel[],
 	fieldBindings?: unknown[],
 	baseline?: BrokenReferenceBaseline,
-): BrokenReferenceCleanup => {
+): InvalidReference[] => {
 	const alreadyBroken = baseline
 		? new Set(findInvalidWorkflowReferences(
 			baseline.nodes, baseline.edges, undefined, fieldBindings).map(referenceKey))
@@ -70,10 +77,19 @@ export const cleanBrokenWorkflowReferences = (
 	const removedProviderColors = baseline
 		? setDifference(collectProviderColors(baseline.nodes), collectProviderColors(nodes))
 		: undefined;
-	const invalidReferences = uniqueReferences(
+	return uniqueReferences(
 		findInvalidWorkflowReferences(nodes, edges, undefined, fieldBindings))
 		.filter((reference) => !alreadyBroken?.has(referenceKey(reference))
 			|| removedProviderColors?.has(reference.sourceColor));
+};
+
+export const cleanBrokenWorkflowReferences = (
+	nodes: WorkflowNodeModel[],
+	edges: WorkflowEdgeModel[],
+	fieldBindings?: unknown[],
+	baseline?: BrokenReferenceBaseline,
+): BrokenReferenceCleanup => {
+	const invalidReferences = findReferencesBrokenByChange(nodes, edges, fieldBindings, baseline);
 	if (invalidReferences.length === 0) {
 		return { nodes, fieldBindings, brokenCount: 0, affectedNodeIds: [] };
 	}

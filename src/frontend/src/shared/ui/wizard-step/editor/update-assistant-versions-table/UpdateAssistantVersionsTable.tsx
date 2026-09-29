@@ -1,48 +1,27 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useFormContext, useFormState } from 'react-hook-form'
-import { useReactTable, getCoreRowModel, type ColumnDef } from '@tanstack/react-table'
+import { useReactTable, getCoreRowModel } from '@tanstack/react-table'
 import { message } from 'antd'
 import {
     useGetOnlineVersionsQuery,
     useGetOfflineVersionsQuery,
     useDeleteOfflineVersionMutation,
 } from '@entities/updateAssistant/api/updateAssistantApi'
+import { useOnlineFeature } from '@entities/subscription/model/useOnlineFeature'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import type { UpdateMode, UpdateVersion, UpdateVersionStatus } from '@entities/updateAssistant/model/types'
+import type { UpdateMode } from '@entities/updateAssistant/model/types'
 import { OfflinePackageUploader } from './OfflinePackageUploader'
+import { OnlineUpdatesUnavailable } from './OnlineUpdatesUnavailable'
+import { getUpdateAssistantVersionColumns } from './getUpdateAssistantVersionColumns'
+import { sortVersionsDesc } from './updateAssistantVersions.utils'
 import { EntityText } from '@shared/ui/primitives/Text'
 import { Table } from '@shared/ui/primitives/Table'
 import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils'
 import { Button } from '@shared/ui/primitives/Button'
-import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton'
-import { Radio } from '@shared/ui/primitives/Radio'
-import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useDialog } from '@shared/ui/dialog/useDialog'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { ChangelogDialogContent } from './ChangelogDialogContent'
 import ErrorMessage from '@shared/ui/primitives/ErrorMessage/ErrorMessage'
-
-const STATUS_COLOR: Record<UpdateVersionStatus, string> = {
-    old: 'var(--color-text-secondary)',
-    current: 'var(--color-text-primary)',
-    available: 'var(--color-status-success-fg)',
-}
-
-function parseSemver(v: string): number[] {
-    return v.split('.').map((p) => parseInt(p, 10) || 0)
-}
-
-function sortVersionsDesc(versions: UpdateVersion[]): UpdateVersion[] {
-    return [...versions].sort((a, b) => {
-        const av = parseSemver(a.name)
-        const bv = parseSemver(b.name)
-        for (let i = 0; i < Math.max(av.length, bv.length); i++) {
-            const diff = (bv[i] ?? 0) - (av[i] ?? 0)
-            if (diff !== 0) return diff
-        }
-        return 0
-    })
-}
 
 type Props = {
     name: string
@@ -70,16 +49,23 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
     const updateMode: UpdateMode = watch('updateMode') ?? 'online'
     const isOffline = updateMode === 'offline'
 
-    const onlineResult = useGetOnlineVersionsQuery(undefined, { skip: isOffline })
+    // Online versions come from the OC update server, so the step is only offered
+    // while the browser has a connection and online services are switched on.
+    const onlineAvailability = useOnlineFeature()
+    const isOnlineReady = isOffline || onlineAvailability.state === 'available'
+
+    const onlineResult = useGetOnlineVersionsQuery(undefined, { skip: !isOnlineReady || isOffline })
     const offlineResult = useGetOfflineVersionsQuery(undefined, { skip: !isOffline })
     const [deleteVersion] = useDeleteOfflineVersionMutation()
     const [deletingVersion, setDeletingVersion] = useState<string | null>(null)
 
     const result = isOffline ? offlineResult : onlineResult
-    const versions = useMemo(
-        () => sortVersionsDesc(result.data ?? []),
-        [result.data],
-    )
+    const versions = useMemo(() => sortVersionsDesc(result.data ?? []), [result.data])
+
+    const switchToOffline = useCallback(() => {
+        setSelectedVersion(null)
+        setValue('updateMode', 'offline', { shouldValidate: true, shouldDirty: true })
+    }, [setSelectedVersion, setValue])
 
     const handleDelete = useCallback(
         async (version: string) => {
@@ -104,108 +90,36 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
         [confirm, t, selectedVersion, setSelectedVersion, deleteVersion],
     )
 
-    // "select" and "action" only ever hold a single control (a radio / an icon
-    // button), so they're pinned to a minimal fixed width, leaving the rest of
-    // the table's width to split evenly across name/status/changelog.
-    const SELECT_COLUMN_WIDTH = 48
-    const ACTION_COLUMN_WIDTH = 48
-    const equalColumnWidth = `calc((100% - ${SELECT_COLUMN_WIDTH + (isOffline ? ACTION_COLUMN_WIDTH : 0)}px) / 3)`
+    const openChangelog = useCallback(
+        (version: string, changelogLink: string) => {
+            dialog.open({
+                title: t('update-assistant.changelog.title', { version }),
+                content: <ChangelogDialogContent changelogLink={changelogLink} />,
+                footer: (
+                    <Button onClick={() => dialog.close()}>
+                        {t('update-assistant.changelog.close')}
+                    </Button>
+                ),
+                width: 700,
+            })
+        },
+        [dialog, t],
+    )
 
-    const columns = useMemo<ColumnDef<UpdateVersion>[]>(
-        () => [
-            {
-                id: 'select',
-                header: () => null,
-                size: SELECT_COLUMN_WIDTH,
-                meta: { align: 'center' },
-                cell: ({ row }) => {
-                    const v = row.original
-                    const selectable = v.status === 'available'
-                    return (
-                        <Radio
-                            name={`${name}-select`}
-                            value={v.name}
-                            disabled={!selectable}
-                            checked={selectedVersion === v.name}
-                            onChange={(checked) => {
-                                if (checked) setSelectedVersion(v.name)
-                            }}
-                        />
-                    )
-                },
-            },
-            {
-                accessorKey: 'name',
-                enableSorting: false,
-                meta: { width: equalColumnWidth },
-                header: () => t('update-assistant.versions.columns.name'),
-            },
-            {
-                accessorKey: 'status',
-                header: () => t('update-assistant.versions.columns.status'),
-                enableSorting: false,
-                meta: { width: equalColumnWidth },
-                cell: ({ getValue }) => {
-                    const status = getValue<UpdateVersionStatus>()
-                    return (
-                        <span style={{ color: STATUS_COLOR[status] }}>
-                            {t(`update-assistant.versions.status.${status}`)}
-                        </span>
-                    )
-                },
-            },
-            {
-                accessorKey: 'changelogLink',
-                header: () => t('update-assistant.versions.columns.changelog'),
-                enableSorting: false,
-                meta: { width: equalColumnWidth },
-                cell: ({ row }) => {
-                    const link = row.original.changelogLink
-                    const version = row.original.name
-                    return link ? (
-                        <Button
-                            type="link"
-                            onClick={() =>
-                                dialog.open({
-                                    title: t('update-assistant.changelog.title', { version }),
-                                    content: <ChangelogDialogContent changelogLink={link} />,
-                                    footer: (
-                                        <Button onClick={() => dialog.close()}>
-                                            {t('update-assistant.changelog.close')}
-                                        </Button>
-                                    ),
-                                    width: 700,
-                                })
-                            }
-                        >
-                            {t('update-assistant.versions.columns.changelog')}
-                        </Button>
-                    ) : '—'
-                },
-            },
-            ...(isOffline
-                ? [{
-                    id: 'action',
-                    header: () => null,
-                    size: ACTION_COLUMN_WIDTH,
-                    meta: { align: 'center', resizable: false },
-                    cell: ({ row }) => {
-                        const isRowDeleting = deletingVersion === row.original.name
-                        return (
-                            <Tooltip content={tCommon('actions.delete')}>
-                                <DeleteIconButton
-                                    iconSize={15}
-                                    onClick={() => handleDelete(row.original.name)}
-                                    loading={isRowDeleting}
-                                    disabled={deletingVersion !== null && !isRowDeleting}
-                                />
-                            </Tooltip>
-                        )
-                    },
-                } as ColumnDef<UpdateVersion>]
-                : []),
-        ],
-        [t, tCommon, name, selectedVersion, dialog, isOffline, handleDelete, deletingVersion, equalColumnWidth],
+    const columns = useMemo(
+        () => getUpdateAssistantVersionColumns({
+            name,
+            isOffline,
+            selectedVersion,
+            onSelect: setSelectedVersion,
+            deletingVersion,
+            onDelete: handleDelete,
+            onOpenChangelog: openChangelog,
+            deleteTooltip: tCommon('actions.delete'),
+            t,
+        }),
+        [name, isOffline, selectedVersion, setSelectedVersion, deletingVersion,
+            handleDelete, openChangelog, tCommon, t],
     )
 
     const tableInstance = useReactTable({
@@ -228,22 +142,29 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
                 </label>
             )}
 
-            <Table
-                data={versions}
-                columns={columns}
-                tableInstance={tableInstance}
-                isLoading={result.isLoading}
-                emptyState={
-                    <div style={{ color: 'var(--color-text-secondary)' }}>{t('update-assistant.versions.empty')}</div>
-                }
-            />
+            {onlineAvailability.state === 'unavailable' && !isOffline ? (
+                <OnlineUpdatesUnavailable
+                    reason={onlineAvailability.reason}
+                    onSwitchToOffline={switchToOffline}
+                />
+            ) : (
+                <Table
+                    data={versions}
+                    columns={columns}
+                    tableInstance={tableInstance}
+                    isLoading={result.isLoading || !isOnlineReady}
+                    emptyState={
+                        <div style={{ color: 'var(--color-text-secondary)' }}>
+                            {t('update-assistant.versions.empty')}
+                        </div>
+                    }
+                />
+            )}
 
             {!result.isLoading && isOffline && <OfflinePackageUploader />}
 
             {hasValidationError && (
-                <ErrorMessage
-                    message={t('update-assistant.validation.versionNotSelected' as any)}
-                />
+                <ErrorMessage message={t('update-assistant.validation.versionNotSelected')} />
             )}
         </div>
     )

@@ -17,4 +17,6 @@
 @import './styles/node-toolbar.css';
 @import './styles/canvas-controls.css';
 @import './styles/edges.css';
+@import './styles/binding-lens.css';
 @import './styles/live-reference.css';
+@import './styles/reference-remap.css';

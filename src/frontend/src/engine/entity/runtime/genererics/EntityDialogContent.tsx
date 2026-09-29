@@ -9,9 +9,10 @@ import { GenericUpdateWizard } from './GenericUpdateWizard';
 type Props =
     | { entityName: string; mode: 'create'; identifier?: undefined; onSuccess: (created?: unknown) => void }
     | { entityName: string; mode: 'view'; identifier: string; onSuccess: () => void }
-    | { entityName: string; mode: 'update'; identifier: string; onSuccess: () => void };
+    | { entityName: string; mode: 'update'; identifier: string; onSuccess: () => void; initialStepId?: string };
 
-export const EntityDialogContent: React.FC<Props> = ({ entityName, mode, identifier, onSuccess }) => {
+export const EntityDialogContent: React.FC<Props> = (props) => {
+    const { entityName, mode, identifier, onSuccess } = props;
     const entity = entityRegistry.get(entityName);
 
     const skip = mode === 'create' || !identifier || !entity.api;
@@ -63,6 +64,7 @@ export const EntityDialogContent: React.FC<Props> = ({ entityName, mode, identif
             initialRecord={record}
             onSuccess={onSuccess}
             skipSuccessState
+            initialStepId={props.mode === 'update' ? props.initialStepId : undefined}
         />
     );
 };

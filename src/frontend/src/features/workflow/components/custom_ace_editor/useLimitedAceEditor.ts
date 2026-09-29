@@ -22,6 +22,23 @@ export function useLimitedAceEditor({
 		setCurrentValue(value);
 	}, [value]);
 
+	useEffect(() => {
+		const editor = editorRef.current?.editor;
+		const container = editor?.container;
+		if (!editor || !container) return;
+		// Ace measures its container once and caches that size, so anything which
+		// gives the editor its height *after* mount — a drawer sliding in, a panel
+		// expanding, a flex parent resolving late — leaves it drawing into a box it
+		// still believes is zero tall: the text sits in the session and nothing
+		// appears on screen. Re-measure on mount, and follow the container from then
+		// on rather than waiting for a window resize to arrive.
+		editor.resize(true);
+		if (typeof ResizeObserver === 'undefined') return;
+		const observer = new ResizeObserver(() => editor.resize());
+		observer.observe(container);
+		return () => observer.disconnect();
+	}, []);
+
 	/**
 	 * react-ace's own `onChange`, which is the only change signal worth listening
 	 * to. Subscribing to the ace session directly instead reported two kinds of

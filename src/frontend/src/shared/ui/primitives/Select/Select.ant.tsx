@@ -15,6 +15,7 @@ export const AntSelectImpl: SelectComponent = ({
     options = [],
     placeholder,
     onChange,
+    onSelect,
     readOnly,
     multiple,
     creatable,
@@ -95,6 +96,7 @@ export const AntSelectImpl: SelectComponent = ({
             }}
             onSearch={setInputValue}
             onChange={onChange}
+            onSelect={(selected) => onSelect?.(selected)}
             onDropdownVisibleChange={setIsOpen}
             suffixIcon={suffixIcon}
             loading={isLoading}

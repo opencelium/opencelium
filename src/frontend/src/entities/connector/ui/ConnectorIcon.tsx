@@ -13,6 +13,7 @@ type Props = {
 const baseStyle: CSSProperties = {
     objectFit: 'contain',
     display: 'block',
+    borderRadius: '50%',
 }
 
 // Inset so the logo doesn't touch the disc edge.
@@ -31,7 +32,7 @@ const circleStyle = (size: number): CSSProperties => ({
     border: '1px solid var(--color-border-subtle)',
 })
 
-export const ConnectorIcon = ({icon, size = 28, style, isCircled}: Props) => {
+export const ConnectorIcon = ({icon, size = 25, style, isCircled}: Props) => {
     const resolved = resolveConnectorIconUrl(typeof icon === 'string' ? icon : null)
     const [hasError, setHasError] = useState(false)
     const src = !resolved || hasError ? defaultConnectorImage : resolved
