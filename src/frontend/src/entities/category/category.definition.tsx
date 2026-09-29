@@ -1,5 +1,5 @@
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import categoryWizardImage from '@assets/images/wizard/category-wizard.gif'
+import categoryWizardImage from '@assets/images/wizard/category.svg'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
 import en from '@entities/category/i18n/en.json'

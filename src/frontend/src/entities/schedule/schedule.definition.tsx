@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import scheduleWizardImage from '@/assets/images/wizard/schedule.gif'
+import scheduleWizardImage from '@/assets/images/wizard/schedule.svg'
 import {createEntityCommands} from "@/engine/entity/command/createEntityCommands.tsx";
 import en from "@entities/schedule/i18n/en.json";
 import de from "@entities/schedule/i18n/de.json";
