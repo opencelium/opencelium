@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+<style>
+.i{stroke:#1a1a1a}.a{stroke:#14b8a6}.af{fill:#14b8a6;stroke:none}.if{fill:#1a1a1a;stroke:none}
+.trail{stroke-dasharray:2 4;animation:tr 1s linear infinite}@keyframes tr{to{stroke-dashoffset:-6}}
+.plane{animation:fl 2.4s ease-in-out infinite}@keyframes fl{50%{transform:translate(2px,-3px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+
+<rect class="i" x="6" y="34" width="22" height="22" rx="3"/>
+<path class="i" d="M11 41h12M11 46h12M11 51h7"/>
+<path class="a trail" d="M22 30c6-8 14-10 20-12"/>
+<g transform="translate(-3 3)"><g class="plane"><path class="i" d="M58 8L36 18l9 4 4 9z" fill="#fff"/><path class="i" d="M45 22l13-14"/></g></g>
+</svg>

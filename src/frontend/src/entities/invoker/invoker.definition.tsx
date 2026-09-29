@@ -1,6 +1,6 @@
 import { message } from 'antd'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import invokerWizardImage from '@assets/images/wizard/invoker-wizard.gif'
+import invokerWizardImage from '@assets/images/wizard/invoker.svg'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
 import en from '@entities/invoker/i18n/en.json'

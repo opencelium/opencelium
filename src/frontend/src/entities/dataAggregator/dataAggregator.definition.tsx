@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import aggregatorWizardImage from '@assets/images/wizard/aggregator-wizard.gif'
+import aggregatorWizardImage from '@assets/images/wizard/aggregator.svg'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
 import en from '@entities/dataAggregator/i18n/en.json'
