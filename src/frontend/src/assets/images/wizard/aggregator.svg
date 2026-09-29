@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+<style>
+.i{stroke:#1a1a1a}.a{stroke:#14b8a6}.af{fill:#14b8a6;stroke:none}.if{fill:#1a1a1a;stroke:none}
+.t1{offset-path:path('M14 16c10 0 12 16 22 16');animation:mv 2.4s ease-in infinite}
+.t2{offset-path:path('M14 32h22');animation:mv 2.4s ease-in .8s infinite}
+.t3{offset-path:path('M14 48c10 0 12-16 22-16');animation:mv 2.4s ease-in 1.6s infinite}
+@keyframes mv{0%{offset-distance:0%;opacity:0}15%{opacity:1}85%{opacity:1}100%{offset-distance:100%;opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+
+<g transform="translate(5 3.5) scale(.86)"><circle class="i" cx="10" cy="16" r="4"/><circle class="i" cx="10" cy="32" r="4"/><circle class="i" cx="10" cy="48" r="4"/>
+<path class="i" id="p1" d="M14 16c10 0 12 16 22 16"/>
+<path class="i" d="M14 32h22"/>
+<path class="i" d="M14 48c10 0 12-16 22-16"/>
+<path class="a" d="M38 26l10-5 10 5-10 5z"/>
+<path class="a" d="M38 32l10 5 10-5"/>
+<path class="a" d="M38 38l10 5 10-5"/>
+<circle class="af t1" cx="0" cy="0" r="2"/><circle class="af t2" cx="0" cy="0" r="2"/><circle class="af t3" cx="0" cy="0" r="2"/></g>
+</svg>

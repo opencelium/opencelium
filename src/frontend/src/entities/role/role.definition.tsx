@@ -1,5 +1,4 @@
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import roleWizardImage from '@assets/images/wizard/role.gif'
 import {createEntityCommands} from "@/engine/entity/command/createEntityCommands.tsx";
 import en from "@entities/role/i18n/en.json";
 import de from "@entities/role/i18n/de.json";
@@ -303,7 +302,6 @@ export const roleDefinition: EntityDefinition = {
     ============================== */
 
     wizard: {
-        image: roleWizardImage as string,
         imageField: 'icon',
         renderImage: RoleWizardImage,
 

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+<style>
+.i{stroke:#1a1a1a}.a{stroke:#14b8a6}.af{fill:#14b8a6;stroke:none}.if{fill:#1a1a1a;stroke:none}
+.top{animation:lf 2.6s ease-in-out infinite}@keyframes lf{50%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+
+<path class="i" d="M8 42l24 12 24-12"/>
+<path class="i" d="M8 34l24 12 24-12"/>
+<g class="top"><path class="a" d="M8 24l24-12 24 12-24 12z" fill="#fff"/><path class="a" d="M24 22l4 2-4 2M40 22l-4 2 4 2"/></g>
+</svg>
