@@ -8,6 +8,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,6 +20,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class RootKeyResolverTest {
 
+	private static final BooleanSupplier NO_DATA_KEYS = () -> false;
+
+	private static final BooleanSupplier DATA_KEYS_EXIST = () -> true;
+
+	private static final BooleanSupplier MUST_NOT_ASK = () -> {
+		throw new AssertionError("the database must not be asked when a key was found");
+	};
+
 	@TempDir
 	Path dataDir;
 
@@ -27,7 +36,7 @@ class RootKeyResolverTest {
 
 	@Test
 	void resolveUsesTheEnvironmentVariableWhenOnlyItIsSet() {
-		RootKey key = resolver(Map.of("OC_MASTER_KEY", randomKey()), Optional.empty()).resolve();
+		RootKey key = resolver(Map.of("OC_MASTER_KEY", randomKey()), Optional.empty()).resolve(MUST_NOT_ASK);
 
 		assertThat(key.source()).isEqualTo(RootKeySource.ENV);
 		assertThat(key.id()).isEqualTo("k-01");
@@ -37,7 +46,7 @@ class RootKeyResolverTest {
 	void resolveUsesTheMasterKeyFileWhenOnlyThePropertyIsSet() throws Exception {
 		Path file = Files.writeString(elsewhere.resolve("oc.key"), randomKey() + "\n");
 
-		RootKey key = resolver(Map.of(), Optional.of(file)).resolve();
+		RootKey key = resolver(Map.of(), Optional.of(file)).resolve(MUST_NOT_ASK);
 
 		assertThat(key.source()).isEqualTo(RootKeySource.FILE);
 	}
@@ -46,7 +55,7 @@ class RootKeyResolverTest {
 	void resolveUsesTheDataDirFileWhenNothingElseIsSet() throws Exception {
 		Files.writeString(dataDir.resolve("master.key"), randomKey());
 
-		RootKey key = resolver(Map.of(), Optional.empty()).resolve();
+		RootKey key = resolver(Map.of(), Optional.empty()).resolve(MUST_NOT_ASK);
 
 		assertThat(key.source()).isEqualTo(RootKeySource.DATA_DIR);
 	}
@@ -55,7 +64,7 @@ class RootKeyResolverTest {
 	void resolvePrefersTheEnvironmentVariableOverTheDataDirFile() throws Exception {
 		Files.writeString(dataDir.resolve("master.key"), randomKey());
 
-		RootKey key = resolver(Map.of("OC_MASTER_KEY", randomKey()), Optional.empty()).resolve();
+		RootKey key = resolver(Map.of("OC_MASTER_KEY", randomKey()), Optional.empty()).resolve(MUST_NOT_ASK);
 
 		assertThat(key.source()).isEqualTo(RootKeySource.ENV);
 	}
@@ -65,7 +74,7 @@ class RootKeyResolverTest {
 		Path file = Files.writeString(elsewhere.resolve("oc.key"), randomKey());
 		var resolver = resolver(Map.of("OC_MASTER_KEY", randomKey()), Optional.of(file));
 
-		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve())
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve(MUST_NOT_ASK))
 				.withMessageContaining("Both OC_MASTER_KEY and opencelium.master-key-file are set")
 				.satisfies(ex -> assertThat(ex.propertyName()).isEqualTo("opencelium.master-key-file"));
 	}
@@ -75,7 +84,7 @@ class RootKeyResolverTest {
 		String shortKey = Base64.getEncoder().encodeToString(new byte[16]);
 		var resolver = resolver(Map.of("OC_MASTER_KEY", shortKey), Optional.empty());
 
-		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve())
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve(MUST_NOT_ASK))
 				.withMessageContaining("OC_MASTER_KEY decodes to 16 bytes, expected 32")
 				.satisfies(ex -> assertThat(ex.propertyName()).isEqualTo("OC_MASTER_KEY"))
 				.satisfies(ex -> assertThat(ex.action()).hasValueSatisfying(
@@ -86,7 +95,7 @@ class RootKeyResolverTest {
 	void resolveStopsWithoutQuotingTheValueWhenTheEnvironmentKeyIsNotBase64() {
 		var resolver = resolver(Map.of("OC_MASTER_KEY", "secret-value-with-dashes!"), Optional.empty());
 
-		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve())
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve(MUST_NOT_ASK))
 				.withMessageContaining("OC_MASTER_KEY is not valid base64").withNoCause()
 				.satisfies(ex -> assertThat(ex.getMessage()).doesNotContain("secret").doesNotContain("-"));
 	}
@@ -95,7 +104,7 @@ class RootKeyResolverTest {
 	void resolveStopsWhenTheEnvironmentVariableIsEmpty() {
 		var resolver = resolver(Map.of("OC_MASTER_KEY", ""), Optional.empty());
 
-		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve())
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve(MUST_NOT_ASK))
 				.withMessageContaining("OC_MASTER_KEY is empty");
 		assertThat(dataDir.resolve("master.key")).doesNotExist();
 	}
@@ -105,7 +114,7 @@ class RootKeyResolverTest {
 		Path missing = elsewhere.resolve("missing.key");
 		var resolver = resolver(Map.of(), Optional.of(missing));
 
-		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve())
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve(MUST_NOT_ASK))
 				.withMessageContaining(missing + " does not exist")
 				.satisfies(ex -> assertThat(ex.propertyName()).isEqualTo("opencelium.master-key-file"));
 		assertThat(dataDir.resolve("master.key")).doesNotExist();
@@ -116,7 +125,7 @@ class RootKeyResolverTest {
 		Path file = Files.writeString(dataDir.resolve("master.key"), Base64.getEncoder().encodeToString(new byte[31]));
 		var resolver = resolver(Map.of(), Optional.empty());
 
-		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve())
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve(MUST_NOT_ASK))
 				.withMessageContaining(file + " decodes to 31 bytes, expected 32")
 				.satisfies(ex -> assertThat(ex.propertyName()).isEqualTo("opencelium.data-dir"))
 				.satisfies(ex -> assertThat(ex.action()).hasValueSatisfying(
@@ -125,7 +134,7 @@ class RootKeyResolverTest {
 
 	@Test
 	void resolveGeneratesAKeyIntoTheDataDirOnAFreshInstall() throws Exception {
-		RootKey generated = resolver(Map.of(), Optional.empty()).resolve();
+		RootKey generated = resolver(Map.of(), Optional.empty()).resolve(NO_DATA_KEYS);
 
 		Path file = dataDir.resolve("master.key");
 		assertThat(generated.source()).isEqualTo(RootKeySource.GENERATED);
@@ -134,9 +143,19 @@ class RootKeyResolverTest {
 			assertThat(PosixFilePermissions.toString(Files.getPosixFilePermissions(file))).isEqualTo("rw-------");
 		}
 		// The next start loads the same key from the file.
-		RootKey reloaded = resolver(Map.of(), Optional.empty()).resolve();
+		RootKey reloaded = resolver(Map.of(), Optional.empty()).resolve(MUST_NOT_ASK);
 		assertThat(reloaded.source()).isEqualTo(RootKeySource.DATA_DIR);
 		assertThat(reloaded.secretKey().getEncoded()).isEqualTo(generated.secretKey().getEncoded());
+	}
+
+	@Test
+	void resolveStopsWithRestoreOrResetAndWritesNoFileWhenDataKeysExist() {
+		var resolver = resolver(Map.of(), Optional.empty());
+
+		assertThatExceptionOfType(KeyStartupException.class).isThrownBy(() -> resolver.resolve(DATA_KEYS_EXIST))
+				.withMessageStartingWith(KeyStartupException.RESTORE_OR_RESET)
+				.withMessageContaining("No master key was found");
+		assertThat(dataDir.resolve("master.key")).doesNotExist();
 	}
 
 	private RootKeyResolver resolver(Map<String, String> environment, Optional<Path> masterKeyFile) {
