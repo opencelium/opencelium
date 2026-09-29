@@ -66,17 +66,20 @@ export const buildWorkflowTopology = (
 	nodes: WorkflowNodeModel[],
 	edges: WorkflowEdgeModel[],
 ): WorkflowTopology => {
-	const selectedOperator = nodes.find((node) =>
-		node.selected && (node.type === 'if' || node.type === 'loop'));
+	const highlightedBranch = { nodeIds: new Set<string>(), edgeIds: new Set<string>() };
+	for (const node of nodes) {
+		if (!node.selected || (node.type !== 'if' && node.type !== 'loop')) continue;
+		const branch = getOperatorBottomBranch(node.id, nodes, edges);
+		branch.nodeIds.forEach((id) => highlightedBranch.nodeIds.add(id));
+		branch.edgeIds.forEach((id) => highlightedBranch.edgeIds.add(id));
+	}
 	const leafById = new Map<string, LeafInfo>();
 	for (const node of nodes) leafById.set(node.id, computeLeafInfo(node, edges));
 	return {
 		sig: buildTopologySignature(nodes, edges),
 		onlyStartNode: nodes.length === 1 && nodes[0]?.type === 'start',
 		methodInstanceById: getMethodInstanceData(nodes),
-		highlightedBranch: selectedOperator
-			? getOperatorBottomBranch(selectedOperator.id, nodes, edges)
-			: { nodeIds: new Set<string>(), edgeIds: new Set<string>() },
+		highlightedBranch,
 		leafById,
 	};
 };

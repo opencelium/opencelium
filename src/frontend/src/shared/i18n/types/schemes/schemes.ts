@@ -60,6 +60,11 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             goBack: string
             goHome: string
         }
+        onlineFeature: {
+            offline: string
+            syncDisabled: string
+            portalUnreachable: string
+        }
         accessDenied: {
             title: string
             subtitle: string
@@ -135,11 +140,15 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 uploadTemplate: string
                 downloadTemplate: string
                 uploadInvoker: string
+                installOnlineInvokers: string
                 downloadInvoker: string
                 systemCheck: string
                 ldapCheck: string
                 workflow: string
                 help: string
+                onboarding: string
+                workflowTutorial: string
+                dashboardTour: string
             }
             footer: {
                 select: string
@@ -171,6 +180,11 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         }
         footer: {
             copyright: string
+            copyrightMobile: string
+            docsLink: string
+            gitLink: string
+            landingPageLink: string
+            servicePortalLink: string
         }
         topbar: {
             switchToGerman: string
@@ -182,6 +196,10 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             createWorkflow: string
             createWorkflowHint: string
             docs: string
+            help: string
+            startOnboardingTour: string
+            startDashboardTour: string
+            servicePortal: string
         }
         user: {
             unknown: string

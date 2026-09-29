@@ -57,7 +57,7 @@
   "systemLogo": {
     "title": "Application logo",
     "description": "Replace the OpenCelium logo with your own for every user. It is shown in the navigation menu and on the login screen, so users see it before they sign in.",
-    "hint": "PNG or JPG, up to 5 MB. A wide logo on a transparent background works best — the same file is shown on both the light and the dark theme.",
+    "hint": "PNG or JPG, up to 10 MB. A wide logo on a transparent background works best — the same file is shown on both the light and the dark theme.",
     "usingDefault": "No logo uploaded — every user sees the default OpenCelium logo.",
     "upload": "Upload logo",
     "replace": "Replace logo",
@@ -66,8 +66,8 @@
     "saveFailed": "The logo could not be uploaded",
     "removed": "Logo reset to the default",
     "removeFailed": "The logo could not be reset",
-    "invalidType": "The logo must be a PNG or JPG file",
-    "tooLarge": "The logo must be smaller than 5 MB",
+    "invalidType": "The logo must be a PNG or JPG file (.png, .jpg, .jpeg)",
+    "tooLarge": "The logo must be smaller than 10 MB",
     "confirmRemove": {
       "title": "Reset to the default logo?",
       "message": "The uploaded logo is deleted and every user sees the OpenCelium logo again."

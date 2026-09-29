@@ -8,8 +8,9 @@ export const buildFreeDragNodes = (
 	sourceNodeId: string,
 	nodes: WorkflowNodeModel[],
 	delta: WorkflowPosition,
+	draggedIds = new Set([sourceNodeId]),
 ) => nodes.map((node) => {
-	const isGrabbed = node.id === sourceNodeId;
+	const isGrabbed = draggedIds.has(node.id);
 	return {
 		...node,
 		position: isGrabbed

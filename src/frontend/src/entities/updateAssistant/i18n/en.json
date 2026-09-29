@@ -110,7 +110,13 @@
       "success": "Package uploaded successfully",
       "error": "Failed to upload package",
       "uploading": "Uploading {{fileName}} — {{progress}}%",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "invalidType": "The offline package must be a .zip file.",
+      "tooLarge": "The offline package must not exceed 1 GB."
+    },
+    "onlineUnavailable": {
+      "title": "Online updates are not available",
+      "switchToOffline": "Use an offline package"
     }
   },
   "update": {

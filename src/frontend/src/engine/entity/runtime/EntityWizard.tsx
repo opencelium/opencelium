@@ -27,6 +27,12 @@ type Props<EntityFormValues> = {
     mode: Mode
     onSubmit?: (data: unknown, meta?: SubmitMeta) => void
     initialValues?: Partial<EntityFormValues>
+    /**
+     * Seeds specific fields on a create form. Merged over the entity's own defaults
+     * rather than fed to `form.reset` — unlike `initialValues`, which replaces every
+     * value and would blank the fields it does not mention.
+     */
+    defaultValuesOverride?: Partial<EntityFormValues>
     readOnly?: boolean
     header?: string
     subheader?: string
@@ -48,6 +54,12 @@ type Props<EntityFormValues> = {
      * inputs. Used when the wizard is embedded inside a host that already has its own title.
      */
     hideHeader?: boolean
+    /** Force the horizontal, description-less step rail — for narrow hosts. */
+    compact?: boolean
+    /** Field names to leave unrendered; see SectionRenderer's own note. */
+    hiddenFields?: string[]
+    /** Id of the wizard step to open on, e.g. jump straight to a connector's credentials. */
+    initialStepId?: string
 }
 
 export function EntityWizard<EntityFormValues>({
@@ -55,6 +67,9 @@ export function EntityWizard<EntityFormValues>({
     mode,
     onSubmit,
     initialValues,
+    defaultValuesOverride,
+    compact,
+    hiddenFields,
     readOnly,
     header,
     subheader,
@@ -62,6 +77,7 @@ export function EntityWizard<EntityFormValues>({
     liveUpdate,
     hideRecommendations,
     hideHeader,
+    initialStepId,
 }: Props<EntityFormValues>) {
 
     const { user, normalizedUser } = useAuth()
@@ -93,8 +109,8 @@ export function EntityWizard<EntityFormValues>({
     )
 
     const defaultValues = useMemo(
-        () => buildDefaultValues(entity),
-        [entity]
+        () => ({ ...buildDefaultValues(entity), ...defaultValuesOverride }),
+        [entity, defaultValuesOverride]
     )
     const form = useForm({
         resolver: entityResolver(schema, entity, apiExecutor, initialValues, mode),
@@ -130,7 +146,7 @@ export function EntityWizard<EntityFormValues>({
         typeof entity.wizard?.steps === 'function'
             ? entity.wizard.steps(mode)
             : entity.wizard?.steps
-    const steps: StepDefinition[] =
+    const visibleWizardSteps =
         wizardSteps
             ?.filter(step => {
                 const hasAccessibleSection = step.sectionIds.some(sectionId => {
@@ -151,6 +167,10 @@ export function EntityWizard<EntityFormValues>({
 
                 return hasAccessibleSection
             })
+        ?? []
+    const initialStep = Math.max(0, visibleWizardSteps.findIndex(step => step.id === initialStepId))
+    const steps: StepDefinition[] =
+        visibleWizardSteps
             .map(step => ({
                 header: step.header,
                 subheader: step.subheader,
@@ -170,6 +190,7 @@ export function EntityWizard<EntityFormValues>({
                                     entity={entity}
                                     mode={mode}
                                     forcedReadonly={wizardReadOnly}
+                                    hiddenFields={hiddenFields}
                                 />
                             ))}
                     </>
@@ -205,7 +226,6 @@ export function EntityWizard<EntityFormValues>({
                     return result;
                 }
             }))
-        ?? []
     const modeConfig =
         entity.wizard.modes?.[mode]
     if (!entityDecision.allowed) {
@@ -264,6 +284,8 @@ export function EntityWizard<EntityFormValues>({
                             skipSuccessState={skipSuccessState}
                             hideSubmit={liveUpdate}
                             hideHeader={hideHeader}
+                            compact={compact}
+                            initialStep={initialStep}
                         />
                     </form>
                 </FormConstraintsProvider>

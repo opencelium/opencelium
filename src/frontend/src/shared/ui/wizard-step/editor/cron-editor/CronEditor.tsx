@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {useFormContext, useWatch} from "react-hook-form";
 import {Cron} from 'react-js-cron'
-import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import type {Mode} from "@/engine/entity/EntityDefinition.ts";
 import 'react-js-cron/styles.css'
 import {FormInput} from "@shared/ui/form/FormInput";
@@ -31,12 +30,16 @@ export const CronEditor: React.FC<CronEditorProps> = ({ name, label, mode, autoF
     const [cronValue, setCronValue] = useState(stripSeconds(fullCron));
 
     // Sync local state when the form value changes externally (e.g. form.reset
-    // after the entity payload loads in update/view mode).
+    // after the entity payload loads in update/view mode). Every local edit already
+    // round-trips through `setValue` below, so `watched` echoes back exactly what we
+    // just typed — comparing against the RAW `watched` (not a re-normalized version of
+    // it) is what tells apart "this is our own edit" from "a real external reset".
+    // Comparing the normalized form instead would re-run `toQuartzDayRule`/`addSeconds`
+    // on every keystroke and silently restore characters (e.g. a `?`) the user just deleted.
     const watched = useWatch({ control, name }) as string | undefined;
     useEffect(() => {
-        if (typeof watched !== 'string') return;
+        if (typeof watched !== 'string' || watched === fullCron) return;
         const normalized = toQuartzDayRule(hasSeconds(watched) ? watched : addSeconds(watched));
-        if (normalized === fullCron) return;
         setFullCron(normalized);
         setCronValue(stripSeconds(normalized));
     }, [watched]);
@@ -44,9 +47,6 @@ export const CronEditor: React.FC<CronEditorProps> = ({ name, label, mode, autoF
     useEffect(() => {
         setValue(name, fullCron, { shouldDirty: true });
     }, [fullCron]);
-
-    const isSixPartCron = (val: string) =>
-        val.trim().split(/\s+/).length === 6;
 
     return (
         <div style={{display: 'grid', gap: 4}}>
@@ -57,15 +57,16 @@ export const CronEditor: React.FC<CronEditorProps> = ({ name, label, mode, autoF
                 onChange={(e) => {
                     const val = e.target.value;
 
+                    // Never rewrite what the user is typing — the field stays free text;
+                    // the server validates it on save. Only the graphical builder below
+                    // is kept in sync, and only once the value is a well-formed 6-field cron.
                     setFullCron(val);
 
-                    // ✅ update Cron ONLY if the cron is valid
                     if (hasSeconds(val)) {
                         const normalized = toQuartzDayRule(normalizeCron(val));
 
                         if (normalized.split(' ').length === 6) {
-                            setCronValue(stripSeconds(normalized)); // 👈 update Cron UI
-                            setFullCron(normalized); // normalize input
+                            setCronValue(stripSeconds(normalized));
                         }
                     }
                 }}
@@ -84,7 +85,7 @@ export const CronEditor: React.FC<CronEditorProps> = ({ name, label, mode, autoF
                         // tokens like `?`. Visualize `?` as `*` so existing Quartz expressions
                         // render instead of showing a red invalid state.
                         value={cronValue.replace(/\?/g, '*')}
-                        setValue={(val) => {
+                        setValue={(val: string) => {
                             if (!val) {
                                 setFullCron('');
                                 setCronValue('');

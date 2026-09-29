@@ -1,17 +1,14 @@
 import { useRef } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { message } from 'antd'
-import cron from 'cron-validate'
 import { Button } from '@shared/ui/primitives/Button'
 import { Loading } from '@shared/ui/primitives/Loading/Loading'
 import { StepHeader } from '@shared/ui/step-form/StepHeader'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext'
 import { CronEditor } from '@shared/ui/wizard-step/editor/cron-editor/CronEditor'
-import { stripSeconds } from '@shared/ui/wizard-step/editor/cron-editor/cron-editor.utils'
 import { useFetchEntitiesQuery, useUpdateEntityMutation } from '@shared/api/genericApi'
 import type { Schedule, ScheduleUpdateDTO } from '../model/types'
-import { notifyError } from '@shared/ui/feedback/notifyError'
 
 type Props = {
     schedulerId: number
@@ -67,11 +64,6 @@ function CronEditForm({ schedule, connectionTitle, onClose }: FormProps) {
     })
 
     const handleSubmit = form.handleSubmit(async ({ cronExp }) => {
-        if (cronExp && !cron(stripSeconds(cronExp), { override: { useBlankDay: true } }).isValid()) {
-            notifyError(tEntities('schedule.fields.cronExp.error.invalid'))
-            return
-        }
-
         const body: ScheduleUpdateDTO = {
             schedulerId: schedule.schedulerId,
             title: schedule.title,
@@ -85,9 +77,8 @@ function CronEditForm({ schedule, connectionTitle, onClose }: FormProps) {
             await updateEntity({ url: `/scheduler/${schedule.schedulerId}`, body }).unwrap()
             message.success(tEntities('schedule.cronEdit.success', { connectionTitle, cronExp }))
             onClose()
-        } catch (err) {
-            console.error(err)
-            notifyError(tEntities('schedule.cronEdit.error'))
+        } catch {
+            // baseQuery already emits the failure on errorBus, which shows the backend message.
         }
     })
 

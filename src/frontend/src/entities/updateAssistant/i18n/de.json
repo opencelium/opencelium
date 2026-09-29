@@ -108,7 +108,13 @@
       "success": "Paket erfolgreich hochgeladen",
       "error": "Fehler beim Hochladen des Pakets",
       "uploading": "Lade {{fileName}} hoch — {{progress}}%",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "invalidType": "Das Offline-Paket muss eine .zip-Datei sein.",
+      "tooLarge": "Das Offline-Paket darf 1 GB nicht überschreiten."
+    },
+    "onlineUnavailable": {
+      "title": "Online-Updates sind nicht verfügbar",
+      "switchToOffline": "Offline-Paket verwenden"
     }
   },
   "update": {

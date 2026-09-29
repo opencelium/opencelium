@@ -18,6 +18,7 @@
 .conditionGroup {
 	position: relative;
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	gap: 10px;
 	padding-bottom: 10px;
 	overflow-x: visible;
@@ -124,8 +125,20 @@
 .conditionGroupBody {
 	position: relative;
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	gap: 10px;
 	padding-right: 10px;
 	padding-left: 24px;
 }
 
+
+.conditionGroupLead {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+}
+
+.conditionGroup.conditionDrop-inside {
+	outline: 2px dashed var(--color-action-primary);
+	outline-offset: -2px;
+}

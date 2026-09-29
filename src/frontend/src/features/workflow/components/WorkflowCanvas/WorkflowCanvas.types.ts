@@ -8,6 +8,8 @@ import type {
 	Viewport,
 } from '@xyflow/react';
 import type { PropsWithChildren } from 'react';
+import type { LensView } from '../../lens/bindingLens.types';
+import type { LensActions } from '../../lens/buildLensElements';
 import type {
 	WorkflowAction,
 	WorkflowContextMenu,
@@ -46,6 +48,28 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	onPaneClick?: () => void;
 	/** Clears the red rings a rejected save or test run left behind — Escape. */
 	onClearNodeErrors?: () => void;
+	fieldBindings?: readonly unknown[];
+	bindingLens?: {
+		open: boolean;
+		view: LensView;
+		/** Set only while the focused method is pinned rather than hovered. */
+		pinnedNodeId: string | null;
+		/** The binding list panel — the canvas only hosts its toggle. */
+		tableOpen: boolean;
+		onToggleTable: () => void;
+		onToggle: () => void;
+		onHoverNode: (nodeId: string | null) => void;
+		onToggleFocus: (nodeId: string) => void;
+		/** Focus a method outright — selecting it on the canvas, rather than
+		 *  toggling it from its own badge. */
+		onFocusNode: (nodeId: string) => void;
+		onClearFocus: () => void;
+		actions: LensActions;
+	};
+	/** True while the logs card is the 46px bar overlaying the canvas' bottom
+	 *  edge rather than a splitter pane beside it — the bottom-right legend has
+	 *  to clear it. */
+	hasOverlaidLogsBar?: boolean;
 	restoredViewport?: Viewport;
 	viewportRestoreVersion?: number;
 	centerStartVersion?: number;

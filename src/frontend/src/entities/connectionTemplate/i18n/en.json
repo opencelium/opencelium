@@ -9,7 +9,12 @@
         "message": "The template with such filename already exists. It will be replaced. Are you sure?"
       },
       "success": "Template uploaded successfully: {{name}}",
-      "error": "Failed to upload template file."
+      "successArchive": "Templates uploaded from {{name}}: {{count}}",
+      "emptyArchive": "The archive does not contain any workflow templates.",
+      "error": "Failed to upload template file.",
+      "invalidType": "Workflow template files must use the .json or .zip format.",
+      "tooLarge": "The workflow template file must not exceed 1 GB.",
+      "archiveTooLarge": "The workflow template archive must not exceed 1 GB."
     },
     "download": {
       "tooltip": "Download",
