@@ -2,4 +2,5 @@ org.springframework.boot.EnvironmentPostProcessor=\
 io.opencelium.core.config.DefaultsEnvironmentPostProcessor
 
 org.springframework.boot.diagnostics.FailureAnalyzer=\
-io.opencelium.core.config.BootstrapFailureAnalyzer
+io.opencelium.core.config.BootstrapFailureAnalyzer,\
+io.opencelium.core.secrets.keys.KeyStartupFailureAnalyzer
