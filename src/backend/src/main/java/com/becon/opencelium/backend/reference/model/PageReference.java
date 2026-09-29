@@ -43,6 +43,11 @@ public final class PageReference implements Reference {
         return raw;
     }
 
+    @Override
+    public String getName() {
+        return raw.substring(2, raw.length() - 1);
+    }
+
     public PageParam getPageParam() {
         return pageParam;
     }

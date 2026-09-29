@@ -1,8 +1,10 @@
 package com.becon.opencelium.backend.reference.utility;
 
+import com.becon.opencelium.backend.reference.Patterns;
 import com.becon.opencelium.backend.reference.ReferenceDetector;
 import com.becon.opencelium.backend.reference.ReferenceParser;
 import com.becon.opencelium.backend.reference.ReferenceScanner;
+import com.becon.opencelium.backend.reference.enums.ReferenceType;
 import com.becon.opencelium.backend.reference.model.Reference;
 
 import java.util.ArrayList;
@@ -30,8 +32,8 @@ public class ReferenceUtility {
         return "NO ref(" + expression + ")";
     }
 
-    public static String extractReference(String value, String type) {
-        Pattern pattern = Pattern.compile(type);
+    public static String extractReference(String value, ReferenceType type) {
+        Pattern pattern = Patterns.of(type);
         Matcher matcher = pattern.matcher(value);
 
         if (matcher.find()) {

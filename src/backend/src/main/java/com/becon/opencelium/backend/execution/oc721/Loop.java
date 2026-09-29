@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.execution.oc721;
 
-import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.RelationalOperator;
+import com.becon.opencelium.backend.reference.enums.ReferenceType;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.reference.utility.ReferenceUtility;
 
@@ -30,7 +30,7 @@ public class Loop {
     public static Loop fromExpression(String expression) {
         Loop loop = new Loop();
 
-        String wrappedDirectRef = ReferenceUtility.extractReference(expression, RegExpression.wrappedDirectRef);
+        String wrappedDirectRef = ReferenceUtility.extractReference(expression, ReferenceType.WRAPPED_DIRECT);
 
         if (expression.startsWith(FOR_IN.getName())) {
             configureForInLoop(loop, expression, wrappedDirectRef);
@@ -114,7 +114,7 @@ public class Loop {
     }
 
     private static String buildIterableWebhookRef(String expression) {
-        String webhookRef = ReferenceUtility.extractReference(expression, RegExpression.webhook);
+        String webhookRef = ReferenceUtility.extractReference(expression, ReferenceType.WEBHOOK);
 
         int colonIndex = webhookRef.contains(":")
                 ? webhookRef.indexOf(":")
