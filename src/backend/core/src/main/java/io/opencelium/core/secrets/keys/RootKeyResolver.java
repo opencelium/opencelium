@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
@@ -20,8 +21,9 @@ import io.opencelium.core.config.OpenCeliumProperties;
 /**
  * Finds the root key at startup, in a fixed order where the first hit wins: the {@code OC_MASTER_KEY} environment
  * variable, the file named by {@code opencelium.master-key-file}, {@code <data-dir>/master.key}. When none has a key,
- * a new one is generated into {@code <data-dir>/master.key}. Setting both the variable and the property is an error,
- * not a question of order. Logs the source, never the key.
+ * a new one is generated into {@code <data-dir>/master.key}, but only on a fresh install: if the database already
+ * holds wrapped data keys, a new key could not read them, so startup stops instead. Setting both the variable and the
+ * property is an error, not a question of order. Logs the source, never the key.
  */
 public final class RootKeyResolver {
 
@@ -56,14 +58,21 @@ public final class RootKeyResolver {
 	}
 
 	/**
+	 * @param wrappedDeksExist asked only when no source has a key: whether the database holds wrapped data keys
 	 * @throws BootstrapPropertyException when both sources are set, or a key is missing or malformed
+	 * @throws KeyStartupException        when no source has a key and the database holds wrapped data keys
 	 */
-	public RootKey resolve() {
+	public RootKey resolve(BooleanSupplier wrappedDeksExist) {
 		Optional<RootKey> found = load();
 		if (found.isPresent()) {
 			RootKey key = found.get();
 			log.info("Master key loaded from " + location(key.source()) + " (key id " + key.id() + ")");
 			return key;
+		}
+		if (wrappedDeksExist.getAsBoolean()) {
+			throw KeyStartupException.restoreOrReset("No master key was found: " + ENV_VARIABLE + " is not set, "
+					+ OpenCeliumProperties.MASTER_KEY_FILE + " is not set, and " + dataDirFile + " does not exist."
+					+ " The database already holds encrypted data keys, so no new key is generated.");
 		}
 		RootKey key = generate();
 		log.warn(backupWarning(dataDirFile));
