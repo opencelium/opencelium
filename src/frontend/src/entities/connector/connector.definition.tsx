@@ -1,5 +1,4 @@
 import type {EntityDefinition, Mode} from '@/engine/entity/EntityDefinition'
-import connectorWizardImage from '@/assets/images/wizard/connector.gif'
 import {ConnectorWizardImage} from "@entities/connector/ui/ConnectorWizardImage";
 import {createEntityCommands} from "@/engine/entity/command/createEntityCommands.tsx";
 import en from "@entities/connector/i18n/en.json";
@@ -535,7 +534,6 @@ export const connectorDefinition: EntityDefinition = {
     ============================== */
 
     wizard: {
-        image: connectorWizardImage as string,
         imageField: 'icon',
         renderImage: ConnectorWizardImage,
 

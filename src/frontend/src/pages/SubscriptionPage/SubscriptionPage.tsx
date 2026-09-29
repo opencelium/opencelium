@@ -8,7 +8,7 @@ import { LicenseInformationStep } from '@pages/SubscriptionPage/LicenseInformati
 import { OperationUsageStep } from '@pages/SubscriptionPage/OperationUsageStep'
 import { OperationDetailsStep } from '@pages/SubscriptionPage/OperationDetailsStep'
 import { useGetActiveSubscriptionQuery } from '@entities/subscription/api/subscriptionApi'
-import subscriptionWizardImage from '@assets/images/wizard/subscription.gif'
+import subscriptionWizardImage from '@assets/images/wizard/subscription.svg'
 
 type StepIndex = 0 | 1 | 2
 

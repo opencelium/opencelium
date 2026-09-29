@@ -1,5 +1,5 @@
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import uiWizardImage from '@/assets/images/wizard/ui.gif'
+import uiWizardImage from '@/assets/images/wizard/ui.svg'
 import {useCommandPaletteUIStore} from "@widgets/CommandPalette/command-palette.store.ts";
 import {GenericUpdateWizard} from "@/engine/entity/runtime/genererics/GenericUpdateWizard.tsx";
 import React from "react";

@@ -1,5 +1,5 @@
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import notificationWizardImage from '@assets/images/wizard/notification-template-wizard.gif'
+import notificationWizardImage from '@assets/images/wizard/notification-template.svg'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
 import en from '@entities/notificationTemplate/i18n/en.json'
