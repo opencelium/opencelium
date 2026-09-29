@@ -51,7 +51,7 @@ class AsyncQueueExecutionEventTransportTest {
 
         // GIVEN
         ExecutionEvent first = new ExecutionStartedEvent(42L, 1L, 1, "2026-07-29");
-        ExecutionEvent second = new ExecutionFinishedEvent(42L, null, SUCCESS);
+        ExecutionEvent second = new ExecutionFinishedEvent(42L, 1, null, SUCCESS);
 
         // WHEN
         transport.accept(first);
@@ -72,7 +72,7 @@ class AsyncQueueExecutionEventTransportTest {
 
         // GIVEN
         ExecutionEvent first = new ExecutionStartedEvent(42L, 1L, 1, "2026-07-29");
-        ExecutionEvent second = new ExecutionFinishedEvent(42L, null, result);
+        ExecutionEvent second = new ExecutionFinishedEvent(42L, 1, null, result);
 
         // WHEN
         transport.accept(first);
@@ -89,7 +89,7 @@ class AsyncQueueExecutionEventTransportTest {
         transport.start();
 
         // GIVEN
-        ExecutionEvent failed = new ExecutionFinishedEvent(41L, null, FAIL);
+        ExecutionEvent failed = new ExecutionFinishedEvent(41L, 1, null, FAIL);
         ExecutionEvent following = new ExecutionStartedEvent(42L, 1L, 2, "2026-07-29");
 
         doThrow(new RuntimeException("Consumer failed to process an event"))
@@ -109,7 +109,7 @@ class AsyncQueueExecutionEventTransportTest {
         transport = new AsyncQueueExecutionEventTransport(consumer);
 
         // GIVEN
-        ExecutionEvent event = new ExecutionFinishedEvent(42L, null, SUCCESS);
+        ExecutionEvent event = new ExecutionFinishedEvent(42L, 1, null, SUCCESS);
 
         // THEN before
         assertThrows(IllegalStateException.class, () -> transport.accept(event));
@@ -128,7 +128,7 @@ class AsyncQueueExecutionEventTransportTest {
         transport.start();
 
         // GIVEN
-        ExecutionEvent first = new ExecutionFinishedEvent(41L, null, TERMINATED);
+        ExecutionEvent first = new ExecutionFinishedEvent(41L, 1, null, TERMINATED);
         ExecutionEvent second = new ExecutionStartedEvent(42L, 1L, 2, "2026-07-29");
 
         // WHEN
