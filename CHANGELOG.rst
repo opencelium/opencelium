@@ -167,6 +167,16 @@ Fixes
 * Plus icon from initial node disappears (OC-1496)
 * Fix an error when using template from service portal (version 2.1) (OC-1504)
 
+4.8.4
+========
+
+:Date: June 8, 2026
+
+
+Fixes
+--------
+
+* Fix [null] reference bug (OC-1434)
 
 4.8.1
 ========

@@ -9,7 +9,12 @@
         "message": "Eine Vorlage mit diesem Dateinamen existiert bereits. Sie wird ersetzt. Sind Sie sicher?"
       },
       "success": "Vorlage erfolgreich hochgeladen: {{name}}",
-      "error": "Hochladen der Vorlagendatei fehlgeschlagen."
+      "successArchive": "Aus {{name}} hochgeladene Vorlagen: {{count}}",
+      "emptyArchive": "Das Archiv enthält keine Workflow-Vorlagen.",
+      "error": "Hochladen der Vorlagendatei fehlgeschlagen.",
+      "invalidType": "Workflow-Vorlagendateien müssen das .json- oder .zip-Format verwenden.",
+      "tooLarge": "Die Workflow-Vorlagendatei darf 1 GB nicht überschreiten.",
+      "archiveTooLarge": "Das Workflow-Vorlagenarchiv darf 1 GB nicht überschreiten."
     },
     "download": {
       "tooltip": "Herunterladen",

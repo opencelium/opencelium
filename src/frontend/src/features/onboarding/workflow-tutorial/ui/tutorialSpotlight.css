@@ -1,0 +1,85 @@
+/*
+ * The dimming is a shadow, not a background — an enormous spread paints everything
+ * outside the box and leaves the box untouched, so what is inside stays visible AND
+ * clickable. `pointer-events: none` keeps the mask from swallowing the click the
+ * tutorial is asking for.
+ */
+.workflow-tutorial-mask {
+    position: fixed;
+    pointer-events: none;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 0 9999px rgb(12 16 22 / 60%);
+}
+
+/*
+ * Keyed off the class WorkflowTutorial puts on <html>, not off `data-theme`: this app
+ * switches theme by rewriting CSS custom properties (see applyTheme) and sets no theme
+ * attribute at all, so `:root:not([data-theme='light'])` matched permanently and a
+ * light-themed editor was dimmed with the dark overlay.
+ */
+html.workflow-tutorial-dark .workflow-tutorial-mask {
+    box-shadow: 0 0 0 9999px rgb(2 4 8 / 72%);
+}
+
+/*
+ * The canvas keeps its `+` triggers at opacity 0 until their node is hovered, so the
+ * one being pointed at has to be forced visible — otherwise the cut-out frames a
+ * blank patch of canvas.
+ */
+html.workflow-tutorial-active [data-tutorial-highlight] {
+    opacity: 1 !important;
+}
+
+/*
+ * Undimming is not emphasis: the canvas `+` is a 22px outline circle in
+ * `--color-text-secondary`, which still reads as scenery inside the cut-out. The one
+ * being pointed at wears the primary action colour instead, matching
+ * `.historyExpandButtonActive`. This recolouring is what calls out the target — the
+ * mask deliberately draws no border of its own.
+ */
+html.workflow-tutorial-active [data-tutorial-highlight] .addCircle {
+    background: var(--color-action-primary);
+    border-color: var(--color-action-primary);
+    color: var(--color-text-on-action);
+}
+
+/*
+ * Says how to act on the highlighted node, for the one gesture the canvas does not
+ * advertise: the request editors live behind a right-click. Sits above the mask, not
+ * in its cut-out, so it can overhang the node's own edge; and takes no pointer events,
+ * because the thing to click is the node underneath it.
+ */
+.workflow-tutorial-cue {
+    position: fixed;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    padding: 3px 9px;
+    background: var(--color-action-primary);
+    color: var(--color-text-on-action);
+    font-family: var(--typography-font-family-body);
+    font-size: var(--typography-font-size-sm);
+    line-height: 1.4;
+    white-space: nowrap;
+    box-shadow: var(--shadow-lg);
+    pointer-events: none;
+}
+
+/*
+ * The reference generator's apply action is a borderless text-weight `+` in
+ * `--color-text-primary` (bodyLegacy.css), no louder than the row it sits in — yet it
+ * is the last press that commits a reference, and the tutorial's steps 5 and 9 both
+ * end on it. While the tour runs it takes the action colour and an outline, so it
+ * reads as a button rather than as one more glyph in the row.
+ *
+ * `:not(:disabled)` because it stays disabled until a method and a field are chosen,
+ * and a bright dead control invites a click that does nothing. Scoped to the active
+ * class rather than to `[data-tutorial-highlight]`: on the body step the generator is
+ * undimmed alongside the field row rather than being the marked target itself.
+ */
+html.workflow-tutorial-active .bodyLegacyGeneratorAction:not(:disabled) {
+    border: 1px solid var(--color-action-primary);
+    border-radius: var(--radius-sm);
+    color: var(--color-action-primary);
+}

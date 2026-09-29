@@ -1,5 +1,5 @@
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import notificationWizardImage from '@assets/images/wizard/notification-template-wizard.gif'
+import notificationWizardImage from '@assets/images/wizard/notification-template.svg'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
 import en from '@entities/notificationTemplate/i18n/en.json'
@@ -13,6 +13,9 @@ import { getAggregatorsFromCache } from '@entities/notificationTemplate/lib/getA
 import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'notification-template'
+const hasMeaningfulText = (value: unknown): boolean => /[\p{L}\p{N}]/u.test(String(value ?? '').trim())
+const isEmptyOrMeaningful = (value: unknown): boolean =>
+    String(value ?? '').length === 0 || hasMeaningfulText(value)
 
 const resolveNotificationTemplateId = (value: string): string => {
     if (/^\d+$/.test(value)) return value
@@ -132,6 +135,12 @@ export const notificationTemplateDefinition: EntityDefinition = {
             validation: {
                 required: true,
                 max: 255,
+                custom: [
+                    {
+                        validate: isEmptyOrMeaningful,
+                        message: `${baseKey}.validation.meaningfulText`,
+                    },
+                ],
             },
             table: {
                 width: '60%',
@@ -174,7 +183,16 @@ export const notificationTemplateDefinition: EntityDefinition = {
                 component: 'input',
                 overrideKey: 'templateSubjectEditor',
             },
-            validation: { required: true, max: 255 },
+            validation: {
+                required: true,
+                max: 255,
+                custom: [
+                    {
+                        validate: isEmptyOrMeaningful,
+                        message: `${baseKey}.validation.meaningfulText`,
+                    },
+                ],
+            },
         },
         {
             name: 'body',
@@ -184,7 +202,16 @@ export const notificationTemplateDefinition: EntityDefinition = {
                 component: 'input',
                 overrideKey: 'templateBodyEditor',
             },
-            validation: { required: true, max: 65535 },
+            validation: {
+                required: true,
+                max: 65535,
+                custom: [
+                    {
+                        validate: isEmptyOrMeaningful,
+                        message: `${baseKey}.validation.meaningfulText`,
+                    },
+                ],
+            },
         },
         {
             name: 'aggregator',

@@ -38,15 +38,8 @@
     },
     "duplicate": {
       "tooltip": "Duplicate",
-      "dialogTitle": "Duplicate workflow",
-      "titleLabel": "Title",
-      "descriptionLabel": "Description",
-      "titleRequired": "Title is a required field",
-      "titleExists": "A workflow with this title already exists",
       "defaultTitle": "{{title}} (copy)",
-      "cancel": "Cancel",
-      "submit": "Duplicate",
-      "success": "Workflow \"{{name}}\" duplicated",
+      "numberedTitle": "{{title}} (copy {{number}})",
       "error": "Failed to duplicate workflow"
     },
     "confirmDelete": {

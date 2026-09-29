@@ -2,11 +2,12 @@ import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type { ReactFlowInstance } from '@xyflow/react';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import type { UseWorkflowPageOptions, WorkflowDragSnapshot } from '../drag-drop/workflowPage.types';
-import { moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
+import { dropWorkflowNodeGroup, moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
 import { sanitizeGraphEdges, sanitizeGraphNodes } from '../drag-drop/workflowPageGraph.utils';
 import { clearDragFlags, clearDragPreviewNodes, clearEdgeDragFlags } from '../drag-drop/workflowPageNodes.utils';
 import { computeGhostRootPosition } from '../drag-drop/workflowDragCalculations.utils';
 import { positionDragCommit, resolveDragCommit } from '../drag-drop/workflowDragCommit.utils';
+import { findWorkflowDropTarget } from '../drag-drop/workflowDropTarget.utils';
 import { pruneInvalidJoints } from '../utils/jumpValidator';
 import { withCommentOffsetFromPosition } from '../utils/commentAnchor';
 
@@ -32,7 +33,52 @@ export const useWorkflowDragStop = ({ options, setNodes, setEdges, setIsDragging
 	setIsDragging(false);
 	if (multiDrag.current) {
 		multiDrag.current = false;
-		positionLock.current = null;
+		const snapshot = dragSnapshot.current;
+		dragSnapshot.current = null;
+		try {
+			const rootIds = snapshot?.multiRootIds ?? [];
+			const target = snapshot && findWorkflowDropTarget(
+				reactFlowInstance.current, event, node.id, snapshot.nodes, snapshot.edges,
+				snapshot.draggedNodeIds,
+			)?.target;
+			if (!snapshot || rootIds.length < 2) return;
+			const restoreSnapshot = () => {
+				setNodes(snapshot.nodes);
+				setEdges(snapshot.edges);
+			};
+			if (!target) {
+				// A copy dropped nowhere is abandoned; the originals were dragged
+				// along with the pointer and must snap back.
+				if (snapshot.mode === 'copy') restoreSnapshot();
+				return;
+			}
+			const dropGroup = (cleanInvalid = false) => dropWorkflowNodeGroup({
+				sourceNodeIds: rootIds, target, mode: snapshot.mode, nodes: snapshot.nodes,
+				edges: snapshot.edges, fieldBindings: options.fieldBindings, cleanInvalid,
+			});
+			let next = dropGroup();
+			if (next.invalidReferences.length > 0) {
+				const accepted = await options.confirmDependencyDrop?.(next.invalidReferences);
+				if (!accepted) {
+					restoreSnapshot();
+					return;
+				}
+				next = dropGroup(true);
+			}
+			const copiedIds = new Set(next.idMap?.values());
+			const droppedNodes = snapshot.mode === 'copy'
+				? next.nodes.map((item) => ({ ...item, selected: copiedIds.has(item.id) }))
+				: next.nodes;
+			const finalNodes = sanitizeGraphNodes(clearDragFlags(droppedNodes));
+			const finalEdges = sanitizeGraphEdges(finalNodes, clearEdgeDragFlags(next.edges));
+			const joints = pruneInvalidJoints(finalNodes, finalEdges, next.fieldBindings);
+			if (joints.removedSourceIds.length > 0) onJointsRemoved(joints.removedSourceIds.length);
+			setNodes(joints.nodes);
+			setEdges(finalEdges);
+			options.onFieldBindingsChange?.(next.fieldBindings);
+		} finally {
+			positionLock.current = null;
+		}
 		return;
 	}
 	if (node.type === 'comment') {

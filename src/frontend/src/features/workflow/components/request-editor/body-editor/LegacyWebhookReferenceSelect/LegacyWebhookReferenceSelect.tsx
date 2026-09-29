@@ -7,7 +7,7 @@ import type { LegacyWebhookReferenceSelectProps } from './LegacyWebhookReference
 import { CreateWebhookModal } from './CreateWebhookModal';
 import '../bodyLegacy.css';
 
-export function LegacyWebhookReferenceSelect({ value, onChange }: LegacyWebhookReferenceSelectProps) {
+export function LegacyWebhookReferenceSelect({ value, popupZIndex, onChange }: LegacyWebhookReferenceSelectProps) {
   const { t } = useI18n('workflow');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const options = useMemo(() => getWebhookOptions(), [isModalOpen, value]);
@@ -27,7 +27,7 @@ export function LegacyWebhookReferenceSelect({ value, onChange }: LegacyWebhookR
         showSearch
         optionFilterProp='label'
         getPopupContainer={() => document.body}
-        styles={{ popup: { root: { zIndex: 13010 } } }}
+        styles={{ popup: { root: { zIndex: popupZIndex ?? 13010 } } }}
         notFoundContent={t('webhook.noWebhooks')}
         popupRender={(menu) => (
           <>

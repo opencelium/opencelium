@@ -29,16 +29,23 @@ export const normalizeConnectionPayload = (payload: any) => {
 		? payload.toConnector.operators : [];
 	const fromInvokerName = payload?.fromConnector?.invoker?.name ?? fromConnector?.invoker?.name;
 	const toInvokerName = payload?.toConnector?.invoker?.name;
+	// Legacy (4.x) templates carry the connector on each side, not on each method.
+	const sideConnector = (side: { connectorId?: unknown; title?: unknown } | undefined) => ({
+		fallbackConnectorId: typeof side?.connectorId === 'number' ? side.connectorId : undefined,
+		fallbackConnectorTitle: typeof side?.title === 'string' ? side.title : undefined,
+	});
 	const combinedMethods = [
 		...sourceMethods.map((method: any, index: number) => ({
 			...method,
 			index: normalizeIndex(method?.index, index),
 			fallbackInvokerName: fromInvokerName,
+			...sideConnector(payload?.fromConnector),
 		})),
 		...toMethods.map((method: any, index: number) => ({
 			...method,
 			index: shiftRootIndex(method?.index, sourceMethods.length + index),
 			fallbackInvokerName: toInvokerName,
+			...sideConnector(payload?.toConnector),
 		})),
 	];
 	const combinedOperators = [
@@ -68,9 +75,10 @@ export const normalizeConnectionPayload = (payload: any) => {
 				return {
 					...method,
 					connector: method?.connector === null ? null : {
-						connectorId: method?.connector?.connectorId ?? method?.connectorId ?? -1,
+						connectorId: method?.connector?.connectorId ?? method?.connectorId
+							?? method?.fallbackConnectorId ?? -1,
 						title: method?.connector?.title ?? method?.connectorTitle
-							?? method?.connector?.name ?? 'DEFAULT',
+							?? method?.connector?.name ?? method?.fallbackConnectorTitle ?? 'DEFAULT',
 						icon: method?.connector?.icon ?? null,
 						invokerName: connectorInvokerName ?? method?.invokerName
 							?? method?.connector?.invokerName ?? method?.fallbackInvokerName ?? null,

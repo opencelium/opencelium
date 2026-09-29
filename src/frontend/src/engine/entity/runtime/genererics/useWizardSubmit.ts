@@ -117,10 +117,11 @@ async function runMainMutation({
     const op = api.operations?.update
     if (op) {
         const url = op.buildUrl ? op.buildUrl(api.baseUrl, identifier) : `${api.baseUrl}/${identifier}`
+        const body = op.buildBody ? op.buildBody(payload, identifier) : payload
         return apiExecutor({
             url,
             method: op.method ?? 'PUT',
-            body: payload,
+            body,
             options: { headers },
         })
     }

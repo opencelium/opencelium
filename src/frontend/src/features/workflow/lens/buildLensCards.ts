@@ -1,0 +1,116 @@
+import type { LensBinding, LensCardData, LensCardRow, LensNodeModel } from './bindingLens.types';
+import { bindingAnchorNodeId } from './buildLensSummary';
+import { lensCardId } from './lensIds';
+
+export const LENS_CARD_WIDTH = 240;
+// node.position is the centre of the 62px circle (see .nodeBody in nodes.css),
+// so the card is centred under it, clear of the node and of the arcs' dip.
+const CARD_OFFSET_Y = 64;
+
+type AnchorNode = { id: string; position: { x: number; y: number }; label: string; color: string };
+
+/** What clicking each of a row's bindings would open. One enhancement is one
+ *  editor however many references it pulls together; a reference living in the
+ *  field's own value is its own target. The row can only be a control when every
+ *  binding behind it leads to the same place — the builder's own bookkeeping, not
+ *  part of the row the card renders. */
+type RowDraft = LensCardRow & { editorKeys: Set<string> };
+
+const editorKey = (binding: LensBinding) => binding.source.kind === 'enhancement'
+	? `enhancement:${binding.source.enhanceId}`
+	: binding.key;
+
+const addRow = (rows: Map<string, RowDraft>, row: RowDraft) => {
+	const key = `${row.role}:${row.path}`;
+	const existing = rows.get(key);
+	if (!existing) {
+		rows.set(key, row);
+		return;
+	}
+	// One field can be bound several times over (many sources into one target,
+	// or one response field read by several methods): the row is the field, and
+	// it carries every binding behind it.
+	existing.bindingKeys.push(...row.bindingKeys);
+	row.editorKeys.forEach((key) => existing.editorKeys.add(key));
+	existing.hasScript = existing.hasScript || row.hasScript;
+	existing.isBroken = existing.isBroken || row.isBroken;
+	existing.isSelected = existing.isSelected || row.isSelected;
+	if (existing.counterpartLabel !== row.counterpartLabel) existing.counterpartLabel = null;
+};
+
+export const buildLensCards = (
+	bindings: LensBinding[],
+	expandedNodeIds: Set<string>,
+	anchorsById: Map<string, AnchorNode>,
+	selectedKey: string | null,
+	onCollapse: (nodeId: string) => void,
+	onSelectBinding: (bindingKey: string) => void,
+): LensNodeModel[] => {
+	const rowsByNode = new Map<string, Map<string, RowDraft>>();
+	const rowsFor = (nodeId: string) => {
+		const rows = rowsByNode.get(nodeId) ?? new Map<string, RowDraft>();
+		rowsByNode.set(nodeId, rows);
+		return rows;
+	};
+
+	[...expandedNodeIds].filter((nodeId) => anchorsById.has(nodeId)).forEach((nodeId) => rowsFor(nodeId));
+
+	bindings.forEach((binding) => {
+		const isBroken = !!binding.invalidReason;
+		const isSelected = binding.key === selectedKey;
+		const sourceNodeId = bindingAnchorNodeId(binding);
+		const targetNodeId = binding.consumer.nodeId;
+		if (sourceNodeId && expandedNodeIds.has(sourceNodeId)) {
+			addRow(rowsFor(sourceNodeId), {
+				role: 'source', path: binding.provider.path,
+				counterpartLabel: binding.consumer.label, color: binding.provider.color,
+				hasScript: binding.isScript, isBroken, isSelected, bindingKeys: [binding.key],
+				editorKeys: new Set([editorKey(binding)]),
+			});
+		}
+		if (targetNodeId && expandedNodeIds.has(targetNodeId)) {
+			addRow(rowsFor(targetNodeId), {
+				role: 'target', path: binding.consumer.path,
+				counterpartLabel: binding.provider.label, color: binding.provider.color,
+				hasScript: binding.isScript, isBroken, isSelected, bindingKeys: [binding.key],
+				editorKeys: new Set([editorKey(binding)]),
+			});
+		}
+	});
+
+	const toRow = ({ editorKeys, ...row }: RowDraft): LensCardRow => ({
+		...row,
+		onActivate: editorKeys.size === 1
+			? () => onSelectBinding(row.bindingKeys[0])
+			: undefined,
+	});
+
+	return [...rowsByNode.entries()].flatMap(([nodeId, rows]) => {
+		const anchor = anchorsById.get(nodeId);
+		if (!anchor) return [];
+		const data: LensCardData = {
+			anchorNodeId: nodeId,
+			label: anchor.label,
+			color: anchor.color,
+			rows: [...rows.values()].map(toRow),
+			onCollapse: () => onCollapse(nodeId),
+		};
+		return [{
+			id: lensCardId(nodeId),
+			type: 'binding-lens-card' as const,
+			position: {
+				x: anchor.position.x - LENS_CARD_WIDTH / 2,
+				y: anchor.position.y + CARD_OFFSET_Y,
+			},
+			draggable: false,
+			selectable: false,
+			focusable: false,
+			deletable: false,
+			// Above the node layer (.nodeWrap is z-index 6, its badges 7): a card is
+			// the thing being read, and it hangs under a node close enough to be
+			// clipped by the next one down — and its rows have to be clickable.
+			zIndex: 10,
+			data,
+		} satisfies LensNodeModel];
+	});
+};

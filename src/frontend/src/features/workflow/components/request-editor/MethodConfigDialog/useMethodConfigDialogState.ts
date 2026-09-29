@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { buildFromConnectorPayload } from '../../../api/connectionPayload';
 import { clearConnection, setConnection, setFlowchart } from '../../../store/connection/connectionSlice';
 import { createLegacyStore } from '../../../store';
-import { buildLegacyConnection, extractWorkflowMethodConfig } from '../legacyAdapter';
+import { buildEditorConnection } from '../editorConnection';
+import { extractWorkflowMethodConfig } from '../legacyAdapter';
 import { sortValue } from '../../../utils/workflowPage.utils';
 import { toAuthoredMethodConfig } from '../../../utils/requestConfig';
 import type { WorkflowMethodConfig } from '../../../types/request-config.types';
@@ -23,26 +23,8 @@ const bindingsIdentity = (fieldBindings: unknown) =>
 export function useMethodConfigDialogState({ open, node, mode, nodes, edges,
 	fieldBindings, onFieldBindingsChange, onClose, onSave }: MethodConfigDialogProps) {
 	const store = useMemo(() => createLegacyStore(), []);
-	const connection = useMemo(() => {
-		const legacyConnection = buildLegacyConnection(nodes);
-		const fromConnectorPayload = buildFromConnectorPayload(nodes, edges ?? []) as any;
-		const indexById = new Map<string, string>(
-			(fromConnectorPayload.methods ?? []).map((method: any) => [method.id, method.index]),
-		);
-		return {
-			...legacyConnection,
-			...(Array.isArray(fieldBindings) ? { fieldBindings } : {}),
-			fromConnector: {
-				...legacyConnection.fromConnector,
-				method: legacyConnection.fromConnector.method.map((method) => ({
-					...method,
-					index: indexById.get(method.id) ?? method.index,
-				})),
-				operator: fromConnectorPayload.operators ?? [],
-			},
-			ui: { ...legacyConnection.ui, workflowEdges: edges ?? [] } as any,
-		};
-	}, [edges, fieldBindings, nodes]);
+	const connection = useMemo(() => buildEditorConnection(nodes, edges ?? [], fieldBindings),
+		[edges, fieldBindings, nodes]);
 	const isPersistingRef = useRef(false);
 	const activeSessionRef = useRef<string | null>(null);
 	// What this session started from, captured after the legacy store is seeded so

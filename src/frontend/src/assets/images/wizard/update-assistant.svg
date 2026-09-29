@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+<style>
+.i{stroke:#1a1a1a}.a{stroke:#14b8a6}.af{fill:#14b8a6;stroke:none}.if{fill:#1a1a1a;stroke:none}
+.ring{stroke-width:3.5;stroke-dasharray:138.2;animation:rg 3s ease-in-out -1.2s infinite}@keyframes rg{0%{stroke-dashoffset:138.2}70%,100%{stroke-dashoffset:0}}
+.arr{animation:up 3s ease-in-out infinite}@keyframes up{0%,100%{transform:translateY(2px)}50%{transform:translateY(-2px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+
+<circle class="i" cx="32" cy="32" r="22" stroke-opacity=".15"/>
+<circle class="a ring" cx="32" cy="32" r="22" transform="rotate(-90 32 32)"/>
+<g class="arr"><path class="i" d="M32 42V22M24 29l8-8 8 8"/></g>
+</svg>

@@ -105,4 +105,8 @@ export const getInvalidSavedEdgeReason = (
 		if (outgoingHandles.has(outgoingKey)) return 'duplicate-outgoing-handle';
 		outgoingHandles.add(outgoingKey);
 	}
+	if (nodes.some((node) => node.type !== 'start' && node.type !== 'comment'
+		&& !node.data.dragGhost && !node.data.dropPlaceholder && !incoming.has(node.id))) {
+		return 'missing-incoming';
+	}
 };
