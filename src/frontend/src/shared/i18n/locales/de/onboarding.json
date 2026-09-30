@@ -214,6 +214,7 @@
   },
   "workflow": {
     "kicker": "Workflow",
+    "dragHint": "Zum Verschieben ziehen",
     "actions": {
       "done": "Beenden"
     },
