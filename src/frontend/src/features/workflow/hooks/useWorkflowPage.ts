@@ -4,7 +4,7 @@ import type { Connection } from '@xyflow/react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
-import { createNodeFromAction, deleteNodeGraph } from '../utils/graphUtils';
+import { createNodeFromAction } from '../utils/graphUtils';
 import { cleanBrokenWorkflowReferences } from '../utils/graph.brokenReferenceCleanup';
 import { message } from 'antd';
 import { createCommentNode } from '../utils/createCommentNode';
@@ -22,6 +22,9 @@ import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
 import { evaluateJointTargets } from '../utils/jumpValidator';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
+import { copyWorkflowNodeGroup, moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
+import { useDeleteWorkflowNodes } from './useDeleteWorkflowNodes';
+import { useBindingLensState } from '../lens/useBindingLensState';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
@@ -32,9 +35,21 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     isAnyNodeDragging, setIsAnyNodeDragging, sidebarAction, setSidebarAction,
     contextMenu, setContextMenu, historyOpen, setHistoryOpen, methodEditor,
     setMethodEditor, responseNodeId, setResponseNodeId, conditionEditor,
-    setConditionEditor, aggregatorEditor, setAggregatorEditor, restoredViewport,
+    setConditionEditor, aggregatorEditor, setAggregatorEditor, connectorEditor,
+    setConnectorEditor, restoredViewport,
     setRestoredViewport, viewportRestoreVersion, setViewportRestoreVersion,
-    centerStartVersion, setCenterStartVersion } = state;
+    centerStartVersion, setCenterStartVersion, bindingLensOpen,
+    setBindingLensOpen, bindingLensExpanded, setBindingLensExpanded,
+    bindingLensSelectedKey, setBindingLensSelectedKey, bindingLensPinnedNodeId,
+    setBindingLensPinnedNodeId, bindingLensHoveredNodeId,
+    setBindingLensHoveredNodeId, bindingTableOpen, setBindingTableOpen } = state;
+
+  const bindingLens = useBindingLensState({ open: bindingLensOpen, setOpen: setBindingLensOpen,
+    pinnedNodeId: bindingLensPinnedNodeId, setPinnedNodeId: setBindingLensPinnedNodeId,
+    hoveredNodeId: bindingLensHoveredNodeId, setHoveredNodeId: setBindingLensHoveredNodeId,
+    tableOpen: bindingTableOpen, setTableOpen: setBindingTableOpen,
+    expandedNodeIds: bindingLensExpanded, setExpandedNodeIds: setBindingLensExpanded,
+    selectedKey: bindingLensSelectedKey, setSelectedKey: setBindingLensSelectedKey });
 
   const dragPreview = useWorkflowDragPreviewState(setNodes, setEdges);
   const { updateEdges: updateDragPreviewEdges, updateNodes: updateDragPreviewNodes,
@@ -56,7 +71,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes, setEdges, onFieldBindingsChange: options.onFieldBindingsChange });
   const nodeUpdates = useWorkflowNodeUpdates(setNodes,
     () => setMethodEditor(null), () => setConditionEditor(null),
-    () => setAggregatorEditor(null));
+    () => setAggregatorEditor(null), () => setConnectorEditor(null));
 
   const [jointSourceId, setJointSourceId] = useState<string | null>(null);
   const jointVerdicts = useMemo(
@@ -76,8 +91,11 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes,
     centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
-      aggregatorEditor !== null || responseNodeId !== null || historyOpen,
+      aggregatorEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
   });
+
+  const deleteNodes = useDeleteWorkflowNodes({ nodes, edges, options, setNodes, setEdges,
+    onDeleted: () => setContextMenu(null) });
 
   return {
     nodes,
@@ -92,9 +110,11 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     responseNodeId,
     conditionEditor,
     aggregatorEditor,
+    connectorEditor,
     restoredViewport,
     viewportRestoreVersion,
     centerStartVersion,
+    bindingLens,
     canUndo: undoHistory.canUndo,
     canRedo: undoHistory.canRedo,
     undo: undoHistory.undo,
@@ -114,6 +134,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setMethodEditor,
     setConditionEditor,
     setAggregatorEditor,
+    setConnectorEditor,
     setWorkflowGraph: (
       nextNodes: WorkflowNodeModel[],
       nextEdges: WorkflowEdgeModel[],
@@ -136,7 +157,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onNodeDragStop: handleNodeDragStop,
     onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
     onCloseResponse: () => setResponseNodeId(null),
-    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); },
+    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setConnectorEditor(null); },
     onStartJoint: (sourceNodeId: string) => {
       setSidebarAction(null);
       setContextMenu(null);
@@ -200,32 +221,60 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       const comment = createCommentNode(nodes, nodeId);
       if (comment) setNodes([...nodes, comment]);
     },
-    onDeleteNode: async (nodeId: string) => {
-      const targetNode = nodes.find((node) => node.id === nodeId);
-      if (!targetNode || targetNode.type === 'start') return;
-      const result = deleteNodeGraph(nodeId, nodes, edges);
-      // What the deletion costs elsewhere, resolved before it is confirmed: every
-      // reference to the method being deleted, plus anything the smaller graph can
-      // no longer reach. Leaving them behind was the old behaviour and it left
-      // methods reading a method that is not there any more.
-      const cleanup = cleanBrokenWorkflowReferences(
-        result.nodes, result.edges, options.fieldBindings, { nodes, edges });
-      const confirmed = await confirm({
-        title: t('confirmDelete.title'),
-        message: cleanup.affectedNodeIds.length > 0
-          ? `${t('confirmDelete.message')} ${t('confirmDelete.clearsReferences',
-            { count: cleanup.affectedNodeIds.length })}`
-          : t('confirmDelete.message'),
-        confirmText: t('actions.delete'),
-        cancelText: t('actions.cancel'),
-        confirmVariant: 'solid',
-      });
-      if (!confirmed) return;
-      setNodes(cleanup.nodes);
+    onPasteNode: async (sourceNodeId: string, targetNodeId: string,
+      direction: 'right' | 'bottom') => {
+      const source = nodes.find((node) => node.id === sourceNodeId);
+      const target = nodes.find((node) => node.id === targetNodeId);
+      if (!source || !target || source.type === 'start' || source.type === 'comment' ||
+        target.type === 'comment') return false;
+      const args = {
+        sourceNodeId,
+        target: { nodeId: targetNodeId, direction },
+        mode: 'copy' as const,
+        nodes,
+        edges,
+        fieldBindings: options.fieldBindings,
+      };
+      let result = moveOrCopyWorkflowNodes(args);
+      if (result.invalidReferences.length > 0) {
+        const accepted = await options.confirmDependencyDrop?.(result.invalidReferences);
+        if (!accepted) return false;
+        result = moveOrCopyWorkflowNodes({ ...args, cleanInvalid: true });
+      }
+      const pastedRootId = result.idMap?.get(sourceNodeId);
+      setNodes(result.nodes.map((node) => ({
+        ...node,
+        selected: node.id === pastedRootId,
+      })));
       setEdges(result.edges);
-      if (cleanup.brokenCount > 0) options.onFieldBindingsChange?.(cleanup.fieldBindings);
-      setContextMenu(null);
+      options.onFieldBindingsChange?.(result.fieldBindings);
+      return true;
     },
+    onPasteNodes: async (sourceNodeIds: string[], targetNodeId: string,
+      direction: 'right' | 'bottom') => {
+      const target = nodes.find((node) => node.id === targetNodeId);
+      if (sourceNodeIds.length === 0 || !target || target.type === 'comment') return false;
+      const args = {
+        sourceNodeIds,
+        target: { nodeId: targetNodeId, direction },
+        nodes,
+        edges,
+        fieldBindings: options.fieldBindings,
+      };
+      let result = copyWorkflowNodeGroup(args);
+      if (result.invalidReferences.length > 0) {
+        const accepted = await options.confirmDependencyDrop?.(result.invalidReferences);
+        if (!accepted) return false;
+        result = copyWorkflowNodeGroup({ ...args, cleanInvalid: true });
+      }
+      const pastedIds = new Set(result.idMap?.values());
+      setNodes(result.nodes.map((node) => ({ ...node, selected: pastedIds.has(node.id) })));
+      setEdges(result.edges);
+      options.onFieldBindingsChange?.(result.fieldBindings);
+      return true;
+    },
+    onDeleteNode: (nodeId: string) => deleteNodes([nodeId]),
+    onDeleteNodes: deleteNodes,
     ...nodeUpdates,
   };
 }

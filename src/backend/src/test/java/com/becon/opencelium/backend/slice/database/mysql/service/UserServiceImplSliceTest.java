@@ -16,6 +16,7 @@ import com.becon.opencelium.backend.database.mysql.service.WidgetSettingServiceI
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.exception.ServiceUnavailableException;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
+import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.testutil.annotation.SliceTest;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import org.junit.jupiter.api.AfterEach;
@@ -73,6 +74,9 @@ class UserServiceImplSliceTest {
 
     @MockBean
     private WidgetSettingServiceImp widgetSettingService;
+
+    @MockBean
+    private StorageService storageService;
 
     @AfterEach
     void clearSecurityContext() {

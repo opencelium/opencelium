@@ -75,6 +75,7 @@ export function FieldRenderer({
         !field.interactive &&
         (forcedReadOnly ||
             mode === 'view' ||
+            field.readOnlyInModes?.includes(mode) ||
             (!decision.allowed && decision.strategy === 'disable'))
 
     /* ===============================

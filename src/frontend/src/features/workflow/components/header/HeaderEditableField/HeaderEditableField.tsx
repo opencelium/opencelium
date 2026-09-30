@@ -19,6 +19,10 @@ export function HeaderEditableField({
     <div
       className="headerInlineEditor"
       onBlur={(event) => {
+        // Confirming disables the confirm button, and a focused button that
+        // becomes disabled loses focus — that blur is the commit already
+        // running, not the user leaving the field.
+        if (loading) return;
         if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
         onBlur?.();
       }}

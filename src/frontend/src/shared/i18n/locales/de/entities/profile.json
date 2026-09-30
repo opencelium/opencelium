@@ -12,10 +12,18 @@
         "mrs": "Frau"
       }
     },
-    "name": { "label": "Name" },
-    "surname": { "label": "Nachname" },
-    "department": { "label": "Abteilung" },
-    "organization": { "label": "Organisation" },
+    "name": {
+      "label": "Name"
+    },
+    "surname": {
+      "label": "Nachname"
+    },
+    "department": {
+      "label": "Abteilung"
+    },
+    "organization": {
+      "label": "Organisation"
+    },
     "phoneNumber": {
       "label": "Telefonnummer",
       "validation1": "Ungültiges Telefonnummernformat"
@@ -24,7 +32,9 @@
       "label": "E-Mail",
       "invalid": "Ungültiges E-Mail-Format"
     },
-    "username": { "label": "Benutzername" },
+    "username": {
+      "label": "Benutzername"
+    },
     "currentPassword": {
       "label": "Aktuelles Passwort",
       "wrong": "Aktuelles Passwort ist falsch"
@@ -51,7 +61,11 @@
   "messages": {
     "detailsUpdated": "Profildaten aktualisiert",
     "detailsUpdateFailed": "Profildaten konnten nicht gespeichert werden.",
-    "passwordUpdated": "Passwort aktualisiert. Sie werden abgemeldet."
+    "passwordUpdated": "Passwort aktualisiert. Sie werden abgemeldet.",
+    "pictureUpdated": "Profilbild aktualisiert",
+    "pictureUpdateFailed": "Das Profilbild konnte nicht hochgeladen werden.",
+    "pictureDeleted": "Profilbild entfernt",
+    "pictureDeleteFailed": "Das Profilbild konnte nicht entfernt werden."
   },
   "validation": {
     "required": "Pflichtfeld",

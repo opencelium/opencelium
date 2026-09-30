@@ -66,6 +66,26 @@ export const connectionTemplateHandlers = [
         return HttpResponse.json({ id, path: `/storage/template/${id}` })
     }),
 
+    http.post('/storage/template/zip', async ({ request }) => {
+        const form = await request.formData()
+        const file = form.get('file') as File | null
+        const archive = file?.name ?? 'templates.zip'
+        const stored = [1, 2].map((n) => {
+            const id = String(nextUploadId++)
+            templates.push({
+                id: Number(id),
+                name: `${archive} #${n}`,
+                description: `Uploaded from ${archive}`,
+                connection: {
+                    fromConnector: { invoker: { name: 'Uploaded' } },
+                    toConnector: { invoker: { name: 'Uploaded' } },
+                },
+            })
+            return { id, path: `/storage/template/${id}` }
+        })
+        return HttpResponse.json(stored)
+    }),
+
     http.get('/template/:id', ({ params }) => {
         const id = Number(params.id)
         const found = templates.find((t) => t.id === id)

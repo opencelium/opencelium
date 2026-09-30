@@ -1,7 +1,7 @@
 {
   "wizard": {
-    "header": "Subscription",
-    "subheader": "Review your license, monthly API operation usage, and per-connection execution history."
+    "header": "License Management",
+    "subheader": "Review your license, monthly API operation usage, and per-connection execution history. Upgrades, extra operations and support tickets are handled on the OpenCelium Service Portal."
   },
   "steps": {
     "license": {
@@ -45,7 +45,9 @@
     },
     "importLicense": {
       "button": "Import License",
-      "success": "License imported."
+      "success": "License imported.",
+      "invalidType": "Select a license file in .txt format.",
+      "tooLarge": "The license file must not exceed 10 MB."
     },
     "activate": {
       "button": "Activate",
@@ -57,7 +59,9 @@
     },
     "extraOps": {
       "button": "Extra Ops",
-      "success": "Extra operations imported."
+      "success": "Extra operations imported.",
+      "invalidType": "Select an extra operations file in .txt format.",
+      "tooLarge": "The extra operations file must not be larger than 10 MB."
     },
     "deleteLicense": {
       "button": "Delete License",
@@ -68,6 +72,9 @@
     "activateFree": {
       "button": "Activate Free License",
       "success": "Free license activated."
+    },
+    "servicePortal": {
+      "button": "Service Portal"
     }
   },
   "columns": {

@@ -55,10 +55,13 @@ public class DatabaseConfiguration {
         return new DataSourceProperties();
     }
 
+    // Pool settings (e.g. transaction-isolation) live under spring.datasource.hikari, the same
+    // prefix Spring Boot binds for its auto-configured pool. Binding the bare spring.datasource
+    // prefix here would skip that block entirely.
     @Bean
     @Primary
-    @ConfigurationProperties("spring.datasource")
-    public DataSource dataSource(){
+    @ConfigurationProperties("spring.datasource.hikari")
+    public DataSource dataSource() {
         return firstDataSourceProperties().initializeDataSourceBuilder().build();
     }
 

@@ -1,5 +1,5 @@
 import type {EntityDefinition} from "@/engine/entity/EntityDefinition.ts";
-import metaWizardImage from '@/assets/images/wizard/meta.gif'
+import metaWizardImage from '@/assets/images/wizard/meta.svg'
 
 export const metaEntityDefinition: EntityDefinition = {
     name: 'MetaEntity',

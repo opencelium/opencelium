@@ -54,7 +54,8 @@
   },
   "validation": {
     "scriptContainsNotExistedArgs": "Das Skript enthält nicht existierende Argumente.",
-    "argNameInvalid": "Muss mit einem Buchstaben, _ oder $ beginnen und nur Buchstaben, Ziffern, _ oder $ enthalten."
+    "argNameInvalid": "Muss mit einem Buchstaben, _ oder $ beginnen und nur Buchstaben, Ziffern, _ oder $ enthalten.",
+    "nameMeaningful": "Der Name muss mindestens einen Buchstaben oder eine Zahl enthalten."
   },
   "confirmation": {
     "delete": {

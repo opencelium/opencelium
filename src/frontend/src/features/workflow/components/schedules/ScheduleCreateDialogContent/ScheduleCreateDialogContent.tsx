@@ -19,7 +19,7 @@ export function ScheduleCreateDialogContent(props: ScheduleCreateDialogContentPr
     const { form, saving, handleSubmit } = useScheduleCreateForm(props)
 
     return (
-        <div ref={containerRef}>
+        <div ref={containerRef} data-testid="workflow-schedule-create">
             <Typography variant="headline" as="h2">{t('schedules.create.title')}</Typography>
             <Typography variant="body" isSubtle>
                 {t('schedules.create.subtitle', { title: connectionTitle })}
@@ -28,26 +28,33 @@ export function ScheduleCreateDialogContent(props: ScheduleCreateDialogContentPr
                 <FormProvider {...form}>
                     <div style={{ display: 'grid', gap: 16, marginTop: 20 }}>
                         <FormInput name="title" label={tEntities('schedule.fields.title.label')}
-                            autoFocus showCounter rules={{
+                            autoFocus showCounter testId="workflow-schedule-title" rules={{
                                 required: tCommon('field.required'),
                                 validate: value => (typeof value === 'string' && value.trim().length > 0)
                                     || tCommon('field.required'),
                             }}
                         />
                         <Controller name="debugMode" control={form.control} render={({ field }) => (
-                            <Switch checked={field.value} onChange={field.onChange} textKey={{
-                                on: 'schedule.fields.debugMode.text.on',
-                                off: 'schedule.fields.debugMode.text.off',
-                            }} />
+                            <Switch checked={field.value} onChange={field.onChange}
+                                testId="workflow-schedule-debug" textKey={{
+                                    on: 'schedule.fields.debugMode.text.on',
+                                    off: 'schedule.fields.debugMode.text.off',
+                                }} />
                         )} />
-                        <CronEditor name="cronExp" mode="create"
-                            label={tEntities('schedule.fields.cronExp.label')} />
+                        {/* CronEditor is a field plus its visual builder, and both are
+                            one lesson — wrapped so a caller can point at the pair. */}
+                        <div data-testid="workflow-schedule-cron">
+                            <CronEditor name="cronExp" mode="create"
+                                label={tEntities('schedule.fields.cronExp.label')} />
+                        </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-                        <Button type="primary" loading={saving} onClick={handleSubmit}>
+                        <Button type="primary" loading={saving} onClick={handleSubmit}
+                            testId="workflow-schedule-submit">
                             {t('schedules.create.submit')}
                         </Button>
-                        <Button onClick={onSuccess} disabled={saving}>{t('schedules.create.cancel')}</Button>
+                        <Button onClick={onSuccess} disabled={saving}
+                            testId="workflow-schedule-cancel">{t('schedules.create.cancel')}</Button>
                     </div>
                 </FormProvider>
             </FormConstraintsProvider>

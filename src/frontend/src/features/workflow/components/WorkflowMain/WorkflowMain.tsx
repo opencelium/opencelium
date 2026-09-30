@@ -36,7 +36,11 @@ export const WorkflowMain = ({ loading, canvas }: WorkflowMainProps) => {
 	// the same in both places.
 	const resolveMethodLabel = useMethodLabels(canvas.nodes, canvas.edges);
 
-	const canvasElement = <WorkflowCanvas {...canvas}>
+	// Only the panel state knows whether the logs card is a pane below the canvas
+	// or the bar floating over its bottom edge, and the canvas' own bottom-right
+	// content has to sit above it — hence a prop rather than something the canvas
+	// could work out for itself.
+	const canvasElement = <WorkflowCanvas {...canvas} hasOverlaidLogsBar={panel !== 'normal'}>
 		<Background gap={16} size={1} />
 	</WorkflowCanvas>;
 	const logsElement = <WorkflowLogs panel={panel} onPanelChange={setLogsPanel}

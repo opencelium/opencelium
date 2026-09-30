@@ -19,7 +19,7 @@
     "forgotPassword": {
       "emailNotExists": "No account is registered with this email address.",
       "tooManyAttempts": "Too many attempts. Please try again later.",
-      "emailRecoveryFailed": "There is an issue with your email configuration. For security reasons, the detailed error message has been written to your Opencelium logs. Please review the logs for more information.",
+      "emailRecoveryFailed": "There is an issue with your email configuration. For security reasons, the detailed error message has been written to your OpenCelium logs. Please review the logs for more information.",
       "network": "Could not reach the server. Please try again.",
       "failed": "Could not send the recovery email. Please try again."
     },
@@ -34,6 +34,12 @@
       "update": "Could not update {{resource}}",
       "delete": "Could not delete {{resource}}",
       "request": "Request to {{resource}} failed"
+    },
+    "invokerRepository": {
+      "offline": "No internet connection. Reconnect to install invokers from the online repository.",
+      "syncDisabled": "Online services are disabled in the system configuration, so invokers cannot be installed from the online repository.",
+      "unavailable": "The OpenCelium server could not reach the online invoker repository. Check the server's internet connection and try again.",
+      "serverUnreachable": "Could not reach the OpenCelium server. Please try again."
     }
   },
   "field": {

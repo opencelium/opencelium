@@ -5,6 +5,7 @@ import { Icon } from '@shared/ui/primitives/Icon';
 import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { NodeToolbar } from '../../components/node/NodeToolbar/NodeToolbar';
+import { useIsMultiNodeSelection } from '../../hooks/useIsMultiNodeSelection';
 import type { CommentWorkflowNode } from '../../types/workflow.types';
 import { COMMENT_NODE_MIN_SIZE } from '../../utils/graph.constants';
 
@@ -12,6 +13,7 @@ export function CommentNode({ id, data, selected }: NodeProps<CommentWorkflowNod
 	const { t } = useI18n('workflow');
 	const onChangeText = data.onChangeCommentText;
 	const isPreviewNode = data.dragGhost || data.dropPlaceholder;
+	const isMultiSelection = useIsMultiNodeSelection();
 	const onTextChange = (event: ChangeEvent<HTMLTextAreaElement>) =>
 		onChangeText?.(id, event.target.value);
 
@@ -22,7 +24,7 @@ export function CommentNode({ id, data, selected }: NodeProps<CommentWorkflowNod
 			// operator actions) has nothing to offer for it.
 			onContextMenu={(event: MouseEvent<HTMLDivElement>) => event.preventDefault()}
 		>
-			{selected && !isPreviewNode && data.onDeleteNode && (
+			{selected && !isMultiSelection && !isPreviewNode && data.onDeleteNode && (
 				<NodeToolbar canDelete onDelete={() => data.onDeleteNode?.(id)} />
 			)}
 			<NodeResizer

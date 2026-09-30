@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.constant.props.OnlineServicesProps;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
@@ -25,12 +26,14 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.invoker.resource.OperationResource;
+import com.becon.opencelium.backend.invoker.service.InvokerRepositoryService;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.mysql.invoker.InvokerMapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connector.FunctionDTO;
+import com.becon.opencelium.backend.resource.connector.InvokerBulkInstallDTO;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.becon.opencelium.backend.resource.connector.InvokerXMLResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -65,25 +68,31 @@ import java.util.stream.Collectors;
 public class InvokerController {
     private final InvokerService invokerService;
     private final InvokerSyncService invokerSyncService;
+    private final InvokerRepositoryService invokerRepositoryService;
     private final ConnectorService connectorService;
     private final ConnectionService connectionService;
     private final Mapper<Invoker, InvokerDTO> invokerMapper;
     private final Mapper<FunctionInvoker, FunctionDTO> functionMapper;
+    private final OnlineServicesProps onlineServicesProps;
 
     public InvokerController(
             @Qualifier("invokerServiceImp") InvokerService invokerService,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             InvokerSyncService invokerSyncService,
+            InvokerRepositoryService invokerRepositoryService,
             Mapper<Invoker, InvokerDTO> invokerMapper,
-            Mapper<FunctionInvoker, FunctionDTO> functionMapper
+            Mapper<FunctionInvoker, FunctionDTO> functionMapper,
+            OnlineServicesProps onlineServicesProps
     ) {
         this.invokerService = invokerService;
         this.invokerSyncService = invokerSyncService;
+        this.invokerRepositoryService = invokerRepositoryService;
         this.connectorService = connectorService;
         this.connectionService = connectionService;
         this.invokerMapper = invokerMapper;
         this.functionMapper = functionMapper;
+        this.onlineServicesProps = onlineServicesProps;
     }
 
     @Operation(summary = "Retrieves an 'invoker' based on the provided invoker 'name'")
@@ -137,6 +146,45 @@ public class InvokerController {
                 .map(this::setManualChangeValue)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(invokerDTOS);
+    }
+
+    @Operation(summary = "Downloads all invoker files from the configured remote repository "
+            + "(opencelium.invoker-repository) and installs them into the runtime invoker folder. "
+            + "Existing local files are overwritten, new ones are added, invokers that exist only "
+            + "locally are left untouched. Returns the metadata of the installed invokers "
+            + "(without operations) plus the files that were rejected.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Invokers have been downloaded and installed. If online services are disabled,"
+                            + " property 'result' contains a message explaining how to enable them",
+                    content = @Content(schema = @Schema(implementation = InvokerBulkInstallDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "502",
+                    description = "The remote repository could not be reached",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping("/remote")
+    public ResponseEntity<?> downloadInvokersFromRepository() {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
+        InvokerRepositoryService.DownloadResult result = invokerRepositoryService.downloadAll();
+
+        InvokerMapper mapper = (InvokerMapper) invokerMapper;
+        List<InvokerDTO> installed = result.installed().stream()
+                .map(invokerService::findByName)
+                .map(mapper::toDTONoOps)
+                .map(this::setManualChangeValue)
+                .collect(Collectors.toList());
+        List<InvokerBulkInstallDTO.FailedFileDTO> failed = result.failed().stream()
+                .map(f -> new InvokerBulkInstallDTO.FailedFileDTO(f.fileName(), f.reason()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new InvokerBulkInstallDTO(installed, failed));
     }
 
     @Operation(summary = "Checks by name whether an invoker exist or not")
@@ -398,6 +446,9 @@ public class InvokerController {
     })
     @PutMapping("/{invokerName}/sync-force")
     public ResponseEntity<?> syncForce(@PathVariable String invokerName) {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         invokerSyncService.forceSync(invokerName);
         return ResponseEntity.noContent().build();
     }
@@ -415,6 +466,9 @@ public class InvokerController {
     })
     @PutMapping(path = "list/sync-force", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> syncForceByNames(@RequestBody IdentifiersDTO<String> invokerNames) {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         invokerNames.getIdentifiers().forEach(invokerSyncService::forceSync);
         return ResponseEntity.noContent().build();
     }

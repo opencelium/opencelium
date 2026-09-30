@@ -1,0 +1,143 @@
+import { useCallback, useMemo, useState } from 'react'
+import type { Step } from 'react-joyride'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@features/auth/useAuth'
+import { useGetInvokersQuery } from '@entities/invoker/api/invokerApi'
+import { useI18n } from '@shared/i18n/hooks/useI18n'
+import { buildIntroJoyrideSteps } from './buildIntroJoyrideSteps'
+import { useOnboardingStore } from './onboarding.store'
+import { useGetConnectorsMetaQuery } from '@entities/connector/api/connectorApi'
+import { useGetActiveSubscriptionQuery } from '@entities/subscription/api/subscriptionApi'
+import { useWorkflowTutorialStore } from '@features/onboarding/workflow-tutorial/model/workflowTutorial.store'
+import { ONBOARDING_STEP_ORDER, type OnboardingStepId } from './types'
+
+const LICENSE_ROUTE = '/license'
+const INVOKER_CREATE_ROUTE = '/invoker/create'
+const WORKFLOW_CREATE_ROUTE = '/workflow/create'
+
+type IntroStepsOptions = {
+    isAdmin: boolean
+    canCreateInvoker: boolean
+    canCreateConnector: boolean
+    paletteTargetMissing: boolean
+}
+
+/**
+ * Assembles the Joyride step list and owns the state those steps read from: which
+ * steps the user's permissions allow, the position in that list, the connector
+ * draft, and the "show the task anyway" flag for the skipped path.
+ */
+export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, paletteTargetMissing }: IntroStepsOptions) {
+    const { t } = useI18n('onboarding')
+    const { user } = useAuth()
+    const navigate = useNavigate()
+    const { complete, finishTour, goTo, pause } = useOnboardingStore()
+    const [stepIndex, setStepIndex] = useState(0)
+    const [showInvokerAnyway, setShowInvokerAnyway] = useState(false)
+    const [connectorFormInvoker, setConnectorFormInvoker] = useState<string | null>(null)
+    const { data: invokerList } = useGetInvokersQuery(undefined, { skip: !isAdmin })
+    const { data: connectorList } = useGetConnectorsMetaQuery(undefined, { skip: !isAdmin })
+    const { data: subscription } = useGetActiveSubscriptionQuery(undefined, { skip: !isAdmin })
+    const invokers = useMemo(() => invokerList ?? [], [invokerList])
+
+    // How many connectors already point at each invoker, from the same meta list the
+    // resume watch uses — no extra request.
+    const connectorsPerInvoker = useMemo(() => {
+        const counts = new Map<string, number>()
+        for (const connector of connectorList ?? []) {
+            const name = connector.invoker?.name
+            if (name) counts.set(name, (counts.get(name) ?? 0) + 1)
+        }
+        return counts
+    }, [connectorList])
+
+    const invokerSummaries = useMemo(
+        () => invokers.map(invoker => ({
+            name: invoker.name,
+            description: invoker.description ?? '',
+            methodCount: invoker.operations?.length ?? 0,
+            connectorCount: connectorsPerInvoker.get(invoker.name) ?? 0,
+            requiredData: invoker.requiredData ?? {},
+        })),
+        [connectorsPerInvoker, invokers],
+    )
+    const includeConnectorSteps = canCreateConnector && (canCreateInvoker || invokers.length > 0)
+    const activeStepIds: OnboardingStepId[] = useMemo(() => ONBOARDING_STEP_ORDER.filter(id => {
+        if (id === 'invoker') return canCreateInvoker
+        if (id === 'connector') return includeConnectorSteps
+        return true
+    }), [canCreateInvoker, includeConnectorSteps])
+
+    const goToIndex = useCallback((index: number) => {
+        const bounded = Math.max(0, Math.min(index, activeStepIds.length - 1))
+        setStepIndex(bounded)
+        goTo(activeStepIds[bounded])
+    }, [activeStepIds, goTo])
+    const isLastStep = stepIndex >= activeStepIds.length - 1
+    const advance = useCallback(() => {
+        // Past the final step there is nothing to show, so advancing finishes.
+        if (isLastStep) complete()
+        else goToIndex(stepIndex + 1)
+    }, [complete, goToIndex, isLastStep, stepIndex])
+
+    const userName = user?.userDetail?.name || user?.username || t('content.welcome.anonymous')
+
+    const steps: Step[] = useMemo(() => buildIntroJoyrideSteps({
+        t,
+        userName,
+        includeInvokerStep: canCreateInvoker,
+        includeConnectorSteps,
+        showInvokerTask: showInvokerAnyway,
+        paletteTargetMissing,
+        invokers: invokerSummaries,
+        onInvokerUploaded: advance,
+        onSkipInvoker: advance,
+        onShowInvokerAnyway: () => setShowInvokerAnyway(true),
+        onSkipTask: finishTour,
+        // No navigation: the form opens docked beside the tour, so the step stays put.
+        onCreateConnectorFor: setConnectorFormInvoker,
+        // Completing first means the route change below cannot re-pause the tour,
+        // and the checklist shows every milestone done rather than "paused".
+        // Requesting the workflow tutorial here is the same call the command palette's
+        // "help workflow" entry makes — arriving at the editor straight from the intro
+        // tour should not require a second, separate ask to see it.
+        onCreateWorkflow: () => {
+            complete()
+            useWorkflowTutorialStore.getState().request()
+            void navigate(WORKFLOW_CREATE_ROUTE)
+        },
+        // Reaching the licence page is all this step asks for, so it advances on
+        // the way out — the tour parks on the following step instead of asking
+        // about the licence again. Activating one then just un-pauses it.
+        onOpenLicensePage: () => {
+            advance()
+            pause()
+            void navigate(LICENSE_ROUTE)
+        },
+        onCreateInvoker: () => {
+            pause()
+            void navigate(INVOKER_CREATE_ROUTE)
+        },
+    }), [advance, canCreateInvoker, complete, finishTour, includeConnectorSteps, invokerSummaries, navigate, paletteTargetMissing, pause, showInvokerAnyway, t, userName])
+
+    const closeConnectorForm = useCallback(() => setConnectorFormInvoker(null), [])
+
+    const reset = useCallback(() => {
+        setStepIndex(0)
+        setShowInvokerAnyway(false)
+        setConnectorFormInvoker(null)
+    }, [])
+
+    return {
+        steps, stepIndex, setStepIndex, activeStepIds, advance, goToIndex, reset,
+        connectorFormInvoker,
+        closeConnectorForm,
+        stepAfterLicense: activeStepIds[activeStepIds.indexOf('license') + 1],
+        licenseActive: subscription?.active === true,
+        licenseLoaded: subscription !== undefined,
+        invokerCount: invokers.length,
+        invokersLoaded: invokerList !== undefined,
+        connectorCount: connectorList?.length ?? 0,
+        connectorsLoaded: connectorList !== undefined,
+    }
+}
