@@ -64,7 +64,6 @@ jobs:
           cyclonedxBom {
             includeConfigs = ["runtimeClasspath"]
             projectType = "application"
-            schemaVersion = org.cyclonedx.model.schema.SchemaVersion.VERSION_16
             jsonOutput = file("build/reports/sbom/bom.json")
             includeLicenseText = false
           }
@@ -92,8 +91,11 @@ jobs:
       run: |
         for f in sbom/*.cdx.json; do
           n=$(jq '.components | length' "$f")
-          echo "$f: $n components"
+          v=$(jq -r '.specVersion' "$f")
+          echo "$f: CycloneDX $v, $n components"
           if [ "$n" -lt 10 ]; then echo "::error::$f has only $n components"; exit 1; fi
+          # BSI TR-03183-2 requires CycloneDX >= 1.5
+          case "$v" in 1.5|1.6|1.7) ;; *) echo "::error::$f uses CycloneDX $v (< 1.5)"; exit 1;; esac
         done
 
     - name: store SBOMs as workflow artifact
