@@ -17,47 +17,63 @@ permissions:
 
 jobs:
   sbom:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       TAG: ${{ github.event.release.tag_name || inputs.tag }}
     steps:
     - name: checkout the source code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         ref: ${{ env.TAG }}
 
     - name: set up Java 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v6
       with:
         distribution: temurin
         java-version: '17'
 
     - name: set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
-        node-version: '20'
+        node-version: '24'
 
-    # Spring Boot fat jar contains all runtime libraries -> exact backend dependency list
-    - name: build backend jar
+    # Backend: CycloneDX Gradle plugin, injected via init script so build.gradle stays
+    # untouched. It resolves the runtimeClasspath WITHOUT compiling the code.
+    # Version 1.10.0 = last release supporting Gradle 7.x (the wrapper uses 7.5.1).
+    - name: generate SBOM (backend)
       working-directory: src/backend
       run: |
+        cat > "$RUNNER_TEMP/cyclonedx.init.gradle" <<'GRADLE'
+        initscript {
+          repositories {
+            maven { url "https://plugins.gradle.org/m2/" }
+          }
+          dependencies {
+            classpath "org.cyclonedx:cyclonedx-gradle-plugin:1.10.0"
+          }
+        }
+        rootProject {
+          apply plugin: org.cyclonedx.gradle.CycloneDxPlugin
+          cyclonedxBom {
+            includeConfigs = ["runtimeClasspath"]
+            projectType = "application"
+            schemaVersion = "1.5"
+            destination = file("build/reports")
+            outputName = "bom"
+            outputFormat = "json"
+            includeLicenseText = false
+          }
+        }
+        GRADLE
         chmod +x gradlew
-        ./gradlew bootJar -x test --no-daemon
-        ls -l build/libs
+        ./gradlew --no-daemon --init-script "$RUNNER_TEMP/cyclonedx.init.gradle" cyclonedxBom
+        mkdir -p "$GITHUB_WORKSPACE/sbom"
+        cp build/reports/bom.json "$GITHUB_WORKSPACE/sbom/opencelium-${TAG//\//-}-backend.cdx.json"
 
-    # the frontend has no lockfile in the repo -> resolve exact versions without installing
+    # Frontend: no lockfile in the repo -> resolve exact versions without installing
     - name: resolve frontend dependency versions
       working-directory: src/frontend
       run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-
-    - name: generate SBOM (backend)
-      uses: anchore/sbom-action@v0
-      with:
-        path: src/backend/build/libs
-        format: cyclonedx-json
-        output-file: sbom/opencelium-${{ env.TAG }}-backend.cdx.json
-        upload-artifact: false
-        upload-release-assets: false
 
     - name: generate SBOM (frontend)
       uses: anchore/sbom-action@v0
@@ -68,8 +84,16 @@ jobs:
         upload-artifact: false
         upload-release-assets: false
 
+    - name: check SBOMs are not empty
+      run: |
+        for f in sbom/*.cdx.json; do
+          n=$(jq '.components | length' "$f")
+          echo "$f: $n components"
+          if [ "$n" -lt 10 ]; then echo "::error::$f has only $n components"; exit 1; fi
+        done
+
     - name: store SBOMs as workflow artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: sbom
         path: sbom/*.cdx.json
