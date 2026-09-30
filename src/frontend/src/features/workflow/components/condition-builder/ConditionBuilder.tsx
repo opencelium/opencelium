@@ -634,6 +634,7 @@ function RuleRow({
 	return (
 		<div
 			className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''} ${reorderItem?.className ?? ''}`}
+			data-testid="workflow-condition-rule"
 			{...reorderItem?.itemProps}
 		>
 			{reorderItem?.handle}

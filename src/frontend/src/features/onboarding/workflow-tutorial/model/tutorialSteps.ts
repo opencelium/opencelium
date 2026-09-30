@@ -71,6 +71,12 @@ const ENDPOINT_FIELD_PATH = `customers[${ITERATOR_NAMES[0]}].email`
 const CONDITION_BUILDER = sel('workflow-condition-builder')
 const CONDITION_ADD = sel('workflow-condition-add-condition')
 /**
+ * The loop's whole condition dialog — title, the picks and Save — undimmed around the
+ * row, so the step reads as "fill in this dialog" rather than as one island inside it.
+ * `.ant-modal-container` is antd 6's modal box; `.ant-modal` itself carries padding.
+ */
+const LOOP_CONDITION_DIALOG = '.conditionBuilderModal-loop .ant-modal-container'
+/**
  * One comparison row: the two reference sides and the operator between them. An IF
  * opens with none — hence its Add Condition button — while a loop's group is created
  * holding one, so for the loop this link resolves as soon as the dialog does.
@@ -383,8 +389,8 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
         chain: [
             { target: LOOP_NODE, cue: 'right-click' },
             { target: CONTEXT('open-config') },
-            { target: CONDITION_BUILDER },
-            { target: CONDITION_RULE, include: [OPEN_DROPDOWN, CONDITION_SAVE] },
+            { target: CONDITION_BUILDER, include: [LOOP_CONDITION_DIALOG] },
+            { target: CONDITION_RULE, include: [LOOP_CONDITION_DIALOG, OPEN_DROPDOWN, CONDITION_SAVE] },
         ],
         isDone: progress => progress.loopConditionSaved,
     },
