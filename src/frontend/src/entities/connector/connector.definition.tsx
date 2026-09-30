@@ -348,6 +348,7 @@ export const connectorDefinition: EntityDefinition = {
         {
             name: 'timeout',
             type: 'string',
+            defaultValue: '1000',
             ui: {
                 component: 'input',
                 props: {
