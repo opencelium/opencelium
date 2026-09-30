@@ -1,4 +1,5 @@
 import { apiExecutor } from '@shared/api/apiExecutor'
+import { isApiExecutorError } from '../graphQlBodyEditor.utils'
 
 export type RemoteApiRequestPayload = {
     url: string
@@ -11,9 +12,6 @@ export type RemoteApiRequestPayload = {
 export type RemoteApiResult<T> =
     | { ok: true; data: T }
     | { ok: false; error: unknown }
-
-const isApiExecutorError = (response: unknown): boolean =>
-    !!response && typeof response === 'object' && ('status' in response || 'error' in response)
 
 export async function remoteApiRequest<T = unknown>(payload: RemoteApiRequestPayload): Promise<RemoteApiResult<T>> {
     const response: unknown = await apiExecutor({
