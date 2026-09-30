@@ -3,6 +3,7 @@ import { connectorDefinition } from '@entities/connector/connector.definition.ts
 import { scheduleDefinition } from '@entities/schedule/schedule.definition.tsx'
 import { roleDefinition } from '@entities/role/role.definition.tsx'
 import { ldapDefinition } from '@entities/ldap/ldap.definition.tsx'
+import { oidcDefinition } from '@entities/oidc/oidc.definition.tsx'
 import { uiDefinition } from '@entities/ui/ui.definition.tsx'
 import { metaEntityDefinition } from '@entities/meta/meta.definition.ts'
 import { categoryDefinition } from '@entities/category/category.definition.tsx'
@@ -29,6 +30,7 @@ export function registerEntities() {
     entityRegistry.register(userDefinition);
     entityRegistry.register(roleDefinition);
     entityRegistry.register(ldapDefinition);
+    entityRegistry.register(oidcDefinition);
     entityRegistry.register(invokerDefinition);
     entityRegistry.register(connectorDefinition);
     entityRegistry.register(scheduleDefinition);

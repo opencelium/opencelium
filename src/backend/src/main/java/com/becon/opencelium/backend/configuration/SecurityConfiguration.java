@@ -21,7 +21,9 @@ import com.becon.opencelium.backend.security.AuthExceptionHandler;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.DaoUserDetailsService;
+import com.becon.opencelium.backend.security.OidcAuthenticationFilter;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
+import com.becon.opencelium.backend.security.oidc.OidcAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -79,6 +81,13 @@ public class SecurityConfiguration {
     @Autowired
     private  TotpAuthenticationFilter totpAuthenticationFilter;
 
+    @Lazy
+    @Autowired
+    private OidcAuthenticationFilter oidcAuthenticationFilter;
+
+    @Autowired
+    private OidcAuthenticationProvider oidcAuthenticationProvider;
+
     @Autowired
     private AuthExceptionHandler authExceptionHandler;
 
@@ -101,7 +110,11 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/forgot-password",
-                                "/auth/reset-password"
+                                "/auth/reset-password",
+                                "/oidc/authorize",
+                                "/oidc/callback",
+                                "/oidc/exchange",
+                                "/oidc/info"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement()
@@ -109,6 +122,7 @@ public class SecurityConfiguration {
                 .and()
                 .addFilter(authenticationFilter)
                 .addFilterBefore(totpAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(oidcAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(authorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
                 .authenticationEntryPoint(authExceptionHandler)
@@ -121,6 +135,7 @@ public class SecurityConfiguration {
                 http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder
                 .authenticationProvider(ldapAuthenticationProvider())
+                .authenticationProvider(oidcAuthenticationProvider)
                 .authenticationProvider(daoAuthenticationProvider());
 
         return authenticationManagerBuilder.build();

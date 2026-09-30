@@ -25,7 +25,8 @@
     "updateAssistant": "Update-Assistent",
     "systemCheck": "Systemprüfung",
     "config": "Konfiguration",
-    "ui": "UI"
+    "ui": "UI",
+    "oidcConfig": "OpenID Connect"
   },
   "commandPalette": {
     "placeholder": "Befehl eingeben...",

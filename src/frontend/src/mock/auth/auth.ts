@@ -75,4 +75,46 @@ export const authHandlers = [
     http.post('/auth/logout', () => {
         return new HttpResponse(null, { status: 200 })
     }),
+
+    // Single sign-on. "enabled" is hard-coded true so the login button and the admin page can be
+    // worked on without a real identity provider. Note the button navigates the browser to
+    // /oidc/authorize, which is a full-page redirect and therefore cannot be intercepted here —
+    // the end-to-end flow needs the backend and an IdP.
+    http.get('/oidc/info', () => {
+        return HttpResponse.json({ enabled: true, displayName: 'OpenID Connect' })
+    }),
+
+    http.get('/oidc/config', () => {
+        return HttpResponse.json({
+            enabled: true,
+            displayName: 'OpenID Connect',
+            issuerUri: 'https://idp.example.com/realms/opencelium',
+            clientId: 'opencelium',
+            clientSecretConfigured: true,
+            scopes: ['openid', 'profile', 'email'],
+            redirectUri: 'http://localhost:9090/oidc/callback',
+            frontendRedirectUri: 'http://localhost:5173/oidc/callback',
+            userInfoUri: null,
+            emailClaim: 'email',
+            groupClaim: 'groups',
+            defaultRole: 'User',
+            jitProvisioning: true,
+            groupRoleMapping: [{ group: 'oc-admins', ocRole: 'Admin' }],
+        })
+    }),
+
+    // Mirrors /login: the session travels in the Authorization header, and an account whose email
+    // starts with "2fa" gets a challenge instead.
+    http.post('/oidc/exchange', async ({ request }) => {
+        const { code } = (await request.json()) as { code: string }
+
+        if (!code) {
+            return HttpResponse.json({ message: 'Invalid one-time code' }, { status: 403 })
+        }
+
+        return new HttpResponse(null, {
+            status: 200,
+            headers: { Authorization: `Bearer ${MOCK_TOKEN}` },
+        })
+    }),
 ]

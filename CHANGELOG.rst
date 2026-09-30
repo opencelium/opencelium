@@ -9,6 +9,7 @@ Changelog
 
 Features
 --------
+* OpenID Connect (SSO) authentication as an additional login method
 * Joint Element for connecting workflow paths
 * Debugger mode for Test Run
 * Undo/Redo in the Workflow Editor

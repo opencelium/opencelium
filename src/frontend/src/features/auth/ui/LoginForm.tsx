@@ -3,7 +3,7 @@ import { Controller, FormProvider } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { useLoginForm } from '../model/useLoginForm'
 import { useAuth } from '@features/auth/useAuth'
-import { SessionHydrationError } from '@features/auth/strategies/PasswordStrategy'
+import { SessionHydrationError } from '@features/auth/session/completeLogin'
 import { API_TIMEOUT_ERROR_NAME, ApiFetchError } from '@shared/api/apiFetch'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext.tsx'
@@ -13,8 +13,11 @@ import type { TotpChallenge } from '@entities/auth/model/types'
 import { TotpLoginDialog } from './TotpLoginDialog'
 import { Button } from '@shared/ui/primitives/Button'
 import { Card } from '@shared/ui/primitives/Card'
+import { Divider } from '@shared/ui/primitives/Divider'
 import { Input } from '@shared/ui/primitives/Input'
 import { Typography } from '@shared/ui/primitives/Typography'
+import { useGetOidcInfoQuery } from '@entities/oidc/api/oidcApi'
+import { startOidcLogin } from '@features/auth/oidc/oidcLogin'
 
 const FORM_WIDTH = 400
 
@@ -37,6 +40,9 @@ export function LoginForm() {
     const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [totp, setTotp] = useState<TotpChallenge | null>(null)
+    // Single sign-on is optional and configured server-side; the button only appears when the
+    // backend reports it as enabled.
+    const { data: oidcInfo } = useGetOidcInfoQuery()
 
     const onSubmit = async (data: LoginFormValues) => {
         setIsSubmitting(true)
@@ -160,6 +166,20 @@ export function LoginForm() {
                         >
                             {t('actions.signIn')}
                         </Button>
+
+                        {oidcInfo?.enabled && (
+                            <>
+                                <Divider placement="center">{t('oidc.divider')}</Divider>
+                                <Button
+                                    type="default"
+                                    onClick={startOidcLogin}
+                                    style={{ width: '100%' }}
+                                    testId="login-sso"
+                                >
+                                    {t('oidc.signInWith', { provider: oidcInfo.displayName })}
+                                </Button>
+                            </>
+                        )}
                     </form>
                 </FormConstraintsProvider>
             </FormProvider>
