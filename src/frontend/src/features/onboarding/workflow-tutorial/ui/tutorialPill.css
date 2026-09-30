@@ -22,6 +22,34 @@
     gap: 8px;
 }
 
+/*
+ * The header is the drag handle: grabbing the body would steal clicks from its picks
+ * and code. The grip and a hover tint say so before the cursor has to.
+ */
+.workflow-tutorial-pill--movable header {
+    margin: -6px -8px 0;
+    padding: 6px 8px;
+    border-radius: var(--radius-md);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    transition: background-color .15s ease;
+}
+
+.workflow-tutorial-pill--movable header:hover {
+    background: var(--color-background-hover);
+}
+
+.workflow-tutorial-pill__grip {
+    display: inline-flex;
+    margin-left: -2px;
+    color: var(--color-text-secondary);
+}
+
+.workflow-tutorial-pill--movable header:active {
+    cursor: grabbing;
+}
+
 .workflow-tutorial-pill__eyebrow {
     flex: 1;
     color: var(--color-action-primary);

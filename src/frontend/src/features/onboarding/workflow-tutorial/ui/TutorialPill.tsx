@@ -1,10 +1,13 @@
+import { useRef } from 'react'
 import { Button } from '@shared/ui/primitives/Button'
+import { Icon } from '@shared/ui/primitives/Icon'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { ONBOARDING_Z_INDEX } from '../../model/types'
 import { CommandHint } from '../../ui/CommandHint'
 import { ShortcutHint, type Shortcut } from '../../ui/ShortcutHint'
 import type { TutorialPick, TutorialStep } from '../model/tutorialSteps'
 import '../../ui/onboardingCode.css'
+import { usePillDrag } from './usePillDrag'
 import './tutorialPill.css'
 
 /** Reopens this tutorial from the palette, once dismissed — the introduction is
@@ -47,6 +50,10 @@ export function TutorialPill({
     // from the very key the dropdown renders, rather than from a copy of the label.
     const { t: tWorkflow } = useI18n('workflow')
     const base = `workflow.steps.${copy}`
+    const pillRef = useRef<HTMLElement>(null)
+    // The centred book-ends sit over a backdrop with nothing behind them to uncover.
+    const isMovable = anchor !== 'center'
+    const drag = usePillDrag({ pillRef, isEnabled: isMovable, resetKey: anchor ?? 'bottom-left' })
     // Only the centred introduction reorders the footer: Exit on its own at the
     // left, Next at the right, so the primary "go on" action and the "leave"
     // action read as opposites rather than as two options next to each other —
@@ -69,11 +76,21 @@ export function TutorialPill({
 
     return (
         <aside
-            className={`workflow-tutorial-pill${anchor ? ` workflow-tutorial-pill--${anchor}` : ''}`}
-            style={{ zIndex: ONBOARDING_Z_INDEX.checklist }}
+            ref={pillRef}
+            className={`workflow-tutorial-pill${anchor ? ` workflow-tutorial-pill--${anchor}` : ''}${isMovable ? ' workflow-tutorial-pill--movable' : ''}`}
+            style={{ ...drag.style, zIndex: ONBOARDING_Z_INDEX.checklist }}
             aria-label={t('workflow.kicker')}
         >
-            <header>
+            <header
+                {...drag.handleProps}
+                title={isMovable ? t('workflow.dragHint') : undefined}
+                data-testid="workflow-tutorial-drag-handle"
+            >
+                {isMovable && (
+                    <span className="workflow-tutorial-pill__grip" aria-hidden>
+                        <Icon name="drag-handle" size={14} isSubtle />
+                    </span>
+                )}
                 <span className="workflow-tutorial-pill__eyebrow">{t('workflow.kicker')}</span>
                 <span className="workflow-tutorial-pill__counter">
                     {t('progress.counter', { current: index + 1, total })}
