@@ -39,7 +39,14 @@ jobs:
 
     # Backend: CycloneDX Gradle plugin, injected via init script so build.gradle stays
     # untouched. It resolves the runtimeClasspath WITHOUT compiling the code.
-    # Version 1.10.0 = last release supporting Gradle 7.x (the wrapper uses 7.5.1).
+    # The project wrapper (Gradle 7.5.1) cannot load current Jackson jars and the
+    # plugin 1.x only supports CycloneDX 1.4 (BSI TR-03183-2 requires >= 1.5), so a
+    # newer Gradle is used for this step only.
+    - name: set up Gradle 8 (SBOM only)
+      uses: gradle/actions/setup-gradle@v6
+      with:
+        gradle-version: '8.14.3'
+
     - name: generate SBOM (backend)
       working-directory: src/backend
       run: |
@@ -49,7 +56,7 @@ jobs:
             maven { url "https://plugins.gradle.org/m2/" }
           }
           dependencies {
-            classpath "org.cyclonedx:cyclonedx-gradle-plugin:1.10.0"
+            classpath "org.cyclonedx:cyclonedx-gradle-plugin:2.4.1"
           }
         }
         rootProject {
@@ -57,18 +64,15 @@ jobs:
           cyclonedxBom {
             includeConfigs = ["runtimeClasspath"]
             projectType = "application"
-            schemaVersion = "1.5"
-            destination = file("build/reports")
-            outputName = "bom"
-            outputFormat = "json"
+            schemaVersion = org.cyclonedx.model.schema.SchemaVersion.VERSION_16
+            jsonOutput = file("build/reports/sbom/bom.json")
             includeLicenseText = false
           }
         }
         GRADLE
-        chmod +x gradlew
-        ./gradlew --no-daemon --init-script "$RUNNER_TEMP/cyclonedx.init.gradle" cyclonedxBom
+        gradle --no-daemon --init-script "$RUNNER_TEMP/cyclonedx.init.gradle" cyclonedxBom
         mkdir -p "$GITHUB_WORKSPACE/sbom"
-        cp build/reports/bom.json "$GITHUB_WORKSPACE/sbom/opencelium-${TAG//\//-}-backend.cdx.json"
+        cp build/reports/sbom/bom.json "$GITHUB_WORKSPACE/sbom/opencelium-${TAG//\//-}-backend.cdx.json"
 
     # Frontend: no lockfile in the repo -> resolve exact versions without installing
     - name: resolve frontend dependency versions
