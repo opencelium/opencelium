@@ -1,6 +1,9 @@
 import React from 'react';
+import { LuScan } from 'react-icons/lu';
 import {
     HolderOutlined,
+    MinusOutlined,
+    UpOutlined,
     CheckOutlined,
     CloseOutlined,
     UserOutlined,
@@ -123,6 +126,9 @@ const iconMap = {
     globe: GlobalOutlined,
     portal: AppstoreOutlined,
     'drag-handle': HolderOutlined,
+    minus: MinusOutlined,
+    'chevron-up': UpOutlined,
+    'fit-view': LuScan,
 };
 
 export const AntIcon: IconComponent = ({
