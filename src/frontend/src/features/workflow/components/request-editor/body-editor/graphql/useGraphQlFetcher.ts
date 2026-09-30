@@ -11,7 +11,7 @@ export function useGraphQlFetcher(connector: Connector | null, accessToken: stri
 	return useCallback<Fetcher>(async (params: FetcherParams) => {
 		if (!connector) return {};
 		const runQuery = (token: string) => resolveGraphQlAuthStrategy(connector).query({
-			url: connector.requestData?.url ?? '', accessToken: token, sslOn: connector.sslCert,
+			url: connector.requestData?.url ?? '', accessToken: token, trustAnyCertificate: connector.sslCert,
 			query: params.query,
 			variables: params.variables as Record<string, unknown> | undefined,
 			operationName: params.operationName,
