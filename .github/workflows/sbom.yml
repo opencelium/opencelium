@@ -1,0 +1,95 @@
+# CRA: generate CycloneDX SBOMs for every OpenCelium release, attach them to the
+# GitHub release and archive them (WORM) in Azure Blob Storage.
+name: SBOM
+
+on:
+  release:
+    types: [published]
+  # manual run to backfill SBOMs for existing tags (e.g. v5.1)
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag, e.g. v5.1'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+    - name: checkout the source code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ env.TAG }}
+
+    - name: set up Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+
+    - name: set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    # Spring Boot fat jar contains all runtime libraries -> exact backend dependency list
+    - name: build backend jar
+      working-directory: src/backend
+      run: |
+        chmod +x gradlew
+        ./gradlew bootJar -x test --no-daemon
+        ls -l build/libs
+
+    # the frontend has no lockfile in the repo -> resolve exact versions without installing
+    - name: resolve frontend dependency versions
+      working-directory: src/frontend
+      run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+    - name: generate SBOM (backend)
+      uses: anchore/sbom-action@v0
+      with:
+        path: src/backend/build/libs
+        format: cyclonedx-json
+        output-file: sbom/opencelium-${{ env.TAG }}-backend.cdx.json
+        upload-artifact: false
+        upload-release-assets: false
+
+    - name: generate SBOM (frontend)
+      uses: anchore/sbom-action@v0
+      with:
+        path: src/frontend
+        format: cyclonedx-json
+        output-file: sbom/opencelium-${{ env.TAG }}-frontend.cdx.json
+        upload-artifact: false
+        upload-release-assets: false
+
+    - name: store SBOMs as workflow artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom
+        path: sbom/*.cdx.json
+        if-no-files-found: error
+
+    - name: attach SBOMs to GitHub release
+      run: |
+        if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          gh release upload "$TAG" sbom/*.cdx.json --clobber --repo "$GITHUB_REPOSITORY"
+        else
+          echo "No GitHub release for $TAG - skipping release upload"
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: archive SBOMs in Azure Blob Storage
+      run: |
+        az storage blob upload-batch \
+          --destination sbom \
+          --destination-path "opencelium/${TAG//\//-}" \
+          --source sbom --pattern "*.cdx.json"
+      env:
+        AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.SBOM_STORAGE_CONN }}
