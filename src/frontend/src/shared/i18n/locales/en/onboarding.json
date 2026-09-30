@@ -214,6 +214,7 @@
   },
   "workflow": {
     "kicker": "Workflow",
+    "dragHint": "Drag to move",
     "actions": {
       "done": "Exit"
     },

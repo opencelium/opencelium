@@ -10,6 +10,8 @@ vi.mock('@shared/ui/primitives/Button', () => ({
     }) => <button data-testid={testId} data-color={color} data-variant={variant} onClick={onClick}>{children}</button>,
 }))
 
+vi.mock('@shared/ui/primitives/Icon', () => ({ Icon: ({ name }: { name: string }) => <i data-icon={name} /> }))
+
 import { TutorialPill } from './TutorialPill'
 
 const renderPill = (over: Partial<Parameters<typeof TutorialPill>[0]> = {}) => {
@@ -133,5 +135,51 @@ describe('TutorialPill', () => {
         expect(view.container.querySelector('code')!.textContent)
             .toBe('RESULT_VAR = VAR_0 + " " + VAR_1')
         expect(renderPill().view.container.querySelector('code')).toBeNull()
+    })
+
+    describe('dragging', () => {
+        // jsdom has no pointer capture; the hook only needs the calls to exist.
+        HTMLElement.prototype.setPointerCapture = vi.fn()
+        HTMLElement.prototype.releasePointerCapture = vi.fn()
+        HTMLElement.prototype.hasPointerCapture = vi.fn(() => true)
+
+        const pill = (view: ReturnType<typeof render>) =>
+            view.container.querySelector<HTMLElement>('.workflow-tutorial-pill')!
+        const handle = (view: ReturnType<typeof render>) =>
+            view.container.querySelector<HTMLElement>('[data-testid="workflow-tutorial-drag-handle"]')!
+        const drag = (view: ReturnType<typeof render>, to: { x: number; y: number }) => {
+            fireEvent.pointerDown(handle(view), { button: 0, clientX: 0, clientY: 0, pointerId: 1 })
+            fireEvent.pointerMove(handle(view), { clientX: to.x, clientY: to.y, pointerId: 1 })
+            fireEvent.pointerUp(handle(view), { pointerId: 1 })
+        }
+
+        it('moves a corner-docked step to where it is dropped', () => {
+            const { view } = renderPill({ index: 3 })
+            drag(view, { x: 120, y: 90 })
+            expect(pill(view).style.left).toBe('120px')
+            expect(pill(view).style.top).toBe('90px')
+        })
+
+        it('shows a grip only on steps that can be moved', () => {
+            const grip = '[data-icon="drag-handle"]'
+            expect(renderPill({ index: 3 }).view.container.querySelector(grip)).not.toBeNull()
+            expect(renderPill({ anchor: 'center' }).view.container.querySelector(grip)).toBeNull()
+        })
+
+        it('keeps the centred book-ends fixed', () => {
+            const { view } = renderPill({ anchor: 'center' })
+            drag(view, { x: 120, y: 90 })
+            expect(pill(view).style.left).toBe('')
+            expect(pill(view).className).not.toContain('workflow-tutorial-pill--movable')
+        })
+
+        it('returns to its corner when the next step docks elsewhere', () => {
+            const { view } = renderPill({ index: 3 })
+            drag(view, { x: 120, y: 90 })
+            view.rerender(<TutorialPill copy="customers" index={4} total={10} onClose={vi.fn()} />)
+            expect(pill(view).style.left).toBe('120px')
+            view.rerender(<TutorialPill copy="customers" anchor="top-right" index={5} total={10} onClose={vi.fn()} />)
+            expect(pill(view).style.left).toBe('')
+        })
     })
 })

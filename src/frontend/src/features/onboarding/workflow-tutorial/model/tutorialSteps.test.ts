@@ -338,6 +338,14 @@ describe('workflow tutorial steps', () => {
         expect(byId('iterate').chain.at(-1)!.target).toBe(rule)
     })
 
+    // The loop's dialog is the task as a whole, so none of it is left dimmed.
+    it('undims the whole loop condition dialog', () => {
+        const dialog = '.conditionBuilderModal-loop .ant-modal-container'
+        const [, , builder, rule] = byId('iterate').chain
+        expect(builder.include).toContain(dialog)
+        expect(rule.include).toContain(dialog)
+    })
+
     // A picker's list is portalled to the body, so it sits outside the row's rectangle
     // and would be dimmed at the very moment the user has to read it.
     it('undims the open list wherever a reference is chosen', () => {
