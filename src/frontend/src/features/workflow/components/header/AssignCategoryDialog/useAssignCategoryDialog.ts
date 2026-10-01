@@ -22,7 +22,7 @@ export function useAssignCategoryDialog({ open, currentCategoryId, onAssign }: P
     const confirmed = await confirm({
       title: t('assignCategoryDialog.confirmUnassign.title'),
       message: t('assignCategoryDialog.confirmUnassign.message'),
-      confirmText: t('actions.delete'),
+      confirmText: t('actions.remove'),
       cancelText: t('actions.cancel'),
       confirmVariant: 'solid',
     });

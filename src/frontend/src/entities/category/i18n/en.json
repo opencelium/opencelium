@@ -3,7 +3,7 @@
     "title": "Categories",
     "subTitle": "Categories are used to organize and group Workflows and Schedules for better structure and navigation.",
     "confirmDelete": {
-      "message": "Are you sure you want to delete category with name \"{{name}}\"?"
+      "message": "Delete the category \"{{name}}\"? This can't be undone."
     }
   },
   "fields": {
@@ -14,7 +14,8 @@
       }
     },
     "parentCategory": {
-      "label": "Parent Category"
+      "label": "Parent Category",
+      "placeholder": "Select parent category"
     }
   },
   "sections": {
@@ -26,17 +27,17 @@
     "modes": {
       "create": {
         "header": "Create Category",
-        "subheader": "Categories are used to organize and group Workflows and Schedules for better structure and navigation.",
+        "subheader": "Create a category to group workflows and schedules.",
         "successMessage": "Category \"{{name}}\" was successfully created"
       },
       "update": {
         "header": "Update Category",
-        "subheader": "Categories are used to organize and group Workflows and Schedules for better structure and navigation.",
+        "subheader": "Edit the category.",
         "successMessage": "Category \"{{name}}\" was successfully updated"
       },
       "view": {
         "header": "Category Details",
-        "subheader": "Categories are used to organize and group Workflows and Schedules for better structure and navigation."
+        "subheader": "View the category."
       }
     },
     "recommendations": {
@@ -52,8 +53,8 @@
   },
   "confirmation": {
     "delete": {
-      "byName": "Delete category by name \"{{name}}\"?",
-      "byId": "Delete category by id \"{{id}}\"?"
+      "byName": "Delete category \"{{name}}\"?",
+      "byId": "Delete category #{{id}}?"
     }
   }
 }

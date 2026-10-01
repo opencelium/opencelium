@@ -1,20 +1,20 @@
 {
   "list": {
-    "title": "Laufpläne",
-    "subTitle": "Laufpläne bestimmen, wann bestimmte Worflows ausgeführt werden — nach festem Zeitplan oder durch Auslöser. Die Zahl unter einem Statuskreis zählt bis zu dessen nächstem Cron-Trigger herunter.<legend>Statuslegende: <legendRunning>Läuft</legendRunning><legendSucceeded>Letzter Lauf erfolgreich</legendSucceeded><legendFailed>Letzter Lauf fehlgeschlagen</legendFailed><legendNone>Kein Cron und keine Historie</legendNone></legend>",
-    "searchPlaceholder": "Nach Workflowsname suchen",
+    "title": "Zeitpläne",
+    "subTitle": "Zeitpläne bestimmen, wann bestimmte Workflows ausgeführt werden — zu festen Zeiten oder durch Auslöser. Die Zahl unter einem Statuskreis zählt bis zu dessen nächstem Cron-Trigger herunter.<legend>Statuslegende: <legendRunning>Läuft</legendRunning><legendSucceeded>Letzte Ausführung erfolgreich</legendSucceeded><legendFailed>Letzte Ausführung fehlgeschlagen</legendFailed><legendNone>Kein Cron und keine Historie</legendNone></legend>",
+    "searchPlaceholder": "Nach Workflow-Name suchen",
     "columns": {
-      "executions": "Läufe",
+      "executions": "Ausführungen",
       "status": "Status",
       "connection": "Workflow",
       "cronExp": "Cron",
       "lastSuccessExecution": "Letzter Erfolg",
       "lastFailExecution": "Letzter Fehler",
       "lastDuration": "Ø Dauer",
-      "debugMode": "Debug",
+      "debugMode": "Debug-Modus",
       "webhook": "Webhook"
     },
-    "noExecutions": "Keine aktuellen Läufe",
+    "noExecutions": "Keine laufenden Ausführungen",
     "confirmDelete": {
       "message": "Sind Sie sicher, dass Sie den Zeitplan löschen möchten?"
     }
@@ -35,7 +35,7 @@
     "tooltip": "Ausführung starten",
     "success": "Zeitplan-Ausführung gestartet",
     "error": {
-      "concurrentForbidden": "Ein anderer Zeitplan für dies Workflow läuft bereits. Warten Sie, bis er abgeschlossen ist, bevor Sie diesen starten.",
+      "concurrentForbidden": "Ein anderer Zeitplan für diesen Workflow läuft bereits. Warten Sie, bis er abgeschlossen ist, bevor Sie diesen starten.",
       "failed": "Zeitplan-Ausführung konnte nicht gestartet werden"
     }
   },
@@ -53,7 +53,7 @@
     "cancel": "Abbrechen",
     "unnamedItem": "Unbenannte Benachrichtigung",
     "deleteTooltip": "Benachrichtigung löschen",
-    "aggregatorHint": "Datenaggregator funktioniert nur für Post",
+    "aggregatorHint": "Datenaggregatoren sind nur für Benachrichtigungen „Nach erfolgreicher Ausführung“ verfügbar.",
     "created": "Benachrichtigung erstellt",
     "updated": "Benachrichtigung aktualisiert",
     "deleted": "Benachrichtigung gelöscht",
@@ -66,9 +66,9 @@
       "webhookUrl": "Webhook-URL"
     },
     "eventTypeOptions": {
-      "pre": "Pre",
-      "post": "Post",
-      "alert": "Alert"
+      "pre": "Vor der Ausführung",
+      "post": "Nach erfolgreicher Ausführung",
+      "alert": "Bei Fehler"
     },
     "actions": {
       "create": "Erstellen",
@@ -89,17 +89,21 @@
     },
     "bulk": {
       "button": "Benachrichtigungen",
-      "title": "Benachrichtigung zu ausgewählten Laufplänen hinzufügen",
-      "subtitle": "Diese Benachrichtigung wird für {{count}} ausgewählte(n) Zeitplan/-pläne erstellt.",
-      "create": "Für {{count}} Zeitplan/-pläne erstellen",
-      "success": "Benachrichtigung für {{count}} Zeitplan/-pläne erstellt",
-      "partialError": "Benachrichtigung für {{count}} Zeitplan/-pläne konnte nicht erstellt werden"
+      "title": "Benachrichtigung zu ausgewählten Zeitplänen hinzufügen",
+      "subtitle_one": "Diese Benachrichtigung wird für {{count}} ausgewählten Zeitplan erstellt.",
+      "subtitle_other": "Diese Benachrichtigung wird für {{count}} ausgewählte Zeitpläne erstellt.",
+      "create_one": "Für {{count}} Zeitplan erstellen",
+      "create_other": "Für {{count}} Zeitpläne erstellen",
+      "success_one": "Benachrichtigung für {{count}} Zeitplan erstellt",
+      "success_other": "Benachrichtigung für {{count}} Zeitpläne erstellt",
+      "partialError_one": "Benachrichtigung für {{count}} Zeitplan konnte nicht erstellt werden",
+      "partialError_other": "Benachrichtigung für {{count}} Zeitpläne konnte nicht erstellt werden"
     }
   },
   "supportLogs": {
     "tooltip": "Support-Logs",
     "title": "Support-Logs",
-    "titleHint": "Erzeugt eine maskierte Support-Logs-Datei für dieses Workflow. Wählen Sie über die Augen-Schalter, welche Teile vor dem Download maskiert werden.",
+    "titleHint": "Erzeugt eine maskierte Support-Log-Datei für diesen Workflow. Wählen Sie über die Augen-Schalter, welche Teile vor dem Download maskiert werden.",
     "levelLabel": "Maskierungsstufe",
     "levels": {
       "custom": "Benutzerdefiniert",
@@ -117,7 +121,7 @@
     "unmask": "Maskierung dieses Abschnitts aufheben",
     "submit": "Support-Logs erstellen",
     "cancel": "Abbrechen",
-    "started": "Sammlung der Support-Logs für \"{{connectionTitle}}\" gestartet. Sie werden benachrichtigt, sobald die Datei bereit ist.",
+    "started": "Sammlung der Support-Logs für „{{connectionTitle}}“ gestartet. Sie werden benachrichtigt, sobald die Datei bereit ist.",
     "error": "Sammlung der Support-Logs konnte nicht gestartet werden"
   },
   "executionLogs": {
@@ -133,7 +137,7 @@
     "subtitle": "Ändern Sie, wann dieser Zeitplan ausgeführt wird. Beim Speichern wird der Zeitplan mit dem neuen Cron-Ausdruck aktualisiert.",
     "submit": "Speichern",
     "cancel": "Abbrechen",
-    "success": "Der Cron-Ausdruck für die Connection \"{{connectionTitle}}\" wurde erfolgreich auf \"{{cronExp}}\" aktualisiert"
+    "success": "Der Cron-Ausdruck für den Workflow „{{connectionTitle}}“ wurde erfolgreich auf „{{cronExp}}“ aktualisiert"
   },
   "fields": {
     "title": {
@@ -143,10 +147,10 @@
       "label": "Workflow"
     },
     "debugMode": {
-      "label": "Logs",
+      "label": "Debug-Modus",
       "text": {
-        "on": "Logs sind aktiviert",
-        "off": "Logs sind deaktiviert"
+        "on": "Vollständige Anfragen und Antworten werden in den Logs gespeichert",
+        "off": "Nur grundlegende Ausführungs-Logs werden gespeichert"
       }
     },
     "cronExp": {
@@ -166,14 +170,14 @@
       "create": {
         "header": "Zeitplan erstellen",
         "subheader": "Richten Sie einen Zeitplan ein, um einen Workflow automatisch anhand eines Cron-Ausdrucks auszuführen.",
-        "successMessage": "Zeitplan für das Workflow \"{{connectionTitle}}\" wurde erfolgreich erstellt",
-        "successMessageWithCron": "Zeitplan für das Workflow \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich erstellt"
+        "successMessage": "Zeitplan für den Workflow „{{connectionTitle}}“ wurde erfolgreich erstellt",
+        "successMessageWithCron": "Zeitplan für den Workflow „{{connectionTitle}}“ mit Cron „{{cronExp}}“ wurde erfolgreich erstellt"
       },
       "update": {
         "header": "Zeitplan bearbeiten",
         "subheader": "Zeitplan-Informationen ändern und Änderungen speichern.",
-        "successMessage": "Zeitplan für das Workflow \"{{connectionTitle}}\" wurde erfolgreich aktualisiert",
-        "successMessageWithCron": "Zeitplan für das Workflow \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich aktualisiert"
+        "successMessage": "Zeitplan für den Workflow „{{connectionTitle}}“ wurde erfolgreich aktualisiert",
+        "successMessageWithCron": "Zeitplan für den Workflow „{{connectionTitle}}“ mit Cron „{{cronExp}}“ wurde erfolgreich aktualisiert"
       },
       "view": {
         "header": "Zeitplandetails",
@@ -194,8 +198,8 @@
   },
   "confirmation": {
     "delete": {
-      "byConnectionTitle": "Zeitplan anhand des Verbindungstitels \"{{connectionTitle}}\" löschen?",
-      "byId": "Zeitplan anhand der ID \"{{id}}\" löschen?"
+      "byConnectionTitle": "Zeitplan für Workflow „{{connectionTitle}}“ löschen?",
+      "byId": "Zeitplan #{{id}} löschen?"
     }
   }
 }
