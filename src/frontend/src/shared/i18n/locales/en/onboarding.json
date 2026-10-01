@@ -14,7 +14,7 @@
     "keep": "Keep it",
     "hide": "Hide it",
     "skipForNow": "Skip for now",
-    "addAnotherInvoker": "Add another invoker",
+    "addAnotherInvoker": "Add another API definition",
     "later": "I'll do this later",
     "retrySave": "Retry save",
     "buildWorkflow": "Build the workflow",
@@ -27,12 +27,13 @@
   "steps": {
     "welcome": {
       "kicker": "Welcome to OpenCelium",
-      "title": "Welcome, {{name}}. Let's set up your first integration."
+      "title": "Welcome, {{name}}. Let's set up your first integration.",
+      "titleAnonymous": "Welcome! Let's set up your first integration."
     },
     "theme": {
       "kicker": "Choose your theme",
       "title": "Pick how OpenCelium should look",
-      "note": "Change it later in /ui/config or with Ctrl + K → ui theme"
+      "note": "You can change this later in the UI settings, or press Ctrl + K and type \"ui theme\"."
     },
     "palette": {
       "kicker": "The command palette",
@@ -41,19 +42,19 @@
     "layers": {
       "kicker": "How an integration is built",
       "title": "Three things, in this order",
-      "note": "Nothing runs without at least one invoker"
+      "note": "Nothing runs without at least one API definition"
     },
     "invoker": {
-      "kicker": "Your first invoker",
-      "existingKicker": "Your invokers",
-      "emptyTitle": "You have no invokers yet",
-      "anotherTitle": "Add another invoker",
-      "existingTitle_one": "You already have {{count}} invoker",
-      "existingTitle_other": "You already have {{count}} invokers"
+      "kicker": "Your first API definition",
+      "existingKicker": "Your API definitions",
+      "emptyTitle": "You have no API definitions yet",
+      "anotherTitle": "Add another API definition",
+      "existingTitle_one": "You already have {{count}} API definition",
+      "existingTitle_other": "You already have {{count}} API definitions"
     },
     "connector": {
       "kicker": "Connectors",
-      "title": "Now point an invoker at a real system"
+      "title": "Now point an API definition at a real system"
     },
     "license": {
       "kicker": "Your license",
@@ -67,11 +68,11 @@
       "duration": "~2 minutes, {{phases}} phases",
       "phasesLabel": "Onboarding phases",
       "theme": "Theme",
-      "license": "Licence",
+      "license": "License",
       "palette": "Palette",
-      "invoker": "Invoker",
+      "invoker": "API Definition",
       "connector": "Connector",
-      "anonymous": "there",
+      "hiddenAnonymous": "Welcome",
       "hidden": "Welcome, {{name}}"
     },
     "theme": {
@@ -92,23 +93,23 @@
       "body": "OpenCelium builds an integration in three layers, and each one needs the one before it. The next two steps set up the first layer.",
       "step": "Step {{count}}",
       "invoker": "Describes an API: its endpoints, auth and request shapes. One file, reusable.",
-      "connector": "One real system: that invoker plus a base URL and credentials.",
+      "connector": "One real system: that API definition plus a base URL and credentials.",
       "workflow": "The integration itself: methods of as many connectors as you need, wired on a canvas."
     },
     "invoker": {
-      "body": "An invoker describes one API. Choose the quicker path unless your system requires a custom setup.",
+      "body": "An API definition describes one API. Choose the quicker path unless your system requires a custom setup.",
       "recommended": "Recommended",
-      "uploadTitle": "Upload an invoker file",
+      "uploadTitle": "Upload an API definition file",
       "uploadBody": "Upload an existing .xml file or a .zip archive of .xml files. Maximum size: 1 GB.",
-      "gitTitle": "Download invokers",
-      "gitBody": "Download the current community library from the OpenCelium repository.",
-      "gitAction": "Download from Git",
-      "gitSuccess_one": "{{count}} invoker installed from Git",
-      "gitSuccess_other": "{{count}} invokers installed from Git",
-      "gitEmpty": "The repository had no invokers to install.",
+      "gitTitle": "Install API definitions",
+      "gitBody": "Install the current community library from the OpenCelium online repository.",
+      "gitAction": "Install from online repository",
+      "gitSuccess_one": "{{count}} API definition installed from the online repository",
+      "gitSuccess_other": "{{count}} API definitions installed from the online repository",
+      "gitEmpty": "The repository had no API definitions to install.",
       "gitFailed_one": "{{count}} file could not be installed",
       "gitFailed_other": "{{count}} files could not be installed",
-      "gitError": "The invoker repository could not be reached. Please try again in a few minutes.",
+      "gitError": "The online repository for API definitions could not be reached. Please try again in a few minutes.",
       "manualTitle": "Create one manually",
       "manualBody": "For an API we do not support yet, define its endpoints, authentication and response formats manually.",
       "manualAction": "Open the editor",
@@ -118,7 +119,7 @@
       "fileAdded": "{{name}} added",
       "ready": "Ready to use in a connector.",
       "fileError": "Could not read {{name}}",
-      "invalidType": "Invoker files must use the .xml or .zip format.",
+      "invalidType": "API definition files must use the .xml or .zip format.",
       "tooLarge": "The file exceeds the 1 GB limit.",
       "chooseAnother": "Choose another file",
       "parsing": "Parsing endpoints…",
@@ -126,36 +127,36 @@
       "methods_one": "{{count}} method",
       "methods_other": "{{count}} methods",
       "archiveTooLarge": "The archive exceeds the 1 GB limit.",
-      "emptyArchive": "The archive does not contain any invokers.",
-      "invokers_one": "{{count}} invoker",
-      "invokers_other": "{{count}} invokers"
+      "emptyArchive": "The archive does not contain any API definitions.",
+      "invokers_one": "{{count}} API definition",
+      "invokers_other": "{{count}} API definitions"
     },
     "connector": {
-      "body": "A connector is one invoker plus the base URL and credentials of a system you actually run. The wizard walks you through it and tests the connection before saving.",
-      "pickInvoker": "Pick the invoker to build it from",
+      "body": "A connector is one API definition plus the base URL and credentials of a system you actually run. The wizard walks you through it and tests the connection before saving.",
+      "pickInvoker": "Pick the API definition to build it from",
       "panelEyebrow": "New connector",
       "panelTitle": "Connector from {{name}}",
-      "noInvokers": "Add an invoker first — every connector is built from one.",
+      "noInvokers": "Add an API definition first — every connector is built from one.",
       "tableTitle": "Title",
       "tableDescription": "Description",
       "tableConnectors": "Connectors",
       "tableActionTooltip": "Create a connector from {{name}}"
     },
     "license": {
-      "body": "Every call a workflow makes to a connected system counts as one operation. Activate a license when you need more.",
+      "body": "Every call a workflow makes to a connected system counts as one API operation. Activate a license when you need more.",
       "information": "License Information",
       "status": "Status",
       "valid": "Valid",
       "free": "Free",
       "type": "Type",
-      "operations": "Amount of API Operations",
+      "operations": "API operations per month",
       "expiration": "Expiration Date",
-      "more": "Need more operations?",
-      "actionsBody": "Activation, extra operations and offline requests all live on the licence page. Whichever applies to this install is offered there.",
-      "openPage": "Go to licence page",
+      "more": "Need more API operations?",
+      "actionsBody": "Activation, extra operations and offline requests all live on the license page. Whichever applies to this install is offered there.",
+      "openPage": "Go to license page",
       "servicePortalHint": "Need to buy extra operations or manage your license online? Visit the <1>OpenCelium Service Portal</1>.",
       "thisMonth": "This month",
-      "usage": "{{used}} of {{total}} operations"
+      "usage": "{{used}} of {{total}} API operations"
     }
   },
   "dashboard": {
@@ -188,7 +189,7 @@
       },
       "createWorkflow": {
         "title": "Start a new workflow",
-        "body": "Opens the visual editor on an empty canvas, where connector methods and if/loop operators are composed into an integration. It is hidden on narrow screens and for roles that may not create connections."
+        "body": "Opens the visual editor on an empty canvas, where connector methods and IF/LOOP logic blocks are composed into an integration. It is hidden on narrow screens and for roles that may not create workflows."
       },
       "palette": {
         "title": "The command palette",
@@ -226,8 +227,8 @@
     "steps": {
       "intro": {
         "title": "Build a working workflow, step by step",
-        "body": "This short, hands-on tutorial walks the whole editor — methods, a loop, a condition, references and a live test run — built against two invented systems, so nothing you do here is saved. Each step tells you exactly what to do next; follow the pill.",
-        "note": ""
+        "body": "This short, hands-on tutorial walks the whole editor — methods, a loop, a condition, references and a live test run — built against two invented systems, so nothing you do here is saved. Each step tells you exactly what to do next; follow the highlighted hint.",
+        "note": "Ready when you are"
       },
       "customers": {
         "title": "List the customers",
@@ -236,17 +237,17 @@
       },
       "loop": {
         "title": "Repeat per customer",
-        "body": "getCustomers returns a list, so the rest of the workflow has to run once per entry. Use the + after it to add a loop operator.",
-        "note": "Add a loop operator to continue"
+        "body": "getCustomers returns a list, so the rest of the workflow has to run once per entry. Use the + after it to add a LOOP block.",
+        "note": "Add a LOOP block to continue"
       },
       "iterate": {
         "title": "Tell the loop what to iterate",
-        "body": "A loop on its own does not know what it is walking. Right-click it and open Configuration. The operator decides how it walks — For iterates an array — and its argument is a reference to the array to walk. Save it, and the loop variable i becomes the customer of the current iteration. Pick, in this order:",
+        "body": "A loop on its own does not know what it is walking. Right-click it and open Configuration. The loop type decides how it walks — Repeat Over a List walks an array — and its argument is a reference to the array to walk. Save it, and the loop variable i becomes the customer of the current iteration. Pick, in this order:",
         "note": "Save the configuration to continue"
       },
       "lookup": {
         "title": "Look each one up, inside the loop",
-        "body": "Use the + below the loop, not the one after it — below puts the step inside the loop's scope, at index 1_0, where each iteration has a customer to work with. After the loop it would be step 2 and run just once. Add getClientByEmail from Tutorial Support Desk.",
+        "body": "Use the + below the loop, not the one after it — below puts the step inside the loop, where each iteration has a customer to work with. After the loop it would be step 2 and run just once. Add getClientByEmail from Tutorial Support Desk.",
         "note": "Add the method under the loop to continue"
       },
       "endpoint": {
@@ -256,8 +257,8 @@
       },
       "branch": {
         "title": "Only when it is missing",
-        "body": "Use the + after getClientByEmail to add an IF operator — still inside the loop — and set its condition on the lookup's response: found is false.",
-        "note": "Add an IF operator to continue"
+        "body": "Use the + after getClientByEmail to add an IF block — still inside the loop — and set its condition on the lookup's response: found is false.",
+        "note": "Add an IF block to continue"
       },
       "condition": {
         "title": "Compare the two emails",
@@ -271,7 +272,7 @@
       },
       "username": {
         "title": "Two references, one field",
-        "body": "Open createClient's body and find username. Hover its row and press the reference icon, then pick getCustomers, customers, (i loop), firstName. Do it again for lastName. Two references in one field are wrapped in an enhancement automatically — unfold Variable Information to see them listed as VAR_0 and VAR_1, in that order. Join them with a space in the script, then close the dialog.",
+        "body": "Open createClient's body and find username. Hover its row and press the reference icon, then pick getCustomers, customers, (i loop), firstName. Do it again for lastName. Two references in one field are wrapped in a transformation automatically — unfold Variable Information to see them listed as VAR_0 and VAR_1, in that order. Join them with a space in the script, then close the dialog.",
         "note": "Add both references, unfold the variables, edit the script, then close"
       },
       "changeHistory": {
@@ -281,7 +282,7 @@
       },
       "versionHistory": {
         "title": "Every save, kept",
-        "body": "The change history ends when you leave the editor; the version history does not. Open ⋯, then Version History. Every Save stores a version on the server — when, by whom, and the comment typed in the save dialog. The versions listed here are examples of how this workflow could have grown; the tutorial itself never saves. On a real workflow, clicking a version loads it onto the canvas without touching the server until you save again — here it only marks the row. The comment can be edited right on the row, and its ⋯ menu copies the snapshot id, downloads the version as a template or deletes it.",
+        "body": "The change history ends when you leave the editor; the version history does not. Open ⋯, then Version History. Every Save stores a version on the server — when, by whom, and the comment typed in the save dialog. The versions listed here are examples of how this workflow could have grown; the tutorial itself never saves. On a real workflow, clicking a version loads it onto the canvas without touching the server until you save again — here it only marks the row. The comment can be edited right on the row, and its ⋯ menu copies the snapshot ID, downloads the version as a template or deletes it.",
         "note": "Open the version history, then continue"
       },
       "testrun": {
@@ -311,7 +312,7 @@
       },
       "logs": {
         "title": "Read the run",
-        "body": "This is the same tree stored runs are shown in. A method row opens to its request and response, a loop row pages through its iterations, an IF row names the branch it took. All of it came from the graph you built — compare createClient's payload against the script you wrote for it.",
+        "body": "This is the same tree stored executions are shown in. A method row opens to its request and response, a loop row pages through its iterations, an IF row names the branch it took. All of it came from the graph you built — compare createClient's payload against the script you wrote for it.",
         "note": "Open a row, then continue"
       },
       "schedules": {
@@ -336,7 +337,7 @@
       },
       "summary": {
         "title": "That is a working workflow",
-        "body": "getCustomers lists everyone, the loop walks them one at a time, getClientByEmail asks the second system about the current customer by reference, the IF lets only the unknown ones through, and createClient fills its fields from the customer being walked. Methods, scope, references, enhancements — every real integration is these four ideas; the test run is how you check them, and the schedule is what runs them when nobody is watching. Nothing here was saved, neither the graph nor the schedule; build the same shape with your own connectors.",
+        "body": "getCustomers lists everyone, the loop walks them one at a time, getClientByEmail asks the second system about the current customer by reference, the IF lets only the unknown ones through, and createClient fills its fields from the customer being walked. Methods, scope, references, transformations — every real integration is these four ideas; the test run is how you check them, and the schedule is what runs them when nobody is watching. Nothing here was saved, neither the graph nor the schedule; build the same shape with your own connectors.",
         "note": "Invented connectors, so there is nothing to keep"
       }
     },
@@ -358,7 +359,7 @@
     "pill": "Setup {{count}}/{{total}}",
     "paused": "Tour paused · resume",
     "dismissTitle": "Hide the setup checklist?",
-    "dismissBody": "It will not come back. You can still restart the tour from the palette with help onboarding, or turn it back on in /ui/config.",
+    "dismissBody": "It will not come back. You can still restart the tour from the Help menu, or press Ctrl + K and type \"help onboarding\".",
     "theme": {
       "title": "Choose a theme",
       "detail": "Light, dark or match device."
@@ -368,12 +369,12 @@
       "detail": "Ctrl + K reaches every screen."
     },
     "invoker": {
-      "title": "Add your first invoker",
+      "title": "Add your first API definition",
       "detail": "Upload a description or write one."
     },
     "connector": {
       "title": "Create a connector",
-      "detail": "Invoker, URL and credentials."
+      "detail": "API definition, URL and credentials."
     },
     "license": {
       "title": "Activate a license",
