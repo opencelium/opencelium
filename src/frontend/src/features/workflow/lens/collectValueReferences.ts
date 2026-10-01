@@ -10,6 +10,8 @@ export type ValueReferenceTarget = {
 	field: string;
 	/** The reference as stored, e.g. '#3fa9f5.(response).body.$.id'. */
 	reference: string;
+	/** The field's whole value, which may hold several references or text around one. */
+	value: string;
 };
 
 export type NodeValueReferences = {
@@ -59,6 +61,7 @@ const collectFromBody = (body: unknown, targets: ValueReferenceTarget[]) => {
 			segments[segments.length - 1] ?? '');
 		references.forEach((reference) => targets.push({
 			messageProperty: 'body', path, field: stripPrefix(path, 'body'), reference,
+			value: String(value),
 		}));
 	};
 	visit(body, []);
@@ -98,6 +101,7 @@ export const collectValueReferences = (
 		const path = buildRequestResultField('header', [], key);
 		readReferences(value).forEach((reference) => targets.push({
 			messageProperty: 'header', path, field: stripPrefix(path, 'header'), reference,
+			value: String(value),
 		}));
 	});
 	collectFromBody(config.body, targets);

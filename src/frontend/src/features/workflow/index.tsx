@@ -44,6 +44,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     hasManualChanges: hasManualUnsavedChanges } = changes;
   const { selectedNode, contextMenuNode, editorNode, conditionNode, aggregatorNode,
     conditionConnection } = derived;
+  const connectorEditorNode = hydratedNodes.find((node) => node.id === workflow.connectorEditor?.nodeId) ?? null;
   const loopAncestorsByIndexPath = useMemo(
     () => buildLoopAncestorsByIndexPath(hydratedNodes, workflow.edges),
     [hydratedNodes, workflow.edges],
@@ -148,6 +149,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         centerStartVersion: workflow.centerStartVersion,
         onInit: workflow.setReactFlowInstance, activeAction: workflow.sidebarAction,
         jointSourceId: workflow.jointSourceId, jointVerdicts: workflow.jointVerdicts,
+        jointDeadEndNodeId: workflow.jointDeadEndNodeId,
         onConfirmJoint: workflow.onConfirmJoint, onCancelJoint: workflow.onCancelJoint,
         onAddJoint: workflow.onStartJoint,
         onRemoveJoint: workflow.onRemoveJoint,
@@ -196,7 +198,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             // likely as not to belong to a method that is currently off screen.
             const consumerNodeId = binding.consumer.nodeId;
             if (consumerNodeId) {
-              workflow.bindingLens.onFocusNode(consumerNodeId);
+              workflow.bindingLens.onPinNode(consumerNodeId);
               workflow.centerOnNode(consumerNodeId);
             }
           } }}
@@ -205,6 +207,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           readOnly: readOnly || isTestRunLocked,
           onFieldBindingsChange: setLoadedFieldBindings,
           onClose: workflow.bindingLens.onClearSelection,
+          onSelectBinding: workflow.bindingLens.onSelectBinding,
           onOpenMethodEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }) }}
         contextMenu={{ menu: workflow.contextMenu, node: contextMenuNode,
           onChangeLabel: workflow.onChangeNodeLabel,
@@ -212,7 +215,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onOpenConditionEditor: (nodeId) => workflow.setConditionEditor({ nodeId }),
           onShowResponse: workflow.onShowResponse,
           onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
-          onOpenConnectorEditor: (nodeId) => workflow.setConnectorEditor({ nodeId }),
+          onOpenConnectorEditor: (nodeId, kind) => workflow.setConnectorEditor({ nodeId, kind }),
           onClose: () => workflow.setContextMenu(null) }} />
       <WorkflowNodeEditors
         response={{ open: !!workflow.responseNodeId,
@@ -235,10 +238,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         aggregator={{ open: !!workflow.aggregatorEditor, node: aggregatorNode,
           onClose: () => workflow.setAggregatorEditor(null),
           onSave: workflow.onSaveDataAggregator }}
-        connector={{ open: !!workflow.connectorEditor, connectors,
-          node: hydratedNodes.find((node) => node.id === workflow.connectorEditor?.nodeId) ?? null,
-          onClose: () => workflow.setConnectorEditor(null),
-          onChange: workflow.onChangeNodeConnector }} />
+        connector={{ open: workflow.connectorEditor?.kind === 'switch', connectors,
+          node: connectorEditorNode, onClose: () => workflow.setConnectorEditor(null),
+          onChange: workflow.onChangeNodeConnector }}
+        connectorImage={{ open: workflow.connectorEditor?.kind === 'image', connectors,
+          node: connectorEditorNode, onClose: () => workflow.setConnectorEditor(null) }} />
     </div>
     </TestRunProvider>
   );
