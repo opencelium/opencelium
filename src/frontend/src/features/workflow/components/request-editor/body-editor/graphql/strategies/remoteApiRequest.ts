@@ -1,5 +1,5 @@
 import { apiExecutor } from '@shared/api/apiExecutor'
-import { isApiExecutorError } from '../graphQlBodyEditor.utils'
+import { isApiExecutorError } from '@shared/api/isApiExecutorError'
 
 export type RemoteApiRequestPayload = {
     url: string
