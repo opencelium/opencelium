@@ -15,6 +15,7 @@
 @import './styles/nodes.comment.css';
 @import './styles/connector-status.css';
 @import './styles/node-toolbar.css';
+@import './styles/joint-picking.css';
 @import './styles/canvas-controls.css';
 @import './styles/canvas-minimap.css';
 @import './styles/edges.css';
