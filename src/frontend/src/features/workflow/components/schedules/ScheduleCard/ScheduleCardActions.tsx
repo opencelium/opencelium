@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Popover } from 'antd';
 import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
@@ -11,9 +12,12 @@ type Props = { schedule: ScheduleCardItem['schedule']; deleting: boolean;
 
 export function ScheduleCardActions({ schedule, deleting, onDelete }: Props) {
 	const { t } = useI18n('workflow');
-	return <Popover trigger={['hover', 'click']} placement='leftTop' arrow={false}
-		overlayInnerStyle={{ padding: 4 }} content={<div style={{ display: 'flex',
-			flexDirection: 'column', gap: 2 }}>
+	const [isOpen, setOpen] = useState(false);
+	// Every action opens a dialog or a confirm, so the menu closes on pick rather than
+	// lingering behind it; a click anywhere else closes it via onOpenChange.
+	return <Popover trigger='click' open={isOpen} onOpenChange={setOpen} placement='leftTop'
+		arrow={false} overlayInnerStyle={{ padding: 4 }} content={<div onClick={() => setOpen(false)}
+			style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 			<SupportLogsAction schedule={schedule} tooltipPlacement='left' />
 			<NotificationsAction schedule={schedule} tooltipPlacement='left' />
 			<Tooltip content={t('schedules.actions.delete')} placement='left'>

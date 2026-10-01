@@ -2,6 +2,7 @@ import { genericApi } from '@/shared/api/genericApi'
 import { store } from '@app/store/store.ts'
 import { selectAccessToken } from '@entities/auth/model/authSelectors'
 import { runtimeConfig } from '@shared/config/runtimeConfig'
+import { findRequestOverride, OVERRIDE_UNAVAILABLE, OVERRIDE_UNAVAILABLE_ERROR } from '@shared/api/requestOverrides'
 
 export type ApiExecutorOptions = {
     ignoreError?: boolean
@@ -41,6 +42,13 @@ function buildAuthHeaders(extra?: Record<string, string>): Record<string, string
 }
 
 async function fetchBinary({ url, method, body, options }: ApiExecutorArgs): Promise<Response> {
+    // Binary downloads skip baseQuery, so the sandbox overrides are consulted here too.
+    const override = findRequestOverride(url, method, body)
+    if (override === OVERRIDE_UNAVAILABLE) throw new Error(OVERRIDE_UNAVAILABLE_ERROR)
+    if (override !== undefined) {
+        return new Response(override instanceof Blob ? override : JSON.stringify(override))
+    }
+
     const res = await fetch(resolveUrl(url), {
         method,
         headers: buildAuthHeaders(options?.headers),
