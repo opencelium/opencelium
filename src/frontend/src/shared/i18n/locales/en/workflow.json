@@ -475,7 +475,8 @@
   },
   "contextMenu": {
     "changeLabel": "Change Label",
-    "changeConnector": "Change Connector",
+    "changeConnector": "Use Another Connector",
+    "changeConnectorImage": "Change Connector Image",
     "openConfiguration": "Open Configuration",
     "configureAggregator": "Configure Aggregator",
     "request": "Request",
@@ -495,8 +496,17 @@
       "minimize": "Minimize comment"
     }
   },
+  "connectorImageDialog": {
+    "title": "Connector Image",
+    "intro": "This image belongs to the connector \"{{connector}}\". Changing it updates every step and workflow that uses this connector.",
+    "updated": "Connector image updated",
+    "updateFailed": "Could not update the connector image",
+    "removed": "Connector image removed",
+    "removeFailed": "Could not remove the connector image",
+    "confirmRemoveMessage": "The image is removed everywhere this connector is used. This can't be undone."
+  },
   "changeConnectorDialog": {
-    "title": "Change Connector",
+    "title": "Use Another Connector",
     "intro": "Select another connector of the invoker \"{{invoker}}\" for this step.",
     "selectPlaceholder": "Select a connector",
     "change": "Change"

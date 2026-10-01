@@ -1,5 +1,7 @@
 import { buildTestId } from '@shared/testing/testId';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { hasComponentPermission } from '@/engine/policy';
+import { useAuth } from '@features/auth/useAuth';
 import { menuByType } from '../context-menu/contextMenuData';
 import { buildContextMenuEntries, filterEntriesForSection } from '../context-menu/contextMenuEntries';
 import type { NodeContextMenuProps } from './NodeContextMenu.types';
@@ -12,8 +14,12 @@ type Props = Pick<NodeContextMenuProps, 'menu' | 'node' | 'onClose' | 'onOpenReq
 export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
   onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onOpenAggregatorEditor, onOpenConnectorEditor }: Props) {
   const { t } = useI18n('workflow');
+  const { normalizedUser } = useAuth();
   if (!menu) return null;
-  const sections = menuByType[menu.kind] || [];
+  // The image is the connector's, not the step's — editing it needs connector rights.
+  const canUpdateConnector = hasComponentPermission(normalizedUser?.permissions ?? [], 'CONNECTOR', 'UPDATE');
+  const sections = (menuByType[menu.kind] || []).map((section) => ({ ...section,
+    items: section.items.filter((item) => item.id !== 'change-connector-image' || canUpdateConnector) }));
   const entries = buildContextMenuEntries(sections);
 
   const select = (id: string) => {
@@ -26,7 +32,8 @@ export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
     if (id === 'edit-body') onOpenRequestEditor(menu.nodeId, 'body');
     if (id === 'show-response') onShowResponse(menu.nodeId);
     if (id === 'configure-aggregator') onOpenAggregatorEditor(menu.nodeId);
-    if (id === 'change-connector') onOpenConnectorEditor(menu.nodeId);
+    if (id === 'change-connector') onOpenConnectorEditor(menu.nodeId, 'switch');
+    if (id === 'change-connector-image') onOpenConnectorEditor(menu.nodeId, 'image');
     onClose();
   };
 

@@ -475,7 +475,8 @@
   },
   "contextMenu": {
     "changeLabel": "Bezeichnung ändern",
-    "changeConnector": "Connector ändern",
+    "changeConnector": "Anderen Connector verwenden",
+    "changeConnectorImage": "Connector-Bild ändern",
     "openConfiguration": "Konfiguration öffnen",
     "configureAggregator": "Aggregator konfigurieren",
     "request": "Anfrage",
@@ -495,8 +496,17 @@
       "minimize": "Kommentar minimieren"
     }
   },
+  "connectorImageDialog": {
+    "title": "Connector-Bild",
+    "intro": "Dieses Bild gehört zum Connector \"{{connector}}\". Eine Änderung wirkt sich auf alle Schritte und Workflows aus, die diesen Connector verwenden.",
+    "updated": "Connector-Bild aktualisiert",
+    "updateFailed": "Connector-Bild konnte nicht aktualisiert werden",
+    "removed": "Connector-Bild entfernt",
+    "removeFailed": "Connector-Bild konnte nicht entfernt werden",
+    "confirmRemoveMessage": "Das Bild wird überall entfernt, wo dieser Connector verwendet wird. Dies kann nicht rückgängig gemacht werden."
+  },
   "changeConnectorDialog": {
-    "title": "Connector ändern",
+    "title": "Anderen Connector verwenden",
     "intro": "Wählen Sie einen anderen Connector des Invokers \"{{invoker}}\" für diesen Schritt.",
     "selectPlaceholder": "Connector auswählen",
     "change": "Ändern"

@@ -1,4 +1,5 @@
 import type { WorkflowContextMenu, WorkflowNodeModel } from '../../types/workflow.types';
+import type { ConnectorEditorKind } from '../../types/request-config.types';
 
 export type NodeContextMenuProps = {
 	menu: WorkflowContextMenu | null;
@@ -9,5 +10,5 @@ export type NodeContextMenuProps = {
 	onOpenConditionEditor: (nodeId: string) => void;
 	onShowResponse: (nodeId: string) => void;
 	onOpenAggregatorEditor: (nodeId: string) => void;
-	onOpenConnectorEditor: (nodeId: string) => void;
+	onOpenConnectorEditor: (nodeId: string, kind: ConnectorEditorKind) => void;
 };
