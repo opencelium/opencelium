@@ -23,6 +23,7 @@ describe('collectValueReferences', () => {
 			path: 'body.$.user.id',
 			field: 'user.id',
 			reference: '#3fa9f5.(response).body.$.id',
+			value: '#3fa9f5.(response).body.$.id',
 		}]);
 	});
 
@@ -43,6 +44,7 @@ describe('collectValueReferences', () => {
 			path: 'header.$.Authorization',
 			field: 'Authorization',
 			reference: '#3fa9f5.(response).body.$.token',
+			value: 'Bearer #3fa9f5.(response).body.$.token',
 		}]);
 	});
 

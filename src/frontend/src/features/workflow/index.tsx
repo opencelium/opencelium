@@ -196,7 +196,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             // likely as not to belong to a method that is currently off screen.
             const consumerNodeId = binding.consumer.nodeId;
             if (consumerNodeId) {
-              workflow.bindingLens.onFocusNode(consumerNodeId);
+              workflow.bindingLens.onPinNode(consumerNodeId);
               workflow.centerOnNode(consumerNodeId);
             }
           } }}
@@ -205,6 +205,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           readOnly: readOnly || isTestRunLocked,
           onFieldBindingsChange: setLoadedFieldBindings,
           onClose: workflow.bindingLens.onClearSelection,
+          onSelectBinding: workflow.bindingLens.onSelectBinding,
           onOpenMethodEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }) }}
         contextMenu={{ menu: workflow.contextMenu, node: contextMenuNode,
           onChangeLabel: workflow.onChangeNodeLabel,
