@@ -1,14 +1,12 @@
 import { useMemo, useRef, useState } from 'react';
 import { CloseOutlined } from '@ant-design/icons';
-import { getCoreRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
-import { Icon } from '@shared/ui/primitives/Icon';
-import { Input } from '@shared/ui/primitives/Input';
 import { Table } from '@shared/ui/primitives/Table';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import type { LensBinding } from '../bindingLens.types';
+import { fieldGroupKey } from '../groupBindingsByField';
 import { useBindingGraph } from '../useBindingLens';
-import { buildBindingTableColumns } from './bindingTableColumns';
-import { countBroken, selectBindingTableRows } from './bindingTableRows';
+import { BindingTableToolbar } from './BindingTableToolbar';
+import { type BindingTableRow, countBroken, getRowBindings } from './bindingTableRows';
+import { useBindingTable } from './useBindingTable';
 import { useDismissOnOutsideClick } from './useDismissOnOutsideClick';
 import type { BindingTablePanelProps } from './BindingTablePanel.types';
 
@@ -26,22 +24,15 @@ export function BindingTablePanel({ open, nodes, edges, fieldBindings, selectedK
 	const panelRef = useRef<HTMLElement | null>(null);
 	const [search, setSearch] = useState('');
 	const graph = useBindingGraph({ nodes, edges, fieldBindings, open });
-	const rows = useMemo(() => selectBindingTableRows(graph, { search }), [graph, search]);
-	const columns = useMemo(() => buildBindingTableColumns(t), [t]);
-
-	const tableInstance = useReactTable({
-		data: rows,
-		columns,
-		enableRowSelection: false,
-		getRowId: (binding) => binding.key,
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-	});
+	const { rows, columns, tableInstance, isAllExpanded,
+		toggleAllExpanded } = useBindingTable(graph, search);
 
 	useDismissOnOutsideClick({ open, panelRef, onClose });
 
 	const total = graph.bindings.length;
+	const fieldCount = useMemo(() => new Set(graph.bindings.map(fieldGroupKey)).size, [graph]);
+	const isSelected = (row: BindingTableRow) =>
+		getRowBindings(row).some((binding) => binding.key === selectedKey);
 	const broken = countBroken(graph.bindings);
 	const notShown = graph.skipped.malformed + graph.skipped.outsideScope
 		+ graph.skipped.unanchored;
@@ -64,7 +55,8 @@ export function BindingTablePanel({ open, nodes, edges, fieldBindings, selectedK
 					<div>
 						<div className='drawerTitle'>{t('bindingLens.legendTitle')}</div>
 						<div className='drawerSubTitle'>
-							{t('bindingLens.bindingCount', { count: total })}
+							{t('bindingLens.fieldCount', { count: fieldCount })}
+							{` · ${t('bindingLens.referenceCount', { count: total })}`}
 							{broken > 0 && ` · ${t('bindingLens.brokenCount', { count: broken })}`}
 						</div>
 					</div>
@@ -74,23 +66,28 @@ export function BindingTablePanel({ open, nodes, edges, fieldBindings, selectedK
 					<CloseOutlined />
 				</button>
 			</div>
-			<div className='bindingTableFilters'>
-				<Input
-					value={search}
-					onChange={(event) => setSearch(event.target.value)}
-					placeholder={t('bindingLens.tableSearch')}
-					leftSlot={<Icon name='search' size={14} isSubtle />}
-					testId='workflow-binding-table-search'
-				/>
-			</div>
+			<BindingTableToolbar
+				search={search}
+				onSearchChange={setSearch}
+				isAllExpanded={isAllExpanded}
+				onToggleAllExpanded={toggleAllExpanded}
+			/>
 			<div className='drawerBody bindingTableBody'>
-				<Table<LensBinding>
+				<Table<BindingTableRow>
 					data={rows}
 					columns={columns}
 					tableInstance={tableInstance}
-					onRowClick={onSelectBinding}
-					rowClassName={(binding) =>
-						(binding.key === selectedKey ? 'bindingTableRowSelected' : undefined)}
+					// Every reference of a field opens the same editor; a field that is
+					// already open keeps the reference it was opened on.
+					onRowClick={(row) => {
+						const bindings = getRowBindings(row);
+						onSelectBinding(bindings.find((binding) => binding.key === selectedKey)
+							?? bindings[0]);
+					}}
+					rowClassName={(row) => [
+						row.kind === 'source' ? 'bindingTableSourceRow' : '',
+						isSelected(row) ? 'bindingTableRowSelected' : '',
+					].filter(Boolean).join(' ') || undefined}
 					emptyState={<span>{t(total === 0
 						? 'bindingLens.legendEmpty' : 'bindingLens.tableNoMatch')}</span>}
 				/>
