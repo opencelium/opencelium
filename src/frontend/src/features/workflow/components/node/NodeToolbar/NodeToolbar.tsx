@@ -14,7 +14,7 @@ export function NodeToolbar({ canDelete, canComment, canAddJoint, canRemoveJoint
 	const hasEditActions = canAddJoint || canRemoveJoint || canComment;
 
 	return (
-		<div className='nodeToolbar'>
+		<div className='nodeToolbar' onDoubleClick={(event) => event.stopPropagation()}>
 			{canAddJoint && (
 				<Tooltip content={t('actions.addJoint')}>
 					<IconButton
