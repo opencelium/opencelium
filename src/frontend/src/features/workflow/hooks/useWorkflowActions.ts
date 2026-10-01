@@ -150,7 +150,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		edges: workflow.edges,
 		onCopyNodes: (nodeIds) => {
 			setCopiedNodeIds(nodeIds);
-			message.success(t('messages.nodeCopied'));
+			message.success(t('messages.nodeCopied', { count: nodeIds.length }));
 		},
 	});
 	const pasteNodes = async (sourceNodeIds: string[], targetNodeId: string,

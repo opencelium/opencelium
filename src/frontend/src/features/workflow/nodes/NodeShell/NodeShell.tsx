@@ -4,6 +4,7 @@ import { NodeToolbar } from '../../components/node/NodeToolbar/NodeToolbar';
 import { useBindingLensNode } from '../../lens/BindingLensNodeContext';
 import { useJointRejectionMessage } from '../../hooks/useJointRejectionMessage';
 import { useIsMultiNodeSelection } from '../../hooks/useIsMultiNodeSelection';
+import { useHasNoJointTarget } from '../../components/WorkflowCanvas/JointDeadEndContext';
 import { AddStepTrigger } from '../AddStepTrigger/AddStepTrigger';
 import { BindingBadge } from '../BindingBadge/BindingBadge';
 import { CommentBadge } from '../CommentBadge/CommentBadge';
@@ -25,6 +26,7 @@ export function NodeShell({
 	const isMethodNode = data.kind === 'connector' || data.kind === 'system';
 	const bindingLens = useBindingLensNode();
 	const isMultiSelection = useIsMultiNodeSelection();
+	const hasNoJointTarget = useHasNoJointTarget(id);
 	const isPreview = !!data.dragGhost || !!data.dropPlaceholder;
 	// While one method's bindings are being read, every method outside them steps
 	// back: the focused view exists because all of them at once cannot be read.
@@ -109,6 +111,7 @@ export function NodeShell({
 					   node — an existing one is replaced from its own remove action,
 					   so these two are never offered together. */
 					canAddJoint={isMethodNode && !data.jump && !!data.onAddJoint}
+					isAddJointDisabled={hasNoJointTarget}
 					canRemoveJoint={Boolean(data.jump) && !!data.onRemoveJoint}
 					onDelete={() => data.onDeleteNode?.(id)}
 					onComment={() => data.onAddComment?.(id)}
