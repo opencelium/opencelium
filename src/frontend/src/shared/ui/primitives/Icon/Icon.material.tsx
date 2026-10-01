@@ -65,6 +65,9 @@ import {
 
 import MouseOutlined from '@mui/icons-material/MouseOutlined';
 import DragIndicator from '@mui/icons-material/DragIndicator';
+import Remove from '@mui/icons-material/Remove';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import FitScreen from '@mui/icons-material/FitScreen';
 import type { IconComponent } from './Icon.types';
 
 const iconMap = {
@@ -133,6 +136,9 @@ const iconMap = {
     globe: Public,
     portal: Apps,
     'drag-handle': DragIndicator,
+    minus: Remove,
+    'chevron-up': ExpandLess,
+    'fit-view': FitScreen,
 };
 
 export const MaterialIcon: IconComponent = ({
