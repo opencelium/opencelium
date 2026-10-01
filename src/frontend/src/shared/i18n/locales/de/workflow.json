@@ -888,5 +888,36 @@
     "masterPasswordNotConfigured": "Es ist kein Master-Passwort konfiguriert",
     "masterPasswordNotConfiguredDescription": "Bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten, um auf die GraphQL-API dieses Connectors zugreifen zu können.",
     "retry": "Erneut versuchen"
+  },
+  "minimap": {
+    "title": "Minimap",
+    "ariaLabel": "Workflow-Minimap",
+    "stepCount": "{{count}} Schritte",
+    "stepCount_one": "{{count}} Schritt",
+    "collapse": "Minimap einklappen",
+    "expand": "Minimap ausklappen",
+    "attention": "{{count}} Schritte benötigen Aufmerksamkeit",
+    "attention_one": "{{count}} Schritt benötigt Aufmerksamkeit",
+    "issueCounter": "{{current}} / {{total}}",
+    "previousIssue": "Vorheriger Schritt mit einem Problem",
+    "nextIssue": "Nächster Schritt mit einem Problem",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "fitView": "Workflow an den Bildschirm anpassen",
+    "legend": {
+      "system": "System",
+      "trigger": "Ausgelöster Workflow",
+      "operator": "Operator",
+      "otherConnectors": "Weitere Connectors"
+    },
+    "problems": {
+      "testRunFailed": "Der Testlauf ist bei diesem Schritt fehlgeschlagen.",
+      "binding": "{{count}} fehlerhafte Feldbindungen: {{reason}}",
+      "binding_one": "{{count}} fehlerhafte Feldbindung: {{reason}}",
+      "ifUnconfigured": "Die IF-Bedingung ist nicht konfiguriert.",
+      "loopUnconfigured": "Die Schleife ist nicht konfiguriert."
+    },
+    "showDetails": "Fehlerdetails anzeigen",
+    "hideDetails": "Fehlerdetails ausblenden"
   }
 }

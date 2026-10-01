@@ -71,6 +71,9 @@ export type IconName =
     | 'globe'
     | 'portal'
     | 'drag-handle'
+    | 'minus'
+    | 'chevron-up'
+    | 'fit-view'
 
 export type IconColor =
     | 'default'
