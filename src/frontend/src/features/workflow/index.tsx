@@ -148,6 +148,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         centerStartVersion: workflow.centerStartVersion,
         onInit: workflow.setReactFlowInstance, activeAction: workflow.sidebarAction,
         jointSourceId: workflow.jointSourceId, jointVerdicts: workflow.jointVerdicts,
+        jointDeadEndNodeId: workflow.jointDeadEndNodeId,
         onConfirmJoint: workflow.onConfirmJoint, onCancelJoint: workflow.onCancelJoint,
         onAddJoint: workflow.onStartJoint,
         onRemoveJoint: workflow.onRemoveJoint,

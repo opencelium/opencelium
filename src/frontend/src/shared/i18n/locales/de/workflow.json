@@ -152,6 +152,10 @@
     "enhancementScriptBroken_one": "{{count}} Schritt hat eine Anreicherung, deren Skript noch {{marker}} verwendet — der gelesene Verweis wurde mit dem Schritt entfernt, auf den er zeigte. Korrigieren Sie das Skript vor dem Speichern."
   },
   "joint": {
+    "noTargets": "Keine Methode kann Ziel eines Joints von dieser Methode sein — das Ziel muss später laufen, im selben Loop-Bereich.",
+    "picking": {
+      "hint": "Klicken Sie auf eine hervorgehobene Methode, um sie als Ziel des Joints festzulegen. Mit Esc abbrechen."
+    },
     "invalid": {
       "notAMethod": "Nur eine Methode kann Ziel eines Joints sein.",
       "differentLoopScope": "Das Ziel muss eine Methode im selben Loop-Bereich wie die ausgewählte sein — entweder beide außerhalb jeder Schleife oder beide in derselben Schleife.",

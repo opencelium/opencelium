@@ -152,6 +152,10 @@
     "enhancementScriptBroken_one": "{{count}} step has an enhancement whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving."
   },
   "joint": {
+    "noTargets": "No method can be the target of a joint from this one — a target must run later, in the same loop scope.",
+    "picking": {
+      "hint": "Click a highlighted method to make it the joint's target. Press Esc to cancel."
+    },
     "invalid": {
       "notAMethod": "Only a method can be the target of a joint.",
       "differentLoopScope": "The target must be a method in the same loop scope as the selected one — both outside every loop, or both inside the same loop.",
