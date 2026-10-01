@@ -14,7 +14,7 @@ import { CommandHint } from '../ui/CommandHint'
 
 type BuildIntroStepsOptions = {
     t: ReturnType<typeof useI18n<'onboarding'>>['t']
-    userName: string
+    userName?: string
     includeInvokerStep: boolean
     includeConnectorSteps: boolean
     showInvokerTask: boolean
@@ -58,7 +58,7 @@ export function buildIntroJoyrideSteps({ t, userName, includeInvokerStep, includ
             target: 'body',
             placement: 'center',
             disableBeacon: true,
-            title: t('steps.welcome.title', { name: userName }),
+            title: userName ? t('steps.welcome.title', { name: userName }) : t('steps.welcome.titleAnonymous'),
             content: <WelcomeContent userName={userName} />,
             data: data({ kicker: t('steps.welcome.kicker'), brand: true, primaryLabel: t('actions.showAround'), secondaryLabel: t('actions.skipForNow'), secondaryAction: onSkipTask, footerNote: <CommandHint command={COMMANDS.restart} /> }),
         },

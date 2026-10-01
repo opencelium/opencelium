@@ -9,7 +9,6 @@ const passwordRules = {
 const passwordSchema = z
     .string('Password is a required field')
     .min(8, 'Minimum 8 characters')
-    .max(16, 'Maximum 16 characters')
     .regex(passwordRules.upper, 'Must contain uppercase letter')
     .regex(passwordRules.lower, 'Must contain lowercase letter')
     .regex(passwordRules.number, 'Must contain a number')

@@ -13,7 +13,6 @@ export const setPasswordSchema = z
             .string()
             .min(1, 'setPassword.fields.password.required')
             .min(8, 'setPassword.fields.password.minLength')
-            .max(16, 'setPassword.fields.password.maxLength')
             .regex(passwordRules.upper, 'setPassword.fields.password.upper')
             .regex(passwordRules.lower, 'setPassword.fields.password.lower')
             .regex(passwordRules.number, 'setPassword.fields.password.number')

@@ -1,9 +1,9 @@
 {
   "list": {
     "title": "Rollen",
-    "subTitle": "Verwalten Sie Rollen, zugewiesene Komponenten und Berechtigungsstufen für Systembenutzer.",
+    "subTitle": "Rollen legen fest, was Benutzer erstellen, anzeigen, bearbeiten oder löschen dürfen.",
     "confirmDelete": {
-      "message": "Sind Sie sicher, dass Sie die Rolle mit dem Namen \"{{name}}\" löschen möchten?"
+      "message": "Möchten Sie die Rolle „{{name}}“ wirklich löschen? Dies kann nicht rückgängig gemacht werden."
     }
   },
   "actions": {
@@ -15,7 +15,7 @@
     "name": {
       "label": "Name",
       "errors": {
-        "name_already_exists": "Eine Rolle mit diesem Namen existiert bereits"
+        "name_already_exists": "Eine Rolle mit diesem Namen existiert bereits."
       }
     },
     "description": {
@@ -28,7 +28,7 @@
       "replace": "Symbol ersetzen",
       "delete": "Symbol löschen",
       "crop": {
-        "title": "Gruppensymbol zuschneiden",
+        "title": "Rollensymbol zuschneiden",
         "zoom": "Zoom",
         "cancel": "Abbrechen",
         "apply": "Zuschnitt anwenden",
@@ -36,7 +36,7 @@
       },
       "confirmDelete": {
         "title": "Symbol entfernen?",
-        "message": "Dies kann nicht widerrufen werden."
+        "message": "Dies kann nicht rückgängig gemacht werden."
       },
       "invalidType": "Das Symbol muss eine PNG- oder JPG-Datei sein (.png, .jpg, .jpeg)",
       "tooLarge": "Das Symbol muss kleiner als 10 MB sein"
@@ -63,13 +63,13 @@
     "modes": {
       "create": {
         "header": "Rolle erstellen",
-        "subheader": "Gruppen definieren Rollen und Berechtigungsstufen innerhalb des Systems. Jede Gruppe steuert, was Benutzer erstellen, anzeigen, bearbeiten oder löschen dürfen.",
-        "successMessage": "Rolle \"{{name}}\" wurde erfolgreich erstellt"
+        "subheader": "Rollen legen fest, was Benutzer erstellen, anzeigen, bearbeiten oder löschen dürfen.",
+        "successMessage": "Rolle „{{name}}“ wurde erfolgreich erstellt"
       },
       "update": {
         "header": "Rolle aktualisieren",
         "subheader": "Rolleninformationen ändern und speichern.",
-        "successMessage": "Rolle \"{{name}}\" wurde erfolgreich aktualisiert"
+        "successMessage": "Rolle „{{name}}“ wurde erfolgreich aktualisiert"
       },
       "view": {
         "header": "Rollendetails",
@@ -77,7 +77,7 @@
       }
     },
     "recommendations": {
-      "1": "Connector erstellen",
+      "1": "Konnektor erstellen",
       "2": "Workflow erstellen"
     },
     "steps": {
@@ -87,22 +87,22 @@
       },
       "permissions": {
         "header": "Berechtigungen",
-        "subheader": "Wählen Sie die Systemmodule aus, auf die diese Gruppe Zugriff hat."
+        "subheader": "Wählen Sie die Systemmodule aus, auf die diese Rolle Zugriff hat."
       }
     }
   },
   "confirmation": {
     "delete": {
-      "byName": "Rolle mit dem Namen „{{name}}“ löschen?",
-      "byId": "Rolle mit der ID „{{id}}“ löschen?"
+      "byName": "Rolle „{{name}}“ löschen?",
+      "byId": "Rolle #{{id}} löschen?"
     }
   },
   "lifecycle": {
     "uploadIcon": {
-      "failed": "Gruppe gespeichert, aber das Hochladen des Symbols ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
+      "failed": "Rolle gespeichert, aber das Hochladen des Symbols ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
     },
     "deleteIcon": {
-      "failed": "Gruppe gespeichert, aber das Entfernen des Symbols ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
+      "failed": "Rolle gespeichert, aber das Entfernen des Symbols ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
     }
   }
 }

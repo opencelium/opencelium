@@ -4,7 +4,7 @@
       "label": "Master Password",
       "info": {
         "title": "Master Password",
-        "content": "The Request Data section defines the payload that will be sent to the target system. You can specify static values or dynamically reference data from previous request results and webhooks."
+        "content": "The master password decrypts the stored credentials of this connector. It is set by an administrator in application.yml (opencelium.connector.master-password)."
       }
     },
     "button": {

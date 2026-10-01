@@ -44,7 +44,7 @@
         "header": "Apply Update",
         "subheader": "Execute the system update",
         "actions": {
-          "runUpdate": "Update OC"
+          "runUpdate": "Update OpenCelium"
         }
       }
     },
@@ -73,9 +73,9 @@
       "mongoDB": "MongoDB",
       "opencelium": "OpenCelium",
       "os": "Operating System",
-      "polyglot": "Polyglot"
+      "polyglot": "Script engine (Polyglot)"
     },
-    "hint": "Please, do not forget to create a backup of the system, before you start the update (see <1>docs</1>)."
+    "hint": "Back up the system before you start the update (see <1>docs</1>)."
   },
   "validation": {
     "requiredComponentsDown": "One or more required components are not operational. All required services must be running before you can proceed with the update.",
@@ -122,15 +122,15 @@
   "update": {
     "confirmRun": {
       "title": "Run Update",
-      "message": "Are you sure you want to update OpenCelium to version {{version}}? The application will be restarted and you will be logged out automatically once the update starts.",
+      "message": "Are you sure you want to update OpenCelium to version {{version}}? The application will be restarted and you will be signed out automatically once the update starts.",
       "confirm": "Run Update",
       "cancel": "Cancel"
     },
     "successTitle": "Update Started",
     "success": "The update of OpenCelium to version {{version}} has been started successfully.",
-    "successLogoutNotice": "For the update to take effect, you will be logged out automatically in {{count}} seconds.",
-    "successLogoutNotice_one": "For the update to take effect, you will be logged out automatically in {{count}} second.",
-    "hint": "Don't forget to clear browser cache (especially the javascript cache)."
+    "successLogoutNotice": "For the update to take effect, you will be signed out automatically in {{count}} seconds.",
+    "successLogoutNotice_one": "For the update to take effect, you will be signed out automatically in {{count}} second.",
+    "hint": "Clear your browser cache after the update."
   },
   "changelog": {
     "title": "Changelog of {{version}}",
