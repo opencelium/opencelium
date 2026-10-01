@@ -347,6 +347,9 @@
         "lookup": "Look up every customer in the support system",
         "customers": "Read all customers from the CRM"
       }
+    },
+    "sandbox": {
+      "unavailable": "Not available in the tutorial — this needs a real schedule. Try it once your workflow is saved."
     }
   },
   "checklist": {
