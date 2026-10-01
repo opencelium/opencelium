@@ -22,9 +22,33 @@ export type OverrideRequest = {
 }
 
 /**
+ * Fails a request without letting it reach the server. For a sandbox that owns the
+ * ids in a path but has no answer for what is being asked of them: declining would
+ * send the invented id to the real backend, which can only reply with an error toast
+ * about something the user never had. `baseQuery` turns this into a request error
+ * that skips the error bus, so callers unwind as on any failure and the sandbox
+ * decides what, if anything, to tell the user.
+ */
+export const OVERRIDE_UNAVAILABLE: unique symbol = Symbol('override-unavailable')
+
+/** The `error` of the `CUSTOM_ERROR` that `baseQuery` returns for `OVERRIDE_UNAVAILABLE`. */
+export const OVERRIDE_UNAVAILABLE_ERROR = 'Unavailable in sandbox'
+
+/**
+ * Whether a caught request error is a sandbox refusal rather than a real failure. For
+ * call sites that toast their own error: the sandbox has already said why, and a
+ * second, red "failed" notification would contradict it.
+ */
+export function isOverrideUnavailableError(error: unknown): boolean {
+    return typeof error === 'object' && error !== null
+        && 'status' in error && error.status === 'CUSTOM_ERROR'
+        && 'error' in error && error.error === OVERRIDE_UNAVAILABLE_ERROR
+}
+
+/**
  * Answers requests the static map cannot: paths that carry an id, and writes whose
  * result depends on what was written. Returning `undefined` declines, and the
- * request goes to the server untouched.
+ * request goes to the server untouched; `OVERRIDE_UNAVAILABLE` fails it locally.
  *
  * One handler at a time, because only one sandbox can be running: the tutorial's
  * schedules are the sole user, and a second registration would silently replace it

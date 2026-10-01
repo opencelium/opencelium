@@ -3,6 +3,9 @@ import {
     clearRequestOverrides,
     findRequestOverride,
     hasRequestOverrides,
+    isOverrideUnavailableError,
+    OVERRIDE_UNAVAILABLE,
+    OVERRIDE_UNAVAILABLE_ERROR,
     setRequestOverrideHandler,
     setRequestOverrides,
 } from './requestOverrides'
@@ -85,5 +88,17 @@ describe('requestOverrides', () => {
             expect(hasRequestOverrides()).toBe(false)
             expect(findRequestOverride('/scheduler/all', 'GET')).toBeUndefined()
         })
+    })
+
+    it('passes the handler\'s unavailable marker through, so baseQuery can fail the request', () => {
+        setRequestOverrideHandler(() => OVERRIDE_UNAVAILABLE)
+        expect(findRequestOverride('/scheduler/-1', 'PUT', {})).toBe(OVERRIDE_UNAVAILABLE)
+    })
+
+    it('tells a sandbox refusal apart from a real request failure', () => {
+        expect(isOverrideUnavailableError({ status: 'CUSTOM_ERROR', error: OVERRIDE_UNAVAILABLE_ERROR })).toBe(true)
+        expect(isOverrideUnavailableError({ status: 'CUSTOM_ERROR', error: 'other' })).toBe(false)
+        expect(isOverrideUnavailableError({ status: 500, data: {} })).toBe(false)
+        expect(isOverrideUnavailableError(undefined)).toBe(false)
     })
 })
