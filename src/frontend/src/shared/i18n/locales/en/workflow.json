@@ -888,5 +888,36 @@
     "masterPasswordNotConfigured": "No master password is configured",
     "masterPasswordNotConfiguredDescription": "Ask an administrator to set opencelium.connector.master-password in /backend/src/main/resources/application.yml and restart the backend to enable browsing this connector's GraphQL API.",
     "retry": "Try again"
+  },
+  "minimap": {
+    "title": "Minimap",
+    "ariaLabel": "Workflow minimap",
+    "stepCount": "{{count}} steps",
+    "stepCount_one": "{{count}} step",
+    "collapse": "Collapse minimap",
+    "expand": "Expand minimap",
+    "attention": "{{count}} steps need attention",
+    "attention_one": "{{count}} step needs attention",
+    "issueCounter": "{{current}} / {{total}}",
+    "previousIssue": "Previous step with a problem",
+    "nextIssue": "Next step with a problem",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fitView": "Fit the workflow to the screen",
+    "legend": {
+      "system": "System",
+      "trigger": "Triggered workflow",
+      "operator": "Operator",
+      "otherConnectors": "Other connectors"
+    },
+    "problems": {
+      "testRunFailed": "The test run failed at this step.",
+      "binding": "{{count}} broken field bindings: {{reason}}",
+      "binding_one": "{{count}} broken field binding: {{reason}}",
+      "ifUnconfigured": "The IF condition is not configured.",
+      "loopUnconfigured": "The loop is not configured."
+    },
+    "showDetails": "Show error details",
+    "hideDetails": "Hide error details"
   }
 }

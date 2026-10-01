@@ -21,6 +21,7 @@ import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWor
 import { EMPTY_TEST_RUN_SCOPE, getTestRunScope } from './testRunScope.utils';
 import { useEscapeKey } from './useEscapeKey';
 import { TestRunDebugControls } from './TestRunDebugControls';
+import { WorkflowMinimap } from './minimap/WorkflowMinimap';
 import { useBoxSelection } from './useBoxSelection';
 import { useCtrlClickContextMenu } from './useCtrlClickContextMenu';
 import { getDragSubtreeNodeIds } from '../../drag-drop/workflowDropTarget.utils';
@@ -394,6 +395,9 @@ export function WorkflowCanvas({
             </Controls>
             <TestRunDebugControls />
           </Panel>
+          {/* The lens legend takes the same corner, and the lens rearranges the graph
+              into cards the overview would not match. */}
+          {!isLensOpen && <WorkflowMinimap fieldBindings={fieldBindings} isAboveLogsBar={hasOverlaidLogsBar} />}
           {isLensOpen && (
             <Panel position="bottom-right"
               className={hasOverlaidLogsBar ? 'bindingLensLegendPanelAboveLogs' : undefined}>
