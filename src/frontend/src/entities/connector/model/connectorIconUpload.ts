@@ -1,4 +1,4 @@
-import {apiExecutor} from '@shared/api/apiExecutor'
+import {apiExecutor, type ApiExecutorOptions} from '@shared/api/apiExecutor'
 import {isImageFile} from '@shared/utils/fileTypeGuards'
 import type {Connector, ConnectorUpdateDto} from '@entities/connector/model/types'
 
@@ -14,6 +14,16 @@ const isNonEmptyString = (value: unknown): value is string =>
 
 const resolveConnectorId = (ctx: IconCtx): number | undefined =>
     ctx.response?.connectorId ?? ctx.payload?.connectorId
+
+/** Resolves with the response body, or with the RTK Query error object on failure. */
+export const postConnectorIcon = (connectorId: number, file: File, options?: ApiExecutorOptions) => {
+    const body = new FormData()
+    body.append('file', file)
+    return apiExecutor({url: `/connector/${connectorId}/icon`, method: 'POST', body, options})
+}
+
+export const removeConnectorIcon = (connectorId: number, options?: ApiExecutorOptions) =>
+    apiExecutor({url: `/connector/${connectorId}/icon`, method: 'DELETE', options})
 
 /** Fires when the user staged a freshly picked image to upload or replace the icon. */
 export const hasConnectorIconFile = (ctx: IconCtx) => isImageFile(ctx.formData?.icon)
@@ -39,14 +49,7 @@ export const uploadConnectorIcon = async (ctx: IconCtx) => {
 
     if (!isImageFile(icon) || !connectorId) return
 
-    const body = new FormData()
-    body.append('file', icon)
-
-    await apiExecutor({
-        url: `/connector/${connectorId}/icon`,
-        method: 'POST',
-        body,
-    })
+    await postConnectorIcon(connectorId, icon)
 }
 
 /** Remove the stored icon file and clear the connector's icon column. */
@@ -54,8 +57,5 @@ export const deleteConnectorIcon = async (ctx: IconCtx) => {
     const connectorId = resolveConnectorId(ctx)
     if (!connectorId) return
 
-    await apiExecutor({
-        url: `/connector/${connectorId}/icon`,
-        method: 'DELETE',
-    })
+    await removeConnectorIcon(connectorId)
 }

@@ -1,0 +1,21 @@
+/* Sits below the WorkflowHeader, which overlays the canvas top (see .canvasTopLeftPanel). */
+.jointPickingPanel {
+  top: 65px !important;
+}
+
+.jointPickingBar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 12px;
+  color: var(--color-text-primary);
+  background: var(--color-background-elevated);
+  border: 1px solid var(--color-status-success-fg);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  font-size: 13px;
+}
+
+.jointPickingBarEmpty {
+  border-color: var(--color-status-warning-fg);
+}

@@ -141,7 +141,8 @@
     "loadTemplateFailed": "Failed to load template",
     "downloadTemplateFailed": "Failed to download template.",
     "copySnapshotIdSuccess": "Snapshot ID copied to clipboard",
-    "nodeCopied": "Node copied",
+    "nodeCopied": "Nodes copied",
+    "nodeCopied_one": "Node copied",
     "nodePasted": "Node pasted",
     "nodeDuplicated": "Node duplicated",
     "deleteVersionSuccess": "Version deleted",
@@ -152,6 +153,10 @@
     "enhancementScriptBroken_one": "{{count}} step has an enhancement whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving."
   },
   "joint": {
+    "noTargets": "No method can be the target of a joint from this one — a target must run later, in the same loop scope.",
+    "picking": {
+      "hint": "Click a highlighted method to make it the joint's target. Press Esc to cancel."
+    },
     "invalid": {
       "notAMethod": "Only a method can be the target of a joint.",
       "differentLoopScope": "The target must be a method in the same loop scope as the selected one — both outside every loop, or both inside the same loop.",
@@ -471,7 +476,8 @@
   },
   "contextMenu": {
     "changeLabel": "Change Label",
-    "changeConnector": "Change Connector",
+    "changeConnector": "Use Another Connector",
+    "changeConnectorImage": "Change Connector Image",
     "openConfiguration": "Open Configuration",
     "configureAggregator": "Configure Aggregator",
     "request": "Request",
@@ -491,8 +497,17 @@
       "minimize": "Minimize comment"
     }
   },
+  "connectorImageDialog": {
+    "title": "Connector Image",
+    "intro": "This image belongs to the connector \"{{connector}}\". Changing it updates every step and workflow that uses this connector.",
+    "updated": "Connector image updated",
+    "updateFailed": "Could not update the connector image",
+    "removed": "Connector image removed",
+    "removeFailed": "Could not remove the connector image",
+    "confirmRemoveMessage": "The image is removed everywhere this connector is used. This can't be undone."
+  },
   "changeConnectorDialog": {
-    "title": "Change Connector",
+    "title": "Use Another Connector",
     "intro": "Select another connector of the invoker \"{{invoker}}\" for this step.",
     "selectPlaceholder": "Select a connector",
     "change": "Change"
@@ -831,13 +846,17 @@
     "pairTooltip": "{{provider}} → {{consumer}}",
     "bindingCount": "{{count}} bindings",
     "bindingCount_one": "{{count}} binding",
+    "fieldCount": "{{count}} fields",
+    "fieldCount_one": "{{count}} field",
+    "referenceCount": "{{count}} references",
+    "referenceCount_one": "{{count}} reference",
     "brokenCount": "{{count}} broken",
     "brokenCount_one": "{{count}} broken",
     "expandHint": "click to expand",
     "editHint": "click to edit",
     "drawerTitle": "Field binding",
     "drawerGone": "This binding no longer exists.",
-    "drawerValueReference": "This reference sits in the field's own value, so there is no enhancement to edit here. Open the method editor to change or remove it.",
+    "drawerValueReference": "This reference sits in the field's own value, so there is no enhancement to edit yet. Create one to transform the value with a script, or open the method editor to change or remove it.",
     "drawerSimpleCode": "This enhancement was built in the old simple mode, so its logic is not a script and cannot be shown here. Anything you type below replaces it.",
     "openInBodyEditor": "Open in the body editor",
     "collapseCard": "Collapse",
@@ -861,9 +880,12 @@
     "tableSearch": "Filter by method or field",
     "tableColumnTarget": "Receives",
     "tableColumnSource": "From",
-    "tableColumnKind": "Kind",
-    "tableKindDirect": "Direct",
-    "tableKindEnhancement": "Enhancement",
+    "sourceCount": "{{count}} sources",
+    "sourceCount_one": "{{count}} source",
+    "tableExpandAll": "Expand all",
+    "tableCollapseAll": "Collapse all",
+    "tableExpandRow": "Show sources",
+    "tableCollapseRow": "Hide sources",
     "reasonOutOfScope": "Not readable here",
     "reasonMissingMethod": "Method missing",
     "reasonMissingVariable": "Script variable missing",
