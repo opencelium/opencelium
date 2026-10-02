@@ -2,6 +2,45 @@
 Changelog
 *********
 
+5.2
+========
+ 
+:Date: October 7, 2026
+
+Features
+--------
+* Field Reference Overview
+* Automatic Field Reference Remapping
+* UI Onboarding Tour
+* Gravatar Support
+* Easy Connector Replacement
+* Multi-Node Selection via Mouse Drag
+
+Fixes
+--------
+
+* Fix buffered log blocks being stored for failed executions (OC-1539)
+* Fix incorrect execution percentage displayed in the scheduler list (OC-1535)
+* Fix connector and invoker icons not being readable with different themes (OC-1544)
+* Allow username to be used as login ID when creating users (OC-1545)
+* Fix invoker dialog scrolling completely instead of only scrolling the content area (OC-1546)
+* Fix console error when opening step 2 (Authentication) of the Invoker details (OC-1547)
+* Fix fields appearing editable in the Invoker details view (OC-1549)
+* Update backup link in the update wizard (OC-1553)
+* Prevent storing decrypted connector credentials (OC-1570)
+* Prevent double encryption of credentials in the findById decrypt fallback (OC-1571)
+* Fix incorrect "Status" selection in the operator condition dialog for body fields containing .status (OC-1573)
+* Fix error when loading the i-doit-OTRS template (OC-1643)
+* Fix error when filtering and selecting fields in references (OC-1582)
+* Fix issues with double quotes in request URLs (OC-1597)
+* Prevent duplicate requests when saving the workflow name (OC-1609)
+* Prevent access to usage and execution statistics without a valid subscription (OC-1610)
+* Fix empty IF operator conditions after upgrading from 4.8 to 5.1 (OC-1618)
+* Fix issues identified during internal testing (OC-1631)
+* Fix template condition validation (OC-1632)
+* Enable multi-node selection and moving nodes together using commands (OC-1633)
+
+
 5.1
 ========
  
