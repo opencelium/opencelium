@@ -1,7 +1,7 @@
 # Security — authentication flow diagrams
 
 Login sequence diagrams behind architecture decision #10 (pluggable authentication,
-separate from authorization) and roadmap story ST-03 "Authentication (OIDC + portal)".
+separate from authorization) and roadmap story OC-1585 "Authentication (OIDC + portal)".
 
 This README is the single source of truth for these diagrams — Jira tickets link here
 (branch URL, not commit-pinned) instead of attaching snapshots; a diagram change is one
@@ -12,8 +12,9 @@ Common to all flows: authentication produces a verified principal (identity, ten
 groups), and core always issues its own session/app JWT carrying the tenant ID —
 IdP/portal tokens never reach the frontend.
 
-Status: the portal's OIDC-OP role and its credential-login API require portal-side
-changes — PM confirmation pending.
+Status: the portal-as-OIDC-OP design was confirmed by PM on 2026-09-21 (architecture
+decision #10); the portal-side changes for the OP role and the credential-login API
+are verified by the first OC-1585 task.
 
 ## Self-hosted — direct flow
 

@@ -242,7 +242,7 @@ Fast tests are kept strictly separate from slow, Docker-dependent ones:
 
 **Unit tests** — pure Java: no Spring context, no database, no network. Instantiate the class under test with `new` (or `@InjectMocks`), mock collaborators with `@ExtendWith(MockitoExtension.class)` + `@Mock`. These run in milliseconds and should cover the bulk of the logic — the engine, IF/LOOP operators, mapping, validation, exception paths. Never use `@SpringBootTest` or slice annotations in a unit test.
 
-**Slice tests** — load exactly one Spring layer: `@WebMvcTest(MyController.class)` for controllers, `@DataMongoTest` for Mongo repositories, `@JsonTest` for serialization. Declare `@ActiveProfiles("test")` on every slice test.
+**Slice tests** — load exactly one Spring layer: `@WebMvcTest(MyController.class)` for controllers, `@JsonTest` for serialization. No `@DataMongoTest` in `core`: slices ignore `CoreApplication`'s exclusion of Boot's Mongo auto-configuration, so Mongo code is tested in a full `@SpringBootTest` integration test. Declare `@ActiveProfiles("test")` on every slice test.
 
 **Integration tests** — full `@SpringBootTest` against real databases provisioned by Testcontainers. `*IT` suffix, never in `src/test`. Override datasource URLs with `@DynamicPropertySource` — never hard-code container ports or credentials. These are the slowest tests; run them deliberately. They are excluded from `check` and triggered explicitly in CI.
 
