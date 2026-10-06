@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    OpenCelium invoker file format, version 6.
+
+    What this schema checks and what it leaves out:
+      * Structure, element order and the fixed vocabularies are checked here, so tools and editors
+        can validate a file on their own.
+      * Rules about values and about how parts relate are checked by the invoker model when the file
+        is read. Those checks name the offending element and explain the fix, which a schema
+        violation message cannot.
+
+    Invoker files use no XML namespace. The root element's version attribute names the format
+    version: 5.x files have none, and a 6.x file keeps this schema. A future major version gets its
+    own schema, and readers reject versions they do not know.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="6.0">
+
+    <xs:element name="invoker" type="Invoker"/>
+
+    <!-- ================================================================ invoker -->
+
+    <xs:complexType name="Invoker">
+        <xs:sequence>
+            <xs:element name="name" type="Text"/>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="hint" type="xs:string" minOccurs="0"/>
+            <xs:element name="icon" type="xs:string" minOccurs="0"/>
+            <xs:element name="category_tags" type="CategoryTags" minOccurs="0"/>
+            <xs:element name="authType" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="version" use="required" type="FormatVersion"/>
+        <xs:attribute name="id" use="required" type="Text"/>
+    </xs:complexType>
+
+    <xs:complexType name="CategoryTags">
+        <xs:sequence>
+            <xs:element name="item" type="Text" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- ================================================================ simple types -->
+
+    <!-- Text containing at least one non-whitespace character. -->
+    <xs:simpleType name="Text">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[\s\S]*\S[\s\S]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="FormatVersion">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="6\.[0-9]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>
