@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    participant U as User (Browser)
+    participant FE as Frontend
+    participant BE as Backend (OIDC client, owns users + tenantID in local DB)
+    participant G as Google / Apple
+
+    Note over U,G: SELF-HOST DEPLOYMENT — Direct flow (no Service Portal)
+
+    U->>FE: Click "Login with Google"
+    FE->>BE: GET /auth/login?provider=google
+    BE-->>U: 302 Redirect to Google authorize URL (state + PKCE)
+    U->>G: Login on accounts.google.com (user enters credentials at Google only)
+    G-->>U: 302 Redirect to Backend callback (+ code)
+    U->>BE: GET /callback?code=...
+    BE->>G: Exchange code for token (server-to-server)
+    G-->>BE: Google ID token (sub, email)
+    Note over BE: Validate signature via Google JWKS<br/>Map (google, sub) → user in LOCAL DB<br/>Resolve/assign tenantID locally<br/>(account linking, invites live here)
+    BE-->>FE: Session / app token (contains tenant_id)
+    FE-->>U: Logged in, tenant context set
