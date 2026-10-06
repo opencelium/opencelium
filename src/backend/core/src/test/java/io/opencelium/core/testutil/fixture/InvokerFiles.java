@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 /** Invoker files from {@code src/test/resources/invoker}, and files written inline in a test. */
 public final class InvokerFiles {
 
-    /** A v6 invoker with every part of the header filled in. */
+    /** A v6 invoker with every part of the header filled in and every kind of setting. */
     public static final String V6_SERVICE_DESK = "v6/service-desk.xml";
 
     private InvokerFiles() {
@@ -27,6 +27,18 @@ public final class InvokerFiles {
 
     public static byte[] xml(String text) {
         return text.getBytes(StandardCharsets.UTF_8);
+    }
+
+    /** A minimal valid v6 file whose requiredData can be replaced. */
+    public static byte[] v6WithSettings(String settings) {
+        return xml("""
+                <invoker version="6.0" id="minimal">
+                    <name>Minimal</name>
+                    <requiredData>
+                %s
+                    </requiredData>
+                </invoker>
+                """.formatted(settings));
     }
 
     /** The smallest valid v6 file: an id and a name. */
