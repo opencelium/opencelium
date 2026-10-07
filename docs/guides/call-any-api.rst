@@ -5,13 +5,13 @@ Call any API
 .. contents::
    :local:
 
-You do not always want to write an invoker. 5.0 gives you two ways around it, plus
+You do not always want to write an API definition. 5.0 gives you two ways around it, plus
 first-class GraphQL and XML support.
 
 A one-off REST call
 ===================
 
-Add a step with **Add HTTP Request**. You get a step with no invoker and no
+Add a step with **Add HTTP Request**. You get a step with no API definition and no
 connector, where you supply everything:
 
 * the **HTTP method**, from a selector,
@@ -19,13 +19,13 @@ connector, where you supply everything:
 * **headers**,
 * the **body**.
 
-Use it for an endpoint you call once, or a service too small to justify an invoker.
+Use it for an endpoint you call once, or a service too small to justify an API definition.
 
 .. note::
-   The trade-off: an invoker is reusable, self-documenting, gives you the
+   The trade-off: an API definition is reusable, self-documenting, gives you the
    connector health check, and can describe pagination. A simple HTTP request
    gives you none of that. If you find yourself adding the same raw call to
-   several workflows, write an invoker instead —
+   several workflows, write an API definition instead —
    :doc:`../concepts/connectors-and-invokers`.
 
 GraphQL

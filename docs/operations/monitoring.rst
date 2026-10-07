@@ -31,7 +31,7 @@ depends on.
      - Performs a real SMTP connection test. *Down* until ``spring.mail`` is
        configured and reachable.
    * - **Polyglot**
-     - The ``polyglot-engine`` service for Python and Ruby enhancements. *Down*
+     - The ``polyglot-engine`` service for Python and Ruby transformations. *Down*
        unless you deploy it — harmless if you do not use those languages.
    * - **Operating System**
      - Host information.

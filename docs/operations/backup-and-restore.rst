@@ -26,7 +26,7 @@ OpenCelium keeps state in three places, and a usable backup needs all of them:
    * - **MongoDB**
      - The workflow documents — the integrations themselves.
    * - **Filesystem**
-     - All programm files, invokers and templates.
+     - All programm files, API definitions and templates.
 
 Restoring only the SQL database leaves you with connectors and schedules pointing
 at workflows that no longer exist.
@@ -55,7 +55,7 @@ Old backups will be removed after 14 days.
 | - backup of the installation directory /opt/opencelium/
 
 Full Restore
-=======
+============
 
 To restore a local backup of your OpenCelium installation, please execute the following command as root.
 
@@ -73,7 +73,7 @@ To restore a local backup of your OpenCelium installation, please execute the fo
 
 
 Partitial Restore
-=======
+=================
 
 Mostly it is not needed to restore everything at once.
 A partial restore of OpenCelium allows you to selectively recover specific components such as databases or files.
@@ -109,7 +109,7 @@ A partial restore of OpenCelium allows you to selectively recover specific compo
 	mongorestore --drop --db opencelium /var/backups/opencelium/restore/opencelium/
 
 
-**Restore files and folders: (all programm files, invokers and templates)**
+**Restore files and folders: (all programm files, API definitions and templates)**
 
 In case you have to replace single files and folders, you will find all backuped files within the extracted
 backup in /var/backups/opencelium/restore/opt-backup .

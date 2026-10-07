@@ -22,7 +22,7 @@ Installation
 
 Additional Information are available at github (https://github.com/opencelium/csv2api)
 
-Afterwords please download the CSV2api Invoker file from the service portal (https://service.opencelium.io) an import it into you OpenCelium instance.
+Afterwords please download the CSV2api API definition file from the service portal (https://service.opencelium.io) an import it into you OpenCelium instance.
 
 Serv file through HTTP
 """""""""""""""""""""""
@@ -86,7 +86,7 @@ Additional Service
 """""""""""""""""""
 
 User **with subscription** has an access to Service Portal. There is a tool for easy conversion
-a csv file into an invoker file.
+a csv file into an API definition file.
 
 |image2|
 

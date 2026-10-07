@@ -80,7 +80,7 @@ GraphQL schema and the System Configuration page. ASCII characters only.
 opencelium.polyglot
 ===================
 
-The external engine that executes Python and Ruby enhancements.
+The external engine that executes Python and Ruby transformations.
 
 .. code-block:: yaml
 
@@ -101,7 +101,7 @@ The external engine that executes Python and Ruby enhancements.
 .. warning::
    This block belongs **under** ``opencelium:``. The backend binds it from the
    prefix ``opencelium.polyglot``; a top-level ``polyglot:`` block is silently
-   ignored, enhancements keep running on the internal JavaScript engine, and
+   ignored, transformations keep running on the internal JavaScript engine, and
    nothing tells you why.
 
 Reachability is reported as the **Polyglot** row on :ref:`ref-system-check`.
@@ -176,27 +176,69 @@ health service answers on the configured port.
    itself instead. A separate unit is usually preferable: the engine's lifecycle,
    logs and memory limits stay independent of the backend.
 
+.. _ref-config-online-services:
+
 opencelium.online-services
 ==========================
 
-Automatic synchronisation of invokers and workflow templates from the Service
-Portal.
+One switch for every feature that reaches out to the internet, plus the scheduled
+synchronisation of API definitions and workflow templates from the Service Portal.
 
 .. code-block:: yaml
 
    opencelium:
      online-services:
+       active: true            # master switch, default true
        invoker-sync:
          time: 0 0 0 * * *
          active: false
        template-sync:
          time: 0 0 0 * * *
          active: false
-       active: false           # master switch
+
+**active** defaults to ``true``: a missing key, or the whole block commented out
+as in the shipped ``application.yml``, means online services are **on**. Setting it
+to ``false`` switches off:
+
+* the Service Portal connection — license activation, API definition and
+  template sync, the usage report,
+* installing API definitions from the online repository (``install
+  online-invokers`` and the onboarding tour),
+* the online versions in the Update Assistant — an offline package still works,
+* the Gravatar suggestion for profile pictures.
+
+With online services off, the license page offers **Generate Activation Request**
+and **Import License** (a ``.txt`` file) instead of **Activate**. Features that
+are blocked say why in their tooltip — browser offline, switched off here, or the
+Service Portal not reachable from the server.
+
+.. warning::
+   An installation that started on a version before 4.5.1 and was upgraded since
+   carries ``active: false``: the 4.5.1 configuration migration wrote it, and it
+   leaves these features off without anyone having chosen that. Check the value after upgrading if the onboarding tour's *Install from
+   online repository* is disabled.
 
 .. note::
    In 5.0 these are real booleans. Earlier versions wrote them as quoted strings
    (``"false"``); drop the quotes when carrying an old file over.
+
+.. _ref-config-invoker-repository:
+
+opencelium.invoker-repository
+=============================
+
+*New in 5.2.* Where ``install online-invokers`` downloads API definitions from.
+
+.. code-block:: yaml
+
+   opencelium:
+     invoker-repository:
+       url: https://api.github.com/repos/opencelium/invoker/contents
+       branch: main
+
+**url** is the GitHub *Contents API* URL of the folder holding the ``.xml``
+files; **branch** is the branch, tag or commit to read. Point them at a fork to
+distribute your own API definitions the same way.
 
 spring.security.ldap
 ====================

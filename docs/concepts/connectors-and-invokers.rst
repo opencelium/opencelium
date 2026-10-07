@@ -1,20 +1,25 @@
 .. _concept-connectors:
 
-########################
-Connectors and invokers
-########################
+##############################
+Connectors and API definitions
+##############################
 
 .. contents::
    :local:
 
-These two are constantly confused, so it is worth being precise: an **invoker**
-describes *how to talk to a kind of system*; a **connector** is *one instance of
-such a system, with credentials*.
+These two are constantly confused, so it is worth being precise: an **API
+definition** describes *how to talk to a kind of system*; a **connector** is *one
+instance of such a system, with credentials*.
 
-Invoker
-=======
+.. note::
+   Up to 5.1 the interface called an API definition an **invoker**. The REST API,
+   the command palette (``upload invoker``) and the folder on disk still use that
+   name.
 
-An invoker is a definition file (XML) that describes an API:
+API definition
+==============
+
+An API definition is a definition file (XML) that describes an API:
 
 * the **authentication type** — API key, token, basic, or endpoint
   authentication — and the fields required for it,
@@ -24,42 +29,89 @@ An invoker is a definition file (XML) that describes an API:
 * optionally a **pagination** description, so OpenCelium can fetch a paged
   result set as a whole (see :ref:`concept-pagination`).
 
-One invoker is written once per product. `i-doit`, `CheckMK`, `OTRS` are
-invokers.
+One API definition is written once per product. `i-doit`, `CheckMK`, `OTRS` are
+API definitions.
 
-Invokers live in ``src/backend/src/main/resources/invoker`` and can be created
-in the UI, uploaded as XML, or synchronised from the Service Portal.
+API definitions live in ``src/backend/src/main/resources/invoker``. The admin menu
+lists them under **Configurations → API Definitions**. There are four ways to add
+one:
+
+* **create** it in the UI,
+* **upload** a file — ``.xml``, or a ``.zip`` of several, up to 1 GB,
+* **install** them from the online repository *(5.2)* — see below,
+* **synchronise** them from the Service Portal (subscribers).
+
+Install from the online repository
+----------------------------------
 
 .. note::
-   Editing an invoker file does **not** update the connectors and workflows that
-   already use it. That is deliberate — an invoker change is not always wanted
+   **New in 5.2.**
+
+The public repository `github.com/opencelium/invoker
+<https://github.com/opencelium/invoker>`_ holds the API definitions maintained by
+the OpenCelium team. Install them with the palette command
+``install online-invokers`` (or the onboarding tour's *Install from online
+repository*). Files already on the server are updated, new ones are added, and API
+definitions that exist only on your server are kept. It needs the permission to
+create API definitions, internet access from the server, and online services
+switched on; the repository location is configurable — see
+:ref:`ref-config-online-services`.
+
+.. note::
+   Editing an API definition file does **not** update the connectors and workflows that
+   already use it. That is deliberate — an API definition change is not always wanted
    downstream. Synchronise explicitly when you want it to propagate.
 
 Connector
 =========
 
-A connector is an invoker plus:
+A connector is an API definition plus:
 
 * a **title** and description,
 * the **credentials** for one concrete system (the fields come from the
-  invoker's authentication type),
+  API definition's authentication type),
 * a **timeout** (default ``1000``) and an **SSL certificate** flag,
 * optionally an icon, which is what you see on the canvas.
 
 `Production CheckMK` and `Staging CheckMK` are two connectors over the same
-CheckMK invoker.
+CheckMK API definition. In a workflow, **Use Another Connector** on a step's
+context menu switches it between such connectors without rebuilding it — see
+:doc:`../guides/build-a-workflow`.
+
+Duplicate a connector
+---------------------
+
+.. note::
+   **New in 5.2.**
+
+The fastest way to the second of those connectors is the **Duplicate connector**
+icon in the connector list. It opens the connector wizard pre-filled from the
+original — title ``<title> (copy)``, description, API definition, timeout and SSL
+flag — so you only adjust what differs, typically the URL and the credentials, and
+save. The icon is not copied. Duplicating needs the permission to create
+connectors.
+
+.. image:: ../img/connector/OC5_connector-duplicate.png
+   :align: center
+   :width: 900
 
 Availability
 ============
 
-A connector can be health-checked: OpenCelium performs the invoker's test
-operation against the connector's credentials. In the workflow editor the result
-appears as a status dot on connector nodes and in the step drawer:
+A connector can be checked with a **connector test** (called *connection test* up
+to 5.1): OpenCelium performs the API definition's test operation against the
+connector's credentials. In the workflow editor the result appears as a status dot
+on connector nodes and in the step drawer:
 
 * **green** — the test passed,
-* **red** — the test failed; the tooltip carries the reason,
-* **grey** — the check is still running,
+* **orange** — the credentials were rejected,
+* **red** — the system could not be reached, or the test failed for another
+  reason; the tooltip carries it,
+* **grey** — not tested yet,
 * **locked** — the credentials need the master password.
+
+From 5.2 an orange or red dot pulses. Hovering it shows a pencil that opens the
+**Update Connector** wizard on its *Credentials* step, right from the canvas.
 
 The point is to notice a broken target system while building, not in production.
 
@@ -81,7 +133,7 @@ Pagination
 ==========
 
 Some APIs return data page by page. Rather than modelling that in every
-workflow, you describe it once in the invoker, in a ``pagination`` element at the
+workflow, you describe it once in the API definition, in a ``pagination`` element at the
 same level as ``authType`` and ``operations``. OpenCelium then fetches all pages
 and hands the workflow the complete result.
 
@@ -141,5 +193,5 @@ Where to go next
 ================
 
 * :doc:`../guides/build-a-workflow` — use a connector in a workflow.
-* :doc:`../guides/call-any-api` — when you do *not* want to write an invoker.
+* :doc:`../guides/call-any-api` — when you do *not* want to write an API definition.
 * :doc:`../reference/screens` — the connector screens field by field.
