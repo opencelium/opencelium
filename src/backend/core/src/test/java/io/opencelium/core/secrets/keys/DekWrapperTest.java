@@ -67,7 +67,7 @@ class DekWrapperTest {
 
 	@Test
 	void unwrapRejectsADamagedDocumentNamingTheProblem() {
-		var damaged = new WrappedDek("id-1", "self", "k-01", 1, null, new byte[48], NOW);
+		var damaged = new WrappedDek("id-1", TenantId.SELF.value(), RootKey.INITIAL_ID, 1, null, new byte[48], NOW);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> wrapper.unwrap(randomRootKey(), damaged))
 				.withMessageContaining("id-1").withMessageContaining("damaged").withMessageContaining("iv");

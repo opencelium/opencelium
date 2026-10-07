@@ -40,7 +40,7 @@ class RootKeyLoggingTest {
 		new SecureRandom().nextBytes(bytes);
 		String key = Base64.getEncoder().encodeToString(bytes);
 
-		start(Map.of("OC_MASTER_KEY", key));
+		start(Map.of(RootKeyResolver.ENV_VARIABLE, key));
 
 		assertThat(output).contains("Master key loaded from environment variable OC_MASTER_KEY (key id k-01)")
 				.doesNotContain(key);

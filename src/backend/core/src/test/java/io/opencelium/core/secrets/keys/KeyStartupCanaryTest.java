@@ -21,6 +21,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import io.opencelium.common.tenant.TenantId;
+import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.testsupport.CoreStartup;
 import io.opencelium.core.testsupport.LocalMongo;
 
@@ -71,7 +72,7 @@ class KeyStartupCanaryTest {
 		Path keyFile = keys.resolve("a.key");
 		storeDataKeyWrappedWith(new RootKeyGenerator().generate(keyFile));
 
-		start(Map.of(), "--opencelium.master-key-file=" + keyFile).close();
+		start(Map.of(), masterKeyFile(keyFile)).close();
 
 		assertThat(output).contains("Master key canary unwrap ok (key id k-01)");
 	}
@@ -82,7 +83,7 @@ class KeyStartupCanaryTest {
 		Path otherKeyFile = keys.resolve("b.key");
 		new RootKeyGenerator().generate(otherKeyFile);
 
-		assertThatThrownBy(() -> start(Map.of(), "--opencelium.master-key-file=" + otherKeyFile));
+		assertThatThrownBy(() -> start(Map.of(), masterKeyFile(otherKeyFile)));
 
 		assertThat(output).contains("APPLICATION FAILED TO START").contains(KeyStartupException.RESTORE_OR_RESET)
 				.contains("cannot decrypt the stored data key of tenant 'self'")
@@ -103,9 +104,9 @@ class KeyStartupCanaryTest {
 
 	@Test
 	void startStopsWhenTheStoredDataKeyLacksFields(CapturedOutput output) {
-		mongo.getCollection("keys").insertOne(new Document("tenantId", "self"));
+		mongo.getCollection("keys").insertOne(new Document("tenantId", TenantId.SELF.value()));
 
-		assertThatThrownBy(() -> start(Map.of("OC_MASTER_KEY", randomKey())));
+		assertThatThrownBy(() -> start(Map.of(RootKeyResolver.ENV_VARIABLE, randomKey())));
 
 		assertThat(output).contains("APPLICATION FAILED TO START")
 				.contains("The oldest stored data key in collection 'keys' is damaged")
@@ -114,10 +115,11 @@ class KeyStartupCanaryTest {
 
 	@Test
 	void startStopsWhenTheStoredDataKeyHasAnIvOfTheWrongLength(CapturedOutput output) {
-		mongo.getCollection("keys").insertOne(new Document("tenantId", "self").append("rootKeyId", "k-01")
+		mongo.getCollection("keys").insertOne(new Document("tenantId", TenantId.SELF.value())
+				.append("rootKeyId", RootKey.INITIAL_ID)
 				.append("dekVersion", 1).append("iv", new byte[3]).append("ciphertext", new byte[48]));
 
-		assertThatThrownBy(() -> start(Map.of("OC_MASTER_KEY", randomKey())));
+		assertThatThrownBy(() -> start(Map.of(RootKeyResolver.ENV_VARIABLE, randomKey())));
 
 		assertThat(output).contains("APPLICATION FAILED TO START").contains("is damaged: its iv is not 12 bytes");
 	}
@@ -133,6 +135,10 @@ class KeyStartupCanaryTest {
 		all[0] = CoreStartup.mongoUri(LocalMongo.uri(DATABASE));
 		System.arraycopy(args, 0, all, 1, args.length);
 		return CoreStartup.run(environmentVariables, dataDir, all);
+	}
+
+	private static String masterKeyFile(Path file) {
+		return CoreStartup.arg(OpenCeliumProperties.MASTER_KEY_FILE, file.toString());
 	}
 
 	private static String randomKey() {

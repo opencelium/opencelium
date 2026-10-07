@@ -11,6 +11,12 @@ import io.opencelium.core.config.BootstrapPropertyException;
 import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.config.OpenCeliumProperties;
 
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_AUTHENTICATION_DATABASE;
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_DATABASE;
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_HOST;
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_PASSWORD;
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_URI;
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_USERNAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -20,7 +26,7 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void selfModeResolvesSelfAndSystemToTheConfiguredDatabase() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://db.example:27017/oc_prod");
+		environment.setProperty(MONGODB_URI, "mongodb://db.example:27017/oc_prod");
 
 		var resolver = resolver(DeploymentMode.SELF);
 
@@ -31,22 +37,22 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void databaseDefaultsToOpenceliumWhenTheUriHasNoPath() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://db.example:27017");
+		environment.setProperty(MONGODB_URI, "mongodb://db.example:27017");
 
 		assertThat(resolver(DeploymentMode.SELF).resolve(TenantId.SELF).databaseName()).isEqualTo("opencelium");
 	}
 
 	@Test
 	void databasePropertyOverridesTheUriPath() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://db.example:27017/from_uri");
-		environment.setProperty("spring.mongodb.database", "from_property");
+		environment.setProperty(MONGODB_URI, "mongodb://db.example:27017/from_uri");
+		environment.setProperty(MONGODB_DATABASE, "from_property");
 
 		assertThat(resolver(DeploymentMode.SELF).resolve(TenantId.SELF).databaseName()).isEqualTo("from_property");
 	}
 
 	@Test
 	void bootHostAndPortPropertiesAreSupported() {
-		environment.setProperty("spring.mongodb.host", "db.example");
+		environment.setProperty(MONGODB_HOST, "db.example");
 		environment.setProperty("spring.mongodb.port", "27018");
 
 		MongoConnection connection = resolver(DeploymentMode.SELF).resolve(TenantId.SELF);
@@ -58,8 +64,8 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void uriTogetherWithHostIsRejected() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://db.example:27017/opencelium");
-		environment.setProperty("spring.mongodb.host", "other.example");
+		environment.setProperty(MONGODB_URI, "mongodb://db.example:27017/opencelium");
+		environment.setProperty(MONGODB_HOST, "other.example");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.withMessageContaining("not both")
@@ -68,9 +74,9 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void uriTogetherWithCredentialPropertiesIsRejectedBecauseBootWouldIgnoreThem() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://db.example:27017/opencelium");
-		environment.setProperty("spring.mongodb.username", "oc");
-		environment.setProperty("spring.mongodb.password", "s3cret");
+		environment.setProperty(MONGODB_URI, "mongodb://db.example:27017/opencelium");
+		environment.setProperty(MONGODB_USERNAME, "oc");
+		environment.setProperty(MONGODB_PASSWORD, "s3cret");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.withMessageContaining("spring.mongodb.username, spring.mongodb.password, not both")
@@ -81,9 +87,9 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void credentialsWithoutHostMeanLocalhostInSelfMode() {
-		environment.setProperty("spring.mongodb.username", "oc");
-		environment.setProperty("spring.mongodb.password", "s3cret");
-		environment.setProperty("spring.mongodb.authentication-database", "admin");
+		environment.setProperty(MONGODB_USERNAME, "oc");
+		environment.setProperty(MONGODB_PASSWORD, "s3cret");
+		environment.setProperty(MONGODB_AUTHENTICATION_DATABASE, "admin");
 
 		MongoConnection connection = resolver(DeploymentMode.SELF).resolve(TenantId.SELF);
 
@@ -96,7 +102,7 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void saasModeNeedsAnExplicitServerEvenWithCredentials() {
-		environment.setProperty("spring.mongodb.username", "oc");
+		environment.setProperty(MONGODB_USERNAME, "oc");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SAAS))
 				.withMessageContaining("saas mode requires the system database URI explicitly");
@@ -111,14 +117,14 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void saasModeResolvesTheSystemDatabase() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://sys.example:27017/oc_system");
+		environment.setProperty(MONGODB_URI, "mongodb://sys.example:27017/oc_system");
 
 		assertThat(resolver(DeploymentMode.SAAS).resolve(TenantId.SYSTEM).databaseName()).isEqualTo("oc_system");
 	}
 
 	@Test
 	void invalidUriStopsWithoutShowingThePassword() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://oc:s3cret@db.example:notaport/opencelium");
+		environment.setProperty(MONGODB_URI, "mongodb://oc:s3cret@db.example:notaport/opencelium");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.withMessageContaining("not a valid MongoDB connection string")
@@ -128,7 +134,7 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void invalidUriWithUnencodedAtSignNeverShowsThePassword() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://oc:p@ss@db.example/opencelium");
+		environment.setProperty(MONGODB_URI, "mongodb://oc:p@ss@db.example/opencelium");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.withMessageContaining("'mongodb://****@db.example/opencelium' is not a valid MongoDB connection string")
@@ -139,7 +145,7 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void uriWithoutSchemeNeverShowsThePassword() {
-		environment.setProperty("spring.mongodb.uri", "oc:s3cret@db.example:27017/opencelium");
+		environment.setProperty(MONGODB_URI, "oc:s3cret@db.example:27017/opencelium");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.withMessageNotContaining("s3cret");
@@ -147,7 +153,7 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void invalidUriWithoutSecretsShowsTheParserMessage() {
-		environment.setProperty("spring.mongodb.uri", "localhost:27017");
+		environment.setProperty(MONGODB_URI, "localhost:27017");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.withMessageContaining("must start with");
@@ -155,7 +161,7 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void passwordTheDriverWouldMisreadAsHostAndPortIsRejected() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://oc:1234/abc@db.example/opencelium");
+		environment.setProperty(MONGODB_URI, "mongodb://oc:1234/abc@db.example/opencelium");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.withMessageContaining("probably not URL-encoded")
@@ -164,7 +170,7 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void proxyPasswordIsRejectedBecauseTheDriverLogsIt() {
-		environment.setProperty("spring.mongodb.uri",
+		environment.setProperty(MONGODB_URI,
 				"mongodb://db.example/opencelium?proxyHost=proxy.example&proxyUsername=u&proxyPassword=pp456");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
@@ -174,8 +180,8 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void conflictTellsTheOperatorWhatToRemove() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://db.example:27017/opencelium");
-		environment.setProperty("spring.mongodb.host", "other.example");
+		environment.setProperty(MONGODB_URI, "mongodb://db.example:27017/opencelium");
+		environment.setProperty(MONGODB_HOST, "other.example");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.satisfies(failure -> assertThat(failure.action()).hasValueSatisfying(action -> assertThat(action)
@@ -184,10 +190,10 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void sourceNamesTheStyleOfConfiguration() {
-		environment.setProperty("spring.mongodb.host", "db.example");
+		environment.setProperty(MONGODB_HOST, "db.example");
 		assertThat(resolver(DeploymentMode.SELF).resolve(TenantId.SELF).source()).isEqualTo("spring.mongodb.host");
 
-		var uriEnvironment = new MockEnvironment().withProperty("spring.mongodb.uri", "mongodb://db.example/x");
+		var uriEnvironment = new MockEnvironment().withProperty(MONGODB_URI, "mongodb://db.example/x");
 		var properties = new OpenCeliumProperties(DeploymentMode.SELF, Path.of("/unused"), Optional.empty());
 		assertThat(StaticMongoConnectionResolver.from(properties, uriEnvironment).resolve(TenantId.SELF).source())
 				.isEqualTo("spring.mongodb.uri");
@@ -195,8 +201,8 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void emptyDatabasePropertyStopsNamingIt() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://db.example:27017/opencelium");
-		environment.setProperty("spring.mongodb.database", "");
+		environment.setProperty(MONGODB_URI, "mongodb://db.example:27017/opencelium");
+		environment.setProperty(MONGODB_DATABASE, "");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.withMessageContaining("not a valid MongoDB database name")
@@ -205,8 +211,8 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void invalidDatabaseNameInHostModeStopsNamingIt() {
-		environment.setProperty("spring.mongodb.host", "db.example");
-		environment.setProperty("spring.mongodb.database", "bad.name");
+		environment.setProperty(MONGODB_HOST, "db.example");
+		environment.setProperty(MONGODB_DATABASE, "bad.name");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.satisfies(failure -> assertThat(failure.propertyName()).isEqualTo("spring.mongodb.database"));
@@ -214,8 +220,8 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void passwordWithoutUsernameIsRejectedBecauseBootWouldIgnoreIt() {
-		environment.setProperty("spring.mongodb.host", "db.example");
-		environment.setProperty("spring.mongodb.password", "s3cret");
+		environment.setProperty(MONGODB_HOST, "db.example");
+		environment.setProperty(MONGODB_PASSWORD, "s3cret");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.withMessageContaining("spring.mongodb.password is set but spring.mongodb.username is not")
@@ -225,8 +231,8 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void authenticationDatabaseWithoutUsernameIsRejected() {
-		environment.setProperty("spring.mongodb.host", "db.example");
-		environment.setProperty("spring.mongodb.authentication-database", "admin");
+		environment.setProperty(MONGODB_HOST, "db.example");
+		environment.setProperty(MONGODB_AUTHENTICATION_DATABASE, "admin");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.satisfies(failure -> assertThat(failure.propertyName()).isEqualTo("spring.mongodb.username"));
@@ -234,9 +240,9 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void spaceInHostStylePasswordIsRejectedBecauseBootWouldCorruptIt() {
-		environment.setProperty("spring.mongodb.host", "db.example");
-		environment.setProperty("spring.mongodb.username", "oc");
-		environment.setProperty("spring.mongodb.password", "pa ss");
+		environment.setProperty(MONGODB_HOST, "db.example");
+		environment.setProperty(MONGODB_USERNAME, "oc");
+		environment.setProperty(MONGODB_PASSWORD, "pa ss");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(DeploymentMode.SELF))
 				.withMessageContaining("contains a space").withMessageNotContaining("pa ss")
@@ -251,7 +257,7 @@ class StaticMongoConnectionResolverTest {
 	}
 
 	private void assertRejected(String property, String value, String uriOption) {
-		var env = new MockEnvironment().withProperty("spring.mongodb.uri", "mongodb://db.example/x")
+		var env = new MockEnvironment().withProperty(MONGODB_URI, "mongodb://db.example/x")
 				.withProperty(property, value);
 		var properties = new OpenCeliumProperties(DeploymentMode.SELF, Path.of("/unused"), Optional.empty());
 
@@ -264,7 +270,7 @@ class StaticMongoConnectionResolverTest {
 
 	@Test
 	void otherTenantsAreNotRoutedYet() {
-		environment.setProperty("spring.mongodb.uri", "mongodb://sys.example:27017/oc_system");
+		environment.setProperty(MONGODB_URI, "mongodb://sys.example:27017/oc_system");
 
 		assertThatExceptionOfType(UnsupportedOperationException.class)
 				.isThrownBy(() -> resolver(DeploymentMode.SAAS).resolve(TenantId.of("acme")))

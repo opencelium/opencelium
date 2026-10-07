@@ -10,6 +10,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
+import io.opencelium.core.config.BootstrapProperties;
+import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.testsupport.CoreStartup;
 import io.opencelium.core.testsupport.LocalMongo;
 
@@ -35,7 +37,7 @@ class MongoStartupFailureTest {
 
 	@Test
 	void saasModeWithoutUriStopsStartup(CapturedOutput output) {
-		assertThatThrownBy(() -> start("--opencelium.deployment-mode=saas"));
+		assertThatThrownBy(() -> start(CoreStartup.arg(OpenCeliumProperties.DEPLOYMENT_MODE, "saas")));
 
 		assertThat(output).contains("saas mode requires the system database URI explicitly")
 				.contains("Property: spring.mongodb.uri");
@@ -44,7 +46,7 @@ class MongoStartupFailureTest {
 	@Test
 	void uriWithIgnoredCredentialPropertyStopsStartup(CapturedOutput output) {
 		assertThatThrownBy(() -> start(CoreStartup.mongoUri(LocalMongo.uri("opencelium")),
-				"--spring.mongodb.username=oc"));
+				CoreStartup.arg(BootstrapProperties.MONGODB_USERNAME, "oc")));
 
 		assertThat(output).contains("Boot ignores it").contains("Property: spring.mongodb.username")
 				.contains("Remove spring.mongodb.username, or remove spring.mongodb.uri");

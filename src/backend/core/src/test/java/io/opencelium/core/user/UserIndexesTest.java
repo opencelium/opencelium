@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
 
@@ -24,6 +25,10 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @MongoIntegrationTest
 class UserIndexesTest {
+
+	private static final String TENANT = TenantId.SELF.value();
+
+	private static final String ADMIN = "admin";
 
 	@TempDir
 	static Path dataDir;
@@ -55,18 +60,18 @@ class UserIndexesTest {
 
 	@Test
 	void insertFailsForASecondUserWithTheSameUsernameInOneTenant() {
-		users.insert(user("self", "admin"));
+		users.insert(user(TENANT, ADMIN));
 
-		assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(() -> users.insert(user("self", "admin")));
+		assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(() -> users.insert(user(TENANT, ADMIN)));
 	}
 
 	@Test
 	void insertAllowsTheSameUsernameInAnotherTenant() {
-		users.insert(user("self", "admin"));
+		users.insert(user(TENANT, ADMIN));
 
-		users.insert(user("other", "admin"));
+		users.insert(user("other", ADMIN));
 
-		assertThat(users.findByTenantIdAndUsername("other", "admin")).isPresent();
+		assertThat(users.findByTenantIdAndUsername("other", ADMIN)).isPresent();
 	}
 
 	private static UserDocument user(String tenant, String username) {
