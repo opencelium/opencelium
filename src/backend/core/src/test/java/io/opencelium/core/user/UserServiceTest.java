@@ -7,12 +7,10 @@ import java.time.ZoneOffset;
 import java.util.NoSuchElementException;
 
 import org.bson.Document;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,11 +20,12 @@ import org.springframework.test.context.bean.override.convention.TestBean;
 
 import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.testsupport.LocalMongo;
+import io.opencelium.core.testsupport.MongoIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-@SpringBootTest
+@MongoIntegrationTest
 class UserServiceTest {
 
 	private static final Instant NOW = Instant.parse("2026-09-28T10:00:00Z");
@@ -38,13 +37,7 @@ class UserServiceTest {
 
 	@DynamicPropertySource
 	static void properties(DynamicPropertyRegistry registry) {
-		registry.add("opencelium.data-dir", () -> dataDir.toString());
-		LocalMongo.register(registry, UserServiceTest.class);
-	}
-
-	@AfterAll
-	static void dropDatabase() {
-		LocalMongo.drop(UserServiceTest.class);
+		LocalMongo.register(registry, UserServiceTest.class, () -> dataDir);
 	}
 
 	@TestBean

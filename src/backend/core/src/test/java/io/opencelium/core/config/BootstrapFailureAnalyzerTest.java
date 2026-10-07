@@ -1,17 +1,17 @@
 package io.opencelium.core.config;
 
 import java.nio.file.Path;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.diagnostics.FailureAnalysis;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
-import io.opencelium.core.CoreApplication;
+import io.opencelium.core.testsupport.CoreStartup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -50,10 +50,7 @@ class BootstrapFailureAnalyzerTest {
 
 	@Test
 	void realStartupReportsThePropertyThroughTheRegisteredAnalyzer(CapturedOutput output) {
-		assertThatThrownBy(() -> SpringApplication.run(CoreApplication.class,
-				"--spring.main.web-application-type=none",
-				"--opencelium.data-dir=" + tmp,
-				"--opencelium.deployment-mode=cloud")).isNotNull();
+		assertThatThrownBy(() -> CoreStartup.run(Map.of(), tmp, "--opencelium.deployment-mode=cloud")).isNotNull();
 
 		assertThat(output).contains("APPLICATION FAILED TO START").contains("Property: opencelium.deployment-mode");
 	}

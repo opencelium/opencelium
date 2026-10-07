@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Starts the real application against a database seeded with a wrapped data key, as {@code java -jar} would. */
-@ExtendWith(OutputCaptureExtension.class)
+@ExtendWith({OutputCaptureExtension.class, LocalMongo.Cleanup.class})
 class KeyStartupCanaryTest {
 
 	private static final String DATABASE = LocalMongo.databaseFor(KeyStartupCanaryTest.class);
@@ -50,9 +50,8 @@ class KeyStartupCanaryTest {
 	}
 
 	@AfterAll
-	static void dropDatabase() {
+	static void closeClient() {
 		client.close();
-		LocalMongo.drop(KeyStartupCanaryTest.class);
 	}
 
 	@BeforeEach
@@ -130,11 +129,10 @@ class KeyStartupCanaryTest {
 	}
 
 	private ConfigurableApplicationContext start(Map<String, String> environmentVariables, String... args) {
-		String[] all = new String[args.length + 2];
-		all[0] = "--opencelium.data-dir=" + dataDir;
-		all[1] = "--spring.mongodb.uri=" + LocalMongo.uri(DATABASE);
-		System.arraycopy(args, 0, all, 2, args.length);
-		return CoreStartup.run(environmentVariables, all);
+		String[] all = new String[args.length + 1];
+		all[0] = CoreStartup.mongoUri(LocalMongo.uri(DATABASE));
+		System.arraycopy(args, 0, all, 1, args.length);
+		return CoreStartup.run(environmentVariables, dataDir, all);
 	}
 
 	private static String randomKey() {

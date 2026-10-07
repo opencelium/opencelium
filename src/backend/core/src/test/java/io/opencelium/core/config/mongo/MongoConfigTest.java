@@ -4,23 +4,22 @@ import java.nio.file.Path;
 
 import com.mongodb.client.MongoClient;
 import org.bson.Document;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.mongodb.autoconfigure.MongoConnectionDetails;
 import org.springframework.boot.mongodb.autoconfigure.MongoProperties;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import io.opencelium.core.testsupport.LocalMongo;
+import io.opencelium.core.testsupport.MongoIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@MongoIntegrationTest
 class MongoConfigTest {
 
 	@TempDir
@@ -28,13 +27,7 @@ class MongoConfigTest {
 
 	@DynamicPropertySource
 	static void properties(DynamicPropertyRegistry registry) {
-		registry.add("opencelium.data-dir", () -> dataDir.toString());
-		LocalMongo.register(registry, MongoConfigTest.class);
-	}
-
-	@AfterAll
-	static void dropDatabase() {
-		LocalMongo.drop(MongoConfigTest.class);
+		LocalMongo.register(registry, MongoConfigTest.class, () -> dataDir);
 	}
 
 	@Autowired

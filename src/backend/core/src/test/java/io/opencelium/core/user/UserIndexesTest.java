@@ -4,12 +4,10 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Set;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.IndexField;
@@ -19,11 +17,12 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import io.opencelium.core.testsupport.LocalMongo;
+import io.opencelium.core.testsupport.MongoIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-@SpringBootTest
+@MongoIntegrationTest
 class UserIndexesTest {
 
 	@TempDir
@@ -31,13 +30,7 @@ class UserIndexesTest {
 
 	@DynamicPropertySource
 	static void properties(DynamicPropertyRegistry registry) {
-		registry.add("opencelium.data-dir", () -> dataDir.toString());
-		LocalMongo.register(registry, UserIndexesTest.class);
-	}
-
-	@AfterAll
-	static void dropDatabase() {
-		LocalMongo.drop(UserIndexesTest.class);
+		LocalMongo.register(registry, UserIndexesTest.class, () -> dataDir);
 	}
 
 	@Autowired
