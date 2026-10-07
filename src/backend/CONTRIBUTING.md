@@ -22,11 +22,10 @@ This document defines the git policy and contribution workflow for the OpenCeliu
 | Tool | Minimum version | Purpose |
 |---|---|---|
 | JDK | 25 | Compilation and test execution (Gradle toolchain downloads it if absent) |
-| Docker | 24 | Testcontainers — integration tests only |
 | Gradle | wrapper (`./gradlew`) | Build and test orchestration |
-| MongoDB | 7.0+ | Document store — needed only to *run* the core app locally |
+| MongoDB | 7.0 or later, 8.x recommended | Document store. The `core` integration tests and a local run of the core app use it. On macOS: `brew install mongodb-community`, then `brew services start mongodb-community`. |
 
-Unit and slice tests run without Docker or any locally installed database.
+Unit tests and slice tests do not use a database. The `core` integration tests connect to the MongoDB server that `OC_TEST_MONGO_URI` names, default `mongodb://localhost:27017` (section 9.5). Docker is not necessary.
 
 All `./gradlew` commands in this guide run from `src/backend/`.
 
@@ -230,21 +229,21 @@ Why the backend is shaped this way — modules, deployment shapes, recorded desi
 
 ### 9.1 Test taxonomy
 
-Fast tests are kept strictly separate from slow, Docker-dependent ones:
+Tests without a database are kept separate from tests that use MongoDB:
 
-| Kind | Source root | Suffix | Gradle task | Docker? | Where |
+| Kind | Source root | Suffix | Gradle task | Database? | Where |
 |---|---|---|---|---|---|
 | Unit | `src/test` | `*Test` | `test` | No | all modules — the default; `common` and `execution` contain *only* these |
 | Slice | `src/test` | `*Test` | `test` | No | `core`, `worker` |
-| Full integration | `src/integrationTest` | `*IT` | `integrationTest` | Yes | `core`, `worker` |
+| Integration | `src/test` | `*Test` | `test` | MongoDB | `core` — a full `@SpringBootTest` against the local MongoDB, one database for each test class |
 
-> The `integrationTest` source root and Gradle task are a defined convention, wired into the build when the first real integration test lands. Until then, everything lives in `src/test`.
+> All tests are in `src/test` and run with `./gradlew test`. The project has no separate integration source root and does not use Testcontainers. The complete `core` suite runs in about 35 s against a local MongoDB.
 
 **Unit tests** — pure Java: no Spring context, no database, no network. Instantiate the class under test with `new` (or `@InjectMocks`), mock collaborators with `@ExtendWith(MockitoExtension.class)` + `@Mock`. These run in milliseconds and should cover the bulk of the logic — the engine, IF/LOOP operators, mapping, validation, exception paths. Never use `@SpringBootTest` or slice annotations in a unit test.
 
 **Slice tests** — load exactly one Spring layer: `@WebMvcTest(MyController.class)` for controllers, `@JsonTest` for serialization. No `@DataMongoTest` in `core`: slices ignore `CoreApplication`'s exclusion of Boot's Mongo auto-configuration, so Mongo code is tested in a full `@SpringBootTest` integration test. Declare `@ActiveProfiles("test")` on every slice test.
 
-**Integration tests** — full `@SpringBootTest` against real databases provisioned by Testcontainers. `*IT` suffix, never in `src/test`. Override datasource URLs with `@DynamicPropertySource` — never hard-code container ports or credentials. These are the slowest tests; run them deliberately. They are excluded from `check` and triggered explicitly in CI.
+**Integration tests** — a full `@SpringBootTest` against the local MongoDB. Each test class gets its own database `oc_test_<class>_<6 random chars>` and drops it after the last test, so the `opencelium` database is never touched. Use the `@MongoIntegrationTest` annotation and the `LocalMongo` helper from `testsupport` (section 9.3). Declare the `@DynamicPropertySource` in the test class itself: Spring caches contexts by that method, and a shared method in a base class would give all subclasses one context and one database. Never hard-code the server or credentials; `LocalMongo` reads them from `OC_TEST_MONGO_URI`. A test that starts the application as `java -jar` does uses `CoreStartup`.
 
 Rule of thumb: push logic down into `execution`/`common` where it's cheap to unit-test, and keep `@SpringBootTest` for wiring checks and end-to-end paths.
 
@@ -257,20 +256,20 @@ execution/src/main/java/io/opencelium/execution/engine/WorkflowEngine.java
 → execution/src/test/java/io/opencelium/execution/engine/WorkflowEngineTest.java
 ```
 
-Same-package placement allows package-private access; the module split plus the `*Test`/`*IT` suffixes handle test routing. A test never lives in a different module than the code it tests. Test fixtures/resources go in `<module>/src/test/resources`.
+Same-package placement allows package-private access; the module split and the `*Test` suffix handle test routing. A test never lives in a different module than the code it tests. Test fixtures/resources go in `<module>/src/test/resources`.
 
-### 9.3 Shared test utilities — `testutil/`
+### 9.3 Shared test utilities — `testsupport/`
 
-Each module may have an `io.opencelium.<module>.testutil` package in its test root for shared test infrastructure:
+Each module can have an `io.opencelium.<module>.testsupport` package in its test root for shared test infrastructure. In `core` it holds `LocalMongo` (the test server and the database of each test class), `MongoIntegrationTest` (the composed annotation), `CoreStartup` (starts the real application without a web server and with a fixed environment) and `MutableClock`. Use these sub-packages when the package grows:
 
 | Sub-package | Purpose | Example |
 |---|---|---|
-| `testutil/fixture/` | Named, reusable test objects (object mothers/builders) | `WorkflowFixture.aLinearTwoNodeWorkflow()` |
-| `testutil/fake/` | In-memory implementations of repositories/services, when mocks need too much setup | `InMemoryWorkflowRepository` |
-| `testutil/assertion/` | Custom AssertJ assertions for domain objects | `WorkflowAssertions.assertThat(wf).hasNode("http-1")` |
-| `testutil/annotation/` | Composed annotations bundling boilerplate | `@SliceTest`, `@IntegrationTest` |
+| `testsupport/fixture/` | Named, reusable test objects (object mothers/builders) | `WorkflowFixture.aLinearTwoNodeWorkflow()` |
+| `testsupport/fake/` | In-memory implementations of repositories/services, when mocks need too much setup | `InMemoryWorkflowRepository` |
+| `testsupport/assertion/` | Custom AssertJ assertions for domain objects | `WorkflowAssertions.assertThat(wf).hasNode("http-1")` |
+| `testsupport/annotation/` | Composed annotations that bundle boilerplate | `@MongoIntegrationTest` (today in the package root) |
 
-`testutil` must never contain `@Test` methods.
+`testsupport` must not contain `@Test` methods.
 
 ### 9.4 Naming conventions
 
@@ -292,21 +291,25 @@ Use `@DisplayName` for extra context only when the method name isn't sufficient.
 
 ### 9.5 Running tests
 
+The `core` integration tests need a MongoDB server. `LocalMongo` reads it from the environment variable `OC_TEST_MONGO_URI`, default `mongodb://localhost:27017`. The value can carry credentials and options; a database path in it is ignored. On a Mac with the Homebrew `mongodb-community` service, nothing else is necessary. `ZeroConfigStartupTest` checks the documented default server and is skipped if `OC_TEST_MONGO_URI` is set. If MongoDB is stopped, each integration test fails within seconds with a message that names the server.
+
 ```bash
-./gradlew test                                        # all fast tests, all modules
+./gradlew test                                        # all tests, all modules
 ./gradlew :execution:test                             # one module
 ./gradlew :core:test --tests "*.CoreApplicationTest"  # one class (short pattern)
-./gradlew :core:test --tests "io.opencelium.core.CoreApplicationTest.contextLoads"  # one method
+./gradlew :core:test --tests "io.opencelium.core.CoreApplicationTest.contextLoadsWithDocumentedDefaults"  # one method
+OC_TEST_MONGO_URI=mongodb://oc:pw@db.example:27017 ./gradlew :core:test   # another MongoDB server
 ./gradlew build                                       # full verification (what CI runs)
 ./gradlew test --info                                 # full output on failure
 ```
 
 Gradle skips tests when nothing changed; add `--rerun-tasks` to force a run.
 
+CI (planned, GitHub Actions) runs the same tests against a pinned MongoDB version in a service container. That version is the reference; a local server can be newer.
+
 ### 9.6 Test dependencies
 
 - `spring-boot-starter-*-test` brings JUnit 5, Mockito, AssertJ, JSONassert, and Spring Test transitively — do not redeclare them.
-- Use the Testcontainers BOM; never pin individual Testcontainers module versions.
 - Use Awaitility for async assertions — never `Thread.sleep()`.
 - New test-only dependencies go under `testImplementation` (or `testRuntimeOnly` for drivers), never `implementation`.
 
