@@ -28,11 +28,11 @@ The pieces
 
    * - Piece
      - What it is
-   * - **Invoker**
+   * - **API definition**
      - A definition of an API: its authentication and its operations. Written
        once per product. See :doc:`../concepts/connectors-and-invokers`.
    * - **Connector**
-     - One concrete system, using an invoker plus credentials. `Production
+     - One concrete system, using an API definition plus credentials. `Production
        CheckMK` is a connector.
    * - **Workflow**
      - The integration itself: an ordered, branching sequence of steps, each
@@ -45,10 +45,21 @@ The pieces
 The shortest possible path: create connectors for the two systems, build a
 workflow between them, attach a schedule.
 
+What is new in 5.2
+==================
+
+5.2 helps you find your way: an **onboarding tour** and a hands-on **workflow
+tutorial** for new installations, a **field links** view of which step reads which
+field, a **minimap** that points at the steps needing attention, deleting a step
+without losing its references, multi-step selection and copy, and editing a
+workflow as **JSON**. Several interface terms were renamed — *invoker* is now *API
+definition*, *joint* is *jump*, *enhancement* is *transformation*. See
+:doc:`whats-new-5-2`.
+
 What is new in 5.1
 ==================
 
-5.1 is an editor release: **joints** to skip steps without an operator, a
+5.1 is an editor release: **jumps** (then called *joints*) to skip steps without an operator, a
 **debug mode** that replays a test run step by step, **undo/redo** and a
 **change history** for the canvas, and **comment boxes** to annotate a workflow
 for the next person who opens it. The model of 5.0 is unchanged, so nothing you
@@ -68,13 +79,13 @@ bidirectionally. This is a real model change, not a rename —
 
 **Steps that are not connector calls.** A *Simple HTTP request* step lets you call
 an endpoint directly, with your own method, URL, headers and body, without writing
-an invoker. A *Trigger Workflow* step starts another workflow's schedule.
+an API definition. A *Trigger Workflow* step starts another workflow's schedule.
 
 **Live connector availability.** Connector nodes show a status dot while you
 build, so an unreachable system is visible before the workflow goes to production.
 
 **A command palette.** ``Ctrl+K`` anywhere: open lists, create and update
-entities, upload and download templates and invokers, or fuzzy-search the
+entities, upload and download templates and API definitions, or fuzzy-search the
 workflow you have open. See :doc:`../reference/command-palette`.
 
 **A rebuilt interface**, on Ant Design, with a two-menu navigation, consistent

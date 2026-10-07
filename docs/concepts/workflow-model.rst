@@ -26,11 +26,11 @@ step as its *method type*:
      - What it does
    * - **Connector method**
      - ``CONNECTOR``
-     - Calls an operation defined in the invoker of a connector. The usual case.
+     - Calls an operation defined in the API definition of a connector. The usual case.
    * - **Simple HTTP request**
      - ``HTTP_REQUEST``
      - A free-form REST call: you pick the HTTP method and supply URL, headers
-       and body. No invoker, no connector.
+       and body. No API definition, no connector.
    * - **Trigger Workflow**
      - ``WEBHOOK``
      - Starts another workflow's schedule through its webhook. Asynchronous —
@@ -43,25 +43,25 @@ Two more node types control the flow rather than calling anything:
 
 And every workflow begins at a **Start** node.
 
-Joints
+Jumps
 ======
 
 .. note::
    **New in 5.1.**
 
-A **joint** is a forward link from one step to a later one. Reaching the source
-step, the engine runs it and then continues at the joint's target; the steps in
+A **jump** is a forward link from one step to a later one. Reaching the source
+step, the engine runs it and then continues at the jump's target; the steps in
 between do not run.
 
-A joint is not an edge. It does not change any step's ``index``, does not affect
+A jump is not an edge. It does not change any step's ``index``, does not affect
 where a new step lands when you add one, and carries no condition of its own —
 the decision to draw it is a structural one, made when you build the workflow.
 Where the choice has to be made per run, that is still an ``If``.
 
 The rules are enforced identically by the editor and the server: both ends must
 be methods, the target must run after the source, both must sit in the same loop
-scope, and a joint may leave an ``If`` but never enter one. A step carries at
-most one joint, stored on the method as ``jump``.
+scope, and a jump may leave an ``If`` but never enter one. A step carries at
+most one jump, stored on the method as ``jump``.
 
 :doc:`../guides/skip-steps-with-joints` covers all of this in working terms.
 
