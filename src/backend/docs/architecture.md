@@ -57,7 +57,7 @@ The project keeps the OpenCelium vocabulary on purpose. The domain terms carry t
 | **Node** | One step in a workflow. See [Node types](#node-types). |
 | **Edge** | A line between 2 nodes in the graph. An edge is not a *Connection* in the legacy sense. |
 | **Deployment shape** | **Monolith**: `oc-app.jar` alone, with the `local` transport. **Distributed**: `oc-app.jar` and N × `oc-worker.jar`, with a broker. Core finds the shape at runtime (decision 4). No configuration value sets it. |
-| **Deployment mode** | `self`: self-hosted, one tenant, the default. `saas`: cloud, many tenants behind the Service Portal (decision 11). The mode is a bootstrap value in the yml file. Each shape can operate in each mode. |
+| **Deployment mode** | `self-host`: one tenant, the default. `cloud`: many tenants behind the Service Portal (decision 11). The mode is a bootstrap value in the yml file. Each shape can operate in each mode. |
 | **Tenant** | One customer whose data is kept apart from the data of all other customers. A self-hosted installation has exactly one tenant. |
 | **Service Portal** | The external system that owns the cloud business: tenants, subscriptions, and user accounts. It is not part of the backend. |
 | **OCEL** | The OpenCelium Expression Language. Users write OCEL expressions in node parameters, for example to map data from one node to another node. |
@@ -114,7 +114,7 @@ Dependencies point only down. No module depends on `core` or on `worker`.
 |---|---|---|---|
 | `common` | Library (plain jar) | The shared vocabulary: the workflow model (workflows, nodes, edges) and the invoker and connector descriptors. Also the access-control model (scopes, ACL entries) and the DTOs that core and the workers exchange (execution requests and results). The module has almost no framework dependencies, on purpose. | BUILT: `TenantId`. PLANNED: all other contracts. |
 | `execution` | Library (plain jar) | The workflow execution engine, built on promise-based dataflow (decision 8). Its parts are the DAG Scheduler, the Workflow Executor, the Request Builder, and the OcLogger. See [Engine parts](#engine-parts). The module is not an application. Its beans are under `io.opencelium.execution`. The application that embeds the engine scans this package. | PLANNED. The module has no engine code yet. |
-| `core` | Spring Boot application, `oc-app.jar`, port 9090 | The management application. See [Core parts](#core-parts). Only core uses MongoDB: with one static connection in `self` mode, and through the tenant catalog in `saas` mode (decision 11). | BUILT: bootstrap properties, MongoDB connection, root key. PLANNED: all other parts. |
+| `core` | Spring Boot application, `oc-app.jar`, port 9090 | The management application. See [Core parts](#core-parts). Only core uses MongoDB: with one static connection in `self-host` mode, and through the tenant catalog in `cloud` mode (decision 11). | BUILT: bootstrap properties, MongoDB connection, root key. PLANNED: all other parts. |
 | `worker` | Spring Boot application, `oc-worker.jar`, port 9091 | An engine host without state, fully isolated. A Transport Endpoint reads self-contained job messages and sends all output back as events. The worker has no MongoDB access and no persistent state. Local log files are a temporary spool. The only purpose of the worker is to add execution capacity. | PLANNED. The module has only the application class. |
 
 ### Engine parts
@@ -290,7 +290,7 @@ A runtime setting is declared in the code, in the `SettingKey` registry: name, t
 |---|---|---|
 | HTTP port | 1 | yml: `server.port` (standard Spring) |
 | MongoDB URI (self-hosted: *the* database, cloud: the system database) | 1 | yml: `spring.mongodb.uri`, or the host-style properties `spring.mongodb.host`, `port`, … (standard Spring, see [MongoDB rules](#mongodb-rules)) |
-| Deployment mode | 1 | yml: `opencelium.deployment-mode`. Values: `self` (self-hosted, the default) or `saas` (cloud mode in this document) |
+| Deployment mode | 1 | yml: `opencelium.deployment-mode`. Values: `self-host` (the default) or `cloud` |
 | Data directory (local state, for example the generated `master.key`) | 1 | yml: `opencelium.data-dir`. Default on Linux: `/var/lib/opencelium`, if that directory is available and writable. Default in all other cases: `./data`. Core makes the directory at the start. The directory must be writable. In a container, mount it as a volume. |
 | Master (root) encryption key | 1 | **Outside the yml file and the database.** Core finds the key at the start in this order: (1) the `OC_MASTER_KEY` environment variable, (2) the file that `opencelium.master-key-file` names, (3) `master.key` in the data directory. On a new installation core generates the file in the data directory. The key value is not in the yml file at any time. Rules and guards: decision 14. |
 | Broker host name, port, vhost | 3 | Runtime setting |
@@ -313,7 +313,7 @@ In self-hosted mode the yml server is *the* database. In cloud mode it is the **
 - **Guard 1: no silent default.** In self-hosted mode core uses the documented default `mongodb://localhost:27017/opencelium` when nothing is set. It writes one log line that names the default (zero-configuration first start, OC-1613 Task 2). In cloud mode the server is mandatory. If it is not set, core stops and names the property.
 - **Guard 2: an immediate ping in the 2 modes.** The driver connects only at the first use. Without the ping, an unreachable server shows as a `MongoTimeoutException` approximately 30 s into the first use. Thus core pings the server at the start, with a 5 s timeout. The check also lists the collections of the database. Thus a wrong login, or no login where one is necessary, also stops the start. If the server is not reachable, core stops with a clear error and a list of options.
 - **Log safety.** All connection strings in logs and error messages are masked. The password and the secret option values become `****`.
-- **Planned rule (OC-1586): the yml client is for the system scope only.** In cloud mode no tenant document goes through it. Tenant data flows only through the clients that the catalog specifies. This rule is not enforced yet. At this time the resolver gives a connection only for `system` (and for `self` in self-hosted mode). For each other tenant it stops with an error.
+- **Planned rule (OC-1586): the yml client is for the system scope only.** In cloud mode no tenant document goes through it. Tenant data flows only through the clients that the catalog specifies. This rule is not enforced yet. At this time the resolver gives a connection only for `system` (and for `self-host` in self-host mode). For each other tenant it stops with an error.
 
 ### How to add a new value
 
@@ -344,7 +344,7 @@ Until the rules are in the build, reviewers examine the 4 rules by hand. ArchUni
 
 **BUILT.** This section tells what occurs when core starts, in the order of the code. Each step stops the application with the report `APPLICATION FAILED TO START` if its check is not successful. The report names the property or the action.
 
-1. `DefaultsEnvironmentPostProcessor` adds the documented defaults for the bootstrap values that are not set. These are the deployment mode `self`, the data directory, and the MongoDB URI in self mode. It writes one `(default)` line to the log for each applied default. It also writes a warning if the Boot 3 property `spring.data.mongodb.uri` is set.
+1. `DefaultsEnvironmentPostProcessor` adds the documented defaults for the bootstrap values that are not set. These are the deployment mode `self-host`, the data directory, and the MongoDB URI in self-host mode. It writes one `(default)` line to the log for each applied default. It also writes a warning if the Boot 3 property `spring.data.mongodb.uri` is set.
 2. `OpenCeliumProperties` binds and validates `opencelium.deployment-mode`, `opencelium.data-dir`, and `opencelium.master-key-file`.
 3. `DataDirectory` makes the data directory if there is none. It makes sure that the directory is writable.
 4. `StaticMongoConnectionResolver` reads `spring.mongodb.*` and validates the connection. It does not accept the settings that Boot ignores.
@@ -422,7 +422,7 @@ The decisions are recorded so that they are not discussed again without a reason
     *Why:* The authentication methods vary with the deployment mode. The authorization (decision 7) must stay identical. Thus no side can know the internals of the other side.
 
     - Authentication produces a principal: identity, tenant, and group or claim mappings. Authorization (RBAC and ACLs, decision 7) uses the principal. Security filters have no permission logic.
-    - The available strategies depend on the deployment mode (`opencelium.deployment-mode`: `self` or `saas`, a yml bootstrap value).
+    - The available strategies depend on the deployment mode (`opencelium.deployment-mode`: `self-host` or `cloud`, a yml bootstrap value).
     - **Self-hosted:** local credentials, LDAP, and OIDC if necessary. Core is the OIDC client. Users and the tenant are in the database of core. External IdPs map claims to users and groups with just-in-time provisioning. 2FA/TOTP is a layer on the local strategy.
     - **Cloud:** only the external **Service Portal**, on 2 paths that end in the same portal-issued token. Path (a) is the OIDC redirect flow. The portal authenticates the user itself (portal-native credentials) or connects to an external IdP (Google, Apple, …). The offered methods are a configuration of the portal that core does not see. Path (b) is a direct credential login. The user enters a user name and a password in the OpenCelium login form. Core exchanges them at the authentication API of the portal for the access token and the claims. This path is for portal-native accounts only. Brokered-IdP users must use the redirect flow. In cloud mode the portal owns the claim mapping and the provisioning.
     - Core trusts only the portal issuer. It keeps a copy of the user row, which is not the source of truth. The token or login response of the portal supplies the **tenant identifier only**. A login tells who the user is. It is not the key that opens database connections. The connection resolution is the tenant catalog of decision 11.
@@ -442,7 +442,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - **Logins carry identity only** (the tenant ID as a token claim). Scheduled and triggered executions find the tenant purely from the catalog. Thus they execute with nobody logged in, and they survive restarts.
     - **Tenant-keyed is the definition of done of each story.** The tenant ID is in the principal and on each document in the database (workflows, connectors, executions, variables, ACL entries, audit records). It is also in the self-contained job message and on each event that a worker publishes. The engine and the transports do not know about tenants. The persistence and API layers enforce the isolation.
     - **Self-hosted** is the same code path with one static tenant: one MongoDB connection at the start. The behaviour at this time does not change.
-    - **BUILT:** `TenantId` with the reserved values `self` and `system`, the `MongoConnectionResolver` interface, and the static resolver for `system` (and `self` in self-hosted mode). **PLANNED:** the catalog and the per-tenant connections (OC-1586, OC-1587).
+    - **BUILT:** `TenantId` with the reserved values `self-host` and `system`, the `MongoConnectionResolver` interface, and the static resolver for `system` (and `self-host` in self-hosted mode). **PLANNED:** the catalog and the per-tenant connections (OC-1586, OC-1587).
 
     *(Added 2026-09-08. Revised 2026-09-22: it replaced "cloud starts without a database, connection data arrives with the portal login". That design left scheduled executions without access to tenant data.)*
 

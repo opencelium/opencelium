@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.assertj.AssertableApplicationContex
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.mock.env.MockEnvironment;
 
+import static io.opencelium.core.config.DeploymentMode.CLOUD;
+import static io.opencelium.core.config.DeploymentMode.SELF_HOST;
 import static io.opencelium.core.config.OpenCeliumProperties.DATA_DIR;
 import static io.opencelium.core.config.OpenCeliumProperties.DEPLOYMENT_MODE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,28 +25,28 @@ class OpenCeliumPropertiesTest {
 	Path tmp;
 
 	@Test
-	void absentModeIsSelf() {
-		runner().run(context -> assertThat(properties(context).deploymentMode()).isEqualTo(DeploymentMode.SELF));
+	void absentModeIsSelfHosted() {
+		runner().run(context -> assertThat(properties(context).deploymentMode()).isEqualTo(SELF_HOST));
 	}
 
 	@Test
-	void saasModeIsParsed() {
-		runner().withPropertyValues("opencelium.deployment-mode=saas")
-				.run(context -> assertThat(properties(context).deploymentMode()).isEqualTo(DeploymentMode.SAAS));
+	void cloudModeIsParsed() {
+		runner().withPropertyValues("opencelium.deployment-mode=cloud")
+				.run(context -> assertThat(properties(context).deploymentMode()).isEqualTo(CLOUD));
 	}
 
 	@Test
 	void modeIsCaseInsensitive() {
-		runner().withPropertyValues("opencelium.deployment-mode=SAAS")
-				.run(context -> assertThat(properties(context).deploymentMode()).isEqualTo(DeploymentMode.SAAS));
+		runner().withPropertyValues("opencelium.deployment-mode=CLOUD")
+				.run(context -> assertThat(properties(context).deploymentMode()).isEqualTo(CLOUD));
 	}
 
 	@Test
 	void unknownModeStopsNamingTheProperty() {
-		runner().withPropertyValues("opencelium.deployment-mode=cloud").run(context -> {
+		runner().withPropertyValues("opencelium.deployment-mode=hybrid").run(context -> {
 			BootstrapPropertyException failure = bootstrapFailure(context);
 			assertThat(failure.propertyName()).isEqualTo("opencelium.deployment-mode");
-			assertThat(failure.getMessage()).contains("'cloud'").contains("self").contains("saas");
+			assertThat(failure.getMessage()).contains("'hybrid'").contains("self-host").contains("cloud");
 		});
 	}
 
@@ -73,7 +75,7 @@ class OpenCeliumPropertiesTest {
 	@Test
 	void parsingDoesNotCreateTheDataDir() {
 		var environment = new MockEnvironment()
-				.withProperty(DEPLOYMENT_MODE, "self")
+				.withProperty(DEPLOYMENT_MODE, "self-host")
 				.withProperty(DATA_DIR, tmp.resolve("missing").toString());
 
 		OpenCeliumProperties properties = OpenCeliumProperties.from(environment);
@@ -98,9 +100,9 @@ class OpenCeliumPropertiesTest {
 		assertThatNullPointerException().isThrownBy(() -> new OpenCeliumProperties(null, tmp, Optional.empty()))
 				.withMessage("deploymentMode");
 		assertThatNullPointerException()
-				.isThrownBy(() -> new OpenCeliumProperties(DeploymentMode.SELF, null, Optional.empty()))
+				.isThrownBy(() -> new OpenCeliumProperties(SELF_HOST, null, Optional.empty()))
 				.withMessage("dataDir");
-		assertThatNullPointerException().isThrownBy(() -> new OpenCeliumProperties(DeploymentMode.SELF, tmp, null))
+		assertThatNullPointerException().isThrownBy(() -> new OpenCeliumProperties(SELF_HOST, tmp, null))
 				.withMessage("masterKeyFile");
 	}
 

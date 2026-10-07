@@ -31,7 +31,7 @@ class CoreApplicationTest {
 
 	@Test
 	void contextLoadsWithDocumentedDefaults() {
-		assertThat(properties.deploymentMode()).isEqualTo(DeploymentMode.SELF);
+		assertThat(properties.deploymentMode()).isEqualTo(DeploymentMode.SELF_HOST);
 	}
 
 }

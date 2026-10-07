@@ -26,7 +26,7 @@ import static io.opencelium.core.config.BootstrapProperties.mongoAddressProperti
 
 /**
  * Resolves to the one database configured under {@code spring.mongodb.*}: the tenant's database in self mode, the
- * system database in saas mode. Reads Boot's standard properties, either the URI or {@code host}/{@code port}/
+ * system database in cloud mode. Reads Boot's standard properties, either the URI or {@code host}/{@code port}/
  * {@code username}/..., but never lets Boot's {@code localhost/test} fallback apply, and rejects every setting Boot
  * or this class would otherwise silently ignore.
  */
@@ -63,7 +63,8 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 			}
 			return new StaticMongoConnectionResolver(mode, fromUri(mongo));
 		}
-		// Without a URI: saas needs an explicit host; self accepts any host-style setting (host defaults to localhost).
+		// Without a URI: cloud needs an explicit host; self-host accepts any host-style setting
+		// (host defaults to localhost).
 		if (mode.mongoUriHasDefault() ? addressProperties.isEmpty() : mongo.getHost() == null) {
 			throw new BootstrapPropertyException(MONGODB_URI, mode.mongoUriHasDefault()
 					? MONGODB_URI + " is not set and no default was applied."
@@ -192,7 +193,8 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 
 	@Override
 	public MongoConnection resolve(TenantId tenant) {
-		if (tenant.equals(TenantId.SYSTEM) || (mode == DeploymentMode.SELF && tenant.equals(TenantId.SELF))) {
+		boolean selfHostedTenant = mode == DeploymentMode.SELF_HOST && tenant.equals(TenantId.SELF_HOST);
+		if (tenant.equals(TenantId.SYSTEM) || selfHostedTenant) {
 			return connection;
 		}
 		throw new UnsupportedOperationException("No database for tenant " + tenant + " in " + mode.propertyValue()

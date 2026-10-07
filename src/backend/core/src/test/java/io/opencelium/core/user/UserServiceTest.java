@@ -30,7 +30,7 @@ class UserServiceTest {
 
 	private static final Instant NOW = Instant.parse("2026-09-28T10:00:00Z");
 
-	private static final String TENANT = TenantId.SELF.value();
+	private static final TenantId TENANT = TenantId.SELF_HOST;
 
 	private static final TenantId OTHER = TenantId.of("other");
 
@@ -72,20 +72,20 @@ class UserServiceTest {
 
 	@Test
 	void createAdminStoresABcryptHashThatMatchesThePassword() {
-		UserCreated created = service.createAdmin(command(TenantId.SELF, ADMIN, TYPED_PASSWORD, false));
+		UserCreated created = service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
 
 		UserDocument user = users.findById(created.id()).orElseThrow();
 		assertThat(user.passwordHash()).startsWith("{bcrypt}");
 		assertThat(passwordEncoder.matches(TYPED_PASSWORD, user.passwordHash())).isTrue();
 		assertThat(user.roles()).containsExactly(UserService.ADMIN_ROLE);
-		assertThat(user.tenantId()).isEqualTo("self");
+		assertThat(user.tenantId()).isEqualTo("self-host");
 		assertThat(user.locked()).isFalse();
 		assertThat(user.createdAt()).isEqualTo(NOW);
 	}
 
 	@Test
 	void createAdminNeverStoresThePasswordInPlainText() {
-		service.createAdmin(command(TenantId.SELF, ADMIN, "Plain-Text-Canary-42", true));
+		service.createAdmin(command(TENANT, ADMIN, "Plain-Text-Canary-42", true));
 
 		Document raw = mongo.getCollection("users").find().first();
 		assertThat(raw).isNotNull();
@@ -94,16 +94,16 @@ class UserServiceTest {
 
 	@Test
 	void createAdminReturnsTheIdAndUsername() {
-		UserCreated created = service.createAdmin(command(TenantId.SELF, ADMIN, TYPED_PASSWORD, false));
+		UserCreated created = service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
 
 		assertThat(created.username()).isEqualTo(ADMIN);
-		assertThat(users.findByTenantIdAndUsername(TENANT, ADMIN)).get().extracting(UserDocument::id)
+		assertThat(users.findByTenantIdAndUsername(TENANT.value(), ADMIN)).get().extracting(UserDocument::id)
 				.isEqualTo(created.id());
 	}
 
 	@Test
 	void createAdminRequiresAPasswordChangeWhenThePasswordWasGenerated() {
-		UserCreated created = service.createAdmin(command(TenantId.SELF, ADMIN, "Generated-Pass-123", true));
+		UserCreated created = service.createAdmin(command(TENANT, ADMIN, "Generated-Pass-123", true));
 
 		UserDocument user = users.findById(created.id()).orElseThrow();
 		assertThat(user.mustChangePassword()).isTrue();
@@ -112,7 +112,7 @@ class UserServiceTest {
 
 	@Test
 	void createAdminRequiresNoPasswordChangeWhenThePasswordWasTyped() {
-		UserCreated created = service.createAdmin(command(TenantId.SELF, ADMIN, TYPED_PASSWORD, false));
+		UserCreated created = service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
 
 		assertThat(users.findById(created.id()).orElseThrow().mustChangePassword()).isFalse();
 	}
@@ -127,17 +127,17 @@ class UserServiceTest {
 
 	@Test
 	void createAdminThrowsAdminAlreadyExistsExceptionWhenTheTenantHasAnAdmin() {
-		service.createAdmin(command(TenantId.SELF, ADMIN, TYPED_PASSWORD, false));
+		service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
 
 		assertThatExceptionOfType(AdminAlreadyExistsException.class)
-				.isThrownBy(() -> service.createAdmin(command(TenantId.SELF, "second", "Typed-Password-2", false)))
-				.withMessageContaining("self");
-		assertThat(users.findByTenantIdAndUsername(TENANT, "second")).isEmpty();
+				.isThrownBy(() -> service.createAdmin(command(TENANT, "second", "Typed-Password-2", false)))
+				.withMessageContaining("self-host");
+		assertThat(users.findByTenantIdAndUsername(TENANT.value(), "second")).isEmpty();
 	}
 
 	@Test
 	void createAdminAllowsTheSameUsernameInAnotherTenant() {
-		service.createAdmin(command(TenantId.SELF, ADMIN, TYPED_PASSWORD, false));
+		service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
 
 		service.createAdmin(command(OTHER, ADMIN, "Typed-Password-2", false));
 
@@ -148,32 +148,32 @@ class UserServiceTest {
 	void createAdminZeroesThePassword() {
 		char[] password = TYPED_PASSWORD.toCharArray();
 
-		service.createAdmin(new CreateAdminCommand(TenantId.SELF, ADMIN, password, false, false));
+		service.createAdmin(new CreateAdminCommand(TENANT, ADMIN, password, false, false));
 
 		assertThat(password).containsOnly('\0');
 	}
 
 	@Test
 	void createAdminZeroesThePasswordAlsoWhenItFails() {
-		service.createAdmin(command(TenantId.SELF, ADMIN, TYPED_PASSWORD, false));
+		service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
 		char[] password = "Typed-Password-2".toCharArray();
 
 		assertThatExceptionOfType(AdminAlreadyExistsException.class).isThrownBy(
-				() -> service.createAdmin(new CreateAdminCommand(TenantId.SELF, "second", password, false, false)));
+				() -> service.createAdmin(new CreateAdminCommand(TENANT, "second", password, false, false)));
 		assertThat(password).containsOnly('\0');
 	}
 
 	@Test
 	void adminExistsIsTrueOnlyForATenantWithAnAdmin() {
-		service.createAdmin(command(TenantId.SELF, ADMIN, TYPED_PASSWORD, false));
+		service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
 
-		assertThat(service.adminExists(TenantId.SELF)).isTrue();
+		assertThat(service.adminExists(TENANT)).isTrue();
 		assertThat(service.adminExists(OTHER)).isFalse();
 	}
 
 	@Test
 	void changePasswordStoresTheNewHashAndClearsTheChangeRequirement() {
-		UserCreated created = service.createAdmin(command(TenantId.SELF, ADMIN, "Generated-Pass-123", true));
+		UserCreated created = service.createAdmin(command(TENANT, ADMIN, "Generated-Pass-123", true));
 		char[] newPassword = "Chosen-Password-9".toCharArray();
 
 		service.changePassword(created.id(), newPassword);
