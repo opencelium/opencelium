@@ -61,7 +61,7 @@ class DataDirectoryTest {
 		Path dir = tmp.resolve("data");
 
 		new ApplicationContextRunner().withUserConfiguration(BootstrapConfig.class)
-				.withPropertyValues("opencelium.deployment-mode=self", "opencelium.data-dir=" + dir)
+				.withPropertyValues("opencelium.deployment-mode=self-host", "opencelium.data-dir=" + dir)
 				.run(context -> {
 					assertThat(context).hasNotFailed();
 					assertThat(context.getBean(DataDirectory.class).path()).isEqualTo(dir);

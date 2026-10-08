@@ -15,16 +15,16 @@ public enum DeploymentMode {
 	 * nor any host-style {@code spring.mongodb.*} property is set, the URI defaults to
 	 * {@code mongodb://localhost:27017/opencelium}.
 	 */
-	SELF("self", true),
+	SELF_HOST("self-host", true),
 
 	/**
 	 * Operated by us for many tenants; application.yml names only the system database. There is no default:
 	 * {@code StaticMongoConnectionResolver} stops startup unless {@code spring.mongodb.uri} or
 	 * {@code spring.mongodb.host} is set.
 	 */
-	SAAS("saas", false);
+	CLOUD("cloud", false);
 
-	public static final DeploymentMode DEFAULT = SELF;
+	public static final DeploymentMode DEFAULT = SELF_HOST;
 
 	private final String propertyValue;
 

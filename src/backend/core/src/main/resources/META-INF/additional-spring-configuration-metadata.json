@@ -3,8 +3,8 @@
     {
       "name": "opencelium.deployment-mode",
       "type": "java.lang.String",
-      "description": "How this installation is operated: self (self-hosted, one customer, MongoDB from spring.mongodb.uri) or saas (operated for many tenants, spring.mongodb.uri names the system database and is required).",
-      "defaultValue": "self"
+      "description": "How this installation is operated: self-host (one customer, MongoDB from spring.mongodb.uri) or cloud (operated for many tenants, spring.mongodb.uri names the system database and is required).",
+      "defaultValue": "self-host"
     },
     {
       "name": "opencelium.data-dir",
@@ -21,8 +21,8 @@
     {
       "name": "opencelium.deployment-mode",
       "values": [
-        { "value": "self", "description": "Self-hosted: one customer, database configured in application.yml." },
-        { "value": "saas", "description": "Operated for many tenants; application.yml names only the system database." }
+        { "value": "self-host", "description": "One customer, database configured in application.yml." },
+        { "value": "cloud", "description": "Operated for many tenants; application.yml names only the system database." }
       ]
     }
   ]

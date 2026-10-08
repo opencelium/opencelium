@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @MongoIntegrationTest
 class UserIndexesTest {
 
-	private static final String TENANT = TenantId.SELF.value();
+	private static final String TENANT = TenantId.SELF_HOST.value();
 
 	private static final String ADMIN = "admin";
 

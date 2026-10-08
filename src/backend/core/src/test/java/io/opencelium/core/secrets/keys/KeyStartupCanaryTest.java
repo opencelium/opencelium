@@ -86,7 +86,7 @@ class KeyStartupCanaryTest {
 		assertThatThrownBy(() -> start(Map.of(), masterKeyFile(otherKeyFile)));
 
 		assertThat(output).contains("APPLICATION FAILED TO START").contains(KeyStartupException.RESTORE_OR_RESET)
-				.contains("cannot decrypt the stored data key of tenant 'self'")
+				.contains("cannot decrypt the stored data key of tenant 'self-host'")
 				.contains("Do not replace it with a new key");
 	}
 
@@ -104,7 +104,7 @@ class KeyStartupCanaryTest {
 
 	@Test
 	void startStopsWhenTheStoredDataKeyLacksFields(CapturedOutput output) {
-		mongo.getCollection("keys").insertOne(new Document("tenantId", TenantId.SELF.value()));
+		mongo.getCollection("keys").insertOne(new Document("tenantId", TenantId.SELF_HOST.value()));
 
 		assertThatThrownBy(() -> start(Map.of(RootKeyResolver.ENV_VARIABLE, randomKey())));
 
@@ -115,7 +115,7 @@ class KeyStartupCanaryTest {
 
 	@Test
 	void startStopsWhenTheStoredDataKeyHasAnIvOfTheWrongLength(CapturedOutput output) {
-		mongo.getCollection("keys").insertOne(new Document("tenantId", TenantId.SELF.value())
+		mongo.getCollection("keys").insertOne(new Document("tenantId", TenantId.SELF_HOST.value())
 				.append("rootKeyId", RootKey.INITIAL_ID)
 				.append("dekVersion", 1).append("iv", new byte[3]).append("ciphertext", new byte[48]));
 
@@ -127,7 +127,7 @@ class KeyStartupCanaryTest {
 	private void storeDataKeyWrappedWith(RootKey rootKey) {
 		byte[] dek = new byte[32];
 		new SecureRandom().nextBytes(dek);
-		mongo.insert(new DekWrapper().wrap(rootKey, TenantId.SELF, 1, dek, Instant.now()));
+		mongo.insert(new DekWrapper().wrap(rootKey, TenantId.SELF_HOST, 1, dek, Instant.now()));
 	}
 
 	private ConfigurableApplicationContext start(Map<String, String> environmentVariables, String... args) {

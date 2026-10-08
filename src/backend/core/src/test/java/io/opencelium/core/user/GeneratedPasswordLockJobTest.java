@@ -84,7 +84,7 @@ class GeneratedPasswordLockJobTest {
 		job.lockExpiredGeneratedPasswords();
 
 		assertThat(locked(id)).isTrue();
-		assertThat(output).contains("Locked user 'admin' of tenant self: its generated password was not changed"
+		assertThat(output).contains("Locked user 'admin' of tenant self-host: its generated password was not changed"
 				+ " within 24 h");
 	}
 
@@ -131,8 +131,9 @@ class GeneratedPasswordLockJobTest {
 	}
 
 	private String createAdmin(boolean generated) {
-		return service.createAdmin(new CreateAdminCommand(TenantId.SELF, "admin", "Some-Password-1".toCharArray(),
-				generated, false)).id();
+		var command = new CreateAdminCommand(TenantId.SELF_HOST, "admin", "Some-Password-1".toCharArray(),
+				generated, false);
+		return service.createAdmin(command).id();
 	}
 
 	private boolean locked(String id) {

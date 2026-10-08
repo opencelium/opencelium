@@ -33,7 +33,7 @@ class DefaultsEnvironmentPostProcessorTest {
 	void emptyConfigurationGetsAllDocumentedDefaults() {
 		postProcess();
 
-		assertThat(environment.getProperty("opencelium.deployment-mode")).isEqualTo("self");
+		assertThat(environment.getProperty("opencelium.deployment-mode")).isEqualTo("self-host");
 		assertThat(environment.getProperty("opencelium.data-dir")).isEqualTo(tmp.resolve("data").toString());
 		assertThat(environment.getProperty("spring.mongodb.uri")).isEqualTo("mongodb://localhost:27017/opencelium");
 	}
@@ -50,14 +50,14 @@ class DefaultsEnvironmentPostProcessorTest {
 	void logsOneDefaultLinePerAppliedDefault(CapturedOutput output) {
 		postProcess();
 
-		assertThat(output).containsOnlyOnce("opencelium.deployment-mode = self (default)");
+		assertThat(output).containsOnlyOnce("opencelium.deployment-mode = self-host (default)");
 		assertThat(output).containsOnlyOnce("opencelium.data-dir = " + tmp.resolve("data") + " (default)");
 		assertThat(output).containsOnlyOnce("spring.mongodb.uri = mongodb://localhost:27017/opencelium (default)");
 	}
 
 	@Test
-	void saasModeGetsNoMongoDefault(CapturedOutput output) {
-		environment.setProperty(DEPLOYMENT_MODE, "saas");
+	void cloudModeGetsNoMongoDefault(CapturedOutput output) {
+		environment.setProperty(DEPLOYMENT_MODE, "cloud");
 
 		postProcess();
 
@@ -67,7 +67,7 @@ class DefaultsEnvironmentPostProcessorTest {
 
 	@Test
 	void invalidModeGetsNoMongoDefaultSoOnlyTheModeIsReported() {
-		environment.setProperty(DEPLOYMENT_MODE, "cloud");
+		environment.setProperty(DEPLOYMENT_MODE, "hybrid");
 
 		postProcess();
 
@@ -76,7 +76,7 @@ class DefaultsEnvironmentPostProcessorTest {
 
 	@Test
 	void explicitValuesAreNeitherOverriddenNorLogged(CapturedOutput output) {
-		environment.setProperty(DEPLOYMENT_MODE, "self");
+		environment.setProperty(DEPLOYMENT_MODE, "self-host");
 		environment.setProperty(DATA_DIR, "/srv/oc");
 		environment.setProperty(MONGODB_URI, "mongodb://db.example:27017/oc");
 
@@ -108,7 +108,7 @@ class DefaultsEnvironmentPostProcessorTest {
 	@Test
 	void relaxedEnvironmentVariableNameCountsAsSet() {
 		environment.getPropertySources().addFirst(new SystemEnvironmentPropertySource(
-				"systemEnvironment", Map.of("OPENCELIUM_DEPLOYMENTMODE", "saas")));
+				"systemEnvironment", Map.of("OPENCELIUM_DEPLOYMENTMODE", "cloud")));
 
 		postProcess();
 

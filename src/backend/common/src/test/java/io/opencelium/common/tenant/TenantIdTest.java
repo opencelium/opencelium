@@ -10,8 +10,8 @@ class TenantIdTest {
 
 	@Test
 	void wellKnownTenantsAreDistinct() {
-		assertNotEquals(TenantId.SELF, TenantId.SYSTEM);
-		assertEquals("self", TenantId.SELF.value());
+		assertNotEquals(TenantId.SELF_HOST, TenantId.SYSTEM);
+		assertEquals("self-host", TenantId.SELF_HOST.value());
 		assertEquals("system", TenantId.SYSTEM.value());
 	}
 
