@@ -14,6 +14,11 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.mock.env.MockEnvironment;
 
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_HOST;
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_URI;
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_USERNAME;
+import static io.opencelium.core.config.OpenCeliumProperties.DATA_DIR;
+import static io.opencelium.core.config.OpenCeliumProperties.DEPLOYMENT_MODE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(OutputCaptureExtension.class)
@@ -52,7 +57,7 @@ class DefaultsEnvironmentPostProcessorTest {
 
 	@Test
 	void saasModeGetsNoMongoDefault(CapturedOutput output) {
-		environment.setProperty("opencelium.deployment-mode", "saas");
+		environment.setProperty(DEPLOYMENT_MODE, "saas");
 
 		postProcess();
 
@@ -62,7 +67,7 @@ class DefaultsEnvironmentPostProcessorTest {
 
 	@Test
 	void invalidModeGetsNoMongoDefaultSoOnlyTheModeIsReported() {
-		environment.setProperty("opencelium.deployment-mode", "cloud");
+		environment.setProperty(DEPLOYMENT_MODE, "cloud");
 
 		postProcess();
 
@@ -71,9 +76,9 @@ class DefaultsEnvironmentPostProcessorTest {
 
 	@Test
 	void explicitValuesAreNeitherOverriddenNorLogged(CapturedOutput output) {
-		environment.setProperty("opencelium.deployment-mode", "self");
-		environment.setProperty("opencelium.data-dir", "/srv/oc");
-		environment.setProperty("spring.mongodb.uri", "mongodb://db.example:27017/oc");
+		environment.setProperty(DEPLOYMENT_MODE, "self");
+		environment.setProperty(DATA_DIR, "/srv/oc");
+		environment.setProperty(MONGODB_URI, "mongodb://db.example:27017/oc");
 
 		postProcess();
 
@@ -84,7 +89,7 @@ class DefaultsEnvironmentPostProcessorTest {
 
 	@Test
 	void explicitMongoHostSuppressesTheUriDefault() {
-		environment.setProperty("spring.mongodb.host", "db.example");
+		environment.setProperty(MONGODB_HOST, "db.example");
 
 		postProcess();
 
@@ -93,7 +98,7 @@ class DefaultsEnvironmentPostProcessorTest {
 
 	@Test
 	void anyHostStyleMongoPropertySuppressesTheUriDefault() {
-		environment.setProperty("spring.mongodb.username", "oc");
+		environment.setProperty(MONGODB_USERNAME, "oc");
 
 		postProcess();
 

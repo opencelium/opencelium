@@ -2,15 +2,17 @@ package io.opencelium.core.config.mongo;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
-import io.opencelium.core.CoreApplication;
+import io.opencelium.core.config.BootstrapProperties;
+import io.opencelium.core.config.OpenCeliumProperties;
+import io.opencelium.core.testsupport.CoreStartup;
 import io.opencelium.core.testsupport.LocalMongo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +29,7 @@ class MongoStartupFailureTest {
 	@Test
 	void unreachableMongoStopsStartupWithinTenSeconds(CapturedOutput output) {
 		assertTimeoutPreemptively(Duration.ofSeconds(10),
-				() -> assertThatThrownBy(() -> start("--spring.mongodb.uri=mongodb://localhost:1/opencelium")));
+				() -> assertThatThrownBy(() -> start(CoreStartup.mongoUri("mongodb://localhost:1/opencelium"))));
 
 		assertThat(output).contains("APPLICATION FAILED TO START").contains("connection refused")
 				.contains("Property: spring.mongodb.uri");
@@ -35,7 +37,7 @@ class MongoStartupFailureTest {
 
 	@Test
 	void saasModeWithoutUriStopsStartup(CapturedOutput output) {
-		assertThatThrownBy(() -> start("--opencelium.deployment-mode=saas"));
+		assertThatThrownBy(() -> start(CoreStartup.arg(OpenCeliumProperties.DEPLOYMENT_MODE, "saas")));
 
 		assertThat(output).contains("saas mode requires the system database URI explicitly")
 				.contains("Property: spring.mongodb.uri");
@@ -43,8 +45,8 @@ class MongoStartupFailureTest {
 
 	@Test
 	void uriWithIgnoredCredentialPropertyStopsStartup(CapturedOutput output) {
-		assertThatThrownBy(() -> start("--spring.mongodb.uri=" + LocalMongo.uri("opencelium"),
-				"--spring.mongodb.username=oc"));
+		assertThatThrownBy(() -> start(CoreStartup.mongoUri(LocalMongo.uri("opencelium")),
+				CoreStartup.arg(BootstrapProperties.MONGODB_USERNAME, "oc")));
 
 		assertThat(output).contains("Boot ignores it").contains("Property: spring.mongodb.username")
 				.contains("Remove spring.mongodb.username, or remove spring.mongodb.uri");
@@ -52,7 +54,7 @@ class MongoStartupFailureTest {
 
 	@Test
 	void invalidUriWithUnencodedPasswordNeverShowsIt(CapturedOutput output) {
-		assertThatThrownBy(() -> start("--spring.mongodb.uri=mongodb://oc:p@ss%zz@db.example/opencelium"));
+		assertThatThrownBy(() -> start(CoreStartup.mongoUri("mongodb://oc:p@ss%zz@db.example/opencelium")));
 
 		assertThat(output).contains("is not a valid MongoDB connection string").contains("URL-encode")
 				.doesNotContain("p@ss").doesNotContain("ss%zz");
@@ -62,17 +64,13 @@ class MongoStartupFailureTest {
 	void passwordNeverAppearsInTheOutput(CapturedOutput output) {
 		String uri = LocalMongo.uriWithLogin("oc_nobody", "wrong-password", "opencelium");
 
-		assertThatThrownBy(() -> start("--spring.mongodb.uri=" + uri));
+		assertThatThrownBy(() -> start(CoreStartup.mongoUri(uri)));
 
 		assertThat(output).contains("authentication failed").doesNotContain("wrong-password");
 	}
 
 	private void start(String... args) {
-		String[] all = new String[args.length + 2];
-		all[0] = "--spring.main.web-application-type=none";
-		all[1] = "--opencelium.data-dir=" + dataDir;
-		System.arraycopy(args, 0, all, 2, args.length);
-		SpringApplication.run(CoreApplication.class, all).close();
+		CoreStartup.run(Map.of(), dataDir, args).close();
 	}
 
 }

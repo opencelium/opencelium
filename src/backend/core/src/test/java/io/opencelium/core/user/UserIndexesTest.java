@@ -4,12 +4,10 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Set;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.IndexField;
@@ -18,26 +16,26 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.testsupport.LocalMongo;
+import io.opencelium.core.testsupport.MongoIntegrationTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-@SpringBootTest
+@MongoIntegrationTest
 class UserIndexesTest {
+
+	private static final String TENANT = TenantId.SELF.value();
+
+	private static final String ADMIN = "admin";
 
 	@TempDir
 	static Path dataDir;
 
 	@DynamicPropertySource
 	static void properties(DynamicPropertyRegistry registry) {
-		registry.add("opencelium.data-dir", () -> dataDir.toString());
-		LocalMongo.register(registry, UserIndexesTest.class);
-	}
-
-	@AfterAll
-	static void dropDatabase() {
-		LocalMongo.drop(UserIndexesTest.class);
+		LocalMongo.register(registry, UserIndexesTest.class, () -> dataDir);
 	}
 
 	@Autowired
@@ -62,18 +60,18 @@ class UserIndexesTest {
 
 	@Test
 	void insertFailsForASecondUserWithTheSameUsernameInOneTenant() {
-		users.insert(user("self", "admin"));
+		users.insert(user(TENANT, ADMIN));
 
-		assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(() -> users.insert(user("self", "admin")));
+		assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(() -> users.insert(user(TENANT, ADMIN)));
 	}
 
 	@Test
 	void insertAllowsTheSameUsernameInAnotherTenant() {
-		users.insert(user("self", "admin"));
+		users.insert(user(TENANT, ADMIN));
 
-		users.insert(user("other", "admin"));
+		users.insert(user("other", ADMIN));
 
-		assertThat(users.findByTenantIdAndUsername("other", "admin")).isPresent();
+		assertThat(users.findByTenantIdAndUsername("other", ADMIN)).isPresent();
 	}
 
 	private static UserDocument user(String tenant, String username) {

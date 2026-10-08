@@ -1,18 +1,22 @@
 package io.opencelium.core.config;
 
 import java.nio.file.Path;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.diagnostics.FailureAnalysis;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
-import io.opencelium.core.CoreApplication;
+import io.opencelium.core.testsupport.CoreStartup;
 
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_URI;
+import static io.opencelium.core.config.BootstrapProperties.MONGODB_USERNAME;
+import static io.opencelium.core.config.OpenCeliumProperties.DEPLOYMENT_MODE;
+import static io.opencelium.core.config.OpenCeliumProperties.MASTER_KEY_FILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -25,7 +29,7 @@ class BootstrapFailureAnalyzerTest {
 	@Test
 	void descriptionEndsWithThePropertyName() {
 		var failure = new BeanCreationException("openCeliumProperties",
-				new BootstrapPropertyException("opencelium.deployment-mode", "'cloud' is not a deployment mode."));
+				new BootstrapPropertyException(DEPLOYMENT_MODE, "'cloud' is not a deployment mode."));
 
 		FailureAnalysis analysis = new BootstrapFailureAnalyzer().analyze(failure);
 
@@ -36,24 +40,22 @@ class BootstrapFailureAnalyzerTest {
 
 	@Test
 	void exceptionSpecificActionReplacesTheDefault() {
-		var failure = new BootstrapPropertyException("spring.mongodb.username", "conflict", "Remove it.", null);
+		var failure = new BootstrapPropertyException(MONGODB_USERNAME, "conflict", "Remove it.", null);
 
 		assertThat(new BootstrapFailureAnalyzer().analyze(failure).getAction()).isEqualTo("Remove it.");
 	}
 
 	@Test
 	void environmentVariableFollowsSpringRelaxedBinding() {
-		assertThat(BootstrapFailureAnalyzer.environmentVariable("spring.mongodb.uri")).isEqualTo("SPRING_MONGODB_URI");
-		assertThat(BootstrapFailureAnalyzer.environmentVariable("opencelium.master-key-file"))
+		assertThat(BootstrapFailureAnalyzer.environmentVariable(MONGODB_URI)).isEqualTo("SPRING_MONGODB_URI");
+		assertThat(BootstrapFailureAnalyzer.environmentVariable(MASTER_KEY_FILE))
 				.isEqualTo("OPENCELIUM_MASTERKEYFILE");
 	}
 
 	@Test
 	void realStartupReportsThePropertyThroughTheRegisteredAnalyzer(CapturedOutput output) {
-		assertThatThrownBy(() -> SpringApplication.run(CoreApplication.class,
-				"--spring.main.web-application-type=none",
-				"--opencelium.data-dir=" + tmp,
-				"--opencelium.deployment-mode=cloud")).isNotNull();
+		String badMode = CoreStartup.arg(DEPLOYMENT_MODE, "cloud");
+		assertThatThrownBy(() -> CoreStartup.run(Map.of(), tmp, badMode)).isNotNull();
 
 		assertThat(output).contains("APPLICATION FAILED TO START").contains("Property: opencelium.deployment-mode");
 	}
