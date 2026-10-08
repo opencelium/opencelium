@@ -42,6 +42,11 @@ public final class EnhancementReference implements Reference {
         return raw;
     }
 
+    @Override
+    public String getName() {
+        return raw.substring(3, raw.length() - 2);
+    }
+
     public String getBindId() {
         return bindId;
     }

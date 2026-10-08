@@ -45,6 +45,11 @@ public final class RequestDataReference implements Reference {
         return raw;
     }
 
+    @Override
+    public String getName() {
+        return raw.substring(1, raw.length() - 1);
+    }
+
     public Integer getCtorId() {
         return ctorId;
     }

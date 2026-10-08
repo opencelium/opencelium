@@ -1,13 +1,9 @@
 package com.becon.opencelium.backend.reference;
 
-import java.util.regex.Pattern;
+import com.becon.opencelium.backend.reference.enums.ReferenceGroup;
+import com.becon.opencelium.backend.reference.enums.ReferenceType;
 
-import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-import static com.becon.opencelium.backend.constant.RegExpression.requestData;
-import static com.becon.opencelium.backend.constant.RegExpression.webhook;
-import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
+import static com.becon.opencelium.backend.reference.Patterns.*;
 
 /**
  * Low-level reference classifiers.
@@ -17,12 +13,6 @@ import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectR
  * low-level and performance-oriented.
  */
 public final class ReferenceMatchers {
-    private static final Pattern DIRECT_REF = Pattern.compile(directRef);
-    private static final Pattern WRAPPED_DIRECT_REF = Pattern.compile(wrappedDirectRef);
-    private static final Pattern ENHANCEMENT_REF = Pattern.compile(enhancement);
-    private static final Pattern WEBHOOK_REF = Pattern.compile(webhook);
-    private static final Pattern PAGE_REF = Pattern.compile(pageRef);
-    private static final Pattern REQUEST_DATA_REF = Pattern.compile(requestData);
 
     private ReferenceMatchers() {
     }
@@ -107,5 +97,25 @@ public final class ReferenceMatchers {
         }
 
         return REQUEST_DATA_REF.matcher(ref).matches();
+    }
+
+    public static boolean isReference(String ref, ReferenceGroup group) {
+        for (ReferenceType type : group.getReferences()) {
+            if (isThatReference(ref, type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isThatReference(String ref, ReferenceType type) {
+        return switch (type) {
+            case ENHANCEMENT -> isEnhancement(ref);
+            case PAGE -> isPage(ref);
+            case REQUEST_DATA -> isRequestData(ref);
+            case DIRECT -> isDirect(ref);
+            case WEBHOOK -> isWebhook(ref);
+            case WRAPPED_DIRECT -> isWrappedDirect(ref);
+        };
     }
 }

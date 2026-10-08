@@ -95,6 +95,11 @@ public final class DirectReference implements Reference {
         return raw;
     }
 
+    @Override
+    public String getName() {
+        return raw;
+    }
+
     public String getColor() {
         return color;
     }
