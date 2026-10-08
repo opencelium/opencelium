@@ -224,7 +224,7 @@ Why the backend is shaped this way — modules, deployment shapes, recorded desi
   - `worker` stays a thin wrapper around `execution`
 - If a class fits two modules, put it in the lower one: the lower position keeps more options open.
 - Both deployment shapes must keep working: monolith (`oc-app.jar`, in-process `local` transport) and distributed (`oc-app.jar` + `oc-worker.jar`, broker transport via the SPI).
-- Until the ArchUnit rules land (OC-1584 Task 5), reviewers check the four build rules of [architecture.md section 8.9](docs/architecture.md#89-build-checks) by hand: no `@Value`; cryptography only in `core.secrets`; no plaintext secret-named fields on `@Document` classes; the `settings` collection is read only through the settings service.
+- Until the ArchUnit rules land, reviewers check the four build rules of [architecture.md section 8.9](docs/architecture.md#89-build-checks) by hand: no `@Value`; cryptography only in `core.secrets`; no plaintext secret-named fields on `@Document` classes; the `settings` collection is read only through the settings service.
 - New code comes with tests — see below.
 
 ### 8.1 How to add a configuration value
@@ -239,7 +239,7 @@ The placement rule — yml file, secret, or runtime setting — is [architecture
    - In each case, add one comment line to the sample yml file, [core/src/main/resources/application.yaml](core/src/main/resources/application.yaml).
    - Expect objections in review: this list must not grow.
 2. **Runtime setting (database).** Declare the key (name, type, default, validation) in the setting registry in `core.settings` and read it through the settings service. Subscribe to its change notifications if the component must react at runtime. *(Planned: the registry and the service are not built yet; their story names the classes.)*
-3. **Secret.** Write it through the secret provider SPI and hold only a secret reference (`common.secret`). A `@Document` class never has a plaintext field for a secret. *(Planned: OC-1584 Task 4.)*
+3. **Secret.** Write it through the secret provider SPI and hold only a secret reference (`common.secret`). A `@Document` class never has a plaintext field for a secret. *(Planned.)*
 
 ## 9. Testing
 

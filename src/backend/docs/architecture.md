@@ -1,6 +1,6 @@
 # Backend architecture
 
-> This document is written in ASD-STE100 Simplified Technical English (STE). The section [About this document](#about-this-document) lists the technical names, the status markers, and the rule for names.
+> This document is written in ASD-STE100 Simplified Technical English (STE). The section [About this document](#about-this-document) lists the technical names, the status markers, and the rules for names and tickets.
 
 > A drawio diagram of the execution architecture is in [architecture.drawio](architecture.drawio). Open it with [diagrams.net](https://app.diagrams.net) or with the drawio plugin of your IDE. If the diagram and this text do not agree, this text is correct.
 
@@ -29,6 +29,8 @@ This document tells how the OpenCelium backend is made and why. The contribution
 **Structure.** The sections follow the arc42 template. Section 10, quality requirements, is not written. The quality goals in section 1.2 are sufficient at this time. The sections 1.2, 1.3, 2, 3, and 11, and the runtime scenarios after 6.1, are not written yet. The next documentation PR adds them, together with the C4 diagrams of the sections 3, 5, 6, and 7.
 
 **Names of building blocks.** This document names a building block by its responsibility, for example *the connection resolver*. It does not name a Java class or interface. A code identifier appears only when it is a contract for an operator or for the build. Examples: a property, an environment variable, a jar, a port, a collection, or a package. A product or framework name that marks a selected technology, for example Spring RestClient or Quartz, is a technical name. Each building block has at most 1 package pointer. The `package-info.java` of a package lists its classes.
+
+**Tickets.** This document does not name Jira tickets, because ticket numbers change and tickets are removed. A ticket links to a decision number or to a section heading. Those are the stable anchors. A story is named by its subject, for example *the authentication story*.
 
 **Technical names.** STE permits technical names and technical verbs that are standard in the industry. This document uses them as they are. The groups:
 
@@ -112,7 +114,7 @@ Dependencies point only down. No module depends on `core` or on `worker`. A bloc
 | `core` | Spring Boot application, `oc-app.jar`, port 9090 | The management application. Only core uses MongoDB: with one static connection in `self-host` mode, and through the tenant catalog in `cloud` mode (decision 11). See [5.4](#54-level-2-core). | BUILT: bootstrap properties, MongoDB connection, root key, users. PLANNED: all other parts. |
 | `worker` | Spring Boot application, `oc-worker.jar`, port 9091 | An engine host without state, fully isolated. The worker has no MongoDB access and no persistent state. Local log files are a temporary spool. The only purpose of the worker is to add execution capacity. See [5.5](#55-level-2-worker). | PLANNED. The module has only the application class. |
 
-Level 2 shows the blocks of each module and the package of each block. The layout was recorded in OC-1590 on 2026-09-08. It is refined when stories are complete. Each story becomes a package in one of the 4 modules. A story does not make a new module and does not change the dependency direction. The status column shows the state on 2026-10-08.
+Level 2 shows the blocks of each module and the package of each block. The layout was recorded on 2026-09-08. It is refined when stories are complete. Each story becomes a package in one of the 4 modules. A story does not make a new module and does not change the dependency direction. The status column shows the state on 2026-10-08.
 
 ### 5.2 Level 2: common
 
@@ -149,7 +151,7 @@ The module `core` has one package for each feature (modular monolith, decision 1
 |---|---|---|---|
 | **Security filter chain** | It validates the session JWTs that core issues. The login strategies are plug-ins and depend on the deployment mode: local (with 2FA/TOTP), LDAP, OIDC, and Service Portal (decision 10). | `core.auth` | PLANNED |
 | **Access control** | RBAC and ACL enforcement, with one authorization manager (decision 7). | `core.authz` | PLANNED |
-| **Users** | The users of a tenant, with the password hash and never the password. Password changes, the first-admin command, generated passwords, and a job that locks a user whose generated password is older than 24 h. The login is OC-1585. | `core.user` | BUILT |
+| **Users** | The users of a tenant, with the password hash and never the password. Password changes, the first-admin command, generated passwords, and a job that locks a user whose generated password is older than 24 h. The login is part of the authentication story. | `core.user` | BUILT |
 | **Tenant catalog** | The system database and the per-tenant Mongo connections (decision 11). | `core.tenant` | PLANNED |
 | **Management** | CRUD of workflows, connectors, and invokers. The invoker XML parser and importer. | `core.workflow`, `core.connector`, `core.invoker` | PLANNED |
 | **Execution quota** | The quota check for each execution. See the note below the table. | `core.subscription` | PLANNED |
@@ -177,8 +179,8 @@ The module `worker` holds the application wiring only. It grows nothing, on purp
 
 Two decisions are open on purpose. The first story that must have a decision closes it:
 
-- **Where the transport implementations go.** `local` goes to `execution`. `amqp` goes to `execution` or to its own package, but not to `core`. If it is in `core`, the workers cannot use it. OC-1588 closes this decision.
-- **Where the Mongo repositories go.** Preferred: in the core package of each feature, so that each feature stays self-contained. Alternative: one shared persistence package. OC-1587 closes this decision.
+- **Where the transport implementations go.** `local` goes to `execution`. `amqp` goes to `execution` or to its own package, but not to `core`. If it is in `core`, the workers cannot use it. The execution story closes this decision.
+- **Where the Mongo repositories go.** Preferred: in the core package of each feature, so that each feature stays self-contained. Alternative: one shared persistence package. The persistence story closes this decision.
 
 These decisions do not move an item on the roadmap.
 
@@ -253,7 +255,7 @@ The terms are in the [glossary](#12-glossary). The project keeps the OpenCelium 
 - **IF node**: a decision. The data goes to one branch or to the other branch.
 - **LOOP node**: the same steps for each item of a collection. The iterations can execute as parallel batches.
 
-A fifth type, the **Wait-for-Human node**, stops the execution until a person answers (decision 12). It is on the post-release backlog (OC-1603).
+A fifth type, the **Wait-for-Human node**, stops the execution until a person answers (decision 12). It is on the post-release backlog.
 
 **Workflow graph rules.** A workflow is a true DAG, not a chain:
 
@@ -395,10 +397,10 @@ flowchart LR
 In self-hosted mode the yml server is *the* database. In cloud mode it is the **system database**. The tenant connections come from the tenant catalog.
 
 - **How to set the server.** Use `spring.mongodb.uri`, or Boot's host-style properties (`spring.mongodb.host`, `port`, `username`, …). Do not use the 2 together. If the 2 are set, core stops with an error that names the properties. Options that the excluded auto-configuration applied are not accepted: `spring.mongodb.ssl.*` and `spring.mongodb.representation.uuid`. The error names the URI option to use instead. Boot 4 does not read the Boot 3 property `spring.data.mongodb.uri`. If it is set, core writes a warning to the log that points to `spring.mongodb.uri`. The URI option `proxyPassword` is not accepted, because the MongoDB Java driver 5.8 writes it to the log in plaintext.
-- **Guard 1: no silent default.** In self-hosted mode core uses the documented default `mongodb://localhost:27017/opencelium` when nothing is set. It writes one log line that names the default (zero-configuration first start, OC-1613 Task 2). In cloud mode the server is mandatory. If it is not set, core stops and names the property.
+- **Guard 1: no silent default.** In self-hosted mode core uses the documented default `mongodb://localhost:27017/opencelium` when nothing is set. It writes one log line that names the default (the zero-configuration first start). In cloud mode the server is mandatory. If it is not set, core stops and names the property.
 - **Guard 2: an immediate ping in the 2 modes.** The driver connects only at the first use. Without the ping, an unreachable server shows as a driver timeout approximately 30 s into the first use. Thus core pings the server at the start, with a 5 s timeout. The check also lists the collections of the database. Thus a wrong login, or no login where one is necessary, also stops the start. If the server is not reachable, core stops with a clear error and a list of options.
 - **Log safety.** All connection strings in logs and error messages are masked. The password and the secret option values become `****`.
-- **Planned rule (OC-1586): the yml client is for the system scope only.** In cloud mode no tenant document goes through it. Tenant data flows only through the clients that the catalog specifies. This rule is not enforced yet. At this time the resolver gives a connection only for `system` (and for `self-host` in self-host mode). For each other tenant it stops with an error.
+- **Planned rule, with the tenant catalog: the yml client is for the system scope only.** In cloud mode no tenant document goes through it. Tenant data flows only through the clients that the catalog specifies. This rule is not enforced yet. At this time the resolver gives a connection only for `system` (and for `self-host` in self-host mode). For each other tenant it stops with an error.
 
 ### 8.7 Authentication and authorization
 
@@ -423,7 +425,7 @@ The intended result: most product logic (the graph walk, IF, LOOP, data mapping)
 
 ### 8.9 Build checks
 
-**PLANNED.** ArchUnit rules will make these 4 rules build failures (OC-1584 Task 5, not in the build yet):
+**PLANNED.** ArchUnit rules will make these 4 rules build failures. The rules are not in the build yet:
 
 - no `@Value`
 - cryptography only in `core.secrets`
@@ -460,8 +462,8 @@ The decisions are recorded so that they are not discussed again without a reason
    *Why:* Role checks alone are not precise enough. "Share this one workflow with that one colleague" must not make a new role necessary.
 
     - **RBAC** (component × action) is the general layer. **Each resource** (workflow, connector, invoker, data-store entry) also has an ACL: subject, permission, this resource.
-    - **First increment (OC-1589, replaces the workflows-only scope of the v2 design): ACLs on connectors and workflows.** The ACL is kept on each resource document. It is enforced in Mongo queries, REST, the scheduler, and WebSocket topic subscriptions. Execution logs use the ACL of the workflow.
-    - **Permission model (decided, OC-1589):** grants to users and groups. Levels: View, Execute, Edit, Delete, Admin. RBAC roles give the defaults. ACL entries change them for one resource. The creator gets Admin and can give Admin to others.
+    - **First increment (replaces the workflows-only scope of the v2 design): ACLs on connectors and workflows.** The ACL is kept on each resource document. It is enforced in Mongo queries, REST, the scheduler, and WebSocket topic subscriptions. Execution logs use the ACL of the workflow.
+    - **Permission model (decided):** grants to users and groups. Levels: View, Execute, Edit, Delete, Admin. RBAC roles give the defaults. ACL entries change them for one resource. The creator gets Admin and can give Admin to others.
     - Enforcement is in core (API access) **and** in the execution engine (resolution of parameters and credentials at runtime, identical on the 2 transports). Thus the ACL model itself belongs in `common`.
 
    *(The detailed design is on the [open design topics](#open-design-topics) list. Topics: the exact meaning of each permission level, the extension beyond connectors and workflows, secret encryption, and masked logs.)*
@@ -491,7 +493,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - Core always issues its own session JWT. IdP and portal tokens do not reach the frontend.
     - Sequence diagrams for the 3 flows: [docs/security/README.md](security/README.md).
 
-    *(Added 2026-09-08. The PM confirmed the OIDC-provider role of the portal on 2026-09-21. The portal must change for this role. The first OC-1585 task examines the endpoints and the payload.)*
+    *(Added 2026-09-08. The PM confirmed the OIDC-provider role of the portal on 2026-09-21. The portal must change for this role. The first task of the authentication story examines the endpoints and the payload.)*
 
 11. **The tenant context is a basic part of the design. In cloud mode, core keeps a system database with a tenant catalog.**
 
@@ -504,7 +506,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - **Logins carry identity only** (the tenant ID as a token claim). Scheduled and triggered executions find the tenant purely from the catalog. Thus they execute with nobody logged in, and they survive restarts.
     - **Tenant-keyed is the definition of done of each story.** The tenant ID is in the principal and on each document in the database (workflows, connectors, executions, variables, ACL entries, audit records). It is also in the self-contained job message and on each event that a worker publishes. The engine and the transports do not know about tenants. The persistence and API layers enforce the isolation.
     - **Self-hosted** is the same code path with one static tenant: one MongoDB connection at the start. The behaviour at this time does not change.
-    - **BUILT:** the tenant identifier with the reserved values `self-host` and `system`, and the connection resolver interface. The static resolver serves `system`, and `self-host` in self-hosted mode. **PLANNED:** the catalog and the per-tenant connections (OC-1586, OC-1587).
+    - **BUILT:** the tenant identifier with the reserved values `self-host` and `system`, and the connection resolver interface. The static resolver serves `system`, and `self-host` in self-hosted mode. **PLANNED:** the catalog and the per-tenant connections.
 
     *(Added 2026-09-08. Revised 2026-09-22: it replaced "cloud starts without a database, connection data arrives with the portal login". That design left scheduled executions without access to tenant data.)*
 
@@ -516,7 +518,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - Resume = rebuild the promise graph from a checkpoint. The promises of the completed nodes start as complete. The execution continues from the first nodes that are not complete. A resume job message carries the checkpoint (the self-contained rule of decision 9, extended to resumes). Thus each worker can take it.
     - The **Execution Debugger** is the same mechanism, driven interactively on the `local` transport. A breakpoint pauses the execution. The UI examines the node state and the variables through the visibility of decision 8. *Continue* completes the held promise.
 
-    *(Added 2026-09-08. Revised 2026-09-21 with the solo re-plan: it replaced "the design is in the debugger story OC-1599, OC-1588 leaves the checkpoint seam open". Now the execution-level state machine and the checkpoint and resume design are part of OC-1588 (P0). The users of them: restart recovery OC-1601 (P0), the debugger OC-1599 (P1 slack, if capacity permits), and Wait-for-Human OC-1603 (post-release).)*
+    *(Added 2026-09-08. Revised 2026-09-21 with the solo re-plan: it replaced "the design is in the debugger story, and the execution story leaves the checkpoint seam open". Now the execution-level state machine and the checkpoint and resume design are part of the execution story. The users of them: the restart recovery, the debugger if capacity permits, and Wait-for-Human after the release.)*
 
 13. **Configuration is in 2 places: the yml file or the database.**
 
@@ -525,9 +527,9 @@ The decisions are recorded so that they are not discussed again without a reason
     - **The yml file holds only what the application must have to start.** The list is small on purpose. A change means a restart. Standard Spring properties keep their standard names. `opencelium.*` holds only values that Spring has no concept of.
     - **All other values are database settings.** They can be changed at runtime through `GET/PATCH /settings`.
     - **Credentials are database values with 2 more rules.** They are encrypted through the secret provider SPI. The default is a Mongo storage with AES-256-GCM, a new IV for each secret, and key versions. The master key is found outside the yml file and the database (decision 14). No API can read a credential back. Domain documents hold a secret reference. The value is decrypted only at the moment of use. It is not cached in plaintext.
-    - ArchUnit rules will enforce this (OC-1584 Task 5). Then the build stops on a violation, and a review is not necessary for this. Until then, the reviewers examine it.
+    - ArchUnit rules will enforce this (planned). Then the build stops on a violation, and a review is not necessary for this. Until then, the reviewers examine it.
 
-    *(Added 2026-09-16, OC-1584. The master-key clause was revised 2026-09-22 by decision 14. The operational rule, the 3 placement questions, the examples, and the procedure to add a value are in [8.4 Configuration placement](#84-configuration-placement).)*
+    *(Added 2026-09-16. The master-key clause was revised 2026-09-22 by decision 14. The operational rule, the 3 placement questions, the examples, and the procedure to add a value are in [8.4 Configuration placement](#84-configuration-placement).)*
 
 14. **Envelope encryption: one root key for each installation, one DEK for each tenant.** *(Changes the master-key clause of decision 13 and extends its secret storage. Diagram: [8.5 Secrets and keys](#85-secrets-and-keys).)*
 
@@ -540,9 +542,9 @@ The decisions are recorded so that they are not discussed again without a reason
     - The wrap authenticates the tenant ID and the DEK version as associated data. Thus a wrapped DEK that is copied to another tenant does not unwrap.
     - Self-hosted is the same code path with exactly one tenant.
     - The root key does not leave core: not to the workers, not to the broker, and not to a job message.
-    - **BUILT:** the root-key resolution and generation, the generation guard, the DEK wrap and unwrap, the `keys` collection, and the start canary. **PLANNED:** the secret storage that writes DEKs and secrets (OC-1584 Task 4), and the root-key rotation (a follow-up ticket, the key-version fields are already there).
+    - **BUILT:** the root-key resolution and generation, the generation guard, the DEK wrap and unwrap, the `keys` collection, and the start canary. **PLANNED:** the secret storage that writes DEKs and secrets, and the root-key rotation (the key-version fields are already there).
 
-    *(Added 2026-09-22, OC-1584. The worker-side key material for encrypted job payloads is on the [open design topics](#open-design-topics) list. The preferred option: a separate transport key.)*
+    *(Added 2026-09-22. The worker-side key material for encrypted job payloads is on the [open design topics](#open-design-topics) list. The preferred option: a separate transport key.)*
 
 ### Open design topics
 
@@ -583,5 +585,5 @@ This section is not written yet. The next documentation PR adds it.
 
 ## Document history
 
-- 2026-10-08: restructured into the arc42 sections. Building blocks are named by their responsibility. The class names are removed. The procedure to add a configuration value moved to CONTRIBUTING, section 8.1. The key-structure diagram is inline in section 8.5. The user block of core was added. The status markers agree with commit `c61fdc8ff`.
+- 2026-10-08: restructured into the arc42 sections. Building blocks are named by their responsibility. The class names and the ticket numbers are removed. The procedure to add a configuration value moved to CONTRIBUTING, section 8.1. The key-structure diagram is inline in section 8.5. The user block of core was added. The status markers agree with commit `c61fdc8ff`.
 - 2026-10-06: written again in ASD-STE100. The content agrees with the code at commit `dfcbd65c6`. New sections: About this document, the start sequence of core, and the status markers. The test strategy now tells how the MongoDB tests execute. The open topic "Database-user model for tenants" was added.
