@@ -1,6 +1,8 @@
 [Unit]
 Description=OpenCelium API Hub
 After=syslog.target network.target
+StartLimitIntervalSec=30
+StartLimitBurst=3
 
 [Service]
 Restart=on-failure
