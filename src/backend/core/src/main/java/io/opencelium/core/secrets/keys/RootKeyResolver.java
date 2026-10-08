@@ -16,14 +16,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import io.opencelium.core.config.BootstrapPropertyException;
+import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.config.OpenCeliumProperties;
 
 /**
  * Finds the root key at startup, in a fixed order where the first hit wins: the {@code OC_MASTER_KEY} environment
  * variable, the file named by {@code opencelium.master-key-file}, {@code <data-dir>/master.key}. When none has a key,
- * a new one is generated into {@code <data-dir>/master.key}, but only on a fresh install: if the database already
- * holds wrapped data keys, a new key could not read them, so startup stops instead. Setting both the variable and the
- * property is an error, not a question of order. Logs the source, never the key.
+ * a new one is generated into {@code <data-dir>/master.key}, but only in self-host mode and only on a fresh install.
+ * Cloud nodes must all start with the one key the operator supplies, so a cloud start without a key stops; and if the
+ * database already holds wrapped data keys, a new key could not read them, so startup stops there too. Setting both
+ * the variable and the property is an error, not a question of order. Logs the source, never the key.
  */
 public final class RootKeyResolver {
 
@@ -36,6 +38,8 @@ public final class RootKeyResolver {
 
 	private static final Log log = LogFactory.getLog(RootKeyResolver.class);
 
+	private final DeploymentMode mode;
+
 	private final Function<String, String> environment;
 
 	private final Optional<Path> masterKeyFile;
@@ -45,12 +49,14 @@ public final class RootKeyResolver {
 	private final RootKeyGenerator generator;
 
 	/**
+	 * @param mode          the deployment mode; only {@link DeploymentMode#SELF_HOST} may generate a key
 	 * @param environment   looks up environment variables ({@code System::getenv} outside Spring)
 	 * @param masterKeyFile {@code opencelium.master-key-file}
 	 * @param dataDir       the data directory; exists and is writable
 	 */
-	public RootKeyResolver(Function<String, String> environment, Optional<Path> masterKeyFile, Path dataDir,
-			RootKeyGenerator generator) {
+	public RootKeyResolver(DeploymentMode mode, Function<String, String> environment, Optional<Path> masterKeyFile,
+			Path dataDir, RootKeyGenerator generator) {
+		this.mode = mode;
 		this.environment = environment;
 		this.masterKeyFile = masterKeyFile;
 		this.dataDirFile = dataDir.resolve(DATA_DIR_FILE_NAME);
@@ -69,9 +75,16 @@ public final class RootKeyResolver {
 			log.info("Master key loaded from " + location(key.source()) + " (key id " + key.id() + ")");
 			return key;
 		}
+		String missing = "No master key was found: " + ENV_VARIABLE + " is not set, "
+				+ OpenCeliumProperties.MASTER_KEY_FILE + " is not set, and " + dataDirFile + " does not exist.";
+		if (!mode.generatesMasterKey()) {
+			throw new BootstrapPropertyException(OpenCeliumProperties.MASTER_KEY_FILE, missing + " In "
+					+ mode.propertyValue() + " mode no key is generated: every node must start with the same key.",
+					"Set " + ENV_VARIABLE + ", or point " + OpenCeliumProperties.MASTER_KEY_FILE
+							+ " at the key file, then start again. " + KEY_FORMAT, null);
+		}
 		if (wrappedDeksExist.getAsBoolean()) {
-			throw KeyStartupException.restoreOrReset("No master key was found: " + ENV_VARIABLE + " is not set, "
-					+ OpenCeliumProperties.MASTER_KEY_FILE + " is not set, and " + dataDirFile + " does not exist."
+			throw KeyStartupException.restoreOrReset(missing
 					+ " The database already holds encrypted data keys, so no new key is generated.");
 		}
 		RootKey key = generate();
