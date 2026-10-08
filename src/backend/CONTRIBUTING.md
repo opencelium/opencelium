@@ -214,7 +214,7 @@ How to review:
 
 ## 8. Backend code standards
 
-Why the backend is shaped this way — modules, deployment shapes, recorded design decisions — is documented in [docs/architecture.md](docs/architecture.md). The rules below follow from it.
+Why the backend is shaped this way — modules, deployment shapes, recorded design decisions — is documented in [docs/architecture.md](docs/architecture.md): the building blocks in [section 5](docs/architecture.md#5-building-block-view), the decisions in [section 9](docs/architecture.md#9-architecture-decisions). The rules below follow from it.
 
 - Java 25, Spring Boot 4.x, Gradle multi-module. Base package `io.opencelium.<module>`.
 - Respect the module boundaries — the dependency direction is `core`/`worker` → `execution` → `common`, never the reverse:
@@ -222,8 +222,24 @@ Why the backend is shaped this way — modules, deployment shapes, recorded desi
   - workflow execution logic (nodes, IF, LOOP) → `execution`
   - REST API, persistence, auth, scheduling → `core`
   - `worker` stays a thin wrapper around `execution`
+- If a class fits two modules, put it in the lower one: the lower position keeps more options open.
 - Both deployment shapes must keep working: monolith (`oc-app.jar`, in-process `local` transport) and distributed (`oc-app.jar` + `oc-worker.jar`, broker transport via the SPI).
+- Until the ArchUnit rules land (OC-1584 Task 5), reviewers check the four build rules of [architecture.md section 8.9](docs/architecture.md#89-build-checks) by hand: no `@Value`; cryptography only in `core.secrets`; no plaintext secret-named fields on `@Document` classes; the `settings` collection is read only through the settings service.
 - New code comes with tests — see below.
+
+### 8.1 How to add a configuration value
+
+The placement rule — yml file, secret, or runtime setting — is [architecture.md section 8.4](docs/architecture.md#84-configuration-placement). Answer its three questions in order; the first "yes" decides. Then:
+
+1. **Bootstrap value (yml file).** First check whether Spring already owns a property for it.
+   - If yes, use the standard name and add only our validation.
+   - If no, add the value to `OpenCeliumProperties` in `core.config`. Parse and validate it by hand, so that a bad value throws `BootstrapPropertyException` naming the property.
+   - Put the default, if there is one, in `DefaultsEnvironmentPostProcessor`, so that startup logs it as `(default)`.
+   - Add a description to `META-INF/additional-spring-configuration-metadata.json`.
+   - In each case, add one comment line to the sample yml file, [core/src/main/resources/application.yaml](core/src/main/resources/application.yaml).
+   - Expect objections in review: this list must not grow.
+2. **Runtime setting (database).** Declare the key (name, type, default, validation) in the setting registry in `core.settings` and read it through the settings service. Subscribe to its change notifications if the component must react at runtime. *(Planned: the registry and the service are not built yet; their story names the classes.)*
+3. **Secret.** Write it through the secret provider SPI and hold only a secret reference (`common.secret`). A `@Document` class never has a plaintext field for a secret. *(Planned: OC-1584 Task 4.)*
 
 ## 9. Testing
 
