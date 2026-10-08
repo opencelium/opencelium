@@ -12,6 +12,8 @@ import org.springframework.boot.test.context.assertj.AssertableApplicationContex
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.mock.env.MockEnvironment;
 
+import static io.opencelium.core.config.OpenCeliumProperties.DATA_DIR;
+import static io.opencelium.core.config.OpenCeliumProperties.DEPLOYMENT_MODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
@@ -71,8 +73,8 @@ class OpenCeliumPropertiesTest {
 	@Test
 	void parsingDoesNotCreateTheDataDir() {
 		var environment = new MockEnvironment()
-				.withProperty("opencelium.deployment-mode", "self")
-				.withProperty("opencelium.data-dir", tmp.resolve("missing").toString());
+				.withProperty(DEPLOYMENT_MODE, "self")
+				.withProperty(DATA_DIR, tmp.resolve("missing").toString());
 
 		OpenCeliumProperties properties = OpenCeliumProperties.from(environment);
 

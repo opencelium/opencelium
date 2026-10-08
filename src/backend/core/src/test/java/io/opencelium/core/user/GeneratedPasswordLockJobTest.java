@@ -5,13 +5,11 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -22,11 +20,12 @@ import org.springframework.test.context.bean.override.convention.TestBean;
 
 import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.testsupport.LocalMongo;
+import io.opencelium.core.testsupport.MongoIntegrationTest;
 import io.opencelium.core.testsupport.MutableClock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@MongoIntegrationTest
 @ExtendWith(OutputCaptureExtension.class)
 class GeneratedPasswordLockJobTest {
 
@@ -39,13 +38,7 @@ class GeneratedPasswordLockJobTest {
 
 	@DynamicPropertySource
 	static void properties(DynamicPropertyRegistry registry) {
-		registry.add("opencelium.data-dir", () -> dataDir.toString());
-		LocalMongo.register(registry, GeneratedPasswordLockJobTest.class);
-	}
-
-	@AfterAll
-	static void dropDatabase() {
-		LocalMongo.drop(GeneratedPasswordLockJobTest.class);
+		LocalMongo.register(registry, GeneratedPasswordLockJobTest.class, () -> dataDir);
 	}
 
 	@TestBean

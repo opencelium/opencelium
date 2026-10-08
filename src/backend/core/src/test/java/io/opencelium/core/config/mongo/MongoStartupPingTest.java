@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
+import io.opencelium.core.config.BootstrapProperties;
 import io.opencelium.core.config.BootstrapPropertyException;
 import io.opencelium.core.testsupport.LocalMongo;
 
@@ -45,7 +46,7 @@ class MongoStartupPingTest {
 	@Test
 	void hostStyleConfigurationIsNamedInTheError() {
 		var hostStyle = new MongoConnection(new ConnectionString("mongodb://localhost:1/opencelium"), "opencelium",
-				"spring.mongodb.host");
+				BootstrapProperties.MONGODB_HOST);
 
 		assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertThatExceptionOfType(BootstrapPropertyException.class)
 				.isThrownBy(() -> ping.verify(hostStyle))
