@@ -9,10 +9,10 @@ import java.util.Objects;
  */
 public record TenantId(String value) {
 
-	/** The single tenant of a self-hosted installation. */
-	public static final TenantId SELF = new TenantId("self");
+	/** The single tenant of a self-hosted installation; never a value the Service Portal issues. */
+	public static final TenantId SELF_HOST = new TenantId("self-host");
 
-	/** The platform itself: in saas mode the system database with the tenant catalog. */
+	/** The platform itself: in cloud mode the system database with the tenant catalog. */
 	public static final TenantId SYSTEM = new TenantId("system");
 
 	public TenantId {

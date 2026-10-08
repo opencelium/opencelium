@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  *
  * @param mustChangePassword the password was generated for the user and must be replaced at the next login
  * @param passwordIssuedAt   when the current password was set; a generated one is locked 24 h later
- * @param temporary          a setup account to delete when setup completes (the saas {@code operator})
+ * @param temporary          a setup account to delete when setup completes (the cloud {@code operator})
  * @param locked             login refused, for example because a generated password expired
  */
 @Document("users")

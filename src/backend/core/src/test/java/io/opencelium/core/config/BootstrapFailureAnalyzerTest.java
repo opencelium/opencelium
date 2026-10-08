@@ -29,11 +29,11 @@ class BootstrapFailureAnalyzerTest {
 	@Test
 	void descriptionEndsWithThePropertyName() {
 		var failure = new BeanCreationException("openCeliumProperties",
-				new BootstrapPropertyException(DEPLOYMENT_MODE, "'cloud' is not a deployment mode."));
+				new BootstrapPropertyException(DEPLOYMENT_MODE, "'hybrid' is not a deployment mode."));
 
 		FailureAnalysis analysis = new BootstrapFailureAnalyzer().analyze(failure);
 
-		assertThat(analysis.getDescription()).startsWith("'cloud' is not a deployment mode.")
+		assertThat(analysis.getDescription()).startsWith("'hybrid' is not a deployment mode.")
 				.endsWith("Property: opencelium.deployment-mode");
 		assertThat(analysis.getAction()).contains("application.yml").contains("OPENCELIUM_DEPLOYMENTMODE");
 	}
@@ -54,7 +54,7 @@ class BootstrapFailureAnalyzerTest {
 
 	@Test
 	void realStartupReportsThePropertyThroughTheRegisteredAnalyzer(CapturedOutput output) {
-		String badMode = CoreStartup.arg(DEPLOYMENT_MODE, "cloud");
+		String badMode = CoreStartup.arg(DEPLOYMENT_MODE, "hybrid");
 		assertThatThrownBy(() -> CoreStartup.run(Map.of(), tmp, badMode)).isNotNull();
 
 		assertThat(output).contains("APPLICATION FAILED TO START").contains("Property: opencelium.deployment-mode");

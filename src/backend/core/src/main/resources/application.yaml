@@ -6,12 +6,12 @@ spring:
   application:
     name: opencelium-core
 #  mongodb:
-#    uri: mongodb://localhost:27017/opencelium   # default in self mode; saas needs this (or spring.mongodb.host)
+#    uri: mongodb://localhost:27017/opencelium   # default in self-host mode; cloud needs this (or spring.mongodb.host)
 
 server:
   port: 9090
 
 #opencelium:
-#  deployment-mode: self            # self (self-hosted) | saas
+#  deployment-mode: self-host        # self-host | cloud
 #  data-dir: ./data                 # Linux: /var/lib/opencelium when it exists and is writable
 #  master-key-file: /etc/opencelium/master.key   # default <data-dir>/master.key; never together with OC_MASTER_KEY

@@ -36,10 +36,10 @@ class MongoStartupFailureTest {
 	}
 
 	@Test
-	void saasModeWithoutUriStopsStartup(CapturedOutput output) {
-		assertThatThrownBy(() -> start(CoreStartup.arg(OpenCeliumProperties.DEPLOYMENT_MODE, "saas")));
+	void cloudModeWithoutUriStopsStartup(CapturedOutput output) {
+		assertThatThrownBy(() -> start(CoreStartup.arg(OpenCeliumProperties.DEPLOYMENT_MODE, "cloud")));
 
-		assertThat(output).contains("saas mode requires the system database URI explicitly")
+		assertThat(output).contains("cloud mode requires the system database URI explicitly")
 				.contains("Property: spring.mongodb.uri");
 	}
 

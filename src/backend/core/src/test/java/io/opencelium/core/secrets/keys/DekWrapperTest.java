@@ -17,6 +17,8 @@ class DekWrapperTest {
 
 	private static final Instant NOW = Instant.parse("2026-09-28T10:00:00Z");
 
+	private static final TenantId TENANT = TenantId.SELF_HOST;
+
 	private final DekWrapper wrapper = new DekWrapper();
 
 	@Test
@@ -24,10 +26,10 @@ class DekWrapperTest {
 		RootKey rootKey = randomRootKey();
 		byte[] dek = randomBytes(32);
 
-		WrappedDek wrapped = wrapper.wrap(rootKey, TenantId.SELF, 1, dek, NOW);
+		WrappedDek wrapped = wrapper.wrap(rootKey, TENANT, 1, dek, NOW);
 
 		assertThat(wrapper.unwrap(rootKey, wrapped)).isEqualTo(dek);
-		assertThat(wrapped.tenantId()).isEqualTo("self");
+		assertThat(wrapped.tenantId()).isEqualTo("self-host");
 		assertThat(wrapped.rootKeyId()).isEqualTo("k-01");
 		assertThat(wrapped.dekVersion()).isEqualTo(1);
 		assertThat(wrapped.createdAt()).isEqualTo(NOW);
@@ -36,7 +38,7 @@ class DekWrapperTest {
 
 	@Test
 	void unwrapWithAnotherRootKeyThrowsWrongKeyException() {
-		WrappedDek wrapped = wrapper.wrap(randomRootKey(), TenantId.SELF, 1, randomBytes(32), NOW);
+		WrappedDek wrapped = wrapper.wrap(randomRootKey(), TENANT, 1, randomBytes(32), NOW);
 
 		assertThatExceptionOfType(WrongKeyException.class)
 				.isThrownBy(() -> wrapper.unwrap(randomRootKey(), wrapped))
@@ -46,7 +48,7 @@ class DekWrapperTest {
 	@Test
 	void unwrapThrowsWrongKeyExceptionWhenTheDocumentWasMovedToAnotherTenant() {
 		RootKey rootKey = randomRootKey();
-		WrappedDek wrapped = wrapper.wrap(rootKey, TenantId.SELF, 1, randomBytes(32), NOW);
+		WrappedDek wrapped = wrapper.wrap(rootKey, TENANT, 1, randomBytes(32), NOW);
 		var moved = new WrappedDek(wrapped.id(), "other", wrapped.rootKeyId(), wrapped.dekVersion(), wrapped.iv(),
 				wrapped.ciphertext(), wrapped.createdAt());
 
@@ -58,8 +60,8 @@ class DekWrapperTest {
 		RootKey rootKey = randomRootKey();
 		byte[] dek = randomBytes(32);
 
-		WrappedDek first = wrapper.wrap(rootKey, TenantId.SELF, 1, dek, NOW);
-		WrappedDek second = wrapper.wrap(rootKey, TenantId.SELF, 1, dek, NOW);
+		WrappedDek first = wrapper.wrap(rootKey, TENANT, 1, dek, NOW);
+		WrappedDek second = wrapper.wrap(rootKey, TENANT, 1, dek, NOW);
 
 		assertThat(first.iv()).hasSize(12).isNotEqualTo(second.iv());
 		assertThat(first.ciphertext()).isNotEqualTo(second.ciphertext());
@@ -67,7 +69,7 @@ class DekWrapperTest {
 
 	@Test
 	void unwrapRejectsADamagedDocumentNamingTheProblem() {
-		var damaged = new WrappedDek("id-1", TenantId.SELF.value(), RootKey.INITIAL_ID, 1, null, new byte[48], NOW);
+		var damaged = new WrappedDek("id-1", TENANT.value(), RootKey.INITIAL_ID, 1, null, new byte[48], NOW);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> wrapper.unwrap(randomRootKey(), damaged))
 				.withMessageContaining("id-1").withMessageContaining("damaged").withMessageContaining("iv");
@@ -75,9 +77,9 @@ class DekWrapperTest {
 
 	@Test
 	void toStringShowsNoKeyBytes() {
-		WrappedDek wrapped = wrapper.wrap(randomRootKey(), TenantId.SELF, 1, randomBytes(32), NOW);
+		WrappedDek wrapped = wrapper.wrap(randomRootKey(), TENANT, 1, randomBytes(32), NOW);
 
-		assertThat(wrapped.toString()).doesNotContain("[B@").contains("tenant=self").contains("rootKeyId=k-01");
+		assertThat(wrapped.toString()).doesNotContain("[B@").contains("tenant=self-host").contains("rootKeyId=k-01");
 	}
 
 	static RootKey randomRootKey() {
