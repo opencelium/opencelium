@@ -56,7 +56,7 @@ Undo and redo
 
 Undo covers everything you author, not just node placement: adding, deleting and
 moving nodes, edge changes, labels, request configuration (URL, headers, body),
-references and enhancements, operator conditions and groups, aggregator
+references and transformations, operator conditions and groups, aggregator
 assignment, and the connector a step calls. Undoing a deleted step also brings
 back the references that were cleared along with it.
 

@@ -87,7 +87,7 @@ The general shape is::
      - Deletes an entry after a confirmation.
    * - ``upload`` / ``download``
      - ``download invoker by name i-doit``
-     - Exchange invoker and workflow-template files.
+     - Exchange API definition and workflow-template files.
    * - ``check``
      - ``check license``
      - Opens a check page.
@@ -144,7 +144,7 @@ offered by the palette:
      - yes
      - — / yes
      - ``id``, ``name``
-   * - ``invoker``
+   * - ``invoker`` (the *API Definitions* page)
      - yes
      - yes
      - yes
@@ -156,7 +156,7 @@ offered by the palette:
      - yes
      - yes / yes
      - ``id``, ``name``
-   * - ``role`` (the *Groups* page)
+   * - ``role`` (the *Roles* page)
      - yes
      - yes
      - yes
@@ -224,13 +224,35 @@ System commands
    * - ``system ui``
      - Open the UI settings page.
    * - ``upload workflow-template`` / ``upload invoker``
-     - Upload a template or invoker file.
+     - Upload a template (``.json`` or ``.zip``) or API definition file (``.xml``
+       or ``.zip``), up to 1 GB.
+   * - ``install online-invokers``
+     - Install API definitions from the OpenCelium online repository. *(5.2)*
+       Aliases: ``install invokers``, ``install remote-invokers``. Needs the
+       permission to create API definitions; see
+       :ref:`concept-connectors` for what it changes.
    * - ``download workflow-template by name|templateId <value>``
      - Download a workflow template file.
    * - ``download invoker by name <name>``
-     - Download an invoker file.
+     - Download an API definition file.
    * - ``help``
      - Open the command reference dialog.
+   * - ``help onboarding``
+     - Restart the setup tour. *(5.2, administrators)*
+   * - ``help dashboard``
+     - Replay the dashboard tour. *(5.2, administrators)*
+   * - ``help workflow``
+     - Replay the workflow tutorial, in the editor of a new workflow. *(5.2,
+       administrators)*
+
+.. note::
+   The palette keeps the internal word ``invoker`` in its commands; the
+   interface calls these **API definitions** from 5.2 on. The tours are described
+   in :doc:`../start/guided-tours`.
+
+If ``install online-invokers`` cannot run, the palette says why: the browser is
+offline, online services are switched off in the configuration
+(:ref:`ref-config-online-services`), or the server cannot reach the repository.
 
 The command reference
 """""""""""""""""""""
@@ -253,6 +275,8 @@ Workflow scope
 Inside the workflow editor the palette has a pinned **Workflow** section. Typing
 ``workflow`` locks the palette to that scope (shown as a chip), from where
 ``workflow search <term>`` performs a fuzzy search across the open workflow.
+From 5.2, ``Ctrl+F`` in the editor opens the palette in exactly that state, with
+``search`` already typed.
 ``⌫`` on an empty input leaves the scope again.
 See :ref:`concept-workflow` for what exactly is searched and how matches are
 highlighted.
