@@ -4,7 +4,7 @@
       "label": "Master-Passwort",
       "info": {
         "title": "Master-Passwort",
-        "content": "Der Abschnitt „Request Data“ definiert die Nutzdaten, die an das Zielsystem gesendet werden. Sie können statische Werte angeben oder dynamisch auf Daten aus vorherigen Anfrageergebnissen und Webhooks verweisen."
+        "content": "Das Master-Passwort entschlüsselt die gespeicherten Zugangsdaten dieses Konnektors. Es wird von einem Administrator in application.yml (opencelium.connector.master-password) festgelegt."
       }
     },
     "button": {

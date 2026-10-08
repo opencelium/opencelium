@@ -37,6 +37,7 @@ export function MetricTiles() {
 
     return (
         <div
+            data-testid="dashboard-metric-tiles"
             style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',

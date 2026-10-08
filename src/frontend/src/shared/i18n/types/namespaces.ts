@@ -9,3 +9,4 @@ export type I18nNamespace =
     | 'dashboard'
     | 'logs'
     | 'workflow'
+    | 'onboarding'

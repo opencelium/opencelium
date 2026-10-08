@@ -13,6 +13,10 @@ dist-ssr
 *.local
 package-lock.json
 
+# Generated dependency inventory (cyclonedx-npm). Ignored for now; to be
+# committed once the tree it describes is reproducible.
+sbom.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

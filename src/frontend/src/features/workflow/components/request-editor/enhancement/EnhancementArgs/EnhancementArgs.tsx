@@ -7,7 +7,8 @@ export function EnhancementArgs({ enhancement }: EnhancementArgsProps) {
     if (!hasConnection) return null;
 
     return (
-        <div style={{ fontFamily: "Inter, sans-serif", fontSize: 14, maxHeight: 112,
+        <div data-testid='workflow-enhancement-variables'
+            style={{ fontFamily: "Inter, sans-serif", fontSize: 14, maxHeight: 112,
             overflowY: entries.length > 4 ? 'auto' : 'visible', paddingRight: entries.length > 4 ? 4 : 0 }}>
             {entries.map((entry) => <EnhancementArgLine key={entry.key} entry={entry} />)}
         </div>

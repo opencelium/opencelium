@@ -24,6 +24,7 @@ export function TopConnectorsCard() {
 
   return (
     <Card
+      testId="dashboard-top-workflows-card"
       title={t("topConnectors.title")}
       extra={
         <RefreshButton

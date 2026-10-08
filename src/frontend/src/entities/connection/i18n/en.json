@@ -8,7 +8,7 @@
       "create": "Failed to create workflow \"{{title}}\"",
       "update": "Failed to update workflow \"{{title}}\"",
       "connectorNotFound": "One of the connectors used in this workflow could not be found. It may have been deleted — please update or replace the connector node before saving again.",
-      "operatorExpressionEmpty": "The highlighted \"{{type}}\" operator has no condition set. Define its expression before saving.",
+      "operatorExpressionEmpty": "The highlighted \"{{type}}\" block has no condition set. Define its expression before saving.",
       "titleTaken": "A workflow with this title already exists",
       "categoryNotFound": "The category assigned to this workflow no longer exists. It may have been deleted — assign another category before saving again.",
       "connectionNotFound": "This workflow no longer exists. It may have been deleted in another session — reload the page to see its current state.",
@@ -27,7 +27,7 @@
       "title": "Title",
       "description": "Description",
       "category": "Category",
-      "modifiedAt": "Modified At",
+      "modifiedAt": "Last modified",
       "modifiedBy": "Modified By",
       "currentVersion": "Current Version"
     },
@@ -38,19 +38,12 @@
     },
     "duplicate": {
       "tooltip": "Duplicate",
-      "dialogTitle": "Duplicate workflow",
-      "titleLabel": "Title",
-      "descriptionLabel": "Description",
-      "titleRequired": "Title is a required field",
-      "titleExists": "A workflow with this title already exists",
       "defaultTitle": "{{title}} (copy)",
-      "cancel": "Cancel",
-      "submit": "Duplicate",
-      "success": "Workflow \"{{name}}\" duplicated",
+      "numberedTitle": "{{title}} (copy {{number}})",
       "error": "Failed to duplicate workflow"
     },
     "confirmDelete": {
-      "message": "Are you sure you want to delete workflow with title \"{{title}}\"?"
+      "message": "Delete the workflow \"{{title}}\"? This can't be undone."
     }
   },
   "fields": {

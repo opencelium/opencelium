@@ -4,7 +4,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { NodeToolbarProps } from './NodeToolbar.types';
 
-export function NodeToolbar({ canDelete, canComment, canAddJoint, canRemoveJoint,
+export function NodeToolbar({ canDelete, canComment, canAddJoint, canRemoveJoint, isAddJointDisabled,
 	onDelete, onComment, onAddJoint, onRemoveJoint }: NodeToolbarProps) {
 	const { t } = useI18n('workflow');
 	if (!canDelete && !canComment && !canAddJoint && !canRemoveJoint) return null;
@@ -14,13 +14,14 @@ export function NodeToolbar({ canDelete, canComment, canAddJoint, canRemoveJoint
 	const hasEditActions = canAddJoint || canRemoveJoint || canComment;
 
 	return (
-		<div className='nodeToolbar'>
+		<div className='nodeToolbar' onDoubleClick={(event) => event.stopPropagation()}>
 			{canAddJoint && (
-				<Tooltip content={t('actions.addJoint')}>
+				<Tooltip content={isAddJointDisabled ? t('joint.noTargets') : t('actions.addJoint')}>
 					<IconButton
 						type='text'
 						size='xs'
 						iconProps={{ name: 'link', size: 14 }}
+						disabled={isAddJointDisabled}
 						onClick={onAddJoint}
 						testId='workflow-node-add-joint'
 					/>

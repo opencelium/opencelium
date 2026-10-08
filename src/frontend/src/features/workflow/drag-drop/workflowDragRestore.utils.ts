@@ -34,7 +34,8 @@ export const buildFreeRepositionedGraph = (
 		x: ghostRoot.x - snapshotRoot.position.x,
 		y: ghostRoot.y - snapshotRoot.position.y,
 	};
-	const repositioned = snapshot.nodes.map((node) => node.id === sourceNodeId
+	const draggedIds = snapshot.draggedNodeIds ?? new Set([sourceNodeId]);
+	const repositioned = snapshot.nodes.map((node) => draggedIds.has(node.id)
 		? { ...node, position: {
 			x: node.position.x + delta.x,
 			y: node.position.y + delta.y,

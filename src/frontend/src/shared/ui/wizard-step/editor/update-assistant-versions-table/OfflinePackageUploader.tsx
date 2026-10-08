@@ -1,20 +1,32 @@
-import React, { useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Dropzone } from '@shared/ui/primitives/DropZone/DropZone'
-import { Button } from '@shared/ui/primitives/Button'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useOfflinePackageUpload } from './useOfflinePackageUpload'
 import {IconButton} from "@shared/ui/primitives/IconButton";
+import { notifyError } from '@shared/ui/feedback/notifyError'
+
+const MAX_PACKAGE_BYTES = 1024 * 1024 * 1024
 
 export function OfflinePackageUploader() {
     const { t } = useI18n('entities')
     const { state, upload, cancel, reset } = useOfflinePackageUpload()
 
+    // Drag-and-drop bypasses the Dropzone's `accept` filter, so the extension is checked here too.
     const handleFiles = useCallback(
         (files: File[]) => {
             const file = files[0]
-            if (file) upload(file)
+            if (!file) return
+            if (!file.name.toLowerCase().endsWith('.zip')) {
+                notifyError(t('update-assistant.versions.upload.invalidType'))
+                return
+            }
+            if (file.size > MAX_PACKAGE_BYTES) {
+                notifyError(t('update-assistant.versions.upload.tooLarge'))
+                return
+            }
+            upload(file)
         },
-        [upload],
+        [upload, t],
     )
 
     useEffect(() => {

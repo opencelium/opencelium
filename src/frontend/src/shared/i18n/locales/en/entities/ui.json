@@ -4,7 +4,7 @@
       "label": "Theme"
     },
     "commandNode": {
-      "label": "Mode Appearance"
+      "label": "Command palette display"
     }
   },
   "wizard": {
@@ -14,21 +14,21 @@
         "subheader": "Choose between the light and dark appearance for the whole application."
       },
       "commander": {
-        "header": "Commander",
-        "subheader": "It enables users to quickly search, navigate, and execute actions through a keyboard-driven interface, triggered by shortcuts like Ctrl + K"
+        "header": "Command palette",
+        "subheader": "Search, navigate and run actions with the keyboard — open it with Ctrl + K."
       }
     },
     "modes": {
       "update": {
         "header": "UI Settings",
-        "subheader": "Here you can update configurations for User Interface, like menu, commander, connection editor.",
+        "subheader": "Here you can update configurations for the user interface, like menu, command palette and workflow editor.",
         "successMessage": "UI settings updated"
       }
     }
   },
   "messages": {
     "themeUpdated": "Theme updated",
-    "commandModeUpdated": "Commander mode updated"
+    "commandModeUpdated": "Command palette display updated"
   },
   "customTheme": {
     "title": "Custom theme",
@@ -56,8 +56,8 @@
   },
   "systemLogo": {
     "title": "Application logo",
-    "description": "Replace the OpenCelium logo with your own for every user. It is shown in the navigation menu and on the login screen, so users see it before they sign in.",
-    "hint": "PNG or JPG, up to 5 MB. A wide logo on a transparent background works best — the same file is shown on both the light and the dark theme.",
+    "description": "Replace the OpenCelium logo with your own for every user. It is shown in the navigation menu and on the sign-in screen, so users see it before they sign in.",
+    "hint": "PNG or JPG, up to 10 MB. A wide logo on a transparent background works best — the same file is shown on both the light and the dark theme.",
     "usingDefault": "No logo uploaded — every user sees the default OpenCelium logo.",
     "upload": "Upload logo",
     "replace": "Replace logo",
@@ -66,8 +66,8 @@
     "saveFailed": "The logo could not be uploaded",
     "removed": "Logo reset to the default",
     "removeFailed": "The logo could not be reset",
-    "invalidType": "The logo must be a PNG or JPG file",
-    "tooLarge": "The logo must be smaller than 5 MB",
+    "invalidType": "The logo must be a PNG or JPG file (.png, .jpg, .jpeg)",
+    "tooLarge": "The logo must be smaller than 10 MB",
     "confirmRemove": {
       "title": "Reset to the default logo?",
       "message": "The uploaded logo is deleted and every user sees the OpenCelium logo again."

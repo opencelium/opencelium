@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import aggregatorWizardImage from '@assets/images/wizard/aggregator-wizard.gif'
+import aggregatorWizardImage from '@assets/images/wizard/aggregator.svg'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
 import en from '@entities/dataAggregator/i18n/en.json'
@@ -14,6 +14,7 @@ import { ActiveSwitchCell } from '@entities/dataAggregator/ui/ActiveSwitchCell'
 import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'data-aggregator'
+const hasMeaningfulName = (value: unknown): boolean => /[\p{L}\p{N}]/u.test(String(value ?? '').trim())
 
 const resolveDataAggregatorId = (value: string): string => {
     if (/^\d+$/.test(value)) return value
@@ -123,6 +124,12 @@ export const dataAggregatorDefinition: EntityDefinition = {
             validation: {
                 required: true,
                 max: 255,
+                custom: [
+                    {
+                        validate: (value: unknown) => String(value ?? '').trim().length === 0 || hasMeaningfulName(value),
+                        message: `${baseKey}.validation.nameMeaningful`,
+                    },
+                ],
                 remote: {
                     url: `/aggregator/unique/:name`,
                     method: 'GET',

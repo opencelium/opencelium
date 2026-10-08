@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { message } from 'antd';
 import { store } from '@app/store/store';
 import { genericApi } from '@shared/api/genericApi';
@@ -52,6 +52,13 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 	const optimizeDirectReferences = useDirectReferenceOptimization({
 		fieldBindings, setFieldBindings,
 	});
+	// The id of a just-created connection only reaches `connectionId` on the next
+	// render, so a save started before that render would create a second
+	// connection instead of updating the first one.
+	const savedConnectionIdRef = useRef(connectionId);
+	useEffect(() => {
+		savedConnectionIdRef.current = connectionId;
+	}, [connectionId]);
 
 	return useCallback(async ({ title, description, comment,
 		categoryId: categoryOverride }: SaveParams) => {
@@ -70,12 +77,13 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 		}
 		const normalizedDescription = toPayloadDescription(description);
 		const nextCategoryId = categoryOverride !== undefined ? categoryOverride : categoryId;
-		const isCreate = !connectionId;
+		const targetConnectionId = connectionId ?? savedConnectionIdRef.current;
+		const isCreate = !targetConnectionId;
 		const bindingsToSave = await optimizeDirectReferences();
 
 		let response;
 		try {
-			response = await saveWorkflowConnection({ connectionId, title,
+			response = await saveWorkflowConnection({ connectionId: targetConnectionId, title,
 				description: normalizedDescription, comment, nodes, edges,
 				viewport: getViewport(), fieldBindings: bindingsToSave,
 				categoryId: nextCategoryId });
@@ -87,12 +95,13 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 			throw error;
 		}
 		const savedId = (response.data as any)?.connectionId;
-		const nextConnectionId = connectionId ?? savedId;
+		const nextConnectionId = targetConnectionId ?? savedId;
+		if (nextConnectionId) savedConnectionIdRef.current = String(nextConnectionId);
 		setHeaderState({ title, description: toDisplayDescription(normalizedDescription) });
 		setPersistedTitle(title);
 		setCategoryId(nextCategoryId);
 		setBaselineSnapshot(buildWorkflowChangeSnapshot({
-			connectionId: nextConnectionId ? String(nextConnectionId) : connectionId,
+			connectionId: nextConnectionId ? String(nextConnectionId) : targetConnectionId,
 			title, description: normalizedDescription, nodes, edges,
 			fieldBindings: bindingsToSave,
 		}));

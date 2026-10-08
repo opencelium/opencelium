@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 /**
  * Object mother for {@link Operation} test data.
@@ -61,11 +62,26 @@ public final class OperationFixture {
         return operation;
     }
 
-    public static Operation anOperationWithErrorResponseBody(String message) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
+    /**
+     * An operation whose request never reached the remote API: {@code ConnectorExecutor} stores
+     * such a failure as a {@code text/plain} {@code 503} response carrying the failure message.
+     */
+    public static Operation anOperationWithTransportFailureResponse(String message) {
+        return anOperationWithErrorResponse(message, TEXT_PLAIN_VALUE, HttpStatus.SERVICE_UNAVAILABLE);
+    }
 
-        ResponseEntity<?> response = new ResponseEntity<>(message, headers, HttpStatus.NOT_FOUND);
+    /**
+     * An operation whose remote API answered with a {@code 400} and a JSON error payload.
+     */
+    public static Operation anOperationWithJsonErrorResponse(String json) {
+        return anOperationWithErrorResponse(json, APPLICATION_JSON_VALUE, HttpStatus.BAD_REQUEST);
+    }
+
+    private static Operation anOperationWithErrorResponse(String body, String contentType, HttpStatus status) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+
+        ResponseEntity<?> response = new ResponseEntity<>(body, headers, status);
 
         Operation operation = new Operation();
         operation.setColor("#ababab");

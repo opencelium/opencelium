@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
-import { isConnectorConnectionError } from '@entities/connector/model/connectorHealth';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import { useLiveConnectorStatus } from '@entities/connector/socket/useLiveConnectorStatus';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import { ConnectorStatusDot } from '../../connector-status/ConnectorStatusDot/ConnectorStatusDot';
 import type { ConnectorWorkflowNode } from '../../types/workflow.types';
 import { AggregatorBadge } from '../AggregatorBadge/AggregatorBadge';
 import { MethodColorBadge } from '../MethodColorBadge/MethodColorBadge';
+import { ConnectorStatusBadge } from './ConnectorStatusBadge';
 
 export function ConnectorMethodNodeContent({ id, data, suppressTooltip }: {
   id: string; data: ConnectorWorkflowNode['data']; suppressTooltip: boolean;
@@ -36,10 +35,8 @@ export function ConnectorMethodNodeContent({ id, data, suppressTooltip }: {
     <AggregatorBadge dataAggregator={data.dataAggregator}
       testId={`workflow-node-aggregator-${id}`} suppressTooltip={suppressTooltip}
       onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)} />
-    {status && <div className="circleNodeStatus">
-      <ConnectorStatusDot status={status} testId={`workflow-node-connector-status-${id}`}
-        tooltipOverride={isConnectorConnectionError(status) ? lastError : undefined}
-        suppressTooltip={suppressTooltip} lastCheckedAt={lastCheckedAt} />
-    </div>}
+    {status && <ConnectorStatusBadge nodeId={id} connectorId={data.connector?.connectorId}
+      status={status} lastError={lastError} lastCheckedAt={lastCheckedAt}
+      suppressTooltip={suppressTooltip} />}
   </div>;
 }

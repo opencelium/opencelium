@@ -1,0 +1,28 @@
+/*
+ * The entries read as a two-column table: a fixed icon column, then the labels,
+ * so both rows start at the same x. The grid sits *inside* each button and fills
+ * it, rather than restyling the button — the kit centres its content, and this
+ * has to hold for the Ant and Material adapters alike.
+ */
+.topbar-help-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    min-width: 180px;
+}
+
+.topbar-help-menu__item {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 18px 1fr;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+}
+
+/* Both kits give a divider generous page-level margins; inside a compact menu
+   that reads as a gap rather than a separator. */
+.topbar-help-menu .topbar-help-menu__divider > * {
+    margin: 4px 0;
+}

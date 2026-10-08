@@ -4,7 +4,7 @@
       "label": "Design"
     },
     "commandNode": {
-      "label": "Darstellungsmodus"
+      "label": "Darstellung der Befehlspalette"
     }
   },
   "wizard": {
@@ -14,21 +14,21 @@
         "subheader": "Wählen Sie zwischen hellem und dunklem Erscheinungsbild für die gesamte Anwendung."
       },
       "commander": {
-        "header": "Commander",
-        "subheader": "Er ermöglicht es Benutzern, über eine tastaturgesteuerte Oberfläche schnell zu suchen, zu navigieren und Aktionen auszuführen — aufgerufen mit Tastenkürzeln wie Strg + K."
+        "header": "Befehlspalette",
+        "subheader": "Suchen, navigieren und Aktionen ausführen per Tastatur — öffnen mit Strg + K."
       }
     },
     "modes": {
       "update": {
         "header": "UI-Einstellungen",
-        "subheader": "Hier können Sie Konfigurationen für die Benutzeroberfläche anpassen, z. B. Menü, Commander, Workflowseditor.",
+        "subheader": "Hier können Sie Konfigurationen für die Benutzeroberfläche anpassen, z. B. Menü, Befehlspalette, Workflow-Editor.",
         "successMessage": "UI-Einstellungen aktualisiert"
       }
     }
   },
   "messages": {
     "themeUpdated": "Design aktualisiert",
-    "commandModeUpdated": "Commander-Modus aktualisiert"
+    "commandModeUpdated": "Darstellung der Befehlspalette aktualisiert"
   },
   "customTheme": {
     "title": "Eigenes Design",
@@ -57,7 +57,7 @@
   "systemLogo": {
     "title": "Anwendungslogo",
     "description": "Ersetzen Sie das OpenCelium-Logo für alle Benutzer durch Ihr eigenes. Es wird im Navigationsmenü und auf der Anmeldeseite angezeigt, also noch vor der Anmeldung.",
-    "hint": "PNG oder JPG, maximal 5 MB. Am besten geeignet ist ein breites Logo mit transparentem Hintergrund – dieselbe Datei wird im hellen und im dunklen Design angezeigt.",
+    "hint": "PNG oder JPG, maximal 10 MB. Am besten geeignet ist ein breites Logo mit transparentem Hintergrund – dieselbe Datei wird im hellen und im dunklen Design angezeigt.",
     "usingDefault": "Kein Logo hochgeladen – alle Benutzer sehen das Standard-Logo von OpenCelium.",
     "upload": "Logo hochladen",
     "replace": "Logo ersetzen",
@@ -66,8 +66,8 @@
     "saveFailed": "Das Logo konnte nicht hochgeladen werden",
     "removed": "Standard-Logo wiederhergestellt",
     "removeFailed": "Das Logo konnte nicht zurückgesetzt werden",
-    "invalidType": "Das Logo muss eine PNG- oder JPG-Datei sein",
-    "tooLarge": "Das Logo muss kleiner als 5 MB sein",
+    "invalidType": "Das Logo muss eine PNG- oder JPG-Datei sein (.png, .jpg, .jpeg)",
+    "tooLarge": "Das Logo muss kleiner als 10 MB sein",
     "confirmRemove": {
       "title": "Standard-Logo wiederherstellen?",
       "message": "Das hochgeladene Logo wird gelöscht und alle Benutzer sehen wieder das OpenCelium-Logo."

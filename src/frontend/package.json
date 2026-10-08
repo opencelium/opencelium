@@ -36,7 +36,6 @@
     "antd": "^6.2.3",
     "cmdk": "^1.1.1",
     "cron-parser": "^5.5.0",
-    "cron-validate": "^1.5.3",
     "framer-motion": "^12.34.2",
     "fuse.js": "^7.5.0",
     "graphiql": "^5.2.4",

@@ -13,9 +13,14 @@ export const CustomButton: ButtonComponent =
         iconLeft,
         iconRight,
         onClick,
+		className,
+		htmlType = 'button',
+		style,
+		testId,
+		...rest
     }) => {
     return (
-        <button className={`btn btn-${variant}`} onClick={onClick}>
+        <button {...rest} type={htmlType} data-testid={testId} style={style} className={`btn btn-${variant}${className ? ` ${className}` : ''}`} onClick={onClick} disabled={disabled || loading}>
             <span className="custom-btn-content">
                 {!loading && iconLeft && (
                     <Icon name={iconLeft} size={16} color="inherit"/>

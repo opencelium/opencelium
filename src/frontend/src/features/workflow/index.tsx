@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './styles.css';
 import { WorkflowPageHeader } from './components/WorkflowPageHeader/WorkflowPageHeader';
@@ -11,8 +12,11 @@ import { TestRunProvider } from './test-run/TestRunProvider';
 import { TestRunEditLockSync } from './test-run/TestRunEditLockSync';
 import { useWorkflowPageState } from './hooks/useWorkflowPageState';
 import { useWorkflowActions } from './hooks/useWorkflowActions';
+import { useDuplicatedWorkflowHint } from './hooks/useDuplicatedWorkflowHint';
 import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { buildWorkflowIndexes } from './api/connectionPayload';
+import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJsonDialog/workflowJson.validate';
+import { useSchedulesConnectionId } from './components/schedules/simulatedSchedulesConnection';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -21,6 +25,7 @@ type WorkflowProps = {
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const { t } = useI18n('workflow');
+  useDuplicatedWorkflowHint();
   // Mirrored up from inside TestRunProvider by TestRunEditLockSync — see there
   // for why paused does not count as locked.
   const [isTestRunLocked, setIsTestRunLocked] = useState(false);
@@ -31,11 +36,15 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setFieldBindings: setLoadedFieldBindings,
     selectedHistoryVersionId, setSelectedHistoryVersionId, categoryId, setCategoryId,
     isLoading: isConnectionLoading } = connection;
-  const { hydratedNodes, activeConnectionId, displayedHistoryVersions } = view;
+  const { hydratedNodes, activeConnectionId, displayedHistoryVersions, isSimulatedHistory } = view;
+  // Not activeConnectionId: the tutorial teaches the schedules panel on an unsaved
+  // graph, and only the pill and the panel may see its stand-in connection.
+  const schedulesConnectionId = useSchedulesConnectionId(activeConnectionId);
   const { hasChanges: hasConnectionChanges,
     hasManualChanges: hasManualUnsavedChanges } = changes;
   const { selectedNode, contextMenuNode, editorNode, conditionNode, aggregatorNode,
     conditionConnection } = derived;
+  const connectorEditorNode = hydratedNodes.find((node) => node.id === workflow.connectorEditor?.nodeId) ?? null;
   const loopAncestorsByIndexPath = useMemo(
     () => buildLoopAncestorsByIndexPath(hydratedNodes, workflow.edges),
     [hydratedNodes, workflow.edges],
@@ -53,7 +62,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { validation, saveWorkflow: handleSave, category, templates: templateActions,
     history: historyActions, canvas, header, buildTestPayload, isShortcutsOpen,
     setIsShortcutsOpen, schedulesOpen, setSchedulesOpen, changeHistoryOpen,
-    setChangeHistoryOpen } = actions;
+    jsonEditorOpen, setJsonEditorOpen, jsonEditorValue,
+    setChangeHistoryOpen, pasteOperatorTarget, cancelPasteOperator,
+    pasteOperatorInScope, pasteOperatorAfter } = actions;
   const { validateTitle, resolveAndHighlightError: resolveAndHighlightWorkflowError } = validation;
   const { closeCanvasPanels, handleNodeDoubleClick } = canvas;
   const { selectMenuItem: handleHeaderMenuSelect, showHistory: handleOpenHistory } = header;
@@ -75,7 +86,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       loopAncestorsByIndexPath={loopAncestorsByIndexPath}>
     <TestRunEditLockSync onLockChange={setIsTestRunLocked} />
     <div className="page" data-testid="workflow-page">
-      <WorkflowPageHeader connectionId={activeConnectionId} schedulesOpen={schedulesOpen}
+      <WorkflowPageHeader connectionId={schedulesConnectionId} schedulesOpen={schedulesOpen}
         onToggleSchedules={() => setSchedulesOpen((open) => {
           if (!open) {
             workflow.setHistoryOpen(false);
@@ -112,6 +123,22 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             onCancel: handleCancelConnectorMapping },
         }}
         shortcuts={{ open: isShortcutsOpen, onClose: () => setIsShortcutsOpen(false) }}
+		jsonEditor={{ open: jsonEditorOpen, readOnly: readOnly || isTestRunLocked,
+          connectors,
+          value: jsonEditorValue ?? {},
+          onApply: (payload) => {
+            const state = mapWorkflowJsonToWorkflowState(payload);
+            workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
+            setLoadedFieldBindings(state.fieldBindings);
+            setHeaderState({ title: state.title, description: state.description });
+            setCategoryId(state.categoryId);
+            changes.markDirty();
+            setJsonEditorOpen(false);
+            message.success(t('json.applied'));
+          },
+          onClose: () => setJsonEditorOpen(false) }}
+        pasteOperator={{ open: !!pasteOperatorTarget, onCancel: cancelPasteOperator,
+          onPasteInScope: pasteOperatorInScope, onPasteAfter: pasteOperatorAfter }}
         category={{ open: assignCategoryOpen, currentCategoryId: categoryId,
           loading: isAssigningCategory, onClose: () => setAssignCategoryOpen(false),
           onAssign: handleAssignCategory }} />
@@ -122,6 +149,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         centerStartVersion: workflow.centerStartVersion,
         onInit: workflow.setReactFlowInstance, activeAction: workflow.sidebarAction,
         jointSourceId: workflow.jointSourceId, jointVerdicts: workflow.jointVerdicts,
+        jointDeadEndNodeId: workflow.jointDeadEndNodeId,
         onConfirmJoint: workflow.onConfirmJoint, onCancelJoint: workflow.onCancelJoint,
         onAddJoint: workflow.onStartJoint,
         onRemoveJoint: workflow.onRemoveJoint,
@@ -135,17 +163,21 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onToggleComment: workflow.onToggleComment,
         onAddComment: workflow.onAddComment,
         onClearNodeErrors: workflow.onClearNodeErrors,
+        fieldBindings: loadedFieldBindings,
+        bindingLens: workflow.bindingLens,
         onPaneClick: closeCanvasPanels }} />
       <WorkflowPanels
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
           connectionId: activeConnectionId, onClose: () => workflow.setSidebarAction(null),
           onSelect: workflow.onAddStep }}
-        schedules={{ open: schedulesOpen, connectionId: activeConnectionId,
+        schedules={{ open: schedulesOpen, connectionId: schedulesConnectionId,
           connectionTitle: headerState.title, onClose: () => setSchedulesOpen(false) }}
         history={{ open: workflow.historyOpen, items: displayedHistoryVersions,
           selectedId: selectedHistoryVersionId,
           onSelectedIdChange: setSelectedHistoryVersionId,
-          hasUnsavedChanges: hasManualUnsavedChanges,
+          // A sample version never loads, so warning that it would replace the
+          // unsaved canvas would ask the user to confirm something that won't happen.
+          hasUnsavedChanges: hasManualUnsavedChanges && !isSimulatedHistory,
           onClose: () => workflow.setHistoryOpen(false),
           onSelectVersion: historyActions.selectVersion,
           onSaveComment: historyActions.saveComment,
@@ -154,12 +186,36 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         changeHistory={{ open: changeHistoryOpen, entries: workflow.undoEntries,
           onClose: () => setChangeHistoryOpen(false),
           onJumpTo: workflow.jumpToUndoEntry }}
+        bindingTable={{ open: workflow.bindingLens.tableOpen,
+          nodes: hydratedNodes, edges: workflow.edges, fieldBindings: loadedFieldBindings,
+          selectedKey: workflow.bindingLens.view.selectedKey,
+          isDetailOpen: !!workflow.bindingLens.view.selectedKey,
+          onClose: workflow.bindingLens.onCloseTable,
+          onSelectBinding: (binding) => {
+            workflow.bindingLens.onSelectBinding(binding.key);
+            // The row's own method on the canvas behind: focused so the lens draws
+            // its arcs, and centred because a binding picked from a list is as
+            // likely as not to belong to a method that is currently off screen.
+            const consumerNodeId = binding.consumer.nodeId;
+            if (consumerNodeId) {
+              workflow.bindingLens.onPinNode(consumerNodeId);
+              workflow.centerOnNode(consumerNodeId);
+            }
+          } }}
+        bindingDrawer={{ selectedKey: workflow.bindingLens.view.selectedKey,
+          nodes: hydratedNodes, edges: workflow.edges, fieldBindings: loadedFieldBindings,
+          readOnly: readOnly || isTestRunLocked,
+          onFieldBindingsChange: setLoadedFieldBindings,
+          onClose: workflow.bindingLens.onClearSelection,
+          onSelectBinding: workflow.bindingLens.onSelectBinding,
+          onOpenMethodEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }) }}
         contextMenu={{ menu: workflow.contextMenu, node: contextMenuNode,
           onChangeLabel: workflow.onChangeNodeLabel,
           onOpenRequestEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }),
           onOpenConditionEditor: (nodeId) => workflow.setConditionEditor({ nodeId }),
           onShowResponse: workflow.onShowResponse,
           onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
+          onOpenConnectorEditor: (nodeId, kind) => workflow.setConnectorEditor({ nodeId, kind }),
           onClose: () => workflow.setContextMenu(null) }} />
       <WorkflowNodeEditors
         response={{ open: !!workflow.responseNodeId,
@@ -181,7 +237,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onSave: workflow.onSaveConditionConfig }}
         aggregator={{ open: !!workflow.aggregatorEditor, node: aggregatorNode,
           onClose: () => workflow.setAggregatorEditor(null),
-          onSave: workflow.onSaveDataAggregator }} />
+          onSave: workflow.onSaveDataAggregator }}
+        connector={{ open: workflow.connectorEditor?.kind === 'switch', connectors,
+          node: connectorEditorNode, onClose: () => workflow.setConnectorEditor(null),
+          onChange: workflow.onChangeNodeConnector }}
+        connectorImage={{ open: workflow.connectorEditor?.kind === 'image', connectors,
+          node: connectorEditorNode, onClose: () => workflow.setConnectorEditor(null) }} />
     </div>
     </TestRunProvider>
   );

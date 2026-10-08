@@ -25,6 +25,7 @@ import {
 import { SupportLogsSection } from './SupportLogsSection'
 import { LogJsonView } from '@shared/ui/json-view/LogJsonView'
 import { notifyError } from '@shared/ui/feedback/notifyError'
+import { isOverrideUnavailableError } from '@shared/api/requestOverrides'
 
 type Props = {
     connectionId: number
@@ -57,6 +58,7 @@ export function SupportLogsDialogContent({ connectionId, connectionTitle, onClos
             message.success(tEntities('schedule.supportLogs.started', { connectionTitle }))
             onClose()
         } catch (err) {
+            if (isOverrideUnavailableError(err)) return
             console.error(err)
             notifyError(tEntities('schedule.supportLogs.error'))
         }

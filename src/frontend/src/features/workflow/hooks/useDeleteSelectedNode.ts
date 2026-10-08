@@ -6,24 +6,30 @@ type Params = {
 	readOnly: boolean;
 	disabled: boolean;
 	nodes: WorkflowNodeModel[];
-	onDeleteNode: (nodeId: string) => Promise<void> | void;
+	onDeleteNodes: (nodeIds: string[]) => Promise<void> | void;
 };
 
+// Backspace is what a Mac keyboard's delete key sends.
+const DELETE_KEYS = new Set(['Delete', 'Backspace']);
+
 export const useDeleteSelectedNode = ({ readOnly, disabled, nodes,
-	onDeleteNode }: Params) => {
-	const deleteSelectedRef = useRef(() => {});
+	onDeleteNodes }: Params) => {
+	const deleteSelectedRef = useRef<() => boolean>(() => false);
 	deleteSelectedRef.current = () => {
-		if (readOnly || disabled) return;
-		const selected = nodes.find((node) => node.selected && node.type !== 'start');
-		if (selected) void onDeleteNode(selected.id);
+		if (readOnly || disabled) return false;
+		const selectedIds = nodes.filter((node) => node.selected && node.type !== 'start')
+			.map((node) => node.id);
+		if (selectedIds.length === 0) return false;
+		void onDeleteNodes(selectedIds);
+		return true;
 	};
 
 	useEffect(() => {
 		const handleDelete = (event: KeyboardEvent) => {
-			if (event.key !== 'Delete') return;
+			if (!DELETE_KEYS.has(event.key)) return;
 			const target = event.target as HTMLElement | null;
 			if (target?.closest(EDITABLE_TARGET_SELECTOR)) return;
-			deleteSelectedRef.current();
+			if (deleteSelectedRef.current()) event.preventDefault();
 		};
 		window.addEventListener('keydown', handleDelete);
 		return () => window.removeEventListener('keydown', handleDelete);

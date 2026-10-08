@@ -47,3 +47,11 @@ export type WorkflowConditionEditorState = {
 export type WorkflowAggregatorEditorState = {
   nodeId: string;
 };
+
+/** `switch` points the step at another connector; `image` edits that connector's image. */
+export type ConnectorEditorKind = 'switch' | 'image';
+
+export type WorkflowConnectorEditorState = {
+  nodeId: string;
+  kind: ConnectorEditorKind;
+};

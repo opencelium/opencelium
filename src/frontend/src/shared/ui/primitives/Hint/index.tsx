@@ -6,17 +6,21 @@ type HintProps = {
     children: ReactNode;
     noPrefix?: boolean;
     type?: 'info' | 'success' | 'warning' | 'error';
+    closable?: boolean;
+    onClose?: () => void;
 };
 
-export function Hint({children, noPrefix, type = 'info'}: HintProps) {
+export function Hint({children, noPrefix, type = 'info', closable, onClose}: HintProps) {
     if (noPrefix) {
-        return <Alert type={type} message={children} />;
+        return <Alert type={type} message={children} closable={closable} onClose={onClose} />;
     }
     return (
         <Alert
             type={type}
             message={<CommonText i18nKey="hintLabel" typoProps={{isBold: true}} />}
             description={children}
+            closable={closable}
+            onClose={onClose}
         />
     );
 }

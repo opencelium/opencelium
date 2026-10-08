@@ -7,6 +7,8 @@ export type ImageCropDialogProps = {
      * then starts as the whole image and zooming only trims it. Defaults to a square.
      */
     aspect?: number | 'image'
+    /** Mask shape for the selection overlay. Defaults to a square; avatars (connector/user/group icons) use `'circle'`. */
+    shape?: 'square' | 'circle'
     onCancel: () => void
     onConfirm: (file: File) => void
     /** Already-translated copy — this dialog resolves no i18n keys of its own. */

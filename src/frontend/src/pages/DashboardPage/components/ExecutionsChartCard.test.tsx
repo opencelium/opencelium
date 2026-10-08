@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
     query: vi.fn(),
     refetch: vi.fn(),
     series: null as Series[] | null,
+    renderTooltip: null as ((index: number) => ReactNode) | null,
 }))
 
 // Identity translator + fixed language so weekday labels are deterministic.
@@ -47,8 +48,15 @@ vi.mock('@shared/ui/primitives/Empty', () => ({
 
 // Capture the series instead of rendering SVG (MiniLineChart needs ResizeObserver).
 vi.mock('./MiniLineChart', () => ({
-    MiniLineChart: ({series}: {series: Series[]}) => {
+    MiniLineChart: ({
+        series,
+        renderTooltip,
+    }: {
+        series: Series[]
+        renderTooltip?: (index: number) => ReactNode
+    }) => {
         mocks.series = series
+        mocks.renderTooltip = renderTooltip ?? null
         return <div data-testid="mini-line-chart" />
     },
 }))
@@ -87,6 +95,7 @@ beforeEach(() => {
     mocks.query.mockReset()
     mocks.refetch.mockReset()
     mocks.series = null
+    mocks.renderTooltip = null
     setQuery()
 })
 
@@ -139,6 +148,39 @@ describe('ExecutionsChartCard', () => {
         })
         render(<ExecutionsChartCard />)
         expect(mocks.series![0].points.map((p) => p.label)).toEqual(['Mon', 'Sun'])
+    })
+
+    it('renders a hover tooltip with the weekday, executions and failure rate', () => {
+        setQuery({
+            data: {points: [point({dayOfWeek: 'WEDNESDAY', executions: 176, failures: 37})]},
+        })
+        render(<ExecutionsChartCard />)
+
+        expect(mocks.renderTooltip).not.toBeNull()
+        const {container} = render(<>{mocks.renderTooltip!(0)}</>)
+        expect(container.textContent).toBe(
+            'WednesdayexecutionsChart.executions 176executionsChart.failures 37 \u00b7 21%',
+        )
+    })
+
+    it('omits the failure rate from the tooltip when a day had no executions', () => {
+        setQuery({
+            data: {points: [point({dayOfWeek: 'MONDAY', executions: 0, failures: 0})]},
+        })
+        render(<ExecutionsChartCard />)
+
+        const {container} = render(<>{mocks.renderTooltip!(0)}</>)
+        expect(container.textContent).toBe(
+            'MondayexecutionsChart.executions 0executionsChart.failures 0',
+        )
+    })
+
+    it('renders no tooltip for an index outside the timeline', () => {
+        setQuery({
+            data: {points: [point({dayOfWeek: 'MONDAY', executions: 1, failures: 0})]},
+        })
+        render(<ExecutionsChartCard />)
+        expect(mocks.renderTooltip!(5)).toBeNull()
     })
 
     it('reflects the fetching state on both the overlay and the refresh button', () => {

@@ -1,5 +1,4 @@
 import type {EntityDefinition, Mode} from '@/engine/entity/EntityDefinition'
-import connectorWizardImage from '@/assets/images/wizard/connector.gif'
 import {ConnectorWizardImage} from "@entities/connector/ui/ConnectorWizardImage";
 import {createEntityCommands} from "@/engine/entity/command/createEntityCommands.tsx";
 import en from "@entities/connector/i18n/en.json";
@@ -20,6 +19,10 @@ import {userApi} from "@entities/user/api/userApi";
 import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
+import {connectorRecommendations} from "@entities/connector/connector.recommendations";
+import {readPreselectedInvoker} from "@entities/connector/lib/connectorCreateLink";
+import {IMAGE_UPLOAD_ACCEPT} from "@shared/utils/imageUploadRules";
+import {DuplicateConnectorAction} from "@entities/connector/ui/DuplicateConnectorAction";
 
 const baseKey = 'connector';
 
@@ -137,6 +140,12 @@ export const connectorDefinition: EntityDefinition = {
         },
         actions: [
             { type: 'view' },
+            {
+                type: 'custom',
+                key: 'duplicate-connector',
+                permissionAction: 'CREATE',
+                render: ({row}) => <DuplicateConnectorAction row={row as Connector}/>,
+            },
             { type: 'update' },
             {
                 type: 'delete',
@@ -168,8 +177,10 @@ export const connectorDefinition: EntityDefinition = {
             }
         },
         mapToApi: ({data: {invoker, timeout, requestData, icon, iconOriginal, ...formData}, mode}: {data: ConnectorUpdateDto, mode: Mode}): Connector => {
+            const payloadFormData = {...formData}
+            if (mode === 'create') Reflect.deleteProperty(payloadFormData, 'connectorId')
             const payload: Connector = {
-                ...formData,
+                ...payloadFormData,
                 timeout: +timeout,
                 invoker: {
                     name: invoker,
@@ -246,6 +257,12 @@ export const connectorDefinition: EntityDefinition = {
             validation: {
                 required: true,
                 max: 255,
+                custom: [
+                    {
+                        validate: (value: unknown) => !/[<>]/.test(String(value ?? '')),
+                        message: `${baseKey}.fields.title.errors.markup_not_allowed`,
+                    },
+                ],
                 remote: {
                     url: `/connector/exists/:title`,
                     method: 'GET',
@@ -293,6 +310,9 @@ export const connectorDefinition: EntityDefinition = {
         {
             name: 'invoker',
             type: 'string',
+            // Lets callers deep-link straight to a connector for a chosen invoker
+            // (the onboarding tour's connector step does).
+            getDefaultValue: () => readPreselectedInvoker(),
             ui: {
                 component: 'select',
                 props: {
@@ -328,6 +348,7 @@ export const connectorDefinition: EntityDefinition = {
         {
             name: 'timeout',
             type: 'string',
+            defaultValue: '1000',
             ui: {
                 component: 'input',
                 props: {
@@ -335,7 +356,17 @@ export const connectorDefinition: EntityDefinition = {
                 }
             },
             validation: {
-                max: 11
+                max: 10,
+                custom: [
+                    {
+                        validate: (value: unknown) => {
+                            const timeout = String(value ?? '')
+                            if (timeout === '') return true
+                            return /^\d+$/.test(timeout) && Number(timeout) <= 2_147_483_647
+                        },
+                        message: `${baseKey}.fields.timeout.errors.invalid`,
+                    },
+                ],
             },
             table: {
                 width: 100,
@@ -426,7 +457,7 @@ export const connectorDefinition: EntityDefinition = {
                 component: 'file-dropzone',
                 props: {
                     multiple: false,
-                    accept: "image/png, image/jpeg",
+                    accept: IMAGE_UPLOAD_ACCEPT,
                     labelKey: `${baseKey}.fields.icon.label`,
                 }
             },
@@ -456,6 +487,10 @@ export const connectorDefinition: EntityDefinition = {
                     {
                         validate: (value, values, mode) =>
                             {
+                                if (mode === 'create' && values?.connectorId
+                                    && !useMasterPasswordStore.getState().masterPassword) {
+                                    return false;
+                                }
                                 if (mode === 'update') {
                                     const masterPassword = useMasterPasswordStore.getState().masterPassword
                                     if (!masterPassword) {
@@ -500,7 +535,6 @@ export const connectorDefinition: EntityDefinition = {
     ============================== */
 
     wizard: {
-        image: connectorWizardImage as string,
         imageField: 'icon',
         renderImage: ConnectorWizardImage,
 
@@ -529,24 +563,7 @@ export const connectorDefinition: EntityDefinition = {
             }
         },
 
-        recommendations: [
-            {
-                title: `${baseKey}.wizard.recommendations.1`,
-                link: '/connector/create'
-            },
-            {
-                title: `${baseKey}.wizard.recommendations.2`,
-                link: '/workflow/create'
-            },
-            {
-                title: `${baseKey}.wizard.recommendations.3`,
-                link: '/invoker/create'
-            },
-            {
-                title: `${baseKey}.wizard.recommendations.4`,
-                link: '/connector'
-            },
-        ],
+        recommendations: [...connectorRecommendations],
 
         steps: [
             {

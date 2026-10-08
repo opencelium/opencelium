@@ -1,6 +1,6 @@
 {
-  "title": "Lauf-Logs",
-  "subtitle": "Wählen Sie eine Ausführung, um deren Konnektor-, Methoden- und Operator-Logs einzusehen.",
+  "title": "Ausführungs-Logs",
+  "subtitle": "Wählen Sie eine Ausführung, um deren Konnektor-, Methoden- und Logikblock-Logs einzusehen.",
   "selectLabel": "Ausführung",
   "selectPlaceholder": "Ausführung auswählen",
   "selectHint": "Wählen Sie eine Ausführung, um deren Logs anzuzeigen.",
@@ -24,7 +24,7 @@
   "testRunDetails": "TESTLAUFDETAILS",
   "logsLabel": "LOGS",
   "live": {
-    "title": "Lauf-Logs",
+    "title": "Ausführungs-Logs",
     "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",
     "running": "Läuft…",
     "stopping": "Test wird gestoppt…",
@@ -33,7 +33,7 @@
     "speedTooltip": "Passt an, wie schnell die Testlauf-Animation abläuft. Hat keinen Einfluss auf die tatsächliche Ausführungsgeschwindigkeit.",
     "pauseTooltip": "Pausieren",
     "resumeTooltip": "Fortsetzen",
-    "stepForwardTooltip": "Vorwärts springen",
+    "stepForwardTooltip": "Einzelschritt",
     "liveToggleLabel": "Live",
     "liveToggleTooltip": "An: Logs live anzeigen, ohne Animation. Aus: Canvas-Animation und Logs zur besseren Übersicht verlangsamen.",
     "finished": "TEST BEENDET in {{time}}",

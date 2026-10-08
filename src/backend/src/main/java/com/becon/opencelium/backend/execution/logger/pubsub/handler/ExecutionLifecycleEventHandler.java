@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.constant.props.SupportFileProperties;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.database.mysql.service.LastExecutionService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.enums.SupportFileStatus;
 import com.becon.opencelium.backend.execution.logger.pubsub.Execution2MetadataMapping;
@@ -16,6 +17,7 @@ import com.becon.opencelium.backend.execution.logger.service.LogDataService;
 import com.becon.opencelium.backend.execution.supportfile.SupportFile;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.service.TemplateService;
 import com.becon.opencelium.backend.websocket.Connection2WebSocketChannelMapping;
@@ -58,6 +60,7 @@ import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
 public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
     private final SchedulerService schedulerService;
     private final ConnectionService connectionService;
+    private final LastExecutionService lastExecutionService;
     private final Connection2WebSocketChannelMapping connection2ChannelMapping;
     private final Execution2MetadataMapping metadata;
     private final LogDataService logDataService;
@@ -77,6 +80,7 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
     public ExecutionLifecycleEventHandler(
             SchedulerService schedulerService,
             ConnectionService connectionService,
+            LastExecutionService lastExecutionService,
             Connection2WebSocketChannelMapping connection2ChannelMapping,
             Execution2MetadataMapping metadata,
             LogDataService logDataService,
@@ -89,6 +93,7 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
     ) {
         this.schedulerService = schedulerService;
         this.connectionService = connectionService;
+        this.lastExecutionService = lastExecutionService;
         this.connection2ChannelMapping = connection2ChannelMapping;
         this.metadata = metadata;
         this.logDataService = logDataService;
@@ -123,6 +128,10 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
                 // the mapping entry and its open file channel must be released even
                 // when finish handling fails, otherwise they leak until restart
                 metadata.remove(e.executionId());
+                // announced only now: clients refetch the scheduler on this message and must
+                // see its final state, including whether the execution's log can be viewed
+                runQuietly(() -> sendRunningJobsNotification(e.schedulerId()),
+                        "announce the end of execution " + e.executionId());
             }
         }
     }
@@ -158,9 +167,25 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
             if (logExists) {
                 collectSupportFile(connectionId, executionId, timestamp, result);
             }
-        } else if (logExists) {
-            moveLogFile(connectionId, executionId, timestamp, result);
+        } else if (logExists && moveLogFile(connectionId, executionId, timestamp, result)) {
+            // the has-log flag is set here rather than when the job returns: only on this thread
+            // is it certain that every log line of the execution has been processed and persisted
+            markLogAvailable(schedulerId, executionId, result);
         }
+    }
+
+    private void markLogAvailable(int schedulerId, long executionId, String result) {
+        // a terminated execution is recorded as the scheduler's last failure
+        if (SUCCESS.equals(result)) {
+            lastExecutionService.markSuccessLogAvailable(schedulerId, executionId);
+        } else {
+            lastExecutionService.markFailLogAvailable(schedulerId, executionId);
+        }
+    }
+
+    private void sendRunningJobsNotification(int schedulerId) {
+        List<RunningJobsResource> runningJobs = schedulerService.getAllRunningJobsExcludingOne(schedulerId);
+        notificationService.send(SocketConstant.SCHEDULER_DESTINATION, runningJobs);
     }
 
     private void runQuietly(Runnable action, String description) {
@@ -176,7 +201,13 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
         return Files.isRegularFile(logFilePath);
     }
 
-    private void moveLogFile(Long connectionId, long executionId, String timestamp, String result) {
+    /**
+     * Moves the uncategorized log file into the connection's folder under its final name, then
+     * applies the retention limit of its result.
+     *
+     * @return {@code true} if the file is in the connection's folder afterwards, where it is listed
+     */
+    private boolean moveLogFile(Long connectionId, long executionId, String timestamp, String result) {
         Path sourcePath = buildUncategorizedLogFilePath(timestamp, connectionId, executionId);
         Path destinationPath = toPath(LOG_LOCATION, connectionId.toString(), toFilename(timestamp, connectionId, result, executionId, LOG_FILE_EXTENSION));
 
@@ -190,6 +221,9 @@ public class ExecutionLifecycleEventHandler implements ExecutionEventHandler {
             int fileLimit = SUCCESS.equals(result) ? logFileSuccessLimit : FAIL.equals(result) ? logFileFailLimit : 1;
             enforceLimit(LOG_LOCATION, connectionId, result, fileLimit);
         }
+
+        // the move can fail, and a retention limit of 0 deletes the file right away
+        return Files.isRegularFile(destinationPath);
     }
 
     private void collectSupportFile(Long connectionId, long executionId, String timestamp, String type) {

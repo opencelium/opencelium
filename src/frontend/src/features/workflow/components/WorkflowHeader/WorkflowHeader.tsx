@@ -27,7 +27,8 @@ export function WorkflowHeader({
 		() => headerMenuItems
 			.filter((item) => !(readOnly && item.id === 'change-history'))
 			.map((item) => {
-				if (testRunLocked && (item.id === 'assign-category' || item.id === 'version-history' || item.id === 'load-template')) {
+				if (testRunLocked && (item.id === 'assign-category' || item.id === 'version-history'
+					|| item.id === 'load-template' || item.id === 'edit-json')) {
 					return {
 						...item,
 						disabled: true,
