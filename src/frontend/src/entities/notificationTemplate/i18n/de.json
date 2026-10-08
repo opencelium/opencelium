@@ -1,9 +1,9 @@
 {
   "list": {
     "title": "Benachrichtigungsvorlagen",
-    "subTitle": "Verwalten Sie wiederverwendbare Vorlagen, die für Benachrichtigungen in Laufplänen verwendet werden.",
+    "subTitle": "Verwalten Sie wiederverwendbare Vorlagen, die für Benachrichtigungen in Zeitplänen verwendet werden.",
     "confirmDelete": {
-      "message": "Sind Sie sicher, dass Sie die Benachrichtigungsvorlage mit dem Namen \"{{name}}\" löschen möchten?"
+      "message": "Möchten Sie die Benachrichtigungsvorlage „{{name}}“ wirklich löschen? Dies kann nicht rückgängig gemacht werden."
     }
   },
   "fields": {
@@ -14,13 +14,13 @@
       "label": "Typ"
     },
     "aggregator": {
-      "label": "Aggregator"
+      "label": "Datenaggregator"
     },
     "subject": {
       "label": "Betreff"
     },
     "body": {
-      "label": "Inhalt"
+      "label": "Nachrichtentext"
     }
   },
   "sections": {
@@ -36,12 +36,12 @@
       "create": {
         "header": "Benachrichtigungsvorlage erstellen",
         "subheader": "Benachrichtigungsvorlagen definieren den Inhalt und das Format von Nachrichten, die vom System gesendet werden.",
-        "successMessage": "Benachrichtigungsvorlage \"{{name}}\" wurde erfolgreich erstellt"
+        "successMessage": "Benachrichtigungsvorlage „{{name}}“ wurde erfolgreich erstellt"
       },
       "update": {
         "header": "Benachrichtigungsvorlage aktualisieren",
         "subheader": "Benachrichtigungsvorlagen definieren den Inhalt und das Format von Nachrichten, die vom System gesendet werden.",
-        "successMessage": "Benachrichtigungsvorlage \"{{name}}\" wurde erfolgreich aktualisiert"
+        "successMessage": "Benachrichtigungsvorlage „{{name}}“ wurde erfolgreich aktualisiert"
       },
       "view": {
         "header": "Details der Benachrichtigungsvorlage",
@@ -59,14 +59,17 @@
       },
       "template-content": {
         "header": "Vorlageninhalt",
-        "subheader": "Definieren Sie Aggregator, Betreff und Inhalt der Benachrichtigungsvorlage."
+        "subheader": "Definieren Sie Datenaggregator, Betreff und Nachrichtentext der Benachrichtigungsvorlage. Verwenden Sie Argumente des Datenaggregators, um dynamische Werte einzufügen."
       }
     }
   },
+  "validation": {
+    "meaningfulText": "Geben Sie mindestens einen Buchstaben oder eine Zahl ein."
+  },
   "confirmation": {
     "delete": {
-      "byName": "Benachrichtigungsvorlage mit Name \"{{name}}\" löschen?",
-      "byId": "Benachrichtigungsvorlage mit ID \"{{id}}\" löschen?"
+      "byName": "Benachrichtigungsvorlage „{{name}}“ löschen?",
+      "byId": "Benachrichtigungsvorlage #{{id}} löschen?"
     }
   }
 }

@@ -1,7 +1,7 @@
 {
   "list": {
-    "title": "Data Aggregator",
-    "subTitle": "A Data Aggregator is a feature that enables structured notification handling after a Connection is triggered in a Schedule. When a Schedule executes a Connection, the Aggregator processes the execution data and prepares it for notification delivery (e.g., via <ntLink>Notification Templates</ntLink>).",
+    "title": "Data Aggregators",
+    "subTitle": "A data aggregator is a feature that enables structured notification handling after a workflow is triggered in a schedule. When a schedule executes a workflow, the data aggregator processes the execution data and prepares it for notification delivery (e.g., via <ntLink>Notification Templates</ntLink>).",
     "filters": {
       "showArchived": "Show archived"
     }
@@ -10,7 +10,7 @@
     "name": {
       "label": "Name",
       "errors": {
-        "name_already_exists": "An aggregator with this name already exists"
+        "name_already_exists": "A data aggregator with this name already exists"
       }
     },
     "args": { "label": "Arguments" },
@@ -55,16 +55,18 @@
   },
   "scriptEditor": {
     "maximize": "Maximize script",
-    "minimize": "Minimize script"
+    "minimize": "Minimize script",
+    "yourScript": "Your script"
   },
   "validation": {
-    "scriptContainsNotExistedArgs": "Script contains not existed arguments.",
-    "argNameInvalid": "Must start with a letter, _ or $ and contain only letters, digits, _ or $."
+    "scriptContainsNotExistedArgs": "The script uses arguments that are not defined.",
+    "argNameInvalid": "Must start with a letter, _ or $ and contain only letters, digits, _ or $.",
+    "nameMeaningful": "Name must contain at least one letter or number."
   },
   "confirmation": {
     "delete": {
-      "byName": "Delete data aggregator by name \"{{name}}\"?",
-      "byId": "Delete data aggregator by id \"{{id}}\"?"
+      "byName": "Delete data aggregator \"{{name}}\"?",
+      "byId": "Delete data aggregator #{{id}}?"
     }
   }
 }

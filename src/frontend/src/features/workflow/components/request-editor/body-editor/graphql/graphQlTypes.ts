@@ -1,7 +1,7 @@
 export type GraphQlQueryParams = {
     url: string
     accessToken: string
-    sslOn: boolean
+    trustAnyCertificate: boolean
     query: string
     variables?: Record<string, unknown>
     operationName?: string | null

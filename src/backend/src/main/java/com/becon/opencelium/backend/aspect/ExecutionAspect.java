@@ -44,7 +44,6 @@ import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.logger.pubsub.ExecutionEventPublisher;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionFinishedEvent;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionStartedEvent;
-import com.becon.opencelium.backend.execution.logger.service.LogDataService;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.oc721.Operation;
@@ -104,7 +103,6 @@ public class ExecutionAspect {
     private final DataAggregatorService dataAggregatorService;
     private final SubscriptionService subscriptionService;
     private final WebSocketNotificationService notificationService;
-    private final LogDataService logDataService;
     private final ConnectionService connectionService;
     private final LanguageService languageService;
 
@@ -115,7 +113,6 @@ public class ExecutionAspect {
             @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
             @Qualifier("dataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
-            @Qualifier("logDataServiceImp") LogDataService logDataService,
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
             Environment env,
@@ -132,7 +129,6 @@ public class ExecutionAspect {
         this.dataAggregatorService = dataAggregatorService;
         this.subscriptionService = subscriptionService;
         this.notificationService = notificationService;
-        this.logDataService = logDataService;
         this.connectionService = connectionService;
         this.languageService = languageService;
     }
@@ -189,11 +185,10 @@ public class ExecutionAspect {
 
         triggerNotifications(schedulerId, "post", null);
 
-        sendRunningJobsNotification(schedulerId);
-
-
+        // ExecutionLifecycleEventHandler announces the end of the execution to the running-jobs
+        // subscribers once it has handled this event
         ExecutionEventPublisher.publish(
-                new ExecutionFinishedEvent(execId, data.getExecType(), SUCCESS)
+                new ExecutionFinishedEvent(execId, schedulerId, data.getExecType(), SUCCESS)
         );
     }
 
@@ -216,11 +211,10 @@ public class ExecutionAspect {
 
         triggerNotifications(schedulerId, "alert", ex);
 
-        sendRunningJobsNotification(schedulerId);
-
+        // see sendAfter: the end of the execution is announced by ExecutionLifecycleEventHandler
         final String result = ex instanceof ExecutionTerminatedException ? TERMINATED : FAIL;
         ExecutionEventPublisher.publish(
-                new ExecutionFinishedEvent(execId, data.getExecType(), result)
+                new ExecutionFinishedEvent(execId, schedulerId, data.getExecType(), result)
         );
     }
 
@@ -239,24 +233,26 @@ public class ExecutionAspect {
         execution.setEndTime(new Date());
         execution.setStatus(success ? "S" : "F");
         executionService.save(execution);
-        boolean hasLog = LogFileUtility.logFileExistForExecId(execId) && logDataService.hasDbRecords(execId);
         LastExecution le;
         if (lastExecutionService.existsBySchedulerId(execution.getScheduler().getId())) {
             le = lastExecutionService.findBySchedulerId(execution.getScheduler().getId());
         } else {
             le = new LastExecution();
         }
+        // The log lines of this execution are still being processed asynchronously, so its log
+        // cannot be judged here. The flag is reset for the new execution and set by
+        // ExecutionLifecycleEventHandler once the execution's log has been stored.
         if (success) {
             le.setSuccessDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
             le.setSuccessStartTime(execution.getStartTime());
             le.setSuccessEndTime(execution.getEndTime());
-            le.setSuccessHasLog(hasLog);
+            le.setSuccessHasLog(false);
             le.setSuccessExecutionId(execution.getId());
         } else {
             le.setFailDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
             le.setFailStartTime(execution.getStartTime());
             le.setFailEndTime(execution.getEndTime());
-            le.setFailHasLog(hasLog);
+            le.setFailHasLog(false);
             le.setFailExecutionId(execution.getId());
         }
         if (le.getScheduler() == null) {
@@ -534,10 +530,5 @@ public class ExecutionAspect {
             List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobs();
             notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
         } catch (Exception e) {}
-    }
-
-    private void sendRunningJobsNotification(int schedulerId) {
-        List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobsExcludingOne(schedulerId);
-        notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
     }
 }

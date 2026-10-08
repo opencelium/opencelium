@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+<style>
+.i{stroke:#1a1a1a}.a{stroke:#14b8a6}.af{fill:#14b8a6;stroke:none}.if{fill:#1a1a1a;stroke:none}
+.out{animation:o 2s ease-in-out infinite}@keyframes o{50%{transform:translateX(3px)}}
+.in{animation:n 2s ease-in-out infinite}@keyframes n{50%{transform:translateX(-3px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+
+<path class="i" d="M20 50h26a11 11 0 001-22 15 15 0 00-28.5-3A12.5 12.5 0 0020 50z"/>
+<path class="a out" d="M22 34h18M36 30l4 4-4 4"/>
+<path class="a in" d="M42 43H24M28 39l-4 4 4 4"/>
+</svg>

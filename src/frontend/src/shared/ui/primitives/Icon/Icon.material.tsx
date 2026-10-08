@@ -3,6 +3,7 @@ import {
     Check,
     Close,
     Person,
+    Groups,
     Delete,
     Edit,
     Info,
@@ -39,6 +40,7 @@ import {
     FullscreenExit,
     ContentCopy,
     AccountTree,
+    Hub,
     Refresh,
     AltRoute,
     Webhook,
@@ -56,14 +58,23 @@ import {
     Redo,
     CallSplit,
     Loop,
+    RadioButtonUnchecked,
+    GitHub,
+    Apps,
 } from '@mui/icons-material';
 
+import MouseOutlined from '@mui/icons-material/MouseOutlined';
+import DragIndicator from '@mui/icons-material/DragIndicator';
+import Remove from '@mui/icons-material/Remove';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import FitScreen from '@mui/icons-material/FitScreen';
 import type { IconComponent } from './Icon.types';
 
 const iconMap = {
     check: Check,
     close: Close,
     user: Person,
+    team: Groups,
     delete: Delete,
     edit: Edit,
     info: Info,
@@ -74,6 +85,7 @@ const iconMap = {
     stop: Stop,
     'step-forward': SkipNext,
     'skip-forward': FastForward,
+    mouse: MouseOutlined,
     download: Download,
     upload: Upload,
     key: Key,
@@ -101,6 +113,7 @@ const iconMap = {
     'arrow-switch': SwapHoriz,
     'content-copy': ContentCopy,
     workflow: AccountTree,
+    bindings: Hub,
     refresh: Refresh,
     connector: AltRoute,
     webhook: Webhook,
@@ -118,6 +131,14 @@ const iconMap = {
     redo: Redo,
     if: CallSplit,
     loop: Loop,
+    circle: RadioButtonUnchecked,
+    git: GitHub,
+    globe: Public,
+    portal: Apps,
+    'drag-handle': DragIndicator,
+    minus: Remove,
+    'chevron-up': ExpandLess,
+    'fit-view': FitScreen,
 };
 
 export const MaterialIcon: IconComponent = ({

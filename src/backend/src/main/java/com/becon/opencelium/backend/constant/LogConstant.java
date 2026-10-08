@@ -13,10 +13,11 @@ public interface LogConstant {
 
     // pattern to match log file names and extract executionId:
     // yyyy-MM-dd_HH-mm_<tag>_(u|f|s)_<executionId>.log
-    Pattern FILE_NAME_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}_.+_(u|f|s)_(.+)\\.log");
+    Pattern FILE_NAME_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}_.+_(u|f|t|s)_(.+)\\.log");
 
     // execution result types
     String SUCCESS = "s";
     String FAIL = "f";
+    String TERMINATED = "t";
     String UNCATEGORIZED = "u";
 }

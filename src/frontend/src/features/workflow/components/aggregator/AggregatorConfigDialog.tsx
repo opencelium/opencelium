@@ -52,7 +52,7 @@ export function AggregatorConfigDialog({ open, node, onClose, onSave }: Props) {
     const confirmed = await confirm({
       title: t('aggregatorDialog.confirmUnassign.title'),
       message: t('aggregatorDialog.confirmUnassign.message'),
-      confirmText: t('actions.delete'),
+      confirmText: t('actions.remove'),
       cancelText: t('actions.cancel'),
       confirmVariant: 'solid',
     });

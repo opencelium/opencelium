@@ -16,4 +16,7 @@ export type NodeShellProps = PropsWithChildren<{
 	bottomExtra?: ReactNode;
 	rightAdd?: NodeShellAddConfig;
 	bottomAdd?: NodeShellAddConfig;
+	/** Identifies the node itself, so a test or a tour can scope to one node's
+	 *  controls — its add triggers included. */
+	testId?: string;
 }>;

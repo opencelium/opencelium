@@ -1,0 +1,27 @@
+/*
+ * The intro tour's tooltip is 840px wide because its steps are centred over the
+ * whole page. Anchored to a dashboard widget that width would cover the very card
+ * it points at, so this variant narrows the box and tightens its padding.
+ *
+ * Doubled class rather than a single one: this file and onboardingTooltip.css are
+ * both imported, and the doubled selector wins whichever order they land in.
+ */
+.onboarding-tooltip.onboarding-tooltip--dashboard {
+    width: min(420px, calc(100vw - 32px));
+}
+
+.onboarding-tooltip.onboarding-tooltip--dashboard .onboarding-tooltip__header { padding: 18px 20px 0; }
+.onboarding-tooltip.onboarding-tooltip--dashboard .onboarding-tooltip__title { margin: 10px 20px 0; font-size: 18px; }
+.onboarding-tooltip.onboarding-tooltip--dashboard .onboarding-tooltip__content { padding: 10px 20px 18px; }
+.onboarding-tooltip.onboarding-tooltip--dashboard .onboarding-tooltip__content p { margin: 0; }
+.onboarding-tooltip.onboarding-tooltip--dashboard .onboarding-tooltip__footer { min-height: 60px; margin: 0 20px; }
+
+/* The footer's note and its buttons do not fit side by side at this width. */
+@media (max-width: 700px) {
+    .onboarding-tooltip.onboarding-tooltip--dashboard .onboarding-tooltip__footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 0;
+    }
+}

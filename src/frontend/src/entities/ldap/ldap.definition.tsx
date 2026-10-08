@@ -1,5 +1,5 @@
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import roleWizardImage from '@assets/images/wizard/ldap.gif'
+import ldapWizardImage from '@assets/images/wizard/ldap.svg'
 import {resolveUserEmails} from "@entities/user/command/resolvers/resolveUserEmails.ts";
 import {useCommandPaletteUIStore} from "@widgets/CommandPalette/command-palette.store.ts";
 import React from "react";
@@ -166,7 +166,7 @@ export const ldapDefinition: EntityDefinition = {
     ============================== */
 
     wizard: {
-        image: roleWizardImage as string,
+        image: ldapWizardImage as string,
 
         modes: {
             view: {

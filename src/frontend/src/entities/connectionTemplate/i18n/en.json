@@ -1,15 +1,20 @@
 {
   "list": {
     "title": "Workflow Templates",
-    "subTitle": "The Templates section contains predefined connection configurations that can be reused to quickly create new Workflows.",
+    "subTitle": "The Templates section contains predefined workflow configurations that can be reused to quickly create new workflows.",
     "upload": {
       "button": "Upload",
       "confirmReplace": {
         "title": "Replace existing template?",
-        "message": "The template with such filename already exists. It will be replaced. Are you sure?"
+        "message": "A template with this file name already exists. Replace it?"
       },
       "success": "Template uploaded successfully: {{name}}",
-      "error": "Failed to upload template file."
+      "successArchive": "Templates uploaded from {{name}}: {{count}}",
+      "emptyArchive": "The archive does not contain any workflow templates.",
+      "error": "Failed to upload template file.",
+      "invalidType": "Workflow template files must use the .json or .zip format.",
+      "tooLarge": "The workflow template file must not exceed 1 GB.",
+      "archiveTooLarge": "The workflow template archive must not exceed 1 GB."
     },
     "download": {
       "tooltip": "Download",
@@ -17,7 +22,7 @@
       "error": "Failed to download template."
     },
     "confirmDelete": {
-      "message": "Are you sure you want to delete workflow template with name \"{{name}}\"?"
+      "message": "Delete the workflow template \"{{name}}\"? This can't be undone."
     }
   },
   "fields": {
@@ -28,16 +33,16 @@
       "label": "Description"
     },
     "fromInvoker": {
-      "label": "From Invoker"
+      "label": "Source API"
     },
     "toInvoker": {
-      "label": "To Invoker"
+      "label": "Target API"
     }
   },
   "confirmation": {
     "delete": {
-      "byId": "Delete workflow template by id \"{{templateId}}\"?",
-      "byName": "Delete workflow template by name \"{{name}}\"?"
+      "byId": "Delete workflow template with ID \"{{templateId}}\"?",
+      "byName": "Delete workflow template \"{{name}}\"?"
     }
   }
 }

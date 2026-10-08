@@ -60,4 +60,14 @@ public class LastExecutionServiceImp implements LastExecutionService{
     public void deleteAllBySchedulerId(int schedulerId) {
         lastExecutionRepository.deleteBySchedulerId(schedulerId);
     }
+
+    @Override
+    public void markSuccessLogAvailable(int schedulerId, long executionId) {
+        lastExecutionRepository.markSuccessLogAvailable(schedulerId, executionId);
+    }
+
+    @Override
+    public void markFailLogAvailable(int schedulerId, long executionId) {
+        lastExecutionRepository.markFailLogAvailable(schedulerId, executionId);
+    }
 }

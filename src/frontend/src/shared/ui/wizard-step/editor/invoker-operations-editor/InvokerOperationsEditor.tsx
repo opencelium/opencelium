@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-json'
+import 'ace-builds/src-noconflict/mode-xml'
 import 'ace-builds/src-noconflict/theme-tomorrow'
 import 'ace-builds/src-noconflict/theme-tomorrow_night'
 import { useController, useFormContext, useWatch } from 'react-hook-form'
@@ -53,6 +54,33 @@ const TYPE_OPTIONS: RadioOption[] = [
     { label: 'object', value: 'object' },
     { label: 'array', value: 'array' },
 ]
+
+const getStructuredValueError = (
+    value: string,
+    format: 'json' | 'xml',
+    type?: 'object' | 'array',
+): string | undefined => {
+    try {
+        if (format === 'xml') {
+            const document = new DOMParser().parseFromString(value, 'application/xml')
+            if (document.querySelector('parsererror')) throw new Error('Invalid XML')
+        } else {
+            const parsed = JSON.parse(value)
+            if (type === 'array' && !Array.isArray(parsed)) {
+                return 'Body must be a JSON array'
+            }
+            if (
+                type === 'object' &&
+                (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed))
+            ) {
+                return 'Body must be a JSON object'
+            }
+        }
+        return undefined
+    } catch {
+        return format === 'xml' ? 'Invalid XML' : 'Invalid JSON'
+    }
+}
 
 const DEFAULT_OPERATION = {
     name: '',
@@ -115,32 +143,30 @@ function RadioGroupField({
     )
 }
 
-function JsonEditorField({
+function StructuredEditorField({
     name,
     label,
     readOnly,
+    format = 'json',
+    type,
     height = '120px',
 }: {
     name: string
     label: string
     readOnly: boolean
+    format?: 'json' | 'xml'
+    type?: 'object' | 'array'
     height?: string
 }) {
     const { control } = useFormContext()
     const { field } = useController({ name, control })
-    const [localError, setLocalError] = useState<string | undefined>()
     const { themeMode } = useTheme()
     const aceTheme = themeMode === 'dark' ? 'tomorrow_night' : 'tomorrow'
 
     const value = typeof field.value === 'string' ? field.value : '{}'
+    const localError = getStructuredValueError(value, format, type)
 
     const handleChange = (val: string) => {
-        try {
-            JSON.parse(val)
-            setLocalError(undefined)
-        } catch {
-            setLocalError('Invalid JSON')
-        }
         field.onChange(val)
     }
 
@@ -148,7 +174,7 @@ function JsonEditorField({
         <FormControl label={label} name={name} error={localError}>
             <div style={{ border: '1px solid var(--color-border-default)', borderRadius: 4, overflow: 'hidden', width: '100%' }}>
                 <AceEditor
-                    mode="json"
+                    mode={format}
                     theme={aceTheme}
                     name={`ace_${name.replace(/\./g, '_')}`}
                     value={value}
@@ -174,6 +200,9 @@ function OperationSection({
     readOnly: boolean
 }) {
     const { t } = useI18n('entities')
+    const { control } = useFormContext()
+    const format = useWatch({ name: `${prefix}.format`, control }) as 'json' | 'xml'
+    const type = useWatch({ name: `${prefix}.type`, control }) as 'object' | 'array'
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0, width: '100%' }}>
             {withStatus && (
@@ -183,7 +212,7 @@ function OperationSection({
                     readOnly={readOnly}
                 />
             )}
-            <JsonEditorField
+            <StructuredEditorField
                 name={`${prefix}.headersJson`}
                 label={t('invoker.fields.operations.item.headers', { defaultValue: 'Headers' })}
                 readOnly={readOnly}
@@ -208,10 +237,12 @@ function OperationSection({
                     readOnly={readOnly}
                 />
             </div>
-            <JsonEditorField
+            <StructuredEditorField
                 name={`${prefix}.bodyJson`}
                 label={t('invoker.fields.operations.item.body', { defaultValue: 'Body' })}
                 readOnly={readOnly}
+                format={format}
+                type={type}
                 height="160px"
             />
         </div>

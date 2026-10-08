@@ -243,6 +243,24 @@ public class UserController {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
+    @Operation(summary = "Deletes the profile picture of a user by the provided user ID")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "204",
+                description = "Profile picture has been successfully deleted (or was not set).",
+                content = @Content),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error (also returned with message USER_NOT_EXIST for an unknown ID)",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping("/{id}/profilePicture")
+    public ResponseEntity<?> deleteProfilePicture(@PathVariable("id") int id) {
+        userService.deleteProfilePicture(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Deletes users by ids ")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "204",

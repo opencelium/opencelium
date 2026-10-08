@@ -39,7 +39,7 @@ export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, conf
 
     return (
         <Tooltip content={tCommon('actions.view')} placement={tooltipPlacement}>
-            <IconButton iconProps={{ name: 'info', color: 'primary', size: iconSize }} type={'text'} size={'xs'} onClick={handleClick} testId={testId} />
+            <IconButton iconProps={{ name: 'eye', color: 'primary', size: iconSize }} type={'text'} size={'xs'} onClick={handleClick} testId={testId} />
         </Tooltip>
     );
 };

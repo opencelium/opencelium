@@ -1,9 +1,9 @@
 {
   "list": {
     "title": "Support-Dateien",
-    "subTitle": "Diagnose-Pakete, die von Workflowsausführungen erzeugt wurden. Laden Sie ein Paket herunter, um es an den Support weiterzugeben, oder entfernen Sie nicht mehr benötigte Pakete.",
+    "subTitle": "Diagnose-Pakete, die von Workflow-Ausführungen erzeugt wurden. Laden Sie ein Paket herunter, um es an den Support weiterzugeben, oder entfernen Sie nicht mehr benötigte Pakete.",
     "searchPlaceholder": "Nach Workflow suchen",
-    "deletedConnection": "Gelöschte Workflow",
+    "deletedConnection": "Gelöschter Workflow",
     "columns": {
       "status": "Status",
       "connection": "Workflow",
@@ -16,7 +16,7 @@
       "error": "Support-Datei konnte nicht heruntergeladen werden"
     },
     "confirmDelete": {
-      "message": "Sind Sie sicher, dass Sie die Support-Datei \"{{filePath}}\" löschen möchten?"
+      "message": "Support-Datei „{{filePath}}“ löschen? Dies kann nicht rückgängig gemacht werden."
     }
   },
   "events": {

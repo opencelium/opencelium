@@ -21,6 +21,7 @@ import type { AuthUser } from '@entities/auth/model/types'
 import { useProfileDetailsForm } from '@pages/ProfilePage/hooks/useProfileDetailsForm'
 import type { ProfileDetailsValues } from '@pages/ProfilePage/schemas/profileDetails.schema'
 import { UserTitleField } from '@pages/ProfilePage/components/UserTitleField'
+import { ProfilePictureEditor } from '@pages/ProfilePage/components/ProfilePictureEditor'
 
 function toFormValues(user: AuthUser): ProfileDetailsValues {
     const raw = user.userDetail?.userTitle?.toLowerCase() ?? null
@@ -110,7 +111,12 @@ export function UserDetailsCard({ style }: { style?: React.CSSProperties }) {
                         onSubmit={form.handleSubmit(onSubmit)}
                         style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
                     >
-                        <UserTitleField readOnly={!canUpdate} />
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <UserTitleField readOnly={!canUpdate} />
+                            </div>
+                            <ProfilePictureEditor readOnly={!canUpdate} />
+                        </div>
                         <FormInput name="name" label="profile.fields.name.label" autoFocus readOnly={!canUpdate} />
                         <FormInput name="surname" label="profile.fields.surname.label" readOnly={!canUpdate} />
                         <FormInput name="department" label="profile.fields.department.label" readOnly={!canUpdate} />

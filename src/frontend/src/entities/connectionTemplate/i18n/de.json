@@ -1,15 +1,20 @@
 {
   "list": {
-    "title": "Workflow Templates",
-    "subTitle": "Der Bereich Vorlagen enthält vordefinierte Workflowskonfigurationen, die wiederverwendet werden können, um schnell neue Workflows zu erstellen.",
+    "title": "Workflow-Vorlagen",
+    "subTitle": "Der Bereich Vorlagen enthält vordefinierte Workflow-Konfigurationen, die wiederverwendet werden können, um schnell neue Workflows zu erstellen.",
     "upload": {
       "button": "Hochladen",
       "confirmReplace": {
         "title": "Vorhandene Vorlage ersetzen?",
-        "message": "Eine Vorlage mit diesem Dateinamen existiert bereits. Sie wird ersetzt. Sind Sie sicher?"
+        "message": "Eine Vorlage mit diesem Dateinamen existiert bereits. Möchten Sie sie ersetzen?"
       },
       "success": "Vorlage erfolgreich hochgeladen: {{name}}",
-      "error": "Hochladen der Vorlagendatei fehlgeschlagen."
+      "successArchive": "Aus {{name}} hochgeladene Vorlagen: {{count}}",
+      "emptyArchive": "Das Archiv enthält keine Workflow-Vorlagen.",
+      "error": "Hochladen der Vorlagendatei fehlgeschlagen.",
+      "invalidType": "Workflow-Vorlagendateien müssen das .json- oder .zip-Format verwenden.",
+      "tooLarge": "Die Workflow-Vorlagendatei darf 1 GB nicht überschreiten.",
+      "archiveTooLarge": "Das Workflow-Vorlagenarchiv darf 1 GB nicht überschreiten."
     },
     "download": {
       "tooltip": "Herunterladen",
@@ -17,7 +22,7 @@
       "error": "Herunterladen der Vorlage fehlgeschlagen."
     },
     "confirmDelete": {
-      "message": "Sind Sie sicher, dass Sie die Workflowvorlage mit dem Namen \"{{name}}\" löschen möchten?"
+      "message": "Workflow-Vorlage „{{name}}“ löschen? Dies kann nicht rückgängig gemacht werden."
     }
   },
   "fields": {
@@ -28,16 +33,16 @@
       "label": "Beschreibung"
     },
     "fromInvoker": {
-      "label": "Vom Invoker"
+      "label": "Quell-API"
     },
     "toInvoker": {
-      "label": "Zum Invoker"
+      "label": "Ziel-API"
     }
   },
   "confirmation": {
     "delete": {
-      "byId": "Workflowvorlage anhand der id \"{{templateId}}\" löschen?",
-      "byName": "Workflowvorlage anhand des Namens \"{{name}}\" löschen?"
+      "byId": "Workflow-Vorlage mit der ID „{{templateId}}“ löschen?",
+      "byName": "Workflow-Vorlage „{{name}}“ löschen?"
     }
   }
 }
