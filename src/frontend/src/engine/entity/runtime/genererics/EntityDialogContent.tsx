@@ -5,6 +5,7 @@ import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { GenericCreateWizard } from './GenericCreateWizard';
 import { GenericViewWizard } from './GenericViewWizard';
 import { GenericUpdateWizard } from './GenericUpdateWizard';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props =
     | { entityName: string; mode: 'create'; identifier?: undefined; onSuccess: (created?: unknown) => void }
@@ -14,6 +15,7 @@ type Props =
 export const EntityDialogContent: React.FC<Props> = (props) => {
     const { entityName, mode, identifier, onSuccess } = props;
     const entity = entityRegistry.get(entityName);
+    const { t: tCommon } = useI18n('common');
 
     const skip = mode === 'create' || !identifier || !entity.api;
     const { data, isLoading } = useFetchEntitiesQuery(
@@ -44,7 +46,7 @@ export const EntityDialogContent: React.FC<Props> = (props) => {
     }
 
     if (!record) {
-        return <div style={{ padding: 24 }}>Not found</div>;
+        return <div style={{ padding: 24 }}>{tCommon('notFound.entity')}</div>;
     }
 
     if (mode === 'view') {

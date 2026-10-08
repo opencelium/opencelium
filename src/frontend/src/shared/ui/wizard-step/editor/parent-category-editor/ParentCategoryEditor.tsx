@@ -36,7 +36,7 @@ export function ParentCategoryEditor({ name, label, mode }: ParentCategoryEditor
                 value={field.value ?? undefined}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
-                placeholder="Select parent category"
+                placeholder={t('category.fields.parentCategory.placeholder')}
                 allowClear
                 treeDefaultExpandAll
                 disabled={readOnly}

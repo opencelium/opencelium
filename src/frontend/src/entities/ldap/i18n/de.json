@@ -4,10 +4,10 @@
       "label": "URL"
     },
     "userDN": {
-      "label": "UserDN"
+      "label": "Benutzer-DN"
     },
     "groupDN": {
-      "label": "GroupDN"
+      "label": "Gruppen-DN"
     },
     "username": {
       "label": "Lesekonto-DN"
@@ -22,12 +22,13 @@
       "label": "Gruppensuchfilter"
     },
     "logs": {
-      "label": "Protokolle"
+      "label": "Logs",
+      "empty": "Keine Logs"
     }
   },
   "sections": {
     "configurations": {
-      "title": "Konfigurationen"
+      "title": "Konfiguration"
     }
   },
   "wizard": {
@@ -43,7 +44,7 @@
     },
     "steps": {
       "configurations": {
-        "header": "Konfigurationen",
+        "header": "Konfiguration",
         "subheader": "Wird aus der application.yml unter dem Schlüssel security: geladen. Nur lesbar — zum Ändern die Datei bearbeiten und neu starten.",
         "actions": {
           "nextLabel": "Testen"
@@ -53,8 +54,8 @@
         }
       },
       "logs": {
-        "header": "Protokolle",
-        "subheader": "Protokolle des Testergebnisses"
+        "header": "Logs",
+        "subheader": "Logs des Testergebnisses"
       }
     }
   }

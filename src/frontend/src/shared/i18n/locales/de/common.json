@@ -1,22 +1,22 @@
 {
   "question": {
     "confirmation": {
-      "delete": "Sind Sie sicher, dass Sie {{entityName}} nach {{field}} {{value}} löschen möchten?"
+      "delete": "Möchten Sie „{{value}}“ wirklich löschen?"
     }
   },
   "menu": {
     "dashboard": "Dashboard",
     "connectors": "Konnektoren",
     "connections": "Workflows",
-    "schedules": "Laufpläne",
+    "schedules": "Zeitpläne",
     "usersAccess": "Benutzer & Zugriff",
     "users": "Benutzer",
-    "groups": "Gruppen",
+    "groups": "Rollen",
     "ldapCheck": "LDAP-Prüfung",
     "configurations": "Konfigurationen",
-    "invokers": "Invoker",
-    "connectionTemplates": "Workflow Templates",
-    "dataAggregator": "Datensammler",
+    "invokers": "API-Definitionen",
+    "connectionTemplates": "Workflow-Vorlagen",
+    "dataAggregator": "Datenaggregatoren",
     "notificationTemplates": "Benachrichtigungsvorlagen",
     "categories": "Kategorien",
     "supportFiles": "Support-Dateien",
@@ -24,7 +24,7 @@
     "licenseManagement": "Lizenzverwaltung",
     "updateAssistant": "Update-Assistent",
     "systemCheck": "Systemprüfung",
-    "config": "Konfiguration",
+    "config": "Systemkonfiguration",
     "ui": "UI"
   },
   "commandPalette": {
@@ -52,9 +52,9 @@
       "changeTheme": "Anwendungsdesign wechseln",
       "uploadTemplate": "Workflow-Vorlagendatei hochladen",
       "downloadTemplate": "Workflow-Vorlagendatei herunterladen",
-      "uploadInvoker": "Invoker-Datei hochladen",
-      "installOnlineInvokers": "Invoker aus dem OpenCelium-Online-Repository installieren",
-      "downloadInvoker": "Invoker-Datei herunterladen",
+      "uploadInvoker": "API-Definitionsdatei hochladen",
+      "installOnlineInvokers": "API-Definitionen aus dem OpenCelium-Online-Repository installieren",
+      "downloadInvoker": "API-Definitionsdatei herunterladen",
       "systemCheck": "Systemprüfungsseite öffnen",
       "ldapCheck": "LDAP-Verbindungsprüfungsseite öffnen",
       "workflow": "Den aktuellen Workflow durchsuchen",
@@ -75,7 +75,7 @@
       "keyboardTitle": "Tastatur",
       "empty": "Keine Befehle verfügbar",
       "searchPlaceholder": "Befehle suchen...",
-      "noResults": "Keine Befehle entsprechen \"{{query}}\"",
+      "noResults": "Keine Befehle entsprechen „{{query}}“",
       "shortcuts": {
         "open": "Befehlspalette öffnen",
         "clearScope": "Gesperrten Bereich verlassen (leere Eingabe)"
@@ -96,7 +96,7 @@
     "copyrightMobile": "© {{year}} | Version {{version}}",
     "docsLink": "Dokumentation",
     "gitLink": "GitHub",
-    "landingPageLink": "OpenCelium Webseite",
+    "landingPageLink": "OpenCelium-Website",
     "servicePortalLink": "Service-Portal"
   },
   "topbar": {
@@ -164,7 +164,8 @@
     "title": "Seite nicht gefunden",
     "subtitle": "Die gesuchte Seite existiert nicht oder wurde möglicherweise verschoben.",
     "goBack": "Zurück",
-    "goHome": "Zum Dashboard"
+    "goHome": "Zum Dashboard",
+    "entity": "Dieser Eintrag wurde nicht gefunden. Möglicherweise wurde er gelöscht."
   },
   "accessDenied": {
     "title": "Zugriff verweigert",
@@ -183,11 +184,11 @@
     "deleteSelectedSuccess": "{{count}} Einträge erfolgreich gelöscht",
     "deleteSelectedSuccess_one": "{{count}} Eintrag erfolgreich gelöscht",
     "filtersTooltip": "Filter",
-    "expandRow": "Läufe anzeigen",
-    "collapseRow": "Läufe ausblenden",
+    "expandRow": "Ausführungen anzeigen",
+    "collapseRow": "Ausführungen ausblenden",
     "confirmDelete": {
       "title": "Löschen",
-      "message": "Möchten Sie dieses {{name}} wirklich löschen?",
+      "message": "Möchten Sie diesen Eintrag ({{name}}) wirklich löschen?",
       "bulkMessage": "{{count}} ausgewählte Einträge löschen?",
       "bulkMessage_one": "{{count}} ausgewählten Eintrag löschen?"
     }
@@ -195,6 +196,6 @@
   "onlineFeature": {
     "offline": "Keine Internetverbindung. Stellen Sie die Verbindung wieder her, um Online-Dienste zu nutzen.",
     "syncDisabled": "Online-Dienste sind in der Systemkonfiguration deaktiviert.",
-    "portalUnreachable": "Das Service Portal ist von diesem Server aus nicht erreichbar. Prüfen Sie die Portal-Einstellungen und das Zugriffstoken."
+    "portalUnreachable": "Das Service-Portal ist von diesem Server aus nicht erreichbar. Prüfen Sie die Portal-Einstellungen und das Zugriffstoken."
   }
 }
