@@ -4,8 +4,7 @@ export const changePasswordBaseSchema = z.object({
     currentPassword: z.string().min(1, 'profile.validation.required'),
     newPassword: z
         .string()
-        .min(8)
-        .max(16)
+        .min(8, 'profile.fields.newPassword.minLength')
         .regex(/[A-Z]/, 'profile.fields.newPassword.validation1')
         .regex(/[a-z]/, 'profile.fields.newPassword.validation2')
         .regex(/\d/, 'profile.fields.newPassword.validation3')

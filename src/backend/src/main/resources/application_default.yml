@@ -244,7 +244,7 @@ opencelium:
   #                                                                         #
   ###########################################################################
   config:
-    file-path: ./application.yml
+    file-path: src/main/resources/application.yml
     backup:
       directory: runtime/backup/application
       keep: 10

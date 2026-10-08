@@ -1,13 +1,18 @@
 {
   "list": {
-    "title": "Datenaggregator",
-    "subTitle": "Ein Datenaggregator ist eine Funktion, die eine strukturierte Benachrichtigungsverarbeitung ermöglicht, nachdem ein Workflow in einem Zeitplan ausgelöst wurde. Wenn ein Zeitplan ein Workflow ausführt, verarbeitet der Aggregator die Ausführungsdaten und bereitet sie für die Benachrichtigungszustellung vor (z. B. über <ntLink>Benachrichtigungsvorlagen</ntLink>).",
+    "title": "Datenaggregatoren",
+    "subTitle": "Ein Datenaggregator ist eine Funktion, die eine strukturierte Benachrichtigungsverarbeitung ermöglicht, nachdem ein Workflow in einem Zeitplan ausgelöst wurde. Wenn ein Zeitplan einen Workflow ausführt, verarbeitet der Datenaggregator die Ausführungsdaten und bereitet sie für die Benachrichtigungszustellung vor (z. B. über <ntLink>Benachrichtigungsvorlagen</ntLink>).",
     "filters": {
       "showArchived": "Archivierte anzeigen"
     }
   },
   "fields": {
-    "name": { "label": "Name" },
+    "name": {
+      "label": "Name",
+      "errors": {
+        "name_already_exists": "Ein Datenaggregator mit diesem Namen existiert bereits"
+      }
+    },
     "args": { "label": "Argumente" },
     "script": { "label": "Skript" },
     "archived": { "label": "Archiviert" }
@@ -20,17 +25,17 @@
     "modes": {
       "create": {
         "header": "Datenaggregator erstellen",
-        "subheader": "Datenaggregato definieren Skripte zum Sammeln und Transformieren von Daten für Benachrichtigungsvorlagen.",
-        "successMessage": "Datenaggregator \"{{name}}\" wurde erfolgreich erstellt"
+        "subheader": "Datenaggregatoren definieren Skripte, die Daten für Benachrichtigungsvorlagen sammeln und aufbereiten.",
+        "successMessage": "Datenaggregator „{{name}}“ wurde erfolgreich erstellt"
       },
       "update": {
         "header": "Datenaggregator aktualisieren",
-        "subheader": "Datenaggregato definieren Skripte zum Sammeln und Transformieren von Daten für Benachrichtigungsvorlagen.",
-        "successMessage": "Datenaggregator \"{{name}}\" wurde erfolgreich aktualisiert"
+        "subheader": "Datenaggregatoren definieren Skripte, die Daten für Benachrichtigungsvorlagen sammeln und aufbereiten.",
+        "successMessage": "Datenaggregator „{{name}}“ wurde erfolgreich aktualisiert"
       },
       "view": {
-        "header": "Datenaggregator Details",
-        "subheader": "Datenaggregato definieren Skripte zum Sammeln und Transformieren von Daten für Benachrichtigungsvorlagen."
+        "header": "Datenaggregator-Details",
+        "subheader": "Datenaggregatoren definieren Skripte, die Daten für Benachrichtigungsvorlagen sammeln und aufbereiten."
       }
     },
     "recommendations": {
@@ -50,17 +55,18 @@
   },
   "scriptEditor": {
     "maximize": "Skript maximieren",
-    "minimize": "Skript minimieren"
+    "minimize": "Skript minimieren",
+    "yourScript": "Ihr Skript"
   },
   "validation": {
-    "scriptContainsNotExistedArgs": "Das Skript enthält nicht existierende Argumente.",
+    "scriptContainsNotExistedArgs": "Das Skript verwendet Argumente, die nicht definiert sind.",
     "argNameInvalid": "Muss mit einem Buchstaben, _ oder $ beginnen und nur Buchstaben, Ziffern, _ oder $ enthalten.",
     "nameMeaningful": "Der Name muss mindestens einen Buchstaben oder eine Zahl enthalten."
   },
   "confirmation": {
     "delete": {
-      "byName": "Datenaggregator mit Name \"{{name}}\" löschen?",
-      "byId": "Datenaggregator mit ID {{id}} löschen?"
+      "byName": "Datenaggregator „{{name}}“ löschen?",
+      "byId": "Datenaggregator #{{id}} löschen?"
     }
   }
 }
