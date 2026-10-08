@@ -7,6 +7,7 @@ import { useFetchEntitiesQuery } from '@/shared/api/genericApi';
 import { GenericUpdateWizard } from '@/engine/entity/runtime/genererics/GenericUpdateWizard';
 import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
     entityName: string;
@@ -18,6 +19,7 @@ export const GenericUpdatePage: React.FC<Props> = ({ entityName }) => {
     const { id } = useParams(); // 👈 /:id
 
     const entity = entityRegistry.get(entityName);
+    const { t: tCommon } = useI18n('common');
 
     // 🔥 fetch entity
     // A mutation elsewhere (e.g. a command-palette delete of this same record)
@@ -54,7 +56,7 @@ export const GenericUpdatePage: React.FC<Props> = ({ entityName }) => {
     }
 
     if (!record) {
-        return <div>Not found</div>;
+        return <div>{tCommon('notFound.entity')}</div>;
     }
 
     return (

@@ -1,9 +1,9 @@
 {
   "list": {
-    "title": "Groups",
-    "subTitle": "Groups define roles and permission levels within the system. Each group controls what users are allowed to create, view, update, or delete.",
+    "title": "Roles",
+    "subTitle": "Roles define what users are allowed to create, view, update or delete.",
     "confirmDelete": {
-      "message": "Are you sure you want to delete role with name \"{{name}}\"?"
+      "message": "Delete the role \"{{name}}\"? This can't be undone."
     }
   },
   "actions": {
@@ -15,7 +15,7 @@
     "name": {
       "label": "Name",
       "errors": {
-        "name_already_exists": "The role with such name is already created"
+        "name_already_exists": "A role with this name already exists."
       }
     },
     "description": {
@@ -28,7 +28,7 @@
       "replace": "Replace icon",
       "delete": "Delete icon",
       "crop": {
-        "title": "Crop group icon",
+        "title": "Crop role icon",
         "zoom": "Zoom",
         "cancel": "Cancel",
         "apply": "Apply crop",
@@ -53,7 +53,7 @@
   },
   "sections": {
     "group-details": {
-      "title": "Group Details"
+      "title": "Role Details"
     },
     "components": {
       "title": "Components"
@@ -63,7 +63,7 @@
     "modes": {
       "create": {
         "header": "Create Role",
-        "subheader": "Groups define roles and permission levels within the system. Each group controls what users are allowed to create, view, update, or delete.",
+        "subheader": "Roles define what users are allowed to create, view, update or delete.",
         "successMessage": "Role \"{{name}}\" was successfully created"
       },
       "update": {
@@ -87,22 +87,22 @@
       },
       "permissions": {
         "header": "Permissions",
-        "subheader": "Select the system modules that this group will have access to."
+        "subheader": "Select the system modules that this role will have access to."
       }
     }
   },
   "confirmation": {
     "delete": {
-      "byName": "Delete role by name \"{{name}}\"?",
-      "byId": "Delete role by id \"{{id}}\"?"
+      "byName": "Delete role \"{{name}}\"?",
+      "byId": "Delete role #{{id}}?"
     }
   },
   "lifecycle": {
     "uploadIcon": {
-      "failed": "Group saved, but the icon upload failed. You can retry from edit."
+      "failed": "Role saved, but the icon upload failed. You can retry from edit."
     },
     "deleteIcon": {
-      "failed": "Group saved, but removing the icon failed. You can retry from edit."
+      "failed": "Role saved, but removing the icon failed. You can retry from edit."
     }
   }
 }

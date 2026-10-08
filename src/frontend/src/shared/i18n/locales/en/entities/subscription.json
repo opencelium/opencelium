@@ -1,7 +1,7 @@
 {
   "wizard": {
     "header": "License Management",
-    "subheader": "Review your license, monthly API operation usage, and per-connection execution history. Upgrades, extra operations and support tickets are handled on the OpenCelium Service Portal."
+    "subheader": "Review your license, monthly API operation usage, and per-workflow execution history. Upgrades, extra operations and support tickets are handled on the OpenCelium Service Portal."
   },
   "steps": {
     "license": {
@@ -9,19 +9,19 @@
       "subheader": "Current plan, limits and monthly usage."
     },
     "operationUsage": {
-      "header": "Usage by Connection",
-      "subheader": "API operations summed by connection.",
+      "header": "Usage by Workflow",
+      "subheader": "API operations summed by workflow.",
       "rowHint": "Click a row to inspect its executions."
     },
     "operationDetails": {
-      "header": "Connection Executions",
-      "subheader": "Per-execution usage for the selected connection."
+      "header": "Workflow Executions",
+      "subheader": "Per-execution usage for the selected workflow."
     }
   },
   "license": {
     "status": "Status",
     "type": "Type",
-    "totalOperations": "Amount of API Operations",
+    "totalOperations": "API operations per month",
     "expirationDate": "Expiration Date",
     "monthlyPeriod": "Monthly Period",
     "extraOps": "Extra Operations",
@@ -31,13 +31,13 @@
     "usageOf": "{{used}} / {{total}}"
   },
   "banner": {
-    "noSubscription": "There is no active subscription. Please activate a license.",
-    "expired": "Your subscription has expired. Please renew your license.",
+    "noSubscription": "No active license. Please activate one.",
+    "expired": "Your license has expired. Please renew it.",
     "opsLimit": "You have reached your API operation limit. Please upgrade your license.",
     "link": "Go to license page"
   },
   "manage": {
-    "noSubscription": "No active subscription.",
+    "noSubscription": "No active license.",
     "error": "The operation failed. Please try again.",
     "generateRequest": {
       "button": "Generate Activation Request",
@@ -52,13 +52,13 @@
     "activate": {
       "button": "Activate",
       "dialogTitle": "Activate License",
-      "placeholder": "Select a subscription…",
+      "placeholder": "Select a license…",
       "cancel": "Cancel",
       "submit": "Activate License",
       "success": "License activated."
     },
     "extraOps": {
-      "button": "Extra Ops",
+      "button": "Add extra operations",
       "success": "Extra operations imported.",
       "invalidType": "Select an extra operations file in .txt format.",
       "tooLarge": "The extra operations file must not be larger than 10 MB."
@@ -78,7 +78,7 @@
     }
   },
   "columns": {
-    "connection": "Connection",
+    "connection": "Workflow",
     "apiOperations": "API Operations",
     "startDate": "Start Date"
   },

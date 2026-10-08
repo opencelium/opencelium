@@ -2,7 +2,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { ONBOARDING_MILESTONES } from '../../model/types'
 import '../onboardingIntro.css'
 
-export function WelcomeContent({ userName }: { userName: string }) {
+export function WelcomeContent({ userName }: { userName?: string }) {
     const { t } = useI18n('onboarding')
     return (
         <div>
@@ -17,7 +17,7 @@ export function WelcomeContent({ userName }: { userName: string }) {
                     <span key={milestone.id}>{t(`content.welcome.${milestone.key}`)}</span>
                 ))}
             </div>
-            <span className="onboarding-visually-hidden">{t('content.welcome.hidden', { name: userName })}</span>
+            <span className="onboarding-visually-hidden">{userName ? t('content.welcome.hidden', { name: userName }) : t('content.welcome.hiddenAnonymous')}</span>
         </div>
     )
 }

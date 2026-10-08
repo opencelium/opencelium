@@ -396,7 +396,6 @@ export const userDefinition: EntityDefinition = {
             validation: {
                 required: true,
                 min: 8,
-                max: 16,
                 regex: [
                     { pattern: /[A-Z]/, message: `${baseKey}.fields.password.validation1` },
                     { pattern: /[a-z]/, message: `${baseKey}.fields.password.validation2` },

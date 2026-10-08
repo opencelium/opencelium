@@ -1,6 +1,6 @@
 {
   "title": "Execution Logs",
-  "subtitle": "Pick an execution to inspect its connector, method and operator logs.",
+  "subtitle": "Pick an execution to inspect its connector, method and logic block logs.",
   "selectLabel": "Execution",
   "selectPlaceholder": "Select an execution",
   "selectHint": "Select an execution to view its logs.",
