@@ -25,6 +25,7 @@ export const MenuSwitcher = () => {
                 type={menuType === 'admin' ? "primary" : "text"}
                 iconProps={{ name: 'settings', color: menuType === 'admin' ? 'inherit' : 'primary' }}
                 onClick={toggleMenu}
+                testId="topbar-menu-switch"
             />
         </Tooltip>
     );

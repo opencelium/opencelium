@@ -1,5 +1,7 @@
 import { useRef, useState, type ChangeEvent } from 'react'
-import { LOGO_ACCEPT, useSystemLogoAdmin } from '@entities/ui/ui/useSystemLogoAdmin'
+import { useSystemLogoAdmin } from '@entities/ui/ui/useSystemLogoAdmin'
+import { IMAGE_UPLOAD_ACCEPT, validateImageUpload } from '@shared/utils/imageUploadRules'
+import { notifyError } from '@shared/ui/feedback/notifyError'
 import { AppLogo } from '@features/branding/AppLogo'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useTheme } from '@shared/theme/hooks/useTheme'
@@ -38,9 +40,16 @@ export const SystemLogoSection = () => {
 
     const handlePick = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
-        if (file) setCropFile(file)
         // Reset so picking the same file again still fires onChange.
         event.target.value = ''
+        if (!file) return
+        // Checked on the picked file: the crop downscales, so its output could pass a limit the source broke.
+        const rejection = validateImageUpload(file)
+        if (rejection) {
+            notifyError(tEntities(`ui.systemLogo.${rejection}`))
+            return
+        }
+        setCropFile(file)
     }
 
     const handleCropConfirm = (file: File) => {
@@ -92,7 +101,7 @@ export const SystemLogoSection = () => {
                 <input
                     ref={inputRef}
                     type="file"
-                    accept={LOGO_ACCEPT}
+                    accept={IMAGE_UPLOAD_ACCEPT}
                     style={{ display: 'none' }}
                     onChange={handlePick}
                     data-testid="ui-system-logo-input"
@@ -100,7 +109,7 @@ export const SystemLogoSection = () => {
 
                 {/* The logo has no target shape, so the selection keeps the source's own
                     ratio: the crop trims padding instead of forcing the picture into a box.
-                    It also downscales, which is what usually keeps an upload under 5 MB. */}
+                    It also downscales, so the uploaded file is usually far below the 10 MB cap. */}
                 <ImageCropDialog
                     key={cropFile ? `${cropFile.name}-${cropFile.lastModified}` : 'closed'}
                     file={cropFile}

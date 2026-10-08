@@ -1,0 +1,171 @@
+{
+  "{null}": null,
+  "{bool_true}": true,
+  "{bool_false}": false,
+  "{url}": "https://www.google.com",
+  "{number1}": 1,
+  "{number2}": 2,
+  "{number_1}": -1,
+  "{double1}": 1.0,
+  "{double2}": 2.0,
+  "{double_2}": -2.0,
+  "{name}": "A",
+  "{date_1}": "2020-01-01",
+  "{date_2}": "2020-02-02",
+  "{email}": "bob@gmail.com",
+  "{phone}": "1234567890",
+  "{array_of_numbers}": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "{array_of_strings}": [
+    "hello",
+    "world"
+  ],
+  "{array_of_bool}": [
+    true,
+    false
+  ],
+  "{array_of_objects}": [
+    {
+      "id": 1,
+      "name": "A"
+    }
+  ],
+  "{person_object}": {
+    "id": 1,
+    "name": "Obid",
+    "address": "Tashkent"
+  },
+  "${null}": null,
+  "${bool_true}": true,
+  "${url}": "https://www.google.com",
+  "${number1}": 1,
+  "${number2}": 2,
+  "${number_1}": -1,
+  "${double1}": 1.0,
+  "${double2}": 2.0,
+  "${double_2}": -2.0,
+  "${name}": "A",
+  "${date_1}": "2020-01-01",
+  "${date_2}": "2020-02-02",
+  "${email}": "bob@gmail.com",
+  "${phone}": "1234567890",
+  "${array_of_numbers}": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "${array_of_strings}": [
+    "hello",
+    "world"
+  ],
+  "${array_of_bool}": [
+    true,
+    false
+  ],
+  "${array_of_objects}": [
+    {
+      "id": 1,
+      "name": "A"
+    }
+  ],
+  "{%#ffffff.(response).body.$.null%}": null,
+  "{%#ffffff.(response).body.$.bool_true%}": true,
+  "{%#ffffff.(request).body.$.url%}": "https://www.google.com",
+  "{%#ffffff.(request).body.$.number1%}": 1,
+  "{%#ffffff.(request).body.$.number2%}": 2,
+  "{%#ffffff.(request).body.$.number_1%}": -1,
+  "{%#ffffff.(request).body.$.double1%}": 1.0,
+  "{%#ffffff.(request).body.$.double2%}": 2.0,
+  "{%#ffffff.(request).body.$.double_2%}": -2.0,
+  "{%#ffffff.(request).body.$.name%}": "A",
+  "{%#ffffff.(request).body.$.date_1%}": "2020-01-01",
+  "{%#ffffff.(request).body.$.date_2%}": "2020-02-02",
+  "{%#ffffff.(response).body.$.email%}": "bob@gmail.com",
+  "{%#ffffff.(request).body.$.phone%}": "1234567890",
+  "{%#ffffff.(response).body.$.array_of_numbers%}": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "{%#ffffff.(request).body.$.array_of_strings%}": [
+    "hello",
+    "world"
+  ],
+  "{%#ffffff.(response).body.$.array_of_bool%}": [
+    true,
+    false
+  ],
+  "{%#ffffff.(request).body.$.array_of_objects%}": [
+    {
+      "id": 1,
+      "name": "A"
+    }
+  ],
+  "{%#ffffff.(request).body.$.object%}": {
+    "id": 1,
+    "name": "A"
+  },
+  "{%#ffffff.(request).body.$.person%}": {
+    "id": 1,
+    "name": "Obid",
+    "address": "Tashkent"
+  },
+  "{%#ffffff.(request).body.$.person.address%}": {
+    "id": 1,
+    "name": "Obid",
+    "address": "Tashkent"
+  },
+  "#{%600d5b5f4f3e2c1d8a7b6c00%}": null,
+  "#{%600d5b5f4f3e2c1d8a7b6c01%}": 1,
+  "#{%600d5b5f4f3e2c1d8a7b6c02%}": 2,
+  "#{%600d5b5f4f3e2c1d8a7b6c03%}": -1,
+  "#{%600d5b5f4f3e2c1d8a7b6c04%}": 1.0,
+  "#{%600d5b5f4f3e2c1d8a7b6c05%}": 2.0,
+  "#{%600d5b5f4f3e2c1d8a7b6c06%}": -2.0,
+  "#{%600d5b5f4f3e2c1d8a7b6c12%}": true,
+  "#{%600d5b5f4f3e2c1d8a7b6c13%}": "https://www.google.com",
+  "#{%600d5b5f4f3e2c1d8a7b6c15%}": "A",
+  "#{%600d5b5f4f3e2c1d8a7b6c16%}": "2020-01-01",
+  "#{%600d5b5f4f3e2c1d8a7b6c17%}": "2020-02-02",
+  "#{%600d5b5f4f3e2c1d8a7b6c18%}": "bob@gmail.com",
+  "#{%600d5b5f4f3e2c1d8a7b6c19%}": "1234567890",
+  "#{%600d5b5f4f3e2c1d8a7b6c20%}": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "#{%600d5b5f4f3e2c1d8a7b6c21%}": [
+    "hello",
+    "world"
+  ],
+  "#{%600d5b5f4f3e2c1d8a7b6c22%}": [
+    true,
+    false
+  ],
+  "#{%600d5b5f4f3e2c1d8a7b6c23%}": [
+    {
+      "id": 1,
+      "name": "A"
+    }
+  ],
+
+  "{%#ffffff.(request).body.$.nested_object%}": {
+    "id": 10,
+    "meta": {
+      "name": "X",
+      "active": true
+    },
+    "tags": ["a", "b"]
+  }
+}

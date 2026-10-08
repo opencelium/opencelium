@@ -11,6 +11,7 @@ import type {
 import type {
 	WorkflowAggregatorEditorState,
 	WorkflowConditionEditorState,
+	WorkflowConnectorEditorState,
 	WorkflowMethodEditorState,
 } from '../types/request-config.types';
 import type { WorkflowDragSnapshot } from '../drag-drop/workflowPage.types';
@@ -30,9 +31,16 @@ export const useWorkflowGraphState = () => {
 	const [responseNodeId, setResponseNodeId] = useState<string | null>(null);
 	const [conditionEditor, setConditionEditor] = useState<WorkflowConditionEditorState | null>(null);
 	const [aggregatorEditor, setAggregatorEditor] = useState<WorkflowAggregatorEditorState | null>(null);
+	const [connectorEditor, setConnectorEditor] = useState<WorkflowConnectorEditorState | null>(null);
 	const [restoredViewport, setRestoredViewport] = useState<Viewport | undefined>();
 	const [viewportRestoreVersion, setViewportRestoreVersion] = useState(0);
 	const [centerStartVersion, setCenterStartVersion] = useState(1);
+	const [bindingLensOpen, setBindingLensOpen] = useState(false);
+	const [bindingLensPinnedNodeId, setBindingLensPinnedNodeId] = useState<string | null>(null);
+	const [bindingLensHoveredNodeId, setBindingLensHoveredNodeId] = useState<string | null>(null);
+	const [bindingLensExpanded, setBindingLensExpanded] = useState<string[]>([]);
+	const [bindingTableOpen, setBindingTableOpen] = useState(false);
+	const [bindingLensSelectedKey, setBindingLensSelectedKey] = useState<string | null>(null);
 	const handleNodesChange: typeof onNodesChange = (changes) => {
 		const locked = draggedPositionLockRef.current;
 		onNodesChange(!locked?.size ? changes : changes.filter((change) =>
@@ -46,8 +54,13 @@ export const useWorkflowGraphState = () => {
 		sidebarAction, setSidebarAction, contextMenu, setContextMenu,
 		historyOpen, setHistoryOpen, methodEditor, setMethodEditor,
 		responseNodeId, setResponseNodeId, conditionEditor, setConditionEditor,
-		aggregatorEditor, setAggregatorEditor, restoredViewport, setRestoredViewport,
+		aggregatorEditor, setAggregatorEditor, connectorEditor, setConnectorEditor, restoredViewport, setRestoredViewport,
 		viewportRestoreVersion, setViewportRestoreVersion,
+		bindingLensOpen, setBindingLensOpen, bindingLensExpanded, setBindingLensExpanded,
+		bindingLensPinnedNodeId, setBindingLensPinnedNodeId,
+		bindingLensHoveredNodeId, setBindingLensHoveredNodeId,
+		bindingTableOpen, setBindingTableOpen,
+		bindingLensSelectedKey, setBindingLensSelectedKey,
 		centerStartVersion, setCenterStartVersion,
 	};
 };

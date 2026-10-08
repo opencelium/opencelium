@@ -1,29 +1,42 @@
 {
   "list": {
-    "title": "Invokers",
-    "subTitle": "The Invokers section contains all configured external system integrations available in OpenCelium. An Invoker represents a connection interface to an external API or service. It defines how OpenCelium communicates with external systems.\n\nSee docs for more information.",
+    "title": "API Definitions",
+    "subTitle": "The API Definitions section contains all configured external system integrations available in OpenCelium. An API definition represents a connection interface to an external API or service. It defines how OpenCelium communicates with external systems.\n\nSee docs for more information.",
     "upload": {
       "button": "Upload",
       "confirmReplace": {
-        "title": "Replace existing invoker?",
-        "message": "The invoker with such filename already exists. It will be replaced. Are you sure?"
+        "title": "Replace existing API definition?",
+        "message": "An API definition with this file name already exists. Replace it?"
       },
-      "success": "Invoker uploaded successfully: {{name}}",
-      "error": "Failed to upload invoker file."
+      "success": "API definition uploaded successfully: {{name}}",
+      "successArchive": "API definitions uploaded from {{name}}: {{count}}",
+      "emptyArchive": "The archive does not contain any API definitions.",
+      "error": "Failed to upload API definition file.",
+      "invalidType": "API definition files must use the .xml or .zip format.",
+      "tooLarge": "The API definition file must not exceed 1 GB.",
+      "archiveTooLarge": "The API definition archive must not exceed 1 GB."
     },
     "download": {
-      "success": "Invoker downloaded: {{name}}",
-      "error": "Failed to download invoker file."
+      "success": "API definition downloaded: {{name}}",
+      "error": "Failed to download API definition file."
+    },
+    "repository": {
+      "success_one": "{{count}} API definition installed from the online repository",
+      "success_other": "{{count}} API definitions installed from the online repository",
+      "empty": "The online repository had no API definitions to install.",
+      "failed_one": "{{count}} file could not be installed",
+      "failed_other": "{{count}} files could not be installed"
     }
   },
   "fields": {
     "name": {
       "label": "Name",
       "errors": {
-        "name_already_exists": "An invoker with this name already exists",
+        "name_already_exists": "An API definition with this name already exists",
         "invalid_characters": "Use only letters, digits, spaces, hyphens, underscores, parentheses, and periods",
         "invalid_period": "A period cannot be first or last, and consecutive periods are not allowed",
-        "max_length": "Name must not exceed 200 characters"
+        "max_length": "Name must not exceed 200 characters",
+        "meaningful": "Name must contain at least one letter or digit"
       }
     },
     "description": {
@@ -56,7 +69,8 @@
       "add": "Add Field",
       "empty": "No required data fields.",
       "errors": {
-        "required": "At least one required data field must be defined"
+        "required": "At least one required data field must be defined",
+        "meaningfulName": "Each required data field name must contain at least one letter or digit"
       }
     },
     "operations": {
@@ -65,10 +79,10 @@
         "name": "Name",
         "endpoint": "Endpoint",
         "method": "Method",
-        "testConnection": "Test Connection",
+        "testConnection": "Use for connection test",
         "request": "Request",
         "responseSuccess": "Response (Success)",
-        "responseFail": "Response (Fail)",
+        "responseFail": "Response (Error)",
         "status": "Status",
         "headers": "Headers",
         "data": "Data",
@@ -83,7 +97,9 @@
         "nameRequired": "Name is required",
         "endpointRequired": "Endpoint is required",
         "incompleteOperations": "All operations must have a name and endpoint defined",
-        "noTestOperation": "At least one operation must have Test Operation enabled",
+        "meaningfulValues": "Operation names and endpoints must contain at least one letter or digit",
+        "bodyTypeMismatch": "JSON Body must match the selected Type (object or array)",
+        "noTestOperation": "Mark at least one operation as \"Use for connection test\".",
         "invalidJson": "Invalid JSON"
       }
     }
@@ -102,23 +118,28 @@
   "wizard": {
     "modes": {
       "create": {
-        "header": "Create Invoker",
-        "subheader": "An invoker defines the HTTP operations and authentication configuration for communicating with an external system.",
-        "successMessage": "Successfully Created a new Invoker: {{name}}!"
+        "header": "Create API Definition",
+        "subheader": "An API definition defines the HTTP operations and authentication configuration for communicating with an external system.",
+        "successMessage": "API definition \"{{name}}\" was successfully created"
       },
       "view": {
-        "header": "Invoker Details",
-        "subheader": "View invoker configuration."
+        "header": "API Definition Details",
+        "subheader": "View API definition configuration."
+      },
+      "update": {
+        "header": "Edit API Definition",
+        "subheader": "Update API definition configuration.",
+        "successMessage": "API definition updated successfully."
       }
     },
     "recommendations": {
-      "1": "Create another Invoker",
+      "1": "Create another API Definition",
       "2": "Create Connector"
     },
     "steps": {
       "general-data": {
         "header": "General Data",
-        "subheader": "Define the basic information for this invoker."
+        "subheader": "Define the basic information for this API definition."
       },
       "authentication": {
         "header": "Authentication",
@@ -126,15 +147,15 @@
       },
       "operations": {
         "header": "Operations",
-        "subheader": "Define the HTTP operations that this invoker exposes."
+        "subheader": "Define the HTTP operations that this API definition exposes."
       }
     }
   },
   "confirmation": {
     "delete": {
-      "byName": "Warning: invoker \"{{name}}\" may be in use by one or more connectors. Deleting it can break those connectors.\n\nAre you sure you want to continue?",
-      "bulkMessage": "Warning: the {{count}} selected invokers may be in use by one or more connectors. Deleting them can break those connectors.\n\nAre you sure you want to continue?",
-      "bulkMessage_one": "Warning: the selected invoker may be in use by one or more connectors. Deleting it can break those connectors.\n\nAre you sure you want to continue?"
+      "byName": "Warning: API definition \"{{name}}\" may be in use by one or more connectors. Deleting it can break those connectors.\n\nAre you sure you want to continue?",
+      "bulkMessage": "Warning: the {{count}} selected API definitions may be in use by one or more connectors. Deleting them can break those connectors.\n\nAre you sure you want to continue?",
+      "bulkMessage_one": "Warning: the selected API definition may be in use by one or more connectors. Deleting it can break those connectors.\n\nAre you sure you want to continue?"
     }
   }
 }

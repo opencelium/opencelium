@@ -4,7 +4,8 @@ import type { Connector } from '@entities/connector/model/types';
 import { resolveGraphQlAuthStrategy } from './strategies/resolveGraphQlAuthStrategy';
 import type { GraphQlBodyEditorError,
 	GraphQlBodyEditorStatus } from './graphQlBodyEditor.types';
-import { fetchGraphQlConnector, isApiExecutorError } from './graphQlBodyEditor.utils';
+import { isApiExecutorError } from '@shared/api/isApiExecutorError';
+import { fetchGraphQlConnector } from './graphQlBodyEditor.utils';
 
 export function useGraphQlConnectorAuth(connectorId?: number | string) {
 	const { masterPassword } = useMasterPasswordStore();

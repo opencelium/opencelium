@@ -1,25 +1,25 @@
 {
   "title": "Error",
   "api": {
-    "unauthorized": "Your session has expired. Please log in again.",
-    "forbidden": "Your session is expired",
+    "unauthorized": "Your session has expired. Please sign in again.",
+    "forbidden": "You don't have permission to perform this action.",
     "unknown": "An unexpected error occurred. Please try again.",
     "validation": "The request was rejected as invalid. Please check your input.",
     "notFound": "The requested resource was not found.",
     "default": "An unexpected error occurred. Please try again.",
-    "unknownError": "Unknown Error in {{place}}",
+    "unknownError": "An unexpected error occurred. Please try again.",
     "CATEGORY_NOT_FOUND": "This category was not found. It may have already been deleted.",
     "socketDisconnected": "Live connection lost. Metrics are no longer updating.",
     "login": {
       "network": "Could not reach the server. Please try again.",
-      "invalidCredentials": "Invalid email or password",
-      "failed": "Login failed",
+      "invalidCredentials": "Invalid email/username or password",
+      "failed": "Sign-in failed",
       "sessionLoadFailed": "You signed in, but we couldn't load your account. Please try again."
     },
     "forgotPassword": {
       "emailNotExists": "No account is registered with this email address.",
       "tooManyAttempts": "Too many attempts. Please try again later.",
-      "emailRecoveryFailed": "There is an issue with your email configuration. For security reasons, the detailed error message has been written to your Opencelium logs. Please review the logs for more information.",
+      "emailRecoveryFailed": "There is an issue with your email configuration. For security reasons, the detailed error message has been written to your OpenCelium logs. Please review the logs for more information.",
       "network": "Could not reach the server. Please try again.",
       "failed": "Could not send the recovery email. Please try again."
     },
@@ -34,6 +34,12 @@
       "update": "Could not update {{resource}}",
       "delete": "Could not delete {{resource}}",
       "request": "Request to {{resource}} failed"
+    },
+    "invokerRepository": {
+      "offline": "No internet connection. Reconnect to install API definitions from the online repository.",
+      "syncDisabled": "Online services are disabled in the system configuration, so API definitions cannot be installed from the online repository.",
+      "unavailable": "The OpenCelium server could not reach the online repository for API definitions. Check the server's internet connection and try again.",
+      "serverUnreachable": "Could not reach the OpenCelium server. Please try again."
     }
   },
   "field": {

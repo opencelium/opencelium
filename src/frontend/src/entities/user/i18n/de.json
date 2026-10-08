@@ -1,9 +1,9 @@
 {
   "list": {
     "title": "Benutzer",
-    "subTitle": "In diesem Bereich können Administratoren Systembenutzer verwalten, Gruppen zuweisen, die Zwei-Faktor-Authentifizierung (2FA) aktivieren und Zugriffsberechtigungen steuern.",
+    "subTitle": "In diesem Bereich können Administratoren Systembenutzer verwalten, Rollen zuweisen, die Zwei-Faktor-Authentifizierung (2FA) aktivieren und Zugriffsberechtigungen steuern.",
     "confirmDelete": {
-      "message": "Sind Sie sicher, dass Sie den Benutzer \"{{user}}\" löschen möchten?"
+      "message": "Sind Sie sicher, dass Sie den Benutzer „{{user}}“ löschen möchten?"
     }
   },
   "crossValidations": {
@@ -40,7 +40,7 @@
     "email": {
       "label": "E-Mail",
       "errors": {
-        "email_already_exists": "Ein Benutzer mit dieser E-Mail existiert bereits"
+        "email_already_exists": "Ein Benutzer mit dieser E-Mail-Adresse existiert bereits."
       }
     },
     "username": {
@@ -55,13 +55,41 @@
       "validation4": "Muss ein Sonderzeichen enthalten"
     },
     "repeatPassword": {
-      "label": "Passwort wiederholen"
+      "label": "Passwort bestätigen"
     },
     "userGroup": {
       "label": "Rolle"
     },
     "totpEnabled": {
       "label": "2FA"
+    },
+    "profilePicture": {
+      "label": "Profilbild",
+      "uploadButton": "Bild hochladen",
+      "hint": "PNG oder JPG, maximal 10 MB",
+      "replace": "Bild ersetzen",
+      "delete": "Bild löschen",
+      "confirmDelete": {
+        "title": "Profilbild entfernen?",
+        "message": "Dies kann nicht rückgängig gemacht werden."
+      },
+      "crop": {
+        "title": "Profilbild zuschneiden",
+        "zoom": "Zoom",
+        "cancel": "Abbrechen",
+        "apply": "Zuschnitt anwenden",
+        "instruction": "Verschieben Sie das Quadrat, um den Bildbereich auszuwählen"
+      },
+      "invalidType": "Das Bild muss eine PNG- oder JPG-Datei sein (.png, .jpg, .jpeg)",
+      "tooLarge": "Das Bild muss kleiner als 10 MB sein",
+      "gravatar": {
+        "title": "Gravatar-Bild verwenden?",
+        "message": "Mit dieser E-Mail ist ein Gravatar-Bild verknüpft. Möchten Sie es als Profilbild verwenden?",
+        "messageReplace": "Mit dieser E-Mail ist ein Gravatar-Bild verknüpft. Möchten Sie es anstelle des aktuellen Profilbilds verwenden? Das aktuelle Bild wird beim Speichern gelöscht.",
+        "refresh": "Von Gravatar aktualisieren",
+        "notFound": "Für diese E-Mail konnte kein Gravatar-Bild geladen werden.",
+        "staged": "Bild von Gravatar geladen. Speichern Sie den Benutzer, um es zu übernehmen."
+      }
     }
   },
   "sections": {
@@ -79,14 +107,14 @@
     "modes": {
       "create": {
         "header": "Benutzer erstellen",
-        "subheader": "Ein Benutzer in OpenCelium bezieht sich auf die Verwaltung aller Personen, die Zugriff auf das System haben, einschließlich ihrer Zugangsdaten, persönlichen Informationen und zugewiesenen Rollen/Gruppen. Administratoren können Benutzer erstellen, bearbeiten, anzeigen und löschen sowie deren Berechtigungen und Sicherheitseinstellungen wie 2FA verwalten.",
-        "successMessage": "Benutzer \"{{name}}\" wurde erfolgreich erstellt",
+        "subheader": "Legen Sie einen Benutzer an und weisen Sie ihm eine Rolle zu.",
+        "successMessage": "Benutzer „{{name}}“ wurde erfolgreich erstellt",
         "info": "Folgen Sie den einfachen 3 Schritten, um die Benutzererstellung abzuschließen."
       },
       "update": {
         "header": "Benutzer aktualisieren",
         "subheader": "Benutzerdaten ändern und speichern.",
-        "successMessage": "Benutzer \"{{name}}\" wurde erfolgreich aktualisiert"
+        "successMessage": "Benutzer „{{name}}“ wurde erfolgreich aktualisiert"
       },
       "view": {
         "header": "Benutzerdetails",
@@ -94,7 +122,7 @@
       }
     },
     "recommendations": {
-      "1": "Connector erstellen",
+      "1": "Konnektor erstellen",
       "2": "Rolle erstellen"
     },
     "steps": {
@@ -116,13 +144,13 @@
   },
   "confirmation": {
     "delete": {
-      "byEmail": "Benutzer mit der E-Mail „{{email}}“ löschen?",
-      "byId": "Benutzer mit der ID „{{id}}“ löschen?"
+      "byEmail": "Benutzer „{{email}}“ löschen?",
+      "byId": "Benutzer #{{id}} löschen?"
     }
   },
   "actions": {
     "delete": {
-      "cannotDeleteSelf": "Sie können den angemeldeten Benutzer nicht löschen."
+      "cannotDeleteSelf": "Sie können Ihr eigenes Konto nicht löschen."
     }
   },
   "totp": {
@@ -134,7 +162,16 @@
     "disableSuccess": "Zwei-Faktor-Authentifizierung deaktiviert",
     "bulkEnable": {
       "label": "2FA aktivieren",
-      "success": "Zwei-Faktor-Authentifizierung für {{count}} Benutzer aktiviert"
+      "success_one": "Zwei-Faktor-Authentifizierung für {{count}} Benutzer aktiviert",
+      "success_other": "Zwei-Faktor-Authentifizierung für {{count}} Benutzer aktiviert"
+    }
+  },
+  "lifecycle": {
+    "uploadProfilePicture": {
+      "failed": "Benutzer gespeichert, aber das Hochladen des Profilbilds ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
+    },
+    "deleteProfilePicture": {
+      "failed": "Benutzer gespeichert, aber das Entfernen des Profilbilds ist fehlgeschlagen. Sie können es über Bearbeiten erneut versuchen."
     }
   }
 }

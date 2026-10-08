@@ -1,13 +1,13 @@
 {
   "fields": {
     "urls": {
-      "label": "Url"
+      "label": "URL"
     },
     "userDN": {
-      "label": "UserDN"
+      "label": "User DN"
     },
     "groupDN": {
-      "label": "GroupDN"
+      "label": "Group DN"
     },
     "username": {
       "label": "Read Account DN"
@@ -22,12 +22,13 @@
       "label": "Group Search Filter"
     },
     "logs": {
-      "label": "Logs"
+      "label": "Logs",
+      "empty": "No logs"
     }
   },
   "sections": {
     "configurations": {
-      "title": "Configurations"
+      "title": "Configuration"
     }
   },
   "wizard": {
@@ -43,13 +44,13 @@
     },
     "steps": {
       "configurations": {
-        "header": "Configurations",
+        "header": "Configuration",
         "subheader": "Loaded from application.yml under the security: key. Read-only — edit the file and restart to change these values.",
         "actions": {
           "nextLabel": "Test"
         },
         "remote": {
-          "error": "Could not test ldap connection"
+          "error": "Could not test the LDAP connection"
         }
       },
       "logs": {

@@ -13,10 +13,12 @@ export const AntCard: CardComponent = ({
     className = '',
     style,
     children,
+    testId,
 }) => {
     return (
         <Card
             id={id}
+            data-testid={testId}
             style={style}
             rootClassName={className}
             title={title}

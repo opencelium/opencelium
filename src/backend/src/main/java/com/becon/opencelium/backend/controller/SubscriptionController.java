@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.api.serviceportal.ServicePortal;
+import com.becon.opencelium.backend.constant.props.OnlineServicesProps;
 import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
 import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistory;
 import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistoryDetail;
@@ -8,6 +9,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.mapper.mysql.ActivationRequestMapper;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.ActivationRequestDTO;
@@ -53,6 +55,7 @@ public class SubscriptionController {
     private final ActivationRequestMapper activationRequestMapper;
     private final OperationUsageHistoryService operationUsageHistoryService;
     private final ExtraOpsService extraOpsService;
+    private final OnlineServicesProps onlineServicesProps;
 
     public SubscriptionController(
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
@@ -60,7 +63,8 @@ public class SubscriptionController {
             @Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService,
             @Qualifier("extraOpsServiceImp") ExtraOpsService extraOpsService,
             ActivationRequestMapper activationRequestMapper,
-            ApiFactory apiFactory
+            ApiFactory apiFactory,
+            OnlineServicesProps onlineServicesProps
 
     ) {
         this.subscriptionService = subscriptionService;
@@ -69,29 +73,42 @@ public class SubscriptionController {
         this.activationRequestMapper = activationRequestMapper;
         this.operationUsageHistoryService = operationUsageHistoryService;
         this.extraOpsService = extraOpsService;
+        this.onlineServicesProps = onlineServicesProps;
     }
 
     // -------------------- ONLINE -------------------- //
 
     @GetMapping(path = "/all")
-    public ResponseEntity<String> getAllSubscriptions() {
+    public ResponseEntity<?> getAllSubscriptions() {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         SubscriptionModule subsModule = servicePortal.features().subscription();
         return subsModule.getAllSubs();
     }
 
     @GetMapping(path = "/connection/check")
     public ResponseEntity<?> checkConnection() {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         return servicePortal.checkConnection();
     }
 
     @GetMapping(path = "/{subId}")
-    public ResponseEntity<String> getSubById(@PathVariable String subId) {
+    public ResponseEntity<?> getSubById(@PathVariable String subId) {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         SubscriptionModule module = servicePortal.features().subscription();
         return module.getSubById(subId);
     }
 
     @PostMapping(path = "/{subId}")
     public ResponseEntity<?> setSubscription(@PathVariable String subId) {
+        if (!onlineServicesProps.isServiceActive()) {
+            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
+        }
         // generate activationReq object
         ActivationRequest ar = activationRequestService.generateActiveReq();
         String encodedAr = Base64Utility.encode(ar);
