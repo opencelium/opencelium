@@ -45,6 +45,10 @@ import io.opencelium.core.config.OpenCeliumProperties;
  */
 public final class LocalMongo {
 
+	public static final String SERVER_VARIABLE = "OC_TEST_MONGO_URI";
+
+	public static final String DEFAULT_SERVER = "mongodb://localhost:27017";
+
 	private static final Map<Class<?>, String> DATABASES = new ConcurrentHashMap<>();
 
 	private LocalMongo() {
@@ -59,6 +63,14 @@ public final class LocalMongo {
 			login = encode(server.getUsername()) + password + "@";
 		}
 		return build(server, login, database);
+	}
+
+	/**
+	 * Whether the tests run against the documented default server {@code mongodb://localhost:27017}, that is, whether
+	 * {@code OC_TEST_MONGO_URI} is not set. Tests of the zero-configuration start need that server.
+	 */
+	public static boolean isDefaultServer() {
+		return System.getenv(SERVER_VARIABLE) == null;
 	}
 
 	/** The test server with the database of {@code testClass} as path. */
@@ -110,7 +122,7 @@ public final class LocalMongo {
 	}
 
 	private static ConnectionString server() {
-		return new ConnectionString(System.getenv().getOrDefault("OC_TEST_MONGO_URI", "mongodb://localhost:27017"));
+		return new ConnectionString(System.getenv().getOrDefault(SERVER_VARIABLE, DEFAULT_SERVER));
 	}
 
 	private static String build(ConnectionString server, String login, String database) {
