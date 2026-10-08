@@ -13,16 +13,17 @@ public enum DeploymentMode {
 	/**
 	 * Self-hosted: one customer, whose MongoDB is configured in application.yml. When neither {@code spring.mongodb.uri}
 	 * nor any host-style {@code spring.mongodb.*} property is set, the URI defaults to
-	 * {@code mongodb://localhost:27017/opencelium}.
+	 * {@code mongodb://localhost:27017/opencelium}. A fresh install generates its master key into the data directory.
 	 */
-	SELF_HOST("self-host", true),
+	SELF_HOST("self-host", true, true),
 
 	/**
 	 * Operated by us for many tenants; application.yml names only the system database. There is no default:
 	 * {@code StaticMongoConnectionResolver} stops startup unless {@code spring.mongodb.uri} or
-	 * {@code spring.mongodb.host} is set.
+	 * {@code spring.mongodb.host} is set. A missing master key stops startup too: every node must start with the
+	 * same key, so none generates one.
 	 */
-	CLOUD("cloud", false);
+	CLOUD("cloud", false, false);
 
 	public static final DeploymentMode DEFAULT = SELF_HOST;
 
@@ -30,9 +31,12 @@ public enum DeploymentMode {
 
 	private final boolean mongoUriHasDefault;
 
-	DeploymentMode(String propertyValue, boolean mongoUriHasDefault) {
+	private final boolean generatesMasterKey;
+
+	DeploymentMode(String propertyValue, boolean mongoUriHasDefault, boolean generatesMasterKey) {
 		this.propertyValue = propertyValue;
 		this.mongoUriHasDefault = mongoUriHasDefault;
+		this.generatesMasterKey = generatesMasterKey;
 	}
 
 	/** The spelling used in application.yml. */
@@ -43,6 +47,11 @@ public enum DeploymentMode {
 	/** Whether a missing {@code spring.mongodb.uri} gets the documented default in this mode. */
 	public boolean mongoUriHasDefault() {
 		return mongoUriHasDefault;
+	}
+
+	/** Whether a fresh install may generate {@code <data-dir>/master.key} when no source has a key. */
+	public boolean generatesMasterKey() {
+		return generatesMasterKey;
 	}
 
 	/**

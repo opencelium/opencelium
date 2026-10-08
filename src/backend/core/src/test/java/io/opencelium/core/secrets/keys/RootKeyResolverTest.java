@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.opencelium.core.config.BootstrapPropertyException;
+import io.opencelium.core.config.DeploymentMode;
 
 import static io.opencelium.core.secrets.keys.RootKeyResolver.DATA_DIR_FILE_NAME;
 import static io.opencelium.core.secrets.keys.RootKeyResolver.ENV_VARIABLE;
@@ -27,7 +28,7 @@ class RootKeyResolverTest {
 	private static final BooleanSupplier DATA_KEYS_EXIST = () -> true;
 
 	private static final BooleanSupplier MUST_NOT_ASK = () -> {
-		throw new AssertionError("the database must not be asked when a key was found");
+		throw new AssertionError("the database must not be asked in this case");
 	};
 
 	@TempDir
@@ -136,7 +137,7 @@ class RootKeyResolverTest {
 	}
 
 	@Test
-	void resolveGeneratesAKeyIntoTheDataDirOnAFreshInstall() throws Exception {
+	void resolveGeneratesAKeyIntoTheDataDirOnAFreshSelfHostInstall() throws Exception {
 		RootKey generated = resolver(Map.of(), Optional.empty()).resolve(NO_DATA_KEYS);
 
 		Path file = dataDir.resolve("master.key");
@@ -152,6 +153,37 @@ class RootKeyResolverTest {
 	}
 
 	@Test
+	void resolveStopsNamingTheFilePropertyInCloudModeWhenNoSourceHasAKey() {
+		var resolver = cloudResolver(Map.of(), Optional.empty());
+
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve(NO_DATA_KEYS))
+				.withMessageContaining("No master key was found")
+				.withMessageContaining("In cloud mode no key is generated")
+				.satisfies(ex -> assertThat(ex.propertyName()).isEqualTo("opencelium.master-key-file"))
+				.satisfies(ex -> assertThat(ex.action()).hasValueSatisfying(
+						action -> assertThat(action).contains("OC_MASTER_KEY").contains("opencelium.master-key-file")
+								.contains("openssl rand -base64 32")));
+		assertThat(dataDir.resolve("master.key")).doesNotExist();
+	}
+
+	@Test
+	void resolveStopsInCloudModeWithoutAskingWhetherDataKeysExist() {
+		var resolver = cloudResolver(Map.of(), Optional.empty());
+
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver.resolve(MUST_NOT_ASK));
+		assertThat(dataDir.resolve("master.key")).doesNotExist();
+	}
+
+	@Test
+	void resolveReadsTheDataDirFileInCloudModeWhenItExists() throws Exception {
+		Files.writeString(dataDir.resolve(DATA_DIR_FILE_NAME), randomKey());
+
+		RootKey key = cloudResolver(Map.of(), Optional.empty()).resolve(MUST_NOT_ASK);
+
+		assertThat(key.source()).isEqualTo(RootKeySource.DATA_DIR);
+	}
+
+	@Test
 	void resolveStopsWithRestoreOrResetAndWritesNoFileWhenDataKeysExist() {
 		var resolver = resolver(Map.of(), Optional.empty());
 
@@ -162,7 +194,16 @@ class RootKeyResolverTest {
 	}
 
 	private RootKeyResolver resolver(Map<String, String> environment, Optional<Path> masterKeyFile) {
-		return new RootKeyResolver(environment::get, masterKeyFile, dataDir, new RootKeyGenerator());
+		return resolver(DeploymentMode.SELF_HOST, environment, masterKeyFile);
+	}
+
+	private RootKeyResolver cloudResolver(Map<String, String> environment, Optional<Path> masterKeyFile) {
+		return resolver(DeploymentMode.CLOUD, environment, masterKeyFile);
+	}
+
+	private RootKeyResolver resolver(DeploymentMode mode, Map<String, String> environment,
+			Optional<Path> masterKeyFile) {
+		return new RootKeyResolver(mode, environment::get, masterKeyFile, dataDir, new RootKeyGenerator());
 	}
 
 	private static String randomKey() {

@@ -19,8 +19,8 @@ public final class RootKeyConfig {
 			ConfigurableEnvironment environment) {
 		// The operating system's variables only: the master key is never read from application.yml.
 		var variables = environment.getSystemEnvironment();
-		return new RootKeyResolver(name -> (String) variables.get(name), properties.masterKeyFile(),
-				dataDirectory.path(), new RootKeyGenerator());
+		return new RootKeyResolver(properties.deploymentMode(), name -> (String) variables.get(name),
+				properties.masterKeyFile(), dataDirectory.path(), new RootKeyGenerator());
 	}
 
 	@Bean
