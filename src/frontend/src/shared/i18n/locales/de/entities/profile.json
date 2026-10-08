@@ -12,10 +12,18 @@
         "mrs": "Frau"
       }
     },
-    "name": { "label": "Name" },
-    "surname": { "label": "Nachname" },
-    "department": { "label": "Abteilung" },
-    "organization": { "label": "Organisation" },
+    "name": {
+      "label": "Name"
+    },
+    "surname": {
+      "label": "Nachname"
+    },
+    "department": {
+      "label": "Abteilung"
+    },
+    "organization": {
+      "label": "Organisation"
+    },
     "phoneNumber": {
       "label": "Telefonnummer",
       "validation1": "Ungültiges Telefonnummernformat"
@@ -24,20 +32,23 @@
       "label": "E-Mail",
       "invalid": "Ungültiges E-Mail-Format"
     },
-    "username": { "label": "Benutzername" },
+    "username": {
+      "label": "Benutzername"
+    },
     "currentPassword": {
       "label": "Aktuelles Passwort",
       "wrong": "Aktuelles Passwort ist falsch"
     },
     "newPassword": {
       "label": "Neues Passwort",
+      "minLength": "Mindestens 8 Zeichen",
       "validation1": "Muss einen Großbuchstaben enthalten",
       "validation2": "Muss einen Kleinbuchstaben enthalten",
       "validation3": "Muss eine Zahl enthalten",
       "validation4": "Muss ein Sonderzeichen enthalten"
     },
     "repeatNewPassword": {
-      "label": "Neues Passwort wiederholen",
+      "label": "Neues Passwort bestätigen",
       "mismatch": "Passwörter stimmen nicht überein"
     }
   },
@@ -46,12 +57,16 @@
     "save": "Speichern"
   },
   "hints": {
-    "sessionWillExpire": "Ihre Sitzung wird nach dem Update sofort beendet."
+    "sessionWillExpire": "Nach dem Speichern werden Sie sofort abgemeldet."
   },
   "messages": {
     "detailsUpdated": "Profildaten aktualisiert",
     "detailsUpdateFailed": "Profildaten konnten nicht gespeichert werden.",
-    "passwordUpdated": "Passwort aktualisiert. Sie werden abgemeldet."
+    "passwordUpdated": "Passwort aktualisiert. Sie werden abgemeldet.",
+    "pictureUpdated": "Profilbild aktualisiert",
+    "pictureUpdateFailed": "Das Profilbild konnte nicht hochgeladen werden.",
+    "pictureDeleted": "Profilbild entfernt",
+    "pictureDeleteFailed": "Das Profilbild konnte nicht entfernt werden."
   },
   "validation": {
     "required": "Pflichtfeld",

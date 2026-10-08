@@ -13,6 +13,7 @@ export interface CardProps {
     children?: ReactNode;
 
     className?: string;
+    testId?: string;
 
     style?: React.CSSProperties,
 }

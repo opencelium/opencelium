@@ -1,7 +1,7 @@
 {
   "list": {
     "title": "Users",
-    "subTitle": "This section allows administrators to manage system users, assign groups, enable two-factor authentication (2FA), and control access permissions.",
+    "subTitle": "This section allows administrators to manage system users, assign roles, enable two-factor authentication (2FA), and control access permissions.",
     "confirmDelete": {
       "message": "Are you sure you want to delete the user \"{{user}}\"?"
     }
@@ -21,7 +21,7 @@
         "info": "The User Details section contains personal and organizational information associated with the account, including contact details and role-related metadata."
       },
       "surname": {
-        "label": "Surname"
+        "label": "Last name"
       },
       "department": {
         "label": "Department"
@@ -40,7 +40,7 @@
     "email": {
       "label": "Email",
       "errors": {
-        "email_already_exists": "The user with such e-mail is already created"
+        "email_already_exists": "A user with this email already exists."
       }
     },
     "username": {
@@ -48,20 +48,48 @@
     },
     "password": {
       "label": "Password",
-      "info": "Password should be minimum 8 char length and have at least one uppercase, one lowercase, number and special character.",
+      "info": "At least 8 characters, including an uppercase letter, a lowercase letter, a number and a special character.",
       "validation1": "Must contain uppercase letter",
       "validation2": "Must contain lowercase letter",
       "validation3": "Must contain a number",
       "validation4": "Must contain special character"
     },
     "repeatPassword": {
-      "label": "Repeat Password"
+      "label": "Confirm password"
     },
     "userGroup": {
       "label": "Role"
     },
     "totpEnabled": {
       "label": "2FA"
+    },
+    "profilePicture": {
+      "label": "Profile picture",
+      "uploadButton": "Upload picture",
+      "hint": "PNG or JPG, up to 10 MB",
+      "replace": "Replace picture",
+      "delete": "Delete picture",
+      "confirmDelete": {
+        "title": "Remove profile picture?",
+        "message": "This can't be undone."
+      },
+      "crop": {
+        "title": "Crop profile picture",
+        "zoom": "Zoom",
+        "cancel": "Cancel",
+        "apply": "Apply crop",
+        "instruction": "Move the square to select the picture area"
+      },
+      "invalidType": "The picture must be a PNG or JPG file (.png, .jpg, .jpeg)",
+      "tooLarge": "The picture must be smaller than 10 MB",
+      "gravatar": {
+        "title": "Use Gravatar picture?",
+        "message": "A Gravatar picture is linked to this email. Do you want to use it as the profile picture?",
+        "messageReplace": "A Gravatar picture is linked to this email. Do you want to use it instead of the current profile picture? The current picture will be deleted when you save.",
+        "refresh": "Refresh from Gravatar",
+        "notFound": "Could not load a Gravatar picture for this email.",
+        "staged": "Picture loaded from Gravatar. Save the user to apply it."
+      }
     }
   },
   "sections": {
@@ -79,7 +107,7 @@
     "modes": {
       "create": {
         "header": "Create User",
-        "subheader": "User in OpenCelium refers to managing all people who can access the system, including their credentials, personal details, and assigned roles/groups. It allows administrators to create, edit, view, and delete users, as well as control their permissions and security settings like 2FA.",
+        "subheader": "Create a user and assign a role.",
         "successMessage": "User \"{{name}}\" was successfully created",
         "info": "Follow the simple 3 steps to complete user creation."
       },
@@ -105,8 +133,8 @@
       },
       "credentials": {
         "header": "Credentials",
-        "subheader": "Login credentials used to access the system. An email, a username, or both can be set — at least one is needed to sign in.",
-        "subheaderUpdate": "Update the login email, the username and the role assigned to this user."
+        "subheader": "Sign-in credentials used to access the system. An email, a username, or both can be set — at least one is needed to sign in.",
+        "subheaderUpdate": "Update the sign-in email, the username and the role assigned to this user."
       },
       "role": {
         "header": "Role",
@@ -116,13 +144,13 @@
   },
   "confirmation": {
     "delete": {
-      "byEmail": "Delete user by email \"{{email}}\"?",
-      "byId": "Delete user by id \"{{id}}\"?"
+      "byEmail": "Delete user \"{{email}}\"?",
+      "byId": "Delete user #{{id}}?"
     }
   },
   "actions": {
     "delete": {
-      "cannotDeleteSelf": "You cannot delete the authorized user."
+      "cannotDeleteSelf": "You can't delete your own account."
     }
   },
   "totp": {
@@ -134,7 +162,16 @@
     "disableSuccess": "Two-factor authentication disabled",
     "bulkEnable": {
       "label": "Enable 2FA",
-      "success": "Two-factor authentication enabled for {{count}} user(s)"
+      "success_one": "Two-factor authentication enabled for {{count}} user",
+      "success_other": "Two-factor authentication enabled for {{count}} users"
+    }
+  },
+  "lifecycle": {
+    "uploadProfilePicture": {
+      "failed": "User saved, but the profile picture upload failed. You can retry from edit."
+    },
+    "deleteProfilePicture": {
+      "failed": "User saved, but removing the profile picture failed. You can retry from edit."
     }
   }
 }

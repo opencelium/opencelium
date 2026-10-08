@@ -53,6 +53,8 @@ import {
 } from './conditionBuilder.utils';
 import { evaluateIfComparison, type ComparisonEvaluation, type OperandInput } from './conditionComparison';
 import { LoopInfoPanel } from './LoopInfoPanel/LoopInfoPanel';
+import { useConditionDragItem } from './ConditionReorder/useConditionDragItem';
+import { ConditionReorderProvider } from './ConditionReorder/ConditionReorderProvider';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
@@ -75,6 +77,10 @@ type Props = {
 	nodes: WorkflowNodeModel[];
 	edges: WorkflowEdgeModel[];
 	connection: Connection;
+	/** Stacking, for a host that is itself a dialog — the delete dialog opens
+	 *  this one over its own confirm at 20000. Left to antd's default
+	 *  otherwise, which is what every other caller wants. */
+	zIndex?: number;
 	onClose: () => void;
 	onSave: (nodeId: string, config: ConditionConfig) => void;
 };
@@ -301,11 +307,13 @@ function MethodSelect({
 	methods,
 	selectedMethod,
 	value,
+	popupZIndex,
 	onChange,
 }: {
 	methods: MethodWithId[];
 	selectedMethod?: MethodWithId;
 	value?: string;
+	popupZIndex?: number;
 	onChange: (value?: string) => void;
 }) {
 	const { t } = useI18n('workflow');
@@ -362,7 +370,7 @@ function MethodSelect({
 				}}
 				getPopupContainer={() => document.body}
 				popupMatchSelectWidth={420}
-				styles={{ popup: { root: { zIndex: 13010 } } }}
+				styles={{ popup: { root: { zIndex: popupZIndex ?? 13010 } } }}
 			/>
 		</div>
 	);
@@ -376,6 +384,7 @@ function ConditionValueInput({
 	iterators,
 	connection,
 	operatorIndexPath,
+	popupZIndex,
 	onChange,
 }: {
 	side: 'left' | 'right';
@@ -385,6 +394,7 @@ function ConditionValueInput({
 	iterators: string[];
 	connection: Connection;
 	operatorIndexPath: string | undefined;
+	popupZIndex?: number;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 }) {
 	const { t } = useI18n('workflow');
@@ -451,6 +461,7 @@ function ConditionValueInput({
 				<SourceSwitcher value={source} onChange={setSource} />
 				<LegacyWebhookReferenceSelect
 					value={extractWebhookValue(fieldValue) || undefined}
+					popupZIndex={popupZIndex}
 					onChange={(value) => onChange({ [fieldKey]: value ? webhookSnippet(value) : undefined })}
 				/>
 			</div>
@@ -464,6 +475,7 @@ function ConditionValueInput({
 				methods={methods}
 				selectedMethod={selectedMethod}
 				value={methodId}
+				popupZIndex={popupZIndex}
 				onChange={(value) => {
 					setDraftMethodId(value);
 					onChange({ [fieldKey]: undefined });
@@ -494,6 +506,7 @@ function ConditionValueInput({
 							value={parsePathFromReference(fieldValue)}
 							disabled={!methodId}
 							iterators={iterators}
+							popupZIndex={popupZIndex}
 							onChange={(value) => {
 								const path = parsePathFromReference(value);
 								onChange({
@@ -564,6 +577,7 @@ function RuleRow({
 	iterators,
 	connection,
 	operatorIndexPath,
+	popupZIndex,
 	canDelete,
 	onChange,
 	onDelete,
@@ -576,6 +590,7 @@ function RuleRow({
 	iterators: string[];
 	connection: Connection;
 	operatorIndexPath: string | undefined;
+	popupZIndex?: number;
 	canDelete: boolean;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 	onDelete: () => void;
@@ -589,6 +604,7 @@ function RuleRow({
 	const isUnary = operator && UNARY_IF_OPERATORS.has(operator as IfOperatorName);
 	const isSplitString = operator === LoopOperatorName.SplitString;
 	const hasBinaryRight = !!operator && !isUnary;
+	const reorderItem = useConditionDragItem({ kind: 'rule', id: rule.id });
 
 	// Hovering the operator select resolves BOTH operands at once (independent
 	// of each ConditionValueInput's own per-field hover state) so the
@@ -616,7 +632,12 @@ function RuleRow({
 	const isComparisonLoading = isOperatorHovered && (leftLive.isLoading || (hasBinaryRight && rightLive.isLoading));
 
 	return (
-		<div className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''}`}>
+		<div
+			className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''} ${reorderItem?.className ?? ''}`}
+			data-testid="workflow-condition-rule"
+			{...reorderItem?.itemProps}
+		>
+			{reorderItem?.handle}
 			{isLoop ? (
 				<Select
 					placeholder={t('placeholders.selectOperator')}
@@ -628,6 +649,7 @@ function RuleRow({
 					onChange={(value) => onChange({ operator: value, leftField: undefined, rightField: undefined })}
 					suffixIcon={<DownOutlined />}
 					getPopupContainer={() => document.body}
+					styles={{ popup: { root: { zIndex: popupZIndex ?? 13010 } } }}
 				/>
 			) : (
 				<ConditionValueInput
@@ -638,6 +660,7 @@ function RuleRow({
 					iterators={iterators}
 					connection={connection}
 					operatorIndexPath={operatorIndexPath}
+					popupZIndex={popupZIndex}
 					onChange={onChange}
 				/>
 			)}
@@ -655,6 +678,7 @@ function RuleRow({
 						onChange={(value) => onChange({ operator: value, rightField: undefined })}
 						suffixIcon={<DownOutlined />}
 						getPopupContainer={() => document.body}
+						styles={{ popup: { root: { zIndex: popupZIndex ?? 13010 } } }}
 					/>
 				);
 				if (!operator || !testRun?.isPaused) return operatorSelect;
@@ -682,6 +706,7 @@ function RuleRow({
 					iterators={iterators}
 					connection={connection}
 					operatorIndexPath={operatorIndexPath}
+					popupZIndex={popupZIndex}
 					onChange={onChange}
 				/>
 			) : !isLoop && hasBinaryRight ? (
@@ -693,6 +718,7 @@ function RuleRow({
 					iterators={iterators}
 					connection={connection}
 					operatorIndexPath={operatorIndexPath}
+					popupZIndex={popupZIndex}
 					onChange={onChange}
 				/>
 			) : null}
@@ -705,6 +731,7 @@ function RuleRow({
 					iterators={iterators}
 					connection={connection}
 					operatorIndexPath={operatorIndexPath}
+					popupZIndex={popupZIndex}
 					onChange={onChange}
 				/>
 			) : null}
@@ -735,6 +762,7 @@ function GroupEditor({
 	iterators,
 	connection,
 	operatorIndexPath,
+	popupZIndex,
 	onDelete,
 	onChange,
 }: {
@@ -745,6 +773,7 @@ function GroupEditor({
 	iterators: string[];
 	connection: Connection;
 	operatorIndexPath: string | undefined;
+	popupZIndex?: number;
 	onDelete?: () => void;
 	onChange: (group: ConditionGroup) => void;
 }) {
@@ -755,6 +784,7 @@ function GroupEditor({
 	const isConjunctionDisabled = items.length <= 1;
 	const conjunction = group.properties?.conjunction;
 	const activeConjunction = conjunction;
+	const reorderItem = useConditionDragItem({ kind: 'group', id: group.id });
 	const groupClassName = operatorType === 'loop'
 		? 'conditionLoopGroup'
 		: `conditionGroup${group.error ? ' conditionGroupInvalid' : ''}`;
@@ -794,8 +824,10 @@ function GroupEditor({
 	}, [conjunction, group, items.length, onChange, operatorType]);
 
 	return (
-		<div className={groupClassName}>
+		<div className={`${groupClassName} ${reorderItem?.className ?? ''}`} {...reorderItem?.itemProps}>
 			{operatorType === 'if' ? <div className="conditionGroupHeader">
+				<div className="conditionGroupLead">
+				{reorderItem?.handle}
 				<div className="conditionGroupStatus">
 					<div className="conditionGroupToggle">
 						<button
@@ -816,6 +848,7 @@ function GroupEditor({
 						</button>
 					</div>
 					{group.error ? <div className="conditionGroupError">{group.error}</div> : null}
+				</div>
 				</div>
 				<div className="conditionGroupActions">
 					<Button
@@ -853,6 +886,7 @@ function GroupEditor({
 							iterators={iterators}
 							connection={connection}
 							operatorIndexPath={operatorIndexPath}
+							popupZIndex={popupZIndex}
 							canDelete={operatorType === 'if'}
 							onDelete={() => onChange(removeChildById(group, child.id))}
 							onDuplicate={() => onChange(duplicateRuleById(group, child.id))}
@@ -868,6 +902,7 @@ function GroupEditor({
 							iterators={iterators}
 							connection={connection}
 							operatorIndexPath={operatorIndexPath}
+							popupZIndex={popupZIndex}
 							onDelete={() => onChange(removeChildById(group, child.id))}
 							onChange={(nextGroup) => {
 								onChange({
@@ -891,6 +926,7 @@ export function ConditionBuilderDialog({
 	nodes,
 	edges,
 	connection,
+	zIndex,
 	onClose,
 	onSave,
 }: Props) {
@@ -951,6 +987,7 @@ export function ConditionBuilderDialog({
 	return (
 		<Modal
 			open={open}
+			zIndex={zIndex}
 			destroyOnHidden
 			focusable={{ focusTriggerAfterClose: false }}
 			title={t(isLoop ? 'conditionBuilder.dialogTitleLoop' : 'conditionBuilder.dialogTitleIf')}
@@ -979,16 +1016,19 @@ export function ConditionBuilderDialog({
 		>
 			<div key={renderKey} className="conditionBuilder" data-testid="workflow-condition-builder">
 				<LiveInspectHint />
-				<GroupEditor
-					group={tree}
-					operatorType={operatorType}
-					methods={methods}
-					allMethods={allMethods}
-					iterators={iterators}
-					connection={connection}
-					operatorIndexPath={operatorIndexPath}
-					onChange={setTree}
-				/>
+				<ConditionReorderProvider tree={tree} isEnabled={operatorType === 'if'} onChange={setTree}>
+					<GroupEditor
+						group={tree}
+						operatorType={operatorType}
+						methods={methods}
+						allMethods={allMethods}
+						iterators={iterators}
+						connection={connection}
+						operatorIndexPath={operatorIndexPath}
+						popupZIndex={zIndex}
+						onChange={setTree}
+					/>
+				</ConditionReorderProvider>
 				{isLoop ? (
 					<LoopInfoPanel
 						iterator={loopIterator}

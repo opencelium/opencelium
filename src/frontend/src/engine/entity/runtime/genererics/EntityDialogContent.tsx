@@ -5,14 +5,17 @@ import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { GenericCreateWizard } from './GenericCreateWizard';
 import { GenericViewWizard } from './GenericViewWizard';
 import { GenericUpdateWizard } from './GenericUpdateWizard';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props =
     | { entityName: string; mode: 'create'; identifier?: undefined; onSuccess: (created?: unknown) => void }
     | { entityName: string; mode: 'view'; identifier: string; onSuccess: () => void }
-    | { entityName: string; mode: 'update'; identifier: string; onSuccess: () => void };
+    | { entityName: string; mode: 'update'; identifier: string; onSuccess: () => void; initialStepId?: string };
 
-export const EntityDialogContent: React.FC<Props> = ({ entityName, mode, identifier, onSuccess }) => {
+export const EntityDialogContent: React.FC<Props> = (props) => {
+    const { entityName, mode, identifier, onSuccess } = props;
     const entity = entityRegistry.get(entityName);
+    const { t: tCommon } = useI18n('common');
 
     const skip = mode === 'create' || !identifier || !entity.api;
     const { data, isLoading } = useFetchEntitiesQuery(
@@ -43,7 +46,7 @@ export const EntityDialogContent: React.FC<Props> = ({ entityName, mode, identif
     }
 
     if (!record) {
-        return <div style={{ padding: 24 }}>Not found</div>;
+        return <div style={{ padding: 24 }}>{tCommon('notFound.entity')}</div>;
     }
 
     if (mode === 'view') {
@@ -63,6 +66,7 @@ export const EntityDialogContent: React.FC<Props> = ({ entityName, mode, identif
             initialRecord={record}
             onSuccess={onSuccess}
             skipSuccessState
+            initialStepId={props.mode === 'update' ? props.initialStepId : undefined}
         />
     );
 };

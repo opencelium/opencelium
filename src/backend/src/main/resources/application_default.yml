@@ -32,6 +32,12 @@ spring:
     password: secret1234
     initialization-mode: always
     driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      # MariaDB 11.6+ enables innodb_snapshot_isolation by default: a REPEATABLE READ transaction
+      # that locks or deletes a row changed after its read view opened fails with error 1020
+      # "Record has changed since last read". Quartz's JDBC job store and the concurrent
+      # scheduler/connection cleanup rely on the READ COMMITTED semantics instead.
+      transaction-isolation: TRANSACTION_READ_COMMITTED
   data:
     mongodb:
       uri: mongodb://oc_admin:secretsecret@localhost:27017/opencelium
@@ -94,8 +100,8 @@ spring:
     open-in-view: false
   servlet:
     multipart:
-      max-file-size: 1000000KB
-      max-request-size: 1000000KB
+      max-file-size: 1GB
+      max-request-size: 1GB
   http:
     multipart:
       enabled: false
@@ -195,7 +201,7 @@ management:
           UP: 200
 
 opencelium:
-  version: 5.1
+  version: 5.2
   ###########################################################################
   #                                                                         #
   #   Interface languages                                                   #
@@ -238,7 +244,7 @@ opencelium:
   #                                                                         #
   ###########################################################################
   config:
-    file-path: ./application.yml
+    file-path: src/main/resources/application.yml
     backup:
       directory: runtime/backup/application
       keep: 10
@@ -323,6 +329,21 @@ opencelium:
     token: your-token-heren
   ###########################################################################
   #                                                                         #
+  #   Remote invoker repository                                             #
+  #                                                                         #
+  #   Source the invoker files are downloaded from by                       #
+  #   POST /invoker/remote (/api/invoker/remote behind the proxy).          #
+  #                                                                         #
+  #   url    - GitHub Contents API url of the folder that holds the         #
+  #            invoker xml files                                            #
+  #   branch - git ref (branch, tag or commit) the files are read from      #
+  #                                                                         #
+  ###########################################################################
+  invoker-repository:
+    url: https://api.github.com/repos/opencelium/invoker/contents
+    branch: main
+  ###########################################################################
+  #                                                                         #
   #   Polyglot Engine Configuration                                         #
   #   You can enable Python 3, Ruby, or GraalVM JS                          #
   #   using this configuration.                                             #
@@ -399,6 +420,22 @@ opencelium:
 #      port: 8082
 #      username: ####
 #      password: ####
+  ###########################################################################
+  #                                                                         #
+  #   Online services                                                       #
+  #                                                                         #
+  #   'active' is the master switch for every feature that calls a remote   #
+  #   OpenCelium service: Service Portal (subscriptions, invoker/template   #
+  #   sync, usage reports), the remote invoker repository and the online    #
+  #   update assistant. When the key is commented out or removed, online    #
+  #   services are ENABLED (default: true). With 'active: false' the        #
+  #   affected endpoints do not call the internet and instead return a      #
+  #   message explaining how to re-enable them.                             #
+  #                                                                         #
+  #   'invoker-sync' / 'template-sync' schedule the automatic Service       #
+  #   Portal sync jobs (both default to inactive).                          #
+  #                                                                         #
+  ###########################################################################
 #  online-services:
 #    invoker-sync:
 #      time: 0 0 0 * * *
@@ -406,4 +443,4 @@ opencelium:
 #    template-sync:
 #      time: 0 0 0 * * *
 #      active: false
-#    active: false
+#    active: true

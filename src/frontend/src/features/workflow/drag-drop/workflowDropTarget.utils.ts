@@ -14,6 +14,7 @@ export const findWorkflowDropTarget = (
 	sourceNodeId: string,
 	nodes: WorkflowNodeModel[],
 	edges: WorkflowEdgeModel[],
+	excludedNodeIds?: Set<string>,
 ): DragDropTarget | undefined => {
 	if (!instance || typeof event?.clientX !== 'number' || typeof event?.clientY !== 'number') {
 		return undefined;
@@ -27,7 +28,7 @@ export const findWorkflowDropTarget = (
 	const sourceBranch = source && (source.type === 'if' || source.type === 'loop')
 		? getOperatorBottomBranch(source.id, nodes, edges)
 		: { nodeIds: new Set<string>() };
-	const movedNodeIds = new Set([sourceNodeId, ...sourceBranch.nodeIds]);
+	const movedNodeIds = excludedNodeIds ?? new Set([sourceNodeId, ...sourceBranch.nodeIds]);
 	const closestEdge = edges
 		.filter((edge) => !movedNodeIds.has(edge.source) && !movedNodeIds.has(edge.target))
 		.map<DragDropTarget | undefined>((edge) => {
@@ -59,18 +60,26 @@ export const findWorkflowDropTarget = (
 	return nodes
 		.filter((node) => node.type !== 'start' && node.type !== 'comment'
 			&& !movedNodeIds.has(node.id))
-		.map((node): DragDropTarget => {
+		.map((node): DragDropTarget | undefined => {
 			const width = node.measured?.width ?? node.width ?? 80;
 			const height = node.measured?.height ?? node.height ?? 80;
 			const center = { x: node.position.x + width / 2, y: node.position.y + height / 2 };
 			const direction = (node.type === 'if' || node.type === 'loop') &&
 				Math.abs(point.x - center.x) < width && point.y > center.y ? 'bottom' : 'right';
+			const alreadyContainsGroup = edges.some((edge) => {
+				if (edge.source !== node.id || !movedNodeIds.has(edge.target)) return false;
+				const edgeDirection = edge.targetHandle === 'top' || edge.sourceHandle === 'true'
+					|| edge.sourceHandle === 'bottom' ? 'bottom' : 'right';
+				return edgeDirection === direction;
+			});
+			if (alreadyContainsGroup) return undefined;
 			const anchor = direction === 'bottom'
 				? { x: center.x, y: node.position.y + height + 30 }
 				: { x: node.position.x + width + 30, y: center.y };
 			return { target: { nodeId: node.id, direction },
 				distance: Math.hypot(point.x - anchor.x, point.y - anchor.y) };
 		})
+		.filter((target): target is DragDropTarget => target !== undefined)
 		.sort((left, right) => left.distance - right.distance)
 		.find((target) => target.distance <= DROP_LEAF_MAX_DISTANCE);
 };
@@ -97,4 +106,39 @@ export const getDragSubtreeNodeIds = (
 	if (!source) return new Set<string>();
 	if (source.type !== 'if' && source.type !== 'loop') return new Set([sourceNodeId]);
 	return new Set([sourceNodeId, ...getOperatorBottomBranch(source.id, nodes, edges).nodeIds]);
+};
+
+export const getSelectedDragGroup = (
+	nodes: WorkflowNodeModel[],
+	edges: WorkflowEdgeModel[],
+) => {
+	const selected = nodes.filter((node) => node.selected && node.type !== 'start'
+		&& node.type !== 'comment');
+	const selectedIds = new Set(selected.map((node) => node.id));
+	const carriedIds = new Set<string>();
+	selected.forEach((node) => {
+		if (node.type !== 'if' && node.type !== 'loop') return;
+		getOperatorBottomBranch(node.id, nodes, edges).nodeIds.forEach((id) => carriedIds.add(id));
+	});
+	const rootIds = selected.filter((node) => !carriedIds.has(node.id)).map((node) => node.id);
+	const order = new Map<string, number>();
+	const incoming = new Map(edges.map((edge) => [edge.target, edge.source]));
+	const depth = (id: string) => {
+		let current: string | undefined = id;
+		let value = 0;
+		const seen = new Set<string>();
+		while (current && !seen.has(current)) {
+			seen.add(current);
+			current = incoming.get(current);
+			value += 1;
+		}
+		return value;
+	};
+	rootIds.forEach((id) => order.set(id, depth(id)));
+	rootIds.sort((left, right) => (order.get(left) ?? 0) - (order.get(right) ?? 0));
+	const nodeIds = new Set<string>();
+	rootIds.forEach((id) => getDragSubtreeNodeIds(id, nodes, edges)
+		.forEach((nodeId) => nodeIds.add(nodeId)));
+	selectedIds.forEach((id) => nodeIds.add(id));
+	return { rootIds, nodeIds };
 };

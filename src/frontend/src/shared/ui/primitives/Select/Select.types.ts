@@ -26,6 +26,16 @@ export interface SelectProps<T = string> {
     placeholder?: string;
 
     onChange?: (value: T) => void;
+    /**
+     * Fires when an option is picked, including a pick of the value already
+     * selected — which `onChange` cannot report, since nothing changed. Use it
+     * only for "the user answered this again" (re-seeding dependent controls);
+     * for the value itself, use `onChange`.
+     *
+     * Ant fires it on every pick. Material's Autocomplete has no equivalent, so
+     * there it only follows `onChange`.
+     */
+    onSelect?: (value: T) => void;
     readOnly?: boolean;
     multiple?: boolean,
     // Defaults to true: options are sorted alphabetically by label. Set false to

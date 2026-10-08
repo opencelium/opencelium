@@ -40,8 +40,9 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 				Insert Reference
 			</Button>} />
 		{!readOnly && editor.referenceOpen && editor.connection && (
+			// Mounted only while open, so autoFocus fires on the click that opened it.
 			<LegacyBodyReferenceGenerator connection={editor.connection} currentMethod={editor.method}
-				showWebhookOption={false} onApply={editor.applyReference} />
+				showWebhookOption={false} onApply={editor.applyReference} autoFocus />
 		)}
 		<UrlQueryParamsTable readOnly={readOnly} rows={editor.queryParams}
 			endpointArgs={editor.endpointArgs} connection={editor.connection}

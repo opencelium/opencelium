@@ -14,8 +14,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -381,6 +384,175 @@ class YamlConfigWriterTest {
                 .isInstanceOf(ApplicationConfigWriteException.class);
     }
 
+    // ── Empty-valued keys ────────────────────────────────────────────────────
+    //
+    // A key with no value on disk (`username:`) is where the SMTP GUI save used
+    // to brick the installation: snakeyaml reports the empty scalar's start and
+    // end marks as a single zero-width point immediately after the `:`, so an
+    // in-line splice at that range produced `username:Test123` — no separating
+    // space, no longer valid YAML, and the application would not boot.
+
+    @Test
+    void mergeSeparatesValueFromColonWhenExistingKeyHasNoValue() throws Exception {
+        String original = """
+                spring:
+                  mail:
+                    username:
+                    password:
+                    host: smtp.gmail.com
+                """;
+        JsonNode patch = json.readTree("""
+                { "spring": { "mail": { "username": "Test123", "password": "s3cret" } } }
+                """);
+
+        String merged = writer.merge(original, patch);
+
+        assertThat(merged).contains("    username: Test123");
+        assertThat(merged).contains("    password: s3cret");
+        assertThat(merged).doesNotContain("username:Test123");
+        assertThat(parse(merged)).isNotNull();
+        assertThat(leaf(merged, "spring", "mail", "username")).isEqualTo("Test123");
+        assertThat(leaf(merged, "spring", "mail", "host")).isEqualTo("smtp.gmail.com");
+    }
+
+    @Test
+    void mergeWritesSingleSpaceWhenExistingKeyHasTrailingSpaceAfterColon() throws Exception {
+        // `url: ` (one trailing space) is how the bundled file ships the
+        // incoming-webhook URL — and it is active out of the box.
+        String original = "opencelium:\n"
+                + "  notification:\n"
+                + "    tools:\n"
+                + "      incoming-webhook:\n"
+                + "        url: \n"
+                + "        enabled: true\n";
+        JsonNode patch = json.readTree("""
+                { "opencelium": { "notification": { "tools": {
+                    "incoming-webhook": { "url": "https://hooks.example.com/abc" } } } } }
+                """);
+
+        String merged = writer.merge(original, patch);
+
+        assertThat(merged).contains("        url: https://hooks.example.com/abc\n");
+        assertThat(merged).doesNotContain("url:  ");
+        assertThat(merged).contains("        enabled: true");
+        assertThat(parse(merged)).isNotNull();
+    }
+
+    @Test
+    void mergeCollapsesPaddingWhenExistingKeyHasSeveralSpacesAfterColon() throws Exception {
+        String original = """
+                spring:
+                  mail:
+                    username:
+                """.replace("username:", "username:     ");
+        JsonNode patch = json.readTree("""
+                { "spring": { "mail": { "username": "Test123" } } }
+                """);
+
+        String merged = writer.merge(original, patch);
+
+        assertThat(merged).contains("    username: Test123");
+        assertThat(merged).doesNotContain("username:  ");
+        assertThat(parse(merged)).isNotNull();
+    }
+
+    @Test
+    void mergeKeepsCommentAndSiblingWhenExistingKeyHasInlineCommentAfterColon() throws Exception {
+        // With a trailing comment snakeyaml puts the empty scalar's marks on the
+        // *next* line, so the old line-range fallback deleted the sibling below
+        // it. Both the comment and the sibling must survive.
+        String original = """
+                spring:
+                  mail:
+                    username:   # set me from the GUI
+                    host: smtp.gmail.com
+                """;
+        JsonNode patch = json.readTree("""
+                { "spring": { "mail": { "username": "Test123" } } }
+                """);
+
+        String merged = writer.merge(original, patch);
+
+        assertThat(merged).contains("    username: Test123 # set me from the GUI");
+        assertThat(merged).contains("    host: smtp.gmail.com");
+        assertThat(parse(merged)).isNotNull();
+        assertThat(leaf(merged, "spring", "mail", "host")).isEqualTo("smtp.gmail.com");
+    }
+
+    @Test
+    void mergeWritesNonStringScalarsWhenExistingKeyHasNoValue() throws Exception {
+        String original = """
+                spring:
+                  mail:
+                    port:
+                    debug:
+                """;
+        JsonNode patch = json.readTree("""
+                { "spring": { "mail": { "port": 587, "debug": true } } }
+                """);
+
+        String merged = writer.merge(original, patch);
+
+        assertThat(merged).contains("    port: 587");
+        assertThat(merged).contains("    debug: true");
+        assertThat(parse(merged)).isNotNull();
+    }
+
+    @Test
+    void mergeKeepsSiblingsWhenEmptyKeyIsReplacedByNestedMapping() throws Exception {
+        String original = """
+                spring:
+                  mail:
+                    properties:
+                    host: smtp.gmail.com
+                """;
+        JsonNode patch = json.readTree("""
+                { "spring": { "mail": { "properties": { "smtp": { "auth": true } } } } }
+                """);
+
+        String merged = writer.merge(original, patch);
+
+        assertThat(parse(merged)).isNotNull();
+        assertThat(merged).contains("    host: smtp.gmail.com");
+        assertThat(leaf(merged, "spring", "mail", "properties", "smtp", "auth")).isEqualTo(Boolean.TRUE);
+    }
+
+    @Test
+    void mergeProducesParseableYamlWhenUncommentedMailBlockHasEmptyCredentialKeys() throws Exception {
+        // The exact sequence ApplicationConfigServiceImpl.patch() runs for an
+        // SMTP save: activate the bundled (commented) mail block, then merge the
+        // user's credentials into its empty username/password keys.
+        String original = """
+                spring:
+                  application:
+                    name: opencelium
+                #  mail:
+                #    host: smtp.gmail.com
+                #    port: 587
+                #    username:
+                #    password:
+                """;
+
+        String activated = writer.uncomment(original, List.of(
+                "spring.mail", "spring.mail.host", "spring.mail.port",
+                "spring.mail.username", "spring.mail.password"));
+        JsonNode patch = json.readTree("""
+                { "spring": { "mail": { "username": "user@example.com", "password": "Test123" } } }
+                """);
+
+        String merged = writer.merge(activated, patch);
+
+        assertThat(parse(merged)).isNotNull();
+        assertThat(merged).contains("    username: user@example.com");
+        assertThat(merged).contains("    password: Test123");
+        assertThat(merged).doesNotContain("username:user");
+        assertThat(merged).doesNotContain("password:Test123");
+        assertThat(leaf(merged, "spring", "mail", "username")).isEqualTo("user@example.com");
+        assertThat(leaf(merged, "spring", "mail", "password")).isEqualTo("Test123");
+        assertThat(leaf(merged, "spring", "mail", "port")).isEqualTo(587);
+        assertThat(leaf(merged, "spring", "application", "name")).isEqualTo("opencelium");
+    }
+
     @Test
     void commentOutThrowsWhenPathDoesNotExist() {
         String original = """
@@ -390,5 +562,22 @@ class YamlConfigWriterTest {
 
         assertThatThrownBy(() -> writer.commentOut(original, List.of("server.missing")))
                 .isInstanceOf(ApplicationConfigWriteException.class);
+    }
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    /** Parses {@code yaml} the way Spring's config loader would; fails the test on invalid YAML. */
+    private static Object parse(String yaml) {
+        return new Load(LoadSettings.builder().build()).loadFromString(yaml);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object leaf(String yaml, String... path) {
+        Object current = parse(yaml);
+        for (String segment : path) {
+            assertThat(current).isInstanceOf(Map.class);
+            current = ((Map<String, Object>) current).get(segment);
+        }
+        return current;
     }
 }

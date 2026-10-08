@@ -1,0 +1,26 @@
+/*
+ * The graph is built from invented connectors, so saving it would post ids that do
+ * not exist. Suppressing the button is blunt but honest: the tutorial is a sketch,
+ * and "help workflow" reopens it once the user has real connectors to use.
+ */
+html.workflow-tutorial-active [data-testid='workflow-save'] {
+    pointer-events: none;
+    opacity: .45;
+}
+
+/*
+ * The backdrop behind a centred step: full coverage rather than the spotlight's
+ * cut-out mask, and left to take pointer events rather than passing them through.
+ * Neither of the two steps that use it asks for anything to be clicked, so blocking
+ * the page under it costs nothing and keeps a stray click off the canvas.
+ */
+.workflow-tutorial-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgb(12 16 22 / 60%);
+}
+
+/* Same class, and for the same reason — see tutorialSpotlight.css. */
+html.workflow-tutorial-dark .workflow-tutorial-backdrop {
+    background: rgb(2 4 8 / 72%);
+}

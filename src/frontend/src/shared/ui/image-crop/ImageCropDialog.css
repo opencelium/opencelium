@@ -28,6 +28,10 @@
     touch-action: none;
 }
 
+.imageCropSelectionCircle {
+    border-radius: 50%;
+}
+
 .imageCropGrid {
     position: absolute;
     border-color: rgb(255 255 255 / 55%);

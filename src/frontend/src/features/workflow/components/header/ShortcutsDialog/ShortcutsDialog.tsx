@@ -9,7 +9,8 @@ export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
   const { t } = useI18n('workflow');
 
   return (
-    <Dialog open={open} onClose={onClose} title={t('shortcutsDialog.title')} width={460}>
+    <Dialog open={open} onClose={onClose} title={t('shortcutsDialog.title')}
+      width="min(1040px, calc(100vw - 32px))">
       <div className="shortcutsList">
         {SHORTCUT_GROUPS.map((group) => (
           <div key={group.titleKey} className="shortcutsGroup">

@@ -6,6 +6,7 @@ import { Empty } from "@shared/ui/primitives/Empty";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { MiniLineChart, type Series } from "./MiniLineChart";
 import { RefreshButton } from "./RefreshButton";
+import { formatNumber, formatPercent } from "../utils/format";
 import {
   useGetExecutionsTimelineQuery,
   type DayOfWeek,
@@ -27,16 +28,20 @@ const DAY_OFFSET: Record<DayOfWeek, number> = {
   SATURDAY: 6,
 };
 
-const weekdayShort = (day: DayOfWeek, lang: string): string => {
+const weekdayName = (
+  day: DayOfWeek,
+  lang: string,
+  style: "short" | "long",
+): string => {
   const reference = new Date(2024, 0, 7 + DAY_OFFSET[day]);
-  return new Intl.DateTimeFormat(lang, { weekday: "short" }).format(reference);
+  return new Intl.DateTimeFormat(lang, { weekday: style }).format(reference);
 };
 
 const toSeries = (
   points: ExecutionsTimelinePoint[],
   lang: string,
 ): Series[] => {
-  const labels = points.map((p) => weekdayShort(p.dayOfWeek, lang));
+  const labels = points.map((p) => weekdayName(p.dayOfWeek, lang, "short"));
   return [
     {
       key: "executions",
@@ -60,6 +65,7 @@ export function ExecutionsChartCard() {
 
   return (
     <Card
+      testId="dashboard-executions-card"
       title={t("executionsChart.title")}
       extra={
         <RefreshButton
@@ -79,7 +85,21 @@ export function ExecutionsChartCard() {
             <Empty />
           ) : (
             <>
-              <MiniLineChart series={toSeries(points, lang)} />
+              <MiniLineChart
+                series={toSeries(points, lang)}
+                testId="dashboard-executions-chart"
+                renderTooltip={(index) => {
+                  const point = points[index];
+                  return point ? (
+                    <TooltipContent
+                      point={point}
+                      lang={lang}
+                      executionsLabel={t("executionsChart.executions")}
+                      failuresLabel={t("executionsChart.failures")}
+                    />
+                  ) : null;
+                }}
+              />
               <div style={{ display: "flex", gap: 16, marginTop: 8 }}>
                 <Legend
                   color={EXECUTIONS_COLOR}
@@ -95,6 +115,38 @@ export function ExecutionsChartCard() {
         </LoadingOverlay>
       )}
     </Card>
+  );
+}
+
+type TooltipContentProps = {
+  point: ExecutionsTimelinePoint;
+  lang: string;
+  executionsLabel: string;
+  failuresLabel: string;
+};
+
+function TooltipContent({
+  point,
+  lang,
+  executionsLabel,
+  failuresLabel,
+}: TooltipContentProps) {
+  const failureRate =
+    point.executions > 0 ? (point.failures / point.executions) * 100 : null;
+
+  return (
+    <>
+      <div style={{ fontWeight: 600, marginBottom: 2 }}>
+        {weekdayName(point.dayOfWeek, lang, "long")}
+      </div>
+      <div>
+        {executionsLabel} {formatNumber(point.executions, lang)}
+      </div>
+      <div style={{ color: FAILURES_COLOR }}>
+        {failuresLabel} {formatNumber(point.failures, lang)}
+        {failureRate !== null && ` · ${formatPercent(failureRate, lang, 0)}`}
+      </div>
+    </>
   );
 }
 

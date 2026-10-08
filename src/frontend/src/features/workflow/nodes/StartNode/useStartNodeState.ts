@@ -8,12 +8,17 @@ export function useStartNodeState() {
 	const { issue: subscriptionIssue } = useSubscriptionIssue();
 	const socketStatus = testRun?.socketStatus ?? 'idle';
 	const phase = testRun?.phase ?? 'idle';
-	const isSocketConnected = socketStatus === 'connected';
-	const isSocketConnecting = socketStatus === 'idle' || socketStatus === 'connecting';
+	// A simulated run is played locally (see simulatedTestRun.ts), so the transport,
+	// the subscription and the one-test-at-a-time rule are all beside the point —
+	// reporting them would leave the button disabled under a warning about a socket
+	// the run never touches.
+	const isSimulated = testRun?.isSimulated ?? false;
+	const isSocketConnected = isSimulated || socketStatus === 'connected';
+	const isSocketConnecting = !isSimulated && (socketStatus === 'idle' || socketStatus === 'connecting');
 	const isRunning = phase === 'starting' || phase === 'running';
 	const isBusy = phase === 'starting' || phase === 'stopping';
-	const isSubscriptionBlocked = subscriptionIssue !== null && !isRunning;
-	const isOtherTestRunning = testRun?.isOtherTestRunning ?? false;
+	const isSubscriptionBlocked = !isSimulated && subscriptionIssue !== null && !isRunning;
+	const isOtherTestRunning = !isSimulated && (testRun?.isOtherTestRunning ?? false);
 	const isStartUnavailable = !isSocketConnected || isSubscriptionBlocked || isOtherTestRunning;
 	// The backend already finished (completed, failed or terminated) but the
 	// paced animation is still playing. The main button still LOOKS like a

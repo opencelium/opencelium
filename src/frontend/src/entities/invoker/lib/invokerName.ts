@@ -1,6 +1,7 @@
 export const INVOKER_NAME_MAX_LENGTH = 200
 
 const ALLOWED_INVOKER_NAME_PATTERN = /^[A-Za-z0-9 _().-]+$/
+const MEANINGFUL_TEXT_PATTERN = /[\p{L}\p{N}]/u
 
 export const normalizeInvokerName = (value: unknown): string =>
     typeof value === 'string' ? value.trim() : ''
@@ -21,6 +22,9 @@ export const isInvokerNameDotPlacementValid = (value: unknown): boolean => {
 
 export const isInvokerNameLengthValid = (value: unknown): boolean =>
     normalizeInvokerName(value).length <= INVOKER_NAME_MAX_LENGTH
+
+export const hasMeaningfulInvokerText = (value: unknown): boolean =>
+    typeof value === 'string' && MEANINGFUL_TEXT_PATTERN.test(value.trim())
 
 export const normalizeInvokerNameForComparison = (value: unknown): string =>
     normalizeInvokerName(value).toLowerCase()

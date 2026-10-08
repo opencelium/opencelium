@@ -1,8 +1,13 @@
 import React from 'react';
+import { LuScan } from 'react-icons/lu';
 import {
+    HolderOutlined,
+    MinusOutlined,
+    UpOutlined,
     CheckOutlined,
     CloseOutlined,
     UserOutlined,
+    TeamOutlined,
     DeleteOutlined,
     EditOutlined,
     InfoOutlined,
@@ -37,20 +42,24 @@ import {
     MessageOutlined,
     UndoOutlined,
     RedoOutlined,
+    GithubOutlined,
+    AppstoreOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
 import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
-import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdPause, MdStop, MdSkipNext, MdFastForward, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff, MdCallSplit, MdLoop} from "react-icons/md";
-import {TbWebhook, TbReportAnalytics, TbLink, TbUnlink} from "react-icons/tb";
+import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdPause, MdStop, MdSkipNext, MdFastForward, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff, MdCallSplit, MdLoop, MdRadioButtonUnchecked} from "react-icons/md";
+import {TbWebhook, TbReportAnalytics, TbLink, TbUnlink, TbMouse} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
 import {GoArrowSwitch, GoWorkflow} from "react-icons/go";
+import { Waypoints } from "lucide-react";
 import {GrAggregate} from "react-icons/gr";
 
 const iconMap = {
     check: CheckOutlined,
     close: CloseOutlined,
     user: UserOutlined,
+    team: TeamOutlined,
     delete: DeleteOutlined,
     edit: EditOutlined,
     info: InfoOutlined,
@@ -70,6 +79,7 @@ const iconMap = {
     stop: MdStop,
     'step-forward': MdSkipNext,
     'skip-forward': MdFastForward,
+    mouse: TbMouse,
     download: DownloadOutlined,
     upload: UploadOutlined,
     key: KeyOutlined,
@@ -96,6 +106,7 @@ const iconMap = {
     minimize: FullscreenExitOutlined,
     'arrow-switch': GoArrowSwitch,
     workflow: GoWorkflow,
+    bindings: Waypoints,
     refresh: ReloadOutlined,
     connector: BranchesOutlined,
     flash: ThunderboltOutlined,
@@ -110,6 +121,14 @@ const iconMap = {
     redo: RedoOutlined,
     if: MdCallSplit,
     loop: MdLoop,
+    circle: MdRadioButtonUnchecked,
+    git: GithubOutlined,
+    globe: GlobalOutlined,
+    portal: AppstoreOutlined,
+    'drag-handle': HolderOutlined,
+    minus: MinusOutlined,
+    'chevron-up': UpOutlined,
+    'fit-view': LuScan,
 };
 
 export const AntIcon: IconComponent = ({

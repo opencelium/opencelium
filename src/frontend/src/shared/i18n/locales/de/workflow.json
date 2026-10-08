@@ -5,10 +5,11 @@
     "confirm": "Bestätigen",
     "apply": "Übernehmen",
     "close": "Schließen",
-    "ok": "Ok",
+    "ok": "OK",
     "delete": "Löschen",
-    "addJoint": "Verbindung hinzufügen",
-    "removeJoint": "Verbindung entfernen",
+    "remove": "Entfernen",
+    "addJoint": "Sprung hinzufügen",
+    "removeJoint": "Sprung entfernen",
     "duplicate": "Duplizieren",
     "edit": "Bearbeiten",
     "select": "Auswählen",
@@ -24,25 +25,46 @@
     "load": "Laden",
     "undo": "Rückgängig",
     "redo": "Wiederholen",
-    "createEnhancement": "Enhancement erstellen",
-    "deleteEnhancement": "Enhancement löschen",
+    "createEnhancement": "Transformation erstellen",
+    "deleteEnhancement": "Transformation löschen",
     "deleteReference": "Referenz löschen"
+  },
+  "referenceRemap": {
+    "intro": "Einige Schritte lesen den Schritt, den Sie löschen. Wählen Sie für jeden eine Ersatzmethode oder entfernen Sie die Referenz — einzelne Felder können Sie unten bei Bedarf noch anpassen:",
+    "replaceWith": "Ersetzen durch:",
+    "perFieldHint": "Optional — passen Sie nur die Felder an, die etwas anderes lesen sollen. Unverändert gelassene Felder folgen der oben gewählten Methode oder werden entfernt, falls keine gewählt wurde:",
+    "resetField": "Feld zurücksetzen",
+    "editCondition": "Bedingung bearbeiten",
+    "columnCurrent": "Aktuelle Referenz",
+    "columnHeld": "Verwendet in",
+    "columnNew": "Neue Referenz",
+    "readBy": "von {{count}} Schritten gelesen",
+    "readBy_one": "von {{count}} Schritt gelesen",
+    "clear": "Diese Referenzen entfernen",
+    "noCandidates": "Von hier aus kann nichts anderes im Workflow gelesen werden — diese Referenzen werden entfernt."
   },
   "confirmDelete": {
     "title": "Schritt löschen",
-    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
-    "clearsReferences": "Verweise darauf aus {{count}} anderen Schritten werden entfernt.",
-    "clearsReferences_one": "Verweise darauf aus {{count}} anderen Schritt werden entfernt."
+    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt.",
+    "titleSeveral": "{{count}} Schritte löschen",
+    "messageSeveral": "Möchten Sie diese {{count}} Schritte wirklich löschen? Darin verschachtelte Schritte werden ebenfalls entfernt.",
+    "referencesClearedTitle": "Referenzen entfernt",
+    "referencesCleared": "{{count}} andere Schritte haben „{{name}}“ gelesen. Diese Referenzen sind entfernt.",
+    "referencesCleared_one": "{{count}} anderer Schritt hat „{{name}}“ gelesen. Diese Referenzen sind entfernt.",
+    "referencesClearedUnnamed": "{{count}} andere Schritte haben den gelöschten Schritt gelesen. Diese Referenzen sind entfernt.",
+    "referencesClearedUnnamed_one": "{{count}} anderer Schritt hat den gelöschten Schritt gelesen. Diese Referenzen sind entfernt.",
+    "referencesClearedSeveral": "{{count}} andere Schritte haben die gelöschten Schritte gelesen. Diese Referenzen sind entfernt.",
+    "referencesClearedSeveral_one": "{{count}} anderer Schritt hat die gelöschten Schritte gelesen. Diese Referenzen sind entfernt."
   },
   "confirmRemoveJoint": {
-    "title": "Verbindung entfernen?",
-    "message": "Ohne diese Verbindung können {{count}} Schritte die von ihnen verwendeten Verweise nicht mehr lesen; diese Verweise werden entfernt.",
-    "message_one": "Ohne diese Verbindung kann {{count}} Schritt die von ihm verwendeten Verweise nicht mehr lesen; diese Verweise werden entfernt."
+    "title": "Sprung entfernen?",
+    "message": "Ohne diesen Sprung können {{count}} Schritte die von ihnen verwendeten Referenzen nicht mehr lesen; diese Referenzen werden entfernt.",
+    "message_one": "Ohne diesen Sprung kann {{count}} Schritt die von ihm verwendeten Referenzen nicht mehr lesen; diese Referenzen werden entfernt."
   },
   "confirmDependencyDrop": {
     "title": "Abhängigkeitskonflikt",
-    "message": "Dieser Vorgang beschädigt Verweise, die von {{count}} Schritten verwendet werden. Wenn Sie fortfahren, werden sie entfernt.",
-    "message_one": "Dieser Vorgang beschädigt Verweise, die von {{count}} Schritt verwendet werden. Wenn Sie fortfahren, werden sie entfernt."
+    "message": "Das Verschieben des Schritts an diese Stelle beschädigt Referenzen, die von {{count}} Schritten verwendet werden. Wenn Sie fortfahren, werden sie entfernt.",
+    "message_one": "Das Verschieben des Schritts an diese Stelle beschädigt Referenzen, die von {{count}} Schritt verwendet werden. Wenn Sie fortfahren, werden sie entfernt."
   },
   "template": {
     "addTitle": "Vorlage hinzufügen",
@@ -58,38 +80,38 @@
     }
   },
   "schedules": {
-    "title": "Laufpläne",
+    "title": "Zeitpläne",
     "add": "Zeitplan erstellen",
     "nextRun": "Nächste Ausführung in {{duration}}",
     "manual": "Nur manuell",
     "expand": "Details anzeigen",
     "collapse": "Details ausblenden",
-    "empty": "Noch keine Laufpläne für diesen Workflow.",
-    "saveFirst": "Speichern Sie den Workflow, um Laufpläne hinzuzufügen.",
+    "empty": "Noch keine Zeitpläne für diesen Workflow.",
+    "saveFirst": "Speichern Sie den Workflow, um Zeitpläne hinzuzufügen.",
     "pill": {
-      "tooltip": "Laufpläne für diesen Workflow"
+      "tooltip": "Zeitpläne für diesen Workflow"
     },
     "aggregate": {
       "running": "Ein Zeitplan wird ausgeführt",
       "error": "Letzte Ausführung fehlgeschlagen",
-      "ok": "Alle Laufpläne fehlerfrei",
-      "idle": "Keine kürzlichen Läufe"
+      "ok": "Alle Zeitpläne fehlerfrei",
+      "idle": "Keine kürzlichen Ausführungen"
     },
     "actions": {
       "delete": "Zeitplan löschen"
     },
     "create": {
       "title": "Neuer Zeitplan",
-      "subtitle": "Erstellen Sie einen Zeitplan für \"{{title}}\".",
+      "subtitle": "Erstellen Sie einen Zeitplan für „{{title}}“.",
       "submit": "Erstellen",
       "cancel": "Abbrechen",
-      "success": "Zeitplan für \"{{title}}\" erstellt.",
+      "success": "Zeitplan für „{{title}}“ erstellt.",
       "error": "Zeitplan konnte nicht erstellt werden."
     },
     "delete": {
       "title": "Zeitplan löschen",
-      "message": "Möchten Sie den Zeitplan \"{{title}}\" wirklich löschen?",
-      "success": "Zeitplan \"{{title}}\" gelöscht."
+      "message": "Möchten Sie den Zeitplan „{{title}}“ wirklich löschen?",
+      "success": "Zeitplan „{{title}}“ gelöscht."
     }
   },
   "history": {
@@ -120,36 +142,45 @@
     "loadTemplateFailed": "Vorlage konnte nicht geladen werden",
     "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden.",
     "copySnapshotIdSuccess": "Snapshot-ID in die Zwischenablage kopiert",
+    "nodeCopied": "Knoten kopiert",
+    "nodeCopied_one": "Knoten kopiert",
+    "nodePasted": "Knoten eingefügt",
+    "nodeDuplicated": "Knoten dupliziert",
     "deleteVersionSuccess": "Version gelöscht",
+    "duplicatedTitleHint": "Workflow „{{name}}“ dupliziert. Wir empfehlen, den Titel zu ändern.",
     "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?",
-    "enhancementScriptBrokenIn": "„{{method}}“ hat eine Anreicherung, deren Skript noch {{marker}} verwendet — der gelesene Verweis wurde mit dem Schritt entfernt, auf den er zeigte. Korrigieren Sie das Skript vor dem Speichern.",
-    "enhancementScriptBroken": "{{count}} Schritte haben eine Anreicherung, deren Skript noch {{marker}} verwendet — die gelesenen Verweise wurden mit den Schritten entfernt, auf die sie zeigten. Korrigieren Sie die Skripte vor dem Speichern.",
-    "enhancementScriptBroken_one": "{{count}} Schritt hat eine Anreicherung, deren Skript noch {{marker}} verwendet — der gelesene Verweis wurde mit dem Schritt entfernt, auf den er zeigte. Korrigieren Sie das Skript vor dem Speichern."
+    "enhancementScriptBrokenIn": "„{{method}}“ hat eine Transformation, deren Skript noch {{marker}} verwendet — die gelesene Referenz wurde mit dem Schritt entfernt, auf den sie zeigte. Korrigieren Sie das Skript vor dem Speichern.",
+    "enhancementScriptBroken": "{{count}} Schritte haben eine Transformation, deren Skript noch {{marker}} verwendet — die gelesenen Referenzen wurden mit den Schritten entfernt, auf die sie zeigten. Korrigieren Sie die Skripte vor dem Speichern.",
+    "enhancementScriptBroken_one": "{{count}} Schritt hat eine Transformation, deren Skript noch {{marker}} verwendet — die gelesene Referenz wurde mit dem Schritt entfernt, auf den sie zeigte. Korrigieren Sie das Skript vor dem Speichern."
   },
   "joint": {
-    "invalid": {
-      "notAMethod": "Nur eine Methode kann Ziel eines Joints sein.",
-      "differentLoopScope": "Das Ziel muss eine Methode im selben Loop-Bereich wie die ausgewählte sein — entweder beide außerhalb jeder Schleife oder beide in derselben Schleife.",
-      "entersIfScope": "Eine Verbindung kann nicht in eine Bedingung springen, in der die ausgewählte Methode nicht selbst liegt. Sie darf die umgebenden Bedingungen verlassen, aber keine andere betreten.",
-      "backwards": "Ein Joint kann nur nach vorne zeigen, auf eine Methode, die nach der ausgewählten läuft.",
-      "skipsReferencedMethod": "Dieser Joint würde {{method}} überspringen, deren Antwort diese Methode verwendet.",
-      "skipsReferencedMethodUnnamed": "Dieser Joint würde eine Methode überspringen, deren Antwort diese Methode verwendet."
+    "noTargets": "Keine Methode kann Ziel eines Sprungs von dieser Methode sein — das Ziel muss später laufen, im selben Schleifenbereich.",
+    "picking": {
+      "hint": "Klicken Sie auf eine hervorgehobene Methode, um sie als Ziel des Sprungs festzulegen. Mit Esc abbrechen."
     },
-    "removedAfterMove": "{{count}} Joints wurden entfernt — sie sind nach dieser Verschiebung nicht mehr gültig",
-    "removedAfterMove_one": "Der Joint wurde entfernt — er ist nach dieser Verschiebung nicht mehr gültig"
+    "invalid": {
+      "notAMethod": "Nur eine Methode kann Ziel eines Sprungs sein.",
+      "differentLoopScope": "Das Ziel muss eine Methode im selben Schleifenbereich wie die ausgewählte sein — entweder beide außerhalb jeder Schleife oder beide in derselben Schleife.",
+      "entersIfScope": "Ein Sprung kann nicht in eine Bedingung führen, in der die ausgewählte Methode nicht selbst liegt. Er darf die umgebenden Bedingungen verlassen, aber keine andere betreten.",
+      "backwards": "Ein Sprung kann nur nach vorne zeigen, auf eine Methode, die nach der ausgewählten läuft.",
+      "skipsReferencedMethod": "Dieser Sprung würde {{method}} überspringen, deren Antwort diese Methode verwendet.",
+      "skipsReferencedMethodUnnamed": "Dieser Sprung würde eine Methode überspringen, deren Antwort diese Methode verwendet."
+    },
+    "removedAfterMove": "{{count}} Sprünge wurden entfernt — sie sind nach dieser Verschiebung nicht mehr gültig",
+    "removedAfterMove_one": "Der Sprung wurde entfernt — er ist nach dieser Verschiebung nicht mehr gültig"
   },
   "sidebar": {
     "useConnector": {
       "title": "Konnektor verwenden",
-      "description": "Durchsuchen Sie die Liste der verfügbaren API-Aufrufe Ihres Konnektors."
+      "description": "Durchsuchen Sie die für diesen Konnektor verfügbaren API-Aufrufe."
     },
     "addOperator": {
-      "title": "Operator hinzufügen",
-      "description": "Fügen Sie einen IF- oder LOOP-Operator hinzu."
+      "title": "Logikblock hinzufügen",
+      "description": "Fügen Sie einen IF- oder LOOP-Block hinzu."
     },
     "addHttpRequest": {
       "title": "HTTP-Anfrage hinzufügen",
-      "description": "Fügen Sie eine einfache HTTP-Anfrage hinzu und geben Sie Ihre URL ein."
+      "description": "Fügen Sie eine einfache HTTP-Anfrage an eine beliebige URL hinzu."
     },
     "operatorOption": {
       "if": {
@@ -162,26 +193,26 @@
       }
     },
     "operatorStep": {
-      "header": "Operatortyp wählen",
-      "subtitle": "Wählen Sie einen Operator",
-      "searchPlaceholder": "Operator suchen"
+      "header": "Blocktyp wählen",
+      "subtitle": "Wählen Sie einen Block",
+      "searchPlaceholder": "Blöcke suchen…"
     },
     "connectorStep": {
       "header": "Konnektor wählen",
       "subtitle": "Wählen Sie zuerst einen Konnektor",
-      "searchPlaceholder": "Konnektor suchen",
+      "searchPlaceholder": "Konnektoren suchen…",
       "fixConnector": "Konnektor bearbeiten, um die Verbindung zu reparieren",
       "createConnector": "Konnektor erstellen"
     },
     "methodStep": {
       "header": "Methode wählen",
       "subtitle": "Wählen Sie eine Methode für {{connector}}",
-      "searchPlaceholder": "Methode suchen",
+      "searchPlaceholder": "Methoden suchen…",
       "connectorFallback": "Konnektor"
     },
     "chooseNextStep": "Wählen Sie Ihren nächsten Schritt",
     "willBeAddedAfter": "Wird hinzugefügt nach: {{name}}",
-    "searchPlaceholder": "suchen",
+    "searchPlaceholder": "Suchen…",
     "triggerConnection": {
       "title": "Workflow anstoßen",
       "description": "Startet den Zeitplan eines anderen Workflows über dessen Webhook, wenn dieser Schritt erfolgreich war, ohne auf dessen Abschluss zu warten."
@@ -189,9 +220,9 @@
     "triggerConnectionStep": {
       "header": "Workflow wählen",
       "subtitle": "Wählen Sie den Workflow, den Sie auslösen möchten",
-      "searchPlaceholder": "Workflow suchen",
+      "searchPlaceholder": "Workflows suchen…",
       "noSchedule": "Dieser Workflow hat noch keinen Zeitplan.",
-      "scheduleCount": "{{count}} Laufpläne",
+      "scheduleCount": "{{count}} Zeitpläne",
       "scheduleCount_one": "{{count}} Zeitplan",
       "loadError": {
         "title": "Workflows konnten nicht geladen werden",
@@ -207,8 +238,8 @@
       },
       "selectScheduleDialog": {
         "title": "Zeitplan auswählen",
-        "description": "„{{connection}}“ hat mehrere Laufpläne. Wählen Sie, welcher durch diesen Schritt ausgelöst werden soll.",
-        "placeholder": "Zeitplan suchen",
+        "description": "„{{connection}}“ hat mehrere Zeitpläne. Wählen Sie, welcher durch diesen Schritt ausgelöst werden soll.",
+        "placeholder": "Zeitpläne suchen…",
         "submit": "Weiter",
         "cancel": "Abbrechen",
         "hasWebhookTooltip": "Dieser Zeitplan hat bereits einen Webhook"
@@ -223,11 +254,11 @@
       "description": "Es gibt keine Konnektoren, die zu dieser Suche passen."
     },
     "connectorStatus": {
-      "up": "Verbindungstest erfolgreich — dieser Connector ist einsatzbereit.",
-      "authFailed": "Verbindungstest fehlgeschlagen — die Zugangsdaten des Connectors wurden abgelehnt.",
-      "down": "Verbindungstest fehlgeschlagen — der Connector konnte nicht erreicht werden.",
-      "unknown": "Dieser Connector wurde noch nicht getestet.",
-      "failedWithReason": "Verbindungstest fehlgeschlagen. Fehler: \"{{reason}}\".",
+      "up": "Konnektor-Test erfolgreich — dieser Konnektor ist einsatzbereit.",
+      "authFailed": "Konnektor-Test fehlgeschlagen — die Zugangsdaten des Konnektors wurden abgelehnt.",
+      "down": "Konnektor-Test fehlgeschlagen — der Konnektor konnte nicht erreicht werden.",
+      "unknown": "Dieser Konnektor wurde noch nicht getestet.",
+      "failedWithReason": "Konnektor-Test fehlgeschlagen. Fehler: „{{reason}}“.",
       "checkedAt": "{{message}} Geprüft {{time}}."
     },
     "methodsEmpty": {
@@ -236,10 +267,10 @@
     },
     "searchEmpty": {
       "title": "Keine Ergebnisse gefunden",
-      "description": "Keine Konnektoren, Operatoren oder Methoden entsprechen Ihrer Suche."
+      "description": "Keine Konnektoren, Logikblöcke oder Methoden entsprechen Ihrer Suche."
     },
-    "methodItemText": "Invoker-Methode",
-    "connectorMethodsFallback": "Methoden vom Invoker {{invoker}}."
+    "methodItemText": "Methode",
+    "connectorMethodsFallback": "Methoden von {{invoker}}."
   },
   "headerMenu": {
     "assignCategory": "Kategorie zuweisen",
@@ -248,11 +279,86 @@
     "downloadAsTemplateDisabledHint": "Speichern Sie den Workflow zuerst, um ihn als Vorlage herunterzuladen",
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
+    "editJson": "Als JSON bearbeiten",
     "versionHistory": "Versionsverlauf",
     "changeHistory": "Änderungsverlauf",
     "testRunLockedHint": "Während eines Testlaufs nicht verfügbar",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
+  },
+  "json": {
+    "title": "Workflow als JSON bearbeiten",
+    "reset": "Zurücksetzen",
+    "forceApply": "Erzwungen anwenden",
+    "applied": "Workflow-JSON wurde übernommen.",
+    "discard": {
+      "title": "JSON-Änderungen verwerfen?",
+      "message": "Ihre nicht gespeicherten JSON-Änderungen gehen verloren."
+    },
+    "applyConfirm": {
+      "title": "Workflow ersetzen?",
+      "message": "Beim Übernehmen wird der gesamte Workflow ersetzt und der Rückgängig-Verlauf dieser Sitzung gelöscht."
+    },
+    "forceApplyConfirm": {
+      "title": "Ungültiges Workflow-JSON erzwingen?",
+      "message": "Validierungsfehler werden ignoriert. Dadurch kann der Workflow ungültig werden. Fortfahren?"
+    },
+    "mode": {
+      "tree": "Baum",
+      "raw": "Rohtext"
+    },
+    "errors": {
+      "syntax": "Ungültiges JSON: {{reason}}",
+      "schema": "{{path}}: {{reason}}",
+      "indexShape": "{{path}}: Der Index muss durch Unterstriche getrennte Zahlen enthalten.",
+      "duplicateIndex": "{{path}}: Dieser Workflow-Index ist doppelt vorhanden.",
+      "missingParent": "{{path}}: Der übergeordnete Logikblock existiert nicht.",
+      "duplicateNode": "{{path}}: Diese Knoten-ID ist doppelt vorhanden.",
+      "startCount": "Der Workflow muss genau einen Startknoten enthalten (gefunden: {{reason}}).",
+      "edgeSource": "{{path}}: Der Quellknoten existiert nicht.",
+      "edgeTarget": "{{path}}: Der Zielknoten existiert nicht.",
+      "unknownConnector": "{{path}}: Der Konnektor existiert nicht.",
+      "invalidInvoker": "{{path}}: Die API-Definition muss zum ausgewählten Konnektor passen (erwartet: {{reason}}).",
+      "titleTaken": "{{path}}: Ein Workflow mit diesem Titel existiert bereits.",
+      "connectionNamesUnavailable": "{{path}}: Workflow-Namen werden noch geladen oder sind nicht verfügbar.",
+      "unknownCategory": "{{path}}: Diese Kategorie existiert nicht.",
+      "unknownAggregator": "{{path}}: Dieser Datenaggregator existiert nicht.",
+      "duplicateBinding": "{{path}}: Diese Feldverknüpfungs-ID ist doppelt vorhanden.",
+      "emptyBinding": "{{path}}: Eine Feldverknüpfung benötigt Referenzen oder eine Transformation.",
+      "emptyEnhancementScript": "{{path}}: Ein Transformationsskript darf nicht leer sein.",
+      "missingEnhancementResult": "{{path}}: Eine Transformation benötigt RESULT_VAR.",
+      "duplicateEntryId": "{{path}}: Diese Methoden- oder Logikblock-ID ist doppelt vorhanden.",
+      "duplicateColor": "{{path}}: Methodenfarben müssen eindeutig sein.",
+      "connectorRequired": "{{path}}: Eine CONNECTOR-Methode benötigt einen Konnektor.",
+      "connectorForbidden": "{{path}}: Dieser Methodentyp darf keinen Konnektor enthalten.",
+      "iteratorRequired": "{{path}}: Ein LOOP-Block benötigt einen Iterator.",
+      "iteratorForbidden": "{{path}}: Ein Iterator ist nur für LOOP-Blöcke erlaubt.",
+      "commentRequired": "{{path}}: Ein Kommentar-Knoten benötigt Kommentardaten.",
+      "commentForbidden": "{{path}}: Kommentardaten sind nur bei Kommentar-Knoten erlaubt.",
+      "commentAnchor": "{{path}}: Der Kommentar-Anker muss auf einen vorhandenen Knoten verweisen.",
+      "invalidExpression": "{{path}}: Der Bedingungsausdruck ist ungültig.",
+      "entryNodeMissing": "{{path}}: Für diese Methode oder diesen Logikblock existiert kein UI-Knoten.",
+      "orphanEntryNode": "{{path}}: Dieser ausführbare UI-Knoten hat keine Methode oder keinen Logikblock.",
+      "duplicateEdge": "{{path}}: Diese Kanten-ID ist doppelt vorhanden.",
+      "duplicateFlowchart": "{{path}}: Diese Legacy-Flowchart-ID ist doppelt vorhanden.",
+      "flowchartNode": "{{path}}: Das Legacy-Flowchart verweist auf einen fehlenden Knoten.",
+      "duplicateFlowchartEdge": "{{path}}: Diese Legacy-Kanten-ID ist doppelt vorhanden.",
+      "flowchartEdgeMismatch": "{{path}}: Die Legacy-Kante stimmt nicht mit der Workflow-Kante überein.",
+      "flowchartEdgeCount": "{{path}}: Die Anzahl der Legacy- und Workflow-Kanten stimmt nicht überein.",
+      "mapperFailed": "Der Workflow konnte nicht neu erstellt werden: {{reason}}",
+      "mapperDroppedMethods": "Der Workflow-Mapper hat alle angegebenen Methoden verworfen.",
+      "brokenReference": "{{path}} enthält eine nicht auflösbare Referenz auf {{reason}}.",
+      "brokenScript": "{{path}} enthält ein fehlerhaftes Transformationsskript.",
+      "illegalJoint": {
+        "self": "{{path}} enthält einen Sprung zu sich selbst.",
+        "not-a-method": "{{path}} enthält einen Sprung zu einem Knoten, der keine Methode ist.",
+        "different-loop-scope": "{{path}} enthält einen Sprung über verschiedene Schleifenbereiche hinweg.",
+        "enters-if-scope": "{{path}} enthält einen Sprung in einen IF-Bereich hinein.",
+        "backwards": "{{path}} enthält einen rückwärts gerichteten Sprung.",
+        "skips-referenced-method": "{{path}} enthält einen Sprung, der eine referenzierte Methode überspringt.",
+        "missingTarget": "{{path}} enthält einen Sprung mit fehlendem Ziel."
+      }
+    }
   },
   "assignCategoryDialog": {
     "title": "Kategorie zuweisen",
@@ -272,7 +378,7 @@
       "loop": "LOOP"
     },
     "nodeKind": {
-      "httpRequest": "HTTP-Request",
+      "httpRequest": "HTTP-Anfrage",
       "webhook": "Webhook",
       "if": "IF",
       "loop": "LOOP"
@@ -289,7 +395,7 @@
       "nodesRemoved": "{{count}} Knoten gelöscht",
       "nodeMoved": "{{name}} verschoben",
       "nodesMoved": "{{count}} Knoten verschoben",
-      "changedLabel": "Label zu {{label}} geändert",
+      "changedLabel": "Bezeichnung zu {{label}} geändert",
       "methodConfig": "Anfrage von {{name}} bearbeitet",
       "methodUrl": "URL von {{name}} bearbeitet",
       "methodHeader": "Header von {{name}} bearbeitet",
@@ -297,13 +403,13 @@
       "referenceAdded": "{{section}}-Referenz in {{name}} hinzugefügt",
       "referenceRemoved": "{{section}}-Referenz in {{name}} gelöscht",
       "referenceEdited": "{{section}}-Referenz in {{name}} bearbeitet",
-      "enhancement": "{{section}}-Enhancement von {{name}} bearbeitet",
-      "enhancementLanguage": "Enhancement-Sprache von {{name}} aktualisiert",
-      "enhancementDescription": "Enhancement-Beschreibung von {{name}} aktualisiert",
-      "enhancementRemoved": "Enhancement von {{name}} gelöscht",
+      "enhancement": "{{section}}-Transformation von {{name}} bearbeitet",
+      "enhancementLanguage": "Sprache der Transformation von {{name}} aktualisiert",
+      "enhancementDescription": "Beschreibung der Transformation von {{name}} aktualisiert",
+      "enhancementRemoved": "Transformation von {{name}} gelöscht",
       "conditionConfig": "Bedingung von {{name}} bearbeitet",
-      "aggregatorConfigured": "Aggregator von {{name}} konfiguriert",
-      "aggregatorRemoved": "Aggregator von {{name}} gelöscht",
+      "aggregatorConfigured": "Datenaggregator für {{name}} zugewiesen",
+      "aggregatorRemoved": "Datenaggregator von {{name}} entfernt",
       "connectorConfig": "Konnektor von {{name}} geändert",
       "edgesChanged": "Verbindungen geändert",
       "references": "Referenzen geändert",
@@ -330,32 +436,51 @@
       "click": "Klick",
       "doubleClick": "Doppelklick",
       "ctrl": "Strg",
+      "c": "C",
+      "d": "D",
+      "f": "F",
+      "v": "V",
       "esc": "Esc",
       "s": "S",
       "z": "Z",
       "redo": "(Umschalt + Z / Y)",
       "shift": "Umschalt",
-      "delete": "Entf"
+      "delete": "Entf / Rücktaste"
     },
     "items": {
       "pan": "Arbeitsfläche verschieben",
       "zoom": "Vergrößern und verkleinern",
+      "boxSelect": "Alle Knoten im aufgezogenen Rahmen auswählen",
       "openConfig": "Knotenkonfiguration öffnen",
-      "moveNode": "Knoten verschieben",
-      "duplicate": "Knoten duplizieren statt verschieben",
-      "multiSelect": "Mehrere Knoten auswählen",
-      "deleteNode": "Ausgewählten Knoten löschen",
+      "moveNode": "Einen Knoten oder alle ausgewählten Knoten verschieben",
+      "duplicate": "Den gezogenen Knoten oder alle ausgewählten Knoten kopieren statt verschieben",
+      "multiSelect": "Knoten zur Auswahl hinzufügen oder daraus entfernen",
+      "selectScope": "Bei IF oder Schleife: zusammen mit ihrem gesamten Bereich auswählen",
+      "copyNode": "Ausgewählte Knoten kopieren",
+      "pasteNode": "Kopierte Knoten nach dem ausgewählten Knoten einfügen (bei IF oder Schleife wählen Sie: innerhalb ihres Bereichs oder danach)",
+      "duplicateNode": "Ausgewählten Knoten duplizieren",
+      "searchNode": "Workflow-Knoten suchen",
+      "deleteNode": "Ausgewählte Knoten löschen",
       "save": "Workflow speichern",
       "undo": "Letzte Änderung auf der Arbeitsfläche rückgängig machen",
       "redo": "Rückgängig gemachte Änderung wiederherstellen",
       "close": "Geöffnetes Menü, Dialog oder Panel schließen",
-      "dismissError": "Fehlermarkierung an einem Schritt ausblenden"
+      "dismissError": "Fehlermarkierung an einem Schritt ausblenden",
+      "cancelJoint": "Erstellen eines Sprungs abbrechen"
     }
+  },
+  "pasteOperator": {
+    "title": "Wo soll der Knoten eingefügt werden?",
+    "message": "Wählen Sie, ob der kopierte Knoten innerhalb des Bereichs des ausgewählten Blocks oder nach dem Block und seinem Bereich eingefügt werden soll.",
+    "inScope": "Im Bereich",
+    "after": "Nach dem Block"
   },
   "contextMenu": {
     "changeLabel": "Bezeichnung ändern",
+    "changeConnector": "Anderen Konnektor verwenden",
+    "changeConnectorImage": "Konnektor-Bild ändern",
     "openConfiguration": "Konfiguration öffnen",
-    "configureAggregator": "Aggregator konfigurieren",
+    "configureAggregator": "Datenaggregator zuweisen…",
     "request": "Anfrage",
     "editUrl": "URL bearbeiten",
     "editHeader": "Header bearbeiten",
@@ -373,33 +498,48 @@
       "minimize": "Kommentar minimieren"
     }
   },
+  "connectorImageDialog": {
+    "title": "Konnektor-Bild",
+    "intro": "Dieses Bild gehört zum Konnektor „{{connector}}“. Eine Änderung wirkt sich auf alle Schritte und Workflows aus, die diesen Konnektor verwenden.",
+    "updated": "Konnektor-Bild aktualisiert",
+    "updateFailed": "Konnektor-Bild konnte nicht aktualisiert werden",
+    "removed": "Konnektor-Bild entfernt",
+    "removeFailed": "Konnektor-Bild konnte nicht entfernt werden",
+    "confirmRemoveMessage": "Das Bild wird überall entfernt, wo dieser Konnektor verwendet wird. Dies kann nicht rückgängig gemacht werden."
+  },
+  "changeConnectorDialog": {
+    "title": "Anderen Konnektor verwenden",
+    "intro": "Wählen Sie für diesen Schritt einen anderen Konnektor der API-Definition „{{invoker}}“.",
+    "selectPlaceholder": "Konnektor auswählen",
+    "change": "Ändern"
+  },
   "aggregatorDialog": {
-    "title": "Aggregator konfigurieren",
+    "title": "Datenaggregator zuweisen",
     "selectPlaceholder": "Datenaggregator auswählen",
     "createNewTooltip": "Neuen Datenaggregator erstellen",
     "emptyState": "Wählen Sie einen vorhandenen Datenaggregator aus oder erstellen Sie einen neuen.",
     "confirmUnassign": {
-      "title": "Zugewiesenen Datenaggregator löschen?",
+      "title": "Datenaggregator von diesem Schritt entfernen?",
       "message": "Dadurch wird der Datenaggregator von diesem Schritt entfernt. Der Datenaggregator selbst wird nicht gelöscht und bleibt für andere Schritte verfügbar."
     }
   },
   "templateConnectorMapping": {
-    "title": "Vorlagen-Connectoren zuordnen",
-    "intro": "Diese Vorlage wurde mit Connectoren aus einer anderen Umgebung erstellt. Wählen Sie für jeden Connector, welcher Connector in dieser Umgebung verwendet werden soll, bevor der Workflow geladen wird.",
-    "noInvokerHint": "Kein Invoker-Hinweis verfügbar",
+    "title": "Vorlagen-Konnektoren zuordnen",
+    "intro": "Diese Vorlage wurde mit Konnektoren aus einer anderen Umgebung erstellt. Wählen Sie für jeden Konnektor, welcher Konnektor in dieser Umgebung verwendet werden soll, bevor der Workflow geladen wird.",
+    "noInvokerHint": "Kein Hinweis auf die API-Definition verfügbar",
     "usedBy": "Verwendet von: {{methods}}",
-    "unknownConnector": "Connector Nr. {{id}}",
-    "selectPlaceholder": "Connector auswählen",
-    "createNewTooltip": "Neuen Connector erstellen"
+    "unknownConnector": "Konnektor Nr. {{id}}",
+    "selectPlaceholder": "Konnektor auswählen",
+    "createNewTooltip": "Neuen Konnektor erstellen"
   },
   "node": {
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
     "branchContinue": "weiter",
-    "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort.",
-    "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
-    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf.",
+    "asyncBadge": "Löst den anderen Workflow aus, ohne auf dessen Antwort zu warten (asynchrone Anfrage).",
+    "aggregatorBadge": "Ergebnisse werden mit dem Datenaggregator „{{name}}“ zusammengeführt.",
+    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Konnektors auf.",
     "testRunIteration": "{{iterator}} = {{count}}",
     "testRunIterator": "{{iterator}} =",
     "skipToNextIteration": "Zur nächsten Iteration springen",
@@ -410,7 +550,7 @@
     "commentPlaceholder": "Kommentar",
     "autoNameChangeComment": "Workflow-Name wird zu {{name}} geändert",
     "autoDescriptionChangeComment": "Workflow-Beschreibung wird zu {{description}} geändert",
-    "autoCategoryAssignedComment": "Kategorie \"{{category}}\" wird zugewiesen",
+    "autoCategoryAssignedComment": "Kategorie „{{category}}“ wird zugewiesen",
     "autoCategoryClearedComment": "Kategoriezuweisung wird entfernt"
   },
   "placeholders": {
@@ -428,6 +568,7 @@
     "dialogTitleLoop": "LOOP-Bedingung",
     "addCondition": "Bedingung hinzufügen",
     "addGroup": "Gruppe hinzufügen",
+    "dragToReorder": "Ziehen zum Neuordnen",
     "comparisonUnknown": "Noch nicht verfügbar",
     "comparisonError": "Kann nicht verglichen werden",
     "comparisonTrue": "Wahr",
@@ -443,21 +584,21 @@
           "description": "Iteriert durch ein Array.",
           "args": [
             {
-              "code": "o1",
+              "code": "liste",
               "text": "Ein Array, durch das iteriert wird."
             }
           ],
           "examples": [
             {
-              "code": "o1 = [\"a\", \"b\", \"c\"]",
+              "code": "liste = [\"a\", \"b\", \"c\"]",
               "result": "Iteriert durch \"a\", \"b\", \"c\""
             },
             {
-              "code": "o1 = [1, 2, 3]",
+              "code": "liste = [1, 2, 3]",
               "result": "Iteriert durch 1, 2, 3"
             },
             {
-              "code": "o1 = []",
+              "code": "liste = []",
               "result": "Führt keine Iterationen aus"
             }
           ]
@@ -466,21 +607,21 @@
           "description": "Iteriert durch die Eigenschaften eines Objekts.",
           "args": [
             {
-              "code": "o1",
+              "code": "objekt",
               "text": "Ein Objekt, dessen Eigenschaften iteriert werden sollen."
             }
           ],
           "examples": [
             {
-              "code": "o1 = {\"name\":\"Hob\",\"age\":123}",
+              "code": "objekt = {\"name\":\"Hob\",\"age\":123}",
               "result": "Iteriert durch die Eigenschaften \"name\", \"age\""
             },
             {
-              "code": "o1 = {\"a\":1,\"b\":2}",
+              "code": "objekt = {\"a\":1,\"b\":2}",
               "result": "Iteriert durch die Eigenschaften \"a\", \"b\""
             },
             {
-              "code": "o1 = {}",
+              "code": "objekt = {}",
               "result": "Führt keine Iterationen aus"
             }
           ]
@@ -489,25 +630,25 @@
           "description": "Teilt eine Zeichenkette anhand eines Trennzeichens und iteriert durch das resultierende Array.",
           "args": [
             {
-              "code": "o1",
+              "code": "text",
               "text": "Eine zu teilende Zeichenkette."
             },
             {
-              "code": "o2",
+              "code": "trennzeichen",
               "text": "Ein Trennzeichen."
             }
           ],
           "examples": [
             {
-              "code": "o1 = \"a,b,c\", o2 = \",\"",
+              "code": "text = \"a,b,c\", trennzeichen = \",\"",
               "result": "Iteriert durch \"a\", \"b\", \"c\""
             },
             {
-              "code": "o1 = \"one|two|three\", o2 = \"|\"",
+              "code": "text = \"one|two|three\", trennzeichen = \"|\"",
               "result": "Iteriert durch \"one\", \"two\", \"three\""
             },
             {
-              "code": "o1 = \"abc\", o2 = \",\"",
+              "code": "text = \"abc\", trennzeichen = \",\"",
               "result": "Iteriert einmal durch \"abc\""
             }
           ]
@@ -536,32 +677,37 @@
         "lessOrEqual": "Kleiner oder gleich",
         "contains": "Enthält",
         "notContains": "Enthält nicht",
-        "containsSubStr": "Enthält Teilzeichenfolge",
-        "notContainsSubStr": "Enthält Teilzeichenfolge nicht",
-        "allowList": "Zulassungsliste",
-        "denyList": "Sperrliste",
-        "isTypeOf": "Ist vom Typ",
-        "propertyExists": "Eigenschaft existiert",
-        "propertyNotExists": "Eigenschaft existiert nicht",
-        "regEx": "Regulärer Ausdruck",
+        "containsSubStr": "Enthält Text",
+        "notContainsSubStr": "Enthält Text nicht",
+        "allowList": "Ist einer von …",
+        "denyList": "Ist keiner von …",
+        "isTypeOf": "Datentyp ist",
+        "propertyExists": "Feld vorhanden",
+        "propertyNotExists": "Feld fehlt",
+        "regEx": "Entspricht Muster (Regex)",
         "isEmpty": "Ist leer",
         "isNotEmpty": "Ist nicht leer",
-        "isNull": "Ist Null",
-        "isNotNull": "Ist nicht Null"
+        "isNull": "Hat keinen Wert (null)",
+        "isNotNull": "Hat einen Wert"
       },
       "loop": {
-        "for": "For",
-        "forIn": "ForIn",
-        "splitString": "String aufteilen"
+        "for": "Liste durchlaufen",
+        "forIn": "Felder eines Objekts durchlaufen",
+        "splitString": "Text aufteilen und durchlaufen"
       }
     }
   },
   "methodConfig": {
     "body": "Body",
     "header": "Header",
-    "requestUrl": "Request-URL",
+    "requestUrl": "Anfrage-URL",
     "response": "Antwort",
-    "liveBadge": "Live-Ausführungsergebnis"
+    "liveBadge": "Live-Ausführungsergebnis",
+    "queryParams": {
+      "delete": "Parameter löschen",
+      "encode": "Vor dem Senden kodieren",
+      "raw": "Unverändert senden"
+    }
   },
   "response": {
     "success": "Erfolg",
@@ -593,19 +739,19 @@
     "empty": "Leer"
   },
   "enhancement": {
-    "title": "Enhancement",
+    "title": "Transformation",
     "language": "Sprache",
     "script": "Skript",
-    "emptyState": "Bitte klicken Sie auf die Referenz, um ihr Enhancement anzuzeigen.",
-    "deleteDisabledMultipleReferences": "Dieses Feld hat mehr als eine Referenz, daher muss es in ein Enhancement eingebettet bleiben.",
+    "emptyState": "Klicken Sie auf die Referenz, um ihre Transformation anzuzeigen.",
+    "deleteDisabledMultipleReferences": "Dieses Feld hat mehr als eine Referenz, daher muss es in eine Transformation eingebettet bleiben.",
     "confirmDelete": {
-      "title": "Enhancement löschen?",
-      "message": "Dadurch werden das Enhancement und sein Skript endgültig entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+      "title": "Transformation löschen?",
+      "message": "Dadurch werden die Transformation und ihr Skript endgültig entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
     },
     "directReference": {
       "title": "Direkte Referenz",
-      "description": "Dieses Feld hat kein Enhancement — es besteht eine direkte Eins-zu-eins-Referenz zwischen den beiden unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript.",
-      "descriptionMany": "Dieses Feld hat kein Enhancement — es besteht eine direkte Referenz zwischen den unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript."
+      "description": "Dieses Feld hat keine Transformation — es besteht eine direkte Eins-zu-eins-Referenz zwischen den beiden unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als eine Transformation mit Skript.",
+      "descriptionMany": "Dieses Feld hat keine Transformation — es besteht eine direkte Referenz zwischen den unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als eine Transformation mit Skript."
     },
     "optimizeDirectReferences": {
       "title": "Optimierung verfügbar",
@@ -620,10 +766,10 @@
       "loadingHint": "Wird aufgelöst…",
       "noReferences": "Keine Referenzen",
       "references": "Referenzen",
-      "resultLabel": "RESULT_VAR · {{type}}",
+      "resultLabel": "Ergebnis ({{type}})",
       "errorTitle": "Fehler",
       "errorNotPaused": "Starten Sie einen pausierten Testlauf, um dies aus den Live-Ausführungsdaten aufzulösen.",
-      "errorMethodFailed": "Die Ausführung dieser Methode ist in diesem Lauf fehlgeschlagen — ihre Anfrage könnte unvollständig sein.",
+      "errorMethodFailed": "Die Ausführung dieser Methode ist bei diesem Testlauf fehlgeschlagen — ihre Anfrage könnte unvollständig sein.",
       "errorFieldNotFound": "Für dieses Feld konnte kein Wert in der tatsächlich gesendeten Anfrage gefunden werden.",
       "errorNotRun": "Diese Methode wurde in der aktuellen Testsitzung noch nicht ausgeführt. Starten oder setzen Sie den pausierten Test fort und prüfen Sie danach erneut.",
       "status": {
@@ -636,24 +782,24 @@
   },
   "description": {
     "label": "Beschreibung",
-    "placeholder": "Beschreibung für dieses Enhancement hinzufügen…"
+    "placeholder": "Beschreibung für diese Transformation hinzufügen…"
   },
   "args": {
     "sectionTitle": "Variableninformationen",
-    "fromResponseStatus": "wird aus dem Response-Status der Methode <method>{{method}}</method> übernommen.",
-    "usedAsField": "wird als Wert des Felds <field>{{field}}</field> im {{location}} der Methode <method>{{method}}</method> verwendet.",
-    "takenFromField": "wird aus dem Wert des Felds <field>{{field}}</field> im {{location}} der Methode <method>{{method}}</method> übernommen.",
+    "fromResponseStatus": "wird aus dem Antwort-Status der Methode <method>{{method}}</method> übernommen.",
+    "usedAsField": "wird als Wert des Felds <field>{{field}}</field> ({{location}}) der Methode <method>{{method}}</method> verwendet.",
+    "takenFromField": "wird aus dem Wert des Felds <field>{{field}}</field> ({{location}}) der Methode <method>{{method}}</method> übernommen.",
     "locations": {
-      "requestBody": "Request-Body",
-      "requestHeader": "Request-Header",
-      "requestUrl": "Request-URL",
-      "responseStatus": "Response-Status",
-      "responseBody": "Response-Body",
-      "responseHeader": "Response-Header"
+      "requestBody": "Anfrage-Body",
+      "requestHeader": "Anfrage-Header",
+      "requestUrl": "Anfrage-URL",
+      "responseStatus": "Antwort-Status",
+      "responseBody": "Antwort-Body",
+      "responseHeader": "Antwort-Header"
     }
   },
   "references": {
-    "responseStatus": "Response-Status",
+    "responseStatus": "Antwort-Status",
     "rootObject": "Das Wurzelobjekt",
     "firstArrayElement": "Erstes Element des Arrays",
     "wholeArray": "Das gesamte Array",
@@ -688,7 +834,7 @@
     "selectedValue": "Ausgewählter Wert",
     "mixedValueTitle": "Gemischter Wert",
     "mixedValueDescription": "Dieses Feld sollte entweder nur Klartext oder nur Referenzen enthalten. Gemischte Werte sind nicht zulässig.",
-    "help": "Wählen Sie ein primitives Feld im JSON-Baum aus, um es zu inspizieren und Referenzen anzuhängen."
+    "help": "Wählen Sie einen einfachen Wert im Anfragebaum aus, um ihn zu prüfen und Referenzen anzuhängen."
   },
   "referenceInfo": {
     "title": "Referenzinformationen",
@@ -699,14 +845,107 @@
       "message": "Dadurch wird diese Referenz endgültig entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
     }
   },
+  "bindingLens": {
+    "show": "Feldverknüpfungen anzeigen",
+    "hide": "Feldverknüpfungen ausblenden",
+    "unknownMethod": "Unbekannte Methode",
+    "pairTooltip": "{{provider}} → {{consumer}}",
+    "bindingCount": "{{count}} Verknüpfungen",
+    "bindingCount_one": "{{count}} Verknüpfung",
+    "fieldCount": "{{count}} Felder",
+    "fieldCount_one": "{{count}} Feld",
+    "referenceCount": "{{count}} Referenzen",
+    "referenceCount_one": "{{count}} Referenz",
+    "brokenCount": "{{count}} ungültig",
+    "brokenCount_one": "{{count}} ungültig",
+    "expandHint": "zum Aufklappen klicken",
+    "editHint": "zum Bearbeiten klicken",
+    "drawerTitle": "Feldverknüpfung",
+    "drawerGone": "Diese Feldverknüpfung existiert nicht mehr.",
+    "drawerValueReference": "Diese Referenz steht direkt im Wert des Feldes, es gibt also noch keine Transformation zu bearbeiten. Erstellen Sie eine, um den Wert per Skript umzuwandeln, oder öffnen Sie den Methoden-Editor, um die Referenz zu ändern oder zu entfernen.",
+    "drawerSimpleCode": "Diese Transformation wurde im alten einfachen Modus erstellt; ihre Logik ist kein Skript und kann hier nicht angezeigt werden. Was Sie unten eingeben, ersetzt sie.",
+    "openInBodyEditor": "Im Body-Editor öffnen",
+    "collapseCard": "Einklappen",
+    "cardEmpty": "Keine Feldverknüpfungen für diese Methode.",
+    "rowEditHint": "Klicken, um diese Feldverknüpfung zu bearbeiten",
+    "rowAmbiguous": "{{count}} Verknüpfungen an diesem Feld — klicken Sie einen ihrer Bögen an, um sie zu bearbeiten",
+    "rowAmbiguous_one": "{{count}} Verknüpfung an diesem Feld",
+    "cardReceives": "Empfängt",
+    "cardProvides": "Stellt bereit",
+    "badgeReceives": "Empfängt {{count}} Felder von anderen Methoden",
+    "badgeReceives_one": "Empfängt {{count}} Feld von einer anderen Methode",
+    "badgeProvides": "{{count}} Antwortfelder werden von anderen Methoden gelesen",
+    "badgeProvides_one": "{{count}} Antwortfeld wird von einer anderen Methode gelesen",
+    "badgeBroken": "{{count}} ungültige Referenzen",
+    "badgeBroken_one": "{{count}} ungültige Referenz",
+    "badgePinHint": "klicken, um diese Verknüpfungen sichtbar zu halten",
+    "badgeUnpinHint": "klicken, um die Auswahl aufzuheben",
+    "focusHint": "Bewegen Sie den Zeiger über eine Methode, um ihre Feldverknüpfungen zu sehen; klicken Sie auf ihr Abzeichen, um sie sichtbar zu halten.",
+    "tableShow": "Liste der Feldverknüpfungen anzeigen",
+    "tableHide": "Liste der Feldverknüpfungen ausblenden",
+    "tableSearch": "Nach Methode oder Feld filtern",
+    "tableColumnTarget": "Empfängt",
+    "tableColumnSource": "Von",
+    "sourceCount": "{{count}} Quellen",
+    "sourceCount_one": "{{count}} Quelle",
+    "tableExpandAll": "Alle aufklappen",
+    "tableCollapseAll": "Alle zuklappen",
+    "tableExpandRow": "Quellen anzeigen",
+    "tableCollapseRow": "Quellen ausblenden",
+    "reasonOutOfScope": "Hier nicht lesbar",
+    "reasonMissingMethod": "Methode fehlt",
+    "reasonMissingVariable": "Skriptvariable fehlt",
+    "tableNoMatch": "Keine Feldverknüpfungen entsprechen diesem Filter.",
+    "legendTitle": "Feldverknüpfungen",
+    "legendEmpty": "Keine Body- oder Header-Verknüpfungen in diesem Workflow.",
+    "legendDirect": "{{count}} direkte Referenzen",
+    "legendDirect_one": "{{count}} direkte Referenz",
+    "legendEnhancement": "{{count}} mit einer Transformation",
+    "legendEnhancement_one": "{{count}} mit einer Transformation",
+    "legendBroken": "{{count}} ungültig",
+    "legendBroken_one": "{{count}} ungültig",
+    "legendNotShown": "{{count}} nicht dargestellt",
+    "legendNotShown_one": "{{count}} nicht dargestellt"
+  },
   "requestData": "Anfragedaten",
   "graphqlBody": {
-    "masterPasswordTitle": "Geben Sie das Master-Passwort ein, um auf die GraphQL-API dieses Connectors zuzugreifen",
-    "editorHint": "Strg + Leertaste für die Autovervollständigung. Nur die Abfrage des aktiven Tabs wird ausgeführt, wenn diese Methode läuft — Tabs werden nach dem Operationsnamen der Abfrage benannt (z. B. \"query MyQuery {...}\"), anonyme Abfragen bleiben daher \"<untitled>\".",
-    "connectorFailed": "Der Connector konnte nicht geladen werden. Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut.",
-    "loginFailed": "Die Authentifizierung bei der GraphQL-API dieses Connectors ist fehlgeschlagen. Überprüfen Sie dessen Zugangsdaten und versuchen Sie es erneut.",
+    "masterPasswordTitle": "Geben Sie das Master-Passwort ein, um auf die GraphQL-API dieses Konnektors zuzugreifen",
+    "editorHint": "Strg + Leertaste für die Autovervollständigung. Nur die Abfrage des aktiven Tabs wird ausgeführt, wenn diese Methode läuft — Tabs werden nach dem Operationsnamen der Abfrage benannt (z. B. „query MyQuery {...}“), anonyme Abfragen bleiben daher „<untitled>“.",
+    "connectorFailed": "Der Konnektor konnte nicht geladen werden. Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut.",
+    "loginFailed": "Die Authentifizierung bei der GraphQL-API dieses Konnektors ist fehlgeschlagen. Überprüfen Sie dessen Zugangsdaten und versuchen Sie es erneut.",
     "masterPasswordNotConfigured": "Es ist kein Master-Passwort konfiguriert",
-    "masterPasswordNotConfiguredDescription": "Bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten, um auf die GraphQL-API dieses Connectors zugreifen zu können.",
+    "masterPasswordNotConfiguredDescription": "Bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten, um auf die GraphQL-API dieses Konnektors zugreifen zu können.",
     "retry": "Erneut versuchen"
+  },
+  "minimap": {
+    "title": "Minimap",
+    "ariaLabel": "Workflow-Minimap",
+    "stepCount": "{{count}} Schritte",
+    "stepCount_one": "{{count}} Schritt",
+    "collapse": "Minimap einklappen",
+    "expand": "Minimap ausklappen",
+    "attention": "{{count}} Schritte benötigen Aufmerksamkeit",
+    "attention_one": "{{count}} Schritt benötigt Aufmerksamkeit",
+    "issueCounter": "{{current}} / {{total}}",
+    "previousIssue": "Vorheriger Schritt mit einem Problem",
+    "nextIssue": "Nächster Schritt mit einem Problem",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "fitView": "Workflow an den Bildschirm anpassen",
+    "legend": {
+      "system": "System",
+      "trigger": "Ausgelöster Workflow",
+      "operator": "Logikblock",
+      "otherConnectors": "Weitere Konnektoren"
+    },
+    "problems": {
+      "testRunFailed": "Der Testlauf ist bei diesem Schritt fehlgeschlagen.",
+      "binding": "{{count}} fehlerhafte Feldverknüpfungen: {{reason}}",
+      "binding_one": "{{count}} fehlerhafte Feldverknüpfung: {{reason}}",
+      "ifUnconfigured": "Die IF-Bedingung ist nicht konfiguriert.",
+      "loopUnconfigured": "Die Schleife ist nicht konfiguriert."
+    },
+    "showDetails": "Fehlerdetails anzeigen",
+    "hideDetails": "Fehlerdetails ausblenden"
   }
 }

@@ -10,6 +10,7 @@ import { useWorkflowConnectionState } from './useWorkflowConnectionState';
 import { useWorkflowViewData } from './useWorkflowViewData';
 import { useWorkflowChangeTracking } from './useWorkflowChangeTracking';
 import { useWorkflowDerivedData } from './useWorkflowDerivedData';
+import { useSimulatedWorkflowGraph } from './simulatedWorkflowGraph';
 
 type Params = {
 	connectionId?: string;
@@ -31,7 +32,8 @@ export const useWorkflowPageState = ({ connectionId, readOnly,
 		onFieldBindingsChange: connection.setFieldBindings,
 		confirmDependencyDrop: (invalidReferences) => confirm({
 			title: t('confirmDependencyDrop.title'),
-			message: t('confirmDependencyDrop.message', { count: invalidReferences.length }),
+			message: t('confirmDependencyDrop.message',
+				{ count: new Set(invalidReferences.map((ref) => ref.consumerNodeId)).size }),
 			confirmText: t('actions.confirm'),
 			cancelText: t('actions.cancel'),
 			confirmVariant: 'danger',
@@ -40,6 +42,10 @@ export const useWorkflowPageState = ({ connectionId, readOnly,
 	connection.applyConnectionRef.current = (state) => workflow.setWorkflowGraph(
 		state.nodes, state.edges, state.viewport, { centerStart: true },
 	);
+	useSimulatedWorkflowGraph(!connectionId, (graph) => {
+		workflow.setWorkflowGraph(graph.nodes, graph.edges, undefined, { centerStart: true });
+		connection.setFieldBindings(graph.fieldBindings);
+	});
 	const view = useWorkflowViewData({ connectionId,
 		createdConnectionId: connection.createdConnectionId,
 		title: connection.headerState.title,

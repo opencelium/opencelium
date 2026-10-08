@@ -1,0 +1,11 @@
+.connectorImageDialogIntro {
+  margin: 0 0 16px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.connectorImageDialogTile {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 8px;
+}

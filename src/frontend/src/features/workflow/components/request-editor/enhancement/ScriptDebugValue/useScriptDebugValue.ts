@@ -12,6 +12,7 @@ export type ScriptDebugStatus = 'idle' | 'loading' | 'value' | 'error' | 'stale'
 // each other and with whatever script text they were actually resolved from.
 export function useScriptDebugValue(enhancement: Enhancement | undefined, connection: Connection | null | undefined, currentMethod: MethodWithId | undefined) {
 	const testRun = useTestRun();
+	const isAvailable = testRun?.isPaused ?? false;
 	const [isOpen, setIsOpen] = useState(false);
 	const [status, setStatus] = useState<ScriptDebugStatus>('idle');
 	const [snapshot, setSnapshot] = useState<ScriptDebugResult | null>(null);
@@ -56,5 +57,5 @@ export function useScriptDebugValue(enhancement: Enhancement | undefined, connec
 		setStatus((current) => (current === 'value' || current === 'error' || current === 'stale' ? 'stale' : current));
 	}, []);
 
-	return { isOpen, status, snapshot, toggle, markStale };
+	return { isAvailable, isOpen: isAvailable && isOpen, status, snapshot, toggle, markStale };
 }

@@ -1,7 +1,7 @@
 {
   "question": {
     "confirmation": {
-      "delete": "Are you sure you want to delete {{entityName}} by {{field}} {{value}}?"
+      "delete": "Are you sure you want to delete \"{{value}}\"?"
     }
   },
   "menu": {
@@ -11,12 +11,12 @@
     "schedules": "Schedules",
     "usersAccess": "Users & Access",
     "users": "Users",
-    "groups": "Groups",
+    "groups": "Roles",
     "ldapCheck": "LDAP Check",
     "configurations": "Configurations",
-    "invokers": "Invokers",
+    "invokers": "API Definitions",
     "connectionTemplates": "Workflow Templates",
-    "dataAggregator": "Data Aggregator",
+    "dataAggregator": "Data Aggregators",
     "notificationTemplates": "Notification Templates",
     "categories": "Categories",
     "supportFiles": "Support Files",
@@ -24,7 +24,7 @@
     "licenseManagement": "License Management",
     "updateAssistant": "Update Assistant",
     "systemCheck": "System Check",
-    "config": "Configurations",
+    "config": "System Configuration",
     "ui": "UI"
   },
   "commandPalette": {
@@ -52,12 +52,16 @@
       "changeTheme": "Change the application theme",
       "uploadTemplate": "Upload a workflow template file",
       "downloadTemplate": "Download a workflow template file",
-      "uploadInvoker": "Upload an invoker file",
-      "downloadInvoker": "Download an invoker file",
+      "uploadInvoker": "Upload an API definition file",
+      "installOnlineInvokers": "Install API definitions from the OpenCelium online repository",
+      "downloadInvoker": "Download an API definition file",
       "systemCheck": "Open the system check page",
       "ldapCheck": "Open the LDAP connectivity check page",
       "workflow": "Search the current workflow",
-      "help": "View all commands"
+      "help": "View all commands",
+      "onboarding": "Restart the setup tour",
+      "workflowTutorial": "Replay the workflow tutorial",
+      "dashboardTour": "Replay the dashboard tour"
     },
     "footer": {
       "select": "Select",
@@ -81,14 +85,19 @@
   "sidebar": {
     "expand": "Expand sidebar",
     "collapse": "Collapse sidebar",
-    "logout": "Sign Out",
+    "logout": "Sign out",
     "confirmLogout": {
       "title": "Sign out",
       "message": "Are you sure you want to sign out?"
     }
   },
   "footer": {
-    "copyright": "© Copyright {{year}} <1>OpenCelium GmbH</1> | version {{version}}"
+    "copyright": "© Copyright {{year}} <1>OpenCelium GmbH</1> | version {{version}}",
+    "copyrightMobile": "© {{year}} | version {{version}}",
+    "docsLink": "Documentation",
+    "gitLink": "GitHub",
+    "landingPageLink": "OpenCelium website",
+    "servicePortalLink": "Service Portal"
   },
   "topbar": {
     "switchToGerman": "Switch to German",
@@ -99,7 +108,11 @@
     "profile": "Profile",
     "createWorkflow": "Create Workflow",
     "createWorkflowHint": "Create Workflow (Alt+W)",
-    "docs": "Documentation"
+    "docs": "Documentation",
+    "help": "Help",
+    "startOnboardingTour": "Start onboarding tour",
+    "startDashboardTour": "Start dashboard tour",
+    "servicePortal": "Service Portal"
   },
   "user": {
     "unknown": "Unknown User"
@@ -151,7 +164,8 @@
     "title": "Page not found",
     "subtitle": "The page you're looking for doesn't exist or may have been moved.",
     "goBack": "Go back",
-    "goHome": "Go to Dashboard"
+    "goHome": "Go to Dashboard",
+    "entity": "This item was not found. It may have been deleted."
   },
   "accessDenied": {
     "title": "Access denied",
@@ -178,5 +192,10 @@
       "bulkMessage": "Delete {{count}} selected entries?",
       "bulkMessage_one": "Delete {{count}} selected entry?"
     }
+  },
+  "onlineFeature": {
+    "offline": "No internet connection. Reconnect to use online services.",
+    "syncDisabled": "Online services are disabled in the system configuration.",
+    "portalUnreachable": "The Service Portal cannot be reached from this server. Check the portal settings and its access token."
   }
 }

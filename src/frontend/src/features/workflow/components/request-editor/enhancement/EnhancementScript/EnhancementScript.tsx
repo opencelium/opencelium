@@ -2,6 +2,7 @@ import CustomAceEditor from '../../../custom_ace_editor/CustomAceEditor';
 import { useTheme } from '@shared/theme/hooks/useTheme';
 import type { EnhancementScriptProps } from './EnhancementScript.types';
 import { useEnhancementScriptValue } from './useEnhancementScriptValue';
+import { logFieldBinding } from '../../../../utils/fieldBindingDebug';
 
 const modeMap = {
     'js': 'javascript',
@@ -14,6 +15,14 @@ const EnhancementScript = ({ enhancement, onChangeScript, readOnly }: Enhancemen
     const [localScript, setLocalScript] = useEnhancementScriptValue(
         enhancement.script, onChangeScript,
     );
+    logFieldBinding('5. what the script editor renders', {
+        fromEnhancement: typeof enhancement.script === 'string'
+            ? `string(len=${enhancement.script.length})` : String(enhancement.script),
+        handedToAce: typeof localScript === 'string'
+            ? `string(len=${localScript.length})` : String(localScript),
+        language: enhancement.language,
+        mode: modeMap[enhancement.language],
+    });
     return (
         <CustomAceEditor
             hasDiffLang

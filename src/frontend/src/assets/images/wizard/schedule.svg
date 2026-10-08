@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5">
+<style>
+.i{stroke:#1a1a1a}.a{stroke:#14b8a6}.af{fill:#14b8a6;stroke:none}.if{fill:#1a1a1a;stroke:none}
+.hop{animation:hp 4s steps(1) infinite}@keyframes hp{0%{transform:translate(0,0)}25%{transform:translate(20px,0)}50%{transform:translate(10px,9px)}75%{transform:translate(30px,9px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+
+<rect class="i" x="8" y="12" width="48" height="44" rx="4"/>
+<path class="i" d="M8 24h48M20 7v9M44 7v9"/>
+<g class="if"><circle cx="18" cy="33" r="1.8"/><circle cx="28" cy="33" r="1.8"/><circle cx="38" cy="33" r="1.8"/><circle cx="48" cy="33" r="1.8"/>
+<circle cx="18" cy="42" r="1.8"/><circle cx="28" cy="42" r="1.8"/><circle cx="38" cy="42" r="1.8"/><circle cx="48" cy="42" r="1.8"/>
+<circle cx="18" cy="50" r="1.8"/><circle cx="28" cy="50" r="1.8"/></g>
+<rect class="a hop" x="12" y="27" width="12" height="12" rx="3"/>
+</svg>

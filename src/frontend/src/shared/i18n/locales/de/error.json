@@ -2,24 +2,24 @@
   "title": "Fehler",
   "api": {
     "unauthorized": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
-    "forbidden": "Ihre Sitzung ist abgelaufen",
+    "forbidden": "Sie haben keine Berechtigung für diese Aktion.",
     "unknown": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     "validation": "Die Anfrage wurde als ungültig abgelehnt. Bitte überprüfen Sie Ihre Eingaben.",
     "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
     "default": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
-    "unknownError": "Unbekannter Fehler in {{place}}",
+    "unknownError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     "CATEGORY_NOT_FOUND": "Diese Kategorie wurde nicht gefunden. Sie wurde möglicherweise bereits gelöscht.",
     "socketDisconnected": "Live-Verbindung verloren. Metriken werden nicht mehr aktualisiert.",
     "login": {
       "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
-      "invalidCredentials": "Ungültige E-Mail oder Passwort",
+      "invalidCredentials": "E-Mail-Adresse/Benutzername oder Passwort ist falsch.",
       "failed": "Anmeldung fehlgeschlagen",
       "sessionLoadFailed": "Sie wurden angemeldet, aber Ihr Konto konnte nicht geladen werden. Bitte versuchen Sie es erneut."
     },
     "forgotPassword": {
       "emailNotExists": "Für diese E-Mail-Adresse ist kein Konto registriert.",
       "tooManyAttempts": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",
-      "emailRecoveryFailed": "Es gibt ein Problem mit Ihrer E-Mail-Konfiguration. Aus Sicherheitsgründen wurde die detaillierte Fehlermeldung in die Opencelium-Logs geschrieben. Bitte prüfen Sie die Logs für weitere Informationen.",
+      "emailRecoveryFailed": "Es gibt ein Problem mit Ihrer E-Mail-Konfiguration. Aus Sicherheitsgründen wurde die detaillierte Fehlermeldung in die OpenCelium-Logs geschrieben. Bitte prüfen Sie die Logs für weitere Informationen.",
       "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
       "failed": "Die Wiederherstellungs-E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
     },
@@ -29,11 +29,17 @@
       "failed": "Das Passwort konnte nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
     },
     "operation": {
-      "load": "{{resource}} konnten nicht geladen werden",
-      "create": "{{resource}} konnten nicht erstellt werden",
-      "update": "{{resource}} konnten nicht aktualisiert werden",
-      "delete": "{{resource}} konnten nicht gelöscht werden",
+      "load": "Fehler beim Laden: {{resource}}",
+      "create": "Fehler beim Erstellen: {{resource}}",
+      "update": "Fehler beim Aktualisieren: {{resource}}",
+      "delete": "Fehler beim Löschen: {{resource}}",
       "request": "Anfrage an {{resource}} fehlgeschlagen"
+    },
+    "invokerRepository": {
+      "offline": "Keine Internetverbindung. Stellen Sie die Verbindung wieder her, um API-Definitionen aus dem Online-Repository zu installieren.",
+      "syncDisabled": "Online-Dienste sind in der Systemkonfiguration deaktiviert, daher können keine API-Definitionen aus dem Online-Repository installiert werden.",
+      "unavailable": "Der OpenCelium-Server konnte das Online-Repository für API-Definitionen nicht erreichen. Prüfen Sie die Internetverbindung des Servers und versuchen Sie es erneut.",
+      "serverUnreachable": "Der OpenCelium-Server ist nicht erreichbar. Bitte versuchen Sie es erneut."
     }
   },
   "field": {

@@ -719,12 +719,12 @@ public class ReferenceExtractorTest {
     }
 
     @Test
-    void extractValueThrowsExceptionWhenHttpExceptionIsWrappedInResponse() {
+    void extractValueThrowsFailureMessageWhenTransportFailureIsStoredAsResponse() {
         // GIVEN
-        String ref = "#ababab.(response).body.$.data";
-        String message = "NOT_FOUND message";
+        String ref = "#ababab.(response).body.$.[*]";
+        String message = "Connection error: Connect to http://localhost:8081 failed: Connection refused";
 
-        Operation operation = OperationFixture.anOperationWithErrorResponseBody(message);
+        Operation operation = OperationFixture.anOperationWithTransportFailureResponse(message);
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -736,7 +736,69 @@ public class ReferenceExtractorTest {
         assertThatThrownBy(() -> extractValue(ref))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining(ref)
-                .hasMessageContaining(message);
+                .hasMessageContaining(message)
+                .hasMessageNotContaining("Invalid JSON body");
+    }
+
+    @Test
+    void extractValueReturnsFieldWhenReferencingJsonErrorResponseBody() {
+        // GIVEN
+        String ref = "#ababab.(response).body.$.error.message.value";
+        String json = "{\"error\":{\"code\":-5002,\"message\":{\"lang\":\"en-us\",\"value\":\"Enter valid code\"}}}";
+
+        Operation operation = OperationFixture.anOperationWithJsonErrorResponse(json);
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object value = extractValue(ref);
+
+        // THEN
+        assertEquals("Enter valid code", value);
+    }
+
+    @Test
+    void extractValueReturnsStatusWhenReferencingTransportFailureStatus() {
+        // GIVEN
+        String ref = "#ababab.(response).status";
+
+        Operation operation = OperationFixture.anOperationWithTransportFailureResponse("Connection error");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object value = extractValue(ref);
+
+        // THEN
+        assertEquals(503, value);
+    }
+
+    @Test
+    void extractValueReturnsHeaderWhenReferencingTransportFailureHeader() {
+        // GIVEN
+        String ref = "#ababab.(response).header.$.Content-Type";
+
+        Operation operation = OperationFixture.anOperationWithTransportFailureResponse("Connection error");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object value = extractValue(ref);
+
+        // THEN
+        assertEquals("text/plain", value);
     }
 
     @Test
