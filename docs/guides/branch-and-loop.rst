@@ -5,15 +5,15 @@ Branch and loop
 .. contents::
    :local:
 
-Conditional logic and repetition are both **operators**. One operator holds as
-many conditions as you need, combined with AND/OR and grouped, so you rarely need
-more than one.
+Conditional logic and repetition are both **logic blocks** (called *operators* up
+to 5.1; the API still says ``operator``). One block holds as many conditions as
+you need, combined with AND/OR and grouped, so you rarely need more than one.
 
-Add an operator
-===============
+Add a logic block
+=================
 
-Use the **+** handle on the step the operator should follow, choose **Add
-Operator**, then ``If`` or ``Loop``. Both selects are searchable.
+Use the **+** handle on the step the block should follow, choose **Add Logic
+Block**, then ``If`` or ``Loop``. Both selects are searchable.
 
 * An ``If`` node has two outgoing paths, ``true`` and ``false``.
 * A ``Loop`` node has a nested path for the repeated steps, and a continuation
@@ -25,7 +25,8 @@ Mind which handle you use when adding steps afterwards: the nested path runs
 Define the condition
 ====================
 
-Double-click the operator. The condition builder opens.
+Double-click the block, or right-click it → **Open Configuration**. The
+condition builder opens.
 
 .. image:: ../img/workflow/OC5_condition-builder.png
    :align: center
@@ -34,16 +35,24 @@ Double-click the operator. The condition builder opens.
 * **Add Condition** adds a row; **Add Group** adds a nested group.
 * The **AND / OR** toggle joins the rows of a group.
 * The copy icon on a row duplicates it, inserting the clone directly below.
+* *(5.2)* In an ``If``, the **grip** at the left of a row or group header reorders
+  it by drag and drop — before or after another row, or into another group by
+  dropping it on that group's header. The grips appear once there are at least two
+  rows or groups.
 * Each side of a row takes its value from **Constant**, **Method** (an earlier
   step's *Body*, *Header* or *Status*) or **Webhook**.
 
 Pick the comparison from the operator select — the full catalogue with arguments
 and examples is in :doc:`../reference/operators`.
 
-Save the operator to return to the canvas.
+.. image:: ../img/workflow/OC5_if-reorder.png
+   :align: center
+   :width: 1000
+
+Save the block to return to the canvas.
 
 .. note::
-   An operator with no condition is refused on save with
+   A logic block with no condition is refused on save with
    ``OPERATOR_EXPRESSION_IS_EMPTY``, and the node is outlined in red.
 
 Loops
@@ -87,25 +96,25 @@ Nesting
 =======
 
 Operators nest freely: a loop inside a loop, an ``If`` inside a loop branch.
-Deleting an operator deletes everything nested inside it, so the confirmation
+Deleting a logic block deletes everything nested inside it, so the confirmation
 dialog is not a formality.
 
 In the execution log, nested loop iterations are grouped and paginated, so you can
 page to a specific iteration — see :doc:`debug-a-workflow`.
 
-Skipping steps without an operator
-==================================
+Skipping steps without a logic block
+====================================
 
 .. note::
    **New in 5.1.**
 
 An ``If`` decides *per run* which path to take. When the decision is structural —
-"once we are here, these three steps are not needed" — a **joint** says so
-directly, as one line on the canvas, instead of an operator around every step you
+"once we are here, these three steps are not needed" — a **jump** says so
+directly, as one line on the canvas, instead of a logic block around every step you
 want to pass over.
 
-Joints point forward only and cannot cross a loop boundary, so they complement
-operators rather than replacing them. See :doc:`skip-steps-with-joints`.
+Jumps point forward only and cannot cross a loop boundary, so they complement
+logic blocks rather than replacing them. See :doc:`skip-steps-with-joints`.
 
 Debugging a loop
 ================

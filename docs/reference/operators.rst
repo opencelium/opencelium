@@ -436,7 +436,7 @@ IF operators
 Pagination
 ==========
 
-Declared in the invoker, not in the workflow — see
+Declared in the API definition, not in the workflow — see
 :ref:`concept-pagination` for what the parameters mean.
 
 Pagination parameters:
