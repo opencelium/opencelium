@@ -50,9 +50,20 @@ Command palette
 Workflow editor
 ===============
 
+This is the list the editor shows under **Header menu (…) → Shortcuts**, titled
+*Keyboard & mouse shortcuts*. On macOS every ``Ctrl`` below is ``⌘`` — the dialog
+shows it that way, too.
+
+.. image:: ../img/workflow/OC5_shortcuts-dialog.png
+   :align: center
+   :width: 900
+
+Canvas
+------
+
 .. list-table::
    :header-rows: 1
-   :widths: 22 78
+   :widths: 26 74
 
    * - Shortcut
      - Action
@@ -60,28 +71,65 @@ Workflow editor
      - Pan the canvas.
    * - Scroll
      - Zoom in and out.
+   * - ``Shift`` + drag
+     - Select every node inside the drawn box. *(5.2)*
+
+Nodes
+-----
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 74
+
+   * - Shortcut
+     - Action
    * - Double-click
-     - Open a node's configuration.
-   * - Drag a node
-     - Move it.
+     - Open the node's configuration.
+   * - Drag
+     - Move a node, or all selected nodes.
    * - ``Ctrl`` + drag
-     - Duplicate a node instead of moving it.
+     - Copy the dragged node, or all selected nodes, instead of moving them.
    * - ``Ctrl`` + click
-     - Select multiple nodes.
-   * - ``Delete``
-     - Delete the selected node.
+     - Add a node to the selection, or remove it. On an IF or LOOP: select it
+       together with everything in its scope. *(5.2)*
+   * - ``Ctrl+C``
+     - Copy the selected nodes. *(5.2)*
+   * - ``Ctrl+V``
+     - Paste the copied nodes after the selected node. On an IF or LOOP you choose:
+       inside its scope or after it. *(5.2)*
+   * - ``Ctrl+D``
+     - Duplicate the selected node. *(5.2)*
+   * - ``Ctrl+F``
+     - Search the workflow's nodes. *(5.2)*
+   * - ``Delete`` / ``Backspace``
+     - Delete the selected nodes, after one confirmation.
+
+General
+-------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 74
+
+   * - Shortcut
+     - Action
    * - ``Ctrl+S``
      - Save the workflow.
-   * - ``Ctrl+Z`` / ``⌘+Z``
+   * - ``Ctrl+Z``
      - Undo the last canvas change. *(5.1)*
    * - ``Ctrl+Shift+Z`` / ``Ctrl+Y``
      - Redo the change that was undone. *(5.1)*
    * - ``Esc``
      - Close the open menu, dialog or panel; dismiss the error highlight on a
-       node; leave joint target-picking mode.
+       node; cancel creating a jump.
 
-The same list is available in the editor under **Shortcuts** in the header menu.
+The keyboard shortcuts act on the canvas only. They are ignored while the cursor
+is in a text field or a code editor, while an editing dialog is open, in
+read-only mode and while a test run is in progress.
 
 .. note::
    ``Ctrl+Z`` inside a text field — a URL, a body, a script — is the browser's own
    undo for that field, not the canvas undo. See :doc:`../guides/undo-and-history`.
+
+The field links lens, the field links list and the minimap have no shortcuts of
+their own; ``Esc`` closes the field links list.

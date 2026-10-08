@@ -4,9 +4,9 @@
 Permissions
 ###########
 
-Permissions are granted per **group** (the *Groups* page; the API and the command
-palette call the entity ``role``). A group selects **components** and, per
-component, the CRUD actions its members may perform.
+Permissions are granted per **role** (the *Roles* page, called *Groups* up to
+5.1; the API and the command palette call the entity ``role``). A role selects
+**components** and, per component, the CRUD actions its members may perform.
 
 Components
 ==========
@@ -26,7 +26,7 @@ Components
    * - ``DASHBOARD``
      - The dashboard.
    * - ``INVOKER``
-     - Invokers.
+     - API definitions.
    * - ``MYPROFILE``
      - The user's own profile.
    * - ``SCHEDULE``
@@ -34,10 +34,10 @@ Components
    * - ``USER``
      - Users.
    * - ``USERGROUP``
-     - Groups.
+     - Roles.
 
 Actions are ``CREATE``, ``READ``, ``UPDATE`` and ``DELETE``. At least one
-component permission is required per group.
+component permission is required per role.
 
 How permissions show up in the interface
 ========================================

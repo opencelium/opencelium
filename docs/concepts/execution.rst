@@ -15,7 +15,7 @@ What the engine does
 ====================
 
 It walks the step tree in ``index`` order. For each step it builds the request —
-substituting references and running enhancements — issues the call, stores the
+substituting references and running transformations — issues the call, stores the
 response so later steps can reference it, and moves on.
 
 Operators change the walk rather than issuing calls:
@@ -25,18 +25,18 @@ Operators change the walk rather than issuing calls:
 * a **Loop** operator repeats its nested steps, exposing the current item as its
   iterator.
 
-A **joint** (new in 5.1) changes the walk too, without a node of its own: after
-running a step that carries one, the engine continues at the joint's target
-instead of at the next step, so everything in between is skipped. Joints point
+A **jump** (new in 5.1) changes the walk too, without a node of its own: after
+running a step that carries one, the engine continues at the jump's target
+instead of at the next step, so everything in between is skipped. Jumps point
 forward only and cannot cross a loop boundary, so they can never produce a cycle.
 The server validates them on save and again before execution — see
 :doc:`../guides/skip-steps-with-joints`.
 
-A reference to a step that did not run — because a joint skipped it, or because
+A reference to a step that did not run — because a jump skipped it, or because
 it sits on the branch the ``If`` did not take — resolves to an **empty value**
 and is reported. It does not fail the run.
 
-If an invoker declares pagination for the operation, the engine fetches all pages
+If an API definition declares pagination for the operation, the engine fetches all pages
 before the step is considered finished, so the workflow sees one complete result.
 
 Conditions and OCEL
@@ -107,7 +107,7 @@ Support bundles
 ===============
 
 When you need help from support, a **support bundle** packages a run's logs
-together with the invoker files as a ZIP. Because logs contain real payloads, you
+together with the API definition files as a ZIP. Because logs contain real payloads, you
 choose a masking level first — URL, headers, request and response can each be
 masked independently, with Light/Medium/Strict presets.
 

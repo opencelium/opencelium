@@ -9,7 +9,7 @@ Data mapping
 
 Steps are useless in isolation: the value of a workflow is that the output of one
 call becomes the input of the next. That wiring is done with **references** and,
-where a plain copy is not enough, **enhancements**.
+where a plain copy is not enough, **transformations**.
 
 References
 ==========
@@ -49,13 +49,13 @@ If a field holds a reference and nothing else, that is a **direct reference**: a
 one-to-one copy with no code in between. The UI says so explicitly and shows the
 two parameter paths.
 
-Direct references execute faster than a scripted enhancement. Prefer them; only
-reach for an enhancement when you actually need to transform the value.
+Direct references execute faster than a scripted transformation. Prefer them; only
+reach for a transformation when you actually need to transform the value.
 
-Enhancements
-============
+Transformations
+===============
 
-An enhancement is a script that computes a target field from one or more
+A transformation is a script that computes a target field from one or more
 references. It runs during execution, per field.
 
 The contract is fixed:
@@ -96,7 +96,7 @@ Languages
 
 The engine is a separate service you deploy yourself
 (`opencelium/polyglot-engine <https://github.com/opencelium/polyglot-engine>`_)
-and enable under ``opencelium.polyglot``. While it is disabled, enhancements run
+and enable under ``opencelium.polyglot``. While it is disabled, transformations run
 on JavaScript; if it is enabled but unreachable, execution falls back to
 JavaScript. Its reachability is reported on the System Check page.
 
@@ -108,7 +108,7 @@ JavaScript. Its reachability is reported on the System Check page.
 Data aggregators
 ================
 
-An enhancement shapes one field. A **data aggregator** collects data across the
+A transformation shapes one field. A **data aggregator** collects data across the
 calls of a whole workflow, so a notification can summarise the run.
 
 An aggregator has a name, a set of **arguments**, and a script that assigns
