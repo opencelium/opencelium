@@ -20,6 +20,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import static io.opencelium.core.setup.LaunchDecision.Kind.BOOT;
 import static io.opencelium.core.setup.LaunchDecision.Kind.HELP;
+import static io.opencelium.core.setup.LaunchDecision.Kind.TEMPLATE;
 import static io.opencelium.core.setup.LaunchDecision.Kind.WIZARD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -215,6 +216,71 @@ class SetupLauncherTest {
 	}
 
 	@Test
+	void decideReturnsTemplateWhenSetupTemplateIsGiven() {
+		// Also without a terminal: the template is meant to be piped into a file.
+		terminal = false;
+
+		LaunchDecision decision = decide("setup", "--template", "--file", "ignored.yml");
+
+		assertThat(decision.kind()).isEqualTo(TEMPLATE);
+	}
+
+	@Test
+	void decideThrowsUsageErrorWhenTemplateIsGivenWithoutSetup() {
+		assertThatExceptionOfType(SetupFailedException.class).isThrownBy(() -> decide("--template"))
+				.withMessage("--template needs the setup command: java -jar oc-app.jar setup --template.")
+				.extracting(SetupFailedException::exitCode).isEqualTo(2);
+	}
+
+	@Test
+	void launchPrintsTheTemplateWithThisHostsDefaultsAndExitsZero() {
+		terminal = false;
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--template"}, booted::set);
+
+		assertThat(exitCode).hasValue(0);
+		assertThat(out.toString()).startsWith("# OpenCelium setup file. Run: java -jar oc-app.jar setup --file <this file>")
+				.contains("\n# Where OpenCelium keeps its local state").contains("\ndata-dir: ")
+				.contains("\n# The HTTP port of the web interface").contains("\nport: 9090\n");
+		assertThat(err.toString()).isEmpty();
+		assertThat(console.output()).isEmpty();
+		assertThat(booted.get()).isNull();
+	}
+
+	@Test
+	void launchPrintsAMissingValueOnStandardErrorLikeEveryOtherFailure() throws IOException {
+		terminal = false;
+		Path file = Files.writeString(workingDir.resolve("setup-values.yml"),
+				"data-dir: " + workingDir.resolve("data") + "\n");
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", file.toString()}, booted::set);
+
+		assertThat(exitCode).hasValue(1);
+		assertThat(err.toString()).isEqualTo("Missing value: port in " + file + "\n"
+				+ "A template with every key: java -jar oc-app.jar setup --template\n");
+		assertThat(console.output()).contains("(from " + file + ")").doesNotContain("Missing value");
+		assertThat(workingDir.resolve("config")).doesNotExist();
+		assertThat(booted.get()).isNull();
+	}
+
+	@Test
+	void launchPrintsAWriteFailureOnStandardError() throws IOException {
+		Files.writeString(workingDir.resolve("config"), "a file where the directory is needed");
+		console.type("", String.valueOf(freePort()), "");
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[0], booted::set);
+
+		assertThat(exitCode).hasValue(1);
+		assertThat(err.toString()).startsWith("Cannot write " + workingDir.resolve("config/application.yml") + ": ")
+				.endsWith("\nNothing was written.\n");
+		assertThat(console.output()).doesNotContain("Cannot write");
+		assertThat(booted.get()).isNull();
+	}
+
+	@Test
 	void decideReturnsHelpWhenHelpIsGiven() {
 		assertThat(decide("--help").kind()).isEqualTo(HELP);
 	}
@@ -237,8 +303,8 @@ class SetupLauncherTest {
 		OptionalInt exitCode = launcher().launch(new String[] {"--help"}, booted::set);
 
 		assertThat(exitCode).hasValue(0);
-		assertThat(out.toString()).contains("Usage:").contains("setup").contains("--file")
-				.contains("--non-interactive");
+		assertThat(out.toString()).contains("Usage:").contains("setup").contains("-f, --file <path>")
+				.contains("--template").contains("--non-interactive");
 		assertThat(booted.get()).isNull();
 	}
 

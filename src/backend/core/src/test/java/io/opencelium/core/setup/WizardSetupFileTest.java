@@ -17,11 +17,12 @@ import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * The wizard with a setup file: a complete file gives the same files as a scripted run, byte for byte; an
- * absent key is asked; in non-interactive mode an absent or bad value stops the setup naming the key and the file,
- * and nothing is written.
+ * absent key is asked; in non-interactive mode an absent or bad value stops the setup with an exception that names
+ * the key and the file, which the launcher prints on standard error, and nothing is written.
  */
 class WizardSetupFileTest {
 
@@ -83,10 +84,13 @@ class WizardSetupFileTest {
 	void runStopsNamingTheKeyWhenNonInteractiveValueIsAbsent() throws IOException {
 		Path file = setupFile("data-dir: " + dataDir + "\n");
 
-		OptionalInt exitCode = wizard(source(file, true), tmp.resolve("work")).run(REASON);
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> wizard(source(file, true), tmp.resolve("work")).run(REASON)).actual();
 
-		assertThat(exitCode).hasValue(1);
-		assertThat(console.output()).contains("  ! Missing value: port in " + file);
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.getMessage()).isEqualTo("Missing value: port in " + file
+				+ "\nA template with every key: java -jar oc-app.jar setup --template");
+		assertThat(console.output()).doesNotContain("Missing value");
 		assertThat(tmp.resolve("work/config")).doesNotExist();
 		assertThat(started).isFalse();
 	}
@@ -95,11 +99,10 @@ class WizardSetupFileTest {
 	void runStopsNamingTheKeyAndFileWhenFileValueIsBad() throws IOException {
 		Path file = setupFile("data-dir: " + dataDir + "\nport: 70000\n");
 
-		OptionalInt exitCode = wizard(source(file, true), tmp.resolve("work")).run(REASON);
+		assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> wizard(source(file, true), tmp.resolve("work")).run(REASON))
+				.withMessage("Bad value: port in " + file + ": Please enter a port number between 1 and 65535.");
 
-		assertThat(exitCode).hasValue(1);
-		assertThat(console.output()).contains("  ! Bad value: port in " + file
-				+ ": Please enter a port number between 1 and 65535.");
 		assertThat(tmp.resolve("work/config")).doesNotExist();
 		assertThat(started).isFalse();
 	}
@@ -109,10 +112,10 @@ class WizardSetupFileTest {
 		// A blank value is absent, not the working directory, which the empty path would resolve to.
 		Path file = setupFile("data-dir: \"\"\nport: " + port + "\n");
 
-		OptionalInt exitCode = wizard(source(file, true), tmp.resolve("work")).run(REASON);
+		assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> wizard(source(file, true), tmp.resolve("work")).run(REASON))
+				.withMessageStartingWith("Missing value: data-dir in " + file);
 
-		assertThat(exitCode).hasValue(1);
-		assertThat(console.output()).contains("  ! Missing value: data-dir in " + file);
 		assertThat(tmp.resolve("work/config")).doesNotExist();
 	}
 

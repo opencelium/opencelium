@@ -40,6 +40,14 @@ class LaunchArgumentsTest {
 				.contains(Path.of("setup-values.yml"));
 		assertThat(LaunchArguments.parse("setup", "--file=setup-values.yml").setupFile())
 				.contains(Path.of("setup-values.yml"));
+		assertThat(LaunchArguments.parse("setup", "-f", "setup-values.yml").setupFile())
+				.contains(Path.of("setup-values.yml"));
+	}
+
+	@Test
+	void parseReadsTemplateFlag() {
+		assertThat(LaunchArguments.parse("setup", "--template").template()).isTrue();
+		assertThat(LaunchArguments.parse("setup").template()).isFalse();
 	}
 
 	@Test
@@ -56,6 +64,9 @@ class LaunchArgumentsTest {
 		// The next option is not a path.
 		assertThatExceptionOfType(SetupFailedException.class)
 				.isThrownBy(() -> LaunchArguments.parse("setup", "--file", "--non-interactive"))
+				.withMessageContaining("--file");
+		assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> LaunchArguments.parse("setup", "-f"))
 				.withMessageContaining("--file");
 	}
 

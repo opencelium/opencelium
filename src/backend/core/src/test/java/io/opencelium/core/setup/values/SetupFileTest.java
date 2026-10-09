@@ -122,7 +122,8 @@ class SetupFileTest {
 		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
 				.isThrownBy(() -> SetupFile.load(file)).actual();
 
-		assertThat(ex.getMessage()).isEqualTo("Unknown key 'colour' in " + file + ". Known keys: data-dir, port.");
+		assertThat(ex.getMessage()).isEqualTo("Unknown key 'colour' in " + file + ". Known keys: data-dir, port.\n"
+				+ "A template with every key: java -jar oc-app.jar setup --template");
 		assertThat(ex.exitCode()).isEqualTo(1);
 	}
 

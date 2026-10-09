@@ -22,6 +22,8 @@ class ValueSourceTest {
 
 	private static final Path FILE = Path.of("setup-values.yml");
 
+	private static final Question PORT_QUESTION = new Question(ValueKey.PORT, "Web port", "help", "9090");
+
 	private static final Function<String, Optional<String>> DIGITS = value -> value.chars().allMatch(Character::isDigit)
 			? Optional.empty() : Optional.of("Please enter a number.");
 
@@ -33,7 +35,7 @@ class ValueSourceTest {
 	void textTakesFileValueAndPrintsItWithoutAsking() {
 		ValueSource source = withFile(Map.of(ValueKey.PORT, "9091"), false);
 
-		String value = source.text(ValueKey.PORT, "Web port", "help", "9090", DIGITS, prompter);
+		String value = source.text(PORT_QUESTION, DIGITS, prompter);
 
 		assertThat(value).isEqualTo("9091");
 		assertThat(console.output()).isEqualTo("  Web port        9091   (from setup-values.yml)\n");
@@ -44,7 +46,7 @@ class ValueSourceTest {
 		console.type("9092");
 		ValueSource source = withFile(Map.of(), false);
 
-		String value = source.text(ValueKey.PORT, "Web port", "help", "9090", DIGITS, prompter);
+		String value = source.text(PORT_QUESTION, DIGITS, prompter);
 
 		assertThat(value).isEqualTo("9092");
 		assertThat(console.output()).contains("  Web port        [9090]: ");
@@ -55,9 +57,10 @@ class ValueSourceTest {
 		ValueSource source = withFile(Map.of(), true);
 
 		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> source.text(ValueKey.PORT, "Web port", "help", "9090", DIGITS, prompter)).actual();
+				.isThrownBy(() -> source.text(PORT_QUESTION, DIGITS, prompter)).actual();
 
-		assertThat(ex.getMessage()).isEqualTo("Missing value: port in setup-values.yml");
+		assertThat(ex.getMessage()).isEqualTo("Missing value: port in setup-values.yml\n"
+				+ "A template with every key: java -jar oc-app.jar setup --template");
 		assertThat(ex.exitCode()).isEqualTo(1);
 		assertThat(console.output()).isEmpty();
 	}
@@ -67,7 +70,7 @@ class ValueSourceTest {
 		ValueSource source = withFile(Map.of(ValueKey.PORT, "abc"), false);
 
 		assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> source.text(ValueKey.PORT, "Web port", "help", "9090", DIGITS, prompter))
+				.isThrownBy(() -> source.text(PORT_QUESTION, DIGITS, prompter))
 				.withMessage("Bad value: port in setup-values.yml: Please enter a number.");
 	}
 
@@ -95,8 +98,7 @@ class ValueSourceTest {
 		console.type("", "y");
 
 		assertThat(ValueSource.PROMPTED.nonInteractive()).isFalse();
-		assertThat(ValueSource.PROMPTED.text(ValueKey.PORT, "Web port", "help", "9090", DIGITS, prompter))
-				.isEqualTo("9090");
+		assertThat(ValueSource.PROMPTED.text(PORT_QUESTION, DIGITS, prompter)).isEqualTo("9090");
 		assertThat(ValueSource.PROMPTED.yesNo("Write?", "help", false, prompter)).isTrue();
 	}
 
