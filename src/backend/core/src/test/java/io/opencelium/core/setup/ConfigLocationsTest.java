@@ -81,6 +81,12 @@ class ConfigLocationsTest {
 	}
 
 	@Test
+	void ymlFileAndEnvFileAreUnderTheWriteDirectory() {
+		assertThat(locations.ymlFile()).isEqualTo(workingDir.resolve("config/application.yml"));
+		assertThat(locations.envFile()).isEqualTo(workingDir.resolve("config/opencelium.env"));
+	}
+
+	@Test
 	void isSystemLocationIsTrueOnlyUnderSystemDirectory() {
 		assertThat(locations.isSystemLocation(workingDir.resolve("etc/opencelium/application.yml"))).isTrue();
 		assertThat(locations.isSystemLocation(workingDir.resolve("config/application.yml"))).isFalse();
