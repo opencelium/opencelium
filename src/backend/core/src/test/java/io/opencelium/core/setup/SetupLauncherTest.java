@@ -236,9 +236,10 @@ class SetupLauncherTest {
 
 		assertThat(exitCode).isEmpty();
 		assertThat(console.output()).contains("OpenCelium").contains("No configuration was found.")
-				.contains("?  Data directory  [").contains("?  Web port        [9090] ❯ ").contains("╭── Summary ")
-				.contains("?  Write the files and start OpenCelium?  [Y/n] ❯ ")
-				.contains("✔  Configuration written to " + workingDir.resolve("config") + "\n▸  Starting OpenCelium...")
+				.contains("  Data directory  [").contains("  Web port        [9090]: ").contains("+-- Summary ")
+				.contains("  Write the files and start OpenCelium? [Y/n]: ")
+				.contains("  OK Configuration written to " + workingDir.resolve("config")
+						+ "\n  -> Starting OpenCelium...")
 				.doesNotContain("Cloud");
 		assertThat(workingDir.resolve("config/application.yml")).content().contains("port: " + port);
 		assertThat(workingDir.resolve("config/opencelium.env")).exists();

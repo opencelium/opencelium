@@ -36,7 +36,7 @@ class PortStepTest {
 		new PortStep(free).run(context, prompter());
 
 		assertThat(context.port()).hasValue(free);
-		assertThat(console.output()).contains("?  Web port        [" + free + "] ❯ ");
+		assertThat(console.output()).contains("  Web port        [" + free + "]: ");
 	}
 
 	@Test

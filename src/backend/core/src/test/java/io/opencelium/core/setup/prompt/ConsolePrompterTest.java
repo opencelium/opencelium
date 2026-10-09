@@ -1,6 +1,5 @@
 package io.opencelium.core.setup.prompt;
 
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -18,9 +17,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 /**
  * The prompts on a console: Enter takes the default, anything the prompt cannot accept is explained and asked
  * again, {@code ?} prints the help text, and {@code q} or the end of the input cancels the setup. Bad input never
- * ends the wizard. The layout: a question starts with {@code ?}, its label is padded to one column, the default
- * is in brackets before the prompt mark; a status line starts with its symbol; help is indented under the
- * question. On a console that is not UTF-8 the symbols are ASCII.
+ * ends the wizard. The layout, in plain characters: a question is its label padded to one column, the default in
+ * brackets, and a colon; a problem starts with {@code !}; help is indented under the question.
  */
 class ConsolePrompterTest {
 
@@ -30,16 +28,16 @@ class ConsolePrompterTest {
 
 	private static final String QUESTION = "How will this OpenCelium run?";
 
-	private static final String PROMPT = "   Choice [1] ❯ ";
+	private static final String PROMPT = "  Choice [1]: ";
 
-	private static final String RANGE_MESSAGE = "✖  Please enter a number between 1 and 2.";
+	private static final String RANGE_MESSAGE = "  ! Please enter a number between 1 and 2.";
 
 	private static final String DIR_QUESTION = "Data directory";
 
-	private static final String DIR_PROMPT = "?  Data directory  [/srv/oc] ❯ ";
+	private static final String DIR_PROMPT = "  Data directory  [/srv/oc]: ";
 
 	/** A short label is padded to the label column. */
-	private static final String WRITE_PROMPT = "?  Write?" + " ".repeat(10) + "[Y/n] ❯ ";
+	private static final String WRITE_PROMPT = "  Write?" + " ".repeat(10) + "[Y/n]: ";
 
 	private static final Function<String, Optional<String>> NO_SPACES = value -> value.contains(" ")
 			? Optional.of("No spaces, please.") : Optional.empty();
@@ -68,8 +66,8 @@ class ConsolePrompterTest {
 
 		prompter.choice(QUESTION, MODES, 1);
 
-		assertThat(console.output()).containsSubsequence("?  " + QUESTION,
-				"   1) Self-host    one company, one database", "   2) Cloud        many tenants", "   Choice [2] ❯ ");
+		assertThat(console.output()).containsSubsequence("  " + QUESTION,
+				"    1) Self-host    one company, one database", "    2) Cloud        many tenants", "  Choice [2]: ");
 	}
 
 	@Test
@@ -139,7 +137,7 @@ class ConsolePrompterTest {
 		console.type("/with space", "/ok");
 
 		assertThat(prompter.text(DIR_QUESTION, "Help.", "/srv/oc", NO_SPACES)).isEqualTo("/ok");
-		assertThat(console.output()).containsOnlyOnce("✖  No spaces, please.");
+		assertThat(console.output()).containsOnlyOnce("  ! No spaces, please.");
 		assertThat(count(DIR_PROMPT)).isEqualTo(2);
 	}
 
@@ -148,7 +146,7 @@ class ConsolePrompterTest {
 		console.type("", "/ok");
 
 		assertThat(prompter.text(DIR_QUESTION, "Help.", "/bad default", NO_SPACES)).isEqualTo("/ok");
-		assertThat(console.output()).containsOnlyOnce("✖  No spaces, please.");
+		assertThat(console.output()).containsOnlyOnce("  ! No spaces, please.");
 	}
 
 	@Test
@@ -156,7 +154,7 @@ class ConsolePrompterTest {
 		console.type("?", "");
 
 		assertThat(prompter.text(DIR_QUESTION, "Where the data goes.", "/srv/oc", NO_SPACES)).isEqualTo("/srv/oc");
-		assertThat(console.output()).contains("   Where the data goes.");
+		assertThat(console.output()).contains("    Where the data goes.");
 		assertThat(count(DIR_PROMPT)).isEqualTo(2);
 	}
 
@@ -173,7 +171,7 @@ class ConsolePrompterTest {
 		console.type("");
 
 		assertThat(prompter.yesNo("Write the files?", "help", true)).isTrue();
-		assertThat(console.output()).isEqualTo("?  Write the files?  [Y/n] ❯ ");
+		assertThat(console.output()).isEqualTo("  Write the files? [Y/n]: ");
 	}
 
 	@Test
@@ -181,7 +179,7 @@ class ConsolePrompterTest {
 		console.type("");
 
 		assertThat(prompter.yesNo("Write the files?", "help", false)).isFalse();
-		assertThat(console.output()).isEqualTo("?  Write the files?  [y/N] ❯ ");
+		assertThat(console.output()).isEqualTo("  Write the files? [y/N]: ");
 	}
 
 	@Test
@@ -200,7 +198,7 @@ class ConsolePrompterTest {
 
 		assertThat(prompter.yesNo("Write?", "help", true)).isTrue();
 		// The scripted console does not echo the input, so the message follows the prompt on the same line.
-		assertThat(console.output()).isEqualTo(WRITE_PROMPT + "✖  Please answer y or n.\n" + WRITE_PROMPT);
+		assertThat(console.output()).isEqualTo(WRITE_PROMPT + "  ! Please answer y or n.\n" + WRITE_PROMPT);
 	}
 
 	@Test
@@ -208,7 +206,7 @@ class ConsolePrompterTest {
 		console.type("?", "n");
 
 		assertThat(prompter.yesNo("Write?", "y writes the files.\nn ends the setup.", true)).isFalse();
-		assertThat(console.output()).contains("   y writes the files.\n   n ends the setup.\n" + WRITE_PROMPT);
+		assertThat(console.output()).contains("    y writes the files.\n    n ends the setup.\n" + WRITE_PROMPT);
 	}
 
 	@Test
@@ -225,57 +223,62 @@ class ConsolePrompterTest {
 
 		prompter.text("Web port", "Help.", "9090", NO_SPACES);
 
-		assertThat(console.output()).isEqualTo("?  Web port" + " ".repeat(8) + "[9090] ❯ ");
+		assertThat(console.output()).isEqualTo("  Web port" + " ".repeat(8) + "[9090]: ");
 	}
 
 	@Test
 	void titlePrintsTheTitleOverARule() {
 		prompter.title("OpenCelium setup");
 
-		assertThat(console.output()).isEqualTo("  OpenCelium setup\n" + "─".repeat(76) + "\n");
+		assertThat(console.output()).isEqualTo("  OpenCelium setup\n  " + "-".repeat(74) + "\n");
 	}
 
 	@Test
-	void statusLinesStartWithTheirSymbolAndIndentTheContinuation() {
+	void statusLinesStartWithTheirMarkAndIndentTheContinuation() {
 		prompter.info("No configuration was found.", "Press Enter to accept.");
 		prompter.error("Cannot write x.", "Nothing was written.");
 		prompter.success("Configuration written.");
 		prompter.progress("Starting OpenCelium...");
 
 		assertThat(console.output()).isEqualTo("""
-				ℹ  No configuration was found.
-				   Press Enter to accept.
-				✖  Cannot write x.
-				   Nothing was written.
-				✔  Configuration written.
-				▸  Starting OpenCelium...
+				  No configuration was found.
+				  Press Enter to accept.
+				  ! Cannot write x.
+				    Nothing was written.
+				  OK Configuration written.
+				  -> Starting OpenCelium...
 				""");
 	}
 
 	@Test
-	void boxAndListUseTheBoxAndTreeGlyphs() {
+	void boxAndListDrawTheFrameAndTheBullets() {
 		var rows = new LinkedHashMap<String, String>();
 		rows.put("Mode", "self-host");
 
 		prompter.box("Summary", rows);
 		prompter.list("Files to write", List.of("a.yml", "b.env"));
 
-		assertThat(console.output()).containsSubsequence("╭── Summary ──", "│  Mode" + " ".repeat(12) + "self-host",
-				"╰──", "   Files to write", "   ├─ a.yml", "   └─ b.env");
+		assertThat(console.output()).containsSubsequence("  +-- Summary --", "  |  Mode" + " ".repeat(12) + "self-host",
+				"  +--", "  Files to write", "    - a.yml", "    - b.env");
 	}
 
 	@Test
-	void asciiConsoleGetsAsciiSymbols() {
-		var ascii = new ScriptedConsoleIo(StandardCharsets.US_ASCII).type("");
-		var asciiPrompter = new ConsolePrompter(ascii);
+	void everyScreenUsesPlainCharactersOnly() {
+		console.type("", "");
+		var rows = new LinkedHashMap<String, String>();
+		rows.put("Mode", "self-host");
 
-		asciiPrompter.title("OpenCelium setup");
-		asciiPrompter.info("Hello.");
-		asciiPrompter.success("Done.");
-		asciiPrompter.text(DIR_QUESTION, "Help.", "/srv/oc", NO_SPACES);
+		prompter.title("OpenCelium setup");
+		prompter.info("Hello.");
+		prompter.error("Failed.", "Nothing was written.");
+		prompter.success("Done.");
+		prompter.progress("Starting.");
+		prompter.box("Summary", rows);
+		prompter.list("Files", List.of("a"));
+		prompter.text(DIR_QUESTION, "Help.", "/srv/oc", NO_SPACES);
+		prompter.yesNo("Write?", "Help.", true);
 
-		assertThat(ascii.output()).isEqualTo("  OpenCelium setup\n" + "-".repeat(76) + "\n"
-				+ "i  Hello.\nOK Done.\n?  Data directory  [/srv/oc] > ");
+		assertThat(console.output().chars()).allMatch(c -> c < 128);
 	}
 
 	@Test

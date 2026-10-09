@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.tuple;
 
 /**
- * The summary: the answers in a box (the mode always self-host), the two files that will be written as a tree,
+ * The summary: the answers in a box (the mode always self-host), the two files that will be written as a list,
  * and the confirmation. Yes plans both files; no cancels the setup with nothing planned.
  */
 class SummaryStepTest {
@@ -39,8 +39,8 @@ class SummaryStepTest {
 
 		step().run(context, new ConsolePrompter(console));
 
-		assertThat(console.output()).containsSubsequence("╭── Summary ──", "│  Mode" + " ".repeat(12) + "self-host",
-				"│  Data directory  /srv/oc", "│  Web port        9090", "╰──");
+		assertThat(console.output()).containsSubsequence("  +-- Summary --", "  |  Mode" + " ".repeat(12) + "self-host",
+				"  |  Data directory  /srv/oc", "  |  Web port        9090", "  +--");
 	}
 
 	@Test
@@ -52,10 +52,10 @@ class SummaryStepTest {
 
 		step().run(context, new ConsolePrompter(console));
 
-		assertThat(console.output()).containsSubsequence("   Files to write",
-				"   ├─ " + workingDir.resolve("config/application.yml") + "   (replaces the file that exists)",
-				"   └─ " + workingDir.resolve("config/opencelium.env") + "\n",
-				"?  Write the files and start OpenCelium?  [Y/n] ❯ ");
+		assertThat(console.output()).containsSubsequence("  Files to write",
+				"    - " + workingDir.resolve("config/application.yml") + "   (replaces the file that exists)",
+				"    - " + workingDir.resolve("config/opencelium.env") + "\n",
+				"  Write the files and start OpenCelium? [Y/n]: ");
 	}
 
 	@Test

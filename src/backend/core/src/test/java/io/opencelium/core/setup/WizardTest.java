@@ -77,7 +77,7 @@ class WizardTest {
 
 		assertThat(exitCode).hasValue(0);
 		assertThat(ran).containsExactly("first");
-		assertThat(console.output()).contains("ℹ  Setup cancelled. Nothing was written.");
+		assertThat(console.output()).contains("\n  Setup cancelled. Nothing was written.\n");
 		assertThat(started).isFalse();
 	}
 
@@ -88,10 +88,10 @@ class WizardTest {
 
 		wizard(List.of(asking)).run(REASON);
 
-		assertThat(console.output()).containsSubsequence("  OpenCelium setup (1.2.3)\n" + "─".repeat(76),
-				"ℹ  No configuration was found. Let's set up OpenCelium.",
-				"   Press Enter to accept the value in [brackets]. Type ? for help, q to quit.",
-				"?  Web port        [1] ❯ ");
+		assertThat(console.output()).containsSubsequence("  OpenCelium setup (1.2.3)\n  " + "-".repeat(74),
+				"  No configuration was found. Let's set up OpenCelium.",
+				"  Press Enter to accept the value in [brackets]. Type ? for help, q to quit.",
+				"  Web port        [1]: ");
 	}
 
 	@Test
@@ -99,7 +99,7 @@ class WizardTest {
 		new Wizard(new ConsolePrompter(console), List.of(), () -> started = true, Optional.empty())
 				.run("requested with setup");
 
-		assertThat(console.output()).contains("  OpenCelium setup\n").contains("ℹ  Requested with setup. Let's set up");
+		assertThat(console.output()).contains("  OpenCelium setup\n").contains("  Requested with setup. Let's set up");
 	}
 
 	@Test
@@ -111,8 +111,8 @@ class WizardTest {
 
 		assertThat(exitCode).isEmpty();
 		assertThat(file).content().isEqualTo("port: 1\n");
-		assertThat(console.output()).contains("✔  Configuration written to " + tmp.resolve("config")
-				+ "\n▸  Starting OpenCelium...\n");
+		assertThat(console.output()).contains("  OK Configuration written to " + tmp.resolve("config")
+				+ "\n  -> Starting OpenCelium...\n");
 		assertThat(started).isTrue();
 		assertThat(wizard.hasWritten()).isTrue();
 	}
@@ -126,7 +126,7 @@ class WizardTest {
 		OptionalInt exitCode = wizard.run(REASON);
 
 		assertThat(exitCode).hasValue(1);
-		assertThat(console.output()).contains("✖  Cannot write " + file).contains("\n   Nothing was written.\n");
+		assertThat(console.output()).contains("  ! Cannot write " + file).contains("\n    Nothing was written.\n");
 		assertThat(started).isFalse();
 		assertThat(wizard.hasWritten()).isFalse();
 	}

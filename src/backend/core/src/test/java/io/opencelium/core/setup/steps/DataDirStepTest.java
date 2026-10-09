@@ -38,7 +38,7 @@ class DataDirStepTest {
 		step(tmp.resolve("data")).run(context, prompter());
 
 		assertThat(context.dataDir()).contains(tmp.resolve("data"));
-		assertThat(console.output()).contains("?  Data directory  [" + tmp.resolve("data") + "] ❯ ");
+		assertThat(console.output()).contains("  Data directory  [" + tmp.resolve("data") + "]: ");
 	}
 
 	@Test
@@ -105,7 +105,7 @@ class DataDirStepTest {
 
 		step(home().resolve("oc/data")).run(context, prompter());
 
-		assertThat(console.output()).contains("?  Data directory  [~/oc/data] ❯ ");
+		assertThat(console.output()).contains("  Data directory  [~/oc/data]: ");
 		assertThat(context.dataDir()).contains(home().resolve("oc/data"));
 	}
 
@@ -115,7 +115,7 @@ class DataDirStepTest {
 
 		step(home()).run(context, prompter());
 
-		assertThat(console.output()).contains("[~] ❯ ");
+		assertThat(console.output()).contains("[~]: ");
 		assertThat(context.dataDir()).contains(home());
 	}
 
