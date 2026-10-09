@@ -10,6 +10,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.util.Optional;
 
 import io.opencelium.core.setup.SetupContext;
+import io.opencelium.core.setup.answers.AnswerKey;
 import io.opencelium.core.setup.prompt.Prompter;
 
 /**
@@ -42,7 +43,8 @@ public final class PortStep implements SetupStep {
 
 	@Override
 	public void run(SetupContext context, Prompter prompter) {
-		String answer = prompter.text("Web port", HELP, String.valueOf(defaultPort), PortStep::check);
+		String answer = context.answers().text(AnswerKey.PORT, "Web port", HELP, String.valueOf(defaultPort),
+				PortStep::check, prompter);
 		context.setPort(Integer.parseInt(answer));
 	}
 
