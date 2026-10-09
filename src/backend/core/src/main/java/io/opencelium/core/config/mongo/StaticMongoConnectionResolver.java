@@ -198,7 +198,7 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 			return connection;
 		}
 		throw new UnsupportedOperationException("No database for tenant " + tenant + " in " + mode.propertyValue()
-				+ " mode: per-tenant routing (decision #11) is not built yet.");
+				+ " mode: per-tenant routing is not built yet.");
 	}
 
 }

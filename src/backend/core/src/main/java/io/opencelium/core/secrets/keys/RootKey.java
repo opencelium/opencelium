@@ -7,7 +7,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * The root key of this installation (self-hosted name: master key): 32 bytes that wrap the per-tenant data keys and
- * nothing else (decision #14). Lives in memory only; {@link #close()} zeroes it, which Spring does on shutdown.
+ * nothing else. Lives in memory only; {@link #close()} zeroes it, which Spring does on shutdown.
  * {@link #toString()} shows the key id, never the key.
  */
 public final class RootKey implements AutoCloseable {
@@ -15,7 +15,7 @@ public final class RootKey implements AutoCloseable {
 	/** Length in bytes: AES-256. */
 	public static final int LENGTH = 32;
 
-	/** Id of an installation's first root key. Root-key rotation (follow-up ticket) introduces further ids. */
+	/** Id of an installation's first root key. Root-key rotation introduces further ids. */
 	public static final String INITIAL_ID = "k-01";
 
 	private final String id;

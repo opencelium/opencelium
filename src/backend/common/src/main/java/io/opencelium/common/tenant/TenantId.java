@@ -3,7 +3,7 @@ package io.opencelium.common.tenant;
 import java.util.Objects;
 
 /**
- * Identifies whose data an operation touches (decision #11). Travels in job messages, so it lives in {@code common}.
+ * Identifies whose data an operation touches. Travels in job messages, so it lives in {@code common}.
  *
  * @param value opaque identifier; never blank
  */
