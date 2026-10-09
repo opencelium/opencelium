@@ -3,8 +3,13 @@ package io.opencelium.core.setup.prompt;
 import java.io.Console;
 import java.io.PrintWriter;
 
-/** {@code System.console()}, looked up at each use so that a process without a console fails with a clear message. */
+/**
+ * {@code System.console()}, looked up at each use. Without a console the writer is standard output, so the
+ * non-interactive wizard can still print; a read then fails with a clear message.
+ */
 final class SystemConsoleIo implements ConsoleIo {
+
+	private final PrintWriter standardOut = new PrintWriter(System.out, true);
 
 	@Override
 	public String readLine() {
@@ -13,7 +18,8 @@ final class SystemConsoleIo implements ConsoleIo {
 
 	@Override
 	public PrintWriter writer() {
-		return console().writer();
+		Console console = System.console();
+		return console != null ? console.writer() : standardOut;
 	}
 
 	private static Console console() {

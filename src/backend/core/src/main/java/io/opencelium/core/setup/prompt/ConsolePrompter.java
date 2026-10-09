@@ -123,6 +123,11 @@ public final class ConsolePrompter implements Prompter {
 	}
 
 	@Override
+	public void answered(String question, String value, String remark) {
+		print(MARGIN + Screen.padded(question) + value + "   (" + remark + ")");
+	}
+
+	@Override
 	public void title(String title) {
 		PrintWriter out = console.writer();
 		out.println(MARGIN + title);

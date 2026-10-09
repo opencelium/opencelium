@@ -1,7 +1,9 @@
 package io.opencelium.core.setup;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * What {@code main()} does: print the usage, start Spring Boot, or run the setup wizard. Carries the reason in
@@ -12,9 +14,11 @@ import java.util.Objects;
  * @param kind            what runs
  * @param reason          why, in words for the terminal, for example "no configuration was found"
  * @param nonInteractive  for the wizard: ask nothing, because of {@code --non-interactive} or a missing terminal
+ * @param answersFile     for the wizard: the answers file behind {@code --answers}, when one was given
  * @param springArguments the arguments for Spring Boot
  */
-public record LaunchDecision(Kind kind, String reason, boolean nonInteractive, List<String> springArguments) {
+public record LaunchDecision(Kind kind, String reason, boolean nonInteractive, Optional<Path> answersFile,
+		List<String> springArguments) {
 
 	public enum Kind {
 
@@ -32,6 +36,7 @@ public record LaunchDecision(Kind kind, String reason, boolean nonInteractive, L
 	public LaunchDecision {
 		Objects.requireNonNull(kind, "kind");
 		Objects.requireNonNull(reason, "reason");
+		Objects.requireNonNull(answersFile, "answersFile");
 		springArguments = List.copyOf(springArguments);
 	}
 

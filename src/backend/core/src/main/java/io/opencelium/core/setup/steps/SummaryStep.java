@@ -17,7 +17,8 @@ import io.opencelium.core.setup.prompt.Prompter;
 /**
  * The last screen: the answers in a box, the list of the two files that will be written, and the confirmation.
  * Yes plans application.yml and the env file, which the wizard writes after this step; no cancels the setup with
- * nothing planned. A file that exists is marked, because the write replaces it.
+ * nothing planned. A file that exists is marked, because the write replaces it. In non-interactive mode the
+ * confirmation is not asked: the answers file is the decision.
  */
 public final class SummaryStep implements SetupStep {
 
@@ -47,7 +48,7 @@ public final class SummaryStep implements SetupStep {
 		prompter.list("Files to write", List.of(locations.ymlFile() + marker(locations.ymlFile()),
 				locations.envFile() + marker(locations.envFile())));
 		prompter.print("");
-		if (!prompter.yesNo(CONFIRM_QUESTION, CONFIRM_HELP, true)) {
+		if (!context.answers().yesNo(CONFIRM_QUESTION, CONFIRM_HELP, true, prompter)) {
 			throw new SetupCancelledException();
 		}
 		context.filePlan().add(PlannedFile.groupReadable(locations.ymlFile(), YmlRenderer.render(values)));

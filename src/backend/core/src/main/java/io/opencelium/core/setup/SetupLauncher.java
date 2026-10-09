@@ -15,6 +15,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import io.opencelium.core.setup.answers.AnswerSource;
+import io.opencelium.core.setup.answers.Answers;
+import io.opencelium.core.setup.answers.AnswersFile;
 import io.opencelium.core.setup.prompt.ConsoleIo;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 
@@ -26,8 +29,8 @@ import io.opencelium.core.setup.LaunchDecision.Kind;
  * <ol>
  * <li>{@code --help}: the usage text.</li>
  * <li>A bare word other than {@code setup}: a usage error, exit code 2.</li>
- * <li>{@code setup}: the wizard, on demand. Without a terminal or with {@code --non-interactive} it would ask
- * nothing; until the answers file exists that stops with exit code 1.</li>
+ * <li>{@code setup}: the wizard, on demand. Without a terminal or with {@code --non-interactive} it asks nothing:
+ * the answers come from {@code --answers <file>}, and a missing one stops the setup with exit code 1.</li>
  * <li>{@code --non-interactive}: the normal start.</li>
  * <li>No interactive terminal (Docker, systemd, a pipe): the normal start.</li>
  * <li>A {@code spring.config.*} location in the arguments, the system properties or the environment: the normal
@@ -155,12 +158,12 @@ public final class SetupLauncher {
 		LaunchArguments arguments = LaunchArguments.parse(args);
 		List<String> springArguments = arguments.springArguments();
 		if (arguments.help()) {
-			return new LaunchDecision(Kind.HELP, "help was requested", false, springArguments);
+			return new LaunchDecision(Kind.HELP, "help was requested", false, Optional.empty(), springArguments);
 		}
 		boolean interactive = terminal.getAsBoolean();
 		if (arguments.isSetup()) {
 			return new LaunchDecision(Kind.WIZARD, "requested with " + Subcommand.SETUP.word(),
-					arguments.nonInteractive() || !interactive, springArguments);
+					arguments.nonInteractive() || !interactive, arguments.answersFile(), springArguments);
 		}
 		if (arguments.nonInteractive()) {
 			return boot("the flag " + LaunchArguments.NON_INTERACTIVE_FLAG, springArguments);
@@ -177,23 +180,32 @@ public final class SetupLauncher {
 		if (file.isPresent()) {
 			return boot("a configuration was found at " + file.get(), withSystemLocation(file.get(), springArguments));
 		}
-		return new LaunchDecision(Kind.WIZARD, "no configuration was found", false, springArguments);
+		return new LaunchDecision(Kind.WIZARD, "no configuration was found", false, Optional.empty(), springArguments);
 	}
 
 	/**
-	 * Runs the wizard on the console; after the write the wizard starts the application through {@code boot}. The
-	 * shutdown hook for Ctrl+C says that nothing was written, as long as that is true.
+	 * Runs the wizard on the console, with the answers file when one was given; after the write the wizard starts
+	 * the application through {@code boot}. The shutdown hook for Ctrl+C says that nothing was written, as long as
+	 * that is true.
 	 */
 	private OptionalInt runWizard(LaunchDecision decision, Consumer<String[]> boot) {
-		if (decision.nonInteractive()) {
-			// Non-interactive setup takes its answers from a file, which does not exist yet.
-			err.println("The setup wizard needs an interactive terminal.");
+		if (decision.nonInteractive() && decision.answersFile().isEmpty()) {
+			err.println("The setup wizard needs an interactive terminal, or an answers file: setup --answers <file>.");
 			return OptionalInt.of(SetupFailedException.FAILURE_EXIT_CODE);
 		}
+		Answers answers;
+		try {
+			answers = decision.answersFile().map(AnswersFile::load).orElse(Answers.NONE);
+		}
+		catch (SetupFailedException ex) {
+			err.println(ex.getMessage());
+			return OptionalInt.of(ex.exitCode());
+		}
+		var source = new AnswerSource(answers, decision.answersFile(), decision.nonInteractive());
 		String[] springArguments = decision.springArguments().toArray(String[]::new);
 		var prompter = new ConsolePrompter(console);
-		var wizard = new Wizard(prompter, Wizard.standardSteps(locations), () -> boot.accept(springArguments),
-				Wizard.versionFromManifest());
+		var wizard = new Wizard(prompter, source, Wizard.standardSteps(locations),
+				() -> boot.accept(springArguments), Wizard.versionFromManifest());
 		Thread cancelHook = new Thread(() -> {
 			if (!wizard.hasWritten()) {
 				prompter.print("");
@@ -215,7 +227,7 @@ public final class SetupLauncher {
 	}
 
 	private static LaunchDecision boot(String reason, List<String> springArguments) {
-		return new LaunchDecision(Kind.BOOT, reason, false, springArguments);
+		return new LaunchDecision(Kind.BOOT, reason, false, Optional.empty(), springArguments);
 	}
 
 	/** The first {@code spring.config.*} location that is set, by its property or variable name. */
