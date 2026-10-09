@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The answers an answers file gave: at most one text for each key, as the user would have typed it. A step checks
- * the text with the same rules as a typed answer.
+ * The answers an answers file gave: at most one text for each key, stripped and never blank, as the user would
+ * have typed it. A step checks the text with the same rules as a typed answer.
  */
 public record Answers(Map<AnswerKey, String> values) {
 

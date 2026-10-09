@@ -28,7 +28,8 @@ import io.opencelium.core.setup.LaunchDecision.Kind;
  * rules, first match wins:
  * <ol>
  * <li>{@code --help}: the usage text.</li>
- * <li>A bare word other than {@code setup}: a usage error, exit code 2.</li>
+ * <li>A bare word other than {@code setup}, or {@code --answers} without {@code setup}: a usage error, exit code
+ * 2. The answers file only means something to the setup; without it the file would be dropped silently.</li>
  * <li>{@code setup}: the wizard, on demand. Without a terminal or with {@code --non-interactive} it asks nothing:
  * the answers come from {@code --answers <file>}, and a missing one stops the setup with exit code 1.</li>
  * <li>{@code --non-interactive}: the normal start.</li>
@@ -73,7 +74,7 @@ public final class SetupLauncher {
 			  help, --help, -h      print this text
 
 			Flags
-			  --answers <file>      take the answers from this file; a missing answer is asked
+			  --answers <file>      with setup: take the answers from this file; a missing answer is asked
 			  --non-interactive     never ask: with setup a missing answer is an error, without setup the
 			                        wizard does not start
 
@@ -159,6 +160,10 @@ public final class SetupLauncher {
 		List<String> springArguments = arguments.springArguments();
 		if (arguments.help()) {
 			return new LaunchDecision(Kind.HELP, "help was requested", false, Optional.empty(), springArguments);
+		}
+		if (arguments.answersFile().isPresent() && !arguments.isSetup()) {
+			throw SetupFailedException.usage(LaunchArguments.ANSWERS_FLAG + " needs the setup command: java -jar "
+					+ "oc-app.jar " + Subcommand.SETUP.word() + " " + LaunchArguments.ANSWERS_FLAG + " <file>.");
 		}
 		boolean interactive = terminal.getAsBoolean();
 		if (arguments.isSetup()) {
