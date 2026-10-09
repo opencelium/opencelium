@@ -11,6 +11,7 @@ import java.util.OptionalInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.opencelium.core.setup.answers.AnswerSource;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.setup.prompt.Prompter;
@@ -96,7 +97,8 @@ class WizardTest {
 
 	@Test
 	void runOmitsVersionWhenUnknown() {
-		new Wizard(new ConsolePrompter(console), List.of(), () -> started = true, Optional.empty())
+		new Wizard(new ConsolePrompter(console), AnswerSource.PROMPTED, List.of(), () -> started = true,
+				Optional.empty())
 				.run("requested with setup");
 
 		assertThat(console.output()).contains("  OpenCelium setup\n").contains("  Requested with setup. Let's set up");
@@ -149,7 +151,8 @@ class WizardTest {
 	}
 
 	private Wizard wizard(List<SetupStep> steps) {
-		return new Wizard(new ConsolePrompter(console), steps, () -> started = true, Optional.of("1.2.3"));
+		return new Wizard(new ConsolePrompter(console), AnswerSource.PROMPTED, steps, () -> started = true,
+				Optional.of("1.2.3"));
 	}
 
 	private SetupStep recording(String name) {
