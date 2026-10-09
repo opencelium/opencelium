@@ -11,8 +11,8 @@ import io.opencelium.core.setup.SetupCancelledException;
  * The questions the setup wizard asks and the screens it shows, apart from where they go: the console in
  * production, a script in tests. Every question accepts {@code ?} for help and {@code q} to cancel the setup.
  * The display methods carry the kind of a line (a title, a status, a box, a list), so the steps never know a
- * symbol or a frame; the implementation chooses them for the terminal. A masked password question joins with the
- * first step that asks it.
+ * mark or a frame; the implementation draws them. A masked password question joins with the first step that asks
+ * it.
  */
 public interface Prompter {
 
