@@ -20,6 +20,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import static io.opencelium.core.setup.LaunchDecision.Kind.BOOT;
 import static io.opencelium.core.setup.LaunchDecision.Kind.HELP;
+import static io.opencelium.core.setup.LaunchDecision.Kind.TEMPLATE;
 import static io.opencelium.core.setup.LaunchDecision.Kind.WIZARD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -30,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * no test needs a real terminal and none reads the developer's own environment.
  * <p>
  * The rules, first match wins: {@code --help}; an unknown command is a usage error; {@code setup} runs the wizard
- * (non-interactive without a terminal or with {@code --non-interactive}); otherwise {@code --non-interactive}, no
+ * (batch without a terminal or with {@code --batch}); otherwise {@code --batch}, no
  * terminal, a {@code spring.config.*} location, a bootstrap property, or a configuration file means a normal start;
  * and only when nothing at all is configured does the wizard start on its own.
  */
@@ -59,7 +60,7 @@ class SetupLauncherTest {
 
 		assertThat(decision.kind()).isEqualTo(WIZARD);
 		assertThat(decision.reason()).isEqualTo("no configuration was found");
-		assertThat(decision.nonInteractive()).isFalse();
+		assertThat(decision.batch()).isFalse();
 	}
 
 	@Test
@@ -71,30 +72,30 @@ class SetupLauncherTest {
 
 		assertThat(decision.kind()).isEqualTo(WIZARD);
 		assertThat(decision.reason()).isEqualTo("requested with setup");
-		assertThat(decision.nonInteractive()).isFalse();
+		assertThat(decision.batch()).isFalse();
 	}
 
 	@Test
-	void decideReturnsNonInteractiveWizardWhenSetupHasNoTerminal() {
+	void decideReturnsBatchWizardWhenSetupHasNoTerminal() {
 		terminal = false;
 
 		LaunchDecision decision = decide("setup");
 
 		assertThat(decision.kind()).isEqualTo(WIZARD);
-		assertThat(decision.nonInteractive()).isTrue();
+		assertThat(decision.batch()).isTrue();
 	}
 
 	@Test
-	void decideReturnsNonInteractiveWizardWhenSetupAndTheFlagAreGiven() {
-		LaunchDecision decision = decide("setup", "--non-interactive");
+	void decideReturnsBatchWizardWhenSetupAndTheFlagAreGiven() {
+		LaunchDecision decision = decide("setup", "--batch");
 
 		assertThat(decision.kind()).isEqualTo(WIZARD);
-		assertThat(decision.nonInteractive()).isTrue();
+		assertThat(decision.batch()).isTrue();
 	}
 
 	@Test
-	void decideReturnsBootWhenNonInteractiveFlagIsGivenWithoutSetup() {
-		assertBoot(decide("--non-interactive"), "the flag --non-interactive");
+	void decideReturnsBootWhenBatchFlagIsGivenWithoutSetup() {
+		assertBoot(decide("--batch"), "the flag --batch");
 	}
 
 	@Test
@@ -182,35 +183,101 @@ class SetupLauncherTest {
 
 	@Test
 	void decideStripsWizardArgumentsFromSpringArguments() {
-		LaunchDecision decision = decide("setup", "--answers", "a.yml", "--non-interactive", UNRELATED_ARGUMENT);
+		LaunchDecision decision = decide("setup", "--file", "a.yml", "--batch", UNRELATED_ARGUMENT);
 
 		assertThat(decision.springArguments()).containsExactly(UNRELATED_ARGUMENT);
 	}
 
 	@Test
-	void decideCarriesAnswersPathWhenFlagIsGiven() {
-		assertThat(decide("setup", "--answers", "a.yml").answersFile()).contains(Path.of("a.yml"));
-		assertThat(decide("setup").answersFile()).isEmpty();
+	void decideCarriesFilePathWhenFlagIsGiven() {
+		assertThat(decide("setup", "--file", "a.yml").setupFile()).contains(Path.of("a.yml"));
+		assertThat(decide("setup").setupFile()).isEmpty();
 	}
 
 	@Test
-	void decideThrowsUsageErrorWhenAnswersIsGivenWithoutSetup() {
+	void decideThrowsUsageErrorWhenFileIsGivenWithoutSetup() {
 		// Without setup the file would be dropped silently: a fresh install would ask everything, a configured one
 		// would boot without it.
-		assertThatExceptionOfType(SetupFailedException.class).isThrownBy(() -> decide("--answers", "a.yml"))
-				.withMessage("--answers needs the setup command: java -jar oc-app.jar setup --answers <file>.")
+		assertThatExceptionOfType(SetupFailedException.class).isThrownBy(() -> decide("--file", "a.yml"))
+				.withMessage("--file needs the setup command: java -jar oc-app.jar setup --file <path>.")
 				.extracting(SetupFailedException::exitCode).isEqualTo(2);
 	}
 
 	@Test
-	void launchReturnsExitCodeTwoAndPrintsUsageWhenAnswersIsGivenWithoutSetup() {
+	void launchReturnsExitCodeTwoAndPrintsUsageWhenFileIsGivenWithoutSetup() {
 		terminal = false;
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
-		OptionalInt exitCode = launcher().launch(new String[] {"--answers", "a.yml"}, booted::set);
+		OptionalInt exitCode = launcher().launch(new String[] {"--file", "a.yml"}, booted::set);
 
 		assertThat(exitCode).hasValue(2);
-		assertThat(err.toString()).contains("--answers needs the setup command").contains("Usage:");
+		assertThat(err.toString()).contains("--file needs the setup command").contains("Usage:");
+		assertThat(booted.get()).isNull();
+	}
+
+	@Test
+	void decideReturnsTemplateWhenSetupTemplateIsGiven() {
+		// Also without a terminal: the template is meant to be piped into a file.
+		terminal = false;
+
+		LaunchDecision decision = decide("setup", "--template", "--file", "ignored.yml");
+
+		assertThat(decision.kind()).isEqualTo(TEMPLATE);
+	}
+
+	@Test
+	void decideThrowsUsageErrorWhenTemplateIsGivenWithoutSetup() {
+		assertThatExceptionOfType(SetupFailedException.class).isThrownBy(() -> decide("--template"))
+				.withMessage("--template needs the setup command: java -jar oc-app.jar setup --template.")
+				.extracting(SetupFailedException::exitCode).isEqualTo(2);
+	}
+
+	@Test
+	void launchPrintsTheTemplateWithThisHostsDefaultsAndExitsZero() {
+		terminal = false;
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--template"}, booted::set);
+
+		assertThat(exitCode).hasValue(0);
+		assertThat(out.toString())
+				.startsWith("# OpenCelium setup file. Run: java -jar oc-app.jar setup --file <this file>")
+				.contains("\n# Where OpenCelium keeps its local state").contains("\ndata-dir: ")
+				.contains("\n# The HTTP port of the web interface").contains("\nport: 9090\n");
+		assertThat(err.toString()).isEmpty();
+		assertThat(console.output()).isEmpty();
+		assertThat(booted.get()).isNull();
+	}
+
+	@Test
+	void launchPrintsAMissingValueOnStandardErrorLikeEveryOtherFailure() throws IOException {
+		terminal = false;
+		Path file = Files.writeString(workingDir.resolve("setup-values.yml"),
+				"data-dir: " + workingDir.resolve("data") + "\n");
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", file.toString()}, booted::set);
+
+		assertThat(exitCode).hasValue(1);
+		assertThat(err.toString()).isEqualTo("Missing value: port in " + file + "\n"
+				+ "A template with every key: java -jar oc-app.jar setup --template\n");
+		assertThat(console.output()).contains("(from " + file + ")").doesNotContain("Missing value");
+		assertThat(workingDir.resolve("config")).doesNotExist();
+		assertThat(booted.get()).isNull();
+	}
+
+	@Test
+	void launchPrintsAWriteFailureOnStandardError() throws IOException {
+		Files.writeString(workingDir.resolve("config"), "a file where the directory is needed");
+		console.type("", String.valueOf(freePort()), "");
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[0], booted::set);
+
+		assertThat(exitCode).hasValue(1);
+		assertThat(err.toString()).startsWith("Cannot write " + workingDir.resolve("config/application.yml") + ": ")
+				.endsWith("\nNothing was written.\n");
+		assertThat(console.output()).doesNotContain("Cannot write");
 		assertThat(booted.get()).isNull();
 	}
 
@@ -237,8 +304,11 @@ class SetupLauncherTest {
 		OptionalInt exitCode = launcher().launch(new String[] {"--help"}, booted::set);
 
 		assertThat(exitCode).hasValue(0);
-		assertThat(out.toString()).contains("Usage:").contains("setup").contains("--answers")
-				.contains("--non-interactive");
+		assertThat(out.toString()).contains("Usage:").contains("setup").contains("-f, --file <path>")
+				.contains("--template").contains("--batch")
+				// The batch section says where it is for, what must exist before, and how to run it.
+				.contains("Batch mode").contains("setup --template > setup-values.yml")
+				.contains("setup --file setup-values.yml --batch").contains("Exit code 1");
 		assertThat(booted.get()).isNull();
 	}
 
@@ -247,7 +317,7 @@ class SetupLauncherTest {
 		environment.put("OPENCELIUM_DEPLOYMENTMODE", "self-host");
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
-		OptionalInt exitCode = launcher().launch(new String[] {"--non-interactive", UNRELATED_ARGUMENT}, booted::set);
+		OptionalInt exitCode = launcher().launch(new String[] {"--batch", UNRELATED_ARGUMENT}, booted::set);
 
 		assertThat(exitCode).isEmpty();
 		assertThat(booted.get()).containsExactly(UNRELATED_ARGUMENT);
@@ -288,39 +358,39 @@ class SetupLauncherTest {
 	}
 
 	@Test
-	void launchStopsWithExitCodeOneWhenSetupHasNoTerminalAndNoAnswersFile() {
+	void launchStopsWithExitCodeOneWhenSetupHasNoTerminalAndNoSetupFile() {
 		terminal = false;
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
 		OptionalInt exitCode = launcher().launch(new String[] {"setup"}, booted::set);
 
 		assertThat(exitCode).hasValue(1);
-		assertThat(err.toString()).contains("interactive terminal").contains("--answers");
+		assertThat(err.toString()).contains("interactive terminal").contains("--file");
 		assertThat(booted.get()).isNull();
 	}
 
 	@Test
-	void launchStopsNamingTheFileWhenAnswersFileIsMissing() {
+	void launchStopsNamingTheFileWhenSetupFileIsMissing() {
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
-		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--answers", "missing.yml"}, booted::set);
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", "missing.yml"}, booted::set);
 
 		assertThat(exitCode).hasValue(1);
-		assertThat(err.toString()).contains("The answers file missing.yml does not exist.");
+		assertThat(err.toString()).contains("The setup file missing.yml does not exist.");
 		assertThat(booted.get()).isNull();
 	}
 
 	@Test
-	void launchWritesTheFilesWithoutATerminalWhenAnswersFileIsComplete() throws IOException {
+	void launchWritesTheFilesWithoutATerminalWhenSetupFileIsComplete() throws IOException {
 		terminal = false;
-		Path answers = Files.writeString(workingDir.resolve("setup-answers.yml"),
+		Path file = Files.writeString(workingDir.resolve("setup-values.yml"),
 				"data-dir: " + workingDir.resolve("data") + "\nport: " + freePort() + "\n");
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
-		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--answers", answers.toString()}, booted::set);
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", file.toString()}, booted::set);
 
 		assertThat(exitCode).isEmpty();
-		assertThat(console.output()).contains("(from the answers file)").contains("yes   (non-interactive)")
+		assertThat(console.output()).contains("(from " + file + ")").contains("yes   (batch)")
 				.doesNotContain("[Y/n]");
 		assertThat(workingDir.resolve("config/application.yml")).content()
 				.contains("data-dir: " + workingDir.resolve("data"));

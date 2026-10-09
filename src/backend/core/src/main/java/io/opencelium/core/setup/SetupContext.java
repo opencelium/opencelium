@@ -6,12 +6,12 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import io.opencelium.core.config.DeploymentMode;
-import io.opencelium.core.setup.answers.AnswerSource;
+import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.FilePlan;
 
 /**
- * What the wizard knows so far: where the answers come from, the answers of the steps that ran, and the files the
- * summary planned from them. Each step takes its answer through the source, reads what earlier steps stored, and
+ * What the wizard knows so far: where the values come from, the answers of the steps that ran, and the files the
+ * summary planned from them. Each step takes its value through the source, reads what earlier steps stored, and
  * stores its own answer. Nothing here touches the disk; the wizard writes the plan after the last step.
  */
 public final class SetupContext {
@@ -22,7 +22,7 @@ public final class SetupContext {
 	 */
 	public static final DeploymentMode DEPLOYMENT_MODE = DeploymentMode.SELF_HOST;
 
-	private final AnswerSource answers;
+	private final ValueSource values;
 
 	private final FilePlan filePlan = new FilePlan();
 
@@ -32,16 +32,16 @@ public final class SetupContext {
 
 	/** Every question is asked. */
 	public SetupContext() {
-		this(AnswerSource.PROMPTED);
+		this(ValueSource.PROMPTED);
 	}
 
-	public SetupContext(AnswerSource answers) {
-		this.answers = Objects.requireNonNull(answers, "answers");
+	public SetupContext(ValueSource values) {
+		this.values = Objects.requireNonNull(values, "values");
 	}
 
-	/** Where a step gets its answer: the answers file, else the prompter. */
-	public AnswerSource answers() {
-		return answers;
+	/** Where a step gets its value: the setup file, else the prompter. */
+	public ValueSource values() {
+		return values;
 	}
 
 	public DeploymentMode deploymentMode() {

@@ -1,11 +1,11 @@
-package io.opencelium.core.setup.answers;
+package io.opencelium.core.setup.values;
 
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/** The questions of the wizard, by the key an answers file uses for them. */
-public enum AnswerKey {
+/** The questions of the wizard, by the key a setup file uses for them. */
+public enum ValueKey {
 
 	DATA_DIR("data-dir"),
 
@@ -13,22 +13,22 @@ public enum AnswerKey {
 
 	private final String word;
 
-	AnswerKey(String word) {
+	ValueKey(String word) {
 		this.word = word;
 	}
 
-	/** The key as it is written in the answers file. */
+	/** The key as it is written in the setup file. */
 	public String word() {
 		return word;
 	}
 
-	public static Optional<AnswerKey> parse(String word) {
+	public static Optional<ValueKey> parse(String word) {
 		return Arrays.stream(values()).filter(key -> key.word.equals(word)).findFirst();
 	}
 
 	/** All keys, comma-separated, for a message. */
 	public static String words() {
-		return Arrays.stream(values()).map(AnswerKey::word).collect(Collectors.joining(", "));
+		return Arrays.stream(values()).map(ValueKey::word).collect(Collectors.joining(", "));
 	}
 
 }

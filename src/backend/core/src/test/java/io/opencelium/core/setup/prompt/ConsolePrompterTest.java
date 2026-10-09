@@ -228,9 +228,9 @@ class ConsolePrompterTest {
 
 	@Test
 	void answeredPrintsTheLabelTheValueAndTheRemark() {
-		prompter.answered("Data directory", "./data", "from the answers file");
+		prompter.answered("Data directory", "./data", "from setup-values.yml");
 
-		assertThat(console.output()).isEqualTo("  Data directory  ./data   (from the answers file)\n");
+		assertThat(console.output()).isEqualTo("  Data directory  ./data   (from setup-values.yml)\n");
 	}
 
 	@Test
