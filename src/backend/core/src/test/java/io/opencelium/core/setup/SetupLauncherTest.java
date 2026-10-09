@@ -12,6 +12,8 @@ import java.util.OptionalInt;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -46,6 +48,8 @@ class SetupLauncherTest {
 	private final StringWriter out = new StringWriter();
 
 	private final StringWriter err = new StringWriter();
+
+	private final ScriptedConsoleIo console = new ScriptedConsoleIo();
 
 	@Test
 	void decideReturnsWizardWhenNothingIsConfigured() {
@@ -222,15 +226,29 @@ class SetupLauncherTest {
 	}
 
 	@Test
-	void launchPrintsReasonAndBootsWhenWizardIsDecided() {
-		// Until the wizard exists, a WIZARD decision is reported on the console and the application starts normally.
+	void launchRunsWizardInsteadOfBootingWhenWizardIsDecided() {
+		console.type("");
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
 		OptionalInt exitCode = launcher().launch(new String[0], booted::set);
 
-		assertThat(exitCode).isEmpty();
-		assertThat(out.toString()).contains("Setup wizard: no configuration was found");
-		assertThat(booted.get()).isEmpty();
+		assertThat(exitCode).hasValue(0);
+		assertThat(console.output()).contains("OpenCelium").contains("No configuration was found.")
+				.contains("How will this OpenCelium run?").contains("Mode: self-host.");
+		assertThat(booted.get()).isNull();
+	}
+
+	@Test
+	void launchStopsWithExitCodeOneWhenSetupHasNoTerminal() {
+		// Non-interactive setup needs the answers file, which does not exist yet.
+		terminal = false;
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[] {"setup"}, booted::set);
+
+		assertThat(exitCode).hasValue(1);
+		assertThat(err.toString()).contains("interactive terminal");
+		assertThat(booted.get()).isNull();
 	}
 
 	private LaunchDecision decide(String... args) {
@@ -239,8 +257,8 @@ class SetupLauncherTest {
 
 	private SetupLauncher launcher() {
 		var locations = new ConfigLocations(workingDir, workingDir.resolve("etc/opencelium"));
-		return new SetupLauncher(() -> terminal, environment, systemProperties, locations, new PrintWriter(out, true),
-				new PrintWriter(err, true));
+		return new SetupLauncher(() -> terminal, environment, systemProperties, locations, console,
+				new PrintWriter(out, true), new PrintWriter(err, true));
 	}
 
 	private static void assertBoot(LaunchDecision decision, String reason) {
