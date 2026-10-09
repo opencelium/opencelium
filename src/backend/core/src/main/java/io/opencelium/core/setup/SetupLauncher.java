@@ -85,17 +85,6 @@ public final class SetupLauncher {
 			  --batch               Run in non-interactive mode. Auto-confirms prompts, fails on missing
 			                        values, and disables the setup wizard.
 			                        (e.g., setup --file setup-values.yml --batch)
-
-			Batch mode, for scripts, Docker, systemd and CI
-			  Before: a setup file with every key. Print the template on the target machine, then set the values:
-			      java -jar oc-app.jar setup --template > setup-values.yml
-			  Then: run the setup with the file and --batch, so that nothing waits for input:
-			      java -jar oc-app.jar setup --file setup-values.yml --batch
-			  Without a terminal the setup runs in batch mode by itself. The application starts once the files
-			  are written. Exit code 1: a missing or bad value; the message names the key and the file.
-			  Exit code 2: a usage error. Both go to standard error.
-
-			Every other --<property>=<value> goes to Spring Boot unchanged, for example --server.port=9090.
 			""";
 
 	private final BooleanSupplier terminal;

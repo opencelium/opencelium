@@ -306,9 +306,8 @@ class SetupLauncherTest {
 		assertThat(exitCode).hasValue(0);
 		assertThat(out.toString()).contains("Usage:").contains("setup").contains("-f, --file <path>")
 				.contains("--template").contains("--batch")
-				// The batch section says where it is for, what must exist before, and how to run it.
-				.contains("Batch mode").contains("setup --template > setup-values.yml")
-				.contains("setup --file setup-values.yml --batch").contains("Exit code 1");
+				// Each flag carries an example.
+				.contains("setup --template > setup-values.yml").contains("setup --file setup-values.yml --batch");
 		assertThat(booted.get()).isNull();
 	}
 
