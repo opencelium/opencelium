@@ -104,6 +104,18 @@ class WizardAnswersTest {
 		assertThat(started).isFalse();
 	}
 
+	@Test
+	void runStopsNamingTheKeyWhenNonInteractiveAnswerIsBlank() throws IOException {
+		// A blank value is absent, not the working directory, which the empty path would resolve to.
+		Path file = answers("data-dir: \"\"\nport: " + port + "\n");
+
+		OptionalInt exitCode = wizard(source(file, true), tmp.resolve("work")).run(REASON);
+
+		assertThat(exitCode).hasValue(1);
+		assertThat(console.output()).contains("  ! Missing answer: data-dir in " + file);
+		assertThat(tmp.resolve("work/config")).doesNotExist();
+	}
+
 	private Path answers(String content) throws IOException {
 		return Files.writeString(tmp.resolve("setup-answers.yml"), content);
 	}

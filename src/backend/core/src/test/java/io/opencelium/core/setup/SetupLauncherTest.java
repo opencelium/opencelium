@@ -22,6 +22,7 @@ import static io.opencelium.core.setup.LaunchDecision.Kind.BOOT;
 import static io.opencelium.core.setup.LaunchDecision.Kind.HELP;
 import static io.opencelium.core.setup.LaunchDecision.Kind.WIZARD;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * What {@code main()} does first: decide whether the setup wizard runs or Spring Boot starts normally, from the
@@ -190,6 +191,27 @@ class SetupLauncherTest {
 	void decideCarriesAnswersPathWhenFlagIsGiven() {
 		assertThat(decide("setup", "--answers", "a.yml").answersFile()).contains(Path.of("a.yml"));
 		assertThat(decide("setup").answersFile()).isEmpty();
+	}
+
+	@Test
+	void decideThrowsUsageErrorWhenAnswersIsGivenWithoutSetup() {
+		// Without setup the file would be dropped silently: a fresh install would ask everything, a configured one
+		// would boot without it.
+		assertThatExceptionOfType(SetupFailedException.class).isThrownBy(() -> decide("--answers", "a.yml"))
+				.withMessage("--answers needs the setup command: java -jar oc-app.jar setup --answers <file>.")
+				.extracting(SetupFailedException::exitCode).isEqualTo(2);
+	}
+
+	@Test
+	void launchReturnsExitCodeTwoAndPrintsUsageWhenAnswersIsGivenWithoutSetup() {
+		terminal = false;
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[] {"--answers", "a.yml"}, booted::set);
+
+		assertThat(exitCode).hasValue(2);
+		assertThat(err.toString()).contains("--answers needs the setup command").contains("Usage:");
+		assertThat(booted.get()).isNull();
 	}
 
 	@Test
