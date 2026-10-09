@@ -162,6 +162,57 @@ class ConsolePrompterTest {
 	}
 
 	@Test
+	void yesNoReturnsDefaultWhenInputIsEmpty() {
+		console.type("");
+
+		assertThat(prompter.yesNo("Write the files?", "help", true)).isTrue();
+		assertThat(console.output()).isEqualTo("  Write the files? [Y/n]: ");
+	}
+
+	@Test
+	void yesNoShowsNoAsDefaultInBrackets() {
+		console.type("");
+
+		assertThat(prompter.yesNo("Write the files?", "help", false)).isFalse();
+		assertThat(console.output()).isEqualTo("  Write the files? [y/N]: ");
+	}
+
+	@Test
+	void yesNoAcceptsYesAndNoInAnyCaseAndLength() {
+		console.type("Y", "no", " yes ", "N");
+
+		assertThat(prompter.yesNo("Write?", "help", false)).isTrue();
+		assertThat(prompter.yesNo("Write?", "help", true)).isFalse();
+		assertThat(prompter.yesNo("Write?", "help", false)).isTrue();
+		assertThat(prompter.yesNo("Write?", "help", true)).isFalse();
+	}
+
+	@Test
+	void yesNoAsksAgainWhenInputIsNeither() {
+		console.type("maybe", "y");
+
+		assertThat(prompter.yesNo("Write?", "help", true)).isTrue();
+		// The scripted console does not echo the input, so the message follows the prompt on the same line.
+		assertThat(console.output()).isEqualTo("  Write? [Y/n]:   Please answer y or n.\n  Write? [Y/n]: ");
+	}
+
+	@Test
+	void yesNoPrintsHelpWhenInputIsQuestionMark() {
+		console.type("?", "n");
+
+		assertThat(prompter.yesNo("Write?", "y writes the files.\nn ends the setup.", true)).isFalse();
+		assertThat(console.output()).contains("  y writes the files.\n  n ends the setup.\n  Write? [Y/n]: ");
+	}
+
+	@Test
+	void yesNoThrowsSetupCancelledWhenInputIsQ() {
+		console.type("q");
+
+		assertThatExceptionOfType(SetupCancelledException.class)
+				.isThrownBy(() -> prompter.yesNo("Write?", "help", true));
+	}
+
+	@Test
 	void printWritesTheLineAsItIs() {
 		prompter.print("  hello");
 

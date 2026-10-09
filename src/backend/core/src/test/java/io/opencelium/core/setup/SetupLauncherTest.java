@@ -227,16 +227,34 @@ class SetupLauncherTest {
 	}
 
 	@Test
-	void launchRunsWizardInsteadOfBootingWhenWizardIsDecided() throws IOException {
-		console.type("", String.valueOf(freePort()));
+	void launchRunsWizardThenBootsOnTheWrittenFilesWhenConfirmed() throws IOException {
+		int port = freePort();
+		console.type("", String.valueOf(port), "");
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[] {UNRELATED_ARGUMENT}, booted::set);
+
+		assertThat(exitCode).isEmpty();
+		assertThat(console.output()).contains("OpenCelium").contains("No configuration was found.")
+				.contains("Data directory [").contains("Web port [9090]: ").contains("── Summary ")
+				.contains("Write the files and start OpenCelium? [Y/n]: ")
+				.contains("Configuration written to " + workingDir.resolve("config") + ". OpenCelium starts now.")
+				.doesNotContain("Cloud");
+		assertThat(workingDir.resolve("config/application.yml")).content().contains("port: " + port);
+		assertThat(workingDir.resolve("config/opencelium.env")).exists();
+		assertThat(booted.get()).containsExactly(UNRELATED_ARGUMENT);
+	}
+
+	@Test
+	void launchWritesNothingAndBootsNothingWhenSummaryIsDeclined() throws IOException {
+		console.type("", String.valueOf(freePort()), "n");
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
 		OptionalInt exitCode = launcher().launch(new String[0], booted::set);
 
 		assertThat(exitCode).hasValue(0);
-		assertThat(console.output()).contains("OpenCelium").contains("No configuration was found.")
-				.contains("Data directory [").contains("Web port [9090]: ").contains("── Summary ")
-				.doesNotContain("Cloud");
+		assertThat(console.output()).contains("Setup cancelled. Nothing was written.");
+		assertThat(workingDir.resolve("config")).doesNotExist();
 		assertThat(booted.get()).isNull();
 	}
 

@@ -35,7 +35,8 @@ public record OpenCeliumProperties(DeploymentMode deploymentMode, Path dataDir, 
 		Objects.requireNonNull(masterKeyFile, "masterKeyFile");
 	}
 
-	static OpenCeliumProperties from(Environment environment) {
+	/** Binds from any environment, also from one that holds only a file the setup wizard rendered. */
+	public static OpenCeliumProperties from(Environment environment) {
 		Binder binder = Binder.get(environment);
 		return new OpenCeliumProperties(deploymentMode(binder), dataDir(binder), masterKeyFile(binder));
 	}
