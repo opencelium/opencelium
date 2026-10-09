@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import io.opencelium.core.config.DataDirDefaults;
 import io.opencelium.core.setup.SetupContext;
-import io.opencelium.core.setup.answers.AnswerKey;
+import io.opencelium.core.setup.values.ValueKey;
 import io.opencelium.core.setup.prompt.Prompter;
 
 /**
@@ -41,9 +41,9 @@ public final class DataDirStep implements SetupStep {
 
 	@Override
 	public void run(SetupContext context, Prompter prompter) {
-		String answer = context.answers().text(AnswerKey.DATA_DIR, "Data directory", HELP, abbreviated(defaultDir),
+		String value = context.values().text(ValueKey.DATA_DIR, "Data directory", HELP, abbreviated(defaultDir),
 				this::check, prompter);
-		context.setDataDir(absolute(expanded(answer)));
+		context.setDataDir(absolute(expanded(value)));
 	}
 
 	/** The problem with {@code value} as a data directory, or empty when it is acceptable. */

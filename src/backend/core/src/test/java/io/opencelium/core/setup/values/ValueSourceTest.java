@@ -1,4 +1,4 @@
-package io.opencelium.core.setup.answers;
+package io.opencelium.core.setup.values;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -15,12 +15,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Where a step gets its answer: a value from the answers file is checked, printed and taken without a question; an
+ * Where a step gets its value: a value from the setup file is checked, printed and taken without a question; an
  * absent value is asked, or, in non-interactive mode, stops the setup naming the key and the file.
  */
-class AnswerSourceTest {
+class ValueSourceTest {
 
-	private static final Path FILE = Path.of("setup-answers.yml");
+	private static final Path FILE = Path.of("setup-values.yml");
 
 	private static final Function<String, Optional<String>> DIGITS = value -> value.chars().allMatch(Character::isDigit)
 			? Optional.empty() : Optional.of("Please enter a number.");
@@ -31,49 +31,49 @@ class AnswerSourceTest {
 
 	@Test
 	void textTakesFileValueAndPrintsItWithoutAsking() {
-		AnswerSource source = withFile(Map.of(AnswerKey.PORT, "9091"), false);
+		ValueSource source = withFile(Map.of(ValueKey.PORT, "9091"), false);
 
-		String value = source.text(AnswerKey.PORT, "Web port", "help", "9090", DIGITS, prompter);
+		String value = source.text(ValueKey.PORT, "Web port", "help", "9090", DIGITS, prompter);
 
 		assertThat(value).isEqualTo("9091");
-		assertThat(console.output()).isEqualTo("  Web port        9091   (from the answers file)\n");
+		assertThat(console.output()).isEqualTo("  Web port        9091   (from setup-values.yml)\n");
 	}
 
 	@Test
 	void textAsksWhenFileValueIsAbsent() {
 		console.type("9092");
-		AnswerSource source = withFile(Map.of(), false);
+		ValueSource source = withFile(Map.of(), false);
 
-		String value = source.text(AnswerKey.PORT, "Web port", "help", "9090", DIGITS, prompter);
+		String value = source.text(ValueKey.PORT, "Web port", "help", "9090", DIGITS, prompter);
 
 		assertThat(value).isEqualTo("9092");
 		assertThat(console.output()).contains("  Web port        [9090]: ");
 	}
 
 	@Test
-	void textThrowsMissingAnswerWhenNonInteractiveAndAbsent() {
-		AnswerSource source = withFile(Map.of(), true);
+	void textThrowsMissingValueWhenNonInteractiveAndAbsent() {
+		ValueSource source = withFile(Map.of(), true);
 
 		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> source.text(AnswerKey.PORT, "Web port", "help", "9090", DIGITS, prompter)).actual();
+				.isThrownBy(() -> source.text(ValueKey.PORT, "Web port", "help", "9090", DIGITS, prompter)).actual();
 
-		assertThat(ex.getMessage()).isEqualTo("Missing answer: port in setup-answers.yml");
+		assertThat(ex.getMessage()).isEqualTo("Missing value: port in setup-values.yml");
 		assertThat(ex.exitCode()).isEqualTo(1);
 		assertThat(console.output()).isEmpty();
 	}
 
 	@Test
 	void textThrowsNamingKeyAndFileWhenFileValueIsRejected() {
-		AnswerSource source = withFile(Map.of(AnswerKey.PORT, "abc"), false);
+		ValueSource source = withFile(Map.of(ValueKey.PORT, "abc"), false);
 
 		assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> source.text(AnswerKey.PORT, "Web port", "help", "9090", DIGITS, prompter))
-				.withMessage("Bad answer: port in setup-answers.yml: Please enter a number.");
+				.isThrownBy(() -> source.text(ValueKey.PORT, "Web port", "help", "9090", DIGITS, prompter))
+				.withMessage("Bad value: port in setup-values.yml: Please enter a number.");
 	}
 
 	@Test
 	void yesNoTakesDefaultAndPrintsItWhenNonInteractive() {
-		AnswerSource source = withFile(Map.of(), true);
+		ValueSource source = withFile(Map.of(), true);
 
 		assertThat(source.yesNo("Write the files?", "help", true, prompter)).isTrue();
 		assertThat(source.yesNo("Write the files?", "help", false, prompter)).isFalse();
@@ -84,7 +84,7 @@ class AnswerSourceTest {
 	@Test
 	void yesNoAsksWhenInteractive() {
 		console.type("n");
-		AnswerSource source = withFile(Map.of(), false);
+		ValueSource source = withFile(Map.of(), false);
 
 		assertThat(source.yesNo("Write the files?", "help", true, prompter)).isFalse();
 		assertThat(console.output()).contains("  Write the files? [Y/n]: ");
@@ -94,14 +94,14 @@ class AnswerSourceTest {
 	void promptedSourceAsksEverything() {
 		console.type("", "y");
 
-		assertThat(AnswerSource.PROMPTED.nonInteractive()).isFalse();
-		assertThat(AnswerSource.PROMPTED.text(AnswerKey.PORT, "Web port", "help", "9090", DIGITS, prompter))
+		assertThat(ValueSource.PROMPTED.nonInteractive()).isFalse();
+		assertThat(ValueSource.PROMPTED.text(ValueKey.PORT, "Web port", "help", "9090", DIGITS, prompter))
 				.isEqualTo("9090");
-		assertThat(AnswerSource.PROMPTED.yesNo("Write?", "help", false, prompter)).isTrue();
+		assertThat(ValueSource.PROMPTED.yesNo("Write?", "help", false, prompter)).isTrue();
 	}
 
-	private static AnswerSource withFile(Map<AnswerKey, String> values, boolean nonInteractive) {
-		return new AnswerSource(new Answers(values), Optional.of(FILE), nonInteractive);
+	private static ValueSource withFile(Map<ValueKey, String> values, boolean nonInteractive) {
+		return new ValueSource(new SetupValues(values), Optional.of(FILE), nonInteractive);
 	}
 
 }

@@ -11,7 +11,7 @@ import java.util.OptionalInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import io.opencelium.core.setup.answers.AnswerSource;
+import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.setup.prompt.Prompter;
@@ -97,7 +97,7 @@ class WizardTest {
 
 	@Test
 	void runOmitsVersionWhenUnknown() {
-		new Wizard(new ConsolePrompter(console), AnswerSource.PROMPTED, List.of(), () -> started = true,
+		new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, List.of(), () -> started = true,
 				Optional.empty())
 				.run("requested with setup");
 
@@ -151,7 +151,7 @@ class WizardTest {
 	}
 
 	private Wizard wizard(List<SetupStep> steps) {
-		return new Wizard(new ConsolePrompter(console), AnswerSource.PROMPTED, steps, () -> started = true,
+		return new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, steps, () -> started = true,
 				Optional.of("1.2.3"));
 	}
 

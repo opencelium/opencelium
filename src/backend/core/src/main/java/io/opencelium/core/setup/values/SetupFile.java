@@ -1,4 +1,4 @@
-package io.opencelium.core.setup.answers;
+package io.opencelium.core.setup.values;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -22,53 +22,53 @@ import org.yaml.snakeyaml.resolver.Resolver;
 import io.opencelium.core.setup.SetupFailedException;
 
 /**
- * Reads the answers file: YAML with one {@code key: value} line for each question, for example
+ * Reads the setup file: YAML with one {@code key: value} line for each question, for example
  * {@code data-dir: ./data} and {@code port: 9090}. Each value is kept as the text that is written, stripped, so it
  * means what the same text typed at the prompt means: YAML's type guessing is off, because it would read {@code ~}
  * as no value, {@code 010} as 8, and {@code yes} as true. A key without a value or with a blank value is the same
  * as an absent key. An unknown key is an error, so a typo cannot silently turn into a question; a duplicated key and
  * a value that is a list or a map are errors too.
  */
-public final class AnswersFile {
+public final class SetupFile {
 
-	private AnswersFile() {
+	private SetupFile() {
 	}
 
 	/**
 	 * @throws SetupFailedException with exit code 1 when the file is missing, unreadable or broken, holds an unknown
 	 *                              or duplicated key, or holds a value that is not one value
 	 */
-	public static Answers load(Path file) {
+	public static SetupValues load(Path file) {
 		if (Files.isDirectory(file)) {
-			throw SetupFailedException.failure("The answers file " + file + " is a directory, not a file.");
+			throw SetupFailedException.failure("The setup file " + file + " is a directory, not a file.");
 		}
 		Object document;
 		try (Reader reader = Files.newBufferedReader(file)) {
 			document = textOnlyYaml().load(reader);
 		}
 		catch (NoSuchFileException ex) {
-			throw SetupFailedException.failure("The answers file " + file + " does not exist.");
+			throw SetupFailedException.failure("The setup file " + file + " does not exist.");
 		}
 		catch (AccessDeniedException ex) {
-			throw SetupFailedException.failure("The answers file " + file + " cannot be read: permission denied");
+			throw SetupFailedException.failure("The setup file " + file + " cannot be read: permission denied");
 		}
 		catch (IOException | YAMLException ex) {
-			throw SetupFailedException.failure("The answers file " + file + " cannot be read: " + reason(ex));
+			throw SetupFailedException.failure("The setup file " + file + " cannot be read: " + reason(ex));
 		}
 		if (document == null) {
-			return Answers.NONE;
+			return SetupValues.NONE;
 		}
 		if (!(document instanceof Map<?, ?> entries)) {
-			throw SetupFailedException.failure("The answers file " + file + " must hold key: value lines.");
+			throw SetupFailedException.failure("The setup file " + file + " must hold key: value lines.");
 		}
-		Map<AnswerKey, String> values = new EnumMap<>(AnswerKey.class);
+		Map<ValueKey, String> values = new EnumMap<>(ValueKey.class);
 		for (Map.Entry<?, ?> entry : entries.entrySet()) {
 			String word = String.valueOf(entry.getKey());
-			AnswerKey key = AnswerKey.parse(word).orElseThrow(() -> SetupFailedException.failure(
-					"Unknown key '" + word + "' in " + file + ". Known keys: " + AnswerKey.words() + "."));
+			ValueKey key = ValueKey.parse(word).orElseThrow(() -> SetupFailedException.failure(
+					"Unknown key '" + word + "' in " + file + ". Known keys: " + ValueKey.words() + "."));
 			Object value = entry.getValue();
 			if (value instanceof Collection || value instanceof Map) {
-				throw SetupFailedException.failure("Bad answer: " + key.word() + " in " + file
+				throw SetupFailedException.failure("Bad value: " + key.word() + " in " + file
 						+ ": one value is expected.");
 			}
 			String text = value == null ? "" : String.valueOf(value).strip();
@@ -76,7 +76,7 @@ public final class AnswersFile {
 				values.put(key, text);
 			}
 		}
-		return new Answers(values);
+		return new SetupValues(values);
 	}
 
 	/**

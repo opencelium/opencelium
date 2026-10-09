@@ -35,28 +35,28 @@ class LaunchArgumentsTest {
 	}
 
 	@Test
-	void parseReadsAnswersPathInBothSpellings() {
-		assertThat(LaunchArguments.parse("setup", "--answers", "setup-answers.yml").answersFile())
-				.contains(Path.of("setup-answers.yml"));
-		assertThat(LaunchArguments.parse("setup", "--answers=setup-answers.yml").answersFile())
-				.contains(Path.of("setup-answers.yml"));
+	void parseReadsFilePathInAllSpellings() {
+		assertThat(LaunchArguments.parse("setup", "--file", "setup-values.yml").setupFile())
+				.contains(Path.of("setup-values.yml"));
+		assertThat(LaunchArguments.parse("setup", "--file=setup-values.yml").setupFile())
+				.contains(Path.of("setup-values.yml"));
 	}
 
 	@Test
-	void parseLeavesAnswersEmptyWhenFlagIsAbsent() {
-		assertThat(LaunchArguments.parse("setup").answersFile()).isEmpty();
+	void parseLeavesFileEmptyWhenFlagIsAbsent() {
+		assertThat(LaunchArguments.parse("setup").setupFile()).isEmpty();
 	}
 
 	@Test
-	void parseThrowsUsageErrorWhenAnswersFlagHasNoPath() {
+	void parseThrowsUsageErrorWhenFileFlagHasNoPath() {
 		assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> LaunchArguments.parse("setup", "--answers"))
-				.withMessageContaining("--answers")
+				.isThrownBy(() -> LaunchArguments.parse("setup", "--file"))
+				.withMessageContaining("--file")
 				.satisfies(failure -> assertThat(failure.exitCode()).isEqualTo(2));
 		// The next option is not a path.
 		assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> LaunchArguments.parse("setup", "--answers", "--non-interactive"))
-				.withMessageContaining("--answers");
+				.isThrownBy(() -> LaunchArguments.parse("setup", "--file", "--non-interactive"))
+				.withMessageContaining("--file");
 	}
 
 	@Test
@@ -76,7 +76,7 @@ class LaunchArgumentsTest {
 	@Test
 	void parseKeepsSpringArgumentsInOrderAndStripsTheWizardOnes() {
 		LaunchArguments arguments = LaunchArguments.parse("--server.port=9091", "setup", "--non-interactive",
-				"--spring.mongodb.uri=mongodb://db.example/oc", "--answers", "a.yml", "--logging.level.root=INFO");
+				"--spring.mongodb.uri=mongodb://db.example/oc", "--file", "a.yml", "--logging.level.root=INFO");
 
 		assertThat(arguments.springArguments()).containsExactly("--server.port=9091",
 				"--spring.mongodb.uri=mongodb://db.example/oc", "--logging.level.root=INFO");

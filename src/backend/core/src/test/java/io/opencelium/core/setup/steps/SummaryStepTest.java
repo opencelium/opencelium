@@ -11,8 +11,8 @@ import org.junit.jupiter.api.io.TempDir;
 import io.opencelium.core.setup.ConfigLocations;
 import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
-import io.opencelium.core.setup.answers.AnswerSource;
-import io.opencelium.core.setup.answers.Answers;
+import io.opencelium.core.setup.values.ValueSource;
+import io.opencelium.core.setup.values.SetupValues;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
@@ -78,7 +78,7 @@ class SummaryStepTest {
 
 	@Test
 	void runPlansTheFilesWithoutAskingWhenNonInteractive() {
-		var nonInteractive = new SetupContext(new AnswerSource(Answers.NONE, Optional.of(Path.of("a.yml")), true));
+		var nonInteractive = new SetupContext(new ValueSource(SetupValues.NONE, Optional.of(Path.of("a.yml")), true));
 		nonInteractive.setDataDir(Path.of("/srv/oc"));
 		nonInteractive.setPort(9090);
 

@@ -14,10 +14,10 @@ import java.util.Optional;
  * @param kind            what runs
  * @param reason          why, in words for the terminal, for example "no configuration was found"
  * @param nonInteractive  for the wizard: ask nothing, because of {@code --non-interactive} or a missing terminal
- * @param answersFile     for the wizard: the answers file behind {@code --answers}, when one was given
+ * @param setupFile     for the wizard: the setup file behind {@code --file}, when one was given
  * @param springArguments the arguments for Spring Boot
  */
-public record LaunchDecision(Kind kind, String reason, boolean nonInteractive, Optional<Path> answersFile,
+public record LaunchDecision(Kind kind, String reason, boolean nonInteractive, Optional<Path> setupFile,
 		List<String> springArguments) {
 
 	public enum Kind {
@@ -36,7 +36,7 @@ public record LaunchDecision(Kind kind, String reason, boolean nonInteractive, O
 	public LaunchDecision {
 		Objects.requireNonNull(kind, "kind");
 		Objects.requireNonNull(reason, "reason");
-		Objects.requireNonNull(answersFile, "answersFile");
+		Objects.requireNonNull(setupFile, "setupFile");
 		springArguments = List.copyOf(springArguments);
 	}
 

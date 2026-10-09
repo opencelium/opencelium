@@ -182,35 +182,35 @@ class SetupLauncherTest {
 
 	@Test
 	void decideStripsWizardArgumentsFromSpringArguments() {
-		LaunchDecision decision = decide("setup", "--answers", "a.yml", "--non-interactive", UNRELATED_ARGUMENT);
+		LaunchDecision decision = decide("setup", "--file", "a.yml", "--non-interactive", UNRELATED_ARGUMENT);
 
 		assertThat(decision.springArguments()).containsExactly(UNRELATED_ARGUMENT);
 	}
 
 	@Test
-	void decideCarriesAnswersPathWhenFlagIsGiven() {
-		assertThat(decide("setup", "--answers", "a.yml").answersFile()).contains(Path.of("a.yml"));
-		assertThat(decide("setup").answersFile()).isEmpty();
+	void decideCarriesFilePathWhenFlagIsGiven() {
+		assertThat(decide("setup", "--file", "a.yml").setupFile()).contains(Path.of("a.yml"));
+		assertThat(decide("setup").setupFile()).isEmpty();
 	}
 
 	@Test
-	void decideThrowsUsageErrorWhenAnswersIsGivenWithoutSetup() {
+	void decideThrowsUsageErrorWhenFileIsGivenWithoutSetup() {
 		// Without setup the file would be dropped silently: a fresh install would ask everything, a configured one
 		// would boot without it.
-		assertThatExceptionOfType(SetupFailedException.class).isThrownBy(() -> decide("--answers", "a.yml"))
-				.withMessage("--answers needs the setup command: java -jar oc-app.jar setup --answers <file>.")
+		assertThatExceptionOfType(SetupFailedException.class).isThrownBy(() -> decide("--file", "a.yml"))
+				.withMessage("--file needs the setup command: java -jar oc-app.jar setup --file <path>.")
 				.extracting(SetupFailedException::exitCode).isEqualTo(2);
 	}
 
 	@Test
-	void launchReturnsExitCodeTwoAndPrintsUsageWhenAnswersIsGivenWithoutSetup() {
+	void launchReturnsExitCodeTwoAndPrintsUsageWhenFileIsGivenWithoutSetup() {
 		terminal = false;
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
-		OptionalInt exitCode = launcher().launch(new String[] {"--answers", "a.yml"}, booted::set);
+		OptionalInt exitCode = launcher().launch(new String[] {"--file", "a.yml"}, booted::set);
 
 		assertThat(exitCode).hasValue(2);
-		assertThat(err.toString()).contains("--answers needs the setup command").contains("Usage:");
+		assertThat(err.toString()).contains("--file needs the setup command").contains("Usage:");
 		assertThat(booted.get()).isNull();
 	}
 
@@ -237,7 +237,7 @@ class SetupLauncherTest {
 		OptionalInt exitCode = launcher().launch(new String[] {"--help"}, booted::set);
 
 		assertThat(exitCode).hasValue(0);
-		assertThat(out.toString()).contains("Usage:").contains("setup").contains("--answers")
+		assertThat(out.toString()).contains("Usage:").contains("setup").contains("--file")
 				.contains("--non-interactive");
 		assertThat(booted.get()).isNull();
 	}
@@ -288,39 +288,39 @@ class SetupLauncherTest {
 	}
 
 	@Test
-	void launchStopsWithExitCodeOneWhenSetupHasNoTerminalAndNoAnswersFile() {
+	void launchStopsWithExitCodeOneWhenSetupHasNoTerminalAndNoSetupFile() {
 		terminal = false;
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
 		OptionalInt exitCode = launcher().launch(new String[] {"setup"}, booted::set);
 
 		assertThat(exitCode).hasValue(1);
-		assertThat(err.toString()).contains("interactive terminal").contains("--answers");
+		assertThat(err.toString()).contains("interactive terminal").contains("--file");
 		assertThat(booted.get()).isNull();
 	}
 
 	@Test
-	void launchStopsNamingTheFileWhenAnswersFileIsMissing() {
+	void launchStopsNamingTheFileWhenSetupFileIsMissing() {
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
-		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--answers", "missing.yml"}, booted::set);
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", "missing.yml"}, booted::set);
 
 		assertThat(exitCode).hasValue(1);
-		assertThat(err.toString()).contains("The answers file missing.yml does not exist.");
+		assertThat(err.toString()).contains("The setup file missing.yml does not exist.");
 		assertThat(booted.get()).isNull();
 	}
 
 	@Test
-	void launchWritesTheFilesWithoutATerminalWhenAnswersFileIsComplete() throws IOException {
+	void launchWritesTheFilesWithoutATerminalWhenSetupFileIsComplete() throws IOException {
 		terminal = false;
-		Path answers = Files.writeString(workingDir.resolve("setup-answers.yml"),
+		Path file = Files.writeString(workingDir.resolve("setup-values.yml"),
 				"data-dir: " + workingDir.resolve("data") + "\nport: " + freePort() + "\n");
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
-		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--answers", answers.toString()}, booted::set);
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", file.toString()}, booted::set);
 
 		assertThat(exitCode).isEmpty();
-		assertThat(console.output()).contains("(from the answers file)").contains("yes   (non-interactive)")
+		assertThat(console.output()).contains("(from " + file + ")").contains("yes   (non-interactive)")
 				.doesNotContain("[Y/n]");
 		assertThat(workingDir.resolve("config/application.yml")).content()
 				.contains("data-dir: " + workingDir.resolve("data"));
