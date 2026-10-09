@@ -5,8 +5,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 import io.opencelium.core.setup.prompt.Prompter;
-import io.opencelium.core.setup.steps.ModeStep;
+import io.opencelium.core.setup.steps.DataDirStep;
+import io.opencelium.core.setup.steps.PortStep;
 import io.opencelium.core.setup.steps.SetupStep;
+import io.opencelium.core.setup.steps.SummaryStep;
 
 /**
  * The interactive setup: the banner, then the steps in order, each one skipped when it does not apply. A cancel at
@@ -32,7 +34,7 @@ public final class Wizard {
 
 	/** The steps of a full setup, in the order the user sees them. */
 	public static List<SetupStep> standardSteps() {
-		return List.of(new ModeStep());
+		return List.of(new DataDirStep(), new PortStep(), new SummaryStep());
 	}
 
 	/** The version from the jar manifest; empty when the classes run unpacked, for example from the build tool. */
@@ -57,13 +59,7 @@ public final class Wizard {
 		catch (SetupCancelledException ex) {
 			prompter.print("");
 			prompter.print(ex.getMessage());
-			return 0;
 		}
-		// Until the next steps exist: show what was answered, so the run has a visible result.
-		context.deploymentMode().ifPresent(mode -> {
-			prompter.print("");
-			prompter.print("Mode: " + mode.propertyValue() + ". The other questions come in the next change.");
-		});
 		return 0;
 	}
 
@@ -74,6 +70,7 @@ public final class Wizard {
 		prompter.print("  " + sentence(reason) + " I will ask a few questions, install what is missing, and write");
 		prompter.print("  application.yml. Everything else is configured in the browser afterwards.");
 		prompter.print("  Press Enter to accept the value in [brackets]. Type ? for help, q to quit.");
+		prompter.print("");
 	}
 
 	private static String sentence(String reason) {
