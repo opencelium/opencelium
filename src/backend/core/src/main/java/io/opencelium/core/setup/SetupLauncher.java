@@ -41,7 +41,8 @@ import io.opencelium.core.setup.LaunchDecision.Kind;
  * The terminal, the environment, the system properties, the file locations, the console and the output are all
  * given to the constructor, so the decision and the wizard are testable without a real terminal and without the
  * developer's own environment. Nothing here logs: before Spring starts the log system is not configured, so the
- * console is the only output. On Ctrl+C a shutdown hook says that nothing was written; the JVM exits with 130.
+ * console is the only output. On Ctrl+C before the files are written a shutdown hook says that nothing was written;
+ * the JVM exits with 130. After the write the application is starting, and its own shutdown runs.
  */
 public final class SetupLauncher {
 
@@ -141,7 +142,7 @@ public final class SetupLauncher {
 			return OptionalInt.of(0);
 		}
 		if (decision.kind() == Kind.WIZARD) {
-			return OptionalInt.of(runWizard(decision));
+			return runWizard(decision, boot);
 		}
 		boot.accept(decision.springArguments().toArray(String[]::new));
 		return OptionalInt.empty();
@@ -179,17 +180,24 @@ public final class SetupLauncher {
 		return new LaunchDecision(Kind.WIZARD, "no configuration was found", false, springArguments);
 	}
 
-	/** Runs the wizard on the console, with a shutdown hook for Ctrl+C that says that nothing was written. */
-	private int runWizard(LaunchDecision decision) {
+	/**
+	 * Runs the wizard on the console; after the write the wizard starts the application through {@code boot}. The
+	 * shutdown hook for Ctrl+C says that nothing was written, as long as that is true.
+	 */
+	private OptionalInt runWizard(LaunchDecision decision, Consumer<String[]> boot) {
 		if (decision.nonInteractive()) {
 			// Non-interactive setup takes its answers from a file, which does not exist yet.
 			err.println("The setup wizard needs an interactive terminal.");
-			return SetupFailedException.FAILURE_EXIT_CODE;
+			return OptionalInt.of(SetupFailedException.FAILURE_EXIT_CODE);
 		}
-		var wizard = new Wizard(new ConsolePrompter(console), Wizard.standardSteps(), Wizard.versionFromManifest());
+		String[] springArguments = decision.springArguments().toArray(String[]::new);
+		var wizard = new Wizard(new ConsolePrompter(console), Wizard.standardSteps(locations),
+				() -> boot.accept(springArguments), Wizard.versionFromManifest());
 		Thread cancelHook = new Thread(() -> {
-			out.println();
-			out.println(SetupCancelledException.MESSAGE);
+			if (!wizard.hasWritten()) {
+				out.println();
+				out.println(SetupCancelledException.MESSAGE);
+			}
 		});
 		Runtime.getRuntime().addShutdownHook(cancelHook);
 		try {

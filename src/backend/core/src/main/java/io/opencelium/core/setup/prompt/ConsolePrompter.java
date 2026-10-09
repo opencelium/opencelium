@@ -2,6 +2,7 @@ package io.opencelium.core.setup.prompt;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -84,6 +85,30 @@ public final class ConsolePrompter implements Prompter {
 				return value;
 			}
 			out.println(INDENT + problem.get());
+		}
+	}
+
+	@Override
+	public boolean yesNo(String question, String help, boolean defaultYes) {
+		PrintWriter out = console.writer();
+		while (true) {
+			String input = ask(INDENT + question + (defaultYes ? " [Y/n]: " : " [y/N]: "));
+			if (input.isEmpty()) {
+				return defaultYes;
+			}
+			if (input.equals(HELP)) {
+				printIndented(INDENT, help);
+				continue;
+			}
+			switch (input.toLowerCase(Locale.ROOT)) {
+				case "y", "yes" -> {
+					return true;
+				}
+				case "n", "no" -> {
+					return false;
+				}
+				default -> out.println(INDENT + "Please answer y or n.");
+			}
 		}
 	}
 
