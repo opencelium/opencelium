@@ -30,7 +30,7 @@ class SetupFileTemplateTest {
 		assertThat(template).isEqualTo("""
 				# OpenCelium setup file. Run: java -jar oc-app.jar setup --file <this file>
 				# Every value below is the default of this machine. Remove a line, and the wizard
-				# asks for it; with --non-interactive every key is required.
+				# asks for it; with --batch every key is required.
 				""");
 	}
 

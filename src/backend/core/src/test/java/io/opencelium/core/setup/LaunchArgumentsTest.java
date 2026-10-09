@@ -63,7 +63,7 @@ class LaunchArgumentsTest {
 				.satisfies(failure -> assertThat(failure.exitCode()).isEqualTo(2));
 		// The next option is not a path.
 		assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> LaunchArguments.parse("setup", "--file", "--non-interactive"))
+				.isThrownBy(() -> LaunchArguments.parse("setup", "--file", "--batch"))
 				.withMessageContaining("--file");
 		assertThatExceptionOfType(SetupFailedException.class)
 				.isThrownBy(() -> LaunchArguments.parse("setup", "-f"))
@@ -71,9 +71,9 @@ class LaunchArgumentsTest {
 	}
 
 	@Test
-	void parseReadsNonInteractiveFlag() {
-		assertThat(LaunchArguments.parse("--non-interactive").nonInteractive()).isTrue();
-		assertThat(LaunchArguments.parse("setup").nonInteractive()).isFalse();
+	void parseReadsBatchFlag() {
+		assertThat(LaunchArguments.parse("--batch").batch()).isTrue();
+		assertThat(LaunchArguments.parse("setup").batch()).isFalse();
 	}
 
 	@Test
@@ -86,7 +86,7 @@ class LaunchArgumentsTest {
 
 	@Test
 	void parseKeepsSpringArgumentsInOrderAndStripsTheWizardOnes() {
-		LaunchArguments arguments = LaunchArguments.parse("--server.port=9091", "setup", "--non-interactive",
+		LaunchArguments arguments = LaunchArguments.parse("--server.port=9091", "setup", "--batch",
 				"--spring.mongodb.uri=mongodb://db.example/oc", "--file", "a.yml", "--logging.level.root=INFO");
 
 		assertThat(arguments.springArguments()).containsExactly("--server.port=9091",

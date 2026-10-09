@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * no test needs a real terminal and none reads the developer's own environment.
  * <p>
  * The rules, first match wins: {@code --help}; an unknown command is a usage error; {@code setup} runs the wizard
- * (non-interactive without a terminal or with {@code --non-interactive}); otherwise {@code --non-interactive}, no
+ * (batch without a terminal or with {@code --batch}); otherwise {@code --batch}, no
  * terminal, a {@code spring.config.*} location, a bootstrap property, or a configuration file means a normal start;
  * and only when nothing at all is configured does the wizard start on its own.
  */
@@ -60,7 +60,7 @@ class SetupLauncherTest {
 
 		assertThat(decision.kind()).isEqualTo(WIZARD);
 		assertThat(decision.reason()).isEqualTo("no configuration was found");
-		assertThat(decision.nonInteractive()).isFalse();
+		assertThat(decision.batch()).isFalse();
 	}
 
 	@Test
@@ -72,30 +72,30 @@ class SetupLauncherTest {
 
 		assertThat(decision.kind()).isEqualTo(WIZARD);
 		assertThat(decision.reason()).isEqualTo("requested with setup");
-		assertThat(decision.nonInteractive()).isFalse();
+		assertThat(decision.batch()).isFalse();
 	}
 
 	@Test
-	void decideReturnsNonInteractiveWizardWhenSetupHasNoTerminal() {
+	void decideReturnsBatchWizardWhenSetupHasNoTerminal() {
 		terminal = false;
 
 		LaunchDecision decision = decide("setup");
 
 		assertThat(decision.kind()).isEqualTo(WIZARD);
-		assertThat(decision.nonInteractive()).isTrue();
+		assertThat(decision.batch()).isTrue();
 	}
 
 	@Test
-	void decideReturnsNonInteractiveWizardWhenSetupAndTheFlagAreGiven() {
-		LaunchDecision decision = decide("setup", "--non-interactive");
+	void decideReturnsBatchWizardWhenSetupAndTheFlagAreGiven() {
+		LaunchDecision decision = decide("setup", "--batch");
 
 		assertThat(decision.kind()).isEqualTo(WIZARD);
-		assertThat(decision.nonInteractive()).isTrue();
+		assertThat(decision.batch()).isTrue();
 	}
 
 	@Test
-	void decideReturnsBootWhenNonInteractiveFlagIsGivenWithoutSetup() {
-		assertBoot(decide("--non-interactive"), "the flag --non-interactive");
+	void decideReturnsBootWhenBatchFlagIsGivenWithoutSetup() {
+		assertBoot(decide("--batch"), "the flag --batch");
 	}
 
 	@Test
@@ -183,7 +183,7 @@ class SetupLauncherTest {
 
 	@Test
 	void decideStripsWizardArgumentsFromSpringArguments() {
-		LaunchDecision decision = decide("setup", "--file", "a.yml", "--non-interactive", UNRELATED_ARGUMENT);
+		LaunchDecision decision = decide("setup", "--file", "a.yml", "--batch", UNRELATED_ARGUMENT);
 
 		assertThat(decision.springArguments()).containsExactly(UNRELATED_ARGUMENT);
 	}
@@ -305,7 +305,10 @@ class SetupLauncherTest {
 
 		assertThat(exitCode).hasValue(0);
 		assertThat(out.toString()).contains("Usage:").contains("setup").contains("-f, --file <path>")
-				.contains("--template").contains("--non-interactive");
+				.contains("--template").contains("--batch")
+				// The batch section says where it is for, what must exist before, and how to run it.
+				.contains("Batch mode").contains("setup --template > setup-values.yml")
+				.contains("setup --file setup-values.yml --batch").contains("Exit code 1");
 		assertThat(booted.get()).isNull();
 	}
 
@@ -314,7 +317,7 @@ class SetupLauncherTest {
 		environment.put("OPENCELIUM_DEPLOYMENTMODE", "self-host");
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
-		OptionalInt exitCode = launcher().launch(new String[] {"--non-interactive", UNRELATED_ARGUMENT}, booted::set);
+		OptionalInt exitCode = launcher().launch(new String[] {"--batch", UNRELATED_ARGUMENT}, booted::set);
 
 		assertThat(exitCode).isEmpty();
 		assertThat(booted.get()).containsExactly(UNRELATED_ARGUMENT);
@@ -387,7 +390,7 @@ class SetupLauncherTest {
 		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", file.toString()}, booted::set);
 
 		assertThat(exitCode).isEmpty();
-		assertThat(console.output()).contains("(from " + file + ")").contains("yes   (non-interactive)")
+		assertThat(console.output()).contains("(from " + file + ")").contains("yes   (batch)")
 				.doesNotContain("[Y/n]");
 		assertThat(workingDir.resolve("config/application.yml")).content()
 				.contains("data-dir: " + workingDir.resolve("data"));

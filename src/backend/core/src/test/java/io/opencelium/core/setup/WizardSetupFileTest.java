@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * The wizard with a setup file: a complete file gives the same files as a scripted run, byte for byte; an
- * absent key is asked; in non-interactive mode an absent or bad value stops the setup with an exception that names
+ * absent key is asked; in batch mode an absent or bad value stops the setup with an exception that names
  * the key and the file, which the launcher prints on standard error, and nothing is written.
  */
 class WizardSetupFileTest {
@@ -58,7 +58,7 @@ class WizardSetupFileTest {
 		assertThat(exitCode).isEmpty();
 		assertThat(console.output()).contains("  Data directory  " + dataDir + "   (from " + file + ")")
 				.contains("  Web port        " + port + "   (from " + file + ")")
-				.contains("  Write the files and start OpenCelium? yes   (non-interactive)");
+				.contains("  Write the files and start OpenCelium? yes   (batch)");
 		for (String name : new String[] {"application.yml", "opencelium.env"}) {
 			assertThat(tmp.resolve("from-file/config/" + name))
 					.hasSameBinaryContentAs(tmp.resolve("scripted/config/" + name));
@@ -81,7 +81,7 @@ class WizardSetupFileTest {
 	}
 
 	@Test
-	void runStopsNamingTheKeyWhenNonInteractiveValueIsAbsent() throws IOException {
+	void runStopsNamingTheKeyWhenBatchValueIsAbsent() throws IOException {
 		Path file = setupFile("data-dir: " + dataDir + "\n");
 
 		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
@@ -108,7 +108,7 @@ class WizardSetupFileTest {
 	}
 
 	@Test
-	void runStopsNamingTheKeyWhenNonInteractiveValueIsBlank() throws IOException {
+	void runStopsNamingTheKeyWhenBatchValueIsBlank() throws IOException {
 		// A blank value is absent, not the working directory, which the empty path would resolve to.
 		Path file = setupFile("data-dir: \"\"\nport: " + port + "\n");
 
@@ -123,8 +123,8 @@ class WizardSetupFileTest {
 		return Files.writeString(tmp.resolve("setup-values.yml"), content);
 	}
 
-	private static ValueSource source(Path file, boolean nonInteractive) {
-		return new ValueSource(SetupFile.load(file), Optional.of(file), nonInteractive);
+	private static ValueSource source(Path file, boolean batch) {
+		return new ValueSource(SetupFile.load(file), Optional.of(file), batch);
 	}
 
 	private Wizard wizard(ValueSource values, Path workingDir) {

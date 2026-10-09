@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Where a step gets its value: a value from the setup file is checked, printed and taken without a question; an
- * absent value is asked, or, in non-interactive mode, stops the setup naming the key and the file.
+ * absent value is asked, or, in batch mode, stops the setup naming the key and the file.
  */
 class ValueSourceTest {
 
@@ -53,7 +53,7 @@ class ValueSourceTest {
 	}
 
 	@Test
-	void textThrowsMissingValueWhenNonInteractiveAndAbsent() {
+	void textThrowsMissingValueWhenBatchAndAbsent() {
 		ValueSource source = withFile(Map.of(), true);
 
 		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
@@ -75,13 +75,13 @@ class ValueSourceTest {
 	}
 
 	@Test
-	void yesNoTakesDefaultAndPrintsItWhenNonInteractive() {
+	void yesNoTakesDefaultAndPrintsItWhenBatch() {
 		ValueSource source = withFile(Map.of(), true);
 
 		assertThat(source.yesNo("Write the files?", "help", true, prompter)).isTrue();
 		assertThat(source.yesNo("Write the files?", "help", false, prompter)).isFalse();
-		assertThat(console.output()).isEqualTo("  Write the files? yes   (non-interactive)\n"
-				+ "  Write the files? no   (non-interactive)\n");
+		assertThat(console.output()).isEqualTo("  Write the files? yes   (batch)\n"
+				+ "  Write the files? no   (batch)\n");
 	}
 
 	@Test
@@ -97,13 +97,13 @@ class ValueSourceTest {
 	void promptedSourceAsksEverything() {
 		console.type("", "y");
 
-		assertThat(ValueSource.PROMPTED.nonInteractive()).isFalse();
+		assertThat(ValueSource.PROMPTED.batch()).isFalse();
 		assertThat(ValueSource.PROMPTED.text(PORT_QUESTION, DIGITS, prompter)).isEqualTo("9090");
 		assertThat(ValueSource.PROMPTED.yesNo("Write?", "help", false, prompter)).isTrue();
 	}
 
-	private static ValueSource withFile(Map<ValueKey, String> values, boolean nonInteractive) {
-		return new ValueSource(new SetupValues(values), Optional.of(FILE), nonInteractive);
+	private static ValueSource withFile(Map<ValueKey, String> values, boolean batch) {
+		return new ValueSource(new SetupValues(values), Optional.of(FILE), batch);
 	}
 
 }

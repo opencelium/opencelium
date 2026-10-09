@@ -139,10 +139,10 @@ class WizardTest {
 	}
 
 	@Test
-	void runOmitsTheKeyHintFromTheBannerWhenNonInteractive() {
-		var nonInteractive = new ValueSource(SetupValues.NONE, Optional.of(Path.of("setup-values.yml")), true);
+	void runOmitsTheKeyHintFromTheBannerWhenBatch() {
+		var batch = new ValueSource(SetupValues.NONE, Optional.of(Path.of("setup-values.yml")), true);
 
-		new Wizard(new ConsolePrompter(console), nonInteractive, List.of(), () -> started = true, Optional.of("1.2.3"))
+		new Wizard(new ConsolePrompter(console), batch, List.of(), () -> started = true, Optional.of("1.2.3"))
 				.run(REASON);
 
 		assertThat(console.output()).contains("  No configuration was found. Let's set up OpenCelium.\n")

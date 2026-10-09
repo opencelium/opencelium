@@ -77,15 +77,15 @@ class SummaryStepTest {
 	}
 
 	@Test
-	void runPlansTheFilesWithoutAskingWhenNonInteractive() {
-		var nonInteractive = new SetupContext(new ValueSource(SetupValues.NONE, Optional.of(Path.of("a.yml")), true));
-		nonInteractive.setDataDir(Path.of("/srv/oc"));
-		nonInteractive.setPort(9090);
+	void runPlansTheFilesWithoutAskingWhenBatch() {
+		var batch = new SetupContext(new ValueSource(SetupValues.NONE, Optional.of(Path.of("a.yml")), true));
+		batch.setDataDir(Path.of("/srv/oc"));
+		batch.setPort(9090);
 
-		step().run(nonInteractive, new ConsolePrompter(console));
+		step().run(batch, new ConsolePrompter(console));
 
-		assertThat(nonInteractive.filePlan().files()).hasSize(2);
-		assertThat(console.output()).contains("  Write the files and start OpenCelium? yes   (non-interactive)")
+		assertThat(batch.filePlan().files()).hasSize(2);
+		assertThat(console.output()).contains("  Write the files and start OpenCelium? yes   (batch)")
 				.doesNotContain("[Y/n]");
 	}
 
