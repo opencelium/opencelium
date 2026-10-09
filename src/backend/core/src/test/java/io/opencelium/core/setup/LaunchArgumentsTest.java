@@ -35,34 +35,45 @@ class LaunchArgumentsTest {
 	}
 
 	@Test
-	void parseReadsAnswersPathInBothSpellings() {
-		assertThat(LaunchArguments.parse("setup", "--answers", "setup-answers.yml").answersFile())
-				.contains(Path.of("setup-answers.yml"));
-		assertThat(LaunchArguments.parse("setup", "--answers=setup-answers.yml").answersFile())
-				.contains(Path.of("setup-answers.yml"));
+	void parseReadsFilePathInAllSpellings() {
+		assertThat(LaunchArguments.parse("setup", "--file", "setup-values.yml").setupFile())
+				.contains(Path.of("setup-values.yml"));
+		assertThat(LaunchArguments.parse("setup", "--file=setup-values.yml").setupFile())
+				.contains(Path.of("setup-values.yml"));
+		assertThat(LaunchArguments.parse("setup", "-f", "setup-values.yml").setupFile())
+				.contains(Path.of("setup-values.yml"));
 	}
 
 	@Test
-	void parseLeavesAnswersEmptyWhenFlagIsAbsent() {
-		assertThat(LaunchArguments.parse("setup").answersFile()).isEmpty();
+	void parseReadsTemplateFlag() {
+		assertThat(LaunchArguments.parse("setup", "--template").template()).isTrue();
+		assertThat(LaunchArguments.parse("setup").template()).isFalse();
 	}
 
 	@Test
-	void parseThrowsUsageErrorWhenAnswersFlagHasNoPath() {
+	void parseLeavesFileEmptyWhenFlagIsAbsent() {
+		assertThat(LaunchArguments.parse("setup").setupFile()).isEmpty();
+	}
+
+	@Test
+	void parseThrowsUsageErrorWhenFileFlagHasNoPath() {
 		assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> LaunchArguments.parse("setup", "--answers"))
-				.withMessageContaining("--answers")
+				.isThrownBy(() -> LaunchArguments.parse("setup", "--file"))
+				.withMessageContaining("--file")
 				.satisfies(failure -> assertThat(failure.exitCode()).isEqualTo(2));
 		// The next option is not a path.
 		assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> LaunchArguments.parse("setup", "--answers", "--non-interactive"))
-				.withMessageContaining("--answers");
+				.isThrownBy(() -> LaunchArguments.parse("setup", "--file", "--batch"))
+				.withMessageContaining("--file");
+		assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> LaunchArguments.parse("setup", "-f"))
+				.withMessageContaining("--file");
 	}
 
 	@Test
-	void parseReadsNonInteractiveFlag() {
-		assertThat(LaunchArguments.parse("--non-interactive").nonInteractive()).isTrue();
-		assertThat(LaunchArguments.parse("setup").nonInteractive()).isFalse();
+	void parseReadsBatchFlag() {
+		assertThat(LaunchArguments.parse("--batch").batch()).isTrue();
+		assertThat(LaunchArguments.parse("setup").batch()).isFalse();
 	}
 
 	@Test
@@ -75,8 +86,8 @@ class LaunchArgumentsTest {
 
 	@Test
 	void parseKeepsSpringArgumentsInOrderAndStripsTheWizardOnes() {
-		LaunchArguments arguments = LaunchArguments.parse("--server.port=9091", "setup", "--non-interactive",
-				"--spring.mongodb.uri=mongodb://db.example/oc", "--answers", "a.yml", "--logging.level.root=INFO");
+		LaunchArguments arguments = LaunchArguments.parse("--server.port=9091", "setup", "--batch",
+				"--spring.mongodb.uri=mongodb://db.example/oc", "--file", "a.yml", "--logging.level.root=INFO");
 
 		assertThat(arguments.springArguments()).containsExactly("--server.port=9091",
 				"--spring.mongodb.uri=mongodb://db.example/oc", "--logging.level.root=INFO");

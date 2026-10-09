@@ -11,7 +11,8 @@ import java.util.OptionalInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import io.opencelium.core.setup.answers.AnswerSource;
+import io.opencelium.core.setup.values.SetupValues;
+import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.setup.prompt.Prompter;
@@ -22,6 +23,7 @@ import io.opencelium.core.setup.steps.SummaryStep;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * The wizard loop: the banner first, then the steps in order, skipping those that do not apply; then the planned
@@ -97,7 +99,7 @@ class WizardTest {
 
 	@Test
 	void runOmitsVersionWhenUnknown() {
-		new Wizard(new ConsolePrompter(console), AnswerSource.PROMPTED, List.of(), () -> started = true,
+		new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, List.of(), () -> started = true,
 				Optional.empty())
 				.run("requested with setup");
 
@@ -120,17 +122,31 @@ class WizardTest {
 	}
 
 	@Test
-	void runDoesNotStartWhenWriteFails() throws IOException {
+	void runThrowsSetupFailedAndDoesNotStartWhenWriteFails() throws IOException {
 		Files.writeString(tmp.resolve("blocker"), "a file where a directory is needed");
 		Path file = tmp.resolve("blocker/application.yml");
 		Wizard wizard = wizard(List.of(planning(file)));
 
-		OptionalInt exitCode = wizard.run(REASON);
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> wizard.run(REASON)).actual();
 
-		assertThat(exitCode).hasValue(1);
-		assertThat(console.output()).contains("  ! Cannot write " + file).contains("\n    Nothing was written.\n");
+		// The launcher prints it on standard error, like every failure that ends the setup.
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.getMessage()).startsWith("Cannot write " + file + ": ").endsWith("\nNothing was written.");
+		assertThat(console.output()).doesNotContain("Cannot write");
 		assertThat(started).isFalse();
 		assertThat(wizard.hasWritten()).isFalse();
+	}
+
+	@Test
+	void runOmitsTheKeyHintFromTheBannerWhenBatch() {
+		var batch = new ValueSource(SetupValues.NONE, Optional.of(Path.of("setup-values.yml")), true);
+
+		new Wizard(new ConsolePrompter(console), batch, List.of(), () -> started = true, Optional.of("1.2.3"))
+				.run(REASON);
+
+		assertThat(console.output()).contains("  No configuration was found. Let's set up OpenCelium.\n")
+				.doesNotContain("Press Enter");
 	}
 
 	@Test
@@ -151,7 +167,7 @@ class WizardTest {
 	}
 
 	private Wizard wizard(List<SetupStep> steps) {
-		return new Wizard(new ConsolePrompter(console), AnswerSource.PROMPTED, steps, () -> started = true,
+		return new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, steps, () -> started = true,
 				Optional.of("1.2.3"));
 	}
 

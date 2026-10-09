@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 
 /**
  * {@code System.console()}, looked up at each use. Without a console the writer is standard output, so the
- * non-interactive wizard can still print; a read then fails with a clear message.
+ * batch wizard can still print; a read then fails with a clear message.
  */
 final class SystemConsoleIo implements ConsoleIo {
 
