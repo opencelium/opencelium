@@ -23,8 +23,6 @@ import io.opencelium.core.setup.steps.SummaryStep;
  */
 public final class Wizard {
 
-	private static final String INDENT = "  ";
-
 	private final Prompter prompter;
 
 	private final List<SetupStep> steps;
@@ -74,7 +72,7 @@ public final class Wizard {
 		}
 		catch (SetupCancelledException ex) {
 			prompter.print("");
-			prompter.print(ex.getMessage());
+			prompter.info(ex.getMessage());
 			return OptionalInt.of(0);
 		}
 		FilePlan plan = context.filePlan();
@@ -82,18 +80,17 @@ public final class Wizard {
 			return OptionalInt.of(0);
 		}
 		try {
-			new FilePlanWriter(line -> prompter.print(INDENT + line)).write(plan);
+			new FilePlanWriter(prompter::info).write(plan);
 		}
 		catch (SetupWriteException ex) {
 			prompter.print("");
-			prompter.print(INDENT + ex.getMessage());
-			prompter.print(INDENT + ex.rollbackReport());
+			prompter.error(ex.getMessage(), ex.rollbackReport());
 			return OptionalInt.of(SetupFailedException.FAILURE_EXIT_CODE);
 		}
 		written = true;
 		prompter.print("");
-		prompter.print(INDENT + "Configuration written to " + plan.files().getFirst().path().getParent()
-				+ ". OpenCelium starts now.");
+		prompter.success("Configuration written to " + plan.files().getFirst().path().getParent());
+		prompter.progress("Starting OpenCelium...");
 		prompter.print("");
 		start.run();
 		return OptionalInt.empty();
@@ -109,11 +106,9 @@ public final class Wizard {
 
 	private void printBanner(String reason) {
 		prompter.print("");
-		prompter.print(INDENT + "OpenCelium" + version.map(v -> " " + v).orElse("") + " · setup");
-		prompter.print("");
-		prompter.print(INDENT + sentence(reason) + " I will ask a few questions, install what is missing, and write");
-		prompter.print(INDENT + "application.yml. Everything else is configured in the browser afterwards.");
-		prompter.print(INDENT + "Press Enter to accept the value in [brackets]. Type ? for help, q to quit.");
+		prompter.title("OpenCelium setup" + version.map(v -> " (" + v + ")").orElse(""));
+		prompter.info(sentence(reason) + " Let's set up OpenCelium.",
+				"Press Enter to accept the value in [brackets]. Type ? for help, q to quit.");
 		prompter.print("");
 	}
 

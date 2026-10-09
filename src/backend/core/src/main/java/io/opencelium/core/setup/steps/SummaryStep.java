@@ -3,6 +3,7 @@ package io.opencelium.core.setup.steps;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import io.opencelium.core.setup.ConfigLocations;
 import io.opencelium.core.setup.SetupCancelledException;
@@ -12,12 +13,11 @@ import io.opencelium.core.setup.files.EnvRenderer;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.files.YmlRenderer;
 import io.opencelium.core.setup.prompt.Prompter;
-import io.opencelium.core.setup.prompt.Screen;
 
 /**
- * The last screen: the answers as a table, the two files that will be written, and the confirmation. Yes plans
- * application.yml and the env file, which the wizard writes after this step; no cancels the setup with nothing
- * planned. A file that exists is marked, because the write replaces it.
+ * The last screen: the answers in a box, the list of the two files that will be written, and the confirmation.
+ * Yes plans application.yml and the env file, which the wizard writes after this step; no cancels the setup with
+ * nothing planned. A file that exists is marked, because the write replaces it.
  */
 public final class SummaryStep implements SetupStep {
 
@@ -40,14 +40,12 @@ public final class SummaryStep implements SetupStep {
 		var rows = new LinkedHashMap<String, String>();
 		rows.put("Mode", values.deploymentMode().propertyValue());
 		rows.put("Data directory", values.dataDir().toString());
-		rows.put("Port", String.valueOf(values.port()));
+		rows.put("Web port", String.valueOf(values.port()));
 		prompter.print("");
-		prompter.print(Screen.section("Summary"));
-		Screen.table(rows).forEach(prompter::print);
+		prompter.box("Summary", rows);
 		prompter.print("");
-		prompter.print("  Files to write");
-		prompter.print("    " + locations.ymlFile() + marker(locations.ymlFile()));
-		prompter.print("    " + locations.envFile() + marker(locations.envFile()));
+		prompter.list("Files to write", List.of(locations.ymlFile() + marker(locations.ymlFile()),
+				locations.envFile() + marker(locations.envFile())));
 		prompter.print("");
 		if (!prompter.yesNo(CONFIRM_QUESTION, CONFIRM_HELP, true)) {
 			throw new SetupCancelledException();
@@ -57,7 +55,7 @@ public final class SummaryStep implements SetupStep {
 	}
 
 	private static String marker(Path file) {
-		return Files.exists(file) ? "  (replaces the file that exists)" : "";
+		return Files.exists(file) ? "   (replaces the file that exists)" : "";
 	}
 
 }

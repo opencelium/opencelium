@@ -17,9 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
- * The data directory question: the host default in brackets, a typed path made absolute, a directory that does
- * not exist yet is fine under a writable parent, a file or an unwritable place is explained and asked again. The
- * step only checks; nothing is made before the summary.
+ * The data directory question: the host default in brackets, with the home directory shown as {@code ~}; a typed
+ * path made absolute, {@code ~} expanded; a directory that does not exist yet is fine under a writable parent; a
+ * file or an unwritable place is explained and asked again. The step only checks; nothing is made before the
+ * summary.
  */
 class DataDirStepTest {
 
@@ -34,17 +35,17 @@ class DataDirStepTest {
 	void runStoresDefaultWhenInputIsEmpty() {
 		console.type("");
 
-		new DataDirStep(tmp.resolve("data")).run(context, prompter());
+		step(tmp.resolve("data")).run(context, prompter());
 
 		assertThat(context.dataDir()).contains(tmp.resolve("data"));
-		assertThat(console.output()).contains("Data directory [" + tmp.resolve("data") + "]: ");
+		assertThat(console.output()).contains("  Data directory  [" + tmp.resolve("data") + "]: ");
 	}
 
 	@Test
 	void runStoresTypedPathAbsoluteAndNormalized() {
 		console.type(tmp + "/a/../b");
 
-		new DataDirStep(tmp).run(context, prompter());
+		step(tmp).run(context, prompter());
 
 		assertThat(context.dataDir()).contains(tmp.resolve("b"));
 	}
@@ -53,7 +54,7 @@ class DataDirStepTest {
 	void runAcceptsExistingWritableDirectory() {
 		console.type(tmp.toString());
 
-		new DataDirStep(tmp.resolve("other")).run(context, prompter());
+		step(tmp.resolve("other")).run(context, prompter());
 
 		assertThat(context.dataDir()).contains(tmp);
 	}
@@ -62,7 +63,7 @@ class DataDirStepTest {
 	void runAcceptsPathThatDoesNotExistUnderWritableParent() {
 		console.type(tmp.resolve("new/deeper").toString());
 
-		new DataDirStep(tmp).run(context, prompter());
+		step(tmp).run(context, prompter());
 
 		assertThat(context.dataDir()).contains(tmp.resolve("new/deeper"));
 		assertThat(console.output()).doesNotContain("cannot be created");
@@ -73,7 +74,7 @@ class DataDirStepTest {
 		Path file = Files.writeString(tmp.resolve("file"), "x");
 		console.type(file.toString(), tmp.toString());
 
-		new DataDirStep(tmp).run(context, prompter());
+		step(tmp).run(context, prompter());
 
 		assertThat(context.dataDir()).contains(tmp);
 		assertThat(console.output()).contains(file + " is a file, not a directory.");
@@ -87,7 +88,7 @@ class DataDirStepTest {
 		try {
 			console.type(locked.resolve("data").toString(), tmp.toString());
 
-			new DataDirStep(tmp).run(context, prompter());
+			step(tmp).run(context, prompter());
 
 			assertThat(context.dataDir()).contains(tmp);
 			assertThat(console.output()).contains(locked.resolve("data") + " cannot be created: " + locked
@@ -99,16 +100,56 @@ class DataDirStepTest {
 	}
 
 	@Test
+	void runShowsHomeDirectoryAsTildeInTheDefault() {
+		console.type("");
+
+		step(home().resolve("oc/data")).run(context, prompter());
+
+		assertThat(console.output()).contains("  Data directory  [~/oc/data]: ");
+		assertThat(context.dataDir()).contains(home().resolve("oc/data"));
+	}
+
+	@Test
+	void runShowsHomeDirectoryItselfAsTilde() {
+		console.type("");
+
+		step(home()).run(context, prompter());
+
+		assertThat(console.output()).contains("[~]: ");
+		assertThat(context.dataDir()).contains(home());
+	}
+
+	@Test
+	void runExpandsTildeInTypedPath() {
+		console.type("~/typed/data", "~");
+
+		step(tmp).run(context, prompter());
+		assertThat(context.dataDir()).contains(home().resolve("typed/data"));
+
+		step(tmp).run(context, prompter());
+		assertThat(context.dataDir()).contains(home());
+	}
+
+	@Test
 	void runMakesNoDirectory() {
 		console.type(tmp.resolve("not-yet").toString());
 
-		new DataDirStep(tmp).run(context, prompter());
+		step(tmp).run(context, prompter());
 
 		assertThat(tmp.resolve("not-yet")).doesNotExist();
 	}
 
 	private ConsolePrompter prompter() {
 		return new ConsolePrompter(console);
+	}
+
+	private DataDirStep step(Path defaultDir) {
+		return new DataDirStep(defaultDir, home());
+	}
+
+	/** A home directory under the temporary directory, so the tests never touch the real one. */
+	private Path home() {
+		return tmp.resolve("home");
 	}
 
 	private static boolean posix() {

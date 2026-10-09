@@ -11,9 +11,10 @@ import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.setup.prompt.Prompter;
 
 /**
- * Where OpenCelium keeps its local state. The default is the one the application uses without a configuration.
- * A path is accepted when it is a writable directory, or when it does not exist and its nearest existing ancestor
- * is a writable directory. The step makes nothing: the application creates the directory at its start.
+ * Where OpenCelium keeps its local state. The default is the one the application uses without a configuration,
+ * shown with {@code ~} for the home directory; a typed {@code ~} is expanded the same way. A path is accepted when
+ * it is a writable directory, or when it does not exist and its nearest existing ancestor is a writable directory.
+ * The step makes nothing: the application creates the directory at its start.
  */
 public final class DataDirStep implements SetupStep {
 
@@ -22,27 +23,32 @@ public final class DataDirStep implements SetupStep {
 			On Linux the usual place is /var/lib/opencelium. The directory must be writable by the user that runs
 			OpenCelium; it is made at the first start.""";
 
+	private static final String HOME = "~";
+
 	private final Path defaultDir;
 
+	private final Path home;
+
 	public DataDirStep() {
-		this(DataDirDefaults.forThisHost().resolve());
+		this(DataDirDefaults.forThisHost().resolve(), Path.of(System.getProperty("user.home")));
 	}
 
-	DataDirStep(Path defaultDir) {
+	DataDirStep(Path defaultDir, Path home) {
 		this.defaultDir = Objects.requireNonNull(defaultDir, "defaultDir");
+		this.home = Objects.requireNonNull(home, "home").toAbsolutePath().normalize();
 	}
 
 	@Override
 	public void run(SetupContext context, Prompter prompter) {
-		String answer = prompter.text("Data directory", HELP, defaultDir.toString(), DataDirStep::check);
-		context.setDataDir(absolute(answer));
+		String answer = prompter.text("Data directory", HELP, abbreviated(defaultDir), this::check);
+		context.setDataDir(absolute(expanded(answer)));
 	}
 
 	/** The problem with {@code value} as a data directory, or empty when it is acceptable. */
-	static Optional<String> check(String value) {
+	Optional<String> check(String value) {
 		Path dir;
 		try {
-			dir = absolute(value);
+			dir = absolute(expanded(value));
 		}
 		catch (InvalidPathException ex) {
 			return Optional.of("'" + value + "' is not a valid path: " + ex.getReason() + ".");
@@ -67,6 +73,22 @@ public final class DataDirStep implements SetupStep {
 			return Optional.of(dir + " cannot be created: " + ancestor + " is not writable by this user.");
 		}
 		return Optional.empty();
+	}
+
+	/** {@code ~/oc/data} for a path under the home directory, else the path as it is. */
+	private String abbreviated(Path dir) {
+		if (dir.equals(home)) {
+			return HOME;
+		}
+		return dir.startsWith(home) ? HOME + "/" + home.relativize(dir) : dir.toString();
+	}
+
+	/** The home directory for {@code ~} and {@code ~/...}; any other value as it is. */
+	private String expanded(String value) {
+		if (value.equals(HOME)) {
+			return home.toString();
+		}
+		return value.startsWith(HOME + "/") ? home.resolve(value.substring(2)).toString() : value;
 	}
 
 	private static Path absolute(String value) {
