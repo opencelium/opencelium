@@ -1,6 +1,8 @@
 package io.opencelium.core.setup.prompt;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,9 +14,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * The numbered choice on a console: Enter takes the default, a number picks an option, anything else is explained
- * and asked again, {@code ?} prints the help texts, and {@code q} or the end of the input cancels the setup. Bad
- * input never ends the wizard.
+ * The prompts on a console: Enter takes the default, anything the prompt cannot accept is explained and asked
+ * again, {@code ?} prints the help text, and {@code q} or the end of the input cancels the setup. Bad input never
+ * ends the wizard.
  */
 class ConsolePrompterTest {
 
@@ -27,6 +29,13 @@ class ConsolePrompterTest {
 	private static final String PROMPT = "  Choice [1]: ";
 
 	private static final String RANGE_MESSAGE = "  Please enter a number between 1 and 2.";
+
+	private static final String DIR_QUESTION = "Data directory";
+
+	private static final String DIR_PROMPT = "  Data directory [/srv/oc]: ";
+
+	private static final Function<String, Optional<String>> NO_SPACES = value -> value.contains(" ")
+			? Optional.of("No spaces, please.") : Optional.empty();
 
 	private final ScriptedConsoleIo console = new ScriptedConsoleIo();
 
@@ -101,6 +110,55 @@ class ConsolePrompterTest {
 	@Test
 	void choiceRejectsDefaultOutsideTheOptions() {
 		assertThatIllegalArgumentException().isThrownBy(() -> prompter.choice(QUESTION, MODES, 2));
+	}
+
+	@Test
+	void textReturnsDefaultWhenInputIsEmpty() {
+		console.type("");
+
+		assertThat(prompter.text(DIR_QUESTION, "Help.", "/srv/oc", NO_SPACES)).isEqualTo("/srv/oc");
+		assertThat(console.output()).contains(DIR_PROMPT);
+	}
+
+	@Test
+	void textReturnsTypedValueStripped() {
+		console.type("  /data/oc  ");
+
+		assertThat(prompter.text(DIR_QUESTION, "Help.", "/srv/oc", NO_SPACES)).isEqualTo("/data/oc");
+	}
+
+	@Test
+	void textAsksAgainWhenValidatorRejects() {
+		console.type("/with space", "/ok");
+
+		assertThat(prompter.text(DIR_QUESTION, "Help.", "/srv/oc", NO_SPACES)).isEqualTo("/ok");
+		assertThat(console.output()).containsOnlyOnce("  No spaces, please.");
+		assertThat(count(DIR_PROMPT)).isEqualTo(2);
+	}
+
+	@Test
+	void textValidatesTheDefaultToo() {
+		console.type("", "/ok");
+
+		assertThat(prompter.text(DIR_QUESTION, "Help.", "/bad default", NO_SPACES)).isEqualTo("/ok");
+		assertThat(console.output()).containsOnlyOnce("  No spaces, please.");
+	}
+
+	@Test
+	void textPrintsHelpWhenInputIsQuestionMark() {
+		console.type("?", "");
+
+		assertThat(prompter.text(DIR_QUESTION, "Where the data goes.", "/srv/oc", NO_SPACES)).isEqualTo("/srv/oc");
+		assertThat(console.output()).contains("  Where the data goes.");
+		assertThat(count(DIR_PROMPT)).isEqualTo(2);
+	}
+
+	@Test
+	void textThrowsSetupCancelledWhenInputIsQ() {
+		console.type("q");
+
+		assertThatExceptionOfType(SetupCancelledException.class)
+				.isThrownBy(() -> prompter.text(DIR_QUESTION, "Help.", "/srv/oc", NO_SPACES));
 	}
 
 	@Test
