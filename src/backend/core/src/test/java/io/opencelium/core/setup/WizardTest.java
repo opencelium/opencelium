@@ -7,8 +7,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 import io.opencelium.core.setup.prompt.ConsolePrompter;
-import io.opencelium.core.setup.steps.ModeStep;
+import io.opencelium.core.setup.prompt.Prompter;
+import io.opencelium.core.setup.steps.DataDirStep;
+import io.opencelium.core.setup.steps.PortStep;
 import io.opencelium.core.setup.steps.SetupStep;
+import io.opencelium.core.setup.steps.SummaryStep;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +45,7 @@ class WizardTest {
 			}
 
 			@Override
-			public void run(SetupContext context, io.opencelium.core.setup.prompt.Prompter prompter) {
+			public void run(SetupContext context, Prompter prompter) {
 				ran.add("skipped");
 			}
 		};
@@ -68,12 +71,13 @@ class WizardTest {
 	@Test
 	void runPrintsBannerBeforeFirstQuestion() {
 		console.type("");
+		SetupStep asking = (context, prompter) -> prompter.text("Web port", "help", "1", value -> Optional.empty());
 
-		wizard(List.of(new ModeStep())).run(REASON);
+		wizard(List.of(asking)).run(REASON);
 
 		assertThat(console.output()).containsSubsequence("OpenCelium 1.2.3 · setup",
 				"No configuration was found. I will ask a few questions", "Type ? for help, q to quit.",
-				"How will this OpenCelium run?");
+				"Web port [1]: ");
 	}
 
 	@Test
@@ -84,12 +88,9 @@ class WizardTest {
 	}
 
 	@Test
-	void runPrintsTheModeAfterTheSteps() {
-		console.type("2");
-
-		wizard(List.of(new ModeStep())).run(REASON);
-
-		assertThat(console.output()).contains("Mode: cloud. The other questions come in the next change.");
+	void standardStepsAskTheDataDirectoryThenThePortThenShowTheSummary() {
+		assertThat(Wizard.standardSteps()).hasExactlyElementsOfTypes(DataDirStep.class, PortStep.class,
+				SummaryStep.class);
 	}
 
 	private Wizard wizard(List<SetupStep> steps) {

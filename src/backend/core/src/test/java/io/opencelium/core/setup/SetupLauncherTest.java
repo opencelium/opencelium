@@ -3,6 +3,7 @@ package io.opencelium.core.setup;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -226,15 +227,16 @@ class SetupLauncherTest {
 	}
 
 	@Test
-	void launchRunsWizardInsteadOfBootingWhenWizardIsDecided() {
-		console.type("");
+	void launchRunsWizardInsteadOfBootingWhenWizardIsDecided() throws IOException {
+		console.type("", String.valueOf(freePort()));
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
 		OptionalInt exitCode = launcher().launch(new String[0], booted::set);
 
 		assertThat(exitCode).hasValue(0);
 		assertThat(console.output()).contains("OpenCelium").contains("No configuration was found.")
-				.contains("How will this OpenCelium run?").contains("Mode: self-host.");
+				.contains("Data directory [").contains("Web port [9090]: ").contains("── Summary ")
+				.doesNotContain("Cloud");
 		assertThat(booted.get()).isNull();
 	}
 
@@ -264,6 +266,12 @@ class SetupLauncherTest {
 	private static void assertBoot(LaunchDecision decision, String reason) {
 		assertThat(decision.kind()).isEqualTo(BOOT);
 		assertThat(decision.reason()).isEqualTo(reason);
+	}
+
+	private static int freePort() throws IOException {
+		try (ServerSocket socket = new ServerSocket(0)) {
+			return socket.getLocalPort();
+		}
 	}
 
 	private Path touch(String relative) throws IOException {

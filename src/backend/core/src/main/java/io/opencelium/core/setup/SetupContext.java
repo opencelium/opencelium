@@ -1,6 +1,8 @@
 package io.opencelium.core.setup;
 
+import java.nio.file.Path;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import io.opencelium.core.config.DeploymentMode;
 
@@ -10,15 +12,36 @@ import io.opencelium.core.config.DeploymentMode;
  */
 public final class SetupContext {
 
-	private DeploymentMode deploymentMode;
+	/**
+	 * The wizard installs the self-host mode only. The cloud mode needs a hand-written configuration and is set up
+	 * by the consulting service, not by this wizard.
+	 */
+	public static final DeploymentMode DEPLOYMENT_MODE = DeploymentMode.SELF_HOST;
 
-	/** The answer of the mode step; empty before it ran. */
-	public Optional<DeploymentMode> deploymentMode() {
-		return Optional.ofNullable(deploymentMode);
+	private Path dataDir;
+
+	private Integer port;
+
+	public DeploymentMode deploymentMode() {
+		return DEPLOYMENT_MODE;
 	}
 
-	public void setDeploymentMode(DeploymentMode mode) {
-		this.deploymentMode = mode;
+	/** The answer of the data directory step, absolute; empty before it ran. */
+	public Optional<Path> dataDir() {
+		return Optional.ofNullable(dataDir);
+	}
+
+	public void setDataDir(Path dataDir) {
+		this.dataDir = dataDir;
+	}
+
+	/** The answer of the port step; empty before it ran. */
+	public OptionalInt port() {
+		return port == null ? OptionalInt.empty() : OptionalInt.of(port);
+	}
+
+	public void setPort(int port) {
+		this.port = port;
 	}
 
 }
