@@ -15,6 +15,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import io.opencelium.core.setup.prompt.ConsoleIo;
+import io.opencelium.core.setup.prompt.ConsolePrompter;
+
 import io.opencelium.core.setup.LaunchDecision.Kind;
 
 /**
@@ -23,7 +26,8 @@ import io.opencelium.core.setup.LaunchDecision.Kind;
  * <ol>
  * <li>{@code --help}: the usage text.</li>
  * <li>A bare word other than {@code setup}: a usage error, exit code 2.</li>
- * <li>{@code setup}: the wizard, on demand; without a terminal or with {@code --non-interactive} it asks nothing.</li>
+ * <li>{@code setup}: the wizard, on demand. Without a terminal or with {@code --non-interactive} it would ask
+ * nothing; until the answers file exists that stops with exit code 1.</li>
  * <li>{@code --non-interactive}: the normal start.</li>
  * <li>No interactive terminal (Docker, systemd, a pipe): the normal start.</li>
  * <li>A {@code spring.config.*} location in the arguments, the system properties or the environment: the normal
@@ -34,9 +38,10 @@ import io.opencelium.core.setup.LaunchDecision.Kind;
  * <li>A configuration file at one of the {@link ConfigLocations}: the normal start.</li>
  * <li>Otherwise: the wizard.</li>
  * </ol>
- * The terminal, the environment, the system properties, the file locations and the output are all given to the
- * constructor, so the decision is testable without a real terminal and without the developer's own environment.
- * Nothing here logs: before Spring starts the log system is not configured, so the console is the only output.
+ * The terminal, the environment, the system properties, the file locations, the console and the output are all
+ * given to the constructor, so the decision and the wizard are testable without a real terminal and without the
+ * developer's own environment. Nothing here logs: before Spring starts the log system is not configured, so the
+ * console is the only output. On Ctrl+C a shutdown hook says that nothing was written; the JVM exits with 130.
  */
 public final class SetupLauncher {
 
@@ -79,6 +84,8 @@ public final class SetupLauncher {
 
 	private final ConfigLocations locations;
 
+	private final ConsoleIo console;
+
 	private final PrintWriter out;
 
 	private final PrintWriter err;
@@ -88,15 +95,17 @@ public final class SetupLauncher {
 	 * @param environment      the environment variables ({@code System.getenv()} in production)
 	 * @param systemProperties the JVM system properties ({@code -D...})
 	 * @param locations        where a configuration file is looked for
+	 * @param console          what the wizard reads and writes
 	 * @param out              standard output
 	 * @param err              standard error, for usage errors
 	 */
 	public SetupLauncher(BooleanSupplier terminal, Map<String, String> environment, Properties systemProperties,
-			ConfigLocations locations, PrintWriter out, PrintWriter err) {
+			ConfigLocations locations, ConsoleIo console, PrintWriter out, PrintWriter err) {
 		this.terminal = terminal;
 		this.environment = environment;
 		this.systemProperties = systemProperties;
 		this.locations = locations;
+		this.console = console;
 		this.out = out;
 		this.err = err;
 	}
@@ -104,11 +113,12 @@ public final class SetupLauncher {
 	/** The real terminal, environment, system properties, file system and console of this process. */
 	public static SetupLauncher forThisHost() {
 		return new SetupLauncher(SetupLauncher::hasInteractiveTerminal, System.getenv(), System.getProperties(),
-				ConfigLocations.forThisHost(), new PrintWriter(System.out, true), new PrintWriter(System.err, true));
+				ConfigLocations.forThisHost(), ConsoleIo.ofSystemConsole(), new PrintWriter(System.out, true),
+				new PrintWriter(System.err, true));
 	}
 
 	/**
-	 * Decides, prints what the decision calls for, and starts Spring Boot through {@code boot} when it says so.
+	 * Decides, then prints the usage, runs the wizard, or starts Spring Boot through {@code boot}.
 	 *
 	 * @param boot starts the application with the arguments meant for Spring Boot
 	 * @return the exit code when the process must end without the application; empty when the application started
@@ -131,8 +141,7 @@ public final class SetupLauncher {
 			return OptionalInt.of(0);
 		}
 		if (decision.kind() == Kind.WIZARD) {
-			// The wizard itself does not exist yet: say why it would run, then start as usual.
-			out.println("Setup wizard: " + decision.reason() + ". The wizard comes in the next change; normal start.");
+			return OptionalInt.of(runWizard(decision));
 		}
 		boot.accept(decision.springArguments().toArray(String[]::new));
 		return OptionalInt.empty();
@@ -168,6 +177,32 @@ public final class SetupLauncher {
 			return boot("a configuration was found at " + file.get(), withSystemLocation(file.get(), springArguments));
 		}
 		return new LaunchDecision(Kind.WIZARD, "no configuration was found", false, springArguments);
+	}
+
+	/** Runs the wizard on the console, with a shutdown hook for Ctrl+C that says that nothing was written. */
+	private int runWizard(LaunchDecision decision) {
+		if (decision.nonInteractive()) {
+			// Non-interactive setup takes its answers from a file, which does not exist yet.
+			err.println("The setup wizard needs an interactive terminal.");
+			return SetupFailedException.FAILURE_EXIT_CODE;
+		}
+		var wizard = new Wizard(new ConsolePrompter(console), Wizard.standardSteps(), Wizard.versionFromManifest());
+		Thread cancelHook = new Thread(() -> {
+			out.println();
+			out.println(SetupCancelledException.MESSAGE);
+		});
+		Runtime.getRuntime().addShutdownHook(cancelHook);
+		try {
+			return wizard.run(decision.reason());
+		}
+		finally {
+			try {
+				Runtime.getRuntime().removeShutdownHook(cancelHook);
+			}
+			catch (IllegalStateException ex) {
+				// The shutdown has begun (Ctrl+C): the hook runs and prints the message.
+			}
+		}
 	}
 
 	private static LaunchDecision boot(String reason, List<String> springArguments) {
