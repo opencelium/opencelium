@@ -3,6 +3,8 @@ package io.opencelium.core.setup.prompt;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 
 import io.opencelium.core.setup.SetupCancelledException;
 
@@ -63,6 +65,25 @@ public final class ConsolePrompter implements Prompter {
 				// Not a number: the same message as a number out of range.
 			}
 			out.println(INDENT + "Please enter a number between 1 and " + options.size() + ".");
+		}
+	}
+
+	@Override
+	public String text(String question, String help, String defaultValue,
+			Function<String, Optional<String>> validator) {
+		PrintWriter out = console.writer();
+		while (true) {
+			String input = ask(INDENT + question + " [" + defaultValue + "]: ");
+			if (input.equals(HELP)) {
+				printIndented(INDENT, help);
+				continue;
+			}
+			String value = input.isEmpty() ? defaultValue : input;
+			Optional<String> problem = validator.apply(value);
+			if (problem.isEmpty()) {
+				return value;
+			}
+			out.println(INDENT + problem.get());
 		}
 	}
 
