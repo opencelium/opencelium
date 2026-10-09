@@ -3,6 +3,7 @@ package io.opencelium.core.setup.steps;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.io.TempDir;
 import io.opencelium.core.setup.ConfigLocations;
 import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
+import io.opencelium.core.setup.answers.AnswerSource;
+import io.opencelium.core.setup.answers.Answers;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
@@ -71,6 +74,19 @@ class SummaryStepTest {
 		assertThat(context.filePlan().files().get(0).content()).contains("port: 9090")
 				.contains("deployment-mode: self-host").contains("data-dir: /srv/oc");
 		assertThat(context.filePlan().files().get(1).content()).startsWith("# Written by OpenCelium setup.");
+	}
+
+	@Test
+	void runPlansTheFilesWithoutAskingWhenNonInteractive() {
+		var nonInteractive = new SetupContext(new AnswerSource(Answers.NONE, Optional.of(Path.of("a.yml")), true));
+		nonInteractive.setDataDir(Path.of("/srv/oc"));
+		nonInteractive.setPort(9090);
+
+		step().run(nonInteractive, new ConsolePrompter(console));
+
+		assertThat(nonInteractive.filePlan().files()).hasSize(2);
+		assertThat(console.output()).contains("  Write the files and start OpenCelium? yes   (non-interactive)")
+				.doesNotContain("[Y/n]");
 	}
 
 	@Test

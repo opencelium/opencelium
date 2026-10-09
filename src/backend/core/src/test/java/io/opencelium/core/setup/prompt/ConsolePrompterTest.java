@@ -227,6 +227,13 @@ class ConsolePrompterTest {
 	}
 
 	@Test
+	void answeredPrintsTheLabelTheValueAndTheRemark() {
+		prompter.answered("Data directory", "./data", "from the answers file");
+
+		assertThat(console.output()).isEqualTo("  Data directory  ./data   (from the answers file)\n");
+	}
+
+	@Test
 	void titlePrintsTheTitleOverARule() {
 		prompter.title("OpenCelium setup");
 

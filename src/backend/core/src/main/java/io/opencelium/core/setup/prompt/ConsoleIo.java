@@ -13,7 +13,10 @@ public interface ConsoleIo {
 
 	PrintWriter writer();
 
-	/** The console of this process. It has to exist, which the launcher checks before the wizard starts. */
+	/**
+	 * The console of this process. Without one (a pipe, a service) the output goes to standard output and a read
+	 * fails; the wizard then runs non-interactively and never reads.
+	 */
 	static ConsoleIo ofSystemConsole() {
 		return new SystemConsoleIo();
 	}

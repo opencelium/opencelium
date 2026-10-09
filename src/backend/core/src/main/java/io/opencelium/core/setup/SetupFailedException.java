@@ -24,6 +24,11 @@ public final class SetupFailedException extends RuntimeException {
 		return new SetupFailedException(message, USAGE_EXIT_CODE);
 	}
 
+	/** A setup that stops with exit code 1: a missing or bad answer, an answers file that cannot be read. */
+	public static SetupFailedException failure(String message) {
+		return new SetupFailedException(message, FAILURE_EXIT_CODE);
+	}
+
 	public int exitCode() {
 		return exitCode;
 	}

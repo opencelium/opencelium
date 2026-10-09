@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import io.opencelium.core.setup.answers.AnswerSource;
 import io.opencelium.core.setup.files.FilePlan;
 import io.opencelium.core.setup.files.FilePlanWriter;
 import io.opencelium.core.setup.files.SetupWriteException;
@@ -15,15 +16,18 @@ import io.opencelium.core.setup.steps.SetupStep;
 import io.opencelium.core.setup.steps.SummaryStep;
 
 /**
- * The interactive setup: the banner, then the steps in order, each one skipped when it does not apply, then the
- * write of the files the steps planned, then the start of the application. A cancel at any question ends the run
- * with "nothing written" and exit code 0; a write failure ends it with exit code 1 and starts nothing. Everything
- * goes through the prompter, never through a logger: before Spring starts the log system is not configured, and a
- * password must never reach a log.
+ * The setup: the banner, then the steps in order, each one skipped when it does not apply, then the write of the
+ * files the steps planned, then the start of the application. The steps take their answers from the answer source:
+ * the answers file, else the prompter. A cancel at any question ends the run with "nothing written" and exit code
+ * 0; a missing or bad answer in non-interactive mode, and a write failure, end it with exit code 1 and start
+ * nothing. Everything goes through the prompter, never through a logger: before Spring starts the log system is
+ * not configured, and a password must never reach a log.
  */
 public final class Wizard {
 
 	private final Prompter prompter;
+
+	private final AnswerSource answers;
 
 	private final List<SetupStep> steps;
 
@@ -34,11 +38,14 @@ public final class Wizard {
 	private volatile boolean written;
 
 	/**
+	 * @param answers where the steps get their answers
 	 * @param start   starts the application once the files are written
 	 * @param version the product version for the banner; empty when unknown
 	 */
-	public Wizard(Prompter prompter, List<SetupStep> steps, Runnable start, Optional<String> version) {
+	public Wizard(Prompter prompter, AnswerSource answers, List<SetupStep> steps, Runnable start,
+			Optional<String> version) {
 		this.prompter = Objects.requireNonNull(prompter, "prompter");
+		this.answers = Objects.requireNonNull(answers, "answers");
 		this.steps = List.copyOf(steps);
 		this.start = Objects.requireNonNull(start, "start");
 		this.version = Objects.requireNonNull(version, "version");
@@ -57,12 +64,12 @@ public final class Wizard {
 	/**
 	 * @param reason why the wizard runs, in the words of the launch decision; the banner starts with it
 	 * @return the exit code when the process must end: 0 after a cancel, and when no step planned a file; 1 after a
-	 * write failure. Empty when the application started.
+	 * missing or bad answer in non-interactive mode, and after a write failure. Empty when the application started.
 	 */
 	public OptionalInt run(String reason) {
 		written = false;
 		printBanner(reason);
-		SetupContext context = new SetupContext();
+		SetupContext context = new SetupContext(answers);
 		try {
 			for (SetupStep step : steps) {
 				if (step.applicable(context)) {
@@ -74,6 +81,11 @@ public final class Wizard {
 			prompter.print("");
 			prompter.info(ex.getMessage());
 			return OptionalInt.of(0);
+		}
+		catch (SetupFailedException ex) {
+			prompter.print("");
+			prompter.error(ex.getMessage());
+			return OptionalInt.of(ex.exitCode());
 		}
 		FilePlan plan = context.filePlan();
 		if (plan.isEmpty()) {

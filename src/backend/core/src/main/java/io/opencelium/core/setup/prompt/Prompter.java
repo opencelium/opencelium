@@ -40,6 +40,9 @@ public interface Prompter {
 	 */
 	boolean yesNo(String question, String help, boolean defaultYes);
 
+	/** A question that was not asked, with the answer it got and where the answer came from, in a remark. */
+	void answered(String question, String value, String remark);
+
 	/** The title line of a screen, with a rule under it. */
 	void title(String title);
 
