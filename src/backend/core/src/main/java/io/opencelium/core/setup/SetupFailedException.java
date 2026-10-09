@@ -10,6 +10,9 @@ public final class SetupFailedException extends RuntimeException {
 	/** The exit code of a command line that cannot be understood. */
 	public static final int USAGE_EXIT_CODE = 2;
 
+	/** The exit code of a setup that stops for another reason, for example a missing terminal or answer. */
+	public static final int FAILURE_EXIT_CODE = 1;
+
 	private final int exitCode;
 
 	public SetupFailedException(String message, int exitCode) {
