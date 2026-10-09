@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import io.opencelium.core.config.DataDirDefaults;
 import io.opencelium.core.setup.SetupContext;
+import io.opencelium.core.setup.values.Question;
 import io.opencelium.core.setup.values.ValueKey;
 import io.opencelium.core.setup.prompt.Prompter;
 
@@ -40,9 +41,13 @@ public final class DataDirStep implements SetupStep {
 	}
 
 	@Override
+	public Optional<Question> question() {
+		return Optional.of(new Question(ValueKey.DATA_DIR, "Data directory", HELP, abbreviated(defaultDir)));
+	}
+
+	@Override
 	public void run(SetupContext context, Prompter prompter) {
-		String value = context.values().text(ValueKey.DATA_DIR, "Data directory", HELP, abbreviated(defaultDir),
-				this::check, prompter);
+		String value = context.values().text(question().orElseThrow(), this::check, prompter);
 		context.setDataDir(absolute(expanded(value)));
 	}
 

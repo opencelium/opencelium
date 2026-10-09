@@ -27,9 +27,13 @@ import io.opencelium.core.setup.SetupFailedException;
  * means what the same text typed at the prompt means: YAML's type guessing is off, because it would read {@code ~}
  * as no value, {@code 010} as 8, and {@code yes} as true. A key without a value or with a blank value is the same
  * as an absent key. An unknown key is an error, so a typo cannot silently turn into a question; a duplicated key and
- * a value that is a list or a map are errors too.
+ * a value that is a list or a map are errors too. The same reader, used as a writer, renders a {@code key: value}
+ * line for the template, so a default that needs quoting loads back unchanged.
  */
 public final class SetupFile {
+
+	/** The second line of a message about a key, so the first failure also shows the way to a complete file. */
+	static final String TEMPLATE_HINT = "A template with every key: java -jar oc-app.jar setup --template";
 
 	private SetupFile() {
 	}
@@ -65,7 +69,8 @@ public final class SetupFile {
 		for (Map.Entry<?, ?> entry : entries.entrySet()) {
 			String word = String.valueOf(entry.getKey());
 			ValueKey key = ValueKey.parse(word).orElseThrow(() -> SetupFailedException.failure(
-					"Unknown key '" + word + "' in " + file + ". Known keys: " + ValueKey.words() + "."));
+					"Unknown key '" + word + "' in " + file + ". Known keys: " + ValueKey.words() + ".\n"
+							+ TEMPLATE_HINT));
 			Object value = entry.getValue();
 			if (value instanceof Collection || value instanceof Map) {
 				throw SetupFailedException.failure("Bad value: " + key.word() + " in " + file
@@ -83,6 +88,11 @@ public final class SetupFile {
 	 * A safe YAML reader that resolves every plain scalar as a string and rejects a duplicated key, which it would
 	 * otherwise resolve silently to the last value.
 	 */
+	/** {@code key: value} and a line break, quoted when YAML needs it, as the template writes it. */
+	static String line(ValueKey key, String value) {
+		return textOnlyYaml().dump(Map.of(key.word(), value));
+	}
+
 	private static Yaml textOnlyYaml() {
 		var options = new LoaderOptions();
 		options.setAllowDuplicateKeys(false);
@@ -93,6 +103,7 @@ public final class SetupFile {
 			}
 		};
 		var dumperOptions = new DumperOptions();
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		return new Yaml(new SafeConstructor(options), new Representer(dumperOptions), dumperOptions, options,
 				noTypeGuessing);
 	}

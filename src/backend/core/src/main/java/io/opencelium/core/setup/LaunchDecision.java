@@ -25,6 +25,9 @@ public record LaunchDecision(Kind kind, String reason, boolean nonInteractive, O
 		/** Print the usage text and end with exit code 0. */
 		HELP,
 
+		/** Print the template of the setup file and end with exit code 0. */
+		TEMPLATE,
+
 		/** Start Spring Boot as if the setup did not exist. */
 		BOOT,
 

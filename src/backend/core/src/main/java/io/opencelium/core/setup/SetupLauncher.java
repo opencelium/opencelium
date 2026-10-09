@@ -18,6 +18,7 @@ import java.util.function.Predicate;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.values.SetupValues;
 import io.opencelium.core.setup.values.SetupFile;
+import io.opencelium.core.setup.values.SetupFileTemplate;
 import io.opencelium.core.setup.prompt.ConsoleIo;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 
@@ -28,8 +29,11 @@ import io.opencelium.core.setup.LaunchDecision.Kind;
  * rules, first match wins:
  * <ol>
  * <li>{@code --help}: the usage text.</li>
- * <li>A bare word other than {@code setup}, or {@code --file} without {@code setup}: a usage error, exit code
- * 2. The setup file only means something to the setup; without it the file would be dropped silently.</li>
+ * <li>A bare word other than {@code setup}, or {@code --file} or {@code --template} without {@code setup}: a usage
+ * error, exit code 2. Both flags only mean something to the setup; without it the file would be dropped
+ * silently.</li>
+ * <li>{@code setup --template}: the template of the setup file, also without a terminal, so it can be piped into a
+ * file.</li>
  * <li>{@code setup}: the wizard, on demand. Without a terminal or with {@code --non-interactive} it asks nothing:
  * the values come from {@code --file <path>}, and a missing one stops the setup with exit code 1.</li>
  * <li>{@code --non-interactive}: the normal start.</li>
@@ -67,14 +71,17 @@ public final class SetupLauncher {
 	private static final String SERVER_PORT_VARIABLE = "SERVER_PORT";
 
 	private static final String USAGE = """
-			Usage: java -jar oc-app.jar [setup] [--file <path>] [--non-interactive] [--<property>=<value>...]
+			Usage: java -jar oc-app.jar [setup] [--file <path>] [--template] [--non-interactive]
+			                            [--<property>=<value>...]
 
 			Commands
 			  setup                 run the setup wizard, also when a configuration exists
 			  help, --help, -h      print this text
 
 			Flags
-			  --file <path>         with setup: take the values from this setup file; a missing value is asked
+			  -f, --file <path>     with setup: take the values from this setup file; a missing value is asked
+			  --template            with setup: print a setup file with every key, its help and this machine's
+			                        defaults, for example: setup --template > setup-values.yml
 			  --non-interactive     never ask: with setup a missing value is an error, without setup the
 			                        wizard does not start
 
@@ -145,6 +152,11 @@ public final class SetupLauncher {
 			out.flush();
 			return OptionalInt.of(0);
 		}
+		if (decision.kind() == Kind.TEMPLATE) {
+			out.print(SetupFileTemplate.render(Wizard.standardSteps(locations)));
+			out.flush();
+			return OptionalInt.of(0);
+		}
 		if (decision.kind() == Kind.WIZARD) {
 			return runWizard(decision, boot);
 		}
@@ -164,6 +176,14 @@ public final class SetupLauncher {
 		if (arguments.setupFile().isPresent() && !arguments.isSetup()) {
 			throw SetupFailedException.usage(LaunchArguments.FILE_FLAG + " needs the setup command: java -jar "
 					+ "oc-app.jar " + Subcommand.SETUP.word() + " " + LaunchArguments.FILE_FLAG + " <path>.");
+		}
+		if (arguments.template() && !arguments.isSetup()) {
+			throw SetupFailedException.usage(LaunchArguments.TEMPLATE_FLAG + " needs the setup command: java -jar "
+					+ "oc-app.jar " + Subcommand.SETUP.word() + " " + LaunchArguments.TEMPLATE_FLAG + ".");
+		}
+		if (arguments.template()) {
+			return new LaunchDecision(Kind.TEMPLATE, "the setup file template was requested", false,
+					Optional.empty(), springArguments);
 		}
 		boolean interactive = terminal.getAsBoolean();
 		if (arguments.isSetup()) {
@@ -190,8 +210,9 @@ public final class SetupLauncher {
 
 	/**
 	 * Runs the wizard on the console, with the setup file when one was given; after the write the wizard starts
-	 * the application through {@code boot}. The shutdown hook for Ctrl+C says that nothing was written, as long as
-	 * that is true.
+	 * the application through {@code boot}. A failure that ends the setup goes to standard error, like a usage
+	 * error, so a script finds every failure in one place. The shutdown hook for Ctrl+C says that nothing was
+	 * written, as long as that is true.
 	 */
 	private OptionalInt runWizard(LaunchDecision decision, Consumer<String[]> boot) {
 		if (decision.nonInteractive() && decision.setupFile().isEmpty()) {
@@ -220,6 +241,10 @@ public final class SetupLauncher {
 		Runtime.getRuntime().addShutdownHook(cancelHook);
 		try {
 			return wizard.run(decision.reason());
+		}
+		catch (SetupFailedException ex) {
+			err.println(ex.getMessage());
+			return OptionalInt.of(ex.exitCode());
 		}
 		finally {
 			try {

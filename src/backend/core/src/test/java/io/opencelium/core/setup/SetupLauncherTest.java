@@ -240,7 +240,8 @@ class SetupLauncherTest {
 		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--template"}, booted::set);
 
 		assertThat(exitCode).hasValue(0);
-		assertThat(out.toString()).startsWith("# OpenCelium setup file. Run: java -jar oc-app.jar setup --file <this file>")
+		assertThat(out.toString())
+				.startsWith("# OpenCelium setup file. Run: java -jar oc-app.jar setup --file <this file>")
 				.contains("\n# Where OpenCelium keeps its local state").contains("\ndata-dir: ")
 				.contains("\n# The HTTP port of the web interface").contains("\nport: 9090\n");
 		assertThat(err.toString()).isEmpty();

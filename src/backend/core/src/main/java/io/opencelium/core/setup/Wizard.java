@@ -19,9 +19,9 @@ import io.opencelium.core.setup.steps.SummaryStep;
  * The setup: the banner, then the steps in order, each one skipped when it does not apply, then the write of the
  * files the steps planned, then the start of the application. The steps take their values from the value source:
  * the setup file, else the prompter. A cancel at any question ends the run with "nothing written" and exit code
- * 0; a missing or bad value in non-interactive mode, and a write failure, end it with exit code 1 and start
- * nothing. Everything goes through the prompter, never through a logger: before Spring starts the log system is
- * not configured, and a password must never reach a log.
+ * 0. A missing or bad value in non-interactive mode, and a write failure, end it with a {@link SetupFailedException}
+ * that the launcher prints on standard error, and start nothing. The dialogue goes through the prompter, never
+ * through a logger: before Spring starts the log system is not configured, and a password must never reach a log.
  */
 public final class Wizard {
 
@@ -63,8 +63,10 @@ public final class Wizard {
 
 	/**
 	 * @param reason why the wizard runs, in the words of the launch decision; the banner starts with it
-	 * @return the exit code when the process must end: 0 after a cancel, and when no step planned a file; 1 after a
-	 * missing or bad value in non-interactive mode, and after a write failure. Empty when the application started.
+	 * @return the exit code when the process must end: 0 after a cancel, and when no step planned a file. Empty when
+	 * the application started.
+	 * @throws SetupFailedException with exit code 1 after a missing or bad value in non-interactive mode, and after
+	 *                              a write failure; the message names the file or the key
 	 */
 	public OptionalInt run(String reason) {
 		written = false;
@@ -82,11 +84,6 @@ public final class Wizard {
 			prompter.info(ex.getMessage());
 			return OptionalInt.of(0);
 		}
-		catch (SetupFailedException ex) {
-			prompter.print("");
-			prompter.error(ex.getMessage());
-			return OptionalInt.of(ex.exitCode());
-		}
 		FilePlan plan = context.filePlan();
 		if (plan.isEmpty()) {
 			return OptionalInt.of(0);
@@ -95,9 +92,7 @@ public final class Wizard {
 			new FilePlanWriter(prompter::info).write(plan);
 		}
 		catch (SetupWriteException ex) {
-			prompter.print("");
-			prompter.error(ex.getMessage(), ex.rollbackReport());
-			return OptionalInt.of(SetupFailedException.FAILURE_EXIT_CODE);
+			throw SetupFailedException.failure(ex.getMessage() + "\n" + ex.rollbackReport());
 		}
 		written = true;
 		prompter.print("");
@@ -116,11 +111,20 @@ public final class Wizard {
 		return written;
 	}
 
+	/**
+	 * The Enter, ? and q hint only when a question can come: the log of a non-interactive run must not suggest a
+	 * wait.
+	 */
 	private void printBanner(String reason) {
 		prompter.print("");
 		prompter.title("OpenCelium setup" + version.map(v -> " (" + v + ")").orElse(""));
-		prompter.info(sentence(reason) + " Let's set up OpenCelium.",
-				"Press Enter to accept the value in [brackets]. Type ? for help, q to quit.");
+		String opening = sentence(reason) + " Let's set up OpenCelium.";
+		if (values.nonInteractive()) {
+			prompter.info(opening);
+		}
+		else {
+			prompter.info(opening, "Press Enter to accept the value in [brackets]. Type ? for help, q to quit.");
+		}
 		prompter.print("");
 	}
 
