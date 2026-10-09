@@ -79,8 +79,8 @@ public final class SetupLauncher {
 
 			Flags
 			  -f, --file <path>     with setup: take the values from this setup file; a missing value is asked
-			  --template            with setup: print a setup file with every key, its help and this machine's
-			                        defaults, for example: setup --template > setup-values.yml
+			  --template            Generate a template setup file containing all available keys, descriptions,
+			                        and default values. (e.g., setup --template > setup-values.yml)
 			  --batch               Run in non-interactive mode. Auto-confirms prompts, fails on missing
 			                        values, and disables the setup wizard.
 
