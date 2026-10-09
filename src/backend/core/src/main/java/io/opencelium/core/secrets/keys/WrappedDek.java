@@ -7,8 +7,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * A tenant's data-encryption key (DEK), wrapped under the root key with AES-256-GCM by {@link DekWrapper}. Stored in
- * the tenant's own database (decision #14); deleting it makes that tenant's secrets unrecoverable. The secret store
- * (OC-1584 Task 4) creates these; at startup {@link KeyStartupCanary} only checks that one unwraps.
+ * the tenant's own database; deleting it makes that tenant's secrets unrecoverable. The secret store creates these;
+ * at startup {@link KeyStartupCanary} only checks that one unwraps.
  *
  * @param rootKeyId  id of the root key that wrapped it ({@link RootKey#id()}), for root-key rotation
  * @param dekVersion version of the tenant's data key, from 1, for data-key rotation

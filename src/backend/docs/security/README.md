@@ -1,25 +1,12 @@
-# Security — authentication flow diagrams
+# Authentication flows
 
-Login sequence diagrams behind architecture decision #10 (pluggable authentication,
-separate from authorization) and roadmap story OC-1585 "Authentication (OIDC + portal)".
+The 3 login flows of the backend, as sequence diagrams. The rules behind them are in [architecture.md, section 6.7](../architecture.md#67-authentication-and-authorization) and in decision 10.
 
-This README is the single source of truth for these diagrams — Jira tickets link here
-(branch URL, not commit-pinned) instead of attaching snapshots; a diagram change is one
-edit in this file. To export a diagram (PNG for a slide, mermaid-cli, draw.io), copy the
-fenced block content.
+Common to all flows: authentication produces a verified principal (identity, tenant ID, groups). Core always issues its own session JWT, which carries the tenant ID. IdP and portal tokens do not reach the frontend.
 
-Common to all flows: authentication produces a verified principal (identity, tenant ID,
-groups), and core always issues its own session/app JWT carrying the tenant ID —
-IdP/portal tokens never reach the frontend.
+## Self-hosted: direct flow
 
-Status: the portal-as-OIDC-OP design was confirmed by PM on 2026-09-21 (architecture
-decision #10); the portal-side changes for the OP role and the credential-login API
-are verified by the first OC-1585 task.
-
-## Self-hosted — direct flow
-
-Core is the OIDC client against any IdP (Authorization Code + PKCE). Users, tenant,
-account linking and invites live in core's local DB.
+Core is the OIDC client against any IdP (Authorization Code + PKCE). The users, the tenant, the account linking, and the invites are in the local database of core.
 
 ```mermaid
 sequenceDiagram
@@ -44,11 +31,9 @@ sequenceDiagram
     FE-->>U: Logged in, tenant context set
 ```
 
-## Cloud — redirect flow (brokered)
+## Cloud: redirect flow (brokered)
 
-The Service Portal is the OIDC OP — it authenticates users itself (portal-native
-credentials) or brokers Google/Apple. Core trusts only the portal issuer and keeps a
-non-authoritative shadow user row.
+The Service Portal is the OIDC OP. It authenticates the users itself (portal-native credentials) or brokers Google and Apple. Core trusts only the portal issuer and keeps a non-authoritative shadow user row.
 
 ```mermaid
 sequenceDiagram
@@ -81,11 +66,9 @@ sequenceDiagram
     FE-->>U: Logged in, tenant context set
 ```
 
-## Cloud — credential flow (portal-native accounts only)
+## Cloud: credential flow (portal-native accounts only)
 
-Username/password entered in the OpenCelium login form; core exchanges them at the
-portal's auth API for the token + claims. Brokered-IdP users have no portal password and
-use the redirect flow instead.
+The user enters a user name and a password in the OpenCelium login form. Core exchanges them at the authentication API of the portal for the token and the claims. Brokered-IdP users have no portal password and use the redirect flow instead.
 
 ```mermaid
 sequenceDiagram

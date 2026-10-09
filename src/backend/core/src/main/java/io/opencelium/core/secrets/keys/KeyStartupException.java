@@ -7,7 +7,7 @@ package io.opencelium.core.secrets.keys;
  */
 public final class KeyStartupException extends RuntimeException {
 
-	/** The text defined in OC-1584 Task 4. */
+	/** The message when the stored secrets cannot be decrypted with the resolved root key. */
 	public static final String RESTORE_OR_RESET = "Stored secrets were encrypted with a key this installation no"
 			+ " longer has. Restore the original master key, or run an explicit secrets reset.";
 

@@ -17,7 +17,7 @@ import io.opencelium.common.tenant.TenantId;
 
 /**
  * Creates users and changes their passwords. Passwords arrive as {@code char[]} and are zeroed once hashed, also when
- * the call fails; they are never logged or returned. Login is OC-1585.
+ * the call fails; they are never logged or returned. Login is not part of this service.
  */
 @Service
 public class UserService {
