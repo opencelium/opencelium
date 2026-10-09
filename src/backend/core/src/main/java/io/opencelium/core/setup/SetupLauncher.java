@@ -191,12 +191,13 @@ public final class SetupLauncher {
 			return OptionalInt.of(SetupFailedException.FAILURE_EXIT_CODE);
 		}
 		String[] springArguments = decision.springArguments().toArray(String[]::new);
-		var wizard = new Wizard(new ConsolePrompter(console), Wizard.standardSteps(locations),
-				() -> boot.accept(springArguments), Wizard.versionFromManifest());
+		var prompter = new ConsolePrompter(console);
+		var wizard = new Wizard(prompter, Wizard.standardSteps(locations), () -> boot.accept(springArguments),
+				Wizard.versionFromManifest());
 		Thread cancelHook = new Thread(() -> {
 			if (!wizard.hasWritten()) {
-				out.println();
-				out.println(SetupCancelledException.MESSAGE);
+				prompter.print("");
+				prompter.info(SetupCancelledException.MESSAGE);
 			}
 		});
 		Runtime.getRuntime().addShutdownHook(cancelHook);
