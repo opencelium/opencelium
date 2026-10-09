@@ -17,7 +17,7 @@ import io.opencelium.core.setup.prompt.Prompter;
 /**
  * The last screen: the answers in a box, the list of the two files that will be written, and the confirmation.
  * Yes plans application.yml and the env file, which the wizard writes after this step; no cancels the setup with
- * nothing planned. A file that exists is marked, because the write replaces it. In non-interactive mode the
+ * nothing planned. A file that exists is marked, because the write replaces it. In batch mode the
  * confirmation is not asked: the setup file is the decision.
  */
 public final class SummaryStep implements SetupStep {

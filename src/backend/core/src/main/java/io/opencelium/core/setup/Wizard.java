@@ -19,7 +19,7 @@ import io.opencelium.core.setup.steps.SummaryStep;
  * The setup: the banner, then the steps in order, each one skipped when it does not apply, then the write of the
  * files the steps planned, then the start of the application. The steps take their values from the value source:
  * the setup file, else the prompter. A cancel at any question ends the run with "nothing written" and exit code
- * 0. A missing or bad value in non-interactive mode, and a write failure, end it with a {@link SetupFailedException}
+ * 0. A missing or bad value in batch mode, and a write failure, end it with a {@link SetupFailedException}
  * that the launcher prints on standard error, and start nothing. The dialogue goes through the prompter, never
  * through a logger: before Spring starts the log system is not configured, and a password must never reach a log.
  */
@@ -65,7 +65,7 @@ public final class Wizard {
 	 * @param reason why the wizard runs, in the words of the launch decision; the banner starts with it
 	 * @return the exit code when the process must end: 0 after a cancel, and when no step planned a file. Empty when
 	 * the application started.
-	 * @throws SetupFailedException with exit code 1 after a missing or bad value in non-interactive mode, and after
+	 * @throws SetupFailedException with exit code 1 after a missing or bad value in batch mode, and after
 	 *                              a write failure; the message names the file or the key
 	 */
 	public OptionalInt run(String reason) {
@@ -112,14 +112,14 @@ public final class Wizard {
 	}
 
 	/**
-	 * The Enter, ? and q hint only when a question can come: the log of a non-interactive run must not suggest a
+	 * The Enter, ? and q hint only when a question can come: the log of a batch run must not suggest a
 	 * wait.
 	 */
 	private void printBanner(String reason) {
 		prompter.print("");
 		prompter.title("OpenCelium setup" + version.map(v -> " (" + v + ")").orElse(""));
 		String opening = sentence(reason) + " Let's set up OpenCelium.";
-		if (values.nonInteractive()) {
+		if (values.batch()) {
 			prompter.info(opening);
 		}
 		else {

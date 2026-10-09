@@ -34,9 +34,9 @@ import io.opencelium.core.setup.LaunchDecision.Kind;
  * silently.</li>
  * <li>{@code setup --template}: the template of the setup file, also without a terminal, so it can be piped into a
  * file.</li>
- * <li>{@code setup}: the wizard, on demand. Without a terminal or with {@code --non-interactive} it asks nothing:
+ * <li>{@code setup}: the wizard, on demand. Without a terminal or with {@code --batch} it asks nothing:
  * the values come from {@code --file <path>}, and a missing one stops the setup with exit code 1.</li>
- * <li>{@code --non-interactive}: the normal start.</li>
+ * <li>{@code --batch}: the normal start.</li>
  * <li>No interactive terminal (Docker, systemd, a pipe): the normal start.</li>
  * <li>A {@code spring.config.*} location in the arguments, the system properties or the environment: the normal
  * start; Boot loads what the operator named.</li>
@@ -71,8 +71,7 @@ public final class SetupLauncher {
 	private static final String SERVER_PORT_VARIABLE = "SERVER_PORT";
 
 	private static final String USAGE = """
-			Usage: java -jar oc-app.jar [setup] [--file <path>] [--template] [--non-interactive]
-			                            [--<property>=<value>...]
+			Usage: java -jar oc-app.jar [setup] [--file <path>] [--template] [--batch] [--<property>=<value>...]
 
 			Commands
 			  setup                 run the setup wizard, also when a configuration exists
@@ -82,8 +81,17 @@ public final class SetupLauncher {
 			  -f, --file <path>     with setup: take the values from this setup file; a missing value is asked
 			  --template            with setup: print a setup file with every key, its help and this machine's
 			                        defaults, for example: setup --template > setup-values.yml
-			  --non-interactive     never ask: with setup a missing value is an error, without setup the
-			                        wizard does not start
+			  --batch               never ask a question: a missing value is an error, and the confirmation is
+			                        taken as yes; without setup, the wizard does not start
+
+			Batch mode, for scripts, Docker, systemd and CI
+			  Before: a setup file with every key. Print the template on the target machine, then set the values:
+			      java -jar oc-app.jar setup --template > setup-values.yml
+			  Then: run the setup with the file and --batch, so that nothing waits for input:
+			      java -jar oc-app.jar setup --file setup-values.yml --batch
+			  Without a terminal the setup runs in batch mode by itself. The application starts once the files
+			  are written. Exit code 1: a missing or bad value; the message names the key and the file.
+			  Exit code 2: a usage error. Both go to standard error.
 
 			Every other --<property>=<value> goes to Spring Boot unchanged, for example --server.port=9090.
 			""";
@@ -188,10 +196,10 @@ public final class SetupLauncher {
 		boolean interactive = terminal.getAsBoolean();
 		if (arguments.isSetup()) {
 			return new LaunchDecision(Kind.WIZARD, "requested with " + Subcommand.SETUP.word(),
-					arguments.nonInteractive() || !interactive, arguments.setupFile(), springArguments);
+					arguments.batch() || !interactive, arguments.setupFile(), springArguments);
 		}
-		if (arguments.nonInteractive()) {
-			return boot("the flag " + LaunchArguments.NON_INTERACTIVE_FLAG, springArguments);
+		if (arguments.batch()) {
+			return boot("the flag " + LaunchArguments.BATCH_FLAG, springArguments);
 		}
 		if (!interactive) {
 			return boot("no interactive terminal", springArguments);
@@ -215,7 +223,7 @@ public final class SetupLauncher {
 	 * written, as long as that is true.
 	 */
 	private OptionalInt runWizard(LaunchDecision decision, Consumer<String[]> boot) {
-		if (decision.nonInteractive() && decision.setupFile().isEmpty()) {
+		if (decision.batch() && decision.setupFile().isEmpty()) {
 			err.println("The setup wizard needs an interactive terminal, or a setup file: setup --file <path>.");
 			return OptionalInt.of(SetupFailedException.FAILURE_EXIT_CODE);
 		}
@@ -227,7 +235,7 @@ public final class SetupLauncher {
 			err.println(ex.getMessage());
 			return OptionalInt.of(ex.exitCode());
 		}
-		var source = new ValueSource(values, decision.setupFile(), decision.nonInteractive());
+		var source = new ValueSource(values, decision.setupFile(), decision.batch());
 		String[] springArguments = decision.springArguments().toArray(String[]::new);
 		var prompter = new ConsolePrompter(console);
 		var wizard = new Wizard(prompter, source, Wizard.standardSteps(locations),

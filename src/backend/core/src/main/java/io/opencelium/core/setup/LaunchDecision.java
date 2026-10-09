@@ -13,11 +13,11 @@ import java.util.Optional;
  *
  * @param kind            what runs
  * @param reason          why, in words for the terminal, for example "no configuration was found"
- * @param nonInteractive  for the wizard: ask nothing, because of {@code --non-interactive} or a missing terminal
+ * @param batch           for the wizard: ask nothing, because of {@code --batch} or a missing terminal
  * @param setupFile     for the wizard: the setup file behind {@code --file}, when one was given
  * @param springArguments the arguments for Spring Boot
  */
-public record LaunchDecision(Kind kind, String reason, boolean nonInteractive, Optional<Path> setupFile,
+public record LaunchDecision(Kind kind, String reason, boolean batch, Optional<Path> setupFile,
 		List<String> springArguments) {
 
 	public enum Kind {
