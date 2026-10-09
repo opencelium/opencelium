@@ -78,11 +78,13 @@ public final class SetupLauncher {
 			  help, --help, -h      print this text
 
 			Flags
-			  -f, --file <path>     with setup: take the values from this setup file; a missing value is asked
+			  -f, --file <path>     Take the setup values from this file; a value the file does not have is
+			                        asked. (e.g., setup --file setup-values.yml)
 			  --template            Generate a template setup file containing all available keys, descriptions,
 			                        and default values. (e.g., setup --template > setup-values.yml)
 			  --batch               Run in non-interactive mode. Auto-confirms prompts, fails on missing
 			                        values, and disables the setup wizard.
+			                        (e.g., setup --file setup-values.yml --batch)
 
 			Batch mode, for scripts, Docker, systemd and CI
 			  Before: a setup file with every key. Print the template on the target machine, then set the values:
