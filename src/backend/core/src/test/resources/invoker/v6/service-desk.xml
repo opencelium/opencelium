@@ -10,4 +10,12 @@
         <item>Service Desk</item>
     </category_tags>
     <authType>token</authType>
+    <requiredData>
+        <item name="url">https://acme.example.com</item>
+        <item name="username"/>
+        <item name="password" visibility="protected"/>
+        <item name="retries" type="integer">3</item>
+        <item name="sessionToken" visibility="private" source="%{login.body.result.session-id}"/>
+        <item name="basicAuth" visibility="private" source="{username:password}"/>
+    </requiredData>
 </invoker>
