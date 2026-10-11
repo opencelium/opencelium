@@ -173,7 +173,8 @@ spring:
 #      enabled: false
 #      # Label of the SSO button on the login page
 #      display-name: OpenID Connect
-#      # Issuer used for OIDC discovery (/.well-known/openid-configuration)
+#      # Issuer used for OIDC discovery (/.well-known/openid-configuration). The document is read on
+#      # the first login and then cached, so OpenCelium still starts while the provider is unreachable
 #      issuer-uri: https://idp.example.com/realms/opencelium
 #      # Endpoints can be given manually instead of using discovery
 #      authorization-uri: https://idp.example.com/realms/opencelium/protocol/openid-connect/auth

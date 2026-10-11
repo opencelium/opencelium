@@ -138,7 +138,8 @@ class OidcLoginServiceImplTest {
         properties.setFrontendRedirectUri("http://localhost:5173/oidc/callback");
 
         OidcConfiguration configuration = new OidcConfiguration();
-        ClientRegistrationRepository clientRegistrations = configuration.oidcClientRegistrationRepository(properties);
+        ClientRegistrationRepository clientRegistrations = configuration.oidcClientRegistrationRepository(properties,
+                configuration.oidcClientRegistrationFactory(properties));
 
         oidcLoginService = new OidcLoginServiceImpl(
                 properties,

@@ -1,7 +1,9 @@
 package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.database.mysql.service.UserService;
+import com.becon.opencelium.backend.security.oidc.LazyClientRegistrationRepository;
 import com.becon.opencelium.backend.security.oidc.OidcAuthenticationProvider;
+import com.becon.opencelium.backend.security.oidc.OidcClientRegistrationFactory;
 import com.becon.opencelium.backend.security.oidc.OidcLoginService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,13 +16,8 @@ import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorH
 import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.ClientRegistrations;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -32,13 +29,23 @@ import java.util.Arrays;
 @Configuration
 public class OidcConfiguration {
 
+    /**
+     * Discovery runs on the first /oidc/authorize and the outcome is cached, so that restarting
+     * OpenCelium does not depend on the identity provider being reachable.
+     */
     @Bean
-    public ClientRegistrationRepository oidcClientRegistrationRepository(OidcProperties oidcProperties) {
+    public ClientRegistrationRepository oidcClientRegistrationRepository(OidcProperties oidcProperties,
+                                                                        OidcClientRegistrationFactory factory) {
         if (!oidcProperties.isEnabled()) {
             return registrationId -> null;
         }
 
-        return new InMemoryClientRegistrationRepository(clientRegistration(oidcProperties));
+        return new LazyClientRegistrationRepository(OidcProperties.REGISTRATION_ID, factory::create);
+    }
+
+    @Bean
+    public OidcClientRegistrationFactory oidcClientRegistrationFactory(OidcProperties oidcProperties) {
+        return new OidcClientRegistrationFactory(oidcProperties);
     }
 
     @Bean
@@ -72,25 +79,5 @@ public class OidcConfiguration {
                                                                  UserService userService,
                                                                  OidcProperties oidcProperties) {
         return new OidcAuthenticationProvider(oidcLoginService, userService, oidcProperties);
-    }
-
-    private ClientRegistration clientRegistration(OidcProperties oidcProperties) {
-        ClientRegistration.Builder builder = StringUtils.hasText(oidcProperties.getIssuerUri())
-                ? ClientRegistrations.fromIssuerLocation(oidcProperties.getIssuerUri())
-                        .registrationId(OidcProperties.REGISTRATION_ID)
-                : ClientRegistration.withRegistrationId(OidcProperties.REGISTRATION_ID)
-                        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                        .authorizationUri(oidcProperties.getAuthorizationUri())
-                        .tokenUri(oidcProperties.getTokenUri())
-                        .jwkSetUri(oidcProperties.getJwkSetUri());
-
-        return builder
-                .clientId(oidcProperties.getClientId())
-                .clientSecret(oidcProperties.getClientSecret())
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .redirectUri(oidcProperties.getRedirectUri())
-                .scope(oidcProperties.getScopes().toArray(String[]::new))
-                .clientName(oidcProperties.getDisplayName())
-                .build();
     }
 }
