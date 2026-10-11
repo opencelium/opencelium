@@ -138,6 +138,20 @@ class OidcClientRegistrationFactoryTest {
     }
 
     @Test
+    void configuredEndpointsValidateTheIssuerWithoutAskingTheProvider() {
+        OidcProperties properties = configuredProperties();
+        properties.setIssuerUri(issuer);
+
+        ClientRegistration registration = repository(properties).findByRegistrationId("opencelium");
+
+        assertThat(registration.getProviderDetails().getIssuerUri()).isEqualTo(issuer);
+        assertThat(registration.getProviderDetails().getAuthorizationUri())
+                .isEqualTo("https://idp.example.com/authorize");
+        // The endpoints win, so the discovery document of the issuer is never requested.
+        assertThat(discoveryRequests.get()).isZero();
+    }
+
+    @Test
     void configuredEndpointsNeedNoDiscoveryAtAll() {
         ClientRegistration registration = repository(configuredProperties()).findByRegistrationId("opencelium");
 

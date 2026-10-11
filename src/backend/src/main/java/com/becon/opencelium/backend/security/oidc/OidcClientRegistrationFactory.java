@@ -50,9 +50,22 @@ public class OidcClientRegistrationFactory {
 
     /** Uses discovery when an issuer is configured, otherwise the endpoints from the configuration. */
     public ClientRegistration create() {
-        return StringUtils.hasText(properties.getIssuerUri())
-                ? fromDiscovery(properties.getIssuerUri())
-                : fromConfiguredEndpoints();
+        if (hasConfiguredEndpoints() || !StringUtils.hasText(properties.getIssuerUri())) {
+            return fromConfiguredEndpoints();
+        }
+
+        return fromDiscovery(properties.getIssuerUri());
+    }
+
+    /**
+     * Explicit endpoints win over discovery: they need no call to the provider, and 'issuer-uri' still
+     * says which issuer the ID token has to carry. So the ID token is validated against the issuer in
+     * both modes, which is what discovery used to be the only way to get.
+     */
+    private boolean hasConfiguredEndpoints() {
+        return StringUtils.hasText(properties.getAuthorizationUri())
+                && StringUtils.hasText(properties.getTokenUri())
+                && StringUtils.hasText(properties.getJwkSetUri());
     }
 
     private ClientRegistration fromDiscovery(String issuerUri) {
@@ -83,11 +96,17 @@ public class OidcClientRegistrationFactory {
     }
 
     private ClientRegistration fromConfiguredEndpoints() {
-        return builder()
+        ClientRegistration.Builder builder = builder()
                 .authorizationUri(properties.getAuthorizationUri())
                 .tokenUri(properties.getTokenUri())
-                .jwkSetUri(properties.getJwkSetUri())
-                .build();
+                .jwkSetUri(properties.getJwkSetUri());
+
+        // Optional, but strongly advised: this is what makes the decoder check the ID token's 'iss'.
+        if (StringUtils.hasText(properties.getIssuerUri())) {
+            builder.issuerUri(properties.getIssuerUri());
+        }
+
+        return builder.build();
     }
 
     private ClientRegistration.Builder builder() {
