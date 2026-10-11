@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 /**
  * Run with: ./gradlew test --tests "*.OidcPropertiesTest"
@@ -61,6 +63,70 @@ class OidcPropertiesTest {
     @Test
     void isEnabledReturnsFalseByDefault() {
         assertThat(new OidcProperties().isEnabled()).isFalse();
+    }
+
+    @Test
+    void validateStaysSilentWhileTheFeatureIsDisabled() {
+        assertThatCode(new OidcProperties()::validate).doesNotThrowAnyException();
+    }
+
+    @Test
+    void validateAcceptsDiscoveryConfiguration() {
+        OidcProperties properties = clientProperties();
+        properties.setIssuerUri("https://idp.example.com");
+
+        assertThatCode(properties::validate).doesNotThrowAnyException();
+    }
+
+    @Test
+    void validateAcceptsManuallyConfiguredEndpoints() {
+        OidcProperties properties = clientProperties();
+        properties.setAuthorizationUri("https://idp.example.com/authorize");
+        properties.setTokenUri("https://idp.example.com/token");
+        properties.setJwkSetUri("https://idp.example.com/jwks");
+
+        assertThatCode(properties::validate).doesNotThrowAnyException();
+    }
+
+    @Test
+    void validateNamesEverySettingAnEnabledLoginCannotWorkWithout() {
+        OidcProperties properties = new OidcProperties();
+        properties.setEnabled(true);
+
+        IllegalStateException failure = catchThrowableOfType(properties::validate, IllegalStateException.class);
+
+        assertThat(failure)
+                .isNotNull()
+                .hasMessageContaining("client-id")
+                .hasMessageContaining("client-secret")
+                .hasMessageContaining("redirect-uri")
+                .hasMessageContaining("frontend-redirect-uri")
+                .hasMessageContaining("authorization-uri")
+                .hasMessageContaining("token-uri")
+                .hasMessageContaining("jwk-set-uri");
+    }
+
+    @Test
+    void validateAsksForTheEndpointsOnlyWhenDiscoveryIsNotConfigured() {
+        IllegalStateException failure = catchThrowableOfType(clientProperties()::validate, IllegalStateException.class);
+
+        assertThat(failure).isNotNull();
+        assertThat(failure.getMessage())
+                .doesNotContain("client-id", "client-secret", "redirect-uri", "frontend-redirect-uri")
+                .contains("authorization-uri", "token-uri", "jwk-set-uri");
+    }
+
+    /** Everything an enabled login needs apart from the provider endpoints, which discovery or the
+     * three explicit endpoints have to provide. */
+    private OidcProperties clientProperties() {
+        OidcProperties properties = new OidcProperties();
+        properties.setEnabled(true);
+        properties.setClientId("opencelium");
+        properties.setClientSecret("secret");
+        properties.setRedirectUri("http://localhost:9090/oidc/callback");
+        properties.setFrontendRedirectUri("http://localhost:5173/oidc/callback");
+
+        return properties;
     }
 
     private OidcProperties propertiesWith(OidcProperties.Group2Role... mappings) {

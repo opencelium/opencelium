@@ -1,7 +1,9 @@
 package com.becon.opencelium.backend.configuration;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +57,53 @@ public class OidcProperties {
                 .map(Group2Role::getOcRole)
                 .findFirst()
                 .orElseThrow();
+    }
+
+    /**
+     * Fails the startup of a half configured single sign-on instead of letting it surface as a broken
+     * login later. Checked are the settings the flow cannot work without: the client, the two redirect
+     * URIs and either discovery through 'issuer-uri' or the three endpoints.
+     */
+    public void validate() {
+        if (!enabled) {
+            return;
+        }
+
+        List<String> missing = new ArrayList<>();
+
+        if (!StringUtils.hasText(clientId)) {
+            missing.add("client-id");
+        }
+        if (!StringUtils.hasText(clientSecret)) {
+            missing.add("client-secret");
+        }
+        if (!StringUtils.hasText(redirectUri)) {
+            missing.add("redirect-uri");
+        }
+        if (!StringUtils.hasText(frontendRedirectUri)) {
+            missing.add("frontend-redirect-uri");
+        }
+        if (!StringUtils.hasText(issuerUri)) {
+            if (!StringUtils.hasText(authorizationUri)) {
+                missing.add("authorization-uri");
+            }
+            if (!StringUtils.hasText(tokenUri)) {
+                missing.add("token-uri");
+            }
+            if (!StringUtils.hasText(jwkSetUri)) {
+                missing.add("jwk-set-uri");
+            }
+        }
+
+        if (!missing.isEmpty()) {
+            throw new IllegalStateException("spring.security.oidc is enabled but incomplete, set: "
+                    + String.join(", ", missing));
+        }
+    }
+
+    @PostConstruct
+    void validateOnStartup() {
+        validate();
     }
 
     public List<String> getGroups() {

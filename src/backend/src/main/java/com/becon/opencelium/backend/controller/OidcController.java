@@ -20,6 +20,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,6 +39,12 @@ import java.util.Optional;
 @Tag(name = "Oidc", description = "OpenID Connect single sign-on")
 @RequestMapping(value = "/oidc")
 public class OidcController {
+
+    /** Error codes used when the failure has no code of its own for the frontend to show. */
+    private static final String AUTHORIZE_FAILED = "authorize_failed";
+    private static final String CALLBACK_FAILED = "callback_failed";
+
+    private static final Logger logger = LoggerFactory.getLogger(OidcController.class);
 
     private final OidcProperties properties;
     private final OidcLoginService oidcLoginService;
@@ -70,6 +78,12 @@ public class OidcController {
             start = oidcLoginService.beginLogin(clientNonce);
         } catch (OidcLoginException e) {
             return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            // An unreachable discovery document or a broken client registration used to end on a raw
+            // error page; the frontend can show the same information in its own layout.
+            logger.error("OpenID Connect authorization request failed", e);
+
+            return redirectToFrontend("error", AUTHORIZE_FAILED);
         }
 
         stateCookieService.write(response, start.state(), request.isSecure());
@@ -97,15 +111,27 @@ public class OidcController {
             return redirectToFrontend("error", error);
         }
 
+        String parameter = "code";
+        String value;
         try {
             OidcIdentity identity = oidcLoginService.completeLogin(code, state, expected.orElse(null));
 
             String clientNonceHash = expected.map(OidcAuthorizationState::clientNonceHash).orElse(null);
 
-            return redirectToFrontend("code", oidcLoginService.issueTicket(identity, clientNonceHash));
+            value = oidcLoginService.issueTicket(identity, clientNonceHash);
         } catch (OidcLoginException e) {
-            return redirectToFrontend("error", e.getCode());
+            parameter = "error";
+            value = e.getCode();
+        } catch (Exception e) {
+            // Everything else - a callback without code and error, an unusable ID token decoder, a
+            // failure of the identity provider - has to reach the frontend as well, not a 500 page.
+            logger.error("OpenID Connect callback failed", e);
+
+            parameter = "error";
+            value = CALLBACK_FAILED;
         }
+
+        return redirectToFrontend(parameter, value);
     }
 
     @Operation(summary = "Returns the configured OpenID Connect settings without the client secret")
