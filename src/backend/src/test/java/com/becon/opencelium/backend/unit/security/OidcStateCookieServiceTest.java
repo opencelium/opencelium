@@ -20,6 +20,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -94,6 +99,17 @@ class OidcStateCookieServiceTest {
         assertThat(otherService.read(request)).isEmpty();
     }
 
+    @Test
+    void readReturnsEmptyWhenCookieWasSignedWithTheRawTokenSecret() {
+        MockHttpServletRequest request = roundTrip(stateExpiringIn(60_000));
+        Cookie cookie = request.getCookies()[0];
+
+        // The cookie key is derived from the token secret, so the secret itself must not verify it.
+        cookie.setValue(resign(cookie.getValue(), "test-secret"));
+
+        assertThat(cookieService.read(request)).isEmpty();
+    }
+
     private OidcAuthorizationState stateExpiringIn(long millis) {
         return new OidcAuthorizationState("state-value", "nonce-value", "verifier-value",
                 "http://localhost:9090/oidc/callback", "client-nonce-hash-value",
@@ -115,6 +131,22 @@ class OidcStateCookieServiceTest {
         request.setCookies(new Cookie(OidcStateCookieService.COOKIE_NAME, value));
 
         return request;
+    }
+
+    /** Replaces the signature of a serialized state with one made by the given key as it is. */
+    private String resign(String value, String key) {
+        try {
+            int separator = value.lastIndexOf('.');
+            String payload = value.substring(0, separator);
+
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+
+            return payload + "." + Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(mac.doFinal(payload.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private String tamperWithPayload(String value) {

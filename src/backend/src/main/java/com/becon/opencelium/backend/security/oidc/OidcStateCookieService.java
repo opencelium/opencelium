@@ -30,12 +30,15 @@ public class OidcStateCookieService {
 
     private static final String HMAC_ALGORITHM = "HmacSHA256";
 
+    /** Label the cookie signing key is derived with, see {@link #deriveSigningKey(String)}. */
+    private static final String KEY_DERIVATION_LABEL = "oidc-state";
+
     private final ObjectMapper objectMapper;
-    private final TokenUtility tokenUtility;
+    private final byte[] signingKey;
 
     public OidcStateCookieService(ObjectMapper objectMapper, TokenUtility tokenUtility) {
         this.objectMapper = objectMapper;
-        this.tokenUtility = tokenUtility;
+        this.signingKey = deriveSigningKey(tokenUtility.getSecret());
     }
 
     public void write(HttpServletResponse response, OidcAuthorizationState state, boolean secure) {
@@ -111,10 +114,25 @@ public class OidcStateCookieService {
         }
     }
 
+    /**
+     * Derives the key of this cookie from the JWT secret instead of using the secret itself, so signing
+     * a login state and signing a session token do not share key material: HMAC(secret, "oidc-state").
+     */
+    private byte[] deriveSigningKey(String secret) {
+        try {
+            Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), HMAC_ALGORITHM));
+
+            return mac.doFinal(KEY_DERIVATION_LABEL.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException("Cannot derive the OIDC state signing key", e);
+        }
+    }
+
     private String sign(String payload) {
         try {
             Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-            mac.init(new SecretKeySpec(tokenUtility.getSecret().getBytes(StandardCharsets.UTF_8), HMAC_ALGORITHM));
+            mac.init(new SecretKeySpec(signingKey, HMAC_ALGORITHM));
 
             return Base64.getUrlEncoder().withoutPadding()
                     .encodeToString(mac.doFinal(payload.getBytes(StandardCharsets.UTF_8)));
