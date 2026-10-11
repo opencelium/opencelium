@@ -34,7 +34,7 @@ public class OidcAuthenticationFilter extends AuthenticationFilter {
             OidcTicketDTO dto = new ObjectMapper()
                     .readValue(request.getInputStream(), OidcTicketDTO.class);
 
-            return getAuthenticationManager().authenticate(new OidcAuthenticationToken(dto.code()));
+            return getAuthenticationManager().authenticate(new OidcAuthenticationToken(dto.code(), dto.clientNonce()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

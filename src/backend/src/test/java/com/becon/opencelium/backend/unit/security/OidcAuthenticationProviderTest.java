@@ -70,10 +70,10 @@ class OidcAuthenticationProviderTest {
     @Test
     void authenticateReturnsTheLinkedAccountWithGroupAuthorities() {
         User linked = user(7, EMAIL);
-        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
+        when(oidcLoginService.consumeTicket("ticket-value", "nonce-value")).thenReturn(identity());
         when(userService.findByOidcIdentity(ISSUER, "subject-1")).thenReturn(Optional.of(linked));
 
-        OidcUserDetails principal = principalOf(provider.authenticate(new OidcAuthenticationToken("ticket-value")));
+        OidcUserDetails principal = principalOf(provider.authenticate(new OidcAuthenticationToken("ticket-value", "nonce-value")));
 
         assertThat(principal.getUser()).isSameAs(linked);
         assertThat(principal.getEmail()).isEqualTo(EMAIL);
@@ -82,6 +82,8 @@ class OidcAuthenticationProviderTest {
                 .containsExactly("oc-admins");
         // The email is only ever consulted when nothing is linked to the identity.
         verify(userService, never()).findByEmail(anyString());
+        // The nonce of the browser has to reach the service, it is what makes the ticket spendable.
+        verify(oidcLoginService).consumeTicket("ticket-value", "nonce-value");
     }
 
     @Test
@@ -90,10 +92,10 @@ class OidcAuthenticationProviderTest {
         User moved = user(7, EMAIL);
         moved.setOidcIssuer("https://old-idp.example.com");
         moved.setOidcSubject("old-subject");
-        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
+        when(oidcLoginService.consumeTicket("ticket-value", "nonce-value")).thenReturn(identity());
         when(userService.findByEmail(EMAIL)).thenReturn(Optional.of(moved));
 
-        OidcUserDetails principal = principalOf(provider.authenticate(new OidcAuthenticationToken("ticket-value")));
+        OidcUserDetails principal = principalOf(provider.authenticate(new OidcAuthenticationToken("ticket-value", "nonce-value")));
 
         assertThat(principal.getUser()).isSameAs(moved);
         assertThat(moved.getOidcIssuer()).isEqualTo(ISSUER);
@@ -102,21 +104,21 @@ class OidcAuthenticationProviderTest {
 
     @Test
     void authenticateThrowsWhenTheAccountExistsButIsNotLinkedAndWeakMatchingIsOff() {
-        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
+        when(oidcLoginService.consumeTicket("ticket-value", "nonce-value")).thenReturn(identity());
         when(userService.findByEmail(EMAIL)).thenReturn(Optional.of(user(7, EMAIL)));
 
-        assertThatThrownBy(() -> provider.authenticate(new OidcAuthenticationToken("ticket-value")))
+        assertThatThrownBy(() -> provider.authenticate(new OidcAuthenticationToken("ticket-value", "nonce-value")))
                 .isInstanceOf(OidcLoginException.class)
                 .hasFieldOrPropertyWithValue("code", "account_not_linked");
     }
 
     @Test
     void authenticateReturnsNoAccountWhenNothingIsLinkedAndJitProvisioningIsEnabled() {
-        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
+        when(oidcLoginService.consumeTicket("ticket-value", "nonce-value")).thenReturn(identity());
         when(userService.findByOidcIdentity(ISSUER, "subject-1")).thenReturn(Optional.empty());
         when(userService.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
-        OidcUserDetails principal = principalOf(provider.authenticate(new OidcAuthenticationToken("ticket-value")));
+        OidcUserDetails principal = principalOf(provider.authenticate(new OidcAuthenticationToken("ticket-value", "nonce-value")));
 
         // No account: AuthenticationFilter provisions one.
         assertThat(principal.getUser()).isNull();
@@ -126,21 +128,21 @@ class OidcAuthenticationProviderTest {
     @Test
     void authenticateThrowsWhenUserIsUnknownAndJitProvisioningIsDisabled() {
         properties.setJitProvisioning(false);
-        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
+        when(oidcLoginService.consumeTicket("ticket-value", "nonce-value")).thenReturn(identity());
         when(userService.findByOidcIdentity(ISSUER, "subject-1")).thenReturn(Optional.empty());
         when(userService.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> provider.authenticate(new OidcAuthenticationToken("ticket-value")))
+        assertThatThrownBy(() -> provider.authenticate(new OidcAuthenticationToken("ticket-value", "nonce-value")))
                 .isInstanceOf(OidcLoginException.class)
                 .hasFieldOrPropertyWithValue("code", "user_not_provisioned");
     }
 
     @Test
     void authenticateThrowsWhenTicketWasAlreadyConsumed() {
-        when(oidcLoginService.consumeTicket("used-ticket"))
+        when(oidcLoginService.consumeTicket("used-ticket", "nonce-value"))
                 .thenThrow(new OidcLoginException("invalid_code", "The one-time code has expired or was already used."));
 
-        assertThatThrownBy(() -> provider.authenticate(new OidcAuthenticationToken("used-ticket")))
+        assertThatThrownBy(() -> provider.authenticate(new OidcAuthenticationToken("used-ticket", "nonce-value")))
                 .isInstanceOf(OidcLoginException.class);
     }
 

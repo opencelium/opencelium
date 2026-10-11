@@ -40,7 +40,9 @@ public class OidcAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        OidcIdentity identity = oidcLoginService.consumeTicket((String) authentication.getCredentials());
+        OidcAuthenticationToken token = (OidcAuthenticationToken) authentication;
+
+        OidcIdentity identity = oidcLoginService.consumeTicket(token.getTicket(), token.getClientNonce());
 
         User user = userService.findByOidcIdentity(identity.issuer(), identity.subject()).orElse(null);
 

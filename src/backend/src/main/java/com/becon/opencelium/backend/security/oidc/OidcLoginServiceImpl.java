@@ -89,7 +89,12 @@ public class OidcLoginServiceImpl implements OidcLoginService {
     }
 
     @Override
-    public Start beginLogin() {
+    public Start beginLogin(String clientNonce) {
+        if (!StringUtils.hasText(clientNonce) || clientNonce.length() < MIN_CLIENT_NONCE_LENGTH) {
+            throw new OidcLoginException("invalid_nonce",
+                    "A client nonce of at least " + MIN_CLIENT_NONCE_LENGTH + " characters is required.");
+        }
+
         ClientRegistration registration = clientRegistration();
 
         String state = randomValue();
@@ -111,7 +116,8 @@ public class OidcLoginServiceImpl implements OidcLoginService {
                 .toUriString();
 
         OidcAuthorizationState authorizationState = new OidcAuthorizationState(state, nonce, codeVerifier,
-                properties.getRedirectUri(), System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(properties.getStateActivityTime()));
+                properties.getRedirectUri(), hashClientNonce(clientNonce),
+                System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(properties.getStateActivityTime()));
 
         return new Start(authorizationState, authorizationUri);
     }
@@ -190,10 +196,11 @@ public class OidcLoginServiceImpl implements OidcLoginService {
 
     @Override
     @Transactional
-    public String issueTicket(OidcIdentity identity) {
+    public String issueTicket(OidcIdentity identity, String clientNonceHash) {
         OidcLoginTicket ticket = new OidcLoginTicket();
         ticket.setTicket(randomValue());
         ticket.setIdentity(serialize(identity));
+        ticket.setClientNonceHash(clientNonceHash);
         ticket.setExpiresAt(new Date(System.currentTimeMillis()
                 + TimeUnit.SECONDS.toMillis(properties.getTicketActivityTime())));
 
@@ -202,7 +209,7 @@ public class OidcLoginServiceImpl implements OidcLoginService {
 
     @Override
     @Transactional
-    public OidcIdentity consumeTicket(String ticket) {
+    public OidcIdentity consumeTicket(String ticket, String clientNonce) {
         if (!StringUtils.hasText(ticket)) {
             throw new OidcLoginException("invalid_code", "No one-time code has been supplied.");
         }
@@ -212,6 +219,12 @@ public class OidcLoginServiceImpl implements OidcLoginService {
 
         if (found.getUsedAt() != null || found.getExpiresAt().before(new Date())) {
             throw new OidcLoginException("invalid_code", "The one-time code has expired or was already used.");
+        }
+
+        // /oidc/exchange is reachable from any browser, so the ticket is only spent by the one that
+        // started the login. Checked before the row is marked used, and a wrong nonce leaves it alone.
+        if (!matchesClientNonce(found, clientNonce)) {
+            throw new OidcLoginException("invalid_code", "The one-time code was not issued to this browser.");
         }
 
         found.setUsedAt(new Date());
@@ -289,14 +302,31 @@ public class OidcLoginServiceImpl implements OidcLoginService {
     }
 
     private String codeChallenge(String codeVerifier) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256")
-                    .digest(codeVerifier.getBytes(StandardCharsets.US_ASCII));
+        return sha256Base64(codeVerifier.getBytes(StandardCharsets.US_ASCII), "the PKCE code challenge");
+    }
 
-            return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
+    /** Only the hash of the client nonce is left behind, on the cookie as well as on the ticket row. */
+    private String hashClientNonce(String clientNonce) {
+        return sha256Base64(clientNonce.getBytes(StandardCharsets.UTF_8), "the client nonce");
+    }
+
+    private String sha256Base64(byte[] value, String description) {
+        try {
+            return Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(MessageDigest.getInstance("SHA-256").digest(value));
         } catch (Exception e) {
-            throw new IllegalStateException("Cannot compute the PKCE code challenge", e);
+            throw new IllegalStateException("Cannot compute " + description, e);
         }
+    }
+
+    private boolean matchesClientNonce(OidcLoginTicket ticket, String clientNonce) {
+        String stored = ticket.getClientNonceHash();
+        if (!StringUtils.hasText(stored) || !StringUtils.hasText(clientNonce)) {
+            return false;
+        }
+
+        return MessageDigest.isEqual(stored.getBytes(StandardCharsets.UTF_8),
+                hashClientNonce(clientNonce).getBytes(StandardCharsets.UTF_8));
     }
 
     /**

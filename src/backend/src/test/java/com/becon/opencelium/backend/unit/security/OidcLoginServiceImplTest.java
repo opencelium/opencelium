@@ -75,6 +75,9 @@ class OidcLoginServiceImplTest {
     private static final String CLIENT_ID = "opencelium";
     private static final String REDIRECT_URI = "http://localhost:9090/oidc/callback";
 
+    /** The nonce the frontend would keep and hand back to /oidc/exchange. */
+    private static final String CLIENT_NONCE = "client-nonce-0123456789abcdef";
+
     private static HttpServer identityProvider;
     private static String issuer;
     private static RSAKey signingKey;
@@ -148,7 +151,7 @@ class OidcLoginServiceImplTest {
 
     @Test
     void beginLoginReturnsAuthorizationUriWithPkceAndNonceWhenDiscoveryIsAvailable() {
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
 
         // The consumer of this string is URI.create(...) in the controller: a raw space in the
         // scope parameter used to make it throw "Illegal character in query".
@@ -172,7 +175,7 @@ class OidcLoginServiceImplTest {
 
     @Test
     void completeLoginReturnsIdentityWhenProviderAnswersWithValidTokens() {
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
         nonceToEcho = start.state().nonce();
 
         OidcIdentity identity = oidcLoginService.completeLogin("auth-code", start.state().state(), start.state());
@@ -187,7 +190,7 @@ class OidcLoginServiceImplTest {
     @Test
     void completeLoginThrowsWhenTheIdentityProviderReportsTheEmailAsUnverified() {
         emailVerifiedClaim = Boolean.FALSE;
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
         nonceToEcho = start.state().nonce();
 
         assertThatThrownBy(() -> oidcLoginService.completeLogin("auth-code", start.state().state(), start.state()))
@@ -198,7 +201,7 @@ class OidcLoginServiceImplTest {
     @Test
     void completeLoginThrowsWhenTheIdentityProviderDoesNotConfirmTheEmail() {
         emailVerifiedClaim = null;
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
         nonceToEcho = start.state().nonce();
 
         assertThatThrownBy(() -> oidcLoginService.completeLogin("auth-code", start.state().state(), start.state()))
@@ -210,7 +213,7 @@ class OidcLoginServiceImplTest {
     void completeLoginAcceptsAnUnconfirmedEmailWhenTheRequirementIsSwitchedOff() {
         properties.setRequireVerifiedEmail(false);
         emailVerifiedClaim = null;
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
         nonceToEcho = start.state().nonce();
 
         OidcIdentity identity = oidcLoginService.completeLogin("auth-code", start.state().state(), start.state());
@@ -226,7 +229,7 @@ class OidcLoginServiceImplTest {
                   "department": "Platform"
                 }
                 """;
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
         nonceToEcho = start.state().nonce();
 
         OidcIdentity identity = oidcLoginService.completeLogin("auth-code", start.state().state(), start.state());
@@ -244,7 +247,7 @@ class OidcLoginServiceImplTest {
                   "groups": ["oc-users"]
                 }
                 """;
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
         nonceToEcho = start.state().nonce();
 
         OidcIdentity identity = oidcLoginService.completeLogin("auth-code", start.state().state(), start.state());
@@ -256,7 +259,7 @@ class OidcLoginServiceImplTest {
 
     @Test
     void completeLoginThrowsWhenStateDoesNotMatchTheAuthorizationRequest() {
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
         nonceToEcho = start.state().nonce();
 
         assertThatThrownBy(() -> oidcLoginService.completeLogin("auth-code", "another-state", start.state()))
@@ -266,7 +269,7 @@ class OidcLoginServiceImplTest {
 
     @Test
     void completeLoginThrowsWhenStateIsMissingFromTheCallback() {
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
         nonceToEcho = start.state().nonce();
 
         assertThatThrownBy(() -> oidcLoginService.completeLogin("auth-code", null, start.state()))
@@ -276,7 +279,7 @@ class OidcLoginServiceImplTest {
 
     @Test
     void completeLoginThrowsWhenIdTokenCarriesAnotherNonce() {
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
         nonceToEcho = "a-nonce-from-another-authorization-request";
 
         assertThatThrownBy(() -> oidcLoginService.completeLogin("auth-code", start.state().state(), start.state()))
@@ -288,35 +291,90 @@ class OidcLoginServiceImplTest {
     void completeLoginThrowsWhenIssuerIsNotEnabled() {
         properties.setEnabled(false);
 
-        assertThatThrownBy(oidcLoginService::beginLogin)
+        assertThatThrownBy(() -> oidcLoginService.beginLogin(CLIENT_NONCE))
                 .isInstanceOf(OidcLoginException.class)
                 .hasFieldOrPropertyWithValue("code", "oidc_disabled");
+    }
+
+    @Test
+    void beginLoginRefusesAMissingOrTooShortClientNonce() {
+        assertThatThrownBy(() -> oidcLoginService.beginLogin(null))
+                .isInstanceOf(OidcLoginException.class)
+                .hasFieldOrPropertyWithValue("code", "invalid_nonce");
+        assertThatThrownBy(() -> oidcLoginService.beginLogin("   "))
+                .isInstanceOf(OidcLoginException.class)
+                .hasFieldOrPropertyWithValue("code", "invalid_nonce");
+        assertThatThrownBy(() -> oidcLoginService.beginLogin("too-short"))
+                .isInstanceOf(OidcLoginException.class)
+                .hasFieldOrPropertyWithValue("code", "invalid_nonce");
+    }
+
+    @Test
+    void beginLoginKeepsOnlyTheHashOfTheClientNonce() {
+        String hash = oidcLoginService.beginLogin(CLIENT_NONCE).state().clientNonceHash();
+
+        assertThat(hash).isNotBlank().isNotEqualTo(CLIENT_NONCE);
+        // Hashed deterministically, so /oidc/exchange can recompute it from the presented nonce.
+        assertThat(oidcLoginService.beginLogin(CLIENT_NONCE).state().clientNonceHash()).isEqualTo(hash);
+        assertThat(oidcLoginService.beginLogin(CLIENT_NONCE + "-other").state().clientNonceHash()).isNotEqualTo(hash);
     }
 
     @Test
     void issueTicketReturnsIdentityWhenTicketIsFresh() {
         OidcIdentity identity = identity();
 
-        OidcIdentity consumed = oidcLoginService.consumeTicket(oidcLoginService.issueTicket(identity));
+        OidcIdentity consumed = oidcLoginService.consumeTicket(ticketFor(identity), CLIENT_NONCE);
 
         assertThat(consumed).isEqualTo(identity);
     }
 
     @Test
     void consumeTicketThrowsWhenTicketWasAlreadyUsed() {
-        String ticket = oidcLoginService.issueTicket(identity());
-        oidcLoginService.consumeTicket(ticket);
+        String ticket = ticketFor(identity());
+        oidcLoginService.consumeTicket(ticket, CLIENT_NONCE);
 
-        assertThatThrownBy(() -> oidcLoginService.consumeTicket(ticket))
+        assertThatThrownBy(() -> oidcLoginService.consumeTicket(ticket, CLIENT_NONCE))
+                .isInstanceOf(OidcLoginException.class)
+                .hasFieldOrPropertyWithValue("code", "invalid_code");
+    }
+
+    @Test
+    void consumeTicketThrowsWhenTheTicketWasIssuedToAnotherBrowser() {
+        String ticket = ticketFor(identity());
+
+        assertThatThrownBy(() -> oidcLoginService.consumeTicket(ticket, "nonce-of-another-browser"))
+                .isInstanceOf(OidcLoginException.class)
+                .hasFieldOrPropertyWithValue("code", "invalid_code");
+
+        // A foreign attempt must not burn the ticket of the browser that started the login.
+        assertThat(oidcLoginService.consumeTicket(ticket, CLIENT_NONCE)).isEqualTo(identity());
+    }
+
+    @Test
+    void consumeTicketThrowsWhenNoClientNonceIsPresented() {
+        String ticket = ticketFor(identity());
+
+        assertThatThrownBy(() -> oidcLoginService.consumeTicket(ticket, null))
+                .isInstanceOf(OidcLoginException.class)
+                .hasFieldOrPropertyWithValue("code", "invalid_code");
+        assertThatThrownBy(() -> oidcLoginService.consumeTicket(ticket, ""))
                 .isInstanceOf(OidcLoginException.class)
                 .hasFieldOrPropertyWithValue("code", "invalid_code");
     }
 
     @Test
     void consumeTicketThrowsWhenTicketIsUnknown() {
-        assertThatThrownBy(() -> oidcLoginService.consumeTicket("never-issued"))
+        assertThatThrownBy(() -> oidcLoginService.consumeTicket("never-issued", CLIENT_NONCE))
                 .isInstanceOf(OidcLoginException.class)
                 .hasFieldOrPropertyWithValue("code", "invalid_code");
+    }
+
+    private String ticketFor(OidcIdentity identity) {
+        return oidcLoginService.issueTicket(identity, clientNonceHash());
+    }
+
+    private String clientNonceHash() {
+        return oidcLoginService.beginLogin(CLIENT_NONCE).state().clientNonceHash();
     }
 
     /** In-memory stand-in for the repository; the ticket lifecycle is what matters here. */

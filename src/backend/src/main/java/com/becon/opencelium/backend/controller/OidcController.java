@@ -55,14 +55,23 @@ public class OidcController {
         return ResponseEntity.ok(new OidcInfoDTO(properties.isEnabled(), properties.getDisplayName()));
     }
 
-    @Operation(summary = "Redirects the browser to the identity provider")
+    @Operation(summary = "Redirects the browser to the identity provider",
+            description = "'clientNonce' is generated and kept by the frontend; only its hash is stored, "
+                    + "so that the session can later be handed to that same browser only.")
     @GetMapping("/authorize")
-    public ResponseEntity<Void> authorize(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Void> authorize(@RequestParam String clientNonce,
+                                          HttpServletRequest request, HttpServletResponse response) {
         if (!properties.isEnabled()) {
             return ResponseEntity.notFound().build();
         }
 
-        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        OidcLoginService.Start start;
+        try {
+            start = oidcLoginService.beginLogin(clientNonce);
+        } catch (OidcLoginException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
         stateCookieService.write(response, start.state(), request.isSecure());
 
         return ResponseEntity.status(HttpStatus.FOUND)
@@ -91,7 +100,9 @@ public class OidcController {
         try {
             OidcIdentity identity = oidcLoginService.completeLogin(code, state, expected.orElse(null));
 
-            return redirectToFrontend("code", oidcLoginService.issueTicket(identity));
+            String clientNonceHash = expected.map(OidcAuthorizationState::clientNonceHash).orElse(null);
+
+            return redirectToFrontend("code", oidcLoginService.issueTicket(identity, clientNonceHash));
         } catch (OidcLoginException e) {
             return redirectToFrontend("error", e.getCode());
         }

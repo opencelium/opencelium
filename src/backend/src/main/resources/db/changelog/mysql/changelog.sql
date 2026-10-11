@@ -824,3 +824,11 @@ ALTER TABLE user
   ADD COLUMN IF NOT EXISTS oidc_issuer VARCHAR(255) DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS oidc_subject VARCHAR(255) DEFAULT NULL,
   ADD UNIQUE KEY uk_user_oidc_identity (oidc_issuer, oidc_subject);
+
+--changeset 5.1:7 stripComments:true splitStatements:true endDelimiter:;
+-- Binds a one-time ticket to the browser that started the login. The frontend sends a nonce to
+-- /oidc/authorize and only its hash is kept here, so /oidc/exchange can refuse a ticket that is
+-- presented by a browser which did not begin that login. Rows written before this migration carry
+-- NULL here and are refused as well.
+ALTER TABLE oidc_login_ticket
+  ADD COLUMN IF NOT EXISTS client_nonce_hash VARCHAR(64) DEFAULT NULL;

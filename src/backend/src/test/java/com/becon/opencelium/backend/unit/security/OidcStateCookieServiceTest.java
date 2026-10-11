@@ -96,7 +96,8 @@ class OidcStateCookieServiceTest {
 
     private OidcAuthorizationState stateExpiringIn(long millis) {
         return new OidcAuthorizationState("state-value", "nonce-value", "verifier-value",
-                "http://localhost:9090/oidc/callback", System.currentTimeMillis() + millis);
+                "http://localhost:9090/oidc/callback", "client-nonce-hash-value",
+                System.currentTimeMillis() + millis);
     }
 
     /** Writes the cookie and turns the emitted Set-Cookie header into a request that carries it. */

@@ -108,10 +108,11 @@ export const authHandlers = [
     // Mirrors /login: the session travels in the Authorization header, and an account whose email
     // starts with "2fa" gets a challenge instead.
     http.post('/oidc/exchange', async ({ request }) => {
-        const { code } = (await request.json()) as { code: string }
+        const { code, clientNonce } = (await request.json()) as { code: string; clientNonce?: string }
 
-        if (!code) {
-            return HttpResponse.json({ message: 'Invalid one-time code' }, { status: 403 })
+        // Mirrors the backend: the ticket is only spent by the browser that started the login.
+        if (!code || !clientNonce) {
+            return HttpResponse.json({ message: 'The one-time code was not issued to this browser' }, { status: 403 })
         }
 
         return new HttpResponse(null, {

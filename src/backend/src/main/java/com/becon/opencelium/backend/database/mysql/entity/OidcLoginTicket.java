@@ -21,7 +21,8 @@ import java.util.Date;
 /**
  * Single-use hand-off between the OIDC callback endpoint (browser navigation) and
  * /oidc/exchange (called by the frontend), which is where the JWT is issued. Keeps the
- * authorization code and the access token out of the browser.
+ * authorization code and the access token out of the browser, and carries the hash of the client
+ * nonce so that only the browser the ticket was issued to can spend it.
  */
 @Entity
 @Table(name = "oidc_login_ticket")
@@ -33,6 +34,9 @@ public class OidcLoginTicket {
 
     @Column(name = "identity", columnDefinition = "TEXT")
     private String identity;
+
+    @Column(name = "client_nonce_hash", length = 64)
+    private String clientNonceHash;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -61,6 +65,14 @@ public class OidcLoginTicket {
 
     public void setIdentity(String identity) {
         this.identity = identity;
+    }
+
+    public String getClientNonceHash() {
+        return clientNonceHash;
+    }
+
+    public void setClientNonceHash(String clientNonceHash) {
+        this.clientNonceHash = clientNonceHash;
     }
 
     public Date getCreatedAt() {
