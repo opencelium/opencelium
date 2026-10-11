@@ -231,13 +231,14 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             String roleName;
 
             if (userGroups.isEmpty()) {
-                logInfo("User is not a member of any group under group-search-base='" + properties.getGroupSearchBase() + "' with group-search-filter='" + properties.getGroupSearchFilter() + "'");
+                logInfo("User is not a member of any group under group-search-base='" + properties.getGroupSearchBase() + "' with group-search-filter='" + properties.getGroupSearchFilter() + "'", properties.isShowLogs());
 
                 roleName = properties.getDefaultRole();
             } else {
                 // The configured mapping decides the role, not the order in which the directory listed the groups.
                 roleName = GroupRoleResolver.resolveRole("LDAP", properties.getGroups(), userGroups,
-                        properties::getRoleByGroup, properties.getDefaultRole(), this::logInfo);
+                        properties::getRoleByGroup, properties.getDefaultRole(),
+                        message -> logInfo(message, properties.isShowLogs()));
             }
 
             UserRole role = userRoleService.findByName(roleName)
@@ -274,13 +275,14 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             String roleName;
 
             if (userGroups.isEmpty()) {
-                logInfo("User is not a member of any group of claim '" + oidcProperties.getGroupClaim() + "'");
+                logInfo("User is not a member of any group of claim '" + oidcProperties.getGroupClaim() + "'", oidcProperties.isShowLogs());
 
                 roleName = oidcProperties.getDefaultRole();
             } else {
                 // The configured mapping decides the role, not the order in which the identity provider listed the groups.
                 roleName = GroupRoleResolver.resolveRole("OIDC", oidcProperties.getGroups(), userGroups,
-                        oidcProperties::getRoleByGroup, oidcProperties.getDefaultRole(), this::logInfo);
+                        oidcProperties::getRoleByGroup, oidcProperties.getDefaultRole(),
+                        message -> logInfo(message, oidcProperties.isShowLogs()));
             }
 
             UserRole role = userRoleService.findByName(roleName)
@@ -298,15 +300,23 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         Session session = sessionService.replace(result.getId());
         result.setSession(session);
 
-        logInfo("User " + result.getPrincipal() + " is authenticated via " + authType);
-        logInfo("Role '" + result.getUserRole().getName() + "' has been assigned to " + result.getPrincipal());
+        // These messages concern the session, not one authenticator, so they follow the switch of the
+        // authenticator that handled the login: OIDC has its own, LDAP and the password login share the LDAP one.
+        String showLogs = principal instanceof OidcUserDetails ? oidcProperties.isShowLogs() : properties.isShowLogs();
+
+        logInfo("User " + result.getPrincipal() + " is authenticated via " + authType, showLogs);
+        logInfo("Role '" + result.getUserRole().getName() + "' has been assigned to " + result.getPrincipal(), showLogs);
 
         return result;
     }
 
 
-    private void logInfo(String message) {
-        if (properties.isShowLogs().equals("OFF") && oidcProperties.isShowLogs().equals("OFF")) {
+    /**
+     * Logs a message of the login currently being processed, gated by the switch of the authenticator
+     * that produced it, so that enabling the logs of one protocol does not enable those of the other.
+     */
+    private void logInfo(String message, String showLogs) {
+        if ("OFF".equals(showLogs)) {
             return;
         }
 
