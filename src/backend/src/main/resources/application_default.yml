@@ -165,6 +165,10 @@ spring:
   #                                                                    #
   ######################################################################
 #    oidc:
+#      # Behind a TLS terminating reverse proxy keep 'server.forward-headers-strategy' active (see the
+#      # top of this file, 'native' by default). Without the forwarded headers request.isSecure() is
+#      # false, so the state cookie goes out without the Secure flag and the browser is sent back to
+#      # an http:// redirect URI.
 #      # Activates single sign-on; while false the login page hides the SSO button
 #      enabled: false
 #      # Label of the SSO button on the login page
