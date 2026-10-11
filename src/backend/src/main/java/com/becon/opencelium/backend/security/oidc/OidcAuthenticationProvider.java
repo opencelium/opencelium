@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.security.oidc;
 
 import com.becon.opencelium.backend.configuration.OidcProperties;
-import com.becon.opencelium.backend.database.mysql.service.OidcLoginService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

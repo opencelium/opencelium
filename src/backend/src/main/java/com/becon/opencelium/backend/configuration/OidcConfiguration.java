@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.configuration;
 
-import com.becon.opencelium.backend.database.mysql.service.OidcLoginService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.security.oidc.OidcAuthenticationProvider;
+import com.becon.opencelium.backend.security.oidc.OidcLoginService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;

@@ -1,7 +1,4 @@
-package com.becon.opencelium.backend.database.mysql.service;
-
-import com.becon.opencelium.backend.security.oidc.OidcAuthorizationState;
-import com.becon.opencelium.backend.security.oidc.OidcIdentity;
+package com.becon.opencelium.backend.security.oidc;
 
 public interface OidcLoginService {
 

@@ -9,12 +9,12 @@
 package com.becon.opencelium.backend.unit.security;
 
 import com.becon.opencelium.backend.configuration.OidcProperties;
-import com.becon.opencelium.backend.database.mysql.service.OidcLoginService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.security.oidc.OidcAuthenticationProvider;
 import com.becon.opencelium.backend.security.oidc.OidcAuthenticationToken;
 import com.becon.opencelium.backend.security.oidc.OidcIdentity;
 import com.becon.opencelium.backend.security.oidc.OidcLoginException;
+import com.becon.opencelium.backend.security.oidc.OidcLoginService;
 import com.becon.opencelium.backend.security.oidc.OidcUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

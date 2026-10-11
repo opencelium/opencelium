@@ -9,12 +9,12 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.OidcProperties;
-import com.becon.opencelium.backend.database.mysql.service.OidcLoginService;
 import com.becon.opencelium.backend.resource.OidcConfigDTO;
 import com.becon.opencelium.backend.resource.OidcInfoDTO;
 import com.becon.opencelium.backend.security.oidc.OidcAuthorizationState;
 import com.becon.opencelium.backend.security.oidc.OidcIdentity;
 import com.becon.opencelium.backend.security.oidc.OidcLoginException;
+import com.becon.opencelium.backend.security.oidc.OidcLoginService;
 import com.becon.opencelium.backend.security.oidc.OidcStateCookieService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

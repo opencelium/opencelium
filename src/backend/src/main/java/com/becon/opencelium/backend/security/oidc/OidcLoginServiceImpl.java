@@ -1,11 +1,8 @@
-package com.becon.opencelium.backend.database.mysql.service;
+package com.becon.opencelium.backend.security.oidc;
 
 import com.becon.opencelium.backend.configuration.OidcProperties;
 import com.becon.opencelium.backend.database.mysql.entity.OidcLoginTicket;
 import com.becon.opencelium.backend.database.mysql.repository.OidcLoginTicketRepository;
-import com.becon.opencelium.backend.security.oidc.OidcAuthorizationState;
-import com.becon.opencelium.backend.security.oidc.OidcIdentity;
-import com.becon.opencelium.backend.security.oidc.OidcLoginException;
 import com.becon.opencelium.backend.utility.EmailUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
