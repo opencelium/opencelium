@@ -45,6 +45,9 @@ class OidcControllerTest {
 
     private static final String FRONTEND_REDIRECT = "http://localhost:5173/oidc/callback";
 
+    /** Fixed instant: a value derived from the clock would make two equal states differ occasionally. */
+    private static final long STATE_EXPIRES_AT = 1_800_000_000_000L;
+
     private final OidcLoginService oidcLoginService = mock(OidcLoginService.class);
     private final OidcStateCookieService stateCookieService = mock(OidcStateCookieService.class);
     private final OidcProperties properties = new OidcProperties();
@@ -147,8 +150,7 @@ class OidcControllerTest {
 
     private OidcAuthorizationState state() {
         return new OidcAuthorizationState("state-value", "nonce-value", "verifier-value",
-                "http://localhost:9090/oidc/callback", "client-nonce-hash-value",
-                System.currentTimeMillis() + 60_000);
+                "http://localhost:9090/oidc/callback", "client-nonce-hash-value", STATE_EXPIRES_AT);
     }
 
     private OidcIdentity identity() {
