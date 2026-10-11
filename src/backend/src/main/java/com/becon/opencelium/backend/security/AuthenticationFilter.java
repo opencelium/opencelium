@@ -69,7 +69,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.websocket.constant.SocketConstant.USER_SESSION_DESTINATION;
@@ -225,28 +225,19 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             });
 
             Collection<? extends GrantedAuthority> authorities = ldapUserDetails.getAuthorities();
+            Set<String> userGroups = authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toSet());
             String roleName;
 
-            if (authorities.isEmpty()) {
+            if (userGroups.isEmpty()) {
                 logInfo("User is not a member of any group under group-search-base='" + properties.getGroupSearchBase() + "' with group-search-filter='" + properties.getGroupSearchFilter() + "'");
 
                 roleName = properties.getDefaultRole();
             } else {
-                List<String> groups = properties.getGroups();
-
-                roleName = authorities.stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .filter(groupDN -> {
-                            if (groups.contains(groupDN)) {
-                                logInfo("Match found for LDAP group = '" + groupDN + "'");
-                                return true;
-                            }
-                            logInfo("No match found for LDAP group = '" + groupDN + "' in OC mappings " + groups.stream().collect(Collectors.joining("; ", "[", "]")));
-                            return false;
-                        })
-                        .map(properties::getRoleByGroup)
-                        .findFirst()
-                        .orElse(properties.getDefaultRole());
+                // The configured mapping decides the role, not the order in which the directory listed the groups.
+                roleName = GroupRoleResolver.resolveRole("LDAP", properties.getGroups(), userGroups,
+                        properties::getRoleByGroup, properties.getDefaultRole(), this::logInfo);
             }
 
             UserRole role = userRoleService.findByName(roleName)
@@ -277,28 +268,19 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             });
 
             Collection<? extends GrantedAuthority> authorities = oidcUserDetails.getAuthorities();
+            Set<String> userGroups = authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toSet());
             String roleName;
 
-            if (authorities.isEmpty()) {
+            if (userGroups.isEmpty()) {
                 logInfo("User is not a member of any group of claim '" + oidcProperties.getGroupClaim() + "'");
 
                 roleName = oidcProperties.getDefaultRole();
             } else {
-                List<String> groups = oidcProperties.getGroups();
-
-                roleName = authorities.stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .filter(group -> {
-                            if (groups.contains(group)) {
-                                logInfo("Match found for OIDC group = '" + group + "'");
-                                return true;
-                            }
-                            logInfo("No match found for OIDC group = '" + group + "' in OC mappings " + groups.stream().collect(Collectors.joining("; ", "[", "]")));
-                            return false;
-                        })
-                        .map(oidcProperties::getRoleByGroup)
-                        .findFirst()
-                        .orElse(oidcProperties.getDefaultRole());
+                // The configured mapping decides the role, not the order in which the identity provider listed the groups.
+                roleName = GroupRoleResolver.resolveRole("OIDC", oidcProperties.getGroups(), userGroups,
+                        oidcProperties::getRoleByGroup, oidcProperties.getDefaultRole(), this::logInfo);
             }
 
             UserRole role = userRoleService.findByName(roleName)
