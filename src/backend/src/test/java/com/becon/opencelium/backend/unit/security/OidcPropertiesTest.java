@@ -13,11 +13,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 /**
@@ -30,15 +28,14 @@ class OidcPropertiesTest {
     void getRoleByGroupReturnsMappedRoleWhenGroupIsMapped() {
         OidcProperties properties = propertiesWith(mapping("oc-admins", "Admin"));
 
-        assertThat(properties.getRoleByGroup("oc-admins")).isEqualTo("Admin");
+        assertThat(properties.getRoleByGroup("oc-admins")).contains("Admin");
     }
 
     @Test
-    void getRoleByGroupThrowsWhenGroupIsNotMapped() {
+    void getRoleByGroupReturnsEmptyWhenGroupIsNotMapped() {
         OidcProperties properties = propertiesWith(mapping("oc-admins", "Admin"));
 
-        assertThatThrownBy(() -> properties.getRoleByGroup("oc-unknown"))
-                .isInstanceOf(NoSuchElementException.class);
+        assertThat(properties.getRoleByGroup("oc-unknown")).isEmpty();
     }
 
     @Test

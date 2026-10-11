@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @ConfigurationProperties(prefix = "spring.security.oidc")
 public class OidcProperties {
@@ -51,12 +52,12 @@ public class OidcProperties {
     @Value("${logging.level.org.springframework.security.oauth2:OFF}")
     private String showLogs;
 
-    public String getRoleByGroup(String group) {
+    /** Role configured for a group, empty when the group is not part of the mapping. */
+    public Optional<String> getRoleByGroup(String group) {
         return groupRoleMapping.stream()
                 .filter(mapping -> Objects.equals(group, mapping.group))
                 .map(Group2Role::getOcRole)
-                .findFirst()
-                .orElseThrow();
+                .findFirst();
     }
 
     /**

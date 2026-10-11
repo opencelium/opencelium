@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,7 +66,7 @@ class GroupRoleResolverTest {
         List<String> log = new ArrayList<>();
 
         String role = GroupRoleResolver.resolveRole("OIDC", List.of("oc-admins", "oc-users"), Set.of("oc-users"),
-                ROLES::get, "User", log::add);
+                roleFor(ROLES), "User", log::add);
 
         assertThat(role).isEqualTo("User");
         assertThat(log).containsExactly(
@@ -74,8 +75,12 @@ class GroupRoleResolverTest {
     }
 
     private String resolve(List<String> mappedGroups, Set<String> userGroups) {
-        return GroupRoleResolver.resolveRole("OIDC", mappedGroups, userGroups, ROLES::get, "User", message -> {
+        return GroupRoleResolver.resolveRole("OIDC", mappedGroups, userGroups, roleFor(ROLES), "User", message -> {
         });
+    }
+
+    private static java.util.function.Function<String, Optional<String>> roleFor(Map<String, String> roles) {
+        return group -> Optional.ofNullable(roles.get(group));
     }
 
     private Set<String> groups(String... groups) {
