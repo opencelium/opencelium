@@ -83,6 +83,18 @@ class OidcLoginServiceImplTest {
     /** 'email_verified' of the ID token, null to leave the claim out altogether. */
     private static Object emailVerifiedClaim;
 
+    /** Everything the fake identity provider answers on /userinfo, unless a test overrides it. */
+    private static final String DEFAULT_USER_INFO = """
+            {
+              "sub": "subject-1",
+              "email": "alice@example.com",
+              "groups": ["oc-admins"],
+              "department": "Platform"
+            }
+            """;
+
+    private static String userInfoJson = DEFAULT_USER_INFO;
+
     private OidcLoginServiceImpl oidcLoginService;
     private OidcProperties properties;
     private final Map<String, OidcLoginTicket> tickets = new HashMap<>();
@@ -112,6 +124,7 @@ class OidcLoginServiceImplTest {
     @BeforeEach
     void setUp() {
         emailVerifiedClaim = Boolean.TRUE;
+        userInfoJson = DEFAULT_USER_INFO;
 
         properties = new OidcProperties();
         properties.setEnabled(true);
@@ -203,6 +216,42 @@ class OidcLoginServiceImplTest {
         OidcIdentity identity = oidcLoginService.completeLogin("auth-code", start.state().state(), start.state());
 
         assertThat(identity.email()).isEqualTo("alice@example.com");
+    }
+
+    @Test
+    void completeLoginIgnoresUserInfoWhenItDescribesAnotherSubject() {
+        userInfoJson = """
+                {
+                  "sub": "someone-else",
+                  "department": "Platform"
+                }
+                """;
+        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        nonceToEcho = start.state().nonce();
+
+        OidcIdentity identity = oidcLoginService.completeLogin("auth-code", start.state().state(), start.state());
+
+        assertThat(identity.subject()).isEqualTo("subject-1");
+        assertThat(identity.claims()).doesNotContainKey("department");
+    }
+
+    @Test
+    void completeLoginKeepsTheIdTokenClaimsWhenUserInfoRepeatsThem() {
+        userInfoJson = """
+                {
+                  "sub": "subject-1",
+                  "email": "mallory@example.com",
+                  "groups": ["oc-users"]
+                }
+                """;
+        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        nonceToEcho = start.state().nonce();
+
+        OidcIdentity identity = oidcLoginService.completeLogin("auth-code", start.state().state(), start.state());
+
+        // The ID token was validated, the UserInfo response was not, so the token wins.
+        assertThat(identity.email()).isEqualTo("alice@example.com");
+        assertThat(identity.groups()).containsExactly("oc-admins");
     }
 
     @Test
@@ -334,13 +383,7 @@ class OidcLoginServiceImplTest {
             return;
         }
 
-        respondJson(exchange, """
-                {
-                  "email": "alice@example.com",
-                  "groups": ["oc-admins"],
-                  "department": "Platform"
-                }
-                """);
+        respondJson(exchange, userInfoJson);
     }
 
     private static String signedIdToken() throws Exception {

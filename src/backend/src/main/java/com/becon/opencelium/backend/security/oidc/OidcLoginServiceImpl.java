@@ -6,6 +6,8 @@ import com.becon.opencelium.backend.database.mysql.repository.OidcLoginTicketRep
 import com.becon.opencelium.backend.utility.EmailUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -56,6 +58,9 @@ public class OidcLoginServiceImpl implements OidcLoginService {
 
     private static final String CLAIM_EMAIL_VERIFIED = "email_verified";
     private static final String CLAIM_ISSUER = "iss";
+    private static final String CLAIM_SUBJECT = "sub";
+
+    private static final Logger logger = LoggerFactory.getLogger(OidcLoginServiceImpl.class);
 
     private final OidcProperties properties;
     private final ClientRegistrationRepository clientRegistrationRepository;
@@ -155,7 +160,17 @@ public class OidcLoginServiceImpl implements OidcLoginService {
         Map<String, Object> claims = new LinkedHashMap<>(idToken.getClaims());
         String userInfoUri = userInfoUri(registration);
         if (StringUtils.hasText(userInfoUri)) {
-            claims.putAll(fetchUserInfo(userInfoUri, tokenResponse.getAccessToken()));
+            Map<String, Object> userInfo = fetchUserInfo(userInfoUri, tokenResponse.getAccessToken());
+
+            // OIDC Core 5.3.2: the UserInfo response belongs to the subject of the ID token, otherwise
+            // it must not be used at all. The ID token is the validated source, so UserInfo only fills
+            // in what the token does not carry already - it never overwrites a validated claim.
+            if (Objects.equals(idToken.getSubject(), asString(userInfo.get(CLAIM_SUBJECT)))) {
+                userInfo.forEach(claims::putIfAbsent);
+            } else {
+                logger.warn("Ignoring the UserInfo response: it describes subject '{}', but the ID token belongs to '{}'.",
+                        userInfo.get(CLAIM_SUBJECT), idToken.getSubject());
+            }
         }
 
         String email = asString(claims.get(properties.getEmailClaim()));
