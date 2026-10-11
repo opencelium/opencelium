@@ -41,6 +41,12 @@
     "jitProvisioning": {
       "label": "JIT provisioning"
     },
+    "requireVerifiedEmail": {
+      "label": "Require verified email"
+    },
+    "weakMatching": {
+      "label": "Weak matching by email"
+    },
     "groupRoleMapping": {
       "label": "Group role mapping"
     }

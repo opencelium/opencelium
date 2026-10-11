@@ -193,6 +193,13 @@ spring:
 #      group-claim: groups
 #      # Creates users that do not exist in OpenCelium yet
 #      jit-provisioning: true
+#      # Requires the identity provider to confirm the email_verified claim, because the email address
+#      # decides which account a login lands on
+#      require-verified-email: true
+#      # Links an existing account with the same verified email to an identity the account is not
+#      # linked to yet. Only meant for switching the identity provider, because a moved account keeps
+#      # its email but gets a new subject
+#      weak-matching: false
 #      # Maps groups of the identity provider to roles of the application
 #      group-role-mapping:
 #        - group: oc-admins

@@ -80,6 +80,9 @@ class OidcLoginServiceImplTest {
     private static RSAKey signingKey;
     private static String nonceToEcho;
 
+    /** 'email_verified' of the ID token, null to leave the claim out altogether. */
+    private static Object emailVerifiedClaim;
+
     private OidcLoginServiceImpl oidcLoginService;
     private OidcProperties properties;
     private final Map<String, OidcLoginTicket> tickets = new HashMap<>();
@@ -108,6 +111,8 @@ class OidcLoginServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        emailVerifiedClaim = Boolean.TRUE;
+
         properties = new OidcProperties();
         properties.setEnabled(true);
         properties.setIssuerUri(issuer);
@@ -161,8 +166,43 @@ class OidcLoginServiceImplTest {
 
         assertThat(identity.email()).isEqualTo("alice@example.com");
         assertThat(identity.subject()).isEqualTo("subject-1");
+        assertThat(identity.issuer()).isEqualTo(issuer);
         assertThat(identity.groups()).containsExactly("oc-admins");
         assertThat(identity.claims()).containsEntry("department", "Platform");
+    }
+
+    @Test
+    void completeLoginThrowsWhenTheIdentityProviderReportsTheEmailAsUnverified() {
+        emailVerifiedClaim = Boolean.FALSE;
+        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        nonceToEcho = start.state().nonce();
+
+        assertThatThrownBy(() -> oidcLoginService.completeLogin("auth-code", start.state().state(), start.state()))
+                .isInstanceOf(OidcLoginException.class)
+                .hasFieldOrPropertyWithValue("code", "email_not_verified");
+    }
+
+    @Test
+    void completeLoginThrowsWhenTheIdentityProviderDoesNotConfirmTheEmail() {
+        emailVerifiedClaim = null;
+        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        nonceToEcho = start.state().nonce();
+
+        assertThatThrownBy(() -> oidcLoginService.completeLogin("auth-code", start.state().state(), start.state()))
+                .isInstanceOf(OidcLoginException.class)
+                .hasFieldOrPropertyWithValue("code", "email_not_verified");
+    }
+
+    @Test
+    void completeLoginAcceptsAnUnconfirmedEmailWhenTheRequirementIsSwitchedOff() {
+        properties.setRequireVerifiedEmail(false);
+        emailVerifiedClaim = null;
+        OidcLoginService.Start start = oidcLoginService.beginLogin();
+        nonceToEcho = start.state().nonce();
+
+        OidcIdentity identity = oidcLoginService.completeLogin("auth-code", start.state().state(), start.state());
+
+        assertThat(identity.email()).isEqualTo("alice@example.com");
     }
 
     @Test
@@ -246,7 +286,7 @@ class OidcLoginServiceImplTest {
     }
 
     private OidcIdentity identity() {
-        return new OidcIdentity("subject-1", "alice@example.com", List.of("oc-admins"),
+        return new OidcIdentity(issuer, "subject-1", "alice@example.com", List.of("oc-admins"),
                 Map.of("email", "alice@example.com"));
     }
 
@@ -304,7 +344,7 @@ class OidcLoginServiceImplTest {
     }
 
     private static String signedIdToken() throws Exception {
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+        JWTClaimsSet.Builder claims = new JWTClaimsSet.Builder()
                 .issuer(issuer)
                 .audience(CLIENT_ID)
                 .subject("subject-1")
@@ -312,10 +352,13 @@ class OidcLoginServiceImplTest {
                 .claim("groups", List.of("oc-admins"))
                 .claim("nonce", nonceToEcho)
                 .issueTime(new Date())
-                .expirationTime(Date.from(Instant.now().plusSeconds(300)))
-                .build();
+                .expirationTime(Date.from(Instant.now().plusSeconds(300)));
 
-        SignedJWT idToken = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claims);
+        if (emailVerifiedClaim != null) {
+            claims.claim("email_verified", emailVerifiedClaim);
+        }
+
+        SignedJWT idToken = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claims.build());
         idToken.sign(new RSASSASigner(signingKey));
 
         return idToken.serialize();

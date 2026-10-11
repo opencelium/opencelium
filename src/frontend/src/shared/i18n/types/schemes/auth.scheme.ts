@@ -79,6 +79,8 @@ export interface AuthSchema {
             errors: {
                 failed: string
                 notProvisioned: string
+                accountNotLinked: string
+                emailNotVerified: string
                 accessDenied: string
             }
         }

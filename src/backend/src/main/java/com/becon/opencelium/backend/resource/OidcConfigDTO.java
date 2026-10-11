@@ -11,6 +11,6 @@ import java.util.List;
 public record OidcConfigDTO(boolean enabled, String displayName, String issuerUri, String clientId,
                             boolean clientSecretConfigured, List<String> scopes, String redirectUri,
                             String frontendRedirectUri, String userInfoUri, String emailClaim, String groupClaim,
-                            String defaultRole, boolean jitProvisioning,
-                            List<OidcProperties.Group2Role> groupRoleMapping) {
+                            String defaultRole, boolean jitProvisioning, boolean requireVerifiedEmail,
+                            boolean weakMatching, List<OidcProperties.Group2Role> groupRoleMapping) {
 }

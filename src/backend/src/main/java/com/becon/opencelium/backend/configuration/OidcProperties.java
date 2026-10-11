@@ -28,6 +28,20 @@ public class OidcProperties {
     private String groupClaim = "groups";
     private String defaultRole;
     private boolean jitProvisioning = true;
+    /**
+     * Requires the identity provider to confirm the 'email_verified' claim. The email decides which
+     * account a login lands on - it becomes the username of a provisioned account and it is the
+     * fallback link of the weak matching mode - so an unconfirmed address must not be trusted.
+     */
+    private boolean requireVerifiedEmail = true;
+    /**
+     * Opt-in fallback for identity provider migrations, where a moved account keeps its email but
+     * gets a new subject: an existing account with the same email is then used and re-linked to the
+     * identity that just reported it. Off by default, because it lets an identity provider take over
+     * an account by claiming its email address. The account is only ever found by email while this
+     * is on and while the email is verified.
+     */
+    private boolean weakMatching = false;
     private List<Group2Role> groupRoleMapping = new ArrayList<>();
     private int timeout = 10000; // in milliseconds
     private int stateActivityTime = 300; // in seconds, lifetime of the authorization request
@@ -175,6 +189,22 @@ public class OidcProperties {
 
     public void setJitProvisioning(boolean jitProvisioning) {
         this.jitProvisioning = jitProvisioning;
+    }
+
+    public boolean isRequireVerifiedEmail() {
+        return requireVerifiedEmail;
+    }
+
+    public void setRequireVerifiedEmail(boolean requireVerifiedEmail) {
+        this.requireVerifiedEmail = requireVerifiedEmail;
+    }
+
+    public boolean isWeakMatching() {
+        return weakMatching;
+    }
+
+    public void setWeakMatching(boolean weakMatching) {
+        this.weakMatching = weakMatching;
     }
 
     public List<Group2Role> getGroupRoleMapping() {

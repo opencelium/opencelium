@@ -54,6 +54,9 @@ public class OidcLoginServiceImpl implements OidcLoginService {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
+    private static final String CLAIM_EMAIL_VERIFIED = "email_verified";
+    private static final String CLAIM_ISSUER = "iss";
+
     private final OidcProperties properties;
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> tokenResponseClient;
@@ -161,7 +164,13 @@ public class OidcLoginServiceImpl implements OidcLoginService {
                     "The identity provider did not return a valid '" + properties.getEmailClaim() + "' claim.");
         }
 
-        return new OidcIdentity(idToken.getSubject(), email, asGroups(claims.get(properties.getGroupClaim())), claims);
+        if (properties.isRequireVerifiedEmail() && !isTrue(claims.get(CLAIM_EMAIL_VERIFIED))) {
+            throw new OidcLoginException("email_not_verified",
+                    "The identity provider did not confirm '" + CLAIM_EMAIL_VERIFIED + "' for this email address.");
+        }
+
+        return new OidcIdentity(issuer(idToken), idToken.getSubject(), email,
+                asGroups(claims.get(properties.getGroupClaim())), claims);
     }
 
     @Override
@@ -273,6 +282,31 @@ public class OidcLoginServiceImpl implements OidcLoginService {
         } catch (Exception e) {
             throw new IllegalStateException("Cannot compute the PKCE code challenge", e);
         }
+    }
+
+    /**
+     * Issuer the account gets linked to. The configured issuer wins, because that is the value the
+     * ID token was validated against; the 'iss' claim is only used when the endpoints are given
+     * manually instead of through discovery.
+     */
+    private String issuer(Jwt idToken) {
+        if (StringUtils.hasText(properties.getIssuerUri())) {
+            return properties.getIssuerUri();
+        }
+
+        String issuer = idToken.getClaimAsString(CLAIM_ISSUER);
+        if (!StringUtils.hasText(issuer)) {
+            throw new OidcLoginException("invalid_token",
+                    "The ID token carries no '" + CLAIM_ISSUER + "' claim and no issuer-uri is configured.");
+        }
+
+        return issuer;
+    }
+
+    /** Providers are not consistent here: some send 'email_verified' as a string. */
+    private boolean isTrue(Object value) {
+        return Boolean.TRUE.equals(value)
+                || (value instanceof String text && Boolean.parseBoolean(text.trim()));
     }
 
     private String asString(Object value) {

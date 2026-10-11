@@ -114,6 +114,8 @@ public class OidcController {
                 properties.getGroupClaim(),
                 properties.getDefaultRole(),
                 properties.isJitProvisioning(),
+                properties.isRequireVerifiedEmail(),
+                properties.isWeakMatching(),
                 properties.getGroupRoleMapping());
 
         return ResponseEntity.ok(result);

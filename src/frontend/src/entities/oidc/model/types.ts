@@ -22,5 +22,7 @@ export type OidcConfig = {
     groupClaim: string
     defaultRole: string | null
     jitProvisioning: boolean
+    requireVerifiedEmail: boolean
+    weakMatching: boolean
     groupRoleMapping: OidcGroupMapping[]
 }

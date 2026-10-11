@@ -17,6 +17,8 @@ type AuthKey = Parameters<ReturnType<typeof useI18n<'auth'>>['t']>[0]
 /** Error codes the backend appends to the frontend redirect that deserve their own message. */
 const ERROR_KEYS: Record<string, AuthKey> = {
     user_not_provisioned: 'oidc.errors.notProvisioned',
+    account_not_linked: 'oidc.errors.accountNotLinked',
+    email_not_verified: 'oidc.errors.emailNotVerified',
     access_denied: 'oidc.errors.accessDenied',
 }
 

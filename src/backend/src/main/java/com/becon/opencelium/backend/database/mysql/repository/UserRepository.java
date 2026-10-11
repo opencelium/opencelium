@@ -31,6 +31,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByOidcIssuerAndOidcSubject(String oidcIssuer, String oidcSubject);
+
     Optional<User> findByUsernameAndAuthMethod(String username, AuthMethod authMethod);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

@@ -99,6 +99,8 @@ export const authHandlers = [
             groupClaim: 'groups',
             defaultRole: 'User',
             jitProvisioning: true,
+            requireVerifiedEmail: true,
+            weakMatching: false,
             groupRoleMapping: [{ group: 'oc-admins', ocRole: 'Admin' }],
         })
     }),

@@ -55,6 +55,8 @@ export function OidcConfigPage() {
         { label: t('oidc.fields.groupClaim.label'), value: data.groupClaim },
         { label: t('oidc.fields.defaultRole.label'), value: optionally(data.defaultRole) },
         { label: t('oidc.fields.jitProvisioning.label'), value: onOff(data.jitProvisioning) },
+        { label: t('oidc.fields.requireVerifiedEmail.label'), value: onOff(data.requireVerifiedEmail) },
+        { label: t('oidc.fields.weakMatching.label'), value: onOff(data.weakMatching) },
         { label: t('oidc.fields.groupRoleMapping.label'), value: formatGroupMapping(data, t) },
     ]
 

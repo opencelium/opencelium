@@ -814,3 +814,13 @@ CREATE TABLE IF NOT EXISTS `oidc_login_ticket` (
     `used_at`    TIMESTAMP NULL DEFAULT NULL,
     PRIMARY KEY (`ticket`)
 );
+
+--changeset 5.1:6 stripComments:true splitStatements:true endDelimiter:;
+-- Links an account to the identity it authenticates with at its identity provider. A login is
+-- matched against this pair, so that nobody can take over an account by claiming its email address
+-- at the provider - the email fallback is opt-in, see 'weak-matching'. Both columns stay NULL for
+-- BASIC and LDAP accounts, and the unique key tolerates that because NULLs count as distinct.
+ALTER TABLE user
+  ADD COLUMN IF NOT EXISTS oidc_issuer VARCHAR(255) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS oidc_subject VARCHAR(255) DEFAULT NULL,
+  ADD UNIQUE KEY uk_user_oidc_identity (oidc_issuer, oidc_subject);

@@ -41,6 +41,12 @@
     "jitProvisioning": {
       "label": "JIT-Bereitstellung"
     },
+    "requireVerifiedEmail": {
+      "label": "Bestätigte E-Mail-Adresse verlangen"
+    },
+    "weakMatching": {
+      "label": "Schwache Zuordnung über die E-Mail-Adresse"
+    },
     "groupRoleMapping": {
       "label": "Gruppen-Rollen-Zuordnung"
     }

@@ -9,6 +9,7 @@
 package com.becon.opencelium.backend.unit.security;
 
 import com.becon.opencelium.backend.configuration.OidcProperties;
+import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.security.oidc.OidcAuthenticationProvider;
 import com.becon.opencelium.backend.security.oidc.OidcAuthenticationToken;
@@ -25,9 +26,12 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -38,6 +42,9 @@ import static org.mockito.Mockito.when;
  */
 @DisplayName("OidcAuthenticationProvider — ticket to authentication")
 class OidcAuthenticationProviderTest {
+
+    private static final String ISSUER = "https://idp.example.com";
+    private static final String EMAIL = "alice@example.com";
 
     private final OidcLoginService oidcLoginService = mock(OidcLoginService.class);
     private final UserService userService = mock(UserService.class);
@@ -61,16 +68,71 @@ class OidcAuthenticationProviderTest {
     }
 
     @Test
-    void authenticateReturnsIdentityWithGroupAuthoritiesWhenTicketIsValid() {
+    void authenticateReturnsTheLinkedAccountWithGroupAuthorities() {
+        User linked = user(7, EMAIL);
         when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
+        when(userService.findByOidcIdentity(ISSUER, "subject-1")).thenReturn(Optional.of(linked));
 
-        Authentication authentication = provider.authenticate(new OidcAuthenticationToken("ticket-value"));
+        OidcUserDetails principal = principalOf(provider.authenticate(new OidcAuthenticationToken("ticket-value")));
 
-        assertThat(authentication.getPrincipal()).isInstanceOf(OidcUserDetails.class);
-        assertThat(((OidcUserDetails) authentication.getPrincipal()).getEmail()).isEqualTo("alice@example.com");
-        assertThat(authentication.getAuthorities())
+        assertThat(principal.getUser()).isSameAs(linked);
+        assertThat(principal.getEmail()).isEqualTo(EMAIL);
+        assertThat(principal.getAuthorities())
                 .extracting(GrantedAuthority::getAuthority)
                 .containsExactly("oc-admins");
+        // The email is only ever consulted when nothing is linked to the identity.
+        verify(userService, never()).findByEmail(anyString());
+    }
+
+    @Test
+    void authenticateRelinksAnAccountByEmailWhenWeakMatchingIsEnabled() {
+        properties.setWeakMatching(true);
+        User moved = user(7, EMAIL);
+        moved.setOidcIssuer("https://old-idp.example.com");
+        moved.setOidcSubject("old-subject");
+        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
+        when(userService.findByEmail(EMAIL)).thenReturn(Optional.of(moved));
+
+        OidcUserDetails principal = principalOf(provider.authenticate(new OidcAuthenticationToken("ticket-value")));
+
+        assertThat(principal.getUser()).isSameAs(moved);
+        assertThat(moved.getOidcIssuer()).isEqualTo(ISSUER);
+        assertThat(moved.getOidcSubject()).isEqualTo("subject-1");
+    }
+
+    @Test
+    void authenticateThrowsWhenTheAccountExistsButIsNotLinkedAndWeakMatchingIsOff() {
+        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
+        when(userService.findByEmail(EMAIL)).thenReturn(Optional.of(user(7, EMAIL)));
+
+        assertThatThrownBy(() -> provider.authenticate(new OidcAuthenticationToken("ticket-value")))
+                .isInstanceOf(OidcLoginException.class)
+                .hasFieldOrPropertyWithValue("code", "account_not_linked");
+    }
+
+    @Test
+    void authenticateReturnsNoAccountWhenNothingIsLinkedAndJitProvisioningIsEnabled() {
+        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
+        when(userService.findByOidcIdentity(ISSUER, "subject-1")).thenReturn(Optional.empty());
+        when(userService.findByEmail(EMAIL)).thenReturn(Optional.empty());
+
+        OidcUserDetails principal = principalOf(provider.authenticate(new OidcAuthenticationToken("ticket-value")));
+
+        // No account: AuthenticationFilter provisions one.
+        assertThat(principal.getUser()).isNull();
+        verify(userService, never()).save(any());
+    }
+
+    @Test
+    void authenticateThrowsWhenUserIsUnknownAndJitProvisioningIsDisabled() {
+        properties.setJitProvisioning(false);
+        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
+        when(userService.findByOidcIdentity(ISSUER, "subject-1")).thenReturn(Optional.empty());
+        when(userService.findByEmail(EMAIL)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> provider.authenticate(new OidcAuthenticationToken("ticket-value")))
+                .isInstanceOf(OidcLoginException.class)
+                .hasFieldOrPropertyWithValue("code", "user_not_provisioned");
     }
 
     @Test
@@ -82,30 +144,21 @@ class OidcAuthenticationProviderTest {
                 .isInstanceOf(OidcLoginException.class);
     }
 
-    @Test
-    void authenticateThrowsWhenUserIsUnknownAndJitProvisioningIsDisabled() {
-        properties.setJitProvisioning(false);
-        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
-        when(userService.existsByEmail("alice@example.com")).thenReturn(false);
-
-        assertThatThrownBy(() -> provider.authenticate(new OidcAuthenticationToken("ticket-value")))
-                .isInstanceOf(OidcLoginException.class)
-                .hasFieldOrPropertyWithValue("code", "user_not_provisioned");
-    }
-
-    @Test
-    void authenticateReturnsIdentityWhenUserIsUnknownButJitProvisioningIsEnabled() {
-        when(oidcLoginService.consumeTicket("ticket-value")).thenReturn(identity());
-        when(userService.existsByEmail("alice@example.com")).thenReturn(false);
-
-        Authentication authentication = provider.authenticate(new OidcAuthenticationToken("ticket-value"));
-
+    private OidcUserDetails principalOf(Authentication authentication) {
         assertThat(authentication.getPrincipal()).isInstanceOf(OidcUserDetails.class);
-        verify(userService, never()).save(org.mockito.ArgumentMatchers.any());
+
+        return (OidcUserDetails) authentication.getPrincipal();
     }
 
     private OidcIdentity identity() {
-        return new OidcIdentity("subject-1", "alice@example.com", List.of("oc-admins"),
-                Map.of("email", "alice@example.com"));
+        return new OidcIdentity(ISSUER, "subject-1", EMAIL, List.of("oc-admins"), Map.of("email", EMAIL));
+    }
+
+    private User user(int id, String email) {
+        User user = new User();
+        user.setId(id);
+        user.setEmail(email);
+
+        return user;
     }
 }

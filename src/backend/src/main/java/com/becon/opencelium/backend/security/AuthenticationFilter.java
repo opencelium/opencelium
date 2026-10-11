@@ -38,6 +38,7 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.resource.user.TotpResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.security.oidc.OidcIdentity;
 import com.becon.opencelium.backend.security.oidc.OidcUserDetails;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
@@ -248,25 +249,26 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             result = userService.save(user);
             authType = "LDAP server";
         } else if (principal instanceof OidcUserDetails oidcUserDetails) {
-            String email = oidcUserDetails.getEmail();
+            OidcIdentity identity = oidcUserDetails.getIdentity();
+            User user = oidcUserDetails.getUser();
 
-            User user = userService.findByEmail(email).orElseGet(() -> {
-                User newUser = new User();
-
-                newUser.setEmail(email);
-                newUser.setUsername(email);
-                newUser.setAuthMethod(AuthMethod.OIDC);
+            if (user == null) {
+                // The provider matched the identity to no account and allowed provisioning.
+                user = new User();
+                user.setEmail(identity.email());
+                user.setUsername(identity.email());
+                user.setAuthMethod(AuthMethod.OIDC);
+                user.setOidcIssuer(identity.issuer());
+                user.setOidcSubject(identity.subject());
 
                 // create details for new user
                 UserDetail userDetail = new UserDetail();
                 userDetail.setLang(languageService.getDefault());
                 userDetail.setTutorial(false);
-                userDetail.setUser(newUser);
+                userDetail.setUser(user);
 
-                newUser.setUserDetail(userDetail);
-
-                return newUser;
-            });
+                user.setUserDetail(userDetail);
+            }
 
             Collection<? extends GrantedAuthority> authorities = oidcUserDetails.getAuthorities();
             Set<String> userGroups = authorities.stream()
