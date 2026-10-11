@@ -191,7 +191,7 @@ public class OidcLoginServiceImpl implements OidcLoginService {
         }
 
         return new OidcIdentity(issuer(idToken), idToken.getSubject(), email,
-                asGroups(claims.get(properties.getGroupClaim())), claims);
+                asGroups(claims.get(properties.getGroupClaim())));
     }
 
     @Override

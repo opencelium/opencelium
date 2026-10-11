@@ -83,6 +83,9 @@ class OidcLoginServiceImplTest {
     private static RSAKey signingKey;
     private static String nonceToEcho;
 
+    /** 'groups' of the ID token; empty leaves the claim out so the UserInfo response has to supply it. */
+    private static List<String> idTokenGroups;
+
     /** 'email_verified' of the ID token, null to leave the claim out altogether. */
     private static Object emailVerifiedClaim;
 
@@ -127,6 +130,7 @@ class OidcLoginServiceImplTest {
     @BeforeEach
     void setUp() {
         emailVerifiedClaim = Boolean.TRUE;
+        idTokenGroups = List.of("oc-admins");
         userInfoJson = DEFAULT_USER_INFO;
 
         properties = new OidcProperties();
@@ -185,7 +189,6 @@ class OidcLoginServiceImplTest {
         assertThat(identity.subject()).isEqualTo("subject-1");
         assertThat(identity.issuer()).isEqualTo(issuer);
         assertThat(identity.groups()).containsExactly("oc-admins");
-        assertThat(identity.claims()).containsEntry("department", "Platform");
     }
 
     @Test
@@ -223,11 +226,23 @@ class OidcLoginServiceImplTest {
     }
 
     @Test
+    void completeLoginTakesTheGroupsThatOnlyTheUserInfoResponseCarries() {
+        idTokenGroups = List.of();
+        OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
+        nonceToEcho = start.state().nonce();
+
+        OidcIdentity identity = oidcLoginService.completeLogin("auth-code", start.state().state(), start.state());
+
+        assertThat(identity.groups()).containsExactly("oc-admins");
+    }
+
+    @Test
     void completeLoginIgnoresUserInfoWhenItDescribesAnotherSubject() {
+        idTokenGroups = List.of();
         userInfoJson = """
                 {
                   "sub": "someone-else",
-                  "department": "Platform"
+                  "groups": ["oc-admins"]
                 }
                 """;
         OidcLoginService.Start start = oidcLoginService.beginLogin(CLIENT_NONCE);
@@ -236,7 +251,8 @@ class OidcLoginServiceImplTest {
         OidcIdentity identity = oidcLoginService.completeLogin("auth-code", start.state().state(), start.state());
 
         assertThat(identity.subject()).isEqualTo("subject-1");
-        assertThat(identity.claims()).doesNotContainKey("department");
+        // The response was dropped as a whole, so the groups it carried were not used either.
+        assertThat(identity.groups()).isEmpty();
     }
 
     @Test
@@ -370,6 +386,17 @@ class OidcLoginServiceImplTest {
                 .hasFieldOrPropertyWithValue("code", "invalid_code");
     }
 
+    @Test
+    void theStoredTicketCarriesNoClaimsBeyondWhatTheLoginNeeds() {
+        String ticket = ticketFor(identity());
+
+        // The row is the only place the identity is persisted, so nothing beyond the fields the login
+        // uses belongs in it.
+        assertThat(tickets.get(ticket).getIdentity())
+                .contains("alice@example.com", "subject-1", "oc-admins")
+                .doesNotContain("claims", "department");
+    }
+
     private String ticketFor(OidcIdentity identity) {
         return oidcLoginService.issueTicket(identity, clientNonceHash());
     }
@@ -394,8 +421,7 @@ class OidcLoginServiceImplTest {
     }
 
     private OidcIdentity identity() {
-        return new OidcIdentity(issuer, "subject-1", "alice@example.com", List.of("oc-admins"),
-                Map.of("email", "alice@example.com"));
+        return new OidcIdentity(issuer, "subject-1", "alice@example.com", List.of("oc-admins"));
     }
 
     private static String decode(String value) {
@@ -451,10 +477,13 @@ class OidcLoginServiceImplTest {
                 .audience(CLIENT_ID)
                 .subject("subject-1")
                 .claim("email", "alice@example.com")
-                .claim("groups", List.of("oc-admins"))
                 .claim("nonce", nonceToEcho)
                 .issueTime(new Date())
                 .expirationTime(Date.from(Instant.now().plusSeconds(300)));
+
+        if (!idTokenGroups.isEmpty()) {
+            claims.claim("groups", idTokenGroups);
+        }
 
         if (emailVerifiedClaim != null) {
             claims.claim("email_verified", emailVerifiedClaim);

@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Principal produced by {@link OidcAuthenticationProvider}. Carries the raw group names of the
@@ -41,10 +40,6 @@ public class OidcUserDetails implements UserDetails {
 
     public String getSubject() {
         return identity.subject();
-    }
-
-    public Map<String, Object> getClaims() {
-        return identity.claims();
     }
 
     public List<String> getGroups() {

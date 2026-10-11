@@ -24,7 +24,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -154,7 +153,6 @@ class OidcControllerTest {
     }
 
     private OidcIdentity identity() {
-        return new OidcIdentity("https://idp.example.com", "subject-1", "alice@example.com",
-                List.of("oc-users"), Map.of("email", "alice@example.com"));
+        return new OidcIdentity("https://idp.example.com", "subject-1", "alice@example.com", List.of("oc-users"));
     }
 }

@@ -25,7 +25,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -153,7 +152,7 @@ class OidcAuthenticationProviderTest {
     }
 
     private OidcIdentity identity() {
-        return new OidcIdentity(ISSUER, "subject-1", EMAIL, List.of("oc-admins"), Map.of("email", EMAIL));
+        return new OidcIdentity(ISSUER, "subject-1", EMAIL, List.of("oc-admins"));
     }
 
     private User user(int id, String email) {
