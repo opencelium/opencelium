@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.security;
 
 import com.becon.opencelium.backend.application.language.LanguageService;
 import com.becon.opencelium.backend.configuration.LdapProperties;
+import com.becon.opencelium.backend.configuration.OidcProperties;
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
@@ -37,6 +38,8 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.resource.user.TotpResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.security.oidc.OidcIdentity;
+import com.becon.opencelium.backend.security.oidc.OidcUserDetails;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.EmailUtility;
@@ -67,7 +70,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.websocket.constant.SocketConstant.USER_SESSION_DESTINATION;
@@ -92,6 +95,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Autowired
     private LdapProperties properties;
+    @Autowired
+    private OidcProperties oidcProperties;
     @Autowired
     private SubscriptionService subscriptionService;
     @Autowired
@@ -221,28 +226,20 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             });
 
             Collection<? extends GrantedAuthority> authorities = ldapUserDetails.getAuthorities();
+            Set<String> userGroups = authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toSet());
             String roleName;
 
-            if (authorities.isEmpty()) {
-                logInfo("User is not a member of any group under group-search-base='" + properties.getGroupSearchBase() + "' with group-search-filter='" + properties.getGroupSearchFilter() + "'");
+            if (userGroups.isEmpty()) {
+                logInfo("User is not a member of any group under group-search-base='" + properties.getGroupSearchBase() + "' with group-search-filter='" + properties.getGroupSearchFilter() + "'", properties.isShowLogs());
 
                 roleName = properties.getDefaultRole();
             } else {
-                List<String> groups = properties.getGroups();
-
-                roleName = authorities.stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .filter(groupDN -> {
-                            if (groups.contains(groupDN)) {
-                                logInfo("Match found for LDAP group = '" + groupDN + "'");
-                                return true;
-                            }
-                            logInfo("No match found for LDAP group = '" + groupDN + "' in OC mappings " + groups.stream().collect(Collectors.joining("; ", "[", "]")));
-                            return false;
-                        })
-                        .map(properties::getRoleByGroup)
-                        .findFirst()
-                        .orElse(properties.getDefaultRole());
+                // The configured mapping decides the role, not the order in which the directory listed the groups.
+                roleName = GroupRoleResolver.resolveRole("LDAP", properties.getGroups(), userGroups,
+                        properties::getRoleByGroup, properties.getDefaultRole(),
+                        message -> logInfo(message, properties.isShowLogs()));
             }
 
             UserRole role = userRoleService.findByName(roleName)
@@ -251,6 +248,51 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
             result = userService.save(user);
             authType = "LDAP server";
+        } else if (principal instanceof OidcUserDetails oidcUserDetails) {
+            OidcIdentity identity = oidcUserDetails.getIdentity();
+            User user = oidcUserDetails.getUser();
+
+            if (user == null) {
+                // The provider matched the identity to no account and allowed provisioning.
+                user = new User();
+                user.setEmail(identity.email());
+                user.setUsername(identity.email());
+                user.setAuthMethod(AuthMethod.OIDC);
+                user.setOidcIssuer(identity.issuer());
+                user.setOidcSubject(identity.subject());
+
+                // create details for new user
+                UserDetail userDetail = new UserDetail();
+                userDetail.setLang(languageService.getDefault());
+                userDetail.setTutorial(false);
+                userDetail.setUser(user);
+
+                user.setUserDetail(userDetail);
+            }
+
+            Collection<? extends GrantedAuthority> authorities = oidcUserDetails.getAuthorities();
+            Set<String> userGroups = authorities.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toSet());
+            String roleName;
+
+            if (userGroups.isEmpty()) {
+                logInfo("User is not a member of any group of claim '" + oidcProperties.getGroupClaim() + "'", oidcProperties.isShowLogs());
+
+                roleName = oidcProperties.getDefaultRole();
+            } else {
+                // The configured mapping decides the role, not the order in which the identity provider listed the groups.
+                roleName = GroupRoleResolver.resolveRole("OIDC", oidcProperties.getGroups(), userGroups,
+                        oidcProperties::getRoleByGroup, oidcProperties.getDefaultRole(),
+                        message -> logInfo(message, oidcProperties.isShowLogs()));
+            }
+
+            UserRole role = userRoleService.findByName(roleName)
+                    .orElseThrow(() -> new EntityNotFoundException("OIDC group mapped to role = '" + roleName + "', but it does not exists in OC system."));
+            user.setUserRole(role);
+
+            result = userService.save(user);
+            authType = "OIDC provider";
         } else {
             result = ((UserPrincipals) authentication.getPrincipal()).getUser();
             authType = "OC system";
@@ -260,15 +302,23 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         Session session = sessionService.replace(result.getId());
         result.setSession(session);
 
-        logInfo("User " + result.getPrincipal() + " is authenticated via " + authType);
-        logInfo("Role '" + result.getUserRole().getName() + "' has been assigned to " + result.getPrincipal());
+        // These messages concern the session, not one authenticator, so they follow the switch of the
+        // authenticator that handled the login: OIDC has its own, LDAP and the password login share the LDAP one.
+        String showLogs = principal instanceof OidcUserDetails ? oidcProperties.isShowLogs() : properties.isShowLogs();
+
+        logInfo("User " + result.getPrincipal() + " is authenticated via " + authType, showLogs);
+        logInfo("Role '" + result.getUserRole().getName() + "' has been assigned to " + result.getPrincipal(), showLogs);
 
         return result;
     }
 
 
-    private void logInfo(String message) {
-        if (properties.isShowLogs().equals("OFF")) {
+    /**
+     * Logs a message of the login currently being processed, gated by the switch of the authenticator
+     * that produced it, so that enabling the logs of one protocol does not enable those of the other.
+     */
+    private void logInfo(String message, String showLogs) {
+        if ("OFF".equals(showLogs)) {
             return;
         }
 

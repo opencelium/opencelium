@@ -1,7 +1,7 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '@features/auth/useAuth'
-import { SessionHydrationError } from '@features/auth/strategies/PasswordStrategy'
+import { SessionHydrationError } from '@features/auth/session/completeLogin'
 import { API_TIMEOUT_ERROR_NAME, ApiFetchError } from '@shared/api/apiFetch'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext'

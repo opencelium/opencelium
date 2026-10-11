@@ -16,6 +16,7 @@ import CheckLdapPage from "@pages/LdapPage/CheckLdapPage.tsx";
 import UIPage from "@pages/UIPage/UIPage.tsx";
 
 const LoginPage = lazy(() => import('@pages/LoginPage'))
+const OidcCallbackPage = lazy(() => import('@pages/OidcCallbackPage'))
 const ForgotPasswordPage = lazy(() => import('@pages/ForgotPasswordPage'))
 const SetPasswordPage = lazy(() => import('@pages/SetPasswordPage'))
 const ProfilePage = lazy(() => import('@pages/ProfilePage/ProfilePage.tsx'))
@@ -35,6 +36,7 @@ export function getRoutes(): RouteConfig[] {
             element: <PublicLayout/>,
             children: [
                 {path: '/login', element: <LoginPage/>},
+                {path: '/oidc/callback', element: <OidcCallbackPage/>},
                 {path: '/forgot-password', element: <ForgotPasswordPage/>},
                 {path: '/set-password', element: <SetPasswordPage/>},
             ],

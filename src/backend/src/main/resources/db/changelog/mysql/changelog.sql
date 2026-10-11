@@ -796,3 +796,39 @@ CREATE TABLE IF NOT EXISTS `system_setting` (
     `updated_by` INT DEFAULT NULL,
     PRIMARY KEY (`name`)
 );
+
+--changeset 5.1:5 stripComments:true splitStatements:true endDelimiter:;
+-- OpenID Connect single sign-on. 'auth_method' is a SQL ENUM, so the new value has to be added
+-- explicitly - Hibernate writes it as a string and would otherwise fail on insert.
+ALTER TABLE user
+  MODIFY COLUMN auth_method ENUM('LDAP', 'BASIC', 'OIDC') NOT NULL DEFAULT 'BASIC';
+
+-- Single-use hand-off between the OIDC callback endpoint (browser navigation) and /oidc/exchange
+-- (called by the frontend), which is where the JWT is issued. 'identity' holds the verified claims
+-- as JSON, so new claims need no further migrations.
+CREATE TABLE IF NOT EXISTS `oidc_login_ticket` (
+    `ticket`     VARCHAR(128) NOT NULL,
+    `identity`   TEXT DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT NULL,
+    `expires_at` TIMESTAMP NULL DEFAULT NULL,
+    `used_at`    TIMESTAMP NULL DEFAULT NULL,
+    PRIMARY KEY (`ticket`)
+);
+
+--changeset 5.1:6 stripComments:true splitStatements:true endDelimiter:;
+-- Links an account to the identity it authenticates with at its identity provider. A login is
+-- matched against this pair, so that nobody can take over an account by claiming its email address
+-- at the provider - the email fallback is opt-in, see 'weak-matching'. Both columns stay NULL for
+-- BASIC and LDAP accounts, and the unique key tolerates that because NULLs count as distinct.
+ALTER TABLE user
+  ADD COLUMN IF NOT EXISTS oidc_issuer VARCHAR(255) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS oidc_subject VARCHAR(255) DEFAULT NULL,
+  ADD UNIQUE KEY uk_user_oidc_identity (oidc_issuer, oidc_subject);
+
+--changeset 5.1:7 stripComments:true splitStatements:true endDelimiter:;
+-- Binds a one-time ticket to the browser that started the login. The frontend sends a nonce to
+-- /oidc/authorize and only its hash is kept here, so /oidc/exchange can refuse a ticket that is
+-- presented by a browser which did not begin that login. Rows written before this migration carry
+-- NULL here and are refused as well.
+ALTER TABLE oidc_login_ticket
+  ADD COLUMN IF NOT EXISTS client_nonce_hash VARCHAR(64) DEFAULT NULL;

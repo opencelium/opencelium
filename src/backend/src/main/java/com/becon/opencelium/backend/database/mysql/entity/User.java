@@ -76,6 +76,17 @@ public class User {
     @Column(name = "totp_secret_key")
     private String totpSecretKey; // created when admin does 'enable' action
 
+    /**
+     * Identity the account is linked to at its identity provider: the issuer together with the
+     * subject of the ID token. Both stay null for accounts that never signed in through OpenID
+     * Connect, so a login is only ever matched by email when weak matching was switched on.
+     */
+    @Column(name = "oidc_issuer")
+    private String oidcIssuer;
+
+    @Column(name = "oidc_subject")
+    private String oidcSubject;
+
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL,  mappedBy = "user")
     private List<WidgetSetting> widgetSettings = new ArrayList<>();
@@ -174,6 +185,22 @@ public class User {
 
     public void setTotpSecretKey(String totpSecretKey) {
         this.totpSecretKey = totpSecretKey;
+    }
+
+    public String getOidcIssuer() {
+        return oidcIssuer;
+    }
+
+    public void setOidcIssuer(String oidcIssuer) {
+        this.oidcIssuer = oidcIssuer;
+    }
+
+    public String getOidcSubject() {
+        return oidcSubject;
+    }
+
+    public void setOidcSubject(String oidcSubject) {
+        this.oidcSubject = oidcSubject;
     }
 
     public List<WidgetSetting> getWidgetSettings() {

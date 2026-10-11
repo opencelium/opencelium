@@ -1,7 +1,7 @@
 import { errorBus } from '../errorBus'
 import { store } from '@app/store/store'
 import { authActions } from '@entities/auth/model/authSlice'
-import { clearAuthTokens } from '@features/auth/strategies/PasswordStrategy'
+import { clearAuthTokens } from '@features/auth/session/completeLogin'
 
 const SESSION_CHANNEL_NAME = 'session-events'
 

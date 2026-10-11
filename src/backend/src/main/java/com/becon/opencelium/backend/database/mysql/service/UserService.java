@@ -30,6 +30,12 @@ public interface UserService {
 
     Optional<User> findByUsername(String username);
 
+    /**
+     * Account that is linked to the given identity of an identity provider. Accounts are only ever
+     * matched this way, so that nobody can take over an account by claiming its email address.
+     */
+    Optional<User> findByOidcIdentity(String issuer, String subject);
+
     Optional<User> findById(int id);
 
     User getById(Integer userId);
