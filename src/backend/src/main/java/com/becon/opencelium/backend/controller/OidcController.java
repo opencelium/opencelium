@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,14 +38,16 @@ import java.util.Optional;
 @RequestMapping(value = "/oidc")
 public class OidcController {
 
-    @Autowired
-    private OidcProperties properties;
+    private final OidcProperties properties;
+    private final OidcLoginService oidcLoginService;
+    private final OidcStateCookieService stateCookieService;
 
-    @Autowired
-    private OidcLoginService oidcLoginService;
-
-    @Autowired
-    private OidcStateCookieService stateCookieService;
+    public OidcController(OidcProperties properties, OidcLoginService oidcLoginService,
+                          OidcStateCookieService stateCookieService) {
+        this.properties = properties;
+        this.oidcLoginService = oidcLoginService;
+        this.stateCookieService = stateCookieService;
+    }
 
     @Operation(summary = "Tells the frontend whether single sign-on is available")
     @GetMapping("/info")
