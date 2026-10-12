@@ -2,6 +2,10 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.enums.RelationalOperator;
+import com.becon.opencelium.backend.exception.ReferenceNotFoundException;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.execution.logger.ThreadLocalOcLogger;
+import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Extractor;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
@@ -14,6 +18,8 @@ import com.becon.opencelium.backend.scriptengine.LanguageType;
 import com.becon.opencelium.backend.scriptengine.ScriptEngine;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManagerProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -24,6 +30,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ExecutionManagerImpl implements ExecutionManager {
+    private static final Logger log = LoggerFactory.getLogger(ExecutionManagerImpl.class);
+
+    // substituted for a reference whose data has never been produced
+    private static final String MISSING_REFERENCE_VALUE = "";
+
     private final Map<String, Object> webhookVars;
     private final Map<Integer, Map<String, String>> requestData;
     private final Map<Integer, RestTemplate> restTemplate;
@@ -33,6 +44,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final List<FieldBindEx> fieldBind;
     private final List<Operation> operations = new ArrayList<>();
     private final ScriptExecutionManager scriptExecutionManager;
+    private final OcLogger<ExecutionLog> logger;
     private Integer currentConnectorId;
     private Pagination currentPagination;
 
@@ -51,6 +63,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
         this.refExtractor = new ReferenceExtractor(this);
         this.scriptExecutionManager = ScriptExecutionManagerProvider.get();
+        this.logger = ThreadLocalOcLogger.get();
     }
 
     @Override
@@ -146,7 +159,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
         // 3) value is a complex reference (only 5 reference types): references.size() == 1 but value is not a reference, it contains a reference
         if (!references.isEmpty() && (references.size() != 1 || !Objects.equals(value, references.get(0)))) {
             for (String ref : references) {
-                Object val = refExtractor.extractValue(ref);
+                Object val = extractOrEmpty(ref);
                 val = val == null ? "" : val.toString();
                 value = value.replace(ref, (String) val);
             }
@@ -155,7 +168,34 @@ public class ExecutionManagerImpl implements ExecutionManager {
         }
 
         // at this point we could have simple 'directRef' or other 5 reference types
-        return refExtractor.extractValue(value);
+        return extractOrEmpty(value);
+    }
+
+    /**
+     * Resolves a single reference, tolerating data that has never been produced.
+     *
+     * <p>A reference whose method has not been executed - so neither its request nor its
+     * response is held by the container - is not an execution failure: the incident is
+     * reported to the server console and to the execution log, an empty value takes the place
+     * of the missing one, and the execution continues. Every other resolution failure - an
+     * error response, an unparsable body, a malformed reference - still stops the execution.
+     */
+    private Object extractOrEmpty(String reference) {
+        try {
+            return refExtractor.extractValue(reference);
+        } catch (ReferenceNotFoundException e) {
+            reportMissingReference(reference, e);
+
+            return MISSING_REFERENCE_VALUE;
+        }
+    }
+
+    private void reportMissingReference(String reference, ReferenceNotFoundException cause) {
+        String message = "%s An empty value is used instead and the execution continues."
+                .formatted(cause.getMessage());
+
+        log.warn("Reference '{}' is not resolved. {}", reference, message);
+        logger.logAndSend("segment=REF_NOT_FOUND ref=(%s) data=%s".formatted(reference, message));
     }
 
     @Override

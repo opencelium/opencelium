@@ -5,7 +5,7 @@
     "dateRangeLabel": "Last 7 days"
   },
   "comingSoon": "Coming soon",
-  "waitingApi": "Waiting API",
+  "waitingApi": "Not available yet",
   "refresh": "Refresh",
   "connection": {
     "statusConnected": "Live — synced in real time",

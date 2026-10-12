@@ -29,15 +29,20 @@ public class LogStorageService {
      * Reads a specific block of log lines for a given executionId.
      *
      * @param execId the executionId to identify the log file
-     * @param startOffset line number to start reading (1-based)
-     * @param endOffset line number to stop reading (inclusive)
-     * @return list of log lines in the given range
+     * @param startOffset byte offset of the first byte to read
+     * @param endOffset byte offset just past the last byte to read (exclusive)
+     * @return list of log lines in the given range, empty if the range is empty
      */
     public List<String> readBlock(String execId, long startOffset, long endOffset) {
+        long length = endOffset - startOffset;
+        if (length <= 0) {
+            // an empty range holds no lines; splitting "" would yield one blank line that no parser accepts
+            return List.of();
+        }
+
         Path logfile = getLogFileByExecutionId(execId);
 
         try (RandomAccessFile raf = new RandomAccessFile(logfile.toFile(), "r")) {
-            long length = Math.max(endOffset - startOffset, 0);
             byte[] buffer = new byte[(int) length];
             raf.seek(startOffset);
             raf.readFully(buffer);

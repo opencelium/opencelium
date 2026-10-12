@@ -35,4 +35,16 @@ public interface LastExecutionService {
     LastExecutionResource toResource(LastExecution lastExecution);
 
     void deleteAllBySchedulerId(int schedulerId);
+
+    /**
+     * Marks the log of a successful execution as viewable. Has no effect once a newer execution
+     * has become the scheduler's last success.
+     */
+    void markSuccessLogAvailable(int schedulerId, long executionId);
+
+    /**
+     * Marks the log of a failed or terminated execution as viewable. Has no effect once a newer
+     * execution has become the scheduler's last failure.
+     */
+    void markFailLogAvailable(int schedulerId, long executionId);
 }

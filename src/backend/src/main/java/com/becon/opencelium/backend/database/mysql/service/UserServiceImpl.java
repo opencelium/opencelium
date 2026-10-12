@@ -27,10 +27,14 @@ import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.ServiceUnavailableException;
+import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.EmailUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -66,6 +70,11 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private WidgetSettingServiceImp widgetSettingServiceImp;
+
+    @Autowired
+    private StorageService storageService;
+
+    private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     public Optional<User> findByEmail(String email) {
@@ -170,7 +179,15 @@ public class UserServiceImpl implements UserService {
             user.setAuthMethod(userDb.getAuthMethod());
             user.setTotpProcessCompleted(userDb.isTotpProcessCompleted());
             user.setTotpSecretKey(userDb.getTotpSecretKey());
+        }
+
+        if (user.getAuthMethod() != AuthMethod.LDAP) {
+            user.setUsername(userRequestResource.getUsername());
+        } else {
+            // LDAP owns the username: ignore the request's value and keep the stored one.
+            // userDb is never null here — a user can only be LDAP once persisted as such.
             user.setUsername(userDb.getUsername());
+            logger.warn("Ldap user detected. Username {} can't be modified.", userDb.getUsername());
         }
 
         userDetail.setId(userRequestResource.getUserId());
@@ -220,5 +237,25 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setPassword(encodePassword(dto.newPassword()));
+    }
+
+    @Override
+    @Transactional
+    public void deleteProfilePicture(int id) {
+        User user = findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        UserDetail userDetail = user.getUserDetail();
+
+        if (userDetail == null || userDetail.getProfilePicture() == null) {
+            return;
+        }
+
+        String filename = userDetail.getProfilePicture();
+
+        // Clear the reference first so a failing file deletion rolls the column back
+        // together with the transaction instead of leaving a dangling picture URL.
+        userDetail.setProfilePicture(null);
+        detailService.save(userDetail);
+
+        storageService.delete(filename);
     }
 }

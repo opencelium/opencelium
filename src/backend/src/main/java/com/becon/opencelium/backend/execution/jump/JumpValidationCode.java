@@ -15,7 +15,13 @@ public enum JumpValidationCode {
     JUMP_ESCAPES_LOOP,
     /** The target does not run strictly after the source. */
     JUMP_BACKWARD,
-    /** The target consumes output of a method this jump would skip. */
+    /**
+     * The target consumes output of a method this jump would skip.
+     *
+     * <p>No longer emitted: a method may reference any node, and the engine substitutes an empty
+     * value for a reference whose method did not execute. Kept so the frontend contract and any
+     * stored payload stay valid.
+     */
     JUMP_SKIPS_REFERENCED_METHOD,
     /** The target color/index is absent from the connection. */
     JUMP_TARGET_NOT_FOUND,

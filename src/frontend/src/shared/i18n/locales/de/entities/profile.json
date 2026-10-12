@@ -41,13 +41,14 @@
     },
     "newPassword": {
       "label": "Neues Passwort",
+      "minLength": "Mindestens 8 Zeichen",
       "validation1": "Muss einen Großbuchstaben enthalten",
       "validation2": "Muss einen Kleinbuchstaben enthalten",
       "validation3": "Muss eine Zahl enthalten",
       "validation4": "Muss ein Sonderzeichen enthalten"
     },
     "repeatNewPassword": {
-      "label": "Neues Passwort wiederholen",
+      "label": "Neues Passwort bestätigen",
       "mismatch": "Passwörter stimmen nicht überein"
     }
   },
@@ -56,7 +57,7 @@
     "save": "Speichern"
   },
   "hints": {
-    "sessionWillExpire": "Ihre Sitzung wird nach dem Update sofort beendet."
+    "sessionWillExpire": "Nach dem Speichern werden Sie sofort abgemeldet."
   },
   "messages": {
     "detailsUpdated": "Profildaten aktualisiert",

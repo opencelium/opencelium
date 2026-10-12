@@ -21,6 +21,7 @@ import { useWorkflowDragMove } from './useWorkflowDragMove';
 import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
 import { evaluateJointTargets } from '../utils/jumpValidator';
+import { useJointDeadEndNodeId } from './useJointDeadEndNodeId';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
 import { copyWorkflowNodeGroup, moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
 import { useDeleteWorkflowNodes } from './useDeleteWorkflowNodes';
@@ -80,6 +81,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       : undefined),
     [jointSourceId, nodes, edges, options.fieldBindings],
   );
+  const jointDeadEndNodeId = useJointDeadEndNodeId(nodes, edges, options.fieldBindings);
 
   // Stable: the instance is read from the ref at call time, so every consumer
   // (command bridge, save-error highlighting) can hold on to one identity.
@@ -104,6 +106,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     sidebarAction,
     jointSourceId,
     jointVerdicts,
+    jointDeadEndNodeId,
     contextMenu,
     historyOpen,
     methodEditor,
