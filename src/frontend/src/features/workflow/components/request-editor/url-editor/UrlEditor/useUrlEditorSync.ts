@@ -1,8 +1,8 @@
 import { useEffect, type Dispatch, type RefObject, type SetStateAction } from 'react';
 import type { EndpointArg, MethodWithId, QueryParam } from '../../../../types/connection';
-import { buildQueryParamsFromEndpoint, decodeEndpointQuery, ensureTemplateRow,
-	getInlineVisualLength, stripMockActiveFromEndpoint,
-	stripMockActiveRows } from '../urlEditor.utils';
+import { buildQueryParamsFromEndpoint, decodeEndpointPath, decodeEndpointQuery,
+	ensureTemplateRow, getInlineVisualLength, stripMockActiveRows,
+	toEditableEndpoint } from '../urlEditor.utils';
 import { decodeStoredQueryParams } from './urlEditor.data';
 
 type Params = {
@@ -27,7 +27,7 @@ export function useUrlEditorSync(params: Params) {
 	useEffect(() => { rawRef.current = endpointRaw; }, [endpointRaw, rawRef]);
 
 	useEffect(() => {
-		const endpoint = decodeEndpointQuery(stripMockActiveFromEndpoint(method.request.endpoint || ''));
+		const endpoint = toEditableEndpoint(method.request.endpoint || '');
 		const args = { ...(method.request.endpointArgs || {}) };
 		resetEndpointArgs(args);
 		setEndpointRaw(endpoint);
@@ -44,10 +44,10 @@ export function useUrlEditorSync(params: Params) {
 	}, [method.id, resetEndpointArgs]);
 
 	useEffect(() => {
-		const incoming = decodeEndpointQuery(stripMockActiveFromEndpoint(method.request.endpoint || ''));
+		const incoming = toEditableEndpoint(method.request.endpoint || '');
 		if (incoming === endpointRaw) return;
 		if (lastDispatchedRef.current
-			&& incoming === decodeEndpointQuery(lastDispatchedRef.current)) {
+			&& incoming === decodeEndpointPath(decodeEndpointQuery(lastDispatchedRef.current))) {
 			setEndpointRaw(incoming); rawRef.current = incoming; return;
 		}
 		setEndpointRaw(incoming); rawRef.current = incoming;

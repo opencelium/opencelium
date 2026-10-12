@@ -3,7 +3,8 @@ import { useDispatch } from 'react-redux';
 import type { EndpointArg, QueryParam } from '../../../types/connection';
 import { updateEndpoint, updateQueryParams,
 	upsertEndpointArg } from '../../../store/connection/connectionSlice';
-import { buildQueryFromParams, splitEndpoint, stripTemplateRows } from './urlEditor.utils';
+import { buildQueryFromParams, encodeEndpointPath, splitEndpoint,
+	stripTemplateRows } from './urlEditor.utils';
 
 type Params = {
 	methodId: string;
@@ -24,7 +25,7 @@ export function useUrlEndpointPersistence(params: Params) {
 	const saveAll = useCallback((endpoint: string, rows: QueryParam[],
 		args: Record<string, EndpointArg>) => {
 		if (readOnly) return;
-		const { base } = splitEndpoint(endpoint);
+		const base = encodeEndpointPath(splitEndpoint(endpoint).base);
 		const query = buildQueryFromParams(rows, true);
 		dispatch(updateEndpoint({ methodId, endpoint: query ? `${base}?${query}` : base } as any));
 		dispatch(updateQueryParams({ methodId, queryParams: stripTemplateRows(rows) } as any));

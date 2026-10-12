@@ -4,8 +4,8 @@ import { useMethodContext } from '../../../../providers/MethodContext';
 import type { RootState } from '../../../../store';
 import type { QueryParam } from '../../../../types/connection';
 import { updateRequestMethod } from '../../../../store/connection/connectionSlice';
-import { buildQueryParamsFromEndpoint, decodeEndpointQuery, ensureTemplateRow,
-	getInlineVisualLength, stripMockActiveFromEndpoint, stripMockActiveRows } from '../urlEditor.utils';
+import { buildQueryParamsFromEndpoint, ensureTemplateRow, getInlineVisualLength,
+	stripMockActiveRows, toEditableEndpoint } from '../urlEditor.utils';
 import { useUrlEndpointArgs } from '../useUrlEndpointArgs';
 import { useUrlEndpointPersistence } from '../useUrlEndpointPersistence';
 import { useUrlQueryParams } from '../useUrlQueryParams';
@@ -24,7 +24,7 @@ export function useUrlEditor(readOnly?: boolean) {
 	const selectedTokenRef = useRef<number | null>(null);
 	const queryCaretTargetRef = useRef<QueryCaretTarget | null>(null);
 	const lastDispatchedRef = useRef<string | null>(null);
-	const initialEndpoint = decodeEndpointQuery(stripMockActiveFromEndpoint(method.request.endpoint || ''));
+	const initialEndpoint = toEditableEndpoint(method.request.endpoint || '');
 	const [endpointRaw, setEndpointRaw] = useState(initialEndpoint);
 	const rawRef = useRef(initialEndpoint);
 	const args = useUrlEndpointArgs({ methodId: method.id,

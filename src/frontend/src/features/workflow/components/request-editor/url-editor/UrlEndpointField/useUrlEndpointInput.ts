@@ -1,7 +1,7 @@
 import type { ClipboardEvent, FormEvent, KeyboardEvent, MouseEvent, RefObject } from 'react';
-import { getCaretPositionOfDivEditable,
+import { getCaretPositionOfDivEditable, getRawCaretPositionOfDivEditable,
 	isCaretReportedAtEditableRootStart } from '../utils/contentEditable';
-import { getInlineVisualLength, parseHtmlToRaw, PROHIBITED_ENDPOINT_CHARACTERS,
+import { decodeEndpointPath, getInlineVisualLength, parseHtmlToRaw, PROHIBITED_ENDPOINT_CHARACTERS,
 	removeInlineTokenByIndex, sanitizePlainTextPaste, sanitizeUrlInputValue, isSelectionInside,
 	shouldBlockUrlKeyInput } from '../urlEditor.utils';
 import type { UrlEndpointFieldProps, UrlEndpointRender } from './UrlEndpointField.types';
@@ -19,9 +19,25 @@ export function useUrlEndpointInput(props: UrlEndpointFieldProps, typing: RefObj
 			onRawCaretChange?.(rawCaret, lastCaretRef.current);
 		}
 	};
+	const commitDecodedPath = (root: HTMLElement, next: string) => {
+		const decoded = decodeEndpointPath(next);
+		if (decoded === next) return false;
+		const domCaret = getRawCaretPositionOfDivEditable(root);
+		const rawCaret = decodeEndpointPath(next.slice(0, domCaret >= 0 ? domCaret : next.length)).length;
+		const visualCaret = getInlineVisualLength(decoded.slice(0, rawCaret), endpointArgsRef.current);
+		lastRawCaretRef.current = rawCaret;
+		lastCaretRef.current = visualCaret;
+		onRawCaretChange?.(rawCaret, visualCaret);
+		selectedTokenIndexRef.current = null;
+		typing.current = true; onRawChange(decoded); typing.current = false;
+		render(decoded, visualCaret);
+		return true;
+	};
 	const updateFromDom = () => {
 		const root = divRef.current;
 		if (!root) return;
+		const parsed = sanitizeUrlInputValue(parseHtmlToRaw(root.innerHTML, ENDPOINT_REFERENCE_CLASS));
+		if (commitDecodedPath(root, parsed)) return;
 		typing.current = true;
 		if (isSelectionInside(root)) {
 			const caret = getCaretPositionOfDivEditable(root);
@@ -63,6 +79,7 @@ export function useUrlEndpointInput(props: UrlEndpointFieldProps, typing: RefObj
 		try { document.execCommand('insertText', false, pasted); } catch {}
 		requestAnimationFrame(() => {
 			const next = sanitizeUrlInputValue(parseHtmlToRaw(root.innerHTML, ENDPOINT_REFERENCE_CLASS));
+			if (commitDecodedPath(root, next)) return;
 			reportRawChange(next);
 			typing.current = true; onRawChange(next); typing.current = false;
 		});
