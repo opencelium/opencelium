@@ -15,7 +15,7 @@ const GIT_URL = 'https://github.com/opencelium';
 const SERVICE_PORTAL_URL = 'https://service.opencelium.io/login';
 // Stands in only where the running version can't be asked for: the login page,
 // which renders this footer while `/assistant/oc/version` still requires auth.
-const FALLBACK_APP_VERSION = '5.1';
+const FALLBACK_APP_VERSION = '5.2';
 // The onboarding checklist pill docks fixed at the viewport's bottom-right
 // (ONBOARDING_Z_INDEX.checklist = 20300, see @features/onboarding/model/types.ts)
 // — the same corner these tooltips pop up from. Without this, the pill's

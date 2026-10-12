@@ -200,7 +200,7 @@ export function DataAggregatorScriptEditor({ name, label, mode }: DataAggregator
                 }
             >
                 <div style={panelHeaderStyle}>
-                    <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>Your script</span>
+                    <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>{t('data-aggregator.scriptEditor.yourScript')}</span>
                     <Tooltip content={t(isScriptMaximized ? 'data-aggregator.scriptEditor.minimize' : 'data-aggregator.scriptEditor.maximize')}>
                         <IconButton
                             iconProps={{ name: isScriptMaximized ? 'minimize' : 'maximize' }}

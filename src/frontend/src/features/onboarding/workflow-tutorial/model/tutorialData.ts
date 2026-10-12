@@ -1,8 +1,17 @@
-import { clearRequestOverrides, setRequestOverrideHandler, setRequestOverrides } from '@shared/api/requestOverrides'
+import { message } from 'antd'
+import {
+    clearRequestOverrides,
+    OVERRIDE_UNAVAILABLE,
+    setRequestOverrideHandler,
+    setRequestOverrides,
+    type OverrideRequest,
+} from '@shared/api/requestOverrides'
+import { i18n } from '@shared/i18n/config/i18n'
 import { store } from '@app/store/store'
 import { baseApi } from '@shared/api/baseApi'
 import { TUTORIAL_CONNECTORS, TUTORIAL_CONNECTORS_META, TUTORIAL_INVOKERS } from './tutorialFixtures'
 import { resetTutorialSchedules, tutorialScheduleRequest } from './tutorialSchedules'
+import { resetLastTutorialRunScript } from './tutorialTestRun'
 
 /**
  * The three GETs the workflow editor and its sidebar read. `/connector/meta/all` is
@@ -25,6 +34,35 @@ const SCHEDULE_LIST_PATH = '/scheduler/all'
 /** Exported so a test can pin them to the endpoints that actually request them. */
 export const TUTORIAL_OVERRIDE_PATHS = [...Object.keys(OVERRIDES), SCHEDULE_LIST_PATH]
 
+/** Long enough to read the two sentences; antd's 3s default is gone mid-way. */
+const UNAVAILABLE_DURATION_SEC = 8
+
+/**
+ * The handler's side effects, kept out of it so it stays a pure function of the
+ * request.
+ *
+ * A manual start is a GET, which `generalRequest` deliberately does not invalidate
+ * on: against a server the finished run arrives over the socket. The tutorial has no
+ * socket, so the list is re-read here — after the current request settles, so the
+ * refetch does not race the mutation that caused it.
+ *
+ * An unavailable action gets the only feedback the user sees, since `baseQuery` skips
+ * the error bus for those.
+ */
+function scheduleRequest(request: OverrideRequest): unknown {
+    const response = tutorialScheduleRequest(request)
+    if (request.method === 'GET' && request.path.startsWith('/scheduler/execute/')) {
+        queueMicrotask(() => invalidate([SCHEDULE_LIST_PATH]))
+    }
+    if (response === OVERRIDE_UNAVAILABLE) {
+        message.info(
+            i18n.getFixedT(i18n.language, 'onboarding')('workflow.sandbox.unavailable'),
+            UNAVAILABLE_DURATION_SEC,
+        )
+    }
+    return response
+}
+
 /**
  * Answers those requests with the tutorial's invented systems, then drops the cached
  * real responses so the editor asks again and gets the fixtures.
@@ -36,7 +74,8 @@ export const TUTORIAL_OVERRIDE_PATHS = [...Object.keys(OVERRIDES), SCHEDULE_LIST
 export function seedTutorialData() {
     setRequestOverrides(OVERRIDES)
     resetTutorialSchedules()
-    setRequestOverrideHandler(tutorialScheduleRequest)
+    resetLastTutorialRunScript()
+    setRequestOverrideHandler(scheduleRequest)
     invalidate()
 }
 
@@ -44,12 +83,13 @@ export function seedTutorialData() {
 export function clearTutorialData() {
     clearRequestOverrides()
     resetTutorialSchedules()
+    resetLastTutorialRunScript()
     invalidate()
 }
 
 /** `as never` matches the codebase's own tag casts — the union omits these string ids. */
-function invalidate() {
+function invalidate(paths: string[] = TUTORIAL_OVERRIDE_PATHS) {
     store.dispatch(baseApi.util.invalidateTags(
-        TUTORIAL_OVERRIDE_PATHS.map(id => ({ type: 'Entity', id })) as never,
+        paths.map(id => ({ type: 'Entity', id })) as never,
     ))
 }

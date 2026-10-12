@@ -20,7 +20,7 @@
       "mongoDB": "MongoDB",
       "opencelium": "OpenCelium",
       "os": "Operating System",
-      "polyglot": "Polyglot"
+      "polyglot": "Script engine (Polyglot)"
     }
   }
 }

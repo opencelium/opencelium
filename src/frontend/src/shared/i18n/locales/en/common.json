@@ -1,7 +1,7 @@
 {
   "question": {
     "confirmation": {
-      "delete": "Are you sure you want to delete {{entityName}} by {{field}} {{value}}?"
+      "delete": "Are you sure you want to delete \"{{value}}\"?"
     }
   },
   "menu": {
@@ -11,12 +11,12 @@
     "schedules": "Schedules",
     "usersAccess": "Users & Access",
     "users": "Users",
-    "groups": "Groups",
+    "groups": "Roles",
     "ldapCheck": "LDAP Check",
     "configurations": "Configurations",
-    "invokers": "Invokers",
+    "invokers": "API Definitions",
     "connectionTemplates": "Workflow Templates",
-    "dataAggregator": "Data Aggregator",
+    "dataAggregator": "Data Aggregators",
     "notificationTemplates": "Notification Templates",
     "categories": "Categories",
     "supportFiles": "Support Files",
@@ -24,7 +24,7 @@
     "licenseManagement": "License Management",
     "updateAssistant": "Update Assistant",
     "systemCheck": "System Check",
-    "config": "Configurations",
+    "config": "System Configuration",
     "ui": "UI"
   },
   "commandPalette": {
@@ -52,9 +52,9 @@
       "changeTheme": "Change the application theme",
       "uploadTemplate": "Upload a workflow template file",
       "downloadTemplate": "Download a workflow template file",
-      "uploadInvoker": "Upload an invoker file",
-      "installOnlineInvokers": "Install invokers from the OpenCelium online repository",
-      "downloadInvoker": "Download an invoker file",
+      "uploadInvoker": "Upload an API definition file",
+      "installOnlineInvokers": "Install API definitions from the OpenCelium online repository",
+      "downloadInvoker": "Download an API definition file",
       "systemCheck": "Open the system check page",
       "ldapCheck": "Open the LDAP connectivity check page",
       "workflow": "Search the current workflow",
@@ -85,7 +85,7 @@
   "sidebar": {
     "expand": "Expand sidebar",
     "collapse": "Collapse sidebar",
-    "logout": "Sign Out",
+    "logout": "Sign out",
     "confirmLogout": {
       "title": "Sign out",
       "message": "Are you sure you want to sign out?"
@@ -164,7 +164,8 @@
     "title": "Page not found",
     "subtitle": "The page you're looking for doesn't exist or may have been moved.",
     "goBack": "Go back",
-    "goHome": "Go to Dashboard"
+    "goHome": "Go to Dashboard",
+    "entity": "This item was not found. It may have been deleted."
   },
   "accessDenied": {
     "title": "Access denied",

@@ -17,6 +17,7 @@ const operatorMenu: MenuSection[] = [
 
 const changeLabelItem: WorkflowNodeMenuItem = { id: 'change-label', labelKey: 'contextMenu.changeLabel' };
 const changeConnectorItem: WorkflowNodeMenuItem = { id: 'change-connector', labelKey: 'contextMenu.changeConnector' };
+const connectorImageItem: WorkflowNodeMenuItem = { id: 'change-connector-image', labelKey: 'contextMenu.changeConnectorImage' };
 const configureAggregatorItem: WorkflowNodeMenuItem = { id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator' };
 
 const requestSections: MenuSection[] = [
@@ -24,7 +25,13 @@ const requestSections: MenuSection[] = [
   { id: 'response', items: [{ id: 'show-response', labelKey: 'contextMenu.showResponse' }] },
 ];
 
-const methodMenu: MenuSection[] = [
+// Only a connector node draws its connector's image; a system node shows a globe.
+const connectorMenu: MenuSection[] = [
+  { id: 'main', items: [changeLabelItem, changeConnectorItem, connectorImageItem, configureAggregatorItem] },
+  ...requestSections,
+];
+
+const systemMenu: MenuSection[] = [
   { id: 'main', items: [changeLabelItem, changeConnectorItem, configureAggregatorItem] },
   ...requestSections,
 ];
@@ -36,8 +43,8 @@ const triggerConnectionMenu: MenuSection[] = [
 ];
 
 export const menuByType: Record<string, MenuSection[]> = {
-  connector: methodMenu,
-  system: methodMenu,
+  connector: connectorMenu,
+  system: systemMenu,
   'trigger-connection': triggerConnectionMenu,
   if: operatorMenu,
   loop: operatorMenu,
