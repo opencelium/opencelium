@@ -9,14 +9,14 @@
       "label": "Title",
       "options": {
         "mr": "Mr",
-        "mrs": "Mrs"
+        "mrs": "Ms"
       }
     },
     "name": {
       "label": "Name"
     },
     "surname": {
-      "label": "Surname"
+      "label": "Last name"
     },
     "department": {
       "label": "Department"
@@ -41,13 +41,14 @@
     },
     "newPassword": {
       "label": "New Password",
+      "minLength": "Minimum 8 characters",
       "validation1": "Must contain uppercase letter",
       "validation2": "Must contain lowercase letter",
       "validation3": "Must contain a number",
       "validation4": "Must contain special character"
     },
     "repeatNewPassword": {
-      "label": "Repeat New Password",
+      "label": "Confirm new password",
       "mismatch": "Passwords do not match"
     }
   },
@@ -56,12 +57,12 @@
     "save": "Save"
   },
   "hints": {
-    "sessionWillExpire": "Your session will be immediately expired after update."
+    "sessionWillExpire": "You'll be signed out as soon as you save."
   },
   "messages": {
     "detailsUpdated": "Profile details updated",
     "detailsUpdateFailed": "Profile details could not be saved.",
-    "passwordUpdated": "Password updated. You will be logged out.",
+    "passwordUpdated": "Password updated. You'll be signed out.",
     "pictureUpdated": "Profile picture updated",
     "pictureUpdateFailed": "The profile picture could not be uploaded.",
     "pictureDeleted": "Profile picture removed",

@@ -3,7 +3,7 @@
     "title": "Notification Templates",
     "subTitle": "Manage reusable templates used for notifications in Schedules.",
     "confirmDelete": {
-      "message": "Are you sure you want to delete notification template with name \"{{name}}\"?"
+      "message": "Delete the notification template \"{{name}}\"? This can't be undone."
     }
   },
   "fields": {
@@ -14,7 +14,7 @@
       "label": "Type"
     },
     "aggregator": {
-      "label": "Aggregator"
+      "label": "Data Aggregator"
     },
     "subject": {
       "label": "Subject"
@@ -59,7 +59,7 @@
       },
       "template-content": {
         "header": "Template Content",
-        "subheader": "Define the aggregator, subject and body of the notification template. Use aggregator arguments to insert dynamic values."
+        "subheader": "Define the data aggregator, subject and body of the notification template. Use data aggregator arguments to insert dynamic values."
       }
     }
   },
@@ -68,8 +68,8 @@
   },
   "confirmation": {
     "delete": {
-      "byName": "Delete notification template by name \"{{name}}\"?",
-      "byId": "Delete notification template by id \"{{id}}\"?"
+      "byName": "Delete notification template \"{{name}}\"?",
+      "byId": "Delete notification template #{{id}}?"
     }
   }
 }

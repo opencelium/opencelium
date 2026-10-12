@@ -20,6 +20,8 @@ import com.becon.opencelium.backend.resource.execution.FieldBindEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,6 +39,8 @@ public class ConnectionExecutor {
     private final MaskingService masking;
     private final ProxyEx proxy;
     private ExecutionManager executionManager;
+
+    private static final Logger log = LoggerFactory.getLogger(ConnectionExecutor.class);
 
     public ConnectionExecutor(ExecutionObj executionObj, List<MaskingRule> rules) {
         this.webhookVars = executionObj.getWebhookVars();
@@ -83,9 +87,7 @@ public class ConnectionExecutor {
 
         List<JumpViolation> violations = collectJumpViolations(connection.getSource(), connection.getFieldBind());
 
-        if (!violations.isEmpty()) {
-            throw new JumpValidationException(violations);
-        }
+        violations.forEach(violation -> log.warn(violation.toString()));
     }
 
     private List<JumpViolation> collectJumpViolations(ConnectorEx connector, List<FieldBindEx> fieldBindings) {

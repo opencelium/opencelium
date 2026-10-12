@@ -19,4 +19,5 @@ export type {
   SocketLogSegment,
   DetailedMethodLog,
   FlowchartChildLog,
+  FlowchartLog,
 } from "./model/types";

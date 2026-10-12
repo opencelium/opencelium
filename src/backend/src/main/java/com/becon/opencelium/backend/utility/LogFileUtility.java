@@ -53,33 +53,22 @@ public class LogFileUtility {
         );
     }
 
+    public static LocalDateTime extractTime(Path path) {
+        String filename = path.getFileName().toString();
+
+        try {
+            String timestamp = filename.substring(0, 16);
+            return LocalDateTime.parse(timestamp, DATE_TIME_FORMATTER);
+        } catch (Exception e) {
+            return LocalDateTime.MIN;
+        }
+    }
+
     public static void create(String base) throws IOException {
         Path directory = toPath(base);
 
         if (!Files.exists(directory)) {
             Files.createDirectories(directory);
-        }
-    }
-
-    public static void enforceLimit(String base, Long connectionId, String type, int limit) {
-        Path connectionFilesFolder = toPath(base, connectionId.toString());
-
-        try (Stream<Path> stream = Files.list(connectionFilesFolder)) {
-            List<Path> matchingDirs = stream
-                    .filter(path -> Files.isRegularFile(path) && path.getFileName().toString().contains(connectionId + NAME_PARTS_SEPARATOR + type))
-                    .sorted((p1, p2) -> {
-                        LocalDateTime time1 = extractTime(p1);
-                        LocalDateTime time2 = extractTime(p2);
-
-                        return time1.compareTo(time2);
-                    })
-                    .toList();
-
-            for (int i = 0; i < matchingDirs.size() - limit; i++) {
-                delete(matchingDirs.get(i));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -121,7 +110,8 @@ public class LogFileUtility {
                     .forEach(p -> {
                         try {
                             Files.deleteIfExists(p);
-                        } catch (IOException ignored) {}
+                        } catch (IOException ignored) {
+                        }
                     });
         } catch (IOException e) {
             logger.warn("Failed to delete old log files by executionId", e);
@@ -205,33 +195,6 @@ public class LogFileUtility {
         return Collections.emptyList();
     }
 
-    private static FileDescriptor readFile(Path path) {
-        try (InputStream in = new FileInputStream(path.toFile())) {
-            return FileDescriptor.of(
-                    in.readAllBytes(),
-                    path.getFileName().toString(),
-                    MediaType.APPLICATION_OCTET_STREAM_VALUE
-            );
-        } catch (IOException e) {
-            throw new GeneralServiceException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ExceptionConstant.INTERNAL_ERROR,
-                    ExceptionMessages.UNKNOWN_ERROR
-            );
-        }
-    }
-
-    private static LocalDateTime extractTime(Path path) {
-        String filename = path.getFileName().toString();
-
-        try {
-            String timestamp = filename.substring(0, 16);
-            return LocalDateTime.parse(timestamp, DATE_TIME_FORMATTER);
-        } catch (Exception e) {
-            return LocalDateTime.MIN;
-        }
-    }
-
     public static String extractExecutionId(String fileName) {
         if (fileName == null || !fileName.endsWith(".log")) {
             throw new IllegalArgumentException("Invalid log file name: " + fileName);
@@ -241,6 +204,19 @@ public class LogFileUtility {
         String withoutExt = fileName.substring(0, fileName.length() - 4);
         String[] parts = withoutExt.split(NAME_PARTS_SEPARATOR);
         return parts[parts.length - 1];
+    }
+
+    public static String extractExecutionIdAsString(Path path) {
+        String filename = path.getFileName().toString();
+
+        int separatorIndex = filename.lastIndexOf('_');
+        int extensionIndex = filename.lastIndexOf('.');
+
+        if (separatorIndex < 0 || extensionIndex <= separatorIndex + 1) {
+            throw new IllegalArgumentException("Invalid artifact filename: " + filename);
+        }
+
+        return filename.substring(separatorIndex + 1, extensionIndex);
     }
 
     private static boolean executedByScheduler(Path path, int schedulerId) {
@@ -255,6 +231,22 @@ public class LogFileUtility {
             return firstLine != null && firstLine.contains(token);
         } catch (IOException e) {
             return false;
+        }
+    }
+
+    private static FileDescriptor readFile(Path path) {
+        try (InputStream in = new FileInputStream(path.toFile())) {
+            return FileDescriptor.of(
+                    in.readAllBytes(),
+                    path.getFileName().toString(),
+                    MediaType.APPLICATION_OCTET_STREAM_VALUE
+            );
+        } catch (IOException e) {
+            throw new GeneralServiceException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ExceptionConstant.INTERNAL_ERROR,
+                    ExceptionMessages.UNKNOWN_ERROR
+            );
         }
     }
 }

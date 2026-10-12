@@ -57,4 +57,12 @@ public interface UserService {
     User getCurrentUser();
 
     void changePassword(ChangePasswordDTO dto);
+
+    /**
+     * Removes the profile picture of the given user: deletes the stored image file (if any)
+     * and clears the {@code profile_picture} column. A no-op when the user has no picture.
+     *
+     * @throws com.becon.opencelium.backend.exception.UserNotFoundException if no user has the id
+     */
+    void deleteProfilePicture(int id);
 }

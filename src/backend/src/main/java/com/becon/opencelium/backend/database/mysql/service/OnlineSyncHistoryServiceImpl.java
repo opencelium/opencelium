@@ -57,7 +57,7 @@ public class OnlineSyncHistoryServiceImpl implements OnlineSyncHistoryService {
     @Override
     public OnlineSyncStatusDTO getStatus() {
         return OnlineSyncStatusDTO.fromStatus(
-                onlineServicesProps.getActive(),
+                onlineServicesProps.isServiceActive(),
                 onlineServicesProps.getInvokerSync() != null ? onlineServicesProps.getInvokerSync().getActive() : false,
                 onlineServicesProps.getTemplateSync() != null ? onlineServicesProps.getTemplateSync().getActive() : false
         );

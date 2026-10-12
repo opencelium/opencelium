@@ -11,6 +11,7 @@ public enum SegmentType implements LogLineStage {
     IF_REF,
     IF_RESULT,
     LOOP_REF,
+    REF_NOT_FOUND, // a reference whose data was never produced; execution continues
     EXCEPTION;
 
 

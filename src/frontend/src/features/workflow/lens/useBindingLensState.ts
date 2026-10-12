@@ -32,11 +32,19 @@ export const useBindingLensState = ({ open, setOpen, pinnedNodeId, setPinnedNode
 	// Pinning expands the method's own card straight away — the field rows are the
 	// reason to pin, and a pin that only froze the arcs would need a second click
 	// to say anything more than the hover already did.
-	/** Focus a method outright, rather than toggling it — what picking a row in the
-	 *  binding list means for the canvas behind it. */
+	/** Focus a method outright, rather than toggling it — what selecting it on the
+	 *  canvas means. */
 	const onFocusNode = useCallback((nodeId: string) => {
 		setPinnedNodeId(nodeId);
 		setExpandedNodeIds([nodeId]);
+	}, [setExpandedNodeIds, setPinnedNodeId]);
+
+	/** Pin a method's arcs without opening its card — what picking a row in the
+	 *  binding list means for the canvas behind it: the list already shows the
+	 *  field rows, and a card would only cover the canvas the arcs are drawn on. */
+	const onPinNode = useCallback((nodeId: string) => {
+		setPinnedNodeId(nodeId);
+		setExpandedNodeIds([]);
 	}, [setExpandedNodeIds, setPinnedNodeId]);
 
 	const onToggleFocus = useCallback((nodeId: string) => {
@@ -105,9 +113,9 @@ export const useBindingLensState = ({ open, setOpen, pinnedNodeId, setPinnedNode
 		[expandedNodeIds, focusNodeId, selectedKey]);
 
 	return useMemo(() => ({ open, view, pinnedNodeId, tableOpen, onToggle, onHoverNode,
-		onToggleFocus, onFocusNode, onClearFocus, onToggleTable, onCloseTable, actions,
-		onClearSelection, onSelectBinding }),
+		onToggleFocus, onFocusNode, onPinNode, onClearFocus, onToggleTable, onCloseTable,
+		actions, onClearSelection, onSelectBinding }),
 	[actions, onClearFocus, onClearSelection, onCloseTable, onFocusNode, onHoverNode,
-		onSelectBinding, onToggle, onToggleFocus, onToggleTable, open, pinnedNodeId,
+		onPinNode, onSelectBinding, onToggle, onToggleFocus, onToggleTable, open, pinnedNodeId,
 		tableOpen, view]);
 };

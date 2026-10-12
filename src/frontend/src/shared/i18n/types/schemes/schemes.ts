@@ -59,6 +59,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             subtitle: string
             goBack: string
             goHome: string
+            entity: string
         }
         onlineFeature: {
             offline: string

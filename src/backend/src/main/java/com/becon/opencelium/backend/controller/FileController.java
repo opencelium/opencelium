@@ -17,7 +17,9 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
-import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
 import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl;
@@ -25,10 +27,6 @@ import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
-import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.FileDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
@@ -36,8 +34,8 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.utility.FileNameUtils;
-import com.becon.opencelium.backend.utility.Xml;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,18 +61,14 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.w3c.dom.Document;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
@@ -190,36 +184,7 @@ public class FileController {
     @PostMapping(path = "/groupIcon", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> groupPictureUpload(@RequestParam("file") MultipartFile file,
                                                 @RequestParam("userGroupId") int userGroupId) {
-
-        // Get extension of file
-        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
-        Objects.requireNonNull(extension);
-        // Check image extension. It should be JPEG, PNG or JPG
-        if (!FileNameUtils.isSupportedImageExtension(extension)){
-            throw new StorageException("File should be jpg or png");
-        }
-
-        // Get userGroup data from database
-        UserRole userRole = userRoleService.findById(userGroupId)
-                .orElseThrow(() -> new RuntimeException("Role doesn't exist"));
-
-        //Generate new file name
-        String newFilename = UUID.randomUUID() + "." + extension;
-
-        // If user group has an old image, delete the picture from files
-        if (userRole.getIcon() != null){
-            storageService.delete(userRole.getIcon());
-        }
-
-        // Set new image name
-        userRole.setIcon(newFilename);
-
-        // Save in database the name of image
-        userRoleService.save(userRole);
-
-        // Save image in storage
-        storageService.store(file, newFilename);
-
+        userRoleService.uploadIcon(userGroupId, file);
         return ResponseEntity.ok().build();
     }
 
@@ -347,20 +312,15 @@ public class FileController {
     @PostMapping(path = "/invoker", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadInvoker(@RequestParam("file") MultipartFile file) {
         String filename = file.getOriginalFilename();
-        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
+        if (file.isEmpty()) {
+            throw new StorageException("Failed to store empty file " + filename);
+        }
+        Objects.requireNonNull(filename);
+
+        String targetFileName = invokerServiceImp.toStoredFileName(filename);
+        String name = null;
         try {
-            if (file.isEmpty()) {
-                throw new StorageException("Failed to store empty file " + filename);
-            }
-            Objects.requireNonNull(filename);
-            if (filename.contains("..")) {
-                throw new StorageException(
-                        "Cannot store file with relative path outside current directory "
-                                + filename);
-            }
-            Objects.requireNonNull(extension);
-            Xml xml = saveXmlFile(file.getInputStream(), filename);
-            String name = xml.getValueByXPath("//invoker/name");
+            name = invokerServiceImp.storeInvokerFile(file.getInputStream(), targetFileName);
             FileDTO fileDTO = new FileDTO(name);
 
             // update invoker sync table to store latest files information
@@ -368,8 +328,12 @@ public class FileController {
 
             return ResponseEntity.ok(fileDTO);
         }
+        catch (GeneralServiceException e) {
+            // the invoker was rejected before anything was written - report the reason as it is
+            throw e;
+        }
         catch (Exception e) {
-            invokerServiceImp.delete(FileNameUtils.removeExtension(filename));
+            invokerServiceImp.deleteQuietly(name);
             throw new StorageException("Failed to store file " + filename, e);
         }
     }
@@ -413,12 +377,12 @@ public class FileController {
 
             while ((zipEntry = zis.getNextEntry()) != null) {
                 try {
-                    if (zipEntry.isDirectory() || !zipEntry.getName().endsWith(".xml")) {
+                    if (zipEntry.isDirectory() || !zipEntry.getName().toLowerCase(Locale.ROOT).endsWith(".xml")) {
                         continue;
                     }
 
-                    Xml xml = saveXmlFile(zis, zipEntry.getName());
-                    String name = xml.getValueByXPath("//invoker/name");
+                    String name = invokerServiceImp.storeInvokerFile(
+                            zis, invokerServiceImp.toStoredFileName(zipEntry.getName()));
 
                     fileDTOList.add(new FileDTO(name));
 
@@ -430,45 +394,14 @@ public class FileController {
             }
 
             return ResponseEntity.ok(fileDTOList);
+        } catch (GeneralServiceException e) {
+            fileDTOList.forEach(f -> invokerServiceImp.deleteQuietly(f.getId()));
+            throw e;
         } catch (Exception e) {
-            fileDTOList.forEach(f -> invokerServiceImp.delete(f.getId()));
+            fileDTOList.forEach(f -> invokerServiceImp.deleteQuietly(f.getId()));
             throw new StorageException("Failed to store file " + filename, e);
         }
     }
-
-    private Xml saveXmlFile(InputStream inputStream, String filename) {
-        try {
-            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            InputStream copyIS = getInputStreamCopy(inputStream);
-            Document doc = dBuilder.parse(copyIS);
-            doc.setDocumentURI(PathConstant.INVOKER + filename);
-            Xml xml = new Xml(doc, filename);
-            xml.save(); // TODO: add to invokerServiceImpl
-            invokerServiceImp.save(doc);
-            copyIS.close();
-            return xml;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    private InputStream getInputStreamCopy(InputStream originInputStream) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-        try {
-            while ((bytesRead = originInputStream.read(buffer)) > -1 ) {
-                baos.write(buffer, 0, bytesRead);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return new ByteArrayInputStream(baos.toByteArray());
-    }
-
 
     /**
      * @deprecated Connector icon management has moved to the connector resource itself.

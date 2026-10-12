@@ -6,6 +6,7 @@ import { GenericViewWizard } from '@/engine/entity/runtime/genererics/GenericVie
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
 import {entityRegistry} from "@/engine/entity/EntityRegistry.ts";
 import {useFetchEntitiesQuery} from "@shared/api/genericApi.ts";
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
     entityName: string;
@@ -18,6 +19,7 @@ export const GenericViewPage: React.FC<Props> = ({ entityName }) => {
     const id = rawId ? decodeURIComponent(rawId) : rawId;
 
     const entity = entityRegistry.get(entityName);
+    const { t: tCommon } = useI18n('common');
 
     // 🔥 fetch entity
     // A mutation elsewhere (e.g. a command-palette delete of this same record)
@@ -54,7 +56,7 @@ export const GenericViewPage: React.FC<Props> = ({ entityName }) => {
     }
 
     if (!record) {
-        return <div>Not found</div>;
+        return <div>{tCommon('notFound.entity')}</div>;
     }
 
 

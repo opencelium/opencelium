@@ -244,13 +244,31 @@ public class YamlConfigWriter {
         Node value = tuple.getValueNode();
         int keyStartLine = markLine(keyScalar);
         int keyIndent = markColumn(keyScalar);
+
+        boolean newIsContainer = newValue.isObject() || newValue.isArray();
+        boolean oldIsScalar = value instanceof ScalarNode;
+        boolean oldIsEmpty = value instanceof ScalarNode s && s.getValue().isEmpty();
+
+        if (oldIsEmpty) {
+            // A key with no value (`username:`, `url: `) has no text on disk to
+            // overwrite, and snakeyaml gives its empty scalar degenerate marks:
+            // a zero-width point immediately after the `:` — or, when a trailing
+            // comment follows the colon, a point on the *next* line entirely.
+            // Splicing at either would produce `username:Test123` or swallow the following line
+            if (!newIsContainer) {
+                edits.add(new FillEmptyValue(
+                        markEndLine(keyScalar), markEndColumn(keyScalar), emitScalar(newValue)));
+                return;
+            }
+            edits.add(new ReplaceLineRange(
+                    keyStartLine, keyStartLine, renderEntry(keyScalar.getValue(), newValue, keyIndent)));
+            return;
+        }
+
         int valueStartLine = markLine(value);
         int valueEndLine = markEndLine(value);
         int valueStartCol = markColumn(value);
         int valueEndCol = markEndColumn(value);
-
-        boolean newIsContainer = newValue.isObject() || newValue.isArray();
-        boolean oldIsScalar = value instanceof ScalarNode;
 
         if (oldIsScalar && !newIsContainer && valueStartLine == valueEndLine && valueStartLine == keyStartLine) {
             String emitted = emitScalar(newValue);
@@ -347,7 +365,8 @@ public class YamlConfigWriter {
         return new ApplicationConfigWriteException("YAML node has no source position");
     }
 
-    private sealed interface Edit permits ReplaceInLine, ReplaceLineRange, InsertAfter, CommentLineRange {
+    private sealed interface Edit
+            permits ReplaceInLine, FillEmptyValue, ReplaceLineRange, InsertAfter, CommentLineRange {
         int sortKey();
 
         void apply(List<String> lines);
@@ -398,6 +417,43 @@ public class YamlConfigWriter {
             int safeStart = Math.min(startCol, safeEnd);
             String replaced = original.substring(0, safeStart) + newText + original.substring(safeEnd);
             lines.set(line, replaced);
+        }
+    }
+
+    /**
+     * Writes a value into a key that currently has none. Unlike
+     * {@link ReplaceInLine} this does not trust the value node's marks — an
+     * empty scalar has none worth trusting — but re-finds the {@code :} from
+     * the end of the key and rebuilds the line around it, guaranteeing exactly
+     * one space between colon and value. Any whitespace already sitting after
+     * the colon is collapsed into that single space, and a trailing comment is
+     * preserved with a space of its own.
+     */
+    private record FillEmptyValue(int line, int keyEndCol, String newText) implements Edit {
+        @Override
+        public int sortKey() {
+            return line;
+        }
+
+        @Override
+        public void apply(List<String> lines) {
+            if (line < 0 || line >= lines.size()) {
+                return;
+            }
+            String original = lines.get(line);
+            int colon = original.indexOf(':', Math.min(Math.max(keyEndCol, 0), original.length()));
+            if (colon < 0) {
+                throw new ApplicationConfigWriteException(
+                        "Cannot write value: no ':' found on line " + (line + 1) + ": " + original);
+            }
+            int tail = colon + 1;
+            while (tail < original.length()
+                    && (original.charAt(tail) == ' ' || original.charAt(tail) == '\t')) {
+                tail++;
+            }
+            String rest = original.substring(tail);
+            lines.set(line, original.substring(0, colon + 1) + " " + newText
+                    + (rest.isEmpty() ? "" : " " + rest));
         }
     }
 
