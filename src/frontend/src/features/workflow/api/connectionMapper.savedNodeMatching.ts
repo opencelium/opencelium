@@ -29,6 +29,14 @@ export const mergeSavedNodeData = (
 	};
 };
 
+const matchesConnectorMethod = (saved: SavedUiNode, entry: IndexedWorkflowEntry) => {
+	const connectorId = saved.data?.connector?.connectorId;
+	if (connectorId == null || connectorId !== entry.node.data.connector?.connectorId) return false;
+	const savedName = saved.name ?? saved.data?.methodConfig?.name ?? saved.data?.subtitle;
+	return !!savedName && [entry.source?.name, entry.source?.label, entry.node.data.subtitle]
+		.some((name) => normalizeMatchValue(name) === normalizeMatchValue(savedName));
+};
+
 const normalizeMatchValue = (value: unknown) => String(value ?? '').trim().toLowerCase();
 const typeMatches = (
 	savedType: WorkflowNodeModel['type'] | undefined,
@@ -59,6 +67,11 @@ export const findSavedNode = (
 		});
 		if (match) return match;
 	}
+	if (entry) {
+		const matches = savedUiNodes.filter((saved) => !usedSavedNodeIds.has(saved.id)
+			&& typeMatches(saved.type, node.type) && matchesConnectorMethod(saved, entry));
+		if (matches.length === 1) return matches[0];
+	}
 };
 
 export const findEntryForSavedNode = (
@@ -83,4 +96,7 @@ export const findEntryForSavedNode = (
 		});
 		if (match) return match;
 	}
+	const matches = entries.filter((entry) => !usedEntryIds.has(entry.node.id)
+		&& typeMatches(savedNode.type, entry.node.type) && matchesConnectorMethod(savedNode, entry));
+	if (matches.length === 1) return matches[0];
 };

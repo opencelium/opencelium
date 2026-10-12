@@ -1,58 +1,99 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, type Dispatch, type SetStateAction } from 'react';
 import type { HistoryVersionItem } from '../types/history.types';
-import type { WorkflowConnectionState } from '../api/connectionMapper';
-import { loadWorkflowConnection } from '../api/connectionService';
-import { EMPTY_DESCRIPTION_LABEL, EMPTY_NAME_LABEL,
-	toDisplayDescription } from '../utils/workflowPage.utils';
+import { mapConnectionToWorkflowState, type WorkflowConnectionState } from '../api/connectionMapper';
+import type { Connector } from '@entities/connector/model/types';
+import { findDeletedConnectorGroups, repairDeletedConnectors } from '../api/deletedConnectorRepair';
+import { loadWorkflowConnectionData } from '../api/connectionService';
+import { EMPTY_DESCRIPTION_LABEL, EMPTY_NAME_LABEL, toDisplayDescription } from '../utils/workflowPage.utils';
 
-export const useWorkflowConnectionState = (connectionId?: string) => {
-	const [createdConnectionId, setCreatedConnectionId] = useState<string>();
-	const [headerState, setHeaderState] = useState({
-		title: EMPTY_NAME_LABEL,
-		description: EMPTY_DESCRIPTION_LABEL,
+type ConnectionState = {
+	pendingRepair: Awaited<ReturnType<typeof loadWorkflowConnectionData>> | null;
+	loadFailed: boolean;
+	loadAttempt: number;
+	isLoading: boolean;
+	createdConnectionId: string | undefined;
+	headerState: { title: string; description: string };
+	persistedTitle: string;
+	fieldBindings: WorkflowConnectionState['fieldBindings'] | undefined;
+	historyVersions: HistoryVersionItem[];
+	selectedHistoryVersionId: string | null;
+	categoryId: number | null;
+};
+type Update = Partial<ConnectionState> | ((state: ConnectionState) => Partial<ConnectionState>);
+const updateConnection = (state: ConnectionState, update: Update): ConnectionState =>
+	({ ...state, ...(typeof update === 'function' ? update(state) : update) });
+
+export const useWorkflowConnectionState = (connectionId?: string, connectors?: Connector[], connectorLoadFailed = false, connectorsRefreshing = false) => {
+	const [state, dispatch] = useReducer(updateConnection, {
+		pendingRepair: null, loadFailed: false, loadAttempt: 0, isLoading: Boolean(connectionId),
+		createdConnectionId: undefined,
+		headerState: { title: EMPTY_NAME_LABEL, description: EMPTY_DESCRIPTION_LABEL },
+		persistedTitle: '', fieldBindings: undefined, historyVersions: [], selectedHistoryVersionId: null, categoryId: null,
 	});
-	const [persistedTitle, setPersistedTitle] = useState('');
-	const [fieldBindings, setFieldBindings] = useState<any[] | undefined>();
-	const [historyVersions, setHistoryVersions] = useState<HistoryVersionItem[]>([]);
-	const [selectedHistoryVersionId, setSelectedHistoryVersionId] = useState<string | null>(null);
-	const [categoryId, setCategoryId] = useState<number | null>(null);
+	const { pendingRepair, loadAttempt } = state;
+	const repairAppliedRef = useRef<(() => void) | null>(null);
 	const applyConnectionRef = useRef<((state: WorkflowConnectionState) => void) | null>(null);
-	const [isLoading, setIsLoading] = useState(Boolean(connectionId));
+	const setters = useMemo(() => {
+		const setField = <K extends keyof ConnectionState>(key: K): Dispatch<SetStateAction<ConnectionState[K]>> =>
+			(value) => dispatch((previous) => ({
+				[key]: typeof value === 'function'
+					? (value as (current: ConnectionState[K]) => ConnectionState[K])(previous[key]) : value,
+			}) as Partial<ConnectionState>);
+		return {
+			setCreatedConnectionId: setField('createdConnectionId'), setHeaderState: setField('headerState'),
+			setPersistedTitle: setField('persistedTitle'), setFieldBindings: setField('fieldBindings'),
+			setHistoryVersions: setField('historyVersions'), setSelectedHistoryVersionId: setField('selectedHistoryVersionId'),
+			setCategoryId: setField('categoryId'),
+		};
+	}, []);
+	const retryLoad = () => dispatch((previous) => ({ loadAttempt: previous.loadAttempt + 1 }));
+	const applyState = useCallback((loaded: WorkflowConnectionState) => {
+		applyConnectionRef.current?.(loaded);
+		dispatch((previous) => ({
+			pendingRepair: null,
+			headerState: { title: loaded.title, description: toDisplayDescription(loaded.description) },
+			persistedTitle: loaded.title, fieldBindings: loaded.fieldBindings, categoryId: loaded.categoryId,
+			historyVersions: loaded.versions,
+			selectedHistoryVersionId: previous.selectedHistoryVersionId
+				&& loaded.versions.some((version) => version.id === previous.selectedHistoryVersionId)
+				? previous.selectedHistoryVersionId
+				: loaded.versions.find((version) => version.current)?.id ?? loaded.versions[0]?.id ?? null,
+		}));
+	}, []);
+	const mappingGroups = useMemo(() => pendingRepair && connectors && !connectorLoadFailed
+		? findDeletedConnectorGroups(pendingRepair.payload, connectors) : [], [pendingRepair, connectors, connectorLoadFailed]);
+	const confirmRepair = (mapping: Record<number, number>, created: Connector[] = []) => {
+		const available = [...(connectors ?? []), ...created];
+		if (!pendingRepair || !connectors || connectorLoadFailed || connectorsRefreshing || !mappingGroups.length) return;
+		if (!mappingGroups.every((group) => available.some((connector) =>
+			connector.connectorId === mapping[group.oldConnectorId]
+			&& (!group.invokerName || connector.invoker?.name?.toLowerCase() === group.invokerName.toLowerCase())))) return;
+		const payload = repairDeletedConnectors(pendingRepair.payload, mapping, available);
+		applyState({ ...mapConnectionToWorkflowState(payload), versions: pendingRepair.versions });
+		repairAppliedRef.current?.();
+	};
 
 	useEffect(() => {
-		setCreatedConnectionId(undefined);
-		setCategoryId(null);
-		if (!connectionId) {
-			setIsLoading(false);
-			return;
-		}
+		dispatch({ pendingRepair: null, loadFailed: false, createdConnectionId: undefined, categoryId: null, isLoading: Boolean(connectionId) });
+		if (!connectionId) return;
 		let cancelled = false;
-		setIsLoading(true);
-		loadWorkflowConnection(connectionId).then((state) => {
-			if (cancelled) return;
-			applyConnectionRef.current?.(state);
-			setHeaderState({ title: state.title,
-				description: toDisplayDescription(state.description) });
-			setPersistedTitle(state.title);
-			setFieldBindings(state.fieldBindings);
-			setCategoryId(state.categoryId);
-			setHistoryVersions(state.versions);
-			setSelectedHistoryVersionId((selectedId) =>
-				selectedId && state.versions.some((version) => version.id === selectedId)
-					? selectedId
-					: state.versions.find((version) => version.current)?.id ??
-						state.versions[0]?.id ?? null);
+		loadWorkflowConnectionData(connectionId).then((data) => {
+			if (!cancelled) dispatch({ pendingRepair: data });
+		}).catch(() => {
+			if (!cancelled) dispatch({ loadFailed: true });
 		}).finally(() => {
-			if (!cancelled) setIsLoading(false);
+			if (!cancelled) dispatch({ isLoading: false });
 		});
-		return () => {
-			cancelled = true;
-		};
-	}, [connectionId]);
+		return () => { cancelled = true; };
+	}, [connectionId, loadAttempt]);
 
-	return { createdConnectionId, setCreatedConnectionId, headerState, setHeaderState,
-		persistedTitle, setPersistedTitle, fieldBindings, setFieldBindings,
-		historyVersions, setHistoryVersions, selectedHistoryVersionId,
-		setSelectedHistoryVersionId, categoryId, setCategoryId,
-		applyConnectionRef, isLoading };
+	useEffect(() => {
+		if (!pendingRepair || !connectors || connectorLoadFailed || connectorsRefreshing || mappingGroups.length) return;
+		applyState({ ...mapConnectionToWorkflowState(pendingRepair.payload), versions: pendingRepair.versions });
+	}, [pendingRepair, connectors, connectorLoadFailed, connectorsRefreshing, mappingGroups, applyState]);
+
+	const { createdConnectionId, headerState, persistedTitle, fieldBindings, historyVersions, selectedHistoryVersionId, categoryId } = state;
+	return { createdConnectionId, headerState, persistedTitle, fieldBindings, historyVersions, selectedHistoryVersionId, categoryId,
+		...setters, loadFailed: state.loadFailed || connectorLoadFailed, retryLoad, mappingGroups,
+		confirmRepair, repairAppliedRef, applyConnectionRef, isLoading: state.isLoading || !!pendingRepair };
 };

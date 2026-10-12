@@ -76,7 +76,8 @@ export function mapConnectionToWorkflowState(
 		: entries.length > 0 && savedUiEdges.length > 0 && !hasUnmatchedEntries && !invalidSavedEdgeReason;
 	const edges = useSavedEdges ? savedUiEdges : entries.length ? buildEdges(entries) : initialEdges;
 	const shouldAutoLayout = entries.length > 0
-		&& ((!restoredFromUi && savedUiNodes.length === 0) || hasStackedNodes(nodes));
+		&& !restoredFromUi
+		&& (savedUiNodes.length === 0 || (usedSavedNodeIds.size < builtNodes.length && hasStackedNodes(nodes)));
 	const positionedNodes = shouldAutoLayout ? normalizeWorkflowPositions(nodes, edges) : nodes;
 	const normalizedNodes = backfillMissingInvokerNames(
 		withLeafState(assignMissingMethodColors(positionedNodes), edges),

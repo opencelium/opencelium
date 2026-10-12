@@ -1,4 +1,13 @@
 {
+  "loadError": {
+    "title": "Could not load the workflow",
+    "description": "The workflow or connector list could not be loaded. Try again or return to the workflow list.",
+    "retry": "Try again"
+  },
+  "deletedConnectorMapping": {
+    "title": "Replace deleted connectors",
+    "intro": "This workflow uses deleted connectors. Choose a replacement for each connector to open the repaired workflow. Changes are saved only when you save the workflow."
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",

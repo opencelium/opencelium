@@ -1,8 +1,10 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { message } from 'antd';
+import { WorkflowLoadError } from './components/WorkflowLoadError/WorkflowLoadError';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './styles.css';
+import { TemplateConnectorMappingDialog } from './components/template/TemplateConnectorMappingDialog/TemplateConnectorMappingDialog';
 import { WorkflowPageHeader } from './components/WorkflowPageHeader/WorkflowPageHeader';
 import { WorkflowNodeEditors } from './components/WorkflowNodeEditors/WorkflowNodeEditors';
 import { WorkflowPanels } from './components/WorkflowPanels/WorkflowPanels';
@@ -23,6 +25,7 @@ type WorkflowProps = {
 };
 
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
+  const navigate = useNavigate();
   const { connectionId } = useParams<{ connectionId: string }>();
   const { t } = useI18n('workflow');
   useDuplicatedWorkflowHint();
@@ -30,7 +33,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   // for why paused does not count as locked.
   const [isTestRunLocked, setIsTestRunLocked] = useState(false);
   const { connection, workflow, connectors, invokers, view, changes, derived,
-    isLoading } = useWorkflowPageState({ connectionId, readOnly,
+    isLoading, retryLoad } = useWorkflowPageState({ connectionId, readOnly,
       leaveConfirmMessage: t('messages.unsavedLeaveConfirm') });
   const { headerState, setHeaderState, fieldBindings: loadedFieldBindings,
     setFieldBindings: setLoadedFieldBindings,
@@ -57,7 +60,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const actions = useWorkflowActions({ connectionId, readOnly, isTestRunLocked,
     page: { connection, workflow, connectors, invokers, view, changes, derived,
-      isLoading } });
+      isLoading, retryLoad } });
   const { validation, saveWorkflow: handleSave, category, templates: templateActions,
     history: historyActions, canvas, header, buildTestPayload, isShortcutsOpen,
     setIsShortcutsOpen, schedulesOpen, setSchedulesOpen, changeHistoryOpen,
@@ -77,6 +80,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     isUploadingTemplate, uploadTemplateInLoadDialog, closeLoadTemplateDialog, isApplyingTemplate,
     connectorMappingDialogOpen, connectorMappingGroups, applySelectedTemplate,
     handleConfirmConnectorMapping, handleCancelConnectorMapping } = templateActions;
+
+  if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate('/workflow')} />;
 
   return (
     <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title}
@@ -103,6 +108,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           readOnly: readOnly || isTestRunLocked, testRunLocked: isTestRunLocked,
           loading: isConnectionLoading,
           hasSavedConnection: !!activeConnectionId }} />
+      <TemplateConnectorMappingDialog open={connection.mappingGroups.length > 0}
+        purpose="repair" groups={connection.mappingGroups} connectors={connectors} invokers={invokers}
+        onConfirm={connection.confirmRepair} onCancel={() => navigate('/workflow')} />
       <WorkflowPageDialogs
         templates={{
           save: { open: templateDialogOpen, name: templateName,

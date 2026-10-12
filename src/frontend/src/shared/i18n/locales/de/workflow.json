@@ -1,4 +1,13 @@
 {
+  "loadError": {
+    "title": "Workflow konnte nicht geladen werden",
+    "description": "Der Workflow oder die Konnektorliste konnte nicht geladen werden. Versuchen Sie es erneut oder kehren Sie zur Workflow-Liste zurück.",
+    "retry": "Erneut versuchen"
+  },
+  "deletedConnectorMapping": {
+    "title": "Gelöschte Konnektoren ersetzen",
+    "intro": "Dieser Workflow verwendet gelöschte Konnektoren. Wählen Sie für jeden Konnektor einen Ersatz, um den reparierten Workflow zu öffnen. Änderungen werden erst gespeichert, wenn Sie den Workflow speichern."
+  },
   "actions": {
     "save": "Speichern",
     "cancel": "Abbrechen",
