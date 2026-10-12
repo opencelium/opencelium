@@ -1,0 +1,125 @@
+# CRA: generate CycloneDX SBOMs for every OpenCelium release, attach them to the
+# GitHub release and archive them (WORM) in Azure Blob Storage.
+name: SBOM
+
+on:
+  release:
+    types: [published]
+  # manual run to backfill SBOMs for existing tags (e.g. v5.1)
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag, e.g. v5.1'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  sbom:
+    runs-on: ubuntu-24.04
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+    - name: checkout the source code
+      uses: actions/checkout@v7
+      with:
+        ref: ${{ env.TAG }}
+
+    - name: set up Java 17
+      uses: actions/setup-java@v6
+      with:
+        distribution: temurin
+        java-version: '17'
+
+    - name: set up Node.js
+      uses: actions/setup-node@v7
+      with:
+        node-version: '24'
+
+    # Backend: CycloneDX Gradle plugin, injected via init script so build.gradle stays
+    # untouched. It resolves the runtimeClasspath WITHOUT compiling the code.
+    # The project wrapper (Gradle 7.5.1) cannot load current Jackson jars and the
+    # plugin 1.x only supports CycloneDX 1.4 (BSI TR-03183-2 requires >= 1.5), so a
+    # newer Gradle is used for this step only.
+    - name: set up Gradle 8 (SBOM only)
+      uses: gradle/actions/setup-gradle@v6
+      with:
+        gradle-version: '8.14.3'
+
+    - name: generate SBOM (backend)
+      working-directory: src/backend
+      run: |
+        cat > "$RUNNER_TEMP/cyclonedx.init.gradle" <<'GRADLE'
+        initscript {
+          repositories {
+            maven { url "https://plugins.gradle.org/m2/" }
+          }
+          dependencies {
+            classpath "org.cyclonedx:cyclonedx-gradle-plugin:2.4.1"
+          }
+        }
+        rootProject {
+          apply plugin: org.cyclonedx.gradle.CycloneDxPlugin
+          cyclonedxBom {
+            includeConfigs = ["runtimeClasspath"]
+            projectType = "application"
+            jsonOutput = file("build/reports/sbom/bom.json")
+            includeLicenseText = false
+          }
+        }
+        GRADLE
+        gradle --no-daemon --init-script "$RUNNER_TEMP/cyclonedx.init.gradle" cyclonedxBom
+        mkdir -p "$GITHUB_WORKSPACE/sbom"
+        cp build/reports/sbom/bom.json "$GITHUB_WORKSPACE/sbom/opencelium-${TAG//\//-}-backend.cdx.json"
+
+    # Frontend: no lockfile in the repo -> resolve exact versions without installing
+    - name: resolve frontend dependency versions
+      working-directory: src/frontend
+      run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+    - name: generate SBOM (frontend)
+      uses: anchore/sbom-action@v0
+      with:
+        path: src/frontend
+        format: cyclonedx-json
+        output-file: sbom/opencelium-${{ env.TAG }}-frontend.cdx.json
+        upload-artifact: false
+        upload-release-assets: false
+
+    - name: check SBOMs are not empty
+      run: |
+        for f in sbom/*.cdx.json; do
+          n=$(jq '.components | length' "$f")
+          v=$(jq -r '.specVersion' "$f")
+          echo "$f: CycloneDX $v, $n components"
+          if [ "$n" -lt 10 ]; then echo "::error::$f has only $n components"; exit 1; fi
+          # BSI TR-03183-2 requires CycloneDX >= 1.5
+          case "$v" in 1.5|1.6|1.7) ;; *) echo "::error::$f uses CycloneDX $v (< 1.5)"; exit 1;; esac
+        done
+
+    - name: store SBOMs as workflow artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: sbom
+        path: sbom/*.cdx.json
+        if-no-files-found: error
+
+    - name: attach SBOMs to GitHub release
+      run: |
+        if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          gh release upload "$TAG" sbom/*.cdx.json --clobber --repo "$GITHUB_REPOSITORY"
+        else
+          echo "No GitHub release for $TAG - skipping release upload"
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }}
+
+    - name: archive SBOMs in Azure Blob Storage
+      run: |
+        az storage blob upload-batch \
+          --destination sbom \
+          --destination-path "opencelium/${TAG//\//-}" \
+          --source sbom --pattern "*.cdx.json"
+      env:
+        AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.SBOM_STORAGE_CONN }}

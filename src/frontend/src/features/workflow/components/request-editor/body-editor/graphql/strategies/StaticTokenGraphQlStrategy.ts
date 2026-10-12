@@ -8,7 +8,7 @@ export const staticTokenGraphQlStrategy: GraphQlAuthStrategy = {
         return { ok: true, accessToken: connector.requestData?.token ?? '' }
     },
 
-    async query({ url, accessToken, sslOn, query, variables, operationName }: GraphQlQueryParams): Promise<GraphQlQueryOutcome> {
+    async query({ url, accessToken, trustAnyCertificate, query, variables, operationName }: GraphQlQueryParams): Promise<GraphQlQueryOutcome> {
         const result = await remoteApiRequest<GraphQlQueryResult>({
             url,
             method: 'POST',
@@ -17,7 +17,7 @@ export const staticTokenGraphQlStrategy: GraphQlAuthStrategy = {
                 Authorization: `Token ${accessToken}`,
             },
             body: { query, variables, operationName },
-            sslOn,
+            trustAnyCertificate,
         })
 
         return result.ok ? { ok: true, result: result.data } : { ok: false, error: result.error }

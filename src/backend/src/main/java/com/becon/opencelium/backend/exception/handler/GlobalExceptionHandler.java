@@ -1,11 +1,15 @@
 package com.becon.opencelium.backend.exception.handler;
 
+import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.exception.JumpValidationException;
+import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.error.JumpValidationErrorResource;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,6 +20,10 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import java.time.Instant;
 import java.util.Date;
 
+// Must run before ResponseExceptionHandler: Spring stops at the first advice with any
+// matching method, and its catch-all Exception handler would otherwise shadow these ones.
+// Without an explicit order, which advice goes first depends on jar entry order.
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(value = NoHandlerFoundException.class)
@@ -51,6 +59,16 @@ public class GlobalExceptionHandler {
         errorResource.setStatus(ex.getStatus());
         return ResponseEntity.status(ex.getStatus())
                 .body(errorResource);
+    }
+
+    @ExceptionHandler(WrongDecryptException.class)
+    public ResponseEntity<ErrorResource> handleWrongDecryptException(WrongDecryptException ex) {
+        ErrorResource errorResource = new ErrorResource();
+        errorResource.setMessage(ex.getMessage());
+        errorResource.setError(ExceptionConstant.DECRYPTION_FAILED);
+        errorResource.setTimestamp(Date.from(Instant.now()));
+        errorResource.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.internalServerError().body(errorResource);
     }
 
     @ExceptionHandler(StorageFileNotFoundException.class)

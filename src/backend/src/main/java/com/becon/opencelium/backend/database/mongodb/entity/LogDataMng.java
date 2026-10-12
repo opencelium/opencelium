@@ -1,10 +1,9 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
-import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -12,9 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Document(collection = "log_data")
-@CompoundIndex(name = "exec_connection_flowchart_indexPath_idx",
-        def = "{'executionId': 1, 'connectionId': 1, 'flowId': 1, 'indexPath': 1}",
-        unique = true)
 public class LogDataMng {
     @Id
     private String id;

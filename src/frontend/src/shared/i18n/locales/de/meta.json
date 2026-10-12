@@ -2,19 +2,19 @@
   "step": {
     "field": {
       "general_section": {
-        "label": "General"
+        "label": "Allgemein"
       },
       "ui_section": {
-        "label": "UI"
+        "label": "Oberfläche"
       },
       "table_section": {
-        "label": "Table"
+        "label": "Tabelle"
       },
       "validation_section": {
-        "label": "Validation"
+        "label": "Validierung"
       },
       "policy_section": {
-        "label": "Access Policy"
+        "label": "Zugriffsrichtlinie"
       }
     }
   }
