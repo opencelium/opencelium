@@ -2,9 +2,14 @@ import type { EndpointArg } from '../../../types/connection';
 import { getReferenceDisplayLabel } from '../shared/referenceDisplay';
 import { createId as createStableId } from '@shared/lib/createId';
 
-export const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
-export const URL_FORBIDDEN_INPUT_RE = /[\u0000-\u001F\u007F<>`|\\^[\]]/g;
-const URL_FORBIDDEN_INPUT_SINGLE_RE = /[\u0000-\u001F\u007F<>`|\\^[\]]/;
+export const PROHIBITED_ENDPOINT_CHARACTERS = ['Enter'];
+export const URL_FORBIDDEN_INPUT_RE = /[\u0000-\u001F\u007F]/g;
+const URL_FORBIDDEN_INPUT_SINGLE_RE = /[\u0000-\u001F\u007F]/;
+// The backend passes the static path to java.net.URI unencoded, which rejects
+// these characters there, so the path is stored with them percent-encoded and
+// shown decoded. Only these codes are decoded, so e.g. %2F keeps its meaning.
+const PATH_UNSAFE_RE = /[ "<>`|\\^[\]]/g;
+const PATH_UNSAFE_ENCODED_RE = /%(20|22|3C|3E|5B|5C|5D|5E|60|7C)/gi;
 const CARET_BOUNDARY = '\u200B';
 
 export const ARG_TOKEN_RE = /(#{%\s*([A-Za-z0-9_-]+)\s*%})/g;
@@ -311,6 +316,26 @@ export const sanitizeUrlInputValue = (s: string) =>
 
 export const shouldBlockUrlKeyInput = (key: string) =>
 	key.length === 1 && URL_FORBIDDEN_INPUT_SINGLE_RE.test(key);
+
+const mapEndpointPath = (endpoint: string, transform: (path: string) => string) => {
+	const { base, queryRaw, hasQuestion } = splitEndpoint(endpoint);
+	return hasQuestion ? `${transform(base)}?${queryRaw}` : transform(base);
+};
+
+export const encodeEndpointPath = (endpoint: string) =>
+	mapEndpointPath(endpoint, (path) => transformQueryTextPreservingRefs(path,
+		(text) => text.replace(PATH_UNSAFE_RE,
+			(char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)));
+
+// Reference tokens (#{%<uuid>%}) are skipped: a uuid starting with e.g. "5b" would
+// otherwise read as an encoded "[".
+export const decodeEndpointPath = (endpoint: string) =>
+	mapEndpointPath(endpoint, (path) => transformQueryTextPreservingRefs(path,
+		(text) => text.replace(PATH_UNSAFE_ENCODED_RE,
+			(_match, hex: string) => String.fromCharCode(parseInt(hex, 16)))));
+
+export const toEditableEndpoint = (stored: string) =>
+	decodeEndpointPath(decodeEndpointQuery(stripMockActiveFromEndpoint(stored || '')));
 
 const transformQueryTextPreservingRefs = (
 	value: string,
