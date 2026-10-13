@@ -108,6 +108,9 @@ const OBJECT_WILDCARD = '*';
 // object the path points at. The backend only honours it as the last segment.
 const KEY_NAMES_SUFFIX = "['*']~";
 const LENGTH_SUFFIX = '.length()';
+// Some hosts (the condition dialog) pass paths without `$.`, so a root-array
+// `$.length()` can arrive as a bare `length()`.
+const LENGTH_TAIL_RE = /(?:^|\.)length\(\)$/;
 
 const isObjectNode = (value: unknown): value is Record<string, unknown> =>
   isRecord(value) && !isArrayNode(value);
@@ -253,7 +256,7 @@ export const isExpandableReferencePath = (
 
 // The backend's tail operators (`['k']~`, `[i]~`) and `.length()` aren't schema
 // keys — only the path in front of them can be checked against the response shape.
-const PATH_TAIL_OPERATOR_RE = /(?:\['[^'[\]]*']~|\[[a-z0-9*]+]~|\.length\(\))$/;
+const PATH_TAIL_OPERATOR_RE = /(?:\['[^'[\]]*']~|\[[a-z0-9*]+]~|(?:^|\.)length\(\))$/;
 
 // The invoker declared the field but nothing below it (an empty object, or an
 // array without an item shape), so any path through it is plausible.
@@ -373,8 +376,8 @@ export const readLiveValueAtPath = (
     const base = readLiveValueAtPath(source, path.slice(0, -KEY_NAMES_SUFFIX.length), resolveIteratorIndex);
     return isRecord(base) ? Object.keys(base) : undefined;
   }
-  if (path.endsWith(LENGTH_SUFFIX)) {
-    const base = readLiveValueAtPath(source, path.slice(0, -LENGTH_SUFFIX.length), resolveIteratorIndex);
+  if (LENGTH_TAIL_RE.test(path)) {
+    const base = readLiveValueAtPath(source, path.replace(LENGTH_TAIL_RE, ''), resolveIteratorIndex);
     return Array.isArray(base) ? base.length : undefined;
   }
   const parts = normalizePath(path).match(PATH_RE) || [];
