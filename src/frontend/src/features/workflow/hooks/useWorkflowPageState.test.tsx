@@ -68,6 +68,13 @@ describe('workflow page loading', () => {
 		act(() => result.current.connection.confirmRepair({ 2: 10 }));
 		expect(mocks.setGraph).toHaveBeenCalledOnce();
 	});
+	it('keeps the editor open while connectors refetch after the initial load', async () => {
+		const { result, rerender } = renderHook(usePage);
+		await waitFor(() => expect(result.current.isLoading).toBe(false));
+		mocks.query.isFetching = true;
+		rerender();
+		expect(result.current.isLoading).toBe(false);
+	});
 	it('retries both the workflow and connector requests', async () => {
 		mocks.query.isError = true;
 		const { result, rerender } = renderHook(usePage);
