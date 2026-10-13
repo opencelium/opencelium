@@ -10,6 +10,7 @@ import de from '@entities/connectionTemplate/i18n/de.json'
 import type { ConnectionTemplate } from '@entities/connectionTemplate/model/types'
 import { ConnectionTemplateUploadButton } from '@entities/connectionTemplate/components/ConnectionTemplateUploadButton'
 import { ConnectionTemplateDownloadAction } from '@entities/connectionTemplate/components/ConnectionTemplateDownloadAction'
+import { ConnectionTemplateEditAction } from '@entities/connectionTemplate/components/ConnectionTemplateEditAction'
 import {
     pickConnectionTemplateFile,
     uploadConnectionTemplate,
@@ -39,6 +40,11 @@ export const connectionTemplateDefinition: EntityDefinition = {
         defaultSort: { field: 'name', direction: 'asc' },
         bulkDelete: true,
         actions: [
+            {
+                type: 'custom',
+                key: 'edit',
+                render: ({ row, rowId }) => <ConnectionTemplateEditAction row={row} rowId={rowId} />,
+            },
             {
                 type: 'custom',
                 key: 'download',

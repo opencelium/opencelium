@@ -16,6 +16,25 @@
       "tooLarge": "Die Workflow-Vorlagendatei darf 1 GB nicht überschreiten.",
       "archiveTooLarge": "Das Workflow-Vorlagenarchiv darf 1 GB nicht überschreiten."
     },
+    "edit": {
+      "tooltip": "Als JSON bearbeiten",
+      "title": "Workflow-Vorlage als JSON bearbeiten",
+      "success": "Vorlage gespeichert: {{name}}",
+      "error": "Vorlage konnte nicht gespeichert werden.",
+      "loadError": "Vorlage konnte nicht geladen werden.",
+      "applyConfirm": {
+        "title": "Vorlage speichern?",
+        "message": "Beim Speichern wird die gespeicherte Workflow-Vorlage durch dieses JSON ersetzt."
+      },
+      "forceApplyConfirm": {
+        "title": "Ungültiges Vorlagen-JSON erzwungen speichern?",
+        "message": "Validierungsfehler werden ignoriert. Dadurch kann die Vorlage ungültig werden. Fortfahren?"
+      },
+      "errors": {
+        "schema": "{{path}}: {{reason}}",
+        "idChanged": "{{path}}: Die Vorlagen-ID kann nicht geändert werden."
+      }
+    },
     "download": {
       "tooltip": "Herunterladen",
       "success": "Vorlage heruntergeladen: {{name}}",
