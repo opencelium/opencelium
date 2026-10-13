@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { getReferenceOptions, isExpandableReferencePath } from '../requestReferenceOptions';
+import { getReferenceOptions, isExpandableReferencePath, isUnknownReferencePath } from '../requestReferenceOptions';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
 import { getReferenceFilterTerm } from '../../reference-generator/referenceGenerator.utils';
 
@@ -52,6 +52,8 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
     searchValue: type === 'status' ? 'status' : displayPath,
     isDisabled: disabled || type === 'status',
     open: disabled || type === 'status' ? false : open,
+    // Only once the user stops typing — a half-typed key is always "unknown".
+    isUnknownPath: !open && isUnknownReferencePath(method, type, path, iterators),
     notFoundContent: undefined,
     onSearch: (nextValue: string) => {
       if (!userInteractionRef.current) return;

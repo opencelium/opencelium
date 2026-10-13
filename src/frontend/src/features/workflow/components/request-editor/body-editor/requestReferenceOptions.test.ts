@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MethodWithId } from '../../../types/connection';
 import { buildReferenceValue, getReferenceOptions, isExpandableReferencePath,
-	readLiveValueAtPath } from './requestReferenceOptions';
+	isUnknownReferencePath, readLiveValueAtPath } from './requestReferenceOptions';
 
 const body = {
 	node: {
@@ -127,5 +127,45 @@ describe('getReferenceOptions — array length', () => {
 		expect(readLiveValueAtPath(data, '$.servers.length()', resolve)).toBe(2);
 		expect(readLiveValueAtPath(data, '$.servers[-1].tags.length()', resolve)).toBe(0);
 		expect(readLiveValueAtPath(data, '$.servers[0].name.length()', resolve)).toBeUndefined();
+	});
+});
+
+describe('isUnknownReferencePath', () => {
+	const shape = {
+		node: { name: '', object1: { title: '' } },
+		servers: [{ name: '', tags: [] }],
+		declaredOnly: {},
+		untypedList: [],
+	};
+	const shapeMethod = { response: { success: { body: { type: 'object', fields: shape } } } } as unknown as MethodWithId;
+	const isUnknown = (path: string, iterators: string[] = []) =>
+		isUnknownReferencePath(shapeMethod, 'body', path, iterators);
+
+	it('flags a key the declared shape does not have', () => {
+		expect(isUnknown('node.titel')).toBe(true);
+		expect(isUnknown('$.node.object1.missing')).toBe(true);
+		expect(isUnknown('node.name.deeper')).toBe(true);
+	});
+
+	it('accepts every path the picker can generate', () => {
+		['node.object1.title', 'node.*.title', "node['*']~", 'servers[0].name', 'servers[-1].tags',
+			'servers[*].name', 'servers.length()', '$', '']
+			.forEach((path) => expect(isUnknown(path), path).toBe(false));
+	});
+
+	it('accepts typed array indexes and for-in iterator keys', () => {
+		expect(isUnknown('servers[3].name')).toBe(false);
+		expect(isUnknown('servers[j].name')).toBe(false);
+		expect(isUnknown("node['i'].title", ['i'])).toBe(false);
+	});
+
+	it('does not judge paths below a field the invoker declared without children', () => {
+		expect(isUnknown('declaredOnly.anything.deeper')).toBe(false);
+		expect(isUnknown('untypedList[0].id')).toBe(false);
+	});
+
+	it('only checks the response body', () => {
+		expect(isUnknownReferencePath(shapeMethod, 'header', 'X-Unknown')).toBe(false);
+		expect(isUnknownReferencePath(undefined, 'body', 'node.titel')).toBe(false);
 	});
 });
