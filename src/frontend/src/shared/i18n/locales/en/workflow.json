@@ -813,6 +813,7 @@
     "firstArrayElement": "First element of the array",
     "lastArrayElement": "Last element of the array",
     "wholeArray": "The whole array",
+    "arrayLength": "Number of elements",
     "allKeyNames": "All key names",
     "iteratorLoop": "({{iterator}} loop)",
     "noVariableReferences": "No variable references",
