@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { MethodWithId } from '../../../types/connection';
-import { getIteratorsForMethod, getReferenceOptions, isExpandableReferencePath,
+import { getIteratorsForMethod, getReferenceOptions, isExpandableReferencePath, matchesReferenceOptionSyntax,
 	type ReferencePathOption, type ResponseType } from '../body-editor/requestReferenceOptions';
 import type { ReferenceOption } from './ReferenceGenerator.types';
 import { getReferenceFilterTerm } from './referenceGenerator.utils';
@@ -35,7 +35,8 @@ export function useReferenceFieldActions(params: Params) {
 		}
 		const term = getReferenceFilterTerm(value);
 		const filtered = options(params.responseType, value).filter((option) => !term
-			|| option.label.toLowerCase().includes(term) || option.value.toLowerCase().includes(term));
+			|| option.label.toLowerCase().includes(term) || option.value.toLowerCase().includes(term)
+			|| matchesReferenceOptionSyntax(option, term));
 		params.setFilteredOptions(filtered);
 		params.setSelectedOption(filtered.find((option) => option.value === value) ?? null);
 	};
