@@ -817,6 +817,8 @@
     "allKeyNames": "Alle Schlüsselnamen",
     "iteratorLoop": "({{iterator}}-Schleife)",
     "unknownPath": "Dieses Feld ist nicht in der Antwortstruktur der gewählten Methode enthalten. Die Ausführung schlägt fehl, wenn es in der echten Antwort fehlt.",
+    "listResult": "Liste",
+    "listResultHint": "Liefert eine Liste aller Treffer, auch wenn nur einer passt.",
     "noVariableReferences": "Keine Variablenreferenzen",
     "more": "mehr",
     "pausedHint": "Bewegen Sie den Mauszeiger über eine hervorgehobene Referenz, um den ermittelten Wert zu sehen.",
