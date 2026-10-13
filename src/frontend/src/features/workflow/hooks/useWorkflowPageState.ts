@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { selectAuthUser } from '@entities/auth/model/authSelectors';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
 import { useGetInvokersQuery } from '@entities/invoker/api/invokerApi';
@@ -63,7 +63,13 @@ export const useWorkflowPageState = ({ connectionId, readOnly,
 		historyVersions: connection.historyVersions,
 		authUser,
 	});
-	const isLoading = connection.isLoading || isConnectorsLoading || isConnectorsFetching || connection.loadFailed;
+	// The connector list must be fresh before the first graph is shown (deleted-connector
+	// detection), but later refetches — e.g. the sidebar mounting its own subscription
+	// under the global refetchOnMountOrArgChange — must not blank the open editor.
+	const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+	const isConnectorsBlocking = isConnectorsLoading || (isConnectorsFetching && !hasInitiallyLoaded);
+	const isLoading = connection.isLoading || isConnectorsBlocking || connection.loadFailed;
+	if (!isLoading && !hasInitiallyLoaded) setHasInitiallyLoaded(true);
 	const retryLoad = () => {
 		connection.retryLoad();
 		void refetchConnectors();
