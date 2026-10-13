@@ -10,10 +10,12 @@ const TAG_TOOLTIP_Z_INDEX = 30000;
 export function ReferenceOptionLabel({ option }: { option: ReferencePathOption }) {
   const { t } = useI18n('workflow');
   const isList = isListReferencePath(option.value);
-  if (option.kind === 'field' && !isList) return <>{option.label}</>;
+  // The native title sits on the text alone, so hovering a tag shows only that tag's tooltip.
+  const text = <span className='referenceOptionLabelText' title={option.label}>{option.label}</span>;
+  if (option.kind === 'field' && !isList) return text;
   return (
     <span className='referenceOptionLabel'>
-      <span className='referenceOptionLabelText'>{option.label}</span>
+      {text}
       <span className='referenceOptionLabelTags'>
         {option.kind === 'operation' && (
           <Tooltip content={option.description} placement='right' zIndex={TAG_TOOLTIP_Z_INDEX} maxWidth={280}>
