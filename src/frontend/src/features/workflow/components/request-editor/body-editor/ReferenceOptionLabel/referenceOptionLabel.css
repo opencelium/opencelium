@@ -1,0 +1,22 @@
+.referenceOptionLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.referenceOptionLabelText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.referenceListBadge {
+  flex-shrink: 0;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--color-status-info-fg);
+  background: var(--color-status-info-bg);
+}
