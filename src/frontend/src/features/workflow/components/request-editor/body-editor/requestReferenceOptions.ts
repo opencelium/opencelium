@@ -238,6 +238,9 @@ export const getReferenceOptions = (
   return options;
 };
 
+export const matchesReferenceOptionSyntax = (option: ReferencePathOption, term: string) =>
+  option.kind === 'operation' && !!term && option.syntax.toLowerCase().startsWith(term);
+
 const OPTION_GROUP_ORDER: ReferencePathOptionKind[] = ['operation', 'field'];
 
 export const REFERENCE_GROUP_LABEL_KEY: Record<ReferencePathOptionKind, string> = {

@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { getReferenceOptions, isExpandableReferencePath, isUnknownReferencePath } from '../requestReferenceOptions';
+import { getReferenceOptions, isExpandableReferencePath, isUnknownReferencePath,
+  matchesReferenceOptionSyntax } from '../requestReferenceOptions';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
 import { getReferenceFilterTerm } from '../../reference-generator/referenceGenerator.utils';
 
@@ -27,7 +28,8 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
   }, [iterators, method, type, value]);
 
   const options = useMemo(() => getReferenceOptions(method, type, optionsBase, iterators, t)
-    .filter(({ label }) => !filterTerm || label.toLowerCase().startsWith(filterTerm)),
+    .filter((option) => !filterTerm || option.label.toLowerCase().startsWith(filterTerm)
+      || matchesReferenceOptionSyntax(option, filterTerm)),
   [filterTerm, iterators, method, optionsBase, type, t]);
 
   const focusInputToEnd = () => requestAnimationFrame(() => {

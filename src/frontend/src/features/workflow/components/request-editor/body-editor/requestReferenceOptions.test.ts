@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MethodWithId } from '../../../types/connection';
-import { buildReferenceValue, getReferenceOptions, groupReferenceOptions, isExpandableReferencePath,
+import { buildReferenceValue, getReferenceOptions, groupReferenceOptions, matchesReferenceOptionSyntax, isExpandableReferencePath,
 	isListReferencePath, isUnknownReferencePath, readLiveValueAtPath } from './requestReferenceOptions';
 
 const body = {
@@ -258,5 +258,24 @@ describe('getReferenceOptions — operation descriptions', () => {
 			'references.firstArrayElementHint', 'references.lastArrayElementHint', 'references.wholeArrayHint',
 			'references.arrayLengthHint', 'references.iteratorLoopHint({"iterator":"i"})',
 		]);
+	});
+});
+
+describe('matchesReferenceOptionSyntax', () => {
+	const servers = { servers: [{ name: '' }] };
+	const arrayMethod = { response: { success: { body: { type: 'object', fields: servers } } } } as unknown as MethodWithId;
+	const matching = (path: string, term: string) => getReferenceOptions(arrayMethod, 'body', path)
+		.filter((option) => matchesReferenceOptionSyntax(option, term)).map(({ value }) => value);
+
+	it('finds operations by the syntax they write', () => {
+		expect(matching('servers', '[')).toEqual(['servers[0]', 'servers[-1]', 'servers[*]']);
+		expect(matching('servers', '[-')).toEqual(['servers[-1]']);
+		expect(matching('servers', 'len')).toEqual(['servers.length()']);
+		expect(matching('servers[0]', "['")).toEqual(["servers[0]['*']~"]);
+	});
+
+	it('never matches fields or an empty term', () => {
+		expect(matching('servers[0]', 'na')).toEqual([]);
+		expect(matching('servers', '')).toEqual([]);
 	});
 });
