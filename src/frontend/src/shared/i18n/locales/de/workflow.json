@@ -814,6 +814,8 @@
     "lastArrayElement": "Letztes Element des Arrays",
     "wholeArray": "Das gesamte Array",
     "arrayLength": "Anzahl der Elemente",
+    "anyProperty": "Beliebige Eigenschaft",
+    "anyPropertyHint": "Trifft auf jede Eigenschaft dieses Objekts zu. Mit einem Feldnamen fortfahren, um dieses Feld aus allen auszuwählen.",
     "allKeyNames": "Alle Schlüsselnamen",
     "iteratorLoop": "({{iterator}}-Schleife)",
     "unknownPath": "Dieses Feld ist nicht in der Antwortstruktur der gewählten Methode enthalten. Die Ausführung schlägt fehl, wenn es in der echten Antwort fehlt.",
