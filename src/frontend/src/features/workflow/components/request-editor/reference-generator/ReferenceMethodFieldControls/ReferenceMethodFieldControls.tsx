@@ -26,13 +26,15 @@ export function ReferenceMethodFieldControls(props: ReferenceMethodFieldControls
             checked={props.responseType === type} onChange={() => props.onResponseTypeChange(type)}
             label={<span className="referenceTypeLabel">{RESPONSE_LABELS[type]}</span>} />)}
         </div>}
-        <Tooltip content={props.fieldWarning ?? null} zIndex={FIELD_WARNING_Z_INDEX} maxWidth={320}>
-          <input ref={props.fieldInputRef} type="text" value={props.searchValue}
-            onChange={(event) => props.onSearchChange(event.target.value)}
-            onFocus={props.onFieldFocus} onBlur={props.onFieldBlur}
-            placeholder={props.fieldPlaceholder} disabled={props.fieldDisabled}
-            className={props.fieldWarning ? 'referenceFieldInput referenceFieldInputWarning' : 'referenceFieldInput'} />
-        </Tooltip>
+        <div className="referenceFieldInputHost">
+          <Tooltip content={props.fieldWarning ?? null} zIndex={FIELD_WARNING_Z_INDEX} maxWidth={320}>
+            <input ref={props.fieldInputRef} type="text" value={props.searchValue}
+              onChange={(event) => props.onSearchChange(event.target.value)}
+              onFocus={props.onFieldFocus} onBlur={props.onFieldBlur}
+              placeholder={props.fieldPlaceholder} disabled={props.fieldDisabled}
+              className={props.fieldWarning ? 'referenceFieldInput referenceFieldInputWarning' : 'referenceFieldInput'} />
+          </Tooltip>
+        </div>
       </div>
     </div>
   </div>;
