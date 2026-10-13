@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MethodWithId } from '../../../types/connection';
-import { buildReferenceValue, getReferenceOptionTitle, getReferenceOptions, groupReferenceOptions, isExpandableReferencePath,
+import { buildReferenceValue, getReferenceOptions, groupReferenceOptions, isExpandableReferencePath,
 	isListReferencePath, isUnknownReferencePath, readLiveValueAtPath } from './requestReferenceOptions';
 
 const body = {
@@ -240,8 +240,23 @@ describe('getReferenceOptions — any property', () => {
 			.toBeUndefined();
 	});
 
-	it('carries a hint in its hover title', () => {
-		const option = anyProperty('node.');
-		expect(option && getReferenceOptionTitle(option)).toBe('references.anyProperty — references.anyPropertyHint');
+});
+
+describe('getReferenceOptions — operation descriptions', () => {
+	const descriptions = (target: MethodWithId, path: string, iterators: string[] = []) =>
+		getReferenceOptions(target, 'body', path, iterators, (key, values) =>
+			values ? `${key}(${JSON.stringify(values)})` : key)
+			.flatMap((option) => option.kind === 'operation' ? [option.description] : []);
+
+	it('describes every operation with its `<labelKey>Hint` key', () => {
+		expect(descriptions(method, '')).toEqual([
+			'references.rootObjectHint', 'references.anyPropertyHint', 'references.allKeyNamesHint',
+		]);
+		const servers = { servers: [{ name: '' }] };
+		const arrayMethod = { response: { success: { body: { type: 'object', fields: servers } } } } as unknown as MethodWithId;
+		expect(descriptions(arrayMethod, 'servers', ['i'])).toEqual([
+			'references.firstArrayElementHint', 'references.lastArrayElementHint', 'references.wholeArrayHint',
+			'references.arrayLengthHint', 'references.iteratorLoopHint({"iterator":"i"})',
+		]);
 	});
 });
