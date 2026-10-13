@@ -2,7 +2,7 @@ import { useEffect, type Dispatch, type RefObject, type SetStateAction } from 'r
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { MethodWithId } from '../../../types/connection';
 import { getIteratorsForMethod, getReferenceOptions,
-	type ResponseType } from '../body-editor/requestReferenceOptions';
+	type ReferencePathOption, type ResponseType } from '../body-editor/requestReferenceOptions';
 import type { ReferenceOption } from './ReferenceGenerator.types';
 import type { useReferenceDropdowns } from './useReferenceDropdowns';
 
@@ -22,7 +22,7 @@ type Params = {
 	setResponseType: Setter<ResponseType>;
 	setSearchValue: Setter<string>;
 	setSelectedOption: Setter<ReferenceOption | null>;
-	setFilteredOptions: Setter<ReferenceOption[]>;
+	setFilteredOptions: Setter<ReferencePathOption[]>;
 };
 
 export function useReferenceGeneratorEffects(params: Params) {

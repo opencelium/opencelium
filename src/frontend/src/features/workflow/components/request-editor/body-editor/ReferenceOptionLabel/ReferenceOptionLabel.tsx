@@ -1,17 +1,21 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { isListReferencePath } from '../requestReferenceOptions';
+import { isListReferencePath, type ReferencePathOption } from '../requestReferenceOptions';
 import './referenceOptionLabel.css';
 
-type ReferenceOptionLabelProps = { label: string; value: string };
-
-export function ReferenceOptionLabel({ label, value }: ReferenceOptionLabelProps) {
+export function ReferenceOptionLabel({ option }: { option: ReferencePathOption }) {
   const { t } = useI18n('workflow');
-  if (!isListReferencePath(value)) return <>{label}</>;
+  const isList = isListReferencePath(option.value);
+  if (option.kind === 'field' && !isList) return <>{option.label}</>;
   return (
     <span className='referenceOptionLabel'>
-      <span className='referenceOptionLabelText'>{label}</span>
-      <span className='referenceListBadge' title={t('references.listResultHint')}>
-        {t('references.listResult')}
+      <span className='referenceOptionLabelText'>{option.label}</span>
+      <span className='referenceOptionLabelTags'>
+        {option.kind === 'operation' && <code className='referenceOptionSyntax'>{option.syntax}</code>}
+        {isList && (
+          <span className='referenceListBadge' title={t('references.listResultHint')}>
+            {t('references.listResult')}
+          </span>
+        )}
       </span>
     </span>
   );
