@@ -20,4 +20,5 @@ export type ReferenceMethodFieldControlsProps = {
   onFieldBlur: () => void;
   fieldPlaceholder: string;
   fieldDisabled: boolean;
+  fieldWarning?: string;
 };

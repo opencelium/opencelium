@@ -1,5 +1,7 @@
 import { Select } from 'antd';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
 import { useLegacyResponseFieldSelect } from './useLegacyResponseFieldSelect';
 import '../bodyLegacy.css';
@@ -10,8 +12,10 @@ const DEFAULT_POPUP_Z_INDEX = 13010;
 
 export function LegacyResponseFieldSelect({ method, type, value, disabled, iterators = [], popupZIndex, onChange }: LegacyResponseFieldSelectProps) {
   const state = useLegacyResponseFieldSelect({ method, type, value, disabled, iterators, onChange });
+  const { t } = useI18n('workflow');
+  const zIndex = popupZIndex ?? DEFAULT_POPUP_Z_INDEX;
 
-  return (
+  const field = (
     <div
       ref={state.wrapperRef}
       className='selectCopyHost'
@@ -33,7 +37,8 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
         showSearch
         filterOption={false}
         getPopupContainer={() => document.body}
-        styles={{ popup: { root: { zIndex: popupZIndex ?? DEFAULT_POPUP_Z_INDEX } } }}
+        styles={{ popup: { root: { zIndex } } }}
+        status={state.isUnknownPath ? 'warning' : undefined}
         options={state.options}
         notFoundContent={state.notFoundContent}
         open={state.open}
@@ -45,5 +50,12 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
         allowClear
       />
     </div>
+  );
+
+  // Always mounted so toggling the warning doesn't remount the field and drop focus.
+  return (
+    <Tooltip content={state.isUnknownPath ? t('references.unknownPath') : null} zIndex={zIndex} maxWidth={320}>
+      {field}
+    </Tooltip>
   );
 }
