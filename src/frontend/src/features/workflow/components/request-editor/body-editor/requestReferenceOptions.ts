@@ -225,6 +225,12 @@ export const getReferenceOptions = (
   return options;
 };
 
+// Paths whose resolved value is a list: a wildcard fans out (JsonPath returns all
+// matches, even a single one, as a list), `[*]` is the array itself, and
+// `['*']~` is the list of key names.
+export const isListReferencePath = (path: string) =>
+  path.endsWith(KEY_NAMES_SUFFIX) || !isSingleMatchPath(path);
+
 export const buildReferenceValue = (color: string, type: ResponseType, path: string) => {
   const normalizedPath = normalizeRootArrayPath(path);
   if (type === 'status') return `${color}.(response).status`;

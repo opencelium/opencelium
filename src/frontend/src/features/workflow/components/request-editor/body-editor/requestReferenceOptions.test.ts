@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MethodWithId } from '../../../types/connection';
 import { buildReferenceValue, getReferenceOptions, isExpandableReferencePath,
-	isUnknownReferencePath, readLiveValueAtPath } from './requestReferenceOptions';
+	isListReferencePath, isUnknownReferencePath, readLiveValueAtPath } from './requestReferenceOptions';
 
 const body = {
 	node: {
@@ -167,5 +167,17 @@ describe('isUnknownReferencePath', () => {
 	it('only checks the response body', () => {
 		expect(isUnknownReferencePath(shapeMethod, 'header', 'X-Unknown')).toBe(false);
 		expect(isUnknownReferencePath(undefined, 'body', 'node.titel')).toBe(false);
+	});
+});
+
+describe('isListReferencePath', () => {
+	it('marks paths that resolve to a list', () => {
+		['node.*.title', 'node.*', 'servers[*]', 'servers[*].name', "node['*']~", "$.['*']~"]
+			.forEach((path) => expect(isListReferencePath(path), path).toBe(true));
+	});
+
+	it('leaves single-value paths unmarked', () => {
+		['node.object1.title', 'servers[0].name', 'servers[-1]', 'servers[i].name', 'servers.length()', '$']
+			.forEach((path) => expect(isListReferencePath(path), path).toBe(false));
 	});
 });
