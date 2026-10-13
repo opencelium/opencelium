@@ -3,6 +3,7 @@ import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { ReferenceOptionLabel } from '../ReferenceOptionLabel/ReferenceOptionLabel';
+import { groupReferenceOptions, REFERENCE_GROUP_LABEL_KEY } from '../requestReferenceOptions';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
 import { useLegacyResponseFieldSelect } from './useLegacyResponseFieldSelect';
 import '../bodyLegacy.css';
@@ -44,8 +45,12 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
           getPopupContainer={() => document.body}
           styles={{ popup: { root: { zIndex } } }}
           status={state.isUnknownPath ? 'warning' : undefined}
-          options={state.options.map((option) => ({
-            value: option.value, label: <ReferenceOptionLabel label={option.label} value={option.value} />,
+          options={groupReferenceOptions(state.options).map((group) => ({
+            key: group.kind,
+            label: t(REFERENCE_GROUP_LABEL_KEY[group.kind]),
+            options: group.options.map((option) => ({
+              value: option.value, label: <ReferenceOptionLabel option={option} />,
+            })),
           }))}
           notFoundContent={state.notFoundContent}
           open={state.open}
