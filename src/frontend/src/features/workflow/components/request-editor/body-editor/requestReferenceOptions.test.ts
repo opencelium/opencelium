@@ -153,6 +153,14 @@ describe('isUnknownReferencePath', () => {
 			.forEach((path) => expect(isUnknown(path), path).toBe(false));
 	});
 
+	it('accepts a bare root `length()`, as the condition dialog passes it without `$.`', () => {
+		const rootArrayMethod = { response: { success: { body: { type: 'array', fields: [{ id: '' }] } } } } as unknown as MethodWithId;
+		expect(isUnknownReferencePath(rootArrayMethod, 'body', 'length()')).toBe(false);
+		expect(isUnknownReferencePath(rootArrayMethod, 'body', '$.length()')).toBe(false);
+		expect(isUnknownReferencePath(rootArrayMethod, 'body', 'size()')).toBe(true);
+		expect(readLiveValueAtPath([1, 2, 3], 'length()', () => null)).toBe(3);
+	});
+
 	it('accepts typed array indexes and for-in iterator keys', () => {
 		expect(isUnknown('servers[3].name')).toBe(false);
 		expect(isUnknown('servers[j].name')).toBe(false);
