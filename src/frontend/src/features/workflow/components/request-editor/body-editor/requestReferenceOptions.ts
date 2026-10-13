@@ -245,6 +245,46 @@ export const isExpandableReferencePath = (
   return readNodesAtPath(source, path, iterators).some((node) => isArrayNode(node) || isRecord(node));
 };
 
+// The backend's tail operators (`['k']~`, `[i]~`) and `.length()` aren't schema
+// keys — only the path in front of them can be checked against the response shape.
+const PATH_TAIL_OPERATOR_RE = /(?:\['[^'[\]]*']~|\[[a-z0-9*]+]~|\.length\(\))$/;
+
+// The invoker declared the field but nothing below it (an empty object, or an
+// array without an item shape), so any path through it is plausible.
+const isEmptyShape = (node: unknown) =>
+  node === undefined || (isObjectNode(node) && Object.keys(node).length === 0);
+
+const isUndescribedNode = (node: unknown) =>
+  isEmptyShape(node) || (isArrayNode(node) && isEmptyShape(getArrayItem(node)));
+
+// Lenient on what the picker never generates but a user may type: any array
+// index, and a for-in iterator used as an object key (`obj['i']`).
+const stepDeclaredNodes = (nodes: unknown[], part: string, iterators: string[]) => {
+  if (isArrayPathPart(part) && nodes.some(isArrayNode)) return nodes.filter(isArrayNode).map(getArrayItem);
+  const key = unquotePathPart(part);
+  if (key !== part && iterators.includes(key)) return stepNodes(nodes, OBJECT_WILDCARD, iterators);
+  return stepNodes(nodes, part, iterators);
+};
+
+// True only when the method's declared response body positively contradicts
+// the path; the backend fails the run on a missing property, so it's worth a warning.
+export const isUnknownReferencePath = (
+  method: MethodWithId | undefined,
+  type: ResponseType,
+  path: string,
+  iterators: string[] = [],
+) => {
+  if (type !== 'body' || !method) return false;
+  const parts = normalizePath(path.trim().replace(PATH_TAIL_OPERATOR_RE, '')).match(PATH_RE) || [];
+  let nodes: unknown[] = [getSource(method, type)];
+  for (const part of parts) {
+    if (nodes.some(isUndescribedNode)) return false;
+    nodes = stepDeclaredNodes(nodes, part, iterators);
+    if (nodes.length === 0) return true;
+  }
+  return false;
+};
+
 const parseIndexPath = (value: unknown) =>
   String(value ?? '')
     .split('_')
