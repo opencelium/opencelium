@@ -297,13 +297,7 @@
   },
   "json": {
     "title": "Workflow als JSON bearbeiten",
-    "reset": "Zurücksetzen",
-    "forceApply": "Erzwungen anwenden",
     "applied": "Workflow-JSON wurde übernommen.",
-    "discard": {
-      "title": "JSON-Änderungen verwerfen?",
-      "message": "Ihre nicht gespeicherten JSON-Änderungen gehen verloren."
-    },
     "applyConfirm": {
       "title": "Workflow ersetzen?",
       "message": "Beim Übernehmen wird der gesamte Workflow ersetzt und der Rückgängig-Verlauf dieser Sitzung gelöscht."
@@ -312,12 +306,7 @@
       "title": "Ungültiges Workflow-JSON erzwingen?",
       "message": "Validierungsfehler werden ignoriert. Dadurch kann der Workflow ungültig werden. Fortfahren?"
     },
-    "mode": {
-      "tree": "Baum",
-      "raw": "Rohtext"
-    },
     "errors": {
-      "syntax": "Ungültiges JSON: {{reason}}",
       "schema": "{{path}}: {{reason}}",
       "indexShape": "{{path}}: Der Index muss durch Unterstriche getrennte Zahlen enthalten.",
       "duplicateIndex": "{{path}}: Dieser Workflow-Index ist doppelt vorhanden.",

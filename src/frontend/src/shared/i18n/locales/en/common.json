@@ -197,5 +197,20 @@
     "offline": "No internet connection. Reconnect to use online services.",
     "syncDisabled": "Online services are disabled in the system configuration.",
     "portalUnreachable": "The Service Portal cannot be reached from this server. Check the portal settings and its access token."
+  },
+  "jsonEditor": {
+    "reset": "Reset",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "forceApply": "Force Apply",
+    "syntaxError": "Invalid JSON: {{reason}}",
+    "discard": {
+      "title": "Discard JSON changes?",
+      "message": "Your unsaved JSON changes will be lost."
+    },
+    "mode": {
+      "tree": "Tree",
+      "raw": "Raw"
+    }
   }
 }
