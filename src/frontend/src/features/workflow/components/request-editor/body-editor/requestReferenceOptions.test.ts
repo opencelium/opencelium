@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MethodWithId } from '../../../types/connection';
-import { getReferenceOptions, isExpandableReferencePath } from './requestReferenceOptions';
+import { buildReferenceValue, getReferenceOptions, isExpandableReferencePath,
+	readLiveValueAtPath } from './requestReferenceOptions';
 
 const body = {
 	node: {
@@ -33,8 +34,40 @@ describe('getReferenceOptions — object wildcard', () => {
 		expect(isExpandableReferencePath(method, 'body', 'node.*.title')).toBe(false);
 	});
 
-	it('leaves non-wildcard paths unchanged', () => {
-		expect(labels('node.')).toEqual(['name', 'object1', 'object2']);
-		expect(labels('node.object2.')).toEqual(['path', 'value', 'hostname']);
+	it('lists the keys of a non-wildcard object path', () => {
+		expect(labels('node.')).toEqual(['references.allKeyNames', 'name', 'object1', 'object2']);
+		expect(labels('node.object2.')).toEqual(['references.allKeyNames', 'path', 'value', 'hostname']);
+	});
+});
+
+const keyNamesOption = (path: string) =>
+	getReferenceOptions(method, 'body', path).find(({ label }) => label === 'references.allKeyNames');
+
+describe('getReferenceOptions — all key names', () => {
+	it("offers `['*']~` on a single object", () => {
+		expect(keyNamesOption('node.')?.value).toBe("node['*']~");
+		expect(keyNamesOption('node.object2.hostname.')?.value).toBe("node.object2.hostname['*']~");
+	});
+
+	it('offers it on the root object and builds a backend-readable reference', () => {
+		const rootValue = keyNamesOption('')?.value ?? '';
+		expect(buildReferenceValue('#C77E7E', 'body', rootValue)).toBe("#C77E7E.(response).body.$.['*']~");
+		expect(buildReferenceValue('#C77E7E', 'body', "node['*']~")).toBe("#C77E7E.(response).body.$.node['*']~");
+	});
+
+	it('is not offered once the path fans out, since the backend base would be a list', () => {
+		expect(keyNamesOption('node.*.')).toBeUndefined();
+		expect(keyNamesOption('node.*.owner.')).toBeUndefined();
+	});
+
+	it('is a leaf, not an expandable path', () => {
+		expect(isExpandableReferencePath(method, 'body', "node['*']~")).toBe(false);
+	});
+
+	it('resolves to the field names in a live value', () => {
+		const resolve = () => null;
+		expect(readLiveValueAtPath(body, "$.node['*']~", resolve)).toEqual(['name', 'object1', 'object2']);
+		expect(readLiveValueAtPath(body, "$.['*']~", resolve)).toEqual(['node']);
+		expect(readLiveValueAtPath(body, "$.node.name['*']~", resolve)).toBeUndefined();
 	});
 });
