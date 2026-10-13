@@ -71,3 +71,28 @@ describe('getReferenceOptions — all key names', () => {
 		expect(readLiveValueAtPath(body, "$.node.name['*']~", resolve)).toBeUndefined();
 	});
 });
+
+describe('getReferenceOptions — last array element', () => {
+	const servers = { servers: [{ name: 'web-01', ip: '10.0.0.1' }, { name: 'web-02', ip: '10.0.0.2' }] };
+	const arrayMethod = { response: { success: { body: { type: 'object', fields: servers } } } } as unknown as MethodWithId;
+	const options = (path: string) => getReferenceOptions(arrayMethod, 'body', path);
+
+	it('offers `[-1]` next to the first element on an array', () => {
+		expect(options('servers').map(({ value }) => value))
+			.toEqual(['servers[0]', 'servers[-1]', 'servers[*]']);
+		expect(options('servers').find(({ value }) => value === 'servers[-1]')?.label)
+			.toBe('references.lastArrayElement');
+	});
+
+	it('drills into the element fields after `[-1]`', () => {
+		expect(isExpandableReferencePath(arrayMethod, 'body', 'servers[-1]')).toBe(true);
+		expect(options('servers[-1].').map(({ label }) => label))
+			.toEqual(['references.allKeyNames', 'name', 'ip']);
+	});
+
+	it('resolves `[-1]` to the last element in a live value', () => {
+		const resolve = () => null;
+		expect(readLiveValueAtPath(servers, '$.servers[-1].name', resolve)).toBe('web-02');
+		expect(readLiveValueAtPath({ servers: [] }, '$.servers[-1]', resolve)).toBeUndefined();
+	});
+});

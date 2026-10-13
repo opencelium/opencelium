@@ -811,6 +811,7 @@
     "responseStatus": "Response Status",
     "rootObject": "The root object",
     "firstArrayElement": "First element of the array",
+    "lastArrayElement": "Last element of the array",
     "wholeArray": "The whole array",
     "allKeyNames": "All key names",
     "iteratorLoop": "({{iterator}} loop)",
