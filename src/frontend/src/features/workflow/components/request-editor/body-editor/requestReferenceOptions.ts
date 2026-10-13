@@ -104,6 +104,9 @@ const getArrayItem = (value: unknown) => {
 };
 
 const OBJECT_WILDCARD = '*';
+// OpenCelium's own operator (not JsonPath): resolves to the field names of the
+// object the path points at. The backend only honours it as the last segment.
+const KEY_NAMES_SUFFIX = "['*']~";
 
 const isObjectNode = (value: unknown): value is Record<string, unknown> =>
   isRecord(value) && !isArrayNode(value);
@@ -135,6 +138,11 @@ const appendPath = (base: string, part: string) => {
   if (base === '$') return `$.${serializedPart}`;
   return base ? `${base}${isArrayPathPart(serializedPart) ? '' : '.'}${serializedPart}` : serializedPart;
 };
+
+// The backend reads the base of `['*']~` with JsonPath; any multi-match segment
+// makes that base a list, which has no field names.
+const isSingleMatchPath = (path: string) =>
+  !(normalizePath(path).match(PATH_RE) || []).some((part) => part === OBJECT_WILDCARD || part === '[*]');
 
 const normalizeRootArrayPath = (path: string) => {
   if (path.startsWith('$[')) return `$.${path.slice(1)}`;
@@ -190,6 +198,10 @@ export const getReferenceOptions = (
         value: appendPath(lastValidPath, `[${iterator}]`),
       })),
     ];
+  }
+
+  if (nodes.length === 1 && isObjectNode(nodes[0]) && isSingleMatchPath(lastValidPath)) {
+    options.push({ label: t('references.allKeyNames'), value: `${lastValidPath}${KEY_NAMES_SUFFIX}` });
   }
 
   const keys = new Set(nodes.filter(isObjectNode).flatMap((node) => Object.keys(node)));
@@ -299,6 +311,10 @@ export const readLiveValueAtPath = (
   resolveIteratorIndex: (iteratorName: string) => number | null,
 ): unknown => {
   if (!path) return source;
+  if (path.endsWith(KEY_NAMES_SUFFIX)) {
+    const base = readLiveValueAtPath(source, path.slice(0, -KEY_NAMES_SUFFIX.length), resolveIteratorIndex);
+    return isRecord(base) ? Object.keys(base) : undefined;
+  }
   const parts = normalizePath(path).match(PATH_RE) || [];
   let current: unknown = source;
   for (const part of parts) {
