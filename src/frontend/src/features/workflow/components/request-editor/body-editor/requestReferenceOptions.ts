@@ -111,8 +111,12 @@ const KEY_NAMES_SUFFIX = "['*']~";
 const isObjectNode = (value: unknown): value is Record<string, unknown> =>
   isRecord(value) && !isArrayNode(value);
 
+const FIRST_ELEMENT = '[0]';
+const LAST_ELEMENT = '[-1]';
+
 const isArrayAccessPart = (part: string, iterators: string[]) =>
-  part === '[0]' || part === '[*]' || iterators.includes(getArrayAccessIterator(part));
+  part === FIRST_ELEMENT || part === LAST_ELEMENT || part === '[*]'
+  || iterators.includes(getArrayAccessIterator(part));
 
 // A `*` segment fans out over every child of an object, so a path no longer
 // points at one node but at a set of them; later segments apply to each match
@@ -191,7 +195,8 @@ export const getReferenceOptions = (
   if (nodes.length > 0 && nodes.every(isArrayNode)) {
     return [
       ...options,
-      { label: t('references.firstArrayElement'), value: appendPath(lastValidPath, '[0]') },
+      { label: t('references.firstArrayElement'), value: appendPath(lastValidPath, FIRST_ELEMENT) },
+      { label: t('references.lastArrayElement'), value: appendPath(lastValidPath, LAST_ELEMENT) },
       { label: t('references.wholeArray'), value: appendPath(lastValidPath, '[*]') },
       ...iterators.map((iterator) => ({
         label: t('references.iteratorLoop', { iterator }),
@@ -321,7 +326,9 @@ export const readLiveValueAtPath = (
     if (isArrayPathPart(part)) {
       if (!Array.isArray(current)) return undefined;
       if (part === '[*]') continue;
-      const index = part === '[0]' ? 0 : resolveIteratorIndex(getArrayAccessIterator(part));
+      const index = part === FIRST_ELEMENT ? 0
+        : part === LAST_ELEMENT ? current.length - 1
+        : resolveIteratorIndex(getArrayAccessIterator(part));
       if (index === null || index === undefined) return undefined;
       current = current[index];
       continue;

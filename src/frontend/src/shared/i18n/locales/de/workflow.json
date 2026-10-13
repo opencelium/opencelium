@@ -811,6 +811,7 @@
     "responseStatus": "Antwort-Status",
     "rootObject": "Das Wurzelobjekt",
     "firstArrayElement": "Erstes Element des Arrays",
+    "lastArrayElement": "Letztes Element des Arrays",
     "wholeArray": "Das gesamte Array",
     "allKeyNames": "Alle Schlüsselnamen",
     "iteratorLoop": "({{iterator}}-Schleife)",
