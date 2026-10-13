@@ -48,8 +48,10 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
           options={groupReferenceOptions(state.options).map((group) => ({
             key: group.kind,
             label: t(REFERENCE_GROUP_LABEL_KEY[group.kind]),
+            // `title` is antd's native hover text for an option: it lives inside the
+            // popup, so unlike a Tooltip it can't open behind the dialog stack.
             options: group.options.map((option) => ({
-              value: option.value, label: <ReferenceOptionLabel option={option} />,
+              value: option.value, title: option.label, label: <ReferenceOptionLabel option={option} />,
             })),
           }))}
           notFoundContent={state.notFoundContent}
