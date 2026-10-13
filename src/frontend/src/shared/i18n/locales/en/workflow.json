@@ -814,6 +814,8 @@
     "lastArrayElement": "Last element of the array",
     "wholeArray": "The whole array",
     "arrayLength": "Number of elements",
+    "anyProperty": "Any property",
+    "anyPropertyHint": "Matches every property of this object. Continue with a field name to pick that field from all of them.",
     "allKeyNames": "All key names",
     "iteratorLoop": "({{iterator}} loop)",
     "unknownPath": "This field is not in the response structure of the selected method. The run fails if it is missing from the real response.",

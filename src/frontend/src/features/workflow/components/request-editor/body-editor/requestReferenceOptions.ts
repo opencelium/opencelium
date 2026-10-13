@@ -4,7 +4,7 @@ export type ResponseType = 'body' | 'header' | 'status';
 
 export type ReferencePathOption =
   | { kind: 'field'; label: string; value: string }
-  | { kind: 'operation'; label: string; value: string; syntax: string };
+  | { kind: 'operation'; label: string; value: string; syntax: string; hint?: string };
 
 export type ReferencePathOptionKind = ReferencePathOption['kind'];
 
@@ -200,8 +200,8 @@ export const getReferenceOptions = (
   if (type === 'status') return [{ kind: 'field', label: t('references.responseStatus'), value: 'status' }];
   const { nodes, lastValidPath } = getContext(method, type, currentPath, iterators);
   const options: ReferencePathOption[] = [];
-  const operation = (label: string, value: string, syntax: string) =>
-    options.push({ kind: 'operation', label, value, syntax });
+  const operation = (label: string, value: string, syntax: string, hint?: string) =>
+    options.push({ kind: 'operation', label, value, syntax, hint });
 
   if (!normalizePath(currentPath)) operation(t('references.rootObject'), '$', '$');
 
@@ -215,6 +215,11 @@ export const getReferenceOptions = (
     iterators.forEach((iterator) => operation(t('references.iteratorLoop', { iterator }),
       appendPath(lastValidPath, `[${iterator}]`), `[${iterator}]`));
     return options;
+  }
+
+  if (nodes.some((node) => isObjectNode(node) && Object.keys(node).length > 0)) {
+    operation(t('references.anyProperty'), appendPath(lastValidPath, OBJECT_WILDCARD), OBJECT_WILDCARD,
+      t('references.anyPropertyHint'));
   }
 
   if (nodes.length === 1 && isObjectNode(nodes[0]) && isSingleMatchPath(lastValidPath)) {
@@ -232,6 +237,9 @@ export const getReferenceOptions = (
 };
 
 const OPTION_GROUP_ORDER: ReferencePathOptionKind[] = ['operation', 'field'];
+
+export const getReferenceOptionTitle = (option: ReferencePathOption) =>
+  option.kind === 'operation' && option.hint ? `${option.label} — ${option.hint}` : option.label;
 
 export const REFERENCE_GROUP_LABEL_KEY: Record<ReferencePathOptionKind, string> = {
   operation: 'references.operationsGroup',
