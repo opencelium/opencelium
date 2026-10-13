@@ -205,5 +205,20 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         user: {
             unknown: string
         }
+        jsonEditor: {
+            reset: string
+            cancel: string
+            apply: string
+            forceApply: string
+            syntaxError: string
+            discard: {
+                title: string
+                message: string
+            }
+            mode: {
+                tree: string
+                raw: string
+            }
+        }
     },
 }
