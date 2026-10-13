@@ -2,6 +2,7 @@ import { Select } from 'antd';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { ReferenceOptionLabel } from '../ReferenceOptionLabel/ReferenceOptionLabel';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
 import { useLegacyResponseFieldSelect } from './useLegacyResponseFieldSelect';
 import '../bodyLegacy.css';
@@ -39,7 +40,9 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
         getPopupContainer={() => document.body}
         styles={{ popup: { root: { zIndex } } }}
         status={state.isUnknownPath ? 'warning' : undefined}
-        options={state.options}
+        options={state.options.map((option) => ({
+          value: option.value, label: <ReferenceOptionLabel label={option.label} value={option.value} />,
+        }))}
         notFoundContent={state.notFoundContent}
         open={state.open}
         onSearch={state.onSearch}

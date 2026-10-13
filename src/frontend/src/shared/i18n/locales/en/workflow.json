@@ -817,6 +817,8 @@
     "allKeyNames": "All key names",
     "iteratorLoop": "({{iterator}} loop)",
     "unknownPath": "This field is not in the response structure of the selected method. The run fails if it is missing from the real response.",
+    "listResult": "list",
+    "listResultHint": "Returns a list of all matches, even when only one matches.",
     "noVariableReferences": "No variable references",
     "more": "more",
     "pausedHint": "Hover a highlighted reference to see the value it resolved to.",
