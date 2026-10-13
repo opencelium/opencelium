@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { MethodWithId } from '../../../types/connection';
 import { getIteratorsForMethod, getReferenceOptions, isExpandableReferencePath,
-	type ResponseType } from '../body-editor/requestReferenceOptions';
+	type ReferencePathOption, type ResponseType } from '../body-editor/requestReferenceOptions';
 import type { ReferenceOption } from './ReferenceGenerator.types';
 import { getReferenceFilterTerm } from './referenceGenerator.utils';
 import type { useReferenceDropdowns } from './useReferenceDropdowns';
@@ -13,7 +13,7 @@ type Params = { selectedMethod?: MethodWithId; responseType: ResponseType;
 	dropdowns: ReturnType<typeof useReferenceDropdowns>;
 	setResponseType: Setter<ResponseType>; setSearchValue: Setter<string>;
 	setSelectedOption: Setter<ReferenceOption | null>;
-	setFilteredOptions: Setter<ReferenceOption[]> };
+	setFilteredOptions: Setter<ReferencePathOption[]> };
 
 export function useReferenceFieldActions(params: Params) {
 	const { t } = useI18n('workflow');
@@ -51,7 +51,7 @@ export function useReferenceFieldActions(params: Params) {
 			requestAnimationFrame(() => { params.dropdowns.fieldInputRef.current?.focus();
 				params.dropdowns.updateFieldPosition(); }); }
 	};
-	const selectOption = (option: ReferenceOption) => {
+	const selectOption = (option: ReferencePathOption) => {
 		params.setSelectedOption(option); params.setSearchValue(option.value);
 		if (!params.selectedMethod) return;
 		if (option.value === '$' || option.value === '$.') {

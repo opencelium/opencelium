@@ -2,7 +2,13 @@ import { MethodType, OperatorType, type Connection, type LoopOperatorWithId, typ
 
 export type ResponseType = 'body' | 'header' | 'status';
 
-export type ReferenceOption = { label: string; value: string };
+export type ReferencePathOption =
+  | { kind: 'field'; label: string; value: string }
+  | { kind: 'operation'; label: string; value: string; syntax: string };
+
+export type ReferencePathOptionKind = ReferencePathOption['kind'];
+
+export type ReferencePathOptionGroup = { kind: ReferencePathOptionKind; options: ReferencePathOption[] };
 
 // Reverse a reference's color back to the method it points at. Case-
 // insensitive and '#'-stripped on both sides since the two reference parsers
@@ -190,43 +196,52 @@ export const getReferenceOptions = (
   currentPath = '',
   iterators: string[] = [],
   t: ReferenceLabelT = (key) => key,
-): ReferenceOption[] => {
-  if (type === 'status') return [{ label: t('references.responseStatus'), value: 'status' }];
+): ReferencePathOption[] => {
+  if (type === 'status') return [{ kind: 'field', label: t('references.responseStatus'), value: 'status' }];
   const { nodes, lastValidPath } = getContext(method, type, currentPath, iterators);
-  const options: ReferenceOption[] = [];
+  const options: ReferencePathOption[] = [];
+  const operation = (label: string, value: string, syntax: string) =>
+    options.push({ kind: 'operation', label, value, syntax });
 
-  if (!normalizePath(currentPath)) {
-    options.push({ label: t('references.rootObject'), value: '$' });
-  }
+  if (!normalizePath(currentPath)) operation(t('references.rootObject'), '$', '$');
 
   if (nodes.length > 0 && nodes.every(isArrayNode)) {
-    return [
-      ...options,
-      { label: t('references.firstArrayElement'), value: appendPath(lastValidPath, FIRST_ELEMENT) },
-      { label: t('references.lastArrayElement'), value: appendPath(lastValidPath, LAST_ELEMENT) },
-      { label: t('references.wholeArray'), value: appendPath(lastValidPath, '[*]') },
-      ...(nodes.length === 1 && isSingleMatchPath(lastValidPath)
-        ? [{ label: t('references.arrayLength'), value: appendLength(lastValidPath) }]
-        : []),
-      ...iterators.map((iterator) => ({
-        label: t('references.iteratorLoop', { iterator }),
-        value: appendPath(lastValidPath, `[${iterator}]`),
-      })),
-    ];
+    operation(t('references.firstArrayElement'), appendPath(lastValidPath, FIRST_ELEMENT), FIRST_ELEMENT);
+    operation(t('references.lastArrayElement'), appendPath(lastValidPath, LAST_ELEMENT), LAST_ELEMENT);
+    operation(t('references.wholeArray'), appendPath(lastValidPath, '[*]'), '[*]');
+    if (nodes.length === 1 && isSingleMatchPath(lastValidPath)) {
+      operation(t('references.arrayLength'), appendLength(lastValidPath), LENGTH_SUFFIX.slice(1));
+    }
+    iterators.forEach((iterator) => operation(t('references.iteratorLoop', { iterator }),
+      appendPath(lastValidPath, `[${iterator}]`), `[${iterator}]`));
+    return options;
   }
 
   if (nodes.length === 1 && isObjectNode(nodes[0]) && isSingleMatchPath(lastValidPath)) {
-    options.push({ label: t('references.allKeyNames'), value: `${lastValidPath}${KEY_NAMES_SUFFIX}` });
+    operation(t('references.allKeyNames'), `${lastValidPath}${KEY_NAMES_SUFFIX}`, KEY_NAMES_SUFFIX);
   }
 
   const keys = new Set(nodes.filter(isObjectNode).flatMap((node) => Object.keys(node)));
-  options.push(...[...keys].map((key) => ({
+  options.push(...[...keys].map((key): ReferencePathOption => ({
+    kind: 'field',
     label: key,
     value: appendPath(lastValidPath, key),
   })));
 
   return options;
 };
+
+const OPTION_GROUP_ORDER: ReferencePathOptionKind[] = ['operation', 'field'];
+
+export const REFERENCE_GROUP_LABEL_KEY: Record<ReferencePathOptionKind, string> = {
+  operation: 'references.operationsGroup',
+  field: 'references.fieldsGroup',
+};
+
+export const groupReferenceOptions = (options: ReferencePathOption[]): ReferencePathOptionGroup[] =>
+  OPTION_GROUP_ORDER
+    .map((kind) => ({ kind, options: options.filter((option) => option.kind === kind) }))
+    .filter((group) => group.options.length > 0);
 
 // Paths whose resolved value is a list: a wildcard fans out (JsonPath returns all
 // matches, even a single one, as a list), `[*]` is the array itself, and
