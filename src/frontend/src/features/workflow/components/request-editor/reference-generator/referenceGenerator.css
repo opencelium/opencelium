@@ -77,6 +77,10 @@
 	min-height: 32px;
 	height: 32px;
 }
+.referenceFieldInputHost {
+	flex: 1;
+	min-width: 0;
+}
 .referenceFieldInputWarning {
 	border-color: var(--color-status-warning-fg);
 }
