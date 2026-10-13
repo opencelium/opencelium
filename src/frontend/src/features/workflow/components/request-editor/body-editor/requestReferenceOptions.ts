@@ -107,6 +107,7 @@ const OBJECT_WILDCARD = '*';
 // OpenCelium's own operator (not JsonPath): resolves to the field names of the
 // object the path points at. The backend only honours it as the last segment.
 const KEY_NAMES_SUFFIX = "['*']~";
+const LENGTH_SUFFIX = '.length()';
 
 const isObjectNode = (value: unknown): value is Record<string, unknown> =>
   isRecord(value) && !isArrayNode(value);
@@ -147,6 +148,9 @@ const appendPath = (base: string, part: string) => {
 // makes that base a list, which has no field names.
 const isSingleMatchPath = (path: string) =>
   !(normalizePath(path).match(PATH_RE) || []).some((part) => part === OBJECT_WILDCARD || part === '[*]');
+
+// `length()` is a JsonPath function, not a key, so it must bypass appendPath's quoting.
+const appendLength = (base: string) => `${base && base !== '$' ? base : '$'}${LENGTH_SUFFIX}`;
 
 const normalizeRootArrayPath = (path: string) => {
   if (path.startsWith('$[')) return `$.${path.slice(1)}`;
@@ -198,6 +202,9 @@ export const getReferenceOptions = (
       { label: t('references.firstArrayElement'), value: appendPath(lastValidPath, FIRST_ELEMENT) },
       { label: t('references.lastArrayElement'), value: appendPath(lastValidPath, LAST_ELEMENT) },
       { label: t('references.wholeArray'), value: appendPath(lastValidPath, '[*]') },
+      ...(nodes.length === 1 && isSingleMatchPath(lastValidPath)
+        ? [{ label: t('references.arrayLength'), value: appendLength(lastValidPath) }]
+        : []),
       ...iterators.map((iterator) => ({
         label: t('references.iteratorLoop', { iterator }),
         value: appendPath(lastValidPath, `[${iterator}]`),
@@ -319,6 +326,10 @@ export const readLiveValueAtPath = (
   if (path.endsWith(KEY_NAMES_SUFFIX)) {
     const base = readLiveValueAtPath(source, path.slice(0, -KEY_NAMES_SUFFIX.length), resolveIteratorIndex);
     return isRecord(base) ? Object.keys(base) : undefined;
+  }
+  if (path.endsWith(LENGTH_SUFFIX)) {
+    const base = readLiveValueAtPath(source, path.slice(0, -LENGTH_SUFFIX.length), resolveIteratorIndex);
+    return Array.isArray(base) ? base.length : undefined;
   }
   const parts = normalizePath(path).match(PATH_RE) || [];
   let current: unknown = source;

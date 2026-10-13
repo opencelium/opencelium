@@ -79,7 +79,7 @@ describe('getReferenceOptions — last array element', () => {
 
 	it('offers `[-1]` next to the first element on an array', () => {
 		expect(options('servers').map(({ value }) => value))
-			.toEqual(['servers[0]', 'servers[-1]', 'servers[*]']);
+			.toEqual(['servers[0]', 'servers[-1]', 'servers[*]', 'servers.length()']);
 		expect(options('servers').find(({ value }) => value === 'servers[-1]')?.label)
 			.toBe('references.lastArrayElement');
 	});
@@ -94,5 +94,38 @@ describe('getReferenceOptions — last array element', () => {
 		const resolve = () => null;
 		expect(readLiveValueAtPath(servers, '$.servers[-1].name', resolve)).toBe('web-02');
 		expect(readLiveValueAtPath({ servers: [] }, '$.servers[-1]', resolve)).toBeUndefined();
+	});
+});
+
+describe('getReferenceOptions — array length', () => {
+	const data = { servers: [{ name: 'web-01', tags: ['a', 'b'] }, { name: 'web-02', tags: [] }] };
+	const arrayMethod = { response: { success: { body: { type: 'object', fields: data } } } } as unknown as MethodWithId;
+	const rootArrayMethod = { response: { success: { body: { type: 'array', fields: [{ id: '1' }] } } } } as unknown as MethodWithId;
+	const lengthOption = (target: MethodWithId, path: string) =>
+		getReferenceOptions(target, 'body', path).find(({ label }) => label === 'references.arrayLength');
+
+	it('offers `.length()` on an array without quoting it as a key', () => {
+		expect(lengthOption(arrayMethod, 'servers')?.value).toBe('servers.length()');
+		expect(lengthOption(arrayMethod, 'servers[0].tags')?.value).toBe('servers[0].tags.length()');
+	});
+
+	it('builds `$.length()` for a root array', () => {
+		const value = lengthOption(rootArrayMethod, '')?.value ?? '';
+		expect(buildReferenceValue('#C77E7E', 'body', value)).toBe('#C77E7E.(response).body.$.length()');
+	});
+
+	it('is not offered after a multi-match segment', () => {
+		expect(lengthOption(arrayMethod, 'servers[*].tags')).toBeUndefined();
+	});
+
+	it('is a leaf, not an expandable path', () => {
+		expect(isExpandableReferencePath(arrayMethod, 'body', 'servers.length()')).toBe(false);
+	});
+
+	it('resolves to the array size in a live value', () => {
+		const resolve = () => null;
+		expect(readLiveValueAtPath(data, '$.servers.length()', resolve)).toBe(2);
+		expect(readLiveValueAtPath(data, '$.servers[-1].tags.length()', resolve)).toBe(0);
+		expect(readLiveValueAtPath(data, '$.servers[0].name.length()', resolve)).toBeUndefined();
 	});
 });
