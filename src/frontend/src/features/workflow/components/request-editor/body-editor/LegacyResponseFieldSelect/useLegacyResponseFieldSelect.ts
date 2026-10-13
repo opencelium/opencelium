@@ -27,8 +27,7 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
   }, [iterators, method, type, value]);
 
   const options = useMemo(() => getReferenceOptions(method, type, optionsBase, iterators, t)
-    .filter(({ label }) => !filterTerm || label.toLowerCase().startsWith(filterTerm))
-    .map(({ label, value: optionValue }) => ({ label, value: optionValue })),
+    .filter(({ label }) => !filterTerm || label.toLowerCase().startsWith(filterTerm)),
   [filterTerm, iterators, method, optionsBase, type, t]);
 
   const focusInputToEnd = () => requestAnimationFrame(() => {

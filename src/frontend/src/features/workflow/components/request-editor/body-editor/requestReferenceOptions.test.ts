@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MethodWithId } from '../../../types/connection';
-import { buildReferenceValue, getReferenceOptions, isExpandableReferencePath,
+import { buildReferenceValue, getReferenceOptions, groupReferenceOptions, isExpandableReferencePath,
 	isListReferencePath, isUnknownReferencePath, readLiveValueAtPath } from './requestReferenceOptions';
 
 const body = {
@@ -187,5 +187,30 @@ describe('isListReferencePath', () => {
 	it('leaves single-value paths unmarked', () => {
 		['node.object1.title', 'servers[0].name', 'servers[-1]', 'servers[i].name', 'servers.length()', '$']
 			.forEach((path) => expect(isListReferencePath(path), path).toBe(false));
+	});
+});
+
+describe('groupReferenceOptions', () => {
+	const groups = (path: string) => groupReferenceOptions(getReferenceOptions(method, 'body', path))
+		.map((group) => ({ kind: group.kind, values: group.options.map(({ value }) => value) }));
+
+	it('puts operations first, then fields', () => {
+		expect(groups('node.')).toEqual([
+			{ kind: 'operation', values: ["node['*']~"] },
+			{ kind: 'field', values: ['node.name', 'node.object1', 'node.object2'] },
+		]);
+	});
+
+	it('tags each operation with the syntax it writes', () => {
+		const root = getReferenceOptions(method, 'body', '');
+		expect(root.filter((option) => option.kind === 'operation')
+			.map((option) => option.kind === 'operation' && option.syntax)).toEqual(['$', "['*']~"]);
+	});
+
+	it('drops a group with no options', () => {
+		expect(groups('node.*.').map(({ kind }) => kind)).toEqual(['field']);
+		const arrayMethod = { response: { success: { body: { type: 'array', fields: [{ id: '' }] } } } } as unknown as MethodWithId;
+		expect(groupReferenceOptions(getReferenceOptions(arrayMethod, 'body', '')).map(({ kind }) => kind))
+			.toEqual(['operation']);
 	});
 });
