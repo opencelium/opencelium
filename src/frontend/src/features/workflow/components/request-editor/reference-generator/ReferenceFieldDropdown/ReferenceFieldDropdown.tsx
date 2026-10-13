@@ -15,7 +15,7 @@ export function ReferenceFieldDropdown({ open, position, dropdownRef, options,
     {groupReferenceOptions(options).map((group) => <Fragment key={group.kind}>
       <div className="referenceDropdownGroupLabel">{t(REFERENCE_GROUP_LABEL_KEY[group.kind])}</div>
       {group.options.map((option) => <div key={option.value} className="referenceDropdownOption"
-        title={option.label} onMouseDown={(event) => event.preventDefault()} onClick={() => onSelect(option)}>
+        onMouseDown={(event) => event.preventDefault()} onClick={() => onSelect(option)}>
         <ReferenceOptionLabel option={option} />
       </div>)}
     </Fragment>)}
