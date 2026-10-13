@@ -103,27 +103,35 @@ const getArrayItem = (value: unknown) => {
   return undefined;
 };
 
-const exactReadAtPath = (source: unknown, path: string, iterators: string[] = []) => {
-  if (!path) return source;
-  const parts = normalizePath(path).match(PATH_RE) || [];
-  let current = source;
-  for (const part of parts) {
-    const iterator = getArrayAccessIterator(part);
-    if (isArrayNode(current) && (part === '[0]' || part === '[*]' || iterators.includes(iterator))) {
-      current = getArrayItem(current);
-      continue;
-    }
-    if (isRecord(current)) {
-      current = current[unquotePathPart(part)];
-      continue;
-    }
-    return undefined;
+const OBJECT_WILDCARD = '*';
+
+const isObjectNode = (value: unknown): value is Record<string, unknown> =>
+  isRecord(value) && !isArrayNode(value);
+
+const isArrayAccessPart = (part: string, iterators: string[]) =>
+  part === '[0]' || part === '[*]' || iterators.includes(getArrayAccessIterator(part));
+
+// A `*` segment fans out over every child of an object, so a path no longer
+// points at one node but at a set of them; later segments apply to each match
+// and non-matching ones (e.g. primitives under `*`) simply drop out.
+const stepNodes = (nodes: unknown[], part: string, iterators: string[]): unknown[] => {
+  if (part === OBJECT_WILDCARD) return nodes.filter(isObjectNode).flatMap((node) => Object.values(node));
+  if (isArrayAccessPart(part, iterators) && nodes.some(isArrayNode)) {
+    return nodes.filter(isArrayNode).map(getArrayItem);
   }
-  return current;
+  const key = unquotePathPart(part);
+  return nodes.filter(isRecord).filter((node) => key in node).map((node) => node[key]);
+};
+
+const readNodesAtPath = (source: unknown, path: string, iterators: string[] = []) => {
+  const parts = normalizePath(path).match(PATH_RE) || [];
+  return parts.reduce<unknown[]>((nodes, part) => stepNodes(nodes, part, iterators), [source]);
 };
 
 const appendPath = (base: string, part: string) => {
-  const serializedPart = isArrayPathPart(part) ? part : serializeObjectKey(unquotePathPart(part));
+  const serializedPart = isArrayPathPart(part) || part === OBJECT_WILDCARD
+    ? part
+    : serializeObjectKey(unquotePathPart(part));
   if (base === '$') return `$.${serializedPart}`;
   return base ? `${base}${isArrayPathPart(serializedPart) ? '' : '.'}${serializedPart}` : serializedPart;
 };
@@ -139,30 +147,20 @@ const getContext = (
   type: ResponseType,
   currentPath = '',
   iterators: string[] = [],
-): { node: unknown; lastValidPath: string } => {
-  if (type === 'status') return { node: 'status', lastValidPath: 'status' };
-  const source = getSource(method, type);
+): { nodes: unknown[]; lastValidPath: string } => {
+  if (type === 'status') return { nodes: ['status'], lastValidPath: 'status' };
   const parts = normalizePath(currentPath).match(PATH_RE) || [];
-  let current = source;
+  let nodes: unknown[] = [getSource(method, type)];
   let lastValidPath = currentPath === '$' || currentPath === '$.' ? '$' : '';
 
   for (const part of parts) {
-    const iterator = getArrayAccessIterator(part);
-    if (isArrayNode(current) && (part === '[0]' || part === '[*]' || iterators.includes(iterator))) {
-      current = getArrayItem(current);
-      lastValidPath = appendPath(lastValidPath, part);
-      continue;
-    }
-    const objectKey = unquotePathPart(part);
-    if (isRecord(current) && objectKey in current) {
-      current = current[objectKey];
-      lastValidPath = appendPath(lastValidPath, objectKey);
-      continue;
-    }
-    break;
+    const nextNodes = stepNodes(nodes, part, iterators);
+    if (nextNodes.length === 0) break;
+    nodes = nextNodes;
+    lastValidPath = appendPath(lastValidPath, isArrayPathPart(part) ? part : unquotePathPart(part));
   }
 
-  return { node: current, lastValidPath };
+  return { nodes, lastValidPath };
 };
 
 type ReferenceLabelT = (key: string, values?: Record<string, unknown>) => string;
@@ -175,14 +173,14 @@ export const getReferenceOptions = (
   t: ReferenceLabelT = (key) => key,
 ): ReferenceOption[] => {
   if (type === 'status') return [{ label: t('references.responseStatus'), value: 'status' }];
-  const { node, lastValidPath } = getContext(method, type, currentPath, iterators);
+  const { nodes, lastValidPath } = getContext(method, type, currentPath, iterators);
   const options: ReferenceOption[] = [];
 
   if (!normalizePath(currentPath)) {
     options.push({ label: t('references.rootObject'), value: '$' });
   }
 
-  if (isArrayNode(node)) {
+  if (nodes.length > 0 && nodes.every(isArrayNode)) {
     return [
       ...options,
       { label: t('references.firstArrayElement'), value: appendPath(lastValidPath, '[0]') },
@@ -194,12 +192,11 @@ export const getReferenceOptions = (
     ];
   }
 
-  if (isRecord(node)) {
-    options.push(...Object.keys(node).map((key) => ({
-      label: key,
-      value: appendPath(lastValidPath, key),
-    })));
-  }
+  const keys = new Set(nodes.filter(isObjectNode).flatMap((node) => Object.keys(node)));
+  options.push(...[...keys].map((key) => ({
+    label: key,
+    value: appendPath(lastValidPath, key),
+  })));
 
   return options;
 };
@@ -221,8 +218,7 @@ export const isExpandableReferencePath = (
   if (type === 'status') return false;
   if (isRootPath(path)) return false;
   const source = getSource(method, type);
-  const current = exactReadAtPath(source, path, iterators);
-  return isArrayNode(current) || isRecord(current);
+  return readNodesAtPath(source, path, iterators).some((node) => isArrayNode(node) || isRecord(node));
 };
 
 const parseIndexPath = (value: unknown) =>
@@ -285,10 +281,10 @@ export const getIteratorsForMethod = (
 ): string[] => getIteratorsForIndex(connection, method?.index);
 
 // Walks `path` against an ACTUAL captured value (a real, already-parsed JSON
-// response — not the static sample response the picker/exactReadAtPath peek
+// response — not the static sample response the picker/readNodesAtPath peek
 // at) to extract the exact value a reference resolves to while debugging a
 // paused test run (see useLiveReferenceValue.ts). Same path grammar as
-// exactReadAtPath, but different bracket semantics: that function always
+// readNodesAtPath, but different bracket semantics: that function always
 // takes element 0 (correct for shape-discovery — it only needs to know what
 // fields exist further down), whereas this one is producing a real value a
 // user will read, so `[*]` must return the WHOLE array and `[<iteratorName>]`
