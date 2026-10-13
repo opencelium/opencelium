@@ -22,10 +22,6 @@ function Section({ label, children }: { label: string; children: ReactNode }) {
 export function ScriptDebugValueBody({ status, snapshot }: Props) {
 	const { t } = useI18n('workflow');
 
-	if (status === 'idle' || !snapshot) {
-		return <span style={{ color: 'var(--color-text-secondary)' }}>{t('enhancement.debugValue.idleHint')}</span>;
-	}
-
 	if (status === 'loading') {
 		return (
 			<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, color: 'var(--color-text-secondary)' }}>
@@ -33,6 +29,10 @@ export function ScriptDebugValueBody({ status, snapshot }: Props) {
 				{t('enhancement.debugValue.loadingHint')}
 			</span>
 		);
+	}
+
+	if (status === 'idle' || !snapshot) {
+		return <span style={{ color: 'var(--color-text-secondary)' }}>{t('enhancement.debugValue.idleHint')}</span>;
 	}
 
 	// `stale` still renders the last settled (value/error) snapshot — only the
