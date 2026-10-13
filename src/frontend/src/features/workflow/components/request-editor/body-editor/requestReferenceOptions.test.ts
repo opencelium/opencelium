@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MethodWithId } from '../../../types/connection';
-import { buildReferenceValue, getReferenceOptions, groupReferenceOptions, isExpandableReferencePath,
+import { buildReferenceValue, getReferenceOptionTitle, getReferenceOptions, groupReferenceOptions, isExpandableReferencePath,
 	isListReferencePath, isUnknownReferencePath, readLiveValueAtPath } from './requestReferenceOptions';
 
 const body = {
@@ -13,7 +13,8 @@ const body = {
 
 const method = { response: { success: { body: { type: 'object', fields: body } } } } as unknown as MethodWithId;
 
-const labels = (path: string) => getReferenceOptions(method, 'body', path).map(({ label }) => label);
+const labels = (path: string) => getReferenceOptions(method, 'body', path)
+	.filter(({ kind }) => kind === 'field').map(({ label }) => label);
 const values = (path: string) => getReferenceOptions(method, 'body', path).map(({ value }) => value);
 
 describe('getReferenceOptions — object wildcard', () => {
@@ -35,8 +36,8 @@ describe('getReferenceOptions — object wildcard', () => {
 	});
 
 	it('lists the keys of a non-wildcard object path', () => {
-		expect(labels('node.')).toEqual(['references.allKeyNames', 'name', 'object1', 'object2']);
-		expect(labels('node.object2.')).toEqual(['references.allKeyNames', 'path', 'value', 'hostname']);
+		expect(labels('node.')).toEqual(['name', 'object1', 'object2']);
+		expect(labels('node.object2.')).toEqual(['path', 'value', 'hostname']);
 	});
 });
 
@@ -87,7 +88,7 @@ describe('getReferenceOptions — last array element', () => {
 	it('drills into the element fields after `[-1]`', () => {
 		expect(isExpandableReferencePath(arrayMethod, 'body', 'servers[-1]')).toBe(true);
 		expect(options('servers[-1].').map(({ label }) => label))
-			.toEqual(['references.allKeyNames', 'name', 'ip']);
+			.toEqual(['references.anyProperty', 'references.allKeyNames', 'name', 'ip']);
 	});
 
 	it('resolves `[-1]` to the last element in a live value', () => {
@@ -196,7 +197,7 @@ describe('groupReferenceOptions', () => {
 
 	it('puts operations first, then fields', () => {
 		expect(groups('node.')).toEqual([
-			{ kind: 'operation', values: ["node['*']~"] },
+			{ kind: 'operation', values: ['node.*', "node['*']~"] },
 			{ kind: 'field', values: ['node.name', 'node.object1', 'node.object2'] },
 		]);
 	});
@@ -204,13 +205,43 @@ describe('groupReferenceOptions', () => {
 	it('tags each operation with the syntax it writes', () => {
 		const root = getReferenceOptions(method, 'body', '');
 		expect(root.filter((option) => option.kind === 'operation')
-			.map((option) => option.kind === 'operation' && option.syntax)).toEqual(['$', "['*']~"]);
+			.map((option) => option.kind === 'operation' && option.syntax)).toEqual(['$', '*', "['*']~"]);
 	});
 
 	it('drops a group with no options', () => {
-		expect(groups('node.*.').map(({ kind }) => kind)).toEqual(['field']);
 		const arrayMethod = { response: { success: { body: { type: 'array', fields: [{ id: '' }] } } } } as unknown as MethodWithId;
 		expect(groupReferenceOptions(getReferenceOptions(arrayMethod, 'body', '')).map(({ kind }) => kind))
 			.toEqual(['operation']);
+	});
+});
+
+describe('getReferenceOptions — any property', () => {
+	const anyProperty = (path: string) =>
+		getReferenceOptions(method, 'body', path).find(({ label }) => label === 'references.anyProperty');
+
+	it('offers `*` on an object and keeps the dropdown open on it', () => {
+		expect(anyProperty('node.')?.value).toBe('node.*');
+		expect(isExpandableReferencePath(method, 'body', 'node.*')).toBe(true);
+		expect(labels('node.*.')).toEqual(['hostname', 'title', 'path', 'value']);
+	});
+
+	it('builds `$.*` at the root', () => {
+		expect(buildReferenceValue('#C77E7E', 'body', anyProperty('')?.value ?? '')).toBe('#C77E7E.(response).body.$.*');
+	});
+
+	it('is offered again after a wildcard, for nested fan-out', () => {
+		expect(anyProperty('node.*.')?.value).toBe('node.*.*');
+	});
+
+	it('is not offered on a leaf or an array', () => {
+		expect(anyProperty('node.name.')).toBeUndefined();
+		const arrayMethod = { response: { success: { body: { type: 'array', fields: [{ id: '' }] } } } } as unknown as MethodWithId;
+		expect(getReferenceOptions(arrayMethod, 'body', '').find(({ label }) => label === 'references.anyProperty'))
+			.toBeUndefined();
+	});
+
+	it('carries a hint in its hover title', () => {
+		const option = anyProperty('node.');
+		expect(option && getReferenceOptionTitle(option)).toBe('references.anyProperty — references.anyPropertyHint');
 	});
 });
