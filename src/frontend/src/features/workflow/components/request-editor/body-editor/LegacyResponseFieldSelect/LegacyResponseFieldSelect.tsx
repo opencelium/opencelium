@@ -49,7 +49,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
             key: group.kind,
             label: t(REFERENCE_GROUP_LABEL_KEY[group.kind]),
             options: group.options.map((option) => ({
-              value: option.value, title: option.label, label: <ReferenceOptionLabel option={option} />,
+              value: option.value, label: <ReferenceOptionLabel option={option} />,
             })),
           }))}
           notFoundContent={state.notFoundContent}
