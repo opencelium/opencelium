@@ -16,7 +16,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
   const { t } = useI18n('workflow');
   const zIndex = popupZIndex ?? DEFAULT_POPUP_Z_INDEX;
 
-  const field = (
+  return (
     <div
       ref={state.wrapperRef}
       className='selectCopyHost'
@@ -28,37 +28,35 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
       }}
     >
       <CopyButton value={state.displayPath} className='selectCopyButton' />
-      <Select
-        placeholder={state.placeholder}
-        value={undefined}
-        searchValue={state.searchValue}
-        className='bodyLegacyGeneratorSelect'
-        size='large'
-        disabled={state.isDisabled}
-        showSearch
-        filterOption={false}
-        getPopupContainer={() => document.body}
-        styles={{ popup: { root: { zIndex } } }}
-        status={state.isUnknownPath ? 'warning' : undefined}
-        options={state.options.map((option) => ({
-          value: option.value, label: <ReferenceOptionLabel label={option.label} value={option.value} />,
-        }))}
-        notFoundContent={state.notFoundContent}
-        open={state.open}
-        onSearch={state.onSearch}
-        onSelect={state.onSelect}
-        onFocus={state.onFocus}
-        onBlur={state.onBlur}
-        onClear={state.onClear}
-        allowClear
-      />
+      {/* Inside the host, not around it: the primitive's wrapper span would take
+          the host's place in the generator row and shrink it. Always mounted so
+          toggling the warning doesn't remount the select and drop focus. */}
+      <Tooltip content={state.isUnknownPath ? t('references.unknownPath') : null} zIndex={zIndex} maxWidth={320}>
+        <Select
+          placeholder={state.placeholder}
+          value={undefined}
+          searchValue={state.searchValue}
+          className='bodyLegacyGeneratorSelect'
+          size='large'
+          disabled={state.isDisabled}
+          showSearch
+          filterOption={false}
+          getPopupContainer={() => document.body}
+          styles={{ popup: { root: { zIndex } } }}
+          status={state.isUnknownPath ? 'warning' : undefined}
+          options={state.options.map((option) => ({
+            value: option.value, label: <ReferenceOptionLabel label={option.label} value={option.value} />,
+          }))}
+          notFoundContent={state.notFoundContent}
+          open={state.open}
+          onSearch={state.onSearch}
+          onSelect={state.onSelect}
+          onFocus={state.onFocus}
+          onBlur={state.onBlur}
+          onClear={state.onClear}
+          allowClear
+        />
+      </Tooltip>
     </div>
-  );
-
-  // Always mounted so toggling the warning doesn't remount the field and drop focus.
-  return (
-    <Tooltip content={state.isUnknownPath ? t('references.unknownPath') : null} zIndex={zIndex} maxWidth={320}>
-      {field}
-    </Tooltip>
   );
 }
