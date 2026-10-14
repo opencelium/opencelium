@@ -20,6 +20,8 @@ const changeConnectorItem: WorkflowNodeMenuItem = { id: 'change-connector', labe
 const connectorImageItem: WorkflowNodeMenuItem = { id: 'change-connector-image', labelKey: 'contextMenu.changeConnectorImage' };
 const configureAggregatorItem: WorkflowNodeMenuItem = { id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator' };
 
+const testSection: MenuSection = { id: 'test', items: [{ id: 'test-method', labelKey: 'contextMenu.testMethod' }] };
+
 const requestSections: MenuSection[] = [
   { id: 'request', items: [{ id: 'request', labelKey: 'contextMenu.request' }, { id: 'edit-url', labelKey: 'contextMenu.editUrl' }, { id: 'edit-headers', labelKey: 'contextMenu.editHeader' }, { id: 'edit-body', labelKey: 'contextMenu.editBody' }] },
   { id: 'response', items: [{ id: 'show-response', labelKey: 'contextMenu.showResponse' }] },
@@ -29,14 +31,17 @@ const requestSections: MenuSection[] = [
 const connectorMenu: MenuSection[] = [
   { id: 'main', items: [changeLabelItem, changeConnectorItem, connectorImageItem, configureAggregatorItem] },
   ...requestSections,
+  testSection,
 ];
 
 const systemMenu: MenuSection[] = [
   { id: 'main', items: [changeLabelItem, changeConnectorItem, configureAggregatorItem] },
   ...requestSections,
+  testSection,
 ];
 
-// A trigger-connection node calls another workflow's webhook — it has no connector to swap.
+// A trigger-connection node calls another workflow's webhook — it has no connector to swap,
+// and no test entry: testing it would start that other workflow for real.
 const triggerConnectionMenu: MenuSection[] = [
   { id: 'main', items: [changeLabelItem, configureAggregatorItem] },
   ...requestSections,
