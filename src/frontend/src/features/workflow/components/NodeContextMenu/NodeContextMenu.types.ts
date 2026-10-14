@@ -9,6 +9,7 @@ export type NodeContextMenuProps = {
 	onOpenRequestEditor: (nodeId: string, mode: 'url' | 'body' | 'header') => void;
 	onOpenConditionEditor: (nodeId: string) => void;
 	onShowResponse: (nodeId: string) => void;
+	onTestMethod: (nodeId: string) => void;
 	onOpenAggregatorEditor: (nodeId: string) => void;
 	onOpenConnectorEditor: (nodeId: string, kind: ConnectorEditorKind) => void;
 };

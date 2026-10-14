@@ -495,6 +495,7 @@
     "editHeader": "Header bearbeiten",
     "editBody": "Body bearbeiten",
     "showResponse": "Antwort anzeigen",
+    "testMethod": "Methode testen",
     "newLabelPlaceholder": "Neue Bezeichnung"
   },
   "comment": {
@@ -956,5 +957,53 @@
     },
     "showDetails": "Fehlerdetails anzeigen",
     "hideDetails": "Fehlerdetails ausblenden"
+  },
+  "testMethod": {
+    "title": "Methode testen: {{name}}",
+    "send": "Senden",
+    "reset": "Auf den vorgeschlagenen Wert zurücksetzen",
+    "confirmWrite": {
+      "title": "Anfrage an das Live-System senden?",
+      "message": "Dieser Test sendet eine echte {{method}}-Anfrage. Dabei können im verbundenen System Daten angelegt, geändert oder gelöscht werden."
+    },
+    "inputs": {
+      "references": "Werte aus vorherigen Methoden",
+      "webhooks": "Webhook-Parameter",
+      "hint": "Vorherige Methoden werden nicht aufgerufen. Geben Sie den Wert ein, den jede Referenz liefern soll. Die Werte werden aus einem pausierten Testlauf, Ihrem letzten Test dieser Methode oder der Beispielantwort vorbelegt.",
+      "none": "Diese Methode verweist auf keine anderen Methoden. Sie wird genau so gesendet, wie sie konfiguriert ist.",
+      "missing": "Leere Werte: {{count}}. Sie werden als leerer Text gesendet.",
+      "unknownMethod": "Unbekannte Methode",
+      "placeholder": "Wert"
+    },
+    "location": {
+      "url": "URL",
+      "header": "Header",
+      "body": "Body"
+    },
+    "source": {
+      "live": "Testlauf",
+      "stored": "Letzter Test",
+      "sample": "Beispiel",
+      "edited": "Bearbeitet",
+      "empty": "Leer"
+    },
+    "kind": {
+      "string": "Abc",
+      "json": "{ }",
+      "stringHint": "Wird als Text gesendet. Klicken, um es als JSON zu senden.",
+      "jsonHint": "Wird als JSON gesendet, wenn gültig, sonst als Text. Klicken, um es immer als Text zu senden."
+    },
+    "result": {
+      "empty": "Senden Sie die Anfrage, um die Antwort zu sehen.",
+      "duration": "{{ms}} ms",
+      "body": "Antwort-Body",
+      "headers": "Antwort-Header",
+      "request": "Gesendete Anfrage",
+      "stage": {
+        "resolve": "Die Referenzen konnten nicht aufgelöst werden",
+        "enhancement": "Ein Transformationsskript ist fehlgeschlagen",
+        "connect": "Das System ist nicht erreichbar"
+      }
+    }
   }
 }
