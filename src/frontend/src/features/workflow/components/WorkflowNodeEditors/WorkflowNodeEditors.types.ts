@@ -5,6 +5,7 @@ import type { ConditionBuilderDialog } from '../condition-builder/ConditionBuild
 import type { AggregatorConfigDialog } from '../aggregator/AggregatorConfigDialog';
 import type { ChangeConnectorDialog } from '../change-connector/ChangeConnectorDialog';
 import type { ConnectorImageDialog } from '../connector-image/ConnectorImageDialog';
+import type { TestMethodDialogProps } from '../../test-method/TestMethodDialog';
 
 export type WorkflowNodeEditorsProps = {
 	response: ComponentProps<typeof ResponseDialog>;
@@ -13,4 +14,5 @@ export type WorkflowNodeEditorsProps = {
 	aggregator: ComponentProps<typeof AggregatorConfigDialog>;
 	connector: ComponentProps<typeof ChangeConnectorDialog>;
 	connectorImage: ComponentProps<typeof ConnectorImageDialog>;
+	testMethod: TestMethodDialogProps;
 };
