@@ -495,6 +495,7 @@
     "editHeader": "Edit Header",
     "editBody": "Edit Body",
     "showResponse": "Show Response",
+    "testMethod": "Test Method",
     "newLabelPlaceholder": "New label"
   },
   "comment": {
@@ -956,5 +957,53 @@
     },
     "showDetails": "Show error details",
     "hideDetails": "Hide error details"
+  },
+  "testMethod": {
+    "title": "Test method: {{name}}",
+    "send": "Send",
+    "reset": "Reset to the suggested value",
+    "confirmWrite": {
+      "title": "Send the request to the live system?",
+      "message": "This test sends a real {{method}} request. It may create, change or delete data in the connected system."
+    },
+    "inputs": {
+      "references": "Values from previous methods",
+      "webhooks": "Webhook parameters",
+      "hint": "Previous methods are not called. Enter the value each reference should resolve to. Values are prefilled from a paused test run, your last test of this method, or the sample response.",
+      "none": "This method has no references to other methods. It is sent exactly as configured.",
+      "missing": "Empty values: {{count}}. They are sent as empty text.",
+      "unknownMethod": "Unknown method",
+      "placeholder": "Value"
+    },
+    "location": {
+      "url": "URL",
+      "header": "Header",
+      "body": "Body"
+    },
+    "source": {
+      "live": "Test run",
+      "stored": "Last test",
+      "sample": "Sample",
+      "edited": "Edited",
+      "empty": "Empty"
+    },
+    "kind": {
+      "string": "Abc",
+      "json": "{ }",
+      "stringHint": "Sent as text. Click to send it as JSON.",
+      "jsonHint": "Sent as JSON when valid, otherwise as text. Click to always send it as text."
+    },
+    "result": {
+      "empty": "Send the request to see the response.",
+      "duration": "{{ms}} ms",
+      "body": "Response body",
+      "headers": "Response headers",
+      "request": "Request sent",
+      "stage": {
+        "resolve": "The references could not be resolved",
+        "enhancement": "A transformation script failed",
+        "connect": "The system could not be reached"
+      }
+    }
   }
 }

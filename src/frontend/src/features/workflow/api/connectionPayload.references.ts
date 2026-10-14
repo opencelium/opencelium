@@ -1,4 +1,4 @@
-const REFERENCE_RE =
+export const PAYLOAD_REFERENCE_RE =
 	/\{%\s*#(?:[A-Fa-f0-9]{6})\.\((?:request|response)\)\.(?:body|header|status)(?:\.[^%{}]*)?\s*%}|#(?:[A-Fa-f0-9]{6})\.\((?:request|response)\)\.(?:body|header|status)(?:\.[^;{}\s%]*)?/g;
 const ENDPOINT_ARG_TOKEN_RE = /#\{%\s*([A-Za-z0-9_-]+)\s*%}/g;
 
@@ -36,7 +36,7 @@ export const serializeReferenceString = (
 		const source = endpointArgs?.[argId]?.source;
 		return typeof source === 'string' ? wrapReference(source) : `#{%${argId}%}`;
 	})
-	.replace(REFERENCE_RE, (reference) => wrapReference(reference));
+	.replace(PAYLOAD_REFERENCE_RE, (reference) => wrapReference(reference));
 
 const serializeHeaderString = (value: string, endpointArgs?: Record<string, any>) => value
 	.replace(ENDPOINT_ARG_TOKEN_RE, (token, argId: string) => {
