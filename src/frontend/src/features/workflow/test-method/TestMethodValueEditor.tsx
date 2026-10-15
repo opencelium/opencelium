@@ -7,7 +7,7 @@ import 'ace-builds/src-noconflict/theme-tomorrow_night';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useTheme } from '@shared/theme/hooks/useTheme';
 import { Textarea } from '@shared/ui/primitives/Textarea';
-import { findJsonSyntaxErrorPosition } from '../components/header/WorkflowJsonDialog/workflowJson.locations';
+import { findJsonSyntaxErrorPosition } from '@shared/ui/json-editor/jsonEditor.locations';
 import { readJsonError, type TestInputValue } from './testMethodInputValue';
 
 type Props = {
