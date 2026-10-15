@@ -18,7 +18,7 @@ export function BodyWebhookReference({ webhook, onRemove }: BodyWebhookReference
       <span className='bodyLegacyWebhookBadge' title={parsed.label}>
         {parsed.name}
       </span>
-      {hovered ? (
+      {hovered && onRemove ? (
         <span
           className='bodyLegacyWebhookRemove'
           onClick={(event) => event.stopPropagation()}

@@ -17,7 +17,8 @@ import {
     useLiveReferenceValue
 } from "@features/workflow/components/request-editor/utils/useLiveReferenceValue.ts";
 
-export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, connection, currentMethod }: BodyPointerProps) {
+export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, connection, currentMethod,
+  isSelected = false, isWarning = false }: BodyPointerProps) {
   const [hovered, setHovered] = useState(false);
   const [menuBelow, setMenuBelow] = useState(false);
   const [editorPos, setEditorPos] = useState<{ left: number; top: number } | null>(null);
@@ -31,6 +32,9 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
   const color = parsed?.color || 'var(--color-text-disabled)';
   const staticTitle = parsed ? formatParsedArgPath(parsed) : pointer;
   const canEdit = !!onEdit && !!connection && !!currentMethod;
+  const swatchStyle = { width: 20, height: 10, background: color,
+    ...(isWarning ? { boxShadow: '0 0 0 2px var(--color-status-warning-fg)' } : {}),
+    ...(isSelected ? { outline: '2px solid var(--color-action-primary)', outlineOffset: 3 } : {}) };
 
   // While paused and the referenced method has already run this test, show
   // what it actually resolved to instead of just the structural path — see
@@ -116,13 +120,13 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
         <Tooltip content={tooltipContent} maxWidth={320}>
           <div
             className={canInspect ? LIVE_INSPECTABLE_CLASS : undefined}
-            style={{ width: 20, height: 10, background: color }}
+            style={swatchStyle}
           />
         </Tooltip>
       ) : (
-        <div style={{ width: 20, height: 10, background: color }} />
+        <div style={swatchStyle} />
       )}
-      {hovered && !isPaused ? (
+      {hovered && !isPaused && (canEdit || onRemove) ? (
         <div className={`bodyPointerMenu ${menuBelow ? 'bodyPointerMenu--below' : ''}`}>
           <div className='bodyPointerMenuList'>
             {canEdit && (

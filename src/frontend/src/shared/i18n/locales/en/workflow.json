@@ -961,7 +961,6 @@
   "testMethod": {
     "title": "Test method: {{name}}",
     "send": "Send",
-    "reset": "Reset to the suggested value",
     "confirmWrite": {
       "title": "Send the request to the live system?",
       "message": "This test sends a real {{method}} request. It may create, change or delete data in the connected system."
@@ -969,11 +968,14 @@
     "inputs": {
       "references": "Values from previous methods",
       "webhooks": "Webhook parameters",
-      "hint": "Previous methods are not called. Enter the value each reference should resolve to. Values are prefilled from a paused test run, your last test of this method, or the sample response.",
-      "none": "This method has no references to other methods. It is sent exactly as configured.",
-      "missing": "Empty values: {{count}}. They are sent as empty text.",
+      "hint": "Previous methods are not called. Click a reference in the request to enter the value it should get. Values are prefilled from a paused test run, your last test of this method, or the sample response.",
+      "from": "from",
+      "fromWebhook": "from webhook parameter",
       "unknownMethod": "Unknown method",
-      "placeholder": "Value"
+      "placeholder": "Value",
+      "invalidJson": "Not valid JSON (line {{line}}). Fix it or switch the value to text.",
+      "invalidJsonSend_one": "A value is not valid JSON. Fix it before sending.",
+      "invalidJsonSend_other": "{{count}} values are not valid JSON. Fix them before sending."
     },
     "location": {
       "url": "URL",
@@ -983,9 +985,12 @@
     "source": {
       "live": "Test run",
       "stored": "Last test",
-      "sample": "Sample",
-      "edited": "Edited",
-      "empty": "Empty"
+      "sample": "Sample"
+    },
+    "sourceHint": {
+      "live": "Read from the paused test run: the source method has already run, so this is its real value.",
+      "stored": "The value you used the last time you tested this method in this browser session.",
+      "sample": "Read from the saved sample response of the source method."
     },
     "kind": {
       "string": "Abc",
@@ -995,10 +1000,8 @@
     },
     "result": {
       "empty": "Send the request to see the response.",
+      "noResponse": "No response was received.",
       "duration": "{{ms}} ms",
-      "body": "Response body",
-      "headers": "Response headers",
-      "request": "Request sent",
       "stage": {
         "resolve": "The references could not be resolved",
         "enhancement": "A transformation script failed",

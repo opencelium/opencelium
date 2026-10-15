@@ -25,28 +25,23 @@ type Args = {
 	storageKey: string;
 };
 
-type InputState = {
-	values: Record<string, TestInputValue>;
-	// What "reset" returns a row to: the best value not typed by the user.
-	fallbacks: Record<string, TestInputValue>;
-};
+type InputValues = Record<string, TestInputValue>;
 
-function buildInitialState(inputs: MethodTestInputs, stored: Record<string, StoredTestInput>): InputState {
-	const state: InputState = { values: {}, fallbacks: {} };
+function buildInitialValues(inputs: MethodTestInputs, stored: Record<string, StoredTestInput>): InputValues {
+	const values: InputValues = {};
 	const seed = (key: string, fallback: TestInputValue) => {
-		state.fallbacks[key] = fallback;
-		state.values[key] = stored[key] ? { ...stored[key], source: 'stored' } : fallback;
+		values[key] = stored[key] ? { ...stored[key], source: 'stored' } : fallback;
 	};
 	inputs.references.forEach((reference) =>
 		seed(referenceInputKey(reference), toInputValue(readSampleValue(reference), 'sample')));
 	inputs.webhooks.forEach((webhook) =>
 		seed(webhookInputKey(webhook), { ...EMPTY_INPUT, kind: defaultWebhookKind(webhook) }));
-	return state;
+	return values;
 }
 
 export function useTestMethodInputs({ inputs, connection, currentMethod, storageKey }: Args) {
 	const snapshot = useTestRunLiveSnapshot();
-	const [state, setState] = useState(() => buildInitialState(inputs, readStoredTestInputs(storageKey)));
+	const [values, setValues] = useState(() => buildInitialValues(inputs, readStoredTestInputs(storageKey)));
 	const [resolvingKeys, setResolvingKeys] = useState<string[]>(() => inputs.references
 		.filter((reference) => canInspectLiveReference(reference.parsed, connection, currentMethod, snapshot))
 		.map(referenceInputKey));
@@ -65,10 +60,7 @@ export function useTestMethodInputs({ inputs, connection, currentMethod, storage
 					setResolvingKeys((keys) => keys.filter((item) => item !== key));
 					if (!hasValue) return;
 					const live = toInputValue(value, 'live');
-					setState((current) => ({
-						fallbacks: { ...current.fallbacks, [key]: live },
-						values: current.values[key]?.source === 'edited' ? current.values : { ...current.values, [key]: live },
-					}));
+					setValues((current) => current[key]?.source === 'edited' ? current : { ...current, [key]: live });
 				});
 			});
 	});
@@ -80,9 +72,9 @@ export function useTestMethodInputs({ inputs, connection, currentMethod, storage
 	}, []);
 
 	const updateValue = useCallback((key: string, update: (value: TestInputValue) => Partial<TestInputValue>) => {
-		setState((current) => {
-			const value = current.values[key] ?? EMPTY_INPUT;
-			return { ...current, values: { ...current.values, [key]: { ...value, ...update(value), source: 'edited' } } };
+		setValues((current) => {
+			const value = current[key] ?? EMPTY_INPUT;
+			return { ...current, [key]: { ...value, ...update(value), source: 'edited' } };
 		});
 	}, []);
 
@@ -91,17 +83,12 @@ export function useTestMethodInputs({ inputs, connection, currentMethod, storage
 	const toggleKind = useCallback((key: string) =>
 		updateValue(key, (value) => ({ kind: value.kind === 'string' ? 'json' : 'string' })), [updateValue]);
 
-	const reset = useCallback((key: string) => setState((current) => ({
-		...current,
-		values: { ...current.values, [key]: current.fallbacks[key] ?? EMPTY_INPUT },
-	})), []);
-
 	const persist = useCallback(() => {
-		const remembered = Object.fromEntries(Object.entries(state.values)
+		const remembered = Object.fromEntries(Object.entries(values)
 			.filter(([, value]) => value.source === 'edited' || value.source === 'stored')
 			.map(([key, { text, kind }]) => [key, { text, kind }]));
 		writeStoredTestInputs(storageKey, remembered);
-	}, [state.values, storageKey]);
+	}, [values, storageKey]);
 
-	return { values: state.values, resolvingKeys, setText, toggleKind, reset, persist };
+	return { values, resolvingKeys, setText, toggleKind, persist };
 }

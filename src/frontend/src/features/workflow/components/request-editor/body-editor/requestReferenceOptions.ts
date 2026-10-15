@@ -306,10 +306,24 @@ export const readLiveValueAtPath = (
   const parts = normalizePath(path).match(PATH_RE) || [];
   let current: unknown = source;
   for (const part of parts) {
+    // JsonPath semantics, as the backend evaluates them: `length()` is the array
+    // size and a literal index counts from the end when negative.
+    if (part === 'length()') {
+      if (!Array.isArray(current)) return undefined;
+      current = current.length;
+      continue;
+    }
+    const literalIndex = part.match(/^\[(-?\d+)]$/);
+    if (literalIndex) {
+      if (!Array.isArray(current)) return undefined;
+      const index = Number(literalIndex[1]);
+      current = current[index < 0 ? current.length + index : index];
+      continue;
+    }
     if (isArrayPathPart(part)) {
       if (!Array.isArray(current)) return undefined;
       if (part === '[*]') continue;
-      const index = part === '[0]' ? 0 : resolveIteratorIndex(getArrayAccessIterator(part));
+      const index = resolveIteratorIndex(getArrayAccessIterator(part));
       if (index === null || index === undefined) return undefined;
       current = current[index];
       continue;
