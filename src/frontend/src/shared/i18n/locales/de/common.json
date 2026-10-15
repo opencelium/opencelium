@@ -197,5 +197,20 @@
     "offline": "Keine Internetverbindung. Stellen Sie die Verbindung wieder her, um Online-Dienste zu nutzen.",
     "syncDisabled": "Online-Dienste sind in der Systemkonfiguration deaktiviert.",
     "portalUnreachable": "Das Service-Portal ist von diesem Server aus nicht erreichbar. Prüfen Sie die Portal-Einstellungen und das Zugriffstoken."
+  },
+  "jsonEditor": {
+    "reset": "Zurücksetzen",
+    "cancel": "Abbrechen",
+    "apply": "Übernehmen",
+    "forceApply": "Erzwungen anwenden",
+    "syntaxError": "Ungültiges JSON: {{reason}}",
+    "discard": {
+      "title": "JSON-Änderungen verwerfen?",
+      "message": "Ihre nicht gespeicherten JSON-Änderungen gehen verloren."
+    },
+    "mode": {
+      "tree": "Baum",
+      "raw": "Rohtext"
+    }
   }
 }

@@ -16,6 +16,25 @@
       "tooLarge": "The workflow template file must not exceed 1 GB.",
       "archiveTooLarge": "The workflow template archive must not exceed 1 GB."
     },
+    "edit": {
+      "tooltip": "Edit as JSON",
+      "title": "Edit workflow template as JSON",
+      "success": "Template saved: {{name}}",
+      "error": "Failed to save template.",
+      "loadError": "Failed to load template.",
+      "applyConfirm": {
+        "title": "Save the template?",
+        "message": "Saving will replace the stored workflow template with this JSON."
+      },
+      "forceApplyConfirm": {
+        "title": "Force save invalid template JSON?",
+        "message": "Validation errors will be ignored. This may leave the template in an invalid state. Continue?"
+      },
+      "errors": {
+        "schema": "{{path}}: {{reason}}",
+        "idChanged": "{{path}}: the template ID cannot be changed."
+      }
+    },
     "download": {
       "tooltip": "Download",
       "success": "Template downloaded: {{name}}",

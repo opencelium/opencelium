@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findJsonPathPositions, findJsonSyntaxErrorPosition } from './workflowJson.locations';
+import { findJsonPathPositions, findJsonSyntaxErrorPosition } from './jsonEditor.locations';
 
 describe('workflow JSON text locations', () => {
 	it('finds a nested property inside an array', () => {
