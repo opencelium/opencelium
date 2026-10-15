@@ -1,67 +1,82 @@
+import type { ReactNode } from 'react';
+import { LogRow, Meta, MethodBadge, RequestResponseTabs, StatusBadge } from '@features/logs';
+import { CopyButton } from '@shared/ui/actions/CopyButton';
+import { Typography } from '@shared/ui/primitives/Typography';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { LogJsonView } from '@shared/ui/json-view/LogJsonView';
 import { Alert } from '@shared/ui/primitives/Alert';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
-import { Tabs } from '@shared/ui/primitives/Tabs';
-import type { TestMethodResponse, TestMethodSentRequest } from './testMethod.types';
+import { previewDraftRequest } from './buildTestMethodRequest';
+import { TestMethodJsonView, type TestInputHighlight } from './TestMethodJsonView';
+import { TestMethodUrl } from './TestMethodUrl';
+import type { TestMethodDraft, TestMethodResponse } from './testMethod.types';
+import type { Connection, MethodWithId } from '../types/connection';
 
-type Props = {
+type Props = TestInputHighlight & {
+	draft: TestMethodDraft;
+	connection: Connection;
+	currentMethod?: MethodWithId;
 	result: TestMethodResponse | undefined;
 	isSending: boolean;
 };
 
-function Payload({ value }: { value: unknown }) {
-	if (value && typeof value === 'object') {
-		return <div className='testMethodJson'><LogJsonView data={value} bare /></div>;
-	}
-	const text = value === undefined || value === null || value === '' ? '—' : String(value);
-	return <pre className='testMethodRaw'>{text}</pre>;
-}
+const RESULT_VIEW_PATH = 'test-method';
 
-function SentRequest({ request }: { request: TestMethodSentRequest }) {
-	return (
-		<div className='testMethodSection'>
-			<div className='testMethodRequestLine'>
-				<span className='testMethodVerb'>{request.method.toUpperCase()}</span>
-				<span className='testMethodEndpoint' title={request.url}>{request.url}</span>
-			</div>
-			<Payload value={request.headers} />
-			<Payload value={request.body} />
-		</div>
-	);
-}
+// The logs views take the raw text a log line carries, so objects are re-serialized.
+const toText = (value: unknown) => {
+	if (value === undefined || value === null) return '';
+	return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+};
 
-const statusTone = (status: number) => status >= 200 && status < 300 ? 'success' : status >= 400 ? 'error' : 'warning';
+const placeholder = (content: ReactNode) => ({
+	kind: 'placeholder' as const,
+	content: <div className='testMethodResponsePlaceholder' data-testid='workflow-test-method-response-placeholder'>
+		{content}
+	</div>,
+});
 
-export function TestMethodResult({ result, isSending }: Props) {
+export function TestMethodResult({ draft, connection, currentMethod, result, isSending, selectedKey, onSelect, missingKeys }: Props) {
 	const { t } = useI18n('workflow');
+	const request = (!isSending && result?.request) || previewDraftRequest(draft);
+	const success = !isSending && result?.kind === 'success' ? result : undefined;
+	const error = !isSending && result?.kind === 'error' ? result : undefined;
 
-	if (isSending) return <div className='testMethodPane testMethodPaneCentered'><Loading size='md' /></div>;
-	if (!result) {
-		return <div className='testMethodPane testMethodPaneCentered testMethodEmpty'>{t('testMethod.result.empty')}</div>;
-	}
-	if (result.kind === 'error') {
-		return (
-			<div className='testMethodPane' data-testid='workflow-test-method-result'>
-				<Alert type='error' showIcon message={t(`testMethod.result.stage.${result.stage}`)} description={result.message} />
-				{result.request && <SentRequest request={result.request} />}
-			</div>
-		);
-	}
+	const jsonView = (data: unknown, testId: string) => data && typeof data === 'object'
+		? <TestMethodJsonView data={data} testId={testId} connection={connection} currentMethod={currentMethod}
+			selectedKey={selectedKey} onSelect={onSelect} missingKeys={missingKeys} />
+		: undefined;
 
-	const { response, request, durationMs } = result;
+	const response = success
+		? { kind: 'payload' as const, header: toText(success.response.headers), payload: toText(success.response.body) }
+		: placeholder(isSending ? <Loading size='md' />
+			: t(error ? 'testMethod.result.noResponse' : 'testMethod.result.empty'));
+
 	return (
 		<div className='testMethodPane' data-testid='workflow-test-method-result'>
-			<div className='testMethodStatusLine'>
-				<span className={`testMethodStatus testMethodStatus--${statusTone(response.status)}`}
-					data-testid='workflow-test-method-status'>{response.status}</span>
-				<span className='testMethodDuration'>{t('testMethod.result.duration', { ms: durationMs })}</span>
+			{error && <Alert type='error' showIcon message={t(`testMethod.result.stage.${error.stage}`)}
+				description={error.message} />}
+			<div className='testMethodLogRow' data-testid='workflow-test-method-sent-endpoint'>
+				<LogRow
+					left={<>
+						<MethodBadge method={(request.method || 'GET').toUpperCase()} />
+						<TestMethodUrl url={request.url} connection={connection} currentMethod={currentMethod}
+							selectedKey={selectedKey} onSelect={onSelect} missingKeys={missingKeys} />
+						<CopyButton value={request.url} />
+					</>}
+					right={success && <Meta>
+						<span data-testid='workflow-test-method-status'>
+							<StatusBadge status={String(success.response.status)} />
+						</span>
+						<Typography variant='caption' isSubtle>
+							{t('testMethod.result.duration', { ms: success.durationMs })}
+						</Typography>
+					</Meta>} />
 			</div>
-			<Tabs defaultValue='body' items={[
-				{ key: 'body', label: t('testMethod.result.body'), content: <Payload value={response.body} /> },
-				{ key: 'headers', label: t('testMethod.result.headers'), content: <Payload value={response.headers} /> },
-				{ key: 'request', label: t('testMethod.result.request'), content: <SentRequest request={request} /> },
-			]} />
+			<div className='testMethodExchange'>
+				<RequestResponseTabs path={RESULT_VIEW_PATH} response={response} isFullHeight isBodyMaximizable
+					requestHeader={toText(request.headers)} requestPayload={toText(request.body)}
+					requestHeaderContent={jsonView(request.headers, 'workflow-test-method-request-header')}
+					requestBodyContent={jsonView(request.body, 'workflow-test-method-request-body')} />
+			</div>
 		</div>
 	);
 }

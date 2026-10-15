@@ -9,4 +9,8 @@ export type BodyPointerProps = {
 	onEdit?: (pointer: string, pointers: string[], reference: string) => void;
 	connection?: Connection;
 	currentMethod?: MethodWithId;
+	/** Rings the pointer, e.g. as the reference currently shown elsewhere. */
+	isSelected?: boolean;
+	/** Marks the pointer with the warning color, e.g. a reference that still lacks a value. */
+	isWarning?: boolean;
 };

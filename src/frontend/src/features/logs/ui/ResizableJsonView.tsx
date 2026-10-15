@@ -7,12 +7,15 @@ const MIN_HEIGHT = 80;
 
 // A vertically resizable JSON viewer. Its height is persisted (keyed by
 // `storageKey`) so it survives method rows remounting between loop iterations.
+// With `isFullHeight` it fills its container instead and is not resizable.
 export function ResizableJsonView({
   storageKey,
   value,
+  isFullHeight = false,
 }: {
   storageKey: string;
   value: string;
+  isFullHeight?: boolean;
 }) {
   const { heights, setHeight } = useMethodDetailViewState();
   const ref = useRef<HTMLDivElement>(null);
@@ -20,7 +23,7 @@ export function ResizableJsonView({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || isFullHeight) return;
     // border-box height matches the applied inline height, so writing it back
     // is a no-op until the user actually drags the resize handle. Ignore a
     // 0 height: an inactive antd tab pane is kept in the DOM as display:none,
@@ -31,16 +34,16 @@ export function ResizableJsonView({
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [storageKey, setHeight]);
+  }, [storageKey, setHeight, isFullHeight]);
 
   return (
     <div
       ref={ref}
       style={{
-        height,
+        height: isFullHeight ? "100%" : height,
         minHeight: MIN_HEIGHT,
         boxSizing: "border-box",
-        resize: "vertical",
+        resize: isFullHeight ? "none" : "vertical",
         overflow: "auto",
         border: "1px solid var(--color-border-default)",
         borderRadius: 6,

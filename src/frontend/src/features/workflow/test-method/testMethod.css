@@ -12,41 +12,13 @@
 	overflow: auto;
 }
 
-.testMethodPaneCentered {
-	align-items: center;
-	justify-content: center;
-}
 
-.testMethodEmpty {
+
+.testMethodDescription {
+	margin: 0;
 	color: var(--color-text-secondary);
 	font-size: 13px;
-}
-
-.testMethodRequestLine {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	min-width: 0;
-	padding: 8px 10px;
-	border: 1px solid var(--color-border-default);
-	border-radius: var(--radius-md);
-	background: var(--color-background-input);
-}
-
-.testMethodVerb {
-	flex-shrink: 0;
-	font-size: 12px;
-	font-weight: 700;
-	color: var(--color-action-primary);
-}
-
-.testMethodEndpoint {
-	overflow: hidden;
-	font-family: monospace;
-	font-size: 12px;
-	color: var(--color-text-primary);
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	line-height: 1.5;
 }
 
 .testMethodGroup {
@@ -78,6 +50,38 @@
 	gap: 6px;
 	min-width: 0;
 	font-size: 12px;
+}
+
+.testMethodTargets {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	min-width: 0;
+}
+
+.testMethodTarget {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+}
+
+.testMethodTargetProperty {
+	overflow: hidden;
+	font-family: monospace;
+	font-weight: 600;
+	color: var(--color-text-primary);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.testMethodRowSource {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	font-size: 12px;
+	color: var(--color-text-secondary);
 }
 
 .testMethodRowLabel {
@@ -114,15 +118,9 @@
 	background: var(--color-status-success-bg);
 }
 
-.testMethodSource--edited,
 .testMethodSource--stored {
 	color: var(--color-action-primary);
 	background: var(--color-action-primary-subtle);
-}
-
-.testMethodSource--empty {
-	color: var(--color-status-warning-fg);
-	background: var(--color-status-warning-bg);
 }
 
 .testMethodKindToggle {
@@ -130,58 +128,117 @@
 	font-size: 11px;
 }
 
-.testMethodStatusLine {
+.testMethodLogRow {
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+	overflow: hidden;
+}
+
+.testMethodLogRow .oc-log-row {
+	border-bottom: none !important;
+}
+
+.testMethodResponsePlaceholder {
 	display: flex;
 	align-items: center;
-	gap: 12px;
-}
-
-.testMethodStatus {
-	padding: 2px 10px;
-	border-radius: 10px;
-	font-weight: 700;
-	font-size: 13px;
-}
-
-.testMethodStatus--success {
-	color: var(--color-status-success-fg);
-	background: var(--color-status-success-bg);
-}
-
-.testMethodStatus--warning {
-	color: var(--color-status-warning-fg);
-	background: var(--color-status-warning-bg);
-}
-
-.testMethodStatus--error {
-	color: var(--color-status-error-fg);
-	background: var(--color-status-error-bg);
-}
-
-.testMethodDuration {
-	font-size: 12px;
+	justify-content: center;
+	height: 100%;
+	padding: 12px;
+	border: 1px dashed var(--color-border-default);
+	border-radius: 6px;
 	color: var(--color-text-secondary);
+	font-size: 13px;
+	text-align: center;
 }
 
-.testMethodSection {
+.testMethodExchange {
+	flex: 1;
+	min-height: 0;
+}
+
+.testMethodJsonView {
+	box-sizing: border-box;
+	min-height: 100%;
+}
+
+.testMethodUrl {
+	min-width: 0;
+	flex-shrink: 1;
+	/* Room for the pill rings (2px + 3px offset), which overflow: hidden would clip. */
+	margin: -6px 0;
+	padding: 6px;
+	overflow: hidden;
+	font-size: 13px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.testMethodUrl .oc-endpoint-ref {
+	/* The pill's inline margin is 2px; the rings need about 5px to clear the URL text. */
+	margin: 0 6px !important;
+}
+
+.testMethodUrl .testMethodUrlPill--missing {
+	box-shadow: 0 0 0 2px var(--color-status-warning-fg);
+}
+
+.testMethodUrl .testMethodUrlPill--selected {
+	outline: 2px solid var(--color-action-primary);
+	outline-offset: 3px;
+}
+
+.testMethodWebhook {
+	cursor: pointer;
+}
+
+.testMethodWebhook--missing .bodyLegacyWebhookBadge {
+	box-shadow: 0 0 0 2px var(--color-status-warning-fg);
+}
+
+.testMethodWebhook--selected .bodyLegacyWebhookBadge {
+	outline: 2px solid var(--color-action-primary);
+	outline-offset: 3px;
+}
+
+/* The left pane shows one input at a time, so its row and value editor take the remaining height. */
+.testMethodGroup:has(.testMethodRow) {
+	flex: 1;
+	min-height: 0;
+}
+
+.testMethodRow:has(.testMethodValue) {
+	flex: 1;
+	min-height: 0;
+}
+
+.testMethodValue {
+	flex: 1;
+	min-height: 160px;
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
 }
 
-.testMethodJson {
+.testMethodValue--text textarea {
+	flex: 1;
+	height: 100% !important;
+	resize: none;
+}
+
+.testMethodValue--json {
+	position: relative;
+	overflow: hidden;
 	border: 1px solid var(--color-border-default);
 	border-radius: var(--radius-md);
 }
 
-.testMethodRaw {
-	margin: 0;
-	padding: 8px 10px;
-	border: 1px solid var(--color-border-default);
-	border-radius: var(--radius-md);
-	background: var(--color-background-input);
-	color: var(--color-text-primary);
+.testMethodValue--missing {
+	border-color: var(--color-status-error-fg);
+}
+
+.testMethodValueError {
+	padding: 4px 10px;
+	border-top: 1px solid var(--color-status-error-fg);
+	background: var(--color-status-error-bg);
+	color: var(--color-status-error-fg);
 	font-size: 12px;
-	white-space: pre-wrap;
-	word-break: break-word;
 }

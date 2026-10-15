@@ -961,7 +961,6 @@
   "testMethod": {
     "title": "Methode testen: {{name}}",
     "send": "Senden",
-    "reset": "Auf den vorgeschlagenen Wert zurücksetzen",
     "confirmWrite": {
       "title": "Anfrage an das Live-System senden?",
       "message": "Dieser Test sendet eine echte {{method}}-Anfrage. Dabei können im verbundenen System Daten angelegt, geändert oder gelöscht werden."
@@ -969,11 +968,14 @@
     "inputs": {
       "references": "Werte aus vorherigen Methoden",
       "webhooks": "Webhook-Parameter",
-      "hint": "Vorherige Methoden werden nicht aufgerufen. Geben Sie den Wert ein, den jede Referenz liefern soll. Die Werte werden aus einem pausierten Testlauf, Ihrem letzten Test dieser Methode oder der Beispielantwort vorbelegt.",
-      "none": "Diese Methode verweist auf keine anderen Methoden. Sie wird genau so gesendet, wie sie konfiguriert ist.",
-      "missing": "Leere Werte: {{count}}. Sie werden als leerer Text gesendet.",
+      "hint": "Vorherige Methoden werden nicht aufgerufen. Klicken Sie im Request auf eine Referenz, um den Wert einzugeben, den sie erhalten soll. Die Werte werden aus einem pausierten Testlauf, Ihrem letzten Test dieser Methode oder der Beispielantwort vorbelegt.",
+      "from": "aus",
+      "fromWebhook": "aus Webhook-Parameter",
       "unknownMethod": "Unbekannte Methode",
-      "placeholder": "Wert"
+      "placeholder": "Wert",
+      "invalidJson": "Kein gültiges JSON (Zeile {{line}}). Korrigieren Sie es oder stellen Sie den Wert auf Text um.",
+      "invalidJsonSend_one": "Ein Wert ist kein gültiges JSON. Korrigieren Sie ihn vor dem Senden.",
+      "invalidJsonSend_other": "{{count}} Werte sind kein gültiges JSON. Korrigieren Sie sie vor dem Senden."
     },
     "location": {
       "url": "URL",
@@ -983,9 +985,12 @@
     "source": {
       "live": "Testlauf",
       "stored": "Letzter Test",
-      "sample": "Beispiel",
-      "edited": "Bearbeitet",
-      "empty": "Leer"
+      "sample": "Beispiel"
+    },
+    "sourceHint": {
+      "live": "Aus dem pausierten Testlauf übernommen: Die Quellmethode wurde bereits ausgeführt, dies ist ihr tatsächlicher Wert.",
+      "stored": "Der Wert, den Sie beim letzten Test dieser Methode in dieser Browsersitzung verwendet haben.",
+      "sample": "Aus der gespeicherten Beispielantwort der Quellmethode übernommen."
     },
     "kind": {
       "string": "Abc",
@@ -995,10 +1000,8 @@
     },
     "result": {
       "empty": "Senden Sie die Anfrage, um die Antwort zu sehen.",
+      "noResponse": "Es wurde keine Antwort empfangen.",
       "duration": "{{ms}} ms",
-      "body": "Antwort-Body",
-      "headers": "Antwort-Header",
-      "request": "Gesendete Anfrage",
       "stage": {
         "resolve": "Die Referenzen konnten nicht aufgelöst werden",
         "enhancement": "Ein Transformationsskript ist fehlgeschlagen",

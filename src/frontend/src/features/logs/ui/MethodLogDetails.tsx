@@ -1,22 +1,9 @@
 import { Loading } from "@shared/ui/primitives/Loading/Loading";
-import { Tabs } from "@shared/ui/primitives/Tabs";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { useGetMethodDetailsQuery } from "../api/logsApi";
-import { ResizableJsonView } from "./ResizableJsonView";
-import { useMethodDetailViewState } from "./methodDetailViewState";
-import { CopyButton } from "@shared/ui/actions/CopyButton";
+import { RequestResponseTabs } from "./RequestResponseTabs";
 import { ErrorDetail } from "./ErrorDetail";
-
-// A tab label with a copy button (for the tab's raw content) next to the text.
-function LabelWithCopy({ label, value }: { label: string; value: string }) {
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-      {label}
-      <CopyButton value={value} />
-    </span>
-  );
-}
 
 type Props = {
   id: string;
@@ -28,7 +15,6 @@ type Props = {
 
 export function MethodLogDetails({ id, depth, path }: Props) {
   const { t } = useI18n("logs");
-  const { tabs, setTab } = useMethodDetailViewState();
   // A method's own detail never changes once logged — skip baseApi's default
   // refetch-on-mount so a warm cache entry (from a previous expand, or from
   // prefetchErrorTracePath's reveal warm-up) is reused as-is instead of a
@@ -36,9 +22,6 @@ export function MethodLogDetails({ id, depth, path }: Props) {
   const { data, isFetching, isError } = useGetMethodDetailsQuery(id, {
     refetchOnMountOrArgChange: false,
   });
-
-  const requestTabKey = `${path}/request`;
-  const responseTabKey = `${path}/response`;
 
   const wrapStyle: React.CSSProperties = {
     padding: `10px 12px 14px ${22 + depth * 22}px`,
@@ -87,59 +70,15 @@ export function MethodLogDetails({ id, depth, path }: Props) {
   // render as an empty object.
   const request = data.segment?.request;
   const response = data.segment?.response;
-  const requestHeader = request?.header ?? "";
-  const requestPayload = request?.payload ?? "";
-  const responseHeader = response?.header ?? "";
-  const responsePayload = response?.payload ?? "";
 
   return (
     <div style={wrapStyle}>
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-        <div style={{ flex: 1, minWidth: 280 }}>
-          <Tabs
-            value={tabs[requestTabKey] ?? "body"}
-            onChange={(key) => setTab(requestTabKey, key)}
-            items={[
-              {
-                key: "header",
-                label: <LabelWithCopy label={t("tabs.requestHeader")} value={requestHeader} />,
-                content: (
-                  <ResizableJsonView storageKey={`${path}/requestHeight`} value={requestHeader} />
-                ),
-              },
-              {
-                key: "body",
-                label: <LabelWithCopy label={t("tabs.requestBody")} value={requestPayload} />,
-                content: (
-                  <ResizableJsonView storageKey={`${path}/requestHeight`} value={requestPayload} />
-                ),
-              },
-            ]}
-          />
-        </div>
-        <div style={{ flex: 1, minWidth: 280 }}>
-          <Tabs
-            value={tabs[responseTabKey] ?? "body"}
-            onChange={(key) => setTab(responseTabKey, key)}
-            items={[
-              {
-                key: "header",
-                label: <LabelWithCopy label={t("tabs.responseHeader")} value={responseHeader} />,
-                content: (
-                  <ResizableJsonView storageKey={`${path}/responseHeight`} value={responseHeader} />
-                ),
-              },
-              {
-                key: "body",
-                label: <LabelWithCopy label={t("tabs.responseBody")} value={responsePayload} />,
-                content: (
-                  <ResizableJsonView storageKey={`${path}/responseHeight`} value={responsePayload} />
-                ),
-              },
-            ]}
-          />
-        </div>
-      </div>
+      <RequestResponseTabs
+        path={path}
+        requestHeader={request?.header ?? ""}
+        requestPayload={request?.payload ?? ""}
+        response={{ kind: "payload", header: response?.header ?? "", payload: response?.payload ?? "" }}
+      />
     </div>
   );
 }

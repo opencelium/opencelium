@@ -24,12 +24,24 @@ describe('collectMethodReferences', () => {
 			body: { fields: { id: '#aaaaaa.(response).body.$.users[i].id', nested: { all: '#aaaaaa.(response).body.$' } } },
 		}), connection);
 
-		expect(references.map(({ reference, locations }) => ({ reference, locations }))).toEqual([
-			{ reference: '#aaaaaa.(response).body.$.users[i].id', locations: ['url', 'body'] },
-			{ reference: '#aaaaaa.(response).header.$.x-total', locations: ['header'] },
-			{ reference: '#aaaaaa.(response).body.$', locations: ['body'] },
+		expect(references.map(({ reference, targets }) => ({ reference, targets }))).toEqual([
+			{ reference: '#aaaaaa.(response).body.$.users[i].id', targets: [
+				{ location: 'url', property: null }, { location: 'body', property: 'id' }] },
+			{ reference: '#aaaaaa.(response).header.$.x-total', targets: [{ location: 'header', property: 'X-Count' }] },
+			{ reference: '#aaaaaa.(response).body.$', targets: [{ location: 'body', property: 'nested.all' }] },
 		]);
 		expect(references[0].sourceMethod).toBe(upstream);
+	});
+
+	it('names the query parameter and the array position a value lands in', () => {
+		const { references } = collectMethodReferences(draft({
+			endpoint: '/users?page=1&owner={%#aaaaaa.(response).body.$.id%}',
+			body: { fields: { units: [{ id: '#aaaaaa.(response).body.$.unit' }] } },
+		}), connection);
+		expect(references.map((item) => item.targets)).toEqual([
+			[{ location: 'url', property: 'owner' }],
+			[{ location: 'body', property: 'units[0].id' }],
+		]);
 	});
 
 	it('splits `;`-joined references of one field into separate inputs', () => {
@@ -61,8 +73,8 @@ describe('collectMethodReferences', () => {
 			body: { fields: { tags: '${tags:array}', again: '${userId:int}' } },
 		}), connection);
 		expect(webhooks).toEqual([
-			{ name: 'userId', type: 'int', locations: ['url', 'body'] },
-			{ name: 'tags', type: 'array', locations: ['body'] },
+			{ name: 'userId', type: 'int', targets: [{ location: 'url', property: null }, { location: 'body', property: 'again' }] },
+			{ name: 'tags', type: 'array', targets: [{ location: 'body', property: 'tags' }] },
 		]);
 	});
 });
@@ -75,6 +87,19 @@ describe('readSampleValue', () => {
 		expect(sampleOf('/{%#aaaaaa.(response).body.$.users[i].name%}')).toBe('Ann');
 		expect(sampleOf('/{%#aaaaaa.(response).header.$.x-total%}')).toBe('2');
 		expect(sampleOf('/{%#aaaaaa.(response).status%}')).toBe('200');
+	});
+
+	it('treats an array response as a list of its declared element, with JsonPath [-1] and length()', () => {
+		const list = {
+			id: 'm0', index: '0', name: 'GetAllUsers', color: '#dddddd',
+			response: { success: { status: '200', body: { type: 'array', fields: { name: 'Ann' } } } },
+		} as unknown as MethodWithId;
+		const withList = { fromConnector: { method: [list], operator: [] } } as unknown as Connection;
+		const sampleFrom = (endpoint: string) =>
+			readSampleValue(collectMethodReferences(draft({ endpoint }), withList).references[0]);
+		expect(sampleFrom('/{%#dddddd.(response).body.$.[-1].name%}')).toBe('Ann');
+		expect(sampleFrom('/{%#dddddd.(response).body.$[0].name%}')).toBe('Ann');
+		expect(sampleFrom('/{%#dddddd.(response).body.$.length()%}')).toBe(1);
 	});
 
 	it('has no sample for a deleted source method', () => {
