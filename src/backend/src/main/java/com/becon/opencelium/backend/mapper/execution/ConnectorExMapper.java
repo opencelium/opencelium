@@ -72,6 +72,8 @@ public class ConnectorExMapper {
         } else {
             connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(), null));
             connectorEx.setInvoker(ConnectionConstants.DEFAULT_INVOKER_NAME);
+            // methods carry their own connector, so the operation type (e.g. 'page') comes from that connector's invoker
+            setPagination(connectorEx, null);
         }
 
         connectorEx.setName(dto.getTitle());
@@ -128,18 +130,27 @@ public class ConnectorExMapper {
     }
 
     private void setPagination(ConnectorEx connectorEx, Invoker invoker) {
-        connectorEx.setPagination(invoker.getPagination());
+        if (invoker != null) {
+            connectorEx.setPagination(invoker.getPagination());
+        }
 
         List<OperationDTO> operations = connectorEx.getMethods();
+        Map<Integer, Invoker> methodInvokers = new HashMap<>();
 
         for (OperationDTO operation : operations) {
-            invoker.getOperations().stream()
+            Invoker operationInvoker = invoker != null ? invoker : resolveMethodInvoker(operation, methodInvokers);
+            if (operationInvoker == null) {
+                // method without connector (plain request), there is no invoker operation to take the type from
+                continue;
+            }
+
+            operationInvoker.getOperations().stream()
                     .filter(f -> f.getName().equals(operation.getName()))
                     .findAny()
                     .ifPresentOrElse(ff -> {
                         if (ff.getType().equals("page")) {
                             if (ff.getPagination() == null) {
-                                operation.setPagination(invoker.getPagination());
+                                operation.setPagination(operationInvoker.getPagination());
                             } else {
                                 operation.setPagination(ff.getPagination());
                             }
@@ -151,5 +162,14 @@ public class ConnectorExMapper {
                         throw new RuntimeException("Method not found with name: " + operation.getName());
                     });
         }
+    }
+
+    private Invoker resolveMethodInvoker(OperationDTO operation, Map<Integer, Invoker> cache) {
+        Integer connectorId = operation.getConnectorId();
+        if (connectorId == null || Objects.equals(ConnectionConstants.DEFAULT_CONNECTOR_ID, connectorId)) {
+            return null;
+        }
+        return cache.computeIfAbsent(connectorId,
+                id -> invokerService.findByName(connectorService.getById(id).getInvoker()));
     }
 }
