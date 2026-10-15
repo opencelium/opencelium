@@ -1,9 +1,10 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Button } from 'antd';
 import {
 	buildReferenceValue,
 	getIteratorsForMethod,
 	getReferenceOptions,
+	isUnknownReferencePath,
 	type ResponseType,
 } from '../body-editor/requestReferenceOptions';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -59,6 +60,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	const fieldActions = useReferenceFieldActions({ selectedMethod, responseType,
 		iterators: currentMethodIterators, dropdowns, setResponseType, setSearchValue,
 		setSelectedOption, setFilteredOptions });
+	const [isFieldFocused, setIsFieldFocused] = useState(false);
 	if (!open) return null;
 	const handleApply = () => {
 		if (!selectedMethod) return;
@@ -76,7 +78,10 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	const selectedConnectorLabel = selectedConnector || t('placeholders.selectConnector');
 	const fieldPlaceholder = !selectedMethod ? t('placeholders.selectMethodFirst')
 		: responseType === 'status' ? t('references.responseStatus') : t('placeholders.selectField');
+	const isUnknownPath = !isFieldFocused
+		&& isUnknownReferencePath(selectedMethod, responseType, searchValue, currentMethodIterators);
 	const handleFieldFocus = () => {
+		setIsFieldFocused(true);
 		if (!selectedMethod || responseType === 'status') return;
 		setFilteredOptions(getReferenceOptions(selectedMethod, responseType,
 			searchValue.trim(), currentMethodIterators, t));
@@ -102,8 +107,9 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 						responseType={responseType} onResponseTypeChange={fieldActions.changeResponseType}
 						searchValue={searchValue} onSearchChange={fieldActions.changeSearch}
 						onFieldFocus={handleFieldFocus} onFieldBlur={() => {
-							setFilteredOptions([]); dropdowns.setFieldPosition(null);
+							setIsFieldFocused(false); setFilteredOptions([]); dropdowns.setFieldPosition(null);
 						}} fieldPlaceholder={fieldPlaceholder}
+						fieldWarning={isUnknownPath ? t('references.unknownPath') : undefined}
 						fieldDisabled={!selectedMethod || responseType === 'status'} />
 				</div>
 				<div className='referenceGeneratorActions'>
