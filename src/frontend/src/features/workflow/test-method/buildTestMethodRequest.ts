@@ -1,10 +1,11 @@
 import { serializeWorkflowFieldBindings } from '../api/connectionPayload.fieldBindings';
 import { parseEnhancementArg } from '../components/request-editor/utils/parseEnhancementArg';
-import type { MethodTestInputs } from './collectMethodReferences';
-import type { TestMethodDraft, TestMethodRequest } from './testMethod.types';
+import { readBodyFields, type MethodTestInputs } from './collectMethodReferences';
+import type { TestMethodDraft, TestMethodRequest, TestMethodSentRequest } from './testMethod.types';
 import {
 	EMPTY_INPUT,
 	parseInputValue,
+	readJsonError,
 	referenceInputKey,
 	webhookInputKey,
 	type TestInputValue,
@@ -58,3 +59,18 @@ export function findMissingInputKeys(inputs: MethodTestInputs, values: Record<st
 		...inputs.webhooks.map(webhookInputKey),
 	].filter((key) => !(values[key]?.text ?? '').trim());
 }
+
+export function findInvalidJsonInputKeys(inputs: MethodTestInputs, values: Record<string, TestInputValue>): string[] {
+	return [
+		...inputs.references.map(referenceInputKey),
+		...inputs.webhooks.map(webhookInputKey),
+	].filter((key) => values[key] && readJsonError(values[key]) !== null);
+}
+
+// What the method is configured to send, references still unresolved — shown until a test returns the real request.
+export const previewDraftRequest = ({ request }: TestMethodDraft): TestMethodSentRequest => ({
+	url: request.endpoint,
+	method: request.method,
+	headers: (request.header ?? {}) as Record<string, string>,
+	body: readBodyFields(request.body),
+});

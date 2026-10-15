@@ -69,3 +69,21 @@
     box-shadow: 0 0 0 8px color-mix(in srgb, currentColor 0%, transparent);
   }
 }
+
+/* Request/response tab bars scroll sideways when they don't fit, instead of hiding tabs
+   behind antd's overflow "…" menu. antd's own translate-based scrolling is switched off so
+   native scrolling and the ink bar (a child of the list) stay in step. */
+.oc-request-response-tabs .ant-tabs-nav-wrap {
+  overflow-x: auto !important;
+  scrollbar-width: thin;
+}
+
+.oc-request-response-tabs .ant-tabs-nav-list {
+  transform: none !important;
+}
+
+.oc-request-response-tabs .ant-tabs-nav-wrap::before,
+.oc-request-response-tabs .ant-tabs-nav-wrap::after,
+.oc-request-response-tabs .ant-tabs-nav-operations {
+  display: none !important;
+}

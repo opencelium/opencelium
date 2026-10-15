@@ -9,8 +9,8 @@ export type TestInputKind = 'string' | 'json';
 
 export type TestInputValue = { text: string; kind: TestInputKind; source: TestInputSource };
 
-export const referenceInputKey = (reference: CollectedReference) => reference.reference;
-export const webhookInputKey = (webhook: CollectedWebhook) => `webhook:${webhook.name}`;
+export const referenceInputKey = ({ reference }: Pick<CollectedReference, 'reference'>) => reference;
+export const webhookInputKey = ({ name }: Pick<CollectedWebhook, 'name'>) => `webhook:${name}`;
 
 export const EMPTY_INPUT: TestInputValue = { text: '', kind: 'json', source: 'empty' };
 
@@ -18,6 +18,17 @@ export function toInputValue(value: unknown, source: Exclude<TestInputSource, 'e
 	if (value === undefined) return EMPTY_INPUT;
 	if (typeof value === 'string') return { text: value, kind: 'string', source };
 	return { text: JSON.stringify(value, null, 2), kind: 'json', source };
+}
+
+// A JSON value that does not parse; empty is reported separately as missing.
+export function readJsonError({ text, kind }: Pick<TestInputValue, 'text' | 'kind'>): string | null {
+	if (kind !== 'json' || !text.trim()) return null;
+	try {
+		JSON.parse(text);
+		return null;
+	} catch (error) {
+		return error instanceof Error ? error.message : String(error);
+	}
 }
 
 export function parseInputValue({ text, kind }: Pick<TestInputValue, 'text' | 'kind'>): unknown {
@@ -40,6 +51,12 @@ const parseIfJsonString = (value: unknown) => {
 
 // The connector's documented sample response: the only value available for a
 // method that has never run. Iterators read element 0, as the reference picker does.
+// An `array` response describes one element in its fields; the sample is that array.
+const readSampleBody = (body: { type?: string; fields?: unknown } | null | undefined) => {
+	const fields = parseIfJsonString(body?.fields);
+	return body?.type === 'array' && !Array.isArray(fields) ? [fields ?? {}] : fields;
+};
+
 export function readSampleValue({ parsed, sourceMethod }: CollectedReference): unknown {
 	if (!sourceMethod || parsed.direction !== 'response') return undefined;
 	const sample = sourceMethod.response?.success;
@@ -50,7 +67,7 @@ export function readSampleValue({ parsed, sourceMethod }: CollectedReference): u
 		case 'header':
 			return readLiveValueAtPath(sample.header, parsed.path, () => 0);
 		case 'body':
-			return readLiveValueAtPath(parseIfJsonString(sample.body?.fields), parsed.path, () => 0);
+			return readLiveValueAtPath(readSampleBody(sample.body), parsed.path, () => 0);
 		default:
 			return undefined;
 	}
