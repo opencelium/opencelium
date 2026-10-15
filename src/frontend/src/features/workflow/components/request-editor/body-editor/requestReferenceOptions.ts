@@ -2,7 +2,13 @@ import { MethodType, OperatorType, type Connection, type LoopOperatorWithId, typ
 
 export type ResponseType = 'body' | 'header' | 'status';
 
-export type ReferenceOption = { label: string; value: string };
+export type ReferencePathOption =
+  | { kind: 'field'; label: string; value: string }
+  | { kind: 'operation'; label: string; value: string; syntax: string; description: string };
+
+export type ReferencePathOptionKind = ReferencePathOption['kind'];
+
+export type ReferencePathOptionGroup = { kind: ReferencePathOptionKind; options: ReferencePathOption[] };
 
 // Reverse a reference's color back to the method it points at. Case-
 // insensitive and '#'-stripped on both sides since the two reference parsers
@@ -103,30 +109,57 @@ const getArrayItem = (value: unknown) => {
   return undefined;
 };
 
-const exactReadAtPath = (source: unknown, path: string, iterators: string[] = []) => {
-  if (!path) return source;
-  const parts = normalizePath(path).match(PATH_RE) || [];
-  let current = source;
-  for (const part of parts) {
-    const iterator = getArrayAccessIterator(part);
-    if (isArrayNode(current) && (part === '[0]' || part === '[*]' || iterators.includes(iterator))) {
-      current = getArrayItem(current);
-      continue;
-    }
-    if (isRecord(current)) {
-      current = current[unquotePathPart(part)];
-      continue;
-    }
-    return undefined;
+const OBJECT_WILDCARD = '*';
+// OpenCelium's own operator (not JsonPath): resolves to the field names of the
+// object the path points at. The backend only honours it as the last segment.
+const KEY_NAMES_SUFFIX = "['*']~";
+const LENGTH_SUFFIX = '.length()';
+// Some hosts (the condition dialog) pass paths without `$.`, so a root-array
+// `$.length()` can arrive as a bare `length()`.
+const LENGTH_TAIL_RE = /(?:^|\.)length\(\)$/;
+
+const isObjectNode = (value: unknown): value is Record<string, unknown> =>
+  isRecord(value) && !isArrayNode(value);
+
+const FIRST_ELEMENT = '[0]';
+const LAST_ELEMENT = '[-1]';
+
+const isArrayAccessPart = (part: string, iterators: string[]) =>
+  part === FIRST_ELEMENT || part === LAST_ELEMENT || part === '[*]'
+  || iterators.includes(getArrayAccessIterator(part));
+
+// A `*` segment fans out over every child of an object, so a path no longer
+// points at one node but at a set of them; later segments apply to each match
+// and non-matching ones (e.g. primitives under `*`) simply drop out.
+const stepNodes = (nodes: unknown[], part: string, iterators: string[]): unknown[] => {
+  if (part === OBJECT_WILDCARD) return nodes.filter(isObjectNode).flatMap((node) => Object.values(node));
+  if (isArrayAccessPart(part, iterators) && nodes.some(isArrayNode)) {
+    return nodes.filter(isArrayNode).map(getArrayItem);
   }
-  return current;
+  const key = unquotePathPart(part);
+  return nodes.filter(isRecord).filter((node) => key in node).map((node) => node[key]);
+};
+
+const readNodesAtPath = (source: unknown, path: string, iterators: string[] = []) => {
+  const parts = normalizePath(path).match(PATH_RE) || [];
+  return parts.reduce<unknown[]>((nodes, part) => stepNodes(nodes, part, iterators), [source]);
 };
 
 const appendPath = (base: string, part: string) => {
-  const serializedPart = isArrayPathPart(part) ? part : serializeObjectKey(unquotePathPart(part));
+  const serializedPart = isArrayPathPart(part) || part === OBJECT_WILDCARD
+    ? part
+    : serializeObjectKey(unquotePathPart(part));
   if (base === '$') return `$.${serializedPart}`;
   return base ? `${base}${isArrayPathPart(serializedPart) ? '' : '.'}${serializedPart}` : serializedPart;
 };
+
+// The backend reads the base of `['*']~` with JsonPath; any multi-match segment
+// makes that base a list, which has no field names.
+const isSingleMatchPath = (path: string) =>
+  !(normalizePath(path).match(PATH_RE) || []).some((part) => part === OBJECT_WILDCARD || part === '[*]');
+
+// `length()` is a JsonPath function, not a key, so it must bypass appendPath's quoting.
+const appendLength = (base: string) => `${base && base !== '$' ? base : '$'}${LENGTH_SUFFIX}`;
 
 const normalizeRootArrayPath = (path: string) => {
   if (path.startsWith('$[')) return `$.${path.slice(1)}`;
@@ -139,30 +172,20 @@ const getContext = (
   type: ResponseType,
   currentPath = '',
   iterators: string[] = [],
-): { node: unknown; lastValidPath: string } => {
-  if (type === 'status') return { node: 'status', lastValidPath: 'status' };
-  const source = getSource(method, type);
+): { nodes: unknown[]; lastValidPath: string } => {
+  if (type === 'status') return { nodes: ['status'], lastValidPath: 'status' };
   const parts = normalizePath(currentPath).match(PATH_RE) || [];
-  let current = source;
+  let nodes: unknown[] = [getSource(method, type)];
   let lastValidPath = currentPath === '$' || currentPath === '$.' ? '$' : '';
 
   for (const part of parts) {
-    const iterator = getArrayAccessIterator(part);
-    if (isArrayNode(current) && (part === '[0]' || part === '[*]' || iterators.includes(iterator))) {
-      current = getArrayItem(current);
-      lastValidPath = appendPath(lastValidPath, part);
-      continue;
-    }
-    const objectKey = unquotePathPart(part);
-    if (isRecord(current) && objectKey in current) {
-      current = current[objectKey];
-      lastValidPath = appendPath(lastValidPath, objectKey);
-      continue;
-    }
-    break;
+    const nextNodes = stepNodes(nodes, part, iterators);
+    if (nextNodes.length === 0) break;
+    nodes = nextNodes;
+    lastValidPath = appendPath(lastValidPath, isArrayPathPart(part) ? part : unquotePathPart(part));
   }
 
-  return { node: current, lastValidPath };
+  return { nodes, lastValidPath };
 };
 
 type ReferenceLabelT = (key: string, values?: Record<string, unknown>) => string;
@@ -173,36 +196,68 @@ export const getReferenceOptions = (
   currentPath = '',
   iterators: string[] = [],
   t: ReferenceLabelT = (key) => key,
-): ReferenceOption[] => {
-  if (type === 'status') return [{ label: t('references.responseStatus'), value: 'status' }];
-  const { node, lastValidPath } = getContext(method, type, currentPath, iterators);
-  const options: ReferenceOption[] = [];
+): ReferencePathOption[] => {
+  if (type === 'status') return [{ kind: 'field', label: t('references.responseStatus'), value: 'status' }];
+  const { nodes, lastValidPath } = getContext(method, type, currentPath, iterators);
+  const options: ReferencePathOption[] = [];
+  // Every operation's description lives next to its label, under `<labelKey>Hint`.
+  const operation = (labelKey: string, value: string, syntax: string, values?: Record<string, unknown>) =>
+    options.push({
+      kind: 'operation', label: t(labelKey, values), value, syntax, description: t(`${labelKey}Hint`, values),
+    });
 
-  if (!normalizePath(currentPath)) {
-    options.push({ label: t('references.rootObject'), value: '$' });
+  if (!normalizePath(currentPath)) operation('references.rootObject', '$', '$');
+
+  if (nodes.length > 0 && nodes.every(isArrayNode)) {
+    operation('references.firstArrayElement', appendPath(lastValidPath, FIRST_ELEMENT), FIRST_ELEMENT);
+    operation('references.lastArrayElement', appendPath(lastValidPath, LAST_ELEMENT), LAST_ELEMENT);
+    operation('references.wholeArray', appendPath(lastValidPath, '[*]'), '[*]');
+    if (nodes.length === 1 && isSingleMatchPath(lastValidPath)) {
+      operation('references.arrayLength', appendLength(lastValidPath), LENGTH_SUFFIX.slice(1));
+    }
+    iterators.forEach((iterator) => operation('references.iteratorLoop',
+      appendPath(lastValidPath, `[${iterator}]`), `[${iterator}]`, { iterator }));
+    return options;
   }
 
-  if (isArrayNode(node)) {
-    return [
-      ...options,
-      { label: t('references.firstArrayElement'), value: appendPath(lastValidPath, '[0]') },
-      { label: t('references.wholeArray'), value: appendPath(lastValidPath, '[*]') },
-      ...iterators.map((iterator) => ({
-        label: t('references.iteratorLoop', { iterator }),
-        value: appendPath(lastValidPath, `[${iterator}]`),
-      })),
-    ];
+  if (nodes.some((node) => isObjectNode(node) && Object.keys(node).length > 0)) {
+    operation('references.anyProperty', appendPath(lastValidPath, OBJECT_WILDCARD), OBJECT_WILDCARD);
   }
 
-  if (isRecord(node)) {
-    options.push(...Object.keys(node).map((key) => ({
-      label: key,
-      value: appendPath(lastValidPath, key),
-    })));
+  if (nodes.length === 1 && isObjectNode(nodes[0]) && isSingleMatchPath(lastValidPath)) {
+    operation('references.allKeyNames', `${lastValidPath}${KEY_NAMES_SUFFIX}`, KEY_NAMES_SUFFIX);
   }
+
+  const keys = new Set(nodes.filter(isObjectNode).flatMap((node) => Object.keys(node)));
+  options.push(...[...keys].map((key): ReferencePathOption => ({
+    kind: 'field',
+    label: key,
+    value: appendPath(lastValidPath, key),
+  })));
 
   return options;
 };
+
+export const matchesReferenceOptionSyntax = (option: ReferencePathOption, term: string) =>
+  option.kind === 'operation' && !!term && option.syntax.toLowerCase().startsWith(term);
+
+const OPTION_GROUP_ORDER: ReferencePathOptionKind[] = ['operation', 'field'];
+
+export const REFERENCE_GROUP_LABEL_KEY: Record<ReferencePathOptionKind, string> = {
+  operation: 'references.operationsGroup',
+  field: 'references.fieldsGroup',
+};
+
+export const groupReferenceOptions = (options: ReferencePathOption[]): ReferencePathOptionGroup[] =>
+  OPTION_GROUP_ORDER
+    .map((kind) => ({ kind, options: options.filter((option) => option.kind === kind) }))
+    .filter((group) => group.options.length > 0);
+
+// Paths whose resolved value is a list: a wildcard fans out (JsonPath returns all
+// matches, even a single one, as a list), `[*]` is the array itself, and
+// `['*']~` is the list of key names.
+export const isListReferencePath = (path: string) =>
+  path.endsWith(KEY_NAMES_SUFFIX) || !isSingleMatchPath(path);
 
 export const buildReferenceValue = (color: string, type: ResponseType, path: string) => {
   const normalizedPath = normalizeRootArrayPath(path);
@@ -221,8 +276,47 @@ export const isExpandableReferencePath = (
   if (type === 'status') return false;
   if (isRootPath(path)) return false;
   const source = getSource(method, type);
-  const current = exactReadAtPath(source, path, iterators);
-  return isArrayNode(current) || isRecord(current);
+  return readNodesAtPath(source, path, iterators).some((node) => isArrayNode(node) || isRecord(node));
+};
+
+// The backend's tail operators (`['k']~`, `[i]~`) and `.length()` aren't schema
+// keys — only the path in front of them can be checked against the response shape.
+const PATH_TAIL_OPERATOR_RE = /(?:\['[^'[\]]*']~|\[[a-z0-9*]+]~|(?:^|\.)length\(\))$/;
+
+// The invoker declared the field but nothing below it (an empty object, or an
+// array without an item shape), so any path through it is plausible.
+const isEmptyShape = (node: unknown) =>
+  node === undefined || (isObjectNode(node) && Object.keys(node).length === 0);
+
+const isUndescribedNode = (node: unknown) =>
+  isEmptyShape(node) || (isArrayNode(node) && isEmptyShape(getArrayItem(node)));
+
+// Lenient on what the picker never generates but a user may type: any array
+// index, and a for-in iterator used as an object key (`obj['i']`).
+const stepDeclaredNodes = (nodes: unknown[], part: string, iterators: string[]) => {
+  if (isArrayPathPart(part) && nodes.some(isArrayNode)) return nodes.filter(isArrayNode).map(getArrayItem);
+  const key = unquotePathPart(part);
+  if (key !== part && iterators.includes(key)) return stepNodes(nodes, OBJECT_WILDCARD, iterators);
+  return stepNodes(nodes, part, iterators);
+};
+
+// True only when the method's declared response body positively contradicts
+// the path; the backend fails the run on a missing property, so it's worth a warning.
+export const isUnknownReferencePath = (
+  method: MethodWithId | undefined,
+  type: ResponseType,
+  path: string,
+  iterators: string[] = [],
+) => {
+  if (type !== 'body' || !method) return false;
+  const parts = normalizePath(path.trim().replace(PATH_TAIL_OPERATOR_RE, '')).match(PATH_RE) || [];
+  let nodes: unknown[] = [getSource(method, type)];
+  for (const part of parts) {
+    if (nodes.some(isUndescribedNode)) return false;
+    nodes = stepDeclaredNodes(nodes, part, iterators);
+    if (nodes.length === 0) return true;
+  }
+  return false;
 };
 
 const parseIndexPath = (value: unknown) =>
@@ -285,10 +379,10 @@ export const getIteratorsForMethod = (
 ): string[] => getIteratorsForIndex(connection, method?.index);
 
 // Walks `path` against an ACTUAL captured value (a real, already-parsed JSON
-// response — not the static sample response the picker/exactReadAtPath peek
+// response — not the static sample response the picker/readNodesAtPath peek
 // at) to extract the exact value a reference resolves to while debugging a
 // paused test run (see useLiveReferenceValue.ts). Same path grammar as
-// exactReadAtPath, but different bracket semantics: that function always
+// readNodesAtPath, but different bracket semantics: that function always
 // takes element 0 (correct for shape-discovery — it only needs to know what
 // fields exist further down), whereas this one is producing a real value a
 // user will read, so `[*]` must return the WHOLE array and `[<iteratorName>]`
@@ -303,27 +397,23 @@ export const readLiveValueAtPath = (
   resolveIteratorIndex: (iteratorName: string) => number | null,
 ): unknown => {
   if (!path) return source;
+  if (path.endsWith(KEY_NAMES_SUFFIX)) {
+    const base = readLiveValueAtPath(source, path.slice(0, -KEY_NAMES_SUFFIX.length), resolveIteratorIndex);
+    return isRecord(base) ? Object.keys(base) : undefined;
+  }
+  if (LENGTH_TAIL_RE.test(path)) {
+    const base = readLiveValueAtPath(source, path.replace(LENGTH_TAIL_RE, ''), resolveIteratorIndex);
+    return Array.isArray(base) ? base.length : undefined;
+  }
   const parts = normalizePath(path).match(PATH_RE) || [];
   let current: unknown = source;
   for (const part of parts) {
-    // JsonPath semantics, as the backend evaluates them: `length()` is the array
-    // size and a literal index counts from the end when negative.
-    if (part === 'length()') {
-      if (!Array.isArray(current)) return undefined;
-      current = current.length;
-      continue;
-    }
-    const literalIndex = part.match(/^\[(-?\d+)]$/);
-    if (literalIndex) {
-      if (!Array.isArray(current)) return undefined;
-      const index = Number(literalIndex[1]);
-      current = current[index < 0 ? current.length + index : index];
-      continue;
-    }
     if (isArrayPathPart(part)) {
       if (!Array.isArray(current)) return undefined;
       if (part === '[*]') continue;
-      const index = resolveIteratorIndex(getArrayAccessIterator(part));
+      const index = part === FIRST_ELEMENT ? 0
+        : part === LAST_ELEMENT ? current.length - 1
+        : resolveIteratorIndex(getArrayAccessIterator(part));
       if (index === null || index === undefined) return undefined;
       current = current[index];
       continue;
