@@ -1,18 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
-import { validateWorkflowJson, type WorkflowJsonValidationContext } from './workflowJson.validate';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { JsonEditorValidate } from './JsonEditorDialog.types';
 
-export type WorkflowJsonMode = 'tree' | 'raw';
+export type JsonEditorMode = 'tree' | 'raw';
 
 const stringify = (value: Record<string, unknown>) => JSON.stringify(value, null, 2);
 
-export function useWorkflowJsonEditor(open: boolean, value: Record<string, unknown>,
-	validationContext?: WorkflowJsonValidationContext) {
+export function useJsonEditor<T>(open: boolean, value: Record<string, unknown>,
+	validate: JsonEditorValidate<T>) {
 	const sourceRef = useRef(value);
 	const wasOpenRef = useRef(false);
 	const [sourceText, setSourceText] = useState(() => stringify(value));
 	const [draft, setDraft] = useState(value);
 	const [raw, setRaw] = useState(() => stringify(value));
-	const [mode, setMode] = useState<WorkflowJsonMode>('tree');
+	const [mode, setMode] = useState<JsonEditorMode>('tree');
 	const [syntaxError, setSyntaxError] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -46,7 +46,8 @@ export function useWorkflowJsonEditor(open: boolean, value: Record<string, unkno
 	const reset = () => setTreeDraft(sourceRef.current);
 	const dirty = raw !== sourceText;
 
-	const validation = syntaxError ? null : validateWorkflowJson(draft, validationContext);
+	const validation = useMemo(() => syntaxError ? null : validate(draft),
+		[syntaxError, validate, draft]);
 	return { draft, raw, updateRaw, mode, setMode, setTreeDraft, reset, dirty,
 		syntaxError, validation };
 }
