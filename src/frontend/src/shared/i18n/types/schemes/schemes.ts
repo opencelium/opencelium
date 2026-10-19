@@ -114,6 +114,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             systemCheck: string
             config: string
             ui: string
+            backToMain: string
         }
         commandPalette: {
             placeholder: string
