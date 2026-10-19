@@ -1,8 +1,7 @@
 import type { QueryParam } from '../../../../types/connection';
 import { decodeQueryParamValue } from '../urlEditor.utils';
 
-const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
-export const urlMethodOptions = HTTP_METHODS.map((value) => ({ value, label: value }));
+export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
 
 const TOKEN_ID_RE = /#{%\s*([A-Za-z0-9_-]+)\s*%}/g;
 export const extractTokenIds = (value: string) =>
