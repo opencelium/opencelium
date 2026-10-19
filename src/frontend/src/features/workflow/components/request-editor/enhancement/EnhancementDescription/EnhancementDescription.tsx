@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Input } from 'antd';
-import { Collapse } from '@shared/ui/primitives/Collapse';
 import { DebounceDelay } from '../../../../constants/constants';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { EnhancementDescriptionProps } from './EnhancementDescription.types';
 
-const EnhancementDescription = ({ onChangeDescription, description, readOnly }: EnhancementDescriptionProps) => {
+const EnhancementDescription = ({
+	onChangeDescription,
+	description,
+	readOnly,
+}: EnhancementDescriptionProps) => {
 	const { t } = useI18n('workflow');
 	const [localValue, setLocalValue] = useState(description);
 
@@ -22,25 +25,18 @@ const EnhancementDescription = ({ onChangeDescription, description, readOnly }: 
 	}, [description, localValue, onChangeDescription]);
 
 	return (
-		<Collapse
-			className='bodyLegacyDescriptionCollapse'
-			items={[
-				{
-					key: 'description',
-					label: t('description.label'),
-					content: (
-						<Input.TextArea
-							readOnly={readOnly}
-							rows={3}
-							placeholder={t('description.placeholder')}
-							value={localValue}
-							onChange={(e) => setLocalValue(e.target.value)}
-							style={{ resize: 'none' }}
-						/>
-					),
-				},
-			]}
-		/>
+		<label className="scriptEnhancementDescription">
+			<span>{t('description.label')}</span>
+			<Input.TextArea
+				readOnly={readOnly}
+				rows={3}
+				data-testid="workflow-enhancement-description"
+				placeholder={t('sandbox.descriptionPlaceholder')}
+				value={localValue}
+				onChange={(event) => setLocalValue(event.target.value)}
+				style={{ resize: 'none' }}
+			/>
+		</label>
 	);
 };
 
