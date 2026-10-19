@@ -22,7 +22,8 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
   return (
     <div
       ref={state.wrapperRef}
-      className={fit.isExpanded ? 'selectCopyHost isFitExpanded' : 'selectCopyHost'}
+      className={['selectCopyHost', fit.isExpanded && 'isFitExpanded', fit.isTailShown && 'isTailShown']
+        .filter(Boolean).join(' ')}
       onMouseDownCapture={() => {
         state.userInteractionRef.current = true;
       }}

@@ -676,6 +676,12 @@
   display: none;
 }
 
+/* Scrolled to the end of an overflowing path (useFitWidthOnFocus): fade the
+   cut-off start so it reads as truncated rather than as the path's beginning. */
+.selectCopyHost.isTailShown .bodyLegacyGeneratorSelect .ant-select-selection-search-input {
+  mask-image: linear-gradient(to right, transparent, #000 18px);
+}
+
 .bodyLegacyWebhookSelect {
   width: 100%;
 }
