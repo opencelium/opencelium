@@ -16,6 +16,11 @@ type Props = {
 	onDeleteEnhancement: (enhanceId: string) => void;
 };
 
+/** Lets a long path wrap at its segments; overflow-wrap still splits a single
+ *  segment that is wider than the panel. */
+const withSegmentBreaks = (path: string) => path.split('.').flatMap((segment, index) =>
+	index ? ['.', <wbr key={index} />, segment] : [segment]);
+
 export function ReferenceInfoRow({ field, refs, messageProperty, paramKey, readOnly,
 	onClick, onDeleteReference, onDeleteEnhancement }: Props) {
 	const confirm = useConfirm();
@@ -27,7 +32,7 @@ export function ReferenceInfoRow({ field, refs, messageProperty, paramKey, readO
 		<div className='referenceInfoRow' onClick={() => enhanceId && onClick?.(enhanceId)}>
 			<div className='referenceInfoTitle'>
 				<span className='referenceInfoTarget'>
-					{formatTargetField(messageProperty, field, paramKey)}
+					{withSegmentBreaks(formatTargetField(messageProperty, field, paramKey))}
 				</span>{' '}
 				has {refs.length > 1 ? 'next references:' : 'one reference:'}
 			</div>
@@ -43,7 +48,7 @@ export function ReferenceInfoRow({ field, refs, messageProperty, paramKey, readO
 						</span>
 						<span> bound with </span>
 						<span className='referenceInfoSource' style={{ color: reference.color }}>
-							{formatSourceField(reference.sourceMessageProperty, reference.target)}
+							{withSegmentBreaks(formatSourceField(reference.sourceMessageProperty, reference.target))}
 						</span>
 						<span>{index === refs.length - 1 ? ' field.' : ' field; '}</span>
 						{!readOnly && <span className='referenceInfoDelete' onClick={async (event) => {
