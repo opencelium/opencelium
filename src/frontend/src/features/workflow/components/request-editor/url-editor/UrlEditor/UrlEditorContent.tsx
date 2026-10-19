@@ -1,6 +1,6 @@
 import { LinkOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import { MethodBadge } from '@features/logs';
+import { HttpMethodBadge } from '@shared/ui/http-method/HttpMethodBadge';
 import { Select } from '@shared/ui/primitives/Select';
 import { LegacyBodyReferenceGenerator } from '../../body-editor/LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
 import { UrlEndpointField } from '../UrlEndpointField/UrlEndpointField';
@@ -12,7 +12,7 @@ import '../urlMethodSelect.css';
 type Props = { readOnly?: boolean; editor: ReturnType<typeof useUrlEditor> };
 
 const urlMethodOptions = HTTP_METHODS.map((value) => ({
-	value, label: <MethodBadge method={value} />, searchLabel: value,
+	value, label: <HttpMethodBadge method={value} />, searchLabel: value,
 }));
 
 export function UrlEditorContent({ readOnly, editor }: Props) {
@@ -27,7 +27,7 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 						testId='workflow-url-method-select' />
 				</div>
 			) : <div className='wfUrlMethodReadonly' data-testid='workflow-url-method-readonly'>
-				<MethodBadge method={selectedMethod} />
+				<HttpMethodBadge method={selectedMethod} />
 			</div>}
 			endpointArgs={editor.endpointArgs} endpointArgsRef={editor.endpointArgsRef}
 			connection={editor.connection} currentMethod={editor.method}
