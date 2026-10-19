@@ -6,6 +6,7 @@ import { ReferenceOptionLabel } from '../ReferenceOptionLabel/ReferenceOptionLab
 import { groupReferenceOptions, REFERENCE_GROUP_LABEL_KEY } from '../requestReferenceOptions';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
 import { useLegacyResponseFieldSelect } from './useLegacyResponseFieldSelect';
+import { useFitWidthOnFocus } from './useFitWidthOnFocus';
 import '../bodyLegacy.css';
 
 /** Above the method dialog the picker was written for, and below the confirm
@@ -16,11 +17,12 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
   const state = useLegacyResponseFieldSelect({ method, type, value, disabled, iterators, onChange });
   const { t } = useI18n('workflow');
   const zIndex = popupZIndex ?? DEFAULT_POPUP_Z_INDEX;
+  const fit = useFitWidthOnFocus(state.wrapperRef, state.searchValue);
 
   return (
     <div
       ref={state.wrapperRef}
-      className='selectCopyHost'
+      className={fit.isExpanded ? 'selectCopyHost isFitExpanded' : 'selectCopyHost'}
       onMouseDownCapture={() => {
         state.userInteractionRef.current = true;
       }}
@@ -38,11 +40,13 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
           value={undefined}
           searchValue={state.searchValue}
           className='bodyLegacyGeneratorSelect'
+          style={fit.style}
           size='large'
           disabled={state.isDisabled}
           showSearch
           filterOption={false}
           getPopupContainer={() => document.body}
+          popupMatchSelectWidth={420}
           styles={{ popup: { root: { zIndex } } }}
           status={state.isUnknownPath ? 'warning' : undefined}
           options={groupReferenceOptions(state.options).map((group) => ({
@@ -56,8 +60,14 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
           open={state.open}
           onSearch={state.onSearch}
           onSelect={state.onSelect}
-          onFocus={state.onFocus}
-          onBlur={state.onBlur}
+          onFocus={() => {
+            fit.onFocus();
+            state.onFocus();
+          }}
+          onBlur={() => {
+            fit.onBlur();
+            state.onBlur();
+          }}
           onClear={state.onClear}
           allowClear
         />
