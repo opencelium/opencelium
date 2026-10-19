@@ -278,7 +278,10 @@
       "title": "No results found",
       "description": "No connectors, logic blocks, or methods match your search."
     },
-    "methodItemText": "Method",
+    "methodInfo": {
+      "formFormat": "Form",
+      "bodyFormatHint": "Request body format"
+    },
     "connectorMethodsFallback": "Methods from {{invoker}}."
   },
   "headerMenu": {
