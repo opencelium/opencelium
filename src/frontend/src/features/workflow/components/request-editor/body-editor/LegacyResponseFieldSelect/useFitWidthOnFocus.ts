@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, type CSSProperties, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useState, type CSSProperties, type RefObject } from 'react';
 
 const MAX_WIDTH = 560;
 const EDGE_GUTTER = 8;
@@ -22,9 +22,10 @@ function getClipRight(element: HTMLElement) {
 }
 
 /**
- * While focused, widens the select to fit `text` when it doesn't. The extra width
- * is cancelled by an equal negative end margin, so the select overlays its right
- * neighbours instead of reflowing the row — operator rows have no room to grow.
+ * Keeps a long path readable. While focused, widens the select to fit `text`
+ * when it doesn't; the extra width is cancelled by an equal negative end margin,
+ * so the select overlays its right neighbours instead of reflowing the row —
+ * operator rows have no room to grow. Unfocused, shows the end of the path.
  */
 export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, text: string) {
   const [isFocused, setIsFocused] = useState(false);
@@ -45,12 +46,38 @@ export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, te
     setLayout(width > hostRect.width ? { width, hostWidth: hostRect.width } : null);
   }, [hostRef, isFocused, text]);
 
+  const [isTailShown, setIsTailShown] = useState(false);
+
+  // Unfocused, an input shows the start of an overflowing value; the last
+  // segments are what tell paths apart, so scroll to the end instead.
+  useEffect(() => {
+    const input = hostRef.current?.querySelector('input');
+    if (isFocused || !(input instanceof HTMLInputElement)) {
+      setIsTailShown(false);
+      return;
+    }
+    const showTail = () => {
+      const isOverflowing = input.scrollWidth > input.clientWidth;
+      input.scrollLeft = isOverflowing ? input.scrollWidth : 0;
+      setIsTailShown(isOverflowing);
+    };
+    // Browsers reset the scroll on blur after the event, so wait a frame.
+    const frame = requestAnimationFrame(showTail);
+    const observer = new ResizeObserver(showTail);
+    observer.observe(input);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [hostRef, isFocused, text]);
+
   const style: CSSProperties | undefined = layout
     ? { width: layout.width, marginInlineEnd: layout.hostWidth - layout.width }
     : undefined;
 
   return {
     isExpanded: layout !== null,
+    isTailShown,
     style,
     onFocus: () => setIsFocused(true),
     onBlur: () => setIsFocused(false),
