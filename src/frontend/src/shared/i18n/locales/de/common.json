@@ -114,6 +114,15 @@
     "startDashboardTour": "Dashboard-Tour starten",
     "servicePortal": "Service-Portal"
   },
+  "newFeature": {
+    "label": "Neu",
+    "workflowTemplateJsonEdit": {
+      "description": "Workflow-Vorlagen lassen sich jetzt direkt in der Vorlagenliste als JSON bearbeiten."
+    },
+    "enhancementScriptSandbox": {
+      "description": "Führen Sie ein Erweiterungsskript vor dem Speichern im Browser mit Beispieleingaben aus."
+    }
+  },
   "user": {
     "unknown": "Unbekannter Benutzer"
   },

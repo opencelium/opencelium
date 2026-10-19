@@ -202,6 +202,15 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             startDashboardTour: string
             servicePortal: string
         }
+        newFeature: {
+            label: string
+            workflowTemplateJsonEdit: {
+                description: string
+            }
+            enhancementScriptSandbox: {
+                description: string
+            }
+        }
         user: {
             unknown: string
         }
