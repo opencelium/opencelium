@@ -159,6 +159,7 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
                 <LegacyBodyReferenceGenerator
                   connection={connection}
                   currentMethod={currentMethod}
+                  value={pointer}
                   onApply={(reference) => {
                     onEdit?.(pointer, pointers, reference);
                     setEditorPos(null);
