@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react'
 import { message } from 'antd'
 import { IconButton } from '@shared/ui/primitives/IconButton'
-import { Tooltip } from '@shared/ui/primitives/Tooltip'
+import { NewFeature } from '@shared/ui/feedback/NewFeature/NewFeature'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 import { JsonEditorDialog } from '@shared/ui/json-editor/JsonEditorDialog'
@@ -61,7 +61,11 @@ export const ConnectionTemplateEditAction: React.FC<Props> = ({ row, rowId }) =>
 
     return (
         <>
-            <Tooltip content={tEntities('connection-template.list.edit.tooltip')} placement="top">
+            <NewFeature
+                id="workflow-template-json-edit"
+                tooltip={tEntities('connection-template.list.edit.tooltip')}
+                placement="top"
+            >
                 <IconButton
                     iconProps={{ name: 'edit', color: 'primary', size: 15 }}
                     type={'text'}
@@ -70,7 +74,7 @@ export const ConnectionTemplateEditAction: React.FC<Props> = ({ row, rowId }) =>
                     onClick={open}
                     testId={`connection-template-row-action-edit-json-${id}`}
                 />
-            </Tooltip>
+            </NewFeature>
             {value !== null && <JsonEditorDialog
                 open
                 readOnly={false}
