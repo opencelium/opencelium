@@ -2,7 +2,7 @@ import { ConfigProvider, Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useRef } from 'react';
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
-import {useAdminMenu, useMainMenu} from "@app/layouts/AppLayout/Sidebar/menues.tsx";
+import {BACK_TO_MAIN_MENU_KEY, useAdminMenu, useMainMenu} from "@app/layouts/AppLayout/Sidebar/menues.tsx";
 import {useTheme} from "@shared/theme/hooks/useTheme.tsx";
 import {AnimatePresence, motion} from "framer-motion";
 
@@ -38,7 +38,7 @@ export const NavigationMenu = () => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const { theme } = useTheme();
-    const { menuType, openSubmenuKeys, setOpenSubmenuKeys, setMenu, setLastPath } = useLayoutStore();
+    const { menuType, openSubmenuKeys, setOpenSubmenuKeys, setMenu, setLastPath, lastPathByMenu } = useLayoutStore();
     const sidebar = theme.color.sidebar;
 
     const mainMenu = useMainMenu();
@@ -123,6 +123,11 @@ export const NavigationMenu = () => {
                         mode="inline"
                         style={{ background: 'transparent', borderInlineEnd: 'none' }}
                         onClick={({ key, domEvent }) => {
+                            if (key === BACK_TO_MAIN_MENU_KEY) {
+                                setMenu('main');
+                                navigate(lastPathByMenu.main);
+                                return;
+                            }
                             // Modifier-held clicks fall through to the label's <a href>,
                             // letting the browser open the route in a new tab.
                             if (domEvent.metaKey || domEvent.ctrlKey || domEvent.shiftKey) return;

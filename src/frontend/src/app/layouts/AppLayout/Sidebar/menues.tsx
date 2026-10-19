@@ -1,4 +1,4 @@
-import {BranchesOutlined, DashboardOutlined, ScheduleOutlined, UserAddOutlined} from "@ant-design/icons";
+import {ArrowLeftOutlined, BranchesOutlined, DashboardOutlined, ScheduleOutlined, UserAddOutlined} from "@ant-design/icons";
 import {GoWorkflow} from "react-icons/go";
 import {MdNotificationAdd, MdOutlineAssistantPhoto, MdOutlineSettingsAccessibility} from "react-icons/md";
 import {GrAggregate, GrConfigure, GrDocumentConfig, GrGroup, GrLicense, GrSystem} from "react-icons/gr";
@@ -51,6 +51,9 @@ const leaf = (key: string, icon: ReactNode, label: string) => ({
     'data-testid': buildTestId('sidebar-menu', key),
 });
 
+// Not a route: NavigationMenu intercepts this key and switches back to the main menu.
+export const BACK_TO_MAIN_MENU_KEY = 'back-to-main-menu';
+
 export const useMainMenu = (): any[] => {
     const {t} = useI18n('common');
     const {normalizedUser} = useAuth();
@@ -68,6 +71,12 @@ export const useAdminMenu = (): any[] => {
     const {normalizedUser} = useAuth();
     const permissions = normalizedUser?.permissions ?? [];
     return useMemo(() => filterMenuItems([
+        {
+            key: BACK_TO_MAIN_MENU_KEY,
+            icon: <ArrowLeftOutlined/>,
+            label: t('menu.backToMain'),
+            'data-testid': 'sidebar-menu-back-to-main',
+        },
         {
             key: 'user_access',
             label: t('menu.usersAccess'),
