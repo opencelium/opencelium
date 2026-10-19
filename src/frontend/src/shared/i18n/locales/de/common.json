@@ -61,7 +61,8 @@
       "help": "Alle Befehle anzeigen",
       "onboarding": "Einrichtungstour neu starten",
       "workflowTutorial": "Workflow-Tutorial erneut ansehen",
-      "dashboardTour": "Dashboard-Tour erneut ansehen"
+      "dashboardTour": "Dashboard-Tour erneut ansehen",
+      "changelog": "Änderungsprotokoll öffnen"
     },
     "footer": {
       "select": "Auswählen",
@@ -112,7 +113,8 @@
     "help": "Hilfe",
     "startOnboardingTour": "Onboarding-Tour starten",
     "startDashboardTour": "Dashboard-Tour starten",
-    "servicePortal": "Service-Portal"
+    "servicePortal": "Service-Portal",
+    "changelog": "Änderungsprotokoll"
   },
   "user": {
     "unknown": "Unbekannter Benutzer"

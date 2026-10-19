@@ -1,0 +1,21 @@
+{
+  "title": "Änderungsprotokoll",
+  "subtitle": "Neuigkeiten in OpenCelium: Funktionen und Fehlerbehebungen jeder Version.",
+  "previous": "Frühere Versionen",
+  "empty": "Noch keine Einträge im Änderungsprotokoll",
+  "badges": {
+    "installed": "Installierte Version",
+    "latest": "Neueste Version",
+    "major": "Hauptversion"
+  },
+  "sections": {
+    "features": "Neue Funktionen",
+    "fixes": "Fehlerbehebungen"
+  },
+  "summary": {
+    "features_one": "{{count}} Funktion",
+    "features_other": "{{count}} Funktionen",
+    "fixes_one": "{{count}} Fehlerbehebung",
+    "fixes_other": "{{count}} Fehlerbehebungen"
+  }
+}
