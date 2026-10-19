@@ -1,0 +1,482 @@
+/* Script editor + compatibility status */
+.scriptCompatibilityEditor {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	position: relative;
+}
+.scriptCompatibilityEditor > :first-child {
+	flex: 1;
+	min-height: 100px;
+}
+.scriptCompatibilityEditor .ace_gutter {
+	width: 22px !important;
+}
+.scriptCompatibilityEditor .ace_scroller {
+	left: 22px !important;
+}
+.scriptCompatibilityError,
+.scriptCompatibilityWarning {
+	position: absolute;
+	border-bottom: 2px dotted var(--color-status-warning-fg);
+}
+.scriptCompatibilityError {
+	border-bottom-color: var(--color-status-error-fg);
+}
+.scriptRuntimeError {
+	position: absolute;
+	background: var(--color-status-error-bg);
+}
+.scriptCompatibilityCount {
+	flex: none;
+	text-align: right;
+	padding: 4px 8px;
+	font-size: 11px;
+	color: var(--color-text-secondary);
+}
+.scriptCompatibilityIssues {
+	flex: none;
+	font-size: 12px;
+	padding: 6px;
+	max-height: 150px;
+	overflow: auto;
+	border-top: 1px solid var(--color-border-subtle);
+	background: var(--color-background-page);
+}
+.scriptCompatibilitySummary,
+.scriptVariablesSummary {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	min-height: 20px;
+}
+.scriptCompatibilitySummaryText {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.scriptCompatibilityIssues .scriptCompatibilityIssue {
+	display: block;
+	height: auto;
+	padding: 4px 0;
+	text-align: left;
+	white-space: normal;
+}
+.scriptVariablesSummary small {
+	color: var(--color-text-secondary);
+	font-size: 11px;
+}
+.scriptTone {
+	display: inline-flex;
+}
+.scriptTone--error {
+	color: var(--color-status-error-fg);
+}
+.scriptTone--warning {
+	color: var(--color-status-warning-fg);
+}
+.scriptTone--success {
+	color: var(--color-status-success-fg);
+}
+.scriptTone--info {
+	color: var(--color-text-secondary);
+}
+.scriptEnhancementDescription {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	font-size: 13px;
+}
+
+/* Enhancement header actions */
+.bodyLegacyEnhancementHeader > span:first-child {
+	font-weight: 600;
+}
+.bodyLegacyEnhancementActions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.bodyLegacyEnhancementDelete {
+	border-left: 1px solid var(--color-border-subtle);
+	margin-left: 6px;
+	padding-left: 8px;
+}
+.bodyLegacyEnhancementHeader .scriptHeaderAction--active {
+	background: var(--color-action-primary-subtle);
+}
+
+/* Editor | playground split */
+.scriptPlaygroundLayout {
+	width: 100%;
+}
+.scriptPlaygroundLayout--stacked {
+	width: calc(100% - 1px);
+	min-height: 840px !important;
+	flex: none !important;
+}
+.scriptPlaygroundLayout .ant-splitter-panel,
+.scriptPlayground {
+	scrollbar-width: thin;
+	scrollbar-color: var(--color-text-disabled) transparent;
+}
+.scriptPlaygroundLayout .bodyLegacyEnhancementBody {
+	height: 100%;
+	box-sizing: border-box;
+	padding: 16px;
+	background: var(--color-background-surface);
+}
+.scriptPlaygroundLayout .bodyLegacyEnhancementLabel {
+	font-size: 14px;
+	margin-bottom: 8px;
+}
+.scriptPlaygroundLayout .bodyLegacyEnhancementLanguage {
+	margin-bottom: 16px;
+}
+.scriptPlaygroundLayout .bodyLegacyEnhancementDescription {
+	margin-top: 16px;
+}
+.scriptPlaygroundLayout .bodyLegacyEnhancementLanguage .ant-select {
+	min-height: 36px;
+}
+.scriptPlaygroundLayout .bodyLegacyEnhancementArgs .ant-collapse-header {
+	padding: 10px 12px !important;
+}
+.bodyLegacyEnhancementContent--playground
+	.bodyLegacyEnhancementCollapse
+	> .ant-collapse-item
+	> .ant-collapse-panel
+	> .ant-collapse-body {
+	padding: 0;
+}
+
+/* Playground pane */
+.scriptPlayground {
+	height: 100%;
+	overflow: auto;
+	box-sizing: border-box;
+	font-size: 14px;
+	padding: 16px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	color: var(--color-text-primary);
+	background: var(--color-background-page);
+}
+.scriptPlayground > * {
+	flex-shrink: 0;
+}
+.scriptPlayground h4 {
+	margin: 4px 0 0;
+}
+.scriptPlayground pre {
+	margin: 0;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	font-family: var(--typography-font-family-mono, monospace);
+}
+.scriptPlaygroundInputHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+}
+.scriptPlaygroundTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 16px;
+}
+.scriptPlaygroundTitle small {
+	font-weight: 400;
+	font-size: 12px;
+	padding: 2px 6px;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-sm);
+	color: var(--color-text-secondary);
+}
+
+/* Inputs */
+.scriptPlaygroundInput {
+	background: var(--color-background-surface);
+}
+.scriptPlaygroundInputLabel {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+.scriptPlaygroundInputLabel > strong {
+	flex: none;
+}
+.scriptPlaygroundInputSummary {
+	display: inline-flex;
+	align-items: center;
+	flex: 0 1 auto;
+	gap: 6px;
+	margin-left: auto;
+	min-width: 0;
+	max-width: 45%;
+	font-size: 12px;
+	white-space: nowrap;
+	color: var(--color-text-secondary);
+}
+.scriptPlaygroundInputSummary code {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-family: var(--typography-font-family-mono, monospace);
+}
+.scriptPlaygroundInputSummary--empty {
+	flex: none;
+	max-width: none;
+	color: var(--color-action-primary);
+}
+.scriptPlaygroundModes {
+	display: flex;
+	width: fit-content;
+	margin-bottom: 8px;
+	gap: 2px;
+	padding: 2px;
+	border-radius: var(--radius-sm);
+	background: var(--color-background-hover);
+}
+.scriptPlaygroundReference {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--color-text-secondary);
+}
+.scriptPlaygroundMethod {
+	flex: none;
+	padding: 1px 6px;
+	border-radius: var(--radius-sm);
+	font-weight: 600;
+	color: var(--color-text-on-action);
+}
+.scriptPlaygroundLocation {
+	flex: none;
+}
+.scriptPlaygroundField {
+	color: var(--color-text-primary);
+	font-family: var(--typography-font-family-mono, monospace);
+}
+/* antd's header and title would otherwise size to the label and push "Set value" out. */
+.scriptPlaygroundInput .ant-collapse-header,
+.scriptPlaygroundInput .ant-collapse-title,
+.scriptPlaygroundInput .ant-collapse-title > span {
+	min-width: 0;
+}
+.scriptPlaygroundInput .ant-collapse-title > span {
+	display: block;
+}
+
+/* Long field paths scroll to their end and back, like a long track title on a phone. */
+.marqueeText {
+	display: block;
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.marqueeTextContent {
+	display: inline-block;
+}
+.marqueeText--running .marqueeTextContent {
+	animation: marquee-scroll var(--marquee-duration) ease-in-out infinite;
+}
+.marqueeText--running:hover .marqueeTextContent {
+	animation-play-state: paused;
+}
+@keyframes marquee-scroll {
+	0%,
+	20% {
+		transform: translateX(0);
+	}
+	50%,
+	70% {
+		transform: translateX(var(--marquee-shift));
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.marqueeText--running .marqueeTextContent {
+		animation: none;
+	}
+	.marqueeText {
+		text-overflow: ellipsis;
+	}
+	.marqueeTextContent {
+		display: inline;
+	}
+}
+.scriptPlaygroundJsonEditor {
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-sm);
+	overflow: hidden;
+}
+.scriptPlaygroundJsonEditor .ace_marker-layer .ace_error-line {
+	position: absolute;
+	background: var(--color-status-error-bg);
+	border-bottom: 1px solid var(--color-status-error-border);
+}
+.scriptPlaygroundValueEditor textarea {
+	font-family: var(--typography-font-family-mono, monospace);
+	font-size: 13px;
+}
+.scriptPlaygroundMissing {
+	margin: 0;
+	padding: 12px;
+	border: 1px dashed var(--color-border-default);
+	border-radius: var(--radius-sm);
+	color: var(--color-text-secondary);
+}
+.scriptPlaygroundInputError {
+	margin-top: 6px;
+	font-size: 12px;
+	color: var(--color-status-error-fg);
+}
+
+/* Run row */
+.scriptPlaygroundRunRow {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+}
+.scriptPlaygroundRunStatus {
+	font-size: 12px;
+	color: var(--color-text-secondary);
+}
+
+/* Output */
+.scriptPlaygroundOutput {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	flex: 1;
+	min-height: 180px;
+	padding: 0 14px 14px;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+	background: var(--color-background-surface);
+}
+.scriptPlaygroundOutput > .ant-alert {
+	margin-top: 14px;
+}
+/* Stretch the antd Tabs down to the active pane so the empty state can centre in the box,
+   and let that pane scroll when its content is taller than the box. */
+.scriptPlaygroundOutput > .ant-tabs {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+.scriptPlaygroundOutput .ant-tabs-body-holder,
+.scriptPlaygroundOutput .ant-tabs-body,
+.scriptPlaygroundOutput .ant-tabs-content-active {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+.scriptPlaygroundOutput .ant-tabs-content-active {
+	overflow: auto;
+}
+.scriptPlaygroundPanel {
+	flex: 1;
+	min-height: 140px;
+}
+div.scriptPlaygroundPanel {
+	display: flex;
+	flex-direction: column;
+}
+.scriptPlaygroundEmpty {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 140px;
+	margin: 0;
+	text-align: center;
+}
+.scriptPlaygroundUnsupportedLine {
+	display: block;
+}
+.scriptPlaygroundResultHeader {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--color-text-secondary);
+}
+.scriptPlaygroundResultHeader > :last-child {
+	margin-left: auto;
+}
+.scriptPlaygroundType {
+	display: inline-block;
+	padding: 3px 6px;
+	font-size: 11px;
+	font-weight: 600;
+	border: 1px solid currentColor;
+	border-radius: var(--radius-sm);
+	color: var(--color-status-info-fg);
+	background: var(--color-status-info-bg);
+}
+.scriptPlaygroundType--String {
+	color: var(--color-status-success-fg);
+	background: var(--color-status-success-bg);
+}
+.scriptPlaygroundType--Number {
+	color: var(--color-status-warning-fg);
+	background: var(--color-status-warning-bg);
+}
+.scriptPlaygroundType--Boolean {
+	color: var(--color-status-error-fg);
+	background: var(--color-status-error-bg);
+}
+.scriptPlaygroundType--Null {
+	color: var(--color-text-secondary);
+	background: var(--color-background-hover);
+}
+.scriptPlaygroundValue {
+	margin-top: 12px;
+	border: 1px solid var(--color-border-subtle);
+	border-radius: var(--radius-sm);
+	background: var(--color-background-page);
+}
+.scriptPlaygroundValue pre {
+	padding: 12px;
+	font-size: 12px;
+	line-height: 1.5;
+}
+.scriptPlaygroundErrorText {
+	color: inherit;
+}
+.scriptPlaygroundConsole {
+	margin: 0;
+	padding-left: 24px;
+}
+.scriptPlaygroundConsole li {
+	padding-left: 8px;
+	color: var(--color-text-secondary);
+	border-bottom: 1px solid var(--color-border-subtle);
+}
+.scriptPlaygroundConsole pre {
+	padding: 8px 0;
+	color: var(--color-text-primary);
+}
+.scriptPlaygroundWarnings {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}

@@ -13,6 +13,7 @@ const CustomAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 	(props, ref) => {
 		const {
 			maxLength,
+			hideCounter,
 			mode,
 			editorTheme,
 			value,
@@ -26,6 +27,8 @@ const CustomAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 			readOnly,
 			style,
 			markers,
+			annotations,
+			onLoad,
 			name,
 			editorProps,
 			// height,
@@ -43,7 +46,7 @@ const CustomAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 
 		return (
 			<LimitedAceEditorContainer style={{ height: '100%' }}>
-				{isFocused && maxLength && typeof maxLength === 'number' && (
+				{!hideCounter && isFocused && maxLength && typeof maxLength === 'number' && (
 					<LimitedAceEditorCounter
 						top={counterStyles?.top}
 						right={counterStyles?.right}
@@ -69,6 +72,8 @@ const CustomAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 					className={className}
 					readOnly={readOnly}
 					markers={markers}
+					annotations={annotations}
+					onLoad={onLoad}
 					name={name}
 					editorProps={editorProps}
 					placeholder={placeholder}
