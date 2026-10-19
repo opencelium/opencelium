@@ -142,7 +142,7 @@ const EnhancementScript = ({
 			</div>
 			<ScriptCompatibilityStatus
 				issues={issues}
-				enabled={enhancement.language === 'js'}
+				isEnabled={enhancement.language === 'js'}
 				onLocate={(line, column) => {
 					editor.current?.gotoLine(line, column, true);
 					editor.current?.focus();

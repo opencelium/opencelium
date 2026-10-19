@@ -1,16 +1,7 @@
 import { Trans } from 'react-i18next';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { ParsedArgEntry } from './EnhancementArgs.types';
-
-const stripRootPath = (path: string) => String(path || '')
-    .replace(/\.$/, '').replace(/^\$\./, '').replace(/^\$/, '');
-
-const REQUEST_LOCATION_KEYS: Record<string, string> = {
-    body: 'args.locations.requestBody',
-    header: 'args.locations.requestHeader',
-    endpoint: 'args.locations.requestUrl',
-    status: 'args.locations.responseStatus',
-};
+import { argLocation } from './argLocation';
 
 export function EnhancementArgLine({ entry }: { entry: ParsedArgEntry }) {
     const { t } = useI18n('workflow');
@@ -28,13 +19,8 @@ export function EnhancementArgLine({ entry }: { entry: ParsedArgEntry }) {
         </div>;
     }
 
-    const location = entry.direction === 'response'
-        ? t(entry.messageProperty === 'body' ? 'args.locations.responseBody'
-            : entry.messageProperty === 'header' ? 'args.locations.responseHeader' : entry.messageProperty)
-        : t(REQUEST_LOCATION_KEYS[entry.messageProperty] || entry.messageProperty);
-    const strippedPath = stripRootPath(entry.path);
-    const fieldName = !strippedPath && ['body', 'header'].includes(entry.messageProperty)
-        ? `${entry.messageProperty}.$` : strippedPath;
+    const { locationKey, field: fieldName } = argLocation(entry);
+    const location = t(locationKey);
 
     return <div style={{ marginBottom: 6 }}><strong>{entry.key}</strong>{' '}
         <span style={{ opacity: 0.7 }}><Trans ns="workflow"

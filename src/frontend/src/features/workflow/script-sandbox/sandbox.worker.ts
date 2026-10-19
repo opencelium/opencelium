@@ -113,7 +113,7 @@ globalThis.onmessage = (event: MessageEvent<SandboxRequest>) => {
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
 		const stack = error instanceof Error ? error.stack : undefined;
-		const location = stack?.match(/(?:opencelium-enhancement\.js|<anonymous>):(\d+):(\d+)/);
+		const location = stack?.match(/opencelium-enhancement\.js:(\d+):(\d+)/);
 		send({
 			kind: 'error',
 			message:
