@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { LogRow, Meta, MethodBadge, RequestResponseTabs, StatusBadge } from '@features/logs';
+import { LogRow, Meta, RequestResponseTabs, StatusBadge } from '@features/logs';
+import { HttpMethodBadge } from '@shared/ui/http-method/HttpMethodBadge';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { Typography } from '@shared/ui/primitives/Typography';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -57,7 +58,7 @@ export function TestMethodResult({ draft, connection, currentMethod, result, isS
 			<div className='testMethodLogRow' data-testid='workflow-test-method-sent-endpoint'>
 				<LogRow
 					left={<>
-						<MethodBadge method={(request.method || 'GET').toUpperCase()} />
+						<HttpMethodBadge method={request.method || 'GET'} />
 						<TestMethodUrl url={request.url} connection={connection} currentMethod={currentMethod}
 							selectedKey={selectedKey} onSelect={onSelect} missingKeys={missingKeys} />
 						<CopyButton value={request.url} />
