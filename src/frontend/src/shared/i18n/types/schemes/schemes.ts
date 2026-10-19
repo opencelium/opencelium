@@ -150,6 +150,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 onboarding: string
                 workflowTutorial: string
                 dashboardTour: string
+                changelog: string
             }
             footer: {
                 select: string
@@ -201,6 +202,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             startOnboardingTour: string
             startDashboardTour: string
             servicePortal: string
+            changelog: string
         }
         user: {
             unknown: string

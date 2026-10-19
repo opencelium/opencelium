@@ -10,6 +10,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useIsAdmin } from '@features/auth/useIsAdmin'
 import { useDashboardTourStore } from '@features/onboarding/dashboard-tour/model/dashboardTour.store'
 import { ONBOARDING_RESTART_EVENT } from '@features/onboarding/model/types'
+import { CHANGELOG_ROUTE } from '@features/changelog/model/changelog.route'
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types'
 import './helpMenu.css'
 
@@ -18,8 +19,8 @@ const SERVICE_PORTAL_URL = 'https://service.opencelium.io/login'
 const DASHBOARD_ROUTE = '/'
 
 /**
- * The top bar's help affordance: the manual, and a replay of the onboarding
- * and dashboard tours.
+ * The top bar's help affordance: the manual, the changelog, and a replay of the
+ * onboarding and dashboard tours.
  *
  * Controlled `open` rather than antd's own trigger handling, because every
  * entry takes the user somewhere — a popover left standing would sit over the
@@ -34,6 +35,11 @@ export function HelpMenu() {
     const openDocs = () => {
         setIsOpen(false)
         window.open(DOCS_URL, '_blank', 'noopener,noreferrer')
+    }
+
+    const openChangelog = () => {
+        setIsOpen(false)
+        void navigate(CHANGELOG_ROUTE)
     }
 
     const openServicePortal = () => {
@@ -95,6 +101,12 @@ export function HelpMenu() {
                         label={tCommon('topbar.docs')}
                         onClick={openDocs}
                         testId="topbar-docs"
+                    />
+                    <MenuEntry
+                        icon="journal-text"
+                        label={tCommon('topbar.changelog')}
+                        onClick={openChangelog}
+                        testId="topbar-changelog"
                     />
                     <MenuEntry
                         icon="portal"
