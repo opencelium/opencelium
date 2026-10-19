@@ -25,7 +25,8 @@
     "updateAssistant": "Update-Assistent",
     "systemCheck": "Systemprüfung",
     "config": "Systemkonfiguration",
-    "ui": "UI"
+    "ui": "UI",
+    "backToMain": "Zurück"
   },
   "commandPalette": {
     "placeholder": "Befehl eingeben...",
