@@ -20,14 +20,10 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 	return <div data-testid='workflow-url-editor'
 		style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
 		<UrlEndpointField readOnly={readOnly} value={editor.endpointRaw}
-			beforeNode={editor.method.connector == null ? (
-				<div className='wfUrlMethodSelect' data-testid='workflow-url-method'>
-					<Select value={selectedMethod} onChange={editor.onMethodChange}
-						options={urlMethodOptions} sortOptions={false} readOnly={readOnly}
-						testId='workflow-url-method-select' />
-				</div>
-			) : <div className='wfUrlMethodReadonly' data-testid='workflow-url-method-readonly'>
-				<HttpMethodBadge method={selectedMethod} />
+			beforeNode={<div className='wfUrlMethodSelect' data-testid='workflow-url-method'>
+				<Select value={selectedMethod} onChange={editor.onMethodChange}
+					options={urlMethodOptions} sortOptions={false} readOnly={readOnly}
+					testId='workflow-url-method-select' />
 			</div>}
 			endpointArgs={editor.endpointArgs} endpointArgsRef={editor.endpointArgsRef}
 			connection={editor.connection} currentMethod={editor.method}

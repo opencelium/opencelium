@@ -24,12 +24,3 @@
 .wfUrlMethodSelect .ant-select-custom .ant-select-selector:hover {
 	border-color: var(--color-primary, var(--color-border-default)) !important;
 }
-
-.wfUrlMethodReadonly {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 32px;
-	cursor: default;
-	user-select: none;
-}
