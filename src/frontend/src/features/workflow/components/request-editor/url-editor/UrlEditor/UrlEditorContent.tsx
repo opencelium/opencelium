@@ -1,14 +1,19 @@
 import { LinkOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
+import { MethodBadge } from '@features/logs';
 import { Select } from '@shared/ui/primitives/Select';
 import { LegacyBodyReferenceGenerator } from '../../body-editor/LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
 import { UrlEndpointField } from '../UrlEndpointField/UrlEndpointField';
 import { UrlQueryParamsTable } from '../UrlQueryParamsTable/UrlQueryParamsTable';
 import type { useUrlEditor } from './useUrlEditor';
-import { urlMethodOptions } from './urlEditor.data';
+import { HTTP_METHODS } from './urlEditor.data';
 import '../urlMethodSelect.css';
 
 type Props = { readOnly?: boolean; editor: ReturnType<typeof useUrlEditor> };
+
+const urlMethodOptions = HTTP_METHODS.map((value) => ({
+	value, label: <MethodBadge method={value} />, searchLabel: value,
+}));
 
 export function UrlEditorContent({ readOnly, editor }: Props) {
 	const selectedMethod = (editor.method.request.method || 'GET').toUpperCase();
@@ -22,7 +27,7 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 						testId='workflow-url-method-select' />
 				</div>
 			) : <div className='wfUrlMethodReadonly' data-testid='workflow-url-method-readonly'>
-				{selectedMethod}
+				<MethodBadge method={selectedMethod} />
 			</div>}
 			endpointArgs={editor.endpointArgs} endpointArgsRef={editor.endpointArgsRef}
 			connection={editor.connection} currentMethod={editor.method}
