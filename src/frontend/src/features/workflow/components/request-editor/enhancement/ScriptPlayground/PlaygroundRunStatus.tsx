@@ -3,11 +3,11 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
 	status: 'idle' | 'running' | 'done';
-	stale: boolean;
+	isStale: boolean;
 	completedAt?: number;
 	blockedReason?: string;
 };
-export function PlaygroundRunStatus({ status, stale, completedAt, blockedReason }: Props) {
+export function PlaygroundRunStatus({ status, isStale, completedAt, blockedReason }: Props) {
 	const { t } = useI18n('workflow');
 	const [now, setNow] = useState(0);
 	useEffect(() => {
@@ -24,7 +24,7 @@ export function PlaygroundRunStatus({ status, stale, completedAt, blockedReason 
 					? blockedReason
 					: completedAt === undefined
 						? t('sandbox.notRun')
-						: stale
+						: isStale
 							? t('sandbox.stale')
 							: t('sandbox.lastRun', {
 									seconds: Math.max(0, (now - completedAt) / 1000).toFixed(1),

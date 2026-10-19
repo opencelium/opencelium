@@ -2,7 +2,13 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { NashornServer } from './nashornServer.testSupport';
 import { nashornParityCases } from './nashornParity.cases';
 import { execute } from './sandbox.worker.testSupport';
-const backend = new NashornServer();
+
+// Live check against a running backend; it creates and deletes temporary connections.
+// Opt in with OC_TEST_TOKEN, or OC_TEST_EMAIL + OC_TEST_PASSWORD (and OC_TEST_BACKEND_URL
+// when the backend is not on 127.0.0.1:9090). Use it to re-record nashornParity.test.ts.
+const hasBackend = Boolean(
+	process.env.OC_TEST_TOKEN || (process.env.OC_TEST_EMAIL && process.env.OC_TEST_PASSWORD),
+);
 const rejected = new Set([
 	'arrow',
 	'let',
@@ -13,9 +19,10 @@ const rejected = new Set([
 	'assign',
 	'includes',
 ]);
-beforeAll(() => backend.start(), 20000);
-afterAll(() => backend.stop(), 20000);
-describe('sandbox compared with a running Nashorn backend', () => {
+describe.skipIf(!hasBackend)('sandbox compared with a running Nashorn backend', () => {
+	const backend = new NashornServer();
+	beforeAll(() => backend.start(), 20000);
+	afterAll(() => backend.stop(), 20000);
 	it.each(nashornParityCases)(
 		'$id',
 		async (c) => {

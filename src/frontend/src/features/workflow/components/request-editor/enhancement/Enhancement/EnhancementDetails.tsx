@@ -16,8 +16,7 @@ import type { useEnhancementState } from './useEnhancementState';
 type Props = {
 	enhancement: Enhancement;
 	readOnly?: boolean;
-	playgroundOpen?: boolean;
-	onClosePlayground?: () => void;
+	isPlaygroundOpen?: boolean;
 	onChangeScript?: (script: string) => void;
 	state: ReturnType<typeof useEnhancementState>;
 };
@@ -26,22 +25,13 @@ export function EnhancementDetails({
 	enhancement,
 	readOnly,
 	state,
-	playgroundOpen,
-	onClosePlayground,
+	isPlaygroundOpen,
 	onChangeScript,
 }: Props) {
 	const { t } = useI18n('workflow');
 	const [draft, setDraft] = useState(enhancement.script);
 	const [sourceScript, setSourceScript] = useState(enhancement.script);
-	const {
-		scriptBoxRef,
-		isScriptMaximized,
-		maximizedStyle,
-		toggleScriptMaximized,
-		onChangeLanguage,
-		onChangeScript: changeScript,
-		onChangeDescription,
-	} = state;
+	const { onChangeLanguage, onChangeScript: changeScript, onChangeDescription } = state;
 	const [issues, setIssues] = useState<CompatibilityIssue[]>([]);
 	const [runtimeLocation, setRuntimeLocation] = useState<{ line: number; column: number }>();
 	const editor = useRef<Ace.Editor | null>(null);
@@ -67,58 +57,43 @@ export function EnhancementDetails({
 	};
 	const details = (
 		<div className="bodyLegacyEnhancementBody">
-			<div className="bodyLegacyEnhancementArgs">
-				<Collapse
-					defaultActiveKeys={[]}
-					items={[
-						{
-							key: 'variableInfo',
-							label: (
-								<span className="scriptVariablesSummary">
-									<span>{t('sandbox.variables')}</span>
-									<small>
-										{Object.keys(enhancement.args)
-											.filter((name) => /^VAR_\d+$/.test(name))
-											.join(', ')}
-									</small>
-								</span>
-							),
-							testId: 'workflow-enhancement-variables-toggle',
-							content: <EnhancementArgs enhancement={enhancement} />,
-						},
-					]}
-				/>
-			</div>
-			<div className="bodyLegacyEnhancementLabel">{t('enhancement.language')}</div>
-			<div className="bodyLegacyEnhancementLanguage">
-				<ScriptLanguage
-					readOnly={readOnly}
-					language={enhancement.language}
-					onChangeLanguage={onChangeLanguage}
-				/>
-			</div>
-			<div
-				ref={scriptBoxRef}
-				style={isScriptMaximized ? maximizedStyle : undefined}
-				className={
-					isScriptMaximized
-						? 'bodyLegacyEnhancementScript bodyLegacyEnhancementScriptMaximized'
-						: 'bodyLegacyEnhancementScript'
-				}
-			>
+			{!isPlaygroundOpen && (
+				<>
+					<div className="bodyLegacyEnhancementArgs">
+						<Collapse
+							defaultActiveKeys={[]}
+							items={[
+								{
+									key: 'variableInfo',
+									label: (
+										<span className="scriptVariablesSummary">
+											<span>{t('sandbox.variables')}</span>
+											<small>
+												{Object.keys(enhancement.args)
+													.filter((name) => /^VAR_\d+$/.test(name))
+													.join(', ')}
+											</small>
+										</span>
+									),
+									testId: 'workflow-enhancement-variables-toggle',
+									content: <EnhancementArgs enhancement={enhancement} />,
+								},
+							]}
+						/>
+					</div>
+					<div className="bodyLegacyEnhancementLabel">{t('enhancement.language')}</div>
+					<div className="bodyLegacyEnhancementLanguage">
+						<ScriptLanguage
+							readOnly={readOnly}
+							language={enhancement.language}
+							onChangeLanguage={onChangeLanguage}
+						/>
+					</div>
+				</>
+			)}
+			<div className="bodyLegacyEnhancementScript">
 				<div className="bodyLegacyEnhancementLabel">{t('enhancement.script')}</div>
 				<div className="bodyLegacyEnhancementScriptEditor">
-					{isScriptMaximized && (
-						<button
-							className="bodyLegacyScriptToggle scriptMaximizeExit"
-							type="button"
-							data-testid="workflow-script-minimize"
-							onClick={toggleScriptMaximized}
-						>
-							{t('actions.minimizeScript')}
-						</button>
-					)}
-
 					<EnhancementScript
 						readOnly={readOnly}
 						enhancement={enhancement}
@@ -133,13 +108,15 @@ export function EnhancementDetails({
 					/>
 				</div>
 			</div>
-			<div className="bodyLegacyEnhancementDescription">
-				<EnhancementDescription
-					readOnly={readOnly}
-					description={enhancement.description || ''}
-					onChangeDescription={onChangeDescription}
-				/>
-			</div>
+			{!isPlaygroundOpen && (
+				<div className="bodyLegacyEnhancementDescription">
+					<EnhancementDescription
+						readOnly={readOnly}
+						description={enhancement.description || ''}
+						onChangeDescription={onChangeDescription}
+					/>
+				</div>
+			)}
 		</div>
 	);
 	return (
@@ -154,15 +131,15 @@ export function EnhancementDetails({
 		>
 			<Splitter
 				className={
-					playgroundOpen && stacked
+					isPlaygroundOpen && stacked
 						? 'scriptPlaygroundLayout scriptPlaygroundLayout--stacked'
 						: 'scriptPlaygroundLayout'
 				}
-				layout={playgroundOpen && stacked ? 'vertical' : 'horizontal'}
+				layout={isPlaygroundOpen && stacked ? 'vertical' : 'horizontal'}
 				style={{ flex: 1, minHeight: 0 }}
 				panels={[
 					{ key: 'editor', content: details, defaultSize: '55%', min: '30%' },
-					...(playgroundOpen
+					...(isPlaygroundOpen
 						? [
 								{
 									key: 'playground',
@@ -174,7 +151,6 @@ export function EnhancementDetails({
 											script={draft}
 											issues={issues}
 											onRuntimeLocation={setRuntimeLocation}
-											onClose={() => onClosePlayground?.()}
 											onLocate={(line, column) => {
 												editor.current?.gotoLine(line, column, true);
 												editor.current?.focus();

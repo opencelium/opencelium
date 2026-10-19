@@ -1,11 +1,10 @@
-import { useTheme } from '@shared/theme/hooks/useTheme';
 import { useCallback, useState } from 'react';
 import { ConfigProvider } from 'antd';
 import { EnhancementHeader } from './EnhancementHeader';
 import { EnhancementDetails } from './EnhancementDetails';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import { Empty } from '@shared/ui/primitives/Empty';
-import { Icon } from '@shared/ui/primitives/Icon';
+import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useMethodContext } from '../../../../providers/MethodContext';
 import DirectReferenceInfo from '../DirectReferenceInfo/DirectReferenceInfo';
@@ -23,12 +22,18 @@ const ReferenceEnhancement = ({
 	directReference,
 	onCreateEnhancement,
 	onDeleteEnhancement,
+	isPlaygroundOpen: controlledPlaygroundOpen,
 	onPlaygroundOpenChange,
 }: EnhancementProps) => {
 	const { t } = useI18n('workflow');
-	const { themeMode } = useTheme();
-	const [playgroundOpen, setPlaygroundOpen] = useState(false);
+	const [localPlaygroundOpen, setLocalPlaygroundOpen] = useState(false);
+	const isPlaygroundOpen = controlledPlaygroundOpen ?? localPlaygroundOpen;
+	const setPlaygroundOpen = (isOpen: boolean) => {
+		setLocalPlaygroundOpen(isOpen);
+		onPlaygroundOpenChange?.(isOpen);
+	};
 	const state = useEnhancementState(enhancement);
+	const { containerRef, isMaximized, maximizedStyle, toggleMaximized } = state;
 	const { method: currentMethod } = useMethodContext();
 	const debug = useScriptDebugValue(enhancement, state.connection, currentMethod);
 	// Stable identity: EnhancementScript debounces on this callback, and an
@@ -48,7 +53,9 @@ const ReferenceEnhancement = ({
 
 	return (
 		<div
-			className={`bodyLegacyEnhancementContent scriptEnhancement--${themeMode} ${playgroundOpen ? 'bodyLegacyEnhancementContent--playground' : ''}`}
+			ref={containerRef}
+			style={isMaximized ? maximizedStyle : undefined}
+			className={`bodyLegacyEnhancementContent ${isPlaygroundOpen ? 'bodyLegacyEnhancementContent--playground' : ''} ${isMaximized ? 'bodyLegacyEnhancementMaximized' : ''}`}
 		>
 			<ConfigProvider theme={{ token: { motion: false } }}>
 				<Collapse
@@ -60,32 +67,29 @@ const ReferenceEnhancement = ({
 							label: (
 								<EnhancementHeader
 									canDelete={canDelete}
-									onToggleMaximized={hasEnhancement ? state.toggleScriptMaximized : undefined}
-									maximized={state.isScriptMaximized}
+									onToggleMaximized={hasEnhancement ? toggleMaximized : undefined}
+									isMaximized={isMaximized}
 									readOnly={readOnly}
 									onDelete={hasEnhancement ? onDeleteEnhancement : undefined}
-									playgroundOpen={playgroundOpen}
+									isPlaygroundOpen={isPlaygroundOpen}
 									onTogglePlayground={
 										enhancement?.language === 'js'
 											? () => {
 													if (debug.isOpen) debug.toggle();
-													setPlaygroundOpen(!playgroundOpen);
-													onPlaygroundOpenChange?.(!playgroundOpen);
+													setPlaygroundOpen(!isPlaygroundOpen);
 												}
 											: undefined
 									}
 								>
 									{!debug.isAvailable && (
 										<Tooltip content={t('enhancement.debugValue.errorNotPaused')}>
-											<button
-												type="button"
-												data-testid="workflow-script-debug-unavailable"
-												className="scriptDebugTrigger"
+											<IconButton
+												type="text"
+												size="xs"
 												disabled
-												aria-label={t('enhancement.debugValue.show')}
-											>
-												<Icon name="eye" size={14} />
-											</button>
+												testId="workflow-script-debug-unavailable"
+												iconProps={{ name: 'eye', color: 'inherit' }}
+											/>
 										</Tooltip>
 									)}
 									{debug.isAvailable && (
@@ -96,25 +100,17 @@ const ReferenceEnhancement = ({
 													: 'enhancement.debugValue.show',
 											)}
 										>
-											<button
-												type='button'
-												className={
-													debug.isOpen
-														? 'scriptDebugTrigger scriptDebugTrigger--active'
-														: 'scriptDebugTrigger'
-												}
-												onClick={(event) => {
-													event.stopPropagation();
-													debug.toggle();
+											<IconButton
+												type="text"
+												size="xs"
+												testId="workflow-script-debug-toggle"
+												className={debug.isOpen ? 'scriptHeaderAction--active' : undefined}
+												iconProps={{
+													name: debug.isOpen ? 'eye-off' : 'eye',
+													color: debug.isOpen ? 'primary' : 'inherit',
 												}}
-												aria-label={t(
-													debug.isOpen
-														? 'enhancement.debugValue.hide'
-														: 'enhancement.debugValue.show',
-												)}
-											>
-												<Icon name={debug.isOpen ? 'eye-off' : 'eye'} size={14} />
-											</button>
+												onClick={debug.toggle}
+											/>
 										</Tooltip>
 									)}
 								</EnhancementHeader>
@@ -136,11 +132,7 @@ const ReferenceEnhancement = ({
 										readOnly={readOnly}
 										state={state}
 										onChangeScript={handleChangeScript}
-										playgroundOpen={playgroundOpen}
-										onClosePlayground={() => {
-											setPlaygroundOpen(false);
-											onPlaygroundOpenChange?.(false);
-										}}
+										isPlaygroundOpen={isPlaygroundOpen}
 									/>
 								)
 							) : directReference ? (
