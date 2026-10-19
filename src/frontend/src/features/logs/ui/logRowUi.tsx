@@ -2,18 +2,9 @@ import type { ReactNode } from "react";
 import { Icon } from "@shared/ui/primitives/Icon";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { LogJsonView } from "@shared/ui/json-view/LogJsonView";
-import type { HttpMethod } from "../model/types";
 import "./logs.css";
 
 const INDENT_STEP = 22;
-
-const METHOD_COLORS: Record<HttpMethod, string> = {
-  GET: "var(--color-status-info-fg)",
-  POST: "var(--color-status-success-fg)",
-  PUT: "var(--color-status-warning-fg)",
-  DELETE: "var(--color-status-error-fg)",
-  PATCH: "var(--color-action-secondary)",
-};
 
 const badgeBase: React.CSSProperties = {
   display: "inline-flex",
@@ -27,11 +18,6 @@ const badgeBase: React.CSSProperties = {
   lineHeight: 1,
   whiteSpace: "nowrap",
 };
-
-export function MethodBadge({ method }: { method: string }) {
-  const color = METHOD_COLORS[method as HttpMethod] ?? "var(--color-text-secondary)";
-  return <span style={{ ...badgeBase, backgroundColor: color }}>{method}</span>;
-}
 
 export function StatusBadge({ status }: { status: string }) {
   const code = Number.parseInt(status, 10);

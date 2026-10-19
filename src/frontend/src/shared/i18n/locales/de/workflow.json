@@ -278,7 +278,10 @@
       "title": "Keine Ergebnisse gefunden",
       "description": "Keine Konnektoren, Logikblöcke oder Methoden entsprechen Ihrer Suche."
     },
-    "methodItemText": "Methode",
+    "methodInfo": {
+      "formFormat": "Formular",
+      "bodyFormatHint": "Format des Request-Bodys"
+    },
     "connectorMethodsFallback": "Methoden von {{invoker}}."
   },
   "headerMenu": {
