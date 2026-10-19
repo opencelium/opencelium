@@ -665,6 +665,17 @@
   pointer-events: auto;
 }
 
+/* Widened past its slot while focused (useFitWidthOnFocus) — lift it over the
+   neighbours it now overlaps; the copy button would sit mid-text. */
+.selectCopyHost.isFitExpanded .bodyLegacyGeneratorSelect.ant-select {
+  position: relative;
+  z-index: 3;
+}
+
+.selectCopyHost.isFitExpanded .selectCopyButton {
+  display: none;
+}
+
 .bodyLegacyWebhookSelect {
   width: 100%;
 }
