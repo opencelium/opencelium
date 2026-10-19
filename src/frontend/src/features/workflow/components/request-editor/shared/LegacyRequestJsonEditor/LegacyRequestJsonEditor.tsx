@@ -16,7 +16,7 @@ import '../../body-editor/bodyLegacy.css';
 
 export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 	const { messageProperty, source, readOnly } = props;
-	const [requestCollapsed, setRequestCollapsed] = useState(false);
+	const [isPlaygroundOpen, setPlaygroundOpen] = useState(false);
 	const { method } = useMethodContext();
 	const { t } = useI18n('workflow');
 	const editor = useRequestObjectEditor({ messageProperty, source });
@@ -56,7 +56,7 @@ export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 	];
 	return (
 		<div className="bodyLegacyLayout">
-			<RequestDataPane collapsed={requestCollapsed} onChange={setRequestCollapsed}>
+			<RequestDataPane isCollapsed={isPlaygroundOpen} onExpand={() => setPlaygroundOpen(false)}>
 				<ConfigProvider theme={{ token: { motion: false } }}>
 					<Collapse
 						className="bodyLegacyLeftCollapse"
@@ -68,7 +68,8 @@ export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 			<div className="bodyLegacyEnhancementPane">
 				<div className="bodyLegacyEnhancement">
 					<ReferenceEnhancement
-						onPlaygroundOpenChange={setRequestCollapsed}
+						isPlaygroundOpen={isPlaygroundOpen}
+						onPlaygroundOpenChange={setPlaygroundOpen}
 						readOnly={readOnly}
 						enhancement={editor.currentEnhancement}
 						directReference={editor.directReference}

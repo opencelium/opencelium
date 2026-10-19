@@ -1,13 +1,17 @@
-import { Code, FlaskConical, Info, Play, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useTheme } from '@shared/theme/hooks/useTheme';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { Alert } from '@shared/ui/primitives/Alert';
+import { Button } from '@shared/ui/primitives/Button';
+import { Empty } from '@shared/ui/primitives/Empty';
+import { Icon } from '@shared/ui/primitives/Icon';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { Enhancement } from '@features/workflow/types/connection';
 import {
 	checkNashornCompatibility,
 	type CompatibilityIssue,
 } from '@features/workflow/script-sandbox/checkNashornCompatibility';
 import { useScriptSandbox } from '@features/workflow/script-sandbox/useScriptSandbox';
+import { useEnhancementArgs } from '../EnhancementArgs/useEnhancementArgs';
 import {
 	emptyInput,
 	parseInput,
@@ -15,32 +19,33 @@ import {
 	saveInputs,
 	type InputValues,
 } from './playgroundInputs';
+import { PlaygroundHeader } from './PlaygroundHeader';
 import { PlaygroundInput } from './PlaygroundInput';
 import { PlaygroundOutput } from './PlaygroundOutput';
 import { PlaygroundRunStatus } from './PlaygroundRunStatus';
+import { SimulationBanner } from './SimulationBanner';
 import './ScriptPlayground.css';
 
 type Props = {
 	enhancement: Enhancement;
 	script: string;
 	issues: CompatibilityIssue[];
-	onClose: () => void;
 	onRuntimeLocation?: (location: { line: number; column: number } | undefined) => void;
 	onLocate: (line: number, column: number) => void;
 };
+
 export function ScriptPlayground({
 	enhancement,
 	script,
 	issues,
-	onClose,
 	onRuntimeLocation,
 	onLocate,
 }: Props) {
 	const { t } = useI18n('workflow');
-	const { themeMode } = useTheme();
 	const [inputs, setInputs] = useState<InputValues>(() => readInputs(enhancement.enhanceId));
 	const [lastRun, setLastRun] = useState<string>();
 	const sandbox = useScriptSandbox();
+	const { entries: argEntries } = useEnhancementArgs(enhancement);
 	const args: Record<string, unknown> = {};
 	const invalid: string[] = [];
 	const names = Object.keys(enhancement.args).filter((name) => /^VAR_\d+$/.test(name));
@@ -52,12 +57,16 @@ export function ScriptPlayground({
 		}
 	});
 
-	const syntax =
+	const hasSyntaxError =
 		enhancement.language === 'js' &&
 		checkNashornCompatibility(script).some((issue) => issue.kind === 'syntax');
-	const disabled =
-		enhancement.language !== 'js' || sandbox.status === 'running' || syntax || invalid.length > 0;
+	const isDisabled =
+		enhancement.language !== 'js' ||
+		sandbox.status === 'running' ||
+		hasSyntaxError ||
+		invalid.length > 0;
 	const signature = JSON.stringify([script, inputs, enhancement.args, enhancement.language]);
+	const isStale = lastRun !== signature;
 	useEffect(() => {
 		const result = sandbox.result;
 		onRuntimeLocation?.(
@@ -70,40 +79,31 @@ export function ScriptPlayground({
 		);
 	}, [sandbox.result, lastRun, signature, enhancement.language, onRuntimeLocation]);
 	const run = () => {
-		if (disabled) return;
+		if (isDisabled) return;
 		setLastRun(signature);
 		sandbox.run({ script, args });
 	};
 	if (enhancement.language !== 'js')
 		return (
-			<section className={`scriptPlayground scriptPlayground--${themeMode}`}>
-				<div className="scriptPlaygroundInputHeader">
-					<strong className="scriptPlaygroundTitle">
-						<FlaskConical size={17} />
-						{t('sandbox.title')}
-						<small>{t('sandbox.simulation')}</small>
-					</strong>
-					<button
-						type="button"
-						data-testid="script-playground-close"
-						aria-label={t('sandbox.close')}
-						onClick={onClose}
-					>
-						<X size={16} />
-					</button>
-				</div>
-				<div className="scriptPlaygroundEmpty scriptPlaygroundUnsupported">
-					<Code size={32} />
-					<p>
-						<span>{t('sandbox.onlyJs')}</span>
-						<span>{t('sandbox.serverLanguages')}</span>
-					</p>
-				</div>
+			<section className="scriptPlayground">
+				<PlaygroundHeader />
+				<Empty
+					className="scriptPlaygroundEmpty"
+					image={<Icon name="code" size={32} isSubtle />}
+					description={
+						<>
+							<span className="scriptPlaygroundUnsupportedLine">{t('sandbox.onlyJs')}</span>
+							<span className="scriptPlaygroundUnsupportedLine">
+								{t('sandbox.serverLanguages')}
+							</span>
+						</>
+					}
+				/>
 			</section>
 		);
 	return (
 		<section
-			className={`scriptPlayground scriptPlayground--${themeMode}`}
+			className="scriptPlayground"
 			onKeyDown={(event) => {
 				if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
 					event.preventDefault();
@@ -111,27 +111,10 @@ export function ScriptPlayground({
 				}
 			}}
 		>
-			<div className="scriptPlaygroundInputHeader">
-				<strong className="scriptPlaygroundTitle">
-					<FlaskConical size={17} />
-					{t('sandbox.title')}
-					<small>{t('sandbox.simulation')}</small>
-				</strong>
-				<button
-					type="button"
-					data-testid="script-playground-close"
-					aria-label={t('sandbox.close')}
-					onClick={onClose}
-				>
-					<X size={16} />
-				</button>
-			</div>
-			<p className="scriptPlaygroundBanner">
-				<Info size={16} />
-				<span>{t('sandbox.banner')}</span>
-			</p>
+			<PlaygroundHeader />
+			<SimulationBanner />
 			{Object.values(args).some((value) => typeof value === 'number') && (
-				<p role="alert">{t('sandbox.numberTypes')}</p>
+				<Alert type="warning" showIcon message={t('sandbox.numberTypes')} />
 			)}
 			<h4>{t('sandbox.inputs')}</h4>
 			{names.map((name) => (
@@ -139,8 +122,9 @@ export function ScriptPlayground({
 					key={name}
 					name={name}
 					reference={enhancement.args[name]}
+					entry={argEntries.find((entry) => entry.key === name)}
 					input={inputs[name] ?? emptyInput}
-					invalid={invalid.includes(name)}
+					isInvalid={invalid.includes(name)}
 					onChange={(input) => {
 						const next = { ...inputs, [name]: input };
 						setInputs(next);
@@ -149,40 +133,39 @@ export function ScriptPlayground({
 				/>
 			))}
 			<div className="scriptPlaygroundRunRow">
-				<button
-					type="button"
-					className="scriptPlaygroundRun"
-					data-testid="script-playground-run"
-					disabled={disabled}
-					onClick={run}
-					title={
-						syntax
+				<Tooltip
+					content={
+						hasSyntaxError
 							? t('sandbox.fixSyntax')
 							: invalid.length
 								? t('sandbox.invalidJson', { name: invalid[0] })
 								: t('sandbox.shortcut')
 					}
 				>
-					<Play size={15} />
-					{t(sandbox.status === 'running' ? 'sandbox.running' : 'sandbox.run')}
-					<kbd>{navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} ↵</kbd>
-				</button>
+					<Button
+						type="primary"
+						iconLeft="play"
+						testId="script-playground-run"
+						disabled={isDisabled}
+						onClick={run}
+					>
+						{t(sandbox.status === 'running' ? 'sandbox.running' : 'sandbox.run')}
+					</Button>
+				</Tooltip>
 				<PlaygroundRunStatus
 					blockedReason={
 						invalid.length ? t('sandbox.invalidJson', { name: invalid[0] }) : undefined
 					}
 					completedAt={sandbox.completedAt}
 					status={sandbox.status}
-					stale={lastRun !== signature}
+					isStale={isStale}
 				/>
 			</div>
 			<PlaygroundOutput
-				missingNames={
-					lastRun === signature ? names.filter((name) => inputs[name]?.mode === 'missing') : []
-				}
+				missingNames={isStale ? [] : names.filter((name) => inputs[name]?.mode === 'missing')}
 				result={sandbox.result}
 				issues={issues}
-				stale={lastRun !== signature}
+				isStale={isStale}
 				onLocate={onLocate}
 			/>
 		</section>

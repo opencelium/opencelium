@@ -1,17 +1,28 @@
-import { AlertTriangle, CheckCircle2, CircleX, Info } from 'lucide-react';
 import { useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { Button } from '@shared/ui/primitives/Button';
+import { Icon } from '@shared/ui/primitives/Icon';
+import type { IconName } from '@shared/ui/primitives/Icon/Icon.types';
 import type { CompatibilityIssue } from '@features/workflow/script-sandbox/checkNashornCompatibility';
 import { issueMessage } from '@features/workflow/script-sandbox/issueMessage';
 
 type Props = {
 	issues: CompatibilityIssue[];
-	enabled: boolean;
+	isEnabled: boolean;
 	onLocate: (line: number, column: number) => void;
 };
-export function ScriptCompatibilityStatus({ issues, enabled, onLocate }: Props) {
+type Tone = 'error' | 'warning' | 'success' | 'info';
+
+const toneIcon: Record<Tone, IconName> = {
+	error: 'error-circle',
+	warning: 'warning',
+	success: 'check-circle',
+	info: 'info',
+};
+
+export function ScriptCompatibilityStatus({ issues, isEnabled, onLocate }: Props) {
 	const { t } = useI18n('workflow');
-	const [open, setOpen] = useState(false);
+	const [isOpen, setOpen] = useState(false);
 	const errors = issues.filter((issue) => issue.kind === 'syntax').length;
 	const warnings = issues.length - errors;
 	const summary = [
@@ -20,43 +31,42 @@ export function ScriptCompatibilityStatus({ issues, enabled, onLocate }: Props) 
 	]
 		.filter(Boolean)
 		.join(' · ');
+	const tone: Tone = !isEnabled ? 'info' : errors ? 'error' : warnings ? 'warning' : 'success';
 	return (
 		<div className="scriptCompatibilityIssues">
 			<div className="scriptCompatibilitySummary">
 				<span className="scriptCompatibilitySummaryText">
-					{enabled &&
-						(errors ? (
-							<CircleX size={14} color="#e5484d" />
-						) : warnings ? (
-							<AlertTriangle size={14} color="#d99500" />
-						) : (
-							<CheckCircle2 size={14} color="#389e0d" />
-						))}
-					{!enabled && <Info size={14} />}
-					{!enabled ? t('sandbox.compatibilityOnlyJs') : issues.length ? summary : t('sandbox.compatible')}
+					<span className={`scriptTone scriptTone--${tone}`}>
+						<Icon name={toneIcon[tone]} size={14} color="inherit" />
+					</span>
+					{!isEnabled
+						? t('sandbox.compatibilityOnlyJs')
+						: issues.length
+							? summary
+							: t('sandbox.compatible')}
 				</span>
-				{enabled && issues.length > 0 && (
-					<button
-						type="button"
-						data-testid="script-compatibility-issues-toggle"
-						aria-expanded={open}
-						onClick={() => setOpen(!open)}
+				{isEnabled && issues.length > 0 && (
+					<Button
+						type="link"
+						testId="script-compatibility-issues-toggle"
+						onClick={() => setOpen(!isOpen)}
 					>
-						{t(open ? 'sandbox.hide' : 'sandbox.show')}
-					</button>
+						{t(isOpen ? 'sandbox.hide' : 'sandbox.show')}
+					</Button>
 				)}
 			</div>
-			{enabled &&
-				open &&
+			{isEnabled &&
+				isOpen &&
 				issues.map((issue, index) => (
-					<button
-						type="button"
-						data-testid={`script-compatibility-issue-${index}`}
+					<Button
 						key={index}
+						type="text"
+						className="scriptCompatibilityIssue"
+						testId={`script-compatibility-issue-${index}`}
 						onClick={() => onLocate(issue.line, issue.column)}
 					>
 						{issue.line}:{issue.column + 1} — {issueMessage(issue, t)}
-					</button>
+					</Button>
 				))}
 		</div>
 	);

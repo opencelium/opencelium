@@ -27,8 +27,8 @@
     "addAttribute": "Add attribute",
     "addWebhook": "Add Webhook",
     "openScriptNewWindow": "Open script in new window",
-    "maximizeScript": "Maximize script",
-    "minimizeScript": "Minimize script",
+    "maximizeEnhancement": "Maximize enhancement",
+    "minimizeEnhancement": "Minimize enhancement",
     "maximizeRequestData": "Maximize request data",
     "minimizeRequestData": "Minimize request data",
     "load": "Load",
@@ -958,8 +958,12 @@
     "hideDetails": "Hide error details"
   },
   "sandbox": {
+    "source": {
+      "response": "response",
+      "request": "request"
+    },
+    "setValueHint": "Set value",
     "title": "Playground",
-    "close": "Close playground",
     "banner": "Simulated in your browser using the server’s rules (Nashorn ES5.1). This is not a server execution.",
     "inputs": "Test values",
     "text": "Text",
@@ -1005,7 +1009,6 @@
     "show": "Show",
     "hide": "Hide",
     "expandRequest": "Expand request data",
-    "collapseRequest": "Collapse request data",
     "invalidJsonLocation": "Invalid JSON · Line {{line}}:{{column}}",
     "notRun": "Not run yet",
     "stale": "Not run since your last edit",
