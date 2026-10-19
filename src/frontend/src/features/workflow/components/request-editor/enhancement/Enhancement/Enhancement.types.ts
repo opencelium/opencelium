@@ -7,4 +7,5 @@ export type EnhancementProps = {
 	directReference?: DirectReferenceInfo | null;
 	onCreateEnhancement?: () => void;
 	onDeleteEnhancement?: () => void;
+	onPlaygroundOpenChange?: (open: boolean) => void;
 };

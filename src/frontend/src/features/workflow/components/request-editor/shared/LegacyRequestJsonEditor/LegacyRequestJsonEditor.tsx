@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { RequestDataPane } from '../../body-editor/RequestDataPane';
 import { ConfigProvider } from 'antd';
 import { useMethodContext } from '../../../../providers/MethodContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -14,35 +16,67 @@ import '../../body-editor/bodyLegacy.css';
 
 export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 	const { messageProperty, source, readOnly } = props;
+	const [requestCollapsed, setRequestCollapsed] = useState(false);
 	const { method } = useMethodContext();
 	const { t } = useI18n('workflow');
 	const editor = useRequestObjectEditor({ messageProperty, source });
-	const components = useLegacyJsonComponents({ ...props, methodId: method.id, editor });
+	const components = useLegacyJsonComponents({
+		...props,
+		methodId: method.id,
+		editor,
+	});
 	const hasReferences = !!editor.connection?.fieldBindings.some((binding) => {
 		const result = binding.enhancement?.args?.RESULT_VAR;
-		return typeof result === 'string'
-			&& result.startsWith(`${method.color}.(request).${messageProperty}.$`);
+		return (
+			typeof result === 'string' &&
+			result.startsWith(`${method.color}.(request).${messageProperty}.$`)
+		);
 	});
 	const items: CollapseItem[] = [
-		{ key: 'referenceInfo', label: t('referenceInfo.legacyTitle'),
-			content: hasReferences ? <ReferenceInfo messageProperty={messageProperty} data={{}}
-				readOnly={readOnly} onReferenceClick={editor.setSelectedEnhanceId}
-				onDeleteReference={editor.deleteReferenceAtPath} />
-				: <Empty description={t('referenceInfo.empty')} /> },
-		{ key: 'requestData', label: t('requestData'), content: <LegacyRequestData {...props}
-			editor={editor} {...components} /> },
+		{
+			key: 'referenceInfo',
+			label: t('referenceInfo.legacyTitle'),
+			content: hasReferences ? (
+				<ReferenceInfo
+					messageProperty={messageProperty}
+					data={{}}
+					readOnly={readOnly}
+					onReferenceClick={editor.setSelectedEnhanceId}
+					onDeleteReference={editor.deleteReferenceAtPath}
+				/>
+			) : (
+				<Empty description={t('referenceInfo.empty')} />
+			),
+		},
+		{
+			key: 'requestData',
+			label: t('requestData'),
+			content: <LegacyRequestData {...props} editor={editor} {...components} />,
+		},
 	];
-	return <div className='bodyLegacyLayout'>
-		<div className='bodyLegacyLeftPane'><div className='bodyLegacyLeft'>
-			<ConfigProvider theme={{ token: { motion: false } }}>
-				<Collapse className='bodyLegacyLeftCollapse' items={items}
-					defaultActiveKeys={['requestData']} />
-			</ConfigProvider>
-		</div></div>
-		<div className='bodyLegacyEnhancementPane'><div className='bodyLegacyEnhancement'>
-			<ReferenceEnhancement readOnly={readOnly} enhancement={editor.currentEnhancement}
-				directReference={editor.directReference} onCreateEnhancement={editor.createEnhancement}
-				onDeleteEnhancement={editor.deleteEnhancement} />
-		</div></div>
-	</div>;
+	return (
+		<div className="bodyLegacyLayout">
+			<RequestDataPane collapsed={requestCollapsed} onChange={setRequestCollapsed}>
+				<ConfigProvider theme={{ token: { motion: false } }}>
+					<Collapse
+						className="bodyLegacyLeftCollapse"
+						items={items}
+						defaultActiveKeys={['requestData']}
+					/>
+				</ConfigProvider>
+			</RequestDataPane>
+			<div className="bodyLegacyEnhancementPane">
+				<div className="bodyLegacyEnhancement">
+					<ReferenceEnhancement
+						onPlaygroundOpenChange={setRequestCollapsed}
+						readOnly={readOnly}
+						enhancement={editor.currentEnhancement}
+						directReference={editor.directReference}
+						onCreateEnhancement={editor.createEnhancement}
+						onDeleteEnhancement={editor.deleteEnhancement}
+					/>
+				</div>
+			</div>
+		</div>
+	);
 }
