@@ -74,6 +74,12 @@ export type IconName =
     | 'minus'
     | 'chevron-up'
     | 'fit-view'
+    | 'flask'
+    | 'warning'
+    | 'error-circle'
+    | 'check-circle'
+    | 'clock'
+    | 'code'
 
 export type IconColor =
     | 'default'
