@@ -25,7 +25,8 @@
     "updateAssistant": "Update Assistant",
     "systemCheck": "System Check",
     "config": "System Configuration",
-    "ui": "UI"
+    "ui": "UI",
+    "backToMain": "Back"
   },
   "commandPalette": {
     "placeholder": "Type a command...",
