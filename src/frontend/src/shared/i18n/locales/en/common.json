@@ -114,6 +114,15 @@
     "startDashboardTour": "Start dashboard tour",
     "servicePortal": "Service Portal"
   },
+  "newFeature": {
+    "label": "New",
+    "workflowTemplateJsonEdit": {
+      "description": "Workflow templates can now be edited directly as JSON from the template list."
+    },
+    "enhancementScriptSandbox": {
+      "description": "Run an enhancement script in the browser against sample input before saving it."
+    }
+  },
   "user": {
     "unknown": "Unknown User"
   },
