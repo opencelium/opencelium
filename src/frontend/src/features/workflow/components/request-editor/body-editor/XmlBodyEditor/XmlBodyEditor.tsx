@@ -15,7 +15,7 @@ import '../bodyLegacy.css';
 
 export function XmlBodyEditor({ readOnly }: XmlBodyEditorProps) {
 	const { t } = useI18n('workflow');
-	const [requestCollapsed, setRequestCollapsed] = useState(false);
+	const [isPlaygroundOpen, setPlaygroundOpen] = useState(false);
 	const editor = useXmlBodyEditor();
 	const hasReferenceInfo = !!editor.connection?.fieldBindings.some((binding) => {
 		const result = binding.enhancement?.args?.RESULT_VAR;
@@ -47,7 +47,7 @@ export function XmlBodyEditor({ readOnly }: XmlBodyEditorProps) {
 	return (
 		<>
 			<div className="bodyLegacyLayout">
-				<RequestDataPane collapsed={requestCollapsed} onChange={setRequestCollapsed}>
+				<RequestDataPane isCollapsed={isPlaygroundOpen} onExpand={() => setPlaygroundOpen(false)}>
 					<ConfigProvider theme={{ token: { motion: false } }}>
 						<Collapse
 							className="bodyLegacyLeftCollapse"
@@ -59,7 +59,8 @@ export function XmlBodyEditor({ readOnly }: XmlBodyEditorProps) {
 				<div className="bodyLegacyEnhancementPane">
 					<div className="bodyLegacyEnhancement">
 						<ReferenceEnhancement
-							onPlaygroundOpenChange={setRequestCollapsed}
+							isPlaygroundOpen={isPlaygroundOpen}
+							onPlaygroundOpenChange={setPlaygroundOpen}
 							readOnly={readOnly}
 							enhancement={editor.currentEnhancement}
 							directReference={editor.directReference}

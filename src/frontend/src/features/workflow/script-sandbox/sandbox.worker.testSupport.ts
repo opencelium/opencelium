@@ -16,10 +16,16 @@ const source = transpileModule(
 		},
 	},
 ).outputText;
-export function execute(request: SandboxRequest, timeout = 1000, blockEval = false) {
+export function execute(
+	request: SandboxRequest,
+	timeout = 1000,
+	blockEval = false,
+	globals: Record<string, unknown> = {},
+) {
 	let result: SandboxResult | undefined;
 	const context = createContext(
 		{
+			...globals,
 			exports: {},
 			require: (name: string) => (name === './checkNashornCompatibility' ? compatibility : bindings),
 			postMessage: (value: SandboxResult) => {

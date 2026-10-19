@@ -27,8 +27,8 @@
     "addAttribute": "Attribut hinzufügen",
     "addWebhook": "Webhook hinzufügen",
     "openScriptNewWindow": "Skript in neuem Fenster öffnen",
-    "maximizeScript": "Skript maximieren",
-    "minimizeScript": "Skript minimieren",
+    "maximizeEnhancement": "Transformation maximieren",
+    "minimizeEnhancement": "Transformation minimieren",
     "maximizeRequestData": "Anfragedaten maximieren",
     "minimizeRequestData": "Anfragedaten minimieren",
     "load": "Laden",
@@ -958,8 +958,12 @@
     "hideDetails": "Fehlerdetails ausblenden"
   },
   "sandbox": {
+    "source": {
+      "response": "Antwort",
+      "request": "Anfrage"
+    },
+    "setValueHint": "Wert festlegen",
     "title": "Playground",
-    "close": "Playground schließen",
     "banner": "Simulation im Browser nach den Serverregeln (Nashorn ES5.1). Dies ist keine Serverausführung.",
     "inputs": "Testwerte",
     "text": "Text",
@@ -1005,7 +1009,6 @@
     "show": "Anzeigen",
     "hide": "Ausblenden",
     "expandRequest": "Anfragedaten aufklappen",
-    "collapseRequest": "Anfragedaten einklappen",
     "invalidJsonLocation": "Ungültiges JSON · Zeile {{line}}:{{column}}",
     "notRun": "Noch nicht ausgeführt",
     "stale": "Seit der letzten Änderung nicht ausgeführt",
