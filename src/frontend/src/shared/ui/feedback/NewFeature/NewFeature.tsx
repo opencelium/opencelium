@@ -14,19 +14,22 @@ type Props = {
     /**
      * The control's own tooltip text. NewFeature owns the Tooltip so the "new" note
      * joins that one popup instead of a second tooltip stacking on top of it.
+     * Omit it for a control without a tooltip of its own (a labelled menu item).
      */
-    tooltip: ReactNode
+    tooltip?: ReactNode
     placement?: TooltipPlacement
+    /** For a control inside a popup that stacks above the default tooltip layer. */
+    zIndex?: number
     children: ReactNode
 }
 
-export function NewFeature({ id, variant = 'dot', tooltip, placement, children }: Props) {
+export function NewFeature({ id, variant = 'dot', tooltip, placement, zIndex, children }: Props) {
     const { t } = useI18n('common')
     const { isNew, markSeen } = useNewFeature(id)
 
     const content = isNew ? (
         <span className="newFeatureTooltip">
-            <span>{tooltip}</span>
+            {tooltip && <span>{tooltip}</span>}
             <span className="newFeatureTooltip__note">
                 <NewFeatureBadge />
                 <span>{t(NEW_FEATURES[id].descriptionKey)}</span>
@@ -37,7 +40,7 @@ export function NewFeature({ id, variant = 'dot', tooltip, placement, children }
     // The wrapper stays mounted once the feature is seen, so dropping the badge
     // never remounts the wrapped control.
     return (
-        <Tooltip content={content} placement={placement} maxWidth={isNew ? 280 : undefined}>
+        <Tooltip content={content} placement={placement} zIndex={zIndex} maxWidth={isNew ? 280 : undefined}>
             {/* Capture, so the control's own click handler cannot stop the "seen" mark. */}
             <span className="newFeature" onClickCapture={isNew ? markSeen : undefined}>
                 {children}

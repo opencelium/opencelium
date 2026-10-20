@@ -127,6 +127,18 @@
     },
     "enhancementScriptSandbox": {
       "description": "Run an enhancement script in the browser against sample input before saving it."
+    },
+    "workflowReferenceOperations": {
+      "description": "References can now use operations on the response: any property (*), all key names, the last array element and the number of elements. Type an operation's syntax to jump to it."
+    },
+    "workflowConnectorHttpMethod": {
+      "description": "The HTTP method can now be changed for connector methods too, not only for HTTP request and webhook steps."
+    },
+    "workflowHeaderUserActions": {
+      "description": "Language, help with the workflow tutorial, the menu switch and your profile are now available right in the editor header."
+    },
+    "workflowTestMethod": {
+      "description": "Send this method on its own, with values for its references to previous methods, without running the whole workflow."
     }
   },
   "user": {

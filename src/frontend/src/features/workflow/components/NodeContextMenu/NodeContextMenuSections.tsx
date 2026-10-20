@@ -1,5 +1,6 @@
 import { buildTestId } from '@shared/testing/testId';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { NewFeature } from '@shared/ui/feedback/NewFeature/NewFeature';
 import { hasComponentPermission } from '@/engine/policy';
 import { useAuth } from '@features/auth/useAuth';
 import { menuByType } from '../context-menu/contextMenuData';
@@ -45,6 +46,10 @@ export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
         : <button key={entry.id}
           className={`contextMenuItem ${entry.indented ? 'contextMenuItemIndented' : ''}`}
           type="button" data-testid={buildTestId('workflow-context-menu', entry.item.id)}
-          onClick={() => select(entry.item.id)}>{t(entry.item.labelKey)}</button>) }
+          onClick={() => select(entry.item.id)}>
+          {entry.item.newFeatureId
+            ? <NewFeature id={entry.item.newFeatureId} variant='pill' placement='right'>{t(entry.item.labelKey)}</NewFeature>
+            : t(entry.item.labelKey)}
+        </button>) }
     </div>)}</div>;
 }

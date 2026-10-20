@@ -2,8 +2,10 @@ import { Select } from 'antd';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { useNewFeature } from '@shared/ui/feedback/NewFeature/useNewFeature';
 import { ReferenceOptionLabel } from '../ReferenceOptionLabel/ReferenceOptionLabel';
-import { groupReferenceOptions, REFERENCE_GROUP_LABEL_KEY } from '../requestReferenceOptions';
+import { ReferenceGroupLabel } from '../ReferenceGroupLabel/ReferenceGroupLabel';
+import { groupReferenceOptions } from '../requestReferenceOptions';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
 import { useLegacyResponseFieldSelect } from './useLegacyResponseFieldSelect';
 import { useFitWidthOnFocus } from './useFitWidthOnFocus';
@@ -18,6 +20,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
   const { t } = useI18n('workflow');
   const zIndex = popupZIndex ?? DEFAULT_POPUP_Z_INDEX;
   const fit = useFitWidthOnFocus(state.wrapperRef, state.searchValue);
+  const { markSeen } = useNewFeature('workflow-reference-operations');
 
   return (
     <div
@@ -52,7 +55,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
           status={state.isUnknownPath ? 'warning' : undefined}
           options={groupReferenceOptions(state.options).map((group) => ({
             key: group.kind,
-            label: t(REFERENCE_GROUP_LABEL_KEY[group.kind]),
+            label: <ReferenceGroupLabel kind={group.kind} zIndex={zIndex + 1} />,
             options: group.options.map((option) => ({
               value: option.value, label: <ReferenceOptionLabel option={option} />,
             })),
@@ -60,7 +63,10 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
           notFoundContent={state.notFoundContent}
           open={state.open}
           onSearch={state.onSearch}
-          onSelect={state.onSelect}
+          onSelect={(nextValue: unknown) => {
+            if (state.options.some((option) => option.kind === 'operation' && option.value === nextValue)) markSeen();
+            state.onSelect(nextValue);
+          }}
           onFocus={() => {
             fit.onFocus();
             state.onFocus();

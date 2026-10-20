@@ -1,3 +1,10 @@
+/* The Ant Tooltip wraps its trigger in a full-width flex span that centres it
+   (inline style, so `justify-content` can't be overridden); shrinking the span
+   keeps a pill after a left-aligned label (menu item, group header) on the left. */
+:has(> .newFeature) {
+    width: fit-content;
+}
+
 .newFeature {
     position: relative;
     display: inline-flex;
