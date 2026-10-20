@@ -7,4 +7,5 @@ export const WorkflowPageHeader = ({ header, connectionId, schedulesOpen,
 	<WorkflowHeader {...header} schedulesSlot={connectionId
 		? <WorkflowSchedulesPill connectionId={connectionId} open={schedulesOpen}
 			onToggle={onToggleSchedules} />
-		: null} />;
+		: null}
+		onToggleSchedules={connectionId ? onToggleSchedules : undefined} />;

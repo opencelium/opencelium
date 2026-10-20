@@ -10,6 +10,7 @@ import type { Mode } from '@/engine/entity/EntityDefinition'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { renameVariableInScript, replaceDeletedArgInScript } from '@entities/dataAggregator/lib/scriptUtils'
 import {FormInput} from "@shared/ui/form/FormInput";
+import './dataAggregatorArgsEditor.css'
 
 interface DataAggregatorArgsEditorProps {
     name: string
@@ -96,37 +97,43 @@ export function DataAggregatorArgsEditor({ name, label, mode }: DataAggregatorAr
     const translatedLabel = label ? t(label, { defaultValue: label }) : undefined
 
     return (
-        <FieldArrayEditor
-            name={name}
-            variant={'compact'}
-            required
-            error={emptyError}
-            label={translatedLabel}
-            defaultItem={DEFAULT_ARG}
-            hideAddButton={readOnly}
-            addButtonText={t('data-aggregator.fields.args.add', { defaultValue: 'Add Argument' })}
-            emptyText={t('data-aggregator.fields.args.empty', { defaultValue: 'No arguments yet.' })}
-            rules={{
-                validate: (value: unknown[]) =>
-                    value.length > 0 || t('data-aggregator.fields.args.required', { defaultValue: 'At least one argument is required' }),
-            }}
-            renderItem={({ index, remove }) => (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr auto', gap: 8, alignItems: 'start' }}>
-                    <ArgNameInput fieldName={`${name}.${index}.name`} readOnly={readOnly} />
-                    <FormInput
-                        name={`${name}.${index}.description`}
-                        label={t('data-aggregator.fields.args.description', { defaultValue: 'Description' })}
-                        readOnly={readOnly}
-                    />
-                    {!readOnly && (
-                        <div style={{ paddingTop: 24 }}>
-                            <Tooltip content={tCommon('actions.delete')}>
-                                <DeleteIconButton onClick={() => remove(index)} />
-                            </Tooltip>
+        <div className="data-aggregator-args">
+            <FieldArrayEditor
+                name={name}
+                variant={'compact'}
+                required
+                error={emptyError}
+                label={translatedLabel}
+                defaultItem={DEFAULT_ARG}
+                hideAddButton={readOnly}
+                addButtonText={t('data-aggregator.fields.args.add', { defaultValue: 'Add Argument' })}
+                emptyText={t('data-aggregator.fields.args.empty', { defaultValue: 'No arguments yet.' })}
+                rules={{
+                    validate: (value: unknown[]) =>
+                        value.length > 0 || t('data-aggregator.fields.args.required', { defaultValue: 'At least one argument is required' }),
+                }}
+                renderItem={({ index, remove }) => (
+                    <div className="data-aggregator-args__row">
+                        <div className="data-aggregator-args__name">
+                            <ArgNameInput fieldName={`${name}.${index}.name`} readOnly={readOnly} />
                         </div>
-                    )}
-                </div>
-            )}
-        />
+                        <div className="data-aggregator-args__description">
+                            <FormInput
+                                name={`${name}.${index}.description`}
+                                label={t('data-aggregator.fields.args.description', { defaultValue: 'Description' })}
+                                readOnly={readOnly}
+                            />
+                        </div>
+                        {!readOnly && (
+                            <div className="data-aggregator-args__remove">
+                                <Tooltip content={tCommon('actions.delete')}>
+                                    <DeleteIconButton onClick={() => remove(index)} />
+                                </Tooltip>
+                            </div>
+                        )}
+                    </div>
+                )}
+            />
+        </div>
     )
 }

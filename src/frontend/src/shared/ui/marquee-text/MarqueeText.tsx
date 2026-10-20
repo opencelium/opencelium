@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import './marqueeText.css';
 
 // Pixels per second while scrolling; the pauses at both ends come from the keyframes.
 const SPEED = 40;
