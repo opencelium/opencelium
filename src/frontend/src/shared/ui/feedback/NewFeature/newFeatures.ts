@@ -22,6 +22,22 @@ export const NEW_FEATURES = {
         since: '5.3',
         descriptionKey: 'newFeature.enhancementScriptSandbox.description',
     },
+    'workflow-reference-operations': {
+        since: '5.3',
+        descriptionKey: 'newFeature.workflowReferenceOperations.description',
+    },
+    'workflow-connector-http-method': {
+        since: '5.3',
+        descriptionKey: 'newFeature.workflowConnectorHttpMethod.description',
+    },
+    'workflow-header-user-actions': {
+        since: '5.3',
+        descriptionKey: 'newFeature.workflowHeaderUserActions.description',
+    },
+    'workflow-test-method': {
+        since: '5.3',
+        descriptionKey: 'newFeature.workflowTestMethod.description',
+    },
 } as const satisfies Record<string, NewFeatureEntry>
 
 export type NewFeatureId = keyof typeof NEW_FEATURES
