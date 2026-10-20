@@ -75,11 +75,47 @@
       "os": "Betriebssystem",
       "polyglot": "Skript-Engine (Polyglot)"
     },
-    "hint": "Erstellen Sie vor dem Update eine Sicherung des Systems (siehe <1>Dokumentation</1>)."
+    "hint": "Bitte vergessen Sie nicht, vor dem Update <1>eine Sicherung des Systems zu erstellen</1>."
   },
   "validation": {
     "requiredComponentsDown": "Eine oder mehrere erforderliche Komponenten sind nicht betriebsbereit. Alle erforderlichen Dienste müssen laufen, bevor Sie mit dem Update fortfahren können.",
     "versionNotSelected": "Bitte wählen Sie eine Version aus, um mit dem Update fortzufahren."
+  },
+  "availableUpdates": {
+    "title": "Verfügbare Updates",
+    "installed": "Installiert:",
+    "guideLink": "So führen Sie ein Update durch",
+    "modes": {
+      "online": {
+        "title": "Online",
+        "description": "Versionen vom Update-Server abrufen. Erfordert Internetzugang."
+      },
+      "offline": {
+        "title": "Offline",
+        "description": "Ein Paket (.zip) für isolierte oder eingeschränkte Systeme hochladen."
+      }
+    },
+    "offline": {
+      "download": {
+        "title": "Offline-Paket herunterladen",
+        "description": "Laden Sie die .zip für Ihre Zielversion von packagecloud herunter.",
+        "action": "packagecloud öffnen"
+      },
+      "upload": {
+        "title": "Hier hochladen",
+        "description": "Jedes Paket wird geprüft, bevor seine Version ausgewählt werden kann.",
+        "dropLabel": "Paket hierher ziehen und ablegen",
+        "or": "oder",
+        "browse": "Dateien auswählen",
+        "accepted": "Akzeptiertes Format: .zip · jeweils ein Paket",
+        "more": "Weitere Pakete hochladen",
+        "moreDrop": "— oder eine .zip-Datei hier ablegen"
+      },
+      "packages": {
+        "title": "Hochgeladene Pakete",
+        "selectableHint": "Nur Pakete neuer als {{version}} können ausgewählt werden"
+      }
+    }
   },
   "versions": {
     "columns": {
