@@ -3,24 +3,26 @@ import { useGetAppVersionQuery } from '@entities/updateAssistant/api/updateAssis
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 
 type Props = {
-    count: number
+    title: string
+    count?: number
+    testId: string
     children: ReactNode
 }
 
-export function UploadedPackages({ count, children }: Props) {
+export function VersionsCard({ title, count, testId, children }: Props) {
     const { t } = useI18n('entities')
     const { data } = useGetAppVersionQuery()
 
     return (
-        <div className="ua-packages" data-testid="update-assistant-uploaded-packages">
-            <div className="ua-packages__header">
+        <div className="ua-versions-card" data-testid={testId}>
+            <div className="ua-versions-card__header">
                 <span className="ua-title">
-                    {t('update-assistant.availableUpdates.offline.packages.title')}{' '}
-                    <span className="ua-packages__count">({count})</span>
+                    {title}
+                    {count !== undefined && <span className="ua-versions-card__count"> ({count})</span>}
                 </span>
                 {data?.version && (
                     <span className="ua-description">
-                        {t('update-assistant.availableUpdates.offline.packages.selectableHint', { version: data.version })}
+                        {t('update-assistant.availableUpdates.selectableHint', { version: data.version })}
                     </span>
                 )}
             </div>

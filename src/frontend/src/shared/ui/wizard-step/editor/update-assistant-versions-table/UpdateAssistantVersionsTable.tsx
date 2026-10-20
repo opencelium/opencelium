@@ -11,12 +11,12 @@ import { useOnlineStatus } from '@shared/network/useOnlineStatus'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { UpdateMode } from '@entities/updateAssistant/model/types'
 import { OfflinePackagePanel } from './OfflinePackagePanel'
-import { UploadedPackages } from './UploadedPackages'
+import { VersionsCard } from './VersionsCard'
+import { VersionSelectionStatus } from './VersionSelectionStatus'
 import { OnlineUpdatesUnavailable } from './OnlineUpdatesUnavailable'
 import { useSelectUpdateMode } from './useSelectUpdateMode'
 import { getUpdateAssistantVersionColumns } from './getUpdateAssistantVersionColumns'
 import { sortVersionsDesc } from './updateAssistantVersions.utils'
-import { EntityText } from '@shared/ui/primitives/Text'
 import { Table } from '@shared/ui/primitives/Table'
 import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils'
 import { Button } from '@shared/ui/primitives/Button'
@@ -31,7 +31,7 @@ type Props = {
     mode: 'create' | 'update' | 'view'
 }
 
-export function UpdateAssistantVersionsTable({ name, label }: Props) {
+export function UpdateAssistantVersionsTable({ name }: Props) {
     const { t } = useI18n('entities')
     const { t: tCommon } = useI18n('common')
     const dialog = useDialog()
@@ -154,7 +154,13 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
             {isOffline && (
                 <OfflinePackagePanel
                     uploadedPackages={versions.length > 0 && (
-                        <UploadedPackages count={versions.length}>{table}</UploadedPackages>
+                        <VersionsCard
+                            title={t('update-assistant.availableUpdates.offline.packages.title')}
+                            count={versions.length}
+                            testId="update-assistant-uploaded-packages"
+                        >
+                            {table}
+                        </VersionsCard>
                     )}
                 />
             )}
@@ -164,14 +170,21 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
             )}
 
             {!isOffline && !isOnlineBlocked && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {label && (
-                        <label className="form-control__label">
-                            <EntityText typoProps={{ isBold: true }} i18nKey={label} />
-                        </label>
-                    )}
+                <VersionsCard
+                    title={t('update-assistant.availableUpdates.onlineVersionsTitle')}
+                    count={result.isLoading ? undefined : versions.length}
+                    testId="update-assistant-online-versions"
+                >
                     {table}
-                </div>
+                </VersionsCard>
+            )}
+
+            {!result.isLoading && (
+                <VersionSelectionStatus
+                    isOffline={isOffline}
+                    hasVersions={versions.length > 0}
+                    selectedVersion={selectedVersion}
+                />
             )}
 
             {hasValidationError && (
