@@ -85,6 +85,8 @@
     "title": "Available updates",
     "installed": "Installed:",
     "guideLink": "How to perform an update",
+    "onlineVersionsTitle": "Available versions",
+    "selectableHint": "Only versions newer than {{version}} can be selected",
     "modes": {
       "online": {
         "title": "Online",
@@ -112,9 +114,14 @@
         "moreDrop": "— or drop a .zip file here"
       },
       "packages": {
-        "title": "Uploaded packages",
-        "selectableHint": "Only packages newer than {{version}} can be selected"
+        "title": "Uploaded packages"
       }
+    },
+    "status": {
+      "selectVersion": "Select a version to continue.",
+      "uploadPackage": "Upload a package to continue.",
+      "selectPackage": "Select a package to continue.",
+      "ready": "Ready to install version {{version}}."
     }
   },
   "versions": {
