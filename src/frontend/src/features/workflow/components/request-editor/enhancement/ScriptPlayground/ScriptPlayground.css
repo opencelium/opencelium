@@ -279,47 +279,6 @@
 	display: block;
 }
 
-/* Long field paths scroll to their end and back, like a long track title on a phone. */
-.marqueeText {
-	display: block;
-	flex: 0 1 auto;
-	min-width: 0;
-	overflow: hidden;
-	white-space: nowrap;
-}
-.marqueeTextContent {
-	display: inline-block;
-}
-.marqueeText--running .marqueeTextContent {
-	animation: marquee-scroll var(--marquee-duration) ease-in-out infinite;
-}
-.marqueeText--running:hover .marqueeTextContent {
-	animation-play-state: paused;
-}
-@keyframes marquee-scroll {
-	0%,
-	20% {
-		transform: translateX(0);
-	}
-	50%,
-	70% {
-		transform: translateX(var(--marquee-shift));
-	}
-	100% {
-		transform: translateX(0);
-	}
-}
-@media (prefers-reduced-motion: reduce) {
-	.marqueeText--running .marqueeTextContent {
-		animation: none;
-	}
-	.marqueeText {
-		text-overflow: ellipsis;
-	}
-	.marqueeTextContent {
-		display: inline;
-	}
-}
 .scriptPlaygroundJsonEditor {
 	border: 1px solid var(--color-border-default);
 	border-radius: var(--radius-sm);

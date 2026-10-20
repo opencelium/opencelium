@@ -17,7 +17,7 @@ export function Hint({children, noPrefix, type = 'info', closable, onClose}: Hin
     return (
         <Alert
             type={type}
-            message={<CommonText i18nKey="hintLabel" typoProps={{isBold: true}} />}
+            message={<CommonText i18nKey={type === 'warning' ? 'importantLabel' : 'hintLabel'} typoProps={{isBold: true}} />}
             description={children}
             closable={closable}
             onClose={onClose}

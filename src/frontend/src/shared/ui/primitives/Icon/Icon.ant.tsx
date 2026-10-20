@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuScan, LuFlaskConical } from 'react-icons/lu';
+import { LuScan, LuFlaskConical, LuPackage } from 'react-icons/lu';
 import {
     HolderOutlined,
     MinusOutlined,
@@ -49,6 +49,8 @@ import {
     CheckCircleOutlined,
     ClockCircleOutlined,
     CodeOutlined,
+    CloudOutlined,
+    ExportOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -140,6 +142,9 @@ const iconMap = {
     'check-circle': CheckCircleOutlined,
     clock: ClockCircleOutlined,
     code: CodeOutlined,
+    cloud: CloudOutlined,
+    package: LuPackage,
+    'external-link': ExportOutlined,
 };
 
 export const AntIcon: IconComponent = ({
