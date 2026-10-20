@@ -35,9 +35,10 @@ export const TruncatedTextCell: React.FC<Props> = ({ value, breakAnywhere }) => 
         return <div style={style}>{text}</div>
     }
 
+    // The Ant Tooltip trigger is a centering flex wrapper; filling it keeps the text left-aligned.
     return (
         <Tooltip content={text}>
-            <div style={style}>{shortened}</div>
+            <div style={{ ...style, width: '100%' }}>{shortened}</div>
         </Tooltip>
     )
 }
