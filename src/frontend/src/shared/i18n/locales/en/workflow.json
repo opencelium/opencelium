@@ -160,7 +160,17 @@
     "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?",
     "enhancementScriptBrokenIn": "“{{method}}” has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
     "enhancementScriptBroken": "{{count}} steps have a transformation whose script still uses {{marker}} — the references they read were removed with the steps they pointed at. Fix the scripts before saving.",
-    "enhancementScriptBroken_one": "{{count}} step has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving."
+    "enhancementScriptBroken_one": "{{count}} step has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
+    "invalidReferencePathsTitle": "Invalid reference paths",
+    "invalidReferencePathIn": "“{{step}}” reads “{{path}}” from the {{part}} of “{{source}}”, but this is not a valid JsonPath. The run fails when it reaches it.",
+    "invalidReferencePathNoSource": "“{{step}}” reads “{{path}}”, but this is not a valid JsonPath. The run fails when it reaches it.",
+    "referencePart": {
+      "responseBody": "response body",
+      "requestBody": "request body"
+    },
+    "invalidReferencePaths": "{{count}} steps use references whose path is not valid JsonPath. The run fails when it reaches them.",
+    "invalidReferencePaths_one": "{{count}} step uses a reference whose path is not valid JsonPath. The run fails when it reaches it.",
+    "saveAnyway": "Save anyway"
   },
   "joint": {
     "noTargets": "No method can be the target of a jump from this one — a target must run later, in the same loop scope.",
@@ -820,6 +830,8 @@
     "iteratorLoop": "({{iterator}} loop)",
     "iteratorLoopHint": "The element of the current iteration of the {{iterator}} loop. Use it inside a loop that runs over this array.",
     "unknownPath": "This field is not in the response structure of the selected method. The run fails if it is missing from the real response.",
+    "invalidSyntax": "Invalid path syntax at character {{position}} (“{{character}}”). The run fails on this reference.",
+    "incompleteSyntax": "The path is incomplete — it ends where more is expected. The run fails on this reference.",
     "listResult": "list",
     "listResultHint": "Returns a list of all matches, even when only one matches.",
     "operationsGroup": "Operations",
