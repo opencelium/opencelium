@@ -10,6 +10,7 @@ export const MaterialDropzone: DropzoneComponent = ({
     disabled = false,
     label,
     hint,
+    content,
     className,
     style,
     testId,
@@ -69,14 +70,18 @@ export const MaterialDropzone: DropzoneComponent = ({
                 onChange={(e) => handleFiles(e.target.files)}
             />
 
-            <Typography variant="body1" fontWeight={500}>
-                {label ?? t('common.dropzone.label', { defaultValue: 'Click or drag file to this area' })}
-            </Typography>
+            {content ?? (
+                <>
+                    <Typography variant="body1" fontWeight={500}>
+                        {label ?? t('common.dropzone.label', { defaultValue: 'Click or drag file to this area' })}
+                    </Typography>
 
-            {hint && (
-                <Typography variant="body2" color="text.secondary">
-                    {hint}
-                </Typography>
+                    {hint && (
+                        <Typography variant="body2" color="text.secondary">
+                            {hint}
+                        </Typography>
+                    )}
+                </>
             )}
         </Box>
     )

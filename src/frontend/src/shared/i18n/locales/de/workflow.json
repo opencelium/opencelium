@@ -296,6 +296,7 @@
     "changeHistory": "Änderungsverlauf",
     "testRunLockedHint": "Während eines Testlaufs nicht verfügbar",
     "shortcuts": "Tastenkürzel",
+    "schedules": "Zeitpläne",
     "exit": "Beenden"
   },
   "json": {

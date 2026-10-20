@@ -1,0 +1,33 @@
+.user-actions-menu__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.user-actions-menu {
+    max-width: 320px;
+}
+
+.user-actions-menu__header > :first-child {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* The name column has to be allowed to shrink below its text width, or MarqueeText never sees an overflow to scroll.
+   Scoped under the menu to outrank the shared `.topbar-help-menu__item` grid regardless of CSS order. */
+.user-actions-menu .user-actions-menu__identity {
+    grid-template-columns: 18px minmax(0, 1fr);
+    font-weight: 500;
+}
+
+.user-actions-menu__static {
+    padding: 4px 15px;
+}
+
+.user-actions-menu__language-options {
+    display: inline-flex;
+    gap: 2px;
+    padding-right: 4px;
+}

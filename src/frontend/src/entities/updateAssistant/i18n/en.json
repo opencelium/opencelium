@@ -75,11 +75,55 @@
       "os": "Operating System",
       "polyglot": "Script engine (Polyglot)"
     },
-    "hint": "Back up the system before you start the update (see <1>docs</1>)."
+    "hint": "Please, do not forget to <1>create a backup of the system</1> before you start the update."
   },
   "validation": {
     "requiredComponentsDown": "One or more required components are not operational. All required services must be running before you can proceed with the update.",
     "versionNotSelected": "Please select a version to proceed with the update."
+  },
+  "availableUpdates": {
+    "title": "Available updates",
+    "installed": "Installed:",
+    "guideLink": "How to perform an update",
+    "onlineVersionsTitle": "Available versions",
+    "selectableHint": "Only versions newer than {{version}} can be selected",
+    "modes": {
+      "online": {
+        "title": "Online",
+        "description": "Fetch releases from the update server. Requires internet access."
+      },
+      "offline": {
+        "title": "Offline",
+        "description": "Upload a package (.zip) for air-gapped or restricted systems."
+      }
+    },
+    "offline": {
+      "download": {
+        "title": "Download the offline package",
+        "description": "Get the .zip for your target version from packagecloud.",
+        "action": "Open packagecloud"
+      },
+      "upload": {
+        "title": "Upload here",
+        "description": "Each package is validated before its version can be selected.",
+        "dropLabel": "Drag and drop your package here",
+        "or": "or",
+        "browse": "Browse files",
+        "accepted": "Accepted format: .zip · one package at a time",
+        "more": "Upload more packages",
+        "moreDrop": "— or drop a .zip file here"
+      },
+      "packages": {
+        "title": "Uploaded packages"
+      }
+    },
+    "status": {
+      "selectVersion": "Select a version to continue.",
+      "uploadPackage": "Upload a package to continue.",
+      "selectPackage": "Select a package to continue.",
+      "ready": "Ready to install version {{version}}.",
+      "switchToOffline": "Switch to offline to continue."
+    }
   },
   "versions": {
     "columns": {
