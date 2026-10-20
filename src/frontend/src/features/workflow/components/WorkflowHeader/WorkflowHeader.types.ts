@@ -18,6 +18,8 @@ export type WorkflowHeaderProps = {
 	testRunLocked?: boolean;
 	loading?: boolean;
 	schedulesSlot?: ReactNode;
+	/** Set only for a saved workflow, like `schedulesSlot`; the `…` menu's Schedules entry calls it on narrow screens. */
+	onToggleSchedules?: () => void;
 	/** Whether this workflow has been saved at least once (has a persisted connectionId).
 	 * "Download as Template" hits a backend endpoint keyed by connectionId, so it's
 	 * disabled until that's true. */
