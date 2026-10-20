@@ -357,11 +357,12 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     return (
         <div data-testid={buildTestId(entity.name, 'list')} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <header style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                     <h1 style={{ margin: 0 }}>
                         <Typography variant="headline" as="span">{titleText}</Typography>
                     </h1>
-                    <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
+                    {/* Wraps under the title (and onto more lines itself) instead of running off a narrow page. */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8, alignSelf: 'flex-start', marginLeft: 'auto' }}>
                         {bulkActions.map((action) => {
                             const field = action.field ?? rowKey;
                             const ids = selectedRows
@@ -446,7 +447,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                             <Tooltip content={tCommon('list.filtersTooltip')}>
                                 <IconButton
                                     type={areFiltersOpen ? 'primary' : 'default'}
-                                    iconProps={{ name: 'filter', color: areFiltersOpen ? 'inherit' : 'secondary' }}
+                                    iconProps={{ name: 'filter', color: areFiltersOpen ? 'inherit' : 'primary' }}
                                     onClick={() => setAreFiltersOpen((v) => !v)}
                                     testId={buildTestId(entity.name, 'filters-toggle')}
                                 />

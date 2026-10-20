@@ -3,6 +3,7 @@ import HelpIcon from "@shared/ui/tour/HelpIcon.tsx";
 import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
 import {EntityText} from "@shared/ui/primitives/Text";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
+import {IMAGE_JUSTIFY_VAR} from "@shared/ui/wizard-image-editor/WizardImageEditor.styles";
 
 interface Props {
     header: string
@@ -38,7 +39,10 @@ export function StepHeader({
             display: "flex",
             alignItems: "center",
             justifyContent: isMobile ? 'center' : "right",
-        }}
+            // Custom image editors size their own box, so they need the alignment
+            // too — see WizardImageEditor's wrapper.
+            [IMAGE_JUSTIFY_VAR]: isMobile ? 'center' : 'flex-end',
+        } as React.CSSProperties}
     >
         {typeof image === "string" ? (
             // Square frame keeps the radius a true circle regardless of the
@@ -74,6 +78,9 @@ export function StepHeader({
         <div
             style={{
                 display: isMobile ? "grid" : "flex",
+                // One full-width track: an auto track sizes to the widest child, so a
+                // short subheader left both the title and the image off-centre.
+                gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : undefined,
                 justifyContent: "space-between",
                 alignItems: "flex-start",
                 marginBottom: isTabletOrMobile ? 30 : 20,
@@ -81,8 +88,8 @@ export function StepHeader({
         >
             {image && isMobile && ImageComponent}
             <div style={{flex: 1}}>
-                <h1 style={{marginBottom: 8}}>
-                    <span style={{position: 'relative', textAlign: isMobile ? 'center' : 'left'}}>
+                <h1 style={{marginBottom: 8, textAlign: isMobile ? 'center' : 'left'}}>
+                    <span style={{position: 'relative'}}>
                         <EntityText i18nKey={header} typoProps={{variant: 'headline'}}/>
                         {info && <div style={{position: 'absolute', right: -20, top: -20}}>
                             <HelpIcon steps={infoSteps} inputRef={containerRef}/>
