@@ -25,10 +25,12 @@
     "updateAssistant": "Update Assistant",
     "systemCheck": "System Check",
     "config": "System Configuration",
-    "ui": "UI"
+    "ui": "UI",
+    "backToMain": "Back"
   },
   "commandPalette": {
     "placeholder": "Type a command...",
+    "placeholderShort": "Command...",
     "noResults": "No results found",
     "groups": {
       "workflow": "Workflow",
@@ -112,7 +114,11 @@
     "help": "Help",
     "startOnboardingTour": "Start onboarding tour",
     "startDashboardTour": "Start dashboard tour",
-    "servicePortal": "Service Portal"
+    "servicePortal": "Service Portal",
+    "account": "Account and settings",
+    "adminMenu": "Switch to admin menu",
+    "mainMenu": "Switch to main menu",
+    "startWorkflowTutorial": "Start workflow tutorial"
   },
   "newFeature": {
     "label": "New",
@@ -152,6 +158,7 @@
     "masterPasswordNotConfigured": "You can save without a master password — only the general data will be updated. To change the required credentials, ask an administrator to set opencelium.connector.master-password in /backend/src/main/resources/application.yml and restart the backend."
   },
   "hintLabel": "Hint",
+  "importantLabel": "Important",
   "errorBoundary": {
     "retry": "Try again",
     "reload": "Reload page",

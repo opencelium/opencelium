@@ -1,0 +1,257 @@
+.ua-available {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ua-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+}
+
+.ua-header__title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.ua-header__installed {
+    padding: 2px 10px;
+    border: 1px solid var(--color-border-default);
+    border-radius: 999px;
+    background: var(--color-background-surface);
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.ua-header__installed strong {
+    color: var(--color-text-primary);
+}
+
+.ua-header__guide {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-action-primary);
+    font-weight: 500;
+}
+
+.ua-modes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.ua-mode-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 16px 18px 18px;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    background: var(--color-background-surface);
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ua-mode-card:hover {
+    border-color: var(--color-border-strong);
+}
+
+.ua-mode-card--selected,
+.ua-mode-card--selected:hover {
+    border-color: var(--color-action-primary);
+    box-shadow: 0 0 0 1px var(--color-action-primary);
+}
+
+.ua-mode-card__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: var(--color-background-hover);
+    color: var(--color-text-secondary);
+}
+
+.ua-mode-card--selected .ua-mode-card__icon {
+    background: var(--color-action-primary-subtle);
+    color: var(--color-action-primary);
+}
+
+.ua-mode-card__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.ua-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.ua-description {
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.ua-offline-panel {
+    padding: 20px;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    background: var(--color-background-surface);
+}
+
+.ua-offline-panel__divider {
+    height: 1px;
+    margin: 20px 0;
+    background: var(--color-border-subtle);
+}
+
+.ua-offline-step {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px 14px;
+}
+
+.ua-offline-step__index {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-action-primary-subtle);
+    color: var(--color-action-primary);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ua-offline-step__body {
+    flex: 1;
+    min-width: 200px;
+}
+
+.ua-offline-step__content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.ua-versions-card {
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.ua-versions-card__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.ua-versions-card__count {
+    font-weight: 400;
+    color: var(--color-text-secondary);
+}
+
+.ua-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 12px;
+}
+
+.ua-drop__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--color-action-primary-subtle);
+    color: var(--color-action-primary);
+}
+
+.ua-drop__label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.ua-drop__or,
+.ua-drop__accepted {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.ua-drop--compact {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 12px;
+}
+
+.ua-drop__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--color-action-primary);
+}
+
+.ua-drop--compact .ua-drop__or {
+    font-size: 14px;
+}
+
+/* Decorative only: the whole drop area already opens the file picker. */
+.ua-drop__browse {
+    padding: 5px 16px;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    background: var(--color-background-surface);
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.ua-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.ua-status--ready {
+    color: var(--color-text-primary);
+}
+
+.ua-status--ready .anticon,
+.ua-status--ready svg {
+    color: var(--color-status-success-fg);
+}
+
+.ua-version-row--selected > td {
+    background: var(--color-action-primary-subtle) !important;
+}
+
+.ua-version-row--selected > td:first-child {
+    box-shadow: inset 3px 0 0 var(--color-action-primary);
+}

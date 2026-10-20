@@ -14,6 +14,7 @@ import {InvokerRequiredDataEditor} from "@shared/ui/wizard-step/editor/invoker-r
 import {InvokerOperationsEditor} from "@shared/ui/wizard-step/editor/invoker-operations-editor/InvokerOperationsEditor.tsx";
 import {UpdateAssistantHealthViewer} from "@shared/ui/wizard-step/editor/update-assistant-health-viewer/UpdateAssistantHealthViewer.tsx";
 import {UpdateAssistantVersionsTable} from "@shared/ui/wizard-step/editor/update-assistant-versions-table/UpdateAssistantVersionsTable.tsx";
+import {AvailableUpdatesSection} from "@shared/ui/wizard-step/editor/update-assistant-versions-table/AvailableUpdatesSection.tsx";
 import {UpdateAssistantRunButton} from "@shared/ui/wizard-step/editor/update-assistant-run-button/UpdateAssistantRunButton.tsx";
 import {CustomThemeSection} from "@entities/ui/ui/CustomThemeSection";
 import {SystemLogoSection} from "@entities/ui/ui/SystemLogoSection";
@@ -63,6 +64,7 @@ export function setupLocalOverrides() {
     overrideRegistry.registerField('updateAssistantHealthViewer', ({ field }) => (
         <UpdateAssistantHealthViewer name={field.name} label={field.label} />
     ));
+    overrideRegistry.registerSection('updateAssistantAvailableUpdates', AvailableUpdatesSection);
     overrideRegistry.registerField('updateAssistantVersionsTable', ({ field, mode }) => (
         <UpdateAssistantVersionsTable name={field.name} label={field.label} mode={mode} />
     ));
