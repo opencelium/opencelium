@@ -121,7 +121,8 @@
       "selectVersion": "Select a version to continue.",
       "uploadPackage": "Upload a package to continue.",
       "selectPackage": "Select a package to continue.",
-      "ready": "Ready to install version {{version}}."
+      "ready": "Ready to install version {{version}}.",
+      "switchToOffline": "Switch to offline to continue."
     }
   },
   "versions": {
