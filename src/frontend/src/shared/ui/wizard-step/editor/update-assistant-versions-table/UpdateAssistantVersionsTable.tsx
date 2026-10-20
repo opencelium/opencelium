@@ -7,11 +7,13 @@ import {
     useGetOfflineVersionsQuery,
     useDeleteOfflineVersionMutation,
 } from '@entities/updateAssistant/api/updateAssistantApi'
-import { useOnlineFeature } from '@entities/subscription/model/useOnlineFeature'
+import { useOnlineStatus } from '@shared/network/useOnlineStatus'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { UpdateMode } from '@entities/updateAssistant/model/types'
-import { OfflinePackageUploader } from './OfflinePackageUploader'
+import { OfflinePackagePanel } from './OfflinePackagePanel'
+import { UploadedPackages } from './UploadedPackages'
 import { OnlineUpdatesUnavailable } from './OnlineUpdatesUnavailable'
+import { useSelectUpdateMode } from './useSelectUpdateMode'
 import { getUpdateAssistantVersionColumns } from './getUpdateAssistantVersionColumns'
 import { sortVersionsDesc } from './updateAssistantVersions.utils'
 import { EntityText } from '@shared/ui/primitives/Text'
@@ -49,23 +51,22 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
     const updateMode: UpdateMode = watch('updateMode') ?? 'online'
     const isOffline = updateMode === 'offline'
 
-    // Online versions come from the OC update server, so the step is only offered
-    // while the browser has a connection and online services are switched on.
-    const onlineAvailability = useOnlineFeature()
-    const isOnlineReady = isOffline || onlineAvailability.state === 'available'
+    const isOnline = useOnlineStatus()
 
-    const onlineResult = useGetOnlineVersionsQuery(undefined, { skip: !isOnlineReady || isOffline })
+    const onlineResult = useGetOnlineVersionsQuery(undefined, { skip: !isOnline || isOffline })
     const offlineResult = useGetOfflineVersionsQuery(undefined, { skip: !isOffline })
     const [deleteVersion] = useDeleteOfflineVersionMutation()
     const [deletingVersion, setDeletingVersion] = useState<string | null>(null)
 
     const result = isOffline ? offlineResult : onlineResult
-    const versions = useMemo(() => sortVersionsDesc(result.data ?? []), [result.data])
+    // With online services disabled the backend answers 200 with a ResultDTO, not a list.
+    const versions = useMemo(
+        () => sortVersionsDesc(Array.isArray(result.data) ? result.data : []),
+        [result.data],
+    )
 
-    const switchToOffline = useCallback(() => {
-        setSelectedVersion(null)
-        setValue('updateMode', 'offline', { shouldValidate: true, shouldDirty: true })
-    }, [setSelectedVersion, setValue])
+    const selectMode = useSelectUpdateMode()
+    const switchToOffline = useCallback(() => selectMode('offline'), [selectMode])
 
     const handleDelete = useCallback(
         async (version: string) => {
@@ -132,36 +133,46 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
 
     const hasValidationError = Boolean(errors[name])
 
+    const isOnlineBlocked = !isOnline && !isOffline
+
+    const table = (
+        <Table
+            data={versions}
+            columns={columns}
+            tableInstance={tableInstance}
+            isLoading={result.isLoading}
+            emptyState={
+                <div style={{ color: 'var(--color-text-secondary)' }}>
+                    {t('update-assistant.versions.empty')}
+                </div>
+            }
+        />
+    )
+
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {label && (
-                <label className="form-control__label">
-                    <span style={{ position: 'relative' }}>
-                        <EntityText typoProps={{ isBold: true }} i18nKey={label} />
-                    </span>
-                </label>
-            )}
-
-            {onlineAvailability.state === 'unavailable' && !isOffline ? (
-                <OnlineUpdatesUnavailable
-                    reason={onlineAvailability.reason}
-                    onSwitchToOffline={switchToOffline}
-                />
-            ) : (
-                <Table
-                    data={versions}
-                    columns={columns}
-                    tableInstance={tableInstance}
-                    isLoading={result.isLoading || !isOnlineReady}
-                    emptyState={
-                        <div style={{ color: 'var(--color-text-secondary)' }}>
-                            {t('update-assistant.versions.empty')}
-                        </div>
-                    }
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {isOffline && (
+                <OfflinePackagePanel
+                    uploadedPackages={versions.length > 0 && (
+                        <UploadedPackages count={versions.length}>{table}</UploadedPackages>
+                    )}
                 />
             )}
 
-            {!result.isLoading && isOffline && <OfflinePackageUploader />}
+            {isOnlineBlocked && (
+                <OnlineUpdatesUnavailable reason="offline" onSwitchToOffline={switchToOffline} />
+            )}
+
+            {!isOffline && !isOnlineBlocked && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {label && (
+                        <label className="form-control__label">
+                            <EntityText typoProps={{ isBold: true }} i18nKey={label} />
+                        </label>
+                    )}
+                    {table}
+                </div>
+            )}
 
             {hasValidationError && (
                 <ErrorMessage message={t('update-assistant.validation.versionNotSelected')} />

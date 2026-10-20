@@ -3,11 +3,16 @@ import { Dropzone } from '@shared/ui/primitives/DropZone/DropZone'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useOfflinePackageUpload } from './useOfflinePackageUpload'
 import {IconButton} from "@shared/ui/primitives/IconButton";
+import { Icon } from '@shared/ui/primitives/Icon'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 
 const MAX_PACKAGE_BYTES = 1024 * 1024 * 1024
 
-export function OfflinePackageUploader() {
+type Props = {
+    isCompact?: boolean
+}
+
+export function OfflinePackageUploader({ isCompact = false }: Props) {
     const { t } = useI18n('entities')
     const { state, upload, cancel, reset } = useOfflinePackageUpload()
 
@@ -67,7 +72,26 @@ export function OfflinePackageUploader() {
         <Dropzone
             accept=".zip"
             onFiles={handleFiles}
-            label={t('update-assistant.versions.upload.button')}
+            testId="update-assistant-package-dropzone"
+            content={isCompact ? (
+                <div className="ua-drop ua-drop--compact">
+                    <span className="ua-drop__more">
+                        <Icon name="upload" size={16} color="inherit" />
+                        {t('update-assistant.availableUpdates.offline.upload.more')}
+                    </span>
+                    <span className="ua-drop__or">{t('update-assistant.availableUpdates.offline.upload.moreDrop')}</span>
+                </div>
+            ) : (
+                <div className="ua-drop">
+                    <span className="ua-drop__icon">
+                        <Icon name="upload" size={20} color="inherit" />
+                    </span>
+                    <span className="ua-drop__label">{t('update-assistant.availableUpdates.offline.upload.dropLabel')}</span>
+                    <span className="ua-drop__or">{t('update-assistant.availableUpdates.offline.upload.or')}</span>
+                    <span className="ua-drop__browse">{t('update-assistant.availableUpdates.offline.upload.browse')}</span>
+                    <span className="ua-drop__accepted">{t('update-assistant.availableUpdates.offline.upload.accepted')}</span>
+                </div>
+            )}
         />
     )
 }
