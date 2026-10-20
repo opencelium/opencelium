@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Dialog } from '@/shared/ui/primitives/Dialog';
 import { Button } from '@/shared/ui/primitives/Button';
@@ -36,6 +36,9 @@ export const ConfirmDialogProvider: React.FC<{
             });
         });
     }, []);
+
+    // Stable across the dialog's own state changes, so opening a confirm doesn't re-render every consumer.
+    const contextValue = useMemo(() => ({ confirm }), [confirm]);
 
     // Move focus to the default button (Cancel, unless `autoFocusConfirm`) once
     // the open animation settles. Doing it here — not via the button's autoFocus
@@ -90,7 +93,7 @@ export const ConfirmDialogProvider: React.FC<{
     }, [isAuthenticated]);
 
     return (
-        <ConfirmDialogContext.Provider value={{ confirm }}>
+        <ConfirmDialogContext.Provider value={contextValue}>
             {children}
 
             <Dialog
