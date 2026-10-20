@@ -4,26 +4,27 @@ import { StepFooterStatus } from '@shared/ui/step-form/StepFooterSlotContext'
 
 type Props = {
     isOffline: boolean
+    isOnlineBlocked: boolean
     hasVersions: boolean
     selectedVersion: string | null
 }
 
-export function VersionSelectionStatus({ isOffline, hasVersions, selectedVersion }: Props) {
+export function VersionSelectionStatus({ isOffline, isOnlineBlocked, hasVersions, selectedVersion }: Props) {
     const { t } = useI18n('entities')
 
-    const content = selectedVersion ? (
+    const hintKey = isOnlineBlocked
+        ? 'switchToOffline'
+        : isOffline
+            ? hasVersions ? 'selectPackage' : 'uploadPackage'
+            : 'selectVersion'
+
+    const content = selectedVersion && !isOnlineBlocked ? (
         <span className="ua-status ua-status--ready">
             <Icon name="check-circle" size={16} color="inherit" />
             {t('update-assistant.availableUpdates.status.ready', { version: selectedVersion })}
         </span>
     ) : (
-        <span className="ua-status">
-            {t(isOffline
-                ? hasVersions
-                    ? 'update-assistant.availableUpdates.status.selectPackage'
-                    : 'update-assistant.availableUpdates.status.uploadPackage'
-                : 'update-assistant.availableUpdates.status.selectVersion')}
-        </span>
+        <span className="ua-status">{t(`update-assistant.availableUpdates.status.${hintKey}`)}</span>
     )
 
     return (

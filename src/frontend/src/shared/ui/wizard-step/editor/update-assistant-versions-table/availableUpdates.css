@@ -247,3 +247,11 @@
 .ua-status--ready svg {
     color: var(--color-status-success-fg);
 }
+
+.ua-version-row--selected > td {
+    background: var(--color-action-primary-subtle) !important;
+}
+
+.ua-version-row--selected > td:first-child {
+    box-shadow: inset 3px 0 0 var(--color-action-primary);
+}

@@ -121,7 +121,8 @@
       "selectVersion": "Wählen Sie eine Version aus, um fortzufahren.",
       "uploadPackage": "Laden Sie ein Paket hoch, um fortzufahren.",
       "selectPackage": "Wählen Sie ein Paket aus, um fortzufahren.",
-      "ready": "Bereit zur Installation von Version {{version}}."
+      "ready": "Bereit zur Installation von Version {{version}}.",
+      "switchToOffline": "Wechseln Sie zu Offline, um fortzufahren."
     }
   },
   "versions": {

@@ -141,6 +141,7 @@ export function UpdateAssistantVersionsTable({ name }: Props) {
             columns={columns}
             tableInstance={tableInstance}
             isLoading={result.isLoading}
+            rowClassName={(row) => (row.name === selectedVersion ? 'ua-version-row--selected' : undefined)}
             emptyState={
                 <div style={{ color: 'var(--color-text-secondary)' }}>
                     {t('update-assistant.versions.empty')}
@@ -182,6 +183,7 @@ export function UpdateAssistantVersionsTable({ name }: Props) {
             {!result.isLoading && (
                 <VersionSelectionStatus
                     isOffline={isOffline}
+                    isOnlineBlocked={isOnlineBlocked}
                     hasVersions={versions.length > 0}
                     selectedVersion={selectedVersion}
                 />
