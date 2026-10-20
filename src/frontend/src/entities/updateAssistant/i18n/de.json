@@ -85,6 +85,8 @@
     "title": "Verfügbare Updates",
     "installed": "Installiert:",
     "guideLink": "So führen Sie ein Update durch",
+    "onlineVersionsTitle": "Verfügbare Versionen",
+    "selectableHint": "Nur Versionen neuer als {{version}} können ausgewählt werden",
     "modes": {
       "online": {
         "title": "Online",
@@ -112,9 +114,14 @@
         "moreDrop": "— oder eine .zip-Datei hier ablegen"
       },
       "packages": {
-        "title": "Hochgeladene Pakete",
-        "selectableHint": "Nur Pakete neuer als {{version}} können ausgewählt werden"
+        "title": "Hochgeladene Pakete"
       }
+    },
+    "status": {
+      "selectVersion": "Wählen Sie eine Version aus, um fortzufahren.",
+      "uploadPackage": "Laden Sie ein Paket hoch, um fortzufahren.",
+      "selectPackage": "Wählen Sie ein Paket aus, um fortzufahren.",
+      "ready": "Bereit zur Installation von Version {{version}}."
     }
   },
   "versions": {

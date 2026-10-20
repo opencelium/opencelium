@@ -149,13 +149,13 @@
     margin-top: 12px;
 }
 
-.ua-packages {
+.ua-versions-card {
     border: 1px solid var(--color-border-default);
     border-radius: var(--radius-lg);
     overflow: hidden;
 }
 
-.ua-packages__header {
+.ua-versions-card__header {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
@@ -165,7 +165,7 @@
     border-bottom: 1px solid var(--color-border-subtle);
 }
 
-.ua-packages__count {
+.ua-versions-card__count {
     font-weight: 400;
     color: var(--color-text-secondary);
 }
@@ -229,4 +229,21 @@
     background: var(--color-background-surface);
     font-weight: 500;
     color: var(--color-text-primary);
+}
+
+.ua-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.ua-status--ready {
+    color: var(--color-text-primary);
+}
+
+.ua-status--ready .anticon,
+.ua-status--ready svg {
+    color: var(--color-status-success-fg);
 }
