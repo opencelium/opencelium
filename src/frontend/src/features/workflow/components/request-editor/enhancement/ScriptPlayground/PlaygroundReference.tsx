@@ -1,7 +1,7 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { argLocation } from '../EnhancementArgs/argLocation';
-import { MarqueeText } from './MarqueeText';
+import { MarqueeText } from '@shared/ui/marquee-text/MarqueeText';
 import { EnhancementArgLine } from '../EnhancementArgs/EnhancementArgLine';
 import type { ParsedArgEntry } from '../EnhancementArgs/EnhancementArgs.types';
 

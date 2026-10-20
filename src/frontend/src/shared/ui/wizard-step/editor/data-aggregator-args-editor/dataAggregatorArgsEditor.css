@@ -1,0 +1,41 @@
+/* Sized off the editor's own width, not the viewport: the same form renders in a
+   fullscreen mobile dialog and beside the step list in the desktop one. */
+.data-aggregator-args {
+    container-type: inline-size;
+}
+
+.data-aggregator-args__row {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    grid-template-areas: "name description remove";
+    gap: 8px;
+    align-items: start;
+}
+
+.data-aggregator-args__name { grid-area: name; min-width: 0; }
+.data-aggregator-args__description { grid-area: description; min-width: 0; }
+.data-aggregator-args__remove { grid-area: remove; padding-top: 24px; }
+
+/* Side by side, the name column is too narrow for its label, which wraps and drops
+   the input below the description's; stack the description under the name instead.
+   Each argument is outlined with the delete in its corner, so it reads as removing
+   the whole argument rather than just its name. */
+@container (max-width: 480px) {
+    .data-aggregator-args__row {
+        position: relative;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "name"
+            "description";
+        padding: 8px 12px 0;
+        border: 1px solid var(--color-border-subtle);
+        border-radius: var(--radius-md);
+    }
+
+    .data-aggregator-args__remove {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        padding-top: 0;
+    }
+}

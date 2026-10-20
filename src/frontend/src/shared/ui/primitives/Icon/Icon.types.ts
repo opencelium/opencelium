@@ -80,6 +80,9 @@ export type IconName =
     | 'check-circle'
     | 'clock'
     | 'code'
+    | 'cloud'
+    | 'package'
+    | 'external-link'
 
 export type IconColor =
     | 'default'
