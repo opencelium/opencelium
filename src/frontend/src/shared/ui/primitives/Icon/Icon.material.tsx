@@ -74,6 +74,9 @@ import HighlightOff from '@mui/icons-material/HighlightOff';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import AccessTime from '@mui/icons-material/AccessTime';
 import Code from '@mui/icons-material/Code';
+import CloudOutlined from '@mui/icons-material/CloudOutlined';
+import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
+import OpenInNew from '@mui/icons-material/OpenInNew';
 import type { IconComponent } from './Icon.types';
 
 const iconMap = {
@@ -151,6 +154,9 @@ const iconMap = {
     'check-circle': CheckCircleOutline,
     clock: AccessTime,
     code: Code,
+    cloud: CloudOutlined,
+    package: Inventory2Outlined,
+    'external-link': OpenInNew,
 };
 
 export const MaterialIcon: IconComponent = ({
