@@ -43,6 +43,7 @@
     "graphiql": "^5.2.4",
     "graphql": "16.11.0",
     "i18next": "^25.8.0",
+    "json-p3": "2.2.2",
     "lucide-react": "^1.7.0",
     "react": "19.2.0",
     "react-ace": "^14.0.1",

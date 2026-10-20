@@ -37,6 +37,9 @@ export function NodeShell({
 	// so the label would be the same text twice, half of it behind the card.
 	const hasBindingCard = !!bindingLens?.cardNodeIds.has(id);
 	const jointRejection = useJointRejectionMessage(data.jointInvalidReason, data.jointBlockingLabel);
+	const redNodeMessage = data.hasError ? data.errorMessage
+		: data.testRunFailedVisible ? data.testRunFailedMessage : undefined;
+	const bodyTooltip = jointRejection || redNodeMessage;
 	const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
 		if (data.dragGhost || data.dropPlaceholder) return;
 		if (event.ctrlKey) {
@@ -64,7 +67,6 @@ export function NodeShell({
 	const nodeBody = (
 		<div
 			className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError || data.testRunFailedVisible ? 'nodeBodyError' : ''} ${data.testRunFailedVisible ? 'nodeBodyTestRunFailed' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''} ${data.testRunActive ? 'nodeBodyTestRunActive' : ''} ${data.jointCandidate ? 'nodeBodyJointCandidate' : ''} ${data.jointSource ? 'nodeBodyJointSource' : ''} ${jointRejection ? 'nodeBodyJointInvalid' : ''}`}
-			title={data.hasError ? data.errorMessage : data.testRunFailedVisible ? data.testRunFailedMessage : undefined}
 		>
 			{children}
 			{/* Not gated on the node's kind: the badge is there for whatever the
@@ -120,7 +122,11 @@ export function NodeShell({
 				/>
 			)}
 			{topLabel && <div className='nodeTopLabel'>{topLabel}</div>}
-			{jointRejection ? <Tooltip content={jointRejection}>{nodeBody}</Tooltip> : nodeBody}
+			{/* Content goes null while dragging rather than unwrapping, which would
+			    remount the node body mid-drag. */}
+			{bodyTooltip
+				? <Tooltip content={data.isAnyNodeDragging ? null : bodyTooltip} maxWidth={320}>{nodeBody}</Tooltip>
+				: nodeBody}
 			{/* Hosted here rather than per node type: the badge is the same for a
 			    method, an operator or the start node. It hangs off the outer wrap's
 			    top-right corner rather than the node body's, which keeps it clear of

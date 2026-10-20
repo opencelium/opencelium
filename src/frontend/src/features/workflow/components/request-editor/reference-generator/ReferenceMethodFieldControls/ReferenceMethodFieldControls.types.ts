@@ -1,5 +1,6 @@
 import type { ReactNode, RefObject } from 'react';
 import type { ResponseType } from '../../body-editor/requestReferenceOptions';
+import type { ReferencePathFeedback } from '../../body-editor/referencePathSyntax';
 
 export type ReferenceMethodFieldControlsProps = {
   methodLabel: string;
@@ -20,5 +21,5 @@ export type ReferenceMethodFieldControlsProps = {
   onFieldBlur: () => void;
   fieldPlaceholder: string;
   fieldDisabled: boolean;
-  fieldWarning?: string;
+  fieldFeedback?: ReferencePathFeedback | null;
 };

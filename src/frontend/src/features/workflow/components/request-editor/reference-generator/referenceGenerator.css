@@ -84,6 +84,9 @@
 .referenceFieldInputWarning {
 	border-color: var(--color-status-warning-fg);
 }
+.referenceFieldInputError {
+	border-color: var(--color-status-error-fg);
+}
 .referenceFieldInput:disabled {
 	background: var(--color-background-disabled);
 }

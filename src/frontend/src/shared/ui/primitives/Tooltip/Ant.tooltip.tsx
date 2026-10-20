@@ -7,12 +7,16 @@ export const AntTooltip: TooltipComponent = ({
     placement = 'top',
     zIndex,
     maxWidth,
+    open,
+    onOpenChange,
     children,
 }) => {
     return (
         <AntTooltipBase
             title={content}
             placement={placement}
+            open={open}
+            onOpenChange={onOpenChange}
             classNames={{ root: 'ant-tooltip-custom' }}
             styles={(zIndex || maxWidth) ? { root: { ...(zIndex && { zIndex }), ...(maxWidth && { maxWidth }) } } : undefined}
         >
