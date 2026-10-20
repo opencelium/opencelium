@@ -6,11 +6,8 @@ import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 import { resolveStorageUrl } from '@shared/utils/storageUrl'
 import { ImageTileEditor } from '@shared/ui/wizard-image-editor/ImageTileEditor'
-import {
-    deleteProfilePicture,
-    syncOwnProfilePicture,
-    uploadProfilePicture,
-} from '@entities/user/lib/profilePicture'
+import { deleteProfilePicture, uploadProfilePicture } from '@entities/user/lib/profilePicture'
+import { syncOwnSessionUser } from '@entities/user/lib/ownSessionUser'
 import { useGravatarRefresh } from '@entities/user/ui/useGravatarRefresh'
 
 type Props = {
@@ -42,7 +39,7 @@ export function ProfilePictureEditor({ readOnly }: Props) {
         setIsBusy(true)
         try {
             await uploadProfilePicture(file, email)
-            await syncOwnProfilePicture(user.userId)
+            await syncOwnSessionUser(user.userId)
             message.success(t('profile.messages.pictureUpdated'))
         } catch (error) {
             console.error(error)
@@ -61,7 +58,7 @@ export function ProfilePictureEditor({ readOnly }: Props) {
         setIsBusy(true)
         try {
             await deleteProfilePicture(user.userId)
-            await syncOwnProfilePicture(user.userId)
+            await syncOwnSessionUser(user.userId)
             message.success(t('profile.messages.pictureDeleted'))
         } catch (error) {
             console.error(error)

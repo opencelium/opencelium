@@ -118,6 +118,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         }
         commandPalette: {
             placeholder: string
+            placeholderShort: string
             noResults: string
             groups: {
                 workflow: string
@@ -202,6 +203,10 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             startOnboardingTour: string
             startDashboardTour: string
             servicePortal: string
+            account: string
+            adminMenu: string
+            mainMenu: string
+            startWorkflowTutorial: string
         }
         user: {
             unknown: string

@@ -30,6 +30,7 @@
   },
   "commandPalette": {
     "placeholder": "Type a command...",
+    "placeholderShort": "Command...",
     "noResults": "No results found",
     "groups": {
       "workflow": "Workflow",
@@ -113,7 +114,11 @@
     "help": "Help",
     "startOnboardingTour": "Start onboarding tour",
     "startDashboardTour": "Start dashboard tour",
-    "servicePortal": "Service Portal"
+    "servicePortal": "Service Portal",
+    "account": "Account and settings",
+    "adminMenu": "Switch to admin menu",
+    "mainMenu": "Switch to main menu",
+    "startWorkflowTutorial": "Start workflow tutorial"
   },
   "user": {
     "unknown": "Unknown User"

@@ -223,7 +223,7 @@ export type CreateNodeFromActionArgs = {
 export type WorkflowHeaderMenuItem = {
 	id: string;
 	labelKey: string;
-	section?: 'template' | 'history' | 'shortcuts' | 'exit';
+	section?: 'schedules' | 'template' | 'history' | 'shortcuts' | 'exit';
 	keepOpenOnSelect?: boolean;
 	disabled?: boolean;
 	/** Tooltip shown while `disabled` explaining why the action is unavailable. */
