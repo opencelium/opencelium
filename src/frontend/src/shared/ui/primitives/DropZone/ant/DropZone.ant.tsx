@@ -31,6 +31,7 @@ export const AntDropzone: DropzoneComponent = ({
     disabled = false,
     label,
     hint,
+    content,
     className,
     style,
     testId,
@@ -68,16 +69,20 @@ export const AntDropzone: DropzoneComponent = ({
                     return false
                 }}
             >
-                <p className="ant-upload-drag-icon" style={{ margin: '8px 0' }}>
-                    <span style={{ fontSize: 32 }}>📁</span>
-                </p>
-                <p className="ant-upload-text" style={{ margin: '4px 0' }}>
-                    {label ?? t('common.dropzone.label', { defaultValue: 'Click or drag file to this area' })}
-                </p>
-                {hint && (
-                    <p className="ant-upload-hint" style={{ margin: '4px 0' }}>
-                        {hint}
-                    </p>
+                {content ?? (
+                    <>
+                        <p className="ant-upload-drag-icon" style={{ margin: '8px 0' }}>
+                            <span style={{ fontSize: 32 }}>📁</span>
+                        </p>
+                        <p className="ant-upload-text" style={{ margin: '4px 0' }}>
+                            {label ?? t('common.dropzone.label', { defaultValue: 'Click or drag file to this area' })}
+                        </p>
+                        {hint && (
+                            <p className="ant-upload-hint" style={{ margin: '4px 0' }}>
+                                {hint}
+                            </p>
+                        )}
+                    </>
                 )}
             </Dragger>
 
