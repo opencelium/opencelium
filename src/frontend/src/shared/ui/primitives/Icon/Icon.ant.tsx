@@ -51,6 +51,7 @@ import {
     CodeOutlined,
     CloudOutlined,
     ExportOutlined,
+    SendOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -145,6 +146,7 @@ const iconMap = {
     cloud: CloudOutlined,
     package: LuPackage,
     'external-link': ExportOutlined,
+    send: SendOutlined,
 };
 
 export const AntIcon: IconComponent = ({
