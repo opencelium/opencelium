@@ -4,6 +4,7 @@ import type { ConditionConfig } from '../components/condition-builder/conditionB
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { ConnectorHealthStatus } from '@entities/connector/model/types';
 import type { JointRejectionReason } from '../utils/jumpValidator';
+import type { WorkflowIssueTone } from '../problems/workflowProblems';
 
 export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
 
@@ -115,6 +116,9 @@ export type WorkflowNodeData = {
 	 * live match ring distinct from the drag-preview `highlighted` state and
 	 * the `hasError` state, so all three can coexist without visual collision. */
 	searchHighlighted?: boolean;
+	/** The step last picked from the problems panel or the minimap, ringed in its
+	 *  problem's tone. Set only on the nodes passed to the canvas (applyProblemFocus). */
+	problemFocus?: WorkflowIssueTone;
 	hasError?: boolean;
 	errorMessage?: string;
 	dropTarget?: boolean;

@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import type { MinimapIssue } from './minimapIssues';
-import { useMinimapProblemText } from './useMinimapProblemText';
+import { getIssueTone, type WorkflowIssue } from '../../../problems/workflowProblems';
+import { useWorkflowProblemText } from '../../../problems/useWorkflowProblemText';
 
 type Props = {
-	issues: MinimapIssue[];
+	issues: WorkflowIssue[];
 	currentIndex: number;
 	onNavigate: (step: -1 | 1) => void;
 	onFocusCurrent: () => void;
@@ -14,7 +14,7 @@ type Props = {
 
 export function MinimapIssueBar({ issues, currentIndex, onNavigate, onFocusCurrent }: Props) {
 	const { t } = useI18n('workflow');
-	const describe = useMinimapProblemText();
+	const describe = useWorkflowProblemText();
 	// Collapsed by default so the card stays compact; kept across ‹ › so a user who
 	// opened the details reads every step's the same way.
 	const [isExpanded, setExpanded] = useState(false);
@@ -23,7 +23,8 @@ export function MinimapIssueBar({ issues, currentIndex, onNavigate, onFocusCurre
 	const hasSeveral = issues.length > 1;
 
 	return (
-		<section className="workflowMinimapIssues" aria-live="polite" data-testid="workflow-minimap-issues">
+		<section className={`workflowMinimapIssues workflowMinimapIssues--${getIssueTone(current)}`} aria-live="polite"
+			data-testid="workflow-minimap-issues">
 			<div className="workflowMinimapIssuesHeader">
 				<span className="workflowMinimapIssuesDot" aria-hidden />
 				<span className="workflowMinimapIssuesCount">
