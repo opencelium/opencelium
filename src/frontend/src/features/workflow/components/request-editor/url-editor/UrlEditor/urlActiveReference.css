@@ -1,0 +1,5 @@
+.oc-endpoint-ref.urlReferenceActive {
+ outline: 2px solid var(--color-action-primary, #1677ff);
+ outline-offset: 2px;
+ box-shadow: 0 0 0 4px var(--color-background-surface, #fff);
+}
