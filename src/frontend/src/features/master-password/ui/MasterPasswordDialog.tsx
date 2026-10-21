@@ -89,8 +89,9 @@ export const MasterPasswordDialog: React.FC<MasterPasswordDialogProps> = ({ labe
                     </span>
                 </Tooltip>
             </div>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <div style={{ flex: 1 }}>
+            {/* Send wraps below the input once the card is too narrow to keep the input usable. */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', gap: 10 }}>
+                <div style={{ flex: '1 1 160px', minWidth: 0 }}>
                     <Input
                         autoFocus
                         type="password"
@@ -136,5 +137,5 @@ export const MasterPasswordDialog: React.FC<MasterPasswordDialogProps> = ({ labe
         )
     }
 
-    return <Card style={{ width: 500 }}>{form}</Card>
+    return <Card style={{ width: '100%', maxWidth: 500 }}>{form}</Card>
 }

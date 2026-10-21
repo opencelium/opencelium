@@ -3,118 +3,66 @@ import {useNavigate} from "react-router-dom";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
 import {Button} from "@shared/ui/primitives/Button";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
-import {IconButton} from "@shared/ui/primitives/IconButton";
 import {Tooltip} from "@shared/ui/primitives/Tooltip";
-import {MenuSwitcher} from "@app/layouts/AppLayout/Sidebar/MenuSwitcher.tsx";
-import {HelpMenu} from "@app/layouts/AppLayout/TopBar/HelpMenu.tsx";
+import {IconButton} from "@shared/ui/primitives/IconButton";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {hasComponentPermission} from "@/engine/policy";
-import {useAppLanguage} from "@features/user/language/useAppLanguage";
-import {EntityAvatar} from "@shared/ui/entity-avatar/EntityAvatar";
+import {UserActions} from "@widgets/UserActions/UserActions";
+
+const COMPACT_USER_ACTIONS_BELOW_WIDTH = 1200;
+const ICON_ONLY_CREATE_BELOW_WIDTH = 1000;
 
 export const TopBar = () => {
-    const {isTabletOrMobile, isMobile} = useBreakpoints();
-    const {lang, changeLanguage} = useAppLanguage();
+    const {width} = useBreakpoints();
     const {t: tCommon} = useI18n('common');
     const navigate = useNavigate();
-    const {user, normalizedUser} = useAuth();
-    const profilePicture = user?.userDetail?.profilePicture ?? null;
+    const {normalizedUser} = useAuth();
     const permissions = normalizedUser?.permissions ?? [];
     const canCreateWorkflow = hasComponentPermission(permissions, 'CONNECTION', 'CREATE');
-    const canReadProfile = hasComponentPermission(permissions, 'MYPROFILE', 'READ');
+    const openWorkflowCreate = () => navigate('/workflow/create');
     return (
         <div
             style={{
-                position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
+                gap: 16,
                 height: '100%',
                 margin: '0 24px 0 4px',
             }}
         >
-            {/* LEFT */}
-            <div style={{display: 'flex', alignItems: 'center'}}>
-                {!isTabletOrMobile && canCreateWorkflow && (
+            {/* The two sides share the leftover space equally, which keeps the palette
+                centred; when there is none left, only the palette gives way, so it can
+                never slide over the buttons beside it. */}
+            <div style={{flex: '1 1 0', display: 'flex', alignItems: 'center'}}>
+                {canCreateWorkflow && (
                     <Tooltip content={tCommon('topbar.createWorkflowHint')}>
-                        <Button
-                            type="primary"
-                            iconLeft="workflow"
-                            onClick={() => navigate('/workflow/create')}
-                            testId="topbar-create-workflow"
-                        >
-                            {tCommon('topbar.createWorkflow')}
-                        </Button>
-                    </Tooltip>
-                )}
-            </div>
-
-            {/* CENTER (true center) */}
-            <div
-                style={{
-                    position: isMobile ? 'relative' : 'absolute',
-                    left: isMobile ? 'unset' : '50%',
-                    transform: isMobile ? 'unset' : 'translateX(-50%)',
-                    width: '100%',
-                    maxWidth: 600,
-                    pointerEvents: 'none', // optional
-                    zIndex: 1,
-                }}
-            >
-                <div style={{pointerEvents: 'auto'}}>
-                    <CommandPalette/>
-                </div>
-            </div>
-
-            {/* RIGHT */}
-            <div
-                style={{
-                    marginLeft: 'auto',
-                    display: 'flex',
-                    alignItems: 'center',
-                }}
-            >
-
-                <Tooltip content={tCommon(lang === 'en' ? 'topbar.switchToGerman' : 'topbar.switchToEnglish')}>
-                    <Button
-                        type={'text'}
-                        onClick={() => void changeLanguage(lang === 'en' ? 'de' : 'en')}
-                        testId="topbar-language"
-                    >
-                        {lang.toUpperCase()}
-                    </Button>
-                </Tooltip>
-                <HelpMenu/>
-               {/* <Tooltip content={tCommon('topbar.notifications')}>
-                    <IconButton
-                        size="xs"
-                        type={'text'}
-                        iconProps={{name: 'notification', color: 'primary'}}
-                        onClick={() => {}}
-                    />
-                </Tooltip>*/}
-                <MenuSwitcher/>
-                {canReadProfile && (
-                    <Tooltip content={tCommon('topbar.profile')}>
-                        {profilePicture ? (
-                            <Button
-                                type={'text'}
-                                onClick={() => navigate('/profile')}
-                                testId="topbar-profile"
-                                style={{padding: 2, height: 'auto'}}
-                            >
-                                <EntityAvatar path={profilePicture} fallbackIcon="profile" size={26} fit="cover"/>
-                            </Button>
-                        ) : (
+                        {width < ICON_ONLY_CREATE_BELOW_WIDTH ? (
                             <IconButton
-                                size="xs"
-                                type={'text'}
-                                iconProps={{name: 'profile', color: 'primary'}}
-                                onClick={() => navigate('/profile')}
-                                testId="topbar-profile"
+                                type="primary"
+                                iconProps={{name: 'workflow', color: 'inherit', size: 16}}
+                                onClick={openWorkflowCreate}
+                                testId="topbar-create-workflow"
                             />
+                        ) : (
+                            <Button
+                                type="primary"
+                                iconLeft="workflow"
+                                onClick={openWorkflowCreate}
+                                testId="topbar-create-workflow"
+                            >
+                                {tCommon('topbar.createWorkflow')}
+                            </Button>
                         )}
                     </Tooltip>
                 )}
+            </div>
+
+            <div style={{flex: '0 1 600px', minWidth: 0}}>
+                <CommandPalette/>
+            </div>
+
+            <div style={{flex: '1 1 0', display: 'flex', justifyContent: 'flex-end'}}>
+                <UserActions layout={width < COMPACT_USER_ACTIONS_BELOW_WIDTH ? 'compact' : 'inline'}/>
             </div>
         </div>
     );

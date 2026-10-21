@@ -54,9 +54,11 @@ type CommandPaletteProps = {
     scopeActivation?: { requestId: number; scope: string; inputValue: string };
 };
 
+const SHORT_PLACEHOLDER_BELOW_WIDTH = 560;
+
 export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessRecommendations,
     onScopeExit, onEscapeClearScope, scopeActivation }: CommandPaletteProps = {}) => {
-    const {isMobile} = useBreakpoints();
+    const {isMobile, width} = useBreakpoints();
     const { showCommandContent, toggleCommandContent } = useLayoutStore();
     const {t: tCommon} = useI18n('common');
     const navigate = useNavigate();
@@ -378,7 +380,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                                     }
                                 }
                             }}
-                            placeholder={tCommon('commandPalette.placeholder')}
+                            placeholder={tCommon(width < SHORT_PLACEHOLDER_BELOW_WIDTH ? 'commandPalette.placeholderShort' : 'commandPalette.placeholder')}
                         />
                         <div className="cmdk-loading">
                             {isLoading ? (
