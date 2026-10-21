@@ -160,7 +160,13 @@
     "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?",
     "enhancementScriptBrokenIn": "“{{method}}” has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
     "enhancementScriptBroken": "{{count}} steps have a transformation whose script still uses {{marker}} — the references they read were removed with the steps they pointed at. Fix the scripts before saving.",
-    "enhancementScriptBroken_one": "{{count}} step has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving."
+    "enhancementScriptBroken_one": "{{count}} step has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
+    "saveBlockedIn": "Cannot save: “{{step}}” — {{problem}}",
+    "saveBlocked": "Cannot save: {{count}} steps have problems that must be fixed first. They are marked on the canvas.",
+    "saveBlocked_one": "Cannot save: {{count}} step has a problem that must be fixed first. It is marked on the canvas.",
+    "testRunBlockedIn": "Cannot start the test run: “{{step}}” — {{problem}}",
+    "testRunBlocked": "Cannot start the test run: {{count}} steps have problems that must be fixed first. They are marked on the canvas.",
+    "testRunBlocked_one": "Cannot start the test run: {{count}} step has a problem that must be fixed first. It is marked on the canvas."
   },
   "joint": {
     "noTargets": "No method can be the target of a jump from this one — a target must run later, in the same loop scope.",
@@ -555,6 +561,23 @@
     "autoDescriptionChangeComment": "Changing Workflow Description to {{description}}",
     "autoCategoryAssignedComment": "Assigning category \"{{category}}\"",
     "autoCategoryClearedComment": "Removing category assignment"
+  },
+  "saveProblems": {
+    "confirmTitle": "Save with warnings?",
+    "confirmMessage": "These steps may not run as expected:",
+    "saveAnyway": "Save anyway"
+  },
+  "problems": {
+    "title": "Problems",
+    "close": "Close problems",
+    "empty": "No problems found in this workflow.",
+    "badgeTooltip": "{{count}} steps have problems — show them",
+    "badgeTooltip_one": "{{count}} step has a problem — show it",
+    "groups": {
+      "error": "Must be fixed before saving ({{count}})",
+      "warning": "Asked about when saving ({{count}})",
+      "notice": "For information ({{count}})"
+    }
   },
   "placeholders": {
     "selectMethod": "Select Method...",
@@ -963,7 +986,9 @@
       "binding": "{{count}} broken field links: {{reason}}",
       "binding_one": "{{count}} broken field link: {{reason}}",
       "ifUnconfigured": "The IF condition is not configured.",
-      "loopUnconfigured": "The loop is not configured."
+      "loopUnconfigured": "The loop is not configured.",
+      "unknownPath": "{{count}} field links read a field the method's response does not declare",
+      "unknownPath_one": "{{count}} field link reads a field the method's response does not declare"
     },
     "showDetails": "Show error details",
     "hideDetails": "Hide error details"

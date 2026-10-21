@@ -102,6 +102,7 @@ export function WorkflowCanvas({
   onToggleComment,
   onAddComment,
   onPaneClick,
+  onFocusProblemNode,
   onClearNodeErrors,
   fieldBindings,
   bindingLens,
@@ -402,7 +403,8 @@ export function WorkflowCanvas({
             {jointSourceId && <JointPickingBar verdicts={jointVerdicts} onCancel={onCancelJoint} />}
             {/* The lens legend takes the same corner, and the lens rearranges the graph
                 into cards the overview would not match. */}
-            {!isLensOpen && <WorkflowMinimap fieldBindings={fieldBindings} isAboveLogsBar={hasOverlaidLogsBar} />}
+            {!isLensOpen && <WorkflowMinimap fieldBindings={fieldBindings} isAboveLogsBar={hasOverlaidLogsBar}
+              onFocusIssue={onFocusProblemNode} />}
             {isLensOpen && (
               <Panel position="bottom-right"
                 className={hasOverlaidLogsBar ? 'bindingLensLegendPanelAboveLogs' : undefined}>

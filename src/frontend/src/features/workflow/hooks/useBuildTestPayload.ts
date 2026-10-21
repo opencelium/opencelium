@@ -15,11 +15,12 @@ type Params = {
 	getViewport: () => { x: number; y: number; zoom: number } | undefined;
 	clearNodeErrors: () => void;
 	validateEnhancementScripts: (fieldBindings?: readonly unknown[]) => string | null;
+	validateTestRunProblems: (fieldBindings?: readonly unknown[]) => string | null;
 };
 
 export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 	edges, fieldBindings, getViewport, clearNodeErrors,
-	validateEnhancementScripts }: Params) => {
+	validateEnhancementScripts, validateTestRunProblems }: Params) => {
 	const { t } = useI18n('entities');
 	return useCallback(() => {
 		clearNodeErrors();
@@ -37,6 +38,13 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 			notifyError(brokenScriptMessage);
 			return null;
 		}
+		// What blocks a save cannot run either. Warnings stay silent here: a test run
+		// is how the user finds out whether an out-of-scope reference really breaks.
+		const blockingProblemMessage = validateTestRunProblems(fieldBindings);
+		if (blockingProblemMessage) {
+			notifyError(blockingProblemMessage);
+			return null;
+		}
 		return {
 			...buildConnectionPayload({ connectionId, title,
 				description: toPayloadDescription(description), nodes, edges,
@@ -45,5 +53,5 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 			toConnector: null,
 		};
 	}, [connectionId, title, description, nodes, edges, fieldBindings,
-		getViewport, clearNodeErrors, validateEnhancementScripts, t]);
+		getViewport, clearNodeErrors, validateEnhancementScripts, validateTestRunProblems, t]);
 };
