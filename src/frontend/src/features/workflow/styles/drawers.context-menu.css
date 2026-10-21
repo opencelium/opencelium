@@ -67,3 +67,24 @@
   padding-left: 26px;
 }
 
+.contextMenuItemNew {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--color-action-primary-subtle);
+  color: var(--color-action-primary);
+  font-weight: 600;
+}
+
+.contextMenuNewBadge {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--color-action-primary);
+  color: var(--color-text-on-action);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
