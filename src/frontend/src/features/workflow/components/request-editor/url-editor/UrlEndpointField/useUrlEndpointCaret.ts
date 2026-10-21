@@ -15,7 +15,7 @@ export function useUrlEndpointCaret(props: UrlEndpointFieldProps) {
 		if (caret < 0) return;
 		lastCaretRef.current = caret;
 		const rawCaret = getRawCaretPositionOfDivEditable(root);
-		if (rawCaret > 0 || !(value || '')) {
+		if (rawCaret >= 0) {
 			lastRawCaretRef.current = rawCaret;
 			onRawCaretChange?.(rawCaret, caret);
 		}
