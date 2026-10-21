@@ -700,6 +700,8 @@
     }
   },
   "methodConfig": {
+    "insertReference": "Insert Reference",
+    "replaceReference": "Replace Reference",
     "body": "Body",
     "header": "Header",
     "requestUrl": "Request URL",
