@@ -700,6 +700,8 @@
     }
   },
   "methodConfig": {
+    "insertReference": "Referenz einfügen",
+    "replaceReference": "Referenz ersetzen",
     "body": "Body",
     "header": "Header",
     "requestUrl": "Anfrage-URL",
