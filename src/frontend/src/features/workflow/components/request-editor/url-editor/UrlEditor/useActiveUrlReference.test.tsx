@@ -80,6 +80,17 @@ describe('active URL references', () => {
 			expect(screen.getByTestId('workflow-url-active-reference')).toBe(pills()[0]),
 		);
 	});
+	it('leaves Shift+arrow to the browser so a selection can grow over a token', () => {
+		render(<Harness />);
+		const root = screen.getByTestId('field');
+		root.focus();
+		caret(root.firstChild!, root.firstChild!.textContent!.length);
+		expect(fireEvent.keyDown(root, { key: 'ArrowRight', shiftKey: true })).toBe(true);
+		expect(screen.getByTestId('active')).toBeEmptyDOMElement();
+		fireEvent.click(pills()[0]);
+		expect(fireEvent.keyDown(root, { key: 'ArrowLeft', shiftKey: true })).toBe(true);
+		expect(screen.getByTestId('workflow-url-active-reference')).toBe(pills()[0]);
+	});
 	it('keeps selection in the picker and on cancel, but clears outside', async () => {
 		render(<Harness />);
 		fireEvent.click(pills()[0]);
