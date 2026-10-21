@@ -79,6 +79,10 @@
 	stroke-width: 2;
 }
 
+.workflowMinimapIssueRing--warning {
+	stroke: var(--color-status-warning-fg);
+}
+
 .workflowMinimapIssueRingCurrent {
 	stroke-width: 3.5;
 }
@@ -104,6 +108,13 @@
 	background: var(--color-status-error-bg);
 	color: var(--color-status-error-fg);
 	font-size: var(--typography-font-size-sm);
+}
+
+/* Follows the step on show: amber only while every problem it has is a warning. */
+.workflowMinimapIssues--warning {
+	border-color: var(--color-status-warning-border);
+	background: var(--color-status-warning-bg);
+	color: var(--color-status-warning-fg);
 }
 
 .workflowMinimapIssuesHeader {

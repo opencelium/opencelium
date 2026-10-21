@@ -6,6 +6,8 @@ export type WorkflowHeaderProps = {
 	initialDescription?: string;
 	onOpenHistory: () => void;
 	onSave: (values: { title: string; description: string; comment: string }) => void | Promise<void>;
+	/** Asked on an explicit Save before the comment dialog opens; `false` cancels the save. */
+	confirmBeforeSave?: () => Promise<boolean>;
 	onChange?: (values: { title: string; description: string }) => void;
 	onMenuItemSelect?: (item: WorkflowHeaderMenuItem) => void;
 	menuLoadingItemId?: string | null;
@@ -18,6 +20,8 @@ export type WorkflowHeaderProps = {
 	testRunLocked?: boolean;
 	loading?: boolean;
 	schedulesSlot?: ReactNode;
+	/** Rendered just before Save, at every width — what it flags is what Save is about to refuse. */
+	problemsSlot?: ReactNode;
 	/** Set only for a saved workflow, like `schedulesSlot`; the `…` menu's Schedules entry calls it on narrow screens. */
 	onToggleSchedules?: () => void;
 	/** Whether this workflow has been saved at least once (has a persisted connectionId).
