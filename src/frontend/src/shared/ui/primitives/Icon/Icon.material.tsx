@@ -68,6 +68,15 @@ import DragIndicator from '@mui/icons-material/DragIndicator';
 import Remove from '@mui/icons-material/Remove';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import FitScreen from '@mui/icons-material/FitScreen';
+import Science from '@mui/icons-material/Science';
+import WarningAmber from '@mui/icons-material/WarningAmber';
+import HighlightOff from '@mui/icons-material/HighlightOff';
+import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
+import AccessTime from '@mui/icons-material/AccessTime';
+import Code from '@mui/icons-material/Code';
+import CloudOutlined from '@mui/icons-material/CloudOutlined';
+import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
+import OpenInNew from '@mui/icons-material/OpenInNew';
 import type { IconComponent } from './Icon.types';
 
 const iconMap = {
@@ -139,6 +148,15 @@ const iconMap = {
     minus: Remove,
     'chevron-up': ExpandLess,
     'fit-view': FitScreen,
+    flask: Science,
+    warning: WarningAmber,
+    'error-circle': HighlightOff,
+    'check-circle': CheckCircleOutline,
+    clock: AccessTime,
+    code: Code,
+    cloud: CloudOutlined,
+    package: Inventory2Outlined,
+    'external-link': OpenInNew,
 };
 
 export const MaterialIcon: IconComponent = ({

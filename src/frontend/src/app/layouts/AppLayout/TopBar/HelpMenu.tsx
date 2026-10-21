@@ -9,6 +9,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useIsAdmin } from '@features/auth/useIsAdmin'
 import { useDashboardTourStore } from '@features/onboarding/dashboard-tour/model/dashboardTour.store'
+import { useWorkflowTutorialStore } from '@features/onboarding/workflow-tutorial/model/workflowTutorial.store'
 import { ONBOARDING_RESTART_EVENT } from '@features/onboarding/model/types'
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types'
 import './helpMenu.css'
@@ -16,46 +17,22 @@ import './helpMenu.css'
 const DOCS_URL = 'https://docs.opencelium.io/en/prod/'
 const SERVICE_PORTAL_URL = 'https://service.opencelium.io/login'
 const DASHBOARD_ROUTE = '/'
+const WORKFLOW_CREATE_ROUTE = '/workflow/create'
+
+/** `app` replays the onboarding and dashboard tours; `workflow` offers the editor's own tutorial instead. */
+export type HelpTours = 'app' | 'workflow'
 
 /**
- * The top bar's help affordance: the manual, and a replay of the onboarding
- * and dashboard tours.
+ * The top bar's help affordance: the manual, and a replay of the guided tours —
+ * onboarding and dashboard tours app-wide, the workflow tutorial in the editor.
  *
  * Controlled `open` rather than antd's own trigger handling, because every
  * entry takes the user somewhere — a popover left standing would sit over the
  * tour it just started.
  */
-export function HelpMenu() {
+export function HelpMenu({ tours = 'app' }: { tours?: HelpTours }) {
     const { t: tCommon } = useI18n('common')
-    const navigate = useNavigate()
-    const isAdmin = useIsAdmin()
     const [isOpen, setIsOpen] = useState(false)
-
-    const openDocs = () => {
-        setIsOpen(false)
-        window.open(DOCS_URL, '_blank', 'noopener,noreferrer')
-    }
-
-    const openServicePortal = () => {
-        setIsOpen(false)
-        window.open(SERVICE_PORTAL_URL, '_blank', 'noopener,noreferrer')
-    }
-
-    // Same order as the palette's `help onboarding`: home first, so the tour finds
-    // its anchors on the page rather than resolving against the previous route.
-    const startOnboardingTour = () => {
-        setIsOpen(false)
-        void navigate(DASHBOARD_ROUTE)
-        window.dispatchEvent(new Event(ONBOARDING_RESTART_EVENT))
-    }
-
-    // Same order as the palette's `help dashboard`: home first, so the tour finds
-    // its anchors on the page rather than resolving against the previous route.
-    const startDashboardTour = () => {
-        setIsOpen(false)
-        void navigate(DASHBOARD_ROUTE)
-        useDashboardTourStore.getState().request()
-    }
 
     return (
         <Popover
@@ -69,39 +46,7 @@ export function HelpMenu() {
             styles={{ container: { padding: 4 } }}
             content={
                 <div className="topbar-help-menu">
-                    {/* Both tours are admin-only, so for anyone else these entries
-                        would open menu items that quietly do nothing. */}
-                    {isAdmin && (
-                        <>
-                            <MenuEntry
-                                icon="mouse"
-                                label={tCommon('topbar.startOnboardingTour')}
-                                onClick={startOnboardingTour}
-                                testId="topbar-start-onboarding-tour"
-                            />
-                            <MenuEntry
-                                icon="report-analytics"
-                                label={tCommon('topbar.startDashboardTour')}
-                                onClick={startDashboardTour}
-                                testId="topbar-start-dashboard-tour"
-                            />
-                            <div className="topbar-help-menu__divider">
-                                <Divider />
-                            </div>
-                        </>
-                    )}
-                    <MenuEntry
-                        icon="docs"
-                        label={tCommon('topbar.docs')}
-                        onClick={openDocs}
-                        testId="topbar-docs"
-                    />
-                    <MenuEntry
-                        icon="portal"
-                        label={tCommon('topbar.servicePortal')}
-                        onClick={openServicePortal}
-                        testId="topbar-service-portal"
-                    />
+                    <HelpMenuEntries tours={tours} onSelect={() => setIsOpen(false)} />
                 </div>
             }
         >
@@ -125,6 +70,106 @@ export function HelpMenu() {
     )
 }
 
+/**
+ * The help entries on their own, so a host menu (the compact user-actions popover)
+ * can list them without nesting a second popover. `onSelect` runs before each
+ * entry's action so the host can close itself out of the way first.
+ */
+export function HelpMenuEntries({ tours, onSelect }: { tours: HelpTours; onSelect: () => void }) {
+    const { t: tCommon } = useI18n('common')
+    const navigate = useNavigate()
+    const isAdmin = useIsAdmin()
+
+    const openDocs = () => {
+        onSelect()
+        window.open(DOCS_URL, '_blank', 'noopener,noreferrer')
+    }
+
+    const openServicePortal = () => {
+        onSelect()
+        window.open(SERVICE_PORTAL_URL, '_blank', 'noopener,noreferrer')
+    }
+
+    // Same order as the palette's `help onboarding`: home first, so the tour finds
+    // its anchors on the page rather than resolving against the previous route.
+    const startOnboardingTour = () => {
+        onSelect()
+        void navigate(DASHBOARD_ROUTE)
+        window.dispatchEvent(new Event(ONBOARDING_RESTART_EVENT))
+    }
+
+    // Same order as the palette's `help dashboard`: home first, so the tour finds
+    // its anchors on the page rather than resolving against the previous route.
+    const startDashboardTour = () => {
+        onSelect()
+        void navigate(DASHBOARD_ROUTE)
+        useDashboardTourStore.getState().request()
+    }
+
+    // Same order as the palette's `help workflow`: the request seeds the tutorial's
+    // fixtures, which must be in place before the editor mounts and fetches.
+    const startWorkflowTutorial = () => {
+        onSelect()
+        useWorkflowTutorialStore.getState().request()
+        void navigate(WORKFLOW_CREATE_ROUTE)
+    }
+
+    return (
+        <>
+            {/* Both tours are admin-only, so for anyone else these entries
+                would open menu items that quietly do nothing. */}
+            {isAdmin && tours === 'workflow' && (
+                <>
+                    <MenuEntry
+                        icon="workflow"
+                        label={tCommon('topbar.startWorkflowTutorial')}
+                        onClick={startWorkflowTutorial}
+                        testId="topbar-start-workflow-tutorial"
+                    />
+                    <MenuDivider />
+                </>
+            )}
+            {isAdmin && tours === 'app' && (
+                <>
+                    <MenuEntry
+                        icon="mouse"
+                        label={tCommon('topbar.startOnboardingTour')}
+                        onClick={startOnboardingTour}
+                        testId="topbar-start-onboarding-tour"
+                    />
+                    <MenuEntry
+                        icon="report-analytics"
+                        label={tCommon('topbar.startDashboardTour')}
+                        onClick={startDashboardTour}
+                        testId="topbar-start-dashboard-tour"
+                    />
+                    <MenuDivider />
+                </>
+            )}
+            <MenuEntry
+                icon="docs"
+                label={tCommon('topbar.docs')}
+                onClick={openDocs}
+                testId="topbar-docs"
+            />
+            <MenuEntry
+                icon="portal"
+                label={tCommon('topbar.servicePortal')}
+                onClick={openServicePortal}
+                testId="topbar-service-portal"
+            />
+        </>
+    )
+}
+
+export function MenuDivider() {
+    return (
+        <div className="topbar-help-menu__divider">
+            <Divider />
+        </div>
+    )
+}
+
 type MenuEntryProps = {
     icon: IconName
     label: string
@@ -132,7 +177,7 @@ type MenuEntryProps = {
     testId: string
 }
 
-function MenuEntry({ icon, label, onClick, testId }: MenuEntryProps) {
+export function MenuEntry({ icon, label, onClick, testId }: MenuEntryProps) {
     return (
         <Button type="text" onClick={onClick} testId={testId}>
             <span className="topbar-help-menu__item">

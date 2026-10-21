@@ -6,8 +6,13 @@ import {useDashboardTourStore} from '@features/onboarding/dashboard-tour/model/d
 const mocks = vi.hoisted(() => ({
     isAdmin: true,
     navigate: vi.fn(),
+    requestWorkflowTutorial: vi.fn(),
 }))
 
+// The real request seeds tutorial fixtures into the store and caches; only the call matters here.
+vi.mock('@features/onboarding/workflow-tutorial/model/workflowTutorial.store', () => ({
+    useWorkflowTutorialStore: {getState: () => ({request: mocks.requestWorkflowTutorial})},
+}))
 vi.mock('@features/auth/useIsAdmin', () => ({useIsAdmin: () => mocks.isAdmin}))
 vi.mock('react-router-dom', () => ({useNavigate: () => mocks.navigate}))
 vi.mock('@shared/i18n/hooks/useI18n', () => ({
@@ -28,6 +33,9 @@ vi.mock('@shared/ui/primitives/Icon', () => ({
 }))
 vi.mock('@shared/ui/primitives/Tooltip', () => ({
     Tooltip: ({children}: {children?: ReactNode}) => <>{children}</>,
+}))
+vi.mock('@shared/ui/primitives/Divider', () => ({
+    Divider: () => <hr />,
 }))
 
 /**
@@ -67,6 +75,7 @@ const openMenu = () => fireEvent.click(screen.getByTestId('topbar-help'))
 beforeEach(() => {
     mocks.isAdmin = true
     mocks.navigate.mockReset()
+    mocks.requestWorkflowTutorial.mockReset()
     useDashboardTourStore.setState({requested: false})
     vi.restoreAllMocks()
 })
@@ -157,5 +166,27 @@ describe('HelpMenu', () => {
         expect(screen.getByTestId('topbar-docs')).toBeInTheDocument()
         expect(screen.queryByTestId('topbar-start-onboarding-tour')).not.toBeInTheDocument()
         expect(screen.queryByTestId('topbar-start-dashboard-tour')).not.toBeInTheDocument()
+    })
+
+    it('offers only the workflow tutorial in the editor, and starts it on a fresh create route', () => {
+        render(<HelpMenu tours="workflow" />)
+        openMenu()
+
+        expect(screen.queryByTestId('topbar-start-onboarding-tour')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('topbar-start-dashboard-tour')).not.toBeInTheDocument()
+        fireEvent.click(screen.getByTestId('topbar-start-workflow-tutorial'))
+
+        expect(mocks.requestWorkflowTutorial).toHaveBeenCalledTimes(1)
+        expect(mocks.navigate).toHaveBeenCalledWith('/workflow/create')
+        expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
+    })
+
+    it('hides the workflow tutorial from a non-admin as well', () => {
+        mocks.isAdmin = false
+        render(<HelpMenu tours="workflow" />)
+        openMenu()
+
+        expect(screen.getByTestId('topbar-docs')).toBeInTheDocument()
+        expect(screen.queryByTestId('topbar-start-workflow-tutorial')).not.toBeInTheDocument()
     })
 })

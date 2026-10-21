@@ -138,6 +138,7 @@ export const updateAssistantDefinition: EntityDefinition = {
         {
             id: 'available-updates',
             fields: ['updateMode', 'versionsDisplay'],
+            overrideKey: 'updateAssistantAvailableUpdates',
         },
         {
             id: 'update-process',

@@ -8,6 +8,8 @@ export interface DropzoneProps {
     disabled?: boolean
     label?: string
     hint?: string
+    /** Replaces the default icon / label / hint body; the whole area stays the click and drop target. */
+    content?: React.ReactNode
     className?: string
     style?: React.CSSProperties
     /** Stable selector for e2e tests; emitted as `data-testid` on the dropzone. */
