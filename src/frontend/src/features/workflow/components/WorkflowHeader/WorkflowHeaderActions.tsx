@@ -26,12 +26,13 @@ type Props = {
 	saveDisabled: boolean;
 	saveDialogOpen: boolean;
 	schedulesSlot?: ReactNode;
+	problemsSlot?: ReactNode;
 	onToggleSchedules?: () => void;
 };
 
 export function WorkflowHeaderActions({
 	items, loadingItemId, onOpenHistory, onMenuItemSelect, onSave,
-	readOnly, saveDisabled, saveDialogOpen, schedulesSlot, onToggleSchedules,
+	readOnly, saveDisabled, saveDialogOpen, schedulesSlot, problemsSlot, onToggleSchedules,
 }: Props) {
 	const { t } = useI18n('workflow');
 	const { width } = useBreakpoints();
@@ -74,6 +75,7 @@ export function WorkflowHeaderActions({
 					<span className='headerActionsDivider' aria-hidden />
 				</>
 			)}
+			{problemsSlot}
 			{!readOnly && (
 				<button className='primaryButton headerPrimaryButton' type='button'
 					disabled={saveDisabled} onClick={onSave} data-testid='workflow-save'>

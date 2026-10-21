@@ -160,7 +160,13 @@
     "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?",
     "enhancementScriptBrokenIn": "„{{method}}“ hat eine Transformation, deren Skript noch {{marker}} verwendet — die gelesene Referenz wurde mit dem Schritt entfernt, auf den sie zeigte. Korrigieren Sie das Skript vor dem Speichern.",
     "enhancementScriptBroken": "{{count}} Schritte haben eine Transformation, deren Skript noch {{marker}} verwendet — die gelesenen Referenzen wurden mit den Schritten entfernt, auf die sie zeigten. Korrigieren Sie die Skripte vor dem Speichern.",
-    "enhancementScriptBroken_one": "{{count}} Schritt hat eine Transformation, deren Skript noch {{marker}} verwendet — die gelesene Referenz wurde mit dem Schritt entfernt, auf den sie zeigte. Korrigieren Sie das Skript vor dem Speichern."
+    "enhancementScriptBroken_one": "{{count}} Schritt hat eine Transformation, deren Skript noch {{marker}} verwendet — die gelesene Referenz wurde mit dem Schritt entfernt, auf den sie zeigte. Korrigieren Sie das Skript vor dem Speichern.",
+    "saveBlockedIn": "Speichern nicht möglich: „{{step}}“ – {{problem}}",
+    "saveBlocked": "Speichern nicht möglich: {{count}} Schritte haben Probleme, die zuerst behoben werden müssen. Sie sind auf der Arbeitsfläche markiert.",
+    "saveBlocked_one": "Speichern nicht möglich: {{count}} Schritt hat ein Problem, das zuerst behoben werden muss. Er ist auf der Arbeitsfläche markiert.",
+    "testRunBlockedIn": "Testlauf kann nicht gestartet werden: „{{step}}“ – {{problem}}",
+    "testRunBlocked": "Testlauf kann nicht gestartet werden: {{count}} Schritte haben Probleme, die zuerst behoben werden müssen. Sie sind auf der Arbeitsfläche markiert.",
+    "testRunBlocked_one": "Testlauf kann nicht gestartet werden: {{count}} Schritt hat ein Problem, das zuerst behoben werden muss. Er ist auf der Arbeitsfläche markiert."
   },
   "joint": {
     "noTargets": "Keine Methode kann Ziel eines Sprungs von dieser Methode sein — das Ziel muss später laufen, im selben Schleifenbereich.",
@@ -555,6 +561,23 @@
     "autoDescriptionChangeComment": "Workflow-Beschreibung wird zu {{description}} geändert",
     "autoCategoryAssignedComment": "Kategorie „{{category}}“ wird zugewiesen",
     "autoCategoryClearedComment": "Kategoriezuweisung wird entfernt"
+  },
+  "saveProblems": {
+    "confirmTitle": "Mit Warnungen speichern?",
+    "confirmMessage": "Diese Schritte werden möglicherweise nicht wie erwartet ausgeführt:",
+    "saveAnyway": "Trotzdem speichern"
+  },
+  "problems": {
+    "title": "Probleme",
+    "close": "Probleme schließen",
+    "empty": "In diesem Workflow wurden keine Probleme gefunden.",
+    "badgeTooltip": "{{count}} Schritte haben Probleme – anzeigen",
+    "badgeTooltip_one": "{{count}} Schritt hat ein Problem – anzeigen",
+    "groups": {
+      "error": "Vor dem Speichern zu beheben ({{count}})",
+      "warning": "Rückfrage beim Speichern ({{count}})",
+      "notice": "Zur Information ({{count}})"
+    }
   },
   "placeholders": {
     "selectMethod": "Methode auswählen...",
@@ -963,7 +986,9 @@
       "binding": "{{count}} fehlerhafte Feldverknüpfungen: {{reason}}",
       "binding_one": "{{count}} fehlerhafte Feldverknüpfung: {{reason}}",
       "ifUnconfigured": "Die IF-Bedingung ist nicht konfiguriert.",
-      "loopUnconfigured": "Die Schleife ist nicht konfiguriert."
+      "loopUnconfigured": "Die Schleife ist nicht konfiguriert.",
+      "unknownPath": "{{count}} Feldverknüpfungen lesen ein Feld, das die Antwort der Methode nicht deklariert",
+      "unknownPath_one": "{{count}} Feldverknüpfung liest ein Feld, das die Antwort der Methode nicht deklariert"
     },
     "showDetails": "Fehlerdetails anzeigen",
     "hideDetails": "Fehlerdetails ausblenden"

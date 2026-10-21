@@ -1,6 +1,7 @@
 import { useRef, type PointerEvent } from 'react';
 import { useReactFlow, useStore } from '@xyflow/react';
 import type { ThemeMode } from '@shared/theme/types';
+import type { WorkflowIssueTone } from '../../../problems/workflowProblems';
 import type { MinimapDot, MinimapGroup, MinimapModel } from './minimap.model';
 import { contains, fitViewBox, flowViewRect, type MinimapViewBox } from './minimapGeometry';
 import { groupColor } from './minimapPalette';
@@ -23,7 +24,7 @@ const dotRadiusPx = (tightestGap: number | null, unitsPerPx: number) => tightest
 
 type Props = {
 	model: MinimapModel;
-	issueNodeIds: ReadonlySet<string>;
+	issueTones: ReadonlyMap<string, WorkflowIssueTone>;
 	currentIssueNodeId: string | null;
 	themeMode: ThemeMode;
 	ariaLabel: string;
@@ -45,7 +46,7 @@ function MinimapMarker({ dot, color, radius }: { dot: MinimapDot; color: string 
 	}
 }
 
-export function MinimapCanvas({ model, issueNodeIds, currentIssueNodeId, themeMode, ariaLabel }: Props) {
+export function MinimapCanvas({ model, issueTones, currentIssueNodeId, themeMode, ariaLabel }: Props) {
 	const { ref, width: mapWidth, height: mapHeight } = useElementSize<SVGSVGElement>();
 	const transform = useStore((state) => state.transform);
 	const paneWidth = useStore((state) => state.width);
@@ -101,14 +102,16 @@ export function MinimapCanvas({ model, issueNodeIds, currentIssueNodeId, themeMo
 					vectorEffect="non-scaling-stroke" />
 			))}
 			{model.dots.map((dot) => {
-				const hasIssue = issueNodeIds.has(dot.id);
+				const issueTone = issueTones.get(dot.id);
+				const hasIssue = !!issueTone;
 				const isCurrent = dot.id === currentIssueNodeId;
 				const isOutside = !contains(view, dot.x, dot.y);
 				return (
 					<g key={dot.id} className={`workflowMinimapDot${isOutside ? ' workflowMinimapDotOutside' : ''}`}
 						data-testid={`workflow-minimap-dot-${dot.id}`} data-issue={hasIssue || undefined}>
 						{hasIssue && (
-							<circle className={`workflowMinimapIssueRing${isCurrent ? ' workflowMinimapIssueRingCurrent' : ''}`}
+							<circle className={`workflowMinimapIssueRing workflowMinimapIssueRing--${issueTone}${
+								isCurrent ? ' workflowMinimapIssueRingCurrent' : ''}`}
 								cx={dot.x} cy={dot.y} r={radius + ISSUE_RING_PX * box.unitsPerPx}
 								vectorEffect="non-scaling-stroke" />
 						)}
