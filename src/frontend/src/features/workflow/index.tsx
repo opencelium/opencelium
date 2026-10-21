@@ -32,7 +32,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   // Mirrored up from inside TestRunProvider by TestRunEditLockSync — see there
   // for why paused does not count as locked.
   const [isTestRunLocked, setIsTestRunLocked] = useState(false);
-  const [testMethodNodeId, setTestMethodNodeId] = useState<string | null>(null);
+  const [playgroundNodeId, setPlaygroundNodeId] = useState<string | null>(null);
   const { connection, workflow, connectors, invokers, view, changes, derived,
     isLoading, retryLoad } = useWorkflowPageState({ connectionId, readOnly,
       leaveConfirmMessage: t('messages.unsavedLeaveConfirm') });
@@ -223,7 +223,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onOpenRequestEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }),
           onOpenConditionEditor: (nodeId) => workflow.setConditionEditor({ nodeId }),
           onShowResponse: workflow.onShowResponse,
-          onTestMethod: setTestMethodNodeId,
+          onTryRequest: setPlaygroundNodeId,
           onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
           onOpenConnectorEditor: (nodeId, kind) => workflow.setConnectorEditor({ nodeId, kind }),
           onClose: () => workflow.setContextMenu(null) }} />
@@ -253,11 +253,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onChange: workflow.onChangeNodeConnector }}
         connectorImage={{ open: workflow.connectorEditor?.kind === 'image', connectors,
           node: connectorEditorNode, onClose: () => workflow.setConnectorEditor(null) }}
-        testMethod={{ open: !!testMethodNodeId,
-          node: hydratedNodes.find((node) => node.id === testMethodNodeId) ?? null,
+        requestPlayground={{ open: !!playgroundNodeId,
+          node: hydratedNodes.find((node) => node.id === playgroundNodeId) ?? null,
           nodes: hydratedNodes, edges: workflow.edges, fieldBindings: loadedFieldBindings,
           connectionId: Number(activeConnectionId) || null,
-          onClose: () => setTestMethodNodeId(null) }} />
+          connectors, isReadOnly: readOnly || isTestRunLocked,
+          onApplyConfig: workflow.onSaveMethodConfig,
+          onClose: () => setPlaygroundNodeId(null) }} />
     </div>
     </TestRunProvider>
   );

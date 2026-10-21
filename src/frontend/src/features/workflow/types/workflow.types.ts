@@ -234,4 +234,6 @@ export type WorkflowHeaderMenuItem = {
 export type WorkflowNodeMenuItem = {
 	id: string;
 	labelKey: string;
+	/** Highlighted with a "new" tag so a freshly added action gets noticed. */
+	isNew?: boolean;
 };
