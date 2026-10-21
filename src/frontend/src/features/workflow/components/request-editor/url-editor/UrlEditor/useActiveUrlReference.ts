@@ -94,7 +94,8 @@ export function useActiveUrlReference(
 			activate(pill);
 		};
 		const key = (event: KeyboardEvent) => {
-			if (event.ctrlKey || event.metaKey || event.altKey) return;
+			// Shift+arrow extends a selection; the browser already selects a token whole.
+			if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
 			const root = (event.target as HTMLElement).closest<HTMLElement>('[contenteditable="true"]');
 			if (!root || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
 			const s = window.getSelection();
