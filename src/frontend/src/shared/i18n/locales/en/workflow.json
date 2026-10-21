@@ -488,7 +488,8 @@
     "editHeader": "Edit Header",
     "editBody": "Edit Body",
     "showResponse": "Show Response",
-    "testMethod": "Test Method",
+    "tryRequest": "Try Request…",
+    "newBadge": "NEW",
     "newLabelPlaceholder": "New label"
   },
   "comment": {
@@ -970,55 +971,230 @@
     "showDetails": "Show error details",
     "hideDetails": "Hide error details"
   },
-  "testMethod": {
-    "title": "Test method: {{name}}",
-    "send": "Send",
-    "confirmWrite": {
-      "title": "Send the request to the live system?",
-      "message": "This test sends a real {{method}} request. It may create, change or delete data in the connected system."
+  "requestPlayground": {
+    "title": "Request Playground",
+    "breadcrumb": {
+      "inside": "inside {{path}}",
+      "loop": "Loop",
+      "loopWithIterator": "Loop ({{iterator}})",
+      "if": "If"
     },
-    "inputs": {
-      "references": "Values from previous methods",
-      "webhooks": "Webhook parameters",
-      "hint": "Previous methods are not called. Click a reference in the request to enter the value it should get. Values are prefilled from a paused test run, your last test of this method, or the sample response.",
-      "from": "from",
-      "fromWebhook": "from webhook parameter",
-      "unknownMethod": "Unknown method",
-      "placeholder": "Value",
-      "invalidJson": "Not valid JSON (line {{line}}). Fix it or switch the value to text.",
+    "toolbar": {
+      "connection": "Connection",
+      "prefill": "Prefill values from"
+    },
+    "prefill": {
+      "testRun": "Paused test run",
+      "lastTest": "Your last test of this method",
+      "sample": "Sample responses",
+      "upstream": "Run upstream steps first (fresh data)",
+      "manual": "Manual input only",
+      "testRunUnavailable": "Pause a test run on this step to use its values."
+    },
+    "prefillSentence": {
+      "testRun": "the paused test run",
+      "lastTest": "your last test",
+      "sample": "the sample responses",
+      "upstream": "a fresh run of the upstream steps",
+      "manual": "manual input"
+    },
+    "url": {
+      "method": "HTTP method",
+      "curl": "cURL",
+      "curlHint": "Show the request as a cURL command",
+      "send": "Send",
+      "sendUpstream": "Run upstream + Send"
+    },
+    "curl": {
+      "title": "Generated cURL (secrets masked)"
+    },
+    "writeWarning": {
+      "title": "{{method}} on {{connection}} changes live data.",
+      "titleDirect": "{{method}} changes live data.",
+      "message": "This request may create, change or delete data in the connected system.",
+      "sendAnyway": "Send anyway",
+      "switchTo": "Switch to {{connection}}",
+      "cancel": "Cancel",
+      "dontAskAgain": "Don't ask again this session"
+    },
+    "tabs": {
+      "values": "Test values",
+      "params": "Params",
+      "headers": "Headers",
+      "body": "Body",
+      "settings": "Settings"
+    },
+    "table": {
+      "on": "On",
+      "key": "Key",
+      "value": "Value",
+      "origin": "Origin",
+      "field": "Field",
+      "source": "Source",
+      "enable": "Enable"
+    },
+    "values": {
+      "hint": "Every value this request sends – URL, headers and body – in one place. Prefilled from <b>{{source}}</b>; type to override it for this test.",
+      "noChanges": "No changes",
+      "changed_one": "{{count}} value changed",
+      "changed_other": "{{count}} values changed",
+      "resetAll": "Reset all",
+      "reset": "Reset to prefilled value",
+      "placeholder": "Enter test value",
+      "upstreamPlaceholder": "Filled by the upstream run",
+      "connectionPlaceholder": "Filled in from the connection",
+      "empty": "This request has no dynamic values. It is sent exactly as configured.",
+      "pathSegment": "path",
+      "fromMethod": "From {{method}} · used in {{target}}",
+      "fromWebhook": "Webhook parameter ({{type}}) · used in {{target}}",
+      "fromConnection": "Connection field · used in {{target}}",
+      "unknownMethod": "unknown method",
+      "groups": {
+        "url": "URL",
+        "header": "Headers",
+        "body": "Body"
+      },
+      "kind": {
+        "string": "Abc",
+        "json": "{ }",
+        "stringHint": "Sent as text. Click to send it as JSON.",
+        "jsonHint": "Sent as JSON when valid, otherwise as text. Click to always send it as text."
+      },
+      "invalidJson": "Not valid JSON. Fix it or switch the value to text.",
       "invalidJsonSend_one": "A value is not valid JSON. Fix it before sending.",
       "invalidJsonSend_other": "{{count}} values are not valid JSON. Fix them before sending."
     },
-    "location": {
-      "url": "URL",
-      "header": "Header",
-      "body": "Body"
-    },
     "source": {
-      "live": "Test run",
-      "stored": "Last test",
-      "sample": "Sample"
+      "testRun": "Test run",
+      "lastTest": "Last test",
+      "sample": "Sample",
+      "upstream": "Upstream",
+      "edited": "Manual",
+      "empty": "Required",
+      "connection": "Connection",
+      "secret": "Secret"
     },
     "sourceHint": {
-      "live": "Read from the paused test run: the source method has already run, so this is its real value.",
-      "stored": "The value you used the last time you tested this method in this browser session.",
-      "sample": "Read from the saved sample response of the source method."
+      "testRun": "Read from the paused test run: the source step has already run, so this is its real value.",
+      "lastTest": "The value you used the last time you tested this step in this browser session.",
+      "sample": "Read from the saved sample response of the source step.",
+      "upstream": "The steps before this one run first; their response provides this value.",
+      "edited": "Changed for this test.",
+      "empty": "No value yet – enter one before sending.",
+      "connection": "Taken from the selected connection. A change applies to this test only.",
+      "secret": "Taken from the selected connection and never shown."
     },
-    "kind": {
-      "string": "Abc",
-      "json": "{ }",
-      "stringHint": "Sent as text. Click to send it as JSON.",
-      "jsonHint": "Sent as JSON when valid, otherwise as text. Click to always send it as text."
+    "origin": {
+      "fixed": "Fixed",
+      "dynamic": "Dynamic",
+      "connection": "Connection",
+      "secret": "Secret",
+      "editable": "Editable"
     },
-    "result": {
-      "empty": "Send the request to see the response.",
-      "noResponse": "No response was received.",
-      "duration": "{{ms}} ms",
-      "stage": {
-        "resolve": "The references could not be resolved",
-        "enhancement": "A transformation script failed",
-        "connect": "The system could not be reached"
+    "originHint": {
+      "fixed": "set by the API definition",
+      "dynamic": "change in Test values",
+      "connection": "from the connection",
+      "secret": "from the connection, masked",
+      "editable": "change freely for this test"
+    },
+    "params": {
+      "hint": "Query parameters of the URL. Changes apply to this test only, until you choose <b>Apply to method</b>.",
+      "add": "+ Add parameter",
+      "keyPlaceholder": "key",
+      "valuePlaceholder": "value",
+      "empty": "The URL has no query parameters."
+    },
+    "headers": {
+      "add": "+ Add header",
+      "empty": "This request sends no headers."
+    },
+    "body": {
+      "type": "Body type",
+      "pretty": "Pretty",
+      "raw": "Raw edit",
+      "hint": "Highlighted values are filled dynamically · change them in <b>Test values</b>",
+      "rawHint": "Changes apply to this test only, until you choose <b>Apply to method</b>.",
+      "invalidJson": "Not valid JSON – the last valid body is sent.",
+      "empty": "This request has no body.",
+      "format": {
+        "json": "JSON",
+        "xml": "XML",
+        "urlencoded": "x-www-form-urlencoded"
       }
+    },
+    "settings": {
+      "timeout": "Timeout (seconds)",
+      "retries": "Retries on failure",
+      "proxy": "Proxy",
+      "proxyUrl": "Proxy URL",
+      "proxyMode": {
+        "system": "Use system setting",
+        "none": "No proxy",
+        "custom": "Custom…"
+      },
+      "followRedirects": {
+        "label": "Follow redirects",
+        "hint": "Follow HTTP 3xx responses automatically."
+      },
+      "verifySsl": {
+        "label": "Verify SSL certificate",
+        "hint": "Turn off only for internal systems with self-signed certificates."
+      },
+      "saveResponseAsSample": {
+        "label": "Save every response as sample",
+        "hint": "Makes the fields available for mapping in the next steps."
+      },
+      "logToHistory": {
+        "label": "Log test runs in execution history",
+        "hint": "Off by default so tests don't mix with real runs."
+      }
+    },
+    "response": {
+      "title": "Response",
+      "emptyTitle": "Nothing sent yet",
+      "emptyHint": "Check the prefilled values, adjust what you need and press <b>Send</b>. The request is executed only once – the workflow itself does not run.",
+      "sending": "Sending request to {{connection}}…",
+      "sendingDirect": "Sending request…",
+      "sendingUpstream": "Running {{methods}}, then sending the request…",
+      "duration": "{{ms}} ms",
+      "run": "Run #{{run}}",
+      "runOn": "Run #{{run}} · {{connection}}",
+      "rpcError": "JSON-RPC error {{code}}",
+      "tabs": {
+        "body": "Body",
+        "headers": "Headers ({{count}})",
+        "timeline": "Timeline"
+      },
+      "pretty": "Pretty",
+      "raw": "Raw",
+      "copy": "Copy",
+      "saveSample": "Save as sample for mapping",
+      "sampleSaved": "Saved as sample – the fields are now available for mapping",
+      "noHeaders": "The response has no headers.",
+      "noBody": "The response has no body.",
+      "noResponse": "No response was received.",
+      "timeline": {
+        "dns": "DNS lookup",
+        "connect": "TCP connect",
+        "tls": "TLS handshake",
+        "firstByte": "Waiting (TTFB)",
+        "download": "Content download",
+        "total": "Total",
+        "unavailable": "Timing details are not available for this response."
+      },
+      "stage": {
+        "upstream": "An upstream step failed",
+        "resolve": "Could not fill in the values",
+        "enhancement": "A transformation script failed",
+        "connect": "Could not reach the system"
+      }
+    },
+    "footer": {
+      "hint": "Test runs are not written to the workflow's execution history unless you turn it on in Settings. Changes stay local until you apply them.",
+      "apply": "Apply to method",
+      "applied": "Changes applied to {{name}}",
+      "close": "Close"
     }
   },
   "sandbox": {

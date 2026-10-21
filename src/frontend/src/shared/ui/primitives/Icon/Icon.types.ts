@@ -83,6 +83,7 @@ export type IconName =
     | 'cloud'
     | 'package'
     | 'external-link'
+    | 'send'
 
 export type IconColor =
     | 'default'

@@ -488,7 +488,8 @@
     "editHeader": "Header bearbeiten",
     "editBody": "Body bearbeiten",
     "showResponse": "Antwort anzeigen",
-    "testMethod": "Methode testen",
+    "tryRequest": "Request ausprobieren…",
+    "newBadge": "NEU",
     "newLabelPlaceholder": "Neue Bezeichnung"
   },
   "comment": {
@@ -970,55 +971,230 @@
     "showDetails": "Fehlerdetails anzeigen",
     "hideDetails": "Fehlerdetails ausblenden"
   },
-  "testMethod": {
-    "title": "Methode testen: {{name}}",
-    "send": "Senden",
-    "confirmWrite": {
-      "title": "Anfrage an das Live-System senden?",
-      "message": "Dieser Test sendet eine echte {{method}}-Anfrage. Dabei können im verbundenen System Daten angelegt, geändert oder gelöscht werden."
+  "requestPlayground": {
+    "title": "Request-Playground",
+    "breadcrumb": {
+      "inside": "in {{path}}",
+      "loop": "Schleife",
+      "loopWithIterator": "Schleife ({{iterator}})",
+      "if": "Wenn"
     },
-    "inputs": {
-      "references": "Werte aus vorherigen Methoden",
-      "webhooks": "Webhook-Parameter",
-      "hint": "Vorherige Methoden werden nicht aufgerufen. Klicken Sie im Request auf eine Referenz, um den Wert einzugeben, den sie erhalten soll. Die Werte werden aus einem pausierten Testlauf, Ihrem letzten Test dieser Methode oder der Beispielantwort vorbelegt.",
-      "from": "aus",
-      "fromWebhook": "aus Webhook-Parameter",
-      "unknownMethod": "Unbekannte Methode",
-      "placeholder": "Wert",
-      "invalidJson": "Kein gültiges JSON (Zeile {{line}}). Korrigieren Sie es oder stellen Sie den Wert auf Text um.",
+    "toolbar": {
+      "connection": "Verbindung",
+      "prefill": "Werte vorbelegen aus"
+    },
+    "prefill": {
+      "testRun": "Pausierter Testlauf",
+      "lastTest": "Ihr letzter Test dieses Schritts",
+      "sample": "Beispielantworten",
+      "upstream": "Vorherige Schritte zuerst ausführen (aktuelle Daten)",
+      "manual": "Nur manuelle Eingabe",
+      "testRunUnavailable": "Pausieren Sie einen Testlauf an diesem Schritt, um seine Werte zu verwenden."
+    },
+    "prefillSentence": {
+      "testRun": "dem pausierten Testlauf",
+      "lastTest": "Ihrem letzten Test",
+      "sample": "den Beispielantworten",
+      "upstream": "einer neuen Ausführung der vorherigen Schritte",
+      "manual": "manueller Eingabe"
+    },
+    "url": {
+      "method": "HTTP-Methode",
+      "curl": "cURL",
+      "curlHint": "Request als cURL-Befehl anzeigen",
+      "send": "Senden",
+      "sendUpstream": "Vorherige Schritte + Senden"
+    },
+    "curl": {
+      "title": "Erzeugter cURL-Befehl (Geheimnisse maskiert)"
+    },
+    "writeWarning": {
+      "title": "{{method}} auf {{connection}} ändert Live-Daten.",
+      "titleDirect": "{{method}} ändert Live-Daten.",
+      "message": "Dieser Request kann Daten im verbundenen System anlegen, ändern oder löschen.",
+      "sendAnyway": "Trotzdem senden",
+      "switchTo": "Zu {{connection}} wechseln",
+      "cancel": "Abbrechen",
+      "dontAskAgain": "In dieser Sitzung nicht mehr fragen"
+    },
+    "tabs": {
+      "values": "Testwerte",
+      "params": "Parameter",
+      "headers": "Header",
+      "body": "Body",
+      "settings": "Einstellungen"
+    },
+    "table": {
+      "on": "An",
+      "key": "Schlüssel",
+      "value": "Wert",
+      "origin": "Herkunft",
+      "field": "Feld",
+      "source": "Quelle",
+      "enable": "Aktivieren"
+    },
+    "values": {
+      "hint": "Alle Werte, die dieser Request sendet – URL, Header und Body – an einem Ort. Vorbelegt aus <b>{{source}}</b>; überschreiben Sie sie für diesen Test.",
+      "noChanges": "Keine Änderungen",
+      "changed_one": "{{count}} Wert geändert",
+      "changed_other": "{{count}} Werte geändert",
+      "resetAll": "Alle zurücksetzen",
+      "reset": "Auf vorbelegten Wert zurücksetzen",
+      "placeholder": "Testwert eingeben",
+      "upstreamPlaceholder": "Wird durch die vorherigen Schritte gefüllt",
+      "connectionPlaceholder": "Wird aus der Verbindung übernommen",
+      "empty": "Dieser Request hat keine dynamischen Werte. Er wird genau so gesendet, wie er konfiguriert ist.",
+      "pathSegment": "Pfad",
+      "fromMethod": "Aus {{method}} · verwendet in {{target}}",
+      "fromWebhook": "Webhook-Parameter ({{type}}) · verwendet in {{target}}",
+      "fromConnection": "Verbindungsfeld · verwendet in {{target}}",
+      "unknownMethod": "unbekannter Schritt",
+      "groups": {
+        "url": "URL",
+        "header": "Header",
+        "body": "Body"
+      },
+      "kind": {
+        "string": "Abc",
+        "json": "{ }",
+        "stringHint": "Wird als Text gesendet. Klicken, um ihn als JSON zu senden.",
+        "jsonHint": "Wird als JSON gesendet, wenn gültig, sonst als Text. Klicken, um ihn immer als Text zu senden."
+      },
+      "invalidJson": "Kein gültiges JSON. Korrigieren Sie den Wert oder senden Sie ihn als Text.",
       "invalidJsonSend_one": "Ein Wert ist kein gültiges JSON. Korrigieren Sie ihn vor dem Senden.",
       "invalidJsonSend_other": "{{count}} Werte sind kein gültiges JSON. Korrigieren Sie sie vor dem Senden."
     },
-    "location": {
-      "url": "URL",
-      "header": "Header",
-      "body": "Body"
-    },
     "source": {
-      "live": "Testlauf",
-      "stored": "Letzter Test",
-      "sample": "Beispiel"
+      "testRun": "Testlauf",
+      "lastTest": "Letzter Test",
+      "sample": "Beispiel",
+      "upstream": "Vorherige Schritte",
+      "edited": "Manuell",
+      "empty": "Erforderlich",
+      "connection": "Verbindung",
+      "secret": "Geheim"
     },
     "sourceHint": {
-      "live": "Aus dem pausierten Testlauf übernommen: Die Quellmethode wurde bereits ausgeführt, dies ist ihr tatsächlicher Wert.",
-      "stored": "Der Wert, den Sie beim letzten Test dieser Methode in dieser Browsersitzung verwendet haben.",
-      "sample": "Aus der gespeicherten Beispielantwort der Quellmethode übernommen."
+      "testRun": "Aus dem pausierten Testlauf gelesen: Der Quellschritt wurde bereits ausgeführt, dies ist sein echter Wert.",
+      "lastTest": "Der Wert, den Sie beim letzten Test dieses Schritts in dieser Browsersitzung verwendet haben.",
+      "sample": "Aus der gespeicherten Beispielantwort des Quellschritts gelesen.",
+      "upstream": "Die vorherigen Schritte werden zuerst ausgeführt; ihre Antwort liefert diesen Wert.",
+      "edited": "Für diesen Test geändert.",
+      "empty": "Noch kein Wert – geben Sie vor dem Senden einen ein.",
+      "connection": "Aus der gewählten Verbindung übernommen. Eine Änderung gilt nur für diesen Test.",
+      "secret": "Aus der gewählten Verbindung übernommen und nie angezeigt."
     },
-    "kind": {
-      "string": "Abc",
-      "json": "{ }",
-      "stringHint": "Wird als Text gesendet. Klicken, um es als JSON zu senden.",
-      "jsonHint": "Wird als JSON gesendet, wenn gültig, sonst als Text. Klicken, um es immer als Text zu senden."
+    "origin": {
+      "fixed": "Fest",
+      "dynamic": "Dynamisch",
+      "connection": "Verbindung",
+      "secret": "Geheim",
+      "editable": "Bearbeitbar"
     },
-    "result": {
-      "empty": "Senden Sie die Anfrage, um die Antwort zu sehen.",
-      "noResponse": "Es wurde keine Antwort empfangen.",
-      "duration": "{{ms}} ms",
-      "stage": {
-        "resolve": "Die Referenzen konnten nicht aufgelöst werden",
-        "enhancement": "Ein Transformationsskript ist fehlgeschlagen",
-        "connect": "Das System ist nicht erreichbar"
+    "originHint": {
+      "fixed": "von der API-Definition festgelegt",
+      "dynamic": "unter Testwerte ändern",
+      "connection": "aus der Verbindung",
+      "secret": "aus der Verbindung, maskiert",
+      "editable": "für diesen Test frei änderbar"
+    },
+    "params": {
+      "hint": "Query-Parameter der URL. Änderungen gelten nur für diesen Test, bis Sie <b>Auf Methode anwenden</b> wählen.",
+      "add": "+ Parameter hinzufügen",
+      "keyPlaceholder": "Schlüssel",
+      "valuePlaceholder": "Wert",
+      "empty": "Die URL hat keine Query-Parameter."
+    },
+    "headers": {
+      "add": "+ Header hinzufügen",
+      "empty": "Dieser Request sendet keine Header."
+    },
+    "body": {
+      "type": "Body-Typ",
+      "pretty": "Formatiert",
+      "raw": "Roh bearbeiten",
+      "hint": "Hervorgehobene Werte werden dynamisch gefüllt · ändern Sie sie unter <b>Testwerte</b>",
+      "rawHint": "Änderungen gelten nur für diesen Test, bis Sie <b>Auf Methode anwenden</b> wählen.",
+      "invalidJson": "Kein gültiges JSON – der letzte gültige Body wird gesendet.",
+      "empty": "Dieser Request hat keinen Body.",
+      "format": {
+        "json": "JSON",
+        "xml": "XML",
+        "urlencoded": "x-www-form-urlencoded"
       }
+    },
+    "settings": {
+      "timeout": "Timeout (Sekunden)",
+      "retries": "Wiederholungen bei Fehler",
+      "proxy": "Proxy",
+      "proxyUrl": "Proxy-URL",
+      "proxyMode": {
+        "system": "Systemeinstellung verwenden",
+        "none": "Kein Proxy",
+        "custom": "Benutzerdefiniert…"
+      },
+      "followRedirects": {
+        "label": "Weiterleitungen folgen",
+        "hint": "HTTP-3xx-Antworten automatisch folgen."
+      },
+      "verifySsl": {
+        "label": "SSL-Zertifikat prüfen",
+        "hint": "Nur für interne Systeme mit selbstsignierten Zertifikaten ausschalten."
+      },
+      "saveResponseAsSample": {
+        "label": "Jede Antwort als Beispiel speichern",
+        "hint": "Macht die Felder für das Mapping in den nächsten Schritten verfügbar."
+      },
+      "logToHistory": {
+        "label": "Testläufe im Ausführungsverlauf protokollieren",
+        "hint": "Standardmäßig aus, damit sich Tests nicht mit echten Ausführungen mischen."
+      }
+    },
+    "response": {
+      "title": "Antwort",
+      "emptyTitle": "Noch nichts gesendet",
+      "emptyHint": "Prüfen Sie die vorbelegten Werte, passen Sie an, was nötig ist, und klicken Sie auf <b>Senden</b>. Der Request wird genau einmal ausgeführt – der Workflow selbst läuft nicht.",
+      "sending": "Request wird an {{connection}} gesendet…",
+      "sendingDirect": "Request wird gesendet…",
+      "sendingUpstream": "{{methods}} wird ausgeführt, danach wird der Request gesendet…",
+      "duration": "{{ms}} ms",
+      "run": "Lauf #{{run}}",
+      "runOn": "Lauf #{{run}} · {{connection}}",
+      "rpcError": "JSON-RPC-Fehler {{code}}",
+      "tabs": {
+        "body": "Body",
+        "headers": "Header ({{count}})",
+        "timeline": "Zeitverlauf"
+      },
+      "pretty": "Formatiert",
+      "raw": "Roh",
+      "copy": "Kopieren",
+      "saveSample": "Als Beispiel für das Mapping speichern",
+      "sampleSaved": "Als Beispiel gespeichert – die Felder sind jetzt für das Mapping verfügbar",
+      "noHeaders": "Die Antwort hat keine Header.",
+      "noBody": "Die Antwort hat keinen Body.",
+      "noResponse": "Es wurde keine Antwort empfangen.",
+      "timeline": {
+        "dns": "DNS-Auflösung",
+        "connect": "TCP-Verbindung",
+        "tls": "TLS-Handshake",
+        "firstByte": "Warten (TTFB)",
+        "download": "Inhalt herunterladen",
+        "total": "Gesamt",
+        "unavailable": "Für diese Antwort sind keine Zeitdetails verfügbar."
+      },
+      "stage": {
+        "upstream": "Ein vorheriger Schritt ist fehlgeschlagen",
+        "resolve": "Die Werte konnten nicht eingesetzt werden",
+        "enhancement": "Ein Transformationsskript ist fehlgeschlagen",
+        "connect": "Das System war nicht erreichbar"
+      }
+    },
+    "footer": {
+      "hint": "Testläufe werden nicht in den Ausführungsverlauf des Workflows geschrieben, außer Sie schalten es unter Einstellungen ein. Änderungen bleiben lokal, bis Sie sie anwenden.",
+      "apply": "Auf Methode anwenden",
+      "applied": "Änderungen auf {{name}} angewendet",
+      "close": "Schließen"
     }
   },
   "sandbox": {
