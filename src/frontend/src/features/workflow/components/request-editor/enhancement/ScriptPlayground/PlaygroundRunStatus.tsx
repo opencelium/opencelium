@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { formatRelativeTime } from '@shared/utils/formatRelativeTime';
 
 type Props = {
 	status: 'idle' | 'running' | 'done';
@@ -8,8 +9,8 @@ type Props = {
 	blockedReason?: string;
 };
 export function PlaygroundRunStatus({ status, isStale, completedAt, blockedReason }: Props) {
-	const { t } = useI18n('workflow');
-	const [now, setNow] = useState(0);
+	const { t, lang } = useI18n('workflow');
+	const [now, setNow] = useState(() => Date.now());
 	useEffect(() => {
 		if (completedAt === undefined) return;
 		const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -27,7 +28,7 @@ export function PlaygroundRunStatus({ status, isStale, completedAt, blockedReaso
 						: isStale
 							? t('sandbox.stale')
 							: t('sandbox.lastRun', {
-									seconds: Math.max(0, (now - completedAt) / 1000).toFixed(1),
+									time: formatRelativeTime(Math.min(completedAt, now), lang, now),
 								})}
 		</span>
 	);
