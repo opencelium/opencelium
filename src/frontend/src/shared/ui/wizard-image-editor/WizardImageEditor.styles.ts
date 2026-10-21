@@ -1,3 +1,6 @@
+/** Set by StepHeader: right-aligned beside the title, centred above it on mobile. */
+export const IMAGE_JUSTIFY_VAR = '--wizard-image-justify'
+
 // The header slot this renders into is a fixed 260x120 box (see StepHeader).
 // The filename is shown as a caption bar inside the tile (not below it) so the
 // tile can use nearly the full 120px height without overflowing that box.
@@ -6,7 +9,7 @@ export const wrapperStyle = {
     height: 120,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: `var(${IMAGE_JUSTIFY_VAR}, flex-end)`,
 } as const
 
 export const tileStyle = {

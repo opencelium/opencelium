@@ -11,6 +11,7 @@ const languageOptions = [
 const ScriptLanguage = ({ language, onChangeLanguage, readOnly }: ScriptLanguageProps) => {
     return (
         <Select<Language>
+            testId='workflow-enhancement-language'
             value={language}
             onChange={(value) => onChangeLanguage(value)}
             readOnly={readOnly}
