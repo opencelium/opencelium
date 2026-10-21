@@ -1074,7 +1074,7 @@
     "invalidJsonLocation": "Invalid JSON · Line {{line}}:{{column}}",
     "notRun": "Not run yet",
     "stale": "Not run since your last edit",
-    "lastRun": "Last run {{seconds}}s ago",
+    "lastRun": "Last run {{time}}",
     "runtimeError": "Runtime error at this line",
     "arrowSyntax": "Arrow functions are not supported in Nashorn ES5.1. Use function(x) { return …; }.",
     "templateSyntax": "Template literals are not supported. Use string concatenation.",

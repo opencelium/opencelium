@@ -1074,7 +1074,7 @@
     "invalidJsonLocation": "Ungültiges JSON · Zeile {{line}}:{{column}}",
     "notRun": "Noch nicht ausgeführt",
     "stale": "Seit der letzten Änderung nicht ausgeführt",
-    "lastRun": "Letzte Ausführung vor {{seconds}}s",
+    "lastRun": "Letzte Ausführung {{time}}",
     "runtimeError": "Laufzeitfehler in dieser Zeile",
     "arrowSyntax": "Pfeilfunktionen werden in Nashorn ES5.1 nicht unterstützt. Verwenden Sie function(x) { return …; }.",
     "templateSyntax": "Template-Literale werden nicht unterstützt. Verwenden Sie Zeichenkettenverkettung.",
