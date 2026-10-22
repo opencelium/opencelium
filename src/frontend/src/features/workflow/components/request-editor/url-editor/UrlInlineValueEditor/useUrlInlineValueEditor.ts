@@ -23,7 +23,7 @@ export function useUrlInlineValueEditor({ value, endpointArgs, readOnly,
 		const root = rootRef.current;
 		if (!root) return;
 		lastRendered.current = raw;
-		root.innerHTML = buildInlineHtml(raw, endpointArgs);
+		root.innerHTML = buildInlineHtml(raw, endpointArgs, { cursorPointer: true });
 		const end = getInlineVisualLength(raw, endpointArgs);
 		lastCaret.current = Math.max(0, Math.min(lastCaret.current, end));
 		if (!readOnly && document.activeElement === root) {
