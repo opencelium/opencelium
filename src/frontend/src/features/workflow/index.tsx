@@ -19,6 +19,8 @@ import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { buildWorkflowIndexes } from './api/connectionPayload';
 import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJsonDialog/workflowJson.validate';
 import { useSchedulesConnectionId } from './components/schedules/simulatedSchedulesConnection';
+import { WorkflowProblemsBadge } from './problems/WorkflowProblemsBadge';
+import { applyProblemFocus } from './problems/applyProblemFocus';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -63,7 +65,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const actions = useWorkflowActions({ connectionId, readOnly, isTestRunLocked,
     page: { connection, workflow, connectors, invokers, view, changes, derived,
       isLoading, retryLoad } });
-  const { validation, saveWorkflow: handleSave, category, templates: templateActions,
+  const { validation, saveWorkflow: handleSave, confirmBeforeSave, problems, category, templates: templateActions,
     history: historyActions, canvas, header, buildTestPayload, isShortcutsOpen,
     setIsShortcutsOpen, schedulesOpen, setSchedulesOpen, changeHistoryOpen,
     jsonEditorOpen, setJsonEditorOpen, jsonEditorValue,
@@ -71,6 +73,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     pasteOperatorInScope, pasteOperatorAfter } = actions;
   const { validateTitle, resolveAndHighlightError: resolveAndHighlightWorkflowError } = validation;
   const { closeCanvasPanels, handleNodeDoubleClick } = canvas;
+  const canvasNodes = useMemo(() => applyProblemFocus(hydratedNodes, problems.focus.nodeId, problems.focus.tone),
+    [hydratedNodes, problems.focus.nodeId, problems.focus.tone]);
   const { selectMenuItem: handleHeaderMenuSelect, showHistory: handleOpenHistory } = header;
   const { open: assignCategoryOpen, setOpen: setAssignCategoryOpen,
     isAssigning: isAssigningCategory, assignCategory: handleAssignCategory } = category;
@@ -97,6 +101,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           if (!open) {
             workflow.setHistoryOpen(false);
             setChangeHistoryOpen(false);
+            problems.closePanel();
           }
           return !open;
         })}
@@ -104,7 +109,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           initialDescription: headerState.description, onChange: setHeaderState,
           onMenuItemSelect: handleHeaderMenuSelect,
           menuLoadingItemId: isDownloadingTemplate ? 'download-template' : null,
-          validateTitle, onSave: handleSave,
+          validateTitle, onSave: handleSave, confirmBeforeSave,
+          problemsSlot: <WorkflowProblemsBadge issues={problems.issues} onOpen={problems.openPanel} />,
           saveDisabled: isLoading || !hasConnectionChanges,
           onOpenHistory: handleOpenHistory,
           readOnly: readOnly || isTestRunLocked, testRunLocked: isTestRunLocked,
@@ -151,7 +157,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         category={{ open: assignCategoryOpen, currentCategoryId: categoryId,
           loading: isAssigningCategory, onClose: () => setAssignCategoryOpen(false),
           onAssign: handleAssignCategory }} />
-      <WorkflowMain loading={isLoading} canvas={{ nodes: hydratedNodes,
+      <WorkflowMain loading={isLoading} canvas={{ nodes: canvasNodes,
         edges: workflow.edges, isAnyNodeDragging: workflow.isAnyNodeDragging,
         restoredViewport: workflow.restoredViewport,
         viewportRestoreVersion: workflow.viewportRestoreVersion,
@@ -174,7 +180,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onClearNodeErrors: workflow.onClearNodeErrors,
         fieldBindings: loadedFieldBindings,
         bindingLens: workflow.bindingLens,
-        onPaneClick: closeCanvasPanels }} />
+        onFocusProblemNode: problems.setFocus,
+        onPaneClick: () => {
+          closeCanvasPanels();
+          problems.clearFocus();
+        } }} />
       <WorkflowPanels
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
           connectionId: activeConnectionId, onClose: () => workflow.setSidebarAction(null),
@@ -192,6 +202,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onSaveComment: historyActions.saveComment,
           onDeleteVersion: historyActions.deleteVersion,
           onDownloadTemplate: downloadConnectionTemplate }}
+        problems={{ open: problems.open, issues: problems.issues, onClose: problems.closePanel,
+          onSelectNode: problems.focusNode }}
         changeHistory={{ open: changeHistoryOpen, entries: workflow.undoEntries,
           onClose: () => setChangeHistoryOpen(false),
           onJumpTo: workflow.jumpToUndoEntry }}

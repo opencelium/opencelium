@@ -31,6 +31,7 @@ type Params = {
 	resolveError: (error: unknown) => string | null;
 	validateEnhancementScripts: (fieldBindings?: readonly unknown[]) => string | null;
 	validateReferencePaths: (fieldBindings?: unknown[]) => string | null;
+	validateSaveProblems: (fieldBindings?: readonly unknown[]) => string | null;
 	setFieldBindings: (bindings: any[] | undefined) => void;
 	setHeaderState: (state: { title: string; description: string }) => void;
 	setPersistedTitle: (title: string) => void;
@@ -45,7 +46,7 @@ type Params = {
 
 export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 	fieldBindings, getViewport, clearNodeErrors, resolveError, validateEnhancementScripts,
-	validateReferencePaths, setFieldBindings,
+	validateSaveProblems, validateReferencePaths, setFieldBindings,
 	setHeaderState, setPersistedTitle, setCategoryId, setBaselineSnapshot,
 	setChangeSource, setHistoryPreviewSnapshot, setHistoryVersions,
 	setSelectedHistoryVersionId, setCreatedConnectionId }: Params) => {
@@ -77,6 +78,11 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 		if (brokenScriptMessage) {
 			notifyError(brokenScriptMessage);
 			throw new Error('Enhancement script references a variable that no longer exists');
+		}
+		const blockingProblemMessage = validateSaveProblems(fieldBindings);
+		if (blockingProblemMessage) {
+			notifyError(blockingProblemMessage);
+			throw new Error('Workflow has problems that block saving');
 		}
 		// A warning, not a refusal: the check approximates the backend's Jayway dialect.
 		const invalidPathMessage = validateReferencePaths(fieldBindings);
@@ -131,7 +137,7 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 			window.history.replaceState(window.history.state, '', `/workflow/update/${id}`);
 		}
 	}, [connectionId, categoryId, nodes, edges, fieldBindings, getViewport,
-		clearNodeErrors, resolveError, validateEnhancementScripts, validateReferencePaths,
+		clearNodeErrors, resolveError, validateEnhancementScripts, validateSaveProblems, validateReferencePaths,
 		confirm, setFieldBindings, setHeaderState,
 		setPersistedTitle, setCategoryId, setBaselineSnapshot, setChangeSource,
 		setHistoryPreviewSnapshot, setHistoryVersions, setSelectedHistoryVersionId,
