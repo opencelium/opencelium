@@ -1,11 +1,14 @@
 package com.becon.opencelium.backend.utility;
 
-import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.exception.FieldTypeMismatchException;
+import com.becon.opencelium.backend.reference.ReferenceDetector;
+import com.becon.opencelium.backend.reference.ReferenceParser;
+import com.becon.opencelium.backend.reference.enums.ReferenceType;
+import com.becon.opencelium.backend.reference.model.Reference;
 
 import java.util.*;
 
@@ -64,11 +67,9 @@ public class BindingUtility {
 
     private static Object findRefAndReplace(Object obj, List<FieldBindingMng> fieldBinding) {
         if (obj instanceof String str) {
-            if (str.matches(RegExpression.enhancement)) {
-                String id = str.replace("#{%", "")
-                        .replace("%}", "");
-
-                obj = getRefOfFB(id, fieldBinding);
+            Optional<Reference> reference = ReferenceParser.tryParse(str, ReferenceType.ENHANCEMENT);
+            if (reference.isPresent()) {
+                obj = getRefOfFB(reference.get().getName(), fieldBinding);
             }
         } else if (obj instanceof List<?> list) {
             List<Object> objects = new ArrayList<>();
@@ -130,7 +131,7 @@ public class BindingUtility {
             List<String[]> variables = PathAndReferenceUtility.getQueryVariables(query);
             out:
             for (String[] p : variables) {
-                if (p[1].matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
+                if (ReferenceDetector.containsReference(p[1], ReferenceType.WRAPPED_DIRECT)) {
                     // p[1] can be:
                     // pure ref - '{%#ffffff.(response).body.$.a.b%}'
                     // one enhancement having several references - '{%#ffffff.(response).body.$.a.b;#ffffff.(response).a.c%}'
@@ -159,7 +160,7 @@ public class BindingUtility {
         List<String> subPaths = PathAndReferenceUtility.splitByDelimiter(path, '/');
         out:
         for (int i = 0; i < subPaths.size(); i++) {
-            if (subPaths.get(i).matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
+            if (ReferenceDetector.containsReference(subPaths.get(i), ReferenceType.WRAPPED_DIRECT)) {
                 for (String ref : refs) {
                     if (!subPaths.get(i).contains(ref)) {
                         continue out;
