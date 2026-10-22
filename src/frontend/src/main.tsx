@@ -22,11 +22,11 @@ await loadRuntimeConfig();
 if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS !== 'false') {
 	const { worker } = await import('@/mock/server');
 	await worker.start();
-} else if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_TEST_METHOD_MOCK !== 'false') {
+} else if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_REQUEST_PLAYGROUND_MOCK !== 'false') {
 	// Mocking the one route that has no backend yet keeps the rest of the app on the
 	// real API — the full mock server would shadow every endpoint with fixtures.
-	const { testMethodOnlyWorker } = await import('@/mock/server');
-	await testMethodOnlyWorker.start({ onUnhandledRequest: 'bypass' });
+	const { requestPlaygroundOnlyWorker } = await import('@/mock/server');
+	await requestPlaygroundOnlyWorker.start({ onUnhandledRequest: 'bypass' });
 }
 
 createRoot(document.getElementById('root')!).render(

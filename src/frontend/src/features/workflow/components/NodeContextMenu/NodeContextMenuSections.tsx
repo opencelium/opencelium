@@ -8,12 +8,12 @@ import { buildContextMenuEntries, filterEntriesForSection } from '../context-men
 import type { NodeContextMenuProps } from './NodeContextMenu.types';
 
 type Props = Pick<NodeContextMenuProps, 'menu' | 'node' | 'onClose' | 'onOpenRequestEditor'
-  | 'onOpenConditionEditor' | 'onShowResponse' | 'onTestMethod' | 'onOpenAggregatorEditor' | 'onOpenConnectorEditor'> & {
+  | 'onOpenConditionEditor' | 'onShowResponse' | 'onTryRequest' | 'onOpenAggregatorEditor' | 'onOpenConnectorEditor'> & {
   onEditLabel: () => void;
 };
 
 export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
-  onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTestMethod, onOpenAggregatorEditor, onOpenConnectorEditor }: Props) {
+  onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor }: Props) {
   const { t } = useI18n('workflow');
   const { normalizedUser } = useAuth();
   if (!menu) return null;
@@ -32,7 +32,7 @@ export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
     if (id === 'edit-headers') onOpenRequestEditor(menu.nodeId, 'header');
     if (id === 'edit-body') onOpenRequestEditor(menu.nodeId, 'body');
     if (id === 'show-response') onShowResponse(menu.nodeId);
-    if (id === 'test-method') onTestMethod(menu.nodeId);
+    if (id === 'try-request') onTryRequest(menu.nodeId);
     if (id === 'configure-aggregator') onOpenAggregatorEditor(menu.nodeId);
     if (id === 'change-connector') onOpenConnectorEditor(menu.nodeId, 'switch');
     if (id === 'change-connector-image') onOpenConnectorEditor(menu.nodeId, 'image');
