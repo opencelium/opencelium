@@ -141,6 +141,14 @@
     "workflowTestMethod": {
       "title": "Request ausprobieren",
       "description": "Senden Sie diese Methode einzeln – mit Werten für ihre Referenzen auf vorherige Methoden –, ohne den ganzen Workflow auszuführen."
+    },
+    "workflowProblems": {
+      "title": "Workflow-Linting",
+      "description": "Der Workflow wird jetzt beim Bearbeiten geprüft. Fehler und Warnungen werden hier gezählt; per Klick sehen Sie alle Probleme und springen zum betroffenen Schritt."
+    },
+    "sidebarBackToMainMenu": {
+      "title": "Zurück zum Hauptmenü",
+      "description": "„Zurück“ bringt Sie ins Hauptmenü, auf die Seite, die Sie dort zuletzt geöffnet hatten. Mit Alt+M wechseln Sie ebenfalls zwischen den beiden Menüs."
     }
   },
   "user": {

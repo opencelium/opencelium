@@ -13,7 +13,7 @@ type Props = {
 export function NewFeatureCard({ id, title, onDismiss }: Props) {
     const { t } = useI18n('common')
     const entry: NewFeatureEntry = NEW_FEATURES[id]
-    const heading = title ?? (entry.titleKey && t(entry.titleKey))
+    const heading = entry.titleKey ? t(entry.titleKey) : title
     return (
         <span className="newFeatureCard" data-testid={`new-feature-${id}-card`}>
             <span className="newFeatureCard__header">

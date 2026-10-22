@@ -12,6 +12,7 @@ import {BsLayoutTextWindowReverse} from "react-icons/bs";
 import {useMemo, type ReactNode} from "react";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import {buildTestId} from "@shared/testing/testId.ts";
+import {NewFeature} from "@shared/ui/feedback/NewFeature/NewFeature";
 import {useAuth} from "@features/auth/useAuth.ts";
 import type {PermissionComponent} from "@/engine/policy";
 import {filterMenuItems} from "./filterMenuItems";
@@ -74,7 +75,7 @@ export const useAdminMenu = (): any[] => {
         {
             key: BACK_TO_MAIN_MENU_KEY,
             icon: <ArrowLeftOutlined/>,
-            label: t('menu.backToMain'),
+            label: <NewFeature id='sidebar-back-to-main-menu' variant='pill' placement='right'>{t('menu.backToMain')}</NewFeature>,
             'data-testid': 'sidebar-menu-back-to-main',
         },
         {
