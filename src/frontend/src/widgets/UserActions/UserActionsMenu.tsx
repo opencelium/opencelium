@@ -9,11 +9,13 @@ import {useAppLanguage} from '@features/user/language/useAppLanguage'
 import {useMenuSwitch} from '@app/layouts/AppLayout/Sidebar/useMenuSwitch'
 import {HelpMenuEntries, MenuDivider, MenuEntry, type HelpTours} from '@app/layouts/AppLayout/TopBar/HelpMenu'
 import {MarqueeText} from '@shared/ui/marquee-text/MarqueeText'
+import {NewFeature} from '@shared/ui/feedback/NewFeature/NewFeature'
+import type {NewFeatureId} from '@shared/ui/feedback/NewFeature/newFeatures'
 import {useUserProfile} from './useUserProfile'
 import './userActions.css'
 
 /** Compact form of `UserActions`: the profile picture opens one popover holding every user-level action. */
-export const UserActionsMenu = ({tours}: {tours: HelpTours}) => {
+export const UserActionsMenu = ({tours, newFeatureId}: {tours: HelpTours; newFeatureId?: NewFeatureId}) => {
     const {t: tCommon} = useI18n('common')
     const [isOpen, setIsOpen] = useState(false)
     const {profilePicture, displayName, canReadProfile, openProfile} = useUserProfile()
@@ -80,7 +82,9 @@ export const UserActionsMenu = ({tours}: {tours: HelpTours}) => {
             {/* A real DOM node for Popover's injected click handler and ref — see HelpMenu. */}
             <span style={{display: 'inline-flex'}}>
                 {/* The tooltip would sit over the language buttons, so it's dropped while the menu is open. */}
-                {isOpen ? trigger : <Tooltip content={tCommon('topbar.account')}>{trigger}</Tooltip>}
+                {isOpen ? trigger : newFeatureId
+                    ? <NewFeature id={newFeatureId} tooltip={tCommon('topbar.account')}>{trigger}</NewFeature>
+                    : <Tooltip content={tCommon('topbar.account')}>{trigger}</Tooltip>}
             </span>
         </Popover>
     )

@@ -1,6 +1,7 @@
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { NewFeature } from '@shared/ui/feedback/NewFeature/NewFeature';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { ReactNode } from 'react';
@@ -37,7 +38,7 @@ export function EnhancementHeader({
 			{/* The header is a Collapse label: keep its clicks from toggling the panel. */}
 			<span className="bodyLegacyEnhancementActions" onClick={(event) => event.stopPropagation()}>
 				{onTogglePlayground && (
-					<Tooltip content={t('sandbox.title')}>
+					<NewFeature id="enhancement-script-sandbox" tooltip={t('sandbox.title')}>
 						<IconButton
 							type="text"
 							size="xs"
@@ -46,7 +47,7 @@ export function EnhancementHeader({
 							iconProps={{ name: 'flask', color: isPlaygroundOpen ? 'primary' : 'inherit' }}
 							onClick={onTogglePlayground}
 						/>
-					</Tooltip>
+					</NewFeature>
 				)}
 				{children}
 				{onToggleMaximized && (

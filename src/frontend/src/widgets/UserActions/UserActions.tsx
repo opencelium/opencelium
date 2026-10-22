@@ -6,6 +6,7 @@ import {EntityAvatar} from '@shared/ui/entity-avatar/EntityAvatar'
 import {useAppLanguage} from '@features/user/language/useAppLanguage'
 import {MenuSwitcher} from '@app/layouts/AppLayout/Sidebar/MenuSwitcher'
 import {HelpMenu, type HelpTours} from '@app/layouts/AppLayout/TopBar/HelpMenu'
+import type {NewFeatureId} from '@shared/ui/feedback/NewFeature/newFeatures'
 import {UserActionsMenu} from './UserActionsMenu'
 import {useUserProfile} from './useUserProfile'
 
@@ -14,16 +15,18 @@ type Props = {
     layout: 'inline' | 'compact'
     /** Which guided tours the help entries offer; defaults to the app-wide ones. */
     tours?: HelpTours
+    /** Badges the entry point to these actions: the help icon inline, the profile picture when compact. */
+    newFeatureId?: NewFeatureId
 }
 
 /** The user-level header actions (language, help, menu switch, profile) shared by the top bar and the workflow editor. */
-export const UserActions = ({layout, tours = 'app'}: Props) => {
-    if (layout === 'compact') return <UserActionsMenu tours={tours}/>
+export const UserActions = ({layout, tours = 'app', newFeatureId}: Props) => {
+    if (layout === 'compact') return <UserActionsMenu tours={tours} newFeatureId={newFeatureId}/>
 
     return (
         <div style={{display: 'flex', alignItems: 'center'}}>
             <LanguageToggle/>
-            <HelpMenu tours={tours}/>
+            <HelpMenu tours={tours} newFeatureId={newFeatureId}/>
             <MenuSwitcher/>
             <ProfileButton/>
         </div>
