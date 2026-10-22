@@ -1,6 +1,5 @@
 import { Fragment } from 'react';
 import { createPortal } from 'react-dom';
-import { useNewFeature } from '@shared/ui/feedback/NewFeature/useNewFeature';
 import { ReferenceOptionLabel } from '../../body-editor/ReferenceOptionLabel/ReferenceOptionLabel';
 import { ReferenceGroupLabel } from '../../body-editor/ReferenceGroupLabel/ReferenceGroupLabel';
 import { groupReferenceOptions } from '../../body-editor/requestReferenceOptions';
@@ -12,7 +11,6 @@ const GROUP_TOOLTIP_Z_INDEX = 4001;
 
 export function ReferenceFieldDropdown({ open, position, dropdownRef, options,
   onSelect }: ReferenceFieldDropdownProps) {
-  const { markSeen } = useNewFeature('workflow-reference-operations');
   if (!open || !position) return null;
   return createPortal(<div ref={dropdownRef} className="referenceDropdown referenceFieldDropdown"
     style={{ top: position.top, left: position.left, width: position.width }}>
@@ -21,10 +19,7 @@ export function ReferenceFieldDropdown({ open, position, dropdownRef, options,
         <ReferenceGroupLabel kind={group.kind} zIndex={GROUP_TOOLTIP_Z_INDEX} />
       </div>
       {group.options.map((option) => <div key={option.value} className="referenceDropdownOption"
-        onMouseDown={(event) => event.preventDefault()} onClick={() => {
-          if (option.kind === 'operation') markSeen();
-          onSelect(option);
-        }}>
+        onMouseDown={(event) => event.preventDefault()} onClick={() => onSelect(option)}>
         <ReferenceOptionLabel option={option} />
       </div>)}
     </Fragment>)}
