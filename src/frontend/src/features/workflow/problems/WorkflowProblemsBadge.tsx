@@ -1,6 +1,6 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
-import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { NewFeature } from '@shared/ui/feedback/NewFeature/NewFeature';
 import type { WorkflowIssueGroups } from './useWorkflowIssues';
 
 type Props = {
@@ -18,12 +18,12 @@ export function WorkflowProblemsBadge({ issues, onOpen }: Props) {
 	const count = issues.errors.length + issues.warnings.length;
 	const severity = issues.errors.length > 0 ? 'error' : count > 0 ? 'warning' : 'clean';
 	return (
-		<Tooltip content={severity === 'clean' ? t('problems.badgeTooltipClean') : t('problems.badgeTooltip', { count })}
-			placement="bottom">
+		<NewFeature id="workflow-problems" placement="bottom"
+			tooltip={severity === 'clean' ? t('problems.badgeTooltipClean') : t('problems.badgeTooltip', { count })}>
 			<Button type="text" iconLeft={severity === 'clean' ? 'check-circle' : 'warning'} onClick={onOpen}
 				testId="workflow-problems-badge" className={`workflowProblemsBadge workflowProblemsBadge--${severity}`}>
 				{severity === 'clean' ? null : count}
 			</Button>
-		</Tooltip>
+		</NewFeature>
 	);
 }

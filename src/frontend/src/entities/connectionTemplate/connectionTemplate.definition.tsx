@@ -43,7 +43,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
             {
                 type: 'custom',
                 key: 'edit',
-                render: ({ row, rowId }) => <ConnectionTemplateEditAction row={row} rowId={rowId} />,
+                render: ({ row, rowId, isFirstRow }) => <ConnectionTemplateEditAction row={row} rowId={rowId} isFirstRow={isFirstRow} />,
             },
             {
                 type: 'custom',
