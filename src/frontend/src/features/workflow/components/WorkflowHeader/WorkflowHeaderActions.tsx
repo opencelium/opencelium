@@ -70,7 +70,8 @@ export function WorkflowHeaderActions({
 			{!isMenuOnly && (
 				<>
 					{schedulesSlot}
-					<UserActions layout={width <= COMPACT_USER_ACTIONS_MAX_WIDTH ? 'compact' : 'inline'} tours='workflow' />
+					<UserActions layout={width <= COMPACT_USER_ACTIONS_MAX_WIDTH ? 'compact' : 'inline'} tours='workflow'
+						newFeatureId='workflow-header-user-actions' />
 					<span className='headerActionsDivider' aria-hidden />
 				</>
 			)}
