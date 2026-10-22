@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ContextMenuEditor } from '../context-menu/ContextMenuEditor/ContextMenuEditor';
 import type { NodeContextMenuProps } from './NodeContextMenu.types';
+import { placeContextMenu } from './contextMenuPlacement';
 import { NodeContextMenuSections } from './NodeContextMenuSections';
 
 export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor }: NodeContextMenuProps) {
@@ -10,6 +11,20 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [draftLabel, setDraftLabel] = useState('');
+  const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
+
+  // Re-placed whenever the menu changes size (a group expands, the label editor opens).
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!menu || !element) return;
+    const place = () => setPosition(placeContextMenu({ x: menu.x, y: menu.y },
+      { width: element.offsetWidth, height: element.offsetHeight },
+      { width: window.innerWidth, height: window.innerHeight }));
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [menu]);
 
   useEffect(() => {
     if (!menu) return;
@@ -37,7 +52,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
 
   if (!menu) return null;
   return createPortal(
-    <div ref={ref} className="contextMenu" data-testid="workflow-context-menu" style={{ left: menu.x, top: menu.y }}>
+    <div ref={ref} className="contextMenu" data-testid="workflow-context-menu" style={position ?? { left: menu.x, top: menu.y, visibility: 'hidden' }}>
       {isEditingLabel ? (
         <ContextMenuEditor
           inputRef={inputRef}
