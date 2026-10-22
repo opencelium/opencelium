@@ -135,6 +135,18 @@ describe('HelpMenu', () => {
         expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
     })
 
+    it('opens the changelog page and closes the menu, for admins and non-admins alike', () => {
+        mocks.isAdmin = false
+        render(<HelpMenu />)
+        openMenu()
+
+        expect(screen.getByTestId('topbar-changelog')).toHaveTextContent('topbar.changelog')
+        fireEvent.click(screen.getByTestId('topbar-changelog'))
+
+        expect(mocks.navigate).toHaveBeenCalledWith('/changelog')
+        expect(screen.queryByTestId('popover-content')).not.toBeInTheDocument()
+    })
+
     it('sends the user home and requests the dashboard tour, with the menu out of the way', () => {
         render(<HelpMenu />)
         openMenu()
