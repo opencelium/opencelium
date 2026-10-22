@@ -118,6 +118,22 @@
   box-shadow: 0 0 0 4px var(--color-status-warning-bg);
 }
 
+/* The step picked from the problems panel or the minimap. A wider halo than the
+   error ring, so the one being looked at stands out among the ringed ones. */
+.nodeBodyProblemFocus--danger .startNode,
+.nodeBodyProblemFocus--danger .circleNode,
+.nodeBodyProblemFocus--danger .ifNode {
+  border-color: var(--color-status-error-fg);
+  box-shadow: 0 0 0 6px var(--color-status-error-bg);
+}
+
+.nodeBodyProblemFocus--warning .startNode,
+.nodeBodyProblemFocus--warning .circleNode,
+.nodeBodyProblemFocus--warning .ifNode {
+  border-color: var(--color-status-warning-fg);
+  box-shadow: 0 0 0 6px var(--color-status-warning-bg);
+}
+
 /* Live test-run indicators. A currently-open LOOP/IF operator (any nesting
    depth), or a top-level method with no enclosing operator, gets a pulsing
    ring — distinct from the static hover/path-selection highlight above.
