@@ -873,7 +873,9 @@
     "valueDialog": {
       "copyTooltip": "Wert kopieren",
       "copySuccess": "Wert in die Zwischenablage kopiert"
-    }
+    },
+    "clearField": "Feld leeren",
+    "addReference": "Referenz hinzufügen"
   },
   "refGenerator": {
     "connector": "Konnektor",
