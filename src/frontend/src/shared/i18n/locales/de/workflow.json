@@ -495,14 +495,15 @@
   },
   "contextMenu": {
     "changeLabel": "Bezeichnung ändern",
+    "connector": "Konnektor",
+    "url": "URL",
+    "header": "Header",
+    "body": "Body",
     "changeConnector": "Anderen Konnektor verwenden",
     "changeConnectorImage": "Konnektor-Bild ändern",
     "openConfiguration": "Konfiguration öffnen",
     "configureAggregator": "Datenaggregator zuweisen…",
     "request": "Anfrage",
-    "editUrl": "URL bearbeiten",
-    "editHeader": "Header bearbeiten",
-    "editBody": "Body bearbeiten",
     "showResponse": "Antwort anzeigen",
     "tryRequest": "Request ausprobieren…",
     "newLabelPlaceholder": "Neue Bezeichnung"

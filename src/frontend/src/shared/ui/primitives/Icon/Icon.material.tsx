@@ -78,6 +78,7 @@ import CloudOutlined from '@mui/icons-material/CloudOutlined';
 import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
 import OpenInNew from '@mui/icons-material/OpenInNew';
 import SendOutlined from '@mui/icons-material/SendOutlined';
+import ImageOutlined from '@mui/icons-material/ImageOutlined';
 import type { IconComponent } from './Icon.types';
 
 const iconMap = {
@@ -159,6 +160,7 @@ const iconMap = {
     package: Inventory2Outlined,
     'external-link': OpenInNew,
     send: SendOutlined,
+    image: ImageOutlined,
 };
 
 export const MaterialIcon: IconComponent = ({

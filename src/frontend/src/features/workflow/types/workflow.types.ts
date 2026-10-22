@@ -4,7 +4,6 @@ import type { ConditionConfig } from '../components/condition-builder/conditionB
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { ConnectorHealthStatus } from '@entities/connector/model/types';
 import type { JointRejectionReason } from '../utils/jumpValidator';
-import type { NewFeatureId } from '@shared/ui/feedback/NewFeature/newFeatures';
 import type { WorkflowIssueTone } from '../problems/workflowProblems';
 
 export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
@@ -236,8 +235,3 @@ export type WorkflowHeaderMenuItem = {
 	badgeKey?: string;
 };
 
-export type WorkflowNodeMenuItem = {
-	id: string;
-	labelKey: string;
-	newFeatureId?: NewFeatureId;
-};
