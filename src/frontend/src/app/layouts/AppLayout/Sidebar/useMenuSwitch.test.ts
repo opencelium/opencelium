@@ -1,10 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import type { NavigateFunction } from 'react-router-dom'
 import { useLayoutStore } from '@app/layouts/AppLayout/layout.store'
 import { switchMenu } from './useMenuSwitch'
 
 const pushing: NavigateFunction = ((to: string) => window.history.pushState(null, '', to)) as NavigateFunction
-const vetoed: NavigateFunction = (() => undefined) as NavigateFunction
 
 describe('switchMenu', () => {
     beforeEach(() => {
@@ -19,9 +18,10 @@ describe('switchMenu', () => {
     })
 
     it('keeps the menu when a leave guard drops the navigation', () => {
-        const navigate = vi.fn(vetoed)
-        switchMenu(navigate, 'admin')
-        expect(navigate).toHaveBeenCalledWith('/user')
+        const attempted: unknown[] = []
+        const vetoed = ((to: unknown) => { attempted.push(to) }) as NavigateFunction
+        switchMenu(vetoed, 'admin')
+        expect(attempted).toEqual(['/user'])
         expect(useLayoutStore.getState().menuType).toBe('main')
     })
 })
