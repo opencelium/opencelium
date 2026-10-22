@@ -62,7 +62,7 @@ export const TopBar = () => {
             </div>
 
             <div style={{flex: '1 1 0', display: 'flex', justifyContent: 'flex-end'}}>
-                <UserActions layout={width < COMPACT_USER_ACTIONS_BELOW_WIDTH ? 'compact' : 'inline'}/>
+                <UserActions layout={width < COMPACT_USER_ACTIONS_BELOW_WIDTH ? 'compact' : 'inline'} newFeatureId='changelog'/>
             </div>
         </div>
     );

@@ -52,6 +52,11 @@ export const NEW_FEATURES = {
         descriptionKey: 'newFeature.sidebarBackToMainMenu.description',
         titleKey: 'newFeature.sidebarBackToMainMenu.title',
     },
+    changelog: {
+        since: '5.3',
+        descriptionKey: 'newFeature.changelog.description',
+        titleKey: 'newFeature.changelog.title',
+    },
 } as const satisfies Record<string, NewFeatureEntry>
 
 export type NewFeatureId = keyof typeof NEW_FEATURES
