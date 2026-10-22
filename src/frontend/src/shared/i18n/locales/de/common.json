@@ -63,7 +63,8 @@
       "help": "Alle Befehle anzeigen",
       "onboarding": "Einrichtungstour neu starten",
       "workflowTutorial": "Workflow-Tutorial erneut ansehen",
-      "dashboardTour": "Dashboard-Tour erneut ansehen"
+      "dashboardTour": "Dashboard-Tour erneut ansehen",
+      "changelog": "Änderungsprotokoll öffnen"
     },
     "footer": {
       "select": "Auswählen",
@@ -118,7 +119,8 @@
     "account": "Konto und Einstellungen",
     "adminMenu": "Zum Admin-Menü wechseln",
     "mainMenu": "Zum Hauptmenü wechseln",
-    "startWorkflowTutorial": "Workflow-Tutorial starten"
+    "startWorkflowTutorial": "Workflow-Tutorial starten",
+    "changelog": "Änderungsprotokoll"
   },
   "newFeature": {
     "label": "Neu",

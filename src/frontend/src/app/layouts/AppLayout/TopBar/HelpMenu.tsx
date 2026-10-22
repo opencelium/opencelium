@@ -13,6 +13,7 @@ import { useIsAdmin } from '@features/auth/useIsAdmin'
 import { useDashboardTourStore } from '@features/onboarding/dashboard-tour/model/dashboardTour.store'
 import { useWorkflowTutorialStore } from '@features/onboarding/workflow-tutorial/model/workflowTutorial.store'
 import { ONBOARDING_RESTART_EVENT } from '@features/onboarding/model/types'
+import { CHANGELOG_ROUTE } from '@features/changelog/model/changelog.route'
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types'
 import './helpMenu.css'
 
@@ -25,8 +26,8 @@ const WORKFLOW_CREATE_ROUTE = '/workflow/create'
 export type HelpTours = 'app' | 'workflow'
 
 /**
- * The top bar's help affordance: the manual, and a replay of the guided tours —
- * onboarding and dashboard tours app-wide, the workflow tutorial in the editor.
+ * The top bar's help affordance: the manual, the changelog, and a replay of the
+ * guided tours — onboarding and dashboard tours app-wide, the workflow tutorial in the editor.
  *
  * Controlled `open` rather than antd's own trigger handling, because every
  * entry takes the user somewhere — a popover left standing would sit over the
@@ -88,6 +89,11 @@ export function HelpMenuEntries({ tours, onSelect }: { tours: HelpTours; onSelec
     const openDocs = () => {
         onSelect()
         window.open(DOCS_URL, '_blank', 'noopener,noreferrer')
+    }
+
+    const openChangelog = () => {
+        onSelect()
+        void navigate(CHANGELOG_ROUTE)
     }
 
     const openServicePortal = () => {
@@ -156,6 +162,12 @@ export function HelpMenuEntries({ tours, onSelect }: { tours: HelpTours; onSelec
                 label={tCommon('topbar.docs')}
                 onClick={openDocs}
                 testId="topbar-docs"
+            />
+            <MenuEntry
+                icon="journal-text"
+                label={tCommon('topbar.changelog')}
+                onClick={openChangelog}
+                testId="topbar-changelog"
             />
             <MenuEntry
                 icon="portal"
