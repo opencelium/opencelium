@@ -1,8 +1,10 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { getReferenceOptions, isExpandableReferencePath, isUnknownReferencePath,
+import { getReferenceOptions, isExpandableReferencePath,
   matchesReferenceOptionSyntax } from '../requestReferenceOptions';
+import { describeReferencePathValidation, validateReferencePath } from '../referencePathSyntax';
+import { useJsonPathEnvironment } from '../jsonPathEnvironment';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
 import { getReferenceFilterTerm } from '../../reference-generator/referenceGenerator.utils';
 
@@ -11,6 +13,7 @@ const normalizePath = (value?: string) => value === '$.' ? '$' : value || '';
 export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectProps) {
   const { method, type, value, disabled, iterators = [], onChange } = props;
   const { t } = useI18n('workflow');
+  const jsonPathEnvironment = useJsonPathEnvironment();
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const selectingRef = useRef(false);
   const userInteractionRef = useRef(false);
@@ -53,8 +56,9 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
     searchValue: type === 'status' ? 'status' : displayPath,
     isDisabled: disabled || type === 'status',
     open: disabled || type === 'status' ? false : open,
-    // Only once the user stops typing — a half-typed key is always "unknown".
-    isUnknownPath: !open && isUnknownReferencePath(method, type, path, iterators),
+    // Only once the user stops typing — a half-typed path is always invalid.
+    pathFeedback: open ? null : describeReferencePathValidation(
+      validateReferencePath(jsonPathEnvironment, method, type, path, iterators), t),
     notFoundContent: undefined,
     onSearch: (nextValue: string) => {
       if (!userInteractionRef.current) return;
