@@ -160,7 +160,17 @@
     "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?",
     "enhancementScriptBrokenIn": "„{{method}}“ hat eine Transformation, deren Skript noch {{marker}} verwendet — die gelesene Referenz wurde mit dem Schritt entfernt, auf den sie zeigte. Korrigieren Sie das Skript vor dem Speichern.",
     "enhancementScriptBroken": "{{count}} Schritte haben eine Transformation, deren Skript noch {{marker}} verwendet — die gelesenen Referenzen wurden mit den Schritten entfernt, auf die sie zeigten. Korrigieren Sie die Skripte vor dem Speichern.",
-    "enhancementScriptBroken_one": "{{count}} Schritt hat eine Transformation, deren Skript noch {{marker}} verwendet — die gelesene Referenz wurde mit dem Schritt entfernt, auf den sie zeigte. Korrigieren Sie das Skript vor dem Speichern."
+    "enhancementScriptBroken_one": "{{count}} Schritt hat eine Transformation, deren Skript noch {{marker}} verwendet — die gelesene Referenz wurde mit dem Schritt entfernt, auf den sie zeigte. Korrigieren Sie das Skript vor dem Speichern.",
+    "invalidReferencePathsTitle": "Ungültige Referenzpfade",
+    "invalidReferencePathIn": "„{{step}}“ liest „{{path}}“ aus dem {{part}} von „{{source}}“, aber das ist kein gültiger JsonPath. Die Ausführung schlägt fehl, sobald sie diese Stelle erreicht.",
+    "invalidReferencePathNoSource": "„{{step}}“ liest „{{path}}“, aber das ist kein gültiger JsonPath. Die Ausführung schlägt fehl, sobald sie diese Stelle erreicht.",
+    "referencePart": {
+      "responseBody": "Antwort-Body",
+      "requestBody": "Anfrage-Body"
+    },
+    "invalidReferencePaths": "{{count}} Schritte verwenden Referenzen, deren Pfad kein gültiger JsonPath ist. Die Ausführung schlägt fehl, sobald sie diese erreicht.",
+    "invalidReferencePaths_one": "{{count}} Schritt verwendet eine Referenz, deren Pfad kein gültiger JsonPath ist. Die Ausführung schlägt fehl, sobald sie diese erreicht.",
+    "saveAnyway": "Trotzdem speichern"
   },
   "joint": {
     "noTargets": "Keine Methode kann Ziel eines Sprungs von dieser Methode sein — das Ziel muss später laufen, im selben Schleifenbereich.",
@@ -822,6 +832,8 @@
     "iteratorLoop": "({{iterator}}-Schleife)",
     "iteratorLoopHint": "Das Element des aktuellen Durchlaufs der {{iterator}}-Schleife. Innerhalb einer Schleife über dieses Array verwenden.",
     "unknownPath": "Dieses Feld ist nicht in der Antwortstruktur der gewählten Methode enthalten. Die Ausführung schlägt fehl, wenn es in der echten Antwort fehlt.",
+    "invalidSyntax": "Ungültige Pfadsyntax bei Zeichen {{position}} („{{character}}“). Die Ausführung schlägt bei dieser Referenz fehl.",
+    "incompleteSyntax": "Der Pfad ist unvollständig — er endet, wo noch etwas erwartet wird. Die Ausführung schlägt bei dieser Referenz fehl.",
     "listResult": "Liste",
     "listResultHint": "Liefert eine Liste aller Treffer, auch wenn nur einer passt.",
     "operationsGroup": "Operationen",

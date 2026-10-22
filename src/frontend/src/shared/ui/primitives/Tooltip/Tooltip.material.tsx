@@ -19,6 +19,8 @@ export const MaterialTooltip: TooltipComponent = ({
     placement = 'top',
     zIndex,
     maxWidth,
+    open,
+    onOpenChange,
     children,
 }) => {
     return (
@@ -26,6 +28,9 @@ export const MaterialTooltip: TooltipComponent = ({
             title={content}
             placement={muiPlacement[placement]}
             arrow
+            open={open}
+            onOpen={() => onOpenChange?.(true)}
+            onClose={() => onOpenChange?.(false)}
             slotProps={{
                 tooltip: {
                     sx: {
