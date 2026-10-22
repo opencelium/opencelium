@@ -31,30 +31,45 @@
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
-    height: 18px;
-    padding: 0 6px;
-    border-radius: 9px;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.2;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.04em;
     white-space: nowrap;
-    color: var(--color-action-primary);
-    background: var(--color-action-primary-subtle);
-    border: 1px solid var(--color-action-primary);
+    color: var(--color-text-on-action);
+    background: var(--color-action-primary);
 }
 
-.newFeatureTooltip {
+.newFeatureCard {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
 }
 
-.newFeatureTooltip__note {
+.newFeatureCard__header {
     display: flex;
-    align-items: flex-start;
-    gap: 6px;
+    align-items: center;
+    gap: 10px;
+}
+
+.newFeatureCard__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.newFeatureCard__description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+.newFeatureCard__footer {
+    display: flex;
+    justify-content: flex-end;
 }
 
 @keyframes newFeaturePulse {
