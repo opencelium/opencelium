@@ -1,0 +1,337 @@
+.rpBody {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	height: calc(100vh - 230px);
+	min-height: 420px;
+}
+
+.rpSplit {
+	flex: 1;
+	min-height: 0;
+	border-top: 1px solid var(--color-border-subtle);
+}
+
+.rpMono,
+.rpMonoInput input {
+	font-family: var(--typography-font-family-mono, monospace);
+	font-size: 12px;
+}
+
+.rpEllipsis {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.rpBreakAll {
+	word-break: break-all;
+}
+
+.rpAlignEnd {
+	justify-self: end;
+	text-align: right;
+}
+
+.rpPushEnd {
+	margin-left: auto;
+}
+
+.rpHint {
+	color: var(--color-text-secondary);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.rpEmptyNote {
+	padding: 12px;
+	color: var(--color-text-secondary);
+	font-size: 13px;
+}
+
+/* Title */
+.rpTitle {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.rpTitleText {
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.rpBreadcrumb {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	color: var(--color-text-secondary);
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.rpBreadcrumbStep {
+	color: var(--color-text-primary);
+	font-weight: 600;
+}
+
+.rpBreadcrumbPart {
+	display: inline-flex;
+	gap: 6px;
+}
+
+/* Toolbar */
+.rpToolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 12px 20px;
+}
+
+.rpField {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 200px;
+}
+
+.rpField--wide {
+	min-width: 280px;
+}
+
+.rpFieldLabel,
+.rpTableGroupTitle {
+	color: var(--color-text-secondary);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+
+/* Request pane */
+.rpRequest {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	height: 100%;
+	padding: 12px 16px 0 0;
+	overflow: auto;
+}
+
+.rpUrlBar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+.rpUrlMethod {
+	width: 112px;
+}
+
+.rpUrl {
+	display: flex;
+	flex: 1 1 280px;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	height: 32px;
+	padding: 0 10px;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+	background: var(--color-background-input);
+	font-family: var(--typography-font-family-mono, monospace);
+	font-size: 13px;
+}
+
+.rpUrlText {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.rpWarningBody {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.rpWarningActions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+.rpWarningCheckbox {
+	margin-left: auto;
+}
+
+.rpCurl {
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+	background: var(--color-background-hover);
+}
+
+.rpCurlHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 4px 8px 4px 12px;
+	border-bottom: 1px solid var(--color-border-subtle);
+	color: var(--color-text-secondary);
+	font-size: 12px;
+}
+
+.rpCurlCode,
+.rpRaw {
+	margin: 0;
+	padding: 10px 12px;
+	font-family: var(--typography-font-family-mono, monospace);
+	font-size: 12px;
+	line-height: 1.6;
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.rpRequestTabs {
+	flex: 1;
+	min-height: 0;
+}
+
+.rpTabLabel {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.rpCount {
+	padding: 0 7px;
+	border-radius: 10px;
+	background: var(--color-background-hover);
+	color: var(--color-text-secondary);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+.rpTabBody {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding-bottom: 16px;
+}
+
+.rpTabIntro {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+}
+
+.rpTabIntro > .rpHint:first-child {
+	flex: 1 1 320px;
+}
+
+.rpCodeBox {
+	min-height: 120px;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+	background: var(--color-background-input);
+	overflow: auto;
+}
+
+.rpBodyFormat {
+	width: 200px;
+}
+
+.rpRawEditor {
+	height: 360px;
+	overflow: hidden;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+}
+
+.rpRawEditor--invalid {
+	border-color: var(--color-status-error-fg);
+}
+
+.rpWebhook {
+	cursor: pointer;
+}
+
+.rpWebhook--missing .bodyLegacyWebhookBadge {
+	box-shadow: 0 0 0 2px var(--color-status-warning-fg);
+}
+
+/* Settings form */
+.rpForm {
+	max-width: 680px;
+}
+
+.rpFormInline {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 16px;
+}
+
+.rpFormField {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 200px;
+}
+
+.rpFormField--narrow {
+	width: 140px;
+	min-width: 0;
+}
+
+.rpFormField--grow {
+	flex: 1;
+}
+
+.rpFormLabel,
+.rpSettingLabel {
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.rpSettingList {
+	display: flex;
+	flex-direction: column;
+}
+
+.rpSettingRow {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 12px 0;
+	border-top: 1px solid var(--color-border-subtle);
+}
+
+.rpSettingText {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+/* Footer */
+.rpFooter {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+.rpFooterHint {
+	flex: 1 1 260px;
+	text-align: left;
+}

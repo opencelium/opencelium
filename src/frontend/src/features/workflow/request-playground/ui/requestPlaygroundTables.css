@@ -1,0 +1,286 @@
+/* Badges */
+.rpBadge {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	padding: 0 7px;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-sm);
+	background: var(--color-background-hover);
+	color: var(--color-text-secondary);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	white-space: nowrap;
+}
+
+.rpBadge--primary {
+	border-color: var(--color-action-primary);
+	background: var(--color-action-primary-subtle);
+	color: var(--color-action-primary);
+}
+
+.rpBadge--success {
+	border-color: var(--color-status-success-border);
+	background: var(--color-status-success-bg);
+	color: var(--color-status-success-fg);
+}
+
+.rpBadge--warning {
+	border-color: var(--color-status-warning-border);
+	background: var(--color-status-warning-bg);
+	color: var(--color-status-warning-fg);
+}
+
+.rpBadge--danger {
+	border-color: var(--color-status-error-border);
+	background: var(--color-status-error-bg);
+	color: var(--color-status-error-fg);
+}
+
+.rpBadge--info {
+	border-color: var(--color-status-info-border);
+	background: var(--color-status-info-bg);
+	color: var(--color-status-info-fg);
+}
+
+.rpChip {
+	padding: 2px 8px;
+	border-radius: var(--radius-sm);
+	background: var(--color-background-hover);
+	color: var(--color-text-secondary);
+	font-size: 12px;
+}
+
+/* Grid tables (Test values, Params, Headers, response headers) */
+.rpTable {
+	overflow: hidden;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+}
+
+.rpGridRow {
+	display: grid;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px;
+	border-top: 1px solid var(--color-border-subtle);
+	font-size: 13px;
+}
+
+.rpGridRow:first-child {
+	border-top: none;
+}
+
+.rpTableHead {
+	background: var(--color-background-hover);
+	font-weight: 600;
+}
+
+.rpTableGroupTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 12px;
+	border-top: 1px solid var(--color-border-default);
+	background: var(--color-background-hover);
+}
+
+.rpTableFooter {
+	padding: 4px 12px;
+	border-top: 1px solid var(--color-border-subtle);
+}
+
+.rpValueRow {
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 176px;
+}
+
+.rpValueRow--edited {
+	background: var(--color-status-info-bg);
+}
+
+.rpValueRow--focused {
+	box-shadow: inset 3px 0 0 var(--color-action-primary);
+}
+
+.rpValueField {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+.rpValuePath {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+}
+
+.rpValueDescription {
+	min-width: 0;
+	color: var(--color-text-secondary);
+	font-size: 11px;
+}
+
+.rpValueInput {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.rpValueInput textarea {
+	min-height: 96px;
+	font-family: var(--typography-font-family-mono, monospace);
+	font-size: 12px;
+}
+
+.rpValueError {
+	color: var(--color-status-error-fg);
+	font-size: 12px;
+}
+
+.rpValueMeta,
+.rpRowActions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 6px;
+}
+
+.rpKindToggle button {
+	font-family: var(--typography-font-family-mono, monospace);
+	font-size: 11px;
+}
+
+.rpEditRow {
+	grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1.3fr) 128px;
+}
+
+.rpEditRow--off > :not(:first-child) {
+	opacity: 0.55;
+}
+
+.rpHeaderRow {
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+}
+
+.rpHeaderKey {
+	font-weight: 600;
+}
+
+.rpLegend {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 14px;
+	color: var(--color-text-secondary);
+	font-size: 12px;
+}
+
+.rpLegendItem {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+/* Response */
+.rpResponse {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	height: 100%;
+	padding: 12px 0 0 16px;
+	overflow: auto;
+}
+
+.rpResponseSummary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	min-height: 32px;
+}
+
+.rpSectionTitle {
+	margin-right: 8px;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.rpPlaceholder {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	min-height: 320px;
+	padding: 24px;
+	border: 1px dashed var(--color-border-default);
+	border-radius: var(--radius-md);
+	color: var(--color-text-secondary);
+	font-size: 13px;
+	text-align: center;
+}
+
+.rpPlaceholder--busy {
+	border-style: solid;
+}
+
+.rpPlaceholderTitle {
+	color: var(--color-text-primary);
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.rpPlaceholderText {
+	max-width: 340px;
+}
+
+.rpResponseTabs {
+	flex: 1;
+	min-height: 0;
+}
+
+.rpCodeBox--fill {
+	min-height: 320px;
+}
+
+.rpTimeline {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 14px;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+}
+
+.rpTimelineRow {
+	display: grid;
+	grid-template-columns: 140px minmax(0, 1fr) 72px;
+	align-items: center;
+	gap: 12px;
+	font-size: 13px;
+}
+
+.rpTimelineTrack {
+	position: relative;
+	height: 10px;
+	border-radius: 5px;
+	background: var(--color-background-hover);
+}
+
+.rpTimelineBar {
+	position: absolute;
+	top: 0;
+	height: 10px;
+	border-radius: 5px;
+	background: var(--color-action-primary);
+}
+
+.rpTimelineTotal {
+	padding-top: 10px;
+	border-top: 1px solid var(--color-border-subtle);
+	font-weight: 600;
+}

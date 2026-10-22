@@ -20,31 +20,32 @@ const changeConnectorItem: WorkflowNodeMenuItem = { id: 'change-connector', labe
 const connectorImageItem: WorkflowNodeMenuItem = { id: 'change-connector-image', labelKey: 'contextMenu.changeConnectorImage' };
 const configureAggregatorItem: WorkflowNodeMenuItem = { id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator' };
 
-const testSection: MenuSection = { id: 'test', items: [{ id: 'test-method', labelKey: 'contextMenu.testMethod', newFeatureId: 'workflow-test-method' }] };
+const requestItems: WorkflowNodeMenuItem[] = [{ id: 'request', labelKey: 'contextMenu.request' }, { id: 'edit-url', labelKey: 'contextMenu.editUrl' }, { id: 'edit-headers', labelKey: 'contextMenu.editHeader' }, { id: 'edit-body', labelKey: 'contextMenu.editBody' }];
+const tryRequestItem: WorkflowNodeMenuItem = { id: 'try-request', labelKey: 'contextMenu.tryRequest', newFeatureId: 'workflow-test-method' };
+const responseSection: MenuSection = { id: 'response', items: [{ id: 'show-response', labelKey: 'contextMenu.showResponse' }] };
 
 const requestSections: MenuSection[] = [
-  { id: 'request', items: [{ id: 'request', labelKey: 'contextMenu.request' }, { id: 'edit-url', labelKey: 'contextMenu.editUrl' }, { id: 'edit-headers', labelKey: 'contextMenu.editHeader' }, { id: 'edit-body', labelKey: 'contextMenu.editBody' }] },
-  { id: 'response', items: [{ id: 'show-response', labelKey: 'contextMenu.showResponse' }] },
+  { id: 'request', items: [...requestItems, tryRequestItem] },
+  responseSection,
 ];
 
 // Only a connector node draws its connector's image; a system node shows a globe.
 const connectorMenu: MenuSection[] = [
   { id: 'main', items: [changeLabelItem, changeConnectorItem, connectorImageItem, configureAggregatorItem] },
   ...requestSections,
-  testSection,
 ];
 
 const systemMenu: MenuSection[] = [
   { id: 'main', items: [changeLabelItem, changeConnectorItem, configureAggregatorItem] },
   ...requestSections,
-  testSection,
 ];
 
 // A trigger-connection node calls another workflow's webhook — it has no connector to swap,
-// and no test entry: testing it would start that other workflow for real.
+// and no Try Request entry: trying it would start that other workflow for real.
 const triggerConnectionMenu: MenuSection[] = [
   { id: 'main', items: [changeLabelItem, configureAggregatorItem] },
-  ...requestSections,
+  { id: 'request', items: requestItems },
+  responseSection,
 ];
 
 export const menuByType: Record<string, MenuSection[]> = {
