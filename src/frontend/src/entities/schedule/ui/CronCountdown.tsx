@@ -1,11 +1,12 @@
 import {useEffect, useState} from 'react'
 import {CronExpressionParser} from 'cron-parser'
+import {quartzToStandardCron} from '@shared/lib/cron/quartzCron'
 
 const TICK_MS = 1000
 
 function getNextCronTriggerMs(cronExp: string, fromMs: number): number | null {
     try {
-        const interval = CronExpressionParser.parse(cronExp.trim(), {
+        const interval = CronExpressionParser.parse(quartzToStandardCron(cronExp), {
             currentDate: new Date(fromMs),
         })
         return interval.next().getTime()
