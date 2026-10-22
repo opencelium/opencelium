@@ -67,3 +67,10 @@
   padding-left: 26px;
 }
 
+.contextMenuItem:has(.newFeatureBadge) {
+  /* Keyed on the badge so the highlight expires with it on the next release. */
+  background: var(--color-action-primary-subtle);
+  color: var(--color-action-primary);
+  font-weight: 600;
+}
+
