@@ -583,6 +583,7 @@
     "empty": "No problems found in this workflow.",
     "badgeTooltip": "{{count}} steps have problems — show them",
     "badgeTooltip_one": "{{count}} step has a problem — show it",
+    "badgeTooltipClean": "No errors or warnings — show the problems list",
     "groups": {
       "error": "Must be fixed before saving ({{count}})",
       "warning": "Asked about when saving ({{count}})",
