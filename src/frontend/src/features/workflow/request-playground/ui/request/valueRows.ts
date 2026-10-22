@@ -22,6 +22,16 @@ const describeTargets = (targets: InputTarget[], t: Translate) => targets
 
 const groupOf = (targets: InputTarget[]): InputLocation => targets[0]?.location ?? 'body';
 
+// A connector field in the URL (the `{url}` base, mostly) is already shown in the URL bar,
+// so the URL group lists only the method references and webhook parameters that need a value.
+const listedConnectionFields = (inputs: PlaygroundInputs) => inputs.connectionFields
+	.map((connectionField) => ({ ...connectionField,
+		targets: connectionField.targets.filter(({ location }) => location !== 'url') }))
+	.filter(({ targets }) => targets.length > 0);
+
+export const countValueRows = (inputs: PlaygroundInputs) =>
+	inputs.references.length + inputs.webhooks.length + listedConnectionFields(inputs).length;
+
 export function buildValueRows(inputs: PlaygroundInputs, t: Translate): ValueRow[] {
 	return [
 		...inputs.references.map((reference): ValueRow => ({
@@ -45,7 +55,7 @@ export function buildValueRows(inputs: PlaygroundInputs, t: Translate): ValueRow
 			description: t('requestPlayground.values.fromWebhook',
 				{ type: webhook.type, target: describeTargets(webhook.targets, t) }),
 		})),
-		...inputs.connectionFields.map(({ field, targets }): ValueRow => ({
+		...listedConnectionFields(inputs).map(({ field, targets }): ValueRow => ({
 			kind: 'connection',
 			key: `connection:${field}`,
 			group: groupOf(targets),
