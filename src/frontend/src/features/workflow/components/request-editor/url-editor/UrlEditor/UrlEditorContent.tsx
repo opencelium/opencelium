@@ -4,6 +4,7 @@ import { LinkOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { HttpMethodBadge } from '@shared/ui/http-method/HttpMethodBadge';
 import { Select } from '@shared/ui/primitives/Select';
+import { NewFeature } from '@shared/ui/feedback/NewFeature/NewFeature';
 import { LegacyBodyReferenceGenerator } from '../../body-editor/LegacyBodyReferenceGenerator/LegacyBodyReferenceGenerator';
 import { UrlEndpointField } from '../UrlEndpointField/UrlEndpointField';
 import { UrlQueryParamsTable } from '../UrlQueryParamsTable/UrlQueryParamsTable';
@@ -51,6 +52,18 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 		if (!open) restore();
 	};
 	const selectedMethod = (method.request.method || 'GET').toUpperCase();
+	const methodSelect = (
+		<div className="wfUrlMethodSelect" data-testid="workflow-url-method">
+			<Select
+				value={selectedMethod}
+				onChange={onMethodChange}
+				options={urlMethodOptions}
+				sortOptions={false}
+				readOnly={readOnly}
+				testId="workflow-url-method-select"
+			/>
+		</div>
+	);
 	return (
 		<div
 			ref={wrapperRef}
@@ -68,16 +81,11 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 				readOnly={readOnly}
 				value={endpointRaw}
 				beforeNode={
-					<div className="wfUrlMethodSelect" data-testid="workflow-url-method">
-						<Select
-							value={selectedMethod}
-							onChange={onMethodChange}
-							options={urlMethodOptions}
-							sortOptions={false}
-							readOnly={readOnly}
-							testId="workflow-url-method-select"
-						/>
-					</div>
+					!readOnly && method.connector != null ? (
+						<NewFeature id="workflow-connector-http-method">{methodSelect}</NewFeature>
+					) : (
+						methodSelect
+					)
 				}
 				endpointArgs={endpointArgs}
 				endpointArgsRef={endpointArgsRef}
