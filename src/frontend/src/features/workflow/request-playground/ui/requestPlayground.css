@@ -133,26 +133,13 @@
 }
 
 .rpUrl {
-	display: flex;
 	flex: 1 1 280px;
-	align-items: center;
-	gap: 8px;
 	min-width: 0;
-	height: 32px;
-	padding: 0 10px;
-	border: 1px solid var(--color-border-default);
-	border-radius: var(--radius-md);
-	background: var(--color-background-input);
-	font-family: var(--typography-font-family-mono, monospace);
-	font-size: 13px;
 }
 
-.rpUrlText {
-	flex: 1;
-	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+.rpUrl input {
+	font-family: var(--typography-font-family-mono, monospace);
+	font-size: 13px;
 }
 
 .rpWarningBody {

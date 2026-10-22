@@ -8,7 +8,8 @@ import { EditableRowsTable } from './EditableRowsTable';
 export function ParamsTab({ session }: { session: PlaygroundSession }) {
 	const { t } = useI18n('workflow');
 	const { baseConfig, edits, setEdits, connectionFieldNames } = session;
-	const initialRows = useMemo(() => paramRowsOf(baseConfig), [baseConfig]);
+	const initialRows = useMemo(() => paramRowsOf({ ...baseConfig, url: edits.url ?? baseConfig.url }),
+		[baseConfig, edits.url]);
 	const rows = edits.paramRows ?? initialRows;
 
 	return (

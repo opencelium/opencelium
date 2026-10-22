@@ -143,7 +143,7 @@
     },
     "workflowTestMethod": {
       "title": "Request ausprobieren",
-      "description": "Senden Sie diese Methode einzeln – mit Werten für ihre Referenzen auf vorherige Methoden –, ohne den ganzen Workflow auszuführen."
+      "description": "Senden Sie diese Methode einzeln – mit Werten für ihre Referenzen auf vorherige Methoden –, ohne den ganzen Workflow auszuführen. Noch in Entwicklung: Antworten sind vorerst Mock-Daten."
     },
     "workflowProblems": {
       "title": "Workflow-Linting",

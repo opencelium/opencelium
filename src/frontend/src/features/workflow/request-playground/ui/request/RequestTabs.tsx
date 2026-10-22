@@ -9,6 +9,7 @@ import { HeadersTab } from './HeadersTab';
 import { ParamsTab } from './ParamsTab';
 import { SettingsTab } from './SettingsTab';
 import { TestValuesTab } from './TestValuesTab';
+import { countValueRows } from './valueRows';
 
 export type RequestTab = 'values' | 'params' | 'headers' | 'body' | 'settings';
 
@@ -32,7 +33,7 @@ export function RequestTabs({ session, values, settings, missingKeys, tab, focus
 	onSelectInput, onSettingsChange }: Props) {
 	const { t } = useI18n('workflow');
 	const { inputs, config } = session;
-	const valueCount = inputs.references.length + inputs.webhooks.length + inputs.connectionFields.length;
+	const valueCount = countValueRows(inputs);
 	const { queryRaw } = splitEndpoint(config.url ?? '');
 	const label = (key: RequestTab, count?: number) =>
 		<TabLabel label={t(`requestPlayground.tabs.${key}`)} count={count} />;

@@ -1016,8 +1016,14 @@
       "loopWithIterator": "Loop ({{iterator}})",
       "if": "If"
     },
+    "preview": {
+      "badge": "In development",
+      "badgeHint": "Coming soon: the backend for testing a method is not available yet.",
+      "title": "Coming soon: this feature is still in development",
+      "message": "The backend for testing a single method is not available yet. Responses shown here are mock data, not a real call to the connector."
+    },
     "toolbar": {
-      "connection": "Connection",
+      "connector": "Connector",
       "prefill": "Prefill values from"
     },
     "prefill": {
@@ -1079,12 +1085,12 @@
       "reset": "Reset to prefilled value",
       "placeholder": "Enter test value",
       "upstreamPlaceholder": "Filled by the upstream run",
-      "connectionPlaceholder": "Filled in from the connection",
+      "connectionPlaceholder": "Filled in from the connector",
       "empty": "This request has no dynamic values. It is sent exactly as configured.",
       "pathSegment": "path",
       "fromMethod": "From {{method}} · used in {{target}}",
       "fromWebhook": "Webhook parameter ({{type}}) · used in {{target}}",
-      "fromConnection": "Connection field · used in {{target}}",
+      "fromConnection": "Connector field · used in {{target}}",
       "unknownMethod": "unknown method",
       "groups": {
         "url": "URL",
@@ -1108,7 +1114,7 @@
       "upstream": "Upstream",
       "edited": "Manual",
       "empty": "Required",
-      "connection": "Connection",
+      "connection": "Connector",
       "secret": "Secret"
     },
     "sourceHint": {
@@ -1118,21 +1124,21 @@
       "upstream": "The steps before this one run first; their response provides this value.",
       "edited": "Changed for this test.",
       "empty": "No value yet – enter one before sending.",
-      "connection": "Taken from the selected connection. A change applies to this test only.",
-      "secret": "Taken from the selected connection and never shown."
+      "connection": "Taken from the selected connector. A change applies to this test only.",
+      "secret": "Taken from the selected connector and never shown."
     },
     "origin": {
       "fixed": "Fixed",
       "dynamic": "Dynamic",
-      "connection": "Connection",
+      "connection": "Connector",
       "secret": "Secret",
       "editable": "Editable"
     },
     "originHint": {
       "fixed": "set by the API definition",
       "dynamic": "change in Test values",
-      "connection": "from the connection",
-      "secret": "from the connection, masked",
+      "connection": "from the connector",
+      "secret": "from the connector, masked",
       "editable": "change freely for this test"
     },
     "params": {

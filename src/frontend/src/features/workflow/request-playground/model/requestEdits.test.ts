@@ -50,6 +50,13 @@ describe('applyRequestEdits', () => {
 		expect(edited.body).toEqual({ b: 2 });
 	});
 
+	it('takes a typed URL as is and applies parameter edits on top of it', () => {
+		const url = '{url}/orders?page=2';
+		expect(applyRequestEdits(config, { url }).url).toBe(url);
+		const paramRows = [{ ...createEmptyRow(), key: 'page', value: '3' }];
+		expect(applyRequestEdits(config, { url, paramRows }).url).toBe('{url}/orders?page=3');
+	});
+
 	it('marks only the rows added in the playground', () => {
 		expect(isAddedRow(createEmptyRow())).toBe(true);
 		expect(headerRowsOf(config).some(isAddedRow)).toBe(false);
