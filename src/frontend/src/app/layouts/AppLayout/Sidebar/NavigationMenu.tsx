@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useRef } from 'react';
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
 import {BACK_TO_MAIN_MENU_KEY, useAdminMenu, useMainMenu} from "@app/layouts/AppLayout/Sidebar/menues.tsx";
+import {switchMenu} from "@app/layouts/AppLayout/Sidebar/useMenuSwitch";
 import {useTheme} from "@shared/theme/hooks/useTheme.tsx";
 import {AnimatePresence, motion} from "framer-motion";
 
@@ -42,7 +43,7 @@ export const NavigationMenu = () => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const { theme } = useTheme();
-    const { menuType, openSubmenuKeys, setOpenSubmenuKeys, setMenu, setLastPath, lastPathByMenu } = useLayoutStore();
+    const { menuType, openSubmenuKeys, setOpenSubmenuKeys, setMenu, setLastPath } = useLayoutStore();
     const sidebar = theme.color.sidebar;
 
     const mainMenu = useMainMenu();
@@ -130,8 +131,7 @@ export const NavigationMenu = () => {
                         style={{ background: 'transparent', borderInlineEnd: 'none' }}
                         onClick={({ key, domEvent }) => {
                             if (key === BACK_TO_MAIN_MENU_KEY) {
-                                setMenu('main');
-                                navigate(lastPathByMenu.main);
+                                switchMenu(navigate, 'main');
                                 return;
                             }
                             // Modifier-held clicks fall through to the label's <a href>,
