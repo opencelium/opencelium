@@ -64,7 +64,63 @@
 }
 
 .contextMenuItemIndented {
-  padding-left: 26px;
+  padding-left: 38px;
+}
+
+.contextMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contextMenuItemLabel,
+.contextMenuItem :has(> .newFeature) {
+  flex: 1;
+  min-width: 0;
+}
+
+.contextMenuInlineRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 12px;
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.contextMenuInlineLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.contextMenuInlineActions {
+  display: flex;
+  gap: 4px;
+}
+
+.contextMenuChip {
+  padding: 3px 9px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  background: var(--color-background-surface);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.contextMenuChip:hover,
+.contextMenuChip:focus-visible {
+  border-color: var(--color-action-primary);
+  background: var(--color-action-primary-subtle);
+  color: var(--color-action-primary);
 }
 
 .contextMenuItem:has(.newFeatureBadge) {

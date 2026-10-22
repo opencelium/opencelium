@@ -495,14 +495,15 @@
   },
   "contextMenu": {
     "changeLabel": "Change Label",
+    "connector": "Connector",
+    "url": "URL",
+    "header": "Header",
+    "body": "Body",
     "changeConnector": "Use Another Connector",
     "changeConnectorImage": "Change Connector Image",
     "openConfiguration": "Open Configuration",
     "configureAggregator": "Assign Data Aggregator…",
     "request": "Request",
-    "editUrl": "Edit URL",
-    "editHeader": "Edit Header",
-    "editBody": "Edit Body",
     "showResponse": "Show Response",
     "tryRequest": "Try Request…",
     "newLabelPlaceholder": "New label"
