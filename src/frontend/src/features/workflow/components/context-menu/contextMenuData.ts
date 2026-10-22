@@ -20,7 +20,7 @@ const changeConnectorItem: WorkflowNodeMenuItem = { id: 'change-connector', labe
 const connectorImageItem: WorkflowNodeMenuItem = { id: 'change-connector-image', labelKey: 'contextMenu.changeConnectorImage' };
 const configureAggregatorItem: WorkflowNodeMenuItem = { id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator' };
 
-const testSection: MenuSection = { id: 'test', items: [{ id: 'test-method', labelKey: 'contextMenu.testMethod' }] };
+const testSection: MenuSection = { id: 'test', items: [{ id: 'test-method', labelKey: 'contextMenu.testMethod', newFeatureId: 'workflow-test-method' }] };
 
 const requestSections: MenuSection[] = [
   { id: 'request', items: [{ id: 'request', labelKey: 'contextMenu.request' }, { id: 'edit-url', labelKey: 'contextMenu.editUrl' }, { id: 'edit-headers', labelKey: 'contextMenu.editHeader' }, { id: 'edit-body', labelKey: 'contextMenu.editBody' }] },

@@ -120,6 +120,27 @@
     "mainMenu": "Zum Hauptmenü wechseln",
     "startWorkflowTutorial": "Workflow-Tutorial starten"
   },
+  "newFeature": {
+    "label": "Neu",
+    "workflowTemplateJsonEdit": {
+      "description": "Workflow-Vorlagen lassen sich jetzt direkt in der Vorlagenliste als JSON bearbeiten."
+    },
+    "enhancementScriptSandbox": {
+      "description": "Führen Sie ein Erweiterungsskript vor dem Speichern im Browser mit Beispieleingaben aus."
+    },
+    "workflowReferenceOperations": {
+      "description": "Referenzen können jetzt Operationen auf die Antwort anwenden: beliebige Eigenschaft (*), alle Schlüsselnamen, das letzte Array-Element und die Anzahl der Elemente. Tippen Sie die Syntax einer Operation, um direkt zu ihr zu springen."
+    },
+    "workflowConnectorHttpMethod": {
+      "description": "Die HTTP-Methode lässt sich jetzt auch für Konnektor-Methoden ändern, nicht nur für HTTP-Request- und Webhook-Schritte."
+    },
+    "workflowHeaderUserActions": {
+      "description": "Sprache, Hilfe zum Workflow-Tutorial, Menüwechsel und Ihr Profil sind jetzt direkt in der Kopfzeile des Editors verfügbar."
+    },
+    "workflowTestMethod": {
+      "description": "Senden Sie diese Methode einzeln – mit Werten für ihre Referenzen auf vorherige Methoden –, ohne den ganzen Workflow auszuführen."
+    }
+  },
   "user": {
     "unknown": "Unbekannter Benutzer"
   },

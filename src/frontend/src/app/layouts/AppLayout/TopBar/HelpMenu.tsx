@@ -6,6 +6,8 @@ import { Divider } from '@shared/ui/primitives/Divider'
 import { Icon } from '@shared/ui/primitives/Icon'
 import { IconButton } from '@shared/ui/primitives/IconButton'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
+import { NewFeature } from '@shared/ui/feedback/NewFeature/NewFeature'
+import type { NewFeatureId } from '@shared/ui/feedback/NewFeature/newFeatures'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useIsAdmin } from '@features/auth/useIsAdmin'
 import { useDashboardTourStore } from '@features/onboarding/dashboard-tour/model/dashboardTour.store'
@@ -30,9 +32,17 @@ export type HelpTours = 'app' | 'workflow'
  * entry takes the user somewhere — a popover left standing would sit over the
  * tour it just started.
  */
-export function HelpMenu({ tours = 'app' }: { tours?: HelpTours }) {
+export function HelpMenu({ tours = 'app', newFeatureId }: { tours?: HelpTours; newFeatureId?: NewFeatureId }) {
     const { t: tCommon } = useI18n('common')
     const [isOpen, setIsOpen] = useState(false)
+    const helpButton = (
+        <IconButton
+            size="xs"
+            type="text"
+            iconProps={{ name: 'help', color: 'primary' }}
+            testId="topbar-help"
+        />
+    )
 
     return (
         <Popover
@@ -57,14 +67,9 @@ export function HelpMenu({ tours = 'app' }: { tours?: HelpTours }) {
               * which left the icon inert. A real DOM node takes them.
               */}
             <span style={{ display: 'inline-flex' }}>
-                <Tooltip content={tCommon('topbar.help')}>
-                    <IconButton
-                        size="xs"
-                        type="text"
-                        iconProps={{ name: 'help', color: 'primary' }}
-                        testId="topbar-help"
-                    />
-                </Tooltip>
+                {newFeatureId
+                    ? <NewFeature id={newFeatureId} tooltip={tCommon('topbar.help')}>{helpButton}</NewFeature>
+                    : <Tooltip content={tCommon('topbar.help')}>{helpButton}</Tooltip>}
             </span>
         </Popover>
     )

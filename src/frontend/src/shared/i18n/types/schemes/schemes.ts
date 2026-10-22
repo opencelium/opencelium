@@ -209,6 +209,27 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             mainMenu: string
             startWorkflowTutorial: string
         }
+        newFeature: {
+            label: string
+            workflowTemplateJsonEdit: {
+                description: string
+            }
+            enhancementScriptSandbox: {
+                description: string
+            }
+            workflowReferenceOperations: {
+                description: string
+            }
+            workflowConnectorHttpMethod: {
+                description: string
+            }
+            workflowHeaderUserActions: {
+                description: string
+            }
+            workflowTestMethod: {
+                description: string
+            }
+        }
         user: {
             unknown: string
         }
