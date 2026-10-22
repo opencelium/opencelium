@@ -7,6 +7,8 @@ import 'ace-builds/src-noconflict/theme-tomorrow';
 import 'ace-builds/src-noconflict/theme-tomorrow_night';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useTheme } from '@shared/theme/hooks/useTheme';
+import { CopyButton } from '@shared/ui/actions/CopyButton';
+import { DialogHeaderActions } from '@shared/ui/primitives/Dialog/DialogHeaderSlotContext';
 import type { JsonEditorDialogProps } from './JsonEditorDialog.types';
 import { JsonEditorTree } from './JsonEditorTree';
 import { JsonEditorDialogFooter } from './JsonEditorDialogFooter';
@@ -55,6 +57,9 @@ export function JsonEditorDialog<T>({ open, readOnly, title, testId, value, vali
 				canForceApply={forceApply ? !!forcePayload : null}
 				onForceApply={() => void runForceApply()} onCancel={() => void close()}
 				onReset={editor.reset} onApply={() => void apply()} />}>
+			<DialogHeaderActions>
+				<CopyButton value={editor.raw} testId={`${testId}-copy`} />
+			</DialogHeaderActions>
 			<Segmented data-testid={`${testId}-mode-toggle`} value={editor.mode}
 				onChange={(mode) => editor.setMode(mode as JsonEditorMode)}
 				options={[{ label: t('jsonEditor.mode.tree'), value: 'tree' },
