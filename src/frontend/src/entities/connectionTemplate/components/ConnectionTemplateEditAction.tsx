@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react'
 import { message } from 'antd'
 import { IconButton } from '@shared/ui/primitives/IconButton'
 import { NewFeature } from '@shared/ui/feedback/NewFeature/NewFeature'
+import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { notifyError } from '@shared/ui/feedback/notifyError'
 import { JsonEditorDialog } from '@shared/ui/json-editor/JsonEditorDialog'
@@ -15,9 +16,11 @@ import {
 type Props = {
     row: unknown
     rowId: string
+    /** The "new" badge goes on the top row only: one per row would turn the whole column blue. */
+    isFirstRow: boolean
 }
 
-export const ConnectionTemplateEditAction: React.FC<Props> = ({ row, rowId }) => {
+export const ConnectionTemplateEditAction: React.FC<Props> = ({ row, rowId, isFirstRow }) => {
     const { t: tEntities } = useI18n('entities')
     const [isLoading, setIsLoading] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
@@ -59,22 +62,25 @@ export const ConnectionTemplateEditAction: React.FC<Props> = ({ row, rowId }) =>
         }
     }
 
+    const tooltip = tEntities('connection-template.list.edit.tooltip')
+    const button = (
+        <IconButton
+            iconProps={{ name: 'edit', color: 'primary', size: 15 }}
+            type={'text'}
+            size={'xs'}
+            loading={isLoading}
+            onClick={open}
+            testId={`connection-template-row-action-edit-json-${id}`}
+        />
+    )
+
     return (
         <>
-            <NewFeature
-                id="workflow-template-json-edit"
-                tooltip={tEntities('connection-template.list.edit.tooltip')}
-                placement="top"
-            >
-                <IconButton
-                    iconProps={{ name: 'edit', color: 'primary', size: 15 }}
-                    type={'text'}
-                    size={'xs'}
-                    loading={isLoading}
-                    onClick={open}
-                    testId={`connection-template-row-action-edit-json-${id}`}
-                />
-            </NewFeature>
+            {isFirstRow ? (
+                <NewFeature id="workflow-template-json-edit" tooltip={tooltip} placement="top">{button}</NewFeature>
+            ) : (
+                <Tooltip content={tooltip} placement="top">{button}</Tooltip>
+            )}
             {value !== null && <JsonEditorDialog
                 open
                 readOnly={false}

@@ -36,6 +36,7 @@ const renderAction = (
     rowId: string,
     iconSize: number | undefined,
     tooltipPlacement: TooltipPlacement | undefined,
+    isFirstRow: boolean,
 ): React.ReactNode => {
     const testId = buildTestId(entity.name, 'row-action', action.type, rowId);
     switch (action.type) {
@@ -54,6 +55,7 @@ const renderAction = (
                         rowId,
                         iconSize,
                         tooltipPlacement,
+                        isFirstRow,
                         // Keyed by `action.key`, not the shared 'custom' type — a row
                         // with two custom actions must not hand both the same selector.
                         testId: buildTestId(entity.name, 'row-action', action.key, rowId),
@@ -87,14 +89,16 @@ export function buildRowActionsColumn<T extends Record<string, unknown>>(
         // before widths are frozen, keeping the initial layout from stretching
         // the icons across the whole table.
         meta: { align: 'center', resizable: false, fillTrailingSpace: true },
-        cell: ({ row }) => {
+        cell: ({ row, table }) => {
             // Sub-rows (depth > 0) are decorative children — they carry no actions.
             if (row.depth > 0) return null;
             const original = row.original;
             const rowId = String(getValueByPath(original as Record<string, unknown>, rowKey) ?? '');
             const iconSize = display === 'menu' ? undefined : INLINE_ACTION_ICON_SIZE;
             const tooltipPlacement = display === 'menu' ? MENU_TOOLTIP_PLACEMENT : INLINE_TOOLTIP_PLACEMENT;
-            const rendered = actions.map((action, index) => renderAction(action, index, entity, original, rowId, iconSize, tooltipPlacement));
+            const isFirstRow = table.getRowModel().rows.find((candidate) => candidate.depth === 0)?.id === row.id;
+            const rendered = actions.map((action, index) =>
+                renderAction(action, index, entity, original, rowId, iconSize, tooltipPlacement, isFirstRow));
 
             if (display === 'menu') {
                 return (

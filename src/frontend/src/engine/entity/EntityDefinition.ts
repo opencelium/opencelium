@@ -355,6 +355,8 @@ export type CustomActionContext = {
     tooltipPlacement?: TooltipPlacement
     /** Stable e2e selector for the rendered button, keyed by the action's `key`. */
     testId?: string
+    /** Top row as currently shown (after sorting, filtering and paging) — for a hint that should appear once, not on every row. */
+    isFirstRow: boolean
 }
 
 export type ListAction =
