@@ -84,6 +84,7 @@ export type IconName =
     | 'package'
     | 'external-link'
     | 'send'
+    | 'image'
 
 export type IconColor =
     | 'default'
