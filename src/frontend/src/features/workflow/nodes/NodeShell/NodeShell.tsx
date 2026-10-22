@@ -10,6 +10,12 @@ import { BindingBadge } from '../BindingBadge/BindingBadge';
 import { CommentBadge } from '../CommentBadge/CommentBadge';
 import type { NodeShellProps } from './NodeShell.types';
 
+// A failed test run can report a whole backend stack trace.
+const MAX_TOOLTIP_MESSAGE_LENGTH = 200;
+
+const shortenMessage = (message: string | undefined) => message && message.length > MAX_TOOLTIP_MESSAGE_LENGTH
+	? `${message.slice(0, MAX_TOOLTIP_MESSAGE_LENGTH)}...` : message;
+
 export function NodeShell({
 	id,
 	data,
@@ -37,8 +43,8 @@ export function NodeShell({
 	// so the label would be the same text twice, half of it behind the card.
 	const hasBindingCard = !!bindingLens?.cardNodeIds.has(id);
 	const jointRejection = useJointRejectionMessage(data.jointInvalidReason, data.jointBlockingLabel);
-	const redNodeMessage = data.hasError ? data.errorMessage
-		: data.testRunFailedVisible ? data.testRunFailedMessage : undefined;
+	const redNodeMessage = shortenMessage(data.hasError ? data.errorMessage
+		: data.testRunFailedVisible ? data.testRunFailedMessage : undefined);
 	const bodyTooltip = jointRejection || redNodeMessage;
 	const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
 		if (data.dragGhost || data.dropPlaceholder) return;
