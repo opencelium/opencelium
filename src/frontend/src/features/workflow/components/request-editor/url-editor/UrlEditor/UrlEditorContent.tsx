@@ -131,7 +131,7 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 			/>
 			{!readOnly && referenceOpen && connection && (
 				// Mounted only while open, so autoFocus fires on the click that opened it.
-				<div data-url-reference-control>
+				<div data-url-reference-control className='urlReferenceGenerator'>
 					<LegacyBodyReferenceGenerator
 						value={
 							active
