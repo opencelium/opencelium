@@ -74,3 +74,15 @@
   font-weight: 600;
 }
 
+/* Stretch the tooltip trigger and the NewFeature wrapper (newFeature.css shrinks
+   them to fit-content) so the tag sits at the row's right edge. */
+.contextMenuItem :has(> .newFeature),
+.contextMenuItem .newFeature {
+  width: 100%;
+}
+
+.contextMenuItem .newFeature {
+  justify-content: space-between;
+  gap: 12px;
+}
+

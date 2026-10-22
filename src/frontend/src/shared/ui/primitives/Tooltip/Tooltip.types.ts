@@ -18,6 +18,8 @@ export interface TooltipProps {
     zIndex?: number;
     /** Overrides the popup's default max-width (px) — use for tooltips carrying longer free-text content than the default wrap width comfortably fits. */
     maxWidth?: number;
+    /** `card` renders a light, padded popover surface for richer content (title, text, actions). */
+    variant?: 'default' | 'card';
     /** Controlled visibility; omit to let hover decide. */
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
