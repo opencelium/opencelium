@@ -211,6 +211,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         }
         newFeature: {
             label: string
+            gotIt: string
             workflowTemplateJsonEdit: {
                 description: string
             }
@@ -227,6 +228,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 description: string
             }
             workflowTestMethod: {
+                title: string
                 description: string
             }
         }

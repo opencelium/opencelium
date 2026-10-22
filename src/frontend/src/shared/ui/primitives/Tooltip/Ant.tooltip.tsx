@@ -7,6 +7,7 @@ export const AntTooltip: TooltipComponent = ({
     placement = 'top',
     zIndex,
     maxWidth,
+    variant = 'default',
     open,
     onOpenChange,
     children,
@@ -17,7 +18,8 @@ export const AntTooltip: TooltipComponent = ({
             placement={placement}
             open={open}
             onOpenChange={onOpenChange}
-            classNames={{ root: 'ant-tooltip-custom' }}
+            color={variant === 'card' ? 'var(--color-background-elevated)' : undefined}
+            classNames={{ root: variant === 'card' ? 'ant-tooltip-custom ant-tooltip-card' : 'ant-tooltip-custom' }}
             styles={(zIndex || maxWidth) ? { root: { ...(zIndex && { zIndex }), ...(maxWidth && { maxWidth }) } } : undefined}
         >
             <span style={{justifyContent: 'center', alignItems: 'center', display: 'flex', minWidth: 0}}>{children}</span>

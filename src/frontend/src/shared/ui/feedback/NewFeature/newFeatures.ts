@@ -7,6 +7,8 @@ export type NewFeatureEntry = {
     /** Release (major.minor) that introduced the feature; the badge disappears once the backend runs a later one. */
     since: string
     descriptionKey: CommonKey
+    /** Card title for a control without a tooltip of its own; otherwise the tooltip text titles the card. */
+    titleKey?: CommonKey
 }
 
 /**
@@ -37,6 +39,7 @@ export const NEW_FEATURES = {
     'workflow-test-method': {
         since: '5.3',
         descriptionKey: 'newFeature.workflowTestMethod.description',
+        titleKey: 'newFeature.workflowTestMethod.title',
     },
 } as const satisfies Record<string, NewFeatureEntry>
 

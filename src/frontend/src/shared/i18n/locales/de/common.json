@@ -122,6 +122,7 @@
   },
   "newFeature": {
     "label": "Neu",
+    "gotIt": "Verstanden",
     "workflowTemplateJsonEdit": {
       "description": "Workflow-Vorlagen lassen sich jetzt direkt in der Vorlagenliste als JSON bearbeiten."
     },
@@ -138,6 +139,7 @@
       "description": "Sprache, Hilfe zum Workflow-Tutorial, Menüwechsel und Ihr Profil sind jetzt direkt in der Kopfzeile des Editors verfügbar."
     },
     "workflowTestMethod": {
+      "title": "Request ausprobieren",
       "description": "Senden Sie diese Methode einzeln – mit Werten für ihre Referenzen auf vorherige Methoden –, ohne den ganzen Workflow auszuführen."
     }
   },
