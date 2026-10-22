@@ -152,6 +152,10 @@
     "sidebarBackToMainMenu": {
       "title": "Back to main menu",
       "description": "Back returns you to the main menu, on the page you last had open there. Alt+M switches between the two menus as well."
+    },
+    "changelog": {
+      "title": "Changelog",
+      "description": "See what changed in each OpenCelium release: the current version first, earlier ones below. Open it from the help menu."
     }
   },
   "user": {
