@@ -31,6 +31,7 @@ export const NEW_FEATURES = {
     'workflow-connector-http-method': {
         since: '5.3',
         descriptionKey: 'newFeature.workflowConnectorHttpMethod.description',
+        titleKey: 'newFeature.workflowConnectorHttpMethod.title',
     },
     'workflow-header-user-actions': {
         since: '5.3',
