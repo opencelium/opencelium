@@ -25,7 +25,7 @@ type Props = {
 
 export function NewFeature({ id, variant = 'dot', tooltip, placement, zIndex, children }: Props) {
     const { t } = useI18n('common')
-    const { isNew, markSeen } = useNewFeature(id)
+    const { isNew } = useNewFeature(id)
 
     const content = isNew ? (
         <span className="newFeatureTooltip">
@@ -37,12 +37,11 @@ export function NewFeature({ id, variant = 'dot', tooltip, placement, zIndex, ch
         </span>
     ) : tooltip
 
-    // The wrapper stays mounted once the feature is seen, so dropping the badge
+    // The wrapper stays mounted once the release moves on, so dropping the badge
     // never remounts the wrapped control.
     return (
         <Tooltip content={content} placement={placement} zIndex={zIndex} maxWidth={isNew ? 280 : undefined}>
-            {/* Capture, so the control's own click handler cannot stop the "seen" mark. */}
-            <span className="newFeature" onClickCapture={isNew ? markSeen : undefined}>
+            <span className="newFeature">
                 {children}
                 {isNew && (variant === 'dot'
                     ? <span className="newFeature__dot" data-testid={`new-feature-${id}`} />

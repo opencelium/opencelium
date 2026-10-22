@@ -1,7 +1,6 @@
 import { Select } from 'antd';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import { useNewFeature } from '@shared/ui/feedback/NewFeature/useNewFeature';
 import { ReferenceOptionLabel } from '../ReferenceOptionLabel/ReferenceOptionLabel';
 import { ReferenceGroupLabel } from '../ReferenceGroupLabel/ReferenceGroupLabel';
 import { groupReferenceOptions } from '../requestReferenceOptions';
@@ -19,7 +18,6 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
   const state = useLegacyResponseFieldSelect({ method, type, value, disabled, iterators, onChange });
   const zIndex = popupZIndex ?? DEFAULT_POPUP_Z_INDEX;
   const fit = useFitWidthOnFocus(state.wrapperRef, state.searchValue);
-  const { markSeen } = useNewFeature('workflow-reference-operations');
   const feedbackTooltip = useReferenceFeedbackTooltip(state.pathFeedback);
 
   return (
@@ -64,10 +62,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
           notFoundContent={state.notFoundContent}
           open={state.open}
           onSearch={state.onSearch}
-          onSelect={(nextValue: unknown) => {
-            if (state.options.some((option) => option.kind === 'operation' && option.value === nextValue)) markSeen();
-            state.onSelect(nextValue);
-          }}
+          onSelect={state.onSelect}
           onFocus={() => {
             fit.onFocus();
             state.onFocus();
