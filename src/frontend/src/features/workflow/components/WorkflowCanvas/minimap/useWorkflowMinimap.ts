@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import { useEdges, useNodes } from '@xyflow/react';
 import { useGetConnectorsMetaQuery } from '@entities/connector/api/connectorApi';
 import { isLensElementId } from '../../../lens/lensIds';
-import { buildBindingGraph } from '../../../lens/buildBindingGraph';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../../types/workflow.types';
 import { buildMinimapModel } from './minimap.model';
-import { collectMinimapIssues } from './minimapIssues';
+import { buildWorkflowIssues } from '../../../problems/buildWorkflowIssues';
+import { useWorkflowProblemText } from '../../../problems/useWorkflowProblemText';
 
 /**
  * Read from the flow store rather than the page's graph state: the store holds the
@@ -17,6 +17,7 @@ export const useWorkflowMinimap = (fieldBindings: readonly unknown[] | undefined
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();
 	const { data: liveHealth } = useGetConnectorsMetaQuery();
+	const describe = useWorkflowProblemText();
 
 	const nodes = useMemo(() => flowNodes.filter((node) => !isLensElementId(node.id)) as WorkflowNodeModel[],
 		[flowNodes]);
@@ -24,9 +25,8 @@ export const useWorkflowMinimap = (fieldBindings: readonly unknown[] | undefined
 		[flowEdges]);
 
 	const model = useMemo(() => buildMinimapModel(nodes, edges), [nodes, edges]);
-	const issues = useMemo(() => collectMinimapIssues({
-		nodes, liveHealth, bindingGraph: buildBindingGraph(nodes, edges, fieldBindings),
-	}), [nodes, edges, fieldBindings, liveHealth]);
+	const issues = useMemo(() => buildWorkflowIssues(nodes, edges, fieldBindings, liveHealth, describe),
+		[nodes, edges, fieldBindings, liveHealth, describe]);
 
 	return { model, issues };
 };

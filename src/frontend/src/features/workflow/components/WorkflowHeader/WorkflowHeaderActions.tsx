@@ -1,11 +1,20 @@
 import { MoreHorizontal } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { CommandPalette } from '@widgets/CommandPalette/CommandPalette';
+import { UserActions } from '@widgets/UserActions/UserActions';
+import { useBreakpoints } from '@app/hooks/useBreakpoints';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { WorkflowHeaderMenuItem } from '../../types/workflow.types';
 import { workflowCommandBridgeStore } from '../../command/workflowCommandBridge';
 import { HeaderMenu } from '../header/HeaderMenu/HeaderMenu';
 import { useWorkflowSearchShortcut } from '../../hooks/useWorkflowSearchShortcut';
+
+// The editor header also carries the name, search, schedules and Save, so the user actions fold away well before the app's tablet breakpoint.
+const COMPACT_USER_ACTIONS_MAX_WIDTH = 1600;
+// Below this the header can't spare room for the schedules pill or the profile icon: schedules moves into the `…` menu, the profile actions are dropped.
+const MENU_ONLY_BELOW_WIDTH = 700;
+
+const SCHEDULES_MENU_ITEM: WorkflowHeaderMenuItem = { id: 'schedules', labelKey: 'headerMenu.schedules', section: 'schedules' };
 
 type Props = {
 	items: WorkflowHeaderMenuItem[];
@@ -17,14 +26,24 @@ type Props = {
 	saveDisabled: boolean;
 	saveDialogOpen: boolean;
 	schedulesSlot?: ReactNode;
+	problemsSlot?: ReactNode;
+	onToggleSchedules?: () => void;
 };
 
 export function WorkflowHeaderActions({
 	items, loadingItemId, onOpenHistory, onMenuItemSelect, onSave,
-	readOnly, saveDisabled, saveDialogOpen, schedulesSlot,
+	readOnly, saveDisabled, saveDialogOpen, schedulesSlot, problemsSlot, onToggleSchedules,
 }: Props) {
 	const { t } = useI18n('workflow');
+	const { width } = useBreakpoints();
 	const [menuOpen, setMenuOpen] = useState(false);
+	const isMenuOnly = width < MENU_ONLY_BELOW_WIDTH;
+	const menuItems = isMenuOnly && onToggleSchedules ? [SCHEDULES_MENU_ITEM, ...items] : items;
+	const selectMenuItem = (item: WorkflowHeaderMenuItem) => {
+		if (item.id === 'schedules') onToggleSchedules?.();
+		else if (item.id === 'version-history') onOpenHistory();
+		else onMenuItemSelect?.(item);
+	};
 	const [searchRequestId, setSearchRequestId] = useState(0);
 	useWorkflowSearchShortcut({
 		disabled: saveDialogOpen || workflowCommandBridgeStore.getState().hasOpenDialog(),
@@ -49,7 +68,15 @@ export function WorkflowHeaderActions({
 					return true;
 				}}
 			/>
-			{schedulesSlot}
+			{!isMenuOnly && (
+				<>
+					{schedulesSlot}
+					<UserActions layout={width <= COMPACT_USER_ACTIONS_MAX_WIDTH ? 'compact' : 'inline'} tours='workflow'
+						newFeatureId='workflow-header-user-actions' />
+					<span className='headerActionsDivider' aria-hidden />
+				</>
+			)}
+			{problemsSlot}
 			{!readOnly && (
 				<button className='primaryButton headerPrimaryButton' type='button'
 					disabled={saveDisabled} onClick={onSave} data-testid='workflow-save'>
@@ -61,9 +88,8 @@ export function WorkflowHeaderActions({
 					onClick={() => setMenuOpen((open) => !open)}>
 					<MoreHorizontal size={16} />
 				</button>
-				<HeaderMenu open={menuOpen} items={items} onClose={() => setMenuOpen(false)}
-					onSelect={(item) => item.id === 'version-history'
-						? onOpenHistory() : onMenuItemSelect?.(item)}
+				<HeaderMenu open={menuOpen} items={menuItems} onClose={() => setMenuOpen(false)}
+					onSelect={selectMenuItem}
 					loadingItemId={loadingItemId}
 				/>
 			</div>

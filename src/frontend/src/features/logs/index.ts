@@ -1,6 +1,8 @@
 export { LogsDialogContent } from "./ui/LogsDialogContent";
 export { LiveExecutionLogTree } from "./ui/live/LiveExecutionLogTree";
 export { MethodLogDetails } from "./ui/MethodLogDetails";
+export { RequestResponseTabs } from "./ui/RequestResponseTabs";
+export { LogRow, Meta, StatusBadge, Url } from "./ui/logRowUi";
 export { MethodDetailViewStateProvider } from "./ui/methodDetailViewState";
 export { MethodViewModeProvider, MethodViewSwitcher, useMethodViewMode } from "./ui/methodViewMode";
 export { MethodLabelProvider } from "./ui/methodLabels";

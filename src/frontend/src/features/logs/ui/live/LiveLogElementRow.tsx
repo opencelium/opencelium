@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Loading } from "@shared/ui/primitives/Loading/Loading";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { appendLoopIndex, type LiveLogNode, type LiveLogTree } from "../../model/liveLogTree";
-import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, TraceDot, Url } from "../logRowUi";
+import { LogRow, Meta, OperatorLabel, StatusBadge, TraceDot, Url } from "../logRowUi";
 import { LoopPager } from "../LoopPager";
 import { ElementChildren } from "../LogElementRow";
 import { MethodLogDetails } from "../MethodLogDetails";
 import { ErrorDetail } from "../ErrorDetail";
 import { CopyButton } from "@shared/ui/actions/CopyButton";
+import { HttpMethodBadge } from "@shared/ui/http-method/HttpMethodBadge";
 import { serializeLogElement } from "../serializeLogElement";
 import { useMethodViewMode } from "../methodViewMode";
 import { methodDisplayText } from "../methodView";
@@ -271,7 +272,7 @@ export function LiveLogElementRow({
             left={
               <>
                 {request?.http_method ? (
-                  <MethodBadge method={request.http_method} />
+                  <HttpMethodBadge method={request.http_method} />
                 ) : null}
                 <Url isError={hasError || target}>{displayText}</Url>
                 {displayText ? (

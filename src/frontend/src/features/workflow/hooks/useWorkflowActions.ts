@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { message } from 'antd';
+import { notifyError } from '@shared/ui/feedback/notifyError';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useWorkflowValidation } from './useWorkflowValidation';
+import { useSaveProblemsGate } from './useSaveProblemsGate';
+import { useWorkflowIssues } from '../problems/useWorkflowIssues';
+import { getIssueTone } from '../problems/workflowProblems';
 import { useSaveWorkflow } from './useSaveWorkflow';
 import { useAssignWorkflowCategory } from './useAssignWorkflowCategory';
 import { useWorkflowTemplates } from './useWorkflowTemplates';
@@ -35,6 +39,9 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
 	const [schedulesOpen, setSchedulesOpen] = useState(false);
 	const [changeHistoryOpen, setChangeHistoryOpen] = useState(false);
+	const [problemsOpen, setProblemsOpen] = useState(false);
+	const [focusedProblemNodeId, setFocusedProblemNodeId] = useState<string | null>(null);
+	const issues = useWorkflowIssues(view.hydratedNodes, workflow.edges, fieldBindings);
 	const [jsonEditorOpen, setJsonEditorOpen] = useState(false);
 	const [jsonEditorValue, setJsonEditorValue] = useState<Record<string, unknown> | null>(null);
 	const [copiedNodeIds, setCopiedNodeIds] = useState<string[]>([]);
@@ -46,11 +53,15 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		nodes: view.hydratedNodes, edges: workflow.edges,
 		setNodeError: workflow.onSetNodeError,
 		centerOnNode: workflow.centerOnNode });
+	const saveProblems = useSaveProblemsGate({ nodes: view.hydratedNodes, edges: workflow.edges,
+		setNodeError: workflow.onSetNodeError, centerOnNode: workflow.centerOnNode });
 	const saveWorkflow = useSaveWorkflow({ connectionId: view.activeConnectionId,
 		categoryId, nodes: view.hydratedNodes, edges: workflow.edges, fieldBindings,
 		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors,
 		resolveError: validation.resolveAndHighlightError,
 		validateEnhancementScripts: validation.validateEnhancementScripts,
+		validateReferencePaths: validation.validateReferencePaths,
+		validateSaveProblems: saveProblems.validateSaveProblems,
 		setFieldBindings: connection.setFieldBindings,
 		setHeaderState: connection.setHeaderState,
 		setPersistedTitle: connection.setPersistedTitle,
@@ -62,6 +73,17 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		setSelectedHistoryVersionId: connection.setSelectedHistoryVersionId,
 		setCreatedConnectionId: connection.setCreatedConnectionId,
 	});
+	// Runs before the save-comment dialog opens, so the user is not asked for a
+	// comment on a save that is going to be refused.
+	const confirmBeforeSave = async (): Promise<boolean> => {
+		workflow.onClearNodeErrors();
+		const blockingMessage = saveProblems.validateSaveProblems(fieldBindings);
+		if (blockingMessage) {
+			notifyError(blockingMessage);
+			return false;
+		}
+		return saveProblems.confirmSaveWarnings(fieldBindings);
+	};
 	const category = useAssignWorkflowCategory({ title: headerState.title,
 		description: headerState.description, saveWorkflow });
 	const templates = useWorkflowTemplates({ connectionId: view.activeConnectionId,
@@ -118,6 +140,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		openChangeHistory: () => {
 			setSchedulesOpen(false);
 			workflow.setHistoryOpen(false);
+			setProblemsOpen(false);
 			canvas.closeCanvasPanels();
 			setChangeHistoryOpen(true);
 		},
@@ -130,7 +153,9 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		title: headerState.title, description: headerState.description,
 		nodes: view.hydratedNodes, edges: workflow.edges, fieldBindings,
 		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors,
-		validateEnhancementScripts: validation.validateEnhancementScripts });
+		validateEnhancementScripts: validation.validateEnhancementScripts,
+		validateReferencePaths: validation.validateReferencePaths,
+		validateTestRunProblems: saveProblems.validateTestRunProblems });
 
 	// Anything hosting its own editing surface: canvas-level keyboard shortcuts
 	// must not reach past it into the graph underneath.
@@ -189,7 +214,26 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		setChangeHistoryOpen(false);
 	}, [isTestRunLocked, setSidebarAction, setContextMenu, setHistoryOpen]);
 
-	return { validation, saveWorkflow, category, templates, history, canvas, header,
+	// Looked up live, so the ring goes once the step's problems are fixed.
+	const focusedIssue = [...issues.errors, ...issues.warnings, ...issues.notices]
+		.find((issue) => issue.nodeId === focusedProblemNodeId);
+	const problems = { issues, open: problemsOpen,
+		focus: { nodeId: focusedProblemNodeId, tone: focusedIssue ? getIssueTone(focusedIssue) : null },
+		setFocus: setFocusedProblemNodeId,
+		focusNode: (nodeId: string) => {
+			setFocusedProblemNodeId(nodeId);
+			workflow.centerOnNode(nodeId);
+		},
+		clearFocus: () => setFocusedProblemNodeId(null),
+		openPanel: () => {
+			setSchedulesOpen(false);
+			setChangeHistoryOpen(false);
+			canvas.closeCanvasPanels();
+			setProblemsOpen(true);
+		},
+		closePanel: () => setProblemsOpen(false) };
+
+	return { validation, saveWorkflow, confirmBeforeSave, problems, category, templates, history, canvas, header,
 		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen,
 		jsonEditorOpen, setJsonEditorOpen, jsonEditorValue,
 		schedulesOpen, setSchedulesOpen, changeHistoryOpen, setChangeHistoryOpen,

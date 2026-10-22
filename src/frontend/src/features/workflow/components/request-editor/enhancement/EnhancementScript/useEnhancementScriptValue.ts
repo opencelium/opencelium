@@ -6,6 +6,7 @@ export function useEnhancementScriptValue(
   onChangeScript: (value: string) => void,
 ) {
   const [value, setValue] = useState(script);
+  const [sourceScript, setSourceScript] = useState(script);
   // Callers build this inline, so its identity changes on every render — keeping
   // it out of the effect's deps stops that from re-running (and re-scheduling)
   // the debounce on renders where nothing was actually typed.
@@ -15,7 +16,10 @@ export function useEnhancementScriptValue(
     onChangeScriptRef.current = onChangeScript;
   }, [onChangeScript]);
 
-  useEffect(() => setValue(script), [script]);
+  if (sourceScript !== script) {
+    setSourceScript(script);
+    setValue(script);
+  }
 
   useEffect(() => {
     if (value === script) return;

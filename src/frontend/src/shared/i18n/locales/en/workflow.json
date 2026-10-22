@@ -1,4 +1,13 @@
 {
+  "loadError": {
+    "title": "Could not load the workflow",
+    "description": "The workflow or connector list could not be loaded. Try again or return to the workflow list.",
+    "retry": "Try again"
+  },
+  "deletedConnectorMapping": {
+    "title": "Replace deleted connectors",
+    "intro": "This workflow uses deleted connectors. Choose a replacement for each connector to open the repaired workflow. Changes are saved only when you save the workflow."
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",
@@ -18,8 +27,8 @@
     "addAttribute": "Add attribute",
     "addWebhook": "Add Webhook",
     "openScriptNewWindow": "Open script in new window",
-    "maximizeScript": "Maximize script",
-    "minimizeScript": "Minimize script",
+    "maximizeEnhancement": "Maximize transformation",
+    "minimizeEnhancement": "Minimize transformation",
     "maximizeRequestData": "Maximize request data",
     "minimizeRequestData": "Minimize request data",
     "load": "Load",
@@ -151,7 +160,23 @@
     "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?",
     "enhancementScriptBrokenIn": "“{{method}}” has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
     "enhancementScriptBroken": "{{count}} steps have a transformation whose script still uses {{marker}} — the references they read were removed with the steps they pointed at. Fix the scripts before saving.",
-    "enhancementScriptBroken_one": "{{count}} step has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving."
+    "enhancementScriptBroken_one": "{{count}} step has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
+    "invalidReferencePathsTitle": "Invalid reference paths",
+    "invalidReferencePathIn": "“{{step}}” reads “{{path}}” from the {{part}} of “{{source}}”, but this is not a valid JsonPath. The run fails when it reaches it.",
+    "invalidReferencePathNoSource": "“{{step}}” reads “{{path}}”, but this is not a valid JsonPath. The run fails when it reaches it.",
+    "referencePart": {
+      "responseBody": "response body",
+      "requestBody": "request body"
+    },
+    "invalidReferencePaths": "{{count}} steps use references whose path is not valid JsonPath. The run fails when it reaches them.",
+    "invalidReferencePaths_one": "{{count}} step uses a reference whose path is not valid JsonPath. The run fails when it reaches it.",
+    "saveAnyway": "Save anyway",
+    "saveBlockedIn": "Cannot save: “{{step}}” — {{problem}}",
+    "saveBlocked": "Cannot save: {{count}} steps have problems that must be fixed first. They are marked on the canvas.",
+    "saveBlocked_one": "Cannot save: {{count}} step has a problem that must be fixed first. It is marked on the canvas.",
+    "testRunBlockedIn": "Cannot start the test run: “{{step}}” — {{problem}}",
+    "testRunBlocked": "Cannot start the test run: {{count}} steps have problems that must be fixed first. They are marked on the canvas.",
+    "testRunBlocked_one": "Cannot start the test run: {{count}} step has a problem that must be fixed first. It is marked on the canvas."
   },
   "joint": {
     "noTargets": "No method can be the target of a jump from this one — a target must run later, in the same loop scope.",
@@ -269,7 +294,10 @@
       "title": "No results found",
       "description": "No connectors, logic blocks, or methods match your search."
     },
-    "methodItemText": "Method",
+    "methodInfo": {
+      "formFormat": "Form",
+      "bodyFormatHint": "Request body format"
+    },
     "connectorMethodsFallback": "Methods from {{invoker}}."
   },
   "headerMenu": {
@@ -284,17 +312,12 @@
     "changeHistory": "Change History",
     "testRunLockedHint": "Not available while a test run is in progress",
     "shortcuts": "Shortcuts",
+    "schedules": "Schedules",
     "exit": "Exit"
   },
   "json": {
     "title": "Edit workflow as JSON",
-    "reset": "Reset",
-    "forceApply": "Force Apply",
     "applied": "Workflow JSON applied.",
-    "discard": {
-      "title": "Discard JSON changes?",
-      "message": "Your unsaved JSON changes will be lost."
-    },
     "applyConfirm": {
       "title": "Replace the workflow?",
       "message": "Applying will replace the whole workflow and clear the in-session undo history."
@@ -303,12 +326,7 @@
       "title": "Force apply invalid workflow JSON?",
       "message": "Validation errors will be ignored. This may leave the workflow in an invalid state. Continue?"
     },
-    "mode": {
-      "tree": "Tree",
-      "raw": "Raw"
-    },
     "errors": {
-      "syntax": "Invalid JSON: {{reason}}",
       "schema": "{{path}}: {{reason}}",
       "indexShape": "{{path}}: index must contain numbers separated by underscores.",
       "duplicateIndex": "{{path}}: this workflow index is duplicated.",
@@ -477,15 +495,17 @@
   },
   "contextMenu": {
     "changeLabel": "Change Label",
+    "connector": "Connector",
+    "url": "URL",
+    "header": "Header",
+    "body": "Body",
     "changeConnector": "Use Another Connector",
     "changeConnectorImage": "Change Connector Image",
     "openConfiguration": "Open Configuration",
     "configureAggregator": "Assign Data Aggregator…",
     "request": "Request",
-    "editUrl": "Edit URL",
-    "editHeader": "Edit Header",
-    "editBody": "Edit Body",
     "showResponse": "Show Response",
+    "tryRequest": "Try Request…",
     "newLabelPlaceholder": "New label"
   },
   "comment": {
@@ -552,6 +572,24 @@
     "autoDescriptionChangeComment": "Changing Workflow Description to {{description}}",
     "autoCategoryAssignedComment": "Assigning category \"{{category}}\"",
     "autoCategoryClearedComment": "Removing category assignment"
+  },
+  "saveProblems": {
+    "confirmTitle": "Save with warnings?",
+    "confirmMessage": "These steps may not run as expected:",
+    "saveAnyway": "Save anyway"
+  },
+  "problems": {
+    "title": "Problems",
+    "close": "Close problems",
+    "empty": "No problems found in this workflow.",
+    "badgeTooltip": "{{count}} steps have problems — show them",
+    "badgeTooltip_one": "{{count}} step has a problem — show it",
+    "badgeTooltipClean": "No errors or warnings — show the problems list",
+    "groups": {
+      "error": "Must be fixed before saving ({{count}})",
+      "warning": "Asked about when saving ({{count}})",
+      "notice": "For information ({{count}})"
+    }
   },
   "placeholders": {
     "selectMethod": "Select Method...",
@@ -698,6 +736,8 @@
     }
   },
   "methodConfig": {
+    "insertReference": "Insert Reference",
+    "replaceReference": "Replace Reference",
     "body": "Body",
     "header": "Header",
     "requestUrl": "Request URL",
@@ -801,9 +841,28 @@
   "references": {
     "responseStatus": "Response Status",
     "rootObject": "The root object",
+    "rootObjectHint": "The whole response body, unchanged.",
     "firstArrayElement": "First element of the array",
+    "firstArrayElementHint": "The first element of the array, as a single value. Continue with a field name to take a field from it.",
+    "lastArrayElement": "Last element of the array",
+    "lastArrayElementHint": "The last element of the array, as a single value. Continue with a field name to take a field from it.",
     "wholeArray": "The whole array",
+    "wholeArrayHint": "All elements of the array, as a list. Continue with a field name to take that field from every element.",
+    "arrayLength": "Number of elements",
+    "arrayLengthHint": "How many elements the array has, as a number. Useful in conditions, e.g. to continue only if the list is not empty.",
+    "anyProperty": "Any property",
+    "anyPropertyHint": "Matches every property of this object. Continue with a field name to pick that field from all of them. The result is a list.",
+    "allKeyNames": "All key names",
+    "allKeyNamesHint": "The names of all properties of this object, as a list, not their values.",
     "iteratorLoop": "({{iterator}} loop)",
+    "iteratorLoopHint": "The element of the current iteration of the {{iterator}} loop. Use it inside a loop that runs over this array.",
+    "unknownPath": "This field is not in the response structure of the selected method. The run fails if it is missing from the real response.",
+    "invalidSyntax": "Invalid path syntax at character {{position}} (“{{character}}”). The run fails on this reference.",
+    "incompleteSyntax": "The path is incomplete — it ends where more is expected. The run fails on this reference.",
+    "listResult": "list",
+    "listResultHint": "Returns a list of all matches, even when only one matches.",
+    "operationsGroup": "Operations",
+    "fieldsGroup": "Fields",
     "noVariableReferences": "No variable references",
     "more": "more",
     "pausedHint": "Hover a highlighted reference to see the value it resolved to.",
@@ -943,9 +1002,314 @@
       "binding": "{{count}} broken field links: {{reason}}",
       "binding_one": "{{count}} broken field link: {{reason}}",
       "ifUnconfigured": "The IF condition is not configured.",
-      "loopUnconfigured": "The loop is not configured."
+      "loopUnconfigured": "The loop is not configured.",
+      "unknownPath": "{{count}} field links read a field the method's response does not declare",
+      "unknownPath_one": "{{count}} field link reads a field the method's response does not declare"
     },
     "showDetails": "Show error details",
     "hideDetails": "Hide error details"
+  },
+  "requestPlayground": {
+    "title": "Request Playground",
+    "breadcrumb": {
+      "inside": "inside {{path}}",
+      "loop": "Loop",
+      "loopWithIterator": "Loop ({{iterator}})",
+      "if": "If"
+    },
+    "preview": {
+      "badge": "In development",
+      "badgeHint": "Coming soon: the backend for testing a method is not available yet.",
+      "title": "Coming soon: this feature is still in development",
+      "message": "The backend for testing a single method is not available yet. Responses shown here are mock data, not a real call to the connector."
+    },
+    "toolbar": {
+      "connector": "Connector",
+      "prefill": "Prefill values from"
+    },
+    "prefill": {
+      "testRun": "Paused test run",
+      "lastTest": "Your last test of this method",
+      "sample": "Sample responses",
+      "upstream": "Run upstream steps first (fresh data)",
+      "manual": "Manual input only",
+      "testRunUnavailable": "Pause a test run on this step to use its values."
+    },
+    "prefillSentence": {
+      "testRun": "the paused test run",
+      "lastTest": "your last test",
+      "sample": "the sample responses",
+      "upstream": "a fresh run of the upstream steps",
+      "manual": "manual input"
+    },
+    "url": {
+      "method": "HTTP method",
+      "curl": "cURL",
+      "curlHint": "Show the request as a cURL command",
+      "send": "Send",
+      "sendUpstream": "Run upstream + Send"
+    },
+    "curl": {
+      "title": "Generated cURL (secrets masked)"
+    },
+    "writeWarning": {
+      "title": "{{method}} on {{connection}} changes live data.",
+      "titleDirect": "{{method}} changes live data.",
+      "message": "This request may create, change or delete data in the connected system.",
+      "sendAnyway": "Send anyway",
+      "switchTo": "Switch to {{connection}}",
+      "cancel": "Cancel",
+      "dontAskAgain": "Don't ask again this session"
+    },
+    "tabs": {
+      "values": "Test values",
+      "params": "Params",
+      "headers": "Headers",
+      "body": "Body",
+      "settings": "Settings"
+    },
+    "table": {
+      "on": "On",
+      "key": "Key",
+      "value": "Value",
+      "origin": "Origin",
+      "field": "Field",
+      "source": "Source",
+      "enable": "Enable"
+    },
+    "values": {
+      "hint": "Every value this request sends – URL, headers and body – in one place. Prefilled from <b>{{source}}</b>; type to override it for this test.",
+      "noChanges": "No changes",
+      "changed_one": "{{count}} value changed",
+      "changed_other": "{{count}} values changed",
+      "resetAll": "Reset all",
+      "reset": "Reset to prefilled value",
+      "placeholder": "Enter test value",
+      "upstreamPlaceholder": "Filled by the upstream run",
+      "connectionPlaceholder": "Filled in from the connector",
+      "empty": "This request has no dynamic values. It is sent exactly as configured.",
+      "pathSegment": "path",
+      "fromMethod": "From {{method}} · used in {{target}}",
+      "fromWebhook": "Webhook parameter ({{type}}) · used in {{target}}",
+      "fromConnection": "Connector field · used in {{target}}",
+      "unknownMethod": "unknown method",
+      "groups": {
+        "url": "URL",
+        "header": "Headers",
+        "body": "Body"
+      },
+      "kind": {
+        "string": "Abc",
+        "json": "{ }",
+        "stringHint": "Sent as text. Click to send it as JSON.",
+        "jsonHint": "Sent as JSON when valid, otherwise as text. Click to always send it as text."
+      },
+      "invalidJson": "Not valid JSON. Fix it or switch the value to text.",
+      "invalidJsonSend_one": "A value is not valid JSON. Fix it before sending.",
+      "invalidJsonSend_other": "{{count}} values are not valid JSON. Fix them before sending."
+    },
+    "source": {
+      "testRun": "Test run",
+      "lastTest": "Last test",
+      "sample": "Sample",
+      "upstream": "Upstream",
+      "edited": "Manual",
+      "empty": "Required",
+      "connection": "Connector",
+      "secret": "Secret"
+    },
+    "sourceHint": {
+      "testRun": "Read from the paused test run: the source step has already run, so this is its real value.",
+      "lastTest": "The value you used the last time you tested this step in this browser session.",
+      "sample": "Read from the saved sample response of the source step.",
+      "upstream": "The steps before this one run first; their response provides this value.",
+      "edited": "Changed for this test.",
+      "empty": "No value yet – enter one before sending.",
+      "connection": "Taken from the selected connector. A change applies to this test only.",
+      "secret": "Taken from the selected connector and never shown."
+    },
+    "origin": {
+      "fixed": "Fixed",
+      "dynamic": "Dynamic",
+      "connection": "Connector",
+      "secret": "Secret",
+      "editable": "Editable"
+    },
+    "originHint": {
+      "fixed": "set by the API definition",
+      "dynamic": "change in Test values",
+      "connection": "from the connector",
+      "secret": "from the connector, masked",
+      "editable": "change freely for this test"
+    },
+    "params": {
+      "hint": "Query parameters of the URL. Changes apply to this test only, until you choose <b>Apply to method</b>.",
+      "add": "+ Add parameter",
+      "keyPlaceholder": "key",
+      "valuePlaceholder": "value",
+      "empty": "The URL has no query parameters."
+    },
+    "headers": {
+      "add": "+ Add header",
+      "empty": "This request sends no headers."
+    },
+    "body": {
+      "type": "Body type",
+      "pretty": "Pretty",
+      "raw": "Raw edit",
+      "hint": "Highlighted values are filled dynamically · change them in <b>Test values</b>",
+      "rawHint": "Changes apply to this test only, until you choose <b>Apply to method</b>.",
+      "invalidJson": "Not valid JSON – the last valid body is sent.",
+      "empty": "This request has no body.",
+      "format": {
+        "json": "JSON",
+        "xml": "XML",
+        "urlencoded": "x-www-form-urlencoded"
+      }
+    },
+    "settings": {
+      "timeout": "Timeout (seconds)",
+      "retries": "Retries on failure",
+      "proxy": "Proxy",
+      "proxyUrl": "Proxy URL",
+      "proxyMode": {
+        "system": "Use system setting",
+        "none": "No proxy",
+        "custom": "Custom…"
+      },
+      "followRedirects": {
+        "label": "Follow redirects",
+        "hint": "Follow HTTP 3xx responses automatically."
+      },
+      "verifySsl": {
+        "label": "Verify SSL certificate",
+        "hint": "Turn off only for internal systems with self-signed certificates."
+      },
+      "saveResponseAsSample": {
+        "label": "Save every response as sample",
+        "hint": "Makes the fields available for mapping in the next steps."
+      },
+      "logToHistory": {
+        "label": "Log test runs in execution history",
+        "hint": "Off by default so tests don't mix with real runs."
+      }
+    },
+    "response": {
+      "title": "Response",
+      "emptyTitle": "Nothing sent yet",
+      "emptyHint": "Check the prefilled values, adjust what you need and press <b>Send</b>. The request is executed only once – the workflow itself does not run.",
+      "sending": "Sending request to {{connection}}…",
+      "sendingDirect": "Sending request…",
+      "sendingUpstream": "Running {{methods}}, then sending the request…",
+      "duration": "{{ms}} ms",
+      "run": "Run #{{run}}",
+      "runOn": "Run #{{run}} · {{connection}}",
+      "rpcError": "JSON-RPC error {{code}}",
+      "tabs": {
+        "body": "Body",
+        "headers": "Headers ({{count}})",
+        "timeline": "Timeline"
+      },
+      "pretty": "Pretty",
+      "raw": "Raw",
+      "copy": "Copy",
+      "saveSample": "Save as sample for mapping",
+      "sampleSaved": "Saved as sample – the fields are now available for mapping",
+      "noHeaders": "The response has no headers.",
+      "noBody": "The response has no body.",
+      "noResponse": "No response was received.",
+      "timeline": {
+        "dns": "DNS lookup",
+        "connect": "TCP connect",
+        "tls": "TLS handshake",
+        "firstByte": "Waiting (TTFB)",
+        "download": "Content download",
+        "total": "Total",
+        "unavailable": "Timing details are not available for this response."
+      },
+      "stage": {
+        "upstream": "An upstream step failed",
+        "resolve": "Could not fill in the values",
+        "enhancement": "A transformation script failed",
+        "connect": "Could not reach the system"
+      }
+    },
+    "footer": {
+      "hint": "Test runs are not written to the workflow's execution history unless you turn it on in Settings. Changes stay local until you apply them.",
+      "apply": "Apply to method",
+      "applied": "Changes applied to {{name}}",
+      "close": "Close"
+    }
+  },
+  "sandbox": {
+    "source": {
+      "response": "response",
+      "request": "request"
+    },
+    "setValueHint": "Set value",
+    "title": "Playground",
+    "banner": "Simulated in your browser using the server’s rules (Nashorn ES5.1). This is not a server execution.",
+    "inputs": "Test values",
+    "text": "Text",
+    "missing": "Missing",
+    "mode": "Input mode for {{name}}",
+    "missingHint": "\"\" (empty string, as for a reference with no data on the server)",
+    "missingRuntime": "{{names}} is set to Missing, so it is an empty string.",
+    "jsonHint": "Paste or type a JSON value",
+    "textHint": "string · no quotes needed",
+    "invalidJson": "{{name}} is not valid JSON",
+    "fixSyntax": "Fix the ES5.1 syntax error before running",
+    "shortcut": "Run: Ctrl/Cmd+Enter",
+    "run": "Run",
+    "running": "Running…",
+    "result": "Result",
+    "console": "Console",
+    "warnings": "Warnings",
+    "empty": "Enter test values and press Run",
+    "timeout": "Stopped after 2 seconds. The script may contain an endless loop.",
+    "previous": "From the previous run",
+    "simulatedResult": "Simulated result",
+    "unreliable": "Server-only feature: this result is not reliable.",
+    "location": "Line {{line}}, column {{column}}",
+    "syntax": "Syntax is incompatible with Nashorn ES5.1. Use ES5 syntax.",
+    "builtin": "{{name}} is not available on the server engine (Nashorn ES5.1).",
+    "serverOnly": "{{name}} is a server-only feature and cannot be simulated.",
+    "nashornSyntax": "Nashorn-specific syntax cannot be checked or simulated in the browser.",
+    "timezone": "Date may behave differently because the server uses its own time zone.",
+    "onlyJs": "The playground can only simulate JavaScript.",
+    "serverLanguages": "Python and Ruby scripts run only on the server.",
+    "compatibilityOnlyJs": "Compatibility check runs for JavaScript only",
+    "compatible": "No compatibility issues · Nashorn ES5.1",
+    "csp": "The Content Security Policy blocks eval in the worker. Browser simulation is unavailable.",
+    "invalidResult": "The result cannot be converted to a server String, Number, Boolean, Null, Map or List.",
+    "workerError": "The sandbox worker could not start. Check the Content Security Policy.",
+    "invalidArgument": "Invalid sandbox variable name.",
+    "numberTypes": "Browser numbers cannot reproduce Java Long input types: typeof returns \"number\" here but \"object\" for a Java Long on Nashorn.",
+    "copy": "Copy result",
+    "simulation": "Simulation",
+    "characters": "{{count}} characters",
+    "variables": "Variables",
+    "issueCounts": "{{errors}} errors · {{warnings}} warnings · Nashorn ES5.1",
+    "show": "Show",
+    "hide": "Hide",
+    "expandRequest": "Expand request data",
+    "invalidJsonLocation": "Invalid JSON · Line {{line}}:{{column}}",
+    "notRun": "Not run yet",
+    "stale": "Not run since your last edit",
+    "lastRun": "Last run {{time}}",
+    "runtimeError": "Runtime error at this line",
+    "arrowSyntax": "Arrow functions are not supported in Nashorn ES5.1. Use function(x) { return …; }.",
+    "templateSyntax": "Template literals are not supported. Use string concatenation.",
+    "declarationSyntax": "let and const are not supported in Nashorn ES5.1. Use var.",
+    "classSyntax": "Classes are not supported in Nashorn ES5.1. Use functions and prototypes.",
+    "spreadSyntax": "Spread and rest syntax are not supported in Nashorn ES5.1.",
+    "destructuringSyntax": "Destructuring is not supported. Read properties explicitly.",
+    "regexSyntax": "Regular expression flags u, y and s are not supported in Nashorn ES5.1.",
+    "enhancement": "Transformation",
+    "descriptionPlaceholder": "What does this script do?",
+    "errors": "{{count}} errors",
+    "errors_one": "{{count}} error",
+    "warningCount": "{{count}} warnings",
+    "warningCount_one": "{{count}} warning"
   }
 }

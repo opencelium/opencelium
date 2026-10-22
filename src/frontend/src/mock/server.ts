@@ -11,6 +11,7 @@ import { supportFileHandlers } from '@/mock/supportFile/handler.ts'
 import { connectionHandlers } from '@/mock/connection/handler.ts'
 import { subscriptionHandlers } from '@/mock/subscription/handler.ts'
 import { systemConfigHandlers } from '@/mock/systemConfig/handler.ts'
+import { requestPlaygroundHandlers } from '@/mock/requestPlayground/handler.ts'
 
 export const worker = setupWorker(
     ...authHandlers,
@@ -25,4 +26,10 @@ export const worker = setupWorker(
     ...connectionHandlers,
     ...subscriptionHandlers,
     ...systemConfigHandlers,
+    ...requestPlaygroundHandlers,
 )
+
+// The request playground endpoint has no backend yet, so it is mocked even when every other
+// request goes to the real one. Started instead of `worker` when VITE_ENABLE_MOCKS
+// disables the rest — intercepting only this route leaves the real API untouched.
+export const requestPlaygroundOnlyWorker = setupWorker(...requestPlaygroundHandlers)

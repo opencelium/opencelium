@@ -3,6 +3,8 @@ import { fetchMethodDetails, resolveTraceTarget, type LiveLogTree } from '@featu
 import { useTestRun } from '../../../test-run/useTestRun';
 import { buildIteratorIndexResolver, resolveCurrentLoopIndex, type LiveGraphStatus } from '../../../test-run/liveGraphStatus';
 import { findMethodByColor, readLiveValueAtPath } from '../body-editor/requestReferenceOptions';
+import { readLiveValueWithJsonPath } from '../body-editor/referencePathSyntax';
+import { loadJsonPathEnvironment } from '../body-editor/jsonPathEnvironment';
 import type { Connection } from '../../../types/connection';
 import type { ParsedArg } from './parseEnhancementArg';
 import type { ParsedReference } from '../body-editor/bodyReference';
@@ -119,7 +121,11 @@ export async function resolveLiveReferenceValue(
 	if (parsedBody === undefined) return { value: undefined, hasValue: false };
 
 	const resolveIteratorIndex = buildIteratorIndexResolver(currentIndexPath, loopAncestorsByIndexPath, liveGraphStatus);
-	const value = readLiveValueAtPath(parsedBody, reference.path, resolveIteratorIndex);
+	const environment = await loadJsonPathEnvironment();
+	const fromJsonPath = environment
+		? readLiveValueWithJsonPath(environment, parsedBody, reference.path, resolveIteratorIndex)
+		: null;
+	const value = fromJsonPath ? fromJsonPath.value : readLiveValueAtPath(parsedBody, reference.path, resolveIteratorIndex);
 	return { value, hasValue: value !== undefined };
 }
 

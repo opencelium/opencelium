@@ -3,6 +3,7 @@ import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { buildTestId } from '@shared/testing/testId';
 import { ConnectorStatusDot } from '../../../connector-status/ConnectorStatusDot/ConnectorStatusDot';
+import { SidebarMethodSummary } from '../SidebarMethodSummary/SidebarMethodSummary';
 import type { SidebarListProps } from './SidebarList.types';
 
 // Fits inside the 40px .sidebarItemImage slot.
@@ -24,8 +25,10 @@ export function SidebarList({ items, onSelect, testIdPrefix, updateAction }: Sid
 						if (!item.disabled) onSelect(item.key);
 					}}
 				>
-					<strong>{item.title}</strong>
-					<span>{item.text}</span>
+					{item.methodInfo
+						? <SidebarMethodSummary title={item.title} info={item.methodInfo} />
+						: <strong>{item.title}</strong>}
+					{item.text ? <span>{item.text}</span> : null}
 					{/* The line is clipped to one row, and a backend connection error is
 					    routinely longer than that — so the untruncated text is on hover. */}
 					{item.statusError ? (

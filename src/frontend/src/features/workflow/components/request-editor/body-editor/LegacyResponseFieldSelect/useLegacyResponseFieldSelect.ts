@@ -1,7 +1,10 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { getReferenceOptions, isExpandableReferencePath } from '../requestReferenceOptions';
+import { getReferenceOptions, isExpandableReferencePath,
+  matchesReferenceOptionSyntax } from '../requestReferenceOptions';
+import { describeReferencePathValidation, validateReferencePath } from '../referencePathSyntax';
+import { useJsonPathEnvironment } from '../jsonPathEnvironment';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
 import { getReferenceFilterTerm } from '../../reference-generator/referenceGenerator.utils';
 
@@ -10,6 +13,7 @@ const normalizePath = (value?: string) => value === '$.' ? '$' : value || '';
 export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectProps) {
   const { method, type, value, disabled, iterators = [], onChange } = props;
   const { t } = useI18n('workflow');
+  const jsonPathEnvironment = useJsonPathEnvironment();
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const selectingRef = useRef(false);
   const userInteractionRef = useRef(false);
@@ -27,8 +31,8 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
   }, [iterators, method, type, value]);
 
   const options = useMemo(() => getReferenceOptions(method, type, optionsBase, iterators, t)
-    .filter(({ label }) => !filterTerm || label.toLowerCase().startsWith(filterTerm))
-    .map(({ label, value: optionValue }) => ({ label, value: optionValue })),
+    .filter((option) => !filterTerm || option.label.toLowerCase().startsWith(filterTerm)
+      || matchesReferenceOptionSyntax(option, filterTerm)),
   [filterTerm, iterators, method, optionsBase, type, t]);
 
   const focusInputToEnd = () => requestAnimationFrame(() => {
@@ -52,6 +56,9 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
     searchValue: type === 'status' ? 'status' : displayPath,
     isDisabled: disabled || type === 'status',
     open: disabled || type === 'status' ? false : open,
+    // Only once the user stops typing — a half-typed path is always invalid.
+    pathFeedback: open ? null : describeReferencePathValidation(
+      validateReferencePath(jsonPathEnvironment, method, type, path, iterators), t),
     notFoundContent: undefined,
     onSearch: (nextValue: string) => {
       if (!userInteractionRef.current) return;

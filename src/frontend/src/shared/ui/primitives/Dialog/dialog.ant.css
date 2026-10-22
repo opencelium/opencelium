@@ -15,8 +15,13 @@
 .ant-dialog-viewport-wizard .ant-modal-container {
     display: flex;
     flex-direction: column;
-    max-height: calc(100dvh - 58px);
     overflow: hidden;
+}
+
+/* The cap is the floating dialog's room (18px top + 40px bottom padding); a fullscreen
+   dialog is already pinned to 100vh and would stop 58px short of the bottom with it. */
+.ant-dialog-custom.ant-dialog-viewport-wizard .ant-modal-container {
+    max-height: calc(100dvh - 58px);
 }
 
 .ant-dialog-viewport-wizard .ant-modal-body {

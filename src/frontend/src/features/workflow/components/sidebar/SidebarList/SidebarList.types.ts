@@ -1,9 +1,10 @@
+import type { SidebarMethodInfo } from '../SidebarMethodSummary/sidebarMethodInfo';
 import type { ConnectorStatus } from '../../../connector-status/ConnectorStatusDot/ConnectorStatusDot.types';
 
 export type SidebarListItem = {
 	key: string;
 	title: string;
-	text: string;
+	text?: string;
 	/** Present on connector-backed items, and then it always renders something: the
 	 * connector's icon on a white disc, or the shared default connector image when the
 	 * chain (connector → invoker) has none. Items with no artwork omit it — which is
@@ -15,6 +16,7 @@ export type SidebarListItem = {
 	hasConnectionError?: boolean;
 	lastCheckedAt?: number | null;
 	disabled?: boolean;
+	methodInfo?: SidebarMethodInfo;
 };
 
 export type SidebarListProps = {

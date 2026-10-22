@@ -21,7 +21,7 @@ import { toAuthoredMethodConfig } from './requestConfig';
  */
 const EPHEMERAL_NODE_DATA_KEYS = new Set<keyof WorkflowNodeData>([
 	'isLeaf', 'rightLeaf', 'bottomLeaf', 'duplicateMethodIndex',
-	'duplicateMethodColor', 'alwaysShowRightAdd', 'highlighted', 'searchHighlighted',
+	'duplicateMethodColor', 'alwaysShowRightAdd', 'highlighted', 'searchHighlighted', 'problemFocus',
 	'hasError', 'errorMessage', 'dropTarget', 'dropInvalid', 'dragGhost',
 	'dropPlaceholder', 'dragSourceMoving', 'dragSourceFaint', 'hideAddControls',
 	'suppressHoverAddControls', 'lockVisibleAddControls', 'isAnyNodeDragging',

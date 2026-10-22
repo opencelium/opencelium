@@ -93,6 +93,15 @@ export const connectionTemplateHandlers = [
         return HttpResponse.json(found)
     }),
 
+    http.put('/template/:id', async ({ params, request }) => {
+        const id = Number(params.id)
+        const updated = (await request.json()) as ConnectionTemplate
+        const idx = templates.findIndex((t) => t.id === id)
+        if (idx < 0) return HttpResponse.json({ message: 'Not found' }, { status: 404 })
+        templates[idx] = { ...updated, id }
+        return HttpResponse.json(templates[idx])
+    }),
+
     http.delete('/template/:id', ({ params }) => {
         const id = Number(params.id)
         templates = templates.filter((t) => t.id !== id)

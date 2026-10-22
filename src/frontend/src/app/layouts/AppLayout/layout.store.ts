@@ -43,6 +43,7 @@ export const useLayoutStore = create<LayoutState>((set) => ({
         localStorage.setItem('collapsed', !s.collapsed ? '1' : '0');
         return { collapsed: !s.collapsed }
     }),
+    collapse: () => set({ collapsed: true }),
     toggleCommandContent: (value) => set({ showCommandContent: value }),
     toggleIsContentLoading: (value) => set({ isContentLoading: value }),
     setMenu: (type) => set((s) => {

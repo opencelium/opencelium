@@ -10,6 +10,12 @@ import { BindingBadge } from '../BindingBadge/BindingBadge';
 import { CommentBadge } from '../CommentBadge/CommentBadge';
 import type { NodeShellProps } from './NodeShell.types';
 
+// A failed test run can report a whole backend stack trace.
+const MAX_TOOLTIP_MESSAGE_LENGTH = 200;
+
+const shortenMessage = (message: string | undefined) => message && message.length > MAX_TOOLTIP_MESSAGE_LENGTH
+	? `${message.slice(0, MAX_TOOLTIP_MESSAGE_LENGTH)}...` : message;
+
 export function NodeShell({
 	id,
 	data,
@@ -37,6 +43,9 @@ export function NodeShell({
 	// so the label would be the same text twice, half of it behind the card.
 	const hasBindingCard = !!bindingLens?.cardNodeIds.has(id);
 	const jointRejection = useJointRejectionMessage(data.jointInvalidReason, data.jointBlockingLabel);
+	const redNodeMessage = shortenMessage(data.hasError ? data.errorMessage
+		: data.testRunFailedVisible ? data.testRunFailedMessage : undefined);
+	const bodyTooltip = jointRejection || redNodeMessage;
 	const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
 		if (data.dragGhost || data.dropPlaceholder) return;
 		if (event.ctrlKey) {
@@ -63,8 +72,7 @@ export function NodeShell({
 
 	const nodeBody = (
 		<div
-			className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError || data.testRunFailedVisible ? 'nodeBodyError' : ''} ${data.testRunFailedVisible ? 'nodeBodyTestRunFailed' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''} ${data.testRunActive ? 'nodeBodyTestRunActive' : ''} ${data.jointCandidate ? 'nodeBodyJointCandidate' : ''} ${data.jointSource ? 'nodeBodyJointSource' : ''} ${jointRejection ? 'nodeBodyJointInvalid' : ''}`}
-			title={data.hasError ? data.errorMessage : data.testRunFailedVisible ? data.testRunFailedMessage : undefined}
+			className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError || data.testRunFailedVisible ? 'nodeBodyError' : ''} ${data.testRunFailedVisible ? 'nodeBodyTestRunFailed' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''} ${data.problemFocus ? `nodeBodyProblemFocus nodeBodyProblemFocus--${data.problemFocus}` : ''} ${data.testRunActive ? 'nodeBodyTestRunActive' : ''} ${data.jointCandidate ? 'nodeBodyJointCandidate' : ''} ${data.jointSource ? 'nodeBodyJointSource' : ''} ${jointRejection ? 'nodeBodyJointInvalid' : ''}`}
 		>
 			{children}
 			{/* Not gated on the node's kind: the badge is there for whatever the
@@ -120,7 +128,11 @@ export function NodeShell({
 				/>
 			)}
 			{topLabel && <div className='nodeTopLabel'>{topLabel}</div>}
-			{jointRejection ? <Tooltip content={jointRejection}>{nodeBody}</Tooltip> : nodeBody}
+			{/* Content goes null while dragging rather than unwrapping, which would
+			    remount the node body mid-drag. */}
+			{bodyTooltip
+				? <Tooltip content={data.isAnyNodeDragging ? null : bodyTooltip} maxWidth={320}>{nodeBody}</Tooltip>
+				: nodeBody}
 			{/* Hosted here rather than per node type: the badge is the same for a
 			    method, an operator or the start node. It hangs off the outer wrap's
 			    top-right corner rather than the node body's, which keeps it clear of

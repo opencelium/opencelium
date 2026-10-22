@@ -43,15 +43,12 @@ export async function saveWorkflowConnection(args: SaveWorkflowConnectionArgs) {
 	return result;
 }
 
-export async function loadWorkflowConnection(connectionId: string) {
+export async function loadWorkflowConnectionData(connectionId: string) {
 	const response = await getConnectionById(connectionId);
 	const versions = await loadConnectionVersions(connectionId);
 	const storedUi = readStoredCanvas(connectionId);
 	const mergedResponseData = mergeCanvasFallback(response.data, storedUi);
-	return {
-		...mapConnectionToWorkflowState(mergedResponseData),
-		versions,
-	};
+	return { payload: mergedResponseData, versions };
 }
 
 export async function loadWorkflowConnectionVersion(connectionId: string | number, snapshotId: string) {

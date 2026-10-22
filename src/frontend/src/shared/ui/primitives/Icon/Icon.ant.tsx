@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuScan } from 'react-icons/lu';
+import { LuScan, LuFlaskConical, LuPackage } from 'react-icons/lu';
 import {
     HolderOutlined,
     MinusOutlined,
@@ -44,6 +44,15 @@ import {
     RedoOutlined,
     GithubOutlined,
     AppstoreOutlined,
+    WarningOutlined,
+    CloseCircleOutlined,
+    CheckCircleOutlined,
+    ClockCircleOutlined,
+    CodeOutlined,
+    CloudOutlined,
+    ExportOutlined,
+    SendOutlined,
+    PictureOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -129,6 +138,17 @@ const iconMap = {
     minus: MinusOutlined,
     'chevron-up': UpOutlined,
     'fit-view': LuScan,
+    flask: LuFlaskConical,
+    warning: WarningOutlined,
+    'error-circle': CloseCircleOutlined,
+    'check-circle': CheckCircleOutlined,
+    clock: ClockCircleOutlined,
+    code: CodeOutlined,
+    cloud: CloudOutlined,
+    package: LuPackage,
+    'external-link': ExportOutlined,
+    send: SendOutlined,
+    image: PictureOutlined,
 };
 
 export const AntIcon: IconComponent = ({
