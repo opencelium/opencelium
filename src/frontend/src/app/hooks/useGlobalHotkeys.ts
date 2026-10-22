@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLayoutStore } from '@app/layouts/AppLayout/layout.store';
+import { switchMenu } from '@app/layouts/AppLayout/Sidebar/useMenuSwitch';
 
 export const useGlobalHotkeys = () => {
     const navigate = useNavigate();
@@ -14,10 +15,8 @@ export const useGlobalHotkeys = () => {
             event.preventDefault();
 
             if (key === 'm') {
-                const { menuType, setMenu, lastPathByMenu } = useLayoutStore.getState();
-                const target = menuType === 'main' ? 'admin' : 'main';
-                setMenu(target);
-                navigate(lastPathByMenu[target]);
+                const { menuType } = useLayoutStore.getState();
+                switchMenu(navigate, menuType === 'main' ? 'admin' : 'main');
                 return;
             }
 
