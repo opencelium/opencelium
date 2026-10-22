@@ -583,6 +583,7 @@
     "empty": "In diesem Workflow wurden keine Probleme gefunden.",
     "badgeTooltip": "{{count}} Schritte haben Probleme – anzeigen",
     "badgeTooltip_one": "{{count}} Schritt hat ein Problem – anzeigen",
+    "badgeTooltipClean": "Keine Fehler oder Warnungen – Problemliste anzeigen",
     "groups": {
       "error": "Vor dem Speichern zu beheben ({{count}})",
       "warning": "Rückfrage beim Speichern ({{count}})",
