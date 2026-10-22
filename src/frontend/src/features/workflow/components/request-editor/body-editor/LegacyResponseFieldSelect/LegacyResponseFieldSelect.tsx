@@ -1,4 +1,6 @@
-import { Select } from 'antd';
+import { CloseCircleFilled } from '@ant-design/icons';
+import { AutoComplete, Input } from 'antd';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { ReferenceOptionLabel } from '../ReferenceOptionLabel/ReferenceOptionLabel';
@@ -12,9 +14,11 @@ import '../bodyLegacy.css';
 
 /** Above the method dialog the picker was written for, and below the confirm
  *  dialog at 20000 that can also host it. */
-const DEFAULT_POPUP_Z_INDEX = 13010;
+export const DEFAULT_POPUP_Z_INDEX = 13010;
 
-export function LegacyResponseFieldSelect({ method, type, value, disabled, iterators = [], popupZIndex, onChange }: LegacyResponseFieldSelectProps) {
+export function LegacyResponseFieldSelect({ method, type, value, disabled, iterators = [], popupZIndex, onChange,
+  onSubmit }: LegacyResponseFieldSelectProps) {
+  const { t } = useI18n('workflow');
   const state = useLegacyResponseFieldSelect({ method, type, value, disabled, iterators, onChange });
   const zIndex = popupZIndex ?? DEFAULT_POPUP_Z_INDEX;
   const fit = useFitWidthOnFocus(state.wrapperRef, state.searchValue);
@@ -38,16 +42,14 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
           toggling the warning doesn't remount the select and drop focus. */}
       <Tooltip content={state.pathFeedback?.message ?? null} zIndex={zIndex} maxWidth={320}
         open={feedbackTooltip.open} onOpenChange={feedbackTooltip.onOpenChange}>
-        <Select
+        <AutoComplete
           placeholder={state.placeholder}
-          value={undefined}
-          searchValue={state.searchValue}
-          className='bodyLegacyGeneratorSelect'
+          value={state.searchValue}
+          className='bodyLegacyGeneratorSelect referenceFieldPathSelect'
           style={fit.style}
-          size='large'
           disabled={state.isDisabled}
-          showSearch
           filterOption={false}
+          defaultActiveFirstOption
           getPopupContainer={() => document.body}
           popupMatchSelectWidth={420}
           styles={{ popup: { root: { zIndex } } }}
@@ -72,8 +74,24 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
             state.onBlur();
           }}
           onClear={state.onClear}
-          allowClear
-        />
+          allowClear={{ clearIcon: <Tooltip content={t('references.clearField')} zIndex={zIndex + 1}>
+            <CloseCircleFilled />
+          </Tooltip> }}
+        >
+          {/* A textarea, not an input, so a path longer than the widest the field
+              may grow wraps onto more lines instead of scrolling sideways. */}
+          <Input.TextArea size='large' className='referenceFieldPathInput'
+            status={state.pathFeedback?.severity}
+            autoSize={fit.isFocused ? { minRows: 1 } : { minRows: 1, maxRows: 1 }}
+            wrap={fit.isFocused ? 'soft' : 'off'}
+            onKeyDown={(event) => {
+              if (event.key !== 'Enter' || event.nativeEvent.isComposing) return;
+              event.preventDefault();
+              // With the list open, Enter picks the highlighted option instead.
+              const isListShown = state.open && state.options.length > 0;
+              if (!isListShown && state.searchValue) onSubmit?.();
+            }} />
+        </AutoComplete>
       </Tooltip>
     </div>
   );

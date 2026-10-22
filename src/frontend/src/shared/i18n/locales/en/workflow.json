@@ -873,7 +873,9 @@
     "valueDialog": {
       "copyTooltip": "Copy value",
       "copySuccess": "Value copied to clipboard"
-    }
+    },
+    "clearField": "Clear field",
+    "addReference": "Add reference"
   },
   "refGenerator": {
     "connector": "Connector",

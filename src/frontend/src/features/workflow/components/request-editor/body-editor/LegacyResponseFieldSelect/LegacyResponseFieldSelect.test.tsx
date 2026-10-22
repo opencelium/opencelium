@@ -61,4 +61,28 @@ describe('LegacyResponseFieldSelect', () => {
 		openDropdown();
 		expect(document.querySelector('.ant-select-status-warning')).toBeNull();
 	});
+
+	it('submits on Enter while the options list is closed', () => {
+		const onSubmit = vi.fn();
+		render(<LegacyResponseFieldSelect method={method} type='body' value='node.name'
+			onChange={vi.fn()} onSubmit={onSubmit} />);
+		fireEvent.keyDown(screen.getByRole('combobox'), { key: 'Enter' });
+		expect(onSubmit).toHaveBeenCalledTimes(1);
+	});
+
+	it('leaves Enter to the options list while it is open', () => {
+		const onSubmit = vi.fn();
+		render(<LegacyResponseFieldSelect method={method} type='body' value='node.'
+			onChange={vi.fn()} onSubmit={onSubmit} />);
+		openDropdown();
+		fireEvent.keyDown(screen.getByRole('combobox'), { key: 'Enter' });
+		expect(onSubmit).not.toHaveBeenCalled();
+	});
+
+	it('does not submit an empty field', () => {
+		const onSubmit = vi.fn();
+		render(<LegacyResponseFieldSelect method={method} type='body' onChange={vi.fn()} onSubmit={onSubmit} />);
+		fireEvent.keyDown(screen.getByRole('combobox'), { key: 'Enter' });
+		expect(onSubmit).not.toHaveBeenCalled();
+	});
 });
