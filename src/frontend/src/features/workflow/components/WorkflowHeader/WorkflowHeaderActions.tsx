@@ -10,7 +10,7 @@ import { HeaderMenu } from '../header/HeaderMenu/HeaderMenu';
 import { useWorkflowSearchShortcut } from '../../hooks/useWorkflowSearchShortcut';
 
 // The editor header also carries the name, search, schedules and Save, so the user actions fold away well before the app's tablet breakpoint.
-const COMPACT_USER_ACTIONS_MAX_WIDTH = 1500;
+const COMPACT_USER_ACTIONS_MAX_WIDTH = 1600;
 // Below this the header can't spare room for the schedules pill or the profile icon: schedules moves into the `…` menu, the profile actions are dropped.
 const MENU_ONLY_BELOW_WIDTH = 700;
 
