@@ -95,3 +95,8 @@
   color: var(--color-status-warning-fg);
   background: var(--color-status-warning-bg);
 }
+
+/* Quiet on purpose: an all-clear should not compete with the Save button next to it. */
+.workflowProblemsBadge.workflowProblemsBadge--clean {
+  color: var(--color-text-secondary);
+}
