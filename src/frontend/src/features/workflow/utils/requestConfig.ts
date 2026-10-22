@@ -51,18 +51,23 @@ export const createMethodConfigFromWebhookUrl = (url: string): WorkflowMethodCon
   queryParams: buildQueryParamsFromEndpoint(url),
 });
 
-export const ensureMethodConfig = (config?: Partial<WorkflowMethodConfig>): WorkflowMethodConfig => ({
-  name: config?.name,
-  url: config?.url ?? createEmptyMethodConfig().url,
-  method: config?.method ?? 'GET',
-  headers: config?.headers ?? createEmptyMethodConfig().headers,
-  queryParams: config?.queryParams?.length ? config.queryParams : createEmptyMethodConfig().queryParams,
-  endpointArgs: config?.endpointArgs ?? {},
-  bodyFormat: config?.bodyFormat ?? 'json',
-  bodyData: config?.bodyData ?? 'raw',
-  body: config?.body ?? {},
-  response: config?.response,
-});
+export const ensureMethodConfig = (config?: Partial<WorkflowMethodConfig>): WorkflowMethodConfig => {
+  const url = config?.url ?? createEmptyMethodConfig().url;
+  return {
+    name: config?.name,
+    url,
+    method: config?.method ?? 'GET',
+    headers: config?.headers ?? createEmptyMethodConfig().headers,
+    // Templates carry the query only in the URL; without parsing it the URL editor's
+    // table starts empty and its first edit rebuilds the query from the table alone.
+    queryParams: config?.queryParams?.length ? config.queryParams : buildQueryParamsFromEndpoint(url),
+    endpointArgs: config?.endpointArgs ?? {},
+    bodyFormat: config?.bodyFormat ?? 'json',
+    bodyData: config?.bodyData ?? 'raw',
+    body: config?.body ?? {},
+    response: config?.response,
+  };
+};
 
 /**
  * Strips the parts of a method config the user never authored, so merely opening
