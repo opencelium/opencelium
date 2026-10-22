@@ -63,7 +63,8 @@
       "help": "View all commands",
       "onboarding": "Restart the setup tour",
       "workflowTutorial": "Replay the workflow tutorial",
-      "dashboardTour": "Replay the dashboard tour"
+      "dashboardTour": "Replay the dashboard tour",
+      "changelog": "Open the changelog"
     },
     "footer": {
       "select": "Select",
@@ -118,7 +119,8 @@
     "account": "Account and settings",
     "adminMenu": "Switch to admin menu",
     "mainMenu": "Switch to main menu",
-    "startWorkflowTutorial": "Start workflow tutorial"
+    "startWorkflowTutorial": "Start workflow tutorial",
+    "changelog": "Changelog"
   },
   "newFeature": {
     "label": "New",

@@ -153,6 +153,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 onboarding: string
                 workflowTutorial: string
                 dashboardTour: string
+                changelog: string
             }
             footer: {
                 select: string
@@ -208,6 +209,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             adminMenu: string
             mainMenu: string
             startWorkflowTutorial: string
+            changelog: string
         }
         newFeature: {
             label: string
