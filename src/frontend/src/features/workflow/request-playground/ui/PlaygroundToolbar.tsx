@@ -16,7 +16,7 @@ export function PlaygroundToolbar({ session, values }: Props) {
 		<div className='rpToolbar'>
 			{session.connectors.length > 0 && (
 				<label className='rpField'>
-					<span className='rpFieldLabel'>{t('requestPlayground.toolbar.connection')}</span>
+					<span className='rpFieldLabel'>{t('requestPlayground.toolbar.connector')}</span>
 					<Select<number> value={session.connectorId ?? undefined} onChange={session.setConnectorId}
 						testId='request-playground-connection'
 						options={session.connectors.map((connector) => ({ value: connector.connectorId, label: connector.title }))} />

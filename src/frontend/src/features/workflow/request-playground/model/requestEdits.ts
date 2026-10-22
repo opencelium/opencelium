@@ -17,6 +17,7 @@ export type RowOrigin = 'fixed' | 'dynamic' | 'connection' | 'secret' | 'editabl
 // Changes made for this test only; `undefined` means "as configured on the step".
 export type RequestEdits = {
 	method?: string;
+	url?: string;
 	headerRows?: EditableRow[];
 	paramRows?: EditableRow[];
 	body?: unknown;
@@ -70,12 +71,14 @@ const rowsToUrl = (url: string, rows: EditableRow[]) => {
 };
 
 export function applyRequestEdits(config: WorkflowMethodConfig, edits: RequestEdits): WorkflowMethodConfig {
-	const url = edits.paramRows ? rowsToUrl(config.url, edits.paramRows) : config.url;
+	const baseUrl = edits.url ?? config.url;
+	const url = edits.paramRows ? rowsToUrl(baseUrl, edits.paramRows) : baseUrl;
+	const isUrlEdited = edits.url !== undefined || edits.paramRows !== undefined;
 	return {
 		...config,
 		...(edits.method ? { method: edits.method } : {}),
 		...(edits.headerRows ? { headers: rowsToHeaders(edits.headerRows) } : {}),
-		...(edits.paramRows ? { url, queryParams: buildQueryParamsFromEndpoint(url, config.queryParams) } : {}),
+		...(isUrlEdited ? { url, queryParams: buildQueryParamsFromEndpoint(url, config.queryParams) } : {}),
 		...(edits.body !== undefined ? { body: edits.body } : {}),
 		...(edits.bodyFormat ? { bodyFormat: edits.bodyFormat } : {}),
 	};

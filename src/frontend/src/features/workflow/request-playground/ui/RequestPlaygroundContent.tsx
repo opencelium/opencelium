@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { Alert } from '@shared/ui/primitives/Alert';
 import { Dialog } from '@shared/ui/primitives/Dialog';
 import { Splitter } from '@shared/ui/primitives/Splitter';
 import type { WorkflowMethodConfig } from '../../types/request-config.types';
@@ -41,6 +42,7 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 	const [tab, setTab] = useState<RequestTab>('values');
 	const [focusKey, setFocusKey] = useState<string | null>(null);
 	const [isCurlVisible, setIsCurlVisible] = useState(false);
+	const [isPreviewNoticeVisible, setIsPreviewNoticeVisible] = useState(true);
 	const [settings, setSettings] = useState<PlaygroundSettings>(() => defaultSettings(session.connector));
 	const [appliedEdits, setAppliedEdits] = useState<RequestEdits | null>(null);
 	const values = usePlaygroundValues({ inputs: session.inputs, connection: session.connection,
@@ -77,8 +79,9 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 
 	const requestPane = (
 		<div className='rpRequest'>
-			<PlaygroundUrlBar method={session.draft.request.method || 'GET'} url={preview.url}
-				isUrlEdited={session.edits.paramRows !== undefined} prefillSource={values.prefillSource}
+			<PlaygroundUrlBar method={session.draft.request.method || 'GET'} url={session.draft.request.endpoint} previewUrl={preview.url}
+				isUrlEdited={session.edits.url !== undefined || session.edits.paramRows !== undefined}
+				onUrlChange={(url) => session.setEdits((current) => ({ ...current, url, paramRows: undefined }))} prefillSource={values.prefillSource}
 				isCurlVisible={isCurlVisible} isSending={send.isSending}
 				onMethodChange={(method) => session.setEdits((current) => ({ ...current, method }))}
 				onToggleCurl={() => setIsCurlVisible((isVisible) => !isVisible)} onSend={send.send} />
@@ -104,6 +107,13 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 			footer={<PlaygroundFooter onApply={apply} onClose={onClose}
 				canApply={!isReadOnly && session.hasEdits && appliedEdits !== session.edits} />}>
 			<div className='rpBody'>
+				{isPreviewNoticeVisible && (
+					<div data-testid='request-playground-preview-notice'>
+						<Alert type='info' showIcon closable onClose={() => setIsPreviewNoticeVisible(false)}
+							message={t('requestPlayground.preview.title')}
+							description={t('requestPlayground.preview.message')} />
+					</div>
+				)}
 				<PlaygroundToolbar session={session} values={values} />
 				<div className='rpSplit'>
 					<Splitter panels={[

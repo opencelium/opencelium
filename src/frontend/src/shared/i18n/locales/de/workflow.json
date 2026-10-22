@@ -1016,8 +1016,14 @@
       "loopWithIterator": "Schleife ({{iterator}})",
       "if": "Wenn"
     },
+    "preview": {
+      "badge": "In Entwicklung",
+      "badgeHint": "Demnächst verfügbar: Das Backend zum Testen einer Methode ist noch nicht verfügbar.",
+      "title": "Demnächst verfügbar: Diese Funktion befindet sich noch in Entwicklung",
+      "message": "Das Backend zum Testen einer einzelnen Methode ist noch nicht verfügbar. Die hier angezeigten Antworten sind Mock-Daten und kein echter Aufruf des Konnektors."
+    },
     "toolbar": {
-      "connection": "Verbindung",
+      "connector": "Konnektor",
       "prefill": "Werte vorbelegen aus"
     },
     "prefill": {
@@ -1079,12 +1085,12 @@
       "reset": "Auf vorbelegten Wert zurücksetzen",
       "placeholder": "Testwert eingeben",
       "upstreamPlaceholder": "Wird durch die vorherigen Schritte gefüllt",
-      "connectionPlaceholder": "Wird aus der Verbindung übernommen",
+      "connectionPlaceholder": "Wird aus dem Konnektor übernommen",
       "empty": "Dieser Request hat keine dynamischen Werte. Er wird genau so gesendet, wie er konfiguriert ist.",
       "pathSegment": "Pfad",
       "fromMethod": "Aus {{method}} · verwendet in {{target}}",
       "fromWebhook": "Webhook-Parameter ({{type}}) · verwendet in {{target}}",
-      "fromConnection": "Verbindungsfeld · verwendet in {{target}}",
+      "fromConnection": "Konnektorfeld · verwendet in {{target}}",
       "unknownMethod": "unbekannter Schritt",
       "groups": {
         "url": "URL",
@@ -1108,7 +1114,7 @@
       "upstream": "Vorherige Schritte",
       "edited": "Manuell",
       "empty": "Erforderlich",
-      "connection": "Verbindung",
+      "connection": "Konnektor",
       "secret": "Geheim"
     },
     "sourceHint": {
@@ -1118,21 +1124,21 @@
       "upstream": "Die vorherigen Schritte werden zuerst ausgeführt; ihre Antwort liefert diesen Wert.",
       "edited": "Für diesen Test geändert.",
       "empty": "Noch kein Wert – geben Sie vor dem Senden einen ein.",
-      "connection": "Aus der gewählten Verbindung übernommen. Eine Änderung gilt nur für diesen Test.",
-      "secret": "Aus der gewählten Verbindung übernommen und nie angezeigt."
+      "connection": "Aus dem gewählten Konnektor übernommen. Eine Änderung gilt nur für diesen Test.",
+      "secret": "Aus dem gewählten Konnektor übernommen und nie angezeigt."
     },
     "origin": {
       "fixed": "Fest",
       "dynamic": "Dynamisch",
-      "connection": "Verbindung",
+      "connection": "Konnektor",
       "secret": "Geheim",
       "editable": "Bearbeitbar"
     },
     "originHint": {
       "fixed": "von der API-Definition festgelegt",
       "dynamic": "unter Testwerte ändern",
-      "connection": "aus der Verbindung",
-      "secret": "aus der Verbindung, maskiert",
+      "connection": "aus dem Konnektor",
+      "secret": "aus dem Konnektor, maskiert",
       "editable": "für diesen Test frei änderbar"
     },
     "params": {
