@@ -1,0 +1,97 @@
+.workflowProblemsDrawer {
+  width: 380px;
+}
+
+.workflowProblemsBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 10px;
+}
+
+.workflowProblemsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.workflowProblemsGroupTitle {
+  padding: 0 10px 6px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.workflowProblemsItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.workflowProblemsItem:hover,
+.workflowProblemsItem:focus-visible {
+  background: var(--color-background-hover);
+}
+
+.workflowProblemsItemDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.workflowProblemsItem--error .workflowProblemsItemDot {
+  color: var(--color-status-error-fg);
+}
+
+.workflowProblemsItem--warning .workflowProblemsItemDot {
+  color: var(--color-status-warning-fg);
+}
+
+.workflowProblemsItem--notice .workflowProblemsItemDot {
+  color: var(--color-status-info-fg);
+}
+
+.workflowProblemsItemBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.workflowProblemsItemTitle {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.workflowProblemsItemText {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+/* The header badge takes its severity's colour over the text button's neutral one. */
+.workflowProblemsBadge.workflowProblemsBadge--error,
+.workflowProblemsBadge.workflowProblemsBadge--error:hover {
+  color: var(--color-status-error-fg);
+  background: var(--color-status-error-bg);
+}
+
+.workflowProblemsBadge.workflowProblemsBadge--warning,
+.workflowProblemsBadge.workflowProblemsBadge--warning:hover {
+  color: var(--color-status-warning-fg);
+  background: var(--color-status-warning-bg);
+}

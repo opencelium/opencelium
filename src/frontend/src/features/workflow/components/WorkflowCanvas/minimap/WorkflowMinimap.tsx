@@ -10,14 +10,16 @@ import { MinimapLegend } from './MinimapLegend';
 import { MinimapZoomControls } from './MinimapZoomControls';
 import { useMinimapCollapsed } from './useMinimapCollapsed';
 import { useWorkflowMinimap } from './useWorkflowMinimap';
+import { getIssueTone } from '../../../problems/workflowProblems';
 
 type Props = {
 	fieldBindings: readonly unknown[] | undefined;
 	/** Lifts the card clear of the minimized logs bar, which docks over the canvas' bottom edge. */
 	isAboveLogsBar: boolean;
+	onFocusIssue?: (nodeId: string) => void;
 };
 
-export function WorkflowMinimap({ fieldBindings, isAboveLogsBar }: Props) {
+export function WorkflowMinimap({ fieldBindings, isAboveLogsBar, onFocusIssue }: Props) {
 	const { t } = useI18n('workflow');
 	const { themeMode } = useTheme();
 	const { getNode, setCenter, getZoom } = useReactFlow();
@@ -27,11 +29,12 @@ export function WorkflowMinimap({ fieldBindings, isAboveLogsBar }: Props) {
 	// pager to whichever step slid into its slot.
 	const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
 
-	const issueNodeIds = useMemo(() => new Set(issues.map((issue) => issue.nodeId)), [issues]);
+	const issueTones = useMemo(() => new Map(issues.map((issue) => [issue.nodeId, getIssueTone(issue)])), [issues]);
 	const currentIndex = Math.max(0, issues.findIndex((issue) => issue.nodeId === currentNodeId));
 	const current = issues[currentIndex] ?? null;
 
 	const focusNode = (nodeId: string) => {
+		onFocusIssue?.(nodeId);
 		const node = getNode(nodeId);
 		if (!node) return;
 		setCenter(node.position.x + (node.measured?.width ?? 0) / 2, node.position.y + (node.measured?.height ?? 0) / 2,
@@ -59,7 +62,7 @@ export function WorkflowMinimap({ fieldBindings, isAboveLogsBar }: Props) {
 				</header>
 				{!isCollapsed && (
 					<>
-						<MinimapCanvas model={model} issueNodeIds={issueNodeIds} themeMode={themeMode}
+						<MinimapCanvas model={model} issueTones={issueTones} themeMode={themeMode}
 							currentIssueNodeId={current?.nodeId ?? null} ariaLabel={t('minimap.ariaLabel')} />
 						<MinimapIssueBar issues={issues} currentIndex={currentIndex} onNavigate={navigate}
 							onFocusCurrent={() => current && focusNode(current.nodeId)} />
