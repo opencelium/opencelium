@@ -1,49 +1,53 @@
-import { buildTestId } from '@shared/testing/testId';
-import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { useState } from 'react';
 import { hasComponentPermission } from '@/engine/policy';
 import { useAuth } from '@features/auth/useAuth';
-import { menuByType } from '../context-menu/contextMenuData';
-import { buildContextMenuEntries, filterEntriesForSection } from '../context-menu/contextMenuEntries';
+import { filterMenuSections, menuByType, type NodeMenuActionId } from '../context-menu/contextMenuData';
 import type { NodeContextMenuProps } from './NodeContextMenu.types';
+import { NodeContextMenuRow } from './NodeContextMenuRow';
 
 type Props = Pick<NodeContextMenuProps, 'menu' | 'node' | 'onClose' | 'onOpenRequestEditor'
-  | 'onOpenConditionEditor' | 'onShowResponse' | 'onOpenAggregatorEditor' | 'onOpenConnectorEditor'> & {
+  | 'onOpenConditionEditor' | 'onShowResponse' | 'onTryRequest' | 'onOpenAggregatorEditor' | 'onOpenConnectorEditor'> & {
   onEditLabel: () => void;
 };
 
 export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
-  onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onOpenAggregatorEditor, onOpenConnectorEditor }: Props) {
-  const { t } = useI18n('workflow');
+  onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor }: Props) {
   const { normalizedUser } = useAuth();
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   if (!menu) return null;
   // The image is the connector's, not the step's — editing it needs connector rights.
   const canUpdateConnector = hasComponentPermission(normalizedUser?.permissions ?? [], 'CONNECTOR', 'UPDATE');
-  const sections = (menuByType[menu.kind] || []).map((section) => ({ ...section,
-    items: section.items.filter((item) => item.id !== 'change-connector-image' || canUpdateConnector) }));
-  const entries = buildContextMenuEntries(sections);
+  const sections = filterMenuSections(menuByType[menu.kind] || [],
+    (id) => id !== 'change-connector-image' || canUpdateConnector);
 
-  const select = (id: string) => {
-    if (id === 'change-label') return onEditLabel();
-    if (id === 'open-config' && (node?.type === 'if' || node?.type === 'loop')) {
-      onOpenConditionEditor(menu.nodeId);
+  const run = (id: NodeMenuActionId) => {
+    switch (id) {
+      case 'change-label': return onEditLabel();
+      case 'open-config':
+        if (node?.type === 'if' || node?.type === 'loop') onOpenConditionEditor(menu.nodeId);
+        break;
+      case 'edit-url': onOpenRequestEditor(menu.nodeId, 'url'); break;
+      case 'edit-headers': onOpenRequestEditor(menu.nodeId, 'header'); break;
+      case 'edit-body': onOpenRequestEditor(menu.nodeId, 'body'); break;
+      case 'show-response': onShowResponse(menu.nodeId); break;
+      case 'try-request': onTryRequest(menu.nodeId); break;
+      case 'configure-aggregator': onOpenAggregatorEditor(menu.nodeId); break;
+      case 'change-connector': onOpenConnectorEditor(menu.nodeId, 'switch'); break;
+      case 'change-connector-image': onOpenConnectorEditor(menu.nodeId, 'image'); break;
+      default: {
+        const _exhaustive: never = id;
+        return _exhaustive;
+      }
     }
-    if (id === 'edit-url') onOpenRequestEditor(menu.nodeId, 'url');
-    if (id === 'edit-headers') onOpenRequestEditor(menu.nodeId, 'header');
-    if (id === 'edit-body') onOpenRequestEditor(menu.nodeId, 'body');
-    if (id === 'show-response') onShowResponse(menu.nodeId);
-    if (id === 'configure-aggregator') onOpenAggregatorEditor(menu.nodeId);
-    if (id === 'change-connector') onOpenConnectorEditor(menu.nodeId, 'switch');
-    if (id === 'change-connector-image') onOpenConnectorEditor(menu.nodeId, 'image');
     onClose();
   };
 
   return <div className="contextMenuSections">{sections.map((section) =>
     <div key={section.id} className="contextMenuSection">
-      {filterEntriesForSection(section, entries).map((entry) => entry.type === 'label'
-        ? <div key={entry.id} className="contextMenuGroupLabel">{t(entry.labelKey)}</div>
-        : <button key={entry.id}
-          className={`contextMenuItem ${entry.indented ? 'contextMenuItemIndented' : ''}`}
-          type="button" data-testid={buildTestId('workflow-context-menu', entry.item.id)}
-          onClick={() => select(entry.item.id)}>{t(entry.item.labelKey)}</button>) }
+      {section.rows.map((row) => {
+        const rowId = row.kind === 'action' ? row.action.id : row.id;
+        return <NodeContextMenuRow key={rowId} row={row} isExpanded={expandedRowId === rowId} onRun={run}
+          onToggle={() => setExpandedRowId((current) => current === rowId ? null : rowId)} />;
+      })}
     </div>)}</div>;
 }

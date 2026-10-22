@@ -1,0 +1,38 @@
+.referenceOptionLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.referenceOptionLabelText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.referenceOptionLabelTags {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.referenceOptionSyntax {
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--color-text-secondary);
+  background: var(--color-background-hover);
+}
+
+.referenceListBadge {
+  flex-shrink: 0;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--color-status-info-fg);
+  background: var(--color-status-info-bg);
+}

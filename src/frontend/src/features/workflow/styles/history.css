@@ -86,10 +86,49 @@
   white-space: nowrap;
 }
 
+.sidebarItemTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sidebarItemTitleRow strong {
+  flex: 1;
+}
+
 .sidebarItem span {
   color: var(--color-text-secondary);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.sidebarMethodRequestRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sidebarMethodRequestRow > span:last-child:not(.sidebarMethodEndpoint) {
+  flex-shrink: 0;
+}
+
+/* Scoped under .sidebarItem to outrank the generic `.sidebarItem span` text rule. */
+.sidebarItem .sidebarMethodEndpoint {
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+}
+
+.sidebarItem .sidebarMethodTag {
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--color-text-secondary);
+  background: var(--color-background-hover);
+  border: 1px solid var(--color-border-default);
 }
 
 .sidebarItem .sidebarItemError {

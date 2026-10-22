@@ -4,6 +4,8 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { NOT_EXIST_ARG } from '../utils/enhancementArgs';
 import { findBrokenEnhancementScripts } from '../utils/graph.brokenScriptValidation';
+import { findInvalidReferencePaths, type InvalidReferencePath } from '../utils/graph.referencePathSyntax';
+import { useJsonPathEnvironment } from '../components/request-editor/body-editor/jsonPathEnvironment';
 import { resolveWorkflowApiError } from '../utils/workflowApiErrors';
 import { EMPTY_NAME_LABEL } from '../utils/workflowPage.utils';
 
@@ -19,6 +21,8 @@ export const useWorkflowValidation = ({ persistedTitle, nodes, edges,
 	setNodeError, centerOnNode }: Params) => {
 	const { t } = useI18n('workflow');
 	const { t: tEntities } = useI18n('entities');
+	// Loaded with the editor so the save and test-run checks below can stay synchronous.
+	const jsonPathEnvironment = useJsonPathEnvironment();
 
 	const validateTitle = useCallback(async (title: string): Promise<string | null> => {
 		const trimmed = title.trim();
@@ -55,6 +59,34 @@ export const useWorkflowValidation = ({ persistedTitle, nodes, edges,
 			return message;
 		}, [nodes, setNodeError, centerOnNode, t]);
 
+	const describeInvalidReferencePath = useCallback((item: InvalidReferencePath) => {
+		const step = item.step.kind === 'named' ? item.step.name : t(`node.${item.step.operator}`);
+		if (!item.sourceName) return t('messages.invalidReferencePathNoSource', { step, path: item.path });
+		return t('messages.invalidReferencePathIn', { step, path: item.path, source: item.sourceName,
+			part: t(item.direction === 'response' ? 'messages.referencePart.responseBody'
+				: 'messages.referencePart.requestBody') });
+	}, [t]);
+
+	/**
+	 * Flags references whose path would not compile, the same way broken scripts
+	 * are flagged — each step with a message naming its own paths. Returns the
+	 * message for the caller to warn with, or null.
+	 */
+	const validateReferencePaths = useCallback(
+		(fieldBindings?: unknown[]): string | null => {
+			if (!jsonPathEnvironment) return null;
+			const invalid = findInvalidReferencePaths(jsonPathEnvironment, nodes, fieldBindings);
+			if (invalid.length === 0) return null;
+			const messagesByNode = new Map<string, string[]>();
+			invalid.forEach((item) => messagesByNode.set(item.nodeId,
+				[...(messagesByNode.get(item.nodeId) ?? []), describeInvalidReferencePath(item)]));
+			messagesByNode.forEach((messages, nodeId) => setNodeError(nodeId, messages.join(' ')));
+			centerOnNode(invalid[0].nodeId);
+			return invalid.length === 1
+				? describeInvalidReferencePath(invalid[0])
+				: t('messages.invalidReferencePaths', { count: messagesByNode.size });
+		}, [jsonPathEnvironment, nodes, setNodeError, centerOnNode, describeInvalidReferencePath, t]);
+
 	const resolveAndHighlightError = useCallback((error: unknown): string | null => {
 		const resolution = resolveWorkflowApiError(error, nodes, edges);
 		if (!resolution) return null;
@@ -78,5 +110,5 @@ export const useWorkflowValidation = ({ persistedTitle, nodes, edges,
 		}
 	}, [nodes, edges, setNodeError, centerOnNode, tEntities]);
 
-	return { validateTitle, validateEnhancementScripts, resolveAndHighlightError };
+	return { validateTitle, validateEnhancementScripts, validateReferencePaths, resolveAndHighlightError };
 };

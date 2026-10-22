@@ -29,6 +29,9 @@ vi.mock('@shared/ui/primitives/Icon', () => ({
 vi.mock('@shared/ui/primitives/Tooltip', () => ({
     Tooltip: ({children}: {children?: ReactNode}) => <>{children}</>,
 }))
+vi.mock('@shared/ui/primitives/Divider', () => ({
+    Divider: () => <hr />,
+}))
 
 import {HelpMenu} from './HelpMenu'
 

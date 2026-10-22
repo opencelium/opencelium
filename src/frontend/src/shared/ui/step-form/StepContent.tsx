@@ -2,7 +2,8 @@ import { useStepForm } from "./context"
 import type {StepActionDefinition, StepDefinition} from "./types"
 import { Button } from "@shared/ui/primitives/Button"
 import { Tooltip } from "@shared/ui/primitives/Tooltip"
-import {useRef} from "react";
+import {useRef, useState} from "react";
+import {StepFooterSlotProvider} from "./StepFooterSlotContext";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
 import {useTestScope} from "@shared/testing/TestScopeContext.tsx";
 import {buildTestId} from "@shared/testing/testId.ts";
@@ -32,6 +33,7 @@ export function StepContent({
     const {t: tCommon} = useI18n('common')
     const {t: tEntities} = useI18n('entities')
     const containerRef = useRef(null);
+    const [footerSlot, setFooterSlot] = useState<HTMLDivElement | null>(null);
     const testScope = useTestScope();
     const { currentStep, next: nextStep, prev, isLast } =
         useStepForm()
@@ -65,12 +67,14 @@ export function StepContent({
     return (
         <div className="step-form-content-shell" style={{ flex: 1, paddingLeft: isTabletOrMobile ? 0 : 48 }} ref={containerRef}>
             <div className="step-form-scroll-region" style={{display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 15}}>
-                {step.render({
-                    currentStep,
-                    next,
-                    prev,
-                    isLast,
-                })}
+                <StepFooterSlotProvider value={footerSlot}>
+                    {step.render({
+                        currentStep,
+                        next,
+                        prev,
+                        isLast,
+                    })}
+                </StepFooterSlotProvider>
             </div>
             <div
                 className="step-form-actions"
@@ -78,9 +82,12 @@ export function StepContent({
                     marginTop: 48,
                     display: "flex",
                     justifyContent: "flex-end",
+                    alignItems: "center",
+                    flexWrap: "wrap",
                     gap: 12,
                 }}
             >
+                <div ref={setFooterSlot} className="step-form-actions__status" style={{ marginRight: 'auto', minWidth: 0 }} />
                 {currentStep > 0 && <Button
                     onClick={prev}
                     disabled={currentStep === 0}

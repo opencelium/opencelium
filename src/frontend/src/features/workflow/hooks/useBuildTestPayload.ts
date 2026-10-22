@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { buildConnectionPayload, buildFromConnectorPayload } from '../api/connectionPayload';
@@ -15,11 +16,13 @@ type Params = {
 	getViewport: () => { x: number; y: number; zoom: number } | undefined;
 	clearNodeErrors: () => void;
 	validateEnhancementScripts: (fieldBindings?: readonly unknown[]) => string | null;
+	validateReferencePaths: (fieldBindings?: unknown[]) => string | null;
+	validateTestRunProblems: (fieldBindings?: readonly unknown[]) => string | null;
 };
 
 export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 	edges, fieldBindings, getViewport, clearNodeErrors,
-	validateEnhancementScripts }: Params) => {
+	validateEnhancementScripts, validateTestRunProblems, validateReferencePaths }: Params) => {
 	const { t } = useI18n('entities');
 	return useCallback(() => {
 		clearNodeErrors();
@@ -37,6 +40,16 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 			notifyError(brokenScriptMessage);
 			return null;
 		}
+		// What blocks a save cannot run either. Warnings stay silent here: a test run
+		// is how the user finds out whether an out-of-scope reference really breaks.
+		const blockingProblemMessage = validateTestRunProblems(fieldBindings);
+		if (blockingProblemMessage) {
+			notifyError(blockingProblemMessage);
+			return null;
+		}
+		// Not a refusal: the run itself shows whether the backend resolves the path.
+		const invalidPathMessage = validateReferencePaths(fieldBindings);
+		if (invalidPathMessage) message.warning(invalidPathMessage);
 		return {
 			...buildConnectionPayload({ connectionId, title,
 				description: toPayloadDescription(description), nodes, edges,
@@ -45,5 +58,5 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 			toConnector: null,
 		};
 	}, [connectionId, title, description, nodes, edges, fieldBindings,
-		getViewport, clearNodeErrors, validateEnhancementScripts, t]);
+		getViewport, clearNodeErrors, validateEnhancementScripts, validateTestRunProblems, validateReferencePaths, t]);
 };

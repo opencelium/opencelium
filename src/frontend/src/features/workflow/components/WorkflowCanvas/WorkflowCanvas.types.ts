@@ -48,6 +48,8 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	onToggleComment: (commentNodeId: string) => void;
 	onAddComment: (nodeId: string) => void;
 	onPaneClick?: () => void;
+	/** The step the minimap's issue pager moved to, for the page to ring it. */
+	onFocusProblemNode?: (nodeId: string) => void;
 	/** Clears the red rings a rejected save or test run left behind — Escape. */
 	onClearNodeErrors?: () => void;
 	fieldBindings?: readonly unknown[];
