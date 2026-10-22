@@ -17,11 +17,12 @@ type Params = {
 	clearNodeErrors: () => void;
 	validateEnhancementScripts: (fieldBindings?: readonly unknown[]) => string | null;
 	validateReferencePaths: (fieldBindings?: unknown[]) => string | null;
+	validateTestRunProblems: (fieldBindings?: readonly unknown[]) => string | null;
 };
 
 export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 	edges, fieldBindings, getViewport, clearNodeErrors,
-	validateEnhancementScripts, validateReferencePaths }: Params) => {
+	validateEnhancementScripts, validateTestRunProblems, validateReferencePaths }: Params) => {
 	const { t } = useI18n('entities');
 	return useCallback(() => {
 		clearNodeErrors();
@@ -39,6 +40,13 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 			notifyError(brokenScriptMessage);
 			return null;
 		}
+		// What blocks a save cannot run either. Warnings stay silent here: a test run
+		// is how the user finds out whether an out-of-scope reference really breaks.
+		const blockingProblemMessage = validateTestRunProblems(fieldBindings);
+		if (blockingProblemMessage) {
+			notifyError(blockingProblemMessage);
+			return null;
+		}
 		// Not a refusal: the run itself shows whether the backend resolves the path.
 		const invalidPathMessage = validateReferencePaths(fieldBindings);
 		if (invalidPathMessage) message.warning(invalidPathMessage);
@@ -50,5 +58,5 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 			toConnector: null,
 		};
 	}, [connectionId, title, description, nodes, edges, fieldBindings,
-		getViewport, clearNodeErrors, validateEnhancementScripts, validateReferencePaths, t]);
+		getViewport, clearNodeErrors, validateEnhancementScripts, validateTestRunProblems, validateReferencePaths, t]);
 };

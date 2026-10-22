@@ -8,8 +8,8 @@ import type { WorkflowHeaderProps } from './WorkflowHeader.types';
 import { useWorkflowHeaderState } from './useWorkflowHeaderState';
 
 export function WorkflowHeader({
-	onOpenHistory, onSave, onMenuItemSelect, menuLoadingItemId,
-	saveDisabled = false, readOnly = false, testRunLocked = false, loading = false, schedulesSlot, onToggleSchedules, hasSavedConnection = false, ...stateProps
+	onOpenHistory, onSave, confirmBeforeSave, onMenuItemSelect, menuLoadingItemId,
+	saveDisabled = false, readOnly = false, testRunLocked = false, loading = false, schedulesSlot, problemsSlot, onToggleSchedules, hasSavedConnection = false, ...stateProps
 }: WorkflowHeaderProps) {
 	const { t } = useI18n('workflow');
 	const state = useWorkflowHeaderState({
@@ -54,8 +54,18 @@ export function WorkflowHeader({
 		[hasSavedConnection, readOnly, testRunLocked],
 	);
 
+	// Ctrl+S while the problems confirm is up would otherwise stack a second one.
+	const isCheckingSaveRef = useRef(false);
 	const openSaveDialog = async () => {
-		if (await state.prepareSave(t('messages.enterWorkflowName'))) setSaveDialogOpen(true);
+		if (isCheckingSaveRef.current) return;
+		isCheckingSaveRef.current = true;
+		try {
+			if (!(await state.prepareSave(t('messages.enterWorkflowName')))) return;
+			if (confirmBeforeSave && !(await confirmBeforeSave())) return;
+			setSaveDialogOpen(true);
+		} finally {
+			isCheckingSaveRef.current = false;
+		}
 	};
 	const closeSaveDialog = () => {
 		setSaveDialogOpen(false);
@@ -85,7 +95,7 @@ export function WorkflowHeader({
 				<WorkflowHeaderActions items={menuItems} loadingItemId={menuLoadingItemId}
 					onOpenHistory={onOpenHistory} onMenuItemSelect={onMenuItemSelect}
 					onSave={openSaveDialog} readOnly={readOnly} saveDisabled={saveDisabled}
-					saveDialogOpen={saveDialogOpen} schedulesSlot={schedulesSlot} onToggleSchedules={onToggleSchedules}
+					saveDialogOpen={saveDialogOpen} schedulesSlot={schedulesSlot} problemsSlot={problemsSlot} onToggleSchedules={onToggleSchedules}
 				/>
 			</div>
 			<HeaderSaveDialog open={saveDialogOpen} value={saveComment}

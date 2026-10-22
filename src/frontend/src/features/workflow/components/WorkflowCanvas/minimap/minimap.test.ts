@@ -4,7 +4,7 @@ import type { LensBindingGraph } from '../../../lens/bindingLens.types';
 import type { WorkflowEdgeModel, WorkflowNodeData, WorkflowNodeModel } from '../../../types/workflow.types';
 import { buildMinimapModel } from './minimap.model';
 import { fitViewBox, flowViewRect } from './minimapGeometry';
-import { collectMinimapIssues } from './minimapIssues';
+import { collectWorkflowIssues } from '../../../problems/workflowProblems';
 import { CONNECTOR_SLOT_COUNT } from './minimapPalette';
 
 const SIZE = { width: 40, height: 40 };
@@ -60,9 +60,9 @@ describe('buildMinimapModel', () => {
 	});
 });
 
-describe('collectMinimapIssues', () => {
-	const collect = (nodes: WorkflowNodeModel[], extra: Partial<Parameters<typeof collectMinimapIssues>[0]> = {}) =>
-		collectMinimapIssues({ nodes, bindingGraph: NO_BINDINGS, liveHealth: undefined, ...extra });
+describe('collectWorkflowIssues', () => {
+	const collect = (nodes: WorkflowNodeModel[], extra: Partial<Parameters<typeof collectWorkflowIssues>[0]> = {}) =>
+		collectWorkflowIssues({ nodes, bindingGraph: NO_BINDINGS, unknownPaths: new Map(), liveHealth: undefined, ...extra });
 
 	it('flags an operator whose condition is empty, and not one that has one', () => {
 		const configured = node('if1', 0, 0, { kind: 'if', conditionConfig: { operatorType: 'if', tree: {} as never, expression: 'a = b' } });
@@ -94,6 +94,23 @@ describe('collectMinimapIssues', () => {
 			{ kind: 'binding', reason: 'out-of-scope', count: 2 },
 			{ kind: 'binding', reason: 'missing-method', count: 1 },
 		]);
+	});
+
+	// What a reference cleanup leaves of a condition whose every rule it removed.
+	it('treats an expression with nothing left to compare as unconfigured', () => {
+		const leftovers = ['()', '!()', '(())', ' '].map((expression, index) =>
+			node(`if${index}`, index * 10, 0, { kind: 'if', conditionConfig: { operatorType: 'if', expression, tree: { id: 'g', type: 'group' } } }));
+		expect(collect(leftovers)).toHaveLength(4);
+		const configured = node('ok', 0, 50, { kind: 'if',
+			conditionConfig: { operatorType: 'if', expression: "({%#111111.(response).body.$.a%} = 'y')", tree: { id: 'g', type: 'group' } } });
+		expect(collect([configured])).toEqual([]);
+	});
+
+	// The subtitle holds the raw expression, which still names a method a cleanup removed.
+	it('names an operator the way the canvas does, unless the user named it', () => {
+		const loop = node('loop1', 0, 0, { kind: 'loop', title: 'Loop', subtitle: 'for {%#C77E7E.(response).body.$.[*]%}' });
+		const named = node('loop2', 10, 0, { kind: 'loop', title: 'Loop', subtitle: 'Each user', labelEdited: true });
+		expect(collect([loop, named]).map((issue) => issue.title)).toEqual(['Loop', 'Each user']);
 	});
 
 	it('lists issues left to right, then top to bottom', () => {
