@@ -122,6 +122,7 @@
   },
   "newFeature": {
     "label": "New",
+    "gotIt": "Got it",
     "workflowTemplateJsonEdit": {
       "description": "Workflow templates can now be edited directly as JSON from the template list."
     },
@@ -138,6 +139,7 @@
       "description": "Language, help with the workflow tutorial, the menu switch and your profile are now available right in the editor header."
     },
     "workflowTestMethod": {
+      "title": "Try Request",
       "description": "Send this method on its own, with values for its references to previous methods, without running the whole workflow."
     }
   },
