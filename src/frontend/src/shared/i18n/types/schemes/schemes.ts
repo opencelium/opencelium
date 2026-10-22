@@ -222,6 +222,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 description: string
             }
             workflowConnectorHttpMethod: {
+                title: string
                 description: string
             }
             workflowHeaderUserActions: {
