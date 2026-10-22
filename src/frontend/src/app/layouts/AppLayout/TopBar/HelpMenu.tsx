@@ -168,6 +168,7 @@ export function HelpMenuEntries({ tours, onSelect }: { tours: HelpTours; onSelec
                 label={tCommon('topbar.changelog')}
                 onClick={openChangelog}
                 testId="topbar-changelog"
+                newFeatureId="changelog"
             />
             <MenuEntry
                 icon="portal"
@@ -192,14 +193,17 @@ type MenuEntryProps = {
     label: string
     onClick: () => void
     testId: string
+    newFeatureId?: NewFeatureId
 }
 
-export function MenuEntry({ icon, label, onClick, testId }: MenuEntryProps) {
+export function MenuEntry({ icon, label, onClick, testId, newFeatureId }: MenuEntryProps) {
     return (
         <Button type="text" onClick={onClick} testId={testId}>
             <span className="topbar-help-menu__item">
                 <Icon name={icon} size={16} color="primary" />
-                <span>{label}</span>
+                {newFeatureId
+                    ? <NewFeature id={newFeatureId} variant="pill" placement="left">{label}</NewFeature>
+                    : <span>{label}</span>}
             </span>
         </Button>
     )
