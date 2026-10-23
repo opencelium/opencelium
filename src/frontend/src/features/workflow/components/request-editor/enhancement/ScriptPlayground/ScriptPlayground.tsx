@@ -86,7 +86,7 @@ export function ScriptPlayground({
 	if (enhancement.language !== 'js')
 		return (
 			<section className="scriptPlayground">
-				<PlaygroundHeader />
+				<PlaygroundHeader hasDocsLink={false} />
 				<Empty
 					className="scriptPlaygroundEmpty"
 					image={<Icon name="code" size={32} isSubtle />}
@@ -111,7 +111,7 @@ export function ScriptPlayground({
 				}
 			}}
 		>
-			<PlaygroundHeader />
+			<PlaygroundHeader hasDocsLink />
 			<SimulationBanner />
 			{Object.values(args).some((value) => typeof value === 'number') && (
 				<Alert type="warning" showIcon message={t('sandbox.numberTypes')} />
