@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { buildTestId } from '@shared/testing/testId';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
@@ -10,16 +11,29 @@ import { createEmptyRow, isAddedRow, isLockedOrigin, type EditableRow, type RowO
 import { ORIGIN_TONE } from '../badgeTones';
 import { PlaygroundBadge } from '../PlaygroundBadge';
 
+// `byOrigin` locks rows filled from the API definition, a reference or the connector.
+export type LockPolicy = 'byOrigin' | 'none';
+
+export type ValueCellArgs = {
+	row: EditableRow;
+	placeholder: string;
+	testId: string | undefined;
+	onChange: (value: string) => void;
+};
+
 type Props = {
 	rows: EditableRow[];
 	originOf: (row: EditableRow) => RowOrigin;
+	lockPolicy: LockPolicy;
+	renderValue?: (args: ValueCellArgs) => ReactNode;
 	addLabel: string;
 	emptyText: string;
 	testIdPrefix: string;
 	onChange: (rows: EditableRow[]) => void;
 };
 
-export function EditableRowsTable({ rows, originOf, addLabel, emptyText, testIdPrefix, onChange }: Props) {
+export function EditableRowsTable({ rows, originOf, lockPolicy, renderValue, addLabel, emptyText, testIdPrefix,
+	onChange }: Props) {
 	const { t } = useI18n('workflow');
 	const update = (id: string, patch: Partial<EditableRow>) =>
 		onChange(rows.map((row) => row.id === id ? { ...row, ...patch } : row));
@@ -36,7 +50,9 @@ export function EditableRowsTable({ rows, originOf, addLabel, emptyText, testIdP
 			{rows.length === 0 && <div className='rpGridRow rpEmptyNote'>{emptyText}</div>}
 			{rows.map((row) => {
 				const origin = originOf(row);
-				const isLocked = isLockedOrigin(origin) && !isAddedRow(row);
+				const isLocked = lockPolicy === 'byOrigin' && isLockedOrigin(origin) && !isAddedRow(row);
+				const valuePlaceholder = t('requestPlayground.params.valuePlaceholder');
+				const updateValue = (value: string) => update(row.id, { value });
 				const testId = (part: string) => buildTestId(testIdPrefix, row.key || row.id, part);
 				return (
 					<div key={row.id} className={`rpGridRow rpEditRow${row.enabled ? '' : ' rpEditRow--off'}`}
@@ -48,11 +64,12 @@ export function EditableRowsTable({ rows, originOf, addLabel, emptyText, testIdP
 						<Input value={row.key} readOnly={isLocked} testId={testId('key')}
 							placeholder={t('requestPlayground.params.keyPlaceholder')}
 							onChange={(event) => update(row.id, { key: event.target.value })} />
-						<Input value={row.value} readOnly={isLocked} type={origin === 'secret' ? 'password' : 'text'}
-							className='rpMonoInput' testId={testId('value')}
-							placeholder={t('requestPlayground.params.valuePlaceholder')}
-							rightSlot={isLocked ? <Icon name='lock' size={12} isSubtle /> : undefined}
-							onChange={(event) => update(row.id, { value: event.target.value })} />
+						{renderValue
+							? renderValue({ row, placeholder: valuePlaceholder, testId: testId('value'), onChange: updateValue })
+							: <Input value={row.value} readOnly={isLocked} type={origin === 'secret' ? 'password' : 'text'}
+								className='rpMonoInput' testId={testId('value')} placeholder={valuePlaceholder}
+								rightSlot={isLocked ? <Icon name='lock' size={12} isSubtle /> : undefined}
+								onChange={(event) => updateValue(event.target.value)} />}
 						<span className='rpRowActions'>
 							<PlaygroundBadge tone={ORIGIN_TONE[origin]} hint={t(`requestPlayground.originHint.${origin}`)}>
 								{t(`requestPlayground.origin.${origin}`)}

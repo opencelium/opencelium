@@ -1021,12 +1021,9 @@
     },
     "preview": {
       "badge": "In Entwicklung",
-      "badgeHint": "Demnächst verfügbar: Das Backend zum Testen einer Methode ist noch nicht verfügbar.",
-      "title": "Demnächst verfügbar: Diese Funktion befindet sich noch in Entwicklung",
-      "message": "Das Backend zum Testen einer einzelnen Methode ist noch nicht verfügbar. Die hier angezeigten Antworten sind Mock-Daten und kein echter Aufruf des Konnektors."
+      "badgeHint": "Demnächst verfügbar: Das Backend zum Testen einer Methode ist noch nicht verfügbar."
     },
     "toolbar": {
-      "connector": "Konnektor",
       "prefill": "Werte vorbelegen aus"
     },
     "prefill": {
@@ -1037,13 +1034,6 @@
       "manual": "Nur manuelle Eingabe",
       "testRunUnavailable": "Pausieren Sie einen Testlauf an diesem Schritt, um seine Werte zu verwenden."
     },
-    "prefillSentence": {
-      "testRun": "dem pausierten Testlauf",
-      "lastTest": "Ihrem letzten Test",
-      "sample": "den Beispielantworten",
-      "upstream": "einer neuen Ausführung der vorherigen Schritte",
-      "manual": "manueller Eingabe"
-    },
     "url": {
       "method": "HTTP-Methode",
       "curl": "cURL",
@@ -1053,15 +1043,6 @@
     },
     "curl": {
       "title": "Erzeugter cURL-Befehl (Geheimnisse maskiert)"
-    },
-    "writeWarning": {
-      "title": "{{method}} auf {{connection}} ändert Live-Daten.",
-      "titleDirect": "{{method}} ändert Live-Daten.",
-      "message": "Dieser Request kann Daten im verbundenen System anlegen, ändern oder löschen.",
-      "sendAnyway": "Trotzdem senden",
-      "switchTo": "Zu {{connection}} wechseln",
-      "cancel": "Abbrechen",
-      "dontAskAgain": "In dieser Sitzung nicht mehr fragen"
     },
     "tabs": {
       "values": "Testwerte",
@@ -1080,10 +1061,7 @@
       "enable": "Aktivieren"
     },
     "values": {
-      "hint": "Alle Werte, die dieser Request sendet – URL, Header und Body – an einem Ort. Vorbelegt aus <b>{{source}}</b>; überschreiben Sie sie für diesen Test.",
-      "noChanges": "Keine Änderungen",
-      "changed_one": "{{count}} Wert geändert",
-      "changed_other": "{{count}} Werte geändert",
+      "hint": "Werte, die dieser Request sendet. Bearbeiten Sie einen, um ihn für diesen Test zu überschreiben.",
       "resetAll": "Alle zurücksetzen",
       "reset": "Auf vorbelegten Wert zurücksetzen",
       "placeholder": "Testwert eingeben",
@@ -1159,8 +1137,10 @@
       "type": "Body-Typ",
       "pretty": "Formatiert",
       "raw": "Roh bearbeiten",
-      "hint": "Hervorgehobene Werte werden dynamisch gefüllt · ändern Sie sie unter <b>Testwerte</b>",
+      "hint": "Hervorgehobene Werte in <b>Testwerte</b> setzen",
       "rawHint": "Änderungen gelten nur für diesen Test, bis Sie <b>Auf Methode anwenden</b> wählen.",
+      "setReference": "[Referenz setzen]",
+      "setValue": "[Wert setzen]",
       "invalidJson": "Kein gültiges JSON – der letzte gültige Body wird gesendet.",
       "empty": "Dieser Request hat keinen Body.",
       "format": {

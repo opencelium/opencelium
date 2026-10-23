@@ -3,7 +3,6 @@ import type { InputKind } from './playgroundValues';
 export type StoredInput = { text: string; kind: InputKind };
 
 const INPUTS_PREFIX = 'oc_request_playground_inputs';
-const WRITE_CONFIRMED_KEY = 'oc_request_playground_write_confirmed';
 
 export const buildInputStorageKey = (connectionId: number | null, methodColor: string) =>
 	`${INPUTS_PREFIX}:${connectionId ?? 'unsaved'}:${methodColor.toLowerCase()}`;
@@ -47,8 +46,3 @@ export function readStoredInputs(storageKey: string): Record<string, StoredInput
 export function writeStoredInputs(storageKey: string, inputs: Record<string, StoredInput>) {
 	writeItem(storageKey, Object.keys(inputs).length === 0 ? null : JSON.stringify(inputs));
 }
-
-export const isWriteConfirmedForSession = () => readItem(WRITE_CONFIRMED_KEY) === '1';
-
-export const setWriteConfirmedForSession = (isConfirmed: boolean) =>
-	writeItem(WRITE_CONFIRMED_KEY, isConfirmed ? '1' : null);

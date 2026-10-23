@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { Alert } from '@shared/ui/primitives/Alert';
 import { Dialog } from '@shared/ui/primitives/Dialog';
 import { Splitter } from '@shared/ui/primitives/Splitter';
 import type { WorkflowMethodConfig } from '../../types/request-config.types';
@@ -19,13 +18,15 @@ import { buildCurl } from '../model/resolveRequest';
 import { PlaygroundCurl } from './PlaygroundCurl';
 import { PlaygroundFooter } from './PlaygroundFooter';
 import { PlaygroundTitle } from './PlaygroundTitle';
-import { PlaygroundToolbar } from './PlaygroundToolbar';
 import { PlaygroundUrlBar } from './PlaygroundUrlBar';
-import { PlaygroundWriteWarning } from './PlaygroundWriteWarning';
 import { RequestTabs, type RequestTab } from './request/RequestTabs';
+import type { FocusRequest } from './request/TestValuesTab';
 import { ResponsePanel } from './response/ResponsePanel';
 import './requestPlayground.css';
 import './requestPlaygroundTables.css';
+
+// Fits method, a usable URL, cURL and the longest Send label (de) on one line.
+const REQUEST_PANE_MIN_WIDTH = 640;
 
 type Props = {
 	session: PlaygroundSession;
@@ -40,9 +41,8 @@ type Props = {
 export function RequestPlaygroundContent({ session, liveNode, connectionId, isReadOnly, onApplyConfig, onClose }: Props) {
 	const { t } = useI18n('workflow');
 	const [tab, setTab] = useState<RequestTab>('values');
-	const [focusKey, setFocusKey] = useState<string | null>(null);
+	const [focus, setFocus] = useState<FocusRequest | null>(null);
 	const [isCurlVisible, setIsCurlVisible] = useState(false);
-	const [isPreviewNoticeVisible, setIsPreviewNoticeVisible] = useState(true);
 	const [settings, setSettings] = useState<PlaygroundSettings>(() => defaultSettings(session.connector));
 	const [appliedEdits, setAppliedEdits] = useState<RequestEdits | null>(null);
 	const values = usePlaygroundValues({ inputs: session.inputs, connection: session.connection,
@@ -51,7 +51,7 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 
 	const selectInput = (key: string) => {
 		setTab('values');
-		setFocusKey(key);
+		setFocus((current) => ({ key, nonce: (current?.nonce ?? 0) + 1 }));
 	};
 	const saveSample = (result: Extract<PlaygroundResponse, { kind: 'success' }>) => {
 		onApplyConfig(liveNode.id, withSampleResponse(ensureMethodConfig(liveNode.data.methodConfig), liveNode.id, result));
@@ -85,18 +85,9 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 				isCurlVisible={isCurlVisible} isSending={send.isSending}
 				onMethodChange={(method) => session.setEdits((current) => ({ ...current, method }))}
 				onToggleCurl={() => setIsCurlVisible((isVisible) => !isVisible)} onSend={send.send} />
-			{send.isWarningVisible && (
-				<PlaygroundWriteWarning verb={send.verb} connector={session.connector}
-					alternative={session.connectors.find((connector) => connector.connectorId !== session.connectorId)}
-					onSendAnyway={send.sendAnyway} onCancel={send.cancelWarning}
-					onSwitchConnection={(connectorId) => {
-						session.setConnectorId(connectorId);
-						send.cancelWarning();
-					}} />
-			)}
 			{isCurlVisible && <PlaygroundCurl command={buildCurl(preview)} />}
 			<RequestTabs session={session} values={values} settings={settings} missingKeys={missingKeys}
-				tab={tab} focusKey={focusKey} onTabChange={setTab} onSelectInput={selectInput}
+				tab={tab} focus={focus} onTabChange={setTab} onSelectInput={selectInput}
 				onSettingsChange={(patch) => setSettings((current) => ({ ...current, ...patch }))} />
 		</div>
 	);
@@ -107,17 +98,9 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 			footer={<PlaygroundFooter onApply={apply} onClose={onClose}
 				canApply={!isReadOnly && session.hasEdits && appliedEdits !== session.edits} />}>
 			<div className='rpBody'>
-				{isPreviewNoticeVisible && (
-					<div data-testid='request-playground-preview-notice'>
-						<Alert type='info' showIcon closable onClose={() => setIsPreviewNoticeVisible(false)}
-							message={t('requestPlayground.preview.title')}
-							description={t('requestPlayground.preview.message')} />
-					</div>
-				)}
-				<PlaygroundToolbar session={session} values={values} />
 				<div className='rpSplit'>
 					<Splitter panels={[
-						{ key: 'request', defaultSize: '58%', min: 420, content: requestPane },
+						{ key: 'request', defaultSize: '58%', min: REQUEST_PANE_MIN_WIDTH, content: requestPane },
 						{ key: 'response', min: 320, content: (
 							<ResponsePanel result={send.result} isSending={send.isSending} sendingText={sendingText}
 								run={send.run} canSaveSample={!isReadOnly} onSaveSample={() => {
