@@ -5,9 +5,11 @@
     What this schema checks and what it leaves out:
       * Structure, element order and the fixed vocabularies are checked here, so tools and editors
         can validate a file on their own.
-      * Rules about values and about how parts relate are checked by the invoker model when the file
-        is read. Those checks name the offending element and explain the fix, which a schema
-        violation message cannot.
+      * Rules about values and about how parts relate (a private setting needing a source, setting
+        names being unique) are checked by the invoker model when the file is read. Those checks
+        name the offending element and explain the fix, which a schema violation message cannot.
+      * Setting sources such as %{login.body.token} are expressions the execution engine resolves
+        when a workflow runs, so they are stored as written and not checked at all.
 
     Invoker files use no XML namespace. The root element's version attribute names the format
     version: 5.x files have none, and a 6.x file keeps this schema. A future major version gets its
@@ -27,6 +29,7 @@
             <xs:element name="icon" type="xs:string" minOccurs="0"/>
             <xs:element name="category_tags" type="CategoryTags" minOccurs="0"/>
             <xs:element name="authType" type="xs:string" minOccurs="0"/>
+            <xs:element name="requiredData" type="RequiredData" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="version" use="required" type="FormatVersion"/>
         <xs:attribute name="id" use="required" type="Text"/>
@@ -36,6 +39,26 @@
         <xs:sequence>
             <xs:element name="item" type="Text" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
+    </xs:complexType>
+
+    <!-- ================================================================ settings -->
+
+    <xs:complexType name="RequiredData">
+        <xs:sequence>
+            <xs:element name="item" type="Setting" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Element text is the default value of a public or protected setting. -->
+    <xs:complexType name="Setting">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="name" use="required" type="Text"/>
+                <xs:attribute name="type" type="ScalarType" default="string"/>
+                <xs:attribute name="visibility" type="Visibility" default="public"/>
+                <xs:attribute name="source" type="Text"/>
+            </xs:extension>
+        </xs:simpleContent>
     </xs:complexType>
 
     <!-- ================================================================ simple types -->
@@ -50,6 +73,23 @@
     <xs:simpleType name="FormatVersion">
         <xs:restriction base="xs:string">
             <xs:pattern value="6\.[0-9]+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Visibility">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="public"/>
+            <xs:enumeration value="protected"/>
+            <xs:enumeration value="private"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ScalarType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="string"/>
+            <xs:enumeration value="number"/>
+            <xs:enumeration value="integer"/>
+            <xs:enumeration value="boolean"/>
         </xs:restriction>
     </xs:simpleType>
 </xs:schema>
