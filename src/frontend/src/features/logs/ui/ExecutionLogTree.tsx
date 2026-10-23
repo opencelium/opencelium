@@ -3,15 +3,22 @@ import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { useGetExecutionConnectorsQuery } from "../api/logsApi";
 import { ConnectorLogRow } from "./ConnectorLogRow";
+import { LogErrorTraceContext } from "./logErrorTrace";
+import { useStoredErrorTrace } from "./useStoredErrorTrace";
 
 export function ExecutionLogTree({
   executionId,
   fill = false,
+  isFailure = false,
 }: {
   executionId: string;
   fill?: boolean;
+  // Failed runs reveal their error: the path down to it is expanded and the
+  // failing element is scrolled into view.
+  isFailure?: boolean;
 }) {
   const { t } = useI18n("logs");
+  const errorTrace = useStoredErrorTrace(executionId, isFailure);
   const { data, isFetching, isError } =
     useGetExecutionConnectorsQuery(executionId);
 
@@ -33,21 +40,23 @@ export function ExecutionLogTree({
   }
 
   return (
-    <div
-      style={{
-        border: "1px solid var(--color-border-default)",
-        borderRadius: 6,
-        overflow: "auto",
-        ...(fill ? { flex: 1, minHeight: 0 } : { maxHeight: "60vh" }),
-      }}
-    >
-      {data.map((connector, index) => (
-        <ConnectorLogRow
-          key={connector.id}
-          log={connector}
-          path={String(index)}
-        />
-      ))}
-    </div>
+    <LogErrorTraceContext.Provider value={errorTrace}>
+      <div
+        style={{
+          border: "1px solid var(--color-border-default)",
+          borderRadius: 6,
+          overflow: "auto",
+          ...(fill ? { flex: 1, minHeight: 0 } : { maxHeight: "60vh" }),
+        }}
+      >
+        {data.map((connector, index) => (
+          <ConnectorLogRow
+            key={connector.id}
+            log={connector}
+            path={String(index)}
+          />
+        ))}
+      </div>
+    </LogErrorTraceContext.Provider>
   );
 }
