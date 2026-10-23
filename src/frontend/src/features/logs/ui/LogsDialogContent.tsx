@@ -96,7 +96,11 @@ export function LogsDialogContent({ connectionId, schedulerId, status }: Props) 
           }}
         >
           {executionId ? (
-            <ExecutionLogTree executionId={executionId} fill={isFullscreen} />
+            <ExecutionLogTree
+              executionId={executionId}
+              fill={isFullscreen}
+              isFailure={status === "f"}
+            />
           ) : (
             <Typography variant="caption" isSubtle>
               {t("selectHint")}
