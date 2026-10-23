@@ -8,7 +8,7 @@ import { BodyTab } from './BodyTab';
 import { HeadersTab } from './HeadersTab';
 import { ParamsTab } from './ParamsTab';
 import { SettingsTab } from './SettingsTab';
-import { TestValuesTab } from './TestValuesTab';
+import { TestValuesTab, type FocusRequest } from './TestValuesTab';
 import { countValueRows } from './valueRows';
 
 export type RequestTab = 'values' | 'params' | 'headers' | 'body' | 'settings';
@@ -19,7 +19,7 @@ type Props = {
 	settings: PlaygroundSettings;
 	missingKeys: string[];
 	tab: RequestTab;
-	focusKey: string | null;
+	focus: FocusRequest | null;
 	onTabChange: (tab: RequestTab) => void;
 	onSelectInput: (key: string) => void;
 	onSettingsChange: (patch: Partial<PlaygroundSettings>) => void;
@@ -29,7 +29,7 @@ const TabLabel = ({ label, count }: { label: string; count?: number }) => (
 	<span className='rpTabLabel'>{label}{count !== undefined && <span className='rpCount'>{count}</span>}</span>
 );
 
-export function RequestTabs({ session, values, settings, missingKeys, tab, focusKey, onTabChange,
+export function RequestTabs({ session, values, settings, missingKeys, tab, focus, onTabChange,
 	onSelectInput, onSettingsChange }: Props) {
 	const { t } = useI18n('workflow');
 	const { inputs, config } = session;
@@ -42,13 +42,14 @@ export function RequestTabs({ session, values, settings, missingKeys, tab, focus
 		<div className='rpRequestTabs' data-testid='request-playground-request-tabs'>
 			<Tabs value={tab} onChange={(key) => onTabChange(key as RequestTab)} items={[
 				{ key: 'values', label: label('values', valueCount), content:
-					<TestValuesTab session={session} values={values} missingKeys={missingKeys} focusKey={focusKey} /> },
+					<TestValuesTab session={session} values={values} missingKeys={missingKeys} focus={focus} /> },
 				{ key: 'params', label: label('params', queryRaw ? queryRaw.split('&').filter(Boolean).length : 0),
 					content: <ParamsTab session={session} /> },
 				{ key: 'headers', label: label('headers', Object.keys(config.headers ?? {}).length),
-					content: <HeadersTab session={session} /> },
+					content: <HeadersTab session={session} values={values} missingKeys={missingKeys}
+						onSelectInput={onSelectInput} /> },
 				{ key: 'body', label: label('body'), content:
-					<BodyTab session={session} missingKeys={missingKeys} onSelectInput={onSelectInput} /> },
+					<BodyTab session={session} values={values} missingKeys={missingKeys} onSelectInput={onSelectInput} /> },
 				{ key: 'settings', label: label('settings'), content:
 					<SettingsTab settings={settings} onChange={onSettingsChange} /> },
 			]} />

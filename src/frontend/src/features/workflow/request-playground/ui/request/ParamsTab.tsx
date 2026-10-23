@@ -18,7 +18,7 @@ export function ParamsTab({ session }: { session: PlaygroundSession }) {
 				<Trans ns='workflow' i18nKey='requestPlayground.params.hint' components={{ b: <b /> }} />
 			</span>
 			<EditableRowsTable rows={rows} testIdPrefix='request-playground-param'
-				originOf={(row: EditableRow) => readRowOrigin(row, connectionFieldNames)}
+				originOf={(row: EditableRow) => readRowOrigin(row, connectionFieldNames)} lockPolicy='byOrigin'
 				addLabel={t('requestPlayground.params.add')} emptyText={t('requestPlayground.params.empty')}
 				onChange={(paramRows) => setEdits((current) => ({ ...current, paramRows }))} />
 		</div>

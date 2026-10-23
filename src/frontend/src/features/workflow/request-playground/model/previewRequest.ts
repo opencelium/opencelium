@@ -2,7 +2,13 @@ import type { Connector } from '@entities/connector/model/types';
 import type { PlaygroundInputs } from './collectPlaygroundInputs';
 import type { PlaygroundDraft, PlaygroundSentRequest } from './playground.types';
 import { isSecretField, readConnectionFieldValue, SECRET_MASK } from './playgroundConnection';
-import { parseInputValue, referenceInputKey, webhookInputKey, type InputValue } from './playgroundValues';
+import {
+	connectionInputKey,
+	parseInputValue,
+	referenceInputKey,
+	webhookInputKey,
+	type InputValue,
+} from './playgroundValues';
 import {
 	connectionFieldSubstitution,
 	referenceSubstitution,
@@ -19,21 +25,35 @@ type Args = {
 	requestData: Record<string, string>;
 };
 
-// What the request will look like once sent; an input without a value keeps its placeholder.
-export function previewRequest({ draft, inputs, values, connector, requestData }: Args): PlaygroundSentRequest {
+export type PreviewInputSource = 'reference' | 'webhook' | 'connection';
+
+// A missing input is kept, without a value, so a preview can still show where it lands.
+export type PreviewInput = Substitution & { key: string; source: PreviewInputSource; isMissing: boolean };
+
+export function buildPreviewInputs({ inputs, values, connector, requestData }: Omit<Args, 'draft'>): PreviewInput[] {
 	const hasValue = (key: string) => !!values[key]?.text.trim();
-	const substitutions: Substitution[] = [
-		...inputs.references
-			.filter((reference) => hasValue(referenceInputKey(reference)))
-			.map((reference) => referenceSubstitution(reference.reference,
-				parseInputValue(values[referenceInputKey(reference)]))),
-		...inputs.webhooks
-			.filter((webhook) => hasValue(webhookInputKey(webhook)))
-			.map((webhook) => webhookSubstitution(webhook.name, parseInputValue(values[webhookInputKey(webhook)]))),
-		...inputs.connectionFields
-			.filter(({ field }) => !!readConnectionFieldValue(connector, field, requestData))
-			.map(({ field }) => connectionFieldSubstitution(field,
-				isSecretField(field) ? SECRET_MASK : readConnectionFieldValue(connector, field, requestData))),
+	return [
+		...inputs.references.map((reference) => {
+			const key = referenceInputKey(reference);
+			const isMissing = !hasValue(key);
+			return { ...referenceSubstitution(reference.reference, isMissing ? undefined : parseInputValue(values[key])),
+				key, source: 'reference' as const, isMissing };
+		}),
+		...inputs.webhooks.map((webhook) => {
+			const key = webhookInputKey(webhook);
+			const isMissing = !hasValue(key);
+			return { ...webhookSubstitution(webhook.name, isMissing ? undefined : parseInputValue(values[key])),
+				key, source: 'webhook' as const, isMissing };
+		}),
+		...inputs.connectionFields.map(({ field }) => {
+			const value = readConnectionFieldValue(connector, field, requestData);
+			return { ...connectionFieldSubstitution(field, isSecretField(field) ? SECRET_MASK : value),
+				key: connectionInputKey(field), source: 'connection' as const, isMissing: !value };
+		}),
 	];
-	return resolveRequest(draft, substitutions);
+}
+
+// What the request will look like once sent; an input without a value keeps its placeholder.
+export function previewRequest({ draft, ...args }: Args): PlaygroundSentRequest {
+	return resolveRequest(draft, buildPreviewInputs(args).filter(({ isMissing }) => !isMissing));
 }

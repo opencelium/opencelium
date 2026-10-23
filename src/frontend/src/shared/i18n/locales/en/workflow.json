@@ -1021,12 +1021,9 @@
     },
     "preview": {
       "badge": "In development",
-      "badgeHint": "Coming soon: the backend for testing a method is not available yet.",
-      "title": "Coming soon: this feature is still in development",
-      "message": "The backend for testing a single method is not available yet. Responses shown here are mock data, not a real call to the connector."
+      "badgeHint": "Coming soon: the backend for testing a method is not available yet."
     },
     "toolbar": {
-      "connector": "Connector",
       "prefill": "Prefill values from"
     },
     "prefill": {
@@ -1037,13 +1034,6 @@
       "manual": "Manual input only",
       "testRunUnavailable": "Pause a test run on this step to use its values."
     },
-    "prefillSentence": {
-      "testRun": "the paused test run",
-      "lastTest": "your last test",
-      "sample": "the sample responses",
-      "upstream": "a fresh run of the upstream steps",
-      "manual": "manual input"
-    },
     "url": {
       "method": "HTTP method",
       "curl": "cURL",
@@ -1053,15 +1043,6 @@
     },
     "curl": {
       "title": "Generated cURL (secrets masked)"
-    },
-    "writeWarning": {
-      "title": "{{method}} on {{connection}} changes live data.",
-      "titleDirect": "{{method}} changes live data.",
-      "message": "This request may create, change or delete data in the connected system.",
-      "sendAnyway": "Send anyway",
-      "switchTo": "Switch to {{connection}}",
-      "cancel": "Cancel",
-      "dontAskAgain": "Don't ask again this session"
     },
     "tabs": {
       "values": "Test values",
@@ -1080,10 +1061,7 @@
       "enable": "Enable"
     },
     "values": {
-      "hint": "Every value this request sends – URL, headers and body – in one place. Prefilled from <b>{{source}}</b>; type to override it for this test.",
-      "noChanges": "No changes",
-      "changed_one": "{{count}} value changed",
-      "changed_other": "{{count}} values changed",
+      "hint": "Values this request sends. Edit one to override it for this test.",
       "resetAll": "Reset all",
       "reset": "Reset to prefilled value",
       "placeholder": "Enter test value",
@@ -1159,8 +1137,10 @@
       "type": "Body type",
       "pretty": "Pretty",
       "raw": "Raw edit",
-      "hint": "Highlighted values are filled dynamically · change them in <b>Test values</b>",
+      "hint": "Set highlighted values in <b>Test values</b>",
       "rawHint": "Changes apply to this test only, until you choose <b>Apply to method</b>.",
+      "setReference": "[set reference]",
+      "setValue": "[set value]",
       "invalidJson": "Not valid JSON – the last valid body is sent.",
       "empty": "This request has no body.",
       "format": {
