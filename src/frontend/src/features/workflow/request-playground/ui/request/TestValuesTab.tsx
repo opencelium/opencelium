@@ -1,4 +1,3 @@
-import { Trans } from 'react-i18next';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { buildTestId } from '@shared/testing/testId';
 import { Button } from '@shared/ui/primitives/Button';
@@ -7,20 +6,25 @@ import type { PlaygroundValues } from '../../hooks/usePlaygroundValues';
 import { readConnectionFieldValue, SECRET_MASK } from '../../model/playgroundConnection';
 import { emptyInput } from '../../model/playgroundValues';
 import { SOURCE_TONE } from '../badgeTones';
+import { PrefillSourceSelect } from './PrefillSourceSelect';
 import { ConnectionValueControl, InputValueControl, KindToggle } from './TestValueControls';
 import { TestValueRow } from './TestValueRow';
 import { buildValueRows, VALUE_GROUPS, type ValueRow } from './valueRows';
+
+// The nonce changes on every request, so selecting the same value again still moves focus to it.
+export type FocusRequest = { key: string; nonce: number };
 
 type Props = {
 	session: PlaygroundSession;
 	values: PlaygroundValues;
 	missingKeys: string[];
-	focusKey: string | null;
+	focus: FocusRequest | null;
 };
 
-export function TestValuesTab({ session, values, missingKeys, focusKey }: Props) {
+export function TestValuesTab({ session, values, missingKeys, focus }: Props) {
 	const { t } = useI18n('workflow');
 	const rows = buildValueRows(session.inputs, t);
+	const focusNonce = (key: string) => focus?.key === key ? focus.nonce : null;
 	const testId = (key: string, part: string) => buildTestId('request-playground-value', key, part);
 
 	const renderInputRow = (row: Extract<ValueRow, { kind: 'input' }>) => {
@@ -28,7 +32,7 @@ export function TestValuesTab({ session, values, missingKeys, focusKey }: Props)
 		const isMissing = missingKeys.includes(row.key);
 		const source = isMissing ? 'empty' : value.source;
 		return (
-			<TestValueRow key={row.key} row={row} isEdited={value.source === 'edited'} isFocused={row.key === focusKey}
+			<TestValueRow key={row.key} row={row} isEdited={value.source === 'edited'} focusNonce={focusNonce(row.key)}
 				onReset={() => values.resetValue(row.key)}
 				badge={{ tone: SOURCE_TONE[source], label: t(`requestPlayground.source.${source}`),
 					hint: t(`requestPlayground.sourceHint.${source}`) }}
@@ -46,7 +50,7 @@ export function TestValuesTab({ session, values, missingKeys, focusKey }: Props)
 		const value = row.isSecret && !isOverridden
 			? SECRET_MASK : readConnectionFieldValue(session.connector, field, values.requestData);
 		return (
-			<TestValueRow key={row.key} row={row} isEdited={isOverridden} isFocused={row.key === focusKey}
+			<TestValueRow key={row.key} row={row} isEdited={isOverridden} focusNonce={focusNonce(row.key)}
 				onReset={() => values.setRequestDataValue(field, undefined)}
 				badge={isOverridden
 					? { tone: 'info', label: t('requestPlayground.source.edited'), hint: t('requestPlayground.sourceHint.edited') }
@@ -59,16 +63,9 @@ export function TestValuesTab({ session, values, missingKeys, focusKey }: Props)
 
 	return (
 		<div className='rpTabBody' data-testid='request-playground-values'>
-			<div className='rpTabIntro'>
-				<span className='rpHint'>
-					<Trans ns='workflow' i18nKey='requestPlayground.values.hint' components={{ b: <b /> }}
-						values={{ source: t(`requestPlayground.prefillSentence.${values.prefillSource}`) }} />
-				</span>
-				<span className='rpHint'>
-					{values.changedCount
-						? t('requestPlayground.values.changed', { count: values.changedCount })
-						: t('requestPlayground.values.noChanges')}
-				</span>
+			<div className='rpTabIntro rpTabIntro--values'>
+				<span className='rpHint'>{t('requestPlayground.values.hint')}</span>
+				<PrefillSourceSelect values={values} />
 				<Button onClick={values.resetAll} disabled={!values.changedCount} testId='request-playground-reset-all'>
 					{t('requestPlayground.values.resetAll')}
 				</Button>

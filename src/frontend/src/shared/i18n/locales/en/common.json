@@ -146,7 +146,7 @@
       "description": "Send this method on its own, with values for its references to previous methods, without running the whole workflow. Still in development: responses are mock data for now."
     },
     "workflowProblems": {
-      "title": "Workflow Linting",
+      "title": "Automatic Workflow Check",
       "description": "The workflow is now checked as you edit. Errors and warnings are counted here; click to see every problem and jump to the step it is on."
     },
     "sidebarBackToMainMenu": {

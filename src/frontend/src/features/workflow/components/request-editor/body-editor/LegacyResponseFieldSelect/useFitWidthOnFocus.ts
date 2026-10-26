@@ -5,7 +5,7 @@ const EDGE_GUTTER = 8;
 
 let measureContext: CanvasRenderingContext2D | null = null;
 
-function measureText(text: string, input: HTMLInputElement) {
+function measureText(text: string, input: HTMLElement) {
   measureContext ??= document.createElement('canvas').getContext('2d');
   if (!measureContext) return 0;
   const style = getComputedStyle(input);
@@ -21,11 +21,14 @@ function getClipRight(element: HTMLElement) {
   return document.documentElement.clientWidth;
 }
 
+const findTextarea = (host: HTMLElement | null) => host?.querySelector('textarea') ?? null;
+
 /**
  * Keeps a long path readable. While focused, widens the select to fit `text`
  * when it doesn't; the extra width is cancelled by an equal negative end margin,
  * so the select overlays its right neighbours instead of reflowing the row —
- * operator rows have no room to grow. Unfocused, shows the end of the path.
+ * operator rows have no room to grow. Once the width is capped, the textarea
+ * wraps and grows in height instead. Unfocused, shows the end of the path on one line.
  */
 export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, text: string) {
   const [isFocused, setIsFocused] = useState(false);
@@ -33,14 +36,17 @@ export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, te
 
   useLayoutEffect(() => {
     const host = hostRef.current;
-    const input = host?.querySelector('input');
+    const input = findTextarea(host);
     const select = input?.closest<HTMLElement>('.ant-select');
-    if (!isFocused || !host || !(input instanceof HTMLInputElement) || !select) {
+    if (!isFocused || !host || !input || !select) {
       setLayout(null);
       return;
     }
     const hostRect = host.getBoundingClientRect();
-    const chrome = select.offsetWidth - input.clientWidth;
+    const inputStyle = getComputedStyle(input);
+    const contentWidth = input.clientWidth - parseFloat(inputStyle.paddingLeft)
+      - parseFloat(inputStyle.paddingRight);
+    const chrome = select.offsetWidth - contentWidth;
     const available = getClipRight(host) - hostRect.left - EDGE_GUTTER;
     const width = Math.min(measureText(text, input) + chrome + 2, MAX_WIDTH, available);
     setLayout(width > hostRect.width ? { width, hostWidth: hostRect.width } : null);
@@ -51,8 +57,8 @@ export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, te
   // Unfocused, an input shows the start of an overflowing value; the last
   // segments are what tell paths apart, so scroll to the end instead.
   useEffect(() => {
-    const input = hostRef.current?.querySelector('input');
-    if (isFocused || !(input instanceof HTMLInputElement)) {
+    const input = findTextarea(hostRef.current);
+    if (isFocused || !input) {
       setIsTailShown(false);
       return;
     }
@@ -76,6 +82,7 @@ export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, te
     : undefined;
 
   return {
+    isFocused,
     isExpanded: layout !== null,
     isTailShown,
     style,

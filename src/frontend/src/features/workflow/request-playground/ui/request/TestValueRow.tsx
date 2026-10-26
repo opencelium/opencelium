@@ -12,22 +12,38 @@ type Props = {
 	row: ValueRow;
 	badge: { tone: BadgeTone; label: ReactNode; hint?: string };
 	isEdited: boolean;
-	isFocused: boolean;
+	focusNonce: number | null;
 	control: ReactNode;
 	extra?: ReactNode;
 	onReset: () => void;
 };
 
-export function TestValueRow({ row, badge, isEdited, isFocused, control, extra, onReset }: Props) {
+export function TestValueRow({ row, badge, isEdited, focusNonce, control, extra, onReset }: Props) {
 	const { t } = useI18n('workflow');
 	const ref = useRef<HTMLDivElement | null>(null);
 	const testId = (part: string) => buildTestId('request-playground-value', row.key, part);
 
+	const isFocused = focusNonce !== null;
+
 	useEffect(() => {
-		if (!isFocused) return;
-		ref.current?.scrollIntoView({ block: 'nearest' });
-		ref.current?.querySelector<HTMLElement>('input, textarea')?.focus();
-	}, [isFocused]);
+		if (focusNonce === null) return;
+		// When the request also switches to this tab, antd shows the pane a render later, and a
+		// hidden input ignores focus(), so wait (a few frames at most) until the row is visible.
+		let frame = 0;
+		let attempts = 0;
+		const focusWhenVisible = () => {
+			const row = ref.current;
+			if (!row) return;
+			if (!row.offsetParent && attempts++ < 10) {
+				frame = requestAnimationFrame(focusWhenVisible);
+				return;
+			}
+			row.scrollIntoView({ block: 'nearest' });
+			row.querySelector<HTMLElement>('input, textarea')?.focus();
+		};
+		focusWhenVisible();
+		return () => cancelAnimationFrame(frame);
+	}, [focusNonce]);
 
 	return (
 		<div ref={ref} className={['rpGridRow rpValueRow', isEdited && 'rpValueRow--edited', isFocused && 'rpValueRow--focused']

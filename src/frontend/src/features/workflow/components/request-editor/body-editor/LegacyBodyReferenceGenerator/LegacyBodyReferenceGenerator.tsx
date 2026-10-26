@@ -1,7 +1,9 @@
 import { ApiOutlined, LinkOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { LegacyWebhookReferenceSelect } from '../LegacyWebhookReferenceSelect/LegacyWebhookReferenceSelect';
-import { LegacyResponseFieldSelect } from '../LegacyResponseFieldSelect/LegacyResponseFieldSelect';
+import { DEFAULT_POPUP_Z_INDEX, LegacyResponseFieldSelect } from '../LegacyResponseFieldSelect/LegacyResponseFieldSelect';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Radio } from '@shared/ui/primitives/Radio';
 import type { ResponseType } from '../requestReferenceOptions';
 import type { LegacyBodyReferenceGeneratorProps } from './LegacyBodyReferenceGenerator.types';
@@ -20,6 +22,8 @@ import '../bodyLegacy.css';
 export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply, showWebhookOption = true, autoFocus, popupZIndex, defaultMethodId, resetKey,
   applyOnSelect, value, readOnly, showMethod = true,
   responsePartAsText }: LegacyBodyReferenceGeneratorProps) {
+  const { t } = useI18n('workflow');
+  const tooltipZIndex = (popupZIndex ?? DEFAULT_POPUP_Z_INDEX) + 1;
   const state = useLegacyBodyReferenceGenerator({
     connection, currentMethod, onApply, showWebhookOption, defaultMethodId, resetKey,
     applyOnSelect, value, showMethod, readOnly,
@@ -87,8 +91,10 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
             disabled={readOnly || !state.methodId} iterators={state.iterators}
             popupZIndex={popupZIndex}
             onChange={state.setField}
+            onSubmit={!applyOnSelect && !readOnly ? state.applyDirect : undefined}
           />
           {!applyOnSelect && !readOnly && (
+            <Tooltip content={t('references.addReference')} zIndex={tooltipZIndex}>
             <Button
               type='text'
               className='bodyLegacyGeneratorAction'
@@ -96,18 +102,21 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
               icon={<PlusOutlined />}
               disabled={!state.selectedMethod || !state.field} onClick={state.applyDirect}
             />
+            </Tooltip>
           )}
         </>
       ) : (
         <>
           <LegacyWebhookReferenceSelect value={state.webhookValue} onChange={state.setWebhookValue} />
-          <Button
-            type='text'
-            className='bodyLegacyGeneratorAction'
-            data-testid='workflow-reference-apply'
-            icon={<PlusOutlined />}
-            disabled={!state.webhookValue} onClick={state.applyWebhook}
-          />
+          <Tooltip content={t('references.addReference')} zIndex={tooltipZIndex}>
+            <Button
+              type='text'
+              className='bodyLegacyGeneratorAction'
+              data-testid='workflow-reference-apply'
+              icon={<PlusOutlined />}
+              disabled={!state.webhookValue} onClick={state.applyWebhook}
+            />
+          </Tooltip>
         </>
       )}
     </div>

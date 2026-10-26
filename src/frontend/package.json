@@ -4,15 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/patch-react-json-view.cjs && vite",
-    "build": "node scripts/patch-react-json-view.cjs && node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build && node scripts/write-production-config.cjs",
+    "dev": "node scripts/patch-react-json-view.cjs && node scripts/generate-changelog.cjs && vite",
+    "build": "node scripts/patch-react-json-view.cjs && node scripts/generate-changelog.cjs && node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build && node scripts/write-production-config.cjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write src",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
-    "gen-server": "node scripts/generate-server.cjs"
+    "gen-server": "node scripts/generate-server.cjs",
+    "gen-changelog": "node scripts/generate-changelog.cjs"
   },
   "dependencies": {
     "@ant-design/colors": "^8.0.1",

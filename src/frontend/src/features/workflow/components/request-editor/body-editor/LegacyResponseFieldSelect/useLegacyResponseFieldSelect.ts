@@ -36,8 +36,8 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
   [filterTerm, iterators, method, optionsBase, type, t]);
 
   const focusInputToEnd = () => requestAnimationFrame(() => {
-    const input = wrapperRef.current?.querySelector('input');
-    if (!(input instanceof HTMLInputElement)) return;
+    const input = wrapperRef.current?.querySelector('textarea');
+    if (!input) return;
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
   });
@@ -60,8 +60,10 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
     pathFeedback: open ? null : describeReferencePathValidation(
       validateReferencePath(jsonPathEnvironment, method, type, path, iterators), t),
     notFoundContent: undefined,
-    onSearch: (nextValue: string) => {
+    onSearch: (typedValue: string) => {
       if (!userInteractionRef.current) return;
+      // The field is a wrapping textarea; a pasted line break is never part of a path.
+      const nextValue = typedValue.replace(/[\r\n]+/g, '');
       if (selectingRef.current) {
         selectingRef.current = false;
         if (!nextValue) return;

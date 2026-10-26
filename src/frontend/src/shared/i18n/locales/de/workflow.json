@@ -873,7 +873,9 @@
     "valueDialog": {
       "copyTooltip": "Wert kopieren",
       "copySuccess": "Wert in die Zwischenablage kopiert"
-    }
+    },
+    "clearField": "Feld leeren",
+    "addReference": "Referenz hinzufügen"
   },
   "refGenerator": {
     "connector": "Konnektor",
@@ -1019,12 +1021,9 @@
     },
     "preview": {
       "badge": "In Entwicklung",
-      "badgeHint": "Demnächst verfügbar: Das Backend zum Testen einer Methode ist noch nicht verfügbar.",
-      "title": "Demnächst verfügbar: Diese Funktion befindet sich noch in Entwicklung",
-      "message": "Das Backend zum Testen einer einzelnen Methode ist noch nicht verfügbar. Die hier angezeigten Antworten sind Mock-Daten und kein echter Aufruf des Konnektors."
+      "badgeHint": "Demnächst verfügbar: Das Backend zum Testen einer Methode ist noch nicht verfügbar."
     },
     "toolbar": {
-      "connector": "Konnektor",
       "prefill": "Werte vorbelegen aus"
     },
     "prefill": {
@@ -1035,13 +1034,6 @@
       "manual": "Nur manuelle Eingabe",
       "testRunUnavailable": "Pausieren Sie einen Testlauf an diesem Schritt, um seine Werte zu verwenden."
     },
-    "prefillSentence": {
-      "testRun": "dem pausierten Testlauf",
-      "lastTest": "Ihrem letzten Test",
-      "sample": "den Beispielantworten",
-      "upstream": "einer neuen Ausführung der vorherigen Schritte",
-      "manual": "manueller Eingabe"
-    },
     "url": {
       "method": "HTTP-Methode",
       "curl": "cURL",
@@ -1051,15 +1043,6 @@
     },
     "curl": {
       "title": "Erzeugter cURL-Befehl (Geheimnisse maskiert)"
-    },
-    "writeWarning": {
-      "title": "{{method}} auf {{connection}} ändert Live-Daten.",
-      "titleDirect": "{{method}} ändert Live-Daten.",
-      "message": "Dieser Request kann Daten im verbundenen System anlegen, ändern oder löschen.",
-      "sendAnyway": "Trotzdem senden",
-      "switchTo": "Zu {{connection}} wechseln",
-      "cancel": "Abbrechen",
-      "dontAskAgain": "In dieser Sitzung nicht mehr fragen"
     },
     "tabs": {
       "values": "Testwerte",
@@ -1078,10 +1061,7 @@
       "enable": "Aktivieren"
     },
     "values": {
-      "hint": "Alle Werte, die dieser Request sendet – URL, Header und Body – an einem Ort. Vorbelegt aus <b>{{source}}</b>; überschreiben Sie sie für diesen Test.",
-      "noChanges": "Keine Änderungen",
-      "changed_one": "{{count}} Wert geändert",
-      "changed_other": "{{count}} Werte geändert",
+      "hint": "Werte, die dieser Request sendet. Bearbeiten Sie einen, um ihn für diesen Test zu überschreiben.",
       "resetAll": "Alle zurücksetzen",
       "reset": "Auf vorbelegten Wert zurücksetzen",
       "placeholder": "Testwert eingeben",
@@ -1157,8 +1137,9 @@
       "type": "Body-Typ",
       "pretty": "Formatiert",
       "raw": "Roh bearbeiten",
-      "hint": "Hervorgehobene Werte werden dynamisch gefüllt · ändern Sie sie unter <b>Testwerte</b>",
+      "hint": "Hervorgehobene Werte in <b>Testwerte</b> setzen",
       "rawHint": "Änderungen gelten nur für diesen Test, bis Sie <b>Auf Methode anwenden</b> wählen.",
+      "setReference": "[Referenz setzen]",
       "invalidJson": "Kein gültiges JSON – der letzte gültige Body wird gesendet.",
       "empty": "Dieser Request hat keinen Body.",
       "format": {
@@ -1248,7 +1229,7 @@
     },
     "setValueHint": "Wert festlegen",
     "title": "Playground",
-    "banner": "Simulation im Browser nach den Serverregeln (Nashorn ES5.1). Dies ist keine Serverausführung.",
+    "banner": "Simulation im Browser nach den Serverregeln (Nashorn · ES5.1). Dies ist keine Serverausführung.",
     "inputs": "Testwerte",
     "text": "Text",
     "missing": "Fehlend",
@@ -1271,15 +1252,15 @@
     "simulatedResult": "Simuliertes Ergebnis",
     "unreliable": "Nur auf dem Server verfügbare Funktion: Dieses Ergebnis ist nicht zuverlässig.",
     "location": "Zeile {{line}}, Spalte {{column}}",
-    "syntax": "Die Syntax ist nicht mit Nashorn ES5.1 kompatibel. ES5-Syntax verwenden.",
-    "builtin": "{{name}} ist auf dem Server (Nashorn ES5.1) nicht verfügbar.",
+    "syntax": "Die Syntax ist nicht mit Nashorn (ES5.1) kompatibel. ES5-Syntax verwenden.",
+    "builtin": "{{name}} ist auf dem Server (Nashorn · ES5.1) nicht verfügbar.",
     "serverOnly": "{{name}} ist nur auf dem Server verfügbar und kann nicht simuliert werden.",
     "nashornSyntax": "Nashorn-spezifische Syntax kann im Browser nicht geprüft oder simuliert werden.",
     "timezone": "Date kann abweichende Ergebnisse liefern, da der Server seine eigene Zeitzone verwendet.",
     "onlyJs": "Der Playground kann nur JavaScript simulieren.",
     "serverLanguages": "Python- und Ruby-Skripte laufen nur auf dem Server.",
     "compatibilityOnlyJs": "Die Kompatibilitätsprüfung ist nur für JavaScript verfügbar",
-    "compatible": "Keine Kompatibilitätsprobleme · Nashorn ES5.1",
+    "compatible": "Keine Kompatibilitätsprobleme · Nashorn · ES5.1",
     "csp": "Die Content Security Policy blockiert eval im Worker. Die Browsersimulation ist nicht verfügbar.",
     "invalidResult": "Das Ergebnis kann nicht in einen Servertyp String, Number, Boolean, Null, Map oder List umgewandelt werden.",
     "workerError": "Der Sandbox-Worker konnte nicht gestartet werden. Content Security Policy prüfen.",
@@ -1287,9 +1268,10 @@
     "numberTypes": "Browser-Zahlen bilden Java-Long-Eingabetypen nicht nach: typeof ergibt hier \"number\", bei Java Long in Nashorn jedoch \"object\".",
     "copy": "Ergebnis kopieren",
     "simulation": "Simulation",
+    "nashornDocs": "Nashorn · ES5.1-Dokumentation",
     "characters": "{{count}} Zeichen",
     "variables": "Variablen",
-    "issueCounts": "{{errors}} Fehler · {{warnings}} Warnungen · Nashorn ES5.1",
+    "issueCounts": "{{errors}} Fehler · {{warnings}} Warnungen · Nashorn · ES5.1",
     "show": "Anzeigen",
     "hide": "Ausblenden",
     "expandRequest": "Anfragedaten aufklappen",
@@ -1298,13 +1280,13 @@
     "stale": "Seit der letzten Änderung nicht ausgeführt",
     "lastRun": "Letzte Ausführung {{time}}",
     "runtimeError": "Laufzeitfehler in dieser Zeile",
-    "arrowSyntax": "Pfeilfunktionen werden in Nashorn ES5.1 nicht unterstützt. Verwenden Sie function(x) { return …; }.",
+    "arrowSyntax": "Pfeilfunktionen werden in Nashorn (ES5.1) nicht unterstützt. Verwenden Sie function(x) { return …; }.",
     "templateSyntax": "Template-Literale werden nicht unterstützt. Verwenden Sie Zeichenkettenverkettung.",
-    "declarationSyntax": "let und const werden in Nashorn ES5.1 nicht unterstützt. Verwenden Sie var.",
-    "classSyntax": "Klassen werden in Nashorn ES5.1 nicht unterstützt. Verwenden Sie Funktionen und Prototypen.",
-    "spreadSyntax": "Spread- und Rest-Syntax werden in Nashorn ES5.1 nicht unterstützt.",
+    "declarationSyntax": "let und const werden in Nashorn (ES5.1) nicht unterstützt. Verwenden Sie var.",
+    "classSyntax": "Klassen werden in Nashorn (ES5.1) nicht unterstützt. Verwenden Sie Funktionen und Prototypen.",
+    "spreadSyntax": "Spread- und Rest-Syntax werden in Nashorn (ES5.1) nicht unterstützt.",
     "destructuringSyntax": "Destrukturierung wird nicht unterstützt. Lesen Sie Eigenschaften explizit.",
-    "regexSyntax": "Die RegExp-Flags u, y und s werden in Nashorn ES5.1 nicht unterstützt.",
+    "regexSyntax": "Die RegExp-Flags u, y und s werden in Nashorn (ES5.1) nicht unterstützt.",
     "enhancement": "Transformation",
     "descriptionPlaceholder": "Was macht dieses Skript?",
     "errors": "{{count}} Fehler",
