@@ -21,6 +21,9 @@ import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJson
 import { useSchedulesConnectionId } from './components/schedules/simulatedSchedulesConnection';
 import { WorkflowProblemsBadge } from './problems/WorkflowProblemsBadge';
 import { applyProblemFocus } from './problems/applyProblemFocus';
+import { useAiPromptPanel } from '@features/ai-assistant/hooks/useAiPromptPanel';
+import { AiHeaderButton } from '@features/ai-assistant/ui/AiHeaderButton';
+import { AiPromptPanel } from '@features/ai-assistant/ui/AiPromptPanel/AiPromptPanel';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -86,6 +89,15 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     isUploadingTemplate, uploadTemplateInLoadDialog, closeLoadTemplateDialog, isApplyingTemplate,
     connectorMappingDialogOpen, connectorMappingGroups, applySelectedTemplate,
     handleConfirmConnectorMapping, handleCancelConnectorMapping } = templateActions;
+  const ai = useAiPromptPanel({ nodes: hydratedNodes, connectors,
+    isOtherPanelOpen: problems.open || schedulesOpen || workflow.historyOpen || changeHistoryOpen,
+    onBeforeOpen: () => {
+      problems.closePanel();
+      setSchedulesOpen(false);
+      workflow.setHistoryOpen(false);
+      setChangeHistoryOpen(false);
+      closeCanvasPanels();
+    } });
 
   if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate('/workflow')} />;
 
@@ -111,6 +123,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           menuLoadingItemId: isDownloadingTemplate ? 'download-template' : null,
           validateTitle, onSave: handleSave, confirmBeforeSave,
           problemsSlot: <WorkflowProblemsBadge issues={problems.issues} onOpen={problems.openPanel} />,
+          assistantSlot: ai.isConfigured && !readOnly ? <AiHeaderButton {...ai.button} /> : null,
           saveDisabled: isLoading || !hasConnectionChanges,
           onOpenHistory: handleOpenHistory,
           readOnly: readOnly || isTestRunLocked, testRunLocked: isTestRunLocked,
@@ -239,6 +252,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
           onOpenConnectorEditor: (nodeId, kind) => workflow.setConnectorEditor({ nodeId, kind }),
           onClose: () => workflow.setContextMenu(null) }} />
+      {ai.isConfigured && !readOnly && <AiPromptPanel model={ai.panel} />}
       <WorkflowNodeEditors
         response={{ open: !!workflow.responseNodeId,
           node: hydratedNodes.find((node) => node.id === workflow.responseNodeId) ?? null,

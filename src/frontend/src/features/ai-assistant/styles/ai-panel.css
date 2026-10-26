@@ -1,0 +1,547 @@
+/* Header entry point: same box as the editor's .iconButton. The wrapper raises specificity over antd's text-button rules. */
+.aiHeaderButtonWrap {
+  display: inline-flex;
+}
+
+.aiHeaderButtonWrap .aiHeaderButton.aiHeaderButton {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--color-border-default);
+  border-radius: 10px;
+  background: var(--color-background-surface);
+  color: var(--color-action-primary);
+}
+
+.aiHeaderButtonWrap .aiHeaderButton.aiHeaderButton:not(:disabled):hover {
+  background: var(--color-background-hover);
+  color: var(--color-action-primary);
+}
+
+.aiHeaderButtonWrap .aiHeaderButton.aiHeaderButton--active,
+.aiHeaderButtonWrap .aiHeaderButton.aiHeaderButton--active:not(:disabled):hover {
+  border-color: var(--color-action-primary);
+  background: var(--color-action-primary-subtle);
+}
+
+.aiHeaderButtonWrap .aiHeaderButton.aiHeaderButton:disabled {
+  border-color: var(--color-border-subtle);
+  background: var(--color-background-disabled);
+  color: var(--color-text-disabled);
+}
+
+/* Drawer */
+.aiPanelDrawer {
+  width: 420px;
+}
+
+.aiPanelSubtitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.aiPanelBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.aiPanelForm,
+.aiResult {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.aiPanelSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aiPanelSectionTitle {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.aiPanelSectionTitle--split {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.aiPanelSectionMeta {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Connectors */
+.aiConnectorRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: 8px;
+}
+
+.aiConnectorField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.aiConnectorLabel {
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.aiConnectorArrow {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  color: var(--color-text-secondary);
+}
+
+.aiConnectorOption,
+.aiConnectorChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.aiConnectorOptionTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Prompt */
+.aiPrompt textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.aiPromptMeta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.aiPromptMeta kbd {
+  padding: 0 4px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-surface);
+  font-family: var(--typography-font-family-mono);
+  font-size: 11px;
+}
+
+/* Examples */
+.aiExampleList,
+.aiIssueList,
+.aiUnavailableSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aiExample {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-background-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.aiExample svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--color-action-primary);
+}
+
+.aiExample:hover,
+.aiExample:focus-visible {
+  border-color: var(--color-action-primary);
+  background: var(--color-background-hover);
+  outline: 0;
+}
+
+/* Generating */
+.aiProgress,
+.aiResultSummary,
+.aiStepTreeCard {
+  padding: 12px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-background-surface);
+}
+
+.aiProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aiProgressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.aiProgressTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.aiProgressElapsed {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.aiProgressTrack {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--color-background-hover);
+}
+
+.aiProgressBar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  border-radius: 2px;
+  background: var(--color-action-primary);
+  animation: aiProgressSlide 1.6s ease-in-out infinite;
+}
+
+@keyframes aiProgressSlide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aiProgressBar {
+    animation: none;
+    width: 100%;
+    opacity: 0.4;
+  }
+}
+
+.aiProgressHint {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+/* Error */
+.aiErrorBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aiErrorDetail {
+  color: var(--color-text-secondary);
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* Unavailable */
+.aiUnavailable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 24px;
+  text-align: center;
+}
+
+.aiUnavailableIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+}
+
+.aiUnavailableTitle {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.aiUnavailableText {
+  margin: 0 0 8px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.aiUnavailableSteps {
+  align-self: stretch;
+  gap: 16px;
+  text-align: left;
+}
+
+.aiUnavailableSteps li {
+  display: flex;
+  gap: 10px;
+}
+
+.aiUnavailableStepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 22px;
+  height: 22px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.aiUnavailableStepBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.aiUnavailableStepTitle {
+  font-weight: 600;
+}
+
+.aiUnavailableStepTitle code,
+.aiCommand {
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+}
+
+.aiCommand {
+  display: block;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-input);
+  user-select: all;
+}
+
+.aiUnavailable .aiUnavailableCheck {
+  align-self: stretch;
+  margin-top: 8px;
+}
+
+/* Result */
+.aiResultSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.aiResultSummaryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.aiResultConnectors {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.aiResultPrompt {
+  margin: 0;
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.aiStepTree {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aiStepTree .aiStepTree {
+  margin: 6px 0 0 7px;
+  padding-left: 14px;
+  border-left: 1px solid var(--color-border-default);
+}
+
+.aiStep + .aiStep {
+  margin-top: 10px;
+}
+
+.aiStepRow,
+.aiStepCondition {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.aiStepRow > svg {
+  color: var(--color-text-secondary);
+}
+
+.aiStepCondition {
+  margin: 4px 0 0 20px;
+}
+
+.aiStepName {
+  font-weight: 600;
+}
+
+.aiStepMuted {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.aiAssignments {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0 0 26px;
+  padding: 0;
+  list-style: none;
+}
+
+.aiAssignment {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.aiAssignmentName {
+  font-family: var(--typography-font-family-mono);
+}
+
+.aiAssignmentArrow {
+  color: var(--color-text-secondary);
+}
+
+.aiAssignmentIssue {
+  display: inline-flex;
+}
+
+.aiLiteral,
+.aiRefPath {
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.aiLiteral {
+  color: var(--color-status-warning-fg);
+}
+
+.aiRefChip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 1px 6px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-hover);
+  font-size: 12px;
+}
+
+.aiRefSource {
+  font-weight: 600;
+}
+
+.aiRefSeparator {
+  color: var(--color-text-secondary);
+}
+
+/* Issues, styled like the Problems panel items */
+.aiIssue {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.aiIssueDot {
+  flex: 0 0 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.aiIssue--warning {
+  color: var(--color-status-warning-fg);
+}
+
+.aiIssue--error {
+  color: var(--color-status-error-fg);
+}
+
+.aiIssueBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  color: var(--color-text-primary);
+}
+
+.aiIssueTitle {
+  font-weight: 600;
+}
+
+.aiIssueText {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+/* Footer */
+.aiPanelFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.aiPanelFooter--split {
+  justify-content: space-between;
+}
+
+.aiPanelFooterGroup {
+  display: flex;
+  gap: 8px;
+}
