@@ -1,14 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { Connector } from '@entities/connector/model/types';
-import type { WorkflowNodeModel } from '@features/workflow/types/workflow.types';
 import { isAiConfigured, useGetAiHealthQuery } from '../api/aiApi';
-import type { AiPanelView } from '../model/aiPanelState';
+import { type AiApplyBlock, type AiPanelView, toPanelView } from '../model/aiPanelState';
 import { pickDefaultConnectors, toConnectorChoices } from '../utils/aiConnectors.utils';
+import { type AiWorkflowApplyTarget, useApplyAiWorkflow } from './useApplyAiWorkflow';
 import { useAiWorkflowGeneration } from './useAiWorkflowGeneration';
 
 type Params = {
-	nodes: WorkflowNodeModel[];
-	connectors: Connector[];
+	target: AiWorkflowApplyTarget;
+	/** A running test run locks the graph; generating still works, applying does not. */
+	isLocked: boolean;
 	/** True while another right-hand drawer is open; the AI panel steps aside for it. */
 	isOtherPanelOpen: boolean;
 	/** Closes the other drawers before this one opens. */
@@ -18,7 +18,8 @@ type Params = {
 // While the service is down the header button is disabled, so nothing else would notice it coming back.
 const UNAVAILABLE_POLL_MS = 15_000;
 
-export function useAiPromptPanel({ nodes, connectors, isOtherPanelOpen, onBeforeOpen }: Params) {
+export function useAiPromptPanel({ target, isLocked, isOtherPanelOpen, onBeforeOpen }: Params) {
+	const { nodes, connectors } = target;
 	const isConfigured = isAiConfigured();
 	const [isAvailable, setIsAvailable] = useState(true);
 	const health = useGetAiHealthQuery(undefined, {
@@ -31,11 +32,26 @@ export function useAiPromptPanel({ nodes, connectors, isOtherPanelOpen, onBefore
 		if (isHealthy !== isAvailable) setIsAvailable(isHealthy);
 	}
 	const [isOpen, setIsOpen] = useState(false);
+	const hasSteps = nodes.some((node) => node.type !== 'start' && node.type !== 'comment');
+	// Confirmed health, not the optimistic default: the hint must not flash up before the check fails.
+	const isHealthConfirmed = health.data?.status === 'ok' && !health.isError;
 	const choices = useMemo(() => toConnectorChoices(connectors), [connectors]);
 	const generation = useAiWorkflowGeneration({ choices, onUnreachable: health.refetch });
 	const { connectors: selected, setConnectors } = generation;
 
 	const close = useCallback(() => setIsOpen(false), []);
+	const applyWorkflow = useApplyAiWorkflow(target);
+	const { state } = generation;
+	const applyBlock: AiApplyBlock = isLocked ? 'locked'
+		: state.status === 'result' && state.response.issues.some((issue) => issue.severity === 'error') ? 'errors' : null;
+
+	const apply = async () => {
+		if (state.status !== 'result' || applyBlock) return;
+		const isApplied = await applyWorkflow(state.response.dsl, selected);
+		if (!isApplied) return;
+		generation.backToPrompt();
+		close();
+	};
 
 	const open = () => {
 		onBeforeOpen();
@@ -52,13 +68,15 @@ export function useAiPromptPanel({ nodes, connectors, isOtherPanelOpen, onBefore
 
 	const view: AiPanelView = !isAvailable && generation.state.status !== 'result'
 		? 'unavailable'
-		: generation.state.status;
+		: toPanelView(generation.state);
 
 	return {
 		isConfigured,
 		button: {
 			isOpen,
 			isAvailable,
+			/** Show the "new feature" card unprompted: a workflow without steps is where the assistant helps most. */
+			isIntroOpen: isHealthConfirmed && !isOpen && !isLocked && !hasSteps,
 			onToggle: () => (isOpen ? close() : open()),
 		},
 		panel: {
@@ -69,6 +87,8 @@ export function useAiPromptPanel({ nodes, connectors, isOtherPanelOpen, onBefore
 			isCheckingHealth: health.isFetching,
 			onCheckAgain: () => void health.refetch(),
 			onClose: close,
+			applyBlock,
+			onApply: () => void apply(),
 		},
 	};
 }

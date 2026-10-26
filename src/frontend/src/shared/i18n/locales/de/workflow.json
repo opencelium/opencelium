@@ -1321,8 +1321,8 @@
       "lookupOrCreate": "Den Verantwortlichen jedes {{from}}-Elements in {{to}} suchen und anlegen, falls er fehlt"
     },
     "generating": {
-      "title": "Workflow wird generiert…",
-      "hint": "Dauert meist 30–60 s. Das Modell läuft auf diesem Rechner."
+      "title": "Workflow wird erstellt…",
+      "hint": "Dauert meist 1–4 min, bei großen Plänen länger. Das Modell läuft auf diesem Rechner."
     },
     "actions": {
       "generate": "Generieren",
@@ -1333,7 +1333,12 @@
       "discard": "Verwerfen",
       "editPrompt": "Prompt bearbeiten",
       "tryAgain": "Erneut versuchen",
-      "checkAgain": "Erneut prüfen"
+      "checkAgain": "Erneut prüfen",
+      "createPlan": "Plan erstellen",
+      "planning": "Wird geplant…",
+      "buildWorkflow": "Workflow erstellen",
+      "building": "Wird erstellt…",
+      "editPlan": "Plan bearbeiten"
     },
     "result": {
       "steps": "Generierte Schritte",
@@ -1349,7 +1354,9 @@
         "gt": "ist größer als",
         "lt": "ist kleiner als",
         "contains": "enthält",
-        "exists": "existiert"
+        "not_contains": "enthält nicht",
+        "exists": "ist nicht leer",
+        "empty": "ist leer"
       }
     },
     "error": {
@@ -1363,6 +1370,25 @@
       "text": "Der Assistent läuft vollständig auf diesem Rechner. Starten Sie das lokale Modell und das Gateway und prüfen Sie dann erneut.",
       "startModel": "Lokales Modell starten",
       "startGateway": "Gateway starten in"
+    },
+    "apply": {
+      "replaceTitle": "Aktuellen Workflow ersetzen?",
+      "replaceMessage": "Die generierten Schritte ersetzen alles auf der Arbeitsfläche. Mit Strg + Z können Sie das rückgängig machen.",
+      "replace": "Ersetzen",
+      "success": "Generierter Workflow wurde zur Arbeitsfläche hinzugefügt",
+      "failed": "Der generierte Workflow konnte nicht hinzugefügt werden. Prüfen Sie, ob die ausgewählten Konnektoren noch existieren, und generieren Sie neu.",
+      "blockedByErrors": "Das Ergebnis enthält noch Fehler. Generieren Sie neu oder formulieren Sie den Prompt um.",
+      "blockedByTestRun": "Beenden Sie den Testlauf, um den Workflow zu ändern."
+    },
+    "planning": {
+      "title": "Workflow wird geplant…",
+      "hint": "Dauert meist 30–60 s. Das Modell läuft auf diesem Rechner."
+    },
+    "plan": {
+      "title": "Plan",
+      "patternSync": "Sync-Muster",
+      "shortcutHint": "zum Erstellen",
+      "hint": "Prüfen Sie die Schritte vor dem Erstellen. Jede Zeile ist änderbar; eine Zeile mit zwei Leerzeichen einrücken, um sie in die Schleife oder Bedingung darüber zu setzen."
     }
   }
 }

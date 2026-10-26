@@ -3,6 +3,9 @@ import { Button } from '@shared/ui/primitives/Button';
 import { NewFeature } from '@shared/ui/feedback/NewFeature/NewFeature';
 import type { WorkflowIssueGroups } from './useWorkflowIssues';
 
+// The antd Button sets an inline 51px min-width for text buttons; the badge is a 36px square like its neighbours.
+const SQUARE = { minWidth: 36 };
+
 type Props = {
 	issues: WorkflowIssueGroups;
 	onOpen: () => void;
@@ -20,7 +23,7 @@ export function WorkflowProblemsBadge({ issues, onOpen }: Props) {
 	return (
 		<NewFeature id="workflow-problems" placement="bottom"
 			tooltip={severity === 'clean' ? t('problems.badgeTooltipClean') : t('problems.badgeTooltip', { count })}>
-			<Button type="text" iconLeft={severity === 'clean' ? 'check-circle' : 'warning'} onClick={onOpen}
+			<Button type="text" iconLeft={severity === 'clean' ? 'check-circle' : 'warning'} onClick={onOpen} style={SQUARE}
 				testId="workflow-problems-badge" className={`workflowProblemsBadge workflowProblemsBadge--${severity}`}>
 				{severity === 'clean' ? null : count}
 			</Button>

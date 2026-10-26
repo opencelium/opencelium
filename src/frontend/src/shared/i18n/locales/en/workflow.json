@@ -1321,8 +1321,8 @@
       "lookupOrCreate": "Look up the owner of each {{from}} item in {{to}} and create them if missing"
     },
     "generating": {
-      "title": "Generating workflow…",
-      "hint": "Usually 30–60 s. The model runs on this machine."
+      "title": "Building workflow…",
+      "hint": "Usually 1–4 min, longer for large plans. The model runs on this machine."
     },
     "actions": {
       "generate": "Generate",
@@ -1333,7 +1333,12 @@
       "discard": "Discard",
       "editPrompt": "Edit prompt",
       "tryAgain": "Try again",
-      "checkAgain": "Check again"
+      "checkAgain": "Check again",
+      "createPlan": "Create plan",
+      "planning": "Planning…",
+      "buildWorkflow": "Build workflow",
+      "building": "Building…",
+      "editPlan": "Edit plan"
     },
     "result": {
       "steps": "Generated steps",
@@ -1349,7 +1354,9 @@
         "gt": "is greater than",
         "lt": "is less than",
         "contains": "contains",
-        "exists": "exists"
+        "not_contains": "does not contain",
+        "exists": "is not empty",
+        "empty": "is empty"
       }
     },
     "error": {
@@ -1363,6 +1370,25 @@
       "text": "The assistant runs entirely on this machine. Start the local model and the gateway, then check again.",
       "startModel": "Start the local model",
       "startGateway": "Start the gateway in"
+    },
+    "apply": {
+      "replaceTitle": "Replace the current workflow?",
+      "replaceMessage": "The generated steps replace everything on the canvas. You can undo this with Ctrl + Z.",
+      "replace": "Replace",
+      "success": "Generated workflow added to the canvas",
+      "failed": "Couldn't add the generated workflow. Check that the selected connectors still exist, then regenerate.",
+      "blockedByErrors": "The result still has errors. Regenerate or rephrase the prompt first.",
+      "blockedByTestRun": "Stop the test run to change the workflow."
+    },
+    "planning": {
+      "title": "Planning workflow…",
+      "hint": "Usually 30–60 s. The model runs on this machine."
+    },
+    "plan": {
+      "title": "Plan",
+      "patternSync": "Sync pattern",
+      "shortcutHint": "to build",
+      "hint": "Check the steps before building. Edit any line; indent a line by two spaces to put it inside the loop or condition above it."
     }
   }
 }

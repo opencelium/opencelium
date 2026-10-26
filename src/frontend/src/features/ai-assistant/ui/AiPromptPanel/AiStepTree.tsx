@@ -3,7 +3,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { AiWorkflowIssue } from '../../model/aiGateway.types';
-import type { Assignment, ConnectorSide, MethodStep, WorkflowStep } from '../../model/workflowDsl.schema';
+import { type Assignment, type ConnectorSide, type MethodStep, UNARY_CONDITION_OPS, type WorkflowStep } from '../../model/workflowDsl.schema';
 import type { AiConnectorChoice } from '../../utils/aiConnectors.utils';
 import { type DslPreview, issuesForAssignment } from '../../utils/dslPreview.utils';
 import { AiValue } from './AiValue';
@@ -56,7 +56,7 @@ function AiStepItem({ step, preview, connectors, issues }: ItemProps) {
 					<div className="aiStepCondition">
 						<AiValue value={preview.describeValue(step.condition.left)} />
 						<span className="aiStepMuted">{t(`ai.result.ops.${step.condition.op}`)}</span>
-						<AiValue value={preview.describeValue(step.condition.right)} />
+						{!UNARY_CONDITION_OPS.has(step.condition.op) && <AiValue value={preview.describeValue(step.condition.right)} />}
 					</div>
 					<AiStepTree steps={step.then} {...nested} />
 				</li>
