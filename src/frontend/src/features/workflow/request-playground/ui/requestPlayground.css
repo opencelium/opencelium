@@ -57,6 +57,12 @@
 	min-width: 0;
 }
 
+.rpTitleRow {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
 .rpTitleText {
 	font-size: 16px;
 	font-weight: 600;
@@ -82,26 +88,6 @@
 	gap: 6px;
 }
 
-/* Toolbar */
-.rpToolbar {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: flex-end;
-	gap: 12px 20px;
-}
-
-.rpField {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-	min-width: 200px;
-}
-
-.rpField--wide {
-	min-width: 280px;
-}
-
-.rpFieldLabel,
 .rpTableGroupTitle {
 	color: var(--color-text-secondary);
 	font-size: 11px;
@@ -123,40 +109,82 @@
 
 .rpUrlBar {
 	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
+	align-items: flex-start;
 	gap: 8px;
+}
+
+.rpUrlBar > * {
+	flex-shrink: 0;
 }
 
 .rpUrlMethod {
 	width: 112px;
 }
 
-.rpUrl {
-	flex: 1 1 280px;
-	min-width: 0;
+.rpUrlBar > .rpUrl {
+	flex: 1 1 160px;
+	min-width: 160px;
 }
 
-.rpUrl input {
+.rpTokenInput {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 32px;
+	padding: 0 11px;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+	background: var(--color-background-input);
+	transition: border-color 0.2s;
+}
+
+.rpTokenInput:hover,
+.rpTokenInput:focus-within {
+	border-color: var(--color-action-primary);
+}
+
+.rpTokenInputText {
+	flex: 1;
+	min-width: 0;
+	overflow-x: auto;
+	color: var(--color-text-primary);
 	font-family: var(--typography-font-family-mono, monospace);
 	font-size: 13px;
+	line-height: 30px;
+	white-space: nowrap;
+	outline: none;
+	scrollbar-width: none;
 }
 
-.rpWarningBody {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
+.rpTokenInputText::-webkit-scrollbar {
+	display: none;
 }
 
-.rpWarningActions {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 8px;
+.rpTokenInputText:empty::before {
+	content: attr(data-placeholder);
+	color: var(--color-text-disabled);
 }
 
-.rpWarningCheckbox {
-	margin-left: auto;
+/* While typing, the URL wraps and grows so the whole of it is in view. */
+.rpUrl .rpTokenInput {
+	transition: border-color 0.2s, min-height 0.15s;
+}
+
+.rpUrl .rpTokenInput:focus-within {
+	align-items: flex-start;
+	min-height: 96px;
+	padding-block: 4px;
+}
+
+.rpUrl .rpTokenInput:focus-within .rpTokenInputText {
+	overflow-x: visible;
+	line-height: 24px;
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.rpTokenInput--cell .rpTokenInputText {
+	font-size: 12px;
 }
 
 .rpCurl {
@@ -227,6 +255,48 @@
 	flex: 1 1 320px;
 }
 
+/* The prefill select and Reset all stay on one line; the hint wraps in the space left. */
+.rpTabIntro--values {
+	flex-wrap: nowrap;
+}
+
+.rpTabIntro--values > * {
+	flex-shrink: 0;
+}
+
+.rpTabIntro--values > .rpHint:first-child {
+	flex: 1 1 0;
+	min-width: 0;
+}
+
+/* Format, Pretty/Raw edit and the hint stay on one line; the hint truncates first. */
+.rpTabIntro--body {
+	flex-wrap: nowrap;
+}
+
+.rpTabIntro--body > * {
+	flex-shrink: 0;
+}
+
+.rpTabIntro--body > .rpHint {
+	flex: 1 1 0;
+	min-width: 0;
+	text-align: end;
+}
+
+.rpPrefillSelect {
+	width: 200px;
+}
+
+/* The Tooltip wrapper centers its child; stretch the label so it aligns like the other options. */
+.rpPrefillOptionLabel {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-align: start;
+}
+
 .rpCodeBox {
 	min-height: 120px;
 	border: 1px solid var(--color-border-default);
@@ -250,12 +320,111 @@
 	border-color: var(--color-status-error-fg);
 }
 
-.rpWebhook {
+.rpCodeView {
+	padding: 8px 0;
+	font-family: var(--typography-font-family-mono, monospace);
+	font-size: 13px;
+	line-height: 22px;
+}
+
+.rpCodeLine {
+	display: flex;
+}
+
+.rpCodeLineNo {
+	flex-shrink: 0;
+	width: 40px;
+	padding-inline-end: 12px;
+	color: var(--color-text-disabled);
+	text-align: end;
+	user-select: none;
+}
+
+.rpCodeLineText {
+	min-width: 0;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.rpJson-syntax {
+	color: var(--color-text-secondary);
+}
+
+.rpJson-key {
+	color: var(--color-action-primary);
+}
+
+.rpJson-string {
+	color: var(--color-status-success-fg);
+}
+
+.rpJson-number,
+.rpJson-literal {
+	color: var(--color-status-warning-fg);
+}
+
+.rpDynamic {
+	padding: 1px 6px;
+	border: 1px dashed var(--color-status-info-border);
+	border-radius: var(--radius-sm);
+	background: var(--color-status-info-bg);
 	cursor: pointer;
 }
 
-.rpWebhook--missing .bodyLegacyWebhookBadge {
-	box-shadow: 0 0 0 2px var(--color-status-warning-fg);
+.rpDynamic:hover,
+.rpDynamic:focus-visible {
+	border-style: solid;
+	outline: none;
+}
+
+.rpEditableValue {
+	border-radius: var(--radius-sm);
+	cursor: text;
+}
+
+.rpEditableValue:hover,
+.rpEditableValue:focus-visible {
+	background: var(--color-background-hover);
+	outline: none;
+}
+
+.rpInlineEdit {
+	display: inline-block;
+	width: min(100%, 360px);
+	vertical-align: middle;
+}
+
+.rpJson-placeholder {
+	color: var(--color-status-info-fg);
+	font-style: italic;
+}
+
+/* Read view of a header value with references; mirrors the input it turns into on click. */
+.rpValuePreview {
+	min-height: 32px;
+	padding: 4px 11px;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+	background: var(--color-background-input);
+	font-family: var(--typography-font-family-mono, monospace);
+	font-size: 12px;
+	line-height: 22px;
+	word-break: break-word;
+	cursor: pointer;
+}
+
+.rpValuePreview:hover {
+	border-color: var(--color-action-primary);
+	outline: none;
+}
+
+.rpValuePreview .rpJson-string {
+	color: var(--color-text-primary);
+}
+
+.rpDynamic--missing {
+	border-color: var(--color-status-warning-border);
+	background: var(--color-status-warning-bg);
 }
 
 /* Settings form */

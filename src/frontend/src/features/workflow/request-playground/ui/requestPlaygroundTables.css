@@ -129,10 +129,18 @@
 	gap: 4px;
 }
 
-.rpValueInput textarea {
-	min-height: 96px;
-	font-family: var(--typography-font-family-mono, monospace);
-	font-size: 12px;
+.rpJsonValue {
+	overflow: hidden;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+}
+
+.rpJsonValue:focus-within {
+	border-color: var(--color-action-primary);
+}
+
+.rpJsonValue--error {
+	border-color: var(--color-status-error-fg);
 }
 
 .rpValueError {

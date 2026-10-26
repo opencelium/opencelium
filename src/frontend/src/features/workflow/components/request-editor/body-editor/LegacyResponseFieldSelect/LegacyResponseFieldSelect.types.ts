@@ -14,4 +14,6 @@ export type LegacyResponseFieldSelectProps = {
 	 *  its own popup opens behind it. */
 	popupZIndex?: number;
 	onChange: (value?: string) => void;
+	/** Enter while the options list is closed; omit to make Enter a no-op there. */
+	onSubmit?: () => void;
 };

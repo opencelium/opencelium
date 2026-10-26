@@ -652,7 +652,39 @@
 
 /* Scrolled to the end of an overflowing path (useFitWidthOnFocus): fade the
    cut-off start so it reads as truncated rather than as the path's beginning. */
-.selectCopyHost.isTailShown .bodyLegacyGeneratorSelect .ant-select-selection-search-input {
+.referenceFieldPathInput {
+  resize: none;
+  overflow: hidden;
+  word-break: break-all;
+}
+
+/* The textarea draws the field's border, so the select around it must not add
+   its own padding; the textarea's end padding keeps text clear of the clear icon. */
+.bodyLegacyGeneratorSelect.referenceFieldPathSelect.ant-select {
+  padding-inline: 0 !important;
+}
+
+.referenceFieldPathSelect .referenceFieldPathInput {
+  padding-inline-end: 32px;
+  border-radius: 2px;
+}
+
+.referenceFieldPathSelect .ant-select-clear {
+  inset-inline-end: 10px;
+}
+
+/* antd narrows the content on hover to make room for the clear icon; the textarea's
+   end padding already does, and narrowing would pull its border in under the cursor. */
+.referenceFieldPathSelect.ant-select .ant-select-content {
+  margin-inline-end: 0 !important;
+}
+
+/* antd reveals the clear icon only on hover; keep it while the user is typing too. */
+.referenceFieldPathSelect:focus-within .ant-select-clear {
+  opacity: 1;
+}
+
+.selectCopyHost.isTailShown .referenceFieldPathInput {
   mask-image: linear-gradient(to right, transparent, #000 18px);
 }
 

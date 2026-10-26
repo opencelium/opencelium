@@ -12,6 +12,7 @@ export type InputValue = { text: string; kind: InputKind; source: InputValueSour
 
 export const referenceInputKey = ({ reference }: Pick<CollectedReference, 'reference'>) => reference;
 export const webhookInputKey = ({ name }: Pick<CollectedWebhook, 'name'>) => `webhook:${name}`;
+export const connectionInputKey = (field: string) => `connection:${field}`;
 
 export const emptyInput = (kind: InputKind = 'json'): InputValue => ({ text: '', kind, source: 'empty' });
 

@@ -1,3 +1,5 @@
+// Generated from CHANGELOG.rst by scripts/generate-changelog.cjs (`npm run gen-changelog`).
+// Do not edit by hand — edit CHANGELOG.rst and regenerate.
 import type { ChangelogRelease } from '@features/changelog/model/types'
 
 export const CHANGELOG: ChangelogRelease[] = [

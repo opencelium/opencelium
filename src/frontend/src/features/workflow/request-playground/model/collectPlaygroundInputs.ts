@@ -77,7 +77,9 @@ export function collectPlaygroundInputs(draft: PlaygroundDraft, connection: Conn
 	const ownColor = draft.color.toLowerCase();
 
 	const scan = (text: string, location: InputLocation, property: (offset: number) => string | null) => {
-		for (const match of text.matchAll(PAYLOAD_REFERENCE_RE)) {
+		// A reference in the URL is replaced by typing the value into the URL itself, not in Test values.
+		const referenceMatches = location === 'url' ? [] : text.matchAll(PAYLOAD_REFERENCE_RE);
+		for (const match of referenceMatches) {
 			const reference = unwrapReference(match[0]);
 			const parsed = parseEnhancementArg(reference);
 			// The method's own request is what the backend produces while testing,

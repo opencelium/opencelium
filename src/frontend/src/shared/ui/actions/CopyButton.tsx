@@ -9,13 +9,14 @@ type Props = {
     value: string;
     // Applied to the wrapper so callers can opt into hover-reveal styling.
     className?: string;
+    testId?: string;
 };
 
 // Copies `value` to the clipboard and shows a translated success/fail toast.
 // When `value` is empty the button is disabled and the tooltip explains why.
 // The wrapper stops click propagation so copying never triggers a parent's
 // own click handler (e.g. a clickable row or an open/close toggle).
-export function CopyButton({ value, className }: Props) {
+export function CopyButton({ value, className, testId }: Props) {
     const { t } = useI18n('common');
     const isEmpty = !value || !value.trim();
 
@@ -40,6 +41,7 @@ export function CopyButton({ value, className }: Props) {
                     type="text"
                     size="xs"
                     disabled={isEmpty}
+                    testId={testId}
                     onClick={handleCopy}
                 />
             </span>

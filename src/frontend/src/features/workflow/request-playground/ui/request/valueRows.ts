@@ -1,7 +1,7 @@
 import { formatParsedArgPath } from '../../../components/request-editor/utils/parseEnhancementArg';
 import type { InputLocation, InputTarget, PlaygroundInputs } from '../../model/collectPlaygroundInputs';
 import { isSecretField } from '../../model/playgroundConnection';
-import { referenceInputKey, webhookInputKey } from '../../model/playgroundValues';
+import { connectionInputKey, referenceInputKey, webhookInputKey } from '../../model/playgroundValues';
 
 type Translate = (key: string, options?: Record<string, unknown>) => string;
 
@@ -57,7 +57,7 @@ export function buildValueRows(inputs: PlaygroundInputs, t: Translate): ValueRow
 		})),
 		...listedConnectionFields(inputs).map(({ field, targets }): ValueRow => ({
 			kind: 'connection',
-			key: `connection:${field}`,
+			key: connectionInputKey(field),
 			group: groupOf(targets),
 			field: `{${field}}`,
 			connectionField: field,

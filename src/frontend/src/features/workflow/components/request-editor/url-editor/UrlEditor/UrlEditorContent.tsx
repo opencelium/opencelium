@@ -10,6 +10,7 @@ import { UrlEndpointField } from '../UrlEndpointField/UrlEndpointField';
 import { UrlQueryParamsTable } from '../UrlQueryParamsTable/UrlQueryParamsTable';
 import type { useUrlEditor } from './useUrlEditor';
 import { HTTP_METHODS } from './urlEditor.data';
+import type { QueryParam } from '../../../../types/connection';
 import '../urlMethodSelect.css';
 
 type Props = { readOnly?: boolean; editor: ReturnType<typeof useUrlEditor> };
@@ -50,6 +51,17 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 		setPickerOpen(open);
 		setReferenceOpen(open);
 		if (!open) restore();
+	};
+	const openRowReference = (row: QueryParam) => {
+		const isSameRow = queryCaretTargetRef.current?.rowId === row.id;
+		if (referenceOpen && isSameRow) return togglePicker();
+		if (active?.rowId !== row.id) references.clear();
+		if (!isSameRow) {
+			const field = !row.key.trim() && !(row.value ?? '').trim() ? 'key' : 'value';
+			queryCaretTargetRef.current = { rowId: row.id, field, caret: (row[field] ?? '').length };
+		}
+		setPickerOpen(true);
+		setReferenceOpen(true);
 	};
 	const selectedMethod = (method.request.method || 'GET').toUpperCase();
 	const methodSelect = (
@@ -119,7 +131,7 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 			/>
 			{!readOnly && referenceOpen && connection && (
 				// Mounted only while open, so autoFocus fires on the click that opened it.
-				<div data-url-reference-control>
+				<div data-url-reference-control className='urlReferenceGenerator'>
 					<LegacyBodyReferenceGenerator
 						value={
 							active
@@ -143,6 +155,8 @@ export function UrlEditorContent({ readOnly, editor }: Props) {
 				onToggleEnabled={query.onToggleEnabled}
 				onChangeParam={query.onChangeParam}
 				onRemoveParamRow={query.removeParamRow}
+				onInsertReference={openRowReference}
+				activeReferenceRowId={active?.rowId}
 				onCaretChange={(target) => {
 					queryCaretTargetRef.current = target;
 				}}

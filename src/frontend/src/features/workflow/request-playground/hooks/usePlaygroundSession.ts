@@ -48,7 +48,7 @@ function snapshotSession({ node, nodes, edges, fieldBindings, connectionId }: Ar
 export function usePlaygroundSession(args: Args) {
 	const [snapshot] = useState(() => snapshotSession(args));
 	const [edits, setEdits] = useState<RequestEdits>({});
-	const [connectorId, setConnectorId] = useState<number | null>(args.node.data.connector?.connectorId ?? null);
+	const connectorId = args.node.data.connector?.connectorId ?? null;
 
 	const connectors = useMemo(() => connectorsOfInvoker(args.connectors, args.node.data.connector?.invokerName),
 		[args.connectors, args.node.data.connector?.invokerName]);
@@ -78,10 +78,8 @@ export function usePlaygroundSession(args: Args) {
 		edits,
 		setEdits,
 		hasEdits: hasRequestEdits(edits),
-		connectors,
 		connector,
 		connectorId,
-		setConnectorId,
 		connectionFieldNames,
 		fixedHeaders,
 	};
