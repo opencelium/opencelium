@@ -34,6 +34,13 @@ describe('buildConstrainedSchema', () => {
         expect(constrained.safeParse(step).success).toBe(false)
     })
 
+    it('rejects body fields the connector fills from its credentials', () => {
+        const dsl = structuredClone(validWorkflow)
+        const loop = dsl.steps[1] as { body: { fields: unknown[] }[] }
+        loop.body[0]?.fields.push({ name: 'apikey', value: { literal: '<your_api_key>' } })
+        expect(constrained.safeParse(dsl).success).toBe(false)
+    })
+
     it('exports a recursive JSON schema with shared definitions', () => {
         const json = toJsonSchema(constrained)
         expect(json).toHaveProperty('$defs')
@@ -90,7 +97,7 @@ describe('validateWorkflow', () => {
             fields: [{ name: 'title', value: { ref: { step: 's2', path: 'fields.summary' } } }],
         })
         expect(validateWorkflow(dsl, connectors)).toEqual([
-            expect.objectContaining({ stepId: 's4', severity: 'error', message: expect.stringContaining('enclosing loop') }),
+            expect.objectContaining({ stepId: 's4', severity: 'error', message: expect.stringContaining('has already ended') }),
         ])
     })
 
@@ -120,6 +127,17 @@ describe('validateWorkflow', () => {
                         },
                     ],
                 },
+            ],
+        }
+        expect(validateWorkflow(dsl, connectors)).toEqual([])
+    })
+
+    it('does not check the unused right side of a unary condition', () => {
+        const dsl: WorkflowDsl = {
+            steps: [
+                { id: 's1', kind: 'method', connector: 'from', operation: 'ListIssues', params: [], fields: [] },
+                { id: 's2', kind: 'if', then: [],
+                    condition: { left: { ref: { step: 's1', path: 'issues' } }, op: 'empty', right: { ref: { step: 's9', path: 'x' } } } },
             ],
         }
         expect(validateWorkflow(dsl, connectors)).toEqual([])

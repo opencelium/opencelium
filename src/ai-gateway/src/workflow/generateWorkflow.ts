@@ -1,6 +1,8 @@
 import { type WorkflowConnectors, buildConstrainedSchema, toJsonSchema } from '../dsl/buildConstrainedSchema.ts'
+import { normalizeWorkflow } from '../dsl/normalizeWorkflow.ts'
 import { type WorkflowIssue, hasErrors, validateWorkflow } from '../dsl/validateWorkflow.ts'
-import type { WorkflowDsl } from '../dsl/workflowDsl.schema.ts'
+import { type WorkflowDsl, workflowDslSchema } from '../dsl/workflowDsl.schema.ts'
+import type { z } from 'zod'
 import type { ChatMessage, LlmClient } from '../llm/llmClient.ts'
 import { buildRepairMessage, buildWorkflowSystemPrompt } from './buildWorkflowPrompt.ts'
 
@@ -40,16 +42,20 @@ function errorCount(issues: WorkflowIssue[]): number {
  * (step order, loop scope, response paths) and asks the model to repair errors up to `maxRepairAttempts` times.
  * Returns the attempt with the fewest errors; its remaining issues travel with it.
  */
+/** A fixed structure to fill (from a reviewed plan): its own schema and the message describing it. */
+export type WorkflowConstraint = { schema: z.ZodType; userMessage: string }
+
 export async function generateWorkflow(
     prompt: string,
     connectors: WorkflowConnectors,
     deps: GenerateWorkflowDeps,
+    constraint?: WorkflowConstraint,
 ): Promise<GenerateWorkflowResult> {
-    const schema = buildConstrainedSchema(connectors)
+    const schema = constraint?.schema ?? buildConstrainedSchema(connectors)
     const format = toJsonSchema(schema)
     const messages: ChatMessage[] = [
         { role: 'system', content: buildWorkflowSystemPrompt(connectors) },
-        { role: 'user', content: prompt },
+        { role: 'user', content: constraint?.userMessage ?? prompt },
     ]
     const attempts: GenerationAttempt[] = []
     let best: Candidate | undefined
@@ -85,7 +91,7 @@ export async function generateWorkflow(
 
 function parseAndValidate(
     content: string,
-    schema: ReturnType<typeof buildConstrainedSchema>,
+    schema: z.ZodType,
     connectors: WorkflowConnectors,
 ): { dsl?: WorkflowDsl; issues: WorkflowIssue[] } {
     let json: unknown
@@ -102,5 +108,9 @@ function parseAndValidate(
             .join('; ')
         return { issues: [{ stepId: '', severity: 'error', message: `The answer does not match the schema: ${message}` }] }
     }
-    return { dsl: parsed.data, issues: validateWorkflow(parsed.data, connectors) }
+    // A constraint schema checks the exact structure; the static schema then types the document as the DSL.
+    const typed = workflowDslSchema.safeParse(parsed.data)
+    if (!typed.success) return { issues: [{ stepId: '', severity: 'error', message: 'The answer is not a workflow' }] }
+    const dsl = normalizeWorkflow(typed.data)
+    return { dsl, issues: validateWorkflow(dsl, connectors) }
 }

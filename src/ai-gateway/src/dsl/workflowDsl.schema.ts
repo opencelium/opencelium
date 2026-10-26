@@ -1,7 +1,12 @@
 import { z } from 'zod'
 
 export const CONNECTOR_SIDES = ['from', 'to'] as const
-export const CONDITION_OPS = ['eq', 'ne', 'gt', 'lt', 'contains', 'exists'] as const
+export const CONDITION_OPS = ['eq', 'ne', 'gt', 'lt', 'contains', 'not_contains', 'exists', 'empty'] as const
+
+/** Operators that test the left value alone; their right value is ignored. */
+export const UNARY_CONDITION_OPS: ReadonlySet<ConditionOp> = new Set<ConditionOp>(['exists', 'empty'])
+
+export type ConditionOp = (typeof CONDITION_OPS)[number]
 
 export type ConnectorSide = (typeof CONNECTOR_SIDES)[number]
 

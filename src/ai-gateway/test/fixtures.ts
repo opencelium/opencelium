@@ -41,7 +41,7 @@ export const targetXml = `<?xml version="1.0" encoding="UTF-8"?>
 <invoker type="RESTful">
     <name>Helpdesk</name>
     <description>Ticket system</description>
-    <requiredData><item name="url" type="string"/></requiredData>
+    <requiredData><item name="url" type="string"/><item name="apikey" type="string"/></requiredData>
     <operations>
         <operation name="CreateTicket" type="">
             <request>
@@ -49,6 +49,7 @@ export const targetXml = `<?xml version="1.0" encoding="UTF-8"?>
                 <endpoint>{url}/tickets</endpoint>
                 <body data="raw" format="json" type="object">
                     <field name="title" type="string"/>
+                    <field name="apikey" type="string">{apikey}</field>
                     <field name="article" type="object">
                         <field name="body" type="string"/>
                     </field>

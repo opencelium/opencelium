@@ -83,6 +83,23 @@ describe('gateway HTTP API', () => {
         expect(response.json()).toMatchObject({ error: { type: 'GENERATION_FAILED', message: 'fetch failed' } })
     })
 
+    it('plans a workflow', async () => {
+        const planning = llm({
+            chat: async () => ({ content: JSON.stringify({ pattern: 'custom', steps: [{ text: 'Read issues', depth: 0 }] }),
+                promptTokens: 1, outputTokens: 1, durationMs: 1 }),
+        })
+        const app = await buildApp({ config, llm: planning, invokers })
+        const response = await app.inject({ method: 'POST', url: '/workflow/plan', payload: { prompt: 'x', from: 'tracker' } })
+        expect(response.statusCode).toBe(200)
+        expect(response.json()).toMatchObject({ pattern: 'custom', steps: [{ text: 'Read issues', depth: 0 }] })
+    })
+
+    it('rejects a plan request for an unknown invoker', async () => {
+        const app = await buildApp({ config, llm: llm(), invokers })
+        const response = await app.inject({ method: 'POST', url: '/workflow/plan', payload: { prompt: 'x', from: 'nope' } })
+        expect(response.statusCode).toBe(404)
+    })
+
     it('allows the frontend dev origin via CORS', async () => {
         const app = await buildApp({ config, llm: llm(), invokers })
         const response = await app.inject({ method: 'GET', url: '/health', headers: { origin: 'http://localhost:5173' } })
