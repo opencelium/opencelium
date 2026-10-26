@@ -39,6 +39,7 @@ function parseFields(body: unknown): FieldNode[] {
     return asNodes(asNode(body)?.field).map((field) => ({
         name: attr(field, 'name'),
         type: attr(field, 'type'),
+        value: text(field),
         children: parseFields(field),
     }))
 }

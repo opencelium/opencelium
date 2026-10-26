@@ -1,9 +1,9 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { loadConfig } from '../src/config.ts'
-import { flattenFieldPaths, normalizePath } from '../src/invokers/fieldPaths.ts'
+import { assignableRequestPaths, flattenFieldPaths, isConnectorManaged, normalizePath } from '../src/invokers/fieldPaths.ts'
 import { parseInvoker } from '../src/invokers/parseInvoker.ts'
-import { tracker } from './fixtures.ts'
+import { helpdesk, tracker } from './fixtures.ts'
 
 describe('parseInvoker', () => {
     it('drops the test operation and separates endpoint params from connector settings', () => {
@@ -41,6 +41,25 @@ describe('parseInvoker', () => {
             const invoker = parseInvoker(readFileSync(`${dir}/${file}`, 'utf8'))
             expect(invoker.name, file).not.toBe('')
         }
+    })
+})
+
+describe('connector-managed fields', () => {
+    it.each([
+        ['{apikey}', true],
+        ['Basic {username:password}', true],
+        ['{APIKEY}', true],
+        ['{ISSUEID}', false],
+        ['plain', false],
+        ['', false],
+    ])('%s -> %s', (value, expected) => {
+        expect(isConnectorManaged(value, ['url', 'apikey', 'username', 'password'])).toBe(expected)
+    })
+
+    it('leaves credential fields out of the assignable request paths', () => {
+        const fields = helpdesk.operations[0]?.requestFields ?? []
+        expect(assignableRequestPaths(fields, helpdesk.requiredData).map((field) => field.path))
+            .toEqual(['title', 'article', 'article.body'])
     })
 })
 

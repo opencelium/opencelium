@@ -1,31 +1,31 @@
 import type { WorkflowConnectors } from '../dsl/buildConstrainedSchema.ts'
 import type { WorkflowIssue } from '../dsl/validateWorkflow.ts'
-import { flattenFieldPaths } from '../invokers/fieldPaths.ts'
+import { type FieldPath, assignableRequestPaths, flattenFieldPaths } from '../invokers/fieldPaths.ts'
 import type { Invoker, InvokerOperation } from '../invokers/invoker.types.ts'
 
 // Caps keep a large invoker inside the context window; the constrained schema still allows every field.
 const MAX_BODY_PATHS = 40
 const MAX_RESPONSE_PATHS = 40
 
-function listPaths(fields: InvokerOperation['requestFields'], max: number): string {
-    const paths = flattenFieldPaths(fields)
+function listPaths(paths: FieldPath[], max: number): string {
     if (paths.length === 0) return '-'
     const shown = paths.slice(0, max).map((field) => `${field.path}:${field.type}`)
     return paths.length > max ? `${shown.join(', ')}, ...` : shown.join(', ')
 }
 
-function describeOperation(operation: InvokerOperation): string {
+function describeOperation(operation: InvokerOperation, requiredData: string[]): string {
     const params = operation.endpointParams.length ? operation.endpointParams.join(', ') : '-'
     return [
         `- ${operation.name}: ${operation.httpMethod} ${operation.endpoint}`,
         `    params: ${params}`,
-        `    body: ${listPaths(operation.requestFields, MAX_BODY_PATHS)}`,
-        `    response: ${listPaths(operation.responseFields, MAX_RESPONSE_PATHS)}`,
+        `    body: ${listPaths(assignableRequestPaths(operation.requestFields, requiredData), MAX_BODY_PATHS)}`,
+        `    response: ${listPaths(flattenFieldPaths(operation.responseFields), MAX_RESPONSE_PATHS)}`,
     ].join('\n')
 }
 
-function describeConnector(side: 'from' | 'to', invoker: Invoker): string {
-    return `${invoker.name} operations (connector "${side}"):\n${invoker.operations.map(describeOperation).join('\n')}`
+export function describeConnector(side: 'from' | 'to', invoker: Invoker): string {
+    const operations = invoker.operations.map((operation) => describeOperation(operation, invoker.requiredData))
+    return `${invoker.name} operations (connector "${side}"):\n${operations.join('\n')}`
 }
 
 export function buildWorkflowSystemPrompt(connectors: WorkflowConnectors): string {
@@ -39,6 +39,9 @@ A workflow is a tree of steps with ids s1, s2, s3, ... in document order:
 - if: runs "then" only when the condition holds.
 - loop: iterates over an array in an earlier method step's response ("over").
 
+Condition operators ("op"): eq, ne, gt, lt; contains / not_contains (a list or text contains the right value, or not);
+exists / empty (the left value is present and non-empty, or missing / empty). For exists and empty set "right" to {"literal":""}.
+
 A value is one of:
   {"literal":"text"}
   {"ref":{"step":"<earlier method step id>","path":"<dot path in its response>"}}
@@ -46,9 +49,14 @@ A value is one of:
 
 Rules:
 - Use only the operations, params and body fields listed below.
-- Connection settings (url, username, password, token) are configured on the connector; never set them.
+- Connection settings and credentials (url, username, password, token, API keys) come from the connector; they are not listed and must never be set.
 - Inside a loop, read the current element through the loop's id; the path starts inside the element.
+- A loop's id is only valid inside that loop. To go over the same list again later, add a new loop whose "over" is the method step that returned the list, and read the element through the new loop's id.
+- To test whether a list or value is present, use the exists / empty operators on it; never append .length to a path.
 - Add only the steps the request needs.
+- The request may end with a reviewed plan. Follow it step by step: a step numbered under another (2.1 under 2) runs inside
+  that loop or if. "Loop A: For each ..." starts a loop; its steps stay inside it until "Loop A ends here.". Every loop in
+  the plan is its own loop step, and its "over" is the method step that returned the list, never another loop.
 
 ${sections.join('\n\n')}`
 }
