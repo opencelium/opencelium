@@ -1140,7 +1140,6 @@
       "hint": "Hervorgehobene Werte in <b>Testwerte</b> setzen",
       "rawHint": "Änderungen gelten nur für diesen Test, bis Sie <b>Auf Methode anwenden</b> wählen.",
       "setReference": "[Referenz setzen]",
-      "setValue": "[Wert setzen]",
       "invalidJson": "Kein gültiges JSON – der letzte gültige Body wird gesendet.",
       "empty": "Dieser Request hat keinen Body.",
       "format": {

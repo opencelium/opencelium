@@ -1140,7 +1140,6 @@
       "hint": "Set highlighted values in <b>Test values</b>",
       "rawHint": "Changes apply to this test only, until you choose <b>Apply to method</b>.",
       "setReference": "[set reference]",
-      "setValue": "[set value]",
       "invalidJson": "Not valid JSON – the last valid body is sent.",
       "empty": "This request has no body.",
       "format": {

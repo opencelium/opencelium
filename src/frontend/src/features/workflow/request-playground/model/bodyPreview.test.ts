@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildBodyPreview, buildTextPreview, hasInputPart, type JsonLine } from './bodyPreview';
+import { buildBodyPreview, buildReferencePreview, replaceReferences, buildTextPreview, hasInputPart, type JsonLine } from './bodyPreview';
 import type { PreviewInput } from './previewRequest';
 import { connectionFieldSubstitution, referenceSubstitution, webhookSubstitution } from './resolveRequest';
 
@@ -42,6 +42,7 @@ describe('buildBodyPreview', () => {
 		expect(lineText(line)).toBe('"path": "/office/<webhook>/[••••]"');
 		const placeholder = line.parts.find((part) => part.kind === 'input');
 		expect(placeholder).toMatchObject({ key: 'webhook:city', isMissing: true });
+		expect(line.edit).toBeUndefined();
 	});
 });
 
@@ -50,5 +51,23 @@ describe('buildTextPreview', () => {
 		const parts = buildTextPreview('Bearer {apikey} for {%' + REFERENCE + '%}', inputs);
 		expect(lineText({ depth: 0, parts })).toBe('Bearer [••••] for [4730]');
 		expect(hasInputPart(buildTextPreview('application/json', inputs))).toBe(false);
+	});
+});
+
+describe('buildReferencePreview', () => {
+	it('turns every reference into a placeholder and keeps the text around it', () => {
+		const parts = buildReferencePreview(`{url}/user?test={%${REFERENCE}%}&page=2`);
+		expect(parts).toEqual([
+			{ kind: 'string', text: '{url}/user?test=' },
+			{ kind: 'input', key: `{%${REFERENCE}%}`, source: 'reference', isMissing: true, raw: `{%${REFERENCE}%}`, parts: [] },
+			{ kind: 'string', text: '&page=2' },
+		]);
+	});
+});
+
+describe('replaceReferences', () => {
+	it('swaps each reference for the placeholder and keeps the rest of the text', () => {
+		expect(replaceReferences(`https://api.test/user?test={%${REFERENCE}%}&id=${REFERENCE}`, '[set reference]'))
+			.toBe('https://api.test/user?test=[set reference]&id=[set reference]');
 	});
 });

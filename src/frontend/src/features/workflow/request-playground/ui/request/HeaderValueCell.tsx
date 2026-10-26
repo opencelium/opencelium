@@ -1,8 +1,7 @@
-import { useState, type KeyboardEvent } from 'react';
 import { Input } from '@shared/ui/primitives/Input';
-import { buildTextPreview, hasInputPart } from '../../model/bodyPreview';
+import { buildTextPreview, firstInputKey } from '../../model/bodyPreview';
 import type { PreviewInput } from '../../model/previewRequest';
-import { PreviewParts } from './PreviewParts';
+import { ReferenceValuePreview } from './ReferenceValuePreview';
 
 type Props = {
 	value: string;
@@ -14,27 +13,16 @@ type Props = {
 	onChange: (value: string) => void;
 };
 
-// A value with references shows them as in the Body tab; clicking beside a chip edits the raw text.
 export function HeaderValueCell({ value, previewInputs, missingKeys, placeholder, testId, onSelectInput, onChange }: Props) {
-	const [isEditing, setIsEditing] = useState(false);
 	const parts = buildTextPreview(value, previewInputs);
+	const inputKey = firstInputKey(parts);
 
-	if (isEditing || !hasInputPart(parts)) {
+	if (inputKey === undefined) {
 		return (
-			<Input value={value} className='rpMonoInput' testId={testId} placeholder={placeholder} autoFocus={isEditing}
-				onBlur={() => setIsEditing(false)} onChange={(event) => onChange(event.target.value)} />
+			<Input value={value} className='rpMonoInput' testId={testId} placeholder={placeholder}
+				onChange={(event) => onChange(event.target.value)} />
 		);
 	}
-
-	const onKeyDown = (event: KeyboardEvent) => {
-		if (event.key !== 'Enter') return;
-		event.preventDefault();
-		setIsEditing(true);
-	};
-	return (
-		<div className='rpValuePreview' role='textbox' tabIndex={0} data-testid={testId}
-			onClick={() => setIsEditing(true)} onKeyDown={onKeyDown}>
-			<PreviewParts parts={parts} missingKeys={missingKeys} testId={testId} onSelect={onSelectInput} />
-		</div>
-	);
+	return <ReferenceValuePreview parts={parts} inputKey={inputKey} missingKeys={missingKeys} testId={testId}
+		onSelectInput={onSelectInput} />;
 }

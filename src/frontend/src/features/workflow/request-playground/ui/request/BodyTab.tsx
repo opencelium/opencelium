@@ -9,7 +9,7 @@ import type { PlaygroundValues } from '../../hooks/usePlaygroundValues';
 import { fromEditText, setBodyValue } from '../../model/bodyEdit';
 import { buildBodyPreview, type LineEdit } from '../../model/bodyPreview';
 import { readBodyFields } from '../../model/collectPlaygroundInputs';
-import { buildPreviewInputs } from '../../model/previewRequest';
+import { buildChipInputs } from '../../model/previewRequest';
 import { BodyRawEditor } from './BodyRawEditor';
 import { BodyCodeView } from './BodyCodeView';
 
@@ -61,7 +61,7 @@ export function BodyTab({ session, values, missingKeys, onSelectInput }: Props) 
 					? <div className='rpCodeBox'>
 						<BodyCodeView missingKeys={missingKeys} testId='request-playground-body' onSelect={onSelectInput}
 							onEditValue={editValue}
-							lines={buildBodyPreview(fields, buildPreviewInputs({ inputs, values: values.values, connector,
+							lines={buildBodyPreview(fields, buildChipInputs({ inputs, values: values.values, connector,
 								requestData: values.requestData }))} />
 					</div>
 					: <div className='rpEmptyNote'>{t('requestPlayground.body.empty')}</div>}
