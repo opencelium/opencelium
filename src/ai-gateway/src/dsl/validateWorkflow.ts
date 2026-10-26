@@ -1,7 +1,7 @@
 import { flattenFieldPaths, normalizePath } from '../invokers/fieldPaths.ts'
 import type { InvokerOperation } from '../invokers/invoker.types.ts'
 import type { WorkflowConnectors } from './buildConstrainedSchema.ts'
-import type { DslValue, LoopStep, MethodStep, StepRef, WorkflowDsl, WorkflowStep } from './workflowDsl.schema.ts'
+import { type DslValue, type LoopStep, type MethodStep, type StepRef, UNARY_CONDITION_OPS, type WorkflowDsl, type WorkflowStep } from './workflowDsl.schema.ts'
 
 export type WorkflowIssue = {
     stepId: string
@@ -13,6 +13,8 @@ export type WorkflowIssue = {
 type Scope = {
     methods: Map<string, MethodStep>
     stepIds: Set<string>
+    /** Loops whose body has been walked; a ref to one is out of scope, but names a list the model can loop over again. */
+    finishedLoops: Map<string, LoopStep>
 }
 
 type Context = {
@@ -45,14 +47,22 @@ function resolveTarget(ctx: Context, scope: Scope, loops: LoopStep[], stepId: st
     return { operation: source.operation, prefix: joinPath(source.prefix, loop.over.path) }
 }
 
+/** Says how to fix a ref to a loop that has ended: the repair prompt needs a concrete move, not just "out of scope". */
+function describeUnresolvedRef(scope: Scope, what: string, ref: StepRef): string {
+    const finished = scope.finishedLoops.get(ref.step)
+    const source = finished && scope.methods.get(finished.over.step)
+    if (!finished || !source) {
+        return `${what} refers to "${ref.step}", which is neither an earlier method step nor an enclosing loop`
+    }
+    const over = JSON.stringify(finished.over)
+    return `${what} refers to "${ref.step}", the loop over ${source.operation} › ${finished.over.path}, which has already ended. `
+        + `To use one element of that list here, put these steps inside a new loop with "over": ${over} and refer to the new loop's id.`
+}
+
 function checkRef(ctx: Context, scope: Scope, loops: LoopStep[], stepId: string, ref: StepRef, what: string) {
     const target = resolveTarget(ctx, scope, loops, ref.step)
     if (!target) {
-        ctx.issues.push({
-            stepId,
-            severity: 'error',
-            message: `${what} refers to "${ref.step}", which is neither an earlier method step nor an enclosing loop`,
-        })
+        ctx.issues.push({ stepId, severity: 'error', message: describeUnresolvedRef(scope, what, ref) })
         return
     }
     // Unknown paths are warnings, not errors: invoker response declarations are often incomplete.
@@ -81,12 +91,15 @@ function walk(ctx: Context, steps: WorkflowStep[], scope: Scope, loops: LoopStep
                 break
             case 'if':
                 checkValue(ctx, scope, loops, step.id, step.condition.left, 'Condition left side')
-                checkValue(ctx, scope, loops, step.id, step.condition.right, 'Condition right side')
+                if (!UNARY_CONDITION_OPS.has(step.condition.op)) {
+                    checkValue(ctx, scope, loops, step.id, step.condition.right, 'Condition right side')
+                }
                 walk(ctx, step.then, scope, loops)
                 break
             case 'loop':
                 checkRef(ctx, scope, loops, step.id, step.over, 'Loop source')
                 walk(ctx, step.body, scope, [...loops, step])
+                scope.finishedLoops.set(step.id, step)
                 break
             default: {
                 const _exhaustive: never = step
@@ -98,7 +111,7 @@ function walk(ctx: Context, steps: WorkflowStep[], scope: Scope, loops: LoopStep
 
 export function validateWorkflow(dsl: WorkflowDsl, connectors: WorkflowConnectors): WorkflowIssue[] {
     const ctx: Context = { connectors, issues: [] }
-    walk(ctx, dsl.steps, { methods: new Map(), stepIds: new Set() }, [])
+    walk(ctx, dsl.steps, { methods: new Map(), stepIds: new Set(), finishedLoops: new Map() }, [])
     return ctx.issues
 }
 

@@ -1,6 +1,8 @@
 export type FieldNode = {
     name: string
     type: string
+    /** Default value from the template; `{apikey}`-style placeholders are filled from connector settings. */
+    value: string
     children: FieldNode[]
 }
 
