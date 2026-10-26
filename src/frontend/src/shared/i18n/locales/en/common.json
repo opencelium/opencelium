@@ -156,6 +156,10 @@
     "changelog": {
       "title": "Changelog",
       "description": "See what changed in each OpenCelium release: the current version first, earlier ones below. Open it from the help menu."
+    },
+    "workflowAiAssistant": {
+      "title": "Generate with AI",
+      "description": "Describe the workflow in your own words and the assistant drafts the steps for you. It runs locally, nothing leaves this machine."
     }
   },
   "user": {

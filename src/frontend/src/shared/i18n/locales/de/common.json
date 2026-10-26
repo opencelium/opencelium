@@ -156,6 +156,10 @@
     "changelog": {
       "title": "Änderungsprotokoll",
       "description": "Sehen Sie, was sich in jeder OpenCelium-Version geändert hat: die aktuelle Version zuerst, ältere darunter. Sie finden es im Hilfemenü."
+    },
+    "workflowAiAssistant": {
+      "title": "Mit KI generieren",
+      "description": "Beschreiben Sie den Workflow in eigenen Worten, und der Assistent entwirft die Schritte für Sie. Er läuft lokal, nichts verlässt diesen Rechner."
     }
   },
   "user": {

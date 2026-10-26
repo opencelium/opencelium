@@ -19,8 +19,8 @@ type Props = {
 
 export function AiPromptForm({ generation, choices, promptRef, onPromptKeyDown }: Props) {
 	const { t } = useI18n('workflow');
-	const { connectors, setConnectors, prompt, setPrompt, state, generate } = generation;
-	const isLocked = state.status === 'generating';
+	const { connectors, setConnectors, prompt, setPrompt, state, retry } = generation;
+	const isLocked = state.status === 'planning';
 	const titleOf = (connectorId: number | null) => choices.find((choice) => choice.connectorId === connectorId)?.title;
 
 	return (
@@ -57,12 +57,12 @@ export function AiPromptForm({ generation, choices, promptRef, onPromptKeyDown }
 				<AiExamplePrompts fromTitle={titleOf(connectors.fromId)} toTitle={titleOf(connectors.toId)}
 					onPick={(text) => {
 						setPrompt(text);
-						promptRef.current?.focus();
+						promptRef.current?.focus({ preventScroll: true });
 					}} />
 			)}
-			{state.status === 'generating' && <AiGeneratingProgress startedAt={state.startedAt} />}
-			{state.status === 'error' && (
-				<AiGenerationErrorAlert failure={state.failure} detail={state.message} onRetry={() => void generate()} />
+			{state.status === 'planning' && <AiGeneratingProgress stage="plan" startedAt={state.startedAt} />}
+			{state.status === 'error' && state.stage === 'plan' && (
+				<AiGenerationErrorAlert failure={state.failure} detail={state.message} onRetry={retry} />
 			)}
 		</div>
 	);

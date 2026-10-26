@@ -52,6 +52,11 @@ export const NEW_FEATURES = {
         descriptionKey: 'newFeature.sidebarBackToMainMenu.description',
         titleKey: 'newFeature.sidebarBackToMainMenu.title',
     },
+    'workflow-ai-assistant': {
+        since: '5.3',
+        descriptionKey: 'newFeature.workflowAiAssistant.description',
+        titleKey: 'newFeature.workflowAiAssistant.title',
+    },
     changelog: {
         since: '5.3',
         descriptionKey: 'newFeature.changelog.description',
