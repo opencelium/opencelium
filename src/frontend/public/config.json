@@ -10,5 +10,11 @@
     "hostname": "",
     "port": "9090",
     "prefix": "/ws"
+  },
+  "ai": {
+    "protocol": "",
+    "hostname": "",
+    "port": "8787",
+    "prefix": ""
   }
 }

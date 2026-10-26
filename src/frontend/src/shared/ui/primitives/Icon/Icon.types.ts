@@ -85,6 +85,9 @@ export type IconName =
     | 'external-link'
     | 'send'
     | 'image'
+    | 'sparkles'
+    | 'plug-off'
+    | 'arrow-right'
 
 export type IconColor =
     | 'default'
