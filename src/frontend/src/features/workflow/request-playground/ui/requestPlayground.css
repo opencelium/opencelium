@@ -109,7 +109,7 @@
 
 .rpUrlBar {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	gap: 8px;
 }
 
@@ -126,9 +126,65 @@
 	min-width: 160px;
 }
 
-.rpUrl input {
+.rpTokenInput {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 32px;
+	padding: 0 11px;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+	background: var(--color-background-input);
+	transition: border-color 0.2s;
+}
+
+.rpTokenInput:hover,
+.rpTokenInput:focus-within {
+	border-color: var(--color-action-primary);
+}
+
+.rpTokenInputText {
+	flex: 1;
+	min-width: 0;
+	overflow-x: auto;
+	color: var(--color-text-primary);
 	font-family: var(--typography-font-family-mono, monospace);
 	font-size: 13px;
+	line-height: 30px;
+	white-space: nowrap;
+	outline: none;
+	scrollbar-width: none;
+}
+
+.rpTokenInputText::-webkit-scrollbar {
+	display: none;
+}
+
+.rpTokenInputText:empty::before {
+	content: attr(data-placeholder);
+	color: var(--color-text-disabled);
+}
+
+/* While typing, the URL wraps and grows so the whole of it is in view. */
+.rpUrl .rpTokenInput {
+	transition: border-color 0.2s, min-height 0.15s;
+}
+
+.rpUrl .rpTokenInput:focus-within {
+	align-items: flex-start;
+	min-height: 96px;
+	padding-block: 4px;
+}
+
+.rpUrl .rpTokenInput:focus-within .rpTokenInputText {
+	overflow-x: visible;
+	line-height: 24px;
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.rpTokenInput--cell .rpTokenInputText {
+	font-size: 12px;
 }
 
 .rpCurl {
@@ -354,11 +410,10 @@
 	font-size: 12px;
 	line-height: 22px;
 	word-break: break-word;
-	cursor: text;
+	cursor: pointer;
 }
 
-.rpValuePreview:hover,
-.rpValuePreview:focus-visible {
+.rpValuePreview:hover {
 	border-color: var(--color-action-primary);
 	outline: none;
 }

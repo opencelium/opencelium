@@ -41,8 +41,6 @@ export function readRowOrigin(row: Pick<EditableRow, 'key' | 'value'>, connectio
 	return fixedHeaders[row.key] === row.value ? 'fixed' : 'editable';
 }
 
-export const isLockedOrigin = (origin: RowOrigin) => origin !== 'editable';
-
 const ADDED_ROW_PREFIX = 'added';
 
 export const createEmptyRow = (): EditableRow =>

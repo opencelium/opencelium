@@ -53,6 +53,10 @@ export function buildPreviewInputs({ inputs, values, connector, requestData }: O
 	];
 }
 
+// Only references show as chips in the request views; webhook and connector placeholders stay plain text.
+export const buildChipInputs = (args: Omit<Args, 'draft'>) =>
+	buildPreviewInputs(args).filter(({ source }) => source === 'reference');
+
 // What the request will look like once sent; an input without a value keeps its placeholder.
 export function previewRequest({ draft, ...args }: Args): PlaygroundSentRequest {
 	return resolveRequest(draft, buildPreviewInputs(args).filter(({ isMissing }) => !isMissing));

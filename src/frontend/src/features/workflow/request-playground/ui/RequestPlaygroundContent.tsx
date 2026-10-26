@@ -80,7 +80,6 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 	const requestPane = (
 		<div className='rpRequest'>
 			<PlaygroundUrlBar method={session.draft.request.method || 'GET'} url={session.draft.request.endpoint} previewUrl={preview.url}
-				isUrlEdited={session.edits.url !== undefined || session.edits.paramRows !== undefined}
 				onUrlChange={(url) => session.setEdits((current) => ({ ...current, url, paramRows: undefined }))} prefillSource={values.prefillSource}
 				isCurlVisible={isCurlVisible} isSending={send.isSending}
 				onMethodChange={(method) => session.setEdits((current) => ({ ...current, method }))}

@@ -20,7 +20,7 @@ const collect = (request: Partial<PlaygroundDraft['request']>, fields: string[] 
 	collectPlaygroundInputs(draft(request), connection, fields);
 
 describe('collectPlaygroundInputs', () => {
-	it('finds references in the url, headers and body and merges repeated ones', () => {
+	it('finds references in the headers and body and merges repeated ones, but not in the url', () => {
 		const { references } = collect({
 			endpoint: 'https://api.test/users/{%#aaaaaa.(response).body.$.users[i].id%}',
 			header: { 'X-Count': '#aaaaaa.(response).header.$.x-total' },
@@ -28,23 +28,16 @@ describe('collectPlaygroundInputs', () => {
 		});
 
 		expect(references.map(({ reference, targets }) => ({ reference, targets }))).toEqual([
-			{ reference: '#aaaaaa.(response).body.$.users[i].id', targets: [
-				{ location: 'url', property: null }, { location: 'body', property: 'id' }] },
 			{ reference: '#aaaaaa.(response).header.$.x-total', targets: [{ location: 'header', property: 'X-Count' }] },
+			{ reference: '#aaaaaa.(response).body.$.users[i].id', targets: [{ location: 'body', property: 'id' }] },
 			{ reference: '#aaaaaa.(response).body.$', targets: [{ location: 'body', property: 'nested.all' }] },
 		]);
-		expect(references[0].sourceMethod).toBe(upstream);
+		expect(references[1].sourceMethod).toBe(upstream);
 	});
 
-	it('names the query parameter and the array position a value lands in', () => {
-		const { references } = collect({
-			endpoint: '/users?page=1&owner={%#aaaaaa.(response).body.$.id%}',
-			body: { fields: { units: [{ id: '#aaaaaa.(response).body.$.unit' }] } },
-		});
-		expect(references.map((item) => item.targets)).toEqual([
-			[{ location: 'url', property: 'owner' }],
-			[{ location: 'body', property: 'units[0].id' }],
-		]);
+	it('names the array position a value lands in', () => {
+		const { references } = collect({ body: { fields: { units: [{ id: '#aaaaaa.(response).body.$.unit' }] } } });
+		expect(references.map((item) => item.targets)).toEqual([[{ location: 'body', property: 'units[0].id' }]]);
 	});
 
 	it('skips references to the method’s own request, which the backend produces', () => {
@@ -52,7 +45,7 @@ describe('collectPlaygroundInputs', () => {
 	});
 
 	it('keeps a reference whose source method no longer exists, without a source', () => {
-		const { references } = collect({ endpoint: '/x/{%#cccccc.(response).status%}' });
+		const { references } = collect({ body: { fields: { status: '#cccccc.(response).status' } } });
 		expect(references).toHaveLength(1);
 		expect(references[0].sourceMethod).toBeUndefined();
 	});
@@ -84,15 +77,15 @@ describe('collectPlaygroundInputs', () => {
 });
 
 describe('readSampleValue', () => {
-	const referenceAt = (endpoint: string) => collect({ endpoint }).references[0];
+	const referenceAt = (reference: string) => collect({ body: { fields: { value: reference } } }).references[0];
 
 	it('reads the sample response, taking element 0 for an iterator', () => {
-		expect(readSampleValue(referenceAt('/{%#aaaaaa.(response).body.$.users[i].name%}'))).toBe('Ann');
-		expect(readSampleValue(referenceAt('/{%#aaaaaa.(response).header.$.x-total%}'))).toBe('2');
-		expect(readSampleValue(referenceAt('/{%#aaaaaa.(response).status%}'))).toBe('200');
+		expect(readSampleValue(referenceAt('#aaaaaa.(response).body.$.users[i].name'))).toBe('Ann');
+		expect(readSampleValue(referenceAt('#aaaaaa.(response).header.$.x-total'))).toBe('2');
+		expect(readSampleValue(referenceAt('#aaaaaa.(response).status'))).toBe('200');
 	});
 
 	it('has no sample for a deleted source method', () => {
-		expect(readSampleValue(referenceAt('/{%#cccccc.(response).body.$.id%}'))).toBeUndefined();
+		expect(readSampleValue(referenceAt('#cccccc.(response).body.$.id'))).toBeUndefined();
 	});
 });
