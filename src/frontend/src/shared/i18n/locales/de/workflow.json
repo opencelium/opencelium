@@ -1293,5 +1293,76 @@
     "errors_one": "{{count}} Fehler",
     "warningCount": "{{count}} Warnungen",
     "warningCount_one": "{{count}} Warnung"
+  },
+  "ai": {
+    "open": "Mit KI generieren",
+    "unavailableTooltip": "Der KI-Dienst ist nicht erreichbar. Starten Sie Ollama und das lokale Gateway.",
+    "title": "Mit KI generieren",
+    "subtitle": "Läuft lokal, nichts verlässt diesen Rechner",
+    "close": "Schließen",
+    "connectors": {
+      "title": "Konnektoren",
+      "from": "Von",
+      "to": "Nach",
+      "placeholder": "Konnektor auswählen"
+    },
+    "prompt": {
+      "title": "Prompt",
+      "placeholder": "Beschreiben Sie, was der Workflow tun soll…",
+      "shortcutHint": "zum Generieren",
+      "counter": "{{count}} / {{max}}"
+    },
+    "examples": {
+      "title": "Beispiel ausprobieren",
+      "fallbackFrom": "der Quelle",
+      "fallbackTo": "dem Ziel",
+      "createForEach": "Für jedes neue Element in {{from}} einen Datensatz in {{to}} anlegen",
+      "filterAndCreate": "Für jedes Element mit hoher Priorität in {{from}} einen Eintrag mit Beschreibung in {{to}} anlegen",
+      "lookupOrCreate": "Den Verantwortlichen jedes {{from}}-Elements in {{to}} suchen und anlegen, falls er fehlt"
+    },
+    "generating": {
+      "title": "Workflow wird generiert…",
+      "hint": "Dauert meist 30–60 s. Das Modell läuft auf diesem Rechner."
+    },
+    "actions": {
+      "generate": "Generieren",
+      "generating": "Wird generiert…",
+      "cancel": "Abbrechen",
+      "apply": "Übernehmen",
+      "regenerate": "Neu generieren",
+      "discard": "Verwerfen",
+      "editPrompt": "Prompt bearbeiten",
+      "tryAgain": "Erneut versuchen",
+      "checkAgain": "Erneut prüfen"
+    },
+    "result": {
+      "steps": "Generierte Schritte",
+      "stepCount_one": "{{count}} Schritt",
+      "stepCount_other": "{{count}} Schritte",
+      "loop": "Schleife",
+      "over": "über",
+      "if": "Wenn",
+      "review": "Vor dem Übernehmen prüfen ({{count}})",
+      "ops": {
+        "eq": "ist gleich",
+        "ne": "ist ungleich",
+        "gt": "ist größer als",
+        "lt": "ist kleiner als",
+        "contains": "enthält",
+        "exists": "existiert"
+      }
+    },
+    "error": {
+      "title": "Workflow konnte nicht generiert werden",
+      "generationFailed": "Das Modell hat nichts Verwertbares geliefert. Formulieren Sie den Prompt um oder versuchen Sie es erneut.",
+      "unknownInvoker": "Der KI-Dienst kennt einen der ausgewählten Konnektoren nicht. Wählen Sie einen anderen Konnektor oder starten Sie das Gateway neu.",
+      "unreachable": "Der KI-Dienst antwortet nicht mehr. Prüfen Sie, ob er noch läuft, und versuchen Sie es erneut."
+    },
+    "unavailable": {
+      "title": "KI-Dienst nicht erreichbar",
+      "text": "Der Assistent läuft vollständig auf diesem Rechner. Starten Sie das lokale Modell und das Gateway und prüfen Sie dann erneut.",
+      "startModel": "Lokales Modell starten",
+      "startGateway": "Gateway starten in"
+    }
   }
 }

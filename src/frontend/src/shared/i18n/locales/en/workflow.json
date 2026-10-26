@@ -1293,5 +1293,76 @@
     "errors_one": "{{count}} error",
     "warningCount": "{{count}} warnings",
     "warningCount_one": "{{count}} warning"
+  },
+  "ai": {
+    "open": "Generate with AI",
+    "unavailableTooltip": "AI service isn't reachable. Start Ollama and the local gateway.",
+    "title": "Generate with AI",
+    "subtitle": "Runs locally, nothing leaves this machine",
+    "close": "Close",
+    "connectors": {
+      "title": "Connectors",
+      "from": "From",
+      "to": "To",
+      "placeholder": "Select a connector"
+    },
+    "prompt": {
+      "title": "Prompt",
+      "placeholder": "Describe what the workflow should do…",
+      "shortcutHint": "to generate",
+      "counter": "{{count}} / {{max}}"
+    },
+    "examples": {
+      "title": "Try an example",
+      "fallbackFrom": "the source",
+      "fallbackTo": "the target",
+      "createForEach": "For every new item in {{from}}, create a record in {{to}}",
+      "filterAndCreate": "For each high-priority item in {{from}}, create an entry in {{to}} with its description",
+      "lookupOrCreate": "Look up the owner of each {{from}} item in {{to}} and create them if missing"
+    },
+    "generating": {
+      "title": "Generating workflow…",
+      "hint": "Usually 30–60 s. The model runs on this machine."
+    },
+    "actions": {
+      "generate": "Generate",
+      "generating": "Generating…",
+      "cancel": "Cancel",
+      "apply": "Apply",
+      "regenerate": "Regenerate",
+      "discard": "Discard",
+      "editPrompt": "Edit prompt",
+      "tryAgain": "Try again",
+      "checkAgain": "Check again"
+    },
+    "result": {
+      "steps": "Generated steps",
+      "stepCount_one": "{{count}} step",
+      "stepCount_other": "{{count}} steps",
+      "loop": "Loop",
+      "over": "over",
+      "if": "If",
+      "review": "Review before applying ({{count}})",
+      "ops": {
+        "eq": "equals",
+        "ne": "does not equal",
+        "gt": "is greater than",
+        "lt": "is less than",
+        "contains": "contains",
+        "exists": "exists"
+      }
+    },
+    "error": {
+      "title": "Couldn't generate a workflow",
+      "generationFailed": "The model returned nothing usable. Rephrase the prompt or try again.",
+      "unknownInvoker": "The AI service doesn't know one of the selected connectors. Pick another connector or restart the gateway.",
+      "unreachable": "The AI service stopped responding. Check that it is still running, then try again."
+    },
+    "unavailable": {
+      "title": "AI service isn't reachable",
+      "text": "The assistant runs entirely on this machine. Start the local model and the gateway, then check again.",
+      "startModel": "Start the local model",
+      "startGateway": "Start the gateway in"
+    }
   }
 }

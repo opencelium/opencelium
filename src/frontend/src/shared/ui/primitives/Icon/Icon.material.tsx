@@ -71,6 +71,9 @@ import FitScreen from '@mui/icons-material/FitScreen';
 import Science from '@mui/icons-material/Science';
 import WarningAmber from '@mui/icons-material/WarningAmber';
 import HighlightOff from '@mui/icons-material/HighlightOff';
+import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
+import PowerOffOutlined from '@mui/icons-material/PowerOffOutlined';
+import ArrowForward from '@mui/icons-material/ArrowForward';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import AccessTime from '@mui/icons-material/AccessTime';
 import Code from '@mui/icons-material/Code';
@@ -161,6 +164,9 @@ const iconMap = {
     'external-link': OpenInNew,
     send: SendOutlined,
     image: ImageOutlined,
+    sparkles: AutoAwesomeOutlined,
+    'plug-off': PowerOffOutlined,
+    'arrow-right': ArrowForward,
 };
 
 export const MaterialIcon: IconComponent = ({

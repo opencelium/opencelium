@@ -14,11 +14,14 @@ export type OcServerSettings = {
 export type OcRuntimeConfig = {
     server?: OcServerSettings
     socket?: OcServerSettings
+    /** Local AI gateway (src/ai-gateway). Absent = the AI assistant is hidden. */
+    ai?: OcServerSettings
 }
 
 export const runtimeConfig = {
     apiUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? '',
     socketUrl: import.meta.env.VITE_SOCKET_URL as string | undefined,
+    aiUrl: import.meta.env.VITE_AI_URL as string | undefined,
 }
 
 const buildOrigin = (settings: OcServerSettings | undefined) => {
@@ -39,6 +42,11 @@ export async function loadRuntimeConfig(): Promise<void> {
 
         const socketPrefix = settings.socket?.prefix?.trim() || ''
         runtimeConfig.socketUrl = `${buildOrigin(settings.socket)}${socketPrefix}`
+
+        if (settings.ai) {
+            const aiPrefix = settings.ai.prefix?.trim() || ''
+            runtimeConfig.aiUrl = `${buildOrigin(settings.ai)}${aiPrefix}`.replace(/\/+$/, '')
+        }
     } catch {
         // config.json missing/unreachable — keep the VITE_* dev fallback above.
     }

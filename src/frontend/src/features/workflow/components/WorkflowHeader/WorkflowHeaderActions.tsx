@@ -27,12 +27,13 @@ type Props = {
 	saveDialogOpen: boolean;
 	schedulesSlot?: ReactNode;
 	problemsSlot?: ReactNode;
+	assistantSlot?: ReactNode;
 	onToggleSchedules?: () => void;
 };
 
 export function WorkflowHeaderActions({
 	items, loadingItemId, onOpenHistory, onMenuItemSelect, onSave,
-	readOnly, saveDisabled, saveDialogOpen, schedulesSlot, problemsSlot, onToggleSchedules,
+	readOnly, saveDisabled, saveDialogOpen, schedulesSlot, problemsSlot, assistantSlot, onToggleSchedules,
 }: Props) {
 	const { t } = useI18n('workflow');
 	const { width } = useBreakpoints();
@@ -77,6 +78,7 @@ export function WorkflowHeaderActions({
 				</>
 			)}
 			{problemsSlot}
+			{assistantSlot}
 			{!readOnly && (
 				<button className='primaryButton headerPrimaryButton' type='button'
 					disabled={saveDisabled} onClick={onSave} data-testid='workflow-save'>
