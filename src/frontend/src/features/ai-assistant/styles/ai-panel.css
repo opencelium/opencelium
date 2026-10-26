@@ -1,4 +1,5 @@
-/* Header entry point: same box as the editor's .iconButton. The wrapper raises specificity over antd's text-button rules. */
+/* Header entry point: a borderless 36px square like the header's other icon controls. The wrapper raises
+   specificity over antd's text-button rules. */
 .aiHeaderButtonWrap {
   display: inline-flex;
 }
@@ -7,9 +8,9 @@
   width: 36px;
   height: 36px;
   padding: 0;
-  border: 1px solid var(--color-border-default);
+  border-color: transparent;
   border-radius: 10px;
-  background: var(--color-background-surface);
+  background: transparent;
   color: var(--color-action-primary);
 }
 
@@ -20,12 +21,10 @@
 
 .aiHeaderButtonWrap .aiHeaderButton.aiHeaderButton--active,
 .aiHeaderButtonWrap .aiHeaderButton.aiHeaderButton--active:not(:disabled):hover {
-  border-color: var(--color-action-primary);
   background: var(--color-action-primary-subtle);
 }
 
 .aiHeaderButtonWrap .aiHeaderButton.aiHeaderButton:disabled {
-  border-color: var(--color-border-subtle);
   background: var(--color-background-disabled);
   color: var(--color-text-disabled);
 }
@@ -544,4 +543,37 @@
 .aiPanelFooterGroup {
   display: flex;
   gap: 8px;
+}
+
+/* A disabled button fires no pointer events; the wrapper carries the tooltip that says why. */
+.aiApplyWrap {
+  display: inline-flex;
+}
+
+/* Plan review */
+.aiPlanHint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.aiPlanPattern {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--color-action-primary-subtle);
+  color: var(--color-action-primary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Indentation carries the plan's nesting, so the editor uses the mono font; long steps wrap, their indent stays. */
+.aiPlanEditor textarea {
+  min-height: 320px;
+  resize: vertical;
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
 }

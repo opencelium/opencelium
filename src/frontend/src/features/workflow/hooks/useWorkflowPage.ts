@@ -142,12 +142,14 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       nextNodes: WorkflowNodeModel[],
       nextEdges: WorkflowEdgeModel[],
       nextViewport?: Viewport,
-      options?: { centerStart?: boolean },
+      options?: { centerStart?: boolean; isUndoable?: boolean },
     ) => {
       // A wholesale replacement (connection load, template, version rollback)
       // is not an in-session edit — starting a fresh stack keeps undo from
-      // splicing the previous workflow into this one.
-      undoHistory.reset();
+      // splicing the previous workflow into this one. A replacement the user
+      // makes inside the session (applying a generated workflow) opts out, so
+      // the change observer records it as one undoable step.
+      if (!options?.isUndoable) undoHistory.reset();
       setNodes(nextNodes);
       setEdges(nextEdges);
       setRestoredViewport(nextViewport);

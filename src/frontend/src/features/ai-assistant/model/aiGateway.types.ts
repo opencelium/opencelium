@@ -25,6 +25,19 @@ export type GenerateWorkflowRequest = {
 	prompt: string;
 	from: string;
 	to?: string;
+	/** The reviewed plan, one step per line, two spaces of indentation per level; the gateway builds it step by step. */
+	plan?: string;
+};
+
+export type PlanPattern = 'sync' | 'custom';
+
+export type PlanStep = { text: string; depth: number };
+
+export type PlanWorkflowResponse = {
+	pattern: PlanPattern;
+	steps: PlanStep[];
+	durationMs: number;
+	model: string;
 };
 
 export type GenerateWorkflowResponse = {

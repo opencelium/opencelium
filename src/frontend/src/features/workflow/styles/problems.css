@@ -83,6 +83,15 @@
   overflow-wrap: anywhere;
 }
 
+/* A 36px square like the header's other icon controls; tight padding keeps "⚠ 1" inside the square. */
+.workflowProblemsBadge.workflowProblemsBadge {
+  height: 36px;
+  min-width: 36px;
+  padding: 0 3px;
+  gap: 4px;
+  border-radius: 10px;
+}
+
 /* The header badge takes its severity's colour over the text button's neutral one. */
 .workflowProblemsBadge.workflowProblemsBadge--error,
 .workflowProblemsBadge.workflowProblemsBadge--error:hover {

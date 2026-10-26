@@ -89,7 +89,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     isUploadingTemplate, uploadTemplateInLoadDialog, closeLoadTemplateDialog, isApplyingTemplate,
     connectorMappingDialogOpen, connectorMappingGroups, applySelectedTemplate,
     handleConfirmConnectorMapping, handleCancelConnectorMapping } = templateActions;
-  const ai = useAiPromptPanel({ nodes: hydratedNodes, connectors,
+  const ai = useAiPromptPanel({ isLocked: isTestRunLocked,
+    target: { nodes: hydratedNodes, connectors, setWorkflowGraph: workflow.setWorkflowGraph,
+      setFieldBindings: setLoadedFieldBindings, markDirty: changes.markDirty },
     isOtherPanelOpen: problems.open || schedulesOpen || workflow.historyOpen || changeHistoryOpen,
     onBeforeOpen: () => {
       problems.closePanel();

@@ -100,3 +100,15 @@
 .headerActionWrap {
   position: relative;
 }
+
+/* The profile button comes from the shared UserActions widget, whose antd Button sets min-width, padding and height
+   inline. In the editor header it becomes a 36px square like the other icon controls; !important is scoped here so
+   the app top bar keeps its own look. */
+.headerActions [data-testid='user-actions-trigger'],
+.headerActions [data-testid='topbar-profile'] {
+  width: 36px;
+  min-width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  border-radius: 10px;
+}
