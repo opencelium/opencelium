@@ -1,5 +1,5 @@
 import { normalizePath } from '../invokers/fieldPaths.ts'
-import type { Assignment, DslValue, StepRef, WorkflowDsl, WorkflowStep } from './workflowDsl.schema.ts'
+import type { Assignment, DslValue, FieldAssignment, FieldValue, StepRef, WorkflowDsl, WorkflowStep } from './workflowDsl.schema.ts'
 
 /** A loop as seen by later steps: what it iterates, in method terms when that is known. */
 type LoopInfo = {
@@ -21,7 +21,7 @@ const isWholeElement = (path: string) => normalizePath(path) === ''
  * Models also "fill" the parent of the fields they set (`ConfigItem = "{}"` beside `ConfigItem.Name`); written as a
  * string it would replace the object its children go into, so a parent of another assigned path is dropped.
  */
-function withoutParentAssignments(assignments: Assignment[]): Assignment[] {
+function withoutParentAssignments<T extends Assignment | FieldAssignment>(assignments: T[]): T[] {
     const names = assignments.map((assignment) => assignment.name)
     return assignments.filter(({ name }) => !names.some((other) => other !== name
         && (other.startsWith(`${name}.`) || other.startsWith(`${name}[]`))))
@@ -57,6 +57,15 @@ function resolveOver(over: StepRef, scope: Scope, enclosing: LoopInfo[]): { over
     return { over, info: { methodOver: undefined, key: undefined } }
 }
 
+function normalizeFieldValue(value: FieldValue, scope: Scope, enclosing: LoopInfo[]): FieldValue {
+    if (!('script' in value)) return normalizeValue(value, scope, enclosing)
+    const inputs = value.script.inputs.map((input) => {
+        const normalized = normalizeValue({ ref: input }, scope, enclosing)
+        return 'ref' in normalized ? normalized.ref : input
+    })
+    return { script: { ...value.script, inputs } }
+}
+
 function normalizeValue(value: DslValue, scope: Scope, enclosing: LoopInfo[]): DslValue {
     if (!('ref' in value)) return value
     const finished = scope.finishedLoops.get(value.ref.step)
@@ -73,7 +82,8 @@ function normalizeSteps(steps: WorkflowStep[], scope: Scope, enclosing: LoopInfo
                 const normalized = {
                     ...step,
                     params: step.params.map((param) => ({ ...param, value: value(param.value) })),
-                    fields: withoutParentAssignments(step.fields).map((field) => ({ ...field, value: value(field.value) })),
+                    fields: withoutParentAssignments(step.fields)
+                        .map((field) => ({ ...field, value: normalizeFieldValue(field.value, scope, enclosing) })),
                 }
                 scope.methods.add(step.id)
                 return normalized

@@ -5,6 +5,7 @@ import { type WorkflowDsl, workflowDslSchema } from '../dsl/workflowDsl.schema.t
 import type { z } from 'zod'
 import type { ChatMessage, LlmClient } from '../llm/llmClient.ts'
 import { buildRepairMessage, buildWorkflowSystemPrompt } from './buildWorkflowPrompt.ts'
+import { brokenScripts, repairScripts } from './repairScripts.ts'
 
 export type GenerateWorkflowDeps = {
     llm: LlmClient
@@ -40,6 +41,7 @@ function errorCount(issues: WorkflowIssue[]): number {
 /**
  * Generates a workflow under a per-request JSON-schema constraint, then validates what the schema cannot express
  * (step order, loop scope, response paths) and asks the model to repair errors up to `maxRepairAttempts` times.
+ * When only transformation scripts are wrong, those scripts are repaired one by one instead of the whole workflow.
  * Returns the attempt with the fewest errors; its remaining issues travel with it.
  */
 /** A fixed structure to fill (from a reviewed plan): its own schema and the message describing it. */
@@ -79,6 +81,15 @@ export async function generateWorkflow(
             best = { dsl: outcome.dsl, issues: outcome.issues }
         }
         if (!hasErrors(outcome.issues)) break
+        const scripts = outcome.dsl && brokenScripts(outcome.issues)
+        if (outcome.dsl && scripts?.length) {
+            const repaired = await repairScripts(outcome.dsl, scripts, connectors, deps)
+            attempts.push(...repaired.attempts)
+            if (errorCount(repaired.issues) <= errorCount(best?.issues ?? repaired.issues)) {
+                best = { dsl: repaired.dsl, issues: repaired.issues }
+            }
+            break
+        }
         messages.push(
             { role: 'assistant', content: result.content },
             { role: 'user', content: buildRepairMessage(outcome.issues) },

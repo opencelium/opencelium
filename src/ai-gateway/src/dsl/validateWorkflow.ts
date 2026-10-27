@@ -1,7 +1,8 @@
 import { flattenFieldPaths, normalizePath } from '../invokers/fieldPaths.ts'
 import type { InvokerOperation } from '../invokers/invoker.types.ts'
 import type { WorkflowConnectors } from './buildConstrainedSchema.ts'
-import { type DslValue, type LoopStep, type MethodStep, type StepRef, UNARY_CONDITION_OPS, type WorkflowDsl, type WorkflowStep } from './workflowDsl.schema.ts'
+import { checkScript } from './checkScript.ts'
+import { type DslValue, type FieldValue, type LoopStep, type MethodStep, type StepRef, UNARY_CONDITION_OPS, type WorkflowDsl, type WorkflowStep } from './workflowDsl.schema.ts'
 
 export type WorkflowIssue = {
     stepId: string
@@ -77,6 +78,18 @@ function checkValue(ctx: Context, scope: Scope, loops: LoopStep[], stepId: strin
     if ('ref' in value) checkRef(ctx, scope, loops, stepId, value.ref, what)
 }
 
+function checkFieldValue(ctx: Context, scope: Scope, loops: LoopStep[], stepId: string, value: FieldValue, what: string) {
+    if (!('script' in value)) {
+        checkValue(ctx, scope, loops, stepId, value, what)
+        return
+    }
+    const { inputs, code } = value.script
+    inputs.forEach((input, index) => checkRef(ctx, scope, loops, stepId, input, `${what} script input VAR_${index}`))
+    for (const problem of checkScript(code, inputs.length)) {
+        ctx.issues.push({ stepId, severity: 'error', message: `${what} script ${problem}` })
+    }
+}
+
 function walk(ctx: Context, steps: WorkflowStep[], scope: Scope, loops: LoopStep[]) {
     for (const step of steps) {
         if (scope.stepIds.has(step.id)) {
@@ -86,7 +99,7 @@ function walk(ctx: Context, steps: WorkflowStep[], scope: Scope, loops: LoopStep
         switch (step.kind) {
             case 'method':
                 for (const param of step.params) checkValue(ctx, scope, loops, step.id, param.value, `Param "${param.name}"`)
-                for (const field of step.fields) checkValue(ctx, scope, loops, step.id, field.value, `Field "${field.name}"`)
+                for (const field of step.fields) checkFieldValue(ctx, scope, loops, step.id, field.value, `Field "${field.name}"`)
                 scope.methods.set(step.id, step)
                 break
             case 'if':
