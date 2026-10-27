@@ -32,6 +32,8 @@ export const aiApi = baseApi.injectEndpoints({
 	}),
 });
 
-export const { useGetAiHealthQuery, usePlanWorkflowMutation, useGenerateWorkflowMutation } = aiApi;
+export const {
+	useGetAiHealthQuery, usePlanWorkflowMutation, useGenerateWorkflowMutation,
+} = aiApi;
 
 export const isAiConfigured = (): boolean => Boolean(runtimeConfig.aiUrl);

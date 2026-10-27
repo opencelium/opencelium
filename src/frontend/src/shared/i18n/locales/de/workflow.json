@@ -1391,6 +1391,15 @@
       "patternSync": "Sync-Muster",
       "shortcutHint": "zum Erstellen",
       "hint": "Prüfen Sie die Schritte vor dem Erstellen. Jede Zeile ist änderbar; eine Zeile mit zwei Leerzeichen einrücken, um sie in die Schleife oder Bedingung darüber zu setzen. Zeilen mit \"set\" füllen Felder: \"script: …\" für einen Wert, der berechnet werden muss."
+    },
+    "script": {
+      "placeholder": "Transformation beschreiben, z. B. \"Operational, wenn der Status in operation ist, sonst Incident\"",
+      "generate": "Generieren",
+      "generating": "Skript wird generiert… {{elapsed}}",
+      "applied": "Skript generiert. Führen Sie es im Playground aus, um es zu prüfen.",
+      "problems": "Das Skript läuft so evtl. nicht: prüfen Sie die markierten Zeilen unten.",
+      "replaceTitle": "Aktuelles Skript ersetzen?",
+      "replaceMessage": "Das generierte Skript ersetzt den Inhalt des Editors."
     }
   }
 }

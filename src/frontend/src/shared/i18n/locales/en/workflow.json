@@ -1391,6 +1391,15 @@
       "patternSync": "Sync pattern",
       "shortcutHint": "to build",
       "hint": "Check the steps before building. Edit any line; indent a line by two spaces to put it inside the loop or condition above it. Lines with \"set\" fill fields: write \"script: …\" for a value that must be computed."
+    },
+    "script": {
+      "placeholder": "Describe the transformation, e.g. \"Operational when the status is in operation, otherwise Incident\"",
+      "generate": "Generate",
+      "generating": "Generating script… {{elapsed}}",
+      "applied": "Script generated. Run it in the playground to check it.",
+      "problems": "The script may not run as is: check the marked lines below.",
+      "replaceTitle": "Replace the current script?",
+      "replaceMessage": "The generated script replaces what is in the editor."
     }
   }
 }

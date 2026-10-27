@@ -10,6 +10,7 @@ import { EnhancementArgs } from '../EnhancementArgs/EnhancementArgs';
 import EnhancementDescription from '../EnhancementDescription/EnhancementDescription';
 import ScriptLanguage from '../ScriptLanguage/ScriptLanguage';
 import EnhancementScript from '../EnhancementScript/EnhancementScript';
+import { AiScriptPrompt } from '@features/ai-assistant/ui/AiScriptPrompt/AiScriptPrompt';
 import type { Enhancement } from '../../../../types/connection';
 import type { useEnhancementState } from './useEnhancementState';
 
@@ -93,6 +94,10 @@ export function EnhancementDetails({
 			)}
 			<div className="bodyLegacyEnhancementScript">
 				<div className="bodyLegacyEnhancementLabel">{t('enhancement.script')}</div>
+				{!readOnly && (
+					<AiScriptPrompt enhancement={enhancement} currentScript={draft}
+						onApply={state.onApplyGeneratedScript} />
+				)}
 				<div className="bodyLegacyEnhancementScriptEditor">
 					<EnhancementScript
 						readOnly={readOnly}
