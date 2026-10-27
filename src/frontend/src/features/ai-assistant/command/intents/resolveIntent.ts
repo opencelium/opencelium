@@ -5,6 +5,7 @@ import { apiExecutor } from '@shared/api/apiExecutor';
 import { isApiExecutorError } from '@shared/api/isApiExecutorError';
 import type { CommandIntent } from '../../model/aiGateway.types';
 import { matchByName } from './matchByName';
+import type { PageContext } from './pageContext';
 
 /** A gateway intent with its names matched to real records: what opens, and what it opens with. */
 export type ResolvedIntent =
@@ -49,11 +50,16 @@ async function resolveWorkflow(intent: Extract<CommandIntent, { kind: 'workflow'
 	}
 }
 
-export async function resolveIntent(intent: CommandIntent): Promise<ResolvedIntent> {
+export async function resolveIntent(intent: CommandIntent, context: PageContext = {}): Promise<ResolvedIntent> {
 	switch (intent.kind) {
 		case 'schedule': {
 			const workflows = await fetchList<WorkflowMeta>('/connection/all/meta');
-			const workflow = matchByName(workflows, (item) => [item.title], intent.workflow);
+			const named = matchByName(workflows, (item) => [item.title], intent.workflow);
+			// Only when no workflow was named: a name that matches nothing must not quietly become the open one.
+			const current = !intent.workflow && context.currentWorkflowId !== undefined
+				? workflows.find((item) => item.id === context.currentWorkflowId) ?? { id: context.currentWorkflowId, title: '' }
+				: undefined;
+			const workflow = named ?? current;
 			return {
 				kind: 'schedule',
 				values: { title: intent.title || workflow?.title || '', connectionId: workflow?.id, cronExp: intent.cronExp },

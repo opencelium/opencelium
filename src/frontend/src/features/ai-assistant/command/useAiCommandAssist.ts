@@ -8,6 +8,7 @@ import { toAiGenerationError } from '../utils/aiGenerationError.utils';
 import { buildCommandCatalog } from './buildCommandCatalog';
 import { type AiCommandProposal, toCatalogItem, toCommandProposal } from './commandProposal';
 import type { ResolvedIntent } from './intents/resolveIntent';
+import { pageContextOf } from './intents/pageContext';
 import { useCommandSuggestions } from './useCommandSuggestions';
 
 export type AiCommandState =
@@ -62,7 +63,7 @@ export function useAiCommandAssist({ query, isUnmatched, onRun, onRunIntent }: O
 		try {
 			const language = i18n.language.startsWith('de') ? 'de' : 'en';
 			const answer = await routeCommand({ prompt, commands: catalog.map(toCatalogItem), page: pathname, language }).unwrap();
-			const proposal = await toCommandProposal(answer, catalog);
+			const proposal = await toCommandProposal(answer, catalog, pageContextOf(pathname));
 			if (id !== requestId.current) return;
 			if (proposal.kind === 'ready' && proposal.isAutoRun) {
 				setState(IDLE);

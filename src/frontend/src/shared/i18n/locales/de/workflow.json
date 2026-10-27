@@ -1432,6 +1432,14 @@
         "beforeRestore": "Vor dem Wiederherstellen einer Version",
         "compare": "Vergleichen"
       }
+    },
+    "templates": {
+      "label": "Vorlagen verwenden",
+      "hint": "Transformationsskripte aus den installierten Vorlagen werden dem Modell beim Erstellen des Workflows als Beispiele gezeigt. Deaktivieren Sie die Option, um das Ergebnis ohne sie zu sehen.",
+      "resultUsed_one": "Mit {{count}} Vorlagenskript als Beispiel erstellt",
+      "resultUsed_other": "Mit {{count}} Vorlagenskripten als Beispielen erstellt",
+      "resultNone": "Für diesen Workflow wurden keine ähnlichen Vorlagenskripte gefunden",
+      "resultOff": "Ohne Vorlagen erstellt"
     }
   }
 }

@@ -6,6 +6,7 @@ import {
 import type { AiConnectorChoice, AiConnectorPair } from '../utils/aiConnectors.utils';
 import { toAiGenerationError } from '../utils/aiGenerationError.utils';
 import { hasPlanSteps, planToText } from '../utils/planText.utils';
+import { readUseTemplates, saveUseTemplates } from '../model/templatePreference';
 
 type Params = {
 	choices: AiConnectorChoice[];
@@ -22,6 +23,7 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 	const [prompt, setPromptValue] = useState('');
 	const [planText, setPlanTextValue] = useState('');
 	const [state, setState] = useState<AiGenerationState>({ status: 'idle' });
+	const [useTemplates, setUseTemplatesValue] = useState(readUseTemplates);
 	const pending = useRef<{ abort: () => void } | null>(null);
 
 	const invokerOf = (connectorId: number | null) =>
@@ -33,6 +35,10 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 	const canBuild = !isBusy && Boolean(fromInvoker) && trimmedPrompt !== '' && hasPlanSteps(planText);
 
 	const setPrompt = useCallback((value: string) => setPromptValue(value.slice(0, AI_PROMPT_MAX_LENGTH)), []);
+	const setUseTemplates = useCallback((isOn: boolean) => {
+		setUseTemplatesValue(isOn);
+		saveUseTemplates(isOn);
+	}, []);
 	const setPlanText = useCallback((value: string) => setPlanTextValue(value.slice(0, AI_PLAN_MAX_LENGTH)), []);
 
 	/** Runs one gateway request; `onAbort` is where Cancel leads (one stage back). */
@@ -82,8 +88,9 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 	const build = async () => {
 		if (!canBuild) return;
 		const pattern = state.status === 'plan' ? state.pattern : 'custom';
-		await run('build', generateWorkflow({ ...target(), plan: planText }), (response) => {
-			setState({ status: 'result', prompt: trimmedPrompt, response });
+		const usedTemplates = useTemplates;
+		await run('build', generateWorkflow({ ...target(), plan: planText, useTemplates: usedTemplates }), (response) => {
+			setState({ status: 'result', prompt: trimmedPrompt, response, usedTemplates });
 		}, { status: 'plan', pattern });
 	};
 
@@ -102,7 +109,7 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 	};
 
 	return {
-		connectors, setConnectors, prompt, setPrompt, planText, setPlanText, state, canPlan, canBuild,
+		connectors, setConnectors, prompt, setPrompt, planText, setPlanText, useTemplates, setUseTemplates, state, canPlan, canBuild,
 		plan, planRequest, build, retry, cancel, backToPrompt, backToPlan, discard,
 	};
 }

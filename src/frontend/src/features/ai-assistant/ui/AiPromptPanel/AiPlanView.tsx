@@ -6,6 +6,7 @@ import type { AiConnectorChoice } from '../../utils/aiConnectors.utils';
 import { AiGeneratingProgress } from './AiGeneratingProgress';
 import { AiGenerationErrorAlert } from './AiGenerationErrorAlert';
 import { AiRequestSummary } from './AiRequestSummary';
+import { AiTemplateOption } from './AiTemplateOption';
 
 type Props = {
 	generation: AiWorkflowGeneration;
@@ -34,6 +35,7 @@ export function AiPlanView({ generation, choices, planRef, onPlanKeyDown }: Prop
 					)}
 				</div>
 				<p className="aiPlanHint">{t('ai.plan.hint')}</p>
+				<AiTemplateOption isOn={generation.useTemplates} onChange={generation.setUseTemplates} isDisabled={isBuilding} />
 				<div className="aiPlanEditor" onKeyDown={onPlanKeyDown}>
 					<Textarea value={planText} disabled={isBuilding} textareaRef={planRef} testId="ai-panel-plan-text"
 						onChange={(event) => setPlanText(event.target.value)} />

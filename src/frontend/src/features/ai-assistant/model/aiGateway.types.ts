@@ -31,6 +31,8 @@ export type GenerateWorkflowRequest = {
 	to?: string;
 	/** The reviewed plan, one step per line, two spaces of indentation per level; the gateway builds it step by step. */
 	plan?: string;
+	/** False builds without the installation's template scripts as examples; the gateway defaults to true. */
+	useTemplates?: boolean;
 };
 
 export type PlanPattern = 'sync' | 'custom';
@@ -49,6 +51,8 @@ export type GenerateWorkflowResponse = {
 	issues: AiWorkflowIssue[];
 	attempts: AiGenerationAttempt[];
 	model: string;
+	/** Distinct template scripts shown to the model as examples; missing from gateways older than the switch. */
+	templateExampleCount?: number;
 };
 
 /** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */

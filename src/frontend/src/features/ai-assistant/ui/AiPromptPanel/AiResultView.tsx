@@ -10,16 +10,21 @@ import { AiRequestSummary } from './AiRequestSummary';
 type Props = {
 	prompt: string;
 	response: GenerateWorkflowResponse;
+	usedTemplates: boolean;
 	choices: AiConnectorChoice[];
 	connectors: AiConnectorPair;
 	onEditPlan: () => void;
 };
 
-export function AiResultView({ prompt, response, choices, connectors, onEditPlan }: Props) {
+export function AiResultView({ prompt, response, usedTemplates, choices, connectors, onEditPlan }: Props) {
 	const { t } = useI18n('workflow');
 	const preview = useMemo(() => buildDslPreview(response.dsl), [response.dsl]);
 	const byId = (connectorId: number | null) => choices.find((choice) => choice.connectorId === connectorId);
 	const lookup: ConnectorLookup = { from: byId(connectors.fromId), to: byId(connectors.toId) };
+	const exampleCount = response.templateExampleCount;
+	const templateNote = !usedTemplates ? t('ai.templates.resultOff')
+		: exampleCount === undefined ? null
+		: exampleCount > 0 ? t('ai.templates.resultUsed', { count: exampleCount }) : t('ai.templates.resultNone');
 
 	return (
 		<div className="aiResult" data-testid="ai-panel-result">
@@ -31,6 +36,7 @@ export function AiResultView({ prompt, response, choices, connectors, onEditPlan
 					<span>{t('ai.result.steps')}</span>
 					<span className="aiPanelSectionMeta">{t('ai.result.stepCount', { count: preview.stepCount })}</span>
 				</div>
+				{templateNote && <div className="aiTemplateNote" data-testid="ai-panel-template-note">{templateNote}</div>}
 				<div className="aiStepTreeCard">
 					<AiStepTree steps={response.dsl.steps} preview={preview} connectors={lookup} issues={response.issues} />
 				</div>

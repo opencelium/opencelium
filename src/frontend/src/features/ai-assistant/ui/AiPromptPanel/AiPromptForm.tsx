@@ -9,6 +9,7 @@ import { AiConnectorSelect } from './AiConnectorSelect';
 import { AiExamplePrompts } from './AiExamplePrompts';
 import { AiGeneratingProgress } from './AiGeneratingProgress';
 import { AiGenerationErrorAlert } from './AiGenerationErrorAlert';
+import { AiTemplateOption } from './AiTemplateOption';
 
 type Props = {
 	generation: AiWorkflowGeneration;
@@ -42,6 +43,7 @@ export function AiPromptForm({ generation, choices, promptRef, onPromptKeyDown }
 
 			<section className="aiPanelSection">
 				<div className="aiPanelSectionTitle">{t('ai.prompt.title')}</div>
+				<AiTemplateOption isOn={generation.useTemplates} onChange={generation.setUseTemplates} isDisabled={isLocked} />
 				<div className="aiPrompt" onKeyDown={onPromptKeyDown}>
 					<Textarea value={prompt} placeholder={t('ai.prompt.placeholder')} disabled={isLocked}
 						textareaRef={promptRef} testId="ai-panel-prompt"

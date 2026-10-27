@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { matchByName } from './matchByName';
 import { resolveIntent } from './resolveIntent';
+import { pageContextOf } from './pageContext';
 
 const responses: Record<string, unknown> = {};
 vi.mock('@shared/api/apiExecutor', () => ({
@@ -38,6 +39,16 @@ describe('resolveIntent', () => {
 			.toEqual({ kind: 'schedule', values: { title: 'fake2', connectionId: 9, cronExp: '0 0/15 * * * ?' } });
 		expect(await resolveIntent({ kind: 'schedule', workflow: 'nothing like it', title: 'Nightly', cronExp: '' }))
 			.toEqual({ kind: 'schedule', values: { title: 'Nightly', connectionId: undefined, cronExp: '' } });
+	});
+
+	it('schedules the open workflow when the request names none', async () => {
+		const context = pageContextOf('/workflow/update/7');
+		expect(await resolveIntent({ kind: 'schedule', workflow: '', title: '', cronExp: '0 0/15 * * * ?' }, context))
+			.toEqual({ kind: 'schedule', values: { title: 'config item create/update', connectionId: 7, cronExp: '0 0/15 * * * ?' } });
+		expect(await resolveIntent({ kind: 'schedule', workflow: 'nothing like it', title: '', cronExp: '' }, context))
+			.toMatchObject({ values: { connectionId: undefined } });
+		expect(pageContextOf('/workflow/create')).toEqual({});
+		expect(pageContextOf('/schedule')).toEqual({});
 	});
 
 	it('starts a workflow from the matched template, or from the template picker', async () => {
