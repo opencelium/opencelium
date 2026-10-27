@@ -28,3 +28,160 @@
 .aiScriptPromptStatus--error {
   color: var(--color-status-error-fg);
 }
+
+.aiScriptPromptAction--active {
+  background: var(--color-action-primary-subtle);
+}
+
+.aiScriptProposal,
+.aiScriptHistory {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-background-surface);
+}
+
+.aiScriptProposal {
+  border-left: 3px solid var(--color-action-primary);
+}
+
+.aiScriptProposalHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.aiScriptProposalTitle {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.aiScriptProposalModes {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  padding: 2px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.aiScriptProposalModes .aiScriptProposalMode {
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.aiScriptProposalModes .aiScriptProposalMode--active {
+  color: var(--color-action-primary);
+  background: var(--color-action-primary-subtle);
+}
+
+.aiScriptCompareCode {
+  margin: 0;
+  max-height: 240px;
+  overflow: auto;
+  padding: 8px 0;
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  white-space: pre;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-page);
+}
+
+.aiScriptCompareCode:not(.aiScriptDiff) {
+  padding: 8px 12px;
+}
+
+.aiScriptDiffLine {
+  padding: 0 12px 0 0;
+}
+
+.aiScriptDiffMark {
+  display: inline-block;
+  width: 24px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+
+.aiScriptDiffLine--added {
+  background: var(--color-status-success-bg);
+}
+
+.aiScriptDiffLine--added .aiScriptDiffMark {
+  color: var(--color-status-success-fg);
+}
+
+.aiScriptDiffLine--removed {
+  background: var(--color-status-error-bg);
+}
+
+.aiScriptDiffLine--removed .aiScriptDiffMark {
+  color: var(--color-status-error-fg);
+}
+
+.aiScriptCompareSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.aiScriptCompareLabel {
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.aiScriptCompareSame,
+.aiScriptProposalDescription,
+.aiScriptHistoryHint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.aiScriptProposalFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.aiScriptProposalFooter .aiScriptProposalPlayground {
+  margin-right: auto;
+}
+
+.aiScriptHistoryList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aiScriptHistoryItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.aiScriptHistoryTime {
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.aiScriptHistoryReason {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

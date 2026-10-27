@@ -13,6 +13,7 @@ import { useScriptDebugValue } from '../ScriptDebugValue/useScriptDebugValue';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { EnhancementProps } from './Enhancement.types';
 import { useEnhancementState } from './useEnhancementState';
+import { useScriptVersions } from '@features/ai-assistant/hooks/useScriptVersions';
 import { countEnhancementReferences } from '../../body-editor/bodyReference';
 import '../../body-editor/bodyLegacy.css';
 
@@ -33,6 +34,8 @@ const ReferenceEnhancement = ({
 		onPlaygroundOpenChange?.(isOpen);
 	};
 	const state = useEnhancementState(enhancement);
+	// Held here, not in the details pane: the debug view swaps that pane out and would drop the history.
+	const scriptVersions = useScriptVersions(enhancement?.enhanceId);
 	const { containerRef, isMaximized, maximizedStyle, toggleMaximized } = state;
 	const { method: currentMethod } = useMethodContext();
 	const debug = useScriptDebugValue(enhancement, state.connection, currentMethod);
@@ -133,6 +136,8 @@ const ReferenceEnhancement = ({
 										state={state}
 										onChangeScript={handleChangeScript}
 										isPlaygroundOpen={isPlaygroundOpen}
+										onOpenPlayground={() => setPlaygroundOpen(true)}
+										scriptVersions={scriptVersions}
 									/>
 								)
 							) : directReference ? (

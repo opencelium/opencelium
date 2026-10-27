@@ -1,21 +1,27 @@
 import { useState } from 'react';
-import { message } from 'antd';
 import type { Enhancement } from '@features/workflow/types/connection';
-import { DEFAULT_ENHANCEMENT_SCRIPT } from '@features/workflow/components/request-editor/body-editor/bodyReference';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { Button } from '@shared/ui/primitives/Button';
 import { Icon } from '@shared/ui/primitives/Icon';
+import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Input } from '@shared/ui/primitives/Input';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { formatElapsed, useElapsedSeconds } from '../../hooks/useElapsedSeconds';
-import { useAiScriptGeneration } from '../../hooks/useAiScriptGeneration';
+import { useScriptPromptActions } from '../../hooks/useScriptPromptActions';
+import type { ScriptVersions } from '../../hooks/useScriptVersions';
+import type { ScriptSnapshot } from '../../utils/scriptVersions.utils';
+import { AiScriptHistory } from './AiScriptHistory';
+import { AiScriptProposal } from './AiScriptProposal';
 import './aiScriptPrompt.css';
 
 type Props = {
 	enhancement: Enhancement;
 	/** What the editor shows now, including edits not yet saved. */
-	currentScript: string;
-	onApply: (script: string, description: string) => void;
+	current: ScriptSnapshot;
+	versions: ScriptVersions;
+	onReplace: (next: ScriptSnapshot) => void;
+	isPlaygroundOpen: boolean;
+	onOpenPlayground?: () => void;
 };
 
 const ERROR_KEY = {
@@ -24,63 +30,72 @@ const ERROR_KEY = {
 	unreachable: 'ai.error.unreachable',
 } as const;
 
-const isUntouched = (script: string) => {
-	const trimmed = script.trim().replace(/;$/, '');
-	return trimmed === '' || trimmed === DEFAULT_ENHANCEMENT_SCRIPT;
-};
-
-/** A prompt row above the script editor: describe the transformation, get a script to run in the playground. */
-export function AiScriptPrompt({ enhancement, currentScript, onApply }: Props) {
+/** A prompt row above the script editor: describe the transformation, compare the answer with the script, apply it. */
+export function AiScriptPrompt({ enhancement, current, versions, onReplace, isPlaygroundOpen, onOpenPlayground }: Props) {
 	const { t } = useI18n('workflow');
-	const confirm = useConfirm();
 	const [prompt, setPrompt] = useState('');
-	const { isAvailable, state, generate, cancel } = useAiScriptGeneration(enhancement);
+	const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+	const { generation, generate, accept, undo } = useScriptPromptActions({ enhancement, current, versions, onReplace });
+	const { state } = generation;
 	const elapsed = useElapsedSeconds(state.status === 'generating' ? state.startedAt : null);
-	if (!isAvailable || enhancement.language !== 'js') return null;
+	if (!generation.isAvailable || enhancement.language !== 'js') return null;
 
 	const isGenerating = state.status === 'generating';
-	const submit = async () => {
-		if (isGenerating || !prompt.trim()) return;
-		const result = await generate(prompt.trim(), isUntouched(currentScript) ? '' : currentScript);
-		if (!result) return;
-		if (!isUntouched(currentScript) && currentScript.trim() !== result.code.trim()) {
-			const shouldReplace = await confirm({
-				title: t('ai.script.replaceTitle'),
-				message: t('ai.script.replaceMessage'),
-				confirmText: t('ai.apply.replace'),
-				cancelText: t('ai.actions.cancel'),
-			});
-			if (!shouldReplace) return;
-		}
-		onApply(result.code, result.description);
-		message.success(t('ai.script.applied'));
+	const hasVersions = versions.versions.length > 0;
+	const submit = () => {
+		if (!isGenerating && prompt.trim()) void generate(prompt.trim());
 	};
 
 	return (
 		<div className="aiScriptPrompt" data-testid="ai-script-prompt">
 			<div className="aiScriptPromptRow">
-				<Input value={prompt} disabled={isGenerating} placeholder={t('ai.script.placeholder')} maxLength={2000}
-					leftSlot={<Icon name="sparkles" size={14} color="primary" />} testId="ai-script-prompt-input"
+				<Input value={prompt} disabled={isGenerating} maxLength={2000} testId="ai-script-prompt-input"
+					placeholder={t(versions.candidate?.kind === 'generated' ? 'ai.script.refinePlaceholder' : 'ai.script.placeholder')}
+					leftSlot={<Icon name="sparkles" size={14} color="primary" />}
 					onChange={(event) => setPrompt(event.target.value)}
 					onKeyDown={(event) => {
 						if (event.key !== 'Enter') return;
 						event.preventDefault();
-						void submit();
+						submit();
 					}} />
 				{isGenerating
-					? <Button onClick={cancel} testId="ai-script-prompt-cancel">{t('ai.actions.cancel')}</Button>
-					: <Button type="primary" onClick={() => void submit()} disabled={!prompt.trim()} testId="ai-script-prompt-generate">
+					? <Button onClick={generation.cancel} testId="ai-script-prompt-cancel">{t('ai.actions.cancel')}</Button>
+					: <Button type="primary" onClick={submit} disabled={!prompt.trim()} testId="ai-script-prompt-generate">
 						{t('ai.script.generate')}
 					</Button>}
+				{hasVersions && (
+					<>
+						<Tooltip content={t('ai.script.undoTooltip')}>
+							<IconButton type="text" size="sm" disabled={isGenerating} testId="ai-script-undo"
+								iconProps={{ name: 'undo', color: 'inherit' }} onClick={undo} />
+						</Tooltip>
+						<Tooltip content={t('ai.script.history.tooltip', { count: versions.versions.length })}>
+							<IconButton type="text" size="sm" testId="ai-script-history-toggle"
+								className={isHistoryOpen ? 'aiScriptPromptAction--active' : undefined}
+								iconProps={{ name: 'history', color: isHistoryOpen ? 'primary' : 'inherit' }}
+								onClick={() => setIsHistoryOpen((isOpen) => !isOpen)} />
+						</Tooltip>
+					</>
+				)}
 			</div>
 			{isGenerating && (
 				<div className="aiScriptPromptStatus" role="status">{t('ai.script.generating', { elapsed: formatElapsed(elapsed) })}</div>
 			)}
-			{state.status === 'done' && state.problems.length > 0 && (
+			{state.status === 'done' && !versions.candidate && state.problems.length > 0 && (
 				<div className="aiScriptPromptStatus aiScriptPromptStatus--warning">{t('ai.script.problems')}</div>
 			)}
 			{state.status === 'error' && (
 				<div className="aiScriptPromptStatus aiScriptPromptStatus--error">{t(ERROR_KEY[state.error.failure])}</div>
+			)}
+			{isHistoryOpen && hasVersions && (
+				<AiScriptHistory versions={versions.versions} onShow={(id) => {
+					versions.showVersion(id);
+					setIsHistoryOpen(false);
+				}} />
+			)}
+			{versions.candidate && (
+				<AiScriptProposal candidate={versions.candidate} currentScript={current.script} isPlaygroundOpen={isPlaygroundOpen}
+					onOpenPlayground={onOpenPlayground} onAccept={accept} onDiscard={versions.discard} />
 			)}
 		</div>
 	);
