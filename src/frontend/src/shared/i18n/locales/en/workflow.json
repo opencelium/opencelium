@@ -1292,7 +1292,14 @@
     "errors": "{{count}} errors",
     "errors_one": "{{count}} error",
     "warningCount": "{{count}} warnings",
-    "warningCount_one": "{{count}} warning"
+    "warningCount_one": "{{count}} warning",
+    "comparison": {
+      "title": "Current vs. {{candidate}}",
+      "current": "Current",
+      "pending": "Run to compare",
+      "same": "Same result",
+      "different": "Different results"
+    }
   },
   "ai": {
     "open": "Generate with AI",
@@ -1396,10 +1403,35 @@
       "placeholder": "Describe the transformation, e.g. \"Operational when the status is in operation, otherwise Incident\"",
       "generate": "Generate",
       "generating": "Generating script… {{elapsed}}",
-      "applied": "Script generated. Run it in the playground to check it.",
+      "applied": "Script applied. Run it in the playground to check it.",
       "problems": "The script may not run as is: check the marked lines below.",
-      "replaceTitle": "Replace the current script?",
-      "replaceMessage": "The generated script replaces what is in the editor."
+      "refinePlaceholder": "Refine the generated script, e.g. \"also trim the value\"",
+      "restored": "Earlier script restored.",
+      "undo": "Undo",
+      "undoTooltip": "Restore the previous script",
+      "proposal": {
+        "generatedTitle": "Generated script",
+        "versionTitle": "Earlier version",
+        "apply": "Apply",
+        "restore": "Restore",
+        "discard": "Discard",
+        "compareInPlayground": "Compare in playground"
+      },
+      "compare": {
+        "diff": "Changes",
+        "split": "Side by side",
+        "current": "Current",
+        "generated": "Generated",
+        "version": "Earlier version",
+        "noChanges": "Same as the current script."
+      },
+      "history": {
+        "tooltip": "Earlier versions ({{count}})",
+        "hint": "Kept until the method dialog closes. Compare a version before restoring it.",
+        "beforeAi": "Before AI: {{prompt}}",
+        "beforeRestore": "Before restoring a version",
+        "compare": "Compare"
+      }
     }
   }
 }

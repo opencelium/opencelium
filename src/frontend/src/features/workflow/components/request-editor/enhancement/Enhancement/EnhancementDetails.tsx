@@ -11,6 +11,7 @@ import EnhancementDescription from '../EnhancementDescription/EnhancementDescrip
 import ScriptLanguage from '../ScriptLanguage/ScriptLanguage';
 import EnhancementScript from '../EnhancementScript/EnhancementScript';
 import { AiScriptPrompt } from '@features/ai-assistant/ui/AiScriptPrompt/AiScriptPrompt';
+import type { ScriptVersions } from '@features/ai-assistant/hooks/useScriptVersions';
 import type { Enhancement } from '../../../../types/connection';
 import type { useEnhancementState } from './useEnhancementState';
 
@@ -19,6 +20,8 @@ type Props = {
 	readOnly?: boolean;
 	isPlaygroundOpen?: boolean;
 	onChangeScript?: (script: string) => void;
+	onOpenPlayground?: () => void;
+	scriptVersions: ScriptVersions;
 	state: ReturnType<typeof useEnhancementState>;
 };
 
@@ -28,6 +31,8 @@ export function EnhancementDetails({
 	state,
 	isPlaygroundOpen,
 	onChangeScript,
+	onOpenPlayground,
+	scriptVersions,
 }: Props) {
 	const { t } = useI18n('workflow');
 	const [draft, setDraft] = useState(enhancement.script);
@@ -95,8 +100,14 @@ export function EnhancementDetails({
 			<div className="bodyLegacyEnhancementScript">
 				<div className="bodyLegacyEnhancementLabel">{t('enhancement.script')}</div>
 				{!readOnly && (
-					<AiScriptPrompt enhancement={enhancement} currentScript={draft}
-						onApply={state.onApplyGeneratedScript} />
+					<AiScriptPrompt
+						enhancement={enhancement}
+						current={{ script: draft, description: enhancement.description || '' }}
+						versions={scriptVersions}
+						onReplace={state.onReplaceScript}
+						isPlaygroundOpen={!!isPlaygroundOpen}
+						onOpenPlayground={onOpenPlayground}
+					/>
 				)}
 				<div className="bodyLegacyEnhancementScriptEditor">
 					<EnhancementScript
@@ -155,6 +166,18 @@ export function EnhancementDetails({
 											enhancement={enhancement}
 											script={draft}
 											issues={issues}
+											comparison={
+												scriptVersions.candidate && !readOnly
+													? {
+															script: scriptVersions.candidate.script,
+															label: t(
+																scriptVersions.candidate.kind === 'generated'
+																	? 'ai.script.compare.generated'
+																	: 'ai.script.compare.version',
+															),
+														}
+													: undefined
+											}
 											onRuntimeLocation={setRuntimeLocation}
 											onLocate={(line, column) => {
 												editor.current?.gotoLine(line, column, true);

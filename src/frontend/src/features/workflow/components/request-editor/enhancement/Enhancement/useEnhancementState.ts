@@ -50,9 +50,9 @@ export function useEnhancementState(enhancement?: Enhancement) {
 	const onChangeScript = (script: string) => {
 		if (enhancement) updateEnhancement({ ...enhancement, script });
 	};
-	/** One update for a generated script: two would each start from the old enhancement, and the second would undo the first. */
-	const onApplyGeneratedScript = (script: string, description: string) => {
-		if (enhancement) updateEnhancement({ ...enhancement, script, description: enhancement.description || description });
+	/** Script and description in one update: two would each start from the old enhancement, and the second would undo the first. */
+	const onReplaceScript = ({ script, description }: { script: string; description: string }) => {
+		if (enhancement) updateEnhancement({ ...enhancement, script, description });
 	};
 
 	return {
@@ -64,6 +64,6 @@ export function useEnhancementState(enhancement?: Enhancement) {
 		onChangeLanguage,
 		onChangeDescription,
 		onChangeScript,
-		onApplyGeneratedScript,
+		onReplaceScript,
 	};
 }

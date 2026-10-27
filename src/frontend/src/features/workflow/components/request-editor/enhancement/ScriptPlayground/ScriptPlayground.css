@@ -439,3 +439,61 @@ div.scriptPlaygroundPanel {
 	flex-direction: column;
 	gap: 8px;
 }
+.scriptPlaygroundComparison {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 10px 12px;
+	border: 1px solid var(--color-border-default);
+	border-left: 3px solid var(--color-action-primary);
+	border-radius: var(--radius-sm);
+	background: var(--color-background-surface);
+}
+.scriptPlaygroundComparisonHeader {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 600;
+	color: var(--color-text-primary);
+}
+.scriptPlaygroundVerdict {
+	margin-left: auto;
+	padding: 2px 8px;
+	font-size: 12px;
+	font-weight: 500;
+	border-radius: var(--radius-sm);
+	color: var(--color-text-secondary);
+	background: var(--color-background-hover);
+}
+.scriptPlaygroundVerdict--same {
+	color: var(--color-status-success-fg);
+	background: var(--color-status-success-bg);
+}
+.scriptPlaygroundVerdict--different {
+	color: var(--color-status-warning-fg);
+	background: var(--color-status-warning-bg);
+}
+.scriptPlaygroundComparisonGrid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 8px;
+}
+.scriptPlaygroundComparisonLabel {
+	margin-bottom: 4px;
+	font-size: 12px;
+	color: var(--color-text-secondary);
+}
+.scriptPlaygroundComparisonValue {
+	margin: 4px 0 0;
+	max-height: 160px;
+	overflow: auto;
+	padding: 8px;
+	font-family: var(--typography-font-family-mono);
+	font-size: 12px;
+	border: 1px solid var(--color-border-subtle);
+	border-radius: var(--radius-sm);
+	background: var(--color-background-page);
+}
+.scriptPlaygroundComparisonValue--error {
+	color: var(--color-status-error-fg);
+}
