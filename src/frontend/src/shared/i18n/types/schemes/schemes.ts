@@ -129,6 +129,24 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 manage: string
                 system: string
                 general: string
+                ai: string
+                aiSuggested: string
+            }
+            ai: {
+                ask: string
+                askHint: string
+                thinking: string
+                run: string
+                finish: string
+                edit: string
+                confirmFirst: string
+                choose: string
+                notFound: string
+                needsValue: string
+                noCommand: string
+                unreachable: string
+                failed: string
+                retry: string
             }
             descriptions: {
                 create: string

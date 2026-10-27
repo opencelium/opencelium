@@ -39,7 +39,9 @@
       "create": "Create",
       "manage": "Manage",
       "system": "System",
-      "general": "General"
+      "general": "General",
+      "ai": "AI assistant",
+      "aiSuggested": "Suggested commands"
     },
     "descriptions": {
       "create": "Create a new entry",
@@ -83,6 +85,22 @@
         "open": "Open the command palette",
         "clearScope": "Exit a locked scope (empty input)"
       }
+    },
+    "ai": {
+      "ask": "Ask AI: “{{prompt}}”",
+      "askHint": "Turns your request into a command",
+      "thinking": "Finding the command… {{elapsed}}",
+      "run": "Run ↵",
+      "finish": "Complete ↵",
+      "edit": "Edit the command before running it",
+      "confirmFirst": "Asks for confirmation",
+      "choose": "Several matches for “{{value}}”: pick one",
+      "notFound": "Nothing found for “{{value}}”: enter the value yourself",
+      "needsValue": "Add the value, then run",
+      "noCommand": "No command fits this request.",
+      "unreachable": "The AI service isn't reachable.",
+      "failed": "The AI couldn't pick a command. Try rephrasing.",
+      "retry": "Ask again"
     }
   },
   "sidebar": {

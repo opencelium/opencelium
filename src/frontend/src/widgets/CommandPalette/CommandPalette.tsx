@@ -27,6 +27,8 @@ import {PaletteFooter} from "@widgets/CommandPalette/PaletteFooter.tsx";
 import {buildTestId} from "@shared/testing/testId.ts";
 import {orderGroups} from "@shared/command/groupOrder.ts";
 import {IS_MAC} from "@shared/utils/platform.ts";
+import {useAiCommandAssist} from "@features/ai-assistant/command/useAiCommandAssist";
+import {AiCommandItems} from "@features/ai-assistant/ui/AiCommandItems/AiCommandItems";
 
 type CommandPaletteProps = {
     /** Render as a compact icon + hotkey pill that animates open to the full
@@ -72,6 +74,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
 
     const [isActive, setIsActive] = useState(false);
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+    const [isCommandComplete, setIsCommandComplete] = useState(false);
     const [recent, setRecent] = useState<string[]>(() => getRecentCommands());
     const [highlighted, setHighlighted] = useState<string>('');
     // A literal command with `lockAsChip` locks here on selection — rendered
@@ -159,7 +162,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                 const id = ++requestIdRef.current;
 
                 const tokens = buildTokens(value);
-                const {suggestions, ast: newAst} = await parseTokens(tokens, policyContext);
+                const {suggestions, ast: newAst, isComplete} = await parseTokens(tokens, policyContext);
 
                 if (id === requestIdRef.current) {
 
@@ -167,6 +170,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                         await executeWithContext(newAst);
                     }
                     setSuggestions(suggestions);
+                    setIsCommandComplete(isComplete);
                     setIsLoading(false);
                 }
             } catch (e: unknown) {
@@ -277,6 +281,19 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
         setValue(recentValue + ' ');
     };
 
+    // Text the parser can't place (a sentence, a German request, a half-remembered command) goes to the AI instead.
+    const aiAssist = useAiCommandAssist({
+        query: lockedScope ? '' : value,
+        isUnmatched: suggestions.length === 0 && !isCommandComplete,
+    });
+    const continueFromAi = (text: string) => {
+        changeSourceRef.current = 'input';
+        aiAssist.reset();
+        setLockedScope(null);
+        setValue(text);
+        inputRef.current?.focus();
+    };
+
     const displayGroups = useMemo(() => {
         const groups = new Map<string, Suggestion[]>();
         // Recent commands are unrelated, standalone command strings — hide them
@@ -299,7 +316,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
         }));
     }, [suggestions, recent, value, lockedScope, tCommon]);
 
-    const hasItems = displayGroups.some(g => g.items.length > 0);
+    const hasItems = displayGroups.some(g => g.items.length > 0) || aiAssist.canAsk;
 
     // Collapsed only while idle: focus, typed text, or a locked scope (e.g. the
     // workflow search pill) expands it — a locked scope must stay visible even
@@ -394,6 +411,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                         <div className="cmdk-dropdown">
                             {hasItems ? (
                                 <Command.List>
+                                    <AiCommandItems assist={aiAssist} onRun={handleSelectRecent} onEdit={continueFromAi}/>
                                     {displayGroups.map(group => group.items.length > 0 && (
                                         <Command.Group key={group.key} heading={group.heading}>
                                             {group.items.map((s) => (

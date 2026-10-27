@@ -17,10 +17,12 @@ export const createDeleteByCommand = ({
         group: 'manage',
         icon: 'delete',
         description: 'commandPalette.descriptions.delete',
+        effect: 'destructive',
         children: [
             {
                 type: 'literal',
                 value: name,
+                entityName: def.name,
                 group: 'manage',
                 icon: 'delete',
                 // The outer "delete" literal is shared/merged across every entity's delete

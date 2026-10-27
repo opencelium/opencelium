@@ -64,6 +64,21 @@ export type GenerateScriptResponse = {
 	model: string;
 };
 
+/** Mirrors `src/ai-gateway/src/command/commandRequest.schema.ts`. */
+export type CommandCatalogItem = { id: string; phrase: string; description: string };
+
+export type SearchCommandsRequest = { query: string; commands: CommandCatalogItem[]; limit?: number };
+export type SearchCommandsResponse = { matches: { id: string; score: number }[] };
+
+export type RouteCommandRequest = { prompt: string; commands: CommandCatalogItem[]; page: string; language: 'en' | 'de' };
+export type RouteCommandResponse = {
+	commandId: string | null;
+	argument: string;
+	reply: string;
+	durationMs: number;
+	model: string;
+};
+
 export type AiGatewayErrorType = 'BAD_REQUEST' | 'UNKNOWN_INVOKER' | 'GENERATION_FAILED';
 
 export type AiGatewayErrorBody = {
