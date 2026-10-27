@@ -1,9 +1,15 @@
 import type { AiWorkflowIssue } from '../model/aiGateway.types';
-import type { DslValue, LoopStep, StepRef, WorkflowDsl, WorkflowStep } from '../model/workflowDsl.schema';
+import {
+	type CompatibilityIssue, checkNashornCompatibility,
+} from '@features/workflow/script-sandbox/checkNashornCompatibility';
+import type { DslValue, FieldValue, LoopStep, StepRef, WorkflowDsl, WorkflowStep } from '../model/workflowDsl.schema';
+
+export type PreviewRef = { kind: 'ref'; source: string; path: string };
 
 export type PreviewValue =
 	| { kind: 'literal'; text: string }
-	| { kind: 'ref'; source: string; path: string };
+	| PreviewRef
+	| { kind: 'script'; description: string; code: string; inputs: PreviewRef[]; problems: CompatibilityIssue[] };
 
 type StepIndex = Map<string, WorkflowStep>;
 
@@ -38,7 +44,7 @@ function resolveLoopArray(index: StepIndex, loop: LoopStep, seen: Set<string>): 
 
 export type DslPreview = {
 	stepCount: number;
-	describeValue: (value: DslValue) => PreviewValue;
+	describeValue: (value: DslValue | FieldValue) => PreviewValue;
 	describeLoopSource: (loop: LoopStep) => PreviewValue;
 	/** Display name of a step for issue titles: the operation, or the loop/if kind. */
 	stepLabel: (stepId: string) => string | undefined;
@@ -48,10 +54,17 @@ export function buildDslPreview(dsl: WorkflowDsl): DslPreview {
 	const index = indexSteps(dsl.steps);
 	return {
 		stepCount: index.size,
-		describeValue: (value) =>
-			'literal' in value
-				? { kind: 'literal', text: value.literal }
-				: { kind: 'ref', ...resolveRef(index, value.ref) },
+		describeValue: (value) => {
+			if ('literal' in value) return { kind: 'literal', text: value.literal };
+			if ('ref' in value) return { kind: 'ref', ...resolveRef(index, value.ref) };
+			const { inputs, code, description } = value.script;
+			return {
+				kind: 'script', description, code,
+				inputs: inputs.map((input) => ({ kind: 'ref', ...resolveRef(index, input) })),
+				// The editor's own check, so the preview flags what the transformation editor would.
+				problems: checkNashornCompatibility(code),
+			};
+		},
 		describeLoopSource: (loop) => ({ kind: 'ref', ...resolveLoopArray(index, loop, new Set([loop.id])) }),
 		stepLabel: (stepId) => {
 			const step = index.get(stepId);
