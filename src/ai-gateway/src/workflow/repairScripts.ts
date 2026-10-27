@@ -9,6 +9,8 @@ export type ScriptRepairDeps = {
     model: string
     contextTokens: number
     maxRepairAttempts: number
+    /** Example scripts for a field, from the installation's templates. */
+    hints?: (field: string) => string
 }
 
 export type ScriptRepairAttempt = { promptTokens: number; outputTokens: number; durationMs: number; errorCount: number }
@@ -61,7 +63,7 @@ function scopeOf(steps: WorkflowStep[], targetId: string, methods: ScopeEntry[] 
     return undefined
 }
 
-function repairMessage(dsl: WorkflowDsl, broken: BrokenScript, method: MethodStep): string {
+function repairMessage(dsl: WorkflowDsl, broken: BrokenScript, method: MethodStep, hints: string): string {
     const current = method.fields.find((field) => field.name === broken.field)?.value
     const scope = scopeOf(dsl.steps, method.id) ?? []
     return `This workflow is fine except one transformation script. Fix only that script.
@@ -78,7 +80,7 @@ ${broken.problems.map((problem) => `- ${problem}`).join('\n')}
 Values this step can read (use them as inputs; the current element of a loop is usually the item being processed):
 ${scope.map((entry) => `- "${entry.id}": ${entry.what}`).join('\n')}
 If the code uses a VAR_n that has no input, add the input it stands for (in order) rather than changing what the code does.
-
+${hints ? `\nSimilar transformations already used in this installation:\n${hints}\n` : ''}
 Return the corrected script as {"inputs":[...],"code":"...","description":"..."}. inputs[n] is VAR_n; every VAR_n the code
 uses needs an input. An input is {"step":"<earlier method step id or enclosing loop id>","path":"<dot path>"}.
 The code assigns RESULT_VAR and is ECMAScript 5.1 (var, function; no let/const/arrow functions/template strings).`
@@ -102,7 +104,7 @@ export async function repairScripts(dsl: WorkflowDsl, broken: BrokenScript[], co
             if (!method || !field) break
             const result = await deps.llm.chat({
                 model: deps.model,
-                messages: [{ role: 'user', content: repairMessage(repaired, current, method) }],
+                messages: [{ role: 'user', content: repairMessage(repaired, current, method, deps.hints?.(current.field) ?? '') }],
                 format: scriptFormat,
                 contextTokens: deps.contextTokens,
                 temperature: attempt === 0 ? 0 : 0.4,

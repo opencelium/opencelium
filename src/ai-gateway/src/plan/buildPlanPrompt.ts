@@ -18,7 +18,7 @@ depth 2:     If the existing items' <match field>s do not contain the item's <so
 depth 2:     If the existing items' <match field>s contain the item's <source match field>: update it with <target update operation>.
 depth 0: If the <target search operation> result <id list field> is empty:
 depth 1:   For each source item (a new loop over the <source list operation> result): create it with <target create operation>.
-depth 0: Create and update set: <target field> = item <source field>, ... (the match field plus every mapping the request names).`
+(then "fieldRules" for the create and update operations: the match field plus every mapping the request names)`
 
 export function buildPlanSystemPrompt(connectors: WorkflowConnectors): string {
     const sections = [describeConnector('from', connectors.from)]
@@ -27,10 +27,23 @@ export function buildPlanSystemPrompt(connectors: WorkflowConnectors): string {
     return `You plan integration workflows for OpenCelium. Answer with JSON only.
 
 Turn the user's request into a short plan of steps in plain language, for a person to review before the workflow is built.
+Steps describe the flow only; the values written into fields go into "fieldRules", never into the steps.
 - Each step is one action and names the exact operation it uses (as listed below).
 - "depth" is nesting: a step runs inside the closest loop or condition above it with a smaller depth.
 - A loop's items are only available inside it; to go over the same list again later, start a new loop over the same operation result.
 - Name the fields that are compared or copied, using the field names listed below.
+
+"fieldRules" lists what each target operation sets, one entry per field: {"operations":[...],"field":"<request body
+field>","value":"<value>"}. Give every field the request mentions, for every operation that writes it (create and
+update). "value" is one of:
+  item <source field>             copy a value from the current source item (or "<Operation> <field>" for another step's result)
+  "<text>"                        a fixed value
+  script: <what it computes>      when the value must be computed: mapping one value to another, finding an item in a
+                                  list, combining several values or building an object. Say in plain words which values
+                                  it reads and what it returns, e.g. script: "Operational" when the item cmdb_status_title
+                                  is "in operation", otherwise "Incident".
+An update usually also needs the id of the existing item it changes: a script that finds the existing item whose match
+field equals the source item's match field and returns its id.
 - Do not invent operations or fields. Keep the plan as short as the request allows.
 
 Choose "pattern":

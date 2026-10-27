@@ -37,7 +37,8 @@ npm test && npm run typecheck
 | --- | --- | --- | --- |
 | GET | `/health` | — | `{ status: 'ok' \| 'degraded', ollama, workflowModel, invokerCount }` |
 | GET | `/invokers` | — | `[{ name, description, operationCount }]` |
-| POST | `/workflow/generate` | `{ prompt, from, to? }` (invoker names, case-insensitive) | `{ dsl, issues, attempts, model }` |
+| POST | `/workflow/plan` | `{ prompt, from, to? }` | `{ pattern, steps: [{ text, depth }], durationMs, model }`: plain-language plan for review, field rules as `<Operation> set <field> = <value>` lines |
+| POST | `/workflow/generate` | `{ prompt, from, to?, plan? }` (invoker names, case-insensitive; `plan` = the reviewed plan text) | `{ dsl, issues, attempts, model }` |
 
 Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAILED', message, details? } }` with 400 / 404 / 502.
 
@@ -49,6 +50,8 @@ Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAIL
 | `OLLAMA_URL` | `http://127.0.0.1:11434` |
 | `AI_WORKFLOW_MODEL` | `qwen2.5-coder:14b` |
 | `AI_INVOKER_DIR` | `../backend/runtime/invoker` |
+| `AI_TEMPLATE_DIR` | `../backend/runtime/templates` (their transformation scripts are examples for generated ones) |
+| `AI_EMBED_MODEL` | `nomic-embed-text` (finds the most similar template scripts; without it, no examples are used) |
 | `AI_CORS_ORIGINS` | `http://localhost:5173` (comma-separated) |
 | `AI_MAX_REPAIR_ATTEMPTS` | `2` |
 | `AI_CONTEXT_TOKENS` | `16384` |

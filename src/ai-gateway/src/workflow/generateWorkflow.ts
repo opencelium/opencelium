@@ -45,7 +45,12 @@ function errorCount(issues: WorkflowIssue[]): number {
  * Returns the attempt with the fewest errors; its remaining issues travel with it.
  */
 /** A fixed structure to fill (from a reviewed plan): its own schema and the message describing it. */
-export type WorkflowConstraint = { schema: z.ZodType; userMessage: string }
+export type WorkflowConstraint = {
+    schema: z.ZodType
+    userMessage: string
+    /** Example scripts for a field, shown again when that field's script is repaired. */
+    scriptHints?: (field: string) => string
+}
 
 export async function generateWorkflow(
     prompt: string,
@@ -83,7 +88,7 @@ export async function generateWorkflow(
         if (!hasErrors(outcome.issues)) break
         const scripts = outcome.dsl && brokenScripts(outcome.issues)
         if (outcome.dsl && scripts?.length) {
-            const repaired = await repairScripts(outcome.dsl, scripts, connectors, deps)
+            const repaired = await repairScripts(outcome.dsl, scripts, connectors, { ...deps, hints: constraint?.scriptHints })
             attempts.push(...repaired.attempts)
             if (errorCount(repaired.issues) <= errorCount(best?.issues ?? repaired.issues)) {
                 best = { dsl: repaired.dsl, issues: repaired.issues }
