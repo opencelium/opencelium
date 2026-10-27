@@ -26,6 +26,7 @@ export function AiResultView({ prompt, response, usedTemplates, choices, connect
 	const templateNote = !usedTemplates ? t('ai.templates.resultOff')
 		: exampleCount === undefined ? null
 		: exampleCount > 0 ? t('ai.templates.resultUsed', { count: exampleCount }) : t('ai.templates.resultNone');
+	const operationCount = usedTemplates ? response.operationExampleCount ?? 0 : 0;
 
 	return (
 		<div className="aiResult" data-testid="ai-panel-result">
@@ -39,6 +40,11 @@ export function AiResultView({ prompt, response, usedTemplates, choices, connect
 				</div>
 				{templateNote && <div className="aiTemplateNote" data-testid="ai-panel-template-note">{templateNote}</div>}
 				<AiTemplateBasis templates={response.templates ?? []} testId="ai-panel-result-templates" />
+				{operationCount > 0 && (
+					<div className="aiTemplateNote" data-testid="ai-panel-result-operation-examples">
+						{t('ai.templates.operationsUsed', { count: operationCount })}
+					</div>
+				)}
 				<div className="aiStepTreeCard">
 					<AiStepTree steps={response.dsl.steps} preview={preview} connectors={lookup} issues={response.issues} />
 				</div>

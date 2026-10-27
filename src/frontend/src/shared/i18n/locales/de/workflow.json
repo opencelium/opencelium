@@ -1441,7 +1441,9 @@
       "resultNone": "Für diesen Workflow wurden keine ähnlichen Vorlagenskripte gefunden",
       "resultOff": "Ohne Vorlagen erstellt",
       "basedOn_one": "Orientiert sich an der Vorlage {{names}}",
-      "basedOn_other": "Orientiert sich an den Vorlagen {{names}}"
+      "basedOn_other": "Orientiert sich an den Vorlagen {{names}}",
+      "operationsUsed_one": "{{count}} Operation so ausgefüllt, wie Vorlagen sie aufrufen",
+      "operationsUsed_other": "{{count}} Operationen so ausgefüllt, wie Vorlagen sie aufrufen"
     }
   }
 }

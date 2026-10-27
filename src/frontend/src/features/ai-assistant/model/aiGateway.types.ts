@@ -60,6 +60,8 @@ export type GenerateWorkflowResponse = {
 	templateExampleCount?: number;
 	/** Templates whose flow the build followed; missing from gateways older than template-guided planning. */
 	templates?: AiTemplateRef[];
+	/** Operations shown with how templates call them; missing from gateways older than operation usage examples. */
+	operationExampleCount?: number;
 };
 
 /** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */

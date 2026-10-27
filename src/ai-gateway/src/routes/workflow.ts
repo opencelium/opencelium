@@ -8,6 +8,8 @@ import { type WorkflowConstraint, generateWorkflow } from '../workflow/generateW
 import { type ScriptExamples, formatScriptExamples, noScriptExamples } from '../examples/scriptExamples.ts'
 import { describeTemplateExamples, noTemplateFlows } from '../examples/templateFlows.ts'
 import type { TemplateFlow } from '../examples/templateFlow.ts'
+import { type OperationCall, type OperationExamples, describeOperationExamples, noOperationUsages } from '../examples/operationUsages.ts'
+import { skeletonCalls, textCalls } from '../plan/planCalls.ts'
 import { describeSkeleton, ruleKey } from '../plan/describeSkeleton.ts'
 import { buildSkeleton, buildSkeletonSchema, scriptRules } from '../plan/planSkeleton.ts'
 import { parseFieldRuleLine } from '../plan/planFieldRules.ts'
@@ -35,6 +37,8 @@ type ParsedRequest = {
     /** Distinct template scripts handed to the model as examples. */
     templateExampleCount: number
     useTemplates: boolean
+    /** The operations the workflow will call, for the template usages of each. */
+    calls: OperationCall[]
 }
 
 const EXAMPLES_PER_RULE = 2
@@ -42,6 +46,7 @@ const EXAMPLES_PER_RULE = 2
 const TEMPLATES_PER_PLAN = 2
 // A reviewed plan already fixes the structure; one template is enough to show how its values are filled.
 const TEMPLATES_PER_PLAN_BUILD = 1
+const USAGES_PER_OPERATION = 2
 
 const templateRefs = (flows: TemplateFlow[]) => flows.map(({ id, name }) => ({ id, name }))
 
@@ -66,14 +71,15 @@ async function examplesForPlanText(steps: PlanStep[], examples: ScriptExamples):
  * Each script rule brings the most similar transformations from the installation's templates as examples.
  */
 async function constraintFromPlan(prompt: string, planText: string, connectors: WorkflowConnectors,
-    examples: ScriptExamples): Promise<{ prompt: string; constraint?: WorkflowConstraint; templateExampleCount: number }> {
+    examples: ScriptExamples): Promise<{ prompt: string; constraint?: WorkflowConstraint; templateExampleCount: number; calls: OperationCall[] }> {
     const steps = parsePlanText(planText)
     let skeleton
     try {
         skeleton = buildSkeleton(steps, connectors)
     } catch {
         const fallback = await examplesForPlanText(steps, examples)
-        return { prompt: `${prompt}\n\n${renderPlanForBuild(steps)}${fallback.text}`, templateExampleCount: fallback.count }
+        return { prompt: `${prompt}\n\n${renderPlanForBuild(steps)}${fallback.text}`, templateExampleCount: fallback.count,
+            calls: textCalls(steps.map((step) => step.text), connectors) }
     }
     const rules = scriptRules(skeleton)
     const found = await Promise.all(rules.map((rule) => examples.find(ruleKey(rule), EXAMPLES_PER_RULE)))
@@ -82,6 +88,7 @@ async function constraintFromPlan(prompt: string, planText: string, connectors: 
     return {
         prompt,
         templateExampleCount: new Set(found.flat().map((example) => example.code)).size,
+        calls: skeletonCalls(skeleton, connectors),
         constraint: {
             schema: buildSkeletonSchema(skeleton),
             userMessage: describeSkeleton(prompt, skeleton, byRule),
@@ -112,7 +119,7 @@ async function parseRequest(request: FastifyRequest, reply: FastifyReply, { invo
         return undefined
     }
     const connectors = { from, to }
-    if (!body.data.plan) return { task: prompt, prompt, connectors, templateExampleCount: 0, useTemplates }
+    if (!body.data.plan) return { task: prompt, prompt, connectors, templateExampleCount: 0, useTemplates, calls: textCalls([prompt], connectors) }
     const examplesToUse = useTemplates ? examples : noScriptExamples
     return { ...await constraintFromPlan(prompt, body.data.plan, connectors, examplesToUse), task: prompt, connectors, useTemplates }
 }
@@ -123,16 +130,19 @@ function failGeneration(request: FastifyRequest, reply: FastifyReply, error: unk
     return sendApiError(reply, 'GENERATION_FAILED', message)
 }
 
-/** The request prompt with the closest templates appended, or the plan-fixed message with them appended. */
-function withTemplates(parsed: ParsedRequest, flows: TemplateFlow[]): { prompt: string; constraint?: WorkflowConstraint } {
-    if (flows.length === 0) return parsed
-    if (!parsed.constraint) return { prompt: `${parsed.prompt}\n\n${describeTemplateExamples(flows, 'build', parsed.connectors)}`.trimEnd() }
-    const userMessage = `${parsed.constraint.userMessage}\n\n${describeTemplateExamples(flows, 'fill', parsed.connectors)}`.trimEnd()
+/** The request prompt, or the plan-fixed message, with the closest templates and the operations' template calls appended. */
+function withTemplates(parsed: ParsedRequest, flows: TemplateFlow[], usages: OperationExamples[]): { prompt: string; constraint?: WorkflowConstraint } {
+    const calls = describeOperationExamples(usages)
+    if (flows.length === 0 && !calls) return parsed
+    if (!parsed.constraint) {
+        return { prompt: `${parsed.prompt}\n\n${describeTemplateExamples(flows, 'build', parsed.connectors)}${calls}`.trimEnd() }
+    }
+    const userMessage = `${parsed.constraint.userMessage}\n\n${describeTemplateExamples(flows, 'fill', parsed.connectors)}${calls}`.trimEnd()
     return { prompt: parsed.prompt, constraint: { ...parsed.constraint, userMessage } }
 }
 
 export function registerWorkflowRoutes(app: FastifyInstance, deps: AppDeps) {
-    const { config, llm, templates = noTemplateFlows } = deps
+    const { config, llm, templates = noTemplateFlows, operationUsages = noOperationUsages } = deps
     const findTemplates = (parsed: ParsedRequest, limit: number) =>
         parsed.useTemplates ? templates.find(parsed.task, parsed.connectors, limit) : Promise.resolve([])
 
@@ -158,7 +168,8 @@ export function registerWorkflowRoutes(app: FastifyInstance, deps: AppDeps) {
         const { connectors } = parsed
         try {
             const flows = await findTemplates(parsed, parsed.constraint ? TEMPLATES_PER_PLAN_BUILD : TEMPLATES_PER_PLAN)
-            const { prompt, constraint } = withTemplates(parsed, flows)
+            const usages = parsed.useTemplates ? await operationUsages.find(parsed.calls, USAGES_PER_OPERATION) : []
+            const { prompt, constraint } = withTemplates(parsed, flows, usages)
             const result = await generateWorkflow(prompt, connectors, {
                 llm,
                 model: config.workflowModel,
@@ -168,10 +179,11 @@ export function registerWorkflowRoutes(app: FastifyInstance, deps: AppDeps) {
             request.log.info(
                 { from: connectors.from.name, to: connectors.to?.name, isPlanFixed: Boolean(constraint),
                     templateExampleCount: parsed.templateExampleCount, templateIds: flows.map((flow) => flow.id),
-                    attempts: result.attempts, issueCount: result.issues.length },
+                    operationExampleCount: usages.length, attempts: result.attempts, issueCount: result.issues.length },
                 'workflow generated',
             )
-            return { ...result, templateExampleCount: parsed.templateExampleCount, templates: templateRefs(flows) }
+            return { ...result, templateExampleCount: parsed.templateExampleCount, templates: templateRefs(flows),
+                operationExampleCount: usages.length }
         } catch (error) {
             return failGeneration(request, reply, error, 'Workflow generation')
         }
