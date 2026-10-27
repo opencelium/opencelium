@@ -7,6 +7,7 @@ import type { ScriptExamples } from './examples/scriptExamples.ts'
 import { registerHealthRoutes } from './routes/health.ts'
 import { registerInvokerRoutes } from './routes/invokers.ts'
 import { registerWorkflowRoutes } from './routes/workflow.ts'
+import { registerScriptRoutes } from './routes/script.ts'
 
 export type AppDeps = {
     config: GatewayConfig
@@ -23,5 +24,6 @@ export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}
     registerHealthRoutes(app, deps)
     registerInvokerRoutes(app, deps)
     registerWorkflowRoutes(app, deps)
+    registerScriptRoutes(app, deps)
     return app
 }

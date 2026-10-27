@@ -38,6 +38,7 @@ npm test && npm run typecheck
 | GET | `/health` | — | `{ status: 'ok' \| 'degraded', ollama, workflowModel, invokerCount }` |
 | GET | `/invokers` | — | `[{ name, description, operationCount }]` |
 | POST | `/workflow/plan` | `{ prompt, from, to? }` | `{ pattern, steps: [{ text, depth }], durationMs, model }`: plain-language plan for review, field rules as `<Operation> set <field> = <value>` lines |
+| POST | `/script/generate` | `{ prompt, target?, inputs: [{ name: 'VAR_n', source, sample? }], currentScript? }` | `{ code, description, problems, durationMs, model }`: one transformation script for the editor |
 | POST | `/workflow/generate` | `{ prompt, from, to?, plan? }` (invoker names, case-insensitive; `plan` = the reviewed plan text) | `{ dsl, issues, attempts, model }` |
 
 Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAILED', message, details? } }` with 400 / 404 / 502.

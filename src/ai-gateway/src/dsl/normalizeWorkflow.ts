@@ -1,5 +1,6 @@
 import { normalizePath } from '../invokers/fieldPaths.ts'
 import type { Assignment, DslValue, FieldAssignment, FieldValue, StepRef, WorkflowDsl, WorkflowStep } from './workflowDsl.schema.ts'
+import { unescapeScriptCode } from './checkScript.ts'
 
 /** A loop as seen by later steps: what it iterates, in method terms when that is known. */
 type LoopInfo = {
@@ -72,7 +73,7 @@ function normalizeFieldValue(value: FieldValue, scope: Scope, enclosing: LoopInf
         const normalized = normalizeValue({ ref: input }, scope, enclosing)
         return 'ref' in normalized ? normalized.ref : input
     })
-    return { script: { ...value.script, inputs, code: withoutCopiedHeaders(value.script.code) } }
+    return { script: { ...value.script, inputs, code: withoutCopiedHeaders(unescapeScriptCode(value.script.code)) } }
 }
 
 function normalizeValue(value: DslValue, scope: Scope, enclosing: LoopInfo[]): DslValue {
