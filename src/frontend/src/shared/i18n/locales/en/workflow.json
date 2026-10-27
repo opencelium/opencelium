@@ -1390,7 +1390,7 @@
       "title": "Plan",
       "patternSync": "Sync pattern",
       "shortcutHint": "to build",
-      "hint": "Check the steps before building. Edit any line; indent a line by two spaces to put it inside the loop or condition above it."
+      "hint": "Check the steps before building. Edit any line; indent a line by two spaces to put it inside the loop or condition above it. Lines with \"set\" fill fields: write \"script: …\" for a value that must be computed."
     }
   }
 }
