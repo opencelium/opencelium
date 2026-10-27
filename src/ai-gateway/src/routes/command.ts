@@ -6,7 +6,7 @@ import { routeCommandRequestSchema, searchCommandsRequestSchema } from '../comma
 import { routeCommand } from '../command/routeCommand.ts'
 import { sendApiError } from './apiError.ts'
 
-export function registerCommandRoutes(app: FastifyInstance, { config, llm, embedder }: AppDeps) {
+export function registerCommandRoutes(app: FastifyInstance, { config, llm, embedder, invokers }: AppDeps) {
     const index = createCommandIndex(embedder)
 
     app.post('/command/search', async (request, reply) => {
@@ -19,8 +19,9 @@ export function registerCommandRoutes(app: FastifyInstance, { config, llm, embed
         const body = routeCommandRequestSchema.safeParse(request.body)
         if (!body.success) return sendApiError(reply, 'BAD_REQUEST', 'Invalid request body', z.treeifyError(body.error))
         try {
-            const result = await routeCommand(body.data, { llm, index, model: config.commandModel, contextTokens: config.contextTokens })
-            request.log.info({ commandId: result.commandId, durationMs: result.durationMs }, 'command routed')
+            const systems = async () => (await invokers.list()).map((invoker) => invoker.name)
+            const result = await routeCommand(body.data, { llm, index, model: config.commandModel, contextTokens: config.contextTokens, systems })
+            request.log.info({ commandId: result.commandId, action: result.action, intent: result.intent?.kind, durationMs: result.durationMs }, 'command routed')
             return result
         } catch (error) {
             request.log.error({ err: error }, 'command routing failed')

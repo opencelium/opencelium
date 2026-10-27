@@ -4,6 +4,7 @@ import { createInvokerRepository } from './invokers/invokerRepository.ts'
 import { createOllamaClient } from './llm/ollamaClient.ts'
 import { createOllamaEmbedder } from './llm/ollamaEmbedder.ts'
 import { createScriptExamples } from './examples/scriptExamples.ts'
+import { createWhisperClient } from './speech/speechClient.ts'
 
 const config = loadConfig()
 const embedder = createOllamaEmbedder(config.ollamaUrl, config.embedModel)
@@ -14,6 +15,7 @@ const app = await buildApp(
         invokers: createInvokerRepository(config.invokerDir),
         examples: createScriptExamples(config.templateDir, embedder),
         embedder,
+        speech: config.speechUrl ? createWhisperClient(config.speechUrl) : undefined,
     },
     { logger: { level: process.env.LOG_LEVEL ?? 'info' } },
 )

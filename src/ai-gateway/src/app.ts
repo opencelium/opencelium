@@ -5,11 +5,13 @@ import type { InvokerRepository } from './invokers/invokerRepository.ts'
 import type { LlmClient } from './llm/llmClient.ts'
 import type { ScriptExamples } from './examples/scriptExamples.ts'
 import type { Embedder } from './llm/ollamaEmbedder.ts'
+import type { SpeechClient } from './speech/speechClient.ts'
 import { registerHealthRoutes } from './routes/health.ts'
 import { registerInvokerRoutes } from './routes/invokers.ts'
 import { registerWorkflowRoutes } from './routes/workflow.ts'
 import { registerScriptRoutes } from './routes/script.ts'
 import { registerCommandRoutes } from './routes/command.ts'
+import { registerSpeechRoutes } from './routes/speech.ts'
 
 export type AppDeps = {
     config: GatewayConfig
@@ -19,6 +21,8 @@ export type AppDeps = {
     examples?: ScriptExamples
     /** Ranks palette commands by meaning; without it, by shared words. */
     embedder?: Embedder
+    /** Turns spoken commands into text; without it, voice input is reported unavailable. */
+    speech?: SpeechClient
 }
 
 export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}): Promise<FastifyInstance> {
@@ -30,5 +34,6 @@ export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}
     registerWorkflowRoutes(app, deps)
     registerScriptRoutes(app, deps)
     registerCommandRoutes(app, deps)
+    registerSpeechRoutes(app, deps)
     return app
 }
