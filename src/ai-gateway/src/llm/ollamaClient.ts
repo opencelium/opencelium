@@ -11,16 +11,17 @@ type OllamaTagsResponse = {
     models?: { name: string }[]
 }
 
-const CHAT_TIMEOUT_MS = 5 * 60_000
+const DEFAULT_CHAT_TIMEOUT_MS = 15 * 60_000
 const TAGS_TIMEOUT_MS = 3_000
 
-export function createOllamaClient(baseUrl: string): LlmClient {
+/** `chatTimeoutMs` bounds one model answer; a large plan-fixed build on a laptop GPU can take well over five minutes. */
+export function createOllamaClient(baseUrl: string, chatTimeoutMs = DEFAULT_CHAT_TIMEOUT_MS): LlmClient {
     return {
         async chat(request: ChatRequest): Promise<ChatResult> {
             const response = await fetch(`${baseUrl}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                signal: AbortSignal.timeout(CHAT_TIMEOUT_MS),
+                signal: AbortSignal.timeout(chatTimeoutMs),
                 body: JSON.stringify({
                     model: request.model,
                     stream: false,

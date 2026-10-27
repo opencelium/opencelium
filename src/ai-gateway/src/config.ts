@@ -12,6 +12,7 @@ export type GatewayConfig = {
     corsOrigins: string[]
     maxRepairAttempts: number
     contextTokens: number
+    chatTimeoutMs: number
 }
 
 const defaultInvokerDir = fileURLToPath(new URL('../../backend/runtime/invoker', import.meta.url))
@@ -38,5 +39,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): GatewayConfig 
             .filter(Boolean),
         maxRepairAttempts: toInt(env.AI_MAX_REPAIR_ATTEMPTS, 2),
         contextTokens: toInt(env.AI_CONTEXT_TOKENS, 16384),
+        chatTimeoutMs: toInt(env.AI_CHAT_TIMEOUT_MS, 15 * 60_000),
     }
 }
