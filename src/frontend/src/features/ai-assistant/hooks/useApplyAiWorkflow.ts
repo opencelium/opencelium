@@ -40,8 +40,8 @@ export function useApplyAiWorkflow({ nodes, connectors, setWorkflowGraph, setFie
 		try {
 			const state = mapConnectionToWorkflowState(dslToConnection(dsl, { from: byId(pair.fromId), to: byId(pair.toId) }));
 			setWorkflowGraph(state.nodes, state.edges, undefined, { centerStart: true, isUndoable: true });
-			// Field bindings point at nodes of the replaced graph.
-			setFieldBindings([]);
+			// The generated transformations replace the old graph's, which pointed at nodes that are gone.
+			setFieldBindings(state.fieldBindings);
 			markDirty();
 			message.success(t('ai.apply.success'));
 			return true;

@@ -13,6 +13,7 @@ import {
 } from '../model/workflowDsl.schema';
 import { buildResponseReference, joinJsonPath, toArrayPath, toJsonPathTail, wrapUrlReference } from './dslReferences.utils';
 import { setBodyField } from './dslRequestBody.utils';
+import { type GeneratedFieldBinding, buildFieldBinding } from './dslBindings.utils';
 
 export type DslConnectors = Record<ConnectorSide, Connector | null>;
 
@@ -38,7 +39,7 @@ export type GeneratedOperatorPayload = {
 
 export type GeneratedConnection = {
 	fromConnector: { method: GeneratedMethodPayload[]; operator: GeneratedOperatorPayload[] };
-	fieldBinding: [];
+	fieldBinding: GeneratedFieldBinding[];
 };
 
 type LoopFrame = { stepId: string; color: string; elementPath: string };
@@ -49,6 +50,7 @@ type Context = {
 	colors: Map<string, string>;
 	methods: GeneratedMethodPayload[];
 	operators: GeneratedOperatorPayload[];
+	bindings: GeneratedFieldBinding[];
 };
 
 /** A ref to an earlier method reads its response; a ref to an enclosing loop reads the current element. */
@@ -75,8 +77,16 @@ function addMethod(ctx: Context, step: MethodStep, index: string, loops: LoopFra
 	const fields = (typeof request.body?.fields === 'object' && request.body.fields !== null ? request.body.fields : {}) as Record<string, unknown>;
 
 	for (const field of step.fields) {
-		const reference = resolveReference(ctx, loops, field.value);
-		setBodyField(fields, field.name, reference ?? ('literal' in field.value ? field.value.literal : ''), reference === null);
+		const { value } = field;
+		if ('script' in value) {
+			const inputs = value.script.inputs.map((input) => resolveReference(ctx, loops, { ref: input }) ?? '');
+			const { binding, bodyValue } = buildFieldBinding(color, field.name, inputs, value.script.code, value.script.description);
+			ctx.bindings.push(binding);
+			setBodyField(fields, field.name, bodyValue, false);
+			continue;
+		}
+		const reference = resolveReference(ctx, loops, value);
+		setBodyField(fields, field.name, reference ?? ('literal' in value ? value.literal : ''), reference === null);
 	}
 	for (const param of step.params) {
 		const reference = resolveReference(ctx, loops, param.value);
@@ -170,14 +180,14 @@ function walk(ctx: Context, steps: WorkflowStep[], parentIndex: string | null, l
 
 /**
  * Converts generated DSL into the saved-connection payload, so the regular loader lays it out, links it and
- * assigns node data exactly as for a stored workflow. Throws when a step names something the connectors lack.
+ * assigns node data exactly as for a stored workflow. Script values become field bindings (transformations). Throws when a step names something the connectors lack.
  */
 export function dslToConnection(
 	dsl: WorkflowDsl,
 	connectors: DslConnectors,
 	createId: (prefix: string) => string = createShortId,
 ): GeneratedConnection {
-	const ctx: Context = { connectors, createId, colors: new Map(), methods: [], operators: [] };
+	const ctx: Context = { connectors, createId, colors: new Map(), methods: [], operators: [], bindings: [] };
 	walk(ctx, dsl.steps, null, []);
-	return { fromConnector: { method: ctx.methods, operator: ctx.operators }, fieldBinding: [] };
+	return { fromConnector: { method: ctx.methods, operator: ctx.operators }, fieldBinding: ctx.bindings };
 }
