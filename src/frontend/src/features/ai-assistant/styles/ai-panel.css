@@ -662,3 +662,22 @@
   color: var(--color-status-warning-fg);
   font-size: 12px;
 }
+
+.aiTemplateOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.aiTemplateOptionHint {
+  display: inline-flex;
+  color: var(--color-text-secondary);
+  cursor: help;
+}
+
+.aiTemplateNote {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

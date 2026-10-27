@@ -2,6 +2,7 @@ import type { RouteCommandResponse } from '../model/aiGateway.types';
 import type { CatalogEntry } from './buildCommandCatalog';
 import { resolveCommandArgument } from './resolveCommandArgument';
 import { type ResolvedIntent, resolveIntent } from './intents/resolveIntent';
+import type { PageContext } from './intents/pageContext';
 
 /** `record` is the chosen record's label, shown apart from the command words so a long command never hides it. */
 export type ProposedCommand = { phrase: string; label: string; record?: string };
@@ -27,11 +28,15 @@ export const toCatalogItem = ({ id, phrase, description }: CatalogEntry) => ({ i
  * Opening a page or wizard is harmless and shows the record before anything changes, so a command that opens one
  * runs by itself once its record is certain. A delete always waits for the user to pick the record, even the only one.
  */
-export async function toCommandProposal(answer: RouteCommandResponse, catalog: CatalogEntry[]): Promise<AiCommandProposal> {
+export async function toCommandProposal(
+	answer: RouteCommandResponse,
+	catalog: CatalogEntry[],
+	context: PageContext = {},
+): Promise<AiCommandProposal> {
 	const { reply } = answer;
 	const entry = catalog.find((candidate) => candidate.id === answer.commandId);
 	if (!entry) return { kind: 'no-command', reply };
-	if (answer.intent) return { kind: 'action', entry, resolved: await resolveIntent(answer.intent), reply };
+	if (answer.intent) return { kind: 'action', entry, resolved: await resolveIntent(answer.intent, context), reply };
 	const isOpening = entry.effect === 'open';
 	if (!entry.argument) return { kind: 'ready', entry, reply, phrase: entry.prefix, label: entry.prefix, isAutoRun: isOpening };
 	const argument = answer.argument.trim();

@@ -70,7 +70,7 @@ export function AiPromptPanel({ model }: Props) {
 				<div className="drawerBody aiPanelBody">
 					{view === 'unavailable' && <AiUnavailable isChecking={isCheckingHealth} onCheckAgain={onCheckAgain} />}
 					{state.status === 'result' && view === 'result' && (
-						<AiResultView prompt={state.prompt} response={state.response} choices={choices}
+						<AiResultView prompt={state.prompt} response={state.response} usedTemplates={state.usedTemplates} choices={choices}
 							connectors={generation.connectors} onEditPlan={generation.backToPlan} />
 					)}
 					{(view === 'prompt' || view === 'planning') && (

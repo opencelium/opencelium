@@ -11,7 +11,7 @@ export type AiGenerationState =
 	| { status: 'planning'; startedAt: number }
 	| { status: 'plan'; pattern: PlanPattern }
 	| { status: 'generating'; startedAt: number }
-	| { status: 'result'; prompt: string; response: GenerateWorkflowResponse }
+	| { status: 'result'; prompt: string; response: GenerateWorkflowResponse; usedTemplates: boolean }
 	| { status: 'error'; stage: AiGenerationStage; failure: AiGenerationFailure; message?: string };
 
 /** What the drawer shows. A failure stays on the stage it came from; `unavailable` comes from the health check. */
