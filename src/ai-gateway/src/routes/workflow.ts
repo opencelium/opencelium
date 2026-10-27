@@ -8,6 +8,8 @@ import { type WorkflowConstraint, generateWorkflow } from '../workflow/generateW
 import { type ScriptExamples, formatScriptExamples, noScriptExamples } from '../examples/scriptExamples.ts'
 import { describeSkeleton, ruleKey } from '../plan/describeSkeleton.ts'
 import { buildSkeleton, buildSkeletonSchema, scriptRules } from '../plan/planSkeleton.ts'
+import { parseFieldRuleLine } from '../plan/planFieldRules.ts'
+import type { PlanStep } from '../plan/workflowPlan.schema.ts'
 import { sendApiError } from './apiError.ts'
 
 export const generateWorkflowRequestSchema = z.object({
@@ -16,26 +18,51 @@ export const generateWorkflowRequestSchema = z.object({
     to: z.string().trim().min(1).optional(),
     /** The plan the user reviewed, one step per line with two-space indentation per level; it is built step by step. */
     plan: z.string().trim().min(1).max(6000).optional(),
+    /** Off: build without the installation's template scripts as examples, e.g. to show what the model does alone. */
+    useTemplates: z.boolean().default(true),
 })
 
 export type GenerateWorkflowRequest = z.infer<typeof generateWorkflowRequestSchema>
 
-type ParsedRequest = { prompt: string; connectors: WorkflowConnectors; constraint?: WorkflowConstraint }
+type ParsedRequest = {
+    prompt: string
+    connectors: WorkflowConnectors
+    constraint?: WorkflowConstraint
+    /** Distinct template scripts handed to the model as examples. */
+    templateExampleCount: number
+}
 
 const EXAMPLES_PER_RULE = 2
+
+/**
+ * A plan that can't be read as steps still has its "set <field> = script: …" lines; their closest template scripts go
+ * into the prompt, so templates help (and the switch shows a difference) for every plan, not only the parsed ones.
+ */
+async function examplesForPlanText(steps: PlanStep[], examples: ScriptExamples): Promise<{ text: string; count: number }> {
+    const rules = steps.flatMap((step) => parseFieldRuleLine(step.text, [])?.rules.filter((rule) => rule.isScript) ?? [])
+    const keys = [...new Set(rules.map(ruleKey))]
+    const found = (await Promise.all(keys.map((key) => examples.find(key, EXAMPLES_PER_RULE)))).flat()
+    const unique = [...new Map(found.map((example) => [example.code, example])).values()]
+    if (unique.length === 0) return { text: '', count: 0 }
+    return {
+        text: `\n\nSimilar transformations already used in this installation (adapt them, don't copy their paths):\n${formatScriptExamples(unique)}`,
+        count: unique.length,
+    }
+}
 
 /**
  * The reviewed plan fixes the structure when it can be read as steps; otherwise it is passed on as explicit text.
  * Each script rule brings the most similar transformations from the installation's templates as examples.
  */
 async function constraintFromPlan(prompt: string, planText: string, connectors: WorkflowConnectors,
-    examples: ScriptExamples): Promise<{ prompt: string; constraint?: WorkflowConstraint }> {
+    examples: ScriptExamples): Promise<{ prompt: string; constraint?: WorkflowConstraint; templateExampleCount: number }> {
     const steps = parsePlanText(planText)
     let skeleton
     try {
         skeleton = buildSkeleton(steps, connectors)
     } catch {
-        return { prompt: `${prompt}\n\n${renderPlanForBuild(steps)}` }
+        const fallback = await examplesForPlanText(steps, examples)
+        return { prompt: `${prompt}\n\n${renderPlanForBuild(steps)}${fallback.text}`, templateExampleCount: fallback.count }
     }
     const rules = scriptRules(skeleton)
     const found = await Promise.all(rules.map((rule) => examples.find(ruleKey(rule), EXAMPLES_PER_RULE)))
@@ -43,6 +70,7 @@ async function constraintFromPlan(prompt: string, planText: string, connectors: 
     const byField = new Map(rules.map((rule, index) => [rule.field, found[index] ?? []]))
     return {
         prompt,
+        templateExampleCount: new Set(found.flat().map((example) => example.code)).size,
         constraint: {
             schema: buildSkeletonSchema(skeleton),
             userMessage: describeSkeleton(prompt, skeleton, byRule),
@@ -61,7 +89,7 @@ async function parseRequest(request: FastifyRequest, reply: FastifyReply, { invo
         await sendApiError(reply, 'BAD_REQUEST', 'Invalid request body', z.treeifyError(body.error))
         return undefined
     }
-    const { prompt, from: fromName, to: toName } = body.data
+    const { prompt, from: fromName, to: toName, useTemplates } = body.data
     const from = await invokers.get(fromName)
     if (!from) {
         await sendApiError(reply, 'UNKNOWN_INVOKER', `Unknown invoker "${fromName}"`)
@@ -73,8 +101,9 @@ async function parseRequest(request: FastifyRequest, reply: FastifyReply, { invo
         return undefined
     }
     const connectors = { from, to }
-    if (!body.data.plan) return { prompt, connectors }
-    return { ...await constraintFromPlan(prompt, body.data.plan, connectors, examples), connectors }
+    if (!body.data.plan) return { prompt, connectors, templateExampleCount: 0 }
+    const examplesToUse = useTemplates ? examples : noScriptExamples
+    return { ...await constraintFromPlan(prompt, body.data.plan, connectors, examplesToUse), connectors }
 }
 
 function failGeneration(request: FastifyRequest, reply: FastifyReply, error: unknown, what: string) {
@@ -112,10 +141,10 @@ export function registerWorkflowRoutes(app: FastifyInstance, deps: AppDeps) {
             }, parsed.constraint)
             request.log.info(
                 { from: connectors.from.name, to: connectors.to?.name, isPlanFixed: Boolean(parsed.constraint),
-                    attempts: result.attempts, issueCount: result.issues.length },
+                    templateExampleCount: parsed.templateExampleCount, attempts: result.attempts, issueCount: result.issues.length },
                 'workflow generated',
             )
-            return result
+            return { ...result, templateExampleCount: parsed.templateExampleCount }
         } catch (error) {
             return failGeneration(request, reply, error, 'Workflow generation')
         }

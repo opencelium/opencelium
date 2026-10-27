@@ -24,6 +24,9 @@ const CASES: Case[] = [
     { prompt: 'run the workflow fake2 every 15 minutes', page: '/', expected: 'create schedule', intent: { workflow: 'fake2', cronExp: '0 0/15 * * * ?' } },
     { prompt: 'schedule the idoit to OTRS workflow every day at 6 am', page: '/', expected: 'create schedule', intent: { cronExp: '0 0 6 * * ?' } },
     { prompt: 'Zeitplan für den Workflow config item jeden Montag und Freitag um 18 Uhr anlegen', page: '/', expected: 'create schedule', intent: { workflow: 'config item', cronExp: '0 0 18 ? * 2,6' } },
+    // In the editor no workflow is named: the frontend fills in the open one.
+    { prompt: 'schedule current workflow each 15 minutes', page: '/workflow/update/2', expected: 'create schedule', intent: { workflow: '', cronExp: '0 0/15 * * * ?' } },
+    { prompt: 'plane diesen Workflow jeden Montag um 8 Uhr', page: '/workflow/update/2', expected: 'create schedule', intent: { workflow: '', cronExp: '0 0 8 ? * 2' } },
     { prompt: 'add a connector for i-doit called CMDB production', page: '/', expected: 'create connector', intent: { system: 'i-doit', title: 'CMDB production' } },
     { prompt: 'neuen Konnektor für OTRS anlegen', page: '/', expected: 'create connector', intent: { system: 'OTRS' } },
     { prompt: 'create a workflow from the template idoit otrs incidents', page: '/', expected: 'create workflow', intent: { source: 'template' } },
