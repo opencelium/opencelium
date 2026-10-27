@@ -70,3 +70,36 @@
 .aiCommandPlaceholder {
   opacity: 0.6;
 }
+
+[cmdk-item][data-testid="command-palette-ai-choose"] {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-size: 12px;
+}
+
+.aiCommandPhrase--record {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: inherit;
+}
+
+.aiCommandWords {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  background: none;
+  color: inherit;
+  opacity: 0.65;
+}
+
+.aiCommandRecord {
+  flex-shrink: 0;
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}

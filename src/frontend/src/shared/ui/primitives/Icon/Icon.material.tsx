@@ -74,6 +74,7 @@ import HighlightOff from '@mui/icons-material/HighlightOff';
 import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
 import PowerOffOutlined from '@mui/icons-material/PowerOffOutlined';
 import ArrowForward from '@mui/icons-material/ArrowForward';
+import MicNoneOutlined from '@mui/icons-material/MicNoneOutlined';
 import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import AccessTime from '@mui/icons-material/AccessTime';
 import Code from '@mui/icons-material/Code';
@@ -167,6 +168,7 @@ const iconMap = {
     sparkles: AutoAwesomeOutlined,
     'plug-off': PowerOffOutlined,
     'arrow-right': ArrowForward,
+    microphone: MicNoneOutlined,
 };
 
 export const MaterialIcon: IconComponent = ({

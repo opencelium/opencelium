@@ -27,13 +27,8 @@ export const useApplyConnectionTemplate = ({ templates, selectedTemplateId,
 	const [mappingGroups, setMappingGroups] = useState<ConnectorMappingGroup[]>([]);
 	const [pendingApply, setPendingApply] = useState<PendingApply | null>(null);
 
-	const applySelected = async () => {
-		const template = templates.find((item) =>
-			String(item.templateId) === selectedTemplateId);
-		if (!template) {
-			notifyError(t('messages.selectTemplate'));
-			return;
-		}
+	/** Loads one template into the graph, asking for a connector mapping when it uses connectors. */
+	const applyTemplate = async (template: WorkflowTemplate) => {
 		setIsApplying(true);
 		try {
 			const fullTemplate = await apiExecutor({
@@ -61,6 +56,16 @@ export const useApplyConnectionTemplate = ({ templates, selectedTemplateId,
 		}
 	};
 
+	const applySelected = async () => {
+		const template = templates.find((item) =>
+			String(item.templateId) === selectedTemplateId);
+		if (!template) {
+			notifyError(t('messages.selectTemplate'));
+			return;
+		}
+		await applyTemplate(template);
+	};
+
 	const confirmMapping = async (mapping: Record<number, number>) => {
 		if (!pendingApply) return;
 		setMappingDialogOpen(false);
@@ -85,5 +90,5 @@ export const useApplyConnectionTemplate = ({ templates, selectedTemplateId,
 	};
 
 	return { isApplying, mappingDialogOpen, mappingGroups,
-		applySelected, confirmMapping, cancelMapping };
+		applySelected, applyTemplate, confirmMapping, cancelMapping };
 };

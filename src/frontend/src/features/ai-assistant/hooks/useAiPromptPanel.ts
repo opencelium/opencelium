@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { isAiConfigured, useGetAiHealthQuery } from '../api/aiApi';
 import { type AiApplyBlock, type AiPanelView, toPanelView } from '../model/aiPanelState';
-import { pickDefaultConnectors, toConnectorChoices } from '../utils/aiConnectors.utils';
+import { type AiConnectorPair, pickDefaultConnectors, toConnectorChoices } from '../utils/aiConnectors.utils';
 import { type AiWorkflowApplyTarget, useApplyAiWorkflow } from './useApplyAiWorkflow';
 import { useAiWorkflowGeneration } from './useAiWorkflowGeneration';
 
@@ -60,6 +60,13 @@ export function useAiPromptPanel({ target, isLocked, isOtherPanelOpen, onBeforeO
 		if (isConfigured) void health.refetch();
 	};
 
+	/** Opens the panel with a request from outside the editor and starts planning it. */
+	const openWith = (request: { prompt: string; connectors: AiConnectorPair }) => {
+		onBeforeOpen();
+		setIsOpen(true);
+		void generation.planRequest(request);
+	};
+
 	const [wasOtherPanelOpen, setWasOtherPanelOpen] = useState(isOtherPanelOpen);
 	if (isOtherPanelOpen !== wasOtherPanelOpen) {
 		setWasOtherPanelOpen(isOtherPanelOpen);
@@ -72,6 +79,7 @@ export function useAiPromptPanel({ target, isLocked, isOtherPanelOpen, onBeforeO
 
 	return {
 		isConfigured,
+		openWith,
 		button: {
 			isOpen,
 			isAvailable,

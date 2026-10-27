@@ -88,6 +88,7 @@ export type IconName =
     | 'sparkles'
     | 'plug-off'
     | 'arrow-right'
+    | 'microphone'
 
 export type IconColor =
     | 'default'

@@ -24,6 +24,7 @@ import { applyProblemFocus } from './problems/applyProblemFocus';
 import { useAiPromptPanel } from '@features/ai-assistant/hooks/useAiPromptPanel';
 import { AiHeaderButton } from '@features/ai-assistant/ui/AiHeaderButton';
 import { AiPromptPanel } from '@features/ai-assistant/ui/AiPromptPanel/AiPromptPanel';
+import { useWorkflowIntent } from './intent/useWorkflowIntent';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -100,6 +101,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       setChangeHistoryOpen(false);
       closeCanvasPanels();
     } });
+
+  useWorkflowIntent({ isNewWorkflow: !connectionId && !readOnly, isReady: !isLoading,
+    onTitle: (title) => setHeaderState((current) => ({ ...current, title })),
+    onTemplate: (template) => void templateActions.applyTemplate(template),
+    onPickTemplate: () => void templateActions.openLoadTemplateDialog(),
+    onAi: ai.openWith });
 
   if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate('/workflow')} />;
 

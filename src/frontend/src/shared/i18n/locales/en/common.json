@@ -66,7 +66,8 @@
       "onboarding": "Restart the setup tour",
       "workflowTutorial": "Replay the workflow tutorial",
       "dashboardTour": "Replay the dashboard tour",
-      "changelog": "Open the changelog"
+      "changelog": "Open the changelog",
+      "createWorkflow": "Create a new workflow: empty, from a template or generated with AI"
     },
     "footer": {
       "select": "Select",
@@ -83,7 +84,8 @@
       "noResults": "No commands match \"{{query}}\"",
       "shortcuts": {
         "open": "Open the command palette",
-        "clearScope": "Exit a locked scope (empty input)"
+        "clearScope": "Exit a locked scope (empty input)",
+        "voice": "Speak a command (outside text fields, when voice input is available)"
       }
     },
     "ai": {
@@ -94,13 +96,21 @@
       "finish": "Complete ↵",
       "edit": "Edit the command before running it",
       "confirmFirst": "Asks for confirmation",
-      "choose": "Several matches for “{{value}}”: pick one",
+      "choose": "Pick the record for “{{value}}”",
       "notFound": "Nothing found for “{{value}}”: enter the value yourself",
       "needsValue": "Add the value, then run",
       "noCommand": "No command fits this request.",
       "unreachable": "The AI service isn't reachable.",
       "failed": "The AI couldn't pick a command. Try rephrasing.",
       "retry": "Ask again"
+    },
+    "voice": {
+      "start": "Speak a command (M)",
+      "listening": "Listening… M or click to send, Esc to cancel",
+      "transcribing": "Transcribing…",
+      "noSpeech": "Didn't catch anything. Click the microphone and speak your command.",
+      "denied": "Microphone access is blocked. Allow it for this site in the browser to speak commands.",
+      "failed": "The spoken command couldn't be transcribed. Check that the local speech service (whisper-server) is running."
     }
   },
   "sidebar": {

@@ -16,6 +16,7 @@ import { resolveConnectionTitles } from '@entities/connection/command/resolvers/
 import { resolveConnectionIds } from '@entities/connection/command/resolvers/resolveConnectionIds'
 import { findConnectionIdByTitle } from '@entities/connection/command/connectionCache'
 import type { CommandNode } from '@shared/command/types'
+import { buildActionAccess } from '@/engine/policy'
 import { workflowCommandBridgeStore } from '@features/workflow/command/workflowCommandBridge'
 import { resolveWorkflowSearch } from '@features/workflow/command/workflowCommandResolvers'
 import { i18n } from '@shared/i18n/config/i18n'
@@ -238,6 +239,25 @@ export const connectionDefinition: EntityDefinition = {
                 },
             ],
         } as CommandNode<any>] : []),
+        // The editor itself is the create flow (no wizard); the AI fills it from a request (template, AI or empty).
+        {
+            type: 'literal',
+            value: 'create',
+            group: 'create',
+            icon: 'plus',
+            description: 'commandPalette.descriptions.create',
+            effect: 'open',
+            children: [{
+                type: 'literal',
+                value: 'workflow',
+                group: 'create',
+                icon: 'workflow',
+                entityName: def.name,
+                description: 'commandPalette.descriptions.createWorkflow',
+                access: buildActionAccess('CONNECTION', 'CREATE'),
+                execute: (_, ctx) => ctx.navigate('/workflow/create'),
+            }],
+        } as CommandNode<any>,
         ...createEntityCommands({
             def,
             commandName: 'workflow',

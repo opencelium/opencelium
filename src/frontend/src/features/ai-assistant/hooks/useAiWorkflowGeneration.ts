@@ -65,6 +65,20 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 		}, { status: 'idle' });
 	};
 
+	/** Fills the form and plans in one go, for a request handed over from elsewhere (the command palette, by voice). */
+	const planRequest = async (request: { prompt: string; connectors: AiConnectorPair }) => {
+		const requestPrompt = request.prompt.slice(0, AI_PROMPT_MAX_LENGTH);
+		setConnectors(request.connectors);
+		setPromptValue(requestPrompt);
+		const from = invokerOf(request.connectors.fromId);
+		// Without a known source system or a task there is nothing to plan: the user completes the form.
+		if (isBusy || !from || !requestPrompt.trim()) return;
+		await run('plan', planWorkflow({ prompt: requestPrompt.trim(), from, to: invokerOf(request.connectors.toId) }), (response) => {
+			setPlanTextValue(planToText(response.steps));
+			setState({ status: 'plan', pattern: response.pattern });
+		}, { status: 'idle' });
+	};
+
 	const build = async () => {
 		if (!canBuild) return;
 		const pattern = state.status === 'plan' ? state.pattern : 'custom';
@@ -89,7 +103,7 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 
 	return {
 		connectors, setConnectors, prompt, setPrompt, planText, setPlanText, state, canPlan, canBuild,
-		plan, build, retry, cancel, backToPrompt, backToPlan, discard,
+		plan, planRequest, build, retry, cancel, backToPrompt, backToPlan, discard,
 	};
 }
 
