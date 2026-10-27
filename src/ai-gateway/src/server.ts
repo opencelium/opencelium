@@ -6,12 +6,14 @@ import { createOllamaEmbedder } from './llm/ollamaEmbedder.ts'
 import { createScriptExamples } from './examples/scriptExamples.ts'
 
 const config = loadConfig()
+const embedder = createOllamaEmbedder(config.ollamaUrl, config.embedModel)
 const app = await buildApp(
     {
         config,
         llm: createOllamaClient(config.ollamaUrl, config.chatTimeoutMs),
         invokers: createInvokerRepository(config.invokerDir),
-        examples: createScriptExamples(config.templateDir, createOllamaEmbedder(config.ollamaUrl, config.embedModel)),
+        examples: createScriptExamples(config.templateDir, embedder),
+        embedder,
     },
     { logger: { level: process.env.LOG_LEVEL ?? 'info' } },
 )
