@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildConstrainedSchema } from '../src/dsl/buildConstrainedSchema.ts'
-import { checkScript } from '../src/dsl/checkScript.ts'
+import { checkScript, unescapeScriptCode } from '../src/dsl/checkScript.ts'
 import { normalizeWorkflow } from '../src/dsl/normalizeWorkflow.ts'
 import { validateWorkflow } from '../src/dsl/validateWorkflow.ts'
 import type { FieldValue, WorkflowDsl } from '../src/dsl/workflowDsl.schema.ts'
@@ -35,6 +35,22 @@ describe('checkScript', () => {
     })
 })
 
+describe('checkScript with the editor\'s Nashorn check', () => {
+    it.each([
+        ["RESULT_VAR = VAR_0.includes('x');", /uses VAR_0\.includes, which Nashorn \(ECMAScript 5\.1\) does not have \(line 1\)/],
+        ['RESULT_VAR = VAR_0.find(function (item) { return item.id; });', /uses VAR_0\.find/],
+        ['RESULT_VAR = Object.assign({}, VAR_0);', /uses Object\.assign/],
+        ['var m = new Map(); RESULT_VAR = m;', /uses Map/],
+        ['RESULT_VAR = `a${VAR_0}`;', /template string; join strings with \+/],
+    ])('%s', (code, problem) => {
+        expect(checkScript(code, 1).join(' ')).toMatch(problem)
+    })
+
+    it('allows what runs on the server: Java types and Date', () => {
+        expect(checkScript("var Text = Java.type('java.lang.String'); RESULT_VAR = new Date().getTime() + VAR_0;", 1)).toEqual([])
+    })
+})
+
 describe('script values', () => {
     it('are allowed for body fields and validated with their inputs', () => {
         const dsl = withTitle(script(mapPriority))
@@ -47,7 +63,7 @@ describe('script values', () => {
         const messages = validateWorkflow(dsl, connectors).map((issue) => issue.message)
         expect(messages).toEqual(expect.arrayContaining([
             expect.stringMatching(/Field "title" script input VAR_0 refers to "s9"/),
-            expect.stringMatching(/Field "title" script is not valid ECMAScript 5\.1/),
+            expect.stringMatching(/Field "title" script uses let or const; use var .*ECMAScript 5\.1/),
             expect.stringMatching(/Field "title" script never assigns RESULT_VAR/),
         ]))
     })
@@ -130,5 +146,19 @@ describe('copied example headers', () => {
         const loop = normalizeWorkflow(withTitle(script(code))).steps[1]
         const value = loop?.kind === 'loop' && loop.body[0]?.kind === 'method' ? loop.body[0].fields[0]?.value : undefined
         expect(value).toMatchObject({ script: { code: '// map the status\nRESULT_VAR = VAR_0;' } })
+    })
+})
+
+describe('double-escaped script code', () => {
+    it('turns literal \\n into line breaks when that makes the script valid', () => {
+        const code = String.raw`RESULT_VAR = false;\nfor (var i = 0; i < VAR_0.length; i++) {\n    if (VAR_0[i] === "a") RESULT_VAR = true;\n}`
+        const fixed = unescapeScriptCode(code)
+        expect(fixed.split('\n')).toHaveLength(4)
+        expect(checkScript(fixed, 1)).toEqual([])
+    })
+
+    it('keeps a valid one-line script with \\n inside a string', () => {
+        const code = String.raw`RESULT_VAR = VAR_0.join("\n");`
+        expect(unescapeScriptCode(code)).toBe(code)
     })
 })
