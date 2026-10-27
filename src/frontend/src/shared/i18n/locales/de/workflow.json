@@ -1357,7 +1357,9 @@
         "not_contains": "enthält nicht",
         "exists": "ist nicht leer",
         "empty": "ist leer"
-      }
+      },
+      "script": "Skript",
+      "scriptProblem": "Zeile {{line}}: {{message}}"
     },
     "error": {
       "title": "Workflow konnte nicht generiert werden",

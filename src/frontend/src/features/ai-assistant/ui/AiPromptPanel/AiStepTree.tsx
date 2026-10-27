@@ -3,7 +3,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { AiWorkflowIssue } from '../../model/aiGateway.types';
-import { type Assignment, type ConnectorSide, type MethodStep, UNARY_CONDITION_OPS, type WorkflowStep } from '../../model/workflowDsl.schema';
+import { type Assignment, type ConnectorSide, type FieldAssignment, type MethodStep, UNARY_CONDITION_OPS, type WorkflowStep } from '../../model/workflowDsl.schema';
 import type { AiConnectorChoice } from '../../utils/aiConnectors.utils';
 import { type DslPreview, issuesForAssignment } from '../../utils/dslPreview.utils';
 import { AiValue } from './AiValue';
@@ -70,7 +70,7 @@ function AiStepItem({ step, preview, connectors, issues }: ItemProps) {
 
 function AiMethodItem({ step, preview, connectors, issues }: Omit<ItemProps, 'step'> & { step: MethodStep }) {
 	const connector = connectors[step.connector];
-	const assignments: Assignment[] = [...step.params, ...step.fields];
+	const assignments: (Assignment | FieldAssignment)[] = [...step.params, ...step.fields];
 
 	return (
 		<li className="aiStep" data-testid={`ai-step-${step.id}`}>

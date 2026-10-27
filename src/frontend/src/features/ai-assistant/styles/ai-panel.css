@@ -577,3 +577,88 @@
   line-height: 1.6;
   white-space: pre-wrap;
 }
+
+/* Transformation (script) values in the step tree */
+.aiAssignment:has(.aiScript) {
+  align-items: flex-start;
+}
+
+.aiScript {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 100%;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-surface);
+}
+
+.aiScriptHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.aiScriptBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--color-action-primary-subtle);
+  color: var(--color-action-primary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.aiScriptDescription {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.aiScriptInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aiScriptInputs li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.aiScriptVar {
+  font-family: var(--typography-font-family-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.aiScriptCode {
+  margin: 0;
+  padding: 6px 8px;
+  max-height: 180px;
+  overflow: auto;
+  border-radius: var(--radius-sm);
+  background: var(--color-background-input);
+  font-family: var(--typography-font-family-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.aiScriptProblem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-status-warning-fg);
+  font-size: 12px;
+}
