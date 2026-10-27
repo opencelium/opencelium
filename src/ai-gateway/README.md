@@ -23,25 +23,35 @@ Requires Node 24+ (runs TypeScript directly, no build step) and Ollama with the 
 
 ```bash
 brew install ollama && brew services start ollama
-ollama pull qwen2.5-coder:14b
+ollama pull qwen2.5-coder:14b qwen2.5-coder:7b nomic-embed-text
+
+# Voice commands (optional): whisper.cpp with a multilingual model, loopback only
+brew install whisper.cpp
+mkdir -p ~/models/whisper && curl -L -o ~/models/whisper/ggml-large-v3-turbo-q5_0.bin \
+  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin
+whisper-server -m ~/models/whisper/ggml-large-v3-turbo-q5_0.bin --host 127.0.0.1 --port 8178 -l auto -nt -sns
 
 npm install
 npm start                       # http://127.0.0.1:8787
 npm run generate -- jira zammad "Create a Zammad ticket for every Jira issue"
 npm test && npm run typecheck
+npm run eval:commands           # routes 18 prompts through the running gateway, reports misroutes
 ```
 
 ## API
 
 | Method | Path | Body | Response |
 | --- | --- | --- | --- |
-| GET | `/health` | — | `{ status: 'ok' \| 'degraded', ollama, workflowModel, invokerCount }` |
+| GET | `/health` | — | `{ status: 'ok' \| 'degraded', ollama, workflowModel, invokerCount, speech: { available } }` |
 | GET | `/invokers` | — | `[{ name, description, operationCount }]` |
 | POST | `/workflow/plan` | `{ prompt, from, to? }` | `{ pattern, steps: [{ text, depth }], durationMs, model }`: plain-language plan for review, field rules as `<Operation> set <field> = <value>` lines |
 | POST | `/script/generate` | `{ prompt, target?, inputs: [{ name: 'VAR_n', source, sample? }], currentScript? }` | `{ code, description, problems, durationMs, model }`: one transformation script for the editor |
+| POST | `/command/search` | `{ query, commands: [{ id, phrase, description }], limit? }` | `{ matches: [{ id, score }] }`: palette commands close in meaning |
+| POST | `/command/route` | `{ prompt, commands, page?, language? }` | `{ commandId \| null, argument, reply, candidates, durationMs, model }`: one command for a request; the frontend resolves `argument` to a record |
+| POST | `/speech/transcribe` | WAV audio (`audio/wav`, 16 kHz mono, up to ~30 s) | `{ text, language, durationMs }`: a spoken command, with system names (from the invokers) as vocabulary |
 | POST | `/workflow/generate` | `{ prompt, from, to?, plan? }` (invoker names, case-insensitive; `plan` = the reviewed plan text) | `{ dsl, issues, attempts, model }` |
 
-Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAILED', message, details? } }` with 400 / 404 / 502.
+Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAILED' \| 'SPEECH_UNAVAILABLE', message, details? } }` with 400 / 404 / 502 / 503.
 
 ## Configuration
 
@@ -53,10 +63,12 @@ Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAIL
 | `AI_INVOKER_DIR` | `../backend/runtime/invoker` |
 | `AI_TEMPLATE_DIR` | `../backend/runtime/templates` (their transformation scripts are examples for generated ones) |
 | `AI_EMBED_MODEL` | `nomic-embed-text` (finds the most similar template scripts; without it, no examples are used) |
+| `AI_COMMAND_MODEL` | `qwen2.5-coder:7b` (picks command palette commands) |
+| `AI_SPEECH_URL` | `http://127.0.0.1:8178` (whisper-server; empty turns voice commands off) |
 | `AI_CORS_ORIGINS` | `http://localhost:5173` (comma-separated) |
 | `AI_MAX_REPAIR_ATTEMPTS` | `2` |
 | `AI_CONTEXT_TOKENS` | `16384` |
 | `AI_CHAT_TIMEOUT_MS` | `900000` (15 min per model answer; large plan-fixed builds can exceed 5 min) |
 | `LOG_LEVEL` | `info` |
 
-Prompts are not logged; each generation logs invoker names, token counts, durations and issue count.
+Prompts and audio are not logged (speech logs size, language and duration only); each generation logs invoker names, token counts, durations and issue count.

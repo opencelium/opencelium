@@ -6,9 +6,10 @@ export type HealthResponse = {
     ollama: { reachable: boolean; models: string[] }
     workflowModel: { name: string; available: boolean }
     invokerCount: number
+    speech: { available: boolean }
 }
 
-export function registerHealthRoutes(app: FastifyInstance, { config, llm, invokers }: AppDeps) {
+export function registerHealthRoutes(app: FastifyInstance, { config, llm, invokers, speech }: AppDeps) {
     app.get('/health', async (): Promise<HealthResponse> => {
         let models: string[] = []
         let reachable = true
@@ -23,6 +24,7 @@ export function registerHealthRoutes(app: FastifyInstance, { config, llm, invoke
             ollama: { reachable, models },
             workflowModel: { name: config.workflowModel, available },
             invokerCount: (await invokers.list()).length,
+            speech: { available: Boolean(speech && (await speech.isReachable())) },
         }
     })
 }
