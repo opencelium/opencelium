@@ -17,6 +17,7 @@
     "dependencies": {
         "@fastify/cors": "^11.3.1",
         "acorn": "^8.18.0",
+        "acorn-walk": "^8.3.4",
         "fast-xml-parser": "^5.11.2",
         "fastify": "^5.12.7",
         "zod": "^4.6.7"
