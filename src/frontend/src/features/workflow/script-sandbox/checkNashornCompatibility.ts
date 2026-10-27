@@ -1,6 +1,7 @@
 import { parse, type Node } from 'acorn';
 import { full } from 'acorn-walk';
-import { hasNashornSyntax } from './hasNashornSyntax';
+// Copied verbatim to src/ai-gateway (checked by a sync test), so the import keeps its extension for Node.
+import { hasNashornSyntax } from './hasNashornSyntax.ts';
 
 export type IssueKind = 'syntax' | 'unsupportedBuiltin' | 'serverOnly' | 'timezone';
 export type CompatibilityIssue = {
@@ -81,16 +82,17 @@ export function checkNashornCompatibility(script: string): CompatibilityIssue[] 
 			pos?: number;
 		};
 		const serverSyntax = hasNashornSyntax(script, failure.pos ?? 0);
-		issues.push({
+		const parseIssue: CompatibilityIssue = {
 			kind: serverSyntax ? 'serverOnly' : 'syntax',
 			message: serverSyntax ? 'nashornSyntax' : 'syntax',
 			line: failure.loc?.line ?? 1,
 			column: failure.loc?.column ?? 0,
-		});
+		};
+		issues.push(parseIssue);
 		try {
 			tree = parse(script, { ecmaVersion: 'latest', locations: true });
-			issues[0].kind = 'syntax';
-			issues[0].message = 'syntax';
+			parseIssue.kind = 'syntax';
+			parseIssue.message = 'syntax';
 			{
 				full(tree, (raw) => {
 					const node = raw as InspectNode;
@@ -112,11 +114,11 @@ export function checkNashornCompatibility(script: string): CompatibilityIssue[] 
 													: undefined;
 					if (
 						syntaxMessage &&
-						issues[0].message === 'syntax' &&
+						parseIssue.message === 'syntax' &&
 						node.start <= (failure.pos ?? 0) &&
 						node.end >= (failure.pos ?? 0)
 					)
-						issues[0].message = syntaxMessage;
+						parseIssue.message = syntaxMessage;
 				});
 			}
 		} catch {

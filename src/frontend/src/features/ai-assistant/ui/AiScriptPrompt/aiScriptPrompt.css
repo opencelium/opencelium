@@ -1,0 +1,30 @@
+.aiScriptPrompt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.aiScriptPromptRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.aiScriptPromptRow > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.aiScriptPromptStatus {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.aiScriptPromptStatus--warning {
+  color: var(--color-status-warning-fg);
+}
+
+.aiScriptPromptStatus--error {
+  color: var(--color-status-error-fg);
+}
