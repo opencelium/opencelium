@@ -5,6 +5,8 @@ export type GatewayConfig = {
     port: number
     ollamaUrl: string
     workflowModel: string
+    /** Picks palette commands: a small model is enough and answers in a second or two. */
+    commandModel: string
     invokerDir: string
     /** Templates whose transformation scripts serve as examples for generated ones. */
     templateDir: string
@@ -30,6 +32,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): GatewayConfig 
         port: toInt(env.AI_GATEWAY_PORT, 8787),
         ollamaUrl: env.OLLAMA_URL ?? 'http://127.0.0.1:11434',
         workflowModel: env.AI_WORKFLOW_MODEL ?? 'qwen2.5-coder:14b',
+        commandModel: env.AI_COMMAND_MODEL ?? 'qwen2.5-coder:7b',
         invokerDir: env.AI_INVOKER_DIR ?? defaultInvokerDir,
         templateDir: env.AI_TEMPLATE_DIR ?? defaultTemplateDir,
         embedModel: env.AI_EMBED_MODEL ?? 'nomic-embed-text',
