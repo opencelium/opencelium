@@ -123,3 +123,12 @@ describe('reading properties of scalar inputs', () => {
         expect(validateWorkflow(lookup('RESULT_VAR = VAR_0[0].key;', 'issues'), connectors)).toEqual([])
     })
 })
+
+describe('copied example headers', () => {
+    it('are stripped from the top of a script, other comments stay', () => {
+        const code = "// ConfigItem.InciState from VAR_0=success.result[i].cmdb_status_title\n// map the status\nRESULT_VAR = VAR_0;"
+        const loop = normalizeWorkflow(withTitle(script(code))).steps[1]
+        const value = loop?.kind === 'loop' && loop.body[0]?.kind === 'method' ? loop.body[0].fields[0]?.value : undefined
+        expect(value).toMatchObject({ script: { code: '// map the status\nRESULT_VAR = VAR_0;' } })
+    })
+})

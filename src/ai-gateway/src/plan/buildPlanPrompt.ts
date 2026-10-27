@@ -35,7 +35,8 @@ Steps describe the flow only; the values written into fields go into "fieldRules
 
 "fieldRules" lists what each target operation sets, one entry per field: {"operations":[...],"field":"<request body
 field>","value":"<value>"}. Give every field the request mentions, for every operation that writes it (create and
-update). "value" is one of:
+update). A field may also be a new attribute below an object field listed for the operation (e.g.
+ConfigItem.CIXMLData.<Attribute>) when the request names it. "value" is one of:
   item <source field>             copy a value from the current source item (or "<Operation> <field>" for another step's result)
   "<text>"                        a fixed value
   script: <what it computes>      when the value must be computed: mapping one value to another, finding an item in a

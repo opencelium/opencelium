@@ -93,7 +93,7 @@ describe('buildSkeleton', () => {
             expect(message).toContain('    sets title = script: "URGENT " before the summary when the priority is High')
             expect(message).toContain('    sets article.body = item key')
             expect(message).toContain('Similar transformations already used in this installation')
-            expect(message).toContain('  // Ticket.title from VAR_0=summary')
+            expect(message).toContain('  Example for Ticket.title, with VAR_0 = summary:')
         })
     })
 })

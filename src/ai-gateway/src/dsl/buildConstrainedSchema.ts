@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { assignableRequestPaths } from '../invokers/fieldPaths.ts'
+import { assignableRequestPaths, extendsDeclaredObject } from '../invokers/fieldPaths.ts'
 import type { Invoker, InvokerOperation } from '../invokers/invoker.types.ts'
 import {
     type ConnectorSide,
@@ -22,8 +22,11 @@ function assignmentsFor<V extends z.ZodType>(names: string[], value: V) {
     return z.array(z.object({ name: z.enum([first, ...rest]), value }))
 }
 
-/** Fields the plan asks a script for; every other field of that step then takes a plain value only. */
-export type ScriptPolicy = { scriptFields: ReadonlySet<string> }
+/**
+ * What a reviewed plan decides for one step: which fields take a script (every other field then takes a plain value),
+ * and which fields it adds below declared objects (see `extendsDeclaredObject`).
+ */
+export type ScriptPolicy = { scriptFields: ReadonlySet<string>; extraFields?: readonly string[] }
 
 function fieldsFor(names: string[], policy: ScriptPolicy | undefined) {
     if (!policy) return assignmentsFor(names, fieldValueSchema)
@@ -42,7 +45,9 @@ function fieldsFor(names: string[], policy: ScriptPolicy | undefined) {
  */
 export function operationStepSchema(side: ConnectorSide, invoker: Invoker, operation: InvokerOperation, id?: string,
     policy?: ScriptPolicy): z.ZodType<MethodStep> {
-    const fieldNames = [...new Set(assignableRequestPaths(operation.requestFields, invoker.requiredData).map((field) => field.path))]
+    const declared = assignableRequestPaths(operation.requestFields, invoker.requiredData)
+    const extra = (policy?.extraFields ?? []).filter((path) => extendsDeclaredObject(declared, path))
+    const fieldNames = [...new Set([...declared.map((field) => field.path), ...extra])]
     return z.object({
         id: id === undefined ? z.string() : z.literal(id),
         kind: z.literal('method'),

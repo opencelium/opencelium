@@ -57,13 +57,22 @@ function resolveOver(over: StepRef, scope: Scope, enclosing: LoopInfo[]): { over
     return { over, info: { methodOver: undefined, key: undefined } }
 }
 
+/** A "// <field> from VAR_0=<path>" header copied from an example describes the example's inputs, not this script's. */
+const COPIED_EXAMPLE_HEADER_RE = /^\s*\/\/.*\bVAR_\d+\s*=.*$/
+
+function withoutCopiedHeaders(code: string): string {
+    const lines = code.split('\n')
+    while (lines.length > 1 && COPIED_EXAMPLE_HEADER_RE.test(lines[0] ?? '')) lines.shift()
+    return lines.join('\n')
+}
+
 function normalizeFieldValue(value: FieldValue, scope: Scope, enclosing: LoopInfo[]): FieldValue {
     if (!('script' in value)) return normalizeValue(value, scope, enclosing)
     const inputs = value.script.inputs.map((input) => {
         const normalized = normalizeValue({ ref: input }, scope, enclosing)
         return 'ref' in normalized ? normalized.ref : input
     })
-    return { script: { ...value.script, inputs } }
+    return { script: { ...value.script, inputs, code: withoutCopiedHeaders(value.script.code) } }
 }
 
 function normalizeValue(value: DslValue, scope: Scope, enclosing: LoopInfo[]): DslValue {

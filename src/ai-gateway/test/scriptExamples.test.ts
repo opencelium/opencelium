@@ -55,6 +55,6 @@ describe('createScriptExamples', () => {
 
     it('formats examples with their VAR_n inputs', () => {
         expect(formatScriptExamples([{ target: 'A', inputs: ['x', 'y'], code: 'RESULT_VAR = VAR_0 + VAR_1;' }]))
-            .toBe('  // A from VAR_0=x, VAR_1=y\n  RESULT_VAR = VAR_0 + VAR_1;')
+            .toBe('  Example for A, with VAR_0 = x, VAR_1 = y:\n    RESULT_VAR = VAR_0 + VAR_1;')
     })
 })

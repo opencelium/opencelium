@@ -102,7 +102,8 @@ export function createScriptExamples(dir: string, embedder: Embedder): ScriptExa
 
 export const noScriptExamples: ScriptExamples = { find: async () => [] }
 
+/** Examples as prose plus code: a header written as a code comment gets copied, wrong paths and all, into new scripts. */
 export function formatScriptExamples(examples: ScriptExample[]): string {
-    return examples.map((example) => `  // ${example.target} from ${example.inputs.map((input, n) => `VAR_${n}=${input}`).join(', ')}\n`
-        + example.code.split('\n').map((line) => `  ${line}`).join('\n')).join('\n\n')
+    return examples.map((example) => `  Example for ${example.target}, with ${example.inputs.map((input, n) => `VAR_${n} = ${input}`).join(', ')}:\n`
+        + example.code.split('\n').map((line) => `    ${line}`).join('\n')).join('\n\n')
 }

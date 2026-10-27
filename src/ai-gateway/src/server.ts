@@ -9,7 +9,7 @@ const config = loadConfig()
 const app = await buildApp(
     {
         config,
-        llm: createOllamaClient(config.ollamaUrl),
+        llm: createOllamaClient(config.ollamaUrl, config.chatTimeoutMs),
         invokers: createInvokerRepository(config.invokerDir),
         examples: createScriptExamples(config.templateDir, createOllamaEmbedder(config.ollamaUrl, config.embedModel)),
     },
