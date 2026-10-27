@@ -60,24 +60,25 @@ describe('command index', () => {
 
 describe('POST /command/route', () => {
     it('offers the closest commands under short keys and returns the chosen one with its value', async () => {
-        const llm = llmAnswering({ command: 'c1', argument: 'idoit sync', reply: 'Deletes the schedule.' })
+        const llm = llmAnswering({ action: 'delete', command: 'c1', argument: 'idoit sync', reply: 'Deletes the schedule.' })
         const app = await buildApp({ config: loadConfig({}), llm, invokers, embedder: topicEmbedder() })
         const response = await app.inject({
-            method: 'POST', url: '/command/route', payload: { prompt: 'remove the idoit sync schedule', commands, page: '/schedule' },
+            method: 'POST', url: '/command/route', payload: { prompt: 'remove the idoit sync schedule', commands, page: '/schedule/update/4' },
         })
         expect(response.statusCode).toBe(200)
         expect(response.json()).toMatchObject({ commandId: commands[1]!.id, argument: 'idoit sync', reply: 'Deletes the schedule.', model: 'qwen2.5-coder:7b' })
         const message = llm.requests[0]?.messages[0]?.content ?? ''
         expect(message).toContain('c1: delete schedule by workflow.title <identifier>: Delete an entry')
-        expect(message).toContain('on the page /schedule')
+        expect(message).toContain('in the "schedule" section')
+        expect(message).not.toContain('update/4')
     })
 
     it('drops a value for a command that takes none, and reports "none" as no command', async () => {
         const embedder = topicEmbedder()
-        let app = await buildApp({ config: loadConfig({}), llm: llmAnswering({ command: 'c1', argument: 'x', reply: 'ok' }), invokers, embedder })
+        let app = await buildApp({ config: loadConfig({}), llm: llmAnswering({ action: 'other', command: 'c1', argument: 'x', reply: 'ok' }), invokers, embedder })
         let response = await app.inject({ method: 'POST', url: '/command/route', payload: { prompt: 'dark theme', commands } })
         expect(response.json()).toMatchObject({ commandId: 'theme dark', argument: '' })
-        app = await buildApp({ config: loadConfig({}), llm: llmAnswering({ command: 'none', argument: '', reply: 'Not possible.' }), invokers, embedder })
+        app = await buildApp({ config: loadConfig({}), llm: llmAnswering({ action: 'other', command: 'none', argument: '', reply: 'Not possible.' }), invokers, embedder })
         response = await app.inject({ method: 'POST', url: '/command/route', payload: { prompt: 'order a pizza', commands } })
         expect(response.json()).toMatchObject({ commandId: null, reply: 'Not possible.' })
     })
@@ -99,9 +100,59 @@ describe('POST /command/search', () => {
 
 describe('reply language', () => {
     it('asks for the reply in the UI language', async () => {
-        const llm = llmAnswering({ command: 'none', argument: '', reply: 'x' })
+        const llm = llmAnswering({ action: 'other', command: 'none', argument: '', reply: 'x' })
         const app = await buildApp({ config: loadConfig({}), llm, invokers, embedder: topicEmbedder() })
         await app.inject({ method: 'POST', url: '/command/route', payload: { prompt: 'users', commands, language: 'de' } })
         expect(llm.requests[0]?.messages[0]?.content).toContain('one short sentence in German')
+    })
+})
+
+describe('stated action', () => {
+    const userCommands = [
+        { id: 'search user by email <identifier>', phrase: 'search user by email <identifier>', description: 'Open a user' },
+        { id: 'delete user by email <identifier>', phrase: 'delete user by email <identifier>', description: 'Delete a user' },
+        { id: 'delete role by name <identifier>', phrase: 'delete role by name <identifier>', description: 'Delete a role' },
+    ]
+    const route = async (answer: object) => {
+        const app = await buildApp({ config: loadConfig({}), llm: llmAnswering(answer), invokers, embedder: topicEmbedder() })
+        const response = await app.inject({ method: 'POST', url: '/command/route', payload: { prompt: 'delete the user ba', commands: userCommands } })
+        return response.json()
+    }
+    const keyOf = async (id: string) => {
+        const ranked = await createCommandIndex(topicEmbedder()).rank('delete the user ba', userCommands, 12, { isThresholded: false })
+        return `c${ranked.findIndex((entry) => entry.id === id) + 1}`
+    }
+
+    it('swaps a neighbouring command for the one with the stated action on the same record, dropping its reply', async () => {
+        const result = await route({ action: 'delete', command: await keyOf('search user by email <identifier>'), argument: 'ba', reply: 'Opening the user.' })
+        expect(result).toMatchObject({ commandId: 'delete user by email <identifier>', argument: 'ba', reply: '' })
+    })
+
+    it('falls back to the closest command with the stated action when the model found none', async () => {
+        const result = await route({ action: 'delete', command: 'none', argument: 'ba', reply: 'No.' })
+        expect(result.commandId).toMatch(/^delete /)
+    })
+
+    it('keeps "none" for a request with no palette action', async () => {
+        expect((await route({ action: 'other', command: 'none', argument: '', reply: 'No.' })).commandId).toBeNull()
+    })
+})
+
+describe('lookup field', () => {
+    const roleCommands = [
+        { id: 'delete role by id <identifier>', phrase: 'delete role by id <identifier>', description: 'Delete a role' },
+        { id: 'delete role by name <identifier>', phrase: 'delete role by name <identifier>', description: 'Delete a role' },
+    ]
+    const route = async (command: string, argument: string) => {
+        const ranked = await createCommandIndex(topicEmbedder()).rank('delete role', roleCommands, 12, { isThresholded: false })
+        const key = `c${ranked.findIndex((entry) => entry.id === command) + 1}`
+        const app = await buildApp({ config: loadConfig({}), llm: llmAnswering({ action: 'delete', command: key, argument, reply: 'x' }), invokers, embedder: topicEmbedder() })
+        return (await app.inject({ method: 'POST', url: '/command/route', payload: { prompt: 'delete role', commands: roleCommands } })).json()
+    }
+
+    it('looks a name up by name and a number by id, whichever the model picked', async () => {
+        expect((await route('delete role by id <identifier>', 'Test')).commandId).toBe('delete role by name <identifier>')
+        expect((await route('delete role by name <identifier>', '12')).commandId).toBe('delete role by id <identifier>')
+        expect((await route('delete role by name <identifier>', 'Test')).commandId).toBe('delete role by name <identifier>')
     })
 })

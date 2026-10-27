@@ -11,6 +11,8 @@ export type GatewayConfig = {
     /** Templates whose transformation scripts serve as examples for generated ones. */
     templateDir: string
     embedModel: string
+    /** whisper.cpp's whisper-server; empty turns voice input off. */
+    speechUrl: string
     corsOrigins: string[]
     maxRepairAttempts: number
     contextTokens: number
@@ -36,6 +38,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): GatewayConfig 
         invokerDir: env.AI_INVOKER_DIR ?? defaultInvokerDir,
         templateDir: env.AI_TEMPLATE_DIR ?? defaultTemplateDir,
         embedModel: env.AI_EMBED_MODEL ?? 'nomic-embed-text',
+        speechUrl: env.AI_SPEECH_URL ?? 'http://127.0.0.1:8178',
         corsOrigins: (env.AI_CORS_ORIGINS ?? 'http://localhost:5173')
             .split(',')
             .map((origin) => origin.trim())
