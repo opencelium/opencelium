@@ -34,6 +34,9 @@ export type CommandNodeType =
 
 export type CommandGroup = string;
 
+/** What running a command does, shown before the AI runs it: open a page or form, run an action, or delete something. */
+export type CommandEffect = 'open' | 'run' | 'destructive';
+
 export interface CommandNode<Entity> {
     type: CommandNodeType;
     url?: string,
@@ -53,6 +56,11 @@ export interface CommandNode<Entity> {
     lockAsChip?: boolean;
 
     access?: PolicyDefinition;
+
+    /** Inherited by the children; commands without one count as 'run'. */
+    effect?: CommandEffect;
+    /** The registered entity this node acts on, so the AI can name it by its translated title. */
+    entityName?: string;
 
     resolve?: (input?: unknown) => Promise<SuggestionOption[]>; // ⚡ async suggestions
 

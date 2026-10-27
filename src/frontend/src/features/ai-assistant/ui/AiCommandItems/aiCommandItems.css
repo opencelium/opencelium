@@ -1,0 +1,72 @@
+/* Selected palette items turn primary with inverted text, so secondary text here inherits and dims instead of
+   using its own colour. */
+.aiCommandIcon {
+  color: var(--color-action-primary);
+}
+
+[cmdk-item][aria-selected="true"] .aiCommandIcon,
+[cmdk-item][aria-selected="true"] .aiCommandIcon--error {
+  color: inherit;
+}
+
+.aiCommandIcon--error {
+  color: var(--color-status-warning-fg);
+}
+
+.aiCommandProposal {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.aiCommandProposalTitle {
+  font-weight: 500;
+}
+
+.aiCommandPhrase {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--typography-font-family-mono);
+  font-size: 13px;
+  background: none;
+  color: inherit;
+}
+
+.aiCommandBadge {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  font-size: 11px;
+  border-radius: var(--radius-sm);
+}
+
+.aiCommandBadge--danger {
+  color: var(--color-status-error-fg);
+  background: var(--color-status-error-bg);
+}
+
+.aiCommandAction {
+  flex-shrink: 0;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.aiCommandHint,
+.aiCommandReply {
+  padding-left: 28px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.aiCommandHint {
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.aiCommandPlaceholder {
+  opacity: 0.6;
+}

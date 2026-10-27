@@ -39,7 +39,9 @@
       "create": "Erstellen",
       "manage": "Verwalten",
       "system": "System",
-      "general": "Allgemein"
+      "general": "Allgemein",
+      "ai": "KI-Assistent",
+      "aiSuggested": "Vorgeschlagene Befehle"
     },
     "descriptions": {
       "create": "Einen neuen Eintrag erstellen",
@@ -83,6 +85,22 @@
         "open": "Befehlspalette öffnen",
         "clearScope": "Gesperrten Bereich verlassen (leere Eingabe)"
       }
+    },
+    "ai": {
+      "ask": "KI fragen: „{{prompt}}“",
+      "askHint": "Macht aus Ihrer Anfrage einen Befehl",
+      "thinking": "Befehl wird gesucht… {{elapsed}}",
+      "run": "Ausführen ↵",
+      "finish": "Vervollständigen ↵",
+      "edit": "Befehl vor dem Ausführen bearbeiten",
+      "confirmFirst": "Mit Bestätigung",
+      "choose": "Mehrere Treffer für „{{value}}“ – bitte auswählen",
+      "notFound": "Nichts gefunden für „{{value}}“ – Wert bitte selbst eingeben",
+      "needsValue": "Wert ergänzen, dann ausführen",
+      "noCommand": "Kein Befehl passt zu dieser Anfrage.",
+      "unreachable": "Der KI-Dienst ist nicht erreichbar.",
+      "failed": "Die KI konnte keinen Befehl wählen. Formulieren Sie die Anfrage anders.",
+      "retry": "Erneut fragen"
     }
   },
   "sidebar": {
