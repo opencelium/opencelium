@@ -3,6 +3,7 @@ import { useGenerateWorkflowMutation, usePlanWorkflowMutation } from '../api/aiA
 import {
 	AI_PLAN_MAX_LENGTH, AI_PROMPT_MAX_LENGTH, type AiGenerationStage, type AiGenerationState,
 } from '../model/aiPanelState';
+import type { AiTemplateRef, PlanWorkflowResponse } from '../model/aiGateway.types';
 import type { AiConnectorChoice, AiConnectorPair } from '../utils/aiConnectors.utils';
 import { toAiGenerationError } from '../utils/aiGenerationError.utils';
 import { hasPlanSteps, planToText } from '../utils/planText.utils';
@@ -24,6 +25,7 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 	const [planText, setPlanTextValue] = useState('');
 	const [state, setState] = useState<AiGenerationState>({ status: 'idle' });
 	const [useTemplates, setUseTemplatesValue] = useState(readUseTemplates);
+	const [planTemplates, setPlanTemplates] = useState<AiTemplateRef[]>([]);
 	const pending = useRef<{ abort: () => void } | null>(null);
 
 	const invokerOf = (connectorId: number | null) =>
@@ -63,12 +65,15 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 
 	const target = () => ({ prompt: trimmedPrompt, from: fromInvoker ?? '', to: invokerOf(connectors.toId) });
 
+	const showPlan = (response: PlanWorkflowResponse) => {
+		setPlanTextValue(planToText(response.steps));
+		setPlanTemplates(response.templates ?? []);
+		setState({ status: 'plan', pattern: response.pattern });
+	};
+
 	const plan = async () => {
 		if (!canPlan) return;
-		await run('plan', planWorkflow(target()), (response) => {
-			setPlanTextValue(planToText(response.steps));
-			setState({ status: 'plan', pattern: response.pattern });
-		}, { status: 'idle' });
+		await run('plan', planWorkflow({ ...target(), useTemplates }), showPlan, { status: 'idle' });
 	};
 
 	/** Fills the form and plans in one go, for a request handed over from elsewhere (the command palette, by voice). */
@@ -79,10 +84,8 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 		const from = invokerOf(request.connectors.fromId);
 		// Without a known source system or a task there is nothing to plan: the user completes the form.
 		if (isBusy || !from || !requestPrompt.trim()) return;
-		await run('plan', planWorkflow({ prompt: requestPrompt.trim(), from, to: invokerOf(request.connectors.toId) }), (response) => {
-			setPlanTextValue(planToText(response.steps));
-			setState({ status: 'plan', pattern: response.pattern });
-		}, { status: 'idle' });
+		await run('plan', planWorkflow({ prompt: requestPrompt.trim(), from, to: invokerOf(request.connectors.toId), useTemplates }),
+			showPlan, { status: 'idle' });
 	};
 
 	const build = async () => {
@@ -105,11 +108,12 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 	const discard = () => {
 		setPromptValue('');
 		setPlanTextValue('');
+		setPlanTemplates([]);
 		setState({ status: 'idle' });
 	};
 
 	return {
-		connectors, setConnectors, prompt, setPrompt, planText, setPlanText, useTemplates, setUseTemplates, state, canPlan, canBuild,
+		connectors, setConnectors, prompt, setPrompt, planText, setPlanText, planTemplates, useTemplates, setUseTemplates, state, canPlan, canBuild,
 		plan, planRequest, build, retry, cancel, backToPrompt, backToPlan, discard,
 	};
 }

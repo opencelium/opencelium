@@ -25,7 +25,7 @@ const body = {
     currentScript: 'RESULT_VAR = VAR_0;',
 }
 const good = JSON.stringify({ code: "RESULT_VAR = VAR_0 == 'in operation' ? 'Operational' : 'Incident';", description: 'Map the status' })
-const examples = { find: async () => [{ target: 'ConfigItem.InciState', inputs: ['result[i].cmdb_status_title'], code: 'RESULT_VAR = 1;' }] }
+const examples = { find: async () => [{ target: 'ConfigItem.InciState', inputs: ['result[i].cmdb_status_title'], code: 'RESULT_VAR = 1;' }], warmUp: async () => undefined }
 
 describe('POST /script/generate', () => {
     it('returns the script, telling the model the inputs, samples, current script and similar examples', async () => {

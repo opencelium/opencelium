@@ -35,6 +35,7 @@ function countingExamples(): ScriptExamples & { calls: number } {
             examples.calls++
             return [{ target: 'Ticket.Title', inputs: ['issue.summary'], code: 'RESULT_VAR = "TEMPLATE " + VAR_0;' }]
         },
+        async warmUp() {},
     }
     return examples
 }
