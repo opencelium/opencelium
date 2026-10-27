@@ -5,8 +5,8 @@ import {
     type ConnectorSide,
     type MethodStep,
     type WorkflowDsl,
-    assignmentSchema,
     createWorkflowDslSchema,
+    fieldValueSchema,
     valueSchema,
 } from './workflowDsl.schema.ts'
 
@@ -15,10 +15,10 @@ export type WorkflowConnectors = {
     to: Invoker | null
 }
 
-function assignmentsFor(names: string[]) {
+function assignmentsFor<V extends z.ZodType>(names: string[], value: V) {
     const [first, ...rest] = names
-    if (first === undefined) return z.array(assignmentSchema).max(0)
-    return z.array(z.object({ name: z.enum([first, ...rest]), value: valueSchema }))
+    if (first === undefined) return z.array(z.object({ name: z.string(), value })).max(0)
+    return z.array(z.object({ name: z.enum([first, ...rest]), value }))
 }
 
 /** A method step limited to one operation's params and body fields; `id` pins the step id when the skeleton fixes it. */
@@ -29,8 +29,8 @@ export function operationStepSchema(side: ConnectorSide, invoker: Invoker, opera
         kind: z.literal('method'),
         connector: z.literal(side),
         operation: z.literal(operation.name),
-        params: assignmentsFor(operation.endpointParams),
-        fields: assignmentsFor(fieldNames),
+        params: assignmentsFor(operation.endpointParams, valueSchema),
+        fields: assignmentsFor(fieldNames, fieldValueSchema),
     })
 }
 

@@ -19,6 +19,8 @@ export type PlanSkeleton = {
 
 const LOOP_RE = /^for each\b/i
 const IF_RE = /^if\b/i
+/** "Create and update set: Name = title", "Update also sets ID = …": field instructions, even when they name an operation. */
+const ASSIGNMENT_RE = /=/
 
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
@@ -91,7 +93,7 @@ function buildLevel(builder: Builder, steps: PlanStep[], start: number, depth: n
             const id = builder.nextId()
             const inline = actionAfterColon(builder, step.text).map((op) => methodNode(builder, op, step.text))
             nodes.push({ id, kind: 'if', text: step.text, then: [...inline, ...collectChildren()] })
-        } else if (ops[0]) {
+        } else if (ops[0] && !ASSIGNMENT_RE.test(step.text)) {
             // The first operation is the step's action; later ones name earlier results it uses ("… using the X result").
             nodes.push(methodNode(builder, ops[0], step.text))
             nodes.push(...collectChildren())

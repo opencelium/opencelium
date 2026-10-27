@@ -46,6 +46,13 @@ A value is one of:
   {"literal":"text"}
   {"ref":{"step":"<earlier method step id>","path":"<dot path in its response>"}}
   {"ref":{"step":"<enclosing loop id>","path":"<dot path inside the current array element>"}}
+A body field (not a param, not a condition) may instead be computed by a script:
+  {"script":{"inputs":[<ref>, ...],"code":"<JavaScript>","description":"<what it computes>"}}
+  inputs[0] is available as VAR_0, inputs[1] as VAR_1, ...; the code must assign RESULT_VAR. It runs on Nashorn, so write
+  ECMAScript 5.1 only: var and function, no let/const/arrow functions/template strings/includes/find.
+  Use a script only when a field needs computing: mapping one value to another, looking an item up in a list, combining
+  several values, or building an object. Copy a value with a plain ref. Put scripts only on the fields the request asks
+  for, and declare one input for every VAR_n the code uses.
 
 Rules:
 - Use only the operations, params and body fields listed below.
