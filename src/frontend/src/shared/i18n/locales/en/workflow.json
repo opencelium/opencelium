@@ -1441,7 +1441,9 @@
       "resultNone": "No similar template scripts were found for this workflow",
       "resultOff": "Built without templates",
       "basedOn_one": "Follows the template {{names}}",
-      "basedOn_other": "Follows the templates {{names}}"
+      "basedOn_other": "Follows the templates {{names}}",
+      "operationsUsed_one": "{{count}} operation filled in following how templates call it",
+      "operationsUsed_other": "{{count}} operations filled in following how templates call them"
     }
   }
 }

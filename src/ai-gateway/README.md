@@ -18,7 +18,11 @@ loop. The frontend converts the DSL into graph nodes.
 4. With `useTemplates` (default on), the closest stored templates (`src/examples/templateFlows.ts`: similarity in meaning
    plus how many of their operations the request's systems offer, on the same side) are shown as worked examples: the
    planner sees their steps, the build also the fields they set. Calls the installed invokers no longer have are marked.
-5. Errors go back to the model for up to `AI_MAX_REPAIR_ATTEMPTS` repairs; the best attempt is returned with its issues.
+5. A build also gets, per operation it calls, how templates call that operation (`src/examples/operationUsages.ts`):
+   the loops and conditions around the call, its endpoint params, fixed values and field sources. These are found by
+   operation name on the installed invoker, so they help even when no whole template fits the request; the calls are
+   ranked by closeness to the plan step, then by the same other system.
+6. Errors go back to the model for up to `AI_MAX_REPAIR_ATTEMPTS` repairs; the best attempt is returned with its issues.
 
 ## Run
 
@@ -52,7 +56,7 @@ npm run eval:commands           # routes 18 prompts through the running gateway,
 | POST | `/command/search` | `{ query, commands: [{ id, phrase, description }], limit? }` | `{ matches: [{ id, score }] }`: palette commands close in meaning |
 | POST | `/command/route` | `{ prompt, commands, page?, language? }` | `{ commandId \| null, argument, reply, candidates, durationMs, model }`: one command for a request; the frontend resolves `argument` to a record |
 | POST | `/speech/transcribe` | WAV audio (`audio/wav`, 16 kHz mono, up to ~30 s) | `{ text, language, durationMs }`: a spoken command, with system names (from the invokers) as vocabulary |
-| POST | `/workflow/generate` | `{ prompt, from, to?, plan?, useTemplates? }` (invoker names, case-insensitive; `plan` = the reviewed plan text) | `{ dsl, issues, attempts, model, templateExampleCount, templates }` |
+| POST | `/workflow/generate` | `{ prompt, from, to?, plan?, useTemplates? }` (invoker names, case-insensitive; `plan` = the reviewed plan text) | `{ dsl, issues, attempts, model, templateExampleCount, templates, operationExampleCount }` |
 
 Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAILED' \| 'SPEECH_UNAVAILABLE', message, details? } }` with 400 / 404 / 502 / 503.
 

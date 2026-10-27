@@ -5,7 +5,7 @@ import type { Invoker, InvokerOperation } from '../invokers/invoker.types.ts'
 import { type FieldRule, type FieldRuleLine, parseFieldRuleLine, ruleAppliesTo } from './planFieldRules.ts'
 import type { PlanStep } from './workflowPlan.schema.ts'
 
-type OperationRef = { side: ConnectorSide; invoker: Invoker; operation: InvokerOperation }
+export type OperationRef = { side: ConnectorSide; invoker: Invoker; operation: InvokerOperation }
 
 export type SkeletonNode =
     | { id: string; kind: 'method'; text: string; op: OperationRef }
@@ -50,7 +50,7 @@ const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&
  * Operations a line names, in the order they appear. A name must stand alone: not inside a longer name such as
  * `cmdb.objects.read.all`, but a sentence's full stop after it is fine.
  */
-function operationsIn(text: string, connectors: WorkflowConnectors): OperationRef[] {
+export function operationsIn(text: string, connectors: WorkflowConnectors): OperationRef[] {
     const sides: [ConnectorSide, Invoker][] = [['from', connectors.from]]
     if (connectors.to) sides.push(['to', connectors.to])
     const found: { at: number; ref: OperationRef }[] = []
