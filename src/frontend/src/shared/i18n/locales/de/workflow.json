@@ -1390,7 +1390,7 @@
       "title": "Plan",
       "patternSync": "Sync-Muster",
       "shortcutHint": "zum Erstellen",
-      "hint": "Prüfen Sie die Schritte vor dem Erstellen. Jede Zeile ist änderbar; eine Zeile mit zwei Leerzeichen einrücken, um sie in die Schleife oder Bedingung darüber zu setzen."
+      "hint": "Prüfen Sie die Schritte vor dem Erstellen. Jede Zeile ist änderbar; eine Zeile mit zwei Leerzeichen einrücken, um sie in die Schleife oder Bedingung darüber zu setzen. Zeilen mit \"set\" füllen Felder: \"script: …\" für einen Wert, der berechnet werden muss."
     }
   }
 }
