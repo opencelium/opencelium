@@ -7,6 +7,7 @@ import {
     type WorkflowDsl,
     createWorkflowDslSchema,
     fieldValueSchema,
+    scriptValueSchema,
     valueSchema,
 } from './workflowDsl.schema.ts'
 
@@ -21,8 +22,26 @@ function assignmentsFor<V extends z.ZodType>(names: string[], value: V) {
     return z.array(z.object({ name: z.enum([first, ...rest]), value }))
 }
 
-/** A method step limited to one operation's params and body fields; `id` pins the step id when the skeleton fixes it. */
-export function operationStepSchema(side: ConnectorSide, invoker: Invoker, operation: InvokerOperation, id?: string): z.ZodType<MethodStep> {
+/** Fields the plan asks a script for; every other field of that step then takes a plain value only. */
+export type ScriptPolicy = { scriptFields: ReadonlySet<string> }
+
+function fieldsFor(names: string[], policy: ScriptPolicy | undefined) {
+    if (!policy) return assignmentsFor(names, fieldValueSchema)
+    const variants = names.map((name) => z.object({
+        name: z.literal(name),
+        value: policy.scriptFields.has(name) ? scriptValueSchema : valueSchema,
+    }))
+    const [first, second, ...rest] = variants
+    if (first === undefined) return z.array(z.object({ name: z.string(), value: valueSchema })).max(0)
+    return z.array(second === undefined ? first : z.union([first, second, ...rest]))
+}
+
+/**
+ * A method step limited to one operation's params and body fields; `id` pins the step id when the skeleton fixes it,
+ * and `policy` limits scripts to the fields the plan asks a script for.
+ */
+export function operationStepSchema(side: ConnectorSide, invoker: Invoker, operation: InvokerOperation, id?: string,
+    policy?: ScriptPolicy): z.ZodType<MethodStep> {
     const fieldNames = [...new Set(assignableRequestPaths(operation.requestFields, invoker.requiredData).map((field) => field.path))]
     return z.object({
         id: id === undefined ? z.string() : z.literal(id),
@@ -30,7 +49,7 @@ export function operationStepSchema(side: ConnectorSide, invoker: Invoker, opera
         connector: z.literal(side),
         operation: z.literal(operation.name),
         params: assignmentsFor(operation.endpointParams, valueSchema),
-        fields: assignmentsFor(fieldNames, fieldValueSchema),
+        fields: fieldsFor(fieldNames, policy),
     })
 }
 

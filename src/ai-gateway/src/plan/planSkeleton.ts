@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { type WorkflowConnectors, operationStepSchema } from '../dsl/buildConstrainedSchema.ts'
 import { type ConnectorSide, conditionSchema } from '../dsl/workflowDsl.schema.ts'
 import type { Invoker, InvokerOperation } from '../invokers/invoker.types.ts'
+import { type FieldRule, type FieldRuleLine, parseFieldRuleLine, ruleAppliesTo } from './planFieldRules.ts'
 import type { PlanStep } from './workflowPlan.schema.ts'
 
 type OperationRef = { side: ConnectorSide; invoker: Invoker; operation: InvokerOperation }
@@ -13,8 +14,29 @@ export type SkeletonNode =
 
 export type PlanSkeleton = {
     nodes: SkeletonNode[]
-    /** Plan lines that are not a step of their own (field mappings, remarks), passed on as instructions. */
+    /** Plan lines that are not a step and not a field rule (remarks), passed on as instructions. */
     notes: string[]
+    /** "<Operation> set <field> = <value>" lines, attached to the methods they name. */
+    ruleLines: FieldRuleLine[]
+}
+
+/** The field rules for one operation; a later line overrides an earlier one for the same field. */
+export function rulesFor(skeleton: PlanSkeleton, operation: string): FieldRule[] {
+    const byField = new Map<string, FieldRule>()
+    for (const line of skeleton.ruleLines) {
+        if (!ruleAppliesTo(line, operation)) continue
+        for (const rule of line.rules) byField.set(rule.field, rule)
+    }
+    return [...byField.values()]
+}
+
+/** Every distinct script rule, so examples are looked up once per rule rather than once per method. */
+export function scriptRules(skeleton: PlanSkeleton): FieldRule[] {
+    const byText = new Map<string, FieldRule>()
+    for (const line of skeleton.ruleLines) {
+        for (const rule of line.rules) if (rule.isScript) byText.set(`${rule.field} = ${rule.value}`, rule)
+    }
+    return [...byText.values()]
 }
 
 const LOOP_RE = /^for each\b/i
@@ -49,6 +71,7 @@ type Builder = {
     /** Every method created so far, so a loop can find the step whose result it iterates. */
     methods: { id: string; operation: string }[]
     notes: string[]
+    ruleLines: FieldRuleLine[]
 }
 
 function methodNode(builder: Builder, op: OperationRef, text: string): SkeletonNode {
@@ -98,7 +121,9 @@ function buildLevel(builder: Builder, steps: PlanStep[], start: number, depth: n
             nodes.push(methodNode(builder, ops[0], step.text))
             nodes.push(...collectChildren())
         } else {
-            builder.notes.push(step.text)
+            const ruleLine = parseFieldRuleLine(step.text, ops.map((op) => op.operation.name))
+            if (ruleLine) builder.ruleLines.push(ruleLine)
+            else builder.notes.push(step.text)
             nodes.push(...collectChildren())
         }
     }
@@ -108,10 +133,10 @@ function buildLevel(builder: Builder, steps: PlanStep[], start: number, depth: n
 /** The workflow's fixed structure taken from a reviewed plan; throws when a loop cannot be tied to its list. */
 export function buildSkeleton(steps: PlanStep[], connectors: WorkflowConnectors): PlanSkeleton {
     let counter = 0
-    const builder: Builder = { connectors, nextId: () => `s${++counter}`, methods: [], notes: [] }
+    const builder: Builder = { connectors, nextId: () => `s${++counter}`, methods: [], notes: [], ruleLines: [] }
     const { nodes } = buildLevel(builder, steps, 0, 0)
     if (!nodes.some((node) => node.kind === 'method')) throw new Error('The plan does not name any operation of the selected connectors')
-    return { nodes, notes: builder.notes }
+    return { nodes, notes: builder.notes, ruleLines: builder.ruleLines }
 }
 
 function tupleOf(items: z.ZodType[]): z.ZodType {
@@ -119,18 +144,22 @@ function tupleOf(items: z.ZodType[]): z.ZodType {
     return first === undefined ? z.array(z.never()).max(0) : z.tuple([first, ...rest])
 }
 
-function nodeSchema(node: SkeletonNode): z.ZodType {
+function nodeSchema(skeleton: PlanSkeleton, node: SkeletonNode): z.ZodType {
+    const child = (nested: SkeletonNode) => nodeSchema(skeleton, nested)
     switch (node.kind) {
-        case 'method':
-            return operationStepSchema(node.op.side, node.op.invoker, node.op.operation, node.id)
+        case 'method': {
+            // The plan decides where transformations go: scripts on the fields it marks, plain values elsewhere.
+            const scriptFields = new Set(rulesFor(skeleton, node.op.operation.name).filter((rule) => rule.isScript).map((rule) => rule.field))
+            return operationStepSchema(node.op.side, node.op.invoker, node.op.operation, node.id, { scriptFields })
+        }
         case 'loop':
             return z.object({
                 id: z.literal(node.id), kind: z.literal('loop'),
                 over: z.object({ step: z.literal(node.sourceId), path: z.string() }),
-                body: tupleOf(node.body.map(nodeSchema)),
+                body: tupleOf(node.body.map(child)),
             })
         case 'if':
-            return z.object({ id: z.literal(node.id), kind: z.literal('if'), condition: conditionSchema, then: tupleOf(node.then.map(nodeSchema)) })
+            return z.object({ id: z.literal(node.id), kind: z.literal('if'), condition: conditionSchema, then: tupleOf(node.then.map(child)) })
         default: {
             const _exhaustive: never = node
             return _exhaustive
@@ -140,32 +169,5 @@ function nodeSchema(node: SkeletonNode): z.ZodType {
 
 /** Decoding under this schema can only fill values: ids, kinds, operations, loop sources and nesting are fixed. */
 export function buildSkeletonSchema(skeleton: PlanSkeleton): z.ZodType {
-    return z.object({ steps: tupleOf(skeleton.nodes.map(nodeSchema)) })
-}
-
-function describeNode(node: SkeletonNode, depth: number): string[] {
-    const pad = '  '.repeat(depth)
-    switch (node.kind) {
-        case 'method':
-            return [`${pad}${node.id}: method ${node.op.operation.name} (connector "${node.op.side}") - ${node.text}`]
-        case 'loop':
-            return [`${pad}${node.id}: loop over the ${node.sourceOperation} result of ${node.sourceId} - ${node.text}`,
-                ...node.body.flatMap((child) => describeNode(child, depth + 1))]
-        case 'if':
-            return [`${pad}${node.id}: if - ${node.text}`, ...node.then.flatMap((child) => describeNode(child, depth + 1))]
-        default: {
-            const _exhaustive: never = node
-            return _exhaustive
-        }
-    }
-}
-
-/** The user message for a skeleton build: the request, the fixed steps, and what is left to fill in. */
-export function describeSkeleton(request: string, skeleton: PlanSkeleton): string {
-    const notes = skeleton.notes.length ? `\n\nAlso apply:\n${skeleton.notes.map((note) => `- ${note}`).join('\n')}` : ''
-    return `${request}
-
-The workflow's steps are fixed (ids, nesting and operations below). Fill in only the values: each loop's "over.path"
-(the list inside the source step's response), each if's condition, and each method's params and fields.
-${skeleton.nodes.flatMap((node) => describeNode(node, 0)).join('\n')}${notes}`
+    return z.object({ steps: tupleOf(skeleton.nodes.map((node) => nodeSchema(skeleton, node))) })
 }

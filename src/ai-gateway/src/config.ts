@@ -6,12 +6,16 @@ export type GatewayConfig = {
     ollamaUrl: string
     workflowModel: string
     invokerDir: string
+    /** Templates whose transformation scripts serve as examples for generated ones. */
+    templateDir: string
+    embedModel: string
     corsOrigins: string[]
     maxRepairAttempts: number
     contextTokens: number
 }
 
 const defaultInvokerDir = fileURLToPath(new URL('../../backend/runtime/invoker', import.meta.url))
+const defaultTemplateDir = fileURLToPath(new URL('../../backend/runtime/templates', import.meta.url))
 
 function toInt(value: string | undefined, fallback: number): number {
     const parsed = Number.parseInt(value ?? '', 10)
@@ -26,6 +30,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): GatewayConfig 
         ollamaUrl: env.OLLAMA_URL ?? 'http://127.0.0.1:11434',
         workflowModel: env.AI_WORKFLOW_MODEL ?? 'qwen2.5-coder:14b',
         invokerDir: env.AI_INVOKER_DIR ?? defaultInvokerDir,
+        templateDir: env.AI_TEMPLATE_DIR ?? defaultTemplateDir,
+        embedModel: env.AI_EMBED_MODEL ?? 'nomic-embed-text',
         corsOrigins: (env.AI_CORS_ORIGINS ?? 'http://localhost:5173')
             .split(',')
             .map((origin) => origin.trim())

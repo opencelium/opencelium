@@ -78,6 +78,34 @@ function checkValue(ctx: Context, scope: Scope, loops: LoopStep[], stepId: strin
     if ('ref' in value) checkRef(ctx, scope, loops, stepId, value.ref, what)
 }
 
+const SCALAR_TYPES = new Set(['string', 'number', 'boolean', 'integer', 'int'])
+
+/** The declared type of a ref's path, when the invoker declares it. */
+function declaredType(ctx: Context, scope: Scope, loops: LoopStep[], ref: StepRef): { path: string; type: string } | undefined {
+    const target = resolveTarget(ctx, scope, loops, ref.step)
+    if (!target?.operation) return undefined
+    const full = normalizePath(joinPath(target.prefix, ref.path))
+    const field = flattenFieldPaths(target.operation.responseFields).find((candidate) => normalizePath(candidate.path) === full)
+    return field && { path: ref.path, type: field.type }
+}
+
+/**
+ * A script that reads a property of a scalar input (`VAR_0[i].ConfigItemID` where VAR_0 is a list of names) gets
+ * undefined at run time. Calls (`VAR_0.split(',')`) and `length` are fine on strings.
+ */
+function scalarPropertyReads(code: string, inputs: StepRef[], typeOf: (ref: StepRef) => { path: string; type: string } | undefined): string[] {
+    return inputs.flatMap((input, index) => {
+        const declared = typeOf(input)
+        if (!declared || !SCALAR_TYPES.has(declared.type)) return []
+        const reads = [...code.matchAll(new RegExp(`\\bVAR_${index}\\s*(?:\\[[^\\]]*\\]\\s*)*\\.(\\w+)\\b(?!\\s*\\()`, 'g'))]
+            .map((match) => match[1]).filter((property): property is string => !!property && property !== 'length')
+        if (reads.length === 0) return []
+        const items = declared.path.replace(/\.[^.[\]]+$/, '')
+        return [`reads VAR_${index}.${reads[0]}, but input VAR_${index} (${declared.path}) holds ${declared.type} values, which have no `
+            + `"${reads[0]}". To read fields of whole items, use the items as the input (path "${items}") and compare their fields in the code`]
+    })
+}
+
 function checkFieldValue(ctx: Context, scope: Scope, loops: LoopStep[], stepId: string, value: FieldValue, what: string) {
     if (!('script' in value)) {
         checkValue(ctx, scope, loops, stepId, value, what)
@@ -85,7 +113,8 @@ function checkFieldValue(ctx: Context, scope: Scope, loops: LoopStep[], stepId: 
     }
     const { inputs, code } = value.script
     inputs.forEach((input, index) => checkRef(ctx, scope, loops, stepId, input, `${what} script input VAR_${index}`))
-    for (const problem of checkScript(code, inputs.length)) {
+    const typeOf = (ref: StepRef) => declaredType(ctx, scope, loops, ref)
+    for (const problem of [...checkScript(code, inputs.length), ...scalarPropertyReads(code, inputs, typeOf)]) {
         ctx.issues.push({ stepId, severity: 'error', message: `${what} script ${problem}` })
     }
 }

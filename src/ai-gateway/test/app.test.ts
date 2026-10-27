@@ -85,7 +85,7 @@ describe('gateway HTTP API', () => {
 
     it('plans a workflow', async () => {
         const planning = llm({
-            chat: async () => ({ content: JSON.stringify({ pattern: 'custom', steps: [{ text: 'Read issues', depth: 0 }] }),
+            chat: async () => ({ content: JSON.stringify({ pattern: 'custom', fieldRules: [], steps: [{ text: 'Read issues', depth: 0 }] }),
                 promptTokens: 1, outputTokens: 1, durationMs: 1 }),
         })
         const app = await buildApp({ config, llm: planning, invokers })

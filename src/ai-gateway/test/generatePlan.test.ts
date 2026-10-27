@@ -20,9 +20,22 @@ const deps = (llm: LlmClient) => ({ llm, model: 'test-model', contextTokens: 409
 
 describe('generatePlan', () => {
     it('returns the plan and pins the first step to the root', async () => {
-        const llm = llmAnswering(JSON.stringify({ pattern: 'sync', steps: [{ text: 'Read issues with ListIssues', depth: 1 }, { text: 'For each issue', depth: 0 }] }))
+        const llm = llmAnswering(JSON.stringify({ pattern: 'sync', fieldRules: [],
+            steps: [{ text: 'Read issues with ListIssues', depth: 1 }, { text: 'For each issue', depth: 0 }] }))
         const plan = await generatePlan('sync issues', connectors, deps(llm))
         expect(plan).toMatchObject({ pattern: 'sync', model: 'test-model', steps: [{ depth: 0 }, { depth: 0 }] })
+    })
+
+    it('appends the field rules as plan lines the skeleton reads back', async () => {
+        const llm = llmAnswering(JSON.stringify({ pattern: 'sync',
+            steps: [{ text: 'Read issues with ListIssues', depth: 0 }],
+            fieldRules: [
+                { operations: ['CreateTicket'], field: 'title', value: 'item fields.summary' },
+                { operations: ['CreateTicket'], field: 'article.body', value: 'script: join key; summary' },
+            ] }))
+        const plan = await generatePlan('sync issues', connectors, deps(llm))
+        expect(plan.steps.at(-1)).toEqual({ depth: 0,
+            text: 'CreateTicket set title = item fields.summary; article.body = script: join key, summary' })
     })
 
     it('rejects answers that are not a plan', async () => {
