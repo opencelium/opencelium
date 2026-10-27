@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Alert } from '@shared/ui/primitives/Alert';
 import { Button } from '@shared/ui/primitives/Button';
@@ -21,6 +21,7 @@ import {
 } from './playgroundInputs';
 import { PlaygroundHeader } from './PlaygroundHeader';
 import { PlaygroundInput } from './PlaygroundInput';
+import { PlaygroundComparison } from './PlaygroundComparison';
 import { PlaygroundOutput } from './PlaygroundOutput';
 import { PlaygroundRunStatus } from './PlaygroundRunStatus';
 import { SimulationBanner } from './SimulationBanner';
@@ -30,6 +31,8 @@ type Props = {
 	enhancement: Enhancement;
 	script: string;
 	issues: CompatibilityIssue[];
+	/** A script to run beside the editor's on the same inputs, e.g. a generated one not applied yet. */
+	comparison?: { script: string; label: string };
 	onRuntimeLocation?: (location: { line: number; column: number } | undefined) => void;
 	onLocate: (line: number, column: number) => void;
 };
@@ -38,6 +41,7 @@ export function ScriptPlayground({
 	enhancement,
 	script,
 	issues,
+	comparison,
 	onRuntimeLocation,
 	onLocate,
 }: Props) {
@@ -45,6 +49,7 @@ export function ScriptPlayground({
 	const [inputs, setInputs] = useState<InputValues>(() => readInputs(enhancement.enhanceId));
 	const [lastRun, setLastRun] = useState<string>();
 	const sandbox = useScriptSandbox();
+	const comparisonSandbox = useScriptSandbox();
 	const { entries: argEntries } = useEnhancementArgs(enhancement);
 	const args: Record<string, unknown> = {};
 	const invalid: string[] = [];
@@ -65,7 +70,7 @@ export function ScriptPlayground({
 		sandbox.status === 'running' ||
 		hasSyntaxError ||
 		invalid.length > 0;
-	const signature = JSON.stringify([script, inputs, enhancement.args, enhancement.language]);
+	const signature = JSON.stringify([script, comparison?.script, inputs, enhancement.args, enhancement.language]);
 	const isStale = lastRun !== signature;
 	useEffect(() => {
 		const result = sandbox.result;
@@ -82,7 +87,14 @@ export function ScriptPlayground({
 		if (isDisabled) return;
 		setLastRun(signature);
 		sandbox.run({ script, args });
+		if (comparison) comparisonSandbox.run({ script: comparison.script, args });
 	};
+	const runNewComparison = useEffectEvent(run);
+	useEffect(() => {
+		if (!comparison?.script) return;
+		const timer = setTimeout(runNewComparison, 0);
+		return () => clearTimeout(timer);
+	}, [comparison?.script]);
 	if (enhancement.language !== 'js')
 		return (
 			<section className="scriptPlayground">
@@ -161,6 +173,14 @@ export function ScriptPlayground({
 					isStale={isStale}
 				/>
 			</div>
+			{comparison && (
+				<PlaygroundComparison
+					current={sandbox.result}
+					candidate={comparisonSandbox.result}
+					candidateLabel={comparison.label}
+					isStale={isStale}
+				/>
+			)}
 			<PlaygroundOutput
 				missingNames={isStale ? [] : names.filter((name) => inputs[name]?.mode === 'missing')}
 				result={sandbox.result}

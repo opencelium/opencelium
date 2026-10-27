@@ -1292,7 +1292,14 @@
     "errors": "{{count}} Fehler",
     "errors_one": "{{count}} Fehler",
     "warningCount": "{{count}} Warnungen",
-    "warningCount_one": "{{count}} Warnung"
+    "warningCount_one": "{{count}} Warnung",
+    "comparison": {
+      "title": "Aktuell vs. {{candidate}}",
+      "current": "Aktuell",
+      "pending": "Zum Vergleichen ausführen",
+      "same": "Gleiches Ergebnis",
+      "different": "Unterschiedliche Ergebnisse"
+    }
   },
   "ai": {
     "open": "Mit KI generieren",
@@ -1396,10 +1403,35 @@
       "placeholder": "Transformation beschreiben, z. B. \"Operational, wenn der Status in operation ist, sonst Incident\"",
       "generate": "Generieren",
       "generating": "Skript wird generiert… {{elapsed}}",
-      "applied": "Skript generiert. Führen Sie es im Playground aus, um es zu prüfen.",
+      "applied": "Skript übernommen. Führen Sie es im Playground aus, um es zu prüfen.",
       "problems": "Das Skript läuft so evtl. nicht: prüfen Sie die markierten Zeilen unten.",
-      "replaceTitle": "Aktuelles Skript ersetzen?",
-      "replaceMessage": "Das generierte Skript ersetzt den Inhalt des Editors."
+      "refinePlaceholder": "Generiertes Skript verfeinern, z. B. „den Wert zusätzlich trimmen“",
+      "restored": "Früheres Skript wiederhergestellt.",
+      "undo": "Rückgängig",
+      "undoTooltip": "Vorheriges Skript wiederherstellen",
+      "proposal": {
+        "generatedTitle": "Generiertes Skript",
+        "versionTitle": "Frühere Version",
+        "apply": "Übernehmen",
+        "restore": "Wiederherstellen",
+        "discard": "Verwerfen",
+        "compareInPlayground": "Im Playground vergleichen"
+      },
+      "compare": {
+        "diff": "Änderungen",
+        "split": "Nebeneinander",
+        "current": "Aktuell",
+        "generated": "Generiert",
+        "version": "Frühere Version",
+        "noChanges": "Identisch mit dem aktuellen Skript."
+      },
+      "history": {
+        "tooltip": "Frühere Versionen ({{count}})",
+        "hint": "Bleiben erhalten, bis der Methodendialog geschlossen wird. Vergleichen Sie eine Version, bevor Sie sie wiederherstellen.",
+        "beforeAi": "Vor KI: {{prompt}}",
+        "beforeRestore": "Vor dem Wiederherstellen einer Version",
+        "compare": "Vergleichen"
+      }
     }
   }
 }
