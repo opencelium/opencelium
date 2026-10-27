@@ -83,3 +83,27 @@ describe('script values on Apply', () => {
 		});
 	});
 });
+
+describe('fields below declared objects', () => {
+	it('are written into the body template next to what the invoker declares', () => {
+		const withData = connector(2, 'otrs', [{
+			name: 'ConfigItemCreate', type: '',
+			request: { endpoint: '{url}', method: 'POST', header: {}, body: body({ ConfigItem: { Name: '', CIXMLData: { Vendor: '' } } }) },
+			response: response({ ConfigItemID: '' }),
+		}]);
+		const extended: WorkflowDsl = { steps: [
+			{ id: 's1', kind: 'method', connector: 'from', operation: 'cmdb.objects.read', params: [], fields: [] },
+			{ id: 's2', kind: 'loop', over: { step: 's1', path: 'result' }, body: [{
+				id: 's3', kind: 'method', connector: 'to', operation: 'ConfigItemCreate', params: [],
+				fields: [
+					{ name: 'ConfigItem.CIXMLData.IdoitObjectID', value: { ref: { step: 's2', path: 'id' } } },
+					{ name: 'ConfigItem.CIXMLData.Tenant', value: { literal: 'i-doit' } },
+				],
+			}] },
+		] };
+		const [read, create] = dslToConnection(extended, { from: idoit, to: withData }).fromConnector.method;
+		expect(create?.request.body.fields).toEqual({ ConfigItem: { Name: '', CIXMLData: {
+			Vendor: '', IdoitObjectID: `${read?.color}.(response).body.$.result[i].id`, Tenant: 'i-doit',
+		} } });
+	});
+});

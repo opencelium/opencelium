@@ -55,6 +55,7 @@ Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAIL
 | `AI_CORS_ORIGINS` | `http://localhost:5173` (comma-separated) |
 | `AI_MAX_REPAIR_ATTEMPTS` | `2` |
 | `AI_CONTEXT_TOKENS` | `16384` |
+| `AI_CHAT_TIMEOUT_MS` | `900000` (15 min per model answer; large plan-fixed builds can exceed 5 min) |
 | `LOG_LEVEL` | `info` |
 
 Prompts are not logged; each generation logs invoker names, token counts, durations and issue count.

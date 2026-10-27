@@ -149,8 +149,11 @@ function nodeSchema(skeleton: PlanSkeleton, node: SkeletonNode): z.ZodType {
     switch (node.kind) {
         case 'method': {
             // The plan decides where transformations go: scripts on the fields it marks, plain values elsewhere.
-            const scriptFields = new Set(rulesFor(skeleton, node.op.operation.name).filter((rule) => rule.isScript).map((rule) => rule.field))
-            return operationStepSchema(node.op.side, node.op.invoker, node.op.operation, node.id, { scriptFields })
+            const rules = rulesFor(skeleton, node.op.operation.name)
+            const scriptFields = new Set(rules.filter((rule) => rule.isScript).map((rule) => rule.field))
+            // Fields the plan names below a declared object (CIXMLData.<attribute>) become settable for this step.
+            return operationStepSchema(node.op.side, node.op.invoker, node.op.operation, node.id,
+                { scriptFields, extraFields: rules.map((rule) => rule.field) })
         }
         case 'loop':
             return z.object({

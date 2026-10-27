@@ -32,6 +32,22 @@ export function assignableRequestPaths(fields: FieldNode[], requiredData: string
     return flattenFieldPaths(fields, '', (field) => !isConnectorManaged(field.value, requiredData))
 }
 
+const SEGMENT_RE = /^[A-Za-z_][\w-]*$/
+
+/**
+ * Whether `path` may be added below a declared object field: objects such as OTRS's `CIXMLData` hold per-installation
+ * attributes an invoker cannot list. The closest declared ancestor must be an object (not a scalar, not an array) and
+ * every new segment a plain name.
+ */
+export function extendsDeclaredObject(declared: FieldPath[], path: string): boolean {
+    if (declared.some((field) => field.path === path)) return false
+    const parent = declared
+        .filter((field) => path.startsWith(`${field.path}.`))
+        .sort((left, right) => right.path.length - left.path.length)[0]
+    if (!parent || parent.type !== 'object') return false
+    return path.slice(parent.path.length + 1).split('.').every((segment) => SEGMENT_RE.test(segment))
+}
+
 /** Canonical form for comparing paths the model writes (`issues[0].key`, `issues.key`) with declared ones. */
 export function normalizePath(path: string): string {
     return path
