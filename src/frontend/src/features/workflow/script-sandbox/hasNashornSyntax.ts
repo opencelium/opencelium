@@ -9,13 +9,16 @@ export function hasNashornSyntax(script: string, position: number): boolean {
 	}
 	for (let index = 0; index < tokens.length; index++) {
 		const token = tokens[index];
+		if (!token) continue;
+		const next = tokens[index + 1];
+		const afterNext = tokens[index + 2];
 		if (
 			token.type.label === 'for' &&
-			tokens[index + 1]?.type.label === 'name' &&
-			script.slice(tokens[index + 1].start, tokens[index + 1].end) === 'each' &&
-			tokens[index + 2]?.type.label === '('
+			next?.type.label === 'name' &&
+			script.slice(next.start, next.end) === 'each' &&
+			afterNext?.type.label === '('
 		) {
-			if (position >= token.start && position <= tokens[index + 2].end) return true;
+			if (position >= token.start && position <= afterNext.end) return true;
 		}
 		if (token.type.label !== 'function') continue;
 		let cursor = index + 1;
@@ -23,8 +26,9 @@ export function hasNashornSyntax(script: string, position: number): boolean {
 		if (tokens[cursor]?.type.label !== '(') continue;
 		let depth = 0;
 		do {
-			if (tokens[cursor].type.label === '(') depth++;
-			if (tokens[cursor].type.label === ')') depth--;
+			const label = tokens[cursor]?.type.label;
+			if (label === '(') depth++;
+			if (label === ')') depth--;
 			cursor++;
 		} while (cursor < tokens.length && depth > 0);
 		const body = tokens[cursor];

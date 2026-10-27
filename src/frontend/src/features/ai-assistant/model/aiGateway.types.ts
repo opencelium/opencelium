@@ -47,6 +47,23 @@ export type GenerateWorkflowResponse = {
 	model: string;
 };
 
+/** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */
+export type GenerateScriptRequest = {
+	prompt: string;
+	target: string;
+	inputs: { name: string; source: string; sample?: string }[];
+	currentScript: string;
+};
+
+export type GenerateScriptResponse = {
+	code: string;
+	description: string;
+	/** Rule violations still left after the gateway's repair attempt; the editor's own check shows them too. */
+	problems: string[];
+	durationMs: number;
+	model: string;
+};
+
 export type AiGatewayErrorType = 'BAD_REQUEST' | 'UNKNOWN_INVOKER' | 'GENERATION_FAILED';
 
 export type AiGatewayErrorBody = {
