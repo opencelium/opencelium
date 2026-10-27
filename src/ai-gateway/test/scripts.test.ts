@@ -108,3 +108,18 @@ describe('targeted script repair', () => {
         expect(loop?.kind === 'loop' && loop.body[0]?.kind === 'method' && loop.body[0].fields[0]?.value).toEqual({ script: fixed })
     })
 })
+
+describe('reading properties of scalar inputs', () => {
+    const lookup = (code: string, path: string) => withTitle(script(code, [{ step: 's1', path }, { step: 's2', path: 'key' }]))
+
+    it('flags a property read on a list of declared strings, pointing at the whole items', () => {
+        const messages = validateWorkflow(lookup('for (var i = 0; i < VAR_0.length; i++) { if (VAR_0[i] === VAR_1) { RESULT_VAR = VAR_0[i].id; } }',
+            'issues[].key'), connectors).map((issue) => issue.message)
+        expect(messages).toEqual([expect.stringMatching(/reads VAR_0\.id, but input VAR_0 \(issues\[\]\.key\) holds string values.*path "issues\[\]"/)])
+    })
+
+    it('accepts method calls and length on strings, and property reads on object inputs', () => {
+        expect(validateWorkflow(lookup('RESULT_VAR = VAR_0.toUpperCase() + VAR_0.length;', 'issues[].key'), connectors)).toEqual([])
+        expect(validateWorkflow(lookup('RESULT_VAR = VAR_0[0].key;', 'issues'), connectors)).toEqual([])
+    })
+})
