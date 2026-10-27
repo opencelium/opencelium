@@ -18,9 +18,11 @@ export const createUpdateByCommand = ({
         group: 'manage',
         icon: 'edit',
         description: 'commandPalette.descriptions.update',
+        effect: 'open',
         children: [{
             type: 'literal',
             value: name,
+            entityName: def.name,
             group: 'manage',
             icon: 'edit',
             // The outer "update" literal is shared/merged across every entity's update

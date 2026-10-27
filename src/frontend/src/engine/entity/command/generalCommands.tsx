@@ -15,9 +15,11 @@ export const getListCommand = ({def, config, name}: GeneralCommandType): Command
         group: 'navigate',
         icon: 'list',
         description: 'commandPalette.descriptions.list',
+        effect: 'open',
         children: [{
             type: 'literal',
             value: pluralName,
+            entityName: def.name,
             group: 'navigate',
             icon: 'list',
             // The outer "list" literal is shared/merged across every entity's list
@@ -48,10 +50,12 @@ export const getCreateCommand = ({ def, config, name }: GeneralCommandType): Com
     group: 'create',
     icon: 'plus',
     description: 'commandPalette.descriptions.create',
+    effect: 'open',
     children: [
         {
             type: 'literal',
             value: name,
+            entityName: def.name,
             group: 'create',
             icon: 'plus',
             // The outer "create" literal is shared/merged across every entity's create

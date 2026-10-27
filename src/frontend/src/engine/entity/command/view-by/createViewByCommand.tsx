@@ -13,6 +13,7 @@ export const createViewByCommand = ({
     const node: CommandNode<any> = {
         type: 'literal',
         value: name,
+        entityName: def.name,
         group: 'navigate',
         icon: 'search',
         // The outer "find" literal is shared/merged across every entity's view
@@ -47,6 +48,7 @@ export const createViewByCommand = ({
         group: 'navigate',
         icon: 'search',
         description: 'commandPalette.descriptions.find',
+        effect: 'open',
         children: [node],
         ...config?.overrideProps?.['view'],
     };

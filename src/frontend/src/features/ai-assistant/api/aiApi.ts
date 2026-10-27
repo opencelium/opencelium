@@ -2,6 +2,7 @@ import { baseApi } from '@shared/api/baseApi';
 import { runtimeConfig } from '@shared/config/runtimeConfig';
 import type {
 	AiHealth, GenerateWorkflowRequest, GenerateWorkflowResponse, PlanWorkflowResponse,
+	RouteCommandRequest, RouteCommandResponse, SearchCommandsRequest, SearchCommandsResponse,
 } from '../model/aiGateway.types';
 
 // The panel renders every gateway failure itself; the global error toast would duplicate it.
@@ -29,11 +30,27 @@ export const aiApi = baseApi.injectEndpoints({
 				customOptions: quiet,
 			}),
 		}),
+		searchCommands: b.mutation<SearchCommandsResponse, SearchCommandsRequest>({
+			query: (body) => ({
+				url: `${runtimeConfig.aiUrl}/command/search`,
+				method: 'POST',
+				body,
+				customOptions: quiet,
+			}),
+		}),
+		routeCommand: b.mutation<RouteCommandResponse, RouteCommandRequest>({
+			query: (body) => ({
+				url: `${runtimeConfig.aiUrl}/command/route`,
+				method: 'POST',
+				body,
+				customOptions: quiet,
+			}),
+		}),
 	}),
 });
 
 export const {
-	useGetAiHealthQuery, usePlanWorkflowMutation, useGenerateWorkflowMutation,
+	useGetAiHealthQuery, usePlanWorkflowMutation, useGenerateWorkflowMutation, useSearchCommandsMutation, useRouteCommandMutation,
 } = aiApi;
 
 export const isAiConfigured = (): boolean => Boolean(runtimeConfig.aiUrl);
