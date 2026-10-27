@@ -66,7 +66,8 @@
       "onboarding": "Einrichtungstour neu starten",
       "workflowTutorial": "Workflow-Tutorial erneut ansehen",
       "dashboardTour": "Dashboard-Tour erneut ansehen",
-      "changelog": "Änderungsprotokoll öffnen"
+      "changelog": "Änderungsprotokoll öffnen",
+      "createWorkflow": "Neuen Workflow erstellen: leer, aus einer Vorlage oder mit KI generiert"
     },
     "footer": {
       "select": "Auswählen",
@@ -83,7 +84,8 @@
       "noResults": "Keine Befehle entsprechen „{{query}}“",
       "shortcuts": {
         "open": "Befehlspalette öffnen",
-        "clearScope": "Gesperrten Bereich verlassen (leere Eingabe)"
+        "clearScope": "Gesperrten Bereich verlassen (leere Eingabe)",
+        "voice": "Befehl sprechen (außerhalb von Textfeldern, wenn Spracheingabe verfügbar ist)"
       }
     },
     "ai": {
@@ -94,13 +96,21 @@
       "finish": "Vervollständigen ↵",
       "edit": "Befehl vor dem Ausführen bearbeiten",
       "confirmFirst": "Mit Bestätigung",
-      "choose": "Mehrere Treffer für „{{value}}“ – bitte auswählen",
+      "choose": "Datensatz für „{{value}}“ auswählen",
       "notFound": "Nichts gefunden für „{{value}}“ – Wert bitte selbst eingeben",
       "needsValue": "Wert ergänzen, dann ausführen",
       "noCommand": "Kein Befehl passt zu dieser Anfrage.",
       "unreachable": "Der KI-Dienst ist nicht erreichbar.",
       "failed": "Die KI konnte keinen Befehl wählen. Formulieren Sie die Anfrage anders.",
       "retry": "Erneut fragen"
+    },
+    "voice": {
+      "start": "Befehl sprechen (M)",
+      "listening": "Höre zu… M oder Klick zum Senden, Esc zum Abbrechen",
+      "transcribing": "Wird transkribiert…",
+      "noSpeech": "Nichts verstanden. Klicken Sie auf das Mikrofon und sprechen Sie Ihren Befehl.",
+      "denied": "Der Mikrofonzugriff ist blockiert. Erlauben Sie ihn für diese Seite im Browser, um Befehle zu sprechen.",
+      "failed": "Der gesprochene Befehl konnte nicht transkribiert werden. Prüfen Sie, ob der lokale Sprachdienst (whisper-server) läuft."
     }
   },
   "sidebar": {
