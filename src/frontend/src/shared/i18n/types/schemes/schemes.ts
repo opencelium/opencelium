@@ -148,8 +148,17 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 failed: string
                 retry: string
             }
+            voice: {
+                start: string
+                listening: string
+                transcribing: string
+                noSpeech: string
+                denied: string
+                failed: string
+            }
             descriptions: {
                 create: string
+                createWorkflow: string
                 update: string
                 delete: string
                 find: string
@@ -188,6 +197,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 noResults: string
                 shortcuts: {
                     open: string
+                    voice: string
                     clearScope: string
                 }
             }

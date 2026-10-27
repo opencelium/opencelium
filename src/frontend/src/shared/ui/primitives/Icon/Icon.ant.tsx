@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuScan, LuFlaskConical, LuPackage, LuSparkles, LuUnplug, LuArrowRight } from 'react-icons/lu';
+import { LuScan, LuFlaskConical, LuPackage, LuSparkles, LuUnplug, LuArrowRight, LuMic } from 'react-icons/lu';
 import {
     HolderOutlined,
     MinusOutlined,
@@ -152,6 +152,7 @@ const iconMap = {
     sparkles: LuSparkles,
     'plug-off': LuUnplug,
     'arrow-right': LuArrowRight,
+    microphone: LuMic,
 };
 
 export const AntIcon: IconComponent = ({

@@ -70,6 +70,7 @@ export const useWorkflowTemplates = ({ connectionId, headerState, setHeaderState
 		connectorMappingDialogOpen: apply.mappingDialogOpen,
 		connectorMappingGroups: apply.mappingGroups,
 		applySelectedTemplate: apply.applySelected,
+		applyTemplate: apply.applyTemplate,
 		handleConfirmConnectorMapping: apply.confirmMapping,
 		handleCancelConnectorMapping: apply.cancelMapping,
 	};

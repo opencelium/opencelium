@@ -1,0 +1,29 @@
+.voiceCommand {
+  position: absolute;
+  top: 50%;
+  right: 94px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transform: translateY(-50%);
+}
+
+.voiceCommand--busy {
+  width: 32px;
+  height: 32px;
+}
+
+/* The ring grows with the input level, so the user sees that the microphone hears them. */
+.voiceCommand--listening {
+  background: var(--color-status-error-bg);
+  box-shadow: 0 0 0 calc(1px + var(--voice-level, 0) * 3px) var(--color-status-error-bg);
+  transition: box-shadow 80ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voiceCommand--listening {
+    transition: none;
+  }
+}

@@ -13,6 +13,7 @@ import { orderGroups } from '@shared/command/groupOrder'
 
 const SHORTCUTS: { keys: string[]; labelKey: string }[] = [
     { keys: ['Ctrl', 'K'], labelKey: 'commandPalette.help.shortcuts.open' },
+    { keys: ['M'], labelKey: 'commandPalette.help.shortcuts.voice' },
     { keys: ['↑', '↓'], labelKey: 'commandPalette.footer.navigate' },
     { keys: ['↵'], labelKey: 'commandPalette.footer.select' },
     { keys: ['Tab'], labelKey: 'commandPalette.footer.autocomplete' },

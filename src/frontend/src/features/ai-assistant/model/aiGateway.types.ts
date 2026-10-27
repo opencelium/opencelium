@@ -6,7 +6,11 @@ export type AiHealth = {
 	ollama: { reachable: boolean; models: string[] };
 	workflowModel: { name: string; available: boolean };
 	invokerCount: number;
+	/** Missing from gateways older than voice input. */
+	speech?: { available: boolean };
 };
+
+export type TranscribeSpeechResponse = { text: string; language: string | null; durationMs: number };
 
 export type AiWorkflowIssue = {
 	stepId: string;
@@ -71,10 +75,18 @@ export type SearchCommandsRequest = { query: string; commands: CommandCatalogIte
 export type SearchCommandsResponse = { matches: { id: string; score: number }[] };
 
 export type RouteCommandRequest = { prompt: string; commands: CommandCatalogItem[]; page: string; language: 'en' | 'de' };
+/** Mirrors `CommandIntent` in `src/ai-gateway/src/command/extractIntent.ts`: values for a create command's form. */
+export type CommandIntent =
+	| { kind: 'schedule'; workflow: string; title: string; cronExp: string }
+	| { kind: 'connector'; system: string; title: string; description: string }
+	| { kind: 'workflow'; source: 'template' | 'ai' | 'empty'; template: string; from: string; to: string; title: string; task: string };
+
 export type RouteCommandResponse = {
 	commandId: string | null;
 	argument: string;
 	reply: string;
+	/** Present for create commands the gateway can fill (schedule, connector, workflow). */
+	intent?: CommandIntent | null;
 	durationMs: number;
 	model: string;
 };

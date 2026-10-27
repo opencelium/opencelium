@@ -2,9 +2,10 @@ import type { SuggestionOption } from '@shared/command/types';
 
 export type ArgumentOption = { value: string; label: string };
 
+/** `single`: the lookup found one record, or one named exactly as asked; `ranked`: several, closest first. */
 export type ArgumentResolution =
-	| { kind: 'match'; option: ArgumentOption }
-	| { kind: 'choose'; options: ArgumentOption[] }
+	| { kind: 'single'; option: ArgumentOption }
+	| { kind: 'ranked'; options: ArgumentOption[] }
 	| { kind: 'none' };
 
 const toOption = (option: SuggestionOption): ArgumentOption | undefined => {
@@ -56,11 +57,13 @@ export async function resolveCommandArgument(
 	if (options.length === 0) return { kind: 'none' };
 
 	const exact = options.find((option) => [option.label, option.value].some((candidate) => candidate.toLowerCase() === text.trim().toLowerCase()));
-	if (exact) return { kind: 'match', option: exact };
-	const scored = options
-		.map((option) => ({ option, score: coverage(requested, option.label) }))
-		.sort((left, right) => right.score - left.score);
-	const [best, second] = scored;
-	if (best && best.score > 0 && (!second || best.score > second.score)) return { kind: 'match', option: best.option };
-	return options.length === 1 && options[0] ? { kind: 'match', option: options[0] } : { kind: 'choose', options };
+	if (exact) return { kind: 'single', option: exact };
+	if (options.length === 1 && options[0]) return { kind: 'single', option: options[0] };
+	return {
+		kind: 'ranked',
+		options: options
+			.map((option) => ({ option, score: coverage(requested, option.label) }))
+			.sort((left, right) => right.score - left.score)
+			.map(({ option }) => option),
+	};
 }

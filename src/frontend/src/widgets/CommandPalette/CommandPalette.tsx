@@ -29,6 +29,12 @@ import {orderGroups} from "@shared/command/groupOrder.ts";
 import {IS_MAC} from "@shared/utils/platform.ts";
 import {useAiCommandAssist} from "@features/ai-assistant/command/useAiCommandAssist";
 import {AiCommandItems} from "@features/ai-assistant/ui/AiCommandItems/AiCommandItems";
+import {useVoiceCommand} from "@features/ai-assistant/voice/useVoiceCommand";
+import {useVoiceHotkey} from "@features/ai-assistant/voice/useVoiceHotkey";
+import {firstActionableAiItem} from "@features/ai-assistant/command/aiCommandItemValues";
+import {runIntent} from "@features/ai-assistant/command/intents/runIntent";
+import type {ResolvedIntent} from "@features/ai-assistant/command/intents/resolveIntent";
+import {VoiceCommandButton} from "@features/ai-assistant/ui/VoiceCommandButton/VoiceCommandButton";
 
 type CommandPaletteProps = {
     /** Render as a compact icon + hotkey pill that animates open to the full
@@ -285,7 +291,14 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
     const aiAssist = useAiCommandAssist({
         query: lockedScope ? '' : value,
         isUnmatched: suggestions.length === 0 && !isCommandComplete,
+        onRun: handleSelectRecent,
+        onRunIntent: (resolved) => runAiIntent(resolved),
     });
+    function runAiIntent(resolved: ResolvedIntent) {
+        changeSourceRef.current = 'input';
+        setValue('');
+        runIntent(resolved, { navigate, openModal: (node) => openModalStore(node) });
+    }
     const continueFromAi = (text: string) => {
         changeSourceRef.current = 'input';
         aiAssist.reset();
@@ -293,6 +306,33 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
         setValue(text);
         inputRef.current?.focus();
     };
+    // When an answer arrives, Enter should act on it, not on whatever the list highlighted before.
+    const aiAnswerItem = firstActionableAiItem(aiAssist.state);
+    const [highlightedAnswer, setHighlightedAnswer] = useState<string | undefined>();
+    if (aiAnswerItem !== highlightedAnswer) {
+        setHighlightedAnswer(aiAnswerItem);
+        if (aiAnswerItem) setHighlighted(aiAnswerItem);
+    }
+    // A spoken command lands in the input and goes straight to the AI.
+    const voice = useVoiceCommand({
+        isSpeechAvailable: aiAssist.isSpeechAvailable,
+        onTranscript: (text) => {
+            continueFromAi(text);
+            setIsActive(true);
+            void aiAssist.ask(text);
+        },
+    });
+    useVoiceHotkey({
+        isAvailable: voice.isAvailable,
+        isListening: voice.status === 'listening',
+        isBlocked: () => useModalStore.getState().isOpen,
+        onStart: () => {
+            setIsActive(true);
+            inputRef.current?.focus();
+            void voice.listen();
+        },
+        onSend: voice.stop,
+    });
 
     const displayGroups = useMemo(() => {
         const groups = new Map<string, Suggestion[]>();
@@ -316,7 +356,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
         }));
     }, [suggestions, recent, value, lockedScope, tCommon]);
 
-    const hasItems = displayGroups.some(g => g.items.length > 0) || aiAssist.canAsk;
+    const hasItems = displayGroups.some(g => g.items.length > 0) || aiAssist.isVisible;
 
     // Collapsed only while idle: focus, typed text, or a locked scope (e.g. the
     // workflow search pill) expands it — a locked scope must stay visible even
@@ -330,7 +370,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                 style={{justifyContent: collapsible ? 'flex-start' : isMobile ? 'left' : 'center'}}
                 onMouseDown={isCollapsed ? (e) => { e.preventDefault(); inputRef.current?.focus(); setIsActive(true); } : undefined}
             >
-                <Command data-testid="command-palette-tour-target" shouldFilter={false} value={highlighted} onValueChange={setHighlighted} style={{position: 'relative', paddingLeft: 20, paddingRight: 80}}>
+                <Command data-testid="command-palette-tour-target" shouldFilter={false} value={highlighted} onValueChange={setHighlighted} style={{position: 'relative', paddingLeft: 20, paddingRight: voice.isAvailable && !isCollapsed ? 132 : 80}}>
                     <div className="cmdk-input-row">
                         {lockedScope && (
                             <span className="cmdk-scope-chip" data-testid="command-palette-scope-chip">
@@ -405,13 +445,14 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                             ) : <Icon isSubtle name={IS_MAC ? 'command' : 'search'}/>}
                         </div>
                     </div>
+                    {!isCollapsed && <VoiceCommandButton voice={voice}/>}
                     <HotKey/>
 
                     {isActive && !isLoading && (hasItems || value.trim().length > 0) &&
                         <div className="cmdk-dropdown">
                             {hasItems ? (
                                 <Command.List>
-                                    <AiCommandItems assist={aiAssist} onRun={handleSelectRecent} onEdit={continueFromAi}/>
+                                    <AiCommandItems assist={aiAssist} onRun={handleSelectRecent} onEdit={continueFromAi} onRunIntent={runAiIntent}/>
                                     {displayGroups.map(group => group.items.length > 0 && (
                                         <Command.Group key={group.key} heading={group.heading}>
                                             {group.items.map((s) => (
