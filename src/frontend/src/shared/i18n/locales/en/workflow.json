@@ -1435,11 +1435,13 @@
     },
     "templates": {
       "label": "Use templates",
-      "hint": "Transformation scripts from the installed templates are shown to the model as examples when it builds the workflow. Switch off to see what it generates without them.",
+      "hint": "Workflows and transformation scripts from the installed templates are shown to the model as examples when it plans and builds the workflow. Switch off to see what it generates without them.",
       "resultUsed_one": "Built with {{count}} template script as an example",
       "resultUsed_other": "Built with {{count}} template scripts as examples",
       "resultNone": "No similar template scripts were found for this workflow",
-      "resultOff": "Built without templates"
+      "resultOff": "Built without templates",
+      "basedOn_one": "Follows the template {{names}}",
+      "basedOn_other": "Follows the templates {{names}}"
     }
   }
 }

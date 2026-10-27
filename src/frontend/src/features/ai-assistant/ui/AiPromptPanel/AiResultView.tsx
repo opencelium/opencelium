@@ -6,6 +6,7 @@ import { buildDslPreview } from '../../utils/dslPreview.utils';
 import { AiStepTree, type ConnectorLookup } from './AiStepTree';
 import { AiIssueList } from './AiIssueList';
 import { AiRequestSummary } from './AiRequestSummary';
+import { AiTemplateBasis } from './AiTemplateBasis';
 
 type Props = {
 	prompt: string;
@@ -37,6 +38,7 @@ export function AiResultView({ prompt, response, usedTemplates, choices, connect
 					<span className="aiPanelSectionMeta">{t('ai.result.stepCount', { count: preview.stepCount })}</span>
 				</div>
 				{templateNote && <div className="aiTemplateNote" data-testid="ai-panel-template-note">{templateNote}</div>}
+				<AiTemplateBasis templates={response.templates ?? []} testId="ai-panel-result-templates" />
 				<div className="aiStepTreeCard">
 					<AiStepTree steps={response.dsl.steps} preview={preview} connectors={lookup} issues={response.issues} />
 				</div>

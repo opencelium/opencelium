@@ -1,5 +1,6 @@
 import type { WorkflowConnectors } from '../dsl/buildConstrainedSchema.ts'
 import { toJsonSchema } from '../dsl/buildConstrainedSchema.ts'
+import type { TemplateFlow } from '../examples/templateFlow.ts'
 import type { LlmClient } from '../llm/llmClient.ts'
 import { buildPlanSystemPrompt } from './buildPlanPrompt.ts'
 import { type PlanAnswer, type PlanStep, type WorkflowPlan, buildPlanAnswerSchema } from './workflowPlan.schema.ts'
@@ -8,6 +9,8 @@ export type GeneratePlanDeps = {
     llm: LlmClient
     model: string
     contextTokens: number
+    /** Similar stored templates, shown as worked examples. */
+    templates?: TemplateFlow[]
 }
 
 export type GeneratePlanResult = WorkflowPlan & { durationMs: number; model: string }
@@ -29,7 +32,7 @@ export async function generatePlan(prompt: string, connectors: WorkflowConnector
     const result = await deps.llm.chat({
         model: deps.model,
         messages: [
-            { role: 'system', content: buildPlanSystemPrompt(connectors) },
+            { role: 'system', content: buildPlanSystemPrompt(connectors, deps.templates) },
             { role: 'user', content: prompt },
         ],
         format: toJsonSchema(schema),

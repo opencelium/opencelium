@@ -1,4 +1,6 @@
 import type { WorkflowConnectors } from '../dsl/buildConstrainedSchema.ts'
+import type { TemplateFlow } from '../examples/templateFlow.ts'
+import { describeTemplateExamples } from '../examples/templateFlows.ts'
 import { describeConnector } from '../workflow/buildWorkflowPrompt.ts'
 
 /**
@@ -20,7 +22,7 @@ depth 0: If the <target search operation> result <id list field> is empty:
 depth 1:   For each source item (a new loop over the <source list operation> result): create it with <target create operation>.
 (then "fieldRules" for the create and update operations: the match field plus every mapping the request names)`
 
-export function buildPlanSystemPrompt(connectors: WorkflowConnectors): string {
+export function buildPlanSystemPrompt(connectors: WorkflowConnectors, templates: TemplateFlow[] = []): string {
     const sections = [describeConnector('from', connectors.from)]
     if (connectors.to) sections.push(describeConnector('to', connectors.to))
 
@@ -53,6 +55,6 @@ Choose "pattern":
 ${SYNC_SKELETON}
 - "custom" for anything else; plan the steps freely.
 
-${sections.join('\n\n')}`
+${describeTemplateExamples(templates, 'plan', connectors)}${sections.join('\n\n')}`
 }
 

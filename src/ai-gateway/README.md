@@ -15,7 +15,10 @@ loop. The frontend converts the DSL into graph nodes.
    operations, misplaced operations and invented fields cannot be produced.
 3. What a schema cannot express is checked afterwards (`validateWorkflow.ts`): refs point to an earlier method step or an
    enclosing loop, step ids are unique, response paths exist (unknown paths are warnings).
-4. Errors go back to the model for up to `AI_MAX_REPAIR_ATTEMPTS` repairs; the best attempt is returned with its issues.
+4. With `useTemplates` (default on), the closest stored templates (`src/examples/templateFlows.ts`: similarity in meaning
+   plus how many of their operations the request's systems offer, on the same side) are shown as worked examples: the
+   planner sees their steps, the build also the fields they set. Calls the installed invokers no longer have are marked.
+5. Errors go back to the model for up to `AI_MAX_REPAIR_ATTEMPTS` repairs; the best attempt is returned with its issues.
 
 ## Run
 
@@ -44,12 +47,12 @@ npm run eval:commands           # routes 18 prompts through the running gateway,
 | --- | --- | --- | --- |
 | GET | `/health` | — | `{ status: 'ok' \| 'degraded', ollama, workflowModel, invokerCount, speech: { available } }` |
 | GET | `/invokers` | — | `[{ name, description, operationCount }]` |
-| POST | `/workflow/plan` | `{ prompt, from, to? }` | `{ pattern, steps: [{ text, depth }], durationMs, model }`: plain-language plan for review, field rules as `<Operation> set <field> = <value>` lines |
+| POST | `/workflow/plan` | `{ prompt, from, to?, useTemplates? }` | `{ pattern, steps: [{ text, depth }], templates: [{ id, name }], durationMs, model }`: plain-language plan for review, field rules as `<Operation> set <field> = <value>` lines; `templates` are the stored templates shown as worked examples |
 | POST | `/script/generate` | `{ prompt, target?, inputs: [{ name: 'VAR_n', source, sample? }], currentScript? }` | `{ code, description, problems, durationMs, model }`: one transformation script for the editor |
 | POST | `/command/search` | `{ query, commands: [{ id, phrase, description }], limit? }` | `{ matches: [{ id, score }] }`: palette commands close in meaning |
 | POST | `/command/route` | `{ prompt, commands, page?, language? }` | `{ commandId \| null, argument, reply, candidates, durationMs, model }`: one command for a request; the frontend resolves `argument` to a record |
 | POST | `/speech/transcribe` | WAV audio (`audio/wav`, 16 kHz mono, up to ~30 s) | `{ text, language, durationMs }`: a spoken command, with system names (from the invokers) as vocabulary |
-| POST | `/workflow/generate` | `{ prompt, from, to?, plan? }` (invoker names, case-insensitive; `plan` = the reviewed plan text) | `{ dsl, issues, attempts, model }` |
+| POST | `/workflow/generate` | `{ prompt, from, to?, plan?, useTemplates? }` (invoker names, case-insensitive; `plan` = the reviewed plan text) | `{ dsl, issues, attempts, model, templateExampleCount, templates }` |
 
 Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAILED' \| 'SPEECH_UNAVAILABLE', message, details? } }` with 400 / 404 / 502 / 503.
 
@@ -61,8 +64,8 @@ Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAIL
 | `OLLAMA_URL` | `http://127.0.0.1:11434` |
 | `AI_WORKFLOW_MODEL` | `qwen2.5-coder:14b` |
 | `AI_INVOKER_DIR` | `../backend/runtime/invoker` |
-| `AI_TEMPLATE_DIR` | `../backend/runtime/templates` (their transformation scripts are examples for generated ones) |
-| `AI_EMBED_MODEL` | `nomic-embed-text` (finds the most similar template scripts; without it, no examples are used) |
+| `AI_TEMPLATE_DIR` | `../backend/runtime/templates` (the closest templates are worked examples for plans and builds; their transformation scripts are examples for generated ones) |
+| `AI_EMBED_MODEL` | `nomic-embed-text` (finds the most similar templates and template scripts; without it, no examples are used) |
 | `AI_COMMAND_MODEL` | `qwen2.5-coder:7b` (picks command palette commands) |
 | `AI_SPEECH_URL` | `http://127.0.0.1:8178` (whisper-server; empty turns voice commands off) |
 | `AI_CORS_ORIGINS` | `http://localhost:5173` (comma-separated) |

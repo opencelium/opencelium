@@ -1,6 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { Embedder } from '../llm/ollamaEmbedder.ts'
+import { cosine } from './cosine.ts'
 
 /** A transformation from a stored template: the field it fills, the fields it reads (VAR_0, VAR_1, …) and its code. */
 export type ScriptExample = { target: string; inputs: string[]; code: string }
@@ -8,6 +9,8 @@ export type ScriptExample = { target: string; inputs: string[]; code: string }
 export type ScriptExamples = {
     /** The most similar stored scripts to a plain-language rule; empty when none is close or the index is unavailable. */
     find(query: string, limit: number): Promise<ScriptExample[]>
+    /** Builds the index ahead of the first request, so that request does not wait for the embeddings. */
+    warmUp(): Promise<void>
 }
 
 type RawEndpoint = { field?: unknown }
@@ -56,17 +59,6 @@ export async function loadTemplateScripts(dir: string): Promise<ScriptExample[]>
 const describe = (example: ScriptExample) =>
     `Field ${example.target} computed from ${example.inputs.join(', ')}:\n${example.code}`
 
-function cosine(left: number[], right: number[]): number {
-    let dot = 0, leftNorm = 0, rightNorm = 0
-    left.forEach((value, index) => {
-        const other = right[index] ?? 0
-        dot += value * other
-        leftNorm += value * value
-        rightNorm += other * other
-    })
-    return leftNorm && rightNorm ? dot / Math.sqrt(leftNorm * rightNorm) : 0
-}
-
 /**
  * Embeds the template scripts on first use and keeps them in memory: a handful of scripts needs no vector store.
  * Any failure (no embedding model, no templates) degrades to "no examples", never to a failed request.
@@ -97,10 +89,17 @@ export function createScriptExamples(dir: string, embedder: Embedder): ScriptExa
                 return []
             }
         },
+        async warmUp() {
+            try {
+                await (index ??= load())
+            } catch {
+                index = undefined
+            }
+        },
     }
 }
 
-export const noScriptExamples: ScriptExamples = { find: async () => [] }
+export const noScriptExamples: ScriptExamples = { find: async () => [], warmUp: async () => undefined }
 
 /** Examples as prose plus code: a header written as a code comment gets copied, wrong paths and all, into new scripts. */
 export function formatScriptExamples(examples: ScriptExample[]): string {
