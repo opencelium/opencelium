@@ -28,6 +28,13 @@ describe('buildSkeleton', () => {
             .toEqual(['ListIssues', 'CreateTicket'])
     })
 
+    it('keeps a field instruction as a note even when it names an operation', () => {
+        const steps = parsePlanText('- Read with ListIssues.\n- Create with CreateTicket.\n- CreateTicket also sets title = the ListIssues key.')
+        const skeleton = buildSkeleton(steps, connectors)
+        expect(skeleton.nodes.map((node) => node.id)).toEqual(['s1', 's2'])
+        expect(skeleton.notes).toEqual(['CreateTicket also sets title = the ListIssues key.'])
+    })
+
     it('refuses a plan whose loop does not name the operation it goes over, or that names no operation', () => {
         expect(() => buildSkeleton(parsePlanText('- Read with ListIssues.\n- For each thing: create it with CreateTicket.'), connectors))
             .toThrow(/does not name the operation/)

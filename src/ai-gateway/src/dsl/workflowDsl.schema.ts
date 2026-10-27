@@ -18,7 +18,23 @@ export const stepRefSchema = z.object({ step: z.string(), path: z.string() })
 
 export const valueSchema = z.union([z.object({ literal: z.string() }), z.object({ ref: stepRefSchema })])
 
+/**
+ * A transformation (OpenCelium "enhancement"): `inputs[n]` arrive as `VAR_n`, the code assigns `RESULT_VAR`. Nashorn
+ * runs it, so the code is ECMAScript 5.1. Only body fields take one; URL params and conditions cannot.
+ */
+export const scriptValueSchema = z.object({
+    script: z.object({
+        inputs: z.array(stepRefSchema).min(1),
+        code: z.string(),
+        description: z.string(),
+    }),
+})
+
+export const fieldValueSchema = z.union([valueSchema, scriptValueSchema])
+
 export const assignmentSchema = z.object({ name: z.string(), value: valueSchema })
+
+export const fieldAssignmentSchema = z.object({ name: z.string(), value: fieldValueSchema })
 
 export const conditionSchema = z.object({
     left: valueSchema,
@@ -32,10 +48,13 @@ export const methodStepSchema = z.object({
     connector: z.enum(CONNECTOR_SIDES),
     operation: z.string(),
     params: z.array(assignmentSchema),
-    fields: z.array(assignmentSchema),
+    fields: z.array(fieldAssignmentSchema),
 })
 
 export type DslValue = z.infer<typeof valueSchema>
+export type ScriptValue = z.infer<typeof scriptValueSchema>
+export type FieldValue = z.infer<typeof fieldValueSchema>
+export type FieldAssignment = z.infer<typeof fieldAssignmentSchema>
 export type StepRef = z.infer<typeof stepRefSchema>
 export type Assignment = z.infer<typeof assignmentSchema>
 export type Condition = z.infer<typeof conditionSchema>
