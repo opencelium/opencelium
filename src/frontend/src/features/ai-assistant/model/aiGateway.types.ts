@@ -104,6 +104,46 @@ export type RunFix = {
 	model: string;
 };
 
+/** Mirrors `src/ai-gateway/src/invokerDraft/invokerDraft.schema.ts`: an invoker described from API docs. */
+export type InvokerDraftField = { name: string; type: 'string' | 'number' | 'boolean' | 'object' | 'array'; children: InvokerDraftField[] };
+
+export type InvokerDraftBody = { type: 'object' | 'array'; fields: InvokerDraftField[] };
+
+export type InvokerDraftOperation = {
+	name: string;
+	method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+	/** After the base URL; {name} placeholders become workflow params. */
+	path: string;
+	summary: string;
+	group: string;
+	request: InvokerDraftBody | null;
+	response: InvokerDraftBody & { status: string };
+};
+
+export type InvokerDraftAuthKind = 'none' | 'basic' | 'bearer' | 'apikeyHeader' | 'apikeyQuery';
+
+export type InvokerDraft = {
+	name: string;
+	description: string;
+	hint: string;
+	category: string;
+	auth: { kind: InvokerDraftAuthKind; keyName: string };
+	baseUrl: string;
+	operations: InvokerDraftOperation[];
+	testOperation: string;
+};
+
+export type InvokerDraftRequest = { docs: string; name: string };
+
+export type InvokerDraftResponse = {
+	draft: InvokerDraft;
+	/** `openapi`: converted exactly from the spec; `ai`: read from the docs by the model, to be checked. */
+	source: 'openapi' | 'ai';
+	/** The docs were longer than the model reads; later parts are missing from the draft. */
+	isTruncated: boolean;
+	durationMs: number;
+};
+
 /** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */
 export type GenerateScriptRequest = {
 	prompt: string;

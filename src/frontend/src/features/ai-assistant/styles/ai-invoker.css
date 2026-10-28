@@ -1,0 +1,89 @@
+.aiInvokerStep {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aiInvokerFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.aiInvokerLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.aiInvokerValue {
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.aiInvokerDocs textarea {
+  min-height: 260px;
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+}
+
+.aiInvokerOperations {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.aiInvokerOperationsBar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.aiInvokerMeta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.aiInvokerOperationRows {
+  margin: 0;
+  padding: 4px 8px;
+  max-height: 340px;
+  overflow: auto;
+  list-style: none;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-surface);
+}
+
+.aiInvokerOperationRows li {
+  padding: 2px 0;
+}
+
+.aiInvokerOperation {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.aiInvokerMethod {
+  min-width: 52px;
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-action-primary);
+}
+
+.aiInvokerPath {
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  color: var(--color-text-primary);
+  word-break: break-all;
+}
+
+.aiInvokerOpName {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
