@@ -62,6 +62,8 @@ npm run eval:templates -- --limit 20   # rebuilds templates from their descripti
 | POST | `/script/generate` | `{ prompt, target?, inputs: [{ name: 'VAR_n', source, sample? }], currentScript? }` | `{ code, description, problems, durationMs, model }`: one transformation script for the editor |
 | POST | `/command/search` | `{ query, commands: [{ id, phrase, description }], limit? }` | `{ matches: [{ id, score }] }`: palette commands close in meaning |
 | POST | `/command/route` | `{ prompt, commands, page?, language? }` | `{ commandId \| null, argument, reply, candidates, durationMs, model }`: one command for a request; the frontend resolves `argument` to a record |
+| POST | `/run/explain` | `{ language, workflowTitle, failure: { kind, message, stepName, system, operation, context, request?, response? }, step?, earlierSteps }` | `{ summary, cause, fix: string[], isRequestFixable, durationMs, model }`: why a test run failed, in plain language |
+| POST | `/run/fix` | same as `/run/explain` (needs `step`) | `{ body, changes, problems, durationMs, model }`: the failed call's corrected request body; references the step had are kept, or the body comes back unchanged with advice only |
 | POST | `/speech/transcribe` | WAV audio (`audio/wav`, 16 kHz mono, up to ~30 s) | `{ text, language, durationMs }`: a spoken command, with system names (from the invokers) as vocabulary |
 | POST | `/workflow/generate` | `{ prompt, from, to?, plan?, useTemplates? }` (invoker names, case-insensitive; `plan` = the reviewed plan text) | `{ dsl, issues, attempts, model, templateExampleCount, templates, operationExampleCount }` |
 

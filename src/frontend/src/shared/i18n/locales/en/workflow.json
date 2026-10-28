@@ -1444,6 +1444,23 @@
       "basedOn_other": "Follows the templates {{names}}",
       "operationsUsed_one": "{{count}} operation filled in following how templates call it",
       "operationsUsed_other": "{{count}} operations filled in following how templates call them"
+    },
+    "run": {
+      "explain": "Explain",
+      "fix": "Fix with AI",
+      "showStep": "Show step",
+      "working": "Asking the AI…",
+      "failed": "The AI could not answer. Try again in a moment.",
+      "whatToChange": "What to change",
+      "changes": "Proposed changes",
+      "problems": "The proposal may still be wrong",
+      "noBodyChange": "The request body needs no change; see what to change above.",
+      "currentBody": "Current request body",
+      "proposedBody": "Proposed request body",
+      "apply": "Apply to step",
+      "discard": "Discard",
+      "applied": "Request body updated",
+      "appliedHint": "The step's request body was updated. Run the test again to check it; Undo restores the old body."
     }
   }
 }

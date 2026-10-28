@@ -4,6 +4,7 @@ import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodLabelProvider, MethodV
 import { useTestRun } from '../../test-run/useTestRun';
 import { useTestRunModePromptStore } from '../../test-run/testRunModePromptStore';
 import type { TestRunResult } from '../../test-run/TestRunContext';
+import { AiRunAssist } from '@features/ai-assistant/ui/AiRunAssist/AiRunAssist';
 import { WorkflowLogsHeader } from './WorkflowLogsHeader';
 import type { WorkflowLogsProps } from './WorkflowLogs.types';
 
@@ -44,7 +45,7 @@ function TestRunResultLine({ result }: { result: TestRunResult }) {
 // height the pane gives it instead of the fixed-height overlay used for
 // 'minimized'/'full'). Minimized/full stay the original absolute overlay,
 // rendered as a plain sibling of the canvas, unchanged.
-export function WorkflowLogs({ panel, onPanelChange, resolveMethodLabel }: WorkflowLogsProps) {
+export function WorkflowLogs({ panel, onPanelChange, resolveMethodLabel, runAssist }: WorkflowLogsProps) {
 	const { t: tLogs } = useI18n('logs');
 	const testRun = useTestRun();
 	const isModePromptOpen = useTestRunModePromptStore((state) => state.isOpen);
@@ -127,6 +128,10 @@ export function WorkflowLogs({ panel, onPanelChange, resolveMethodLabel }: Workf
 					)}
 					{!isOrphaned && !revealPending && result && (
 						<TestRunResultLine result={result} />
+					)}
+					{/* Keyed by the run's error reveal, so a new failure starts a fresh explanation. */}
+					{!isOrphaned && !revealPending && result?.kind === 'failed' && (
+						<AiRunAssist key={errorRevealNonce} tree={logTree} isLocked={isRunning} {...runAssist} />
 					)}
 				</div>
 			)}

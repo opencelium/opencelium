@@ -1,4 +1,6 @@
 import type { MethodLabelResolver } from '@features/logs';
+import type { WorkflowMethodConfig } from '../../types/request-config.types';
+import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 
 export type WorkflowLogsPanelState = 'minimized' | 'normal' | 'full';
 
@@ -12,6 +14,15 @@ export type WorkflowLogsProps = {
 	onPanelChange: (panel: WorkflowLogsPanelState) => void;
 	/** Names the user gave the graph's steps, for the method rows' name view. */
 	resolveMethodLabel: MethodLabelResolver;
+	/** What Explain / Fix with AI need after a failed run: the graph, and how to save one step's request. */
+	runAssist: WorkflowRunAssistProps;
+};
+
+export type WorkflowRunAssistProps = {
+	nodes: WorkflowNodeModel[];
+	edges: WorkflowEdgeModel[];
+	workflowTitle: string;
+	onSaveMethodConfig: (nodeId: string, config: WorkflowMethodConfig) => void;
 };
 
 export type WorkflowLogsHeaderProps = {

@@ -10,7 +10,7 @@ import { useTestRun } from '../../test-run/useTestRun';
 import { useTestRunModePromptStore } from '../../test-run/testRunModePromptStore';
 import { useMethodLabels } from '../WorkflowLogs/useMethodLabels';
 
-export const WorkflowMain = ({ loading, canvas }: WorkflowMainProps) => {
+export const WorkflowMain = ({ loading, canvas, runAssist }: WorkflowMainProps) => {
 	const testRun = useTestRun();
 	const [logsPanel, setLogsPanel] = useState<WorkflowLogsPanelState>('minimized');
 	const [logsPaneHeight, setLogsPaneHeight] = useState(430);
@@ -44,7 +44,8 @@ export const WorkflowMain = ({ loading, canvas }: WorkflowMainProps) => {
 		<Background gap={16} size={1} />
 	</WorkflowCanvas>;
 	const logsElement = <WorkflowLogs panel={panel} onPanelChange={setLogsPanel}
-		resolveMethodLabel={resolveMethodLabel} />;
+		resolveMethodLabel={resolveMethodLabel}
+		runAssist={{ ...runAssist, nodes: canvas.nodes, edges: canvas.edges }} />;
 
 	return <div className='workflowMain'>
 		{loading ? <div style={{ width: '100%', height: '100%', display: 'flex',
