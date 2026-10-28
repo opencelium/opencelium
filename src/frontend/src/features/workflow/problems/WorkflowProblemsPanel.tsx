@@ -6,6 +6,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { WorkflowIssue, WorkflowProblemSeverity } from './workflowProblems';
 import type { WorkflowIssueGroups } from './useWorkflowIssues';
 import { useWorkflowProblemText } from './useWorkflowProblemText';
+import { AiConnectorErrorExplain } from '@features/ai-assistant/ui/AiConnectorError/AiConnectorErrorExplain';
 
 type Props = {
 	open: boolean;
@@ -33,7 +34,8 @@ function ProblemGroup({ severity, issues, onSelectNode }: GroupProps) {
 		<section className="workflowProblemsGroup" data-testid={`workflow-problems-group-${severity}`}>
 			<div className="workflowProblemsGroupTitle">{t(`problems.groups.${severity}`, { count: issues.length })}</div>
 			{issues.map((issue) => (
-				<button key={issue.nodeId} type="button" onClick={() => onSelectNode(issue.nodeId)}
+				<div key={issue.nodeId}>
+				<button type="button" onClick={() => onSelectNode(issue.nodeId)}
 					className={`workflowProblemsItem workflowProblemsItem--${severity}`}
 					data-testid={`workflow-problems-item-${issue.nodeId}`}>
 					<span className="workflowProblemsItemDot" aria-hidden />
@@ -44,6 +46,11 @@ function ProblemGroup({ severity, issues, onSelectNode }: GroupProps) {
 						))}
 					</span>
 				</button>
+				{issue.problems.map((problem) => problem.kind === 'connector' && (
+					<AiConnectorErrorExplain key={`ai-${problem.connector.connectorId}`} connector={problem.connector}
+						status={problem.status} lastError={problem.lastError} />
+				))}
+				</div>
 			))}
 		</section>
 	);

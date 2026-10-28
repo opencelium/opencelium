@@ -1,5 +1,5 @@
 import { XMLParser } from 'fast-xml-parser'
-import type { FieldNode, Invoker, InvokerOperation } from './invoker.types.ts'
+import type { FieldNode, Invoker, InvokerOperation, InvokerSetup } from './invoker.types.ts'
 
 type XmlNode = Record<string, unknown>
 
@@ -62,6 +62,23 @@ function parseOperation(node: XmlNode, requiredData: Set<string>): InvokerOperat
     }
 }
 
+function parseSetup(root: XmlNode): InvokerSetup {
+    const settings = asNodes(asNode(root.requiredData)?.item)
+        .map((item) => ({ name: attr(item, 'name'), visibility: attr(item, 'visibility'), value: text(item) }))
+    const test = asNodes(asNode(root.operations)?.operation).find((operation) => attr(operation, 'type') === 'test')
+    const request = asNode(test?.request)
+    return {
+        authType: text(root.authType),
+        settings,
+        ...(test ? { test: {
+            name: attr(test, 'name'),
+            method: text(request?.method).toUpperCase(),
+            endpoint: text(request?.endpoint),
+            headers: asNodes(asNode(request?.header)?.item).map((item) => ({ name: attr(item, 'name'), value: text(item) })),
+        } } : {}),
+    }
+}
+
 export function parseInvoker(xml: string): Invoker {
     const root = asNode(asNode(parser.parse(xml))?.invoker)
     if (!root) throw new Error('Not an invoker document: missing <invoker> root')
@@ -78,5 +95,6 @@ export function parseInvoker(xml: string): Invoker {
         description: text(root.description),
         requiredData,
         operations,
+        setup: parseSetup(root),
     }
 }

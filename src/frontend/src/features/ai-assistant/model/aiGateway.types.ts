@@ -161,6 +161,26 @@ export type ExplainWorkflowRequest = { language: 'en' | 'de'; title: string; out
 
 export type WorkflowExplanation = { description: string; explanation: string[]; durationMs: number; model: string };
 
+/** Mirrors `src/ai-gateway/src/connectorError/explainConnectorError.ts`. */
+export type ExplainConnectorErrorRequest = {
+	language: 'en' | 'de';
+	connector: string;
+	invoker: string;
+	status: 'DOWN' | 'AUTH_FAILED' | 'UNKNOWN';
+	error: string;
+};
+
+export type ConnectorErrorExplanation = {
+	summary: string;
+	cause: string;
+	checks: string[];
+	/** Where the fix is; the UI offers the connector's settings only for `connector`. */
+	fixIn: 'connector' | 'remoteSystem' | 'network';
+	kind: string;
+	durationMs: number;
+	model: string;
+};
+
 /** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */
 export type GenerateScriptRequest = {
 	prompt: string;

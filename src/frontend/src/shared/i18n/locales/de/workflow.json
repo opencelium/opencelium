@@ -1487,6 +1487,16 @@
       "description": "Vorgeschlagene Beschreibung (bearbeitbar)",
       "use": "Als Beschreibung übernehmen",
       "close": "Schließen"
+    },
+    "connectorError": {
+      "explain": "Mit KI erklären",
+      "failed": "Die KI konnte diesen Fehler nicht erklären. Bitte gleich noch einmal versuchen.",
+      "fixIn": {
+        "connector": "Beheben in den Einstellungen des Konnektors:",
+        "remoteSystem": "Beheben im angebundenen System:",
+        "network": "Beheben im Netzwerk oder in der Server-Konfiguration:"
+      },
+      "openConnector": "Konnektor {{name}} öffnen"
     }
   }
 }

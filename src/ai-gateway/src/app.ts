@@ -19,6 +19,7 @@ import { registerRunRoutes } from './routes/run.ts'
 import { registerInvokerDraftRoutes } from './routes/invokerDraft.ts'
 import { registerMappingRoutes } from './routes/mapping.ts'
 import { registerExplainRoutes } from './routes/explain.ts'
+import { registerConnectorErrorRoutes } from './routes/connectorError.ts'
 
 export type AppDeps = {
     config: GatewayConfig
@@ -52,5 +53,6 @@ export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}
     registerInvokerDraftRoutes(app, deps)
     registerMappingRoutes(app, deps)
     registerExplainRoutes(app, deps)
+    registerConnectorErrorRoutes(app, deps)
     return app
 }
