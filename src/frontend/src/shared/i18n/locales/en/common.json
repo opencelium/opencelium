@@ -289,5 +289,17 @@
       "tree": "Tree",
       "raw": "Raw"
     }
+  },
+  "assistant": {
+    "open": "Help assistant",
+    "title": "Help assistant",
+    "intro": "Ask how something works in OpenCelium. Answers come from the documentation, with links to the pages they are based on; follow-up questions keep the conversation's context.",
+    "placeholder": "e.g. How do I get an e-mail when a schedule fails?",
+    "send": "Ask",
+    "newConversation": "New conversation",
+    "close": "Close",
+    "searching": "Looking through the documentation…",
+    "failed": "The assistant could not answer. Try again in a moment.",
+    "askInPalette": "Ask the assistant: {{question}}"
   }
 }

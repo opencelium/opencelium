@@ -2,7 +2,7 @@
 // Usage: node scripts/evalCommandRouting.ts [gatewayUrl]   (needs the gateway and Ollama running)
 import { readFile } from 'node:fs/promises'
 
-type Case = { prompt: string; page: string; expected: string | null; intent?: Record<string, string> }
+type Case = { prompt: string; page: string; expected: string | null; intent?: Record<string, string>; isQuestion?: boolean }
 
 const CASES: Case[] = [
     { prompt: 'delete the user ba@user.com', page: '/user/update/2', expected: 'delete user' },
@@ -34,6 +34,10 @@ const CASES: Case[] = [
     // "for every new object" is not a timetable, and the Schedules page must not turn it into a schedule.
     { prompt: 'create a workflow that creates an OTRS ticket for every new i-doit object', page: '/schedule', expected: 'create workflow', intent: { source: 'ai' } },
     { prompt: 'erstelle einen Workflow, der für jedes neue i-doit Objekt ein OTRS Ticket anlegt', page: '/schedule', expected: 'create workflow', intent: { source: 'ai' } },
+    // Questions go to the help assistant; one that also names an action keeps its command.
+    { prompt: 'how do I add a notification to a schedule', page: '/schedule', expected: null, isQuestion: true },
+    { prompt: 'Wie funktionieren Datenaggregatoren?', page: '/', expected: null, isQuestion: true },
+    { prompt: 'what is the difference between a workflow and a template', page: '/workflow', expected: null, isQuestion: true },
     { prompt: 'order a pizza', page: '/', expected: null },
     { prompt: 'book a flight to Berlin', page: '/', expected: null },
 ]
@@ -42,17 +46,19 @@ const gateway = process.argv[2] ?? 'http://127.0.0.1:8787'
 const commands = JSON.parse(await readFile(new URL('../test/fixtures/commandCatalog.json', import.meta.url), 'utf8'))
 let passed = 0
 const started = Date.now()
-for (const { prompt, page, expected, intent } of CASES) {
+for (const { prompt, page, expected, intent, isQuestion } of CASES) {
     const response = await fetch(`${gateway}/command/route`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt, page, commands }),
     })
-    const { commandId, argument, intent: values } = (await response.json()) as {
-        commandId: string | null; argument: string; intent: Record<string, unknown> | null
+    const { commandId, argument, intent: values, isQuestion: asked } = (await response.json()) as {
+        commandId: string | null; argument: string; intent: Record<string, unknown> | null; isQuestion?: boolean
     }
     const isIntentPass = Object.entries(intent ?? {}).every(([key, value]) => values?.[key] === value)
-    const isPass = (expected === null ? commandId === null : Boolean(commandId?.startsWith(expected))) && isIntentPass
+    // A question may also bring a fitting command; for those only the question outcome is checked.
+    const isCommandPass = isQuestion ? true : expected === null ? commandId === null : Boolean(commandId?.startsWith(expected))
+    const isPass = isCommandPass && isIntentPass && (isQuestion === undefined || asked === isQuestion)
     if (isPass) passed++
-    else console.log(`FAIL ${JSON.stringify(prompt)} (${page}) -> ${commandId} ${JSON.stringify(argument)} ${JSON.stringify(values)}, expected ${expected} ${JSON.stringify(intent ?? {})}`)
+    else console.log(`FAIL ${JSON.stringify(prompt)} (${page}) -> ${commandId} ${JSON.stringify(argument)} ${JSON.stringify(values)} question=${asked}, expected ${expected} ${JSON.stringify(intent ?? {})}${isQuestion === undefined ? '' : ` question=${isQuestion}`}`)
 }
 console.log(`${passed}/${CASES.length} routed correctly, ${((Date.now() - started) / CASES.length / 1000).toFixed(1)} s per prompt`)
 process.exitCode = passed === CASES.length ? 0 : 1

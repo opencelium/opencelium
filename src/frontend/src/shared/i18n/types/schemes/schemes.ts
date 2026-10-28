@@ -297,5 +297,17 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 raw: string
             }
         }
+        assistant: {
+            open: string
+            title: string
+            intro: string
+            placeholder: string
+            send: string
+            newConversation: string
+            close: string
+            searching: string
+            failed: string
+            askInPalette: string
+        }
     },
 }

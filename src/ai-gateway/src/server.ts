@@ -7,6 +7,7 @@ import { createScriptExamples } from './examples/scriptExamples.ts'
 import { createTemplateFlows } from './examples/templateFlows.ts'
 import { createOperationUsages } from './examples/operationUsages.ts'
 import { createOperationRanker } from './invokers/focusConnectors.ts'
+import { createDocsIndex } from './help/docsIndex.ts'
 import { createWhisperClient } from './speech/speechClient.ts'
 
 const config = loadConfig()
@@ -15,6 +16,7 @@ const examples = createScriptExamples(config.templateDir, embedder)
 const templates = createTemplateFlows(config.templateDir, embedder)
 const invokers = createInvokerRepository(config.invokerDir)
 const operationUsages = createOperationUsages(config.templateDir, invokers, embedder)
+const docs = createDocsIndex(config.docsDir, embedder)
 const app = await buildApp(
     {
         config,
@@ -24,6 +26,7 @@ const app = await buildApp(
         templates,
         operationUsages,
         operationRanker: createOperationRanker(embedder),
+        docs,
         embedder,
         speech: config.speechUrl ? createWhisperClient(config.speechUrl) : undefined,
     },
@@ -38,5 +41,5 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 
 await app.listen({ host: config.host, port: config.port })
 // Embedding every template takes seconds; doing it now keeps that wait off the first plan or build.
-void Promise.all([templates.warmUp(), examples.warmUp(), operationUsages.warmUp()])
+void Promise.all([templates.warmUp(), examples.warmUp(), operationUsages.warmUp(), docs.warmUp()])
 app.log.info({ model: config.workflowModel, ollama: config.ollamaUrl, invokerDir: config.invokerDir, templateDir: config.templateDir }, 'AI gateway ready')

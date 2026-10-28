@@ -28,6 +28,7 @@ import {buildTestId} from "@shared/testing/testId.ts";
 import {orderGroups} from "@shared/command/groupOrder.ts";
 import {IS_MAC} from "@shared/utils/platform.ts";
 import {useAiCommandAssist} from "@features/ai-assistant/command/useAiCommandAssist";
+import {useAssistantStore} from "@features/ai-assistant/assistant/assistantStore";
 import {AiCommandItems} from "@features/ai-assistant/ui/AiCommandItems/AiCommandItems";
 import {useVoiceCommand} from "@features/ai-assistant/voice/useVoiceCommand";
 import {useVoiceHotkey} from "@features/ai-assistant/voice/useVoiceHotkey";
@@ -286,6 +287,18 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
         setLockedScope(null);
         setValue(recentValue + ' ');
     };
+
+    // A command the help assistant offers is typed in here, for the user to finish and confirm like any other.
+    useEffect(() => useAssistantStore.subscribe((state) => {
+        if (!state.paletteRequest) return;
+        const request = useAssistantStore.getState().takePaletteRequest();
+        if (!request) return;
+        changeSourceRef.current = 'select';
+        setLockedScope(null);
+        setValue(request + ' ');
+        inputRef.current?.focus();
+        setIsActive(true);
+    }), []);
 
     // Text the parser can't place (a sentence, a German request, a half-remembered command) goes to the AI instead.
     const aiAssist = useAiCommandAssist({

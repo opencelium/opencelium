@@ -8,6 +8,7 @@ import type { ResolvedIntent } from '../../command/intents/resolveIntent';
 import { AI_ITEM } from '../../command/aiCommandItemValues';
 import { AiCommandProposalItems } from './AiCommandProposalItems';
 import { AiCommandSuggestions } from './AiCommandSuggestions';
+import { useAssistantStore } from '../../assistant/assistantStore';
 import './aiCommandItems.css';
 
 type Props = {
@@ -22,7 +23,13 @@ export function AiCommandItems({ assist, onRun, onEdit, onRunIntent }: Props) {
 	const { t } = useI18n('common');
 	const { state } = assist;
 	const elapsed = useElapsedSeconds(state.status === 'routing' ? state.startedAt : null);
+	const openAssistant = useAssistantStore((store) => store.open);
 	if (!assist.isVisible) return null;
+	const askAssistant = (question: string) => {
+		openAssistant(question);
+		assist.reset();
+		onEdit('');
+	};
 
 	return (
 		<>
@@ -45,7 +52,18 @@ export function AiCommandItems({ assist, onRun, onEdit, onRunIntent }: Props) {
 						</div>
 					</Command.Item>
 				)}
-				{state.status === 'done' && <AiCommandProposalItems proposal={state.proposal} onRun={onRun} onEdit={onEdit} onRunIntent={onRunIntent} />}
+				{state.status === 'done' && state.isQuestion && (
+					<Command.Item value={AI_ITEM.askAssistant} onSelect={() => askAssistant(state.prompt)} onMouseDown={(event) => event.preventDefault()}
+						data-testid="command-palette-ai-ask-assistant">
+						<div className="cmdk-item-row">
+							<span className="cmdk-item-icon aiCommandIcon"><Icon name="help" size={16} /></span>
+							<span className="cmdk-item-value">{t('assistant.askInPalette', { question: state.prompt })}</span>
+						</div>
+					</Command.Item>
+				)}
+				{state.status === 'done' && !(state.isQuestion && state.proposal.kind === 'no-command') && (
+					<AiCommandProposalItems proposal={state.proposal} onRun={onRun} onEdit={onEdit} onRunIntent={onRunIntent} />
+				)}
 				{state.status === 'error' && (
 					<Command.Item value={AI_ITEM.retry} onSelect={() => void assist.ask()} onMouseDown={(event) => event.preventDefault()}
 						data-testid="command-palette-ai-retry">

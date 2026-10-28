@@ -156,3 +156,14 @@ describe('lookup field', () => {
         expect((await route('delete role by name <identifier>', 'Test')).commandId).toBe('delete role by name <identifier>')
     })
 })
+
+describe('isQuestionRequest', () => {
+    it('reads how/why/what questions in English and German, or the model\'s reading, as a question', async () => {
+        const { isQuestionRequest } = await import('../src/command/routeCommand.ts')
+        expect(isQuestionRequest('How do I add a notification to a schedule')).toBe(true)
+        expect(isQuestionRequest('Wie lege ich einen Datenaggregator an?')).toBe(true)
+        expect(isQuestionRequest('open the schedules')).toBe(false)
+        expect(isQuestionRequest('delete the user ann@example.com')).toBe(false)
+        expect(isQuestionRequest('explain cron expressions', 'question')).toBe(true)
+    })
+})

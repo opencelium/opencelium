@@ -109,7 +109,7 @@ describe('targeted script repair', () => {
         const requests: { format: unknown; content: string }[] = []
         const answers = [JSON.stringify(broken), JSON.stringify(fixed)]
         const llm = {
-            async chat(request: { format: Record<string, unknown>; messages: { content: string }[] }) {
+            async chat(request: { format?: Record<string, unknown>; messages: { content: string }[] }) {
                 requests.push({ format: request.format, content: request.messages.at(-1)?.content ?? '' })
                 return { content: answers[requests.length - 1] ?? '', promptTokens: 1, outputTokens: 1, durationMs: 1 }
             },

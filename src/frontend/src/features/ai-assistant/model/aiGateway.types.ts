@@ -222,6 +222,25 @@ export type ConditionSuggestion = {
 	model: string;
 };
 
+/** Mirrors `src/ai-gateway/src/help/answerHelp.ts`. */
+export type HelpMessage = { role: 'user' | 'assistant'; content: string };
+
+export type HelpRequest = {
+	language: 'en' | 'de';
+	messages: HelpMessage[];
+	page: string;
+	commands: CommandCatalogItem[];
+};
+
+export type HelpSource = { n: number; title: string; url: string };
+
+/** What `/help/ask` streams, one JSON object per line. */
+export type HelpEvent =
+	| { type: 'sources'; question: string; sources: HelpSource[] }
+	| { type: 'delta'; text: string }
+	| { type: 'done'; commands: string[] }
+	| { type: 'error'; message: string };
+
 /** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */
 export type GenerateScriptRequest = {
 	prompt: string;
@@ -258,6 +277,8 @@ export type RouteCommandResponse = {
 	reply: string;
 	/** Present for create commands the gateway can fill (schedule, connector, workflow). */
 	intent?: CommandIntent | null;
+	/** The request asks how, why or what; missing from gateways older than the help assistant. */
+	isQuestion?: boolean;
 	durationMs: number;
 	model: string;
 };
