@@ -63,7 +63,6 @@ export async function constraintFromPlan(prompt: string, planText: string, conne
         constraint: {
             schema: buildSkeletonSchema(skeleton),
             userMessage: describeSkeleton(prompt, skeleton, byRule),
-            skeleton,
             scriptHints: (field) => {
                 const forField = byField.get(field) ?? []
                 return forField.length ? formatScriptExamples(forField) : ''
