@@ -1,0 +1,78 @@
+.aiRunAssist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-background-surface);
+  color: var(--color-text-primary);
+  font-size: 13px;
+}
+
+.aiRunActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.aiRunExplanation p {
+  margin: 0 0 6px;
+}
+
+.aiRunSummary {
+  font-weight: 600;
+}
+
+.aiRunCause {
+  color: var(--color-text-secondary);
+}
+
+.aiRunLabel {
+  margin: 4px 0 2px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.aiRunFixList {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.aiRunFix {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.aiRunBodies {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
+}
+
+.aiRunBody {
+  margin: 0;
+  max-height: 260px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-input);
+  color: var(--color-text-primary);
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.aiRunBody--proposed {
+  border-color: var(--color-action-primary);
+  background: var(--color-action-primary-subtle);
+}
+
+.aiRunError {
+  color: var(--color-status-error-fg);
+}

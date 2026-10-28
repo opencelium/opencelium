@@ -64,6 +64,46 @@ export type GenerateWorkflowResponse = {
 	operationExampleCount?: number;
 };
 
+/** Mirrors `runFailureSchema` in `src/ai-gateway/src/run/runFailure.ts`: what a failed test run tells the AI. */
+export type RunFailureRequest = {
+	language: 'en' | 'de';
+	workflowTitle: string;
+	failure: {
+		kind: 'method' | 'loop' | 'if' | 'execution';
+		message: string;
+		stepName: string;
+		system: string;
+		operation: string;
+		/** Loops and ifs around the failing element, outermost first. */
+		context: string[];
+		request?: { method: string; url: string; body?: string };
+		response?: { status: string; body?: string };
+	};
+	/** The failing method as configured, references unresolved. */
+	step?: { url: string; body: string };
+	earlierSteps: { color: string; name: string; operation: string; system: string }[];
+};
+
+export type RunExplanation = {
+	summary: string;
+	cause: string;
+	fix: string[];
+	/** True when a corrected request body is likely enough: "Fix with AI" is offered only then. */
+	isRequestFixable: boolean;
+	durationMs: number;
+	model: string;
+};
+
+export type RunFix = {
+	/** The corrected request body as text (JSON for JSON bodies). */
+	body: string;
+	changes: string[];
+	/** Rule violations the gateway could not repair; shown beside the proposal. */
+	problems: string[];
+	durationMs: number;
+	model: string;
+};
+
 /** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */
 export type GenerateScriptRequest = {
 	prompt: string;

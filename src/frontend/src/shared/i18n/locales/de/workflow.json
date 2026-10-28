@@ -1444,6 +1444,23 @@
       "basedOn_other": "Orientiert sich an den Vorlagen {{names}}",
       "operationsUsed_one": "{{count}} Operation so ausgefüllt, wie Vorlagen sie aufrufen",
       "operationsUsed_other": "{{count}} Operationen so ausgefüllt, wie Vorlagen sie aufrufen"
+    },
+    "run": {
+      "explain": "Erklären",
+      "fix": "Mit KI beheben",
+      "showStep": "Schritt zeigen",
+      "working": "KI wird gefragt…",
+      "failed": "Die KI konnte nicht antworten. Bitte gleich noch einmal versuchen.",
+      "whatToChange": "Was zu ändern ist",
+      "changes": "Vorgeschlagene Änderungen",
+      "problems": "Der Vorschlag kann noch fehlerhaft sein",
+      "noBodyChange": "Der Request-Body muss nicht geändert werden; siehe oben, was zu ändern ist.",
+      "currentBody": "Aktueller Request-Body",
+      "proposedBody": "Vorgeschlagener Request-Body",
+      "apply": "Auf Schritt anwenden",
+      "discard": "Verwerfen",
+      "applied": "Request-Body aktualisiert",
+      "appliedHint": "Der Request-Body des Schritts wurde aktualisiert. Führen Sie den Test erneut aus; Rückgängig stellt den alten Body wieder her."
     }
   }
 }
