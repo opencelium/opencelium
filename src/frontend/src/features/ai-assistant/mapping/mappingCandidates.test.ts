@@ -73,3 +73,14 @@ describe('applyProposals', () => {
 		expect(result.fieldBindings.map((binding) => binding.enhancement?.args?.RESULT_VAR)).toEqual(['#98BEC7.(request).body.$.ConfigItem.Name']);
 	});
 });
+
+describe('collectConditionSources', () => {
+	it('reads the loop item at the iterator and other lists whole, for conditions such as "the names contain X"', async () => {
+		const { collectConditionSources } = await import('./mappingCandidates');
+		const sources = collectConditionSources(connection, [hosts, object], '1_2');
+		expect(sources.map((source) => `${source.step} › ${source.path}`)).toEqual([
+			'cmdb.objects.read › result[*].id', 'cmdb.objects.read › result[*].title',
+			'host.get › result[i].host', 'host.get › result[i].hostid', 'host.get › result[i].interfaces[*].ip',
+		]);
+	});
+});

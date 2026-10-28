@@ -1497,6 +1497,13 @@
         "network": "Beheben im Netzwerk oder in der Server-Konfiguration:"
       },
       "openConnector": "Konnektor {{name}} öffnen"
+    },
+    "condition": {
+      "placeholder": "Bedingung beschreiben, z. B. nur Tickets mit Priorität hoch, die nicht geschlossen sind",
+      "build": "Bedingung erstellen",
+      "checkHint": "Prüfen Sie die Regeln unten vor dem Speichern.",
+      "nothingToCompare": "Es gibt nichts zu vergleichen: Kein vorheriger Schritt liefert hier Werte.",
+      "failed": "Die KI konnte die Bedingung nicht erstellen. Bitte gleich noch einmal versuchen oder anders beschreiben."
     }
   }
 }

@@ -53,6 +53,7 @@ import {
 } from './conditionBuilder.utils';
 import { evaluateIfComparison, type ComparisonEvaluation, type OperandInput } from './conditionComparison';
 import { LoopInfoPanel } from './LoopInfoPanel/LoopInfoPanel';
+import { AiConditionPanel } from '@features/ai-assistant/ui/AiCondition/AiConditionPanel';
 import { useConditionDragItem } from './ConditionReorder/useConditionDragItem';
 import { ConditionReorderProvider } from './ConditionReorder/ConditionReorderProvider';
 import { Radio } from '@shared/ui/primitives/Radio';
@@ -1014,6 +1015,13 @@ export function ConditionBuilderDialog({
 				</Button>,
 			]}
 		>
+			{!isLoop && node ? (
+				<AiConditionPanel connection={connection} methods={methods} operatorIndex={operatorIndexPath ?? ''}
+					onApply={(next) => {
+						setTree(next);
+						setRenderKey((current) => current + 1);
+					}} />
+			) : null}
 			<div key={renderKey} className="conditionBuilder" data-testid="workflow-condition-builder">
 				<LiveInspectHint />
 				<ConditionReorderProvider tree={tree} isEnabled={operatorType === 'if'} onChange={setTree}>

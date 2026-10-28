@@ -1,0 +1,22 @@
+.aiCondition {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.aiConditionBar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.aiConditionNote {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.aiConditionError {
+  font-size: 12px;
+  color: var(--color-status-error-fg);
+}

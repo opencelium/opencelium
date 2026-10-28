@@ -1497,6 +1497,13 @@
         "network": "Fix it in the network or server setup:"
       },
       "openConnector": "Open connector {{name}}"
+    },
+    "condition": {
+      "placeholder": "Describe the condition, e.g. only tickets with priority high that are not closed",
+      "build": "Build condition",
+      "checkHint": "Check the rules below before saving.",
+      "nothingToCompare": "There is nothing to compare: no earlier step returns values here.",
+      "failed": "The AI could not build the condition. Try again in a moment, or describe it differently."
     }
   }
 }
