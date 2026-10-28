@@ -1,7 +1,7 @@
 import { baseApi } from '@shared/api/baseApi';
 import { runtimeConfig } from '@shared/config/runtimeConfig';
 import type {
-	AiHealth, GenerateWorkflowRequest, InvokerDraft, InvokerDraftRequest, InvokerDraftResponse, RunExplanation, RunFailureRequest, RunFix, GenerateWorkflowResponse, PlanWorkflowResponse,
+	AiHealth, GenerateWorkflowRequest, InvokerDraft, SuggestMappingRequest, SuggestMappingResponse, InvokerDraftRequest, InvokerDraftResponse, RunExplanation, RunFailureRequest, RunFix, GenerateWorkflowResponse, PlanWorkflowResponse,
 	RouteCommandRequest, RouteCommandResponse, SearchCommandsRequest, SearchCommandsResponse, TranscribeSpeechResponse,
 } from '../model/aiGateway.types';
 
@@ -58,6 +58,9 @@ export const aiApi = baseApi.injectEndpoints({
 		}),
 		buildInvokerXml: b.mutation<{ xml: string }, { draft: InvokerDraft }>({
 			query: (body) => ({ url: `${runtimeConfig.aiUrl}/invoker/xml`, method: 'POST', body, customOptions: quiet }),
+		}),
+		suggestMapping: b.mutation<SuggestMappingResponse, SuggestMappingRequest>({
+			query: (body) => ({ url: `${runtimeConfig.aiUrl}/mapping/suggest`, method: 'POST', body, customOptions: quiet }),
 		}),
 		routeCommand: b.mutation<RouteCommandResponse, RouteCommandRequest>({
 			query: (body) => ({

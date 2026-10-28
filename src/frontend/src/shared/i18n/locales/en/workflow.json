@@ -1461,6 +1461,21 @@
       "discard": "Discard",
       "applied": "Request body updated",
       "appliedHint": "The step's request body was updated. Run the test again to check it; Undo restores the old body."
+    },
+    "mapping": {
+      "title": "AI mapping",
+      "hint": "Suggests which value from an earlier step fills each field of this request body. Only values the earlier steps return are offered; check each one before applying.",
+      "instructionPlaceholder": "Optional: what this step should do, e.g. create the host as a computer",
+      "suggest": "Suggest mapping",
+      "nothingToMap": "There is nothing to map: this step has no earlier steps, or its body has no fields.",
+      "failed": "The AI could not suggest a mapping. Try again in a moment.",
+      "none": "No field has a value from an earlier step that clearly fits.",
+      "replaces": "replaces {{value}}",
+      "apply_one": "Apply {{count}} field",
+      "apply_other": "Apply {{count}} fields",
+      "discard": "Discard",
+      "applied_one": "{{count}} field mapped",
+      "applied_other": "{{count}} fields mapped"
     }
   }
 }

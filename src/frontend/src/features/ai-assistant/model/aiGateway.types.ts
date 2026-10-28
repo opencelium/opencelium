@@ -144,6 +144,18 @@ export type InvokerDraftResponse = {
 	durationMs: number;
 };
 
+/** Mirrors `src/ai-gateway/src/mapping/suggestMapping.ts`: which earlier value fills each body field of a step. */
+export type SuggestMappingRequest = {
+	language: 'en' | 'de';
+	instruction: string;
+	target: { step: string; operation: string; system: string; fields: { path: string; current: string }[] };
+	sources: { id: string; step: string; system: string; path: string }[];
+};
+
+export type MappingSuggestion = { field: string; source: string; reason: string };
+
+export type SuggestMappingResponse = { suggestions: MappingSuggestion[]; durationMs: number; model: string };
+
 /** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */
 export type GenerateScriptRequest = {
 	prompt: string;

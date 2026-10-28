@@ -11,6 +11,8 @@ import ReferenceEnhancement from '../../enhancement/Enhancement/Enhancement';
 import { ReferenceInfo } from '../../reference-info/ReferenceInfo/ReferenceInfo';
 import { LegacyRequestData } from './LegacyRequestData';
 import { useLegacyJsonComponents } from './useLegacyJsonComponents';
+import { AiFieldMappingSection } from '@features/ai-assistant/ui/AiFieldMapping/AiFieldMappingSection';
+import { useAiAvailability } from '@features/ai-assistant/mapping/useAiAvailability';
 import type { LegacyRequestJsonEditorProps } from './LegacyRequestJsonEditor.types';
 import '../../body-editor/bodyLegacy.css';
 
@@ -20,6 +22,7 @@ export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 	const { method } = useMethodContext();
 	const { t } = useI18n('workflow');
 	const editor = useRequestObjectEditor({ messageProperty, source });
+	const isAiAvailable = useAiAvailability();
 	const components = useLegacyJsonComponents({
 		...props,
 		methodId: method.id,
@@ -53,6 +56,11 @@ export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 			label: t('requestData'),
 			content: <LegacyRequestData {...props} editor={editor} {...components} />,
 		},
+		...(isAiAvailable && messageProperty === 'body' && !readOnly ? [{
+			key: 'aiMapping',
+			label: t('ai.mapping.title'),
+			content: <AiFieldMappingSection connection={editor.connection} method={method} body={source} />,
+		}] : []),
 	];
 	return (
 		<div className="bodyLegacyLayout">

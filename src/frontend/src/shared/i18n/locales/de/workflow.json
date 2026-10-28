@@ -1461,6 +1461,21 @@
       "discard": "Verwerfen",
       "applied": "Request-Body aktualisiert",
       "appliedHint": "Der Request-Body des Schritts wurde aktualisiert. Führen Sie den Test erneut aus; Rückgängig stellt den alten Body wieder her."
+    },
+    "mapping": {
+      "title": "KI-Zuordnung",
+      "hint": "Schlägt vor, welcher Wert aus einem vorherigen Schritt jedes Feld dieses Request-Bodys füllt. Es werden nur Werte angeboten, die die vorherigen Schritte liefern; prüfen Sie jeden vor dem Übernehmen.",
+      "instructionPlaceholder": "Optional: was dieser Schritt tun soll, z. B. den Host als Computer anlegen",
+      "suggest": "Zuordnung vorschlagen",
+      "nothingToMap": "Es gibt nichts zuzuordnen: Dieser Schritt hat keine vorherigen Schritte, oder sein Body hat keine Felder.",
+      "failed": "Die KI konnte keine Zuordnung vorschlagen. Bitte gleich noch einmal versuchen.",
+      "none": "Für kein Feld passt ein Wert aus einem vorherigen Schritt eindeutig.",
+      "replaces": "ersetzt {{value}}",
+      "apply_one": "{{count}} Feld übernehmen",
+      "apply_other": "{{count}} Felder übernehmen",
+      "discard": "Verwerfen",
+      "applied_one": "{{count}} Feld zugeordnet",
+      "applied_other": "{{count}} Felder zugeordnet"
     }
   }
 }
