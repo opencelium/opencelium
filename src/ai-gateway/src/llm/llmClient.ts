@@ -6,8 +6,8 @@ export type ChatMessage = {
 export type ChatRequest = {
     model: string
     messages: ChatMessage[]
-    /** JSON Schema the runtime enforces while decoding. */
-    format: Record<string, unknown>
+    /** JSON Schema the runtime enforces while decoding; absent for a plain-text answer. */
+    format?: Record<string, unknown>
     contextTokens: number
     temperature: number
 }
@@ -21,5 +21,7 @@ export type ChatResult = {
 
 export type LlmClient = {
     chat(request: ChatRequest): Promise<ChatResult>
+    /** The answer's text as it is written; clients without streaming leave it out and callers fall back to `chat`. */
+    stream?(request: ChatRequest): AsyncIterable<string>
     listModels(): Promise<string[]>
 }

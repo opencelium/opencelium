@@ -16,6 +16,8 @@ export type RouteCommandResult = {
     reply: string
     /** For create commands: the form's values from the request (see `extractIntent`). */
     intent: CommandIntent | null
+    /** The request asks how, why or what rather than for an action; the palette offers the help assistant. */
+    isQuestion: boolean
     candidates: string[]
     durationMs: number
     model: string
@@ -87,6 +89,12 @@ function withStatedAction(
         ?? (chosen ? chosen : candidates.find((candidate) => actionOf(candidate) === action))
 }
 
+// "How do I …?", "Wie lege ich …?", "What is …": asking to be told, not to have something done.
+const QUESTION_RE = /^\s*(how|why|what|when|where|which|who|can|could|is|are|does|do|should|wie|warum|was|wann|wo|welche[rsmn]?|wer|kann|könnte|ist|sind|gibt|soll|muss)\b|\?\s*$/i
+
+/** Whether a request asks to be told something; the model's reading and the wording each count. */
+export const isQuestionRequest = (prompt: string, kind?: string) => kind === 'question' || QUESTION_RE.test(prompt)
+
 // Only the section: a path like /user/update/2 carries an action word the small model copies instead of the request's.
 const sectionOf = (page: string) => page.split(/[/?#]/).find(Boolean) ?? ''
 
@@ -118,7 +126,9 @@ wrote it (a name, title, email or id), without the command's words and without t
 You do not need to know whether that record exists: it is looked up after you answer, so a name the user gives is enough.
 "by <field>" only says where that name is searched (a schedule by its workflow's title): any name the user gives fits it.
 Answer "${NONE}" only when no command has the asked action at all, and then say in "reply" what the palette can do instead.
-"reply" is one short sentence in ${request.language === 'de' ? 'German' : 'English'} saying what will happen.`
+"reply" is one short sentence in ${request.language === 'de' ? 'German' : 'English'} saying what will happen.
+Last, set "kind": "question" when the request asks how, why or what something is or works (it wants an explanation),
+"command" when it asks for something to be done. A question can still have a fitting command.`
 }
 
 /** Narrows the catalog by meaning, then lets the model pick one command and the value it needs. */
@@ -137,6 +147,8 @@ export async function routeCommand(request: RouteCommandRequest, deps: RouteComm
         command: z.enum([NONE, ...candidates.map((candidate) => candidate.key)]),
         argument: z.string(),
         reply: z.string(),
+        // Last, so it cannot sway the action and command decided before it.
+        kind: z.enum(['command', 'question']).default('command'),
     })
     const result = await deps.llm.chat({
         model: deps.model,
@@ -163,6 +175,7 @@ export async function routeCommand(request: RouteCommandRequest, deps: RouteComm
         // The reply describes the model's own pick; after a swap it would announce the wrong action.
         reply: chosen === picked ? answer.reply.trim() : '',
         intent,
+        isQuestion: isQuestionRequest(request.prompt, answer.kind),
         candidates: candidates.map((candidate) => candidate.command.id),
         durationMs: result.durationMs,
         model: deps.model,

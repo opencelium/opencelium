@@ -289,5 +289,17 @@
       "tree": "Baum",
       "raw": "Rohtext"
     }
+  },
+  "assistant": {
+    "open": "Hilfe-Assistent",
+    "title": "Hilfe-Assistent",
+    "intro": "Fragen Sie, wie etwas in OpenCelium funktioniert. Die Antworten stammen aus der Dokumentation und verlinken die Seiten, auf denen sie beruhen; Rückfragen behalten den Zusammenhang des Gesprächs.",
+    "placeholder": "z. B. Wie bekomme ich eine E-Mail, wenn ein Zeitplan fehlschlägt?",
+    "send": "Fragen",
+    "newConversation": "Neues Gespräch",
+    "close": "Schließen",
+    "searching": "Die Dokumentation wird durchsucht…",
+    "failed": "Der Assistent konnte nicht antworten. Bitte gleich noch einmal versuchen.",
+    "askInPalette": "Den Assistenten fragen: {{question}}"
   }
 }

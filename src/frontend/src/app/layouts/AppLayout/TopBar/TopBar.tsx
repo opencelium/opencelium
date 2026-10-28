@@ -8,6 +8,7 @@ import {IconButton} from "@shared/ui/primitives/IconButton";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {hasComponentPermission} from "@/engine/policy";
 import {UserActions} from "@widgets/UserActions/UserActions";
+import {AiAssistantButton} from "@features/ai-assistant/ui/AiAssistant/AiAssistantButton";
 
 const COMPACT_USER_ACTIONS_BELOW_WIDTH = 1200;
 const ICON_ONLY_CREATE_BELOW_WIDTH = 1000;
@@ -61,7 +62,8 @@ export const TopBar = () => {
                 <CommandPalette/>
             </div>
 
-            <div style={{flex: '1 1 0', display: 'flex', justifyContent: 'flex-end'}}>
+            <div style={{flex: '1 1 0', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8}}>
+                <AiAssistantButton/>
                 <UserActions layout={width < COMPACT_USER_ACTIONS_BELOW_WIDTH ? 'compact' : 'inline'} newFeatureId='changelog'/>
             </div>
         </div>

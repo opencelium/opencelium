@@ -13,6 +13,12 @@ export type GatewayConfig = {
     embedModel: string
     /** whisper.cpp's whisper-server; empty turns voice input off. */
     speechUrl: string
+    /** The documentation the help assistant answers from (reStructuredText). */
+    docsDir: string
+    /** Where the same documentation is published; answers link their sources there. */
+    docsUrl: string
+    /** Writes help answers. */
+    helpModel: string
     corsOrigins: string[]
     maxRepairAttempts: number
     contextTokens: number
@@ -21,6 +27,7 @@ export type GatewayConfig = {
 
 const defaultInvokerDir = fileURLToPath(new URL('../../backend/runtime/invoker', import.meta.url))
 const defaultTemplateDir = fileURLToPath(new URL('../../backend/runtime/templates', import.meta.url))
+const defaultDocsDir = fileURLToPath(new URL('../../../docs', import.meta.url))
 
 function toInt(value: string | undefined, fallback: number): number {
     const parsed = Number.parseInt(value ?? '', 10)
@@ -39,6 +46,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): GatewayConfig 
         templateDir: env.AI_TEMPLATE_DIR ?? defaultTemplateDir,
         embedModel: env.AI_EMBED_MODEL ?? 'nomic-embed-text',
         speechUrl: env.AI_SPEECH_URL ?? 'http://127.0.0.1:8178',
+        docsDir: env.AI_DOCS_DIR ?? defaultDocsDir,
+        docsUrl: (env.AI_DOCS_URL ?? 'https://docs.opencelium.io/en/prod').replace(/\/+$/, ''),
+        helpModel: env.AI_HELP_MODEL ?? env.AI_WORKFLOW_MODEL ?? 'qwen2.5-coder:14b',
         corsOrigins: (env.AI_CORS_ORIGINS ?? 'http://localhost:5173')
             .split(',')
             .map((origin) => origin.trim())

@@ -11,6 +11,7 @@ export const AI_ITEM = {
 	run: 'ai:run',
 	edit: 'ai:edit',
 	finish: 'ai:finish',
+	askAssistant: 'ai:ask-assistant',
 	option: (phrase: string) => `ai:option:${phrase}`,
 } as const;
 
@@ -35,6 +36,7 @@ function firstOfProposal(proposal: AiCommandProposal): string | undefined {
 
 /** The item Enter should act on for an answer (or a failure); none while the AI is thinking or idle. */
 export function firstActionableAiItem(state: AiCommandState): string | undefined {
-	if (state.status === 'done') return firstOfProposal(state.proposal);
+	// A question goes to the help assistant first; a fitting command is still offered below it.
+	if (state.status === 'done') return state.isQuestion ? AI_ITEM.askAssistant : firstOfProposal(state.proposal);
 	return state.status === 'error' ? AI_ITEM.retry : undefined;
 }

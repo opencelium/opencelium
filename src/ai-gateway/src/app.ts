@@ -7,6 +7,7 @@ import type { ScriptExamples } from './examples/scriptExamples.ts'
 import type { TemplateFlows } from './examples/templateFlows.ts'
 import type { OperationUsages } from './examples/operationUsages.ts'
 import type { OperationRanker } from './invokers/focusConnectors.ts'
+import type { DocsIndex } from './help/docsIndex.ts'
 import type { Embedder } from './llm/ollamaEmbedder.ts'
 import type { SpeechClient } from './speech/speechClient.ts'
 import { registerHealthRoutes } from './routes/health.ts'
@@ -22,6 +23,7 @@ import { registerExplainRoutes } from './routes/explain.ts'
 import { registerConnectorErrorRoutes } from './routes/connectorError.ts'
 import { registerNotificationRoutes } from './routes/notification.ts'
 import { registerConditionRoutes } from './routes/condition.ts'
+import { registerHelpRoutes } from './routes/help.ts'
 
 export type AppDeps = {
     config: GatewayConfig
@@ -35,6 +37,8 @@ export type AppDeps = {
     operationUsages?: OperationUsages
     /** Picks the operations of a too-large invoker to describe by meaning; without it, by shared words. */
     operationRanker?: OperationRanker
+    /** The documentation the help assistant answers from; without it, every answer says the docs do not cover it. */
+    docs?: DocsIndex
     /** Ranks palette commands by meaning; without it, by shared words. */
     embedder?: Embedder
     /** Turns spoken commands into text; without it, voice input is reported unavailable. */
@@ -58,5 +62,6 @@ export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}
     registerConnectorErrorRoutes(app, deps)
     registerNotificationRoutes(app, deps)
     registerConditionRoutes(app, deps)
+    registerHelpRoutes(app, deps)
     return app
 }

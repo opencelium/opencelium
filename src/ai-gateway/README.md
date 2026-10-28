@@ -48,6 +48,7 @@ npm start                       # http://127.0.0.1:8787
 npm run generate -- jira zammad "Create a Zammad ticket for every Jira issue"
 npm test && npm run typecheck
 npm run eval:commands           # routes 18 prompts through the running gateway, reports misroutes
+npm run eval:help                     # 30 help questions: is the answering page among the sources, are undocumented ones refused
 npm run eval:templates -- --limit 20   # rebuilds templates from their descriptions (each hidden from the examples)
                                        # and scores operations, call placement and fields; --templates on|off|both
 ```
@@ -71,6 +72,7 @@ npm run eval:templates -- --limit 20   # rebuilds templates from their descripti
 | POST | `/connector/explain-error` | `{ language, connector?, invoker?, status: 'DOWN' \| 'AUTH_FAILED' \| 'UNKNOWN', error? }` | `{ summary, cause, checks: string[], fixIn: 'connector' \| 'remoteSystem' \| 'network', kind, durationMs, model }`: why a connector test failed; the error is classified first, the invoker's settings and test call are looked up |
 | POST | `/notification/draft` | `{ language, type?, templateName?, instruction, placeholders: [{ token, description? }], current? }` | `{ subject, body, removedPlaceholders, durationMs, model }`: a notification template text that uses only the given `{{aggregator.arg}}` placeholders |
 | POST | `/condition/suggest` | `{ language, instruction, sources: [{ id, step, system, path }] }` | `{ conjunction, not, rules: [{ left, operator, right }], explanation, durationMs, model }`: an if step's rules from a sentence; sides are source ids or fixed values, operators the editor's own |
+| POST | `/help/ask` | `{ language, messages: [{ role, content }], page?, commands? }` | streamed lines: `{ type: 'sources', question, sources }`, `{ type: 'delta', text }`…, `{ type: 'done', commands }`: an answer from the documentation (`AI_DOCS_DIR`), sources linked to `AI_DOCS_URL`, offered commands from the given catalog |
 | POST | `/speech/transcribe` | WAV audio (`audio/wav`, 16 kHz mono, up to ~30 s) | `{ text, language, durationMs }`: a spoken command, with system names (from the invokers) as vocabulary |
 | POST | `/workflow/generate` | `{ prompt, from, to?, plan?, useTemplates? }` (invoker names, case-insensitive; `plan` = the reviewed plan text) | `{ dsl, issues, attempts, model, templateExampleCount, templates, operationExampleCount }` |
 
@@ -88,6 +90,8 @@ Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAIL
 | `AI_EMBED_MODEL` | `nomic-embed-text` (finds the most similar templates and template scripts; without it, no examples are used) |
 | `AI_COMMAND_MODEL` | `qwen2.5-coder:7b` (picks command palette commands) |
 | `AI_SPEECH_URL` | `http://127.0.0.1:8178` (whisper-server; empty turns voice commands off) |
+| `AI_DOCS_DIR` / `AI_DOCS_URL` | `../../docs` / `https://docs.opencelium.io/en/prod` (the help assistant's documentation, and where it is published) |
+| `AI_HELP_MODEL` | `AI_WORKFLOW_MODEL` (writes help answers; a follow-up is first rewritten by `AI_COMMAND_MODEL`) |
 | `AI_CORS_ORIGINS` | `http://localhost:5173` (comma-separated) |
 | `AI_MAX_REPAIR_ATTEMPTS` | `2` |
 | `AI_CONTEXT_TOKENS` | `16384` |

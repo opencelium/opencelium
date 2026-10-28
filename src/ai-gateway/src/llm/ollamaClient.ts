@@ -36,25 +36,31 @@ type OllamaTagsResponse = {
 const DEFAULT_CHAT_TIMEOUT_MS = 15 * 60_000
 const TAGS_TIMEOUT_MS = 3_000
 
-/** Joins a streamed answer (one JSON object per line) into the content and the final counts. */
-async function readStream(body: AsyncIterable<string>): Promise<ChatResult> {
-    let content = ''
-    let last: OllamaChatChunk = {}
+/** The answer's lines as they arrive, each parsed; an error Ollama sends in the stream is thrown. */
+async function* chunks(body: AsyncIterable<string>): AsyncGenerator<OllamaChatChunk> {
     let buffer = ''
-    const take = (line: string) => {
-        if (!line.trim()) return
+    const parse = (line: string) => {
         const chunk = JSON.parse(line) as OllamaChatChunk
         if (chunk.error) throw new Error(`Ollama chat failed: ${chunk.error}`)
-        content += chunk.message?.content ?? ''
-        last = chunk
+        return chunk
     }
     for await (const part of body) {
         buffer += part
         const lines = buffer.split('\n')
         buffer = lines.pop() ?? ''
-        lines.forEach(take)
+        for (const line of lines) if (line.trim()) yield parse(line)
     }
-    take(buffer)
+    if (buffer.trim()) yield parse(buffer)
+}
+
+/** Joins a streamed answer (one JSON object per line) into the content and the final counts. */
+async function readStream(body: AsyncIterable<string>): Promise<ChatResult> {
+    let content = ''
+    let last: OllamaChatChunk = {}
+    for await (const chunk of chunks(body)) {
+        content += chunk.message?.content ?? ''
+        last = chunk
+    }
     return {
         content,
         promptTokens: last.prompt_eval_count ?? 0,
@@ -69,22 +75,31 @@ async function readStream(body: AsyncIterable<string>): Promise<ChatResult> {
  * default (see `httpPost`).
  */
 export function createOllamaClient(baseUrl: string, chatTimeoutMs = DEFAULT_CHAT_TIMEOUT_MS, post: StreamingPost = httpPost): LlmClient {
+    const open = async (request: ChatRequest) => {
+        const body = JSON.stringify({
+            model: request.model,
+            stream: true,
+            format: request.format,
+            messages: request.messages,
+            options: { temperature: request.temperature, num_ctx: request.contextTokens },
+        })
+        const response = await post(`${baseUrl}/api/chat`, body, AbortSignal.timeout(chatTimeoutMs))
+        if (response.status < 200 || response.status >= 300) {
+            let text = ''
+            for await (const part of response.body) text += part
+            throw new Error(`Ollama chat failed with HTTP ${response.status}: ${text}`)
+        }
+        return response.body
+    }
     return {
         async chat(request: ChatRequest): Promise<ChatResult> {
-            const body = JSON.stringify({
-                model: request.model,
-                stream: true,
-                format: request.format,
-                messages: request.messages,
-                options: { temperature: request.temperature, num_ctx: request.contextTokens },
-            })
-            const response = await post(`${baseUrl}/api/chat`, body, AbortSignal.timeout(chatTimeoutMs))
-            if (response.status < 200 || response.status >= 300) {
-                let text = ''
-                for await (const part of response.body) text += part
-                throw new Error(`Ollama chat failed with HTTP ${response.status}: ${text}`)
+            return readStream(await open(request))
+        },
+
+        async *stream(request: ChatRequest): AsyncIterable<string> {
+            for await (const chunk of chunks(await open(request))) {
+                if (chunk.message?.content) yield chunk.message.content
             }
-            return readStream(response.body)
         },
 
         async listModels(): Promise<string[]> {

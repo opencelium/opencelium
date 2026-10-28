@@ -14,7 +14,7 @@ import { useCommandSuggestions } from './useCommandSuggestions';
 export type AiCommandState =
 	| { status: 'idle' }
 	| { status: 'routing'; prompt: string; startedAt: number }
-	| { status: 'done'; prompt: string; proposal: AiCommandProposal }
+	| { status: 'done'; prompt: string; proposal: AiCommandProposal; isQuestion: boolean }
 	| { status: 'error'; prompt: string; error: 'unreachable' | 'failed' };
 
 const MIN_PROMPT_LENGTH = 3;
@@ -65,17 +65,19 @@ export function useAiCommandAssist({ query, isUnmatched, onRun, onRunIntent }: O
 			const answer = await routeCommand({ prompt, commands: catalog.map(toCatalogItem), page: pathname, language }).unwrap();
 			const proposal = await toCommandProposal(answer, catalog, pageContextOf(pathname));
 			if (id !== requestId.current) return;
-			if (proposal.kind === 'ready' && proposal.isAutoRun) {
+			// "How do I open the schedules?" asks to be told, not taken there: nothing runs by itself for a question.
+			const isQuestion = answer.isQuestion === true;
+			if (!isQuestion && proposal.kind === 'ready' && proposal.isAutoRun) {
 				setState(IDLE);
 				onRun(proposal.phrase);
 				return;
 			}
-			if (proposal.kind === 'action') {
+			if (!isQuestion && proposal.kind === 'action') {
 				setState(IDLE);
 				onRunIntent(proposal.resolved);
 				return;
 			}
-			setState({ status: 'done', prompt, proposal });
+			setState({ status: 'done', prompt, proposal, isQuestion });
 		} catch (error) {
 			if (id !== requestId.current) return;
 			const failure = toAiGenerationError(error);
