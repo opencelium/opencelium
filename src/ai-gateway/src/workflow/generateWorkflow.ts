@@ -6,6 +6,9 @@ import type { z } from 'zod'
 import type { ChatMessage, LlmClient } from '../llm/llmClient.ts'
 import { buildRepairMessage, buildWorkflowSystemPrompt } from './buildWorkflowPrompt.ts'
 import { brokenScripts, repairScripts } from './repairScripts.ts'
+import type { PlanSkeleton } from '../plan/planSkeleton.ts'
+import { flattenSkeleton } from '../plan/skeletonChunks.ts'
+import { STEPS_PER_ANSWER, generateInChunks } from './generateInChunks.ts'
 
 export type GenerateWorkflowDeps = {
     llm: LlmClient
@@ -50,6 +53,8 @@ export type WorkflowConstraint = {
     userMessage: string
     /** Example scripts for a field, shown again when that field's script is repaired. */
     scriptHints?: (field: string) => string
+    /** The plan's structure; a large one is filled in several short answers (see `generateInChunks`). */
+    skeleton?: PlanSkeleton
 }
 
 export async function generateWorkflow(
@@ -58,6 +63,9 @@ export async function generateWorkflow(
     deps: GenerateWorkflowDeps,
     constraint?: WorkflowConstraint,
 ): Promise<GenerateWorkflowResult> {
+    if (constraint?.skeleton && flattenSkeleton(constraint.skeleton.nodes).length > STEPS_PER_ANSWER) {
+        return generateInChunks(constraint.skeleton, connectors, deps, constraint)
+    }
     const schema = constraint?.schema ?? buildConstrainedSchema(connectors)
     const format = toJsonSchema(schema)
     const messages: ChatMessage[] = [
