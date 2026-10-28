@@ -13,8 +13,13 @@ loop. The frontend converts the DSL into graph nodes.
 2. A JSON schema is built **for this request**: one method variant per operation, each allowing only that operation's
    endpoint params and body fields on the connector that owns it. Ollama enforces it while decoding, so unknown
    operations, misplaced operations and invented fields cannot be produced.
+   Invokers too large for the context (Netbox, weclapp, Proxmox, …) are narrowed first (`focusConnectors.ts`): a build
+   from a reviewed plan is told only about the operations the plan calls; otherwise the operations the request names
+   and the example templates call are kept, plus the closest ones in meaning, within half the context.
 3. What a schema cannot express is checked afterwards (`validateWorkflow.ts`): refs point to an earlier method step or an
-   enclosing loop, step ids are unique, response paths exist (unknown paths are warnings).
+   enclosing loop, step ids are unique, response paths exist (unknown paths are warnings), a condition reads a step and
+   `contains` gets a list. Conditions with an obvious intent are rewritten instead (`normalizeCondition.ts`): the right
+   side of `exists`/`empty` is cleared, `= ""` / `!= ""` become `empty` / `exists`, a step value moves to the left.
 4. With `useTemplates` (default on), the closest stored templates (`src/examples/templateFlows.ts`: similarity in meaning
    plus how many of their operations the request's systems offer, on the same side) are shown as worked examples: the
    planner sees their steps, the build also the fields they set. Calls the installed invokers no longer have are marked.
@@ -43,6 +48,8 @@ npm start                       # http://127.0.0.1:8787
 npm run generate -- jira zammad "Create a Zammad ticket for every Jira issue"
 npm test && npm run typecheck
 npm run eval:commands           # routes 18 prompts through the running gateway, reports misroutes
+npm run eval:templates -- --limit 20   # rebuilds templates from their descriptions (each hidden from the examples)
+                                       # and scores operations, call placement and fields; --templates on|off|both
 ```
 
 ## API

@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
+import type { ConnectorSide } from '../dsl/workflowDsl.schema.ts'
 import type { Invoker } from '../invokers/invoker.types.ts'
 import type { InvokerRepository } from '../invokers/invokerRepository.ts'
 import type { Embedder } from '../llm/ollamaEmbedder.ts'
@@ -7,7 +8,7 @@ import { cosine } from './cosine.ts'
 import { type OperationUsage, parseOperationUsages } from './operationUsage.ts'
 
 /** An operation a workflow calls, on the system that owns it, with the other system and the words the plan uses for it. */
-export type OperationCall = { invoker: Invoker; operation: string; counterpart: Invoker | null; text: string }
+export type OperationCall = { side: ConnectorSide; invoker: Invoker; operation: string; counterpart: Invoker | null; text: string }
 
 export type OperationExamples = { operation: string; system: string; usages: OperationUsage[] }
 
@@ -51,7 +52,7 @@ async function loadIndex(dir: string, invokers: InvokerRepository, embedder?: Em
     for (const file of files) {
         let usages: OperationUsage[]
         try {
-            usages = parseOperationUsages(JSON.parse(await readFile(join(dir, file), 'utf8')))
+            usages = parseOperationUsages(JSON.parse(await readFile(join(dir, file), 'utf8')), basename(file, '.json'))
         } catch {
             continue
         }

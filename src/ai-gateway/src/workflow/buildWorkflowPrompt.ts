@@ -13,7 +13,7 @@ function listPaths(paths: FieldPath[], max: number): string {
     return paths.length > max ? `${shown.join(', ')}, ...` : shown.join(', ')
 }
 
-function describeOperation(operation: InvokerOperation, requiredData: string[]): string {
+export function describeOperation(operation: InvokerOperation, requiredData: string[]): string {
     const params = operation.endpointParams.length ? operation.endpointParams.join(', ') : '-'
     return [
         `- ${operation.name}: ${operation.httpMethod} ${operation.endpoint}`,

@@ -39,7 +39,7 @@ describe('parseOperationUsages', () => {
 
     it('records each call with its systems, enclosing loop, endpoint, fixed values and field sources', () => {
         expect(create).toEqual({
-            template: 'Urgent tickets', system: 'Helpdesk', counterpart: 'Tracker', operation: 'CreateTicket',
+            templateId: '', template: 'Urgent tickets', system: 'Helpdesk', counterpart: 'Tracker', operation: 'CreateTicket',
             context: ['for each item of ListIssues issues'],
             endpoint: '/tickets?queue=ListIssues issues.key',
             fields: ['title = item ListIssues issues.fields.summary', 'state = "urgent"', 'article.body = item ListIssues issues.fields.summary'],
@@ -67,7 +67,7 @@ const invokers: InvokerRepository = {
 }
 
 const call = (text: string, invoker: Invoker = helpdesk, operation = 'CreateTicket') =>
-    ({ invoker, operation, counterpart: tracker, text })
+    ({ side: 'to' as const, invoker, operation, counterpart: tracker, text })
 
 describe('createOperationUsages', () => {
     it('finds the calls of an operation on its installed system, the one sharing the plan words first', async () => {

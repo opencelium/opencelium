@@ -2,7 +2,7 @@ import { flattenFieldPaths, normalizePath } from '../invokers/fieldPaths.ts'
 import type { InvokerOperation } from '../invokers/invoker.types.ts'
 import type { WorkflowConnectors } from './buildConstrainedSchema.ts'
 import { checkScript } from './checkScript.ts'
-import { type DslValue, type FieldValue, type LoopStep, type MethodStep, type StepRef, UNARY_CONDITION_OPS, type WorkflowDsl, type WorkflowStep } from './workflowDsl.schema.ts'
+import { type DslValue, type FieldValue, type IfStep, type LoopStep, type MethodStep, type StepRef, UNARY_CONDITION_OPS, type WorkflowDsl, type WorkflowStep } from './workflowDsl.schema.ts'
 
 export type WorkflowIssue = {
     stepId: string
@@ -119,6 +119,39 @@ function checkFieldValue(ctx: Context, scope: Scope, loops: LoopStep[], stepId: 
     }
 }
 
+/**
+ * Whether a ref reads a single declared value: a scalar field reached without passing through an array other than the
+ * loop's own element (`ConfigItem[].Name` is a list of names). Undefined when the invoker does not declare the path.
+ */
+function readsSingleValue(ctx: Context, scope: Scope, loops: LoopStep[], ref: StepRef): boolean | undefined {
+    if (ref.path.includes('[')) return false
+    const target = resolveTarget(ctx, scope, loops, ref.step)
+    if (!target?.operation) return undefined
+    const full = normalizePath(joinPath(target.prefix, ref.path))
+    const field = flattenFieldPaths(target.operation.responseFields).find((candidate) => normalizePath(candidate.path) === full)
+    if (!field) return undefined
+    const ownSegments = normalizePath(target.prefix).split('.').filter(Boolean).length
+    const crossesArray = field.path.split('.').slice(ownSegments, -1).some((segment) => segment.endsWith('[]'))
+    return SCALAR_TYPES.has(field.type) && !crossesArray
+}
+
+/**
+ * What `normalizeCondition` cannot settle: a condition that reads no step is always true or always false, and
+ * contains / not_contains test list membership, so their left side must be a list (a text match is eq).
+ */
+function checkCondition(ctx: Context, scope: Scope, loops: LoopStep[], step: IfStep) {
+    const { left, op, right } = step.condition
+    if (!('ref' in left) && !('ref' in right)) {
+        ctx.issues.push({ stepId: step.id, severity: 'error', message: 'The condition compares two fixed values, so it is always '
+            + 'true or always false. Its left side must read a value from an earlier step or an enclosing loop' })
+        return
+    }
+    if ((op === 'contains' || op === 'not_contains') && 'ref' in left && readsSingleValue(ctx, scope, loops, left.ref)) {
+        ctx.issues.push({ stepId: step.id, severity: 'error', message: `"${op}" tests whether a list holds a value, but `
+            + `"${left.ref.path}" is a single value. Compare it with eq / ne, or put the list on the left` })
+    }
+}
+
 function walk(ctx: Context, steps: WorkflowStep[], scope: Scope, loops: LoopStep[]) {
     for (const step of steps) {
         if (scope.stepIds.has(step.id)) {
@@ -136,6 +169,7 @@ function walk(ctx: Context, steps: WorkflowStep[], scope: Scope, loops: LoopStep
                 if (!UNARY_CONDITION_OPS.has(step.condition.op)) {
                     checkValue(ctx, scope, loops, step.id, step.condition.right, 'Condition right side')
                 }
+                checkCondition(ctx, scope, loops, step)
                 walk(ctx, step.then, scope, loops)
                 break
             case 'loop':

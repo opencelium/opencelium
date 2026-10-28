@@ -3,6 +3,7 @@ import type { OperationCall } from '../examples/operationUsages.ts'
 import { type OperationRef, type PlanSkeleton, type SkeletonNode, operationsIn, rulesFor } from './planSkeleton.ts'
 
 const toCall = (ref: OperationRef, connectors: WorkflowConnectors, text: string): OperationCall => ({
+    side: ref.side,
     invoker: ref.invoker,
     operation: ref.operation.name,
     counterpart: ref.side === 'from' ? connectors.to : connectors.from,

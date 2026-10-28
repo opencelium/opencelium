@@ -6,6 +6,7 @@ import { createOllamaEmbedder } from './llm/ollamaEmbedder.ts'
 import { createScriptExamples } from './examples/scriptExamples.ts'
 import { createTemplateFlows } from './examples/templateFlows.ts'
 import { createOperationUsages } from './examples/operationUsages.ts'
+import { createOperationRanker } from './invokers/focusConnectors.ts'
 import { createWhisperClient } from './speech/speechClient.ts'
 
 const config = loadConfig()
@@ -22,6 +23,7 @@ const app = await buildApp(
         examples,
         templates,
         operationUsages,
+        operationRanker: createOperationRanker(embedder),
         embedder,
         speech: config.speechUrl ? createWhisperClient(config.speechUrl) : undefined,
     },

@@ -1,10 +1,10 @@
 import { readdir, readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import type { Embedder } from '../llm/ollamaEmbedder.ts'
 import { cosine } from './cosine.ts'
 
 /** A transformation from a stored template: the field it fills, the fields it reads (VAR_0, VAR_1, …) and its code. */
-export type ScriptExample = { target: string; inputs: string[]; code: string }
+export type ScriptExample = { target: string; inputs: string[]; code: string; /** File name of the template it came from. */ template?: string }
 
 export type ScriptExamples = {
     /** The most similar stored scripts to a plain-language rule; empty when none is close or the index is unavailable. */
@@ -50,7 +50,7 @@ export async function loadTemplateScripts(dir: string): Promise<ScriptExample[]>
             if (typeof code !== 'string' || !code.trim() || PASS_THROUGH_RE.test(code) || code.length > MAX_CODE_LENGTH) continue
             if (seen.has(code.trim())) continue
             seen.add(code.trim())
-            examples.push({ target: fieldOf(binding.to?.[0]), inputs: (binding.from ?? []).map(fieldOf), code: code.trim() })
+            examples.push({ target: fieldOf(binding.to?.[0]), inputs: (binding.from ?? []).map(fieldOf), code: code.trim(), template: basename(file, '.json') })
         }
     }
     return examples
