@@ -1,7 +1,7 @@
 // Rebuilds stored templates from their descriptions and scores each result against the original: operations, where
 // each call sits (loops / ifs), fields set, and validation errors. The template being rebuilt is hidden from every
 // example source (whole templates, operation usages, scripts), so it measures generation, not copying.
-// Usage: node scripts/evalTemplates.ts [--limit N] [--ids id1,id2] [--templates on|off|both] [--out file]
+// Usage: node scripts/evalTemplates.ts [--limit N] [--ids id1,id2] [--skip id1,id2] [--templates on|off|both] [--out file]
 // Needs Ollama with the workflow and embedding models; runs the gateway in-process, one request at a time.
 import { appendFile, mkdir, readdir, readFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
@@ -20,7 +20,7 @@ import { createOllamaClient } from '../src/llm/ollamaClient.ts'
 import { createOllamaEmbedder } from '../src/llm/ollamaEmbedder.ts'
 
 const { values: args } = parseArgs({ options: {
-    limit: { type: 'string' }, ids: { type: 'string' }, templates: { type: 'string', default: 'both' }, out: { type: 'string' },
+    limit: { type: 'string' }, ids: { type: 'string' }, skip: { type: 'string' }, templates: { type: 'string', default: 'both' }, out: { type: 'string' },
 } })
 
 // A template whose calls are mostly gone from the installed invokers cannot be rebuilt; it would only measure staleness.
@@ -69,7 +69,9 @@ async function loadCases(): Promise<Case[]> {
         if (calls.filter(Boolean).length < calls.length * MIN_CURRENT_SHARE) continue
         cases.push({ id, name: flow.name, prompt: flow.description, from: from.name, to: to?.name, json })
     }
-    return args.limit ? cases.slice(0, Number(args.limit)) : cases
+    // --skip drops cases after --limit, so a resumed run covers the same templates as the interrupted one.
+    const skipped = new Set(args.skip?.split(',').map((id) => id.trim()))
+    return (args.limit ? cases.slice(0, Number(args.limit)) : cases).filter((testCase) => !skipped.has(testCase.id))
 }
 
 type Result = WorkflowScore & { id: string; name: string; useTemplates: boolean; errors: number; warnings: number

@@ -16,6 +16,7 @@ import {
 } from '@entities/invoker/lib/invokerName'
 import type { Invoker } from '@entities/invoker/model/types'
 import { InvokerUploadButton } from '@entities/invoker/components/InvokerUploadButton'
+import { AiInvokerCreateButton } from '@features/ai-assistant/ui/AiInvokerCreate/AiInvokerCreateButton'
 import { InvokerDownloadAction } from '@entities/invoker/components/InvokerDownloadAction'
 import { pickInvokerFile, uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
 import { buildInvokerXml } from '@entities/invoker/lib/invokerXml'
@@ -76,6 +77,7 @@ export const invokerDefinition: EntityDefinition = {
             },
         ],
         headerActions: [
+            { key: 'aiCreate', permissionAction: 'CREATE', render: () => <AiInvokerCreateButton /> },
             { key: 'upload', permissionAction: 'CREATE', render: () => <InvokerUploadButton /> },
         ],
     },
