@@ -66,6 +66,7 @@ npm run eval:templates -- --limit 20   # rebuilds templates from their descripti
 | POST | `/run/fix` | same as `/run/explain` (needs `step`) | `{ body, changes, problems, durationMs, model }`: the failed call's corrected request body; references the step had are kept, or the body comes back unchanged with advice only |
 | POST | `/invoker/draft` | `{ docs, name? }` (OpenAPI/Swagger JSON or YAML up to 20 MB, or docs as text/HTML) | `{ draft, source: 'openapi' \| 'ai', isTruncated, durationMs }`: an OpenAPI document is converted without the model; other docs are read by it |
 | POST | `/invoker/xml` | `{ draft }` (the reviewed draft) | `{ xml }`: the backend's invoker XML, with a separate `TestConnection` operation |
+| POST | `/mapping/suggest` | `{ language, instruction?, target: { step, operation, system, fields: [{ path, current }] }, sources: [{ id, step, system, path }] }` | `{ suggestions: [{ field, source, reason }], durationMs, model }`: which earlier value fills each body field; the model can only choose among the given fields and source ids |
 | POST | `/speech/transcribe` | WAV audio (`audio/wav`, 16 kHz mono, up to ~30 s) | `{ text, language, durationMs }`: a spoken command, with system names (from the invokers) as vocabulary |
 | POST | `/workflow/generate` | `{ prompt, from, to?, plan?, useTemplates? }` (invoker names, case-insensitive; `plan` = the reviewed plan text) | `{ dsl, issues, attempts, model, templateExampleCount, templates, operationExampleCount }` |
 

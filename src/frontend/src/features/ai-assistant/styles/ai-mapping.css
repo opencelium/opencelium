@@ -1,0 +1,67 @@
+.aiMapping {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.aiMappingHint,
+.aiMappingNote {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.aiMappingBar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.aiMappingRows {
+  margin: 0;
+  padding: 4px 8px;
+  max-height: 280px;
+  overflow: auto;
+  list-style: none;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-background-surface);
+}
+
+.aiMappingRow {
+  padding: 3px 0;
+}
+
+.aiMappingRowText {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.aiMappingField,
+.aiMappingSource {
+  font-family: var(--typography-font-family-mono);
+  font-size: 12px;
+}
+
+.aiMappingField {
+  font-weight: 600;
+}
+
+.aiMappingArrow,
+.aiMappingReason,
+.aiMappingReplaces {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.aiMappingReplaces {
+  color: var(--color-status-warning-fg);
+}
+
+.aiMappingError {
+  color: var(--color-status-error-fg);
+}
