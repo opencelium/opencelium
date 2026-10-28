@@ -71,5 +71,16 @@
       "byName": "Benachrichtigungsvorlage „{{name}}“ löschen?",
       "byId": "Benachrichtigungsvorlage #{{id}} löschen?"
     }
+  },
+  "aiDraft": {
+    "open": "Mit KI entwerfen",
+    "instructionLabel": "Wofür ist diese Benachrichtigung?",
+    "instructionPlaceholder": "z. B. Das CMDB-Team informieren, dass der nächtliche Abgleich von i-doit nach OTRS fehlgeschlagen ist und wie viele Datensätze betroffen sind. Wählen Sie zuerst den Daten-Aggregator, um seine Werte zu verwenden.",
+    "generate": "Text entwerfen",
+    "close": "Schließen",
+    "failed": "Die KI konnte keinen Text entwerfen. Bitte gleich noch einmal versuchen.",
+    "removed": "Nicht vorhandene Platzhalter entfernt: {{names}}",
+    "use": "Als Betreff und Text übernehmen",
+    "discard": "Verwerfen"
   }
 }

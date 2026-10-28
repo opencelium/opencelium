@@ -181,6 +181,25 @@ export type ConnectorErrorExplanation = {
 	model: string;
 };
 
+/** Mirrors `src/ai-gateway/src/notification/draftNotification.ts`. */
+export type DraftNotificationRequest = {
+	language: 'en' | 'de';
+	type: string;
+	templateName: string;
+	instruction: string;
+	placeholders: { token: string; description: string }[];
+	current: { subject: string; body: string };
+};
+
+export type NotificationDraft = {
+	subject: string;
+	body: string;
+	/** Placeholders the model invented; removed from the text. */
+	removedPlaceholders: string[];
+	durationMs: number;
+	model: string;
+};
+
 /** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */
 export type GenerateScriptRequest = {
 	prompt: string;
