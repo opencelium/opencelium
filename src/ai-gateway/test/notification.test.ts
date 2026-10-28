@@ -32,19 +32,21 @@ describe('POST /notification/draft', () => {
         expect(response.json()).toMatchObject({ ...good, removedPlaceholders: [] })
         const told = requests[0]?.messages[1]?.content ?? ''
         expect(told).toContain('- {{SyncStats.failedCount}}: records that failed')
+        expect(told).toContain('- {SCHEDULER_TITLE}: title of the schedule')
+        expect(told).toContain('filled only for "post" notifications')
         expect(told).toContain('sent via email')
         expect(told).toContain('Write it in German.')
         expect(requests).toHaveLength(1)
     })
 
     it('sends invented placeholders back once, then removes the ones still there', async () => {
-        const invented = { subject: 'Sync {{schedule.name}} fehlgeschlagen', body: '{{SyncStats.failedCount}} Fehler um {{run.time}}.' }
+        const invented = { subject: 'Sync {{schedule.name}} fehlgeschlagen', body: '{{SyncStats.failedCount}} Fehler in {SCHEDULER_TITLE} um {{run.time}} {RUN_TIME}.' }
         const { app, requests } = await appAnswering(invented)
         const response = await app.inject({ method: 'POST', url: '/notification/draft', payload: request })
         expect(requests).toHaveLength(2)
-        expect(requests[1]?.messages.at(-1)?.content).toContain('These placeholders do not exist: {{schedule.name}}, {{run.time}}')
-        expect(response.json()).toMatchObject({ subject: 'Sync fehlgeschlagen', body: '{{SyncStats.failedCount}} Fehler um .',
-            removedPlaceholders: ['{{schedule.name}}', '{{run.time}}'] })
+        expect(requests[1]?.messages.at(-1)?.content).toContain('These placeholders do not exist: {{schedule.name}}, {{run.time}}, {RUN_TIME}')
+        expect(response.json()).toMatchObject({ subject: 'Sync fehlgeschlagen', body: '{{SyncStats.failedCount}} Fehler in {SCHEDULER_TITLE} um .',
+            removedPlaceholders: ['{{schedule.name}}', '{{run.time}}', '{RUN_TIME}'] })
     })
 
     it('needs an instruction', async () => {

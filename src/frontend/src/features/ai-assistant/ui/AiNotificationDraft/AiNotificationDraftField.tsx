@@ -17,7 +17,7 @@ export function AiNotificationDraftField({ mode }: { mode?: Mode }) {
 	if (!isOpen) {
 		return (
 			<div className="aiNotificationToggle">
-				<Button iconLeft="sparkles" onClick={() => setIsOpen(true)} testId="ai-notification-open">{t('notificationTemplate.aiDraft.open')}</Button>
+				<Button iconLeft="sparkles" onClick={() => setIsOpen(true)} testId="ai-notification-open">{t('notification-template.aiDraft.open')}</Button>
 			</div>
 		);
 	}
