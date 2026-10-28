@@ -214,6 +214,15 @@ export const notificationTemplateDefinition: EntityDefinition = {
             },
         },
         {
+            // Not stored: the AI drafting panel for subject and body, placed at the top of the content step.
+            name: 'aiDraft',
+            type: 'other',
+            ui: {
+                component: 'input',
+                overrideKey: 'notificationTemplateAiDraft',
+            },
+        },
+        {
             name: 'aggregator',
             label: `${baseKey}.fields.aggregator.label`,
             type: 'other',
@@ -235,7 +244,7 @@ export const notificationTemplateDefinition: EntityDefinition = {
         },
         {
             id: 'template-content',
-            fields: ['aggregator', 'subject', 'body'],
+            fields: ['aiDraft', 'aggregator', 'subject', 'body'],
         },
     ],
 

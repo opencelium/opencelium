@@ -71,5 +71,16 @@
       "byName": "Delete notification template \"{{name}}\"?",
       "byId": "Delete notification template #{{id}}?"
     }
+  },
+  "aiDraft": {
+    "open": "Draft with AI",
+    "instructionLabel": "What is this notification for?",
+    "instructionPlaceholder": "e.g. Tell the CMDB team that the nightly i-doit to OTRS sync failed and how many records were affected. Pick the data aggregator first to use its values.",
+    "generate": "Draft text",
+    "close": "Close",
+    "failed": "The AI could not draft the text. Try again in a moment.",
+    "removed": "Removed placeholders that do not exist: {{names}}",
+    "use": "Use as subject and body",
+    "discard": "Discard"
   }
 }

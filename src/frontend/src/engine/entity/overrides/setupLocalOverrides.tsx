@@ -8,6 +8,7 @@ import {ParentCategoryEditor} from "@shared/ui/wizard-step/editor/parent-categor
 import {AggregatorWithArgsEditor} from "@shared/ui/wizard-step/editor/aggregator-with-args-editor/AggregatorWithArgsEditor.tsx";
 import {TemplateSubjectEditor} from "@shared/ui/wizard-step/editor/template-subject-editor/TemplateSubjectEditor.tsx";
 import {TemplateBodyEditor} from "@shared/ui/wizard-step/editor/template-body-editor/TemplateBodyEditor.tsx";
+import {AiNotificationDraftField} from "@features/ai-assistant/ui/AiNotificationDraft/AiNotificationDraftField";
 import {DataAggregatorArgsEditor} from "@shared/ui/wizard-step/editor/data-aggregator-args-editor/DataAggregatorArgsEditor.tsx";
 import {DataAggregatorScriptEditor} from "@shared/ui/wizard-step/editor/data-aggregator-script-editor/DataAggregatorScriptEditor.tsx";
 import {InvokerRequiredDataEditor} from "@shared/ui/wizard-step/editor/invoker-required-data-editor/InvokerRequiredDataEditor.tsx";
@@ -49,6 +50,7 @@ export function setupLocalOverrides() {
     overrideRegistry.registerField('templateBodyEditor', ({ field, mode }) => (
         <TemplateBodyEditor name={field.name} label={field.label} mode={mode} />
     ));
+    overrideRegistry.registerField('notificationTemplateAiDraft', ({ mode }) => <AiNotificationDraftField mode={mode} />);
     overrideRegistry.registerField('dataAggregatorArgsEditor', ({ field, mode }) => (
         <DataAggregatorArgsEditor name={field.name} label={field.label} mode={mode} />
     ));
