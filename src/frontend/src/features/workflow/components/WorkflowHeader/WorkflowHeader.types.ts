@@ -24,6 +24,8 @@ export type WorkflowHeaderProps = {
 	problemsSlot?: ReactNode;
 	/** The AI assistant's entry point, between the problems badge and Save; absent when no AI gateway is configured. */
 	assistantSlot?: ReactNode;
+	/** Beside the description: explains the workflow and proposes a description; absent when no AI gateway is configured. */
+	describeSlot?: ReactNode;
 	/** Set only for a saved workflow, like `schedulesSlot`; the `…` menu's Schedules entry calls it on narrow screens. */
 	onToggleSchedules?: () => void;
 	/** Whether this workflow has been saved at least once (has a persisted connectionId).

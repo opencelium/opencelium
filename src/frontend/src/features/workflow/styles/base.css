@@ -420,6 +420,9 @@ textarea {
 }
 
 .headerInlineDescriptionWrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   min-width: 0;
   max-width: 70%;
 }

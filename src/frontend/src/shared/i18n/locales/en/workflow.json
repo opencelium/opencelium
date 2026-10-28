@@ -1476,6 +1476,17 @@
       "discard": "Discard",
       "applied_one": "{{count}} field mapped",
       "applied_other": "{{count}} fields mapped"
+    },
+    "explain": {
+      "open": "Explain this workflow and suggest a description",
+      "noSteps": "Add steps first; an empty workflow has nothing to explain",
+      "title": "What this workflow does",
+      "working": "Reading the workflow…",
+      "failed": "The AI could not explain the workflow. Try again in a moment.",
+      "whatItDoes": "Step by step",
+      "description": "Suggested description (you can edit it)",
+      "use": "Use as description",
+      "close": "Close"
     }
   }
 }

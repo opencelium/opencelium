@@ -18,6 +18,7 @@ import { registerSpeechRoutes } from './routes/speech.ts'
 import { registerRunRoutes } from './routes/run.ts'
 import { registerInvokerDraftRoutes } from './routes/invokerDraft.ts'
 import { registerMappingRoutes } from './routes/mapping.ts'
+import { registerExplainRoutes } from './routes/explain.ts'
 
 export type AppDeps = {
     config: GatewayConfig
@@ -50,5 +51,6 @@ export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}
     registerRunRoutes(app, deps)
     registerInvokerDraftRoutes(app, deps)
     registerMappingRoutes(app, deps)
+    registerExplainRoutes(app, deps)
     return app
 }

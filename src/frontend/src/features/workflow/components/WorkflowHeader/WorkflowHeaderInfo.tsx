@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { HeaderEditableField } from '../header/HeaderEditableField/HeaderEditableField';
 import { EMPTY_NAME_LABEL } from './useWorkflowHeaderState';
@@ -6,9 +7,10 @@ type Props = {
 	loading: boolean;
 	readOnly: boolean;
 	state: ReturnType<typeof import('./useWorkflowHeaderState').useWorkflowHeaderState>;
+	describeSlot?: ReactNode;
 };
 
-export function WorkflowHeaderInfo({ loading, readOnly, state }: Props) {
+export function WorkflowHeaderInfo({ loading, readOnly, state, describeSlot }: Props) {
 	if (loading) return <span className='headerInlineLoading' aria-hidden />;
 
 	return (
@@ -66,6 +68,7 @@ export function WorkflowHeaderInfo({ loading, readOnly, state }: Props) {
 							{state.description}
 						</div>
 					</Tooltip>
+					{!readOnly && describeSlot}
 				</div>
 			)}
 		</>
