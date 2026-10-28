@@ -200,6 +200,28 @@ export type NotificationDraft = {
 	model: string;
 };
 
+/** Mirrors `src/ai-gateway/src/condition/suggestCondition.ts`. */
+export type SuggestConditionRequest = {
+	language: 'en' | 'de';
+	instruction: string;
+	sources: { id: string; step: string; system: string; path: string }[];
+};
+
+export type SuggestedConditionRule = {
+	left: string;
+	operator: string;
+	right: { kind: 'none' } | { kind: 'value'; value: string } | { kind: 'source'; source: string };
+};
+
+export type ConditionSuggestion = {
+	conjunction: 'and' | 'or';
+	not: boolean;
+	rules: SuggestedConditionRule[];
+	explanation: string;
+	durationMs: number;
+	model: string;
+};
+
 /** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */
 export type GenerateScriptRequest = {
 	prompt: string;

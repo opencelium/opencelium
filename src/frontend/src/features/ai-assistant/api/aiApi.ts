@@ -1,7 +1,7 @@
 import { baseApi } from '@shared/api/baseApi';
 import { runtimeConfig } from '@shared/config/runtimeConfig';
 import type {
-	AiHealth, ConnectorErrorExplanation, DraftNotificationRequest, NotificationDraft, ExplainConnectorErrorRequest, ExplainWorkflowRequest, WorkflowExplanation, GenerateWorkflowRequest, InvokerDraft, SuggestMappingRequest, SuggestMappingResponse, InvokerDraftRequest, InvokerDraftResponse, RunExplanation, RunFailureRequest, RunFix, GenerateWorkflowResponse, PlanWorkflowResponse,
+	AiHealth, ConditionSuggestion, SuggestConditionRequest, ConnectorErrorExplanation, DraftNotificationRequest, NotificationDraft, ExplainConnectorErrorRequest, ExplainWorkflowRequest, WorkflowExplanation, GenerateWorkflowRequest, InvokerDraft, SuggestMappingRequest, SuggestMappingResponse, InvokerDraftRequest, InvokerDraftResponse, RunExplanation, RunFailureRequest, RunFix, GenerateWorkflowResponse, PlanWorkflowResponse,
 	RouteCommandRequest, RouteCommandResponse, SearchCommandsRequest, SearchCommandsResponse, TranscribeSpeechResponse,
 } from '../model/aiGateway.types';
 
@@ -70,6 +70,9 @@ export const aiApi = baseApi.injectEndpoints({
 		}),
 		draftNotification: b.mutation<NotificationDraft, DraftNotificationRequest>({
 			query: (body) => ({ url: `${runtimeConfig.aiUrl}/notification/draft`, method: 'POST', body, customOptions: quiet }),
+		}),
+		suggestCondition: b.mutation<ConditionSuggestion, SuggestConditionRequest>({
+			query: (body) => ({ url: `${runtimeConfig.aiUrl}/condition/suggest`, method: 'POST', body, customOptions: quiet }),
 		}),
 		routeCommand: b.mutation<RouteCommandResponse, RouteCommandRequest>({
 			query: (body) => ({

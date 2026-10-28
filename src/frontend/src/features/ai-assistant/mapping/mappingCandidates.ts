@@ -30,16 +30,23 @@ function loopArraysAround(connection: Connection, index: string): LoopArray[] {
 const joinKey = (path: string, key: string) => (path ? `${path}.${key}` : key);
 
 /**
- * The response's leaves as paths. An array a loop around the step runs over is read at the loop's current element
- * (`result[i].title`); any other array at its first element, which is what a single value from it means.
+ * How an array no surrounding loop runs over is read: at its first element, which is what one value from it means for
+ * a body field, or as all elements, which is what a condition such as "the names contain X" needs.
  */
-function leafPaths(body: unknown, loops: LoopArray[], color: string): string[] {
+export type OtherArrays = 'first' | 'all';
+
+/**
+ * The response's leaves as paths. An array a loop around the step runs over is read at the loop's current element
+ * (`result[i].title`); any other array as `otherArrays` says.
+ */
+function leafPaths(body: unknown, loops: LoopArray[], color: string, otherArrays: OtherArrays): string[] {
 	const paths: string[] = [];
 	const visit = (value: unknown, path: string, plainPath: string, depth: number) => {
 		if (depth > MAX_DEPTH) return;
 		if (Array.isArray(value)) {
 			const loop = loops.find((candidate) => candidate.color === color.toUpperCase() && candidate.path === plainPath);
-			visit(value[0], `${path}[${loop?.iterator ?? 0}]`, plainPath, depth + 1);
+			const accessor = loop?.iterator ?? (otherArrays === 'all' ? '*' : '0');
+			visit(value[0], `${path}[${accessor}]`, plainPath, depth + 1);
 			return;
 		}
 		if (value !== null && typeof value === 'object') {
@@ -52,13 +59,10 @@ function leafPaths(body: unknown, loops: LoopArray[], color: string): string[] {
 	return paths;
 }
 
-/** Every value the earlier steps the editor allows can supply to `method`, nearest first. */
-export function collectMappingSources(connection: Connection, method: MethodWithId): MappingSource[] {
-	const loops = loopArraysAround(connection, method.index);
+function sourcesOf(methods: MethodWithId[], loops: LoopArray[], otherArrays: OtherArrays): MappingSource[] {
 	const sources: MappingSource[] = [];
-	const methods = [...getEligibleReferenceMethods(connection, method)].reverse();
 	for (const source of methods) {
-		for (const path of leafPaths(source.response?.success?.body?.fields, loops, source.color)) {
+		for (const path of leafPaths(source.response?.success?.body?.fields, loops, source.color, otherArrays)) {
 			if (sources.length >= MAX_SOURCES) return sources;
 			sources.push({
 				id: `s${sources.length + 1}`, methodId: source.id, step: source.label || source.name,
@@ -67,6 +71,20 @@ export function collectMappingSources(connection: Connection, method: MethodWith
 		}
 	}
 	return sources;
+}
+
+/** Every value the earlier steps the editor allows can supply to `method`, nearest first. */
+export function collectMappingSources(connection: Connection, method: MethodWithId): MappingSource[] {
+	const methods = [...getEligibleReferenceMethods(connection, method)].reverse();
+	return sourcesOf(methods, loopArraysAround(connection, method.index), 'first');
+}
+
+/**
+ * The values a condition at `index` can compare: from the steps the condition dialog offers (`methods`, nearest last),
+ * lists it does not loop over read whole.
+ */
+export function collectConditionSources(connection: Connection, methods: MethodWithId[], index: string): MappingSource[] {
+	return sourcesOf([...methods].reverse(), loopArraysAround(connection, index), 'all');
 }
 
 const asText = (value: unknown) => (typeof value === 'string' ? value : value === null || value === undefined ? '' : JSON.stringify(value));
