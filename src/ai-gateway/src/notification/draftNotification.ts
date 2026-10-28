@@ -29,13 +29,27 @@ export type NotificationDraft = z.infer<typeof answerSchema> & {
 
 export type DraftNotificationDeps = { llm: LlmClient; model: string; contextTokens: number }
 
-const PLACEHOLDER_RE = /\{\{[^{}]*\}\}/g
+// Aggregator values ({{agg.arg}}) and the built-in ones ({SCHEDULER_TITLE}); the double-brace form is tried first.
+const PLACEHOLDER_RE = /\{\{[^{}]*\}\}|\{[A-Z][A-Z_]*\}/g
+
+/** Values every template may use, whatever its aggregator (docs: guides/schedule-and-notify › Notifications). */
+export const BUILT_IN_PLACEHOLDERS: { token: string; description: string }[] = [
+    { token: '{USER_NAME}', description: 'first name of the user the notification goes to' },
+    { token: '{USER_SURNAME}', description: 'last name of that user' },
+    { token: '{USER_TITLE}', description: 'title of that user' },
+    { token: '{USER_DEPARTMENT}', description: 'department of that user' },
+    { token: '{CONNECTION_ID}', description: 'id of the workflow' },
+    { token: '{CONNECTION_NAME}', description: 'name of the workflow' },
+    { token: '{SCHEDULER_ID}', description: 'id of the schedule' },
+    { token: '{SCHEDULER_TITLE}', description: 'title of the schedule' },
+]
 const MAX_ATTEMPTS = 2
 
 const SYSTEM_PROMPT = `You write notification texts for OpenCelium, an integration platform that runs scheduled
 workflows. A notification is sent before or after a scheduled run, or when it fails. Write a subject and a body.
 - Write for the people who receive it: what happened, which workflow or data it is about, and what to do if anything.
-- Insert dynamic values only with the placeholders listed, written exactly as listed ({{name.arg}}); never invent one.
+- Insert dynamic values only with the placeholders listed, written exactly as listed ({SCHEDULER_TITLE}, {{name.arg}});
+  never invent one. Prefer the schedule and workflow names so the reader knows which run it is about.
   If no placeholder fits, write the text without one.
 - E-mail: a short greeting, two to five short sentences or a short list, and a sign-off line. Chat tools (Teams, Slack,
   ...): one to three short lines, no greeting or sign-off; the subject is a short title.
@@ -45,9 +59,12 @@ Answer with JSON only.`
 const answerFormat = toJsonSchema(answerSchema)
 
 function describe(request: DraftNotificationRequest): string {
-    const placeholders = request.placeholders.length
-        ? request.placeholders.map((placeholder) => `- ${placeholder.token}${placeholder.description ? `: ${placeholder.description}` : ''}`).join('\n')
-        : '- (none: write the text without dynamic values)'
+    const line = (placeholder: { token: string; description: string }) =>
+        `- ${placeholder.token}${placeholder.description ? `: ${placeholder.description}` : ''}`
+    const aggregator = request.placeholders.length
+        ? `\nFrom the template's data aggregator (filled only for "post" notifications, sent after a run):\n${request.placeholders.map(line).join('\n')}`
+        : ''
+    const placeholders = `Always available:\n${BUILT_IN_PLACEHOLDERS.map(line).join('\n')}${aggregator}`
     const current = request.current.subject || request.current.body
         ? `\n\nCurrent text (change it as asked; keep what the request does not mention):\nSubject: ${request.current.subject}\nBody:\n${request.current.body}`
         : ''
@@ -65,7 +82,7 @@ const unknownPlaceholders = (text: string, allowed: ReadonlySet<string>) =>
 
 /** A subject and body that use only the listed placeholders; invented ones are sent back once, then removed. */
 export async function draftNotification(request: DraftNotificationRequest, deps: DraftNotificationDeps): Promise<NotificationDraft> {
-    const allowed = new Set(request.placeholders.map((placeholder) => placeholder.token))
+    const allowed = new Set([...BUILT_IN_PLACEHOLDERS, ...request.placeholders].map((placeholder) => placeholder.token))
     const messages: ChatMessage[] = [{ role: 'system', content: SYSTEM_PROMPT }, { role: 'user', content: describe(request) }]
     let durationMs = 0
     let draft: z.infer<typeof answerSchema> | undefined
