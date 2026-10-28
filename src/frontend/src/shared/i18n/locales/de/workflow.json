@@ -1476,6 +1476,17 @@
       "discard": "Verwerfen",
       "applied_one": "{{count}} Feld zugeordnet",
       "applied_other": "{{count}} Felder zugeordnet"
+    },
+    "explain": {
+      "open": "Diesen Workflow erklären und eine Beschreibung vorschlagen",
+      "noSteps": "Fügen Sie zuerst Schritte hinzu; ein leerer Workflow lässt sich nicht erklären",
+      "title": "Was dieser Workflow tut",
+      "working": "Der Workflow wird gelesen…",
+      "failed": "Die KI konnte den Workflow nicht erklären. Bitte gleich noch einmal versuchen.",
+      "whatItDoes": "Schritt für Schritt",
+      "description": "Vorgeschlagene Beschreibung (bearbeitbar)",
+      "use": "Als Beschreibung übernehmen",
+      "close": "Schließen"
     }
   }
 }

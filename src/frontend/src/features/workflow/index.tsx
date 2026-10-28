@@ -23,6 +23,7 @@ import { WorkflowProblemsBadge } from './problems/WorkflowProblemsBadge';
 import { applyProblemFocus } from './problems/applyProblemFocus';
 import { useAiPromptPanel } from '@features/ai-assistant/hooks/useAiPromptPanel';
 import { AiHeaderButton } from '@features/ai-assistant/ui/AiHeaderButton';
+import { AiWorkflowExplainButton } from '@features/ai-assistant/ui/AiWorkflowExplain/AiWorkflowExplainButton';
 import { AiPromptPanel } from '@features/ai-assistant/ui/AiPromptPanel/AiPromptPanel';
 import { useWorkflowIntent } from './intent/useWorkflowIntent';
 
@@ -133,6 +134,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           validateTitle, onSave: handleSave, confirmBeforeSave,
           problemsSlot: <WorkflowProblemsBadge issues={problems.issues} onOpen={problems.openPanel} />,
           assistantSlot: ai.isConfigured && !readOnly ? <AiHeaderButton {...ai.button} /> : null,
+          describeSlot: ai.isConfigured && !readOnly ? <AiWorkflowExplainButton nodes={canvasNodes} edges={workflow.edges}
+            title={headerState.title} onUseDescription={(description) => {
+              setHeaderState((current) => ({ ...current, description }));
+              changes.markDirty();
+            }} /> : null,
           saveDisabled: isLoading || !hasConnectionChanges,
           onOpenHistory: handleOpenHistory,
           readOnly: readOnly || isTestRunLocked, testRunLocked: isTestRunLocked,

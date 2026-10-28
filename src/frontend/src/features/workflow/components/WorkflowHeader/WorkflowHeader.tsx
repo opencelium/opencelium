@@ -9,7 +9,7 @@ import { useWorkflowHeaderState } from './useWorkflowHeaderState';
 
 export function WorkflowHeader({
 	onOpenHistory, onSave, confirmBeforeSave, onMenuItemSelect, menuLoadingItemId,
-	saveDisabled = false, readOnly = false, testRunLocked = false, loading = false, schedulesSlot, problemsSlot, assistantSlot, onToggleSchedules, hasSavedConnection = false, ...stateProps
+	saveDisabled = false, readOnly = false, testRunLocked = false, loading = false, schedulesSlot, problemsSlot, assistantSlot, describeSlot, onToggleSchedules, hasSavedConnection = false, ...stateProps
 }: WorkflowHeaderProps) {
 	const { t } = useI18n('workflow');
 	const state = useWorkflowHeaderState({
@@ -90,7 +90,7 @@ export function WorkflowHeader({
 		<>
 			<div className={`headerCard ${state.nameError ? 'headerCardWithInlineError' : ''}`}>
 				<div className='headerInlineInfo'>
-					<WorkflowHeaderInfo loading={loading} readOnly={readOnly} state={state} />
+					<WorkflowHeaderInfo loading={loading} readOnly={readOnly} state={state} describeSlot={describeSlot} />
 				</div>
 				<WorkflowHeaderActions items={menuItems} loadingItemId={menuLoadingItemId}
 					onOpenHistory={onOpenHistory} onMenuItemSelect={onMenuItemSelect}

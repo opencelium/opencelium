@@ -156,6 +156,11 @@ export type MappingSuggestion = { field: string; source: string; reason: string 
 
 export type SuggestMappingResponse = { suggestions: MappingSuggestion[]; durationMs: number; model: string };
 
+/** Mirrors `src/ai-gateway/src/explain/explainWorkflow.ts`. */
+export type ExplainWorkflowRequest = { language: 'en' | 'de'; title: string; outline: string };
+
+export type WorkflowExplanation = { description: string; explanation: string[]; durationMs: number; model: string };
+
 /** Mirrors `src/ai-gateway/src/script/generateScript.ts`. */
 export type GenerateScriptRequest = {
 	prompt: string;
