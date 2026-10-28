@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "eval:commands": "node scripts/evalCommandRouting.ts"
+    "eval:commands": "node scripts/evalCommandRouting.ts",
+    "eval:templates": "node scripts/evalTemplates.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.1",

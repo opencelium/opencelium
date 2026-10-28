@@ -29,6 +29,8 @@ const REFERENCE_RE = /#(\w+)\.\((?:response|request)\)\.([\w.[\]*$-]+)/g
 // JSON-RPC envelope keys repeat on every call of an RPC API and say nothing about this call.
 const ENVELOPE_KEYS = new Set(['method', 'id', 'jsonrpc', 'version', 'apikey', 'language'])
 
+export const isEnvelopeKey = (key: string) => ENVELOPE_KEYS.has(key)
+
 export const str = (value: unknown) => (typeof value === 'string' ? value.trim() : '')
 export const list = <T>(value: unknown): T[] => (Array.isArray(value) ? value as T[] : [])
 

@@ -9,6 +9,8 @@ import {
  * to any request that uses the same operation, whatever the task or the other system.
  */
 export type OperationUsage = {
+    /** Template file name and display name. */
+    templateId: string
     template: string
     /** The template's invoker names for the calling side and the other side, as written in the template. */
     system: string
@@ -66,7 +68,7 @@ function fieldsOf(method: RawMethod, bindings: RawBinding[], methodByColor: Map<
 }
 
 /** Every call in a template file's JSON; an unreadable template has none. */
-export function parseOperationUsages(json: unknown): OperationUsage[] {
+export function parseOperationUsages(json: unknown, templateId = ''): OperationUsage[] {
     const { template, connection } = readConnection(json)
     const sides: [RawConnector | undefined, RawConnector | undefined][] = [
         [connection.fromConnector, connection.toConnector], [connection.toConnector, connection.fromConnector],
@@ -79,6 +81,7 @@ export function parseOperationUsages(json: unknown): OperationUsage[] {
             const operation = str(method.name)
             if (!operation) return []
             return [{
+                templateId,
                 template: str(template.name),
                 system: str(connector?.invoker?.name),
                 counterpart: str(other?.invoker?.name),

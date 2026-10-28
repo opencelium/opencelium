@@ -1,6 +1,7 @@
 import { normalizePath } from '../invokers/fieldPaths.ts'
 import type { Assignment, DslValue, FieldAssignment, FieldValue, StepRef, WorkflowDsl, WorkflowStep } from './workflowDsl.schema.ts'
 import { unescapeScriptCode } from './checkScript.ts'
+import { normalizeCondition } from './normalizeCondition.ts'
 
 /** A loop as seen by later steps: what it iterates, in method terms when that is known. */
 type LoopInfo = {
@@ -99,7 +100,7 @@ function normalizeSteps(steps: WorkflowStep[], scope: Scope, enclosing: LoopInfo
                 return normalized
             }
             case 'if': {
-                const condition = { ...step.condition, left: value(step.condition.left), right: value(step.condition.right) }
+                const condition = normalizeCondition({ ...step.condition, left: value(step.condition.left), right: value(step.condition.right) })
                 return { ...step, condition, then: normalizeSteps(step.then, scope, enclosing) }
             }
             case 'loop': {

@@ -32,7 +32,7 @@ const embedder: Embedder = {
 describe('loadTemplateScripts', () => {
     it('keeps non-trivial scripts once, with the field they fill and the fields they read', async () => {
         expect(await loadTemplateScripts(templateDir())).toEqual([
-            { target: 'ConfigItem.InciState', inputs: ['result[i].cmdb_status_title'], code: mapping },
+            { target: 'ConfigItem.InciState', inputs: ['result[i].cmdb_status_title'], code: mapping, template: 'a' },
         ])
     })
 

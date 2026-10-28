@@ -6,6 +6,7 @@ import type { LlmClient } from './llm/llmClient.ts'
 import type { ScriptExamples } from './examples/scriptExamples.ts'
 import type { TemplateFlows } from './examples/templateFlows.ts'
 import type { OperationUsages } from './examples/operationUsages.ts'
+import type { OperationRanker } from './invokers/focusConnectors.ts'
 import type { Embedder } from './llm/ollamaEmbedder.ts'
 import type { SpeechClient } from './speech/speechClient.ts'
 import { registerHealthRoutes } from './routes/health.ts'
@@ -25,6 +26,8 @@ export type AppDeps = {
     templates?: TemplateFlows
     /** How templates call each operation, shown when building; without it, operations are filled from the invoker alone. */
     operationUsages?: OperationUsages
+    /** Picks the operations of a too-large invoker to describe by meaning; without it, by shared words. */
+    operationRanker?: OperationRanker
     /** Ranks palette commands by meaning; without it, by shared words. */
     embedder?: Embedder
     /** Turns spoken commands into text; without it, voice input is reported unavailable. */
