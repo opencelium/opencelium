@@ -6,7 +6,9 @@ export type WorkflowProblem =
 	/** Set on the node by a rejected save or test run (see useWorkflowValidation). */
 	| { kind: 'validation'; message: string }
 	| { kind: 'test-run'; message: string | null }
-	| { kind: 'connector'; status: 'AUTH_FAILED' | 'DOWN'; lastError: string | null }
+	| { kind: 'connector'; status: 'AUTH_FAILED' | 'DOWN'; lastError: string | null;
+		/** Which connector, so its error can be explained and its settings opened. */
+		connector: { connectorId: number; title: string; invokerName: string } }
 	| { kind: 'binding'; reason: LensInvalidReason; count: number }
 	/** References into a response-body field the provider does not declare. */
 	| { kind: 'unknown-path'; count: number }
@@ -96,7 +98,8 @@ const connectorProblem = (node: WorkflowNodeModel, liveHealth: Params['liveHealt
 	const status = live?.status ?? connector.status;
 	// The same pair isConnectorConnectionError checks, spelled out so the union narrows.
 	if (status !== 'AUTH_FAILED' && status !== 'DOWN') return null;
-	return { kind: 'connector', status, lastError: live?.lastTestError ?? connector.lastTestError ?? null };
+	return { kind: 'connector', status, lastError: live?.lastTestError ?? connector.lastTestError ?? null,
+		connector: { connectorId: connector.connectorId, title: connector.title, invokerName: connector.invokerName ?? '' } };
 };
 
 /**

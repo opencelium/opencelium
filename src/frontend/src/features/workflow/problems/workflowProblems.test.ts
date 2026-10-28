@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { dropEchoedValidation, filterIssuesBySeverity, getIssueTone, getProblemSeverity, type WorkflowIssue } from './workflowProblems';
 
+const connector = { connectorId: 1, title: 'Zabbix', invokerName: 'Zabbix' };
+
 describe('getProblemSeverity', () => {
 	it('blocks on what cannot run, asks on what may not, ignores run and system state', () => {
 		expect(getProblemSeverity({ kind: 'operator-unconfigured', operator: 'if' })).toBe('error');
@@ -10,7 +12,7 @@ describe('getProblemSeverity', () => {
 		expect(getProblemSeverity({ kind: 'unknown-path', count: 1 })).toBe('warning');
 		expect(getProblemSeverity({ kind: 'validation', message: 'Rejected' })).toBe('notice');
 		expect(getProblemSeverity({ kind: 'test-run', message: null })).toBe('notice');
-		expect(getProblemSeverity({ kind: 'connector', status: 'DOWN', lastError: null })).toBe('notice');
+		expect(getProblemSeverity({ kind: 'connector', status: 'DOWN', lastError: null, connector })).toBe('notice');
 	});
 });
 
@@ -20,7 +22,7 @@ describe('filterIssuesBySeverity', () => {
 			{ kind: 'binding', reason: 'missing-method', count: 1 },
 			{ kind: 'binding', reason: 'out-of-scope', count: 2 },
 		] },
-		{ nodeId: 'b', title: 'B', problems: [{ kind: 'connector', status: 'DOWN', lastError: null }] },
+		{ nodeId: 'b', title: 'B', problems: [{ kind: 'connector', status: 'DOWN', lastError: null, connector }] },
 	];
 
 	it('keeps only the problems of that severity and drops issues left empty', () => {
@@ -46,7 +48,7 @@ describe('getIssueTone', () => {
 	// A failed run or a connector that is down is a real failure, whatever it means for saving.
 	it('keeps notices loud', () => {
 		expect(getIssueTone(issue([{ kind: 'test-run', message: null }]))).toBe('danger');
-		expect(getIssueTone(issue([{ kind: 'connector', status: 'DOWN', lastError: null }]))).toBe('danger');
+		expect(getIssueTone(issue([{ kind: 'connector', status: 'DOWN', lastError: null, connector }]))).toBe('danger');
 	});
 });
 

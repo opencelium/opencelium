@@ -77,7 +77,7 @@ describe('collectWorkflowIssues', () => {
 		const stale = method('m', 0, 0, 5, { connector: { connectorId: 5, title: 'C', status: 'UP' } });
 		const live = [{ connectorId: 5, status: 'DOWN', lastTestError: 'timeout' }] as ConnectorMetaDTO[];
 		expect(collect([stale], { liveHealth: live })[0].problems)
-			.toEqual([{ kind: 'connector', status: 'DOWN', lastError: 'timeout' }]);
+			.toEqual([{ kind: 'connector', status: 'DOWN', lastError: 'timeout', connector: { connectorId: 5, title: 'C', invokerName: '' } }]);
 		expect(collect([stale])).toEqual([]);
 	});
 

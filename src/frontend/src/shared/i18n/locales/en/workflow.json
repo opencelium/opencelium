@@ -1487,6 +1487,16 @@
       "description": "Suggested description (you can edit it)",
       "use": "Use as description",
       "close": "Close"
+    },
+    "connectorError": {
+      "explain": "Explain with AI",
+      "failed": "The AI could not explain this error. Try again in a moment.",
+      "fixIn": {
+        "connector": "Fix it in the connector's settings:",
+        "remoteSystem": "Fix it in the connected system:",
+        "network": "Fix it in the network or server setup:"
+      },
+      "openConnector": "Open connector {{name}}"
     }
   }
 }
