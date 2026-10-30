@@ -1,4 +1,3 @@
-import { CloseOutlined } from '@ant-design/icons'
 import { Button } from '@shared/ui/primitives/Button'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useDialog } from '@shared/ui/dialog/useDialog'
@@ -6,6 +5,7 @@ import { ScheduleCreateDialogContent } from '../ScheduleCreateDialogContent/Sche
 import { useWorkflowSchedules } from '../useWorkflowSchedules'
 import { WorkflowSchedulesPanelBody } from './WorkflowSchedulesPanelBody'
 import type { WorkflowSchedulesPanelProps } from './WorkflowSchedulesPanel.types'
+import { DrawerHeader } from '@features/workflow/components/sidebar/DrawerHeader/DrawerHeader';
 
 export function WorkflowSchedulesPanel({ open, connectionId, connectionTitle,
     onClose }: WorkflowSchedulesPanelProps) {
@@ -23,11 +23,8 @@ export function WorkflowSchedulesPanel({ open, connectionId, connectionTitle,
         <div className={`drawerOverlay ${open ? 'drawerOverlayOpen' : ''}`} onClick={onClose} />
         <aside data-testid="workflow-schedules-panel"
             className={`rightDrawer wf-schedules-drawer ${open ? 'rightDrawerOpen' : ''}`}>
-            <div className="drawerHeader">
-                <div className="drawerTitle">{t('schedules.title')}
-                    {connectionId && count > 0 ? ` (${count})` : ''}</div>
-                <button className="iconButton" type="button" onClick={onClose}><CloseOutlined /></button>
-            </div>
+            <DrawerHeader title={<>{t('schedules.title')}{connectionId && count > 0 ? ` (${count})` : ''}</>}
+                onClose={onClose} closeTestId="workflow-schedules-close" />
             {connectionId && <div className="wf-schedules-toolbar">
                 {/* Same affordance as the connector picker's create button (primary,
                     full width): both are "add one to this list", and reading as one

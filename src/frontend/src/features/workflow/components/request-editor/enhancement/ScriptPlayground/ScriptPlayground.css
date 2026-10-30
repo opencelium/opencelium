@@ -152,6 +152,18 @@
 	> .ant-collapse-body {
 	padding: 0;
 }
+/* With no body padding the panes' backgrounds reach the panel's square edges and hide the
+   collapse item's rounded bottom corners: pass that radius down to the splitter and clip there. */
+.bodyLegacyEnhancementContent--playground .bodyLegacyEnhancementCollapse > .ant-collapse-item > .ant-collapse-panel,
+.bodyLegacyEnhancementContent--playground .bodyLegacyEnhancementCollapse > .ant-collapse-item > .ant-collapse-panel > .ant-collapse-body,
+.bodyLegacyEnhancementContent--playground .bodyLegacyEnhancementCollapse .ant-collapse-body > div:has(> .scriptPlaygroundLayout),
+.bodyLegacyEnhancementContent--playground .scriptPlaygroundLayout {
+	border-bottom-left-radius: inherit;
+	border-bottom-right-radius: inherit;
+}
+.bodyLegacyEnhancementContent--playground .scriptPlaygroundLayout {
+	overflow: hidden;
+}
 
 /* Playground pane */
 .scriptPlayground {

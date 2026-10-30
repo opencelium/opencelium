@@ -10,6 +10,7 @@ export { appendLoopIndex, EMPTY_LIVE_LOG_TREE, failPendingNodes, reduceLiveLog }
 export { fetchMethodDetails, prefetchErrorTracePath, prefetchPauseTracePath, resolveTraceTarget } from "./model/prefetchErrorTracePath";
 export { useGetMethodDetailsQuery } from "./api/logsApi";
 export type { MethodLabelResolver } from "./ui/methodLabels";
+export type { LogTargetSlots } from "./ui/logTargetSlots";
 export type { LiveLogTree, LiveLogNode, RevealLocation } from "./model/liveLogTree";
 export type {
   LogFileStatus,

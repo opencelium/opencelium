@@ -2,12 +2,14 @@ import { useRef, useState } from 'react';
 import { message } from 'antd';
 import { fetchMethodDetails, resolveTraceTarget, type LiveLogTree } from '@features/logs';
 import { buildWorkflowIndexes } from '@features/workflow/api/connectionPayload.indexes';
+import type { FieldBinding } from '@features/workflow/types/connection';
 import type { WorkflowMethodConfig } from '@features/workflow/types/request-config.types';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '@features/workflow/types/workflow.types';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useExplainRunMutation, useFixRunMutation } from '../api/aiApi';
 import type { RunExplanation, RunFix } from '../model/aiGateway.types';
-import { type CollectedFailure, type FixTarget, buildRunFailure, findFailedElement, toEditorBody } from './runFailure.utils';
+import { applyFixToBindings } from './runFailureBindings';
+import { type CollectedFailure, type FixTarget, buildRunFailure, findFailedElement, isSameBody, toEditorBody, toEditorHeaders } from './runFailure.utils';
 
 export type RunAssistState =
 	| { status: 'idle' }
@@ -24,54 +26,75 @@ export type RunAssistTarget = {
 	edges: WorkflowEdgeModel[];
 	workflowTitle: string;
 	onSaveMethodConfig: (nodeId: string, config: WorkflowMethodConfig) => void;
+	/** The workflow's field bindings: references in a request are kept there too, so a fix updates both. */
+	fieldBindings: FieldBinding[];
+	onFieldBindingsChange: (fieldBindings: FieldBinding[]) => void;
+	/** Changes with every test run; whatever was asked about an earlier run is dropped. */
+	runKey: number;
 };
 
+/** The assist of one run; `explainedAt` is when the shown explanation was generated. */
+type RunAssistSession = { runKey: number; state: RunAssistState; explainedAt: number | null; isHidden: boolean };
+
+const IDLE: RunAssistState = { status: 'idle' };
+
 /**
- * Explain and Fix with AI for a failed test run. The failure is collected once, on the first request: the failing
- * element, its full request and response (fetched like the logs panel does) and the step as configured.
+ * Explain and Fix with AI for a failed test run. The failure is collected once per run, on the first request: the
+ * failing element, its full request and response (fetched like the logs panel does) and the step as configured.
  */
-export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveMethodConfig }: RunAssistTarget) {
+export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveMethodConfig, fieldBindings, onFieldBindingsChange, runKey }: RunAssistTarget) {
 	const { t, lang } = useI18n('workflow');
 	const [explainRun] = useExplainRunMutation();
 	const [fixRun] = useFixRunMutation();
-	const [state, setState] = useState<RunAssistState>({ status: 'idle' });
-	const collected = useRef<CollectedFailure | null>(null);
+	const [session, setSession] = useState<RunAssistSession>({ runKey, state: IDLE, explainedAt: null, isHidden: false });
+	const collected = useRef<{ runKey: number; failure: CollectedFailure } | null>(null);
 	const failed = findFailedElement(tree);
+	const current = session.runKey === runKey ? session : { runKey, state: IDLE, explainedAt: null, isHidden: false };
+	const { state } = current;
+
+	// Answers arriving after the next run started belong to the old run and are dropped.
+	const update = (patch: Partial<Omit<RunAssistSession, 'runKey'>>) => setSession((previous) =>
+		(previous.runKey === runKey ? { ...previous, ...patch } : { runKey, state: IDLE, explainedAt: null, isHidden: false, ...patch }));
+	const setState = (next: RunAssistState) => update({ state: next });
 
 	const collect = async (): Promise<CollectedFailure | null> => {
-		if (collected.current || !failed) return collected.current;
+		if (collected.current?.runKey === runKey) return collected.current.failure;
+		if (!failed) return null;
 		const leaf = failed.indexPath ? await resolveTraceTarget(tree, failed, tree.errorLocations) : null;
 		const details = leaf?.type === 'OPERATION' ? await fetchMethodDetails(leaf.id) : null;
-		collected.current = buildRunFailure({ failed, details, tree, nodes, indexByNodeId: buildWorkflowIndexes(nodes, edges),
+		const failure = buildRunFailure({ failed, details, tree, nodes, indexByNodeId: buildWorkflowIndexes(nodes, edges),
 			workflowTitle, language: lang.startsWith('de') ? 'de' : 'en' });
-		return collected.current;
+		collected.current = { runKey, failure };
+		return failure;
 	};
 
 	const explain = async () => {
-		setState({ status: 'explaining' });
+		update({ state: { status: 'explaining' }, isHidden: false });
 		try {
 			const failure = await collect();
 			if (!failure) throw new Error('No failure to explain');
 			const explanation = await explainRun(failure.request).unwrap();
-			setState({ status: 'explained', explanation: { ...explanation, isRequestFixable: explanation.isRequestFixable && !!failure.target } });
-		} catch {
+			update({ state: { status: 'explained', explanation: { ...explanation, isRequestFixable: explanation.isRequestFixable && !!failure.target } },
+				explainedAt: Date.now() });
+		} catch (error) {
+			console.error(error);
 			setState({ status: 'error', explanation: null });
 		}
 	};
 
-	const explanationOf = (current: RunAssistState) =>
-		('explanation' in current ? current.explanation : null);
+	const explanationOf = (value: RunAssistState) => ('explanation' in value ? value.explanation : null);
 
 	const fix = async () => {
 		const explanation = explanationOf(state);
 		if (!explanation?.isRequestFixable || state.status === 'fixing') return;
-		setState({ status: 'fixing', explanation });
+		update({ state: { status: 'fixing', explanation }, isHidden: false });
 		try {
 			const failure = await collect();
 			if (!failure?.target) throw new Error('Only a failed method call can be fixed');
-			const proposal = await fixRun(failure.request).unwrap();
+			const proposal = await fixRun({ ...failure.request, diagnosis: { cause: explanation.cause, fix: explanation.fix } }).unwrap();
 			setState({ status: 'fix', explanation, fix: proposal, target: failure.target });
-		} catch {
+		} catch (error) {
+			console.error(error);
 			setState({ status: 'error', explanation });
 		}
 	};
@@ -79,14 +102,18 @@ export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveM
 	const apply = () => {
 		if (state.status !== 'fix') return;
 		const { target, fix: proposal, explanation } = state;
-		// The step may have been edited since the failure was collected; only its body is replaced.
-		const current = nodes.find((node) => node.id === target.nodeId)?.data.methodConfig ?? target.methodConfig;
-		const body = toEditorBody(current.body, proposal.body);
+		// The step may have been edited since the failure was collected; only its body and headers are replaced.
+		const node = nodes.find((candidate) => candidate.id === target.nodeId);
+		const config = node?.data.methodConfig ?? target.methodConfig;
+		const isBodyChanged = !isSameBody(config.body, proposal.body);
+		const body = isBodyChanged ? toEditorBody(config.body, proposal.body) : config.body;
 		if (body === undefined) {
 			setState({ status: 'error', explanation });
 			return;
 		}
-		onSaveMethodConfig(target.nodeId, { ...current, body });
+		const headers = toEditorHeaders(config, proposal.headers ?? []);
+		if (node?.data.color) onFieldBindingsChange(applyFixToBindings(fieldBindings, node.data.color, config, { body, headers }));
+		onSaveMethodConfig(target.nodeId, { ...config, body, headers });
 		setState({ status: 'applied', explanation });
 		message.success(t('ai.run.applied'));
 	};
@@ -99,5 +126,13 @@ export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveM
 		? [...buildWorkflowIndexes(nodes, edges)].find(([, index]) => index === failed.indexPath)?.[0] ?? null
 		: null;
 
-	return { state, failedNodeId, canAssist: failed !== null, explain, fix, apply, discard };
+	return {
+		state, failed, failedNodeId, canAssist: failed !== null, explainedAt: current.explainedAt,
+		isShown: state.status !== 'idle' && !current.isHidden,
+		hide: () => update({ isHidden: true }),
+		show: () => update({ isHidden: false }),
+		explain, fix, apply, discard,
+	};
 }
+
+export type RunFailureAssist = ReturnType<typeof useRunFailureAssist>;

@@ -1,9 +1,9 @@
-import { CloseOutlined } from '@ant-design/icons';
 import { useEffect } from 'react';
 import { Empty } from '@shared/ui/primitives/Empty';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { ChangeHistoryEntryRow } from './ChangeHistoryEntryRow';
 import type { ChangeHistoryPanelProps } from './ChangeHistoryPanel.types';
+import { DrawerHeader } from '@features/workflow/components/sidebar/DrawerHeader/DrawerHeader';
 
 /**
  * Sidebar over the in-session undo stack: every recorded change, newest first,
@@ -29,13 +29,7 @@ export function ChangeHistoryPanel({ open, entries, onClose, onJumpTo }: ChangeH
 			<div className={`drawerOverlay ${open ? 'drawerOverlayOpen' : ''}`} onClick={onClose} />
 			<aside data-testid='workflow-change-history-panel'
 				className={`rightDrawer changeHistoryDrawer ${open ? 'rightDrawerOpen' : ''}`}>
-				<div className='drawerHeader'>
-					<div className='drawerTitle'>{t('undoHistory.title')}</div>
-					<button className='iconButton' type='button' onClick={onClose}
-						data-testid='workflow-change-history-close'>
-						<CloseOutlined />
-					</button>
-				</div>
+				<DrawerHeader title={t('undoHistory.title')} onClose={onClose} closeTestId='workflow-change-history-close' />
 				<div className='drawerBody changeHistoryBody'>
 					{hasHistory
 						? <div className='changeHistoryList'>

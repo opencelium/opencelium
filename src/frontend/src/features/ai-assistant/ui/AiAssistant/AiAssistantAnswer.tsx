@@ -3,6 +3,7 @@ import { Button } from '@shared/ui/primitives/Button';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { splitCitations } from '../../assistant/citations';
 import { type AssistantTurn, useAssistantStore } from '../../assistant/assistantStore';
+import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 
 type Answer = Extract<AssistantTurn, { role: 'assistant' }>;
 
@@ -13,7 +14,7 @@ export function AiAssistantAnswer({ turn }: { turn: Answer }) {
 	if (turn.status === 'error') return <div className="aiAssistantError">{t('assistant.failed')}</div>;
 	return (
 		<div className="aiAssistantAnswer">
-			{turn.status === 'searching' && <div className="aiAssistantMeta"><Loading size="xs" inline /> {t('assistant.searching')}</div>}
+			{turn.status === 'searching' && <div className="aiAssistantMeta"><Loading size="xs" inline /> {t('assistant.searching')} <AiExpectedTime feature="help" /></div>}
 			{turn.text && (
 				<div className="aiAssistantText">
 					{splitCitations(turn.text, turn.sources).map((part, index) => (part.kind === 'text'

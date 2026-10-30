@@ -1,5 +1,4 @@
 import { useMemo, useRef, useState } from 'react';
-import { CloseOutlined } from '@ant-design/icons';
 import { Table } from '@shared/ui/primitives/Table';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { fieldGroupKey } from '../groupBindingsByField';
@@ -9,6 +8,7 @@ import { type BindingTableRow, countBroken, getRowBindings } from './bindingTabl
 import { useBindingTable } from './useBindingTable';
 import { useDismissOnOutsideClick } from './useDismissOnOutsideClick';
 import type { BindingTablePanelProps } from './BindingTablePanel.types';
+import { DrawerHeader } from '@features/workflow/components/sidebar/DrawerHeader/DrawerHeader';
 
 /**
  * Every field binding in the workflow as one list — the view the canvas arcs
@@ -50,22 +50,16 @@ export function BindingTablePanel({ open, nodes, edges, fieldBindings, selectedK
 				isDetailOpen ? 'bindingTableDrawerAside' : '',
 			].filter(Boolean).join(' ')}
 		>
-			<div className='drawerHeader'>
-				<div className='drawerHeaderContent'>
-					<div>
-						<div className='drawerTitle'>{t('bindingLens.legendTitle')}</div>
-						<div className='drawerSubTitle'>
-							{t('bindingLens.fieldCount', { count: fieldCount })}
-							{` · ${t('bindingLens.referenceCount', { count: total })}`}
-							{broken > 0 && ` · ${t('bindingLens.brokenCount', { count: broken })}`}
-						</div>
-					</div>
-				</div>
-				<button className='iconButton' type='button' onClick={onClose}
-					data-testid='workflow-binding-table-close'>
-					<CloseOutlined />
-				</button>
-			</div>
+			<DrawerHeader
+				title={t('bindingLens.legendTitle')}
+				subtitle={<>
+					{t('bindingLens.fieldCount', { count: fieldCount })}
+					{` · ${t('bindingLens.referenceCount', { count: total })}`}
+					{broken > 0 && ` · ${t('bindingLens.brokenCount', { count: broken })}`}
+				</>}
+				onClose={onClose}
+				closeTestId='workflow-binding-table-close'
+			/>
 			<BindingTableToolbar
 				search={search}
 				onSearchChange={setSearch}

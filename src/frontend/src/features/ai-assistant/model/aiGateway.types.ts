@@ -64,6 +64,9 @@ export type GenerateWorkflowResponse = {
 	operationExampleCount?: number;
 };
 
+/** A request header as the AI reads it: references written out, not as the editor's tokens. */
+export type RunHeader = { name: string; value: string };
+
 /** Mirrors `runFailureSchema` in `src/ai-gateway/src/run/runFailure.ts`: what a failed test run tells the AI. */
 export type RunFailureRequest = {
 	language: 'en' | 'de';
@@ -80,8 +83,10 @@ export type RunFailureRequest = {
 		response?: { status: string; body?: string };
 	};
 	/** The failing method as configured, references unresolved. */
-	step?: { url: string; body: string };
+	step?: { url: string; body: string; headers: RunHeader[] };
 	earlierSteps: { color: string; name: string; operation: string; system: string }[];
+	/** The explanation the user sees, sent with a fix so the fix follows it. */
+	diagnosis?: { cause: string; fix: string[] };
 };
 
 export type RunExplanation = {
@@ -97,6 +102,8 @@ export type RunExplanation = {
 export type RunFix = {
 	/** The corrected request body as text (JSON for JSON bodies). */
 	body: string;
+	/** All the step's headers after the fix; missing from gateways older than header fixes. */
+	headers?: RunHeader[];
 	changes: string[];
 	/** Rule violations the gateway could not repair; shown beside the proposal. */
 	problems: string[];

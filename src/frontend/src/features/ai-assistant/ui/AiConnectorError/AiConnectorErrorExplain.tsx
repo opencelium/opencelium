@@ -4,6 +4,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import { isAiConfigured, useExplainConnectorErrorMutation, useGetAiHealthQuery } from '../../api/aiApi';
 import type { ConnectorErrorExplanation } from '../../model/aiGateway.types';
+import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 import '../../styles/ai-connector-error.css';
 
 type Props = {
@@ -48,6 +49,7 @@ export function AiConnectorErrorExplain({ connector, status, lastError }: Props)
 			<div className="aiConnectorError">
 				<Button type="link" iconLeft="sparkles" onClick={() => void run()} loading={state.status === 'explaining'}
 					testId={`ai-connector-explain-${connector.connectorId}`}>{t('ai.connectorError.explain')}</Button>
+				{state.status === 'explaining' && <AiExpectedTime feature="connectorError" />}
 				{state.status === 'error' && <div className="aiConnectorErrorFailed">{t('ai.connectorError.failed')}</div>}
 			</div>
 		);

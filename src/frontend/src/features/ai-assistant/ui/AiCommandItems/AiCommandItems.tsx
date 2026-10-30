@@ -2,12 +2,12 @@ import { Command } from 'cmdk';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
-import { formatElapsed, useElapsedSeconds } from '../../hooks/useElapsedSeconds';
 import type { AiCommandAssist } from '../../command/useAiCommandAssist';
 import type { ResolvedIntent } from '../../command/intents/resolveIntent';
 import { AI_ITEM } from '../../command/aiCommandItemValues';
 import { AiCommandProposalItems } from './AiCommandProposalItems';
 import { AiCommandSuggestions } from './AiCommandSuggestions';
+import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 import { useAssistantStore } from '../../assistant/assistantStore';
 import './aiCommandItems.css';
 
@@ -22,7 +22,6 @@ type Props = {
 export function AiCommandItems({ assist, onRun, onEdit, onRunIntent }: Props) {
 	const { t } = useI18n('common');
 	const { state } = assist;
-	const elapsed = useElapsedSeconds(state.status === 'routing' ? state.startedAt : null);
 	const openAssistant = useAssistantStore((store) => store.open);
 	if (!assist.isVisible) return null;
 	const askAssistant = (question: string) => {
@@ -48,7 +47,8 @@ export function AiCommandItems({ assist, onRun, onEdit, onRunIntent }: Props) {
 					<Command.Item value={AI_ITEM.thinking} disabled data-testid="command-palette-ai-thinking">
 						<div className="cmdk-item-row">
 							<span className="cmdk-item-icon"><Loading size="xs" inline /></span>
-							<span className="cmdk-item-value">{t('commandPalette.ai.thinking', { elapsed: formatElapsed(elapsed) })}</span>
+							<span className="cmdk-item-value">{t('commandPalette.ai.thinking')}</span>
+							<span className="cmdk-item-description"><AiExpectedTime feature="command" startedAt={state.startedAt} /></span>
 						</div>
 					</Command.Item>
 				)}

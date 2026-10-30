@@ -101,20 +101,3 @@
   overflow: hidden;
 }
 
-.historyPanelDrawer .drawerHeader {
-  padding: 16px 18px;
-  align-items: center;
-}
-
-.historyPanelDrawer .drawerTitle {
-  font-size: 18px;
-  line-height: 1.2;
-  font-weight: 700;
-}
-
-.historyPanelDrawer .iconButton {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  padding: 0;
-}

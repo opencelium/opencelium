@@ -1,8 +1,8 @@
 import type { DetailedMethodLog, LiveLogNode, LiveLogTree, LogType } from '@features/logs';
-import { serializeReferenceString } from '@features/workflow/api/connectionPayload.references';
+import { serializeHeaderReferences, serializeReferenceString } from '@features/workflow/api/connectionPayload.references';
 import type { WorkflowNodeModel } from '@features/workflow/types/workflow.types';
 import type { WorkflowMethodConfig } from '@features/workflow/types/request-config.types';
-import type { RunFailureRequest } from '../model/aiGateway.types';
+import type { RunFailureRequest, RunHeader } from '../model/aiGateway.types';
 
 /** The failing element as the log tree knows it: where it is, what kind it is and the error it carries. */
 export type FailedElement = { indexPath: string; loopIndex: string; type: LogType; message: string };
@@ -47,7 +47,57 @@ export function enclosingOperators(tree: LiveLogTree, indexPath: string): string
 		});
 }
 
-const bodyText = (body: unknown) => (typeof body === 'string' ? body : body === undefined || body === null ? '' : JSON.stringify(body, null, 2));
+export const bodyText = (body: unknown) => (typeof body === 'string' ? body : body === undefined || body === null ? '' : JSON.stringify(body, null, 2));
+
+const canonicalJson = (text: string) => {
+	try {
+		return JSON.stringify(JSON.parse(text));
+	} catch {
+		return null;
+	}
+};
+
+/** A JSON body laid out like the step's own body is shown; anything else as it came. */
+export function prettyBody(text: string): string {
+	try {
+		return JSON.stringify(JSON.parse(text), null, 2);
+	} catch {
+		return text;
+	}
+}
+
+/** Whether a proposed body says the same as the step's: the model reformats JSON it leaves unchanged. */
+export function isSameBody(current: unknown, proposed: string): boolean {
+	const text = bodyText(current);
+	if (text.trim() === proposed.trim()) return true;
+	const before = canonicalJson(text);
+	return before !== null && before === canonicalJson(proposed);
+}
+
+/** The step's headers with their reference tokens written out, as the AI reads and answers them. */
+export const stepHeaders = (config: WorkflowMethodConfig): RunHeader[] => Object.entries(config.headers ?? {})
+	.map(([name, value]) => ({ name, value: String(serializeHeaderReferences(value, config.endpointArgs)) }));
+
+const findHeader = (headers: RunHeader[], name: string) => headers.find((header) => header.name.toLowerCase() === name.toLowerCase());
+
+/** The headers a fix changes or adds; `before` is null for a new one. */
+export function changedHeaders(config: WorkflowMethodConfig, fixed: RunHeader[]): { name: string; before: string | null; after: string }[] {
+	const current = stepHeaders(config);
+	return fixed.flatMap((header) => {
+		const before = findHeader(current, header.name)?.value ?? null;
+		return before === header.value ? [] : [{ name: header.name, before, after: header.value }];
+	});
+}
+
+/** The editor's headers with a fix applied: unchanged ones keep their tokens, changed ones take the new text. */
+export function toEditorHeaders(config: WorkflowMethodConfig, fixed: RunHeader[]): Record<string, string> {
+	const headers = { ...config.headers };
+	for (const { name, after } of changedHeaders(config, fixed)) {
+		const key = Object.keys(headers).find((candidate) => candidate.toLowerCase() === name.toLowerCase()) ?? name;
+		headers[key] = after;
+	}
+	return headers;
+}
 
 const operationOf = (node: WorkflowNodeModel) => node.data.methodConfig?.name ?? node.data.subtitle ?? '';
 
@@ -66,23 +116,23 @@ export function buildRunFailure({ failed, details, tree, nodes, indexByNodeId, w
 	const node = nodes.find((candidate) => indexByNodeId.get(candidate.id) === failed.indexPath);
 	const config = node?.data.methodConfig;
 	const kind = KIND[failed.type] ?? 'execution';
-	const segment = details?.segment;
+	// A call that failed before it was sent is logged with an empty segment and nulls, despite the declared strings.
+	const sent = details?.segment?.request;
+	const received = details?.segment?.response;
 	const request: RunFailureRequest = {
 		language,
 		workflowTitle,
 		failure: {
 			kind,
 			message: failed.message || details?.error?.message || '',
-			stepName: node?.data.title ?? details?.properties.label ?? details?.properties.name ?? '',
+			stepName: node?.data.title ?? details?.properties?.label ?? details?.properties?.name ?? '',
 			system: node?.data.connector?.invokerName ?? '',
-			operation: node ? operationOf(node) : details?.properties.name ?? '',
+			operation: node ? operationOf(node) : details?.properties?.name ?? '',
 			context: failed.indexPath ? enclosingOperators(tree, failed.indexPath) : [],
-			...(segment ? {
-				request: { method: segment.request.http_method, url: segment.request.url, body: segment.request.payload },
-				response: { status: segment.response.status, body: segment.response.payload },
-			} : {}),
+			...(sent ? { request: { method: sent.http_method ?? '', url: sent.url ?? '', body: sent.payload ?? undefined } } : {}),
+			...(received ? { response: { status: received.status ?? '', body: received.payload ?? undefined } } : {}),
 		},
-		...(kind === 'method' && config ? { step: { url: serializeReferenceString(config.url, config.endpointArgs), body: bodyText(config.body) } } : {}),
+		...(kind === 'method' && config ? { step: { url: serializeReferenceString(config.url, config.endpointArgs), body: bodyText(config.body), headers: stepHeaders(config) } } : {}),
 		earlierSteps: nodes.filter((candidate) => isMethodNode(candidate) && candidate.id !== node?.id && candidate.data.color)
 			.map((candidate) => ({
 				color: candidate.data.color ?? '', name: candidate.data.title, operation: operationOf(candidate),

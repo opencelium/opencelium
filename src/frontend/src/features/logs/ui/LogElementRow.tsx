@@ -14,6 +14,7 @@ import { serializeLogElement } from "./serializeLogElement";
 import { useMethodViewMode } from "./methodViewMode";
 import { methodDisplayText } from "./methodView";
 import { useMethodLabelResolver } from "./methodLabels";
+import { useLogTargetSlots } from "./useLogTargetSlots";
 import { useLogErrorTrace } from "./logErrorTrace";
 
 const INDENT_STEP = 22;
@@ -157,6 +158,7 @@ export function LogElementRow({
   const onTrace = isOnTrace(log.indexPath, loopIndexPath);
   const target = isTarget(log.indexPath, loopIndexPath);
   const pausedHere = isPauseTarget(log.indexPath, loopIndexPath);
+  const slots = useLogTargetSlots(log.indexPath, loopIndexPath, depth + 1);
 
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
@@ -250,12 +252,16 @@ export function LogElementRow({
                     {response.duration}
                   </Typography>
                 ) : null}
+                {slots.actions}
                 {onTrace ? <TraceDot /> : null}
               </Meta>
             }
           />
           {expanded ? (
-            <MethodLogDetails id={log.id} depth={depth + 1} path={path} />
+            <>
+              <MethodLogDetails id={log.id} depth={depth + 1} path={path} />
+              {slots.addon}
+            </>
           ) : null}
         </>
       );

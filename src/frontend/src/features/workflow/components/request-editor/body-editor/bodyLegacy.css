@@ -263,8 +263,11 @@
 .bodyLegacyEnhancementScript {
   flex: 1;
   /* A floor rather than 0: `flex: 1` alone resolves to nothing when no ancestor
-     has a definite height, and Ace then measures a zero-height container. */
-  min-height: 240px;
+     has a definite height, and Ace then measures a zero-height container.
+     min-content (label + AI prompt + the editor box's own floor) instead of a fixed
+     number: a fixed floor below that let the block shrink under its content in a
+     fixed-height host and spill over the description below. */
+  min-height: min-content;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -808,3 +811,11 @@
   font-size: 13px;
 }
 
+
+.bodyLegacyAiTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}

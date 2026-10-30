@@ -4,6 +4,7 @@ import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { useVoiceCommand } from '../../voice/useVoiceCommand';
+import { useAiExpectedTimeText } from '../../hooks/useAiExpectedTimeText';
 import './voiceCommandButton.css';
 
 type Props = {
@@ -17,6 +18,7 @@ const LEVEL_SCALE = 5;
 export function VoiceCommandButton({ voice }: Props) {
 	const { t } = useI18n('common');
 	const { status, cancel } = voice;
+	const expectedTime = useAiExpectedTimeText('voice');
 
 	useEffect(() => {
 		if (status !== 'listening') return;
@@ -34,7 +36,7 @@ export function VoiceCommandButton({ voice }: Props) {
 	if (!voice.isAvailable) return null;
 	if (status === 'processing' || status === 'transcribing') {
 		return (
-			<Tooltip content={t('commandPalette.voice.transcribing')}>
+			<Tooltip content={`${t('commandPalette.voice.transcribing')} ${expectedTime}`}>
 				<span className="voiceCommand voiceCommand--busy" data-testid="command-palette-voice-busy" role="status">
 					<Loading size="xs" inline />
 				</span>

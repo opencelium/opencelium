@@ -580,7 +580,6 @@
   },
   "problems": {
     "title": "Problems",
-    "close": "Close problems",
     "empty": "No problems found in this workflow.",
     "badgeTooltip": "{{count}} steps have problems — show them",
     "badgeTooltip_one": "{{count}} step has a problem — show it",
@@ -1306,7 +1305,6 @@
     "unavailableTooltip": "AI service isn't reachable. Start Ollama and the local gateway.",
     "title": "Generate with AI",
     "subtitle": "Runs locally, nothing leaves this machine",
-    "close": "Close",
     "connectors": {
       "title": "Connectors",
       "from": "From",
@@ -1402,7 +1400,7 @@
     "script": {
       "placeholder": "Describe the transformation, e.g. \"Operational when the status is in operation, otherwise Incident\"",
       "generate": "Generate",
-      "generating": "Generating script… {{elapsed}}",
+      "generating": "Generating script…",
       "applied": "Script applied. Run it in the playground to check it.",
       "problems": "The script may not run as is: check the marked lines below.",
       "refinePlaceholder": "Refine the generated script, e.g. \"also trim the value\"",
@@ -1451,16 +1449,24 @@
       "showStep": "Show step",
       "working": "Asking the AI…",
       "failed": "The AI could not answer. Try again in a moment.",
-      "whatToChange": "What to change",
       "changes": "Proposed changes",
       "problems": "The proposal may still be wrong",
-      "noBodyChange": "The request body needs no change; see what to change above.",
+      "noBodyChange": "The request stays as it is; change instead",
       "currentBody": "Current request body",
       "proposedBody": "Proposed request body",
+      "changedHeaders": "Changed headers",
+      "newHeader": "new",
       "apply": "Apply to step",
       "discard": "Discard",
+      "dismiss": "Got it",
+      "applyLocked": "Stop the test run to apply the change.",
       "applied": "Request body updated",
-      "appliedHint": "The step's request body was updated. Run the test again to check it; Undo restores the old body."
+      "appliedHint": "The step's request body was updated. Run the test again to check it; Undo restores the old body.",
+      "title": "AI explanation",
+      "close": "Close explanation",
+      "howToFix": "How to fix",
+      "regenerate": "Regenerate",
+      "generatedAt": "Generated at {{time}}"
     },
     "mapping": {
       "title": "AI mapping",

@@ -309,5 +309,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             failed: string
             askInPalette: string
         }
+        aiExpectedTime: {
+            range: string
+            hint: string
+        }
     },
 }

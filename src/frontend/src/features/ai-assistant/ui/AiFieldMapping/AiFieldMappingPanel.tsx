@@ -4,6 +4,7 @@ import { Button } from '@shared/ui/primitives/Button';
 import { Checkbox } from '@shared/ui/primitives/Checkbox';
 import { Input } from '@shared/ui/primitives/Input';
 import type { AiFieldMapping } from '../../mapping/useAiFieldMapping';
+import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 import '../../styles/ai-mapping.css';
 
 /** "Suggest mapping" in the body editor: proposed sources per field, each picked or left, then applied together. */
@@ -23,6 +24,7 @@ export function AiFieldMappingPanel({ mapping }: { mapping: AiFieldMapping }) {
 				<Button iconLeft="sparkles" onClick={() => void mapping.suggest()} loading={state.status === 'suggesting'}
 					testId="ai-mapping-suggest">{t('ai.mapping.suggest')}</Button>
 			</div>
+			{state.status === 'suggesting' && <div className="aiMappingNote"><AiExpectedTime feature="mapping" /></div>}
 			{state.status === 'nothingToMap' && <div className="aiMappingNote">{t('ai.mapping.nothingToMap')}</div>}
 			{state.status === 'error' && <div className="aiMappingError" data-testid="ai-mapping-error">{t('ai.mapping.failed')}</div>}
 			{state.status === 'suggested' && state.proposals.length === 0 && <div className="aiMappingNote">{t('ai.mapping.none')}</div>}
@@ -45,7 +47,7 @@ export function AiFieldMappingPanel({ mapping }: { mapping: AiFieldMapping }) {
 							</li>
 						))}
 					</ul>
-					<div className="aiMappingBar">
+					<div className="aiMappingActions">
 						<Button type="primary" onClick={apply} disabled={state.chosen.size === 0} testId="ai-mapping-apply">
 							{t('ai.mapping.apply', { count: state.chosen.size })}
 						</Button>

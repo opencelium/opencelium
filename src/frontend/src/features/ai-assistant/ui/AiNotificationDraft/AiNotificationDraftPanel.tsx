@@ -4,6 +4,7 @@ import { Button } from '@shared/ui/primitives/Button';
 import { Select } from '@shared/ui/primitives/Select';
 import { Textarea } from '@shared/ui/primitives/Textarea';
 import { useAiNotificationDraft } from '../../notification/useAiNotificationDraft';
+import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 
 const LANGUAGES = [{ value: 'en' as const, label: 'English' }, { value: 'de' as const, label: 'Deutsch' }];
 
@@ -28,6 +29,7 @@ export function AiNotificationDraftPanel({ onClose }: { onClose: () => void }) {
 					disabled={!draft.instruction.trim()} testId="ai-notification-generate">{t('notification-template.aiDraft.generate')}</Button>
 				<Button type="text" onClick={onClose} testId="ai-notification-close">{t('notification-template.aiDraft.close')}</Button>
 			</div>
+			{state.status === 'drafting' && <AiExpectedTime feature="notification" />}
 			{state.status === 'error' && <Alert type="error" showIcon message={t('notification-template.aiDraft.failed')} />}
 			{state.status === 'drafted' && (
 				<div className="aiNotificationPreview" data-testid="ai-notification-preview">

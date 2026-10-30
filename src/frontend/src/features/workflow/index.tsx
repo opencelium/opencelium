@@ -186,7 +186,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           loading: isAssigningCategory, onClose: () => setAssignCategoryOpen(false),
           onAssign: handleAssignCategory }} />
       <WorkflowMain loading={isLoading}
-        runAssist={{ workflowTitle: headerState.title, onSaveMethodConfig: workflow.onSaveMethodConfig }}
+        runAssist={{ workflowTitle: headerState.title, onSaveMethodConfig: workflow.onSaveMethodConfig,
+          fieldBindings: loadedFieldBindings ?? [], onFieldBindingsChange: setLoadedFieldBindings }}
         canvas={{ nodes: canvasNodes,
         edges: workflow.edges, isAnyNodeDragging: workflow.isAnyNodeDragging,
         restoredViewport: workflow.restoredViewport,

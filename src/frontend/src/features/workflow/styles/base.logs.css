@@ -107,6 +107,36 @@
   color: var(--color-status-error-fg);
 }
 
+.logsStatusBadge {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.logsStatusBadge--finished {
+  color: var(--color-status-success-fg);
+  background: var(--color-status-success-bg);
+}
+
+.logsStatusBadge--stopped {
+  color: var(--color-status-warning-fg);
+  background: var(--color-status-warning-bg);
+}
+
+.logsStatusBadge--failed {
+  color: var(--color-status-error-fg);
+  background: var(--color-status-error-bg);
+}
+
+.logsStatusSteps {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
 .headerCard {
   position: absolute;
   top: 0;

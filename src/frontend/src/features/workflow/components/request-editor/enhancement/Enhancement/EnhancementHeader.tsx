@@ -80,7 +80,6 @@ export function EnhancementHeader({
 							)}
 						>
 							<DeleteIconButton
-								iconSize={15}
 								disabled={readOnly || !canDelete}
 								testId="workflow-enhancement-delete"
 							/>

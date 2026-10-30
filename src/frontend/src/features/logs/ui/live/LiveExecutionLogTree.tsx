@@ -17,9 +17,12 @@ import {
   useLogErrorTrace,
   type LogErrorTrace,
 } from "../logErrorTrace";
+import { LogTargetSlotsProvider, type LogTargetSlots } from "../logTargetSlots";
+import { useLogTargetSlots } from "../useLogTargetSlots";
 
-function LiveConnectorRow({ tree, node }: { tree: LiveLogTree; node: LiveLogNode }) {
+function LiveConnectorRow({ tree, node, isFirst }: { tree: LiveLogTree; node: LiveLogNode; isFirst: boolean }) {
   const [expanded, setExpanded] = useState(true);
+  const { headerStatus } = useLogTargetSlots(node.indexPath, node.loopIndex);
   const { t } = useI18n("logs");
   const { nonce, isOnTrace, pauseNonce } = useLogErrorTrace();
   const onTrace = isOnTrace(node.indexPath, node.loopIndex) && node.status !== "FAIL";
@@ -50,6 +53,7 @@ function LiveConnectorRow({ tree, node }: { tree: LiveLogTree; node: LiveLogNode
         }
         right={
           <Meta>
+            {isFirst ? headerStatus : null}
             {onTrace ? <TraceDot /> : null}
             <LiveStatusIndicator status={node.status} />
           </Meta>
@@ -62,6 +66,8 @@ function LiveConnectorRow({ tree, node }: { tree: LiveLogTree; node: LiveLogNode
   );
 }
 
+const NO_SLOTS: LogTargetSlots = {};
+
 // Same look as ExecutionLogTree, but rendered entirely from the live socket
 // stream (LiveLogTree) — used by the workflow test-run panel.
 export function LiveExecutionLogTree({
@@ -70,6 +76,7 @@ export function LiveExecutionLogTree({
   revealNonce = 0,
   pauseTarget = null,
   pauseRevealNonce = 0,
+  slots = NO_SLOTS,
 }: {
   tree: LiveLogTree;
   fill?: boolean;
@@ -84,6 +91,7 @@ export function LiveExecutionLogTree({
   // has warmed the cache; triggers the tree to page loops to the paused
   // iteration and expand down to (but not open) the paused-on element.
   pauseRevealNonce?: number;
+  slots?: LogTargetSlots;
 }) {
   const { t } = useI18n("logs");
 
@@ -123,6 +131,7 @@ export function LiveExecutionLogTree({
 
   return (
     <LogErrorTraceContext.Provider value={errorCtx}>
+      <LogTargetSlotsProvider value={slots}>
       <MethodDetailViewStateProvider>
         <div
           style={{
@@ -132,14 +141,15 @@ export function LiveExecutionLogTree({
             ...(fill ? { flex: 1, minHeight: 0 } : { maxHeight: "60vh" }),
           }}
         >
-          {tree.rootKeys.map((key) => {
+          {tree.rootKeys.map((key, position) => {
             const node = tree.nodes[key];
             return node ? (
-              <LiveConnectorRow key={key} tree={tree} node={node} />
+              <LiveConnectorRow key={key} tree={tree} node={node} isFirst={position === 0} />
             ) : null;
           })}
         </div>
       </MethodDetailViewStateProvider>
+      </LogTargetSlotsProvider>
     </LogErrorTraceContext.Provider>
   );
 }

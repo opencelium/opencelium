@@ -87,3 +87,25 @@
   font-size: 12px;
   color: var(--color-text-secondary);
 }
+
+.aiInvokerDrop {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 14px;
+}
+
+.aiInvokerDropAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--color-action-primary);
+}
+
+.aiInvokerDropHint {
+  color: var(--color-text-secondary);
+}

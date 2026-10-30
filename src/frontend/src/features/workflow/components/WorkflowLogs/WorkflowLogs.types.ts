@@ -1,4 +1,5 @@
 import type { MethodLabelResolver } from '@features/logs';
+import type { FieldBinding } from '../../types/connection';
 import type { WorkflowMethodConfig } from '../../types/request-config.types';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 
@@ -23,6 +24,8 @@ export type WorkflowRunAssistProps = {
 	edges: WorkflowEdgeModel[];
 	workflowTitle: string;
 	onSaveMethodConfig: (nodeId: string, config: WorkflowMethodConfig) => void;
+	fieldBindings: FieldBinding[];
+	onFieldBindingsChange: (fieldBindings: FieldBinding[]) => void;
 };
 
 export type WorkflowLogsHeaderProps = {
