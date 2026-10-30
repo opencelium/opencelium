@@ -1,9 +1,9 @@
-import { CloseOutlined } from '@ant-design/icons';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { HistoryPanelTimeline } from './HistoryPanelTimeline';
 import { useHistoryPanelState } from './useHistoryPanelState';
 import type { HistoryPanelProps } from './HistoryPanel.types';
 import { useHistoryPanelActions } from './useHistoryPanelActions';
+import { DrawerHeader } from '@features/workflow/components/sidebar/DrawerHeader/DrawerHeader';
 
 export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownloadTemplate, onSelectVersion, onSaveComment, hasUnsavedChanges = false, selectedId, onSelectedIdChange }: HistoryPanelProps) {
 	const state = useHistoryPanelState({ open, items, onClose, selectedId, onSelectedIdChange });
@@ -22,12 +22,7 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 				data-testid='workflow-history-panel'
 				className={`rightDrawer historyPanelDrawer ${open ? 'rightDrawerOpen' : ''}`}
 			>
-				<div className='drawerHeader'>
-					<div className='drawerTitle'>{t('history.title')}</div>
-					<button className='iconButton' type='button' onClick={onClose}>
-						<CloseOutlined />
-					</button>
-				</div>
+				<DrawerHeader title={t('history.title')} onClose={onClose} closeTestId='workflow-history-close' />
 				<div className='drawerBody historyBody'>
 					<div className='historyScroll'>
 						<HistoryPanelTimeline state={state}

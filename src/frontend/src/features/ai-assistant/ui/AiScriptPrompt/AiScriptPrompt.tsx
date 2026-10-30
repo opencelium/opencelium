@@ -6,13 +6,16 @@ import { Icon } from '@shared/ui/primitives/Icon';
 import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Input } from '@shared/ui/primitives/Input';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import { formatElapsed, useElapsedSeconds } from '../../hooks/useElapsedSeconds';
 import { useScriptPromptActions } from '../../hooks/useScriptPromptActions';
 import type { ScriptVersions } from '../../hooks/useScriptVersions';
 import type { ScriptSnapshot } from '../../utils/scriptVersions.utils';
+import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 import { AiScriptHistory } from './AiScriptHistory';
 import { AiScriptProposal } from './AiScriptProposal';
 import './aiScriptPrompt.css';
+
+// Matches the transformation header's xs icons (maximize, playground); an explicit size also makes the button square.
+const HEADER_ICON_SIZE = 12;
 
 type Props = {
 	enhancement: Enhancement;
@@ -37,7 +40,6 @@ export function AiScriptPrompt({ enhancement, current, versions, onReplace, isPl
 	const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 	const { generation, generate, accept, undo } = useScriptPromptActions({ enhancement, current, versions, onReplace });
 	const { state } = generation;
-	const elapsed = useElapsedSeconds(state.status === 'generating' ? state.startedAt : null);
 	if (!generation.isAvailable || enhancement.language !== 'js') return null;
 
 	const isGenerating = state.status === 'generating';
@@ -66,20 +68,22 @@ export function AiScriptPrompt({ enhancement, current, versions, onReplace, isPl
 				{hasVersions && (
 					<>
 						<Tooltip content={t('ai.script.undoTooltip')}>
-							<IconButton type="text" size="sm" disabled={isGenerating} testId="ai-script-undo"
-								iconProps={{ name: 'undo', color: 'inherit' }} onClick={undo} />
+							<IconButton type="text" size="xs" disabled={isGenerating} testId="ai-script-undo"
+								iconProps={{ name: 'undo', color: 'inherit', size: HEADER_ICON_SIZE }} onClick={undo} />
 						</Tooltip>
 						<Tooltip content={t('ai.script.history.tooltip', { count: versions.versions.length })}>
-							<IconButton type="text" size="sm" testId="ai-script-history-toggle"
+							<IconButton type="text" size="xs" testId="ai-script-history-toggle"
 								className={isHistoryOpen ? 'aiScriptPromptAction--active' : undefined}
-								iconProps={{ name: 'history', color: isHistoryOpen ? 'primary' : 'inherit' }}
+								iconProps={{ name: 'history', color: isHistoryOpen ? 'primary' : 'inherit', size: HEADER_ICON_SIZE }}
 								onClick={() => setIsHistoryOpen((isOpen) => !isOpen)} />
 						</Tooltip>
 					</>
 				)}
 			</div>
 			{isGenerating && (
-				<div className="aiScriptPromptStatus" role="status">{t('ai.script.generating', { elapsed: formatElapsed(elapsed) })}</div>
+				<div className="aiScriptPromptStatus" role="status">
+					{t('ai.script.generating')} <AiExpectedTime feature="script" startedAt={state.startedAt} />
+				</div>
 			)}
 			{state.status === 'done' && !versions.candidate && state.problems.length > 0 && (
 				<div className="aiScriptPromptStatus aiScriptPromptStatus--warning">{t('ai.script.problems')}</div>

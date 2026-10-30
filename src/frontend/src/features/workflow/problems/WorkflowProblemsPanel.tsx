@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Empty } from '@shared/ui/primitives/Empty';
-import { IconButton } from '@shared/ui/primitives/IconButton';
-import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { WorkflowIssue, WorkflowProblemSeverity } from './workflowProblems';
 import type { WorkflowIssueGroups } from './useWorkflowIssues';
 import { useWorkflowProblemText } from './useWorkflowProblemText';
 import { AiConnectorErrorExplain } from '@features/ai-assistant/ui/AiConnectorError/AiConnectorErrorExplain';
+import { DrawerHeader } from '@features/workflow/components/sidebar/DrawerHeader/DrawerHeader';
 
 type Props = {
 	open: boolean;
@@ -75,13 +74,7 @@ export function WorkflowProblemsPanel({ open, issues, onClose, onSelectNode }: P
 			<div className={`drawerOverlay ${open ? 'drawerOverlayOpen' : ''}`} onClick={onClose} />
 			<aside data-testid="workflow-problems-panel"
 				className={`rightDrawer workflowProblemsDrawer ${open ? 'rightDrawerOpen' : ''}`}>
-				<div className="drawerHeader">
-					<div className="drawerTitle">{t('problems.title')}</div>
-					<Tooltip content={t('problems.close')}>
-						<IconButton type="text" iconProps={{ name: 'close' }} onClick={onClose}
-							testId="workflow-problems-close" />
-					</Tooltip>
-				</div>
+				<DrawerHeader title={t('problems.title')} onClose={onClose} closeTestId="workflow-problems-close" />
 				<div className="drawerBody workflowProblemsBody">
 					{isEmpty
 						? <Empty description={t('problems.empty')} />

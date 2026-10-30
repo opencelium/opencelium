@@ -42,6 +42,13 @@
     "expand": "Log-Panel ausklappen",
     "collapse": "Log-Panel einklappen",
     "clear": "Logs löschen",
-    "orphaned": "Dieser Test wurde gestartet, bevor die Seite erneut geöffnet wurde. Daher sind die Live-Logs nicht mehr verfügbar. Bitte stoppen Sie den Test und führen Sie ihn erneut aus, um die Logs zu sehen."
+    "orphaned": "Dieser Test wurde gestartet, bevor die Seite erneut geöffnet wurde. Daher sind die Live-Logs nicht mehr verfügbar. Bitte stoppen Sie den Test und führen Sie ihn erneut aus, um die Logs zu sehen.",
+    "failedSteps_one": "{{failed}} von {{count}} Schritt fehlgeschlagen",
+    "failedSteps_other": "{{failed}} von {{count}} Schritten fehlgeschlagen"
+  },
+  "errorTrace": {
+    "showFull_one": "Vollständigen Stacktrace anzeigen ({{count}} weitere Zeile)",
+    "showFull_other": "Vollständigen Stacktrace anzeigen ({{count}} weitere Zeilen)",
+    "hideFull": "Vollständigen Stacktrace ausblenden"
   }
 }

@@ -14,6 +14,7 @@ import { useMethodViewMode } from "../methodViewMode";
 import { methodDisplayText } from "../methodView";
 import { useMethodLabelResolver } from "../methodLabels";
 import { useLogErrorTrace } from "../logErrorTrace";
+import { useLogTargetSlots } from "../useLogTargetSlots";
 
 // How long the error-target row keeps its pulse highlight after the
 // test-run reveal scrolls it into view (see logs.css's oc-log-row-error-pulse,
@@ -175,6 +176,7 @@ export function LiveLogElementRow({
     isPauseTarget,
     pauseLoopIteration,
   } = useLogErrorTrace();
+  const slots = useLogTargetSlots(node.indexPath, node.loopIndex, depth + 1);
   const anchorRef = useRef<HTMLDivElement>(null);
   const [justRevealed, setJustRevealed] = useState(false);
   const [justPaused, setJustPaused] = useState(false);
@@ -288,6 +290,7 @@ export function LiveLogElementRow({
                     {response.duration}
                   </Typography>
                 ) : null}
+                {slots.actions}
                 {onTrace ? <TraceDot /> : null}
                 <LiveStatusIndicator status={node.status} />
               </Meta>
@@ -295,12 +298,15 @@ export function LiveLogElementRow({
           />
           {expandable && expanded ? (
             hasError ? (
-              <ErrorDetail
-                message={node.error!.message}
-                code={node.error!.code}
-                stackTrace={node.error!.stackTrace}
-                depth={depth + 1}
-              />
+              <>
+                <ErrorDetail
+                  message={node.error!.message}
+                  code={node.error!.code}
+                  stackTrace={node.error!.stackTrace}
+                  depth={depth + 1}
+                />
+                {slots.addon}
+              </>
             ) : (
               <MethodLogDetails id={node.id} depth={depth + 1} path={node.key} />
             )
@@ -340,12 +346,14 @@ export function LiveLogElementRow({
                 {total > 0 ? (
                   <LoopPager index={position} size={total} onChange={setIterationPos} />
                 ) : null}
+                {slots.actions}
                 {onTrace ? <TraceDot /> : null}
                 <LiveStatusIndicator status={node.status} />
               </Meta>
             }
           />
           <LiveErrorRow node={node} depth={depth + 1} highlighted={justRevealed} />
+          {slots.addon}
           {expanded ? (
             showStored ? (
               <LiveChildren
@@ -392,12 +400,14 @@ export function LiveLogElementRow({
                     {node.segment.result}
                   </Typography>
                 ) : null}
+                {slots.actions}
                 {onTrace ? <TraceDot /> : null}
                 <LiveStatusIndicator status={node.status} />
               </Meta>
             }
           />
           <LiveErrorRow node={node} depth={depth + 1} highlighted={justRevealed} />
+          {slots.addon}
           {expanded ? (
             <LiveChildren tree={tree} childKeys={node.childKeys} depth={depth + 1} />
           ) : null}
@@ -415,12 +425,14 @@ export function LiveLogElementRow({
             left={<OperatorLabel label={node.type} hint={node.properties.name} />}
             right={
               <Meta>
+                {slots.actions}
                 {onTrace ? <TraceDot /> : null}
                 <LiveStatusIndicator status={node.status} />
               </Meta>
             }
           />
           <LiveErrorRow node={node} depth={depth + 1} highlighted={justRevealed} />
+          {slots.addon}
         </>
       );
   }

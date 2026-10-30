@@ -6,6 +6,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import type { CollapseItem } from '@shared/ui/primitives/Collapse/Collapse.types';
 import { Empty } from '@shared/ui/primitives/Empty';
+import { Icon } from '@shared/ui/primitives/Icon';
 import { useRequestObjectEditor } from '../useRequestObjectEditor';
 import ReferenceEnhancement from '../../enhancement/Enhancement/Enhancement';
 import { ReferenceInfo } from '../../reference-info/ReferenceInfo/ReferenceInfo';
@@ -58,7 +59,12 @@ export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 		},
 		...(isAiAvailable && messageProperty === 'body' && !readOnly ? [{
 			key: 'aiMapping',
-			label: t('ai.mapping.title'),
+			label: (
+				<span className="bodyLegacyAiTitle">
+					{t('ai.mapping.title')}
+					<Icon name="sparkles" size={14} color="primary" />
+				</span>
+			),
 			content: <AiFieldMappingSection connection={editor.connection} method={method} body={source} />,
 		}] : []),
 	];

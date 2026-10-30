@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { DetailedMethodLog, LiveLogNode, LiveLogTree } from '@features/logs';
 import type { WorkflowNodeModel } from '@features/workflow/types/workflow.types';
-import { buildRunFailure, enclosingOperators, findFailedElement, toEditorBody } from './runFailure.utils';
+import type { WorkflowMethodConfig } from '@features/workflow/types/request-config.types';
+import { buildRunFailure, changedHeaders, isSameBody, prettyBody, enclosingOperators, findFailedElement, stepHeaders, toEditorBody, toEditorHeaders } from './runFailure.utils';
 
 const logNode = (indexPath: string, type: LiveLogNode['type'], patch: Partial<LiveLogNode> = {}): LiveLogNode => ({
 	key: `${indexPath}@`, id: `id-${indexPath}`, indexPath, loopIndex: '', type, status: 'COMPLETE', connectorName: null,
@@ -77,6 +78,14 @@ describe('buildRunFailure', () => {
 		expect(target?.nodeId).toBe('n-create');
 	});
 
+	it('describes a call that failed before it was sent, logged with an empty segment', () => {
+		const unsent = { segment: {}, properties: { name: 'CreateTicket' }, error: { message: 'cannot build URL', stack_trace: [] } } as unknown as DetailedMethodLog;
+		const built = buildRunFailure({ failed: { ...failed, message: '' }, details: unsent, tree, nodes, indexByNodeId, workflowTitle: '', language: 'en' });
+		expect(built.request.failure.message).toBe('cannot build URL');
+		expect(built.request.failure.request).toBeUndefined();
+		expect(built.target?.nodeId).toBe('n-create');
+	});
+
 	it('offers no fix target when a loop failed', () => {
 		const loopFailure = { ...failed, indexPath: '1', type: 'LOOP' as const };
 		const built = buildRunFailure({ failed: loopFailure, details: null, tree, nodes, indexByNodeId, workflowTitle: '', language: 'en' });
@@ -90,5 +99,43 @@ describe('toEditorBody', () => {
 		expect(toEditorBody({ title: 'a' }, '{"title":"b"}')).toEqual({ title: 'b' });
 		expect(toEditorBody('<xml/>', '<xml>b</xml>')).toBe('<xml>b</xml>');
 		expect(toEditorBody({}, '{broken')).toBeUndefined();
+	});
+});
+
+describe('headers', () => {
+	// The editor keeps a reference in a header as a token whose source lives in endpointArgs.
+	const config = {
+		url: '', queryParams: [], bodyFormat: 'json', bodyData: 'json', body: {},
+		headers: { 'Content-Type': 'manager', 'X-Tenant': '#{%arg1%}' },
+		endpointArgs: { arg1: { source: '{%#FFCFB5.(response).body.$.tenant%}' } },
+	} as unknown as WorkflowMethodConfig;
+
+	it('writes the tokens out for the AI', () => {
+		expect(stepHeaders(config)).toEqual([
+			{ name: 'Content-Type', value: 'manager' }, { name: 'X-Tenant', value: '#FFCFB5.(response).body.$.tenant' }]);
+	});
+
+	it('applies only the changed headers, keeping the tokens of the others', () => {
+		const fixed = [{ name: 'content-type', value: 'application/json' }, { name: 'X-Tenant', value: '#FFCFB5.(response).body.$.tenant' },
+			{ name: 'Accept', value: 'application/json' }];
+		expect(changedHeaders(config, fixed)).toEqual([
+			{ name: 'content-type', before: 'manager', after: 'application/json' }, { name: 'Accept', before: null, after: 'application/json' }]);
+		expect(toEditorHeaders(config, fixed)).toEqual({ 'Content-Type': 'application/json', 'X-Tenant': '#{%arg1%}', Accept: 'application/json' });
+	});
+});
+
+describe('isSameBody', () => {
+	it('reads a reformatted JSON body as the same, and a changed one as changed', () => {
+		const body = { name: '#C77E7E.(response).body.$.[0].department', units: [] };
+		expect(isSameBody(body, '{"name":"#C77E7E.(response).body.$.[0].department","units":[]}')).toBe(true);
+		expect(isSameBody(body, '{"name":"x","units":[]}')).toBe(false);
+		expect(isSameBody('<a/>', ' <a/> ')).toBe(true);
+	});
+});
+
+describe('prettyBody', () => {
+	it('lays out JSON and leaves other text as it is', () => {
+		expect(prettyBody('{"a":"x","b":[]}')).toBe('{\n  "a": "x",\n  "b": []\n}');
+		expect(prettyBody('<a/>')).toBe('<a/>');
 	});
 });

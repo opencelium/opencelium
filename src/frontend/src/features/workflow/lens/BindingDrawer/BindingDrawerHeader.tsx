@@ -1,8 +1,8 @@
-import { CloseOutlined } from '@ant-design/icons';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { MethodColorDot } from '../../components/MethodColorDot/MethodColorDot';
 import type { LensBinding, LensEndpoint } from '../bindingLens.types';
 import { REASON_KEYS } from '../BindingTable/bindingTableColumns';
+import { DrawerHeader } from '@features/workflow/components/sidebar/DrawerHeader/DrawerHeader';
 
 type BindingDrawerHeaderProps = {
 	consumer: LensEndpoint;
@@ -26,14 +26,12 @@ function EndpointLabel({ endpoint }: { endpoint: LensEndpoint }) {
 export function BindingDrawerHeader({ consumer, sources, onClose }: BindingDrawerHeaderProps) {
 	const { t } = useI18n('workflow');
 	return (
-		<div className='drawerHeader'>
-			<div className='drawerHeaderContent'>
-				<div>
-					<div className='drawerTitle'>{t('bindingLens.drawerTitle')}</div>
-					<div className='drawerSubTitle'>
-						<EndpointLabel endpoint={consumer} />
-						{` ${consumer.path}`}
-					</div>
+		<DrawerHeader
+			title={t('bindingLens.drawerTitle')}
+			subtitle={<><EndpointLabel endpoint={consumer} />{` ${consumer.path}`}</>}
+			onClose={onClose}
+			closeTestId='workflow-binding-drawer-close'
+		>
 					<ul className='bindingDrawerSources' aria-label={t('bindingLens.tableColumnSource')}>
 						{sources.map((binding) => (
 							<li key={binding.key}
@@ -49,12 +47,6 @@ export function BindingDrawerHeader({ consumer, sources, onClose }: BindingDrawe
 							</li>
 						))}
 					</ul>
-				</div>
-			</div>
-			<button className='iconButton' type='button' onClick={onClose}
-				data-testid='workflow-binding-drawer-close'>
-				<CloseOutlined />
-			</button>
-		</div>
+		</DrawerHeader>
 	);
 }

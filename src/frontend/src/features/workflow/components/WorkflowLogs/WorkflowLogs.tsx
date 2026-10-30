@@ -3,41 +3,11 @@ import { LoadingOverlay } from '@shared/ui/primitives/Loading/LoadingOverlay';
 import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodLabelProvider, MethodViewModeProvider } from '@features/logs';
 import { useTestRun } from '../../test-run/useTestRun';
 import { useTestRunModePromptStore } from '../../test-run/testRunModePromptStore';
-import type { TestRunResult } from '../../test-run/TestRunContext';
-import { AiRunAssist } from '@features/ai-assistant/ui/AiRunAssist/AiRunAssist';
+import { useAiRunSlots } from '@features/ai-assistant/ui/AiRunAssist/useAiRunSlots';
+import { TestRunStatus } from './TestRunStatus';
 import { WorkflowLogsHeader } from './WorkflowLogsHeader';
 import type { WorkflowLogsProps } from './WorkflowLogs.types';
 
-
-const formatDuration = (ms: number) => {
-	if (ms < 1000) return `${ms}ms`;
-	const totalSeconds = ms / 1000;
-	if (totalSeconds < 60) return `${totalSeconds.toFixed(1)}s`;
-	const minutes = Math.floor(totalSeconds / 60);
-	const seconds = Math.round(totalSeconds % 60);
-	return `${minutes}m ${seconds}s`;
-};
-
-function TestRunResultLine({ result }: { result: TestRunResult }) {
-	const { t: tLogs } = useI18n('logs');
-
-	switch (result.kind) {
-		case 'finished':
-			return (
-				<div className='logsResult logsResult--finished'>
-					{tLogs('live.finished', { time: formatDuration(result.executionTimeMs) })}
-				</div>
-			);
-		case 'stopped':
-			return <div className='logsResult logsResult--stopped'>{tLogs('live.stopped')}</div>;
-		case 'failed':
-			return <div className='logsResult logsResult--failed'>{tLogs('live.failed')}</div>;
-		default: {
-			const _exhaustive: never = result;
-			return _exhaustive;
-		}
-	}
-}
 
 // Panel state lives in the parent page (index.tsx): while `panel === 'normal'`
 // the parent mounts this inside a Splitter pane sharing height with the
@@ -75,6 +45,11 @@ export function WorkflowLogs({ panel, onPanelChange, resolveMethodLabel, runAssi
 	const isStopping = phase === 'stopping' || (result?.kind === 'failed' && !isBackendDone);
 	const hasLogs = !isOrphaned && logTree.rootKeys.length > 0;
 	const isExpanded = panel !== 'minimized';
+
+	const isResultShown = !isOrphaned && !revealPending && result !== null;
+	const ai = useAiRunSlots({ ...runAssist, tree: logTree, runKey: errorRevealNonce, isFailed: isResultShown && result?.kind === 'failed',
+		isLocked: isRunning });
+	const slots = { ...ai.slots, headerStatus: isResultShown && result ? <TestRunStatus result={result} tree={logTree} /> : null };
 
 	const toggleMinimized = () => onPanelChange(panel === 'minimized' ? 'normal' : 'minimized');
 	const toggleFull = () => onPanelChange(panel === 'full' ? 'normal' : 'full');
@@ -121,18 +96,13 @@ export function WorkflowLogs({ panel, onPanelChange, resolveMethodLabel, runAssi
 								revealNonce={errorRevealNonce}
 								pauseTarget={pauseTarget}
 								pauseRevealNonce={pauseRevealNonce}
+								slots={slots}
 							/>
 						</LoadingOverlay>
 					) : (
 						tLogs('live.empty')
 					)}
-					{!isOrphaned && !revealPending && result && (
-						<TestRunResultLine result={result} />
-					)}
-					{/* Keyed by the run's error reveal, so a new failure starts a fresh explanation. */}
-					{!isOrphaned && !revealPending && result?.kind === 'failed' && (
-						<AiRunAssist key={errorRevealNonce} tree={logTree} isLocked={isRunning} {...runAssist} />
-					)}
+					{ai.detached}
 				</div>
 			)}
 		</div>

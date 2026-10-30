@@ -87,3 +87,26 @@
 .oc-request-response-tabs .ant-tabs-nav-operations {
   display: none !important;
 }
+
+.oc-log-error-detail .oc-log-error-trace-toggle {
+  height: auto;
+  margin-top: 6px;
+  padding: 0;
+}
+
+.oc-log-target-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oc-log-target-addon {
+  padding: 12px 16px 14px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-background-surface);
+}
+
+/* The addon's content renders nothing while it is hidden. */
+.oc-log-target-addon:empty {
+  display: none;
+}

@@ -580,7 +580,6 @@
   },
   "problems": {
     "title": "Probleme",
-    "close": "Probleme schließen",
     "empty": "In diesem Workflow wurden keine Probleme gefunden.",
     "badgeTooltip": "{{count}} Schritte haben Probleme – anzeigen",
     "badgeTooltip_one": "{{count}} Schritt hat ein Problem – anzeigen",
@@ -1306,7 +1305,6 @@
     "unavailableTooltip": "Der KI-Dienst ist nicht erreichbar. Starten Sie Ollama und das lokale Gateway.",
     "title": "Mit KI generieren",
     "subtitle": "Läuft lokal, nichts verlässt diesen Rechner",
-    "close": "Schließen",
     "connectors": {
       "title": "Konnektoren",
       "from": "Von",
@@ -1402,7 +1400,7 @@
     "script": {
       "placeholder": "Transformation beschreiben, z. B. \"Operational, wenn der Status in operation ist, sonst Incident\"",
       "generate": "Generieren",
-      "generating": "Skript wird generiert… {{elapsed}}",
+      "generating": "Skript wird generiert…",
       "applied": "Skript übernommen. Führen Sie es im Playground aus, um es zu prüfen.",
       "problems": "Das Skript läuft so evtl. nicht: prüfen Sie die markierten Zeilen unten.",
       "refinePlaceholder": "Generiertes Skript verfeinern, z. B. „den Wert zusätzlich trimmen“",
@@ -1451,16 +1449,24 @@
       "showStep": "Schritt zeigen",
       "working": "KI wird gefragt…",
       "failed": "Die KI konnte nicht antworten. Bitte gleich noch einmal versuchen.",
-      "whatToChange": "Was zu ändern ist",
       "changes": "Vorgeschlagene Änderungen",
       "problems": "Der Vorschlag kann noch fehlerhaft sein",
-      "noBodyChange": "Der Request-Body muss nicht geändert werden; siehe oben, was zu ändern ist.",
+      "noBodyChange": "Der Request bleibt unverändert; stattdessen ändern",
       "currentBody": "Aktueller Request-Body",
       "proposedBody": "Vorgeschlagener Request-Body",
+      "changedHeaders": "Geänderte Header",
+      "newHeader": "neu",
       "apply": "Auf Schritt anwenden",
       "discard": "Verwerfen",
+      "dismiss": "Verstanden",
+      "applyLocked": "Beenden Sie den Testlauf, um die Änderung zu übernehmen.",
       "applied": "Request-Body aktualisiert",
-      "appliedHint": "Der Request-Body des Schritts wurde aktualisiert. Führen Sie den Test erneut aus; Rückgängig stellt den alten Body wieder her."
+      "appliedHint": "Der Request-Body des Schritts wurde aktualisiert. Führen Sie den Test erneut aus; Rückgängig stellt den alten Body wieder her.",
+      "title": "KI-Erklärung",
+      "close": "Erklärung schließen",
+      "howToFix": "So beheben",
+      "regenerate": "Neu erzeugen",
+      "generatedAt": "Erzeugt um {{time}}"
     },
     "mapping": {
       "title": "KI-Zuordnung",

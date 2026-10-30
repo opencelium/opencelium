@@ -5,6 +5,7 @@ import { Button } from '@shared/ui/primitives/Button';
 import { Input } from '@shared/ui/primitives/Input';
 import { useAiCondition } from '../../condition/useAiCondition';
 import { useAiAvailability } from '../../mapping/useAiAvailability';
+import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 import '../../styles/ai-condition.css';
 
 type Props = {
@@ -31,6 +32,7 @@ export function AiConditionPanel(props: Props) {
 				<Button iconLeft="sparkles" onClick={() => void condition.build()} loading={state.status === 'building'}
 					disabled={!condition.instruction.trim()} testId="ai-condition-build">{t('ai.condition.build')}</Button>
 			</div>
+			{state.status === 'building' && <div className="aiConditionNote"><AiExpectedTime feature="condition" /></div>}
 			{state.status === 'built' && (
 				<div className="aiConditionNote" data-testid="ai-condition-explanation">
 					{state.explanation} {t('ai.condition.checkHint')}

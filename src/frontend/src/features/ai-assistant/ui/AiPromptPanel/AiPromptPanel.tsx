@@ -1,7 +1,5 @@
 import { useEffect, useRef, type KeyboardEvent } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { IconButton } from '@shared/ui/primitives/IconButton';
-import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { Icon } from '@shared/ui/primitives/Icon';
 import type { AiPromptPanelModel } from '../../hooks/useAiPromptPanel';
 import { AiPromptForm } from './AiPromptForm';
@@ -10,6 +8,7 @@ import { AiPlanView } from './AiPlanView';
 import { AiUnavailable } from './AiUnavailable';
 import { AiPanelFooter } from './AiPanelFooter';
 import '../../styles/ai-panel.css';
+import { DrawerHeader } from '@features/workflow/components/sidebar/DrawerHeader/DrawerHeader';
 
 type Props = {
 	model: AiPromptPanelModel;
@@ -55,18 +54,12 @@ export function AiPromptPanel({ model }: Props) {
 			<div className={`drawerOverlay ${isOpen ? 'drawerOverlayOpen' : ''}`} onClick={onClose} />
 			<aside data-testid="ai-panel" aria-label={t('ai.title')}
 				className={`rightDrawer aiPanelDrawer ${isOpen ? 'rightDrawerOpen' : ''}`}>
-				<div className="drawerHeader">
-					<div>
-						<div className="drawerTitle">{t('ai.title')}</div>
-						<div className="drawerSubTitle aiPanelSubtitle">
-							<Icon name="lock" size={12} color="inherit" />
-							{t('ai.subtitle')}
-						</div>
-					</div>
-					<Tooltip content={t('ai.close')}>
-						<IconButton type="text" iconProps={{ name: 'close' }} onClick={onClose} testId="ai-panel-close" />
-					</Tooltip>
-				</div>
+				<DrawerHeader
+					title={t('ai.title')}
+					subtitle={<span className="aiPanelSubtitle"><Icon name="lock" size={12} color="inherit" />{t('ai.subtitle')}</span>}
+					onClose={onClose}
+					closeTestId="ai-panel-close"
+				/>
 				<div className="drawerBody aiPanelBody">
 					{view === 'unavailable' && <AiUnavailable isChecking={isCheckingHealth} onCheckAgain={onCheckAgain} />}
 					{state.status === 'result' && view === 'result' && (

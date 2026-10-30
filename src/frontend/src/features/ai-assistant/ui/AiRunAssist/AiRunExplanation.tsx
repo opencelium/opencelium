@@ -10,10 +10,10 @@ export function AiRunExplanation({ explanation }: { explanation: RunExplanation 
 			<p className="aiRunCause">{explanation.cause}</p>
 			{explanation.fix.length > 0 && (
 				<>
-					<div className="aiRunLabel">{t('ai.run.whatToChange')}</div>
-					<ol className="aiRunFixList">
+					<div className="aiRunLabel">{t('ai.run.howToFix')}</div>
+					<ul className="aiRunFixList">
 						{explanation.fix.map((step) => <li key={step}>{step}</li>)}
-					</ol>
+					</ul>
 				</>
 			)}
 		</div>

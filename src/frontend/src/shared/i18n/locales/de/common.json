@@ -91,7 +91,7 @@
     "ai": {
       "ask": "KI fragen: „{{prompt}}“",
       "askHint": "Macht aus Ihrer Anfrage einen Befehl",
-      "thinking": "Befehl wird gesucht… {{elapsed}}",
+      "thinking": "Befehl wird gesucht…",
       "run": "Ausführen ↵",
       "finish": "Vervollständigen ↵",
       "edit": "Befehl vor dem Ausführen bearbeiten",
@@ -301,5 +301,9 @@
     "searching": "Die Dokumentation wird durchsucht…",
     "failed": "Der Assistent konnte nicht antworten. Bitte gleich noch einmal versuchen.",
     "askInPalette": "Den Assistenten fragen: {{question}}"
+  },
+  "aiExpectedTime": {
+    "range": "Meist {{min}}–{{max}} s",
+    "hint": "Das Modell läuft auf diesem Rechner. Die erste Anfrage nach einer Pause, große Eingaben oder eine andere laufende KI-Anfrage verlängern die Wartezeit."
   }
 }

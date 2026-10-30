@@ -19,6 +19,22 @@
   align-items: center;
 }
 
+/* The input takes the spare width; the button keeps its own, spinner included, instead of being squeezed. */
+.aiMappingBar > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.aiMappingBar > :last-child {
+  flex: none;
+}
+
+.aiMappingActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .aiMappingRows {
   margin: 0;
   padding: 4px 8px;

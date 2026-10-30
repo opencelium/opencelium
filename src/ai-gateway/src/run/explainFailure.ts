@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { toJsonSchema } from '../dsl/buildConstrainedSchema.ts'
 import type { InvokerRepository } from '../invokers/invokerRepository.ts'
 import type { LlmClient } from '../llm/llmClient.ts'
-import { type RunFailure, describeFailure, loadFailureContext } from './runFailure.ts'
+import { type RunFailure, describeFailure, loadFailureContext, referencesNamedInError } from './runFailure.ts'
 
 const answerSchema = z.object({
     /** One sentence a non-developer understands. */
@@ -10,7 +10,7 @@ const answerSchema = z.object({
     cause: z.string().min(1),
     /** Concrete changes, in the order to try them. */
     fix: z.array(z.string().min(1)).max(5),
-    /** True when changing this call's URL or body is likely enough; the UI offers "Fix with AI" only then. */
+    /** True when changing this call's headers or body is likely enough; the UI offers "Fix with AI" only then. */
     isRequestFixable: z.boolean(),
 })
 
@@ -25,7 +25,8 @@ instead of guessing. Typical causes: a required field missing or empty, a value 
 a reference to an earlier step that reads the wrong path (empty value), wrong id in the URL, credentials or
 permissions (fix in the connector, not the workflow), the target system being unreachable.
 "fix" lists concrete changes in the workflow or connector. Set "isRequestFixable" to true only when changing this
-call's URL or request body is likely to make it succeed. Answer with JSON only.`
+call's request headers or request body is likely to make it succeed; a reference in the body or headers that cannot be
+resolved or reads the wrong path is such a change. Answer with JSON only.`
 
 const answerFormat = toJsonSchema(answerSchema)
 
@@ -46,6 +47,6 @@ export async function explainFailure(failure: RunFailure, deps: RunAiDeps): Prom
     }
     const parsed = answerSchema.safeParse(json)
     if (!parsed.success) throw new Error('The model did not return a usable explanation')
-    const isRequestFixable = parsed.data.isRequestFixable && failure.failure.kind === 'method' && Boolean(failure.step)
+    const isRequestFixable = (parsed.data.isRequestFixable || referencesNamedInError(failure).length > 0) && failure.failure.kind === 'method' && Boolean(failure.step)
     return { ...parsed.data, isRequestFixable, durationMs: result.durationMs, model: deps.model }
 }

@@ -42,6 +42,13 @@
     "expand": "Expand logs panel",
     "collapse": "Collapse logs panel",
     "clear": "Clear logs",
-    "orphaned": "This test was started before the page was reopened, so its live logs are no longer available. Please stop the test and run it again to see the logs."
+    "orphaned": "This test was started before the page was reopened, so its live logs are no longer available. Please stop the test and run it again to see the logs.",
+    "failedSteps_one": "{{failed}} of {{count}} step failed",
+    "failedSteps_other": "{{failed}} of {{count}} steps failed"
+  },
+  "errorTrace": {
+    "showFull_one": "Show full stack trace ({{count}} more line)",
+    "showFull_other": "Show full stack trace ({{count}} more lines)",
+    "hideFull": "Hide full stack trace"
   }
 }

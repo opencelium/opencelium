@@ -4,8 +4,11 @@ import { buildBodyEnhancement, buildRequestResultField, getParsedReferences } fr
 import { collectEnhancementsFromObject } from './bodyBindingCollection';
 import type { BodyEditData, RequestMessageProperty } from './bodyBinding.types';
 
-export const updateRequestFieldBindings = (
-  connection: Connection,
+// Only the bindings are read, so anything that carries them (a whole connection, or just the list) can be updated.
+type WithBindings = Pick<Connection, 'fieldBindings'>;
+
+export const updateRequestFieldBindings = <T extends WithBindings>(
+  connection: T,
   methodColor: string,
   messageProperty: RequestMessageProperty,
   bodyData: BodyEditData,
@@ -30,8 +33,8 @@ export const updateRequestFieldBindings = (
   return { ...connection, fieldBindings: [...current, { enhancement: merged }] };
 };
 
-export const removeDeletedRequestBindings = (
-  connection: Connection,
+export const removeDeletedRequestBindings = <T extends WithBindings>(
+  connection: T,
   methodColor: string,
   messageProperty: RequestMessageProperty,
   body: unknown,

@@ -3,6 +3,7 @@ import { Alert } from '@shared/ui/primitives/Alert';
 import { Button } from '@shared/ui/primitives/Button';
 import { Dialog } from '@shared/ui/primitives/Dialog';
 import { useAiInvokerCreate } from '../../invoker/useAiInvokerCreate';
+import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 import { AiInvokerDocsStep } from './AiInvokerDocsStep';
 import { AiInvokerReviewStep } from './AiInvokerReviewStep';
 import '../../styles/ai-invoker.css';
@@ -36,7 +37,7 @@ export function AiInvokerCreateDialog({ open, onClose }: Props) {
 		<Dialog open={open} onClose={onClose} title={t('invoker.list.aiCreate.title')} footer={footer} width={860} top={18}
 			maximizable testId="ai-invoker-dialog">
 			{failure && <Alert type="error" showIcon message={t(failure === 'draft' ? 'invoker.list.aiCreate.draftFailed' : 'invoker.list.aiCreate.createFailed')} />}
-			{state.step === 'drafting' && <div className="aiInvokerMeta">{t('invoker.list.aiCreate.drafting')}</div>}
+			{state.step === 'drafting' && <div className="aiInvokerMeta">{t('invoker.list.aiCreate.drafting')} <AiExpectedTime feature="invokerDraft" /></div>}
 			{isReview ? <AiInvokerReviewStep create={create} result={state.result} /> : <AiInvokerDocsStep create={create} />}
 		</Dialog>
 	);
