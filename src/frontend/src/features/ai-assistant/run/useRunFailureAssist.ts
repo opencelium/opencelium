@@ -15,10 +15,10 @@ export type RunAssistState =
 	| { status: 'idle' }
 	| { status: 'explaining' }
 	| { status: 'explained'; explanation: RunExplanation }
-	| { status: 'fixing'; explanation: RunExplanation }
-	| { status: 'fix'; explanation: RunExplanation; fix: RunFix; target: FixTarget }
-	| { status: 'applied'; explanation: RunExplanation }
-	| { status: 'error'; explanation: RunExplanation | null };
+	| { status: 'fixing'; explanation: RunExplanation | null }
+	| { status: 'fix'; explanation: RunExplanation | null; fix: RunFix; target: FixTarget }
+	| { status: 'applied'; explanation: RunExplanation | null }
+	| { status: 'error'; explanation: RunExplanation | null; failedAction: 'explain' | 'fix' };
 
 export type RunAssistTarget = {
 	tree: LiveLogTree;
@@ -39,7 +39,8 @@ type RunAssistSession = { runKey: number; state: RunAssistState; explainedAt: nu
 const IDLE: RunAssistState = { status: 'idle' };
 
 /**
- * Explain and Fix with AI for a failed test run. The failure is collected once per run, on the first request: the
+ * Explain and Fix with AI for a failed test run. Fix works with or without an explanation first: without one, the
+ * gateway makes its own diagnosis; with one, it follows the diagnosis the user saw. The failure is collected once per run, on the first request: the
  * failing element, its full request and response (fetched like the logs panel does) and the step as configured.
  */
 export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveMethodConfig, fieldBindings, onFieldBindingsChange, runKey }: RunAssistTarget) {
@@ -78,24 +79,37 @@ export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveM
 				explainedAt: Date.now() });
 		} catch (error) {
 			console.error(error);
-			setState({ status: 'error', explanation: null });
+			setState({ status: 'error', explanation: null, failedAction: 'explain' });
 		}
 	};
 
 	const explanationOf = (value: RunAssistState) => ('explanation' in value ? value.explanation : null);
 
+	const failedNodeId = failed?.indexPath
+		? [...buildWorkflowIndexes(nodes, edges)].find(([, index]) => index === failed.indexPath)?.[0] ?? null
+		: null;
+	const isMethodFailure = Boolean(failedNodeId && nodes.find((node) => node.id === failedNodeId)?.data.methodConfig);
+	const shownExplanation = explanationOf(state);
+	// Only a failed method call has a request to change; an explanation that ruled out a request fix is respected.
+	const canFix = isMethodFailure && (shownExplanation ? shownExplanation.isRequestFixable : true);
+
 	const fix = async () => {
 		const explanation = explanationOf(state);
-		if (!explanation?.isRequestFixable || state.status === 'fixing') return;
+		if (!canFix || state.status === 'fixing' || state.status === 'explaining') return;
+		if (state.status === 'fix') {
+			update({ isHidden: false });
+			return;
+		}
 		update({ state: { status: 'fixing', explanation }, isHidden: false });
 		try {
 			const failure = await collect();
 			if (!failure?.target) throw new Error('Only a failed method call can be fixed');
-			const proposal = await fixRun({ ...failure.request, diagnosis: { cause: explanation.cause, fix: explanation.fix } }).unwrap();
+			const diagnosis = explanation ? { diagnosis: { cause: explanation.cause, fix: explanation.fix } } : {};
+			const proposal = await fixRun({ ...failure.request, ...diagnosis }).unwrap();
 			setState({ status: 'fix', explanation, fix: proposal, target: failure.target });
 		} catch (error) {
 			console.error(error);
-			setState({ status: 'error', explanation });
+			setState({ status: 'error', explanation, failedAction: 'fix' });
 		}
 	};
 
@@ -108,7 +122,7 @@ export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveM
 		const isBodyChanged = !isSameBody(config.body, proposal.body);
 		const body = isBodyChanged ? toEditorBody(config.body, proposal.body) : config.body;
 		if (body === undefined) {
-			setState({ status: 'error', explanation });
+			setState({ status: 'error', explanation, failedAction: 'fix' });
 			return;
 		}
 		const headers = toEditorHeaders(config, proposal.headers ?? []);
@@ -119,15 +133,12 @@ export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveM
 	};
 
 	const discard = () => {
-		if (state.status === 'fix') setState({ status: 'explained', explanation: state.explanation });
+		if (state.status !== 'fix') return;
+		setState(state.explanation ? { status: 'explained', explanation: state.explanation } : IDLE);
 	};
 
-	const failedNodeId = failed?.indexPath
-		? [...buildWorkflowIndexes(nodes, edges)].find(([, index]) => index === failed.indexPath)?.[0] ?? null
-		: null;
-
 	return {
-		state, failed, failedNodeId, canAssist: failed !== null, explainedAt: current.explainedAt,
+		state, failed, failedNodeId, canAssist: failed !== null, canFix, explainedAt: current.explainedAt,
 		isShown: state.status !== 'idle' && !current.isHidden,
 		hide: () => update({ isHidden: true }),
 		show: () => update({ isHidden: false }),
