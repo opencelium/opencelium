@@ -6,30 +6,33 @@ import { resolveGuideNode } from './resolveGuideNode'
 import { useWorkflowGuideStore } from './workflowGuide.store'
 import type { WorkflowGuideId } from './workflowGuides'
 
+/** Why a guide did or did not start; the problems are already reported to the user. */
+export type GuideStartResult = 'started' | 'unavailable' | 'no-methods' | 'no-match'
+
 /**
  * Starts a guide on the workflow open in the editor. Outside React on purpose: the
- * command palette (and later the voice assistant) call it from plain executors.
+ * command palette and the voice assistant call it from plain executors.
  */
-export function startWorkflowGuide(guideId: WorkflowGuideId, method?: string): void {
+export function startWorkflowGuide(guideId: WorkflowGuideId, method?: string): GuideStartResult {
     const bridge = workflowCommandBridgeStore.getState()
     // The tutorial owns the editor while it runs; two spotlights would fight over the page.
-    if (!bridge.isActive || useWorkflowTutorialStore.getState().requested) return
+    if (!bridge.isActive || useWorkflowTutorialStore.getState().requested) return 'unavailable'
 
     const t = i18n.getFixedT(i18n.language, 'onboarding')
     const resolution = resolveGuideNode(bridge.getNodes(), bridge.getEdges(), method)
     switch (resolution.kind) {
         case 'no-methods':
             notifyError(t('guides.errors.noMethods'))
-            return
+            return 'no-methods'
         case 'no-match':
             notifyError(t('guides.errors.noMatch', { method: resolution.method }))
-            return
+            return 'no-match'
         case 'found':
             bridge.centerOnNode(resolution.nodeId)
             useWorkflowGuideStore.getState().start({
                 guideId, nodeId: resolution.nodeId, methodLabel: resolution.label,
             })
-            return
+            return 'started'
         default: {
             const _exhaustive: never = resolution
             return _exhaustive

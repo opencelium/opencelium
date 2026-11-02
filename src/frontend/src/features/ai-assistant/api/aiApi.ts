@@ -2,7 +2,7 @@ import { baseApi } from '@shared/api/baseApi';
 import { runtimeConfig } from '@shared/config/runtimeConfig';
 import type {
 	AiHealth, ConditionSuggestion, SuggestConditionRequest, ConnectorErrorExplanation, DraftNotificationRequest, NotificationDraft, ExplainConnectorErrorRequest, ExplainWorkflowRequest, WorkflowExplanation, GenerateWorkflowRequest, InvokerDraft, SuggestMappingRequest, SuggestMappingResponse, InvokerDraftRequest, InvokerDraftResponse, RunExplanation, RunFailureRequest, RunFix, GenerateWorkflowResponse, PlanWorkflowResponse,
-	RouteCommandRequest, RouteCommandResponse, SearchCommandsRequest, SearchCommandsResponse, TranscribeSpeechResponse,
+	RouteCommandRequest, RouteCommandResponse, RouteGuideRequest, RouteGuideResponse, SearchCommandsRequest, SearchCommandsResponse, TranscribeSpeechResponse,
 } from '../model/aiGateway.types';
 
 // The panel renders every gateway failure itself; the global error toast would duplicate it.
@@ -73,6 +73,9 @@ export const aiApi = baseApi.injectEndpoints({
 		}),
 		suggestCondition: b.mutation<ConditionSuggestion, SuggestConditionRequest>({
 			query: (body) => ({ url: `${runtimeConfig.aiUrl}/condition/suggest`, method: 'POST', body, customOptions: quiet }),
+		}),
+		routeGuide: b.mutation<RouteGuideResponse, RouteGuideRequest>({
+			query: (body) => ({ url: `${runtimeConfig.aiUrl}/guide/intent`, method: 'POST', body, customOptions: quiet }),
 		}),
 		routeCommand: b.mutation<RouteCommandResponse, RouteCommandRequest>({
 			query: (body) => ({

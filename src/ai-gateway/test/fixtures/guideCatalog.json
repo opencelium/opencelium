@@ -1,0 +1,6 @@
+[
+    { "id": "method-url", "description": "Show where the URL of a method is (the selected one, or name it) · Zeigen, wo die URL einer Methode ist (der ausgewählten oder einer genannten)" },
+    { "id": "method-headers", "description": "Show where the headers of a method are (the selected one, or name it) · Zeigen, wo die Header einer Methode sind (der ausgewählten oder einer genannten)" },
+    { "id": "method-body", "description": "Show where the body of a method is (the selected one, or name it) · Zeigen, wo der Body einer Methode ist (der ausgewählten oder einer genannten)" },
+    { "id": "method-try", "description": "Show how to try a method (the selected one, or name it) · Zeigen, wie man eine Methode ausprobiert (die ausgewählte oder eine genannte)" }
+]
