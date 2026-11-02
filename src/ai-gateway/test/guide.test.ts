@@ -1,0 +1,84 @@
+import { describe, expect, it } from 'vitest'
+import { buildApp } from '../src/app.ts'
+import { loadConfig } from '../src/config.ts'
+import { findSpokenMethod } from '../src/guide/routeGuide.ts'
+import type { InvokerRepository } from '../src/invokers/invokerRepository.ts'
+import type { ChatRequest, LlmClient } from '../src/llm/llmClient.ts'
+
+const invokers: InvokerRepository = { list: async () => [], get: async () => undefined }
+
+const guides = [
+    { id: 'method-headers', description: 'Where the request headers of a method are' },
+    { id: 'method-body', description: 'Where the request body of a method is' },
+]
+const methods = ['getCustomers', 'getCustomersById', 'createClient', 'getCustomers']
+
+function llmAnswering(answer: object): LlmClient & { requests: ChatRequest[] } {
+    const requests: ChatRequest[] = []
+    return {
+        requests,
+        async chat(request) {
+            requests.push(request)
+            return { content: JSON.stringify(answer), promptTokens: 1, outputTokens: 1, durationMs: 10 }
+        },
+        async listModels() { return [] },
+    }
+}
+
+async function route(prompt: string, answer: object, extra: object = {}) {
+    const llm = llmAnswering(answer)
+    const app = await buildApp({ config: loadConfig({}), llm, invokers })
+    const response = await app.inject({ method: 'POST', url: '/guide/intent', payload: { prompt, guides, methods, ...extra } })
+    return { response, body: response.json(), llm }
+}
+
+describe('findSpokenMethod', () => {
+    it('finds a method spoken as separate words', () => {
+        expect(findSpokenMethod('where are the headers of get customers', methods)).toBe('getCustomers')
+    })
+
+    it('prefers the longest name the request spells out', () => {
+        expect(findSpokenMethod('show the body of get customers by id', methods)).toBe('getCustomersById')
+    })
+
+    it('finds nothing when no method is named', () => {
+        expect(findSpokenMethod('wo ist der Header der Methode?', methods)).toBe('')
+    })
+})
+
+describe('POST /guide/intent', () => {
+    it('answers with the guide and the named method', async () => {
+        const { response, body, llm } = await route('where are the headers of getCustomers?', { guide: 'method-headers', method: 'getCustomers' })
+        expect(response.statusCode).toBe(200)
+        expect(body).toMatchObject({ guideId: 'method-headers', method: 'getCustomers' })
+        // The answer is constrained to the request's own guides and (deduplicated) methods.
+        const format = JSON.stringify(llm.requests[0]?.format)
+        expect(format).toContain('"none","method-headers","method-body"')
+        expect(format).toContain('"","getCustomers","getCustomersById","createClient"]')
+    })
+
+    it('keeps a method out when the request names none, whatever the model picked', async () => {
+        const { body } = await route('wo ist der Header der Methode?', { guide: 'method-headers', method: 'getCustomers' })
+        expect(body).toMatchObject({ guideId: 'method-headers', method: '' })
+    })
+
+    it('takes a method the model matched from a partial name', async () => {
+        const { body } = await route('show me the body of the client creation', { guide: 'method-body', method: 'createClient' })
+        expect(body.method).toBe('createClient')
+    })
+
+    it('answers no guide when none fits', async () => {
+        const { body } = await route('order a pizza', { guide: 'none', method: '' })
+        expect(body).toMatchObject({ guideId: null, method: '' })
+    })
+
+    it('works for a workflow without methods', async () => {
+        const { body } = await route('where is the body', { guide: 'method-body', method: '' }, { methods: [] })
+        expect(body).toMatchObject({ guideId: 'method-body', method: '' })
+    })
+
+    it('rejects a request without guides', async () => {
+        const { response } = await route('where is the body', { guide: 'none', method: '' }, { guides: [] })
+        expect(response.statusCode).toBe(400)
+    })
+})

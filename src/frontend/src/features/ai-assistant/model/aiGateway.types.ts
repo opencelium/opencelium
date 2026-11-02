@@ -290,6 +290,22 @@ export type RouteCommandResponse = {
 	model: string;
 };
 
+/** Mirrors `routeGuideRequestSchema` in `src/ai-gateway/src/guide/guideRequest.schema.ts`. */
+export type RouteGuideRequest = {
+	prompt: string;
+	guides: { id: string; description: string }[];
+	/** Method names in the open workflow; the answer names one of these or none. */
+	methods: string[];
+};
+
+export type RouteGuideResponse = {
+	guideId: string | null;
+	/** Empty when the request names no method. */
+	method: string;
+	durationMs: number;
+	model: string;
+};
+
 export type AiGatewayErrorType = 'BAD_REQUEST' | 'UNKNOWN_INVOKER' | 'GENERATION_FAILED';
 
 export type AiGatewayErrorBody = {

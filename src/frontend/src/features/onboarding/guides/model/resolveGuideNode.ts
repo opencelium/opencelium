@@ -17,6 +17,11 @@ export const methodLabel = (node: WorkflowNodeModel) =>
 const namesOf = (node: WorkflowNodeModel) =>
     [node.data.subtitle, node.data.methodConfig?.name].filter((name): name is string => !!name).map(normalize)
 
+/** Every name a method can be called by — its label and its operation — for the AI to choose from. */
+export const guideMethodNames = (nodes: WorkflowNodeModel[]): string[] =>
+    [...new Set(nodes.filter(isMethodNode).flatMap(node =>
+        [node.data.subtitle, node.data.methodConfig?.name].filter((name): name is string => !!name?.trim())))]
+
 /** Tree-path order: `1` < `1_0` < `1_2_0` < `2`; a node not yet linked into the graph sorts last. */
 const compareIndexes = (left: string | undefined, right: string | undefined) => {
     if (left === right) return 0

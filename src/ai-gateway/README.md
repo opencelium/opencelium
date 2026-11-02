@@ -48,6 +48,7 @@ npm start                       # http://127.0.0.1:8787
 npm run generate -- jira zammad "Create a Zammad ticket for every Jira issue"
 npm test && npm run typecheck
 npm run eval:commands           # routes 18 prompts through the running gateway, reports misroutes
+npm run eval:guides             # routes "where is …" requests (en + de) to workflow guides and methods
 npm run eval:help                     # 30 help questions: is the answering page among the sources, are undocumented ones refused
 npm run eval:templates -- --limit 20   # rebuilds templates from their descriptions (each hidden from the examples)
                                        # and scores operations, call placement and fields; --templates on|off|both
@@ -63,6 +64,7 @@ npm run eval:templates -- --limit 20   # rebuilds templates from their descripti
 | POST | `/script/generate` | `{ prompt, target?, inputs: [{ name: 'VAR_n', source, sample? }], currentScript? }` | `{ code, description, problems, durationMs, model }`: one transformation script for the editor |
 | POST | `/command/search` | `{ query, commands: [{ id, phrase, description }], limit? }` | `{ matches: [{ id, score }] }`: palette commands close in meaning |
 | POST | `/command/route` | `{ prompt, commands, page?, language? }` | `{ commandId \| null, argument, reply, candidates, durationMs, model }`: one command for a request; the frontend resolves `argument` to a record |
+| POST | `/guide/intent` | `{ prompt, guides: [{ id, description }], methods? }` | `{ guideId \| null, method, durationMs, model }`: which "show me where" guide a request asks for, and the method it names (one of `methods`, or empty) |
 | POST | `/run/explain` | `{ language, workflowTitle, failure: { kind, message, stepName, system, operation, context, request?, response? }, step?, earlierSteps }` | `{ summary, cause, fix: string[], isRequestFixable, durationMs, model }`: why a test run failed, in plain language |
 | POST | `/run/fix` | same as `/run/explain` (needs `step`) | `{ body, changes, problems, durationMs, model }`: the failed call's corrected request body; references the step had are kept, or the body comes back unchanged with advice only |
 | POST | `/invoker/draft` | `{ docs, name? }` (OpenAPI/Swagger JSON or YAML up to 20 MB, or docs as text/HTML) | `{ draft, source: 'openapi' \| 'ai', isTruncated, durationMs }`: an OpenAPI document is converted without the model; other docs are read by it |

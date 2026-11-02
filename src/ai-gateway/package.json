@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "eval:commands": "node scripts/evalCommandRouting.ts",
     "eval:templates": "node scripts/evalTemplates.ts",
-    "eval:help": "node scripts/evalHelp.ts"
+    "eval:help": "node scripts/evalHelp.ts",
+    "eval:guides": "node scripts/evalGuideRouting.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.1",
