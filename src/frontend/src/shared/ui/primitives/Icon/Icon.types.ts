@@ -16,6 +16,7 @@ export type IconName =
     | 'notification'
     | 'profile'
     | 'content-copy'
+    | 'content-paste'
     | 'webhook'
     | 'link'
     | 'unlink'

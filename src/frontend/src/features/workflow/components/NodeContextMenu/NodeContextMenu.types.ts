@@ -5,10 +5,9 @@ export type NodeContextMenuProps = {
 	menu: WorkflowContextMenu | null;
 	node: WorkflowNodeModel | null;
 	onClose: () => void;
-	onCopyNodes?: (nodeId: string) => void;
-	onPasteNodes?: (nodeId: string) => void;
-	canPasteNodes?: boolean;
-	clipboardLocked?: boolean;
+	onCopyNodes: (nodeId: string) => void;
+	onPasteNodes: (nodeId: string) => void;
+	canPasteNodes: boolean;
 	onChangeLabel: (nodeId: string, label: string) => void;
 	onOpenRequestEditor: (nodeId: string, mode: 'url' | 'body' | 'header') => void;
 	onOpenConditionEditor: (nodeId: string) => void;

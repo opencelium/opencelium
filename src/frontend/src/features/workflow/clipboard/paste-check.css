@@ -117,3 +117,20 @@
   height: auto !important;
   padding-inline: 0 !important;
 }
+
+.pasteCheck {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pasteCheckBlocked {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.pasteCheckConnector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

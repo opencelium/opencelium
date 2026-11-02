@@ -1,16 +1,15 @@
 {
   "pasteCheck": {
-  "referencesIntro": "These copied steps reference methods outside the copied group. Choose target methods or clear the references.",
-  "title": "Check pasted steps",
-  "intro": "Review connectors and references before inserting the copied steps. Unmapped references will be cleared.",
-  "unavailable": "{{name}} cannot be pasted: no target connector uses invoker {{invoker}}.",
-  "connector": "Choose a connector for {{name}}",
-  "pasteRest": "Paste the rest",
-  "confirm": "Paste",
-  "copyFailed": "Could not store the copied steps in this browser.",
-  "copy": "Copy",
-  "paste": "Paste"
-},
+    "referencesIntro": "These copied steps reference methods outside the copied group. Choose target methods or clear the references.",
+    "title": "Check pasted steps",
+    "intro": "Review connectors and references before inserting the copied steps. Unmapped references will be cleared.",
+    "unavailable": "{{name}} cannot be pasted: its connector {{connector}} no longer exists.",
+    "connector": "Choose a connector for {{name}}",
+    "pasteRest": "Paste the rest",
+    "confirm": "Paste",
+    "copyFailed": "Could not store the copied steps in this browser.",
+    "nothingToPaste": "None of the copied steps can be pasted into this workflow."
+  },
   "loadError": {
     "title": "Could not load the workflow",
     "description": "The workflow or connector list could not be loaded. Try again or return to the workflow list.",
@@ -520,7 +519,9 @@
     "request": "Request",
     "showResponse": "Show Response",
     "tryRequest": "Try Request…",
-    "newLabelPlaceholder": "New label"
+    "newLabelPlaceholder": "New label",
+    "copy": "Copy",
+    "paste": "Paste"
   },
   "comment": {
     "badge": "Comment",

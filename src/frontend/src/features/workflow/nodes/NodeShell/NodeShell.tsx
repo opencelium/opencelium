@@ -55,7 +55,6 @@ export function NodeShell({
 			if (event.button !== 0) event.stopPropagation();
 			return;
 		}
-		if (data.kind === 'start') return;
 		event.preventDefault();
 		data.onOpenContextMenu?.({ nodeId: id, x: event.clientX, y: event.clientY, kind: data.kind });
 	};

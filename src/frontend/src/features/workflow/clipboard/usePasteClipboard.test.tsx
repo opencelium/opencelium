@@ -3,6 +3,7 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {usePasteClipboard} from './usePasteClipboard';
 import {createWorkflowClipboard} from './workflowClipboard';
 import type {WorkflowNodeModel} from '../types/workflow.types';
+import type {Connector} from '@entities/connector/model/types';
 const {confirm} = vi.hoisted(() => ({confirm: vi.fn()}));
 vi.mock('@shared/ui/confirm/ConfirmDialogContext', () => ({useConfirm: () => confirm}));
 vi.mock('@shared/i18n/hooks/useI18n', () => ({useI18n: () => ({t: (key: string) => key})}));
@@ -17,10 +18,12 @@ const nodes = [start, target];
 const edges = [{id: 'e', source: start.id, target: target.id}];
 const bindings: unknown[] = [];
 const snapshot = (body = {}) => createWorkflowClipboard('A', ['source'], [method('source', '#445566', 11, body)], []);
-function setup(disabled = false, targetNodes = nodes) {
+const instanceConnector = (id: number) => ({connectorId: id, title: `Connector ${id}`,
+    invoker: {name: 'Demo'}} as Connector);
+function setup(disabled = false, targetNodes = nodes, instanceConnectors: Connector[] = []) {
     const apply = vi.fn();
     const hook = renderHook(() => usePasteClipboard({nodes: targetNodes, edges, fieldBindings: bindings,
-        connectors: [], disabled, onApply: apply}));
+        connectors: instanceConnectors, disabled, onApply: apply}));
     return {...hook, apply};
 }
 beforeEach(() => {confirm.mockReset(); confirm.mockResolvedValue(true);});
@@ -70,10 +73,26 @@ describe('cross-workflow paste decisions', () => {
         expect(confirm).toHaveBeenCalledOnce();
         expect(hook.apply.mock.calls[0][0].find((node: WorkflowNodeModel) => node.selected)?.data.connector?.connectorId).toBe(33);
     });
-    it('does not paste a method with no compatible invoker', async () => {
+    it('keeps the step’s own connector when the target uses none of that system', async () => {
+        const hook = setup(false, [start], [instanceConnector(11)]);
+        await act(() => hook.result.current.paste(snapshot(), start.id, 'right'));
+        expect(confirm).not.toHaveBeenCalled();
+        const pasted = (hook.apply.mock.calls[0][0] as WorkflowNodeModel[]).find((node) => node.selected);
+        expect(pasted?.data.connector?.connectorId).toBe(11);
+    });
+    it('treats system steps like connector steps', async () => {
+        const system = {...method('source', '#445566', 11), type: 'system' as const};
+        system.data = {...system.data, kind: 'system'};
+        const hook = setup(false, [start]);
+        await act(() => hook.result.current.paste(createWorkflowClipboard('A', ['source'], [system], []), start.id, 'right'));
+        expect(confirm.mock.calls[0][0]).toMatchObject({isConfirmHidden: true});
+        expect(hook.apply).not.toHaveBeenCalled();
+    });
+    it('does not paste a step whose own connector was deleted and the target has no match', async () => {
         const hook = setup(false, [start]);
         await act(() => hook.result.current.paste(snapshot(), start.id, 'right'));
         expect(confirm).toHaveBeenCalledOnce();
+        expect(confirm.mock.calls[0][0]).toMatchObject({isConfirmHidden: true, cancelText: 'actions.close'});
         expect(hook.apply).not.toHaveBeenCalled();
     });
     it('pastes only compatible steps when the user confirms paste the rest', async () => {

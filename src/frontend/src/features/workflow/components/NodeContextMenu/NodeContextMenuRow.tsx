@@ -6,14 +6,14 @@ import type { NodeMenuAction, NodeMenuActionId, NodeMenuRow } from '../context-m
 
 const testId = (id: string) => buildTestId('workflow-context-menu', id);
 
-type ActionProps = { action: NodeMenuAction; isNested?: boolean; onRun: (id: NodeMenuActionId) => void };
+type ActionProps = { action: NodeMenuAction; isNested?: boolean; isDisabled?: boolean; onRun: (id: NodeMenuActionId) => void };
 
-function MenuActionButton({ action, isNested, onRun }: ActionProps) {
+function MenuActionButton({ action, isNested, isDisabled, onRun }: ActionProps) {
 	const { t } = useI18n('workflow');
 	const label = <span className='contextMenuItemLabel'>{t(action.labelKey)}</span>;
 	return (
 		<button type='button' className={`contextMenuItem${isNested ? ' contextMenuItemIndented' : ''}`}
-			data-testid={testId(action.id)} onClick={() => onRun(action.id)}>
+			data-testid={testId(action.id)} disabled={isDisabled} onClick={() => onRun(action.id)}>
 			<Icon name={action.icon} size={16} color='inherit' />
 			{action.newFeatureId
 				? <NewFeature id={action.newFeatureId} variant='pill' placement='right'>{label}</NewFeature>
@@ -25,15 +25,16 @@ function MenuActionButton({ action, isNested, onRun }: ActionProps) {
 type Props = {
 	row: NodeMenuRow;
 	isExpanded: boolean;
+	isDisabled?: (id: NodeMenuActionId) => boolean;
 	onToggle: () => void;
 	onRun: (id: NodeMenuActionId) => void;
 };
 
-export function NodeContextMenuRow({ row, isExpanded, onToggle, onRun }: Props) {
+export function NodeContextMenuRow({ row, isExpanded, isDisabled, onToggle, onRun }: Props) {
 	const { t } = useI18n('workflow');
 	switch (row.kind) {
 		case 'action':
-			return <MenuActionButton action={row.action} onRun={onRun} />;
+			return <MenuActionButton action={row.action} isDisabled={isDisabled?.(row.action.id)} onRun={onRun} />;
 		case 'inline':
 			return (
 				<div className='contextMenuInlineRow' data-testid={testId(row.id)}>
