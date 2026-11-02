@@ -12,11 +12,12 @@ const DARK_CLASS = 'workflow-tutorial-dark'
 const ACTIVE_CLASS = 'workflow-guide-active'
 
 function ActiveGuide({ active, onClose }: { active: ActiveWorkflowGuide; onClose: () => void }) {
-    const { phase, highlight } = useGuideTracking(active, onClose)
+    const { steps, current, next } = useGuideTracking(active, onClose)
+    const link = steps[current]?.link
     return (
         <>
-            <TutorialSpotlight target={highlight?.target ?? null} include={highlight?.include} cue={highlight?.cue} />
-            <WorkflowGuideCard guideId={active.guideId} methodLabel={active.methodLabel} phase={phase} onClose={onClose} />
+            <TutorialSpotlight target={link?.target ?? null} text={link?.text} include={link?.include} cue={link?.cue} />
+            <WorkflowGuideCard active={active} steps={steps} current={current} onNext={next} onClose={onClose} />
         </>
     )
 }

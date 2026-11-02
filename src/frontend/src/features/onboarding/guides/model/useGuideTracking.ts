@@ -1,49 +1,48 @@
 import { useEffect, useMemo, useState } from 'react'
 import { findVisibleTarget } from '../../workflow-tutorial/model/findVisibleTarget'
-import type { TutorialTarget } from '../../workflow-tutorial/model/tutorialSteps'
-import { buildGuideChain, WORKFLOW_GUIDES } from './workflowGuides'
+import { type GuideStep, WORKFLOW_GUIDES } from './workflowGuides'
 import type { ActiveWorkflowGuide } from './workflowGuide.store'
 
-export type GuidePhase = 'node' | 'menu' | 'arrived'
-
-type Tracking = { phase: GuidePhase; highlight: TutorialTarget | null }
-
-/** The deepest link on screen: each one only exists once the previous was clicked. */
-const deepestVisible = (chain: TutorialTarget[]) =>
-    [...chain].reverse().find(link => findVisibleTarget(link.target)) ?? null
+type Tracking = {
+    steps: GuideStep[]
+    /** Index into `steps`. */
+    current: number
+    /** The card's Next, on a step nothing on screen can tell is done. */
+    next: (() => void) | null
+}
 
 /**
  * Follows the user through a guide by watching the page rather than their clicks —
  * the context menu and the dialogs are not React state the guide can subscribe to.
- * Once the destination has been on screen and is gone again, the user has closed it:
- * the question is answered and `onFinished` ends the guide.
+ * The current step is the deepest one on screen, since each only appears once the one
+ * before it was done. Once what the guide leads into has been on screen and is gone
+ * again, the user has closed it: `onFinished` ends the guide.
  */
 export function useGuideTracking(active: ActiveWorkflowGuide, onFinished: () => void): Tracking {
     const guide = WORKFLOW_GUIDES[active.guideId]
-    const chain = useMemo(() => buildGuideChain(guide, active.nodeId), [guide, active.nodeId])
-    const arrivedLink = useMemo<TutorialTarget>(() => ({ target: guide.destination }), [guide])
-    const [tracking, setTracking] = useState<Tracking>({ phase: 'node', highlight: chain[0] })
+    const steps = useMemo(() => guide.steps(active), [guide, active])
+    const closesWith = useMemo(() => guide.closesWith(active), [guide, active])
+    const [current, setCurrent] = useState(0)
+    const [isPastNext, setPastNext] = useState(false)
 
     useEffect(() => {
         let frame = 0
-        let hasArrived = false
+        let hasOpened = false
         const track = () => {
-            if (findVisibleTarget(guide.destination)) {
-                hasArrived = true
-                setTracking(current => current.highlight === arrivedLink ? current : { phase: 'arrived', highlight: arrivedLink })
-            } else if (hasArrived) {
+            if (findVisibleTarget(closesWith)) hasOpened = true
+            else if (hasOpened) {
                 onFinished()
                 return
-            } else {
-                const link = deepestVisible(chain)
-                const phase: GuidePhase = link === chain[1] ? 'menu' : 'node'
-                setTracking(current => current.highlight === link ? current : { phase, highlight: link })
             }
+            const isReached = (step: GuideStep) =>
+                (!step.isAfterNext || isPastNext) && !!findVisibleTarget(step.link.target, step.link.text)
+            const deepest = steps.map(isReached).lastIndexOf(true)
+            setCurrent(Math.max(0, deepest))
             frame = requestAnimationFrame(track)
         }
         frame = requestAnimationFrame(track)
         return () => cancelAnimationFrame(frame)
-    }, [arrivedLink, chain, guide.destination, onFinished])
+    }, [closesWith, isPastNext, onFinished, steps])
 
-    return tracking
+    return { steps, current, next: steps[current]?.isManual ? () => setPastNext(true) : null }
 }

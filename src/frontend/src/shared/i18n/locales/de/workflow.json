@@ -1471,6 +1471,8 @@
     },
     "mapping": {
       "title": "KI-Zuordnung",
+      "onlyFrom": "Nur Werte aus {{source}}",
+      "sourceNotEarlier": "{{source}} kommt nicht vor dieser Methode, daher kann seine Antwort diesen Body nicht füllen.",
       "hint": "Schlägt vor, welcher Wert aus einem vorherigen Schritt jedes Feld dieses Request-Bodys füllt. Es werden nur Werte angeboten, die die vorherigen Schritte liefern; prüfen Sie jeden vor dem Übernehmen.",
       "instructionPlaceholder": "Optional: was dieser Schritt tun soll, z. B. den Host als Computer anlegen",
       "suggest": "Zuordnung vorschlagen",

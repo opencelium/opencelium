@@ -14,7 +14,9 @@ import { LegacyRequestData } from './LegacyRequestData';
 import { useLegacyJsonComponents } from './useLegacyJsonComponents';
 import { AiFieldMappingSection } from '@features/ai-assistant/ui/AiFieldMapping/AiFieldMappingSection';
 import { useAiAvailability } from '@features/ai-assistant/mapping/useAiAvailability';
+import { usePendingMappingStore } from '@features/ai-assistant/mapping/pendingMapping.store';
 import type { LegacyRequestJsonEditorProps } from './LegacyRequestJsonEditor.types';
+import { useRequestEditorRegistration } from './useRequestEditorRegistration';
 import '../../body-editor/bodyLegacy.css';
 
 export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
@@ -24,6 +26,10 @@ export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 	const { t } = useI18n('workflow');
 	const editor = useRequestObjectEditor({ messageProperty, source });
 	const isAiAvailable = useAiAvailability();
+	useRequestEditorRegistration({ editor, method, messageProperty, source, readOnly });
+	// Opened for a requested mapping: its section starts open, where the suggestions appear.
+	const [defaultActiveKeys] = useState(() =>
+		usePendingMappingStore.getState().pending?.methodId === method.id ? ['requestData', 'aiMapping'] : ['requestData']);
 	const components = useLegacyJsonComponents({
 		...props,
 		methodId: method.id,
@@ -75,7 +81,7 @@ export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 					<Collapse
 						className="bodyLegacyLeftCollapse"
 						items={items}
-						defaultActiveKeys={['requestData']}
+						defaultActiveKeys={defaultActiveKeys}
 					/>
 				</ConfigProvider>
 			</RequestDataPane>

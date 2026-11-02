@@ -8,6 +8,7 @@ import { workflowCommandBridgeStore } from '@features/workflow/command/workflowC
 import { aiApi } from '../api/aiApi'
 import { openMicrophoneFeed, type MicrophoneFeed } from './microphoneFeed'
 import { routeSpokenRequest } from './routeSpokenRequest'
+import { SPOKEN_REQUEST_TOAST_KEY, SPOKEN_REQUEST_TOAST_SEC } from './spokenRequest.store'
 import { createUtteranceSegmenter, type UtteranceSegmenter } from './utteranceSegmenter'
 import { samplesToSpeechWav } from './wavEncoding'
 import { matchWakeWord, WAKE_WORD } from './wakeWord'
@@ -88,8 +89,9 @@ export const useWakeWordListenerStore = create<WakeWordListenerState>((set, get)
             return
         }
         current.followUpUntil = 0
-        message.info(t('commandPalette.wakeWord.heard', { text: request }))
-        await routeSpokenRequest(request)
+        message.loading({ key: SPOKEN_REQUEST_TOAST_KEY, duration: SPOKEN_REQUEST_TOAST_SEC,
+            content: t('commandPalette.wakeWord.heard', { name: WAKE_WORD.name, text: request }) })
+        routeSpokenRequest(request)
     }
 
     const enqueue = (current: Session, samples: Float32Array) => {

@@ -1,5 +1,5 @@
 import { Command } from 'cmdk';
-import React, {useEffect, useEffectEvent, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { Card } from '@shared/ui/primitives/Card';
@@ -32,7 +32,7 @@ import {useAssistantStore} from "@features/ai-assistant/assistant/assistantStore
 import {AiCommandItems} from "@features/ai-assistant/ui/AiCommandItems/AiCommandItems";
 import {useVoiceCommand} from "@features/ai-assistant/voice/useVoiceCommand";
 import {useVoiceHotkey} from "@features/ai-assistant/voice/useVoiceHotkey";
-import {useSpokenRequestStore} from "@features/ai-assistant/voice/spokenRequest.store";
+import {useAddressedRequests} from "@features/ai-assistant/voice/useAddressedRequests";
 import {firstActionableAiItem} from "@features/ai-assistant/command/aiCommandItemValues";
 import {runIntent} from "@features/ai-assistant/command/intents/runIntent";
 import type {ResolvedIntent} from "@features/ai-assistant/command/intents/resolveIntent";
@@ -91,6 +91,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
     const [lockedScope, setLockedScope] = useState<Suggestion | null>(null);
     const requestIdRef = useRef(0);
     const changeSourceRef = useRef<'input' | 'select'>('input');
+    const clearAfterRunRef = useRef(false);
     const policyContext = useCommandPolicyContext();
     const inputRef = useRef<HTMLInputElement | null>(null);
     const buildTokens = (raw: string): string[] => {
@@ -176,6 +177,10 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
 
                     if (source === 'select') {
                         await executeWithContext(newAst);
+                        if (clearAfterRunRef.current) {
+                            clearAfterRunRef.current = false;
+                            setValue('');
+                        }
                     }
                     setSuggestions(suggestions);
                     setIsCommandComplete(isComplete);
@@ -305,8 +310,18 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
     const aiAssist = useAiCommandAssist({
         query: lockedScope ? '' : value,
         isUnmatched: suggestions.length === 0 && !isCommandComplete,
-        onRun: handleSelectRecent,
+        onRun: (phrase, isAddressed) => {
+            // Asked of the assistant by name: the command runs and the input is left empty, as it was.
+            clearAfterRunRef.current = isAddressed;
+            handleSelectRecent(phrase);
+        },
         onRunIntent: (resolved) => runAiIntent(resolved),
+        onGuide: () => {
+            changeSourceRef.current = 'input';
+            setValue('');
+            setIsActive(false);
+            inputRef.current?.blur();
+        },
     });
     function runAiIntent(resolved: ResolvedIntent) {
         changeSourceRef.current = 'input';
@@ -336,17 +351,17 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
             void aiAssist.ask(text);
         },
     });
-    // A request the always-listening assistant heard is handled as if it was spoken into this palette.
-    const onSpokenRequest = useEffectEvent((text: string) => {
-        continueFromAi(text);
-        setIsActive(true);
-        void aiAssist.ask(text);
+    // A request the always-listening assistant heard runs without the palette; only an answer to look at opens it.
+    useAddressedRequests({
+        assist: aiAssist,
+        onAnswer: (text) => {
+            changeSourceRef.current = 'input';
+            setLockedScope(null);
+            setValue(text);
+            inputRef.current?.focus();
+            setIsActive(true);
+        },
     });
-    useEffect(() => useSpokenRequestStore.subscribe((state) => {
-        if (!state.pending) return;
-        const text = useSpokenRequestStore.getState().take();
-        if (text) onSpokenRequest(text);
-    }), []);
     useVoiceHotkey({
         isAvailable: voice.isAvailable,
         isListening: voice.status === 'listening',

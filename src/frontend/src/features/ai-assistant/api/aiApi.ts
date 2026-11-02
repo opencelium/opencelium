@@ -2,7 +2,7 @@ import { baseApi } from '@shared/api/baseApi';
 import { runtimeConfig } from '@shared/config/runtimeConfig';
 import type {
 	AiHealth, ConditionSuggestion, SuggestConditionRequest, ConnectorErrorExplanation, DraftNotificationRequest, NotificationDraft, ExplainConnectorErrorRequest, ExplainWorkflowRequest, WorkflowExplanation, GenerateWorkflowRequest, InvokerDraft, SuggestMappingRequest, SuggestMappingResponse, InvokerDraftRequest, InvokerDraftResponse, RunExplanation, RunFailureRequest, RunFix, GenerateWorkflowResponse, PlanWorkflowResponse,
-	RouteCommandRequest, RouteCommandResponse, RouteGuideRequest, RouteGuideResponse, SearchCommandsRequest, SearchCommandsResponse, TranscribeSpeechResponse,
+	RouteCommandRequest, RouteCommandResponse, RouteGuideRequest, RouteGuideResponse, AddMethodIntentRequest, AddMethodIntentResponse, MappingIntentRequest, MappingIntentResponse, TransformationIntentRequest, TransformationIntentResponse, SearchCommandsRequest, SearchCommandsResponse, TranscribeSpeechResponse,
 } from '../model/aiGateway.types';
 
 // The panel renders every gateway failure itself; the global error toast would duplicate it.
@@ -76,6 +76,15 @@ export const aiApi = baseApi.injectEndpoints({
 		}),
 		routeGuide: b.mutation<RouteGuideResponse, RouteGuideRequest>({
 			query: (body) => ({ url: `${runtimeConfig.aiUrl}/guide/intent`, method: 'POST', body, customOptions: quiet }),
+		}),
+		readAddMethod: b.mutation<AddMethodIntentResponse, AddMethodIntentRequest>({
+			query: (body) => ({ url: `${runtimeConfig.aiUrl}/workflow/add-method/intent`, method: 'POST', body, customOptions: quiet }),
+		}),
+		readMapping: b.mutation<MappingIntentResponse, MappingIntentRequest>({
+			query: (body) => ({ url: `${runtimeConfig.aiUrl}/workflow/mapping/intent`, method: 'POST', body, customOptions: quiet }),
+		}),
+		readTransformation: b.mutation<TransformationIntentResponse, TransformationIntentRequest>({
+			query: (body) => ({ url: `${runtimeConfig.aiUrl}/workflow/transformation/intent`, method: 'POST', body, customOptions: quiet }),
 		}),
 		routeCommand: b.mutation<RouteCommandResponse, RouteCommandRequest>({
 			query: (body) => ({

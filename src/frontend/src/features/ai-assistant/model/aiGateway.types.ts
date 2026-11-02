@@ -293,7 +293,9 @@ export type RouteCommandResponse = {
 /** Mirrors `routeGuideRequestSchema` in `src/ai-gateway/src/guide/guideRequest.schema.ts`. */
 export type RouteGuideRequest = {
 	prompt: string;
-	guides: { id: string; description: string }[];
+	/** `isAction`: changes the workflow, so never chosen for a question about how to do it. */
+	/** `teaches`: the action a guide shows how to do; a how-question read as that action gets the guide. */
+	guides: { id: string; description: string; isAction?: boolean; teaches?: string }[];
 	/** Method names in the open workflow; the answer names one of these or none. */
 	methods: string[];
 };
@@ -302,6 +304,57 @@ export type RouteGuideResponse = {
 	guideId: string | null;
 	/** Empty when the request names no method. */
 	method: string;
+	durationMs: number;
+	model: string;
+};
+
+/** Mirrors `addMethodRequestSchema` in `src/ai-gateway/src/editor/addMethodRequest.schema.ts`. */
+export type AddMethodIntentRequest = {
+	prompt: string;
+	connectors: { id: string; title: string; invoker: string }[];
+	/** The workflow's methods in workflow order. */
+	steps: { id: string; label: string }[];
+};
+
+export type AddMethodIntentResponse = {
+	connectorId: string | null;
+	operation: string | null;
+	/** The method as the user said it, for saying what could not be found. */
+	spokenMethod: string;
+	position: 'after' | 'before';
+	stepId: string | null;
+	durationMs: number;
+	model: string;
+};
+
+export type MappingIntentRequest = {
+	prompt: string;
+	/** The workflow's method names in workflow order. */
+	methods: string[];
+};
+
+export type MappingIntentResponse = {
+	/** The method whose body gets references; empty when the request names none. */
+	target: string;
+	/** The method whose response supplies them; empty when the request names none. */
+	source: string;
+	durationMs: number;
+	model: string;
+};
+
+export type TransformationIntentRequest = {
+	prompt: string;
+	/** The open body's or headers' fields as paths. */
+	fields: string[];
+};
+
+export type TransformationIntentResponse = {
+	/** The field the request names; empty when it names none of them. */
+	field: string;
+	/** The field as the user named it; empty when they named none ("this property"): the selected field is meant. */
+	spokenField: string;
+	/** What the script should do, in the user's words. */
+	description: string;
 	durationMs: number;
 	model: string;
 };

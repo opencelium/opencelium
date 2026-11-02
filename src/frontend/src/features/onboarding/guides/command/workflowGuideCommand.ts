@@ -12,6 +12,7 @@ const GUIDE_COMMANDS: GuideCommand[] = [
     { value: 'headers', aliases: ['header'], guideId: 'method-headers', icon: 'list' },
     { value: 'body', guideId: 'method-body', icon: 'code' },
     { value: 'try', aliases: ['test'], guideId: 'method-try', icon: 'send' },
+    { value: 'transformation', aliases: ['script', 'transform'], guideId: 'method-transformation', icon: 'sparkles' },
 ]
 
 const run = (guideId: WorkflowGuideId) => (args: GuideArgs): void => {

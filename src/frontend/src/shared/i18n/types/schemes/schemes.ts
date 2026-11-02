@@ -163,6 +163,33 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 heard: string
                 autoStopped: string
             }
+            workflowEdit: {
+                added: string
+                notEditable: string
+                noConnectors: string
+                unknownConnector: string
+                unknownMethod: string
+                noPlace: string
+                failed: string
+                sameMethod: string
+                unknownStep: string
+                mappingFailed: string
+                noOpenEditor: string
+                noFields: string
+                unknownField: string
+                noFieldNamed: string
+                noReference: string
+                noScriptDescription: string
+                transformationFailed: string
+                part: {
+                    body: string
+                    header: string
+                }
+                confirm: {
+                    title: string
+                    message: string
+                }
+            }
             descriptions: {
                 create: string
                 createWorkflow: string
@@ -188,6 +215,10 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 workflowShowHeaders: string
                 workflowShowBody: string
                 workflowShowTry: string
+                workflowShowTransformation: string
+                workflowAddMethod: string
+                workflowSuggestMapping: string
+                workflowApplyTransformation: string
                 help: string
                 onboarding: string
                 workflowTutorial: string

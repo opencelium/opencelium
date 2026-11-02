@@ -72,7 +72,11 @@
       "workflowShowUrl": "Zeigen, wo die URL einer Methode ist (der ausgewählten oder einer genannten)",
       "workflowShowHeaders": "Zeigen, wo die Header einer Methode sind (der ausgewählten oder einer genannten)",
       "workflowShowBody": "Zeigen, wo der Body einer Methode ist (der ausgewählten oder einer genannten)",
-      "workflowShowTry": "Zeigen, wie man eine Methode ausprobiert (die ausgewählte oder eine genannte)"
+      "workflowShowTry": "Zeigen, wie man eine Methode ausprobiert (die ausgewählte oder eine genannte)",
+      "workflowShowTransformation": "Zeigen, wie man eine Transformation (ein Skript) auf einen Wert im Body oder in den Headern einer Methode anwendet",
+      "workflowAddMethod": "Eine neue Methode aus einem Konnektor zum Workflow hinzufügen, vor oder nach einem Schritt",
+      "workflowSuggestMapping": "Referenzen (ein Mapping) für den Body einer Methode aus der Antwort einer früheren Methode vorschlagen",
+      "workflowApplyTransformation": "Eine Transformation (ein Skript) auf eine Eigenschaft des geöffneten Bodys oder der Header anwenden"
     },
     "footer": {
       "select": "Auswählen",
@@ -121,8 +125,35 @@
       "start": "Mit {{name}} sprechen: Eingeschaltet hört es ständig zu und reagiert nur auf Sätze, die mit „{{name}}“ beginnen, z. B. „{{name}}, wo ist der Header der Methode?“",
       "stop": "{{name}} hört zu. Zum Beenden klicken",
       "listening": "{{name}} hört zu. Was brauchst du?",
-      "heard": "„{{text}}“",
+      "heard": "{{name}} kümmert sich darum: „{{text}}“",
       "autoStopped": "{{name}} hört nach 10 Minuten ohne Anfrage nicht mehr zu."
+    },
+    "workflowEdit": {
+      "added": "{{method}} aus {{connector}} hinzugefügt. Strg+Z macht es rückgängig.",
+      "notEditable": "Der Workflow kann gerade nicht geändert werden (schreibgeschützt oder ein Testlauf läuft).",
+      "noConnectors": "Es gibt keine Konnektoren, aus denen eine Methode hinzugefügt werden kann. Lege zuerst einen Konnektor an.",
+      "unknownConnector": "Keiner deiner Konnektoren passt zu dem genannten.",
+      "unknownMethod": "{{connector}} hat keine Methode wie „{{method}}“.",
+      "noPlace": "Dort kann keine Methode eingefügt werden.",
+      "failed": "Die KI konnte die Anfrage nicht lesen. Versuche es erneut oder füge die Methode mit „+“ hinzu.",
+      "sameMethod": "Nenne zwei verschiedene Methoden: eine, deren Body die Referenzen bekommt, und eine, aus der sie kommen.",
+      "unknownStep": "Keine Methode in diesem Workflow passt zu „{{method}}“.",
+      "mappingFailed": "Die KI konnte die Anfrage nicht lesen. Versuche es erneut oder öffne den Body der Methode und nutze das KI-Mapping.",
+      "noOpenEditor": "Öffne zuerst den Body oder die Header einer Methode: Eine Transformation gilt für die dort geöffnete Anfrage.",
+      "noFields": "Im geöffneten Bereich ({{part}}) gibt es keine Eigenschaften zum Transformieren.",
+      "unknownField": "Keine Eigenschaft im geöffneten Bereich ({{part}}) passt zu „{{field}}“.",
+      "noFieldNamed": "Nenne die Eigenschaft oder wähle sie zuerst im Bereich ({{part}}) aus.",
+      "noReference": "{{field}} enthält keine Referenz: Eine Transformation ändert einen Wert aus einer anderen Methode. Füge zuerst eine Referenz ein.",
+      "noScriptDescription": "Sag, was die Transformation tun soll, z. B. „mit in Großbuchstaben umwandeln“.",
+      "transformationFailed": "Die KI konnte die Anfrage nicht lesen. Versuche es erneut oder beschreibe das Skript im Transformationsbereich.",
+      "part": {
+        "body": "Body",
+        "header": "Header"
+      },
+      "confirm": {
+        "title": "Methode hinzufügen?",
+        "message": "{{method}} aus {{connector}} zum Workflow hinzufügen?"
+      }
     }
   },
   "sidebar": {

@@ -385,11 +385,13 @@
     "kicker": "Zeig es mir",
     "actions": {
       "stop": "Abbrechen",
-      "done": "Verstanden"
+      "done": "Verstanden",
+      "next": "Weiter"
     },
     "errors": {
       "noMethods": "Dieser Workflow hat noch keine Methoden. Füge zuerst eine Methode hinzu.",
-      "noMatch": "In diesem Workflow gibt es keine Methode namens „{{method}}“."
+      "noMatch": "In diesem Workflow gibt es keine Methode namens „{{method}}“.",
+      "noReferences": "Noch keine Methode in diesem Workflow hat eine Referenz im Bereich {{part}}, und eine Transformation ändert einen referenzierten Wert. Füge zuerst Referenzen hinzu, z. B. „{{name}}, schlage Referenzen für … aus … vor“."
     },
     "method-url": {
       "title": "Wo du die URL von {{method}} findest",
@@ -414,6 +416,21 @@
       "node": "Klicke mit der rechten Maustaste auf {{method}}.",
       "menu": "Klicke auf Request ausprobieren….",
       "arrived": "Klicke auf Senden, um {{method}} einmal auszuführen und die Antwort zu sehen."
+    },
+    "parts": {
+      "body": "Body",
+      "header": "Header"
+    },
+    "method-transformation": {
+      "title": "So wendest du eine Transformation in {{method}} an",
+      "node": "Klicke mit der rechten Maustaste auf {{method}}.",
+      "menu": "Klicke unter Request auf {{part}}.",
+      "field": "Klicke auf den Wert von {{field}}: Er enthält eine Referenz, und eine Transformation ändert einen Wert aus einer anderen Methode.",
+      "create": "Klicke auf Transformation erstellen.",
+      "script": "Schreibe das Skript oder beschreibe es im KI-Feld und klicke auf Generieren. Dann auf Weiter.",
+      "playground": "Öffne den Playground: das Kolben-Symbol über dem Skript.",
+      "arrived": "Probiere das Skript mit Beispielwerten aus. Nächstes Mal sag einfach: „{{name}}, wende eine Transformation für {{field}} an mit …“",
+      "noReference": "{{method}} hat noch keine Referenz im Bereich {{part}}, und eine Transformation ändert einen referenzierten Wert. Füge zuerst eine hinzu, z. B. mit „{{name}}, schlage Referenzen für {{method}} aus … vor“."
     }
   }
 }

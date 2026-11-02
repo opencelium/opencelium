@@ -25,6 +25,7 @@ import { registerNotificationRoutes } from './routes/notification.ts'
 import { registerConditionRoutes } from './routes/condition.ts'
 import { registerHelpRoutes } from './routes/help.ts'
 import { registerGuideRoutes } from './routes/guide.ts'
+import { registerEditorRoutes } from './routes/editor.ts'
 
 export type AppDeps = {
     config: GatewayConfig
@@ -65,5 +66,6 @@ export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}
     registerConditionRoutes(app, deps)
     registerHelpRoutes(app, deps)
     registerGuideRoutes(app, deps)
+    registerEditorRoutes(app, deps)
     return app
 }

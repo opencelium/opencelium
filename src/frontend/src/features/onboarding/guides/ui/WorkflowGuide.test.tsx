@@ -92,4 +92,59 @@ describe('WorkflowGuide', () => {
         fireEvent.click(screen.getByTestId('workflow-guide-close'))
         expect(useWorkflowGuideStore.getState().active).toBeNull()
     })
+
+    describe('the transformation guide', () => {
+        const row = (key: string) => {
+            const editor = document.querySelector('[data-testid="workflow-request-body"]') ?? mount('workflow-request-body')
+            const element = document.createElement('div')
+            element.className = 'variable-row'
+            element.textContent = `"${key}" : value`
+            editor.appendChild(element)
+        }
+        beforeEach(() => {
+            useWorkflowGuideStore.setState({ active: { guideId: 'method-transformation', nodeId: 'n1', methodLabel: 'createClient', part: 'body', field: 'name' } })
+        })
+
+        it('walks into the body, onto the field, through the script to the playground', async () => {
+            mount('rf__node-n1')
+            mount('workflow-method-dialog-close')
+            render(<WorkflowGuide />)
+            row('name')
+            await nextFrame()
+            expect(currentStep()).toContain('guides.method-transformation.field')
+
+            mount('workflow-enhancement-create')
+            await nextFrame()
+            expect(currentStep()).toContain('guides.method-transformation.create')
+
+            const script = document.createElement('div')
+            script.id = 'enhancement_code'
+            document.body.appendChild(script)
+            mount('script-playground-toggle')
+            await nextFrame()
+            // Writing a script shows nothing to detect: the card waits for Next.
+            expect(currentStep()).toContain('guides.method-transformation.script')
+            fireEvent.click(screen.getByTestId('workflow-guide-next'))
+            await nextFrame()
+            expect(currentStep()).toContain('guides.method-transformation.playground')
+
+            const playground = document.createElement('section')
+            playground.className = 'scriptPlayground'
+            document.body.appendChild(playground)
+            // The playground folds the body away; the guide stays until the dialog closes.
+            document.querySelector('[data-testid="workflow-request-body"]')?.remove()
+            await nextFrame()
+            expect(currentStep()).toContain('guides.method-transformation.arrived')
+            expect(screen.getByTestId('workflow-guide-close')).toHaveTextContent('guides.actions.done')
+        })
+
+        it('ends at the body when the method has no reference to transform', async () => {
+            useWorkflowGuideStore.setState({ active: { guideId: 'method-transformation', nodeId: 'n1', methodLabel: 'getCustomers', part: 'body', field: null } })
+            mount('rf__node-n1')
+            mount('workflow-request-body')
+            render(<WorkflowGuide />)
+            await nextFrame()
+            expect(currentStep()).toContain('guides.method-transformation.noReference')
+        })
+    })
 })

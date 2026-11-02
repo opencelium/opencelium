@@ -1471,6 +1471,8 @@
     },
     "mapping": {
       "title": "AI mapping",
+      "onlyFrom": "Only values from {{source}}",
+      "sourceNotEarlier": "{{source}} does not come before this method, so its response cannot fill this body.",
       "hint": "Suggests which value from an earlier step fills each field of this request body. Only values the earlier steps return are offered; check each one before applying.",
       "instructionPlaceholder": "Optional: what this step should do, e.g. create the host as a computer",
       "suggest": "Suggest mapping",

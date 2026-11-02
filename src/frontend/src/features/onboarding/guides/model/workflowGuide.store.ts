@@ -1,7 +1,18 @@
 import { create } from 'zustand'
 import type { WorkflowGuideId } from './workflowGuides'
 
-export type ActiveWorkflowGuide = { guideId: WorkflowGuideId; nodeId: string; methodLabel: string }
+export type GuidePart = 'body' | 'header'
+
+export type ActiveWorkflowGuide =
+    | { guideId: Exclude<WorkflowGuideId, 'method-transformation'>; nodeId: string; methodLabel: string }
+    | {
+        guideId: 'method-transformation'
+        nodeId: string
+        methodLabel: string
+        part: GuidePart
+        /** The key of a field holding a reference, to transform; null when the method has none to show. */
+        field: string | null
+    }
 
 type WorkflowGuideState = {
     active: ActiveWorkflowGuide | null
