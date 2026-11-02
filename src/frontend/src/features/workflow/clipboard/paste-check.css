@@ -1,0 +1,119 @@
+.pasteCheck .referenceRemapRow {
+  gap: 10px;
+  padding: 14px;
+  border-radius: 8px;
+}
+
+.pasteCheck .referenceRemapSources {
+  gap: 12px;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.pasteCheck .referenceRemapTable th {
+  padding: 8px 10px;
+}
+
+.pasteCheck .referenceRemapTable th:first-child {
+  width: 26%;
+}
+
+.pasteCheck .referenceRemapTable th:nth-child(2) {
+  width: 32%;
+}
+
+.pasteCheck .referenceRemapTable td {
+  padding: 12px 10px;
+}
+
+.pasteCheck .referenceRemapSourceValueRow,
+.pasteCheck .referenceRemap .bodyLegacyGeneratorShell {
+  min-width: 0;
+}
+
+.pasteCheck .referenceRemapSourceValueRow > .bodyLegacyGeneratorShell {
+  flex: 1;
+}
+
+.pasteCheck .referenceRemapSourceValueRow > :last-child:not(.bodyLegacyGeneratorShell) {
+  align-self: flex-end;
+}
+
+.pasteCheck .referenceRemap .bodyLegacyGeneratorShellNoToggle {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+.pasteCheck .bodyLegacyGeneratorShell:not(.bodyLegacyGeneratorShellNoMethod) > .selectCopyHost:first-child,
+.pasteCheck .referenceRemapSourceValue .bodyLegacyGeneratorShell > .selectCopyHost,
+.pasteCheck .bodyLegacyGeneratorResponse {
+  grid-column: 1 / -1;
+}
+
+.pasteCheck .bodyLegacyGeneratorResponse {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  width: auto;
+  margin: 0;
+}
+
+.pasteCheck .bodyLegacyGeneratorResponseText {
+  margin-inline: 0;
+}
+
+.pasteCheck .selectCopyHost {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pasteCheck .selectCopyHost > :first-child {
+  order: 2;
+  flex: 0 0 26px;
+}
+
+.pasteCheck .selectCopyHost > :last-child {
+  order: 1;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.pasteCheck .selectCopyHost .selectCopyButton {
+  position: static;
+  transform: none;
+  opacity: 0.65;
+  pointer-events: auto;
+}
+
+.pasteCheck .selectCopyHost:hover .selectCopyButton,
+.pasteCheck .selectCopyHost:focus-within .selectCopyButton {
+  opacity: 1;
+}
+
+.pasteCheck .selectCopyHost.isFitExpanded .selectCopyButton {
+  display: inline-flex;
+}
+
+.pasteCheck .referenceRemap .bodyLegacyGeneratorSelect.ant-select {
+  width: 100% !important;
+  min-width: 0;
+  margin-inline-end: 0 !important;
+}
+
+.pasteCheck .referenceFieldPathInput {
+  min-height: 32px !important;
+  padding-block: 5px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.pasteCheck .referenceFieldPathInput:not(:focus) {
+  height: 32px !important;
+}
+
+.pasteCheck .referenceRemap .referenceFieldPathSelect.ant-select {
+  height: auto !important;
+  padding-inline: 0 !important;
+}

@@ -2,10 +2,7 @@ import { createShortId } from '@shared/lib/createId';
 import { buildWorkflowIndexes } from '../api/connectionPayload';
 import { ALL_COLORS } from '../constants/colors';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
-import {
-  collectReferenceColors,
-  normalizeReferenceColor,
-} from './graph.referenceColors';
+import { normalizeReferenceColor } from './graph.referenceColors';
 import {
   compareWorkflowIndexes,
   collectWorkflowJumpLinks,
@@ -14,7 +11,7 @@ import {
 import { getOperatorBottomBranch } from './graph.traversal';
 
 const isMethodNode = (node: WorkflowNodeModel) =>
-  node.type === 'connector' || node.type === 'system';
+  node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection';
 
 const cloneValue = <T,>(value: T): T =>
   value === undefined ? value : JSON.parse(JSON.stringify(value));
@@ -54,6 +51,7 @@ export const cloneWorkflowSubtree = (
   sourceEdges: WorkflowEdgeModel[],
   allNodes: WorkflowNodeModel[],
   allEdges: WorkflowEdgeModel[],
+  referenceGraph = { nodes: allNodes, edges: allEdges },
 ) => {
   const idMap = new Map<string, string>();
   const colorMap = new Map<string, string>();
@@ -65,9 +63,9 @@ export const cloneWorkflowSubtree = (
   );
   const sourceNodeIds = new Set(sourceNodes.map((node) => node.id));
   const sourceMethodNodes = sourceNodes.filter(isMethodNode);
-  const methodNodes = allNodes.filter(isMethodNode);
-  const indexes = buildWorkflowIndexes(allNodes, allEdges);
-  const jumps = collectWorkflowJumpLinks(allNodes, indexes);
+  const methodNodes = referenceGraph.nodes.filter(isMethodNode);
+  const indexes = buildWorkflowIndexes(referenceGraph.nodes, referenceGraph.edges);
+  const jumps = collectWorkflowJumpLinks(referenceGraph.nodes, indexes);
 
   sourceNodes.forEach((node) => {
     idMap.set(node.id, createShortId(node.type));
@@ -103,15 +101,13 @@ export const cloneWorkflowSubtree = (
 
   const replaceColors = (value: unknown, consumer: WorkflowNodeModel): unknown => {
     if (typeof value === 'string') {
-      let result = value;
-      collectReferenceColors(value).forEach((sourceColor) => {
-        const provider = resolveProvider(sourceColor, consumer);
+      return value.replace(/#[A-Fa-f0-9]{6}(?=\.\((?:request|response)\))/g, (color) => {
+        const provider = resolveProvider(normalizeReferenceColor(color), consumer);
         const nextColor = provider && sourceNodeIds.has(provider.id)
           ? clonedColorBySourceId.get(provider.id)
           : undefined;
-        if (nextColor) result = result.replace(new RegExp(sourceColor, 'gi'), nextColor);
+        return nextColor ?? color;
       });
-      return result;
     }
     if (Array.isArray(value)) return value.map((item) => replaceColors(item, consumer));
     if (value && typeof value === 'object') {

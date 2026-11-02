@@ -19,6 +19,11 @@ import { useCopySelectedNodeShortcut } from './useCopySelectedNodeShortcut';
 import { usePasteCopiedNodeShortcut } from './usePasteCopiedNodeShortcut';
 import { useDuplicateSelectedNodeShortcut } from './useDuplicateSelectedNodeShortcut';
 import type { useWorkflowPageState } from './useWorkflowPageState';
+import { createWorkflowClipboard, type WorkflowClipboard } from '../clipboard/workflowClipboard';
+import { useWorkflowClipboard } from '../clipboard/useWorkflowClipboard';
+import { usePasteClipboard } from '../clipboard/usePasteClipboard';
+import { getSelectedDragGroup } from '../drag-drop/workflowDropTarget.utils';
+import { createShortId } from '@shared/lib/createId';
 import { buildConnectionPayload } from '../api/connectionPayload';
 
 type Params = {
@@ -44,9 +49,28 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const issues = useWorkflowIssues(view.hydratedNodes, workflow.edges, fieldBindings);
 	const [jsonEditorOpen, setJsonEditorOpen] = useState(false);
 	const [jsonEditorValue, setJsonEditorValue] = useState<Record<string, unknown> | null>(null);
-	const [copiedNodeIds, setCopiedNodeIds] = useState<string[]>([]);
+	const [unsavedId] = useState(() => createShortId('unsaved'));
+	const clipboardWorkflowId = view.activeConnectionId ?? unsavedId;
+	const clipboard = useWorkflowClipboard();
+	const copiedNodeIds = clipboard.snapshot?.rootIds ?? [];
+	const externalPaste = usePasteClipboard({nodes: workflow.nodes, edges: workflow.edges,
+		fieldBindings, connectors, disabled: isEditLocked,
+		onApply: workflow.onApplyPastedGraph});
+	const copyNodes = (ids: string[]) => {
+		try {
+			const sourceNodes = view.hydratedNodes.map((node) => ({...node, data: {...node.data,
+				connector: node.data.connector ? {...node.data.connector,
+					invokerName: node.data.connector.invokerName ?? connectors.find((connector) =>
+						connector.connectorId === node.data.connector?.connectorId)?.invoker?.name,
+				} : undefined}}));
+			const snapshot = createWorkflowClipboard(String(clipboardWorkflowId), ids, sourceNodes, workflow.edges, fieldBindings);
+			clipboard.copy(snapshot);
+			message.success(t('messages.nodeCopied', {count: snapshot.nodes.filter((node) => node.type !== 'comment').length}));
+		} catch { notifyError(t('pasteCheck.copyFailed')); }
+	};
 	const [pasteOperatorTarget, setPasteOperatorTarget] = useState<{
 		sourceNodeIds: string[];
+		snapshot: WorkflowClipboard | null;
 		targetNodeId: string;
 	} | null>(null);
 	const validation = useWorkflowValidation({ persistedTitle: connection.persistedTitle,
@@ -162,7 +186,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const isEditorDialogOpen = !!(workflow.methodEditor || workflow.conditionEditor ||
 		workflow.aggregatorEditor || workflow.connectorEditor || workflow.historyOpen || templates.templateDialogOpen ||
 		templates.loadTemplateDialogOpen || templates.connectorMappingDialogOpen ||
-		isShortcutsOpen || jsonEditorOpen || pasteOperatorTarget);
+		isShortcutsOpen || jsonEditorOpen || pasteOperatorTarget || externalPaste.checking);
 
 	useDeleteSelectedNode({ readOnly: isEditLocked, nodes: workflow.nodes,
 		onDeleteNodes: workflow.onDeleteNodes, disabled: isEditorDialogOpen });
@@ -173,14 +197,15 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
 		nodes: workflow.nodes,
 		edges: workflow.edges,
-		onCopyNodes: (nodeIds) => {
-			setCopiedNodeIds(nodeIds);
-			message.success(t('messages.nodeCopied', { count: nodeIds.length }));
-		},
+		onCopyNodes: copyNodes,
 	});
 	const pasteNodes = async (sourceNodeIds: string[], targetNodeId: string,
-		direction: 'right' | 'bottom') => {
-		const pasted = await workflow.onPasteNodes(sourceNodeIds, targetNodeId, direction);
+		direction: 'right' | 'bottom', copied = clipboard.snapshot) => {
+		if (isEditLocked || externalPaste.checking || !copied) return;
+		const sameWorkflow = copied.sourceWorkflowId === String(clipboardWorkflowId);
+		const pasted = sameWorkflow
+			? await workflow.onPasteNodes(sourceNodeIds, targetNodeId, direction, copied)
+			: await externalPaste.paste(copied, targetNodeId, direction);
 		if (pasted) message.success(t('messages.nodePasted'));
 	};
 	usePasteCopiedNodeShortcut({
@@ -191,7 +216,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 			void pasteNodes(sourceNodeIds, targetNodeId, 'right');
 		},
 		onChooseOperatorPlacement: (sourceNodeIds, targetNodeId) =>
-			setPasteOperatorTarget({ sourceNodeIds, targetNodeId }),
+			setPasteOperatorTarget({ sourceNodeIds, targetNodeId, snapshot: clipboard.snapshot }),
 	});
 	useDuplicateSelectedNodeShortcut({
 		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
@@ -238,15 +263,27 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		jsonEditorOpen, setJsonEditorOpen, jsonEditorValue,
 		schedulesOpen, setSchedulesOpen, changeHistoryOpen, setChangeHistoryOpen,
 		copiedNodeIds, pasteOperatorTarget,
+		copyNodeFromMenu: (id: string) => {
+			if (isEditLocked || isEditorDialogOpen) return;
+			copyNodes(workflow.nodes.some((node) => node.id === id && node.selected)
+				? getSelectedDragGroup(workflow.nodes, workflow.edges).rootIds : [id]);
+		},
+		canPasteNodes: copiedNodeIds.length > 0 && !isEditLocked && !isEditorDialogOpen,
+		pasteAtNode: (targetNodeId: string) => {
+			if (isEditLocked || isEditorDialogOpen || !clipboard.snapshot) return;
+			const target = workflow.nodes.find((node) => node.id === targetNodeId);
+			if (target?.type === 'if' || target?.type === 'loop') setPasteOperatorTarget({sourceNodeIds: copiedNodeIds, targetNodeId, snapshot: clipboard.snapshot});
+			else void pasteNodes(copiedNodeIds, targetNodeId, 'right');
+		},
 		cancelPasteOperator: () => setPasteOperatorTarget(null),
 		pasteOperatorInScope: () => {
 			if (pasteOperatorTarget) void pasteNodes(pasteOperatorTarget.sourceNodeIds,
-				pasteOperatorTarget.targetNodeId, 'bottom');
+				pasteOperatorTarget.targetNodeId, 'bottom', pasteOperatorTarget.snapshot);
 			setPasteOperatorTarget(null);
 		},
 		pasteOperatorAfter: () => {
 			if (pasteOperatorTarget) void pasteNodes(pasteOperatorTarget.sourceNodeIds,
-				pasteOperatorTarget.targetNodeId, 'right');
+				pasteOperatorTarget.targetNodeId, 'right', pasteOperatorTarget.snapshot);
 			setPasteOperatorTarget(null);
 		} };
 };

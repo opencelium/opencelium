@@ -37,13 +37,31 @@ describe('collectReferenceOccurrences', () => {
 	});
 
 	// A value spliced into a URL has no field to name.
-	it('names the part of the request when a reference has no address', () => {
+	it('includes the resolved URL and consuming method for a path argument', () => {
 		const nodes = [method('m1', CONSUMER, config({
 			url: 'https://x/#{%a1%}', endpointArgs: { a1: { id: 'a1', source: read } },
 		}))];
 
 		expect(collectReferenceOccurrences(nodes, undefined)[0].location)
-			.toEqual({ kind: 'label', value: 'url' });
+			.toEqual({kind: 'label', value: `https://x/{%${read}%}`,
+				url: {nodeId: 'm1', part: 'endpoint'}});
+	});
+
+	it('keeps the query parameter name and value for each usage', () => {
+		const nodes = [method('m1', CONSUMER, config({queryParams: [
+			{id: 'one', key: 'userId', value: read, enabled: true},
+			{id: 'two', key: 'ownerId', value: read, enabled: true},
+		]}))];
+		expect(collectReferenceOccurrences(nodes, undefined).map((item) => item.location)).toEqual([
+			{kind: 'label', value: `{%${read}%}`, url: {nodeId: 'm1', part: 'query', name: 'userId'}},
+			{kind: 'label', value: `{%${read}%}`, url: {nodeId: 'm1', part: 'query', name: 'ownerId'}},
+		]);
+	});
+
+	it('does not attribute unused endpoint arguments to the URL', () => {
+		const nodes = [method('m1', CONSUMER, config({url: '/users',
+			endpointArgs: {unused: {id: 'unused', source: read}}}))];
+		expect(collectReferenceOccurrences(nodes, undefined)).toEqual([]);
 	});
 
 	// The enhancement says where it lands itself.

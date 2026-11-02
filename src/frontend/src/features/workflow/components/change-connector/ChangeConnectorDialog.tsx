@@ -6,6 +6,7 @@ import type { Connector } from '@entities/connector/model/types';
 import type { WorkflowNodeModel } from '../../types/workflow.types';
 import '../dialogHeader.css';
 import './change-connector-dialog.css';
+import { connectorsWithSameInvoker } from './connectorOptions';
 
 type Props = {
   open: boolean;
@@ -13,11 +14,6 @@ type Props = {
   connectors: Connector[];
   onClose: () => void;
   onChange: (nodeId: string, connector: Connector) => void;
-};
-
-const connectorsWithSameInvoker = (connectors: Connector[], invokerName: string | null | undefined) => {
-  const name = invokerName?.toLowerCase();
-  return name ? connectors.filter((connector) => connector.invoker?.name?.toLowerCase() === name) : [];
 };
 
 export function ChangeConnectorDialog({ open, node, ...rest }: Props) {
