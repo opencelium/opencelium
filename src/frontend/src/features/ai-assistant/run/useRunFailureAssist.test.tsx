@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LiveLogNode, LiveLogTree } from '@features/logs';
 import type { FieldBinding } from '@features/workflow/types/connection';
 import type { WorkflowNodeModel } from '@features/workflow/types/workflow.types';
@@ -8,9 +8,17 @@ import { useRunFailureAssist } from './useRunFailureAssist';
 const broken = '#C77E7E.(response).body.$.[i].id[as';
 const fixedBody = JSON.stringify({ name: '#C77E7E.(response).body.$.[0].department', id: '#C77E7E.(response).body.$.[i].id', units: [] }, null, 2);
 
+const { fixRequests, explainAnswer } = vi.hoisted(() => ({
+	fixRequests: [] as unknown[],
+	explainAnswer: { current: { summary: 's', cause: 'c', fix: ['f'], isRequestFixable: true, durationMs: 1, model: 'm' } },
+}));
+
 vi.mock('../api/aiApi', () => ({
-	useExplainRunMutation: () => [() => ({ unwrap: async () => ({ summary: 's', cause: 'c', fix: ['f'], isRequestFixable: true, durationMs: 1, model: 'm' }) })],
-	useFixRunMutation: () => [() => ({ unwrap: async () => ({ body: fixedBody, headers: [{ name: 'Content-Type', value: 'application/json' }], changes: ['id'], problems: [], durationMs: 1, model: 'm' }) })],
+	useExplainRunMutation: () => [() => ({ unwrap: async () => explainAnswer.current })],
+	useFixRunMutation: () => [(request: unknown) => {
+		fixRequests.push(request);
+		return { unwrap: async () => ({ body: fixedBody, headers: [{ name: 'Content-Type', value: 'application/json' }], changes: ['id'], problems: [], durationMs: 1, model: 'm' }) };
+	}],
 }));
 
 vi.mock('@shared/i18n/hooks/useI18n', () => ({ useI18n: () => ({ t: (key: string) => key, lang: 'en' }) }));
@@ -43,6 +51,56 @@ const method = (id: string, title: string, color: string, body: unknown) => ({
 		methodConfig: { name: title, url: '{url}/x', headers: { 'Content-Type': 'application/json' }, queryParams: [], endpointArgs: {},
 			bodyFormat: 'json', bodyData: 'raw', body } },
 }) as unknown as WorkflowNodeModel;
+
+const workflow = () => ({
+	nodes: [
+		{ id: 'start-1', type: 'start', position: { x: 0, y: 0 }, data: { title: 'Start' } } as unknown as WorkflowNodeModel,
+		method('n-all', 'GetAllUser', '#C77E7E', {}),
+		{ id: 'n-loop', type: 'loop', position: { x: 0, y: 0 }, data: { title: 'Loop', kind: 'loop' } } as unknown as WorkflowNodeModel,
+		method('n-add', 'AddUser', '#AAAAAA', { id: broken }),
+	],
+	edges: [
+		{ id: 'e1', source: 'start-1', target: 'n-all' }, { id: 'e2', source: 'n-all', target: 'n-loop' },
+		{ id: 'e3', source: 'n-loop', target: 'n-add', sourceHandle: 'bottom' },
+	] as never,
+});
+
+const renderAssist = () => renderHook(() => useRunFailureAssist({ tree, ...workflow(), workflowTitle: 'fake2', onSaveMethodConfig: vi.fn(),
+	fieldBindings: [], onFieldBindingsChange: vi.fn(), runKey: 1 }));
+
+beforeEach(() => {
+	fixRequests.length = 0;
+	explainAnswer.current = { ...explainAnswer.current, isRequestFixable: true };
+});
+
+describe('useRunFailureAssist direct fix', () => {
+	it('proposes a fix without an explanation first and sends no diagnosis', async () => {
+		const { result } = renderAssist();
+		expect(result.current.canFix).toBe(true);
+		await act(async () => { await result.current.fix(); });
+		expect(result.current.state).toMatchObject({ status: 'fix', explanation: null });
+		expect(fixRequests[0]).not.toHaveProperty('diagnosis');
+	});
+
+	it('closes the panel when a direct fix is discarded', async () => {
+		const { result } = renderAssist();
+		await act(async () => { await result.current.fix(); });
+		act(() => { result.current.discard(); });
+		expect(result.current.state.status).toBe('idle');
+		expect(result.current.isShown).toBe(false);
+	});
+
+	it('sends the shown diagnosis and respects an explanation that rules out a request fix', async () => {
+		const { result } = renderAssist();
+		await act(async () => { await result.current.explain(); });
+		await act(async () => { await result.current.fix(); });
+		expect(fixRequests[0]).toMatchObject({ diagnosis: { cause: 'c', fix: ['f'] } });
+
+		explainAnswer.current = { ...explainAnswer.current, isRequestFixable: false };
+		await act(async () => { await result.current.explain(); });
+		expect(result.current.canFix).toBe(false);
+	});
+});
 
 describe('useRunFailureAssist', () => {
 	it('applies the proposed body to the failing step and to the binding of the field it changed', async () => {

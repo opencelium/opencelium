@@ -1446,7 +1446,6 @@
     "run": {
       "explain": "Erklären",
       "fix": "Mit KI beheben",
-      "showStep": "Schritt zeigen",
       "working": "KI wird gefragt…",
       "failed": "Die KI konnte nicht antworten. Bitte gleich noch einmal versuchen.",
       "changes": "Vorgeschlagene Änderungen",
@@ -1463,7 +1462,9 @@
       "applied": "Request-Body aktualisiert",
       "appliedHint": "Der Request-Body des Schritts wurde aktualisiert. Führen Sie den Test erneut aus; Rückgängig stellt den alten Body wieder her.",
       "title": "KI-Erklärung",
+      "titleFix": "KI-Korrektur",
       "close": "Erklärung schließen",
+      "closeFix": "Korrektur schließen",
       "howToFix": "So beheben",
       "regenerate": "Neu erzeugen",
       "generatedAt": "Erzeugt um {{time}}"
