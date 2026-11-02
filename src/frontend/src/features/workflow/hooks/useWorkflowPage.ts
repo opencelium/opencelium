@@ -90,6 +90,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
 
   useWorkflowCommandBridge({
     nodes,
+    edges,
     setNodes,
     centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||

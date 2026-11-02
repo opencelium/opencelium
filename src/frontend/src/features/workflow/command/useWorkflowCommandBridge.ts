@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import type { WorkflowNodeModel } from '../types/workflow.types';
+import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import {
 	deactivateWorkflowCommandBridge,
 	workflowCommandBridgeStore,
@@ -8,6 +8,7 @@ import {
 
 type Params = {
 	nodes: WorkflowNodeModel[];
+	edges: WorkflowEdgeModel[];
 	setNodes: Dispatch<SetStateAction<WorkflowNodeModel[]>>;
 	centerOnNode: (nodeId: string) => void;
 	hasOpenDialog: boolean;
@@ -15,13 +16,16 @@ type Params = {
 
 export const useWorkflowCommandBridge = ({
 	nodes,
+	edges,
 	setNodes,
 	centerOnNode,
 	hasOpenDialog,
 }: Params) => {
 	const nodesRef = useRef(nodes);
+	const edgesRef = useRef(edges);
 	const hasOpenDialogRef = useRef(hasOpenDialog);
 	useEffect(() => { nodesRef.current = nodes; }, [nodes]);
+	useEffect(() => { edgesRef.current = edges; }, [edges]);
 	useEffect(() => { hasOpenDialogRef.current = hasOpenDialog; }, [hasOpenDialog]);
 
 	const setSearchHighlightedNodeIds = (ids: string[]) => {
@@ -38,6 +42,7 @@ export const useWorkflowCommandBridge = ({
 		workflowCommandBridgeStore.setState({
 			isActive: true,
 			getNodes: () => nodesRef.current,
+			getEdges: () => edgesRef.current,
 			setSearchHighlightedNodeIds,
 			hasSearchHighlights: () => nodesRef.current.some((node) => node.data.searchHighlighted),
 			clearSearchHighlights: () => setSearchHighlightedNodeIds([]),

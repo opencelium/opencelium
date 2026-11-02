@@ -19,6 +19,7 @@ import type { CommandNode } from '@shared/command/types'
 import { buildActionAccess } from '@/engine/policy'
 import { workflowCommandBridgeStore } from '@features/workflow/command/workflowCommandBridge'
 import { resolveWorkflowSearch } from '@features/workflow/command/workflowCommandResolvers'
+import { workflowGuideCommand } from '@features/onboarding/guides/command/workflowGuideCommand'
 import { i18n } from '@shared/i18n/config/i18n'
 import type { ConnectionVersionResource } from '@features/workflow/types/history.types'
 import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
@@ -237,6 +238,7 @@ export const connectionDefinition: EntityDefinition = {
                         { type: 'entity', name: 'term', resolve: resolveWorkflowSearch },
                     ],
                 },
+                workflowGuideCommand,
             ],
         } as CommandNode<any>] : []),
         // The editor itself is the create flow (no wizard); the AI fills it from a request (template, AI or empty).

@@ -61,13 +61,18 @@
       "downloadInvoker": "Download an API definition file",
       "systemCheck": "Open the system check page",
       "ldapCheck": "Open the LDAP connectivity check page",
-      "workflow": "Search the current workflow",
+      "workflow": "Search the current workflow or show where things are",
       "help": "View all commands",
       "onboarding": "Restart the setup tour",
       "workflowTutorial": "Replay the workflow tutorial",
       "dashboardTour": "Replay the dashboard tour",
       "changelog": "Open the changelog",
-      "createWorkflow": "Create a new workflow: empty, from a template or generated with AI"
+      "createWorkflow": "Create a new workflow: empty, from a template or generated with AI",
+      "workflowShow": "Show where a method's URL, headers or body are, or how to try it",
+      "workflowShowUrl": "Show where the URL of a method is (the selected one, or name it)",
+      "workflowShowHeaders": "Show where the headers of a method are (the selected one, or name it)",
+      "workflowShowBody": "Show where the body of a method is (the selected one, or name it)",
+      "workflowShowTry": "Show how to try a method (the selected one, or name it)"
     },
     "footer": {
       "select": "Select",

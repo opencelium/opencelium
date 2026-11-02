@@ -61,13 +61,18 @@
       "downloadInvoker": "API-Definitionsdatei herunterladen",
       "systemCheck": "Systemprüfungsseite öffnen",
       "ldapCheck": "LDAP-Verbindungsprüfungsseite öffnen",
-      "workflow": "Den aktuellen Workflow durchsuchen",
+      "workflow": "Den aktuellen Workflow durchsuchen oder zeigen, wo etwas ist",
       "help": "Alle Befehle anzeigen",
       "onboarding": "Einrichtungstour neu starten",
       "workflowTutorial": "Workflow-Tutorial erneut ansehen",
       "dashboardTour": "Dashboard-Tour erneut ansehen",
       "changelog": "Änderungsprotokoll öffnen",
-      "createWorkflow": "Neuen Workflow erstellen: leer, aus einer Vorlage oder mit KI generiert"
+      "createWorkflow": "Neuen Workflow erstellen: leer, aus einer Vorlage oder mit KI generiert",
+      "workflowShow": "Zeigen, wo URL, Header oder Body einer Methode sind, oder wie man sie ausprobiert",
+      "workflowShowUrl": "Zeigen, wo die URL einer Methode ist (der ausgewählten oder einer genannten)",
+      "workflowShowHeaders": "Zeigen, wo die Header einer Methode sind (der ausgewählten oder einer genannten)",
+      "workflowShowBody": "Zeigen, wo der Body einer Methode ist (der ausgewählten oder einer genannten)",
+      "workflowShowTry": "Zeigen, wie man eine Methode ausprobiert (die ausgewählte oder eine genannte)"
     },
     "footer": {
       "select": "Auswählen",
