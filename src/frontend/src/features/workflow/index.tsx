@@ -231,6 +231,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onSelectBinding: workflow.bindingLens.onSelectBinding,
           onOpenMethodEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }) }}
         contextMenu={{ menu: workflow.contextMenu, node: contextMenuNode,
+          onCopyNodes: actions.copyNodeFromMenu, onPasteNodes: actions.pasteAtNode,
+          canPasteNodes: actions.canPasteNodes, clipboardLocked: readOnly || isTestRunLocked,
           onChangeLabel: workflow.onChangeNodeLabel,
           onOpenRequestEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }),
           onOpenConditionEditor: (nodeId) => workflow.setConditionEditor({ nodeId }),

@@ -7,6 +7,8 @@ export interface ConfirmOptions {
 
     confirmText?: string;
     cancelText?: string;
+    confirmTestId?: string;
+    cancelTestId?: string;
 
     confirmVariant?: ButtonVariant;
     autoFocusConfirm?: boolean;

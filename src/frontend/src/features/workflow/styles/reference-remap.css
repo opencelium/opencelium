@@ -120,19 +120,80 @@
    than its neighbours the moment a reference was held in more than one place.
    On one line they cost nothing extra; the full list is still on the cell's
    own hover title. */
-.referenceRemapSourceHeldRow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
+.referenceRemapUsageList {
+  display: grid;
+  gap: 12px;
+}
+
+.referenceRemapUsageGroup + .referenceRemapUsageGroup {
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 /* The one flexible item in the row: it gives up width to the count beside it
    rather than pushing the count out or forcing the row wider than its column. */
-.referenceRemapSourceHeldRow > .bodyLegacyGeneratorShell,
-.referenceRemapSourceHeldRow > .referenceRemapSourcePath {
-  flex: 1 1 auto;
-  min-width: 0;
+.referenceRemapUsageMethod {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.referenceRemapUsageItems {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.referenceRemapUsageItem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.referenceRemapUsageItem code {
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.referenceRemapUsageDetails {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.referenceRemapUsageDetails summary {
+  width: fit-content;
+  color: var(--color-action-primary);
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.referenceRemapUsageDetails summary:focus-visible {
+  outline: 2px solid var(--color-action-primary);
+  outline-offset: 2px;
+}
+
+.referenceRemapUsageDetails > div {
+  margin-top: 8px;
+}
+
+.referenceRemapUrlValue {
+  display: block;
+  margin-top: 4px;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 4px;
+  background: var(--color-background-elevated);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /* Disabled throughout, so it reads as the row's subject rather than as a

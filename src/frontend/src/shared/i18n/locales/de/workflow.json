@@ -1,4 +1,16 @@
 {
+  "pasteCheck": {
+  "referencesIntro": "Diese kopierten Schritte verweisen auf Methoden außerhalb der kopierten Gruppe. Wählen Sie Zielmethoden oder löschen Sie die Referenzen.",
+  "title": "Eingefügte Schritte prüfen",
+  "intro": "Prüfen Sie Konnektoren und Referenzen vor dem Einfügen. Nicht zugeordnete Referenzen werden gelöscht.",
+  "unavailable": "{{name}} kann nicht eingefügt werden: Kein Zielkonnektor verwendet den Invoker {{invoker}}.",
+  "connector": "Konnektor für {{name}} auswählen",
+  "pasteRest": "Übrige Schritte einfügen",
+  "confirm": "Einfügen",
+  "copyFailed": "Die kopierten Schritte konnten nicht in diesem Browser gespeichert werden.",
+  "copy": "Kopieren",
+  "paste": "Einfügen"
+},
   "loadError": {
     "title": "Workflow konnte nicht geladen werden",
     "description": "Der Workflow oder die Konnektorliste konnte nicht geladen werden. Versuchen Sie es erneut oder kehren Sie zur Workflow-Liste zurück.",
@@ -39,6 +51,8 @@
     "deleteReference": "Referenz löschen"
   },
   "referenceRemap": {
+    "details": "Details",
+    "query": "Abfrageparameter",
     "intro": "Einige Schritte lesen den Schritt, den Sie löschen. Wählen Sie für jeden eine Ersatzmethode oder entfernen Sie die Referenz — einzelne Felder können Sie unten bei Bedarf noch anpassen:",
     "replaceWith": "Ersetzen durch:",
     "perFieldHint": "Optional — passen Sie nur die Felder an, die etwas anderes lesen sollen. Unverändert gelassene Felder folgen der oben gewählten Methode oder werden entfernt, falls keine gewählt wurde:",
@@ -151,8 +165,8 @@
     "loadTemplateFailed": "Vorlage konnte nicht geladen werden",
     "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden.",
     "copySnapshotIdSuccess": "Snapshot-ID in die Zwischenablage kopiert",
-    "nodeCopied": "Knoten kopiert",
-    "nodeCopied_one": "Knoten kopiert",
+    "nodeCopied": "{{count}} Schritte kopiert",
+    "nodeCopied_one": "{{count}} Schritt kopiert",
     "nodePasted": "Knoten eingefügt",
     "nodeDuplicated": "Knoten dupliziert",
     "deleteVersionSuccess": "Version gelöscht",
