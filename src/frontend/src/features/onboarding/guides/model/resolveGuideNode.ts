@@ -35,6 +35,12 @@ const compareIndexes = (left: string | undefined, right: string | undefined) => 
     return a.length - b.length
 }
 
+/** The workflow's methods in tree order, the order the user reads them in. */
+export function methodsInWorkflowOrder(nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[]): WorkflowNodeModel[] {
+    const indexes = buildWorkflowIndexes(nodes, edges)
+    return nodes.filter(isMethodNode).sort((left, right) => compareIndexes(indexes.get(left.id), indexes.get(right.id)))
+}
+
 /**
  * Which method a guide is about. A named method is the first match in the tree; without a
  * name it is the selected method, and with nothing selected, the first method in the tree.
@@ -45,9 +51,7 @@ export function resolveGuideNode(
     edges: WorkflowEdgeModel[],
     method?: string,
 ): GuideNodeResolution {
-    const indexes = buildWorkflowIndexes(nodes, edges)
-    const methods = nodes.filter(isMethodNode)
-        .sort((left, right) => compareIndexes(indexes.get(left.id), indexes.get(right.id)))
+    const methods = methodsInWorkflowOrder(nodes, edges)
     if (methods.length === 0) return { kind: 'no-methods' }
 
     const found = (node: WorkflowNodeModel): GuideNodeResolution => ({ kind: 'found', nodeId: node.id, label: methodLabel(node) })

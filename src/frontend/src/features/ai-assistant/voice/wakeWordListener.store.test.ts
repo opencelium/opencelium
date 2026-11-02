@@ -16,14 +16,17 @@ vi.mock('./utteranceSegmenter', () => ({
     createUtteranceSegmenter: () => ({ push: (frame: Float32Array) => (frame[0] ? frame : null), isHearing: () => false, reset: () => {} }),
 }))
 vi.mock('./wavEncoding', () => ({ samplesToSpeechWav: async () => new Blob() }))
-const speech = vi.hoisted(() => ({ transcripts: [] as string[], requests: [] as unknown[], authListeners: [] as (() => void)[], auth: 'authenticated' }))
+const speech = vi.hoisted(() => ({
+    transcripts: [] as string[], requests: [] as unknown[], authListeners: [] as (() => void)[], auth: 'authenticated',
+    gate: null as Promise<void> | null,
+}))
 vi.mock('../api/aiApi', () => ({ aiApi: { endpoints: { transcribeSpeech: { initiate: (body: unknown) => body } } } }))
 vi.mock('@app/store/store', () => ({
     store: {
         dispatch: (body: unknown) => {
             speech.requests.push(body)
             const text = speech.transcripts.shift() ?? ''
-            return { unwrap: () => Promise.resolve({ text }) }
+            return { unwrap: async () => { await speech.gate; return { text } } }
         },
         getState: () => ({ auth: { status: speech.auth } }),
         subscribe: (listener: () => void) => {
@@ -32,10 +35,11 @@ vi.mock('@app/store/store', () => ({
         },
     },
 }))
-const routeSpokenRequest = vi.hoisted(() => vi.fn(async () => {}))
+const routeSpokenRequest = vi.hoisted(() => vi.fn())
 vi.mock('./routeSpokenRequest', () => ({ routeSpokenRequest }))
 const info = vi.hoisted(() => vi.fn())
-vi.mock('antd', () => ({ message: { info } }))
+const loading = vi.hoisted(() => vi.fn())
+vi.mock('antd', () => ({ message: { info, loading } }))
 const notifyError = vi.hoisted(() => vi.fn())
 vi.mock('@shared/ui/feedback/notifyError', () => ({ notifyError }))
 vi.mock('@shared/i18n/config/i18n', () => ({
@@ -87,11 +91,13 @@ describe('wake word listener', () => {
         await say('we should check the build later')
         expect(routeSpokenRequest).not.toHaveBeenCalled()
         expect(info).not.toHaveBeenCalled()
+        expect(loading).not.toHaveBeenCalled()
     })
 
     it('acts on what starts with its name, without the name', async () => {
         await say('Beebot, where is the header of the method?')
-        expect(info).toHaveBeenCalledWith('commandPalette.wakeWord.heard{"text":"where is the header of the method?"}')
+        expect(loading).toHaveBeenCalledWith(expect.objectContaining({
+            key: 'spoken-request', content: 'commandPalette.wakeWord.heard{"name":"Beebot","text":"where is the header of the method?"}' }))
         expect(routeSpokenRequest).toHaveBeenCalledWith('where is the header of the method?')
     })
 
@@ -107,12 +113,12 @@ describe('wake word listener', () => {
 
     it('drops utterances while two are already waiting', async () => {
         let release = () => {}
-        routeSpokenRequest.mockImplementationOnce(() => new Promise<void>(resolve => { release = resolve }))
+        speech.gate = new Promise<void>(resolve => { release = resolve })
         speech.transcripts.push('Beebot one', 'Beebot two', 'Beebot three')
         for (let i = 0; i < 3; i += 1) mic.onFrame?.(new Float32Array([1]))
-        await vi.waitFor(() => expect(routeSpokenRequest).toHaveBeenCalledTimes(1))
         release()
         await vi.waitFor(() => expect(useWakeWordListenerStore.getState().isWorking).toBe(false))
+        speech.gate = null
         expect(routeSpokenRequest.mock.calls.map(call => (call as unknown[])[0])).toEqual(['one', 'two'])
     })
 

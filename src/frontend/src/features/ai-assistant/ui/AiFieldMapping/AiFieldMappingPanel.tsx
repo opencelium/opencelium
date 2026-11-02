@@ -26,6 +26,12 @@ export function AiFieldMappingPanel({ mapping }: { mapping: AiFieldMapping }) {
 			</div>
 			{state.status === 'suggesting' && <div className="aiMappingNote"><AiExpectedTime feature="mapping" /></div>}
 			{state.status === 'nothingToMap' && <div className="aiMappingNote">{t('ai.mapping.nothingToMap')}</div>}
+			{state.status === 'sourceNotEarlier' && (
+				<div className="aiMappingError" data-testid="ai-mapping-source-not-earlier">{t('ai.mapping.sourceNotEarlier', { source: state.source })}</div>
+			)}
+			{state.status === 'suggested' && state.onlyFrom && (
+				<div className="aiMappingNote" data-testid="ai-mapping-only-from">{t('ai.mapping.onlyFrom', { source: state.onlyFrom })}</div>
+			)}
 			{state.status === 'error' && <div className="aiMappingError" data-testid="ai-mapping-error">{t('ai.mapping.failed')}</div>}
 			{state.status === 'suggested' && state.proposals.length === 0 && <div className="aiMappingNote">{t('ai.mapping.none')}</div>}
 			{state.status === 'suggested' && state.proposals.length > 0 && (

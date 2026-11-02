@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildApp } from '../src/app.ts'
 import { loadConfig } from '../src/config.ts'
-import { findSpokenMethod } from '../src/guide/routeGuide.ts'
+import { findSpokenMethod } from '../src/guide/spokenNames.ts'
 import type { InvokerRepository } from '../src/invokers/invokerRepository.ts'
 import type { ChatRequest, LlmClient } from '../src/llm/llmClient.ts'
 
@@ -74,6 +74,27 @@ describe('POST /guide/intent', () => {
     it('takes a method the model matched from a partial name', async () => {
         const { body } = await route('show me the body of the client creation', { guide: 'method-body', method: 'createClient' })
         expect(body.method).toBe('createClient')
+    })
+
+    it('never runs an action for a question about how to do it', async () => {
+        const options = [...guides, { id: 'add-method', description: 'Add a method', isAction: true }]
+        let result = await route('how do I add a new method?', { guide: 'add-method', method: '' }, { guides: options })
+        expect(result.body.guideId).toBeNull()
+        result = await route('can you add getCustomers from the CRM', { guide: 'add-method', method: '' }, { guides: options })
+        expect(result.body.guideId).toBe('add-method')
+    })
+
+    it('turns an action read into a how-question into the guide teaching it, and back', async () => {
+        const options = [
+            { id: 'method-transformation', description: 'show how to apply a transformation', teaches: 'apply-transformation' },
+            { id: 'apply-transformation', description: 'apply a transformation', isAction: true },
+        ]
+        let result = await route('how do I apply a transformation?', { guide: 'apply-transformation', method: '' }, { guides: options })
+        expect(result.body.guideId).toBe('method-transformation')
+        result = await route('transform the vendor so it is upper case', { guide: 'method-transformation', method: '' }, { guides: options })
+        expect(result.body.guideId).toBe('apply-transformation')
+        result = await route('show me how to transform a value', { guide: 'method-transformation', method: '' }, { guides: options })
+        expect(result.body.guideId).toBe('method-transformation')
     })
 
     it('answers no guide when none fits', async () => {

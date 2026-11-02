@@ -92,6 +92,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     nodes,
     edges,
     setNodes,
+    setEdges,
     centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
       aggregatorEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,

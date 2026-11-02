@@ -1,5 +1,10 @@
 import { create } from 'zustand'
 
+/** The "thinking" toast of a request the assistant heard; whoever handles the request closes it. */
+export const SPOKEN_REQUEST_TOAST_KEY = 'spoken-request'
+/** A safety net: the toast closes by itself should no palette take the request. */
+export const SPOKEN_REQUEST_TOAST_SEC = 90
+
 type SpokenRequestState = {
     /** A request heard by the always-listening assistant, for the palette's AI to act on. */
     pending: string | null

@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { store as appStore } from '@app/store/store';
 import { removeDeletedRequestBindings, updateRequestFieldBindings } from '@features/workflow/components/request-editor/body-editor/bodyBinding';
 import { updateConnection, updatePayload } from '@features/workflow/store/connection/connectionSlice';
 import type { Connection, MethodWithId } from '@features/workflow/types/connection';
+import { getEligibleReferenceMethods } from '@features/workflow/utils/referenceMethodVisibility';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { aiApi } from '../api/aiApi';
 import type { SuggestMappingResponse } from '../model/aiGateway.types';
+import { type PendingMapping, usePendingMappingStore } from './pendingMapping.store';
 import { type MappingSource, type MappingTarget, collectMappingSources, collectMappingTargets, setTargetValue } from './mappingCandidates';
 
 /** One proposed value for one body field, ready to apply. */
@@ -16,7 +18,9 @@ export type AiFieldMappingState =
 	| { status: 'idle' }
 	| { status: 'suggesting' }
 	| { status: 'nothingToMap' }
-	| { status: 'suggested'; proposals: FieldMappingProposal[]; chosen: ReadonlySet<string> }
+	| { status: 'sourceNotEarlier'; source: string }
+	/** `onlyFrom`: the one step whose values were offered, when the request named it. */
+	| { status: 'suggested'; proposals: FieldMappingProposal[]; chosen: ReadonlySet<string>; onlyFrom: string | null }
 	| { status: 'error' };
 
 type Params = { connection: Connection | null; method: MethodWithId; body: unknown };
@@ -44,10 +48,17 @@ export function useAiFieldMapping({ connection, method, body }: Params) {
 	const [state, setState] = useState<AiFieldMappingState>({ status: 'idle' });
 	const [instruction, setInstruction] = useState('');
 
-	const suggest = async () => {
+	const pending = usePendingMappingStore((store) => store.pending);
+
+	const suggest = async (only: PendingMapping['source'] = null) => {
 		if (!connection) return;
-		const sources = collectMappingSources(connection, method);
+		const earlier = collectMappingSources(connection, method);
+		const sources = only ? earlier.filter((source) => source.methodId === only.methodId) : earlier;
 		const targets = collectMappingTargets(body);
+		if (only && sources.length === 0 && !getEligibleReferenceMethods(connection, method).some((item) => item.id === only.methodId)) {
+			setState({ status: 'sourceNotEarlier', source: only.label });
+			return;
+		}
 		if (sources.length === 0 || targets.length === 0) {
 			setState({ status: 'nothingToMap' });
 			return;
@@ -68,11 +79,23 @@ export function useAiFieldMapping({ connection, method, body }: Params) {
 			});
 			// Empty fields are picked by default; replacing a value the user set is an explicit choice.
 			const chosen = new Set(proposals.filter((proposal) => !proposal.target.current.trim()).map((proposal) => proposal.target.path));
-			setState({ status: 'suggested', proposals, chosen });
+			setState({ status: 'suggested', proposals, chosen, onlyFrom: only?.label ?? null });
 		} catch {
 			setState({ status: 'error' });
 		}
 	};
+
+	// A request from outside (Beebot) runs once this method's editor has its connection.
+	const runPending = useEffectEvent(() => {
+		const taken = usePendingMappingStore.getState().take(method.id);
+		if (taken) void suggest(taken.source);
+	});
+	useEffect(() => {
+		if (!connection || pending?.methodId !== method.id) return undefined;
+		// After the dialog has rendered once: the suggestion's state changes are not part of mounting it.
+		const timer = setTimeout(runPending);
+		return () => clearTimeout(timer);
+	}, [connection, pending, method.id]);
 
 	const toggle = (path: string, isOn: boolean) => setState((current) => {
 		if (current.status !== 'suggested') return current;

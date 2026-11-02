@@ -26,6 +26,7 @@ import { AiHeaderButton } from '@features/ai-assistant/ui/AiHeaderButton';
 import { AiWorkflowExplainButton } from '@features/ai-assistant/ui/AiWorkflowExplain/AiWorkflowExplainButton';
 import { AiPromptPanel } from '@features/ai-assistant/ui/AiPromptPanel/AiPromptPanel';
 import { useWorkflowIntent } from './intent/useWorkflowIntent';
+import { useWorkflowEditBridge } from './command/useWorkflowEditBridge';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -103,6 +104,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       closeCanvasPanels();
     } });
 
+  useWorkflowEditBridge({ connectors, isEditable: !readOnly && !isTestRunLocked,
+    openRequestEditor: workflow.setMethodEditor });
   useWorkflowIntent({ isNewWorkflow: !connectionId && !readOnly, isReady: !isLoading,
     onTitle: (title) => setHeaderState((current) => ({ ...current, title })),
     onTemplate: (template) => void templateActions.applyTemplate(template),

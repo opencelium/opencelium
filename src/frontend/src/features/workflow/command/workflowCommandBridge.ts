@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
+import type { Connector } from '@entities/connector/model/types';
+import type { WorkflowMethodEditorState } from '../types/request-config.types';
+import type { WorkflowAction, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 
 /**
  * Bridge between the command-palette's plain-function CommandNode
@@ -25,6 +27,15 @@ type WorkflowCommandBridge = {
    * useModalStore check. Escape must close a dialog before it clears search
    * highlights, so callers gate on this first. */
   hasOpenDialog: () => boolean;
+  /** Adds a step exactly as the "+" and the sidebar do (spliced in, one undo entry);
+   * the new node's id, or null when nothing could be added. */
+  addStep: (action: WorkflowAction) => string | null;
+  /** The connectors a method can be added from, with their invokers' operations. */
+  getConnectors: () => Connector[];
+  /** False in read-only mode and while a test run holds the editor. */
+  isEditable: () => boolean;
+  /** Opens a method's URL, header or body editor, as its context-menu entry does. */
+  openRequestEditor: (editor: WorkflowMethodEditorState) => void;
 };
 
 const INACTIVE_BRIDGE: WorkflowCommandBridge = {
@@ -36,6 +47,10 @@ const INACTIVE_BRIDGE: WorkflowCommandBridge = {
   clearSearchHighlights: () => {},
   centerOnNode: () => {},
   hasOpenDialog: () => false,
+  addStep: () => null,
+  getConnectors: () => [],
+  isEditable: () => false,
+  openRequestEditor: () => {},
 };
 
 export const workflowCommandBridgeStore = create<WorkflowCommandBridge>(() => ({

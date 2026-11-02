@@ -16,7 +16,10 @@
     "eval:commands": "node scripts/evalCommandRouting.ts",
     "eval:templates": "node scripts/evalTemplates.ts",
     "eval:help": "node scripts/evalHelp.ts",
-    "eval:guides": "node scripts/evalGuideRouting.ts"
+    "eval:guides": "node scripts/evalGuideRouting.ts",
+    "eval:add-method": "node scripts/evalAddMethod.ts",
+    "eval:mapping": "node scripts/evalMapping.ts",
+    "eval:transformation": "node scripts/evalTransformation.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.1",

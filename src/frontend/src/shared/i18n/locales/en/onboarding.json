@@ -385,11 +385,13 @@
     "kicker": "Show me",
     "actions": {
       "stop": "Stop",
-      "done": "Got it"
+      "done": "Got it",
+      "next": "Next"
     },
     "errors": {
       "noMethods": "This workflow has no methods yet. Add a method first.",
-      "noMatch": "There is no method called \"{{method}}\" in this workflow."
+      "noMatch": "There is no method called \"{{method}}\" in this workflow.",
+      "noReferences": "No method in this workflow has a reference in its {{part}} yet, and a transformation changes a referenced value. Add references first, e.g. “{{name}}, suggest references for … from …”."
     },
     "method-url": {
       "title": "Where to find the URL of {{method}}",
@@ -414,6 +416,21 @@
       "node": "Right-click {{method}} on the canvas.",
       "menu": "Click Try Request….",
       "arrived": "Click Send to run {{method}} once and see its response."
+    },
+    "parts": {
+      "body": "Body",
+      "header": "Header"
+    },
+    "method-transformation": {
+      "title": "How to apply a transformation in {{method}}",
+      "node": "Right-click {{method}} on the canvas.",
+      "menu": "Under Request, click {{part}}.",
+      "field": "Click the value of {{field}}: it holds a reference, and a transformation changes a value taken from another method.",
+      "create": "Click Create transformation.",
+      "script": "Write the script, or describe it in the AI prompt and press Generate. Then click Next.",
+      "playground": "Open the playground: the flask icon above the script.",
+      "arrived": "Try the script with sample values. Next time just say: “{{name}}, apply transformation for {{field}} with …”",
+      "noReference": "{{method}} has no reference in its {{part}} yet, and a transformation changes a referenced value. Add one first, e.g. say “{{name}}, suggest references for {{method}} from …”."
     }
   }
 }

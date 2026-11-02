@@ -52,13 +52,14 @@ export function useScriptPromptActions({ enhancement, current, versions, onRepla
 		});
 	};
 
-	const generate = async (prompt: string) => {
+	/** `isApplied`: the user asked for the script to be applied (Beebot), so it goes in even over an edited script. */
+	const generate = async (prompt: string, { isApplied = false }: { isApplied?: boolean } = {}) => {
 		const { candidate } = versions;
 		const base = candidate?.kind === 'generated' ? candidate.script : isUntouchedScript(current.script) ? '' : current.script;
 		const result = await generation.generate(prompt, base);
 		if (!result) return;
 		const editor = latest.current.current;
-		if (isUntouchedScript(editor.script)) {
+		if (isApplied || isUntouchedScript(editor.script)) {
 			replaceWithUndo(
 				latest.current.versions.applyGenerated(editor, { prompt, script: result.code, description: result.description }),
 				'ai.script.applied',

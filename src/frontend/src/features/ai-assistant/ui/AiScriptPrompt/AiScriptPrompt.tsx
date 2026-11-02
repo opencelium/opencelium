@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import type { Enhancement } from '@features/workflow/types/connection';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
@@ -6,6 +6,7 @@ import { Icon } from '@shared/ui/primitives/Icon';
 import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Input } from '@shared/ui/primitives/Input';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { usePendingScriptStore } from '../../hooks/pendingScript.store';
 import { useScriptPromptActions } from '../../hooks/useScriptPromptActions';
 import type { ScriptVersions } from '../../hooks/useScriptVersions';
 import type { ScriptSnapshot } from '../../utils/scriptVersions.utils';
@@ -40,6 +41,20 @@ export function AiScriptPrompt({ enhancement, current, versions, onReplace, isPl
 	const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 	const { generation, generate, accept, undo } = useScriptPromptActions({ enhancement, current, versions, onReplace });
 	const { state } = generation;
+	const pending = usePendingScriptStore((store) => store.pending);
+	// A spoken request runs here once the panel can generate: the prompt shows what was asked.
+	const runPending = useEffectEvent(() => {
+		const taken = usePendingScriptStore.getState().take(enhancement.enhanceId);
+		if (!taken) return;
+		setPrompt(taken.description);
+		void generate(taken.description, { isApplied: taken.isApplied });
+	});
+	const canGenerate = generation.isAvailable && enhancement.language === 'js';
+	useEffect(() => {
+		if (!canGenerate || pending?.enhanceId !== enhancement.enhanceId) return undefined;
+		const timer = setTimeout(runPending);
+		return () => clearTimeout(timer);
+	}, [canGenerate, pending, enhancement.enhanceId]);
 	if (!generation.isAvailable || enhancement.language !== 'js') return null;
 
 	const isGenerating = state.status === 'generating';
