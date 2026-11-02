@@ -9,6 +9,8 @@ export interface ConfirmOptions {
     cancelText?: string;
     confirmTestId?: string;
     cancelTestId?: string;
+    /** For a dialog that only informs: the cancel button is the only way out. */
+    isConfirmHidden?: boolean;
 
     confirmVariant?: ButtonVariant;
     autoFocusConfirm?: boolean;

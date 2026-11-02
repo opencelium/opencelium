@@ -1,16 +1,15 @@
 {
   "pasteCheck": {
-  "referencesIntro": "Diese kopierten Schritte verweisen auf Methoden außerhalb der kopierten Gruppe. Wählen Sie Zielmethoden oder löschen Sie die Referenzen.",
-  "title": "Eingefügte Schritte prüfen",
-  "intro": "Prüfen Sie Konnektoren und Referenzen vor dem Einfügen. Nicht zugeordnete Referenzen werden gelöscht.",
-  "unavailable": "{{name}} kann nicht eingefügt werden: Kein Zielkonnektor verwendet den Invoker {{invoker}}.",
-  "connector": "Konnektor für {{name}} auswählen",
-  "pasteRest": "Übrige Schritte einfügen",
-  "confirm": "Einfügen",
-  "copyFailed": "Die kopierten Schritte konnten nicht in diesem Browser gespeichert werden.",
-  "copy": "Kopieren",
-  "paste": "Einfügen"
-},
+    "referencesIntro": "Diese kopierten Schritte verweisen auf Methoden außerhalb der kopierten Gruppe. Wählen Sie Zielmethoden oder löschen Sie die Referenzen.",
+    "title": "Eingefügte Schritte prüfen",
+    "intro": "Prüfen Sie Konnektoren und Referenzen vor dem Einfügen. Nicht zugeordnete Referenzen werden gelöscht.",
+    "unavailable": "{{name}} kann nicht eingefügt werden: Der Konnektor {{connector}} existiert nicht mehr.",
+    "connector": "Konnektor für {{name}} auswählen",
+    "pasteRest": "Übrige Schritte einfügen",
+    "confirm": "Einfügen",
+    "copyFailed": "Die kopierten Schritte konnten nicht in diesem Browser gespeichert werden.",
+    "nothingToPaste": "Keiner der kopierten Schritte kann in diesen Workflow eingefügt werden."
+  },
   "loadError": {
     "title": "Workflow konnte nicht geladen werden",
     "description": "Der Workflow oder die Konnektorliste konnte nicht geladen werden. Versuchen Sie es erneut oder kehren Sie zur Workflow-Liste zurück.",
@@ -520,7 +519,9 @@
     "request": "Anfrage",
     "showResponse": "Antwort anzeigen",
     "tryRequest": "Request ausprobieren…",
-    "newLabelPlaceholder": "Neue Bezeichnung"
+    "newLabelPlaceholder": "Neue Bezeichnung",
+    "copy": "Kopieren",
+    "paste": "Einfügen"
   },
   "comment": {
     "badge": "Kommentar",

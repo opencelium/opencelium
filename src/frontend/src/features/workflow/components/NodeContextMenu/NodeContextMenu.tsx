@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ContextMenuEditor } from '../context-menu/ContextMenuEditor/ContextMenuEditor';
@@ -7,8 +6,7 @@ import type { NodeContextMenuProps } from './NodeContextMenu.types';
 import { placeContextMenu } from './contextMenuPlacement';
 import { NodeContextMenuSections } from './NodeContextMenuSections';
 
-export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor, onCopyNodes, onPasteNodes, canPasteNodes, clipboardLocked }: NodeContextMenuProps) {
-  const {t} = useI18n('workflow');
+export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor, onCopyNodes, onPasteNodes, canPasteNodes }: NodeContextMenuProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingLabel, setIsEditingLabel] = useState(false);
@@ -69,20 +67,11 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
           }}
         />
       ) : (
-        <>
-        {menu.kind !== 'comment' && <div className="contextMenuSection">
-      {menu.kind !== 'start' && <button type="button" className="contextMenuItem"
-        data-testid="workflow-context-menu-copy" disabled={clipboardLocked}
-        onClick={() => {onCopyNodes?.(menu.nodeId); onClose();}}>{t('pasteCheck.copy')}</button>}
-      <button type="button" className="contextMenuItem" data-testid="workflow-context-menu-paste"
-        disabled={!canPasteNodes || clipboardLocked}
-        onClick={() => {onPasteNodes?.(menu.nodeId); onClose();}}>{t('pasteCheck.paste')}</button>
-    </div>}
-    <NodeContextMenuSections menu={menu} node={node} onClose={onClose}
+        <NodeContextMenuSections menu={menu} node={node} onClose={onClose}
           onEditLabel={() => setIsEditingLabel(true)} onOpenRequestEditor={onOpenRequestEditor}
           onOpenConditionEditor={onOpenConditionEditor} onShowResponse={onShowResponse} onTryRequest={onTryRequest}
-          onOpenAggregatorEditor={onOpenAggregatorEditor} onOpenConnectorEditor={onOpenConnectorEditor} />
-        </>
+          onOpenAggregatorEditor={onOpenAggregatorEditor} onOpenConnectorEditor={onOpenConnectorEditor}
+          onCopyNodes={onCopyNodes} onPasteNodes={onPasteNodes} canPasteNodes={canPasteNodes} />
       )}
     </div>,
     document.body,

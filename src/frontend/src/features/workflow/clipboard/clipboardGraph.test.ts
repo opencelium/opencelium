@@ -65,6 +65,21 @@ describe('portable workflow copy', () => {
         expect(result.targets[0].color).not.toBe('#112233');
         expect(result.targets[0].candidates.map((item) => item.nodeId)).toContain('a');
     });
+    it('names outside steps by their source title, not by their reference color', () => {
+        const source = {...a, data: {...a.data, title: 'Fetch customer'}};
+        const snapshot = createWorkflowClipboard('A', ['b'], [start, source, b], graph.edges);
+        expect(snapshot.externalTitles).toEqual({'#112233': 'Fetch customer'});
+        const result = prepareClipboardPaste(snapshot, [start], [], [],
+            {nodeId: 'start-1', direction: 'right'}, new Map(), new Set());
+        expect(result.targets[0].label).toBe('Fetch customer');
+    });
+    it('accepts copies without stored titles and rejects malformed ones', () => {
+        const snapshot = createWorkflowClipboard('A', ['b'], graph.nodes, graph.edges);
+        const withoutTitles: Partial<typeof snapshot> = {...snapshot};
+        delete withoutTitles.externalTitles;
+        expect(parseWorkflowClipboard(JSON.stringify(withoutTitles))).not.toBeNull();
+        expect(parseWorkflowClipboard(JSON.stringify({...snapshot, externalTitles: {x: 1}}))).toBeNull();
+    });
     it('preserves same-workflow references even after the copied original was deleted', () => {
         const snapshot = createWorkflowClipboard('A', ['b'], graph.nodes, graph.edges);
         const result = prepareClipboardPaste(snapshot, [start, a], [edge(start.id, a.id)], [],

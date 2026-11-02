@@ -3,7 +3,7 @@ import type { IconName } from '@shared/ui/primitives/Icon/Icon.types';
 
 export type NodeMenuActionId = 'change-label' | 'change-connector' | 'change-connector-image'
   | 'configure-aggregator' | 'open-config' | 'edit-url' | 'edit-headers' | 'edit-body'
-  | 'try-request' | 'show-response';
+  | 'try-request' | 'show-response' | 'copy' | 'paste';
 
 export type NodeMenuAction = { id: NodeMenuActionId; labelKey: string; icon: IconName; newFeatureId?: NewFeatureId };
 
@@ -32,8 +32,13 @@ const tryRequest = action({ id: 'try-request', labelKey: 'contextMenu.tryRequest
 const responseSection: NodeMenuSection = { id: 'response',
   rows: [action({ id: 'show-response', labelKey: 'contextMenu.showResponse', icon: 'eye' })] };
 
+const copyAction = action({ id: 'copy', labelKey: 'contextMenu.copy', icon: 'content-copy' });
+const pasteAction = action({ id: 'paste', labelKey: 'contextMenu.paste', icon: 'content-paste' });
+const clipboardSection: NodeMenuSection = { id: 'clipboard', rows: [copyAction, pasteAction] };
+
 const operatorMenu: NodeMenuSection[] = [
   { id: 'main', rows: [action({ id: 'open-config', labelKey: 'contextMenu.openConfiguration', icon: 'settings' }), configureAggregator] },
+  clipboardSection,
 ];
 
 // Only a connector node draws its connector's image; a system node shows a globe.
@@ -42,12 +47,14 @@ const connectorMenu: NodeMenuSection[] = [
   responseSection,
   { id: 'main', rows: [changeLabel, { kind: 'submenu', id: 'connector', labelKey: 'contextMenu.connector', icon: 'connector',
     actions: [changeConnector, connectorImage] }, configureAggregator] },
+  clipboardSection,
 ];
 
 const systemMenu: NodeMenuSection[] = [
   { id: 'request', rows: [requestRow, tryRequest] },
   responseSection,
   { id: 'main', rows: [changeLabel, action(changeConnector), configureAggregator] },
+  clipboardSection,
 ];
 
 // A trigger-connection node calls another workflow's webhook — it has no connector to swap,
@@ -56,9 +63,14 @@ const triggerConnectionMenu: NodeMenuSection[] = [
   { id: 'request', rows: [requestRow] },
   responseSection,
   { id: 'main', rows: [changeLabel, configureAggregator] },
+  clipboardSection,
 ];
 
+// The start step can't be copied, but steps can be pasted after it.
+const startMenu: NodeMenuSection[] = [{ id: 'clipboard', rows: [pasteAction] }];
+
 export const menuByType: Record<string, NodeMenuSection[]> = {
+  start: startMenu,
   connector: connectorMenu,
   system: systemMenu,
   'trigger-connection': triggerConnectionMenu,

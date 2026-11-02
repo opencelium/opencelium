@@ -194,7 +194,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		redo: workflow.redo,
 		disabled: isEditorDialogOpen || !!workflow.responseNodeId });
 	useCopySelectedNodeShortcut({
-		disabled: isEditLocked || isEditorDialogOpen || !!workflow.responseNodeId,
+		disabled: isEditorDialogOpen || !!workflow.responseNodeId,
 		nodes: workflow.nodes,
 		edges: workflow.edges,
 		onCopyNodes: copyNodes,
@@ -203,9 +203,13 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		direction: 'right' | 'bottom', copied = clipboard.snapshot) => {
 		if (isEditLocked || externalPaste.checking || !copied) return;
 		const sameWorkflow = copied.sourceWorkflowId === String(clipboardWorkflowId);
-		const pasted = sameWorkflow
-			? await workflow.onPasteNodes(sourceNodeIds, targetNodeId, direction, copied)
-			: await externalPaste.paste(copied, targetNodeId, direction);
+		// Same workflow with the originals still on the canvas: paste the live
+		// steps exactly as before; the stored copy only fills in once they are gone.
+		const originalsPresent = sourceNodeIds.every((id) => workflow.nodes.some((node) => node.id === id));
+		const pasted = !sameWorkflow
+			? await externalPaste.paste(copied, targetNodeId, direction)
+			: await workflow.onPasteNodes(sourceNodeIds, targetNodeId, direction,
+				originalsPresent ? undefined : copied);
 		if (pasted) message.success(t('messages.nodePasted'));
 	};
 	usePasteCopiedNodeShortcut({
@@ -264,7 +268,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		schedulesOpen, setSchedulesOpen, changeHistoryOpen, setChangeHistoryOpen,
 		copiedNodeIds, pasteOperatorTarget,
 		copyNodeFromMenu: (id: string) => {
-			if (isEditLocked || isEditorDialogOpen) return;
+			if (isEditorDialogOpen) return;
 			copyNodes(workflow.nodes.some((node) => node.id === id && node.selected)
 				? getSelectedDragGroup(workflow.nodes, workflow.edges).rootIds : [id]);
 		},
