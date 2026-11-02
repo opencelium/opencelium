@@ -8,6 +8,8 @@ import { WorkflowGuideCard } from './WorkflowGuideCard'
 
 /** The spotlight's dark overlay is keyed off this class — see tutorialSpotlight.css. */
 const DARK_CLASS = 'workflow-tutorial-dark'
+/** Lifts toasts above the spotlight — see workflowGuide.css. */
+const ACTIVE_CLASS = 'workflow-guide-active'
 
 function ActiveGuide({ active, onClose }: { active: ActiveWorkflowGuide; onClose: () => void }) {
     const { phase, highlight } = useGuideTracking(active, onClose)
@@ -36,10 +38,11 @@ export function WorkflowGuide() {
     }, [active, dismiss, isEditorOpen])
 
     useEffect(() => {
-        if (!isShown || themeMode !== 'dark') return
+        if (!isShown) return
         const root = document.documentElement
-        root.classList.add(DARK_CLASS)
-        return () => root.classList.remove(DARK_CLASS)
+        const classes = themeMode === 'dark' ? [ACTIVE_CLASS, DARK_CLASS] : [ACTIVE_CLASS]
+        root.classList.add(...classes)
+        return () => root.classList.remove(...classes)
     }, [isShown, themeMode])
 
     if (!isShown) return null

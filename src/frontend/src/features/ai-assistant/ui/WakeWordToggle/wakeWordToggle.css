@@ -1,0 +1,45 @@
+.wakeWordToggle {
+  position: relative;
+  display: inline-flex;
+  border-radius: var(--radius-md);
+  transition: box-shadow 80ms linear, background-color 150ms ease;
+}
+
+/* On: tinted, so an open microphone is never mistaken for an idle button. */
+.wakeWordToggle:not([data-state='off']) {
+  background: var(--color-background-hover);
+  box-shadow: 0 0 0 calc(1px + var(--wake-level, 0) * 3px) var(--color-action-primary);
+}
+
+/* A small live dot in the corner, the way recording is usually signalled. */
+.wakeWordToggle:not([data-state='off'])::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-action-primary);
+  pointer-events: none;
+}
+
+.wakeWordToggle[data-state='working']::after {
+  animation: wakeWordPulse 900ms ease-in-out infinite;
+}
+
+@keyframes wakeWordPulse {
+  50% {
+    opacity: .25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wakeWordToggle {
+    transition: none;
+  }
+
+  .wakeWordToggle[data-state='working']::after {
+    animation: none;
+  }
+}

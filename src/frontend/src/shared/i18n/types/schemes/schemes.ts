@@ -156,6 +156,13 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 denied: string
                 failed: string
             }
+            wakeWord: {
+                start: string
+                stop: string
+                listening: string
+                heard: string
+                autoStopped: string
+            }
             descriptions: {
                 create: string
                 createWorkflow: string

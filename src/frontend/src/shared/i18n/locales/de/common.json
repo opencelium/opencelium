@@ -116,6 +116,13 @@
       "noSpeech": "Nichts verstanden. Klicken Sie auf das Mikrofon und sprechen Sie Ihren Befehl.",
       "denied": "Der Mikrofonzugriff ist blockiert. Erlauben Sie ihn für diese Seite im Browser, um Befehle zu sprechen.",
       "failed": "Der gesprochene Befehl konnte nicht transkribiert werden. Prüfen Sie, ob der lokale Sprachdienst (whisper-server) läuft."
+    },
+    "wakeWord": {
+      "start": "Mit {{name}} sprechen: Eingeschaltet hört es ständig zu und reagiert nur auf Sätze, die mit „{{name}}“ beginnen, z. B. „{{name}}, wo ist der Header der Methode?“",
+      "stop": "{{name}} hört zu. Zum Beenden klicken",
+      "listening": "{{name}} hört zu. Was brauchst du?",
+      "heard": "„{{text}}“",
+      "autoStopped": "{{name}} hört nach 10 Minuten ohne Anfrage nicht mehr zu."
     }
   },
   "sidebar": {

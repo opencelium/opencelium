@@ -41,6 +41,15 @@ describe('findSpokenMethod', () => {
         expect(findSpokenMethod('show the body of get customers by id', methods)).toBe('getCustomersById')
     })
 
+    it('forgives a slipped letter in a long name', () => {
+        expect(findSpokenMethod('Beebot, wo ist der Body von ConfigItemGit?', ['ConfigItemGet', 'ConfigItemSearch', 'getCustomers'])).toBe('ConfigItemGet')
+        expect(findSpokenMethod('headers of get costumers', methods)).toBe('getCustomers')
+    })
+
+    it('does not stretch a short name to a different word', () => {
+        expect(findSpokenMethod('where is the body', ['body2', 'getBody'])).toBe('')
+    })
+
     it('finds nothing when no method is named', () => {
         expect(findSpokenMethod('wo ist der Header der Methode?', methods)).toBe('')
     })

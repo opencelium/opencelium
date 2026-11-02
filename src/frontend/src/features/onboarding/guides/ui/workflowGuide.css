@@ -49,3 +49,13 @@
     border-color: var(--color-action-primary);
     color: var(--color-action-primary);
 }
+
+/*
+ * Toasts sit far below the spotlight (antd message 2010, notification 2050), and the one
+ * saying what the voice assistant heard arrives just as a guide starts. Lifted to
+ * ONBOARDING_Z_INDEX.overlay while a guide runs; dialogs stay below it on purpose, since
+ * the guide cuts its hole into them.
+ */
+html.workflow-guide-active :is(.ant-message, .ant-notification) {
+    z-index: 20400 !important;
+}

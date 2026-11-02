@@ -25,19 +25,30 @@ export function encodeWav(samples: Float32Array, sampleRate = SAMPLE_RATE): Blob
 	return new Blob([buffer], { type: 'audio/wav' });
 }
 
+/** Resampled offline to 16 kHz mono, which is what whisper is trained on. */
+async function toSpeechRate(buffer: AudioBuffer): Promise<Blob> {
+	const offline = new OfflineAudioContext(1, Math.max(1, Math.ceil(buffer.duration * SAMPLE_RATE)), SAMPLE_RATE);
+	const source = offline.createBufferSource();
+	source.buffer = buffer;
+	source.connect(offline.destination);
+	source.start();
+	const rendered = await offline.startRendering();
+	return encodeWav(rendered.getChannelData(0));
+}
+
 /** Any recording the browser can decode (MediaRecorder gives webm/opus or mp4), resampled to 16 kHz mono WAV. */
 export async function toSpeechWav(recording: Blob): Promise<Blob> {
 	const context = new AudioContext();
 	try {
-		const decoded = await context.decodeAudioData(await recording.arrayBuffer());
-		const offline = new OfflineAudioContext(1, Math.max(1, Math.ceil(decoded.duration * SAMPLE_RATE)), SAMPLE_RATE);
-		const source = offline.createBufferSource();
-		source.buffer = decoded;
-		source.connect(offline.destination);
-		source.start();
-		const rendered = await offline.startRendering();
-		return encodeWav(rendered.getChannelData(0));
+		return await toSpeechRate(await context.decodeAudioData(await recording.arrayBuffer()));
 	} finally {
 		void context.close();
 	}
+}
+
+/** Raw microphone samples at the device rate, resampled to 16 kHz mono WAV. */
+export function samplesToSpeechWav(samples: Float32Array, sampleRate: number): Promise<Blob> {
+	const buffer = new AudioBuffer({ length: Math.max(1, samples.length), numberOfChannels: 1, sampleRate });
+	buffer.copyToChannel(Float32Array.from(samples), 0);
+	return toSpeechRate(buffer);
 }

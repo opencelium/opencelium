@@ -116,6 +116,13 @@
       "noSpeech": "Didn't catch anything. Click the microphone and speak your command.",
       "denied": "Microphone access is blocked. Allow it for this site in the browser to speak commands.",
       "failed": "The spoken command couldn't be transcribed. Check that the local speech service (whisper-server) is running."
+    },
+    "wakeWord": {
+      "start": "Talk to {{name}}: once on, it listens all the time, and acts only on what starts with “{{name}}”, e.g. “{{name}}, where is the header of the method?”",
+      "stop": "{{name}} is listening. Click to stop",
+      "listening": "{{name}} is listening. What do you need?",
+      "heard": "“{{text}}”",
+      "autoStopped": "{{name}} stopped listening after 10 minutes without a request."
     }
   },
   "sidebar": {

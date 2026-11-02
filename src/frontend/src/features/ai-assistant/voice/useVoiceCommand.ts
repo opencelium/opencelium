@@ -26,7 +26,7 @@ export function useVoiceCommand({ isSpeechAvailable, onTranscript }: Options) {
 			case 'failed':
 				return notifyError(t('commandPalette.voice.failed'));
 			case 'audio': {
-				const result = await transcribe(recording.wav).unwrap().catch(() => undefined);
+				const result = await transcribe({ wav: recording.wav }).unwrap().catch(() => undefined);
 				if (!result) return notifyError(t('commandPalette.voice.failed'));
 				if (!result.text) return notifyError(t('commandPalette.voice.noSpeech'), 6);
 				return onTranscript(result.text);
