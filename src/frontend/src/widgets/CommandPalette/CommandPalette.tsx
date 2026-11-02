@@ -1,5 +1,5 @@
 import { Command } from 'cmdk';
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useEffectEvent, useMemo, useRef, useState} from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { Card } from '@shared/ui/primitives/Card';
@@ -32,6 +32,7 @@ import {useAssistantStore} from "@features/ai-assistant/assistant/assistantStore
 import {AiCommandItems} from "@features/ai-assistant/ui/AiCommandItems/AiCommandItems";
 import {useVoiceCommand} from "@features/ai-assistant/voice/useVoiceCommand";
 import {useVoiceHotkey} from "@features/ai-assistant/voice/useVoiceHotkey";
+import {useSpokenRequestStore} from "@features/ai-assistant/voice/spokenRequest.store";
 import {firstActionableAiItem} from "@features/ai-assistant/command/aiCommandItemValues";
 import {runIntent} from "@features/ai-assistant/command/intents/runIntent";
 import type {ResolvedIntent} from "@features/ai-assistant/command/intents/resolveIntent";
@@ -335,6 +336,17 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
             void aiAssist.ask(text);
         },
     });
+    // A request the always-listening assistant heard is handled as if it was spoken into this palette.
+    const onSpokenRequest = useEffectEvent((text: string) => {
+        continueFromAi(text);
+        setIsActive(true);
+        void aiAssist.ask(text);
+    });
+    useEffect(() => useSpokenRequestStore.subscribe((state) => {
+        if (!state.pending) return;
+        const text = useSpokenRequestStore.getState().take();
+        if (text) onSpokenRequest(text);
+    }), []);
     useVoiceHotkey({
         isAvailable: voice.isAvailable,
         isListening: voice.status === 'listening',

@@ -44,6 +44,14 @@ describe('POST /speech/transcribe', () => {
         expect(speech.prompts[0]).toContain('Systems: i-doit, CheckMK, SnipeIT.')
     })
 
+    it('ends the prompt with the words the caller expects to hear', async () => {
+        const speech = speechAnswering('Beebot, wo ist der Header?')
+        const app = await buildApp({ config: loadConfig({}), llm, invokers, speech })
+        const response = await app.inject({ method: 'POST', url: '/speech/transcribe?vocabulary=Beebot', headers: { 'content-type': 'audio/wav' }, payload: wav })
+        expect(response.statusCode).toBe(200)
+        expect(speech.prompts[0]).toMatch(/SnipeIT\. Beebot\.$/)
+    })
+
     it('reports voice as unavailable without a speech service, and rejects other content', async () => {
         let app = await buildApp({ config: loadConfig({}), llm, invokers })
         let response = await app.inject({ method: 'POST', url: '/speech/transcribe', headers: { 'content-type': 'audio/wav' }, payload: wav })

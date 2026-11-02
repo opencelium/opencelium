@@ -38,9 +38,9 @@ export const aiApi = baseApi.injectEndpoints({
 				customOptions: quiet,
 			}),
 		}),
-		transcribeSpeech: b.mutation<TranscribeSpeechResponse, Blob>({
-			query: (wav) => ({
-				url: `${runtimeConfig.aiUrl}/speech/transcribe`,
+		transcribeSpeech: b.mutation<TranscribeSpeechResponse, { wav: Blob; vocabulary?: string }>({
+			query: ({ wav, vocabulary }) => ({
+				url: `${runtimeConfig.aiUrl}/speech/transcribe${vocabulary ? `?vocabulary=${encodeURIComponent(vocabulary)}` : ''}`,
 				method: 'POST',
 				body: wav,
 				headers: { 'Content-Type': 'audio/wav' },
