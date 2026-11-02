@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import type { Node } from '@xyflow/react';
-import type { WorkflowNodeData } from '../types/workflow.types';
+import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 
 /**
  * Bridge between the command-palette's plain-function CommandNode
@@ -11,7 +10,9 @@ import type { WorkflowNodeData } from '../types/workflow.types';
  */
 type WorkflowCommandBridge = {
   isActive: boolean;
-  getNodes: () => Node<WorkflowNodeData>[];
+  getNodes: () => WorkflowNodeModel[];
+  /** Read with the nodes to put methods in workflow (tree-path) order — see buildWorkflowIndexes. */
+  getEdges: () => WorkflowEdgeModel[];
   setSearchHighlightedNodeIds: (ids: string[]) => void;
   hasSearchHighlights: () => boolean;
   clearSearchHighlights: () => void;
@@ -29,6 +30,7 @@ type WorkflowCommandBridge = {
 const INACTIVE_BRIDGE: WorkflowCommandBridge = {
   isActive: false,
   getNodes: () => [],
+  getEdges: () => [],
   setSearchHighlightedNodeIds: () => {},
   hasSearchHighlights: () => false,
   clearSearchHighlights: () => {},

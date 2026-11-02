@@ -380,5 +380,40 @@
       "title": "Activate a license",
       "detail": "Optional — raises your monthly limit."
     }
+  },
+  "guides": {
+    "kicker": "Show me",
+    "actions": {
+      "stop": "Stop",
+      "done": "Got it"
+    },
+    "errors": {
+      "noMethods": "This workflow has no methods yet. Add a method first.",
+      "noMatch": "There is no method called \"{{method}}\" in this workflow."
+    },
+    "method-url": {
+      "title": "Where to find the URL of {{method}}",
+      "node": "Right-click {{method}} on the canvas.",
+      "menu": "Under Request, click URL.",
+      "arrived": "This is the request URL of {{method}}. Close the dialog when you are done."
+    },
+    "method-headers": {
+      "title": "Where to find the headers of {{method}}",
+      "node": "Right-click {{method}} on the canvas.",
+      "menu": "Under Request, click Header.",
+      "arrived": "These are the request headers of {{method}}. Close the dialog when you are done."
+    },
+    "method-body": {
+      "title": "Where to find the body of {{method}}",
+      "node": "Right-click {{method}} on the canvas.",
+      "menu": "Under Request, click Body.",
+      "arrived": "This is the request body of {{method}}. Close the dialog when you are done."
+    },
+    "method-try": {
+      "title": "How to try {{method}}",
+      "node": "Right-click {{method}} on the canvas.",
+      "menu": "Click Try Request….",
+      "arrived": "Click Send to run {{method}} once and see its response."
+    }
   }
 }

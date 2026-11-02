@@ -380,5 +380,40 @@
       "title": "Lizenz aktivieren",
       "detail": "Optional — erhöht Ihr monatliches Limit."
     }
+  },
+  "guides": {
+    "kicker": "Zeig es mir",
+    "actions": {
+      "stop": "Abbrechen",
+      "done": "Verstanden"
+    },
+    "errors": {
+      "noMethods": "Dieser Workflow hat noch keine Methoden. Füge zuerst eine Methode hinzu.",
+      "noMatch": "In diesem Workflow gibt es keine Methode namens „{{method}}“."
+    },
+    "method-url": {
+      "title": "Wo du die URL von {{method}} findest",
+      "node": "Klicke mit der rechten Maustaste auf {{method}}.",
+      "menu": "Klicke unter Anfrage auf URL.",
+      "arrived": "Das ist die Anfrage-URL von {{method}}. Schließe den Dialog, wenn du fertig bist."
+    },
+    "method-headers": {
+      "title": "Wo du die Header von {{method}} findest",
+      "node": "Klicke mit der rechten Maustaste auf {{method}}.",
+      "menu": "Klicke unter Anfrage auf Header.",
+      "arrived": "Das sind die Anfrage-Header von {{method}}. Schließe den Dialog, wenn du fertig bist."
+    },
+    "method-body": {
+      "title": "Wo du den Body von {{method}} findest",
+      "node": "Klicke mit der rechten Maustaste auf {{method}}.",
+      "menu": "Klicke unter Anfrage auf Body.",
+      "arrived": "Das ist der Anfrage-Body von {{method}}. Schließe den Dialog, wenn du fertig bist."
+    },
+    "method-try": {
+      "title": "Wie du {{method}} ausprobierst",
+      "node": "Klicke mit der rechten Maustaste auf {{method}}.",
+      "menu": "Klicke auf Request ausprobieren….",
+      "arrived": "Klicke auf Senden, um {{method}} einmal auszuführen und die Antwort zu sehen."
+    }
   }
 }

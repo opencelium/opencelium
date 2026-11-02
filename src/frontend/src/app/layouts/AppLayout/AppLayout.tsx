@@ -8,6 +8,7 @@ import {useGlobalHotkeys} from "@app/hooks/useGlobalHotkeys.ts";
 import {OnboardingPreview} from "@features/onboarding";
 import {WorkflowTutorial} from "@features/onboarding/workflow-tutorial/ui/WorkflowTutorial";
 import {DashboardTour} from "@features/onboarding/dashboard-tour/ui/DashboardTour";
+import {WorkflowGuide} from "@features/onboarding/guides/ui/WorkflowGuide";
 import {AiAssistantPanel} from "@features/ai-assistant/ui/AiAssistant/AiAssistantPanel";
 
 type AppLayoutProps = {
@@ -31,6 +32,7 @@ export const AppLayout = ({isNotCard, hasNoHeader, hasNoFooter}: AppLayoutProps)
             <GlobalModal />
             <OnboardingPreview />
             <WorkflowTutorial />
+            <WorkflowGuide />
             <DashboardTour />
             <AiAssistantPanel />
         </Layout>

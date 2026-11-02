@@ -1,0 +1,51 @@
+.workflow-guide-card footer {
+    justify-content: flex-end;
+}
+
+.workflow-guide-card__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--typography-font-size-sm);
+    line-height: 1.45;
+}
+
+.workflow-guide-card__steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--color-text-secondary);
+}
+
+.workflow-guide-card__steps li[data-state='current'] {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.workflow-guide-card__marker {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.workflow-guide-card__steps li[data-state='current'] .workflow-guide-card__marker {
+    border-color: var(--color-action-primary);
+    background: var(--color-action-primary);
+    color: var(--color-text-on-action);
+}
+
+.workflow-guide-card__steps li[data-state='done'] .workflow-guide-card__marker {
+    border-color: var(--color-action-primary);
+    color: var(--color-action-primary);
+}
