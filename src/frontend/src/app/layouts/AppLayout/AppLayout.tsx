@@ -10,6 +10,7 @@ import {WorkflowTutorial} from "@features/onboarding/workflow-tutorial/ui/Workfl
 import {DashboardTour} from "@features/onboarding/dashboard-tour/ui/DashboardTour";
 import {WorkflowGuide} from "@features/onboarding/guides/ui/WorkflowGuide";
 import {AiAssistantPanel} from "@features/ai-assistant/ui/AiAssistant/AiAssistantPanel";
+import {BeebotFlight} from "@features/ai-assistant/ui/BeebotFlight/BeebotFlight";
 
 type AppLayoutProps = {
     isNotCard?: boolean;
@@ -33,6 +34,7 @@ export const AppLayout = ({isNotCard, hasNoHeader, hasNoFooter}: AppLayoutProps)
             <OnboardingPreview />
             <WorkflowTutorial />
             <WorkflowGuide />
+            <BeebotFlight />
             <DashboardTour />
             <AiAssistantPanel />
         </Layout>

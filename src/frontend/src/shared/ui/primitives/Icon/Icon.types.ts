@@ -97,13 +97,24 @@ export type IconColor =
     | 'danger'
     | 'inherit';
 
-export interface IconProps {
-    name: IconName;
+/**
+ * The Beebot voice assistant's states: microphone off, waiting for the wake word, hearing speech, working on a
+ * request, and travelling to something it points at (wings only).
+ */
+export type BeebotState = 'off' | 'idle' | 'active' | 'thinking' | 'flying';
+
+type IconBaseProps = {
     size?: number;
     color?: IconColor;
     className?: string;
     onClick?: () => void,
     isSubtle?: boolean,
-}
+};
+
+/** `beebot` is the one stateful icon: it brings its own colours (`color` is ignored) and needs its state. */
+export type IconProps = IconBaseProps & (
+    | { name: IconName; state?: never }
+    | { name: 'beebot'; state: BeebotState }
+);
 
 export type IconComponent = React.FC<IconProps>;

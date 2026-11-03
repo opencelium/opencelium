@@ -126,7 +126,13 @@
       "stop": "{{name}} is listening. Click to stop",
       "listening": "{{name}} is listening. What do you need?",
       "heard": "{{name}} is on it: “{{text}}”",
-      "autoStopped": "{{name}} stopped listening after 10 minutes without a request."
+      "autoStopped": "{{name}} stopped listening after 10 minutes without a request.",
+      "state": {
+        "off": "{{name}} is off",
+        "idle": "{{name}} is listening for its name",
+        "active": "{{name}} is hearing you",
+        "thinking": "{{name}} is working on your request"
+      }
     },
     "workflowEdit": {
       "added": "Added {{method}} from {{connector}}. Ctrl+Z undoes it.",

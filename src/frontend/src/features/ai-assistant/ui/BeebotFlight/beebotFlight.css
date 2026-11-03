@@ -1,0 +1,49 @@
+/* Above the guide spotlight's dimmed backdrop (20199) and its tooltip (20200), below the guide card (20300). */
+.beebotFlight {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 20250;
+  pointer-events: none;
+}
+
+/* Separate easings for X and Y make the path an arc rather than a straight line. */
+.beebotFlight__x {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(.55, 0, .25, 1);
+}
+
+.beebotFlight__y {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(.3, 0, .35, 1);
+}
+
+/* The glyph is centred on the point it flies to. */
+.beebotFlight__y > div {
+  margin: -12px 0 0 -12px;
+  width: 24px;
+  height: 24px;
+}
+
+.beebotFlight__lift {
+  animation-name: beebotLift;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+@keyframes beebotLift {
+  0% { transform: none; }
+  35% { transform: translateY(-34px) scale(1.5) rotate(var(--beebot-bank, 0deg)); }
+  100% { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beebotFlight__x,
+  .beebotFlight__y {
+    transition: none;
+  }
+
+  .beebotFlight__lift {
+    animation: none;
+  }
+}
