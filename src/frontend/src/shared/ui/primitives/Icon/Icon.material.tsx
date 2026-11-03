@@ -1,4 +1,5 @@
 import React from 'react';
+import { BeebotGlyph } from './beebot/BeebotGlyph';
 import {
     Check,
     Close,
@@ -171,13 +172,17 @@ const iconMap = {
     microphone: MicNoneOutlined,
 };
 
-export const MaterialIcon: IconComponent = ({
+export const MaterialIcon: IconComponent = (props) => {
+    if (props.name === 'beebot') {
+        return <BeebotGlyph state={props.state} size={props.size} className={props.className} onClick={props.onClick} />;
+    }
+    const {
     name,
     size = 20,
     color = 'default',
     className,
     onClick,
-}) => {
+} = props;
     const Component = iconMap[name];
 
     const colorMap = {

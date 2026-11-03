@@ -162,6 +162,12 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 listening: string
                 heard: string
                 autoStopped: string
+                state: {
+                    off: string
+                    idle: string
+                    active: string
+                    thinking: string
+                }
             }
             workflowEdit: {
                 added: string

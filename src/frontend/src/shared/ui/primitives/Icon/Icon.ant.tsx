@@ -1,4 +1,5 @@
 import React from 'react';
+import { BeebotGlyph } from './beebot/BeebotGlyph';
 import { LuScan, LuFlaskConical, LuPackage, LuSparkles, LuUnplug, LuArrowRight, LuMic } from 'react-icons/lu';
 import {
     HolderOutlined,
@@ -155,14 +156,18 @@ const iconMap = {
     microphone: LuMic,
 };
 
-export const AntIcon: IconComponent = ({
+export const AntIcon: IconComponent = (props) => {
+    if (props.name === 'beebot') {
+        return <BeebotGlyph state={props.state} size={props.size} className={props.className} onClick={props.onClick} />;
+    }
+    const {
     name,
     size = 20,
     color = 'default',
     className,
     onClick,
     isSubtle,
-}) => {
+} = props;
     const Component = iconMap[name];
 
     const colorMap = {

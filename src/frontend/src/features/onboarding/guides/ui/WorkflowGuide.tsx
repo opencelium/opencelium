@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useTheme } from '@shared/theme/hooks/useTheme'
 import { workflowCommandBridgeStore } from '@features/workflow/command/workflowCommandBridge'
+import { useBeebotFlightStore } from '@features/ai-assistant/voice/beebotFlight.store'
 import { TutorialSpotlight } from '../../workflow-tutorial/ui/TutorialSpotlight'
 import { useGuideTracking } from '../model/useGuideTracking'
 import { useWorkflowGuideStore, type ActiveWorkflowGuide } from '../model/workflowGuide.store'
@@ -14,6 +15,17 @@ const ACTIVE_CLASS = 'workflow-guide-active'
 function ActiveGuide({ active, onClose }: { active: ActiveWorkflowGuide; onClose: () => void }) {
     const { steps, current, next } = useGuideTracking(active, onClose)
     const link = steps[current]?.link
+    const target = link?.target ?? null
+    const text = link?.text
+
+    // Beebot (when listening) flies to each step's target and home when the guide ends.
+    useEffect(() => {
+        const { land, home } = useBeebotFlightStore.getState()
+        if (target) land({ selector: target, text })
+        else home()
+    }, [target, text])
+    useEffect(() => () => useBeebotFlightStore.getState().home(), [])
+
     return (
         <>
             <TutorialSpotlight target={link?.target ?? null} text={link?.text} include={link?.include} cue={link?.cue} />

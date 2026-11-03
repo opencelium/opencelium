@@ -11,35 +11,13 @@
   box-shadow: 0 0 0 calc(1px + var(--wake-level, 0) * 3px) var(--color-action-primary);
 }
 
-/* A small live dot in the corner, the way recording is usually signalled. */
-.wakeWordToggle:not([data-state='off'])::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-action-primary);
-  pointer-events: none;
-}
-
-.wakeWordToggle[data-state='working']::after {
-  animation: wakeWordPulse 900ms ease-in-out infinite;
-}
-
-@keyframes wakeWordPulse {
-  50% {
-    opacity: .25;
-  }
+/* The bee is out pointing at something (BeebotFlight): one bee on screen, not two. */
+.wakeWordToggle[data-away] .bb {
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .wakeWordToggle {
     transition: none;
-  }
-
-  .wakeWordToggle[data-state='working']::after {
-    animation: none;
   }
 }

@@ -126,7 +126,13 @@
       "stop": "{{name}} hört zu. Zum Beenden klicken",
       "listening": "{{name}} hört zu. Was brauchst du?",
       "heard": "{{name}} kümmert sich darum: „{{text}}“",
-      "autoStopped": "{{name}} hört nach 10 Minuten ohne Anfrage nicht mehr zu."
+      "autoStopped": "{{name}} hört nach 10 Minuten ohne Anfrage nicht mehr zu.",
+      "state": {
+        "off": "{{name}} ist aus",
+        "idle": "{{name}} wartet auf seinen Namen",
+        "active": "{{name}} hört dir zu",
+        "thinking": "{{name}} bearbeitet deine Anfrage"
+      }
     },
     "workflowEdit": {
       "added": "{{method}} aus {{connector}} hinzugefügt. Strg+Z macht es rückgängig.",

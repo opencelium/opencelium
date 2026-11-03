@@ -1,0 +1,72 @@
+/* Beebot glyph (BeebotGlyph.tsx): states off | idle | active | thinking (| flying) as a class next to `bb`.
+   CSS keyframes only. Colours come from the active theme's variables, so light, dark and every other theme follow. */
+
+.bb {
+  --bb-ink:  var(--color-text-primary);          /* body outline, antennae, eyes */
+  --bb-fill: var(--color-background-surface);    /* body fill */
+  --bb-wing: var(--color-action-primary-subtle); /* wing fill tint */
+  --bb-blue: var(--color-action-primary);        /* stripes, antenna tips, waves, glow */
+  --bb-teal: var(--color-action-secondary);      /* wing outline */
+  --bb-mute: var(--color-text-secondary);        /* off state */
+}
+
+/* ---- Parts ---- */
+.bb { display: block; overflow: visible; }
+.bb * { transition: opacity 200ms ease-out, transform 240ms ease-out, fill 200ms ease-out, stroke 200ms ease-out; }
+.bb .glow   { fill: var(--bb-blue); opacity: 0; transform-box: view-box; transform-origin: 12px 12px; }
+.bb .wing   { fill: var(--bb-wing); stroke: var(--bb-teal); stroke-width: 1.5; }
+.bb .wing-l { transform-box: view-box; transform-origin: 8.4px 11.4px; }
+.bb .wing-r { transform-box: view-box; transform-origin: 15.6px 11.4px; }
+.bb .ant    { fill: none; stroke: var(--bb-ink); stroke-width: 1.25; stroke-linecap: round; }
+.bb .tip    { fill: var(--bb-blue); }
+.bb .wave   { fill: none; stroke: var(--bb-blue); stroke-width: 1.25; stroke-linecap: round; opacity: 0; }
+.bb .body   { fill: var(--bb-fill); stroke: var(--bb-ink); stroke-width: 1.5; }
+.bb .eye    { fill: var(--bb-ink); }
+.bb .eyes   { transform-box: view-box; }
+.bb .eye-off{ fill: none; stroke: var(--bb-ink); stroke-width: 1.25; stroke-linecap: round; opacity: 0; }
+.bb .stripe { fill: none; stroke: var(--bb-blue); stroke-width: 1.5; stroke-linecap: round; }
+
+/* ---- 1 · Off: grey, wings folded, eyes closed (static) ---- */
+.bb.off { --bb-ink: var(--bb-mute); --bb-blue: var(--bb-mute); --bb-teal: var(--bb-mute); --bb-wing: transparent; }
+.bb.off .eye     { opacity: 0; }
+.bb.off .eye-off { opacity: 1; }
+.bb.off .wing-l  { transform: rotate(-48deg) scale(.78); }
+.bb.off .wing-r  { transform: rotate(48deg) scale(.78); }
+
+/* ---- 2 · Idle listening: 1px bob + slight wing drift, 3.2s ---- */
+@keyframes bb-bob     { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1px); } }
+@keyframes bb-drift-l { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-6deg); } }
+@keyframes bb-drift-r { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(6deg); } }
+.bb.idle .bee    { animation: bb-bob 3.2s ease-in-out infinite; }
+.bb.idle .wing-l { animation: bb-drift-l 3.2s ease-in-out infinite; }
+.bb.idle .wing-r { animation: bb-drift-r 3.2s ease-in-out infinite; }
+
+/* ---- 3 · Active (wake word heard): fast wings, sound waves, glow ---- */
+@keyframes bb-flap-l { from { transform: rotate(10deg); } to { transform: rotate(-16deg); } }
+@keyframes bb-flap-r { from { transform: rotate(-10deg); } to { transform: rotate(16deg); } }
+@keyframes bb-wave   { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes bb-glow   { 0%,100% { opacity: .1; transform: scale(.9); } 50% { opacity: .22; transform: scale(1); } }
+.bb.active .wave   { opacity: 1; }      /* static fallback */
+.bb.active .w2     { opacity: .55; }    /* static fallback */
+.bb.active .glow   { opacity: .16; animation: bb-glow 1.2s ease-in-out infinite; }
+.bb.active .wing-l { animation: bb-flap-l 120ms ease-in-out infinite alternate; }
+.bb.active .wing-r { animation: bb-flap-r 120ms ease-in-out infinite alternate; }
+.bb.active .w1     { animation: bb-wave 1s ease-out infinite; }
+.bb.active .w2     { animation: bb-wave 1s ease-out .25s infinite backwards; }
+
+/* ---- 4 · Thinking: antenna tips blink in sequence, eyes look up, 1.4s ---- */
+@keyframes bb-blink-a { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes bb-blink-b { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+.bb.thinking .tip-r { opacity: .3; }                  /* static fallback */
+.bb.thinking .eyes  { transform: translateY(-.6px); }
+.bb.thinking .tip-l { animation: bb-blink-a 1.4s ease-in-out infinite; }
+.bb.thinking .tip-r { animation: bb-blink-b 1.4s ease-in-out infinite; }
+
+/* ---- Optional 5th class used while the bee travels: wings only, no waves/glow ---- */
+.bb.flying .wing-l { animation: bb-flap-l 110ms ease-in-out infinite alternate; }
+.bb.flying .wing-r { animation: bb-flap-r 110ms ease-in-out infinite alternate; }
+
+/* ---- Reduced motion: every state falls back to its static pose ---- */
+@media (prefers-reduced-motion: reduce) {
+  .bb, .bb * { animation: none !important; transition: none !important; }
+}
