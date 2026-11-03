@@ -13,10 +13,12 @@
     "tooBig": "The log is too big to download. You can find it on the server at {{path}}."
   },
   "tabs": {
-    "requestHeader": "Request Header",
     "requestBody": "Request Body",
-    "responseHeader": "Response Header",
-    "responseBody": "Response Body"
+    "responseBody": "Response Body",
+    "sentReceived": "Sent / Received",
+    "headers": "Headers",
+    "request": "Request",
+    "response": "Response"
   },
   "methodView": {
     "tooltip": "Toggle URL / name"
