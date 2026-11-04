@@ -5,6 +5,7 @@ import type {Mode} from '@/engine/entity/EntityDefinition.ts';
 import 'react-js-cron/styles.css';
 import {FormInput} from '@shared/ui/form/FormInput';
 import {quartzToPickerCron} from '@shared/lib/cron/quartzCron';
+import {CronPreview} from './CronPreview';
 import {toQuartzDayRule} from './cron-editor.utils';
 
 interface CronEditorProps {
@@ -35,6 +36,7 @@ export const CronEditor: React.FC<CronEditorProps> = ({name, label, mode, autoFo
                 onChange={(event) => setValue(name, event.target.value, {shouldDirty: true})}
                 name={name}
             />
+            <CronPreview cron={fullCron} />
             {mode !== 'view' && (
                 <div style={{display: 'flex', justifyContent: 'right'}}>
                     <Cron
