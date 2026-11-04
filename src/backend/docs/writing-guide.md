@@ -2,9 +2,18 @@
 
 All Markdown documents in `docs/` and all tickets are written in ASD-STE100 Simplified Technical English (STE). This guide lists the rules that the project applies and the technical names that it permits. Code, Javadoc, and commit messages follow [CONTRIBUTING.md](../CONTRIBUTING.md), not this guide.
 
+## Scope
+
+The rules apply in 3 tiers:
+
+- Strict STE, with the approved words and the technical names of this guide. This tier applies to the acceptance criteria, the tickets, the decisions and the glossary of the architecture document, and the documents for the users.
+- The STE rules without the dictionary. This tier applies to the plans, the reasons for a decision, the open questions, the risks, the proposals, and CONTRIBUTING.md. The sentence rules apply, and the writer can use a word outside the approved list when the word is clear.
+- Exempt: the code, the Javadoc, the commit messages, the PR descriptions, the agent prompts, and the skills.
+
 ## Language rules
 
 - Use approved words only. Examples: *must* (not *should*), *can* (not *may* or *might*), *make sure* (not *ensure* or *verify*), *permit* (not *allow*), *make* (not *create*), *give* (not *provide*), *through* (not *via*), *for example* (not *e.g.*). Do not write *etc.*: list the items.
+- An acceptance criterion uses *must*, not *shall*. The requirement form "the system shall ..." is not STE.
 - Use the active voice, the simple present for descriptions, and the imperative for instructions.
 - Do not use -ing verb forms, perfect tenses, idioms, or contractions.
 - Put an article before each noun.
@@ -35,3 +44,7 @@ STE permits technical names and technical verbs that are standard in the industr
 - Products and tools: Spring Boot, Gradle, MongoDB, RabbitMQ, Kafka, SQS, Quartz, ArchUnit, Testcontainers, Mockito, n8n.
 - Technical verbs (1): execute, deploy, dispatch, encrypt, decrypt, wrap, unwrap, authenticate, authorize, log in, publish, subscribe, schedule, configure.
 - Technical verbs (2): scan, ping, parse, map, cache, mock, inject, mount, rotate, resume, pause, delete, boot, port (code from the legacy system).
+- Process: SDD (spec-driven development), spec (specification), plan, task list, task, criterion, gate, lifecycle, pilot, definition of done, constitution, template, follow-up, assumption.
+- Agents: LLM (large language model), agent, subagent, prompt, system prompt, context, skill, hook, slash command, model, tool, frontmatter, finding.
+- Build: CI (continuous integration), linter, formatter, Spotless, commitlint, OpenAPI, contract, diff, pull request, PR (pull request), commit, branch.
+- Technical verbs (3): review, approve, merge, squash, lint, anchor, draft, commit, push, resolve.
