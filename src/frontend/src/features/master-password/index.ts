@@ -1,5 +1,6 @@
 export { MasterPasswordDialog } from './ui/MasterPasswordDialog'
 export { MasterPasswordGate } from './ui/MasterPasswordGate'
 export { useMasterPasswordStore } from './model/masterPasswordStore'
+export { useClearMasterPasswordOnSignOut } from './model/useClearMasterPasswordOnSignOut'
 export { masterPasswordApi, useCheckMasterPasswordMutation, useCheckMasterPasswordExistsQuery } from './api/masterPasswordApi'
 export { checkMasterPasswordExistsRaw } from './model/checkMasterPasswordExists'
