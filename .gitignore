@@ -1,9 +1,8 @@
 # Claude Code
 CLAUDE.md
-.claude/*
-!.claude/agents/
-!.claude/skills/
-src/backend/.claude/
+**/.claude/*
+!src/backend/.claude/agents/
+!src/backend/.claude/skills/
 
 # OS
 .DS_Store
