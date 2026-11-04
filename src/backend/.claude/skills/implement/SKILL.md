@@ -134,7 +134,10 @@ The steps:
 2. Run `./gradlew build` from `src/backend`; run it in the background when it takes longer than
    2 minutes. Record the exact command and the result: green or red, the number of tests, the
    duration. "The tests pass" without the command and the result is not a claim. Red: repair,
-   run again, keep the last result.
+   run again, keep the last result. When the cause is not clear after 1 repair attempt, and
+   `.claude/agents/debugger.md` exists: run the debugger agent (the Agent tool,
+   `subagent_type: debugger`) with the command, its output and the phase "commit 2". Apply the
+   fix that it proposes yourself, then run the build again. The agent proposes; you edit.
 3. Set the status of the task to "done" in `tasks.md`.
 4. Commit the implementation, `tasks.md`, and `spec.md` or `plan.md` when they changed. The
    message is the task title of `tasks.md` (Conventional Commits, 72 characters or less).
@@ -156,6 +159,15 @@ The steps:
      or a document; "the tests pass" without the command.
 3. Resolve each `blocking:` finding and amend commit 2 (not pushed). Run `./gradlew build`
    again and keep the new result. Run the gate again until no `blocking:` remains.
+4. The security pass. It applies when the diff touches `core.secrets`, `core.config`,
+   `core.user`, `core.setup`, a Spring Security configuration, an HTTP endpoint, the settings
+   service, a transport message or event, a `@Document` class or a test resource with a key.
+   When it applies and `.claude/agents/security-reviewer.md` exists: run the security-reviewer
+   agent (`subagent_type: security-reviewer`) with the range `origin/next...HEAD`, the feature
+   folder, the task number and the ask "Security review of the diff of task <n>; report in
+   your format." Resolve each `blocking:` finding, amend commit 2, run `./gradlew build` again,
+   and run the pass again until no `blocking:` remains. When it applies and the agent file does
+   not exist, write "security pass: not run, no agent" under "Not confirmed" in the PR text.
 
 ## Step 4: the hand test
 
@@ -187,7 +199,8 @@ No checklist block, no attribution line, nothing after "How to test".
 ## Step 6: the report
 
 End your answer with: the branch; the 2 commits (`git log --oneline origin/next..HEAD`); the
-build command and its result; the last line of each gate report; the PR text; and the sentence
+build command and its result; the last line of each gate report and of the security pass when
+it ran; the PR text; and the sentence
 "Not pushed. Push the branch from your own terminal and open the PR into next with the text
 above." Do not push unless the user asks. When the user asks, push only the feature branch.
 
@@ -199,4 +212,5 @@ above." Do not push unless the user asks. When the user asks, push only the feat
 - Write a secret into code, into test resources or into a document.
 - Write a Javadoc or a comment that names a ticket, a decision number or a document.
 - Report a result that you did not see. Report "green" without the command and its output.
-- Work on 2 tasks in 1 branch. Skip gate 3, gate 4 or the stop for the test review.
+- Work on 2 tasks in 1 branch. Skip gate 3, gate 4, the security pass when it applies, or the
+  stop for the test review.
