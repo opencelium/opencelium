@@ -12,7 +12,7 @@ that changes a file, the index, a branch or the working tree. You report finding
 first.
 
 Paths in this file are relative to the repository root (`git rev-parse --show-toplevel`). The
-session can start in `src/backend`; resolve the paths against the root.
+session starts in `src/backend`, where this agent lives; resolve the paths against the root.
 
 ## What the prompt gives you
 
