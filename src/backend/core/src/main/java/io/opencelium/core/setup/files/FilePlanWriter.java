@@ -19,13 +19,17 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 /**
  * Writes a file plan so that a failure never leaves a half-written configuration. Every file is first staged as
  * {@code <target>.tmp-<random>} in its target directory, with its content and permissions; only then is each
- * staged file moved onto its target in one atomic step, replacing a file that exists. A missing target directory
- * is made. When anything fails, the writer deletes the staged files, the targets this run moved, and the
- * directories it made that are empty again, then throws {@link SetupWriteException} naming the target that failed.
+ * staged file moved onto its target in one atomic step. A file that is in the place of a target is renamed to
+ * {@code <target>.bak-<random>} just before that move and deleted after the last move, so the rollback can put it
+ * back as it was, with its permissions. A missing target directory is made. When anything fails, the writer deletes
+ * the staged files, puts back the files it replaced, deletes the other targets this run moved and the directories
+ * it made that are empty again, then throws {@link SetupWriteException} naming the target that failed.
  */
 public final class FilePlanWriter {
 
 	private static final String STAGE_INFIX = ".tmp-";
+
+	private static final String BACKUP_INFIX = ".bak-";
 
 	static final String NO_POSIX_WARNING = "This file system has no POSIX permissions; the files keep the default"
 			+ " permissions.";
@@ -70,13 +74,17 @@ public final class FilePlanWriter {
 		catch (IOException ex) {
 			throw run.rollBack(ex);
 		}
+		run.removeBackups();
 	}
 
-	/** What one write has done so far, so the rollback knows what to remove. */
+	/** What one write has done so far, so the rollback knows what to undo. */
 	private final class Run {
 
 		/** The staged file of each target that is not moved yet. */
 		private final Map<Path, Path> staged = new LinkedHashMap<>();
+
+		/** The file that was in the place of each replaced target, kept aside until the last move is done. */
+		private final Map<Path, Path> backups = new LinkedHashMap<>();
 
 		private final List<Path> moved = new ArrayList<>();
 
@@ -98,9 +106,34 @@ public final class FilePlanWriter {
 		}
 
 		private void move(PlannedFile file) throws IOException {
+			keepAside(file.path());
 			Files.move(staged.get(file.path()), file.path(), ATOMIC_MOVE, REPLACE_EXISTING);
 			staged.remove(file.path());
 			moved.add(file.path());
+		}
+
+		/**
+		 * Renames a regular file at {@code target} to its backup. The backup name is reserved with an empty file
+		 * first, so the rename never replaces a file this run did not make.
+		 */
+		private void keepAside(Path target) throws IOException {
+			if (!Files.isRegularFile(target)) {
+				return;
+			}
+			Path absolute = target.toAbsolutePath();
+			Path backup = Files.createTempFile(absolute.getParent(), absolute.getFileName() + BACKUP_INFIX, "");
+			Files.move(target, backup, ATOMIC_MOVE, REPLACE_EXISTING);
+			backups.put(target, backup);
+		}
+
+		/** After the last move: a backup that cannot be deleted is reported, because it holds the previous content. */
+		private void removeBackups() {
+			backups.forEach((target, backup) -> {
+				if (!delete(backup)) {
+					warnings.accept("Cannot delete the previous " + target + ", kept at " + backup
+							+ "; please delete it by hand.");
+				}
+			});
 		}
 
 		private void makeDirectories(Path directory) throws IOException {
@@ -115,17 +148,29 @@ public final class FilePlanWriter {
 
 		private SetupWriteException rollBack(IOException cause) {
 			int touched = staged.size() + moved.size();
-			int removed = 0;
+			int undone = 0;
 			for (Path file : staged.values()) {
-				removed += delete(file) ? 1 : 0;
+				undone += delete(file) ? 1 : 0;
 			}
 			for (Path file : moved) {
-				removed += delete(file) ? 1 : 0;
+				undone += (backups.containsKey(file) ? restore(file) : delete(file)) ? 1 : 0;
 			}
 			for (Path directory : madeDirectories.reversed()) {
 				delete(directory);
 			}
-			return new SetupWriteException(current, cause, touched, removed);
+			return new SetupWriteException(current, cause, touched, undone, backups);
+		}
+
+		/** Puts the previous file back in the place of {@code target}; when that fails, its backup stays. */
+		private boolean restore(Path target) {
+			try {
+				Files.move(backups.get(target), target, ATOMIC_MOVE, REPLACE_EXISTING);
+				backups.remove(target);
+				return true;
+			}
+			catch (IOException ex) {
+				return false;
+			}
 		}
 
 	}
