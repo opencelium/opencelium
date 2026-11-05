@@ -1,20 +1,20 @@
 # Setup wizard
 
 ## User story
-As a system administrator who installs OpenCelium for the first time, I want a terminal wizard that asks numbered questions, installs the software that is not installed yet and writes the start-up configuration, so that I get an OpenCelium that operates without the documentation and without edits to the yml files by hand.
+As a system administrator who installs OpenCelium for the first time, I want a terminal wizard that asks numbered questions, connects OpenCelium to MongoDB and writes the start-up configuration, so that I get an OpenCelium that operates without the documentation and without edits to the yml files by hand.
 
 ## Context
-Without the wizard, a new user must write `application.yml` by hand, install MongoDB and give a master key before the first start. Section 6.4 of the architecture document (decisions 13 and 14) keeps the values that the application needs before the database in the yml file. The terminal wizard makes these files, installs the software that a browser page cannot install, and makes the first admin. A start without a terminal never sees the wizard: it uses the defaults and the fail-fast rules of section 4.1.
+Without the wizard, a new user must write `application.yml` by hand, install MongoDB and give a master key before the first start. Section 6.4 of the architecture document (decisions 13 and 14) keeps the values that the application needs before the database in the yml file. The terminal wizard makes these files, does the host tasks that a browser page cannot do, and makes the first admin. The host tasks are the MongoDB start with Docker Compose and the system service. A start without a terminal never sees the wizard: it uses the defaults and the fail-fast rules of section 4.1.
 
 ## Scope
 The wizard runs in the terminal and installs the self-host mode only. It does these things:
 
 - It asks the service question, the data directory and the web port.
-- It finds, downloads, installs or connects to MongoDB, and it pings the server.
+- It uses a local MongoDB server, starts MongoDB with Docker Compose or connects to a server that exists. Then it pings the server.
 - It resolves the master key: a new key in the data directory, the environment variable `OC_MASTER_KEY`, or a key file.
 - It makes the first admin with the password `1234`.
 - It installs OpenCelium as a system service on Linux with systemd, and it prints the service files for macOS and Windows.
-- It makes everything after the summary: the files, the MongoDB installation, the key file and the service. Then the application starts.
+- It makes everything after the summary: the files, the MongoDB container, the key file and the service. Then the application starts.
 - It takes its values from a setup file for a run without a terminal.
 
 LDAP, OIDC, the Service Portal issuer, the broker connection and the license are browser settings after the login, not wizard questions. The browser gets the setup state and the read-only bootstrap facts through 2 endpoints. A configuration is a configuration file at a search location, a Spring configuration location, or a bootstrap property in the arguments or the environment.
@@ -28,10 +28,10 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - **SW-02** Given no terminal and no configuration, when the application starts, then it must start with the defaults and no wizard.
 - **SW-03** Given any state, when the user runs `java -jar oc-app.jar setup`, then the wizard must start.
 - **SW-04** Given the flag `--batch` without `setup`, when the application starts, then the wizard must not start.
-- **SW-05** Given a question, when the user types `q` or presses Ctrl+C, then the wizard must write nothing and say so. The wizard makes, downloads and starts nothing before the summary.
+- **SW-05** Given a question, when the user types `q` or presses Ctrl+C, then the wizard must write nothing and say so. The wizard makes and starts nothing before the summary.
 - **SW-06** Given the summary, when the user confirms, then the wizard must do these steps in this order:
   1. It writes the files together: the yml file, the env file and, with the generate option, the key file.
-  2. It installs and starts MongoDB, with the download option or the Docker option.
+  2. It starts MongoDB, with the Docker option.
   3. It writes the admin marker into the database.
   4. It installs the service, with the service option.
   5. It starts the application: the wizard process without the service, systemd with the service. Only 1 process starts it.
@@ -47,21 +47,11 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
 ### MongoDB
 
-- **SW-11** Given no server on `localhost:27017` and no `mongod`, when the MongoDB step starts, then it must offer 4 options:
-  1. Download MongoDB and run it locally.
-  2. Start it with Docker Compose.
-  3. Type the URI of a server that exists.
-  4. Exit.
+- **SW-11** Given no server on `localhost:27017`, when the MongoDB step starts, then it must offer 3 options:
+  1. Start MongoDB with Docker Compose.
+  2. Type the URI of a server that exists.
+  3. Exit.
 - **SW-12** Given a server on `localhost:27017`, when the MongoDB step starts, then its first and default option must be that server.
-- **SW-13** Given the download option on Linux x86_64 or arm64, when the user confirms the summary, then the wizard must do these steps:
-  1. It downloads MongoDB Community 8.x.
-  2. It compares the SHA-256 checksum with the pinned value.
-  3. It unpacks the tarball under the data directory.
-  4. It starts `mongod` on `127.0.0.1` with authentication.
-  5. It makes the database user `opencelium` with rights on the database `opencelium` only.
-  6. It pings the server.
-- **SW-14** Given a platform without a download, when the user selects the download, then the wizard must refuse and ask again.
-- **SW-15** Given the download option, when the download is complete, then the wizard must print the SSPL license notice.
 - **SW-16** Given the URI option, when the user types a URI, then the wizard must ping the server before it continues.
 - **SW-17** Given a failed ping, when the wizard reports it, then it must name the cause and offer 3 options:
   1. Type the URI again.
@@ -101,11 +91,10 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   2. It copies the jar to `/opt/opencelium`.
   3. It writes the yml file and the env file to `/etc/opencelium`, and the key file to the data directory.
   4. It gives the data directory and its content to the user `opencelium`.
-  5. It installs and starts MongoDB, with the download option or the Docker option.
-  6. With the download option, the `mongod` gets its own unit, which starts before OpenCelium.
-  7. It writes the admin marker into the database.
-  8. It writes the unit file, then runs `daemon-reload` and `enable --now`.
-  9. The wizard process waits 60 seconds for the port, then prints the login box.
+  5. It starts MongoDB, with the Docker option.
+  6. It writes the admin marker into the database.
+  7. It writes the unit file, then runs `daemon-reload` and `enable --now`.
+  8. The wizard process waits 60 seconds for the port, then prints the login box.
 - **SW-44** Given the variable key option, when the child installs the service, then it must enable the service and not start it. The wizard prints the instruction to set `OC_MASTER_KEY`, the start command and the login box. The service generates no key.
 - **SW-45** Given the service option, when the port does not listen after 60 seconds, then the wizard must say so. It names the `journalctl` command, leaves the unit in place and ends with exit code 1.
 - **SW-29** Given the show option, when the user selects it, then the wizard must print the unit file and the commands.
@@ -138,7 +127,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - A generated admin password, a forced password change at the first login, and a lock of the admin account.
 - The browser wizard screens: LDAP, OIDC, the Service Portal, the broker, the license, the password change. They are the frontend story. This feature gives the 2 endpoints and the list of setting keys.
 - Native service registration on macOS and Windows. The print fallback only.
-- The MongoDB download for macOS, Windows, or a CPU other than x86_64 and arm64. Those users select Docker or a server that exists.
+- The download and the installation of MongoDB by the wizard. The user selects a local server, Docker Compose or the URI of a server that exists.
 - The installation of RabbitMQ from the wizard.
 - Encryption of the database password in the yml file under the master key. The env file only.
 - Upgrades and migrations of installations that exist: the upgrade story.
@@ -154,11 +143,9 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - A new decision is necessary for the handover from the wizard to the application: the admin marker in the setup state. It makes the admin in each process that starts the application, and it tells a new installation from an upgrade. The architect agent drafts it.
 
 ## Open questions
-1. What is the SSPL notice text for the MongoDB download? Assumption until the answer comes: the wizard prints a placeholder and a link to the MongoDB license page (assumption).
-2. Which MongoDB version does the wizard pin, and who updates the checksum for each release? Assumption until the answer comes: 8.0.x, updated with each OpenCelium release (assumption).
-3. Is the admin username a question with the default `admin`, or is it fixed like the password? Assumption until the answer comes: a question (assumption).
-4. Is the print flag of SW-40 still wanted, now that `setup --template` exists? Assumption until the answer comes: yes, it prints the values of the last run with the secrets replaced (assumption).
-5. When does the frontend story for the browser wizard screens start? Assumption until the answer comes: after this feature; the endpoints do not wait for it (assumption).
-6. What is the reason for the fixed password `1234` with no forced change? The product management decided it. The application listens on all interfaces, and the settings and login routes are open before the setup is complete. Assumption until the answer comes: the admin logs in right after the wizard, so the window is short (assumption).
-7. Do the browser page `/setup` and the API `/setup/status` share a path, or does the API get a prefix? Assumption until the answer comes: the paths stay as written, and the API contract decision gives the prefix before the endpoint task starts (assumption).
-8. What does a run with a setup file do when the MongoDB server of the file does not answer? Assumption until the answer comes: the setup stops with exit code 1 and names the key, as for a bad value (assumption).
+1. Is the admin username a question with the default `admin`, or is it fixed like the password? Assumption until the answer comes: a question (assumption).
+2. Is the print flag of SW-40 still wanted, now that `setup --template` exists? Assumption until the answer comes: yes, it prints the values of the last run with the secrets replaced (assumption).
+3. When does the frontend story for the browser wizard screens start? Assumption until the answer comes: after this feature; the endpoints do not wait for it (assumption).
+4. What is the reason for the fixed password `1234` with no forced change? The product management decided it. The application listens on all interfaces, and the settings and login routes are open before the setup is complete. Assumption until the answer comes: the admin logs in right after the wizard, so the window is short (assumption).
+5. Do the browser page `/setup` and the API `/setup/status` share a path, or does the API get a prefix? Assumption until the answer comes: the paths stay as written, and the API contract decision gives the prefix before the endpoint task starts (assumption).
+6. What does a run with a setup file do when the MongoDB server of the file does not answer? Assumption until the answer comes: the setup stops with exit code 1 and names the key, as for a bad value (assumption).

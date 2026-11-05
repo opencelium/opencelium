@@ -112,34 +112,16 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 11
 - **Status:** done
 
-## Task 13: feat(core): setup wizard downloads MongoDB and checks the checksum
-- **Criteria:** SW-13 (steps 1 to 3), SW-14, SW-15
-- **Function:** The download option only validates at the step; the download is an action of the plan and runs after the summary. It gets the pinned MongoDB Community tarball for Linux x86_64 or arm64 with a progress bar, compares the SHA-256, unpacks the tarball under the data directory and prints the SSPL notice placeholder. On another platform the option says "not available" and shows the menu again; the local run comes with task 14.
-- **Tests:** `MongoDownloaderTest` (a local HTTP server): downloadStoresFileWhenChecksumMatches, downloadThrowsNamingChecksumWhenChecksumDiffers, downloadResumesWithRangeWhenRetried; `MongoStepTest`: runRefusesDownloadWhenPlatformHasNone, runPrintsLicenseNoticeWhenDownloadIsComplete, runDownloadsNothingWhenRunIsCancelledAfterDownloadOption; `MongoVersionsTest`: versionsHaveUrlAndChecksumForEachPlatformKey
-- **Hand test:** 1. On a Mac, select the download option: "not available", then the menu again. 2. On Ubuntu 24.04, select it and type `q` at the next question: no `<data-dir>`. 3. Select it again and confirm the summary: the progress bar, "checksum verified", the tarball under `<data-dir>/mongodb`, the SSPL notice.
-- **Size:** approximately 280 lines
-- **Depends on:** 12
-- **Status:** open
-
-## Task 14: feat(core): setup wizard runs the downloaded mongod with authentication
-- **Criteria:** SW-13 (steps 4 to 6)
-- **Function:** After the unpack, as an action of the plan after the summary, the wizard writes `mongod.conf` and starts `mongod` on `127.0.0.1` with authentication. It makes the user `opencelium` with rights on the database `opencelium` only, and it pings with that user. The generated password goes to the env file.
-- **Tests:** `MongodConfigRendererTest`: renderBindsLoopbackOnly, renderEnablesAuthorization, renderUsesDataAndLogDirectoriesUnderDataDir; `LocalMongodInstallerTest` (a fake command runner): installStartsWithoutAuthThenMakesScopedUserThenRestartsWithAuth, installPutsGeneratedPasswordIntoEnvFile
-- **Hand test:** 1. On Ubuntu 24.04, select the download option and confirm. 2. `mongod` listens on `127.0.0.1:27017` only, and `mongosh -u opencelium` logs in with the env file password. 3. The application starts on the written files.
-- **Size:** approximately 250 lines
-- **Depends on:** 13
-- **Status:** open
-
-## Task 15: feat(core): setup wizard starts MongoDB with Docker Compose
+## Task 13: feat(core): setup wizard starts MongoDB with Docker Compose
 - **Criteria:** SW-11
-- **Function:** The Docker option adds `quickstart/docker-compose.yml` and `.env` with a generated password to the plan. After the summary the plan runs `docker compose up -d` and waits for the ping. The menu now has its 4 options, and the detector hides the Docker option when Docker is absent.
-- **Tests:** `DockerComposeInstallerTest` (a fake command runner): installWritesComposeFileAndEnvFile, installRunsComposeUpThenPings; `MongoStepTest`: runOffersFourOptionsWhenNoServerAndNoMongod, runHidesDockerOptionWhenDockerIsAbsent
-- **Hand test:** 1. On a host with Docker and no local MongoDB, run the setup: the menu shows 4 options. 2. Select Docker Compose: `docker compose ps` shows the container, and the ping passes. 3. The application starts on the written files.
+- **Function:** The Docker option adds `quickstart/docker-compose.yml` and `.env` with a generated password to the plan. After the summary the plan runs `docker compose up -d` and waits for the ping. The menu now has its 3 options, and the detector hides the Docker option when Docker is absent.
+- **Tests:** `DockerComposeInstallerTest` (a fake command runner): installWritesComposeFileAndEnvFile, installRunsComposeUpThenPings; `MongoStepTest`: runOffersThreeOptionsWhenNoServer, runHidesDockerOptionWhenDockerIsAbsent
+- **Hand test:** 1. On a host with Docker and no local MongoDB, run the setup: the menu shows 3 options. 2. Select Docker Compose: `docker compose ps` shows the container, and the ping passes. 3. The application starts on the written files.
 - **Size:** approximately 150 lines
 - **Depends on:** 12
 - **Status:** open
 
-## Task 16: feat(core): setup wizard asks the master key
+## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-19, SW-20, SW-21, SW-22, SW-23
 - **Function:** The master key step runs the guard first and stops with the restore-or-reset text when a wrapped DEK exists without a key. Then it offers generate, the variable `OC_MASTER_KEY` and a key file. Generate makes the key in memory and adds the key file with owner-only permissions to the plan; after the write the step shows the backup box and asks for the confirmation. `N` prints the path again and asks again; batch mode prints the warning to standard error and continues. A bad source is explained and asked again. With the variable option the step writes nothing and prints the instruction for the service environment.
 - **Tests:** `MasterKeyStepTest`: runOffersThreeOptions, runAddsOwnerOnlyKeyFileToPlanWhenGenerateIsChosen, runAsksBackupConfirmationAfterTheWrite, runPrintsPathAgainAndAsksAgainWhenAnswerIsNo, runPrintsWarningToStandardErrorAndContinuesInBatchMode, runAsksAgainWhenVariableIsNotSet, runPrintsInstructionAndWritesNothingWhenVariableIsSet, runAsksAgainWhenFileIsMissing, runAsksAgainWhenFileIsNot32Bytes, runWritesMasterKeyFilePropertyWhenFileIsChosen; `MasterKeyGuardTest` (local MongoDB, no Spring context): runStopsWithRestoreOrResetWhenDekExistsAndNoKeyResolves, runContinuesWhenDekExistsAndKeyResolves
@@ -148,83 +130,83 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 12
 - **Status:** open
 
-## Task 17: feat(core): setup wizard makes the first admin after the start
+## Task 15: feat(core): setup wizard makes the first admin after the start
 - **Criteria:** SW-24, SW-25, SW-26, SW-32, SW-37, SW-42, SW-43, SW-46
 - **Function:** The admin step asks the username with the default `admin` and skips itself when an admin exists. After the file write, the plan writes the admin marker (the setup state `PENDING_ADMIN` with the username) into the database. After Spring starts, the completion runner finds the marker, makes the admin with the password `1234` and no must-change flag, and sets the state `REQUIRED`; a failed start keeps the marker. The wizard process prints the box with the URL, the username and the password when the port listens. A file at a target path stays as `<name>.bak`. A generated secret never reaches a logger.
 - **Tests:** `AdminStepTest`: runStoresDefaultUsernameWhenInputIsEmpty, runSkipsWhenAdminExists; `AdminLookupTest` (local MongoDB, no Spring context): existsReturnsTrueWhenAdminIsStored, existsReturnsFalseWhenNoAdminIsStored; `AdminMarkerTest` (local MongoDB, no Spring context): writeStoresStatePendingAdminWithUsername; `SetupCompletionRunnerTest` (local MongoDB): runMakesAdminFromMarkerWithFixedPasswordAndNoMustChangeFlag, runSetsStateRequiredAfterTheAdmin, runOnlySetsRequiredWhenAdminExistsAndMarkerRemains, runDoesNothingWhenNoMarkerExists, runWritesNoSecretToLoggerOutput; `FailedFirstStartTest` (full application): markerStaysWhenStartFailsAfterTheMarker; `WizardTest`: runPrintsBoxWithUrlUsernameAndPasswordWhenPortListens; `FilePlanWriterTest`: writeKeepsOldFileAsBak; `UserServiceTest`: createAdminStoresNoLockAndNoMustChangeFlagWhenPasswordIsTyped
 - **Hand test:** 1. Run the setup to the end: the box shows `http://localhost:9090/setup`, `admin` and `1234`. 2. In `mongosh`, the user document has `mustChangePassword: false` and no lock, and `setup_state` is `REQUIRED`. 3. Run `setup` again: the wizard skips the admin step, and `config/application.yml.bak` exists. 4. Search the log files for the env file password: nothing. 5. In `mongosh`, delete the user document and set the state to `PENDING_ADMIN`; start the jar: the admin exists again, and the state is `REQUIRED`.
 - **Size:** approximately 350 lines
-- **Depends on:** 16
+- **Depends on:** 14
 - **Status:** open
 
-## Task 18: feat(core): the setup state and the setup endpoints
+## Task 16: feat(core): the setup state and the setup endpoints
 - **Criteria:** SW-34, SW-35, SW-36
-- **Function:** The setup state service reads the state that task 17 writes, and `GET /setup/status` returns the mode, the state, the open steps and the bootstrap facts without credentials. `POST /setup/complete` sets `COMPLETE`. An admin without a state document is an upgrade and counts as complete; a document with `PENDING_ADMIN` never counts as an upgrade. The open steps are a fixed list in this feature.
+- **Function:** The setup state service reads the state that task 15 writes, and `GET /setup/status` returns the mode, the state, the open steps and the bootstrap facts without credentials. `POST /setup/complete` sets `COMPLETE`. An admin without a state document is an upgrade and counts as complete; a document with `PENDING_ADMIN` never counts as an upgrade. The open steps are a fixed list in this feature.
 - **Tests:** `SetupStateServiceTest` (local MongoDB): stateIsRequiredWhenWizardWroteIt, stateIsCompleteWhenAdminExistsWithoutDocument, stateIsNotAnUpgradeWhenDocumentHoldsTheMarker, completeWritesCompletionTime; `SetupControllerTest` (full application, MockMvc): statusReturnsFourItemsForAdmin, statusNeverContainsCredentialsWhenUriHasPassword, statusReturns403WhenUserIsNotAdmin, completeSetsStateToComplete
 - **Hand test:** 1. After the wizard, call `GET /setup/status` as the admin: `REQUIRED`, the open steps, the host without the password. 2. Call `POST /setup/complete`, then the status again: `COMPLETE`.
 - **Size:** approximately 250 lines
-- **Depends on:** 17
+- **Depends on:** 15
 - **Status:** open
 
-## Task 19: feat(core): block the API with 409 until the setup is complete
+## Task 17: feat(core): block the API with 409 until the setup is complete
 - **Criteria:** SW-33
 - **Function:** A filter after the authentication answers 409 `SETUP_REQUIRED` with the open steps for each route outside the allow-list when the state is `REQUIRED`. The setup, settings, authentication, own-password and health routes stay open.
 - **Tests:** `SetupRequiredFilterTest` (full application, MockMvc): blockedRouteReturns409WhenSetupIsRequired, blockedRouteReturns200AfterComplete, setupRoutesAreNotBlockedWhenSetupIsRequired, bodyListsOpenSteps
 - **Hand test:** 1. After the wizard, call `GET /setup/status`: 200; call a route outside the allow-list: 409 with `SETUP_REQUIRED`. 2. Call `POST /setup/complete`, then the same route: no 409.
 - **Size:** approximately 150 lines
-- **Depends on:** 18
+- **Depends on:** 16
 - **Status:** open
 
-## Task 20: feat(core): the service step prints the unit file, the plist or the sc commands
+## Task 18: feat(core): the service step prints the unit file, the plist or the sc commands
 - **Criteria:** SW-27, SW-29, SW-30
-- **Function:** The service step runs first, before the data directory, asks "Start OpenCelium automatically on boot?" and detects the host. With the sudo option or the show option, the data directory default becomes `/var/lib/opencelium`. On macOS and Windows it prints the launchd plist or the `sc.exe` commands. On Linux the show option prints the unit file and the commands, and the skip option prints the reminder for a start by hand. The sudo option comes with task 21.
-- **Tests:** `UnitFileRendererTest`: renderMatchesTheSystemdUnitSnapshot, renderMatchesTheLaunchdPlistSnapshot, renderMatchesTheScCommandsSnapshot, renderUsesAbsoluteJvmPathPrivateTmpAndRestartSec, renderAddsMongodWantsOnlyForLocalInstallation; `HostDetectorTest`: detectReturnsSystemdWhenRunSystemdExists, detectReturnsLaunchdOnMacOs, detectReturnsNoneOtherwise; `ServiceStepTest`: runPrintsPlistWhenHostIsMacOs, runPrintsUnitFileAndCommandsWhenShowIsChosen, runPrintsReminderWhenSkipIsChosen, runSetsDataDirDefaultToVarLibWhenSudoOrShowIsChosen; `WizardTest`: runAsksServiceQuestionBeforeDataDir
+- **Function:** The service step runs first, before the data directory, asks "Start OpenCelium automatically on boot?" and detects the host. With the sudo option or the show option, the data directory default becomes `/var/lib/opencelium`. On macOS and Windows it prints the launchd plist or the `sc.exe` commands. On Linux the show option prints the unit file and the commands, and the skip option prints the reminder for a start by hand. The sudo option comes with task 19.
+- **Tests:** `UnitFileRendererTest`: renderMatchesTheSystemdUnitSnapshot, renderMatchesTheLaunchdPlistSnapshot, renderMatchesTheScCommandsSnapshot, renderUsesAbsoluteJvmPathPrivateTmpAndRestartSec; `HostDetectorTest`: detectReturnsSystemdWhenRunSystemdExists, detectReturnsLaunchdOnMacOs, detectReturnsNoneOtherwise; `ServiceStepTest`: runPrintsPlistWhenHostIsMacOs, runPrintsUnitFileAndCommandsWhenShowIsChosen, runPrintsReminderWhenSkipIsChosen, runSetsDataDirDefaultToVarLibWhenSudoOrShowIsChosen; `WizardTest`: runAsksServiceQuestionBeforeDataDir
 - **Hand test:** 1. On a Mac, answer yes to the service question: the plist and the `launchctl` commands print, nothing is installed. 2. On Ubuntu, select "show": the unit file and the `systemctl` commands print. 3. Install the printed plist by hand: the application starts at the login. 4. On Ubuntu, answer yes and select "show": the data directory question shows `/var/lib/opencelium` as the default.
 - **Size:** approximately 340 lines
 - **Depends on:** 11
 - **Status:** open
 
-## Task 21: feat(core): the service step installs the systemd service under sudo
+## Task 19: feat(core): the service step installs the systemd service under sudo
 - **Criteria:** SW-28, SW-31
-- **Function:** On Linux with systemd the sudo option serializes the whole plan to an owner-only file in `$XDG_RUNTIME_DIR` and runs `install-service --plan <file>` under sudo, with the absolute paths of the JVM and the jar. The child runs the plan as root in the order of SW-28: the user `opencelium` and the data directory, the jar, the files with their owners, the owner of the data directory, the MongoDB installation with the `mongod` unit before `opencelium.service`, the admin marker, the unit file, `daemon-reload` and `enable --now`. The parent and the child delete the plan file in a `finally` block, and `install-service` runs the step alone. The wait for the port comes with task 22.
-- **Tests:** `SystemdHostServicesTest` (a fake command runner): installRunsCommandsInOrder, installWritesFilesWithOwnersAndPermissions, installGivesDataDirectoryToServiceUser, installMongoServiceOrdersItBeforeOpencelium, installWritesMarkerAfterMongoRuns; `SudoReexecTest`: reexecUsesAbsoluteJvmAndJarPaths, reexecSerializesPlanToOwnerOnlyFileInRuntimeDir, childAppliesPlanAndDeletesFile, parentDeletesFileWhenChildFails; `SetupLauncherTest`: decideRunsServiceStepAloneWhenInstallServiceIsGiven
+- **Function:** On Linux with systemd the sudo option serializes the whole plan to an owner-only file in `$XDG_RUNTIME_DIR` and runs `install-service --plan <file>` under sudo, with the absolute paths of the JVM and the jar. The child runs the plan as root in the order of SW-28: the user `opencelium` and the data directory, the jar, the files with their owners, the owner of the data directory, the MongoDB start with the Docker option, the admin marker, the unit file, `daemon-reload` and `enable --now`. The parent and the child delete the plan file in a `finally` block, and `install-service` runs the step alone. The wait for the port comes with task 20.
+- **Tests:** `SystemdHostServicesTest` (a fake command runner): installRunsCommandsInOrder, installWritesFilesWithOwnersAndPermissions, installGivesDataDirectoryToServiceUser, installWritesMarkerAfterMongoRuns; `SudoReexecTest`: reexecUsesAbsoluteJvmAndJarPaths, reexecSerializesPlanToOwnerOnlyFileInRuntimeDir, childAppliesPlanAndDeletesFile, parentDeletesFileWhenChildFails; `SetupLauncherTest`: decideRunsServiceStepAloneWhenInstallServiceIsGiven
 - **Hand test:** 1. On Ubuntu 24.04 with Java from a tarball, select "run sudo now": the exact command prints, then the sudo password prompt, then "files written, service started". 2. `systemctl status opencelium` is active, `/var/lib/opencelium` belongs to `opencelium`, and the application answers after a reboot. 3. `ls $XDG_RUNTIME_DIR` shows no plan file. 4. On Debian 12, run `java -jar oc-app.jar install-service`: the service step alone.
 - **Size:** approximately 380 lines
-- **Depends on:** 20, 14, 17
+- **Depends on:** 18, 13, 15
 - **Status:** open
 
-## Task 22: feat(core): the service step waits for the port and enables without a start for the variable key
+## Task 20: feat(core): the service step waits for the port and enables without a start for the variable key
 - **Criteria:** SW-32, SW-44, SW-45
 - **Function:** After `enable --now` the wizard process waits 60 seconds for the port and then prints the login box. When the port does not listen, the wizard names the timeout and `journalctl -u opencelium`, leaves the unit in place and ends with exit code 1. With the variable key option the child runs `enable` without `--now`, and the wizard prints the instruction to set `OC_MASTER_KEY`, the start command and the login box without a wait.
 - **Tests:** `ServiceStepTest` (a fake command runner, a fake port probe): installPrintsBoxWhenPortListens, installReportsAndLeavesUnitWhenPortDoesNotListen, installEnablesWithoutStartWhenKeyComesFromVariable; `SystemdHostServicesTest`: installRunsEnableWithoutNowWhenKeyComesFromVariable
-- **Hand test:** 1. On Ubuntu 24.04, run the setup with `master-key: env` and the sudo option: `systemctl is-enabled opencelium` says enabled, `is-active` says inactive, and the box prints with the start command. 2. Set `OC_MASTER_KEY` in a drop-in with `systemctl edit opencelium` and start the service: active, and `/var/lib/opencelium` has no `master.key`. 3. Stop `mongod` and run `install-service` again: after 60 seconds the timeout message with the `journalctl` command, exit code 1, and the unit still exists.
+- **Hand test:** 1. On Ubuntu 24.04, run the setup with `master-key: env` and the sudo option: `systemctl is-enabled opencelium` says enabled, `is-active` says inactive, and the box prints with the start command. 2. Set `OC_MASTER_KEY` in a drop-in with `systemctl edit opencelium` and start the service: active, and `/var/lib/opencelium` has no `master.key`. 3. Stop MongoDB and run `install-service` again: after 60 seconds the timeout message with the `journalctl` command, exit code 1, and the unit still exists.
 - **Size:** approximately 200 lines
-- **Depends on:** 21
+- **Depends on:** 19
 - **Status:** open
 
-## Task 23: feat(core): setup --print-values reproduces the last installation
+## Task 21: feat(core): setup --print-values reproduces the last installation
 - **Criteria:** SW-40
 - **Function:** `setup --print-values` reads the written yml file and env file, in `./config/` first and then in `/etc/opencelium/`, and prints the setup file that reproduces the installation. A password is printed as `generate` or as an env reference. When the user cannot read a file that exists, the message names the file and its owner.
 - **Tests:** `PrintValuesTest`: printReproducesValuesOfWrittenFiles, printReplacesPasswordWithGenerateOrEnvReference, printReadsEtcOpenceliumWhenConfigDirectoryHasNoFile, printNamesFileAndOwnerWhenFileIsNotReadable; `SetupLauncherTest`: decideReturnsPrintValuesWhenSetupPrintValuesIsGiven, decideThrowsUsageErrorWhenPrintValuesIsGivenWithoutSetup
 - **Hand test:** 1. After an interactive run, run `java -jar oc-app.jar setup --print-values > again.yml`. 2. In a fresh directory, run `setup --file again.yml --batch`: the same files, without the password in the yml file. 3. After a service installation, run it as a normal user: the message names `/etc/opencelium/application.yml` and `root`; run it with `sudo`: the setup file.
 - **Size:** approximately 150 lines
-- **Depends on:** 17
+- **Depends on:** 15
 - **Status:** open
 
-## Task 24: docs(core): the first-start guide, the sample files and the end-to-end setup test
+## Task 22: docs(core): the first-start guide, the sample files and the end-to-end setup test
 - **Criteria:** SW-38, SW-26
 - **Function:** The README section "First start", the sample `application.yml` and the quickstart `docker-compose.yml` exist. A full-application test runs a batch installation from a setup file and starts the application. It calls `GET /setup/status` and finds no secret in the log files, in the temporary directory or in a dump of the test database.
 - **Tests:** `BatchInstallationTest` (full application, local MongoDB): batchRunWritesFilesAndStartsApplication, statusAgreesWithSetupFile, logFilesTemporaryDirectoryAndDatabaseDumpHoldNoGeneratedSecret
-- **Hand test:** 1. Run the VM matrix of the plan: Ubuntu 24.04, Debian 12, Docker Compose and macOS; on Ubuntu, `journalctl -u opencelium` holds no generated secret. 2. Record the results in `docs/setup-wizard-test-matrix.md`. 3. A new user follows the README section on a fresh host and reaches `/setup`.
+- **Hand test:** 1. Run the VM matrix of the plan: Ubuntu 24.04 with Docker Compose, Debian 12 and macOS; on Ubuntu, `journalctl -u opencelium` holds no generated secret. 2. Record the results in `docs/setup-wizard-test-matrix.md`. 3. A new user follows the README section on a fresh host and reaches `/setup`.
 - **Size:** approximately 150 lines
-- **Depends on:** 23
+- **Depends on:** 21
 - **Status:** open
 
-## Task 25: docs: record the setup wizard decisions in the architecture document
+## Task 23: docs: record the setup wizard decisions in the architecture document
 - **Criteria:** none
 - **Function:** Section 7 gets 3 records from the architect agent: the first admin instead of a setup token, the env file for the database password, and the admin marker as the handover to the application. Section 6.4 gets the exception for the 2 secrets outside the database, and section 4.1 names the wizard before the start. Section 3.4 gets rows for the setup blocks, and its Users row loses the generated password and the lock. Section 6.8 gets the exception for the tests of code that runs before Spring.
 - **Tests:** none; a documentation change
 - **Hand test:** 1. Read sections 3.4, 4.1, 6.4, 6.8 and 7: the 3 records exist, and the placement table names the env file. 2. Search the architecture document for a status marker, a date or a ticket number: nothing.
 - **Size:** approximately 100 lines
-- **Depends on:** 22
+- **Depends on:** 20
 - **Status:** open
