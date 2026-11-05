@@ -1,6 +1,6 @@
 package io.opencelium.core.setup.steps;
 
-import java.util.Optional;
+import java.util.List;
 
 import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.setup.prompt.Prompter;
@@ -18,9 +18,9 @@ public interface SetupStep {
 		return true;
 	}
 
-	/** The question this step asks, for the setup file template; empty for a step that asks none. */
-	default Optional<Question> question() {
-		return Optional.empty();
+	/** The questions this step asks, in order, for the setup file template; empty for a step that asks none. */
+	default List<Question> questions() {
+		return List.of();
 	}
 
 	/**

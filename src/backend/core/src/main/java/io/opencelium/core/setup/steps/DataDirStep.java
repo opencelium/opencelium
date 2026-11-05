@@ -3,6 +3,7 @@ package io.opencelium.core.setup.steps;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -41,13 +42,17 @@ public final class DataDirStep implements SetupStep {
 	}
 
 	@Override
-	public Optional<Question> question() {
-		return Optional.of(new Question(ValueKey.DATA_DIR, "Data directory", HELP, abbreviated(defaultDir)));
+	public List<Question> questions() {
+		return List.of(question());
+	}
+
+	private Question question() {
+		return new Question(ValueKey.DATA_DIR, "Data directory", HELP, abbreviated(defaultDir));
 	}
 
 	@Override
 	public void run(SetupContext context, Prompter prompter) {
-		String value = context.values().text(question().orElseThrow(), this::check, prompter);
+		String value = context.values().text(question(), this::check, prompter);
 		context.setDataDir(absolute(expanded(value)));
 	}
 

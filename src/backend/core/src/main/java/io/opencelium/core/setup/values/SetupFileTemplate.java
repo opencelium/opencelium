@@ -24,11 +24,11 @@ public final class SetupFileTemplate {
 	public static String render(List<SetupStep> steps) {
 		var text = new StringBuilder(HEADER);
 		for (SetupStep step : steps) {
-			step.question().ifPresent(question -> {
+			for (Question question : step.questions()) {
 				text.append('\n');
 				question.help().lines().forEach(line -> text.append("# ").append(line).append('\n'));
 				text.append(SetupFile.line(question.key(), question.defaultValue()));
-			});
+			}
 		}
 		return text.toString();
 	}

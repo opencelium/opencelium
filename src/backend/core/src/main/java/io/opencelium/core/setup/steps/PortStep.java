@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.ProtocolFamily;
 import java.net.StandardProtocolFamily;
 import java.nio.channels.ServerSocketChannel;
+import java.util.List;
 import java.util.Optional;
 
 import io.opencelium.core.setup.SetupContext;
@@ -43,13 +44,17 @@ public final class PortStep implements SetupStep {
 	}
 
 	@Override
-	public Optional<Question> question() {
-		return Optional.of(new Question(ValueKey.PORT, "Web port", HELP, String.valueOf(defaultPort)));
+	public List<Question> questions() {
+		return List.of(question());
+	}
+
+	private Question question() {
+		return new Question(ValueKey.PORT, "Web port", HELP, String.valueOf(defaultPort));
 	}
 
 	@Override
 	public void run(SetupContext context, Prompter prompter) {
-		String value = context.values().text(question().orElseThrow(), PortStep::check, prompter);
+		String value = context.values().text(question(), PortStep::check, prompter);
 		context.setPort(Integer.parseInt(value));
 	}
 
