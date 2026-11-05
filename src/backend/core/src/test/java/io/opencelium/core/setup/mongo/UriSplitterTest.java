@@ -41,6 +41,13 @@ class UriSplitterTest {
 	}
 
 	@Test
+	void toStringNeverShowsThePassword() {
+		UriSplitter.SplitUri split = UriSplitter.split("mongodb://oc:s3cret@db.example/opencelium");
+
+		assertThat(split.toString()).doesNotContain("s3cret").contains("password=****");
+	}
+
+	@Test
 	void splitIgnoresAnAtSignInTheOptions() {
 		UriSplitter.SplitUri split = UriSplitter.split("mongodb://db.example/opencelium?appName=a@b");
 

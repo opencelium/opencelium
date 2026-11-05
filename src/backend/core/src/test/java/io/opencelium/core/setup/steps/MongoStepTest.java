@@ -22,6 +22,7 @@ import io.opencelium.core.setup.values.SetupValues;
 import io.opencelium.core.setup.values.ValueKey;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.testsupport.LocalMongo;
+import io.opencelium.core.testsupport.fake.FailingDnsClientProvider;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -133,6 +134,19 @@ class MongoStepTest {
 		assertThat(console.output()).containsSubsequence("  Which MongoDB does OpenCelium use?", "  What now?",
 				"  Which MongoDB does OpenCelium use?");
 		assertThat(context.mongoUri()).isEmpty();
+	}
+
+	@Test
+	void runAsksAgainWhenTheDnsLookupOfAnSrvAddressFails() {
+		console.type("", "mongodb+srv://oc:s3cret@" + FailingDnsClientProvider.FAILING_HOST + "/opencelium",
+				"mongodb://db.example/opencelium");
+
+		new MongoStep(NO_LOCAL_SERVER, ANSWERS).run(context, prompter);
+
+		assertThat(console.output()).containsSubsequence("  ! '", FailingDnsClientProvider.FAILING_HOST,
+				"  MongoDB URI     [", "  OK MongoDB answers at mongodb://db.example/opencelium")
+				.doesNotContain("s3cret");
+		assertThat(context.mongoUri()).contains("mongodb://db.example/opencelium");
 	}
 
 	@Test

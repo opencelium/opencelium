@@ -20,6 +20,8 @@ import io.opencelium.core.config.BootstrapProperties;
  */
 public record MongoConnection(ConnectionString connectionString, String databaseName, String source) {
 
+	private static final String SRV_SCHEME = "mongodb+srv://";
+
 	/** Scheme-like prefix (also {@code jdbc:} or a typo), then everything up to the last {@code @}. */
 	private static final Pattern UP_TO_LAST_AT = Pattern.compile("^(\\s*[A-Za-z][A-Za-z0-9+.-]*:/*)?.*@",
 			Pattern.DOTALL);
@@ -64,6 +66,25 @@ public record MongoConnection(ConnectionString connectionString, String database
 			shown.append('/');
 		}
 		return shown.append(options).toString();
+	}
+
+	/**
+	 * {@code uri} without secrets, as {@link #redacted()} shows it, for a URI that has no connection yet, for example
+	 * on a screen of the setup wizard. A URI that the driver cannot parse is masked up to its last {@code @}, and so
+	 * is each {@code mongodb+srv} URI: the driver reads the DNS of its host while it parses, and a screen line must not
+	 * wait for the network or fail with it.
+	 */
+	public static String redact(String uri) {
+		if (uri.strip().regionMatches(true, 0, SRV_SCHEME, 0, SRV_SCHEME.length())) {
+			return maskUnparsed(uri);
+		}
+		try {
+			return new MongoConnection(new ConnectionString(uri), StaticMongoConnectionResolver.DEFAULT_DATABASE)
+					.redacted();
+		}
+		catch (IllegalArgumentException ex) {
+			return maskUnparsed(uri);
+		}
 	}
 
 	/**

@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import io.opencelium.core.config.mongo.MongoConnection;
 import io.opencelium.core.setup.ConfigLocations;
 import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
@@ -15,10 +16,11 @@ import io.opencelium.core.setup.files.YmlRenderer;
 import io.opencelium.core.setup.prompt.Prompter;
 
 /**
- * The last screen: the answers in a box, the list of the two files that will be written, and the confirmation.
- * Yes plans application.yml and the env file, which the wizard writes after this step; no cancels the setup with
- * nothing planned. A file that exists is marked, because the write replaces it. In batch mode the
- * confirmation is not asked: the setup file is the decision.
+ * The last screen: the answers in a box, the MongoDB URI without its password, the list of the two files that will
+ * be written, and the confirmation. Yes plans application.yml and the env file with the entries that the steps
+ * added, which the wizard writes after this step; no cancels the setup with nothing planned. A file that exists is
+ * marked, because the write replaces it. In batch mode the confirmation is not asked: the setup file is the
+ * decision.
  */
 public final class SummaryStep implements SetupStep {
 
@@ -43,6 +45,7 @@ public final class SummaryStep implements SetupStep {
 		rows.put("Mode", values.deploymentMode().propertyValue());
 		rows.put("Data directory", values.dataDir().toString());
 		rows.put("Web port", String.valueOf(values.port()));
+		rows.put("MongoDB", MongoConnection.redact(values.mongoUri()));
 		prompter.print("");
 		prompter.box("Summary", rows);
 		prompter.print("");
@@ -53,7 +56,7 @@ public final class SummaryStep implements SetupStep {
 			throw new SetupCancelledException();
 		}
 		context.filePlan().add(PlannedFile.groupReadable(locations.ymlFile(), YmlRenderer.render(values)));
-		context.filePlan().add(PlannedFile.ownerOnly(locations.envFile(), EnvRenderer.render(new LinkedHashMap<>())));
+		context.filePlan().add(PlannedFile.ownerOnly(locations.envFile(), EnvRenderer.render(context.environment())));
 	}
 
 	private static String marker(Path file) {

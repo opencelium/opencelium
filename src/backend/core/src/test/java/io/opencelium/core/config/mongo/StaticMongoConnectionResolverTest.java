@@ -10,6 +10,7 @@ import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.config.BootstrapPropertyException;
 import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.config.OpenCeliumProperties;
+import io.opencelium.core.testsupport.fake.FailingDnsClientProvider;
 
 import static io.opencelium.core.config.DeploymentMode.CLOUD;
 import static io.opencelium.core.config.DeploymentMode.SELF_HOST;
@@ -182,6 +183,31 @@ class StaticMongoConnectionResolverTest {
 				.satisfies(failure -> assertThat(failure.propertyName()).isEqualTo("spring.mongodb.uri"))
 				.satisfies(failure -> assertThat(failure.action()).hasValueSatisfying(action -> assertThat(action)
 						.contains("./config/opencelium.env").contains("set -a")));
+	}
+
+	@Test
+	void placeholderInsideThePasswordNeverShowsThePassword() {
+		for (String uri : new String[] {"mongodb://oc:Ab${9xq@db.example:27017/opencelium",
+				"mongodb://oc:q7${Zk9}w2@db.example/opencelium"}) {
+			environment.setProperty(MONGODB_URI, uri);
+
+			assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(SELF_HOST))
+					.withMessageContaining("placeholder").withMessageContaining("db.example")
+					.withMessageNotContaining("9xq").withMessageNotContaining("Zk9").withMessageNotContaining("q7")
+					.withMessageNotContaining("w2")
+					.satisfies(failure -> assertThat(failure.action()).hasValueSatisfying(action -> assertThat(action)
+							.doesNotContain("9xq").doesNotContain("Zk9")));
+		}
+	}
+
+	@Test
+	void srvAddressWhoseDnsLookupFailsStopsNamingTheHostWithoutThePassword() {
+		environment.setProperty(MONGODB_URI,
+				"mongodb+srv://oc:s3cret@" + FailingDnsClientProvider.FAILING_HOST + "/opencelium");
+
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(SELF_HOST))
+				.withMessageContaining(FailingDnsClientProvider.FAILING_HOST).withMessageNotContaining("s3cret")
+				.satisfies(failure -> assertThat(failure.propertyName()).isEqualTo("spring.mongodb.uri"));
 	}
 
 	@Test

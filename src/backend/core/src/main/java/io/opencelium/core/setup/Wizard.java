@@ -1,6 +1,5 @@
 package io.opencelium.core.setup;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,6 +13,7 @@ import io.opencelium.core.setup.files.FilePlanWriter;
 import io.opencelium.core.setup.files.SetupWriteException;
 import io.opencelium.core.setup.prompt.Prompter;
 import io.opencelium.core.setup.steps.DataDirStep;
+import io.opencelium.core.setup.steps.MongoStep;
 import io.opencelium.core.setup.steps.PortStep;
 import io.opencelium.core.setup.steps.SetupStep;
 import io.opencelium.core.setup.steps.SummaryStep;
@@ -57,7 +57,7 @@ public final class Wizard {
 
 	/** The steps of a full setup, in the order the user sees them; the summary writes to {@code locations}. */
 	public static List<SetupStep> standardSteps(ConfigLocations locations) {
-		return List.of(new DataDirStep(), new PortStep(), new SummaryStep(locations));
+		return List.of(new DataDirStep(), new PortStep(), new MongoStep(), new SummaryStep(locations));
 	}
 
 	/** The version from the jar manifest; empty when the classes run unpacked, for example from the build tool. */
@@ -103,7 +103,7 @@ public final class Wizard {
 		prompter.success("Configuration written to " + plan.files().getFirst().path().getParent());
 		prompter.progress("Starting OpenCelium...");
 		prompter.print("");
-		start.accept(Collections.emptySortedMap());
+		start.accept(context.environment());
 		return OptionalInt.empty();
 	}
 
