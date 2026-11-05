@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -14,6 +15,10 @@ import org.junit.jupiter.api.io.TempDir;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.values.SetupFile;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
+import io.opencelium.core.setup.steps.DataDirStep;
+import io.opencelium.core.setup.steps.PortStep;
+import io.opencelium.core.setup.steps.SetupStep;
+import io.opencelium.core.setup.steps.SummaryStep;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -127,9 +132,15 @@ class WizardSetupFileTest {
 		return new ValueSource(SetupFile.load(file), Optional.of(file), batch);
 	}
 
+	/**
+	 * The steps of a full setup, with a MongoDB step that answers without a question: the MongoDB keys of the setup
+	 * file have their own tests, and these tests do not depend on a server on this host.
+	 */
 	private Wizard wizard(ValueSource values, Path workingDir) {
 		var locations = new ConfigLocations(workingDir, workingDir.resolve("etc/opencelium"));
-		return new Wizard(new ConsolePrompter(console), values, Wizard.standardSteps(locations), () -> started = true,
+		SetupStep mongo = (context, prompter) -> context.setMongoUri("mongodb://localhost:27017/opencelium");
+		List<SetupStep> steps = List.of(new DataDirStep(), new PortStep(), mongo, new SummaryStep(locations));
+		return new Wizard(new ConsolePrompter(console), values, steps, environment -> started = true,
 				Optional.of("1.2.3"));
 	}
 

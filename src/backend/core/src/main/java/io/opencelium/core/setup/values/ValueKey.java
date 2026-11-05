@@ -9,7 +9,11 @@ public enum ValueKey {
 
 	DATA_DIR("data-dir"),
 
-	PORT("port");
+	PORT("port"),
+
+	MONGO("mongo"),
+
+	MONGO_URI("mongo-uri");
 
 	private final String word;
 

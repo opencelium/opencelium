@@ -4,6 +4,7 @@ import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import com.mongodb.MongoCommandException;
@@ -63,6 +64,11 @@ public final class MongoStartupPing {
 		}
 		long millis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
 		log.info("MongoDB ping ok (" + millis + " ms): " + connection.redacted());
+	}
+
+	/** The cause why MongoDB cannot be used, for the setup wizard. Not implemented yet. */
+	public Optional<String> check(MongoConnection connection) {
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 
 	private static BootstrapPropertyException failure(MongoConnection connection, Failure failure, MongoException ex) {

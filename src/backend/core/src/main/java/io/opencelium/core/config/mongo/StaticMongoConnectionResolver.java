@@ -74,6 +74,11 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 		return new StaticMongoConnectionResolver(mode, fromHostProperties(mongo, addressProperties));
 	}
 
+	/** The connection of a URI, as the start reads it; for the setup wizard. Not implemented yet. */
+	public static MongoConnection parseUri(String uri) {
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+
 	private static MongoProperties bind(Binder binder) {
 		var mongo = new MongoProperties();
 		if (!binder.bind(MONGODB_URI, String.class).isBound()) {

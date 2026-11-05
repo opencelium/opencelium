@@ -7,16 +7,36 @@ import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.opencelium.core.setup.steps.DataDirStep;
+import io.opencelium.core.setup.steps.PortStep;
+import io.opencelium.core.setup.steps.SetupStep;
+import io.opencelium.core.setup.steps.SummaryStep;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoTimeoutException;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import org.bson.Document;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.LoggingSystem;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySourcesPropertyResolver;
+import org.springframework.core.env.SimpleCommandLinePropertySource;
 
 import static io.opencelium.core.setup.LaunchDecision.Kind.BOOT;
 import static io.opencelium.core.setup.LaunchDecision.Kind.HELP;
@@ -35,9 +55,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * terminal, a {@code spring.config.*} location, a bootstrap property, or a configuration file means a normal start;
  * and only when nothing at all is configured does the wizard start on its own.
  */
+@ExtendWith(OutputCaptureExtension.class)
 class SetupLauncherTest {
 
 	private static final String UNRELATED_ARGUMENT = "--logging.level.root=INFO";
+
+	private static final String DRIVER_LOGGER = "org.mongodb.driver";
 
 	@TempDir
 	Path workingDir;
@@ -53,6 +76,12 @@ class SetupLauncherTest {
 	private final StringWriter err = new StringWriter();
 
 	private final ScriptedConsoleIo console = new ScriptedConsoleIo();
+
+	private String mongoUri = "mongodb://localhost:27017/opencelium";
+
+	private final Map<String, String> mongoEnvironment = new LinkedHashMap<>();
+
+	private boolean usesTheDriver;
 
 	@Test
 	void decideReturnsWizardWhenNothingIsConfigured() {
@@ -344,6 +373,45 @@ class SetupLauncherTest {
 	}
 
 	@Test
+	void launchPassesTheEntriesOfTheEnvFileToTheStart() throws IOException {
+		mongoUri = "mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium";
+		mongoEnvironment.put("OC_MONGO_PASSWORD", "s3cret");
+		console.type("", String.valueOf(freePort()), "");
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[] {UNRELATED_ARGUMENT}, booted::set);
+
+		// This process does not have the variable; the start gets it from the wizard, a later start from the env file.
+		assertThat(exitCode).isEmpty();
+		assertThat(workingDir.resolve("config/opencelium.env")).content().contains("OC_MONGO_PASSWORD=s3cret");
+		assertThat(booted.get()).startsWith(UNRELATED_ARGUMENT);
+		assertThat(startedEnvironment(booted.get()).resolveRequiredPlaceholders(mongoUri))
+				.isEqualTo("mongodb://oc:s3cret@db.example/opencelium");
+		assertThat(console.output()).doesNotContain("s3cret");
+	}
+
+	@Test
+	void launchPrintsNoDriverLogLineWhenTheWizardUsesTheDriver(CapturedOutput output) throws IOException {
+		LoggingSystem logging = LoggingSystem.get(getClass().getClassLoader());
+		LogLevel rootLevel = logging.getLoggerConfiguration(LoggingSystem.ROOT_LOGGER_NAME).getConfiguredLevel();
+		// Before Spring starts, the driver logs at the level of the root logger.
+		logging.setLogLevel(DRIVER_LOGGER, null);
+		usesTheDriver = true;
+		console.type("", String.valueOf(freePort()), "");
+		try {
+			OptionalInt exitCode = launcher().launch(new String[0], args -> {
+			});
+
+			assertThat(exitCode).isEmpty();
+		}
+		finally {
+			logging.setLogLevel(DRIVER_LOGGER, null);
+			logging.setLogLevel(LoggingSystem.ROOT_LOGGER_NAME, rootLevel);
+		}
+		assertThat(output).doesNotContain(DRIVER_LOGGER);
+	}
+
+	@Test
 	void launchWritesNothingAndBootsNothingWhenSummaryIsDeclined() throws IOException {
 		console.type("", String.valueOf(freePort()), "n");
 		AtomicReference<String[]> booted = new AtomicReference<>();
@@ -400,10 +468,43 @@ class SetupLauncherTest {
 		return launcher().decide(args);
 	}
 
+	/**
+	 * The steps of a full setup, with a MongoDB step that answers without a question and plans the entries of the env
+	 * file that {@link #mongoEnvironment} holds: the launcher tests do not depend on a server on this host. With
+	 * {@link #usesTheDriver} the step first pings a closed port through the driver, which logs as for a real server.
+	 */
 	private SetupLauncher launcher() {
 		var locations = new ConfigLocations(workingDir, workingDir.resolve("etc/opencelium"));
-		return new SetupLauncher(() -> terminal, environment, systemProperties, locations, console,
+		SetupStep mongo = (context, prompter) -> {
+			if (usesTheDriver) {
+				pingAClosedPort();
+			}
+			context.setMongoUri(mongoUri);
+			mongoEnvironment.forEach(context::putEnvironment);
+		};
+		List<SetupStep> steps = List.of(new DataDirStep(), new PortStep(), mongo, new SummaryStep(locations));
+		return new SetupLauncher(() -> terminal, environment, systemProperties, locations, steps, console,
 				new PrintWriter(out, true), new PrintWriter(err, true));
+	}
+
+	/** A ping through the driver, as the code before Spring does it; the driver logs the client and the failure. */
+	private static void pingAClosedPort() {
+		var settings = MongoClientSettings.builder()
+				.applyConnectionString(new ConnectionString("mongodb://localhost:1/opencelium"))
+				.applyToClusterSettings(cluster -> cluster.serverSelectionTimeout(1, TimeUnit.SECONDS)).build();
+		try (MongoClient client = MongoClients.create(settings)) {
+			client.getDatabase("opencelium").runCommand(new Document("ping", 1));
+		}
+		catch (MongoTimeoutException ex) {
+			// Expected: nothing listens on port 1.
+		}
+	}
+
+	/** Resolves as the started application would from its arguments alone, without the environment of this host. */
+	private static PropertySourcesPropertyResolver startedEnvironment(String[] args) {
+		var sources = new MutablePropertySources();
+		sources.addFirst(new SimpleCommandLinePropertySource(args));
+		return new PropertySourcesPropertyResolver(sources);
 	}
 
 	private static void assertBoot(LaunchDecision decision, String reason) {

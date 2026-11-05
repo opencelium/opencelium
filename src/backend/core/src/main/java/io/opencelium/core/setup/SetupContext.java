@@ -1,9 +1,12 @@
 package io.opencelium.core.setup;
 
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.SequencedMap;
 
 import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.setup.values.ValueSource;
@@ -29,6 +32,10 @@ public final class SetupContext {
 	private Path dataDir;
 
 	private Integer port;
+
+	private String mongoUri;
+
+	private final SequencedMap<String, String> environment = new LinkedHashMap<>();
 
 	/** Every question is asked. */
 	public SetupContext() {
@@ -64,6 +71,28 @@ public final class SetupContext {
 
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	/**
+	 * The answer of the MongoDB step as application.yml will hold it: with the placeholder of a password that the env
+	 * file holds; empty before the step ran.
+	 */
+	public Optional<String> mongoUri() {
+		return Optional.ofNullable(mongoUri);
+	}
+
+	public void setMongoUri(String mongoUri) {
+		this.mongoUri = mongoUri;
+	}
+
+	/** The entries of the env file, in the order the steps added them: the secrets application.yml names. */
+	public SequencedMap<String, String> environment() {
+		return Collections.unmodifiableSequencedMap(environment);
+	}
+
+	/** Adds an entry to the env file, or replaces the value of a name that a step added before. */
+	public void putEnvironment(String name, String value) {
+		environment.put(Objects.requireNonNull(name, "name"), Objects.requireNonNull(value, "value"));
 	}
 
 	/** The files to write after the steps; empty until the summary was confirmed. */

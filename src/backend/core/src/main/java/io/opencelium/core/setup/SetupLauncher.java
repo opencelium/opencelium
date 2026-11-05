@@ -21,6 +21,7 @@ import io.opencelium.core.setup.values.SetupFile;
 import io.opencelium.core.setup.values.SetupFileTemplate;
 import io.opencelium.core.setup.prompt.ConsoleIo;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
+import io.opencelium.core.setup.steps.SetupStep;
 
 import io.opencelium.core.setup.LaunchDecision.Kind;
 
@@ -95,6 +96,8 @@ public final class SetupLauncher {
 
 	private final ConfigLocations locations;
 
+	private final List<SetupStep> steps;
+
 	private final ConsoleIo console;
 
 	private final PrintWriter out;
@@ -106,16 +109,18 @@ public final class SetupLauncher {
 	 * @param environment      the environment variables ({@code System.getenv()} in production)
 	 * @param systemProperties the JVM system properties ({@code -D...})
 	 * @param locations        where a configuration file is looked for
+	 * @param steps            the steps of the wizard, in order; the template shows their questions
 	 * @param console          what the wizard reads and writes
 	 * @param out              standard output
 	 * @param err              standard error, for usage errors
 	 */
 	public SetupLauncher(BooleanSupplier terminal, Map<String, String> environment, Properties systemProperties,
-			ConfigLocations locations, ConsoleIo console, PrintWriter out, PrintWriter err) {
+			ConfigLocations locations, List<SetupStep> steps, ConsoleIo console, PrintWriter out, PrintWriter err) {
 		this.terminal = terminal;
 		this.environment = environment;
 		this.systemProperties = systemProperties;
 		this.locations = locations;
+		this.steps = List.copyOf(steps);
 		this.console = console;
 		this.out = out;
 		this.err = err;
@@ -123,9 +128,10 @@ public final class SetupLauncher {
 
 	/** The real terminal, environment, system properties, file system and console of this process. */
 	public static SetupLauncher forThisHost() {
+		ConfigLocations locations = ConfigLocations.forThisHost();
 		return new SetupLauncher(SetupLauncher::hasInteractiveTerminal, System.getenv(), System.getProperties(),
-				ConfigLocations.forThisHost(), ConsoleIo.ofSystemConsole(), new PrintWriter(System.out, true),
-				new PrintWriter(System.err, true));
+				locations, Wizard.standardSteps(locations), ConsoleIo.ofSystemConsole(),
+				new PrintWriter(System.out, true), new PrintWriter(System.err, true));
 	}
 
 	/**
@@ -152,7 +158,7 @@ public final class SetupLauncher {
 			return OptionalInt.of(0);
 		}
 		if (decision.kind() == Kind.TEMPLATE) {
-			out.print(SetupFileTemplate.render(Wizard.standardSteps(locations)));
+			out.print(SetupFileTemplate.render(steps));
 			out.flush();
 			return OptionalInt.of(0);
 		}
@@ -229,8 +235,8 @@ public final class SetupLauncher {
 		var source = new ValueSource(values, decision.setupFile(), decision.batch());
 		String[] springArguments = decision.springArguments().toArray(String[]::new);
 		var prompter = new ConsolePrompter(console);
-		var wizard = new Wizard(prompter, source, Wizard.standardSteps(locations),
-				() -> boot.accept(springArguments), Wizard.versionFromManifest());
+		var wizard = new Wizard(prompter, source, steps, entries -> boot.accept(springArguments),
+				Wizard.versionFromManifest());
 		Thread cancelHook = new Thread(() -> {
 			if (!wizard.hasWritten()) {
 				prompter.print("");

@@ -1,9 +1,12 @@
 package io.opencelium.core.setup;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.SequencedMap;
+import java.util.function.Consumer;
 
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.FilePlan;
@@ -31,7 +34,7 @@ public final class Wizard {
 
 	private final List<SetupStep> steps;
 
-	private final Runnable start;
+	private final Consumer<SequencedMap<String, String>> start;
 
 	private final Optional<String> version;
 
@@ -39,11 +42,12 @@ public final class Wizard {
 
 	/**
 	 * @param values  where the steps get their values
-	 * @param start   starts the application once the files are written
+	 * @param start   starts the application once the files are written, with the entries of the env file: this
+	 *                process does not have them in its environment
 	 * @param version the product version for the banner; empty when unknown
 	 */
-	public Wizard(Prompter prompter, ValueSource values, List<SetupStep> steps, Runnable start,
-			Optional<String> version) {
+	public Wizard(Prompter prompter, ValueSource values, List<SetupStep> steps,
+			Consumer<SequencedMap<String, String>> start, Optional<String> version) {
 		this.prompter = Objects.requireNonNull(prompter, "prompter");
 		this.values = Objects.requireNonNull(values, "values");
 		this.steps = List.copyOf(steps);
@@ -99,7 +103,7 @@ public final class Wizard {
 		prompter.success("Configuration written to " + plan.files().getFirst().path().getParent());
 		prompter.progress("Starting OpenCelium...");
 		prompter.print("");
-		start.run();
+		start.accept(Collections.emptySortedMap());
 		return OptionalInt.empty();
 	}
 

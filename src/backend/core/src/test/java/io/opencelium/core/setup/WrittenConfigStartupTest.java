@@ -33,9 +33,9 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 /**
  * The files the wizard writes start the application. A scripted run writes them into a temporary working
  * directory; the start then reads that {@code config/} as an additional location, as Boot reads {@code ./config/}
- * next to the jar. The written mode, data directory and port bind; the mode and the data directory get no
- * {@code (default)} line, the MongoDB URI still gets its one, because the wizard does not write it. That default is
- * {@code localhost:27017}, so the class is skipped when {@code OC_TEST_MONGO_URI} points elsewhere.
+ * next to the jar. The written mode, data directory, port and MongoDB URI bind, so none of them gets a
+ * {@code (default)} line. The run takes the local server that the MongoDB step finds on {@code localhost:27017}, so
+ * the class is skipped when {@code OC_TEST_MONGO_URI} points elsewhere.
  */
 @ExtendWith({OutputCaptureExtension.class, LocalMongo.Cleanup.class})
 class WrittenConfigStartupTest {
@@ -55,7 +55,8 @@ class WrittenConfigStartupTest {
 	void applicationStartsOnTheWrittenFiles(CapturedOutput output) throws IOException {
 		Path dataDir = workingDir.resolve("data");
 		int port = freePort();
-		console.type(dataDir.toString(), String.valueOf(port), "");
+		// Enter at the MongoDB menu takes the local server, Enter at the summary confirms.
+		console.type(dataDir.toString(), String.valueOf(port), "", "");
 		var started = new AtomicReference<ConfigurableApplicationContext>();
 
 		OptionalInt exitCode = launcher().launch(new String[0], springArgs -> started.set(boot(springArgs)));
@@ -69,16 +70,16 @@ class WrittenConfigStartupTest {
 			assertThat(context.getEnvironment().getProperty("server.port", Integer.class)).isEqualTo(port);
 		}
 		assertThat(output).doesNotContain("opencelium.deployment-mode = ").doesNotContain("opencelium.data-dir = ")
-				.contains("spring.mongodb.uri = mongodb://localhost:27017/opencelium (default)")
-				.contains("MongoDB ping ok");
-		assertThat(workingDir.resolve("config/application.yml")).exists();
+				.doesNotContain("spring.mongodb.uri = ").contains("MongoDB ping ok");
+		assertThat(workingDir.resolve("config/application.yml")).content()
+				.contains("uri: mongodb://localhost:27017/opencelium");
 		assertThat(workingDir.resolve("config/opencelium.env")).exists();
 	}
 
 	private SetupLauncher launcher() {
 		var locations = new ConfigLocations(workingDir, workingDir.resolve("etc/opencelium"));
-		return new SetupLauncher(() -> true, Map.of(), new Properties(), locations, console,
-				new PrintWriter(new StringWriter(), true), new PrintWriter(new StringWriter(), true));
+		return new SetupLauncher(() -> true, Map.of(), new Properties(), locations, Wizard.standardSteps(locations),
+				console, new PrintWriter(new StringWriter(), true), new PrintWriter(new StringWriter(), true));
 	}
 
 	/** Starts as the launcher would, plus the written directory as a location and the per-class database. */

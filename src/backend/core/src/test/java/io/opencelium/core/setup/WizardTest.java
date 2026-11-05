@@ -17,6 +17,7 @@ import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.setup.prompt.Prompter;
 import io.opencelium.core.setup.steps.DataDirStep;
+import io.opencelium.core.setup.steps.MongoStep;
 import io.opencelium.core.setup.steps.PortStep;
 import io.opencelium.core.setup.steps.SetupStep;
 import io.opencelium.core.setup.steps.SummaryStep;
@@ -99,7 +100,7 @@ class WizardTest {
 
 	@Test
 	void runOmitsVersionWhenUnknown() {
-		new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, List.of(), () -> started = true,
+		new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, List.of(), environment -> started = true,
 				Optional.empty())
 				.run("requested with setup");
 
@@ -142,7 +143,7 @@ class WizardTest {
 	void runOmitsTheKeyHintFromTheBannerWhenBatch() {
 		var batch = new ValueSource(SetupValues.NONE, Optional.of(Path.of("setup-values.yml")), true);
 
-		new Wizard(new ConsolePrompter(console), batch, List.of(), () -> started = true, Optional.of("1.2.3"))
+		new Wizard(new ConsolePrompter(console), batch, List.of(), environment -> started = true, Optional.of("1.2.3"))
 				.run(REASON);
 
 		assertThat(console.output()).contains("  No configuration was found. Let's set up OpenCelium.\n")
@@ -159,15 +160,15 @@ class WizardTest {
 	}
 
 	@Test
-	void standardStepsAskTheDataDirectoryThenThePortThenShowTheSummary() {
+	void standardStepsAskTheDataDirectoryThePortAndMongoDbThenShowTheSummary() {
 		var locations = new ConfigLocations(tmp, tmp.resolve("etc/opencelium"));
 
 		assertThat(Wizard.standardSteps(locations)).hasExactlyElementsOfTypes(DataDirStep.class, PortStep.class,
-				SummaryStep.class);
+				MongoStep.class, SummaryStep.class);
 	}
 
 	private Wizard wizard(List<SetupStep> steps) {
-		return new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, steps, () -> started = true,
+		return new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, steps, environment -> started = true,
 				Optional.of("1.2.3"));
 	}
 
