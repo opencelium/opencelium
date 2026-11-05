@@ -146,6 +146,13 @@ Small PRs merge faster and revert safer. Measured in changed lines excluding tes
 | 401–700 | Split it if any natural seam exists (data layer vs. service layer, feature vs. refactor). |
 | > 700 | Needs prior agreement with the reviewer — break it up or pair on it instead. |
 
+For a task of a spec folder (`docs/specs/<feature>/tasks.md`), this table is the only size rule. It applies to a task as follows:
+
+1. The target of a task is 400 lines, measured as the table says (no tests, no generated code).
+2. A task above 400 lines is split only along a seam that `plan.md` names (for example the data layer and the service layer, or a step and its renderer). A split never produces a PR that cannot be hand-tested or that leaves a class without a caller.
+3. A task above 700 lines stays in `tasks.md` with the note "above 700 lines, the reviewer decides" and the reason; the agent does not split it on its own.
+4. A mechanical change (a rename, a move, a formatter run) is its own PR outside the task list of the feature and does not count toward the task size.
+
 To split a large change: put the shared groundwork (new types, interfaces) in a base branch off `next`, stack follow-on PRs against that base branch, and finish with one thin PR merging the base branch into `next`.
 
 ### 5.4 PR description template

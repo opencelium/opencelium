@@ -1,6 +1,6 @@
 # <Feature name>: the tasks
 
-Each task is 1 pull request with 400 lines or less, without the tests.
+Each task is 1 pull request. The size rule of a task is in CONTRIBUTING.md, section 5.3.
 The status line is the only status in this folder.
 A task that changes the behaviour of a criterion changes spec.md in the same PR.
 

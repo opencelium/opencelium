@@ -1,6 +1,6 @@
 ---
 name: tasks
-description: Cut a backend feature with an approved spec.md and plan.md into PR-sized tasks and write tasks.md. Each task is 1 pull request of 400 lines or less without the tests and gives 1 finished, hand-testable function. Use when the user asks for the tasks, the task list, the PR cut or the breakdown of a feature — or invokes /tasks.
+description: Cut a backend feature with an approved spec.md and plan.md into PR-sized tasks and write tasks.md. Each task is 1 pull request that gives 1 finished, hand-testable function; the size rule is CONTRIBUTING.md section 5.3. Use when the user asks for the tasks, the task list, the PR cut or the breakdown of a feature — or invokes /tasks.
 ---
 
 # Task list writer
@@ -30,8 +30,8 @@ that the decisions are confirmed, say so in 1 line and continue only when the us
 
 1. List the criteria of `spec.md` and the test strategy of `plan.md`.
 2. Cut the feature into tasks:
-   - 1 task is 1 PR of 400 lines or less, without the tests and the generated code. The
-     target is 200 or less (CONTRIBUTING 5.3). Estimate from similar packages in the code.
+   - 1 task is 1 PR. The size rule is CONTRIBUTING 5.3: the table and the 4 points for a
+     task under it. Estimate from similar packages in the code.
    - 1 task gives 1 finished function with a visible result that a person can hand-test: an
      endpoint answers, a screen shows a value, a log line appears, a setting takes effect, a
      command prints a result.
@@ -70,8 +70,9 @@ that the decisions are confirmed, say so in 1 line and continue only when the us
 | 1 | ... | approximately 150 | 4 | nothing |
 | Total | | approximately n | n | |
 
-A task above 400 lines is split before the output, never shown. The criteria coverage is 1
-line per criterion: `LPL-01: task 1`.
+Apply CONTRIBUTING 5.3 to each task above the target before the output: the split along a
+seam, or the note and the reason in the Size line. The criteria coverage is 1 line per
+criterion: `LPL-01: task 1`.
 
 ## Rules for the document
 
