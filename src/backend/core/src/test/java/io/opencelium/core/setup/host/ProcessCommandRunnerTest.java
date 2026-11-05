@@ -1,7 +1,10 @@
 package io.opencelium.core.setup.host;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -41,6 +44,24 @@ class ProcessCommandRunnerTest {
 		assertThat(result.exitCode()).isNotZero();
 		assertThat(result.succeeded()).isFalse();
 		assertThat(result.output()).contains("-no-such-option");
+	}
+
+	@Test
+	void runRemovesTheNamedVariablesWhenItStartsTheProgram() throws IOException {
+		Path program = Files.writeString(directory.resolve("PrintVariable.java"), """
+				class PrintVariable {
+					public static void main(String[] arguments) {
+						System.out.print(arguments[0] + "=" + System.getenv(arguments[0]));
+					}
+				}
+				""");
+		List<String> command = List.of(JAVA, program.toString(), "PATH");
+
+		Result kept = runner.run(directory, command);
+		Result removed = new ProcessCommandRunner(Set.of("PATH")).run(directory, command);
+
+		assertThat(kept.output()).contains("PATH=").doesNotContain("PATH=null");
+		assertThat(removed.output()).contains("PATH=null");
 	}
 
 	@Test

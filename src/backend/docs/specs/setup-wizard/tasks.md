@@ -119,7 +119,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. On a host with Docker and no local MongoDB, run the setup: the menu shows 3 options. 2. Select Docker Compose: `docker compose ps` shows the container, and the ping passes. 3. The application starts on the written files.
 - **Size:** approximately 150 lines
 - **Depends on:** 12
-- **Status:** in work
+- **Status:** done
 
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-19, SW-20, SW-21, SW-22, SW-23

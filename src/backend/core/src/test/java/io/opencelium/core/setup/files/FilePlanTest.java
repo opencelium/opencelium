@@ -64,6 +64,13 @@ class FilePlanTest {
 	}
 
 	@Test
+	void toStringShowsThePathAndNotTheContentWhenTheFileHoldsASecret() {
+		PlannedFile env = PlannedFile.ownerOnly(Path.of("/x/opencelium.env"), "OC_MONGO_PASSWORD=fake-s3cret\n");
+
+		assertThat(env.toString()).contains("/x/opencelium.env").contains("rw-------").doesNotContain("fake-s3cret");
+	}
+
+	@Test
 	void plannedFileCarriesThePermissionsOfItsKind() {
 		assertThat(PlannedFile.groupReadable(Path.of("/x/a"), "").permissions()).isEqualTo(PlannedFile.GROUP_READABLE);
 		assertThat(PlannedFile.ownerOnly(Path.of("/x/b"), "").permissions()).isEqualTo(PlannedFile.OWNER_ONLY);

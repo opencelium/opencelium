@@ -73,7 +73,7 @@ public final class ConfigLocations {
 
 	/** Where the Docker Compose option writes its compose file and its {@code .env}: next to {@code config/}. */
 	public Path quickstartDirectory() {
-		throw new UnsupportedOperationException();
+		return workingDir.resolve(QUICKSTART_DIRECTORY);
 	}
 
 	/** Whether {@code file} is under the system directory, which Boot does not read by itself. */

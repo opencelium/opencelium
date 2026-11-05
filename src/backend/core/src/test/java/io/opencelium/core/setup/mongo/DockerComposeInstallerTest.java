@@ -35,9 +35,13 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  */
 class DockerComposeInstallerTest {
 
-	private static final String PASSWORD = "Gen3rated-Passw0rd";
+	private static final String FAKE_PASSWORD = "Gen3rated-Passw0rd";
 
 	private static final String VOLUME_INSPECT = "docker volume inspect opencelium_mongo-data";
+
+	private static final String UP = "docker compose -p opencelium -f docker-compose.yml --env-file .env up -d";
+
+	private static final String DOWN = "docker compose -p opencelium -f docker-compose.yml --env-file .env down";
 
 	private static final Function<MongoConnection, Optional<String>> ANSWERS = connection -> Optional.empty();
 
@@ -63,8 +67,8 @@ class DockerComposeInstallerTest {
 				.contains("    name: opencelium_mongo-data\n").contains("image: mongo:8")
 				.contains("\"127.0.0.1:27017:27017\"").contains("MONGO_INITDB_ROOT_USERNAME: opencelium")
 				.contains("MONGO_INITDB_ROOT_PASSWORD: ${OC_MONGO_PASSWORD").contains("mongo-data:/data/db")
-				.doesNotContain(PASSWORD);
-		assertThat(quickstart().resolve(".env")).content().contains("\nOC_MONGO_PASSWORD=" + PASSWORD + "\n");
+				.doesNotContain(FAKE_PASSWORD);
+		assertThat(quickstart().resolve(".env")).content().contains("\nOC_MONGO_PASSWORD=" + FAKE_PASSWORD + "\n");
 		assumeTrue(FileSystems.getDefault().supportedFileAttributeViews().contains("posix"), "POSIX permissions");
 		assertThat(PosixFilePermissions.toString(Files.getPosixFilePermissions(quickstart().resolve(".env"))))
 				.isEqualTo("rw-------");
@@ -74,7 +78,7 @@ class DockerComposeInstallerTest {
 	void installRunsNothingWhenThePlanIsNotWritten() {
 		var plan = new FilePlan();
 
-		plan.add(installer(ANSWERS, Duration.ofSeconds(60)).install(PASSWORD, new ConsolePrompter(console)));
+		plan.add(installer(ANSWERS, Duration.ofSeconds(60)).install(FAKE_PASSWORD, new ConsolePrompter(console)));
 
 		assertThat(plan.actions()).singleElement().satisfies(action -> assertThat(action.description())
 				.isEqualTo("Start MongoDB with Docker Compose in " + quickstart()));
@@ -96,29 +100,29 @@ class DockerComposeInstallerTest {
 		write(installer(answersAtTheThirdPing, Duration.ofSeconds(60)));
 
 		assertThat(commandsAtEachPing).hasSize(3);
-		assertThat(commandsAtEachPing.getFirst()).endsWith("docker compose up -d");
+		assertThat(commandsAtEachPing.getFirst()).endsWith(UP);
 		assertThat(commands.directories()).containsOnly(quickstart());
 		assertThat(pinged.getFirst().redacted())
 				.isEqualTo("mongodb://opencelium:****@127.0.0.1:27017/opencelium?authSource=admin");
-		assertThat(pinged.getFirst().connectionString().getPassword()).containsExactly(PASSWORD.toCharArray());
+		assertThat(pinged.getFirst().connectionString().getPassword()).containsExactly(FAKE_PASSWORD.toCharArray());
 		assertThat(console.output()).containsSubsequence(
 				"  -> Starting MongoDB with Docker Compose in " + quickstart(),
 				"  OK MongoDB answers at mongodb://opencelium:****@127.0.0.1:27017/opencelium?authSource=admin")
-				.doesNotContain(PASSWORD);
+				.doesNotContain(FAKE_PASSWORD);
 	}
 
 	@Test
 	void installStopsTheContainerAndRemovesItsFilesWhenComposeUpFails() {
 		commands.answer(VOLUME_INSPECT, 1, "Error response from daemon: get opencelium_mongo-data: no such volume\n")
-				.answer("docker compose up -d", 1, "Pulling mongo\nError: Bind for 127.0.0.1:27017 failed: port is"
+				.answer(UP, 1, "Pulling mongo\nError: Bind for 127.0.0.1:27017 failed: port is"
 						+ " already allocated\n");
 
 		assertThatExceptionOfType(SetupWriteException.class)
 				.isThrownBy(() -> write(installer(ANSWERS, Duration.ofSeconds(60))))
-				.withMessageContaining("docker compose up -d").withMessageContaining("exit code 1")
+				.withMessageContaining(UP).withMessageContaining("exit code 1")
 				.withMessageContaining("port is already allocated")
 				.satisfies(ex -> assertThat(ex.rollbackReport()).isEqualTo("Nothing was written."));
-		assertThat(commands.commands()).endsWith("docker compose down -v");
+		assertThat(commands.commands()).endsWith(DOWN + " -v");
 		assertThat(quickstart()).doesNotExist();
 	}
 
@@ -128,9 +132,8 @@ class DockerComposeInstallerTest {
 
 		assertThatExceptionOfType(SetupWriteException.class)
 				.isThrownBy(() -> write(installer(NEVER_ANSWERS, Duration.ZERO)))
-				.withMessageContaining("connection refused").withMessageNotContaining(PASSWORD);
-		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, "docker compose up -d",
-				"docker compose down -v");
+				.withMessageContaining("connection refused").withMessageNotContaining(FAKE_PASSWORD);
+		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, UP, DOWN + " -v");
 		assertThat(quickstart()).doesNotExist();
 	}
 
@@ -143,8 +146,7 @@ class DockerComposeInstallerTest {
 				.isThrownBy(() -> write(installer(earlierPassword, Duration.ZERO)))
 				.withMessageContaining("authentication failed for user 'opencelium'")
 				.withMessageContaining("opencelium_mongo-data");
-		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, "docker compose up -d",
-				"docker compose down");
+		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, UP, DOWN);
 	}
 
 	private DockerComposeInstaller installer(Function<MongoConnection, Optional<String>> ping, Duration timeout) {
@@ -154,7 +156,7 @@ class DockerComposeInstallerTest {
 	/** The plan of a run that chose Docker Compose: the action and its files, written by the writer of the plan. */
 	private void write(DockerComposeInstaller installer) {
 		var plan = new FilePlan();
-		plan.add(installer.install(PASSWORD, new ConsolePrompter(console)));
+		plan.add(installer.install(FAKE_PASSWORD, new ConsolePrompter(console)));
 		writer.write(plan);
 	}
 

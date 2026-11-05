@@ -47,11 +47,12 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
 ### MongoDB
 
-- **SW-11** Given no server on `localhost:27017`, when the MongoDB step starts, then it must offer 3 options:
+- **SW-11** Given no server on `localhost:27017` and a host where `docker compose version` succeeds, when the MongoDB step starts, then it must offer 3 options:
   1. Start MongoDB with Docker Compose.
   2. Type the URI of a server that exists.
   3. Exit.
-- **SW-12** Given a server on `localhost:27017`, when the MongoDB step starts, then its first and default option must be that server.
+  On a host without Docker Compose, the step offers options 2 and 3 only.
+- **SW-12** Given a server on `localhost:27017`, when the MongoDB step starts, then its first and default option must be that server. The step does not offer Docker Compose, because the container needs the same port. A setup file with `mongo: docker` then stops the setup with a bad value.
 - **SW-16** Given the URI option, when the user types a URI, then the wizard must ping the server before it continues.
 - **SW-17** Given a failed ping, when the wizard reports it, then it must name the cause and offer 3 options:
   1. Type the URI again.
