@@ -13,14 +13,17 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.opencelium.core.testsupport.fake.RecordingAction;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * The write of a file plan: every file is staged next to its target, gets its permissions, and is moved into place;
- * the configuration directory is made when it is missing. A failure anywhere rolls back what this run made, so a
- * half-written configuration never remains, and the exception names the file that failed.
+ * the configuration directory is made when it is missing. Then the actions of the plan run in order. A failure
+ * anywhere rolls back what this run made, the actions that ran included, so a half-written configuration never
+ * remains, and the exception names the file or the action that failed.
  */
 class FilePlanWriterTest {
 
@@ -178,6 +181,63 @@ class FilePlanWriterTest {
 		assertThat(tmp.resolve("config/opencelium.env")).content().isEqualTo("b\n");
 		assertThat(warnings).containsExactly(
 				"This file system has no POSIX permissions; the files keep the default permissions.");
+	}
+
+	@Test
+	void writeRunsActionsInOrderAfterTheFilesWhenPlanHasActions() {
+		List<String> log = new ArrayList<>();
+		PlannedFile compose = PlannedFile.groupReadable(tmp.resolve("quickstart/docker-compose.yml"), "c\n");
+		List<Boolean> inPlaceAtRun = new ArrayList<>();
+		FilePlan plan = plan(yml("a\n"), env("b\n"));
+		plan.add(new RecordingAction("first", log, compose).onRun(() -> inPlaceAtRun.add(
+				Files.exists(tmp.resolve("config/application.yml")) && Files.exists(compose.path()))));
+		plan.add(new RecordingAction("second", log));
+
+		writer.write(plan);
+
+		assertThat(log).containsExactly("run first", "run second");
+		assertThat(inPlaceAtRun).containsExactly(true);
+		assertThat(compose.path()).content().isEqualTo("c\n");
+	}
+
+	@Test
+	void writeUndoesTheActionsAndRollsBackTheFilesWhenAnActionFails() throws IOException {
+		Files.createDirectory(tmp.resolve("config"));
+		Files.writeString(tmp.resolve("config/application.yml"), "old\n");
+		List<String> log = new ArrayList<>();
+		PlannedFile compose = PlannedFile.groupReadable(tmp.resolve("quickstart/docker-compose.yml"), "c\n");
+		List<Boolean> inPlaceAtUndo = new ArrayList<>();
+		FilePlan plan = plan(yml("new\n"), env("b\n"));
+		plan.add(new RecordingAction("first", log, compose)
+				.onUndo(() -> inPlaceAtUndo.add(Files.exists(compose.path()))));
+		plan.add(new RecordingAction("second", log).failsWith("Cannot start the second action: it failed."));
+
+		SetupWriteException ex = assertThatExceptionOfType(SetupWriteException.class)
+				.isThrownBy(() -> writer.write(plan)).actual();
+
+		assertThat(ex.getMessage()).isEqualTo("Cannot start the second action: it failed.");
+		assertThat(ex.getCause()).isInstanceOf(SetupActionException.class);
+		assertThat(ex.rollbackReport()).isEqualTo("Nothing was written.");
+		assertThat(log).containsExactly("run first", "run second", "undo second", "undo first");
+		assertThat(inPlaceAtUndo).containsExactly(true);
+		assertThat(tmp.resolve("config/application.yml")).content().isEqualTo("old\n");
+		assertThat(entries(tmp.resolve("config"))).containsExactly("application.yml");
+		assertThat(tmp.resolve("quickstart")).doesNotExist();
+	}
+
+	@Test
+	void writeNamesWhatAnUndoLeftWhenAnActionFails() {
+		List<String> log = new ArrayList<>();
+		FilePlan plan = plan(yml("a\n"), env("b\n"));
+		plan.add(new RecordingAction("first", log).leaves("Stop MongoDB by hand: docker compose down in /x."));
+		plan.add(new RecordingAction("second", log).failsWith("Cannot start the second action: it failed."));
+
+		SetupWriteException ex = assertThatExceptionOfType(SetupWriteException.class)
+				.isThrownBy(() -> writer.write(plan)).actual();
+
+		assertThat(ex.rollbackReport()).contains("Stop MongoDB by hand: docker compose down in /x.")
+				.doesNotContain("Nothing was written.");
+		assertThat(tmp.resolve("config/application.yml")).doesNotExist();
 	}
 
 	@Test

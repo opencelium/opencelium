@@ -57,7 +57,8 @@ public final class Wizard {
 
 	/** The steps of a full setup, in the order the user sees them; the summary writes to {@code locations}. */
 	public static List<SetupStep> standardSteps(ConfigLocations locations) {
-		return List.of(new DataDirStep(), new PortStep(), new MongoStep(), new SummaryStep(locations));
+		return List.of(new DataDirStep(), new PortStep(), new MongoStep(locations.quickstartDirectory()),
+				new SummaryStep(locations));
 	}
 
 	/** The version from the jar manifest; empty when the classes run unpacked, for example from the build tool. */

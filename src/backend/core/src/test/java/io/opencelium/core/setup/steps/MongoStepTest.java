@@ -10,12 +10,17 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import io.opencelium.core.config.mongo.MongoConnection;
 import io.opencelium.core.config.mongo.MongoStartupPing;
 import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.setup.SetupFailedException;
+import io.opencelium.core.setup.files.PlannedAction;
+import io.opencelium.core.setup.files.PlannedFile;
+import io.opencelium.core.setup.host.CommandRunner;
+import io.opencelium.core.setup.mongo.DockerComposeInstaller;
 import io.opencelium.core.setup.mongo.MongoDetector;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.setup.values.SetupValues;
@@ -31,8 +36,10 @@ import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.Assertions.tuple;
 
 /**
- * The MongoDB step: a server on the local port is the first option and the default; otherwise the user types the
- * URI of a server that exists. Each answer is pinged before the step continues, with the causes of the start ping,
+ * The MongoDB step: a server on the local port is the first option and the default; otherwise Docker Compose is,
+ * when the host has it, and the user can type the URI of a server that exists. Docker Compose is only planned here,
+ * with a generated password, and starts after the summary. Each typed answer is pinged before the step continues,
+ * with the causes of the start ping,
  * and a failed ping offers to type the URI again, to continue, or to go back to the menu. A password in the URI
  * goes to the env file, and application.yml gets the placeholder. The tests that ping use the local MongoDB without
  * a Spring context, because the step runs before Spring starts; the others use a server that always answers.
@@ -42,12 +49,23 @@ class MongoStepTest {
 
 	private static final Path FILE = Path.of("setup-values.yml");
 
+	private static final CommandRunner NO_DOCKER = (directory, command) -> new CommandRunner.Result(1,
+			"docker: 'compose' is not a docker command.");
+
+	private static final CommandRunner DOCKER = (directory, command) -> new CommandRunner.Result(0,
+			"Docker Compose version v2.29.1");
+
 	/** Port 1 is closed on each test host, so the menu has no local server. */
-	private static final MongoDetector NO_LOCAL_SERVER = new MongoDetector("localhost", 1);
+	private static final MongoDetector NO_LOCAL_SERVER = new MongoDetector("localhost", 1, NO_DOCKER);
+
+	private static final MongoDetector ONLY_DOCKER = new MongoDetector("localhost", 1, DOCKER);
 
 	private static final Function<MongoConnection, Optional<String>> ANSWERS = connection -> Optional.empty();
 
 	private static final Function<MongoConnection, Optional<String>> START_PING = new MongoStartupPing()::check;
+
+	@TempDir
+	Path workingDir;
 
 	private final ScriptedConsoleIo console = new ScriptedConsoleIo();
 
@@ -61,7 +79,7 @@ class MongoStepTest {
 			int port = server.getLocalPort();
 			console.type("");
 
-			new MongoStep(new MongoDetector("localhost", port), ANSWERS).run(context, prompter);
+			step(new MongoDetector("localhost", port, NO_DOCKER), ANSWERS).run(context, prompter);
 
 			assertThat(console.output()).containsSubsequence("  Which MongoDB does OpenCelium use?",
 					"1) Local server", "localhost:" + port, "2) Server URI", "3) Exit", "  Choice [1]: ");
@@ -74,7 +92,7 @@ class MongoStepTest {
 		// The last line answers the password question when OC_TEST_MONGO_URI carries a login.
 		console.type("", LocalMongo.uriFor(MongoStepTest.class), "");
 
-		new MongoStep(NO_LOCAL_SERVER, START_PING).run(context, prompter);
+		step(NO_LOCAL_SERVER, START_PING).run(context, prompter);
 
 		assertThat(console.output()).containsSubsequence("1) Server URI", "2) Exit", "  Choice [1]: ",
 				"  MongoDB URI     [", "  -> Pinging MongoDB at mongodb://", "  OK MongoDB answers at mongodb://");
@@ -89,7 +107,7 @@ class MongoStepTest {
 
 		// The input ends at the retry menu, which cancels the setup.
 		assertThatExceptionOfType(SetupCancelledException.class)
-				.isThrownBy(() -> new MongoStep(NO_LOCAL_SERVER, START_PING).run(context, prompter));
+				.isThrownBy(() -> step(NO_LOCAL_SERVER, START_PING).run(context, prompter));
 
 		assertThat(console.output()).contains("  ! Cannot use MongoDB at mongodb://oc_nobody:****@")
 				.contains(": authentication failed for user 'oc_nobody'.")
@@ -102,7 +120,7 @@ class MongoStepTest {
 	void runOffersRetryMenuWhenPortIsClosed() {
 		console.type("", "mongodb://oc:secret@localhost:1/opencelium", "2", "");
 
-		new MongoStep(NO_LOCAL_SERVER, START_PING).run(context, prompter);
+		step(NO_LOCAL_SERVER, START_PING).run(context, prompter);
 
 		assertThat(console.output())
 				.contains("  ! Cannot use MongoDB at mongodb://oc:****@localhost:1/opencelium: connection refused.")
@@ -117,7 +135,7 @@ class MongoStepTest {
 	void runAsksTheUriAgainWhenRetryIsChosen() {
 		console.type("", "mongodb://bad.example/opencelium", "1", "mongodb://db.example/opencelium");
 
-		new MongoStep(NO_LOCAL_SERVER, refusedBy("bad.example")).run(context, prompter);
+		step(NO_LOCAL_SERVER, refusedBy("bad.example")).run(context, prompter);
 
 		assertThat(console.output()).containsSubsequence("connection refused", "  What now?", "  MongoDB URI     [",
 				"  OK MongoDB answers at mongodb://db.example/opencelium");
@@ -129,7 +147,7 @@ class MongoStepTest {
 		console.type("", "mongodb://bad.example/opencelium", "3", "2");
 
 		assertThatExceptionOfType(SetupCancelledException.class)
-				.isThrownBy(() -> new MongoStep(NO_LOCAL_SERVER, refusedBy("bad.example")).run(context, prompter));
+				.isThrownBy(() -> step(NO_LOCAL_SERVER, refusedBy("bad.example")).run(context, prompter));
 
 		assertThat(console.output()).containsSubsequence("  Which MongoDB does OpenCelium use?", "  What now?",
 				"  Which MongoDB does OpenCelium use?");
@@ -141,7 +159,7 @@ class MongoStepTest {
 		console.type("", "mongodb+srv://oc:s3cret@" + FailingDnsClientProvider.FAILING_HOST + "/opencelium",
 				"mongodb://db.example/opencelium");
 
-		new MongoStep(NO_LOCAL_SERVER, ANSWERS).run(context, prompter);
+		step(NO_LOCAL_SERVER, ANSWERS).run(context, prompter);
 
 		assertThat(console.output()).containsSubsequence("  ! '", FailingDnsClientProvider.FAILING_HOST,
 				"  MongoDB URI     [", "  OK MongoDB answers at mongodb://db.example/opencelium")
@@ -153,7 +171,7 @@ class MongoStepTest {
 	void runWarnsAndAsksAgainBeforePlainTextInYml() {
 		console.type("", "mongodb://oc:s3cret@db.example/opencelium", "n", "n", "n", "y");
 
-		new MongoStep(NO_LOCAL_SERVER, ANSWERS).run(context, prompter);
+		step(NO_LOCAL_SERVER, ANSWERS).run(context, prompter);
 
 		assertThat(console.output()).containsSubsequence("  Move the password to the env file? [Y/n]: ",
 				"  ! application.yml is readable by its group", "  Write the password into application.yml? [y/N]: ",
@@ -167,7 +185,7 @@ class MongoStepTest {
 	void runPutsPasswordInEnvFileWhenTheMoveQuestionTakesItsDefault() {
 		console.type("", "mongodb://oc:s3cret@db.example/opencelium", "");
 
-		new MongoStep(NO_LOCAL_SERVER, ANSWERS).run(context, prompter);
+		step(NO_LOCAL_SERVER, ANSWERS).run(context, prompter);
 
 		assertThat(context.mongoUri()).contains("mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium");
 		assertThat(context.environment()).containsExactly(entry("OC_MONGO_PASSWORD", "s3cret"));
@@ -178,7 +196,7 @@ class MongoStepTest {
 		SetupContext batch = batch(Map.of(ValueKey.MONGO, "uri",
 				ValueKey.MONGO_URI, "mongodb://oc:s3cret@db.example/opencelium"));
 
-		new MongoStep(NO_LOCAL_SERVER, ANSWERS).run(batch, prompter);
+		step(NO_LOCAL_SERVER, ANSWERS).run(batch, prompter);
 
 		assertThat(batch.mongoUri()).contains("mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium");
 		assertThat(batch.environment()).containsExactly(entry("OC_MONGO_PASSWORD", "s3cret"));
@@ -193,7 +211,7 @@ class MongoStepTest {
 				ValueKey.MONGO_URI, "mongodb://oc:s3cret@bad.example/opencelium"));
 
 		assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> new MongoStep(NO_LOCAL_SERVER, refusedBy("bad.example")).run(batch, prompter))
+				.isThrownBy(() -> step(NO_LOCAL_SERVER, refusedBy("bad.example")).run(batch, prompter))
 				.withMessage("Bad value: mongo-uri in setup-values.yml: Cannot use MongoDB at"
 						+ " mongodb://oc:****@bad.example/opencelium: connection refused.");
 		assertThat(batch.mongoUri()).isEmpty();
@@ -204,8 +222,8 @@ class MongoStepTest {
 		SetupContext batch = batch(Map.of(ValueKey.MONGO, "postgres"));
 
 		assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> new MongoStep(NO_LOCAL_SERVER, ANSWERS).run(batch, prompter))
-				.withMessage("Bad value: mongo in setup-values.yml: 'postgres' is not one of: local, uri.");
+				.isThrownBy(() -> step(NO_LOCAL_SERVER, ANSWERS).run(batch, prompter))
+				.withMessage("Bad value: mongo in setup-values.yml: 'postgres' is not one of: local, docker, uri.");
 	}
 
 	@Test
@@ -213,13 +231,113 @@ class MongoStepTest {
 		try (ServerSocket server = new ServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
 			int port = server.getLocalPort();
 
-			assertThat(new MongoStep(new MongoDetector("localhost", port), ANSWERS).questions())
+			assertThat(step(new MongoDetector("localhost", port, NO_DOCKER), ANSWERS).questions())
 					.extracting(question -> question.key().word(), question -> question.defaultValue())
 					.containsExactly(tuple("mongo", "local"),
 							tuple("mongo-uri", "mongodb://localhost:" + port
 									+ "/opencelium"));
 		}
-		assertThat(new MongoStep(NO_LOCAL_SERVER, ANSWERS).questions().getFirst().defaultValue()).isEqualTo("uri");
+		assertThat(step(NO_LOCAL_SERVER, ANSWERS).questions().getFirst().defaultValue()).isEqualTo("uri");
+		assertThat(step(ONLY_DOCKER, ANSWERS).questions().getFirst().defaultValue()).isEqualTo("docker");
+		assertThat(step(ONLY_DOCKER, ANSWERS).questions().getFirst().help()).contains("docker");
+	}
+
+	@Test
+	void runOffersThreeOptionsWhenNoServer() {
+		console.type("3");
+
+		assertThatExceptionOfType(SetupCancelledException.class)
+				.isThrownBy(() -> step(ONLY_DOCKER, ANSWERS).run(context, prompter));
+
+		assertThat(console.output()).containsSubsequence("  Which MongoDB does OpenCelium use?",
+				"1) Docker Compose", "2) Server URI", "3) Exit", "  Choice [1]: ");
+		assertThat(context.filePlan().actions()).isEmpty();
+	}
+
+	@Test
+	void runHidesDockerOptionWhenDockerIsAbsent() {
+		console.type("2");
+
+		assertThatExceptionOfType(SetupCancelledException.class)
+				.isThrownBy(() -> step(NO_LOCAL_SERVER, ANSWERS).run(context, prompter));
+
+		assertThat(console.output()).containsSubsequence("1) Server URI", "2) Exit", "  Choice [1]: ")
+				.doesNotContain("Docker Compose");
+	}
+
+	@Test
+	void runHidesDockerOptionWhenALocalServerListens() throws IOException {
+		try (ServerSocket server = new ServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
+			console.type("");
+
+			// The compose file publishes the local port, which the server holds already.
+			step(new MongoDetector("localhost", server.getLocalPort(), DOCKER), ANSWERS).run(context, prompter);
+
+			assertThat(console.output()).containsSubsequence("1) Local server", "2) Server URI", "3) Exit")
+					.doesNotContain("Docker Compose");
+			assertThat(context.filePlan().actions()).isEmpty();
+		}
+	}
+
+	@Test
+	void runPlansDockerComposeWithAGeneratedPasswordWhenDockerIsChosen() {
+		console.type("");
+
+		step(ONLY_DOCKER, ANSWERS).run(context, prompter);
+
+		assertThat(context.mongoUri()).contains(DockerComposeInstaller.URI);
+		assertThat(context.environment()).containsOnlyKeys("OC_MONGO_PASSWORD");
+		String password = context.environment().get("OC_MONGO_PASSWORD");
+		assertThat(password).matches("[A-Za-z0-9-]{20}");
+		assertThat(context.filePlan().actions()).singleElement().extracting(PlannedAction::description)
+				.isEqualTo("Start MongoDB with Docker Compose in " + workingDir.resolve("quickstart"));
+		assertThat(context.filePlan().files()).extracting(PlannedFile::path).containsExactly(
+				workingDir.resolve("quickstart/docker-compose.yml"), workingDir.resolve("quickstart/.env"));
+		// The step only plans: the summary decides, and the plan writes and starts after it.
+		assertThat(workingDir.resolve("quickstart")).doesNotExist();
+		assertThat(console.output()).doesNotContain(password).doesNotContain("Move the password");
+	}
+
+	@Test
+	void runPlansDockerComposeWithoutAQuestionWhenTheFileSaysDocker() {
+		SetupContext batch = batch(Map.of(ValueKey.MONGO, "docker"));
+
+		step(ONLY_DOCKER, ANSWERS).run(batch, prompter);
+
+		assertThat(batch.mongoUri()).contains(DockerComposeInstaller.URI);
+		assertThat(batch.environment()).containsOnlyKeys("OC_MONGO_PASSWORD");
+		assertThat(batch.filePlan().actions()).hasSize(1);
+		assertThat(console.output()).contains("  MongoDB         docker   (from setup-values.yml)")
+				.doesNotContain("Choice [");
+	}
+
+	@Test
+	void runStopsNamingTheKeyWhenTheFileSaysDockerAndDockerIsAbsent() {
+		SetupContext batch = batch(Map.of(ValueKey.MONGO, "docker"));
+
+		assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> step(NO_LOCAL_SERVER, ANSWERS).run(batch, prompter))
+				.withMessageStartingWith("Bad value: mongo in setup-values.yml: ")
+				.withMessageContaining("docker compose version");
+		assertThat(batch.filePlan().actions()).isEmpty();
+	}
+
+	@Test
+	void runStopsNamingTheKeyWhenTheFileSaysDockerAndALocalServerListens() throws IOException {
+		try (ServerSocket server = new ServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
+			SetupContext batch = batch(Map.of(ValueKey.MONGO, "docker"));
+			var detector = new MongoDetector("localhost", server.getLocalPort(), DOCKER);
+
+			assertThatExceptionOfType(SetupFailedException.class)
+					.isThrownBy(() -> step(detector, ANSWERS).run(batch, prompter))
+					.withMessageStartingWith("Bad value: mongo in setup-values.yml: ")
+					.withMessageContaining("localhost:" + server.getLocalPort());
+			assertThat(batch.filePlan().actions()).isEmpty();
+		}
+	}
+
+	private MongoStep step(MongoDetector detector, Function<MongoConnection, Optional<String>> ping) {
+		return new MongoStep(detector, ping, new DockerComposeInstaller(workingDir.resolve("quickstart")));
 	}
 
 	private static SetupContext batch(Map<ValueKey, String> values) {

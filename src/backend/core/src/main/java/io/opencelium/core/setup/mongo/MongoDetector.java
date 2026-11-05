@@ -7,6 +7,8 @@ import java.time.Duration;
 import java.util.Objects;
 
 import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
+import io.opencelium.core.setup.host.CommandRunner;
+import io.opencelium.core.setup.host.ProcessCommandRunner;
 
 /**
  * Looks for a MongoDB server on this host before the MongoDB step shows its menu: a port that accepts a TCP
@@ -26,24 +28,23 @@ public final class MongoDetector {
 
 	private final int port;
 
+	private final CommandRunner commands;
+
 	public MongoDetector() {
-		this(DEFAULT_HOST, DEFAULT_PORT);
+		this(DEFAULT_HOST, DEFAULT_PORT, new ProcessCommandRunner());
 	}
 
-	public MongoDetector(String host, int port) {
+	/**
+	 * @param commands runs {@code docker compose version}
+	 */
+	public MongoDetector(String host, int port, CommandRunner commands) {
 		this.host = Objects.requireNonNull(host, "host");
 		this.port = port;
+		this.commands = Objects.requireNonNull(commands, "commands");
 	}
 
 	public MongoDetection detect() {
-		try (var socket = new Socket()) {
-			socket.connect(new InetSocketAddress(host, port), (int) TIMEOUT.toMillis());
-			return new MongoDetection(true);
-		}
-		catch (IOException ex) {
-			// Refused, unreachable or too slow: no server to offer.
-			return new MongoDetection(false);
-		}
+		throw new UnsupportedOperationException();
 	}
 
 	/** The URI of a server on the probed address, without a login, with the default database. */

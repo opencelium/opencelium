@@ -1,5 +1,6 @@
 package io.opencelium.core.setup.steps;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import io.opencelium.core.config.mongo.MongoStartupPing;
 import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
 import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
+import io.opencelium.core.setup.mongo.DockerComposeInstaller;
 import io.opencelium.core.setup.mongo.MongoDetection;
 import io.opencelium.core.setup.mongo.MongoDetector;
 import io.opencelium.core.setup.mongo.UriSplitter;
@@ -82,16 +84,25 @@ public final class MongoStep implements SetupStep {
 
 	private final Function<MongoConnection, Optional<String>> ping;
 
-	public MongoStep() {
-		this(new MongoDetector(), new MongoStartupPing()::check);
+	private final DockerComposeInstaller dockerCompose;
+
+	/**
+	 * @param quickstartDirectory where the Docker Compose option writes its files
+	 */
+	public MongoStep(Path quickstartDirectory) {
+		this(new MongoDetector(), new MongoStartupPing()::check, new DockerComposeInstaller(quickstartDirectory));
 	}
 
 	/**
-	 * @param ping the cause why MongoDB at a connection cannot be used; empty when it answers and accepts the login
+	 * @param ping          the cause why MongoDB at a connection cannot be used; empty when it answers and accepts the
+	 *                      login
+	 * @param dockerCompose plans the start of MongoDB with Docker Compose
 	 */
-	MongoStep(MongoDetector detector, Function<MongoConnection, Optional<String>> ping) {
+	MongoStep(MongoDetector detector, Function<MongoConnection, Optional<String>> ping,
+			DockerComposeInstaller dockerCompose) {
 		this.detector = Objects.requireNonNull(detector, "detector");
 		this.ping = Objects.requireNonNull(ping, "ping");
+		this.dockerCompose = Objects.requireNonNull(dockerCompose, "dockerCompose");
 	}
 
 	@Override

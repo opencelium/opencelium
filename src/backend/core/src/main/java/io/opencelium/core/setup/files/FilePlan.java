@@ -21,8 +21,20 @@ public final class FilePlan {
 		files.add(file);
 	}
 
+	/**
+	 * @throws IllegalArgumentException when a file of the action has a path that is already planned
+	 */
+	public void add(PlannedAction action) {
+		throw new UnsupportedOperationException();
+	}
+
 	public List<PlannedFile> files() {
 		return List.copyOf(files);
+	}
+
+	/** The actions to run after the files are written, in the order of the adds. */
+	public List<PlannedAction> actions() {
+		throw new UnsupportedOperationException();
 	}
 
 	public boolean isEmpty() {
