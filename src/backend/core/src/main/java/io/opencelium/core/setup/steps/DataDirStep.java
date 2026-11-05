@@ -22,7 +22,7 @@ import io.opencelium.core.setup.prompt.Prompter;
 public final class DataDirStep implements SetupStep {
 
 	private static final String HELP = """
-			Where OpenCelium keeps its local state: the master key, downloads, and a MongoDB that the setup installs.
+			Where OpenCelium keeps its local state, for example the master key.
 			On Linux the usual place is /var/lib/opencelium. The directory must be writable by the user that runs
 			OpenCelium; it is made at the first start.""";
 
