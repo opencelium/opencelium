@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -69,8 +68,8 @@ class SetupFileTemplateTest {
 	private static SetupStep asking(Question question) {
 		return new SetupStep() {
 			@Override
-			public Optional<Question> question() {
-				return Optional.of(question);
+			public List<Question> questions() {
+				return List.of(question);
 			}
 
 			@Override
