@@ -48,12 +48,12 @@ STE permits technical names and technical verbs that are standard in the industr
 - Agents: LLM (large language model), agent, subagent, prompt, system prompt, context, skill, hook, slash command, model, tool, frontmatter, finding.
 - Build: CI (continuous integration), linter, formatter, Spotless, commitlint, OpenAPI, contract, diff, pull request, PR (pull request), commit, branch.
 - Technical verbs (3): review, approve, merge, squash, lint, anchor, draft, commit, push, resolve.
-- Setup: wizard, step, screen, prompt, question, answer, setup file, value, menu, option, box, summary, subcommand, flag, placeholder, help text, setup state, launcher, phase, handover, file plan, renderer, batch mode, exit code, allow-list, filter, retry, progress bar, timestamp, fail-fast.
+- Setup: wizard, step, screen, prompt, question, answer, setup file, value, menu, option, box, summary, subcommand, flag, placeholder, help text, setup state, launcher, phase, handover, file plan, renderer, batch mode, exit code, allow-list, filter, retry, timestamp, fail-fast.
 - Terminal: terminal, console, stdin, standard output, standard error, piped input, SSH, Enter, Ctrl+C, terminal library, scripted console, argument (command line).
-- Host: host, platform, CPU, Linux, macOS, Windows, Ubuntu, Debian, x86_64, arm64, systemd, unit file, launchd, plist, `sc.exe`, sudo, root, system user, service, PATH, permissions, owner, data directory, env file, tarball, checksum, SHA-256, SSPL license, license, Docker, Docker Compose, VM (virtual machine), distribution, working directory, `mongod`, `mongosh`, browser, backup, upgrade, migration.
+- Host: host, platform, CPU, Linux, macOS, Windows, Ubuntu, Debian, x86_64, arm64, systemd, unit file, launchd, plist, `sc.exe`, sudo, root, system user, service, PATH, permissions, owner, data directory, env file, tarball, license, Docker, Docker Compose, VM (virtual machine), distribution, working directory, `mongod`, `mongosh`, browser, backup, upgrade, migration.
 - Data (2): URI, URL, byte, driver, repository, database dump, port (network), route, header (HTTP), issuer.
 - Access control (2): admin (administrator), username, password, login (noun).
 - Software structure (2): seam, runner (application runner, command runner), singleton, Spring context, logger, log level.
 - Test: unit test, slice test, integration test, full-application test, end-to-end test, hand test, fake, fixture, test matrix, mock.
-- Products and tools (2): SnakeYAML, Logback, MongoDB Community, YAML, Jackson, JDK, JVM, MockMvc.
-- Technical verbs (4): type (on the keyboard), download, unpack, install, probe, hash, mask, prompt, skip, run (a command or a service), print, generate, roll back, stage, render, bind, cancel, confirm, serialize, detect, decode, pin (a version or a checksum), listen (a port), back up.
+- Products and tools (2): SnakeYAML, Logback, YAML, Jackson, JDK, JVM, MockMvc.
+- Technical verbs (4): type (on the keyboard), download, install, probe, hash, mask, prompt, skip, run (a command or a service), print, generate, roll back, stage, render, bind, cancel, confirm, serialize, detect, decode, pin (a version), listen (a port), back up.
