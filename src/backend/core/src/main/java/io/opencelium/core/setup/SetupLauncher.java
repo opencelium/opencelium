@@ -10,10 +10,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Properties;
+import java.util.SequencedMap;
 import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.LoggingSystem;
 
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.values.SetupValues;
@@ -70,6 +74,8 @@ public final class SetupLauncher {
 	private static final List<String> BOOTSTRAP_VARIABLE_PREFIXES = List.of("OPENCELIUM_", "SPRING_MONGODB_");
 
 	private static final String SERVER_PORT_VARIABLE = "SERVER_PORT";
+
+	private static final String DRIVER_LOGGER = "org.mongodb.driver";
 
 	private static final String USAGE = """
 			Usage: java -jar oc-app.jar [setup] [--file <path>] [--template] [--batch] [--<property>=<value>...]
@@ -233,10 +239,10 @@ public final class SetupLauncher {
 			return OptionalInt.of(ex.exitCode());
 		}
 		var source = new ValueSource(values, decision.setupFile(), decision.batch());
-		String[] springArguments = decision.springArguments().toArray(String[]::new);
 		var prompter = new ConsolePrompter(console);
-		var wizard = new Wizard(prompter, source, steps, entries -> boot.accept(springArguments),
-				Wizard.versionFromManifest());
+		var wizard = new Wizard(prompter, source, steps,
+				entries -> boot.accept(withEntries(decision.springArguments(), entries)), Wizard.versionFromManifest());
+		quietDriverLogs();
 		Thread cancelHook = new Thread(() -> {
 			if (!wizard.hasWritten()) {
 				prompter.print("");
@@ -259,6 +265,25 @@ public final class SetupLauncher {
 				// The shutdown has begun (Ctrl+C): the hook runs and prints the message.
 			}
 		}
+	}
+
+	/**
+	 * The arguments of the start after the wizard: the entries of the env file follow the arguments of the user, in
+	 * order. A later start gets them from the env file (systemd, or the shell with {@code set -a}); this process does
+	 * not have them in its environment, and application.yml refers to them by name.
+	 */
+	private static String[] withEntries(List<String> springArguments, SequencedMap<String, String> entries) {
+		List<String> arguments = new ArrayList<>(springArguments);
+		entries.forEach((name, value) -> arguments.add("--" + name + "=" + value));
+		return arguments.toArray(String[]::new);
+	}
+
+	/**
+	 * Before Spring configures the logs, the MongoDB driver logs each connection on the console, over the dialogue.
+	 * Only the driver is quieted: the other loggers keep their level. Spring sets the levels again when it starts.
+	 */
+	private static void quietDriverLogs() {
+		LoggingSystem.get(SetupLauncher.class.getClassLoader()).setLogLevel(DRIVER_LOGGER, LogLevel.WARN);
 	}
 
 	private static LaunchDecision boot(String reason, List<String> springArguments) {

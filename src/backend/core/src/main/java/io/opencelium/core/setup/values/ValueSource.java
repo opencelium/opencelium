@@ -49,6 +49,21 @@ public final class ValueSource {
 	 *                              in batch mode
 	 */
 	public String text(Question question, Function<String, Optional<String>> validator, Prompter prompter) {
+		return given(question, validator, UnaryOperator.identity(), prompter)
+				.orElseGet(() -> prompter.text(question.label(), question.help(), question.defaultValue(), validator));
+	}
+
+	/**
+	 * The setup file's value of a question that the step asks itself, for example as a menu: checked with the
+	 * step's own rules, printed with the file it came from, and taken without a question.
+	 *
+	 * @param shown how the value is printed, for example without the password that it holds
+	 * @return empty when the file does not have the value and a terminal can ask it
+	 * @throws SetupFailedException when the file's value is rejected by the validator, or when the value is absent
+	 *                              in batch mode
+	 */
+	public Optional<String> given(Question question, Function<String, Optional<String>> validator,
+			UnaryOperator<String> shown, Prompter prompter) {
 		String key = question.key().word();
 		Optional<String> given = values.get(question.key());
 		if (given.isPresent()) {
@@ -57,21 +72,14 @@ public final class ValueSource {
 			if (problem.isPresent()) {
 				throw SetupFailedException.failure("Bad value: " + key + inFile() + ": " + problem.get());
 			}
-			prompter.answered(question.label(), value, "from " + file.map(Path::toString).orElse("the setup file"));
-			return value;
+			prompter.answered(question.label(), shown.apply(value), "from " + file.map(Path::toString)
+					.orElse("the setup file"));
+			return given;
 		}
 		if (batch) {
 			throw SetupFailedException.failure("Missing value: " + key + inFile() + "\n" + SetupFile.TEMPLATE_HINT);
 		}
-		return prompter.text(question.label(), question.help(), question.defaultValue(), validator);
-	}
-
-	/**
-	 * The setup file's value of a question that the step asks itself, for example as a menu. Not implemented yet.
-	 */
-	public Optional<String> given(Question question, Function<String, Optional<String>> validator,
-			UnaryOperator<String> shown, Prompter prompter) {
-		throw new UnsupportedOperationException("not implemented yet");
+		return Optional.empty();
 	}
 
 	/** The confirmation: asked on a terminal; in batch mode the default, printed as such. */

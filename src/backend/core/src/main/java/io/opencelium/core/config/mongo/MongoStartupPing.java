@@ -27,7 +27,7 @@ import io.opencelium.core.config.BootstrapPropertyException;
  * Checks MongoDB once at startup and stops the application when it cannot be used: the server must answer, and the
  * configured login (or its absence) must be allowed to list the collections of the database. Uses its own
  * short-lived client with a 5 second timeout, so a wrong URI fails in seconds while the application's client keeps
- * the driver's defaults.
+ * the driver's defaults. The setup wizard runs the same ping before Spring starts and gets the same causes.
  */
 public final class MongoStartupPing {
 
@@ -44,11 +44,31 @@ public final class MongoStartupPing {
 	}
 
 	public void verify(MongoConnection connection) {
+		long start = System.nanoTime();
+		Optional<Failed> failed = attempt(connection);
+		if (failed.isPresent()) {
+			throw failure(connection, failed.get().failure(), failed.get().exception());
+		}
+		long millis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+		log.info("MongoDB ping ok (" + millis + " ms): " + connection.redacted());
+	}
+
+	/**
+	 * The same ping without the stop and without a log line, for the setup wizard, which asks again instead of
+	 * stopping.
+	 *
+	 * @return the plain cause, for example "connection refused" or "authentication failed for user 'oc'", without
+	 *         the connection string and without the help text of the start; empty when MongoDB can be used
+	 */
+	public Optional<String> check(MongoConnection connection) {
+		return attempt(connection).map(failed -> failed.failure().reason());
+	}
+
+	private static Optional<Failed> attempt(MongoConnection connection) {
 		var settings = MongoClientFactory.settingsBuilder(connection)
 				.applyToClusterSettings(cluster -> cluster.serverSelectionTimeout(TIMEOUT.toMillis(), TimeUnit.MILLISECONDS))
 				.applyToSocketSettings(socket -> socket.connectTimeout(TIMEOUT.toMillis(), TimeUnit.MILLISECONDS))
 				.build();
-		long start = System.nanoTime();
 		try (var client = MongoClients.create(settings)) {
 			try {
 				MongoDatabase database = client.getDatabase(connection.databaseName());
@@ -56,19 +76,17 @@ public final class MongoStartupPing {
 				// ping works without a login; this does not, so missing credentials fail now, not at the first query.
 				database.runCommand(new Document("listCollections", 1).append("nameOnly", true)
 						.append("authorizedCollections", true));
+				return Optional.empty();
 			}
 			catch (MongoException ex) {
 				// Read the cluster state before the client closes: it holds each server's own connection error.
-				throw failure(connection, classify(ex, connection, client.getClusterDescription()), ex);
+				return Optional.of(new Failed(classify(ex, connection, client.getClusterDescription()), ex));
 			}
 		}
-		long millis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-		log.info("MongoDB ping ok (" + millis + " ms): " + connection.redacted());
 	}
 
-	/** The cause why MongoDB cannot be used, for the setup wizard. Not implemented yet. */
-	public Optional<String> check(MongoConnection connection) {
-		throw new UnsupportedOperationException("not implemented yet");
+	/** A failure and the driver's exception, which the start keeps as the cause of its error. */
+	private record Failed(Failure failure, MongoException exception) {
 	}
 
 	private static BootstrapPropertyException failure(MongoConnection connection, Failure failure, MongoException ex) {

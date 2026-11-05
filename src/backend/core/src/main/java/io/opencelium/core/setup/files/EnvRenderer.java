@@ -3,15 +3,22 @@ package io.opencelium.core.setup.files;
 import java.util.SequencedMap;
 
 /**
- * The text of the env file: a fixed header line, then one {@code KEY=value} line for each entry, in order, the
- * format of systemd's {@code EnvironmentFile}. A value with whitespace, a quote, a backslash, a hash or a dollar is
- * double-quoted with backslash escapes, as systemd reads it. No value is written yet: the file exists so that a
- * service unit can always name it, and so that its owner-only permissions are in place from the first setup.
+ * The text of the env file: a fixed header line, then one {@code KEY=value} line for each entry, in order. A value
+ * with whitespace or a character that the shell reads as syntax ({@code " ' \ # $ ` ; & | < > ( ) * ? [ ] { } ~ !})
+ * is double-quoted, and inside the quotes {@code \ " $} and the backtick are escaped. POSIX sh and systemd's
+ * {@code EnvironmentFile} read this form the same way, so the unit file and a start by hand with
+ * {@code set -a; . ./config/opencelium.env; set +a} give the application the value that was written.
  */
 public final class EnvRenderer {
 
 	static final String HEADER = "# Written by OpenCelium setup. One KEY=value for each line; application.yml refers"
 			+ " to these names.";
+
+	/** The characters, besides whitespace, that the shell would read as syntax in a value without quotes. */
+	private static final String NEEDS_QUOTES = "\"'\\#$`;&|<>()*?[]{}~!";
+
+	/** The characters that keep a meaning inside double quotes, for the shell and for systemd alike. */
+	private static final String ESCAPED = "\\\"$`";
 
 	private EnvRenderer() {
 	}
@@ -23,11 +30,18 @@ public final class EnvRenderer {
 	}
 
 	private static String quoted(String value) {
-		boolean plain = value.chars().noneMatch(c -> Character.isWhitespace(c) || "\"'\\#$".indexOf(c) >= 0);
+		boolean plain = value.chars().noneMatch(c -> Character.isWhitespace(c) || NEEDS_QUOTES.indexOf(c) >= 0);
 		if (plain) {
 			return value;
 		}
-		return '"' + value.replace("\\", "\\\\").replace("\"", "\\\"") + '"';
+		var text = new StringBuilder().append('"');
+		value.chars().forEach(c -> {
+			if (ESCAPED.indexOf(c) >= 0) {
+				text.append('\\');
+			}
+			text.append((char) c);
+		});
+		return text.append('"').toString();
 	}
 
 }

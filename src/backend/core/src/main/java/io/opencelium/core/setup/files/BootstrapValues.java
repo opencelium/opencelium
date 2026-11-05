@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import io.opencelium.core.config.DeploymentMode;
+import io.opencelium.core.config.mongo.MongoConnection;
 
 /**
  * The values the application needs before it can reach its database, as the wizard collected them: what
@@ -21,6 +22,13 @@ public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int p
 		if (port < 1 || port > 65535) {
 			throw new IllegalArgumentException("Port " + port + " is not between 1 and 65535.");
 		}
+	}
+
+	/** Without the password: when the user keeps it in plain text, the URI holds it. */
+	@Override
+	public String toString() {
+		return "BootstrapValues[deploymentMode=" + deploymentMode + ", dataDir=" + dataDir + ", port=" + port
+				+ ", mongoUri=" + MongoConnection.redact(mongoUri) + "]";
 	}
 
 }

@@ -1,8 +1,11 @@
 package io.opencelium.core.config.mongo;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.mongodb.ConnectionString;
+import com.mongodb.MongoConfigurationException;
 import com.mongodb.MongoNamespace;
 import org.bson.UuidRepresentation;
 import org.springframework.boot.context.properties.bind.Bindable;
@@ -32,7 +35,18 @@ import static io.opencelium.core.config.BootstrapProperties.mongoAddressProperti
  */
 public final class StaticMongoConnectionResolver implements MongoConnectionResolver {
 
-	static final String DEFAULT_DATABASE = "opencelium";
+	/** The database when the URI has no path and {@code spring.mongodb.database} is not set. */
+	public static final String DEFAULT_DATABASE = "opencelium";
+
+	/** Spring resolves each placeholder that it can, so a {@code ${} that is left has no value. */
+	private static final String PLACEHOLDER_START = "${";
+
+	/**
+	 * The placeholder that the setup wizard writes: the whole password of the user information is {@code ${NAME}}.
+	 * Only then is the name safe to show; any other {@code ${} can be a part of a password.
+	 */
+	private static final Pattern PASSWORD_PLACEHOLDER = Pattern.compile(
+			"^mongodb(?:\\+srv)?://[^:/?@]+:\\$\\{([A-Za-z_][A-Za-z0-9_]*)}@[^/?@]*(?:[/?].*)?$", Pattern.DOTALL);
 
 	private static final String ENCODING_HINT = "check the format mongodb://user:password@host:port/database?options"
 			+ " and URL-encode special characters (@ : / ? # [ ] % space) in the user name and password";
@@ -74,9 +88,15 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 		return new StaticMongoConnectionResolver(mode, fromHostProperties(mongo, addressProperties));
 	}
 
-	/** The connection of a URI, as the start reads it; for the setup wizard. Not implemented yet. */
+	/**
+	 * The connection of a URI with the rules that the start applies to {@code spring.mongodb.uri}, without an
+	 * environment: the database is the path of the URI, else {@code opencelium}. The setup wizard checks a typed URI
+	 * with it, so a URI that the wizard accepts is one that the start accepts.
+	 *
+	 * @throws BootstrapPropertyException when the URI is not valid; the message never shows a password
+	 */
 	public static MongoConnection parseUri(String uri) {
-		throw new UnsupportedOperationException("not implemented yet");
+		return fromUri(uri, null);
 	}
 
 	private static MongoProperties bind(Binder binder) {
@@ -112,7 +132,17 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 	}
 
 	private static MongoConnection fromUri(MongoProperties mongo) {
-		String uri = mongo.getUri();
+		return fromUri(mongo.getUri(), mongo.getDatabase());
+	}
+
+	/**
+	 * @param databaseProperty the value of {@code spring.mongodb.database}, which wins over the path; {@code null}
+	 *                         when it is not set
+	 */
+	private static MongoConnection fromUri(String uri, String databaseProperty) {
+		if (uri.contains(PLACEHOLDER_START)) {
+			throw unresolvedPlaceholder(uri);
+		}
 		ConnectionString connectionString;
 		try {
 			connectionString = new ConnectionString(uri);
@@ -124,6 +154,11 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 					+ "' is not a valid MongoDB connection string: " + (secret ? ENCODING_HINT : ex.getMessage()) + ".",
 					null, secret ? null : ex);
 		}
+		catch (MongoConfigurationException ex) {
+			// For mongodb+srv the driver reads the TXT record of the host while it parses; its message names the host.
+			throw new BootstrapPropertyException(MONGODB_URI, "'" + MongoConnection.maskUnparsed(uri)
+					+ "' cannot be used: " + ex.getMessage() + ".", ex);
+		}
 		if (connectionString.getUsername() == null && uri.split("\\?", 2)[0].contains("@")) {
 			// For example "oc:1234/abc@db": the driver reads host oc, port 1234 and no credentials.
 			throw new BootstrapPropertyException(MONGODB_URI, "'" + MongoConnection.maskUnparsed(uri)
@@ -133,11 +168,27 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 			throw new BootstrapPropertyException(MONGODB_URI, "proxyPassword in " + MONGODB_URI + " is not supported:"
 					+ " the MongoDB Java driver 5.8 logs the proxy password in plain text.");
 		}
-		boolean fromProperty = mongo.getDatabase() != null;
-		String database = fromProperty ? mongo.getDatabase()
+		boolean fromProperty = databaseProperty != null;
+		String database = fromProperty ? databaseProperty
 				: connectionString.getDatabase() != null ? connectionString.getDatabase() : DEFAULT_DATABASE;
 		validateDatabaseName(database, fromProperty ? MONGODB_DATABASE : MONGODB_URI);
 		return new MongoConnection(connectionString, database, MONGODB_URI);
+	}
+
+	private static BootstrapPropertyException unresolvedPlaceholder(String uri) {
+		Matcher password = PASSWORD_PLACEHOLDER.matcher(uri);
+		if (password.matches()) {
+			String variable = password.group(1);
+			return new BootstrapPropertyException(MONGODB_URI, MONGODB_URI + " refers to " + variable
+					+ ", which is not set in the environment of this process.",
+					"Set " + variable + ". The setup wizard writes it into opencelium.env next to application.yml;"
+							+ " load that file before the start, for example: set -a; . ./config/opencelium.env;"
+							+ " set +a",
+					null);
+		}
+		return new BootstrapPropertyException(MONGODB_URI, "'" + MongoConnection.maskUnparsed(uri)
+				+ "' holds a ${...} placeholder that has no value in the environment of this process.",
+				"Set the variable that the placeholder names. In a password, URL-encode $ as %24 and { as %7B.", null);
 	}
 
 	private static MongoConnection fromHostProperties(MongoProperties mongo, List<String> addressProperties) {

@@ -3,6 +3,8 @@ package io.opencelium.core.config.mongo;
 import com.mongodb.ConnectionString;
 import org.junit.jupiter.api.Test;
 
+import io.opencelium.core.testsupport.fake.FailingDnsClientProvider;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MongoConnectionTest {
@@ -29,6 +31,21 @@ class MongoConnectionTest {
 		var misread = new MongoConnection(new ConnectionString("mongodb://oc:1234/abc@db.example/x"), "x");
 
 		assertThat(misread.redacted()).doesNotContain("1234").doesNotContain("abc");
+	}
+
+	@Test
+	void redactMasksAnSrvUriWithoutADnsLookup() {
+		// The DNS of this host fails; a parse of the URI would throw.
+		String uri = "mongodb+srv://oc:s3cret@" + FailingDnsClientProvider.FAILING_HOST + "/opencelium";
+
+		assertThat(MongoConnection.redact(uri))
+				.isEqualTo("mongodb+srv://****@" + FailingDnsClientProvider.FAILING_HOST + "/opencelium");
+	}
+
+	@Test
+	void redactHidesThePasswordOfAUriWithoutAConnection() {
+		assertThat(MongoConnection.redact("mongodb://oc:s3cret@db.example/opencelium"))
+				.isEqualTo("mongodb://oc:****@db.example/opencelium");
 	}
 
 	@Test

@@ -110,7 +110,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. With the local MongoDB, run `java -jar oc-app.jar setup`: the MongoDB step offers the local server first and as the default. 2. Select the URI option and type `mongodb://oc:secret@localhost:1/opencelium`: "connection refused" and the retry menu. 3. Type a correct URI with a password and confirm: the env file holds `OC_MONGO_PASSWORD`, the yml file the placeholder. 4. The application starts on the written files, with no driver DEBUG line over the dialogue.
 - **Size:** approximately 300 lines
 - **Depends on:** 11
-- **Status:** in work
+- **Status:** done
 
 ## Task 13: feat(core): setup wizard downloads MongoDB and checks the checksum
 - **Criteria:** SW-13 (steps 1 to 3), SW-14, SW-15
