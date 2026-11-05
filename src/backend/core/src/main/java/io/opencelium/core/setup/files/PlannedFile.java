@@ -37,4 +37,11 @@ public record PlannedFile(Path path, String content, Set<PosixFilePermission> pe
 		return new PlannedFile(path, content, GROUP_READABLE);
 	}
 
+	/** Without the content: an env file or a key file holds a secret, and {@link Record#toString()} would print it. */
+	@Override
+	public String toString() {
+		return "PlannedFile[" + path + ", " + PosixFilePermissions.toString(permissions) + ", " + content.length()
+				+ " characters]";
+	}
+
 }

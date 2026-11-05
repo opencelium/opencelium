@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
@@ -21,9 +22,11 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  * {@code <target>.tmp-<random>} in its target directory, with its content and permissions; only then is each
  * staged file moved onto its target in one atomic step. A file that is in the place of a target is renamed to
  * {@code <target>.bak-<random>} just before that move and deleted after the last move, so the rollback can put it
- * back as it was, with its permissions. A missing target directory is made. When anything fails, the writer deletes
- * the staged files, puts back the files it replaced, deletes the other targets this run moved and the directories
- * it made that are empty again, then throws {@link SetupWriteException} naming the target that failed.
+ * back as it was, with its permissions. A missing target directory is made. Then the actions of the plan run in
+ * order, before the replaced files are deleted. When anything fails, the writer undoes the actions that ran, the
+ * failed one included and the last one first, while the files are still in place. Then it deletes the staged files,
+ * puts back the files it replaced, deletes the other targets this run moved and the directories it made that are
+ * empty again, and throws {@link SetupWriteException} naming the target or the action that failed.
  */
 public final class FilePlanWriter {
 
@@ -51,7 +54,7 @@ public final class FilePlanWriter {
 	}
 
 	/**
-	 * @throws SetupWriteException when a file cannot be written; the rollback has run by then
+	 * @throws SetupWriteException when a file cannot be written or an action fails; the rollback has run by then
 	 */
 	public void write(FilePlan plan) {
 		if (plan.isEmpty()) {
@@ -73,6 +76,18 @@ public final class FilePlanWriter {
 		}
 		catch (IOException ex) {
 			throw run.rollBack(ex);
+		}
+		List<PlannedAction> started = new ArrayList<>();
+		try {
+			for (PlannedAction action : plan.actions()) {
+				started.add(action);
+				action.run();
+			}
+		}
+		catch (SetupActionException ex) {
+			List<String> left = started.reversed().stream().map(PlannedAction::undo).flatMap(Optional::stream)
+					.toList();
+			throw run.rollBack(ex, plan.files().getFirst().path(), left);
 		}
 		run.removeBackups();
 	}
@@ -148,6 +163,21 @@ public final class FilePlanWriter {
 
 		private SetupWriteException rollBack(IOException cause) {
 			int touched = staged.size() + moved.size();
+			return new SetupWriteException(current, cause, touched, undoFiles(), backups);
+		}
+
+		/**
+		 * @param firstFile the first file of the plan, where the report sends the user to look
+		 * @param left      what the undo of the actions could not remove
+		 */
+		private SetupWriteException rollBack(SetupActionException failure, Path firstFile, List<String> left) {
+			int touched = staged.size() + moved.size();
+			return new SetupWriteException(failure.getMessage(), firstFile, failure, touched, undoFiles(), backups,
+					left);
+		}
+
+		/** @return how many of the staged and moved files are deleted or put back */
+		private int undoFiles() {
 			int undone = 0;
 			for (Path file : staged.values()) {
 				undone += delete(file) ? 1 : 0;
@@ -158,7 +188,7 @@ public final class FilePlanWriter {
 			for (Path directory : madeDirectories.reversed()) {
 				delete(directory);
 			}
-			return new SetupWriteException(current, cause, touched, undone, backups);
+			return undone;
 		}
 
 		/** Puts the previous file back in the place of {@code target}; when that fails, its backup stays. */

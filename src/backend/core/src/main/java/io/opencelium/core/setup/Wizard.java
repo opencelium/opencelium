@@ -20,10 +20,11 @@ import io.opencelium.core.setup.steps.SummaryStep;
 
 /**
  * The setup: the banner, then the steps in order, each one skipped when it does not apply, then the write of the
- * files the steps planned, then the start of the application. The steps take their values from the value source:
- * the setup file, else the prompter. A cancel at any question ends the run with "nothing written" and exit code
- * 0. A missing or bad value in batch mode, and a write failure, end it with a {@link SetupFailedException}
- * that the launcher prints on standard error, and start nothing. The dialogue goes through the prompter, never
+ * files and the actions that the steps planned, for example the start of MongoDB, then the start of the
+ * application. The steps take their values from the value source: the setup file, else the prompter. A cancel at
+ * any question ends the run with "nothing written" and exit code 0. A missing or bad value in batch mode, and a
+ * write failure, end it with a {@link SetupFailedException} that the launcher prints on standard error, and start
+ * nothing. The dialogue goes through the prompter, never
  * through a logger: before Spring starts the log system is not configured, and a password must never reach a log.
  */
 public final class Wizard {

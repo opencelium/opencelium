@@ -13,9 +13,10 @@ import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.FilePlan;
 
 /**
- * What the wizard knows so far: where the values come from, the answers of the steps that ran, and the files the
- * summary planned from them. Each step takes its value through the source, reads what earlier steps stored, and
- * stores its own answer. Nothing here touches the disk; the wizard writes the plan after the last step.
+ * What the wizard knows so far: where the values come from, the answers of the steps that ran, and the files and the
+ * actions that the steps planned from them. Each step takes its value through the source, reads what earlier steps
+ * stored, and stores its own answer. Nothing here touches the disk; the wizard carries out the plan after the last
+ * step.
  */
 public final class SetupContext {
 
@@ -95,7 +96,10 @@ public final class SetupContext {
 		environment.put(Objects.requireNonNull(name, "name"), Objects.requireNonNull(value, "value"));
 	}
 
-	/** The files to write after the steps; empty until the summary was confirmed. */
+	/**
+	 * The files to write and the actions to run after the summary: a step adds what it needs, and the summary adds
+	 * application.yml and the env file when it is confirmed. After a cancel the wizard carries out nothing of it.
+	 */
 	public FilePlan filePlan() {
 		return filePlan;
 	}

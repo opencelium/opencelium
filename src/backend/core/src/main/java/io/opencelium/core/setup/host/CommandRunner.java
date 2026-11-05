@@ -33,12 +33,13 @@ public interface CommandRunner {
 		}
 
 		public boolean succeeded() {
-			throw new UnsupportedOperationException();
+			return exitCode == 0;
 		}
 
 		/** The last line of the output that is not blank, for a message; {@code no output} when there is none. */
 		public String lastLine() {
-			throw new UnsupportedOperationException();
+			return output.lines().map(String::strip).filter(line -> !line.isEmpty()).reduce((first, last) -> last)
+					.orElse("no output");
 		}
 
 	}

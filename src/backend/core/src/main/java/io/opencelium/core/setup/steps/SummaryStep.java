@@ -2,6 +2,7 @@ package io.opencelium.core.setup.steps;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -11,23 +12,24 @@ import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.setup.files.BootstrapValues;
 import io.opencelium.core.setup.files.EnvRenderer;
+import io.opencelium.core.setup.files.PlannedAction;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.files.YmlRenderer;
 import io.opencelium.core.setup.prompt.Prompter;
 
 /**
- * The last screen: the answers in a box, the MongoDB URI without its password, the list of the two files that will
- * be written, and the confirmation. Yes plans application.yml and the env file with the entries that the steps
- * added, which the wizard writes after this step; no cancels the setup with nothing planned. A file that exists is
- * marked, because the write replaces it. In batch mode the confirmation is not asked: the setup file is the
- * decision.
+ * The last screen: the answers in a box, the MongoDB URI without its password, the list of the files that will be
+ * written, the actions that earlier steps planned, and the confirmation. Yes plans application.yml and the env file
+ * with the entries that the steps added; the wizard writes the files and runs the actions after this step. No
+ * cancels the setup, and the wizard drops the plan. A file that exists is marked, because the write replaces it. In
+ * batch mode the confirmation is not asked: the setup file is the decision.
  */
 public final class SummaryStep implements SetupStep {
 
 	static final String CONFIRM_QUESTION = "Write the files and start OpenCelium?";
 
-	private static final String CONFIRM_HELP = "y writes the two files and starts OpenCelium on them.\n"
-			+ "n ends the setup; nothing is written.";
+	private static final String CONFIRM_HELP = "y writes the files, runs what is listed under 'After the write', and"
+			+ " starts OpenCelium.\nn ends the setup; nothing is written.";
 
 	private final ConfigLocations locations;
 
@@ -49,8 +51,14 @@ public final class SummaryStep implements SetupStep {
 		prompter.print("");
 		prompter.box("Summary", rows);
 		prompter.print("");
-		prompter.list("Files to write", List.of(locations.ymlFile() + marker(locations.ymlFile()),
-				locations.envFile() + marker(locations.envFile())));
+		List<Path> files = new ArrayList<>(List.of(locations.ymlFile(), locations.envFile()));
+		context.filePlan().files().forEach(file -> files.add(file.path()));
+		prompter.list("Files to write", files.stream().map(file -> file + marker(file)).toList());
+		List<String> actions = context.filePlan().actions().stream().map(PlannedAction::description).toList();
+		if (!actions.isEmpty()) {
+			prompter.print("");
+			prompter.list("After the write", actions);
+		}
 		prompter.print("");
 		if (!context.values().yesNo(CONFIRM_QUESTION, CONFIRM_HELP, true, prompter)) {
 			throw new SetupCancelledException();
