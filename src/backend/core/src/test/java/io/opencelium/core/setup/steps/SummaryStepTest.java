@@ -3,6 +3,7 @@ package io.opencelium.core.setup.steps;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.values.SetupValues;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
+import io.opencelium.core.testsupport.fake.RecordingAction;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,9 +25,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.tuple;
 
 /**
- * The summary: the answers in a box (the mode always self-host, the MongoDB URI without its password), the two
- * files that will be written as a list, and the confirmation. Yes plans both files, with the entries of the env
- * file; no cancels the setup with nothing planned.
+ * The summary: the answers in a box (the mode always self-host, the MongoDB URI without its password), the files
+ * that will be written as a list, the actions that earlier steps planned, and the confirmation. Yes plans
+ * application.yml and the env file, with the entries of the env file; no cancels the setup.
  */
 class SummaryStepTest {
 
@@ -60,6 +62,25 @@ class SummaryStepTest {
 				"    - " + workingDir.resolve("config/application.yml") + "   (replaces the file that exists)",
 				"    - " + workingDir.resolve("config/opencelium.env") + "\n",
 				"  Write the files and start OpenCelium? [Y/n]: ");
+	}
+
+	@Test
+	void runListsActionFilesAndActionsWhenAnEarlierStepPlannedAnAction() {
+		answered();
+		Path compose = workingDir.resolve("quickstart/docker-compose.yml");
+		context.filePlan().add(new RecordingAction("Start MongoDB with Docker Compose in " + compose.getParent(),
+				new ArrayList<>(), PlannedFile.groupReadable(compose, "c")));
+		console.type("y");
+
+		step().run(context, new ConsolePrompter(console));
+
+		assertThat(console.output()).containsSubsequence("  Files to write",
+				"    - " + workingDir.resolve("config/application.yml"),
+				"    - " + workingDir.resolve("config/opencelium.env"), "    - " + compose, "  After the write",
+				"    - Start MongoDB with Docker Compose in " + compose.getParent(),
+				"  Write the files and start OpenCelium? [Y/n]: ");
+		assertThat(context.filePlan().files()).extracting(PlannedFile::path).containsExactly(
+				workingDir.resolve("config/application.yml"), workingDir.resolve("config/opencelium.env"), compose);
 	}
 
 	@Test

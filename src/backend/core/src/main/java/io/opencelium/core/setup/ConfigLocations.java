@@ -25,6 +25,8 @@ public final class ConfigLocations {
 
 	static final String ENV_FILE_NAME = "opencelium.env";
 
+	static final String QUICKSTART_DIRECTORY = "quickstart";
+
 	static final List<String> FILE_NAMES = List.of(YML_FILE_NAME, "application.yaml", "application.properties");
 
 	private final Path workingDir;
@@ -67,6 +69,11 @@ public final class ConfigLocations {
 	/** The env file the wizard writes next to application.yml. */
 	public Path envFile() {
 		return writeDirectory().resolve(ENV_FILE_NAME);
+	}
+
+	/** Where the Docker Compose option writes its compose file and its {@code .env}: next to {@code config/}. */
+	public Path quickstartDirectory() {
+		throw new UnsupportedOperationException();
 	}
 
 	/** Whether {@code file} is under the system directory, which Boot does not read by itself. */
