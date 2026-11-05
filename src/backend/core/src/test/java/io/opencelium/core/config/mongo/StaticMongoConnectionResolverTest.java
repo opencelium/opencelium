@@ -173,6 +173,29 @@ class StaticMongoConnectionResolverTest {
 	}
 
 	@Test
+	void unsetPasswordVariableStopsNamingTheVariableAndTheEnvFile() {
+		// What the binder leaves when the yml file refers to a variable that the environment does not have.
+		environment.setProperty(MONGODB_URI, "mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium");
+
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(SELF_HOST))
+				.withMessageContaining("OC_MONGO_PASSWORD")
+				.satisfies(failure -> assertThat(failure.propertyName()).isEqualTo("spring.mongodb.uri"))
+				.satisfies(failure -> assertThat(failure.action()).hasValueSatisfying(action -> assertThat(action)
+						.contains("./config/opencelium.env").contains("set -a")));
+	}
+
+	@Test
+	void parseUriAppliesTheRulesOfTheStartWithoutAnEnvironment() {
+		assertThat(StaticMongoConnectionResolver.parseUri("mongodb://db.example:27017/oc_prod").databaseName())
+				.isEqualTo("oc_prod");
+		assertThat(StaticMongoConnectionResolver.parseUri("mongodb://db.example:27017").databaseName())
+				.isEqualTo("opencelium");
+		assertThatExceptionOfType(BootstrapPropertyException.class)
+				.isThrownBy(() -> StaticMongoConnectionResolver.parseUri("mongodb://oc:p@ss@db.example/opencelium"))
+				.withMessageContaining("URL-encode").withMessageNotContaining("p@ss");
+	}
+
+	@Test
 	void proxyPasswordIsRejectedBecauseTheDriverLogsIt() {
 		environment.setProperty(MONGODB_URI,
 				"mongodb://db.example/opencelium?proxyHost=proxy.example&proxyUsername=u&proxyPassword=pp456");

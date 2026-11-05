@@ -34,6 +34,20 @@ class MongoStartupPingTest {
 	}
 
 	@Test
+	void checkReturnsNoCauseAndLogsNothingWhenTheServerAnswers(CapturedOutput output) {
+		assertThat(ping.check(connection(LocalMongo.uri("oc_test_ping")))).isEmpty();
+
+		assertThat(output).doesNotContain("MongoDB ping ok");
+	}
+
+	@Test
+	void checkReturnsTheCauseWithoutTheHelpTextWhenTheLoginIsWrong() {
+		String uri = LocalMongo.uriWithLogin("oc_nobody", "wrong-password", "opencelium");
+
+		assertThat(ping.check(connection(uri))).contains("authentication failed for user 'oc_nobody'");
+	}
+
+	@Test
 	void refusedConnectionStopsWithinTheShortTimeout() {
 		assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertThatExceptionOfType(BootstrapPropertyException.class)
 				.isThrownBy(() -> ping.verify(connection("mongodb://localhost:1/opencelium")))

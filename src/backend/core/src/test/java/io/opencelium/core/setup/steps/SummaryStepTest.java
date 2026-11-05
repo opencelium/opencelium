@@ -23,8 +23,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.tuple;
 
 /**
- * The summary: the answers in a box (the mode always self-host), the two files that will be written as a list,
- * and the confirmation. Yes plans both files; no cancels the setup with nothing planned.
+ * The summary: the answers in a box (the mode always self-host, the MongoDB URI without its password), the two
+ * files that will be written as a list, and the confirmation. Yes plans both files, with the entries of the env
+ * file; no cancels the setup with nothing planned.
  */
 class SummaryStepTest {
 
@@ -81,12 +82,29 @@ class SummaryStepTest {
 		var batch = new SetupContext(new ValueSource(SetupValues.NONE, Optional.of(Path.of("a.yml")), true));
 		batch.setDataDir(Path.of("/srv/oc"));
 		batch.setPort(9090);
+		batch.setMongoUri("mongodb://localhost:27017/opencelium");
 
 		step().run(batch, new ConsolePrompter(console));
 
 		assertThat(batch.filePlan().files()).hasSize(2);
 		assertThat(console.output()).contains("  Write the files and start OpenCelium? yes   (batch)")
 				.doesNotContain("[Y/n]");
+	}
+
+	@Test
+	void runShowsMongoDbWithoutPasswordAndPutsThePasswordIntoTheEnvFile() {
+		answered();
+		context.setMongoUri("mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium");
+		context.putEnvironment("OC_MONGO_PASSWORD", "s3cret");
+		console.type("y");
+
+		step().run(context, new ConsolePrompter(console));
+
+		assertThat(console.output()).contains("  |  MongoDB         mongodb://oc:****@db.example/opencelium")
+				.doesNotContain("s3cret");
+		assertThat(context.filePlan().files().get(0).content())
+				.contains("uri: mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium").doesNotContain("s3cret");
+		assertThat(context.filePlan().files().get(1).content()).endsWith("\nOC_MONGO_PASSWORD=s3cret\n");
 	}
 
 	@Test
@@ -110,6 +128,7 @@ class SummaryStepTest {
 	private void answered() {
 		context.setDataDir(Path.of("/srv/oc"));
 		context.setPort(9090);
+		context.setMongoUri("mongodb://localhost:27017/opencelium");
 	}
 
 	private SummaryStep step() {

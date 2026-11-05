@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import io.opencelium.core.setup.SetupFailedException;
 import io.opencelium.core.setup.prompt.Prompter;
@@ -63,6 +64,14 @@ public final class ValueSource {
 			throw SetupFailedException.failure("Missing value: " + key + inFile() + "\n" + SetupFile.TEMPLATE_HINT);
 		}
 		return prompter.text(question.label(), question.help(), question.defaultValue(), validator);
+	}
+
+	/**
+	 * The setup file's value of a question that the step asks itself, for example as a menu. Not implemented yet.
+	 */
+	public Optional<String> given(Question question, Function<String, Optional<String>> validator,
+			UnaryOperator<String> shown, Prompter prompter) {
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 
 	/** The confirmation: asked on a terminal; in batch mode the default, printed as such. */
