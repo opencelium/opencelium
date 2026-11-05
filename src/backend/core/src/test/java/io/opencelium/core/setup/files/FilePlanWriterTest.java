@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -106,6 +107,34 @@ class FilePlanWriterTest {
 	}
 
 	@Test
+	void writeRestoresReplacedFileWhenALaterMoveFails() throws IOException {
+		// The second run of the setup: a configuration exists, and the move of the second file cannot be done.
+		Files.createDirectories(tmp.resolve("config/opencelium.env"));
+		Files.writeString(tmp.resolve("config/opencelium.env/child"), "x");
+		Files.writeString(tmp.resolve("config/application.yml"), "old\n");
+
+		SetupWriteException ex = assertThatExceptionOfType(SetupWriteException.class)
+				.isThrownBy(() -> writer.write(plan(yml("new\n"), env("b\n")))).actual();
+
+		assertThat(tmp.resolve("config/application.yml")).content().isEqualTo("old\n");
+		assertThat(ex.rollbackReport()).isEqualTo("Nothing was written.");
+		assertThat(entries(tmp.resolve("config"))).containsExactlyInAnyOrder("application.yml", "opencelium.env");
+	}
+
+	@Test
+	void writeLeavesNoBackupWhenReplacedFilesAreWritten() throws IOException {
+		Files.createDirectory(tmp.resolve("config"));
+		Files.writeString(tmp.resolve("config/application.yml"), "old\n");
+		Files.writeString(tmp.resolve("config/opencelium.env"), "old\n");
+
+		writer.write(plan(yml("new\n"), env("new\n")));
+
+		assertThat(tmp.resolve("config/application.yml")).content().isEqualTo("new\n");
+		assertThat(entries(tmp.resolve("config"))).containsExactlyInAnyOrder("application.yml", "opencelium.env");
+		assertThat(warnings).isEmpty();
+	}
+
+	@Test
 	void writeRemovesDirectoryItMadeWhenRollbackEmptiesIt() throws IOException {
 		Files.writeString(tmp.resolve("blocker"), "a file where a directory is needed");
 
@@ -153,11 +182,23 @@ class FilePlanWriterTest {
 
 	@Test
 	void rollbackReportCountsWhatCouldNotBeRemoved() {
-		var ex = new SetupWriteException(tmp.resolve("config/opencelium.env"), new IOException("disk full"), 2, 1);
+		var ex = new SetupWriteException(tmp.resolve("config/opencelium.env"), new IOException("disk full"), 2, 1,
+				Map.of());
 
 		assertThat(ex.getMessage()).isEqualTo("Cannot write " + tmp.resolve("config/opencelium.env") + ": disk full");
 		assertThat(ex.rollbackReport()).isEqualTo("Rolled back 1 of 2 files; please check " + tmp.resolve("config")
 				+ ".");
+	}
+
+	@Test
+	void rollbackReportNamesTheBackupWhenAReplacedFileCouldNotBeRestored() {
+		Path target = tmp.resolve("config/application.yml");
+		Path backup = tmp.resolve("config/application.yml.bak-123");
+		var ex = new SetupWriteException(tmp.resolve("config/opencelium.env"), new IOException("disk full"), 2, 1,
+				Map.of(target, backup));
+
+		assertThat(ex.rollbackReport()).isEqualTo("Rolled back 1 of 2 files; please check " + tmp.resolve("config")
+				+ ". The previous " + target + " is kept at " + backup + ".");
 	}
 
 	private PlannedFile yml(String content) {
