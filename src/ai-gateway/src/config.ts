@@ -19,6 +19,8 @@ export type GatewayConfig = {
     docsUrl: string
     /** Writes help answers. */
     helpModel: string
+    /** Explains workflows and failed runs, proposes run fixes, writes transformation scripts: a small model keeps up with the large one there. */
+    lightModel: string
     corsOrigins: string[]
     maxRepairAttempts: number
     contextTokens: number
@@ -49,6 +51,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): GatewayConfig 
         docsDir: env.AI_DOCS_DIR ?? defaultDocsDir,
         docsUrl: (env.AI_DOCS_URL ?? 'https://docs.opencelium.io/en/prod').replace(/\/+$/, ''),
         helpModel: env.AI_HELP_MODEL ?? env.AI_WORKFLOW_MODEL ?? 'qwen2.5-coder:14b',
+        lightModel: env.AI_LIGHT_MODEL ?? 'qwen2.5-coder:7b',
         corsOrigins: (env.AI_CORS_ORIGINS ?? 'http://localhost:5173')
             .split(',')
             .map((origin) => origin.trim())

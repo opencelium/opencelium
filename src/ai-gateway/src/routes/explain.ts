@@ -10,7 +10,7 @@ export function registerExplainRoutes(app: FastifyInstance, { config, llm }: App
         const body = explainWorkflowRequestSchema.safeParse(request.body)
         if (!body.success) return sendApiError(reply, 'BAD_REQUEST', 'Invalid request body', z.treeifyError(body.error))
         try {
-            const result = await explainWorkflow(body.data, { llm, model: config.workflowModel, contextTokens: config.contextTokens })
+            const result = await explainWorkflow(body.data, { llm, model: config.lightModel, contextTokens: config.contextTokens })
             request.log.info({ outlineLength: body.data.outline.length, durationMs: result.durationMs }, 'workflow explained')
             return result
         } catch (error) {
