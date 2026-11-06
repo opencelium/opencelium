@@ -4,7 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-docs/oc-roadmap.html
+docs/oc-roadmap-v2.html
 
 ### STS ###
 .apt_generated
