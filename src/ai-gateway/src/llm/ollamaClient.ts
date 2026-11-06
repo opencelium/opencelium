@@ -79,6 +79,9 @@ export function createOllamaClient(baseUrl: string, chatTimeoutMs = DEFAULT_CHAT
         const body = JSON.stringify({
             model: request.model,
             stream: true,
+            // Newer models (Qwen3 and later) reason before answering by default, which multiplies answer time and
+            // breaks schema-constrained output; models without a thinking mode accept and ignore this.
+            think: false,
             format: request.format,
             messages: request.messages,
             options: { temperature: request.temperature, num_ctx: request.contextTokens },
