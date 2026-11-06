@@ -184,7 +184,7 @@ public final class ConsolePrompter implements Prompter {
 
 	@Override
 	public Meter meter(String line) {
-		throw new UnsupportedOperationException("not implemented yet");
+		return new ConsoleMeter(line, console.terminal());
 	}
 
 	/** {@code   Label           [default]: }: the label padded to the label column. */
@@ -219,6 +219,83 @@ public final class ConsolePrompter implements Prompter {
 		for (String line : text.split("\n")) {
 			out.println(INDENT + line);
 		}
+	}
+
+	/**
+	 * The status line on the first update with a known total, then the bar. On a terminal the bar is drawn again
+	 * after a carriage return, padded with spaces over the end of a longer bar before it. In a log file each version
+	 * would stay, so there the bar is printed as 1 line when the progress passes a quarter for the first time. The
+	 * total can grow after a quarter line, so the close prints the end state when the last line shows an earlier one.
+	 */
+	private final class ConsoleMeter implements Meter {
+
+		private static final int QUARTERS = 4;
+
+		private final String line;
+
+		private final boolean terminal;
+
+		private boolean shown;
+
+		/** The bar of the last update. */
+		private String latest = "";
+
+		/** The bar that the console shows now: the last one drawn on a terminal, the last line in a log file. */
+		private String drawn = "";
+
+		private int widest;
+
+		private int quartersPrinted;
+
+		private ConsoleMeter(String line, boolean terminal) {
+			this.line = Objects.requireNonNull(line, "line");
+			this.terminal = terminal;
+		}
+
+		@Override
+		public void update(long done, long total) {
+			if (total <= 0) {
+				return;
+			}
+			PrintWriter out = console.writer();
+			if (!shown) {
+				out.println(MARGIN + STARTS + line);
+				shown = true;
+			}
+			latest = Screen.bar(done, total);
+			if (terminal) {
+				if (!latest.equals(drawn)) {
+					out.print("\r" + latest + " ".repeat(Math.max(0, widest - latest.length())));
+					drawn = latest;
+					widest = Math.max(widest, latest.length());
+				}
+			}
+			else {
+				int quarter = (int) (QUARTERS * Math.clamp(done, 0, total) / total);
+				if (quarter > quartersPrinted) {
+					out.println(latest);
+					drawn = latest;
+					quartersPrinted = quarter;
+				}
+			}
+			out.flush();
+		}
+
+		@Override
+		public void close() {
+			if (!shown) {
+				return;
+			}
+			PrintWriter out = console.writer();
+			if (terminal) {
+				out.println();
+			}
+			else if (!latest.equals(drawn)) {
+				out.println(latest);
+			}
+			out.flush();
+		}
+
 	}
 
 }

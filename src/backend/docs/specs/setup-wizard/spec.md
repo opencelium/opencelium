@@ -52,7 +52,11 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   2. Type the URI of a server that exists.
   3. Exit.
   On a host without Docker Compose, the step offers options 2 and 3 only.
-- **SW-47** Given the Docker option, when Docker Compose downloads the image `mongo:8`, then the wizard must show a progress bar. The bar shows the downloaded MB and the total MB. On a terminal, the wizard draws the bar again in the same line. Without a terminal, it prints 1 line when the progress passes 25 %, 50 %, 75 % or 100 % for the first time. When the host has the image, or when Docker Compose cannot give the progress, the wizard shows no bar. When the download fails, the wizard names the cause from Docker, and the rollback runs.
+- **SW-47** Given the Docker option, when Docker Compose downloads the image `mongo:8`, then the wizard must show a progress bar. The bar shows the downloaded MB and the total MB, with these rules:
+  1. On a terminal, the wizard draws the bar again in the same line.
+  2. Without a terminal, it prints 1 line when the progress passes 25 %, 50 %, 75 % or 100 % for the first time. The last line shows the end state.
+  3. When the host has the image, or when Docker Compose cannot give the progress, the wizard shows no bar.
+  4. When the download fails, the wizard names the cause from Docker, and the rollback runs.
 - **SW-12** Given a server on `localhost:27017`, when the MongoDB step starts, then its first and default option must be that server. The step does not offer Docker Compose, because the container needs the same port. A setup file with `mongo: docker` then stops the setup with a bad value.
 - **SW-16** Given the URI option, when the user types a URI, then the wizard must ping the server before it continues.
 - **SW-17** Given a failed ping, when the wizard reports it, then it must name the cause and offer 3 options:
