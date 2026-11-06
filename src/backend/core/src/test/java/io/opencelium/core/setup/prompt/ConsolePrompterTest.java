@@ -308,7 +308,7 @@ class ConsolePrompterTest {
 		try (Prompter.Meter meter = prompter.meter(DOWNLOAD)) {
 			meter.update(0, 0);
 			meter.update(5_000_000, 20_000_000);
-			// 99.506 %: the percent and the bar round down, so only the end shows 100 % and a full bar.
+			// 99.506 %: the bar, the percent and the MB round down; only the end shows a full bar, the total and 100 %.
 			meter.update(995_060_000, 1_000_000_000);
 			meter.update(1_000_000_000, 1_000_000_000);
 			// A layer gives its size late: the bar moves back, and spaces cover the end of the longer text before it.
@@ -317,7 +317,7 @@ class ConsolePrompterTest {
 
 		assertThat(console.output()).isEqualTo("  -> " + DOWNLOAD + "\n"
 				+ "\r    [######------------------]  5.0 of 20.0 MB  25%"
-				+ "\r    [#######################-]  995.1 of 1000.0 MB  99%"
+				+ "\r    [#######################-]  995.0 of 1000.0 MB  99%"
 				+ "\r    [########################]  1000.0 of 1000.0 MB  100%"
 				+ "\r    [####################----]  1000.0 of 1200.0 MB  83% "
 				+ "\n");
@@ -342,6 +342,22 @@ class ConsolePrompterTest {
 				    [#######-----------------]  30.0 of 100.0 MB  30%
 				    [###################-----]  160.0 of 200.0 MB  80%
 				    [########################]  200.0 of 200.0 MB  100%
+				""");
+	}
+
+	@Test
+	void meterEndsWithTheEndStateWhenTheTotalGrowsAfterTheLastLine() {
+		try (Prompter.Meter meter = prompter.meter(DOWNLOAD)) {
+			// The first layers are complete before the large layer gives its size.
+			meter.update(10_000_000, 10_000_000);
+			meter.update(10_000_000, 300_000_000);
+			meter.update(300_000_000, 300_000_000);
+		}
+
+		assertThat(console.output()).isEqualTo("""
+				  -> Downloading the image mongo:8
+				    [########################]  10.0 of 10.0 MB  100%
+				    [########################]  300.0 of 300.0 MB  100%
 				""");
 	}
 

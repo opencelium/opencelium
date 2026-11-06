@@ -25,8 +25,9 @@ import io.opencelium.core.setup.prompt.Prompter;
 /**
  * Starts MongoDB for OpenCelium with Docker Compose, as an action of the plan after the summary. The action brings
  * {@code docker-compose.yml} and its {@code .env} for the quickstart directory, which the plan writes with its other
- * files. Then it runs {@code docker compose up -d} there and pings with the start ping of the application until
- * MongoDB accepts the login. The container publishes MongoDB on the loopback address only. On its first start it
+ * files. Then it downloads the image with a progress bar when the host does not have it, runs
+ * {@code docker compose up -d} there and pings with the start ping of the application until MongoDB accepts the
+ * login. The container publishes MongoDB on the loopback address only. On its first start it
  * makes the root user {@code opencelium} with the password from {@code .env}, which only its owner can read;
  * application.yml reaches the same password through the placeholder of the env file. The data is in the volume
  * {@code opencelium_mongo-data}, so {@code docker compose down} keeps it.
@@ -66,6 +67,15 @@ public final class DockerComposeInstaller {
 	private static final List<String> COMPOSE_COMMAND = List.of("docker", "compose", "-p", "opencelium", "-f",
 			COMPOSE_FILE, "--env-file", ENV_FILE);
 
+	/** The image of the compose file. */
+	private static final String IMAGE = "mongo:8";
+
+	/**
+	 * Downloads the image only when the host does not have it, so a host without a network starts its image. Each
+	 * line of the output is 1 JSON event with the progress of a layer.
+	 */
+	private static final List<String> PULL = compose("--progress", "json", "pull", "--policy", "missing");
+
 	private static final List<String> UP = compose("up", "-d");
 
 	private static final List<String> DOWN = compose("down");
@@ -82,7 +92,7 @@ public final class DockerComposeInstaller {
 			name: opencelium
 			services:
 			  mongo:
-			    image: mongo:8
+			    image: %s
 			    restart: unless-stopped
 			    ports:
 			      - "127.0.0.1:27017:27017"
@@ -94,7 +104,7 @@ public final class DockerComposeInstaller {
 			volumes:
 			  mongo-data:
 			    name: opencelium_mongo-data
-			""";
+			""".formatted(IMAGE);
 
 	private final Path directory;
 
@@ -180,12 +190,12 @@ public final class DockerComposeInstaller {
 
 		@Override
 		public void run() {
-			prompter.progress("Starting MongoDB with Docker Compose in " + directory
-					+ "; the first start downloads the image mongo:8...");
+			prompter.progress("Starting MongoDB with Docker Compose in " + directory + "...");
 			Result inspect = commands.run(directory, VOLUME_INSPECT);
 			earlierVolume = inspect.succeeded();
 			volumeMadeByThisRun = !inspect.succeeded()
 					&& inspect.output().toLowerCase(Locale.ROOT).contains("no such volume");
+			pull();
 			Result up = commands.run(directory, UP);
 			if (!up.succeeded()) {
 				throw new SetupActionException("Cannot start MongoDB with Docker Compose: " + String.join(" ", UP)
@@ -215,6 +225,25 @@ public final class DockerComposeInstaller {
 			return Optional.of("Cannot stop MongoDB: " + String.join(" ", down) + " ended with exit code "
 					+ result.exitCode() + ": " + result.lastLine() + ". Stop it by hand with: docker compose -p"
 					+ " opencelium down");
+		}
+
+		/**
+		 * Downloads the image with a progress bar that moves while the pull runs. Only an error event of Docker stops
+		 * the run. A Docker Compose without JSON progress fails here without one; {@code up -d} then downloads the
+		 * image without a bar, and a real problem fails there with its own output.
+		 */
+		private void pull() {
+			var progress = new PullProgress();
+			try (Prompter.Meter meter = prompter.meter("Downloading the image " + IMAGE)) {
+				commands.run(directory, PULL, line -> {
+					progress.accept(line);
+					meter.update(progress.done(), progress.total());
+				});
+			}
+			Optional<String> cause = progress.error();
+			if (cause.isPresent()) {
+				throw new SetupActionException("Cannot download the image " + IMAGE + ": " + cause.get());
+			}
 		}
 
 		private Optional<String> waitForPing(MongoConnection connection) {

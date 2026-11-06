@@ -29,7 +29,9 @@ public interface CommandRunner {
 	 * @param eachLine gets each line of the output without its line end, in order
 	 */
 	default Result run(Path directory, List<String> command, Consumer<String> eachLine) {
-		throw new UnsupportedOperationException("not implemented yet");
+		Result result = run(directory, command);
+		result.output().lines().forEach(eachLine);
+		return result;
 	}
 
 	/**
