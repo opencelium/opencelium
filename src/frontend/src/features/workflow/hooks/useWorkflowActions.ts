@@ -3,7 +3,7 @@ import { message } from 'antd';
 import { notifyError } from '@shared/ui/feedback/notifyError';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useWorkflowValidation } from './useWorkflowValidation';
-import { useWorkflowAssistAction } from '../command/workflowAssistBridge';
+import { useWorkflowEditAssist } from '../command/useWorkflowEditAssist';
 import { useSaveProblemsGate } from './useSaveProblemsGate';
 import { useWorkflowIssues } from '../problems/useWorkflowIssues';
 import { getIssueTone } from '../problems/workflowProblems';
@@ -234,7 +234,8 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		},
 		closePanel: () => setProblemsOpen(false) };
 
-	useWorkflowAssistAction('showProblems', problems.openPanel);
+	useWorkflowEditAssist({ isLocked: isEditLocked || isEditorDialogOpen, canUndo: workflow.canUndo, canRedo: workflow.canRedo,
+		undo: workflow.undo, redo: workflow.redo, onDeleteNodes: workflow.onDeleteNodes, openProblems: problems.openPanel });
 
 	return { validation, saveWorkflow, confirmBeforeSave, problems, category, templates, history, canvas, header,
 		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen,

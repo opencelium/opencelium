@@ -106,7 +106,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     } });
 
   useWorkflowEditBridge({ connectors, isEditable: !readOnly && !isTestRunLocked,
-    openRequestEditor: workflow.setMethodEditor });
+    openRequestEditor: workflow.setMethodEditor, openConditionEditor: (nodeId) => workflow.setConditionEditor({ nodeId }) });
   useWorkflowIntent({ isNewWorkflow: !connectionId && !readOnly, isReady: !isLoading,
     onTitle: (title) => setHeaderState((current) => ({ ...current, title })),
     onTemplate: (template) => void templateActions.applyTemplate(template),

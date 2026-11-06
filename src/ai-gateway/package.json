@@ -18,6 +18,7 @@
     "eval:help": "node scripts/evalHelp.ts",
     "eval:guides": "node scripts/evalGuideRouting.ts",
     "eval:add-method": "node scripts/evalAddMethod.ts",
+    "eval:add-operator": "node scripts/evalAddOperator.ts",
     "eval:mapping": "node scripts/evalMapping.ts",
     "eval:transformation": "node scripts/evalTransformation.ts"
   },

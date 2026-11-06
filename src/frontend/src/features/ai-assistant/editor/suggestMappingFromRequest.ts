@@ -1,10 +1,10 @@
 import { store } from '@app/store/store'
 import { i18n } from '@shared/i18n/config/i18n'
-import { notifyError } from '@shared/ui/feedback/notifyError'
 import { guideMethodNames, resolveGuideNode } from '@features/onboarding/guides/model/resolveGuideNode'
 import { workflowCommandBridgeStore } from '@features/workflow/command/workflowCommandBridge'
 import { aiApi } from '../api/aiApi'
 import { usePendingMappingStore } from '../mapping/pendingMapping.store'
+import { tell } from './tell'
 
 export type MappingRequestOutcome = 'opened' | 'not-opened' | 'failed'
 
@@ -20,19 +20,19 @@ export async function suggestMappingFromRequest(prompt: string): Promise<Mapping
     const t = i18n.getFixedT(i18n.language, 'common')
     const tGuides = i18n.getFixedT(i18n.language, 'onboarding')
     if (!bridge.isEditable()) {
-        notifyError(t('commandPalette.workflowEdit.notEditable'))
+        tell.error(t('commandPalette.workflowEdit.notEditable'))
         return 'not-opened'
     }
     const methods = guideMethodNames(bridge.getNodes())
     if (methods.length === 0) {
-        notifyError(tGuides('guides.errors.noMethods'))
+        tell.error(tGuides('guides.errors.noMethods'))
         return 'not-opened'
     }
     let answer
     try {
         answer = await store.dispatch(aiApi.endpoints.readMapping.initiate({ prompt, methods })).unwrap()
     } catch {
-        notifyError(t('commandPalette.workflowEdit.mappingFailed'))
+        tell.error(t('commandPalette.workflowEdit.mappingFailed'))
         return 'failed'
     }
 
@@ -40,12 +40,12 @@ export async function suggestMappingFromRequest(prompt: string): Promise<Mapping
     const target = resolveGuideNode(nodes, edges, answer.target || undefined)
     const source = answer.source ? resolveGuideNode(nodes, edges, answer.source) : null
     for (const resolution of [target, source]) {
-        if (resolution?.kind === 'no-methods') notifyError(tGuides('guides.errors.noMethods'))
-        if (resolution?.kind === 'no-match') notifyError(t('commandPalette.workflowEdit.unknownStep', { method: resolution.method }))
+        if (resolution?.kind === 'no-methods') tell.error(tGuides('guides.errors.noMethods'))
+        if (resolution?.kind === 'no-match') tell.error(t('commandPalette.workflowEdit.unknownStep', { method: resolution.method }))
     }
     if (target.kind !== 'found' || (source && source.kind !== 'found')) return 'not-opened'
     if (source?.nodeId === target.nodeId) {
-        notifyError(t('commandPalette.workflowEdit.sameMethod'))
+        tell.error(t('commandPalette.workflowEdit.sameMethod'))
         return 'not-opened'
     }
 

@@ -54,6 +54,11 @@ export const useWorkflowCommandBridge = ({
 		return added.id;
 	};
 
+	const selectNode = (nodeId: string) => {
+		setNodes((currentNodes) => currentNodes.map((node) =>
+			(!!node.selected === (node.id === nodeId) ? node : { ...node, selected: node.id === nodeId })));
+	};
+
 	useEffect(() => {
 		workflowCommandBridgeStore.setState({
 			isActive: true,
@@ -65,6 +70,7 @@ export const useWorkflowCommandBridge = ({
 			centerOnNode,
 			hasOpenDialog: () => hasOpenDialogRef.current,
 			addStep,
+			selectNode,
 		});
 		return () => deactivateWorkflowCommandBridge();
 	}, []);

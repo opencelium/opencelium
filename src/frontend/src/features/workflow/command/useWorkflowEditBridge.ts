@@ -8,6 +8,7 @@ type Params = {
 	/** Read-only mode and a running test run both forbid edits. */
 	isEditable: boolean;
 	openRequestEditor: (editor: WorkflowMethodEditorState) => void;
+	openConditionEditor: (nodeId: string) => void;
 };
 
 /**
@@ -15,19 +16,22 @@ type Params = {
  * loaded connectors and whether the editor may be changed right now. Read live through
  * refs, so a command started later sees the current values.
  */
-export const useWorkflowEditBridge = ({ connectors, isEditable, openRequestEditor }: Params) => {
+export const useWorkflowEditBridge = ({ connectors, isEditable, openRequestEditor, openConditionEditor }: Params) => {
 	const connectorsRef = useRef(connectors);
 	const isEditableRef = useRef(isEditable);
 	const openRequestEditorRef = useRef(openRequestEditor);
 	useEffect(() => { connectorsRef.current = connectors; }, [connectors]);
 	useEffect(() => { isEditableRef.current = isEditable; }, [isEditable]);
 	useEffect(() => { openRequestEditorRef.current = openRequestEditor; }, [openRequestEditor]);
+	const openConditionEditorRef = useRef(openConditionEditor);
+	useEffect(() => { openConditionEditorRef.current = openConditionEditor; }, [openConditionEditor]);
 
 	useEffect(() => {
 		workflowCommandBridgeStore.setState({
 			getConnectors: () => connectorsRef.current,
 			isEditable: () => isEditableRef.current,
 			openRequestEditor: (editor) => openRequestEditorRef.current(editor),
+			openConditionEditor: (nodeId) => openConditionEditorRef.current(nodeId),
 		});
 	}, []);
 };

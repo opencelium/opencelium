@@ -204,6 +204,49 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 notFixable: string
                 noFix: string
                 noSteps: string
+                nothingToUndo: string
+                nothingToRedo: string
+                cannotSave: string
+                deleteWhich: string
+                deleted: string
+                generateUnavailable: string
+                operatorFailed: string
+                ifAdded: string
+                ifAddedEmpty: string
+                loopAdded: string
+                confirmDelete: {
+                    title: string
+                    message: string
+                }
+                testStarted: {
+                    live: string
+                    debug: string
+                }
+            }
+            beebot: {
+                done: string
+                lookAtPalette: string
+                sayYesDelete: string
+                stoppedListening: string
+                mute: string
+                unmute: string
+                capabilities: {
+                    intro: string
+                    editor: {
+                        addMethod: string
+                        addIf: string
+                        test: string
+                        fix: string
+                        undo: string
+                    }
+                    general: {
+                        schedules: string
+                        createUser: string
+                        theme: string
+                        help: string
+                        check: string
+                    }
+                }
             }
             descriptions: {
                 create: string
@@ -242,6 +285,12 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 workflowExplain: string
                 workflowShowLogs: string
                 workflowShowProblems: string
+                workflowAddOperator: string
+                workflowUndo: string
+                workflowRedo: string
+                workflowSave: string
+                workflowDeleteStep: string
+                workflowGenerate: string
                 help: string
                 onboarding: string
                 workflowTutorial: string

@@ -13,6 +13,7 @@ vi.mock('../api/aiApi', () => ({
             readAddMethod: { initiate: (body: Record<string, unknown>) => ({ endpoint: 'readAddMethod', body }) },
             readMapping: { initiate: (body: Record<string, unknown>) => ({ endpoint: 'readMapping', body }) },
             readTransformation: { initiate: (body: Record<string, unknown>) => ({ endpoint: 'readTransformation', body }) },
+            readAddOperator: { initiate: (body: Record<string, unknown>) => ({ endpoint: 'readAddOperator', body }) },
         },
     },
 }))
@@ -41,6 +42,7 @@ import { usePendingMappingStore } from '../mapping/pendingMapping.store'
 import { usePendingScriptStore } from '../hooks/pendingScript.store'
 import { requestEditorBridgeStore, type OpenRequestEditor } from '@features/workflow/command/requestEditorBridge'
 import { workflowAssistBridgeStore } from '@features/workflow/command/workflowAssistBridge'
+import { usePendingConditionStore } from '../condition/pendingCondition.store'
 import { askWorkflowEditor } from './askWorkflowEditor'
 
 const method = (id: string, label: string) => ({
@@ -59,7 +61,7 @@ describe('askWorkflowEditor', () => {
             isActive: true, isEditable: () => true, getConnectors: () => [crm],
             getNodes: () => [method('a', 'getCustomers'), method('b', 'createClient')],
             getEdges: () => [{ id: 'a-b', source: 'a', target: 'b', type: 'workflow-edge' }] as WorkflowEdgeModel[],
-            addStep, openRequestEditor, centerOnNode: vi.fn(),
+            addStep, openRequestEditor, centerOnNode: vi.fn(), selectNode: vi.fn(),
         })
     })
     afterEach(() => {
@@ -74,8 +76,9 @@ describe('askWorkflowEditor', () => {
         expect(await askWorkflowEditor('order a pizza')).toBe('unhandled')
         const options = (gateway.requests[0]?.body.guides as { id: string; description: string }[])
         expect(options.map(option => option.id)).toEqual(['method-url', 'method-headers', 'method-body', 'method-try',
-            'method-transformation', 'add-method', 'suggest-mapping', 'apply-transformation',
-            'test-workflow', 'stop-test', 'explain-failure', 'fix-failure', 'apply-fix', 'explain-workflow', 'show-logs', 'show-problems'])
+            'method-transformation', 'add-method', 'suggest-mapping', 'apply-transformation', 'add-operator',
+            'test-workflow', 'stop-test', 'explain-failure', 'fix-failure', 'apply-fix', 'explain-workflow', 'show-logs', 'show-problems',
+            'undo', 'redo', 'save-workflow', 'delete-step', 'generate-workflow'])
         expect(options.find(option => option.id === 'test-workflow')).toMatchObject({ isAction: true, withMethod: 'method-try' })
         expect(options.find(option => option.id === 'explain-failure')).toMatchObject({ isAction: false })
         expect(options[4]).toMatchObject({ id: 'method-transformation', teaches: 'apply-transformation' })
@@ -250,11 +253,11 @@ describe('askWorkflowEditor', () => {
         afterEach(() => workflowAssistBridgeStore.setState({ handlers: {} }))
 
         it('starts the test run, and says when one is already going or cannot start', async () => {
-            const startTest = vi.fn<() => 'started' | 'running' | 'unavailable'>(() => 'started')
+            const startTest = vi.fn<(mode: 'live' | 'debug' | null) => 'started' | 'running' | 'unavailable'>(() => 'started')
             workflowAssistBridgeStore.getState().register('startTest', startTest)
             route('test-workflow')
             expect(await askWorkflowEditor('test the workflow')).toBe('handled')
-            expect(startTest).toHaveBeenCalledOnce()
+            expect(startTest).toHaveBeenCalledWith(null)
             expect(toast.info).not.toHaveBeenCalled()
             startTest.mockReturnValueOnce('running')
             await askWorkflowEditor('run the workflow')
@@ -262,6 +265,19 @@ describe('askWorkflowEditor', () => {
             startTest.mockReturnValueOnce('unavailable')
             await askWorkflowEditor('run the workflow')
             expect(toast.error).toHaveBeenCalledWith('commandPalette.workflowAssist.testUnavailable')
+        })
+
+        it('starts in the mode the request names, in either language', async () => {
+            const startTest = vi.fn<(mode: 'live' | 'debug' | null) => 'started'>(() => 'started')
+            workflowAssistBridgeStore.getState().register('startTest', startTest)
+            route('test-workflow')
+            await askWorkflowEditor('run a live test')
+            expect(startTest).toHaveBeenLastCalledWith('live')
+            expect(toast.success).toHaveBeenLastCalledWith('commandPalette.workflowAssist.testStarted.live')
+            await askWorkflowEditor('starte den Test im Debug-Modus')
+            expect(startTest).toHaveBeenLastCalledWith('debug')
+            await askWorkflowEditor('debug the workflow')
+            expect(startTest).toHaveBeenLastCalledWith('debug')
         })
 
         it('opens the logs and explains the failure', async () => {
@@ -310,6 +326,78 @@ describe('askWorkflowEditor', () => {
             expect(explainWorkflow).toHaveBeenCalledOnce()
             unregister()
             expect(workflowAssistBridgeStore.getState().handlers.explainWorkflow).toBeUndefined()
+        })
+    })
+
+    describe('building the graph', () => {
+        const route = (guideId: string, method = '') => { gateway.answers.routeGuide = { guideId, method } }
+        const openConditionEditor = vi.fn()
+        beforeEach(() => workflowCommandBridgeStore.setState({ openConditionEditor }))
+        afterEach(() => {
+            workflowAssistBridgeStore.setState({ handlers: {} })
+            usePendingConditionStore.setState({ pending: null })
+        })
+
+        it('adds an if where the request says and has its condition built from the words', async () => {
+            route('add-operator')
+            gateway.answers.readAddOperator = { kind: 'if', position: 'after', stepId: 'a', condition: 'nothing was found' }
+            expect(await askWorkflowEditor('add an if after get customers when nothing was found')).toBe('handled')
+            expect(gateway.requests[1]?.body).toEqual({ prompt: 'add an if after get customers when nothing was found',
+                steps: [{ id: 'a', label: 'getCustomers' }, { id: 'b', label: 'createClient' }] })
+            expect(addStep).toHaveBeenCalledWith(expect.objectContaining({ sourceNodeId: 'a', kind: 'if' }))
+            expect(usePendingConditionStore.getState().pending).toMatchObject({ nodeId: 'new-1', instruction: 'nothing was found' })
+            expect(openConditionEditor).toHaveBeenCalledWith('new-1')
+        })
+
+        it('adds a loop after the selected step and leaves its list to the dialog', async () => {
+            workflowCommandBridgeStore.setState({ getNodes: () => [method('a', 'getCustomers'), { ...method('b', 'createClient'), selected: true }] })
+            route('add-operator')
+            gateway.answers.readAddOperator = { kind: 'loop', position: 'after', stepId: null, condition: 'the customers' }
+            await askWorkflowEditor('add a loop over the customers')
+            expect(addStep).toHaveBeenCalledWith(expect.objectContaining({ sourceNodeId: 'b', kind: 'loop' }))
+            expect(usePendingConditionStore.getState().pending).toBeNull()
+            expect(toast.success).toHaveBeenCalledWith('commandPalette.workflowAssist.loopAdded')
+        })
+
+        it('removes the named step once confirmed, and only a named or selected one', async () => {
+            const deleteStep = vi.fn(async () => true)
+            workflowAssistBridgeStore.getState().register('deleteStep', deleteStep)
+            route('delete-step', 'createClient')
+            await askWorkflowEditor('remove create client')
+            expect(deleteStep).toHaveBeenCalledWith({ nodeId: 'b', label: 'createClient' })
+            expect(toast.success).toHaveBeenCalledWith('commandPalette.workflowAssist.deleted{"step":"createClient"}')
+            route('delete-step')
+            await askWorkflowEditor('remove it')
+            expect(deleteStep).toHaveBeenCalledOnce()
+            expect(toast.info).toHaveBeenCalledWith('commandPalette.workflowAssist.deleteWhich')
+        })
+
+        it('removes the selected step on a bare "remove it", without asking the model', async () => {
+            const deleteStep = vi.fn(async () => true)
+            workflowAssistBridgeStore.getState().register('deleteStep', deleteStep)
+            workflowCommandBridgeStore.setState({ getNodes: () => [method('a', 'getCustomers'), { ...method('b', 'createClient'), selected: true }] })
+            await askWorkflowEditor('Remove it.')
+            expect(gateway.requests).toHaveLength(0)
+            expect(deleteStep).toHaveBeenCalledWith({ nodeId: 'b', label: 'createClient' })
+        })
+
+        it('undoes, and says when there is nothing to undo', async () => {
+            const undo = vi.fn(() => true)
+            workflowAssistBridgeStore.getState().register('undo', undo)
+            route('undo')
+            await askWorkflowEditor('undo that')
+            expect(undo).toHaveBeenCalledOnce()
+            undo.mockReturnValueOnce(false)
+            await askWorkflowEditor('undo that')
+            expect(toast.info).toHaveBeenCalledWith('commandPalette.workflowAssist.nothingToUndo')
+        })
+
+        it('opens Generate with AI with the whole request', async () => {
+            const generateWorkflow = vi.fn()
+            workflowAssistBridgeStore.getState().register('generateWorkflow', generateWorkflow)
+            route('generate-workflow')
+            await askWorkflowEditor('build a workflow that copies Jira issues to Zammad')
+            expect(generateWorkflow).toHaveBeenCalledWith('build a workflow that copies Jira issues to Zammad')
         })
     })
 })

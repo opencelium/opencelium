@@ -21,3 +21,10 @@
     transition: none;
   }
 }
+
+/* The mute button sits right against the toggle it belongs to. */
+.wakeWordControls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}

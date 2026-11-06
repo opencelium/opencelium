@@ -1,11 +1,10 @@
-import { message } from 'antd'
 import { store } from '@app/store/store'
 import { i18n } from '@shared/i18n/config/i18n'
-import { notifyError } from '@shared/ui/feedback/notifyError'
 import { methodLabel, methodsInWorkflowOrder } from '@features/onboarding/guides/model/resolveGuideNode'
 import { addMethodStep } from '@features/workflow/command/addMethodStep'
 import { workflowCommandBridgeStore } from '@features/workflow/command/workflowCommandBridge'
 import { aiApi } from '../api/aiApi'
+import { tell } from './tell'
 
 export type AddMethodOutcome = 'added' | 'cancelled' | 'not-added' | 'failed'
 
@@ -21,12 +20,12 @@ export async function addMethodFromRequest(prompt: string, confirmEdit?: Confirm
     const bridge = workflowCommandBridgeStore.getState()
     const t = i18n.getFixedT(i18n.language, 'common')
     if (!bridge.isEditable()) {
-        notifyError(t('commandPalette.workflowEdit.notEditable'))
+        tell.error(t('commandPalette.workflowEdit.notEditable'))
         return 'not-added'
     }
     const connectors = bridge.getConnectors().filter(connector => connector.invoker?.name)
     if (connectors.length === 0) {
-        notifyError(t('commandPalette.workflowEdit.noConnectors'))
+        tell.error(t('commandPalette.workflowEdit.noConnectors'))
         return 'not-added'
     }
     const request = {
@@ -38,16 +37,16 @@ export async function addMethodFromRequest(prompt: string, confirmEdit?: Confirm
     try {
         answer = await store.dispatch(aiApi.endpoints.readAddMethod.initiate(request)).unwrap()
     } catch {
-        notifyError(t('commandPalette.workflowEdit.failed'))
+        tell.error(t('commandPalette.workflowEdit.failed'))
         return 'failed'
     }
     const connector = connectors.find(item => String(item.connectorId) === answer.connectorId)
     if (!connector) {
-        notifyError(t('commandPalette.workflowEdit.unknownConnector'))
+        tell.error(t('commandPalette.workflowEdit.unknownConnector'))
         return 'not-added'
     }
     if (!answer.operation) {
-        notifyError(t('commandPalette.workflowEdit.unknownMethod', { method: answer.spokenMethod, connector: connector.title }))
+        tell.error(t('commandPalette.workflowEdit.unknownMethod', { method: answer.spokenMethod, connector: connector.title }))
         return 'not-added'
     }
     if (confirmEdit && !(await confirmEdit({ method: answer.operation, connector: connector.title }))) return 'cancelled'
@@ -60,19 +59,19 @@ export async function addMethodFromRequest(prompt: string, confirmEdit?: Confirm
     })
     switch (result.kind) {
         case 'added':
-            message.success(t('commandPalette.workflowEdit.added', { method: result.method, connector: result.connector }))
+            tell.success(t('commandPalette.workflowEdit.added', { method: result.method, connector: result.connector }))
             return 'added'
         case 'not-editable':
-            notifyError(t('commandPalette.workflowEdit.notEditable'))
+            tell.error(t('commandPalette.workflowEdit.notEditable'))
             return 'not-added'
         case 'unknown-connector':
-            notifyError(t('commandPalette.workflowEdit.unknownConnector'))
+            tell.error(t('commandPalette.workflowEdit.unknownConnector'))
             return 'not-added'
         case 'unknown-operation':
-            notifyError(t('commandPalette.workflowEdit.unknownMethod', { method: answer.operation, connector: connector.title }))
+            tell.error(t('commandPalette.workflowEdit.unknownMethod', { method: answer.operation, connector: connector.title }))
             return 'not-added'
         case 'no-place':
-            notifyError(t('commandPalette.workflowEdit.noPlace'))
+            tell.error(t('commandPalette.workflowEdit.noPlace'))
             return 'not-added'
         default: {
             const _exhaustive: never = result

@@ -30,12 +30,16 @@ type WorkflowCommandBridge = {
   /** Adds a step exactly as the "+" and the sidebar do (spliced in, one undo entry);
    * the new node's id, or null when nothing could be added. */
   addStep: (action: WorkflowAction) => string | null;
+  /** Makes this the only selected node, so "it" / "this step" in the next request means it. */
+  selectNode: (nodeId: string) => void;
   /** The connectors a method can be added from, with their invokers' operations. */
   getConnectors: () => Connector[];
   /** False in read-only mode and while a test run holds the editor. */
   isEditable: () => boolean;
   /** Opens a method's URL, header or body editor, as its context-menu entry does. */
   openRequestEditor: (editor: WorkflowMethodEditorState) => void;
+  /** Opens an if's or a loop's condition dialog, as double-clicking it does. */
+  openConditionEditor: (nodeId: string) => void;
 };
 
 const INACTIVE_BRIDGE: WorkflowCommandBridge = {
@@ -48,9 +52,11 @@ const INACTIVE_BRIDGE: WorkflowCommandBridge = {
   centerOnNode: () => {},
   hasOpenDialog: () => false,
   addStep: () => null,
+  selectNode: () => {},
   getConnectors: () => [],
   isEditable: () => false,
   openRequestEditor: () => {},
+  openConditionEditor: () => {},
 };
 
 export const workflowCommandBridgeStore = create<WorkflowCommandBridge>(() => ({

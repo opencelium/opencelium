@@ -6,6 +6,7 @@ import { WorkflowHeaderActions } from './WorkflowHeaderActions';
 import { WorkflowHeaderInfo } from './WorkflowHeaderInfo';
 import type { WorkflowHeaderProps } from './WorkflowHeader.types';
 import { useWorkflowHeaderState } from './useWorkflowHeaderState';
+import { useWorkflowAssistAction } from '../../command/workflowAssistBridge';
 
 export function WorkflowHeader({
 	onOpenHistory, onSave, confirmBeforeSave, onMenuItemSelect, menuLoadingItemId,
@@ -74,6 +75,11 @@ export function WorkflowHeader({
 
 	const openSaveDialogRef = useRef(openSaveDialog);
 	openSaveDialogRef.current = openSaveDialog;
+	useWorkflowAssistAction('saveWorkflow', () => {
+		if (readOnly || saveDisabled || saveDialogOpen) return false;
+		void openSaveDialog();
+		return true;
+	});
 
 	useEffect(() => {
 		const handleSaveShortcut = (event: KeyboardEvent) => {

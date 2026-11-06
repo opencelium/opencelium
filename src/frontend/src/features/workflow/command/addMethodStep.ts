@@ -47,6 +47,7 @@ export function addMethodStep({ connectorId, operationName, anchorNodeId, positi
 	});
 	if (!nodeId) return { kind: 'no-place' };
 	// A frame later: the canvas has not laid the new node out yet.
+	bridge.selectNode(nodeId);
 	requestAnimationFrame(() => bridge.centerOnNode(nodeId));
 	return { kind: 'added', nodeId, method: operation.name, connector: connector.title };
 }
