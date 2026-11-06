@@ -11,39 +11,25 @@ PR title: `feat(execution): add LOOP operator for iterating over collections (OC
 ```markdown
 ## What
 
-Added the LOOP flow operator to the execution engine. A LOOP node takes a
+Adds the LOOP flow operator to the execution engine. A LOOP node takes a
 collection-valued expression from the incoming payload, runs its body subgraph
 once per element, and aggregates the per-iteration results into an ordered list
-on the outgoing payload. Nested loops are supported; iteration state is kept
-per execution, so parallel executions of the same workflow don't interfere.
+on the outgoing payload. Nested loops work; the iteration state is kept per
+execution, so parallel executions of the same workflow do not interfere.
 
 ## Why
 
-Closes OC-1501
-
-Workflows currently process only single objects. Syncing use cases
-(e.g. "for every Jira ticket, create an OTRS entry") need per-element
-iteration — this is the second of the two planned flow operators (IF landed
-in OC-1489).
+Spec: src/backend/docs/specs/loop-operator/spec.md, criteria LPL-01 to LPL-05. Task 2 of tasks.md.
 
 ## How to test
 
-    ./gradlew :execution:test --tests "*.LoopOperatorTest"
-    ./gradlew :execution:test    # full engine suite
-
-No Docker needed — everything is unit-level.
-
-## Checklist
-- [x] Self-reviewed the diff
-- [x] `./gradlew build` passes locally
-- [x] Tests added or updated — `LoopOperatorTest` (12 cases: empty collection,
-      single element, nested loop, non-collection input rejected, aggregation
-      order), extended `WorkflowEngineTest` with a LOOP-in-graph walk case
-- [x] No secrets, debug logs, or commented-out code
-- [x] WIP commits squashed
+- Run a workflow with a LOOP node over a list of 3 elements; the outgoing payload holds 3 results in the input order.
+- Confirmed: `./gradlew build`: green, 418 tests, 2026-11-06. Hand test: step 1, done by the agent.
+- Not confirmed: nothing.
+- Assumptions and follow-ups: (assumption) an empty collection gives an empty list, not an error; follow-up: the parallel batch size is task 3.
 ```
 
-Why this works: "What" describes observable behavior, not file names. "Why" gives the product reason and links the ticket. "How to test" is copy-pasteable and says whether Docker is needed. The checklist names the actual test classes and what they cover.
+Why this works: "What" describes observable behavior, not file names. "Why" names the spec, the criteria and the task, so the reviewer finds the acceptance criteria without a search. "How to test" is a hand test that a person can repeat, and "Confirmed" carries the build command with its result and date instead of "the tests pass". Nothing follows "How to test": the tests are in commit 1 of the PR, and the checks of CONTRIBUTING 5.1 are the author's own work, not text in the PR.
 
 ---
 
@@ -66,17 +52,14 @@ run the tests
 - [x] Self-reviewed the diff
 - [x] `./gradlew build` passes locally
 - [ ] Tests added or updated — name them here
-- [x] No secrets, debug logs, or commented-out code
-- [ ] WIP commits squashed
 ```
 
 What's wrong, line by line:
 
 - **"Loop changes"** — says nothing. Changed how? Added? Fixed? A reviewer must reverse-engineer the intent from the diff.
-- **"Closes OC-"** — placeholder left in; either reference the real ticket or remove the line (tickets are encouraged, not mandatory — but a dangling `OC-` is neither).
-- **"run the tests"** — which task, which module, Docker or not? The reviewer shouldn't have to guess.
-- **Unchecked "Tests added"** — either the behavior is untested (blocking) or the box was skipped carelessly. Both read badly.
-- **Unchecked "WIP commits squashed"** — the PR isn't Ready for Review yet; it should still be a Draft.
+- **"Closes OC-"** — a placeholder, and the wrong content: a task PR names its spec, its criteria and its task. A ticket is linked only when one exists; a dangling `OC-` is neither.
+- **"run the tests"** — no hand test step and no "Confirmed" line with the build command and its result. "The tests pass" without the command is not a claim.
+- **The Checklist** — not part of the PR form (CONTRIBUTING 5.4). The checks of 5.1 are the author's own work before "Ready for Review"; an unchecked box in a PR says that the PR is still a Draft.
 
 ---
 

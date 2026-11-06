@@ -13,9 +13,9 @@ and the reason. The reviewer confirms each decision before task 1 starts.
 1. **<Title>.** <Question.> Options: <a>, <b>. Recommended: <a>, because <reason>.
 
 ## Interfaces and contracts
-The new public types, the SPI changes, the endpoints (see api.yaml), the
-settings, and the bootstrap properties. The property list must not grow
-without a reason in this section.
+The new public types, the SPI changes, the endpoints (method, path, purpose,
+permission), the settings, and the bootstrap properties. The property list
+must not grow without a reason in this section.
 
 ## Test strategy
 Which criteria get unit tests, slice tests, and full-application tests.
