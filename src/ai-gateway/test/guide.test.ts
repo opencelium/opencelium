@@ -97,6 +97,19 @@ describe('POST /guide/intent', () => {
         expect(result.body.guideId).toBe('method-transformation')
     })
 
+    it('reads an option about the whole workflow as its per-method one when a method is named', async () => {
+        const options = [
+            { id: 'method-try', description: 'show how to try a method' },
+            { id: 'test-workflow', description: 'test the whole workflow', isAction: true, withMethod: 'method-try' },
+        ]
+        let result = await route('test the workflow', { guide: 'test-workflow', method: '' }, { guides: options })
+        expect(result.body.guideId).toBe('test-workflow')
+        result = await route('send a test request for create client', { guide: 'test-workflow', method: 'createClient' }, { guides: options })
+        expect(result.body).toMatchObject({ guideId: 'method-try', method: 'createClient' })
+        result = await route('how can I test the getCustomers request', { guide: 'test-workflow', method: 'getCustomers' }, { guides: options })
+        expect(result.body.guideId).toBe('method-try')
+    })
+
     it('answers no guide when none fits', async () => {
         const { body } = await route('order a pizza', { guide: 'none', method: '' })
         expect(body).toMatchObject({ guideId: null, method: '' })

@@ -3,6 +3,7 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '@features/workflow/ty
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { useWorkflowAssistAction } from '@features/workflow/command/workflowAssistBridge';
 import { isAiConfigured, useGetAiHealthQuery } from '../../api/aiApi';
 import { AiWorkflowExplainDialog } from './AiWorkflowExplainDialog';
 
@@ -23,11 +24,12 @@ export function AiWorkflowExplainButton({ nodes, edges, title, onUseDescription 
 	const [isOpen, setIsOpen] = useState(false);
 	const hasSteps = nodes.some((node) => Boolean(node.data.methodConfig));
 	const isAvailable = isConfigured && health.data?.ollama.reachable === true && health.data.workflowModel.available;
-	if (!isAvailable) return null;
 	const open = () => {
 		setSession((current) => current + 1);
 		setIsOpen(true);
 	};
+	useWorkflowAssistAction('explainWorkflow', isAvailable && hasSteps ? open : null);
+	if (!isAvailable) return null;
 	return (
 		<>
 			<Tooltip content={hasSteps ? t('ai.explain.open') : t('ai.explain.noSteps')}>

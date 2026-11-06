@@ -76,7 +76,15 @@
       "workflowShowTransformation": "Zeigen, wie man eine Transformation (ein Skript) auf einen Wert im Body oder in den Headern einer Methode anwendet",
       "workflowAddMethod": "Eine neue Methode aus einem Konnektor zum Workflow hinzufügen, vor oder nach einem Schritt",
       "workflowSuggestMapping": "Referenzen (ein Mapping) für den Body einer Methode aus der Antwort einer früheren Methode vorschlagen",
-      "workflowApplyTransformation": "Eine Transformation (ein Skript) auf eine Eigenschaft des geöffneten Bodys oder der Header anwenden"
+      "workflowApplyTransformation": "Eine Transformation (ein Skript) auf eine Eigenschaft des geöffneten Bodys oder der Header anwenden",
+      "workflowTestRun": "Einen Testlauf des ganzen Workflows starten (Workflow testen, ausführen, laufen lassen)",
+      "workflowStopTest": "Den laufenden Testlauf stoppen",
+      "workflowExplainFailure": "Erklären, warum der letzte Testlauf fehlgeschlagen ist (was schiefging, welcher Fehler)",
+      "workflowFixFailure": "Beheb es: eine Korrektur für den Schritt vorschlagen, der im letzten Testlauf fehlgeschlagen ist (reparieren)",
+      "workflowApplyFix": "Die vorgeschlagene KI-Korrektur auf den fehlgeschlagenen Schritt anwenden (übernehmen, anwenden)",
+      "workflowExplain": "Erklären, was dieser ganze Workflow tut, Schritt für Schritt",
+      "workflowShowLogs": "Die Logs des Testlaufs zeigen",
+      "workflowShowProblems": "Die Probleme dieses Workflows zeigen (Fehler und Warnungen beim Bearbeiten)"
     },
     "footer": {
       "select": "Auswählen",
@@ -160,6 +168,15 @@
         "title": "Methode hinzufügen?",
         "message": "{{method}} aus {{connector}} zum Workflow hinzufügen?"
       }
+    },
+    "workflowAssist": {
+      "testRunning": "Ein Testlauf läuft bereits. Sag „stoppe den Test“, um ihn zu beenden.",
+      "testUnavailable": "Der Testlauf kann gerade nicht starten: Die Verbindung zum Server ist nicht bereit, oder ein anderer Test dieses Workflows läuft.",
+      "noTestRunning": "Es läuft kein Testlauf.",
+      "noFailure": "Es gibt keinen fehlgeschlagenen Testlauf. Starte einen mit „teste den Workflow“.",
+      "notFixable": "Nur ein fehlgeschlagener Methodenaufruf kann korrigiert werden. Frag stattdessen, warum er fehlgeschlagen ist.",
+      "noFix": "Es gibt keine vorgeschlagene Korrektur zum Anwenden. Bitte zuerst um eine Korrektur.",
+      "noSteps": "Füge zuerst Schritte hinzu und frag dann, was der Workflow tut."
     }
   },
   "sidebar": {

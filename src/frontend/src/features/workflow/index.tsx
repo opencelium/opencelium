@@ -12,6 +12,7 @@ import { WorkflowMain } from './components/WorkflowMain/WorkflowMain';
 import { WorkflowPageDialogs } from './components/WorkflowPageDialogs/WorkflowPageDialogs';
 import { TestRunProvider } from './test-run/TestRunProvider';
 import { TestRunEditLockSync } from './test-run/TestRunEditLockSync';
+import { TestRunAssistBridge } from './test-run/TestRunAssistBridge';
 import { useWorkflowPageState } from './hooks/useWorkflowPageState';
 import { useWorkflowActions } from './hooks/useWorkflowActions';
 import { useDuplicatedWorkflowHint } from './hooks/useDuplicatedWorkflowHint';
@@ -120,6 +121,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       onResolveStartError={resolveAndHighlightWorkflowError}
       loopAncestorsByIndexPath={loopAncestorsByIndexPath}>
     <TestRunEditLockSync onLockChange={setIsTestRunLocked} />
+    <TestRunAssistBridge />
     <div className="page" data-testid="workflow-page">
       <WorkflowPageHeader connectionId={schedulesConnectionId} schedulesOpen={schedulesOpen}
         onToggleSchedules={() => setSchedulesOpen((open) => {

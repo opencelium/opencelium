@@ -196,6 +196,15 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                     message: string
                 }
             }
+            workflowAssist: {
+                testRunning: string
+                testUnavailable: string
+                noTestRunning: string
+                noFailure: string
+                notFixable: string
+                noFix: string
+                noSteps: string
+            }
             descriptions: {
                 create: string
                 createWorkflow: string
@@ -225,6 +234,14 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 workflowAddMethod: string
                 workflowSuggestMapping: string
                 workflowApplyTransformation: string
+                workflowTestRun: string
+                workflowStopTest: string
+                workflowExplainFailure: string
+                workflowFixFailure: string
+                workflowApplyFix: string
+                workflowExplain: string
+                workflowShowLogs: string
+                workflowShowProblems: string
                 help: string
                 onboarding: string
                 workflowTutorial: string

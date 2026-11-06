@@ -8,6 +8,7 @@ import { aiApi } from '../api/aiApi'
 import { addMethodFromRequest, type ConfirmEdit } from './addMethodFromRequest'
 import { suggestMappingFromRequest } from './suggestMappingFromRequest'
 import { applyTransformationFromRequest } from './applyTransformationFromRequest'
+import { ASSIST_OPTIONS, ASSIST_OPTION_IDS, isAssistOptionId, runAssistFromRequest } from './runAssistFromRequest'
 
 /** What the editor itself can do with a request, besides the guides. */
 const ADD_METHOD = 'add-method'
@@ -34,6 +35,11 @@ function describeOptions() {
         { id: ADD_METHOD, description: describe(ADD_METHOD_DESCRIPTION), isAction: true },
         { id: SUGGEST_MAPPING, description: describe(SUGGEST_MAPPING_DESCRIPTION), isAction: true },
         { id: APPLY_TRANSFORMATION, description: describe(APPLY_TRANSFORMATION_DESCRIPTION), isAction: true },
+        ...ASSIST_OPTION_IDS.map(id => {
+            const option: { descriptionKey: string; isAction: boolean; withMethod?: string } = ASSIST_OPTIONS[id]
+            return { id, description: describe(option.descriptionKey), isAction: option.isAction,
+                ...(option.withMethod ? { withMethod: option.withMethod } : {}) }
+        }),
     ]
 }
 
@@ -41,7 +47,8 @@ function describeOptions() {
  * A request made in the workflow editor that the workflow itself answers: "where is the
  * header of getCustomers?" starts a guide, "add get all users from CRM after createClient"
  * adds the method, "suggest references for createClient from getCustomers" opens the AI mapping, "apply
- * transformation for Vendor with upper case" writes the script of a field in the open body or headers. `confirmEdit` is asked before a change; leave it out when the user
+ * transformation for Vendor with upper case" writes the script of a field in the open body or headers, "test the
+ * workflow" / "why did it fail?" / "fix it" run and debug it. `confirmEdit` is asked before a change; leave it out when the user
  * addressed the assistant by name, which is their go-ahead.
  */
 export async function askWorkflowEditor(prompt: string, confirmEdit?: ConfirmEdit): Promise<EditorRequestOutcome> {
@@ -64,6 +71,10 @@ export async function askWorkflowEditor(prompt: string, confirmEdit?: ConfirmEdi
     }
     if (answer.guideId === SUGGEST_MAPPING) {
         await suggestMappingFromRequest(prompt)
+        return 'handled'
+    }
+    if (answer.guideId && isAssistOptionId(answer.guideId)) {
+        runAssistFromRequest(answer.guideId)
         return 'handled'
     }
     if (!answer.guideId || !isGuideId(answer.guideId)) return 'unhandled'
