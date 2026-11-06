@@ -1,6 +1,6 @@
 # Specifications
 
-This folder holds the specification of each backend feature. A feature has a folder `<feature>/` with 3 files: `spec.md`, `plan.md` and `tasks.md`. A feature with endpoints also has the OpenAPI file `api.yaml`. The reviewer is the developer who owns the backend and approves each artifact and each PR. The PM (product manager) answers the product questions. The fixed rules of the project are in [CONTRIBUTING.md](../../CONTRIBUTING.md), [architecture.md](../architecture.md) and the [writing guide](../writing-guide.md).
+This folder holds the specification of each backend feature. A feature has a folder `<feature>/` with 3 files: `spec.md`, `plan.md` and `tasks.md`. A feature with endpoints lists them in `plan.md` and gets the OpenAPI file `api.yaml` when the contract-style decision is closed. The reviewer is the developer who owns the backend and approves each artifact and each PR. The PM (product manager) answers the product questions. The fixed rules of the project are in [CONTRIBUTING.md](../../CONTRIBUTING.md), [architecture.md](../architecture.md) and the [writing guide](../writing-guide.md).
 
 ## The 3 artifacts
 

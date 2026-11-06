@@ -52,8 +52,9 @@ Flow: branch off `next` → open a PR into `next` → review + green CI → squa
 
 ### Branch naming
 
-- Lowercase, hyphen-separated: `feature/node-type-registry`, not `feature/NodeTypeRegistry`.
+- Lowercase, hyphen-separated: `feature/node-type-registry`, not `feature/NodeTypeRegistry`. A ticket key keeps its upper case.
 - If a ticket exists, include its number: `feature/OC-123-node-type-registry`.
+- A task of a spec folder (`docs/specs/<feature>/tasks.md`) uses `feature/<feature>-task-<n>`, without a ticket number: the ticket links to the spec.
 - Keep branches short-lived (days, not weeks). Rebase onto `next` if you fall behind; never rebase a branch others are working on, and never force-push a branch that is under active review without coordinating with the reviewer.
 
 ## 4. Commit messages
@@ -61,7 +62,7 @@ Flow: branch off `next` → open a PR into `next` → review + green CI → squa
 We follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/):
 
 ```
-<type>(<optional scope>): (OC-NNNN) <description>
+<type>(<optional scope>): <description> (OC-NNNN)
 
 [optional body]
 
@@ -116,10 +117,10 @@ Before a PR is marked Ready for Review, all of these hold:
 | Requirement | Detail |
 |---|---|
 | **Green build** | `./gradlew build` passes locally; integration tests too when the PR touches integration paths. |
-| **Tests for the change** | Every changed behavior has at least one covering test, named in the description. |
+| **Tests for the change** | Every changed behavior has at least one covering test, in commit 1 of the PR. |
 | **One logical change** | A feature and its refactor ship separately unless truly inseparable. |
 | **Ticket reference** | The Jira ticket (`OC-NNNN`) is linked when one exists. |
-| **Complete description** | Every template section filled in — no placeholders left. |
+| **Complete description** | The 3 sections of the template (5.4) are filled in; no placeholder is left. |
 | **Self-review done** | You read your own diff first; typos, stray TODOs, and obvious gaps are yours to catch, not the reviewer's. |
 
 PR titles follow the Conventional Commits format (they become the squash-merge commit message).
@@ -133,7 +134,7 @@ A PR contains its one change and nothing else:
 - **No secrets** — not even in test resources. Externalize via environment variables or property placeholders.
 - **No formatter noise.** Reformatting files the PR doesn't otherwise touch buries the real diff.
 - **No dependency bumps riding along with features.** A version upgrade affects the whole project and must be revertable on its own.
-- **No orphan TODOs.** Either fix it in this PR or open a ticket and reference it: `// TODO OC-1500 — replace with domain exception`.
+- **No TODOs.** Fix it in this PR, or put the follow-up under "Assumptions and follow-ups" in the PR text. A comment never names a ticket (section 8).
 
 ### 5.3 PR size
 
@@ -157,22 +158,21 @@ To split a large change: put the shared groundwork (new types, interfaces) in a 
 
 ### 5.4 PR description template
 
+The title is the Conventional Commits subject (section 4). The description has 3 sections and nothing after "How to test": no checklist, no attribution line. The checks of 5.1 are the author's own work before the PR is Ready for Review, not text in the PR.
+
 ```markdown
 ## What
-
+<3 to 4 lines: the change as the diff shows it>
 
 ## Why
-Closes OC-
+Spec: src/backend/docs/specs/<feature>/spec.md, criteria <IDs>. Task <n> of tasks.md.
+(For a change without a spec: the reason in 1 to 2 lines, and the ticket when one exists.)
 
 ## How to test
-
-
-## Checklist
-- [ ] Self-reviewed the diff
-- [ ] `./gradlew build` passes locally
-- [ ] Tests added or updated — name them here
-- [ ] No secrets, debug logs, or commented-out code
-- [ ] WIP commits squashed
+- <the hand test steps, 1 to 2 bullets>
+- Confirmed: <the build command and its result; the hand test steps that were done>
+- Not confirmed: <what was not run and why>, or "nothing"
+- Assumptions and follow-ups: (assumption) <...>; follow-up: <...>   (only when there is one)
 ```
 
 A fully filled-in example — and a bad counter-example with annotations — is in [docs/pr-and-review-examples.md](docs/pr-and-review-examples.md).
