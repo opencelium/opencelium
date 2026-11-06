@@ -53,10 +53,14 @@ prompt is not.
    IDs of the existing criteria; a removed criterion's number is not used again.
 5. Apply the check list of `.claude/skills/shared/ste-checklist.md`. Rewrite each sentence that
    breaks a rule. Count the words of each criterion.
-6. End your answer with, in this order: the path of the file; the filled check list; the open
-   questions; the next step. The next step is gate 1: the architect agent examines the spec
-   against the decisions when `.claude/agents/architect.md` exists, otherwise the reviewer
-   examines it against section 7. Then the reviewer approves the spec and merges the spec PR.
+6. Gate 1. When `.claude/agents/architect.md` exists: run the architect agent (the Agent tool,
+   `subagent_type: architect`) with the path of the file and the ask "Gate 1: examine the
+   spec at <path>; report in your format." Resolve each conflict in the document, apply the
+   check list again, and run the gate again until the last line is "Gate 1: no findings".
+   Otherwise the reviewer examines the spec against section 7.
+7. End your answer with, in this order: the path of the file; the filled check list; the open
+   questions; the last line of the gate-1 report, or "Gate 1: the reviewer"; the next step:
+   the reviewer approves the spec and merges the spec PR.
 
 ## Rules for the acceptance criteria
 
@@ -101,5 +105,6 @@ The end of the chat answer:
     Open questions
     1. ...
 
-    Next: gate 1 — <the architect agent | the reviewer> examines the spec against section 7;
-    then the reviewer approves it and merges the spec PR.
+    Gate 1: <the last line of the architect report | the reviewer examines the spec against section 7>
+
+    Next: the reviewer approves the spec and merges the spec PR.

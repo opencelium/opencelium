@@ -63,35 +63,30 @@ Stop and tell the user when one fails:
    the signature with no logic: a body that throws `UnsupportedOperationException`. No other
    production code goes into commit 1.
 3. Run `./gradlew :<module>:compileTestJava`, then `./gradlew :<module>:test --tests "<test
-   class>"`. Expected: the tests compile and fail (red). Record both commands and their
-   results. A test that passes before the implementation is a finding: it tests nothing, or
-   the behaviour exists already. Say so.
+   class>"`. Expected: the tests compile and fail (red) because the implementation is missing:
+   an `UnsupportedOperationException` from a stub, or an assertion against the existing
+   behaviour. Record both commands, their results and the reason of the red. A test that
+   passes before the implementation is a finding: it tests nothing, or the behaviour exists
+   already. Say so. When the tests do not compile after 1 repair attempt, or a test is red for
+   another reason, and `.claude/agents/debugger.md` exists: run the debugger agent with the
+   command, its output, the feature, the task number and the phase "commit 1".
 4. Commit the test files, the signatures and `tasks.md`:
    `test(<scope>): add the tests for <function>`. Conventional Commits, 72 characters or less,
-   imperative, lower case, no trailer, no attribution.
+   imperative, lower case, no attribution trailer.
 
 ## Gate 3: the tests against the criteria
 
 1. If `.claude/agents/code-reviewer.md` exists: run the code-reviewer agent (the Agent tool,
    `subagent_type: code-reviewer`) with the feature folder, the task number, the base
-   `origin/next`, the range `origin/next..HEAD`, and the ask "Gate 3: compare the tests with
-   the criteria of task <n>; report in your format." Wait for the report.
-2. Otherwise do the self-check and report it in the same form. The list:
-   - each criterion of the task has a test; each test maps to a criterion; no test outside the
-     task;
-   - the kind and the module (9.1): no `@SpringBootTest` and no slice annotation in `common` or
-     `execution`; `@ActiveProfiles("test")` on each slice test; no `@DataMongoTest`;
-   - the location (9.2): same module, same package, `src/test`; fixtures in
-     `src/test/resources`; shared helpers in `testsupport`, which has no `@Test`;
-   - the names (9.4): camelCase, present tense, no `test` prefix, no underscore;
-   - no `Thread.sleep()`; no assertion on the mock; no test that mirrors the implementation;
-   - no secret in a test resource; no new test dependency without a line in `plan.md`.
-
-   The report form, 1 block per finding: `<prefix>: <file>:<line> — <rule> — <what fails and
-   how>`. The prefixes: `blocking:`, `question:`, `nit:`, `suggestion:`. The last line:
-   "Ready for the test review: yes" or "no, <n> blocking".
-3. Resolve each `blocking:` finding and amend commit 1; the branch is not pushed. Run the
-   gate again until no `blocking:` remains.
+   `origin/next`, the head `HEAD`, the 2 commands of step 2.3 with their results (the compile
+   result; the failed tests and the reason of the red), and the ask "Gate 3: compare the
+   tests with the criteria of task <n>; report in your format." Wait for the report.
+2. When the agent cannot run: apply the gate-3 checks of `.claude/agents/code-reviewer.md`
+   yourself, in its report form and with its last line.
+3. Resolve each `blocking:` finding and amend commit 1; the branch is not pushed. Answer each
+   `question:`: resolve it in the code, or give the fact that answers it (file and line) in
+   the rerun prompt; a question you cannot answer goes under "Assumptions and follow-ups" in
+   the PR text. Run the gate again until no `blocking:` remains.
 4. STOP. Show the user: the branch; commit 1 (`git show --stat HEAD`); a table criterion →
    test method; the compile and test commands with their results; the gate-3 report. Ask the
    user to review the tests, and end the turn. Continue with step 3 only on the user's go. A
@@ -136,49 +131,20 @@ The steps:
    duration. "The tests pass" without the command and the result is not a claim. Red: repair,
    run again, keep the last result. When the cause is not clear after 1 repair attempt, and
    `.claude/agents/debugger.md` exists: run the debugger agent (the Agent tool,
-   `subagent_type: debugger`) with the command, its output and the phase "commit 2". Apply the
-   fix that it proposes yourself, then run the build again. The agent proposes; you edit.
+   `subagent_type: debugger`) with the command, its output, the feature, the task number and
+   the phase "commit 2". Apply the fix that it proposes yourself, then run the build again.
+   The agent proposes; you edit.
 3. Set the status of the task to "done" in `tasks.md`.
 4. Commit the implementation, `tasks.md`, and `spec.md` or `plan.md` when they changed. The
    message is the task title of `tasks.md` (Conventional Commits, 72 characters or less).
-   A body is optional. No trailer, no attribution.
+   A body is optional. No attribution trailer; a `BREAKING CHANGE:` footer only with `!` in
+   the subject (CONTRIBUTING 4).
 
-## Gate 4: the diff
+## Step 4: the PR text
 
-1. With the agent: run it with the range `origin/next...HEAD` and the ask "Gate 4: review the
-   whole diff of task <n>; report in your format."
-2. Without the agent: the self-check, in the same report form, against:
-   - CONTRIBUTING sections 8 and 9, the module rules and the 4 build rules;
-   - the scope: 1 logical change; no drive-by edit; no new dependency, property, module or
-     one-user abstraction without a line in `plan.md`;
-   - the spec: no behaviour outside the spec; each criterion of the task has a passing test;
-   - the failure modes of an LLM author: a swallowed exception or a silent fallback; a default
-     where the spec says stop; a library call that the classpath version does not have; a test
-     that asserts the mock or mirrors the implementation; a copy of the legacy code or of a
-     tutorial pattern where the project has its own; a Javadoc that names a ticket, a decision
-     or a document; "the tests pass" without the command.
-3. Resolve each `blocking:` finding and amend commit 2 (not pushed). Run `./gradlew build`
-   again and keep the new result. Run the gate again until no `blocking:` remains.
-4. The security pass. It applies when the diff touches `core.secrets`, `core.config`,
-   `core.user`, `core.setup`, a Spring Security configuration, an HTTP endpoint, the settings
-   service, a transport message or event, a `@Document` class or a test resource with a key.
-   When it applies and `.claude/agents/security-reviewer.md` exists: run the security-reviewer
-   agent (`subagent_type: security-reviewer`) with the range `origin/next...HEAD`, the feature
-   folder, the task number and the ask "Security review of the diff of task <n>; report in
-   your format." Resolve each `blocking:` finding, amend commit 2, run `./gradlew build` again,
-   and run the pass again until no `blocking:` remains. When it applies and the agent file does
-   not exist, write "security pass: not run, no agent" under "Not confirmed" in the PR text.
-
-## Step 4: the hand test
-
-Do the hand test steps of the task when they can run on this machine: the application with
-`./gradlew :core:bootRun` or the jar, a command, a request with curl. Record the result of each
-step. A step you cannot do (no browser, no MongoDB, no credential) goes under "Not confirmed".
-
-## Step 5: the PR text
-
-Draft the PR description in the short form and show it in the chat. Do not write it into the
-repository.
+Draft the PR description in the short form now, before gate 4, and show it in the chat. Gate 4
+and the security pass review it. Do not write it into the repository. The hand-test part of
+the "Confirmed" line is filled in step 5.
 
     <PR title: the task title, Conventional Commits, 72 characters or less>
 
@@ -195,6 +161,33 @@ repository.
     - Assumptions and follow-ups: (assumption) <...>; follow-up: <...>   (only when there is one)
 
 No checklist block, no attribution line, nothing after "How to test".
+
+## Gate 4: the diff
+
+1. With the agent: run it with the feature folder, the task number, the base `origin/next`,
+   the head `HEAD`, the `./gradlew build` command of step 3.2 with its result (green, the
+   number of tests, the duration), the PR text of step 4, and the ask "Gate 4: review the
+   whole diff of task <n>; report in your format."
+2. When the agent cannot run: apply the gate-4 checks of `.claude/agents/code-reviewer.md`
+   yourself, in its report form and with its last line.
+3. Resolve each `blocking:` finding and amend commit 2 (not pushed). Answer each `question:`
+   as at gate 3. Run `./gradlew build` again and keep the new result. Run the gate again until
+   no `blocking:` remains.
+4. The security pass. It applies when the diff touches an area that the `description` line of
+   `.claude/agents/security-reviewer.md` names; read that line. When it applies: run the
+   security-reviewer agent (`subagent_type: security-reviewer`) with the base `origin/next`,
+   the head `HEAD`, the feature folder, the task number, the PR text and the ask "Security
+   review of the diff of task <n>; report in your format." Resolve each `blocking:` finding,
+   amend commit 2, run `./gradlew build` again, and run the pass again until no `blocking:`
+   remains. When the agent file does not exist, write "security pass: not run, no agent"
+   under "Not confirmed" in the PR text.
+
+## Step 5: the hand test
+
+Do the hand test steps of the task when they can run on this machine: the application with
+`./gradlew :core:bootRun` or the jar, a command, a request with curl. Record the result of each
+step. A step you cannot do (no browser, no MongoDB, no credential) goes under "Not confirmed".
+Then complete the "Confirmed" and "Not confirmed" lines of the PR text with the result.
 
 ## Step 6: the report
 

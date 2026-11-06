@@ -59,11 +59,17 @@ approved, say so in 1 line and continue only when the user says to.
 6. **Risks.** The table of the template: the risk and how the plan handles it.
 7. **Definition of done.** The 4 lines of the template plus the items of this feature.
 8. Write the file. Apply the check list; rewrite each sentence that breaks a rule.
-9. End your answer with, in this order: the path of the file; the filled check list; the list
-   "Decisions to confirm before task 1" (number, title, the recommendation, 1 line each); the
-   next step. The next step is gate 2: the architect agent examines the module placement and
-   the decisions when `.claude/agents/architect.md` exists, otherwise the reviewer examines
-   them against sections 3 and 7. Then the reviewer confirms each decision, then `/tasks`.
+9. Gate 2. When `.claude/agents/architect.md` exists: run the architect agent (the Agent tool,
+   `subagent_type: architect`) with the path of the file and the ask "Gate 2: examine the
+   plan at <path>; report in your format." Resolve each conflict and each placement finding
+   in the document, show each drafted decision record in the chat for the reviewer, apply the
+   check list again, and run the gate again until the last line is "Gate 2: no findings".
+   Otherwise the reviewer examines the module placement and the decisions against sections 3
+   and 7.
+10. End your answer with, in this order: the path of the file; the filled check list; the
+    list "Decisions to confirm before task 1" (number, title, the recommendation, 1 line
+    each); the last line of the gate-2 report, or "Gate 2: the reviewer"; the next step: the
+    reviewer confirms each decision, then `/tasks`.
 
 ## Rules for the document
 
@@ -90,5 +96,6 @@ The end of the chat answer:
     1. <Title>: recommended <a>, because <reason>.
     2. ...
 
-    Next: gate 2 — <the architect agent | the reviewer> examines the module placement and the
-    decisions; then the reviewer confirms each decision; then /tasks <feature>.
+    Gate 2: <the last line of the architect report | the reviewer examines the module placement and the decisions>
+
+    Next: the reviewer confirms each decision; then /tasks <feature>.
