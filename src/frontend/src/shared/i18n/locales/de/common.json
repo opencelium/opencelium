@@ -77,14 +77,20 @@
       "workflowAddMethod": "Eine neue Methode aus einem Konnektor zum Workflow hinzufügen, vor oder nach einem Schritt",
       "workflowSuggestMapping": "Referenzen (ein Mapping) für den Body einer Methode aus der Antwort einer früheren Methode vorschlagen",
       "workflowApplyTransformation": "Eine Transformation (ein Skript) auf eine Eigenschaft des geöffneten Bodys oder der Header anwenden",
-      "workflowTestRun": "Einen Testlauf des ganzen Workflows starten (Workflow testen, ausführen, laufen lassen)",
+      "workflowTestRun": "Einen Testlauf des ganzen Workflows starten, live oder im Debug-Modus (Workflow testen, ausführen, laufen lassen, debuggen)",
       "workflowStopTest": "Den laufenden Testlauf stoppen",
       "workflowExplainFailure": "Erklären, warum der letzte Testlauf fehlgeschlagen ist (was schiefging, welcher Fehler)",
       "workflowFixFailure": "Beheb es: eine Korrektur für den Schritt vorschlagen, der im letzten Testlauf fehlgeschlagen ist (reparieren)",
       "workflowApplyFix": "Die vorgeschlagene KI-Korrektur auf den fehlgeschlagenen Schritt anwenden (übernehmen, anwenden)",
       "workflowExplain": "Erklären, was dieser ganze Workflow tut, Schritt für Schritt",
       "workflowShowLogs": "Die Logs des Testlaufs zeigen",
-      "workflowShowProblems": "Die Probleme dieses Workflows zeigen (Fehler und Warnungen beim Bearbeiten)"
+      "workflowShowProblems": "Die Probleme dieses Workflows zeigen (Fehler und Warnungen beim Bearbeiten)",
+      "workflowAddOperator": "Ein IF (die nächsten Schritte nur wenn / nur falls eine Bedingung gilt) oder eine Schleife (für jedes Element einer Liste) hinzufügen, vor oder nach einem Schritt",
+      "workflowUndo": "Die letzte Änderung am Workflow rückgängig machen",
+      "workflowRedo": "Die rückgängig gemachte Änderung wiederherstellen",
+      "workflowSave": "Den Workflow speichern",
+      "workflowDeleteStep": "Einen Schritt aus dem Workflow entfernen (löschen)",
+      "workflowGenerate": "Einen neuen Workflow mit KI aus einer Beschreibung erstellen, was er tun soll"
     },
     "footer": {
       "select": "Auswählen",
@@ -176,7 +182,50 @@
       "noFailure": "Es gibt keinen fehlgeschlagenen Testlauf. Starte einen mit „teste den Workflow“.",
       "notFixable": "Nur ein fehlgeschlagener Methodenaufruf kann korrigiert werden. Frag stattdessen, warum er fehlgeschlagen ist.",
       "noFix": "Es gibt keine vorgeschlagene Korrektur zum Anwenden. Bitte zuerst um eine Korrektur.",
-      "noSteps": "Füge zuerst Schritte hinzu und frag dann, was der Workflow tut."
+      "noSteps": "Füge zuerst Schritte hinzu und frag dann, was der Workflow tut.",
+      "nothingToUndo": "Gerade gibt es nichts rückgängig zu machen.",
+      "nothingToRedo": "Gerade gibt es nichts wiederherzustellen.",
+      "cannotSave": "Der Workflow kann gerade nicht gespeichert werden (schreibgeschützt, nichts geändert oder der Speichern-Dialog ist schon offen).",
+      "deleteWhich": "Nenne den Schritt, der entfernt werden soll, oder wähle ihn zuerst aus.",
+      "deleted": "{{step}} entfernt. Strg+Z macht es rückgängig.",
+      "generateUnavailable": "Mit KI erstellen ist gerade nicht verfügbar.",
+      "operatorFailed": "Die KI konnte die Anfrage nicht lesen. Versuche es erneut oder füge das IF oder die Schleife mit „+“ hinzu.",
+      "ifAdded": "IF hinzugefügt. Die Bedingung wird aus „{{condition}}“ erstellt: Prüfe sie und speichere.",
+      "ifAddedEmpty": "IF hinzugefügt. Beschreibe die Bedingung im Dialog.",
+      "loopAdded": "Schleife hinzugefügt. Wähle im Dialog die Liste, über die sie laufen soll.",
+      "confirmDelete": {
+        "title": "Diesen Schritt entfernen?",
+        "message": "{{step}} aus dem Workflow entfernen?"
+      },
+      "testStarted": {
+        "live": "Live-Testlauf gestartet.",
+        "debug": "Debug-Testlauf gestartet."
+      }
+    },
+    "beebot": {
+      "done": "Erledigt.",
+      "lookAtPalette": "Schau in die Befehlspalette.",
+      "sayYesDelete": "Zum Entfernen sag „ja, löschen“.",
+      "stoppedListening": "{{name}} hört nicht mehr zu. Schalte ihn mit seiner Schaltfläche wieder ein.",
+      "mute": "Stimme von {{name}} stummschalten",
+      "unmute": "{{name}} laut antworten lassen",
+      "capabilities": {
+        "intro": "Hier ein paar Dinge, um die du {{name}} bitten kannst.",
+        "editor": {
+          "addMethod": "Füge CreateTicket aus Zammad nach SearchIssues hinzu",
+          "addIf": "Füge nach ConfigItemSearch eine Bedingung ein: wenn nichts gefunden wurde",
+          "test": "Starte einen Debug-Test",
+          "fix": "Warum ist er fehlgeschlagen? … Beheb es",
+          "undo": "Mach das rückgängig"
+        },
+        "general": {
+          "schedules": "Zeig die Zeitpläne",
+          "createUser": "Lege einen Benutzer an",
+          "theme": "Wechsle zum dunklen Design",
+          "help": "Wie bekomme ich eine E-Mail, wenn ein Zeitplan fehlschlägt?",
+          "check": "Prüfe das System"
+        }
+      }
     }
   },
   "sidebar": {

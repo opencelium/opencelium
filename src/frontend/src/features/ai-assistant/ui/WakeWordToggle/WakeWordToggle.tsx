@@ -8,6 +8,8 @@ import { canRecordVoice } from '../../voice/useVoiceRecorder'
 import { WAKE_WORD } from '../../voice/wakeWord'
 import { useWakeWordListenerStore } from '../../voice/wakeWordListener.store'
 import { useBeebotFlightStore } from '../../voice/beebotFlight.store'
+import { useBeebotReplyStore } from '../../voice/beebotReply.store'
+import { canSpeak } from '../../voice/speechOutput'
 import './wakeWordToggle.css'
 
 // Speech RMS rarely passes 0.2; scaled so normal speaking fills the ring.
@@ -24,6 +26,7 @@ export function WakeWordToggle() {
     const health = useGetAiHealthQuery(undefined, { skip: !isConfigured })
     const { status, level, isHearing, isWorking, start, stop } = useWakeWordListenerStore()
     const isAway = useBeebotFlightStore(state => state.isAway)
+    const { isMuted, setMuted } = useBeebotReplyStore()
     const isAvailable = isConfigured && health.data?.status === 'ok' && Boolean(health.data.speech?.available) && canRecordVoice()
 
     useEffect(() => {
@@ -34,7 +37,7 @@ export function WakeWordToggle() {
     const isOn = status !== 'off'
     const state: BeebotState = !isOn ? 'off' : isWorking ? 'thinking' : isHearing ? 'active' : 'idle'
     const style = { '--wake-level': isHearing ? Math.min(1, level * LEVEL_SCALE) : 0 } as CSSProperties
-    return (
+    const toggle = (
         <Tooltip content={t(isOn ? 'commandPalette.wakeWord.stop' : 'commandPalette.wakeWord.start', { name: WAKE_WORD.name })}>
             <span className="wakeWordToggle" data-state={state} data-away={isAway || undefined} style={style} role="status"
                 aria-label={t(`commandPalette.wakeWord.state.${state}`, { name: WAKE_WORD.name })}>
@@ -43,5 +46,16 @@ export function WakeWordToggle() {
                     onClick={() => (isOn ? stop() : void start())} />
             </span>
         </Tooltip>
+    )
+    if (!isOn || !canSpeak()) return toggle
+    return (
+        <span className="wakeWordControls">
+            {toggle}
+            <Tooltip content={t(isMuted ? 'commandPalette.beebot.unmute' : 'commandPalette.beebot.mute', { name: WAKE_WORD.name })}>
+                <IconButton type="text" size="xs" testId="voice-wake-mute"
+                    iconProps={{ name: isMuted ? 'sound-off' : 'sound', isSubtle: true }}
+                    onClick={() => setMuted(!isMuted)} />
+            </Tooltip>
+        </span>
     )
 }

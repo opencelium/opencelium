@@ -6,6 +6,7 @@ import { useAppSelector } from '@shared/lib/storeHooks';
 import { selectIsAuthenticated } from '@entities/auth/model/authSelectors';
 import type {ConfirmOptions} from "@shared/ui/confirm/ConfirmDialog.types.ts";
 import ConfirmDialogContext from "@shared/ui/confirm/ConfirmDialogContext.tsx";
+import { useOpenConfirmStore } from "@shared/ui/confirm/openConfirm.store";
 
 interface InternalState extends ConfirmOptions {
     open: boolean;
@@ -24,6 +25,8 @@ export const ConfirmDialogProvider: React.FC<{
     const [loading, setLoading] = useState(false);
 
     const resolverRef = useRef<((value: boolean) => void) | null>(null);
+    // Read by the published answer, which outlives the render that opened the dialog.
+    const answerRef = useRef<(isConfirmed: boolean) => void>(() => {});
 
     const confirm = useCallback((options: ConfirmOptions) => {
         return new Promise<boolean>((resolve) => {
@@ -33,6 +36,13 @@ export const ConfirmDialogProvider: React.FC<{
             setState({
                 ...options,
                 open: true,
+            });
+            const textOf = (node: unknown) => (typeof node === 'string' ? node : '');
+            useOpenConfirmStore.getState().set({
+                text: [textOf(options.title), textOf(options.message)].filter(Boolean).join(' '),
+                isDanger: options.confirmVariant === 'danger',
+                openedAt: Date.now(),
+                answer: (isConfirmed) => answerRef.current(isConfirmed),
             });
         });
     }, []);
@@ -58,6 +68,7 @@ export const ConfirmDialogProvider: React.FC<{
     const close = (result: boolean) => {
         const resolve = resolverRef.current;
         resolverRef.current = null;
+        useOpenConfirmStore.getState().set(null);
 
         setLoading(false);
         setState({ open: false });
@@ -83,6 +94,14 @@ export const ConfirmDialogProvider: React.FC<{
             close(false);
         }
     };
+
+    useEffect(() => {
+        answerRef.current = (isConfirmed) => {
+            if (loading || !resolverRef.current) return;
+            if (isConfirmed) void handleConfirm();
+            else close(false);
+        };
+    });
 
     // When the session ends (expiry or logout) dismiss any open confirm and
     // resolve its awaiting caller with `false`, so the dialog doesn't linger on

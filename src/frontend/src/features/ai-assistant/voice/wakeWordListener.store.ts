@@ -8,13 +8,19 @@ import { workflowCommandBridgeStore } from '@features/workflow/command/workflowC
 import { aiApi } from '../api/aiApi'
 import { openMicrophoneFeed, type MicrophoneFeed } from './microphoneFeed'
 import { routeSpokenRequest } from './routeSpokenRequest'
-import { SPOKEN_REQUEST_TOAST_KEY, SPOKEN_REQUEST_TOAST_SEC } from './spokenRequest.store'
+import { SPOKEN_REQUEST_TOAST_KEY, SPOKEN_REQUEST_TOAST_SEC, useSpokenRequestStore } from './spokenRequest.store'
+import { useOpenConfirmStore } from '@shared/ui/confirm/openConfirm.store'
+import { useBeebotReplyStore } from './beebotReply.store'
+import { readConfirmAnswer, readStopRequest } from './spokenAnswers'
+import { isSpeaking, stopSpeaking } from './speechOutput'
 import { createUtteranceSegmenter, type UtteranceSegmenter } from './utteranceSegmenter'
 import { samplesToSpeechWav } from './wavEncoding'
 import { matchWakeWord, WAKE_WORD } from './wakeWord'
 
 /** After the name alone ("Beebot."), the next utterance counts as addressed without it. */
 const FOLLOW_UP_MS = 8_000
+/** A confirmation that opens this soon after a request is Beebot's own question, answered without its name. */
+const OWN_QUESTION_MS = 60_000
 /** Stops listening after this long without a request: an open microphone nobody uses is a privacy cost. */
 const IDLE_STOP_MS = 10 * 60_000
 const IDLE_CHECK_MS = 30_000
@@ -77,7 +83,8 @@ export const useWakeWordListenerStore = create<WakeWordListenerState>((set, get)
             .unwrap().catch(() => undefined)
         if (!result?.text || session !== current) return
         const match = matchWakeWord(result.text)
-        const isFollowUp = Date.now() < current.followUpUntil
+        if (answerOwnQuestion(current, match.isAddressed ? match.request : result.text)) return
+        const isFollowUp = Date.now() < Math.max(current.followUpUntil, useBeebotReplyStore.getState().followUpUntil)
         // Everything not addressed to the assistant is dropped here: never shown, never stored.
         if (!match.isAddressed && !isFollowUp) return
         const request = match.isAddressed ? match.request : result.text.trim()
@@ -89,9 +96,44 @@ export const useWakeWordListenerStore = create<WakeWordListenerState>((set, get)
             return
         }
         current.followUpUntil = 0
+        useBeebotReplyStore.setState({ followUpUntil: 0 })
+        const stopRequest = readStopRequest(request)
+        if (stopRequest) {
+            stopEverything()
+            if (stopRequest === 'stop-listening') {
+                stop()
+                message.info(t('commandPalette.beebot.stoppedListening', { name: WAKE_WORD.name }))
+            }
+            return
+        }
         message.loading({ key: SPOKEN_REQUEST_TOAST_KEY, duration: SPOKEN_REQUEST_TOAST_SEC,
             content: t('commandPalette.wakeWord.heard', { name: WAKE_WORD.name, text: request }) })
         routeSpokenRequest(request)
+    }
+
+    /** "Yes" / "no" to a confirmation Beebot itself asked; true when the utterance was that answer. */
+    const answerOwnQuestion = (current: Session, said: string): boolean => {
+        const question = useOpenConfirmStore.getState().current
+        if (!question || question.openedAt < current.lastRequestAt || question.openedAt - current.lastRequestAt > OWN_QUESTION_MS) return false
+        const answer = readConfirmAnswer(said, question.isDanger)
+        if (answer === null) return false
+        current.lastRequestAt = Date.now()
+        if (answer === 'needs-delete') {
+            const text = tCommon()('commandPalette.beebot.sayYesDelete')
+            message.info(text)
+            useBeebotReplyStore.getState().reply(text)
+            return true
+        }
+        question.answer(answer === 'yes')
+        return true
+    }
+
+    /** Silences Beebot, declines its open question and drops the request it is working on. */
+    const stopEverything = () => {
+        stopSpeaking()
+        useOpenConfirmStore.getState().current?.answer(false)
+        message.destroy(SPOKEN_REQUEST_TOAST_KEY)
+        useSpokenRequestStore.getState().cancel()
     }
 
     const enqueue = (current: Session, samples: Float32Array) => {
@@ -110,8 +152,8 @@ export const useWakeWordListenerStore = create<WakeWordListenerState>((set, get)
     const onFrame = (frame: Float32Array) => {
         const current = session
         if (!current) return
-        // A hidden tab is not being talked to; nothing is transcribed until it is back.
-        if (document.hidden) {
+        // A hidden tab is not being talked to, and Beebot's own voice is not a request; nothing is transcribed then.
+        if (document.hidden || isSpeaking()) {
             current.segmenter.reset()
             return
         }
@@ -124,6 +166,7 @@ export const useWakeWordListenerStore = create<WakeWordListenerState>((set, get)
     const stop = () => {
         const current = session
         session = null
+        stopSpeaking()
         if (current) {
             current.feed.stop()
             window.clearInterval(current.idleTimer)

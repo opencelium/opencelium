@@ -191,3 +191,35 @@ describe('POST /workflow/transformation/intent', () => {
         expect(response.statusCode).toBe(400)
     })
 })
+
+describe('POST /workflow/add-operator/intent', () => {
+    const routeOperator = async (prompt: string, answer: object) => {
+        const app = await buildApp({ config: loadConfig({}), llm: llmAnswering(answer), invokers })
+        const response = await app.inject({ method: 'POST', url: '/workflow/add-operator/intent', payload: { prompt, steps } })
+        return { response, body: response.json() }
+    }
+
+    it('reads the kind, the step and the condition in words', async () => {
+        const { body } = await routeOperator('add an if after get customers when nothing was found',
+            { kind: 'if', position: 'after', step: 's1', condition: 'nothing was found' })
+        expect(body).toMatchObject({ kind: 'if', position: 'after', stepId: 'n1', condition: 'nothing was found' })
+    })
+
+    it('takes the kind the request names outright over the model\'s', async () => {
+        const { body } = await routeOperator('add a loop over the customers of getCustomers',
+            { kind: 'if', position: 'after', step: 's1', condition: 'the customers' })
+        expect(body).toMatchObject({ kind: 'loop', stepId: 'n1' })
+    })
+
+    it('keeps a step out that the request does not name, and with it "before"', async () => {
+        const { body } = await routeOperator('add an if before this step when the status is closed',
+            { kind: 'if', position: 'before', step: 's2', condition: 'the status is closed' })
+        expect(body).toMatchObject({ stepId: null, position: 'after' })
+    })
+
+    it('takes a spelled-out step over the one the model chose', async () => {
+        const { body } = await routeOperator('füge vor createClient eine Bedingung ein: nur wenn der Kunde neu ist',
+            { kind: 'if', position: 'before', step: 's1', condition: 'der Kunde neu ist' })
+        expect(body).toMatchObject({ kind: 'if', position: 'before', stepId: 'n2' })
+    })
+})

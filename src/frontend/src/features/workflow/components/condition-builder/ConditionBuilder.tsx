@@ -1016,7 +1016,7 @@ export function ConditionBuilderDialog({
 			]}
 		>
 			{!isLoop && node ? (
-				<AiConditionPanel connection={connection} methods={methods} operatorIndex={operatorIndexPath ?? ''}
+				<AiConditionPanel nodeId={node.id} connection={connection} methods={methods} operatorIndex={operatorIndexPath ?? ''}
 					onApply={(next) => {
 						setTree(next);
 						setRenderKey((current) => current + 1);

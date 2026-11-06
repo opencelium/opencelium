@@ -33,8 +33,8 @@ export function useAiCondition({ connection, methods, operatorIndex, onApply }: 
 	const [instruction, setInstruction] = useState('');
 	const [state, setState] = useState<AiConditionState>({ status: 'idle' });
 
-	const build = async () => {
-		if (!instruction.trim()) return;
+	const build = async (text = instruction) => {
+		if (!text.trim()) return;
 		const sources = collectConditionSources(connection, methods, operatorIndex);
 		if (sources.length === 0) {
 			setState({ status: 'nothingToCompare' });
@@ -43,7 +43,7 @@ export function useAiCondition({ connection, methods, operatorIndex, onApply }: 
 		setState({ status: 'building' });
 		try {
 			const suggestion: ConditionSuggestion = await appStore.dispatch(aiApi.endpoints.suggestCondition.initiate({
-				language: lang.startsWith('de') ? 'de' : 'en', instruction: instruction.trim(),
+				language: lang.startsWith('de') ? 'de' : 'en', instruction: text.trim(),
 				sources: sources.map(({ id, step, system, path }) => ({ id, step, system, path })),
 			})).unwrap();
 			const tree = suggestionToTree(suggestion, sources);
@@ -55,5 +55,11 @@ export function useAiCondition({ connection, methods, operatorIndex, onApply }: 
 		}
 	};
 
-	return { instruction, setInstruction, state, build };
+	/** Fills in a sentence asked for elsewhere and builds it at once. */
+	const buildFrom = (text: string) => {
+		setInstruction(text);
+		void build(text);
+	};
+
+	return { instruction, setInstruction, state, build, buildFrom };
 }

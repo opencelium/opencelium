@@ -7,6 +7,8 @@ import { mappingRequestSchema } from '../editor/mappingRequest.schema.ts'
 import { routeMapping } from '../editor/routeMapping.ts'
 import { transformationRequestSchema } from '../editor/transformationRequest.schema.ts'
 import { routeTransformation } from '../editor/routeTransformation.ts'
+import { operatorRequestSchema } from '../editor/operatorRequest.schema.ts'
+import { routeOperator } from '../editor/routeOperator.ts'
 import { sendApiError } from './apiError.ts'
 
 export function registerEditorRoutes(app: FastifyInstance, { config, llm, invokers, operationRanker }: AppDeps) {
@@ -50,6 +52,20 @@ export function registerEditorRoutes(app: FastifyInstance, { config, llm, invoke
         } catch (error) {
             request.log.error({ err: error }, 'transformation request routing failed')
             return sendApiError(reply, 'GENERATION_FAILED', error instanceof Error ? error.message : 'Transformation request routing failed')
+        }
+    })
+
+    app.post('/workflow/add-operator/intent', async (request, reply) => {
+        const body = operatorRequestSchema.safeParse(request.body)
+        if (!body.success) return sendApiError(reply, 'BAD_REQUEST', 'Invalid request body', z.treeifyError(body.error))
+        try {
+            const result = await routeOperator(body.data, { llm, model: config.commandModel, contextTokens: config.contextTokens })
+            request.log.info({ kind: result.kind, position: result.position, hasStep: Boolean(result.stepId),
+                hasCondition: Boolean(result.condition), durationMs: result.durationMs }, 'add-operator routed')
+            return result
+        } catch (error) {
+            request.log.error({ err: error }, 'add-operator routing failed')
+            return sendApiError(reply, 'GENERATION_FAILED', error instanceof Error ? error.message : 'Add-operator routing failed')
         }
     })
 }

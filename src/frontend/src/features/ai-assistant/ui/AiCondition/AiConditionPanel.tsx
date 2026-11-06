@@ -1,14 +1,18 @@
+import { useEffect } from 'react';
 import type { ConditionGroup } from '@features/workflow/components/condition-builder/conditionBuilder.types';
 import type { Connection, MethodWithId } from '@features/workflow/types/connection';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import { Input } from '@shared/ui/primitives/Input';
 import { useAiCondition } from '../../condition/useAiCondition';
+import { usePendingConditionStore } from '../../condition/pendingCondition.store';
 import { useAiAvailability } from '../../mapping/useAiAvailability';
 import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 import '../../styles/ai-condition.css';
 
 type Props = {
+	/** The if being edited, to pick up a condition asked for by voice or the palette. */
+	nodeId: string;
 	connection: Connection;
 	methods: MethodWithId[];
 	operatorIndex: string;
@@ -21,6 +25,15 @@ export function AiConditionPanel(props: Props) {
 	const isAvailable = useAiAvailability();
 	const condition = useAiCondition(props);
 	const { state } = condition;
+	const { buildFrom } = condition;
+	const { nodeId } = props;
+	useEffect(() => {
+		if (!isAvailable) return;
+		const instruction = usePendingConditionStore.getState().take(nodeId);
+		if (instruction) buildFrom(instruction);
+		// Once per dialog, when the AI is known to be there; buildFrom changes every render.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isAvailable, nodeId]);
 	if (!isAvailable) return null;
 	return (
 		<div className="aiCondition" data-testid="ai-condition">

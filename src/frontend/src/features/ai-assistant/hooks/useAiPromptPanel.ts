@@ -4,6 +4,7 @@ import { type AiApplyBlock, type AiPanelView, toPanelView } from '../model/aiPan
 import { type AiConnectorPair, pickDefaultConnectors, toConnectorChoices } from '../utils/aiConnectors.utils';
 import { type AiWorkflowApplyTarget, useApplyAiWorkflow } from './useApplyAiWorkflow';
 import { useAiWorkflowGeneration } from './useAiWorkflowGeneration';
+import { useWorkflowAssistAction } from '@features/workflow/command/workflowAssistBridge';
 
 type Params = {
 	target: AiWorkflowApplyTarget;
@@ -66,6 +67,13 @@ export function useAiPromptPanel({ target, isLocked, isOtherPanelOpen, onBeforeO
 		setIsOpen(true);
 		void generation.planRequest(request);
 	};
+
+	/** "Build a workflow that …" said in the editor: the connectors already chosen, else the ones the canvas suggests. */
+	const openWithPrompt = (prompt: string) => {
+		const connectors = selected.fromId === null && selected.toId === null ? pickDefaultConnectors(nodes, choices) : selected;
+		openWith({ prompt, connectors });
+	};
+	useWorkflowAssistAction('generateWorkflow', isConfigured ? openWithPrompt : null);
 
 	const [wasOtherPanelOpen, setWasOtherPanelOpen] = useState(isOtherPanelOpen);
 	if (isOtherPanelOpen !== wasOtherPanelOpen) {

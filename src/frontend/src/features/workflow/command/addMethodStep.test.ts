@@ -14,13 +14,14 @@ const crm = { connectorId: 7, title: 'CRM', invoker: { name: 'CRM', operations: 
 
 let nodes: WorkflowNodeModel[];
 const addStep = vi.fn<(action: WorkflowAction) => string | null>(() => 'new-1');
+const selectNode = vi.fn();
 
 describe('addMethodStep', () => {
 	beforeEach(() => {
 		nodes = [node('start-1', 'start'), node('a', 'connector'), node('b', 'connector')];
 		workflowCommandBridgeStore.setState({
 			isActive: true, isEditable: () => true, getConnectors: () => [crm],
-			getNodes: () => nodes, getEdges: () => [edge('start-1', 'a'), edge('a', 'b')], addStep, centerOnNode: vi.fn(),
+			getNodes: () => nodes, getEdges: () => [edge('start-1', 'a'), edge('a', 'b')], addStep, centerOnNode: vi.fn(), selectNode,
 		});
 	});
 	afterEach(() => {
@@ -31,6 +32,8 @@ describe('addMethodStep', () => {
 	it('adds the operation as a connector step before the named step', () => {
 		const result = addMethodStep({ connectorId: 7, operationName: 'getAllUsers', anchorNodeId: 'b', position: 'before' });
 		expect(result).toEqual({ kind: 'added', nodeId: 'new-1', method: 'getAllUsers', connector: 'CRM' });
+		// Selected, so "it" in the next request means the new step.
+		expect(selectNode).toHaveBeenCalledWith('new-1');
 		expect(addStep.mock.calls[0]?.[0]).toMatchObject({
 			sourceNodeId: 'a', direction: 'right', kind: 'connector', methodName: 'getAllUsers',
 			connector: { connectorId: 7, title: 'CRM' }, methodOperation: { name: 'getAllUsers' },

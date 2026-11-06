@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { create } from 'zustand';
+import type { TestRunMode } from '../test-run/testRunModePreference';
 
 export type StartTestOutcome = 'started' | 'running' | 'unavailable';
 
@@ -9,7 +10,8 @@ export type StartTestOutcome = 'started' | 'running' | 'unavailable';
  * can be used, so an unregistered action means "not possible right now".
  */
 export type WorkflowAssistHandlers = {
-	startTest: () => StartTestOutcome;
+	/** In the mode given; without one, the start button decides (it may ask). */
+	startTest: (mode: TestRunMode | null) => StartTestOutcome;
 	/** False when no run is going. */
 	stopTest: () => boolean;
 	showLogs: () => void;
@@ -20,6 +22,15 @@ export type WorkflowAssistHandlers = {
 	fixFailure: () => boolean;
 	/** False when no fix is proposed, or a test run holds the editor. */
 	applyFix: () => boolean;
+	/** False when there is nothing to undo / redo, or the editor cannot be changed now. */
+	undo: () => boolean;
+	redo: () => boolean;
+	/** Opens the save dialog as Ctrl+S does; false when saving is not possible now. */
+	saveWorkflow: () => boolean;
+	/** Asks first, always; false when cancelled or the editor cannot be changed now. */
+	deleteStep: (step: { nodeId: string; label: string }) => Promise<boolean>;
+	/** Opens Generate with AI with the request filled in and plans it. */
+	generateWorkflow: (prompt: string) => void;
 };
 
 export type WorkflowAssistAction = keyof WorkflowAssistHandlers;
@@ -50,7 +61,8 @@ export function useWorkflowAssistAction<A extends WorkflowAssistAction>(action: 
 	const isAvailable = handler !== null;
 	useEffect(() => {
 		if (!isAvailable) return undefined;
-		const callLatest = (() => handlerRef.current?.()) as WorkflowAssistHandlers[A];
+		const callLatest = ((...args: unknown[]) =>
+			(handlerRef.current as ((...given: unknown[]) => unknown) | null)?.(...args)) as WorkflowAssistHandlers[A];
 		return workflowAssistBridgeStore.getState().register(action, callLatest);
 	}, [action, isAvailable]);
 }

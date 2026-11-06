@@ -327,6 +327,23 @@ export type AddMethodIntentResponse = {
 	model: string;
 };
 
+/** Mirrors `operatorRequestSchema` in `src/ai-gateway/src/editor/operatorRequest.schema.ts`. */
+export type AddOperatorIntentRequest = {
+	prompt: string;
+	/** The workflow's methods in workflow order. */
+	steps: { id: string; label: string }[];
+};
+
+export type AddOperatorIntentResponse = {
+	kind: 'if' | 'loop';
+	position: 'after' | 'before';
+	stepId: string | null;
+	/** The condition, or the list to loop over, in the user's words; empty when none was said. */
+	condition: string;
+	durationMs: number;
+	model: string;
+};
+
 export type MappingIntentRequest = {
 	prompt: string;
 	/** The workflow's method names in workflow order. */
