@@ -24,8 +24,8 @@ vi.mock('@app/store/store', () => ({
         },
     },
 }))
-const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
-vi.mock('antd', async (original) => ({ ...(await original<typeof import('antd')>()), message: { success: toast.success } }))
+const toast = vi.hoisted(() => ({ success: vi.fn(), info: vi.fn(), error: vi.fn() }))
+vi.mock('antd', async (original) => ({ ...(await original<typeof import('antd')>()), message: { success: toast.success, info: toast.info } }))
 vi.mock('@shared/ui/feedback/notifyError', () => ({ notifyError: toast.error }))
 vi.mock('@shared/i18n/config/i18n', () => ({
     i18n: { language: 'en', getFixedT: (language: string) => (key: string, values?: Record<string, string>) =>
@@ -40,6 +40,7 @@ import { useWorkflowGuideStore } from '@features/onboarding/guides/model/workflo
 import { usePendingMappingStore } from '../mapping/pendingMapping.store'
 import { usePendingScriptStore } from '../hooks/pendingScript.store'
 import { requestEditorBridgeStore, type OpenRequestEditor } from '@features/workflow/command/requestEditorBridge'
+import { workflowAssistBridgeStore } from '@features/workflow/command/workflowAssistBridge'
 import { askWorkflowEditor } from './askWorkflowEditor'
 
 const method = (id: string, label: string) => ({
@@ -73,7 +74,10 @@ describe('askWorkflowEditor', () => {
         expect(await askWorkflowEditor('order a pizza')).toBe('unhandled')
         const options = (gateway.requests[0]?.body.guides as { id: string; description: string }[])
         expect(options.map(option => option.id)).toEqual(['method-url', 'method-headers', 'method-body', 'method-try',
-            'method-transformation', 'add-method', 'suggest-mapping', 'apply-transformation'])
+            'method-transformation', 'add-method', 'suggest-mapping', 'apply-transformation',
+            'test-workflow', 'stop-test', 'explain-failure', 'fix-failure', 'apply-fix', 'explain-workflow', 'show-logs', 'show-problems'])
+        expect(options.find(option => option.id === 'test-workflow')).toMatchObject({ isAction: true, withMethod: 'method-try' })
+        expect(options.find(option => option.id === 'explain-failure')).toMatchObject({ isAction: false })
         expect(options[4]).toMatchObject({ id: 'method-transformation', teaches: 'apply-transformation' })
         expect(options[5]).toEqual({ id: 'add-method', description: 'en add · de add', isAction: true })
         expect(options[6]).toEqual({ id: 'suggest-mapping', description: 'en map · de map', isAction: true })
@@ -238,6 +242,74 @@ describe('askWorkflowEditor', () => {
             gateway.answers.readTransformation = { field: '', spokenField: '', description: 'upper case' }
             await askWorkflowEditor('apply transformation with upper case')
             expect(toast.error).toHaveBeenCalledWith('commandPalette.workflowEdit.noFieldNamed{"part":"commandPalette.workflowEdit.part.body"}')
+        })
+    })
+
+    describe('running and debugging', () => {
+        const route = (guideId: string) => { gateway.answers.routeGuide = { guideId, method: '' } }
+        afterEach(() => workflowAssistBridgeStore.setState({ handlers: {} }))
+
+        it('starts the test run, and says when one is already going or cannot start', async () => {
+            const startTest = vi.fn<() => 'started' | 'running' | 'unavailable'>(() => 'started')
+            workflowAssistBridgeStore.getState().register('startTest', startTest)
+            route('test-workflow')
+            expect(await askWorkflowEditor('test the workflow')).toBe('handled')
+            expect(startTest).toHaveBeenCalledOnce()
+            expect(toast.info).not.toHaveBeenCalled()
+            startTest.mockReturnValueOnce('running')
+            await askWorkflowEditor('run the workflow')
+            expect(toast.info).toHaveBeenCalledWith('commandPalette.workflowAssist.testRunning')
+            startTest.mockReturnValueOnce('unavailable')
+            await askWorkflowEditor('run the workflow')
+            expect(toast.error).toHaveBeenCalledWith('commandPalette.workflowAssist.testUnavailable')
+        })
+
+        it('opens the logs and explains the failure', async () => {
+            const showLogs = vi.fn()
+            const explainFailure = vi.fn()
+            workflowAssistBridgeStore.getState().register('showLogs', showLogs)
+            workflowAssistBridgeStore.getState().register('explainFailure', explainFailure)
+            route('explain-failure')
+            expect(await askWorkflowEditor('why did it fail?')).toBe('handled')
+            expect(showLogs).toHaveBeenCalledOnce()
+            expect(explainFailure).toHaveBeenCalledOnce()
+        })
+
+        it('says there is no failed run to explain or fix', async () => {
+            route('fix-failure')
+            expect(await askWorkflowEditor('fix it')).toBe('handled')
+            expect(toast.info).toHaveBeenCalledWith('commandPalette.workflowAssist.noFailure')
+        })
+
+        it('says when the failure has no request to fix', async () => {
+            workflowAssistBridgeStore.getState().register('fixFailure', () => false)
+            route('fix-failure')
+            await askWorkflowEditor('fix it')
+            expect(toast.info).toHaveBeenCalledWith('commandPalette.workflowAssist.notFixable')
+        })
+
+        it('applies the proposed fix, or says there is none', async () => {
+            const applyFix = vi.fn(() => true)
+            workflowAssistBridgeStore.getState().register('applyFix', applyFix)
+            route('apply-fix')
+            await askWorkflowEditor('apply the fix')
+            expect(applyFix).toHaveBeenCalledOnce()
+            expect(toast.info).not.toHaveBeenCalled()
+            applyFix.mockReturnValueOnce(false)
+            await askWorkflowEditor('apply the fix')
+            expect(toast.info).toHaveBeenCalledWith('commandPalette.workflowAssist.noFix')
+        })
+
+        it('explains the workflow only when it has steps to explain', async () => {
+            route('explain-workflow')
+            await askWorkflowEditor('what does this workflow do?')
+            expect(toast.info).toHaveBeenCalledWith('commandPalette.workflowAssist.noSteps')
+            const explainWorkflow = vi.fn()
+            const unregister = workflowAssistBridgeStore.getState().register('explainWorkflow', explainWorkflow)
+            await askWorkflowEditor('what does this workflow do?')
+            expect(explainWorkflow).toHaveBeenCalledOnce()
+            unregister()
+            expect(workflowAssistBridgeStore.getState().handlers.explainWorkflow).toBeUndefined()
         })
     })
 })

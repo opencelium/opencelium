@@ -67,16 +67,19 @@ export async function routeGuide(request: RouteGuideRequest, deps: RouteGuideDep
     const answer = answerSchema.parse(JSON.parse(result.content))
     const spoken = findSpokenMethod(request.prompt, methods)
     const picked = answer.method && isReferredTo(answer.method, request.prompt) ? answer.method : ''
-    const option = request.guides.find((guide) => guide.id === answer.guide)
+    const chosen = request.guides.find((guide) => guide.id === answer.guide)
+    // An option about the whole workflow stands for its per-method one when a method is named.
+    const option = chosen?.withMethod && (spoken || picked)
+        ? request.guides.find((guide) => guide.id === chosen.withMethod) ?? chosen : chosen
     // A how-question never runs an action: it gets the guide teaching that action, if there is one, else nothing.
     const isRefused = option?.isAction === true && HOW_QUESTION_RE.test(request.prompt)
-    const teacher = isRefused ? request.guides.find((guide) => guide.teaches === answer.guide) : undefined
+    const teacher = isRefused ? request.guides.find((guide) => guide.teaches === option?.id) : undefined
     // And the other way round: a guide chosen for an instruction that asks to be shown nothing ("transform X so …")
     // is the action it teaches.
     const taught = option?.teaches && !TEACH_ME_RE.test(request.prompt)
         ? request.guides.find((guide) => guide.id === option.teaches) : undefined
     return {
-        guideId: teacher?.id ?? taught?.id ?? (answer.guide === NONE || isRefused ? null : answer.guide),
+        guideId: teacher?.id ?? taught?.id ?? (!option || isRefused ? null : option.id),
         method: spoken || picked,
         durationMs: result.durationMs,
         model: deps.model,

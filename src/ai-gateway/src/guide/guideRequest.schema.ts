@@ -9,6 +9,8 @@ export const guideOptionSchema = z.object({
     isAction: z.boolean().default(false),
     /** The action this guide shows how to do: a how-question read as that action is this guide instead. */
     teaches: z.string().trim().max(50).optional(),
+    /** The option to use instead when the request names a method: "test the workflow" vs. "test getCustomers". */
+    withMethod: z.string().trim().max(50).optional(),
 })
 
 export const routeGuideRequestSchema = z.object({

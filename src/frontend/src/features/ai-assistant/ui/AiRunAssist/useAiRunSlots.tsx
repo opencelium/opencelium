@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { LogTargetSlots } from '@features/logs';
+import { useWorkflowAssistAction } from '@features/workflow/command/workflowAssistBridge';
 import { isAiConfigured, useGetAiHealthQuery } from '../../api/aiApi';
 import { type RunAssistTarget, useRunFailureAssist } from '../../run/useRunFailureAssist';
 import { AiRunPanel } from './AiRunPanel';
@@ -20,7 +21,19 @@ export function useAiRunSlots({ isFailed, isLocked, ...target }: Args): { slots:
 	const health = useGetAiHealthQuery(undefined, { skip: !isConfigured });
 	const assist = useRunFailureAssist(target);
 	const isAvailable = isConfigured && health.data?.ollama.reachable === true && health.data.workflowModel.available;
-	if (!isFailed || !isAvailable || !assist.failed) return { slots: {}, detached: null };
+	const canAssist = isFailed && isAvailable && assist.failed !== null;
+	useWorkflowAssistAction('explainFailure', canAssist ? () => void assist.explain() : null);
+	useWorkflowAssistAction('fixFailure', canAssist ? () => {
+		if (!assist.canFix) return false;
+		void assist.fix();
+		return true;
+	} : null);
+	useWorkflowAssistAction('applyFix', canAssist ? () => {
+		if (assist.state.status !== 'fix' || isLocked) return false;
+		assist.apply();
+		return true;
+	} : null);
+	if (!canAssist || !assist.failed) return { slots: {}, detached: null };
 
 	const actions = <AiRunRowActions assist={assist} />;
 	const panel = <AiRunPanel assist={assist} nodes={target.nodes} isLocked={isLocked} />;

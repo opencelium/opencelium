@@ -9,6 +9,7 @@ import type { WorkflowLogsPanelState } from '../WorkflowLogs/WorkflowLogs.types'
 import { useTestRun } from '../../test-run/useTestRun';
 import { useTestRunModePromptStore } from '../../test-run/testRunModePromptStore';
 import { useMethodLabels } from '../WorkflowLogs/useMethodLabels';
+import { useWorkflowAssistAction } from '../../command/workflowAssistBridge';
 
 export const WorkflowMain = ({ loading, canvas, runAssist }: WorkflowMainProps) => {
 	const testRun = useTestRun();
@@ -30,6 +31,7 @@ export const WorkflowMain = ({ loading, canvas, runAssist }: WorkflowMainProps) 
 	// pushed into logsPanel so dismissing the dialog without starting anything
 	// puts the panel back on its own.
 	const isModePromptOpen = useTestRunModePromptStore((state) => state.isOpen);
+	useWorkflowAssistAction('showLogs', () => setLogsPanel((current) => current === 'minimized' ? 'normal' : current));
 	const panel = logsPanel === 'minimized' && isModePromptOpen ? 'normal' : logsPanel;
 
 	// The log panel names methods the way the canvas does, so a renamed step reads
