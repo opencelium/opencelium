@@ -182,6 +182,11 @@ public final class ConsolePrompter implements Prompter {
 		out.flush();
 	}
 
+	@Override
+	public Meter meter(String line) {
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+
 	/** {@code   Label           [default]: }: the label padded to the label column. */
 	private static String questionLine(String question, String brackets) {
 		return MARGIN + Screen.padded(question) + brackets + ": ";

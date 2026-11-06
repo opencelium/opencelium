@@ -22,22 +22,31 @@ import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.testsupport.fake.RecordingCommandRunner;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
+import static io.opencelium.core.testsupport.fixture.ComposePullEvents.downloadComplete;
+import static io.opencelium.core.testsupport.fixture.ComposePullEvents.downloading;
+import static io.opencelium.core.testsupport.fixture.ComposePullEvents.error;
+import static io.opencelium.core.testsupport.fixture.ComposePullEvents.pulled;
+import static io.opencelium.core.testsupport.fixture.ComposePullEvents.pulling;
+import static io.opencelium.core.testsupport.fixture.ComposePullEvents.waiting;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * The Docker Compose installer as an action of the plan: its compose file and its {@code .env} are written with the
- * other files of the plan, then {@code docker compose up -d} runs in the quickstart directory, and the action pings
- * until MongoDB accepts the login. A failure stops the container, removes the volume when this run made it, and the
- * rollback of the plan removes the files. The commands go to a fake runner and the ping is a fake, so no test needs
- * Docker.
+ * other files of the plan, then {@code docker compose pull} downloads the image with a progress bar, {@code docker
+ * compose up -d} runs in the quickstart directory, and the action pings until MongoDB accepts the login. A failure
+ * stops the container, removes the volume when this run made it, and the rollback of the plan removes the files. The
+ * commands go to a fake runner and the ping is a fake, so no test needs Docker.
  */
 class DockerComposeInstallerTest {
 
 	private static final String FAKE_PASSWORD = "Gen3rated-Passw0rd";
 
 	private static final String VOLUME_INSPECT = "docker volume inspect opencelium_mongo-data";
+
+	private static final String PULL = "docker compose -p opencelium -f docker-compose.yml --env-file .env"
+			+ " --progress json pull --policy missing";
 
 	private static final String UP = "docker compose -p opencelium -f docker-compose.yml --env-file .env up -d";
 
@@ -133,7 +142,7 @@ class DockerComposeInstallerTest {
 		assertThatExceptionOfType(SetupWriteException.class)
 				.isThrownBy(() -> write(installer(NEVER_ANSWERS, Duration.ZERO)))
 				.withMessageContaining("connection refused").withMessageNotContaining(FAKE_PASSWORD);
-		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, UP, DOWN + " -v");
+		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, PULL, UP, DOWN + " -v");
 		assertThat(quickstart()).doesNotExist();
 	}
 
@@ -146,7 +155,62 @@ class DockerComposeInstallerTest {
 				.isThrownBy(() -> write(installer(earlierPassword, Duration.ZERO)))
 				.withMessageContaining("authentication failed for user 'opencelium'")
 				.withMessageContaining("opencelium_mongo-data");
-		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, UP, DOWN);
+		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, PULL, UP, DOWN);
+	}
+
+	@Test
+	void installShowsTheProgressBarWhenComposePullsTheImage() {
+		commands.answer(PULL, 0, String.join("\n", pulling(), waiting("a1"), waiting("b2"),
+				downloading("a1", 30_000_000, 60_000_000), downloading("b2", 10_000_000, 40_000_000),
+				downloadComplete("a1"), downloadComplete("b2"), pulled()));
+
+		write(installer(ANSWERS, Duration.ofSeconds(60)));
+
+		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, PULL, UP);
+		// The bar moves while the pull runs, so the installer takes the lines through the call that streams them.
+		assertThat(commands.streamed()).containsExactly(PULL);
+		assertThat(console.output()).containsSubsequence(
+				"  -> Starting MongoDB with Docker Compose in " + quickstart(),
+				"  -> Downloading the image mongo:8",
+				"    [############------------]  30.0 of 60.0 MB  50%",
+				"    [########################]  100.0 of 100.0 MB  100%",
+				"  OK MongoDB answers at");
+	}
+
+	@Test
+	void installShowsNoBarWhenTheHostHasTheImage() {
+		// With the image on the host, the pull downloads nothing and gives no layer event.
+		commands.answer(PULL, 0, String.join("\n", pulling(), pulled()));
+
+		write(installer(ANSWERS, Duration.ofSeconds(60)));
+
+		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, PULL, UP);
+		assertThat(console.output()).doesNotContain("Downloading").contains("  OK MongoDB answers at");
+	}
+
+	@Test
+	void installStopsWithTheCauseFromDockerWhenThePullFails() {
+		commands.answer(VOLUME_INSPECT, 1, "no such volume\n").answer(PULL, 1, String.join("\n", pulling(),
+				error("toomanyrequests: You have reached your unauthenticated pull rate limit")));
+
+		assertThatExceptionOfType(SetupWriteException.class)
+				.isThrownBy(() -> write(installer(ANSWERS, Duration.ofSeconds(60))))
+				.withMessageContaining("Cannot download the image mongo:8")
+				.withMessageContaining("toomanyrequests: You have reached your unauthenticated pull rate limit")
+				.satisfies(ex -> assertThat(ex.rollbackReport()).isEqualTo("Nothing was written."));
+		assertThat(commands.commands()).doesNotContain(UP);
+		assertThat(quickstart()).doesNotExist();
+	}
+
+	@Test
+	void installStartsWithoutABarWhenThePullGivesNoJson() {
+		// An older Docker Compose knows no JSON progress; up -d then downloads the image as before.
+		commands.answer(PULL, 1, "unknown flag: --progress\n");
+
+		write(installer(ANSWERS, Duration.ofSeconds(60)));
+
+		assertThat(commands.commands()).containsExactly(VOLUME_INSPECT, PULL, UP);
+		assertThat(console.output()).doesNotContain("Downloading").contains("  OK MongoDB answers at");
 	}
 
 	private DockerComposeInstaller installer(Function<MongoConnection, Optional<String>> ping, Duration timeout) {

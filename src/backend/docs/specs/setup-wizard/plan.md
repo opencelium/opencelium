@@ -16,6 +16,10 @@ The launcher decides between the wizard and the normal start (the rules are in "
 ### The MongoDB step
 The detector probes `localhost:27017`, which is the address of the default URI, and `docker compose version`; the result decides the menu items and the default. The menu does not offer Docker Compose when a server listens on that port, because the container publishes the same port. The ping reuses the start ping and the client factory of `core.config.mongo`, which run without Spring. Thus each Mongo client comes from 1 path, and the causes are the same as at the start. The URI path asks the URI, pings, and offers the retry menu. The URI splitter moves the password to `OC_MONGO_PASSWORD` in the env file and writes the URI with the placeholder. The Docker option only validates and plans at the step: the Docker Compose installer runs after the summary, as an action of the plan. A failed action stops the run; the rollback removes the files and stops what the plan started. The Docker Compose installer writes `quickstart/docker-compose.yml` and `.env`, runs `docker compose up -d` and waits for the ping. Before the first question, the launcher sets the driver logger to WARN, so the driver is quiet before Spring. Spring sets the levels again when it starts.
 
+Before `docker compose up -d`, the installer runs `docker compose --progress json pull --policy missing`. The command downloads the image only when the host does not have it. Docker Compose prints 1 JSON event on each line, and the command runner gives each line while the command runs. An error event stops the run with the message from Docker. When the pull gives no JSON event, the installer shows no bar, and `docker compose up -d` downloads the image.
+
+The installer adds the bytes of all layers and moves 1 progress bar of the prompter. Docker gives the size of a layer only when its download starts. Thus the total can increase in the first seconds. On a terminal, the prompter draws the bar again in 1 line. Without a terminal, it prints 1 line when the progress passes 25 %, 50 %, 75 % or 100 % for the first time, so the log stays short.
+
 ### The master key and the admin
 The master key step runs the guard first, in probe mode, against the pinged database. A wrapped DEK and no key print the restore-or-reset text and stop. Then the step offers generate, variable and file. Generate makes the 32 bytes in memory and adds `<data-dir>/master.key` with owner-only permissions to the plan. After the write, the wizard shows the backup box and asks for the confirmation. The answer `N` prints the path again and asks again; batch mode prints the warning to standard error and continues.
 
@@ -66,11 +70,11 @@ All code is in `core`. The wizard writes the configuration of core, connects to 
 | Package | Responsibility |
 |---|---|
 | `io.opencelium.core.setup` | The launcher with the launch decision and the usage text, the wizard loop, the setup context, the cancel and failure exceptions. Also the admin marker, the completion runner, the setup state with its repository, the 2 endpoints and the setup-required filter. |
-| `io.opencelium.core.setup.prompt` | The prompter contract, the console seam, the console prompter with the loops for bad input, `?` and `q`, the screen helpers. |
+| `io.opencelium.core.setup.prompt` | The prompter contract, the console seam, the console prompter with the loops for bad input, `?` and `q`, the progress bar, the screen helpers. |
 | `io.opencelium.core.setup.values` | The questions, the setup file reader, the template, the value source: the file, else the prompt, else the batch error. |
 | `io.opencelium.core.setup.steps` | One step for each screen: service, data directory, port, MongoDB, master key, admin, summary. |
 | `io.opencelium.core.setup.files` | The plan with its files and actions, the atomic writer with the rollback and the `.bak` copy, the yml, env and service-file renderers, the bootstrap values. |
-| `io.opencelium.core.setup.mongo` | The detector, the Docker Compose installer, the URI splitter. The ping comes from `core.config.mongo`. |
+| `io.opencelium.core.setup.mongo` | The detector, the Docker Compose installer, the pull progress, the URI splitter. The ping comes from `core.config.mongo`. |
 | `io.opencelium.core.setup.host` | The host services SPI, the systemd and the print-only implementations, the sudo re-execution, the command runner seam. |
 
 The wizard uses these packages:
@@ -108,6 +112,7 @@ The reviewer confirms each decision before task 12, the first open task, starts.
 21. **The service question comes first.** Where is the data directory with the service? Options: (a) the data directory question first with the local default, and the service step moves the data to `/var/lib/opencelium`, (b) the service question first, and the data directory default becomes `/var/lib/opencelium`. Recommended: (b), because the unit file permits writes only there, and nothing moves after the write.
 22. **The wizard prints the login box.** Which process prints the box? Options: (a) the completion runner inside the application, (b) the wizard process, when the port listens. Recommended: (b), because with the service the output of the application goes to the journal, not to the terminal.
 23. **An old file stays as a backup.** What happens to a file at a target path on a re-run of `setup`? Options: (a) the write replaces it, (b) the write keeps it as `<name>.bak`. Recommended: (b), because a batch run has no confirmation, and a yml file that an operator edited by hand must not vanish.
+24. **The wizard draws its own progress bar.** How does the user see the download of the image? Options: (a) Docker draws 1 bar for each layer on the terminal, (b) the wizard parses the JSON events and draws 1 bar with the total MB. Recommended: (b), because the user sees 1 total, a log without a terminal stays short, and a failed download gives the cause from Docker. Jackson is on the classpath of core and parses the events, so the feature adds no dependency.
 
 ## Interfaces and contracts
 
@@ -232,7 +237,8 @@ The feature adds no bootstrap property and no runtime setting. The wizard writes
 
 ### The new public types, by responsibility
 - The host services SPI: detect the host, install the service, print the service. One implementation for systemd, one that only prints.
-- The command runner seam: runs a host command and returns its exit code and output; the tests give a fake that records the commands.
+- The command runner seam: runs a host command and returns its exit code and output, and it gives each output line while the command runs; the tests give a fake that records the commands.
+- The progress bar: the prompter opens it, the installer moves it, and when it closes, its line ends.
 - The admin marker: the handover from phase 1 to phase 2, as the setup state `PENDING_ADMIN` in the database. It holds the username and no secret.
 - The plan actions: the MongoDB start with Docker Compose, the admin marker and the service installation, after the file write and with a rollback.
 - The setup state repository and the 2 response types of the endpoints.
@@ -245,6 +251,7 @@ The test kinds follow architecture section 6.8 and CONTRIBUTING section 9. The t
 | SW-01 to SW-04 | Unit: the launcher with an injected terminal state, environment, system properties and working directory. | A temporary directory. |
 | SW-05 to SW-10 | Unit: the console prompter and the wizard loop with scripted input. The script has bad input, `?`, `q` and the end of the input. | `ScriptedConsoleIo`. |
 | SW-11, SW-12 | Unit: the detector with injected probe results; the menu with scripted input. | A fake detector. |
+| SW-47 | Unit: the pull progress with recorded JSON lines; the installer with a fake command runner that gives the lines; the console prompter with a terminal and without a terminal. | A fake command runner, `ScriptedConsoleIo`. |
 | SW-16, SW-17 | A test against the local MongoDB without a Spring context: the step with correct credentials, wrong credentials and a closed port. The retry menu with scripted input. | `LocalMongo`. |
 | SW-18 | Unit: the URI splitter and the rendered yml and env files. | None. |
 | SW-19 to SW-22 | Unit: the master key step with scripted input, a temporary directory and an injected environment map; the backup confirmation with `N` and in batch mode. | `ScriptedConsoleIo`. |

@@ -67,4 +67,28 @@ public interface Prompter {
 	/** Prints one line as it is; the caller indents it. */
 	void print(String line);
 
+	/**
+	 * A progress bar under a status line about something that starts now, for example a download. Nothing is printed
+	 * until the first update with a total above zero, so a run that has nothing to do shows no bar.
+	 *
+	 * @param line the status line above the bar
+	 */
+	Meter meter(String line);
+
+	/** A progress bar that the caller moves; closing it ends its line. */
+	interface Meter extends AutoCloseable {
+
+		/**
+		 * Shows the progress. The total can grow while the work runs, so the bar can also move back.
+		 *
+		 * @param done  the units done so far, in bytes for a download
+		 * @param total the units known so far; zero when none is known yet
+		 */
+		void update(long done, long total);
+
+		@Override
+		void close();
+
+	}
+
 }
