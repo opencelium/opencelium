@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.WidgetSettingServiceImp;
 import com.becon.opencelium.backend.enums.AuthMethod;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
@@ -234,6 +235,7 @@ class UserServiceImplTest {
         saved.setUsername("ldap-user@example.com");
         saved.setEmail("ldap-user@example.com");
 
+        when(userRepository.existsByUsernameAndIdNot("ldap-user@example.com", 0)).thenReturn(false);
         when(userRepository.save(input)).thenReturn(saved);
 
         User result = userService.save(input);
@@ -241,6 +243,7 @@ class UserServiceImplTest {
         assertThat(result.getId()).isEqualTo(17);
         assertThat(result.getUsername()).isEqualTo("ldap-user@example.com");
         assertThat(result.getEmail()).isEqualTo("ldap-user@example.com");
+        verify(userRepository).existsByUsernameAndIdNot("ldap-user@example.com", 0);
         verify(userRepository).save(input);
         verifyNoMoreInteractions(userRepository);
     }
@@ -256,6 +259,7 @@ class UserServiceImplTest {
         saved.setId(17);
         saved.setUsername("ldap-user");
 
+        when(userRepository.existsByUsernameAndIdNot("ldap-user", 0)).thenReturn(false);
         when(userRepository.save(input)).thenReturn(saved);
 
         User result = userService.save(input);
@@ -263,6 +267,7 @@ class UserServiceImplTest {
         assertThat(result.getId()).isEqualTo(17);
         assertThat(result.getUsername()).isEqualTo("ldap-user");
         assertThat(result.getEmail()).isNull();
+        verify(userRepository).existsByUsernameAndIdNot("ldap-user", 0);
         verify(userRepository).save(input);
         verifyNoMoreInteractions(userRepository);
     }
@@ -280,7 +285,73 @@ class UserServiceImplTest {
         verifyNoInteractions(userRepository);
     }
 
-    // ── existsByEmail / existsById / deleteById / findAll ─────────────────────
+    @Test
+    void saveTrimsUsernameWhenItHasSurroundingWhitespace() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.BASIC);
+        input.setEmail("bob@example.com");
+        input.setUsername("  bob  ");
+
+        when(userRepository.existsByUsernameAndIdNot("bob", 0)).thenReturn(false);
+        when(userRepository.save(input)).thenReturn(input);
+
+        User result = userService.save(input);
+
+        assertThat(result.getUsername()).isEqualTo("bob");
+        verify(userRepository).existsByUsernameAndIdNot("bob", 0);
+        verify(userRepository).save(input);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void saveStoresNullUsernameWhenItIsBlank() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.BASIC);
+        input.setEmail("bob@example.com");
+        input.setUsername("   ");
+
+        when(userRepository.save(input)).thenReturn(input);
+
+        User result = userService.save(input);
+
+        assertThat(result.getUsername()).isNull();
+        verify(userRepository).save(input);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void saveThrowsWhenBasicUserUsernameContainsAtSign() {
+        User input = UserFixture.anEmptyUser();
+        input.setAuthMethod(AuthMethod.BASIC);
+        input.setEmail("bob@example.com");
+        input.setUsername("bob@example.com");
+
+        assertThatThrownBy(() -> userService.save(input))
+                .isInstanceOf(GeneralServiceException.class)
+                .hasFieldOrPropertyWithValue("error", ExceptionConstant.USERNAME_INVALID);
+
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void saveThrowsWhenUsernameIsTakenByAnotherUser() {
+        User input = UserFixture.anEmptyUser();
+        input.setId(7);
+        input.setAuthMethod(AuthMethod.BASIC);
+        input.setEmail("bob@example.com");
+        input.setUsername("bob");
+
+        when(userRepository.existsByUsernameAndIdNot("bob", 7)).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.save(input))
+                .isInstanceOf(GeneralServiceException.class)
+                .hasFieldOrPropertyWithValue("error", ExceptionConstant.USERNAME_ALREADY_EXIST);
+
+        verify(userRepository).existsByUsernameAndIdNot("bob", 7);
+        verify(userRepository, never()).save(any());
+    }
+
+    // ── existsByEmail / existsByUsername / existsById / deleteById / findAll ──
 
     @Test
     void existsByEmailReturnsTrueWhenRepositoryReportsExists() {
@@ -290,6 +361,17 @@ class UserServiceImplTest {
 
         assertThat(result).isTrue();
         verify(userRepository).existsByEmail("a@b.com");
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void existsByUsernameReturnsTrueWhenRepositoryReportsExists() {
+        when(userRepository.existsByUsername("bob")).thenReturn(true);
+
+        boolean result = userService.existsByUsername("bob");
+
+        assertThat(result).isTrue();
+        verify(userRepository).existsByUsername("bob");
         verifyNoMoreInteractions(userRepository);
     }
 
@@ -436,7 +518,7 @@ class UserServiceImplTest {
         UserDetail mappedDetail = new UserDetail();
         UserRole role = UserRoleFixture.aStandardUserRole();
 
-        when(userRepository.findOneById(5)).thenReturn(Optional.of(userDb));
+        when(userRepository.findById(5)).thenReturn(Optional.of(userDb));
         when(userRoleRepository.findById(7)).thenReturn(Optional.of(role));
         when(bCryptPasswordEncoder.encode("newPw")).thenReturn("$2a$new");
         when(detailService.toEntity(any(UserDetailResource.class))).thenReturn(mappedDetail);
@@ -469,7 +551,7 @@ class UserServiceImplTest {
         UserRole role = UserRoleFixture.aStandardUserRole();
         UserDetail mappedDetail = new UserDetail();
 
-        when(userRepository.findOneById(5)).thenReturn(Optional.of(userDb));
+        when(userRepository.findById(5)).thenReturn(Optional.of(userDb));
         when(userRoleRepository.findById(7)).thenReturn(Optional.of(role));
         when(detailService.toEntity(any(UserDetailResource.class))).thenReturn(mappedDetail);
         when(sessionService.findByUserId(5)).thenReturn(Optional.empty());

@@ -18,7 +18,8 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.repository.SessionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
+import com.becon.opencelium.backend.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +30,13 @@ import java.util.UUID;
 @Service
 public class SessionServiceImpl implements SessionService {
 
-    @Autowired
-    private SessionRepository sessionRepository;
+    private final SessionRepository sessionRepository;
+    private final UserRepository userRepository;
+
+    public SessionServiceImpl(SessionRepository sessionRepository, UserRepository userRepository) {
+        this.sessionRepository = sessionRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
     public Optional<Session> findById(String id) {
@@ -53,27 +59,39 @@ public class SessionServiceImpl implements SessionService {
         sessionRepository.deleteByUserId(userId);
     }
 
+    /**
+     * Replaces the user's session with a fresh one, serialized against other logins of the same
+     * user.
+     *
+     * <p>{@code User.session} is an eager one-to-one resolved by {@code user_id}, so the entity
+     * model tolerates exactly one {@code user_session} row per user. Two overlapping logins used
+     * to be able to leave two rows behind: the delete ran immediately, but the insert was only
+     * flushed on commit, after this method had returned and any JVM monitor had been released.
+     * The user row is therefore locked first ({@code SELECT ... FOR UPDATE}), so a concurrent
+     * call for the same user blocks until this transaction commits, and the insert is flushed
+     * before returning so it executes while the lock is still held. The unique key
+     * {@code uk_user_session_user_id} (changeset 5.2:1) backs this up at the database level.
+     *
+     * @throws UserNotFoundException if no user with {@code userId} exists
+     */
     @Override
     @Transactional
-    public synchronized Session replace(int userId) {
-        // delete existing session for this user
+    public Session replace(int userId) {
+        userRepository.findOneById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         sessionRepository.deleteByUserId(userId);
 
-        // create new session
-        String sessionId = UUID.randomUUID().toString();
-
         Session session = new Session();
-        session.setId(sessionId);
+        session.setId(UUID.randomUUID().toString());
         session.setUserId(userId);
         session.setActive(true);
         session.setAttempts(0);
 
-        return sessionRepository.save(session);
+        return sessionRepository.saveAndFlush(session);
     }
 
     @Override
     @Transactional
-    public synchronized void updateLastAccessedTime(String sessionId) {
+    public void updateLastAccessedTime(String sessionId) {
         sessionRepository.updateLastAccessed(sessionId, new Date());
     }
 }

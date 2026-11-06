@@ -796,3 +796,45 @@ CREATE TABLE IF NOT EXISTS `system_setting` (
     `updated_by` INT DEFAULT NULL,
     PRIMARY KEY (`name`)
 );
+
+--changeset 5.2:1 stripComments:true splitStatements:true endDelimiter:;
+-- User.session is an eager one-to-one resolved by user_id, so the entity model assumes exactly one
+-- user_session row per user: with two rows Hibernate rejects every login and every authenticated
+-- request of that user (More than one row with the given identifier was found). Nothing in the
+-- schema enforced this (only the primary key on session_id and the non-unique FK index on user_id),
+-- and two overlapping logins of the same user could insert two rows through
+-- SessionServiceImpl.replace. First keep only the most recently accessed row per user (ties broken
+-- by the larger session_id), then make one-session-per-user a constraint.
+DELETE `dup` FROM `user_session` `dup`
+  JOIN `user_session` `keep`
+    ON `keep`.`user_id` = `dup`.`user_id`
+   AND (`keep`.`last_accessed` > `dup`.`last_accessed`
+        OR (`keep`.`last_accessed` = `dup`.`last_accessed` AND `keep`.`session_id` > `dup`.`session_id`));
+ALTER TABLE `user_session` ADD UNIQUE KEY IF NOT EXISTS `uk_user_session_user_id` (`user_id`);
+
+--changeset 5.2:2 stripComments:true splitStatements:true endDelimiter:;
+-- Make user.username a login identifier that resolves to at most one row. Until now the column was
+-- only populated for LDAP users, while every OC (BASIC) user carried NULL or, since the user wizard
+-- started sending the field, an empty string. A unique key tolerates any number of NULLs but only
+-- one '', so blanks must become NULL before the key exists; UserServiceImpl.save keeps it that way
+-- for every later write. An OC username may not contain '@': at login an email-shaped identifier is
+-- resolved as an email, so such a username could never sign in and could only block the first login
+-- of an LDAP account that authenticates with that address. LDAP usernames are owned by the
+-- directory and are left as they are apart from whitespace.
+UPDATE `user` SET `username` = TRIM(`username`) WHERE `username` IS NOT NULL;
+UPDATE `user` SET `username` = NULL WHERE `username` = '';
+UPDATE `user` SET `username` = NULL WHERE `auth_method` <> 'LDAP' AND `username` LIKE '%@%';
+-- An OC user that shares a username with an LDAP user gives it up: the LDAP row needs it to log in.
+UPDATE `user` `oc`
+  JOIN `user` `ldap`
+    ON `ldap`.`username` = `oc`.`username`
+   AND `ldap`.`auth_method` = 'LDAP'
+   SET `oc`.`username` = NULL
+ WHERE `oc`.`auth_method` <> 'LDAP';
+-- Among the remaining duplicates the oldest row (lowest id) keeps the username.
+UPDATE `user` `dup`
+  JOIN `user` `keep`
+    ON `keep`.`username` = `dup`.`username`
+   AND `keep`.`id` < `dup`.`id`
+   SET `dup`.`username` = NULL;
+ALTER TABLE `user` ADD UNIQUE KEY IF NOT EXISTS `uk_user_username` (`username`);

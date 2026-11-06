@@ -38,6 +38,9 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
+    /** Whether any user, OC or LDAP, already owns {@code username}; the comparison is case-insensitive. */
+    boolean existsByUsername(String username);
+
     boolean existsById(int id);
 
     void deleteById(int id);
