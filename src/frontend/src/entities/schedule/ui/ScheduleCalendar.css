@@ -1,0 +1,62 @@
+.schedule-calendar-toolbar {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.schedule-calendar-scroll {
+	overflow: auto;
+	max-height: 65vh;
+}
+
+.schedule-calendar table {
+	width: 100%;
+	min-width: 740px;
+	border-collapse: separate;
+	border-spacing: 0;
+	table-layout: fixed;
+}
+
+.schedule-calendar th,
+.schedule-calendar td {
+	border: 1px solid var(--color-border-subtle);
+	padding: 6px;
+	vertical-align: top;
+}
+
+.schedule-calendar th {
+	background: var(--color-background-surface);
+}
+
+.schedule-calendar thead th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+
+.schedule-calendar th:first-child {
+	width: 65px;
+}
+
+.schedule-calendar td {
+	height: 36px;
+}
+
+.schedule-calendar td a {
+	display: block;
+	margin-bottom: 4px;
+	padding: 4px;
+	overflow-wrap: anywhere;
+	color: var(--color-text-primary);
+	border: 1px solid var(--color-border-strong);
+	border-radius: 4px;
+}
+
+.schedule-calendar-overlap {
+	background: var(--color-status-warning-bg);
+}
+
+.schedule-calendar-disabled {
+	opacity: .55;
+}
