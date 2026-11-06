@@ -93,6 +93,7 @@ Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAIL
 | `AI_COMMAND_MODEL` | `qwen2.5-coder:7b` (picks command palette commands) |
 | `AI_SPEECH_URL` | `http://127.0.0.1:8178` (whisper-server; empty turns voice commands off) |
 | `AI_DOCS_DIR` / `AI_DOCS_URL` | `../../docs` / `https://docs.opencelium.io/en/prod` (the help assistant's documentation, and where it is published) |
+| `AI_LIGHT_MODEL` | `qwen2.5-coder:7b` (explains workflows and failed runs, proposes run fixes, writes transformation scripts) |
 | `AI_HELP_MODEL` | `AI_WORKFLOW_MODEL` (writes help answers; a follow-up is first rewritten by `AI_COMMAND_MODEL`) |
 | `AI_CORS_ORIGINS` | `http://localhost:5173` (comma-separated) |
 | `AI_MAX_REPAIR_ATTEMPTS` | `2` |
