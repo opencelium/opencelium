@@ -30,7 +30,8 @@ export type NotificationDraft = z.infer<typeof answerSchema> & {
 export type DraftNotificationDeps = { llm: LlmClient; model: string; contextTokens: number }
 
 // Aggregator values ({{agg.arg}}) and the built-in ones ({SCHEDULER_TITLE}); the double-brace form is tried first.
-const PLACEHOLDER_RE = /\{\{[^{}]*\}\}|\{[A-Z][A-Z_]*\}/g
+// Any single-brace word counts too, so a value with the wrong brace count ({agg.arg}) is caught instead of sent as text.
+const PLACEHOLDER_RE = /\{\{[^{}]*\}\}|\{[^{}\s]+\}/g
 
 /** Values every template may use, whatever its aggregator (docs: guides/schedule-and-notify › Notifications). */
 export const BUILT_IN_PLACEHOLDERS: { token: string; description: string }[] = [
@@ -77,6 +78,14 @@ ${placeholders}${current}
 Write it in ${request.language === 'de' ? 'German' : 'English'}.`
 }
 
+const placeholderName = (token: string) => token.replace(/^\{+|\}+$/g, '')
+
+/** Gives a listed placeholder written with the wrong brace count ({agg.arg}, {{SCHEDULER_TITLE}}) its listed form. */
+function fixBraces(text: string, allowed: ReadonlySet<string>): string {
+    const byName = new Map([...allowed].map((token) => [placeholderName(token), token]))
+    return text.replace(PLACEHOLDER_RE, (token) => (allowed.has(token) ? token : byName.get(placeholderName(token)) ?? token))
+}
+
 const unknownPlaceholders = (text: string, allowed: ReadonlySet<string>) =>
     [...new Set(text.match(PLACEHOLDER_RE) ?? [])].filter((token) => !allowed.has(token))
 
@@ -98,7 +107,7 @@ export async function draftNotification(request: DraftNotificationRequest, deps:
         }
         const parsed = answerSchema.safeParse(json)
         if (!parsed.success) continue
-        draft = parsed.data
+        draft = { subject: fixBraces(parsed.data.subject, allowed), body: fixBraces(parsed.data.body, allowed) }
         const invented = unknownPlaceholders(`${draft.subject}\n${draft.body}`, allowed)
         if (invented.length === 0) break
         messages.push({ role: 'assistant', content: result.content },
