@@ -18,7 +18,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * The prompts on a console: Enter takes the default, anything the prompt cannot accept is explained and asked
  * again, {@code ?} prints the help text, and {@code q} or the end of the input cancels the setup. Bad input never
  * ends the wizard. The layout, in plain characters: a question is its label padded to one column, the default in
- * brackets, and a colon; a problem starts with {@code !}; help is indented under the question.
+ * brackets, and a colon; a problem starts with {@code !}; help is indented under the question. A progress bar
+ * changes in its line on a terminal; in a log file it prints 1 line when the progress passes a quarter.
  */
 class ConsolePrompterTest {
 
@@ -38,6 +39,8 @@ class ConsolePrompterTest {
 
 	/** A short label is padded to the label column. */
 	private static final String WRITE_PROMPT = "  Write?" + " ".repeat(10) + "[Y/n]: ";
+
+	private static final String DOWNLOAD = "Downloading the image mongo:8";
 
 	private static final Function<String, Optional<String>> NO_SPACES = value -> value.contains(" ")
 			? Optional.of("No spaces, please.") : Optional.empty();
@@ -284,6 +287,9 @@ class ConsolePrompterTest {
 		prompter.list("Files", List.of("a"));
 		prompter.text(DIR_QUESTION, "Help.", "/srv/oc", NO_SPACES);
 		prompter.yesNo("Write?", "Help.", true);
+		try (Prompter.Meter meter = prompter.meter("Downloading.")) {
+			meter.update(1, 2);
+		}
 
 		assertThat(console.output().chars()).allMatch(c -> c < 128);
 	}
@@ -293,6 +299,61 @@ class ConsolePrompterTest {
 		prompter.print("  hello");
 
 		assertThat(console.output()).isEqualTo("  hello" + System.lineSeparator());
+	}
+
+	@Test
+	void meterDrawsTheBarAgainInOneLineWhenConsoleIsATerminal() {
+		console.asTerminal();
+
+		try (Prompter.Meter meter = prompter.meter(DOWNLOAD)) {
+			meter.update(0, 0);
+			meter.update(5_000_000, 20_000_000);
+			// 99.506 %: the percent and the bar round down, so only the end shows 100 % and a full bar.
+			meter.update(995_060_000, 1_000_000_000);
+			meter.update(1_000_000_000, 1_000_000_000);
+			// A layer gives its size late: the bar moves back, and spaces cover the end of the longer text before it.
+			meter.update(1_000_000_000, 1_200_000_000);
+		}
+
+		assertThat(console.output()).isEqualTo("  -> " + DOWNLOAD + "\n"
+				+ "\r    [######------------------]  5.0 of 20.0 MB  25%"
+				+ "\r    [#######################-]  995.1 of 1000.0 MB  99%"
+				+ "\r    [########################]  1000.0 of 1000.0 MB  100%"
+				+ "\r    [####################----]  1000.0 of 1200.0 MB  83% "
+				+ "\n");
+	}
+
+	@Test
+	void meterPrintsOneLineAtEachQuarterWhenConsoleIsNoTerminal() {
+		try (Prompter.Meter meter = prompter.meter(DOWNLOAD)) {
+			meter.update(10_000_000, 100_000_000);
+			meter.update(30_000_000, 100_000_000);
+			// The total grows: the bar moves back under 25 % and passes it again; the 25 % line does not come again.
+			meter.update(30_000_000, 200_000_000);
+			meter.update(60_000_000, 200_000_000);
+			// 1 update passes 50 % and 75 %: 1 line.
+			meter.update(160_000_000, 200_000_000);
+			meter.update(170_000_000, 200_000_000);
+			meter.update(200_000_000, 200_000_000);
+		}
+
+		assertThat(console.output()).isEqualTo("""
+				  -> Downloading the image mongo:8
+				    [#######-----------------]  30.0 of 100.0 MB  30%
+				    [###################-----]  160.0 of 200.0 MB  80%
+				    [########################]  200.0 of 200.0 MB  100%
+				""");
+	}
+
+	@Test
+	void meterPrintsNothingWhenTheTotalStaysZero() {
+		console.asTerminal();
+
+		try (Prompter.Meter meter = prompter.meter(DOWNLOAD)) {
+			meter.update(0, 0);
+		}
+
+		assertThat(console.output()).isEmpty();
 	}
 
 	private int count(String text) {

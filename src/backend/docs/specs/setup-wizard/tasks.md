@@ -121,6 +121,15 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 12
 - **Status:** done
 
+## Task 13a: feat(core): show the download progress of the MongoDB image
+- **Criteria:** SW-47
+- **Function:** Before `docker compose up -d`, the installer runs `docker compose --progress json pull --policy missing` and reads each JSON event while the command runs. The wizard shows 1 progress bar with the downloaded MB and the total MB: in 1 line on a terminal, and without a terminal as 1 line when the progress passes a quarter for the first time. An error event stops the run with the cause from Docker. A pull without JSON events shows no bar, and `up -d` downloads the image.
+- **Tests:** `PullProgressTest`: acceptAddsTheBytesOfEachLayerWhenLayersDownload, acceptCountsALayerAsCompleteWhenItsDownloadIsComplete, acceptKeepsTheDockerMessageWhenAnErrorEventArrives, acceptIgnoresALineWhenItIsNoJson; `ConsolePrompterTest`: meterDrawsTheBarAgainInOneLineWhenConsoleIsATerminal, meterPrintsOneLineAtEachQuarterWhenConsoleIsNoTerminal, meterPrintsNothingWhenTheTotalStaysZero, everyScreenUsesPlainCharactersOnly; `DockerComposeInstallerTest`: installShowsTheProgressBarWhenComposePullsTheImage, installShowsNoBarWhenTheHostHasTheImage, installStopsWithTheCauseFromDockerWhenThePullFails, installStartsWithoutABarWhenThePullGivesNoJson; `ProcessCommandRunnerTest`: runGivesEachLineWhileTheProgramRuns; `CommandRunnerTest`: runGivesTheOutputLinesAfterTheEndWhenTheRunnerOnlyAnswers
+- **Hand test:** 1. Run `docker image rm mongo:8`, then the setup, and select Docker Compose. 2. The bar shows the MB and reaches 100 %; then the ping passes. 3. Run `docker compose -p opencelium down -v`, delete `config` and `quickstart`, and run the setup again: no bar. 4. Repeat step 1 with `setup -f setup-values.yml --batch > setup.log`: the log has at most 4 progress lines, and the last shows 100 %.
+- **Size:** approximately 220 lines
+- **Depends on:** 13
+- **Status:** in work
+
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-19, SW-20, SW-21, SW-22, SW-23
 - **Function:** The master key step runs the guard first and stops with the restore-or-reset text when a wrapped DEK exists without a key. Then it offers generate, the variable `OC_MASTER_KEY` and a key file. Generate makes the key in memory and adds the key file with owner-only permissions to the plan; after the write the step shows the backup box and asks for the confirmation. `N` prints the path again and asks again; batch mode prints the warning to standard error and continues. A bad source is explained and asked again. With the variable option the step writes nothing and prints the instruction for the service environment.

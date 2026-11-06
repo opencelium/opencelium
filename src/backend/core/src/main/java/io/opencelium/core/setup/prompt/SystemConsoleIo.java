@@ -22,6 +22,11 @@ final class SystemConsoleIo implements ConsoleIo {
 		return console != null ? console.writer() : standardOut;
 	}
 
+	@Override
+	public boolean terminal() {
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+
 	private static Console console() {
 		Console console = System.console();
 		if (console == null) {
