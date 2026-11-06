@@ -388,7 +388,7 @@ The decisions are recorded so that they are not discussed again without a reason
 
 3. **The engine is a library. The applications are thin hosts.** Thus local and brokered execution share one implementation. And the engine logic must be testable with unit tests, without Spring.
 
-4. **Dispatch through a transport SPI with plug-ins: `local | amqp | custom`.** *(Revised 2026-09-02: it replaces "HTTP first, queue later". Revised 2026-09-16: the transport is found at runtime, not set in the configuration.)*
+4. **Dispatch through a transport SPI with plug-ins: `local | amqp | custom`.** *(It replaces "HTTP first, queue later". The transport is found at runtime, not set in the configuration.)*
 
     - The monolith shape uses the in-process `local` transport. No infrastructure is necessary.
     - The distributed shape must have a message broker (`amqp`, at-least-once delivery).
@@ -437,8 +437,6 @@ The decisions are recorded so that they are not discussed again without a reason
     - Core always issues its own session JWT. IdP and portal tokens do not reach the frontend.
     - Sequence diagrams for the 3 flows: [docs/security/README.md](security/README.md).
 
-    *(Added 2026-09-08. Revised 2026-09-21: the Service Portal is the OIDC provider in cloud mode.)*
-
 11. **The tenant context is a basic part of the design. In cloud mode, core keeps a system database with a tenant catalog.**
 
     *Why:* Connection data that arrived at login stopped the scheduled executions. After a restart of core with nobody logged in, no tenant data was reachable. Core must be able to find the database of each tenant at each time, by itself.
@@ -451,7 +449,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - **Each record carries the tenant ID.** The tenant ID is in the principal and on each document in the database (workflows, connectors, executions, variables, ACL entries, audit records). It is also in the self-contained job message and on each event that a worker publishes. The engine and the transports do not know about tenants. The persistence and API layers enforce the isolation.
     - **Self-hosted** is the same code path with one static tenant: one MongoDB connection at the start.
 
-    *(Added 2026-09-08. Revised 2026-09-22: it replaced "cloud starts without a database, connection data arrives with the portal login". That design left scheduled executions without access to tenant data.)*
+    *(It replaced "cloud starts without a database, connection data arrives with the portal login". That design left scheduled executions without access to tenant data.)*
 
 12. **Executions have checkpoints. The promise graph can be rebuilt.** *(Extends decision 8.)*
 
@@ -461,7 +459,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - Resume = rebuild the promise graph from a checkpoint. The promises of the completed nodes start as complete. The execution continues from the first nodes that are not complete. A resume job message carries the checkpoint (the self-contained rule of decision 9, extended to resumes). Thus each worker can take it.
     - The **Execution Debugger** is the same mechanism, driven interactively on the `local` transport. A breakpoint pauses the execution. The UI examines the node state and the variables through the visibility of decision 8. *Continue* completes the held promise.
 
-    *(Added 2026-09-08. Revised 2026-09-21: the state machine and the checkpoint design are part of the execution engine, not of the debugger.)*
+    *(The state machine and the checkpoint design are part of the execution engine, not of the debugger.)*
 
 13. **Configuration is in 2 places: the yml file or the database.**
 
@@ -472,7 +470,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - **Credentials are database values with 2 more rules.** They are encrypted through the secret provider SPI. The default is a Mongo storage with AES-256-GCM, a new IV for each secret, and key versions. The master key is found outside the yml file and the database (decision 14). No API can read a credential back. Domain documents hold a secret reference. The value is decrypted only at the moment of use. It is not cached in plaintext.
     - The build checks of [6.9](#69-build-checks) enforce this.
 
-    *(Added 2026-09-16. Revised 2026-09-22: the master-key clause moved to decision 14. The placement questions and the examples are in [6.4 Configuration placement](#64-configuration-placement).)*
+    *(The master-key clause is in decision 14. The placement questions and the examples are in [6.4 Configuration placement](#64-configuration-placement).)*
 
 14. **Envelope encryption: one root key for each installation, one DEK for each tenant.** *(Changes the master-key clause of decision 13 and extends its secret storage. Diagram: [6.5 Secrets and keys](#65-secrets-and-keys).)*
 
@@ -486,7 +484,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - Self-hosted is the same code path with exactly one tenant.
     - The root key does not leave core: not to the workers, not to the broker, and not to a job message.
 
-    *(Added 2026-09-22. Revised 2026-10-08: generation only in self-host mode. The worker-side key material for encrypted job payloads is on the [open decisions](#open-decisions) list.)*
+    *(The worker-side key material for encrypted job payloads is on the [open decisions](#open-decisions) list.)*
 
 ### Open decisions
 
