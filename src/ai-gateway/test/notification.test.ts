@@ -49,6 +49,23 @@ describe('POST /notification/draft', () => {
             removedPlaceholders: ['{{schedule.name}}', '{{run.time}}', '{RUN_TIME}'] })
     })
 
+    it('gives a listed placeholder written with the wrong braces its listed form, without asking again', async () => {
+        const braces = { subject: '{{SCHEDULER_TITLE}} fehlgeschlagen', body: '{SyncStats.failedCount} Datensätze sind fehlgeschlagen.' }
+        const { app, requests } = await appAnswering(braces)
+        const response = await app.inject({ method: 'POST', url: '/notification/draft', payload: request })
+        expect(requests).toHaveLength(1)
+        expect(response.json()).toMatchObject({ subject: '{SCHEDULER_TITLE} fehlgeschlagen',
+            body: '{{SyncStats.failedCount}} Datensätze sind fehlgeschlagen.', removedPlaceholders: [] })
+    })
+
+    it('treats an unlisted single-brace value as invented', async () => {
+        const invented = { subject: 'Sync fehlgeschlagen', body: 'Fehler um {run.time}.' }
+        const { app, requests } = await appAnswering(invented)
+        const response = await app.inject({ method: 'POST', url: '/notification/draft', payload: request })
+        expect(requests[1]?.messages.at(-1)?.content).toContain('These placeholders do not exist: {run.time}')
+        expect(response.json()).toMatchObject({ body: 'Fehler um .', removedPlaceholders: ['{run.time}'] })
+    })
+
     it('needs an instruction', async () => {
         const { app } = await appAnswering({})
         expect((await app.inject({ method: 'POST', url: '/notification/draft', payload: { ...request, instruction: ' ' } })).statusCode).toBe(400)
