@@ -234,7 +234,7 @@ public class TemplateServiceImp implements TemplateService {
                                 template.setVersion(targetVersion);
                                 FileBackupManager.doBackup(backup, oldVersion, targetVersion);
                                 save(template, fileName);
-                                log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), targetVersion);
+                                log.info("Template[id={}, name={}] is successfully updated to current version", template.getTemplateId(), template.getName());
                             });
                 } catch (Exception e) {
                     log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
