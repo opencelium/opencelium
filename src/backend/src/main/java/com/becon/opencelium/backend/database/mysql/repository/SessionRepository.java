@@ -30,7 +30,7 @@ import java.util.Optional;
 public interface SessionRepository extends JpaRepository<Session, String> {
     Optional<Session> findByUserId(int userId);
 
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM Session s WHERE s.userId = :userId")
     int deleteByUserId(@Param("userId") int userId);
 

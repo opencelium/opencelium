@@ -112,12 +112,55 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Email is required for BASIC users");
         }
 
+        user.setUsername(normalizeUsername(user));
+
         return userRepository.save(user);
+    }
+
+    /**
+     * Returns the username to persist: trimmed, {@code null} when blank, and for OC users checked
+     * against the rules that make it a login identifier.
+     *
+     * <p>Blank must become {@code null} because the unique key {@code uk_user_username}
+     * (changeset 5.2:2) tolerates any number of {@code NULL}s but only one empty string, and the
+     * user wizard sends an empty string for every user without a username. LDAP usernames are
+     * owned by the directory and may look like anything, including an email address, so only their
+     * whitespace is normalized. An OC username may not contain {@code '@'}: at login an
+     * email-shaped identifier is resolved as an email, so such a username could never sign in and
+     * could only block the first login of an LDAP account that authenticates with that address.
+     * Uniqueness spans both auth methods and is case-insensitive through the column collation.
+     *
+     * @throws GeneralServiceException with {@link ExceptionConstant#USERNAME_INVALID} or
+     *     {@link ExceptionConstant#USERNAME_ALREADY_EXIST}
+     */
+    private String normalizeUsername(User user) {
+        String username = user.getUsername();
+        if (username == null || username.isBlank()) {
+            return null;
+        }
+        username = username.trim();
+
+        if (user.getAuthMethod() != AuthMethod.LDAP && username.contains("@")) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.USERNAME_INVALID,
+                    "Username must not contain '@'");
+        }
+
+        if (userRepository.existsByUsernameAndIdNot(username, user.getId())) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.USERNAME_ALREADY_EXIST,
+                    "Username '" + username + "' is already taken");
+        }
+
+        return username;
     }
 
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
     }
 
     @Override
