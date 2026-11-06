@@ -60,6 +60,15 @@ class PullProgressTest {
 	}
 
 	@Test
+	void acceptReplacesControlCharactersWhenTheErrorMessageHasThem() {
+		// A registry can send escape sequences that would move the cursor or clear the line of the terminal.
+		progress.accept("""
+				{"error":true,"message":"denied\\u001b[2K\\r  OK MongoDB answers\\n"}""");
+
+		assertThat(progress.error()).contains("denied [2K   OK MongoDB answers ");
+	}
+
+	@Test
 	void acceptIgnoresALineWhenItIsNoJson() {
 		progress.accept(downloading("a1", 1_000_000, 4_000_000));
 		progress.accept("WARN[0000] docker-compose.yml: the attribute `version` is obsolete");

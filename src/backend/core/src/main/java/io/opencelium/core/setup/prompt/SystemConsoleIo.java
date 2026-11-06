@@ -22,9 +22,11 @@ final class SystemConsoleIo implements ConsoleIo {
 		return console != null ? console.writer() : standardOut;
 	}
 
+	/** With some console providers {@code System.console()} is non-null for a pipe, so the console must say so too. */
 	@Override
 	public boolean terminal() {
-		throw new UnsupportedOperationException("not implemented yet");
+		Console console = System.console();
+		return console != null && console.isTerminal();
 	}
 
 	private static Console console() {
