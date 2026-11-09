@@ -72,7 +72,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
 - **SW-48** Given an env file next to the yml file, when the application starts, then the env file values must apply. The user does not load the file into the shell before the start.
 - **SW-49** Given a variable in the environment and the env file, when the application starts, then the environment value must apply. Thus a variable of the shell and the systemd `EnvironmentFile` keep their effect.
-- **SW-50** Given a bad line in the env file, when the application starts, then it must stop with the line number. The message names the file and never shows a value. A good line has the form that the wizard writes.
+- **SW-50** Given a bad line in the env file, when the application starts, then it must stop with the line number. The message names the file and never shows a value. A good line has the form that the wizard writes. An env file that the application cannot read also stops the start.
 - **SW-51** Given `OC_MASTER_KEY` in the env file, when the application starts, then it must stop and name the file. The master key and the database password are never in 1 file.
 - **SW-52** Given no value for `OC_MONGO_PASSWORD`, when the application starts, then the error must name the variable and the env file. When no env file is next to the yml file, the error says so.
 
@@ -135,7 +135,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
 - **SW-38** Given a complete setup file, when the user runs `setup --file setup-values.yml`, then the wizard must ask nothing. It makes the same files as an interactive run.
 - **SW-39** Given a setup file without 1 value, when the wizard runs, then it must ask only that question. With `--batch` it stops instead, with exit code 1, and names the key and the file.
-- **SW-40** Given a complete installation, when the user runs `setup --print-values`, then the wizard must print its setup file. The file reproduces the installation. A password is replaced by `generate` or by an env reference. The wizard reads `./config/` first, then `/etc/opencelium/`. When the user cannot read a file that exists, the wizard names the file and its owner.
+- **SW-40** Given a complete installation, when the user runs `setup --print-values`, then the wizard must print its setup file. The file reproduces the installation. A password is replaced by `generate` or by an env reference. The wizard reads `./config/` first, then `/etc/opencelium/` on Linux and macOS. When the user cannot read a file that exists, the wizard names the file and its owner.
 - **SW-41** Given any state, when the user runs `setup --template`, then the wizard must print a template with each key. Each key has its help text and the default of this host.
 
 ## Out of scope

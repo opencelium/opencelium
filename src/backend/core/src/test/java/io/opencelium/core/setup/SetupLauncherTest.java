@@ -211,6 +211,59 @@ class SetupLauncherTest {
 	}
 
 	@Test
+	void decideGivesTheSystemDirectoryToBootWhenNoTerminalIsAttached() throws IOException {
+		// systemd starts the service without a terminal and in /: Boot must still read /etc/opencelium.
+		terminal = false;
+		Path file = touch("etc/opencelium/application.yml");
+
+		LaunchDecision decision = decide(UNRELATED_ARGUMENT);
+
+		assertBoot(decision, "no interactive terminal");
+		assertThat(decision.springArguments()).containsExactly(UNRELATED_ARGUMENT,
+				"--spring.config.additional-location=optional:file:" + file.getParent() + "/");
+	}
+
+	@Test
+	void decideGivesTheSystemDirectoryToBootWhenBatchOrABootstrapVariableIsSet() throws IOException {
+		Path file = touch("etc/opencelium/application.yml");
+		String location = "--spring.config.additional-location=optional:file:" + file.getParent() + "/";
+
+		LaunchDecision batch = decide("--batch");
+		environment.put("SPRING_MONGODB_URI", "mongodb://db.example/oc");
+		LaunchDecision variable = decide();
+
+		assertBoot(batch, "the flag --batch");
+		assertThat(batch.springArguments()).containsExactly(location);
+		assertBoot(variable, "SPRING_MONGODB_URI is set");
+		assertThat(variable.springArguments()).containsExactly(location);
+	}
+
+	@Test
+	void decideGivesNoSystemDirectoryWhenTheWorkingDirectoryHasAConfiguration() throws IOException {
+		// The first match of the search wins; an additional location would take priority over ./config/ in Boot.
+		terminal = false;
+		touch("config/application.yml");
+		touch("etc/opencelium/application.yml");
+
+		LaunchDecision decision = decide(UNRELATED_ARGUMENT);
+
+		assertBoot(decision, "no interactive terminal");
+		assertThat(decision.springArguments()).containsExactly(UNRELATED_ARGUMENT);
+	}
+
+	@Test
+	void decideGivesNoSystemDirectoryWhenASpringConfigLocationIsSet() throws IOException {
+		// The operator named the configuration; the launcher adds nothing to it.
+		terminal = false;
+		touch("etc/opencelium/application.yml");
+
+		LaunchDecision decision = decide("--spring.config.location=/srv/oc/");
+
+		assertBoot(decision, "no interactive terminal");
+		assertThat(decision.springArguments()).containsExactly("--spring.config.location=/srv/oc/");
+	}
+
+	@Test
 	void decideStripsWizardArgumentsFromSpringArguments() {
 		LaunchDecision decision = decide("setup", "--file", "a.yml", "--batch", UNRELATED_ARGUMENT);
 

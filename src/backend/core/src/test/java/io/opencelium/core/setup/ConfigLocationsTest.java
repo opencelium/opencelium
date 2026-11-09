@@ -13,8 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Where the launcher looks for a configuration file before it decides on the wizard: {@code ./config/}, {@code ./},
- * then the system directory ({@code /etc/opencelium} on a real host), each with the three file names Spring Boot
- * reads. Relative to the working directory, as Boot's own locations are, not to the jar.
+ * then the system directory ({@code /etc/opencelium} on a real Linux or macOS host, none on Windows), each with the
+ * three file names Spring Boot reads. Relative to the working directory, as Boot's own locations are, not to the jar.
  */
 class ConfigLocationsTest {
 
@@ -50,6 +50,26 @@ class ConfigLocationsTest {
 		Path system = touch("etc/opencelium/application.yml");
 
 		assertThat(locations.find()).contains(system);
+	}
+
+	@Test
+	void findIgnoresTheSystemDirectoryWhenTheHostIsWindows() throws IOException {
+		// On Windows /etc/opencelium is <drive>:\etc\opencelium, a folder that any user can make.
+		Path system = touch("etc/opencelium/application.yml");
+		ConfigLocations windows = ConfigLocations.forHost("Windows 11", workingDir, system.getParent());
+
+		assertThat(windows.find()).isEmpty();
+		assertThat(windows.isSystemLocation(system)).isFalse();
+	}
+
+	@Test
+	void findReturnsTheSystemFileWhenTheHostIsLinuxOrMacOs() throws IOException {
+		Path system = touch("etc/opencelium/application.yml");
+
+		for (String osName : List.of("Linux", "Mac OS X")) {
+			assertThat(ConfigLocations.forHost(osName, workingDir, system.getParent()).find()).as(osName)
+					.contains(system);
+		}
 	}
 
 	@Test

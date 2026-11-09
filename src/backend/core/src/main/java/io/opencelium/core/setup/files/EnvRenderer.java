@@ -5,9 +5,9 @@ import java.util.SequencedMap;
 /**
  * The text of the env file: a fixed header line, then one {@code KEY=value} line for each entry, in order. A value
  * with whitespace or a character that the shell reads as syntax ({@code " ' \ # $ ` ; & | < > ( ) * ? [ ] { } ~ !})
- * is double-quoted, and inside the quotes {@code \ " $} and the backtick are escaped. POSIX sh and systemd's
- * {@code EnvironmentFile} read this form the same way, so the unit file and a start by hand with
- * {@code set -a; . ./config/opencelium.env; set +a} give the application the value that was written.
+ * is double-quoted, and inside the quotes {@code \ " $} and the backtick are escaped. POSIX sh, systemd's
+ * {@code EnvironmentFile} and the start of the application read this form the same way, so each of them gives the
+ * application the value that was written.
  */
 public final class EnvRenderer {
 
