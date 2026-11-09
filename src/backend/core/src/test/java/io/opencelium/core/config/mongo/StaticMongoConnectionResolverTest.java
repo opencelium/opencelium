@@ -1,9 +1,12 @@
 package io.opencelium.core.config.mongo;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.env.MockEnvironment;
 
 import io.opencelium.common.tenant.TenantId;
@@ -28,6 +31,9 @@ class StaticMongoConnectionResolverTest {
 	private static final TenantId TENANT = TenantId.SELF_HOST;
 
 	private final MockEnvironment environment = new MockEnvironment();
+
+	@TempDir
+	Path tmp;
 
 	@Test
 	void selfModeResolvesSelfAndSystemToTheConfiguredDatabase() {
@@ -174,15 +180,28 @@ class StaticMongoConnectionResolverTest {
 	}
 
 	@Test
-	void unsetPasswordVariableStopsNamingTheVariableAndTheEnvFile() {
-		// What the binder leaves when the yml file refers to a variable that the environment does not have.
+	void fromNamesTheEnvFileWhenThePasswordHasNoValue() throws IOException {
+		// What the binder leaves when the yml file refers to a variable that neither the process nor the file has.
+		Path config = configurationDirectory();
+		Path envFile = Files.writeString(config.resolve("opencelium.env"), "OC_OTHER=x\n");
 		environment.setProperty(MONGODB_URI, "mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium");
 
 		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(SELF_HOST))
-				.withMessageContaining("OC_MONGO_PASSWORD")
+				.withMessageContaining("OC_MONGO_PASSWORD").withMessageContaining(envFile.toString())
+				.withMessageNotContaining("no env file")
 				.satisfies(failure -> assertThat(failure.propertyName()).isEqualTo("spring.mongodb.uri"))
 				.satisfies(failure -> assertThat(failure.action()).hasValueSatisfying(action -> assertThat(action)
-						.contains("./config/opencelium.env").contains("set -a")));
+						.contains("OC_MONGO_PASSWORD=").contains(envFile.toString()).doesNotContain("set -a")));
+	}
+
+	@Test
+	void fromSaysNoEnvFileExistsWhenThereIsNone() throws IOException {
+		Path envFile = configurationDirectory().resolve("opencelium.env");
+		environment.setProperty(MONGODB_URI, "mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium");
+
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(SELF_HOST))
+				.withMessageContaining("OC_MONGO_PASSWORD").withMessageContaining("no env file")
+				.withMessageContaining(envFile.toString());
 	}
 
 	@Test
@@ -328,6 +347,14 @@ class StaticMongoConnectionResolverTest {
 		assertThatExceptionOfType(UnsupportedOperationException.class)
 				.isThrownBy(() -> resolver(CLOUD).resolve(TenantId.of("acme")))
 				.withMessageContaining("acme");
+	}
+
+	/** A configuration directory that Boot reads as an additional location, with an empty application.yml. */
+	private Path configurationDirectory() throws IOException {
+		Path config = Files.createDirectories(tmp.resolve("config"));
+		Files.writeString(config.resolve("application.yml"), "");
+		environment.setProperty("spring.config.additional-location", "optional:file:" + config + "/");
+		return config;
 	}
 
 	private StaticMongoConnectionResolver resolver(DeploymentMode mode) {
