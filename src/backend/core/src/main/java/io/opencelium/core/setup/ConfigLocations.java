@@ -43,6 +43,13 @@ public final class ConfigLocations {
 		return new ConfigLocations(Path.of("").toAbsolutePath(), SYSTEM_DIRECTORY);
 	}
 
+	/**
+	 * The locations of a host with the operating system {@code osName}: without a system directory on Windows.
+	 */
+	static ConfigLocations forHost(String osName, Path workingDir, Path systemDir) {
+		throw new UnsupportedOperationException("not implemented yet");
+	}
+
 	/** The first configuration file in the search order. Only a regular file counts, not a directory of that name. */
 	public Optional<Path> find() {
 		for (Path directory : List.of(workingDir.resolve(CONFIG_DIRECTORY), workingDir, systemDir)) {
