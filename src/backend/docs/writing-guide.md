@@ -49,7 +49,7 @@ STE permits technical names and technical verbs that are standard in the industr
 - Build: CI (continuous integration), linter, formatter, Spotless, commitlint, OpenAPI, contract, diff, pull request, PR (pull request), commit, branch.
 - Technical verbs (3): review, approve, merge, squash, lint, anchor, draft, commit, push, resolve.
 - Setup: wizard, step, screen, prompt, question, answer, setup file, value, menu, option, box, summary, subcommand, flag, placeholder, help text, setup state, launcher, phase, handover, file plan, renderer, batch mode, exit code, allow-list, filter, retry, timestamp, fail-fast.
-- Terminal: terminal, console, stdin, standard output, standard error, piped input, SSH, Enter, Ctrl+C, terminal library, scripted console, argument (command line), progress bar.
+- Terminal: terminal, console, shell, stdin, standard output, standard error, piped input, SSH, Enter, Ctrl+C, terminal library, scripted console, argument (command line), progress bar, backtick.
 - Host: host, platform, CPU, Linux, macOS, Windows, Ubuntu, Debian, x86_64, arm64, systemd, unit file, launchd, plist, `sc.exe`, sudo, root, system user, service, PATH, permissions, owner, data directory, env file, tarball, license, Docker, Docker Compose, image (Docker image), layer (image layer), VM (virtual machine), distribution, working directory, `mongod`, `mongosh`, browser, backup, upgrade, migration.
 - Data (2): URI, URL, byte, MB (megabyte), driver, repository, database dump, port (network), route, header (HTTP), issuer.
 - Access control (2): admin (administrator), username, password, login (noun).

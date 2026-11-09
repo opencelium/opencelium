@@ -19,6 +19,8 @@ The wizard runs in the terminal and installs the self-host mode only. It does th
 
 LDAP, OIDC, the Service Portal issuer, the broker connection and the license are browser settings after the login, not wizard questions. The browser gets the setup state and the read-only bootstrap facts through 2 endpoints. A configuration is a configuration file at a search location, a Spring configuration location, or a bootstrap property in the arguments or the environment.
 
+A later start reads the env file next to the yml file. Thus the user starts OpenCelium with `java -jar oc-app.jar` and loads no file into the shell before the start.
+
 ## Acceptance criteria
 Each criterion has an ID and the form "Given ..., when ..., then ...".
 
@@ -65,6 +67,14 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   3. Back to the menu.
   The causes are those of the start ping, for example connection refused or authentication failed.
 - **SW-18** Given a password in the URI, when the wizard writes the files, then the env file alone must hold it. The yml file gets the placeholder `${OC_MONGO_PASSWORD}`. Plain text in the yml file needs an extra confirmation and prints a warning. In batch mode the env file alone holds the password.
+
+### The env file at a later start
+
+- **SW-48** Given an env file next to the yml file, when the application starts, then the env file values must apply. The user does not load the file into the shell before the start.
+- **SW-49** Given a variable in the environment and the env file, when the application starts, then the environment value must apply. Thus a variable of the shell and the systemd `EnvironmentFile` keep their effect.
+- **SW-50** Given a bad line in the env file, when the application starts, then it must stop with the line number. The message names the file and never shows a value. A good line has the form that the wizard writes.
+- **SW-51** Given `OC_MASTER_KEY` in the env file, when the application starts, then it must stop and name the file. The master key and the database password are never in 1 file.
+- **SW-52** Given no value for `OC_MONGO_PASSWORD`, when the application starts, then the error must name the variable and the env file. When no env file is next to the yml file, the error says so.
 
 ### Master key
 
@@ -145,7 +155,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - Decision 10: the admin logs in through the local strategy with the normal login form. The wizard issues no setup token.
 - Decision 11: the self-host mode is 1 static tenant. The admin and the setup state carry its tenant ID.
 - Decision 7: the 2 setup endpoints need the admin role. The setup state is not a resource with an ACL.
-- A new decision is necessary for a bootstrap secret: the yml file holds the placeholder `${OC_MONGO_PASSWORD}`, and an env file gives the value. This extends decision 13. The architect agent drafts it.
+- A new decision is necessary for a bootstrap secret. The yml file holds the placeholder `${OC_MONGO_PASSWORD}`, and an env file next to it gives the value. The start reads the env file, and the environment of the process has priority over it. This extends decision 13. The architect agent drafts it.
 - A new decision is necessary for the handover from the wizard to the application: the admin marker in the setup state. It makes the admin in each process that starts the application, and it tells a new installation from an upgrade. The architect agent drafts it.
 
 ## Open questions
