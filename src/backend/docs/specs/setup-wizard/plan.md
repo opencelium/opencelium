@@ -20,6 +20,19 @@ Before `docker compose up -d`, the installer runs `docker compose --progress jso
 
 The installer adds the bytes of all layers and moves 1 progress bar of the prompter. Docker gives the size of a layer only when its download starts. Thus the total can increase in the first seconds. On a terminal, the prompter draws the bar again in 1 line. Without a terminal, it prints 1 line when the progress passes 25 %, 50 %, 75 % or 100 % for the first time, so the log stays short. When the bar closes, it prints the end state if the last line shows an earlier state.
 
+### The env file at a later start
+A normal start reads the env file, so a start by hand has no shell command before it (plan decision 25). The env file reader is a start check in `core.config`. It runs before the defaults post-processor of section 4.1, so a value from the env file gets no `(default)` line. It runs at each start, also in the tests and with `bootRun`:
+
+- The env file is `opencelium.env` in the directory of the configuration file that Boot reads. When Boot reads more than 1 file, the file with the highest priority decides. A file that `spring.config.import` brings in does not count.
+- Without an env file in that directory, the reader adds nothing.
+- The launcher gives `/etc/opencelium/` to Boot at each normal start without a `spring.config.*` location (plan decision 28). Thus the service finds its yml file and its env file.
+
+The reader gives the entries to Spring directly below the process environment. Spring reads them with the name rules of environment variables, so `SERVER_PORT` in the file sets `server.port`. A start argument, a system property and a variable of the process environment have priority over the file. Thus the systemd `EnvironmentFile` and a variable of the shell keep their effect.
+
+The reader accepts only the form that the env renderer writes (plan decision 26). A bad line stops the start with the report `APPLICATION FAILED TO START`. The report names the file, the line number and the key, never the value. `OC_MASTER_KEY` in the file stops the start in the same way (plan decision 27). When `${OC_MONGO_PASSWORD}` has no value, the fail-fast message names the variable and the env file. Without an env file next to the yml file, the message says so.
+
+The start in the wizard process does not change. It gets the entries as start arguments, so the new values have priority over an old variable of the shell.
+
 ### The master key and the admin
 The master key step runs the guard first, in probe mode, against the pinged database. A wrapped DEK and no key print the restore-or-reset text and stop. Then the step offers generate, variable and file. Generate makes the 32 bytes in memory and adds `<data-dir>/master.key` with owner-only permissions to the plan. After the write, the wizard shows the backup box and asks for the confirmation. The answer `N` prints the path again and asks again; batch mode prints the warning to standard error and continues.
 
@@ -47,16 +60,16 @@ Without root rights, the sudo option serializes the whole plan to a file with `0
 
 Then the parent waits 60 seconds for the port and prints the login box. When the port does not listen, the wizard names the timeout and `journalctl -u opencelium`, leaves the unit in place and ends with exit code 1. With the variable key option, the child runs `enable` without `--now`, and the wizard prints the instruction, the start command and the login box without a wait.
 
-The show option prints the files and the commands; the skip option prints the reminder for a start by hand. The print-only implementation renders the launchd plist and the `sc.exe` commands. The subcommand `install-service` runs the service step alone. All commands go through a command runner seam, so the tests use a fake that records them.
+The show option prints the files and the commands; the skip option prints the reminder for a start by hand. The print-only implementation renders the launchd plist and the `sc.exe` commands. The plist sets the working directory to the directory above `config/`, so the start finds the env file. The plist holds no password. The subcommand `install-service` runs the service step alone. All commands go through a command runner seam, so the tests use a fake that records them.
 
 ### The print flag
 `setup --print-values` reads the written yml file and env file, in `./config/` first and then in `/etc/opencelium/`, and prints the setup file that reproduces the run. A password is `generate` or an env reference. After a service installation the files belong to root and `opencelium`, so the command runs as one of them. When the user cannot read a file that exists, the message names the file and its owner.
 
 ### The end-to-end test and the documents
-An integration test runs a batch installation from a setup file against the local MongoDB. It makes sure that the files exist, that Spring starts and that `GET /setup/status` agrees. It searches the log files and a database dump for the database password and the key bytes. The VM matrix is a hand test: Ubuntu 24.04 with the Docker Compose path and the service, Debian 12 with the URI path, and macOS with the print fallback. The results go to `docs/setup-wizard-test-matrix.md`. The sample `application.yml`, the quickstart `docker-compose.yml` and the README section "First start" complete the feature. When the reviewer accepts the decisions, the architecture document gets the exception for the 2 secrets outside the database. Its first-run description gets the wizard.
+An integration test runs a batch installation from a setup file against the local MongoDB. It makes sure that the files exist, that Spring starts and that `GET /setup/status` agrees. It searches the log files and a database dump for the database password and the key bytes. The VM matrix is a hand test: Ubuntu 24.04 with the Docker Compose path and the service, Debian 12 with the URI path, and macOS with the print fallback. The results go to `docs/setup-wizard-test-matrix.md`. The sample `application.yml`, the quickstart `docker-compose.yml` and the README section "First start" complete the feature. When the reviewer accepts the decisions, the architecture document gets the env file as a source of the yml place for the database password. Its first-run description gets the wizard.
 
 ### The order
-The foundations, then the framework, then the MongoDB step, then the master key and the admin. The setup state and the service registration both come after the master key and the admin, because the service installation writes the admin marker. The print flag, then the end-to-end test and the documents close the feature. The login part of the setup state waits for the authentication story.
+The foundations, then the framework, then the MongoDB step and the env file at a later start, then the master key and the admin. The setup state and the service registration both come after the master key and the admin, because the service installation writes the admin marker. The print flag, then the end-to-end test and the documents close the feature. The login part of the setup state waits for the authentication story.
 
 ### What this feature waits for
 - The local login strategy and the password-change screen (the authentication story): the filter test with a real login, and the login at `/setup`. They do not block the terminal part.
@@ -79,7 +92,7 @@ All code is in `core`. The wizard writes the configuration of core, connects to 
 
 The wizard uses these packages:
 
-- `core.config`: the bootstrap properties and the data directory default.
+- `core.config`: the bootstrap properties and the data directory default. The env file reader is also there, because the start reads the bootstrap configuration there, and the fail-fast message of `core.config.mongo` names the env file. A test in `core.setup.files` makes sure that the renderer and the reader agree.
 - `core.config.mongo`: the start ping and the client factory, before Spring. Each Mongo client comes from 1 path (section 6.6).
 - `core.secrets.keys`: the probe, the 32-byte validation, the generator and the DEK repository of the guard. Cryptography stays in `core.secrets` (section 6.9).
 - `core.user`: the first-admin command and the query "an admin exists", before Spring, and the password generator for the database password of the Docker Compose option.
@@ -87,7 +100,7 @@ The wizard uses these packages:
 Test support in `core/src/test/java/io/opencelium/core/testsupport/`: `LocalMongo`, `MongoIntegrationTest`, `CoreStartup`, `MutableClock`, `fake/ScriptedConsoleIo` (a queue of input lines and the captured output), and `fake/FailingDnsClientProvider` (a DNS failure for 1 reserved host, for the `mongodb+srv` paths).
 
 ## Decisions
-The reviewer confirms each decision before task 12, the first open task, starts.
+The reviewer confirms each decision before task 1 starts. The reviewer confirms decisions 25 to 28 before task 13b starts.
 
 1. **Two phases: before Spring and after Spring.** Where does the admin creation run? Options: (a) in phase 1, with the bare driver and an own hash, (b) in phase 2, through the user service after Spring starts. Recommended: (b), because the password hash and the user document then exist exactly once, in the user service.
 2. **The setup state is its own document.** Is the setup state a runtime setting? Options: (a) a setting through the settings service, (b) a document `setup_state` with its own repository. Recommended: (b), because the state is data that the application owns, not a configuration value, and the settings service does not exist yet.
@@ -102,7 +115,7 @@ The reviewer confirms each decision before task 12, the first open task, starts.
 11. **Nothing is made or started before the summary.** When do the side effects run: the data directory, the Docker Compose start, the key file? Options: (a) at the step, (b) after the summary, as actions of the plan with a rollback. Recommended: (b), because a step only validates and plans, and a cancel leaves no trace.
 12. **The exit codes.** Which exit code does each end of the wizard give? Options: (a) 0 and 1 only, (b) 4 codes: 0 for a cancel, 1 for a failure, 2 for a usage error, 130 for Ctrl+C. A cancel is `q` or a declined summary. A failure is an absent value in batch mode or a write failure. Recommended: (b), because a script can then tell a cancel from a failure.
 13. **No own configuration-directory variable.** How does an operator name a 4th search location? Options: (a) an own variable `OC_CONFIG_DIR`, (b) the Spring variable `SPRING_CONFIG_ADDITIONALLOCATION`. Recommended: (b), because it is 1 contract less.
-14. **The env file format.** Which format has the env file? Options: (a) `export KEY=value`, (b) `KEY=value`, 1 for each line, no `export`. Recommended: (b), because it is the format of systemd `EnvironmentFile`. Docker `--env-file` reads the same lines, but it keeps the quotes of a quoted value. A start by hand uses `set -a; . ./config/opencelium.env; set +a; java -jar oc-app.jar`, because a plain `source` does not export the variables to the JVM.
+14. **The env file format.** Which format has the env file? Options: (a) `export KEY=value`, (b) `KEY=value`, 1 for each line, no `export`. Recommended: (b), because it is the format of systemd `EnvironmentFile`. Docker `--env-file` reads the same lines, but it keeps the quotes of a quoted value. The application reads the same lines at a normal start (plan decision 25).
 15. **No mode step.** How does the yml file get the deployment mode? Options: (a) a mode question with self-host and cloud, (b) the fixed value `opencelium.deployment-mode: self-host`. Recommended: (b), because the wizard installs the self-host mode only. The cloud mode stays in core for hand-written configurations.
 16. **The fixed admin password.** How does the admin step make the account with the password `1234`? Options: (a) the generated-password path of the user service, with the must-change flag and the lock, (b) the typed-password path, without them. Recommended: (b), because the spec forbids the forced change and the lock. The lock job has no user in the wizard. The password generator makes only the database password of the Docker Compose option.
 17. **A hand-written argument parser.** Which code parses the command line? Options: (a) a command-line library, (b) a hand-written parser. Recommended: (b), because a handful of flags does not justify a dependency.
@@ -113,6 +126,10 @@ The reviewer confirms each decision before task 12, the first open task, starts.
 22. **The wizard prints the login box.** Which process prints the box? Options: (a) the completion runner inside the application, (b) the wizard process, when the port listens. Recommended: (b), because with the service the output of the application goes to the journal, not to the terminal.
 23. **An old file stays as a backup.** What happens to a file at a target path on a re-run of `setup`? Options: (a) the write replaces it, (b) the write keeps it as `<name>.bak`. Recommended: (b), because a batch run has no confirmation, and a yml file that an operator edited by hand must not vanish.
 24. **The wizard draws its own progress bar.** How does the user see the download of the image? Options: (a) Docker draws 1 bar for each layer on the terminal, (b) the wizard parses the JSON events and draws 1 bar with the total MB. Recommended: (b), because the user sees 1 total, a log without a terminal stays short, and a failed download gives the cause from Docker. Jackson is on the classpath of core and parses the events, so the feature adds no dependency.
+25. **A normal start reads the env file.** How does a later start get `OC_MONGO_PASSWORD`? Options: (a) the shell or systemd loads the env file, (b) a start check in `core.config` reads the env file next to the yml file. Recommended: (b), because a start by hand then has no shell command before it, and launchd has no env-file option. Without (b), the plist must hold the password. The process environment has priority over the file. systemd keeps `EnvironmentFile`, and both sources give the same value. Candidate for section 7, in the record of plan decision 5; the architect agent drafts the record.
+26. **The reader accepts only the form of the renderer.** Which lines does the reader accept? Options: (a) each form of the shell and of systemd, (b) the form that the env renderer writes. This form has 4 line types: a comment, an empty line, `KEY=value`, and `KEY="value"` in double quotes. In the quotes, a backslash keeps `\`, `"`, `$` or the backtick. Recommended: (b), because the reader and the renderer then agree, and a test writes a file with the renderer and reads it with the reader. A hand edit in another form, for example `export`, stops the start with the line number, so the start loses no value without a message. Candidate for section 7, in the record of plan decision 5.
+27. **The master key in the env file stops the start.** What does the start do with `OC_MASTER_KEY` in the env file? Options: (a) it uses the key, (b) it ignores the key, (c) it stops and names the file. Recommended: (c). Option (a) puts the key and the database password into 1 file, against plan decision 19 and architecture decision 14. With option (b), the root-key resolver reads only the process environment. Then a new self-host installation generates a different key, and no message names the line in the env file. Candidate for section 7, in the record of plan decision 5.
+28. **Each normal start runs the search for the configuration file.** How does the service find `/etc/opencelium/application.yml` without a terminal? Without this decision, rule 6 applies there, and only rule 9 gives the system directory to Boot. Options: (a) the unit file sets `SPRING_CONFIG_ADDITIONAL_LOCATION`, (b) the launcher runs the search at each normal start without a `spring.config.*` location. Recommended: (b), because then 1 rule finds the yml file and the env file for each start. The unit file stays as it is.
 
 ## Interfaces and contracts
 
@@ -142,10 +159,10 @@ The launch decision, first match wins:
 | 6 | No interactive terminal | The normal start. |
 | 7 | `spring.config.location`, `spring.config.additional-location` or `spring.config.import` in the arguments, the system properties or the environment | The normal start. |
 | 8 | A bootstrap property (`opencelium.*`, `spring.mongodb.*`, `server.port`) in the arguments, the system properties or the environment | The normal start. |
-| 9 | A configuration file at a search location | The normal start. A file in `/etc/opencelium/` becomes an additional location for Boot. |
+| 9 | A configuration file at a search location | The normal start. |
 | 10 | All other cases | The wizard. |
 
-The search order: `./config/`, `./`, then `/etc/opencelium/`; in each directory `application.yml`, `application.yaml`, `application.properties`. The paths are relative to the working directory. The write location is `./config/`.
+The search order: `./config/`, `./`, then `/etc/opencelium/`; in each directory `application.yml`, `application.yaml`, `application.properties`. The paths are relative to the working directory. The write location is `./config/`. Each normal start without a `spring.config.*` location runs the search (plan decision 28). A file in `/etc/opencelium/` then becomes an additional location for Boot, because Boot does not read that directory by itself. The env file next to the configuration file applies (plan decision 25).
 
 The exit codes:
 
@@ -174,7 +191,9 @@ With the service installed on Linux:
 /etc/systemd/system/opencelium.service   0644  root:root
 ```
 
-Without the service step, the wizard writes `./config/application.yml` and `./config/opencelium.env` under the working directory, and the key into the data directory. The yml header line is fixed text, and the file has no timestamp. The env file has 1 `KEY=value` line for each entry. The renderer double-quotes a value with whitespace or a character that the shell reads as syntax, and it escapes `\`, `"`, `$` and the backtick in the quotes. Spring resolves `${OC_MONGO_PASSWORD}` from the environment. The wizard process does not have the variable in its environment. Thus the start in the wizard process gets the entries of the env file as start arguments. When the variable is not set, the fail-fast rule applies, and the message names `OC_MONGO_PASSWORD` and the path of the env file.
+Without the service step, the wizard writes `./config/application.yml` and `./config/opencelium.env` under the working directory, and the key into the data directory. The yml header line is fixed text, and the file has no timestamp. The env file has 1 `KEY=value` line for each entry. The renderer puts a value in double quotes when the value has whitespace or a shell character. In the quotes, a backslash goes before `\`, `"`, `$` and the backtick.
+
+Spring resolves `${OC_MONGO_PASSWORD}` from the environment or from the env file. The wizard process does not have the variable in its environment. Thus the start in the wizard process gets the entries of the env file as start arguments. A later start reads the env file itself (plan decision 25), so the location and the form of the env file are a contract. When the variable has no value, the fail-fast rule applies, and the message names `OC_MONGO_PASSWORD` and the path of the env file.
 
 The unit file:
 
@@ -233,7 +252,7 @@ The open steps are `AUTH`, `BROKER` and `LICENSE`, as information for the browse
 The collection `setup_state` holds 1 document for each tenant scope: the tenant ID, the state (`PENDING_ADMIN`, `REQUIRED` or `COMPLETE`), the admin username while the state is `PENDING_ADMIN`, and the completion time. The state is data that the application owns, like a user record, not a configuration value. The 3 placement questions of architecture section 6.4 do not apply.
 
 ### Properties and settings
-The feature adds no bootstrap property and no runtime setting. The wizard writes the properties that exist: `server.port`, `spring.mongodb.uri`, `opencelium.deployment-mode`, `opencelium.data-dir`, and `opencelium.master-key-file` when the user names a key file.
+The feature adds no bootstrap property and no runtime setting. The location of the env file comes from the configuration file, not from a property. The feature adds 1 operator contract: the file `opencelium.env` next to the yml file, its form and the variable `OC_MONGO_PASSWORD`. The wizard writes the properties that exist: `server.port`, `spring.mongodb.uri`, `opencelium.deployment-mode`, `opencelium.data-dir`, and `opencelium.master-key-file` when the user names a key file.
 
 ### The new public types, by responsibility
 - The host services SPI: detect the host, install the service, print the service. One implementation for systemd, one that only prints.
@@ -254,6 +273,7 @@ The test kinds follow architecture section 6.8 and CONTRIBUTING section 9. The t
 | SW-47 | Unit: the pull progress with recorded JSON lines; the installer with a fake command runner that gives the lines; the console prompter with a terminal and without a terminal. | A fake command runner, `ScriptedConsoleIo`. |
 | SW-16, SW-17 | A test against the local MongoDB without a Spring context: the step with correct credentials, wrong credentials and a closed port. The retry menu with scripted input. | `LocalMongo`. |
 | SW-18 | Unit: the URI splitter and the rendered yml and env files. | None. |
+| SW-48 to SW-52 | Unit: the env file reader with good lines, bad lines and `OC_MASTER_KEY`. A test writes a file with the env renderer and reads it with the reader. The start check with a temporary working directory and a Spring environment that has a variable. The launcher without a terminal and with a file in the system directory. The fail-fast message with and without an env file. Full application: a start with the password only in the env file, and a start with a bad line. | A temporary directory, `LocalMongo`, `CoreStartup`. |
 | SW-19 to SW-22 | Unit: the master key step with scripted input, a temporary directory and an injected environment map; the backup confirmation with `N` and in batch mode. | `ScriptedConsoleIo`. |
 | SW-23 | A test against the local MongoDB without a Spring context, with a wrapped DEK and no key. | `LocalMongo`. |
 | SW-24 to SW-26, SW-32, SW-42, SW-43 | Full application: the completion runner makes the admin from the marker and sets `REQUIRED`. A start that fails after the marker keeps it. The raw user document holds a hash and no plain text. The captured wizard output holds the box. The captured logger output holds no generated secret. | `LocalMongo`, `CoreStartup`, a list appender on the root logger. |
@@ -273,6 +293,9 @@ The test kinds follow architecture section 6.8 and CONTRIBUTING section 9. The t
 | The service registration grows into 3 implementations. | The host services SPI with the print fallback. Native macOS and Windows are out of scope. |
 | The database password or the key leaks to the logs through an exception message. | The wizard prints secrets through the console only. The full-application test searches the captured logger output and the raw documents. |
 | A setup-file run and an interactive run give different files. | The written files have no timestamp. A test compares the 2 `config/` directories byte for byte. |
+| A hand edit of the env file uses a form of the shell that the reader does not accept, for example `export`. | The start stops with the file and the line number. The README section "First start" shows the form. |
+| An error of the env file reader shows the database password. | The messages name the file, the line number and the key, never the value. A test searches the output for the value. |
+| An old variable of the shell has priority over a new env file after a new `setup` run. | The wizard process starts with the new values as arguments. systemd and Docker apply the same priority. The README section "First start" says it. |
 
 ## Definition of done
 - Each criterion of spec.md has a test that passes.
