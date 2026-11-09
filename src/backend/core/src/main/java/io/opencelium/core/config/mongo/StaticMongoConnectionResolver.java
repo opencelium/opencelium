@@ -1,6 +1,9 @@
 package io.opencelium.core.config.mongo;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +20,7 @@ import org.springframework.core.env.Environment;
 import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.config.BootstrapPropertyException;
 import io.opencelium.core.config.DeploymentMode;
+import io.opencelium.core.config.EnvFileEnvironmentPostProcessor;
 import io.opencelium.core.config.OpenCeliumProperties;
 
 import static io.opencelium.core.config.BootstrapProperties.MONGODB_AUTHENTICATION_DATABASE;
@@ -74,6 +78,9 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 						"Remove " + names + ", or remove " + MONGODB_URI
 								+ " and describe the server with the spring.mongodb.host/port/username/... properties only.",
 						null);
+			}
+			if (mongo.getUri().contains(PLACEHOLDER_START)) {
+				throw unresolvedPlaceholder(mongo.getUri(), PlaceholderLookup.atStart(environment));
 			}
 			return new StaticMongoConnectionResolver(mode, fromUri(mongo));
 		}
@@ -141,7 +148,7 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 	 */
 	private static MongoConnection fromUri(String uri, String databaseProperty) {
 		if (uri.contains(PLACEHOLDER_START)) {
-			throw unresolvedPlaceholder(uri);
+			throw unresolvedPlaceholder(uri, PlaceholderLookup.PROCESS_ONLY);
 		}
 		ConnectionString connectionString;
 		try {
@@ -175,20 +182,52 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 		return new MongoConnection(connectionString, database, MONGODB_URI);
 	}
 
-	private static BootstrapPropertyException unresolvedPlaceholder(String uri) {
+	private static BootstrapPropertyException unresolvedPlaceholder(String uri, PlaceholderLookup lookup) {
 		Matcher password = PASSWORD_PLACEHOLDER.matcher(uri);
 		if (password.matches()) {
 			String variable = password.group(1);
-			return new BootstrapPropertyException(MONGODB_URI, MONGODB_URI + " refers to " + variable
-					+ ", which is not set in the environment of this process.",
-					"Set " + variable + ". The setup wizard writes it into opencelium.env next to application.yml;"
-							+ " load that file before the start, for example: set -a; . ./config/opencelium.env;"
-							+ " set +a",
+			return new BootstrapPropertyException(MONGODB_URI,
+					MONGODB_URI + " refers to " + variable + ", which has no value in " + lookup.lookedIn() + ".",
+					lookup.setIn().map(file -> "Add the line " + variable + "=<value> to " + file + ", or set "
+							+ variable + " in the environment of the process.").orElse("Set " + variable + "."),
 					null);
 		}
 		return new BootstrapPropertyException(MONGODB_URI, "'" + MongoConnection.maskUnparsed(uri)
-				+ "' holds a ${...} placeholder that has no value in the environment of this process.",
-				"Set the variable that the placeholder names. In a password, URL-encode $ as %24 and { as %7B.", null);
+				+ "' holds a ${...} placeholder that has no value in " + lookup.lookedIn() + ".",
+				"Set the variable that the placeholder names" + lookup.setIn().map(file -> ", in " + file + " or in the"
+						+ " environment of the process").orElse("") + ". In a password, URL-encode $ as %24 and { as %7B.",
+				null);
+	}
+
+	/**
+	 * Where a placeholder was looked for, in words for the message, and the env file to put its value in.
+	 *
+	 * @param lookedIn the sources, for example "the environment of this process or in the env file /etc/x.env"
+	 * @param setIn    the env file of this start, also when it does not exist yet; empty outside a start
+	 */
+	private record PlaceholderLookup(String lookedIn, Optional<String> setIn) {
+
+		/** A URI checked outside a start, for example the one that the setup wizard asks for. */
+		static final PlaceholderLookup PROCESS_ONLY = new PlaceholderLookup("the environment of this process",
+				Optional.empty());
+
+		/** At the start Spring also resolves from the env file next to the configuration file. */
+		static PlaceholderLookup atStart(Environment environment) {
+			Optional<Path> envFile = EnvFileEnvironmentPostProcessor.envFile(environment);
+			if (envFile.isEmpty()) {
+				return new PlaceholderLookup("the environment of this process, and there is no env file, because no"
+						+ " configuration file was found", Optional.of(EnvFileEnvironmentPostProcessor.FILE_NAME
+								+ " next to application.yml"));
+			}
+			String file = envFile.get().toString();
+			if (Files.exists(envFile.get())) {
+				return new PlaceholderLookup("the environment of this process or in the env file " + file,
+						Optional.of(file));
+			}
+			return new PlaceholderLookup("the environment of this process, and there is no env file at " + file,
+					Optional.of("a new env file " + file));
+		}
+
 	}
 
 	private static MongoConnection fromHostProperties(MongoProperties mongo, List<String> addressProperties) {

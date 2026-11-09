@@ -51,6 +51,9 @@ import io.opencelium.core.setup.LaunchDecision.Kind;
  * <li>A configuration file at one of the {@link ConfigLocations}: the normal start.</li>
  * <li>Otherwise: the wizard.</li>
  * </ol>
+ * Each normal start without a {@code spring.config.*} location runs the search of rule 9, also when an earlier rule
+ * decided, and hands a file in the system directory to Boot as an additional location. Thus a service that starts
+ * without a terminal finds its application.yml and the env file next to it.
  * The terminal, the environment, the system properties, the file locations, the console and the output are all
  * given to the constructor, so the decision and the wizard are testable without a real terminal and without the
  * developer's own environment. Nothing here logs: before Spring starts the log system is not configured, so the
@@ -202,15 +205,18 @@ public final class SetupLauncher {
 					arguments.batch() || !interactive, arguments.setupFile(), springArguments);
 		}
 		if (arguments.batch()) {
-			return boot("the flag " + LaunchArguments.BATCH_FLAG, springArguments);
+			return boot("the flag " + LaunchArguments.BATCH_FLAG, withSearchResult(springArguments));
 		}
 		if (!interactive) {
-			return boot("no interactive terminal", springArguments);
+			return boot("no interactive terminal", withSearchResult(springArguments));
 		}
-		Optional<String> configured = configLocationSetting(springArguments)
-				.or(() -> bootstrapSetting(springArguments));
-		if (configured.isPresent()) {
-			return boot(configured.get() + " is set", springArguments);
+		Optional<String> location = configLocationSetting(springArguments);
+		if (location.isPresent()) {
+			return boot(location.get() + " is set", springArguments);
+		}
+		Optional<String> bootstrap = bootstrapSetting(springArguments);
+		if (bootstrap.isPresent()) {
+			return boot(bootstrap.get() + " is set", withSearchResult(springArguments));
 		}
 		Optional<Path> file = locations.find();
 		if (file.isPresent()) {
@@ -269,8 +275,8 @@ public final class SetupLauncher {
 
 	/**
 	 * The arguments of the start after the wizard: the entries of the env file follow the arguments of the user, in
-	 * order. A later start gets them from the env file (systemd, or the shell with {@code set -a}); this process does
-	 * not have them in its environment, and application.yml refers to them by name.
+	 * order. As arguments they win over a variable of the same name that the shell of this process still has from an
+	 * earlier installation. A later start reads the env file next to application.yml by itself.
 	 */
 	private static String[] withEntries(List<String> springArguments, SequencedMap<String, String> entries) {
 		List<String> arguments = new ArrayList<>(springArguments);
@@ -330,6 +336,18 @@ public final class SetupLauncher {
 
 	private static boolean isBootstrapVariable(String name) {
 		return name.equals(SERVER_PORT_VARIABLE) || BOOTSTRAP_VARIABLE_PREFIXES.stream().anyMatch(name::startsWith);
+	}
+
+	/**
+	 * The arguments with the result of the search, for a normal start that the search did not decide: a service
+	 * starts without a terminal, and it must still find application.yml and the env file in the system directory.
+	 * A {@code spring.config.*} location means the operator named the configuration, so nothing is added.
+	 */
+	private List<String> withSearchResult(List<String> springArguments) {
+		if (configLocationSetting(springArguments).isPresent()) {
+			return springArguments;
+		}
+		return locations.find().map(file -> withSystemLocation(file, springArguments)).orElse(springArguments);
 	}
 
 	/** Boot does not read the system directory by itself, so a file found there becomes an additional location. */
