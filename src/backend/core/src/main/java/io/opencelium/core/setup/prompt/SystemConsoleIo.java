@@ -17,6 +17,11 @@ final class SystemConsoleIo implements ConsoleIo {
 	}
 
 	@Override
+	public String readLineWithoutEcho(String prompt) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	@Override
 	public PrintWriter writer() {
 		Console console = System.console();
 		return console != null ? console.writer() : standardOut;

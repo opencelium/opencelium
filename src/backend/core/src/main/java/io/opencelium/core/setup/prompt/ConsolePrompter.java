@@ -123,6 +123,11 @@ public final class ConsolePrompter implements Prompter {
 	}
 
 	@Override
+	public String secret(String question) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	@Override
 	public void answered(String question, String value, String remark) {
 		print(MARGIN + Screen.padded(question) + value + "   (" + remark + ")");
 	}
