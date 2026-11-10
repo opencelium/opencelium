@@ -154,6 +154,20 @@ class UserServiceImplTest {
     }
 
     @Test
+    void findByIdNoLockReturnsUserWithoutLockingWhenExists() {
+        User user = UserFixture.anEmptyUser();
+        user.setId(7);
+        when(userRepository.findById(7)).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findByIdNoLock(7);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(7);
+        verify(userRepository).findById(7);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
     void getByIdReturnsUserWhenFound() {
         User user = UserFixture.anEmptyUser();
         user.setId(5);
