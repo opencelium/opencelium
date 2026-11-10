@@ -186,18 +186,18 @@ class FilePlanWriterTest {
 	@Test
 	void writeRunsActionsInOrderAfterTheFilesWhenPlanHasActions() {
 		List<String> log = new ArrayList<>();
-		PlannedFile compose = PlannedFile.groupReadable(tmp.resolve("quickstart/docker-compose.yml"), "c\n");
+		PlannedFile unit = PlannedFile.groupReadable(tmp.resolve("systemd/opencelium.service"), "c\n");
 		List<Boolean> inPlaceAtRun = new ArrayList<>();
 		FilePlan plan = plan(yml("a\n"), env("b\n"));
-		plan.add(new RecordingAction("first", log, compose).onRun(() -> inPlaceAtRun.add(
-				Files.exists(tmp.resolve("config/application.yml")) && Files.exists(compose.path()))));
+		plan.add(new RecordingAction("first", log, unit).onRun(() -> inPlaceAtRun.add(
+				Files.exists(tmp.resolve("config/application.yml")) && Files.exists(unit.path()))));
 		plan.add(new RecordingAction("second", log));
 
 		writer.write(plan);
 
 		assertThat(log).containsExactly("run first", "run second");
 		assertThat(inPlaceAtRun).containsExactly(true);
-		assertThat(compose.path()).content().isEqualTo("c\n");
+		assertThat(unit.path()).content().isEqualTo("c\n");
 	}
 
 	@Test
@@ -205,11 +205,11 @@ class FilePlanWriterTest {
 		Files.createDirectory(tmp.resolve("config"));
 		Files.writeString(tmp.resolve("config/application.yml"), "old\n");
 		List<String> log = new ArrayList<>();
-		PlannedFile compose = PlannedFile.groupReadable(tmp.resolve("quickstart/docker-compose.yml"), "c\n");
+		PlannedFile unit = PlannedFile.groupReadable(tmp.resolve("systemd/opencelium.service"), "c\n");
 		List<Boolean> inPlaceAtUndo = new ArrayList<>();
 		FilePlan plan = plan(yml("new\n"), env("b\n"));
-		plan.add(new RecordingAction("first", log, compose)
-				.onUndo(() -> inPlaceAtUndo.add(Files.exists(compose.path()))));
+		plan.add(new RecordingAction("first", log, unit)
+				.onUndo(() -> inPlaceAtUndo.add(Files.exists(unit.path()))));
 		plan.add(new RecordingAction("second", log).failsWith("Cannot start the second action: it failed."));
 
 		SetupWriteException ex = assertThatExceptionOfType(SetupWriteException.class)
@@ -222,20 +222,20 @@ class FilePlanWriterTest {
 		assertThat(inPlaceAtUndo).containsExactly(true);
 		assertThat(tmp.resolve("config/application.yml")).content().isEqualTo("old\n");
 		assertThat(entries(tmp.resolve("config"))).containsExactly("application.yml");
-		assertThat(tmp.resolve("quickstart")).doesNotExist();
+		assertThat(tmp.resolve("systemd")).doesNotExist();
 	}
 
 	@Test
 	void writeNamesWhatAnUndoLeftWhenAnActionFails() {
 		List<String> log = new ArrayList<>();
 		FilePlan plan = plan(yml("a\n"), env("b\n"));
-		plan.add(new RecordingAction("first", log).leaves("Stop MongoDB by hand: docker compose down in /x."));
+		plan.add(new RecordingAction("first", log).leaves("Remove the service by hand: systemctl disable opencelium."));
 		plan.add(new RecordingAction("second", log).failsWith("Cannot start the second action: it failed."));
 
 		SetupWriteException ex = assertThatExceptionOfType(SetupWriteException.class)
 				.isThrownBy(() -> writer.write(plan)).actual();
 
-		assertThat(ex.rollbackReport()).contains("Stop MongoDB by hand: docker compose down in /x.")
+		assertThat(ex.rollbackReport()).contains("Remove the service by hand: systemctl disable opencelium.")
 				.doesNotContain("Nothing was written.");
 		assertThat(tmp.resolve("config/application.yml")).doesNotExist();
 	}

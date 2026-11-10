@@ -67,20 +67,20 @@ class SummaryStepTest {
 	@Test
 	void runListsActionFilesAndActionsWhenAnEarlierStepPlannedAnAction() {
 		answered();
-		Path compose = workingDir.resolve("quickstart/docker-compose.yml");
-		context.filePlan().add(new RecordingAction("Start MongoDB with Docker Compose in " + compose.getParent(),
-				new ArrayList<>(), PlannedFile.groupReadable(compose, "c")));
+		Path unit = workingDir.resolve("systemd/opencelium.service");
+		context.filePlan().add(new RecordingAction("Install the service opencelium", new ArrayList<>(),
+				PlannedFile.groupReadable(unit, "c")));
 		console.type("y");
 
 		step().run(context, new ConsolePrompter(console));
 
 		assertThat(console.output()).containsSubsequence("  Files to write",
 				"    - " + workingDir.resolve("config/application.yml"),
-				"    - " + workingDir.resolve("config/opencelium.env"), "    - " + compose, "  After the write",
-				"    - Start MongoDB with Docker Compose in " + compose.getParent(),
+				"    - " + workingDir.resolve("config/opencelium.env"), "    - " + unit, "  After the write",
+				"    - Install the service opencelium",
 				"  Write the files and start OpenCelium? [Y/n]: ");
 		assertThat(context.filePlan().files()).extracting(PlannedFile::path).containsExactly(
-				workingDir.resolve("config/application.yml"), workingDir.resolve("config/opencelium.env"), compose);
+				workingDir.resolve("config/application.yml"), workingDir.resolve("config/opencelium.env"), unit);
 	}
 
 	@Test
