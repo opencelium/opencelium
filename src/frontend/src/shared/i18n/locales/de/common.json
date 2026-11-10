@@ -72,11 +72,13 @@
       "workflowShowUrl": "Zeigen, wo die URL einer Methode ist (der ausgewählten oder einer genannten)",
       "workflowShowHeaders": "Zeigen, wo die Header einer Methode sind (der ausgewählten oder einer genannten)",
       "workflowShowBody": "Zeigen, wo der Body einer Methode ist (der ausgewählten oder einer genannten)",
-      "workflowShowTry": "Zeigen, wie man eine Methode ausprobiert (die ausgewählte oder eine genannte)",
+      "workflowShowTry": "Zeigen, wie man eine Methode ausprobiert, also eine Testanfrage an sie sendet (die ausgewählte oder eine genannte)",
       "workflowShowTransformation": "Zeigen, wie man eine Transformation (ein Skript) auf einen Wert im Body oder in den Headern einer Methode anwendet",
       "workflowAddMethod": "Eine neue Methode aus einem Konnektor zum Workflow hinzufügen, vor oder nach einem Schritt",
       "workflowSuggestMapping": "Referenzen (ein Mapping) für den Body einer Methode aus der Antwort einer früheren Methode vorschlagen",
       "workflowApplyTransformation": "Eine Transformation (ein Skript) auf eine Eigenschaft des geöffneten Bodys oder der Header anwenden",
+      "workflowOpenBody": "Den Body einer Methode jetzt öffnen (der ausgewählten oder einer genannten)",
+      "workflowOpenHeaders": "Die Header einer Methode jetzt öffnen (der ausgewählten oder einer genannten)",
       "workflowTestRun": "Einen Testlauf des ganzen Workflows starten, live oder im Debug-Modus (Workflow testen, ausführen, laufen lassen, debuggen)",
       "workflowStopTest": "Den laufenden Testlauf stoppen",
       "workflowExplainFailure": "Erklären, warum der letzte Testlauf fehlgeschlagen ist (was schiefging, welcher Fehler)",
@@ -90,7 +92,8 @@
       "workflowRedo": "Die rückgängig gemachte Änderung wiederherstellen",
       "workflowSave": "Den Workflow speichern",
       "workflowDeleteStep": "Einen Schritt aus dem Workflow entfernen (löschen)",
-      "workflowGenerate": "Einen neuen Workflow mit KI aus einer Beschreibung erstellen, was er tun soll"
+      "workflowGenerate": "Einen neuen Workflow mit KI aus einer Beschreibung erstellen, was er tun soll",
+      "workflowStartTutorial": "Das Tutorial des Workflow-Editors starten (es öffnet sich auf einem neuen Workflow und ändert hier nichts)"
     },
     "footer": {
       "select": "Auswählen",
@@ -136,14 +139,12 @@
       "failed": "Der gesprochene Befehl konnte nicht transkribiert werden. Prüfen Sie, ob der lokale Sprachdienst (whisper-server) läuft."
     },
     "wakeWord": {
-      "start": "Mit {{name}} sprechen: Eingeschaltet hört es ständig zu und reagiert nur auf Sätze, die mit „{{name}}“ beginnen, z. B. „{{name}}, wo ist der Header der Methode?“",
+      "start": "Mit {{name}} sprechen: Eingeschaltet hört es ständig zu und führt aus, worum du bittest, z. B. „Wo ist der Header der Methode?“. Gespräche, die zu keinem Befehl passen, werden ignoriert.",
       "stop": "{{name}} hört zu. Zum Beenden klicken",
-      "listening": "{{name}} hört zu. Was brauchst du?",
-      "heard": "{{name}} kümmert sich darum: „{{text}}“",
       "autoStopped": "{{name}} hört nach 10 Minuten ohne Anfrage nicht mehr zu.",
       "state": {
         "off": "{{name}} ist aus",
-        "idle": "{{name}} wartet auf seinen Namen",
+        "idle": "{{name}} hört zu",
         "active": "{{name}} hört dir zu",
         "thinking": "{{name}} bearbeitet deine Anfrage"
       }
@@ -188,6 +189,7 @@
       "cannotSave": "Der Workflow kann gerade nicht gespeichert werden (schreibgeschützt, nichts geändert oder der Speichern-Dialog ist schon offen).",
       "deleteWhich": "Nenne den Schritt, der entfernt werden soll, oder wähle ihn zuerst aus.",
       "deleted": "{{step}} entfernt. Strg+Z macht es rückgängig.",
+      "tutorialUnavailable": "Das Tutorial ist nur für Administratoren verfügbar.",
       "generateUnavailable": "Mit KI erstellen ist gerade nicht verfügbar.",
       "operatorFailed": "Die KI konnte die Anfrage nicht lesen. Versuche es erneut oder füge das IF oder die Schleife mit „+“ hinzu.",
       "ifAdded": "IF hinzugefügt. Die Bedingung wird aus „{{condition}}“ erstellt: Prüfe sie und speichere.",
@@ -203,12 +205,6 @@
       }
     },
     "beebot": {
-      "done": "Erledigt.",
-      "lookAtPalette": "Schau in die Befehlspalette.",
-      "sayYesDelete": "Zum Entfernen sag „ja, löschen“.",
-      "stoppedListening": "{{name}} hört nicht mehr zu. Schalte ihn mit seiner Schaltfläche wieder ein.",
-      "mute": "Stimme von {{name}} stummschalten",
-      "unmute": "{{name}} laut antworten lassen",
       "capabilities": {
         "intro": "Hier ein paar Dinge, um die du {{name}} bitten kannst.",
         "editor": {
@@ -301,8 +297,8 @@
       "description": "Sehen Sie, was sich in jeder OpenCelium-Version geändert hat: die aktuelle Version zuerst, ältere darunter. Sie finden es im Hilfemenü."
     },
     "workflowAiAssistant": {
-      "title": "Mit KI generieren",
-      "description": "Beschreiben Sie den Workflow in eigenen Worten, und der Assistent entwirft die Schritte für Sie. Er läuft lokal, nichts verlässt diesen Rechner."
+      "title": "KI-Assistent",
+      "description": "Einen Workflow aus deinen eigenen Worten generieren, ihn erklären lassen oder Beebot einschalten und einfach sagen, was du brauchst. Läuft lokal, nichts verlässt diesen Rechner."
     }
   },
   "user": {

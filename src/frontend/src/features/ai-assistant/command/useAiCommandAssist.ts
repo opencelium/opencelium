@@ -29,6 +29,8 @@ export type AiCommandState =
 export type AskOutcome =
 	| { kind: 'done' }
 	| { kind: 'answer' }
+	/** Said to Beebot, but no command fits or it cannot be done as said: most likely talk in the room, so nothing is shown. */
+	| { kind: 'no-command' }
 	| { kind: 'error'; error: 'unreachable' | 'failed' }
 	| { kind: 'skipped' };
 
@@ -117,6 +119,11 @@ export function useAiCommandAssist({ query, isUnmatched, onRun, onRunIntent, onG
 				setState(IDLE);
 				onRunIntent(proposal.resolved);
 				return { kind: 'done' };
+			}
+			// Said to Beebot: no fitting command, or one that cannot be done as said, is most likely talk in the room.
+			if (isAddressed && (proposal.kind === 'no-command' || proposal.kind === 'not-found' || proposal.kind === 'needs-value')) {
+				setState(IDLE);
+				return { kind: 'no-command' };
 			}
 			setState({ status: 'done', prompt, proposal, isQuestion });
 			return { kind: 'answer' };

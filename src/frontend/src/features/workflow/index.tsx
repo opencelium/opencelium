@@ -23,8 +23,7 @@ import { useSchedulesConnectionId } from './components/schedules/simulatedSchedu
 import { WorkflowProblemsBadge } from './problems/WorkflowProblemsBadge';
 import { applyProblemFocus } from './problems/applyProblemFocus';
 import { useAiPromptPanel } from '@features/ai-assistant/hooks/useAiPromptPanel';
-import { AiHeaderButton } from '@features/ai-assistant/ui/AiHeaderButton';
-import { AiWorkflowExplainButton } from '@features/ai-assistant/ui/AiWorkflowExplain/AiWorkflowExplainButton';
+import { AiHeaderMenu } from '@features/ai-assistant/ui/AiHeaderMenu/AiHeaderMenu';
 import { AiPromptPanel } from '@features/ai-assistant/ui/AiPromptPanel/AiPromptPanel';
 import { useWorkflowIntent } from './intent/useWorkflowIntent';
 import { useWorkflowEditBridge } from './command/useWorkflowEditBridge';
@@ -138,12 +137,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           menuLoadingItemId: isDownloadingTemplate ? 'download-template' : null,
           validateTitle, onSave: handleSave, confirmBeforeSave,
           problemsSlot: <WorkflowProblemsBadge issues={problems.issues} onOpen={problems.openPanel} />,
-          assistantSlot: ai.isConfigured && !readOnly ? <AiHeaderButton {...ai.button} /> : null,
-          describeSlot: ai.isConfigured && !readOnly ? <AiWorkflowExplainButton nodes={canvasNodes} edges={workflow.edges}
-            title={headerState.title} onUseDescription={(description) => {
-              setHeaderState((current) => ({ ...current, description }));
-              changes.markDirty();
-            }} /> : null,
+          assistantSlot: ai.isConfigured ? <AiHeaderMenu generate={ai.button} canEdit={!readOnly}
+            explain={readOnly ? undefined : { nodes: canvasNodes, edges: workflow.edges, title: headerState.title,
+              onUseDescription: (description) => {
+                setHeaderState((current) => ({ ...current, description }));
+                changes.markDirty();
+              } }} /> : null,
           saveDisabled: isLoading || !hasConnectionChanges,
           onOpenHistory: handleOpenHistory,
           readOnly: readOnly || isTestRunLocked, testRunLocked: isTestRunLocked,

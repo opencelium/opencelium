@@ -132,6 +132,15 @@ describe('POST /workflow/mapping/intent', () => {
         expect(other).toMatchObject({ target: 'TicketCreate', source: '' })
     })
 
+    it('reads a lone "from Y" as the source, leaving the target to the open dialog', async () => {
+        const { body } = await read('suggest AI mapping from config item get', { target: 'm2', source: '' })
+        expect(body).toMatchObject({ target: '', source: 'ConfigItemGet' })
+        const { body: german } = await read('schlage ein Mapping aus Config Item Search vor', { target: '', source: '' })
+        expect(german).toMatchObject({ target: '', source: 'ConfigItemSearch' })
+        const { body: target } = await read('suggest a mapping for ticket create', { target: 'm4', source: '' })
+        expect(target).toMatchObject({ target: 'TicketCreate', source: '' })
+    })
+
     it('takes a spelled-out name over a close one the model chose', async () => {
         const { body } = await read('suggest references for config item create method from config item get method', { target: 'm1', source: 'm2' })
         expect(body).toMatchObject({ target: 'ConfigItemCreate', source: 'ConfigItemGet' })
@@ -183,6 +192,8 @@ describe('POST /workflow/transformation/intent', () => {
         expect(body).toMatchObject({ field: '', spokenField: 'price' })
         const { body: selected } = await read('apply transformation for this property with upper case', { field: '', spokenField: 'this property', description: 'upper case' })
         expect(selected).toMatchObject({ field: '', spokenField: '' })
+        const { body: invented } = await read('create a transformation to take the first 10 characters', { field: '', spokenField: '@odata.id', description: 'take the first 10 characters' })
+        expect(invented).toMatchObject({ field: '', spokenField: '', description: 'take the first 10 characters' })
     })
 
     it('rejects a request without fields', async () => {

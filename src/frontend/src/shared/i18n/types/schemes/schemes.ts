@@ -159,8 +159,6 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             wakeWord: {
                 start: string
                 stop: string
-                listening: string
-                heard: string
                 autoStopped: string
                 state: {
                     off: string
@@ -210,6 +208,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 deleteWhich: string
                 deleted: string
                 generateUnavailable: string
+                tutorialUnavailable: string
                 operatorFailed: string
                 ifAdded: string
                 ifAddedEmpty: string
@@ -224,12 +223,6 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 }
             }
             beebot: {
-                done: string
-                lookAtPalette: string
-                sayYesDelete: string
-                stoppedListening: string
-                mute: string
-                unmute: string
                 capabilities: {
                     intro: string
                     editor: {
@@ -277,6 +270,8 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 workflowAddMethod: string
                 workflowSuggestMapping: string
                 workflowApplyTransformation: string
+                workflowOpenBody: string
+                workflowOpenHeaders: string
                 workflowTestRun: string
                 workflowStopTest: string
                 workflowExplainFailure: string
@@ -291,6 +286,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 workflowSave: string
                 workflowDeleteStep: string
                 workflowGenerate: string
+                workflowStartTutorial: string
                 help: string
                 onboarding: string
                 workflowTutorial: string

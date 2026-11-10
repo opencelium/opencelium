@@ -2,25 +2,31 @@
 
 const wordsOf = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}\s]+/gu, ' ').split(/\s+/).filter(Boolean)
 
-const YES = new Set(['yes', 'yeah', 'yep', 'ok', 'okay', 'sure', 'confirm', 'ja', 'jawohl', 'jep', 'genau', 'bestätigen', 'bestätige'])
-const NO = new Set(['no', 'nope', 'cancel', 'nein', 'abbrechen', 'nicht', 'don\'t', 'dont'])
-const DELETE = new Set(['delete', 'remove', 'löschen', 'lösche', 'entfernen', 'entferne'])
+const YES = new Set([
+    'yes', 'yeah', 'yep', 'yup', 'ok', 'okay', 'sure', 'confirm', 'confirmed', 'proceed', 'absolutely', 'definitely',
+    'ja', 'jawohl', 'jep', 'jo', 'genau', 'klar', 'gerne', 'bestätigen', 'bestätige', 'bestätigt', 'einverstanden',
+    'delete', 'remove', 'löschen', 'lösche', 'entfernen', 'entferne',
+])
+const NO = new Set([
+    'no', 'nope', 'nah', 'cancel', 'abort', 'keep', 'don\'t', 'dont',
+    'nein', 'nö', 'nee', 'abbrechen', 'abbruch', 'behalten', 'behalte', 'nicht',
+])
+const YES_PHRASE_RE = /^(go ahead|do it|mach (es|das)|tu es|los geht'?s)\b/
 /** An answer is a few words; a longer utterance is a new request, not a reply. */
 const MAX_ANSWER_WORDS = 4
 
-export type ConfirmAnswer = 'yes' | 'no' | 'needs-delete' | null
+export type ConfirmAnswer = 'yes' | 'no' | null
 
 /**
- * Reads a reply to an open confirmation. A destructive one takes "yes, delete" / "ja, löschen": a lone "yes" overheard
- * in the room must not remove anything, so it comes back as `needs-delete`.
+ * Reads a spoken reply to an open confirmation, removals included: "yes", "confirm", "delete" confirm; "no", "cancel"
+ * decline. A reply with both ("no, don't delete") declines, so a mixed answer never removes anything.
  */
-export function readConfirmAnswer(text: string, isDanger: boolean): ConfirmAnswer {
+export function readConfirmAnswer(text: string): ConfirmAnswer {
     const words = wordsOf(text)
     if (words.length === 0 || words.length > MAX_ANSWER_WORDS) return null
     if (words.some(word => NO.has(word))) return 'no'
-    if (!words.some(word => YES.has(word) || DELETE.has(word))) return null
-    if (!isDanger) return 'yes'
-    return words.some(word => YES.has(word)) && words.some(word => DELETE.has(word)) ? 'yes' : 'needs-delete'
+    if (words.some(word => YES.has(word)) || YES_PHRASE_RE.test(words.join(' '))) return 'yes'
+    return null
 }
 
 const STOP_LISTENING_RE = /^(stop|quit|end) (listening|it all)|^(hör|höre) auf (zuzuhören|zu hören)|^geh schlafen|^go to sleep/i

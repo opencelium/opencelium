@@ -97,6 +97,22 @@ describe('POST /guide/intent', () => {
         expect(result.body.guideId).toBe('method-transformation')
     })
 
+    it('opens a part on an instruction and shows where it is when asked to be shown', async () => {
+        const options = [
+            { id: 'method-body', description: 'show where the body is', teaches: 'open-body' },
+            { id: 'open-body', description: 'open the body', isAction: true },
+        ]
+        const methods = { guides: options, methods: ['getCustomers'] }
+        let result = await route('getCustomers body', { guide: 'method-body', method: 'getCustomers' }, methods)
+        expect(result.body).toMatchObject({ guideId: 'open-body', method: 'getCustomers' })
+        result = await route('zeig mir den Body von getCustomers', { guide: 'open-body', method: 'getCustomers' }, methods)
+        expect(result.body.guideId).toBe('method-body')
+        result = await route('where is the body of getCustomers', { guide: 'open-body', method: 'getCustomers' }, methods)
+        expect(result.body.guideId).toBe('method-body')
+        result = await route('open the body of getCustomers', { guide: 'open-body', method: 'getCustomers' }, methods)
+        expect(result.body.guideId).toBe('open-body')
+    })
+
     it('reads an option about the whole workflow as its per-method one when a method is named', async () => {
         const options = [
             { id: 'method-try', description: 'show how to try a method' },

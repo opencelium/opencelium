@@ -71,5 +71,22 @@ export async function routeMapping(request: MappingRequest, deps: RouteMappingDe
     const spoken = request.prompt.replace(/([\p{Ll}\p{N}])(\p{Lu})/gu, '$1 $2')
     const named = (method: string, other: string) =>
         method && isReferredTo(method, other ? withoutWords(spoken, other) : spoken) ? method : ''
-    return { target: named(target, source), source: named(source, target), durationMs: read.durationMs, model: deps.model }
+    const result = { target: named(target, source), source: named(source, target) }
+    // "suggest AI mapping from getCustomers" names only where the values come from: the target is the method whose
+    // dialog is open, so it stays empty. The model reads a lone name as the target, or misses it.
+    const fromOnly = result.source ? '' : result.target || (spelled.length === 1 && !result.target ? spelled[0]! : '')
+    if (fromOnly && isOnlyAfterFrom(fromOnly, spoken)) {
+        return { target: '', source: fromOnly, durationMs: read.durationMs, model: deps.model }
+    }
+    return { ...result, durationMs: read.durationMs, model: deps.model }
+}
+
+const FROM_RE = /\b(?:from|aus|von)\b/iu
+
+/** Whether the request names `method` only after "from" / "aus" / "von", never before it. */
+function isOnlyAfterFrom(method: string, spoken: string): boolean {
+    const match = FROM_RE.exec(spoken)
+    if (!match) return false
+    const [before, after] = [spoken.slice(0, match.index), spoken.slice(match.index + match[0].length)]
+    return isReferredTo(method, after) && !isReferredTo(method, before)
 }

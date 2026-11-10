@@ -9,6 +9,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useExplainRunMutation, useFixRunMutation } from '../api/aiApi';
 import type { RunExplanation, RunFix } from '../model/aiGateway.types';
 import { applyFixToBindings } from './runFailureBindings';
+import { isQuiet } from '../editor/tell';
 import { type CollectedFailure, type FixTarget, buildRunFailure, findFailedElement, isSameBody, toEditorBody, toEditorHeaders } from './runFailure.utils';
 
 export type RunAssistState =
@@ -129,7 +130,8 @@ export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveM
 		if (node?.data.color) onFieldBindingsChange(applyFixToBindings(fieldBindings, node.data.color, config, { body, headers }));
 		onSaveMethodConfig(target.nodeId, { ...config, body, headers });
 		setState({ status: 'applied', explanation });
-		message.success(t('ai.run.applied'));
+		// Applied by voice ("apply the fix"): the changed step speaks for itself.
+		if (!isQuiet()) message.success(t('ai.run.applied'));
 	};
 
 	const discard = () => {

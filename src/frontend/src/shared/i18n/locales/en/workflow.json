@@ -1301,6 +1301,12 @@
     }
   },
   "ai": {
+    "menu": {
+      "title": "AI assistant",
+      "explain": "Explain this workflow",
+      "beebotOn": "Turn on {{name}}",
+      "beebotOff": "Turn off {{name}}"
+    },
     "open": "Generate with AI",
     "unavailableTooltip": "AI service isn't reachable. Start Ollama and the local gateway.",
     "title": "Generate with AI",
@@ -1509,6 +1515,8 @@
     },
     "condition": {
       "placeholder": "Describe the condition, e.g. only tickets with priority high that are not closed",
+      "buildLoop": "Build loop",
+      "loopPlaceholder": "Describe what to repeat over, e.g. for each issue of SearchIssues",
       "build": "Build condition",
       "checkHint": "Check the rules below before saving.",
       "nothingToCompare": "There is nothing to compare: no earlier step returns values here.",

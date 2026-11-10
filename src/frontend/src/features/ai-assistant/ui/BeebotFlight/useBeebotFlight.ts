@@ -4,7 +4,8 @@ import { useBeebotFlightStore } from '../../voice/beebotFlight.store'
 import { useWakeWordListenerStore } from '../../voice/wakeWordListener.store'
 import { FOLLOW_PX, type Point, bankToward, centerOf, distance, flightDuration, perchOn } from './flightPath'
 
-const TOGGLE_SELECTOR = '[data-testid="voice-wake-toggle"]'
+// Where the bee lives: the top bar's Beebot switch, or the AI menu button in the workflow editor.
+const TOGGLE_SELECTOR = '[data-beebot-home]'
 
 /** One leg of the trip: where the bee is headed, how long it takes, and which way it leans. */
 export type Flight = { to: Point; durationMs: number; bank: number; key: number }

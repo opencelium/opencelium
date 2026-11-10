@@ -66,8 +66,6 @@ import {
 
 import MouseOutlined from '@mui/icons-material/MouseOutlined';
 import DragIndicator from '@mui/icons-material/DragIndicator';
-import VolumeUpOutlined from '@mui/icons-material/VolumeUpOutlined';
-import VolumeOffOutlined from '@mui/icons-material/VolumeOffOutlined';
 import Remove from '@mui/icons-material/Remove';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import FitScreen from '@mui/icons-material/FitScreen';
@@ -172,8 +170,6 @@ const iconMap = {
     'plug-off': PowerOffOutlined,
     'arrow-right': ArrowForward,
     microphone: MicNoneOutlined,
-    sound: VolumeUpOutlined,
-    'sound-off': VolumeOffOutlined,
 };
 
 export const MaterialIcon: IconComponent = (props) => {

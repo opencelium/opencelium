@@ -229,6 +229,25 @@ export type ConditionSuggestion = {
 	model: string;
 };
 
+/** Mirrors `src/ai-gateway/src/condition/suggestLoop.ts`. */
+export type LoopSourceKind = 'list' | 'object' | 'text';
+
+export type SuggestLoopRequest = {
+	language: 'en' | 'de';
+	instruction: string;
+	sources: { id: string; step: string; system: string; path: string; kind: LoopSourceKind }[];
+};
+
+export type LoopSuggestion = {
+	operator: 'for' | 'forin' | 'SplitString';
+	source: string;
+	/** Only for SplitString. */
+	delimiter: string;
+	explanation: string;
+	durationMs: number;
+	model: string;
+};
+
 /** Mirrors `src/ai-gateway/src/help/answerHelp.ts`. */
 export type HelpMessage = { role: 'user' | 'assistant'; content: string };
 

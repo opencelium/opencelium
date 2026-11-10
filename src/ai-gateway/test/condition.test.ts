@@ -51,3 +51,38 @@ describe('POST /condition/suggest', () => {
         expect((await app.inject({ method: 'POST', url: '/condition/suggest', payload: request })).statusCode).toBe(502)
     })
 })
+
+describe('POST /condition/loop', () => {
+    const loopRequest = {
+        language: 'en',
+        instruction: 'for each issue of SearchIssues',
+        sources: [
+            { id: 's1', step: 'SearchIssues', system: 'Jira', path: 'issues[*]', kind: 'list' },
+            { id: 's2', step: 'SearchIssues', system: 'Jira', path: 'names', kind: 'object' },
+            { id: 's3', step: 'SearchIssues', system: 'Jira', path: 'expand', kind: 'text' },
+        ],
+    }
+
+    it('returns the operator and the value to loop over', async () => {
+        const { app, requests } = await appAnswering({ operator: 'for', source: 's1', delimiter: '', explanation: 'Repeats for each issue.' })
+        const response = await app.inject({ method: 'POST', url: '/condition/loop', payload: loopRequest })
+        expect(response.statusCode).toBe(200)
+        expect(response.json()).toMatchObject({ operator: 'for', source: 's1', delimiter: '', explanation: 'Repeats for each issue.' })
+        expect(String(requests[0]?.messages[1]?.content)).toContain('s1 [list]: SearchIssues (Jira) › issues[*]')
+    })
+
+    it('takes the operator from the kind of the value chosen, and a delimiter only for split text', async () => {
+        const { app } = await appAnswering({ operator: 'for', source: 's3', delimiter: '', explanation: 'x' })
+        const text = await app.inject({ method: 'POST', url: '/condition/loop', payload: loopRequest })
+        expect(text.json()).toMatchObject({ operator: 'SplitString', source: 's3', delimiter: ',' })
+        const { app: other } = await appAnswering({ operator: 'SplitString', source: 's2', delimiter: ';', explanation: 'x' })
+        const object = await other.inject({ method: 'POST', url: '/condition/loop', payload: loopRequest })
+        expect(object.json()).toMatchObject({ operator: 'forin', source: 's2', delimiter: '' })
+    })
+
+    it('rejects a request without values to loop over', async () => {
+        const { app } = await appAnswering({})
+        const response = await app.inject({ method: 'POST', url: '/condition/loop', payload: { ...loopRequest, sources: [] } })
+        expect(response.statusCode).toBe(400)
+    })
+})

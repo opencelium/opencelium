@@ -3,7 +3,7 @@ import { i18n } from '@shared/i18n/config/i18n'
 import { requestEditorBridgeStore } from '@features/workflow/command/requestEditorBridge'
 import { aiApi } from '../api/aiApi'
 import { usePendingScriptStore } from '../hooks/pendingScript.store'
-import { tell } from './tell'
+import { isQuiet, tell } from './tell'
 
 export type TransformationRequestOutcome = 'started' | 'not-started' | 'failed'
 
@@ -56,7 +56,7 @@ export async function applyTransformationFromRequest(prompt: string, isApplied: 
     const opened = current.openTransformation(field)
     switch (opened.kind) {
         case 'opened':
-            usePendingScriptStore.getState().request({ enhanceId: opened.enhanceId, description: answer.description, isApplied })
+            usePendingScriptStore.getState().request({ enhanceId: opened.enhanceId, description: answer.description, isApplied, isQuiet: isQuiet() })
             return 'started'
         case 'unknown-field':
             tell.error(t('commandPalette.workflowEdit.unknownField', { part, field }))

@@ -72,11 +72,13 @@
       "workflowShowUrl": "Show where the URL of a method is (the selected one, or name it)",
       "workflowShowHeaders": "Show where the headers of a method are (the selected one, or name it)",
       "workflowShowBody": "Show where the body of a method is (the selected one, or name it)",
-      "workflowShowTry": "Show how to try a method (the selected one, or name it)",
+      "workflowShowTry": "Show how to try a method, i.e. send one test request to it (the selected one, or name it)",
       "workflowShowTransformation": "Show how to apply a transformation (a script) to a value in a method's body or headers",
       "workflowAddMethod": "Add a new method from a connector to the workflow, before or after a step",
       "workflowSuggestMapping": "Suggest references (a mapping) for the body of a method from the response of an earlier method",
       "workflowApplyTransformation": "Apply a transformation (a script) to a property of the open body or headers",
+      "workflowOpenBody": "Open the body of a method now (the selected one, or name it)",
+      "workflowOpenHeaders": "Open the headers of a method now (the selected one, or name it)",
       "workflowTestRun": "Start a test run of the whole workflow, live or in debug mode (test, run, execute or debug the workflow)",
       "workflowStopTest": "Stop the test run that is going",
       "workflowExplainFailure": "Explain why the last test run failed (what went wrong, which error)",
@@ -90,7 +92,8 @@
       "workflowRedo": "Redo the change that was undone",
       "workflowSave": "Save the workflow",
       "workflowDeleteStep": "Remove a step from the workflow (delete it)",
-      "workflowGenerate": "Build a new workflow with AI from a description of what it should do"
+      "workflowGenerate": "Build a new workflow with AI from a description of what it should do",
+      "workflowStartTutorial": "Start the tutorial of the workflow editor (it opens on a new workflow and changes nothing here)"
     },
     "footer": {
       "select": "Select",
@@ -136,14 +139,12 @@
       "failed": "The spoken command couldn't be transcribed. Check that the local speech service (whisper-server) is running."
     },
     "wakeWord": {
-      "start": "Talk to {{name}}: once on, it listens all the time, and acts only on what starts with “{{name}}”, e.g. “{{name}}, where is the header of the method?”",
+      "start": "Talk to {{name}}: once on, it listens all the time and acts on what you ask, e.g. “where is the header of the method?”. Talk that matches no command is ignored.",
       "stop": "{{name}} is listening. Click to stop",
-      "listening": "{{name}} is listening. What do you need?",
-      "heard": "{{name}} is on it: “{{text}}”",
       "autoStopped": "{{name}} stopped listening after 10 minutes without a request.",
       "state": {
         "off": "{{name}} is off",
-        "idle": "{{name}} is listening for its name",
+        "idle": "{{name}} is listening",
         "active": "{{name}} is hearing you",
         "thinking": "{{name}} is working on your request"
       }
@@ -188,6 +189,7 @@
       "cannotSave": "The workflow cannot be saved right now (read-only, nothing changed, or the save dialog is already open).",
       "deleteWhich": "Name the step to remove, or select it first.",
       "deleted": "Removed {{step}}. Ctrl+Z undoes it.",
+      "tutorialUnavailable": "The tutorial is available to administrators only.",
       "generateUnavailable": "Generate with AI is not available right now.",
       "operatorFailed": "The AI could not read the request. Try again, or add the IF or loop with “+”.",
       "ifAdded": "Added an IF. Its condition is being built from “{{condition}}”: check it and save.",
@@ -203,12 +205,6 @@
       }
     },
     "beebot": {
-      "done": "Done.",
-      "lookAtPalette": "Have a look at the command palette.",
-      "sayYesDelete": "To remove it, say “yes, delete”.",
-      "stoppedListening": "{{name}} stopped listening. Turn it on again with its button.",
-      "mute": "Mute {{name}}'s voice",
-      "unmute": "Let {{name}} answer aloud",
       "capabilities": {
         "intro": "Here are a few things you can ask {{name}}.",
         "editor": {
@@ -301,8 +297,8 @@
       "description": "See what changed in each OpenCelium release: the current version first, earlier ones below. Open it from the help menu."
     },
     "workflowAiAssistant": {
-      "title": "Generate with AI",
-      "description": "Describe the workflow in your own words and the assistant drafts the steps for you. It runs locally, nothing leaves this machine."
+      "title": "AI assistant",
+      "description": "Generate a workflow from your own words, have it explained, or turn on Beebot and just say what you need. It runs locally, nothing leaves this machine."
     }
   },
   "user": {

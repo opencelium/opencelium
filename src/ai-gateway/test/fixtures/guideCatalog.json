@@ -1,12 +1,14 @@
 [
     {"id": "method-url", "description": "Show where the URL of a method is (the selected one, or name it) · Zeigen, wo die URL einer Methode ist (der ausgewählten oder einer genannten)"},
-    {"id": "method-headers", "description": "Show where the headers of a method are (the selected one, or name it) · Zeigen, wo die Header einer Methode sind (der ausgewählten oder einer genannten)"},
-    {"id": "method-body", "description": "Show where the body of a method is (the selected one, or name it) · Zeigen, wo der Body einer Methode ist (der ausgewählten oder einer genannten)"},
-    {"id": "method-try", "description": "Show how to try a method (the selected one, or name it) · Zeigen, wie man eine Methode ausprobiert (die ausgewählte oder eine genannte)"},
+    {"id": "method-headers", "description": "Show where the headers of a method are (the selected one, or name it) · Zeigen, wo die Header einer Methode sind (der ausgewählten oder einer genannten)", "teaches": "open-headers"},
+    {"id": "method-body", "description": "Show where the body of a method is (the selected one, or name it) · Zeigen, wo der Body einer Methode ist (der ausgewählten oder einer genannten)", "teaches": "open-body"},
+    {"id": "method-try", "description": "Show how to try a method, i.e. send one test request to it (the selected one, or name it) · Zeigen, wie man eine Methode ausprobiert, also eine Testanfrage an sie sendet (die ausgewählte oder eine genannte)"},
     {"id": "method-transformation", "description": "Show step by step how to apply a transformation (a script) to a value in a method's body or headers, when the user asks how or where to do it · Schritt für Schritt zeigen, wie man eine Transformation (ein Skript) auf einen Wert im Body oder in den Headern anwendet, wenn gefragt wird, wie oder wo das geht", "teaches": "apply-transformation"},
     {"id": "add-method", "description": "Add a new method from a connector to the workflow, before or after a step · Eine neue Methode aus einem Konnektor zum Workflow hinzufügen, vor oder nach einem Schritt", "isAction": true},
     {"id": "suggest-mapping", "description": "Suggest references (a mapping) for the body of a method from the response of an earlier method · Referenzen (ein Mapping) für den Body einer Methode aus der Antwort einer früheren Methode vorschlagen", "isAction": true},
     {"id": "apply-transformation", "description": "Apply a transformation now: the request names a property of the open body or headers and says what the script should do · Jetzt eine Transformation anwenden: die Anfrage nennt eine Eigenschaft des geöffneten Bodys oder der Header und sagt, was das Skript tun soll", "isAction": true},
+    {"id": "open-body", "description": "Open the body of a method now (the selected one, or name it) · Den Body einer Methode jetzt öffnen (der ausgewählten oder einer genannten)", "isAction": true},
+    {"id": "open-headers", "description": "Open the headers of a method now (the selected one, or name it) · Die Header einer Methode jetzt öffnen (der ausgewählten oder einer genannten)", "isAction": true},
     {"id": "add-operator", "description": "Add an IF (run the next steps only if / only when a condition holds) or a loop (for each item of a list), before or after a step · Ein IF (die nächsten Schritte nur wenn / nur falls eine Bedingung gilt) oder eine Schleife (für jedes Element einer Liste) hinzufügen, vor oder nach einem Schritt", "isAction": true},
     {"id": "test-workflow", "description": "Start a test run of the whole workflow, live or in debug mode (test, run, execute or debug the workflow) · Einen Testlauf des ganzen Workflows starten, live oder im Debug-Modus (Workflow testen, ausführen, laufen lassen, debuggen)", "isAction": true, "withMethod": "method-try"},
     {"id": "stop-test", "description": "Stop the test run that is going · Den laufenden Testlauf stoppen", "isAction": true},
@@ -20,5 +22,6 @@
     {"id": "redo", "description": "Redo the change that was undone · Die rückgängig gemachte Änderung wiederherstellen", "isAction": true},
     {"id": "save-workflow", "description": "Save the workflow · Den Workflow speichern", "isAction": true},
     {"id": "delete-step", "description": "Remove a step from the workflow (delete it) · Einen Schritt aus dem Workflow entfernen (löschen)", "isAction": true},
-    {"id": "generate-workflow", "description": "Build a new workflow with AI from a description of what it should do · Einen neuen Workflow mit KI aus einer Beschreibung erstellen, was er tun soll", "isAction": true}
+    {"id": "generate-workflow", "description": "Build a new workflow with AI from a description of what it should do · Einen neuen Workflow mit KI aus einer Beschreibung erstellen, was er tun soll", "isAction": true},
+    {"id": "start-tutorial", "description": "Start the tutorial of the workflow editor (it opens on a new workflow and changes nothing here) · Das Tutorial des Workflow-Editors starten (es öffnet sich auf einem neuen Workflow und ändert hier nichts)"}
 ]

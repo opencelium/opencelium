@@ -2,7 +2,6 @@ import { MoreHorizontal } from 'lucide-react';
 import { useMemo, useState, type ReactNode } from 'react';
 import { CommandPalette } from '@widgets/CommandPalette/CommandPalette';
 import { UserActions } from '@widgets/UserActions/UserActions';
-import { WakeWordToggle } from '@features/ai-assistant/ui/WakeWordToggle/WakeWordToggle';
 import { useBreakpoints } from '@app/hooks/useBreakpoints';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { WorkflowHeaderMenuItem } from '../../types/workflow.types';
@@ -79,7 +78,6 @@ export function WorkflowHeaderActions({
 				</>
 			)}
 			{problemsSlot}
-			<WakeWordToggle />
 			{assistantSlot}
 			{!readOnly && (
 				<button className='primaryButton headerPrimaryButton' type='button'

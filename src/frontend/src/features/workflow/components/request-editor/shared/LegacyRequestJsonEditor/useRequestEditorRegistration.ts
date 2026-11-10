@@ -30,6 +30,7 @@ export function useRequestEditorRegistration({ editor, method, messageProperty, 
 	useEffect(() => {
 		if (readOnly) return undefined;
 		return requestEditorBridgeStore.getState().register({
+			methodId: latest.current.method.id,
 			methodLabel: latest.current.method.label || latest.current.method.name,
 			messageProperty,
 			fieldPaths: () => collectMappingTargets(latest.current.source).map((target) => target.path),

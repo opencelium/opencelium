@@ -1,0 +1,4 @@
+/* An icon beside the label keeps its size: as a flex item it would otherwise be squeezed first in a narrow button. */
+.ant-btn > svg {
+  flex-shrink: 0;
+}

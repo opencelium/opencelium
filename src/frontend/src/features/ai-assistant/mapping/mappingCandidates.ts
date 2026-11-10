@@ -9,7 +9,7 @@ export type MappingSource = { id: string; methodId: string; step: string; system
 export type MappingTarget = { path: string; namespace: string[]; name: string; current: string };
 
 /** A loop around the step, by the array it runs over: `for {%#FFCFB5.(response).body.$.result[*]%}`. */
-type LoopArray = { color: string; path: string; iterator: string };
+export type LoopArray = { color: string; path: string; iterator: string };
 
 const MAX_SOURCES = 400;
 const MAX_DEPTH = 6;
@@ -19,7 +19,7 @@ const normalizeArrayPath = (path: string) => path.replace(/\[[^\]]*\]$/, '').rep
 
 const isAncestor = (parent: string, child: string) => child.startsWith(`${parent}_`);
 
-function loopArraysAround(connection: Connection, index: string): LoopArray[] {
+export function loopArraysAround(connection: Connection, index: string): LoopArray[] {
 	return connection.fromConnector.operator.flatMap((operator): LoopArray[] => {
 		if (operator.type !== 'loop' || !isAncestor(operator.index, index)) return [];
 		const match = LOOP_EXPRESSION_RE.exec(operator.expression ?? '');

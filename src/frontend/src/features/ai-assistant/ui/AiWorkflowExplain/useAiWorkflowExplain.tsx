@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '@features/workflow/types/workflow.types';
-import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { IconButton } from '@shared/ui/primitives/IconButton';
-import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useWorkflowAssistAction } from '@features/workflow/command/workflowAssistBridge';
 import { isAiConfigured, useGetAiHealthQuery } from '../../api/aiApi';
 import { AiWorkflowExplainDialog } from './AiWorkflowExplainDialog';
 
-type Props = {
+export type AiWorkflowExplainParams = {
 	nodes: WorkflowNodeModel[];
 	edges: WorkflowEdgeModel[];
 	title: string;
@@ -15,9 +12,8 @@ type Props = {
 	onUseDescription: (description: string) => void;
 };
 
-/** ✨ beside the workflow description: explains the workflow and proposes a description; hidden without the AI gateway. */
-export function AiWorkflowExplainButton({ nodes, edges, title, onUseDescription }: Props) {
-	const { t } = useI18n('workflow');
+/** Explains the workflow and proposes a description; `dialog` is rendered by whoever offers `open`. */
+export function useAiWorkflowExplain({ nodes, edges, title, onUseDescription }: AiWorkflowExplainParams) {
 	const isConfigured = isAiConfigured();
 	const health = useGetAiHealthQuery(undefined, { skip: !isConfigured });
 	const [session, setSession] = useState(0);
@@ -29,21 +25,13 @@ export function AiWorkflowExplainButton({ nodes, edges, title, onUseDescription 
 		setIsOpen(true);
 	};
 	useWorkflowAssistAction('explainWorkflow', isAvailable && hasSteps ? open : null);
-	if (!isAvailable) return null;
-	return (
-		<>
-			<Tooltip content={hasSteps ? t('ai.explain.open') : t('ai.explain.noSteps')}>
-				<IconButton type="text" size="xs" iconProps={{ name: 'sparkles', color: 'inherit' }} onClick={open} disabled={!hasSteps}
-					testId="workflow-ai-explain" />
-			</Tooltip>
-			{isOpen && (
-				<AiWorkflowExplainDialog key={session} nodes={nodes} edges={edges} title={title}
-					onUseDescription={(description) => {
-						onUseDescription(description);
-						setIsOpen(false);
-					}}
-					onClose={() => setIsOpen(false)} />
-			)}
-		</>
-	);
+	const dialog = isOpen ? (
+		<AiWorkflowExplainDialog key={session} nodes={nodes} edges={edges} title={title}
+			onUseDescription={(description) => {
+				onUseDescription(description);
+				setIsOpen(false);
+			}}
+			onClose={() => setIsOpen(false)} />
+	) : null;
+	return { isAvailable, hasSteps, open, dialog };
 }

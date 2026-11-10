@@ -40,7 +40,6 @@ vi.mock('./routeSpokenRequest', () => ({ routeSpokenRequest }))
 const info = vi.hoisted(() => vi.fn())
 const loading = vi.hoisted(() => vi.fn())
 vi.mock('antd', () => ({ message: { info, loading, destroy: vi.fn() } }))
-vi.mock('./speechOutput', () => ({ canSpeak: () => false, speak: vi.fn(), stopSpeaking: vi.fn(), isSpeaking: () => false }))
 const notifyError = vi.hoisted(() => vi.fn())
 vi.mock('@shared/ui/feedback/notifyError', () => ({ notifyError }))
 vi.mock('@shared/i18n/config/i18n', () => ({
@@ -90,28 +89,23 @@ describe('wake word listener', () => {
         expect(vocabulary.length).toBeLessThanOrEqual(300)
     })
 
-    it('drops what is not addressed to it', async () => {
-        await say('we should check the build later')
-        expect(routeSpokenRequest).not.toHaveBeenCalled()
+    it('takes what is said without its name as a request, quietly', async () => {
+        await say('add a loop after GetAllUser')
+        expect(routeSpokenRequest).toHaveBeenCalledWith('add a loop after GetAllUser')
         expect(info).not.toHaveBeenCalled()
         expect(loading).not.toHaveBeenCalled()
     })
 
-    it('acts on what starts with its name, without the name', async () => {
+    it('acts on what starts with its name, without the name and without echoing it', async () => {
         await say('Beebot, where is the header of the method?')
-        expect(loading).toHaveBeenCalledWith(expect.objectContaining({
-            key: 'spoken-request', content: 'commandPalette.wakeWord.heard{"name":"Beebot","text":"where is the header of the method?"}' }))
         expect(routeSpokenRequest).toHaveBeenCalledWith('where is the header of the method?')
+        expect(loading).not.toHaveBeenCalled()
     })
 
-    it('takes the next utterance after the name alone as the request', async () => {
+    it('does nothing when only the name was said', async () => {
         await say('Beebot.')
-        expect(info).toHaveBeenCalledWith('commandPalette.wakeWord.listening{"name":"Beebot"}')
-        await say('wo ist der Body')
-        expect(routeSpokenRequest).toHaveBeenCalledWith('wo ist der Body')
-        // Only once: the follow-up is used up.
-        await say('and now something else')
-        expect(routeSpokenRequest).toHaveBeenCalledTimes(1)
+        expect(info).not.toHaveBeenCalled()
+        expect(routeSpokenRequest).not.toHaveBeenCalled()
     })
 
     it('drops utterances while two are already waiting', async () => {
@@ -172,14 +166,21 @@ describe('wake word listener', () => {
             expect(routeSpokenRequest).toHaveBeenCalledTimes(1)
         })
 
-        it('needs "yes, delete" before something is removed', async () => {
+        it('removes on "confirm" / "delete" and keeps the step on "cancel"', async () => {
             await say('Beebot, remove create ticket')
-            const answer = ask(true)
-            await say('yes')
-            expect(answer).not.toHaveBeenCalled()
-            expect(info).toHaveBeenCalledWith('commandPalette.beebot.sayYesDelete')
-            await say('yes, delete')
-            expect(answer).toHaveBeenCalledWith(true)
+            const confirmed = ask(true)
+            await say('confirm')
+            expect(confirmed).toHaveBeenCalledWith(true)
+
+            await say('Beebot, remove create ticket')
+            const deleted = ask(true)
+            await say('delete')
+            expect(deleted).toHaveBeenCalledWith(true)
+
+            await say('Beebot, remove create ticket')
+            const cancelled = ask(true)
+            await say('cancel')
+            expect(cancelled).toHaveBeenCalledWith(false)
         })
 
         it('leaves a dialog the user opened long after their last request to the mouse', async () => {
@@ -206,15 +207,5 @@ describe('wake word listener', () => {
         await say('Beebot, stop listening')
         expect(useWakeWordListenerStore.getState().status).toBe('off')
         expect(routeSpokenRequest).not.toHaveBeenCalled()
-    })
-
-    it('takes the next thing said without the name for a short while after Beebot answered', async () => {
-        const { useBeebotReplyStore } = await import('./beebotReply.store')
-        useBeebotReplyStore.setState({ followUpUntil: Date.now() + 10_000 })
-        await say('now add an if after it')
-        expect(routeSpokenRequest).toHaveBeenCalledWith('now add an if after it')
-        useBeebotReplyStore.setState({ followUpUntil: 0 })
-        await say('and something unrelated')
-        expect(routeSpokenRequest).toHaveBeenCalledTimes(1)
     })
 })

@@ -22,6 +22,8 @@ export const ASSIST_OPTIONS = {
     'save-workflow': { descriptionKey: 'commandPalette.descriptions.workflowSave', isAction: true },
     'delete-step': { descriptionKey: 'commandPalette.descriptions.workflowDeleteStep', isAction: true },
     'generate-workflow': { descriptionKey: 'commandPalette.descriptions.workflowGenerate', isAction: true },
+    // Not an action: "how does the editor work?" is a fair reason to start it.
+    'start-tutorial': { descriptionKey: 'commandPalette.descriptions.workflowStartTutorial', isAction: false },
 } as const
 
 export type AssistOptionId = keyof typeof ASSIST_OPTIONS
@@ -29,7 +31,7 @@ export type AssistOptionId = keyof typeof ASSIST_OPTIONS
 export const ASSIST_OPTION_IDS = Object.keys(ASSIST_OPTIONS) as AssistOptionId[]
 
 type AssistMessageKey = 'testRunning' | 'testUnavailable' | 'noTestRunning' | 'noFailure' | 'notFixable' | 'noFix' | 'noSteps'
-    | 'nothingToUndo' | 'nothingToRedo' | 'cannotSave' | 'deleteWhich' | 'generateUnavailable'
+    | 'nothingToUndo' | 'nothingToRedo' | 'cannotSave' | 'deleteWhich' | 'generateUnavailable' | 'tutorialUnavailable'
 
 /** What the routed request said besides the option: its text, and the method it names (empty when none). */
 export type AssistRequest = { prompt: string; method: string }
@@ -125,6 +127,10 @@ export async function runAssistFromRequest(id: AssistOptionId, request: AssistRe
         case 'generate-workflow':
             if (!handlers.generateWorkflow) return fail('generateUnavailable')
             handlers.generateWorkflow(request.prompt)
+            return
+        case 'start-tutorial':
+            if (!handlers.startTutorial) return say('tutorialUnavailable')
+            handlers.startTutorial()
             return
         default: {
             const _exhaustive: never = id

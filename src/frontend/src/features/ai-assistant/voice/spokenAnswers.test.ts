@@ -2,23 +2,28 @@ import { describe, expect, it } from 'vitest'
 import { isCapabilitiesQuestion, readConfirmAnswer, readStopRequest, splitRequests } from './spokenAnswers'
 
 describe('readConfirmAnswer', () => {
-    it('takes a yes or a no, in English and German', () => {
-        expect(readConfirmAnswer('Yes.', false)).toBe('yes')
-        expect(readConfirmAnswer('ja bitte', false)).toBe('yes')
-        expect(readConfirmAnswer('no', false)).toBe('no')
-        expect(readConfirmAnswer('Nein, abbrechen!', false)).toBe('no')
+    it('confirms on yes, confirm or delete, in English and German', () => {
+        for (const said of ['Yes.', 'ja bitte', 'confirm', 'Delete!', 'yes, delete', 'remove it', 'okay', 'go ahead', 'do it',
+            'Ja, löschen.', 'bestätigen', 'entfernen', 'mach das']) {
+            expect(readConfirmAnswer(said), said).toBe('yes')
+        }
     })
 
-    it('asks for "yes, delete" before anything is removed', () => {
-        expect(readConfirmAnswer('yes', true)).toBe('needs-delete')
-        expect(readConfirmAnswer('yes, delete', true)).toBe('yes')
-        expect(readConfirmAnswer('Ja, löschen.', true)).toBe('yes')
-        expect(readConfirmAnswer('no', true)).toBe('no')
+    it('cancels on no or cancel, in English and German', () => {
+        for (const said of ['no', 'Cancel.', 'no thanks', 'keep it', 'Nein, abbrechen!', 'nö', 'behalten']) {
+            expect(readConfirmAnswer(said), said).toBe('no')
+        }
+    })
+
+    it('cancels a mixed answer, so it never removes by mistake', () => {
+        expect(readConfirmAnswer("no, don't delete")).toBe('no')
+        expect(readConfirmAnswer('nein, nicht löschen')).toBe('no')
+        expect(readConfirmAnswer('yes cancel')).toBe('no')
     })
 
     it('leaves a longer sentence for a new request', () => {
-        expect(readConfirmAnswer('yes and then add a loop after it', false)).toBeNull()
-        expect(readConfirmAnswer('the weather is nice', false)).toBeNull()
+        expect(readConfirmAnswer('yes and then add a loop after it')).toBeNull()
+        expect(readConfirmAnswer('the weather is nice')).toBeNull()
     })
 })
 

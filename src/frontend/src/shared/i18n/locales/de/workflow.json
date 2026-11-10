@@ -1301,6 +1301,12 @@
     }
   },
   "ai": {
+    "menu": {
+      "title": "KI-Assistent",
+      "explain": "Diesen Workflow erklären",
+      "beebotOn": "{{name}} einschalten",
+      "beebotOff": "{{name}} ausschalten"
+    },
     "open": "Mit KI generieren",
     "unavailableTooltip": "Der KI-Dienst ist nicht erreichbar. Starten Sie Ollama und das lokale Gateway.",
     "title": "Mit KI generieren",
@@ -1509,6 +1515,8 @@
     },
     "condition": {
       "placeholder": "Bedingung beschreiben, z. B. nur Tickets mit Priorität hoch, die nicht geschlossen sind",
+      "buildLoop": "Schleife erstellen",
+      "loopPlaceholder": "Beschreiben Sie, worüber wiederholt wird, z. B. für jedes Ticket aus SearchIssues",
       "build": "Bedingung erstellen",
       "checkHint": "Prüfen Sie die Regeln unten vor dem Speichern.",
       "nothingToCompare": "Es gibt nichts zu vergleichen: Kein vorheriger Schritt liefert hier Werte.",
