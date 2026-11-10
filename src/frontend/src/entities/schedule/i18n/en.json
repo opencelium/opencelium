@@ -203,8 +203,12 @@
     }
   },
   "preview": {
-    "title": "Next 5 runs",
-    "zone": "Time zone: {{zone}}",
+    "title": "Schedule Preview",
+    "zone": "Times in {{zone}}",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "nextRuns": "Next 5 runs",
+    "alsoRuns": "Also runs",
     "invalid": "Invalid or unsupported cron expression",
     "empty": "No upcoming runs"
   },
