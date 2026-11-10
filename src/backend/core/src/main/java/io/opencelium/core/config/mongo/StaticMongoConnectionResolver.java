@@ -46,8 +46,13 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 	private static final String PLACEHOLDER_START = "${";
 
 	/**
-	 * The placeholder that the setup wizard writes: the whole password of the user information is {@code ${NAME}}.
-	 * Only then is the name safe to show; any other {@code ${} can be a part of a password.
+	 * The placeholder that the setup wizard writes: the whole URI is {@code ${NAME}}. The name is then safe to show.
+	 */
+	private static final Pattern URI_PLACEHOLDER = Pattern.compile("^\\$\\{([A-Za-z_][A-Za-z0-9_]*)}$");
+
+	/**
+	 * A placeholder for the whole password of the user information, as a yml file written by hand can hold it. Only
+	 * then is the name safe to show; any other {@code ${} can be a part of a password.
 	 */
 	private static final Pattern PASSWORD_PLACEHOLDER = Pattern.compile(
 			"^mongodb(?:\\+srv)?://[^:/?@]+:\\$\\{([A-Za-z_][A-Za-z0-9_]*)}@[^/?@]*(?:[/?].*)?$", Pattern.DOTALL);
@@ -183,9 +188,12 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 	}
 
 	private static BootstrapPropertyException unresolvedPlaceholder(String uri, PlaceholderLookup lookup) {
-		Matcher password = PASSWORD_PLACEHOLDER.matcher(uri);
-		if (password.matches()) {
-			String variable = password.group(1);
+		Matcher named = URI_PLACEHOLDER.matcher(uri);
+		if (!named.matches()) {
+			named = PASSWORD_PLACEHOLDER.matcher(uri);
+		}
+		if (named.matches()) {
+			String variable = named.group(1);
 			return new BootstrapPropertyException(MONGODB_URI,
 					MONGODB_URI + " refers to " + variable + ", which has no value in " + lookup.lookedIn() + ".",
 					lookup.setIn().map(file -> "Add the line " + variable + "=<value> to " + file + ", or set "

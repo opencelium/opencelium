@@ -74,10 +74,7 @@ public final class SetupContext {
 		this.port = port;
 	}
 
-	/**
-	 * The answer of the MongoDB step as application.yml will hold it: with the placeholder of a password that the env
-	 * file holds; empty before the step ran.
-	 */
+	/** The whole URI that the MongoDB step chose, which the env file will hold; empty before the step ran. */
 	public Optional<String> mongoUri() {
 		return Optional.ofNullable(mongoUri);
 	}

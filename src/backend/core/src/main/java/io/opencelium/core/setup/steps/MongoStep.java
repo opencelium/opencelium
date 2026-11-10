@@ -13,7 +13,6 @@ import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
 import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.setup.mongo.MongoDetector;
-import io.opencelium.core.setup.mongo.UriSplitter;
 import io.opencelium.core.setup.prompt.Choice;
 import io.opencelium.core.setup.prompt.Prompter;
 import io.opencelium.core.setup.values.Question;
@@ -26,22 +25,19 @@ import io.opencelium.core.setup.values.ValueSource;
  * the first option and the default. The user can also type the URI of a server that exists, or exit. Each server is
  * pinged with the start ping of the application before the step continues, so a wrong address or login shows now,
  * with the cause that the start would name. A failed ping offers to type the URI again, to keep it, or to go back to
- * the menu. A password in the URI moves to the env file, and application.yml refers to it by its placeholder; plain
- * text in application.yml needs a second answer after a warning. In batch mode the password always moves. The step
- * makes and starts nothing: the ping only reads.
+ * the menu. The step keeps the whole URI, a database password included, and asks nothing about it: the summary puts
+ * the URI into the env file, and application.yml refers to it. The step makes and starts nothing: the ping only
+ * reads.
  * <p>
  * In the setup file, {@code mongo} is {@code local} or {@code uri}, and {@code mongo-uri} is the URI for {@code uri}.
- * A server of the file that does not answer stops the setup, as each bad value of the file does.
+ * A server of the file that does not answer stops the setup, as each bad value of the file does. A bad value is
+ * shown masked, because a URI under the wrong key holds a database password.
  */
 public final class MongoStep implements SetupStep {
 
 	static final String QUESTION = "Which MongoDB does OpenCelium use?";
 
 	static final String RETRY_QUESTION = "What now?";
-
-	static final String MOVE_QUESTION = "Move the password to the env file?";
-
-	static final String PLAIN_TEXT_QUESTION = "Write the password into application.yml?";
 
 	private static final String LOCAL = "local";
 
@@ -59,18 +55,6 @@ public final class MongoStep implements SetupStep {
 			that holds the database user, often admin. Give OpenCelium its own database user with the readWrite
 			role on its database, not the root user. Percent-encode @ : / ? # [ ] % and the space in the
 			database username and the database password. The setup pings the server before it continues.""";
-
-	private static final String MOVE_HELP = """
-			y: the env file opencelium.env holds the password, readable by its owner only, and application.yml
-			   refers to it as ${OC_MONGO_PASSWORD}.
-			n: application.yml holds the password in plain text.""";
-
-	private static final String PLAIN_TEXT_HELP = """
-			y writes the password in plain text into application.yml.
-			n asks again where the password goes.""";
-
-	private static final String PLAIN_TEXT_WARNING = "application.yml is readable by its group: each member of the"
-			+ " group could read the password.";
 
 	private static final List<Choice> RETRY = List.of(
 			new Choice("Type the URI again", "correct the address or the login", "Type the URI again; the setup pings"
@@ -109,7 +93,7 @@ public final class MongoStep implements SetupStep {
 		Optional<String> fromFile = values.given(serverQuestion(servers), this::checkWord, UnaryOperator.identity(),
 				prompter).flatMap(word -> word.equals(LOCAL) ? Optional.of(detector.localUri())
 						: uriOption(values, prompter));
-		store(fromFile.orElseGet(() -> fromMenu(servers, values, prompter)), context, prompter);
+		context.setMongoUri(fromFile.orElseGet(() -> fromMenu(servers, values, prompter)));
 	}
 
 	/** The menu: a local server first, when one listens; then the URI and the exit. */
@@ -169,12 +153,15 @@ public final class MongoStep implements SetupStep {
 		return prompter.text(question.label(), question.help(), question.defaultValue(), MongoStep::syntax);
 	}
 
-	/** The problem with {@code word} as the {@code mongo} value of the file: {@code local} must answer. */
+	/**
+	 * The problem with {@code word} as the {@code mongo} value of the file: {@code local} must answer. The message
+	 * masks the word, because a URI under this key holds a database password.
+	 */
 	private Optional<String> checkWord(String word) {
 		return switch (word) {
 			case LOCAL -> problem(detector.localUri());
 			case URI -> Optional.empty();
-			default -> Optional.of("'" + word + "' is not one of: " + LOCAL + ", " + URI + ".");
+			default -> Optional.of("'" + MongoConnection.redact(word) + "' is not one of: " + LOCAL + ", " + URI + ".");
 		};
 	}
 
@@ -201,30 +188,6 @@ public final class MongoStep implements SetupStep {
 		}
 		return ping.apply(connection).map(cause -> "Cannot use MongoDB at " + connection.redacted() + ": " + cause
 				+ ".");
-	}
-
-	/** A password moves to the env file unless the user confirms plain text after the warning. */
-	private static void store(String uri, SetupContext context, Prompter prompter) {
-		UriSplitter.SplitUri split = UriSplitter.split(uri);
-		if (split.password().isPresent() && passwordToEnvFile(context.values(), prompter)) {
-			context.setMongoUri(split.uri());
-			context.putEnvironment(UriSplitter.PASSWORD_VARIABLE, split.password().get());
-		}
-		else {
-			context.setMongoUri(uri);
-		}
-	}
-
-	private static boolean passwordToEnvFile(ValueSource values, Prompter prompter) {
-		while (true) {
-			if (values.yesNo(MOVE_QUESTION, MOVE_HELP, true, prompter)) {
-				return true;
-			}
-			prompter.error(PLAIN_TEXT_WARNING);
-			if (prompter.yesNo(PLAIN_TEXT_QUESTION, PLAIN_TEXT_HELP, false)) {
-				return false;
-			}
-		}
 	}
 
 	private Question serverQuestion(List<Server> servers) {
