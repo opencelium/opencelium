@@ -2,10 +2,12 @@ package io.opencelium.core.setup.prompt;
 
 import java.io.Console;
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * {@code System.console()}, looked up at each use. Without a console the writer is standard output, so the
- * batch wizard can still print; a read then fails with a clear message.
+ * batch wizard can still print; a read then fails with a clear message. A line without an echo is the password read
+ * of the console, which prints the prompt when the echo is off and puts the echo back when the user presses Ctrl+C.
  */
 final class SystemConsoleIo implements ConsoleIo {
 
@@ -18,7 +20,14 @@ final class SystemConsoleIo implements ConsoleIo {
 
 	@Override
 	public String readLineWithoutEcho(String prompt) {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		// The console switches the echo off first and prints the prompt then.
+		char[] typed = console().readPassword("%s", prompt);
+		if (typed == null) {
+			return null;
+		}
+		String line = new String(typed);
+		Arrays.fill(typed, '\0');
+		return line;
 	}
 
 	@Override

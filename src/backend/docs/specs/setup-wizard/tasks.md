@@ -164,7 +164,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Start `mongod --auth --port 27018`, and make the database user `root` in `admin` with the password `p@ss+w rd`. 2. Run `java -jar oc-app.jar setup` and select the values option. 3. Type `localhost:27018` at the host question: the wizard names the problem and asks the host again. 4. Type `localhost`, `27018`, Enter, `root`, the database password and Enter. 5. The database password does not show, and the ping passes. 6. Confirm the summary: the env file has `root:p%40ss+w%20rd` and `authSource=admin` in the URI. 7. Start the jar again: the application starts.
 - **Size:** approximately 280 lines
 - **Depends on:** 13d
-- **Status:** in work
+- **Status:** done
 
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-19, SW-20, SW-21, SW-22, SW-23

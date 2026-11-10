@@ -1,5 +1,7 @@
 package io.opencelium.core.setup.mongo;
 
+import java.util.HexFormat;
+
 /**
  * Builds the MongoDB URI from the values that the user types one by one. A database username and a database
  * password can hold each character, so the builder writes the characters that have a meaning in a URI in
@@ -11,6 +13,10 @@ package io.opencelium.core.setup.mongo;
  * rules of the start check the URI that the builder gives.
  */
 public final class UriBuilder {
+
+	private static final String SPECIAL_CHARACTERS = "@:/?#[]%$ ";
+
+	private static final HexFormat HEX = HexFormat.of().withUpperCase();
 
 	private UriBuilder() {
 	}
@@ -27,7 +33,30 @@ public final class UriBuilder {
 	 */
 	public static String build(String host, String port, String database, String databaseUsername,
 			String databasePassword, String authSource) {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		var uri = new StringBuilder("mongodb://");
+		boolean login = !databaseUsername.isEmpty();
+		if (login) {
+			uri.append(encoded(databaseUsername)).append(':').append(encoded(databasePassword)).append('@');
+		}
+		uri.append(host).append(':').append(port).append('/').append(database);
+		if (login) {
+			uri.append("?authSource=").append(authSource);
+		}
+		return uri.toString();
+	}
+
+	/** {@code text} with each special character as {@code %XX}; the special characters are all ASCII. */
+	private static String encoded(String text) {
+		var encoded = new StringBuilder();
+		for (char character : text.toCharArray()) {
+			if (SPECIAL_CHARACTERS.indexOf(character) >= 0) {
+				encoded.append('%').append(HEX.toHexDigits((byte) character));
+			}
+			else {
+				encoded.append(character);
+			}
+		}
+		return encoded.toString();
 	}
 
 }
