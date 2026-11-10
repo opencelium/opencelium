@@ -4,12 +4,21 @@ import java.io.PrintWriter;
 
 /**
  * The seam between the prompts and the terminal: one line in, text out. The production implementation is
- * {@code System.console()}; tests script the input. A masked password method joins when the first step needs one.
+ * {@code System.console()}; tests script the input. A line that holds a secret is read without an echo.
  */
 public interface ConsoleIo {
 
 	/** @return the next line the user typed, without its line end; {@code null} when the input has ended */
 	String readLine();
+
+	/**
+	 * Prints {@code prompt} and reads the next line without an echo: the terminal does not show the characters while
+	 * the user types them. The console prints the prompt itself, after it switches the echo off. A prompt that is
+	 * printed before that shows the first characters of an answer that comes at once, for example a pasted one.
+	 *
+	 * @return the line as typed, without its line end; {@code null} when the input has ended
+	 */
+	String readLineWithoutEcho(String prompt);
 
 	PrintWriter writer();
 
