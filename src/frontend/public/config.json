@@ -10,5 +10,6 @@
     "hostname": "",
     "port": "9090",
     "prefix": "/ws"
-  }
+  },
+  "serverTimeZone": ""
 }

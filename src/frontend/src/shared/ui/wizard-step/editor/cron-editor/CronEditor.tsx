@@ -25,6 +25,8 @@ export const CronEditor: React.FC<CronEditorProps> = ({name, label, mode, autoFo
         if (candidate) converter.parseCronString(candidate);
         pickerValue = candidate;
     } catch {
+        // Expressions the visual picker can't represent stay editable as text only.
+        pickerValue = '';
     }
 
     return (
