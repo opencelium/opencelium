@@ -1,7 +1,7 @@
 import { baseApi } from '@shared/api/baseApi';
 import { runtimeConfig } from '@shared/config/runtimeConfig';
 import type {
-	AiHealth, ConditionSuggestion, SuggestConditionRequest, ConnectorErrorExplanation, DraftNotificationRequest, NotificationDraft, ExplainConnectorErrorRequest, ExplainWorkflowRequest, WorkflowExplanation, GenerateWorkflowRequest, InvokerDraft, SuggestMappingRequest, SuggestMappingResponse, InvokerDraftRequest, InvokerDraftResponse, RunExplanation, RunFailureRequest, RunFix, GenerateWorkflowResponse, PlanWorkflowResponse,
+	AiHealth, ConditionSuggestion, SuggestConditionRequest, LoopSuggestion, SuggestLoopRequest, ConnectorErrorExplanation, DraftNotificationRequest, NotificationDraft, ExplainConnectorErrorRequest, ExplainWorkflowRequest, WorkflowExplanation, GenerateWorkflowRequest, InvokerDraft, SuggestMappingRequest, SuggestMappingResponse, InvokerDraftRequest, InvokerDraftResponse, RunExplanation, RunFailureRequest, RunFix, GenerateWorkflowResponse, PlanWorkflowResponse,
 	RouteCommandRequest, RouteCommandResponse, RouteGuideRequest, RouteGuideResponse, AddMethodIntentRequest, AddMethodIntentResponse, AddOperatorIntentRequest, AddOperatorIntentResponse, MappingIntentRequest, MappingIntentResponse, TransformationIntentRequest, TransformationIntentResponse, SearchCommandsRequest, SearchCommandsResponse, TranscribeSpeechResponse,
 } from '../model/aiGateway.types';
 
@@ -73,6 +73,9 @@ export const aiApi = baseApi.injectEndpoints({
 		}),
 		suggestCondition: b.mutation<ConditionSuggestion, SuggestConditionRequest>({
 			query: (body) => ({ url: `${runtimeConfig.aiUrl}/condition/suggest`, method: 'POST', body, customOptions: quiet }),
+		}),
+		suggestLoop: b.mutation<LoopSuggestion, SuggestLoopRequest>({
+			query: (body) => ({ url: `${runtimeConfig.aiUrl}/condition/loop`, method: 'POST', body, customOptions: quiet }),
 		}),
 		routeGuide: b.mutation<RouteGuideResponse, RouteGuideRequest>({
 			query: (body) => ({ url: `${runtimeConfig.aiUrl}/guide/intent`, method: 'POST', body, customOptions: quiet }),

@@ -71,9 +71,12 @@ export async function routeGuide(request: RouteGuideRequest, deps: RouteGuideDep
     // An option about the whole workflow stands for its per-method one when a method is named.
     const option = chosen?.withMethod && (spoken || picked)
         ? request.guides.find((guide) => guide.id === chosen.withMethod) ?? chosen : chosen
-    // A how-question never runs an action: it gets the guide teaching that action, if there is one, else nothing.
-    const isRefused = option?.isAction === true && HOW_QUESTION_RE.test(request.prompt)
-    const teacher = isRefused ? request.guides.find((guide) => guide.teaches === option?.id) : undefined
+    // A how-question never runs an action: it gets the guide teaching that action, if there is one, else nothing. An
+    // action that has such a guide also gives way to it when the request asks to be shown ("zeig mir den Body von X").
+    const guideTeaching = option?.isAction ? request.guides.find((guide) => guide.teaches === option.id) : undefined
+    const isRefused = option?.isAction === true
+        && (HOW_QUESTION_RE.test(request.prompt) || (guideTeaching !== undefined && TEACH_ME_RE.test(request.prompt)))
+    const teacher = isRefused ? guideTeaching : undefined
     // And the other way round: a guide chosen for an instruction that asks to be shown nothing ("transform X so …")
     // is the action it teaches.
     const taught = option?.teaches && !TEACH_ME_RE.test(request.prompt)

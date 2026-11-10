@@ -90,8 +90,10 @@ export async function routeTransformation(request: TransformationRequest, deps: 
     // A spelled-out field wins over the model's pick; the pick counts only when the request refers to its last segment.
     const field = spelledOut(request.prompt, request.fields) || (picked && isReferredTo(leafOf(picked), request.prompt) ? picked : '')
         || saidInWords(request.prompt, request.fields)
-    // "this property" names none: the frontend then takes the field selected in the editor.
+    // "this property" names none: the frontend then takes the field selected in the editor. So does a name the model
+    // made up ("take the first 10 characters" read as @odata.id): only what the request itself says counts as named.
     const said = answer.spokenField.trim()
-    const spokenField = field ? said || field : DEICTIC_RE.test(said) ? '' : said
+    const isSaid = normalize(said).length > 0 && normalize(request.prompt).includes(normalize(said))
+    const spokenField = field ? said || field : DEICTIC_RE.test(said) || !isSaid ? '' : said
     return { field, spokenField, description: answer.description.trim(), durationMs: read.durationMs, model: deps.model }
 }

@@ -8,6 +8,11 @@ const METHODS = [
 ]
 
 const CASES: Case[] = [
+    { prompt: 'suggest AI mapping', target: '', source: '' },
+    { prompt: 'suggest mapping here', target: '', source: '' },
+    { prompt: 'AI Mapping vorschlagen', target: '', source: '' },
+    { prompt: 'suggest AI mapping from get customers', target: '', source: 'getCustomers' },
+    { prompt: 'schlage ein Mapping aus config item get vor', target: '', source: 'ConfigItemGet' },
     { prompt: 'suggest references for config item update method from config item get method', target: 'ConfigItemUpdate', source: 'ConfigItemGet' },
     { prompt: 'suggest mapping for TicketCreate from cmdb objects read', target: 'TicketCreate', source: 'cmdb.objects.read' },
     { prompt: 'suggest references/mapping for create client method from get customers method', target: 'createClient', source: 'getCustomers' },

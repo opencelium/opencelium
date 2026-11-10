@@ -8,15 +8,15 @@ describe('pending script', () => {
     })
 
     it('goes to the requested transformation once', () => {
-        usePendingScriptStore.getState().request({ enhanceId: 'e1', description: 'upper case', isApplied: true })
+        usePendingScriptStore.getState().request({ enhanceId: 'e1', description: 'upper case', isApplied: true, isQuiet: false })
         expect(usePendingScriptStore.getState().take('e2')).toBeNull()
-        expect(usePendingScriptStore.getState().take('e1')).toEqual({ enhanceId: 'e1', description: 'upper case', isApplied: true })
+        expect(usePendingScriptStore.getState().take('e1')).toEqual({ enhanceId: 'e1', description: 'upper case', isApplied: true, isQuiet: false })
         expect(usePendingScriptStore.getState().take('e1')).toBeNull()
     })
 
     it('is not run by a visit long after the request', () => {
         vi.useFakeTimers()
-        usePendingScriptStore.getState().request({ enhanceId: 'e1', description: 'upper case', isApplied: true })
+        usePendingScriptStore.getState().request({ enhanceId: 'e1', description: 'upper case', isApplied: true, isQuiet: false })
         vi.advanceTimersByTime(31_000)
         expect(usePendingScriptStore.getState().take('e1')).toBeNull()
     })

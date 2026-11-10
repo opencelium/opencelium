@@ -1,6 +1,6 @@
 import React from 'react';
 import { BeebotGlyph } from './beebot/BeebotGlyph';
-import { LuScan, LuFlaskConical, LuPackage, LuSparkles, LuUnplug, LuArrowRight, LuMic, LuVolume2, LuVolumeX } from 'react-icons/lu';
+import { LuScan, LuFlaskConical, LuPackage, LuSparkles, LuUnplug, LuArrowRight, LuMic } from 'react-icons/lu';
 import {
     HolderOutlined,
     MinusOutlined,
@@ -154,8 +154,6 @@ const iconMap = {
     'plug-off': LuUnplug,
     'arrow-right': LuArrowRight,
     microphone: LuMic,
-    sound: LuVolume2,
-    'sound-off': LuVolumeX,
 };
 
 export const AntIcon: IconComponent = (props) => {

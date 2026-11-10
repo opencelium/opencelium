@@ -89,8 +89,6 @@ export type IconName =
     | 'plug-off'
     | 'arrow-right'
     | 'microphone'
-    | 'sound'
-    | 'sound-off'
 
 export type IconColor =
     | 'default'

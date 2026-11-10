@@ -11,15 +11,16 @@ import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 import '../../styles/ai-condition.css';
 
 type Props = {
-	/** The if being edited, to pick up a condition asked for by voice or the palette. */
+	/** The if or loop being edited, to pick up a condition asked for by voice or the palette. */
 	nodeId: string;
+	operatorType: 'if' | 'loop';
 	connection: Connection;
 	methods: MethodWithId[];
 	operatorIndex: string;
 	onApply: (tree: ConditionGroup) => void;
 };
 
-/** A sentence above an if step's rules that writes them; hidden without the AI gateway. */
+/** A sentence above an if's rules or a loop's list that writes them; hidden without the AI gateway. */
 export function AiConditionPanel(props: Props) {
 	const { t } = useI18n('workflow');
 	const isAvailable = useAiAvailability();
@@ -38,12 +39,14 @@ export function AiConditionPanel(props: Props) {
 	return (
 		<div className="aiCondition" data-testid="ai-condition">
 			<div className="aiConditionBar">
-				<Input value={condition.instruction} placeholder={t('ai.condition.placeholder')}
+				<Input value={condition.instruction} placeholder={t(props.operatorType === 'loop' ? 'ai.condition.loopPlaceholder' : 'ai.condition.placeholder')}
 					onChange={(event) => condition.setInstruction(event.target.value)}
 					onKeyDown={(event) => { if (event.key === 'Enter') void condition.build(); }}
 					testId="ai-condition-instruction" />
 				<Button iconLeft="sparkles" onClick={() => void condition.build()} loading={state.status === 'building'}
-					disabled={!condition.instruction.trim()} testId="ai-condition-build">{t('ai.condition.build')}</Button>
+					disabled={!condition.instruction.trim()} testId="ai-condition-build">
+					{t(props.operatorType === 'loop' ? 'ai.condition.buildLoop' : 'ai.condition.build')}
+				</Button>
 			</div>
 			{state.status === 'building' && <div className="aiConditionNote"><AiExpectedTime feature="condition" /></div>}
 			{state.status === 'built' && (

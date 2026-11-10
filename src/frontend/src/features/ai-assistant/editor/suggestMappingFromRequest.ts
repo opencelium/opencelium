@@ -1,7 +1,8 @@
 import { store } from '@app/store/store'
 import { i18n } from '@shared/i18n/config/i18n'
-import { guideMethodNames, resolveGuideNode } from '@features/onboarding/guides/model/resolveGuideNode'
+import { guideMethodNames, resolveGuideNode, type GuideNodeResolution } from '@features/onboarding/guides/model/resolveGuideNode'
 import { workflowCommandBridgeStore } from '@features/workflow/command/workflowCommandBridge'
+import { requestEditorBridgeStore } from '@features/workflow/command/requestEditorBridge'
 import { aiApi } from '../api/aiApi'
 import { usePendingMappingStore } from '../mapping/pendingMapping.store'
 import { tell } from './tell'
@@ -13,7 +14,8 @@ export type MappingRequestOutcome = 'opened' | 'not-opened' | 'failed'
  * the references and which one supplies them, the editor opens the target's body and runs the
  * AI mapping there with only the source's values. Nothing changes until the user applies the
  * suggestions, so no confirmation is asked. Methods resolve like the guides: a named one is the
- * first match in the tree; an unnamed target is the selected method, else the first.
+ * first match in the tree; an unnamed target is the method whose body or headers dialog is open ("suggest AI mapping"),
+ * else the selected method, else the first. The mapping fills the body, so an open headers dialog switches to it.
  */
 export async function suggestMappingFromRequest(prompt: string): Promise<MappingRequestOutcome> {
     const bridge = workflowCommandBridgeStore.getState()
@@ -37,7 +39,10 @@ export async function suggestMappingFromRequest(prompt: string): Promise<Mapping
     }
 
     const [nodes, edges] = [bridge.getNodes(), bridge.getEdges()]
-    const target = resolveGuideNode(nodes, edges, answer.target || undefined)
+    const open = requestEditorBridgeStore.getState().editor
+    const target: GuideNodeResolution = !answer.target && open
+        ? { kind: 'found', nodeId: open.methodId, label: open.methodLabel }
+        : resolveGuideNode(nodes, edges, answer.target || undefined)
     const source = answer.source ? resolveGuideNode(nodes, edges, answer.source) : null
     for (const resolution of [target, source]) {
         if (resolution?.kind === 'no-methods') tell.error(tGuides('guides.errors.noMethods'))
@@ -53,6 +58,8 @@ export async function suggestMappingFromRequest(prompt: string): Promise<Mapping
         methodId: target.nodeId,
         source: source ? { methodId: source.nodeId, label: source.label } : null,
     })
+    // Already open on that body: the editor there picks the request up, nothing to reopen.
+    if (open?.methodId === target.nodeId && open.messageProperty === 'body') return 'opened'
     bridge.centerOnNode(target.nodeId)
     bridge.openRequestEditor({ nodeId: target.nodeId, mode: 'body' })
     return 'opened'

@@ -8,6 +8,8 @@ export type OpenTransformationResult =
 
 /** The body or header editor open in the method dialog, as far as a request from outside (Beebot) needs it. */
 export type OpenRequestEditor = {
+	/** The method's node id. */
+	methodId: string;
 	methodLabel: string;
 	messageProperty: RequestMessageProperty;
 	/** The editor's fields as paths (`ConfigItem.CIXMLData.Vendor`), as they are now. */

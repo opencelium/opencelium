@@ -9,6 +9,8 @@ import { addMethodFromRequest, type ConfirmEdit } from './addMethodFromRequest'
 import { suggestMappingFromRequest } from './suggestMappingFromRequest'
 import { applyTransformationFromRequest } from './applyTransformationFromRequest'
 import { addOperatorFromRequest } from './addOperatorFromRequest'
+import { isQuiet } from './tell'
+import { type MethodPart, openMethodPartFromRequest } from './openMethodPartFromRequest'
 import { ASSIST_OPTIONS, ASSIST_OPTION_IDS, isAssistOptionId, runAssistFromRequest } from './runAssistFromRequest'
 
 /** What the editor itself can do with a request, besides the guides. */
@@ -20,6 +22,16 @@ const APPLY_TRANSFORMATION = 'apply-transformation'
 const APPLY_TRANSFORMATION_DESCRIPTION = 'commandPalette.descriptions.workflowApplyTransformation'
 const ADD_OPERATOR = 'add-operator'
 const ADD_OPERATOR_DESCRIPTION = 'commandPalette.descriptions.workflowAddOperator'
+const OPEN_PARTS: Record<string, { part: MethodPart; descriptionKey: string }> = {
+    'open-body': { part: 'body', descriptionKey: 'commandPalette.descriptions.workflowOpenBody' },
+    'open-headers': { part: 'header', descriptionKey: 'commandPalette.descriptions.workflowOpenHeaders' },
+}
+/** A guide that shows where something is stands for the action doing it when the request asks to be shown nothing. */
+const TEACHES: Partial<Record<WorkflowGuideId, string>> = {
+    'method-transformation': APPLY_TRANSFORMATION,
+    'method-body': 'open-body',
+    'method-headers': 'open-headers',
+}
 
 /** `handled`: a guide or an edit took the request over and told the user how it went; `unhandled`: it is for the palette. */
 export type EditorRequestOutcome = 'handled' | 'unhandled'
@@ -36,11 +48,12 @@ function describeOptions() {
     return [
         ...WORKFLOW_GUIDE_IDS.map(id => ({
             id, description: describe(WORKFLOW_GUIDES[id].descriptionKey),
-            ...(id === 'method-transformation' ? { teaches: APPLY_TRANSFORMATION } : {}),
+            ...(TEACHES[id] ? { teaches: TEACHES[id] } : {}),
         })),
         { id: ADD_METHOD, description: describe(ADD_METHOD_DESCRIPTION), isAction: true },
         { id: SUGGEST_MAPPING, description: describe(SUGGEST_MAPPING_DESCRIPTION), isAction: true },
         { id: APPLY_TRANSFORMATION, description: describe(APPLY_TRANSFORMATION_DESCRIPTION), isAction: true },
+        ...Object.entries(OPEN_PARTS).map(([id, open]) => ({ id, description: describe(open.descriptionKey), isAction: true })),
         { id: ADD_OPERATOR, description: describe(ADD_OPERATOR_DESCRIPTION), isAction: true },
         ...ASSIST_OPTION_IDS.map(id => {
             const option: { descriptionKey: string; isAction: boolean; withMethod?: string } = ASSIST_OPTIONS[id]
@@ -54,7 +67,8 @@ function describeOptions() {
  * A request made in the workflow editor that the workflow itself answers: "where is the
  * header of getCustomers?" starts a guide, "add get all users from CRM after createClient"
  * adds the method, "suggest references for createClient from getCustomers" opens the AI mapping, "apply
- * transformation for Vendor with upper case" writes the script of a field in the open body or headers, "test the
+ * transformation for Vendor with upper case" writes the script of a field in the open body or headers, "open the body
+ * of getCustomers" opens it (where "where is …" walks there), "test the
  * workflow" / "why did it fail?" / "fix it" run and debug it. `confirmEdit` is asked before a change; leave it out when the user
  * addressed the assistant by name, which is their go-ahead.
  */
@@ -76,6 +90,11 @@ export async function askWorkflowEditor(prompt: string, confirmEdit?: ConfirmEdi
         await addMethodFromRequest(prompt, confirmEdit)
         return 'handled'
     }
+    const open = answer.guideId ? OPEN_PARTS[answer.guideId] : undefined
+    if (open) {
+        openMethodPartFromRequest(open.part, answer.method)
+        return 'handled'
+    }
     if (answer.guideId === APPLY_TRANSFORMATION) {
         await applyTransformationFromRequest(prompt, !confirmEdit)
         return 'handled'
@@ -95,7 +114,7 @@ export async function askWorkflowEditor(prompt: string, confirmEdit?: ConfirmEdi
     if (!answer.guideId || !isGuideId(answer.guideId)) return 'unhandled'
     // The transformation guide goes into the headers when the request says so ("… in the headers of X").
     const part = /\b(headers?|kopfzeilen?)\b/i.test(prompt) ? 'header' : 'body'
-    const started = startWorkflowGuide(answer.guideId, answer.method || undefined, { part })
+    const started = startWorkflowGuide(answer.guideId, answer.method || undefined, { part, isQuiet: isQuiet() })
     // A named method that is not there was already reported; the palette would only guess.
     return started === 'started' || started === 'no-match' || started === 'no-methods' || started === 'no-references' ? 'handled' : 'unhandled'
 }

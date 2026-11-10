@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useWorkflowAssistAction } from '@features/workflow/command/workflowAssistBridge'
 import { useIsAdmin } from '@features/auth/useIsAdmin'
 import { useTheme } from '@shared/theme/hooks/useTheme'
 import { runWithoutUnsavedChangesGuard } from '@features/workflow/hooks/unsavedChangesGuard'
@@ -42,6 +43,12 @@ export function WorkflowTutorial() {
     const { requested, request, dismiss } = useWorkflowTutorialStore()
     /** How far the user has clicked through the steps the canvas cannot detect. */
     const [acknowledged, setAcknowledged] = useState(0)
+
+    // "Start tutorial", typed or said in the workflow editor; the tour runs for admins only.
+    useWorkflowAssistAction('startTutorial', isAdmin ? () => {
+        request()
+        navigate(TUTORIAL_ROUTE)
+    } : null)
 
     const onRoute = location.pathname.startsWith(TUTORIAL_ROUTE)
     /**

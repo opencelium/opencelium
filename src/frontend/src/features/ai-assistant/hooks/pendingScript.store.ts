@@ -6,6 +6,8 @@ export type PendingScript = {
 	description: string;
 	/** Applied straight away when the user addressed the assistant by name; otherwise offered to compare and accept. */
 	isApplied: boolean;
+	/** Asked by voice: applied without the "Script applied" toast; Undo stays in the panel. */
+	isQuiet: boolean;
 };
 
 /** Long enough for the panel and the AI availability check; a later visit to the field is not the request's. */

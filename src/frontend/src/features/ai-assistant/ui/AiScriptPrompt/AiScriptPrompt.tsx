@@ -47,7 +47,7 @@ export function AiScriptPrompt({ enhancement, current, versions, onReplace, isPl
 		const taken = usePendingScriptStore.getState().take(enhancement.enhanceId);
 		if (!taken) return;
 		setPrompt(taken.description);
-		void generate(taken.description, { isApplied: taken.isApplied });
+		void generate(taken.description, { isApplied: taken.isApplied, isQuiet: taken.isQuiet });
 	});
 	const canGenerate = generation.isAvailable && enhancement.language === 'js';
 	useEffect(() => {

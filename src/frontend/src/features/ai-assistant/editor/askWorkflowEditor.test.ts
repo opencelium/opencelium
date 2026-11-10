@@ -44,6 +44,7 @@ import { requestEditorBridgeStore, type OpenRequestEditor } from '@features/work
 import { workflowAssistBridgeStore } from '@features/workflow/command/workflowAssistBridge'
 import { usePendingConditionStore } from '../condition/pendingCondition.store'
 import { askWorkflowEditor } from './askWorkflowEditor'
+import { quietly } from './tell'
 
 const method = (id: string, label: string) => ({
     id, type: 'connector', position: { x: 0, y: 0 }, data: { title: 'CRM', subtitle: label, kind: 'connector', methodConfig: { name: label } },
@@ -76,12 +77,15 @@ describe('askWorkflowEditor', () => {
         expect(await askWorkflowEditor('order a pizza')).toBe('unhandled')
         const options = (gateway.requests[0]?.body.guides as { id: string; description: string }[])
         expect(options.map(option => option.id)).toEqual(['method-url', 'method-headers', 'method-body', 'method-try',
-            'method-transformation', 'add-method', 'suggest-mapping', 'apply-transformation', 'add-operator',
+            'method-transformation', 'add-method', 'suggest-mapping', 'apply-transformation', 'open-body', 'open-headers', 'add-operator',
             'test-workflow', 'stop-test', 'explain-failure', 'fix-failure', 'apply-fix', 'explain-workflow', 'show-logs', 'show-problems',
-            'undo', 'redo', 'save-workflow', 'delete-step', 'generate-workflow'])
+            'undo', 'redo', 'save-workflow', 'delete-step', 'generate-workflow', 'start-tutorial'])
         expect(options.find(option => option.id === 'test-workflow')).toMatchObject({ isAction: true, withMethod: 'method-try' })
         expect(options.find(option => option.id === 'explain-failure')).toMatchObject({ isAction: false })
         expect(options[4]).toMatchObject({ id: 'method-transformation', teaches: 'apply-transformation' })
+        expect(options[1]).toMatchObject({ id: 'method-headers', teaches: 'open-headers' })
+        expect(options[2]).toMatchObject({ id: 'method-body', teaches: 'open-body' })
+        expect(options.find(option => option.id === 'open-body')).toMatchObject({ isAction: true })
         expect(options[5]).toEqual({ id: 'add-method', description: 'en add · de add', isAction: true })
         expect(options[6]).toEqual({ id: 'suggest-mapping', description: 'en map · de map', isAction: true })
     })
@@ -90,6 +94,29 @@ describe('askWorkflowEditor', () => {
         gateway.answers.routeGuide = { guideId: 'method-headers', method: 'createClient' }
         expect(await askWorkflowEditor('headers of create client')).toBe('handled')
         expect(useWorkflowGuideStore.getState().active).toMatchObject({ guideId: 'method-headers', nodeId: 'b' })
+    })
+
+    it('opens the body or headers of the named method right away', async () => {
+        gateway.answers.routeGuide = { guideId: 'open-body', method: 'createClient' }
+        expect(await askWorkflowEditor('open body of create client')).toBe('handled')
+        expect(openRequestEditor).toHaveBeenCalledWith({ nodeId: 'b', mode: 'body' })
+        gateway.answers.routeGuide = { guideId: 'open-headers', method: 'getCustomers' }
+        expect(await askWorkflowEditor('getCustomers header')).toBe('handled')
+        expect(openRequestEditor).toHaveBeenLastCalledWith({ nodeId: 'a', mode: 'header' })
+        expect(useWorkflowGuideStore.getState().active).toBeNull()
+    })
+
+    it('opens the selected method\'s part when none is named, and says which named one is not there', async () => {
+        const selected = { ...method('b', 'createClient'), selected: true } as unknown as WorkflowNodeModel
+        workflowCommandBridgeStore.setState({ getNodes: () => [method('a', 'getCustomers'), selected] })
+        gateway.answers.routeGuide = { guideId: 'open-body', method: '' }
+        expect(await askWorkflowEditor('open body')).toBe('handled')
+        expect(openRequestEditor).toHaveBeenCalledWith({ nodeId: 'b', mode: 'body' })
+        openRequestEditor.mockClear()
+        gateway.answers.routeGuide = { guideId: 'open-body', method: 'TicketCreate' }
+        expect(await askWorkflowEditor('open body of ticket create')).toBe('handled')
+        expect(openRequestEditor).not.toHaveBeenCalled()
+        expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('commandPalette.workflowEdit.unknownStep'))
     })
 
     it('takes the transformation guide into the headers when the request says so', async () => {
@@ -111,6 +138,14 @@ describe('askWorkflowEditor', () => {
         })
         expect(addStep).toHaveBeenCalledWith(expect.objectContaining({ methodName: 'getAllUsers', connector: expect.objectContaining({ connectorId: 7 }) }))
         expect(toast.success).toHaveBeenCalledWith('commandPalette.workflowEdit.added{"method":"getAllUsers","connector":"CRM"}')
+    })
+
+    it('adds the method without a confirmation toast when the request was spoken', async () => {
+        gateway.answers.routeGuide = { guideId: 'add-method', method: '' }
+        gateway.answers.readAddMethod = { connectorId: '7', operation: 'getAllUsers', spokenMethod: 'get all users', position: 'after', stepId: 'b' }
+        expect(await quietly(() => askWorkflowEditor('add get all users from CRM after createClient'))).toBe('handled')
+        expect(addStep).toHaveBeenCalled()
+        expect(toast.success).not.toHaveBeenCalled()
     })
 
     it('asks first when given a confirmation, and adds nothing when declined', async () => {
@@ -162,6 +197,25 @@ describe('askWorkflowEditor', () => {
             expect(usePendingMappingStore.getState().pending).toMatchObject({ methodId: 'b', source: null })
         })
 
+        it('suggests for the method whose dialog is open when none is named, without reopening its body', async () => {
+            const selected = { ...method('a', 'getCustomers'), selected: true }
+            workflowCommandBridgeStore.setState({ getNodes: () => [selected, method('b', 'createClient')] })
+            const openEditor = (messageProperty: 'body' | 'header') => requestEditorBridgeStore.setState({ editor: {
+                methodId: 'b', methodLabel: 'createClient', messageProperty, fieldPaths: () => [],
+                selectedFieldPath: () => null, openTransformation: vi.fn(),
+            } })
+            gateway.answers.readMapping = { target: '', source: '' }
+            openEditor('body')
+            expect(await askWorkflowEditor('suggest AI mapping')).toBe('handled')
+            expect(usePendingMappingStore.getState().pending).toMatchObject({ methodId: 'b', source: null })
+            expect(openRequestEditor).not.toHaveBeenCalled()
+
+            openEditor('header')
+            await askWorkflowEditor('suggest AI mapping')
+            expect(openRequestEditor).toHaveBeenCalledWith({ nodeId: 'b', mode: 'body' })
+            requestEditorBridgeStore.setState({ editor: null })
+        })
+
         it('refuses one method as both target and source', async () => {
             gateway.answers.readMapping = { target: 'createClient', source: 'createClient' }
             await askWorkflowEditor('map create client from create client')
@@ -181,7 +235,7 @@ describe('askWorkflowEditor', () => {
         let selectedField: string | null = null
         const openTransformation = vi.fn<OpenRequestEditor['openTransformation']>(() => ({ kind: 'opened', enhanceId: 'e1' }))
         const openBody = () => requestEditorBridgeStore.setState({ editor: {
-            methodLabel: 'ConfigItemUpdate', messageProperty: 'body',
+            methodId: 'b', methodLabel: 'ConfigItemUpdate', messageProperty: 'body',
             fieldPaths: () => ['ConfigItem.Number', 'ConfigItem.CIXMLData.Vendor'], openTransformation,
             selectedFieldPath: () => selectedField,
         } })
@@ -246,6 +300,21 @@ describe('askWorkflowEditor', () => {
             await askWorkflowEditor('apply transformation with upper case')
             expect(toast.error).toHaveBeenCalledWith('commandPalette.workflowEdit.noFieldNamed{"part":"commandPalette.workflowEdit.part.body"}')
         })
+
+        it('says nothing about what could not be done when the request was spoken', async () => {
+            openBody()
+            gateway.answers.readTransformation = { field: '', spokenField: '', description: 'upper case' }
+            expect(await quietly(() => askWorkflowEditor('apply transformation with upper case'))).toBe('handled')
+            expect(toast.error).not.toHaveBeenCalled()
+            expect(toast.info).not.toHaveBeenCalled()
+        })
+    })
+
+    it('starts no guide and says nothing for an unknown method when the request was spoken', async () => {
+        gateway.answers.routeGuide = { guideId: 'method-headers', method: 'TicketCreate' }
+        expect(await quietly(() => askWorkflowEditor('where are the headers of ticket create'))).toBe('handled')
+        expect(useWorkflowGuideStore.getState().active).toBeNull()
+        expect(toast.error).not.toHaveBeenCalled()
     })
 
     describe('running and debugging', () => {
@@ -349,14 +418,24 @@ describe('askWorkflowEditor', () => {
             expect(openConditionEditor).toHaveBeenCalledWith('new-1')
         })
 
-        it('adds a loop after the selected step and leaves its list to the dialog', async () => {
+        it('adds a loop after the selected step and has the dialog build what it repeats over', async () => {
             workflowCommandBridgeStore.setState({ getNodes: () => [method('a', 'getCustomers'), { ...method('b', 'createClient'), selected: true }] })
             route('add-operator')
             gateway.answers.readAddOperator = { kind: 'loop', position: 'after', stepId: null, condition: 'the customers' }
             await askWorkflowEditor('add a loop over the customers')
             expect(addStep).toHaveBeenCalledWith(expect.objectContaining({ sourceNodeId: 'b', kind: 'loop' }))
-            expect(usePendingConditionStore.getState().pending).toBeNull()
+            expect(usePendingConditionStore.getState().pending).toMatchObject({ instruction: 'the customers' })
             expect(toast.success).toHaveBeenCalledWith('commandPalette.workflowAssist.loopAdded')
+        })
+
+        it('starts the tutorial, or says it is not available', async () => {
+            route('start-tutorial')
+            await askWorkflowEditor('start tutorial')
+            expect(toast.info).toHaveBeenCalledWith('commandPalette.workflowAssist.tutorialUnavailable')
+            const startTutorial = vi.fn()
+            workflowAssistBridgeStore.getState().register('startTutorial', startTutorial)
+            await askWorkflowEditor('start tutorial')
+            expect(startTutorial).toHaveBeenCalledOnce()
         })
 
         it('removes the named step once confirmed, and only a named or selected one', async () => {

@@ -31,6 +31,8 @@ export type WorkflowAssistHandlers = {
 	deleteStep: (step: { nodeId: string; label: string }) => Promise<boolean>;
 	/** Opens Generate with AI with the request filled in and plans it. */
 	generateWorkflow: (prompt: string) => void;
+	/** Starts the editor tutorial, in its sandbox on a new workflow: the open one is left as it is. */
+	startTutorial: () => void;
 };
 
 export type WorkflowAssistAction = keyof WorkflowAssistHandlers;

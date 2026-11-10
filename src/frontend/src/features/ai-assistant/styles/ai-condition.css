@@ -11,6 +11,11 @@
   align-items: center;
 }
 
+/* The sentence field gives way, not the button. */
+.aiConditionBar > .ant-btn {
+  flex-shrink: 0;
+}
+
 .aiConditionNote {
   font-size: 12px;
   color: var(--color-text-secondary);

@@ -34,9 +34,10 @@ export function useScriptPromptActions({ enhancement, current, versions, onRepla
 		latest.current.onReplace(next);
 		message.success({ key: TOAST_KEY, content: t('ai.script.restored') });
 	};
-	const replaceWithUndo = (next: ScriptSnapshot | undefined, textKey: 'ai.script.applied' | 'ai.script.restored') => {
+	const replaceWithUndo = (next: ScriptSnapshot | undefined, textKey: 'ai.script.applied' | 'ai.script.restored', isQuiet = false) => {
 		if (!next) return;
 		latest.current.onReplace(next);
+		if (isQuiet) return;
 		message.success({
 			key: TOAST_KEY,
 			content: (
@@ -52,8 +53,11 @@ export function useScriptPromptActions({ enhancement, current, versions, onRepla
 		});
 	};
 
-	/** `isApplied`: the user asked for the script to be applied (Beebot), so it goes in even over an edited script. */
-	const generate = async (prompt: string, { isApplied = false }: { isApplied?: boolean } = {}) => {
+	/**
+	 * `isApplied`: the user asked for the script to be applied (Beebot), so it goes in even over an edited script.
+	 * `isQuiet`: asked by voice, so no toast; the panel's own Undo stays.
+	 */
+	const generate = async (prompt: string, { isApplied = false, isQuiet = false }: { isApplied?: boolean; isQuiet?: boolean } = {}) => {
 		const { candidate } = versions;
 		const base = candidate?.kind === 'generated' ? candidate.script : isUntouchedScript(current.script) ? '' : current.script;
 		const result = await generation.generate(prompt, base);
@@ -63,6 +67,7 @@ export function useScriptPromptActions({ enhancement, current, versions, onRepla
 			replaceWithUndo(
 				latest.current.versions.applyGenerated(editor, { prompt, script: result.code, description: result.description }),
 				'ai.script.applied',
+				isQuiet,
 			);
 			return;
 		}
