@@ -211,15 +211,5 @@
     "alsoRuns": "Weitere Ausführungstage",
     "invalid": "Ungültiger oder nicht unterstützter Cron-Ausdruck",
     "empty": "Keine bevorstehenden Ausführungen"
-  },
-  "calendar": {
-    "title": "Kalender",
-    "list": "Liste",
-    "prev": "Vorherige Woche",
-    "next": "Nächste Woche",
-    "disabled": "Deaktivierte Zeitpläne anzeigen",
-    "hour": "Stunde",
-    "every": "Alle {{count}} Min.",
-    "more": "Weitere Ausführungen"
   }
 }

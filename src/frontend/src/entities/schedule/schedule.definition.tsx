@@ -29,8 +29,6 @@ import {NotificationsAction} from "@entities/schedule/ui/NotificationsAction.tsx
 import {SupportLogsAction} from "@entities/schedule/ui/SupportLogsAction.tsx";
 import {BulkNotificationsDialogContent} from "@entities/schedule/ui/BulkNotificationsDialogContent.tsx";
 
-import {ScheduleCalendar} from './ui/ScheduleCalendar';
-
 const baseKey = 'schedule';
 
 // resolveScheduleConnectionTitles suggests "{connection title} [{schedulerId}]" —
@@ -123,11 +121,6 @@ export const scheduleDefinition: EntityDefinition = {
         { type: 'list' },
     ],
     list: {
-        alternateView: {
-            labelKey: 'schedule.calendar.title',
-            listLabelKey: 'schedule.calendar.list',
-            render: rows => <ScheduleCalendar schedules={rows as Schedule[]} />,
-        },
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
         subtitleComponents: {

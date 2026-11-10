@@ -211,15 +211,5 @@
     "alsoRuns": "Also runs",
     "invalid": "Invalid or unsupported cron expression",
     "empty": "No upcoming runs"
-  },
-  "calendar": {
-    "title": "Calendar",
-    "list": "List",
-    "prev": "Previous week",
-    "next": "Next week",
-    "disabled": "Show disabled schedules",
-    "hour": "Hour",
-    "every": "Every {{count}} min",
-    "more": "More runs"
   }
 }
