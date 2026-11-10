@@ -63,6 +63,8 @@ public final class SummaryStep implements SetupStep {
 		if (!context.values().yesNo(CONFIRM_QUESTION, CONFIRM_HELP, true, prompter)) {
 			throw new SetupCancelledException();
 		}
+		// The env file holds the whole URI, and the start in this process gets it as an argument.
+		context.putEnvironment(YmlRenderer.MONGO_URI_VARIABLE, values.mongoUri());
 		context.filePlan().add(PlannedFile.groupReadable(locations.ymlFile(), YmlRenderer.render(values)));
 		context.filePlan().add(PlannedFile.ownerOnly(locations.envFile(), EnvRenderer.render(context.environment())));
 	}

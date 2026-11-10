@@ -11,7 +11,7 @@ import io.opencelium.core.config.mongo.MongoConnection;
  * application.yml will say. The master key file joins when the wizard asks for it.
  *
  * @param dataDir  absolute
- * @param mongoUri the connection URI; a password that the env file holds is a placeholder here
+ * @param mongoUri the whole connection URI, which the env file holds and application.yml refers to
  */
 public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int port, String mongoUri) {
 
@@ -24,7 +24,7 @@ public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int p
 		}
 	}
 
-	/** Without the password: when the user keeps it in plain text, the URI holds it. */
+	/** Without the database password that the URI holds. */
 	@Override
 	public String toString() {
 		return "BootstrapValues[deploymentMode=" + deploymentMode + ", dataDir=" + dataDir + ", port=" + port
