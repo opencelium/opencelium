@@ -24,7 +24,11 @@ export type WorkflowUndoSnapshot = {
 	 * that only carry newer object references, so it stays the moment the user
 	 * actually made the edit. */
 	at: number;
+	origin: WorkflowUndoOrigin;
 };
+
+/** `ai`: made by an AI feature (generate, a run fix, a request to the palette or Beebot), not by hand. */
+export type WorkflowUndoOrigin = 'user' | 'ai';
 
 /** Which part of a method's request an edit landed in. */
 export type WorkflowUndoMethodSection = 'header' | 'body';
@@ -102,6 +106,7 @@ export type WorkflowUndoEntry = {
 	change: WorkflowUndoChange;
 	/** Epoch ms; see WorkflowUndoSnapshot.at. */
 	at: number;
+	origin: WorkflowUndoOrigin;
 };
 
 export type WorkflowUndoStack = {

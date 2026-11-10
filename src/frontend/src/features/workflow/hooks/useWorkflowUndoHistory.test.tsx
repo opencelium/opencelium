@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
+import { markNextChangeAsAi } from '../utils/aiChangeMarker';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
 
 const makeNode = (id: string, x = 0) => ({
@@ -216,5 +217,28 @@ describe('useWorkflowUndoHistory', () => {
 		expect(result.current.history.entries).toHaveLength(1);
 		expect(result.current.history.entries[0])
 			.toMatchObject({ offset: 0, change: { kind: 'initial' } });
+	});
+
+	it('records a change the AI marked as the AI\'s, and the next hand edit as the user\'s', () => {
+		const { result } = renderHook(() => useHarness());
+		settle();
+		act(() => {
+			markNextChangeAsAi();
+			result.current.setNodes([...startNodes, makeNode('method-1', 240)]);
+		});
+		settle();
+		act(() => result.current.setNodes([...result.current.nodes, makeNode('method-2', 480)]));
+		settle();
+		expect(result.current.history.entries.map((entry) => entry.origin)).toEqual(['user', 'ai', 'user']);
+	});
+
+	it('lets a stale AI mark expire instead of labelling a later hand edit', () => {
+		const { result } = renderHook(() => useHarness());
+		settle();
+		act(() => { markNextChangeAsAi(); });
+		act(() => { vi.advanceTimersByTime(5000); });
+		act(() => result.current.setNodes([...startNodes, makeNode('method-1', 240)]));
+		settle();
+		expect(result.current.history.entries[0]?.origin).toBe('user');
 	});
 });

@@ -1,3 +1,4 @@
+import { markNextChangeAsAi } from '@features/workflow/utils/aiChangeMarker'
 import { store } from '@app/store/store'
 import { i18n } from '@shared/i18n/config/i18n'
 import { methodLabel, methodsInWorkflowOrder } from '@features/onboarding/guides/model/resolveGuideNode'
@@ -30,6 +31,7 @@ export async function addOperatorFromRequest(prompt: string): Promise<AddOperato
         tell.error(t('commandPalette.workflowAssist.operatorFailed'))
         return 'failed'
     }
+    markNextChangeAsAi()
     const result = addOperatorStep({ kind: answer.kind, anchorNodeId: answer.stepId, position: answer.position })
     if (result.kind === 'not-editable') {
         tell.error(t('commandPalette.workflowEdit.notEditable'))

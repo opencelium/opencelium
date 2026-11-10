@@ -10,6 +10,7 @@ import type { WorkflowDsl } from '../model/workflowDsl.schema';
 import type { AiConnectorPair } from '../utils/aiConnectors.utils';
 import { dslToConnection } from '../utils/dslToConnection';
 import { workflowAssistBridgeStore } from '@features/workflow/command/workflowAssistBridge';
+import { markNextChangeAsAi } from '@features/workflow/utils/aiChangeMarker';
 import { notifyAiApplied } from '../ui/AiProposal/notifyAiApplied';
 
 export type AiWorkflowApplyTarget = {
@@ -40,6 +41,7 @@ export function useApplyAiWorkflow({ nodes, connectors, setWorkflowGraph, setFie
 		const byId = (connectorId: number | null) => connectors.find((connector) => connector.connectorId === connectorId) ?? null;
 		try {
 			const state = mapConnectionToWorkflowState(dslToConnection(dsl, { from: byId(pair.fromId), to: byId(pair.toId) }));
+			markNextChangeAsAi();
 			setWorkflowGraph(state.nodes, state.edges, undefined, { centerStart: true, isUndoable: true });
 			// The generated transformations replace the old graph's, which pointed at nodes that are gone.
 			setFieldBindings(state.fieldBindings);

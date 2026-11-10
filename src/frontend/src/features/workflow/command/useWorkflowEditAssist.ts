@@ -1,5 +1,6 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
+import { markNextChangeAsAi } from '../utils/aiChangeMarker';
 import { useWorkflowAssistAction } from './workflowAssistBridge';
 
 type Params = {
@@ -39,6 +40,7 @@ export function useWorkflowEditAssist({ isLocked, canUndo, canRedo, undo, redo, 
 			confirmVariant: 'danger',
 		});
 		if (!isConfirmed) return false;
+		markNextChangeAsAi();
 		await onDeleteNodes([nodeId]);
 		return true;
 	});
