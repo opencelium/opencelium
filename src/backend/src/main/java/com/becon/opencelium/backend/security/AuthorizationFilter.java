@@ -20,7 +20,7 @@ import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
-import com.becon.opencelium.backend.utility.EmailUtility;
+import com.nimbusds.jwt.JWTClaimsSet;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,12 +29,10 @@ import org.apache.hc.core5.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Component
 public class AuthorizationFilter extends OncePerRequestFilter {
@@ -53,8 +51,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                                      HttpServletResponse response,
                                      FilterChain chain ) throws IOException, ServletException {
 
-        String url  = request.getRequestURI();
-        System.out.println(url);
         String token = extractTokenFromRequest(request);
         if (token == null || !token.startsWith(SecurityConstant.BEARER)){
             chain.doFilter(request, response);
@@ -85,32 +81,33 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         return token;
     }
 
+    /**
+     * Resolves the user a bearer token belongs to, or {@code null} when it grants nothing, which
+     * leaves the request unauthenticated for the entry point to reject.
+     *
+     * <p>The signature is verified before anything else, and the user is then loaded by the
+     * {@code userId} claim rather than by the subject: the subject is the email or username, a
+     * value the user can change and that is not unique across OC and LDAP accounts, while the id
+     * is immutable. Loading only after verification also means a forged token cannot probe which
+     * identifiers exist, and an unknown user gets the same answer as a bad signature instead of
+     * an error response.
+     */
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
-        String principal = jwtTokenUtil.extractPrincipal(token);
-        String sessionId = jwtTokenUtil.extractSessionId(token);
-
-        Optional<User> optionalUser;
-        if (EmailUtility.isValid(principal)) {
-            optionalUser = userService.findByEmail(principal);
-        } else {
-            optionalUser = userService.findByUsername(principal);
-        }
-        User user = optionalUser.orElseThrow(() -> new UsernameNotFoundException(principal));
-
-        try {
-            if (!jwtTokenUtil.validateToken(token, user)){
-                return null;
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        JWTClaimsSet claims = jwtTokenUtil.verify(token).orElse(null);
+        if (claims == null) {
+            return null;
         }
 
-        sessionService.updateLastAccessedTime(sessionId);
+        User user = jwtTokenUtil.userIdOf(claims)
+                .flatMap(userService::findByIdNoLock)
+                .orElse(null);
+        if (user == null || !jwtTokenUtil.belongsToActiveSession(claims, user)) {
+            return null;
+        }
 
-        UserPrincipals userDetail = new UserPrincipals(user);
+        sessionService.updateLastAccessedTime(claims.getJWTID());
 
-        return new UsernamePasswordAuthenticationToken(userDetail,
-                                                       null,
-                                                       userDetail.getAuthorities());
+        UserPrincipals principals = new UserPrincipals(user);
+        return new UsernamePasswordAuthenticationToken(principals, null, principals.getAuthorities());
     }
 }

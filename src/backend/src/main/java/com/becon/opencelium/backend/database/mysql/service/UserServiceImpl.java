@@ -31,6 +31,7 @@ import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.security.UserPrincipals;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.EmailUtility;
 import org.slf4j.Logger;
@@ -40,7 +41,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,6 +90,11 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public Optional<User> findById(int id) {
         return userRepository.findOneById(id);
+    }
+
+    @Override
+    public Optional<User> findByIdNoLock(int id) {
+        return userRepository.findById(id);
     }
 
     @Override
@@ -257,11 +262,19 @@ public class UserServiceImpl implements UserService {
         return bCryptPasswordEncoder.encode(password);
     }
 
+    /**
+     * Returns the user behind the current security context, re-read by id so that callers inside
+     * a transaction get a managed entity ({@link #changePassword(ChangePasswordDTO)} relies on
+     * dirty checking), or {@code null} when no user is authenticated.
+     *
+     * @throws UserNotFoundException if the authenticated user has been deleted meanwhile
+     */
     @Override
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            return findByEmail(userDetails.getUsername()).get();
+        if (authentication != null && authentication.getPrincipal() instanceof UserPrincipals principals) {
+            int id = principals.getUser().getId();
+            return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         }
         return null;
     }

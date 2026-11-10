@@ -19,7 +19,9 @@ import com.becon.opencelium.backend.database.mysql.service.WidgetSettingServiceI
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.ServiceUnavailableException;
+import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
+import com.becon.opencelium.backend.security.UserPrincipals;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -84,19 +86,44 @@ class UserServiceImplSecurityContextTest {
     // ── getCurrentUser ────────────────────────────────────────────────────────
 
     @Test
-    void getCurrentUserReturnsUserWhenPrincipalIsUserDetails() {
+    void getCurrentUserReturnsManagedUserWhenPrincipalIsUserPrincipals() {
+        User authenticated = UserFixture.anEmptyUser();
+        authenticated.setId(5);
+        authenticateAs(authenticated);
         User stored = UserFixture.anEmptyUser();
-        stored.setEmail("alice@example.com");
-        UserDetails principal = new org.springframework.security.core.userdetails.User(
-                "alice@example.com", "irrelevant", List.of(new SimpleGrantedAuthority("ROLE_USER")));
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(principal, "irrelevant", principal.getAuthorities()));
-        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(stored));
+        stored.setId(5);
+        when(userRepository.findById(5)).thenReturn(Optional.of(stored));
 
         User result = userService.getCurrentUser();
 
         assertThat(result).isSameAs(stored);
-        verify(userRepository).findByEmail("alice@example.com");
+        verify(userRepository).findById(5);
+    }
+
+    @Test
+    void getCurrentUserThrowsWhenAuthenticatedUserNoLongerExists() {
+        User authenticated = UserFixture.anEmptyUser();
+        authenticated.setId(5);
+        authenticateAs(authenticated);
+        when(userRepository.findById(5)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.getCurrentUser())
+                .isInstanceOf(UserNotFoundException.class);
+
+        verify(userRepository).findById(5);
+    }
+
+    @Test
+    void getCurrentUserReturnsNullWhenPrincipalIsNotUserPrincipals() {
+        UserDetails principal = new org.springframework.security.core.userdetails.User(
+                "alice@example.com", "irrelevant", List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, "irrelevant", principal.getAuthorities()));
+
+        User result = userService.getCurrentUser();
+
+        assertThat(result).isNull();
+        verifyNoInteractions(userRepository);
     }
 
     @Test
@@ -110,7 +137,7 @@ class UserServiceImplSecurityContextTest {
     }
 
     @Test
-    void getCurrentUserReturnsNullWhenPrincipalIsNotUserDetails() {
+    void getCurrentUserReturnsNullWhenAuthenticationIsAnonymous() {
         SecurityContextHolder.getContext().setAuthentication(
                 new AnonymousAuthenticationToken(
                         "key", "anonymousUser", List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))));
@@ -129,7 +156,7 @@ class UserServiceImplSecurityContextTest {
         current.setEmail("ldap-user@example.com");
         current.setAuthMethod(AuthMethod.LDAP);
         authenticateAs(current);
-        when(userRepository.findByEmail("ldap-user@example.com")).thenReturn(Optional.of(current));
+        when(userRepository.findById(current.getId())).thenReturn(Optional.of(current));
 
         ChangePasswordDTO dto = new ChangePasswordDTO("oldPw", "newPw", "newPw");
 
@@ -149,7 +176,7 @@ class UserServiceImplSecurityContextTest {
         current.setAuthMethod(AuthMethod.BASIC);
         current.setPassword("$2a$old");
         authenticateAs(current);
-        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(current));
+        when(userRepository.findById(current.getId())).thenReturn(Optional.of(current));
         when(bCryptPasswordEncoder.matches("wrongPw", "$2a$old")).thenReturn(false);
 
         ChangePasswordDTO dto = new ChangePasswordDTO("wrongPw", "newPw", "newPw");
@@ -171,7 +198,7 @@ class UserServiceImplSecurityContextTest {
         current.setAuthMethod(AuthMethod.BASIC);
         current.setPassword("$2a$old");
         authenticateAs(current);
-        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(current));
+        when(userRepository.findById(current.getId())).thenReturn(Optional.of(current));
         when(bCryptPasswordEncoder.matches("oldPw", "$2a$old")).thenReturn(true);
         when(bCryptPasswordEncoder.encode("newPw")).thenReturn("$2a$new");
 
@@ -182,16 +209,16 @@ class UserServiceImplSecurityContextTest {
         assertThat(current.getPassword()).isEqualTo("$2a$new");
         verify(bCryptPasswordEncoder).matches("oldPw", "$2a$old");
         verify(bCryptPasswordEncoder).encode("newPw");
-        verify(userRepository).findByEmail("alice@example.com");
+        verify(userRepository).findById(current.getId());
         verify(userRepository, org.mockito.Mockito.never()).save(org.mockito.ArgumentMatchers.any());
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private static void authenticateAs(User user) {
-        UserDetails principal = new org.springframework.security.core.userdetails.User(
-                user.getEmail(), "irrelevant", List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        UserPrincipals principal = new UserPrincipals(user);
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(principal, "irrelevant", principal.getAuthorities()));
+                new UsernamePasswordAuthenticationToken(
+                        principal, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))));
     }
 }

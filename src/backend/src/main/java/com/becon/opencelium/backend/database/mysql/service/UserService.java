@@ -32,6 +32,13 @@ public interface UserService {
 
     Optional<User> findById(int id);
 
+    /**
+     * Plain lookup without the pessimistic write lock that {@link #findById(int)} takes. For
+     * per-request reads such as bearer token authentication, where locking the row would
+     * serialize that user's requests and contend with the login path.
+     */
+    Optional<User> findByIdNoLock(int id);
+
     User getById(Integer userId);
 
     User save(User user);
