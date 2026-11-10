@@ -12,16 +12,20 @@ import io.opencelium.core.setup.SetupCancelledException;
 
 /**
  * Asks on a console. Bad input is explained and the question is asked again, so a typo never ends the wizard;
- * only {@code q} and the end of the input do. The layout uses plain characters only, so it looks the same on every
- * terminal: a question is its label padded to one column, the default in brackets, and a colon; a problem starts
- * with {@code !}, a result with {@code OK}, a start with {@code ->}; help and continuation lines are indented under
- * the question or the status.
+ * only {@code q} and the end of the input do. A secret is read without an echo, and each text is its answer, so
+ * there only the end of the input ends the wizard. The layout uses plain characters only, so it looks the same on
+ * every terminal: a question is its label padded to one column, the default in brackets, and a colon; a problem
+ * starts with {@code !}, a result with {@code OK}, a start with {@code ->}; help and continuation lines are
+ * indented under the question or the status.
  */
 public final class ConsolePrompter implements Prompter {
 
 	static final String CANCEL = "q";
 
 	static final String HELP = "?";
+
+	/** In the place of the default of a question: the terminal does not show the answer. */
+	private static final String HIDDEN = "(hidden)";
 
 	private static final String MARGIN = Screen.MARGIN;
 
@@ -124,7 +128,18 @@ public final class ConsolePrompter implements Prompter {
 
 	@Override
 	public String secret(String question) {
-		throw new UnsupportedOperationException("Not implemented yet.");
+		PrintWriter out = console.writer();
+		while (true) {
+			String line = console.readLineWithoutEcho(questionLine(question, HIDDEN));
+			if (line == null) {
+				out.println();
+				throw new SetupCancelledException();
+			}
+			if (!line.isEmpty()) {
+				return line;
+			}
+			out.println(MARGIN + PROBLEM + question + " cannot be empty.");
+		}
 	}
 
 	@Override
