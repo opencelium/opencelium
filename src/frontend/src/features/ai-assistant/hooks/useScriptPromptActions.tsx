@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { Button as AntButton, message } from 'antd';
+import { message } from 'antd';
 import type { Enhancement } from '@features/workflow/types/connection';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { isUntouchedScript, type ScriptSnapshot } from '../utils/scriptVersions.utils';
 import { useAiScriptGeneration } from './useAiScriptGeneration';
+import { notifyAiApplied } from '../ui/AiProposal/notifyAiApplied';
 import type { ScriptVersions } from './useScriptVersions';
 
 type Options = {
@@ -16,8 +17,8 @@ type Options = {
 const TOAST_KEY = 'ai-script-replaced';
 
 /**
- * A generated script for an empty editor goes straight in; otherwise it becomes a candidate to compare. Every replace
- * keeps the old script as a version and offers Undo.
+ * A generated script is a candidate to review and apply, even for an empty editor; only a request to Beebot applies it
+ * straight away. Every replace keeps the old script as a version and offers Undo.
  */
 export function useScriptPromptActions({ enhancement, current, versions, onReplace }: Options) {
 	const { t } = useI18n('workflow');
@@ -28,33 +29,24 @@ export function useScriptPromptActions({ enhancement, current, versions, onRepla
 		latest.current = { current, versions, onReplace };
 	});
 
-	const undo = () => {
+	const undoQuietly = (): boolean => {
 		const next = latest.current.versions.undo(latest.current.current);
-		if (!next) return;
+		if (!next) return false;
 		latest.current.onReplace(next);
-		message.success({ key: TOAST_KEY, content: t('ai.script.restored') });
+		return true;
+	};
+	const undo = () => {
+		if (undoQuietly()) message.success({ key: TOAST_KEY, content: t('ai.script.restored') });
 	};
 	const replaceWithUndo = (next: ScriptSnapshot | undefined, textKey: 'ai.script.applied' | 'ai.script.restored', isQuiet = false) => {
 		if (!next) return;
 		latest.current.onReplace(next);
 		if (isQuiet) return;
-		message.success({
-			key: TOAST_KEY,
-			content: (
-				<span>
-					{t(textKey)}{' '}
-					{/* The static message renders outside the app's providers, where the Button primitive cannot resolve its UI kit. */}
-					<AntButton type="link" size="small" data-testid="ai-script-undo-toast"
-						onClick={() => { message.destroy(TOAST_KEY); undo(); }}>
-						{t('ai.script.undo')}
-					</AntButton>
-				</span>
-			),
-		});
+		notifyAiApplied({ key: TOAST_KEY, undoTestId: 'ai-script-undo-toast', text: t(textKey), onUndo: () => undoQuietly() });
 	};
 
 	/**
-	 * `isApplied`: the user asked for the script to be applied (Beebot), so it goes in even over an edited script.
+	 * `isApplied`: the user asked for the script to be applied (Beebot), so it goes in at once, Undo kept.
 	 * `isQuiet`: asked by voice, so no toast; the panel's own Undo stays.
 	 */
 	const generate = async (prompt: string, { isApplied = false, isQuiet = false }: { isApplied?: boolean; isQuiet?: boolean } = {}) => {
@@ -63,7 +55,7 @@ export function useScriptPromptActions({ enhancement, current, versions, onRepla
 		const result = await generation.generate(prompt, base);
 		if (!result) return;
 		const editor = latest.current.current;
-		if (isApplied || isUntouchedScript(editor.script)) {
+		if (isApplied) {
 			replaceWithUndo(
 				latest.current.versions.applyGenerated(editor, { prompt, script: result.code, description: result.description }),
 				'ai.script.applied',

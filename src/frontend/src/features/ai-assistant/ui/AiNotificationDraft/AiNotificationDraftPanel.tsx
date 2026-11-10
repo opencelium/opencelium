@@ -5,6 +5,7 @@ import { Select } from '@shared/ui/primitives/Select';
 import { Textarea } from '@shared/ui/primitives/Textarea';
 import { useAiNotificationDraft } from '../../notification/useAiNotificationDraft';
 import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
+import { AiProposalActions } from '../AiProposal/AiProposalActions';
 
 const LANGUAGES = [{ value: 'en' as const, label: 'English' }, { value: 'de' as const, label: 'Deutsch' }];
 
@@ -40,10 +41,9 @@ export function AiNotificationDraftPanel({ onClose }: { onClose: () => void }) {
 					<div className="aiNotificationSubject">{state.draft.subject}</div>
 					<div className="aiNotificationLabel">{t('notification-template.fields.body.label')}</div>
 					<pre className="aiNotificationBody">{state.draft.body}</pre>
-					<div className="aiNotificationBar">
-						<Button type="primary" onClick={draft.use} testId="ai-notification-use">{t('notification-template.aiDraft.use')}</Button>
-						<Button onClick={draft.discard} testId="ai-notification-discard">{t('notification-template.aiDraft.discard')}</Button>
-					</div>
+					<AiProposalActions
+						apply={{ label: t('notification-template.aiDraft.use'), onClick: draft.use, testId: 'ai-notification-use' }}
+						discard={{ label: t('notification-template.aiDraft.discard'), onClick: draft.discard, testId: 'ai-notification-discard' }} />
 				</div>
 			)}
 		</div>

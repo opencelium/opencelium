@@ -4,6 +4,7 @@ import type { Aggregator } from '@entities/notificationTemplate/model/types';
 import { useFetchEntitiesQuery } from '@shared/api/genericApi';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useDraftNotificationMutation } from '../api/aiApi';
+import { notifyAiApplied } from '../ui/AiProposal/notifyAiApplied';
 import type { NotificationDraft } from '../model/aiGateway.types';
 
 export type NotificationDraftState =
@@ -24,7 +25,7 @@ export function placeholdersOf(aggregator: Aggregator | undefined): { token: str
  * the form, so validation and saving treat them like typed text.
  */
 export function useAiNotificationDraft() {
-	const { lang } = useI18n('entities');
+	const { t, lang } = useI18n('entities');
 	const { getValues, setValue } = useFormContext();
 	const { data: aggregators = [] } = useFetchEntitiesQuery('/aggregator/all');
 	const [draftNotification] = useDraftNotificationMutation();
@@ -53,9 +54,15 @@ export function useAiNotificationDraft() {
 	const use = () => {
 		if (state.status !== 'drafted') return;
 		const options = { shouldDirty: true, shouldValidate: true, shouldTouch: true };
+		const before = { subject: getValues('subject') as unknown, body: getValues('body') as unknown };
 		setValue('subject', state.draft.subject, options);
 		setValue('body', state.draft.body, options);
 		setState({ status: 'idle' });
+		notifyAiApplied({ key: 'ai-notification-applied', undoTestId: 'ai-notification-undo', text: t('notification-template.aiDraft.applied'),
+			onUndo: () => {
+				setValue('subject', before.subject, options);
+				setValue('body', before.body, options);
+			} });
 	};
 
 	return { state, instruction, setInstruction, language, setLanguage, draft, use, discard: () => setState({ status: 'idle' }) };

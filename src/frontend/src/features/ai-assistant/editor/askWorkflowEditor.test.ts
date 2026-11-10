@@ -81,7 +81,7 @@ describe('askWorkflowEditor', () => {
             'test-workflow', 'stop-test', 'explain-failure', 'fix-failure', 'apply-fix', 'explain-workflow', 'show-logs', 'show-problems',
             'undo', 'redo', 'save-workflow', 'delete-step', 'generate-workflow', 'start-tutorial'])
         expect(options.find(option => option.id === 'test-workflow')).toMatchObject({ isAction: true, withMethod: 'method-try' })
-        expect(options.find(option => option.id === 'explain-failure')).toMatchObject({ isAction: false })
+        expect(options.find(option => option.id === 'explain-failure')).not.toHaveProperty('isAction')
         expect(options[4]).toMatchObject({ id: 'method-transformation', teaches: 'apply-transformation' })
         expect(options[1]).toMatchObject({ id: 'method-headers', teaches: 'open-headers' })
         expect(options[2]).toMatchObject({ id: 'method-body', teaches: 'open-body' })

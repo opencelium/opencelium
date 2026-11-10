@@ -4,31 +4,10 @@ import { workflowCommandBridgeStore } from '@features/workflow/command/workflowC
 import { resolveGuideNode } from '@features/onboarding/guides/model/resolveGuideNode'
 import type { TestRunMode } from '@features/workflow/test-run/testRunModePreference'
 import { tell } from './tell'
+import type { EditorCapabilityIdOf } from './editorCapabilities'
 
-/** Run and debug by request: each is a button of the editor, so the option ids are what the gateway picks between. */
-export const ASSIST_OPTIONS = {
-    // "Test getCustomers" is the try-a-method guide, whatever the model picked.
-    'test-workflow': { descriptionKey: 'commandPalette.descriptions.workflowTestRun', isAction: true, withMethod: 'method-try' },
-    'stop-test': { descriptionKey: 'commandPalette.descriptions.workflowStopTest', isAction: true },
-    // Not actions: "why did it fail?" and "how do I fix it?" are questions these answer, not ones to refuse.
-    'explain-failure': { descriptionKey: 'commandPalette.descriptions.workflowExplainFailure', isAction: false },
-    'fix-failure': { descriptionKey: 'commandPalette.descriptions.workflowFixFailure', isAction: false },
-    'apply-fix': { descriptionKey: 'commandPalette.descriptions.workflowApplyFix', isAction: true },
-    'explain-workflow': { descriptionKey: 'commandPalette.descriptions.workflowExplain', isAction: false },
-    'show-logs': { descriptionKey: 'commandPalette.descriptions.workflowShowLogs', isAction: false },
-    'show-problems': { descriptionKey: 'commandPalette.descriptions.workflowShowProblems', isAction: false },
-    'undo': { descriptionKey: 'commandPalette.descriptions.workflowUndo', isAction: true },
-    'redo': { descriptionKey: 'commandPalette.descriptions.workflowRedo', isAction: true },
-    'save-workflow': { descriptionKey: 'commandPalette.descriptions.workflowSave', isAction: true },
-    'delete-step': { descriptionKey: 'commandPalette.descriptions.workflowDeleteStep', isAction: true },
-    'generate-workflow': { descriptionKey: 'commandPalette.descriptions.workflowGenerate', isAction: true },
-    // Not an action: "how does the editor work?" is a fair reason to start it.
-    'start-tutorial': { descriptionKey: 'commandPalette.descriptions.workflowStartTutorial', isAction: false },
-} as const
-
-export type AssistOptionId = keyof typeof ASSIST_OPTIONS
-
-export const ASSIST_OPTION_IDS = Object.keys(ASSIST_OPTIONS) as AssistOptionId[]
+/** Run and debug by request: each is a button of the editor. */
+export type AssistOptionId = EditorCapabilityIdOf<'assist'>
 
 type AssistMessageKey = 'testRunning' | 'testUnavailable' | 'noTestRunning' | 'noFailure' | 'notFixable' | 'noFix' | 'noSteps'
     | 'nothingToUndo' | 'nothingToRedo' | 'cannotSave' | 'deleteWhich' | 'generateUnavailable' | 'tutorialUnavailable'
@@ -57,8 +36,6 @@ function stepToDelete(method: string): { nodeId: string; label: string } | 'unkn
     const selected = nodes.find(node => node.selected && node.type !== 'start')
     return selected ? { nodeId: selected.id, label: selected.data.subtitle || selected.data.title } : null
 }
-
-export const isAssistOptionId = (id: string): id is AssistOptionId => id in ASSIST_OPTIONS
 
 /** Does what the request asked, or says why it cannot be done now; every outcome is told to the user. */
 export async function runAssistFromRequest(id: AssistOptionId, request: AssistRequest): Promise<void> {

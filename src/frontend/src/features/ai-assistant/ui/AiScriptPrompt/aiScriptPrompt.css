@@ -147,17 +147,6 @@
   color: var(--color-text-secondary);
 }
 
-.aiScriptProposalFooter {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
-}
-
-.aiScriptProposalFooter .aiScriptProposalPlayground {
-  margin-right: auto;
-}
-
 .aiScriptHistoryList {
   margin: 0;
   padding: 0;

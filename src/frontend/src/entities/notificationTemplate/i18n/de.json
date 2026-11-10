@@ -81,6 +81,7 @@
     "failed": "Die KI konnte keinen Text entwerfen. Bitte gleich noch einmal versuchen.",
     "removed": "Nicht vorhandene Platzhalter entfernt: {{names}}",
     "use": "Als Betreff und Text übernehmen",
-    "discard": "Verwerfen"
+    "discard": "Verwerfen",
+    "applied": "Betreff und Text ersetzt"
   }
 }

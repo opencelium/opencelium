@@ -420,6 +420,10 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             failed: string
             askInPalette: string
         }
+        aiResult: {
+            undo: string
+            undone: string
+        }
         aiExpectedTime: {
             range: string
             hint: string

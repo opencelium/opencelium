@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import { message } from 'antd';
 import { fetchMethodDetails, resolveTraceTarget, type LiveLogTree } from '@features/logs';
 import { buildWorkflowIndexes } from '@features/workflow/api/connectionPayload.indexes';
 import type { FieldBinding } from '@features/workflow/types/connection';
@@ -9,7 +8,8 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useExplainRunMutation, useFixRunMutation } from '../api/aiApi';
 import type { RunExplanation, RunFix } from '../model/aiGateway.types';
 import { applyFixToBindings } from './runFailureBindings';
-import { isQuiet } from '../editor/tell';
+import { workflowAssistBridgeStore } from '@features/workflow/command/workflowAssistBridge';
+import { notifyAiApplied } from '../ui/AiProposal/notifyAiApplied';
 import { type CollectedFailure, type FixTarget, buildRunFailure, findFailedElement, isSameBody, toEditorBody, toEditorHeaders } from './runFailure.utils';
 
 export type RunAssistState =
@@ -130,8 +130,9 @@ export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveM
 		if (node?.data.color) onFieldBindingsChange(applyFixToBindings(fieldBindings, node.data.color, config, { body, headers }));
 		onSaveMethodConfig(target.nodeId, { ...config, body, headers });
 		setState({ status: 'applied', explanation });
-		// Applied by voice ("apply the fix"): the changed step speaks for itself.
-		if (!isQuiet()) message.success(t('ai.run.applied'));
+		// The body, headers and bindings change in one tick, so they are one step of the editor's undo history.
+		notifyAiApplied({ key: 'ai-run-applied', undoTestId: 'ai-run-undo', text: t('ai.run.applied'),
+			onUndo: () => workflowAssistBridgeStore.getState().handlers.undo?.() ?? false });
 	};
 
 	const discard = () => {

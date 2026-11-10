@@ -1,9 +1,9 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Alert } from '@shared/ui/primitives/Alert';
 import { Button } from '@shared/ui/primitives/Button';
-import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { WorkflowMethodConfig } from '@features/workflow/types/request-config.types';
 import type { RunFix } from '../../model/aiGateway.types';
+import { AiProposalActions } from '../AiProposal/AiProposalActions';
 import { bodyText, changedHeaders, isSameBody, prettyBody } from '../../run/runFailure.utils';
 
 type Props = {
@@ -59,22 +59,15 @@ export function AiRunFixProposal({ fix, currentConfig, isLocked, onApply, onDisc
 				</div>
 			)}
 			{/* Nothing to apply leaves only the advice, closed like a message. */}
-			<div className="aiRunActions">
-				{isUnchanged ? (
+			{isUnchanged ? (
+				<div className="aiRunActions">
 					<Button onClick={onDiscard} testId="ai-run-dismiss">{t('ai.run.dismiss')}</Button>
-				) : (
-					<>
-						{isLocked ? (
-							<Tooltip content={t('ai.run.applyLocked')}>
-								<span><Button type="primary" disabled testId="ai-run-apply">{t('ai.run.apply')}</Button></span>
-							</Tooltip>
-						) : (
-							<Button type="primary" onClick={onApply} testId="ai-run-apply">{t('ai.run.apply')}</Button>
-						)}
-						<Button onClick={onDiscard} testId="ai-run-discard">{t('ai.run.discard')}</Button>
-					</>
-				)}
-			</div>
+				</div>
+			) : (
+				<AiProposalActions
+					apply={{ label: t('ai.run.apply'), onClick: onApply, blockedReason: isLocked ? t('ai.run.applyLocked') : null, testId: 'ai-run-apply' }}
+					discard={{ label: t('ai.run.discard'), onClick: onDiscard, testId: 'ai-run-discard' }} />
+			)}
 		</div>
 	);
 }

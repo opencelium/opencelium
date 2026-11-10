@@ -540,16 +540,6 @@
   justify-content: space-between;
 }
 
-.aiPanelFooterGroup {
-  display: flex;
-  gap: 8px;
-}
-
-/* A disabled button fires no pointer events; the wrapper carries the tooltip that says why. */
-.aiApplyWrap {
-  display: inline-flex;
-}
-
 /* Plan review */
 .aiPlanHint {
   margin: 0;

@@ -12,6 +12,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
+    "ai:catalog": "UPDATE_GUIDE_CATALOG=1 vitest run src/features/ai-assistant/editor/editorCapabilities.test.ts",
     "gen-server": "node scripts/generate-server.cjs",
     "gen-changelog": "node scripts/generate-changelog.cjs"
   },

@@ -1,20 +1,16 @@
-import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import { Checkbox } from '@shared/ui/primitives/Checkbox';
 import { Input } from '@shared/ui/primitives/Input';
 import type { AiFieldMapping } from '../../mapping/useAiFieldMapping';
 import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
+import { AiProposalActions } from '../AiProposal/AiProposalActions';
 import '../../styles/ai-mapping.css';
 
 /** "Suggest mapping" in the body editor: proposed sources per field, each picked or left, then applied together. */
 export function AiFieldMappingPanel({ mapping }: { mapping: AiFieldMapping }) {
 	const { t } = useI18n('workflow');
 	const { state } = mapping;
-	const apply = () => {
-		const count = mapping.apply();
-		if (count) message.success(t('ai.mapping.applied', { count }));
-	};
 	return (
 		<div className="aiMapping" data-testid="ai-mapping">
 			<p className="aiMappingHint">{t('ai.mapping.hint')}</p>
@@ -53,12 +49,10 @@ export function AiFieldMappingPanel({ mapping }: { mapping: AiFieldMapping }) {
 							</li>
 						))}
 					</ul>
-					<div className="aiMappingActions">
-						<Button type="primary" onClick={apply} disabled={state.chosen.size === 0} testId="ai-mapping-apply">
-							{t('ai.mapping.apply', { count: state.chosen.size })}
-						</Button>
-						<Button onClick={mapping.discard} testId="ai-mapping-discard">{t('ai.mapping.discard')}</Button>
-					</div>
+					<AiProposalActions
+						apply={{ label: t('ai.mapping.apply', { count: state.chosen.size }), onClick: () => { mapping.apply(); },
+							isDisabled: state.chosen.size === 0, testId: 'ai-mapping-apply' }}
+						discard={{ label: t('ai.mapping.discard'), onClick: mapping.discard, testId: 'ai-mapping-discard' }} />
 				</>
 			)}
 		</div>
