@@ -14,12 +14,6 @@ public interface ConsoleIo {
 	PrintWriter writer();
 
 	/**
-	 * Whether the output goes to a terminal, where a line can be drawn again in place. Output to a pipe or a log
-	 * file is not a terminal: a line drawn again there leaves each version of it in the file.
-	 */
-	boolean terminal();
-
-	/**
 	 * The console of this process. Without one (a pipe, a service) the output goes to standard output and a read
 	 * fails; the wizard then runs in batch mode and never reads.
 	 */

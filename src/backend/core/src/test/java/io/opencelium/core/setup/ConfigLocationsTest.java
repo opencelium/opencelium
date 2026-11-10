@@ -107,11 +107,6 @@ class ConfigLocationsTest {
 	}
 
 	@Test
-	void quickstartDirectoryIsNextToTheConfigDirectoryUnderTheWorkingDirectory() {
-		assertThat(locations.quickstartDirectory()).isEqualTo(workingDir.resolve("quickstart"));
-	}
-
-	@Test
 	void isSystemLocationIsTrueOnlyUnderSystemDirectory() {
 		assertThat(locations.isSystemLocation(workingDir.resolve("etc/opencelium/application.yml"))).isTrue();
 		assertThat(locations.isSystemLocation(workingDir.resolve("config/application.yml"))).isFalse();

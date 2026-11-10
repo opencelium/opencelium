@@ -41,14 +41,14 @@ class FilePlanTest {
 
 	@Test
 	void filesListActionFilesAfterOwnFilesWhenAnActionIsPlanned() {
-		PlannedFile compose = PlannedFile.groupReadable(Path.of("/x/quickstart/docker-compose.yml"), "c");
-		var action = new RecordingAction("start", new ArrayList<>(), compose);
+		PlannedFile unit = PlannedFile.groupReadable(Path.of("/x/systemd/opencelium.service"), "c");
+		var action = new RecordingAction("install", new ArrayList<>(), unit);
 		PlannedFile yml = PlannedFile.groupReadable(Path.of("/x/application.yml"), "a");
 
 		plan.add(action);
 		plan.add(yml);
 
-		assertThat(plan.files()).containsExactly(yml, compose);
+		assertThat(plan.files()).containsExactly(yml, unit);
 		assertThat(plan.actions()).containsExactly(action);
 	}
 

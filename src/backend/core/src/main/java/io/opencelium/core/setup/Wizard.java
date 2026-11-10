@@ -58,7 +58,7 @@ public final class Wizard {
 
 	/** The steps of a full setup, in the order the user sees them; the summary writes to {@code locations}. */
 	public static List<SetupStep> standardSteps(ConfigLocations locations) {
-		return List.of(new DataDirStep(), new PortStep(), new MongoStep(locations.quickstartDirectory()),
+		return List.of(new DataDirStep(), new PortStep(), new MongoStep(),
 				new SummaryStep(locations));
 	}
 

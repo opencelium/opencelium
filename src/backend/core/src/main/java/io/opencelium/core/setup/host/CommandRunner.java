@@ -3,10 +3,9 @@ package io.opencelium.core.setup.host;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
- * Runs a program of this host, for example {@code docker}, and waits for its end. Each host command of the setup
+ * Runs a program of this host, for example {@code systemctl}, and waits for its end. Each host command of the setup
  * goes through this seam, so a test gives a fake that records the commands and answers them, and no test needs the
  * program on its host.
  */
@@ -20,19 +19,6 @@ public interface CommandRunner {
 	 *         reason as the output
 	 */
 	Result run(Path directory, List<String> command);
-
-	/**
-	 * The same run, and each line of the output also goes to {@code eachLine}, for example to show the progress of a
-	 * download. A runner of real programs gives each line while the program runs; this default gives the lines of
-	 * the output after the end, which is enough for a fake.
-	 *
-	 * @param eachLine gets each line of the output without its line end, in order
-	 */
-	default Result run(Path directory, List<String> command, Consumer<String> eachLine) {
-		Result result = run(directory, command);
-		result.output().lines().forEach(eachLine);
-		return result;
-	}
 
 	/**
 	 * @param output what the program wrote to standard output and standard error, in one text

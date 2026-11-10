@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import io.opencelium.core.setup.host.CommandRunner;
 
@@ -22,9 +21,7 @@ public final class RecordingCommandRunner implements CommandRunner {
 
 	private final List<Path> directories = new ArrayList<>();
 
-	private final List<String> streamed = new ArrayList<>();
-
-	/** The result of each later run of {@code command}, for example {@code docker compose version}. */
+	/** The result of each later run of {@code command}, for example {@code systemctl daemon-reload}. */
 	public RecordingCommandRunner answer(String command, int exitCode, String output) {
 		results.put(command, new Result(exitCode, output));
 		return this;
@@ -38,23 +35,9 @@ public final class RecordingCommandRunner implements CommandRunner {
 		return results.getOrDefault(line, new Result(0, ""));
 	}
 
-	/** Records the command as {@link #run(Path, List)} does and as streamed, then gives each line of the result. */
-	@Override
-	public Result run(Path directory, List<String> command, Consumer<String> eachLine) {
-		Result result = run(directory, command);
-		streamed.add(String.join(" ", command));
-		result.output().lines().forEach(eachLine);
-		return result;
-	}
-
 	/** The commands so far, in order. */
 	public List<String> commands() {
 		return List.copyOf(commands);
-	}
-
-	/** The commands so far whose output lines went to the caller one by one, in order. */
-	public List<String> streamed() {
-		return List.copyOf(streamed);
 	}
 
 	/** The working directory of each command so far, in the order of {@link #commands()}. */
