@@ -13,16 +13,15 @@ export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
   const { t, lang } = useI18n("entities");
   const canUpdate = useScheduleUpdatePermission();
   const [week, setWeek] = useState(0);
-  const [showDisabled, setShowDisabled] = useState(false);
   const days = useMemo(() => weekDays(week, zone), [week, zone]);
   const slots = useMemo(
     () =>
       calendarSlots(
-        schedules.filter((schedule) => showDisabled || schedule.status),
+        schedules.filter((schedule) => schedule.status),
         days,
         zone,
       ),
-    [schedules, days, zone, showDisabled],
+    [schedules, days, zone],
   );
   const dayFormat = new Intl.DateTimeFormat(lang, {
     timeZone: zone,
@@ -56,15 +55,6 @@ export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
         >
           {t("schedule.calendar.next")}
         </Button>
-        <label>
-          <input
-            type="checkbox"
-            checked={showDisabled}
-            data-testid="schedule-calendar-disabled"
-            onChange={(event) => setShowDisabled(event.target.checked)}
-          />{" "}
-          {t("schedule.calendar.disabled")}
-        </label>
       </div>
       <p>{t("schedule.preview.zone", { zone })}</p>
       <div className="schedule-calendar-scroll">
@@ -86,11 +76,8 @@ export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
                 {days.slice(0, 7).map((day, index) => {
                   const markers = slots.get(index + ":" + hour) ?? [];
                   const overlap =
-                    new Set(
-                      markers
-                        .filter((marker) => marker.schedule.status)
-                        .map((marker) => marker.schedule.schedulerId),
-                    ).size > 1;
+                    new Set(markers.map((marker) => marker.schedule.schedulerId))
+                      .size > 1;
                   return (
                     <td
                       key={day}
@@ -102,11 +89,6 @@ export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
                       {markers.map(({ schedule, time, cadence, more }) => (
                         <Link
                           key={schedule.schedulerId + ":" + time}
-                          className={
-                            schedule.status
-                              ? undefined
-                              : "schedule-calendar-disabled"
-                          }
                           to={`/schedule/${canUpdate ? "update" : "view"}/${schedule.schedulerId}`}
                         >
                           {schedule.title || schedule.connection.title}

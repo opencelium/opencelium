@@ -28,7 +28,7 @@ vi.mock("@shared/ui/primitives/Button", () => ({
 afterEach(() => {
   vi.restoreAllMocks();
 });
-it("highlights overlapping schedules and exposes navigation and disabled markers", () => {
+it("hides disabled schedules, highlights overlaps and navigates weeks", () => {
   vi.spyOn(cronTime, "getScheduleTimeZone").mockReturnValue("UTC");
   const schedules = [1, 2, 3].map((id) => ({
     schedulerId: id,
@@ -61,9 +61,4 @@ it("highlights overlapping schedules and exposes navigation and disabled markers
   expect(
     screen.getAllByRole("columnheader").map((header) => header.textContent),
   ).toEqual(headers);
-  fireEvent.click(screen.getByTestId("schedule-calendar-disabled"));
-  expect(screen.getAllByRole("link", { name: /Schedule 3/ })).toHaveLength(7);
-  expect(screen.getAllByRole("link", { name: /Schedule 3/ })[0]).toHaveClass(
-    "schedule-calendar-disabled",
-  );
 });

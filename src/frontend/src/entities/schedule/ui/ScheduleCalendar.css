@@ -56,7 +56,3 @@
 .schedule-calendar-overlap {
 	background: var(--color-status-warning-bg);
 }
-
-.schedule-calendar-disabled {
-	opacity: .55;
-}

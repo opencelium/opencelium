@@ -217,7 +217,6 @@
     "list": "List",
     "prev": "Previous week",
     "next": "Next week",
-    "disabled": "Show disabled schedules",
     "hour": "Hour",
     "every": "Every {{count}} min",
     "more": "More runs"
