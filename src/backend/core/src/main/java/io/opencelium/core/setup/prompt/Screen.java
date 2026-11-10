@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.SequencedMap;
 
 /**
- * Text helpers for the setup screens: the rule under a title, the framed box of the summary, the list of the files,
- * and the progress bar. Only characters that every terminal, charset and font draws the same way:
- * {@code - | + [ ] #} and spaces. Each
+ * Text helpers for the setup screens: the rule under a title, the framed box of the summary, and the list of the
+ * files. Only characters that every terminal, charset and font draws the same way: {@code - | +} and spaces. Each
  * line starts in the margin of 2. The box is as wide as its longest row needs, at least the width of the rule, so a
  * long path never breaks the frame; its labels are padded to one column like the question labels.
  */
@@ -24,14 +23,6 @@ public final class Screen {
 	private static final String RULE_CHAR = "-";
 
 	private static final String BULLET = "- ";
-
-	/** The width of a progress bar between its brackets, so the line with the amounts fits an 80-column terminal. */
-	private static final int BAR_WIDTH = 24;
-
-	private static final String BAR_DONE = "#";
-
-	/** A tenth of a decimal MB, the last digit that the bar shows. */
-	private static final long BYTES_PER_TENTH_MB = 100_000;
 
 	private Screen() {
 	}
@@ -64,25 +55,6 @@ public final class Screen {
 		lines.add(MARGIN + "|" + " ".repeat(inner) + "|");
 		lines.add(MARGIN + "+" + RULE_CHAR.repeat(inner) + "+");
 		return lines;
-	}
-
-	/**
-	 * A progress bar indented under a status line: the bar, the done and the total amounts in MB, and the percent. The
-	 * bar, the percent and the amounts round down, so only the end shows a full bar, the total and 100 %. The amounts
-	 * are bytes, shown in decimal MB with 1 decimal, as Docker counts them.
-	 *
-	 * @param total above zero
-	 */
-	static String bar(long done, long total) {
-		long part = Math.clamp(done, 0, total);
-		int filled = (int) (BAR_WIDTH * part / total);
-		return MARGIN + MARGIN + "[" + BAR_DONE.repeat(filled) + RULE_CHAR.repeat(BAR_WIDTH - filled) + "]  "
-				+ megabytes(part) + " of " + megabytes(total) + " MB  " + (100 * part / total) + "%";
-	}
-
-	private static String megabytes(long bytes) {
-		long tenths = bytes / BYTES_PER_TENTH_MB;
-		return tenths / 10 + "." + tenths % 10;
 	}
 
 	/** The title in the margin, then one bulleted line for each item, indented under the title. */

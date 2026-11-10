@@ -10,8 +10,7 @@ import io.opencelium.core.setup.prompt.ConsoleIo;
 
 /**
  * A console for tests of the setup prompts: the input is scripted line by line, the output is captured. When the
- * scripted lines are used up, the input has ended, which the prompts treat as a cancel. The output is not a
- * terminal.
+ * scripted lines are used up, the input has ended, which the prompts treat as a cancel.
  */
 public final class ScriptedConsoleIo implements ConsoleIo {
 
@@ -25,11 +24,6 @@ public final class ScriptedConsoleIo implements ConsoleIo {
 	public ScriptedConsoleIo type(String... input) {
 		lines.addAll(List.of(input));
 		return this;
-	}
-
-	@Override
-	public boolean terminal() {
-		return false;
 	}
 
 	@Override
