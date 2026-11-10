@@ -1,0 +1,38 @@
+.schedule-cron-edit {
+  padding: 6px 24px 12px;
+}
+
+.schedule-cron-edit h1.ant-typography {
+  font-size: 40px;
+  line-height: 52px;
+}
+
+.schedule-cron-edit .react-js-cron {
+  column-gap: 6px;
+}
+
+.schedule-cron-edit .react-js-cron-field {
+  gap: 5px;
+}
+
+.schedule-cron-edit .cron-preview {
+  margin-top: 10px;
+}
+
+.schedule-cron-edit__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+@media (max-width: 768px) {
+  .schedule-cron-edit {
+    padding-inline: 0;
+  }
+
+  .schedule-cron-edit h1.ant-typography {
+    font-size: 30px;
+    line-height: 1.25;
+  }
+}

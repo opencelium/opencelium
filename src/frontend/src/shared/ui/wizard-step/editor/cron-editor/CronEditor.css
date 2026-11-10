@@ -1,0 +1,7 @@
+.ant-select-dropdown.react-js-cron-select-dropdown-period {
+  min-width: 120px !important;
+}
+
+.react-js-cron-custom-select-dropdown-grid .ant-select-item-option {
+  padding-inline: 8px;
+}
