@@ -203,8 +203,12 @@
     }
   },
   "preview": {
-    "title": "Nächste 5 Ausführungen",
-    "zone": "Zeitzone: {{zone}}",
+    "title": "Zeitplanvorschau",
+    "zone": "Zeiten in {{zone}}",
+    "previousMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "nextRuns": "Nächste 5 Ausführungen",
+    "alsoRuns": "Weitere Ausführungstage",
     "invalid": "Ungültiger oder nicht unterstützter Cron-Ausdruck",
     "empty": "Keine bevorstehenden Ausführungen"
   },
