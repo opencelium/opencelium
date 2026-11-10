@@ -366,12 +366,6 @@ export type ListAction =
     | CustomActionConfig
 
 export type ListDefinition = {
-    alternateView?: {
-        labelKey: string
-        listLabelKey: string
-        render: (rows: unknown[]) => React.ReactNode
-    }
-
     /** i18n key (entities namespace) for the page title; falls back to entity.plural / `${name}s`. */
     titleKey?: string
     /** i18n key (entities namespace) for the page subtitle. */
