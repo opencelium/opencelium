@@ -28,6 +28,11 @@ The rules apply in 3 tiers:
 - Do not name Jira tickets in a document, because ticket numbers change and tickets are removed. A ticket links to a decision number or to a section heading of [architecture.md](architecture.md). A story is named by its subject, for example *the authentication story*.
 - "(decision 11)" points to the numbered list in [architecture.md, section 7](architecture.md#7-architecture-decisions). The numbers do not change and are not used again.
 - An architecture document gives the target design. It does not tell the state of the code, and it has no status markers, dates, or commit hashes. The code and the git history give the state.
+- Give each term 1 meaning. When a word has more than 1 meaning in the project, write its qualifier each time. Examples:
+  - *database login* (the MongoDB username and password of core) and *admin login* (the login of an OpenCelium user). A *log* is a different thing.
+  - *database user*, *OpenCelium user* and *system user*.
+  - *master key*, *setting key* and *env file key*.
+  - *MongoDB connection* and *broker connection*.
 
 ## Technical names
 
@@ -37,7 +42,7 @@ STE permits technical names and technical verbs that are standard in the industr
 - Execution: job message, event, checkpoint, state machine, breakpoint, debugger, promise, future, virtual thread, scheduler, dispatcher, transport, snapshot, payload, codec, spool.
 - Software structure: module, library, jar, package, class, bean, interface, SPI (service provider interface), API, REST, JSON, endpoint, frontend, plug-in, runtime, default, log.
 - Documentation: building block, cross-cutting concept, runtime view.
-- Protocols: WebSocket, JWT, OIDC, LDAP, HTTP(S), AMQP, broker, queue.
+- Protocols: WebSocket, JWT, OIDC, LDAP, HTTP(S), AMQP, broker, queue, TCP, DNS.
 - Data: database, collection, document, client, connection pool, cluster, credential, secret, setting, property, environment variable, yml file.
 - Cryptography: root key, master key, DEK (data-encryption key), envelope encryption, AES-256-GCM, IV (initialization vector), plaintext, ciphertext, crypto-shredding.
 - Access control: user, group, role, ACL (access-control list), RBAC (role-based access control), token, session, claim, claim mapping, 2FA/TOTP, provisioning, onboarding, offboarding.
@@ -48,12 +53,12 @@ STE permits technical names and technical verbs that are standard in the industr
 - Agents: LLM (large language model), agent, subagent, prompt, system prompt, context, skill, hook, slash command, model, tool, frontmatter, finding.
 - Build: CI (continuous integration), linter, formatter, Spotless, commitlint, OpenAPI, contract, diff, pull request, PR (pull request), commit, branch.
 - Technical verbs (3): review, approve, merge, squash, lint, anchor, draft, commit, push, resolve.
-- Setup: wizard, step, screen, prompt, question, answer, setup file, value, menu, option, box, summary, subcommand, flag, placeholder, help text, setup state, launcher, phase, handover, file plan, renderer, batch mode, exit code, allow-list, filter, retry, timestamp, fail-fast.
-- Terminal: terminal, console, shell, stdin, standard output, standard error, piped input, SSH, Enter, Ctrl+C, terminal library, scripted console, argument (command line), progress bar, backtick.
-- Host: host, platform, CPU, Linux, macOS, Windows, Ubuntu, Debian, x86_64, arm64, systemd, unit file, launchd, plist, `sc.exe`, sudo, root, system user, service, PATH, permissions, owner, data directory, env file, tarball, license, Docker, Docker Compose, image (Docker image), layer (image layer), VM (virtual machine), distribution, working directory, `mongod`, `mongosh`, browser, backup, upgrade, migration.
-- Data (2): URI, URL, byte, MB (megabyte), driver, repository, database dump, port (network), route, header (HTTP), issuer.
+- Setup: wizard, step, screen, prompt, question, answer, setup file, value, menu, option, box, summary, subcommand, flag, placeholder, help text, setup state, launcher, phase, handover, file plan, renderer, batch mode, exit code, allow-list, filter, retry, timestamp, fail-fast, admin marker, env reference.
+- Terminal: terminal, console, shell, stdin, standard output, standard error, piped input, SSH, Enter, Ctrl+C, terminal library, scripted console, argument (command line), progress bar, backtick, backslash, carriage return, whitespace, echo (of the typed characters).
+- Host: host, platform, CPU, Linux, macOS, Windows, Ubuntu, Debian, x86_64, arm64, systemd, unit file, launchd, plist, `sc.exe`, sudo, root, system user, service, PATH, permissions, owner, data directory, env file, tarball, license, Docker, Docker Compose, image (Docker image), layer (image layer), VM (virtual machine), distribution, working directory, `mongod`, `mongosh`, browser, backup, upgrade, migration, journal (of systemd).
+- Data (2): URI, URL, byte, MB (megabyte), driver, repository, database dump, port (network), route, header (HTTP), issuer, percent-encoding.
 - Access control (2): admin (administrator), username, password, login (noun).
 - Software structure (2): seam, runner (application runner, command runner), singleton, Spring context, logger, log level.
 - Test: unit test, slice test, integration test, full-application test, end-to-end test, hand test, fake, fixture, test matrix, mock.
-- Products and tools (2): SnakeYAML, Logback, YAML, Jackson, JDK, JVM, MockMvc.
+- Products and tools (2): SnakeYAML, Logback, YAML, Jackson, JDK, JVM, MockMvc, Spring Boot Actuator, Tomcat.
 - Technical verbs (4): type (on the keyboard), download, install, probe, hash, mask, prompt, skip, run (a command or a service), print, generate, roll back, stage, render, bind, cancel, confirm, serialize, detect, decode, pin (a version), listen (a port), back up.
