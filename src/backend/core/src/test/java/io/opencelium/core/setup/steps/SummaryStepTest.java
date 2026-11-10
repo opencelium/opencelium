@@ -113,19 +113,23 @@ class SummaryStepTest {
 	}
 
 	@Test
-	void runShowsMongoDbWithoutPasswordAndPutsThePasswordIntoTheEnvFile() {
+	void runPutsTheWholeUriIntoTheEnvFileAndItsPlaceholderIntoTheYmlFile() {
 		answered();
-		context.setMongoUri("mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium");
-		context.putEnvironment("OC_MONGO_PASSWORD", "s3cret");
+		context.setMongoUri("mongodb://oc:s3cr%40t@db.example/opencelium?authSource=admin");
 		console.type("y");
 
 		step().run(context, new ConsolePrompter(console));
 
 		assertThat(console.output()).contains("  |  MongoDB         mongodb://oc:****@db.example/opencelium")
-				.doesNotContain("s3cret");
-		assertThat(context.filePlan().files().get(0).content())
-				.contains("uri: mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium").doesNotContain("s3cret");
-		assertThat(context.filePlan().files().get(1).content()).endsWith("\nOC_MONGO_PASSWORD=s3cret\n");
+				.doesNotContain("s3cr");
+		assertThat(context.filePlan().files().get(0).content()).contains("uri: ${OC_MONGO_URI}\n")
+				.doesNotContain("s3cr").doesNotContain("db.example");
+		// The percent-encoding stays as typed.
+		assertThat(context.filePlan().files().get(1).content())
+				.endsWith("\nOC_MONGO_URI=\"mongodb://oc:s3cr%40t@db.example/opencelium?authSource=admin\"\n");
+		// The start in the wizard process gets the entries of the env file as its arguments.
+		assertThat(context.environment())
+				.containsEntry("OC_MONGO_URI", "mongodb://oc:s3cr%40t@db.example/opencelium?authSource=admin");
 	}
 
 	@Test

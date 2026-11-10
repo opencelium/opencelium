@@ -195,6 +195,20 @@ class StaticMongoConnectionResolverTest {
 	}
 
 	@Test
+	void fromNamesTheVariableWhenTheWholeUriPlaceholderHasNoValue() throws IOException {
+		// What the binder leaves when the yml file holds only the placeholder of the whole URI.
+		Path config = configurationDirectory();
+		Path envFile = Files.writeString(config.resolve("opencelium.env"), "OC_OTHER=x\n");
+		environment.setProperty(MONGODB_URI, "${OC_MONGO_URI}");
+
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(() -> resolver(SELF_HOST))
+				.withMessage("spring.mongodb.uri refers to OC_MONGO_URI, which has no value in the environment of this"
+						+ " process or in the env file " + envFile + ".")
+				.satisfies(failure -> assertThat(failure.action()).hasValue("Add the line OC_MONGO_URI=<value> to "
+						+ envFile + ", or set OC_MONGO_URI in the environment of the process."));
+	}
+
+	@Test
 	void fromSaysNoEnvFileExistsWhenThereIsNone() throws IOException {
 		Path envFile = configurationDirectory().resolve("opencelium.env");
 		environment.setProperty(MONGODB_URI, "mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium");

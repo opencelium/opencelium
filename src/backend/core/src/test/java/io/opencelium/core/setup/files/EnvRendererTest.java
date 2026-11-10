@@ -39,6 +39,16 @@ class EnvRendererTest {
 	}
 
 	@Test
+	void renderQuotesTheUriWhenItHasOptions() {
+		var values = new LinkedHashMap<String, String>();
+		values.put("OC_MONGO_URI", "mongodb://oc:p%40ss@db.example:27017/opencelium?authSource=admin&tls=true");
+
+		// The shell would read ? as a pattern and & as the end of a command.
+		assertThat(EnvRenderer.render(values)).endsWith(
+				"\nOC_MONGO_URI=\"mongodb://oc:p%40ss@db.example:27017/opencelium?authSource=admin&tls=true\"\n");
+	}
+
+	@Test
 	void renderQuotesValuesWithSpaces() {
 		var values = new LinkedHashMap<String, String>();
 		values.put("OC_A", "two words");

@@ -27,14 +27,13 @@ import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.Assertions.tuple;
 
 /**
  * The MongoDB step: a server on the local port is the first option and the default, and the user can type the URI
  * of a server that exists. The step starts no MongoDB. Each typed answer is pinged before the step continues, with
  * the causes of the start ping, and a failed ping offers to type the URI again, to continue, or to go back to the
- * menu. A database password in the URI goes to the env file, and application.yml gets the placeholder. The tests
+ * menu. The step keeps the whole URI, also with a database password, and asks nothing about it. The tests
  * that ping use the local MongoDB without a Spring context, because the step runs before Spring starts; the others
  * use a server that always answers.
  */
@@ -101,8 +100,7 @@ class MongoStepTest {
 
 	@Test
 	void runPingsBeforeItContinuesWhenUriIsTyped() {
-		// The last line answers the password question when OC_TEST_MONGO_URI carries a login.
-		console.type("", LocalMongo.uriFor(MongoStepTest.class), "");
+		console.type("", LocalMongo.uriFor(MongoStepTest.class));
 
 		step(noLocalServer, START_PING).run(context, prompter);
 
@@ -130,7 +128,7 @@ class MongoStepTest {
 
 	@Test
 	void runOffersRetryMenuWhenPortIsClosed() {
-		console.type("", "mongodb://oc:secret@localhost:1/opencelium", "2", "");
+		console.type("", "mongodb://oc:secret@localhost:1/opencelium", "2");
 
 		step(noLocalServer, START_PING).run(context, prompter);
 
@@ -139,8 +137,8 @@ class MongoStepTest {
 				.containsSubsequence("  What now?", "1) Type the URI again", "2) Continue", "3) Back to the menu",
 						"  Choice [1]: ", "OpenCelium does not start until MongoDB at mongodb://oc:****@localhost:1"
 								+ "/opencelium answers.");
-		assertThat(context.mongoUri()).contains("mongodb://oc:${OC_MONGO_PASSWORD}@localhost:1/opencelium");
-		assertThat(context.environment()).containsExactly(entry("OC_MONGO_PASSWORD", "secret"));
+		assertThat(context.mongoUri()).contains("mongodb://oc:secret@localhost:1/opencelium");
+		assertThat(context.environment()).isEmpty();
 	}
 
 	@Test
@@ -180,38 +178,29 @@ class MongoStepTest {
 	}
 
 	@Test
-	void runWarnsAndAsksAgainBeforePlainTextInYml() {
-		console.type("", "mongodb://oc:s3cret@db.example/opencelium", "n", "n", "n", "y");
+	void runKeepsTheWholeUriAndAsksNothingWhenTheTypedUriHasADatabasePassword() {
+		// The input ends after the URI: one more question would cancel the setup.
+		console.type("", "mongodb://oc:s3cr%40t@db.example/opencelium?authSource=admin");
 
 		step(noLocalServer, ANSWERS).run(context, prompter);
 
-		assertThat(console.output()).containsSubsequence("  Move the password to the env file? [Y/n]: ",
-				"  ! application.yml is readable by its group", "  Write the password into application.yml? [y/N]: ",
-				"  Move the password to the env file? [Y/n]: ", "  ! application.yml is readable by its group",
-				"  Write the password into application.yml? [y/N]: ");
-		assertThat(context.mongoUri()).contains("mongodb://oc:s3cret@db.example/opencelium");
+		// The percent-encoding stays as typed.
+		assertThat(context.mongoUri()).contains("mongodb://oc:s3cr%40t@db.example/opencelium?authSource=admin");
+		// The summary puts the URI into the env file; the step adds no entry of its own.
 		assertThat(context.environment()).isEmpty();
+		assertThat(console.output()).doesNotContain("Move the password").doesNotContain("application.yml")
+				.doesNotContain("s3cr");
 	}
 
 	@Test
-	void runPutsPasswordInEnvFileWhenTheMoveQuestionTakesItsDefault() {
-		console.type("", "mongodb://oc:s3cret@db.example/opencelium", "");
-
-		step(noLocalServer, ANSWERS).run(context, prompter);
-
-		assertThat(context.mongoUri()).contains("mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium");
-		assertThat(context.environment()).containsExactly(entry("OC_MONGO_PASSWORD", "s3cret"));
-	}
-
-	@Test
-	void runPutsPasswordInEnvFileWithoutAQuestionInBatchMode() {
+	void runKeepsTheWholeUriWhenTheFileGivesItInBatchMode() {
 		SetupContext batch = batch(Map.of(ValueKey.MONGO, "uri",
 				ValueKey.MONGO_URI, "mongodb://oc:s3cret@db.example/opencelium"));
 
 		step(noLocalServer, ANSWERS).run(batch, prompter);
 
-		assertThat(batch.mongoUri()).contains("mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium");
-		assertThat(batch.environment()).containsExactly(entry("OC_MONGO_PASSWORD", "s3cret"));
+		assertThat(batch.mongoUri()).contains("mongodb://oc:s3cret@db.example/opencelium");
+		assertThat(batch.environment()).isEmpty();
 		assertThat(console.output()).contains("  MongoDB         uri   (from setup-values.yml)")
 				.contains("  MongoDB URI     mongodb://oc:****@db.example/opencelium   (from setup-values.yml)")
 				.doesNotContain("[Y/n]").doesNotContain("Choice [").doesNotContain("s3cret");
@@ -238,6 +227,18 @@ class MongoStepTest {
 		assertThatExceptionOfType(SetupFailedException.class)
 				.isThrownBy(() -> step(noLocalServer, ANSWERS).run(batch, prompter))
 				.withMessage("Bad value: mongo in setup-values.yml: 'postgres' is not one of: local, uri.");
+	}
+
+	@Test
+	void runMasksTheDatabasePasswordWhenTheFileGivesAUriAsTheServer() {
+		// The URI under the wrong setup file key.
+		SetupContext batch = batch(Map.of(ValueKey.MONGO, "mongodb://oc:s3cret@db.example/opencelium"));
+
+		assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> step(noLocalServer, ANSWERS).run(batch, prompter))
+				.withMessage("Bad value: mongo in setup-values.yml: 'mongodb://oc:****@db.example/opencelium' is not"
+						+ " one of: local, uri.");
+		assertThat(console.output()).doesNotContain("s3cret");
 	}
 
 	@Test

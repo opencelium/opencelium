@@ -48,6 +48,19 @@ class EnvFileStartupTest {
 	}
 
 	@Test
+	void applicationStartsWhenTheYmlHoldsOnlyTheUriPlaceholder() throws IOException {
+		// The form the wizard writes: application.yml holds the placeholder, the env file holds the whole URI.
+		String uri = LocalMongo.uriFor(EnvFileStartupTest.class);
+		Path config = configuration("spring:\n  mongodb:\n    uri: ${OC_MONGO_URI}\n",
+				"# header\nOC_MONGO_URI=" + quoted(uri) + "\n");
+
+		try (ConfigurableApplicationContext context = CoreStartup.run(Map.of(), workingDir.resolve("data"),
+				location(config))) {
+			assertThat(context.getEnvironment().getProperty(BootstrapProperties.MONGODB_URI)).isEqualTo(uri);
+		}
+	}
+
+	@Test
 	void applicationStartsWhenTheMongoUriIsOnlyInTheEnvFile(CapturedOutput output) throws IOException {
 		String uri = LocalMongo.uriFor(EnvFileStartupTest.class);
 		Path config = configuration("", "# header\nSPRING_MONGODB_URI=" + quoted(uri) + "\n");
