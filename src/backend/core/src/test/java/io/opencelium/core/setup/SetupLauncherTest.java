@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
@@ -78,8 +77,6 @@ class SetupLauncherTest {
 	private final ScriptedConsoleIo console = new ScriptedConsoleIo();
 
 	private String mongoUri = "mongodb://localhost:27017/opencelium";
-
-	private final Map<String, String> mongoEnvironment = new LinkedHashMap<>();
 
 	private boolean usesTheDriver;
 
@@ -422,13 +419,13 @@ class SetupLauncherTest {
 				.doesNotContain("Cloud");
 		assertThat(workingDir.resolve("config/application.yml")).content().contains("port: " + port);
 		assertThat(workingDir.resolve("config/opencelium.env")).exists();
-		assertThat(booted.get()).containsExactly(UNRELATED_ARGUMENT);
+		// The start gets the entries of the env file, because this process does not have them.
+		assertThat(booted.get()).containsExactly(UNRELATED_ARGUMENT, "--OC_MONGO_URI=" + mongoUri);
 	}
 
 	@Test
 	void launchPassesTheEntriesOfTheEnvFileToTheStart() throws IOException {
-		mongoUri = "mongodb://oc:${OC_MONGO_PASSWORD}@db.example/opencelium";
-		mongoEnvironment.put("OC_MONGO_PASSWORD", "s3cret");
+		mongoUri = "mongodb://oc:s3cr%40t@db.example/opencelium?authSource=admin";
 		console.type("", String.valueOf(freePort()), "");
 		AtomicReference<String[]> booted = new AtomicReference<>();
 
@@ -436,11 +433,11 @@ class SetupLauncherTest {
 
 		// This process does not have the variable; the start gets it from the wizard, a later start from the env file.
 		assertThat(exitCode).isEmpty();
-		assertThat(workingDir.resolve("config/opencelium.env")).content().contains("OC_MONGO_PASSWORD=s3cret");
+		assertThat(workingDir.resolve("config/opencelium.env")).content().contains("OC_MONGO_URI=\"" + mongoUri + "\"");
 		assertThat(booted.get()).startsWith(UNRELATED_ARGUMENT);
-		assertThat(startedEnvironment(booted.get()).resolveRequiredPlaceholders(mongoUri))
-				.isEqualTo("mongodb://oc:s3cret@db.example/opencelium");
-		assertThat(console.output()).doesNotContain("s3cret");
+		// The placeholder that the written application.yml holds resolves to the URI, percent-encoding included.
+		assertThat(startedEnvironment(booted.get()).resolveRequiredPlaceholders("${OC_MONGO_URI}")).isEqualTo(mongoUri);
+		assertThat(console.output()).doesNotContain("s3cr");
 	}
 
 	@Test
@@ -514,7 +511,7 @@ class SetupLauncherTest {
 				.doesNotContain("[Y/n]");
 		assertThat(workingDir.resolve("config/application.yml")).content()
 				.contains("data-dir: " + workingDir.resolve("data"));
-		assertThat(booted.get()).isEmpty();
+		assertThat(booted.get()).containsExactly("--OC_MONGO_URI=" + mongoUri);
 	}
 
 	private LaunchDecision decide(String... args) {
@@ -522,9 +519,9 @@ class SetupLauncherTest {
 	}
 
 	/**
-	 * The steps of a full setup, with a MongoDB step that answers without a question and plans the entries of the env
-	 * file that {@link #mongoEnvironment} holds: the launcher tests do not depend on a server on this host. With
-	 * {@link #usesTheDriver} the step first pings a closed port through the driver, which logs as for a real server.
+	 * The steps of a full setup, with a MongoDB step that answers {@link #mongoUri} without a question: the launcher
+	 * tests do not depend on a server on this host. With {@link #usesTheDriver} the step first pings a closed port
+	 * through the driver, which logs as for a real server.
 	 */
 	private SetupLauncher launcher() {
 		var locations = new ConfigLocations(workingDir, workingDir.resolve("etc/opencelium"));
@@ -533,7 +530,6 @@ class SetupLauncherTest {
 				pingAClosedPort();
 			}
 			context.setMongoUri(mongoUri);
-			mongoEnvironment.forEach(context::putEnvironment);
 		};
 		List<SetupStep> steps = List.of(new DataDirStep(), new PortStep(), mongo, new SummaryStep(locations));
 		return new SetupLauncher(() -> terminal, environment, systemProperties, locations, steps, console,

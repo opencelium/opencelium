@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The text of application.yml: a fixed header line, then the bootstrap values in the spelling Boot reads. Loaded
  * back by Boot's own YAML loader, the values bind to the same {@link OpenCeliumProperties} the application uses, and
- * the MongoDB URI resolves its password placeholder from the environment.
+ * the MongoDB URI is the placeholder of the variable that the env file gives.
  */
 class YmlRendererTest {
 
@@ -52,7 +52,7 @@ class YmlRendererTest {
 				  port: 9090
 				spring:
 				  mongodb:
-				    uri: mongodb://localhost:27017/opencelium
+				    uri: ${OC_MONGO_URI}
 				opencelium:
 				  deployment-mode: self-host
 				  data-dir: /srv/oc/data
@@ -89,15 +89,15 @@ class YmlRendererTest {
 	}
 
 	@Test
-	void renderWritesMongoUriWithPlaceholder() throws IOException {
-		String uri = "mongodb://oc:${OC_MONGO_PASSWORD}@db.example:27017/opencelium?authSource=admin";
-		StandardEnvironment environment = loaded(YmlRenderer.render(
-				new BootstrapValues(DeploymentMode.SELF_HOST, tmp, 9090, uri)));
+	void renderWritesTheUriPlaceholder() throws IOException {
+		String uri = "mongodb://oc:s3cret@db.example:27017/opencelium?authSource=admin";
+		String yml = YmlRenderer.render(new BootstrapValues(DeploymentMode.SELF_HOST, tmp, 9090, uri));
+		StandardEnvironment environment = loaded(yml);
 		// The variable as the env file gives it to the process.
-		environment.getPropertySources().addFirst(new MapPropertySource("env", Map.of("OC_MONGO_PASSWORD", "s3cret")));
+		environment.getPropertySources().addFirst(new MapPropertySource("env", Map.of("OC_MONGO_URI", uri)));
 
-		assertThat(environment.getProperty(BootstrapProperties.MONGODB_URI))
-				.isEqualTo("mongodb://oc:s3cret@db.example:27017/opencelium?authSource=admin");
+		assertThat(yml).contains("    uri: ${OC_MONGO_URI}\n").doesNotContain("s3cret").doesNotContain("db.example");
+		assertThat(environment.getProperty(BootstrapProperties.MONGODB_URI)).isEqualTo(uri);
 	}
 
 	@Test

@@ -149,13 +149,13 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Status:** done
 
 ## Task 13d: feat(core): setup wizard keeps the whole MongoDB URI in the env file
-- **Criteria:** SW-18, SW-52
-- **Function:** After the setup, the env file holds the whole MongoDB URI, and the yml file holds only its placeholder. The setup asks no question about the place of the database password.
-- **Tests:** `MongoStepTest`: runPutsTheTypedUriIntoTheEnvFileWhenTheUriOptionIsChosen, runPutsTheDefaultUriIntoTheEnvFileWhenTheLocalOptionIsChosen, runAsksNoQuestionAboutThePlaceOfTheDatabasePassword; `YmlRendererTest`: renderWritesTheUriPlaceholder; `EnvRendererTest`: renderQuotesTheUriWhenItHasOptions; `StaticMongoConnectionResolverTest`: fromNamesTheVariableWhenTheWholeUriPlaceholderHasNoValue; `EnvFileStartupTest`: applicationStartsWhenTheYmlHoldsOnlyTheUriPlaceholder. Removed with their code: `UriSplitterTest` and the cases of `MongoStepTest` for the plain text in the yml file
-- **Hand test:** 1. Run `java -jar oc-app.jar setup`, select "Server URI" and type a URI with a database login. 2. Confirm the summary: `config/application.yml` has `uri: ${OC_MONGO_URI}`. 3. `config/opencelium.env` has `OC_MONGO_URI` with the whole URI in double quotes. 4. In the env file, change the database username to a second database user, then start the jar. 5. The application starts with the second database user.
-- **Size:** approximately 80 lines, most of them deleted
+- **Criteria:** SW-18, SW-26, SW-52
+- **Function:** After the setup, the env file holds the whole MongoDB URI, and the yml file holds only its placeholder. The setup asks no question about the place of the database password. A bad `mongo` value of the setup file appears in the error message with the database password masked.
+- **Tests:** `MongoStepTest`: runKeepsTheWholeUriAndAsksNothingWhenTheTypedUriHasADatabasePassword, runKeepsTheWholeUriWhenTheFileGivesItInBatchMode, runMasksTheDatabasePasswordWhenTheFileGivesAUriAsTheServer; `SummaryStepTest`: runPutsTheWholeUriIntoTheEnvFileAndItsPlaceholderIntoTheYmlFile; `YmlRendererTest`: renderWritesTheUriPlaceholder; `EnvRendererTest`: renderQuotesTheUriWhenItHasOptions; `StaticMongoConnectionResolverTest`: fromNamesTheVariableWhenTheWholeUriPlaceholderHasNoValue; `EnvFileStartupTest`: applicationStartsWhenTheYmlHoldsOnlyTheUriPlaceholder. Changed for the new form: `MongoStepTest`: runOffersRetryMenuWhenPortIsClosed, runPingsBeforeItContinuesWhenUriIsTyped; `YmlRendererTest`: renderWritesBlockStyleWithTwoSpaceIndent; `SetupLauncherTest`: launchPassesTheEntriesOfTheEnvFileToTheStart, launchRunsWizardThenBootsOnTheWrittenFilesWhenConfirmed, launchWritesTheFilesWithoutATerminalWhenSetupFileIsComplete; `WrittenConfigStartupTest`: applicationStartsOnTheWrittenFiles, with the local server. Removed with their code: `UriSplitterTest` and the cases of `MongoStepTest` for the move question and the plain text in the yml file
+- **Hand test:** 1. Run `java -jar oc-app.jar setup`, select "Server URI" and type a URI with a database login. 2. Confirm the summary: `config/application.yml` has `uri: ${OC_MONGO_URI}`. 3. `config/opencelium.env` has `OC_MONGO_URI` with the whole URI in double quotes. 4. In the env file, change the database username to a second database user, then start the jar. 5. The application starts with the second database user. 6. Run `setup --batch` with a setup file whose `mongo` value is a URI with a database password. 7. The message "Bad value: mongo" shows `****` in place of the database password.
+- **Size:** approximately 85 lines, most of them deleted
 - **Depends on:** 13c
-- **Status:** open
+- **Status:** in work
 
 ## Task 13e: feat(core): setup wizard asks the MongoDB values one by one
 - **Criteria:** SW-05, SW-10, SW-11, SW-12, SW-17, SW-53, SW-54

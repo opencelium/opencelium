@@ -71,9 +71,9 @@ class WrittenConfigStartupTest {
 		}
 		assertThat(output).doesNotContain("opencelium.deployment-mode = ").doesNotContain("opencelium.data-dir = ")
 				.doesNotContain("spring.mongodb.uri = ").contains("MongoDB ping ok");
-		assertThat(workingDir.resolve("config/application.yml")).content()
-				.contains("uri: mongodb://localhost:27017/opencelium");
-		assertThat(workingDir.resolve("config/opencelium.env")).exists();
+		assertThat(workingDir.resolve("config/application.yml")).content().contains("uri: ${OC_MONGO_URI}\n");
+		assertThat(workingDir.resolve("config/opencelium.env")).content()
+				.contains("\nOC_MONGO_URI=mongodb://localhost:27017/opencelium\n");
 	}
 
 	private SetupLauncher launcher() {
