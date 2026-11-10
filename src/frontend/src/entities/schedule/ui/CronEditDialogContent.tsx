@@ -9,6 +9,7 @@ import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext'
 import { CronEditor } from '@shared/ui/wizard-step/editor/cron-editor/CronEditor'
 import { useFetchEntitiesQuery, useUpdateEntityMutation } from '@shared/api/genericApi'
 import type { Schedule, ScheduleUpdateDTO } from '../model/types'
+import './CronEditDialog.css'
 
 type Props = {
     schedulerId: number
@@ -83,7 +84,7 @@ function CronEditForm({ schedule, connectionTitle, onClose }: FormProps) {
     })
 
     return (
-        <div ref={containerRef}>
+        <div ref={containerRef} className="schedule-cron-edit">
             <StepHeader
                 containerRef={containerRef}
                 header="schedule.cronEdit.title"
@@ -98,14 +99,7 @@ function CronEditForm({ schedule, connectionTitle, onClose }: FormProps) {
                         autoFocus
                         label={tEntities('schedule.fields.cronExp.label')}
                     />
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                            gap: 8,
-                            marginTop: 20,
-                        }}
-                    >
+                    <div className="schedule-cron-edit__actions">
                         <Button type="primary" loading={isSaving} onClick={handleSubmit}>
                             {tEntities('schedule.cronEdit.submit')}
                         </Button>

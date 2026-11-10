@@ -1,5 +1,5 @@
-import { CronDate, CronExpressionParser } from "cron-parser";
-import { quartzToStandardCron } from "@shared/lib/cron/quartzCron";
+import { CronDate } from "cron-parser";
+import { createQuartzRunIterator } from "@shared/lib/cron/upcomingRuns";
 import type { Schedule } from "../model/types";
 
 export function weekDays(offset: number, zone: string) {
@@ -32,18 +32,11 @@ export function calendarSlots(
   for (const schedule of schedules) {
     if (!schedule.cronExp?.trim()) continue;
     try {
-      const iterator = CronExpressionParser.parse(
-        quartzToStandardCron(schedule.cronExp),
-        {
-          currentDate: days[0] - 1,
-          endDate: days[7] - 1,
-          tz: zone,
-        },
-      );
+      const iterator = createQuartzRunIterator(schedule.cronExp, days[0] - 1, zone, days[7] - 1);
       const [second, minute] = schedule.cronExp.trim().split(/\s+/);
       const step = /^(?:0|\*)\/(\d+)$/.exec(minute);
       const cadence =
-        second === "0"
+        /^\d+$/.test(second)
           ? minute === "*"
             ? 1
             : step
