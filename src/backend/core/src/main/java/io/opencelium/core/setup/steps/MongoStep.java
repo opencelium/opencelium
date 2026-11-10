@@ -137,6 +137,13 @@ public final class MongoStep implements SetupStep {
 		this.dockerCompose = Objects.requireNonNull(dockerCompose, "dockerCompose");
 	}
 
+	/**
+	 * @param ping the cause why MongoDB at a connection cannot be used; empty when it answers and accepts the login
+	 */
+	MongoStep(MongoDetector detector, Function<MongoConnection, Optional<String>> ping) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
 	@Override
 	public List<Question> questions() {
 		return List.of(serverQuestion(servers(detector.detect())), uriQuestion());

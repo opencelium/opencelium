@@ -48,6 +48,19 @@ public final class MongoDetector {
 		this.commands = Objects.requireNonNull(commands, "commands");
 	}
 
+	/**
+	 * @param host the host of the probed address
+	 * @param port the port of the probed address
+	 */
+	public MongoDetector(String host, int port) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	/** Whether a server accepts a TCP connection on the probed address within half a second. */
+	public boolean localServerListens() {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
 	public MongoDetection detect() {
 		return new MongoDetection(localServer(), dockerCompose());
 	}
