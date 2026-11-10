@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Checkbox } from '@shared/ui/primitives/Checkbox';
 import { Empty } from '@shared/ui/primitives/Empty';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { ChangeHistoryEntryRow } from './ChangeHistoryEntryRow';
@@ -12,6 +13,9 @@ import { DrawerHeader } from '@features/workflow/components/sidebar/DrawerHeader
  */
 export function ChangeHistoryPanel({ open, entries, onClose, onJumpTo }: ChangeHistoryPanelProps) {
 	const { t } = useI18n('workflow');
+	const [isAiOnly, setIsAiOnly] = useState(false);
+	const hasAiChanges = entries.some((entry) => entry.origin === 'ai');
+	const shown = isAiOnly && hasAiChanges ? entries.filter((entry) => entry.origin === 'ai') : entries;
 	// A lone seed entry ("session start") is not a history worth listing.
 	const hasHistory = entries.length > 1;
 
@@ -31,9 +35,15 @@ export function ChangeHistoryPanel({ open, entries, onClose, onJumpTo }: ChangeH
 				className={`rightDrawer changeHistoryDrawer ${open ? 'rightDrawerOpen' : ''}`}>
 				<DrawerHeader title={t('undoHistory.title')} onClose={onClose} closeTestId='workflow-change-history-close' />
 				<div className='drawerBody changeHistoryBody'>
+					{hasAiChanges && (
+						<div className='changeHistoryFilter'>
+							<Checkbox checked={isAiOnly} onChange={setIsAiOnly} label={t('undoHistory.onlyAi')}
+								testId='workflow-change-history-ai-only' />
+						</div>
+					)}
 					{hasHistory
 						? <div className='changeHistoryList'>
-							{entries.map((entry) => (
+							{shown.map((entry) => (
 								<ChangeHistoryEntryRow key={entry.offset} entry={entry}
 									onSelect={onJumpTo} />
 							))}

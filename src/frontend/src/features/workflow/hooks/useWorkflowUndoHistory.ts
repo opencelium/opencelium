@@ -5,6 +5,7 @@ import type { WorkflowUndoEntry, WorkflowUndoSnapshot,
 	WorkflowUndoStack } from '../types/undoHistory.types';
 import { buildWorkflowUndoSignature, hasWorkflowDragPreview } from '../utils/workflowUndoHistory.utils';
 import { describeWorkflowUndoChange } from '../utils/workflowUndoDescribe.utils';
+import { takeAiChangeMark } from '../utils/aiChangeMarker';
 
 /**
  * Quiet period before a state is recorded. Bursts of mutations — a multi-node
@@ -52,18 +53,19 @@ export const useWorkflowUndoHistory = ({ nodes, edges, fieldBindings, isDragging
 		}
 		const next: WorkflowUndoEntry[] = [
 			...future.map((snapshot, index) => ({
-				offset: future.length - index, change: snapshot.change, at: snapshot.at,
+				offset: future.length - index, change: snapshot.change, at: snapshot.at, origin: snapshot.origin,
 			})).reverse(),
-			{ offset: 0, change: present.change, at: present.at },
+			{ offset: 0, change: present.change, at: present.at, origin: present.origin },
 			...[...past].reverse().map((snapshot, index) => ({
-				offset: -(index + 1), change: snapshot.change, at: snapshot.at,
+				offset: -(index + 1), change: snapshot.change, at: snapshot.at, origin: snapshot.origin,
 			})),
 		];
 		// Hand back the same array when nothing moved, so consumers of `entries`
 		// don't re-render on a no-op sync.
 		setEntries((current) => current.length === next.length
 			&& current.every((entry, index) => entry.offset === next[index].offset
-				&& entry.change === next[index].change && entry.at === next[index].at)
+				&& entry.change === next[index].change && entry.at === next[index].at
+				&& entry.origin === next[index].origin)
 			? current
 			: next);
 	}, []);
@@ -85,8 +87,10 @@ export const useWorkflowUndoHistory = ({ nodes, edges, fieldBindings, isDragging
 			const change = stack.present
 				? describeWorkflowUndoChange(stack.present, { nodes, edges, fieldBindings })
 				: ({ kind: 'initial' } as const);
+			// The seed state is no one's edit; a mark left from before it is dropped with it.
+			const isAi = takeAiChangeMark() && Boolean(stack.present);
 			const snapshot: WorkflowUndoSnapshot = { nodes, edges, fieldBindings, signature,
-				change, at: Date.now() };
+				change, at: Date.now(), origin: isAi ? 'ai' : 'user' };
 			if (stack.present) {
 				stack.past.push(stack.present);
 				if (stack.past.length > MAX_ENTRIES) stack.past.shift();

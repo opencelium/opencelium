@@ -9,6 +9,7 @@ import { useExplainRunMutation, useFixRunMutation } from '../api/aiApi';
 import type { RunExplanation, RunFix } from '../model/aiGateway.types';
 import { applyFixToBindings } from './runFailureBindings';
 import { workflowAssistBridgeStore } from '@features/workflow/command/workflowAssistBridge';
+import { markNextChangeAsAi } from '@features/workflow/utils/aiChangeMarker';
 import { notifyAiApplied } from '../ui/AiProposal/notifyAiApplied';
 import { type CollectedFailure, type FixTarget, buildRunFailure, findFailedElement, isSameBody, toEditorBody, toEditorHeaders } from './runFailure.utils';
 
@@ -127,6 +128,7 @@ export function useRunFailureAssist({ tree, nodes, edges, workflowTitle, onSaveM
 			return;
 		}
 		const headers = toEditorHeaders(config, proposal.headers ?? []);
+		markNextChangeAsAi();
 		if (node?.data.color) onFieldBindingsChange(applyFixToBindings(fieldBindings, node.data.color, config, { body, headers }));
 		onSaveMethodConfig(target.nodeId, { ...config, body, headers });
 		setState({ status: 'applied', explanation });

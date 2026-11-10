@@ -1,3 +1,4 @@
+import { markNextChangeAsAi } from '@features/workflow/utils/aiChangeMarker'
 import { store } from '@app/store/store'
 import { i18n } from '@shared/i18n/config/i18n'
 import { methodLabel, methodsInWorkflowOrder } from '@features/onboarding/guides/model/resolveGuideNode'
@@ -51,6 +52,7 @@ export async function addMethodFromRequest(prompt: string, confirmEdit?: Confirm
     }
     if (confirmEdit && !(await confirmEdit({ method: answer.operation, connector: connector.title }))) return 'cancelled'
 
+    markNextChangeAsAi()
     const result = addMethodStep({
         connectorId: connector.connectorId,
         operationName: answer.operation,

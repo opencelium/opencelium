@@ -99,3 +99,25 @@
 .changeHistoryItem--delete .changeHistoryItemLabel {
   color: var(--color-action-danger);
 }
+
+/* The row button and, for an AI change, its own Undo beside it (a button cannot hold another). */
+.changeHistoryRow {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.changeHistoryRow > .changeHistoryItem {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.changeHistoryAiBadge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.changeHistoryFilter {
+  padding: 2px 10px 8px;
+}
