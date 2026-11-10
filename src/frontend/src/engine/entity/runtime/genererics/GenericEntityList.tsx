@@ -179,6 +179,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
 
     const [sorting, setSorting] = useState<SortingState>(initialSorting);
     const [globalFilter, setGlobalFilter] = useState('');
+    const [alternate, setAlternate] = useState(false);
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     // Controlled (not left to tanstack's uncontrolled default) — see the
     // `autoResetPageIndex: false` note below for why this alone isn't enough
@@ -464,7 +465,17 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                 </div>
             )}
 
-            <Table
+            {entity.list?.alternateView && <div style={{display: 'flex', gap: 8}}>
+                <Button type={alternate ? 'default' : 'primary'} onClick={() => setAlternate(false)}>
+                    {tEntities(entity.list.alternateView.listLabelKey)}
+                </Button>
+                <Button type={alternate ? 'primary' : 'default'} onClick={() => setAlternate(true)}>
+                    {tEntities(entity.list.alternateView.labelKey)}
+                </Button>
+            </div>}
+            {alternate && entity.list?.alternateView
+                ? entity.list.alternateView.render(table.getFilteredRowModel().rows.map(row => row.original))
+                : <Table
                 data={tableRows}
                 columns={columns}
                 tableInstance={table}
@@ -473,7 +484,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                 disabledRowIds={pendingDeleteIds}
                 rowClassName={rowClassName}
                 onRowClick={handleRowClick}
-            />
+            />}
         </div>
     );
 };
