@@ -29,12 +29,6 @@
   flex: none;
 }
 
-.aiMappingActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
 .aiMappingRows {
   margin: 0;
   padding: 4px 8px;

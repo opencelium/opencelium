@@ -7,6 +7,7 @@ import type { Connection, MethodWithId } from '@features/workflow/types/connecti
 import { getEligibleReferenceMethods } from '@features/workflow/utils/referenceMethodVisibility';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { aiApi } from '../api/aiApi';
+import { notifyAiApplied } from '../ui/AiProposal/notifyAiApplied';
 import type { SuggestMappingResponse } from '../model/aiGateway.types';
 import { type PendingMapping, usePendingMappingStore } from './pendingMapping.store';
 import { type MappingSource, type MappingTarget, collectMappingSources, collectMappingTargets, setTargetValue } from './mappingCandidates';
@@ -43,7 +44,7 @@ export function applyProposals(connection: Connection, method: MethodWithId, bod
  * result like a manual edit.
  */
 export function useAiFieldMapping({ connection, method, body }: Params) {
-	const { lang } = useI18n('workflow');
+	const { t, lang } = useI18n('workflow');
 	const dispatch = useDispatch();
 	const [state, setState] = useState<AiFieldMappingState>({ status: 'idle' });
 	const [instruction, setInstruction] = useState('');
@@ -109,9 +110,17 @@ export function useAiFieldMapping({ connection, method, body }: Params) {
 		if (state.status !== 'suggested' || !connection) return 0;
 		const applied = state.proposals.filter((proposal) => state.chosen.has(proposal.target.path));
 		const next = applyProposals(connection, method, body, applied);
-		dispatch(updatePayload({ methodId: method.id, newFields: next.body, messageProperty: 'body' } as never));
-		dispatch(updateConnection({ fieldBindings: next.fieldBindings } as never));
+		const write = (target: { body: typeof body; fieldBindings: typeof connection.fieldBindings }) => {
+			dispatch(updatePayload({ methodId: method.id, newFields: target.body, messageProperty: 'body' } as never));
+			dispatch(updateConnection({ fieldBindings: target.fieldBindings } as never));
+		};
+		const before = { body, fieldBindings: connection.fieldBindings };
+		write(next);
 		setState({ status: 'idle' });
+		if (applied.length) {
+			notifyAiApplied({ key: 'ai-mapping-applied', undoTestId: 'ai-mapping-undo',
+				text: t('ai.mapping.applied', { count: applied.length }), onUndo: () => write(before) });
+		}
 		return applied.length;
 	};
 

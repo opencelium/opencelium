@@ -81,6 +81,7 @@
     "failed": "The AI could not draft the text. Try again in a moment.",
     "removed": "Removed placeholders that do not exist: {{names}}",
     "use": "Use as subject and body",
-    "discard": "Discard"
+    "discard": "Discard",
+    "applied": "Subject and body replaced"
   }
 }

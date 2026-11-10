@@ -413,6 +413,10 @@
     "failed": "Der Assistent konnte nicht antworten. Bitte gleich noch einmal versuchen.",
     "askInPalette": "Den Assistenten fragen: {{question}}"
   },
+  "aiResult": {
+    "undo": "Rückgängig",
+    "undone": "Änderung rückgängig gemacht."
+  },
   "aiExpectedTime": {
     "range": "Meist {{min}}–{{max}} s",
     "hint": "Das Modell läuft auf diesem Rechner. Die erste Anfrage nach einer Pause, große Eingaben oder eine andere laufende KI-Anfrage verlängern die Wartezeit."

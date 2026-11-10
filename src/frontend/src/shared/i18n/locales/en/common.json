@@ -413,6 +413,10 @@
     "failed": "The assistant could not answer. Try again in a moment.",
     "askInPalette": "Ask the assistant: {{question}}"
   },
+  "aiResult": {
+    "undo": "Undo",
+    "undone": "Change undone."
+  },
   "aiExpectedTime": {
     "range": "Usually {{min}}–{{max}} s",
     "hint": "The model runs on this machine. The first request after a pause, a large input, or another AI request in progress makes it take longer."

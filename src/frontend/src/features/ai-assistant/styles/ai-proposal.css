@@ -1,0 +1,21 @@
+.aiProposalActions {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.aiProposalActionsMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* A disabled button fires no pointer events; the wrapper carries the tooltip that says why. */
+.aiProposalApplyWrap {
+  display: inline-flex;
+}

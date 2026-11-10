@@ -1,6 +1,6 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
-import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { AiProposalActions } from '../AiProposal/AiProposalActions';
 import type { AiApplyBlock, AiPanelView } from '../../model/aiPanelState';
 
 type Props = {
@@ -43,19 +43,12 @@ export function AiPanelFooter({ view, canPlan, canBuild, applyBlock, onPlan, onB
 			);
 		case 'result':
 			return (
-				<div className="aiPanelFooter aiPanelFooter--split">
-					{discard}
-					<div className="aiPanelFooterGroup">
-						<Button iconLeft="refresh" onClick={onBuild} testId="ai-panel-regenerate">{t('ai.actions.regenerate')}</Button>
-						{/* A tooltip with no content stays mounted, so the button does not remount when the block clears. */}
-						<Tooltip content={applyBlock ? t(APPLY_BLOCK_KEY[applyBlock]) : null} maxWidth={260}>
-							<span className="aiApplyWrap">
-								<Button type="primary" onClick={onApply} disabled={applyBlock !== null} testId="ai-panel-apply">
-									{t('ai.actions.apply')}
-								</Button>
-							</span>
-						</Tooltip>
-					</div>
+				<div className="aiPanelFooter">
+					<AiProposalActions
+						apply={{ label: t('ai.actions.apply'), onClick: onApply, testId: 'ai-panel-apply',
+							blockedReason: applyBlock ? t(APPLY_BLOCK_KEY[applyBlock]) : null }}
+						discard={{ label: t('ai.actions.discard'), onClick: onDiscard, testId: 'ai-panel-discard' }}
+						extra={<Button iconLeft="refresh" onClick={onBuild} testId="ai-panel-regenerate">{t('ai.actions.regenerate')}</Button>} />
 				</div>
 			);
 		case 'prompt':

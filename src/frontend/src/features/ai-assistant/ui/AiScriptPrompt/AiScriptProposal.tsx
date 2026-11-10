@@ -3,6 +3,8 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import { Icon } from '@shared/ui/primitives/Icon';
 import type { ScriptCandidate } from '../../hooks/useScriptVersions';
+import { isUntouchedScript } from '../../utils/scriptVersions.utils';
+import { AiProposalActions } from '../AiProposal/AiProposalActions';
 import { type CompareMode, ScriptCompareView } from './ScriptCompareView';
 
 type Props = {
@@ -19,7 +21,8 @@ const MODES: CompareMode[] = ['diff', 'split', 'candidate'];
 /** The generated script (or an earlier version) beside the editor's script, until the user applies or discards it. */
 export function AiScriptProposal({ candidate, currentScript, isPlaygroundOpen, onOpenPlayground, onAccept, onDiscard }: Props) {
 	const { t } = useI18n('workflow');
-	const [mode, setMode] = useState<CompareMode>('diff');
+	// Against an empty editor a diff is all additions: the script alone reads better.
+	const [mode, setMode] = useState<CompareMode>(() => (isUntouchedScript(currentScript) ? 'candidate' : 'diff'));
 	const isGenerated = candidate.kind === 'generated';
 	const candidateLabel = t(isGenerated ? 'ai.script.compare.generated' : 'ai.script.compare.version');
 	return (
@@ -43,18 +46,15 @@ export function AiScriptProposal({ candidate, currentScript, isPlaygroundOpen, o
 			)}
 			<ScriptCompareView mode={mode} current={currentScript} candidate={candidate.script} candidateLabel={candidateLabel} />
 			{candidate.description && <div className="aiScriptProposalDescription">{candidate.description}</div>}
-			<footer className="aiScriptProposalFooter">
-				{!isPlaygroundOpen && onOpenPlayground && (
-					<Button type="link" iconLeft="play" className="aiScriptProposalPlayground" onClick={onOpenPlayground}
-						testId="ai-script-proposal-playground">
+			<AiProposalActions
+				apply={{ label: t(isGenerated ? 'ai.script.proposal.apply' : 'ai.script.proposal.restore'), onClick: onAccept,
+					testId: 'ai-script-proposal-apply' }}
+				discard={{ label: t('ai.script.proposal.discard'), onClick: onDiscard, testId: 'ai-script-proposal-discard' }}
+				extra={!isPlaygroundOpen && onOpenPlayground && (
+					<Button type="link" iconLeft="play" onClick={onOpenPlayground} testId="ai-script-proposal-playground">
 						{t('ai.script.proposal.compareInPlayground')}
 					</Button>
-				)}
-				<Button onClick={onDiscard} testId="ai-script-proposal-discard">{t('ai.script.proposal.discard')}</Button>
-				<Button type="primary" onClick={onAccept} testId="ai-script-proposal-apply">
-					{t(isGenerated ? 'ai.script.proposal.apply' : 'ai.script.proposal.restore')}
-				</Button>
-			</footer>
+				)} />
 		</section>
 	);
 }

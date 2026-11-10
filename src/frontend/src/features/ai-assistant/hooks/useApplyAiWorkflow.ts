@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { message } from 'antd';
 import type { Viewport } from '@xyflow/react';
 import type { Connector } from '@entities/connector/model/types';
 import { mapConnectionToWorkflowState } from '@features/workflow/api/connectionMapper';
@@ -10,6 +9,8 @@ import { notifyError } from '@shared/ui/feedback/notifyError';
 import type { WorkflowDsl } from '../model/workflowDsl.schema';
 import type { AiConnectorPair } from '../utils/aiConnectors.utils';
 import { dslToConnection } from '../utils/dslToConnection';
+import { workflowAssistBridgeStore } from '@features/workflow/command/workflowAssistBridge';
+import { notifyAiApplied } from '../ui/AiProposal/notifyAiApplied';
 
 export type AiWorkflowApplyTarget = {
 	nodes: WorkflowNodeModel[];
@@ -43,7 +44,8 @@ export function useApplyAiWorkflow({ nodes, connectors, setWorkflowGraph, setFie
 			// The generated transformations replace the old graph's, which pointed at nodes that are gone.
 			setFieldBindings(state.fieldBindings);
 			markDirty();
-			message.success(t('ai.apply.success'));
+			notifyAiApplied({ key: 'ai-workflow-applied', undoTestId: 'ai-panel-undo', text: t('ai.apply.success'),
+				onUndo: () => workflowAssistBridgeStore.getState().handlers.undo?.() ?? false });
 			return true;
 		} catch {
 			notifyError(t('ai.apply.failed'));

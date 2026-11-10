@@ -2,7 +2,6 @@ import { store } from '@app/store/store'
 import { i18n } from '@shared/i18n/config/i18n'
 import { guideMethodNames } from '@features/onboarding/guides/model/resolveGuideNode'
 import { startWorkflowGuide } from '@features/onboarding/guides/model/startWorkflowGuide'
-import { WORKFLOW_GUIDE_IDS, WORKFLOW_GUIDES, type WorkflowGuideId } from '@features/onboarding/guides/model/workflowGuides'
 import { workflowCommandBridgeStore } from '@features/workflow/command/workflowCommandBridge'
 import { aiApi } from '../api/aiApi'
 import { addMethodFromRequest, type ConfirmEdit } from './addMethodFromRequest'
@@ -10,28 +9,9 @@ import { suggestMappingFromRequest } from './suggestMappingFromRequest'
 import { applyTransformationFromRequest } from './applyTransformationFromRequest'
 import { addOperatorFromRequest } from './addOperatorFromRequest'
 import { isQuiet } from './tell'
-import { type MethodPart, openMethodPartFromRequest } from './openMethodPartFromRequest'
-import { ASSIST_OPTIONS, ASSIST_OPTION_IDS, isAssistOptionId, runAssistFromRequest } from './runAssistFromRequest'
-
-/** What the editor itself can do with a request, besides the guides. */
-const ADD_METHOD = 'add-method'
-const ADD_METHOD_DESCRIPTION = 'commandPalette.descriptions.workflowAddMethod'
-const SUGGEST_MAPPING = 'suggest-mapping'
-const SUGGEST_MAPPING_DESCRIPTION = 'commandPalette.descriptions.workflowSuggestMapping'
-const APPLY_TRANSFORMATION = 'apply-transformation'
-const APPLY_TRANSFORMATION_DESCRIPTION = 'commandPalette.descriptions.workflowApplyTransformation'
-const ADD_OPERATOR = 'add-operator'
-const ADD_OPERATOR_DESCRIPTION = 'commandPalette.descriptions.workflowAddOperator'
-const OPEN_PARTS: Record<string, { part: MethodPart; descriptionKey: string }> = {
-    'open-body': { part: 'body', descriptionKey: 'commandPalette.descriptions.workflowOpenBody' },
-    'open-headers': { part: 'header', descriptionKey: 'commandPalette.descriptions.workflowOpenHeaders' },
-}
-/** A guide that shows where something is stands for the action doing it when the request asks to be shown nothing. */
-const TEACHES: Partial<Record<WorkflowGuideId, string>> = {
-    'method-transformation': APPLY_TRANSFORMATION,
-    'method-body': 'open-body',
-    'method-headers': 'open-headers',
-}
+import { openMethodPartFromRequest } from './openMethodPartFromRequest'
+import { runAssistFromRequest } from './runAssistFromRequest'
+import { describeEditorCapabilities, type EditorCapabilityIdOf, isCapabilityOfKind, isEditorCapabilityId } from './editorCapabilities'
 
 /** `handled`: a guide or an edit took the request over and told the user how it went; `unhandled`: it is for the palette. */
 export type EditorRequestOutcome = 'handled' | 'unhandled'
@@ -39,28 +19,31 @@ export type EditorRequestOutcome = 'handled' | 'unhandled'
 // Too short for the model to place; it always means the selected step.
 const REMOVE_SELECTED_RE = /^(remove|delete) (it|this|that|this step|the selected step)$|^(entferne|lösche) (ihn|es|das|diesen schritt|den ausgewählten schritt)$/i
 
-const isGuideId = (id: string): id is WorkflowGuideId => (WORKFLOW_GUIDE_IDS as readonly string[]).includes(id)
+type EditRequest = { prompt: string; method: string; confirmEdit?: ConfirmEdit }
+
+/** The edits the AI reads the request for; each tells the user how it went. */
+const EDITS: Record<EditorCapabilityIdOf<'edit'>, (request: EditRequest) => Promise<unknown> | void> = {
+    'add-method': ({ prompt, confirmEdit }) => addMethodFromRequest(prompt, confirmEdit),
+    'suggest-mapping': ({ prompt }) => suggestMappingFromRequest(prompt),
+    // Addressed by name, the transformation is applied at once; otherwise it is proposed.
+    'apply-transformation': ({ prompt, confirmEdit }) => applyTransformationFromRequest(prompt, !confirmEdit),
+    'open-body': ({ method }) => openMethodPartFromRequest('body', method),
+    'open-headers': ({ method }) => openMethodPartFromRequest('header', method),
+    'add-operator': ({ prompt }) => addOperatorFromRequest(prompt),
+}
 
 /** Both languages, whatever the UI's: the request may be spoken in either. */
 function describeOptions() {
-    const [en, de] = [i18n.getFixedT('en', 'common'), i18n.getFixedT('de', 'common')]
-    const describe = (key: string) => [...new Set([en(key), de(key)])].join(' · ')
-    return [
-        ...WORKFLOW_GUIDE_IDS.map(id => ({
-            id, description: describe(WORKFLOW_GUIDES[id].descriptionKey),
-            ...(TEACHES[id] ? { teaches: TEACHES[id] } : {}),
-        })),
-        { id: ADD_METHOD, description: describe(ADD_METHOD_DESCRIPTION), isAction: true },
-        { id: SUGGEST_MAPPING, description: describe(SUGGEST_MAPPING_DESCRIPTION), isAction: true },
-        { id: APPLY_TRANSFORMATION, description: describe(APPLY_TRANSFORMATION_DESCRIPTION), isAction: true },
-        ...Object.entries(OPEN_PARTS).map(([id, open]) => ({ id, description: describe(open.descriptionKey), isAction: true })),
-        { id: ADD_OPERATOR, description: describe(ADD_OPERATOR_DESCRIPTION), isAction: true },
-        ...ASSIST_OPTION_IDS.map(id => {
-            const option: { descriptionKey: string; isAction: boolean; withMethod?: string } = ASSIST_OPTIONS[id]
-            return { id, description: describe(option.descriptionKey), isAction: option.isAction,
-                ...(option.withMethod ? { withMethod: option.withMethod } : {}) }
-        }),
-    ]
+    const translators = { en: i18n.getFixedT('en', 'common'), de: i18n.getFixedT('de', 'common') }
+    return describeEditorCapabilities((language, key) => translators[language](key))
+}
+
+function startGuide(id: EditorCapabilityIdOf<'guide'>, prompt: string, method: string): EditorRequestOutcome {
+    // The transformation guide goes into the headers when the request says so ("… in the headers of X").
+    const part = /\b(headers?|kopfzeilen?)\b/i.test(prompt) ? 'header' : 'body'
+    const started = startWorkflowGuide(id, method || undefined, { part, isQuiet: isQuiet() })
+    // A named method that is not there was already reported; the palette would only guess.
+    return started === 'started' || started === 'no-match' || started === 'no-methods' || started === 'no-references' ? 'handled' : 'unhandled'
 }
 
 /**
@@ -86,35 +69,10 @@ export async function askWorkflowEditor(prompt: string, confirmEdit?: ConfirmEdi
     } catch {
         return 'unhandled'
     }
-    if (answer.guideId === ADD_METHOD) {
-        await addMethodFromRequest(prompt, confirmEdit)
-        return 'handled'
-    }
-    const open = answer.guideId ? OPEN_PARTS[answer.guideId] : undefined
-    if (open) {
-        openMethodPartFromRequest(open.part, answer.method)
-        return 'handled'
-    }
-    if (answer.guideId === APPLY_TRANSFORMATION) {
-        await applyTransformationFromRequest(prompt, !confirmEdit)
-        return 'handled'
-    }
-    if (answer.guideId === SUGGEST_MAPPING) {
-        await suggestMappingFromRequest(prompt)
-        return 'handled'
-    }
-    if (answer.guideId && isAssistOptionId(answer.guideId)) {
-        await runAssistFromRequest(answer.guideId, { prompt, method: answer.method })
-        return 'handled'
-    }
-    if (answer.guideId === ADD_OPERATOR) {
-        await addOperatorFromRequest(prompt)
-        return 'handled'
-    }
-    if (!answer.guideId || !isGuideId(answer.guideId)) return 'unhandled'
-    // The transformation guide goes into the headers when the request says so ("… in the headers of X").
-    const part = /\b(headers?|kopfzeilen?)\b/i.test(prompt) ? 'header' : 'body'
-    const started = startWorkflowGuide(answer.guideId, answer.method || undefined, { part, isQuiet: isQuiet() })
-    // A named method that is not there was already reported; the palette would only guess.
-    return started === 'started' || started === 'no-match' || started === 'no-methods' || started === 'no-references' ? 'handled' : 'unhandled'
+    const id = answer.guideId
+    if (!id || !isEditorCapabilityId(id)) return 'unhandled'
+    if (isCapabilityOfKind(id, 'guide')) return startGuide(id, prompt, answer.method)
+    if (isCapabilityOfKind(id, 'assist')) await runAssistFromRequest(id, { prompt, method: answer.method })
+    else await EDITS[id]({ prompt, method: answer.method, confirmEdit })
+    return 'handled'
 }
