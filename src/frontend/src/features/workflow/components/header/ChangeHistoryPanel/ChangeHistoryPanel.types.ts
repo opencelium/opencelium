@@ -7,4 +7,6 @@ export type ChangeHistoryPanelProps = {
 	entries: WorkflowUndoEntry[];
 	onClose: () => void;
 	onJumpTo: (offset: number) => void;
+	/** Brings the step an entry changed into view, once the canvas shows that entry's state. */
+	onShowNode?: (nodeId: string) => void;
 };

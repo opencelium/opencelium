@@ -9,9 +9,10 @@ import { isUndoChangeDeletion, undoChangeLabel } from '../../../utils/workflowUn
 type Props = {
 	entry: WorkflowUndoEntry;
 	onSelect: (offset: number) => void;
+	onShowNode?: (nodeId: string) => void;
 };
 
-export function ChangeHistoryEntryRow({ entry, onSelect }: Props) {
+export function ChangeHistoryEntryRow({ entry, onSelect, onShowNode }: Props) {
 	const { t, lang } = useI18n('workflow');
 	const label = undoChangeLabel(entry.change);
 	const values = {
@@ -33,7 +34,12 @@ export function ChangeHistoryEntryRow({ entry, onSelect }: Props) {
 				isDeletion ? ' changeHistoryItem--delete' : ''}`}
 			aria-current={isCurrent}
 			data-testid={`workflow-change-history-item-${entry.offset}`}
-			onClick={() => { if (!isCurrent) onSelect(entry.offset); }}>
+			onClick={() => {
+				if (!isCurrent) onSelect(entry.offset);
+				// Also for the current entry: going there changes nothing, but showing where it happened still helps.
+				const { nodeId } = entry.change;
+				if (nodeId) onShowNode?.(nodeId);
+			}}>
 			{/* A deletion takes over the icon column: what it removed is no longer on
 			    the canvas, so its artwork says less than the trash glyph does. The
 			    glyph also keeps the row marked in greyscale, where the tint is lost. */}

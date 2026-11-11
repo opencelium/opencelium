@@ -44,12 +44,12 @@ const iconOf = (node: WorkflowNodeModel): WorkflowUndoIcon | undefined => {
 /** How to name one node in a label: by its own name, or by its kind. */
 const subjectOf = (node: WorkflowNodeModel) => {
 	const nameKey = NODE_KIND_NAME_KEYS[node.type ?? ''];
-	return { ...(nameKey ? { nameKey } : { name: nameOf(node) }), icon: iconOf(node) };
+	return { ...(nameKey ? { nameKey } : { name: nameOf(node) }), icon: iconOf(node), nodeId: node.id };
 };
 
 /** Tags a refined change with the node it concerns. */
 const withIcon = (change: WorkflowUndoChange, node: WorkflowNodeModel): WorkflowUndoChange =>
-	({ ...change, icon: iconOf(node) });
+	({ ...change, icon: iconOf(node), nodeId: node.id });
 
 /**
  * Categories that describe an edit on their own. When exactly one is present it
@@ -143,7 +143,7 @@ export const describeWorkflowUndoChange = (
 	}
 	if (only === 'node-renamed' && fieldChanged) {
 		return { kind: 'node-renamed', label: nameOf(fieldChanged.after),
-			icon: iconOf(fieldChanged.after) };
+			icon: iconOf(fieldChanged.after), nodeId: fieldChanged.after.id };
 	}
 	if (only === 'aggregator-config' && fieldChanged) {
 		// Aggregators sit on operators as well as methods, so the subject may be a
@@ -158,7 +158,7 @@ export const describeWorkflowUndoChange = (
 	}
 	if (only) {
 		return { kind: only, name: fieldChanged && nameOf(fieldChanged.after),
-			icon: fieldChanged && iconOf(fieldChanged.after) };
+			icon: fieldChanged && iconOf(fieldChanged.after), nodeId: fieldChanged?.after.id };
 	}
 
 	if (buildWorkflowEdgeSignature(previous.edges)

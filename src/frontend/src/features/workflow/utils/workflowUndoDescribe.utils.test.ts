@@ -213,6 +213,14 @@ describe('describeWorkflowUndoChange', () => {
 			.toMatchObject({ kind: 'connector', iconUrl: null });
 	});
 
+	it('remembers which node an entry concerns, so the history can show it', () => {
+		const edited = withNodes(base.nodes.map((item) => item.id !== 'm1' ? item
+			: node('m1', 'GetAllUser', { methodConfig: { url: '/user/1' } })));
+		expect(describeWorkflowUndoChange(base, edited).nodeId).toBe('m1');
+		expect(describeWorkflowUndoChange(base, withNodes([...base.nodes,
+			node('m9', 'AddUser')])).nodeId).toBe('m9');
+	});
+
 	it('routes an operator condition edit to the rule or group it happened to', () => {
 		const operatorNode = (items: unknown[]) => ({
 			id: 'if1', type: 'if', position: { x: 0, y: 0 },

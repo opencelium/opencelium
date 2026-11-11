@@ -11,7 +11,7 @@ import { DrawerHeader } from '@features/workflow/components/sidebar/DrawerHeader
  * with any row jumping the canvas to that point. Distinct from HistoryPanel,
  * which restores states that were *saved* on the backend.
  */
-export function ChangeHistoryPanel({ open, entries, onClose, onJumpTo }: ChangeHistoryPanelProps) {
+export function ChangeHistoryPanel({ open, entries, onClose, onJumpTo, onShowNode }: ChangeHistoryPanelProps) {
 	const { t } = useI18n('workflow');
 	const [isAiOnly, setIsAiOnly] = useState(false);
 	const hasAiChanges = entries.some((entry) => entry.origin === 'ai');
@@ -45,7 +45,7 @@ export function ChangeHistoryPanel({ open, entries, onClose, onJumpTo }: ChangeH
 						? <div className='changeHistoryList'>
 							{shown.map((entry) => (
 								<ChangeHistoryEntryRow key={entry.offset} entry={entry}
-									onSelect={onJumpTo} />
+									onSelect={onJumpTo} onShowNode={onShowNode} />
 							))}
 						</div>
 						: <Empty className='historyEmpty' description={t('undoHistory.empty')} />}

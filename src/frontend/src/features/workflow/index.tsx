@@ -241,7 +241,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onSelectNode: problems.focusNode }}
         changeHistory={{ open: changeHistoryOpen, entries: workflow.undoEntries,
           onClose: () => setChangeHistoryOpen(false),
-          onJumpTo: workflow.jumpToUndoEntry }}
+          onJumpTo: workflow.jumpToUndoEntry,
+          // After the jump has rendered: a step the jump brings back is not on the canvas before that.
+          onShowNode: (nodeId) => requestAnimationFrame(() => workflow.centerOnNode(nodeId)) }}
         bindingTable={{ open: workflow.bindingLens.tableOpen,
           nodes: hydratedNodes, edges: workflow.edges, fieldBindings: loadedFieldBindings,
           selectedKey: workflow.bindingLens.view.selectedKey,

@@ -64,6 +64,8 @@ export type WorkflowUndoIcon =
 export type WorkflowUndoChange = WorkflowUndoChangeKind & {
 	/** The node this entry concerns, when there is exactly one. */
 	icon?: WorkflowUndoIcon;
+	/** That node's id, so the history can show where the change happened. */
+	nodeId?: string;
 };
 
 type WorkflowUndoChangeKind =
