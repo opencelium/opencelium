@@ -173,7 +173,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Start a MongoDB on `localhost:27017`, then run `java -jar oc-app.jar setup`. 2. The MongoDB step asks "How do you want to connect OpenCelium to MongoDB?". 3. The options are "Local MongoDB", "MongoDB URI", "Step by step" and "Exit". 4. Select "MongoDB URI" and type `mongodb://localhost:1/opencelium`: the ping fails. 5. The retry menu shows "Back to the menu" with "choose another option". 6. Run `java -jar oc-app.jar setup --template`: the help of `mongo` starts with "How OpenCelium connects to MongoDB".
 - **Size:** approximately 40 lines
 - **Depends on:** 13e
-- **Status:** in work
+- **Status:** done
 
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-19, SW-20, SW-21, SW-22, SW-23
