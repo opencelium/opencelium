@@ -1019,10 +1019,6 @@
       "loopWithIterator": "Schleife ({{iterator}})",
       "if": "Wenn"
     },
-    "preview": {
-      "badge": "In Entwicklung",
-      "badgeHint": "Demnächst verfügbar: Das Backend zum Testen einer Methode ist noch nicht verfügbar."
-    },
     "toolbar": {
       "prefill": "Werte vorbelegen aus"
     },
@@ -1030,7 +1026,6 @@
       "testRun": "Pausierter Testlauf",
       "lastTest": "Ihr letzter Test dieses Schritts",
       "sample": "Beispielantworten",
-      "upstream": "Vorherige Schritte zuerst ausführen (aktuelle Daten)",
       "manual": "Nur manuelle Eingabe",
       "testRunUnavailable": "Pausieren Sie einen Testlauf an diesem Schritt, um seine Werte zu verwenden."
     },
@@ -1038,8 +1033,7 @@
       "method": "HTTP-Methode",
       "curl": "cURL",
       "curlHint": "Request als cURL-Befehl anzeigen",
-      "send": "Senden",
-      "sendUpstream": "Vorherige Schritte + Senden"
+      "send": "Senden"
     },
     "curl": {
       "title": "Erzeugter cURL-Befehl (Geheimnisse maskiert)"
@@ -1048,8 +1042,7 @@
       "values": "Testwerte",
       "params": "Parameter",
       "headers": "Header",
-      "body": "Body",
-      "settings": "Einstellungen"
+      "body": "Body"
     },
     "table": {
       "on": "An",
@@ -1065,13 +1058,11 @@
       "resetAll": "Alle zurücksetzen",
       "reset": "Auf vorbelegten Wert zurücksetzen",
       "placeholder": "Testwert eingeben",
-      "upstreamPlaceholder": "Wird durch die vorherigen Schritte gefüllt",
       "connectionPlaceholder": "Wird aus dem Konnektor übernommen",
       "empty": "Dieser Request hat keine dynamischen Werte. Er wird genau so gesendet, wie er konfiguriert ist.",
       "pathSegment": "Pfad",
       "fromMethod": "Aus {{method}} · verwendet in {{target}}",
       "fromWebhook": "Webhook-Parameter ({{type}}) · verwendet in {{target}}",
-      "fromConnection": "Konnektorfeld · verwendet in {{target}}",
       "unknownMethod": "unbekannter Schritt",
       "groups": {
         "url": "URL",
@@ -1086,27 +1077,40 @@
       },
       "invalidJson": "Kein gültiges JSON. Korrigieren Sie den Wert oder senden Sie ihn als Text.",
       "invalidJsonSend_one": "Ein Wert ist kein gültiges JSON. Korrigieren Sie ihn vor dem Senden.",
-      "invalidJsonSend_other": "{{count}} Werte sind kein gültiges JSON. Korrigieren Sie sie vor dem Senden."
+      "invalidJsonSend_other": "{{count}} Werte sind kein gültiges JSON. Korrigieren Sie sie vor dem Senden.",
+      "secretPlaceholder": "Wird aus dem Konnektor übernommen (verborgen) – zum Überschreiben eingeben",
+      "refsFailed": "Die benötigten Werte dieses Requests konnten nicht ermittelt werden",
+      "fromConnector": "Aus Konnektor {{connector}} übernommen",
+      "connectorFieldMissing": "Konnektor {{connector}} hat kein Feld „{{field}}“ – wird unverändert gesendet",
+      "staticType": {
+        "DIRECT": "Antwort oder Request eines anderen Schritts",
+        "WRAPPED_DIRECT": "Antwort oder Request eines anderen Schritts, im Text",
+        "WEBHOOK": "Webhook-Variable",
+        "ENHANCEMENT": "Ergebnis eines Feldzuordnungs-Skripts",
+        "PAGE": "Paginierungsparameter",
+        "REQUEST_DATA": "Platzhalter ohne Konnektor, der ihn füllt",
+        "unknown": "Sieht aus wie eine Referenz – geben Sie den zu sendenden Wert ein"
+      }
     },
     "source": {
       "testRun": "Testlauf",
       "lastTest": "Letzter Test",
       "sample": "Beispiel",
-      "upstream": "Vorherige Schritte",
       "edited": "Manuell",
       "empty": "Erforderlich",
       "connection": "Konnektor",
-      "secret": "Geheim"
+      "secret": "Geheim",
+      "unavailable": "Fehlt"
     },
     "sourceHint": {
       "testRun": "Aus dem pausierten Testlauf gelesen: Der Quellschritt wurde bereits ausgeführt, dies ist sein echter Wert.",
       "lastTest": "Der Wert, den Sie beim letzten Test dieses Schritts in dieser Browsersitzung verwendet haben.",
       "sample": "Aus der gespeicherten Beispielantwort des Quellschritts gelesen.",
-      "upstream": "Die vorherigen Schritte werden zuerst ausgeführt; ihre Antwort liefert diesen Wert.",
       "edited": "Für diesen Test geändert.",
       "empty": "Noch kein Wert – geben Sie vor dem Senden einen ein.",
-      "connection": "Aus dem gewählten Konnektor übernommen. Eine Änderung gilt nur für diesen Test.",
-      "secret": "Aus dem gewählten Konnektor übernommen und nie angezeigt."
+      "connection": "Wird vom Backend aus dem Konnektor übernommen. Geben Sie einen Wert ein, um ihn nur für diesen Test zu überschreiben.",
+      "secret": "Wird vom Backend aus dem Konnektor übernommen und nie angezeigt. Geben Sie einen Wert ein, um ihn nur für diesen Test zu überschreiben.",
+      "unavailable": "Der Konnektor definiert dieses Feld nicht, daher wird der Platzhalter unverändert gesendet. Geben Sie einen Wert ein, um ihn für diesen Test zu verwenden."
     },
     "origin": {
       "fixed": "Fest",
@@ -1148,40 +1152,12 @@
         "urlencoded": "x-www-form-urlencoded"
       }
     },
-    "settings": {
-      "timeout": "Timeout (Sekunden)",
-      "retries": "Wiederholungen bei Fehler",
-      "proxy": "Proxy",
-      "proxyUrl": "Proxy-URL",
-      "proxyMode": {
-        "system": "Systemeinstellung verwenden",
-        "none": "Kein Proxy",
-        "custom": "Benutzerdefiniert…"
-      },
-      "followRedirects": {
-        "label": "Weiterleitungen folgen",
-        "hint": "HTTP-3xx-Antworten automatisch folgen."
-      },
-      "verifySsl": {
-        "label": "SSL-Zertifikat prüfen",
-        "hint": "Nur für interne Systeme mit selbstsignierten Zertifikaten ausschalten."
-      },
-      "saveResponseAsSample": {
-        "label": "Jede Antwort als Beispiel speichern",
-        "hint": "Macht die Felder für das Mapping in den nächsten Schritten verfügbar."
-      },
-      "logToHistory": {
-        "label": "Testläufe im Ausführungsverlauf protokollieren",
-        "hint": "Standardmäßig aus, damit sich Tests nicht mit echten Ausführungen mischen."
-      }
-    },
     "response": {
       "title": "Antwort",
       "emptyTitle": "Noch nichts gesendet",
       "emptyHint": "Prüfen Sie die vorbelegten Werte, passen Sie an, was nötig ist, und klicken Sie auf <b>Senden</b>. Der Request wird genau einmal ausgeführt – der Workflow selbst läuft nicht.",
       "sending": "Request wird an {{connection}} gesendet…",
       "sendingDirect": "Request wird gesendet…",
-      "sendingUpstream": "{{methods}} wird ausgeführt, danach wird der Request gesendet…",
       "duration": "{{ms}} ms",
       "run": "Lauf #{{run}}",
       "runOn": "Lauf #{{run}} · {{connection}}",
@@ -1189,7 +1165,7 @@
       "tabs": {
         "body": "Body",
         "headers": "Header ({{count}})",
-        "timeline": "Zeitverlauf"
+        "request": "Request"
       },
       "pretty": "Formatiert",
       "raw": "Roh",
@@ -1199,27 +1175,22 @@
       "noHeaders": "Die Antwort hat keine Header.",
       "noBody": "Die Antwort hat keinen Body.",
       "noResponse": "Es wurde keine Antwort empfangen.",
-      "timeline": {
-        "dns": "DNS-Auflösung",
-        "connect": "TCP-Verbindung",
-        "tls": "TLS-Handshake",
-        "firstByte": "Warten (TTFB)",
-        "download": "Inhalt herunterladen",
-        "total": "Gesamt",
-        "unavailable": "Für diese Antwort sind keine Zeitdetails verfügbar."
-      },
-      "stage": {
-        "upstream": "Ein vorheriger Schritt ist fehlgeschlagen",
-        "resolve": "Die Werte konnten nicht eingesetzt werden",
-        "enhancement": "Ein Transformationsskript ist fehlgeschlagen",
-        "connect": "Das System war nicht erreichbar"
-      }
+      "failed": "Der Test konnte nicht ausgeführt werden",
+      "connectorError": "Die Daten von Konnektor {{connector}} konnten nicht gelesen werden – es wurde nichts gesendet",
+      "sentHint": "Der Request, wie er gesendet wurde. Verborgene Konnektorwerte (Passwörter, Secrets, Tokens) werden als **** angezeigt.",
+      "binary": "Binäre Antwort ({{type}})",
+      "download": "Herunterladen",
+      "downloadFailed": "Die Antwort konnte nicht heruntergeladen werden."
     },
     "footer": {
-      "hint": "Testläufe werden nicht in den Ausführungsverlauf des Workflows geschrieben, außer Sie schalten es unter Einstellungen ein. Änderungen bleiben lokal, bis Sie sie anwenden.",
+      "hint": "Senden ruft die echte API mit den Zugangsdaten des Konnektors auf. Nichts wird gespeichert oder protokolliert; Änderungen am Request bleiben lokal, bis Sie sie anwenden.",
       "apply": "Auf Methode anwenden",
       "applied": "Änderungen auf {{name}} angewendet",
       "close": "Schließen"
+    },
+    "confirmWrite": {
+      "title": "Echten {{method}}-Request senden?",
+      "message": "Damit wird ein echter {{method}}-Request mit den Zugangsdaten des Konnektors an die API gesendet, der dort Daten ändern kann. Fortfahren?"
     }
   },
   "sandbox": {

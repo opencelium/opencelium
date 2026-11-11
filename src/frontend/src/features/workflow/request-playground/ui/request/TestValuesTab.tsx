@@ -1,15 +1,15 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { buildTestId } from '@shared/testing/testId';
+import { Alert } from '@shared/ui/primitives/Alert';
 import { Button } from '@shared/ui/primitives/Button';
 import type { PlaygroundSession } from '../../hooks/usePlaygroundSession';
 import type { PlaygroundValues } from '../../hooks/usePlaygroundValues';
-import { readConnectionFieldValue, SECRET_MASK } from '../../model/playgroundConnection';
 import { emptyInput } from '../../model/playgroundValues';
 import { SOURCE_TONE } from '../badgeTones';
 import { PrefillSourceSelect } from './PrefillSourceSelect';
 import { ConnectionValueControl, InputValueControl, KindToggle } from './TestValueControls';
 import { TestValueRow } from './TestValueRow';
-import { buildValueRows, VALUE_GROUPS, type ValueRow } from './valueRows';
+import { VALUE_GROUPS, type ValueRow } from './valueRows';
 
 // The nonce changes on every request, so selecting the same value again still moves focus to it.
 export type FocusRequest = { key: string; nonce: number };
@@ -17,13 +17,13 @@ export type FocusRequest = { key: string; nonce: number };
 type Props = {
 	session: PlaygroundSession;
 	values: PlaygroundValues;
+	rows: ValueRow[];
 	missingKeys: string[];
 	focus: FocusRequest | null;
 };
 
-export function TestValuesTab({ session, values, missingKeys, focus }: Props) {
+export function TestValuesTab({ session, values, rows, missingKeys, focus }: Props) {
 	const { t } = useI18n('workflow');
-	const rows = buildValueRows(session.inputs, t);
 	const focusNonce = (key: string) => focus?.key === key ? focus.nonce : null;
 	const testId = (key: string, part: string) => buildTestId('request-playground-value', key, part);
 
@@ -44,20 +44,20 @@ export function TestValuesTab({ session, values, missingKeys, focus }: Props) {
 	};
 
 	const renderConnectionRow = (row: Extract<ValueRow, { kind: 'connection' }>) => {
-		const field = row.connectionField;
-		const isOverridden = values.requestData[field] !== undefined;
-		const origin = row.isSecret ? 'secret' : 'connection';
-		const value = row.isSecret && !isOverridden
-			? SECRET_MASK : readConnectionFieldValue(session.connector, field, values.requestData);
+		const override = values.requestData[row.reference];
+		const isOverridden = override !== undefined;
+		const origin = !row.isAvailable ? 'unavailable' : row.isSecret ? 'secret' : 'connection';
+		const connector = session.allConnectors.find((item) => item.connectorId === row.connectorId);
+		const value = override ?? (row.isSecret ? '' : connector?.requestData?.[row.connectorField] ?? '');
 		return (
 			<TestValueRow key={row.key} row={row} isEdited={isOverridden} focusNonce={focusNonce(row.key)}
-				onReset={() => values.setRequestDataValue(field, undefined)}
+				onReset={() => values.setRequestDataValue(row.reference, undefined)}
 				badge={isOverridden
 					? { tone: 'info', label: t('requestPlayground.source.edited'), hint: t('requestPlayground.sourceHint.edited') }
-					: { tone: row.isSecret ? 'warning' : 'neutral', label: t(`requestPlayground.source.${origin}`),
+					: { tone: origin === 'connection' ? 'neutral' : 'warning', label: t(`requestPlayground.source.${origin}`),
 						hint: t(`requestPlayground.sourceHint.${origin}`) }}
 				control={<ConnectionValueControl value={value} isSecret={row.isSecret}
-					testId={testId(row.key, 'input')} onChange={(text) => values.setRequestDataValue(field, text)} />} />
+					testId={testId(row.key, 'input')} onChange={(text) => values.setRequestDataValue(row.reference, text)} />} />
 		);
 	};
 
@@ -70,6 +70,10 @@ export function TestValuesTab({ session, values, missingKeys, focus }: Props) {
 					{t('requestPlayground.values.resetAll')}
 				</Button>
 			</div>
+			{session.refs.error !== null && (
+				<Alert type='error' showIcon message={t('requestPlayground.values.refsFailed')}
+					description={session.refs.error || undefined} />
+			)}
 			{rows.length === 0
 				? <div className='rpEmptyNote'>{t('requestPlayground.values.empty')}</div>
 				: <div className='rpTable'>

@@ -22,7 +22,7 @@ type SessionProps = Omit<RequestPlaygroundDialogProps, 'open' | 'node'> & { node
 function PlaygroundSessionGate({ node, nodes, edges, fieldBindings, connectionId, connectors, ...props }: SessionProps) {
 	const session = usePlaygroundSession({ node, nodes, edges, fieldBindings, connectionId, connectors });
 	if (!session) return null;
-	return <RequestPlaygroundContent session={session} liveNode={node} connectionId={connectionId} {...props} />;
+	return <RequestPlaygroundContent session={session} liveNode={node} {...props} />;
 }
 
 export function RequestPlaygroundDialog({ open, node, ...props }: RequestPlaygroundDialogProps) {
