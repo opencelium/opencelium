@@ -49,6 +49,9 @@ class MongoStepTest {
 
 	private static final Function<MongoConnection, Optional<String>> START_PING = new MongoStartupPing()::check;
 
+	/** The menu asks how to give the MongoDB connection, because 2 options can name the same server. */
+	private static final String MENU_QUESTION = "  How do you want to connect OpenCelium to MongoDB?";
+
 	private static final String HOST_PROMPT = "  MongoDB host    [localhost]: ";
 
 	private static final String PORT_PROMPT = "  MongoDB port    [27017]: ";
@@ -80,8 +83,8 @@ class MongoStepTest {
 			step(new MongoDetector("localhost", port), ANSWERS).run(context, prompter);
 
 			// The local server is the first option and the default; the options without a local server follow.
-			assertThat(console.output()).containsSubsequence("  Which MongoDB does OpenCelium use?",
-					"1) Local server", "localhost:" + port, "2) Server URI", "3) Server values", "4) Exit",
+			assertThat(console.output()).containsSubsequence(MENU_QUESTION,
+					"1) Local MongoDB", "localhost:" + port, "2) MongoDB URI", "3) Step by step", "4) Exit",
 					"  Choice [1]: ", "  -> Pinging MongoDB at mongodb://localhost:" + port + "/opencelium...",
 					"  OK MongoDB answers at mongodb://localhost:" + port + "/opencelium");
 			assertThat(context.mongoUri()).contains("mongodb://localhost:" + port + "/opencelium");
@@ -98,8 +101,8 @@ class MongoStepTest {
 		assertThatExceptionOfType(SetupCancelledException.class)
 				.isThrownBy(() -> step(noLocalServer, ANSWERS).run(context, prompter));
 
-		assertThat(console.output()).containsSubsequence("  Which MongoDB does OpenCelium use?", "1) Server URI",
-				"2) Server values", "3) Exit", "  Choice [1]: ").doesNotContain("4)").doesNotContain("Local server")
+		assertThat(console.output()).containsSubsequence(MENU_QUESTION, "1) MongoDB URI",
+				"2) Step by step", "3) Exit", "  Choice [1]: ").doesNotContain("4)").doesNotContain("Local MongoDB")
 				.doesNotContainIgnoringCase("docker");
 		assertThat(context.filePlan().actions()).isEmpty();
 		assertThat(context.mongoUri()).isEmpty();
@@ -124,7 +127,7 @@ class MongoStepTest {
 
 		step(noLocalServer, START_PING).run(context, prompter);
 
-		assertThat(console.output()).containsSubsequence("1) Server URI", "2) Server values", "3) Exit",
+		assertThat(console.output()).containsSubsequence("1) MongoDB URI", "2) Step by step", "3) Exit",
 				"  Choice [1]: ", "  MongoDB URI     [", "  -> Pinging MongoDB at mongodb://",
 				"  OK MongoDB answers at mongodb://");
 		assertThat(console.output()).doesNotContain("Cannot use MongoDB");
@@ -181,8 +184,8 @@ class MongoStepTest {
 				.isThrownBy(() -> step(noLocalServer, refusedBy("bad.example")).run(context, prompter));
 
 		// Option 3 of the menu is the exit: no "out of range" message and no question of the values option.
-		assertThat(console.output()).containsSubsequence("  Which MongoDB does OpenCelium use?", "  What now?",
-				"  Which MongoDB does OpenCelium use?").doesNotContain("Please enter a number")
+		assertThat(console.output()).containsSubsequence(MENU_QUESTION, "  What now?",
+				"3) Back to the menu", "choose another option", MENU_QUESTION).doesNotContain("Please enter a number")
 				.doesNotContain(HOST_PROMPT);
 		assertThat(context.mongoUri()).isEmpty();
 	}
@@ -221,7 +224,7 @@ class MongoStepTest {
 
 		step(noLocalServer, ANSWERS).run(context, prompter);
 
-		assertThat(console.output()).containsSubsequence("2) Server values", HOST_PROMPT, PORT_PROMPT, DATABASE_PROMPT,
+		assertThat(console.output()).containsSubsequence("2) Step by step", HOST_PROMPT, PORT_PROMPT, DATABASE_PROMPT,
 				USERNAME_PROMPT, PASSWORD_PROMPT, AUTH_DATABASE_PROMPT,
 				"  -> Pinging MongoDB at mongodb://oc:****@db.example:27018/ocdb?authSource=users...",
 				"  OK MongoDB answers at mongodb://oc:****@db.example:27018/ocdb?authSource=users")
@@ -352,7 +355,7 @@ class MongoStepTest {
 
 		// Only "Type the values again" keeps the last answers. From the menu, each value has its default again, so
 		// Enter at the database username gives a URI without a database login.
-		assertThat(console.output()).containsSubsequence("3) Back to the menu", "  Which MongoDB does OpenCelium use?",
+		assertThat(console.output()).containsSubsequence("3) Back to the menu", MENU_QUESTION,
 				HOST_PROMPT, PORT_PROMPT, DATABASE_PROMPT, USERNAME_PROMPT,
 				"  OK MongoDB answers at mongodb://localhost:27017/opencelium");
 		assertThat(context.mongoUri()).contains("mongodb://localhost:27017/opencelium");
