@@ -130,7 +130,7 @@ public class BindingUtility {
             List<String[]> variables = PathAndReferenceUtility.getQueryVariables(query);
             out:
             for (String[] p : variables) {
-                if (p[1].matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
+                if (p[1] != null && p[1].matches(".*" + RegExpression.wrappedDirectRef + ".*")) {
                     // p[1] can be:
                     // pure ref - '{%#ffffff.(response).body.$.a.b%}'
                     // one enhancement having several references - '{%#ffffff.(response).body.$.a.b;#ffffff.(response).a.c%}'
@@ -145,7 +145,8 @@ public class BindingUtility {
             }
             StringJoiner sj = new StringJoiner("&");
             for (String[] p : variables) {
-                sj.add(p[0] + "=" + p[1]);
+                // a part without '=' (value null) is written back as it was
+                sj.add(p[1] == null ? p[0] : p[0] + "=" + p[1]);
             }
             query = sj.toString();
         }

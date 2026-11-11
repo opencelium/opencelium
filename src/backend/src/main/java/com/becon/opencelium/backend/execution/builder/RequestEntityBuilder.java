@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.execution.builder;
 
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.enums.execution.ParamLocation;
+import com.becon.opencelium.backend.enums.execution.ParamStyle;
 import com.becon.opencelium.backend.reference.ReferenceDetector;
 import com.becon.opencelium.backend.reference.ReferenceMatchers;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -11,6 +12,7 @@ import com.becon.opencelium.backend.resource.execution.RequestBodyDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
+import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -18,16 +20,24 @@ import org.springframework.http.RequestEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriUtils;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HexFormat;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class RequestEntityBuilder {
+    private static final String ILLEGAL_URI_CHARACTERS = "\"<>{}|\\^`";
+
     private final OperationDTO operation;
     private final Function<String, Object> references;
 
@@ -76,46 +86,192 @@ public class RequestEntityBuilder {
         return operation.getHttpMethod();
     }
 
+    /**
+     * Builds the request URI from the endpoint exactly as the user wrote it.
+     *
+     * <p>Text typed by the user may arrive encoded ({@code %20}) or as is ({@code " "}): it is
+     * encoded leniently, so existing escapes are kept and only characters that are not allowed in
+     * a URI are encoded. References are replaced by their values, which are encoded as data for
+     * the part of the URI they land in, so a value cannot change the structure of the URI.
+     */
     private URI defaultURLBuilder() {
-        String rawUrl = operation.getPath();
+        String endpoint = operation.getPath();
+        if (endpoint == null || endpoint.isBlank()) {
+            throw new IllegalStateException("Endpoint should be supplied");
+        }
 
-        // replace path parameters
-        for (ParameterDTO parameter : getParamsByLocation(ParamLocation.PATH)) {
-            // create the copy of current 'parameter'
-            ParameterDTO copiedParameter = ParameterDTOUtil.copy(parameter);
+        endpoint = endpoint.trim();
 
-            // get 'reference' to replace it later with actual value
-            String ref = copiedParameter.getSchema().getValue();
+        int queryStart = PathAndReferenceUtility.indexOfOutsideReferences(endpoint, '?');
+        if (queryStart == -1) {
+            return URI.create(buildPath(endpoint));
+        }
 
-            // replace referenced schema
-            replaceRefs(copiedParameter.getSchema());
+        String path = buildPath(endpoint.substring(0, queryStart));
+        String query = buildQuery(endpoint.substring(queryStart + 1));
 
-            // convert parameter to string, and replace this path variable with actual value
-            String value = ParameterDTOUtil.toString(copiedParameter);
-            if (!ref.contains("url")) {
-                value = safeEncode(value);
+        return URI.create(path + "?" + query);
+    }
+
+    /**
+     * Builds the part of the URI before the query.
+     *
+     * <p>A reference that starts the endpoint (the base URL, or a whole URL taken from another
+     * method) and a connector request data reference such as {@code {url}} hold URL text, so they
+     * are inserted as is. Any other reference value is data: everything except the characters
+     * allowed in a path is encoded, and {@code '/'} stays a segment separator.
+     */
+    private String buildPath(String path) {
+        StringBuilder result = new StringBuilder();
+        int cursor = 0;
+
+        for (int[] span : PathAndReferenceUtility.findReferenceSpans(path)) {
+            result.append(encodeLeniently(path.substring(cursor, span[0])));
+
+            String reference = path.substring(span[0], span[1]);
+            boolean urlText = span[0] == 0 || ReferenceMatchers.isRequestData(reference);
+            result.append(resolvePathReference(reference, urlText));
+
+            cursor = span[1];
+        }
+
+        result.append(encodeLeniently(path.substring(cursor)));
+
+        return result.toString();
+    }
+
+    private String resolvePathReference(String reference, boolean urlText) {
+        ParameterDTO parameter = resolveReferenceParameter(reference, ParamLocation.PATH, ParamStyle.SIMPLE, reference);
+
+        if (urlText) {
+            return encodeLeniently(ParameterDTOUtil.toString(parameter));
+        }
+
+        encodeValues(parameter.getSchema(), RequestEntityBuilder::encodePathValue);
+
+        return ParameterDTOUtil.toString(parameter);
+    }
+
+    /**
+     * Builds the query, keeping the order and the text of every pair as the user wrote it.
+     *
+     * <p>Reference values are encoded as query data, so {@code '&'}, {@code '='}, {@code '+'} and
+     * {@code '#'} inside a value cannot split the query. A value that is a single reference keeps
+     * the form-style expansion, so an array becomes {@code name=a&name=b}. A pair without
+     * {@code '='} that is a single reference holds query text and is inserted as is.
+     */
+    private String buildQuery(String query) {
+        StringJoiner result = new StringJoiner("&");
+
+        for (String pair : PathAndReferenceUtility.splitOutsideReferences(query, '&')) {
+            int separator = PathAndReferenceUtility.indexOfOutsideReferences(pair, '=');
+
+            if (separator == -1) {
+                result.add(isSingleReference(pair) ? encodeLeniently(resolveAsText(pair)) : encodeQueryText(pair));
+                continue;
             }
 
-            rawUrl = rawUrl.replace(ref, value);
+            String name = encodeQueryText(pair.substring(0, separator));
+            String value = pair.substring(separator + 1);
+
+            result.add(isSingleReference(value)
+                    ? resolveQueryReference(name, value)
+                    : name + "=" + encodeQueryText(value));
         }
 
-        // replace query parameters
-        for (ParameterDTO parameter : getParamsByLocation(ParamLocation.QUERY)) {
-            // reconstruct existing query without resolving references;
-            String rawQuery = ParameterDTOUtil.toString(parameter);
+        return result.toString();
+    }
 
-            // replace referenced schema
-            ParameterDTO copiedParameter = ParameterDTOUtil.copy(parameter);
-            replaceRefs(copiedParameter.getSchema());
+    private String resolveQueryReference(String encodedName, String reference) {
+        ParameterDTO parameter = resolveReferenceParameter(encodedName, ParamLocation.QUERY, ParamStyle.FORM, reference);
+        encodeValues(parameter.getSchema(), RequestEntityBuilder::encodeQueryValue);
 
-            // construct query parameter and safely encode it (if necessary)
-            String query = safeEncode(ParameterDTOUtil.toString(copiedParameter));
+        return ParameterDTOUtil.toString(parameter);
+    }
 
-            // replace raw query parameter with actual encoded query
-            rawUrl = rawUrl.replace(rawQuery, query);
+    /**
+     * Encodes query text that may mix typed text with references: typed text leniently, each
+     * reference value as query data.
+     */
+    private String encodeQueryText(String text) {
+        StringBuilder result = new StringBuilder();
+        int cursor = 0;
+
+        for (int[] span : PathAndReferenceUtility.findReferenceSpans(text)) {
+            result.append(encodeLeniently(text.substring(cursor, span[0])));
+            result.append(encodeQueryValue(resolveAsText(text.substring(span[0], span[1]))));
+            cursor = span[1];
         }
 
-        return URI.create(rawUrl);
+        result.append(encodeLeniently(text.substring(cursor)));
+
+        return result.toString();
+    }
+
+    /**
+     * Resolves a reference the same way a field mixing text and references is resolved: a missing
+     * value becomes an empty string, any other value its {@code toString()}.
+     */
+    private String resolveAsText(String reference) {
+        Object value = references.apply(reference);
+
+        return value == null ? "" : value.toString();
+    }
+
+    /**
+     * Resolves a reference into a parameter whose schema takes the type of the referenced value,
+     * so arrays and objects are serialized in the parameter's style.
+     */
+    private ParameterDTO resolveReferenceParameter(String name, ParamLocation location, ParamStyle style, String reference) {
+        ParameterDTO parameter = new ParameterDTO();
+        parameter.setName(name);
+        parameter.setIn(location);
+        parameter.setStyle(style);
+        parameter.setExplode(style == ParamStyle.FORM);
+        parameter.setSchema(new SchemaDTO(DataType.STRING, reference));
+
+        replaceRefs(parameter.getSchema());
+
+        return parameter;
+    }
+
+    private static boolean isSingleReference(String text) {
+        List<int[]> spans = PathAndReferenceUtility.findReferenceSpans(text);
+
+        return spans.size() == 1 && spans.get(0)[0] == 0 && spans.get(0)[1] == text.length();
+    }
+
+    private static void encodeValues(SchemaDTO schema, UnaryOperator<String> encoder) {
+        if (schema == null) {
+            return;
+        }
+
+        if (schema.getValue() != null) {
+            schema.setValue(encoder.apply(schema.getValue()));
+        }
+
+        if (schema.getItems() != null) {
+            schema.getItems().forEach(item -> encodeValues(item, encoder));
+        }
+
+        if (schema.getProperties() != null) {
+            Map<String, SchemaDTO> encoded = new LinkedHashMap<>();
+            schema.getProperties().forEach((name, property) -> {
+                encodeValues(property, encoder);
+                encoded.put(encoder.apply(name), property);
+            });
+            schema.setProperties(encoded);
+        }
+    }
+
+    private static String encodePathValue(String value) {
+        // keeps '/' as a segment separator, encodes '?', '#', '%', spaces, non-ASCII, ...
+        return UriUtils.encodePath(value, StandardCharsets.UTF_8);
+    }
+
+    private static String encodeQueryValue(String value) {
+        // UriUtils leaves '+', which servers decode as a space, so it is encoded explicitly
+        return UriUtils.encodeQueryParam(value, StandardCharsets.UTF_8).replace("+", "%2B");
     }
 
     private HttpHeaders defaultHeadersBuilder() {
@@ -209,34 +365,53 @@ public class RequestEntityBuilder {
         }
     }
 
-    private static String safeEncode(String query) {
-        if (query == null) {
+    /**
+     * Encodes URL text that may already be encoded: valid {@code %XX} escapes are kept, and only
+     * characters that are not allowed in a URI are encoded. Characters with a meaning in a URI,
+     * such as {@code '/'}, {@code '?'}, {@code '&'} or {@code '='}, are left as they are.
+     */
+    private static String encodeLeniently(String text) {
+        if (text == null) {
             return null;
         }
 
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < query.length(); i++) {
-            char c = query.charAt(i);
+        StringBuilder result = new StringBuilder(text.length());
+        int i = 0;
+        while (i < text.length()) {
+            int codePoint = text.codePointAt(i);
+            int length = Character.charCount(codePoint);
 
-
-            if (c == '%' && i + 2 < query.length() &&
-                    Character.digit(query.charAt(i + 1), 16) != -1 &&
-                    Character.digit(query.charAt(i + 2), 16) != -1) {
-                // keep existing valid %XX sequences
-                sb.append('%').append(query.charAt(i + 1)).append(query.charAt(i + 2));
-                i += 2;
-            } else if (Character.isWhitespace(c)) {
-                // encode all types of whitespace (space, tab, newline, Unicode space, ...)
-                sb.append("%20");
-            } else if ("\"<>{}|\\^`".indexOf(c) >= 0) {
-                // encode other illegal chars if needed
-                sb.append('%').append(String.format("%02X", (int) c));
+            if (codePoint == '%' && isEscapeSequence(text, i)) {
+                // keep an existing %XX escape
+                result.append(text, i, i + 3);
+                length = 3;
+            } else if (Character.isWhitespace(codePoint)) {
+                // any whitespace (space, tab, newline, ...) becomes a space
+                result.append("%20");
+            } else if (codePoint == '%' || codePoint < 0x20 || codePoint > 0x7E
+                    || ILLEGAL_URI_CHARACTERS.indexOf(codePoint) >= 0) {
+                // a lone '%', control characters, non-ASCII and other characters a URI cannot hold
+                appendPercentEncoded(result, codePoint);
             } else {
-                sb.append(c);
+                result.append((char) codePoint);
             }
+
+            i += length;
         }
 
-        return sb.toString();
+        return result.toString();
+    }
+
+    private static boolean isEscapeSequence(String text, int index) {
+        return index + 2 < text.length()
+                && HexFormat.isHexDigit(text.charAt(index + 1))
+                && HexFormat.isHexDigit(text.charAt(index + 2));
+    }
+
+    private static void appendPercentEncoded(StringBuilder result, int codePoint) {
+        for (byte b : Character.toString(codePoint).getBytes(StandardCharsets.UTF_8)) {
+            result.append('%').append(String.format("%02X", b & 0xFF));
+        }
     }
 
     private void replaceRefs(SchemaDTO schema) {
