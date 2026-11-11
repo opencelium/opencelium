@@ -14,6 +14,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import io.opencelium.core.setup.SetupCancelledException;
+
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -26,7 +28,9 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  * order, before the replaced files are deleted. When anything fails, the writer undoes the actions that ran, the
  * failed one included and the last one first, while the files are still in place. Then it deletes the staged files,
  * puts back the files it replaced, deletes the other targets this run moved and the directories it made that are
- * empty again, and throws {@link SetupWriteException} naming the target or the action that failed.
+ * empty again, and throws {@link SetupWriteException} naming the target or the action that failed. A cancel at a
+ * question of an action rolls back in the same way and stays a cancel, so the wizard can say that nothing was
+ * written.
  */
 public final class FilePlanWriter {
 
@@ -54,9 +58,21 @@ public final class FilePlanWriter {
 	}
 
 	/**
-	 * @throws SetupWriteException when a file cannot be written or an action fails; the rollback has run by then
+	 * @throws SetupWriteException     when a file cannot be written or an action fails; the rollback has run by then
+	 * @throws SetupCancelledException when the user cancels at a question of an action; the rollback has run by then
 	 */
 	public void write(FilePlan plan) {
+		write(plan, () -> {
+		});
+	}
+
+	/**
+	 * @param filesInPlace runs when every file is in its place, before the first action
+	 * @throws SetupWriteException     when a file cannot be written or an action fails; the rollback has run by then
+	 * @throws SetupCancelledException when the user cancels at a question of an action; the actions that ran are
+	 *                                 undone and the files rolled back, so nothing is written
+	 */
+	public void write(FilePlan plan, Runnable filesInPlace) {
 		if (plan.isEmpty()) {
 			return;
 		}
@@ -77,6 +93,7 @@ public final class FilePlanWriter {
 		catch (IOException ex) {
 			throw run.rollBack(ex);
 		}
+		filesInPlace.run();
 		List<PlannedAction> started = new ArrayList<>();
 		try {
 			for (PlannedAction action : plan.actions()) {
@@ -88,6 +105,11 @@ public final class FilePlanWriter {
 			List<String> left = started.reversed().stream().map(PlannedAction::undo).flatMap(Optional::stream)
 					.toList();
 			throw run.rollBack(ex, plan.files().getFirst().path(), left);
+		}
+		catch (SetupCancelledException ex) {
+			started.reversed().stream().map(PlannedAction::undo).flatMap(Optional::stream).forEach(warnings);
+			run.undoFiles();
+			throw ex;
 		}
 		run.removeBackups();
 	}

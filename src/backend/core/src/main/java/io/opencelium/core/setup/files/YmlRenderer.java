@@ -30,6 +30,8 @@ public final class YmlRenderer {
 		var opencelium = new LinkedHashMap<String, Object>();
 		opencelium.put(leaf(OpenCeliumProperties.DEPLOYMENT_MODE), values.deploymentMode().propertyValue());
 		opencelium.put(leaf(OpenCeliumProperties.DATA_DIR), values.dataDir().toString());
+		values.masterKeyFile().ifPresent(file -> opencelium.put(leaf(OpenCeliumProperties.MASTER_KEY_FILE),
+				file.toString()));
 		var root = new LinkedHashMap<String, Object>();
 		root.put("server", Map.of("port", values.port()));
 		root.put("spring", Map.of("mongodb", Map.of("uri", "${" + MONGO_URI_VARIABLE + "}")));

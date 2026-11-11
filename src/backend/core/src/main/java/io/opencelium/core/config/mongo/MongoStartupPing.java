@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCommandException;
 import com.mongodb.MongoCredential;
 import com.mongodb.MongoException;
@@ -64,12 +65,19 @@ public final class MongoStartupPing {
 		return attempt(connection).map(failed -> failed.failure().reason());
 	}
 
-	private static Optional<Failed> attempt(MongoConnection connection) {
-		var settings = MongoClientFactory.settingsBuilder(connection)
+	/**
+	 * The settings of a short-lived client for one check before Spring starts: the timeout of this ping in place of
+	 * the driver's 30 seconds, so a server that does not answer fails in seconds.
+	 */
+	public static MongoClientSettings checkSettings(MongoConnection connection) {
+		return MongoClientFactory.settingsBuilder(connection)
 				.applyToClusterSettings(cluster -> cluster.serverSelectionTimeout(TIMEOUT.toMillis(), TimeUnit.MILLISECONDS))
 				.applyToSocketSettings(socket -> socket.connectTimeout(TIMEOUT.toMillis(), TimeUnit.MILLISECONDS))
 				.build();
-		try (var client = MongoClients.create(settings)) {
+	}
+
+	private static Optional<Failed> attempt(MongoConnection connection) {
+		try (var client = MongoClients.create(checkSettings(connection))) {
 			try {
 				MongoDatabase database = client.getDatabase(connection.databaseName());
 				database.runCommand(new Document("ping", 1));

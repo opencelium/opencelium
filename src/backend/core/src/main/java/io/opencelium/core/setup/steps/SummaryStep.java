@@ -42,12 +42,13 @@ public final class SummaryStep implements SetupStep {
 		var values = new BootstrapValues(context.deploymentMode(), context.dataDir()
 				.orElseThrow(() -> new IllegalStateException("The data directory step did not run.")), context.port()
 				.orElseThrow(() -> new IllegalStateException("The port step did not run.")), context.mongoUri()
-				.orElseThrow(() -> new IllegalStateException("The MongoDB step did not run.")));
+				.orElseThrow(() -> new IllegalStateException("The MongoDB step did not run.")), context.masterKeyFile());
 		var rows = new LinkedHashMap<String, String>();
 		rows.put("Mode", values.deploymentMode().propertyValue());
 		rows.put("Data directory", values.dataDir().toString());
 		rows.put("Web port", String.valueOf(values.port()));
 		rows.put("MongoDB", MongoConnection.redact(values.mongoUri()));
+		context.masterKeySource().ifPresent(source -> rows.put("Master key", source));
 		prompter.print("");
 		prompter.box("Summary", rows);
 		prompter.print("");

@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.testsupport.fake.RecordingAction;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -223,6 +224,26 @@ class FilePlanWriterTest {
 		assertThat(tmp.resolve("config/application.yml")).content().isEqualTo("old\n");
 		assertThat(entries(tmp.resolve("config"))).containsExactly("application.yml");
 		assertThat(tmp.resolve("systemd")).doesNotExist();
+	}
+
+	@Test
+	void writeUndoesTheActionsAndRollsBackTheFilesThenRethrowsWhenAnActionIsCancelled() throws IOException {
+		Files.createDirectory(tmp.resolve("config"));
+		Files.writeString(tmp.resolve("config/application.yml"), "old\n");
+		List<String> log = new ArrayList<>();
+		PlannedFile key = PlannedFile.ownerOnly(tmp.resolve("data/master.key"), "a2V5\n");
+		FilePlan plan = plan(yml("new\n"), env("b\n"));
+		plan.add(new RecordingAction("first", log, key));
+		plan.add(new RecordingAction("second", log).onRun(() -> {
+			throw new SetupCancelledException();
+		}));
+
+		assertThatExceptionOfType(SetupCancelledException.class).isThrownBy(() -> writer.write(plan));
+
+		assertThat(log).containsExactly("run first", "undo second", "undo first");
+		assertThat(tmp.resolve("config/application.yml")).content().isEqualTo("old\n");
+		assertThat(entries(tmp.resolve("config"))).containsExactly("application.yml");
+		assertThat(tmp.resolve("data")).doesNotExist();
 	}
 
 	@Test
