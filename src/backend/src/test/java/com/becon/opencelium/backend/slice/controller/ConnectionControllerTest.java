@@ -19,6 +19,7 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.execution.service.MethodTestService;
+import com.becon.opencelium.backend.execution.service.ReferenceValidationService;
 import com.becon.opencelium.backend.reference.enums.ReferenceType;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.ConnectorReference;
@@ -27,6 +28,11 @@ import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReq
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO.ReceivedResponse;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO.SentRequest;
+import com.becon.opencelium.backend.reference.model.DirectReference;
+import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationRequestDTO;
+import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationResultDTO;
+import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationResultDTO.Issue;
+import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationResultDTO.IssueCode;
 import com.becon.opencelium.backend.websocket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
@@ -60,6 +66,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -126,6 +133,9 @@ class ConnectionControllerTest {
 
     @MockBean
     private MethodTestService methodTestService;
+
+    @MockBean
+    private ReferenceValidationService referenceValidationService;
 
     // ── GET /connection/all ───────────────────────────────────────────────────
 
@@ -290,5 +300,48 @@ class ConnectionControllerTest {
                 .andExpect(jsonPath("$.connectorReferences[0].connectorId").value(3))
                 .andExpect(jsonPath("$.connectorReferences[0].available").value(true))
                 .andExpect(jsonPath("$.staticReferences[0].type").value("WEBHOOK"));
+    }
+
+    // ── POST /connection/reference/validate ───────────────────────────────────
+
+    @Test
+    @DisplayName("POST /connection/reference/validate passes the request on and returns the issues")
+    void validateReferenceReturnsResultWhenBodyIsValid() throws Exception {
+        when(referenceValidationService.validate(any())).thenReturn(new ReferenceValidationResultDTO(
+                false, "#ababab.(response).body.data", ReferenceType.DIRECT, DirectReference.Part.BODY,
+                null, null,
+                List.of(new Issue(IssueCode.MISSING_ROOT, "The path must start with '$.'.",
+                        "Write body.$.data.", 24, "data")),
+                List.of()));
+        ArgumentCaptor<ReferenceValidationRequestDTO> captor =
+                ArgumentCaptor.forClass(ReferenceValidationRequestDTO.class);
+
+        mockMvc.perform(post("/connection/reference/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "reference": "#ababab.(response).body.data",
+                                  "iterators": ["i"],
+                                  "sample": { "data": [1] } }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valid").value(false))
+                .andExpect(jsonPath("$.part").value("BODY"))
+                .andExpect(jsonPath("$.errors[0].code").value("MISSING_ROOT"))
+                .andExpect(jsonPath("$.errors[0].position").value(24))
+                .andExpect(jsonPath("$.errors[0].hint").value("Write body.$.data."));
+
+        verify(referenceValidationService).validate(captor.capture());
+        assertThat(captor.getValue().reference()).isEqualTo("#ababab.(response).body.data");
+        assertThat(captor.getValue().iterators()).containsExactly("i");
+        assertThat(captor.getValue().sample()).isEqualTo(Map.of("data", List.of(1)));
+    }
+
+    @Test
+    void validateReferenceReturnsBadRequestWhenBodyIsMissing() throws Exception {
+        mockMvc.perform(post("/connection/reference/validate")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(referenceValidationService);
     }
 }
