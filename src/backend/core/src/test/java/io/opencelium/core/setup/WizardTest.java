@@ -17,10 +17,12 @@ import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.setup.prompt.Prompter;
 import io.opencelium.core.setup.steps.DataDirStep;
+import io.opencelium.core.setup.steps.MasterKeyStep;
 import io.opencelium.core.setup.steps.MongoStep;
 import io.opencelium.core.setup.steps.PortStep;
 import io.opencelium.core.setup.steps.SetupStep;
 import io.opencelium.core.setup.steps.SummaryStep;
+import io.opencelium.core.testsupport.fake.RecordingAction;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -140,6 +142,45 @@ class WizardTest {
 	}
 
 	@Test
+	void runPrintsNothingWrittenAndRemovesTheFilesWhenAnActionIsCancelled() {
+		Path file = tmp.resolve("config/application.yml");
+		SetupStep planning = (context, prompter) -> {
+			context.filePlan().add(PlannedFile.groupReadable(file, "port: 1\n"));
+			context.filePlan().add(new RecordingAction("confirm", new ArrayList<>()).onRun(() -> {
+				throw new SetupCancelledException();
+			}));
+		};
+		Wizard wizard = wizard(List.of(planning));
+
+		OptionalInt exitCode = wizard.run(REASON);
+
+		assertThat(exitCode).hasValue(0);
+		assertThat(file).doesNotExist();
+		assertThat(console.output()).contains("\n  Setup cancelled. Nothing was written.\n")
+				.doesNotContain("Configuration written");
+		assertThat(started).isFalse();
+		assertThat(wizard.hasWritten()).isFalse();
+	}
+
+	@Test
+	void runCountsTheFilesAsWrittenWhileAnActionRuns() {
+		Path file = tmp.resolve("config/application.yml");
+		List<Boolean> writtenDuringTheAction = new ArrayList<>();
+		Wizard[] wizard = new Wizard[1];
+		SetupStep planning = (context, prompter) -> {
+			context.filePlan().add(PlannedFile.groupReadable(file, "port: 1\n"));
+			context.filePlan().add(new RecordingAction("confirm", new ArrayList<>())
+					.onRun(() -> writtenDuringTheAction.add(wizard[0].hasWritten())));
+		};
+		wizard[0] = wizard(List.of(planning));
+
+		wizard[0].run(REASON);
+
+		// Ctrl+C at a question of an action must not say "nothing was written".
+		assertThat(writtenDuringTheAction).containsExactly(true);
+	}
+
+	@Test
 	void runOmitsTheKeyHintFromTheBannerWhenBatch() {
 		var batch = new ValueSource(SetupValues.NONE, Optional.of(Path.of("setup-values.yml")), true);
 
@@ -160,11 +201,11 @@ class WizardTest {
 	}
 
 	@Test
-	void standardStepsAskTheDataDirectoryThePortAndMongoDbThenShowTheSummary() {
+	void standardStepsAskTheDataDirectoryThePortMongoDbAndTheMasterKeyThenShowTheSummary() {
 		var locations = new ConfigLocations(tmp, tmp.resolve("etc/opencelium"));
 
 		assertThat(Wizard.standardSteps(locations)).hasExactlyElementsOfTypes(DataDirStep.class, PortStep.class,
-				MongoStep.class, SummaryStep.class);
+				MongoStep.class, MasterKeyStep.class, SummaryStep.class);
 	}
 
 	private Wizard wizard(List<SetupStep> steps) {

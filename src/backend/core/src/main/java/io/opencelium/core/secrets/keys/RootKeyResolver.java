@@ -92,6 +92,36 @@ public final class RootKeyResolver {
 		return key;
 	}
 
+	/**
+	 * Where the master key comes from, as {@link #resolve(BooleanSupplier)} would find it, without a generation and
+	 * without a write: the setup wizard asks this before it offers to generate a key.
+	 *
+	 * @return empty when no source has a key
+	 * @throws BootstrapPropertyException when both sources are set, or a key is malformed or cannot be read
+	 */
+	public Optional<RootKeySource> probe() {
+		throw new UnsupportedOperationException("probe");
+	}
+
+	/**
+	 * Why {@code value} is not a master key in the text form, without a quote of the value.
+	 *
+	 * @param what names the value in the message, for example "OC_MASTER_KEY"
+	 * @return empty when the value is the base64 of exactly 32 bytes
+	 */
+	public static Optional<String> textProblem(String value, String what) {
+		throw new UnsupportedOperationException("textProblem");
+	}
+
+	/**
+	 * Why {@code file} does not hold a master key that this user can read, without a quote of its content.
+	 *
+	 * @return empty when the file is a regular file with the base64 of exactly 32 bytes
+	 */
+	public static Optional<String> fileProblem(Path file) {
+		throw new UnsupportedOperationException("fileProblem");
+	}
+
 	private Optional<RootKey> load() {
 		String fromEnvironment = environment.apply(ENV_VARIABLE);
 		if (fromEnvironment != null && masterKeyFile.isPresent()) {

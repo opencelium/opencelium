@@ -19,6 +19,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public record WrappedDek(@Id String id, String tenantId, String rootKeyId, int dekVersion, byte[] iv,
 		byte[] ciphertext, Instant createdAt) {
 
+	/** The collection of the wrapped data keys, in each tenant's database. */
+	public static final String COLLECTION = "keys";
+
 	@Override
 	public String toString() {
 		return "WrappedDek[id=" + id + ", tenant=" + tenantId + ", rootKeyId=" + rootKeyId + ", dekVersion="

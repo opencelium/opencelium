@@ -150,6 +150,30 @@ class SummaryStepTest {
 				.withMessageContaining("data directory");
 	}
 
+	@Test
+	void runShowsWhereTheMasterKeyComesFrom() {
+		answered();
+		context.setMasterKey("the key file /keys/master.key", Optional.of(Path.of("/keys/master.key")));
+		console.type("");
+
+		step().run(context, new ConsolePrompter(console));
+
+		assertThat(console.output()).contains("  |  Master key      the key file /keys/master.key");
+	}
+
+	@Test
+	void runPutsTheKeyFileIntoApplicationYml() {
+		answered();
+		context.setMasterKey("the key file /keys/master.key", Optional.of(Path.of("/keys/master.key")));
+		console.type("");
+
+		step().run(context, new ConsolePrompter(console));
+
+		assertThat(context.filePlan().files()).filteredOn(file -> file.path().endsWith("application.yml"))
+				.singleElement().satisfies(file -> assertThat(file.content())
+						.contains("master-key-file: /keys/master.key"));
+	}
+
 	private void answered() {
 		context.setDataDir(Path.of("/srv/oc"));
 		context.setPort(9090);

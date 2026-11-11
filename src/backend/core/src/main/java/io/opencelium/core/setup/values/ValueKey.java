@@ -13,7 +13,9 @@ public enum ValueKey {
 
 	MONGO("mongo"),
 
-	MONGO_URI("mongo-uri");
+	MONGO_URI("mongo-uri"),
+
+	MASTER_KEY("master-key");
 
 	private final String word;
 

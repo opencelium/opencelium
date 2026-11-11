@@ -193,6 +193,75 @@ class RootKeyResolverTest {
 		assertThat(dataDir.resolve("master.key")).doesNotExist();
 	}
 
+	@Test
+	void probeFindsTheDataDirFileAndChangesNothing() throws Exception {
+		Path file = dataDir.resolve(DATA_DIR_FILE_NAME);
+		String key = randomKey();
+		Files.writeString(file, key);
+
+		assertThat(resolver(Map.of(), Optional.empty()).probe()).contains(RootKeySource.DATA_DIR);
+		assertThat(file).content().isEqualTo(key);
+	}
+
+	@Test
+	void probePrefersTheEnvironmentVariableOverTheDataDirFile() throws Exception {
+		Files.writeString(dataDir.resolve(DATA_DIR_FILE_NAME), randomKey());
+
+		assertThat(resolver(Map.of(ENV_VARIABLE, randomKey()), Optional.empty()).probe()).contains(RootKeySource.ENV);
+	}
+
+	@Test
+	void probeIsEmptyAndGeneratesNoFileWhenNoSourceHasAKey() {
+		assertThat(resolver(Map.of(), Optional.empty()).probe()).isEmpty();
+		assertThat(dataDir.resolve(DATA_DIR_FILE_NAME)).doesNotExist();
+	}
+
+	@Test
+	void probeStopsWithoutQuotingTheValueWhenTheEnvironmentKeyIsNotBase64() {
+		var resolver = resolver(Map.of(ENV_VARIABLE, "not*base64"), Optional.empty());
+
+		assertThatExceptionOfType(BootstrapPropertyException.class).isThrownBy(resolver::probe)
+				.withMessageContaining("OC_MASTER_KEY is not valid base64").withMessageNotContaining("not*base64");
+	}
+
+	@Test
+	void textProblemIsEmptyForTheBase64Of32Bytes() {
+		assertThat(RootKeyResolver.textProblem(randomKey(), ENV_VARIABLE)).isEmpty();
+	}
+
+	@Test
+	void textProblemNamesTheLengthWithoutQuotingTheValueWhenItIsNot32Bytes() {
+		String shortKey = Base64.getEncoder().encodeToString(new byte[16]);
+
+		assertThat(RootKeyResolver.textProblem(shortKey, ENV_VARIABLE)).hasValueSatisfying(problem -> assertThat(problem)
+				.contains("OC_MASTER_KEY decodes to 16 bytes, expected 32").doesNotContain(shortKey));
+	}
+
+	@Test
+	void fileProblemIsEmptyForAFileWithTheBase64Of32Bytes() throws Exception {
+		Path file = elsewhere.resolve("master.key");
+		Files.writeString(file, randomKey() + "\n");
+
+		assertThat(RootKeyResolver.fileProblem(file)).isEmpty();
+	}
+
+	@Test
+	void fileProblemSaysThatTheFileDoesNotExist() {
+		Path file = elsewhere.resolve("missing.key");
+
+		assertThat(RootKeyResolver.fileProblem(file)).hasValueSatisfying(problem -> assertThat(problem)
+				.contains("Master key file " + file + " does not exist"));
+	}
+
+	@Test
+	void fileProblemSaysThatAFileIsNotBase64WithoutQuotingIt() throws Exception {
+		Path file = elsewhere.resolve("master.key");
+		Files.writeString(file, "plain*text");
+
+		assertThat(RootKeyResolver.fileProblem(file)).hasValueSatisfying(problem -> assertThat(problem)
+				.contains("Master key file " + file + " is not valid base64").doesNotContain("plain*text"));
+	}
+
 	private RootKeyResolver resolver(Map<String, String> environment, Optional<Path> masterKeyFile) {
 		return resolver(DeploymentMode.SELF_HOST, environment, masterKeyFile);
 	}
