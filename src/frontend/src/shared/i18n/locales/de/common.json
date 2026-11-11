@@ -51,6 +51,7 @@
       "list": "Die Eintragsliste öffnen",
       "login": "Aktuelle Rolle wechseln",
       "system": "Systemaktionen",
+      "checkAiSettings": "KI prüfen: Verfügbarkeit, welches Modell was macht, Beebot",
       "checkLicense": "Lizenz und API-Aufrufverbrauch prüfen",
       "updateSystemConfig": "Anwendungskonfiguration auf der Festplatte bearbeiten",
       "changeTheme": "Anwendungsdesign wechseln",

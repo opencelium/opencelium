@@ -5,6 +5,7 @@ import { createCommandIndex } from '../command/commandIndex.ts'
 import { routeCommandRequestSchema, searchCommandsRequestSchema } from '../command/commandRequest.schema.ts'
 import { routeCommand } from '../command/routeCommand.ts'
 import { sendApiError } from './apiError.ts'
+import { modelFor } from '../featureModels.ts'
 
 export function registerCommandRoutes(app: FastifyInstance, { config, llm, embedder, invokers }: AppDeps) {
     const index = createCommandIndex(embedder)
@@ -20,7 +21,7 @@ export function registerCommandRoutes(app: FastifyInstance, { config, llm, embed
         if (!body.success) return sendApiError(reply, 'BAD_REQUEST', 'Invalid request body', z.treeifyError(body.error))
         try {
             const systems = async () => (await invokers.list()).map((invoker) => invoker.name)
-            const result = await routeCommand(body.data, { llm, index, model: config.commandModel, contextTokens: config.contextTokens, systems })
+            const result = await routeCommand(body.data, { llm, index, model: modelFor(config, 'command-palette'), contextTokens: config.contextTokens, systems })
             request.log.info({ commandId: result.commandId, action: result.action, intent: result.intent?.kind, durationMs: result.durationMs }, 'command routed')
             return result
         } catch (error) {

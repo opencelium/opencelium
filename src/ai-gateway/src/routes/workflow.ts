@@ -12,6 +12,7 @@ import { type FocusResult, focusConnectors, operationKey, restrictConnectors } f
 import { textCalls } from '../plan/planCalls.ts'
 import { type PlanBuild, constraintFromPlan } from '../workflow/planConstraint.ts'
 import { sendApiError } from './apiError.ts'
+import { modelFor } from '../featureModels.ts'
 
 export const generateWorkflowRequestSchema = z.object({
     prompt: z.string().trim().min(1).max(4000),
@@ -118,7 +119,7 @@ export function registerWorkflowRoutes(app: FastifyInstance, deps: AppDeps) {
             const flows = await findTemplates(parsed, TEMPLATES_PER_PLAN)
             const focus = await focusFor(parsed, flows)
             const plan = await generatePlan(parsed.prompt, focus.connectors, {
-                llm, model: config.workflowModel, contextTokens: config.contextTokens, templates: flows,
+                llm, model: modelFor(config, 'generate-workflow'), contextTokens: config.contextTokens, templates: flows,
             })
             request.log.info({ pattern: plan.pattern, stepCount: plan.steps.length, durationMs: plan.durationMs,
                 templateIds: flows.map((flow) => flow.id), omittedOperationCount: focus.omittedCount }, 'plan generated')
@@ -138,7 +139,7 @@ export function registerWorkflowRoutes(app: FastifyInstance, deps: AppDeps) {
             const { prompt, constraint } = withTemplates(parsed, connectors, flows, usages)
             const result = await generateWorkflow(prompt, connectors, {
                 llm,
-                model: config.workflowModel,
+                model: modelFor(config, 'generate-workflow'),
                 contextTokens: config.contextTokens,
                 maxRepairAttempts: config.maxRepairAttempts,
             }, constraint)

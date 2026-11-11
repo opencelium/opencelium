@@ -6,6 +6,7 @@ import { draftFromDocs } from '../invokerDraft/draftFromDocs.ts'
 import { invokerDraftSchema } from '../invokerDraft/invokerDraft.schema.ts'
 import { openApiToDraft, parseOpenApi } from '../invokerDraft/openApiToDraft.ts'
 import { sendApiError } from './apiError.ts'
+import { modelFor } from '../featureModels.ts'
 
 // OpenAPI descriptions of large systems run to megabytes (Netbox's is several); Fastify's default is 1 MB.
 const MAX_DOCS_BYTES = 20 * 1024 * 1024
@@ -33,10 +34,10 @@ export function registerInvokerDraftRoutes(app: FastifyInstance, { config, llm }
             return { draft: named, source: 'openapi', isTruncated: false, durationMs: 0 }
         }
         try {
-            const result = await draftFromDocs(body.data.docs, body.data.name, { llm, model: config.workflowModel, contextTokens: config.contextTokens })
+            const result = await draftFromDocs(body.data.docs, body.data.name, { llm, model: modelFor(config, 'invoker-from-docs'), contextTokens: config.contextTokens })
             request.log.info({ source: 'ai', operationCount: result.draft.operations.length, isTruncated: result.isTruncated,
                 durationMs: result.durationMs }, 'invoker drafted')
-            return { ...result, source: 'ai', model: config.workflowModel }
+            return { ...result, source: 'ai', model: modelFor(config, 'invoker-from-docs') }
         } catch (error) {
             request.log.error({ err: error }, 'invoker draft failed')
             return sendApiError(reply, 'GENERATION_FAILED', error instanceof Error ? error.message : 'Invoker draft failed')

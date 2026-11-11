@@ -8,6 +8,9 @@ export type AiHealth = {
 	invokerCount: number;
 	/** Missing from gateways older than voice input. */
 	speech?: { available: boolean };
+	/** Which model each feature runs on (`src/ai-gateway/src/featureModels.ts`); missing from older gateways. */
+	features?: { id: string; model: string; available: boolean }[];
+	embedModel?: { name: string; available: boolean };
 };
 
 export type TranscribeSpeechResponse = { text: string; language: string | null; durationMs: number };

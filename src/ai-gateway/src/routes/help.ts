@@ -6,6 +6,7 @@ import { createCommandIndex } from '../command/commandIndex.ts'
 import { answerHelp, helpRequestSchema } from '../help/answerHelp.ts'
 import { noDocsIndex } from '../help/docsIndex.ts'
 import { sendApiError } from './apiError.ts'
+import { modelFor } from '../featureModels.ts'
 
 /**
  * The help assistant. The answer streams as newline-delimited JSON (sources, text pieces, offered commands), so the
@@ -18,7 +19,7 @@ export function registerHelpRoutes(app: FastifyInstance, { config, llm, embedder
         if (!body.success) return sendApiError(reply, 'BAD_REQUEST', 'Invalid request body', z.treeifyError(body.error))
         const help = body.data
         const started = Date.now()
-        const events = answerHelp(help, { llm, docs, commands, model: config.helpModel, rewriteModel: config.commandModel,
+        const events = answerHelp(help, { llm, docs, commands, model: modelFor(config, 'help'), rewriteModel: modelFor(config, 'help-follow-up'),
             contextTokens: config.contextTokens, docsUrl: config.docsUrl })
         async function* lines() {
             try {

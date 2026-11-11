@@ -5,12 +5,13 @@ import { type RunAiDeps, explainFailure } from '../run/explainFailure.ts'
 import { fixFailure } from '../run/fixFailure.ts'
 import { type RunFailure, runFailureSchema } from '../run/runFailure.ts'
 import { sendApiError } from './apiError.ts'
+import { modelFor } from '../featureModels.ts'
 
 type RunAi = (failure: RunFailure, deps: RunAiDeps) => Promise<{ durationMs: number }>
 
 /** Explains a failed test run, and proposes a corrected request for a failed method call. */
 export function registerRunRoutes(app: FastifyInstance, { config, llm, invokers }: AppDeps) {
-    const deps: RunAiDeps = { llm, invokers, model: config.lightModel, contextTokens: config.contextTokens }
+    const deps: RunAiDeps = { llm, invokers, model: modelFor(config, 'run-explain-fix'), contextTokens: config.contextTokens }
     const handle = (what: string, run: RunAi) => async (request: FastifyRequest, reply: FastifyReply) => {
         const body = runFailureSchema.safeParse(request.body)
         if (!body.success) return sendApiError(reply, 'BAD_REQUEST', 'Invalid request body', z.treeifyError(body.error))
