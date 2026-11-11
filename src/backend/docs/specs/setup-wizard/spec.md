@@ -48,7 +48,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
 ### MongoDB
 
-- **SW-11** Given no server on `localhost:27017`, when the MongoDB step starts, then it must offer 3 options:
+- **SW-11** Given no server on `localhost:27017`, when the MongoDB step starts, then it must ask how OpenCelium connects to MongoDB and offer 3 options:
   1. Type the URI of a server that exists.
   2. Type the values of the URI one by one.
   3. Exit.

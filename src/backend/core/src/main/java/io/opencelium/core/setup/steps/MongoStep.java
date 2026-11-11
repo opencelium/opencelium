@@ -41,7 +41,11 @@ import io.opencelium.core.setup.values.ValueSource;
  */
 public final class MongoStep implements SetupStep {
 
-	static final String QUESTION = "Which MongoDB does OpenCelium use?";
+	/**
+	 * Asks how, not which: the URI option and the values option can name the same server, so the options are ways to
+	 * give the MongoDB connection, and only the local option names a server.
+	 */
+	static final String QUESTION = "How do you want to connect OpenCelium to MongoDB?";
 
 	static final String RETRY_QUESTION = "What now?";
 
@@ -50,8 +54,8 @@ public final class MongoStep implements SetupStep {
 	private static final String URI = "uri";
 
 	private static final String SERVER_HELP = """
-			Which MongoDB OpenCelium uses:
-			  local   the server that listens on %s on this machine, without a login
+			How OpenCelium connects to MongoDB:
+			  local   the server that listens on %s on this machine, without a database login
 			  uri     a server that exists; mongo-uri gives its URI""";
 
 	private static final String URI_HELP = """
@@ -95,8 +99,8 @@ public final class MongoStep implements SetupStep {
 	 */
 	private static final Pattern DATABASE_NAME = Pattern.compile("[A-Za-z0-9_-]+");
 
-	private static final List<Choice> RETRY_URI = retry("Type the URI again", "correct the address or the login",
-			"Type the URI again; the setup pings it again.");
+	private static final List<Choice> RETRY_URI = retry("Type the URI again", "correct the address or the database"
+			+ " login", "Type the URI again; the setup pings it again.");
 
 	private static final List<Choice> RETRY_VALUES = retry("Type the values again", "correct the address or the"
 			+ " database login", "Type the values again; the last answers are the defaults, except the database"
@@ -149,7 +153,7 @@ public final class MongoStep implements SetupStep {
 		return List.of(new Choice(again, summary, help),
 				new Choice("Continue", "keep this URI", "Keep this URI. OpenCelium does not start until the server"
 						+ " answers; the start names the cause again."),
-				new Choice("Back to the menu", "choose another MongoDB", "Go back to the list of MongoDB servers."));
+				new Choice("Back to the menu", "choose another option", "Go back to the MongoDB menu."));
 	}
 
 	/** The URI of the server that the user chose: it answered, or the user kept it after a failed ping. */
@@ -333,13 +337,15 @@ public final class MongoStep implements SetupStep {
 
 	private Choice choice(Server server) {
 		return switch (server) {
-			case LOCAL -> new Choice("Local server", "the server at " + detector.address(), "Use the MongoDB that"
-					+ " listens on " + detector.address() + " on this machine, database opencelium, without a login.");
-			case URI -> new Choice("Server URI", "type the URI of a server that exists", "Type the connection URI of"
-					+ " a MongoDB server that exists, with its login. The setup pings it before it continues.");
-			case VALUES -> new Choice("Server values", "type the host, the port and the database login", "Type the"
-					+ " host, the port, the database and the database login of a MongoDB server that exists, one by"
-					+ " one. The setup builds the URI from them and pings the server before it continues.");
+			case LOCAL -> new Choice("Local MongoDB", "the server at " + detector.address() + ", no database login",
+					"Use the MongoDB that listens on " + detector.address() + " on this machine, database opencelium,"
+							+ " without a database login.");
+			case URI -> new Choice("MongoDB URI", "type the whole URI with the database login", "Type the"
+					+ " connection URI of a MongoDB server that exists, with its database login. The setup pings it"
+					+ " before it continues.");
+			case VALUES -> new Choice("Step by step", "type the host, the port, the database and the database login",
+					"Type the host, the port, the database and the database login of a MongoDB server that exists, one"
+							+ " by one. The setup builds the URI from them and pings the server before it continues.");
 			case EXIT -> new Choice("Exit", "end the setup; nothing is written", "End the setup; nothing is written."
 					+ " Start MongoDB, then run the setup again.");
 		};
