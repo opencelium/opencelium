@@ -13,6 +13,7 @@ import io.opencelium.core.setup.files.FilePlanWriter;
 import io.opencelium.core.setup.files.SetupWriteException;
 import io.opencelium.core.setup.prompt.Prompter;
 import io.opencelium.core.setup.steps.DataDirStep;
+import io.opencelium.core.setup.steps.MasterKeyStep;
 import io.opencelium.core.setup.steps.MongoStep;
 import io.opencelium.core.setup.steps.PortStep;
 import io.opencelium.core.setup.steps.SetupStep;
@@ -58,7 +59,7 @@ public final class Wizard {
 
 	/** The steps of a full setup, in the order the user sees them; the summary writes to {@code locations}. */
 	public static List<SetupStep> standardSteps(ConfigLocations locations) {
-		return List.of(new DataDirStep(), new PortStep(), new MongoStep(),
+		return List.of(new DataDirStep(), new PortStep(), new MongoStep(), new MasterKeyStep(),
 				new SummaryStep(locations));
 	}
 
@@ -95,12 +96,19 @@ public final class Wizard {
 			return OptionalInt.of(0);
 		}
 		try {
-			new FilePlanWriter(prompter::info).write(plan);
+			// Written from the moment the files are in place: a Ctrl+C at a question of an action leaves them there.
+			new FilePlanWriter(prompter::info).write(plan, () -> written = true);
 		}
 		catch (SetupWriteException ex) {
+			written = false;
 			throw SetupFailedException.failure(ex.getMessage() + "\n" + ex.rollbackReport());
 		}
-		written = true;
+		catch (SetupCancelledException ex) {
+			written = false;
+			prompter.print("");
+			prompter.info(ex.getMessage());
+			return OptionalInt.of(0);
+		}
 		prompter.print("");
 		prompter.success("Configuration written to " + plan.files().getFirst().path().getParent());
 		prompter.progress("Starting OpenCelium...");

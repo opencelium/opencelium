@@ -30,9 +30,9 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - **SW-02** Given no terminal and no configuration, when the application starts, then it must start with the defaults and no wizard.
 - **SW-03** Given any state, when the user runs `java -jar oc-app.jar setup`, then the wizard must start.
 - **SW-04** Given the flag `--batch` without `setup`, when the application starts, then the wizard must not start.
-- **SW-05** Given a question, when the user types `q` or presses Ctrl+C, then the wizard must write nothing and say so. The wizard makes and starts nothing before the summary. At the database password question of SW-53, the wizard takes `q` as the database password, and only Ctrl+C cancels.
+- **SW-05** Given a question, when the user types `q` or presses Ctrl+C, then the wizard must write nothing and say so. The wizard makes and starts nothing before the summary. At the database password question of SW-53, the wizard takes `q` as the database password, and only Ctrl+C cancels. The backup question of SW-20 comes after the write, and SW-20 gives its rule.
 - **SW-06** Given the summary, when the user confirms, then the wizard must do these steps in this order:
-  1. It writes the files together: the yml file, the env file and, with the generate option, the key file.
+  1. It writes the files together: the yml file and the env file. With the generate option, it then writes the key file and asks the backup question of SW-20.
   2. It writes the admin marker into the database.
   3. It installs the service, with the service option.
   4. It starts the application: the wizard process without the service, systemd with the service. Only 1 process starts it.
@@ -84,10 +84,28 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   1. Generate a new master key into the data directory.
   2. Use the environment variable `OC_MASTER_KEY`.
   3. Read a key file.
-- **SW-20** Given the generate option, when the wizard writes the files, then it must write 32 random bytes with owner-only permissions. After the write it shows a backup warning box and asks "I have backed up the master key [y/N]". The answer `N` prints the master key path again and asks again. In batch mode the wizard prints the warning to standard error and continues.
+
+  When the data directory holds `master.key`, option 1 is "Keep the master key in the data directory". The wizard then generates no master key and asks no backup question. A master key in a bad form, in `OC_MASTER_KEY` or in `master.key`, stops the wizard with exit code 1. When `OC_MASTER_KEY` is set in the environment of the setup, the wizard shows no menu and takes the variable (assumption).
+- **SW-20** Given the generate option, when the wizard writes the files, then it must write 32 random bytes with owner-only permissions. After the write it shows a backup warning box and asks "I have backed up the master key [y/N]". The answer `N` prints the master key path again and asks again. In batch mode the wizard prints the warning to standard error and continues. The box and the warning tell facts 3 and 4 of SW-55 again. At this question, `q` rolls back the written files, as SW-05 says. Ctrl+C keeps the written files and starts nothing.
 - **SW-21** Given `OC_MASTER_KEY` not set, when the user selects the variable option, then the wizard must say so and ask again. The wizard does not continue without a master key.
 - **SW-22** Given a bad key file, when the user names it, then the wizard must say so and ask again. A bad file does not exist or does not decode to 32 bytes.
-- **SW-23** Given a wrapped DEK and no master key, when the master key step starts, then the wizard must show restore-or-reset. It stops and does not offer to generate a new master key.
+- **SW-23** Given a wrapped DEK and no master key, when the master key step starts, then the wizard must show restore-or-reset. It stops and does not offer to generate a new master key. When a wrapped DEK exists and a master key is found, the menu has no generate option. The keep option of SW-19 stays.
+- **SW-55** Given the master key step, when it shows the first menu, then it must tell the purpose of the master key. The text comes before the options and tells these 4 facts:
+  1. OpenCelium encrypts the credentials that it keeps, and the master key is the root key of this encryption.
+  2. The master key stays outside the database, thus a copy of the database without the master key shows no credential.
+  3. The user must keep a backup of the master key, but not in the same place as the database backup.
+  4. Without the master key, OpenCelium cannot decrypt the credentials, and a new master key does not decrypt them.
+- **SW-56** Given the master key menu, when the user types `?`, then the wizard must tell when to select each option:
+  1. Generate: the user installs OpenCelium on 1 host and has no master key.
+  2. Variable: the environment of the service gives the master key.
+  3. Key file: the master key is in a file, for example a mounted secret.
+
+  The help text of the key file option also tells these 3 facts:
+  1. OpenCelium reads the file at this path at each start.
+  2. With the service option, the system user `opencelium` must have read permission.
+  3. The file must not be under `/tmp`, because the service does not see it, and a reboot can delete it.
+
+  The help texts of the variable option and of the key file option give the command `openssl rand -base64 32`. The key file option gives it with `umask 077`, so that only the owner can read the new file.
 
 ### First admin account
 
@@ -169,3 +187,4 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 6. What does a run with a setup file do when the MongoDB server of the file does not answer? Assumption until the answer comes: the setup stops with exit code 1 and names the setup file key, as for a bad value (assumption).
 7. What does the option "Continue" of SW-17 do when a later step uses the database? The master key step reads the database before the summary, and the admin marker writes into it after the summary. Assumption until the answer comes: the master key step reports the server, and the setup stops with exit code 1 before the summary (assumption).
 8. Must the values option of SW-53 ask if the MongoDB connection uses TLS (Transport Layer Security)? Assumption until the answer comes: no. The built URI has no TLS option, and a server that must have TLS gets the URI option (assumption).
+9. What does the master key step do when `OC_MASTER_KEY` is set in the environment of the setup? The variable has priority at each start in this environment. Assumption until the answer comes: the wizard shows no menu and takes the variable, and a setup file must give `env` (assumption).

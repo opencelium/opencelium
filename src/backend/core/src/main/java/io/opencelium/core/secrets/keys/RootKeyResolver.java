@@ -92,6 +92,56 @@ public final class RootKeyResolver {
 		return key;
 	}
 
+	/**
+	 * Where the master key comes from, as {@link #resolve(BooleanSupplier)} would find it, without a generation and
+	 * without a write: the setup wizard asks this before it offers to generate a key.
+	 *
+	 * @return empty when no source has a key
+	 * @throws BootstrapPropertyException when both sources are set, or a key is malformed or cannot be read
+	 */
+	public Optional<RootKeySource> probe() {
+		return load().map(key -> {
+			try (key) {
+				return key.source();
+			}
+		});
+	}
+
+	/**
+	 * Why {@code value} is not a master key in the text form, without a quote of the value.
+	 *
+	 * @param what names the value in the message, for example "OC_MASTER_KEY"
+	 * @return empty when the value is the base64 of exactly 32 bytes
+	 */
+	public static Optional<String> textProblem(String value, String what) {
+		byte[] text = value.getBytes(StandardCharsets.US_ASCII);
+		try {
+			Arrays.fill(decode(text, what), (byte) 0);
+			return Optional.empty();
+		}
+		catch (IllegalArgumentException ex) {
+			return Optional.of(ex.getMessage() + ".");
+		}
+		finally {
+			Arrays.fill(text, (byte) 0);
+		}
+	}
+
+	/**
+	 * Why {@code file} does not hold a master key that this user can read, without a quote of its content.
+	 *
+	 * @return empty when the file is a regular file with the base64 of exactly 32 bytes
+	 */
+	public static Optional<String> fileProblem(Path file) {
+		try {
+			fromFile(file, RootKeySource.FILE, OpenCeliumProperties.MASTER_KEY_FILE, null).close();
+			return Optional.empty();
+		}
+		catch (BootstrapPropertyException ex) {
+			return Optional.of(ex.getMessage());
+		}
+	}
+
 	private Optional<RootKey> load() {
 		String fromEnvironment = environment.apply(ENV_VARIABLE);
 		if (fromEnvironment != null && masterKeyFile.isPresent()) {
@@ -118,13 +168,17 @@ public final class RootKeyResolver {
 	}
 
 	private static RootKey fromEnvironment(String value) {
+		byte[] text = value.getBytes(StandardCharsets.US_ASCII);
 		try {
-			byte[] material = decode(value.getBytes(StandardCharsets.US_ASCII), ENV_VARIABLE);
+			byte[] material = decode(text, ENV_VARIABLE);
 			return new RootKey(RootKey.INITIAL_ID, RootKeySource.ENV, material);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new BootstrapPropertyException(ENV_VARIABLE, ex.getMessage() + ".",
 					"Set " + ENV_VARIABLE + " to the original master key, or unset it. " + KEY_FORMAT, null);
+		}
+		finally {
+			Arrays.fill(text, (byte) 0);
 		}
 	}
 

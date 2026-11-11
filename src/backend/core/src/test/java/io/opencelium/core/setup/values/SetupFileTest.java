@@ -123,7 +123,7 @@ class SetupFileTest {
 				.isThrownBy(() -> SetupFile.load(file)).actual();
 
 		assertThat(ex.getMessage()).isEqualTo("Unknown key 'colour' in " + file
-				+ ". Known keys: data-dir, port, mongo, mongo-uri.\n"
+				+ ". Known keys: data-dir, port, mongo, mongo-uri, master-key.\n"
 				+ "A template with every key: java -jar oc-app.jar setup --template");
 		assertThat(ex.exitCode()).isEqualTo(1);
 	}
