@@ -1,0 +1,48 @@
+{
+  "page": {
+    "title": "AI settings",
+    "subtitle": "Whether the AI is available, which model each AI feature runs on, and Beebot. Models are set in the AI gateway's configuration and shown here as it reports them."
+  },
+  "status": {
+    "title": "Availability",
+    "checkAgain": "Check again",
+    "notConfigured": "No AI gateway is configured for this installation, so the AI features are hidden.",
+    "unreachable": "The AI gateway does not answer. The AI features are hidden until it is back.",
+    "gateway": "AI gateway",
+    "ollama": "Ollama (runs the models)",
+    "speech": "Speech to text (palette mic and Beebot)",
+    "ok": "Available",
+    "missing": "Not available"
+  },
+  "models": {
+    "title": "Which model does what",
+    "feature": "Feature",
+    "model": "Model",
+    "installed": "Installed",
+    "notInstalled": "Not installed in Ollama",
+    "embed": "Finding similar templates, scripts, docs pages and commands",
+    "olderGateway": "This AI gateway does not report its models yet. Update it to see them here."
+  },
+  "features": {
+    "generate-workflow": "Generate a workflow",
+    "suggest-mapping": "Suggest a mapping",
+    "build-condition": "Build a condition or loop",
+    "explain-connector-error": "Explain a connector error",
+    "invoker-from-docs": "API definition from docs",
+    "draft-notification": "Draft a notification",
+    "help": "Help assistant answers",
+    "help-follow-up": "Rewording help follow-up questions",
+    "explain-workflow": "Explain a workflow",
+    "transformation-script": "Transformation scripts",
+    "run-explain-fix": "Explain and fix a failed run",
+    "command-palette": "AI in the command palette",
+    "editor-requests": "Requests in the workflow editor"
+  },
+  "beebot": {
+    "title": "Beebot",
+    "toggle": "Listen for requests",
+    "unavailable": "Beebot needs speech to text, which is not available.",
+    "howItWorks": "While Beebot is on, everything you say is taken as a request; its name is optional. It never talks and shows no messages: what matches no command is ignored. It turns itself off after 10 minutes without a request.",
+    "hotkey": "To speak one request into the command palette instead, press {{key}}."
+  }
+}

@@ -250,6 +250,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 list: string
                 login: string
                 system: string
+                checkAiSettings: string
                 checkLicense: string
                 updateSystemConfig: string
                 changeTheme: string

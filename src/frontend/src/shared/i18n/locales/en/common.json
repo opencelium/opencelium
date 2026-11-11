@@ -51,6 +51,7 @@
       "list": "Open the entry list",
       "login": "Switch the current role",
       "system": "System actions",
+      "checkAiSettings": "Check the AI: availability, which model does what, Beebot",
       "checkLicense": "Check license and API operation usage",
       "updateSystemConfig": "Update on-disk application configuration",
       "changeTheme": "Change the application theme",

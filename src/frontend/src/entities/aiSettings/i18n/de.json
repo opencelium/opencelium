@@ -1,0 +1,48 @@
+{
+  "page": {
+    "title": "KI-Einstellungen",
+    "subtitle": "Ob die KI verfügbar ist, welches Modell jede KI-Funktion nutzt, und Beebot. Die Modelle werden in der Konfiguration des KI-Gateways festgelegt und hier so angezeigt, wie es sie meldet."
+  },
+  "status": {
+    "title": "Verfügbarkeit",
+    "checkAgain": "Erneut prüfen",
+    "notConfigured": "Für diese Installation ist kein KI-Gateway konfiguriert, daher sind die KI-Funktionen ausgeblendet.",
+    "unreachable": "Das KI-Gateway antwortet nicht. Die KI-Funktionen sind ausgeblendet, bis es wieder erreichbar ist.",
+    "gateway": "KI-Gateway",
+    "ollama": "Ollama (führt die Modelle aus)",
+    "speech": "Sprache zu Text (Palette-Mikrofon und Beebot)",
+    "ok": "Verfügbar",
+    "missing": "Nicht verfügbar"
+  },
+  "models": {
+    "title": "Welches Modell macht was",
+    "feature": "Funktion",
+    "model": "Modell",
+    "installed": "Installiert",
+    "notInstalled": "Nicht in Ollama installiert",
+    "embed": "Ähnliche Vorlagen, Skripte, Doku-Seiten und Befehle finden",
+    "olderGateway": "Dieses KI-Gateway meldet seine Modelle noch nicht. Aktualisieren Sie es, um sie hier zu sehen."
+  },
+  "features": {
+    "generate-workflow": "Workflow generieren",
+    "suggest-mapping": "Mapping vorschlagen",
+    "build-condition": "Bedingung oder Schleife erstellen",
+    "explain-connector-error": "Konnektorfehler erklären",
+    "invoker-from-docs": "API-Definition aus Doku",
+    "draft-notification": "Benachrichtigung entwerfen",
+    "help": "Antworten des Hilfe-Assistenten",
+    "help-follow-up": "Folgefragen an die Hilfe umformulieren",
+    "explain-workflow": "Workflow erklären",
+    "transformation-script": "Transformationsskripte",
+    "run-explain-fix": "Fehlgeschlagenen Lauf erklären und beheben",
+    "command-palette": "KI in der Befehlspalette",
+    "editor-requests": "Anfragen im Workflow-Editor"
+  },
+  "beebot": {
+    "title": "Beebot",
+    "toggle": "Auf Anfragen hören",
+    "unavailable": "Beebot braucht Sprache zu Text, und das ist nicht verfügbar.",
+    "howItWorks": "Solange Beebot an ist, wird alles Gesagte als Anfrage genommen; der Name ist optional. Beebot spricht nie und zeigt keine Meldungen: Was zu keinem Befehl passt, wird ignoriert. Nach 10 Minuten ohne Anfrage schaltet er sich aus.",
+    "hotkey": "Um stattdessen eine einzelne Anfrage in die Befehlspalette zu sprechen, drücken Sie {{key}}."
+  }
+}

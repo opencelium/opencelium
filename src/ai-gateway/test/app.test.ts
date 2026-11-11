@@ -39,6 +39,13 @@ describe('gateway HTTP API', () => {
         expect(response.json()).toMatchObject({ status: 'ok', workflowModel: { available: true }, invokerCount: 2 })
     })
 
+    it('reports which model each feature runs on and whether it is installed', async () => {
+        const app = await buildApp({ config: { ...config, lightModel: 'small-model' }, llm: llm(), invokers })
+        const { features } = (await app.inject({ method: 'GET', url: '/health' })).json()
+        expect(features).toContainEqual({ id: 'explain-workflow', model: 'small-model', available: false })
+        expect(features).toContainEqual({ id: 'generate-workflow', model: config.workflowModel, available: true })
+    })
+
     it('reports degraded health when Ollama is unreachable', async () => {
         const unreachable = llm({ listModels: () => Promise.reject(new Error('ECONNREFUSED')) })
         const app = await buildApp({ config, llm: unreachable, invokers })
