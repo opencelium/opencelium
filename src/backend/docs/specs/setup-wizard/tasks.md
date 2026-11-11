@@ -175,6 +175,15 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 13e
 - **Status:** done
 
+## Task 13g: feat(core): setup wizard numbers its steps and asks to write the files
+- **Criteria:** SW-06, SW-58
+- **Function:** Each step of the wizard starts with a numbered title line, so the user sees where the next step starts. The summary asks for the write only and shows the start as the last action, so the backup question comes before the start. The box of the summary has the title "Your answers", so that "Summary" does not show 2 times.
+- **Tests:** `ConsolePrompterTest`: stepPrintsTheNumberTheCountAndTheNameOverARule; `WizardTest`: runShowsTheNumberTheCountAndTheNameBeforeEachStep, runMarksTheTitleAsSkippedWhenAStepDoesNotApply, standardStepsHaveTheNamesOfTheirScreens; `SummaryStepTest`: runAsksToWriteTheFilesWithoutTheStart, runListsTheStartAfterThePlannedActionsWhenAStepPlannedAnAction, runListsTheStartAfterTheWriteWhenNoStepPlannedAnAction. Changed for the new texts: `ConsolePrompterTest`: everyScreenUsesPlainCharactersOnly; `SummaryStepTest`: runPrintsModeDataDirectoryAndPortInABox, runNamesTheFilesAndMarksTheOneThatExists, runListsActionFilesAndActionsWhenAnEarlierStepPlannedAnAction, runPlansTheFilesWithoutAskingWhenBatch; `WizardSetupFileTest`: runMakesIdenticalFilesForSetupFileAndScriptedRun, runAsksOnlyTheAbsentQuestion; `SetupLauncherTest`: launchRunsWizardThenBootsOnTheWrittenFilesWhenConfirmed
+- **Hand test:** 1. Run `setup` with a new data directory and a scratch database, and select generate: each step starts with "Step n of 5". 2. At the summary, the question is "Write the files?", and the last action is "Start OpenCelium". 3. Type `y`: the backup question, then "Starting OpenCelium...".
+- **Size:** approximately 60 lines
+- **Depends on:** 14
+- **Status:** in work
+
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-05, SW-06, SW-19, SW-20, SW-21, SW-22, SW-23, SW-55, SW-56
 - **Function:** Before the menu, the master key step runs the guard (SW-23) and tells the purpose of the master key (SW-55). The menu offers generate or keep, the variable `OC_MASTER_KEY` and a key file, each with its help text (SW-19, SW-56). Generate adds an action to the file plan that writes the key file after the other files and then asks the backup question (SW-05, SW-06, SW-20). The variable and the key file follow SW-21 and SW-22.

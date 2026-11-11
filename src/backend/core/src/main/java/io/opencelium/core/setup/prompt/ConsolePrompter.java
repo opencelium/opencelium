@@ -156,6 +156,11 @@ public final class ConsolePrompter implements Prompter {
 	}
 
 	@Override
+	public void step(int number, int count, String name) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void info(String line, String... continuation) {
 		PrintWriter out = console.writer();
 		out.println(MARGIN + line);

@@ -11,8 +11,10 @@ import io.opencelium.core.setup.values.Question;
  * it never writes a file. The wizard runs the steps in order and skips a step that does not apply to the answers
  * so far, for example a step that only cloud mode needs.
  */
-@FunctionalInterface
 public interface SetupStep {
+
+	/** The name of the step in its title line, for example "Data directory". */
+	String name();
 
 	default boolean applicable(SetupContext context) {
 		return true;

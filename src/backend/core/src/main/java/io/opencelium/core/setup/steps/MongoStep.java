@@ -128,6 +128,11 @@ public final class MongoStep implements SetupStep {
 	}
 
 	@Override
+	public String name() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public List<Question> questions() {
 		return List.of(serverQuestion(servers(detector.localServerListens())), uriQuestion());
 	}

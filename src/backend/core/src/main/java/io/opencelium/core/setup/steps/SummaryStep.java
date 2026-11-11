@@ -38,6 +38,11 @@ public final class SummaryStep implements SetupStep {
 	}
 
 	@Override
+	public String name() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void run(SetupContext context, Prompter prompter) {
 		var values = new BootstrapValues(context.deploymentMode(), context.dataDir()
 				.orElseThrow(() -> new IllegalStateException("The data directory step did not run.")), context.port()

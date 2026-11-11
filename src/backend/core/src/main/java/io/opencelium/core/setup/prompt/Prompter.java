@@ -56,6 +56,11 @@ public interface Prompter {
 	/** The title line of a screen, with a rule under it. */
 	void title(String title);
 
+	/**
+	 * The title line of a step, after an empty line: its number, the step count and its name, with a rule under it.
+	 */
+	void step(int number, int count, String name);
+
 	/** A status line that informs; continuation lines are indented under it. */
 	void info(String line, String... continuation);
 

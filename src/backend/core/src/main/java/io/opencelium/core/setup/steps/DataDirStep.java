@@ -42,6 +42,11 @@ public final class DataDirStep implements SetupStep {
 	}
 
 	@Override
+	public String name() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public List<Question> questions() {
 		return List.of(question());
 	}
