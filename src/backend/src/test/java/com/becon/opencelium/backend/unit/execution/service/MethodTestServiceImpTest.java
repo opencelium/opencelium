@@ -33,12 +33,15 @@ import com.becon.opencelium.backend.mapper.execution.OperationExMapper;
 import com.becon.opencelium.backend.mapper.mongo.MethodMngMapper;
 import com.becon.opencelium.backend.reference.enums.ReferenceType;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlRequestDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlResultDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.ConnectorReference;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.StaticReference;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRequestDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO.ConnectorError;
+import com.becon.opencelium.backend.resource.execution.MethodConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.testutil.fake.FakeHttpServer;
 import com.becon.opencelium.backend.testutil.fake.FakeHttpServer.RecordedRequest;
@@ -355,6 +358,95 @@ class MethodTestServiceImpTest {
         MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false));
 
         assertThat(result.response().body()).isEqualTo("AQID");
+    }
+
+    // ── toCurl ────────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toCurl — the command holds static values and the connector's real, unmasked data")
+    void toCurlReturnsUnmaskedConnectorValuesWhenRequestIsBuilt() {
+        MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
+        givenShopConnector();
+
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of("${status}", "open")));
+
+        assertThat(result.curl())
+                .startsWith("curl '" + api.baseUrl() + "/orders?status=open'")
+                .contains("-H 'Authorization: Bearer " + TOKEN + "'")
+                .doesNotContain("****");
+        assertThat(result.connectorErrors()).isEmpty();
+    }
+
+    @Test
+    void toCurlSendsNoRequestWhenCommandIsBuilt() {
+        MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
+        givenShopConnector();
+
+        service.toCurl(new MethodCurlRequestDTO(method, Map.of("${status}", "open")));
+
+        assertThat(api.requests()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("toCurl — a write needs no confirmation, because nothing is sent")
+    void toCurlBuildsWriteRequestWithoutConfirmation() {
+        MethodDTO method = givenMethodMappedTo(
+                anHttpOperation("DELETE", api.baseUrl() + "/orders/7", Map.of(), null));
+
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()));
+
+        assertThat(result.curl()).startsWith("curl -X DELETE '" + api.baseUrl() + "/orders/7'");
+        verifyNoInteractions(connectorService);
+    }
+
+    @Test
+    void toCurlAddsConnectorTransportOptionsWhenConnectorSetsThem() {
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders", Map.of()));
+        Connector shop = aConnector(SHOP_ID, SHOP, aStoredField("url", api.baseUrl(), PUBLIC));
+        MethodConnectorEx resolved = aResolvedConnector(SHOP_ID, Map.of("url", api.baseUrl()));
+        resolved.setSslCert(true);
+        resolved.setTimeout(2500);
+        when(connectorService.getById(SHOP_ID)).thenReturn(shop);
+        when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
+        when(connectorExMapper.toMethodConnector(shop)).thenReturn(resolved);
+
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()));
+
+        assertThat(result.curl()).contains("--insecure", "--connect-timeout 2.5");
+    }
+
+    @Test
+    void toCurlReturnsConnectorErrorsWhenConnectorDataFails() {
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders", BEARER));
+        Connector shop = aConnector(SHOP_ID, SHOP);
+        when(connectorService.getById(SHOP_ID)).thenReturn(shop);
+        when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
+        when(connectorExMapper.toMethodConnector(shop))
+                .thenThrow(new IllegalStateException("Path $.access_token not found"));
+
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()));
+
+        assertThat(result.curl()).isNull();
+        assertThat(result.connectorErrors())
+                .containsExactly(new ConnectorError(SHOP_ID, "Path $.access_token not found"));
+    }
+
+    @Test
+    void toCurlThrowsGeneralServiceExceptionWhenStaticValueIsMissing() {
+        MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
+
+        assertThatThrownBy(() -> service.toCurl(new MethodCurlRequestDTO(method, Map.of())))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING))
+                .hasMessageContaining("${status}");
+        verifyNoInteractions(connectorExMapper);
+    }
+
+    @Test
+    void toCurlThrowsGeneralServiceExceptionWhenMethodHasNoHttpMethod() {
+        assertThatThrownBy(() -> service.toCurl(new MethodCurlRequestDTO(aMethodDto(" "), Map.of())))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_METHOD_INVALID));
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
