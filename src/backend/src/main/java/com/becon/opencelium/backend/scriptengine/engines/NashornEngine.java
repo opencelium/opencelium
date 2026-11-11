@@ -52,7 +52,7 @@ public class NashornEngine implements ScriptEngine {
     private final NashornScriptEngineFactory sandboxFactory = new NashornScriptEngineFactory();
 
     /**
-     * Used for creating engine instances
+     * Used only for creating the compiling engine; scripts are executed in sandboxed engines
      */
     private final ScriptEngineManager engineManager = new ScriptEngineManager();
 
@@ -86,34 +86,25 @@ public class NashornEngine implements ScriptEngine {
     }
 
     /**
-     * Executes a script with optional bindings.
+     * Executes a script with optional bindings in the same sandbox as
+     * {@link #executeSandboxed(String, Map, Writer)}, discarding what the script prints.
      * Handles primitives, Strings, and JSON-serializable Maps/Lists.
      */
     @Override
     public Object execute(String script, Map<String, Object> bindings) throws ScriptExecutionException, InvalidScriptException {
-        try {
-
-            // Creates new engine for each execution
-            javax.script.ScriptEngine engine = engineManager.getEngineByName("nashorn");
-
-            bindArgs(engine, bindings);
-
-            Object result = evaluate(engine, script);
-
-            return translateResult(result, engine);
-        } catch (ScriptExecutionException | InvalidScriptException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ScriptExecutionException("Unknown error: " + e.getMessage(), e);
-        }
+        return executeSandboxed(script, bindings, Writer.nullWriter());
     }
 
+    /**
+     * Resolves each binding through {@code referenceExtractor} and executes the script in the same
+     * sandbox as {@link #executeSandboxed(String, Map, Writer)}, discarding what the script prints.
+     */
     @Override
     public Object execute(String script, Map<String, String> bindings, Function<String, Object> referenceExtractor) throws ScriptExecutionException, InvalidScriptException {
         try {
 
             // Creates new engine for each execution
-            javax.script.ScriptEngine engine = engineManager.getEngineByName("nashorn");
+            javax.script.ScriptEngine engine = createSandboxEngine(Writer.nullWriter());
 
             bindArgs(engine, bindings, referenceExtractor);
 

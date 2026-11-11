@@ -6,6 +6,9 @@ import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 
@@ -13,6 +16,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -128,12 +132,91 @@ class NashornEngineTest {
                 .isEqualTo(url + "a");
     }
 
+    @Test
+    void executeReturnsMapWhenReferenceResolvesToObject() {
+        String ref = "{%#ffffff.(response).success.user%}";
+        Map<String, Object> referenceValues =
+                Map.of(ref, Map.of("name", "Alice", "roles", List.of("admin", "dev")));
+
+        assertThat(engine.execute(
+                "({name: u.name.toUpperCase(), roles: u.roles.join(',')})",
+                Map.of("u", ref),
+                referenceValues::get))
+                .isEqualTo(Map.of("name", "ALICE", "roles", "admin,dev"));
+    }
+
+    // ── execute — Java-typed bindings ─────────────────────────────────────────
+
+    @Test
+    void executeReturnsSumWhenBindingIsLong() {
+        assertThat(((Number) engine.execute("n + 1", Map.of("n", 41L))).intValue()).isEqualTo(42);
+    }
+
+    @Test
+    void executeReturnsNegationWhenBindingIsBoolean() {
+        assertThat(engine.execute("!flag", Map.of("flag", true))).isEqualTo(false);
+    }
+
+    @Test
+    void executeCallsStringMethodsWhenBindingIsString() {
+        assertThat(engine.execute("s.toUpperCase().split('-').length", Map.of("s", "a-b-c")))
+                .isEqualTo(3);
+    }
+
+    @Test
+    void executeReturnsStringWhenBindingIsLongConvertedToString() {
+        assertThat(engine.execute("'' + n", Map.of("n", 7L))).isEqualTo("7");
+    }
+
     // ── execute — errors ──────────────────────────────────────────────────────
 
     @Test
     void executeThrowsScriptExecutionExceptionWhenScriptHasSyntaxError() {
         assertThatThrownBy(() -> engine.execute("function() {", null))
                 .isInstanceOf(ScriptExecutionException.class);
+    }
+
+    // ── execute — sandbox ─────────────────────────────────────────────────────
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("escapingScripts")
+    void executeThrowsWhenScriptEscapesSandbox(String script, String undefinedName) {
+        assertThatThrownBy(() -> engine.execute(script))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("\"" + undefinedName + "\" is not defined");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("escapingScripts")
+    void executeWithBindingsThrowsWhenScriptEscapesSandbox(String script, String undefinedName) {
+        assertThatThrownBy(() -> engine.execute(script, Map.of("a", 1)))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("\"" + undefinedName + "\" is not defined");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("escapingScripts")
+    void executeWithReferenceExtractorThrowsWhenScriptEscapesSandbox(
+            String script, String undefinedName) {
+        assertThatThrownBy(() -> engine.execute(script, Map.of("a", "ref"), ref -> 1))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("\"" + undefinedName + "\" is not defined");
+    }
+
+    @Test
+    void executeReturnsResultWithoutWritingWhenScriptPrints() {
+        assertThat(engine.execute("print('hello'); 1 + 2")).isEqualTo(3);
+    }
+
+    static Stream<Arguments> escapingScripts() {
+        return Stream.of(
+                Arguments.of("Java.type('java.lang.Runtime').getRuntime()", "Java"),
+                Arguments.of("java.lang.System.getProperty('user.home')", "java"),
+                Arguments.of("Packages.java.lang.System.getProperty('user.home')", "Packages"),
+                Arguments.of("exit(1)", "exit"),
+                Arguments.of("quit()", "quit"),
+                Arguments.of("load('http://localhost/script.js')", "load"),
+                Arguments.of("loadWithNewGlobal('http://localhost/script.js')", "loadWithNewGlobal"));
     }
 
     // ── validate ──────────────────────────────────────────────────────────────
