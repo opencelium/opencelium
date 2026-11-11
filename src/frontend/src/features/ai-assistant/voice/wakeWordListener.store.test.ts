@@ -89,9 +89,10 @@ describe('wake word listener', () => {
         expect(vocabulary.length).toBeLessThanOrEqual(300)
     })
 
-    it('takes what is said without its name as a request, quietly', async () => {
+    it('drops what does not start with its name, quietly', async () => {
         await say('add a loop after GetAllUser')
-        expect(routeSpokenRequest).toHaveBeenCalledWith('add a loop after GetAllUser')
+        await say('we should check the build later, Beebot')
+        expect(routeSpokenRequest).not.toHaveBeenCalled()
         expect(info).not.toHaveBeenCalled()
         expect(loading).not.toHaveBeenCalled()
     })
@@ -201,6 +202,11 @@ describe('wake word listener', () => {
         expect(useSpokenRequestStore.getState().cancelCount).toBe(cancelled + 1)
         expect(useWakeWordListenerStore.getState().status).toBe('on')
         useOpenConfirmStore.getState().set(null)
+    })
+
+    it('ignores "stop" without its name', async () => {
+        await say('stop listening')
+        expect(useWakeWordListenerStore.getState().status).toBe('on')
     })
 
     it('turns itself off on "stop listening"', async () => {

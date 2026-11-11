@@ -42,7 +42,7 @@
     "title": "Beebot",
     "toggle": "Listen for requests",
     "unavailable": "Beebot needs speech to text, which is not available.",
-    "howItWorks": "While Beebot is on, everything you say is taken as a request; its name is optional. It never talks and shows no messages: what matches no command is ignored. It turns itself off after 10 minutes without a request.",
+    "howItWorks": "While Beebot is on, it acts only on what starts with its name, e.g. “Beebot, add a loop after GetAllUser”; everything else is ignored. A yes / no to its own question needs no name. It never talks and shows no messages: a request that matches no command is ignored. It turns itself off after 10 minutes without a request.",
     "hotkey": "To speak one request into the command palette instead, press {{key}}."
   }
 }
