@@ -1,26 +1,20 @@
 import { useMemo, useState } from "react";
 import { getScheduleTimeZone } from "@shared/lib/cron/upcomingRuns";
-import { Link } from "react-router-dom";
 import { Button } from "@shared/ui/primitives/Button";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
-import { useScheduleUpdatePermission } from "../model/useScheduleUpdatePermission";
 import type { Schedule } from "../model/types";
 import { calendarSlots, weekDays } from "./calendarSlots";
+import { useOpenScheduleDialog } from "./useOpenScheduleDialog";
 import "./ScheduleCalendar.css";
 
 export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
   const zone = getScheduleTimeZone();
   const { t, lang } = useI18n("entities");
-  const canUpdate = useScheduleUpdatePermission();
+  const openSchedule = useOpenScheduleDialog();
   const [week, setWeek] = useState(0);
   const days = useMemo(() => weekDays(week, zone), [week, zone]);
   const slots = useMemo(
-    () =>
-      calendarSlots(
-        schedules.filter((schedule) => schedule.status),
-        days,
-        zone,
-      ),
+    () => calendarSlots(schedules, days, zone),
     [schedules, days, zone],
   );
   const dayFormat = new Intl.DateTimeFormat(lang, {
@@ -87,9 +81,12 @@ export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
                       data-overlap={overlap || undefined}
                     >
                       {markers.map(({ schedule, time, cadence, more }) => (
-                        <Link
+                        <button
+                          type="button"
                           key={schedule.schedulerId + ":" + time}
-                          to={`/schedule/${canUpdate ? "update" : "view"}/${schedule.schedulerId}`}
+                          className="schedule-calendar-event"
+                          data-testid={`schedule-calendar-event-${schedule.schedulerId}`}
+                          onClick={() => openSchedule(schedule.schedulerId)}
                         >
                           {schedule.title || schedule.connection.title}
                           {" · "}
@@ -99,7 +96,7 @@ export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
                           {more &&
                             !cadence &&
                             " · " + t("schedule.calendar.more")}
-                        </Link>
+                        </button>
                       ))}
                     </td>
                   );
