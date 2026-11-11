@@ -266,7 +266,7 @@ export const describeEnhancementChange = (
 		section: target.section,
 		aspect: target.aspect,
 		name: owner && workflowNodeLabel(owner),
-		...(owner ? { icon: { kind: 'connector' as const,
+		...(owner ? { nodeId: owner.id, icon: { kind: 'connector' as const,
 			iconUrl: owner.data.connector?.icon ?? null } } : {}),
 	};
 };

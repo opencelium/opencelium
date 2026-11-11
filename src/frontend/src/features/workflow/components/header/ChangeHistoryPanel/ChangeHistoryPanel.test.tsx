@@ -16,15 +16,16 @@ import type { WorkflowUndoEntry } from '../../../types/undoHistory.types';
 import { ChangeHistoryPanel } from './ChangeHistoryPanel';
 
 const entry = (offset: number, origin: WorkflowUndoEntry['origin']): WorkflowUndoEntry => ({
-	offset, origin, at: 0, change: offset === -3 ? { kind: 'initial' } : { kind: 'nodes-added', count: 1, name: `step${offset}` },
+	offset, origin, at: 0,
+	change: offset === -3 ? { kind: 'initial' } : { kind: 'nodes-added', count: 1, name: `step${offset}`, nodeId: `node${offset}` },
 });
 
 // Newest first: an AI change undone (redo +1), the current hand edit, an earlier AI change, the session start.
 const entries = [entry(1, 'ai'), entry(0, 'user'), entry(-1, 'ai'), entry(-2, 'user'), entry(-3, 'user')];
 
-const renderPanel = (onJumpTo = vi.fn()) => {
-	render(<ChangeHistoryPanel open entries={entries} onClose={vi.fn()} onJumpTo={onJumpTo} />);
-	return onJumpTo;
+const renderPanel = (onJumpTo = vi.fn(), onShowNode = vi.fn()) => {
+	render(<ChangeHistoryPanel open entries={entries} onClose={vi.fn()} onJumpTo={onJumpTo} onShowNode={onShowNode} />);
+	return { onJumpTo, onShowNode };
 };
 
 describe('ChangeHistoryPanel', () => {
@@ -34,6 +35,20 @@ describe('ChangeHistoryPanel', () => {
 		expect(screen.getByTestId('workflow-change-history-ai-1')).toBeTruthy();
 		expect(screen.queryByTestId('workflow-change-history-ai-0')).toBeNull();
 		expect(screen.queryByTestId('workflow-change-history-undo--1')).toBeNull();
+	});
+
+	it('goes to an entry and shows the step it changed', () => {
+		const { onJumpTo, onShowNode } = renderPanel();
+		fireEvent.click(screen.getByTestId('workflow-change-history-item--1'));
+		expect(onJumpTo).toHaveBeenCalledWith(-1);
+		expect(onShowNode).toHaveBeenCalledWith('node-1');
+	});
+
+	it('shows the step of the current entry without going anywhere', () => {
+		const { onJumpTo, onShowNode } = renderPanel();
+		fireEvent.click(screen.getByTestId('workflow-change-history-item-0'));
+		expect(onJumpTo).not.toHaveBeenCalled();
+		expect(onShowNode).toHaveBeenCalledWith('node0');
 	});
 
 	it('lists only the AI\'s changes when asked', () => {
