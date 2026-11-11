@@ -6,7 +6,9 @@ import { extractWorkflowMethodConfig } from '../legacyAdapter';
 import { sortValue } from '../../../utils/workflowPage.utils';
 import { toAuthoredMethodConfig } from '../../../utils/requestConfig';
 import type { WorkflowMethodConfig } from '../../../types/request-config.types';
-import type { MethodConfigDialogProps } from './MethodConfigDialog.types';
+import type { MethodConfigDialogProps, MethodDraft } from './MethodConfigDialog.types';
+import { createAiDialogSteps } from '../../../utils/aiDialogSteps';
+import type { RecordAiStep } from '../../../providers/AiDialogStepsContext';
 
 // Identity of the method config alone, on its *authored* subset
 // (toAuthoredMethodConfig) with stable key order: each extraction re-derives the
@@ -20,9 +22,23 @@ const configIdentity = (config: WorkflowMethodConfig | null) =>
 const bindingsIdentity = (fieldBindings: unknown) =>
 	JSON.stringify(sortValue(fieldBindings ?? null) ?? null);
 
+const draftIdentity = (draft: MethodDraft) => `${configIdentity(draft.config)}|${bindingsIdentity(draft.fieldBindings)}`;
+
 export function useMethodConfigDialogState({ open, node, mode, nodes, edges,
-	fieldBindings, onFieldBindingsChange, onClose, onSave }: MethodConfigDialogProps) {
+	fieldBindings, onFieldBindingsChange, onClose, onSave, onRecordAiSteps }: MethodConfigDialogProps) {
 	const store = useMemo(() => createLegacyStore(), []);
+	const aiSteps = useMemo(() => createAiDialogSteps<MethodDraft>(draftIdentity), []);
+	const nodeId = node?.id;
+	const readDraft = useCallback((): MethodDraft => {
+		const current = store.getState().connection.connection;
+		return { config: nodeId ? extractWorkflowMethodConfig(current, nodeId) : null,
+			fieldBindings: current?.fieldBindings as unknown[] | undefined };
+	}, [nodeId, store]);
+	const recordAiStep = useCallback<RecordAiStep>((apply) => {
+		const before = readDraft();
+		apply();
+		return aiSteps.record(before, readDraft());
+	}, [aiSteps, readDraft]);
 	const connection = useMemo(() => buildEditorConnection(nodes, edges ?? [], fieldBindings),
 		[edges, fieldBindings, nodes]);
 	const isPersistingRef = useRef(false);
@@ -39,11 +55,12 @@ export function useMethodConfigDialogState({ open, node, mode, nodes, edges,
 		store.dispatch(setConnection(connection));
 		store.dispatch(setFlowchart('workflow-flow'));
 		const seeded = store.getState().connection.connection;
+		aiSteps.start(readDraft());
 		baselineRef.current = node ? {
 			config: configIdentity(extractWorkflowMethodConfig(seeded, node.id)),
 			bindings: bindingsIdentity(seeded?.fieldBindings),
 		} : null;
-	}, [connection, node, open, sessionKey, store]);
+	}, [aiSteps, connection, node, open, readDraft, sessionKey, store]);
 
 	useEffect(() => {
 		if (open || !activeSessionRef.current) return;
@@ -69,6 +86,8 @@ export function useMethodConfigDialogState({ open, node, mode, nodes, edges,
 			// dirty flag, the change history) as two unrelated edits.
 			const configChanged = !!config && (!baseline || configIdentity(config) !== baseline.config);
 			const bindingsChanged = !!baseline && bindingsIdentity(bindings) !== baseline.bindings;
+			const steps = aiSteps.take();
+			if (steps.length) onRecordAiSteps?.(node.id, steps);
 			if (configChanged) onSave(node.id, config, bindings);
 			else {
 				// Nothing to save on the node, but a script edit still has to land.
@@ -77,7 +96,7 @@ export function useMethodConfigDialogState({ open, node, mode, nodes, edges,
 			}
 			isPersistingRef.current = false;
 		});
-	}, [node, onClose, onFieldBindingsChange, onSave, store]);
+	}, [aiSteps, node, onClose, onFieldBindingsChange, onRecordAiSteps, onSave, store]);
 
-	return { store, persistCurrentConfig };
+	return { store, persistCurrentConfig, recordAiStep };
 }

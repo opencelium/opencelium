@@ -71,6 +71,8 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../request-editor/body-editor/bodyLegacy.css';
 import '../dialogHeader.css';
 import './conditionBuilder.css';
+import { useConditionAiSteps } from './useConditionAiSteps';
+import type { AiDialogStep } from '../../utils/aiDialogSteps';
 
 type Props = {
 	open: boolean;
@@ -84,6 +86,8 @@ type Props = {
 	zIndex?: number;
 	onClose: () => void;
 	onSave: (nodeId: string, config: ConditionConfig) => void;
+	/** AI builds made inside the dialog, handed over right before its save so each gets its own history entry. */
+	onRecordAiSteps?: (nodeId: string, steps: AiDialogStep<ConditionConfig>[]) => void;
 };
 
 const SOURCE_OPTIONS: { value: ConditionValueSource; titleKey: string; icon: ReactNode }[] = [
@@ -930,6 +934,7 @@ export function ConditionBuilderDialog({
 	zIndex,
 	onClose,
 	onSave,
+	onRecordAiSteps,
 }: Props) {
 	const { t } = useI18n('workflow');
 	const operatorType = node?.type === 'loop' ? 'loop' : 'if';
@@ -952,6 +957,7 @@ export function ConditionBuilderDialog({
 		[connection, node],
 	);
 	const isLoop = operatorType === 'loop';
+	const aiSteps = useConditionAiSteps({ open, node, operatorType, tree, loopIterator, onRecordAiSteps });
 	const loopCollectionRef = useMemo(
 		() => (isLoop ? getFirstRuleLeftField(tree) : undefined),
 		[isLoop, tree],
@@ -1008,6 +1014,7 @@ export function ConditionBuilderDialog({
 						const result = validateConditionTreeWithErrors(tree, operatorType);
 						setTree(result.tree);
 						if (!result.isValid) return;
+						aiSteps.handOver(node.id);
 						onSave(node.id, buildConditionConfig(operatorType, result.tree, loopIterator));
 					}}
 				>
@@ -1018,6 +1025,7 @@ export function ConditionBuilderDialog({
 			{node ? (
 				<AiConditionPanel nodeId={node.id} operatorType={operatorType} connection={connection} methods={methods} operatorIndex={operatorIndexPath ?? ''}
 					onApply={(next) => {
+						aiSteps.recordBuild(next);
 						setTree(next);
 						setRenderKey((current) => current + 1);
 					}} />

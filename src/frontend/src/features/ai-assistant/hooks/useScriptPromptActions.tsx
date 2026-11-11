@@ -6,6 +6,7 @@ import { isUntouchedScript, type ScriptSnapshot } from '../utils/scriptVersions.
 import { useAiScriptGeneration } from './useAiScriptGeneration';
 import { notifyAiApplied } from '../ui/AiProposal/notifyAiApplied';
 import type { ScriptVersions } from './useScriptVersions';
+import { useRecordAiStep } from '@features/workflow/providers/AiDialogStepsContext';
 
 type Options = {
 	enhancement: Enhancement;
@@ -23,6 +24,7 @@ const TOAST_KEY = 'ai-script-replaced';
 export function useScriptPromptActions({ enhancement, current, versions, onReplace }: Options) {
 	const { t } = useI18n('workflow');
 	const generation = useAiScriptGeneration(enhancement);
+	const recordAiStep = useRecordAiStep();
 	// The toast's Undo and an answer that arrives after a long generation must act on what the editor holds by then.
 	const latest = useRef({ current, versions, onReplace });
 	useEffect(() => {
@@ -40,9 +42,15 @@ export function useScriptPromptActions({ enhancement, current, versions, onRepla
 	};
 	const replaceWithUndo = (next: ScriptSnapshot | undefined, textKey: 'ai.script.applied' | 'ai.script.restored', isQuiet = false) => {
 		if (!next) return;
-		latest.current.onReplace(next);
+		// Only a generated script is the AI's change; bringing back an earlier version is the user's.
+		const replace = () => latest.current.onReplace(next);
+		let forget = () => {};
+		if (textKey === 'ai.script.applied') forget = recordAiStep(replace);
+		else replace();
 		if (isQuiet) return;
-		notifyAiApplied({ key: TOAST_KEY, undoTestId: 'ai-script-undo-toast', text: t(textKey), onUndo: () => undoQuietly() });
+		notifyAiApplied({ key: TOAST_KEY, undoTestId: 'ai-script-undo-toast', text: t(textKey), onUndo: () => {
+			if (undoQuietly()) forget();
+		} });
 	};
 
 	/**

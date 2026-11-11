@@ -391,7 +391,6 @@
     "byAi": "Von der KI gemacht",
     "onlyAi": "Nur KI-Änderungen",
     "emptyAi": "Die KI hat diesen Workflow in dieser Sitzung noch nicht geändert",
-    "undoAi": "Diese Änderung und alles danach rückgängig machen",
     "title": "Änderungsverlauf",
     "current": "Aktuell",
     "empty": "Noch keine Änderungen in dieser Sitzung",

@@ -6,9 +6,6 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@shared/i18n/hooks/useI18n', () => ({ useI18n: () => ({ t: (key: string) => key, lang: 'en' }) }));
 vi.mock('@shared/ui/primitives/Tooltip', () => ({ Tooltip: ({ children }: { children?: ReactNode }) => <>{children}</> }));
 vi.mock('@shared/ui/primitives/Icon', () => ({ Icon: ({ name }: { name: string }) => <i data-icon={name} /> }));
-vi.mock('@shared/ui/primitives/IconButton', () => ({
-	IconButton: ({ onClick, testId }: { onClick?: () => void; testId?: string }) => <button type='button' onClick={onClick} data-testid={testId} />,
-}));
 vi.mock('@shared/ui/primitives/Checkbox', () => ({
 	Checkbox: ({ checked, onChange, testId }: { checked?: boolean; onChange?: (isOn: boolean) => void; testId?: string }) =>
 		<input type='checkbox' checked={checked} onChange={(event) => onChange?.(event.target.checked)} data-testid={testId} />,
@@ -31,18 +28,12 @@ const renderPanel = (onJumpTo = vi.fn()) => {
 };
 
 describe('ChangeHistoryPanel', () => {
-	it('marks the AI\'s changes and undoes one by going back to before it', () => {
-		const onJumpTo = renderPanel();
-		expect(screen.getByTestId('workflow-change-history-ai--1')).toBeTruthy();
-		expect(screen.queryByTestId('workflow-change-history-ai-0')).toBeNull();
-		fireEvent.click(screen.getByTestId('workflow-change-history-undo--1'));
-		expect(onJumpTo).toHaveBeenCalledWith(-2);
-	});
-
-	it('offers no Undo for an AI change that is already undone', () => {
+	it('marks the AI\'s changes with the AI icon and has no Undo button of their own', () => {
 		renderPanel();
+		expect(screen.getByTestId('workflow-change-history-ai--1')).toBeTruthy();
 		expect(screen.getByTestId('workflow-change-history-ai-1')).toBeTruthy();
-		expect(screen.queryByTestId('workflow-change-history-undo-1')).toBeNull();
+		expect(screen.queryByTestId('workflow-change-history-ai-0')).toBeNull();
+		expect(screen.queryByTestId('workflow-change-history-undo--1')).toBeNull();
 	});
 
 	it('lists only the AI\'s changes when asked', () => {

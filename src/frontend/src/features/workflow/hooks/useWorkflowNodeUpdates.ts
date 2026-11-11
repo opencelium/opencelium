@@ -5,6 +5,29 @@ import type { WorkflowNodeModel } from '../types/workflow.types';
 import type { WorkflowMethodConfig } from '../types/request-config.types';
 import { assignConnectorToNode } from '../components/template/templateConnectorMapping.utils';
 
+/** The graph after a method dialog's save; also how an AI step inside that dialog is recorded. */
+export const withMethodConfig = (nodes: WorkflowNodeModel[], nodeId: string,
+	methodConfig: WorkflowMethodConfig): WorkflowNodeModel[] =>
+	nodes.map((node) => node.id === nodeId ? { ...node, data: {
+		...node.data,
+		methodConfig: { ...methodConfig,
+			name: methodConfig.name ?? node.data.methodConfig?.name },
+		hasError: false, errorMessage: undefined,
+	} } : node);
+
+/** The graph after a condition dialog's save; also how an AI step inside that dialog is recorded. */
+export const withConditionConfig = (nodes: WorkflowNodeModel[], nodeId: string,
+	conditionConfig: ConditionConfig): WorkflowNodeModel[] =>
+	nodes.map((node) => node.id === nodeId ? { ...node, data: {
+		...node.data, conditionConfig, hasError: false, errorMessage: undefined,
+		// Mirrors the expression like connectionMapper.entries does on load,
+		// unless the user gave the node its own label: without this, an edit
+		// that moves the condition off a colour leaves that colour quoted in
+		// data.subtitle, which collectNodeReferenceColors reads as a live
+		// reference and flags as broken the moment that method is deleted.
+		...(node.data.labelEdited ? {} : { subtitle: conditionConfig.expression }),
+	} } : node);
+
 export const useWorkflowNodeUpdates = (
 	setNodes: Dispatch<SetStateAction<WorkflowNodeModel[]>>,
 	closeMethodEditor: () => void,
@@ -18,24 +41,11 @@ export const useWorkflowNodeUpdates = (
 			hasError: false, errorMessage: undefined,
 		} } : node)),
 	onSaveMethodConfig: (nodeId: string, methodConfig: WorkflowMethodConfig) => {
-		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? { ...node, data: {
-			...node.data,
-			methodConfig: { ...methodConfig,
-				name: methodConfig.name ?? node.data.methodConfig?.name },
-			hasError: false, errorMessage: undefined,
-		} } : node));
+		setNodes((nodes) => withMethodConfig(nodes, nodeId, methodConfig));
 		closeMethodEditor();
 	},
 	onSaveConditionConfig: (nodeId: string, conditionConfig: ConditionConfig) => {
-		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? { ...node, data: {
-			...node.data, conditionConfig, hasError: false, errorMessage: undefined,
-			// Mirrors the expression like connectionMapper.entries does on load,
-			// unless the user gave the node its own label: without this, an edit
-			// that moves the condition off a colour leaves that colour quoted in
-			// data.subtitle, which collectNodeReferenceColors reads as a live
-			// reference and flags as broken the moment that method is deleted.
-			...(node.data.labelEdited ? {} : { subtitle: conditionConfig.expression }),
-		} } : node));
+		setNodes((nodes) => withConditionConfig(nodes, nodeId, conditionConfig));
 		closeConditionEditor();
 	},
 	onSaveDataAggregator: (nodeId: string, dataAggregator: number | null) => {

@@ -391,7 +391,6 @@
     "byAi": "Made by AI",
     "onlyAi": "AI changes only",
     "emptyAi": "The AI has not changed this workflow in this session yet",
-    "undoAi": "Undo this change and everything after it",
     "title": "Change history",
     "current": "Current",
     "empty": "No changes in this session yet",

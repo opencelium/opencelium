@@ -241,4 +241,30 @@ describe('useWorkflowUndoHistory', () => {
 		settle();
 		expect(result.current.history.entries[0]?.origin).toBe('user');
 	});
+
+	it('records AI steps saved with a dialog as entries of their own, before the dialog\'s final state', () => {
+		const { result } = renderHook(() => useHarness());
+		settle();
+		const userEdit = [makeNode('start-1', 10)];
+		const aiEdit = [makeNode('start-1', 20)];
+		act(() => {
+			result.current.history.recordSteps([
+				{ nodes: userEdit, edges: [], fieldBindings: undefined, origin: 'user', at: 1 },
+				{ nodes: aiEdit, edges: [], fieldBindings: undefined, origin: 'ai', at: 2 },
+			]);
+			result.current.setNodes(aiEdit);
+		});
+		settle();
+		expect(result.current.history.entries.map((entry) => entry.origin)).toEqual(['ai', 'user', 'user']);
+		expect(result.current.history.entries[0].offset).toBe(0);
+	});
+
+	it('skips a recorded step that changes nothing', () => {
+		const { result } = renderHook(() => useHarness());
+		settle();
+		act(() => {
+			result.current.history.recordSteps([{ nodes: startNodes, edges: [], fieldBindings: undefined, origin: 'ai', at: 1 }]);
+		});
+		expect(result.current.history.entries).toHaveLength(1);
+	});
 });

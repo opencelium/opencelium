@@ -285,6 +285,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           edges: workflow.edges, fieldBindings: loadedFieldBindings,
           onFieldBindingsChange: setLoadedFieldBindings,
           onClose: () => workflow.setMethodEditor(null),
+          onRecordAiSteps: workflow.recordAiMethodSteps,
           onSave: (nodeId, config, nextBindings) => {
             if (Array.isArray(nextBindings)) setLoadedFieldBindings(nextBindings);
             workflow.onSaveMethodConfig(nodeId, config);
@@ -292,6 +293,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         condition={{ open: !!workflow.conditionEditor, node: conditionNode,
           nodes: hydratedNodes, edges: workflow.edges, connection: conditionConnection,
           onClose: () => workflow.setConditionEditor(null),
+          onRecordAiSteps: workflow.recordAiConditionSteps,
           onSave: workflow.onSaveConditionConfig }}
         aggregator={{ open: !!workflow.aggregatorEditor, node: aggregatorNode,
           onClose: () => workflow.setAggregatorEditor(null),
