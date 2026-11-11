@@ -87,6 +87,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> findLocalAccount(String identifier) {
+        if (identifier == null || identifier.isBlank()) {
+            return Optional.empty();
+        }
+        String trimmed = identifier.trim();
+
+        return userRepository.findByEmail(trimmed)
+                .or(() -> userRepository.findByUsername(trimmed))
+                .filter(user -> user.getAuthMethod() == AuthMethod.BASIC && user.getPassword() != null);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Optional<User> findById(int id) {
         return userRepository.findOneById(id);
