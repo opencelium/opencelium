@@ -40,6 +40,7 @@ import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.EmailUtility;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.FilterChain;
@@ -65,7 +66,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -100,8 +100,26 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private WebSocketNotificationQueue notificationQueue;
     @Autowired
     protected SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private LoginRateLimiter loginRateLimiter;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
+
+    /*
+    Login body keys that can carry the account identifier, in order of precedence. 'identifier' is
+    the dedicated key; 'email' is what clients built before username login send, filled with
+    whatever was typed into the login field, so it may hold a username as well.
+    */
+    private static final List<String> IDENTIFIER_KEYS = List.of("identifier", "username", "email");
+
+    private static final ObjectMapper LOGIN_READER = new ObjectMapper();
+
+    /*
+    Request attribute holding the identifier of a login that passed the rate limit check. Failures
+    are only counted for such logins: a malformed request never reached a password check, and a
+    refused one must not extend its own lockout.
+    */
+    private static final String RATE_LIMITED_IDENTIFIER = "com.becon.opencelium.backend.security.login_identifier";
 
     @Override
     @Autowired
@@ -114,22 +132,38 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         if (!request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
+        JsonNode body;
         try {
-            User user = new ObjectMapper()
-                    .readValue(request.getInputStream(), User.class);
-            return getAuthenticationManager().authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            user.getPrincipal(),
-                            user.getPassword(),
-                            new ArrayList<>()));
+            body = LOGIN_READER.readTree(request.getInputStream());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new AuthenticationServiceException("Malformed login request", e);
         }
+        if (body == null || !body.isObject()) {
+            throw new AuthenticationServiceException("Malformed login request");
+        }
+
+        String identifier = IDENTIFIER_KEYS.stream()
+                .map(key -> body.path(key).asText(null))
+                .filter(value -> value != null && !value.isBlank())
+                .map(String::trim)
+                .findFirst()
+                .orElse("");
+        String password = body.path("password").asText(null);
+
+        loginRateLimiter.checkAllowed(request.getRemoteAddr(), identifier);
+        request.setAttribute(RATE_LIMITED_IDENTIFIER, identifier);
+
+        return getAuthenticationManager().authenticate(
+                UsernamePasswordAuthenticationToken.unauthenticated(identifier, password));
     }
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication auth) throws IOException {
+        if (request.getAttribute(RATE_LIMITED_IDENTIFIER) instanceof String identifier) {
+            loginRateLimiter.recordSuccess(identifier);
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         User user = getUser(auth);
 
@@ -167,17 +201,26 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException failed) throws IOException {
+        if (request.getAttribute(RATE_LIMITED_IDENTIFIER) instanceof String identifier) {
+            loginRateLimiter.recordFailure(request.getRemoteAddr(), identifier);
+        }
+
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         ObjectMapper mapper = new ObjectMapper();
 
-        ErrorResource errorResource = new ErrorResource(failed,
-                HttpStatus.UNAUTHORIZED,
-                uri.getPath());
+        ErrorResource errorResource;
+        if (failed instanceof LoginRateLimiter.TooManyLoginAttemptsException tooManyAttempts) {
+            errorResource = new ErrorResource(failed, HttpStatus.TOO_MANY_REQUESTS, uri.getPath());
+            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+            response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(tooManyAttempts.getRetryAfterSeconds()));
+        } else {
+            errorResource = new ErrorResource(failed, HttpStatus.UNAUTHORIZED, uri.getPath());
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+        }
         String payload = mapper.writeValueAsString(errorResource);
 
         response.setContentType("application/json");
         response.getWriter().write(payload);
-        response.setStatus(HttpStatus.FORBIDDEN.value());
     }
 
     protected void sendSubscriptionNotification() {

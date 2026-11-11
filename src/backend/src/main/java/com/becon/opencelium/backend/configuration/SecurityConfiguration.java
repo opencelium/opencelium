@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.database.mysql.service.LdapVerificationService;
+import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.security.AuthExceptionHandler;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
@@ -91,6 +92,9 @@ public class SecurityConfiguration {
     @Autowired
     private LdapVerificationService ldapVerificationService;
 
+    @Autowired
+    private UserService userService;
+
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity http) throws Exception{
@@ -135,11 +139,21 @@ public class SecurityConfiguration {
         return authenticationProvider;
     }
 
+    /*
+    The LDAP provider runs first, so every login used to bind against the directory, including logins
+    of OC accounts: their passwords reached the LDAP server, and failed binds for names that also
+    exist in the directory counted towards its lockout policy. Identifiers of local OC accounts are
+    therefore passed straight on to the DAO provider. Unknown identifiers still go to the directory,
+    because that is how an LDAP user signs in for the first time.
+    */
     @Bean
     public LdapAuthenticationProvider ldapAuthenticationProvider() {
         return new LdapAuthenticationProvider(ldapAuthenticator(), ldapAuthoritiesPopulator()){
             @Override
             protected DirContextOperations doAuthentication(UsernamePasswordAuthenticationToken authentication) {
+                if (userService.findLocalAccount(authentication.getName()).isPresent()) {
+                    throw new ProviderNotFoundException("Local OC account: the directory is not consulted");
+                }
                 try {
                     return super.doAuthentication(authentication);
                 } catch (Throwable e) {
