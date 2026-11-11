@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * @param iv         12-byte GCM nonce, new for every wrap
  * @param ciphertext the wrapped 32-byte key followed by the 16-byte GCM tag
  */
-@Document("keys")
+@Document(WrappedDek.COLLECTION)
 public record WrappedDek(@Id String id, String tenantId, String rootKeyId, int dekVersion, byte[] iv,
 		byte[] ciphertext, Instant createdAt) {
 

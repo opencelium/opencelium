@@ -36,6 +36,10 @@ public final class SetupContext {
 
 	private String mongoUri;
 
+	private String masterKeySource;
+
+	private Path masterKeyFile;
+
 	private final SequencedMap<String, String> environment = new LinkedHashMap<>();
 
 	/** Every question is asked. */
@@ -85,12 +89,12 @@ public final class SetupContext {
 
 	/** Where the master key comes from, in words for the summary; empty before the master key step ran. */
 	public Optional<String> masterKeySource() {
-		throw new UnsupportedOperationException("masterKeySource");
+		return Optional.ofNullable(masterKeySource);
 	}
 
 	/** The key file that the user named, absolute, which application.yml will name; empty for the other sources. */
 	public Optional<Path> masterKeyFile() {
-		throw new UnsupportedOperationException("masterKeyFile");
+		return Optional.ofNullable(masterKeyFile);
 	}
 
 	/**
@@ -98,7 +102,8 @@ public final class SetupContext {
 	 * @param file   the key file that the user named, absolute; empty for the other sources
 	 */
 	public void setMasterKey(String source, Optional<Path> file) {
-		throw new UnsupportedOperationException("setMasterKey");
+		this.masterKeySource = Objects.requireNonNull(source, "source");
+		this.masterKeyFile = file.orElse(null);
 	}
 
 	/** The entries of the env file, in the order the steps added them: the secrets application.yml names. */

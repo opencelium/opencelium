@@ -23,6 +23,7 @@ public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int p
 		Objects.requireNonNull(deploymentMode, "deploymentMode");
 		Objects.requireNonNull(dataDir, "dataDir");
 		Objects.requireNonNull(mongoUri, "mongoUri");
+		Objects.requireNonNull(masterKeyFile, "masterKeyFile");
 		if (port < 1 || port > 65535) {
 			throw new IllegalArgumentException("Port " + port + " is not between 1 and 65535.");
 		}
@@ -37,7 +38,8 @@ public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int p
 	@Override
 	public String toString() {
 		return "BootstrapValues[deploymentMode=" + deploymentMode + ", dataDir=" + dataDir + ", port=" + port
-				+ ", mongoUri=" + MongoConnection.redact(mongoUri) + "]";
+				+ ", mongoUri=" + MongoConnection.redact(mongoUri) + ", masterKeyFile=" + masterKeyFile
+				+ "]";
 	}
 
 }

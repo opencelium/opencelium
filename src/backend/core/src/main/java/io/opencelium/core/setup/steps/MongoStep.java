@@ -151,8 +151,8 @@ public final class MongoStep implements SetupStep {
 	/** The options after a failed ping; only the first one depends on what the user typed. */
 	private static List<Choice> retry(String again, String summary, String help) {
 		return List.of(new Choice(again, summary, help),
-				new Choice("Continue", "keep this URI", "Keep this URI. OpenCelium does not start until the server"
-						+ " answers; the start names the cause again."),
+				new Choice("Continue", "keep this URI", "Keep this URI. The master key step reads this database next, so"
+						+ " the setup stops there while the server does not answer."),
 				new Choice("Back to the menu", "choose another option", "Go back to the MongoDB menu."));
 	}
 

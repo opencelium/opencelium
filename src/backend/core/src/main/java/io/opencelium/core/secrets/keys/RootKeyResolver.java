@@ -100,7 +100,11 @@ public final class RootKeyResolver {
 	 * @throws BootstrapPropertyException when both sources are set, or a key is malformed or cannot be read
 	 */
 	public Optional<RootKeySource> probe() {
-		throw new UnsupportedOperationException("probe");
+		return load().map(key -> {
+			try (key) {
+				return key.source();
+			}
+		});
 	}
 
 	/**
@@ -110,7 +114,17 @@ public final class RootKeyResolver {
 	 * @return empty when the value is the base64 of exactly 32 bytes
 	 */
 	public static Optional<String> textProblem(String value, String what) {
-		throw new UnsupportedOperationException("textProblem");
+		byte[] text = value.getBytes(StandardCharsets.US_ASCII);
+		try {
+			Arrays.fill(decode(text, what), (byte) 0);
+			return Optional.empty();
+		}
+		catch (IllegalArgumentException ex) {
+			return Optional.of(ex.getMessage() + ".");
+		}
+		finally {
+			Arrays.fill(text, (byte) 0);
+		}
 	}
 
 	/**
@@ -119,7 +133,13 @@ public final class RootKeyResolver {
 	 * @return empty when the file is a regular file with the base64 of exactly 32 bytes
 	 */
 	public static Optional<String> fileProblem(Path file) {
-		throw new UnsupportedOperationException("fileProblem");
+		try {
+			fromFile(file, RootKeySource.FILE, OpenCeliumProperties.MASTER_KEY_FILE, null).close();
+			return Optional.empty();
+		}
+		catch (BootstrapPropertyException ex) {
+			return Optional.of(ex.getMessage());
+		}
 	}
 
 	private Optional<RootKey> load() {
@@ -148,13 +168,17 @@ public final class RootKeyResolver {
 	}
 
 	private static RootKey fromEnvironment(String value) {
+		byte[] text = value.getBytes(StandardCharsets.US_ASCII);
 		try {
-			byte[] material = decode(value.getBytes(StandardCharsets.US_ASCII), ENV_VARIABLE);
+			byte[] material = decode(text, ENV_VARIABLE);
 			return new RootKey(RootKey.INITIAL_ID, RootKeySource.ENV, material);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new BootstrapPropertyException(ENV_VARIABLE, ex.getMessage() + ".",
 					"Set " + ENV_VARIABLE + " to the original master key, or unset it. " + KEY_FORMAT, null);
+		}
+		finally {
+			Arrays.fill(text, (byte) 0);
 		}
 	}
 
