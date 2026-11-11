@@ -44,6 +44,11 @@ public final class PortStep implements SetupStep {
 	}
 
 	@Override
+	public String name() {
+		return "Web port";
+	}
+
+	@Override
 	public List<Question> questions() {
 		return List.of(question());
 	}

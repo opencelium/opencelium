@@ -290,6 +290,7 @@ The test kinds follow architecture section 6.8 and CONTRIBUTING section 9. The t
 |---|---|---|
 | SW-01 to SW-04 | Unit: the launcher with an injected terminal state, environment, system properties and working directory. | A temporary directory. |
 | SW-05 to SW-10 | Unit: the console prompter and the wizard loop with scripted input. The script has bad input, `?`, `q` and the end of the input. | `ScriptedConsoleIo`. |
+| SW-58 | Unit: the console prompter draws the title line of a step; the wizard loop numbers the steps. | `ScriptedConsoleIo`. |
 | SW-11, SW-12 | Unit: the detector with injected probe results; the menu with scripted input. | A fake detector. |
 | SW-16, SW-17 | A test against the local MongoDB without a Spring context: the step with a correct database login, a wrong database login and a closed port. The retry menu and the help text with scripted input. | `LocalMongo`, `ScriptedConsoleIo`. |
 | SW-18 | Unit: the rendered yml and env files with `${OC_MONGO_URI}` for each option of the MongoDB step, also with a percent-encoded database password. | None. |

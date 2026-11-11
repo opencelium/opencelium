@@ -14,9 +14,9 @@ import io.opencelium.core.setup.SetupCancelledException;
  * Asks on a console. Bad input is explained and the question is asked again, so a typo never ends the wizard;
  * only {@code q} and the end of the input do. A secret is read without an echo, and each text is its answer, so
  * there only the end of the input ends the wizard. The layout uses plain characters only, so it looks the same on
- * every terminal: a question is its label padded to one column, the default in brackets, and a colon; a problem
- * starts with {@code !}, a result with {@code OK}, a start with {@code ->}; help and continuation lines are
- * indented under the question or the status.
+ * every terminal: a step starts after an empty line with its numbered title over a rule; a question is its label
+ * padded to one column, the default in brackets, and a colon; a problem starts with {@code !}, a result with
+ * {@code OK}, a start with {@code ->}; help and continuation lines are indented under the question or the status.
  */
 public final class ConsolePrompter implements Prompter {
 
@@ -153,6 +153,12 @@ public final class ConsolePrompter implements Prompter {
 		out.println(MARGIN + title);
 		out.println(Screen.rule());
 		out.flush();
+	}
+
+	@Override
+	public void step(int number, int count, String name) {
+		print("");
+		title("Step " + number + " of " + count + ": " + name);
 	}
 
 	@Override

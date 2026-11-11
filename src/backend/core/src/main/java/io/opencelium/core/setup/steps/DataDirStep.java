@@ -42,6 +42,11 @@ public final class DataDirStep implements SetupStep {
 	}
 
 	@Override
+	public String name() {
+		return "Data directory";
+	}
+
+	@Override
 	public List<Question> questions() {
 		return List.of(question());
 	}

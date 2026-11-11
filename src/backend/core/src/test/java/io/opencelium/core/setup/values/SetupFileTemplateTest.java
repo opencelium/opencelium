@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.opencelium.core.setup.steps.SetupStep;
+import io.opencelium.core.testsupport.fake.NamedStep;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,6 +69,11 @@ class SetupFileTemplateTest {
 	private static SetupStep asking(Question question) {
 		return new SetupStep() {
 			@Override
+			public String name() {
+				return question.label();
+			}
+
+			@Override
 			public List<Question> questions() {
 				return List.of(question);
 			}
@@ -81,9 +87,9 @@ class SetupFileTemplateTest {
 	}
 
 	private static SetupStep summary() {
-		return (context, prompter) -> {
+		return new NamedStep("Summary", (context, prompter) -> {
 			throw new UnsupportedOperationException("the template does not run a step");
-		};
+		});
 	}
 
 }
