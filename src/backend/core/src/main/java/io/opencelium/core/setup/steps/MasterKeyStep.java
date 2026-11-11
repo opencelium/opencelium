@@ -109,7 +109,7 @@ public final class MasterKeyStep implements SetupStep {
 
 	@Override
 	public String name() {
-		throw new UnsupportedOperationException();
+		return "Master key";
 	}
 
 	@Override
@@ -143,7 +143,6 @@ public final class MasterKeyStep implements SetupStep {
 			fromWord(word.get(), keep, dataDirKey, context, prompter);
 			return;
 		}
-		prompter.print("");
 		prompter.info(PURPOSE.getFirst(), PURPOSE.subList(1, PURPOSE.size()).toArray(String[]::new));
 		if (variableSet) {
 			prompter.print("");

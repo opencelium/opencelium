@@ -8,8 +8,9 @@ import io.opencelium.core.setup.values.Question;
 
 /**
  * One screen of the wizard. A step asks its questions through the prompter and stores the answers in the context;
- * it never writes a file. The wizard runs the steps in order and skips a step that does not apply to the answers
- * so far, for example a step that only cloud mode needs.
+ * it never writes a file. The wizard runs the steps in order, each one under a title line with its number and its
+ * name. It skips a step that does not apply to the answers so far; that step keeps its title line, marked as
+ * skipped, so the numbers have no gap.
  */
 public interface SetupStep {
 

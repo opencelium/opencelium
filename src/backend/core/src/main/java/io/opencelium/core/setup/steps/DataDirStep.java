@@ -43,7 +43,7 @@ public final class DataDirStep implements SetupStep {
 
 	@Override
 	public String name() {
-		throw new UnsupportedOperationException();
+		return "Data directory";
 	}
 
 	@Override

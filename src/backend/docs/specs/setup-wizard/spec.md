@@ -50,7 +50,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
 ### Screens
 
-- **SW-58** Given a step, when it starts, then the wizard must show its number, the step count and its name. The title line has the form "Step 1 of 5: Data directory", and a line of `-` characters is under it. A step that does not apply shows its title line with "(skipped)" after its name. Thus the numbers have no gap, and each title line shows the same step count.
+- **SW-58** Given a step, when it starts, then the wizard must show its number, the step count and its name. The title line has the form "Step <number> of <count>: <name>", and a line of `-` characters is under it. A step that does not apply shows its title line with "(skipped)" after its name. Thus the numbers have no gap, and each title line shows the same step count.
 
 ### MongoDB
 

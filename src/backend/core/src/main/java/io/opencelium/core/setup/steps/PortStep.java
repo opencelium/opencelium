@@ -45,7 +45,7 @@ public final class PortStep implements SetupStep {
 
 	@Override
 	public String name() {
-		throw new UnsupportedOperationException();
+		return "Web port";
 	}
 
 	@Override

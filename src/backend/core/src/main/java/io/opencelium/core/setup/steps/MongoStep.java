@@ -129,7 +129,7 @@ public final class MongoStep implements SetupStep {
 
 	@Override
 	public String name() {
-		throw new UnsupportedOperationException();
+		return "MongoDB";
 	}
 
 	@Override
