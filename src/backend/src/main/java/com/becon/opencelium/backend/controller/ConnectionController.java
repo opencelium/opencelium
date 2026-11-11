@@ -31,6 +31,10 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
+import com.becon.opencelium.backend.execution.service.MethodTestService;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRequestDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO;
 import com.becon.opencelium.backend.websocket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
@@ -108,6 +112,7 @@ public class ConnectionController {
     private final Mapper<Connection, ConnectionResource> connectionResourceMapper;
     private final Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper;
     private final PatchHelper patchHelper;
+    private final MethodTestService methodTestService;
 
     public ConnectionController(
             Environment environment,
@@ -120,7 +125,8 @@ public class ConnectionController {
             Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
-            PatchHelper patchHelper
+            PatchHelper patchHelper,
+            MethodTestService methodTestService
     ) {
         this.environment = environment;
         this.schedulerService = schedulerService;
@@ -133,6 +139,7 @@ public class ConnectionController {
         this.connectionResourceMapper = connectionResourceMapper;
         this.connectionOldDTOMapper = connectionOldDTOMapper;
         this.patchHelper = patchHelper;
+        this.methodTestService = methodTestService;
     }
 
     @Operation(summary = "Retrieves all connections from database")
@@ -464,6 +471,51 @@ public class ConnectionController {
         SchedulerResource schedulerResource = new SchedulerResource();
         schedulerResource.setSchedulerId(scheduler.getId());
         return ResponseEntity.ok(schedulerResource);
+    }
+
+    @Operation(summary = "Lists the references of a single method: those read from connectors, and those "
+            + "that need a static value to test the method. Sends no request.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "References have been successfully listed",
+                    content = @Content(schema = @Schema(implementation = MethodTestReferencesDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "The method has no request with an HTTP method",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/method/test/refs", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MethodTestReferencesDTO> getMethodTestReferences(@RequestBody MethodDTO method) {
+        return ResponseEntity.ok(methodTestService.findReferences(method));
+    }
+
+    @Operation(summary = "Tests a single method against the real API. Connector data (credentials, tokens) "
+            + "is read from the connectors, every other reference takes the given static value. "
+            + "Methods other than GET, HEAD and OPTIONS are only sent with confirmWrite = true.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "The request has been sent, or the data of a connector could not be read "
+                            + "(see connectorErrors)",
+                    content = @Content(schema = @Schema(implementation = MethodTestResultDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid method, write not confirmed, missing static values, or the request "
+                            + "could not be built",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/method/test", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MethodTestResultDTO> testMethod(@RequestBody MethodTestRequestDTO request) {
+        return ResponseEntity.ok(methodTestService.test(request));
     }
 
     @Operation(summary = "Deletes a connection by provided connection ID")

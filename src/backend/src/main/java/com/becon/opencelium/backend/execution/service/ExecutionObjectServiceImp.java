@@ -56,7 +56,7 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         String port = env.getProperty(AppYamlPath.PROXY_PORT, "");
         String user = env.getProperty(AppYamlPath.PROXY_USER, "");
         String password = env.getProperty(AppYamlPath.PROXY_PASS, "");
-        ProxyEx proxy = new ProxyEx(host, port, user, password);
+        ProxyEx proxy = ProxyEx.of(host, port, user, password);
         executionObj.setProxy(proxy);
 
         return executionObj;
