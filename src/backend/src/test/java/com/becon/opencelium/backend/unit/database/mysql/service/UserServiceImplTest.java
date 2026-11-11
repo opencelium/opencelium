@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import com.becon.opencelium.backend.testutil.fixture.UserRoleFixture;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -126,6 +127,91 @@ class UserServiceImplTest {
         assertThat(result).isEmpty();
         verify(userRepository).findByUsernameAndAuthMethod("missing", AuthMethod.LDAP);
         verifyNoMoreInteractions(userRepository);
+    }
+
+    // ── findLocalAccount ──────────────────────────────────────────────────────
+
+    @Test
+    void findLocalAccountReturnsUserWhenEmailBelongsToBasicUserWithPassword() {
+        User user = aLocalAccount("alice@example.com", "alice");
+        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findLocalAccount("alice@example.com");
+
+        assertThat(result).containsSame(user);
+        verify(userRepository, never()).findByUsername(any());
+    }
+
+    @Test
+    void findLocalAccountReturnsUserWhenUsernameBelongsToBasicUser() {
+        User user = aLocalAccount("alice@example.com", "alice");
+        when(userRepository.findByEmail("alice")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findLocalAccount("alice");
+
+        assertThat(result).containsSame(user);
+    }
+
+    @Test
+    void findLocalAccountTrimsIdentifierWhenItHasSurroundingWhitespace() {
+        User user = aLocalAccount("alice@example.com", "alice");
+        when(userRepository.findByEmail("alice")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findLocalAccount("  alice  ");
+
+        assertThat(result).containsSame(user);
+    }
+
+    @Test
+    void findLocalAccountReturnsEmptyWhenAccountIsLdap() {
+        User user = aLocalAccount(null, "ldap-user");
+        user.setAuthMethod(AuthMethod.LDAP);
+        when(userRepository.findByEmail("ldap-user")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("ldap-user")).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findLocalAccount("ldap-user");
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("findLocalAccount — a BASIC row without password is an LDAP user from before auth_method existed")
+    void findLocalAccountReturnsEmptyWhenBasicUserHasNoPassword() {
+        User user = aLocalAccount("legacy@example.com", null);
+        user.setPassword(null);
+        when(userRepository.findByEmail("legacy@example.com")).thenReturn(Optional.of(user));
+
+        Optional<User> result = userService.findLocalAccount("legacy@example.com");
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findLocalAccountReturnsEmptyWhenIdentifierIsUnknown() {
+        when(userRepository.findByEmail("nobody")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("nobody")).thenReturn(Optional.empty());
+
+        Optional<User> result = userService.findLocalAccount("nobody");
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findLocalAccountReturnsEmptyWhenIdentifierIsBlank() {
+        Optional<User> result = userService.findLocalAccount("   ");
+
+        assertThat(result).isEmpty();
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void findLocalAccountReturnsEmptyWhenIdentifierIsNull() {
+        Optional<User> result = userService.findLocalAccount(null);
+
+        assertThat(result).isEmpty();
+        verifyNoInteractions(userRepository);
     }
 
     @Test
@@ -663,5 +749,14 @@ class UserServiceImplTest {
         r.setUserGroup(userGroup);
         r.setUserDetail(new UserDetailResource());
         return r;
+    }
+
+    private static User aLocalAccount(String email, String username) {
+        User user = UserFixture.anEmptyUser();
+        user.setEmail(email);
+        user.setUsername(username);
+        user.setAuthMethod(AuthMethod.BASIC);
+        user.setPassword("$2a$hash");
+        return user;
     }
 }

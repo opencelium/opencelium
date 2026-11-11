@@ -31,15 +31,18 @@ public class DaoUserDetailsService implements UserDetailsService {
     @Autowired
     private UserServiceImpl userService;
 
+    /**
+     * Loads the OC account for a login identifier, which may be its email or its username.
+     *
+     * <p>Only local accounts qualify (see {@link UserServiceImpl#findLocalAccount(String)}): an
+     * LDAP user cannot sign in with a password stored in OC, even if an administrator once set
+     * one, so removing an account from the directory also ends its access to OC.
+     */
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userService.findByEmail(email).orElse(null);
-        if (user == null || user.getPassword() == null) {
-            // 1. user == null          - there is no user with this 'email'
-            // 2. user.password == null - there is a clone of LDAP user, and setup is not finished to authenticate via OC
-            throw new UsernameNotFoundException(email);
-        }
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        User user = userService.findLocalAccount(identifier)
+                .orElseThrow(() -> new UsernameNotFoundException(identifier));
 
         return new UserPrincipals(user);
     }
