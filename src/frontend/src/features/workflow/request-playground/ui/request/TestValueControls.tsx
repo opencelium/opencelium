@@ -19,8 +19,7 @@ export function InputValueControl({ value, isResolving, isMissing, testId, onCha
 	const { t } = useI18n('workflow');
 	if (isResolving) return <Loading size='xs' inline />;
 	const jsonError = readJsonError(value);
-	const placeholder = t(value.source === 'upstream'
-		? 'requestPlayground.values.upstreamPlaceholder' : 'requestPlayground.values.placeholder');
+	const placeholder = t('requestPlayground.values.placeholder');
 	const isError = isMissing || jsonError !== null;
 	return (
 		<div className='rpValueInput'>
@@ -55,12 +54,12 @@ type ConnectionControlProps = {
 	onChange: (text: string) => void;
 };
 
-// A secret stays masked and read-only: the backend fills it in from the connection.
+// A secret is never shown: the backend fills it in from the connector unless the user types one for this test.
 export function ConnectionValueControl({ value, isSecret, testId, onChange }: ConnectionControlProps) {
 	const { t } = useI18n('workflow');
 	return (
-		<Input value={value} type={isSecret ? 'password' : 'text'} readOnly={isSecret} testId={testId}
-			placeholder={t('requestPlayground.values.connectionPlaceholder')}
+		<Input value={value} type={isSecret ? 'password' : 'text'} testId={testId}
+			placeholder={t(isSecret ? 'requestPlayground.values.secretPlaceholder' : 'requestPlayground.values.connectionPlaceholder')}
 			className='rpMonoInput' onChange={(event) => onChange(event.target.value)} />
 	);
 }

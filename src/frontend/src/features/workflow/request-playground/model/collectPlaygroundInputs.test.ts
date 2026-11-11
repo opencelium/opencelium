@@ -20,7 +20,7 @@ const collect = (request: Partial<PlaygroundDraft['request']>, fields: string[] 
 	collectPlaygroundInputs(draft(request), connection, fields);
 
 describe('collectPlaygroundInputs', () => {
-	it('finds references in the headers and body and merges repeated ones, but not in the url', () => {
+	it('finds references in the url, headers and body and merges repeated ones', () => {
 		const { references } = collect({
 			endpoint: 'https://api.test/users/{%#aaaaaa.(response).body.$.users[i].id%}',
 			header: { 'X-Count': '#aaaaaa.(response).header.$.x-total' },
@@ -28,11 +28,12 @@ describe('collectPlaygroundInputs', () => {
 		});
 
 		expect(references.map(({ reference, targets }) => ({ reference, targets }))).toEqual([
+			{ reference: '#aaaaaa.(response).body.$.users[i].id',
+				targets: [{ location: 'url', property: null }, { location: 'body', property: 'id' }] },
 			{ reference: '#aaaaaa.(response).header.$.x-total', targets: [{ location: 'header', property: 'X-Count' }] },
-			{ reference: '#aaaaaa.(response).body.$.users[i].id', targets: [{ location: 'body', property: 'id' }] },
 			{ reference: '#aaaaaa.(response).body.$', targets: [{ location: 'body', property: 'nested.all' }] },
 		]);
-		expect(references[1].sourceMethod).toBe(upstream);
+		expect(references[0].sourceMethod).toBe(upstream);
 	});
 
 	it('names the array position a value lands in', () => {

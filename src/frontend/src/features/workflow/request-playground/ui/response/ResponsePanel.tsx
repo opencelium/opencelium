@@ -1,33 +1,37 @@
 import { Trans } from 'react-i18next';
+import type { Connector } from '@entities/connector/model/types';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Alert } from '@shared/ui/primitives/Alert';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { Tabs } from '@shared/ui/primitives/Tabs';
 import type { PlaygroundRun } from '../../hooks/usePlaygroundSend';
-import type { PlaygroundResponse } from '../../model/playground.types';
+import type { PlaygroundResult } from '../../model/playground.types';
 import { ResponseBody } from './ResponseBody';
 import { ResponseHeaders } from './ResponseHeaders';
 import { ResponseSummary } from './ResponseSummary';
-import { ResponseTimeline } from './ResponseTimeline';
+import { SentRequest } from './SentRequest';
 
 type Props = {
-	result: PlaygroundResponse | undefined;
+	result: PlaygroundResult | undefined;
 	isSending: boolean;
 	sendingText: string;
 	run: PlaygroundRun | null;
+	connectors: readonly Connector[];
 	canSaveSample: boolean;
 	onSaveSample: () => void;
 };
 
-export function ResponsePanel({ result, isSending, sendingText, run, canSaveSample, onSaveSample }: Props) {
+export function ResponsePanel({ result, isSending, sendingText, run, connectors, canSaveSample, onSaveSample }: Props) {
 	const { t } = useI18n('workflow');
-	const success = !isSending && result?.kind === 'success' ? result : undefined;
-	const error = !isSending && result?.kind === 'error' ? result : undefined;
+	const shown = isSending ? undefined : result;
+	const sent = shown?.kind === 'sent' ? shown : undefined;
+	const connectorTitle = (connectorId: number) =>
+		connectors.find((connector) => connector.connectorId === connectorId)?.title ?? `#${connectorId}`;
 
 	return (
 		<section className='rpResponse' data-testid='request-playground-response'>
-			<ResponseSummary result={success} run={run} />
+			<ResponseSummary result={sent} run={run} />
 			{isSending && (
 				<div className='rpPlaceholder rpPlaceholder--busy' data-testid='request-playground-sending'>
 					<Loading size='md' />
@@ -43,20 +47,31 @@ export function ResponsePanel({ result, isSending, sendingText, run, canSaveSamp
 					</span>
 				</div>
 			)}
-			{error && (
-				<Alert type='error' showIcon message={t(`requestPlayground.response.stage.${error.stage}`)}
-					description={error.message || t('requestPlayground.response.noResponse')} />
+			{shown?.kind === 'failed' && (
+				<Alert type='error' showIcon message={t('requestPlayground.response.failed')}
+					description={shown.message ?? undefined} />
 			)}
-			{success && (
+			{shown?.kind === 'connectorErrors' && (
+				<div className='rpResponseAlerts' data-testid='request-playground-connector-errors'>
+					{shown.errors.length === 0
+						? <Alert type='error' showIcon message={t('requestPlayground.response.noResponse')} />
+						: shown.errors.map(({ connectorId, message }) => (
+							<Alert key={connectorId} type='error' showIcon description={message}
+								message={t('requestPlayground.response.connectorError', { connector: connectorTitle(connectorId) })} />
+						))}
+				</div>
+			)}
+			{sent && (
 				<div className='rpResponseTabs'>
 					<Tabs isFullHeight items={[
 						{ key: 'body', label: t('requestPlayground.response.tabs.body'), content:
-							<ResponseBody body={success.response.body} canSaveSample={canSaveSample} onSaveSample={onSaveSample} /> },
+							<ResponseBody body={sent.response.body} headers={sent.response.headers}
+								canSaveSample={canSaveSample} onSaveSample={onSaveSample} /> },
 						{ key: 'headers', label: t('requestPlayground.response.tabs.headers',
-							{ count: Object.keys(success.response.headers ?? {}).length }),
-						content: <ResponseHeaders headers={success.response.headers ?? {}} /> },
-						{ key: 'timeline', label: t('requestPlayground.response.tabs.timeline'), content:
-							<ResponseTimeline timings={success.timings} durationMs={success.durationMs} /> },
+							{ count: Object.keys(sent.response.headers ?? {}).length }),
+						content: <ResponseHeaders headers={sent.response.headers} /> },
+						{ key: 'request', label: t('requestPlayground.response.tabs.request'), content:
+							<SentRequest request={sent.request} /> },
 					]} />
 				</div>
 			)}

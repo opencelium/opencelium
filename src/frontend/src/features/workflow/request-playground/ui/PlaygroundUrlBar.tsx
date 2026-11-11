@@ -2,26 +2,26 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import { Select } from '@shared/ui/primitives/Select';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import type { PrefillSource } from '../model/playground.types';
 import { ReferencePlaceholderInput } from './reference/ReferencePlaceholderInput';
 
-const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
 
 type Props = {
 	method: string;
 	url: string;
 	// The URL with its test values filled in, shown on hover.
 	previewUrl: string;
-	prefillSource: PrefillSource;
 	isCurlVisible: boolean;
 	isSending: boolean;
+	// False while /refs is pending or failed: the test needs its list of values.
+	canSend: boolean;
 	onMethodChange: (method: string) => void;
 	onUrlChange: (url: string) => void;
 	onToggleCurl: () => void;
 	onSend: () => void;
 };
 
-export function PlaygroundUrlBar({ method, url, previewUrl, prefillSource, isCurlVisible, isSending,
+export function PlaygroundUrlBar({ method, url, previewUrl, isCurlVisible, isSending, canSend,
 	onMethodChange, onUrlChange, onToggleCurl, onSend }: Props) {
 	const { t } = useI18n('workflow');
 	const verb = method.toUpperCase();
@@ -42,8 +42,9 @@ export function PlaygroundUrlBar({ method, url, previewUrl, prefillSource, isCur
 					{t('requestPlayground.url.curl')}
 				</Button>
 			</Tooltip>
-			<Button type='primary' iconLeft='send' loading={isSending} onClick={onSend} testId='request-playground-send'>
-				{t(prefillSource === 'upstream' ? 'requestPlayground.url.sendUpstream' : 'requestPlayground.url.send')}
+			<Button type='primary' iconLeft='send' loading={isSending} disabled={!canSend} onClick={onSend}
+				testId='request-playground-send'>
+				{t('requestPlayground.url.send')}
 			</Button>
 		</div>
 	);

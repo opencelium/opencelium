@@ -143,7 +143,7 @@
     },
     "workflowTestMethod": {
       "title": "Request ausprobieren",
-      "description": "Senden Sie diese Methode einzeln – mit Werten für ihre Referenzen auf vorherige Methoden –, ohne den ganzen Workflow auszuführen. Noch in Entwicklung: Antworten sind vorerst Mock-Daten."
+      "description": "Senden Sie diese Methode einzeln – mit Werten für ihre Referenzen auf vorherige Methoden –, ohne den ganzen Workflow auszuführen. Dabei wird die echte API mit den Zugangsdaten des Konnektors aufgerufen; nichts wird gespeichert."
     },
     "workflowProblems": {
       "title": "Automatische Workflow-Prüfung",

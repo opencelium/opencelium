@@ -4,7 +4,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { PlaygroundValues } from '../../hooks/usePlaygroundValues';
 import type { PrefillSource } from '../../model/playground.types';
 
-const PREFILL_SOURCES: PrefillSource[] = ['testRun', 'lastTest', 'sample', 'upstream', 'manual'];
+const PREFILL_SOURCES: PrefillSource[] = ['testRun', 'lastTest', 'sample', 'manual'];
 
 type Props = { values: PlaygroundValues };
 

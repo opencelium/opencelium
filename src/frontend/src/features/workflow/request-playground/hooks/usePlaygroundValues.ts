@@ -24,12 +24,15 @@ type Args = {
 	connection: Connection;
 	currentMethod: LiveReferenceMethodContext | undefined;
 	storageKey: string;
+	// Every value key /refs asks for; the ones the editor's own scan does not
+	// produce (pagination, script results, URL references…) get a plain input.
+	staticKeys: readonly string[];
 };
 
 const fromStored = (stored: StoredInput | undefined): InputValue | undefined =>
 	stored && { ...stored, source: 'lastTest' };
 
-export function usePlaygroundValues({ inputs, connection, currentMethod, storageKey }: Args) {
+export function usePlaygroundValues({ inputs, connection, currentMethod, storageKey, staticKeys }: Args) {
 	const snapshot = useTestRunLiveSnapshot();
 	const [stored] = useState(() => readStoredInputs(storageKey));
 	const isInspectable = (reference: CollectedReference) =>
@@ -64,11 +67,15 @@ export function usePlaygroundValues({ inputs, connection, currentMethod, storage
 
 	const baseReferenceValue = (reference: CollectedReference): InputValue => {
 		const key = referenceInputKey(reference);
+		// A step the paused run or the last test has no value for still gets its sample.
+		const sample = () => toInputValue(readSampleValue(reference), 'sample');
 		switch (prefillSource) {
-			case 'testRun': return live[key] ?? emptyInput();
-			case 'lastTest': return fromStored(stored[key]) ?? emptyInput();
-			case 'sample': return toInputValue(readSampleValue(reference), 'sample');
-			case 'upstream': return { ...emptyInput(), source: 'upstream' };
+			case 'testRun': {
+				const liveValue = live[key];
+				return liveValue && liveValue.source !== 'empty' ? liveValue : sample();
+			}
+			case 'lastTest': return fromStored(stored[key]) ?? sample();
+			case 'sample': return sample();
 			case 'manual': return emptyInput();
 			default: {
 				const _exhaustive: never = prefillSource;
@@ -82,11 +89,13 @@ export function usePlaygroundValues({ inputs, connection, currentMethod, storage
 		const key = referenceInputKey(reference);
 		values[key] = overrides[key] ?? baseReferenceValue(reference);
 	});
+	const remembered = (key: string) => prefillSource === 'lastTest' ? fromStored(stored[key]) : undefined;
 	inputs.webhooks.forEach((webhook) => {
 		const key = webhookInputKey(webhook);
-		const remembered = prefillSource === 'lastTest' ? fromStored(stored[key]) : undefined;
-		values[key] = overrides[key] ?? remembered ?? emptyInput(defaultWebhookKind(webhook));
+		values[key] = overrides[key] ?? remembered(key) ?? emptyInput(defaultWebhookKind(webhook));
 	});
+	staticKeys.filter((key) => !values[key])
+		.forEach((key) => { values[key] = overrides[key] ?? remembered(key) ?? emptyInput(); });
 
 	const updateOverride = useCallback((key: string, value: InputValue, update: Partial<InputValue>) =>
 		setOverrides((current) => ({ ...current, [key]: { ...(current[key] ?? value), ...update, source: 'edited' } })), []);
@@ -120,7 +129,11 @@ export function usePlaygroundValues({ inputs, connection, currentMethod, storage
 			? inputs.references.filter(isInspectable).map(referenceInputKey).filter((key) => !live[key])
 			: [],
 		prefillSource,
-		setPrefillSource,
+		// Picking a source re-fills every value from it; otherwise a typed value would hide its effect.
+		setPrefillSource: (source: PrefillSource) => {
+			setOverrides({});
+			setPrefillSource(source);
+		},
 		canUseTestRun,
 		hasStoredValues: Object.keys(stored).length > 0,
 		setText: (key: string, text: string) => updateOverride(key, values[key], { text }),

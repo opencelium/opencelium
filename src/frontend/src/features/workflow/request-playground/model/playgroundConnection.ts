@@ -18,4 +18,4 @@ export const readConnectionFieldNames = (connector: Connector | undefined) => Ar
 ]));
 
 export const readConnectionFieldValue = (connector: Connector | undefined, field: string,
-	overrides: Record<string, string>) => overrides[field] ?? connector?.requestData?.[field] ?? '';
+	overrides: Record<string, string>) => overrides[`{${field}}`] ?? connector?.requestData?.[field] ?? '';

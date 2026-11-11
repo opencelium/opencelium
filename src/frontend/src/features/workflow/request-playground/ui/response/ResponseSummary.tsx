@@ -1,12 +1,12 @@
 import { StatusBadge } from '@features/logs';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { PlaygroundRun } from '../../hooks/usePlaygroundSend';
-import type { PlaygroundResponse } from '../../model/playground.types';
+import type { PlaygroundResult } from '../../model/playground.types';
 import { PlaygroundBadge } from '../PlaygroundBadge';
 import { formatSize, readJsonRpcErrorCode } from './responseFormat';
 
 type Props = {
-	result: Extract<PlaygroundResponse, { kind: 'success' }> | undefined;
+	result: Extract<PlaygroundResult, { kind: 'sent' }> | undefined;
 	run: PlaygroundRun | null;
 };
 
