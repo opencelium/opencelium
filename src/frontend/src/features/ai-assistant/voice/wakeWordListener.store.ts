@@ -14,11 +14,10 @@ import { readConfirmAnswer, readStopRequest } from './spokenAnswers'
 import { createUtteranceSegmenter, type UtteranceSegmenter } from './utteranceSegmenter'
 import { samplesToSpeechWav } from './wavEncoding'
 import { matchWakeWord, WAKE_WORD } from './wakeWord'
+import { useBeebotPrefsStore } from './beebotPrefs.store'
 
 /** A confirmation that opens this soon after a request is Beebot's own question, answered without its name. */
 const OWN_QUESTION_MS = 60_000
-/** Stops listening after this long without a request: an open microphone nobody uses is a privacy cost. */
-const IDLE_STOP_MS = 10 * 60_000
 const IDLE_CHECK_MS = 30_000
 /** Utterances waiting for transcription; anything beyond is dropped rather than answered minutes late. */
 const MAX_QUEUED = 2
@@ -74,7 +73,9 @@ export const useWakeWordListenerStore = create<WakeWordListenerState>((set, get)
 
     const handleUtterance = async (current: Session, samples: Float32Array) => {
         const wav = await samplesToSpeechWav(samples, current.feed.sampleRate)
-        const result = await store.dispatch(aiApi.endpoints.transcribeSpeech.initiate({ wav, vocabulary: speechVocabulary() }))
+        const { language } = useBeebotPrefsStore.getState()
+        const result = await store.dispatch(aiApi.endpoints.transcribeSpeech.initiate({ wav, vocabulary: speechVocabulary(),
+            language: language === 'auto' ? undefined : language }))
             .unwrap().catch(() => undefined)
         if (!result?.text || session !== current) return
         const match = matchWakeWord(result.text)
@@ -170,9 +171,10 @@ export const useWakeWordListenerStore = create<WakeWordListenerState>((set, get)
             feed: opened.feed,
             segmenter: createUtteranceSegmenter({ sampleRate: opened.feed.sampleRate }),
             idleTimer: window.setInterval(() => {
-                if (session !== current || Date.now() - current.lastRequestAt < IDLE_STOP_MS) return
+                const { autoStopMinutes } = useBeebotPrefsStore.getState()
+                if (session !== current || Date.now() - current.lastRequestAt < autoStopMinutes * 60_000) return
                 stop()
-                message.info(tCommon()('commandPalette.wakeWord.autoStopped', { name: WAKE_WORD.name }))
+                message.info(tCommon()('commandPalette.wakeWord.autoStopped', { name: WAKE_WORD.name, count: autoStopMinutes }))
             }, IDLE_CHECK_MS),
             // Signing out (or a session expiring) closes the microphone with it.
             unsubscribeAuth: store.subscribe(() => {

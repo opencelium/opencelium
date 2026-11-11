@@ -1,6 +1,6 @@
 import type { GatewayConfig } from './config.ts'
 
-type ModelRole = 'workflowModel' | 'commandModel' | 'lightModel' | 'helpModel'
+export type ModelRole = 'workflowModel' | 'commandModel' | 'lightModel' | 'helpModel'
 
 /**
  * Which configured model each user-facing AI feature runs on: the one place this is decided. Routes ask `modelFor`,
@@ -25,4 +25,10 @@ export const FEATURE_MODELS = {
 
 export type AiFeature = keyof typeof FEATURE_MODELS
 
-export const modelFor = (config: GatewayConfig, feature: AiFeature): string => config[FEATURE_MODELS[feature]]
+export const AI_FEATURES = Object.keys(FEATURE_MODELS) as AiFeature[]
+
+export const isAiFeature = (value: string): value is AiFeature => value in FEATURE_MODELS
+
+/** The feature's own model when one is set on the AI settings page, else its role's. */
+export const modelFor = (config: GatewayConfig, feature: AiFeature): string =>
+    config.featureModels[feature] ?? config[FEATURE_MODELS[feature]]

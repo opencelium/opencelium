@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url'
+import type { AiFeature } from './featureModels.ts'
 
 export type GatewayConfig = {
     host: string
@@ -22,6 +23,12 @@ export type GatewayConfig = {
     /** Explains workflows and failed runs, proposes run fixes, writes transformation scripts: a small model keeps up with the large one there. */
     lightModel: string
     corsOrigins: string[]
+    /** A model for one feature instead of its role's (set on the AI settings page). */
+    featureModels: Partial<Record<AiFeature, string>>
+    /** Features switched off on the AI settings page; the app hides them. */
+    disabledFeatures: AiFeature[]
+    /** Where the AI settings page's changes are kept; they override the environment. */
+    settingsFile: string
     maxRepairAttempts: number
     contextTokens: number
     chatTimeoutMs: number
@@ -30,6 +37,7 @@ export type GatewayConfig = {
 const defaultInvokerDir = fileURLToPath(new URL('../../backend/runtime/invoker', import.meta.url))
 const defaultTemplateDir = fileURLToPath(new URL('../../backend/runtime/templates', import.meta.url))
 const defaultDocsDir = fileURLToPath(new URL('../../../docs', import.meta.url))
+const defaultSettingsFile = fileURLToPath(new URL('../data/settings.json', import.meta.url))
 
 function toInt(value: string | undefined, fallback: number): number {
     const parsed = Number.parseInt(value ?? '', 10)
@@ -56,6 +64,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): GatewayConfig 
             .split(',')
             .map((origin) => origin.trim())
             .filter(Boolean),
+        featureModels: {},
+        disabledFeatures: [],
+        settingsFile: env.AI_SETTINGS_FILE ?? defaultSettingsFile,
         maxRepairAttempts: toInt(env.AI_MAX_REPAIR_ATTEMPTS, 2),
         contextTokens: toInt(env.AI_CONTEXT_TOKENS, 16384),
         chatTimeoutMs: toInt(env.AI_CHAT_TIMEOUT_MS, 15 * 60_000),

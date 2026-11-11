@@ -9,7 +9,11 @@ const MAX_AUDIO_BYTES = 1_000_000
 
 // Words the caller expects to hear, e.g. the voice assistant's wake word and the open workflow's methods; capped so the
 // system names still fit the ~224 tokens whisper keeps.
-const querySchema = z.object({ vocabulary: z.string().trim().max(300).optional() })
+const querySchema = z.object({
+    vocabulary: z.string().trim().max(300).optional(),
+    /** Set when the user chose a speech language; whisper detects it otherwise. */
+    language: z.enum(['en', 'de']).optional(),
+})
 
 /** Whisper weighs the end of its prompt most, so the caller's words go last. */
 export const withVocabulary = (prompt: string, vocabulary?: string) => (vocabulary ? `${prompt} ${vocabulary}.` : prompt)
@@ -27,7 +31,7 @@ export function registerSpeechRoutes(app: FastifyInstance, { speech, invokers }:
         if (!query.success) return sendApiError(reply, 'BAD_REQUEST', 'Invalid query', z.treeifyError(query.error))
         const started = Date.now()
         try {
-            const transcript = await speech.transcribe(request.body, withVocabulary(await promptFor(), query.data.vocabulary))
+            const transcript = await speech.transcribe(request.body, withVocabulary(await promptFor(), query.data.vocabulary), query.data.language)
             const text = cleanTranscript(transcript.text)
             request.log.info({ bytes: request.body.length, language: transcript.language, durationMs: Date.now() - started }, 'speech transcribed')
             return { text, language: transcript.language ?? null, durationMs: Date.now() - started }

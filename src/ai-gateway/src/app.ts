@@ -26,6 +26,8 @@ import { registerConditionRoutes } from './routes/condition.ts'
 import { registerHelpRoutes } from './routes/help.ts'
 import { registerGuideRoutes } from './routes/guide.ts'
 import { registerEditorRoutes } from './routes/editor.ts'
+import { registerSettingsRoutes } from './routes/settings.ts'
+import type { SettingsStore } from './settings/gatewaySettings.ts'
 
 export type AppDeps = {
     config: GatewayConfig
@@ -45,12 +47,15 @@ export type AppDeps = {
     embedder?: Embedder
     /** Turns spoken commands into text; without it, voice input is reported unavailable. */
     speech?: SpeechClient
+    /** The AI settings page's changes; without it, `/settings` is not offered and the environment is all there is. */
+    settings?: SettingsStore
 }
 
 export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}): Promise<FastifyInstance> {
     const app = Fastify(options)
     // The frontend's shared baseQuery sends `credentials: 'include'`; without this the browser drops every response.
-    await app.register(cors, { origin: deps.config.corsOrigins, credentials: true })
+    // PUT is for /settings; @fastify/cors allows only GET, HEAD and POST unless told otherwise.
+    await app.register(cors, { origin: deps.config.corsOrigins, credentials: true, methods: ['GET', 'HEAD', 'POST', 'PUT'] })
     registerHealthRoutes(app, deps)
     registerInvokerRoutes(app, deps)
     registerWorkflowRoutes(app, deps)
@@ -67,5 +72,6 @@ export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}
     registerHelpRoutes(app, deps)
     registerGuideRoutes(app, deps)
     registerEditorRoutes(app, deps)
+    registerSettingsRoutes(app, deps)
     return app
 }

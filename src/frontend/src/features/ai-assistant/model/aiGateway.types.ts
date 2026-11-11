@@ -1,6 +1,35 @@
 import type { WorkflowDsl } from './workflowDsl.schema';
+import type { AiFeatureId } from './aiFeatures';
 
-/** Mirrors `src/ai-gateway/src/routes/*` responses. */
+export type { AiFeatureId };
+
+// Mirrors `src/ai-gateway/src/routes/*` responses.
+
+/** The gateway's model roles; each feature runs on one unless it has a model of its own. */
+export type AiModelRole = 'workflowModel' | 'helpModel' | 'lightModel' | 'commandModel';
+
+/** What the AI settings page can change on the gateway (`src/ai-gateway/src/settings/gatewaySettings.ts`). */
+export type AiGatewaySettings = Record<AiModelRole, string> & {
+	featureModels: Partial<Record<AiFeatureId, string>>;
+	disabledFeatures: AiFeatureId[];
+	ollamaUrl: string;
+	/** Empty: speech to text is off. */
+	speechUrl: string;
+	chatTimeoutMs: number;
+	contextTokens: number;
+	maxRepairAttempts: number;
+	docsUrl: string;
+};
+
+export type AiSettingsResponse = {
+	settings: AiGatewaySettings;
+	/** The gateway's environment, for "Reset to defaults". */
+	defaults: AiGatewaySettings;
+	featureRoles: Record<AiFeatureId, AiModelRole>;
+	installedModels: string[];
+	embedModel: string;
+};
+
 export type AiHealth = {
 	status: 'ok' | 'degraded';
 	ollama: { reachable: boolean; models: string[] };
@@ -11,6 +40,8 @@ export type AiHealth = {
 	/** Which model each feature runs on (`src/ai-gateway/src/featureModels.ts`); missing from older gateways. */
 	features?: { id: string; model: string; available: boolean }[];
 	embedModel?: { name: string; available: boolean };
+	/** Switched off on the AI settings page; missing from older gateways. */
+	disabledFeatures?: AiFeatureId[];
 };
 
 export type TranscribeSpeechResponse = { text: string; language: string | null; durationMs: number };

@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "KI-Einstellungen",
-    "subtitle": "Ob die KI verfügbar ist, welches Modell jede KI-Funktion nutzt, und Beebot. Die Modelle werden in der Konfiguration des KI-Gateways festgelegt und hier so angezeigt, wie es sie meldet."
+    "subtitle": "Ob die KI verfügbar ist, welches Modell jede KI-Funktion verwendet, und Beebot. Administratoren ändern hier die Modelle, die KI-Funktionen und die Verbindung des KI-Gateways."
   },
   "status": {
     "title": "Verfügbarkeit",
@@ -42,7 +42,66 @@
     "title": "Beebot",
     "toggle": "Auf Anfragen hören",
     "unavailable": "Beebot braucht Sprache zu Text, und das ist nicht verfügbar.",
-    "howItWorks": "Solange Beebot an ist, reagiert er nur auf das, was mit seinem Namen beginnt, z. B. „Beebot, füge nach GetAllUser eine Schleife hinzu“; alles andere wird ignoriert. Ein Ja / Nein auf seine eigene Frage braucht keinen Namen. Beebot spricht nie und zeigt keine Meldungen: Eine Anfrage, die zu keinem Befehl passt, wird ignoriert. Nach 10 Minuten ohne Anfrage schaltet er sich aus.",
-    "hotkey": "Um stattdessen eine einzelne Anfrage in die Befehlspalette zu sprechen, drücken Sie {{key}}."
+    "howItWorks": "Solange Beebot an ist, reagiert er nur auf das, was mit seinem Namen beginnt, z. B. „Beebot, füge nach GetAllUser eine Schleife hinzu“; alles andere wird ignoriert. Ein Ja / Nein auf seine eigene Frage braucht keinen Namen. Beebot spricht nie und zeigt keine Meldungen: Eine Anfrage, die zu keinem Befehl passt, wird ignoriert. Diese Einstellungen werden in diesem Browser gespeichert.",
+    "hotkey": "Um stattdessen eine einzelne Anfrage in die Befehlspalette zu sprechen, drücken Sie {{key}}.",
+    "language": "Sprache",
+    "languageHint": "Gilt auch für das Mikrofon der Befehlspalette. „Erkennen“ lässt die Spracherkennung sie jedes Mal bestimmen.",
+    "languages": {
+      "auto": "Erkennen",
+      "en": "Englisch",
+      "de": "Deutsch"
+    },
+    "autoStop": "Zuhören beenden nach",
+    "autoStopOption": "{{count}} Min. ohne Anfrage"
+  },
+  "admin": {
+    "title": "Gateway-Einstellungen",
+    "forEveryone": "Diese Einstellungen gelten für alle.",
+    "save": "Einstellungen speichern",
+    "discard": "Verwerfen",
+    "saved": "KI-Einstellungen gespeichert.",
+    "saveFailed": "Die KI-Einstellungen konnten nicht gespeichert werden. Prüfen Sie, ob das KI-Gateway läuft.",
+    "invalid": "Einige Einstellungen sind ungültig. Prüfen Sie die markierten Felder, auch unter „Verbindung und Erweitert“.",
+    "unavailable": "Dieses KI-Gateway lässt sich hier nicht einstellen. Aktualisieren Sie es, um Modelle und Funktionen auf dieser Seite zu ändern.",
+    "confirmSave": {
+      "title": "KI-Einstellungen ändern?",
+      "message": "Die neuen Einstellungen gelten für alle, ab der nächsten KI-Anfrage."
+    },
+    "models": {
+      "title": "Modelle",
+      "resetDefaults": "Auf Standard zurücksetzen",
+      "roles": {
+        "workflowModel": "Großes Modell",
+        "helpModel": "Hilfe-Antworten",
+        "lightModel": "Kleines Modell",
+        "commandModel": "Schnelles Modell"
+      },
+      "noFeatures": "Derzeit verwendet keine Funktion dieses Modell.",
+      "notInstalledOption": "{{model}} (nicht installiert)",
+      "overrides": "Modelle für einzelne Funktionen ({{count}})",
+      "inherit": "{{model}} ({{role}})",
+      "embed": "Suchmodell: {{model}}. Es wird in der Konfiguration des KI-Gateways festgelegt: Eine Änderung bedeutet, alle Vorlagen und Dokumentationsseiten neu zu indizieren."
+    },
+    "features": {
+      "title": "KI-Funktionen",
+      "editor": "Im Workflow-Editor",
+      "elsewhere": "An anderen Stellen der App",
+      "hint": "Eine ausgeschaltete Funktion ist für alle ausgeblendet. Beebot braucht „KI in der Befehlspalette“ oder „Anfragen im Workflow-Editor“."
+    },
+    "connection": {
+      "title": "Verbindung und Erweitert",
+      "ollamaUrl": "Ollama-URL",
+      "speechUrl": "URL des Sprachdienstes",
+      "speechUrlHint": "whisper-server. Leer lassen, um Sprache-zu-Text auszuschalten.",
+      "docsUrl": "Dokumentations-URL (Ziel der Links in Hilfe-Antworten)",
+      "chatTimeoutMinutes": "Zeitlimit für lange Anfragen (Minuten)",
+      "contextTokens": "Kontextgröße (Tokens)",
+      "maxRepairAttempts": "Reparaturversuche für einen generierten Workflow"
+    },
+    "errors": {
+      "url": "Geben Sie eine Adresse ein, die mit http:// oder https:// beginnt.",
+      "model": "Wählen Sie ein Modell.",
+      "range": "Geben Sie eine ganze Zahl von {{min}} bis {{max}} ein."
+    }
   }
 }

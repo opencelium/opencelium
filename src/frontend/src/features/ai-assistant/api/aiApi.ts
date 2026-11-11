@@ -2,11 +2,16 @@ import { baseApi } from '@shared/api/baseApi';
 import { runtimeConfig } from '@shared/config/runtimeConfig';
 import type {
 	AiHealth, ConditionSuggestion, SuggestConditionRequest, LoopSuggestion, SuggestLoopRequest, ConnectorErrorExplanation, DraftNotificationRequest, NotificationDraft, ExplainConnectorErrorRequest, ExplainWorkflowRequest, WorkflowExplanation, GenerateWorkflowRequest, InvokerDraft, SuggestMappingRequest, SuggestMappingResponse, InvokerDraftRequest, InvokerDraftResponse, RunExplanation, RunFailureRequest, RunFix, GenerateWorkflowResponse, PlanWorkflowResponse,
-	RouteCommandRequest, RouteCommandResponse, RouteGuideRequest, RouteGuideResponse, AddMethodIntentRequest, AddMethodIntentResponse, AddOperatorIntentRequest, AddOperatorIntentResponse, MappingIntentRequest, MappingIntentResponse, TransformationIntentRequest, TransformationIntentResponse, SearchCommandsRequest, SearchCommandsResponse, TranscribeSpeechResponse,
+	RouteCommandRequest, RouteCommandResponse, RouteGuideRequest, RouteGuideResponse, AddMethodIntentRequest, AddMethodIntentResponse, AddOperatorIntentRequest, AddOperatorIntentResponse, MappingIntentRequest, MappingIntentResponse, TransformationIntentRequest, TransformationIntentResponse, SearchCommandsRequest, SearchCommandsResponse, TranscribeSpeechResponse, AiGatewaySettings, AiSettingsResponse,
 } from '../model/aiGateway.types';
 
 // The panel renders every gateway failure itself; the global error toast would duplicate it.
 const quiet = { ignoreError: true };
+
+const speechQuery = (params: Record<string, string | undefined>) => {
+	const query = new URLSearchParams(Object.entries(params).filter((entry): entry is [string, string] => Boolean(entry[1])));
+	return query.size ? `?${query}` : '';
+};
 
 export const aiApi = baseApi.injectEndpoints({
 	endpoints: (b) => ({
@@ -38,9 +43,16 @@ export const aiApi = baseApi.injectEndpoints({
 				customOptions: quiet,
 			}),
 		}),
-		transcribeSpeech: b.mutation<TranscribeSpeechResponse, { wav: Blob; vocabulary?: string }>({
-			query: ({ wav, vocabulary }) => ({
-				url: `${runtimeConfig.aiUrl}/speech/transcribe${vocabulary ? `?vocabulary=${encodeURIComponent(vocabulary)}` : ''}`,
+		getAiSettings: b.query<AiSettingsResponse, void>({
+			query: () => ({ url: `${runtimeConfig.aiUrl}/settings`, customOptions: quiet }),
+			keepUnusedDataFor: 0,
+		}),
+		updateAiSettings: b.mutation<AiSettingsResponse, AiGatewaySettings>({
+			query: (body) => ({ url: `${runtimeConfig.aiUrl}/settings`, method: 'PUT', body, customOptions: quiet }),
+		}),
+		transcribeSpeech: b.mutation<TranscribeSpeechResponse, { wav: Blob; vocabulary?: string; language?: 'en' | 'de' }>({
+			query: ({ wav, vocabulary, language }) => ({
+				url: `${runtimeConfig.aiUrl}/speech/transcribe${speechQuery({ vocabulary, language })}`,
 				method: 'POST',
 				body: wav,
 				headers: { 'Content-Type': 'audio/wav' },
@@ -104,7 +116,7 @@ export const aiApi = baseApi.injectEndpoints({
 });
 
 export const {
-	useGetAiHealthQuery, usePlanWorkflowMutation, useGenerateWorkflowMutation, useSearchCommandsMutation, useRouteCommandMutation,
+	useGetAiHealthQuery, useGetAiSettingsQuery, useUpdateAiSettingsMutation, usePlanWorkflowMutation, useGenerateWorkflowMutation, useSearchCommandsMutation, useRouteCommandMutation,
 	useTranscribeSpeechMutation, useExplainRunMutation, useFixRunMutation, useDraftInvokerMutation, useBuildInvokerXmlMutation, useExplainWorkflowMutation, useExplainConnectorErrorMutation, useDraftNotificationMutation,
 } = aiApi;
 

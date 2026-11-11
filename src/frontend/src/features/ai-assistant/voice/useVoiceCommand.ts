@@ -1,6 +1,7 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { notifyError } from '@shared/ui/feedback/notifyError';
 import { useTranscribeSpeechMutation } from '../api/aiApi';
+import { useBeebotPrefsStore } from './beebotPrefs.store';
 import { canRecordVoice, useVoiceRecorder } from './useVoiceRecorder';
 
 type Options = {
@@ -26,7 +27,9 @@ export function useVoiceCommand({ isSpeechAvailable, onTranscript }: Options) {
 			case 'failed':
 				return notifyError(t('commandPalette.voice.failed'));
 			case 'audio': {
-				const result = await transcribe({ wav: recording.wav }).unwrap().catch(() => undefined);
+				const { language } = useBeebotPrefsStore.getState();
+				const result = await transcribe({ wav: recording.wav, language: language === 'auto' ? undefined : language })
+					.unwrap().catch(() => undefined);
 				if (!result) return notifyError(t('commandPalette.voice.failed'));
 				if (!result.text) return notifyError(t('commandPalette.voice.noSpeech'), 6);
 				return onTranscript(result.text);

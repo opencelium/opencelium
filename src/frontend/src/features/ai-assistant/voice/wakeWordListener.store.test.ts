@@ -140,7 +140,7 @@ describe('wake word listener', () => {
         await useWakeWordListenerStore.getState().start()
         vi.advanceTimersByTime(10 * 60_000 + 30_000)
         expect(useWakeWordListenerStore.getState().status).toBe('off')
-        expect(info).toHaveBeenCalledWith('commandPalette.wakeWord.autoStopped{"name":"Beebot"}')
+        expect(info).toHaveBeenCalledWith('commandPalette.wakeWord.autoStopped{"name":"Beebot","count":10}')
     })
 
     it('reports a refused microphone and stays off', async () => {

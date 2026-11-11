@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '@features/workflow/types/workflow.types';
 import { useWorkflowAssistAction } from '@features/workflow/command/workflowAssistBridge';
 import { isAiConfigured, useGetAiHealthQuery } from '../../api/aiApi';
+import { isAiFeatureOn } from '../../api/useIsAiFeatureOn';
 import { AiWorkflowExplainDialog } from './AiWorkflowExplainDialog';
 
 export type AiWorkflowExplainParams = {
@@ -19,7 +20,7 @@ export function useAiWorkflowExplain({ nodes, edges, title, onUseDescription }: 
 	const [session, setSession] = useState(0);
 	const [isOpen, setIsOpen] = useState(false);
 	const hasSteps = nodes.some((node) => Boolean(node.data.methodConfig));
-	const isAvailable = isConfigured && health.data?.ollama.reachable === true && health.data.workflowModel.available;
+	const isAvailable = isConfigured && health.data?.ollama.reachable === true && health.data.workflowModel.available && isAiFeatureOn(health.data, 'explain-workflow');
 	const open = () => {
 		setSession((current) => current + 1);
 		setIsOpen(true);

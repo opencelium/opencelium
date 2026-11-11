@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import type { AppDeps } from '../app.ts'
-import { type AiFeature, FEATURE_MODELS, modelFor } from '../featureModels.ts'
+import { AI_FEATURES, type AiFeature, modelFor } from '../featureModels.ts'
 
 export type HealthResponse = {
     status: 'ok' | 'degraded'
@@ -11,6 +11,8 @@ export type HealthResponse = {
     /** Which model each feature runs on, and whether Ollama has it; for the app's AI settings page. */
     features: { id: AiFeature; model: string; available: boolean }[]
     embedModel: { name: string; available: boolean }
+    /** Switched off on the AI settings page: the app hides them. */
+    disabledFeatures: AiFeature[]
 }
 
 export function registerHealthRoutes(app: FastifyInstance, { config, llm, invokers, speech }: AppDeps) {
@@ -31,11 +33,12 @@ export function registerHealthRoutes(app: FastifyInstance, { config, llm, invoke
             workflowModel: { name: config.workflowModel, available },
             invokerCount: (await invokers.list()).length,
             speech: { available: Boolean(speech && (await speech.isReachable())) },
-            features: (Object.keys(FEATURE_MODELS) as AiFeature[]).map((id) => {
+            features: AI_FEATURES.map((id) => {
                 const model = modelFor(config, id)
                 return { id, model, available: has(model) }
             }),
             embedModel: { name: config.embedModel, available: has(config.embedModel) },
+            disabledFeatures: config.disabledFeatures,
         }
     })
 }

@@ -142,7 +142,7 @@
     "wakeWord": {
       "start": "Talk to {{name}}: once on, it listens all the time and acts only on what starts with “{{name}}”, e.g. “{{name}}, where is the header of the method?”. Everything else is ignored.",
       "stop": "{{name}} is listening. Click to stop",
-      "autoStopped": "{{name}} stopped listening after 10 minutes without a request.",
+      "autoStopped": "{{name}} stopped listening after {{count}} minutes without a request.",
       "state": {
         "off": "{{name}} is off",
         "idle": "{{name}} is listening for its name",

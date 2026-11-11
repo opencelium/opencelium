@@ -3,6 +3,7 @@ import type { Mode } from '@/engine/entity/EntityDefinition';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import { isAiConfigured, useGetAiHealthQuery } from '../../api/aiApi';
+import { isAiFeatureOn } from '../../api/useIsAiFeatureOn';
 import { AiNotificationDraftPanel } from './AiNotificationDraftPanel';
 import '../../styles/ai-notification.css';
 
@@ -12,7 +13,7 @@ export function AiNotificationDraftField({ mode }: { mode?: Mode }) {
 	const isConfigured = isAiConfigured();
 	const health = useGetAiHealthQuery(undefined, { skip: !isConfigured || mode === 'view' });
 	const [isOpen, setIsOpen] = useState(false);
-	const isAvailable = isConfigured && health.data?.ollama.reachable === true && health.data.workflowModel.available;
+	const isAvailable = isConfigured && health.data?.ollama.reachable === true && health.data.workflowModel.available && isAiFeatureOn(health.data, 'draft-notification');
 	if (mode === 'view' || !isAvailable) return null;
 	if (!isOpen) {
 		return (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import { isAiConfigured, useExplainConnectorErrorMutation, useGetAiHealthQuery } from '../../api/aiApi';
+import { isAiFeatureOn } from '../../api/useIsAiFeatureOn';
 import type { ConnectorErrorExplanation } from '../../model/aiGateway.types';
 import { AiExpectedTime } from '../AiExpectedTime/AiExpectedTime';
 import '../../styles/ai-connector-error.css';
@@ -30,7 +31,7 @@ export function AiConnectorErrorExplain({ connector, status, lastError }: Props)
 	const health = useGetAiHealthQuery(undefined, { skip: !isConfigured });
 	const [explain] = useExplainConnectorErrorMutation();
 	const [state, setState] = useState<State>({ status: 'idle' });
-	const isAvailable = isConfigured && health.data?.ollama.reachable === true && health.data.workflowModel.available;
+	const isAvailable = isConfigured && health.data?.ollama.reachable === true && health.data.workflowModel.available && isAiFeatureOn(health.data, 'explain-connector-error');
 	if (!isAvailable) return null;
 
 	const run = async () => {
