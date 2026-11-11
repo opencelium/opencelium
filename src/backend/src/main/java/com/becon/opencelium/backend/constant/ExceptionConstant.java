@@ -58,6 +58,12 @@ public interface ExceptionConstant {
     String CONCURRENT_TEST_IS_FORBIDDEN = "CONCURRENT_TEST_IS_FORBIDDEN";
     String OPERATOR_EXPRESSION_IS_EMPTY = "OPERATOR_EXPRESSION_IS_EMPTY";
 
+    // ----------------------------------------- Method test ----------------------------------------------- //
+    String METHOD_TEST_METHOD_INVALID = "METHOD_TEST_METHOD_INVALID";
+    String METHOD_TEST_WRITE_NOT_CONFIRMED = "METHOD_TEST_WRITE_NOT_CONFIRMED";
+    String METHOD_TEST_STATIC_VALUES_MISSING = "METHOD_TEST_STATIC_VALUES_MISSING";
+    String METHOD_TEST_REQUEST_NOT_BUILT = "METHOD_TEST_REQUEST_NOT_BUILT";
+
     // ----------------------------------------- Enhancement ----------------------------------------------- //
     String ENHANCEMENT_NOT_FOUND = "ENHANCEMENT_NOT_FOUND";
 
