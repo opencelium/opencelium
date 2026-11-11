@@ -9,10 +9,10 @@ import io.opencelium.core.setup.SetupCancelledException;
 
 /**
  * The questions the setup wizard asks and the screens it shows, apart from where they go: the console in
- * production, a script in tests. Every question accepts {@code ?} for help and {@code q} to cancel the setup.
+ * production, a script in tests. Every question accepts {@code ?} for help and {@code q} to cancel the setup,
+ * except the question for a secret, where each text is an answer.
  * The display methods carry the kind of a line (a title, a status, a box, a list), so the steps never know a
- * mark or a frame; the implementation draws them. A masked password question joins with the first step that asks
- * it.
+ * mark or a frame; the implementation draws them.
  */
 public interface Prompter {
 
@@ -39,6 +39,16 @@ public interface Prompter {
 	 * @throws SetupCancelledException when the user types {@code q} or the input ends
 	 */
 	boolean yesNo(String question, String help, boolean defaultYes);
+
+	/**
+	 * A text that the terminal does not show while the user types it, for example a password. The question has no
+	 * default and no help: each text that is not empty is the answer as typed, with the spaces around it, also
+	 * {@code q} and {@code ?}. An empty answer is asked again.
+	 *
+	 * @return the typed text, never empty
+	 * @throws SetupCancelledException when the input ends
+	 */
+	String secret(String question);
 
 	/** A question that was not asked, with the answer it got and where the answer came from, in a remark. */
 	void answered(String question, String value, String remark);

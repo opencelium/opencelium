@@ -16,9 +16,11 @@ import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
  */
 public final class MongoDetector {
 
-	static final String DEFAULT_HOST = "localhost";
+	/** The host of the documented default URI. */
+	public static final String DEFAULT_HOST = "localhost";
 
-	static final int DEFAULT_PORT = 27017;
+	/** The port of the documented default URI. */
+	public static final int DEFAULT_PORT = 27017;
 
 	private static final Duration TIMEOUT = Duration.ofMillis(500);
 

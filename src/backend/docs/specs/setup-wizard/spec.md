@@ -61,14 +61,14 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   The causes are those of the start ping, for example connection refused or authentication failed. With the values option, option 1 is "Type the values again". The last answers are then the defaults, except the database password.
 - **SW-18** Given a MongoDB URI, when the wizard writes the files, then the env file must hold the whole URI. The variable is `OC_MONGO_URI`, and the yml file gets the placeholder `${OC_MONGO_URI}`. This applies to each option of the MongoDB step. The URI keeps its percent-encoding. A value of `OC_MONGO_URI` from the shell or from systemd must have the same form.
 - **SW-53** Given the values option, when the user selects it, then the wizard must ask 6 questions:
-  1. The host. The default is `localhost`.
-  2. The port. The default is `27017`.
-  3. The database. The default is `opencelium`.
+  1. The host: a host name or an IP address, without a port. An IPv6 address is in square brackets. The default is `localhost`.
+  2. The port: a number from 1 to 65535. The default is `27017`.
+  3. The database. Its name has only these characters: `A` to `Z`, `a` to `z`, `0` to `9`, `-` and `_`. The default is `opencelium`.
   4. The database username. An empty answer means no database login, and the wizard skips questions 5 and 6.
   5. The database password. The terminal does not show the typed characters. Each text that is not empty is the database password, also `q` and `?`. An empty answer asks again.
-  6. The authentication database. The default is `admin`.
-  The wizard builds the URI from the answers and pings it, as for the URI option. A setup file has no setup file key for these values: it gives the whole URI.
-- **SW-54** Given special characters in the database login, when the wizard builds the URI, then the database login must succeed. The special characters are `@ : / ? # [ ] %` and the space. The wizard writes them in percent-encoding.
+  6. The authentication database. Its name has the form of question 3. The default is `admin`.
+  An answer that is not in the form of its question is a bad value (SW-08). The wizard builds the URI from the answers and pings it, as for the URI option. A setup file has no setup file key for these values: it gives the whole URI.
+- **SW-54** Given special characters in the database login, when the wizard builds the URI, then the database login must succeed. The special characters are `@ : / ? # [ ] % $` and the space. The wizard writes them in percent-encoding.
 
 ### The env file at a later start
 
@@ -167,3 +167,4 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 5. Do the browser page `/setup` and the API `/setup/status` share a path, or does the API get a prefix? Assumption until the answer comes: the paths stay as written, and the API contract decision gives the prefix before the endpoint task starts (assumption).
 6. What does a run with a setup file do when the MongoDB server of the file does not answer? Assumption until the answer comes: the setup stops with exit code 1 and names the setup file key, as for a bad value (assumption).
 7. What does the option "Continue" of SW-17 do when a later step uses the database? The master key step reads the database before the summary, and the admin marker writes into it after the summary. Assumption until the answer comes: the master key step reports the server, and the setup stops with exit code 1 before the summary (assumption).
+8. Must the values option of SW-53 ask if the MongoDB connection uses TLS (Transport Layer Security)? Assumption until the answer comes: no. The built URI has no TLS option, and a server that must have TLS gets the URI option (assumption).
