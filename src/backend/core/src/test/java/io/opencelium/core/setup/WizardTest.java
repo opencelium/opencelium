@@ -16,6 +16,7 @@ import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
 import io.opencelium.core.setup.prompt.Prompter;
+import io.opencelium.core.setup.steps.AdminStep;
 import io.opencelium.core.setup.steps.DataDirStep;
 import io.opencelium.core.setup.steps.MasterKeyStep;
 import io.opencelium.core.setup.steps.MongoStep;
@@ -228,6 +229,49 @@ class WizardTest {
 	}
 
 	@Test
+	void runPrintsBoxWithUrlUsernameAndPasswordWhenPortListens() {
+		// The probe answers only after the start: a box before the start would show nothing.
+		Wizard wizard = new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, List.of(admin("root", 9191)),
+				environment -> started = true, Optional.of("1.2.3"), port -> started && port == 9191);
+
+		OptionalInt exitCode = wizard.run(REASON);
+
+		assertThat(exitCode).isEmpty();
+		assertThat(console.output()).containsSubsequence("  -> Starting OpenCelium...", "  +-- Log in to OpenCelium ",
+				"  |  URL             http://localhost:9191/setup ", "  |  Admin username  root ",
+				"  |  Admin password  1234 ");
+	}
+
+	@Test
+	void runPrintsOnlyTheUrlWhenTheAdminStepIsSkipped() {
+		// An admin exists, and its admin password can be another one than 1234.
+		SetupStep answers = new NamedStep("Web port", (context, prompter) -> {
+			context.setPort(9191);
+			context.filePlan().add(PlannedFile.groupReadable(tmp.resolve("config/application.yml"), "port: 1\n"));
+		});
+		Wizard wizard = new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, List.of(answers),
+				environment -> started = true, Optional.of("1.2.3"), port -> started && port == 9191);
+
+		wizard.run(REASON);
+
+		assertThat(console.output()).containsSubsequence("  -> Starting OpenCelium...", "  +-- Log in to OpenCelium ",
+				"  |  URL             http://localhost:9191/setup ").doesNotContain("Admin username")
+				.doesNotContain("1234");
+	}
+
+	@Test
+	void runPrintsNoBoxWhenThePortDoesNotListen() {
+		Wizard wizard = new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, List.of(admin("root", 9191)),
+				environment -> started = true, Optional.of("1.2.3"), port -> false);
+
+		wizard.run(REASON);
+
+		assertThat(started).isTrue();
+		assertThat(console.output()).contains("Starting OpenCelium...").doesNotContain("Log in to OpenCelium")
+				.doesNotContain("1234");
+	}
+
+	@Test
 	void runOmitsTheKeyHintFromTheBannerWhenBatch() {
 		var batch = new ValueSource(SetupValues.NONE, Optional.of(Path.of("setup-values.yml")), true);
 
@@ -248,11 +292,11 @@ class WizardTest {
 	}
 
 	@Test
-	void standardStepsAskTheDataDirectoryThePortMongoDbAndTheMasterKeyThenShowTheSummary() {
+	void standardStepsAskTheDataDirectoryThePortMongoDbTheMasterKeyAndTheAdminThenShowTheSummary() {
 		var locations = new ConfigLocations(tmp, tmp.resolve("etc/opencelium"));
 
 		assertThat(Wizard.standardSteps(locations)).hasExactlyElementsOfTypes(DataDirStep.class, PortStep.class,
-				MongoStep.class, MasterKeyStep.class, SummaryStep.class);
+				MongoStep.class, MasterKeyStep.class, AdminStep.class, SummaryStep.class);
 	}
 
 	@Test
@@ -260,7 +304,7 @@ class WizardTest {
 		var locations = new ConfigLocations(tmp, tmp.resolve("etc/opencelium"));
 
 		assertThat(Wizard.standardSteps(locations)).extracting(SetupStep::name)
-				.containsExactly("Data directory", "Web port", "MongoDB", "Master key", "Summary");
+				.containsExactly("Data directory", "Web port", "MongoDB", "Master key", "Admin account", "Summary");
 	}
 
 	private Wizard wizard(List<SetupStep> steps) {
@@ -270,6 +314,15 @@ class WizardTest {
 
 	private SetupStep recording(String name) {
 		return new NamedStep(name, (context, prompter) -> ran.add(name));
+	}
+
+	/** The answers of a full setup that matter for the login box: the port, the admin username, and a file. */
+	private SetupStep admin(String username, int port) {
+		return new NamedStep("Admin account", (context, prompter) -> {
+			context.setPort(port);
+			context.setAdminUsername(username);
+			context.filePlan().add(PlannedFile.groupReadable(tmp.resolve("config/application.yml"), "port: 1\n"));
+		});
 	}
 
 	private static SetupStep planning(Path file) {

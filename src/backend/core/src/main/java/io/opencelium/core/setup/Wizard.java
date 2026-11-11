@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.SequencedMap;
 import java.util.function.Consumer;
+import java.util.function.IntPredicate;
 
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.FilePlan;
@@ -59,6 +60,14 @@ public final class Wizard {
 		this.steps = List.copyOf(steps);
 		this.start = Objects.requireNonNull(start, "start");
 		this.version = Objects.requireNonNull(version, "version");
+	}
+
+	/**
+	 * @param portListens whether the application answers on a port of this host, after the start
+	 */
+	public Wizard(Prompter prompter, ValueSource values, List<SetupStep> steps,
+			Consumer<SequencedMap<String, String>> start, Optional<String> version, IntPredicate portListens) {
+		throw new UnsupportedOperationException();
 	}
 
 	/** The steps of a full setup, in the order the user sees them; the summary writes to {@code locations}. */

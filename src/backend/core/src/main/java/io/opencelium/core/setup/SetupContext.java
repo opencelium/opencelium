@@ -106,6 +106,15 @@ public final class SetupContext {
 		this.masterKeyFile = file.orElse(null);
 	}
 
+	/** The username of the admin that the start makes; empty when the admin step did not run or did not apply. */
+	public Optional<String> adminUsername() {
+		throw new UnsupportedOperationException();
+	}
+
+	public void setAdminUsername(String adminUsername) {
+		throw new UnsupportedOperationException();
+	}
+
 	/** The entries of the env file, in the order the steps added them: the secrets application.yml names. */
 	public SequencedMap<String, String> environment() {
 		return Collections.unmodifiableSequencedMap(environment);
