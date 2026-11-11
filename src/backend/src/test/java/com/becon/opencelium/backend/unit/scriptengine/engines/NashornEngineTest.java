@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,5 +147,65 @@ class NashornEngineTest {
     void validateThrowsInvalidScriptExceptionWhenScriptHasSyntaxError() {
         assertThatThrownBy(() -> engine.validate("function() {"))
                 .isInstanceOf(InvalidScriptException.class);
+    }
+
+    // ── executeSandboxed ──────────────────────────────────────────────────────
+
+    @Test
+    void executeSandboxedThrowsWhenScriptUsesJavaType() {
+        assertThatThrownBy(() -> engine.executeSandboxed(
+                "Java.type('java.lang.System').getProperty('user.home')", null, new StringWriter()))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("\"Java\" is not defined");
+    }
+
+    @Test
+    void executeSandboxedThrowsWhenScriptUsesJavaPackages() {
+        assertThatThrownBy(() -> engine.executeSandboxed(
+                "java.lang.System.getProperty('user.home')", null, new StringWriter()))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("\"java\" is not defined");
+    }
+
+    @Test
+    @DisplayName("executeSandboxed — exit() is removed instead of terminating the JVM")
+    void executeSandboxedThrowsWhenScriptCallsExit() {
+        assertThatThrownBy(() -> engine.executeSandboxed("exit(1)", null, new StringWriter()))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("\"exit\" is not defined");
+    }
+
+    @Test
+    void executeSandboxedThrowsWhenScriptCallsQuit() {
+        assertThatThrownBy(() -> engine.executeSandboxed("quit()", null, new StringWriter()))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("\"quit\" is not defined");
+    }
+
+    @Test
+    void executeSandboxedThrowsWhenScriptCallsLoad() {
+        assertThatThrownBy(() -> engine.executeSandboxed(
+                "load('http://localhost/script.js')", null, new StringWriter()))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("\"load\" is not defined");
+    }
+
+    @Test
+    void executeSandboxedWritesPrintOutputWhenScriptPrints() {
+        StringWriter output = new StringWriter();
+
+        engine.executeSandboxed("print('hello'); 1", null, output);
+
+        assertThat(output.toString()).isEqualTo("hello\n");
+    }
+
+    @Test
+    void executeSandboxedReturnsSameResultAsExecuteWhenBindingIsObject() {
+        Map<String, Object> bindings = Map.of("order", Map.of("id", 7, "tags", List.of("a", "b")));
+        String script = "({id: order.id * 2, first: order.tags[0]})";
+
+        Object sandboxed = engine.executeSandboxed(script, bindings, new StringWriter());
+
+        assertThat(sandboxed).isEqualTo(engine.execute(script, bindings));
     }
 }

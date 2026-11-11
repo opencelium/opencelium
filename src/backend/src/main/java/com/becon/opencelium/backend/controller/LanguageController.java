@@ -4,8 +4,11 @@ import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.scriptengine.client.ScriptLanguageService;
 import com.becon.opencelium.backend.resource.languages.ScriptLanguageDTO;
+import com.becon.opencelium.backend.resource.languages.ScriptExecutionRequest;
+import com.becon.opencelium.backend.resource.languages.ScriptExecutionResultDTO;
 import com.becon.opencelium.backend.resource.languages.ScriptValidationRequest;
 import com.becon.opencelium.backend.resource.languages.ScriptValidationResultDTO;
+import com.becon.opencelium.backend.scriptengine.client.ScriptRunService;
 import com.becon.opencelium.backend.scriptengine.client.ScriptValidationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -30,11 +33,14 @@ public class LanguageController {
 
     private final ScriptLanguageService scriptLanguageService;
     private final ScriptValidationService scriptValidationService;
+    private final ScriptRunService scriptRunService;
 
     public LanguageController(ScriptLanguageService scriptLanguageService,
-                              ScriptValidationService scriptValidationService) {
+                              ScriptValidationService scriptValidationService,
+                              ScriptRunService scriptRunService) {
         this.scriptLanguageService = scriptLanguageService;
         this.scriptValidationService = scriptValidationService;
+        this.scriptRunService = scriptRunService;
     }
 
     @Operation(summary = "Returns All Supported Programming Languages")
@@ -83,5 +89,34 @@ public class LanguageController {
     public ResponseEntity<ScriptValidationResultDTO> validateScript(
             @RequestBody ScriptValidationRequest request) {
         return ResponseEntity.ok(scriptValidationService.validate(request));
+    }
+
+    @Operation(summary = "Runs a script with test values for its variables",
+            description = "Runs the script in a sandbox (no Java access, no load/quit/exit) with "
+                    + "the given variable values and returns the value of its last expression, "
+                    + "which is what an execution would use. A failing script is reported with "
+                    + "200 and success = false, together with the error type, line and a hint. "
+                    + "Only 'js' (ES5.1) can be run.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "The script has been run",
+                    content = @Content(schema = @Schema(implementation = ScriptExecutionResultDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Script or variables are empty, too large or invalid, or the language cannot be run",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "429",
+                    description = "Too many scripts are running",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping("/execute")
+    public ResponseEntity<ScriptExecutionResultDTO> executeScript(
+            @RequestBody ScriptExecutionRequest request) {
+        return ResponseEntity.ok(scriptRunService.run(request));
     }
 }
