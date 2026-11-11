@@ -27,6 +27,9 @@ import { registerHelpRoutes } from './routes/help.ts'
 import { registerGuideRoutes } from './routes/guide.ts'
 import { registerEditorRoutes } from './routes/editor.ts'
 import { registerSettingsRoutes } from './routes/settings.ts'
+import { registerDiagnosticsRoutes } from './routes/diagnostics.ts'
+import type { LlmCallLog } from './diagnostics/llmCallLog.ts'
+import { runInRequestContext } from './llm/requestContext.ts'
 import type { SettingsStore } from './settings/gatewaySettings.ts'
 
 export type AppDeps = {
@@ -49,6 +52,8 @@ export type AppDeps = {
     speech?: SpeechClient
     /** The AI settings page's changes; without it, `/settings` is not offered and the environment is all there is. */
     settings?: SettingsStore
+    /** Measured model calls; without it, `/diagnostics/llm` is not offered. */
+    calls?: LlmCallLog
 }
 
 export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}): Promise<FastifyInstance> {
@@ -56,6 +61,14 @@ export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}
     // The frontend's shared baseQuery sends `credentials: 'include'`; without this the browser drops every response.
     // PUT is for /settings; @fastify/cors allows only GET, HEAD and POST unless told otherwise.
     await app.register(cors, { origin: deps.config.corsOrigins, credentials: true, methods: ['GET', 'HEAD', 'POST', 'PUT'] })
+    // A caller that goes away (closed panel, left page, Cancel) stops the model call made for it; see requestContext.
+    app.addHook('onRequest', (request, reply, done) => {
+        const controller = new AbortController()
+        reply.raw.on('close', () => {
+            if (!reply.raw.writableFinished) controller.abort(new Error('The caller went away'))
+        })
+        runInRequestContext({ route: request.routeOptions.url ?? request.url, signal: controller.signal }, done)
+    })
     registerHealthRoutes(app, deps)
     registerInvokerRoutes(app, deps)
     registerWorkflowRoutes(app, deps)
@@ -73,5 +86,6 @@ export async function buildApp(deps: AppDeps, options: FastifyServerOptions = {}
     registerGuideRoutes(app, deps)
     registerEditorRoutes(app, deps)
     registerSettingsRoutes(app, deps)
+    registerDiagnosticsRoutes(app, deps)
     return app
 }

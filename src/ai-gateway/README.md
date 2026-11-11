@@ -59,6 +59,7 @@ npm run eval:templates -- --limit 20   # rebuilds templates from their descripti
 | Method | Path | Body | Response |
 | --- | --- | --- | --- |
 | GET | `/health` | — | `{ status: 'ok' \| 'degraded', ollama, workflowModel, invokerCount, speech: { available }, features, embedModel, disabledFeatures }` |
+| GET | `/diagnostics/llm` | — | `{ inFlight, loaded, summary, recent }`: the last model calls (route, model, outcome, calls already running, whether the model had to be loaded, wait before the answer started, Ollama's timings), a summary per model (p50/p95 wait, cold starts, aborted/timeouts) and `ollama ps`. Every call is also logged as `llm call`. A call stops when its HTTP request goes away (closed tab, Cancel), so Ollama does not keep working for nobody |
 | GET | `/settings` | — | `{ settings, defaults, featureRoles, installedModels, embedModel }`: what the app's AI settings page can change, and the environment's values |
 | PUT | `/settings` | the full `settings` object | same as GET: applied at once (no restart) and kept in `AI_SETTINGS_FILE`. **No auth:** only the app limits this to admins, so keep the gateway on loopback |
 | GET | `/invokers` | — | `[{ name, description, operationCount }]` |

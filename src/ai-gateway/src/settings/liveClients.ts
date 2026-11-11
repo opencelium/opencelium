@@ -1,5 +1,6 @@
 import type { GatewayConfig } from '../config.ts'
 import type { LlmClient } from '../llm/llmClient.ts'
+import type { LlmCallLog } from '../diagnostics/llmCallLog.ts'
 import { createOllamaClient } from '../llm/ollamaClient.ts'
 import { createOllamaEmbedder, type Embedder } from '../llm/ollamaEmbedder.ts'
 import { createWhisperClient, type SpeechClient } from '../speech/speechClient.ts'
@@ -19,9 +20,9 @@ function rebuiltOn<TKey, TClient>(key: () => TKey, build: (key: TKey) => TClient
     }
 }
 
-export function createLiveLlmClient(config: GatewayConfig): LlmClient {
+export function createLiveLlmClient(config: GatewayConfig, calls?: LlmCallLog): LlmClient {
     const client = rebuiltOn(() => ({ url: config.ollamaUrl, timeout: config.chatTimeoutMs }),
-        ({ url, timeout }) => createOllamaClient(url, timeout))
+        ({ url, timeout }) => createOllamaClient(url, timeout, undefined, calls))
     return {
         chat: (request) => client().chat(request),
         stream: (request) => {
@@ -30,6 +31,7 @@ export function createLiveLlmClient(config: GatewayConfig): LlmClient {
             return current.stream(request)
         },
         listModels: () => client().listModels(),
+        listRunning: () => client().listRunning?.() ?? Promise.resolve([]),
     }
 }
 

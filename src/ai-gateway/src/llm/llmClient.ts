@@ -24,4 +24,8 @@ export type LlmClient = {
     /** The answer's text as it is written; clients without streaming leave it out and callers fall back to `chat`. */
     stream?(request: ChatRequest): AsyncIterable<string>
     listModels(): Promise<string[]>
+    /** The models Ollama holds in memory right now (`ollama ps`); clients that cannot tell leave it out. */
+    listRunning?(): Promise<RunningModel[]>
 }
+
+export type RunningModel = { name: string; sizeVramBytes: number; expiresAt: string | null }

@@ -15,6 +15,10 @@ export function AiInvokerCreateDialog({ open, onClose }: Props) {
 	const { t } = useI18n('entities');
 	const create = useAiInvokerCreate(onClose);
 	const { state, failure } = create;
+	const close = () => {
+		create.abandon();
+		onClose();
+	};
 	const isReview = state.step === 'review' || state.step === 'creating';
 
 	const footer = isReview ? (
@@ -27,14 +31,14 @@ export function AiInvokerCreateDialog({ open, onClose }: Props) {
 		</>
 	) : (
 		<>
-			<Button onClick={onClose} testId="ai-invoker-cancel">{t('invoker.list.aiCreate.cancel')}</Button>
+			<Button onClick={close} testId="ai-invoker-cancel">{t('invoker.list.aiCreate.cancel')}</Button>
 			<Button type="primary" iconLeft="sparkles" onClick={() => void create.draft()} loading={state.step === 'drafting'}
 				disabled={!create.docs.trim()} testId="ai-invoker-draft">{t('invoker.list.aiCreate.draft')}</Button>
 		</>
 	);
 
 	return (
-		<Dialog open={open} onClose={onClose} title={t('invoker.list.aiCreate.title')} footer={footer} width={860} top={18}
+		<Dialog open={open} onClose={close} title={t('invoker.list.aiCreate.title')} footer={footer} width={860} top={18}
 			maximizable testId="ai-invoker-dialog">
 			{failure && <Alert type="error" showIcon message={t(failure === 'draft' ? 'invoker.list.aiCreate.draftFailed' : 'invoker.list.aiCreate.createFailed')} />}
 			{state.step === 'drafting' && <div className="aiInvokerMeta">{t('invoker.list.aiCreate.drafting')} <AiExpectedTime feature="invokerDraft" /></div>}

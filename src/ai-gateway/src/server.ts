@@ -8,10 +8,13 @@ import { createOperationRanker } from './invokers/focusConnectors.ts'
 import { createDocsIndex } from './help/docsIndex.ts'
 import { createSettingsStore } from './settings/gatewaySettings.ts'
 import { createLiveEmbedder, createLiveLlmClient, createLiveSpeechClient } from './settings/liveClients.ts'
+import { createLlmCallLog } from './diagnostics/llmCallLog.ts'
 
 const config = loadConfig()
 // Before anything reads the config: what the AI settings page saved overrides the environment.
 const settings = await createSettingsStore(config, config.settingsFile, (message) => console.warn(message))
+// One log line per model call: what several people at once cost (see GET /diagnostics/llm for the summary).
+const calls = createLlmCallLog((stats) => app.log.info({ llmCall: stats }, 'llm call'))
 const embedder = createLiveEmbedder(config)
 const examples = createScriptExamples(config.templateDir, embedder)
 const templates = createTemplateFlows(config.templateDir, embedder)
@@ -21,7 +24,7 @@ const docs = createDocsIndex(config.docsDir, embedder)
 const app = await buildApp(
     {
         config,
-        llm: createLiveLlmClient(config),
+        llm: createLiveLlmClient(config, calls),
         invokers,
         examples,
         templates,
@@ -31,6 +34,7 @@ const app = await buildApp(
         embedder,
         speech: createLiveSpeechClient(config),
         settings,
+        calls,
     },
     { logger: { level: process.env.LOG_LEVEL ?? 'info' } },
 )
