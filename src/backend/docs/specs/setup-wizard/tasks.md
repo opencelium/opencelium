@@ -166,6 +166,15 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 13d
 - **Status:** done
 
+## Task 13f: fix(core): the MongoDB menu asks how OpenCelium connects to MongoDB
+- **Criteria:** SW-11, SW-12, SW-17
+- **Function:** The MongoDB menu asks how OpenCelium connects to MongoDB. Each option names a way to give the MongoDB connection, because the URI option and the values option can name the same server.
+- **Tests:** Changed for the new texts: `MongoStepTest`: runOffersTheLocalServerFirstWhenAServerListens, runOffersUriValuesAndExitWhenNoServerListens, runPingsBeforeItContinuesWhenUriIsTyped, runShowsTheMenuAgainWhenBackIsChosen, runAsksTheSixValuesWhenTheValuesOptionIsChosen, runAsksTheValuesWithTheirDefaultsAgainWhenTheUserComesBackFromTheMenu
+- **Hand test:** 1. Start a MongoDB on `localhost:27017`, then run `java -jar oc-app.jar setup`. 2. The MongoDB step asks "How do you want to connect OpenCelium to MongoDB?". 3. The options are "Local MongoDB", "MongoDB URI", "Step by step" and "Exit". 4. Select "MongoDB URI" and type `mongodb://localhost:1/opencelium`: the ping fails. 5. The retry menu shows "Back to the menu" with "choose another option". 6. Run `java -jar oc-app.jar setup --template`: the help of `mongo` starts with "How OpenCelium connects to MongoDB".
+- **Size:** approximately 40 lines
+- **Depends on:** 13e
+- **Status:** in work
+
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-19, SW-20, SW-21, SW-22, SW-23
 - **Function:** The master key step runs the guard first and stops with the restore-or-reset text when a wrapped DEK exists without a key. Then it offers generate, the variable `OC_MASTER_KEY` and a key file. Generate makes the key in memory and adds the key file with owner-only permissions to the plan; after the write the step shows the backup box and asks for the confirmation. `N` prints the path again and asks again; batch mode prints the warning to standard error and continues. A bad source is explained and asked again. With the variable option the step writes nothing and prints the instruction for the service environment.
