@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { LogTargetSlots } from '@features/logs';
 import { useWorkflowAssistAction } from '@features/workflow/command/workflowAssistBridge';
 import { isAiConfigured, useGetAiHealthQuery } from '../../api/aiApi';
+import { isAiFeatureOn } from '../../api/useIsAiFeatureOn';
 import { type RunAssistTarget, useRunFailureAssist } from '../../run/useRunFailureAssist';
 import { AiRunPanel } from './AiRunPanel';
 import { AiRunRowActions } from './AiRunRowActions';
@@ -20,7 +21,7 @@ export function useAiRunSlots({ isFailed, isLocked, ...target }: Args): { slots:
 	const isConfigured = isAiConfigured();
 	const health = useGetAiHealthQuery(undefined, { skip: !isConfigured });
 	const assist = useRunFailureAssist(target);
-	const isAvailable = isConfigured && health.data?.ollama.reachable === true && health.data.workflowModel.available;
+	const isAvailable = isConfigured && health.data?.ollama.reachable === true && health.data.workflowModel.available && isAiFeatureOn(health.data, 'run-explain-fix');
 	const canAssist = isFailed && isAvailable && assist.failed !== null;
 	useWorkflowAssistAction('explainFailure', canAssist ? () => void assist.explain() : null);
 	useWorkflowAssistAction('fixFailure', canAssist ? () => {

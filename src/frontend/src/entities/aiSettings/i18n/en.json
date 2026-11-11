@@ -1,7 +1,7 @@
 {
   "page": {
     "title": "AI settings",
-    "subtitle": "Whether the AI is available, which model each AI feature runs on, and Beebot. Models are set in the AI gateway's configuration and shown here as it reports them."
+    "subtitle": "Whether the AI is available, which model each AI feature runs on, and Beebot. Admins change the models, the AI features and the AI gateway's connection here."
   },
   "status": {
     "title": "Availability",
@@ -42,7 +42,66 @@
     "title": "Beebot",
     "toggle": "Listen for requests",
     "unavailable": "Beebot needs speech to text, which is not available.",
-    "howItWorks": "While Beebot is on, it acts only on what starts with its name, e.g. “Beebot, add a loop after GetAllUser”; everything else is ignored. A yes / no to its own question needs no name. It never talks and shows no messages: a request that matches no command is ignored. It turns itself off after 10 minutes without a request.",
-    "hotkey": "To speak one request into the command palette instead, press {{key}}."
+    "howItWorks": "While Beebot is on, it acts only on what starts with its name, e.g. “Beebot, add a loop after GetAllUser”; everything else is ignored. A yes / no to its own question needs no name. It never talks and shows no messages: a request that matches no command is ignored. These settings are kept in this browser.",
+    "hotkey": "To speak one request into the command palette instead, press {{key}}.",
+    "language": "Speech language",
+    "languageHint": "Also used for the palette microphone. “Detect” lets speech to text recognise it each time.",
+    "languages": {
+      "auto": "Detect",
+      "en": "English",
+      "de": "German"
+    },
+    "autoStop": "Stop listening after",
+    "autoStopOption": "{{count}} min without a request"
+  },
+  "admin": {
+    "title": "Gateway settings",
+    "forEveryone": "These settings apply to everyone.",
+    "save": "Save settings",
+    "discard": "Discard",
+    "saved": "AI settings saved.",
+    "saveFailed": "The AI settings could not be saved. Check that the AI gateway is running.",
+    "invalid": "Some settings are not valid. Check the marked fields, also under “Connection and advanced”.",
+    "unavailable": "This AI gateway cannot be configured from here. Update it to change its models and features on this page.",
+    "confirmSave": {
+      "title": "Change the AI settings?",
+      "message": "The new settings apply to everyone, from the next AI request on."
+    },
+    "models": {
+      "title": "Models",
+      "resetDefaults": "Reset to defaults",
+      "roles": {
+        "workflowModel": "Large model",
+        "helpModel": "Help answers",
+        "lightModel": "Small model",
+        "commandModel": "Quick model"
+      },
+      "noFeatures": "No feature uses this model right now.",
+      "notInstalledOption": "{{model}} (not installed)",
+      "overrides": "Models for single features ({{count}})",
+      "inherit": "{{model}} ({{role}})",
+      "embed": "Search model: {{model}}. It is set in the AI gateway's configuration: changing it means indexing all templates and docs again."
+    },
+    "features": {
+      "title": "AI features",
+      "editor": "In the workflow editor",
+      "elsewhere": "Elsewhere in the app",
+      "hint": "A feature that is off is hidden for everyone. Beebot needs “AI in the command palette” or “Requests in the workflow editor”."
+    },
+    "connection": {
+      "title": "Connection and advanced",
+      "ollamaUrl": "Ollama URL",
+      "speechUrl": "Speech service URL",
+      "speechUrlHint": "whisper-server. Leave it empty to turn speech to text off.",
+      "docsUrl": "Documentation URL (where help answers link to)",
+      "chatTimeoutMinutes": "Timeout for long requests (minutes)",
+      "contextTokens": "Context size (tokens)",
+      "maxRepairAttempts": "Repair attempts for a generated workflow"
+    },
+    "errors": {
+      "url": "Enter an address starting with http:// or https://.",
+      "model": "Choose a model.",
+      "range": "Enter a whole number from {{min}} to {{max}}."
+    }
   }
 }

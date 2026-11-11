@@ -9,6 +9,7 @@ import { workflowCommandBridgeStore } from '@features/workflow/command/workflowC
 import { askWorkflowEditor } from '../editor/askWorkflowEditor';
 import type { ConfirmEdit } from '../editor/addMethodFromRequest';
 import { isAiConfigured, useGetAiHealthQuery, useRouteCommandMutation } from '../api/aiApi';
+import { isAiFeatureOn } from '../api/useIsAiFeatureOn';
 import { toAiGenerationError } from '../utils/aiGenerationError.utils';
 import { buildCommandCatalog } from './buildCommandCatalog';
 import { type AiCommandProposal, toCatalogItem, toCommandProposal } from './commandProposal';
@@ -59,6 +60,8 @@ export function useAiCommandAssist({ query, isUnmatched, onRun, onRunIntent, onG
 	const isConfigured = isAiConfigured();
 	const health = useGetAiHealthQuery(undefined, { skip: !isConfigured });
 	const isAvailable = isConfigured && !health.isError && health.data?.status === 'ok';
+	const canAskPalette = isAiFeatureOn(health.data, 'command-palette');
+	const canAskEditor = isAiFeatureOn(health.data, 'editor-requests');
 	const policyContext = useCommandPolicyContext();
 	const { pathname } = useLocation();
 	const [routeCommand] = useRouteCommandMutation();
@@ -73,10 +76,10 @@ export function useAiCommandAssist({ query, isUnmatched, onRun, onRunIntent, onG
 	const requestId = useRef(0);
 
 	const text = query.trim();
-	const canAsk = isAvailable && isUnmatched && text.length >= MIN_PROMPT_LENGTH;
+	const canAsk = isAvailable && (canAskPalette || canAskEditor) && isUnmatched && text.length >= MIN_PROMPT_LENGTH;
 	const getCatalog = () =>
 		buildCommandCatalog(getDynamicCommandTree(), policyContext, { en: i18n.getFixedT('en'), de: i18n.getFixedT('de') });
-	const suggestions = useCommandSuggestions(canAsk ? text : '', getCatalog);
+	const suggestions = useCommandSuggestions(canAsk && canAskPalette ? text : '', getCatalog);
 
 	/**
 	 * Asks for the typed text, or for `spoken` text that is about to replace it (voice input).
@@ -85,7 +88,7 @@ export function useAiCommandAssist({ query, isUnmatched, onRun, onRunIntent, onG
 	 */
 	const ask = async (spoken?: string, { isAddressed = false }: { isAddressed?: boolean } = {}): Promise<AskOutcome> => {
 		const SKIPPED: AskOutcome = { kind: 'skipped' };
-		if (spoken === undefined ? !canAsk : !isAvailable) return SKIPPED;
+		if (spoken === undefined ? !canAsk : !isAvailable || !(canAskPalette || canAskEditor)) return SKIPPED;
 		const prompt = (spoken ?? text).trim();
 		if (!prompt) return SKIPPED;
 		const id = ++requestId.current;
@@ -93,7 +96,7 @@ export function useAiCommandAssist({ query, isUnmatched, onRun, onRunIntent, onG
 		// In the editor, "where is the header of getCustomers?" and "add get all users from CRM" are answered by the
 		// workflow itself. Asked first: the command router reads "where" as a question and cannot edit the workflow.
 		// Only a request said to the assistant by name changes the workflow without asking.
-		if (workflowCommandBridgeStore.getState().isActive
+		if (canAskEditor && workflowCommandBridgeStore.getState().isActive
 			&& await askWorkflowEditor(prompt, isAddressed ? undefined : confirmEdit) === 'handled') {
 			if (id !== requestId.current) return SKIPPED;
 			setState(IDLE);
@@ -101,6 +104,10 @@ export function useAiCommandAssist({ query, isUnmatched, onRun, onRunIntent, onG
 			return { kind: 'done' };
 		}
 		if (id !== requestId.current) return SKIPPED;
+		if (!canAskPalette) {
+			setState(IDLE);
+			return { kind: 'no-command' };
+		}
 		const catalog = getCatalog();
 		try {
 			const language = i18n.language.startsWith('de') ? 'de' : 'en';

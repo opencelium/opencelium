@@ -25,7 +25,7 @@ export function LegacyRequestJsonEditor(props: LegacyRequestJsonEditorProps) {
 	const { method } = useMethodContext();
 	const { t } = useI18n('workflow');
 	const editor = useRequestObjectEditor({ messageProperty, source });
-	const isAiAvailable = useAiAvailability();
+	const isAiAvailable = useAiAvailability('suggest-mapping');
 	useRequestEditorRegistration({ editor, method, messageProperty, source, readOnly });
 	const { activeKeys, setActiveKeys } = useAiMappingSectionKeys(method.id);
 	const components = useLegacyJsonComponents({

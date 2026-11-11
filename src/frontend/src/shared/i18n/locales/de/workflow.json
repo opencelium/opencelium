@@ -1308,7 +1308,8 @@
       "title": "KI-Assistent",
       "explain": "Diesen Workflow erklären",
       "beebotOn": "{{name}} einschalten",
-      "beebotOff": "{{name}} ausschalten"
+      "beebotOff": "{{name}} ausschalten",
+      "settings": "KI-Einstellungen"
     },
     "open": "Mit KI generieren",
     "unavailableTooltip": "Der KI-Dienst ist nicht erreichbar. Starten Sie Ollama und das lokale Gateway.",

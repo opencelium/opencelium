@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { isAiConfigured, useGetAiHealthQuery } from '../api/aiApi';
+import { isAiFeatureOn } from '../api/useIsAiFeatureOn';
 import { type AiApplyBlock, type AiPanelView, toPanelView } from '../model/aiPanelState';
 import { type AiConnectorPair, pickDefaultConnectors, toConnectorChoices } from '../utils/aiConnectors.utils';
 import { type AiWorkflowApplyTarget, useApplyAiWorkflow } from './useApplyAiWorkflow';
@@ -29,7 +30,7 @@ export function useAiPromptPanel({ target, isLocked, isOtherPanelOpen, onBeforeO
 	});
 	// Only a settled check changes availability; a re-check in flight keeps the last answer instead of flickering.
 	if (!health.isFetching && (health.isSuccess || health.isError)) {
-		const isHealthy = !health.isError && health.data?.status === 'ok';
+		const isHealthy = !health.isError && health.data?.status === 'ok' && isAiFeatureOn(health.data, 'generate-workflow');
 		if (isHealthy !== isAvailable) setIsAvailable(isHealthy);
 	}
 	const [isOpen, setIsOpen] = useState(false);

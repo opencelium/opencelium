@@ -23,7 +23,7 @@ type Props = {
 /** A sentence above an if's rules or a loop's list that writes them; hidden without the AI gateway. */
 export function AiConditionPanel(props: Props) {
 	const { t } = useI18n('workflow');
-	const isAvailable = useAiAvailability();
+	const isAvailable = useAiAvailability('build-condition');
 	const condition = useAiCondition(props);
 	const { state } = condition;
 	const { buildFrom } = condition;

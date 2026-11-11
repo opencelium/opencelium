@@ -1,0 +1,134 @@
+.aiSettingsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.aiSettingsRows {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.aiSettingsRows th,
+.aiSettingsRows td {
+  padding: 8px 4px;
+  border-top: 1px solid var(--color-border-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+
+.aiSettingsRows thead th {
+  border-top: 0;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.aiSettingsModel {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 13px;
+}
+
+.aiSettingsState {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.aiSettingsNote {
+  margin: 8px 0 0;
+  color: var(--color-text-secondary);
+}
+
+.aiSettingsAdmin {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.aiSettingsRoles {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.aiSettingsRole {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.aiSettingsRoleHeader {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 280px) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.aiSettingsFields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.aiSettingsField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 480px;
+}
+
+.aiSettingsField .aiSettingsNote {
+  margin: 0;
+}
+
+.aiSettingsFieldLabel {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.aiSettingsFieldError {
+  color: var(--color-action-danger);
+  font-size: 13px;
+}
+
+.aiSettingsFeatureGroup + .aiSettingsFeatureGroup {
+  margin-top: 16px;
+}
+
+.aiSettingsSwitches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px 16px;
+  margin-top: 8px;
+}
+
+.aiSettingsRadios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.aiSettingsActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.aiSettingsActions .aiSettingsNote {
+  margin: 0 auto 0 0;
+}
+
+@media (max-width: 640px) {
+  .aiSettingsRoleHeader {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.aiSettingsOverrideModel {
+  width: 320px;
+}

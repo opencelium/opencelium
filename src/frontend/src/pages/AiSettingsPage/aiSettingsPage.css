@@ -9,39 +9,3 @@
 .aiSettingsSubtitle {
   color: var(--color-text-secondary);
 }
-
-.aiSettingsRows {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.aiSettingsRows th,
-.aiSettingsRows td {
-  padding: 8px 4px;
-  border-top: 1px solid var(--color-border-subtle);
-  text-align: left;
-  vertical-align: top;
-}
-
-.aiSettingsRows thead th {
-  border-top: 0;
-  color: var(--color-text-secondary);
-  font-weight: 500;
-}
-
-.aiSettingsModel {
-  font-family: ui-monospace, Menlo, monospace;
-  font-size: 13px;
-}
-
-.aiSettingsState {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-.aiSettingsNote {
-  margin: 8px 0 0;
-  color: var(--color-text-secondary);
-}

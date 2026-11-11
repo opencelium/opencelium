@@ -1308,7 +1308,8 @@
       "title": "AI assistant",
       "explain": "Explain this workflow",
       "beebotOn": "Turn on {{name}}",
-      "beebotOff": "Turn off {{name}}"
+      "beebotOff": "Turn off {{name}}",
+      "settings": "AI settings"
     },
     "open": "Generate with AI",
     "unavailableTooltip": "AI service isn't reachable. Start Ollama and the local gateway.",

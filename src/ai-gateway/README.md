@@ -58,7 +58,9 @@ npm run eval:templates -- --limit 20   # rebuilds templates from their descripti
 
 | Method | Path | Body | Response |
 | --- | --- | --- | --- |
-| GET | `/health` | — | `{ status: 'ok' \| 'degraded', ollama, workflowModel, invokerCount, speech: { available } }` |
+| GET | `/health` | — | `{ status: 'ok' \| 'degraded', ollama, workflowModel, invokerCount, speech: { available }, features, embedModel, disabledFeatures }` |
+| GET | `/settings` | — | `{ settings, defaults, featureRoles, installedModels, embedModel }`: what the app's AI settings page can change, and the environment's values |
+| PUT | `/settings` | the full `settings` object | same as GET: applied at once (no restart) and kept in `AI_SETTINGS_FILE`. **No auth:** only the app limits this to admins, so keep the gateway on loopback |
 | GET | `/invokers` | — | `[{ name, description, operationCount }]` |
 | POST | `/workflow/plan` | `{ prompt, from, to?, useTemplates? }` | `{ pattern, steps: [{ text, depth }], templates: [{ id, name }], durationMs, model }`: plain-language plan for review, field rules as `<Operation> set <field> = <value>` lines; `templates` are the stored templates shown as worked examples |
 | POST | `/script/generate` | `{ prompt, target?, inputs: [{ name: 'VAR_n', source, sample? }], currentScript? }` | `{ code, description, problems, durationMs, model }`: one transformation script for the editor |
@@ -95,6 +97,7 @@ Errors: `{ error: { type: 'BAD_REQUEST' \| 'UNKNOWN_INVOKER' \| 'GENERATION_FAIL
 | `AI_DOCS_DIR` / `AI_DOCS_URL` | `../../docs` / `https://docs.opencelium.io/en/prod` (the help assistant's documentation, and where it is published) |
 | `AI_LIGHT_MODEL` | `qwen2.5-coder:7b` (explains workflows and failed runs, proposes run fixes, writes transformation scripts) |
 | `AI_HELP_MODEL` | `AI_WORKFLOW_MODEL` (writes help answers; a follow-up is first rewritten by `AI_COMMAND_MODEL`) |
+| `AI_SETTINGS_FILE` | `data/settings.json` (what the AI settings page changed: models, per-feature models, switched-off features, Ollama and speech URLs, timeout, context size, repair attempts, docs URL; only values that differ from the environment are kept, and they win over it) |
 | `AI_CORS_ORIGINS` | `http://localhost:5173` (comma-separated) |
 | `AI_MAX_REPAIR_ATTEMPTS` | `2` |
 | `AI_CONTEXT_TOKENS` | `16384` |

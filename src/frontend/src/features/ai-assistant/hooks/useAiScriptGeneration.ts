@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { isAiFeatureOn } from '../api/useIsAiFeatureOn';
 import type { Enhancement } from '@features/workflow/types/connection';
 import { useEnhancementArgs } from '@features/workflow/components/request-editor/enhancement/EnhancementArgs/useEnhancementArgs';
 import { readInputs } from '@features/workflow/components/request-editor/enhancement/ScriptPlayground/playgroundInputs';
@@ -36,7 +37,8 @@ export function useAiScriptGeneration(enhancement: Enhancement) {
 		if (!isConfigured) return;
 		let isCurrent = true;
 		void apiExecutor({ url: `${runtimeConfig.aiUrl}/health`, method: 'GET', options: quiet }).then((health: unknown) => {
-			if (isCurrent) setIsAvailable(!isApiExecutorError(health) && (health as AiHealth | undefined)?.status === 'ok');
+			if (isCurrent) setIsAvailable(!isApiExecutorError(health) && (health as AiHealth | undefined)?.status === 'ok'
+				&& isAiFeatureOn(health as AiHealth, 'transformation-script'));
 		});
 		return () => {
 			isCurrent = false;

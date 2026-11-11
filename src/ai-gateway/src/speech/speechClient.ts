@@ -1,7 +1,10 @@
 export type Transcript = { text: string; language?: string }
 
+export type SpeechLanguage = 'en' | 'de'
+
 export type SpeechClient = {
-    transcribe(wav: Buffer, prompt: string): Promise<Transcript>
+    /** `language`: what is spoken, when the user set it; whisper detects it otherwise. */
+    transcribe(wav: Buffer, prompt: string, language?: SpeechLanguage): Promise<Transcript>
     isReachable(): Promise<boolean>
 }
 
@@ -11,12 +14,13 @@ const PROBE_TIMEOUT_MS = 2_000
 /** whisper.cpp's `whisper-server`: one 16 kHz mono WAV in, its text out. */
 export function createWhisperClient(baseUrl: string): SpeechClient {
     return {
-        async transcribe(wav, prompt) {
+        async transcribe(wav, prompt, language) {
             const form = new FormData()
             form.append('file', new Blob([new Uint8Array(wav)], { type: 'audio/wav' }), 'speech.wav')
             form.append('response_format', 'verbose_json')
             form.append('temperature', '0')
             if (prompt) form.append('prompt', prompt)
+            if (language) form.append('language', language)
             const response = await fetch(`${baseUrl}/inference`, { method: 'POST', body: form, signal: AbortSignal.timeout(TRANSCRIBE_TIMEOUT_MS) })
             if (!response.ok) throw new Error(`whisper-server failed with HTTP ${response.status}: ${await response.text()}`)
             const body = (await response.json()) as { text?: unknown; language?: unknown; error?: unknown }
