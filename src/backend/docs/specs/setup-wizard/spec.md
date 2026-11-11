@@ -113,6 +113,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   6. It writes the unit file, then runs `daemon-reload` and `enable --now`.
   Then the wizard process waits 60 seconds for the port and prints the admin login box.
 - **SW-44** Given the master key variable option, when the child installs the service, then the child must only enable the service. It does not start the service. The wizard prints the instruction to set `OC_MASTER_KEY`, the start command and the admin login box. The service generates no master key.
+- **SW-57** Given the key file option, when the system user cannot read the key file, then the sudo child must stop. The child does this check after it makes the system user `opencelium` and before it writes a file. The message names the key file and tells how to give read permission to the system user. The wizard ends with exit code 1.
 - **SW-45** Given the service option, when the port does not listen after 60 seconds, then the wizard must say so. It names the `journalctl` command, leaves the unit in place and ends with exit code 1.
 - **SW-29** Given the show option, when the user selects it, then the wizard must print the unit file and the commands.
 - **SW-30** Given macOS or Windows, when the user wants the service, then the wizard must print the files and install nothing. The files are the launchd plist on macOS and the `sc.exe` commands on Windows.
