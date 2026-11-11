@@ -32,9 +32,12 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.execution.service.MethodTestService;
+import com.becon.opencelium.backend.execution.service.ReferenceValidationService;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRequestDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO;
+import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationRequestDTO;
+import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationResultDTO;
 import com.becon.opencelium.backend.websocket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
@@ -113,6 +116,7 @@ public class ConnectionController {
     private final Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper;
     private final PatchHelper patchHelper;
     private final MethodTestService methodTestService;
+    private final ReferenceValidationService referenceValidationService;
 
     public ConnectionController(
             Environment environment,
@@ -126,7 +130,8 @@ public class ConnectionController {
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
             PatchHelper patchHelper,
-            MethodTestService methodTestService
+            MethodTestService methodTestService,
+            ReferenceValidationService referenceValidationService
     ) {
         this.environment = environment;
         this.schedulerService = schedulerService;
@@ -140,6 +145,7 @@ public class ConnectionController {
         this.connectionOldDTOMapper = connectionOldDTOMapper;
         this.patchHelper = patchHelper;
         this.methodTestService = methodTestService;
+        this.referenceValidationService = referenceValidationService;
     }
 
     @Operation(summary = "Retrieves all connections from database")
@@ -516,6 +522,29 @@ public class ConnectionController {
     @PostMapping(path = "/method/test", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MethodTestResultDTO> testMethod(@RequestBody MethodTestRequestDTO request) {
         return ResponseEntity.ok(methodTestService.test(request));
+    }
+
+    @Operation(summary = "Validates a reference and its JSON path while the user writes it. Every problem "
+            + "is returned with its position in the reference and a hint on how to fix it. With an optional "
+            + "sample (e.g. the example response), the path is also looked up in it.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "The reference has been validated; 'valid' tells whether it has errors",
+                    content = @Content(schema = @Schema(implementation = ReferenceValidationResultDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "The request body is missing or is not JSON",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/reference/validate", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ReferenceValidationResultDTO> validateReference(
+            @RequestBody ReferenceValidationRequestDTO request) {
+        return ResponseEntity.ok(referenceValidationService.validate(request));
     }
 
     @Operation(summary = "Deletes a connection by provided connection ID")
