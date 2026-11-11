@@ -18,7 +18,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * The prompts on a console: Enter takes the default, anything the prompt cannot accept is explained and asked
  * again, {@code ?} prints the help text, and {@code q} or the end of the input cancels the setup. Bad input never
  * ends the wizard. The layout, in plain characters: a question is its label padded to one column, the default in
- * brackets, and a colon; a problem starts with {@code !}; help is indented under the question.
+ * brackets, and a colon; a problem starts with {@code !}; help is indented under the question. The question for a
+ * secret is read without an echo, and each text that is not empty is its answer, also {@code q} and {@code ?}.
  */
 class ConsolePrompterTest {
 
@@ -38,6 +39,11 @@ class ConsolePrompterTest {
 
 	/** A short label is padded to the label column. */
 	private static final String WRITE_PROMPT = "  Write?" + " ".repeat(10) + "[Y/n]: ";
+
+	private static final String SECRET_QUESTION = "Database password";
+
+	/** A secret has no default: the place of the brackets says that the terminal hides the answer. */
+	private static final String SECRET_PROMPT = "  Database password (hidden): ";
 
 	private static final Function<String, Optional<String>> NO_SPACES = value -> value.contains(" ")
 			? Optional.of("No spaces, please.") : Optional.empty();
@@ -215,6 +221,39 @@ class ConsolePrompterTest {
 
 		assertThatExceptionOfType(SetupCancelledException.class)
 				.isThrownBy(() -> prompter.yesNo("Write?", "help", true));
+	}
+
+	@Test
+	void secretAsksAgainWhenTheAnswerIsEmpty() {
+		console.type("", "s3cret");
+
+		assertThat(prompter.secret(SECRET_QUESTION)).isEqualTo("s3cret");
+		// The scripted console does not echo the input, so the message follows the prompt on the same line.
+		assertThat(console.output())
+				.isEqualTo(SECRET_PROMPT + "  ! Database password cannot be empty.\n" + SECRET_PROMPT);
+		// The terminal shows no answer to this question.
+		assertThat(console.linesWithoutEcho()).containsExactly("", "s3cret");
+		// The console prints the prompt itself, when the echo is off: an answer that comes at once does not show.
+		assertThat(console.promptsWithoutEcho()).containsExactly(SECRET_PROMPT, SECRET_PROMPT);
+	}
+
+	@Test
+	void secretTakesQAsTextWhenTheAnswerIsQ() {
+		console.type("q");
+
+		assertThat(prompter.secret(SECRET_QUESTION)).isEqualTo("q");
+	}
+
+	@Test
+	void secretKeepsTheSpacesAroundTheAnswer() {
+		console.type(" s3 cret ");
+
+		assertThat(prompter.secret(SECRET_QUESTION)).isEqualTo(" s3 cret ");
+	}
+
+	@Test
+	void secretThrowsSetupCancelledWhenInputEnds() {
+		assertThatExceptionOfType(SetupCancelledException.class).isThrownBy(() -> prompter.secret(SECRET_QUESTION));
 	}
 
 	@Test
