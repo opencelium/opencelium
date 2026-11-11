@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGenerateWorkflowMutation, usePlanWorkflowMutation } from '../api/aiApi';
 import {
 	AI_PLAN_MAX_LENGTH, AI_PROMPT_MAX_LENGTH, type AiGenerationStage, type AiGenerationState,
@@ -27,6 +27,8 @@ export function useAiWorkflowGeneration({ choices, onUnreachable }: Params) {
 	const [useTemplates, setUseTemplatesValue] = useState(readUseTemplates);
 	const [planTemplates, setPlanTemplates] = useState<AiTemplateRef[]>([]);
 	const pending = useRef<{ abort: () => void } | null>(null);
+	// Leaving the editor abandons a plan or build: the request is dropped, and the gateway stops the model with it.
+	useEffect(() => () => pending.current?.abort(), []);
 
 	const invokerOf = (connectorId: number | null) =>
 		choices.find((choice) => choice.connectorId === connectorId)?.invokerName;

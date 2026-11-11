@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { message } from 'antd';
 import { uploadInvoker } from '@entities/invoker/lib/uploadInvoker';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -34,13 +34,20 @@ export function useAiInvokerCreate(onCreated: () => void) {
 	const [nameHint, setNameHint] = useState('');
 	const [selected, setSelected] = useState<Set<string>>(new Set());
 	const [edits, setEdits] = useState<AiInvokerEdits>({ name: '', baseUrl: '', testOperation: '', auth: { kind: 'none', keyName: '' } });
+	const pendingDraft = useRef<{ abort: () => void } | null>(null);
+	// Closing the dialog while a draft is being written drops it, and the gateway stops the model with it.
+	useEffect(() => () => pendingDraft.current?.abort(), []);
 
 	const draft = async () => {
 		if (!docs.trim()) return;
 		setFailure(null);
 		setState({ step: 'drafting' });
 		try {
-			const result = await draftInvoker({ docs, name: nameHint.trim() }).unwrap();
+			const request = draftInvoker({ docs, name: nameHint.trim() });
+			pendingDraft.current = request;
+			const result = await request.unwrap().finally(() => {
+				if (pendingDraft.current === request) pendingDraft.current = null;
+			});
 			setSelected(defaultSelection(result.draft));
 			setEdits({ name: toInvokerName(result.draft.name), baseUrl: result.draft.baseUrl, testOperation: result.draft.testOperation,
 				auth: result.draft.auth });
@@ -90,7 +97,11 @@ export function useAiInvokerCreate(onCreated: () => void) {
 		setState({ step: 'docs' });
 	};
 
-	return { state, failure, docs, setDocs, nameHint, setNameHint, selected, toggle, edits, setEdits, draft, create, backToDocs };
+	/** Drops a draft still being written: the dialog was closed without waiting for it. */
+	const abandon = () => pendingDraft.current?.abort();
+
+	return {
+		abandon, state, failure, docs, setDocs, nameHint, setNameHint, selected, toggle, edits, setEdits, draft, create, backToDocs };
 }
 
 export type AiInvokerCreate = ReturnType<typeof useAiInvokerCreate>;
