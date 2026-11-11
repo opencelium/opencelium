@@ -21,6 +21,8 @@ import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.execution.service.MethodTestService;
 import com.becon.opencelium.backend.execution.service.ReferenceValidationService;
 import com.becon.opencelium.backend.reference.enums.ReferenceType;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlRequestDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlResultDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.ConnectorReference;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.StaticReference;
@@ -279,6 +281,44 @@ class ConnectionControllerTest {
         verify(methodTestService).test(captor.capture());
         assertThat(captor.getValue().staticValues()).containsEntry("${status}", null);
         assertThat(captor.getValue().confirmWrite()).isFalse();
+    }
+
+    // ── POST /connection/method/curl ──────────────────────────────────────────
+
+    @Test
+    @DisplayName("POST /connection/method/curl passes method and static values on and returns the command")
+    void getMethodCurlReturnsCommandWhenServiceBuildsIt() throws Exception {
+        when(methodTestService.toCurl(any())).thenReturn(MethodCurlResultDTO.built("curl 'http://api.test/orders'"));
+
+        mockMvc.perform(post("/connection/method/curl")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "method": { "request": { "method": "GET" } }, "staticValues": { "${status}": "open" } }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.curl").value("curl 'http://api.test/orders'"))
+                .andExpect(jsonPath("$.connectorErrors").isEmpty());
+
+        ArgumentCaptor<MethodCurlRequestDTO> captor = ArgumentCaptor.forClass(MethodCurlRequestDTO.class);
+        verify(methodTestService).toCurl(captor.capture());
+        assertThat(captor.getValue().staticValues()).containsEntry("${status}", "open");
+    }
+
+    @Test
+    @DisplayName("POST /connection/method/curl turns a rejected method into 400 with the error code")
+    void getMethodCurlReturnsBadRequestWhenServiceRejectsRequest() throws Exception {
+        when(methodTestService.toCurl(any())).thenThrow(new GeneralServiceException(
+                HttpStatus.BAD_REQUEST,
+                ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING,
+                "Static values are missing for references: ${status}"));
+
+        mockMvc.perform(post("/connection/method/curl")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "method": { "request": { "method": "GET" } } }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING));
     }
 
     // ── POST /connection/method/test/refs ─────────────────────────────────────

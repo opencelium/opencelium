@@ -33,6 +33,8 @@ import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.execution.service.MethodTestService;
 import com.becon.opencelium.backend.execution.service.ReferenceValidationService;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlRequestDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlResultDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRequestDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO;
@@ -522,6 +524,29 @@ public class ConnectionController {
     @PostMapping(path = "/method/test", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MethodTestResultDTO> testMethod(@RequestBody MethodTestRequestDTO request) {
         return ResponseEntity.ok(methodTestService.test(request));
+    }
+
+    @Operation(summary = "Returns the request of a single method as a cURL command, without sending it. "
+            + "Connector data (credentials, tokens) is read from the connectors and is not masked, every "
+            + "other reference takes the given static value.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "The command has been built, or the data of a connector could not be read "
+                            + "(see connectorErrors)",
+                    content = @Content(schema = @Schema(implementation = MethodCurlResultDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid method, missing static values, or the request could not be built",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/method/curl", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MethodCurlResultDTO> getMethodCurl(@RequestBody MethodCurlRequestDTO request) {
+        return ResponseEntity.ok(methodTestService.toCurl(request));
     }
 
     @Operation(summary = "Validates a reference and its JSON path while the user writes it. Every problem "
