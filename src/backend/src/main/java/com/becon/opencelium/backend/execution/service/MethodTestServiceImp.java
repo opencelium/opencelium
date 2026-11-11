@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.execution.CurlCommandBuilder;
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.execution.ExecutionManagerImpl;
 import com.becon.opencelium.backend.execution.OperationExchange;
@@ -26,6 +27,8 @@ import com.becon.opencelium.backend.reference.ReferenceParser;
 import com.becon.opencelium.backend.reference.enums.ReferenceType;
 import com.becon.opencelium.backend.reference.model.RequestDataReference;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlRequestDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlResultDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.ConnectorReference;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.StaticReference;
@@ -68,7 +71,7 @@ import org.springframework.web.client.RestTemplate;
  * <p>The method is built the way a connection execution builds it, so the request is the one the
  * execution would send. Its references are resolved by a {@link StaticValueExtractor}: request
  * data references are read from the connectors, every other reference takes the static value the
- * user gave for it.
+ * user gave for it. The same request can be returned as a cURL command instead of being sent.
  *
  * <p>Not transactional on purpose: the connectors are read detached and their decrypted request
  * data must never be flushed back to the database.
@@ -135,7 +138,50 @@ public class MethodTestServiceImp implements MethodTestService {
         OperationDTO operation = toOperation(request.method());
         requireWriteConfirmed(operation, request.confirmWrite());
 
-        Map<String, Object> staticValues = request.staticValues();
+        PreparedRequest prepared = prepare(operation, request.staticValues());
+        if (!prepared.connectorErrors().isEmpty()) {
+            return MethodTestResultDTO.notSent(prepared.connectorErrors());
+        }
+
+        RequestEntity<?> requestEntity = prepared.request();
+        Class<?> responseType = OperationExchange.responseTypeOf(operation);
+        RestTemplate restTemplate = newRestTemplate(prepared.ownConnector());
+
+        long start = System.nanoTime();
+        ResponseEntity<?> response =
+                OperationExchange.exchange(restTemplate, requestEntity.getUrl(), requestEntity, responseType);
+        long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+
+        return MethodTestResultDTO.sent(
+                toSentRequest(requestEntity, prepared.secrets()), toReceivedResponse(response), durationMs);
+    }
+
+    @Override
+    public MethodCurlResultDTO toCurl(MethodCurlRequestDTO request) {
+        OperationDTO operation = toOperation(request.method());
+
+        PreparedRequest prepared = prepare(operation, request.staticValues());
+        if (!prepared.connectorErrors().isEmpty()) {
+            return MethodCurlResultDTO.notBuilt(prepared.connectorErrors());
+        }
+
+        MethodConnectorEx ownConnector = prepared.ownConnector();
+        String curl = CurlCommandBuilder.forRequest(prepared.request())
+                .insecure(ownConnector != null && ownConnector.isSslCert())
+                .connectTimeoutMillis(ownConnector != null ? ownConnector.getTimeout() : 0)
+                .build();
+
+        return MethodCurlResultDTO.built(curl);
+    }
+
+    /**
+     * Reads the connectors the request of {@code operation} needs and builds the request, the way
+     * a connection execution would build it. Sends no request of its own, but reading connector
+     * data can, e.g. to obtain a token.
+     *
+     * @return the built request, or only the connector errors when a connector cannot be read
+     */
+    private PreparedRequest prepare(OperationDTO operation, Map<String, Object> staticValues) {
         Set<Integer> connectorIds = connectorsToRead(operation, staticValues);
 
         Map<Integer, MethodConnectorEx> connectors = new HashMap<>();
@@ -159,20 +205,14 @@ public class MethodTestServiceImp implements MethodTestService {
         }
 
         if (!errors.isEmpty()) {
-            return MethodTestResultDTO.notSent(errors);
+            return PreparedRequest.failed(errors);
         }
 
-        RequestEntity<?> requestEntity = buildRequest(operation, staticValues, connectors);
-        Class<?> responseType = OperationExchange.responseTypeOf(operation);
-        RestTemplate restTemplate = newRestTemplate(connectors.get(operation.getConnectorId()));
-
-        long start = System.nanoTime();
-        ResponseEntity<?> response =
-                OperationExchange.exchange(restTemplate, requestEntity.getUrl(), requestEntity, responseType);
-        long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-
-        return MethodTestResultDTO.sent(
-                toSentRequest(requestEntity, secrets), toReceivedResponse(response), durationMs);
+        return new PreparedRequest(
+                buildRequest(operation, staticValues, connectors),
+                connectors.get(operation.getConnectorId()),
+                secrets,
+                List.of());
     }
 
     private OperationDTO toOperation(MethodDTO method) {
@@ -413,4 +453,23 @@ public class MethodTestServiceImp implements MethodTestService {
     }
 
     private record ConnectorField(int connectorId, String key) {}
+
+    /**
+     * The request of a method, ready to send.
+     *
+     * @param request the built request; {@code null} when a connector could not be read
+     * @param ownConnector the method's own connector; {@code null} for a pure HTTP request
+     * @param secrets the non-public values of the connectors that were read
+     * @param connectorErrors why connectors could not be read; empty when the request is built
+     */
+    private record PreparedRequest(
+            RequestEntity<?> request,
+            MethodConnectorEx ownConnector,
+            Set<String> secrets,
+            List<ConnectorError> connectorErrors) {
+
+        static PreparedRequest failed(List<ConnectorError> connectorErrors) {
+            return new PreparedRequest(null, null, Set.of(), List.copyOf(connectorErrors));
+        }
+    }
 }
