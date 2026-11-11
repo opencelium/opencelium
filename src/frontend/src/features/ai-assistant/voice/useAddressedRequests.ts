@@ -15,7 +15,7 @@ type Params = {
 };
 
 /**
- * Requests said to the always-listening assistant, with or without its name: no palette, only the "thinking" toast while the AI works,
+ * Requests said to the always-listening assistant by name: no palette, only the "thinking" toast while the AI works,
  * then it acts. The palette opens only for an answer the user has to look at; a failure is a notification.
  */
 export function useAddressedRequests({ assist, onAnswer }: Params) {

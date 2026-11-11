@@ -140,12 +140,12 @@
       "failed": "Der gesprochene Befehl konnte nicht transkribiert werden. Prüfen Sie, ob der lokale Sprachdienst (whisper-server) läuft."
     },
     "wakeWord": {
-      "start": "Mit {{name}} sprechen: Eingeschaltet hört es ständig zu und führt aus, worum du bittest, z. B. „Wo ist der Header der Methode?“. Gespräche, die zu keinem Befehl passen, werden ignoriert.",
+      "start": "Mit {{name}} sprechen: Eingeschaltet hört es ständig zu und reagiert nur auf das, was mit „{{name}}“ beginnt, z. B. „{{name}}, wo ist der Header der Methode?“. Alles andere wird ignoriert.",
       "stop": "{{name}} hört zu. Zum Beenden klicken",
       "autoStopped": "{{name}} hört nach 10 Minuten ohne Anfrage nicht mehr zu.",
       "state": {
         "off": "{{name}} ist aus",
-        "idle": "{{name}} hört zu",
+        "idle": "{{name}} wartet auf seinen Namen",
         "active": "{{name}} hört dir zu",
         "thinking": "{{name}} bearbeitet deine Anfrage"
       }

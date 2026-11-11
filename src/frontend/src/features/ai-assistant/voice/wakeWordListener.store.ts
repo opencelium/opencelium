@@ -77,12 +77,13 @@ export const useWakeWordListenerStore = create<WakeWordListenerState>((set, get)
         const result = await store.dispatch(aiApi.endpoints.transcribeSpeech.initiate({ wav, vocabulary: speechVocabulary() }))
             .unwrap().catch(() => undefined)
         if (!result?.text || session !== current) return
-        // While Beebot is on, everything said is a request; its name in front is optional and taken off.
         const match = matchWakeWord(result.text)
-        const request = match.isAddressed ? match.request : result.text.trim()
-        if (answerOwnQuestion(current, request)) return
+        if (answerOwnQuestion(current, match.isAddressed ? match.request : result.text.trim())) return
+        // Only what starts with the name is a request; everything else is dropped here: never shown, never stored.
+        if (!match.isAddressed) return
+        const request = match.request
         current.lastRequestAt = Date.now()
-        // The name alone asks for nothing: Beebot is listening anyway.
+        // The name alone asks for nothing.
         if (!request) return
         const stopRequest = readStopRequest(request)
         if (stopRequest) {

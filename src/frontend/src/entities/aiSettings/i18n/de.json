@@ -42,7 +42,7 @@
     "title": "Beebot",
     "toggle": "Auf Anfragen hören",
     "unavailable": "Beebot braucht Sprache zu Text, und das ist nicht verfügbar.",
-    "howItWorks": "Solange Beebot an ist, wird alles Gesagte als Anfrage genommen; der Name ist optional. Beebot spricht nie und zeigt keine Meldungen: Was zu keinem Befehl passt, wird ignoriert. Nach 10 Minuten ohne Anfrage schaltet er sich aus.",
+    "howItWorks": "Solange Beebot an ist, reagiert er nur auf das, was mit seinem Namen beginnt, z. B. „Beebot, füge nach GetAllUser eine Schleife hinzu“; alles andere wird ignoriert. Ein Ja / Nein auf seine eigene Frage braucht keinen Namen. Beebot spricht nie und zeigt keine Meldungen: Eine Anfrage, die zu keinem Befehl passt, wird ignoriert. Nach 10 Minuten ohne Anfrage schaltet er sich aus.",
     "hotkey": "Um stattdessen eine einzelne Anfrage in die Befehlspalette zu sprechen, drücken Sie {{key}}."
   }
 }

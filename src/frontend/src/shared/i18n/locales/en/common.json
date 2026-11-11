@@ -140,12 +140,12 @@
       "failed": "The spoken command couldn't be transcribed. Check that the local speech service (whisper-server) is running."
     },
     "wakeWord": {
-      "start": "Talk to {{name}}: once on, it listens all the time and acts on what you ask, e.g. “where is the header of the method?”. Talk that matches no command is ignored.",
+      "start": "Talk to {{name}}: once on, it listens all the time and acts only on what starts with “{{name}}”, e.g. “{{name}}, where is the header of the method?”. Everything else is ignored.",
       "stop": "{{name}} is listening. Click to stop",
       "autoStopped": "{{name}} stopped listening after 10 minutes without a request.",
       "state": {
         "off": "{{name}} is off",
-        "idle": "{{name}} is listening",
+        "idle": "{{name}} is listening for its name",
         "active": "{{name}} is hearing you",
         "thinking": "{{name}} is working on your request"
       }
