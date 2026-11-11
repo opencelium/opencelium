@@ -88,18 +88,24 @@ public class RestCustomizer implements RestTemplateCustomizer {
 
     private HttpClient getHttpClientWithProxy() {
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-        if (proxyPass != null && !proxyPass.isEmpty() && proxyUser != null && !proxyUser.isEmpty()) {
-            BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
-            credsProvider.setCredentials(
-                    new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
-                    new UsernamePasswordCredentials(proxyUser, proxyPass.toCharArray())
-            );
-            httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
-        }
+        setProxyCredentials(httpClientBuilder);
         HttpHost proxy = new HttpHost(proxyHost, Integer.parseInt(proxyPort));
         return httpClientBuilder
                 .setRoutePlanner(new DefaultProxyRoutePlanner(proxy))
                 .build();
+    }
+
+    /** Sets the configured proxy user and password on the builder, if both are set. */
+    private void setProxyCredentials(HttpClientBuilder httpClientBuilder) {
+        if (proxyPass == null || proxyPass.isEmpty() || proxyUser == null || proxyUser.isEmpty()) {
+            return;
+        }
+        BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(
+                new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
+                new UsernamePasswordCredentials(proxyUser, proxyPass.toCharArray())
+        );
+        httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
     }
 
     private CloseableHttpClient getDisabledHttpsClient() {
@@ -125,16 +131,9 @@ public class RestCustomizer implements RestTemplateCustomizer {
                     .setSSLSocketFactory(ssl).build();
 
             if(proxyHost != null && proxyPort != null && !proxyHost.isEmpty() && !proxyPort.isEmpty()) {
-                HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+                HttpHost proxy = new HttpHost(proxyHost, Integer.parseInt(proxyPort));
                 HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-                if (proxyPass != null && !proxyPass.isEmpty() && proxyUser != null && !proxyUser.isEmpty()) {
-                    BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
-                    credsProvider.setCredentials(
-                            new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
-                            new UsernamePasswordCredentials("bocffjov", "tgjzz8pvelfc".toCharArray())
-                    );
-                    httpClientBuilder.setDefaultCredentialsProvider(credsProvider);
-                }
+                setProxyCredentials(httpClientBuilder);
                 return  httpClientBuilder
                         .setConnectionManager(connectionManager)
                         .setRoutePlanner(new DefaultProxyRoutePlanner(proxy))

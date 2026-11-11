@@ -98,33 +98,42 @@ public class ConnectorExMapper {
                         MethodConnectorMng::getConnectorId,
                         (a, b) -> a))
                 .keySet()
-                .forEach(connectorId -> {
-                    Connector connector = connectorService.getById(connectorId);
-                    Invoker invoker = invokerService.findByName(connector.getInvoker());
-
-                    List<RequestData> requestData = connector.getRequestData();
-                    invoker.getRequiredData().forEach(rd -> {
-                        if (requestData.stream().noneMatch(rqsd -> rqsd.getField().equals(rd.getName()))) {
-                            requestData.add(new RequestData(rd));
-                        }
-                    });
-                    RequiredDataService requiredDataService = new RequiredDataServiceImp(connector, requestData, invoker.getOperations());
-                    requestData.forEach(rqsd -> rqsd.setValue(requiredDataService.getValue(rqsd).orElse(null)));
-
-                    Map<String, String> requiredDataMap = new HashMap<>();
-                    requestData.forEach(r -> requiredDataMap.put(r.getField(), r.getValue()));
-
-                    MethodConnectorEx mcEx = new MethodConnectorEx();
-                    mcEx.setId(connector.getId());
-                    mcEx.setTitle(connector.getTitle());
-                    mcEx.setSslCert(connector.isTrustCertificate());
-                    mcEx.setTimeout(connector.getTimeout());
-                    mcEx.setInvoker(connector.getInvoker());
-                    mcEx.setRequiredData(requiredDataMap);
-                    mcEx.setPagination(invoker.getPagination());
-                    result.put(connectorId, mcEx);
-                });
+                .forEach(connectorId -> result.put(connectorId, toMethodConnector(connectorService.getById(connectorId))));
         return result;
+    }
+
+    /**
+     * Builds the execution view of {@code connector} with its required data resolved.
+     *
+     * <p>Resolving the required data calls the invoker's functions when a field is computed from
+     * another request, e.g. an authentication token, so this sends real requests to the API.
+     * The request data of {@code connector} is completed with the invoker's missing fields and
+     * overwritten with the resolved values.
+     */
+    public MethodConnectorEx toMethodConnector(Connector connector) {
+        Invoker invoker = invokerService.findByName(connector.getInvoker());
+
+        List<RequestData> requestData = connector.getRequestData();
+        invoker.getRequiredData().forEach(rd -> {
+            if (requestData.stream().noneMatch(rqsd -> rqsd.getField().equals(rd.getName()))) {
+                requestData.add(new RequestData(rd));
+            }
+        });
+        RequiredDataService requiredDataService = new RequiredDataServiceImp(connector, requestData, invoker.getOperations());
+        requestData.forEach(rqsd -> rqsd.setValue(requiredDataService.getValue(rqsd).orElse(null)));
+
+        Map<String, String> requiredDataMap = new HashMap<>();
+        requestData.forEach(r -> requiredDataMap.put(r.getField(), r.getValue()));
+
+        MethodConnectorEx mcEx = new MethodConnectorEx();
+        mcEx.setId(connector.getId());
+        mcEx.setTitle(connector.getTitle());
+        mcEx.setSslCert(connector.isTrustCertificate());
+        mcEx.setTimeout(connector.getTimeout());
+        mcEx.setInvoker(connector.getInvoker());
+        mcEx.setRequiredData(requiredDataMap);
+        mcEx.setPagination(invoker.getPagination());
+        return mcEx;
     }
 
     private void setPagination(ConnectorEx connectorEx, Invoker invoker) {

@@ -9,11 +9,25 @@ public class ProxyEx {
     public ProxyEx() {
     }
 
-    public ProxyEx(String host, String port, String password, String user) {
+    private ProxyEx(String host, String port, String user, String password) {
         this.host = host;
         this.port = port;
-        this.password = password;
         this.user = user;
+        this.password = password;
+    }
+
+    /**
+     * Returns the proxy settings for the given address and credentials.
+     *
+     * <p>The credentials come in the usual order, user first, then password.
+     *
+     * @param host the proxy host
+     * @param port the proxy port
+     * @param user the user name the proxy authenticates
+     * @param password the password for {@code user}
+     */
+    public static ProxyEx of(String host, String port, String user, String password) {
+        return new ProxyEx(host, port, user, password);
     }
 
     public String getHost() {
