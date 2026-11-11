@@ -37,6 +37,8 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   3. It installs the service, with the service option.
   4. It starts the application: the wizard process without the service, systemd with the service. Only 1 process starts it.
   5. It prints the admin login box when the port listens.
+
+  The question of the summary is "Write the files?". The summary shows the start as the last action after the write.
 - **SW-46** Given a file at a target path, when the wizard writes the files, then it must keep the old file as `<name>.bak`.
 
 ### Input rules
@@ -45,6 +47,10 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - **SW-08** Given a question on a terminal, when the user types a bad value, then the wizard must name the problem and ask again. On a terminal a bad value never stops the wizard.
 - **SW-09** Given a yes/no question, when the user types `y`, `YES`, `n` or `No`, then the wizard must accept the answer.
 - **SW-10** Given any question, when the user types `?`, then the wizard must print a help text and ask again. At the database password question of SW-53, the wizard takes `?` as the database password.
+
+### Screens
+
+- **SW-58** Given a step, when it starts, then the wizard must show its number, the step count and its name. The title line has the form "Step <number> of <count>: <name>", and a line of `-` characters is under it. A step that does not apply shows its title line with "(skipped)" after its name. Thus the numbers have no gap, and each title line shows the same step count.
 
 ### MongoDB
 

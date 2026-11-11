@@ -280,6 +280,13 @@ class ConsolePrompterTest {
 	}
 
 	@Test
+	void stepPrintsTheNumberTheCountAndTheNameOverARule() {
+		prompter.step(2, 5, "Web port");
+
+		assertThat(console.output()).isEqualTo("\n  Step 2 of 5: Web port\n  " + "-".repeat(74) + "\n");
+	}
+
+	@Test
 	void statusLinesStartWithTheirMarkAndIndentTheContinuation() {
 		prompter.info("No configuration was found.", "Press Enter to accept.");
 		prompter.error("Cannot write x.", "Nothing was written.");
@@ -315,6 +322,7 @@ class ConsolePrompterTest {
 		rows.put("Mode", "self-host");
 
 		prompter.title("OpenCelium setup");
+		prompter.step(1, 5, "Data directory");
 		prompter.info("Hello.");
 		prompter.error("Failed.", "Nothing was written.");
 		prompter.success("Done.");

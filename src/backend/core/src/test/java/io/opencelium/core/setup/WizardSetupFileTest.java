@@ -19,6 +19,7 @@ import io.opencelium.core.setup.steps.DataDirStep;
 import io.opencelium.core.setup.steps.PortStep;
 import io.opencelium.core.setup.steps.SetupStep;
 import io.opencelium.core.setup.steps.SummaryStep;
+import io.opencelium.core.testsupport.fake.NamedStep;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,7 +64,7 @@ class WizardSetupFileTest {
 		assertThat(exitCode).isEmpty();
 		assertThat(console.output()).contains("  Data directory  " + dataDir + "   (from " + file + ")")
 				.contains("  Web port        " + port + "   (from " + file + ")")
-				.contains("  Write the files and start OpenCelium? yes   (batch)");
+				.contains("  Write the files? yes   (batch)");
 		for (String name : new String[] {"application.yml", "opencelium.env"}) {
 			assertThat(tmp.resolve("from-file/config/" + name))
 					.hasSameBinaryContentAs(tmp.resolve("scripted/config/" + name));
@@ -79,7 +80,7 @@ class WizardSetupFileTest {
 
 		assertThat(exitCode).isEmpty();
 		assertThat(console.output()).contains("  Data directory  " + dataDir + "   (from " + file + ")")
-				.contains("  Web port        [9090]: ").contains("  Write the files and start OpenCelium? [Y/n]: ")
+				.contains("  Web port        [9090]: ").contains("  Write the files? [Y/n]: ")
 				.doesNotContain("  Data directory  [");
 		assertThat(tmp.resolve("work/config/application.yml")).content().contains("port: " + port);
 		assertThat(started).isTrue();
@@ -138,7 +139,8 @@ class WizardSetupFileTest {
 	 */
 	private Wizard wizard(ValueSource values, Path workingDir) {
 		var locations = new ConfigLocations(workingDir, workingDir.resolve("etc/opencelium"));
-		SetupStep mongo = (context, prompter) -> context.setMongoUri("mongodb://localhost:27017/opencelium");
+		SetupStep mongo = new NamedStep("MongoDB",
+				(context, prompter) -> context.setMongoUri("mongodb://localhost:27017/opencelium"));
 		List<SetupStep> steps = List.of(new DataDirStep(), new PortStep(), mongo, new SummaryStep(locations));
 		return new Wizard(new ConsolePrompter(console), values, steps, environment -> started = true,
 				Optional.of("1.2.3"));

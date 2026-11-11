@@ -18,6 +18,7 @@ import io.opencelium.core.setup.steps.DataDirStep;
 import io.opencelium.core.setup.steps.PortStep;
 import io.opencelium.core.setup.steps.SetupStep;
 import io.opencelium.core.setup.steps.SummaryStep;
+import io.opencelium.core.testsupport.fake.NamedStep;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import com.mongodb.ConnectionString;
@@ -412,8 +413,8 @@ class SetupLauncherTest {
 
 		assertThat(exitCode).isEmpty();
 		assertThat(console.output()).contains("OpenCelium").contains("No configuration was found.")
-				.contains("  Data directory  [").contains("  Web port        [9090]: ").contains("+-- Summary ")
-				.contains("  Write the files and start OpenCelium? [Y/n]: ")
+				.contains("  Data directory  [").contains("  Web port        [9090]: ").contains("+-- Your answers ")
+				.contains("  Write the files? [Y/n]: ")
 				.contains("  OK Configuration written to " + workingDir.resolve("config")
 						+ "\n  -> Starting OpenCelium...")
 				.doesNotContain("Cloud");
@@ -525,12 +526,12 @@ class SetupLauncherTest {
 	 */
 	private SetupLauncher launcher() {
 		var locations = new ConfigLocations(workingDir, workingDir.resolve("etc/opencelium"));
-		SetupStep mongo = (context, prompter) -> {
+		SetupStep mongo = new NamedStep("MongoDB", (context, prompter) -> {
 			if (usesTheDriver) {
 				pingAClosedPort();
 			}
 			context.setMongoUri(mongoUri);
-		};
+		});
 		List<SetupStep> steps = List.of(new DataDirStep(), new PortStep(), mongo, new SummaryStep(locations));
 		return new SetupLauncher(() -> terminal, environment, systemProperties, locations, steps, console,
 				new PrintWriter(out, true), new PrintWriter(err, true));

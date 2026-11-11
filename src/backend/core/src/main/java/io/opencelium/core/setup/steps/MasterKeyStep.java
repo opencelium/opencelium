@@ -108,6 +108,11 @@ public final class MasterKeyStep implements SetupStep {
 	}
 
 	@Override
+	public String name() {
+		return "Master key";
+	}
+
+	@Override
 	public List<Question> questions() {
 		return List.of(question());
 	}
@@ -138,7 +143,6 @@ public final class MasterKeyStep implements SetupStep {
 			fromWord(word.get(), keep, dataDirKey, context, prompter);
 			return;
 		}
-		prompter.print("");
 		prompter.info(PURPOSE.getFirst(), PURPOSE.subList(1, PURPOSE.size()).toArray(String[]::new));
 		if (variableSet) {
 			prompter.print("");

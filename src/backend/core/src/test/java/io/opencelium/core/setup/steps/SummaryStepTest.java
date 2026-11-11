@@ -26,8 +26,8 @@ import static org.assertj.core.api.Assertions.tuple;
 
 /**
  * The summary: the answers in a box (the mode always self-host, the MongoDB URI without its password), the files
- * that will be written as a list, the actions that earlier steps planned, and the confirmation. Yes plans
- * application.yml and the env file, with the entries of the env file; no cancels the setup.
+ * that will be written as a list, the actions after the write with the start last, and the question whether to write
+ * the files. Yes plans application.yml and the env file, with the entries of the env file; no cancels the setup.
  */
 class SummaryStepTest {
 
@@ -45,8 +45,9 @@ class SummaryStepTest {
 
 		step().run(context, new ConsolePrompter(console));
 
-		assertThat(console.output()).containsSubsequence("  +-- Summary --", "  |  Mode" + " ".repeat(12) + "self-host",
-				"  |  Data directory  /srv/oc", "  |  Web port        9090", "  +--");
+		assertThat(console.output()).containsSubsequence("  +-- Your answers --",
+				"  |  Mode" + " ".repeat(12) + "self-host", "  |  Data directory  /srv/oc", "  |  Web port        9090",
+				"  +--");
 	}
 
 	@Test
@@ -61,7 +62,7 @@ class SummaryStepTest {
 		assertThat(console.output()).containsSubsequence("  Files to write",
 				"    - " + workingDir.resolve("config/application.yml") + "   (replaces the file that exists)",
 				"    - " + workingDir.resolve("config/opencelium.env") + "\n",
-				"  Write the files and start OpenCelium? [Y/n]: ");
+				"  Write the files? [Y/n]: ");
 	}
 
 	@Test
@@ -77,10 +78,44 @@ class SummaryStepTest {
 		assertThat(console.output()).containsSubsequence("  Files to write",
 				"    - " + workingDir.resolve("config/application.yml"),
 				"    - " + workingDir.resolve("config/opencelium.env"), "    - " + unit, "  After the write",
-				"    - Install the service opencelium",
-				"  Write the files and start OpenCelium? [Y/n]: ");
+				"    - Install the service opencelium", "    - Start OpenCelium",
+				"  Write the files? [Y/n]: ");
 		assertThat(context.filePlan().files()).extracting(PlannedFile::path).containsExactly(
 				workingDir.resolve("config/application.yml"), workingDir.resolve("config/opencelium.env"), unit);
+	}
+
+	@Test
+	void runAsksToWriteTheFilesWithoutTheStart() {
+		answered();
+		console.type("y");
+
+		step().run(context, new ConsolePrompter(console));
+
+		assertThat(console.output()).contains("\n  Write the files? [Y/n]: ")
+				.doesNotContain("start OpenCelium?");
+	}
+
+	@Test
+	void runListsTheStartAfterThePlannedActionsWhenAStepPlannedAnAction() {
+		answered();
+		context.filePlan().add(new RecordingAction("Write a new master key", new ArrayList<>()));
+		console.type("y");
+
+		step().run(context, new ConsolePrompter(console));
+
+		assertThat(console.output()).contains("  After the write\n    - Write a new master key\n"
+				+ "    - Start OpenCelium\n\n  Write the files? [Y/n]: ");
+	}
+
+	@Test
+	void runListsTheStartAfterTheWriteWhenNoStepPlannedAnAction() {
+		answered();
+		console.type("y");
+
+		step().run(context, new ConsolePrompter(console));
+
+		assertThat(console.output())
+				.contains("  After the write\n    - Start OpenCelium\n\n  Write the files? [Y/n]: ");
 	}
 
 	@Test
@@ -108,7 +143,7 @@ class SummaryStepTest {
 		step().run(batch, new ConsolePrompter(console));
 
 		assertThat(batch.filePlan().files()).hasSize(2);
-		assertThat(console.output()).contains("  Write the files and start OpenCelium? yes   (batch)")
+		assertThat(console.output()).contains("  Write the files? yes   (batch)")
 				.doesNotContain("[Y/n]");
 	}
 

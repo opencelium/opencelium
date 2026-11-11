@@ -22,6 +22,7 @@ import io.opencelium.core.setup.steps.MongoStep;
 import io.opencelium.core.setup.steps.PortStep;
 import io.opencelium.core.setup.steps.SetupStep;
 import io.opencelium.core.setup.steps.SummaryStep;
+import io.opencelium.core.testsupport.fake.NamedStep;
 import io.opencelium.core.testsupport.fake.RecordingAction;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
@@ -58,6 +59,11 @@ class WizardTest {
 	void runSkipsStepWhenNotApplicable() {
 		SetupStep skipped = new SetupStep() {
 			@Override
+			public String name() {
+				return "Skipped";
+			}
+
+			@Override
 			public boolean applicable(SetupContext context) {
 				return false;
 			}
@@ -74,10 +80,50 @@ class WizardTest {
 	}
 
 	@Test
-	void runPrintsNothingWrittenAndStopsWhenStepCancels() {
-		SetupStep cancelling = (context, prompter) -> {
-			throw new SetupCancelledException();
+	void runShowsTheNumberTheCountAndTheNameBeforeEachStep() {
+		SetupStep dataDir = new NamedStep("Data directory", (context, prompter) -> prompter.info("data directory ran"));
+		SetupStep port = new NamedStep("Web port", (context, prompter) -> prompter.info("port ran"));
+
+		wizard(List.of(dataDir, port)).run(REASON);
+
+		// One empty line between the banner and the first step, and before each next step.
+		assertThat(console.output()).contains("Type ? for help, q to quit.\n\n  Step 1 of 2: Data directory\n  "
+				+ "-".repeat(74) + "\n  data directory ran\n\n  Step 2 of 2: Web port\n  " + "-".repeat(74)
+				+ "\n  port ran\n");
+	}
+
+	@Test
+	void runMarksTheTitleAsSkippedWhenAStepDoesNotApply() {
+		SetupStep admin = new SetupStep() {
+			@Override
+			public String name() {
+				return "Admin account";
+			}
+
+			@Override
+			public boolean applicable(SetupContext context) {
+				return false;
+			}
+
+			@Override
+			public void run(SetupContext context, Prompter prompter) {
+				ran.add("admin");
+			}
 		};
+
+		wizard(List.of(recording("Master key"), admin, recording("Summary"))).run(REASON);
+
+		// The numbers have no gap, and each title line shows the same step count.
+		assertThat(console.output()).contains("\n  Step 2 of 3: Admin account (skipped)\n  " + "-".repeat(74)
+				+ "\n\n  Step 3 of 3: Summary\n");
+		assertThat(ran).containsExactly("Master key", "Summary");
+	}
+
+	@Test
+	void runPrintsNothingWrittenAndStopsWhenStepCancels() {
+		SetupStep cancelling = new NamedStep("Cancelling", (context, prompter) -> {
+			throw new SetupCancelledException();
+		});
 
 		OptionalInt exitCode = wizard(List.of(recording("first"), cancelling, recording("never"))).run(REASON);
 
@@ -90,7 +136,8 @@ class WizardTest {
 	@Test
 	void runPrintsBannerBeforeFirstQuestion() {
 		console.type("");
-		SetupStep asking = (context, prompter) -> prompter.text("Web port", "help", "1", value -> Optional.empty());
+		SetupStep asking = new NamedStep("Web port",
+				(context, prompter) -> prompter.text("Web port", "help", "1", value -> Optional.empty()));
 
 		wizard(List.of(asking)).run(REASON);
 
@@ -144,12 +191,12 @@ class WizardTest {
 	@Test
 	void runPrintsNothingWrittenAndRemovesTheFilesWhenAnActionIsCancelled() {
 		Path file = tmp.resolve("config/application.yml");
-		SetupStep planning = (context, prompter) -> {
+		SetupStep planning = new NamedStep("Planning", (context, prompter) -> {
 			context.filePlan().add(PlannedFile.groupReadable(file, "port: 1\n"));
 			context.filePlan().add(new RecordingAction("confirm", new ArrayList<>()).onRun(() -> {
 				throw new SetupCancelledException();
 			}));
-		};
+		});
 		Wizard wizard = wizard(List.of(planning));
 
 		OptionalInt exitCode = wizard.run(REASON);
@@ -167,11 +214,11 @@ class WizardTest {
 		Path file = tmp.resolve("config/application.yml");
 		List<Boolean> writtenDuringTheAction = new ArrayList<>();
 		Wizard[] wizard = new Wizard[1];
-		SetupStep planning = (context, prompter) -> {
+		SetupStep planning = new NamedStep("Planning", (context, prompter) -> {
 			context.filePlan().add(PlannedFile.groupReadable(file, "port: 1\n"));
 			context.filePlan().add(new RecordingAction("confirm", new ArrayList<>())
 					.onRun(() -> writtenDuringTheAction.add(wizard[0].hasWritten())));
-		};
+		});
 		wizard[0] = wizard(List.of(planning));
 
 		wizard[0].run(REASON);
@@ -208,17 +255,26 @@ class WizardTest {
 				MongoStep.class, MasterKeyStep.class, SummaryStep.class);
 	}
 
+	@Test
+	void standardStepsHaveTheNamesOfTheirScreens() {
+		var locations = new ConfigLocations(tmp, tmp.resolve("etc/opencelium"));
+
+		assertThat(Wizard.standardSteps(locations)).extracting(SetupStep::name)
+				.containsExactly("Data directory", "Web port", "MongoDB", "Master key", "Summary");
+	}
+
 	private Wizard wizard(List<SetupStep> steps) {
 		return new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, steps, environment -> started = true,
 				Optional.of("1.2.3"));
 	}
 
 	private SetupStep recording(String name) {
-		return (context, prompter) -> ran.add(name);
+		return new NamedStep(name, (context, prompter) -> ran.add(name));
 	}
 
 	private static SetupStep planning(Path file) {
-		return (context, prompter) -> context.filePlan().add(PlannedFile.groupReadable(file, "port: 1\n"));
+		return new NamedStep("Planning",
+				(context, prompter) -> context.filePlan().add(PlannedFile.groupReadable(file, "port: 1\n")));
 	}
 
 }

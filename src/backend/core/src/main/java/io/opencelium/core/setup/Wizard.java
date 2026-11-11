@@ -20,15 +20,19 @@ import io.opencelium.core.setup.steps.SetupStep;
 import io.opencelium.core.setup.steps.SummaryStep;
 
 /**
- * The setup: the banner, then the steps in order, each one skipped when it does not apply, then the write of the
- * files and the actions that the steps planned, for example the start of MongoDB, then the start of the
- * application. The steps take their values from the value source: the setup file, else the prompter. A cancel at
- * any question ends the run with "nothing written" and exit code 0. A missing or bad value in batch mode, and a
- * write failure, end it with a {@link SetupFailedException} that the launcher prints on standard error, and start
- * nothing. The dialogue goes through the prompter, never
- * through a logger: before Spring starts the log system is not configured, and a password must never reach a log.
+ * The setup: the banner, then the steps in order, each one under a title line with its number, the step count and its
+ * name, and skipped when it does not apply; then the write of the files and the actions that the steps planned, for
+ * example the backup question of a new master key; then the start of the application. The steps take their values
+ * from the value source: the setup file, else the prompter. A cancel at any question ends the run with "nothing
+ * written" and exit code 0. A missing or bad value in batch mode, and a write failure, end it with a
+ * {@link SetupFailedException} that the launcher prints on standard error, and start nothing. The dialogue goes
+ * through the prompter, never through a logger: before Spring starts the log system is not configured, and a
+ * password must never reach a log.
  */
 public final class Wizard {
+
+	/** After the name of a step that does not apply: its title line stays, so the numbers have no gap. */
+	private static final String SKIPPED = " (skipped)";
 
 	private final Prompter prompter;
 
@@ -80,8 +84,11 @@ public final class Wizard {
 		printBanner(reason);
 		SetupContext context = new SetupContext(values);
 		try {
-			for (SetupStep step : steps) {
-				if (step.applicable(context)) {
+			for (int i = 0; i < steps.size(); i++) {
+				SetupStep step = steps.get(i);
+				boolean applicable = step.applicable(context);
+				prompter.step(i + 1, steps.size(), applicable ? step.name() : step.name() + SKIPPED);
+				if (applicable) {
 					step.run(context, prompter);
 				}
 			}
@@ -127,7 +134,7 @@ public final class Wizard {
 
 	/**
 	 * The Enter, ? and q hint only when a question can come: the log of a batch run must not suggest a
-	 * wait.
+	 * wait. No empty line at the end: the title line of the first step brings its own.
 	 */
 	private void printBanner(String reason) {
 		prompter.print("");
@@ -139,7 +146,6 @@ public final class Wizard {
 		else {
 			prompter.info(opening, "Press Enter to accept the value in [brackets]. Type ? for help, q to quit.");
 		}
-		prompter.print("");
 	}
 
 	private static String sentence(String reason) {
