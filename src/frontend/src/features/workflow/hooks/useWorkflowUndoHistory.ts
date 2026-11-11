@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
-import type { WorkflowUndoEntry, WorkflowUndoSnapshot,
+import type { WorkflowUndoEntry, WorkflowUndoOrigin, WorkflowUndoSnapshot,
 	WorkflowUndoStack } from '../types/undoHistory.types';
 import { buildWorkflowUndoSignature, hasWorkflowDragPreview } from '../utils/workflowUndoHistory.utils';
 import { describeWorkflowUndoChange } from '../utils/workflowUndoDescribe.utils';
@@ -15,6 +15,15 @@ import { takeAiChangeMark } from '../utils/aiChangeMarker';
 const COALESCE_MS = 350;
 /** Bounds a very long editing session; entries themselves are just references. */
 const MAX_ENTRIES = 100;
+
+/** A state recorded directly rather than observed: an AI apply inside a dialog, saved with it. */
+export type WorkflowHistoryStep = {
+	nodes: WorkflowNodeModel[];
+	edges: WorkflowEdgeModel[];
+	fieldBindings: unknown[] | undefined;
+	origin: WorkflowUndoOrigin;
+	at: number;
+};
 
 type Params = {
 	nodes: WorkflowNodeModel[];
@@ -133,6 +142,26 @@ export const useWorkflowUndoHistory = ({ nodes, edges, fieldBindings, isDragging
 		syncEntries();
 	}, [applySnapshot, syncEntries]);
 
+	/** Records states in order ahead of the graph write that follows them. A step equal to the state before it is
+	 * skipped, and so is the final write when it equals the last step: the observer sees it as the current state. */
+	const recordSteps = useCallback((steps: WorkflowHistoryStep[]) => {
+		const stack = stackRef.current;
+		let isChanged = false;
+		for (const step of steps) {
+			if (!stack.present) break;
+			const signature = buildWorkflowUndoSignature(step.nodes, step.edges, step.fieldBindings);
+			if (signature === stack.present.signature) continue;
+			const change = describeWorkflowUndoChange(stack.present, step);
+			stack.past.push(stack.present);
+			if (stack.past.length > MAX_ENTRIES) stack.past.shift();
+			stack.future = [];
+			stack.present = { nodes: step.nodes, edges: step.edges, fieldBindings: step.fieldBindings,
+				signature, change, at: step.at, origin: step.origin };
+			isChanged = true;
+		}
+		if (isChanged) syncEntries();
+	}, [syncEntries]);
+
 	const undo = useCallback(() => jumpTo(-1), [jumpTo]);
 	const redo = useCallback(() => jumpTo(1), [jumpTo]);
 
@@ -152,6 +181,7 @@ export const useWorkflowUndoHistory = ({ nodes, edges, fieldBindings, isDragging
 		undo,
 		redo,
 		jumpTo,
+		recordSteps,
 		reset,
 	};
 };

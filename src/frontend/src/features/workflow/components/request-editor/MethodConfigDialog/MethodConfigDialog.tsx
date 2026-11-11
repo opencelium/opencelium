@@ -5,12 +5,13 @@ import { LiveInspectHint } from '../utils/LiveInspectHint';
 import { MethodConfigDialogEditor } from './MethodConfigDialogEditors';
 import type { MethodConfigDialogProps } from './MethodConfigDialog.types';
 import { useMethodConfigDialogState } from './useMethodConfigDialogState';
+import { AiDialogStepsContext } from '../../../providers/AiDialogStepsContext';
 import '../../dialogHeader.css';
 
 export function MethodConfigDialog(props: MethodConfigDialogProps) {
 	const { open, node, mode } = props;
 	const { t } = useI18n('workflow');
-	const { store, persistCurrentConfig } = useMethodConfigDialogState(props);
+	const { store, persistCurrentConfig, recordAiStep } = useMethodConfigDialogState(props);
 
 	if (!open || !node) return null;
 	const title = mode === 'body' ? t('methodConfig.body')
@@ -52,7 +53,9 @@ export function MethodConfigDialog(props: MethodConfigDialogProps) {
 				<LiveInspectHint />
 				<div style={!isUrlMode ? { flex: 1, minHeight: 0 } : undefined}>
 					<Provider store={store}>
-						<MethodConfigDialogEditor mode={mode} nodeId={node.id} />
+						<AiDialogStepsContext.Provider value={recordAiStep}>
+							<MethodConfigDialogEditor mode={mode} nodeId={node.id} />
+						</AiDialogStepsContext.Provider>
 					</Provider>
 				</div>
 			</div>

@@ -5,6 +5,7 @@ import { removeDeletedRequestBindings, updateRequestFieldBindings } from '@featu
 import { updateConnection, updatePayload } from '@features/workflow/store/connection/connectionSlice';
 import type { Connection, MethodWithId } from '@features/workflow/types/connection';
 import { getEligibleReferenceMethods } from '@features/workflow/utils/referenceMethodVisibility';
+import { useRecordAiStep } from '@features/workflow/providers/AiDialogStepsContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { aiApi } from '../api/aiApi';
 import { notifyAiApplied } from '../ui/AiProposal/notifyAiApplied';
@@ -46,6 +47,7 @@ export function applyProposals(connection: Connection, method: MethodWithId, bod
 export function useAiFieldMapping({ connection, method, body }: Params) {
 	const { t, lang } = useI18n('workflow');
 	const dispatch = useDispatch();
+	const recordAiStep = useRecordAiStep();
 	const [state, setState] = useState<AiFieldMappingState>({ status: 'idle' });
 	const [instruction, setInstruction] = useState('');
 
@@ -115,12 +117,17 @@ export function useAiFieldMapping({ connection, method, body }: Params) {
 			dispatch(updateConnection({ fieldBindings: target.fieldBindings } as never));
 		};
 		const before = { body, fieldBindings: connection.fieldBindings };
-		write(next);
 		setState({ status: 'idle' });
-		if (applied.length) {
-			notifyAiApplied({ key: 'ai-mapping-applied', undoTestId: 'ai-mapping-undo',
-				text: t('ai.mapping.applied', { count: applied.length }), onUndo: () => write(before) });
+		if (!applied.length) {
+			write(next);
+			return 0;
 		}
+		const forget = recordAiStep(() => write(next));
+		notifyAiApplied({ key: 'ai-mapping-applied', undoTestId: 'ai-mapping-undo',
+			text: t('ai.mapping.applied', { count: applied.length }), onUndo: () => {
+				write(before);
+				forget();
+			} });
 		return applied.length;
 	};
 

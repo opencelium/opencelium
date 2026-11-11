@@ -26,6 +26,10 @@ import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
 import { copyWorkflowNodeGroup, moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
 import { useDeleteWorkflowNodes } from './useDeleteWorkflowNodes';
 import { useBindingLensState } from '../lens/useBindingLensState';
+import type { AiDialogStep } from '../utils/aiDialogSteps';
+import type { MethodDraft } from '../components/request-editor/MethodConfigDialog/MethodConfigDialog.types';
+import { conditionStepsToHistory, methodStepsToHistory } from './aiDialogHistory';
+import type { ConditionConfig } from '../components/condition-builder/conditionBuilder.types';
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
@@ -126,6 +130,10 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     redo: undoHistory.redo,
     undoEntries: undoHistory.entries,
     jumpToUndoEntry: undoHistory.jumpTo,
+    recordAiMethodSteps: (nodeId: string, steps: AiDialogStep<MethodDraft>[]) => undoHistory.recordSteps(
+      methodStepsToHistory({ nodes, edges, fieldBindings: options.fieldBindings }, nodeId, steps)),
+    recordAiConditionSteps: (nodeId: string, steps: AiDialogStep<ConditionConfig>[]) => undoHistory.recordSteps(
+      conditionStepsToHistory({ nodes, edges, fieldBindings: options.fieldBindings }, nodeId, steps)),
     getViewport: () => reactFlowInstance.current?.getViewport(),
     centerOnNode,
     setReactFlowInstance: (instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>) => {
