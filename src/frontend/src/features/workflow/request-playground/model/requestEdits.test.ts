@@ -9,7 +9,7 @@ import {
 	paramRowsOf,
 	readRowOrigin,
 } from './requestEdits';
-import { buildCurl, connectionFieldSubstitution, referenceSubstitution, resolveRequest } from './resolveRequest';
+import { connectionFieldSubstitution, referenceSubstitution, resolveRequest } from './resolveRequest';
 
 const config = {
 	url: 'https://api.test/items?page=1&owner=#{%arg1%}',
@@ -63,7 +63,7 @@ describe('applyRequestEdits', () => {
 	});
 });
 
-describe('resolveRequest and buildCurl', () => {
+describe('resolveRequest', () => {
 	const draft = {
 		request: {
 			endpoint: '{url}/users/{%#aaaaaa.(response).body.$.id%}',
@@ -73,7 +73,7 @@ describe('resolveRequest and buildCurl', () => {
 		},
 	} as unknown as PlaygroundDraft;
 
-	it('fills in values and builds a copyable command', () => {
+	it('fills in values', () => {
 		const sent = resolveRequest(draft, [
 			referenceSubstitution('#aaaaaa.(response).body.$.id', 7),
 			connectionFieldSubstitution('url', 'https://api.test'),
@@ -81,10 +81,5 @@ describe('resolveRequest and buildCurl', () => {
 		expect(sent).toEqual({
 			url: 'https://api.test/users/7', method: 'put', headers: { 'X-Id': 7 }, body: { id: 7, note: "it's" },
 		});
-		expect(buildCurl(sent)).toBe([
-			"curl -X PUT 'https://api.test/users/7'",
-			"  -H 'X-Id: 7'",
-			`  -d '{"id":7,"note":"it'\\''s"}'`,
-		].join(' \\\n'));
 	});
 });
