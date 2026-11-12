@@ -19,6 +19,8 @@ import io.opencelium.core.setup.SetupCancelledException;
  * {@code OK}, a start with {@code ->}; help and continuation lines are indented under the question or the status.
  * On a terminal that shows colors, the line of a result is green and the line of a problem red, so a passed check
  * stands out. The marks stay, so the lines say the same without color, in a log file and to a color-blind user.
+ * Each text shows its control characters as {@code ?} before the colors go on, so a message from a server or a value
+ * from a file cannot move the cursor, clear the screen or change the colors; only a help text keeps its line breaks.
  */
 public final class ConsolePrompter implements Prompter {
 
@@ -59,13 +61,12 @@ public final class ConsolePrompter implements Prompter {
 			throw new IllegalArgumentException("The default " + defaultIndex + " is not one of " + options.size()
 					+ " options.");
 		}
-		PrintWriter out = console.writer();
-		out.println();
-		out.println(MARGIN + question);
+		print("");
+		print(MARGIN + question);
 		int width = options.stream().mapToInt(option -> option.label().length()).max().orElseThrow();
 		for (int i = 0; i < options.size(); i++) {
 			Choice option = options.get(i);
-			out.println(INDENT + (i + 1) + ") " + option.label()
+			print(INDENT + (i + 1) + ") " + option.label()
 					+ " ".repeat(width - option.label().length() + 4) + option.summary());
 		}
 		while (true) {
@@ -137,7 +138,7 @@ public final class ConsolePrompter implements Prompter {
 	public String secret(String question) {
 		PrintWriter out = console.writer();
 		while (true) {
-			String line = console.readLineWithoutEcho(questionLine(question, HIDDEN));
+			String line = console.readLineWithoutEcho(Screen.printable(questionLine(question, HIDDEN)));
 			if (line == null) {
 				out.println();
 				throw new SetupCancelledException();
@@ -156,10 +157,8 @@ public final class ConsolePrompter implements Prompter {
 
 	@Override
 	public void title(String title) {
-		PrintWriter out = console.writer();
-		out.println(MARGIN + title);
-		out.println(Screen.rule());
-		out.flush();
+		print(MARGIN + title);
+		print(Screen.rule());
 	}
 
 	@Override
@@ -170,27 +169,23 @@ public final class ConsolePrompter implements Prompter {
 
 	@Override
 	public void info(String line, String... continuation) {
-		PrintWriter out = console.writer();
-		out.println(MARGIN + line);
+		print(MARGIN + line);
 		for (String more : continuation) {
-			out.println(MARGIN + more);
+			print(MARGIN + more);
 		}
-		out.flush();
 	}
 
 	@Override
 	public void error(String line, String... continuation) {
-		PrintWriter out = console.writer();
 		problem(line);
 		for (String more : continuation) {
-			out.println(INDENT + more);
+			print(INDENT + more);
 		}
-		out.flush();
 	}
 
 	@Override
 	public void success(String line) {
-		print(MARGIN + colored(GREEN, DONE + line));
+		write(MARGIN + colored(GREEN, Screen.printable(DONE + line)));
 	}
 
 	@Override
@@ -210,6 +205,11 @@ public final class ConsolePrompter implements Prompter {
 
 	@Override
 	public void print(String line) {
+		write(Screen.printable(line));
+	}
+
+	/** Prints a line as it is: a line that holds only printable text and the escape codes of the colors. */
+	private void write(String line) {
 		PrintWriter out = console.writer();
 		out.println(line);
 		out.flush();
@@ -217,7 +217,7 @@ public final class ConsolePrompter implements Prompter {
 
 	/** The line of a problem in the margin: the mark and the message, red on a terminal that shows colors. */
 	private void problem(String message) {
-		console.writer().println(MARGIN + colored(RED, PROBLEM + message));
+		write(MARGIN + colored(RED, Screen.printable(PROBLEM + message)));
 	}
 
 	/** The text in the color, then the default color again; the text alone when the console shows no colors. */
@@ -237,7 +237,7 @@ public final class ConsolePrompter implements Prompter {
 	 */
 	private String ask(String prompt) {
 		PrintWriter out = console.writer();
-		out.print(prompt);
+		out.print(Screen.printable(prompt));
 		out.flush();
 		String line = console.readLine();
 		if (line == null) {
@@ -253,9 +253,8 @@ public final class ConsolePrompter implements Prompter {
 
 	/** Prints each line of {@code text} indented under the question, so a help text with line breaks stays aligned. */
 	private void printIndented(String text) {
-		PrintWriter out = console.writer();
 		for (String line : text.split("\n")) {
-			out.println(INDENT + line);
+			print(INDENT + line);
 		}
 	}
 

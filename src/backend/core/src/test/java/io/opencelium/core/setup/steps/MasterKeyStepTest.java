@@ -225,6 +225,17 @@ class MasterKeyStepTest {
 	}
 
 	@Test
+	void runPrintsTheBatchWarningWithAQuestionMarkWhenTheDataDirectoryHasAControlCharacter() {
+		SetupContext batch = batch(Map.of(ValueKey.MASTER_KEY, "generate"));
+		batch.setDataDir(dataDir.resolve("oc\u001B[41mx"));
+
+		step().run(batch, prompter);
+		batch.filePlan().actions().getFirst().run();
+
+		assertThat(String.join("\n", standardError)).contains("oc?[41mx").doesNotContain("\u001B");
+	}
+
+	@Test
 	void runKeepsTheMasterKeyAndPlansNothingWhenDataDirHoldsOne() throws Exception {
 		String key = storeDataDirKey();
 		console.type("");
