@@ -59,6 +59,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   4. On each other platform, for example Linux or macOS, the environment variable `TERM` has no value or the value `dumb`.
 
   In each other case, the terminal shows colors.
+- **SW-61** Given a control character in a text, when the wizard prints the text, then it must show a `?` for the character. A control character is a character from U+0000 to U+001F, the character U+007F, or a character from U+0080 to U+009F. The rule applies to the screens and to standard error. A help text and a message on standard error keep their line feeds U+000A, so that their lines stay apart. In each other text, a line feed also shows as `?`, so a text cannot add a line under a status line. The cause of a failed ping in the start error follows the same rule. Thus a text from a MongoDB server or a setup file cannot change the screen. The wizard adds the escape codes of SW-59 after this replacement.
 
 ### MongoDB
 

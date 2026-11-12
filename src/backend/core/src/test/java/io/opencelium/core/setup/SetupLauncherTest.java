@@ -378,6 +378,41 @@ class SetupLauncherTest {
 	}
 
 	@Test
+	void launchShowsAControlCharacterOfAFailureAsAQuestionMark() {
+		OptionalInt exitCode = launcher().launch(new String[] {"install\u001B[2J"}, args -> {
+		});
+
+		assertThat(exitCode).hasValue(2);
+		assertThat(err.toString()).contains("Unknown command 'install?[2J'").doesNotContain("\u001B");
+	}
+
+	@Test
+	void launchShowsAControlCharacterOfAnUnknownSetupFileKeyAsAQuestionMark() throws IOException {
+		terminal = false;
+		Path file = Files.writeString(workingDir.resolve("setup-values.yml"), "\"da\\eta\": x\n");
+
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", file.toString()}, args -> {
+		});
+
+		assertThat(exitCode).hasValue(1);
+		assertThat(err.toString()).contains("Unknown key 'da?ta'").doesNotContain("\u001B");
+	}
+
+	@Test
+	void launchShowsAControlCharacterOfABadSetupFileValueAsAQuestionMark() throws IOException {
+		terminal = false;
+		Path blocker = Files.writeString(workingDir.resolve("blocker"), "a file where a directory is needed");
+		Path file = Files.writeString(workingDir.resolve("setup-values.yml"),
+				"data-dir: \"" + blocker + "/oc\\e[41mx\"\n");
+
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", file.toString()}, args -> {
+		});
+
+		assertThat(exitCode).hasValue(1);
+		assertThat(err.toString()).contains("Bad value: data-dir").contains("/oc?[41mx").doesNotContain("\u001B");
+	}
+
+	@Test
 	void launchReturnsZeroAndPrintsUsageWhenHelpIsGiven() {
 		AtomicReference<String[]> booted = new AtomicReference<>();
 

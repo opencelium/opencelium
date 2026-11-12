@@ -31,6 +31,10 @@ public final class Screen {
 		return MARGIN + RULE_CHAR.repeat(WIDTH - MARGIN.length());
 	}
 
+	public static String printable(String text) {
+		throw new UnsupportedOperationException();
+	}
+
 	/** {@code label} padded to the label column, or followed by one space when it is longer. */
 	static String padded(String label) {
 		return label + " ".repeat(Math.max(LABEL_WIDTH - label.length(), 1));
