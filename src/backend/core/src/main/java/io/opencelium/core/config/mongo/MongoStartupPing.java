@@ -41,7 +41,17 @@ public final class MongoStartupPing {
 
 	enum Kind { UNREACHABLE, AUTHENTICATION, OTHER }
 
+	/**
+	 * Why the ping failed. Each control character of the reason shows as {@code ?}: the reason can quote the error of
+	 * the server and the user name of the URI, and it reaches a terminal in the start error and in the setup wizard,
+	 * where an escape sequence could move the cursor, clear the screen or change the colors.
+	 */
 	record Failure(Kind kind, String reason) {
+
+		Failure {
+			reason = printable(reason);
+		}
+
 	}
 
 	public void verify(MongoConnection connection) {
@@ -91,6 +101,20 @@ public final class MongoStartupPing {
 				return Optional.of(new Failed(classify(ex, connection, client.getClusterDescription()), ex));
 			}
 		}
+	}
+
+	/**
+	 * {@code text} with each control character (U+0000 to U+001F, U+007F, U+0080 to U+009F) as {@code ?}. The setup
+	 * screens apply the same rule; the configuration does not depend on the setup packages, so it has its own copy.
+	 */
+	private static String printable(String text) {
+		char[] chars = text.toCharArray();
+		for (int i = 0; i < chars.length; i++) {
+			if (Character.isISOControl(chars[i])) {
+				chars[i] = '?';
+			}
+		}
+		return new String(chars);
 	}
 
 	/** A failure and the driver's exception, which the start keeps as the cause of its error. */

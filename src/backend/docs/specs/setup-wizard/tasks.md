@@ -196,11 +196,11 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 ## Task 13i: fix(core): replace control characters in the setup screens with ?
 - **Criteria:** SW-61
 - **Function:** The setup screens and standard error show each control character of a text as `?`. Thus a MongoDB error message, a typed path or a setup file value cannot clear the screen or change its colors, and the start error of a failed ping is safe too.
-- **Tests:** `ScreenTest`: printableReplacesEachControlCharacterWithAQuestionMark, printableKeepsPlainAndNonAsciiTextUnchanged; `ConsolePrompterTest`: errorShowsAnEscapeCharacterOfTheMessageAsAQuestionMark, errorShowsALineFeedOfTheMessageAsAQuestionMark, everyDisplayMethodShowsControlCharactersAsQuestionMarks, problemLineKeepsItsColorWhenTheMessageHasAnEscapeCharacter; `SetupLauncherTest`: launchShowsAControlCharacterOfAFailureAsAQuestionMark, launchShowsAControlCharacterOfAnUnknownSetupFileKeyAsAQuestionMark, launchShowsAControlCharacterOfABadSetupFileValueAsAQuestionMark; `MongoStartupPingTest`: classifyShowsAControlCharacterOfTheServerMessageAsAQuestionMark, classifyShowsAControlCharacterOfTheUserNameAsAQuestionMark. Changed for the new behavior: `ConsolePrompterTest`: printWritesAPlainLineUnchanged
+- **Tests:** `ScreenTest`: printableReplacesEachControlCharacterWithAQuestionMark, printableKeepsPlainAndNonAsciiTextUnchanged; `ConsolePrompterTest`: errorShowsAnEscapeCharacterOfTheMessageAsAQuestionMark, errorShowsALineFeedOfTheMessageAsAQuestionMark, everyDisplayMethodShowsControlCharactersAsQuestionMarks, problemLineKeepsItsColorWhenTheMessageHasAnEscapeCharacter; `SetupLauncherTest`: launchShowsAControlCharacterOfAFailureAsAQuestionMark, launchShowsAControlCharacterOfAnUnknownSetupFileKeyAsAQuestionMark, launchShowsAControlCharacterOfABadSetupFileValueAsAQuestionMark; `MongoStartupPingTest`: classifyShowsAControlCharacterOfTheServerMessageAsAQuestionMark, classifyShowsAControlCharacterOfTheUserNameAsAQuestionMark; `MasterKeyStepTest`: runPrintsTheBatchWarningWithAQuestionMarkWhenTheDataDirectoryHasAControlCharacter. Changed for the new behavior: `ConsolePrompterTest`: printWritesAPlainLineUnchanged
 - **Hand test:** 1. Run `java -jar oc-app.jar setup`. At the data directory question, type `/oc`, Ctrl+V, Esc, `[41mx/data` and Enter. 2. The problem line shows `/oc?[41mx/data` in red text, with no red background. 3. Write `data-dir: "/oc\e[41mx"` into `t.yml` and run `setup -f t.yml --batch`: the error on standard error shows `/oc?[41mx`.
 - **Size:** approximately 50 lines
 - **Depends on:** 13h
-- **Status:** in work
+- **Status:** done
 
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-05, SW-06, SW-19, SW-20, SW-21, SW-22, SW-23, SW-55, SW-56

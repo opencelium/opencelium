@@ -25,6 +25,7 @@ import io.opencelium.core.setup.values.SetupFile;
 import io.opencelium.core.setup.values.SetupFileTemplate;
 import io.opencelium.core.setup.prompt.ConsoleIo;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
+import io.opencelium.core.setup.prompt.Screen;
 import io.opencelium.core.setup.steps.SetupStep;
 
 import io.opencelium.core.setup.LaunchDecision.Kind;
@@ -155,7 +156,7 @@ public final class SetupLauncher {
 			decision = decide(args);
 		}
 		catch (SetupFailedException ex) {
-			err.println(ex.getMessage());
+			printFailure(ex.getMessage());
 			err.println();
 			err.print(USAGE);
 			err.flush();
@@ -241,7 +242,7 @@ public final class SetupLauncher {
 			values = decision.setupFile().map(SetupFile::load).orElse(SetupValues.NONE);
 		}
 		catch (SetupFailedException ex) {
-			err.println(ex.getMessage());
+			printFailure(ex.getMessage());
 			return OptionalInt.of(ex.exitCode());
 		}
 		var source = new ValueSource(values, decision.setupFile(), decision.batch());
@@ -260,7 +261,7 @@ public final class SetupLauncher {
 			return wizard.run(decision.reason());
 		}
 		catch (SetupFailedException ex) {
-			err.println(ex.getMessage());
+			printFailure(ex.getMessage());
 			return OptionalInt.of(ex.exitCode());
 		}
 		finally {
@@ -270,6 +271,17 @@ public final class SetupLauncher {
 			catch (IllegalStateException ex) {
 				// The shutdown has begun (Ctrl+C): the hook runs and prints the message.
 			}
+		}
+	}
+
+	/**
+	 * Prints a failure on standard error line by line: the message keeps its own line breaks, and each control
+	 * character in a line shows as {@code ?}, because the message can quote a value of the setup file, an argument
+	 * or the error of a server.
+	 */
+	private void printFailure(String message) {
+		for (String line : message.split("\n")) {
+			err.println(Screen.printable(line));
 		}
 	}
 

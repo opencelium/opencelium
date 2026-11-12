@@ -12,7 +12,8 @@ import io.opencelium.core.setup.SetupCancelledException;
  * production, a script in tests. Every question accepts {@code ?} for help and {@code q} to cancel the setup,
  * except the question for a secret, where each text is an answer.
  * The display methods carry the kind of a line (a title, a status, a box, a list), so the steps never know a
- * mark or a frame; the implementation draws them.
+ * mark or a frame; the implementation draws them. A control character in a text shows as {@code ?}, so a text from
+ * a server or a file cannot change the screen; only a help text keeps its line breaks.
  */
 public interface Prompter {
 
@@ -79,7 +80,7 @@ public interface Prompter {
 	/** A titled list of items. */
 	void list(String title, List<String> items);
 
-	/** Prints one line as it is; the caller indents it. */
+	/** Prints one line; the caller indents it. */
 	void print(String line);
 
 }
