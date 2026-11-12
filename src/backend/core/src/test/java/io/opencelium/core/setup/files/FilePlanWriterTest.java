@@ -126,15 +126,39 @@ class FilePlanWriterTest {
 	}
 
 	@Test
-	void writeLeavesNoBackupWhenReplacedFilesAreWritten() throws IOException {
+	void writeKeepsOldFileAsBak() throws IOException {
+		// The second run of the setup: the files of the first run exist, and an older backup too.
 		Files.createDirectory(tmp.resolve("config"));
 		Files.writeString(tmp.resolve("config/application.yml"), "old\n");
-		Files.writeString(tmp.resolve("config/opencelium.env"), "old\n");
+		Files.writeString(tmp.resolve("config/application.yml.bak"), "older\n");
+		Files.writeString(tmp.resolve("config/opencelium.env"), "OLD=1\n");
 
-		writer.write(plan(yml("new\n"), env("new\n")));
+		writer.write(plan(yml("new\n"), env("NEW=1\n")));
 
 		assertThat(tmp.resolve("config/application.yml")).content().isEqualTo("new\n");
-		assertThat(entries(tmp.resolve("config"))).containsExactlyInAnyOrder("application.yml", "opencelium.env");
+		assertThat(tmp.resolve("config/application.yml.bak")).content().isEqualTo("old\n");
+		assertThat(tmp.resolve("config/opencelium.env.bak")).content().isEqualTo("OLD=1\n");
+		assertThat(entries(tmp.resolve("config"))).containsExactlyInAnyOrder("application.yml", "application.yml.bak",
+				"opencelium.env", "opencelium.env.bak");
+		assertThat(warnings).isEmpty();
+	}
+
+	@Test
+	void writeMakesTheBakOwnerOnlyWhenTheOldFileIsReadableByOthers() throws IOException {
+		assumeTrue(FileSystems.getDefault().supportedFileAttributeViews().contains("posix"), "POSIX permissions");
+		// Files written by hand with the default umask; the old env file holds the old database password.
+		Files.createDirectory(tmp.resolve("config"));
+		Files.writeString(tmp.resolve("config/application.yml"), "old\n");
+		Files.writeString(tmp.resolve("config/opencelium.env"), "OLD=1\n");
+		for (String name : List.of("application.yml", "opencelium.env")) {
+			Path old = tmp.resolve("config").resolve(name);
+			Files.setPosixFilePermissions(old, PosixFilePermissions.fromString("rw-r--r--"));
+		}
+
+		writer.write(plan(yml("new\n"), env("NEW=1\n")));
+
+		assertThat(permissions(tmp.resolve("config/application.yml.bak"))).isEqualTo("rw-------");
+		assertThat(permissions(tmp.resolve("config/opencelium.env.bak"))).isEqualTo("rw-------");
 		assertThat(warnings).isEmpty();
 	}
 

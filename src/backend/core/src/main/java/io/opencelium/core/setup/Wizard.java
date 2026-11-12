@@ -1,17 +1,24 @@
 package io.opencelium.core.setup;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.SequencedMap;
 import java.util.function.Consumer;
+import java.util.function.IntPredicate;
 
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.FilePlan;
 import io.opencelium.core.setup.files.FilePlanWriter;
 import io.opencelium.core.setup.files.SetupWriteException;
 import io.opencelium.core.setup.prompt.Prompter;
+import io.opencelium.core.setup.steps.AdminStep;
 import io.opencelium.core.setup.steps.DataDirStep;
 import io.opencelium.core.setup.steps.MasterKeyStep;
 import io.opencelium.core.setup.steps.MongoStep;
@@ -22,17 +29,22 @@ import io.opencelium.core.setup.steps.SummaryStep;
 /**
  * The setup: the banner, then the steps in order, each one under a title line with its number, the step count and its
  * name, and skipped when it does not apply; then the write of the files and the actions that the steps planned, for
- * example the backup question of a new master key; then the start of the application. The steps take their values
- * from the value source: the setup file, else the prompter. A cancel at any question ends the run with "nothing
- * written" and exit code 0. A missing or bad value in batch mode, and a write failure, end it with a
- * {@link SetupFailedException} that the launcher prints on standard error, and start nothing. The dialogue goes
- * through the prompter, never through a logger: before Spring starts the log system is not configured, and a
- * password must never reach a log.
+ * example the backup question of a new master key; then the start of the application, and the login box when the
+ * application answers on its port. The steps take their values from the value source: the setup file, else the
+ * prompter. A cancel at any question ends the run with "nothing written" and exit code 0. A missing or bad value in
+ * batch mode, and a write failure, end it with a {@link SetupFailedException} that the launcher prints on standard
+ * error, and start nothing. The dialogue goes through the prompter, never through a logger: before Spring starts the
+ * log system is not configured, and a password must never reach a log.
  */
 public final class Wizard {
 
 	/** After the name of a step that does not apply: its title line stays, so the numbers have no gap. */
 	private static final String SKIPPED = " (skipped)";
+
+	/** The host in the URL of the login box: the application starts on this host. */
+	private static final String HOST = "localhost";
+
+	private static final Duration PROBE_TIMEOUT = Duration.ofMillis(500);
 
 	private final Prompter prompter;
 
@@ -44,6 +56,8 @@ public final class Wizard {
 
 	private final Optional<String> version;
 
+	private final IntPredicate portListens;
+
 	private volatile boolean written;
 
 	/**
@@ -54,16 +68,25 @@ public final class Wizard {
 	 */
 	public Wizard(Prompter prompter, ValueSource values, List<SetupStep> steps,
 			Consumer<SequencedMap<String, String>> start, Optional<String> version) {
+		this(prompter, values, steps, start, version, Wizard::portListensOnThisHost);
+	}
+
+	/**
+	 * @param portListens whether the application answers on a port of this host, after the start
+	 */
+	public Wizard(Prompter prompter, ValueSource values, List<SetupStep> steps,
+			Consumer<SequencedMap<String, String>> start, Optional<String> version, IntPredicate portListens) {
 		this.prompter = Objects.requireNonNull(prompter, "prompter");
 		this.values = Objects.requireNonNull(values, "values");
 		this.steps = List.copyOf(steps);
 		this.start = Objects.requireNonNull(start, "start");
 		this.version = Objects.requireNonNull(version, "version");
+		this.portListens = Objects.requireNonNull(portListens, "portListens");
 	}
 
 	/** The steps of a full setup, in the order the user sees them; the summary writes to {@code locations}. */
 	public static List<SetupStep> standardSteps(ConfigLocations locations) {
-		return List.of(new DataDirStep(), new PortStep(), new MongoStep(), new MasterKeyStep(),
+		return List.of(new DataDirStep(), new PortStep(), new MongoStep(), new MasterKeyStep(), new AdminStep(),
 				new SummaryStep(locations));
 	}
 
@@ -121,6 +144,7 @@ public final class Wizard {
 		prompter.progress("Starting OpenCelium...");
 		prompter.print("");
 		start.accept(context.environment());
+		printLogin(context);
 		return OptionalInt.empty();
 	}
 
@@ -130,6 +154,38 @@ public final class Wizard {
 	 */
 	public boolean hasWritten() {
 		return written;
+	}
+
+	/**
+	 * The login box, after the start and only when the application answers on its port: the URL of the setup in the
+	 * browser, and the admin username and the admin password of the admin that the start made. After a skipped admin
+	 * step the box shows the URL only, because the admin can have another admin password. The box goes to the
+	 * console, never to a logger.
+	 */
+	private void printLogin(SetupContext context) {
+		OptionalInt port = context.port();
+		if (port.isEmpty() || !portListens.test(port.getAsInt())) {
+			return;
+		}
+		var rows = new LinkedHashMap<String, String>();
+		rows.put("URL", "http://" + HOST + ":" + port.getAsInt() + "/setup");
+		context.adminUsername().ifPresent(username -> {
+			rows.put("Admin username", username);
+			rows.put("Admin password", SetupContext.FIRST_ADMIN_PASSWORD);
+		});
+		prompter.print("");
+		prompter.box("Log in to OpenCelium", rows);
+	}
+
+	/** Whether a server on this host accepts a TCP connection on the port within half a second. */
+	private static boolean portListensOnThisHost(int port) {
+		try (var socket = new Socket()) {
+			socket.connect(new InetSocketAddress(HOST, port), (int) PROBE_TIMEOUT.toMillis());
+			return true;
+		}
+		catch (IOException ex) {
+			return false;
+		}
 	}
 
 	/**

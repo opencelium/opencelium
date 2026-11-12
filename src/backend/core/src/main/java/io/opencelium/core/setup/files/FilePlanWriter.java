@@ -23,20 +23,23 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  * Writes a file plan so that a failure never leaves a half-written configuration. Every file is first staged as
  * {@code <target>.tmp-<random>} in its target directory, with its content and permissions; only then is each
  * staged file moved onto its target in one atomic step. A file that is in the place of a target is renamed to
- * {@code <target>.bak-<random>} just before that move and deleted after the last move, so the rollback can put it
- * back as it was, with its permissions. A missing target directory is made. Then the actions of the plan run in
- * order, before the replaced files are deleted. When anything fails, the writer undoes the actions that ran, the
- * failed one included and the last one first, while the files are still in place. Then it deletes the staged files,
- * puts back the files it replaced, deletes the other targets this run moved and the directories it made that are
- * empty again, and throws {@link SetupWriteException} naming the target or the action that failed. A cancel at a
- * question of an action rolls back in the same way and stays a cancel, so the wizard can say that nothing was
- * written.
+ * {@code <target>.bak-<random>} just before that move, so the rollback can put it back as it was, with its
+ * permissions. A missing target directory is made. Then the actions of the plan run in order. After the last action
+ * each replaced file becomes {@code <target>.bak}, readable by its owner only, in the place of an older one: a batch
+ * run has no confirmation, and a file that an operator edited by hand must not vanish. When anything fails, the
+ * writer undoes the actions that ran, the failed one included and the last one first, while the files are still in
+ * place. Then it deletes the staged files, puts back the files it replaced, deletes the other targets this run moved
+ * and the directories it made that are empty again, and throws {@link SetupWriteException} naming the target or the
+ * action that failed. A cancel at a question of an action rolls back in the same way and stays a cancel, so the
+ * wizard can say that nothing was written.
  */
 public final class FilePlanWriter {
 
 	private static final String STAGE_INFIX = ".tmp-";
 
 	private static final String BACKUP_INFIX = ".bak-";
+
+	private static final String BACKUP_SUFFIX = ".bak";
 
 	static final String NO_POSIX_WARNING = "This file system has no POSIX permissions; the files keep the default"
 			+ " permissions.";
@@ -111,7 +114,7 @@ public final class FilePlanWriter {
 			run.undoFiles();
 			throw ex;
 		}
-		run.removeBackups();
+		run.keepBackups();
 	}
 
 	/** What one write has done so far, so the rollback knows what to undo. */
@@ -163,12 +166,29 @@ public final class FilePlanWriter {
 			backups.put(target, backup);
 		}
 
-		/** After the last move: a backup that cannot be deleted is reported, because it holds the previous content. */
-		private void removeBackups() {
+		/**
+		 * After the last action: each replaced file becomes {@code <target>.bak}, readable by its owner only before it
+		 * gets that name. The old env file holds the old database password, and a file written by hand can be readable
+		 * by everyone. A backup that cannot be renamed stays where it is, and the warning names it.
+		 */
+		private void keepBackups() {
 			backups.forEach((target, backup) -> {
-				if (!delete(backup)) {
-					warnings.accept("Cannot delete the previous " + target + ", kept at " + backup
-							+ "; please delete it by hand.");
+				Path kept = target.resolveSibling(target.getFileName() + BACKUP_SUFFIX);
+				if (posixPermissions) {
+					try {
+						Files.setPosixFilePermissions(backup, PlannedFile.OWNER_ONLY);
+					}
+					catch (IOException ex) {
+						warnings.accept("Cannot make the previous " + target + " readable by its owner only; please"
+								+ " check the permissions of " + kept + ".");
+					}
+				}
+				try {
+					Files.move(backup, kept, ATOMIC_MOVE, REPLACE_EXISTING);
+				}
+				catch (IOException ex) {
+					warnings.accept("Cannot rename the previous " + target + " to " + kept + "; it is kept at " + backup
+							+ ".");
 				}
 			});
 		}

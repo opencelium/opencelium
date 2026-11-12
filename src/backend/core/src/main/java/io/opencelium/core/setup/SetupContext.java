@@ -26,6 +26,12 @@ public final class SetupContext {
 	 */
 	public static final DeploymentMode DEPLOYMENT_MODE = DeploymentMode.SELF_HOST;
 
+	/**
+	 * The admin password of the admin that the setup makes. The product fixes it, with no forced change: the admin
+	 * logs in right after the setup and changes it in the browser. The console shows it; a log never does.
+	 */
+	public static final String FIRST_ADMIN_PASSWORD = "1234";
+
 	private final ValueSource values;
 
 	private final FilePlan filePlan = new FilePlan();
@@ -39,6 +45,8 @@ public final class SetupContext {
 	private String masterKeySource;
 
 	private Path masterKeyFile;
+
+	private String adminUsername;
 
 	private final SequencedMap<String, String> environment = new LinkedHashMap<>();
 
@@ -104,6 +112,15 @@ public final class SetupContext {
 	public void setMasterKey(String source, Optional<Path> file) {
 		this.masterKeySource = Objects.requireNonNull(source, "source");
 		this.masterKeyFile = file.orElse(null);
+	}
+
+	/** The username of the admin that the start makes; empty when the admin step did not run or did not apply. */
+	public Optional<String> adminUsername() {
+		return Optional.ofNullable(adminUsername);
+	}
+
+	public void setAdminUsername(String adminUsername) {
+		this.adminUsername = Objects.requireNonNull(adminUsername, "adminUsername");
 	}
 
 	/** The entries of the env file, in the order the steps added them: the secrets application.yml names. */

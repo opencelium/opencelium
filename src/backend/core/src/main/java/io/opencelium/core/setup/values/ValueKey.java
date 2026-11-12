@@ -15,7 +15,9 @@ public enum ValueKey {
 
 	MONGO_URI("mongo-uri"),
 
-	MASTER_KEY("master-key");
+	MASTER_KEY("master-key"),
+
+	ADMIN_USERNAME("admin-username");
 
 	private final String word;
 
