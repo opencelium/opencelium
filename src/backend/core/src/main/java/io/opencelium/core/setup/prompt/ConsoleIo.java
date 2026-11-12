@@ -23,6 +23,12 @@ public interface ConsoleIo {
 	PrintWriter writer();
 
 	/**
+	 * Whether the lines can carry color: a terminal that draws the escape codes for colors. A file, a pipe and a
+	 * terminal that prints those codes as text get plain lines, so a log never holds an escape code.
+	 */
+	boolean showsColors();
+
+	/**
 	 * The console of this process. Without one (a pipe, a service) the output goes to standard output and a read
 	 * fails; the wizard then runs in batch mode and never reads.
 	 */

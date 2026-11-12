@@ -184,6 +184,15 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 14
 - **Status:** done
 
+## Task 13h: feat(core): show a result line in green and a problem line in red
+- **Criteria:** SW-59, SW-60
+- **Function:** On a terminal that shows colors, the line "OK MongoDB answers at ..." is green, and each line that starts with `!` is red. A file, a pipe, `NO_COLOR` and a terminal without colors get the same lines without an escape code.
+- **Tests:** `ConsolePrompterTest`: successPrintsTheLineInGreenWhenTheConsoleShowsColors, errorPrintsTheMarkLineInRedAndTheContinuationWithoutColorWhenTheConsoleShowsColors, badAnswersGetARedProblemLineWhenTheConsoleShowsColors, statusLinesHaveNoEscapeCodeWhenTheConsoleShowsNoColors; `SystemConsoleIoTest`: showsColorsReturnsTrueOnATerminalWithATermOutsideWindows, showsColorsReturnsFalseWhenStandardOutputIsNotATerminal, showsColorsReturnsFalseWhenNoColorHasAValue, showsColorsReturnsTrueWhenNoColorIsEmpty, showsColorsReturnsFalseWhenTermIsDumbOrAbsent, showsColorsReturnsTrueOnWindowsOnlyInWindowsTerminal
+- **Hand test:** 1. With the local MongoDB, run `java -jar oc-app.jar setup` and select the local server: the line "OK MongoDB answers at ..." is green. 2. Type `x` at a menu: the line "! Please enter a number ..." is red. 3. Run `NO_COLOR=1 java -jar oc-app.jar setup` and select the local server: the same lines without color. 4. In a new directory, run `setup --template > t.yml`, then `setup -f t.yml --batch > out.log`: `grep -c $'\e' out.log` prints 0.
+- **Size:** approximately 70 lines
+- **Depends on:** 9
+- **Status:** in work
+
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-05, SW-06, SW-19, SW-20, SW-21, SW-22, SW-23, SW-55, SW-56
 - **Function:** Before the menu, the master key step runs the guard (SW-23) and tells the purpose of the master key (SW-55). The menu offers generate or keep, the variable `OC_MASTER_KEY` and a key file, each with its help text (SW-19, SW-56). Generate adds an action to the file plan that writes the key file after the other files and then asks the backup question (SW-05, SW-06, SW-20). The variable and the key file follow SW-21 and SW-22.

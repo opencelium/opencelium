@@ -3,6 +3,7 @@ package io.opencelium.core.setup.prompt;
 import java.io.Console;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * {@code System.console()}, looked up at each use. Without a console the writer is standard output, so the
@@ -34,6 +35,15 @@ final class SystemConsoleIo implements ConsoleIo {
 	public PrintWriter writer() {
 		Console console = System.console();
 		return console != null ? console.writer() : standardOut;
+	}
+
+	@Override
+	public boolean showsColors() {
+		throw new UnsupportedOperationException();
+	}
+
+	static boolean showsColors(boolean terminal, Map<String, String> environment, String osName) {
+		throw new UnsupportedOperationException();
 	}
 
 	private static Console console() {
