@@ -159,7 +159,7 @@ class AdminStepTest {
 		assertThat(new AdminStep(connection -> false).questions()).singleElement().satisfies(question -> {
 			assertThat(question.key().word()).isEqualTo("admin-username");
 			assertThat(question.defaultValue()).isEqualTo("admin");
-			assertThat(question.help()).contains("1234");
+			assertThat(question.help()).contains("1234", "/login");
 		});
 	}
 

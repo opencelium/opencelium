@@ -57,7 +57,7 @@ STE permits technical names and technical verbs that are standard in the industr
 - Terminal: terminal, console, shell, stdin, standard input, standard output, standard error, piped input, SSH, Enter, Ctrl+C, terminal library, scripted console, argument (command line), progress bar, backtick, backslash, carriage return, line feed, whitespace, echo (of the typed characters), escape code, control character, bidi control, Windows Terminal.
 - Host: host, platform, CPU, Linux, macOS, Windows, Ubuntu, Debian, x86_64, arm64, systemd, unit file, launchd, plist, `sc.exe`, sudo, root, system user, service, PATH, permissions, owner, data directory, env file, tarball, license, Docker, Docker Compose, image (Docker image), layer (image layer), VM (virtual machine), distribution, working directory, `mongod`, `mongosh`, browser, backup, upgrade, migration, journal (of systemd).
 - Data (2): URI, URL, byte, MB (megabyte), driver, repository, database dump, port (network), host name, IP address, IPv6 address, route, header (HTTP), issuer, percent-encoding.
-- Access control (2): admin (administrator), username, password, login (noun).
+- Access control (2): admin (administrator), default admin, username, password, login (noun).
 - Software structure (2): seam, runner (application runner, command runner), singleton, Spring context, logger, log level.
 - Test: unit test, slice test, integration test, full-application test, end-to-end test, hand test, fake, fixture, test matrix, mock.
 - Products and tools (2): SnakeYAML, Logback, YAML, Jackson, JDK, JVM, MockMvc, Spring Boot Actuator, Tomcat.

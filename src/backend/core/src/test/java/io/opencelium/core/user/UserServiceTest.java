@@ -172,6 +172,14 @@ class UserServiceTest {
 	}
 
 	@Test
+	void anyUserExistsIsTrueOnlyForATenantWithAUser() {
+		service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
+
+		assertThat(service.anyUserExists(TENANT)).isTrue();
+		assertThat(service.anyUserExists(OTHER)).isFalse();
+	}
+
+	@Test
 	void changePasswordStoresTheNewHashAndClearsTheChangeRequirement() {
 		UserCreated created = service.createAdmin(command(TENANT, ADMIN, "Generated-Pass-123", true));
 		char[] newPassword = "Chosen-Password-9".toCharArray();

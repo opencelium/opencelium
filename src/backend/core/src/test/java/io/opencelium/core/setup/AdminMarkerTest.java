@@ -22,9 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * The admin marker is an action of the file plan: after the files are written, it stores the setup state
- * {@code PENDING_ADMIN} with the admin username, with the plain driver and without a Spring context, because the
- * wizard writes it before the application starts. A rollback of the plan puts back what was there before.
+ * The admin marker is an action of the file plan: after the files are written, it stores the admin username in the
+ * collection {@code admin_marker}, with the plain driver and without a Spring context, because the wizard writes it
+ * before the application starts. A rollback of the plan puts back what was there before.
  */
 @ExtendWith(LocalMongo.Cleanup.class)
 class AdminMarkerTest {
@@ -34,21 +34,17 @@ class AdminMarkerTest {
 	private static final MongoConnection CONNECTION = StaticMongoConnectionResolver.parseUri(URI);
 
 	@BeforeEach
-	void emptySetupStateCollection() {
+	void emptyMarkerCollection() {
 		try (MongoClient client = client()) {
-			setupState(client).drop();
+			markers(client).drop();
 		}
 	}
 
 	@Test
-	void runStoresStatePendingAdminWithUsername() {
+	void runStoresTheMarkerWithTheUsername() {
 		new AdminMarker(CONNECTION, "root").run();
 
-		Document state = state();
-		assertThat(state).isNotNull();
-		assertThat(state.getString("_id")).isEqualTo("self-host");
-		assertThat(state.getString("state")).isEqualTo("PENDING_ADMIN");
-		assertThat(state.getString("adminUsername")).isEqualTo("root");
+		assertThat(marker()).isEqualTo(new Document("_id", "self-host").append("adminUsername", "root"));
 	}
 
 	@Test
@@ -61,25 +57,28 @@ class AdminMarkerTest {
 	}
 
 	@Test
-	void undoRemovesTheMarkerWhenNoSetupStateExistedBefore() {
+	void undoRemovesTheMarkerWhenNoMarkerExistedBefore() {
 		var marker = new AdminMarker(CONNECTION, "root");
 		marker.run();
+		assertThat(marker()).containsEntry("adminUsername", "root");
 
 		assertThat(marker.undo()).isEmpty();
-		assertThat(state()).isNull();
+		assertThat(marker()).isNull();
 	}
 
 	@Test
-	void undoPutsBackTheSetupStateThatExistedBefore() {
-		Document before = new Document("_id", "self-host").append("state", "REQUIRED");
+	void undoPutsBackTheMarkerThatExistedBefore() {
+		// The marker of an earlier setup run whose start did not run yet.
+		Document before = new Document("_id", "self-host").append("adminUsername", "admin");
 		try (MongoClient client = client()) {
-			setupState(client).insertOne(before);
+			markers(client).insertOne(before);
 		}
 		var marker = new AdminMarker(CONNECTION, "root");
 		marker.run();
+		assertThat(marker()).containsEntry("adminUsername", "root");
 
 		assertThat(marker.undo()).isEmpty();
-		assertThat(state()).isEqualTo(before);
+		assertThat(marker()).isEqualTo(before);
 	}
 
 	@Test
@@ -94,9 +93,9 @@ class AdminMarkerTest {
 				.doesNotContain("s3cret");
 	}
 
-	private static Document state() {
+	private static Document marker() {
 		try (MongoClient client = client()) {
-			return setupState(client).find(new Document("_id", "self-host")).first();
+			return markers(client).find(new Document("_id", "self-host")).first();
 		}
 	}
 
@@ -106,8 +105,8 @@ class AdminMarkerTest {
 				.applyToClusterSettings(cluster -> cluster.serverSelectionTimeout(5, TimeUnit.SECONDS)).build());
 	}
 
-	private static MongoCollection<Document> setupState(MongoClient client) {
-		return client.getDatabase(LocalMongo.databaseFor(AdminMarkerTest.class)).getCollection("setup_state");
+	private static MongoCollection<Document> markers(MongoClient client) {
+		return client.getDatabase(LocalMongo.databaseFor(AdminMarkerTest.class)).getCollection("admin_marker");
 	}
 
 }
