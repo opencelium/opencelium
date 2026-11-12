@@ -69,8 +69,8 @@ public final class SetupFile {
 		for (Map.Entry<?, ?> entry : entries.entrySet()) {
 			String word = String.valueOf(entry.getKey());
 			ValueKey key = ValueKey.parse(word).orElseThrow(() -> SetupFailedException.failure(
-					"Unknown key '" + word + "' in " + file + ". Known keys: " + ValueKey.words() + ".\n"
-							+ TEMPLATE_HINT));
+					"Unknown key '" + word + "' in " + file + ". Known keys: " + ValueKey.words() + ".",
+					TEMPLATE_HINT));
 			Object value = entry.getValue();
 			if (value instanceof Collection || value instanceof Map) {
 				throw SetupFailedException.failure("Bad value: " + key.word() + " in " + file

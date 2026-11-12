@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import io.opencelium.core.config.TerminalText;
 import io.opencelium.core.secrets.keys.RootKeyGenerator;
 import io.opencelium.core.secrets.keys.RootKeyResolver;
 import io.opencelium.core.setup.SetupContext;
@@ -23,7 +24,6 @@ import io.opencelium.core.setup.files.SetupActionException;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.Choice;
 import io.opencelium.core.setup.prompt.Prompter;
-import io.opencelium.core.setup.prompt.Screen;
 import io.opencelium.core.setup.values.Question;
 import io.opencelium.core.setup.values.ValueKey;
 
@@ -352,7 +352,7 @@ public final class MasterKeyStep implements SetupStep {
 			if (batch) {
 				// The path comes from the setup file, so a control character in it shows as ? on standard error too.
 				for (String line : List.of("Back up the master key now: " + path, PURPOSE.get(3), PURPOSE.get(4))) {
-					standardError.accept(Screen.printable(line));
+					standardError.accept(TerminalText.printable(line));
 				}
 				return;
 			}

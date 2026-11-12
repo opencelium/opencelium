@@ -209,7 +209,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Write `"da\nta": x` into `t.yml` and run `setup -f t.yml --batch`: standard error shows `Unknown key 'da?ta'` on 1 line. 2. Write `data-dir: "/tmp/oc\u202Ex"` into `t.yml` and run it again: the error names U+202E, and the path is not in the output.
 - **Size:** approximately 90 lines
 - **Depends on:** 13i
-- **Status:** in work
+- **Status:** done
 
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-05, SW-06, SW-19, SW-20, SW-21, SW-22, SW-23, SW-55, SW-56

@@ -23,6 +23,7 @@ import org.bson.Document;
 
 import io.opencelium.core.config.BootstrapProperties;
 import io.opencelium.core.config.BootstrapPropertyException;
+import io.opencelium.core.config.TerminalText;
 
 /**
  * Checks MongoDB once at startup and stops the application when it cannot be used: the server must answer, and the
@@ -49,7 +50,7 @@ public final class MongoStartupPing {
 	record Failure(Kind kind, String reason) {
 
 		Failure {
-			reason = printable(reason);
+			reason = TerminalText.printable(reason);
 		}
 
 	}
@@ -101,20 +102,6 @@ public final class MongoStartupPing {
 				return Optional.of(new Failed(classify(ex, connection, client.getClusterDescription()), ex));
 			}
 		}
-	}
-
-	/**
-	 * {@code text} with each control character (U+0000 to U+001F, U+007F, U+0080 to U+009F) as {@code ?}. The setup
-	 * screens apply the same rule; the configuration does not depend on the setup packages, so it has its own copy.
-	 */
-	private static String printable(String text) {
-		char[] chars = text.toCharArray();
-		for (int i = 0; i < chars.length; i++) {
-			if (Character.isISOControl(chars[i])) {
-				chars[i] = '?';
-			}
-		}
-		return new String(chars);
 	}
 
 	/** A failure and the driver's exception, which the start keeps as the cause of its error. */

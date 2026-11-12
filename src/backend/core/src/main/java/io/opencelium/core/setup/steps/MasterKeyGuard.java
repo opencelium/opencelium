@@ -76,7 +76,7 @@ public final class MasterKeyGuard {
 		}
 		if (dataKeys && found.isEmpty()) {
 			Path dataDirKey = dataDir.resolve(RootKeyResolver.DATA_DIR_FILE_NAME);
-			throw SetupFailedException.failure(KeyStartupException.RESTORE_OR_RESET + "\n\nMongoDB at "
+			throw SetupFailedException.failure(KeyStartupException.RESTORE_OR_RESET, "", "MongoDB at "
 					+ connection.redacted() + " holds encrypted data keys, but no master key was found: "
 					+ RootKeyResolver.ENV_VARIABLE + " is not set, and " + dataDirKey + " does not exist. Set "
 					+ RootKeyResolver.ENV_VARIABLE + " to the original master key, or copy the original key file to "

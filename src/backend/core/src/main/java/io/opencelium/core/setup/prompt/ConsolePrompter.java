@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.SequencedMap;
 import java.util.function.Function;
 
+import io.opencelium.core.config.TerminalText;
 import io.opencelium.core.setup.SetupCancelledException;
 
 /**
@@ -138,7 +139,7 @@ public final class ConsolePrompter implements Prompter {
 	public String secret(String question) {
 		PrintWriter out = console.writer();
 		while (true) {
-			String line = console.readLineWithoutEcho(Screen.printable(questionLine(question, HIDDEN)));
+			String line = console.readLineWithoutEcho(TerminalText.printable(questionLine(question, HIDDEN)));
 			if (line == null) {
 				out.println();
 				throw new SetupCancelledException();
@@ -185,7 +186,7 @@ public final class ConsolePrompter implements Prompter {
 
 	@Override
 	public void success(String line) {
-		write(MARGIN + colored(GREEN, Screen.printable(DONE + line)));
+		write(MARGIN + colored(GREEN, TerminalText.printable(DONE + line)));
 	}
 
 	@Override
@@ -205,7 +206,7 @@ public final class ConsolePrompter implements Prompter {
 
 	@Override
 	public void print(String line) {
-		write(Screen.printable(line));
+		write(TerminalText.printable(line));
 	}
 
 	/** Prints a line as it is: a line that holds only printable text and the escape codes of the colors. */
@@ -217,7 +218,7 @@ public final class ConsolePrompter implements Prompter {
 
 	/** The line of a problem in the margin: the mark and the message, red on a terminal that shows colors. */
 	private void problem(String message) {
-		write(MARGIN + colored(RED, Screen.printable(PROBLEM + message)));
+		write(MARGIN + colored(RED, TerminalText.printable(PROBLEM + message)));
 	}
 
 	/** The text in the color, then the default color again; the text alone when the console shows no colors. */
@@ -237,7 +238,7 @@ public final class ConsolePrompter implements Prompter {
 	 */
 	private String ask(String prompt) {
 		PrintWriter out = console.writer();
-		out.print(Screen.printable(prompt));
+		out.print(TerminalText.printable(prompt));
 		out.flush();
 		String line = console.readLine();
 		if (line == null) {

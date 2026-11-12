@@ -77,7 +77,7 @@ public final class ValueSource {
 			return given;
 		}
 		if (batch) {
-			throw SetupFailedException.failure("Missing value: " + key + inFile() + "\n" + SetupFile.TEMPLATE_HINT);
+			throw SetupFailedException.failure("Missing value: " + key + inFile(), SetupFile.TEMPLATE_HINT);
 		}
 		return Optional.empty();
 	}
