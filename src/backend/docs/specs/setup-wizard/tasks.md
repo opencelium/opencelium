@@ -218,7 +218,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Run `setup` on a database that holds an admin: the box shows the URL and "exists in the database". 2. Start the jar: the log has no line "Using generated security password".
 - **Size:** approximately 20 lines
 - **Depends on:** 15a
-- **Status:** in work
+- **Status:** done
 
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-05, SW-06, SW-19, SW-20, SW-21, SW-22, SW-23, SW-55, SW-56
