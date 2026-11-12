@@ -136,6 +136,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - **SW-42** Given the admin marker, when the application starts, then it must make the admin and delete the marker. The marker holds the admin username of the admin step. Each process that starts the application does this: the wizard process or the service.
 - **SW-43** Given a failed first start, when the application starts again, then it must find the marker and make the admin. When a start stops after it makes the admin, the marker stays. The next start deletes the marker and makes no second admin.
 - **SW-63** Given no admin marker and no OpenCelium user, when the application starts, then it must make the default admin. The default admin has the admin username `admin` and the admin password `1234` of SW-24. The log names the admin username and the admin login page `/login`, but not the admin password. A database with an OpenCelium user and no admin gets no default admin: the user runs `setup`, and the admin step makes the admin. In the cloud mode the start makes no default admin.
+- **SW-64** Given a start, when a tester reads the log, then it must show no Spring Security password. The application makes no Spring Security user, so only an OpenCelium user can log in.
 - **SW-26** Given a secret, when the wizard is complete, then no log, journal or leftover temporary file must hold it. The secrets are the master key and the database password. The summary and each message mask the database password.
 
 ### Service registration
@@ -162,7 +163,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
 ### Handover to the browser
 
-- **SW-32** Given a complete wizard, when the port listens, then the wizard process must print a terminal box. The box shows the URL `http://<host>:<port>/login` of the admin login page, the admin username and the admin password `1234`. With the service, the wizard prints it, not the service. When the wizard skips the admin step (SW-37), the box shows the URL only. The admin password can be different from `1234`.
+- **SW-32** Given a complete wizard, when the port listens, then the wizard process must print a terminal box. The box shows the URL `http://<host>:<port>/login` of the admin login page, the admin username and the admin password `1234`. With the service, the wizard prints it, not the service. When the wizard skips the admin step (SW-37), the box shows the URL and says that an admin exists in the database. It then shows no admin username and no admin password, because the admin password can be different from `1234`.
 - **SW-37** Given an admin that exists, when the user runs `setup`, then the wizard must skip the admin step. It offers only the steps that still apply: the MongoDB URI and the service.
 
 ### Non-interactive install
