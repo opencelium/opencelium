@@ -42,6 +42,12 @@ export type MethodTestResult = {
 	connectorErrors: ConnectorError[];
 };
 
+export type MethodCurlRequest = Omit<MethodTestRequest, 'confirmWrite'>;
+
+// `curl` is null when a connector's data could not be read. The command holds the
+// connectors' real credentials, unmasked, so it runs as is.
+export type MethodCurlResult = { curl: string | null; connectorErrors: ConnectorError[] };
+
 // What the response panel shows. A remote 4xx/5xx is still `sent`: the call went
 // through and its answer is the test result.
 export type PlaygroundResult =
@@ -49,5 +55,5 @@ export type PlaygroundResult =
 	| { kind: 'connectorErrors'; errors: ConnectorError[] }
 	| { kind: 'failed'; message: string | null };
 
-// The request as the playground expects it to go out, built locally for the URL bar and cURL.
+// The request as the playground expects it to go out, built locally for the URL bar preview.
 export type PlaygroundPreviewRequest = { url: string; method: string; headers: Record<string, string>; body: unknown };

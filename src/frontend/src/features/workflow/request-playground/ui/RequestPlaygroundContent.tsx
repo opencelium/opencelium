@@ -7,6 +7,7 @@ import type { WorkflowMethodConfig } from '../../types/request-config.types';
 import type { WorkflowNodeModel } from '../../types/workflow.types';
 import { ensureMethodConfig } from '../../utils/requestConfig';
 import type { PlaygroundSession } from '../hooks/usePlaygroundSession';
+import { usePlaygroundCurl } from '../hooks/usePlaygroundCurl';
 import { usePlaygroundSend } from '../hooks/usePlaygroundSend';
 import { usePlaygroundValues } from '../hooks/usePlaygroundValues';
 import { findMissingInputKeys, listStaticInputKeys } from '../model/methodTestRefs';
@@ -14,7 +15,6 @@ import type { PlaygroundResult } from '../model/playground.types';
 import { withSampleResponse } from '../model/sampleResponse';
 import { previewRequest } from '../model/previewRequest';
 import { applyRequestEdits, type RequestEdits } from '../model/requestEdits';
-import { buildCurl } from '../model/resolveRequest';
 import { PlaygroundCurl } from './PlaygroundCurl';
 import { PlaygroundFooter } from './PlaygroundFooter';
 import { PlaygroundTitle } from './PlaygroundTitle';
@@ -63,6 +63,11 @@ export function RequestPlaygroundContent({ session, liveNode, isReadOnly, onAppl
 		message.success(t('requestPlayground.footer.applied', { name: stepName }));
 	};
 	const send = usePlaygroundSend({ session, values, onInvalidInputs: (keys) => selectInput(keys[0]) });
+	const curl = usePlaygroundCurl({ session, values });
+	const toggleCurl = () => {
+		if (!isCurlVisible) curl.generateIfIdle();
+		setIsCurlVisible(!isCurlVisible);
+	};
 
 	const rows = buildValueRows({ inputs: session.inputs, refs: session.refs.refs, draft: session.draft,
 		connectors: session.allConnectors, methods: session.connection.fromConnector.method }, t);
@@ -80,8 +85,8 @@ export function RequestPlaygroundContent({ session, liveNode, isReadOnly, onAppl
 				onUrlChange={(url) => session.setEdits((current) => ({ ...current, url, paramRows: undefined }))}
 				isCurlVisible={isCurlVisible} isSending={send.isSending} canSend={send.canSend}
 				onMethodChange={(method) => session.setEdits((current) => ({ ...current, method }))}
-				onToggleCurl={() => setIsCurlVisible((isVisible) => !isVisible)} onSend={send.send} />
-			{isCurlVisible && <PlaygroundCurl command={buildCurl(preview)} />}
+				onToggleCurl={toggleCurl} onSend={send.send} />
+			{isCurlVisible && <PlaygroundCurl curl={curl} connectors={session.allConnectors} />}
 			<RequestTabs session={session} values={values} rows={rows} missingKeys={missingKeys}
 				tab={tab} focus={focus} onTabChange={setTab} onSelectInput={selectInput} />
 		</div>

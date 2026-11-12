@@ -1070,7 +1070,17 @@
       "send": "Senden"
     },
     "curl": {
-      "title": "Erzeugter cURL-Befehl (Geheimnisse maskiert)"
+      "title": "cURL (vom Server erzeugt)",
+      "generating": "cURL wird erzeugt…",
+      "regenerate": "Neu erzeugen",
+      "outdated": "Request geändert – neu erzeugen",
+      "failed": "Der cURL-Befehl konnte nicht erzeugt werden",
+      "connectorError": "Die Daten des Konnektors {{connector}} konnten nicht gelesen werden",
+      "invalidJson_one": "Ein Wert ist kein gültiges JSON. Korrigieren Sie ihn, um cURL zu erzeugen.",
+      "invalidJson_other": "{{count}} Werte sind kein gültiges JSON. Korrigieren Sie sie, um cURL zu erzeugen.",
+      "credentialsNote": "Enthält echte Zugangsdaten und Tokens. Für eine POSIX-Shell (bash, zsh, Git Bash), nicht für Windows cmd oder PowerShell.",
+      "generate": "Erzeugen",
+      "idle": "Erzeugen Sie den Befehl, sobald die Testwerte ausgefüllt sind."
     },
     "tabs": {
       "values": "Testwerte",

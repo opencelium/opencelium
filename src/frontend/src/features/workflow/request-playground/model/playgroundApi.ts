@@ -1,5 +1,5 @@
 import { baseApi } from '@shared/api/baseApi';
-import type { MethodTestRefs, MethodTestRequest, MethodTestResult, PlaygroundDraft } from './playground.types';
+import type { MethodCurlRequest, MethodCurlResult, MethodTestRefs, MethodTestRequest, MethodTestResult, PlaygroundDraft } from './playground.types';
 
 const METHOD_TEST_URL = '/connection/method/test';
 
@@ -15,7 +15,11 @@ export const playgroundApi = baseApi.injectEndpoints({
 		testMethod: b.mutation<MethodTestResult, MethodTestRequest>({
 			query: (body) => ({ url: METHOD_TEST_URL, method: 'POST', body, customOptions: { ignoreError: true } }),
 		}),
+		// A mutation, not a query: each call runs the connector's authentication.
+		getMethodCurl: b.mutation<MethodCurlResult, MethodCurlRequest>({
+			query: (body) => ({ url: '/connection/method/curl', method: 'POST', body, customOptions: { ignoreError: true } }),
+		}),
 	}),
 });
 
-export const { useGetMethodTestRefsQuery, useTestMethodMutation } = playgroundApi;
+export const { useGetMethodTestRefsQuery, useTestMethodMutation, useGetMethodCurlMutation } = playgroundApi;

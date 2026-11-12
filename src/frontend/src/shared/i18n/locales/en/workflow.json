@@ -1070,7 +1070,17 @@
       "send": "Send"
     },
     "curl": {
-      "title": "Generated cURL (secrets masked)"
+      "title": "cURL (built by the server)",
+      "generating": "Generating cURL…",
+      "regenerate": "Regenerate",
+      "outdated": "Request changed – regenerate",
+      "failed": "The cURL command could not be generated",
+      "connectorError": "Could not read the data of connector {{connector}}",
+      "invalidJson_one": "A value is not valid JSON. Fix it to generate cURL.",
+      "invalidJson_other": "{{count}} values are not valid JSON. Fix them to generate cURL.",
+      "credentialsNote": "Contains real credentials and tokens. For a POSIX shell (bash, zsh, Git Bash), not Windows cmd or PowerShell.",
+      "generate": "Generate",
+      "idle": "Generate the command once the test values are filled in."
     },
     "tabs": {
       "values": "Test values",
