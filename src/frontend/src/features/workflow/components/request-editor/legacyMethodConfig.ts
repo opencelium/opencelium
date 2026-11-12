@@ -50,11 +50,17 @@ export const deserializeMethodConfigReferences = (
   const endpointArgs = { ...(config.endpointArgs as any) };
   const url = deserializeBackendReferenceTokens(config.url || '', endpointArgs);
   let nextEndpointArgs = url.endpointArgs;
-  const queryParams = (config.queryParams || []).map((param) => {
-    const value = deserializeBackendReferenceTokens(param.value || '', nextEndpointArgs);
-    nextEndpointArgs = value.endpointArgs;
-    return { ...param, value: value.value };
-  });
+  const deserialize = (text: string) => {
+    const result = deserializeBackendReferenceTokens(text, nextEndpointArgs);
+    nextEndpointArgs = result.endpointArgs;
+    return result.value;
+  };
+  // A query part that is only a reference (`?{%…%}`) keeps it in the key.
+  const queryParams = (config.queryParams || []).map((param) => ({
+    ...param,
+    key: deserialize(param.key || ''),
+    value: deserialize(param.value || ''),
+  }));
 
   return {
     ...config,

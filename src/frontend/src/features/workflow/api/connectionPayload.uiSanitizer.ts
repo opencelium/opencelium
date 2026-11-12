@@ -1,8 +1,6 @@
 import type { WorkflowNodeData, WorkflowNodeModel } from '../types/workflow.types';
 
 const ENDPOINT_ARG_TOKEN_RE = /#\{%\s*([A-Za-z0-9_-]+)\s*%}/g;
-const WRAPPED_REFERENCE_RE =
-	/(\{%\s*#[A-Fa-f0-9]{6}\.\((?:request|response)\)\.(?:body|header|status)(?:\.[^%{}]*)?\s*%})/g;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
 	!!value && typeof value === 'object' && !Array.isArray(value);
@@ -35,38 +33,12 @@ const sanitizeReferences = (value: unknown, endpointArgs?: Record<string, any>):
 	return value;
 };
 
-const encodeUrlPart = (value: string) => String(value || '')
-	.split(WRAPPED_REFERENCE_RE)
-	.map((part) => {
-		if (!part) return part;
-		if (WRAPPED_REFERENCE_RE.test(part)) {
-			WRAPPED_REFERENCE_RE.lastIndex = 0;
-			return part;
-		}
-		WRAPPED_REFERENCE_RE.lastIndex = 0;
-		try {
-			return encodeURIComponent(decodeURIComponent(part.replace(/\+/g, ' ')));
-		} catch {
-			return encodeURIComponent(part);
-		}
-	})
-	.join('');
-
 const sanitizeQueryParams = (queryParams: unknown, endpointArgs: Record<string, any>) =>
 	Array.isArray(queryParams)
 		? queryParams
 			.filter((param: any) => param?.enabled && String(param?.key ?? '').trim() !== '')
-			.map((param) => {
-				const sanitized = stripEnhancementObjects(sanitizeReferences(param, endpointArgs)) as any;
-				if (!sanitized || typeof sanitized !== 'object' || sanitized.autoEncode === false) {
-					return sanitized;
-				}
-				return {
-					...sanitized,
-					key: encodeUrlPart(String(sanitized.key ?? '')),
-					value: encodeUrlPart(String(sanitized.value ?? '')),
-				};
-			})
+			// Stored as written, like the endpoint they mirror (see urlQueryParams.utils).
+			.map((param) => stripEnhancementObjects(sanitizeReferences(param, endpointArgs)))
 		: queryParams;
 
 const sanitizeMethodConfig = (methodConfig: unknown) => {
