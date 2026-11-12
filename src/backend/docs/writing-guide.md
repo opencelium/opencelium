@@ -60,5 +60,5 @@ STE permits technical names and technical verbs that are standard in the industr
 - Access control (2): admin (administrator), default admin, username, password, login (noun).
 - Software structure (2): seam, runner (application runner, command runner), singleton, Spring context, logger, log level.
 - Test: unit test, slice test, integration test, full-application test, end-to-end test, hand test, fake, fixture, test matrix, mock.
-- Products and tools (2): SnakeYAML, Logback, YAML, Jackson, JDK, JVM, MockMvc, Spring Boot Actuator, Tomcat.
+- Products and tools (2): SnakeYAML, Logback, YAML, Jackson, JDK, JVM, MockMvc, Spring Boot Actuator, Spring Security, Tomcat.
 - Technical verbs (4): type (on the keyboard), download, install, probe, hash, mask, prompt, skip, run (a command or a service), print, generate, roll back, stage, render, bind, cancel, confirm, serialize, detect, decode, pin (a version), listen (a port), back up.

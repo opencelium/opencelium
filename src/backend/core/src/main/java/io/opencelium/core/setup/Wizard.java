@@ -159,8 +159,8 @@ public final class Wizard {
 	/**
 	 * The login box, after the start and only when the application answers on its port: the URL of the admin login
 	 * page, and the admin username and the admin password of the admin that the start made. After a skipped admin
-	 * step the box shows the URL only, because the admin can have another admin password. The box goes to the
-	 * console, never to a logger.
+	 * step the box shows the URL and says that an admin exists in the database, with no username and no admin
+	 * password, because that admin can have another admin password. The box goes to the console, never to a logger.
 	 */
 	private void printLogin(SetupContext context) {
 		OptionalInt port = context.port();
@@ -169,9 +169,13 @@ public final class Wizard {
 		}
 		var rows = new LinkedHashMap<String, String>();
 		rows.put("URL", "http://" + HOST + ":" + port.getAsInt() + SetupContext.LOGIN_PAGE);
-		context.adminUsername().ifPresent(username -> {
+		context.adminUsername().ifPresentOrElse(username -> {
 			rows.put("Admin username", username);
 			rows.put("Admin password", SetupContext.FIRST_ADMIN_PASSWORD);
+		}, () -> {
+			// The box has no wrap: the empty label continues the row above in the value column.
+			rows.put("Admin", "exists in the database: log in with its");
+			rows.put("", "username and admin password");
 		});
 		prompter.print("");
 		prompter.box("Log in to OpenCelium", rows);

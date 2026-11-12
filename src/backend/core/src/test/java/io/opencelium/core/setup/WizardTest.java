@@ -243,7 +243,7 @@ class WizardTest {
 	}
 
 	@Test
-	void runPrintsOnlyTheUrlWhenTheAdminStepIsSkipped() {
+	void runSaysThatAnAdminExistsWhenTheAdminStepIsSkipped() {
 		// An admin exists, and its admin password can be another one than 1234.
 		SetupStep answers = new NamedStep("Web port", (context, prompter) -> {
 			context.setPort(9191);
@@ -255,7 +255,9 @@ class WizardTest {
 		wizard.run(REASON);
 
 		assertThat(console.output()).containsSubsequence("  -> Starting OpenCelium...", "  +-- Log in to OpenCelium ",
-				"  |  URL             http://localhost:9191/login ").doesNotContain("Admin username")
+				"  |  URL             http://localhost:9191/login ",
+				"  |  Admin           exists in the database: log in with its ",
+				"  |                  username and admin password ").doesNotContain("Admin username")
 				.doesNotContain("1234");
 	}
 

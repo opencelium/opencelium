@@ -211,6 +211,15 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 13i
 - **Status:** done
 
+## Task 13k: fix(core): note the existing admin and drop the generated password
+- **Criteria:** SW-32, SW-64
+- **Function:** When the setup skips the admin step, the login box says that an admin exists in the database. A start of the application logs no Spring Security password.
+- **Tests:** `WizardTest`: runSaysThatAnAdminExistsWhenTheAdminStepIsSkipped, in the place of runPrintsOnlyTheUrlWhenTheAdminStepIsSkipped; `CoreApplicationTest`: startMakesNoSpringSecurityUserAndLogsNoPasswordWhenTheWebServerRuns
+- **Hand test:** 1. Run `setup` on a database that holds an admin: the box shows the URL and "exists in the database". 2. Start the jar: the log has no line "Using generated security password".
+- **Size:** approximately 20 lines
+- **Depends on:** 15a
+- **Status:** done
+
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-05, SW-06, SW-19, SW-20, SW-21, SW-22, SW-23, SW-55, SW-56
 - **Function:** Before the menu, the master key step runs the guard (SW-23) and tells the purpose of the master key (SW-55). The menu offers generate or keep, the variable `OC_MASTER_KEY` and a key file, each with its help text (SW-19, SW-56). Generate adds an action to the file plan that writes the key file after the other files and then asks the backup question (SW-05, SW-06, SW-20). The variable and the key file follow SW-21 and SW-22.
