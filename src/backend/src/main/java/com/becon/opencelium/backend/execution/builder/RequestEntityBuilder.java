@@ -33,10 +33,13 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RequestEntityBuilder {
     private static final String ILLEGAL_URI_CHARACTERS = "\"<>{}|\\^`";
+    private static final Pattern SCHEME_AND_AUTHORITY = Pattern.compile("[A-Za-z][A-Za-z0-9+.\\-]*://[^/?#]*");
 
     private final OperationDTO operation;
     private final Function<String, Object> references;
@@ -137,7 +140,25 @@ public class RequestEntityBuilder {
 
         result.append(encodeLeniently(path.substring(cursor)));
 
-        return result.toString();
+        return encodeBracketsInPath(result.toString());
+    }
+
+    /**
+     * Encodes {@code '['} and {@code ']'} in the path, where {@link URI} does not accept them.
+     * They stay as they are in the authority, around an IPv6 host such as {@code [::1]}, and after
+     * a {@code '?'} or {@code '#'} that a URL inserted from a reference may hold.
+     */
+    private static String encodeBracketsInPath(String url) {
+        Matcher authority = SCHEME_AND_AUTHORITY.matcher(url);
+        int start = authority.lookingAt() ? authority.end() : 0;
+        int end = start;
+        while (end < url.length() && url.charAt(end) != '?' && url.charAt(end) != '#') {
+            end++;
+        }
+
+        return url.substring(0, start)
+                + url.substring(start, end).replace("[", "%5B").replace("]", "%5D")
+                + url.substring(end);
     }
 
     private String resolvePathReference(String reference, boolean urlText) {
