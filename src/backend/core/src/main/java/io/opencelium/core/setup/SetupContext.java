@@ -27,10 +27,17 @@ public final class SetupContext {
 	public static final DeploymentMode DEPLOYMENT_MODE = DeploymentMode.SELF_HOST;
 
 	/**
-	 * The admin password of the admin that the setup makes. The product fixes it, with no forced change: the admin
-	 * logs in right after the setup and changes it in the browser. The console shows it; a log never does.
+	 * The admin password of the first admin, from the admin step or the default admin. The product fixes it, with no
+	 * forced change: the admin logs in right after the first start and changes it in the browser. The console shows
+	 * it; a log never does.
 	 */
 	public static final String FIRST_ADMIN_PASSWORD = "1234";
+
+	/** The default of the admin step, and the admin that a start without the wizard makes on an empty database. */
+	public static final String DEFAULT_ADMIN_USERNAME = "admin";
+
+	/** The path of the admin login page in the browser, which the login box and the log name. */
+	public static final String LOGIN_PAGE = "/login";
 
 	private final ValueSource values;
 

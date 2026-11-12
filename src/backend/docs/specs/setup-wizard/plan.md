@@ -314,7 +314,7 @@ The test kinds follow architecture section 6.8 and CONTRIBUTING section 9. The t
 | An old variable of the shell has priority over a new env file after a new `setup` run. | The wizard process starts with the new values as arguments. systemd and Docker apply the same priority. The README section "First start" says it. |
 | An operator sets `OC_MONGO_URI` by hand with a database password without percent-encoding, and the database login fails with a correct database password. | SW-18 gives the rule. The README section "First start" shows the percent-encoding with an example. |
 | A user types a database username in the URI without `authSource`, and MongoDB looks for the database user in the database of the URI path. | The help text of the URI shows `authSource=admin` (SW-16). The cause "authentication failed" names the database user. |
-| 2 processes start on an empty database at the same time, for example 2 containers, and both make the default admin. | The unique index on the tenant and the username refuses the second admin. The completion runner takes this refusal as an admin that exists and continues the start. |
+| 2 processes start on an empty database at the same time, for example 2 containers, and both make the default admin. | The unique index on the tenant and the username refuses the second admin. When an admin exists after the refusal, the completion runner continues the start. Otherwise the username belongs to a user that is not an admin, and the start stops and keeps the marker. |
 | A MongoDB server of the host holds the data of other applications. | The wizard starts, stops and deletes nothing in MongoDB. The application uses only the database of the URI path, `opencelium` by default. |
 
 ## Definition of done

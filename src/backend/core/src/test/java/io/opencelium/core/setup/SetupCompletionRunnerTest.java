@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -131,6 +130,17 @@ class SetupCompletionRunnerTest {
 		assertThat(users.findByTenantIdAndUsername(TENANT.value(), "root").orElseThrow().roles())
 				.containsExactly(UserService.ADMIN_ROLE);
 		assertThat(marker()).isNull();
+	}
+
+	@Test
+	void runStopsAndKeepsTheMarkerWhenTheUsernameBelongsToANonAdminUser() {
+		// The unique index refuses the admin, but no admin exists: the start must not pretend that one does.
+		storeNonAdminUser("root");
+		storeMarker("root");
+
+		assertThatIllegalStateException().isThrownBy(this::run).withMessageContaining("'root'");
+		assertThat(userService.adminExists(TENANT)).isFalse();
+		assertThat(marker().getString("adminUsername")).isEqualTo("root");
 	}
 
 	@Test
@@ -251,13 +261,14 @@ class SetupCompletionRunnerTest {
 	}
 
 	/**
-	 * A user service that answers "no user and no admin" and then loses the race: another process inserts the same
-	 * admin through the real user service, and the call of the runner is refused.
+	 * A user service that loses the race: the queries go to the real user service, and when the runner makes the
+	 * admin, another process inserts the same admin first. Then the real user service refuses the call of the runner,
+	 * by its admin check or by the unique index on the tenant and the username.
 	 */
 	private UserService racing(Refusal refusal) {
 		UserService racing = mock(UserService.class);
-		when(racing.anyUserExists(TENANT)).thenReturn(false);
-		when(racing.adminExists(TENANT)).thenReturn(false);
+		when(racing.anyUserExists(TENANT)).thenAnswer(invocation -> userService.anyUserExists(TENANT));
+		when(racing.adminExists(TENANT)).thenAnswer(invocation -> userService.adminExists(TENANT));
 		when(racing.createAdmin(any())).thenAnswer(invocation -> {
 			CreateAdminCommand command = invocation.getArgument(0);
 			userService.createAdmin(
@@ -265,7 +276,9 @@ class SetupCompletionRunnerTest {
 			if (refusal == Refusal.ADMIN_CHECK) {
 				return userService.createAdmin(command);
 			}
-			throw new DuplicateKeyException("E11000 duplicate key error collection: users");
+			Instant now = Instant.now();
+			return users.insert(new UserDocument(null, TENANT.value(), command.username(), "{noop}x",
+					Set.of(UserService.ADMIN_ROLE), false, now, false, false, now));
 		});
 		return racing;
 	}

@@ -85,7 +85,7 @@ public class UserService {
 
 	/** Whether the tenant has a user of any role. */
 	public boolean anyUserExists(TenantId tenant) {
-		throw new UnsupportedOperationException();
+		return users.existsByTenantId(tenant.value());
 	}
 
 	/**

@@ -26,11 +26,9 @@ import io.opencelium.core.user.AdminLookup;
  */
 public final class AdminStep implements SetupStep {
 
-	static final String DEFAULT_USERNAME = "admin";
-
 	private static final String HELP = "The username of the first admin. The admin password is "
-			+ SetupContext.FIRST_ADMIN_PASSWORD + ": log in with it at /setup after the start, then change it in the"
-			+ " browser. The setup asks no admin password.";
+			+ SetupContext.FIRST_ADMIN_PASSWORD + ": log in with it at " + SetupContext.LOGIN_PAGE
+			+ " after the start, then change it in the browser. The setup asks no admin password.";
 
 	private final Predicate<MongoConnection> adminExists;
 
@@ -57,7 +55,7 @@ public final class AdminStep implements SetupStep {
 	}
 
 	private static Question question() {
-		return new Question(ValueKey.ADMIN_USERNAME, "Admin username", HELP, DEFAULT_USERNAME);
+		return new Question(ValueKey.ADMIN_USERNAME, "Admin username", HELP, SetupContext.DEFAULT_ADMIN_USERNAME);
 	}
 
 	/**
