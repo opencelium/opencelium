@@ -62,7 +62,7 @@ describe('buildMinimapModel', () => {
 
 describe('collectWorkflowIssues', () => {
 	const collect = (nodes: WorkflowNodeModel[], extra: Partial<Parameters<typeof collectWorkflowIssues>[0]> = {}) =>
-		collectWorkflowIssues({ nodes, bindingGraph: NO_BINDINGS, unknownPaths: new Map(), liveHealth: undefined, ...extra });
+		collectWorkflowIssues({ nodes, bindingGraph: NO_BINDINGS, unknownPaths: new Map(), invalidPaths: new Map(), liveHealth: undefined, ...extra });
 
 	it('flags an operator whose condition is empty, and not one that has one', () => {
 		const configured = node('if1', 0, 0, { kind: 'if', conditionConfig: { operatorType: 'if', tree: {} as never, expression: 'a = b' } });

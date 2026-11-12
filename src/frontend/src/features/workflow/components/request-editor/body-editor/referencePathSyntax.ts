@@ -1,17 +1,12 @@
 import type { JSONPathEnvironment, JSONValue } from 'json-p3';
-import { PayloadFormat, type MethodWithId } from '../../../types/connection';
-import { isUnknownReferencePath, type ResponseType } from './requestReferenceOptions';
 
-export type ReferencePathValidation =
+export type ReferencePathSyntax =
   | { status: 'valid' }
-  | { status: 'syntaxError'; position: number; character: string | null }
-  | { status: 'unknownPath' };
-
-export type ReferencePathFeedback = { severity: 'error' | 'warning'; message: string };
+  | { status: 'syntaxError'; position: number; character: string | null };
 
 type MappedText = { text: string; origin: number[] };
 
-const VALID: ReferencePathValidation = { status: 'valid' };
+const VALID: ReferencePathSyntax = { status: 'valid' };
 
 // The backend (ReferenceExtractor) treats any lowercase bracket word as a loop
 // iterator and replaces it with the current index before JsonPath sees it.
@@ -74,7 +69,7 @@ const readErrorIndex = (error: unknown): number | null => {
 export const checkReferencePathSyntax = (
   environment: JSONPathEnvironment,
   path: string,
-): ReferencePathValidation => {
+): ReferencePathSyntax => {
   const source = path.trim();
   if (!source) return VALID;
   const query = toJsonPathQuery(source);
@@ -85,50 +80,6 @@ export const checkReferencePathSyntax = (
     const index = readErrorIndex(error) ?? query.text.length;
     const position = query.origin[Math.min(index, query.origin.length - 1)] ?? source.length;
     return { status: 'syntaxError', position, character: source[position] ?? null };
-  }
-};
-
-// XML bodies are resolved with XPath, not JsonPath.
-const isJsonPathBody = (method: MethodWithId | undefined) =>
-  method?.response?.success?.body?.format !== PayloadFormat.Xml;
-
-export const validateReferencePath = (
-  environment: JSONPathEnvironment | null,
-  method: MethodWithId | undefined,
-  type: ResponseType,
-  path: string,
-  iterators: string[] = [],
-): ReferencePathValidation => {
-  if (type !== 'body' || !path.trim()) return VALID;
-  if (environment && isJsonPathBody(method)) {
-    const syntax = checkReferencePathSyntax(environment, path);
-    if (syntax.status !== 'valid') return syntax;
-  }
-  return isUnknownReferencePath(method, type, path, iterators) ? { status: 'unknownPath' } : VALID;
-};
-
-type FeedbackT = (key: string, values?: Record<string, unknown>) => string;
-
-export const describeReferencePathValidation = (
-  validation: ReferencePathValidation,
-  t: FeedbackT,
-): ReferencePathFeedback | null => {
-  switch (validation.status) {
-    case 'valid':
-      return null;
-    case 'syntaxError':
-      return {
-        severity: 'error',
-        message: validation.character === null
-          ? t('references.incompleteSyntax')
-          : t('references.invalidSyntax', { position: validation.position + 1, character: validation.character }),
-      };
-    case 'unknownPath':
-      return { severity: 'warning', message: t('references.unknownPath') };
-    default: {
-      const _exhaustive: never = validation;
-      return _exhaustive;
-    }
   }
 };
 

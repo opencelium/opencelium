@@ -1,16 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { JSONPathEnvironment } from 'json-p3';
-import type { MethodWithId } from '../../../types/connection';
-import { checkReferencePathSyntax, describeReferencePathValidation, readLiveValueWithJsonPath,
-	toJsonPathQuery, validateReferencePath } from './referencePathSyntax';
+import { checkReferencePathSyntax, readLiveValueWithJsonPath, toJsonPathQuery } from './referencePathSyntax';
 
 const environment = new JSONPathEnvironment();
 const check = (path: string) => checkReferencePathSyntax(environment, path);
-
-const jsonMethod = { response: { success: { body: { type: 'object', format: 'json',
-	fields: { items: [{ name: 'a' }] } } } } } as unknown as MethodWithId;
-const xmlMethod = { response: { success: { body: { type: 'object', format: 'xml',
-	fields: {} } } } } as unknown as MethodWithId;
 
 describe('toJsonPathQuery', () => {
 	it.each([
@@ -52,28 +45,6 @@ describe('checkReferencePathSyntax', () => {
 	it('rejects OpenCelium tail operators anywhere but the end', () => {
 		expect(check("$.node['*']~.name")).toMatchObject({ status: 'syntaxError', character: '~' });
 		expect(check('$.items.length().x')).toMatchObject({ status: 'syntaxError' });
-	});
-});
-
-describe('validateReferencePath', () => {
-	it('prefers a syntax error over an unknown-path warning', () => {
-		expect(validateReferencePath(environment, jsonMethod, 'body', '$.missing b').status).toBe('syntaxError');
-		expect(validateReferencePath(environment, jsonMethod, 'body', '$.missing').status).toBe('unknownPath');
-	});
-
-	it('skips the syntax check for XML bodies, headers and before json-p3 has loaded', () => {
-		expect(validateReferencePath(environment, xmlMethod, 'body', '$.ns:tag/@id').status).toBe('valid');
-		expect(validateReferencePath(environment, jsonMethod, 'header', 'Content Type').status).toBe('valid');
-		expect(validateReferencePath(null, jsonMethod, 'body', '$.items b').status).toBe('unknownPath');
-	});
-
-	it('describes each status with its severity', () => {
-		const t = (key: string) => key;
-		expect(describeReferencePathValidation({ status: 'valid' }, t)).toBeNull();
-		expect(describeReferencePathValidation({ status: 'unknownPath' }, t))
-			.toEqual({ severity: 'warning', message: 'references.unknownPath' });
-		expect(describeReferencePathValidation({ status: 'syntaxError', position: 2, character: null }, t))
-			.toEqual({ severity: 'error', message: 'references.incompleteSyntax' });
 	});
 });
 

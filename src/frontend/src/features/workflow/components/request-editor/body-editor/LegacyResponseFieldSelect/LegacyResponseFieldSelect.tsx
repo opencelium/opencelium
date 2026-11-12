@@ -10,6 +10,7 @@ import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect
 import { useLegacyResponseFieldSelect } from './useLegacyResponseFieldSelect';
 import { useFitWidthOnFocus } from './useFitWidthOnFocus';
 import { useReferenceFeedbackTooltip } from '../useReferenceFeedbackTooltip';
+import { ReferenceFeedbackContent } from '../ReferenceFeedbackContent';
 import '../bodyLegacy.css';
 
 /** Above the method dialog the picker was written for, and below the confirm
@@ -40,7 +41,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
       {/* Inside the host, not around it: the primitive's wrapper span would take
           the host's place in the generator row and shrink it. Always mounted so
           toggling the warning doesn't remount the select and drop focus. */}
-      <Tooltip content={state.pathFeedback?.message ?? null} zIndex={zIndex} maxWidth={320}
+      <Tooltip content={state.pathFeedback ? <ReferenceFeedbackContent feedback={state.pathFeedback} /> : null} zIndex={zIndex} maxWidth={320}
         open={feedbackTooltip.open} onOpenChange={feedbackTooltip.onOpenChange}>
         <AutoComplete
           placeholder={state.placeholder}
@@ -82,8 +83,8 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
               may grow wraps onto more lines instead of scrolling sideways. */}
           <Input.TextArea size='large' className='referenceFieldPathInput'
             status={state.pathFeedback?.severity}
-            autoSize={fit.isFocused ? { minRows: 1 } : { minRows: 1, maxRows: 1 }}
-            wrap={fit.isFocused ? 'soft' : 'off'}
+            autoSize={fit.isWrapping ? { minRows: 1 } : { minRows: 1, maxRows: 1 }}
+            wrap={fit.isWrapping ? 'soft' : 'off'}
             onKeyDown={(event) => {
               if (event.key !== 'Enter' || event.nativeEvent.isComposing) return;
               event.preventDefault();

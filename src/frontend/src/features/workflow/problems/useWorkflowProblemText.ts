@@ -25,6 +25,8 @@ export const useWorkflowProblemText = () => {
 				return t('minimap.problems.binding', { count: problem.count, reason: t(REASON_KEY[problem.reason]) });
 			case 'unknown-path':
 				return t('minimap.problems.unknownPath', { count: problem.count });
+			case 'invalid-path':
+				return t('minimap.problems.invalidPath', { count: problem.count });
 			case 'operator-unconfigured':
 				return t(problem.operator === 'if' ? 'minimap.problems.ifUnconfigured' : 'minimap.problems.loopUnconfigured');
 			default: {

@@ -3,6 +3,7 @@ import { useGetConnectorsMetaQuery } from '@entities/connector/api/connectorApi'
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { buildWorkflowIssues } from './buildWorkflowIssues';
 import { useWorkflowProblemText } from './useWorkflowProblemText';
+import { useJsonPathEnvironment } from '../components/request-editor/body-editor/jsonPathEnvironment';
 import { filterIssuesBySeverity } from './workflowProblems';
 
 /**
@@ -15,14 +16,15 @@ export const useWorkflowIssues = (nodes: WorkflowNodeModel[], edges: WorkflowEdg
 	fieldBindings: readonly unknown[] | undefined) => {
 	const { data: liveHealth } = useGetConnectorsMetaQuery();
 	const describe = useWorkflowProblemText();
+	const jsonPathEnvironment = useJsonPathEnvironment();
 	return useMemo(() => {
-		const issues = buildWorkflowIssues(nodes, edges, fieldBindings, liveHealth, describe);
+		const issues = buildWorkflowIssues({ nodes, edges, fieldBindings, liveHealth, describe, jsonPathEnvironment });
 		return {
 			errors: filterIssuesBySeverity(issues, 'error'),
 			warnings: filterIssuesBySeverity(issues, 'warning'),
 			notices: filterIssuesBySeverity(issues, 'notice'),
 		};
-	}, [nodes, edges, fieldBindings, liveHealth, describe]);
+	}, [nodes, edges, fieldBindings, liveHealth, describe, jsonPathEnvironment]);
 };
 
 export type WorkflowIssueGroups = ReturnType<typeof useWorkflowIssues>;

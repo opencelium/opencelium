@@ -1,6 +1,6 @@
 import type { ReactNode, RefObject } from 'react';
 import type { ResponseType } from '../../body-editor/requestReferenceOptions';
-import type { ReferencePathFeedback } from '../../body-editor/referencePathSyntax';
+import type { ReferencePathFeedback } from '../../body-editor/referenceValidation.utils';
 
 export type ReferenceMethodFieldControlsProps = {
   methodLabel: string;
