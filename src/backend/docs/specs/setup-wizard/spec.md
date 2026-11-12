@@ -53,7 +53,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - **SW-58** Given a step, when it starts, then the wizard must show its number, the step count and its name. The title line has the form "Step <number> of <count>: <name>", and a line of `-` characters is under it. A step that does not apply shows its title line with "(skipped)" after its name. Thus the numbers have no gap, and each title line shows the same step count.
 - **SW-59** Given a terminal that shows colors, when the wizard prints a result line, then the line must be green. A problem line is red. A result line starts with `OK`, and a problem line starts with `!`. The marks stay, so each line has the same meaning without color. The lines under a status line keep the default color of the terminal.
 - **SW-60** Given 1 of these conditions, when the wizard prints a line, then the line must have no escape code:
-  1. Standard output is not a terminal, for example a file or a pipe.
+  1. Standard input or standard output is not a terminal, for example a file or a pipe.
   2. The environment variable `NO_COLOR` has a value that is not empty.
   3. On Windows, the environment variable `WT_SESSION` has no value. Only Windows Terminal sets it.
   4. On each other platform, for example Linux or macOS, the environment variable `TERM` has no value or the value `dumb`.

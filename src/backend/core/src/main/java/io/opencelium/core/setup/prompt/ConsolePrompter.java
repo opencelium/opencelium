@@ -17,6 +17,8 @@ import io.opencelium.core.setup.SetupCancelledException;
  * every terminal: a step starts after an empty line with its numbered title over a rule; a question is its label
  * padded to one column, the default in brackets, and a colon; a problem starts with {@code !}, a result with
  * {@code OK}, a start with {@code ->}; help and continuation lines are indented under the question or the status.
+ * On a terminal that shows colors, the line of a result is green and the line of a problem red, so a passed check
+ * stands out. The marks stay, so the lines say the same without color, in a log file and to a color-blind user.
  */
 public final class ConsolePrompter implements Prompter {
 
@@ -37,6 +39,13 @@ public final class ConsolePrompter implements Prompter {
 	private static final String DONE = "OK ";
 
 	private static final String STARTS = "-> ";
+
+	private static final String GREEN = "\u001B[32m";
+
+	private static final String RED = "\u001B[31m";
+
+	/** Back to the default color of the terminal. */
+	private static final String RESET = "\u001B[0m";
 
 	private final ConsoleIo console;
 
@@ -79,14 +88,13 @@ public final class ConsolePrompter implements Prompter {
 			catch (NumberFormatException ex) {
 				// Not a number: the same message as a number out of range.
 			}
-			out.println(MARGIN + PROBLEM + "Please enter a number between 1 and " + options.size() + ".");
+			problem("Please enter a number between 1 and " + options.size() + ".");
 		}
 	}
 
 	@Override
 	public String text(String question, String help, String defaultValue,
 			Function<String, Optional<String>> validator) {
-		PrintWriter out = console.writer();
 		while (true) {
 			String input = ask(questionLine(question, "[" + defaultValue + "]"));
 			if (input.equals(HELP)) {
@@ -94,17 +102,16 @@ public final class ConsolePrompter implements Prompter {
 				continue;
 			}
 			String value = input.isEmpty() ? defaultValue : input;
-			Optional<String> problem = validator.apply(value);
-			if (problem.isEmpty()) {
+			Optional<String> rejection = validator.apply(value);
+			if (rejection.isEmpty()) {
 				return value;
 			}
-			out.println(MARGIN + PROBLEM + problem.get());
+			problem(rejection.get());
 		}
 	}
 
 	@Override
 	public boolean yesNo(String question, String help, boolean defaultYes) {
-		PrintWriter out = console.writer();
 		while (true) {
 			String input = ask(questionLine(question, defaultYes ? "[Y/n]" : "[y/N]"));
 			if (input.isEmpty()) {
@@ -121,7 +128,7 @@ public final class ConsolePrompter implements Prompter {
 				case "n", "no" -> {
 					return false;
 				}
-				default -> out.println(MARGIN + PROBLEM + "Please answer y or n.");
+				default -> problem("Please answer y or n.");
 			}
 		}
 	}
@@ -138,7 +145,7 @@ public final class ConsolePrompter implements Prompter {
 			if (!line.isEmpty()) {
 				return line;
 			}
-			out.println(MARGIN + PROBLEM + question + " cannot be empty.");
+			problem(question + " cannot be empty.");
 		}
 	}
 
@@ -174,7 +181,7 @@ public final class ConsolePrompter implements Prompter {
 	@Override
 	public void error(String line, String... continuation) {
 		PrintWriter out = console.writer();
-		out.println(MARGIN + PROBLEM + line);
+		problem(line);
 		for (String more : continuation) {
 			out.println(INDENT + more);
 		}
@@ -183,7 +190,7 @@ public final class ConsolePrompter implements Prompter {
 
 	@Override
 	public void success(String line) {
-		print(MARGIN + DONE + line);
+		print(MARGIN + colored(GREEN, DONE + line));
 	}
 
 	@Override
@@ -206,6 +213,16 @@ public final class ConsolePrompter implements Prompter {
 		PrintWriter out = console.writer();
 		out.println(line);
 		out.flush();
+	}
+
+	/** The line of a problem in the margin: the mark and the message, red on a terminal that shows colors. */
+	private void problem(String message) {
+		console.writer().println(MARGIN + colored(RED, PROBLEM + message));
+	}
+
+	/** The text in the color, then the default color again; the text alone when the console shows no colors. */
+	private String colored(String color, String text) {
+		return console.showsColors() ? color + text + RESET : text;
 	}
 
 	/** {@code   Label           [default]: }: the label padded to the label column. */
