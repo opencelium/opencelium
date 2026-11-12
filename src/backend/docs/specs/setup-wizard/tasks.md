@@ -191,7 +191,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. With the local MongoDB, run `java -jar oc-app.jar setup` and select the local server: the line "OK MongoDB answers at ..." is green. 2. Type `x` at a menu: the line "! Please enter a number ..." is red. 3. Run `NO_COLOR=1 java -jar oc-app.jar setup` and select the local server: the same lines without color. 4. In a new directory, run `setup --template > t.yml`, then `setup -f t.yml --batch > out.log`: `grep -c $'\e' out.log` prints 0.
 - **Size:** approximately 70 lines
 - **Depends on:** 9
-- **Status:** in work
+- **Status:** done
 
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-05, SW-06, SW-19, SW-20, SW-21, SW-22, SW-23, SW-55, SW-56
