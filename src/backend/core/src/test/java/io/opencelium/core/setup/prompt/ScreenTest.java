@@ -53,18 +53,4 @@ class ScreenTest {
 				.containsExactly("  Files to write", "    - a.yml", "    - b.env");
 	}
 
-	@Test
-	void printableReplacesEachControlCharacterWithAQuestionMark() {
-		assertThat(Screen.printable("a\u0000b\u001Bc\u001Fd\u007Fe\u0080f\u009Fg\th\ri\nj"))
-				.isEqualTo("a?b?c?d?e?f?g?h?i?j");
-	}
-
-	@Test
-	void printableKeepsPlainAndNonAsciiTextUnchanged() {
-		String text = "Gr\u00F6\u00DFe: 10 \u20AC [ok]\u00A0~/oc/data";
-
-		assertThat(Screen.printable(text)).isEqualTo(text);
-		assertThat(Screen.printable("")).isEmpty();
-	}
-
 }

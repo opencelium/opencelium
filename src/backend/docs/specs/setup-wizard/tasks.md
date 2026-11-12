@@ -202,6 +202,15 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 13h
 - **Status:** done
 
+## Task 13j: fix(core): close the bidi and line-feed gaps of the setup screens
+- **Criteria:** SW-61, SW-62
+- **Function:** The bidi controls show as `?` like the other control characters, so a MongoDB error message cannot show a line in reverse order. A message on standard error keeps only the line breaks of the wizard, and the data directory question rejects a path with a control character, so a value cannot add a false line.
+- **Tests:** `TerminalTextTest`: printableReplacesEachControlCharacterWithAQuestionMark, printableReplacesEachBidiControlWithAQuestionMark, printableKeepsPlainAndNonAsciiTextUnchanged; `ConsolePrompterTest`: errorShowsABidiControlOfTheMessageAsAQuestionMark; `SetupLauncherTest`: launchShowsALineFeedOfAQuotedKeyAsAQuestionMark; `DataDirStepTest`: checkRejectsAPathWithAControlCharacterAndNamesItsCode; `MongoStartupPingTest`: classifyShowsABidiControlOfTheServerMessageAsAQuestionMark. Moved: the 2 printable tests of `ScreenTest` go to `TerminalTextTest`. Changed for the new behavior: `SetupLauncherTest`: launchShowsAControlCharacterOfABadSetupFileValueAsAQuestionMark becomes launchNamesTheControlCharacterOfABadDataDirectoryWithoutThePath; `MasterKeyGuardTest`: runStopsWithRestoreOrResetWhenDekExistsAndNoKeyResolves checks the lines of the failure.
+- **Hand test:** 1. Write `"da\nta": x` into `t.yml` and run `setup -f t.yml --batch`: standard error shows `Unknown key 'da?ta'` on 1 line. 2. Write `data-dir: "/tmp/oc\u202Ex"` into `t.yml` and run it again: the error names U+202E, and the path is not in the output.
+- **Size:** approximately 90 lines
+- **Depends on:** 13i
+- **Status:** in work
+
 ## Task 14: feat(core): setup wizard asks the master key
 - **Criteria:** SW-05, SW-06, SW-19, SW-20, SW-21, SW-22, SW-23, SW-55, SW-56
 - **Function:** Before the menu, the master key step runs the guard (SW-23) and tells the purpose of the master key (SW-55). The menu offers generate or keep, the variable `OC_MASTER_KEY` and a key file, each with its help text (SW-19, SW-56). Generate adds an action to the file plan that writes the key file after the other files and then asks the backup question (SW-05, SW-06, SW-20). The variable and the key file follow SW-21 and SW-22.

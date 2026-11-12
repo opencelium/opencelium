@@ -63,6 +63,7 @@ class MasterKeyGuardTest {
 
 		assertThat(ex.getMessage()).startsWith(KeyStartupException.RESTORE_OR_RESET)
 				.contains(RootKeyResolver.ENV_VARIABLE, dataDir.resolve("master.key").toString());
+		assertThat(ex.lines()).hasSize(3).startsWith(KeyStartupException.RESTORE_OR_RESET, "");
 		assertThat(ex.exitCode()).isEqualTo(1);
 		assertThat(dataDir.resolve("master.key")).doesNotExist();
 	}
