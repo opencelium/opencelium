@@ -3,12 +3,13 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import { Icon } from '@shared/ui/primitives/Icon';
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types';
-import type { CompatibilityIssue } from '@features/workflow/script-sandbox/checkNashornCompatibility';
+import type { CompatibilityIssue } from '@features/workflow/script-sandbox/sandbox.types';
 import { issueMessage } from '@features/workflow/script-sandbox/issueMessage';
 
 type Props = {
 	issues: CompatibilityIssue[];
 	isEnabled: boolean;
+	isChecked: boolean;
 	onLocate: (line: number, column: number) => void;
 };
 type Tone = 'error' | 'warning' | 'success' | 'info';
@@ -20,7 +21,7 @@ const toneIcon: Record<Tone, IconName> = {
 	info: 'info',
 };
 
-export function ScriptCompatibilityStatus({ issues, isEnabled, onLocate }: Props) {
+export function ScriptCompatibilityStatus({ issues, isEnabled, isChecked, onLocate }: Props) {
 	const { t } = useI18n('workflow');
 	const [isOpen, setOpen] = useState(false);
 	const errors = issues.filter((issue) => issue.kind === 'syntax').length;
@@ -31,7 +32,7 @@ export function ScriptCompatibilityStatus({ issues, isEnabled, onLocate }: Props
 	]
 		.filter(Boolean)
 		.join(' · ');
-	const tone: Tone = !isEnabled ? 'info' : errors ? 'error' : warnings ? 'warning' : 'success';
+	const tone: Tone = !isEnabled || !isChecked ? 'info' : errors ? 'error' : warnings ? 'warning' : 'success';
 	return (
 		<div className="scriptCompatibilityIssues">
 			<div className="scriptCompatibilitySummary">
@@ -41,7 +42,9 @@ export function ScriptCompatibilityStatus({ issues, isEnabled, onLocate }: Props
 					</span>
 					{!isEnabled
 						? t('sandbox.compatibilityOnlyJs')
-						: issues.length
+						: !isChecked
+							? t('sandbox.checking')
+							: issues.length
 							? summary
 							: t('sandbox.compatible')}
 				</span>

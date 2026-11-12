@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Alert } from '@shared/ui/primitives/Alert';
 
-const DISMISSED_KEY = 'opencelium:script-playground:banner-dismissed';
+const DISMISSED_KEY = 'opencelium:script-playground:test-run-banner-dismissed';
 
 const readDismissed = () => {
 	try {
@@ -12,7 +12,7 @@ const readDismissed = () => {
 	}
 };
 
-export function SimulationBanner() {
+export function TestRunBanner() {
 	const { t } = useI18n('workflow');
 	const [isDismissed, setDismissed] = useState(readDismissed);
 	if (isDismissed) return null;

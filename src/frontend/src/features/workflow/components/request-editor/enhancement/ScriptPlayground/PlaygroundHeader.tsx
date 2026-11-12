@@ -11,7 +11,7 @@ export function PlaygroundHeader({ hasDocsLink }: { hasDocsLink: boolean }) {
 			<strong className="scriptPlaygroundTitle">
 				<Icon name="flask" size={17} color="inherit" />
 				{t('sandbox.title')}
-				<small>{t('sandbox.simulation')}</small>
+				<small>{t('sandbox.serverRun')}</small>
 			</strong>
 			{hasDocsLink && (
 				<Button

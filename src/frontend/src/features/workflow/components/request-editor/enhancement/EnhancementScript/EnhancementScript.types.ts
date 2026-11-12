@@ -1,5 +1,5 @@
 import type { Ace } from 'ace-builds';
-import type { CompatibilityIssue } from '@features/workflow/script-sandbox/checkNashornCompatibility';
+import type { CompatibilityIssue } from '@features/workflow/script-sandbox/sandbox.types';
 import type { Enhancement } from '../../../../types/connection';
 
 export type EnhancementScriptProps = {

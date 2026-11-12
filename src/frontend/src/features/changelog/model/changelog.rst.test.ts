@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { parseChangelogRst, renderChangelogModule } from '../../../../scripts/changelog/parseChangelogRst.cjs'

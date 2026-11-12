@@ -1,14 +1,7 @@
 import { parse, type Node } from 'acorn';
 import { full } from 'acorn-walk';
-import { hasNashornSyntax } from './hasNashornSyntax';
+import type { CompatibilityIssue } from './sandbox.types';
 
-export type IssueKind = 'syntax' | 'unsupportedBuiltin' | 'serverOnly' | 'timezone';
-export type CompatibilityIssue = {
-	kind: IssueKind;
-	message: string;
-	line: number;
-	column: number;
-};
 export const unsupportedMethods = [
 	'find',
 	'findIndex',
@@ -31,7 +24,6 @@ export const unsupportedGlobals = [
 	'WeakMap',
 	'WeakSet',
 	'fetch',
-	'console',
 	'Proxy',
 	'Reflect',
 	'BigInt',
@@ -58,70 +50,30 @@ type InspectNode = Node & {
 	property?: InspectNode;
 	callee?: InspectNode;
 	value?: unknown;
-	kind?: string;
-	regex?: { flags: string };
 };
 
+const serverOnlyGlobals = ['load', 'Packages', 'java', 'quit', 'exit'];
+
+/**
+ * Lint for things that compile on Nashorn but fail there or in a test run.
+ * Syntax is checked by the backend (/lang-code/validate), so code that does not
+ * parse simply yields no lint warnings.
+ */
 export function checkNashornCompatibility(script: string): CompatibilityIssue[] {
 	const issues: CompatibilityIssue[] = [];
-	const add = (node: Node, kind: IssueKind, message: string) => {
+	const add = (node: Node, kind: 'unsupportedBuiltin' | 'serverOnly', name: string) => {
 		issues.push({
 			kind,
-			message,
+			name,
 			line: node.loc?.start.line ?? 1,
 			column: node.loc?.start.column ?? 0,
 		});
 	};
 	let tree: Node;
 	try {
-		tree = parse(script, { ecmaVersion: 5, locations: true });
-	} catch (error) {
-		const failure = error as SyntaxError & {
-			loc?: { line: number; column: number };
-			pos?: number;
-		};
-		const serverSyntax = hasNashornSyntax(script, failure.pos ?? 0);
-		issues.push({
-			kind: serverSyntax ? 'serverOnly' : 'syntax',
-			message: serverSyntax ? 'nashornSyntax' : 'syntax',
-			line: failure.loc?.line ?? 1,
-			column: failure.loc?.column ?? 0,
-		});
-		try {
-			tree = parse(script, { ecmaVersion: 'latest', locations: true });
-			issues[0].kind = 'syntax';
-			issues[0].message = 'syntax';
-			{
-				full(tree, (raw) => {
-					const node = raw as InspectNode;
-					const syntaxMessage =
-						node.type === 'ArrowFunctionExpression'
-							? 'arrowSyntax'
-							: node.type === 'TemplateLiteral'
-								? 'templateSyntax'
-								: node.type === 'VariableDeclaration' && node.kind !== 'var'
-									? 'declarationSyntax'
-									: node.type === 'ClassDeclaration' || node.type === 'ClassExpression'
-										? 'classSyntax'
-										: node.type === 'SpreadElement' || node.type === 'RestElement'
-											? 'spreadSyntax'
-											: node.type === 'ObjectPattern' || node.type === 'ArrayPattern'
-												? 'destructuringSyntax'
-												: node.regex && /[uys]/.test(node.regex.flags)
-													? 'regexSyntax'
-													: undefined;
-					if (
-						syntaxMessage &&
-						issues[0].message === 'syntax' &&
-						node.start <= (failure.pos ?? 0) &&
-						node.end >= (failure.pos ?? 0)
-					)
-						issues[0].message = syntaxMessage;
-				});
-			}
-		} catch {
-			return issues;
-		}
+		tree = parse(script, { ecmaVersion: 'latest', locations: true });
+	} catch {
+		return issues;
 	}
 	full(tree, (raw) => {
 		const node = raw as InspectNode;
@@ -130,7 +82,6 @@ export function checkNashornCompatibility(script: string): CompatibilityIssue[] 
 			const member = node.computed ? node.property?.value : node.property?.name;
 			if (owner === 'Java')
 				add(node, 'serverOnly', typeof member === 'string' ? `Java.${member}` : 'Java');
-			else if (owner === 'Date') add(node, 'timezone', 'Date');
 			else if (
 				typeof member === 'string' &&
 				(unsupportedMethods.includes(member) ||
@@ -142,13 +93,11 @@ export function checkNashornCompatibility(script: string): CompatibilityIssue[] 
 		if (node.type === 'Identifier' && node.name && unsupportedGlobals.includes(node.name)) {
 			add(node, 'unsupportedBuiltin', node.name);
 		}
-		if (node.type === 'CallExpression' && node.callee?.name === 'load')
-			add(node, 'serverOnly', 'load');
-		if (
-			(node.type === 'NewExpression' || node.type === 'CallExpression') &&
-			node.callee?.name === 'Date'
-		) {
-			add(node, 'timezone', 'Date');
+		if (node.type === 'Identifier' && node.name === 'console') {
+			issues.push({ kind: 'console', line: node.loc?.start.line ?? 1, column: node.loc?.start.column ?? 0 });
+		}
+		if (node.type === 'Identifier' && node.name && serverOnlyGlobals.includes(node.name)) {
+			add(node, 'serverOnly', node.name);
 		}
 	});
 	return issues;
