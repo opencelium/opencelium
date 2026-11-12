@@ -145,7 +145,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
 ### Handover to the browser
 
-- **SW-32** Given a complete wizard, when the port listens, then the wizard process must print a terminal box. The box shows the URL `http://<host>:<port>/setup`, the admin username and the admin password `1234`. With the service, the wizard prints it, not the service.
+- **SW-32** Given a complete wizard, when the port listens, then the wizard process must print a terminal box. The box shows the URL `http://<host>:<port>/setup`, the admin username and the admin password `1234`. With the service, the wizard prints it, not the service. When the wizard skips the admin step (SW-37), the box shows the URL only. The admin password can be different from `1234`.
 - **SW-33** Given an incomplete setup, when an authenticated request reaches a blocked route, then the API must answer 409 `SETUP_REQUIRED`. The body lists the open steps. The setup, settings, authentication, own-password and health routes are not blocked.
 - **SW-34** Given `GET /setup/status`, when an admin calls it, then it must return 4 items:
   1. The deployment mode.
@@ -194,3 +194,4 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 7. What does the option "Continue" of SW-17 do when a later step uses the database? The master key step reads the database before the summary, and the admin marker writes into it after the summary. Assumption until the answer comes: the master key step reports the server, and the setup stops with exit code 1 before the summary (assumption).
 8. Must the values option of SW-53 ask if the MongoDB connection uses TLS (Transport Layer Security)? Assumption until the answer comes: no. The built URI has no TLS option, and a server that must have TLS gets the URI option (assumption).
 9. What does the master key step do when `OC_MASTER_KEY` is set in the environment of the setup? The variable has priority at each start in this environment. Assumption until the answer comes: the wizard shows no menu and takes the variable, and a setup file must give `env` (assumption).
+10. Which form has the admin username? SW-24 gives only the default `admin`. Assumption until the answer comes: a text without a space and without a control character (assumption).

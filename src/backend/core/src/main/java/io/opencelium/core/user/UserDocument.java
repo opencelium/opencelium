@@ -15,9 +15,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * @param temporary          a setup account to delete when setup completes (the cloud {@code operator})
  * @param locked             login refused, for example because a generated password expired
  */
-@Document("users")
+@Document(UserDocument.COLLECTION)
 public record UserDocument(@Id String id, String tenantId, String username, String passwordHash, Set<String> roles,
 		boolean mustChangePassword, Instant passwordIssuedAt, boolean temporary, boolean locked, Instant createdAt) {
+
+	/** The collection; {@link AdminLookup} reads it with the plain driver, by these field names. */
+	static final String COLLECTION = "users";
+
+	static final String TENANT_ID = "tenantId";
+
+	static final String ROLES = "roles";
 
 	public UserDocument {
 		roles = roles == null ? Set.of() : Set.copyOf(roles);
