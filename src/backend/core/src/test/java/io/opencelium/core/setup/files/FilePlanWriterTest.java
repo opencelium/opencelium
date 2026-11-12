@@ -144,16 +144,22 @@ class FilePlanWriterTest {
 	}
 
 	@Test
-	void writeKeepsTheOwnerOnlyPermissionsWhenItKeepsTheOldEnvFile() throws IOException {
+	void writeMakesTheBakOwnerOnlyWhenTheOldFileIsReadableByOthers() throws IOException {
 		assumeTrue(FileSystems.getDefault().supportedFileAttributeViews().contains("posix"), "POSIX permissions");
+		// Files written by hand with the default umask; the old env file holds the old database password.
 		Files.createDirectory(tmp.resolve("config"));
+		Files.writeString(tmp.resolve("config/application.yml"), "old\n");
 		Files.writeString(tmp.resolve("config/opencelium.env"), "OLD=1\n");
-		Files.setPosixFilePermissions(tmp.resolve("config/opencelium.env"), PosixFilePermissions.fromString("rw-------"));
+		for (String name : List.of("application.yml", "opencelium.env")) {
+			Path old = tmp.resolve("config").resolve(name);
+			Files.setPosixFilePermissions(old, PosixFilePermissions.fromString("rw-r--r--"));
+		}
 
 		writer.write(plan(yml("new\n"), env("NEW=1\n")));
 
-		// The old env file holds the old MongoDB URI with its database password.
+		assertThat(permissions(tmp.resolve("config/application.yml.bak"))).isEqualTo("rw-------");
 		assertThat(permissions(tmp.resolve("config/opencelium.env.bak"))).isEqualTo("rw-------");
+		assertThat(warnings).isEmpty();
 	}
 
 	@Test

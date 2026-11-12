@@ -2,6 +2,7 @@ package io.opencelium.core.setup;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 
 import io.opencelium.common.tenant.TenantId;
+import io.opencelium.core.config.DeploymentMode;
+import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
 import io.opencelium.core.user.CreateAdminCommand;
@@ -30,6 +33,7 @@ import io.opencelium.core.user.UserRepository;
 import io.opencelium.core.user.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * The second half of the setup, after Spring starts on the written files: the runner finds the admin marker of the
@@ -64,6 +68,9 @@ class SetupCompletionRunnerTest {
 
 	@Autowired
 	MongoTemplate mongo;
+
+	@Autowired
+	SetupStateRepository states;
 
 	@BeforeEach
 	void removeUsersAndSetupState() {
@@ -121,6 +128,29 @@ class SetupCompletionRunnerTest {
 
 		assertThat(mongo.count(new Query(), UserDocument.class)).isZero();
 		assertThat(state()).isNull();
+	}
+
+	@Test
+	void runDoesNothingInCloudMode() {
+		// In the cloud mode the database of the configuration is the system database, and no wizard runs.
+		storeMarker("root");
+		var cloud = new SetupCompletionRunner(states, userService,
+				new OpenCeliumProperties(DeploymentMode.CLOUD, dataDir, Optional.empty()));
+
+		cloud.run(new DefaultApplicationArguments());
+
+		assertThat(mongo.count(new Query(), UserDocument.class)).isZero();
+		assertThat(state().getString("state")).isEqualTo("PENDING_ADMIN");
+	}
+
+	@Test
+	void runStopsNamingTheDocumentWhenTheMarkerHasNoUsername() {
+		mongo.getCollection("setup_state")
+				.insertOne(new Document("_id", TENANT.value()).append("state", "PENDING_ADMIN"));
+
+		assertThatIllegalStateException().isThrownBy(this::run).withMessageContaining("setup_state")
+				.withMessageContaining("adminUsername");
+		assertThat(mongo.count(new Query(), UserDocument.class)).isZero();
 	}
 
 	@Test

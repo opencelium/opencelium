@@ -86,6 +86,18 @@ class AdminStepTest {
 	}
 
 	@Test
+	void runAsksAgainWhenTheUsernameHasAControlCharacter() {
+		context.setMongoUri(URI);
+		// An escape sequence would steer the terminal where the username shows: the summary, the box, the log.
+		console.type("ad\u001b[2Jmin", "root");
+
+		new AdminStep(connection -> false).run(context, prompter);
+
+		assertThat(context.adminUsername()).contains("root");
+		assertThat(console.output()).contains("control characters");
+	}
+
+	@Test
 	void runSkipsWhenAdminExists() {
 		var mongo = new NamedStep("MongoDB", (setup, prompts) -> setup.setMongoUri(URI));
 		var admin = new AdminStep(connection -> {
