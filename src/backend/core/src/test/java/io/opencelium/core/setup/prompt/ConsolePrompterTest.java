@@ -48,9 +48,21 @@ class ConsolePrompterTest {
 	private static final Function<String, Optional<String>> NO_SPACES = value -> value.contains(" ")
 			? Optional.of("No spaces, please.") : Optional.empty();
 
+	private static final String GREEN = "\u001B[32m";
+
+	private static final String RED = "\u001B[31m";
+
+	private static final String RESET = "\u001B[0m";
+
+	private static final String NEWLINE = System.lineSeparator();
+
 	private final ScriptedConsoleIo console = new ScriptedConsoleIo();
 
 	private final ConsolePrompter prompter = new ConsolePrompter(console);
+
+	private final ScriptedConsoleIo colorConsole = new ScriptedConsoleIo().showingColors();
+
+	private final ConsolePrompter colorPrompter = new ConsolePrompter(colorConsole);
 
 	@Test
 	void choiceReturnsDefaultWhenInputIsEmpty() {
@@ -301,6 +313,49 @@ class ConsolePrompterTest {
 				  OK Configuration written.
 				  -> Starting OpenCelium...
 				""");
+	}
+
+	@Test
+	void successPrintsTheLineInGreenWhenTheConsoleShowsColors() {
+		colorPrompter.success("MongoDB answers.");
+
+		assertThat(colorConsole.output()).isEqualTo("  " + GREEN + "OK MongoDB answers." + RESET + NEWLINE);
+	}
+
+	@Test
+	void errorPrintsTheMarkLineInRedAndTheContinuationWithoutColorWhenTheConsoleShowsColors() {
+		colorPrompter.error("Connection refused.", "Start MongoDB, then try again.");
+
+		assertThat(colorConsole.output()).isEqualTo("  " + RED + "! Connection refused." + RESET + NEWLINE
+				+ "    Start MongoDB, then try again." + NEWLINE);
+	}
+
+	@Test
+	void badAnswersGetARedProblemLineWhenTheConsoleShowsColors() {
+		colorConsole.type("x", "1", "maybe", "y", "a b", "ab", "", "secret");
+
+		colorPrompter.choice(QUESTION, MODES, 0);
+		colorPrompter.yesNo("Write?", "Help.", true);
+		colorPrompter.text(DIR_QUESTION, "Help.", "/srv/oc", NO_SPACES);
+		colorPrompter.secret(SECRET_QUESTION);
+
+		assertThat(colorConsole.output()).containsSubsequence(
+				"  " + RED + "! Please enter a number between 1 and 2." + RESET + NEWLINE,
+				"  " + RED + "! Please answer y or n." + RESET + NEWLINE,
+				"  " + RED + "! No spaces, please." + RESET + NEWLINE,
+				"  " + RED + "! Database password cannot be empty." + RESET + NEWLINE);
+	}
+
+	@Test
+	void statusLinesHaveNoEscapeCodeWhenTheConsoleShowsNoColors() {
+		console.type("x", "1", "a b", "ab");
+
+		prompter.success("MongoDB answers.");
+		prompter.error("Connection refused.", "Start MongoDB, then try again.");
+		prompter.choice(QUESTION, MODES, 0);
+		prompter.text(DIR_QUESTION, "Help.", "/srv/oc", NO_SPACES);
+
+		assertThat(console.output()).doesNotContain("\u001B");
 	}
 
 	@Test

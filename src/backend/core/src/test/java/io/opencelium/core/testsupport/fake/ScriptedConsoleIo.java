@@ -27,6 +27,14 @@ public final class ScriptedConsoleIo implements ConsoleIo {
 
 	private final PrintWriter writer = new PrintWriter(captured, true);
 
+	private boolean colors;
+
+	/** Makes the console a terminal that shows colors. By default it shows none, as a file or a pipe. */
+	public ScriptedConsoleIo showingColors() {
+		colors = true;
+		return this;
+	}
+
 	/** Adds what the user types, one line for each entry, in order. An empty string is a bare Enter. */
 	public ScriptedConsoleIo type(String... input) {
 		lines.addAll(List.of(input));
@@ -62,6 +70,11 @@ public final class ScriptedConsoleIo implements ConsoleIo {
 	@Override
 	public PrintWriter writer() {
 		return writer;
+	}
+
+	@Override
+	public boolean showsColors() {
+		return colors;
 	}
 
 	/** Everything printed so far. */
