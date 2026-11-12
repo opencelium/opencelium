@@ -229,23 +229,14 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 14
 - **Status:** done
 
-## Task 16: feat(core): the setup state and the setup endpoints
-- **Criteria:** SW-34, SW-35, SW-36
-- **Function:** The setup state service reads the state that task 15 writes, and `GET /setup/status` returns the mode, the state, the open steps and the bootstrap facts without credentials. `POST /setup/complete` sets `COMPLETE`. An admin without a state document is an upgrade and counts as complete; a document with `PENDING_ADMIN` never counts as an upgrade. The open steps are a fixed list in this feature.
-- **Tests:** `SetupStateServiceTest` (local MongoDB): stateIsRequiredWhenWizardWroteIt, stateIsCompleteWhenAdminExistsWithoutDocument, stateIsNotAnUpgradeWhenDocumentHoldsTheMarker, completeWritesCompletionTime; `SetupControllerTest` (full application, MockMvc): statusReturnsFourItemsForAdmin, statusNeverContainsCredentialsWhenUriHasPassword, statusReturns403WhenUserIsNotAdmin, completeSetsStateToComplete
-- **Hand test:** 1. After the wizard, call `GET /setup/status` as the admin: `REQUIRED`, the open steps, the host without the password. 2. Call `POST /setup/complete`, then the status again: `COMPLETE`.
-- **Size:** approximately 250 lines
+## Task 15a: feat(core): the start makes the default admin and deletes the marker
+- **Criteria:** SW-32, SW-42, SW-43, SW-63
+- **Function:** A start without the wizard on a database without an OpenCelium user makes the default admin, so a Docker container has an admin for the first admin login. After the wizard, the first start deletes the admin marker, and the box shows the admin login page. The PR also carries the changes of spec.md, plan.md and tasks.md for these criteria.
+- **Tests:** `SetupCompletionRunnerTest` (full application, local MongoDB): runMakesTheDefaultAdminWhenNoMarkerAndNoOpenCeliumUserExist, runMakesNoAdminWhenNoMarkerAndAnOpenCeliumUserExists, runMakesNoDefaultAdminInCloudMode, runLogsTheUsernameAndTheLoginPageWithoutThePasswordWhenItMakesTheDefaultAdmin, runKeepsTheMarkerWhenTheAdminCannotBeMade, runMakesTheAdminFromTheMarkerWhenANonAdminOpenCeliumUserExists, runDeletesTheMarkerWhenAnotherProcessMadeTheAdminOfTheMarkerFirst and runContinuesWhenAnotherProcessMadeTheDefaultAdminFirst (each for the admin check and for the unique index); `UserServiceTest`: anyUserExistsIsTrueOnlyForATenantWithAUser. Changed for the new behavior: `SetupCompletionRunnerTest`: runSetsStateRequiredAfterTheAdmin becomes runDeletesTheMarkerAfterTheAdmin, runOnlySetsRequiredWhenAdminExistsAndMarkerRemains becomes runOnlyDeletesTheMarkerWhenTheAdminExists, runDoesNothingWhenNoMarkerExists is replaced by the 2 cases without a marker, runStopsNamingTheDocumentWhenTheMarkerHasNoUsername names `admin_marker`, runDoesNothingInCloudMode reads the marker; `AdminMarkerTest`: runStoresStatePendingAdminWithUsername becomes runStoresTheMarkerWithTheUsername, undoRemovesTheMarkerWhenNoSetupStateExistedBefore becomes undoRemovesTheMarkerWhenNoMarkerExistedBefore, undoPutsBackTheSetupStateThatExistedBefore becomes undoPutsBackTheMarkerThatExistedBefore; `FailedFirstStartTest`: nextStartMakesTheAdminWhenTheFirstStartFailed expects no marker; `WizardTest`: runPrintsBoxWithUrlUsernameAndPasswordWhenPortListens and runPrintsOnlyTheUrlWhenTheAdminStepIsSkipped expect `/login`.
+- **Hand test:** 1. Run the setup to the end with the admin username `root`: the box shows `http://localhost:9090/login`, `root` and `1234`. 2. In `mongosh`, the collection `users` holds `root`, and `admin_marker` is empty. 3. Run `java -jar oc-app.jar --spring.mongodb.uri=mongodb://localhost:27017/oc_handtest` on an empty database. 4. The log names the default admin `admin` and `/login`, and the collection `users` holds `admin`. 5. Start the jar again: no second admin and no default admin log line. 6. Delete the users, insert `{_id: "self-host", adminUsername: "root"}` into `admin_marker`, and start: `root` exists, and the marker is gone.
+- **Size:** approximately 120 lines
 - **Depends on:** 15
-- **Status:** open
-
-## Task 17: feat(core): block the API with 409 until the setup is complete
-- **Criteria:** SW-33
-- **Function:** A filter after the authentication answers 409 `SETUP_REQUIRED` with the open steps for each route outside the allow-list when the state is `REQUIRED`. The setup, settings, authentication, own-password and health routes stay open.
-- **Tests:** `SetupRequiredFilterTest` (full application, MockMvc): blockedRouteReturns409WhenSetupIsRequired, blockedRouteReturns200AfterComplete, setupRoutesAreNotBlockedWhenSetupIsRequired, bodyListsOpenSteps
-- **Hand test:** 1. After the wizard, call `GET /setup/status`: 200; call a route outside the allow-list: 409 with `SETUP_REQUIRED`. 2. Call `POST /setup/complete`, then the same route: no 409.
-- **Size:** approximately 150 lines
-- **Depends on:** 16
-- **Status:** open
+- **Status:** in work
 
 ## Task 18: feat(core): the service step prints the unit file, the plist or the sc commands
 - **Criteria:** SW-27, SW-29, SW-30
@@ -285,16 +276,16 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 
 ## Task 22: docs(core): the first-start guide, the sample files and the end-to-end setup test
 - **Criteria:** SW-38, SW-26
-- **Function:** The README section "First start" and the sample `application.yml` exist, and the README shows the percent-encoding of the database password in `OC_MONGO_URI`. A full-application test runs a batch installation from a setup file and starts the application. It calls `GET /setup/status` and finds no secret in the log files, in the temporary directory or in a dump of the test database.
-- **Tests:** `BatchInstallationTest` (full application, local MongoDB): batchRunWritesFilesAndStartsApplication, statusAgreesWithSetupFile, logFilesTemporaryDirectoryAndDatabaseDumpHoldNoSecret
-- **Hand test:** 1. Run the VM matrix of the plan; on Ubuntu, `journalctl -u opencelium` holds no secret. 2. Record the results in `docs/setup-wizard-test-matrix.md`. 3. A new user follows the README section on a fresh host and reaches `/setup`.
+- **Function:** The README section "First start" and the sample `application.yml` exist, and the README shows the percent-encoding of the database password in `OC_MONGO_URI`. A full-application test runs a batch installation from a setup file and starts the application. It finds the admin of the setup file and no secret in the log files, in the temporary directory or in a dump of the test database.
+- **Tests:** `BatchInstallationTest` (full application, local MongoDB): batchRunWritesFilesAndStartsApplication, batchRunMakesTheAdminOfTheSetupFileAndDeletesTheMarker, logFilesTemporaryDirectoryAndDatabaseDumpHoldNoSecret
+- **Hand test:** 1. Run the VM matrix of the plan; on Ubuntu, `journalctl -u opencelium` holds no secret. 2. Record the results in `docs/setup-wizard-test-matrix.md`. 3. A new user follows the README section on a fresh host and gets the admin login box.
 - **Size:** approximately 150 lines
 - **Depends on:** 21
 - **Status:** open
 
 ## Task 23: docs: record the setup wizard decisions in the architecture document
 - **Criteria:** none
-- **Function:** Section 7 gets 3 records from the architect agent: the first admin instead of a setup token, the env file for the database password, and the admin marker as the handover to the application. Section 6.4 says that the env file is a source of the yml place for the database password. Section 4.1 starts with the launcher: the search and the hand-off of `/etc/opencelium/`. Then it names the wizard and the env file reader before the defaults post-processor. Section 3.4 gets rows for the setup blocks, and its Users row loses the generated password and the lock. Section 6.8 gets the exception for the tests of code that runs before Spring.
+- **Function:** Section 7 gets 3 records from the architect agent: the first admin instead of a setup token, the env file for the database password, and the admin marker as the handover to the application, with the default admin. Section 6.4 says that the env file is a source of the yml place for the database password. Section 4.1 starts with the launcher: the search and the hand-off of `/etc/opencelium/`. Then it names the wizard and the env file reader before the defaults post-processor. Section 3.4 gets rows for the setup blocks, and its Users row loses the generated password and the lock. Section 6.8 gets the exception for the tests of code that runs before Spring.
 - **Tests:** none; a documentation change
 - **Hand test:** 1. Read sections 3.4, 4.1, 6.4, 6.8 and 7: the 3 records exist, and the placement table names the env file. 2. Search the architecture document for a status marker, a date or a ticket number: nothing.
 - **Size:** approximately 100 lines

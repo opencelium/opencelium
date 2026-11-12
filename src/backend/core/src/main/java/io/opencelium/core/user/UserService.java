@@ -83,6 +83,11 @@ public class UserService {
 		return users.existsByTenantIdAndRolesContaining(tenant.value(), ADMIN_ROLE);
 	}
 
+	/** Whether the tenant has a user of any role. */
+	public boolean anyUserExists(TenantId tenant) {
+		throw new UnsupportedOperationException();
+	}
+
 	/**
 	 * Locks every user whose generated password is older than 24 h and still unchanged.
 	 *
