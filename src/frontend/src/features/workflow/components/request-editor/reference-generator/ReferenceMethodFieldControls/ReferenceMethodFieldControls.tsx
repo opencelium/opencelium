@@ -3,6 +3,7 @@ import { Select } from '@shared/ui/primitives/Select';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { ResponseType } from '../../body-editor/requestReferenceOptions';
 import { useReferenceFeedbackTooltip } from '../../body-editor/useReferenceFeedbackTooltip';
+import { ReferenceFeedbackContent } from '../../body-editor/ReferenceFeedbackContent';
 import type { ReferenceMethodFieldControlsProps } from './ReferenceMethodFieldControls.types';
 import '../referenceGenerator.css';
 
@@ -31,7 +32,7 @@ export function ReferenceMethodFieldControls(props: ReferenceMethodFieldControls
             label={<span className="referenceTypeLabel">{RESPONSE_LABELS[type]}</span>} />)}
         </div>}
         <div className="referenceFieldInputHost">
-          <Tooltip content={props.fieldFeedback?.message ?? null} zIndex={FIELD_WARNING_Z_INDEX} maxWidth={320}
+          <Tooltip content={props.fieldFeedback ? <ReferenceFeedbackContent feedback={props.fieldFeedback} /> : null} zIndex={FIELD_WARNING_Z_INDEX} maxWidth={320}
             open={feedbackTooltip.open} onOpenChange={feedbackTooltip.onOpenChange}>
             <input ref={props.fieldInputRef} type="text" value={props.searchValue}
               onChange={(event) => props.onSearchChange(event.target.value)}

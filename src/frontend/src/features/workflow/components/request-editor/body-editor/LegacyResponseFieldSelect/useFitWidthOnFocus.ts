@@ -29,10 +29,15 @@ const findTextarea = (host: HTMLElement | null) => host?.querySelector('textarea
  * so the select overlays its right neighbours instead of reflowing the row —
  * operator rows have no room to grow. Once the width is capped, the textarea
  * wraps and grows in height instead. Unfocused, shows the end of the path on one line.
+ *
+ * Wrapping stays off until the width is capped: antd's autoSize measures the
+ * textarea's height before this hook widens it, so a soft-wrapping field would
+ * paint each new character on a second row for a frame, then snap back.
  */
 export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, text: string) {
   const [isFocused, setIsFocused] = useState(false);
   const [layout, setLayout] = useState<{ width: number; hostWidth: number } | null>(null);
+  const [isCapped, setIsCapped] = useState(false);
 
   useLayoutEffect(() => {
     const host = hostRef.current;
@@ -40,6 +45,7 @@ export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, te
     const select = input?.closest<HTMLElement>('.ant-select');
     if (!isFocused || !host || !input || !select) {
       setLayout(null);
+      setIsCapped(false);
       return;
     }
     const hostRect = host.getBoundingClientRect();
@@ -48,8 +54,11 @@ export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, te
       - parseFloat(inputStyle.paddingRight);
     const chrome = select.offsetWidth - contentWidth;
     const available = getClipRight(host) - hostRect.left - EDGE_GUTTER;
-    const width = Math.min(measureText(text, input) + chrome + 2, MAX_WIDTH, available);
-    setLayout(width > hostRect.width ? { width, hostWidth: hostRect.width } : null);
+    const neededWidth = measureText(text, input) + chrome + 2;
+    const width = Math.min(neededWidth, MAX_WIDTH, available);
+    const isExpanded = width > hostRect.width;
+    setLayout(isExpanded ? { width, hostWidth: hostRect.width } : null);
+    setIsCapped(neededWidth > (isExpanded ? width : hostRect.width));
   }, [hostRef, isFocused, text]);
 
   const [isTailShown, setIsTailShown] = useState(false);
@@ -83,6 +92,8 @@ export function useFitWidthOnFocus(hostRef: RefObject<HTMLDivElement | null>, te
 
   return {
     isFocused,
+    /** Focused and as wide as it may get: only now may the path wrap onto more lines. */
+    isWrapping: isFocused && isCapped,
     isExpanded: layout !== null,
     isTailShown,
     style,
