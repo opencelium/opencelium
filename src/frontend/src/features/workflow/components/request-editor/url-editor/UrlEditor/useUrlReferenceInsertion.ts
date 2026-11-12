@@ -3,7 +3,6 @@ import type { EndpointArg, QueryParam } from '../../../../types/connection';
 import {
 	buildQueryFromParams,
 	buildQueryParamsFromEndpoint,
-	decodeQueryParamValue,
 	ensureTemplateRow,
 	getInlineVisualLength,
 	splitEndpoint,
@@ -86,14 +85,7 @@ export function useUrlReferenceInsertion(params: Params) {
 			};
 			const row = target && queryParams.find((item) => item.id === target.rowId);
 			if (target && row) {
-				const stored = String(row[target.field] ?? '');
-				const decoded = target.field === 'value' ? decodeQueryParamValue(stored) : stored;
-				const current =
-					target.field === 'value' &&
-					!extractTokenIds(stored).length &&
-					extractTokenIds(decoded).length
-						? decoded
-						: stored;
+				const current = String(row[target.field] ?? '');
 				const { token } = createArgToken(reference, extractTokenIds(current));
 				const insertAt = Math.max(0, Math.min(target.caret, current.length));
 				const nextValue = `${current.slice(0, insertAt)}${token}${current.slice(active && current.slice(active.start, active.end) === active.token ? active.end : insertAt)}`;

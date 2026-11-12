@@ -3,8 +3,11 @@ import { getReferenceDisplayLabel } from '../shared/referenceDisplay';
 import { createId as createStableId } from '@shared/lib/createId';
 
 export const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
-export const URL_FORBIDDEN_INPUT_RE = /[\u0000-\u001F\u007F<>`|\\^[\]]/g;
-const URL_FORBIDDEN_INPUT_SINGLE_RE = /[\u0000-\u001F\u007F<>`|\\^[\]]/;
+// Only control characters and `<>` (which the contenteditable field cannot hold as
+// text) are refused. Anything else is sent as typed: the backend encodes whatever a
+// URL cannot carry, so `filter[age]=5`, `a|b` or `Müller` are valid input.
+export const URL_FORBIDDEN_INPUT_RE = /[\u0000-\u001F\u007F<>]/g;
+const URL_FORBIDDEN_INPUT_SINGLE_RE = /[\u0000-\u001F\u007F<>]/;
 const CARET_BOUNDARY = '\u200B';
 
 export const ARG_TOKEN_RE = /(#{%\s*([A-Za-z0-9_-]+)\s*%})/g;
@@ -220,83 +223,19 @@ export function removeInlineTokenByIndex(raw: string, tokenIndex: number): strin
 	return out.join('');
 }
 
-type ParsedEndpoint = { base: string; queryRaw: string; hasQuestion: boolean };
-
-export const splitEndpoint = (endpoint: string): ParsedEndpoint => {
-	const s = endpoint || '';
-	const i = s.indexOf('?');
-	return i === -1 ? { base: s, queryRaw: '', hasQuestion: false } : { base: s.slice(0, i), queryRaw: s.slice(i + 1), hasQuestion: true };
-};
-
-const parseQueryToPairs = (queryRaw: string) =>
-	(queryRaw ? queryRaw.split('&') : []).filter(Boolean).map((ch) => {
-		const eq = ch.indexOf('=');
-		return eq === -1 ? { key: ch, value: '' } : { key: ch.slice(0, eq), value: ch.slice(eq + 1) };
-	});
-
-export type QueryParamLite = { id: string; key: string; value: string; enabled: boolean; autoEncode?: boolean };
-
-export const buildQueryFromParams = (params: QueryParamLite[], encoded = false) =>
-	(params || [])
-		.filter((p) => p.enabled && p.key.trim() !== '')
-		.map((p) => {
-			const key = encoded && p.autoEncode !== false ? encodeQueryParamValue(p.key || '') : p.key;
-			const value = encoded && p.autoEncode !== false ? encodeQueryParamValue(p.value ?? '') : p.value ?? '';
-			return `${key}=${value}`;
-		})
-		.join('&');
-
-export function ensureTemplateRow<T extends QueryParamLite>(params: T[]): T[] {
-	const last = params[params.length - 1];
-	const isTemplate = !!last && !last.enabled && !last.key.trim() && !last.value.trim();
-	return isTemplate
-		? params
-		: [...(params.length ? params : []), ({ id: createId(), key: '', value: '', enabled: false } as T)];
-}
-
-export const isTemplateRow = (p: QueryParamLite) => !p.enabled && !p.key.trim() && !p.value.trim();
-
-export const stripTemplateRows = <T extends QueryParamLite>(params: T[]) =>
-	(params || []).filter((p) => !isTemplateRow(p) && p.key.trim() !== '');
-
-const isMockActiveRow = (p: QueryParamLite) =>
-	p.key.trim().toLowerCase() === 'mock' && String(p.value ?? '').trim().toLowerCase() === 'active';
-
-export const stripMockActiveRows = <T extends QueryParamLite>(params: T[]) =>
-	(params || []).filter((p) => !isMockActiveRow(p));
-
-export function stripMockActiveFromEndpoint(endpointStr: string) {
-	const endpoint = splitEndpoint(endpointStr || '');
-	if (!endpoint.hasQuestion) return endpointStr || '';
-	const pairs = parseQueryToPairs(endpoint.queryRaw)
-		.filter((pair) => !isMockActiveRow({ id: '', enabled: true, key: pair.key, value: pair.value }));
-	const query = pairs.map((pair) => `${pair.key}=${pair.value ?? ''}`).join('&');
-	return query ? `${endpoint.base}?${query}` : endpoint.base;
-}
-
-export function buildQueryParamsFromEndpoint<T extends QueryParamLite>(endpointStr: string, prev?: T[], includeTemplateRow = true): T[] {
-	const pairs = parseQueryToPairs(splitEndpoint(stripMockActiveFromEndpoint(endpointStr || '')).queryRaw);
-	const prevMeaningful = stripMockActiveRows(stripTemplateRows(prev || []));
-	const params = pairs
-		.filter((pair) => !isMockActiveRow({ id: '', enabled: true, key: pair.key, value: pair.value }))
-		.map((pair, i) => ({
-			id: prevMeaningful[i]?.id || createId(),
-			key: decodeQueryParamValue(pair.key),
-			value: decodeQueryParamValue(pair.value),
-			enabled: true,
-			autoEncode: prevMeaningful[i]?.autoEncode ?? true,
-		} as T));
-
-	return includeTemplateRow ? ensureTemplateRow(params) : params;
-}
-
-export function decodeEndpointQuery(endpointStr: string) {
-	const endpoint = splitEndpoint(endpointStr || '');
-	if (!endpoint.hasQuestion) return endpointStr || '';
-	const params = buildQueryParamsFromEndpoint<QueryParamLite>(endpointStr, [], false);
-	const query = params.map((param) => `${param.key}=${param.value ?? ''}`).join('&');
-	return query ? `${endpoint.base}?${query}` : endpoint.base;
-}
+export {
+	buildQueryFromParams,
+	buildQueryParamsFromEndpoint,
+	encodeQueryKey,
+	encodeQueryValue,
+	ensureTemplateRow,
+	isTemplateRow,
+	splitEndpoint,
+	stripMockActiveFromEndpoint,
+	stripMockActiveRows,
+	stripTemplateRows,
+	type QueryParamLite,
+} from './urlQueryParams.utils';
 
 export const normalizeReference = (ref: string) => {
 	let r = (ref || '').trim();
@@ -311,28 +250,3 @@ export const sanitizeUrlInputValue = (s: string) =>
 
 export const shouldBlockUrlKeyInput = (key: string) =>
 	key.length === 1 && URL_FORBIDDEN_INPUT_SINGLE_RE.test(key);
-
-const transformQueryTextPreservingRefs = (
-	value: string,
-	transform: (part: string) => string,
-) =>
-	buildInlineParts(value || '')
-		.map((part) => (part.kind === 'arg' ? part.value : transform(part.value)))
-		.join('');
-
-const safeDecodeURIComponent = (value: string) => {
-	try {
-		return decodeURIComponent((value || '').replace(/\+/g, ' '));
-	} catch {
-		return value;
-	}
-};
-
-export const decodeQueryParamValue = (value: string) =>
-	transformQueryTextPreservingRefs(value, safeDecodeURIComponent);
-
-export const encodeQueryParamValue = (value: string) =>
-	transformQueryTextPreservingRefs(
-		decodeQueryParamValue(value || ''),
-		encodeURIComponent,
-	);

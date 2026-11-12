@@ -20,6 +20,7 @@ export type WorkflowQueryParam = {
   value: string;
   enabled: boolean;
   autoEncode?: boolean;
+  isFlag?: boolean;
 };
 
 export type WorkflowMethodConfig = {
