@@ -1,5 +1,7 @@
 package io.opencelium.core.setup;
 
+import java.util.List;
+
 /**
  * The setup cannot go on, and the process must end with the given exit code. A command line that cannot be
  * understood ends with {@link #USAGE_EXIT_CODE}; later failures (a missing value, a file that cannot be written)
@@ -31,6 +33,10 @@ public final class SetupFailedException extends RuntimeException {
 
 	public int exitCode() {
 		return exitCode;
+	}
+
+	public List<String> lines() {
+		throw new UnsupportedOperationException();
 	}
 
 }

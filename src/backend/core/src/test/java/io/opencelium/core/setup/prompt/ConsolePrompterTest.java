@@ -359,6 +359,13 @@ class ConsolePrompterTest {
 	}
 
 	@Test
+	void errorShowsABidiControlOfTheMessageAsAQuestionMark() {
+		prompter.error("Server says \u202Eeulav.");
+
+		assertThat(console.output()).isEqualTo("  ! Server says ?eulav." + NEWLINE);
+	}
+
+	@Test
 	void errorShowsAnEscapeCharacterOfTheMessageAsAQuestionMark() {
 		prompter.error("Server says \u001B[2J now.", "Line \u0007two.");
 

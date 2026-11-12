@@ -18,6 +18,7 @@ import io.opencelium.core.setup.steps.DataDirStep;
 import io.opencelium.core.setup.steps.PortStep;
 import io.opencelium.core.setup.steps.SetupStep;
 import io.opencelium.core.setup.steps.SummaryStep;
+import io.opencelium.core.setup.values.ValueKey;
 import io.opencelium.core.testsupport.fake.NamedStep;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
@@ -399,17 +400,30 @@ class SetupLauncherTest {
 	}
 
 	@Test
-	void launchShowsAControlCharacterOfABadSetupFileValueAsAQuestionMark() throws IOException {
+	void launchShowsALineFeedOfAQuotedKeyAsAQuestionMark() throws IOException {
 		terminal = false;
-		Path blocker = Files.writeString(workingDir.resolve("blocker"), "a file where a directory is needed");
-		Path file = Files.writeString(workingDir.resolve("setup-values.yml"),
-				"data-dir: \"" + blocker + "/oc\\e[41mx\"\n");
+		Path file = Files.writeString(workingDir.resolve("setup-values.yml"), "\"da\\nta\": x\n");
 
 		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", file.toString()}, args -> {
 		});
 
 		assertThat(exitCode).hasValue(1);
-		assertThat(err.toString()).contains("Bad value: data-dir").contains("/oc?[41mx").doesNotContain("\u001B");
+		assertThat(err.toString()).isEqualTo("Unknown key 'da?ta' in " + file + ". Known keys: " + ValueKey.words()
+				+ ".\nA template with every key: java -jar oc-app.jar setup --template\n");
+	}
+
+	@Test
+	void launchNamesTheControlCharacterOfABadDataDirectoryWithoutThePath() throws IOException {
+		terminal = false;
+		Path file = Files.writeString(workingDir.resolve("setup-values.yml"),
+				"data-dir: \"" + workingDir + "/oc\\e[41mx\"\n");
+
+		OptionalInt exitCode = launcher().launch(new String[] {"setup", "--file", file.toString()}, args -> {
+		});
+
+		assertThat(exitCode).hasValue(1);
+		assertThat(err.toString()).isEqualTo("Bad value: data-dir in " + file
+				+ ": The data directory has the control character U+001B.\n");
 	}
 
 	@Test

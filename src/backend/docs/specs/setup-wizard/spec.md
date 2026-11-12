@@ -47,6 +47,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - **SW-08** Given a question on a terminal, when the user types a bad value, then the wizard must name the problem and ask again. On a terminal a bad value never stops the wizard.
 - **SW-09** Given a yes/no question, when the user types `y`, `YES`, `n` or `No`, then the wizard must accept the answer.
 - **SW-10** Given any question, when the user types `?`, then the wizard must print a help text and ask again. At the database password question of SW-53, the wizard takes `?` as the database password.
+- **SW-62** Given a data directory with a control character of SW-61, when the user types it or the setup file gives it, then the wizard must reject it. The problem text names the code of the character, for example U+000A, and does not quote the path. Thus a help text that quotes the data directory gets no extra line.
 
 ### Screens
 
@@ -59,7 +60,11 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   4. On each other platform, for example Linux or macOS, the environment variable `TERM` has no value or the value `dumb`.
 
   In each other case, the terminal shows colors.
-- **SW-61** Given a control character in a text, when the wizard prints the text, then it must show a `?` for the character. A control character is a character from U+0000 to U+001F, the character U+007F, or a character from U+0080 to U+009F. The rule applies to the screens and to standard error. A help text and a message on standard error keep their line feeds U+000A, so that their lines stay apart. In each other text, a line feed also shows as `?`, so a text cannot add a line under a status line. The cause of a failed ping in the start error follows the same rule. Thus a text from a MongoDB server or a setup file cannot change the screen. The wizard adds the escape codes of SW-59 after this replacement.
+- **SW-61** Given a control character in a text, when the wizard prints the text, then it must show a `?` for the character. The rule applies to the screens, to standard error and to the cause of a failed ping in the start error. The control characters are:
+  1. The characters from U+0000 to U+001F, the character U+007F and the characters from U+0080 to U+009F.
+  2. The bidi controls from U+202A to U+202E and from U+2066 to U+2069.
+
+  A help text and a message on standard error keep the line breaks of the wizard. A line feed in a value that the wizard quotes shows as `?`, so a value cannot add a line. The wizard adds the escape codes of SW-59 after this replacement.
 
 ### MongoDB
 

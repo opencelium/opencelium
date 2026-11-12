@@ -139,6 +139,16 @@ class DataDirStepTest {
 		assertThat(tmp.resolve("not-yet")).doesNotExist();
 	}
 
+	@Test
+	void checkRejectsAPathWithAControlCharacterAndNamesItsCode() {
+		DataDirStep step = step(tmp);
+
+		assertThat(step.check(tmp + "/oc\u202Ex")).contains("The data directory has the control character U+202E.");
+		assertThat(step.check(tmp + "/oc\nx")).contains("The data directory has the control character U+000A.");
+		assertThat(step.check(tmp + "/oc\u001B[41mx")).hasValueSatisfying(problem -> assertThat(problem)
+				.doesNotContain(tmp.toString()).doesNotContain("[41m"));
+	}
+
 	private ConsolePrompter prompter() {
 		return new ConsolePrompter(console);
 	}

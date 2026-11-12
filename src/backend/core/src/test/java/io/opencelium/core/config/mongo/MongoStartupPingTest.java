@@ -122,6 +122,18 @@ class MongoStartupPingTest {
 	}
 
 	@Test
+	void classifyShowsABidiControlOfTheServerMessageAsAQuestionMark() {
+		var hostile = new MongoCommandException(new BsonDocument("ok", new BsonInt32(0))
+				.append("code", new BsonInt32(2))
+				.append("errmsg", new BsonString("bad \u202Eeulav here")), new ServerAddress());
+
+		MongoStartupPing.Failure failure = MongoStartupPing.classify(hostile,
+				connection("mongodb://db.example/opencelium"), null);
+
+		assertThat(failure.reason()).contains("bad ?eulav here").doesNotContain("\u202E");
+	}
+
+	@Test
 	void classifyShowsAControlCharacterOfTheUserNameAsAQuestionMark() {
 		var denied = new MongoSecurityException(MongoCredential.createCredential("x", "admin", "p".toCharArray()),
 				"Exception authenticating");
