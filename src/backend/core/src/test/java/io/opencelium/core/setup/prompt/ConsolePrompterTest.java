@@ -359,6 +359,55 @@ class ConsolePrompterTest {
 	}
 
 	@Test
+	void errorShowsAnEscapeCharacterOfTheMessageAsAQuestionMark() {
+		prompter.error("Server says \u001B[2J now.", "Line \u0007two.");
+
+		assertThat(console.output()).isEqualTo("  ! Server says ?[2J now." + NEWLINE + "    Line ?two." + NEWLINE);
+	}
+
+	@Test
+	void errorShowsALineFeedOfTheMessageAsAQuestionMark() {
+		colorPrompter.error("Refused.\n  OK MongoDB answers.");
+
+		assertThat(colorConsole.output())
+				.isEqualTo("  " + RED + "! Refused.?  OK MongoDB answers." + RESET + NEWLINE);
+	}
+
+	@Test
+	void everyDisplayMethodShowsControlCharactersAsQuestionMarks() {
+		console.type("?", "1", "?", "y", "", "pw", "?", "a b", "");
+		var rows = new LinkedHashMap<String, String>();
+		rows.put("Data\u001B", "/srv\u001B[41m");
+		List<Choice> options = List.of(new Choice("Gen\u001Berate", "a key in /srv\u001B[41m", "Help for /srv\u001B[41m."),
+				new Choice("Keep", "the key", "Help."));
+
+		prompter.title("Title\u001B");
+		prompter.step(1, 5, "Name\u001B");
+		prompter.info("Info\u001B", "More\u0007");
+		prompter.success("Done\u001B");
+		prompter.progress("Start\u001B");
+		prompter.answered("Port\u001B", "90\u001B90", "from \u009B the file");
+		prompter.box("Box\u001B", rows);
+		prompter.list("Files\u001B", List.of("a\u001B.yml"));
+		prompter.print("  line\u001B");
+		prompter.choice("Which\u001B key?", options, 0);
+		prompter.yesNo("Saved\u001B?", "The key is in /srv\u001B[41m.", false);
+		prompter.secret("Pass\u001Bword");
+		prompter.text(DIR_QUESTION, "Help\u001B.", "/srv\u001Boc",
+				value -> value.contains(" ") ? Optional.of("No \u001B spaces.") : Optional.empty());
+
+		String output = console.output().replace(System.lineSeparator(), "\n");
+		assertThat(output.chars().filter(c -> c != '\n')).noneMatch(c -> Character.isISOControl(c));
+	}
+
+	@Test
+	void problemLineKeepsItsColorWhenTheMessageHasAnEscapeCharacter() {
+		colorPrompter.error("Server says \u001B[2J now.");
+
+		assertThat(colorConsole.output()).isEqualTo("  " + RED + "! Server says ?[2J now." + RESET + NEWLINE);
+	}
+
+	@Test
 	void boxAndListDrawTheFrameAndTheBullets() {
 		var rows = new LinkedHashMap<String, String>();
 		rows.put("Mode", "self-host");
@@ -391,7 +440,7 @@ class ConsolePrompterTest {
 	}
 
 	@Test
-	void printWritesTheLineAsItIs() {
+	void printWritesAPlainLineUnchanged() {
 		prompter.print("  hello");
 
 		assertThat(console.output()).isEqualTo("  hello" + System.lineSeparator());

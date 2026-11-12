@@ -4,8 +4,12 @@ import java.time.Duration;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoCommandException;
+import com.mongodb.MongoCredential;
+import com.mongodb.MongoSecurityException;
 import com.mongodb.ServerAddress;
 import org.bson.BsonDocument;
+import org.bson.BsonInt32;
+import org.bson.BsonString;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.system.CapturedOutput;
@@ -103,6 +107,29 @@ class MongoStartupPingTest {
 
 		assertThat(failure.kind()).isEqualTo(MongoStartupPing.Kind.AUTHENTICATION);
 		assertThat(failure.reason()).isEqualTo("the server requires a login, but no credentials are configured");
+	}
+
+	@Test
+	void classifyShowsAControlCharacterOfTheServerMessageAsAQuestionMark() {
+		var hostile = new MongoCommandException(new BsonDocument("ok", new BsonInt32(0))
+				.append("code", new BsonInt32(2))
+				.append("errmsg", new BsonString("bad value \u001B[2J here")), new ServerAddress());
+
+		MongoStartupPing.Failure failure = MongoStartupPing.classify(hostile,
+				connection("mongodb://db.example/opencelium"), null);
+
+		assertThat(failure.reason()).contains("bad value ?[2J here").doesNotContain("\u001B");
+	}
+
+	@Test
+	void classifyShowsAControlCharacterOfTheUserNameAsAQuestionMark() {
+		var denied = new MongoSecurityException(MongoCredential.createCredential("x", "admin", "p".toCharArray()),
+				"Exception authenticating");
+
+		MongoStartupPing.Failure failure = MongoStartupPing.classify(denied,
+				connection("mongodb://%1B%5B2J:secret@db.example/opencelium"), null);
+
+		assertThat(failure.reason()).contains("?[2J").doesNotContain("\u001B");
 	}
 
 	@Test
