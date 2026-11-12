@@ -40,7 +40,7 @@ class FailedFirstStartTest {
 	@BeforeEach
 	void emptyCollections() {
 		try (MongoClient client = client()) {
-			for (String collection : List.of("setup_state", "users", "keys")) {
+			for (String collection : List.of("admin_marker", "users", "keys")) {
 				database(client).getCollection(collection).drop();
 			}
 		}
@@ -54,8 +54,7 @@ class FailedFirstStartTest {
 		assertThatThrownBy(this::start).hasStackTraceContaining(KeyStartupException.class.getName());
 
 		// The failed start keeps the marker and makes no admin.
-		Document kept = state();
-		assertThat(kept.getString("state")).isEqualTo("PENDING_ADMIN");
+		Document kept = marker();
 		assertThat(kept.getString("adminUsername")).isEqualTo("root");
 		assertThat(userCount()).isZero();
 		// The operator removes the cause of the failure, then starts again.
@@ -65,7 +64,7 @@ class FailedFirstStartTest {
 
 		start();
 
-		assertThat(state().getString("state")).isEqualTo("REQUIRED");
+		assertThat(marker()).isNull();
 		assertThat(userCount()).isEqualTo(1);
 	}
 
@@ -76,8 +75,8 @@ class FailedFirstStartTest {
 	/** The marker as the wizard writes it before Spring starts. */
 	private static void storeMarker(String adminUsername) {
 		try (MongoClient client = client()) {
-			database(client).getCollection("setup_state").insertOne(new Document("_id", "self-host")
-					.append("state", "PENDING_ADMIN").append("adminUsername", adminUsername));
+			database(client).getCollection("admin_marker")
+					.insertOne(new Document("_id", "self-host").append("adminUsername", adminUsername));
 		}
 	}
 
@@ -89,9 +88,9 @@ class FailedFirstStartTest {
 		}
 	}
 
-	private static Document state() {
+	private static Document marker() {
 		try (MongoClient client = client()) {
-			return database(client).getCollection("setup_state").find(new Document("_id", "self-host")).first();
+			return database(client).getCollection("admin_marker").find(new Document("_id", "self-host")).first();
 		}
 	}
 

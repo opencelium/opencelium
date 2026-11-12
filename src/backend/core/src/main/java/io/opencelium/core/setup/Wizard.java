@@ -157,8 +157,8 @@ public final class Wizard {
 	}
 
 	/**
-	 * The login box, after the start and only when the application answers on its port: the URL of the setup in the
-	 * browser, and the admin username and the admin password of the admin that the start made. After a skipped admin
+	 * The login box, after the start and only when the application answers on its port: the URL of the admin login
+	 * page, and the admin username and the admin password of the admin that the start made. After a skipped admin
 	 * step the box shows the URL only, because the admin can have another admin password. The box goes to the
 	 * console, never to a logger.
 	 */
@@ -168,7 +168,7 @@ public final class Wizard {
 			return;
 		}
 		var rows = new LinkedHashMap<String, String>();
-		rows.put("URL", "http://" + HOST + ":" + port.getAsInt() + "/setup");
+		rows.put("URL", "http://" + HOST + ":" + port.getAsInt() + SetupContext.LOGIN_PAGE);
 		context.adminUsername().ifPresent(username -> {
 			rows.put("Admin username", username);
 			rows.put("Admin password", SetupContext.FIRST_ADMIN_PASSWORD);

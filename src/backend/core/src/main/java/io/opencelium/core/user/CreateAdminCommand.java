@@ -9,7 +9,8 @@ import io.opencelium.common.tenant.TenantId;
  *
  * @param generated the password was generated, not typed: it must be changed at the first login and is locked after
  *                  24 h
- * @param temporary a setup account to delete when setup completes (the cloud {@code operator})
+ * @param temporary an account that the caller marks as temporary; the application stores the flag and does
+ *                  not act on it
  */
 public record CreateAdminCommand(TenantId tenantId, String username, char[] password, boolean generated,
 		boolean temporary) {

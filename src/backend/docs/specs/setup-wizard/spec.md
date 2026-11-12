@@ -17,9 +17,11 @@ The wizard runs in the terminal and installs the self-host mode only. It does th
 - It makes everything after the summary: the files, the key file and the service. Then the application starts.
 - It takes its values from a setup file for a run without a terminal.
 
-LDAP, OIDC, the Service Portal issuer, the broker connection and the license are browser settings after the admin login, not wizard questions. The browser gets the setup state and the read-only bootstrap facts through 2 endpoints. A configuration is a configuration file at a search location, a Spring configuration location, or a bootstrap property in the arguments or the environment.
+LDAP, OIDC, the Service Portal issuer, the broker connection and the license are browser settings after the admin login, not wizard questions. The admin logs in at the admin login page `/login`. A configuration is a configuration file at a search location, a Spring configuration location, or a bootstrap property in the arguments or the environment.
 
 A later start reads the env file next to the yml file. Thus the user starts OpenCelium with `java -jar oc-app.jar` and loads no file into the shell before the start.
+
+A start without the wizard in the self-host mode makes the default admin when the database has no OpenCelium user. Thus a start without a terminal, for example in a Docker container, also gives an admin for the first admin login.
 
 ## Acceptance criteria
 Each criterion has an ID and the form "Given ..., when ..., then ...".
@@ -131,8 +133,9 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
 - **SW-24** Given the admin step, when the user confirms the admin username, then the admin must get the admin password `1234`. The default admin username is `admin`. The wizard asks no admin password.
 - **SW-25** Given the new admin, when a tester reads its record, then it must have no must-change flag and no lock. The admin can change the admin password in the browser at any time.
-- **SW-42** Given the admin marker, when the application starts, then it must make the admin and set the setup state `REQUIRED`. The marker is the setup state `PENDING_ADMIN` with the admin username. Each process that starts the application does this: the wizard process or the service.
-- **SW-43** Given a failed first start, when the application starts again, then it must find the marker and make the admin. A crash after the admin and before the state `REQUIRED` leaves the marker, and the next start sets `REQUIRED`.
+- **SW-42** Given the admin marker, when the application starts, then it must make the admin and delete the marker. The marker holds the admin username of the admin step. Each process that starts the application does this: the wizard process or the service.
+- **SW-43** Given a failed first start, when the application starts again, then it must find the marker and make the admin. When a start stops after it makes the admin, the marker stays. The next start deletes the marker and makes no second admin.
+- **SW-63** Given no admin marker and no OpenCelium user, when the application starts, then it must make the default admin. The default admin has the admin username `admin` and the admin password `1234` of SW-24. The log names the admin username and the admin login page `/login`, but not the admin password. A database with an OpenCelium user and no admin gets no default admin: the user runs `setup`, and the admin step makes the admin. In the cloud mode the start makes no default admin.
 - **SW-26** Given a secret, when the wizard is complete, then no log, journal or leftover temporary file must hold it. The secrets are the master key and the database password. The summary and each message mask the database password.
 
 ### Service registration
@@ -159,16 +162,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 
 ### Handover to the browser
 
-- **SW-32** Given a complete wizard, when the port listens, then the wizard process must print a terminal box. The box shows the URL `http://<host>:<port>/setup`, the admin username and the admin password `1234`. With the service, the wizard prints it, not the service. When the wizard skips the admin step (SW-37), the box shows the URL only. The admin password can be different from `1234`.
-- **SW-33** Given an incomplete setup, when an authenticated request reaches a blocked route, then the API must answer 409 `SETUP_REQUIRED`. The body lists the open steps. The setup, settings, authentication, own-password and health routes are not blocked.
-- **SW-34** Given `GET /setup/status`, when an admin calls it, then it must return 4 items:
-  1. The deployment mode.
-  2. The setup state: `REQUIRED` or `COMPLETE`.
-  3. The open steps.
-  4. The read-only bootstrap facts: the MongoDB host and database without credentials, the master key source, the data directory.
-  The open steps are a fixed list in this feature. The browser wizard story defines when a step closes.
-- **SW-35** Given an incomplete setup, when an admin calls `POST /setup/complete`, then the state must be `COMPLETE` and the 409 stops.
-- **SW-36** Given an admin and no setup state, when the application starts, then the state must be `COMPLETE`. This is the upgrade path for an installation from before the wizard. The admin marker is a setup state, so a new installation never counts as an upgrade.
+- **SW-32** Given a complete wizard, when the port listens, then the wizard process must print a terminal box. The box shows the URL `http://<host>:<port>/login` of the admin login page, the admin username and the admin password `1234`. With the service, the wizard prints it, not the service. When the wizard skips the admin step (SW-37), the box shows the URL only. The admin password can be different from `1234`.
 - **SW-37** Given an admin that exists, when the user runs `setup`, then the wizard must skip the admin step. It offers only the steps that still apply: the MongoDB URI and the service.
 
 ### Non-interactive install
@@ -181,7 +175,9 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 ## Out of scope
 - The cloud mode. The wizard installs the self-host mode only. A cloud installation comes through the consulting service, which writes the yml file by hand.
 - A generated admin password, a forced change of the admin password at the first admin login, and a lock of the admin account.
-- The browser wizard screens: LDAP, OIDC, the Service Portal, the broker, the license, the change of the admin password. They are the frontend story. This feature gives the 2 endpoints and the list of setting keys.
+- The admin login page `/login` and the admin login API: the authentication story.
+- The guide in the frontend after the first admin login: LDAP, OIDC, the Service Portal, the broker connection, the license and the change of the admin password. It is the frontend story.
+- A setup state after the first start, and a block of the API until the admin completes the browser settings. The admin uses OpenCelium right after the first admin login.
 - Native service registration on macOS and Windows. The print fallback only.
 - The download, the installation and the start of MongoDB by the wizard. The user selects a local server or a server that exists.
 - The installation of RabbitMQ from the wizard.
@@ -192,20 +188,18 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 ## Decisions that apply
 - Decision 13 of the architecture document: the wizard writes only the bootstrap values, into the yml file and the env file next to it. All other settings are browser settings in the database.
 - Decision 14: the master key step applies the master key search order and the generation guard. It generates a master key only in the self-host mode, and only when no wrapped DEK exists.
-- Decision 10: the admin logs in through the local strategy with the normal admin login form. The wizard issues no setup token.
-- Decision 11: the self-host mode is 1 static tenant. The admin and the setup state carry its tenant ID.
-- Decision 7: the 2 setup endpoints need the admin role. The setup state is not a resource with an ACL.
+- Decision 10: the admin logs in through the local strategy with the normal admin login form. The wizard issues no setup token. In the cloud mode the Service Portal gives the OpenCelium users, thus the start makes no default admin.
+- Decision 11: the self-host mode is 1 static tenant. The admin and the admin marker carry its tenant ID.
+- Decision 7: the first admin gets its rights from RBAC. The admin marker is not a resource with an ACL.
 - A new decision is necessary for a bootstrap secret. The yml file holds the placeholder `${OC_MONGO_URI}`, and an env file next to it gives the whole MongoDB URI. The start reads the env file, and the environment of the process has priority over it. This extends decision 13. The architect agent drafts it.
-- A new decision is necessary for the handover from the wizard to the application: the admin marker in the setup state. It makes the admin in each process that starts the application, and it tells a new installation from an upgrade. The architect agent drafts it.
+- A new decision is necessary for the first admin of a self-host installation. The admin marker gives the admin username from the wizard to the first start. A start without a marker makes the default admin when the database has no OpenCelium user. Each process that starts the application does this. The architect agent drafts it.
 
 ## Open questions
 1. Is the admin username a question with the default `admin`, or is it fixed like the admin password? Assumption until the answer comes: a question (assumption).
 2. Is the print flag of SW-40 still wanted, now that `setup --template` exists? Assumption until the answer comes: yes, it prints the values of the last run with the secrets replaced (assumption).
-3. When does the frontend story for the browser wizard screens start? Assumption until the answer comes: after this feature; the endpoints do not wait for it (assumption).
-4. What is the reason for the fixed admin password `1234` with no forced change? The product management decided it. The application listens on all interfaces, and the settings routes and the admin login routes are open before the setup is complete. Assumption until the answer comes: the admin logs in right after the wizard, so the window is short (assumption).
-5. Do the browser page `/setup` and the API `/setup/status` share a path, or does the API get a prefix? Assumption until the answer comes: the paths stay as written, and the API contract decision gives the prefix before the endpoint task starts (assumption).
-6. What does a run with a setup file do when the MongoDB server of the file does not answer? Assumption until the answer comes: the setup stops with exit code 1 and names the setup file key, as for a bad value (assumption).
-7. What does the option "Continue" of SW-17 do when a later step uses the database? The master key step reads the database before the summary, and the admin marker writes into it after the summary. Assumption until the answer comes: the master key step reports the server, and the setup stops with exit code 1 before the summary (assumption).
-8. Must the values option of SW-53 ask if the MongoDB connection uses TLS (Transport Layer Security)? Assumption until the answer comes: no. The built URI has no TLS option, and a server that must have TLS gets the URI option (assumption).
-9. What does the master key step do when `OC_MASTER_KEY` is set in the environment of the setup? The variable has priority at each start in this environment. Assumption until the answer comes: the wizard shows no menu and takes the variable, and a setup file must give `env` (assumption).
-10. Which form has the admin username? SW-24 gives only the default `admin`. Assumption until the answer comes: a text without a space and without a control character (assumption).
+3. What is the reason for the fixed admin password `1234` with no forced change? The product management decided it. The application listens on all interfaces, and a start without the wizard also makes the default admin with this admin password. Such a start shows no box: only a log line names the default admin. Assumption until the answer comes: the admin logs in right after the first start, so the window is short (assumption).
+4. What does a run with a setup file do when the MongoDB server of the file does not answer? Assumption until the answer comes: the setup stops with exit code 1 and names the setup file key, as for a bad value (assumption).
+5. What does the option "Continue" of SW-17 do when a later step uses the database? The master key step reads the database before the summary, and the admin marker writes into it after the summary. Assumption until the answer comes: the master key step reports the server, and the setup stops with exit code 1 before the summary (assumption).
+6. Must the values option of SW-53 ask if the MongoDB connection uses TLS (Transport Layer Security)? Assumption until the answer comes: no. The built URI has no TLS option, and a server that must have TLS gets the URI option (assumption).
+7. What does the master key step do when `OC_MASTER_KEY` is set in the environment of the setup? The variable has priority at each start in this environment. Assumption until the answer comes: the wizard shows no menu and takes the variable, and a setup file must give `env` (assumption).
+8. Which form has the admin username? SW-24 gives only the default `admin`. Assumption until the answer comes: a text without a space and without a control character (assumption).

@@ -238,7 +238,7 @@ class WizardTest {
 
 		assertThat(exitCode).isEmpty();
 		assertThat(console.output()).containsSubsequence("  -> Starting OpenCelium...", "  +-- Log in to OpenCelium ",
-				"  |  URL             http://localhost:9191/setup ", "  |  Admin username  root ",
+				"  |  URL             http://localhost:9191/login ", "  |  Admin username  root ",
 				"  |  Admin password  1234 ");
 	}
 
@@ -255,7 +255,7 @@ class WizardTest {
 		wizard.run(REASON);
 
 		assertThat(console.output()).containsSubsequence("  -> Starting OpenCelium...", "  +-- Log in to OpenCelium ",
-				"  |  URL             http://localhost:9191/setup ").doesNotContain("Admin username")
+				"  |  URL             http://localhost:9191/login ").doesNotContain("Admin username")
 				.doesNotContain("1234");
 	}
 

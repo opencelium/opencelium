@@ -22,6 +22,8 @@ public interface UserRepository extends Repository<UserDocument, String> {
 
 	boolean existsByTenantIdAndRolesContaining(String tenantId, String role);
 
+	boolean existsByTenantId(String tenantId);
+
 	/** Unlocked users whose generated password was issued before {@code cutoff} and is still unchanged. */
 	@Query("{ 'mustChangePassword': true, 'locked': false, 'passwordIssuedAt': { '$lt': ?0 } }")
 	List<UserDocument> findAllGeneratedUnchangedBefore(Instant cutoff);

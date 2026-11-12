@@ -22,11 +22,11 @@ import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.files.SetupActionException;
 
 /**
- * The handover from the wizard to the application: after the files are written, this action stores the setup state
- * {@code PENDING_ADMIN} with the admin username in the database. Each process that starts the application finds it
- * and makes the admin, also a service that starts in another process, and also the start after a failed one. The
- * marker holds no secret. It is written with the plain driver and a client of its own, because Spring has not
- * started yet; it takes the place of a setup state that exists, and the undo puts that one back.
+ * The handover from the wizard to the application: after the files are written, this action stores the admin
+ * username in the database. Each process that starts the application finds it, makes the admin and deletes it, also a
+ * service that starts in another process, and also the start after a failed one. The marker holds no secret. It is
+ * written with the plain driver and a client of its own, because Spring has not started yet; it takes the place of a
+ * marker that exists, and the undo puts that one back.
  */
 public final class AdminMarker implements PlannedAction {
 
@@ -39,7 +39,7 @@ public final class AdminMarker implements PlannedAction {
 
 	private boolean written;
 
-	/** The setup state that the marker took the place of; null when there was none. */
+	/** The marker that this one took the place of; null when there was none. */
 	private Document replaced;
 
 	/**
@@ -65,11 +65,10 @@ public final class AdminMarker implements PlannedAction {
 	@Override
 	public void run() {
 		try (MongoClient client = client()) {
-			MongoCollection<Document> states = states(client);
-			replaced = states.find(id()).first();
-			states.replaceOne(id(), new Document(SetupStateDocument.ID, TENANT.value())
-					.append(SetupStateDocument.STATE, SetupState.PENDING_ADMIN.name())
-					.append(SetupStateDocument.ADMIN_USERNAME, adminUsername), new ReplaceOptions().upsert(true));
+			MongoCollection<Document> markers = markers(client);
+			replaced = markers.find(id()).first();
+			markers.replaceOne(id(), new Document(AdminMarkerDocument.ID, TENANT.value())
+					.append(AdminMarkerDocument.ADMIN_USERNAME, adminUsername), new ReplaceOptions().upsert(true));
 			written = true;
 		}
 		catch (MongoException ex) {
@@ -79,26 +78,26 @@ public final class AdminMarker implements PlannedAction {
 		}
 	}
 
-	/** Puts back the setup state that the marker took the place of, or removes the marker when there was none. */
+	/** Puts back the marker that this one took the place of, or removes the marker when there was none. */
 	@Override
 	public Optional<String> undo() {
 		if (!written) {
 			return Optional.empty();
 		}
 		try (MongoClient client = client()) {
-			MongoCollection<Document> states = states(client);
+			MongoCollection<Document> markers = markers(client);
 			if (replaced == null) {
-				states.deleteOne(id());
+				markers.deleteOne(id());
 			}
 			else {
-				states.replaceOne(id(), replaced);
+				markers.replaceOne(id(), replaced);
 			}
 			written = false;
 			return Optional.empty();
 		}
 		catch (MongoException ex) {
 			return Optional.of("Cannot remove the admin marker from MongoDB at " + connection.redacted()
-					+ "; please check the document '" + TENANT + "' of the collection " + SetupStateDocument.COLLECTION
+					+ "; please check the document '" + TENANT + "' of the collection " + AdminMarkerDocument.COLLECTION
 					+ " by hand.");
 		}
 	}
@@ -108,12 +107,12 @@ public final class AdminMarker implements PlannedAction {
 		return MongoClients.create(MongoStartupPing.checkSettings(connection));
 	}
 
-	private MongoCollection<Document> states(MongoClient client) {
-		return client.getDatabase(connection.databaseName()).getCollection(SetupStateDocument.COLLECTION);
+	private MongoCollection<Document> markers(MongoClient client) {
+		return client.getDatabase(connection.databaseName()).getCollection(AdminMarkerDocument.COLLECTION);
 	}
 
 	private static Bson id() {
-		return Filters.eq(SetupStateDocument.ID, TENANT.value());
+		return Filters.eq(AdminMarkerDocument.ID, TENANT.value());
 	}
 
 }
