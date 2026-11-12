@@ -131,7 +131,7 @@ public final class Wizard {
 		}
 		catch (SetupWriteException ex) {
 			written = false;
-			throw SetupFailedException.failure(ex.getMessage() + "\n" + ex.rollbackReport());
+			throw SetupFailedException.failure(ex.getMessage(), ex.rollbackReport());
 		}
 		catch (SetupCancelledException ex) {
 			written = false;

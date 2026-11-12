@@ -19,13 +19,13 @@ import java.util.function.Predicate;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 
+import io.opencelium.core.config.TerminalText;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.values.SetupValues;
 import io.opencelium.core.setup.values.SetupFile;
 import io.opencelium.core.setup.values.SetupFileTemplate;
 import io.opencelium.core.setup.prompt.ConsoleIo;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
-import io.opencelium.core.setup.prompt.Screen;
 import io.opencelium.core.setup.steps.SetupStep;
 
 import io.opencelium.core.setup.LaunchDecision.Kind;
@@ -156,7 +156,7 @@ public final class SetupLauncher {
 			decision = decide(args);
 		}
 		catch (SetupFailedException ex) {
-			printFailure(ex.getMessage());
+			printFailure(ex);
 			err.println();
 			err.print(USAGE);
 			err.flush();
@@ -242,7 +242,7 @@ public final class SetupLauncher {
 			values = decision.setupFile().map(SetupFile::load).orElse(SetupValues.NONE);
 		}
 		catch (SetupFailedException ex) {
-			printFailure(ex.getMessage());
+			printFailure(ex);
 			return OptionalInt.of(ex.exitCode());
 		}
 		var source = new ValueSource(values, decision.setupFile(), decision.batch());
@@ -261,7 +261,7 @@ public final class SetupLauncher {
 			return wizard.run(decision.reason());
 		}
 		catch (SetupFailedException ex) {
-			printFailure(ex.getMessage());
+			printFailure(ex);
 			return OptionalInt.of(ex.exitCode());
 		}
 		finally {
@@ -275,13 +275,13 @@ public final class SetupLauncher {
 	}
 
 	/**
-	 * Prints a failure on standard error line by line: the message keeps its own line breaks, and each control
-	 * character in a line shows as {@code ?}, because the message can quote a value of the setup file, an argument
-	 * or the error of a server.
+	 * Prints a failure on standard error, one line for each line of the failure: the line breaks are those of the
+	 * wizard, and each control character in a line shows as {@code ?}, a line feed too, because a line can quote a
+	 * value of the setup file, an argument or the error of a server.
 	 */
-	private void printFailure(String message) {
-		for (String line : message.split("\n")) {
-			err.println(Screen.printable(line));
+	private void printFailure(SetupFailedException failure) {
+		for (String line : failure.lines()) {
+			err.println(TerminalText.printable(line));
 		}
 	}
 

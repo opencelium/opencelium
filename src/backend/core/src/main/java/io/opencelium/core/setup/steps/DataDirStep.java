@@ -6,8 +6,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import io.opencelium.core.config.DataDirDefaults;
+import io.opencelium.core.config.TerminalText;
 import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.setup.values.Question;
 import io.opencelium.core.setup.values.ValueKey;
@@ -63,6 +65,11 @@ public final class DataDirStep implements SetupStep {
 
 	/** The problem with {@code value} as a data directory, or empty when it is acceptable. */
 	Optional<String> check(String value) {
+		// The path is not quoted: a help text and standard error would show the character, or a line it starts.
+		OptionalInt control = TerminalText.firstControl(value);
+		if (control.isPresent()) {
+			return Optional.of("The data directory has the control character U+%04X.".formatted(control.getAsInt()));
+		}
 		Path dir;
 		try {
 			dir = absolute(expanded(value));
