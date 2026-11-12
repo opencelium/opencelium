@@ -33,7 +33,7 @@ const EnhancementScript = ({
 		onChangeScript,
 	);
 	const { t } = useI18n('workflow');
-	const issues = useNashornCompatibility(localScript, enhancement.language);
+	const { issues, isChecked } = useNashornCompatibility(localScript, enhancement.language);
 	const scriptLines = localScript.split('\n');
 
 	useEffect(() => {
@@ -81,7 +81,7 @@ const EnhancementScript = ({
 						row: issue.line - 1,
 						column: issue.column,
 						type: issue.kind === 'syntax' ? ('error' as const) : ('warning' as const),
-						text: issueMessage(issue, t),
+						text: issue.kind === 'syntax' ? `${issue.hint}\n${issue.message}` : issueMessage(issue, t),
 					})),
 					...(runtimeLocation
 						? [
@@ -142,6 +142,7 @@ const EnhancementScript = ({
 			</div>
 			<ScriptCompatibilityStatus
 				issues={issues}
+				isChecked={isChecked}
 				isEnabled={enhancement.language === 'js'}
 				onLocate={(line, column) => {
 					editor.current?.gotoLine(line, column, true);

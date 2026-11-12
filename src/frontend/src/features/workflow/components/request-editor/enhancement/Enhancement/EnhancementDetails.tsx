@@ -3,7 +3,7 @@ import type { Ace } from 'ace-builds';
 import { Splitter } from '@shared/ui/primitives/Splitter';
 import { ScriptPlayground } from '../ScriptPlayground/ScriptPlayground';
 import { usePlaygroundLayout } from '../ScriptPlayground/usePlaygroundLayout';
-import type { CompatibilityIssue } from '@features/workflow/script-sandbox/checkNashornCompatibility';
+import type { CompatibilityIssue } from '@features/workflow/script-sandbox/sandbox.types';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { EnhancementArgs } from '../EnhancementArgs/EnhancementArgs';

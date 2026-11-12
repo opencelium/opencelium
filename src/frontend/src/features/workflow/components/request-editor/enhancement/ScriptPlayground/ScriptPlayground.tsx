@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { Alert } from '@shared/ui/primitives/Alert';
 import { Button } from '@shared/ui/primitives/Button';
 import { Empty } from '@shared/ui/primitives/Empty';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { Enhancement } from '@features/workflow/types/connection';
-import {
-	checkNashornCompatibility,
-	type CompatibilityIssue,
-} from '@features/workflow/script-sandbox/checkNashornCompatibility';
-import { useScriptSandbox } from '@features/workflow/script-sandbox/useScriptSandbox';
+import type { CompatibilityIssue } from '@features/workflow/script-sandbox/sandbox.types';
+import { useScriptRun } from '@features/workflow/script-sandbox/useScriptRun';
 import { useEnhancementArgs } from '../EnhancementArgs/useEnhancementArgs';
 import {
 	emptyInput,
@@ -23,7 +19,7 @@ import { PlaygroundHeader } from './PlaygroundHeader';
 import { PlaygroundInput } from './PlaygroundInput';
 import { PlaygroundOutput } from './PlaygroundOutput';
 import { PlaygroundRunStatus } from './PlaygroundRunStatus';
-import { SimulationBanner } from './SimulationBanner';
+import { TestRunBanner } from './TestRunBanner';
 import './ScriptPlayground.css';
 
 type Props = {
@@ -44,7 +40,7 @@ export function ScriptPlayground({
 	const { t } = useI18n('workflow');
 	const [inputs, setInputs] = useState<InputValues>(() => readInputs(enhancement.enhanceId));
 	const [lastRun, setLastRun] = useState<string>();
-	const sandbox = useScriptSandbox();
+	const sandbox = useScriptRun();
 	const { entries: argEntries } = useEnhancementArgs(enhancement);
 	const args: Record<string, unknown> = {};
 	const invalid: string[] = [];
@@ -57,9 +53,7 @@ export function ScriptPlayground({
 		}
 	});
 
-	const hasSyntaxError =
-		enhancement.language === 'js' &&
-		checkNashornCompatibility(script).some((issue) => issue.kind === 'syntax');
+	const hasSyntaxError = issues.some((issue) => issue.kind === 'syntax');
 	const isDisabled =
 		enhancement.language !== 'js' ||
 		sandbox.status === 'running' ||
@@ -73,15 +67,15 @@ export function ScriptPlayground({
 			enhancement.language === 'js' &&
 				lastRun === signature &&
 				result?.kind === 'error' &&
-				result.line !== undefined
-				? { line: result.line, column: result.column ?? 0 }
+				result.error.line !== null
+				? { line: result.error.line, column: Math.max(0, (result.error.column ?? 1) - 1) }
 				: undefined,
 		);
 	}, [sandbox.result, lastRun, signature, enhancement.language, onRuntimeLocation]);
 	const run = () => {
 		if (isDisabled) return;
 		setLastRun(signature);
-		sandbox.run({ script, args });
+		void sandbox.run({ language: 'js', script, variables: args });
 	};
 	if (enhancement.language !== 'js')
 		return (
@@ -112,10 +106,7 @@ export function ScriptPlayground({
 			}}
 		>
 			<PlaygroundHeader hasDocsLink />
-			<SimulationBanner />
-			{Object.values(args).some((value) => typeof value === 'number') && (
-				<Alert type="warning" showIcon message={t('sandbox.numberTypes')} />
-			)}
+			<TestRunBanner />
 			<h4>{t('sandbox.inputs')}</h4>
 			{names.map((name) => (
 				<PlaygroundInput
