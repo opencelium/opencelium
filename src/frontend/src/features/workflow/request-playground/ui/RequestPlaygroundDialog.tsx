@@ -1,3 +1,4 @@
+import type { LoggedExecution } from '@features/logs';
 import type { Connector } from '@entities/connector/model/types';
 import type { WorkflowMethodConfig } from '../../types/request-config.types';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
@@ -6,6 +7,7 @@ import { RequestPlaygroundContent } from './RequestPlaygroundContent';
 
 export type RequestPlaygroundDialogProps = {
 	open: boolean;
+	execution?: LoggedExecution;
 	node: WorkflowNodeModel | null;
 	nodes: WorkflowNodeModel[];
 	edges: WorkflowEdgeModel[];
@@ -19,14 +21,14 @@ export type RequestPlaygroundDialogProps = {
 
 type SessionProps = Omit<RequestPlaygroundDialogProps, 'open' | 'node'> & { node: WorkflowNodeModel };
 
-function PlaygroundSessionGate({ node, nodes, edges, fieldBindings, connectionId, connectors, ...props }: SessionProps) {
-	const session = usePlaygroundSession({ node, nodes, edges, fieldBindings, connectionId, connectors });
+function PlaygroundSessionGate({ node, nodes, edges, fieldBindings, connectionId, connectors, execution, ...props }: SessionProps) {
+	const session = usePlaygroundSession({ node, nodes, edges, fieldBindings, connectionId, connectors, includeUrlReferences: !!execution });
 	if (!session) return null;
-	return <RequestPlaygroundContent session={session} liveNode={node} connectionId={connectionId} {...props} />;
+	return <RequestPlaygroundContent session={session} liveNode={node} connectionId={connectionId} execution={execution} {...props} />;
 }
 
 export function RequestPlaygroundDialog({ open, node, ...props }: RequestPlaygroundDialogProps) {
 	if (!open || !node) return null;
 	// Keyed by node: every opening is a fresh session with freshly prefilled values.
-	return <PlaygroundSessionGate key={node.id} node={node} {...props} />;
+	return <PlaygroundSessionGate key={`${node.id}:${props.execution?.location.elementId ?? ''}`} node={node} {...props} />;
 }

@@ -1012,6 +1012,13 @@
     "hideDetails": "Fehlerdetails ausblenden"
   },
   "requestPlayground": {
+    "execution": {
+      "stepMismatch": "Dieser Schritt entspricht nicht mehr der protokollierten Ausführung",
+      "loadError": "Die protokollierte Ausführung konnte nicht geladen werden",
+      "replayFailed": "Die Testanfrage konnte nicht abgeschlossen werden.",
+      "scriptReplayUnavailable": "Das Transformationsergebnis konnte nicht wiederhergestellt oder neu berechnet werden.",
+      "valuesUnavailable": "Geben Sie vor dem Senden die Werte ein, die nicht wiederhergestellt werden konnten."
+    },
     "title": "Request-Playground",
     "breadcrumb": {
       "inside": "in {{path}}",
@@ -1027,6 +1034,7 @@
       "prefill": "Werte vorbelegen aus"
     },
     "prefill": {
+      "execution": "Ausführung #{{id}}",
       "testRun": "Pausierter Testlauf",
       "lastTest": "Ihr letzter Test dieses Schritts",
       "sample": "Beispielantworten",
@@ -1089,6 +1097,8 @@
       "invalidJsonSend_other": "{{count}} Werte sind kein gültiges JSON. Korrigieren Sie sie vor dem Senden."
     },
     "source": {
+      "execution": "Ausführung",
+      "notExecuted": "In dieser Ausführung nicht ausgeführt",
       "testRun": "Testlauf",
       "lastTest": "Letzter Test",
       "sample": "Beispiel",
@@ -1099,6 +1109,8 @@
       "secret": "Geheim"
     },
     "sourceHint": {
+      "execution": "In dieser Ausführung erfasster Wert.",
+      "notExecuted": "Die referenzierte Methode wurde in dieser Iteration nicht ausgeführt.",
       "testRun": "Aus dem pausierten Testlauf gelesen: Der Quellschritt wurde bereits ausgeführt, dies ist sein echter Wert.",
       "lastTest": "Der Wert, den Sie beim letzten Test dieses Schritts in dieser Browsersitzung verwendet haben.",
       "sample": "Aus der gespeicherten Beispielantwort des Quellschritts gelesen.",

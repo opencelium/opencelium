@@ -1,4 +1,5 @@
 {
+  "openInPlayground": "Open in Playground",
   "title": "Execution Logs",
   "subtitle": "Pick an execution to inspect its connector, method and logic block logs.",
   "selectLabel": "Execution",

@@ -30,7 +30,7 @@ export function TestValuesTab({ session, values, missingKeys, focus }: Props) {
 	const renderInputRow = (row: Extract<ValueRow, { kind: 'input' }>) => {
 		const value = values.values[row.key] ?? emptyInput();
 		const isMissing = missingKeys.includes(row.key);
-		const source = isMissing ? 'empty' : value.source;
+		const source = isMissing && value.source !== 'notExecuted' ? 'empty' : value.source;
 		return (
 			<TestValueRow key={row.key} row={row} isEdited={value.source === 'edited'} focusNonce={focusNonce(row.key)}
 				onReset={() => values.resetValue(row.key)}

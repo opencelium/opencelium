@@ -63,12 +63,15 @@ const splitText = (text: string, inputs: PreviewInput[], escape: (text: string) 
 export const buildTextPreview = (text: string, inputs: PreviewInput[]) => splitText(text, inputs, (part) => part);
 
 // Every reference in the text as a placeholder, for the URL where references are not test inputs.
-export function buildReferencePreview(text: string): JsonPart[] {
+export function buildReferencePreview(text: string, inputs: PreviewInput[] = []): JsonPart[] {
 	const parts: JsonPart[] = [];
 	let cursor = 0;
 	for (const match of text.matchAll(new RegExp(PAYLOAD_REFERENCE_RE.source, 'g'))) {
 		if (match.index > cursor) parts.push({ kind: 'string', text: text.slice(cursor, match.index) });
-		parts.push({ kind: 'input', key: match[0], source: 'reference', isMissing: true, raw: match[0], parts: [] });
+		const input = inputs.find(({ whole }) => whole.test(match[0]));
+		parts.push(input
+			? inputPart(input, match[0], (value) => [syntax(asText(value))])
+			: { kind: 'input', key: match[0], source: 'reference', isMissing: true, raw: match[0], parts: [] });
 		cursor = match.index + match[0].length;
 	}
 	if (cursor < text.length) parts.push({ kind: 'string', text: text.slice(cursor) });

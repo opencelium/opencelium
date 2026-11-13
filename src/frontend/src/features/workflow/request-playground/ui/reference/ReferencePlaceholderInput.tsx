@@ -1,10 +1,11 @@
 import { useLayoutEffect, useRef, type ClipboardEvent, type KeyboardEvent, type MouseEvent } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { buildReferencePreview, replaceReferences } from '../../model/bodyPreview';
+import { buildReferencePreview, replaceReferences, type JsonPart } from '../../model/bodyPreview';
 import { findChip, paintParts, readRawText, replaceChipWithCaret, restoreChips, type RemovedChip } from './referenceTextDom';
 
 type Props = {
 	value: string;
+	previewParts?: JsonPart[];
 	testId: string | undefined;
 	placeholder?: string;
 	// Shown on hover, with its references as placeholders too.
@@ -16,24 +17,27 @@ type Props = {
 // A one-line text field where every reference is an atomic placeholder chip, never shown raw.
 // Clicking a chip removes it and leaves the caret in its place, so the user types the value there;
 // leaving the field without typing anything brings the chip back.
-export function ReferencePlaceholderInput({ value, testId, placeholder, title, className,
+export function ReferencePlaceholderInput({ value, previewParts, testId, placeholder, title, className,
 	onChange }: Props) {
 	const { t } = useI18n('workflow');
 	const rootRef = useRef<HTMLDivElement>(null);
 	const typedRef = useRef<string | null>(null);
 	const paintedRef = useRef<string | null>(null);
 	const removedRef = useRef<RemovedChip[]>([]);
+	const previewKey = JSON.stringify(previewParts);
+	const paintedPreviewRef = useRef<string | undefined>(undefined);
 	const chipLabel = t('requestPlayground.body.setReference');
 
 	const paint = () => {
 		if (!rootRef.current) return;
-		paintParts(rootRef.current, buildReferencePreview(value), chipLabel);
+		paintParts(rootRef.current, previewParts ?? buildReferencePreview(value), chipLabel);
+		paintedPreviewRef.current = previewKey;
 		paintedRef.current = value;
 	};
 
 	useLayoutEffect(() => {
 		const isTyping = document.activeElement === rootRef.current && typedRef.current === value;
-		if (!isTyping && paintedRef.current !== value) paint();
+		if (!isTyping && (paintedRef.current !== value || paintedPreviewRef.current !== previewKey)) paint();
 	});
 
 	const emit = () => {

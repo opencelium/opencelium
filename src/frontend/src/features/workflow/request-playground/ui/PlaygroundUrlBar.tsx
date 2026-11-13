@@ -7,21 +7,25 @@ import { ReferencePlaceholderInput } from './reference/ReferencePlaceholderInput
 
 const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
+import type { JsonPart } from '../model/bodyPreview';
+
 type Props = {
 	method: string;
 	url: string;
 	// The URL with its test values filled in, shown on hover.
 	previewUrl: string;
+	previewParts?: JsonPart[];
 	prefillSource: PrefillSource;
 	isCurlVisible: boolean;
 	isSending: boolean;
+	isPrefillingExecution?: boolean;
 	onMethodChange: (method: string) => void;
 	onUrlChange: (url: string) => void;
 	onToggleCurl: () => void;
 	onSend: () => void;
 };
 
-export function PlaygroundUrlBar({ method, url, previewUrl, prefillSource, isCurlVisible, isSending,
+export function PlaygroundUrlBar({ method, url, previewUrl, previewParts, prefillSource, isCurlVisible, isSending, isPrefillingExecution,
 	onMethodChange, onUrlChange, onToggleCurl, onSend }: Props) {
 	const { t } = useI18n('workflow');
 	const verb = method.toUpperCase();
@@ -34,7 +38,7 @@ export function PlaygroundUrlBar({ method, url, previewUrl, prefillSource, isCur
 					options={methods.map((item) => ({ value: item, label: item }))} />
 			</div>
 			<div className='rpUrl'>
-				<ReferencePlaceholderInput value={url} testId='request-playground-url' title={previewUrl} onChange={onUrlChange} />
+				<ReferencePlaceholderInput value={url} previewParts={previewParts} testId='request-playground-url' title={previewUrl} onChange={onUrlChange} />
 			</div>
 			<Tooltip content={t('requestPlayground.url.curlHint')}>
 				<Button iconLeft='code' type={isCurlVisible ? 'primary' : 'default'} onClick={onToggleCurl}
@@ -42,7 +46,8 @@ export function PlaygroundUrlBar({ method, url, previewUrl, prefillSource, isCur
 					{t('requestPlayground.url.curl')}
 				</Button>
 			</Tooltip>
-			<Button type='primary' iconLeft='send' loading={isSending} onClick={onSend} testId='request-playground-send'>
+			<Button type='primary' iconLeft='send' loading={isSending} disabled={isPrefillingExecution}
+				onClick={onSend} testId='request-playground-send'>
 				{t(prefillSource === 'upstream' ? 'requestPlayground.url.sendUpstream' : 'requestPlayground.url.send')}
 			</Button>
 		</div>

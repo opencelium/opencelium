@@ -1,3 +1,4 @@
+import type { LoggedExecution } from '@features/logs';
 import { useState } from 'react';
 import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -12,7 +13,8 @@ import { usePlaygroundValues } from '../hooks/usePlaygroundValues';
 import { findMissingInputKeys } from '../model/buildPlaygroundRequest';
 import type { PlaygroundResponse, PlaygroundSettings } from '../model/playground.types';
 import { defaultSettings, withSampleResponse } from '../model/playgroundSettings';
-import { previewRequest } from '../model/previewRequest';
+import { buildReferencePreview } from '../model/bodyPreview';
+import { buildChipInputs, previewRequest } from '../model/previewRequest';
 import { applyRequestEdits, type RequestEdits } from '../model/requestEdits';
 import { buildCurl } from '../model/resolveRequest';
 import { PlaygroundCurl } from './PlaygroundCurl';
@@ -30,6 +32,7 @@ const REQUEST_PANE_MIN_WIDTH = 640;
 
 type Props = {
 	session: PlaygroundSession;
+	execution?: LoggedExecution;
 	// The step as it is now — Apply and Save as sample write onto it, not onto the snapshot.
 	liveNode: WorkflowNodeModel;
 	connectionId: number | null;
@@ -38,7 +41,7 @@ type Props = {
 	onClose: () => void;
 };
 
-export function RequestPlaygroundContent({ session, liveNode, connectionId, isReadOnly, onApplyConfig, onClose }: Props) {
+export function RequestPlaygroundContent({ session, execution, liveNode, connectionId, isReadOnly, onApplyConfig, onClose }: Props) {
 	const { t } = useI18n('workflow');
 	const [tab, setTab] = useState<RequestTab>('values');
 	const [focus, setFocus] = useState<FocusRequest | null>(null);
@@ -46,7 +49,7 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 	const [settings, setSettings] = useState<PlaygroundSettings>(() => defaultSettings(session.connector));
 	const [appliedEdits, setAppliedEdits] = useState<RequestEdits | null>(null);
 	const values = usePlaygroundValues({ inputs: session.inputs, connection: session.connection,
-		currentMethod: session.currentMethod, storageKey: session.storageKey });
+		currentMethod: session.currentMethod, storageKey: session.storageKey, execution });
 	const stepName = liveNode.data.subtitle || session.draft.name;
 
 	const selectInput = (key: string) => {
@@ -62,13 +65,17 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 		setAppliedEdits(session.edits);
 		message.success(t('requestPlayground.footer.applied', { name: stepName }));
 	};
-	const send = usePlaygroundSend({ session, values, settings, connectionId,
+	const send = usePlaygroundSend({ session, values, settings, connectionId, execution,
 		onInvalidInputs: (keys) => selectInput(keys[0]),
 		onSaveSample: (result) => { if (!isReadOnly) saveSample(result); } });
 
 	const missingKeys = findMissingInputKeys(session.inputs, values.values, values.prefillSource);
-	const preview = previewRequest({ draft: session.draft, inputs: session.inputs, values: values.values,
-		connector: session.connector, requestData: values.requestData });
+	const previewArgs = { inputs: session.inputs, values: values.values,
+		connector: session.connector, requestData: values.requestData };
+	const preview = previewRequest({ draft: session.draft, ...previewArgs });
+	const isExecution = values.prefillSource === 'execution';
+	const url = session.draft.request.endpoint;
+	const previewParts = isExecution ? buildReferencePreview(url, buildChipInputs(previewArgs)) : undefined;
 	const upstreamMethods = Array.from(new Set(session.inputs.references
 		.map(({ sourceMethod }) => sourceMethod && (sourceMethod.label || sourceMethod.name)).filter(Boolean)));
 	const sendingText = values.prefillSource === 'upstream' && upstreamMethods.length
@@ -79,9 +86,11 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 
 	const requestPane = (
 		<div className='rpRequest'>
-			<PlaygroundUrlBar method={session.draft.request.method || 'GET'} url={session.draft.request.endpoint} previewUrl={preview.url}
+			<PlaygroundUrlBar method={session.draft.request.method || 'GET'} url={url} previewUrl={preview.url}
+				previewParts={previewParts}
 				onUrlChange={(url) => session.setEdits((current) => ({ ...current, url, paramRows: undefined }))} prefillSource={values.prefillSource}
 				isCurlVisible={isCurlVisible} isSending={send.isSending}
+				isPrefillingExecution={isExecution && values.resolvingKeys.length > 0}
 				onMethodChange={(method) => session.setEdits((current) => ({ ...current, method }))}
 				onToggleCurl={() => setIsCurlVisible((isVisible) => !isVisible)} onSend={send.send} />
 			{isCurlVisible && <PlaygroundCurl command={buildCurl(preview)} />}
@@ -93,7 +102,7 @@ export function RequestPlaygroundContent({ session, liveNode, connectionId, isRe
 
 	return (
 		<Dialog open onClose={onClose} width='90vw' top={18} maximizable testId='request-playground-dialog'
-			title={<PlaygroundTitle session={session} />}
+			title={<PlaygroundTitle session={session} showPreviewBadge={!isExecution} />}
 			footer={<PlaygroundFooter onApply={apply} onClose={onClose}
 				canApply={!isReadOnly && session.hasEdits && appliedEdits !== session.edits} />}>
 			<div className='rpBody'>

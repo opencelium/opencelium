@@ -84,7 +84,7 @@ export function buildPlaygroundRequest({ connectionId, connectorId, draft, field
 export function findMissingInputKeys(inputs: PlaygroundInputs, values: Record<string, InputValue>,
 	prefillSource: PrefillSource): string[] {
 	if (prefillSource === 'upstream') return [];
-	return listInputKeys(inputs).filter((key) => !(values[key]?.text ?? '').trim());
+	return listInputKeys(inputs).filter((key) => values[key]?.source !== 'execution' && !(values[key]?.text ?? '').trim());
 }
 
 export function findInvalidJsonInputKeys(inputs: PlaygroundInputs, values: Record<string, InputValue>): string[] {
