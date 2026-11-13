@@ -1046,6 +1046,13 @@
     "hideDetails": "Hide error details"
   },
   "requestPlayground": {
+    "execution": {
+      "stepMismatch": "This step no longer matches the logged run",
+      "loadError": "Could not load the logged execution",
+      "replayFailed": "The test request could not be completed.",
+      "scriptReplayUnavailable": "The transformation result could not be recovered or recalculated.",
+      "valuesUnavailable": "Enter the values that could not be recovered before sending."
+    },
     "title": "Request Playground",
     "breadcrumb": {
       "inside": "inside {{path}}",
@@ -1057,6 +1064,7 @@
       "prefill": "Prefill values from"
     },
     "prefill": {
+      "execution": "Execution #{{id}}",
       "testRun": "Paused test run",
       "lastTest": "Your last test of this method",
       "sample": "Sample responses",
@@ -1137,6 +1145,8 @@
       }
     },
     "source": {
+      "execution": "Execution",
+      "notExecuted": "Not executed in this run",
       "testRun": "Test run",
       "lastTest": "Last test",
       "sample": "Sample",
@@ -1147,6 +1157,8 @@
       "unavailable": "Missing"
     },
     "sourceHint": {
+      "execution": "Value recorded in this execution.",
+      "notExecuted": "The referenced method did not run in this iteration.",
       "testRun": "Read from the paused test run: the source step has already run, so this is its real value.",
       "lastTest": "The value you used the last time you tested this step in this browser session.",
       "sample": "Read from the saved sample response of the source step.",

@@ -448,3 +448,21 @@ export const readLiveValueAtPath = (
   }
   return current;
 };
+
+export function replaceLiveValueAtPath(source: unknown, path: string, value: unknown): unknown {
+  const parts = normalizePath(path).match(PATH_RE) ?? [];
+  let current = source;
+  if (!parts.length) return value;
+  for (const [index, part] of parts.entries()) {
+    if (!isRecord(current) && !Array.isArray(current)) throw new Error('Missing transformation target');
+    const arrayIndex = Array.isArray(current)
+      ? part === LAST_ELEMENT ? current.length - 1 : /^\[\d+\]$/.test(part) ? Number(part.slice(1, -1)) : -1
+      : null;
+    const key = arrayIndex === null ? unquotePathPart(part) : String(arrayIndex);
+    const record = current as Record<string, unknown>;
+    if (!Object.prototype.hasOwnProperty.call(record, key)) throw new Error('Missing transformation target');
+    if (index === parts.length - 1) record[key] = value;
+    current = record[key];
+  }
+  return source;
+}

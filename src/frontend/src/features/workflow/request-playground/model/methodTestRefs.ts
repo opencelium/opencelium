@@ -47,7 +47,7 @@ export function buildStaticValues({ refs, values, connectorOverrides }: StaticVa
 }
 
 export const findMissingInputKeys = (keys: readonly string[], values: Record<string, InputValue>) =>
-	keys.filter((key) => !(values[key]?.text ?? '').trim());
+	keys.filter((key) => values[key]?.source !== 'execution' && !(values[key]?.text ?? '').trim());
 
 export const findInvalidJsonInputKeys = (keys: readonly string[], values: Record<string, InputValue>) =>
 	keys.filter((key) => values[key] && readJsonError(values[key]) !== null);

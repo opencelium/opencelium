@@ -3,7 +3,7 @@ import type { buildMethodPayload } from '../../api/connectionPayload.methods';
 export type PlaygroundDraft = ReturnType<typeof buildMethodPayload>;
 
 // Where the values of the method's references come from before the user types over them.
-export type PrefillSource = 'testRun' | 'lastTest' | 'sample' | 'manual';
+export type PrefillSource = 'testRun' | 'execution' | 'lastTest' | 'sample' | 'manual';
 
 export type StaticReferenceType = 'DIRECT' | 'WRAPPED_DIRECT' | 'WEBHOOK' | 'ENHANCEMENT' | 'PAGE' | 'REQUEST_DATA';
 

@@ -12,6 +12,8 @@ export const ORIGIN_TONE: Record<RowOrigin, BadgeTone> = {
 
 export const SOURCE_TONE: Record<InputValueSource, BadgeTone> = {
 	testRun: 'success',
+	execution: 'primary',
+	notExecuted: 'warning',
 	lastTest: 'primary',
 	sample: 'neutral',
 	edited: 'info',

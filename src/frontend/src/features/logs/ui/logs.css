@@ -87,3 +87,24 @@
 .oc-request-response-tabs .ant-tabs-nav-operations {
   display: none !important;
 }
+
+.oc-log-method-actions,
+.oc-log-method-error-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.oc-log-method-actions {
+  justify-content: flex-end;
+}
+
+.oc-log-method-actions:empty {
+  display: none;
+}
+
+.oc-log-method-actions:not(:empty) {
+  margin-bottom: 8px;
+}

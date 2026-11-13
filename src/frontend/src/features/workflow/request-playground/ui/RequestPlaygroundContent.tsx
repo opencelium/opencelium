@@ -1,3 +1,4 @@
+import type { LoggedExecution } from '@features/logs';
 import { useState } from 'react';
 import { message } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -13,7 +14,8 @@ import { usePlaygroundValues } from '../hooks/usePlaygroundValues';
 import { findMissingInputKeys, listStaticInputKeys } from '../model/methodTestRefs';
 import type { PlaygroundResult } from '../model/playground.types';
 import { withSampleResponse } from '../model/sampleResponse';
-import { previewRequest } from '../model/previewRequest';
+import { buildReferencePreview } from '../model/bodyPreview';
+import { buildChipInputs, previewRequest } from '../model/previewRequest';
 import { applyRequestEdits, type RequestEdits } from '../model/requestEdits';
 import { PlaygroundCurl } from './PlaygroundCurl';
 import { PlaygroundFooter } from './PlaygroundFooter';
@@ -31,6 +33,7 @@ const REQUEST_PANE_MIN_WIDTH = 640;
 
 type Props = {
 	session: PlaygroundSession;
+	execution?: LoggedExecution;
 	// The step as it is now — Apply and Save as sample write onto it, not onto the snapshot.
 	liveNode: WorkflowNodeModel;
 	isReadOnly: boolean;
@@ -38,7 +41,7 @@ type Props = {
 	onClose: () => void;
 };
 
-export function RequestPlaygroundContent({ session, liveNode, isReadOnly, onApplyConfig, onClose }: Props) {
+export function RequestPlaygroundContent({ session, execution, liveNode, isReadOnly, onApplyConfig, onClose }: Props) {
 	const { t } = useI18n('workflow');
 	const [tab, setTab] = useState<RequestTab>('values');
 	const [focus, setFocus] = useState<FocusRequest | null>(null);
@@ -46,7 +49,7 @@ export function RequestPlaygroundContent({ session, liveNode, isReadOnly, onAppl
 	const [appliedEdits, setAppliedEdits] = useState<RequestEdits | null>(null);
 	const values = usePlaygroundValues({ inputs: session.inputs, connection: session.connection,
 		currentMethod: session.currentMethod, storageKey: session.storageKey,
-		staticKeys: session.refs.refs ? listStaticInputKeys(session.refs.refs) : [] });
+		execution, staticKeys: session.refs.refs ? listStaticInputKeys(session.refs.refs) : [] });
 	const stepName = liveNode.data.subtitle || session.draft.name;
 
 	const selectInput = (key: string) => {
@@ -73,17 +76,20 @@ export function RequestPlaygroundContent({ session, liveNode, isReadOnly, onAppl
 		connectors: session.allConnectors, methods: session.connection.fromConnector.method }, t);
 	const missingKeys = findMissingInputKeys(rows.filter(({ kind }) => kind === 'input').map(({ key }) => key),
 		values.values);
-	const preview = previewRequest({ draft: session.draft, inputs: session.inputs, values: values.values,
-		connector: session.connector, requestData: values.requestData });
+	const previewArgs = { inputs: session.inputs, values: values.values,
+		connector: session.connector, requestData: values.requestData };
+	const preview = previewRequest({ draft: session.draft, ...previewArgs });
+	const previewParts = values.prefillSource === 'execution'
+		? buildReferencePreview(session.draft.request.endpoint, buildChipInputs(previewArgs)) : undefined;
 	const sendingText = session.connector
 		? t('requestPlayground.response.sending', { connection: session.connector.title })
 		: t('requestPlayground.response.sendingDirect');
 
 	const requestPane = (
 		<div className='rpRequest'>
-			<PlaygroundUrlBar method={session.draft.request.method || 'GET'} url={session.draft.request.endpoint} previewUrl={preview.url}
+			<PlaygroundUrlBar method={session.draft.request.method || 'GET'} url={session.draft.request.endpoint} previewUrl={preview.url} previewParts={previewParts}
 				onUrlChange={(url) => session.setEdits((current) => ({ ...current, url, paramRows: undefined }))}
-				isCurlVisible={isCurlVisible} isSending={send.isSending} canSend={send.canSend}
+				isCurlVisible={isCurlVisible} isSending={send.isSending} canSend={send.canSend && (values.prefillSource !== 'execution' || !values.resolvingKeys.length)}
 				onMethodChange={(method) => session.setEdits((current) => ({ ...current, method }))}
 				onToggleCurl={toggleCurl} onSend={send.send} />
 			{isCurlVisible && <PlaygroundCurl curl={curl} connectors={session.allConnectors} />}

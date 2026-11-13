@@ -6,11 +6,14 @@ import { ReferencePlaceholderInput } from './reference/ReferencePlaceholderInput
 
 const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
 
+import type { JsonPart } from '../model/bodyPreview';
+
 type Props = {
 	method: string;
 	url: string;
 	// The URL with its test values filled in, shown on hover.
 	previewUrl: string;
+	previewParts?: JsonPart[];
 	isCurlVisible: boolean;
 	isSending: boolean;
 	// False while /refs is pending or failed: the test needs its list of values.
@@ -21,7 +24,7 @@ type Props = {
 	onSend: () => void;
 };
 
-export function PlaygroundUrlBar({ method, url, previewUrl, isCurlVisible, isSending, canSend,
+export function PlaygroundUrlBar({ method, url, previewUrl, previewParts, isCurlVisible, isSending, canSend,
 	onMethodChange, onUrlChange, onToggleCurl, onSend }: Props) {
 	const { t } = useI18n('workflow');
 	const verb = method.toUpperCase();
@@ -34,7 +37,7 @@ export function PlaygroundUrlBar({ method, url, previewUrl, isCurlVisible, isSen
 					options={methods.map((item) => ({ value: item, label: item }))} />
 			</div>
 			<div className='rpUrl'>
-				<ReferencePlaceholderInput value={url} testId='request-playground-url' title={previewUrl} onChange={onUrlChange} />
+				<ReferencePlaceholderInput value={url} previewParts={previewParts} testId='request-playground-url' title={previewUrl} onChange={onUrlChange} />
 			</div>
 			<Tooltip content={t('requestPlayground.url.curlHint')}>
 				<Button iconLeft='code' type={isCurlVisible ? 'primary' : 'default'} onClick={onToggleCurl}

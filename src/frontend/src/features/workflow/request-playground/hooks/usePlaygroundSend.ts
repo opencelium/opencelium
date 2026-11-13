@@ -32,7 +32,8 @@ export function usePlaygroundSend({ session, values, onInvalidInputs }: Args) {
 	const { draft, refs } = session;
 
 	const execute = async () => {
-		if (!refs.refs) return;
+		if (!refs.refs || isLoading) return;
+		if (values.prefillSource === 'execution' && values.resolvingKeys.length) return;
 		const invalidKeys = findInvalidJsonInputKeys(listStaticInputKeys(refs.refs), values.values);
 		if (invalidKeys.length) {
 			onInvalidInputs(invalidKeys);
@@ -42,7 +43,7 @@ export function usePlaygroundSend({ session, values, onInvalidInputs }: Args) {
 		const httpMethod = (draft.request.method || 'GET').toUpperCase();
 		const confirmWrite = isWriteMethod(httpMethod);
 		if (confirmWrite && !await confirm({
-			title: t('requestPlayground.confirmWrite.title'),
+			title: t('requestPlayground.confirmWrite.title', { method: httpMethod }),
 			message: t('requestPlayground.confirmWrite.message', { method: httpMethod }),
 		})) return;
 
