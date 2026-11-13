@@ -1,3 +1,5 @@
+import type { LoggedExecution } from '@features/logs';
+import { readExecutionReference } from '../model/readExecutionReference';
 import { useCallback, useEffect, useEffectEvent, useState } from 'react';
 import {
 	canInspectLiveReference,
@@ -24,24 +26,41 @@ type Args = {
 	connection: Connection;
 	currentMethod: LiveReferenceMethodContext | undefined;
 	storageKey: string;
+	execution?: LoggedExecution;
 };
 
 const fromStored = (stored: StoredInput | undefined): InputValue | undefined =>
 	stored && { ...stored, source: 'lastTest' };
 
-export function usePlaygroundValues({ inputs, connection, currentMethod, storageKey }: Args) {
+export function usePlaygroundValues({ inputs, connection, currentMethod, storageKey, execution }: Args) {
 	const snapshot = useTestRunLiveSnapshot();
 	const [stored] = useState(() => readStoredInputs(storageKey));
 	const isInspectable = (reference: CollectedReference) =>
 		canInspectLiveReference(reference.parsed, connection, currentMethod, snapshot);
 	const canUseTestRun = inputs.references.some(isInspectable);
 	const [prefillSource, setPrefillSource] = useState<PrefillSource>(() => {
+		if (execution) return 'execution';
 		if (canUseTestRun) return 'testRun';
 		return Object.keys(stored).length ? 'lastTest' : 'sample';
 	});
 	const [overrides, setOverrides] = useState<Record<string, InputValue>>({});
 	const [requestData, setRequestData] = useState<Record<string, string>>({});
 	const [live, setLive] = useState<Record<string, InputValue>>({});
+	const [recorded, setRecorded] = useState<Record<string, InputValue>>({});
+	const recordedKeys = useEffectEvent(() => recorded);
+	useEffect(() => {
+		if (prefillSource !== 'execution' || !execution) return;
+		let cancelled = false;
+		const loaded = recordedKeys();
+		for (const reference of inputs.references) {
+			const key = referenceInputKey(reference);
+			if (loaded[key]) continue;
+			void readExecutionReference(reference, execution).catch(() => emptyInput()).then((value) => {
+				if (!cancelled) setRecorded((current) => ({ ...current, [key]: value }));
+			});
+		}
+		return () => { cancelled = true; };
+	}, [execution, inputs.references, prefillSource]);
 
 	// A reference inside a loop reads the iteration the paused run is in.
 	const resolveLive = useEffectEvent((isCancelled: () => boolean) => {
@@ -66,6 +85,7 @@ export function usePlaygroundValues({ inputs, connection, currentMethod, storage
 		const key = referenceInputKey(reference);
 		switch (prefillSource) {
 			case 'testRun': return live[key] ?? emptyInput();
+			case 'execution': return recorded[key] ?? emptyInput();
 			case 'lastTest': return fromStored(stored[key]) ?? emptyInput();
 			case 'sample': return toInputValue(readSampleValue(reference), 'sample');
 			case 'upstream': return { ...emptyInput(), source: 'upstream' };
@@ -118,7 +138,10 @@ export function usePlaygroundValues({ inputs, connection, currentMethod, storage
 		values,
 		resolvingKeys: prefillSource === 'testRun'
 			? inputs.references.filter(isInspectable).map(referenceInputKey).filter((key) => !live[key])
-			: [],
+			: prefillSource === 'execution'
+				? inputs.references.map(referenceInputKey).filter((key) => !recorded[key])
+				: [],
+		executionId: execution?.location.executionId,
 		prefillSource,
 		setPrefillSource,
 		canUseTestRun,

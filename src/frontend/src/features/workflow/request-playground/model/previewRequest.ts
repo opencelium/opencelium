@@ -31,7 +31,7 @@ export type PreviewInputSource = 'reference' | 'webhook' | 'connection';
 export type PreviewInput = Substitution & { key: string; source: PreviewInputSource; isMissing: boolean };
 
 export function buildPreviewInputs({ inputs, values, connector, requestData }: Omit<Args, 'draft'>): PreviewInput[] {
-	const hasValue = (key: string) => !!values[key]?.text.trim();
+	const hasValue = (key: string) => values[key]?.source === 'execution' || !!values[key]?.text.trim();
 	return [
 		...inputs.references.map((reference) => {
 			const key = referenceInputKey(reference);

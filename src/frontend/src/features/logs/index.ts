@@ -23,3 +23,6 @@ export type {
   FlowchartChildLog,
   FlowchartLog,
 } from "./model/types";
+export { LogPlaygroundOpenContext } from "./ui/LogPlaygroundAction";
+export { executionPlaygroundSearch, loadLoggedExecution, readExecutionPlaygroundSearch } from "./model/executionPlayground";
+export type { ExecutionPlaygroundLocation, LoggedExecution } from "./model/executionPlayground";

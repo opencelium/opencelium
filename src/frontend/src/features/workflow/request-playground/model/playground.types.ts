@@ -4,7 +4,7 @@ export type PlaygroundDraft = ReturnType<typeof buildMethodPayload>;
 
 // Where the values of the method's references come from before the user types over them.
 // `upstream` sends no values: the backend runs the steps before this one and uses their responses.
-export type PrefillSource = 'testRun' | 'lastTest' | 'sample' | 'upstream' | 'manual';
+export type PrefillSource = 'testRun' | 'execution' | 'lastTest' | 'sample' | 'upstream' | 'manual';
 
 export type ProxyMode = 'system' | 'none' | 'custom';
 
@@ -35,6 +35,7 @@ export type PlaygroundRequest = {
 	// Only the bindings whose RESULT_VAR writes into this method's request, in the
 	// save-payload format — the backend runs their scripts over `references`.
 	fieldBindings: unknown[];
+	enhancementOutputs?: { section: 'body' | 'header'; path: string; value: unknown }[];
 	references: PlaygroundReferenceValue[];
 	webhooks: PlaygroundWebhookValue[];
 	// Replaces the connector's own value of a `{field}` placeholder for this request only.

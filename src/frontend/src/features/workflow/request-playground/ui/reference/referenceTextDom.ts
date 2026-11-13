@@ -3,14 +3,14 @@ import type { JsonPart } from '../../model/bodyPreview';
 // Keeps a caret position next to a chip, which browsers cannot place one beside otherwise.
 const CARET_ANCHOR = '\u200B';
 
-const createChip = (raw: string, placeholder: string) => {
+const createChip = (part: Extract<JsonPart, { kind: 'input' }>, placeholder: string) => {
 	const chip = document.createElement('span');
-	chip.className = 'rpDynamic rpDynamic--missing';
+	chip.className = part.isMissing ? 'rpDynamic rpDynamic--missing' : 'rpDynamic';
 	chip.contentEditable = 'false';
-	chip.dataset.raw = raw;
+	chip.dataset.raw = part.raw;
 	const label = document.createElement('span');
-	label.className = 'rpJson-placeholder';
-	label.textContent = placeholder;
+	if (part.isMissing) label.className = 'rpJson-placeholder';
+	label.textContent = part.isMissing ? placeholder : part.parts.map((item) => item.kind === 'input' ? '' : item.text).join('');
 	chip.append(label);
 	return chip;
 };
@@ -19,8 +19,8 @@ export function paintParts(root: HTMLElement, parts: JsonPart[], placeholder: st
 	const nodes = parts.flatMap((part, index): Node[] => {
 		if (part.kind !== 'input') return [document.createTextNode(part.text)];
 		const isFollowedByText = parts[index + 1] && parts[index + 1].kind !== 'input';
-		return isFollowedByText ? [createChip(part.raw, placeholder)]
-			: [createChip(part.raw, placeholder), document.createTextNode(CARET_ANCHOR)];
+		return isFollowedByText ? [createChip(part, placeholder)]
+			: [createChip(part, placeholder), document.createTextNode(CARET_ANCHOR)];
 	});
 	root.replaceChildren(...nodes);
 }

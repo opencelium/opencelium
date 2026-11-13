@@ -18,6 +18,7 @@ type Args = {
 	fieldBindings: readonly unknown[] | undefined;
 	connectionId: number | null;
 	connectors: readonly Connector[];
+	includeUrlReferences?: boolean;
 };
 
 const readOperatorPath = (methodIndex: string, operators: { index: string; type: string; iterator?: string }[]) =>
@@ -64,8 +65,8 @@ export function usePlaygroundSession(args: Args) {
 		return buildMethodPayload(node, baseDraft.index, 0, baseDraft.color, baseDraft.jump);
 	}, [snapshot, config]);
 	const inputs = useMemo(() => snapshot && draft
-		&& collectPlaygroundInputs(draft, snapshot.connection, connectionFieldNames),
-	[snapshot, draft, connectionFieldNames]);
+		&& collectPlaygroundInputs(draft, snapshot.connection, connectionFieldNames, args.includeUrlReferences),
+	[snapshot, draft, connectionFieldNames, args.includeUrlReferences]);
 
 	if (!snapshot || !config || !draft || !inputs) return null;
 	const fixedHeaders = connector?.invoker?.operations?.find((operation) => operation.name === config.name)

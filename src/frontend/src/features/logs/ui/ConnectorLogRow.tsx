@@ -3,6 +3,7 @@ import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import type { FlowchartLog } from "../model/types";
 import { LogRow } from "./logRowUi";
+import { LogPlaygroundRootContext } from "./LogPlaygroundAction";
 import { ElementChildren } from "./LogElementRow";
 
 export function ConnectorLogRow({
@@ -28,7 +29,11 @@ export function ConnectorLogRow({
           </Typography>
         }
       />
-      {expanded ? <ElementChildren id={log.id} depth={1} path={path} /> : null}
+      {expanded ? (
+        <LogPlaygroundRootContext.Provider value={{ executionId: log.executionId, direction: log.properties.DIRECTION }}>
+          <ElementChildren id={log.id} depth={1} path={path} />
+        </LogPlaygroundRootContext.Provider>
+      ) : null}
     </>
   );
 }
