@@ -1049,8 +1049,6 @@
     "execution": {
       "stepMismatch": "Dieser Schritt entspricht nicht mehr der protokollierten Ausführung",
       "loadError": "Die protokollierte Ausführung konnte nicht geladen werden",
-      "replayFailed": "Die Testanfrage konnte nicht abgeschlossen werden.",
-      "scriptReplayUnavailable": "Das Transformationsergebnis konnte nicht wiederhergestellt oder neu berechnet werden.",
       "valuesUnavailable": "Geben Sie vor dem Senden die Werte ein, die nicht wiederhergestellt werden konnten."
     },
     "title": "Request-Playground",

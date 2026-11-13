@@ -22,7 +22,7 @@ export type RequestPlaygroundDialogProps = {
 type SessionProps = Omit<RequestPlaygroundDialogProps, 'open' | 'node'> & { node: WorkflowNodeModel };
 
 function PlaygroundSessionGate({ node, nodes, edges, fieldBindings, connectionId, connectors, execution, ...props }: SessionProps) {
-	const session = usePlaygroundSession({ node, nodes, edges, fieldBindings, connectionId, connectors, includeUrlReferences: !!execution });
+	const session = usePlaygroundSession({ node, nodes, edges, fieldBindings, connectionId, connectors });
 	if (!session) return null;
 	return <RequestPlaygroundContent session={session} liveNode={node} execution={execution} {...props} />;
 }

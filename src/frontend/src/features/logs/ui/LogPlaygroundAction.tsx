@@ -1,10 +1,8 @@
-import { createContext, useContext } from 'react';
+import { useContext } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Button } from '@shared/ui/primitives/Button';
 import type { ExecutionPlaygroundLocation } from '../model/executionPlayground';
-
-export const LogPlaygroundOpenContext = createContext<((location: ExecutionPlaygroundLocation) => void) | null>(null);
-export const LogPlaygroundRootContext = createContext<Pick<ExecutionPlaygroundLocation, 'direction' | 'executionId'> | null>(null);
+import { LogPlaygroundOpenContext, LogPlaygroundRootContext } from './logPlaygroundContext';
 
 export function LogPlaygroundAction({ elementId, indexPath, loopIndex }: Pick<ExecutionPlaygroundLocation, 'elementId' | 'indexPath' | 'loopIndex'>) {
 	const open = useContext(LogPlaygroundOpenContext);

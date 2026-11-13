@@ -1,4 +1,6 @@
 export interface FieldBinding {
+	// Backend id; a method request refers to the binding's result as `#{%id%}`.
+	id?: string;
 	enhancement: Enhancement;
 }
 

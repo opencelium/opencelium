@@ -3,7 +3,7 @@ import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import type { FlowchartLog } from "../model/types";
 import { LogRow } from "./logRowUi";
-import { LogPlaygroundRootContext } from "./LogPlaygroundAction";
+import { LogPlaygroundRootContext } from "./logPlaygroundContext";
 import { ElementChildren } from "./LogElementRow";
 
 export function ConnectorLogRow({

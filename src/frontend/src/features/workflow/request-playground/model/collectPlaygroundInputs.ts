@@ -69,7 +69,7 @@ export const readBodyFields = (body: unknown) =>
 	body && typeof body === 'object' && 'fields' in body ? (body as { fields: unknown }).fields : body;
 
 export function collectPlaygroundInputs(draft: PlaygroundDraft, connection: Connection,
-	connectionFieldNames: readonly string[], includeUrlReferences = false): PlaygroundInputs {
+	connectionFieldNames: readonly string[]): PlaygroundInputs {
 	const references = new Map<string, CollectedReference>();
 	const webhooks = new Map<string, CollectedWebhook>();
 	const connectionFields = new Map<string, CollectedConnectionField>();
@@ -102,19 +102,6 @@ export function collectPlaygroundInputs(draft: PlaygroundDraft, connection: Conn
 	scan(endpoint, 'url', (offset) => queryParamAt(endpoint, offset));
 	visitStrings(draft.request.header, (text, path) => scan(text, 'header', () => path || null));
 	visitStrings(readBodyFields(draft.request.body), (text, path) => scan(text, 'body', () => path || null));
-	if (includeUrlReferences) {
-		for (const binding of connection.fieldBindings ?? []) {
-			const args = binding.enhancement?.args;
-			const result = typeof args?.RESULT_VAR === 'string'
-				? parseEnhancementArg(unwrapReference(args.RESULT_VAR)) : null;
-			if (result?.direction !== 'request' || result.color.toLowerCase() !== ownColor) continue;
-			const location = result.messageProperty === 'header' ? 'header'
-				: result.messageProperty === 'body' ? 'body' : 'url';
-			for (const [name, value] of Object.entries(args ?? {})) {
-				if (/^VAR_\d+$/.test(name) && typeof value === 'string') scan(value, location, () => result.path || null);
-			}
-		}
-	}
 
 	return {
 		references: Array.from(references.values()),

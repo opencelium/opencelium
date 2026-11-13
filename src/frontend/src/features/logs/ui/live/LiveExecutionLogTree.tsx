@@ -9,7 +9,7 @@ import {
   type LiveLogTree,
   type RevealLocation,
 } from "../../model/liveLogTree";
-import { LogPlaygroundRootContext } from "../LogPlaygroundAction";
+import { LogPlaygroundRootContext } from "../logPlaygroundContext";
 import { LogRow, Meta, TraceDot } from "../logRowUi";
 import { MethodDetailViewStateProvider } from "../methodDetailViewState";
 import { LiveChildren, LiveStatusIndicator } from "./LiveLogElementRow";

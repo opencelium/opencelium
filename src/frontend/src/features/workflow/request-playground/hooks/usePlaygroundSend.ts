@@ -13,6 +13,7 @@ import type { PlaygroundValues } from './usePlaygroundValues';
 type Args = {
 	session: PlaygroundSession;
 	values: PlaygroundValues;
+	missingKeys: readonly string[];
 	onInvalidInputs: (keys: string[]) => void;
 };
 
@@ -23,7 +24,7 @@ const toResult = ({ request, response, durationMs, connectorErrors }: MethodTest
 	return { kind: 'sent', request, response, durationMs: durationMs ?? 0 };
 };
 
-export function usePlaygroundSend({ session, values, onInvalidInputs }: Args) {
+export function usePlaygroundSend({ session, values, missingKeys, onInvalidInputs }: Args) {
 	const { t } = useI18n('workflow');
 	const confirm = useConfirm();
 	const [trigger, { isLoading }] = useTestMethodMutation();
@@ -33,7 +34,15 @@ export function usePlaygroundSend({ session, values, onInvalidInputs }: Args) {
 
 	const execute = async () => {
 		if (!refs.refs || isLoading) return;
-		if (values.prefillSource === 'execution' && values.resolvingKeys.length) return;
+		if (values.prefillSource === 'execution') {
+			if (values.resolvingKeys.length) return;
+			// Sending an empty value in place of one the run had would not reproduce its request.
+			if (missingKeys.length) {
+				onInvalidInputs([...missingKeys]);
+				notifyError(t('requestPlayground.execution.valuesUnavailable'));
+				return;
+			}
+		}
 		const invalidKeys = findInvalidJsonInputKeys(listStaticInputKeys(refs.refs), values.values);
 		if (invalidKeys.length) {
 			onInvalidInputs(invalidKeys);
