@@ -1,4 +1,5 @@
 {
+  "openInPlayground": "Im Playground öffnen",
   "title": "Ausführungs-Logs",
   "subtitle": "Wählen Sie eine Ausführung, um deren Konnektor-, Methoden- und Logikblock-Logs einzusehen.",
   "selectLabel": "Ausführung",

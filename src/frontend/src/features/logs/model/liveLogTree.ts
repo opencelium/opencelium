@@ -27,6 +27,7 @@ export type LiveLogNode = {
   // for a node is the one that exists in the database; '' when no line
   // carried an id.
   id: string;
+  executionId?: string;
   indexPath: string;
   // Comma-separated iteration indices of all enclosing loops (outermost
   // first), '' when the node is not inside a loop.
@@ -94,6 +95,7 @@ export const appendLoopIndex = (base: string, iteration: number | string): strin
 const createNode = (key: string, log: ExecutionSocketLog): LiveLogNode => ({
   key,
   id: log.id ?? "",
+  executionId: log.executionId,
   indexPath: log.indexPath ?? "",
   loopIndex: log.properties?.loopIndex ?? "",
   type: log.type,

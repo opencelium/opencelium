@@ -9,6 +9,7 @@ import {
   type LiveLogTree,
   type RevealLocation,
 } from "../../model/liveLogTree";
+import { LogPlaygroundRootContext } from "../LogPlaygroundAction";
 import { LogRow, Meta, TraceDot } from "../logRowUi";
 import { MethodDetailViewStateProvider } from "../methodDetailViewState";
 import { LiveChildren, LiveStatusIndicator } from "./LiveLogElementRow";
@@ -56,7 +57,10 @@ function LiveConnectorRow({ tree, node }: { tree: LiveLogTree; node: LiveLogNode
         }
       />
       {expanded ? (
-        <LiveChildren tree={tree} childKeys={node.childKeys} depth={1} />
+        <LogPlaygroundRootContext.Provider value={node.executionId && node.properties.DIRECTION
+          ? { executionId: node.executionId, direction: node.properties.DIRECTION } : null}>
+          <LiveChildren tree={tree} childKeys={node.childKeys} depth={1} />
+        </LogPlaygroundRootContext.Provider>
       ) : null}
     </>
   );
