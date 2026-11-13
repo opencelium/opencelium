@@ -65,17 +65,16 @@ export function RequestPlaygroundContent({ session, execution, liveNode, isReadO
 		setAppliedEdits(session.edits);
 		message.success(t('requestPlayground.footer.applied', { name: stepName }));
 	};
-	const send = usePlaygroundSend({ session, values, onInvalidInputs: (keys) => selectInput(keys[0]) });
+	const rows = buildValueRows({ inputs: session.inputs, refs: session.refs.refs, draft: session.draft,
+		connectors: session.allConnectors, methods: session.connection.fromConnector.method }, t);
+	const missingKeys = findMissingInputKeys(rows.filter(({ kind }) => kind === 'input').map(({ key }) => key),
+		values.values);
+	const send = usePlaygroundSend({ session, values, missingKeys, onInvalidInputs: (keys) => selectInput(keys[0]) });
 	const curl = usePlaygroundCurl({ session, values });
 	const toggleCurl = () => {
 		if (!isCurlVisible) curl.generateIfIdle();
 		setIsCurlVisible(!isCurlVisible);
 	};
-
-	const rows = buildValueRows({ inputs: session.inputs, refs: session.refs.refs, draft: session.draft,
-		connectors: session.allConnectors, methods: session.connection.fromConnector.method }, t);
-	const missingKeys = findMissingInputKeys(rows.filter(({ kind }) => kind === 'input').map(({ key }) => key),
-		values.values);
 	const previewArgs = { inputs: session.inputs, values: values.values,
 		connector: session.connector, requestData: values.requestData };
 	const preview = previewRequest({ draft: session.draft, ...previewArgs });

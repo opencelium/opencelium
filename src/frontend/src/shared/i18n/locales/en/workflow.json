@@ -1049,8 +1049,6 @@
     "execution": {
       "stepMismatch": "This step no longer matches the logged run",
       "loadError": "Could not load the logged execution",
-      "replayFailed": "The test request could not be completed.",
-      "scriptReplayUnavailable": "The transformation result could not be recovered or recalculated.",
       "valuesUnavailable": "Enter the values that could not be recovered before sending."
     },
     "title": "Request Playground",

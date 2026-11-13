@@ -17,6 +17,16 @@ export function executionPlaygroundSearch(location: ExecutionPlaygroundLocation)
 	}).toString();
 }
 
+const EXECUTION_PLAYGROUND_PARAMS = ['playground', 'execution', 'loop', 'direction', 'element'];
+
+// The search without the execution playground parameters, `?`-prefixed when anything is left.
+export function withoutExecutionPlaygroundSearch(search: string): string {
+	const params = new URLSearchParams(search);
+	EXECUTION_PLAYGROUND_PARAMS.forEach((name) => params.delete(name));
+	const rest = params.toString();
+	return rest ? `?${rest}` : '';
+}
+
 export function readExecutionPlaygroundSearch(search: URLSearchParams): ExecutionPlaygroundLocation | null {
 	const indexPath = search.get('playground') ?? '';
 	const executionId = search.get('execution') ?? '';

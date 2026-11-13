@@ -1,5 +1,4 @@
 import type { LoggedExecution } from '@features/logs';
-import { readExecutionReference } from '../model/readExecutionReference';
 import { useCallback, useEffect, useEffectEvent, useState } from 'react';
 import {
 	canInspectLiveReference,
@@ -20,6 +19,7 @@ import {
 	webhookInputKey,
 	type InputValue,
 } from '../model/playgroundValues';
+import { useExecutionValues } from './useExecutionValues';
 
 type Args = {
 	inputs: PlaygroundInputs;
@@ -49,21 +49,8 @@ export function usePlaygroundValues({ inputs, connection, currentMethod, storage
 	const [overrides, setOverrides] = useState<Record<string, InputValue>>({});
 	const [requestData, setRequestData] = useState<Record<string, string>>({});
 	const [live, setLive] = useState<Record<string, InputValue>>({});
-	const [recorded, setRecorded] = useState<Record<string, InputValue>>({});
-	const recordedKeys = useEffectEvent(() => recorded);
-	useEffect(() => {
-		if (prefillSource !== 'execution' || !execution) return;
-		let cancelled = false;
-		const loaded = recordedKeys();
-		for (const reference of inputs.references) {
-			const key = referenceInputKey(reference);
-			if (loaded[key]) continue;
-			void readExecutionReference(reference, execution).catch(() => emptyInput()).then((value) => {
-				if (!cancelled) setRecorded((current) => ({ ...current, [key]: value }));
-			});
-		}
-		return () => { cancelled = true; };
-	}, [execution, inputs.references, prefillSource]);
+	const { recorded, pendingKeys } = useExecutionValues({ execution, isActive: prefillSource === 'execution',
+		references: inputs.references, staticKeys, connection });
 
 	// A reference inside a loop reads the iteration the paused run is in.
 	const resolveLive = useEffectEvent((isCancelled: () => boolean) => {
@@ -114,8 +101,9 @@ export function usePlaygroundValues({ inputs, connection, currentMethod, storage
 		const key = webhookInputKey(webhook);
 		values[key] = overrides[key] ?? remembered(key) ?? emptyInput(defaultWebhookKind(webhook));
 	});
+	const recordedStatic = (key: string) => prefillSource === 'execution' ? recorded[key] : undefined;
 	staticKeys.filter((key) => !values[key])
-		.forEach((key) => { values[key] = overrides[key] ?? remembered(key) ?? emptyInput(); });
+		.forEach((key) => { values[key] = overrides[key] ?? remembered(key) ?? recordedStatic(key) ?? emptyInput(); });
 
 	const updateOverride = useCallback((key: string, value: InputValue, update: Partial<InputValue>) =>
 		setOverrides((current) => ({ ...current, [key]: { ...(current[key] ?? value), ...update, source: 'edited' } })), []);
@@ -147,9 +135,7 @@ export function usePlaygroundValues({ inputs, connection, currentMethod, storage
 		values,
 		resolvingKeys: prefillSource === 'testRun'
 			? inputs.references.filter(isInspectable).map(referenceInputKey).filter((key) => !live[key])
-			: prefillSource === 'execution'
-				? inputs.references.map(referenceInputKey).filter((key) => !recorded[key])
-				: [],
+			: pendingKeys,
 		executionId: execution?.location.executionId,
 		prefillSource,
 		// Picking a source re-fills every value from it; otherwise a typed value would hide its effect.

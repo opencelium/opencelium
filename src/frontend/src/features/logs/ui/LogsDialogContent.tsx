@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@features/auth/useAuth";
 import { hasComponentPermission } from "@/engine/policy";
 import { executionPlaygroundSearch, type ExecutionPlaygroundLocation } from "../model/executionPlayground";
-import { LogPlaygroundOpenContext } from "./LogPlaygroundAction";
+import { findEditorPlaygroundOpener } from "../model/editorPlaygroundOpener";
+import { LogPlaygroundOpenContext } from "./logPlaygroundContext";
 import { Select } from "@shared/ui/primitives/Select";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useDialogFullscreen } from "@shared/ui/primitives/Dialog/DialogFullscreenContext";
@@ -32,19 +33,25 @@ export function LogsDialogContent({ connectionId, schedulerId, status, onClose }
   const canUpdate = hasComponentPermission(normalizedUser?.permissions ?? [], "CONNECTION", "UPDATE");
   const navigate = useNavigate();
   const route = useLocation();
-  const pendingRoute = useRef<{ key: string; pathname: string; search: string } | null>(null);
+  const pendingRoute = useRef<{ key: string; pathname: string } | null>(null);
   const openPlayground = (location: ExecutionPlaygroundLocation) => {
+    const openInEditor = findEditorPlaygroundOpener(connectionId);
+    if (openInEditor) {
+      openInEditor(location);
+      onClose?.();
+      return;
+    }
     const pathname = `/workflow/update/${connectionId}`;
     const search = `?${executionPlaygroundSearch(location)}`;
-    pendingRoute.current = { key: route.key, pathname, search };
+    pendingRoute.current = { key: route.key, pathname };
     navigate({ pathname, search });
   };
   useEffect(() => {
     const pending = pendingRoute.current;
     if (!pending || route.key === pending.key) return;
     pendingRoute.current = null;
-    if (route.pathname === pending.pathname && route.search === pending.search) onClose?.();
-  }, [route.key, route.pathname, route.search, onClose]);
+    if (route.pathname === pending.pathname) onClose?.();
+  }, [route.key, route.pathname, onClose]);
 
   const { data: files, isFetching } = useGetLogFilesQuery({
     connectionId,
