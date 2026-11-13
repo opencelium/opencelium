@@ -14,10 +14,12 @@
     "tooBig": "Das Log ist zu groß zum Herunterladen. Sie finden es auf dem Server unter {{path}}."
   },
   "tabs": {
-    "requestHeader": "Anfrage-Header",
     "requestBody": "Anfrage-Body",
-    "responseHeader": "Antwort-Header",
-    "responseBody": "Antwort-Body"
+    "responseBody": "Antwort-Body",
+    "sentReceived": "Gesendet / Empfangen",
+    "headers": "Header",
+    "request": "Anfrage",
+    "response": "Antwort"
   },
   "methodView": {
     "tooltip": "URL / Name umschalten"

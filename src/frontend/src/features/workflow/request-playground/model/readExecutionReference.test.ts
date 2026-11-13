@@ -3,10 +3,7 @@ import type { LoggedExecution } from '@features/logs';
 import type { MethodWithId } from '../../types/connection';
 import type { CollectedReference } from './collectPlaygroundInputs';
 import { readExecutionReference } from './readExecutionReference';
-import { buildPlaygroundRequest } from './buildPlaygroundRequest';
-import { defaultSettings } from './playgroundSettings';
-import type { PlaygroundDraft } from './playground.types';
-import { simulatePlaygroundRequest } from '@/mock/requestPlayground/simulatePlaygroundRequest';
+import { buildStaticValues } from './methodTestRefs';
 
 vi.mock('../../components/request-editor/body-editor/jsonPathEnvironment', () => ({
 	loadJsonPathEnvironment: async () => null,
@@ -40,23 +37,17 @@ it('distinguishes an unexecuted method from an empty value recorded in the logs'
 		.toEqual({ text: '', kind: 'string', source: 'execution' });
 });
 
-it('sends the recorded iteration value in both the URL and request header', async () => {
+it('supplies the recorded iteration value under both API reference spellings', async () => {
 	const response = { payload: JSON.stringify({ items: [{}, {}, { name: 'three' }] }) };
 	const findMethod = vi.fn().mockResolvedValue({ segment: { response }, properties: {} });
 	const value = await readExecutionReference(reference, createExecution(findMethod));
 	const token = `{%${reference.reference}%}`;
-	const request = buildPlaygroundRequest({
-		connectionId: 9, connectorId: null, fieldBindings: [],
-		draft: { color: '#bbbbbb', request: {
-			endpoint: `https://example.test/items/${token}`, method: 'GET',
-			header: { 'X-Logged-Value': token }, body: { fields: {} },
-		} } as PlaygroundDraft,
-		inputs: { references: [reference], webhooks: [], connectionFields: [] },
-		values: { [reference.reference]: value }, prefillSource: 'execution',
-		requestData: {}, settings: defaultSettings(undefined),
-	});
-	expect(request.runUpstream).toBe(false);
-	expect(simulatePlaygroundRequest(request).request).toMatchObject({
-		url: 'https://example.test/items/three', headers: { 'X-Logged-Value': 'three' },
-	});
+	expect(buildStaticValues({
+		refs: { connectorReferences: [], staticReferences: [
+			{ reference: token, type: 'WRAPPED_DIRECT' },
+			{ reference: reference.reference, type: 'DIRECT' },
+		] },
+		values: { [reference.reference]: value },
+		connectorOverrides: {},
+	})).toEqual({ [token]: 'three', [reference.reference]: 'three' });
 });

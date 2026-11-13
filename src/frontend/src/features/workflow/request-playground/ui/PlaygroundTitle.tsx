@@ -1,10 +1,9 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { PlaygroundSession } from '../hooks/usePlaygroundSession';
-import { PlaygroundBadge } from './PlaygroundBadge';
 
-type Props = { session: PlaygroundSession; showPreviewBadge: boolean };
+type Props = { session: PlaygroundSession };
 
-export function PlaygroundTitle({ session, showPreviewBadge }: Props) {
+export function PlaygroundTitle({ session }: Props) {
 	const { t } = useI18n('workflow');
 	const { baseNode, draft, operatorPath, connector } = session;
 	const operatorLabel = ({ type, iterator }: { type: string; iterator?: string }) => {
@@ -25,10 +24,6 @@ export function PlaygroundTitle({ session, showPreviewBadge }: Props) {
 		<div className='rpTitle'>
 			<span className='rpTitleRow'>
 				<span className='rpTitleText'>{t('requestPlayground.title')}</span>
-				{showPreviewBadge && <PlaygroundBadge tone='warning' hint={t('requestPlayground.preview.badgeHint')}
-					testId='request-playground-preview-badge'>
-					{t('requestPlayground.preview.badge')}
-				</PlaygroundBadge>}
 			</span>
 			<span className='rpBreadcrumb' data-testid='request-playground-breadcrumb'>
 				<span className='rpBreadcrumbStep'>{baseNode.data.subtitle || draft.name}</span>

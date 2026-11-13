@@ -1,9 +1,9 @@
 import type { Connector } from '@entities/connector/model/types';
 import type { PlaygroundInputs } from './collectPlaygroundInputs';
-import type { PlaygroundDraft, PlaygroundSentRequest } from './playground.types';
+import type { PlaygroundDraft, PlaygroundPreviewRequest } from './playground.types';
+import { connectorReferenceKey } from './methodTestRefs';
 import { isSecretField, readConnectionFieldValue, SECRET_MASK } from './playgroundConnection';
 import {
-	connectionInputKey,
 	parseInputValue,
 	referenceInputKey,
 	webhookInputKey,
@@ -48,7 +48,7 @@ export function buildPreviewInputs({ inputs, values, connector, requestData }: O
 		...inputs.connectionFields.map(({ field }) => {
 			const value = readConnectionFieldValue(connector, field, requestData);
 			return { ...connectionFieldSubstitution(field, isSecretField(field) ? SECRET_MASK : value),
-				key: connectionInputKey(field), source: 'connection' as const, isMissing: !value };
+				key: connectorReferenceKey(`{${field}}`), source: 'connection' as const, isMissing: !value };
 		}),
 	];
 }
@@ -58,6 +58,6 @@ export const buildChipInputs = (args: Omit<Args, 'draft'>) =>
 	buildPreviewInputs(args).filter(({ source }) => source === 'reference');
 
 // What the request will look like once sent; an input without a value keeps its placeholder.
-export function previewRequest({ draft, ...args }: Args): PlaygroundSentRequest {
+export function previewRequest({ draft, ...args }: Args): PlaygroundPreviewRequest {
 	return resolveRequest(draft, buildPreviewInputs(args).filter(({ isMissing }) => !isMissing));
 }

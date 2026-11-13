@@ -1026,10 +1026,6 @@
       "loopWithIterator": "Loop ({{iterator}})",
       "if": "If"
     },
-    "preview": {
-      "badge": "In development",
-      "badgeHint": "Coming soon: the backend for testing a method is not available yet."
-    },
     "toolbar": {
       "prefill": "Prefill values from"
     },
@@ -1038,7 +1034,6 @@
       "testRun": "Paused test run",
       "lastTest": "Your last test of this method",
       "sample": "Sample responses",
-      "upstream": "Run upstream steps first (fresh data)",
       "manual": "Manual input only",
       "testRunUnavailable": "Pause a test run on this step to use its values."
     },
@@ -1046,8 +1041,7 @@
       "method": "HTTP method",
       "curl": "cURL",
       "curlHint": "Show the request as a cURL command",
-      "send": "Send",
-      "sendUpstream": "Run upstream + Send"
+      "send": "Send"
     },
     "curl": {
       "title": "Generated cURL (secrets masked)"
@@ -1056,8 +1050,7 @@
       "values": "Test values",
       "params": "Params",
       "headers": "Headers",
-      "body": "Body",
-      "settings": "Settings"
+      "body": "Body"
     },
     "table": {
       "on": "On",
@@ -1073,13 +1066,11 @@
       "resetAll": "Reset all",
       "reset": "Reset to prefilled value",
       "placeholder": "Enter test value",
-      "upstreamPlaceholder": "Filled by the upstream run",
       "connectionPlaceholder": "Filled in from the connector",
       "empty": "This request has no dynamic values. It is sent exactly as configured.",
       "pathSegment": "path",
       "fromMethod": "From {{method}} · used in {{target}}",
       "fromWebhook": "Webhook parameter ({{type}}) · used in {{target}}",
-      "fromConnection": "Connector field · used in {{target}}",
       "unknownMethod": "unknown method",
       "groups": {
         "url": "URL",
@@ -1094,7 +1085,20 @@
       },
       "invalidJson": "Not valid JSON. Fix it or switch the value to text.",
       "invalidJsonSend_one": "A value is not valid JSON. Fix it before sending.",
-      "invalidJsonSend_other": "{{count}} values are not valid JSON. Fix them before sending."
+      "invalidJsonSend_other": "{{count}} values are not valid JSON. Fix them before sending.",
+      "secretPlaceholder": "Filled in from the connector (hidden) – type to override",
+      "refsFailed": "Could not determine the values this request needs",
+      "fromConnector": "Filled in from connector {{connector}}",
+      "connectorFieldMissing": "Connector {{connector}} has no field \"{{field}}\" – sent as written",
+      "staticType": {
+        "DIRECT": "Response or request of another step",
+        "WRAPPED_DIRECT": "Response or request of another step, inside text",
+        "WEBHOOK": "Webhook variable",
+        "ENHANCEMENT": "Result of a field-binding script",
+        "PAGE": "Pagination parameter",
+        "REQUEST_DATA": "Placeholder without a connector to fill it",
+        "unknown": "Looks like a reference – enter the value to send"
+      }
     },
     "source": {
       "execution": "Execution",
@@ -1102,11 +1106,11 @@
       "testRun": "Test run",
       "lastTest": "Last test",
       "sample": "Sample",
-      "upstream": "Upstream",
       "edited": "Manual",
       "empty": "Required",
       "connection": "Connector",
-      "secret": "Secret"
+      "secret": "Secret",
+      "unavailable": "Missing"
     },
     "sourceHint": {
       "execution": "Value recorded in this execution.",
@@ -1114,11 +1118,11 @@
       "testRun": "Read from the paused test run: the source step has already run, so this is its real value.",
       "lastTest": "The value you used the last time you tested this step in this browser session.",
       "sample": "Read from the saved sample response of the source step.",
-      "upstream": "The steps before this one run first; their response provides this value.",
       "edited": "Changed for this test.",
       "empty": "No value yet – enter one before sending.",
-      "connection": "Taken from the selected connector. A change applies to this test only.",
-      "secret": "Taken from the selected connector and never shown."
+      "connection": "Filled in from the connector by the backend. Type a value to override it for this test only.",
+      "secret": "Filled in from the connector by the backend and never shown. Type a value to override it for this test only.",
+      "unavailable": "The connector does not define this field, so the placeholder is sent as written. Type a value to use one for this test."
     },
     "origin": {
       "fixed": "Fixed",
@@ -1160,40 +1164,12 @@
         "urlencoded": "x-www-form-urlencoded"
       }
     },
-    "settings": {
-      "timeout": "Timeout (seconds)",
-      "retries": "Retries on failure",
-      "proxy": "Proxy",
-      "proxyUrl": "Proxy URL",
-      "proxyMode": {
-        "system": "Use system setting",
-        "none": "No proxy",
-        "custom": "Custom…"
-      },
-      "followRedirects": {
-        "label": "Follow redirects",
-        "hint": "Follow HTTP 3xx responses automatically."
-      },
-      "verifySsl": {
-        "label": "Verify SSL certificate",
-        "hint": "Turn off only for internal systems with self-signed certificates."
-      },
-      "saveResponseAsSample": {
-        "label": "Save every response as sample",
-        "hint": "Makes the fields available for mapping in the next steps."
-      },
-      "logToHistory": {
-        "label": "Log test runs in execution history",
-        "hint": "Off by default so tests don't mix with real runs."
-      }
-    },
     "response": {
       "title": "Response",
       "emptyTitle": "Nothing sent yet",
       "emptyHint": "Check the prefilled values, adjust what you need and press <b>Send</b>. The request is executed only once – the workflow itself does not run.",
       "sending": "Sending request to {{connection}}…",
       "sendingDirect": "Sending request…",
-      "sendingUpstream": "Running {{methods}}, then sending the request…",
       "duration": "{{ms}} ms",
       "run": "Run #{{run}}",
       "runOn": "Run #{{run}} · {{connection}}",
@@ -1201,7 +1177,7 @@
       "tabs": {
         "body": "Body",
         "headers": "Headers ({{count}})",
-        "timeline": "Timeline"
+        "request": "Request"
       },
       "pretty": "Pretty",
       "raw": "Raw",
@@ -1211,27 +1187,22 @@
       "noHeaders": "The response has no headers.",
       "noBody": "The response has no body.",
       "noResponse": "No response was received.",
-      "timeline": {
-        "dns": "DNS lookup",
-        "connect": "TCP connect",
-        "tls": "TLS handshake",
-        "firstByte": "Waiting (TTFB)",
-        "download": "Content download",
-        "total": "Total",
-        "unavailable": "Timing details are not available for this response."
-      },
-      "stage": {
-        "upstream": "An upstream step failed",
-        "resolve": "Could not fill in the values",
-        "enhancement": "A transformation script failed",
-        "connect": "Could not reach the system"
-      }
+      "failed": "The test could not be run",
+      "connectorError": "Could not read the data of connector {{connector}} – nothing was sent",
+      "sentHint": "The request as it was sent. Hidden connector values (passwords, secrets, tokens) are shown as ****.",
+      "binary": "Binary response ({{type}})",
+      "download": "Download",
+      "downloadFailed": "The response could not be downloaded."
     },
     "footer": {
-      "hint": "Test runs are not written to the workflow's execution history unless you turn it on in Settings. Changes stay local until you apply them.",
+      "hint": "Send calls the real API with the connector's credentials. Nothing is saved or logged; changes to the request stay local until you apply them.",
       "apply": "Apply to method",
       "applied": "Changes applied to {{name}}",
       "close": "Close"
+    },
+    "confirmWrite": {
+      "title": "Send a real {{method}} request?",
+      "message": "This sends a real {{method}} request to the API with the connector's credentials and can change data there. Continue?"
     }
   },
   "sandbox": {

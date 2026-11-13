@@ -217,7 +217,6 @@
     "list": "Liste",
     "prev": "Vorherige Woche",
     "next": "Nächste Woche",
-    "disabled": "Deaktivierte Zeitpläne anzeigen",
     "hour": "Stunde",
     "every": "Alle {{count}} Min.",
     "more": "Weitere Ausführungen"

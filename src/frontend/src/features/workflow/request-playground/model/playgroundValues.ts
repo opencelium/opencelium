@@ -2,7 +2,7 @@ import { readLiveValueAtPath } from '../../components/request-editor/body-editor
 import type { CollectedReference, CollectedWebhook } from './collectPlaygroundInputs';
 
 // `edited` is what the user typed; `empty` a value no source could provide.
-export type InputValueSource = 'testRun' | 'execution' | 'notExecuted' | 'lastTest' | 'sample' | 'upstream' | 'edited' | 'empty';
+export type InputValueSource = 'testRun' | 'execution' | 'notExecuted' | 'lastTest' | 'sample' | 'edited' | 'empty';
 
 // `string` sends the text verbatim; `json` parses it and falls back to the text
 // when it is not valid JSON. Kept per value so a sample id "123" stays a string.
@@ -12,7 +12,6 @@ export type InputValue = { text: string; kind: InputKind; source: InputValueSour
 
 export const referenceInputKey = ({ reference }: Pick<CollectedReference, 'reference'>) => reference;
 export const webhookInputKey = ({ name }: Pick<CollectedWebhook, 'name'>) => `webhook:${name}`;
-export const connectionInputKey = (field: string) => `connection:${field}`;
 
 export const emptyInput = (kind: InputKind = 'json'): InputValue => ({ text: '', kind, source: 'empty' });
 

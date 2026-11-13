@@ -12,6 +12,10 @@ const toWorkflowResponse = (
 	fail: response.fail,
 });
 
+// A sample saved from a real test ("Save as sample for mapping") replaces the invoker's
+// documented example; only a method without a sample body of its own falls back to it.
+const hasOwnSampleBody = (node: WorkflowNodeModel) => !!node.data.methodConfig?.response?.success?.body;
+
 const normalizeConnectorIcon = (icon: Connector['icon']) =>
 	typeof icon === 'string' ? icon : null;
 
@@ -54,7 +58,7 @@ const hydrateNode = (node: WorkflowNodeModel, connectors: Connector[],
 		} : invokerIcon && node.data.connector
 			? { ...node.data.connector, icon: invokerIcon }
 			: node.data.connector,
-		methodConfig: operation?.response ? { ...createEmptyMethodConfig(),
+		methodConfig: operation?.response && !hasOwnSampleBody(node) ? { ...createEmptyMethodConfig(),
 			...node.data.methodConfig,
 			response: toWorkflowResponse(node.id, operation.response),
 		} : node.data.methodConfig,

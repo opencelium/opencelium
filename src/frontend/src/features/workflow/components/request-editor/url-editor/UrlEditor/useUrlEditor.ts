@@ -6,7 +6,6 @@ import type { QueryParam } from '../../../../types/connection';
 import { updateRequestMethod } from '../../../../store/connection/connectionSlice';
 import {
 	buildQueryParamsFromEndpoint,
-	decodeEndpointQuery,
 	ensureTemplateRow,
 	getInlineVisualLength,
 	stripMockActiveFromEndpoint,
@@ -15,7 +14,7 @@ import {
 import { useUrlEndpointArgs } from '../useUrlEndpointArgs';
 import { useUrlEndpointPersistence } from '../useUrlEndpointPersistence';
 import { useUrlQueryParams } from '../useUrlQueryParams';
-import { decodeStoredQueryParams } from './urlEditor.data';
+import { readStoredQueryParams } from './urlEditor.data';
 import { useUrlEditorSync } from './useUrlEditorSync';
 import { useActiveUrlReference } from './useActiveUrlReference';
 import { useUrlReferenceInsertion } from './useUrlReferenceInsertion';
@@ -33,9 +32,7 @@ export function useUrlEditor(readOnly?: boolean) {
 	const lastRawCaretRef = useRef(0);
 	const queryCaretTargetRef = useRef<QueryCaretTarget | null>(null);
 	const lastDispatchedRef = useRef<string | null>(null);
-	const initialEndpoint = decodeEndpointQuery(
-		stripMockActiveFromEndpoint(method.request.endpoint || ''),
-	);
+	const initialEndpoint = stripMockActiveFromEndpoint(method.request.endpoint || '');
 	const [endpointRaw, setEndpointRaw] = useState(initialEndpoint);
 	const rawRef = useRef(initialEndpoint);
 	const args = useUrlEndpointArgs({
@@ -44,7 +41,7 @@ export function useUrlEditor(readOnly?: boolean) {
 		readOnly,
 	});
 	const [queryParams, setQueryParams] = useState<QueryParam[]>(() => {
-		const stored = decodeStoredQueryParams(
+		const stored = readStoredQueryParams(
 			stripMockActiveRows(
 				(method.request.queryParams || []).map((row) => ({ ...row })),
 			) as QueryParam[],
