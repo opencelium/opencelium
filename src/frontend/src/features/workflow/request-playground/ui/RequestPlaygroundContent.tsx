@@ -10,9 +10,9 @@ import { ensureMethodConfig } from '../../utils/requestConfig';
 import type { PlaygroundSession } from '../hooks/usePlaygroundSession';
 import { usePlaygroundSend } from '../hooks/usePlaygroundSend';
 import { usePlaygroundValues } from '../hooks/usePlaygroundValues';
-import { findMissingInputKeys } from '../model/buildPlaygroundRequest';
-import type { PlaygroundResponse, PlaygroundSettings } from '../model/playground.types';
-import { defaultSettings, withSampleResponse } from '../model/playgroundSettings';
+import { findMissingInputKeys, listStaticInputKeys } from '../model/methodTestRefs';
+import type { PlaygroundResult } from '../model/playground.types';
+import { withSampleResponse } from '../model/sampleResponse';
 import { buildReferencePreview } from '../model/bodyPreview';
 import { buildChipInputs, previewRequest } from '../model/previewRequest';
 import { applyRequestEdits, type RequestEdits } from '../model/requestEdits';
@@ -23,6 +23,7 @@ import { PlaygroundTitle } from './PlaygroundTitle';
 import { PlaygroundUrlBar } from './PlaygroundUrlBar';
 import { RequestTabs, type RequestTab } from './request/RequestTabs';
 import type { FocusRequest } from './request/TestValuesTab';
+import { buildValueRows } from './request/valueRows';
 import { ResponsePanel } from './response/ResponsePanel';
 import './requestPlayground.css';
 import './requestPlaygroundTables.css';
@@ -35,28 +36,27 @@ type Props = {
 	execution?: LoggedExecution;
 	// The step as it is now — Apply and Save as sample write onto it, not onto the snapshot.
 	liveNode: WorkflowNodeModel;
-	connectionId: number | null;
 	isReadOnly: boolean;
 	onApplyConfig: (nodeId: string, config: WorkflowMethodConfig) => void;
 	onClose: () => void;
 };
 
-export function RequestPlaygroundContent({ session, execution, liveNode, connectionId, isReadOnly, onApplyConfig, onClose }: Props) {
+export function RequestPlaygroundContent({ session, execution, liveNode, isReadOnly, onApplyConfig, onClose }: Props) {
 	const { t } = useI18n('workflow');
 	const [tab, setTab] = useState<RequestTab>('values');
 	const [focus, setFocus] = useState<FocusRequest | null>(null);
 	const [isCurlVisible, setIsCurlVisible] = useState(false);
-	const [settings, setSettings] = useState<PlaygroundSettings>(() => defaultSettings(session.connector));
 	const [appliedEdits, setAppliedEdits] = useState<RequestEdits | null>(null);
 	const values = usePlaygroundValues({ inputs: session.inputs, connection: session.connection,
-		currentMethod: session.currentMethod, storageKey: session.storageKey, execution });
+		currentMethod: session.currentMethod, storageKey: session.storageKey,
+		execution, staticKeys: session.refs.refs ? listStaticInputKeys(session.refs.refs) : [] });
 	const stepName = liveNode.data.subtitle || session.draft.name;
 
 	const selectInput = (key: string) => {
 		setTab('values');
 		setFocus((current) => ({ key, nonce: (current?.nonce ?? 0) + 1 }));
 	};
-	const saveSample = (result: Extract<PlaygroundResponse, { kind: 'success' }>) => {
+	const saveSample = (result: Extract<PlaygroundResult, { kind: 'sent' }>) => {
 		onApplyConfig(liveNode.id, withSampleResponse(ensureMethodConfig(liveNode.data.methodConfig), liveNode.id, result));
 		message.success(t('requestPlayground.response.sampleSaved'));
 	};
@@ -65,44 +65,37 @@ export function RequestPlaygroundContent({ session, execution, liveNode, connect
 		setAppliedEdits(session.edits);
 		message.success(t('requestPlayground.footer.applied', { name: stepName }));
 	};
-	const send = usePlaygroundSend({ session, values, settings, connectionId, execution,
-		onInvalidInputs: (keys) => selectInput(keys[0]),
-		onSaveSample: (result) => { if (!isReadOnly) saveSample(result); } });
+	const send = usePlaygroundSend({ session, values, onInvalidInputs: (keys) => selectInput(keys[0]) });
 
-	const missingKeys = findMissingInputKeys(session.inputs, values.values, values.prefillSource);
+	const rows = buildValueRows({ inputs: session.inputs, refs: session.refs.refs, draft: session.draft,
+		connectors: session.allConnectors, methods: session.connection.fromConnector.method }, t);
+	const missingKeys = findMissingInputKeys(rows.filter(({ kind }) => kind === 'input').map(({ key }) => key),
+		values.values);
 	const previewArgs = { inputs: session.inputs, values: values.values,
 		connector: session.connector, requestData: values.requestData };
 	const preview = previewRequest({ draft: session.draft, ...previewArgs });
-	const isExecution = values.prefillSource === 'execution';
-	const url = session.draft.request.endpoint;
-	const previewParts = isExecution ? buildReferencePreview(url, buildChipInputs(previewArgs)) : undefined;
-	const upstreamMethods = Array.from(new Set(session.inputs.references
-		.map(({ sourceMethod }) => sourceMethod && (sourceMethod.label || sourceMethod.name)).filter(Boolean)));
-	const sendingText = values.prefillSource === 'upstream' && upstreamMethods.length
-		? t('requestPlayground.response.sendingUpstream', { methods: upstreamMethods.join(' → ') })
-		: session.connector
-			? t('requestPlayground.response.sending', { connection: session.connector.title })
-			: t('requestPlayground.response.sendingDirect');
+	const previewParts = values.prefillSource === 'execution'
+		? buildReferencePreview(session.draft.request.endpoint, buildChipInputs(previewArgs)) : undefined;
+	const sendingText = session.connector
+		? t('requestPlayground.response.sending', { connection: session.connector.title })
+		: t('requestPlayground.response.sendingDirect');
 
 	const requestPane = (
 		<div className='rpRequest'>
-			<PlaygroundUrlBar method={session.draft.request.method || 'GET'} url={url} previewUrl={preview.url}
-				previewParts={previewParts}
-				onUrlChange={(url) => session.setEdits((current) => ({ ...current, url, paramRows: undefined }))} prefillSource={values.prefillSource}
-				isCurlVisible={isCurlVisible} isSending={send.isSending}
-				isPrefillingExecution={isExecution && values.resolvingKeys.length > 0}
+			<PlaygroundUrlBar method={session.draft.request.method || 'GET'} url={session.draft.request.endpoint} previewUrl={preview.url} previewParts={previewParts}
+				onUrlChange={(url) => session.setEdits((current) => ({ ...current, url, paramRows: undefined }))}
+				isCurlVisible={isCurlVisible} isSending={send.isSending} canSend={send.canSend && (values.prefillSource !== 'execution' || !values.resolvingKeys.length)}
 				onMethodChange={(method) => session.setEdits((current) => ({ ...current, method }))}
 				onToggleCurl={() => setIsCurlVisible((isVisible) => !isVisible)} onSend={send.send} />
 			{isCurlVisible && <PlaygroundCurl command={buildCurl(preview)} />}
-			<RequestTabs session={session} values={values} settings={settings} missingKeys={missingKeys}
-				tab={tab} focus={focus} onTabChange={setTab} onSelectInput={selectInput}
-				onSettingsChange={(patch) => setSettings((current) => ({ ...current, ...patch }))} />
+			<RequestTabs session={session} values={values} rows={rows} missingKeys={missingKeys}
+				tab={tab} focus={focus} onTabChange={setTab} onSelectInput={selectInput} />
 		</div>
 	);
 
 	return (
 		<Dialog open onClose={onClose} width='90vw' top={18} maximizable testId='request-playground-dialog'
-			title={<PlaygroundTitle session={session} showPreviewBadge={!isExecution} />}
+			title={<PlaygroundTitle session={session} />}
 			footer={<PlaygroundFooter onApply={apply} onClose={onClose}
 				canApply={!isReadOnly && session.hasEdits && appliedEdits !== session.edits} />}>
 			<div className='rpBody'>
@@ -111,8 +104,8 @@ export function RequestPlaygroundContent({ session, execution, liveNode, connect
 						{ key: 'request', defaultSize: '58%', min: REQUEST_PANE_MIN_WIDTH, content: requestPane },
 						{ key: 'response', min: 320, content: (
 							<ResponsePanel result={send.result} isSending={send.isSending} sendingText={sendingText}
-								run={send.run} canSaveSample={!isReadOnly} onSaveSample={() => {
-									if (send.result?.kind === 'success') saveSample(send.result);
+								run={send.run} connectors={session.allConnectors} canSaveSample={!isReadOnly} onSaveSample={() => {
+									if (send.result?.kind === 'sent') saveSample(send.result);
 								}} />
 						) },
 					]} />

@@ -8,7 +8,7 @@ import {
 import type { WorkflowBodyFormat, WorkflowMethodConfig } from '../../types/request-config.types';
 import { isSecretField } from './playgroundConnection';
 
-export type EditableRow = { id: string; key: string; value: string; enabled: boolean };
+export type EditableRow = { id: string; key: string; value: string; enabled: boolean; isFlag?: boolean };
 
 // Fixed: set by the API definition. Dynamic: filled from a reference or webhook, edited in
 // Test values. Connection/Secret: filled from the connector. Editable: free for this test.
@@ -56,7 +56,7 @@ export const headerRowsOf = (config: WorkflowMethodConfig): EditableRow[] =>
 
 export const paramRowsOf = (config: WorkflowMethodConfig): EditableRow[] =>
 	buildQueryParamsFromEndpoint<EditableRow>(config.url ?? '', [], false)
-		.map((param) => ({ id: param.id, key: param.key, value: param.value, enabled: param.enabled }));
+		.map(({ id, key, value, enabled, isFlag }) => ({ id, key, value, enabled, ...(isFlag ? { isFlag } : {}) }));
 
 const rowsToHeaders = (rows: EditableRow[]) => Object.fromEntries(rows
 	.filter((row) => row.enabled && row.key.trim())

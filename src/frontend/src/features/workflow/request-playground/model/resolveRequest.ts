@@ -1,5 +1,5 @@
 import { readBodyFields } from './collectPlaygroundInputs';
-import type { PlaygroundDraft, PlaygroundSentRequest } from './playground.types';
+import type { PlaygroundDraft, PlaygroundPreviewRequest } from './playground.types';
 
 // Mirrors the backend substitution so the URL bar and the cURL preview show the
 // request with its test values filled in before anything is sent.
@@ -35,7 +35,7 @@ const substitute = (value: unknown, substitutions: Substitution[]): unknown => {
 	return value;
 };
 
-export function resolveRequest(draft: PlaygroundDraft, substitutions: Substitution[]): PlaygroundSentRequest {
+export function resolveRequest(draft: PlaygroundDraft, substitutions: Substitution[]): PlaygroundPreviewRequest {
 	const { endpoint, method, header, body } = draft.request;
 	return {
 		url: asText(substitute(endpoint, substitutions)),
@@ -50,7 +50,7 @@ const quote = (value: string) => `'${value.replace(/'/g, `'\\''`)}'`;
 const hasBody = (body: unknown) => body !== undefined && body !== null && body !== ''
 	&& !(typeof body === 'object' && Object.keys(body).length === 0);
 
-export function buildCurl({ url, method, headers, body }: PlaygroundSentRequest): string {
+export function buildCurl({ url, method, headers, body }: PlaygroundPreviewRequest): string {
 	const lines = [`curl -X ${method.toUpperCase()} ${quote(url)}`,
 		...Object.entries(headers ?? {}).map(([key, value]) => `  -H ${quote(`${key}: ${value}`)}`)];
 	if (hasBody(body)) lines.push(`  -d ${quote(typeof body === 'string' ? body : JSON.stringify(body))}`);

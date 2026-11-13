@@ -24,9 +24,12 @@ export function useUrlEndpointPersistence(params: Params) {
 	const saveAll = useCallback((endpoint: string, rows: QueryParam[],
 		args: Record<string, EndpointArg>) => {
 		if (readOnly) return;
-		const { base } = splitEndpoint(endpoint);
+		const { base, hasQuestion } = splitEndpoint(endpoint);
 		const query = buildQueryFromParams(rows, true);
-		dispatch(updateEndpoint({ methodId, endpoint: query ? `${base}?${query}` : base } as any));
+		// A typed trailing `?` stays: the user is about to add the query (often by inserting
+		// a reference, which blurs the field and saves first).
+		const saved = query ? `${base}?${query}` : hasQuestion ? `${base}?` : base;
+		dispatch(updateEndpoint({ methodId, endpoint: saved } as any));
 		dispatch(updateQueryParams({ methodId, queryParams: stripTemplateRows(rows) } as any));
 		Object.entries(args || {}).forEach(([argId, patch]) => {
 			if (patch) dispatch(upsertEndpointArg({ methodId, argId, patch } as any));

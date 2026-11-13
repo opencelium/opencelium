@@ -16,7 +16,6 @@ export const SOURCE_TONE: Record<InputValueSource, BadgeTone> = {
 	notExecuted: 'warning',
 	lastTest: 'primary',
 	sample: 'neutral',
-	upstream: 'success',
 	edited: 'info',
 	empty: 'danger',
 };

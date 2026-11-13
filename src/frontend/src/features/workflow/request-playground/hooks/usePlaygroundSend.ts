@@ -1,106 +1,79 @@
-import { useEffect, useRef, useState } from 'react';
-import type { LoggedExecution } from '@features/logs';
-import { addRecordedEnhancementOutputs } from '../model/recordedEnhancementOutputs';
+import { useState } from 'react';
+import { errorBus } from '@shared/errors/api/errorBus';
+import { normalizeError } from '@shared/errors/api/normalizeError';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { useSocket } from '@shared/api/socket/useSocket';
-import { sendExecutionRequest } from '../model/sendExecutionRequest';
+import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { notifyError } from '@shared/ui/feedback/notifyError';
-import { buildPlaygroundRequest, findInvalidJsonInputKeys } from '../model/buildPlaygroundRequest';
-import type { PlaygroundResponse, PlaygroundSettings } from '../model/playground.types';
-import { useSendPlaygroundRequestMutation } from '../model/playgroundApi';
+import { buildStaticValues, findInvalidJsonInputKeys, isWriteMethod, listStaticInputKeys } from '../model/methodTestRefs';
+import type { MethodTestResult, PlaygroundResult } from '../model/playground.types';
+import { useTestMethodMutation } from '../model/playgroundApi';
 import type { PlaygroundSession } from './usePlaygroundSession';
 import type { PlaygroundValues } from './usePlaygroundValues';
-
-type SuccessResponse = Extract<PlaygroundResponse, { kind: 'success' }>;
 
 type Args = {
 	session: PlaygroundSession;
 	values: PlaygroundValues;
-	settings: PlaygroundSettings;
-	connectionId: number | null;
-	execution?: LoggedExecution;
 	onInvalidInputs: (keys: string[]) => void;
-	onSaveSample: (response: SuccessResponse) => void;
 };
 
 export type PlaygroundRun = { number: number; connectionTitle: string | null };
 
-export function usePlaygroundSend({ session, values, settings, connectionId, execution, onInvalidInputs, onSaveSample }: Args) {
+const toResult = ({ request, response, durationMs, connectorErrors }: MethodTestResult): PlaygroundResult => {
+	if (connectorErrors.length || !request || !response) return { kind: 'connectorErrors', errors: connectorErrors };
+	return { kind: 'sent', request, response, durationMs: durationMs ?? 0 };
+};
+
+export function usePlaygroundSend({ session, values, onInvalidInputs }: Args) {
 	const { t } = useI18n('workflow');
-	const [trigger, { data, isLoading }] = useSendPlaygroundRequestMutation();
-	const { client, status } = useSocket();
-	const [replay, setReplay] = useState<{ pending: boolean; result?: PlaygroundResponse }>();
-	const activeReplay = useRef<AbortController | null>(null);
-	useEffect(() => () => activeReplay.current?.abort(), []);
+	const confirm = useConfirm();
+	const [trigger, { isLoading }] = useTestMethodMutation();
+	const [result, setResult] = useState<PlaygroundResult | undefined>(undefined);
 	const [run, setRun] = useState<PlaygroundRun | null>(null);
+	const { draft, refs } = session;
 
 	const execute = async () => {
-		if (activeReplay.current || isLoading) return;
-		if (values.prefillSource === 'execution') {
-			if (values.resolvingKeys.length) return;
-			const unavailable = Object.keys(values.values).filter((key) => values.values[key].source === 'empty');
-			if (unavailable.length) {
-				onInvalidInputs(unavailable);
-				notifyError(t('requestPlayground.execution.valuesUnavailable'));
-				return;
-			}
-		}
-		const invalidKeys = findInvalidJsonInputKeys(session.inputs, values.values);
+		if (!refs.refs || isLoading) return;
+		if (values.prefillSource === 'execution' && values.resolvingKeys.length) return;
+		const invalidKeys = findInvalidJsonInputKeys(listStaticInputKeys(refs.refs), values.values);
 		if (invalidKeys.length) {
 			onInvalidInputs(invalidKeys);
 			notifyError(t('requestPlayground.values.invalidJsonSend', { count: invalidKeys.length }));
 			return;
 		}
+		const httpMethod = (draft.request.method || 'GET').toUpperCase();
+		const confirmWrite = isWriteMethod(httpMethod);
+		if (confirmWrite && !await confirm({
+			title: t('requestPlayground.confirmWrite.title', { method: httpMethod }),
+			message: t('requestPlayground.confirmWrite.message', { method: httpMethod }),
+		})) return;
+
 		values.persist();
 		setRun((current) => ({ number: (current?.number ?? 0) + 1, connectionTitle: session.connector?.title ?? null }));
-		// Transport failures surface through errorBus like every other API call.
-		const request = buildPlaygroundRequest({
-			connectionId,
-			connectorId: session.connectorId,
-			draft: session.draft,
-			fieldBindings: session.fieldBindings,
-			inputs: session.inputs,
-			values: values.values,
-			prefillSource: values.prefillSource,
-			requestData: values.requestData,
-			settings,
+		const response = await trigger({
+			method: draft,
+			staticValues: buildStaticValues({ refs: refs.refs, values: values.values, connectorOverrides: values.requestData }),
+			confirmWrite,
 		});
-		if (values.prefillSource === 'execution') {
-			if (!client || status !== 'connected') {
-				setReplay({ pending: false, result: { kind: 'error', stage: 'connect',
-					message: t('requestPlayground.execution.replayFailed') } });
-				return;
-			}
-			const controller = new AbortController();
-			activeReplay.current = controller;
-			setReplay({ pending: true });
-			try {
-				if (request.fieldBindings.length && (!execution || !await addRecordedEnhancementOutputs(request, execution.method, controller.signal))) {
-					setReplay({ pending: false, result: { kind: 'error', stage: 'enhancement',
-						message: t('requestPlayground.execution.scriptReplayUnavailable') } });
-					return;
-				}
-				const result = await sendExecutionRequest(client, request, controller.signal);
-				if (controller.signal.aborted) return;
-				setReplay({ pending: false, result });
-				if (result.kind === 'success' && settings.saveResponseAsSample) onSaveSample(result);
-			} catch {
-				if (!controller.signal.aborted) setReplay({ pending: false, result: { kind: 'error', stage: 'connect',
-					message: t('requestPlayground.execution.replayFailed') } });
-			} finally {
-				activeReplay.current = null;
-			}
+		if ('data' in response && response.data) {
+			setResult(toResult(response.data));
 			return;
 		}
-		setReplay(undefined);
-		const result = await trigger(request);
-		if (result.data?.kind === 'success' && settings.saveResponseAsSample) onSaveSample(result.data);
+		const appError = normalizeError(response.error);
+		if (appError.type === 'UNAUTHORIZED' || appError.type === 'FORBIDDEN') {
+			errorBus.emit(appError);
+			setResult(undefined);
+			return;
+		}
+		setResult({ kind: 'failed', message: appError.serverMessage ?? null });
+		// Most failures (a missing static value above all) mean the reference list is stale.
+		refs.refetch();
 	};
 
 	return {
 		send: () => void execute(),
-		result: replay ? replay.result : isLoading ? undefined : data,
-		isSending: isLoading || !!replay?.pending,
+		result: isLoading ? undefined : result,
+		isSending: isLoading,
+		canSend: !!refs.refs && !refs.isLoading,
 		run,
 	};
 }

@@ -1,6 +1,7 @@
 import { CronDate, CronExpressionParser } from "cron-parser";
 import { quartzToStandardCron } from "./quartzCron";
 import { nextQuartzRun } from "./quartzRunTime";
+import { runtimeConfig } from "@shared/config/runtimeConfig";
 
 const MIN_QUARTZ_YEAR = 1970;
 const maxQuartzYear = () => new Date().getFullYear() + 100;
@@ -133,6 +134,8 @@ export function upcomingRuns(
   return iterator.take(count).map((date) => date.getTime());
 }
 
+// Quartz fires in the backend JVM's default zone, which the API doesn't expose — ops
+// set it as `serverTimeZone` in config.json. The browser zone is only a fallback.
 export function getScheduleTimeZone(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return runtimeConfig.serverTimeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
 }

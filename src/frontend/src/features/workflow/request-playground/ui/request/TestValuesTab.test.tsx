@@ -5,6 +5,7 @@ import en from '@shared/i18n/locales/en/workflow.json';
 import de from '@shared/i18n/locales/de/workflow.json';
 import type { PlaygroundSession } from '../../hooks/usePlaygroundSession';
 import type { PlaygroundValues } from '../../hooks/usePlaygroundValues';
+import { buildValueRows } from './valueRows';
 import { TestValuesTab } from './TestValuesTab';
 
 const locale = vi.hoisted(() => ({ current: 'en' as 'en' | 'de' }));
@@ -26,6 +27,7 @@ vi.mock('@shared/ui/primitives/Select', () => ({ Select: () => null }));
 
 const key = '#112233.(response).body.$.item';
 const session = {
+	refs: { error: null },
 	inputs: {
 		references: [{
 			reference: key,
@@ -50,7 +52,9 @@ it.each([
 	['de', 'In dieser Ausführung nicht ausgeführt'],
 ] as const)('shows the translated unexecuted badge and a blank input in %s', (language, label) => {
 	locale.current = language;
-	render(<TestValuesTab session={session} values={values} missingKeys={[key]} focus={null} />);
+	render(<TestValuesTab session={session} values={values}
+		rows={buildValueRows({ inputs: session.inputs, refs: undefined, draft: session.draft, connectors: [], methods: [] }, (key) => key)}
+		missingKeys={[key]} focus={null} />);
 	expect(screen.getByText(label)).toBeTruthy();
 	expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('');
 });
