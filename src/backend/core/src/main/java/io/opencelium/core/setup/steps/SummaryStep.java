@@ -4,8 +4,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.SequencedMap;
+import java.util.Set;
 
 import io.opencelium.core.config.BootstrapProperties;
 import io.opencelium.core.config.OpenCeliumProperties;
@@ -30,7 +33,10 @@ import io.opencelium.core.setup.prompt.Prompter;
  * asked: the setup file is the decision.
  * <p>
  * A value that an environment variable gives shows the name of the variable, and the summary tells to keep each such
- * variable for each later start. Neither file holds such a value, so the environment stays its only source.
+ * variable for each later start. Neither file holds such a value, so the environment stays its only source: a
+ * MongoDB connection of {@code SPRING_MONGODB_} variables gets no line in application.yml, and one of
+ * {@code OC_MONGO_URI} keeps only the placeholder, without an entry in the env file. The env file is written also
+ * without an entry, because the service needs the file that it names, and the new file replaces an old entry.
  */
 public final class SummaryStep implements SetupStep {
 
@@ -56,25 +62,30 @@ public final class SummaryStep implements SetupStep {
 	@Override
 	public void run(SetupContext context, Prompter prompter) {
 		SequencedMap<String, String> fromEnvironment = context.fromEnvironment();
-		var values = new BootstrapValues(context.deploymentMode(), context.dataDir()
-				.orElseThrow(() -> new IllegalStateException("The data directory step did not run.")), context.port()
-				.orElseThrow(() -> new IllegalStateException("The port step did not run.")), context.mongoUri()
-				.orElseThrow(() -> new IllegalStateException("The MongoDB step did not run.")), context.masterKeyFile(),
-				fromEnvironment.sequencedKeySet());
+		Path dataDir = context.dataDir()
+				.orElseThrow(() -> new IllegalStateException("The data directory step did not run."));
+		int port = context.port().orElseThrow(() -> new IllegalStateException("The port step did not run."));
+		MongoConnection connection = context.mongoConnection();
+		Optional<String> mongoUri = context.mongoUri();
+		List<String> mongoVariables = context.mongoVariables();
+		var values = new BootstrapValues(context.deploymentMode(), dataDir, port, mongoUri, context.masterKeyFile(),
+				leftOut(fromEnvironment, mongoVariables));
 		var rows = new LinkedHashMap<String, String>();
 		rows.put("Mode", values.deploymentMode().propertyValue()
 				+ source(fromEnvironment, OpenCeliumProperties.DEPLOYMENT_MODE));
 		rows.put("Data directory", values.dataDir() + source(fromEnvironment, OpenCeliumProperties.DATA_DIR));
 		rows.put("Web port", values.port() + source(fromEnvironment, BootstrapProperties.SERVER_PORT));
-		rows.put("MongoDB", MongoConnection.redact(values.mongoUri()));
+		rows.put("MongoDB", mongoUri.map(MongoConnection::redact).orElseGet(connection::redacted)
+				+ (mongoVariables.isEmpty() ? "" : "   (from " + String.join(", ", mongoVariables) + ")"));
 		context.masterKeySource().ifPresent(source -> rows.put("Master key", source));
 		prompter.box("Your answers", rows);
 		prompter.print("");
-		if (!fromEnvironment.isEmpty()) {
-			// No file holds these values: a later start without a variable falls back to the default.
-			prompter.info("Keep these variables for each later start: " + String.join(", ", fromEnvironment.values())
-					+ ".", "Set them in the shell or in the environment of the service. A later start",
-					"without a variable uses the default, not the value above.");
+		List<String> keep = new ArrayList<>(fromEnvironment.values());
+		keep.addAll(mongoVariables);
+		context.masterKeyVariable().ifPresent(keep::add);
+		if (!keep.isEmpty()) {
+			prompter.info("Keep these variables for each later start: " + String.join(", ", keep) + ".",
+					laterStart(keep).toArray(String[]::new));
 			prompter.print("");
 		}
 		List<Path> files = new ArrayList<>(List.of(locations.ymlFile(), locations.envFile()));
@@ -89,10 +100,41 @@ public final class SummaryStep implements SetupStep {
 		if (!context.values().yesNo(CONFIRM_QUESTION, CONFIRM_HELP, true, prompter)) {
 			throw new SetupCancelledException();
 		}
-		// The env file holds the whole URI, and the start in this process gets it as an argument.
-		context.putEnvironment(YmlRenderer.MONGO_URI_VARIABLE, values.mongoUri());
+		// The env file holds the whole URI that the user chose, and the start in this process gets it as an argument.
+		// A connection of the environment reaches each start through the environment only.
+		mongoUri.ifPresent(uri -> context.putEnvironment(YmlRenderer.MONGO_URI_VARIABLE, uri));
 		context.filePlan().add(PlannedFile.groupReadable(locations.ymlFile(), YmlRenderer.render(values)));
 		context.filePlan().add(PlannedFile.ownerOnly(locations.envFile(), EnvRenderer.render(context.environment())));
+	}
+
+	/**
+	 * The bootstrap properties that application.yml leaves out. A connection of {@code SPRING_MONGODB_} variables
+	 * leaves out the MongoDB line; one of {@code OC_MONGO_URI} keeps it, because the line refers to that variable.
+	 */
+	private static Set<String> leftOut(SequencedMap<String, String> fromEnvironment, List<String> mongoVariables) {
+		Set<String> leftOut = new LinkedHashSet<>(fromEnvironment.sequencedKeySet());
+		if (!mongoVariables.isEmpty() && !mongoVariables.equals(List.of(YmlRenderer.MONGO_URI_VARIABLE))) {
+			leftOut.add(BootstrapProperties.MONGODB_URI);
+		}
+		return leftOut;
+	}
+
+	/**
+	 * What a later start without a variable does. No file holds these values, so it falls back to the default; only
+	 * {@code OC_MONGO_URI} has none, because application.yml refers to it, and a start without it stops.
+	 */
+	private static List<String> laterStart(List<String> keep) {
+		List<String> lines = new ArrayList<>(List.of("Set them in the shell or in the environment of the service."
+				+ " A later start"));
+		if (!keep.contains(YmlRenderer.MONGO_URI_VARIABLE)) {
+			lines.add("without a variable uses the default, not the value above.");
+			return lines;
+		}
+		lines.add("without " + YmlRenderer.MONGO_URI_VARIABLE + " stops, because application.yml refers to it.");
+		if (keep.size() > 1) {
+			lines.add("A later start without another of them uses the default, not the value above.");
+		}
+		return lines;
 	}
 
 	/** After a value that a variable gives: the name of the variable; nothing for an answer of the setup. */

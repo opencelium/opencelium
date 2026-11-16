@@ -277,7 +277,8 @@ class SummaryStepTest {
 		assertThat(fromVariables.filePlan().files().get(1).content()).doesNotContain("OC_MONGO_URI");
 		assertThat(fromVariables.environment()).isEmpty();
 		assertThat(console.output()).contains("(from OC_MONGO_URI)",
-				"Keep these variables for each later start: OC_MONGO_URI.");
+				"Keep these variables for each later start: OC_MONGO_URI.",
+				"without OC_MONGO_URI stops, because application.yml refers to it.").doesNotContain("uses the default");
 	}
 
 	@Test

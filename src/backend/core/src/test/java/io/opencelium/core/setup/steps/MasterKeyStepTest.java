@@ -450,6 +450,23 @@ class MasterKeyStepTest {
 	}
 
 	@Test
+	void runStopsWithoutQuotingTheKeyWhenTheKeyFileVariableHoldsAMasterKey() {
+		// The master key itself in the key file variable, by mistake: the path of a missing file would quote it.
+		String key = randomKey();
+		environment.put("OPENCELIUM_MASTERKEYFILE", key);
+		SetupContext fromVariables = withVariables();
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> step().run(fromVariables, prompter)).actual();
+
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.lines().getFirst()).startsWith("Bad value: OPENCELIUM_MASTERKEYFILE in the environment: ")
+				.contains("master key", "OC_MASTER_KEY");
+		assertThat(ex.getMessage()).doesNotContain(key);
+		assertThat(console.output()).doesNotContain(key);
+	}
+
+	@Test
 	void runAsksAgainWhenFileIsMissing() throws Exception {
 		Path good = storeKeyFile(tmp.resolve("keys/master.key"));
 		Path missing = tmp.resolve("keys/missing.key");

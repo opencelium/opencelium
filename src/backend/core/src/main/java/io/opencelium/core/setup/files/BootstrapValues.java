@@ -13,14 +13,15 @@ import io.opencelium.core.config.mongo.MongoConnection;
  * application.yml will say.
  *
  * @param dataDir       absolute
- * @param mongoUri      the whole connection URI, which the env file holds and application.yml refers to
+ * @param mongoUri      the whole connection URI that the user chose, which the env file holds and application.yml
+ *                      refers to; empty when environment variables give the connection, so that no file gets a copy
  * @param masterKeyFile absolute; the key file that the user named, empty when the master key comes from the data
  *                      directory or from the environment
  * @param fromEnvironment the bootstrap properties that an environment variable gives, for example
  *                      {@code server.port}: application.yml has no line for them, so the environment stays their
- *                      only source
+ *                      only source; {@code spring.mongodb.uri} stands for each {@code SPRING_MONGODB_} variable
  */
-public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int port, String mongoUri,
+public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int port, Optional<String> mongoUri,
 		Optional<Path> masterKeyFile, Set<String> fromEnvironment) {
 
 	public BootstrapValues {
@@ -37,7 +38,7 @@ public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int p
 	/** No value from the environment. */
 	public BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int port, String mongoUri,
 			Optional<Path> masterKeyFile) {
-		this(deploymentMode, dataDir, port, mongoUri, masterKeyFile, Set.of());
+		this(deploymentMode, dataDir, port, Optional.of(mongoUri), masterKeyFile, Set.of());
 	}
 
 	/** Without a key file: the master key comes from the data directory or from the environment. */
@@ -49,7 +50,7 @@ public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int p
 	@Override
 	public String toString() {
 		return "BootstrapValues[deploymentMode=" + deploymentMode + ", dataDir=" + dataDir + ", port=" + port
-				+ ", mongoUri=" + MongoConnection.redact(mongoUri) + ", masterKeyFile=" + masterKeyFile
+				+ ", mongoUri=" + mongoUri.map(MongoConnection::redact) + ", masterKeyFile=" + masterKeyFile
 				+ ", fromEnvironment=" + fromEnvironment + "]";
 	}
 

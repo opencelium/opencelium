@@ -7,16 +7,24 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.impl.NoOpLog;
+import org.springframework.core.env.ConfigurableEnvironment;
+
+import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.config.BootstrapPropertyException;
+import io.opencelium.core.config.DefaultsEnvironmentPostProcessor;
 import io.opencelium.core.config.mongo.MongoConnection;
 import io.opencelium.core.config.mongo.MongoStartupPing;
 import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
 import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
+import io.opencelium.core.setup.SetupFailedException;
+import io.opencelium.core.setup.files.YmlRenderer;
 import io.opencelium.core.setup.mongo.MongoDetector;
 import io.opencelium.core.setup.mongo.UriBuilder;
 import io.opencelium.core.setup.prompt.Choice;
 import io.opencelium.core.setup.prompt.Prompter;
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
 import io.opencelium.core.setup.values.Question;
 import io.opencelium.core.setup.values.ValueKey;
 import io.opencelium.core.setup.values.ValueSource;
@@ -38,6 +46,14 @@ import io.opencelium.core.setup.values.ValueSource;
  * The values have no key there: the file gives the whole URI. A server of the file that does not answer stops the
  * setup, as each bad value of the file does. A bad value is shown masked, because a URI under the wrong key holds a
  * database password.
+ * <p>
+ * When the environment of the setup gives the connection, the step shows no menu and asks nothing: each start reads
+ * the variable again, so another answer would not apply. A {@code SPRING_MONGODB_} variable goes through the defaults
+ * and the connection resolution of the start; without one, {@code OC_MONGO_URI} goes through the URI rules of the
+ * start, as the placeholder of application.yml gives it. The step shows the connection without its database password
+ * and with the names of the variables, and pings it. A value that the start would not accept, and a server that does
+ * not answer, stop the setup without the retry menu. The {@code mongo} and {@code mongo-uri} values of the setup file
+ * must then give the same database, and the step keeps the connection, not a URI: no file holds a copy of it.
  */
 public final class MongoStep implements SetupStep {
 
@@ -139,12 +155,110 @@ public final class MongoStep implements SetupStep {
 
 	@Override
 	public void run(SetupContext context, Prompter prompter) {
-		List<Server> servers = servers(detector.localServerListens());
 		ValueSource values = context.values();
+		Optional<FromEnvironment> fromEnvironment = fromEnvironment(values.environment());
+		if (fromEnvironment.isPresent()) {
+			useEnvironment(fromEnvironment.get(), context, prompter);
+			return;
+		}
+		List<Server> servers = servers(detector.localServerListens());
 		Optional<String> fromFile = values.given(serverQuestion(servers), this::checkWord, UnaryOperator.identity(),
 				prompter).flatMap(word -> word.equals(LOCAL) ? Optional.of(detector.localUri())
 						: uriOption(values, prompter));
 		context.setMongoUri(fromFile.orElseGet(() -> fromMenu(servers, values, prompter)));
+	}
+
+	/**
+	 * The connection that the environment gives, as the start resolves it, or empty when no variable gives one. A
+	 * {@code SPRING_MONGODB_} variable comes first: with one, application.yml has no MongoDB line, so
+	 * {@code OC_MONGO_URI} has no effect at a start.
+	 *
+	 * @throws SetupFailedException with exit code 1 when the start would not accept the values of the variables
+	 */
+	private static Optional<FromEnvironment> fromEnvironment(EnvironmentSnapshot environment) {
+		List<String> mongoDbVariables = environment.mongoDbVariables();
+		if (!mongoDbVariables.isEmpty()) {
+			return Optional.of(new FromEnvironment(resolve(environment, mongoDbVariables), mongoDbVariables));
+		}
+		return environment.text(YmlRenderer.MONGO_URI_VARIABLE).map(uri -> {
+			List<String> variables = List.of(YmlRenderer.MONGO_URI_VARIABLE);
+			try {
+				return new FromEnvironment(StaticMongoConnectionResolver.parseUri(uri), variables);
+			}
+			catch (BootstrapPropertyException ex) {
+				throw ValueSource.badVariable(variables, ex.getMessage());
+			}
+		});
+	}
+
+	/**
+	 * The connection of the {@code spring.mongodb} variables as the start resolves it: first the defaults, so that a
+	 * database variable alone gives the default server with that database, then the connection resolution. The
+	 * message of a stop names the variable of the rejected property, or each variable when none gives that property.
+	 */
+	private static MongoConnection resolve(EnvironmentSnapshot environment, List<String> variables) {
+		ConfigurableEnvironment start = environment.asEnvironment();
+		// The lines of the applied defaults are for the log of a start, not for the screen of the setup.
+		new DefaultsEnvironmentPostProcessor(destination -> new NoOpLog()).applyDefaults(start);
+		try {
+			return StaticMongoConnectionResolver.from(SetupContext.DEPLOYMENT_MODE, start).resolve(TenantId.SELF_HOST);
+		}
+		catch (BootstrapPropertyException ex) {
+			throw ValueSource.badVariable(environment.variableOf(ex.propertyName()).map(List::of).orElse(variables),
+					ex.getMessage());
+		}
+	}
+
+	/**
+	 * Takes the connection of the environment without a question: the setup file must agree, and the server must
+	 * answer. Nothing offers another server, because each start reads the variables again.
+	 */
+	private void useEnvironment(FromEnvironment fromEnvironment, SetupContext context, Prompter prompter) {
+		MongoConnection connection = fromEnvironment.connection();
+		List<String> variables = fromEnvironment.variables();
+		agreeWithSetupFile(connection, variables, context.values());
+		prompter.answered("MongoDB", connection.redacted(), "from the environment: " + String.join(", ", variables));
+		prompter.progress("Pinging MongoDB at " + connection.redacted() + "...");
+		Optional<String> cause = ping.apply(connection);
+		if (cause.isPresent()) {
+			throw SetupFailedException.failure("Cannot use MongoDB at " + connection.redacted() + " from "
+					+ String.join(", ", variables) + ": " + cause.get() + ".", "Start MongoDB, or "
+							+ ValueSource.repairOrRemove(variables));
+		}
+		prompter.success("MongoDB answers at " + connection.redacted());
+		context.setMongoConnection(connection, variables);
+	}
+
+	/**
+	 * The setup file and the environment must give the same database: {@code local} the local server, else
+	 * {@code mongo-uri}. They agree by the connection that each gives, so a URI and the host-style variables of 1
+	 * server agree. The messages quote no value, because both can hold a database password.
+	 */
+	private void agreeWithSetupFile(MongoConnection connection, List<String> variables, ValueSource values) {
+		Optional<String> word = values.fromFile(ValueKey.MONGO);
+		if (word.isPresent() && !word.get().equals(URI)) {
+			if (!word.get().equals(LOCAL)) {
+				throw values.badFileValue(ValueKey.MONGO, wordNotKnown(word.get()));
+			}
+			agree(detector.localUri(), ValueKey.MONGO, connection, variables, values);
+			return;
+		}
+		values.fromFile(ValueKey.MONGO_URI).ifPresent(uri -> agree(uri, ValueKey.MONGO_URI, connection, variables,
+				values));
+	}
+
+	private static void agree(String uri, ValueKey key, MongoConnection connection, List<String> variables,
+			ValueSource values) {
+		MongoConnection fromFile;
+		try {
+			fromFile = StaticMongoConnectionResolver.parseUri(uri);
+		}
+		catch (BootstrapPropertyException ex) {
+			throw values.badFileValue(key, ex.getMessage());
+		}
+		if (!fromFile.sameDatabase(connection)) {
+			throw values.different(key, variables);
+		}
 	}
 
 	/** The menu: a local server first, when one listens; then the URI, the values and the exit. */
@@ -274,8 +388,12 @@ public final class MongoStep implements SetupStep {
 		return switch (word) {
 			case LOCAL -> problem(detector.localUri());
 			case URI -> Optional.empty();
-			default -> Optional.of("'" + MongoConnection.redact(word) + "' is not one of: " + LOCAL + ", " + URI + ".");
+			default -> Optional.of(wordNotKnown(word));
 		};
+	}
+
+	private static String wordNotKnown(String word) {
+		return "'" + MongoConnection.redact(word) + "' is not one of: " + LOCAL + ", " + URI + ".";
 	}
 
 	/**
@@ -338,6 +456,20 @@ public final class MongoStep implements SetupStep {
 
 	private Question uriQuestion() {
 		return new Question(ValueKey.MONGO_URI, "MongoDB URI", URI_HELP, detector.localUri());
+	}
+
+	/**
+	 * A MongoDB connection that the environment gives.
+	 *
+	 * @param variables the names of the variables that give it, in the order of the result line
+	 */
+	private record FromEnvironment(MongoConnection connection, List<String> variables) {
+
+		FromEnvironment {
+			Objects.requireNonNull(connection, "connection");
+			variables = List.copyOf(variables);
+		}
+
 	}
 
 	private Choice choice(Server server) {

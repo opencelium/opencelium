@@ -9,7 +9,6 @@ import com.mongodb.MongoException;
 
 import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.config.mongo.MongoConnection;
-import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
 import io.opencelium.core.setup.AdminMarker;
 import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.setup.SetupFailedException;
@@ -22,7 +21,8 @@ import io.opencelium.core.user.AdminLookup;
  * The first admin: the step asks the admin username and plans the admin marker, which the start turns into the admin
  * with the fixed first admin password. The step asks no admin password. When the database of the MongoDB step holds
  * an admin already, the step does not apply: the setup makes no second admin, and the admin keeps the admin
- * password it has.
+ * password it has. With a connection from the environment, the step and the marker use the database of that
+ * connection, which the first start uses too.
  */
 public final class AdminStep implements SetupStep {
 
@@ -64,7 +64,7 @@ public final class AdminStep implements SetupStep {
 	 */
 	@Override
 	public boolean applicable(SetupContext context) {
-		MongoConnection connection = connection(context);
+		MongoConnection connection = context.mongoConnection();
 		try {
 			return !adminExists.test(connection);
 		}
@@ -80,7 +80,7 @@ public final class AdminStep implements SetupStep {
 	public void run(SetupContext context, Prompter prompter) {
 		String username = context.values().text(question(), AdminStep::check, prompter);
 		context.setAdminUsername(username);
-		context.filePlan().add(new AdminMarker(connection(context), username));
+		context.filePlan().add(new AdminMarker(context.mongoConnection(), username));
 	}
 
 	/**
@@ -90,11 +90,6 @@ public final class AdminStep implements SetupStep {
 	static Optional<String> check(String value) {
 		return value.codePoints().anyMatch(c -> Character.isWhitespace(c) || Character.isISOControl(c))
 				? Optional.of("An admin username has no spaces and no control characters.") : Optional.empty();
-	}
-
-	private static MongoConnection connection(SetupContext context) {
-		return StaticMongoConnectionResolver.parseUri(context.mongoUri()
-				.orElseThrow(() -> new IllegalStateException("The MongoDB step did not run.")));
 	}
 
 }
