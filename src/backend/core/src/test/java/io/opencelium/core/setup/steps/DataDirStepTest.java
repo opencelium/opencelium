@@ -5,15 +5,23 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import io.opencelium.core.setup.SetupContext;
+import io.opencelium.core.setup.SetupFailedException;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
+import io.opencelium.core.setup.values.SetupValues;
+import io.opencelium.core.setup.values.ValueKey;
+import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
@@ -147,6 +155,53 @@ class DataDirStepTest {
 		assertThat(step.check(tmp + "/oc\nx")).contains("The data directory has the control character U+000A.");
 		assertThat(step.check(tmp + "/oc\u001B[41mx")).hasValueSatisfying(problem -> assertThat(problem)
 				.doesNotContain(tmp.toString()).doesNotContain("[41m"));
+	}
+
+	@Test
+	void runKeepsTildeAsTextWhenTheDataDirectoryComesFromTheVariable() {
+		var fromVariable = new SetupContext(new ValueSource(SetupValues.NONE, Optional.empty(), false,
+				new EnvironmentSnapshot(Map.of("OPENCELIUM_DATADIR", "~/oc-data"))));
+
+		step(tmp.resolve("data")).run(fromVariable, prompter());
+
+		// The start does not expand ~: the directory is under the working directory, not under the home directory.
+		Path asTheStartReadsIt = Path.of("~/oc-data").toAbsolutePath().normalize();
+		assertThat(fromVariable.dataDir()).contains(asTheStartReadsIt);
+		assertThat(console.output()).isEqualTo("  Data directory  " + asTheStartReadsIt
+				+ "   (from the environment: OPENCELIUM_DATADIR)\n");
+	}
+
+	@Test
+	void runAcceptsTheSetupFileWhenItNamesTheDirectoryOfTheVariable() {
+		// The setup file expands ~ to the home directory; the variable gives the absolute path of that directory.
+		Path dir = home().resolve("oc-data");
+		SetupContext fromBoth = fromFileAndVariable("~/oc-data", dir.toString());
+
+		step(tmp.resolve("data")).run(fromBoth, prompter());
+
+		assertThat(fromBoth.dataDir()).contains(dir);
+		assertThat(console.output()).contains("(from the environment: OPENCELIUM_DATADIR)");
+	}
+
+	@Test
+	void runStopsWhenTheSetupFileAndTheVariableNameDifferentDirectories() {
+		// The same text, 2 directories: the setup file expands ~, and the start does not.
+		SetupContext fromBoth = fromFileAndVariable("~/oc-data", "~/oc-data");
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> step(tmp.resolve("data")).run(fromBoth, prompter())).actual();
+
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.getMessage()).contains("data-dir").contains("setup-values.yml").contains("OPENCELIUM_DATADIR")
+				.doesNotContain("oc-data");
+		assertThat(fromBoth.dataDir()).isEmpty();
+	}
+
+	/** A batch setup with a setup file and an environment that both give the data directory. */
+	private static SetupContext fromFileAndVariable(String fileValue, String variableValue) {
+		return new SetupContext(new ValueSource(new SetupValues(Map.of(ValueKey.DATA_DIR, fileValue)),
+				Optional.of(Path.of("setup-values.yml")), true,
+				new EnvironmentSnapshot(Map.of("OPENCELIUM_DATADIR", variableValue))));
 	}
 
 	private ConsolePrompter prompter() {

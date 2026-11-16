@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.io.TempDir;
 import io.opencelium.core.setup.ConfigLocations;
 import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.values.SetupValues;
 import io.opencelium.core.setup.files.PlannedFile;
@@ -27,7 +29,9 @@ import static org.assertj.core.api.Assertions.tuple;
 /**
  * The summary: the answers in a box (the mode always self-host, the MongoDB URI without its password), the files
  * that will be written as a list, the actions after the write with the start last, and the question whether to write
- * the files. Yes plans application.yml and the env file, with the entries of the env file; no cancels the setup.
+ * the files. Yes plans application.yml and the env file, with the entries of the env file; no cancels the setup. A
+ * value from the environment shows its variable, the summary tells to keep each such variable, and no file holds the
+ * value.
  */
 class SummaryStepTest {
 
@@ -207,6 +211,47 @@ class SummaryStepTest {
 		assertThat(context.filePlan().files()).filteredOn(file -> file.path().endsWith("application.yml"))
 				.singleElement().satisfies(file -> assertThat(file.content())
 						.contains("master-key-file: /keys/master.key"));
+	}
+
+	@Test
+	void runTellsToKeepTheVariablesWhenValuesComeFromTheEnvironment() {
+		SetupContext fromVariables = answeredFrom(Map.of("SERVER_PORT", "8080", "OPENCELIUM_DATADIR", "/srv/oc"));
+		console.type("y");
+
+		step().run(fromVariables, new ConsolePrompter(console));
+
+		// A later start without a variable takes the default, not the value that the box shows.
+		assertThat(console.output()).containsSubsequence("  |  Data directory  /srv/oc   (from OPENCELIUM_DATADIR)",
+				"  |  Web port        8080   (from SERVER_PORT)", "  +--",
+				"  Keep these variables for each later start: OPENCELIUM_DATADIR, SERVER_PORT.\n"
+						+ "  Set them in the shell or in the environment of the service. A later start\n"
+						+ "  without a variable uses the default, not the value above.\n",
+				"  Write the files? [Y/n]: ");
+	}
+
+	@Test
+	void runPlansNoLineAndNoEntryForTheValuesFromTheEnvironment() {
+		SetupContext fromVariables = answeredFrom(Map.of("OPENCELIUM_DEPLOYMENTMODE", "self-host", "SERVER_PORT",
+				"8080", "OPENCELIUM_DATADIR", "/srv/oc"));
+		console.type("y");
+
+		step().run(fromVariables, new ConsolePrompter(console));
+
+		// The environment stays the only source: a copy in a file would apply when the variable is gone.
+		assertThat(console.output()).contains("  |  Mode            self-host   (from OPENCELIUM_DEPLOYMENTMODE)");
+		assertThat(fromVariables.filePlan().files().get(0).content()).doesNotContain("port:")
+				.doesNotContain("data-dir:").doesNotContain("deployment-mode:").contains("uri: ${OC_MONGO_URI}\n");
+		assertThat(fromVariables.environment()).containsOnlyKeys("OC_MONGO_URI");
+	}
+
+	/** The answers of the earlier steps, with the setup environment that gives some of them. */
+	private static SetupContext answeredFrom(Map<String, String> variables) {
+		var fromVariables = new SetupContext(new ValueSource(SetupValues.NONE, Optional.empty(), false,
+				new EnvironmentSnapshot(variables)));
+		fromVariables.setDataDir(Path.of("/srv/oc"));
+		fromVariables.setPort(8080);
+		fromVariables.setMongoUri("mongodb://localhost:27017/opencelium");
+		return fromVariables;
 	}
 
 	private void answered() {

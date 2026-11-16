@@ -5,12 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
 import io.opencelium.core.setup.values.SetupValues;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.PlannedFile;
@@ -31,9 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * The wizard loop: the banner first, then the steps in order, skipping those that do not apply; then the planned
- * files are written and the application starts. A cancel ends the run with "nothing written" and exit code 0; a
- * write failure ends it with exit code 1 and starts nothing.
+ * The wizard loop: the banner first, with the names of the variables that give a value; then the steps in order,
+ * skipping those that do not apply; then the planned files are written and the application starts. A cancel ends the
+ * run with "nothing written" and exit code 0; a write failure, and a deployment mode other than self-host in the
+ * environment, end it with exit code 1 and start nothing.
  */
 class WizardTest {
 
@@ -285,6 +288,44 @@ class WizardTest {
 	}
 
 	@Test
+	void runNamesTheVariablesOnTheFirstScreenWhenTheEnvironmentHasThem() {
+		var environment = new EnvironmentSnapshot(Map.of("SERVER_PORT", "8080", "OPENCELIUM_DATADIR", "/srv/oc",
+				"PATH", "/usr/bin"));
+
+		withEnvironment(environment, List.of(recording("Data directory"))).run(REASON);
+
+		// The names only, before the first step: a value can be a secret.
+		assertThat(console.output()).contains("Type ? for help, q to quit.\n\n  Values from the environment, not asked\n"
+				+ "    - OPENCELIUM_DATADIR\n    - SERVER_PORT\n\n  Step 1 of 1: Data directory\n")
+				.doesNotContain("PATH").doesNotContain("8080").doesNotContain("/srv/oc");
+	}
+
+	@Test
+	void runStopsWhenTheDeploymentModeVariableIsCloud() {
+		var environment = new EnvironmentSnapshot(Map.of("OPENCELIUM_DEPLOYMENTMODE", "cloud"));
+		Wizard wizard = withEnvironment(environment, List.of(recording("first")));
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> wizard.run(REASON)).actual();
+
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.getMessage()).contains("OPENCELIUM_DEPLOYMENTMODE").contains("self-host mode only");
+		assertThat(ran).isEmpty();
+		assertThat(started).isFalse();
+	}
+
+	@Test
+	void runRunsTheStepsWhenTheDeploymentModeVariableIsSelfHostInAnotherSpelling() {
+		// The start ignores the case and _ versus -, so SELF_HOST is the self-host mode.
+		var environment = new EnvironmentSnapshot(Map.of("OPENCELIUM_DEPLOYMENTMODE", "SELF_HOST"));
+
+		OptionalInt exitCode = withEnvironment(environment, List.of(recording("first"))).run(REASON);
+
+		assertThat(exitCode).hasValue(0);
+		assertThat(ran).containsExactly("first");
+	}
+
+	@Test
 	void runStartsNothingWhenNoStepPlannedAFile() {
 		OptionalInt exitCode = wizard(List.of(recording("only"))).run(REASON);
 
@@ -311,6 +352,12 @@ class WizardTest {
 
 	private Wizard wizard(List<SetupStep> steps) {
 		return new Wizard(new ConsolePrompter(console), ValueSource.PROMPTED, steps, environment -> started = true,
+				Optional.of("1.2.3"));
+	}
+
+	private Wizard withEnvironment(EnvironmentSnapshot environment, List<SetupStep> steps) {
+		var values = new ValueSource(SetupValues.NONE, Optional.empty(), false, environment);
+		return new Wizard(new ConsolePrompter(console), values, steps, entries -> started = true,
 				Optional.of("1.2.3"));
 	}
 
