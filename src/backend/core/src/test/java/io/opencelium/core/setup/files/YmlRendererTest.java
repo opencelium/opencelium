@@ -116,7 +116,7 @@ class YmlRendererTest {
 	@Test
 	void renderLeavesOutPortAndDataDirectoryWhenTheEnvironmentGivesThem() {
 		String yml = YmlRenderer.render(new BootstrapValues(DeploymentMode.SELF_HOST, Path.of("/srv/oc/data"), 8080,
-				URI, Optional.empty(), Set.of("server.port", OpenCeliumProperties.DATA_DIR)));
+				Optional.of(URI), Optional.empty(), Set.of("server.port", OpenCeliumProperties.DATA_DIR)));
 
 		assertThat(yml).isEqualTo("""
 				# Written by OpenCelium setup. To run the setup again: java -jar oc-app.jar setup
@@ -131,7 +131,8 @@ class YmlRendererTest {
 	@Test
 	void renderWritesNoOpenceliumBlockWhenTheEnvironmentGivesEachOfItsValues() {
 		String yml = YmlRenderer.render(new BootstrapValues(DeploymentMode.SELF_HOST, Path.of("/srv/oc/data"), 8080,
-				URI, Optional.empty(), Set.of(OpenCeliumProperties.DEPLOYMENT_MODE, OpenCeliumProperties.DATA_DIR)));
+				Optional.of(URI), Optional.empty(), Set.of(OpenCeliumProperties.DEPLOYMENT_MODE,
+						OpenCeliumProperties.DATA_DIR)));
 
 		assertThat(yml).isEqualTo("""
 				# Written by OpenCelium setup. To run the setup again: java -jar oc-app.jar setup

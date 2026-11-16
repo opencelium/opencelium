@@ -45,6 +45,14 @@ public final class DefaultsEnvironmentPostProcessor implements EnvironmentPostPr
 
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+		applyDefaults(environment);
+	}
+
+	/**
+	 * Adds the default of each bootstrap property that {@code environment} leaves out, as the start does. The setup
+	 * wizard calls it before Spring starts, on an environment of its own variables, to read them as the start does.
+	 */
+	public void applyDefaults(ConfigurableEnvironment environment) {
 		Binder binder = Binder.get(environment);
 		Map<String, Object> defaults = new LinkedHashMap<>();
 

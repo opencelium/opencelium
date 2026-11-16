@@ -1,5 +1,7 @@
 package io.opencelium.core.setup;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
@@ -16,7 +18,14 @@ import com.mongodb.client.MongoCollection;
 import io.opencelium.core.config.mongo.MongoConnection;
 import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
 import io.opencelium.core.setup.files.SetupActionException;
+import io.opencelium.core.setup.prompt.ConsolePrompter;
+import io.opencelium.core.setup.steps.AdminStep;
+import io.opencelium.core.setup.steps.MongoStep;
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
+import io.opencelium.core.setup.values.SetupValues;
+import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.testsupport.LocalMongo;
+import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -24,7 +33,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * The admin marker is an action of the file plan: after the files are written, it stores the admin username in the
  * collection {@code admin_marker}, with the plain driver and without a Spring context, because the wizard writes it
- * before the application starts. A rollback of the plan puts back what was there before.
+ * before the application starts. A rollback of the plan puts back what was there before. With a MongoDB connection
+ * from the environment, the marker goes to the database of that connection, which the first start uses.
  */
 @ExtendWith(LocalMongo.Cleanup.class)
 class AdminMarkerTest {
@@ -79,6 +89,21 @@ class AdminMarkerTest {
 
 		assertThat(marker.undo()).isEmpty();
 		assertThat(marker()).isEqualTo(before);
+	}
+
+	@Test
+	void runStoresTheMarkerInTheDatabaseOfTheEnvironmentWhenTheConnectionComesFromVariables() {
+		// The path of the URI names another database: the database variable decides, as at the start.
+		var environment = new EnvironmentSnapshot(Map.of("SPRING_MONGODB_URI", LocalMongo.uri("oc_not_this_one"),
+				"SPRING_MONGODB_DATABASE", LocalMongo.databaseFor(AdminMarkerTest.class)));
+		var context = new SetupContext(new ValueSource(SetupValues.NONE, Optional.empty(), false, environment));
+		var prompter = new ConsolePrompter(new ScriptedConsoleIo().type("root"));
+		new MongoStep().run(context, prompter);
+		new AdminStep(connection -> false).run(context, prompter);
+
+		context.filePlan().actions().getFirst().run();
+
+		assertThat(marker()).isEqualTo(new Document("_id", "self-host").append("adminUsername", "root"));
 	}
 
 	@Test

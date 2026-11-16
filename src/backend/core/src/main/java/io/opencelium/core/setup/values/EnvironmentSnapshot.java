@@ -17,6 +17,7 @@ import org.springframework.boot.context.properties.source.IterableConfigurationP
 import org.springframework.boot.origin.Origin;
 import org.springframework.boot.origin.PropertySourceOrigin;
 import org.springframework.core.env.AbstractEnvironment;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
 
@@ -34,9 +35,9 @@ import io.opencelium.core.setup.files.YmlRenderer;
  * example {@code OPENCELIUM_DATADIR} and {@code OPENCELIUM_DATA_DIR} for {@code opencelium.data-dir}, gives the same
  * value here, and each value keeps the name of its variable for the messages.
  * <p>
- * A value is the text as the start reads it: the port as the number that the binder converts, the data directory as
- * the absolute path that the start makes, without an expansion of {@code ~}. When the start cannot read a text, the
- * value is the text as written, and the check of a typed answer names the problem.
+ * A value is the text as the start reads it: the port as the number that the binder converts, the data directory and
+ * the key file as the absolute path that the start makes, without an expansion of {@code ~}. When the start cannot
+ * read a text, the value is the text as written, and the check of a typed answer names the problem.
  */
 public final class EnvironmentSnapshot {
 
@@ -60,10 +61,7 @@ public final class EnvironmentSnapshot {
 		var propertySource = new SystemEnvironmentPropertySource(
 				StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, Map.<String, Object>copyOf(this.variables));
 		this.source = (IterableConfigurationPropertySource) ConfigurationPropertySource.from(propertySource);
-		var environment = new AbstractEnvironment() {
-		};
-		environment.getPropertySources().addFirst(propertySource);
-		this.binder = Binder.get(environment);
+		this.binder = Binder.get(environmentOf(this.variables));
 	}
 
 	/**
@@ -73,19 +71,55 @@ public final class EnvironmentSnapshot {
 	 */
 	public List<String> names() {
 		List<String> names = new ArrayList<>();
-		variable(OpenCeliumProperties.DATA_DIR).ifPresent(names::add);
-		variable(BootstrapProperties.SERVER_PORT).ifPresent(names::add);
-		source.stream().filter(MONGODB::isAncestorOf).map(this::variable).flatMap(Optional::stream).distinct()
-				.sorted().forEach(names::add);
+		variableOf(OpenCeliumProperties.DATA_DIR).ifPresent(names::add);
+		variableOf(BootstrapProperties.SERVER_PORT).ifPresent(names::add);
+		names.addAll(mongoDbVariables());
 		if (variables.containsKey(YmlRenderer.MONGO_URI_VARIABLE)) {
 			names.add(YmlRenderer.MONGO_URI_VARIABLE);
 		}
-		variable(OpenCeliumProperties.MASTER_KEY_FILE).ifPresent(names::add);
+		variableOf(OpenCeliumProperties.MASTER_KEY_FILE).ifPresent(names::add);
 		if (variables.containsKey(RootKeyResolver.ENV_VARIABLE)) {
 			names.add(RootKeyResolver.ENV_VARIABLE);
 		}
-		variable(OpenCeliumProperties.DEPLOYMENT_MODE).ifPresent(names::add);
+		variableOf(OpenCeliumProperties.DEPLOYMENT_MODE).ifPresent(names::add);
 		return names;
+	}
+
+	/**
+	 * The names of the variables that give a property under {@code spring.mongodb}, sorted, for example
+	 * {@code SPRING_MONGODB_URI}: the start reads the MongoDB connection from them.
+	 */
+	public List<String> mongoDbVariables() {
+		return source.stream().filter(MONGODB::isAncestorOf).map(this::variable).flatMap(Optional::stream).distinct()
+				.sorted().toList();
+	}
+
+	/**
+	 * The text of an environment variable as written, for a value that the start reads under the name of the variable
+	 * itself, for example {@code OC_MASTER_KEY}. The text can be a secret: a message names the variable, never the
+	 * text.
+	 *
+	 * @return empty when the variable is not set
+	 */
+	public Optional<String> text(String variable) {
+		return Optional.ofNullable(variables.get(variable));
+	}
+
+	/**
+	 * A new Spring environment with these variables as its only property source, for code that reads the environment
+	 * as the start does, for example the connection resolution of MongoDB. Each call gives a new environment, so a
+	 * property source that the caller adds has no effect on this snapshot.
+	 */
+	public ConfigurableEnvironment asEnvironment() {
+		return environmentOf(variables);
+	}
+
+	private static ConfigurableEnvironment environmentOf(Map<String, String> variables) {
+		var environment = new AbstractEnvironment() {
+		};
+		environment.getPropertySources().addFirst(new SystemEnvironmentPropertySource(
+				StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, Map.<String, Object>copyOf(variables)));
+		return environment;
 	}
 
 	/**
@@ -116,7 +150,7 @@ public final class EnvironmentSnapshot {
 				return text;
 			}
 		}
-		if (property.equals(OpenCeliumProperties.DATA_DIR)) {
+		if (property.equals(OpenCeliumProperties.DATA_DIR) || property.equals(OpenCeliumProperties.MASTER_KEY_FILE)) {
 			try {
 				return Path.of(text).toAbsolutePath().normalize().toString();
 			}
@@ -127,7 +161,14 @@ public final class EnvironmentSnapshot {
 		return text;
 	}
 
-	private Optional<String> variable(String property) {
+	/**
+	 * The name of the variable that gives a bootstrap property, for a message; the name only, because the value can
+	 * be a secret.
+	 *
+	 * @param property the name of the property, for example {@code spring.mongodb.password}
+	 * @return empty when no variable gives the property
+	 */
+	public Optional<String> variableOf(String property) {
 		return variable(ConfigurationPropertyName.of(property));
 	}
 
@@ -155,6 +196,12 @@ public final class EnvironmentSnapshot {
 		public Value {
 			Objects.requireNonNull(variable, "variable");
 			Objects.requireNonNull(text, "text");
+		}
+
+		/** Without the text: it can be a secret, for example a database password. */
+		@Override
+		public String toString() {
+			return "Value[variable=" + variable + "]";
 		}
 
 	}

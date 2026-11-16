@@ -115,6 +115,15 @@ public record MongoConnection(ConnectionString connectionString, String database
 		return MongoClientSettings.builder().applyConnectionString(connectionString).build();
 	}
 
+	/**
+	 * Whether both connections reach the same database: equal driver settings, as for {@link #clusterKey()}, and the
+	 * same database name. Thus a URI and the host-style properties of 1 server, or 2 URIs that differ only in the
+	 * default port or the option order, give the same database.
+	 */
+	public boolean sameDatabase(MongoConnection other) {
+		return databaseName.equals(other.databaseName) && clusterKey().equals(other.clusterKey());
+	}
+
 	/** Redacted: {@link ConnectionString#toString()} would print the password. */
 	@Override
 	public String toString() {
