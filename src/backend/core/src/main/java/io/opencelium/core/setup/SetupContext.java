@@ -3,12 +3,15 @@ package io.opencelium.core.setup;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.SequencedMap;
 
+import io.opencelium.core.config.BootstrapProperties;
 import io.opencelium.core.config.DeploymentMode;
+import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.FilePlan;
 
@@ -66,7 +69,7 @@ public final class SetupContext {
 		this.values = Objects.requireNonNull(values, "values");
 	}
 
-	/** Where a step gets its value: the setup file, else the prompter. */
+	/** Where a step gets its value: the environment, else the setup file, else the prompter. */
 	public ValueSource values() {
 		return values;
 	}
@@ -128,6 +131,20 @@ public final class SetupContext {
 
 	public void setAdminUsername(String adminUsername) {
 		this.adminUsername = Objects.requireNonNull(adminUsername, "adminUsername");
+	}
+
+	/**
+	 * The bootstrap properties that an environment variable gives, with the name of the variable, in the order of
+	 * the summary: the deployment mode, the data directory, the port. The steps take these values from the variables,
+	 * so the files hold no line and no entry for them, and the summary tells to keep each variable.
+	 */
+	public SequencedMap<String, String> fromEnvironment() {
+		var found = new LinkedHashMap<String, String>();
+		for (String property : List.of(OpenCeliumProperties.DEPLOYMENT_MODE, OpenCeliumProperties.DATA_DIR,
+				BootstrapProperties.SERVER_PORT)) {
+			values.environment().value(property).ifPresent(value -> found.put(property, value.variable()));
+		}
+		return Collections.unmodifiableSequencedMap(found);
 	}
 
 	/** The entries of the env file, in the order the steps added them: the secrets application.yml names. */

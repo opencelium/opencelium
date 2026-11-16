@@ -8,10 +8,14 @@ import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.mongodb.autoconfigure.MongoProperties;
 
 /**
- * Raw reads of bootstrap properties, and the names of the {@code spring.mongodb.*} properties shared by the defaults
- * post-processor and the MongoDB connection resolver, so both agree on what "configured" means.
+ * Raw reads of bootstrap properties, and the names of the bootstrap properties that Spring owns: the
+ * {@code spring.mongodb.*} properties shared by the defaults post-processor and the MongoDB connection resolver, so
+ * both agree on what "configured" means, and the port.
  */
 public final class BootstrapProperties {
+
+	/** The HTTP port of the web interface and the API. */
+	public static final String SERVER_PORT = "server.port";
 
 	public static final String MONGODB_URI = "spring.mongodb.uri";
 

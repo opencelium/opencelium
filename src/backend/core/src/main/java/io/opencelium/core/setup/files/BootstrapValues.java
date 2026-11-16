@@ -17,7 +17,8 @@ import io.opencelium.core.config.mongo.MongoConnection;
  * @param masterKeyFile absolute; the key file that the user named, empty when the master key comes from the data
  *                      directory or from the environment
  * @param fromEnvironment the bootstrap properties that an environment variable gives, for example
- *                      {@code server.port}
+ *                      {@code server.port}: application.yml has no line for them, so the environment stays their
+ *                      only source
  */
 public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int port, String mongoUri,
 		Optional<Path> masterKeyFile, Set<String> fromEnvironment) {
@@ -49,7 +50,7 @@ public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int p
 	public String toString() {
 		return "BootstrapValues[deploymentMode=" + deploymentMode + ", dataDir=" + dataDir + ", port=" + port
 				+ ", mongoUri=" + MongoConnection.redact(mongoUri) + ", masterKeyFile=" + masterKeyFile
-				+ "]";
+				+ ", fromEnvironment=" + fromEnvironment + "]";
 	}
 
 }

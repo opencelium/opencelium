@@ -20,6 +20,10 @@ import io.opencelium.core.setup.prompt.Prompter;
  * shown with {@code ~} for the home directory; a typed {@code ~} is expanded the same way. A path is accepted when
  * it is a writable directory, or when it does not exist and its nearest existing ancestor is a writable directory.
  * The step makes nothing: the application creates the directory at its start.
+ * <p>
+ * A data directory from the environment comes as the start reads it: an absolute path, with a {@code ~} kept as text,
+ * because the start does not expand it. A setup file value must name the same directory, after its own {@code ~} is
+ * expanded.
  */
 public final class DataDirStep implements SetupStep {
 
@@ -59,7 +63,7 @@ public final class DataDirStep implements SetupStep {
 
 	@Override
 	public void run(SetupContext context, Prompter prompter) {
-		String value = context.values().text(question(), this::check, prompter);
+		String value = context.values().text(question(), this::check, text -> absolute(expanded(text)), prompter);
 		context.setDataDir(absolute(expanded(value)));
 	}
 

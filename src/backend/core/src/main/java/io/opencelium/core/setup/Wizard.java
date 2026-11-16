@@ -13,6 +13,8 @@ import java.util.SequencedMap;
 import java.util.function.Consumer;
 import java.util.function.IntPredicate;
 
+import io.opencelium.core.config.DeploymentMode;
+import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.FilePlan;
 import io.opencelium.core.setup.files.FilePlanWriter;
@@ -27,14 +29,16 @@ import io.opencelium.core.setup.steps.SetupStep;
 import io.opencelium.core.setup.steps.SummaryStep;
 
 /**
- * The setup: the banner, then the steps in order, each one under a title line with its number, the step count and its
- * name, and skipped when it does not apply; then the write of the files and the actions that the steps planned, for
- * example the backup question of a new master key; then the start of the application, and the login box when the
- * application answers on its port. The steps take their values from the value source: the setup file, else the
- * prompter. A cancel at any question ends the run with "nothing written" and exit code 0. A missing or bad value in
- * batch mode, and a write failure, end it with a {@link SetupFailedException} that the launcher prints on standard
- * error, and start nothing. The dialogue goes through the prompter, never through a logger: before Spring starts the
- * log system is not configured, and a password must never reach a log.
+ * The setup: the banner with the names of the environment variables that give a value, then the steps in order, each
+ * one under a title line with its number, the step count and its name, and skipped when it does not apply; then the
+ * write of the files and the actions that the steps planned, for example the backup question of a new master key;
+ * then the start of the application, and the login box when the application answers on its port. The steps take
+ * their values from the value source: the environment, else the setup file, else the prompter. A cancel at any
+ * question ends the run with "nothing written" and exit code 0. A missing or bad value in batch mode, a bad value from
+ * the environment, a deployment mode other than self-host in the environment, and a write failure, end it with a
+ * {@link SetupFailedException} that the launcher prints on standard error, and start nothing. The dialogue goes
+ * through the prompter, never through a logger: before Spring starts the log system is not configured, and a password
+ * must never reach a log.
  */
 public final class Wizard {
 
@@ -99,12 +103,15 @@ public final class Wizard {
 	 * @param reason why the wizard runs, in the words of the launch decision; the banner starts with it
 	 * @return the exit code when the process must end: 0 after a cancel, and when no step planned a file. Empty when
 	 * the application started.
-	 * @throws SetupFailedException with exit code 1 after a missing or bad value in batch mode, and after
-	 *                              a write failure; the message names the file or the key
+	 * @throws SetupFailedException with exit code 1 after a missing or bad value in batch mode, a bad value or a
+	 *                              deployment mode other than self-host in the environment, and after a write
+	 *                              failure; the message names the file, the key or the variable
 	 */
 	public OptionalInt run(String reason) {
 		written = false;
 		printBanner(reason);
+		printVariables();
+		requireSelfHost();
 		SetupContext context = new SetupContext(values);
 		try {
 			for (int i = 0; i < steps.size(); i++) {
@@ -206,6 +213,32 @@ public final class Wizard {
 		else {
 			prompter.info(opening, "Press Enter to accept the value in [brackets]. Type ? for help, q to quit.");
 		}
+	}
+
+	/** The names of the variables that give a value, so the user sees at once what the setup does not ask. */
+	private void printVariables() {
+		List<String> names = values.environment().names();
+		if (!names.isEmpty()) {
+			prompter.print("");
+			prompter.list("Values from the environment, not asked", names);
+		}
+	}
+
+	/**
+	 * The setup installs the self-host mode only. A variable with another deployment mode would apply at each start,
+	 * so the setup stops before the first step instead of writing files for a mode that the start does not use. The
+	 * mode is read as the start reads it: the case and {@code _} versus {@code -} do not count.
+	 */
+	private void requireSelfHost() {
+		values.environment().value(OpenCeliumProperties.DEPLOYMENT_MODE).ifPresent(mode -> {
+			if (DeploymentMode.parse(mode.text()).filter(SetupContext.DEPLOYMENT_MODE::equals).isEmpty()) {
+				String selfHost = SetupContext.DEPLOYMENT_MODE.propertyValue();
+				throw SetupFailedException.failure(mode.variable() + " in the environment gives a deployment mode"
+						+ " other than " + selfHost + ", and the setup installs the " + selfHost + " mode only.",
+						"Remove the variable, or set it to " + selfHost + ". A cloud installation has a hand-written"
+								+ " configuration.");
+			}
+		});
 	}
 
 	private static String sentence(String reason) {
