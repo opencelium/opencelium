@@ -19,6 +19,7 @@ import io.opencelium.core.secrets.keys.RootKeyResolver;
 import io.opencelium.core.secrets.keys.RootKeySource;
 import io.opencelium.core.secrets.keys.WrappedDekProbe;
 import io.opencelium.core.setup.SetupFailedException;
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
 
 /**
  * The check before the master key menu. A master key that a source holds in a bad form stops the setup, because the
@@ -49,6 +50,25 @@ public final class MasterKeyGuard {
 		this.ping = Objects.requireNonNull(ping, "ping");
 		this.wrappedDeksExist = Objects.requireNonNull(wrappedDeksExist, "wrappedDeksExist");
 		this.environment = Objects.requireNonNull(environment, "environment");
+	}
+
+	/**
+	 * @param ping             the cause why MongoDB at a connection cannot be used; empty when it answers
+	 * @param wrappedDeksExist whether the database of a connection holds encrypted data keys
+	 */
+	public MasterKeyGuard(Function<MongoConnection, Optional<String>> ping,
+			Predicate<MongoConnection> wrappedDeksExist) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	/**
+	 * @param connection  the MongoDB connection that the MongoDB step chose
+	 * @param dataDir     the data directory that the data directory step chose
+	 * @param environment the environment variables of the setup
+	 * @return whether the database holds encrypted data keys
+	 */
+	public boolean run(MongoConnection connection, Path dataDir, EnvironmentSnapshot environment) {
+		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
 	/**

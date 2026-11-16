@@ -96,15 +96,15 @@ class WrittenConfigStartupTest {
 				console, new PrintWriter(new StringWriter(), true), new PrintWriter(new StringWriter(), true));
 	}
 
-	/** The standard steps, with a master key step that reads the database of this class and no variable. */
+	/**
+	 * The standard steps, with a master key step that reads the database of this class; the launcher gives the
+	 * setup no variable.
+	 */
 	private List<SetupStep> steps(ConfigLocations locations) {
-		Map<String, String> noVariables = Map.of();
 		var database = StaticMongoConnectionResolver.parseUri(LocalMongo.uriFor(WrittenConfigStartupTest.class));
-		var guard = new MasterKeyGuard(new MongoStartupPing()::check, connection -> WrappedDekProbe.existsAny(database),
-				noVariables::get);
-		return List.of(new DataDirStep(), new PortStep(), new MongoStep(),
-				new MasterKeyStep(guard, noVariables::get, line -> {
-				}, workingDir), new SummaryStep(locations));
+		var guard = new MasterKeyGuard(new MongoStartupPing()::check, connection -> WrappedDekProbe.existsAny(database));
+		return List.of(new DataDirStep(), new PortStep(), new MongoStep(), new MasterKeyStep(guard, line -> {
+		}, workingDir), new SummaryStep(locations));
 	}
 
 	/** Starts as the launcher would, plus the written directory as a location and the per-class database. */

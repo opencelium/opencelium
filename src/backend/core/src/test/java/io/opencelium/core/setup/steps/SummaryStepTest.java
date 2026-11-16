@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
 import io.opencelium.core.setup.ConfigLocations;
 import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
@@ -31,7 +34,8 @@ import static org.assertj.core.api.Assertions.tuple;
  * that will be written as a list, the actions after the write with the start last, and the question whether to write
  * the files. Yes plans application.yml and the env file, with the entries of the env file; no cancels the setup. A
  * value from the environment shows its variable, the summary tells to keep each such variable, and no file holds the
- * value.
+ * value: a MongoDB connection of {@code SPRING_MONGODB_} variables gets no line, and one of {@code OC_MONGO_URI}
+ * keeps only the placeholder.
  */
 class SummaryStepTest {
 
@@ -242,6 +246,70 @@ class SummaryStepTest {
 		assertThat(fromVariables.filePlan().files().get(0).content()).doesNotContain("port:")
 				.doesNotContain("data-dir:").doesNotContain("deployment-mode:").contains("uri: ${OC_MONGO_URI}\n");
 		assertThat(fromVariables.environment()).containsOnlyKeys("OC_MONGO_URI");
+	}
+
+	@Test
+	void runWritesNoMongoLineAndNoEnvEntryWhenTheUriComesFromTheVariable() {
+		String uri = "mongodb://oc:s3cret@db.example/oc_variable";
+		SetupContext fromVariables = connectedFrom("SPRING_MONGODB_URI", uri, Map.of());
+		console.type("y");
+
+		step().run(fromVariables, new ConsolePrompter(console));
+
+		// The variable gives the property itself: a line or an entry would apply at a later start without it.
+		assertThat(fromVariables.filePlan().files().get(0).content()).doesNotContain("mongodb")
+				.doesNotContain("OC_MONGO_URI");
+		assertThat(fromVariables.filePlan().files().get(1).content()).doesNotContain("OC_MONGO_URI");
+		assertThat(fromVariables.environment()).isEmpty();
+		assertThat(console.output()).contains("mongodb://oc:****@db.example/oc_variable   (from SPRING_MONGODB_URI)",
+				"Keep these variables for each later start: SPRING_MONGODB_URI.").doesNotContain("s3cret");
+	}
+
+	@Test
+	void runKeepsThePlaceholderWithoutEntryWhenOcMongoUriIsSet() {
+		SetupContext fromVariables = connectedFrom("OC_MONGO_URI", "mongodb://db.example/oc_placeholder", Map.of());
+		console.type("y");
+
+		step().run(fromVariables, new ConsolePrompter(console));
+
+		// The variable gives the value of the placeholder, so the line stays, and the env file holds no copy.
+		assertThat(fromVariables.filePlan().files().get(0).content()).contains("uri: ${OC_MONGO_URI}\n");
+		assertThat(fromVariables.filePlan().files().get(1).content()).doesNotContain("OC_MONGO_URI");
+		assertThat(fromVariables.environment()).isEmpty();
+		assertThat(console.output()).contains("(from OC_MONGO_URI)",
+				"Keep these variables for each later start: OC_MONGO_URI.");
+	}
+
+	@Test
+	void runWritesTheEnvFileWithTheHeaderOnlyWhenNoEntryIsLeft() {
+		SetupContext fromVariables = connectedFrom("SPRING_MONGODB_URI", "mongodb://db.example/oc_variable",
+				Map.of("OC_MASTER_KEY", "not shown"));
+		fromVariables.setMasterKeyFromVariable("the variable OC_MASTER_KEY", "OC_MASTER_KEY");
+		console.type("y");
+
+		step().run(fromVariables, new ConsolePrompter(console));
+
+		// systemd needs the file that EnvironmentFile names, and the new file replaces an old OC_MONGO_URI.
+		assertThat(fromVariables.filePlan().files().get(1).path()).hasFileName("opencelium.env");
+		assertThat(fromVariables.filePlan().files().get(1).content().lines()).singleElement().asString()
+				.startsWith("# ");
+		assertThat(console.output()).contains("Keep these variables for each later start: SPRING_MONGODB_URI,"
+				+ " OC_MASTER_KEY.");
+	}
+
+	/**
+	 * The answers of the earlier steps, with a MongoDB connection that {@code variable} of the setup environment gives,
+	 * and {@code more} variables.
+	 */
+	private static SetupContext connectedFrom(String variable, String uri, Map<String, String> more) {
+		var variables = new HashMap<>(more);
+		variables.put(variable, uri);
+		var fromVariables = new SetupContext(new ValueSource(SetupValues.NONE, Optional.empty(), false,
+				new EnvironmentSnapshot(variables)));
+		fromVariables.setDataDir(Path.of("/srv/oc"));
+		fromVariables.setPort(9090);
+		fromVariables.setMongoConnection(StaticMongoConnectionResolver.parseUri(uri), List.of(variable));
+		return fromVariables;
 	}
 
 	/** The answers of the earlier steps, with the setup environment that gives some of them. */

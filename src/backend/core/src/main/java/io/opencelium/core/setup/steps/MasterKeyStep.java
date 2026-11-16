@@ -108,6 +108,14 @@ public final class MasterKeyStep implements SetupStep {
 		this.home = Objects.requireNonNull(home, "home").toAbsolutePath().normalize();
 	}
 
+	/**
+	 * @param standardError where the backup warning goes in batch mode, one line at a time
+	 * @param home          the home directory for a typed {@code ~}
+	 */
+	public MasterKeyStep(MasterKeyGuard guard, Consumer<String> standardError, Path home) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
 	@Override
 	public String name() {
 		return "Master key";

@@ -12,6 +12,7 @@ import java.util.SequencedMap;
 import io.opencelium.core.config.BootstrapProperties;
 import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.config.OpenCeliumProperties;
+import io.opencelium.core.config.mongo.MongoConnection;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.FilePlan;
 
@@ -105,6 +106,19 @@ public final class SetupContext {
 		this.mongoUri = mongoUri;
 	}
 
+	/**
+	 * @param connection the MongoDB connection that environment variables give
+	 * @param variables  the names of these variables
+	 */
+	public void setMongoConnection(MongoConnection connection, List<String> variables) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	/** The MongoDB connection that the MongoDB step chose. */
+	public MongoConnection mongoConnection() {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
 	/** Where the master key comes from, in words for the summary; empty before the master key step ran. */
 	public Optional<String> masterKeySource() {
 		return Optional.ofNullable(masterKeySource);
@@ -122,6 +136,14 @@ public final class SetupContext {
 	public void setMasterKey(String source, Optional<Path> file) {
 		this.masterKeySource = Objects.requireNonNull(source, "source");
 		this.masterKeyFile = file.orElse(null);
+	}
+
+	/**
+	 * @param source   where the master key comes from, in words for the summary
+	 * @param variable the environment variable that gives the master key or its key file
+	 */
+	public void setMasterKeyFromVariable(String source, String variable) {
+		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
 	/** The username of the admin that the start makes; empty when the admin step did not run or did not apply. */
