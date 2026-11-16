@@ -70,7 +70,17 @@ public final class StaticMongoConnectionResolver implements MongoConnectionResol
 	}
 
 	public static StaticMongoConnectionResolver from(OpenCeliumProperties properties, Environment environment) {
-		DeploymentMode mode = properties.deploymentMode();
+		return from(properties.deploymentMode(), environment);
+	}
+
+	/**
+	 * The resolver of the {@code spring.mongodb.*} properties of {@code environment} for a deployment mode, for code
+	 * that runs before the other bootstrap properties are bound, for example the setup wizard.
+	 *
+	 * @throws BootstrapPropertyException when the properties do not give a connection that the start accepts; the
+	 *                                    message never shows a password
+	 */
+	public static StaticMongoConnectionResolver from(DeploymentMode mode, Environment environment) {
 		MongoProperties mongo = bind(Binder.get(environment));
 		rejectConnectionOptionProperties(mongo);
 		List<String> addressProperties = mongoAddressPropertiesSet(mongo);

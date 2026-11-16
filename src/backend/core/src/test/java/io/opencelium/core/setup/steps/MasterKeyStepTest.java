@@ -16,12 +16,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
+import io.opencelium.core.secrets.keys.KeyStartupException;
 import io.opencelium.core.setup.SetupCancelledException;
 import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.setup.SetupFailedException;
 import io.opencelium.core.setup.files.PlannedAction;
 import io.opencelium.core.setup.files.SetupActionException;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
 import io.opencelium.core.setup.values.SetupValues;
 import io.opencelium.core.setup.values.ValueKey;
 import io.opencelium.core.setup.values.ValueSource;
@@ -33,11 +36,12 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * The master key step: it says first why the master key matters, then offers to generate a new key into the data
- * directory, to take the variable {@code OC_MASTER_KEY}, or to read a key file; a key that the data directory holds
- * is kept, and a variable that is set is taken without a menu. The step writes nothing: a generated key is an action
- * of the plan that makes the key file after the write, never over a file that exists, and then asks the backup
- * question. A variable that is not set and a key file that is not a master key are named and asked again;
- * a master key in a bad form in a source stops the setup. A key file path becomes absolute. In batch mode the setup
+ * directory or to read a key file; a key that the data directory holds is kept. The variables {@code OC_MASTER_KEY}
+ * and {@code OPENCELIUM_MASTERKEYFILE} of the setup environment are taken without a menu, and the help of the menu
+ * tells how to use {@code OC_MASTER_KEY}. The step writes nothing: a generated key is an action of the plan that
+ * makes the key file after the write, never over a file that exists, and then asks the backup question. A key file
+ * that is not a master key is named and asked again; a master key in a bad form in a source stops the setup, and so
+ * does a setup file that does not agree with a variable. A key file path becomes absolute. In batch mode the setup
  * file gives the answer, and the backup warning goes to standard error.
  * The guard has a fake ping and a fake data key probe here: its own test reads a real database.
  */
@@ -80,13 +84,14 @@ class MasterKeyStepTest {
 	}
 
 	@Test
-	void runOffersThreeOptions() {
+	void runOffersTwoOptionsWhenTheEnvironmentHasNoKey() {
 		console.type("");
 
 		step().run(context, prompter);
 
-		assertThat(console.output()).containsSubsequence(QUESTION, "1) Generate", "2) Variable", "3) Key file")
-				.doesNotContain("4)");
+		// The variable is no option: the setup takes OC_MASTER_KEY from its environment, without a menu.
+		assertThat(console.output()).containsSubsequence(QUESTION, "1) Generate", "2) Key file").doesNotContain("3)")
+				.doesNotContain("Variable");
 	}
 
 	@Test
@@ -107,12 +112,22 @@ class MasterKeyStepTest {
 
 		// The help block ends at the next prompt of the menu.
 		String help = between(console.output(), "1) Generate: ", "Choice [");
-		assertThat(help).containsSubsequence("1) Generate: ", "2) Variable: ", "3) Key file: ");
-		assertThat(between(help, "1) Generate: ", "2) Variable: ")).contains("1 host", "no master key");
-		assertThat(between(help, "2) Variable: ", "3) Key file: ")).contains("environment of the service",
-				"openssl rand -base64 32");
-		assertThat(help.substring(help.indexOf("3) Key file: "))).contains("mounted secret", "at each start",
+		assertThat(help).containsSubsequence("1) Generate: ", "2) Key file: ");
+		assertThat(between(help, "1) Generate: ", "2) Key file: ")).contains("1 host", "no master key");
+		assertThat(help.substring(help.indexOf("2) Key file: "))).contains("mounted secret", "at each start",
 				"system user opencelium", "/tmp", "umask 077; openssl rand -base64 32");
+	}
+
+	@Test
+	void runTellsHowToUseTheMasterKeyVariableWhenTheUserTypesQuestionMark() {
+		console.type("?", "");
+
+		step().run(context, prompter);
+
+		// After the help of the options: set the variable before the setup, then run the setup again.
+		String help = between(console.output(), "1) Generate: ", "Choice [");
+		assertThat(help).containsSubsequence("2) Key file: ", "OC_MASTER_KEY", "openssl rand -base64 32",
+				"setup again");
 	}
 
 	@Test
@@ -277,12 +292,14 @@ class MasterKeyStepTest {
 	@Test
 	void runTakesTheVariableWhenTheDatabaseHoldsDataKeysAndItIsSet() {
 		environment.put("OC_MASTER_KEY", randomKey());
+		SetupContext fromVariables = withVariables();
 
-		stepWithDataKeys().run(context, prompter);
+		stepWithDataKeys().run(fromVariables, prompter);
 
 		assertThat(console.output()).doesNotContain(QUESTION).doesNotContain("Generate");
-		assertThat(context.filePlan().isEmpty()).isTrue();
-		assertThat(context.masterKeySource()).hasValueSatisfying(source -> assertThat(source).contains("OC_MASTER_KEY"));
+		assertThat(fromVariables.filePlan().isEmpty()).isTrue();
+		assertThat(fromVariables.masterKeySource())
+				.hasValueSatisfying(source -> assertThat(source).contains("OC_MASTER_KEY"));
 	}
 
 	@Test
@@ -292,7 +309,7 @@ class MasterKeyStepTest {
 
 		stepWithDataKeys().run(context, prompter);
 
-		assertThat(console.output()).containsSubsequence(QUESTION, "1) Keep", "2) Variable", "3) Key file")
+		assertThat(console.output()).containsSubsequence(QUESTION, "1) Keep", "2) Key file").doesNotContain("3)")
 				.doesNotContain("Generate");
 		assertThat(context.filePlan().isEmpty()).isTrue();
 		assertThat(dataDirKey).content().isEqualTo(key);
@@ -321,22 +338,12 @@ class MasterKeyStepTest {
 	}
 
 	@Test
-	void runAsksAgainWhenVariableIsNotSet() {
-		console.type("2", "1");
-
-		step().run(context, prompter);
-
-		assertThat(console.output()).contains("OC_MASTER_KEY is not set");
-		assertThat(occurrences(console.output(), QUESTION)).isEqualTo(2);
-		assertThat(context.filePlan().actions()).hasSize(1);
-	}
-
-	@Test
 	void runStopsWithoutQuotingTheValueWhenTheVariableIsNotAMasterKey() {
 		environment.put("OC_MASTER_KEY", "not*a*key");
+		SetupContext fromVariables = withVariables();
 
 		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> step().run(context, prompter)).actual();
+				.isThrownBy(() -> step().run(fromVariables, prompter)).actual();
 
 		assertThat(ex.getMessage()).contains("OC_MASTER_KEY is not valid base64").doesNotContain("not*a*key");
 		assertThat(ex.exitCode()).isEqualTo(1);
@@ -346,21 +353,124 @@ class MasterKeyStepTest {
 	@Test
 	void runTakesTheVariableWithoutTheMenuWhenItIsSet() {
 		environment.put("OC_MASTER_KEY", randomKey());
+		SetupContext fromVariables = withVariables();
 
-		step().run(context, prompter);
+		step().run(fromVariables, prompter);
 
 		assertThat(console.output()).doesNotContain(QUESTION)
 				.containsSubsequence("OC_MASTER_KEY is set", "environment of the service");
-		assertThat(context.filePlan().isEmpty()).isTrue();
-		assertThat(context.masterKeyFile()).isEmpty();
-		assertThat(context.masterKeySource()).isPresent();
+		assertThat(fromVariables.filePlan().isEmpty()).isTrue();
+		assertThat(fromVariables.masterKeyFile()).isEmpty();
+		assertThat(fromVariables.masterKeySource()).isPresent();
+	}
+
+	@Test
+	void runTakesTheKeyFileWithoutMenuWhenTheKeyFileVariableIsSet() throws Exception {
+		Path good = storeKeyFile(tmp.resolve("keys/master.key"));
+		environment.put("OPENCELIUM_MASTERKEYFILE", good.toString());
+		SetupContext fromVariables = withVariables();
+
+		step().run(fromVariables, prompter);
+
+		assertThat(console.output()).doesNotContain(QUESTION)
+				.contains(good + "   (from the environment: OPENCELIUM_MASTERKEYFILE)");
+		// The variable stays the only source: application.yml names no key file.
+		assertThat(fromVariables.masterKeyFile()).isEmpty();
+		assertThat(fromVariables.masterKeySource()).hasValueSatisfying(source -> assertThat(source)
+				.contains(good.toString()));
+		assertThat(fromVariables.filePlan().isEmpty()).isTrue();
+	}
+
+	@Test
+	void runTakesTheVariableInBatchModeWhenTheSetupFileHasNoMasterKey() {
+		environment.put("OC_MASTER_KEY", randomKey());
+		SetupContext batch = batch(Map.of());
+
+		step().run(batch, prompter);
+
+		// The variable gives the master key, so the absent key of the setup file is no missing value.
+		assertThat(batch.filePlan().isEmpty()).isTrue();
+		assertThat(batch.masterKeySource()).hasValueSatisfying(source -> assertThat(source).contains("OC_MASTER_KEY"));
+		assertThat(console.output()).doesNotContain(QUESTION).doesNotContain("Missing value");
+	}
+
+	@Test
+	void runChecksTheDatabaseOfTheEnvironmentWhenTheConnectionComesFromVariables() {
+		// Only the database of the variable holds encrypted data keys, and no source has their master key.
+		var guard = new MasterKeyGuard(connection -> Optional.empty(),
+				connection -> connection.databaseName().equals("oc_variable"));
+		var fromVariables = new SetupContext(new ValueSource(SetupValues.NONE, Optional.empty(), false,
+				new EnvironmentSnapshot(Map.of("SPRING_MONGODB_URI", "mongodb://db.example/oc_variable"))));
+		fromVariables.setDataDir(dataDir);
+		fromVariables.setMongoConnection(StaticMongoConnectionResolver.parseUri("mongodb://db.example/oc_variable"),
+				List.of("SPRING_MONGODB_URI"));
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> new MasterKeyStep(guard, standardError::add, home).run(fromVariables, prompter))
+				.actual();
+
+		assertThat(ex.getMessage()).startsWith(KeyStartupException.RESTORE_OR_RESET)
+				.contains("mongodb://db.example/oc_variable");
+		assertThat(console.output()).doesNotContain(QUESTION);
+	}
+
+	@Test
+	void runStopsWhenBothKeyVariablesAreSet() throws Exception {
+		Path good = storeKeyFile(tmp.resolve("keys/master.key"));
+		String key = randomKey();
+		environment.put("OC_MASTER_KEY", key);
+		environment.put("OPENCELIUM_MASTERKEYFILE", good.toString());
+		SetupContext fromVariables = withVariables();
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> step().run(fromVariables, prompter)).actual();
+
+		// The start does not accept both, so the setup does not ask: it names both variables.
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.getMessage()).contains("OC_MASTER_KEY", "OPENCELIUM_MASTERKEYFILE").doesNotContain(key);
+		assertThat(console.output()).doesNotContain(QUESTION).doesNotContain(key);
+		assertThat(fromVariables.filePlan().isEmpty()).isTrue();
+	}
+
+	@Test
+	void runStopsNamingTheVariableWhenTheKeyFileOfTheVariableDoesNotExist() {
+		Path missing = tmp.resolve("keys/missing.key");
+		environment.put("OPENCELIUM_MASTERKEYFILE", missing.toString());
+		SetupContext fromVariables = withVariables();
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> step().run(fromVariables, prompter)).actual();
+
+		// The variable applies at each start, so the setup does not ask for another key file.
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.lines().getFirst()).startsWith("Bad value: OPENCELIUM_MASTERKEYFILE in the environment: ")
+				.contains("does not exist");
+		assertThat(ex.getMessage()).contains("remove the variable");
+		assertThat(console.output()).doesNotContain(QUESTION);
+	}
+
+	@Test
+	void runStopsWithoutQuotingTheKeyWhenTheKeyFileVariableHoldsAMasterKey() {
+		// The master key itself in the key file variable, by mistake: the path of a missing file would quote it.
+		String key = randomKey();
+		environment.put("OPENCELIUM_MASTERKEYFILE", key);
+		SetupContext fromVariables = withVariables();
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> step().run(fromVariables, prompter)).actual();
+
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.lines().getFirst()).startsWith("Bad value: OPENCELIUM_MASTERKEYFILE in the environment: ")
+				.contains("master key", "OC_MASTER_KEY");
+		assertThat(ex.getMessage()).doesNotContain(key);
+		assertThat(console.output()).doesNotContain(key);
 	}
 
 	@Test
 	void runAsksAgainWhenFileIsMissing() throws Exception {
 		Path good = storeKeyFile(tmp.resolve("keys/master.key"));
 		Path missing = tmp.resolve("keys/missing.key");
-		console.type("3", missing.toString(), good.toString());
+		console.type("2", missing.toString(), good.toString());
 
 		step().run(context, prompter);
 
@@ -374,7 +484,7 @@ class MasterKeyStepTest {
 		Path shortKey = tmp.resolve("keys/short.key");
 		String shortText = Base64.getEncoder().encodeToString(new byte[16]);
 		Files.writeString(shortKey, shortText);
-		console.type("3", shortKey.toString(), good.toString());
+		console.type("2", shortKey.toString(), good.toString());
 
 		step().run(context, prompter);
 
@@ -385,7 +495,7 @@ class MasterKeyStepTest {
 	@Test
 	void runWritesMasterKeyFilePropertyWhenFileIsChosen() throws Exception {
 		Path good = storeKeyFile(tmp.resolve("keys/master.key"));
-		console.type("3", good.toString());
+		console.type("2", good.toString());
 
 		step().run(context, prompter);
 
@@ -397,7 +507,7 @@ class MasterKeyStepTest {
 	void runWritesAbsoluteKeyFilePathWhenPathIsRelative() throws Exception {
 		Path good = storeKeyFile(tmp.resolve("keys/master.key"));
 		Path relative = Path.of("").toAbsolutePath().relativize(good);
-		console.type("3", relative.toString());
+		console.type("2", relative.toString());
 
 		step().run(context, prompter);
 
@@ -407,7 +517,7 @@ class MasterKeyStepTest {
 	@Test
 	void runExpandsTheHomeDirectoryWhenTheKeyFilePathStartsWithTilde() throws Exception {
 		Path good = storeKeyFile(home.resolve("oc/master.key"));
-		console.type("3", "~/oc/master.key");
+		console.type("2", "~/oc/master.key");
 
 		step().run(context, prompter);
 
@@ -439,7 +549,52 @@ class MasterKeyStepTest {
 	}
 
 	@Test
-	void runStopsInBatchModeWhenTheVariableIsNotSet() {
+	void runAcceptsTheSetupFileWhenItNamesTheKeyFileOfTheVariable() throws Exception {
+		Path good = storeKeyFile(tmp.resolve("keys/master.key"));
+		environment.put("OPENCELIUM_MASTERKEYFILE", good.toString());
+		// 1 file in 2 texts: the setup compares the absolute paths.
+		SetupContext batch = batch(Map.of(ValueKey.MASTER_KEY, "file:" + Path.of("").toAbsolutePath()
+				.relativize(good)));
+
+		step().run(batch, prompter);
+
+		assertThat(batch.masterKeyFile()).isEmpty();
+		assertThat(batch.masterKeySource()).hasValueSatisfying(source -> assertThat(source).contains(good.toString()));
+		assertThat(batch.filePlan().isEmpty()).isTrue();
+	}
+
+	@Test
+	void runStopsWhenTheSetupFileNamesAnotherKeyFileThanTheVariable() throws Exception {
+		Path good = storeKeyFile(tmp.resolve("keys/master.key"));
+		Path other = storeKeyFile(tmp.resolve("keys/other.key"));
+		environment.put("OPENCELIUM_MASTERKEYFILE", good.toString());
+		SetupContext batch = batch(Map.of(ValueKey.MASTER_KEY, "file:" + other));
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> step().run(batch, prompter)).actual();
+
+		// The key, the file and the variable, but no value.
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.getMessage()).contains("master-key", FILE.toString(), "OPENCELIUM_MASTERKEYFILE")
+				.doesNotContain(good.toString()).doesNotContain(other.toString());
+		assertThat(batch.filePlan().isEmpty()).isTrue();
+	}
+
+	@Test
+	void runAcceptsTheSetupFileWhenItSaysEnvAndTheVariableIsSet() {
+		environment.put("OC_MASTER_KEY", randomKey());
+		SetupContext batch = batch(Map.of(ValueKey.MASTER_KEY, "env"));
+
+		step().run(batch, prompter);
+
+		assertThat(batch.filePlan().isEmpty()).isTrue();
+		assertThat(batch.masterKeyFile()).isEmpty();
+		assertThat(batch.masterKeySource()).hasValueSatisfying(source -> assertThat(source).contains("OC_MASTER_KEY"));
+		assertThat(console.output()).doesNotContain(QUESTION);
+	}
+
+	@Test
+	void runStopsWhenTheSetupFileSaysEnvAndTheVariableIsMissing() {
 		SetupContext batch = batch(Map.of(ValueKey.MASTER_KEY, "env"));
 
 		assertThatExceptionOfType(SetupFailedException.class).isThrownBy(() -> step().run(batch, prompter))
@@ -461,11 +616,10 @@ class MasterKeyStepTest {
 
 	@Test
 	void runStopsWithoutTheMenuWhenTheGuardStops() {
-		var guard = new MasterKeyGuard(connection -> Optional.empty(), connection -> true, environment::get);
+		var guard = new MasterKeyGuard(connection -> Optional.empty(), connection -> true);
 
 		assertThatExceptionOfType(SetupFailedException.class)
-				.isThrownBy(() -> new MasterKeyStep(guard, environment::get, standardError::add, home)
-						.run(context, prompter));
+				.isThrownBy(() -> new MasterKeyStep(guard, standardError::add, home).run(context, prompter));
 
 		assertThat(console.output()).doesNotContain(QUESTION);
 		assertThat(context.filePlan().isEmpty()).isTrue();
@@ -481,25 +635,36 @@ class MasterKeyStepTest {
 	}
 
 	private MasterKeyStep step() {
-		var noDataKeys = new MasterKeyGuard(connection -> Optional.empty(), connection -> false, environment::get);
-		return new MasterKeyStep(noDataKeys, environment::get, standardError::add, home);
+		var noDataKeys = new MasterKeyGuard(connection -> Optional.empty(), connection -> false);
+		return new MasterKeyStep(noDataKeys, standardError::add, home);
 	}
 
 	/** The database holds encrypted data keys; each test gives their master key. */
 	private MasterKeyStep stepWithDataKeys() {
-		var dataKeys = new MasterKeyGuard(connection -> Optional.empty(), connection -> true, environment::get);
-		return new MasterKeyStep(dataKeys, environment::get, standardError::add, home);
+		var dataKeys = new MasterKeyGuard(connection -> Optional.empty(), connection -> true);
+		return new MasterKeyStep(dataKeys, standardError::add, home);
 	}
 
 	private PlannedAction backupAction() {
 		return context.filePlan().actions().getFirst();
 	}
 
+	/** Batch mode with a setup file of these values, and the variables of {@link #environment}. */
 	private SetupContext batch(Map<ValueKey, String> values) {
-		var batch = new SetupContext(new ValueSource(new SetupValues(values), Optional.of(FILE), true));
+		var batch = new SetupContext(new ValueSource(new SetupValues(values), Optional.of(FILE), true,
+				new EnvironmentSnapshot(environment)));
 		batch.setDataDir(dataDir);
 		batch.setMongoUri(MONGO_URI);
 		return batch;
+	}
+
+	/** A terminal, no setup file, and the variables of {@link #environment}. */
+	private SetupContext withVariables() {
+		var fromVariables = new SetupContext(new ValueSource(SetupValues.NONE, Optional.empty(), false,
+				new EnvironmentSnapshot(environment)));
+		fromVariables.setDataDir(dataDir);
+		fromVariables.setMongoUri(MONGO_URI);
+		return fromVariables;
 	}
 
 	private String storeDataDirKey() throws Exception {

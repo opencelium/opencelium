@@ -10,8 +10,11 @@ import java.util.OptionalInt;
 import java.util.SequencedMap;
 
 import io.opencelium.core.config.BootstrapProperties;
+import io.opencelium.core.config.BootstrapPropertyException;
 import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.config.OpenCeliumProperties;
+import io.opencelium.core.config.mongo.MongoConnection;
+import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.files.FilePlan;
 
@@ -52,9 +55,15 @@ public final class SetupContext {
 
 	private String mongoUri;
 
+	private MongoConnection mongoConnection;
+
+	private List<String> mongoVariables = List.of();
+
 	private String masterKeySource;
 
 	private Path masterKeyFile;
+
+	private String masterKeyVariable;
 
 	private String adminUsername;
 
@@ -96,13 +105,60 @@ public final class SetupContext {
 		this.port = port;
 	}
 
-	/** The whole URI that the MongoDB step chose, which the env file will hold; empty before the step ran. */
+	/**
+	 * The whole URI that the MongoDB step chose, which the env file will hold; empty before the step ran, and empty
+	 * when environment variables give the connection.
+	 */
 	public Optional<String> mongoUri() {
 		return Optional.ofNullable(mongoUri);
 	}
 
+	/** The URI of a server that the user chose; it replaces a connection from the environment. */
 	public void setMongoUri(String mongoUri) {
 		this.mongoUri = mongoUri;
+		this.mongoConnection = null;
+		this.mongoVariables = List.of();
+	}
+
+	/**
+	 * The connection that environment variables give. The host-style variables give no URI text, so the step keeps
+	 * the connection that the start resolves from them, and no file holds a copy.
+	 *
+	 * @param connection the MongoDB connection that environment variables give
+	 * @param variables  the names of these variables
+	 */
+	public void setMongoConnection(MongoConnection connection, List<String> variables) {
+		this.mongoConnection = Objects.requireNonNull(connection, "connection");
+		this.mongoVariables = List.copyOf(variables);
+		this.mongoUri = null;
+	}
+
+	/**
+	 * The MongoDB connection that the MongoDB step chose: from the environment, or from the URI that the user chose.
+	 * The master key step, the admin step and the admin marker use its database, which the first start uses too.
+	 *
+	 * @throws SetupFailedException  with exit code 1 when the start would not accept the chosen URI
+	 * @throws IllegalStateException when the MongoDB step did not run
+	 */
+	public MongoConnection mongoConnection() {
+		if (mongoConnection != null) {
+			return mongoConnection;
+		}
+		if (mongoUri == null) {
+			throw new IllegalStateException("The MongoDB step did not run.");
+		}
+		try {
+			return StaticMongoConnectionResolver.parseUri(mongoUri);
+		}
+		catch (BootstrapPropertyException ex) {
+			// Each parse of a mongodb+srv URI reads DNS, so it can fail here after the step accepted the URI.
+			throw SetupFailedException.failure(ex.getMessage());
+		}
+	}
+
+	/** The variables that give the MongoDB connection, in the order of the result line; empty for a chosen URI. */
+	public List<String> mongoVariables() {
+		return mongoVariables;
 	}
 
 	/** Where the master key comes from, in words for the summary; empty before the master key step ran. */
@@ -122,6 +178,25 @@ public final class SetupContext {
 	public void setMasterKey(String source, Optional<Path> file) {
 		this.masterKeySource = Objects.requireNonNull(source, "source");
 		this.masterKeyFile = file.orElse(null);
+		this.masterKeyVariable = null;
+	}
+
+	/**
+	 * The master key that an environment variable gives, itself or as its key file. application.yml then names no key
+	 * file, so the variable stays the only source.
+	 *
+	 * @param source   where the master key comes from, in words for the summary
+	 * @param variable the environment variable that gives the master key or its key file
+	 */
+	public void setMasterKeyFromVariable(String source, String variable) {
+		this.masterKeySource = Objects.requireNonNull(source, "source");
+		this.masterKeyFile = null;
+		this.masterKeyVariable = Objects.requireNonNull(variable, "variable");
+	}
+
+	/** The variable that gives the master key or its key file; empty for the other sources. */
+	public Optional<String> masterKeyVariable() {
+		return Optional.ofNullable(masterKeyVariable);
 	}
 
 	/** The username of the admin that the start makes; empty when the admin step did not run or did not apply. */

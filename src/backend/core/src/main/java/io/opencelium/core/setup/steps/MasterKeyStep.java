@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.config.TerminalText;
 import io.opencelium.core.secrets.keys.RootKeyGenerator;
 import io.opencelium.core.secrets.keys.RootKeyResolver;
@@ -24,17 +24,23 @@ import io.opencelium.core.setup.files.SetupActionException;
 import io.opencelium.core.setup.files.PlannedFile;
 import io.opencelium.core.setup.prompt.Choice;
 import io.opencelium.core.setup.prompt.Prompter;
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
 import io.opencelium.core.setup.values.Question;
 import io.opencelium.core.setup.values.ValueKey;
+import io.opencelium.core.setup.values.ValueSource;
 
 /**
  * Where the master key comes from. The master key is the root of the encryption of the stored credentials, so the
- * step first says why it matters, then offers to generate a new key into the data directory, to use the variable
- * {@code OC_MASTER_KEY}, or to read a key file. A key that the data directory holds already is kept, never
- * replaced: a new key could not read what the old one encrypted. Before the menu the guard makes sure that the
- * database holds no encrypted data keys without their key; when it holds some, the step generates no key. When
- * {@code OC_MASTER_KEY} is set in the environment of the setup, the step takes it without a menu: the start in this
- * process reads the variable first, so another answer would not be the key that the start uses.
+ * step first says why it matters, then offers to generate a new key into the data directory or to read a key file;
+ * its help tells how to give the key in {@code OC_MASTER_KEY} instead. A key that the data directory holds already
+ * is kept, never replaced: a new key could not read what the old one encrypted. Before the menu the guard makes sure
+ * that the database holds no encrypted data keys without their key; when it holds some, the step generates no key.
+ * <p>
+ * When {@code OC_MASTER_KEY} or {@code OPENCELIUM_MASTERKEYFILE} is set in the environment of the setup, the step
+ * takes it without a menu: each start reads the variable first, so another answer would not be the key that the start
+ * uses. The start does not accept both, and a variable in a bad form stops the setup; neither is asked again. A
+ * setup file must agree: {@code env} with {@code OC_MASTER_KEY}, and {@code file:<path>} with the same file as
+ * {@code OPENCELIUM_MASTERKEYFILE}. No file names the key file of the variable, so the variable stays its only source.
  * <p>
  * The step writes nothing. A generated key is an action of the plan: it makes the key file after the other files are
  * written, never in the place of a file that exists, and then asks whether the user backed it up, because the file
@@ -77,33 +83,34 @@ public final class MasterKeyStep implements SetupStep {
 			+ " other account. Do not put it under /tmp: the service does not see /tmp, and a reboot can delete it."
 			+ " Make a key file that only you can read with: (umask 077; openssl rand -base64 32 > master.key)";
 
+	/** How to give the master key in the variable, which the menu does not offer: the setup takes it without one. */
+	private static final String VARIABLE_HELP = "To give the master key in " + RootKeyResolver.ENV_VARIABLE
+			+ " instead, for example from a secret store: end the setup with q, set the variable, for example with"
+			+ " export " + RootKeyResolver.ENV_VARIABLE + "=\"$(openssl rand -base64 32)\", and run the setup again."
+			+ " The setup then takes the variable and shows no menu. Set it in the environment of the service too.";
+
 	private static final String NO_GENERATE_WITH_DATA_KEYS = "the database holds encrypted data keys, so the setup"
 			+ " generates no master key; use " + ENV + " or " + FILE_PREFIX + "<path>.";
 
 	/** The options of the menu; the first one depends on the data directory and the database. */
-	private enum Source { GENERATE, KEEP, VARIABLE, KEY_FILE }
+	private enum Source { GENERATE, KEEP, KEY_FILE }
 
 	private final MasterKeyGuard guard;
-
-	private final Function<String, String> environment;
 
 	private final Consumer<String> standardError;
 
 	private final Path home;
 
 	public MasterKeyStep() {
-		this(new MasterKeyGuard(), System::getenv, System.err::println, Path.of(System.getProperty("user.home")));
+		this(new MasterKeyGuard(), System.err::println, Path.of(System.getProperty("user.home")));
 	}
 
 	/**
-	 * @param environment   looks up the environment variables of this process
 	 * @param standardError where the backup warning goes in batch mode, one line at a time
 	 * @param home          the home directory for a typed {@code ~}
 	 */
-	public MasterKeyStep(MasterKeyGuard guard, Function<String, String> environment, Consumer<String> standardError,
-			Path home) {
+	public MasterKeyStep(MasterKeyGuard guard, Consumer<String> standardError, Path home) {
 		this.guard = Objects.requireNonNull(guard, "guard");
-		this.environment = Objects.requireNonNull(environment, "environment");
 		this.standardError = Objects.requireNonNull(standardError, "standardError");
 		this.home = Objects.requireNonNull(home, "home").toAbsolutePath().normalize();
 	}
@@ -126,9 +133,12 @@ public final class MasterKeyStep implements SetupStep {
 	public void run(SetupContext context, Prompter prompter) {
 		Path dataDir = context.dataDir()
 				.orElseThrow(() -> new IllegalStateException("The data directory step did not run."));
-		String mongoUri = context.mongoUri()
-				.orElseThrow(() -> new IllegalStateException("The MongoDB step did not run."));
-		boolean dataKeys = guard.run(mongoUri, dataDir);
+		ValueSource values = context.values();
+		EnvironmentSnapshot environment = values.environment();
+		Optional<String> keyVariable = environment.text(VARIABLE);
+		Optional<EnvironmentSnapshot.Value> fileVariable = environment.value(OpenCeliumProperties.MASTER_KEY_FILE);
+		checkVariables(keyVariable, fileVariable, environment);
+		boolean dataKeys = guard.run(context.mongoConnection(), dataDir, environment);
 		Path dataDirKey = dataDir.resolve(RootKeyResolver.DATA_DIR_FILE_NAME);
 		boolean keep = Files.exists(dataDirKey);
 		if (keep) {
@@ -137,27 +147,97 @@ public final class MasterKeyStep implements SetupStep {
 						+ " credential is stored yet.");
 			});
 		}
-		boolean variableSet = environment.apply(VARIABLE) != null;
-		Optional<String> word = context.values().given(question(),
-				value -> wordProblem(value, dataKeys, keep, variableSet), UnaryOperator.identity(), prompter);
+		fileVariable.ifPresent(variable -> agreeWithKeyFileVariable(values, variable));
+		boolean fromVariable = keyVariable.isPresent() || fileVariable.isPresent();
+		// A variable answers the question, so a setup file without the key is no missing value in batch mode.
+		Optional<String> word = fromVariable && values.fromFile(ValueKey.MASTER_KEY).isEmpty() ? Optional.empty()
+				: values.given(question(), value -> wordProblem(value, dataKeys, keep, keyVariable),
+						UnaryOperator.identity(), prompter);
 		if (word.isPresent()) {
-			fromWord(word.get(), keep, dataDirKey, context, prompter);
+			fromWord(word.get(), keep, dataDirKey, fileVariable, context, prompter);
 			return;
 		}
 		prompter.info(PURPOSE.getFirst(), PURPOSE.subList(1, PURPOSE.size()).toArray(String[]::new));
-		if (variableSet) {
+		if (keyVariable.isPresent()) {
 			prompter.print("");
 			prompter.info(VARIABLE + " is set in the environment of this setup, so the setup shows no menu.");
 			variable(context, prompter);
+			return;
+		}
+		if (fileVariable.isPresent()) {
+			prompter.print("");
+			keyFileVariable(fileVariable.get(), context, prompter);
 			return;
 		}
 		fromMenu(menu(dataKeys, keep), dataDirKey, context, prompter);
 	}
 
 	/**
-	 * Keep or generate first, when one applies; then the variable and the key file. With data keys the guard has found
-	 * their key before the menu, so no new key is offered; the check stays here so that a change of that order cannot
-	 * offer one.
+	 * The variables of the master key as the start would read them: not both, and each with a master key. The setup
+	 * stops before the guard, so the message names the variables, and it asks nothing, because each start reads them.
+	 * A master key in the key file variable by mistake is named, not quoted: the message of a missing file would
+	 * show it as a part of the path.
+	 */
+	private static void checkVariables(Optional<String> keyVariable, Optional<EnvironmentSnapshot.Value> fileVariable,
+			EnvironmentSnapshot environment) {
+		if (keyVariable.isPresent() && fileVariable.isPresent()) {
+			String both = VARIABLE + " and " + fileVariable.get().variable();
+			throw SetupFailedException.failure("Bad value: " + both + " are both set in the environment, and the start"
+					+ " does not accept both.", "Remove 1 of them: the master key must come from exactly 1 source. Each"
+							+ " start reads them, so the setup does not ask.");
+		}
+		keyVariable.flatMap(key -> RootKeyResolver.textProblem(key, VARIABLE)).ifPresent(problem -> {
+			throw ValueSource.badVariable(List.of(VARIABLE), problem);
+		});
+		fileVariable.ifPresent(variable -> {
+			String asWritten = environment.text(variable.variable()).orElse(variable.text());
+			if (RootKeyResolver.textProblem(asWritten, variable.variable()).isEmpty()) {
+				throw ValueSource.badVariable(List.of(variable.variable()), "This is a master key, not the path of a"
+						+ " key file. Give the master key in " + VARIABLE + " instead.");
+			}
+			Optional<String> problem;
+			try {
+				problem = RootKeyResolver.fileProblem(Path.of(variable.text()));
+			}
+			catch (InvalidPathException ex) {
+				problem = Optional.of("This is not a valid path: " + ex.getReason() + ".");
+			}
+			problem.ifPresent(text -> {
+				throw ValueSource.badVariable(List.of(variable.variable()), text);
+			});
+		});
+	}
+
+	/**
+	 * With the key file variable, the setup file must name the same file, compared as absolute paths. Another word of
+	 * the step stops the setup without a quote of either path; a word that the step does not know stops it later, as a
+	 * bad value of the setup file.
+	 */
+	private void agreeWithKeyFileVariable(ValueSource values, EnvironmentSnapshot.Value variable) {
+		Optional<String> word = values.fromFile(ValueKey.MASTER_KEY)
+				.filter(text -> text.equals(GENERATE) || text.equals(ENV) || text.startsWith(FILE_PREFIX));
+		if (word.isPresent() && !sameKeyFile(word.get(), variable)) {
+			throw values.different(ValueKey.MASTER_KEY, List.of(variable.variable()));
+		}
+	}
+
+	private boolean sameKeyFile(String word, EnvironmentSnapshot.Value variable) {
+		if (!word.startsWith(FILE_PREFIX)) {
+			return false;
+		}
+		try {
+			return keyFilePath(word.substring(FILE_PREFIX.length())).equals(Path.of(variable.text()));
+		}
+		catch (InvalidPathException ex) {
+			// Not a path: the check of the word names the problem.
+			return true;
+		}
+	}
+
+	/**
+	 * Keep or generate first, when one applies; then the key file. With data keys the guard has found their key
+	 * before the menu, so no new key is offered; the check stays here so that a change of that order cannot offer
+	 * one.
 	 */
 	private static List<Source> menu(boolean dataKeys, boolean keep) {
 		List<Source> sources = new ArrayList<>();
@@ -167,7 +247,6 @@ public final class MasterKeyStep implements SetupStep {
 		else if (!dataKeys) {
 			sources.add(Source.GENERATE);
 		}
-		sources.add(Source.VARIABLE);
 		sources.add(Source.KEY_FILE);
 		return sources;
 	}
@@ -184,14 +263,6 @@ public final class MasterKeyStep implements SetupStep {
 					keep(dataDirKey, context);
 					return;
 				}
-				case VARIABLE -> {
-					Optional<String> problem = variableProblem();
-					if (problem.isEmpty()) {
-						variable(context, prompter);
-						return;
-					}
-					prompter.error(problem.get(), "Set it, then run the setup again, or choose another option.");
-				}
 				case KEY_FILE -> {
 					String path = prompter.text("Key file", KEY_FILE_HELP, "", this::keyFileProblem);
 					keyFile(keyFilePath(path), context);
@@ -201,8 +272,12 @@ public final class MasterKeyStep implements SetupStep {
 		}
 	}
 
-	/** The setup file's word, which {@link #wordProblem} accepted. */
-	private void fromWord(String word, boolean keep, Path dataDirKey, SetupContext context, Prompter prompter) {
+	/**
+	 * The setup file's word, which {@link #wordProblem} accepted. With the key file variable the word names the same
+	 * file, and the variable stays its only source.
+	 */
+	private void fromWord(String word, boolean keep, Path dataDirKey, Optional<EnvironmentSnapshot.Value> fileVariable,
+			SetupContext context, Prompter prompter) {
 		if (word.equals(GENERATE)) {
 			if (keep) {
 				keep(dataDirKey, context);
@@ -214,6 +289,9 @@ public final class MasterKeyStep implements SetupStep {
 		else if (word.equals(ENV)) {
 			variable(context, prompter);
 		}
+		else if (fileVariable.isPresent()) {
+			keyFileVariable(fileVariable.get(), context, prompter);
+		}
 		else {
 			keyFile(keyFilePath(word.substring(FILE_PREFIX.length())), context);
 		}
@@ -224,8 +302,8 @@ public final class MasterKeyStep implements SetupStep {
 	 * data keys is refused even though the guard and the variable rule leave no way to it now, for the same reason as
 	 * in {@link #menu}.
 	 */
-	private Optional<String> wordProblem(String word, boolean dataKeys, boolean keep, boolean variableSet) {
-		if (variableSet && !word.equals(ENV)) {
+	private Optional<String> wordProblem(String word, boolean dataKeys, boolean keep, Optional<String> keyVariable) {
+		if (keyVariable.isPresent() && !word.equals(ENV)) {
 			return Optional.of(VARIABLE + " is set in the environment of this setup, and the start takes the master key"
 					+ " from it; use " + ENV + ", or unset the variable.");
 		}
@@ -233,20 +311,13 @@ public final class MasterKeyStep implements SetupStep {
 			return dataKeys && !keep ? Optional.of(NO_GENERATE_WITH_DATA_KEYS) : Optional.empty();
 		}
 		if (word.equals(ENV)) {
-			return variableProblem();
+			return keyVariable.isEmpty() ? Optional.of(VARIABLE + " is not set in the environment of this setup.")
+					: Optional.empty();
 		}
 		if (word.startsWith(FILE_PREFIX)) {
 			return keyFileProblem(word.substring(FILE_PREFIX.length()));
 		}
 		return Optional.of("The value is not one of: " + GENERATE + ", " + ENV + ", " + FILE_PREFIX + "<path>.");
-	}
-
-	private Optional<String> variableProblem() {
-		String value = environment.apply(VARIABLE);
-		if (value == null) {
-			return Optional.of(VARIABLE + " is not set in the environment of this setup.");
-		}
-		return RootKeyResolver.textProblem(value, VARIABLE);
 	}
 
 	/** The problem with a typed key file path; a master key typed by mistake is named, not quoted. */
@@ -284,7 +355,16 @@ public final class MasterKeyStep implements SetupStep {
 	private static void variable(SetupContext context, Prompter prompter) {
 		prompter.info("OpenCelium takes the master key from " + VARIABLE + ", and the setup writes it nowhere.",
 				"Set " + VARIABLE + " in the environment of the service too, with the same value.");
-		context.setMasterKey("the variable " + VARIABLE, Optional.empty());
+		context.setMasterKeyFromVariable("the variable " + VARIABLE, VARIABLE);
+	}
+
+	/** The key file of the variable, which no file names: the start reads the variable at each start. */
+	private static void keyFileVariable(EnvironmentSnapshot.Value variable, SetupContext context, Prompter prompter) {
+		prompter.answered("Key file", variable.text(), "from the environment: " + variable.variable());
+		prompter.info("OpenCelium reads the master key from this file, and the setup writes the path nowhere.",
+				"Set " + variable.variable() + " in the environment of the service too, with the same path.");
+		context.setMasterKeyFromVariable("the key file " + variable.text() + " from " + variable.variable(),
+				variable.variable());
 	}
 
 	private static void keyFile(Path file, SetupContext context) {
@@ -299,11 +379,9 @@ public final class MasterKeyStep implements SetupStep {
 			case KEEP -> new Choice("Keep", "the master key in " + dataDirKey, dataDirKey + " holds the master key of"
 					+ " this installation. The setup keeps it and writes no new one: a new master key could not decrypt"
 					+ " what this one encrypted.");
-			case VARIABLE -> new Choice("Variable", VARIABLE + " from the environment", "Choose this when the"
-					+ " environment of the service gives the master key, for example from a secret store. The setup"
-					+ " writes nothing; set " + VARIABLE + " in the environment of the service too. Make a master key"
-					+ " with: openssl rand -base64 32");
-			case KEY_FILE -> new Choice("Key file", "a master key that you have, in a file", KEY_FILE_HELP);
+			// The last option: the way through the variable, which is no option, follows its help.
+			case KEY_FILE -> new Choice("Key file", "a master key that you have, in a file", KEY_FILE_HELP + "\n"
+					+ VARIABLE_HELP);
 		};
 	}
 

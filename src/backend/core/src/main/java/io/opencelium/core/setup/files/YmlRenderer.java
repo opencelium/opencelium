@@ -17,7 +17,9 @@ import io.opencelium.core.config.OpenCeliumProperties;
  * URI holds a database password, so {@code spring.mongodb.uri} gets only the placeholder of the variable that the
  * env file gives. Spring resolves it from the environment or from the env file, and a different database user or
  * host changes only the env file. A value that an environment variable gives has no line, so the environment stays
- * its only source: a copy in the file would apply at a later start without the variable.
+ * its only source: a copy in the file would apply at a later start without the variable. When
+ * {@code spring.mongodb.uri} is among these values, {@code SPRING_MONGODB_} variables give the connection, and the
+ * file has no MongoDB line.
  */
 public final class YmlRenderer {
 
@@ -45,7 +47,9 @@ public final class YmlRenderer {
 			root.put(prefix(BootstrapProperties.SERVER_PORT), Map.of(leaf(BootstrapProperties.SERVER_PORT),
 					values.port()));
 		}
-		root.put("spring", Map.of("mongodb", Map.of("uri", "${" + MONGO_URI_VARIABLE + "}")));
+		if (!fromEnvironment.contains(BootstrapProperties.MONGODB_URI)) {
+			root.put("spring", Map.of("mongodb", Map.of("uri", "${" + MONGO_URI_VARIABLE + "}")));
+		}
 		if (!opencelium.isEmpty()) {
 			root.put(prefix(OpenCeliumProperties.DATA_DIR), opencelium);
 		}

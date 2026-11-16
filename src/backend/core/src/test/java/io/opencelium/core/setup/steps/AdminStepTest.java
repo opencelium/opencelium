@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.TimeUnit;
@@ -21,12 +22,14 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
 import io.opencelium.core.config.mongo.MongoConnection;
+import io.opencelium.core.config.mongo.StaticMongoConnectionResolver;
 import io.opencelium.core.setup.AdminMarker;
 import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.setup.SetupFailedException;
 import io.opencelium.core.setup.Wizard;
 import io.opencelium.core.setup.files.PlannedAction;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
 import io.opencelium.core.setup.values.SetupFile;
 import io.opencelium.core.setup.values.SetupValues;
 import io.opencelium.core.setup.values.ValueSource;
@@ -40,8 +43,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * The admin step asks the admin username with the default {@code admin} and plans the admin marker; the start makes
  * the admin from it. The step asks no admin password. When the database of the MongoDB step holds an admin, the step
- * does not apply. The question "an admin exists" is a fake in most tests; 1 test connects the step to its query
- * against the local MongoDB, without a Spring context, as the wizard runs before Spring starts.
+ * does not apply, also when that database comes from the environment. The question "an admin exists" is a fake in
+ * most tests; 1 test connects the step to its query against the local MongoDB, without a Spring context, as the
+ * wizard runs before Spring starts.
  */
 @ExtendWith(LocalMongo.Cleanup.class)
 class AdminStepTest {
@@ -58,6 +62,18 @@ class AdminStepTest {
 
 	@TempDir
 	Path tmp;
+
+	@Test
+	void applicableIsFalseWhenTheDatabaseOfTheEnvironmentHoldsAnAdmin() {
+		String uri = "mongodb://db.example/oc_variable";
+		var fromVariables = new SetupContext(new ValueSource(SetupValues.NONE, Optional.empty(), false,
+				new EnvironmentSnapshot(Map.of("SPRING_MONGODB_URI", uri))));
+		fromVariables.setMongoConnection(StaticMongoConnectionResolver.parseUri(uri), List.of("SPRING_MONGODB_URI"));
+
+		// Only the database of the variable holds an admin: the start uses that database, so no second admin.
+		assertThat(new AdminStep(connection -> connection.databaseName().equals("oc_variable"))
+				.applicable(fromVariables)).isFalse();
+	}
 
 	@Test
 	void runStoresDefaultUsernameWhenInputIsEmpty() {

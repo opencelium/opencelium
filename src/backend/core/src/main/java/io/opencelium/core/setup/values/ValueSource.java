@@ -1,6 +1,7 @@
 package io.opencelium.core.setup.values;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -105,24 +106,71 @@ public final class ValueSource {
 		String name = variable.variable();
 		Optional<String> problem = validator.apply(variable.text());
 		if (problem.isPresent()) {
-			throw SetupFailedException.failure("Bad value: " + name + " in the environment: " + problem.get(),
-					"Repair the value of " + name + ", or remove the variable. Each start reads it, so the setup does"
-							+ " not ask again.");
+			throw badVariable(List.of(name), problem.get());
 		}
-		String key = question.key().word();
 		Optional<String> fromFile = values.get(question.key());
 		if (fromFile.isPresent()) {
 			Optional<String> fileProblem = validator.apply(fromFile.get());
 			if (fileProblem.isPresent()) {
-				throw SetupFailedException.failure("Bad value: " + key + inFile() + ": " + fileProblem.get());
+				throw badFileValue(question.key(), fileProblem.get());
 			}
 			if (!value.apply(fromFile.get()).equals(value.apply(variable.text()))) {
-				throw SetupFailedException.failure("Different values: " + key + inFile() + " and the variable " + name
-						+ ".", "Remove one of them, or give both the same value.");
+				throw different(question.key(), List.of(name));
 			}
 		}
 		prompter.answered(question.label(), variable.text(), "from the environment: " + name);
 		return variable.text();
+	}
+
+	/**
+	 * The setup file's text of a key, not checked and not printed, for a step that asks the environment itself and
+	 * compares the file with it first.
+	 *
+	 * @return empty when the file does not have the key
+	 */
+	public Optional<String> fromFile(ValueKey key) {
+		return values.get(key);
+	}
+
+	/**
+	 * The stop for a value of the environment that the start would not accept. The setup does not ask again, because
+	 * each start reads the variable.
+	 *
+	 * @param variables the variable, or the variables that give the value together
+	 * @param problem   why the value is bad, without a quote of a secret
+	 */
+	public static SetupFailedException badVariable(List<String> variables, String problem) {
+		String advice = repairOrRemove(variables);
+		return SetupFailedException.failure("Bad value: " + String.join(", ", variables) + " in the environment: "
+				+ problem, Character.toUpperCase(advice.charAt(0)) + advice.substring(1));
+	}
+
+	/**
+	 * What the user can do about a value of the environment, as the end of a sentence: "repair the value of X, or
+	 * remove the variable", and why the setup does not ask instead.
+	 */
+	public static String repairOrRemove(List<String> variables) {
+		String names = String.join(", ", variables);
+		return variables.size() == 1
+				? "repair the value of " + names + ", or remove the variable. Each start reads it, so the setup does"
+						+ " not ask again."
+				: "repair the values of " + names + ", or remove the variables. Each start reads them, so the setup"
+						+ " does not ask again.";
+	}
+
+	/** The stop for a setup file value that the step does not accept; the problem quotes no secret. */
+	public SetupFailedException badFileValue(ValueKey key, String problem) {
+		return SetupFailedException.failure("Bad value: " + key.word() + inFile() + ": " + problem);
+	}
+
+	/**
+	 * The stop for a setup file value and a variable that give 2 values for 1 question. The message names the key,
+	 * the file and the variable, but no value: either can hold a secret.
+	 */
+	public SetupFailedException different(ValueKey key, List<String> variables) {
+		return SetupFailedException.failure("Different values: " + key.word() + inFile() + " and the variable"
+				+ (variables.size() == 1 ? " " : "s ") + String.join(", ", variables) + ".",
+				"Remove one of them, or give both the same value.");
 	}
 
 	/**
@@ -142,7 +190,7 @@ public final class ValueSource {
 			String value = given.get();
 			Optional<String> problem = validator.apply(value);
 			if (problem.isPresent()) {
-				throw SetupFailedException.failure("Bad value: " + key + inFile() + ": " + problem.get());
+				throw badFileValue(question.key(), problem.get());
 			}
 			prompter.answered(question.label(), shown.apply(value), "from " + file.map(Path::toString)
 					.orElse("the setup file"));
