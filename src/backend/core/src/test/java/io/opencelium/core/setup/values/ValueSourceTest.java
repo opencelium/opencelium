@@ -15,8 +15,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * Where a step gets its value: a value from the setup file is checked, printed and taken without a question; an
- * absent value is asked, or, in batch mode, stops the setup naming the key and the file.
+ * Where a step gets its value: a value from the environment first, then a value from the setup file; each is
+ * checked, printed and taken without a question. A bad value from the environment stops the setup, also on a
+ * terminal, and a setup file value must agree with it. An absent value is asked, or, in batch mode, stops the setup
+ * naming the key and the file.
  */
 class ValueSourceTest {
 
@@ -102,8 +104,98 @@ class ValueSourceTest {
 		assertThat(ValueSource.PROMPTED.yesNo("Write?", "help", false, prompter)).isTrue();
 	}
 
+	@Test
+	void textTakesTheValueWithoutQuestionWhenTheVariableIsSet() {
+		// No input is scripted: a question would end the input and cancel the setup.
+		ValueSource source = withEnvironment(Map.of(), false, Map.of("SERVER_PORT", "8080"));
+
+		String value = source.text(PORT_QUESTION, DIGITS, prompter);
+
+		assertThat(value).isEqualTo("8080");
+		assertThat(console.output()).isEqualTo("  Web port        8080   (from the environment: SERVER_PORT)\n");
+	}
+
+	@Test
+	void textStopsAndNamesTheVariableWhenTheValueIsBadOnTerminal() {
+		ValueSource source = withEnvironment(Map.of(), false, Map.of("SERVER_PORT", "80a"));
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> source.text(PORT_QUESTION, DIGITS, prompter)).actual();
+
+		// The environment applies at each start, so the setup does not ask again on a terminal either.
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.lines()).containsExactly("Bad value: SERVER_PORT in the environment: Please enter a number.",
+				"Repair the value of SERVER_PORT, or remove the variable. Each start reads it, so the setup does not"
+						+ " ask again.");
+		assertThat(console.output()).isEmpty();
+	}
+
+	@Test
+	void textStopsAndNamesTheVariableWhenTheValueIsBadInBatchMode() {
+		ValueSource source = withEnvironment(Map.of(), true, Map.of("SERVER_PORT", "80a"));
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> source.text(PORT_QUESTION, DIGITS, prompter)).actual();
+
+		// The bad value, not a missing value: the variable gives the port.
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.lines()).first().isEqualTo("Bad value: SERVER_PORT in the environment: Please enter a number.");
+		assertThat(console.output()).isEmpty();
+	}
+
+	@Test
+	void textStopsWhenTheSetupFileDiffersFromTheVariable() {
+		ValueSource source = withEnvironment(Map.of(ValueKey.PORT, "9091"), true, Map.of("SERVER_PORT", "8080"));
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> source.text(PORT_QUESTION, DIGITS, Integer::valueOf, prompter)).actual();
+
+		// The key, the file and the variable, but no value.
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.lines()).containsExactly("Different values: port in setup-values.yml and the variable"
+				+ " SERVER_PORT.", "Remove one of them, or give both the same value.");
+		assertThat(ex.getMessage()).doesNotContain("9091").doesNotContain("8080");
+		assertThat(console.output()).isEmpty();
+	}
+
+	@Test
+	void textStopsNamingTheKeyWhenTheSetupFileValueIsBadAndTheVariableIsSet() {
+		ValueSource source = withEnvironment(Map.of(ValueKey.PORT, "abc"), true, Map.of("SERVER_PORT", "8080"));
+
+		// The check of the setup file value comes before the comparison of the values.
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> source.text(PORT_QUESTION, DIGITS, Integer::valueOf, prompter)).actual();
+
+		assertThat(ex.exitCode()).isEqualTo(1);
+		assertThat(ex.getMessage()).isEqualTo("Bad value: port in setup-values.yml: Please enter a number.");
+	}
+
+	@Test
+	void textAcceptsTheSetupFileWhenItAgreesWithTheVariable() {
+		// 1 value in 2 texts: the setup compares the values, not the texts.
+		ValueSource source = withEnvironment(Map.of(ValueKey.PORT, "08080"), true, Map.of("SERVER_PORT", "8080"));
+
+		String value = source.text(PORT_QUESTION, DIGITS, Integer::valueOf, prompter);
+
+		assertThat(value).isEqualTo("8080");
+		assertThat(console.output()).isEqualTo("  Web port        8080   (from the environment: SERVER_PORT)\n");
+	}
+
+	@Test
+	void textDoesNotStopInBatchModeWhenOnlyTheVariableGivesTheValue() {
+		ValueSource source = withEnvironment(Map.of(), true, Map.of("SERVER_PORT", "8080"));
+
+		assertThat(source.text(PORT_QUESTION, DIGITS, prompter)).isEqualTo("8080");
+		assertThat(console.output()).contains("(from the environment: SERVER_PORT)").doesNotContain("Missing value");
+	}
+
 	private static ValueSource withFile(Map<ValueKey, String> values, boolean batch) {
 		return new ValueSource(new SetupValues(values), Optional.of(FILE), batch);
+	}
+
+	private static ValueSource withEnvironment(Map<ValueKey, String> values, boolean batch,
+			Map<String, String> variables) {
+		return new ValueSource(new SetupValues(values), Optional.of(FILE), batch, new EnvironmentSnapshot(variables));
 	}
 
 }

@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -23,7 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The text of application.yml: a fixed header line, then the bootstrap values in the spelling Boot reads. Loaded
  * back by Boot's own YAML loader, the values bind to the same {@link OpenCeliumProperties} the application uses, and
- * the MongoDB URI is the placeholder of the variable that the env file gives.
+ * the MongoDB URI is the placeholder of the variable that the env file gives. A value that an environment variable
+ * gives has no line: the environment stays its only source.
  */
 class YmlRendererTest {
 
@@ -108,6 +111,36 @@ class YmlRendererTest {
 				new BootstrapValues(DeploymentMode.SELF_HOST, dataDir, 9090, URI)));
 
 		assertThat(OpenCeliumProperties.from(environment).dataDir()).isEqualTo(dataDir);
+	}
+
+	@Test
+	void renderLeavesOutPortAndDataDirectoryWhenTheEnvironmentGivesThem() {
+		String yml = YmlRenderer.render(new BootstrapValues(DeploymentMode.SELF_HOST, Path.of("/srv/oc/data"), 8080,
+				URI, Optional.empty(), Set.of("server.port", OpenCeliumProperties.DATA_DIR)));
+
+		assertThat(yml).isEqualTo("""
+				# Written by OpenCelium setup. To run the setup again: java -jar oc-app.jar setup
+				spring:
+				  mongodb:
+				    uri: ${OC_MONGO_URI}
+				opencelium:
+				  deployment-mode: self-host
+				""");
+	}
+
+	@Test
+	void renderWritesNoOpenceliumBlockWhenTheEnvironmentGivesEachOfItsValues() {
+		String yml = YmlRenderer.render(new BootstrapValues(DeploymentMode.SELF_HOST, Path.of("/srv/oc/data"), 8080,
+				URI, Optional.empty(), Set.of(OpenCeliumProperties.DEPLOYMENT_MODE, OpenCeliumProperties.DATA_DIR)));
+
+		assertThat(yml).isEqualTo("""
+				# Written by OpenCelium setup. To run the setup again: java -jar oc-app.jar setup
+				server:
+				  port: 8080
+				spring:
+				  mongodb:
+				    uri: ${OC_MONGO_URI}
+				""");
 	}
 
 	/** The text as Boot loads {@code config/application.yml}: through its YAML property source loader. */

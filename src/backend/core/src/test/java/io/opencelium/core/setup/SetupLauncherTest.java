@@ -179,6 +179,60 @@ class SetupLauncherTest {
 	}
 
 	@Test
+	void decideStopsWithUsageErrorWhenSetupGetsServerPortArgument() {
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> decide("setup", "--server.port=8080")).actual();
+
+		// The start would apply the argument over an answer: the environment variable is the 1 form for both.
+		assertThat(ex.exitCode()).isEqualTo(2);
+		assertThat(ex.getMessage()).isEqualTo("Use SERVER_PORT, not --server.port: with setup, a bootstrap value comes"
+				+ " from an environment variable only.");
+	}
+
+	@Test
+	void decideStopsWithUsageErrorWhenSetupGetsBootstrapSystemProperty() {
+		systemProperties.setProperty("opencelium.data-dir", "/srv/oc");
+
+		SetupFailedException ex = assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> decide("setup")).actual();
+
+		assertThat(ex.exitCode()).isEqualTo(2);
+		assertThat(ex.getMessage()).startsWith("Use OPENCELIUM_DATADIR, not -Dopencelium.data-dir: ");
+		// Without setup, the start accepts each form, as Spring Boot does.
+		assertBoot(decide(), "opencelium.data-dir is set");
+	}
+
+	@Test
+	void decideStopsWithUsageErrorWhenSetupTemplateGetsBootstrapArgument() {
+		assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> decide("setup", "--template", "--spring.mongodb.uri=mongodb://db.example/oc"))
+				.withMessageStartingWith("Use SPRING_MONGODB_URI, not --spring.mongodb.uri: ")
+				.satisfies(ex -> assertThat(ex.exitCode()).isEqualTo(2));
+		assertThatExceptionOfType(SetupFailedException.class)
+				.isThrownBy(() -> decide("setup", "--template", "--OC_MONGO_URI=mongodb://db.example/oc"))
+				.withMessageStartingWith("Use OC_MONGO_URI, not --OC_MONGO_URI: ");
+	}
+
+	@Test
+	void launchTakesThePortFromTheEnvironmentAndWritesNoPortLine() throws IOException {
+		String port = String.valueOf(freePort());
+		environment.put("SERVER_PORT", port);
+		// The data directory is asked, the port is not; then the summary.
+		console.type("", "");
+		AtomicReference<String[]> booted = new AtomicReference<>();
+
+		OptionalInt exitCode = launcher().launch(new String[] {"setup"}, booted::set);
+
+		assertThat(exitCode).isEmpty();
+		assertThat(console.output()).contains("    - SERVER_PORT\n")
+				.contains("  Web port        " + port + "   (from the environment: SERVER_PORT)\n")
+				.doesNotContain("  Web port        [");
+		assertThat(workingDir.resolve("config/application.yml")).content().doesNotContain("port:");
+		// The process environment gives the port to the start, as to each later start.
+		assertThat(booted.get()).containsExactly("--OC_MONGO_URI=" + mongoUri);
+	}
+
+	@Test
 	void decideIgnoresUnrelatedArgumentsAndVariables() {
 		environment.put("PATH", "/usr/bin");
 		environment.put("SPRING_PROFILES_ACTIVE", "dev");

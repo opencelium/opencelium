@@ -3,6 +3,7 @@ package io.opencelium.core.setup.files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.config.mongo.MongoConnection;
@@ -15,18 +16,27 @@ import io.opencelium.core.config.mongo.MongoConnection;
  * @param mongoUri      the whole connection URI, which the env file holds and application.yml refers to
  * @param masterKeyFile absolute; the key file that the user named, empty when the master key comes from the data
  *                      directory or from the environment
+ * @param fromEnvironment the bootstrap properties that an environment variable gives, for example
+ *                      {@code server.port}
  */
 public record BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int port, String mongoUri,
-		Optional<Path> masterKeyFile) {
+		Optional<Path> masterKeyFile, Set<String> fromEnvironment) {
 
 	public BootstrapValues {
 		Objects.requireNonNull(deploymentMode, "deploymentMode");
 		Objects.requireNonNull(dataDir, "dataDir");
 		Objects.requireNonNull(mongoUri, "mongoUri");
 		Objects.requireNonNull(masterKeyFile, "masterKeyFile");
+		fromEnvironment = Set.copyOf(fromEnvironment);
 		if (port < 1 || port > 65535) {
 			throw new IllegalArgumentException("Port " + port + " is not between 1 and 65535.");
 		}
+	}
+
+	/** No value from the environment. */
+	public BootstrapValues(DeploymentMode deploymentMode, Path dataDir, int port, String mongoUri,
+			Optional<Path> masterKeyFile) {
+		this(deploymentMode, dataDir, port, mongoUri, masterKeyFile, Set.of());
 	}
 
 	/** Without a key file: the master key comes from the data directory or from the environment. */

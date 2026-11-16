@@ -38,6 +38,13 @@ public final class ValueSource {
 		this.batch = batch;
 	}
 
+	/**
+	 * @param environment the bootstrap values of the environment variables; they come before the setup file
+	 */
+	public ValueSource(SetupValues values, Optional<Path> file, boolean batch, EnvironmentSnapshot environment) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
 	public boolean batch() {
 		return batch;
 	}
@@ -51,6 +58,17 @@ public final class ValueSource {
 	public String text(Question question, Function<String, Optional<String>> validator, Prompter prompter) {
 		return given(question, validator, UnaryOperator.identity(), prompter)
 				.orElseGet(() -> prompter.text(question.label(), question.help(), question.defaultValue(), validator));
+	}
+
+	/**
+	 * The value of a question: from the environment, else from the file, else from the prompter.
+	 *
+	 * @param value the value of an accepted text, for example the port as a number; the setup file and the
+	 *              environment agree when they give equal values
+	 */
+	public String text(Question question, Function<String, Optional<String>> validator, Function<String, ?> value,
+			Prompter prompter) {
+		throw new UnsupportedOperationException("not implemented");
 	}
 
 	/**

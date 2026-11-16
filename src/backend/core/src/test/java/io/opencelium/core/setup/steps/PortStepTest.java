@@ -6,11 +6,18 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.StandardProtocolFamily;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import io.opencelium.core.setup.SetupContext;
 import io.opencelium.core.setup.prompt.ConsolePrompter;
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
+import io.opencelium.core.setup.values.SetupValues;
+import io.opencelium.core.setup.values.ValueKey;
+import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.testsupport.fake.ScriptedConsoleIo;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,6 +110,20 @@ class PortStepTest {
 	@Test
 	void defaultPortIsTheApplicationDefault() {
 		assertThat(PortStep.DEFAULT_PORT).isEqualTo(9090);
+	}
+
+	@Test
+	void runAcceptsTheSetupFilePortWhenItGivesTheNumberOfTheVariable() throws IOException {
+		int free = freePort();
+		// 2 texts of 1 port: the step compares the numbers.
+		var fromBoth = new SetupContext(new ValueSource(new SetupValues(Map.of(ValueKey.PORT, "0" + free)),
+				Optional.of(Path.of("setup-values.yml")), true,
+				new EnvironmentSnapshot(Map.of("SERVER_PORT", String.valueOf(free)))));
+
+		new PortStep(freePort()).run(fromBoth, prompter());
+
+		assertThat(fromBoth.port()).hasValue(free);
+		assertThat(console.output()).isEqualTo("  Web port        " + free + "   (from the environment: SERVER_PORT)\n");
 	}
 
 	private ConsolePrompter prompter() {
