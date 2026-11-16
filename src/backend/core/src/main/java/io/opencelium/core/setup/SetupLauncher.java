@@ -20,6 +20,8 @@ import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 
 import io.opencelium.core.config.TerminalText;
+import io.opencelium.core.setup.files.YmlRenderer;
+import io.opencelium.core.setup.values.EnvironmentSnapshot;
 import io.opencelium.core.setup.values.ValueSource;
 import io.opencelium.core.setup.values.SetupValues;
 import io.opencelium.core.setup.values.SetupFile;
@@ -52,6 +54,10 @@ import io.opencelium.core.setup.LaunchDecision.Kind;
  * <li>A configuration file at one of the {@link ConfigLocations}: the normal start.</li>
  * <li>Otherwise: the wizard.</li>
  * </ol>
+ * With {@code setup}, also with {@code --template}, a bootstrap property of rule 8 or {@code OC_MONGO_URI} in the
+ * arguments or the system properties is a usage error: the setup takes a bootstrap value from an environment variable
+ * only, so the setup and each later start read 1 value from 1 place. The wizard gets the environment variables as an
+ * {@link EnvironmentSnapshot}, made 1 time before the first question.
  * Each normal start without a {@code spring.config.*} location runs the search of rule 9, also when an earlier rule
  * decided, and hands a file in the system directory to Boot as an additional location. Thus a service that starts
  * without a terminal finds its application.yml and the env file next to it.
@@ -78,6 +84,9 @@ public final class SetupLauncher {
 	private static final List<String> BOOTSTRAP_VARIABLE_PREFIXES = List.of("OPENCELIUM_", "SPRING_MONGODB_");
 
 	private static final String SERVER_PORT_VARIABLE = "SERVER_PORT";
+
+	/** The variable that holds the MongoDB URI; with setup it is a bootstrap value like the properties. */
+	private static final String MONGO_URI_VARIABLE = YmlRenderer.MONGO_URI_VARIABLE;
 
 	private static final String DRIVER_LOGGER = "org.mongodb.driver";
 
@@ -196,6 +205,9 @@ public final class SetupLauncher {
 			throw SetupFailedException.usage(LaunchArguments.TEMPLATE_FLAG + " needs the setup command: java -jar "
 					+ "oc-app.jar " + Subcommand.SETUP.word() + " " + LaunchArguments.TEMPLATE_FLAG + ".");
 		}
+		if (arguments.isSetup()) {
+			rejectBootstrapProperties(springArguments);
+		}
 		if (arguments.template()) {
 			return new LaunchDecision(Kind.TEMPLATE, "the setup file template was requested", false,
 					Optional.empty(), springArguments);
@@ -245,7 +257,8 @@ public final class SetupLauncher {
 			printFailure(ex);
 			return OptionalInt.of(ex.exitCode());
 		}
-		var source = new ValueSource(values, decision.setupFile(), decision.batch());
+		var source = new ValueSource(values, decision.setupFile(), decision.batch(),
+				new EnvironmentSnapshot(environment));
 		var prompter = new ConsolePrompter(console);
 		var wizard = new Wizard(prompter, source, steps,
 				entries -> boot.accept(withEntries(decision.springArguments(), entries)), Wizard.versionFromManifest());
@@ -340,6 +353,49 @@ public final class SetupLauncher {
 			}
 		}
 		return Optional.empty();
+	}
+
+	/**
+	 * With setup, a bootstrap value comes from an environment variable only. An argument or a system property would
+	 * apply at the start of this process over an answer of the setup, and a later start would not have it. The
+	 * message names the variable to use in its place.
+	 *
+	 * @throws SetupFailedException with exit code 2 for the first bootstrap property in the arguments, then in the
+	 *                              system properties
+	 */
+	private void rejectBootstrapProperties(List<String> springArguments) {
+		for (String argument : springArguments) {
+			if (argument.startsWith("--")) {
+				String name = argument.substring(2).split("=", 2)[0];
+				if (isSetupBootstrapProperty(name)) {
+					throw environmentOnly(name, "--" + name);
+				}
+			}
+		}
+		for (String name : new TreeSet<>(systemProperties.stringPropertyNames())) {
+			if (isSetupBootstrapProperty(name)) {
+				throw environmentOnly(name, "-D" + name);
+			}
+		}
+	}
+
+	/** A bootstrap property of the launch decision, or the variable of the MongoDB URI that application.yml names. */
+	private static boolean isSetupBootstrapProperty(String name) {
+		return isBootstrapProperty(name.toLowerCase(Locale.ROOT)) || name.equalsIgnoreCase(MONGO_URI_VARIABLE);
+	}
+
+	private static SetupFailedException environmentOnly(String name, String form) {
+		return SetupFailedException.usage("Use " + variableName(name) + ", not " + form + ": with setup, a bootstrap"
+				+ " value comes from an environment variable only.");
+	}
+
+	/**
+	 * The environment variable for a property in the form that Spring Boot reads: upper case, {@code _} for a dot and
+	 * for the brackets of an index, without dashes. {@code opencelium.data-dir} gives {@code OPENCELIUM_DATADIR}.
+	 */
+	private static String variableName(String property) {
+		return property.toUpperCase(Locale.ROOT).replace("-", "").replace('.', '_').replace('[', '_')
+				.replace(']', '_');
 	}
 
 	private static boolean isBootstrapProperty(String name) {

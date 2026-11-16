@@ -5,7 +5,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.SequencedMap;
 
+import io.opencelium.core.config.BootstrapProperties;
+import io.opencelium.core.config.OpenCeliumProperties;
 import io.opencelium.core.config.mongo.MongoConnection;
 import io.opencelium.core.setup.ConfigLocations;
 import io.opencelium.core.setup.SetupCancelledException;
@@ -25,6 +28,9 @@ import io.opencelium.core.setup.prompt.Prompter;
  * files, runs the actions and starts the application after this step. No cancels the setup, and the wizard drops
  * the plan. A file that exists is marked, because the write replaces it. In batch mode the confirmation is not
  * asked: the setup file is the decision.
+ * <p>
+ * A value that an environment variable gives shows the name of the variable, and the summary tells to keep each such
+ * variable for each later start. Neither file holds such a value, so the environment stays its only source.
  */
 public final class SummaryStep implements SetupStep {
 
@@ -49,18 +55,28 @@ public final class SummaryStep implements SetupStep {
 
 	@Override
 	public void run(SetupContext context, Prompter prompter) {
+		SequencedMap<String, String> fromEnvironment = context.fromEnvironment();
 		var values = new BootstrapValues(context.deploymentMode(), context.dataDir()
 				.orElseThrow(() -> new IllegalStateException("The data directory step did not run.")), context.port()
 				.orElseThrow(() -> new IllegalStateException("The port step did not run.")), context.mongoUri()
-				.orElseThrow(() -> new IllegalStateException("The MongoDB step did not run.")), context.masterKeyFile());
+				.orElseThrow(() -> new IllegalStateException("The MongoDB step did not run.")), context.masterKeyFile(),
+				fromEnvironment.sequencedKeySet());
 		var rows = new LinkedHashMap<String, String>();
-		rows.put("Mode", values.deploymentMode().propertyValue());
-		rows.put("Data directory", values.dataDir().toString());
-		rows.put("Web port", String.valueOf(values.port()));
+		rows.put("Mode", values.deploymentMode().propertyValue()
+				+ source(fromEnvironment, OpenCeliumProperties.DEPLOYMENT_MODE));
+		rows.put("Data directory", values.dataDir() + source(fromEnvironment, OpenCeliumProperties.DATA_DIR));
+		rows.put("Web port", values.port() + source(fromEnvironment, BootstrapProperties.SERVER_PORT));
 		rows.put("MongoDB", MongoConnection.redact(values.mongoUri()));
 		context.masterKeySource().ifPresent(source -> rows.put("Master key", source));
 		prompter.box("Your answers", rows);
 		prompter.print("");
+		if (!fromEnvironment.isEmpty()) {
+			// No file holds these values: a later start without a variable falls back to the default.
+			prompter.info("Keep these variables for each later start: " + String.join(", ", fromEnvironment.values())
+					+ ".", "Set them in the shell or in the environment of the service. A later start",
+					"without a variable uses the default, not the value above.");
+			prompter.print("");
+		}
 		List<Path> files = new ArrayList<>(List.of(locations.ymlFile(), locations.envFile()));
 		context.filePlan().files().forEach(file -> files.add(file.path()));
 		prompter.list("Files to write", files.stream().map(file -> file + marker(file)).toList());
@@ -77,6 +93,12 @@ public final class SummaryStep implements SetupStep {
 		context.putEnvironment(YmlRenderer.MONGO_URI_VARIABLE, values.mongoUri());
 		context.filePlan().add(PlannedFile.groupReadable(locations.ymlFile(), YmlRenderer.render(values)));
 		context.filePlan().add(PlannedFile.ownerOnly(locations.envFile(), EnvRenderer.render(context.environment())));
+	}
+
+	/** After a value that a variable gives: the name of the variable; nothing for an answer of the setup. */
+	private static String source(SequencedMap<String, String> fromEnvironment, String property) {
+		String variable = fromEnvironment.get(property);
+		return variable == null ? "" : "   (from " + variable + ")";
 	}
 
 	private static String marker(Path file) {

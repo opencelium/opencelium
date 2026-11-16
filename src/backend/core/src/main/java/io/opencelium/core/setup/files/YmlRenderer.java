@@ -2,10 +2,12 @@ package io.opencelium.core.setup.files;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import io.opencelium.core.config.BootstrapProperties;
 import io.opencelium.core.config.OpenCeliumProperties;
 
 /**
@@ -14,7 +16,8 @@ import io.opencelium.core.config.OpenCeliumProperties;
  * line is fixed text and the file has no timestamp: two runs with the same answers give the same bytes. The MongoDB
  * URI holds a database password, so {@code spring.mongodb.uri} gets only the placeholder of the variable that the
  * env file gives. Spring resolves it from the environment or from the env file, and a different database user or
- * host changes only the env file.
+ * host changes only the env file. A value that an environment variable gives has no line, so the environment stays
+ * its only source: a copy in the file would apply at a later start without the variable.
  */
 public final class YmlRenderer {
 
@@ -27,15 +30,25 @@ public final class YmlRenderer {
 	}
 
 	public static String render(BootstrapValues values) {
+		Set<String> fromEnvironment = values.fromEnvironment();
 		var opencelium = new LinkedHashMap<String, Object>();
-		opencelium.put(leaf(OpenCeliumProperties.DEPLOYMENT_MODE), values.deploymentMode().propertyValue());
-		opencelium.put(leaf(OpenCeliumProperties.DATA_DIR), values.dataDir().toString());
+		if (!fromEnvironment.contains(OpenCeliumProperties.DEPLOYMENT_MODE)) {
+			opencelium.put(leaf(OpenCeliumProperties.DEPLOYMENT_MODE), values.deploymentMode().propertyValue());
+		}
+		if (!fromEnvironment.contains(OpenCeliumProperties.DATA_DIR)) {
+			opencelium.put(leaf(OpenCeliumProperties.DATA_DIR), values.dataDir().toString());
+		}
 		values.masterKeyFile().ifPresent(file -> opencelium.put(leaf(OpenCeliumProperties.MASTER_KEY_FILE),
 				file.toString()));
 		var root = new LinkedHashMap<String, Object>();
-		root.put("server", Map.of("port", values.port()));
+		if (!fromEnvironment.contains(BootstrapProperties.SERVER_PORT)) {
+			root.put(prefix(BootstrapProperties.SERVER_PORT), Map.of(leaf(BootstrapProperties.SERVER_PORT),
+					values.port()));
+		}
 		root.put("spring", Map.of("mongodb", Map.of("uri", "${" + MONGO_URI_VARIABLE + "}")));
-		root.put(prefix(OpenCeliumProperties.DATA_DIR), opencelium);
+		if (!opencelium.isEmpty()) {
+			root.put(prefix(OpenCeliumProperties.DATA_DIR), opencelium);
+		}
 		var options = new DumperOptions();
 		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		return HEADER + "\n" + new Yaml(options).dump(root);

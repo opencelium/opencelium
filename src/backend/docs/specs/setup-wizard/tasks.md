@@ -227,7 +227,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Export `SERVER_PORT=8080` and `OPENCELIUM_DATADIR=$PWD/oc-data`. 2. Run `java -jar oc-app.jar setup`: the first screen names both variables. 3. The port step and the data directory step ask nothing. 4. Confirm the summary: it tells you to keep both variables. 5. Open `config/application.yml`: no `server.port` line and no `opencelium.data-dir` line. 6. The login box shows port 8080. 7. Run `java -jar oc-app.jar setup --server.port=8080`: a usage error with exit code 2. 8. Run `SERVER_PORT=abc java -jar oc-app.jar setup`: exit code 1, and the message names `SERVER_PORT`. 9. Run `OPENCELIUM_DEPLOYMENTMODE=cloud java -jar oc-app.jar setup`: exit code 1.
 - **Size:** approximately 350 lines
 - **Depends on:** 10
-- **Status:** in work
+- **Status:** done
 
 ## Task 13m: feat(core): take the MongoDB connection and master key from variables
 - **Criteria:** SW-19, SW-56, SW-66, SW-67, SW-68, SW-69, SW-71, SW-72

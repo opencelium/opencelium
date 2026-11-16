@@ -20,7 +20,8 @@ import io.opencelium.core.setup.prompt.Prompter;
  * bind it right now. The probe binds the IPv4 wildcard and the IPv6 wildcard once each and closes them again: a
  * listener of either family makes the port unusable, and on macOS an IPv6 bind alone would not notice an IPv4
  * listener. A port that another program holds, or that this user may not open, is reported before anything is
- * written.
+ * written. {@code SERVER_PORT} in the environment gives the port without a question; a setup file port must be the
+ * same number.
  */
 public final class PortStep implements SetupStep {
 
@@ -59,7 +60,7 @@ public final class PortStep implements SetupStep {
 
 	@Override
 	public void run(SetupContext context, Prompter prompter) {
-		String value = context.values().text(question(), PortStep::check, prompter);
+		String value = context.values().text(question(), PortStep::check, Integer::valueOf, prompter);
 		context.setPort(Integer.parseInt(value));
 	}
 
