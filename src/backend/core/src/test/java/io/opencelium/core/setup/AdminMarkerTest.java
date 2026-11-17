@@ -54,7 +54,7 @@ class AdminMarkerTest {
 	void runStoresTheMarkerWithTheUsername() {
 		new AdminMarker(CONNECTION, "root").run();
 
-		assertThat(marker()).isEqualTo(new Document("_id", "self-host").append("adminUsername", "root"));
+		assertThat(marker()).isEqualTo(new Document("_id", "self-host-tenant").append("adminUsername", "root"));
 	}
 
 	@Test
@@ -79,7 +79,7 @@ class AdminMarkerTest {
 	@Test
 	void undoPutsBackTheMarkerThatExistedBefore() {
 		// The marker of an earlier setup run whose start did not run yet.
-		Document before = new Document("_id", "self-host").append("adminUsername", "admin");
+		Document before = new Document("_id", "self-host-tenant").append("adminUsername", "admin");
 		try (MongoClient client = client()) {
 			markers(client).insertOne(before);
 		}
@@ -103,7 +103,7 @@ class AdminMarkerTest {
 
 		context.filePlan().actions().getFirst().run();
 
-		assertThat(marker()).isEqualTo(new Document("_id", "self-host").append("adminUsername", "root"));
+		assertThat(marker()).isEqualTo(new Document("_id", "self-host-tenant").append("adminUsername", "root"));
 	}
 
 	@Test
@@ -120,7 +120,7 @@ class AdminMarkerTest {
 
 	private static Document marker() {
 		try (MongoClient client = client()) {
-			return markers(client).find(new Document("_id", "self-host")).first();
+			return markers(client).find(new Document("_id", "self-host-tenant")).first();
 		}
 	}
 

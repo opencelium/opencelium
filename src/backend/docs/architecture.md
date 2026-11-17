@@ -89,7 +89,7 @@ The module `common` holds contracts only, with almost no framework dependencies.
 | **Workflow model** | The node and edge model, and the node types, with Wait-for-Human. | `common.workflow` |
 | **Descriptors** | The invoker and connector descriptors. | `common.invoker`, `common.connector` |
 | **Access-control model** | Subjects and the permission levels View to Admin (decision 7). | `common.acl` |
-| **Tenant context** | The tenant identifier, with the reserved values `self-host` and `system` (decision 11). | `common.tenant` |
+| **Tenant context** | The tenant identifier, with the reserved values `self-host-tenant` and `system` (decision 11). | `common.tenant` |
 | **Secret contract** | The secret provider SPI and the secret reference. A secret reference does not show the value. | `common.secret` |
 | **Transport contract** | The transport SPI, the job message, and the event vocabulary: results, logs, state, variable updates, heartbeat, audit. | `common.transport` |
 

@@ -86,7 +86,7 @@ class KeyStartupCanaryTest {
 		assertThatThrownBy(() -> start(Map.of(), masterKeyFile(otherKeyFile)));
 
 		assertThat(output).contains("APPLICATION FAILED TO START").contains(KeyStartupException.RESTORE_OR_RESET)
-				.contains("cannot decrypt the stored data key of tenant 'self-host'")
+				.contains("cannot decrypt the stored data key of tenant 'self-host-tenant'")
 				.contains("Do not replace it with a new key");
 	}
 

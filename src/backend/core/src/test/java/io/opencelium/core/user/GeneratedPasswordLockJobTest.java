@@ -84,7 +84,7 @@ class GeneratedPasswordLockJobTest {
 		job.lockExpiredGeneratedPasswords();
 
 		assertThat(locked(id)).isTrue();
-		assertThat(output).contains("Locked user 'admin' of tenant self-host: its generated password was not changed"
+		assertThat(output).contains("Locked user 'admin' of tenant self-host-tenant: its generated password was not changed"
 				+ " within 24 h");
 	}
 

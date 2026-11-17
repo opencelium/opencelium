@@ -189,7 +189,7 @@ class AdminStepTest {
 			users.insertOne(admin("other"));
 			assertThat(new AdminStep().applicable(context)).isTrue();
 
-			users.insertOne(admin("self-host"));
+			users.insertOne(admin("self-host-tenant"));
 			assertThat(new AdminStep().applicable(context)).isFalse();
 		}
 	}
