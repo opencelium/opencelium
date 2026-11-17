@@ -40,7 +40,7 @@ export function AiModelsForm({ control, data, onResetToDefaults }: Props) {
                         <div key={role} className="aiSettingsRole" data-testid={`ai-settings-role-${role}`}>
                             <div className="aiSettingsRoleHeader">
                                 <span className="aiSettingsFieldLabel">{t(`ai-settings.admin.models.roles.${role}`)}</span>
-                                <AiModelPicker control={control} name={role} installed={data.installedModels}
+                                <AiModelPicker control={control} name={role} installed={data.installedModels} role={role}
                                     testId={`ai-settings-model-${role}`} />
                                 {model && <AiSettingsState isOk={isInstalled(data.installedModels, model)}
                                     label={t(isInstalled(data.installedModels, model)

@@ -1,4 +1,4 @@
-import type { AiFeatureId, AiGatewaySettings } from '@features/ai-assistant/model/aiGateway.types'
+import type { AiFeatureId, AiGatewaySettings, AiModelRole } from '@features/ai-assistant/model/aiGateway.types'
 import { AI_FEATURE_IDS } from '@features/ai-assistant/model/aiFeatures'
 import type { AiSettingsFormValues } from './aiSettingsForm.schema'
 
@@ -40,6 +40,17 @@ export const toGatewaySettings = (values: AiSettingsFormValues): AiGatewaySettin
 export const isInstalled = (installed: string[], model: string) =>
     installed.includes(model) || installed.includes(`${model}:latest`)
 
-/** The installed models, plus the chosen one when Ollama does not have it, so the picker can still show it. */
-export const modelChoices = (installed: string[], chosen: string[]) =>
-    [...new Set([...installed, ...chosen.filter((model) => model && !isInstalled(installed, model))])]
+const LARGE_MODELS = ['qwen2.5-coder:14b', 'mistral-small3.2:24b'] as const
+const SMALL_MODELS = ['qwen2.5-coder:7b', 'gemma3:12b'] as const
+
+/** The models tested for each role (eval-results/compare-2026-11-16); the picker offers only these. */
+export const ROLE_MODELS: Record<AiModelRole, readonly string[]> = {
+    workflowModel: LARGE_MODELS,
+    helpModel: LARGE_MODELS,
+    lightModel: SMALL_MODELS,
+    commandModel: SMALL_MODELS,
+}
+
+/** The role's models, plus a chosen one outside them, so a model set before stays visible and is not changed by accident. */
+export const modelChoices = (offered: readonly string[], chosen: string[]) =>
+    [...new Set([...offered, ...chosen.filter(Boolean)])]

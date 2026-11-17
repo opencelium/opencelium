@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { AiGatewaySettings } from '@features/ai-assistant/model/aiGateway.types'
 import { aiSettingsFormSchema } from './aiSettingsForm.schema'
-import { modelChoices, toFormValues, toGatewaySettings } from './aiSettingsForm.utils'
+import { modelChoices, ROLE_MODELS, toFormValues, toGatewaySettings } from './aiSettingsForm.utils'
 
 const settings: AiGatewaySettings = {
     workflowModel: 'qwen2.5-coder:14b', helpModel: 'qwen2.5-coder:14b', lightModel: 'qwen2.5-coder:7b', commandModel: 'qwen2.5-coder:7b',
@@ -34,7 +34,14 @@ describe('AI settings form', () => {
         expect(aiSettingsFormSchema.safeParse({ ...toFormValues(settings), speechUrl: '' }).success).toBe(true)
     })
 
-    it('offers the installed models and keeps a chosen one Ollama lacks', () => {
-        expect(modelChoices(['a:latest', 'b'], ['a', 'c'])).toEqual(['a:latest', 'b', 'c'])
+    it('offers the tested large and small models per role', () => {
+        expect(ROLE_MODELS.workflowModel).toEqual(['qwen2.5-coder:14b', 'mistral-small3.2:24b'])
+        expect(ROLE_MODELS.helpModel).toEqual(ROLE_MODELS.workflowModel)
+        expect(ROLE_MODELS.lightModel).toEqual(['qwen2.5-coder:7b', 'gemma3:12b'])
+        expect(ROLE_MODELS.commandModel).toEqual(ROLE_MODELS.lightModel)
+    })
+
+    it('keeps a chosen model outside the offered ones visible', () => {
+        expect(modelChoices(['a', 'b'], ['b', 'c', ''])).toEqual(['a', 'b', 'c'])
     })
 })

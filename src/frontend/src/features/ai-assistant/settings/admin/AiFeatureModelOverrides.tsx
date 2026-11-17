@@ -28,7 +28,7 @@ export function AiFeatureModelOverrides({ control, data }: Props) {
                         <tr key={id}>
                             <td>{featureLabel(id)}</td>
                             <td className="aiSettingsOverrideModel">
-                                <AiModelPicker control={control} name={`featureModels.${id}`} installed={data.installedModels}
+                                <AiModelPicker control={control} name={`featureModels.${id}`} installed={data.installedModels} role={role}
                                     testId={`ai-settings-feature-model-${id}`}
                                     inherit={t('ai-settings.admin.models.inherit', {
                                         model: values[role] ?? '', role: t(`ai-settings.admin.models.roles.${role}`) })} />
