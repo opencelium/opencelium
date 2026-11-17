@@ -29,7 +29,7 @@ class DekWrapperTest {
 		WrappedDek wrapped = wrapper.wrap(rootKey, TENANT, 1, dek, NOW);
 
 		assertThat(wrapper.unwrap(rootKey, wrapped)).isEqualTo(dek);
-		assertThat(wrapped.tenantId()).isEqualTo("self-host");
+		assertThat(wrapped.tenantId()).isEqualTo("self-host-tenant");
 		assertThat(wrapped.rootKeyId()).isEqualTo("k-01");
 		assertThat(wrapped.dekVersion()).isEqualTo(1);
 		assertThat(wrapped.createdAt()).isEqualTo(NOW);
@@ -79,7 +79,7 @@ class DekWrapperTest {
 	void toStringShowsNoKeyBytes() {
 		WrappedDek wrapped = wrapper.wrap(randomRootKey(), TENANT, 1, randomBytes(32), NOW);
 
-		assertThat(wrapped.toString()).doesNotContain("[B@").contains("tenant=self-host").contains("rootKeyId=k-01");
+		assertThat(wrapped.toString()).doesNotContain("[B@").contains("tenant=self-host-tenant").contains("rootKeyId=k-01");
 	}
 
 	static RootKey randomRootKey() {

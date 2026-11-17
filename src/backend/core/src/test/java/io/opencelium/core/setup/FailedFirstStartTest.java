@@ -76,21 +76,21 @@ class FailedFirstStartTest {
 	private static void storeMarker(String adminUsername) {
 		try (MongoClient client = client()) {
 			database(client).getCollection("admin_marker")
-					.insertOne(new Document("_id", "self-host").append("adminUsername", adminUsername));
+					.insertOne(new Document("_id", "self-host-tenant").append("adminUsername", adminUsername));
 		}
 	}
 
 	/** A document in the place of a wrapped data key: without a master key the start stops on it. */
 	private static void storeWrappedDek() {
 		try (MongoClient client = client()) {
-			database(client).getCollection("keys").insertOne(new Document("tenantId", "self-host")
+			database(client).getCollection("keys").insertOne(new Document("tenantId", "self-host-tenant")
 					.append("rootKeyId", "k-01"));
 		}
 	}
 
 	private static Document marker() {
 		try (MongoClient client = client()) {
-			return database(client).getCollection("admin_marker").find(new Document("_id", "self-host")).first();
+			return database(client).getCollection("admin_marker").find(new Document("_id", "self-host-tenant")).first();
 		}
 	}
 

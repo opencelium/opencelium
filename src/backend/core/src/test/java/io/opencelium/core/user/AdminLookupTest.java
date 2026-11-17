@@ -41,7 +41,7 @@ class AdminLookupTest {
 
 	@Test
 	void existsReturnsTrueWhenAdminIsStored() {
-		storeUser("self-host", "admin", UserService.ADMIN_ROLE);
+		storeUser("self-host-tenant","admin", UserService.ADMIN_ROLE);
 
 		assertThat(AdminLookup.exists(CONNECTION, TenantId.SELF_HOST)).isTrue();
 	}
@@ -49,7 +49,7 @@ class AdminLookupTest {
 	@Test
 	void existsReturnsFalseWhenNoAdminIsStored() {
 		// A user without the admin role, and an admin of another tenant: neither is the admin of this tenant.
-		storeUser("self-host", "viewer", "VIEWER");
+		storeUser("self-host-tenant","viewer", "VIEWER");
 		storeUser("other", "admin", UserService.ADMIN_ROLE);
 
 		assertThat(AdminLookup.exists(CONNECTION, TenantId.SELF_HOST)).isFalse();

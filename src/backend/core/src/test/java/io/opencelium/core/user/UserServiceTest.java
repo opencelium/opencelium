@@ -78,7 +78,7 @@ class UserServiceTest {
 		assertThat(user.passwordHash()).startsWith("{bcrypt}");
 		assertThat(passwordEncoder.matches(TYPED_PASSWORD, user.passwordHash())).isTrue();
 		assertThat(user.roles()).containsExactly(UserService.ADMIN_ROLE);
-		assertThat(user.tenantId()).isEqualTo("self-host");
+		assertThat(user.tenantId()).isEqualTo("self-host-tenant");
 		assertThat(user.locked()).isFalse();
 		assertThat(user.createdAt()).isEqualTo(NOW);
 	}
@@ -131,7 +131,7 @@ class UserServiceTest {
 
 		assertThatExceptionOfType(AdminAlreadyExistsException.class)
 				.isThrownBy(() -> service.createAdmin(command(TENANT, "second", "Typed-Password-2", false)))
-				.withMessageContaining("self-host");
+				.withMessageContaining("self-host-tenant");
 		assertThat(users.findByTenantIdAndUsername(TENANT.value(), "second")).isEmpty();
 	}
 

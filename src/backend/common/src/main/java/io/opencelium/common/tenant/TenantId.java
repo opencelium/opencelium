@@ -9,8 +9,12 @@ import java.util.Objects;
  */
 public record TenantId(String value) {
 
-	/** The single tenant of a self-hosted installation; never a value the Service Portal issues. */
-	public static final TenantId SELF_HOST = new TenantId("self-host");
+	/**
+	 * The single tenant of a self-hosted installation; never a value the Service Portal issues. The value differs on
+	 * purpose from the deployment mode value {@code self-host}, so that a stored document or a log line never leaves
+	 * open which of the two it names.
+	 */
+	public static final TenantId SELF_HOST = new TenantId("self-host-tenant");
 
 	/** The platform itself: in cloud mode the system database with the tenant catalog. */
 	public static final TenantId SYSTEM = new TenantId("system");
