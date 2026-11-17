@@ -17,22 +17,73 @@ const calendarViews = {
   week: PicLeftOutlined,
   month: AppstoreOutlined,
   list: BarsOutlined,
-} satisfies Record<CalendarView, typeof CalendarOutlined>;
-const viewOrder: CalendarView[] = ["day", "three", "work", "week", "month", "list"];
+} satisfies Record<CalendarView | "list", typeof CalendarOutlined>;
+const viewOrder: (CalendarView | "list")[] = ["day", "three", "work", "week", "month", "list"];
 
-export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
+export function ScheduleViewMenu({ view, onChange }: {
+  view: CalendarView | "list";
+  onChange: (view: CalendarView | "list") => void;
+}) {
+  const { t } = useI18n("entities");
+  const [viewMenuOpen, setViewMenuOpen] = useState(false);
+  const ViewIcon = calendarViews[view];
+  const viewItems: MenuProps["items"] = viewOrder.flatMap((option): NonNullable<MenuProps["items"]> => {
+    const Icon = calendarViews[option];
+    const item = {
+      key: option,
+      icon: <Icon />,
+      label: <span className="schedule-calendar-view-option">
+        {t(`schedule.calendar.${option}`)}
+        {view === option && <CheckOutlined aria-hidden />}
+      </span>,
+    };
+    return option === "list" ? [{ type: "divider" }, item] : [item];
+  });
+  return (
+    <Dropdown
+      trigger={["click"]}
+      placement="bottomLeft"
+      open={viewMenuOpen}
+      onOpenChange={setViewMenuOpen}
+      menu={{
+        items: viewItems,
+        selectable: true,
+        selectedKeys: [view],
+        onClick: ({ key }) => {
+          onChange(key as CalendarView | "list");
+          setViewMenuOpen(false);
+        },
+      }}
+    >
+      <button
+        type="button"
+        className="schedule-calendar-view"
+        data-testid="schedule-calendar-view"
+        aria-label={t("schedule.calendar.view")}
+        aria-haspopup="menu"
+        aria-expanded={viewMenuOpen}
+      >
+        <ViewIcon aria-hidden />
+        <span>{t(`schedule.calendar.${view}`)}</span>
+        <DownOutlined className="schedule-calendar-view-chevron" aria-hidden />
+      </button>
+    </Dropdown>
+  );
+}
+
+export function ScheduleCalendar({ schedules, initialView = "week", onShowList }: {
+  schedules: Schedule[];
+  initialView?: CalendarView;
+  onShowList: () => void;
+}) {
   const zone = getScheduleTimeZone();
   const { t, lang } = useI18n("entities");
   const openSchedule = useOpenScheduleDialog();
-  const [view, setView] = useState<CalendarView>("week");
+  const [view, setView] = useState<CalendarView>(initialView);
   const [anchor, setAnchor] = useState(Date.now);
-  const [showDisabled, setShowDisabled] = useState(true);
-  const days = useMemo(() => calendarDays(view === "list" ? Date.now() : anchor, view, zone), [anchor, view, zone]);
+  const days = useMemo(() => calendarDays(anchor, view, zone), [anchor, view, zone]);
   const visibleDays = days.slice(0, -1);
-  const slots = useMemo(
-    () => calendarSlots(showDisabled ? schedules : schedules.filter((schedule) => schedule.status), days, zone, view === "list" ? Date.now() : days[0]),
-    [schedules, showDisabled, days, zone, view],
-  );
+  const slots = useMemo(() => calendarSlots(schedules, days, zone), [schedules, days, zone]);
   const dayFormat = new Intl.DateTimeFormat(lang, {
     timeZone: zone,
     weekday: "short",
@@ -59,20 +110,6 @@ export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
     ? dayFormat.format(firstDay)
     : `${(sameYear ? shortDateFormat : rangeFormat).format(firstDay)} – ${rangeFormat.format(lastDay)}`;
   const today = calendarDays(Date.now(), "day", zone)[0];
-  const [viewMenuOpen, setViewMenuOpen] = useState(false);
-  const ViewIcon = calendarViews[view];
-  const viewItems: MenuProps["items"] = viewOrder.flatMap((option): NonNullable<MenuProps["items"]> => {
-    const Icon = calendarViews[option];
-    const item = {
-      key: option,
-      icon: <Icon />,
-      label: <span className="schedule-calendar-view-option">
-        {t(`schedule.calendar.${option}`)}
-        {view === option && <CheckOutlined aria-hidden />}
-      </span>,
-    };
-    return option === "list" ? [{ type: "divider" }, item] : [item];
-  });
   const monthFormat = new Intl.DateTimeFormat(lang, { timeZone: zone, month: "long", year: "numeric" });
   const dateFormat = new Intl.DateTimeFormat(lang, { timeZone: zone, day: "numeric" });
   const weekdayFormat = new Intl.DateTimeFormat(lang, { timeZone: "UTC", weekday: "short" });
@@ -105,35 +142,7 @@ export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
       aria-label={t("schedule.calendar.title")}
     >
       <div className="schedule-calendar-toolbar">
-        <Dropdown
-          trigger={["click"]}
-          placement="bottomLeft"
-          open={viewMenuOpen}
-          onOpenChange={setViewMenuOpen}
-          menu={{
-            items: viewItems,
-            selectable: true,
-            selectedKeys: [view],
-            onClick: ({ key }) => {
-              setView(key as CalendarView);
-              setViewMenuOpen(false);
-            },
-          }}
-        >
-          <button
-            type="button"
-            className="schedule-calendar-view"
-            data-testid="schedule-calendar-view"
-            aria-label={t("schedule.calendar.view")}
-            aria-haspopup="menu"
-            aria-expanded={viewMenuOpen}
-          >
-            <ViewIcon aria-hidden />
-            <span>{t(`schedule.calendar.${view}`)}</span>
-            <DownOutlined className="schedule-calendar-view-chevron" aria-hidden />
-          </button>
-        </Dropdown>
-        {view !== "list" && <>
+        <ScheduleViewMenu view={view} onChange={(next) => next === "list" ? onShowList() : setView(next)} />
         <Button testId="schedule-calendar-prev" onClick={() => setAnchor((date) => moveCalendarDate(date, view, -1, zone))}>
           {t(navigationUnit === "week" ? "schedule.calendar.prev" : `schedule.calendar.prev_${navigationUnit}`)}
         </Button>
@@ -143,58 +152,13 @@ export function ScheduleCalendar({ schedules }: { schedules: Schedule[] }) {
         <Button testId="schedule-calendar-next" onClick={() => setAnchor((date) => moveCalendarDate(date, view, 1, zone))}>
           {t(navigationUnit === "week" ? "schedule.calendar.next" : `schedule.calendar.next_${navigationUnit}`)}
         </Button>
-        </>}
         <strong aria-live="polite">
-          {view === "list" ? t("schedule.calendar.upcoming") : view === "month" ? monthFormat.format(anchor) : rangeLabel}
+          {view === "month" ? monthFormat.format(anchor) : rangeLabel}
         </strong>
-        <label>
-          <input
-            type="checkbox"
-            data-testid="schedule-calendar-show-disabled"
-            checked={showDisabled}
-            onChange={(event) => setShowDisabled(event.target.checked)}
-          />
-          {t("schedule.calendar.showDisabled")}
-        </label>
       </div>
       <p>{t("schedule.preview.zone", { zone })}</p>
       <div className="schedule-calendar-scroll">
-        {view === "list" ? (
-          <table className="schedule-calendar-agenda">
-            <thead>
-              <tr>
-                {(["date", "time", "workflow", "timeZone"] as const).map((column) => (
-                  <th key={column} scope="col">{t(`schedule.calendar.${column}`)}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {slots.size === 0 && (
-                <tr><td colSpan={4}>{t("schedule.calendar.empty")}</td></tr>
-              )}
-              {[...slots.values()].flat().sort((a, b) => a.time - b.time).map(({ schedule, time, cadence, more }) => (
-                <tr key={schedule.schedulerId + ":" + time} data-disabled={!schedule.status || undefined}>
-                  <td>{dayFormat.format(time)}</td>
-                  <td>
-                    {timeFormat.format(time)}
-                    {cadence ? " · " + t("schedule.calendar.every", { count: cadence }) : more && " · " + t("schedule.calendar.more")}
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="schedule-calendar-agenda-workflow"
-                      data-testid={`schedule-calendar-event-${schedule.schedulerId}`}
-                      onClick={() => openSchedule(schedule.schedulerId)}
-                    >
-                      {schedule.connection.title || schedule.title}
-                    </button>
-                  </td>
-                  <td>{zone}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : view === "month" ? (
+        {view === "month" ? (
           <table className="schedule-calendar-month">
             <thead><tr>{weekdayNames.map((name) => <th key={name} scope="col">{name}</th>)}</tr></thead>
             <tbody>

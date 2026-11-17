@@ -369,7 +369,8 @@ export type ListDefinition = {
     alternateView?: {
         labelKey: string
         listLabelKey: string
-        render: (rows: unknown[]) => React.ReactNode
+        render: (rows: unknown[], showList: () => void, mode?: string) => React.ReactNode
+        renderListSwitch?: (showAlternate: (mode: string) => void) => React.ReactNode
     }
 
     /** i18n key (entities namespace) for the page title; falls back to entity.plural / `${name}s`. */
