@@ -2,18 +2,37 @@ import { CronDate } from "cron-parser";
 import { createQuartzRunIterator } from "@shared/lib/cron/upcomingRuns";
 import type { Schedule } from "../model/types";
 
-export function weekDays(offset: number, zone: string) {
-  const day = new CronDate(new Date(), zone);
+export type CalendarView = "day" | "three" | "work" | "week" | "month" | "list";
+
+export function calendarDays(anchor: number, view: CalendarView, zone: string) {
+  const day = new CronDate(anchor, zone);
   day.setHours(0);
   day.setMinutes(0);
   day.setSeconds(0);
   day.setMilliseconds(0);
-  day.setDate(day.getDate() - ((day.getDay() + 6) % 7) + offset * 7);
-  return Array.from({ length: 8 }, () => {
-    const start = day.getTime();
+  if (view === "week" || view === "work") day.setDate(day.getDate() - ((day.getDay() + 6) % 7));
+  if (view === "month") day.setDate(1);
+  const monthStart = day.getTime();
+  const month = day.getMonth();
+  if (view === "month") day.setDate(1 - ((day.getDay() + 6) % 7));
+  const length = { day: 1, three: 3, work: 5, week: 7, month: 31, list: 7 }[view];
+  const days = [day.getTime()];
+  do {
     day.addDay();
-    return start;
-  });
+    days.push(day.getTime());
+  } while (view === "month" ? (day.getMonth() === month || day.getTime() < monthStart || day.getDay() !== 1) : days.length <= length);
+  return days;
+}
+
+export function moveCalendarDate(anchor: number, view: CalendarView, step: number, zone: string) {
+  const day = new CronDate(anchor, zone);
+  if (view === "month") {
+    day.setDate(1);
+    day.setMonth(day.getMonth() + step);
+  } else {
+    day.setDate(day.getDate() + step * (view === "week" || view === "work" ? 7 : view === "three" ? 3 : 1));
+  }
+  return day.getTime();
 }
 
 type Marker = {
@@ -27,12 +46,13 @@ export function calendarSlots(
   schedules: Schedule[],
   days: number[],
   zone: string,
+  from = days[0],
 ) {
   const slots = new Map<string, Marker[]>();
   for (const schedule of schedules) {
     if (!schedule.cronExp?.trim()) continue;
     try {
-      const iterator = createQuartzRunIterator(schedule.cronExp, days[0] - 1, zone, days[7] - 1);
+      const iterator = createQuartzRunIterator(schedule.cronExp, from - 1, zone, days[days.length - 1] - 1);
       const [second, minute] = schedule.cronExp.trim().split(/\s+/);
       const step = /^(?:0|\*)\/(\d+)$/.exec(minute);
       const cadence =
@@ -43,7 +63,7 @@ export function calendarSlots(
               ? Number(step[1])
               : undefined
           : undefined;
-      for (let slot = 0; slot < 200; slot++) {
+      for (let slot = 0; slot < (days.length - 1) * 25; slot++) {
         const run = iterator.take(1)[0];
         if (!run) break;
         const time = run.getTime();

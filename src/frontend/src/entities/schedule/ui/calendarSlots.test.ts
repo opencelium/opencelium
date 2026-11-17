@@ -1,5 +1,5 @@
 import { expect, it, vi, afterEach } from "vitest";
-import { calendarSlots, weekDays } from "./calendarSlots";
+import { calendarSlots, calendarDays } from "./calendarSlots";
 import type { Schedule } from "../model/types";
 
 const schedule = (schedulerId: number, cronExp: string): Schedule => ({
@@ -13,7 +13,7 @@ const schedule = (schedulerId: number, cronExp: string): Schedule => ({
 afterEach(() => vi.useRealTimers());
 it("keeps all seven daily markers, including the last day", () => {
   vi.useFakeTimers().setSystemTime(new Date("2026-11-04T00:00:00Z"));
-  const days = weekDays(0, "Asia/Tashkent");
+  const days = calendarDays(Date.now(), "week", "Asia/Tashkent");
   const slots = calendarSlots(
     [schedule(1, "0 0 8 * * ?")],
     days,
@@ -25,7 +25,7 @@ it("keeps all seven daily markers, including the last day", () => {
 });
 it("limits markers to the requested year and excludes invalid day combinations", () => {
   vi.useFakeTimers().setSystemTime(new Date("2026-12-30T00:00:00Z"));
-  const days = weekDays(0, "Asia/Tashkent");
+  const days = calendarDays(Date.now(), "week", "Asia/Tashkent");
   const slots = calendarSlots(
     [schedule(1, "0 0 8 * * ? 2027"), schedule(2, "0 0 8 * * MON")],
     days,
@@ -35,7 +35,7 @@ it("limits markers to the requested year and excludes invalid day combinations",
 });
 it("shows only the resolved date for Quartz weekday and last-day rules", () => {
   vi.useFakeTimers().setSystemTime(new Date("2026-02-25T00:00:00Z"));
-  const days = weekDays(0, "Europe/Berlin");
+  const days = calendarDays(Date.now(), "week", "Europe/Berlin");
   const slots = calendarSlots(
     [schedule(1, "0 0 8 28W * ?"), schedule(2, "0 0 8 L-3 * ?")],
     days,
@@ -47,7 +47,7 @@ it("shows only the resolved date for Quartz weekday and last-day rules", () => {
 });
 it("aligns Quartz weekdays and retains overlaps", () => {
   vi.useFakeTimers().setSystemTime(new Date("2026-11-04T00:00:00Z"));
-  const days = weekDays(0, "Asia/Tashkent");
+  const days = calendarDays(Date.now(), "week", "Asia/Tashkent");
   const slots = calendarSlots(
     [schedule(1, "0 0 8 ? * 2-6"), schedule(2, "0 30 8 ? * MON-FRI")],
     days,
@@ -58,14 +58,14 @@ it("aligns Quartz weekdays and retains overlaps", () => {
   expect(slots.has("5:8")).toBe(false);
 });
 it.each(["0", "16"])("limits every-minute schedules at second %s to one marker per hour", (second) => {
-  const days = weekDays(0, "UTC");
+  const days = calendarDays(Date.now(), "week", "UTC");
   const slots = calendarSlots([schedule(1, `${second} * * * * ?`)], days, "UTC");
   expect([...slots.values()].flat()).toHaveLength(168);
   expect(slots.get("0:0")?.[0].cadence).toBe(1);
 });
 it("keeps hours across daylight-saving transitions", () => {
   vi.useFakeTimers().setSystemTime(new Date("2026-10-23T00:00:00Z"));
-  const days = weekDays(0, "Europe/Berlin");
+  const days = calendarDays(Date.now(), "week", "Europe/Berlin");
   expect(days[7] - days[0]).toBe(169 * 3600000);
   expect(
     calendarSlots([schedule(1, "0 0 8 * * ?")], days, "Europe/Berlin").size,
