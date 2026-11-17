@@ -38,9 +38,9 @@ The rules apply in 3 tiers:
 
 STE permits technical names and technical verbs that are standard in the industry. The documents use them as they are. A new industry term that STE does not approve is added to this list before use. The groups:
 
-- Domain: invoker, connector, workflow, node, edge, graph, DAG (directed acyclic graph), trigger, tenant, principal, Service Portal, OCEL, Global Params.
-- Execution: job message, event, checkpoint, state machine, breakpoint, debugger, promise, future, virtual thread, scheduler, dispatcher, transport, snapshot, payload, codec, spool.
-- Software structure: module, library, jar, package, class, bean, interface, SPI (service provider interface), API, REST, JSON, endpoint, frontend, plug-in, runtime, default, log.
+- Domain: invoker, connector, workflow, node, edge, graph, DAG (directed acyclic graph), trigger, tenant, current tenant, tenant document, reserved value, principal, Service Portal, OCEL, Global Params.
+- Execution: job message, event, checkpoint, state machine, breakpoint, debugger, promise, future, virtual thread, scheduler, dispatcher, transport, snapshot, payload, codec, spool, background task.
+- Software structure: module, library, jar, package, class, bean, interface, SPI (service provider interface), API, REST, JSON, endpoint, frontend, plug-in, runtime, default, log, application log.
 - Documentation: building block, cross-cutting concept, runtime view.
 - Protocols: WebSocket, JWT, OIDC, LDAP, HTTP(S), AMQP, broker, queue, TCP, DNS.
 - Data: database, collection, document, client, connection pool, cluster, credential, secret, setting, property, environment variable, yml file.
@@ -56,7 +56,7 @@ STE permits technical names and technical verbs that are standard in the industr
 - Setup: wizard, step, screen, prompt, question, answer, setup file, value, menu, option, box, summary, subcommand, flag, placeholder, help text, setup state, launcher, phase, handover, file plan, renderer, batch mode, exit code, allow-list, filter, retry, timestamp, fail-fast, admin marker, env reference, environment snapshot.
 - Terminal: terminal, console, shell, stdin, standard input, standard output, standard error, piped input, SSH, Enter, Ctrl+C, terminal library, scripted console, argument (command line), progress bar, backtick, backslash, carriage return, line feed, whitespace, echo (of the typed characters), escape code, control character, bidi control, Windows Terminal.
 - Host: host, platform, CPU, Linux, macOS, Windows, Ubuntu, Debian, x86_64, arm64, systemd, unit file, launchd, plist, `sc.exe`, sudo, root, system user, service, PATH, permissions, owner, data directory, env file, tarball, license, Docker, Docker Compose, image (Docker image), layer (image layer), VM (virtual machine), distribution, working directory, `mongod`, `mongosh`, browser, backup, upgrade, migration, journal (of systemd).
-- Data (2): URI, URL, byte, MB (megabyte), driver, repository, database dump, port (network), host name, IP address, IPv6 address, route, header (HTTP), issuer, percent-encoding, system property, bootstrap value, bootstrap property, environment (of a process).
+- Data (2): URI, URL, byte, MB (megabyte), driver, repository, database dump, port (network), host name, IP address, IPv6 address, route, header (HTTP), issuer, percent-encoding, system property, bootstrap value, bootstrap property, environment (of a process), digit, hyphen.
 - Access control (2): admin (administrator), default admin, username, password, login (noun).
 - Software structure (2): seam, runner (application runner, command runner), singleton, Spring context, logger, log level, binder (Spring Boot binder), post-processor.
 - Test: unit test, slice test, integration test, full-application test, end-to-end test, hand test, fake, fixture, test matrix, mock.
