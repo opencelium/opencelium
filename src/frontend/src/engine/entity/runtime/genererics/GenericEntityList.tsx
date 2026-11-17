@@ -180,6 +180,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
 
     const [sorting, setSorting] = useState<SortingState>(initialSorting);
     const [globalFilter, setGlobalFilter] = useState('');
+    const [alternateMode, setAlternateMode] = useState<string>();
     const [isAlternate, setIsAlternate] = useState(false);
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     // Controlled (not left to tanstack's uncontrolled default) — see the
@@ -466,7 +467,9 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                 </div>
             )}
 
-            {entity.list?.alternateView && (
+            {entity.list?.alternateView?.renderListSwitch
+                ? !isAlternate && entity.list.alternateView.renderListSwitch(mode => { setAlternateMode(mode); setIsAlternate(true); })
+                : entity.list?.alternateView && (
                 <ListViewSwitch
                     entityName={entity.name}
                     alternateView={entity.list.alternateView}
@@ -475,7 +478,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                 />
             )}
             {isAlternate && entity.list?.alternateView
-                ? entity.list.alternateView.render(table.getFilteredRowModel().rows.map(row => row.original))
+                ? entity.list.alternateView.render(table.getFilteredRowModel().rows.map(row => row.original), () => setIsAlternate(false), alternateMode)
                 : <Table
                 data={tableRows}
                 columns={columns}

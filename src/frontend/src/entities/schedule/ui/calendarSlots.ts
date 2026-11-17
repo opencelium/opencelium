@@ -2,7 +2,7 @@ import { CronDate } from "cron-parser";
 import { createQuartzRunIterator } from "@shared/lib/cron/upcomingRuns";
 import type { Schedule } from "../model/types";
 
-export type CalendarView = "day" | "three" | "work" | "week" | "month" | "list";
+export type CalendarView = "day" | "three" | "work" | "week" | "month";
 
 export function calendarDays(anchor: number, view: CalendarView, zone: string) {
   const day = new CronDate(anchor, zone);
@@ -15,7 +15,7 @@ export function calendarDays(anchor: number, view: CalendarView, zone: string) {
   const monthStart = day.getTime();
   const month = day.getMonth();
   if (view === "month") day.setDate(1 - ((day.getDay() + 6) % 7));
-  const length = { day: 1, three: 3, work: 5, week: 7, month: 31, list: 7 }[view];
+  const length = { day: 1, three: 3, work: 5, week: 7, month: 31 }[view];
   const days = [day.getTime()];
   do {
     day.addDay();

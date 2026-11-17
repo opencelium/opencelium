@@ -45,7 +45,7 @@ it("shows every schedule with a cron expression, opens it in a dialog, highlight
     debugMode: false,
     connection: { connectionId: id, title: "Test" },
   }));
-  const { container } = render(<ScheduleCalendar schedules={schedules} />);
+  const { container } = render(<ScheduleCalendar onShowList={vi.fn()} schedules={schedules} />);
   expect(container.querySelectorAll('[data-overlap="true"]')).toHaveLength(7);
   expect(screen.getAllByRole("button", { name: /Schedule 3/ })).toHaveLength(7);
   expect(
@@ -73,7 +73,7 @@ it("shows every schedule with a cron expression, opens it in a dialog, highlight
   ).toEqual(headers);
 });
 
-it("switches calendar views, navigates periods and can hide disabled schedules", () => {
+it("switches calendar views, navigates periods and returns to the schedule list", () => {
   vi.stubGlobal("ResizeObserver", class {
     observe() {}
     unobserve() {}
@@ -81,7 +81,8 @@ it("switches calendar views, navigates periods and can hide disabled schedules",
   });
   vi.spyOn(cronTime, "getScheduleTimeZone").mockReturnValue("Europe/Berlin");
   vi.spyOn(Date, "now").mockReturnValue(Date.UTC(2026, 10, 16, 12));
-  render(<ScheduleCalendar schedules={[{
+  const showList = vi.fn();
+  render(<ScheduleCalendar onShowList={showList} schedules={[{
     schedulerId: 1,
     title: "Disabled schedule",
     cronExp: "0 0 8 * * ?",
@@ -110,8 +111,5 @@ it("switches calendar views, navigates periods and can hide disabled schedules",
   selectView("work");
   expect(events()).toHaveLength(5);
   selectView("list");
-  expect(events()).toHaveLength(6);
-  expect(screen.queryByTestId("schedule-calendar-next")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByTestId("schedule-calendar-show-disabled"));
-  expect(events()).toHaveLength(0);
+  expect(showList).toHaveBeenCalledOnce();
 });

@@ -29,7 +29,7 @@ import {NotificationsAction} from "@entities/schedule/ui/NotificationsAction.tsx
 import {SupportLogsAction} from "@entities/schedule/ui/SupportLogsAction.tsx";
 import {BulkNotificationsDialogContent} from "@entities/schedule/ui/BulkNotificationsDialogContent.tsx";
 
-import {ScheduleCalendar} from './ui/ScheduleCalendar';
+import {ScheduleCalendar, ScheduleViewMenu} from './ui/ScheduleCalendar';
 
 const baseKey = 'schedule';
 
@@ -126,7 +126,15 @@ export const scheduleDefinition: EntityDefinition = {
         alternateView: {
             labelKey: 'schedule.calendar.title',
             listLabelKey: 'schedule.calendar.list',
-            render: rows => <ScheduleCalendar schedules={rows as Schedule[]} />,
+            render: (rows, showList, mode) => (
+                <ScheduleCalendar schedules={rows as Schedule[]} onShowList={showList}
+                    initialView={mode as import('./ui/calendarSlots').CalendarView | undefined} />
+            ),
+            renderListSwitch: showAlternate => (
+                <div className="schedule-calendar-list-switch">
+                    <ScheduleViewMenu view="list" onChange={view => { if (view !== 'list') showAlternate(view); }} />
+                </div>
+            ),
         },
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
