@@ -20,14 +20,16 @@ const calendarViews = {
 } satisfies Record<CalendarView | "list", typeof CalendarOutlined>;
 const viewOrder: (CalendarView | "list")[] = ["day", "three", "work", "week", "month", "list"];
 
-export function ScheduleViewMenu({ view, onChange }: {
+export function ScheduleViewMenu({ view, onChange, includeList = true }: {
   view: CalendarView | "list";
   onChange: (view: CalendarView | "list") => void;
+  includeList?: boolean;
 }) {
   const { t } = useI18n("entities");
   const [viewMenuOpen, setViewMenuOpen] = useState(false);
   const ViewIcon = calendarViews[view];
   const viewItems: MenuProps["items"] = viewOrder.flatMap((option): NonNullable<MenuProps["items"]> => {
+    if (option === "list" && !includeList) return [];
     const Icon = calendarViews[option];
     const item = {
       key: option,
@@ -74,7 +76,7 @@ export function ScheduleViewMenu({ view, onChange }: {
 export function ScheduleCalendar({ schedules, initialView = "week", onShowList }: {
   schedules: Schedule[];
   initialView?: CalendarView;
-  onShowList: () => void;
+  onShowList?: () => void;
 }) {
   const zone = getScheduleTimeZone();
   const { t, lang } = useI18n("entities");
@@ -142,7 +144,8 @@ export function ScheduleCalendar({ schedules, initialView = "week", onShowList }
       aria-label={t("schedule.calendar.title")}
     >
       <div className="schedule-calendar-toolbar">
-        <ScheduleViewMenu view={view} onChange={(next) => next === "list" ? onShowList() : setView(next)} />
+        <ScheduleViewMenu view={view} includeList={Boolean(onShowList)}
+          onChange={(next) => next === "list" ? onShowList?.() : setView(next)} />
         <Button testId="schedule-calendar-prev" onClick={() => setAnchor((date) => moveCalendarDate(date, view, -1, zone))}>
           {t(navigationUnit === "week" ? "schedule.calendar.prev" : `schedule.calendar.prev_${navigationUnit}`)}
         </Button>

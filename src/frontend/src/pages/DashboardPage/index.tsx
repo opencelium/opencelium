@@ -1,3 +1,5 @@
+import { hasComponentPermission } from '@/engine/policy'
+import { useAuth } from '@features/auth/useAuth'
 import { Typography } from '@shared/ui/primitives/Typography'
 import { Input } from '@shared/ui/primitives/Input'
 import { Icon } from '@shared/ui/primitives/Icon'
@@ -11,11 +13,15 @@ import { ExecutionsChartCard } from './components/ExecutionsChartCard'
 import { ResourceUsageCard } from './components/ResourceUsageCard'
 import { TopConnectorsCard } from './components/TopConnectorsCard'
 import { ComingSoonOverlay } from './components/ComingSoonOverlay'
+import { ScheduleCalendarCard } from './components/ScheduleCalendarCard'
 import { DashboardCardBoundary } from './components/DashboardCardBoundary'
 import { useSocketConnectionNotifications } from './useSocketConnectionNotifications'
+import './dashboard.css'
 
 export default function DashboardPage() {
     const { t } = useI18n('dashboard')
+    const { normalizedUser } = useAuth()
+    const canReadSchedules = hasComponentPermission(normalizedUser?.permissions ?? [], 'SCHEDULE', 'READ')
 
     useSocketConnectionNotifications()
 
@@ -61,6 +67,14 @@ export default function DashboardPage() {
                         <TopConnectorsCard />
                     </DashboardCardBoundary>
                 </div>
+
+                {canReadSchedules && (
+                    <div className="dashboard-calendar-row">
+                        <DashboardCardBoundary>
+                            <ScheduleCalendarCard />
+                        </DashboardCardBoundary>
+                    </div>
+                )}
 
                 <div
                     data-testid="dashboard-coming-soon"
