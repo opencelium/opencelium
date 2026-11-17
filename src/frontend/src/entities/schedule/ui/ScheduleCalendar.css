@@ -1,8 +1,17 @@
 .schedule-calendar-toolbar {
 	display: flex;
-	gap: 12px;
+	gap: 8px;
 	align-items: center;
 	flex-wrap: wrap;
+}
+
+.schedule-calendar-toolbar > button {
+	min-height: 32px;
+	box-shadow: none;
+}
+
+.schedule-calendar-toolbar > strong {
+	margin-inline-start: 8px;
 }
 
 .schedule-calendar-scroll {
@@ -26,7 +35,7 @@
 }
 
 .schedule-calendar th {
-	background: var(--color-background-surface);
+	background: var(--color-background-elevated);
 }
 
 .schedule-calendar thead th {
@@ -52,7 +61,7 @@
 	text-align: left;
 	font: inherit;
 	color: var(--color-text-primary);
-	background: transparent;
+	background: var(--color-background-input);
 	border: 1px solid var(--color-border-strong);
 	border-radius: 4px;
 	cursor: pointer;
@@ -67,6 +76,149 @@
 	outline-offset: 1px;
 }
 
+.schedule-calendar-overlap .schedule-calendar-event {
+	background: transparent;
+}
+
 .schedule-calendar-overlap {
 	background: var(--color-status-warning-bg);
+}
+
+.schedule-calendar-view {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	min-width: 160px;
+	min-height: 32px;
+	cursor: pointer;
+	padding: 6px 12px;
+	font: inherit;
+	color: var(--color-text-primary);
+	background: var(--color-background-input);
+	border: 1px solid var(--color-border-strong);
+	border-radius: 4px;
+}
+
+.schedule-calendar-toolbar label {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.schedule-calendar .schedule-calendar-day {
+	min-width: 0;
+}
+
+.schedule-calendar .schedule-calendar-month th:first-child {
+	width: auto;
+}
+
+.schedule-calendar-month td {
+	height: 88px;
+}
+
+.schedule-calendar-event[data-disabled] {
+	opacity: 0.65;
+}
+
+.schedule-calendar .schedule-calendar-agenda {
+	border: 1px solid var(--color-border-subtle);
+	border-radius: 8px;
+}
+
+.schedule-calendar .schedule-calendar-agenda :is(th, td) {
+	padding: 12px 16px;
+	border: 0;
+	border-bottom: 1px solid var(--color-border-subtle);
+	text-align: start;
+	vertical-align: middle;
+}
+
+.schedule-calendar .schedule-calendar-agenda th:first-child {
+	width: 29%;
+}
+
+.schedule-calendar-agenda th:nth-child(2) {
+	width: 14%;
+}
+
+.schedule-calendar-agenda th:nth-child(3) {
+	width: 29%;
+}
+
+.schedule-calendar .schedule-calendar-agenda tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+.schedule-calendar-agenda tr[data-disabled] td {
+	color: var(--color-text-secondary);
+}
+
+.schedule-calendar-agenda-workflow {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: start;
+	cursor: pointer;
+}
+
+.schedule-calendar-agenda-workflow:hover {
+	text-decoration: underline;
+}
+
+.schedule-calendar-view-chevron {
+	margin-inline-start: auto;
+	font-size: 11px;
+}
+
+.schedule-calendar-view[aria-expanded="true"] .schedule-calendar-view-chevron {
+	transform: rotate(180deg);
+}
+
+.schedule-calendar-view:hover,
+.schedule-calendar-view[aria-expanded="true"] {
+	border-color: var(--color-action-primary);
+}
+
+.schedule-calendar-view-option {
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	min-width: 144px;
+}
+
+.schedule-calendar [aria-current="date"] {
+	color: var(--color-action-primary);
+}
+
+.schedule-calendar-month td > strong {
+	display: block;
+	margin-bottom: 6px;
+	font-weight: 500;
+}
+
+.schedule-calendar-month [data-outside-month] > :is(strong, button) {
+	color: var(--color-text-secondary);
+}
+
+.schedule-calendar-month .schedule-calendar-event {
+	padding: 3px 6px;
+	font-size: 0.875em;
+}
+
+.schedule-calendar:not([data-view="list"]) table {
+	border-block-start: 1px solid var(--color-border-subtle);
+	border-inline-start: 1px solid var(--color-border-subtle);
+}
+
+.schedule-calendar:not([data-view="list"]) :is(th, td) {
+	border-block-start: 0;
+	border-inline-start: 0;
+}
+
+.schedule-calendar:not([data-view="list"]) .schedule-calendar-event:last-child {
+	margin-bottom: 0;
 }
