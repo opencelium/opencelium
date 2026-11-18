@@ -131,6 +131,27 @@ class InvokerControllerTest {
     }
 
     @Test
+    void syncAllReturnsDisabledMessageWhenOnlineServicesInactive() throws Exception {
+        when(onlineServicesProps.isServiceActive()).thenReturn(false);
+
+        mockMvc.perform(put("/invoker/sync").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result").value(containsString("opencelium.online-services.active")));
+
+        verifyNoInteractions(invokerSyncService);
+    }
+
+    @Test
+    void syncAllReturnsNoContentWhenOnlineServicesActive() throws Exception {
+        when(onlineServicesProps.isServiceActive()).thenReturn(true);
+
+        mockMvc.perform(put("/invoker/sync").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        verify(invokerSyncService).syncInvokers();
+    }
+
+    @Test
     void syncForceReturnsNoContentWhenOnlineServicesActive() throws Exception {
         when(onlineServicesProps.isServiceActive()).thenReturn(true);
 
