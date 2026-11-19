@@ -5,12 +5,13 @@ import type {
     GlobalVariableSaveDto,
     GlobalVariableScopeDto,
     JsonValue,
+    PublishMode,
     ScriptParameter,
+    WritePolicy,
 } from './types'
 import { emptyScript, type ScriptFormValues, type ScriptParameterDraft } from './script'
 
-// Kinds the form can create and edit today; the mutable kind joins in phase 3.
-export const FORM_KINDS = ['CONSTANT', 'SCRIPT'] as const satisfies readonly GlobalVariableKind[]
+export const FORM_KINDS = ['CONSTANT', 'MUTABLE', 'SCRIPT'] as const satisfies readonly GlobalVariableKind[]
 export type FormKind = (typeof FORM_KINDS)[number]
 
 export const isFormKind = (kind: GlobalVariableKind): kind is FormKind =>
@@ -31,8 +32,15 @@ export type GlobalVariableFormValues = {
     secret: boolean
     value: string
     script: ScriptFormValues
+    writePolicy: WritePolicy
+    publishMode: PublishMode
+    ownerWorkflowId: number | null
     scope: GlobalVariableScopeDto
 }
+
+export const DEFAULT_WRITE_POLICY: WritePolicy = 'REPLACE'
+export const DEFAULT_PUBLISH_MODE: PublishMode = 'ON_SUCCESS'
+const mutableDefaults = { writePolicy: DEFAULT_WRITE_POLICY, publishMode: DEFAULT_PUBLISH_MODE, ownerWorkflowId: null }
 
 export type ValueJsonType = 'string' | 'number' | 'boolean' | 'null' | 'array' | 'object'
 
@@ -108,6 +116,18 @@ export function toFormValues(variable: GlobalVariable): GlobalVariableFormValues
                 secret: variable.secret,
                 value: variable.secret ? '' : valueToText(variable.value),
                 script: emptyScript(),
+                ...mutableDefaults,
+            }
+        case 'MUTABLE':
+            return {
+                ...base,
+                kind: 'MUTABLE',
+                secret: false,
+                value: valueToText(variable.value),
+                script: emptyScript(),
+                writePolicy: variable.writePolicy,
+                publishMode: variable.publishMode,
+                ownerWorkflowId: variable.ownerWorkflow?.id ?? null,
             }
         case 'SCRIPT':
             return {
@@ -121,9 +141,8 @@ export function toFormValues(variable: GlobalVariable): GlobalVariableFormValues
                     parameters: variable.script.parameters.map(toParameterDraft),
                     imports: variable.script.imports,
                 },
+                ...mutableDefaults,
             }
-        case 'MUTABLE':
-            return null
         default: {
             const _exhaustive: never = variable
             return _exhaustive
@@ -152,6 +171,15 @@ export function toSaveDto(values: GlobalVariableFormValues, mode: Mode): GlobalV
                 kind: 'CONSTANT',
                 secret: values.secret,
                 ...(keepsStoredSecret(values, mode) ? {} : { value: textToValue(values.value) }),
+            }
+        case 'MUTABLE':
+            return {
+                ...base,
+                kind: 'MUTABLE',
+                value: textToValue(values.value),
+                writePolicy: values.writePolicy,
+                publishMode: values.publishMode,
+                ownerWorkflowId: values.ownerWorkflowId,
             }
         case 'SCRIPT':
             return {
@@ -182,3 +210,19 @@ export const isScopeIncomplete = (scope: GlobalVariableScopeDto | undefined) =>
     !!scope
     && ((scope.type === 'CATEGORIES' && scope.categoryIds.length === 0)
         || (scope.type === 'WORKFLOWS' && scope.workflowIds.length === 0))
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}(T[\d:.]+(Z|[+-]\d{2}:?\d{2})?)?$/
+
+// FORWARD_ONLY compares numbers or ISO dates, INCREMENT adds numbers (FR-22); anything else can never be written.
+export function isValueUnfitForPolicy(values: Partial<GlobalVariableFormValues>): boolean {
+    if (values.kind !== 'MUTABLE' || (values.value ?? '').trim() === '') return false
+    const value = textToValue(values.value ?? '')
+    switch (values.writePolicy) {
+        case 'INCREMENT':
+            return typeof value !== 'number'
+        case 'FORWARD_ONLY':
+            return typeof value !== 'number' && !(typeof value === 'string' && ISO_DATE.test(value))
+        default:
+            return false
+    }
+}

@@ -370,5 +370,30 @@
       "atLine": "at line {{line}}",
       "success": "Returned a {{type}} in {{ms}} ms"
     }
+  },
+  "mutable": {
+    "writePolicy": {
+      "label": "Write policy",
+      "hints": {
+        "REPLACE": "The run's value replaces the stored one, unless someone changed it during the run.",
+        "FORWARD_ONLY": "Saved only if it is greater than the stored value (numbers or ISO dates). For cursors.",
+        "INCREMENT": "Adds the run's number to the stored value. For counters."
+      }
+    },
+    "publishMode": {
+      "label": "When writes are saved",
+      "hints": {
+        "ON_SUCCESS": "All writes of a run are saved together once it succeeds; a failed run saves nothing.",
+        "EACH_WRITE": "Saved during the run (at most every 500 ms) and once more at the end, also when the run fails."
+      }
+    },
+    "owner": {
+      "label": "Owner workflow",
+      "hint": "The only workflow that may write this variable. Left empty, the first workflow saved with a write claims it.",
+      "unclaimed": "Claimed by the first workflow that writes it"
+    },
+    "errors": {
+      "valueUnfitForPolicy": "This value can't be used with the write policy: increment needs a number, forward only a number or an ISO date."
+    }
   }
 }

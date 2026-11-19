@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { ConstantVariable, ScriptVariable } from './types'
 import { emptyScript } from './script'
 import {
+    isValueUnfitForPolicy,
     isScopeIncomplete,
     isValueMissing,
     jsonTypeOf,
@@ -22,6 +23,7 @@ const constant = (overrides: Partial<ConstantVariable> = {}): ConstantVariable =
 
 const values = (overrides: Partial<GlobalVariableFormValues> = {}): GlobalVariableFormValues => ({
     kind: 'CONSTANT', name: ' idoitUrl ', description: '', secret: false, value: 'https://cmdb', script: emptyScript(),
+    writePolicy: 'REPLACE', publishMode: 'ON_SUCCESS', ownerWorkflowId: null,
     scope: { type: 'ALL', categoryIds: [9], workflowIds: [8] }, ...overrides,
 })
 
@@ -129,6 +131,25 @@ describe('script form mapping', () => {
 
     it('does not ask a script for a value', () => {
         expect(isValueMissing({ kind: 'SCRIPT', value: '' })).toBe(false)
+    })
+})
+
+describe('mutable form mapping', () => {
+    it('saves the write settings with the value and no secret flag', () => {
+        expect(toSaveDto(values({ kind: 'MUTABLE', value: '2026-11-01T00:00:00Z', writePolicy: 'FORWARD_ONLY', ownerWorkflowId: 42 }), 'create'))
+            .toEqual({
+                kind: 'MUTABLE', name: 'idoitUrl', description: '', value: '2026-11-01T00:00:00Z',
+                writePolicy: 'FORWARD_ONLY', publishMode: 'ON_SUCCESS', ownerWorkflowId: 42,
+                scope: { type: 'ALL', categoryIds: [], workflowIds: [] },
+            })
+    })
+
+    it('checks the value fits the write policy', () => {
+        expect(isValueUnfitForPolicy({ kind: 'MUTABLE', value: '"abc"', writePolicy: 'INCREMENT' })).toBe(true)
+        expect(isValueUnfitForPolicy({ kind: 'MUTABLE', value: '10', writePolicy: 'INCREMENT' })).toBe(false)
+        expect(isValueUnfitForPolicy({ kind: 'MUTABLE', value: '2026-11-01T00:00:00Z', writePolicy: 'FORWARD_ONLY' })).toBe(false)
+        expect(isValueUnfitForPolicy({ kind: 'MUTABLE', value: 'yesterday', writePolicy: 'FORWARD_ONLY' })).toBe(true)
+        expect(isValueUnfitForPolicy({ kind: 'MUTABLE', value: 'anything', writePolicy: 'REPLACE' })).toBe(false)
     })
 })
 
