@@ -1,0 +1,41 @@
+# Tenant context: the tasks
+
+Each task is 1 pull request. The size rule of a task is in CONTRIBUTING.md, section 5.3.
+The status line is the only status in this folder.
+A task that changes the behaviour of a criterion changes spec.md in the same PR.
+
+## Task 1: feat(core): bind the current tenant and show it in each log line
+- **Criteria:** TC-01, TC-03, TC-05, TC-08, TC-09
+- **Function:** Each application log line of core shows the tenant ID. The first admin of the start and the lock task run for the tenant of the self-host installation. In the cloud mode the lock task does not run (plan decision 6). TC-01 gets its request test in task 4, and TC-05 gets its form test in task 4. TC-08 gets its test with a tenant document in task 2.
+- **Tests:** `TenantRunnerTest` (unit): runGivesTheTenantToTheTaskWhenTheModeIsSelfHost, runStartsNoTaskWhenTheTenantIsNotTheSelfHostTenant, runGivesTheTenantOfTheRecordWhenTheModeIsCloud, runStartsNoTaskWhenTheTenantIsReservedInCloudMode, runStartsNoTaskWhenADifferentTenantIsBound, runRemovesTheTenantWhenTheTaskFails, runWritesTheMdcKeyWhenTheTaskRuns; `CurrentTenantTest` (unit): getGivesTheBoundTenantWhenTheTenantRunnerRunsTheTask, getStopsWithNoCurrentTenantWhenNoTenantIsBound; `DefaultsEnvironmentPostProcessorTest` (unit): applyDefaultsGivesTheSelfHostLogPatternWhenTheModeIsSelfHost, applyDefaultsGivesTheCloudLogPatternWhenTheModeIsCloud, applyDefaultsKeepsTheLogPatternWhenTheOperatorSetsOne; `TenantLogLineTest` (full application): startWritesTheTenantIdIntoEachLineWhenTheModeIsSelfHost, runWritesTheBoundTenantIntoTheLineWhenTheModeIsCloud, startWritesNoTenantIdWhenTheModeIsCloud; `SetupCompletionRunnerTest` (full application): runMakesTheAdminForTheSelfHostTenantWhenTheModeIsSelfHost; `GeneratedPasswordLockJobTest` (full application): lockExpiredGeneratedPasswordsRunsForTheSelfHostTenantWhenTheModeIsSelfHost, lockExpiredGeneratedPasswordsLocksNoUserWhenTheModeIsCloud; `WizardTest` (unit): runShowsNoLogPatternDefaultWhenTheWizardAppliesTheDefaults
+- **Hand test:** 1. Start `java -jar oc-app.jar` with `SPRING_MONGODB_URI=mongodb://localhost:27017/oc_hand`. 2. The log has the line `logging.pattern.correlation = [%X{tenant:-self-host-tenant}] (default)`. 3. Each log line shows `[self-host-tenant]`. Stop core. 4. Run `mongosh oc_system` and insert 1 user: `db.users.insertOne({tenantId: "acme", username: "u1", roles: [], mustChangePassword: true, temporary: false, locked: false, passwordIssuedAt: ISODate("2020-01-01"), createdAt: ISODate("2020-01-01")})`. 5. Start core with `OPENCELIUM_DEPLOYMENTMODE=cloud`, `SPRING_MONGODB_URI=mongodb://localhost:27017/oc_system` and `OC_MASTER_KEY` from `openssl rand -base64 32`. 6. Each log line shows `[-]`, and no line says "Locked user". 7. In `mongosh`, the user `u1` has `locked: false`.
+- **Size:** approximately 200 lines
+- **Depends on:** nothing
+- **Status:** open
+
+## Task 2: feat(core): limit the user repository to the current tenant
+- **Criteria:** TC-06, TC-07, TC-08
+- **Function:** Each operation on the OpenCelium users touches only the OpenCelium users of the current tenant. An OpenCelium user of another tenant in the same database stays as it is. TC-06 gets its test with a request body in task 4.
+- **Tests:** `TenantDocumentsTest` (full application): findOneGivesNoDocumentWhenTheDocumentIsOfAnotherTenant, findGivesOnlyTheDocumentsOfTheCurrentTenantWhenTwoTenantsHaveDocuments, countIgnoresTheDocumentsOfAnotherTenantWhenTheConditionMatchesThem, updateChangesNoDocumentOfAnotherTenantWhenTheConditionMatchesIt, deleteRemovesNoDocumentOfAnotherTenantWhenTheConditionMatchesIt, insertStoresTheDocumentWhenItHoldsTheCurrentTenant, insertStopsWhenTheDocumentHoldsAnotherTenant, insertStopsWhenTheDocumentHoldsNoTenant, updateStopsWhenTheChangeNamesTheFieldTenantId, findStopsBeforeAQueryWhenNoTenantIsBound; `TenantDocumentsCloudTest` (full application): findStopsWithNoCurrentTenantWhenNoTenantIsBound, insertStopsWithTheErrorOfTheConnectionResolverWhenTheTenantHasNoDatabase; `UserServiceTest` (full application): createAdminStoresTheCurrentTenantWhenTheTenantRunnerBindsOne, adminExistsIsFalseWhenOnlyAnotherTenantHasAnAdmin, changePasswordChangesNoUserWhenTheUserIsOfAnotherTenant, lockExpiredGeneratedPasswordsLocksNoUserOfAnotherTenant, createAdminStopsWhenNoTenantIsBound; `SetupCompletionRunnerTest` (full application): runMakesTheDefaultAdminWhenOnlyAnotherTenantHasUsers; `GeneratedPasswordLockJobTest` (full application): jobLocksOnlyTheUserOfTheSelfHostTenantWhenTwoTenantsHaveOldGeneratedPasswords
+- **Hand test:** 1. Drop the database `oc_hand`. Start core with `SPRING_MONGODB_URI=mongodb://localhost:27017/oc_hand`, then stop it. 2. Run `mongosh oc_hand`: `db.users.find({}, {tenantId: 1, username: 1})` shows the admin with `tenantId: "self-host-tenant"`. 3. Insert the user `u1` of task 1 with `tenantId: "self-host-tenant"`. 4. Insert the same user as `u2` with `tenantId: "other"`. 5. Start core again. 6. The log has exactly 1 "Locked user" line, and it names `u1`. 7. In `mongosh`, `u1` has `locked: true` and `u2` has `locked: false`.
+- **Size:** approximately 400 lines. The tenant-document access and the user repository stay in 1 task, because the access alone has no caller.
+- **Depends on:** 1
+- **Status:** open
+
+## Task 3: docs: record the tenant context decisions in the architecture document
+- **Criteria:** none
+- **Function:** Section 7 of the architecture document gets the 2 decision records of the plan, from the architect agent. The open decision "Where the Mongo repositories go" leaves the list of the open decisions. 5 sections of the architecture document and section 8 of CONTRIBUTING.md get the items of the definition of done of plan.md.
+- **Tests:** none; a documentation change
+- **Hand test:** 1. Read section 7 of `docs/architecture.md`: the 2 new decision records exist. 2. Read the list of the open decisions: "Where the Mongo repositories go" is not there. 3. Read sections 3.4, 4.1, 6.3, 6.4 and 6.9: each item of the definition of done is there. 4. Read section 8 of CONTRIBUTING.md: it names the rule for the tenant documents. 5. Search the architecture document for a status marker, a date or a ticket number: nothing.
+- **Size:** approximately 90 lines
+- **Depends on:** 2
+- **Status:** open
+
+## Task 4: feat(core): bind the tenant of each request and of parallel work
+- **Criteria:** TC-01, TC-02, TC-04, TC-05, TC-06
+- **Function:** Each request runs for its tenant, and a task on another thread keeps the tenant of its caller. Core has no endpoint at this time, so only the tests show the result. Do this task directly before the task with the first endpoint of the authentication feature.
+- **Tests:** `TenantIdTest` (unit): ofAcceptsTheValueWhenItHasThePermittedForm, ofStopsWhenTheValueBreaksARuleOfTheForm, ofAcceptsTheReservedValues, fromOutsideGivesTheTenantWhenTheValueIsPermitted, fromOutsideStopsWhenTheValueIsReserved; `TenantRequestFilterTest` (full application): doFilterBindsTheSelfHostTenantWhenTheRequestHasAPrincipal, doFilterBindsTheSelfHostTenantWhenTheRequestHasNoPrincipal, doFilterKeepsTheCurrentTenantInTheDocumentWhenTheBodyNamesAnotherTenant; `TenantRequestFilterCloudTest` (full application): doFilterBindsTheTenantOfThePrincipalWhenTheRequestIsAuthenticated, doFilterIgnoresTheTenantIdWhenAHeaderAParameterAndTheBodyNameOne, doFilterBindsNoTenantWhenTheRequestHasNoPrincipal, doFilterStopsTheRequestWhenThePrincipalGivesAReservedValue; `TenantPrincipalTest` (unit): tenantOfGivesTheSameTenantWhenThePrincipalIsOfAWebSocketSession; `TenantTaskDecoratorTest` (unit): decorateCarriesTheBoundTenantWhenTheTaskRunsOnAnotherThread, decorateBindsNoTenantWhenTheCallerHasNone; `TenantTaskExecutorTest` (full application): executeRunsTheTaskForTheTenantOfTheCallerWhenTheApplicationTaskExecutorRunsIt
+- **Hand test:** 1. Run `./gradlew :core:test --tests "*.TenantRequestFilter*" --tests "*.TenantTask*"`: the tests pass. 2. Start core as in task 1: the start has no error, and each log line shows `[self-host-tenant]`.
+- **Size:** approximately 170 lines
+- **Depends on:** 2
+- **Status:** open
