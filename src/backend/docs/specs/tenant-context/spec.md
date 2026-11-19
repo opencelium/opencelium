@@ -69,7 +69,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 - Decision 14: the wrap of a DEK authenticates the tenant ID. Thus the ID of a tenant does not change.
 - Decision 9: a worker has no database. Thus only core applies the rules of the tenant documents.
 - Decision 8: the engine writes the execution ID and the node ID into its log lines. TC-09 applies to the application log of core only.
-- Decision 13: the feature adds no bootstrap value and no runtime setting.
+- Decision 13: the feature adds no `opencelium.*` bootstrap property and no runtime setting.
 - A new decision is necessary for the current tenant, the form of a tenant ID and the tenant ID in the application log. The architect agent drafts it.
 
 ## Open questions
