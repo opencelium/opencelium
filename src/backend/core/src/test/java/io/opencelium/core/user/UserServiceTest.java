@@ -2,9 +2,12 @@ package io.opencelium.core.user;
 
 import java.nio.file.Path;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,20 +22,27 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.convention.TestBean;
 
 import io.opencelium.common.tenant.TenantId;
+import io.opencelium.core.tenant.NoCurrentTenantException;
+import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
+import io.opencelium.core.testsupport.TenantTasks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 
+/**
+ * The user service works on the OpenCelium users of the current tenant. Each call runs through the tenant runner for
+ * the self-host tenant, as the start and the lock task run it. A user of another tenant is written and read with the
+ * plain template: in the self-host mode the tenant runner runs no other tenant.
+ */
 @MongoIntegrationTest
 class UserServiceTest {
 
 	private static final Instant NOW = Instant.parse("2026-09-28T10:00:00Z");
 
-	private static final TenantId TENANT = TenantId.SELF_HOST;
-
-	private static final TenantId OTHER = TenantId.of("other");
+	private static final String OTHER = "other";
 
 	private static final String ADMIN = "admin";
 
@@ -57,7 +67,7 @@ class UserServiceTest {
 	UserService service;
 
 	@Autowired
-	UserRepository users;
+	TenantRunner tenantRunner;
 
 	@Autowired
 	PasswordEncoder passwordEncoder;
@@ -72,20 +82,36 @@ class UserServiceTest {
 
 	@Test
 	void createAdminStoresABcryptHashThatMatchesThePassword() {
-		UserCreated created = service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
+		UserCreated created = createAdmin(ADMIN, TYPED_PASSWORD, false);
 
-		UserDocument user = users.findById(created.id()).orElseThrow();
+		UserDocument user = stored(created.id());
 		assertThat(user.passwordHash()).startsWith("{bcrypt}");
 		assertThat(passwordEncoder.matches(TYPED_PASSWORD, user.passwordHash())).isTrue();
 		assertThat(user.roles()).containsExactly(UserService.ADMIN_ROLE);
-		assertThat(user.tenantId()).isEqualTo("self-host-tenant");
 		assertThat(user.locked()).isFalse();
 		assertThat(user.createdAt()).isEqualTo(NOW);
 	}
 
 	@Test
+	void createAdminStoresTheCurrentTenantWhenTheTenantRunnerBindsOne() {
+		UserCreated created = createAdmin(ADMIN, TYPED_PASSWORD, false);
+
+		assertThat(stored(created.id()).tenantId()).isEqualTo("self-host-tenant");
+	}
+
+	@Test
+	void createAdminStopsWhenNoTenantIsBound() {
+		char[] password = TYPED_PASSWORD.toCharArray();
+
+		assertThatExceptionOfType(NoCurrentTenantException.class)
+				.isThrownBy(() -> service.createAdmin(new CreateAdminCommand(ADMIN, password, false, false)));
+		assertThat(mongo.count(new Query(), UserDocument.class)).isZero();
+		assertThat(password).containsOnly('\0');
+	}
+
+	@Test
 	void createAdminNeverStoresThePasswordInPlainText() {
-		service.createAdmin(command(TENANT, ADMIN, "Plain-Text-Canary-42", true));
+		createAdmin(ADMIN, "Plain-Text-Canary-42", true);
 
 		Document raw = mongo.getCollection("users").find().first();
 		assertThat(raw).isNotNull();
@@ -94,99 +120,119 @@ class UserServiceTest {
 
 	@Test
 	void createAdminReturnsTheIdAndUsername() {
-		UserCreated created = service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
+		UserCreated created = createAdmin(ADMIN, TYPED_PASSWORD, false);
 
 		assertThat(created.username()).isEqualTo(ADMIN);
-		assertThat(users.findByTenantIdAndUsername(TENANT.value(), ADMIN)).get().extracting(UserDocument::id)
-				.isEqualTo(created.id());
+		assertThat(stored(created.id()).username()).isEqualTo(ADMIN);
 	}
 
 	@Test
 	void createAdminRequiresAPasswordChangeWhenThePasswordWasGenerated() {
-		UserCreated created = service.createAdmin(command(TENANT, ADMIN, "Generated-Pass-123", true));
+		UserCreated created = createAdmin(ADMIN, "Generated-Pass-123", true);
 
-		UserDocument user = users.findById(created.id()).orElseThrow();
+		UserDocument user = stored(created.id());
 		assertThat(user.mustChangePassword()).isTrue();
 		assertThat(user.passwordIssuedAt()).isEqualTo(NOW);
 	}
 
 	@Test
 	void createAdminRequiresNoPasswordChangeWhenThePasswordWasTyped() {
-		UserCreated created = service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
+		UserCreated created = createAdmin(ADMIN, TYPED_PASSWORD, false);
 
-		assertThat(users.findById(created.id()).orElseThrow().mustChangePassword()).isFalse();
+		assertThat(stored(created.id()).mustChangePassword()).isFalse();
 	}
 
 	@Test
 	void createAdminStoresTheTemporaryFlag() {
-		UserCreated created = service.createAdmin(
-				new CreateAdminCommand(OTHER, "operator", "Generated-Pass-123".toCharArray(), true, true));
+		UserCreated created = asSelfHost(() -> service.createAdmin(
+				new CreateAdminCommand("operator", "Generated-Pass-123".toCharArray(), true, true)));
 
-		assertThat(users.findById(created.id()).orElseThrow().temporary()).isTrue();
+		assertThat(stored(created.id()).temporary()).isTrue();
 	}
 
 	@Test
 	void createAdminThrowsAdminAlreadyExistsExceptionWhenTheTenantHasAnAdmin() {
-		service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
+		createAdmin(ADMIN, TYPED_PASSWORD, false);
 
 		assertThatExceptionOfType(AdminAlreadyExistsException.class)
-				.isThrownBy(() -> service.createAdmin(command(TENANT, "second", "Typed-Password-2", false)))
+				.isThrownBy(() -> createAdmin("second", "Typed-Password-2", false))
 				.withMessageContaining("self-host-tenant");
-		assertThat(users.findByTenantIdAndUsername(TENANT.value(), "second")).isEmpty();
+		assertThat(mongo.count(new Query(where("username").is("second")), UserDocument.class)).isZero();
 	}
 
 	@Test
 	void createAdminAllowsTheSameUsernameInAnotherTenant() {
-		service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
+		storeUserOfAnotherTenant(ADMIN, Set.of(UserService.ADMIN_ROLE), false, NOW);
 
-		service.createAdmin(command(OTHER, ADMIN, "Typed-Password-2", false));
+		UserCreated created = createAdmin(ADMIN, TYPED_PASSWORD, false);
 
-		assertThat(users.findByTenantIdAndUsername("other", ADMIN)).isPresent();
+		assertThat(stored(created.id()).username()).isEqualTo(ADMIN);
+		assertThat(mongo.count(new Query(where("username").is(ADMIN)), UserDocument.class)).isEqualTo(2);
 	}
 
 	@Test
 	void createAdminZeroesThePassword() {
 		char[] password = TYPED_PASSWORD.toCharArray();
 
-		service.createAdmin(new CreateAdminCommand(TENANT, ADMIN, password, false, false));
+		asSelfHost(() -> service.createAdmin(new CreateAdminCommand(ADMIN, password, false, false)));
 
 		assertThat(password).containsOnly('\0');
 	}
 
 	@Test
 	void createAdminZeroesThePasswordAlsoWhenItFails() {
-		service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
+		createAdmin(ADMIN, TYPED_PASSWORD, false);
 		char[] password = "Typed-Password-2".toCharArray();
 
 		assertThatExceptionOfType(AdminAlreadyExistsException.class).isThrownBy(
-				() -> service.createAdmin(new CreateAdminCommand(TENANT, "second", password, false, false)));
+				() -> asSelfHost(() -> service.createAdmin(new CreateAdminCommand("second", password, false, false))));
 		assertThat(password).containsOnly('\0');
 	}
 
 	@Test
-	void adminExistsIsTrueOnlyForATenantWithAnAdmin() {
-		service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
+	void adminExistsIsTrueWhenTheCurrentTenantHasAnAdmin() {
+		createAdmin(ADMIN, TYPED_PASSWORD, false);
 
-		assertThat(service.adminExists(TENANT)).isTrue();
-		assertThat(service.adminExists(OTHER)).isFalse();
+		boolean exists = asSelfHost(service::adminExists);
+
+		assertThat(exists).isTrue();
 	}
 
 	@Test
-	void anyUserExistsIsTrueOnlyForATenantWithAUser() {
-		service.createAdmin(command(TENANT, ADMIN, TYPED_PASSWORD, false));
+	void adminExistsIsFalseWhenOnlyAnotherTenantHasAnAdmin() {
+		storeUserOfAnotherTenant(ADMIN, Set.of(UserService.ADMIN_ROLE), false, NOW);
 
-		assertThat(service.anyUserExists(TENANT)).isTrue();
-		assertThat(service.anyUserExists(OTHER)).isFalse();
+		boolean exists = asSelfHost(service::adminExists);
+
+		assertThat(exists).isFalse();
+	}
+
+	@Test
+	void anyUserExistsIsTrueWhenTheCurrentTenantHasAUser() {
+		createAdmin(ADMIN, TYPED_PASSWORD, false);
+
+		boolean exists = asSelfHost(service::anyUserExists);
+
+		assertThat(exists).isTrue();
+	}
+
+	@Test
+	void anyUserExistsIsFalseWhenOnlyAnotherTenantHasAUser() {
+		storeUserOfAnotherTenant("alice", Set.of("USER"), false, NOW);
+
+		boolean exists = asSelfHost(service::anyUserExists);
+
+		assertThat(exists).isFalse();
 	}
 
 	@Test
 	void changePasswordStoresTheNewHashAndClearsTheChangeRequirement() {
-		UserCreated created = service.createAdmin(command(TENANT, ADMIN, "Generated-Pass-123", true));
+		UserCreated created = createAdmin(ADMIN, "Generated-Pass-123", true);
 		char[] newPassword = "Chosen-Password-9".toCharArray();
 
-		service.changePassword(created.id(), newPassword);
+		tenantRunner.run(TenantId.SELF_HOST, () -> service.changePassword(created.id(), newPassword));
 
-		UserDocument user = users.findById(created.id()).orElseThrow();
+		UserDocument user = stored(created.id());
 		assertThat(passwordEncoder.matches("Chosen-Password-9", user.passwordHash())).isTrue();
 		assertThat(passwordEncoder.matches("Generated-Pass-123", user.passwordHash())).isFalse();
 		assertThat(user.mustChangePassword()).isFalse();
@@ -198,13 +244,52 @@ class UserServiceTest {
 	void changePasswordThrowsNoSuchElementExceptionForAnUnknownUser() {
 		char[] newPassword = "Chosen-Password-9".toCharArray();
 
-		assertThatExceptionOfType(NoSuchElementException.class)
-				.isThrownBy(() -> service.changePassword("0123456789abcdef01234567", newPassword));
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() -> tenantRunner
+				.run(TenantId.SELF_HOST, () -> service.changePassword("0123456789abcdef01234567", newPassword)));
 		assertThat(newPassword).containsOnly('\0');
 	}
 
-	private static CreateAdminCommand command(TenantId tenant, String username, String password, boolean generated) {
-		return new CreateAdminCommand(tenant, username, password.toCharArray(), generated, false);
+	@Test
+	void changePasswordChangesNoUserWhenTheUserIsOfAnotherTenant() {
+		UserDocument other = storeUserOfAnotherTenant(ADMIN, Set.of(UserService.ADMIN_ROLE), true, NOW);
+		char[] newPassword = "Chosen-Password-9".toCharArray();
+
+		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
+				() -> tenantRunner.run(TenantId.SELF_HOST, () -> service.changePassword(other.id(), newPassword)));
+		assertThat(stored(other.id())).isEqualTo(other);
+	}
+
+	@Test
+	void lockExpiredGeneratedPasswordsLocksNoUserWhenTheUserIsOfAnotherTenant() {
+		UserDocument other = storeUserOfAnotherTenant(ADMIN, Set.of(), true, NOW.minus(Duration.ofHours(25)));
+
+		int locked = asSelfHost(service::lockExpiredGeneratedPasswords);
+
+		assertThat(locked).isZero();
+		assertThat(stored(other.id()).locked()).isFalse();
+	}
+
+	private UserCreated createAdmin(String username, String password, boolean generated) {
+		return asSelfHost(() -> service
+				.createAdmin(new CreateAdminCommand(username, password.toCharArray(), generated, false)));
+	}
+
+	private <T> T asSelfHost(Supplier<T> step) {
+		return TenantTasks.call(tenantRunner, TenantId.SELF_HOST, step);
+	}
+
+	/** Reads with the plain template, without the tenant limit. */
+	private UserDocument stored(String id) {
+		UserDocument user = mongo.findById(id, UserDocument.class);
+		assertThat(user).as("the user %s", id).isNotNull();
+		return user;
+	}
+
+	/** Writes with the plain template: in the self-host mode no work runs for another tenant. */
+	private UserDocument storeUserOfAnotherTenant(String username, Set<String> roles, boolean generated,
+			Instant passwordIssuedAt) {
+		return mongo.insert(new UserDocument(null, OTHER, username, "{noop}x", roles, generated, passwordIssuedAt,
+				false, false, passwordIssuedAt));
 	}
 
 }

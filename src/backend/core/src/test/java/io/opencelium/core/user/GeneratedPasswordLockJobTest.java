@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
 import io.opencelium.core.testsupport.MutableClock;
+import io.opencelium.core.testsupport.TenantTasks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -62,9 +64,6 @@ class GeneratedPasswordLockJobTest {
 
 	@Autowired
 	UserService service;
-
-	@Autowired
-	UserRepository users;
 
 	@Autowired
 	MongoTemplate mongo;
@@ -117,7 +116,7 @@ class GeneratedPasswordLockJobTest {
 	void jobDoesNotLockAGeneratedPasswordThatWasChanged() {
 		String id = createAdmin(true);
 		CLOCK.advance(Duration.ofHours(1));
-		service.changePassword(id, "Chosen-Password-9".toCharArray());
+		changePassword(id);
 		CLOCK.advance(Duration.ofHours(24));
 
 		job.lockExpiredGeneratedPasswords();
@@ -130,8 +129,8 @@ class GeneratedPasswordLockJobTest {
 		createAdmin(true);
 		CLOCK.advance(Duration.ofHours(25));
 
-		assertThat(service.lockExpiredGeneratedPasswords()).isEqualTo(1);
-		assertThat(service.lockExpiredGeneratedPasswords()).isZero();
+		assertThat(lockExpiredGeneratedPasswords()).isEqualTo(1);
+		assertThat(lockExpiredGeneratedPasswords()).isZero();
 	}
 
 	@Test
@@ -140,9 +139,22 @@ class GeneratedPasswordLockJobTest {
 		CLOCK.advance(Duration.ofHours(25));
 		job.lockExpiredGeneratedPasswords();
 
-		service.changePassword(id, "Chosen-Password-9".toCharArray());
+		changePassword(id);
 
 		assertThat(locked(id)).isFalse();
+	}
+
+	@Test
+	void jobLocksOnlyTheUserOfTheSelfHostTenantWhenTwoTenantsHaveOldGeneratedPasswords() {
+		// The users of 2 tenants in 1 database, written with the plain template.
+		String own = storeGeneratedUser(TenantId.SELF_HOST.value());
+		String other = storeGeneratedUser("other");
+		CLOCK.advance(Duration.ofHours(25));
+
+		job.lockExpiredGeneratedPasswords();
+
+		assertThat(locked(own)).isTrue();
+		assertThat(locked(other)).isFalse();
 	}
 
 	@Test
@@ -180,13 +192,28 @@ class GeneratedPasswordLockJobTest {
 	}
 
 	private String createAdmin(boolean generated) {
-		var command = new CreateAdminCommand(TenantId.SELF_HOST, "admin", "Some-Password-1".toCharArray(),
-				generated, false);
-		return service.createAdmin(command).id();
+		var command = new CreateAdminCommand("admin", "Some-Password-1".toCharArray(), generated, false);
+		return TenantTasks.call(tenantRunner, TenantId.SELF_HOST, () -> service.createAdmin(command)).id();
 	}
 
+	private void changePassword(String id) {
+		tenantRunner.run(TenantId.SELF_HOST, () -> service.changePassword(id, "Chosen-Password-9".toCharArray()));
+	}
+
+	private int lockExpiredGeneratedPasswords() {
+		return TenantTasks.call(tenantRunner, TenantId.SELF_HOST, service::lockExpiredGeneratedPasswords);
+	}
+
+	/** An unlocked user with a generated password issued now, written with the plain template. */
+	private String storeGeneratedUser(String tenantId) {
+		Instant now = CLOCK.instant();
+		return mongo.insert(new UserDocument(null, tenantId, "admin", "{noop}x", Set.of(), true, now, false, false,
+				now)).id();
+	}
+
+	/** Reads with the plain template, without the tenant limit. */
 	private boolean locked(String id) {
-		return users.findById(id).orElseThrow().locked();
+		return mongo.findById(id, UserDocument.class).locked();
 	}
 
 }

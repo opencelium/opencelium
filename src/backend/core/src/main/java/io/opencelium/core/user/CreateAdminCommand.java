@@ -27,6 +27,14 @@ public record CreateAdminCommand(TenantId tenantId, String username, char[] pass
 		}
 	}
 
+	public CreateAdminCommand(String username, char[] password, boolean generated, boolean temporary) {
+		this(notImplemented(), username, password, generated, temporary);
+	}
+
+	private static TenantId notImplemented() {
+		throw new UnsupportedOperationException();
+	}
+
 	/** Without the password. */
 	@Override
 	public String toString() {
