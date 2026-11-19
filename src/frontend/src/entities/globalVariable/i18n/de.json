@@ -370,5 +370,30 @@
       "atLine": "in Zeile {{line}}",
       "success": "Hat {{type}} in {{ms}} ms zurückgegeben"
     }
+  },
+  "mutable": {
+    "writePolicy": {
+      "label": "Schreibregel",
+      "hints": {
+        "REPLACE": "Der Wert der Ausführung ersetzt den gespeicherten, außer jemand hat ihn während der Ausführung geändert.",
+        "FORWARD_ONLY": "Wird nur gespeichert, wenn er größer als der gespeicherte Wert ist (Zahlen oder ISO-Datumswerte). Für Cursor.",
+        "INCREMENT": "Addiert die Zahl der Ausführung zum gespeicherten Wert. Für Zähler."
+      }
+    },
+    "publishMode": {
+      "label": "Wann Schreibvorgänge gespeichert werden",
+      "hints": {
+        "ON_SUCCESS": "Alle Schreibvorgänge einer Ausführung werden gemeinsam gespeichert, sobald sie erfolgreich ist; eine fehlgeschlagene Ausführung speichert nichts.",
+        "EACH_WRITE": "Wird während der Ausführung (höchstens alle 500 ms) und am Ende noch einmal gespeichert, auch wenn die Ausführung fehlschlägt."
+      }
+    },
+    "owner": {
+      "label": "Besitzer-Workflow",
+      "hint": "Der einzige Workflow, der diese Variable schreiben darf. Leer gelassen, beansprucht sie der erste Workflow, der mit einem Schreibvorgang gespeichert wird.",
+      "unclaimed": "Wird vom ersten schreibenden Workflow beansprucht"
+    },
+    "errors": {
+      "valueUnfitForPolicy": "Dieser Wert passt nicht zur Schreibregel: Hochzählen braucht eine Zahl, Nur vorwärts eine Zahl oder ein ISO-Datum."
+    }
   }
 }

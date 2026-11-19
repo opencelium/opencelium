@@ -7,8 +7,11 @@ import en from '@entities/globalVariable/i18n/en.json'
 import de from '@entities/globalVariable/i18n/de.json'
 import { GLOBAL_VARIABLE_ENTITY as baseKey, GLOBAL_VARIABLE_PATH } from './globalVariable.constants'
 import {
+    DEFAULT_PUBLISH_MODE,
+    DEFAULT_WRITE_POLICY,
     emptyScope,
     isCodeMissing,
+    isValueUnfitForPolicy,
     isScopeIncomplete,
     isValueMissing,
     MAX_VALUE_BYTES,
@@ -72,6 +75,12 @@ export const globalVariableDefinition: EntityDefinition = {
             fields: ['secret', 'value'],
             validate: (data) => !isValueMissing(data as Partial<GlobalVariableFormValues>),
             message: `${baseKey}.fields.value.errors.required`,
+            path: 'value',
+        },
+        {
+            fields: ['value', 'writePolicy'],
+            validate: (data) => !isValueUnfitForPolicy(data as Partial<GlobalVariableFormValues>),
+            message: `${baseKey}.mutable.errors.valueUnfitForPolicy`,
             path: 'value',
         },
         {
@@ -183,6 +192,9 @@ export const globalVariableDefinition: EntityDefinition = {
             defaultValue: emptyScript() satisfies ScriptFormValues,
             ui: { component: 'input' },
         },
+        { name: 'writePolicy', type: 'string', defaultValue: DEFAULT_WRITE_POLICY, ui: { component: 'input' } },
+        { name: 'publishMode', type: 'string', defaultValue: DEFAULT_PUBLISH_MODE, ui: { component: 'input' } },
+        { name: 'ownerWorkflowId', type: 'other', defaultValue: null, ui: { component: 'input' } },
         {
             name: 'valuePreview',
             type: 'string',
@@ -280,7 +292,7 @@ export const globalVariableDefinition: EntityDefinition = {
                 header: `${baseKey}.wizard.steps.value.header`,
                 subheader: `${baseKey}.wizard.steps.value.subheader`,
                 sectionIds: ['value'],
-                validateFields: ['secret', 'value', 'script'],
+                validateFields: ['secret', 'value', 'script', 'writePolicy', 'publishMode', 'ownerWorkflowId'],
             },
             {
                 id: 'visibility',
