@@ -14,10 +14,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import io.opencelium.common.tenant.TenantId;
+import io.opencelium.core.tenant.CurrentTenant;
+import io.opencelium.core.tenant.NoCurrentTenantException;
 
 /**
- * Creates users and changes their passwords. Passwords arrive as {@code char[]} and are zeroed once hashed, also when
- * the call fails; they are never logged or returned. Login is not part of this service.
+ * Creates users and changes their passwords. Each operation works on the users of the current tenant and stops with
+ * {@link NoCurrentTenantException} without one; no operation takes a tenant as a parameter. Passwords arrive as
+ * {@code char[]} and are zeroed once hashed, also when the call fails; they are never logged or returned. Login is
+ * not part of this service.
  */
 @Service
 public class UserService {
@@ -31,30 +35,34 @@ public class UserService {
 
 	private final UserRepository users;
 
+	private final CurrentTenant currentTenant;
+
 	private final PasswordEncoder passwordEncoder;
 
 	private final Clock clock;
 
-	UserService(UserRepository users, PasswordEncoder passwordEncoder, Clock clock) {
+	UserService(UserRepository users, CurrentTenant currentTenant, PasswordEncoder passwordEncoder, Clock clock) {
 		this.users = users;
+		this.currentTenant = currentTenant;
 		this.passwordEncoder = passwordEncoder;
 		this.clock = clock;
 	}
 
 	/**
-	 * Creates the first admin of a tenant.
+	 * Creates the first admin of the current tenant.
 	 *
 	 * @throws AdminAlreadyExistsException when the tenant has an admin, so a repeated setup cannot add a second one
 	 */
 	public UserCreated createAdmin(CreateAdminCommand command) {
 		try {
-			if (adminExists(command.tenantId())) {
-				throw new AdminAlreadyExistsException(command.tenantId());
+			TenantId tenant = currentTenant.get();
+			if (adminExists()) {
+				throw new AdminAlreadyExistsException(tenant);
 			}
 			String hash = passwordEncoder.encode(CharBuffer.wrap(command.password()));
 			Instant now = clock.instant();
-			UserDocument user = users.insert(new UserDocument(null, command.tenantId().value(), command.username(),
-					hash, Set.of(ADMIN_ROLE), command.generated(), now, command.temporary(), false, now));
+			UserDocument user = users.insert(new UserDocument(null, tenant.value(), command.username(), hash,
+					Set.of(ADMIN_ROLE), command.generated(), now, command.temporary(), false, now));
 			return new UserCreated(user.id(), user.username());
 		}
 		finally {
@@ -65,7 +73,7 @@ public class UserService {
 	/**
 	 * Replaces the password with one the user chose: no change is required any more, and a locked user is unlocked.
 	 *
-	 * @throws NoSuchElementException when no user has this id
+	 * @throws NoSuchElementException when no user of the current tenant has this id
 	 */
 	public void changePassword(String userId, char[] newPassword) {
 		try {
@@ -79,25 +87,18 @@ public class UserService {
 		}
 	}
 
-	public boolean adminExists(TenantId tenant) {
-		return users.existsByTenantIdAndRolesContaining(tenant.value(), ADMIN_ROLE);
-	}
-
+	/** Whether the current tenant has an admin. */
 	public boolean adminExists() {
-		throw new UnsupportedOperationException();
+		return users.existsWithRole(ADMIN_ROLE);
 	}
 
+	/** Whether the current tenant has a user of any role. */
 	public boolean anyUserExists() {
-		throw new UnsupportedOperationException();
-	}
-
-	/** Whether the tenant has a user of any role. */
-	public boolean anyUserExists(TenantId tenant) {
-		return users.existsByTenantId(tenant.value());
+		return users.existsAny();
 	}
 
 	/**
-	 * Locks every user whose generated password is older than 24 h and still unchanged.
+	 * Locks every user of the current tenant whose generated password is older than 24 h and still unchanged.
 	 *
 	 * @return the number of users locked by this call
 	 */

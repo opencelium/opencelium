@@ -2,13 +2,17 @@ package io.opencelium.core.tenant;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -157,6 +161,39 @@ class TenantDocumentsTest {
 				.withMessageContaining(TenantDocument.TENANT_ID);
 		assertThat(storedOf(OWN)).hasSize(1);
 		assertThat(storedOf(OTHER)).isEmpty();
+	}
+
+	@Test
+	void updateStopsWhenTheChangeRenamesAFieldToTenantId() {
+		// A rename names its new field only in its value; the tenant ID would take the value of the old field.
+		mongo.insert(new Document(TenantDocument.TENANT_ID, OWN).append(TestDocument.NAME, "x")
+				.append(TestDocument.NUMBER, 0).append("legacyTenant", OTHER), TestDocument.COLLECTION);
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> asSelfHost(() -> documents.update(TestDocument.class, named("x"),
+						new Update().rename("legacyTenant", TenantDocument.TENANT_ID))))
+				.withMessageContaining(TenantDocument.TENANT_ID);
+		assertThat(storedOf(OWN)).hasSize(1);
+		assertThat(storedOf(OTHER)).isEmpty();
+	}
+
+	@ParameterizedTest
+	@MethodSource("changesThatNameTenantIdInAPlainMap")
+	void updateStopsWhenAChangeFromADocumentNamesTenantIdInAPlainMap(Update change) {
+		// A change made from a document can hold a plain map in place of a BSON document for its operator.
+		mongo.insert(new Document(TenantDocument.TENANT_ID, OWN).append(TestDocument.NAME, "x")
+				.append(TestDocument.NUMBER, 0).append("legacyTenant", OTHER), TestDocument.COLLECTION);
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> asSelfHost(() -> documents.update(TestDocument.class, named("x"), change)))
+				.withMessageContaining(TenantDocument.TENANT_ID);
+		assertThat(storedOf(OWN)).hasSize(1);
+		assertThat(storedOf(OTHER)).isEmpty();
+	}
+
+	static Stream<Update> changesThatNameTenantIdInAPlainMap() {
+		return Stream.of(Update.fromDocument(new Document("$set", Map.of(TenantDocument.TENANT_ID, OTHER))),
+				Update.fromDocument(new Document("$rename", Map.of("legacyTenant", TenantDocument.TENANT_ID))));
 	}
 
 	@Test

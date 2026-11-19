@@ -6,9 +6,11 @@ import java.util.Set;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import io.opencelium.core.tenant.TenantDocument;
+
 /**
- * A user of one tenant; the username is unique per tenant ({@link UserIndexes}). Holds the password hash in Spring
- * Security's {@code {algorithm}hash} format, never the password.
+ * A user of one tenant, a tenant document; the username is unique per tenant ({@link UserIndexes}). Holds the
+ * password hash in Spring Security's {@code {algorithm}hash} format, never the password.
  *
  * @param mustChangePassword the password was generated for the user and must be replaced at the next login
  * @param passwordIssuedAt   when the current password was set; a generated one is locked 24 h later
@@ -18,14 +20,23 @@ import org.springframework.data.mongodb.core.mapping.Document;
  */
 @Document(UserDocument.COLLECTION)
 public record UserDocument(@Id String id, String tenantId, String username, String passwordHash, Set<String> roles,
-		boolean mustChangePassword, Instant passwordIssuedAt, boolean temporary, boolean locked, Instant createdAt) {
+		boolean mustChangePassword, Instant passwordIssuedAt, boolean temporary, boolean locked, Instant createdAt)
+		implements TenantDocument {
 
-	/** The collection; {@link AdminLookup} reads it with the plain driver, by these field names. */
+	/** The collection; {@link AdminLookup} reads it with the plain driver, and {@link UserRepository} queries it. */
 	static final String COLLECTION = "users";
 
-	static final String TENANT_ID = "tenantId";
+	static final String ID = "_id";
 
 	static final String ROLES = "roles";
+
+	static final String PASSWORD_HASH = "passwordHash";
+
+	static final String MUST_CHANGE_PASSWORD = "mustChangePassword";
+
+	static final String PASSWORD_ISSUED_AT = "passwordIssuedAt";
+
+	static final String LOCKED = "locked";
 
 	public UserDocument {
 		roles = roles == null ? Set.of() : Set.copyOf(roles);

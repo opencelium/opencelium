@@ -8,11 +8,13 @@ import com.mongodb.client.model.Projections;
 import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.config.mongo.MongoConnection;
 import io.opencelium.core.config.mongo.MongoStartupPing;
+import io.opencelium.core.tenant.TenantDocument;
 
 /**
  * Whether a database holds an admin of a tenant, read with the plain driver and a client of its own: the setup wizard
- * asks this before Spring starts, so it has no repository. A tenant with an admin gets no second one from the setup.
- * The query is that of {@link UserService#adminExists}.
+ * asks this before Spring starts, so it has no repository and no current tenant. A tenant with an admin gets no
+ * second one from the setup. The query is that of {@link UserService#adminExists}, for the tenant that the caller
+ * names.
  */
 public final class AdminLookup {
 
@@ -26,7 +28,7 @@ public final class AdminLookup {
 	public static boolean exists(MongoConnection connection, TenantId tenant) {
 		try (MongoClient client = MongoClients.create(MongoStartupPing.checkSettings(connection))) {
 			return client.getDatabase(connection.databaseName()).getCollection(UserDocument.COLLECTION)
-					.find(Filters.and(Filters.eq(UserDocument.TENANT_ID, tenant.value()),
+					.find(Filters.and(Filters.eq(TenantDocument.TENANT_ID, tenant.value()),
 							Filters.eq(UserDocument.ROLES, UserService.ADMIN_ROLE)))
 					.projection(Projections.include("_id")).limit(1).first() != null;
 		}
