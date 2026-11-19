@@ -29,6 +29,7 @@ const MENU_ITEM_COMPONENT: Partial<Record<string, PermissionComponent>> = {
     '/role': 'USERGROUP',
     '/invoker': 'INVOKER',
     '/system-config': 'APP',
+    '/global-variable': 'GLOBAL_VARIABLE',
 };
 
 // Render a leaf menu label as a real anchor so the browser can open the route

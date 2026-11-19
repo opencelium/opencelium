@@ -4,7 +4,7 @@ import type {Reference} from "../ReferenceTypes";
 
 export class RequiredDataReference implements ReferenceStrategy {
     match(value: string): boolean {
-        return /^\{.*\}$/.test(value) && !value.startsWith('#{') && !value.startsWith('${');
+        return /^\{.*\}$/.test(value) && !value.startsWith('#{') && !value.startsWith('${') && !value.startsWith('{{');
     }
 
     parse(value: string): Reference {

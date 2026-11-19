@@ -32,7 +32,8 @@ export type PlaygroundInputs = {
 
 const WEBHOOK_RE = /\$\{([^}:\s]+)(?::([a-z]+))?\}/g;
 // `${…}` is a webhook parameter and `{%…%}` a reference, so neither may precede or open the braces.
-const CONNECTION_FIELD_RE = /(?<![$#])\{([A-Za-z_][\w.-]*)\}/g;
+// Request data never starts on `{{`, which belongs to `{{global.x}}` (backend FR-9).
+const CONNECTION_FIELD_RE = /(?<![$#{])\{([A-Za-z_][\w.-]*)\}/g;
 
 const unwrapReference = (match: string) => match.trim().replace(/^\{%\s*/, '').replace(/\s*%}$/, '');
 
