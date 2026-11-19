@@ -30,6 +30,14 @@ public record TenantId(String value) {
 		return new TenantId(value);
 	}
 
+	/**
+	 * Whether this is {@link #SELF_HOST} or {@link #SYSTEM}: IDs that only core gives, never the Service Portal. No
+	 * customer of the cloud mode has such an ID.
+	 */
+	public boolean isReserved() {
+		return equals(SELF_HOST) || equals(SYSTEM);
+	}
+
 	@Override
 	public String toString() {
 		return value;

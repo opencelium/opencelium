@@ -120,6 +120,17 @@ class MongoStepEnvironmentTest {
 	}
 
 	@Test
+	void runShowsNoLogPatternDefaultWhenItAppliesTheDefaults() {
+		// A SPRING_MONGODB_ variable sends the step through the defaults of the start, which include the log pattern.
+		SetupContext context = withVariables(Map.of("SPRING_MONGODB_DATABASE", "oc_from_variable"));
+
+		step(ANSWERS).run(context, prompter);
+
+		assertThat(console.output()).contains("(from the environment: SPRING_MONGODB_DATABASE)")
+				.doesNotContain("logging.pattern").doesNotContain("%X{");
+	}
+
+	@Test
 	void runPrefersTheSpringMongodbVariableWhenOcMongoUriIsAlsoSet() {
 		SetupContext context = withVariables(Map.of("SPRING_MONGODB_URI", "mongodb://oc:s3cret@db.example/oc_spring",
 				"OC_MONGO_URI", "mongodb://other.example/oc_placeholder"));

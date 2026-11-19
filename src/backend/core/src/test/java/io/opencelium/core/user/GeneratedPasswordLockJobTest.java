@@ -4,6 +4,9 @@ import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,11 +22,17 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.convention.TestBean;
 
 import io.opencelium.common.tenant.TenantId;
+import io.opencelium.core.config.DeploymentMode;
+import io.opencelium.core.config.OpenCeliumProperties;
+import io.opencelium.core.tenant.CurrentTenant;
+import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
 import io.opencelium.core.testsupport.MutableClock;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @MongoIntegrationTest
 @ExtendWith(OutputCaptureExtension.class)
@@ -59,6 +68,12 @@ class GeneratedPasswordLockJobTest {
 
 	@Autowired
 	MongoTemplate mongo;
+
+	@Autowired
+	TenantRunner tenantRunner;
+
+	@Autowired
+	CurrentTenant currentTenant;
 
 	@BeforeEach
 	void reset() {
@@ -128,6 +143,40 @@ class GeneratedPasswordLockJobTest {
 		service.changePassword(id, "Chosen-Password-9".toCharArray());
 
 		assertThat(locked(id)).isFalse();
+	}
+
+	@Test
+	void lockExpiredGeneratedPasswordsRunsForTheSelfHostTenantWhenTheModeIsSelfHost() {
+		// The lock has no record of a tenant: it is work of the 1 tenant of the installation.
+		List<TenantId> currentTenants = new ArrayList<>();
+		UserService recording = mock(UserService.class);
+		when(recording.lockExpiredGeneratedPasswords()).thenAnswer(invocation -> {
+			currentTenants.add(currentTenant.get());
+			return service.lockExpiredGeneratedPasswords();
+		});
+		String id = createAdmin(true);
+		CLOCK.advance(Duration.ofHours(25));
+
+		job(recording, DeploymentMode.SELF_HOST).lockExpiredGeneratedPasswords();
+
+		assertThat(currentTenants).containsExactly(TenantId.SELF_HOST);
+		assertThat(locked(id)).isTrue();
+	}
+
+	@Test
+	void lockExpiredGeneratedPasswordsLocksNoUserWhenTheModeIsCloud() {
+		// In the cloud mode the Service Portal owns the users, and the database of the yml file is the system database.
+		String id = createAdmin(true);
+		CLOCK.advance(Duration.ofHours(25));
+
+		job(service, DeploymentMode.CLOUD).lockExpiredGeneratedPasswords();
+
+		assertThat(locked(id)).isFalse();
+	}
+
+	private GeneratedPasswordLockJob job(UserService users, DeploymentMode mode) {
+		return new GeneratedPasswordLockJob(users, tenantRunner,
+				new OpenCeliumProperties(mode, dataDir, Optional.empty()));
 	}
 
 	private String createAdmin(boolean generated) {
