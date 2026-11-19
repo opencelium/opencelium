@@ -1,9 +1,9 @@
 import { useMemo, type ReactNode } from 'react'
-import type { PickerQuery } from '../../model/types'
+import type { PickerScope } from '../../model/types'
 import { GlobalPickerScopeContext } from './globalPicker'
 
 type Props = {
-    scope: PickerQuery | null
+    scope: PickerScope | null
     children: ReactNode
 }
 
