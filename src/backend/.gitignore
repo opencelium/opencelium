@@ -24,7 +24,6 @@ src/main/resources/support-files/**
 src/main/resources/logs/**
 src/main/resources/updating-backup
 src/main/resources/backup
-src/test/
 src/test/java/com/becon/opencelium/backend/ApplicationTests.java
 !src/test/OCELTest.java
 !src/test/OCELFunctionsTest.java
