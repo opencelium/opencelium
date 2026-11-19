@@ -275,6 +275,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           nodes: hydratedNodes, edges: workflow.edges, connection: conditionConnection,
           onClose: () => workflow.setConditionEditor(null),
           onSave: workflow.onSaveConditionConfig }}
+        setGlobal={{ onSave: workflow.onSaveSetGlobal }}
         aggregator={{ open: !!workflow.aggregatorEditor, node: aggregatorNode,
           onClose: () => workflow.setAggregatorEditor(null),
           onSave: workflow.onSaveDataAggregator }}

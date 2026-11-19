@@ -20,18 +20,20 @@ type Props = {
     disabled?: boolean
     className?: string
     testId?: string
+    /** Narrows the offered variables, e.g. to the mutable ones a Set step may write. */
+    filter?: (item: PickerItem) => boolean
 }
 
 // Scripts are listed but not pickable until the field call editor exists (phase 2): a script
 // can't be referenced like a value, it must be called with its parameters.
-export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, className, testId }: Props) {
+export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, className, testId, filter }: Props) {
     const { t } = useI18n('entities')
     const { items, isLoading } = useGlobalVariablePicker()
 
     const options = useMemo(() => KIND_ORDER
         .map((kind) => ({
             label: t(`global-variable.kind.${kind}.label`),
-            options: items.filter((item) => item.kind === kind).map((item) => ({
+            options: items.filter((item) => item.kind === kind && (!filter || filter(item))).map((item) => ({
                 value: item.name,
                 searchText: `${item.name} ${item.description}`,
                 disabled: item.kind === 'SCRIPT',
@@ -46,7 +48,7 @@ export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, c
                 ),
             })),
         }))
-        .filter((group) => group.options.length > 0), [items, t])
+        .filter((group) => group.options.length > 0), [filter, items, t])
 
     return (
         <Select

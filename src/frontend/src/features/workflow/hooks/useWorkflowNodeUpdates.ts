@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { Connector } from '@entities/connector/model/types';
 import type { ConditionConfig } from '../components/condition-builder/conditionBuilder.types';
-import type { WorkflowNodeModel } from '../types/workflow.types';
+import type { WorkflowNodeModel, WorkflowSetGlobalConfig } from '../types/workflow.types';
 import type { WorkflowMethodConfig } from '../types/request-config.types';
 import { assignConnectorToNode } from '../components/template/templateConnectorMapping.utils';
 
@@ -35,6 +35,12 @@ export const useWorkflowNodeUpdates = (
 			// data.subtitle, which collectNodeReferenceColors reads as a live
 			// reference and flags as broken the moment that method is deleted.
 			...(node.data.labelEdited ? {} : { subtitle: conditionConfig.expression }),
+		} } : node));
+		closeConditionEditor();
+	},
+	onSaveSetGlobal: (nodeId: string, setGlobal: WorkflowSetGlobalConfig) => {
+		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? { ...node, data: {
+			...node.data, setGlobal, hasError: false, errorMessage: undefined,
 		} } : node));
 		closeConditionEditor();
 	},

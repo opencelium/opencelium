@@ -1,4 +1,4 @@
-import type { WorkflowOperatorKind } from '../../types/workflow.types';
+import type { WorkflowCreateKind } from '../../types/workflow.types';
 
 export const sidebarItems: {
   key: string;
@@ -28,10 +28,11 @@ export const sidebarItems: {
 ];
 
 export const operatorItems: {
-  key: WorkflowOperatorKind;
+  key: Extract<WorkflowCreateKind, 'if' | 'loop' | 'setglobal'>;
   titleKey: string;
   textKey: string;
 }[] = [
   { key: 'if', titleKey: 'sidebar.operatorOption.if.title', textKey: 'sidebar.operatorOption.if.description' },
   { key: 'loop', titleKey: 'sidebar.operatorOption.loop.title', textKey: 'sidebar.operatorOption.loop.description' },
+  { key: 'setglobal', titleKey: 'sidebar.operatorOption.setglobal.title', textKey: 'sidebar.operatorOption.setglobal.description' },
 ];

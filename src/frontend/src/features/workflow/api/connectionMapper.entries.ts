@@ -7,6 +7,7 @@ import { createConditionId } from '../components/condition-builder/conditionTree
 import { initialNodes } from '../data/initialGraph';
 import { OFFSETS, TITLES } from '../utils/graph.constants';
 import type { IndexedWorkflowEntry } from './connectionMapper.types';
+import { setGlobalValueToText } from '../utils/setGlobalValue';
 
 type LegacyConditionNode = {
 	id?: string;
@@ -107,9 +108,23 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 	} };
 };
 
+const toSetGlobalEntry = (operator: any, index: number, entryIndex: string): IndexedWorkflowEntry => ({
+	index: entryIndex, path: parsePath(entryIndex), source: operator, node: {
+		id: operator?.id ?? operator?.uiId ?? `setglobal-${index}`, type: 'setglobal',
+		position: getPosition(parsePath(entryIndex)), data: {
+			title: 'Set Variable', kind: 'setglobal',
+			setGlobal: {
+				variable: String(operator?.setGlobal?.variable ?? ''),
+				value: setGlobalValueToText(operator?.setGlobal?.value),
+			},
+		},
+	},
+});
+
 const toOperatorEntry = (operator: any, index: number, fallback: number,
 	legacyOperators: LegacyConditionNode[]): IndexedWorkflowEntry => {
 	const entryIndex = normalizeIndex(operator?.index, fallback);
+	if (operator?.type === 'setglobal') return toSetGlobalEntry(operator, index, entryIndex);
 	const type = operator?.type === 'loop' ? 'loop' as const : 'if' as const;
 	const legacyTree = legacyOperators.find((tree) => tree.id === operator?.uiId);
 	return { index: entryIndex, path: parsePath(entryIndex), source: operator, node: {
