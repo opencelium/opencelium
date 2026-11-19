@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
+import static com.becon.opencelium.backend.constant.RegExpression.globalRef;
 import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 import static com.becon.opencelium.backend.constant.RegExpression.webhook;
@@ -17,6 +18,7 @@ public class ReferenceDetector {
                             enhancement + "|" +
                             webhook + "|" +
                             pageRef + "|" +
+                            globalRef + "|" +
                             requestData
             );
 
@@ -32,7 +34,8 @@ public class ReferenceDetector {
             return false;
         }
 
-        return CONTAINS_PATTERN.matcher(expression).find();
+        // an escaped global token is literal text, so its braces are no reference
+        return CONTAINS_PATTERN.matcher(GlobalEscape.mask(expression)).find();
     }
 
 
@@ -42,7 +45,7 @@ public class ReferenceDetector {
      * <p>All supported reference formats either:
      * <ul>
      *   <li>contain a brace pair {@code {...}} (request data, webhooks, page refs,
-     *       wrapped refs, enhancements), or</li>
+     *       wrapped refs, enhancements, global variables), or</li>
      *   <li>start with {@code '#'} followed by a fixed-length identifier and a dot
      *       ({@code direct refs}).</li>
      * </ul>

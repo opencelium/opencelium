@@ -17,7 +17,26 @@ public interface RegExpression {
     String enhancement = "#\\{%[0-9a-fA-F]{24}%\\}";
     String webhook = "\\$\\{(.*?)\\}";
     String pageRef = "@\\{([^}]+)\\}";
-    String requestData = "\\{(?!%)(.*?)(?<!%)\\}";
+
+    /**
+     * Global variable: {@code {{global.name}}}, optionally followed by a path into an array or a
+     * map, e.g. {@code {{global.limits.maxPerPage}}} or {@code {{global.tenants[0].id}}}. Group 1
+     * is the variable name, group 2 the path.
+     *
+     * <p>A token escaped with a backslash, {@code \{{global.name}}}, is literal text and is not
+     * matched. Wherever references are parsed this pattern is checked before {@link #requestData}
+     * and {@link #requiredData}, which would otherwise read a part of the token as request data.
+     */
+    String globalRef = "(?<!\\\\)\\{\\{global\\.([A-Za-z][A-Za-z0-9_]*)([.\\[][^{}]*)?\\}\\}";
+
+    /**
+     * An escaped global variable token, {@code \{{global.name}}}: literal text that is sent as
+     * {@code {{global.name}}} and is never resolved.
+     */
+    String escapedGlobalRef = "\\\\\\{\\{global\\.[A-Za-z][A-Za-z0-9_]*(?:[.\\[][^{}]*)?\\}\\}";
+
+    // never starts on '{{', so it cannot take the opening of a global variable reference
+    String requestData = "\\{(?![%{])(.*?)(?<!%)\\}";
 
     // Another one
     String arrayWithLetterIndex = "\\[([a-z,*]+)\\]";

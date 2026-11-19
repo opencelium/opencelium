@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.quartz;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.ThreadLocalOcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
@@ -28,6 +29,7 @@ import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.utility.TestNameUtils;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -39,8 +41,18 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
+/**
+ * Runs a connection for one schedule.
+ *
+ * <p>{@link DisallowConcurrentExecution} lets only one run per Quartz job go at a time. Every
+ * trigger of a schedule fires the same job (cron, manual start, test run and webhook), so a
+ * second start of that schedule waits for the running one. Two schedules of one connection are
+ * two jobs and can still overlap.
+ */
 @Component
+@DisallowConcurrentExecution
 public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
     private final SubscriptionService subscriptionService;
@@ -97,6 +109,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             long startTime = System.currentTimeMillis();
             try {
                 executionLogger.logAndSend("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d".formatted(execId, connectionId, schedulerId));
+                logGlobalSnapshot(executionLogger, executionObj.getGlobalSnapshot());
                 executor.start();
             } finally {
                 executionLogger.logAndSend("phase=EXECUTION_END id=%d connectionId=%d schedulerId=%d".formatted(execId, connectionId, schedulerId));
@@ -121,6 +134,22 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
         } finally{
             thread = null;
         }
+    }
+
+    /**
+     * Records which version of each global variable the run reads, so a run can be explained
+     * after the variables changed. Values are not logged here: the request log shows them where
+     * they are used.
+     */
+    private static void logGlobalSnapshot(OcLogger<ExecutionLog> executionLogger, GlobalVariableSnapshot snapshot) {
+        if (snapshot.isEmpty()) {
+            return;
+        }
+
+        String versions = snapshot.entries().stream()
+                .map(entry -> entry.name() + "@" + entry.version())
+                .collect(Collectors.joining(", ", "[", "]"));
+        executionLogger.logAndSend("segment=GLOBAL_SNAPSHOT data=" + versions);
     }
 
     @Override

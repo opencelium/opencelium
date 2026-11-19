@@ -11,4 +11,7 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<EventNotification, Integer> {
     @Transactional
     List<EventNotification> findBySchedulerId(int schedulerId);
+
+    /** Finds the notifications that send the texts of a template. */
+    List<EventNotification> findByEventMessageId(int eventMessageId);
 }

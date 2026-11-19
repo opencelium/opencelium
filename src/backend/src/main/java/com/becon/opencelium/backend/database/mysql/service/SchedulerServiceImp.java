@@ -67,6 +67,7 @@ public class SchedulerServiceImp implements SchedulerService {
     private final ExecutionService executionService;
     private final ExecutionArgumentService executionArgumentService;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
+    private final GlobalVariableUsageService globalVariableUsageService;
 
 
     public SchedulerServiceImp(
@@ -81,7 +82,8 @@ public class SchedulerServiceImp implements SchedulerService {
             SchedulerFactoryBean schedulerFactoryBean,
             ExecutionService executionService,
             ExecutionArgumentService executionArgumentService,
-            Mapper<Connection, ConnectionDTO> connectionMapper
+            Mapper<Connection, ConnectionDTO> connectionMapper,
+            GlobalVariableUsageService globalVariableUsageService
     ) {
         this.connectionService = connectionService;
         this.webhookService = webhookService;
@@ -95,6 +97,7 @@ public class SchedulerServiceImp implements SchedulerService {
         this.executionArgumentService = executionArgumentService;
         this.connectionMapper = connectionMapper;
         this.connectorService = connectorService;
+        this.globalVariableUsageService = globalVariableUsageService;
     }
 
     @Override
@@ -137,7 +140,13 @@ public class SchedulerServiceImp implements SchedulerService {
         // ON DELETE NO ACTION, and entity-level cascade misses rows written concurrently.
         executionArgumentService.deleteBySchedulerId(id);
         executionService.deleteBySchedulerId(id);
+        // the notifications of a schedule are deleted with it, and so are their usages
+        List<EventNotification> notifications = scheduler.getEventNotifications();
         schedulerRepository.delete(scheduler);
+        if (notifications != null) {
+            notifications.forEach(notification ->
+                    globalVariableUsageService.deleteForNotification(notification.getId()));
+        }
     }
 
     @Override
@@ -369,14 +378,20 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void saveNotification(EventNotification eventNotification) {
+        // the texts a notification sends are those of its template: checked against the workflow
+        // of its schedule before anything is stored
+        globalVariableUsageService.checkNotification(eventNotification);
+
         notificationRepository.save(eventNotification);
         eventNotification.getEventRecipients().forEach(recipientService::save);
         messageService.save(eventNotification.getEventMessage());
+        globalVariableUsageService.rebuildForNotification(eventNotification);
     }
 
     @Override
     public void deleteNotificationById(int id) {
         notificationRepository.deleteById(id);
+        globalVariableUsageService.deleteForNotification(id);
     }
 
 

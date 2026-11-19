@@ -8,6 +8,8 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.enums.OpType;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalConnectorValues;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
@@ -40,7 +43,11 @@ public class ConnectorExMapper {
         this.invokerService = invokerService;
     }
 
-    ConnectorEx toEntity(ConnectorMng dto) {
+    /**
+     * @param globals the global variables of the run: a connector field that holds a reference
+     *                gets its value from them
+     */
+    ConnectorEx toEntity(ConnectorMng dto, GlobalVariableSnapshot globals) {
         if (dto == null) return null;
         ConnectorEx connectorEx = new ConnectorEx();
         if(!Objects.equals(ConnectionConstants.DEFAULT_CONNECTOR_ID, dto.getConnectorId())){
@@ -53,6 +60,9 @@ public class ConnectorExMapper {
                     requestData.add(new RequestData(rd));
                 }
             });
+
+            // before the fields are computed: what follows must see values, not references
+            GlobalConnectorValues.resolve(requestData, () -> globals);
 
             RequiredDataService requiredDataService = new RequiredDataServiceImp(connector,requestData, invoker.getOperations());
             requestData.forEach(rqsd -> {
@@ -85,7 +95,7 @@ public class ConnectorExMapper {
     // Builds the connectors map for multi-connector connections. Collects unique connectorIds
     // from methods that carry their own connector reference, loads each once, and returns a map
     // keyed by connector ID for fast lookup during execution.
-    Map<Integer, MethodConnectorEx> toMethodConnectorMap(ConnectorMng fromConnector) {
+    Map<Integer, MethodConnectorEx> toMethodConnectorMap(ConnectorMng fromConnector, GlobalVariableSnapshot globals) {
         if (fromConnector == null || fromConnector.getMethods() == null) {
             return Map.of();
         }
@@ -98,7 +108,8 @@ public class ConnectorExMapper {
                         MethodConnectorMng::getConnectorId,
                         (a, b) -> a))
                 .keySet()
-                .forEach(connectorId -> result.put(connectorId, toMethodConnector(connectorService.getById(connectorId))));
+                .forEach(connectorId -> result.put(
+                        connectorId, toMethodConnector(connectorService.getById(connectorId), () -> globals)));
         return result;
     }
 
@@ -109,8 +120,17 @@ public class ConnectorExMapper {
      * another request, e.g. an authentication token, so this sends real requests to the API.
      * The request data of {@code connector} is completed with the invoker's missing fields and
      * overwritten with the resolved values.
+     *
+     * <p>A field that holds global variable references gets their values first, so a computed
+     * field is asked for with real values.
+     *
+     * @param globals gives the global variables to read: the snapshot of the run, or outside a
+     *                run the variables open to all workflows as they are now; asked only if a
+     *                field holds a reference
+     * @throws com.becon.opencelium.backend.exception.GlobalVariableNotFoundException if a field
+     *         references a variable that does not exist or is not open to all workflows
      */
-    public MethodConnectorEx toMethodConnector(Connector connector) {
+    public MethodConnectorEx toMethodConnector(Connector connector, Supplier<GlobalVariableSnapshot> globals) {
         Invoker invoker = invokerService.findByName(connector.getInvoker());
 
         List<RequestData> requestData = connector.getRequestData();
@@ -119,6 +139,8 @@ public class ConnectorExMapper {
                 requestData.add(new RequestData(rd));
             }
         });
+        GlobalConnectorValues.resolve(requestData, globals);
+
         RequiredDataService requiredDataService = new RequiredDataServiceImp(connector, requestData, invoker.getOperations());
         requestData.forEach(rqsd -> rqsd.setValue(requiredDataService.getValue(rqsd).orElse(null)));
 

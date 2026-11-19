@@ -63,6 +63,7 @@ public interface ExceptionConstant {
     String METHOD_TEST_WRITE_NOT_CONFIRMED = "METHOD_TEST_WRITE_NOT_CONFIRMED";
     String METHOD_TEST_STATIC_VALUES_MISSING = "METHOD_TEST_STATIC_VALUES_MISSING";
     String METHOD_TEST_REQUEST_NOT_BUILT = "METHOD_TEST_REQUEST_NOT_BUILT";
+    String METHOD_TEST_WORKFLOW_AMBIGUOUS = "METHOD_TEST_WORKFLOW_AMBIGUOUS";
 
     // ----------------------------------------- Enhancement ----------------------------------------------- //
     String ENHANCEMENT_NOT_FOUND = "ENHANCEMENT_NOT_FOUND";
