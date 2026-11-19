@@ -29,11 +29,22 @@ const toSetGlobalPayload = (config: WorkflowSetGlobalConfig | undefined) => {
 	return { variable: config?.variable ?? '', value: isSetGlobalReference(value) ? value : textToValue(value) };
 };
 
+type ConditionOperatorPayload = {
+	id: string; index: string; type: string; dataAggregator: number | null; expression: string; iterator?: string;
+	setGlobal?: never;
+};
+// The `?: never` fields keep reads such as `operator.expression` valid across both variants.
+type SetGlobalOperatorPayload = {
+	id: string; index: string; type: 'setglobal'; setGlobal: ReturnType<typeof toSetGlobalPayload>;
+	dataAggregator?: never; expression?: never; iterator?: never;
+};
+export type OperatorPayload = ConditionOperatorPayload | SetGlobalOperatorPayload;
+
 export const buildOperatorPayload = (
 	node: WorkflowNodeModel,
 	index: string,
 	iterator?: string,
-) => {
+): OperatorPayload => {
 	const type = nodeKind(node);
 	if (type === 'setglobal') {
 		return { id: node.id, index, type, setGlobal: toSetGlobalPayload(node.data.setGlobal) };
