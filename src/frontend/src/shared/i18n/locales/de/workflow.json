@@ -143,6 +143,7 @@
     }
   },
   "messages": {
+    "focusElementNotFound": "Der verlinkte Schritt existiert in diesem Workflow nicht mehr.",
     "enterWorkflowName": "Bitte geben Sie einen Workflow-Namen ein",
     "workflowNameExists": "Ein Workflow mit diesem Titel existiert bereits",
     "saveTemplateFailed": "Vorlage konnte nicht gespeichert werden",
@@ -686,7 +687,8 @@
     "source": {
       "constant": "Konstante",
       "method": "Methode",
-      "webhook": "Webhook"
+      "webhook": "Webhook",
+      "global": "Globale Variable"
     },
     "responseType": {
       "body": "Body",
@@ -863,6 +865,7 @@
     },
     "clearField": "Feld leeren",
     "addReference": "Referenz hinzufügen",
+    "globalVariable": "Globale Variable",
     "issueHint": "Hinweis:",
     "issues": {
       "REFERENCE_REQUIRED": "Die Referenz ist leer.",

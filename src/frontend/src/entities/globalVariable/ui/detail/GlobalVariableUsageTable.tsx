@@ -7,6 +7,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useGetGlobalVariableUsageQuery } from '../../api/globalVariableApi'
 import type { GlobalVariableUsage } from '../../model/types'
 import { sourceLink } from '../../model/display'
+import { buildWorkflowLink } from '@shared/lib/workflowLinks'
 
 export const GlobalVariableUsageTable: React.FC<{ id: number }> = ({ id }) => {
     const { t } = useI18n('entities')
@@ -17,7 +18,9 @@ export const GlobalVariableUsageTable: React.FC<{ id: number }> = ({ id }) => {
             id: 'source',
             header: () => t('global-variable.usage.columns.source'),
             cell: ({ row: { original } }) => {
-                const link = sourceLink(original.sourceType, original.sourceId)
+                const link = original.sourceType === 'WORKFLOW'
+                    ? buildWorkflowLink(original.sourceId, { index: original.index, color: original.color })
+                    : sourceLink(original.sourceType, original.sourceId)
                 return (
                     <span>
                         {t(`global-variable.usage.sourceType.${original.sourceType}`)}:{' '}

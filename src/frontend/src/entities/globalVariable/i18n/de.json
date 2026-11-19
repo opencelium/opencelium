@@ -1,9 +1,18 @@
 {
   "notFound": "Diese globale Variable existiert nicht oder Sie dürfen sie nicht sehen.",
   "kind": {
-    "CONSTANT": { "label": "Konstante", "hint": "Nur Benutzer ändern sie. Workflows lesen sie." },
-    "MUTABLE": { "label": "Veränderlich", "hint": "Ihr Besitzer-Workflow ändert sie während der Ausführung. Andere Workflows lesen sie." },
-    "SCRIPT": { "label": "Skript", "hint": "Eine gemeinsame Funktion, die bei jedem Aufruf einen Wert zurückgibt." }
+    "CONSTANT": {
+      "label": "Konstante",
+      "hint": "Nur Benutzer ändern sie. Workflows lesen sie."
+    },
+    "MUTABLE": {
+      "label": "Veränderlich",
+      "hint": "Ihr Besitzer-Workflow ändert sie während der Ausführung. Andere Workflows lesen sie."
+    },
+    "SCRIPT": {
+      "label": "Skript",
+      "hint": "Eine gemeinsame Funktion, die bei jedem Aufruf einen Wert zurückgibt."
+    }
   },
   "scope": {
     "ALL": "Alle Workflows",
@@ -58,7 +67,9 @@
         "taken": "Eine globale Variable mit diesem Namen existiert bereits."
       }
     },
-    "description": { "label": "Beschreibung" },
+    "description": {
+      "label": "Beschreibung"
+    },
     "secret": {
       "label": "Geheim",
       "hint": "Ein geheimer Wert wird nach dem Speichern nie wieder angezeigt und in Logs maskiert."
@@ -86,9 +97,15 @@
     }
   },
   "sections": {
-    "general": { "title": "Allgemein" },
-    "value": { "title": "Wert" },
-    "visibility": { "title": "Sichtbarkeit" }
+    "general": {
+      "title": "Allgemein"
+    },
+    "value": {
+      "title": "Wert"
+    },
+    "visibility": {
+      "title": "Sichtbarkeit"
+    }
   },
   "wizard": {
     "modes": {
@@ -108,9 +125,18 @@
       "create": "Weitere globale Variable anlegen"
     },
     "steps": {
-      "general": { "header": "Allgemein", "subheader": "Wählen Sie die Art und benennen Sie die Variable." },
-      "value": { "header": "Wert", "subheader": "Legen Sie den Wert fest, den Workflows lesen." },
-      "visibility": { "header": "Sichtbarkeit", "subheader": "Wählen Sie, welche Workflows die Variable verwenden dürfen." }
+      "general": {
+        "header": "Allgemein",
+        "subheader": "Wählen Sie die Art und benennen Sie die Variable."
+      },
+      "value": {
+        "header": "Wert",
+        "subheader": "Legen Sie den Wert fest, den Workflows lesen."
+      },
+      "visibility": {
+        "header": "Sichtbarkeit",
+        "subheader": "Wählen Sie, welche Workflows die Variable verwenden dürfen."
+      }
     }
   },
   "save": {
@@ -119,7 +145,9 @@
     "failed": "Die globale Variable konnte nicht gespeichert werden.",
     "kindNotEditableYet": "Variablen dieser Art können hier noch nicht bearbeitet werden.",
     "noEditPermission": "Sie dürfen diese globale Variable nicht bearbeiten.",
-    "warnings": { "title": "Diese Änderung kann folgende Stellen betreffen" },
+    "warnings": {
+      "title": "Diese Änderung kann folgende Stellen betreffen"
+    },
     "blocked": {
       "title": "Diese Änderung würde folgende Stellen beschädigen",
       "IN_USE": "Die Variable wird noch verwendet",
@@ -237,8 +265,16 @@
       "REJECTED": "Abgelehnt"
     },
     "filters": {
-      "result": { "ALL": "Alle Ergebnisse", "SAVED": "Gespeichert", "REJECTED": "Abgelehnt" },
-      "actor": { "ALL": "Benutzer und Workflows", "USER": "Benutzer", "WORKFLOW": "Workflows" }
+      "result": {
+        "ALL": "Alle Ergebnisse",
+        "SAVED": "Gespeichert",
+        "REJECTED": "Abgelehnt"
+      },
+      "actor": {
+        "ALL": "Benutzer und Workflows",
+        "USER": "Benutzer",
+        "WORKFLOW": "Workflows"
+      }
     }
   },
   "sharing": {
@@ -248,5 +284,24 @@
     "remove": "Zugriff entfernen",
     "save": "Freigabe speichern",
     "saved": "Die Freigabe wurde gespeichert"
+  },
+  "picker": {
+    "placeholder": "Globale Variable wählen",
+    "empty": "Keine globalen Variablen, die Sie hier verwenden dürfen",
+    "scriptLater": "Skriptaufrufe kommen mit dem Feldaufruf-Editor",
+    "unknown": "Unbekannte globale Variable oder eine, die Sie nicht verwenden dürfen"
+  },
+  "referenceErrors": {
+    "UNKNOWN_VARIABLE": "Die globale Variable \"{{variable}}\" existiert nicht.",
+    "OUT_OF_SCOPE": "Die globale Variable \"{{variable}}\" ist für diesen Workflow nicht sichtbar.",
+    "NO_USE_PERMISSION": "Sie dürfen die globale Variable \"{{variable}}\" nicht verwenden.",
+    "SECOND_WRITER": "Die globale Variable \"{{variable}}\" wird bereits von einem anderen Workflow geschrieben.",
+    "NOT_MUTABLE": "\"{{variable}}\" ist keine veränderliche Variable und kann daher nicht gesetzt werden.",
+    "ARGUMENTS_MISMATCH": "Der Aufruf von \"{{variable}}\" passt nicht zu ihren Parametern.",
+    "REF_UNRESOLVED": "\"{{variable}}\" liest {{ref}}, das dieser Workflow nicht liefern kann.",
+    "IMPORT_LANGUAGE_MISMATCH": "\"{{variable}}\" ist in einer anderen Sprache als dieses Skript geschrieben.",
+    "IMPORT_CYCLE": "Der Import von \"{{variable}}\" würde einen Importzyklus erzeugen.",
+    "SCOPE_NOT_ALL": "Konnektoren können nur globale Variablen verwenden, die für alle Workflows sichtbar sind (\"{{variable}}\").",
+    "more": "(+{{count}} weitere)"
   }
 }

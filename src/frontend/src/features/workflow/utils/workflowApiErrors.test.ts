@@ -148,3 +148,31 @@ describe('resolveWorkflowApiError', () => {
 		expect(resolveWorkflowApiError(bodiless, nodes, edges)).toBeNull();
 	});
 });
+
+describe('global variable reference errors', () => {
+	const referenceError = (violations: unknown[]) => new ApiFetchError('refused', {
+		status: 400,
+		body: { status: 400, error: 'GLOBAL_REFERENCE_INVALID', message: 'refused', violations },
+	});
+
+	it('turns each violation into a translated problem on the element it names', () => {
+		const coloredNodes = nodes.map((node) => node.id === 'method-1'
+			? { ...node, data: { ...node.data, color: '#FFCF00' } } : node) as WorkflowNodeModel[];
+		const resolution = resolveWorkflowApiError(referenceError([
+			{ code: 'OUT_OF_SCOPE', message: 'not in scope', variable: 'tenants', index: '1' },
+			{ code: 'REF_UNRESOLVED', message: 'no tenant', variable: 'buildTitle', ref: '{tenant}', color: '#ffcf00' },
+			{ code: 'NEW_CODE', message: 'something new' },
+		]), coloredNodes, edges);
+		expect(resolution).toEqual({
+			source: 'references',
+			problems: [
+				{ nodeId: 'loop-1', messageKey: 'global-variable.referenceErrors.OUT_OF_SCOPE',
+					messageParams: { variable: 'tenants', ref: '', field: '' }, fallback: 'not in scope' },
+				{ nodeId: 'method-1', messageKey: 'global-variable.referenceErrors.REF_UNRESOLVED',
+					messageParams: { variable: 'buildTitle', ref: '{tenant}', field: '' }, fallback: 'no tenant' },
+				{ nodeId: undefined, messageKey: 'global-variable.referenceErrors.NEW_CODE',
+					messageParams: { variable: '', ref: '', field: '' }, fallback: 'something new' },
+			],
+		});
+	});
+});

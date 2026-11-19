@@ -23,6 +23,9 @@ import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJson
 import { useSchedulesConnectionId } from './components/schedules/simulatedSchedulesConnection';
 import { WorkflowProblemsBadge } from './problems/WorkflowProblemsBadge';
 import { applyProblemFocus } from './problems/applyProblemFocus';
+import { GlobalPickerScopeProvider } from '@entities/globalVariable/ui/picker/GlobalPickerScopeProvider';
+import { workflowPickerScope } from '@entities/globalVariable/ui/picker/globalPicker';
+import { useFocusElementFromUrl } from './hooks/useFocusElementFromUrl';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -63,15 +66,16 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     [hydratedNodes, workflow.edges],
   );
 
+  const selectAndCenterNode = (id: string) => {
+    workflow.onNodesChange(workflow.nodes.filter((node) => !!node.selected !== (node.id === id))
+      .map((node) => ({ id: node.id, type: 'select', selected: node.id === id })));
+    workflow.centerOnNode(id);
+  };
   const playground = useOpenExecutionPlayground({
     connectionId: activeConnectionId ?? undefined, readOnly, isLoading,
-    nodes: hydratedNodes, indexById: nodeIndexById,
-    selectNode: (id) => {
-      workflow.onNodesChange(workflow.nodes.filter((node) => !!node.selected !== (node.id === id))
-        .map((node) => ({ id: node.id, type: 'select', selected: node.id === id })));
-      workflow.centerOnNode(id);
-    },
+    nodes: hydratedNodes, indexById: nodeIndexById, selectNode: selectAndCenterNode,
   });
+  useFocusElementFromUrl({ isLoading, nodes: hydratedNodes, edges: workflow.edges, selectNode: selectAndCenterNode });
   const playgroundNodeId = playground.dialog?.nodeId;
   const actions = useWorkflowActions({ connectionId, readOnly, isTestRunLocked,
     page: { connection, workflow, connectors, invokers, view, changes, derived,
@@ -101,6 +105,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate('/workflow')} />;
 
   return (
+    <GlobalPickerScopeProvider scope={workflowPickerScope(Number(activeConnectionId) || null, categoryId)}>
     <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title}
       buildTestPayload={buildTestPayload}
       onResolveStartError={resolveAndHighlightWorkflowError}
@@ -287,5 +292,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onClose: () => playground.open(null) }} />
     </div>
     </TestRunProvider>
+    </GlobalPickerScopeProvider>
   );
 }

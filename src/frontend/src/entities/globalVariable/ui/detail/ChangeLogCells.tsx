@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { buildWorkflowLink } from '@shared/lib/workflowLinks'
 import { Typography } from '@shared/ui/primitives/Typography'
 import type { GlobalVariableChange, JsonValue } from '../../model/types'
 
@@ -31,7 +32,10 @@ export const WhatCell: React.FC<{ change: GlobalVariableChange; t: Translate }> 
             )}
             {change.source && (
                 <Typography variant="caption" isSubtle>
-                    {[change.source.step.label, origin?.method.name, origin?.path, origin?.connector?.title].filter(Boolean).join(' · ')}
+                    <Link to={buildWorkflowLink(change.source.workflow.id, { index: change.source.step.index })}>
+                        {change.source.step.label}
+                    </Link>
+                    {[origin?.method.name, origin?.path, origin?.connector?.title].filter(Boolean).map((part) => ` · ${part}`).join('')}
                 </Typography>
             )}
         </div>
