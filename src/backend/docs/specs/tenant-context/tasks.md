@@ -29,7 +29,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Read section 7 of `docs/architecture.md`: the 2 new decision records exist. 2. Read the list of the open decisions: "Where the Mongo repositories go" is not there. 3. Read sections 3.4, 4.1, 6.3, 6.4 and 6.9: each item of the definition of done is there. 4. Read section 8 of CONTRIBUTING.md: it names the rule for the tenant documents. 5. Search the architecture document for a status marker, a date or a ticket number: nothing.
 - **Size:** approximately 90 lines
 - **Depends on:** 2
-- **Status:** open
+- **Status:** done
 
 ## Task 4: feat(core): bind the tenant of each request and of parallel work
 - **Criteria:** TC-01, TC-02, TC-04, TC-05, TC-06
