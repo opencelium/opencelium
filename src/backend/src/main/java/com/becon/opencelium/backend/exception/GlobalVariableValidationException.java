@@ -18,7 +18,8 @@ public class GlobalVariableValidationException extends RuntimeException {
         KIND_CHANGE_NOT_ALLOWED,
         DESCRIPTION_TOO_LONG,
         VALUE_TOO_LARGE,
-        SECRET_NOT_SUPPORTED,
+        // a secret is made visible again only with a new value: its hidden one is never shown
+        SECRET_REMOVAL_NEEDS_VALUE,
         SCOPE_REQUIRED,
         SCOPE_INVALID,
         VERSION_REQUIRED,

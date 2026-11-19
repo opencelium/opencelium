@@ -18,11 +18,13 @@ import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepo
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableScopeResolver;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
+import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot.Entry;
 import com.becon.opencelium.backend.execution.service.GlobalVariableSnapshotServiceImp;
 import com.becon.opencelium.backend.testutil.fixture.CategoryFixture;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
+import com.becon.opencelium.backend.utility.crypto.GlobalVariableCipher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.List;
@@ -33,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.env.MockEnvironment;
 
 /**
  * Unit tests for {@link GlobalVariableSnapshotServiceImp}: which variables a run of a workflow
@@ -46,6 +49,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class GlobalVariableSnapshotServiceImpTest {
 
     private static final long WORKFLOW = 11L;
+    // built once each: deriving a key takes a while
+    private static final GlobalVariableCipher CIPHER = cipherWithKey(GlobalVariableFixture.SECRET_KEY);
+    private static final GlobalVariableCipher OTHER_KEY = cipherWithKey("another-key");
 
     @Mock
     GlobalVariableRepository globalVariableRepository;
@@ -62,7 +68,8 @@ class GlobalVariableSnapshotServiceImpTest {
     void setUp() {
         service = new GlobalVariableSnapshotServiceImp(
                 globalVariableRepository, connectionRepository,
-                new GlobalVariableScopeResolver(categoryRepository), new ObjectMapper());
+                new GlobalVariableScopeResolver(categoryRepository), new ObjectMapper(),
+                new GlobalVariableCipher(new MockEnvironment()));
     }
 
     @Test
@@ -238,7 +245,125 @@ class GlobalVariableSnapshotServiceImpTest {
                 .hasMessageContaining("not valid JSON");
     }
 
+    // ── secrets ───────────────────────────────────────────────────────────────
+
+    @Test
+    void takeForDecryptsValueWhenVariableIsSecret() {
+        when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
+        givenVariables(aSecret("apiKey", CIPHER.encrypt("{\"token\":\"s3cr3t\"}")));
+
+        Entry entry = serviceWith(CIPHER).takeFor(WORKFLOW).find("apiKey").orElseThrow();
+
+        assertThat(entry.value().get("token").asText()).isEqualTo("s3cr3t");
+    }
+
+    @Test
+    void takeForMarksEntryAsSecretWhenVariableIsSecret() {
+        when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
+        givenVariables(aSecret("apiKey", CIPHER.encrypt("\"s3cr3t\"")),
+                GlobalVariableFixture.aConstant(2L, "limits", "50"));
+
+        GlobalVariableSnapshot snapshot = serviceWith(CIPHER).takeFor(WORKFLOW);
+
+        assertThat(snapshot.entries()).extracting(Entry::name, Entry::secret)
+                .containsExactly(tuple("apiKey", true), tuple("limits", false));
+    }
+
+    @Test
+    @DisplayName("takeFor — a secret without a value needs no key")
+    void takeForReturnsNullValueWhenSecretHasNoValue() {
+        when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
+        givenVariables(aSecret("apiKey", null));
+
+        Entry entry = service.takeFor(WORKFLOW).find("apiKey").orElseThrow();
+
+        assertThat(entry.value().isNull()).isTrue();
+    }
+
+    @Test
+    @DisplayName("takeFor — a secret that cannot be decrypted fails where it is read, not when the run starts")
+    void takeForReturnsUnreadableEntryWhenKeyIsMissing() {
+        when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
+        givenVariables(aSecret("apiKey", GlobalVariableFixture.S3CR3T_ENCRYPTED));
+
+        Entry entry = service.takeFor(WORKFLOW).find("apiKey").orElseThrow();
+
+        assertThat(entry.isReadable()).isFalse();
+        assertThatThrownBy(entry::value)
+                .isInstanceOf(WrongDecryptException.class)
+                .hasMessageContaining("'apiKey'")
+                .hasMessageContaining("no key is configured");
+    }
+
+    @Test
+    void takeForReturnsUnreadableEntryWhenKeyDiffers() {
+        when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
+        givenVariables(aSecret("apiKey", GlobalVariableFixture.S3CR3T_ENCRYPTED));
+
+        Entry entry = serviceWith(OTHER_KEY).takeFor(WORKFLOW).find("apiKey").orElseThrow();
+
+        assertThatThrownBy(entry::value)
+                .isInstanceOf(WrongDecryptException.class)
+                .hasMessageContaining("'apiKey'")
+                .hasMessageContaining("is not the one the value was saved with")
+                .hasMessageNotContaining(GlobalVariableFixture.S3CR3T_ENCRYPTED);
+    }
+
+    @Test
+    @DisplayName("takeFor — the parser quotes what it fails on, so its message stays out of the error")
+    void takeForReturnsUnreadableEntryWhenDecryptedTextIsNotJson() {
+        when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
+        givenVariables(aSecret("apiKey", CIPHER.encrypt("{s3cr3t")));
+
+        Entry entry = serviceWith(CIPHER).takeFor(WORKFLOW).find("apiKey").orElseThrow();
+
+        assertThatThrownBy(entry::value)
+                .isInstanceOf(WrongDecryptException.class)
+                .hasMessageContaining("not valid JSON")
+                .hasMessageNotContaining("s3cr3t");
+    }
+
+    @Test
+    @DisplayName("takeFor — the decrypted value goes into the snapshot only, never onto the entity")
+    void takeForLeavesEntityEncryptedWhenSecretIsDecrypted() {
+        String stored = CIPHER.encrypt("\"s3cr3t\"");
+        GlobalVariable secret = aSecret("apiKey", stored);
+        when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
+        givenVariables(secret);
+
+        serviceWith(CIPHER).takeFor(WORKFLOW);
+
+        assertThat(secret.getValue()).isEqualTo(stored);
+    }
+
+    @Test
+    void takeOpenToAllDecryptsValueWhenVariableIsSecret() {
+        givenVariables(aSecret("apiKey", CIPHER.encrypt("\"s3cr3t\"")));
+
+        Entry entry = serviceWith(CIPHER).takeOpenToAll().find("apiKey").orElseThrow();
+
+        assertThat(entry.value().asText()).isEqualTo("s3cr3t");
+        assertThat(entry.secret()).isTrue();
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    private GlobalVariableSnapshotServiceImp serviceWith(GlobalVariableCipher cipher) {
+        return new GlobalVariableSnapshotServiceImp(
+                globalVariableRepository, connectionRepository,
+                new GlobalVariableScopeResolver(categoryRepository), new ObjectMapper(), cipher);
+    }
+
+    private static GlobalVariableCipher cipherWithKey(String key) {
+        return new GlobalVariableCipher(new MockEnvironment().withProperty(GlobalVariableCipher.KEY_PROPERTY, key));
+    }
+
+    /** A secret open to all workflows that stores {@code storedValue}: encrypted text, or {@code null}. */
+    private static GlobalVariable aSecret(String name, String storedValue) {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(1L, name, storedValue);
+        variable.setSecret(true);
+        return variable;
+    }
 
     private void givenVariables(GlobalVariable... variables) {
         when(globalVariableRepository.findAllWithScopeTargets(any())).thenReturn(List.of(variables));

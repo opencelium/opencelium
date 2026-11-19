@@ -22,6 +22,16 @@ import java.util.List;
  */
 public final class GlobalVariableFixture {
 
+    /** The key the encrypted fixtures below are made with. */
+    public static final String SECRET_KEY = "test-key";
+
+    /**
+     * The JSON value {@code "s3cr3t"} encrypted with {@link #SECRET_KEY} and a fixed IV. Fixed
+     * rather than encrypted per run: with a random IV, about one decryption in 256 with a wrong
+     * key passes the padding check by chance; with this one, the key "another-key" always fails.
+     */
+    public static final String S3CR3T_ENCRYPTED = "AAECAwQFBgcICQoLDA0OD2u1WXnRxWMQvzSbWavf58w=";
+
     private GlobalVariableFixture() {}
 
     /**

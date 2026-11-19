@@ -6,6 +6,9 @@ import java.util.Collection;
 
 /**
  * Takes the snapshot of global variables a run reads.
+ *
+ * <p>The value of a secret is decrypted into the snapshot, and its entry is marked as a secret.
+ * A secret that cannot be decrypted gets an entry that fails where its value is read.
  */
 public interface GlobalVariableSnapshotService {
 
@@ -16,7 +19,7 @@ public interface GlobalVariableSnapshotService {
      *
      * @param connectionId id of the workflow
      * @return the snapshot; empty when no variable is in scope
-     * @throws IllegalStateException if a stored value is not valid JSON
+     * @throws IllegalStateException if the stored value of a variable that is not secret is not valid JSON
      */
     GlobalVariableSnapshot takeFor(long connectionId);
 
@@ -26,7 +29,7 @@ public interface GlobalVariableSnapshotService {
      * is tested, when its health is checked and when a single method is tested.
      *
      * @return the snapshot; empty when no variable is open to all workflows
-     * @throws IllegalStateException if a stored value is not valid JSON
+     * @throws IllegalStateException if the stored value of a variable that is not secret is not valid JSON
      */
     GlobalVariableSnapshot takeOpenToAll();
 
@@ -37,7 +40,7 @@ public interface GlobalVariableSnapshotService {
      *
      * @param variables the variables, each with its scope loaded
      * @return the snapshot; empty when no variable with a value is given
-     * @throws IllegalStateException if a stored value is not valid JSON
+     * @throws IllegalStateException if the stored value of a variable that is not secret is not valid JSON
      */
     GlobalVariableSnapshot takeOf(Collection<GlobalVariable> variables);
 }
