@@ -7,6 +7,8 @@ export interface ConfirmOptions {
 
     confirmText?: string;
     cancelText?: string;
+    /** False for a notice that only needs acknowledging: the cancel button is left out. Defaults to true. */
+    canCancel?: boolean;
 
     confirmVariant?: ButtonVariant;
     autoFocusConfirm?: boolean;

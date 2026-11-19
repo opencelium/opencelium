@@ -7,7 +7,7 @@ import {FaRegFileCode} from "react-icons/fa";
 import {ImInsertTemplate} from "react-icons/im";
 import {BiCategory} from "react-icons/bi";
 import {LuFileQuestion, LuFileCog} from "react-icons/lu";
-import {TbLicense} from "react-icons/tb";
+import {TbLicense, TbVariable} from "react-icons/tb";
 import {BsLayoutTextWindowReverse} from "react-icons/bs";
 import {useMemo, type ReactNode} from "react";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
@@ -29,7 +29,6 @@ const MENU_ITEM_COMPONENT: Partial<Record<string, PermissionComponent>> = {
     '/role': 'USERGROUP',
     '/invoker': 'INVOKER',
     '/system-config': 'APP',
-    '/global-variable': 'GLOBAL_VARIABLE',
 };
 
 // Render a leaf menu label as a real anchor so the browser can open the route
@@ -97,6 +96,7 @@ export const useAdminMenu = (): any[] => {
                 leaf('/invoker', <FaRegFileCode/>, t('menu.invokers')),
                 leaf('/workflow-template', <ImInsertTemplate/>, t('menu.connectionTemplates')),
                 leaf('/data-aggregator', <GrAggregate/>, t('menu.dataAggregator')),
+                leaf('/global-variable', <TbVariable/>, t('menu.globalVariables')),
                 leaf('/notification-template', <MdNotificationAdd/>, t('menu.notificationTemplates')),
                 leaf('/category', <BiCategory/>, t('menu.categories')),
                 leaf('/support-file', <LuFileQuestion/>, t('menu.supportFiles')),

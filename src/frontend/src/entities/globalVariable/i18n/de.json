@@ -1,0 +1,252 @@
+{
+  "notFound": "Diese globale Variable existiert nicht oder Sie dürfen sie nicht sehen.",
+  "kind": {
+    "CONSTANT": { "label": "Konstante", "hint": "Nur Benutzer ändern sie. Workflows lesen sie." },
+    "MUTABLE": { "label": "Veränderlich", "hint": "Ihr Besitzer-Workflow ändert sie während der Ausführung. Andere Workflows lesen sie." },
+    "SCRIPT": { "label": "Skript", "hint": "Eine gemeinsame Funktion, die bei jedem Aufruf einen Wert zurückgibt." }
+  },
+  "scope": {
+    "ALL": "Alle Workflows",
+    "CATEGORIES": "Ausgewählte Kategorien",
+    "WORKFLOWS": "Ausgewählte Workflows"
+  },
+  "permission": {
+    "VIEW_USE": "Verwenden",
+    "EDIT": "Bearbeiten",
+    "DELETE": "Löschen"
+  },
+  "writePolicy": {
+    "REPLACE": "Ersetzen",
+    "FORWARD_ONLY": "Nur vorwärts",
+    "INCREMENT": "Hochzählen"
+  },
+  "publishMode": {
+    "ON_SUCCESS": "Wenn die Ausführung erfolgreich ist",
+    "EACH_WRITE": "Bei jedem Schreiben"
+  },
+  "jsonType": {
+    "string": "Text",
+    "number": "Zahl",
+    "boolean": "wahr / falsch",
+    "null": "null",
+    "array": "Liste",
+    "object": "Map"
+  },
+  "list": {
+    "title": "Globale Variablen",
+    "subTitle": "Werte, die einmal definiert und in Workflows, Konnektoren und Benachrichtigungen über ihren Namen referenziert werden.",
+    "scriptSummary": "{{language}} · {{count}} Parameter",
+    "columns": {
+      "usageCount": "Verwendet von",
+      "updated": "Letzte Änderung"
+    }
+  },
+  "live": {
+    "beingUpdated": "Wird von Ausführung #{{executionId}} aktualisiert",
+    "beingUpdatedHint": "Der Besitzer-Workflow schreibt diese Variable (gestartet {{startedAt}}). Angezeigt wird der zuletzt gespeicherte Wert."
+  },
+  "fields": {
+    "kind": {
+      "label": "Art",
+      "hint": "Die Art kann nach dem Anlegen nicht mehr geändert werden.",
+      "lockedHint": "Die Art wurde beim Anlegen gewählt und kann sich nicht ändern."
+    },
+    "name": {
+      "label": "Name",
+      "errors": {
+        "pattern": "1 bis 64 Buchstaben, Ziffern oder _, beginnend mit einem Buchstaben.",
+        "taken": "Eine globale Variable mit diesem Namen existiert bereits."
+      }
+    },
+    "description": { "label": "Beschreibung" },
+    "secret": {
+      "label": "Geheim",
+      "hint": "Ein geheimer Wert wird nach dem Speichern nie wieder angezeigt und in Logs maskiert."
+    },
+    "value": {
+      "label": "Wert",
+      "hint": "Text, eine Zahl, true oder false, eine JSON-Liste oder eine JSON-Map.",
+      "savedAs": "Gespeichert als {{type}}. Setzen Sie Zahlen oder true/false in Anführungszeichen, um sie als Text zu behalten.",
+      "secretHint": "Geben Sie den geheimen Wert ein. Er kann nach dem Speichern nicht mehr angezeigt werden.",
+      "secretKeptHint": "Leer lassen, um den gespeicherten Wert zu behalten, oder einen neuen Wert eingeben, um ihn zu ersetzen.",
+      "secretKeptPlaceholder": "Gespeicherter Wert bleibt erhalten",
+      "errors": {
+        "required": "Geben Sie einen Wert ein.",
+        "tooLarge": "Der Wert ist größer als 64 KB."
+      }
+    },
+    "scope": {
+      "label": "Sichtbarkeit",
+      "hint": "Welche Workflows diese Variable verwenden dürfen. Konnektoren können nur Variablen verwenden, die für alle Workflows sichtbar sind.",
+      "categoriesPlaceholder": "Kategorien wählen (Unterkategorien eingeschlossen)",
+      "workflowsPlaceholder": "Workflows wählen",
+      "errors": {
+        "noTarget": "Wählen Sie mindestens eine Kategorie oder einen Workflow."
+      }
+    }
+  },
+  "sections": {
+    "general": { "title": "Allgemein" },
+    "value": { "title": "Wert" },
+    "visibility": { "title": "Sichtbarkeit" }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Globale Variable anlegen",
+        "subheader": "Definieren Sie einen Wert einmal und verwenden Sie ihn in jedem Workflow, Konnektor und jeder Benachrichtigung.",
+        "successMessage": "Globale Variable \"{{name}}\" wurde angelegt"
+      },
+      "update": {
+        "header": "Globale Variable bearbeiten",
+        "subheader": "Änderungen gelten für Ausführungen, die nach dem Speichern starten. Laufende Ausführungen behalten den alten Wert.",
+        "successMessage": "Globale Variable \"{{name}}\" wurde aktualisiert"
+      }
+    },
+    "recommendations": {
+      "list": "Zurück zu den globalen Variablen",
+      "create": "Weitere globale Variable anlegen"
+    },
+    "steps": {
+      "general": { "header": "Allgemein", "subheader": "Wählen Sie die Art und benennen Sie die Variable." },
+      "value": { "header": "Wert", "subheader": "Legen Sie den Wert fest, den Workflows lesen." },
+      "visibility": { "header": "Sichtbarkeit", "subheader": "Wählen Sie, welche Workflows die Variable verwenden dürfen." }
+    }
+  },
+  "save": {
+    "saveAnyway": "Trotzdem speichern",
+    "close": "Schließen",
+    "failed": "Die globale Variable konnte nicht gespeichert werden.",
+    "kindNotEditableYet": "Variablen dieser Art können hier noch nicht bearbeitet werden.",
+    "noEditPermission": "Sie dürfen diese globale Variable nicht bearbeiten.",
+    "warnings": { "title": "Diese Änderung kann folgende Stellen betreffen" },
+    "blocked": {
+      "title": "Diese Änderung würde folgende Stellen beschädigen",
+      "IN_USE": "Die Variable wird noch verwendet",
+      "SCOPE_NARROWING": "Die neue Sichtbarkeit schließt Workflows aus, die die Variable verwenden",
+      "PARAMETER_BREAKING": "Die Parameteränderung beschädigt diese Aufrufer",
+      "REF_UNRESOLVED": "Ein Aufrufer kann eine neue Referenz nicht auflösen",
+      "VERSION_CONFLICT": "Jemand anderes hat zuerst gespeichert"
+    },
+    "versionConflict": {
+      "title": "Jemand anderes hat zuerst gespeichert",
+      "message": "{{detail}}. Laden Sie neu, um den aktuellen Wert zu sehen, und nehmen Sie Ihre Änderung erneut vor.",
+      "reload": "Neu laden"
+    }
+  },
+  "impact": {
+    "reason": {
+      "OUT_OF_SCOPE": "Dürfte die Variable nicht mehr verwenden",
+      "IN_USE": "Verwendet die Variable",
+      "PARAMETER_BREAKING": "Ruft das Skript mit Parametern auf, die nicht mehr passen würden",
+      "REF_UNRESOLVED": "Kann die Referenz {{ref}} nicht auflösen",
+      "CALLS_IN_CODE_NOT_CHECKED": "Aufrufe im Code können nicht automatisch geprüft werden",
+      "IMPORTED_BY_SCRIPT": "Importiert dieses Skript"
+    }
+  },
+  "delete": {
+    "tooltip": "Löschen",
+    "noPermission": "Sie dürfen diese globale Variable nicht löschen",
+    "failed": "Die globale Variable konnte nicht gelöscht werden.",
+    "confirm": {
+      "title": "\"{{name}}\" löschen?",
+      "message": "Die globale Variable \"{{name}}\" wird gelöscht. Dies kann nicht rückgängig gemacht werden.",
+      "messageWithWarnings": "Die Variable wird nicht mehr verwendet, prüfen Sie aber zuerst diese Stellen:"
+    },
+    "blocked": {
+      "title": "\"{{name}}\" kann nicht gelöscht werden",
+      "message": "Sie wird hier noch verwendet. Entfernen Sie zuerst diese Referenzen:",
+      "close": "Schließen"
+    }
+  },
+  "usage": {
+    "empty": "Diese Variable wird noch nirgends verwendet.",
+    "columns": {
+      "source": "Verwendet in",
+      "element": "Element",
+      "access": "Zugriff"
+    },
+    "sourceType": {
+      "WORKFLOW": "Workflow",
+      "CONNECTOR": "Konnektor",
+      "NOTIFICATION": "Benachrichtigung",
+      "SCRIPT_VARIABLE": "Skriptvariable"
+    },
+    "access": {
+      "READ": "Liest",
+      "WRITE": "Schreibt",
+      "CALL": "Ruft auf",
+      "IMPORT": "Importiert",
+      "REF": "Referenziert"
+    }
+  },
+  "detail": {
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "value": "Aktueller Wert",
+    "script": "Skript",
+    "noSecretValue": "Kein Wert gesetzt",
+    "ownerWorkflow": "Besitzer-Workflow",
+    "unclaimed": "Noch nicht beansprucht: Der erste Workflow, der sie schreibt, wird Besitzer",
+    "writePolicy": "Schreibregel",
+    "publishMode": "Gespeichert",
+    "ownerUser": "Besitzer",
+    "version": "Version",
+    "updated": "Letzte Änderung",
+    "created": "Angelegt",
+    "updatedBy": "{{time}} von {{name}}",
+    "imports": "Importe: {{names}}",
+    "tabs": {
+      "usage": "Verwendet von",
+      "changes": "Änderungsprotokoll",
+      "sharing": "Freigabe"
+    }
+  },
+  "changes": {
+    "empty": "Keine Änderungen für diese Filter.",
+    "restore": "Wiederherstellen",
+    "restored": "Die frühere Version wurde wiederhergestellt",
+    "restoreFailed": "Die frühere Version konnte nicht wiederhergestellt werden.",
+    "restoreConfirm": {
+      "title": "Diese Version wiederherstellen?",
+      "message": "Der Wert aus Version {{version}} wird zum aktuellen Wert. Dies wird als neue Änderung protokolliert."
+    },
+    "changedFields": "Geändert: {{fields}}",
+    "writeCount": "{{count}} Schreibvorgänge zusammengefasst",
+    "columns": {
+      "changedAt": "Wann",
+      "changeType": "Änderung",
+      "actor": "Von",
+      "what": "Von → zu",
+      "result": "Ergebnis"
+    },
+    "type": {
+      "CREATE": "Angelegt",
+      "VALUE": "Wert",
+      "CONFIG": "Einstellungen",
+      "PERMISSIONS": "Freigabe",
+      "RESTORE": "Wiederhergestellt",
+      "DELETE": "Gelöscht"
+    },
+    "actor": {
+      "user": "{{name}}",
+      "execution": "Ausführung #{{id}}"
+    },
+    "result": {
+      "SAVED": "Gespeichert",
+      "REJECTED": "Abgelehnt"
+    },
+    "filters": {
+      "result": { "ALL": "Alle Ergebnisse", "SAVED": "Gespeichert", "REJECTED": "Abgelehnt" },
+      "actor": { "ALL": "Benutzer und Workflows", "USER": "Benutzer", "WORKFLOW": "Workflows" }
+    }
+  },
+  "sharing": {
+    "owner": "Besitzer: {{name}}. Der Besitzer und Admins können sie immer verwenden, bearbeiten und löschen.",
+    "user": "Benutzer",
+    "addUser": "Benutzer hinzufügen",
+    "remove": "Zugriff entfernen",
+    "save": "Freigabe speichern",
+    "saved": "Die Freigabe wurde gespeichert"
+  }
+}
