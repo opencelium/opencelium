@@ -14,6 +14,8 @@ import type {
     ImpactRequest,
     ImpactResult,
     PagedResponse,
+    ValidateScriptRequest,
+    ValidateScriptResponse,
 } from '../model/types'
 import { GLOBAL_VARIABLE_TAG } from './globalVariable.tags'
 
@@ -113,6 +115,10 @@ export const globalVariableApi = baseApi
                 ],
             }),
 
+            validateGlobalScript: b.mutation<ValidateScriptResponse, ValidateScriptRequest>({
+                query: (body) => ({ url: `${BASE}/validate-script`, method: 'POST', body }),
+            }),
+
             getGlobalVariablePermissions: b.query<GlobalVariablePermissions, number>({
                 query: (id) => `${BASE}/${id}/permissions`,
                 providesTags: (_result, _error, id) => [{ type: GLOBAL_VARIABLE_TAG, id: `permissions-${id}` }],
@@ -139,6 +145,7 @@ export const {
     useDeleteGlobalVariableMutation,
     usePreviewGlobalVariableImpactMutation,
     useRestoreGlobalVariableChangeMutation,
+    useValidateGlobalScriptMutation,
     useGetGlobalVariablePermissionsQuery,
     useUpdateGlobalVariablePermissionsMutation,
 } = globalVariableApi
