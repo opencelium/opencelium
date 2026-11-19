@@ -33,3 +33,12 @@ describe('script refs', () => {
         ])).toBe('duplicateName')
     })
 })
+
+describe('ruby refs', () => {
+    it('accepts ref without parentheses only in Ruby', () => {
+        expect(detectRefs('t = ref "{tenant}"', 'ruby').refs.map((ref) => ref.ref)).toEqual(['{tenant}'])
+        expect(detectRefs('t = ref name', 'ruby').nonLiteral).toEqual([{ line: 1, column: 5 }])
+        expect(detectRefs('var ref = 1; return ref + 1;', 'js').nonLiteral).toEqual([])
+    })
+})
+
