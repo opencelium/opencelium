@@ -1,11 +1,16 @@
 package com.becon.opencelium.backend.resource.execution;
 
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+
 import java.util.Map;
+import java.util.Objects;
 
 public class ExecutionObj {
     private Map<String, Object> webhookVars;
     private ConnectionEx connection;
     private ProxyEx proxy;
+    // the global variables the run reads, as they were when the run was built
+    private GlobalVariableSnapshot globalSnapshot = GlobalVariableSnapshot.empty();
 
     public ExecutionObj() {
     }
@@ -32,5 +37,13 @@ public class ExecutionObj {
 
     public void setConnection(ConnectionEx connection) {
         this.connection = connection;
+    }
+
+    public GlobalVariableSnapshot getGlobalSnapshot() {
+        return globalSnapshot;
+    }
+
+    public void setGlobalSnapshot(GlobalVariableSnapshot globalSnapshot) {
+        this.globalSnapshot = Objects.requireNonNull(globalSnapshot, "globalSnapshot");
     }
 }

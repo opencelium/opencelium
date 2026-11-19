@@ -9,13 +9,18 @@ import java.util.List;
  *
  * @param connectorReferences references read from a connector
  * @param staticReferences references that need a static value to run the test
+ * @param globalReferences global variable references the test resolves by itself, with the value
+ *     the variable has now
  */
 public record MethodTestReferencesDTO(
-        List<ConnectorReference> connectorReferences, List<StaticReference> staticReferences) {
+        List<ConnectorReference> connectorReferences,
+        List<StaticReference> staticReferences,
+        List<GlobalVariableReference> globalReferences) {
 
     public MethodTestReferencesDTO {
         connectorReferences = List.copyOf(connectorReferences);
         staticReferences = List.copyOf(staticReferences);
+        globalReferences = List.copyOf(globalReferences);
     }
 
     /**
@@ -33,4 +38,14 @@ public record MethodTestReferencesDTO(
      * @param type the kind of reference, or {@code null} when the text is not a valid reference
      */
     public record StaticReference(String reference, ReferenceType type) {}
+
+    /**
+     * A global variable reference, {@code {{global.name}}} with an optional path, that needs no
+     * static value: the user may use the variable in the workflow of the method, so the test reads
+     * its current value. A static value given for it still wins. The value itself is not listed.
+     *
+     * @param reference the reference exactly as written in the method
+     * @param name the name of the variable
+     */
+    public record GlobalVariableReference(String reference, String name) {}
 }

@@ -1,0 +1,70 @@
+package com.becon.opencelium.backend.exception;
+
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Thrown when a change of a global variable cannot be saved because of the state the variable is
+ * in, which the API answers with 409.
+ */
+public class GlobalVariableConflictException extends RuntimeException {
+
+    /** Why the change conflicts. */
+    public enum Code {
+        /** Someone changed the variable after the form loaded it: reload and retry. */
+        VERSION_CONFLICT,
+        /** The variable is used, so it cannot be deleted or renamed. */
+        IN_USE,
+        /** The new scope would leave out a workflow that uses the variable. */
+        SCOPE_NARROWING
+    }
+
+    /**
+     * One usage that stands in the way of the change.
+     *
+     * @param sourceType   WORKFLOW, CONNECTOR, NOTIFICATION or SCRIPT_VARIABLE
+     * @param sourceId     id of the source
+     * @param sourceTitle  title of the source, {@code null} if it no longer exists
+     * @param elementType  kind of the workflow element that holds the reference, {@code null}
+     *                     for a connector and a notification
+     * @param elementLabel what the editor calls the element; for a notification the name of its
+     *                     template
+     * @param color        color of the element if it is a method
+     * @param index        index path of the element, {@code null} outside a workflow
+     * @param field        where the reference stands: in an element, or the request data field
+     *                     of a connector, or the text of a notification template
+     * @param reason       why this usage blocks, the same word as the conflict code
+     */
+    public record Blocking(String sourceType, Long sourceId, String sourceTitle, String elementType,
+                           String elementLabel, String color, String index, String field, String reason) {
+    }
+
+    private final Code code;
+    private final long currentVersion;
+    private final transient List<Blocking> blocking;
+
+    public GlobalVariableConflictException(Code code, String message, long currentVersion) {
+        this(code, message, currentVersion, List.of());
+    }
+
+    public GlobalVariableConflictException(Code code, String message, long currentVersion, List<Blocking> blocking) {
+        super(message);
+        this.code = Objects.requireNonNull(code, "code");
+        this.currentVersion = currentVersion;
+        this.blocking = List.copyOf(blocking);
+    }
+
+    public Code getCode() {
+        return code;
+    }
+
+    /** The version the variable has now. */
+    public long getCurrentVersion() {
+        return currentVersion;
+    }
+
+    /** The usages that block the change; empty for a version conflict. */
+    public List<Blocking> getBlocking() {
+        return blocking;
+    }
+}

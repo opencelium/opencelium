@@ -2,12 +2,18 @@ package com.becon.opencelium.backend.exception.handler;
 
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
+import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
+import com.becon.opencelium.backend.exception.GlobalVariableValidationException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.exception.JumpValidationException;
 import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.error.GlobalReferenceErrorResource;
+import com.becon.opencelium.backend.resource.error.GlobalVariableErrorResource;
 import com.becon.opencelium.backend.resource.error.JumpValidationErrorResource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -42,6 +48,27 @@ public class GlobalExceptionHandler {
     public ResponseEntity<JumpValidationErrorResource> handleJumpValidationException(JumpValidationException ex) {
         return ResponseEntity.badRequest()
                 .body(new JumpValidationErrorResource(ex.getViolations()));
+    }
+
+    @ExceptionHandler(GlobalReferenceValidationException.class)
+    public ResponseEntity<GlobalReferenceErrorResource> handleGlobalReferenceValidationException(
+            GlobalReferenceValidationException ex, HttpServletRequest request) {
+        return ResponseEntity.badRequest()
+                .body(new GlobalReferenceErrorResource(ex, request.getRequestURI()));
+    }
+
+    @ExceptionHandler(GlobalVariableValidationException.class)
+    public ResponseEntity<GlobalVariableErrorResource> handleGlobalVariableValidationException(
+            GlobalVariableValidationException ex, HttpServletRequest request) {
+        return ResponseEntity.badRequest()
+                .body(GlobalVariableErrorResource.of(ex, request.getRequestURI()));
+    }
+
+    @ExceptionHandler(GlobalVariableConflictException.class)
+    public ResponseEntity<GlobalVariableErrorResource> handleGlobalVariableConflictException(
+            GlobalVariableConflictException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(GlobalVariableErrorResource.of(ex, request.getRequestURI()));
     }
 
     @ExceptionHandler(GeneralServiceException.class)

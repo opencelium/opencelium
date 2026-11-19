@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.enums.execution.ParamLocation;
 import com.becon.opencelium.backend.enums.execution.ParamStyle;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
+import com.becon.opencelium.backend.reference.GlobalEscape;
 import com.becon.opencelium.backend.resource.execution.*;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,11 +19,14 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class OperationExMapper {
     private final InvokerService invokerService;
     private final ConnectorService connectorService;
+    private static final Pattern GLOBAL_REF = Pattern.compile(RegExpression.globalRef);
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
     private static final MultipleXmlAttrsStrategy MULTIPLE_XML_ATTRS_STRATEGY = MultipleXmlAttrsStrategy.FAIL;
@@ -633,7 +637,8 @@ public class OperationExMapper {
     }
 
     private DataType findTypeOfReference(String value) {
-        if (value.matches(RegExpression.requiredData)
+        if (value.matches(RegExpression.globalRef)
+                || value.matches(RegExpression.requiredData)
                 || value.matches(RegExpression.enhancement)
                 || value.matches(RegExpression.directRef)
                 || value.matches(RegExpression.webhook)) {
@@ -728,16 +733,24 @@ public class OperationExMapper {
 
     private ArrayList<String> getSubPathParameters(String subPath) {
         ArrayList<String> params = new ArrayList<>();
-        char[] chars = subPath.toCharArray();
+        // an escaped global token is literal text of the path, not a parameter
+        String scanned = GlobalEscape.mask(subPath);
+        char[] chars = scanned.toCharArray();
         int startIdx = -1;
+        Matcher globalRef = GLOBAL_REF.matcher(scanned);
         for (int i = 0; i < chars.length; i++) {
-            if (chars[i] == '{') {
+            if (chars[i] == '{' && globalRef.region(i, chars.length).lookingAt()) {
+                // '{{global.x}}' is one parameter: its inner braces are not request data
+                params.add(globalRef.group());
+                startIdx = -1;
+                i = globalRef.end() - 1;
+            } else if (chars[i] == '{') {
                 startIdx = i;
             } else if (chars[i] == '$' && i + 1 < chars.length && chars[i + 1] == '{') {
                 startIdx = i;
                 i++;
             } else if (chars[i] == '}' && startIdx != -1) {
-                params.add(subPath.substring(startIdx, i + 1));
+                params.add(scanned.substring(startIdx, i + 1));
                 startIdx = -1;
             }
         }
@@ -748,6 +761,8 @@ public class OperationExMapper {
         if (param.matches(RegExpression.wrappedDirectRef)) {
             return param.substring(2, param.length() - 2);
         } else if (("#" + param).matches(RegExpression.enhancement)) {
+            return param.substring(2, param.length() - 2);
+        } else if (param.matches(RegExpression.globalRef)) {
             return param.substring(2, param.length() - 2);
         } else if (param.matches(RegExpression.requestData)) {
             return param.substring(1, param.length() - 1);

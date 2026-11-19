@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
+import static com.becon.opencelium.backend.constant.RegExpression.globalRef;
 import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 import static com.becon.opencelium.backend.constant.RegExpression.webhook;
@@ -22,7 +23,9 @@ public final class ReferenceMatchers {
     private static final Pattern ENHANCEMENT_REF = Pattern.compile(enhancement);
     private static final Pattern WEBHOOK_REF = Pattern.compile(webhook);
     private static final Pattern PAGE_REF = Pattern.compile(pageRef);
+    private static final Pattern GLOBAL_REF = Pattern.compile(globalRef);
     private static final Pattern REQUEST_DATA_REF = Pattern.compile(requestData);
+    private static final String GLOBAL_PREFIX = "{{global.";
 
     private ReferenceMatchers() {
     }
@@ -94,6 +97,25 @@ public final class ReferenceMatchers {
         }
 
         return PAGE_REF.matcher(ref).matches();
+    }
+
+    /**
+     * Tells whether {@code ref} is a global variable reference, e.g. {@code {{global.name}}} or
+     * {@code {{global.limits.maxPerPage}}}. Check it before {@link #isRequestData(String)}.
+     */
+    public static boolean isGlobal(String ref) {
+        // {{global.x}} - shortest possible case
+        if (ref == null || ref.length() < 12) {
+            return false;
+        }
+
+        if (!ref.startsWith(GLOBAL_PREFIX)
+                || ref.charAt(ref.length() - 2) != '}' || ref.charAt(ref.length() - 1) != '}'
+        ) {
+            return false;
+        }
+
+        return GLOBAL_REF.matcher(ref).matches();
     }
 
     public static boolean isRequestData(String ref) {

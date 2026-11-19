@@ -6,17 +6,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
+import static com.becon.opencelium.backend.constant.RegExpression.globalRef;
 import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
 
 public final class ReferenceScanner {
+    // globalRef stands before requestData, so '{{global.x}}' is extracted as one reference
     private static final Pattern EXTRACTION_PATTERN =
             Pattern.compile(
                     enhancement + "|" +
                             webhook + "|" +
                             pageRef + "|" +
+                            globalRef + "|" +
                             requestData
             );
 
@@ -31,9 +34,11 @@ public final class ReferenceScanner {
         }
 
         List<String> result = new ArrayList<>();
-        char[] copy = expression.toCharArray();
+        // an escaped global token is literal text: no reference is looked for inside it
+        String scanned = GlobalEscape.mask(expression);
+        char[] copy = scanned.toCharArray();
 
-        Matcher matcher = EXTRACTION_PATTERN.matcher(expression);
+        Matcher matcher = EXTRACTION_PATTERN.matcher(scanned);
         while (matcher.find()) {
             result.add(matcher.group());
 

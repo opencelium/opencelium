@@ -87,6 +87,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngStartupUpdater;
     private final OwnershipSecurity ownershipSecurity;
+    private final GlobalVariableUsageService globalVariableUsageService;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -106,7 +107,8 @@ public class ConnectionServiceImp implements ConnectionService {
             ExecutionArgumentService executionArgumentService,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
-            OwnershipSecurity ownershipSecurity
+            OwnershipSecurity ownershipSecurity,
+            GlobalVariableUsageService globalVariableUsageService
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -126,6 +128,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ocProps = ocProps;
         this.connectionMngStartupUpdater = entityVersionManager.getUpdater(ConnectionMng.class, UpdaterVersion.VERSION_4_8);
         this.ownershipSecurity = ownershipSecurity;
+        this.globalVariableUsageService = globalVariableUsageService;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -164,6 +167,9 @@ public class ConnectionServiceImp implements ConnectionService {
             categoryService.get(connection.getCategoryId());
         }
 
+        // a new workflow has no id yet, so no variable scoped to chosen workflows can list it
+        globalVariableUsageService.checkWorkflow(connectionMng, null, connection.getCategoryId());
+
         ConnectionMng savedMng = connectionMngService.create(connectionMng);
 
         String version = resolveVersion(connection);
@@ -174,6 +180,7 @@ public class ConnectionServiceImp implements ConnectionService {
         savedMng.setConnectionId(savedConnection.getId());
         savedMng.setVersion(version);
         connectionMngService.save(savedMng);
+        globalVariableUsageService.rebuildForWorkflow(savedConnection.getId(), savedMng);
 
         connectionHistoryService.makeHistoryAndSave(savedConnection, null, Action.CREATE);
         return savedConnection.getId();
@@ -217,6 +224,8 @@ public class ConnectionServiceImp implements ConnectionService {
             categoryService.get(connection.getCategoryId());
         }
 
+        globalVariableUsageService.checkWorkflow(connectionMng, connection.getId(), connection.getCategoryId());
+
         connectionMng.setId(null);
         connectionMng.setConnectionId(connection.getId());
         ConnectionMng savedMng = connectionMngService.create(connectionMng);
@@ -229,6 +238,7 @@ public class ConnectionServiceImp implements ConnectionService {
         connection.setSnapshotId(savedMng.getId());
         connection.setRevision(sCon.getRevision());
         connectionRepository.save(connection);
+        globalVariableUsageService.rebuildForWorkflow(connection.getId(), savedMng);
     }
 
     @Override
@@ -277,6 +287,7 @@ public class ConnectionServiceImp implements ConnectionService {
         executionArgumentService.deleteByConnectionId(id);
 
         deleteSchedules(connection);
+        globalVariableUsageService.deleteForWorkflow(id);
 
         connectionRepository.deleteById(id);
 
@@ -301,6 +312,7 @@ public class ConnectionServiceImp implements ConnectionService {
         executionArgumentService.deleteByConnectionId(id);
 
         deleteSchedules(connection);
+        globalVariableUsageService.deleteForWorkflow(id);
 
         connectionRepository.deleteById(id);
 
@@ -318,6 +330,7 @@ public class ConnectionServiceImp implements ConnectionService {
         executionArgumentService.deleteByConnectionId(id);
 
         deleteSchedules(connection);
+        globalVariableUsageService.deleteForWorkflow(id);
         connectionRepository.deleteById(id);
     }
 
@@ -466,6 +479,12 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public void updateCategory(Connection connection, Integer newCategory) {
+        // a move can take the workflow out of the scope of a variable it uses
+        if (connection.getSnapshotId() != null) {
+            ConnectionMng connectionMng = connectionMngService.getById(connection.getSnapshotId());
+            globalVariableUsageService.checkWorkflow(connectionMng, connection.getId(), newCategory);
+        }
+
         connection.setCategoryId(newCategory);
         connectionRepository.save(connection);
     }
@@ -695,6 +714,7 @@ public class ConnectionServiceImp implements ConnectionService {
         connection.setSnapshotId(connectionMng.getId());
 
         connectionRepository.save(connection);
+        globalVariableUsageService.rebuildForWorkflow(connectionId, connectionMng);
     }
 
     /**
@@ -839,6 +859,8 @@ public class ConnectionServiceImp implements ConnectionService {
 
         ConnectionMng connectionMng = connectionMngMapper.toEntity(patched);
         connectionMngService.save(connectionMng);
+        // a patch is saved without the checks of a full save, but "used by" still follows the content
+        globalVariableUsageService.rebuildForWorkflow(connection.getId(), connectionMng);
         return patched;
     }
 

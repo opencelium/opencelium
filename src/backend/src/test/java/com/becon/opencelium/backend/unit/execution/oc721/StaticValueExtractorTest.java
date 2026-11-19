@@ -11,14 +11,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * Unit tests for {@link StaticValueExtractor}. The connector side is a fake that echoes the
- * reference it was asked for.
+ * Unit tests for {@link StaticValueExtractor}. The delegate, which reads the connectors and the
+ * snapshot of global variables, is a fake that echoes the reference it was asked for.
  */
 @DisplayName("StaticValueExtractor — unit")
 class StaticValueExtractorTest {
 
     private static final String DIRECT_REF = "#c0ffee.(response).id";
     private static final String TOKEN_REF = "{token}";
+    private static final String GLOBAL_REF = "{{global.apiKey}}";
 
     private final Extractor connector = reference -> "connector:" + reference;
 
@@ -68,6 +69,25 @@ class StaticValueExtractorTest {
         Object value = extractor.extractValue(null);
 
         assertThat(value).isNull();
+    }
+
+    @Test
+    void extractValueReturnsStaticValueWhenGlobalVariableReferenceHasOne() {
+        StaticValueExtractor extractor = new StaticValueExtractor(Map.of(GLOBAL_REF, "static"), connector);
+
+        Object value = extractor.extractValue(GLOBAL_REF);
+
+        assertThat(value).isEqualTo("static");
+    }
+
+    @Test
+    @DisplayName("extractValue — a global variable without a static value is read from the snapshot by the delegate")
+    void extractValueReadsDelegateWhenGlobalVariableReferenceHasNoStaticValue() {
+        StaticValueExtractor extractor = new StaticValueExtractor(Map.of(), connector);
+
+        Object value = extractor.extractValue(GLOBAL_REF);
+
+        assertThat(value).isEqualTo("connector:" + GLOBAL_REF);
     }
 
     @Test

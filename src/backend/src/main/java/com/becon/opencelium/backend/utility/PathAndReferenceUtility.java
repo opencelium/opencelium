@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.utility;
 
+import com.becon.opencelium.backend.reference.GlobalEscape;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,19 +10,22 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.becon.opencelium.backend.constant.RegExpression.globalRef;
 import static com.becon.opencelium.backend.constant.RegExpression.referencePath;
 
 public class PathAndReferenceUtility {
     /**
      * Every reference that can appear inside text, matched as short as possible so that two
      * references in one text are never merged: wrapped direct reference, enhancement, webhook,
-     * page reference and request data.
+     * page reference, global variable and request data. The global variable stands before request
+     * data, which would otherwise take the inner braces of {@code {{global.x}}}.
      */
     private static final Pattern REFERENCE_SPAN = Pattern.compile(
             "\\{%#[a-zA-Z0-9]{6}\\.\\((?:response|request)\\)\\..+?%\\}"
                     + "|#\\{%[0-9a-fA-F]{24}%\\}"
                     + "|\\$\\{[^}]*\\}"
                     + "|@\\{[^}]+\\}"
+                    + "|" + globalRef
                     + "|\\{(?!%)[^{}]*(?<!%)\\}");
     private static final String PRE_DIRECT_REF = "{%#";
     private static final String SUF_DIRECT_REF = "%}";
@@ -317,7 +321,8 @@ public class PathAndReferenceUtility {
         }
 
         List<int[]> spans = new ArrayList<>();
-        Matcher matcher = REFERENCE_SPAN.matcher(text);
+        // an escaped global token is typed text; masked, it keeps the positions of the text
+        Matcher matcher = REFERENCE_SPAN.matcher(GlobalEscape.mask(text));
         while (matcher.find()) {
             spans.add(new int[]{matcher.start(), matcher.end()});
         }

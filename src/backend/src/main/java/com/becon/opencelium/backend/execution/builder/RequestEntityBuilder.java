@@ -3,6 +3,8 @@ package com.becon.opencelium.backend.execution.builder;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.enums.execution.ParamLocation;
 import com.becon.opencelium.backend.enums.execution.ParamStyle;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalValueCaster;
+import com.becon.opencelium.backend.reference.GlobalEscape;
 import com.becon.opencelium.backend.reference.ReferenceDetector;
 import com.becon.opencelium.backend.reference.ReferenceMatchers;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
@@ -129,7 +131,7 @@ public class RequestEntityBuilder {
         int cursor = 0;
 
         for (int[] span : PathAndReferenceUtility.findReferenceSpans(path)) {
-            result.append(encodeLeniently(path.substring(cursor, span[0])));
+            result.append(encodeTyped(path.substring(cursor, span[0])));
 
             String reference = path.substring(span[0], span[1]);
             boolean urlText = span[0] == 0 || ReferenceMatchers.isRequestData(reference);
@@ -138,7 +140,7 @@ public class RequestEntityBuilder {
             cursor = span[1];
         }
 
-        result.append(encodeLeniently(path.substring(cursor)));
+        result.append(encodeTyped(path.substring(cursor)));
 
         return encodeBracketsInPath(result.toString());
     }
@@ -219,14 +221,22 @@ public class RequestEntityBuilder {
         int cursor = 0;
 
         for (int[] span : PathAndReferenceUtility.findReferenceSpans(text)) {
-            result.append(encodeLeniently(text.substring(cursor, span[0])));
+            result.append(encodeTyped(text.substring(cursor, span[0])));
             result.append(encodeQueryValue(resolveAsText(text.substring(span[0], span[1]))));
             cursor = span[1];
         }
 
-        result.append(encodeLeniently(text.substring(cursor)));
+        result.append(encodeTyped(text.substring(cursor)));
 
         return result.toString();
+    }
+
+    /**
+     * Encodes text the user typed into the URL. An escaped global token, {@code
+     * \{{global.name}}}, is such text: it loses its backslash and is then encoded like the rest.
+     */
+    private static String encodeTyped(String text) {
+        return encodeLeniently(GlobalEscape.unescape(text));
     }
 
     /**
@@ -235,6 +245,10 @@ public class RequestEntityBuilder {
      */
     private String resolveAsText(String reference) {
         Object value = references.apply(reference);
+
+        if (ReferenceMatchers.isGlobal(reference)) {
+            return GlobalValueCaster.toText(value);
+        }
 
         return value == null ? "" : value.toString();
     }
@@ -251,7 +265,7 @@ public class RequestEntityBuilder {
         parameter.setExplode(style == ParamStyle.FORM);
         parameter.setSchema(new SchemaDTO(DataType.STRING, reference));
 
-        replaceRefs(parameter.getSchema());
+        replaceRefsOfParameter(parameter.getSchema());
 
         return parameter;
     }
@@ -300,13 +314,13 @@ public class RequestEntityBuilder {
 
         getParamsByLocation(ParamLocation.HEADER).stream()
                 .map(ParameterDTOUtil::copy)
-                .peek(parameter -> replaceRefs(parameter.getSchema()))
+                .peek(parameter -> replaceRefsOfParameter(parameter.getSchema()))
                 .forEach(parameter -> headers.add(parameter.getName(), ParameterDTOUtil.toString(parameter)));
 
         // collect Cookie parameter(s) in header if exists
         getParamsByLocation(ParamLocation.COOKIE).stream()
                 .map(ParameterDTOUtil::copy)
-                .peek(parameter -> replaceRefs(parameter.getSchema()))
+                .peek(parameter -> replaceRefsOfParameter(parameter.getSchema()))
                 .forEach(parameter -> headers.add(HttpHeaders.COOKIE, ParameterDTOUtil.toString(parameter)));
 
         String cookies = String.join("; ", headers.getOrDefault(HttpHeaders.COOKIE, List.of()));
@@ -374,7 +388,15 @@ public class RequestEntityBuilder {
                 value = property.getValue() == null ? null : property.getValue().getValue();
 
                 if (ReferenceDetector.containsReference((String) value)) {
-                    value = references.apply((String) value);
+                    String reference = (String) value;
+                    value = references.apply(reference);
+
+                    // a form field is text: a global list or map is sent as compact JSON text
+                    if (ReferenceMatchers.isGlobal(reference)) {
+                        value = GlobalValueCaster.toText(value);
+                    }
+                } else if (value instanceof String text) {
+                    value = GlobalEscape.unescape(text);
                 }
 
                 formData.add(property.getKey(), value);
@@ -435,6 +457,27 @@ public class RequestEntityBuilder {
         }
     }
 
+    /**
+     * Replaces the references of a path, query, header or cookie parameter. Such a value is text,
+     * so a global variable that is the whole value is cast to text: a list or a map becomes
+     * compact JSON text and {@code null} an empty string. Every other reference is replaced as
+     * in a body.
+     */
+    private void replaceRefsOfParameter(SchemaDTO schema) {
+        if (schema != null && ReferenceMatchers.isGlobal(schema.getValue())) {
+            String text = GlobalValueCaster.toText(references.apply(schema.getValue()));
+
+            schema.setType(DataType.STRING);
+            schema.setValue(text);
+            schema.setItems(null);
+            schema.setProperties(null);
+            schema.setXml(null);
+            return;
+        }
+
+        replaceRefs(schema);
+    }
+
     private void replaceRefs(SchemaDTO schema) {
         if (schema == null) {
             return;
@@ -477,6 +520,11 @@ public class RequestEntityBuilder {
 
             // referenced schema does not contain other reference, end recursion
             return;
+        }
+
+        // no reference, but possibly an escaped global token: literal text that loses its backslash
+        if (GlobalEscape.isPresent(value)) {
+            schema.setValue(GlobalEscape.unescape(value));
         }
 
         List<SchemaDTO> items = schema.getItems();

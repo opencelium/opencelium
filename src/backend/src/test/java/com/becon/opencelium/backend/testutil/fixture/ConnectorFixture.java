@@ -2,7 +2,9 @@ package com.becon.opencelium.backend.testutil.fixture;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
+import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
+import com.becon.opencelium.backend.invoker.entity.RequestInv;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.resource.execution.MethodConnectorEx;
 import java.util.ArrayList;
@@ -51,6 +53,24 @@ public final class ConnectorFixture {
         data.setValue(value);
         data.setVisibility(visibility);
         return data;
+    }
+
+    /**
+     * An invoker function whose request has no header and no body. Set it as an operation of an
+     * invoker where a field is computed from its response, e.g. {@code %{login.body.token}}.
+     *
+     * @param endpoint the address; {@code {field}} stands for the value of a request data field
+     */
+    public static FunctionInvoker aFunction(String name, String httpMethod, String endpoint) {
+        RequestInv request = new RequestInv();
+        request.setMethod(httpMethod);
+        request.setEndpoint(endpoint);
+        request.setHeader(new HashMap<>());
+
+        FunctionInvoker function = new FunctionInvoker();
+        function.setName(name);
+        function.setRequest(request);
+        return function;
     }
 
     /** The execution view of connector {@code id} once its request data is resolved. */
