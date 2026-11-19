@@ -10,6 +10,8 @@ export interface Enhancement {
 	language: Language;
 	script: string;
 	args: Record<string, string>;
+	/** Global variables defined under `globals` before the script runs (FR-43). */
+	imports?: string[];
 }
 
 export const Language = {

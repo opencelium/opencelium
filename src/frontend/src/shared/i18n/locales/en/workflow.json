@@ -414,6 +414,7 @@
       "referenceEdited": "Edited {{section}} reference in {{name}}",
       "enhancement": "Edited {{section}} transformation of {{name}}",
       "enhancementLanguage": "Updated transformation language of {{name}}",
+      "enhancementImports": "Updated global variable imports of {{name}}",
       "enhancementDescription": "Updated transformation description of {{name}}",
       "enhancementRemoved": "Deleted transformation of {{name}}",
       "conditionConfig": "Edited condition of {{name}}",
@@ -771,6 +772,7 @@
     "empty": "Empty"
   },
   "enhancement": {
+    "imports": {"label": "Imports (global variables)", "placeholder": "Use global variables in this script"},
     "title": "Transformation",
     "language": "Language",
     "script": "Script",

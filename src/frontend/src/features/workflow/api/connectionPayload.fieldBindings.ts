@@ -39,6 +39,8 @@ const serializeFieldBinding = (binding: any) => {
 			description: binding?.enhancement?.description ?? '',
 			language: binding?.enhancement?.language ?? 'js',
 			simpleCode: binding?.enhancement?.simpleCode ?? null,
+			imports: binding?.enhancement?.imports ?? [],
+			globalScript: null,
 			expertVar,
 			expertCode: binding?.enhancement?.script?.endsWith(';')
 				? binding.enhancement.script
