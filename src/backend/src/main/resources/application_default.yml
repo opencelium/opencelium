@@ -238,6 +238,11 @@ opencelium:
   #   backup.directory — where pre-write backups go (.bak.<epochMillis>)    #
   #   backup.keep      — how many recent backups to retain per target file  #
   #                                                                         #
+  #   To keep application.yml outside src/main/resources, set the env       #
+  #   variable OPENCELIUM_CONFIG_FILEPATH to its location instead of        #
+  #   editing file-path. It overrides file-path and is also used by the     #
+  #   startup YAML migrator and as Spring's spring.config.location.         #
+  #                                                                         #
   #   DO NOT modify or remove this block. The endpoint reads and writes     #
   #   the file that file-path points at — changing these values can break   #
   #   the config editor or make it write to the wrong file.                 #
