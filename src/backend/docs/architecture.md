@@ -50,7 +50,7 @@ The architecture keeps these 2 workloads apart. All other structure comes from t
 - The engine is a library. The applications are thin hosts (decision 3).
 - Promise-based dataflow execution, with checkpoints (decisions 8, 12).
 - Workers without state. Each job message is self-contained (decision 9).
-- The tenant context is in each document, each job message, and each event (decision 11).
+- The tenant context is in each tenant document, each job message, and each event (decisions 11, 15).
 - Configuration in 2 places, and envelope encryption for the secrets (decisions 13, 14).
 - Authentication is a plug-in, separate from authorization (decisions 7, 10).
 
@@ -89,7 +89,7 @@ The module `common` holds contracts only, with almost no framework dependencies.
 | **Workflow model** | The node and edge model, and the node types, with Wait-for-Human. | `common.workflow` |
 | **Descriptors** | The invoker and connector descriptors. | `common.invoker`, `common.connector` |
 | **Access-control model** | Subjects and the permission levels View to Admin (decision 7). | `common.acl` |
-| **Tenant context** | The tenant identifier, with the reserved values `self-host-tenant` and `system` (decision 11). | `common.tenant` |
+| **Tenant context** | The tenant identifier, with the reserved values `self-host-tenant` and `system`, and the check of a tenant ID from outside core (decisions 11, 15). | `common.tenant` |
 | **Secret contract** | The secret provider SPI and the secret reference. A secret reference does not show the value. | `common.secret` |
 | **Transport contract** | The transport SPI, the job message, and the event vocabulary: results, logs, state, variable updates, heartbeat, audit. | `common.transport` |
 
@@ -115,7 +115,8 @@ The module `core` has one package for each feature (modular monolith, decision 1
 |---|---|---|
 | **Security filter chain** | It validates the session JWTs that core issues. The login strategies are plug-ins and depend on the deployment mode: local (with 2FA/TOTP), LDAP, OIDC, and Service Portal (decision 10). | `core.auth` |
 | **Access control** | RBAC and ACL enforcement, with one authorization manager (decision 7). | `core.authz` |
-| **Users** | The users of a tenant, with the password hash and never the password. Password changes, the first-admin command, generated passwords, and the lock of a user whose generated password is older than 24 h. | `core.user` |
+| **Users** | The OpenCelium users of a tenant, with the password hash and never the password. Password changes, the first-admin command, generated passwords, and the lock of a user whose generated password is older than 24 h. The lock runs in the self-host mode only, because the Service Portal owns the users in the cloud mode (decision 10). The user repository is on the tenant-document access (decision 16). | `core.user` |
+| **Current tenant** | The tenant runner binds the current tenant of a request or a background task (decision 15). The request filter, the task decorator and each background task call it. The principal contract gives the tenant of a principal. The tenant-document access is the 1 path from a repository to its tenant documents. | `core.tenant` |
 | **Tenant catalog** | The system database and the per-tenant Mongo connections (decision 11). | `core.tenant` |
 | **Management** | CRUD of workflows, connectors, and invokers. The invoker XML parser and importer. | `core.workflow`, `core.connector`, `core.invoker` |
 | **Execution quota** | The quota check for each execution. See the note below the table. | `core.subscription` |
@@ -145,7 +146,13 @@ The module `worker` holds the application wiring only. It grows nothing, on purp
 
 This scenario tells what occurs when core starts, in the order of the code. Each step stops the application with the report `APPLICATION FAILED TO START` if its check is not successful. The report names the property or the action.
 
-1. The **defaults post-processor** adds the documented defaults for the bootstrap values that are not set. These are the deployment mode `self-host`, the data directory, and the MongoDB URI in self-host mode. It writes one `(default)` line to the log for each applied default. It also writes a warning if the Boot 3 property `spring.data.mongodb.uri` is set.
+1. The **defaults post-processor** adds the documented defaults for the bootstrap values that are not set:
+   - the deployment mode `self-host`
+   - the data directory
+   - the MongoDB URI in self-host mode
+   - the log pattern `logging.pattern.correlation` (decision 15)
+
+   It writes one `(default)` line to the log for each applied default. It also writes a warning if the Boot 3 property `spring.data.mongodb.uri` is set.
 2. The **bootstrap properties** bind and validate `opencelium.deployment-mode`, `opencelium.data-dir`, and `opencelium.master-key-file`.
 3. The **data directory guard** makes the data directory if there is none. It makes sure that the directory is writable.
 4. The **static connection resolver** reads `spring.mongodb.*` and validates the connection. It does not accept the settings that Boot ignores.
@@ -230,9 +237,15 @@ A new requirement extends this vocabulary. It does not open a second channel nex
 
 ### 6.3 Tenancy
 
-The tenant context is a basic part of the design (decision 11). The tenant ID is in 4 places: the principal, each document in the database, each self-contained job message, and each event that a worker publishes. The persistence and API layers enforce the isolation. The engine and the transports do not know about tenants.
+The tenant context is a basic part of the design (decision 11). The tenant ID is in 4 places: the principal, each tenant document, each self-contained job message, and each event that a worker publishes. The persistence and API layers enforce the isolation. The engine and the transports do not know about tenants.
 
 In `self-host` mode there is exactly one tenant, with one static MongoDB connection at the start. In `cloud` mode core keeps a **system database** with the **tenant catalog**: tenant ID, cluster, database name, status, and the connection credential. Scheduled and triggered executions find the tenant purely from the catalog. Thus they execute with nobody logged in, and they survive restarts. The details are in decision 11.
+
+**The current tenant** is the tenant for which a request or a background task runs (decision 15). Only the tenant runner binds it, for 1 task, in a scoped value. The request filter gives the tenant runner the tenant ID of the authenticated principal, from the principal contract. A background task gives the tenant runner the tenant ID of the record that starts the task. The task decorator carries the bound tenant to a task on another thread. In the self-host mode the same path binds `self-host-tenant`.
+
+A **tenant document** belongs to exactly 1 tenant and holds its ID in the field `tenantId`. The tenant-document access of `core.tenant` is the 1 path from a repository to its tenant documents. It applies the tenant limit to each operation, and an operation without a current tenant stops. The data of the installation itself, for example the tenant catalog and the system DEK, belongs to no tenant.
+
+The log line of a task shows the tenant of the task through the MDC key `tenant`. In the self-host mode each application log line shows `self-host-tenant` ([6.4](#64-configuration-placement)).
 
 ### 6.4 Configuration placement
 
@@ -274,6 +287,7 @@ A runtime setting is declared in the code, in the setting registry: name, type, 
 | Deployment mode | 1 | yml: `opencelium.deployment-mode`. Values: `self-host` (the default) or `cloud` |
 | Data directory (local state, for example the generated `master.key`) | 1 | yml: `opencelium.data-dir`. Default on Linux: `/var/lib/opencelium`, if that directory is available and writable. Default in all other cases: `./data`. Core makes the directory at the start. The directory must be writable. In a container, mount it as a volume. |
 | Master (root) encryption key | 1 | **Outside the yml file and the database.** Core finds the key in this order: the `OC_MASTER_KEY` environment variable, then the file that `opencelium.master-key-file` names, then `master.key` in the data directory. In self-host mode, core generates the file in the data directory on a new installation. In cloud mode a start without a key stops. The key value is not in the yml file at any time. Rules and guards: decision 14. |
+| Tenant ID in the application log lines | 1 | yml: `logging.pattern.correlation` (standard Spring). The pattern applies from the first log line. Default: `[%X{tenant:-self-host-tenant}] ` in self-host mode, `[%X{tenant:--}] ` in cloud mode. It prints the MDC key `tenant`, which holds the current tenant (decision 15). |
 | Broker host name, port, vhost | 3 | Runtime setting |
 | Broker password | 2 | Secret (a secret reference in the broker setting) |
 | Connector credentials | 2 | Secret |
@@ -371,12 +385,19 @@ The intended result: most product logic (the graph walk, IF, LOOP, data mapping)
 
 ### 6.9 Build checks
 
-ArchUnit rules make these 4 rules build failures:
+ArchUnit rules make these 5 rules build failures:
 
 - no `@Value`
 - cryptography only in `core.secrets`
 - no plaintext secret-named fields on `@Document` classes
 - the `settings` collection is read only through the settings service
+- a repository reads and writes a tenant document only through the tenant-document access of `core.tenant` (decision 15)
+
+The rule for the tenant documents has 3 exceptions. They are operations of the start of core:
+
+- The wizard runs before Spring, with its own MongoDB client. Each read and each write of the wizard is outside the tenant-document access.
+- The completion runner of the wizard reads the admin marker by its document ID, which is the tenant ID. It deletes the marker after the admin exists.
+- The start checks of the root key read the `keys` collection of the database that the yml file names, without a tenant (decision 14).
 
 ## 7. Architecture decisions
 
@@ -486,12 +507,30 @@ The decisions are recorded so that they are not discussed again without a reason
 
     *(The worker-side key material for encrypted job payloads is on the [open decisions](#open-decisions) list.)*
 
+15. **One current tenant for each request and for each background task. Only the tenant runner binds it, in a scoped value.** *(Extends decision 11.)*
+
+    *Why:* Decision 11 puts the tenant ID on each document, but a rule without 1 place of enforcement is easy to omit. A tenant that arrives as a parameter can differ from the tenant that selects the database. A tenant that a thread keeps after its task leaks into the next task. The self-host mode uses the same bind path, so an omitted bind shows in the hand tests of that mode. The log pattern is a standard Spring property, so core adds no log configuration file.
+
+    - **The current tenant** is the tenant for which a request or a background task runs. Only the tenant runner binds it, for 1 task, in a scoped value. The value ends with the task, also after an error. The task decorator carries the bound tenant to a task on another thread. Code that reads the current tenant without a bound tenant gets an error. Core has no default tenant.
+    - **The source of the tenant.** The request filter binds the tenant of the authenticated principal through the tenant runner. The principal gives its tenant ID through the principal contract. The filter reads no header, no parameter, and no body. The WebSocket gateway binds the tenant of the session for each message through the tenant runner, with the same rule. A background task binds, through the tenant runner, the tenant ID of the record that starts it, for example a schedule or an event. Thus it runs with nobody logged in (decision 11).
+    - **The self-host mode binds `self-host-tenant` on the same path.** The request filter and each background task of the self-host mode bind `self-host-tenant` through the tenant runner. In the self-host mode the tenant runner starts no task for a different tenant. In the cloud mode it starts no task for a reserved value. In the 2 modes it starts no task for a tenant inside the task of another tenant.
+    - **The form of a tenant ID.** A tenant ID has 1 to 64 characters: the letters `a` to `z`, the digits, and the hyphen. The first character and the last character are not a hyphen. The reserved values `self-host-tenant` and `system` have this form. From outside core, for example from the Service Portal, core accepts only a tenant ID with this form that is not a reserved value.
+    - **The tenant-document access is the 1 path from a repository to its tenant documents.** It reads the current tenant and stops without one, before a query goes to MongoDB. It uses the MongoDB connection of the current tenant ([6.6](#66-persistence)). It adds the condition on the field `tenantId` to each read, each change, and each delete. It does not accept a new document of another tenant, and it does not accept a change of the field `tenantId`. Thus a document of another tenant does not exist for the current tenant, and no role and no ACL entry opens it (decision 7).
+    - **The log line of a task carries the tenant ID.** The tenant runner writes the tenant ID into the MDC key `tenant` for the time of the task. The default of the Spring property `logging.pattern.correlation` prints the key. For a line without a bound tenant, it prints `self-host-tenant` in the self-host mode and `-` in the cloud mode: `[%X{tenant:-self-host-tenant}] ` and `[%X{tenant:--}] `. An operator who sets a log pattern prints the key with `%X{tenant}`. The log lines of the engine carry the execution ID (decision 8).
+
+16. **The repositories are in the package of their feature, on the tenant-document access.** *(Extends decision 1.)*
+
+    *Why:* A shared persistence package makes each feature depend on it, and it grows with each feature. The features share only the tenant limit, and the tenant-document access of decision 15 holds that limit in 1 place. A feature package that owns its repository stays self-contained, as decision 1 intends.
+
+    - A repository of a tenant document is in the core package of its feature, for example the user repository in `core.user`.
+    - Each operation of such a repository goes through the tenant-document access of `core.tenant` (decision 15). A repository has no query without the tenant limit. The build rule of [6.9](#69-build-checks) enforces this.
+    - The repositories of the admin marker and of the wrapped DEKs are also in their feature packages. The 3 operations of the start that are outside the tenant-document access are in [6.9](#69-build-checks).
+
 ### Open decisions
 
 These decisions are open on purpose. The first feature that needs one closes it:
 
 - **Where the transport implementations go.** `local` goes to `execution`. `amqp` goes to `execution` or to its own package, but not to `core`. If it is in `core`, the workers cannot use it.
-- **Where the Mongo repositories go.** Preferred: in the core package of each feature, so that each feature stays self-contained. Alternative: one shared persistence package.
 - **ACL detailed design:** the exact meaning of each permission level, the extension beyond connectors and workflows, secret encryption, and masked logs.
 - **Job message contract:** the codec interface. JSON first. Protobuf is a possible transport codec, but not the domain model.
 - **Payload encryption and key distribution:** the worker-side key material for encrypted job payloads (preferred option: a separate transport key, see decision 14).
@@ -512,6 +551,8 @@ These decisions are open on purpose. The first feature that needs one closes it:
 | **Deployment shape** | **Monolith**: `oc-app.jar` alone, with the `local` transport. **Distributed**: `oc-app.jar` and N × `oc-worker.jar`, with a broker. Core finds the shape at runtime (decision 4). No configuration value sets it. |
 | **Deployment mode** | `self-host`: one tenant, the default. `cloud`: many tenants behind the Service Portal (decision 11). The mode is a bootstrap value in the yml file. Each shape can operate in each mode. |
 | **Tenant** | One customer whose data is kept apart from the data of all other customers. A self-hosted installation has exactly one tenant. |
+| **Current tenant** | The tenant for which a request or a background task runs. Only the tenant runner binds it (decision 15). |
+| **Tenant document** | A database document that belongs to exactly 1 tenant, with its ID in the field `tenantId`. The data of the installation itself, for example the tenant catalog, is not a tenant document. |
 | **Service Portal** | The external system that owns the cloud business: tenants, subscriptions, and user accounts. It is not part of the backend. |
 | **OCEL** | The OpenCelium Expression Language. Users write OCEL expressions in node parameters, for example to map data from one node to another node. |
 | **Global Params** | Variables that a workflow can read and write during an execution. Core keeps them between executions. |

@@ -231,8 +231,14 @@ Why the backend is shaped this way — modules, deployment shapes, recorded desi
   - `worker` stays a thin wrapper around `execution`
 - If a class fits two modules, put it in the lower one: the lower position keeps more options open.
 - A new feature becomes a package in one of the four modules. It never adds a module and never changes the dependency direction.
+- A repository is in the package of its feature (decision 16).
 - Both deployment shapes must keep working: monolith (`oc-app.jar`, in-process `local` transport) and distributed (`oc-app.jar` + `oc-worker.jar`, broker transport via the SPI).
-- Until the ArchUnit rules land, reviewers check the four build rules of [architecture.md section 6.9](docs/architecture.md#69-build-checks) by hand: no `@Value`; cryptography only in `core.secrets`; no plaintext secret-named fields on `@Document` classes; the `settings` collection is read only through the settings service.
+- Until the ArchUnit rules land, reviewers check the 5 build rules of [architecture.md section 6.9](docs/architecture.md#69-build-checks) by hand:
+  - no `@Value`
+  - cryptography only in `core.secrets`
+  - no plaintext secret-named fields on `@Document` classes
+  - the `settings` collection is read only through the settings service
+  - a repository reads and writes a tenant document only through the tenant-document access of `core.tenant`. Section 6.9 lists the 3 exceptions, which are operations of the start.
 - Code explains itself. Javadoc and comments state what a class does and why, in their own words; they never reference `docs/architecture.md`, its decision numbers, or Jira tickets. The document can change or get lost, the code must stand alone.
 - New code comes with tests — see below.
 
