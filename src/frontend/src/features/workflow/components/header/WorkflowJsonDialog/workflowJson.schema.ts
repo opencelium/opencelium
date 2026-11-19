@@ -43,6 +43,7 @@ const methodSchema = z.strictObject({
 	methodType: z.enum(['CONNECTOR', 'HTTP_REQUEST', 'WEBHOOK']),
 	dataAggregator: optionalAggregatorSchema, color: hexColorSchema,
 	jump: z.string().min(1).optional(),
+	dataAggregatorPublish: z.record(z.string(), z.string()).optional(),
 	connector: connectorSchema.nullable(), request: requestSchema, response: responseSchema,
 });
 const operatorTypeSchema = z.preprocess(
@@ -130,7 +131,9 @@ const nodeDataSchema = z.strictObject({
 	connector: uiConnectorSchema.optional(), methodConfig: uiMethodConfigSchema.optional(),
 	conditionConfig: conditionConfigSchema.optional(), comment: commentSchema.optional(),
 	setGlobal: z.strictObject({ variable: z.string(), value: z.string() }).optional(),
+	runConflictPolicy: z.enum(['QUEUE', 'REJECT']).optional(),
 	dataAggregator: optionalAggregatorSchema.optional(),
+	dataAggregatorPublish: z.record(z.string(), z.string()).optional(),
 });
 const nodeSchema = z.strictObject({
 	id: z.string().min(1),
@@ -170,6 +173,7 @@ export const workflowJsonSchema = z.strictObject({
 	connectionId: positiveIdSchema.optional(), title: z.string().min(1),
 	name: z.string().min(1).optional(),
 	description: z.string(), categoryId: positiveIdSchema.nullable(),
+	runConflictPolicy: z.enum(['QUEUE', 'REJECT']).optional(),
 	fieldBinding: z.array(fieldBindingSchema),
 	fromConnector: z.strictObject({
 		connectorId: z.number(), title: z.string().min(1),

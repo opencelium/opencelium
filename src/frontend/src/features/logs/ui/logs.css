@@ -108,3 +108,20 @@
 .oc-log-method-actions:not(:empty) {
   margin-bottom: 8px;
 }
+
+.oc-log-globals {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--color-border-subtle);
+}
+
+.oc-log-globals-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}

@@ -16,3 +16,26 @@
   font-size: 13px;
   text-align: center;
 }
+
+.aggregatorPublish {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 16px;
+  padding: 12px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+}
+
+.aggregatorPublishRows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.aggregatorPublishRow {
+  display: grid;
+  grid-template-columns: minmax(120px, max-content) max-content minmax(220px, 360px) max-content;
+  gap: 8px;
+  align-items: center;
+}

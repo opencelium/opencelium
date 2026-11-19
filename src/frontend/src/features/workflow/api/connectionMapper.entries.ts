@@ -1,3 +1,4 @@
+import { setGlobalValueToText } from '../utils/setGlobalValue';
 import { MethodType } from '../types/connection';
 import type { WorkflowMethodConfig } from '../types/request-config.types';
 import type { WorkflowCreateKind } from '../types/workflow.types';
@@ -7,7 +8,6 @@ import { createConditionId } from '../components/condition-builder/conditionTree
 import { initialNodes } from '../data/initialGraph';
 import { OFFSETS, TITLES } from '../utils/graph.constants';
 import type { IndexedWorkflowEntry } from './connectionMapper.types';
-import { setGlobalValueToText } from '../utils/setGlobalValue';
 
 type LegacyConditionNode = {
 	id?: string;
@@ -104,6 +104,8 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 				invokerName: method?.connector?.invokerName ?? method?.invokerName ?? null,
 			} } : {}),
 			dataAggregator: method?.dataAggregator ?? undefined, methodConfig: methodConfig(method),
+			...(method?.dataAggregatorPublish && typeof method.dataAggregatorPublish === 'object'
+				? { dataAggregatorPublish: method.dataAggregatorPublish as Record<string, string> } : {}),
 		},
 	} };
 };

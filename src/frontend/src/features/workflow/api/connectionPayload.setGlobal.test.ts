@@ -38,3 +38,15 @@ describe('Set global variable step', () => {
 		]);
 	});
 });
+
+describe('aggregator publish', () => {
+	it('is saved on the method and loaded back', () => {
+		const published = nodes.map((node) => node.id === 'm1'
+			? { ...node, data: { ...node.data, dataAggregator: 5, dataAggregatorPublish: { lastSyncOut: 'lastSync' } } }
+			: node) as WorkflowNodeModel[];
+		const { methods } = buildFromConnectorPayload(published, edges);
+		expect(methods[0]).toMatchObject({ dataAggregator: 5, dataAggregatorPublish: { lastSyncOut: 'lastSync' } });
+		const [entry] = methodsToEntries([{ ...methods[0] }], []);
+		expect(entry.node.data.dataAggregatorPublish).toEqual({ lastSyncOut: 'lastSync' });
+	});
+});
