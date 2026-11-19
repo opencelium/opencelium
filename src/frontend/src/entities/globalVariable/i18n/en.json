@@ -1,0 +1,252 @@
+{
+  "notFound": "This global variable does not exist or you may not view it.",
+  "kind": {
+    "CONSTANT": { "label": "Constant", "hint": "Only users change it. Workflows read it." },
+    "MUTABLE": { "label": "Mutable", "hint": "Its owner workflow changes it during runs. Other workflows read it." },
+    "SCRIPT": { "label": "Script", "hint": "A shared function that returns a value each time it is called." }
+  },
+  "scope": {
+    "ALL": "All workflows",
+    "CATEGORIES": "Chosen categories",
+    "WORKFLOWS": "Chosen workflows"
+  },
+  "permission": {
+    "VIEW_USE": "Use",
+    "EDIT": "Edit",
+    "DELETE": "Delete"
+  },
+  "writePolicy": {
+    "REPLACE": "Replace",
+    "FORWARD_ONLY": "Forward only",
+    "INCREMENT": "Increment"
+  },
+  "publishMode": {
+    "ON_SUCCESS": "When the run succeeds",
+    "EACH_WRITE": "On each write"
+  },
+  "jsonType": {
+    "string": "text",
+    "number": "number",
+    "boolean": "true / false",
+    "null": "null",
+    "array": "list",
+    "object": "map"
+  },
+  "list": {
+    "title": "Global Variables",
+    "subTitle": "Values defined once and referenced by name in workflows, connectors and notifications.",
+    "scriptSummary": "{{language}} · {{count}} parameters",
+    "columns": {
+      "usageCount": "Used by",
+      "updated": "Last change"
+    }
+  },
+  "live": {
+    "beingUpdated": "Being updated by run #{{executionId}}",
+    "beingUpdatedHint": "The owner workflow is writing this variable (started {{startedAt}}). The value shown is the last saved one."
+  },
+  "fields": {
+    "kind": {
+      "label": "Kind",
+      "hint": "The kind can't be changed after the variable is created.",
+      "lockedHint": "The kind was chosen when the variable was created and can't change."
+    },
+    "name": {
+      "label": "Name",
+      "errors": {
+        "pattern": "Use 1 to 64 letters, digits or _, starting with a letter.",
+        "taken": "A global variable with this name already exists."
+      }
+    },
+    "description": { "label": "Description" },
+    "secret": {
+      "label": "Secret",
+      "hint": "A secret value is never shown again after saving and is masked in logs."
+    },
+    "value": {
+      "label": "Value",
+      "hint": "Text, a number, true or false, a JSON list or a JSON map.",
+      "savedAs": "Saved as {{type}}. Wrap numbers or true/false in quotes to keep them as text.",
+      "secretHint": "Enter the secret value. It can't be shown again after saving.",
+      "secretKeptHint": "Leave empty to keep the stored value, or enter a new one to replace it.",
+      "secretKeptPlaceholder": "Stored value kept",
+      "errors": {
+        "required": "Enter a value.",
+        "tooLarge": "The value is larger than 64 KB."
+      }
+    },
+    "scope": {
+      "label": "Visibility",
+      "hint": "Which workflows may use this variable. Connectors can only use variables visible to all workflows.",
+      "categoriesPlaceholder": "Choose categories (subcategories are included)",
+      "workflowsPlaceholder": "Choose workflows",
+      "errors": {
+        "noTarget": "Choose at least one category or workflow."
+      }
+    }
+  },
+  "sections": {
+    "general": { "title": "General" },
+    "value": { "title": "Value" },
+    "visibility": { "title": "Visibility" }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create Global Variable",
+        "subheader": "Define a value once and use it in any workflow, connector or notification.",
+        "successMessage": "Global variable \"{{name}}\" was created"
+      },
+      "update": {
+        "header": "Update Global Variable",
+        "subheader": "Changes apply to runs that start after saving. Runs already going keep the old value.",
+        "successMessage": "Global variable \"{{name}}\" was updated"
+      }
+    },
+    "recommendations": {
+      "list": "Back to global variables",
+      "create": "Create another global variable"
+    },
+    "steps": {
+      "general": { "header": "General", "subheader": "Choose the kind and name the variable." },
+      "value": { "header": "Value", "subheader": "Set the value workflows will read." },
+      "visibility": { "header": "Visibility", "subheader": "Choose which workflows may use the variable." }
+    }
+  },
+  "save": {
+    "saveAnyway": "Save anyway",
+    "close": "Close",
+    "failed": "The global variable could not be saved.",
+    "kindNotEditableYet": "Variables of this kind can't be edited here yet.",
+    "noEditPermission": "You may not edit this global variable.",
+    "warnings": { "title": "This change may affect these places" },
+    "blocked": {
+      "title": "This change would break these places",
+      "IN_USE": "The variable is still in use",
+      "SCOPE_NARROWING": "The new visibility excludes workflows that use the variable",
+      "PARAMETER_BREAKING": "The parameter change breaks these callers",
+      "REF_UNRESOLVED": "A caller can't resolve a new reference",
+      "VERSION_CONFLICT": "Someone else saved first"
+    },
+    "versionConflict": {
+      "title": "Someone else saved first",
+      "message": "{{detail}}. Reload to see the current value, then make your change again.",
+      "reload": "Reload"
+    }
+  },
+  "impact": {
+    "reason": {
+      "OUT_OF_SCOPE": "Would no longer be allowed to use the variable",
+      "IN_USE": "Uses the variable",
+      "PARAMETER_BREAKING": "Calls the script with parameters that would no longer fit",
+      "REF_UNRESOLVED": "Can't resolve the reference {{ref}}",
+      "CALLS_IN_CODE_NOT_CHECKED": "Calls inside its code can't be checked automatically",
+      "IMPORTED_BY_SCRIPT": "Imports this script"
+    }
+  },
+  "delete": {
+    "tooltip": "Delete",
+    "noPermission": "You may not delete this global variable",
+    "failed": "The global variable could not be deleted.",
+    "confirm": {
+      "title": "Delete \"{{name}}\"?",
+      "message": "Global variable \"{{name}}\" will be deleted. This can't be undone.",
+      "messageWithWarnings": "Nothing uses the variable any more, but check these places first:"
+    },
+    "blocked": {
+      "title": "\"{{name}}\" can't be deleted",
+      "message": "It is still used here. Remove these references first:",
+      "close": "Close"
+    }
+  },
+  "usage": {
+    "empty": "Nothing uses this variable yet.",
+    "columns": {
+      "source": "Used in",
+      "element": "Element",
+      "access": "Access"
+    },
+    "sourceType": {
+      "WORKFLOW": "Workflow",
+      "CONNECTOR": "Connector",
+      "NOTIFICATION": "Notification",
+      "SCRIPT_VARIABLE": "Script variable"
+    },
+    "access": {
+      "READ": "Reads",
+      "WRITE": "Writes",
+      "CALL": "Calls",
+      "IMPORT": "Imports",
+      "REF": "References"
+    }
+  },
+  "detail": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "value": "Current value",
+    "script": "Script",
+    "noSecretValue": "No value set",
+    "ownerWorkflow": "Owner workflow",
+    "unclaimed": "Not claimed yet: the first workflow that writes it becomes the owner",
+    "writePolicy": "Write policy",
+    "publishMode": "Saved",
+    "ownerUser": "Owner",
+    "version": "Version",
+    "updated": "Last change",
+    "created": "Created",
+    "updatedBy": "{{time}} by {{name}}",
+    "imports": "Imports: {{names}}",
+    "tabs": {
+      "usage": "Used by",
+      "changes": "Change log",
+      "sharing": "Sharing"
+    }
+  },
+  "changes": {
+    "empty": "No changes match these filters.",
+    "restore": "Restore",
+    "restored": "The earlier version was restored",
+    "restoreFailed": "The earlier version could not be restored.",
+    "restoreConfirm": {
+      "title": "Restore this version?",
+      "message": "The value from version {{version}} becomes the current value. This is logged as a new change."
+    },
+    "changedFields": "Changed: {{fields}}",
+    "writeCount": "{{count}} writes combined",
+    "columns": {
+      "changedAt": "When",
+      "changeType": "Change",
+      "actor": "By",
+      "what": "From → to",
+      "result": "Result"
+    },
+    "type": {
+      "CREATE": "Created",
+      "VALUE": "Value",
+      "CONFIG": "Settings",
+      "PERMISSIONS": "Sharing",
+      "RESTORE": "Restored",
+      "DELETE": "Deleted"
+    },
+    "actor": {
+      "user": "{{name}}",
+      "execution": "run #{{id}}"
+    },
+    "result": {
+      "SAVED": "Saved",
+      "REJECTED": "Rejected"
+    },
+    "filters": {
+      "result": { "ALL": "All results", "SAVED": "Saved", "REJECTED": "Rejected" },
+      "actor": { "ALL": "Users and workflows", "USER": "Users", "WORKFLOW": "Workflows" }
+    }
+  },
+  "sharing": {
+    "owner": "Owner: {{name}}. The owner and admins can always use, edit and delete it.",
+    "user": "User",
+    "addUser": "Add a user",
+    "remove": "Remove access",
+    "save": "Save sharing",
+    "saved": "Sharing was saved"
+  }
+}

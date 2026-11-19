@@ -8,6 +8,7 @@ import { metaEntityDefinition } from '@entities/meta/meta.definition.ts'
 import { categoryDefinition } from '@entities/category/category.definition.tsx'
 import { notificationTemplateDefinition } from '@entities/notificationTemplate/notificationTemplate.definition.tsx'
 import { dataAggregatorDefinition } from '@entities/dataAggregator/dataAggregator.definition.tsx'
+import { globalVariableDefinition } from '@entities/globalVariable/globalVariable.definition.tsx'
 import { invokerDefinition } from '@entities/invoker/invoker.definition.tsx'
 import { connectionTemplateDefinition } from '@entities/connectionTemplate/connectionTemplate.definition.tsx'
 import { updateAssistantDefinition } from '@entities/updateAssistant/updateAssistant.definition.tsx'
@@ -37,6 +38,7 @@ export function registerEntities() {
     entityRegistry.register(categoryDefinition);
     entityRegistry.register(notificationTemplateDefinition);
     entityRegistry.register(dataAggregatorDefinition);
+    entityRegistry.register(globalVariableDefinition);
     entityRegistry.register(connectionTemplateDefinition);
     entityRegistry.register(updateAssistantDefinition);
     entityRegistry.register(systemCheckDefinition);

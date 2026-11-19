@@ -17,6 +17,7 @@
     "invokers": "API-Definitionen",
     "connectionTemplates": "Workflow-Vorlagen",
     "dataAggregator": "Datenaggregatoren",
+    "globalVariables": "Globale Variablen",
     "notificationTemplates": "Benachrichtigungsvorlagen",
     "categories": "Kategorien",
     "supportFiles": "Support-Dateien",

@@ -23,6 +23,9 @@ import {NotificationTemplateField} from "@entities/schedule/notification/overrid
 import {NotificationRecipientsEmailsField} from "@entities/schedule/notification/overrides/NotificationRecipientsEmailsField";
 import {NotificationRecipientsWebhookField} from "@entities/schedule/notification/overrides/NotificationRecipientsWebhookField";
 import {UserEmailField} from "@entities/user/ui/UserEmailField";
+import {GlobalVariableKindPicker} from "@entities/globalVariable/ui/form/GlobalVariableKindPicker";
+import {GlobalVariableValueEditor} from "@entities/globalVariable/ui/form/GlobalVariableValueEditor";
+import {GlobalVariableScopeEditor} from "@entities/globalVariable/ui/form/GlobalVariableScopeEditor";
 
 export function setupLocalOverrides() {
     overrideRegistry.registerField('permissionEditor', ({ field, mode }) => (
@@ -87,4 +90,7 @@ export function setupLocalOverrides() {
     overrideRegistry.registerField('scheduleNotificationRecipientsEmails', NotificationRecipientsEmailsField);
     overrideRegistry.registerField('scheduleNotificationRecipientsWebhook', NotificationRecipientsWebhookField);
     overrideRegistry.registerField('userEmailGravatar', UserEmailField);
+    overrideRegistry.registerField('globalVariableKindPicker', GlobalVariableKindPicker);
+    overrideRegistry.registerField('globalVariableValueEditor', GlobalVariableValueEditor);
+    overrideRegistry.registerField('globalVariableScopeEditor', GlobalVariableScopeEditor);
 }
