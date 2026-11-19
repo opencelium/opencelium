@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.slice.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -39,12 +40,15 @@ import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
+import com.becon.opencelium.backend.utility.crypto.GlobalVariableCipher;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -229,6 +233,46 @@ class GlobalVariableControllerTest {
                 .andExpect(jsonPath("$.currentVersion").value(5))
                 .andExpect(jsonPath("$.blocking").isEmpty())
                 .andExpect(jsonPath("$.violations").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("update — an explicit null reaches the service as JSON null, which keeps a secret")
+    void updatePassesJsonNullWhenBodySendsNullValue() throws Exception {
+        when(service.update(eq(7L), any())).thenReturn(aDetailDto());
+        String body = VALID_BODY.replace("\"value\": [ { \"id\": \"acme\" } ]", "\"value\": null");
+
+        mockMvc.perform(put("/global-variable/{id}", 7).contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<GlobalVariableRequestDTO> request = ArgumentCaptor.forClass(GlobalVariableRequestDTO.class);
+        verify(service).update(eq(7L), request.capture());
+        assertThat(request.getValue().value()).isEqualTo(NullNode.getInstance());
+    }
+
+    @Test
+    void updateReturnsBadRequestWhenSecretRemovalHasNoValue() throws Exception {
+        when(service.update(eq(7L), any())).thenThrow(new GlobalVariableValidationException(List.of(
+                new Violation("value", Code.SECRET_REMOVAL_NEEDS_VALUE,
+                        "Give a new value to make a secret visible again: its hidden value is never shown"))));
+
+        mockMvc.perform(put("/global-variable/{id}", 7).contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("GLOBAL_VARIABLE_INVALID"))
+                .andExpect(jsonPath("$.violations[0].field").value("value"))
+                .andExpect(jsonPath("$.violations[0].code").value("SECRET_REMOVAL_NEEDS_VALUE"));
+    }
+
+    @Test
+    void createReturnsInternalServerErrorWhenSecretKeyIsMissing() throws Exception {
+        when(service.create(any())).thenThrow(new GeneralServiceException(HttpStatus.INTERNAL_SERVER_ERROR,
+                GlobalVariableCipher.KEY_MISSING,
+                "Secret values cannot be saved: set " + GlobalVariableCipher.KEY_PROPERTY + " in application.yml"));
+
+        mockMvc.perform(post("/global-variable").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error").value(GlobalVariableCipher.KEY_MISSING))
+                .andExpect(jsonPath("$.message").value(
+                        "Secret values cannot be saved: set opencelium.global-variable.secret-key in application.yml"));
     }
 
     // ── DELETE /global-variable/{id} ──────────────────────────────────────────

@@ -3,11 +3,16 @@ package com.becon.opencelium.backend.unit.execution.globalvariable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot.Entry;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -70,5 +75,84 @@ class GlobalVariableSnapshotTest {
         GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(new Entry("idoitUrl", 4, new TextNode("x"))));
 
         assertThat(snapshot.isEmpty()).isFalse();
+    }
+
+    // ── secrets ───────────────────────────────────────────────────────────────
+
+    @Test
+    void valueThrowsWrongDecryptExceptionWhenSecretIsUnreadable() {
+        Entry entry = Entry.ofUnreadableSecret("apiKey", 2, true, "no key is configured");
+
+        assertThatThrownBy(entry::value)
+                .isInstanceOf(WrongDecryptException.class)
+                .hasMessageContaining("'apiKey'")
+                .hasMessageContaining("no key is configured");
+    }
+
+    @Test
+    void toStringHidesValueWhenEntryIsSecret() {
+        Entry entry = Entry.ofSecret("apiKey", 2, new TextNode("s3cr3t"), true);
+
+        assertThat(entry.toString()).doesNotContain("s3cr3t").contains("name=apiKey").contains("secret=true");
+    }
+
+    @Test
+    void secretTextsReturnsEmptyWhenNoEntryIsSecret() {
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(new Entry("idoitUrl", 4, new TextNode("visible"))));
+
+        assertThat(snapshot.secretTexts()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("secretTexts — a string as written, in a JSON string, in a URL path or query and in a form")
+    void secretTextsReturnsEncodedFormsWhenSecretIsString() {
+        GlobalVariableSnapshot snapshot = aSnapshotOfSecret(new TextNode("p@ss w\"rd/1+x"));
+
+        assertThat(snapshot.secretTexts()).containsExactlyInAnyOrder(
+                "p@ss w\"rd/1+x",
+                "p@ss w\\\"rd/1+x",
+                "p@ss%20w%22rd/1+x",
+                "p@ss%20w%22rd/1%2Bx",
+                "p%40ss+w%22rd%2F1%2Bx");
+    }
+
+    @Test
+    @DisplayName("secretTexts — a map is hidden whole and value by value, for a reference with a path")
+    void secretTextsReturnsJsonAndLeavesWhenSecretIsMap() {
+        GlobalVariableSnapshot snapshot = aSnapshotOfSecret(
+                new ObjectMapper().valueToTree(Map.of("user", "admin1", "password", "s3cr3t")));
+
+        assertThat(snapshot.secretTexts()).contains("admin1", "s3cr3t")
+                .anyMatch(text -> text.startsWith("{") && text.contains("\"password\":\"s3cr3t\""));
+    }
+
+    @Test
+    @DisplayName("secretTexts — a text of 3 characters is not hidden, one of 4 is")
+    void secretTextsLeavesOutTextWhenShorterThanMinimum() {
+        GlobalVariableSnapshot shortSecret = aSnapshotOfSecret(new TextNode("abc"));
+        GlobalVariableSnapshot minimalSecret = aSnapshotOfSecret(new TextNode("abcd"));
+
+        assertThat(shortSecret.secretTexts()).isEmpty();
+        assertThat(minimalSecret.secretTexts()).containsExactly("abcd");
+    }
+
+    @Test
+    @DisplayName("secretTexts — hiding a boolean would hide every 'true' of a log")
+    void secretTextsLeavesOutBooleanWhenSecretIsBoolean() {
+        GlobalVariableSnapshot snapshot = aSnapshotOfSecret(BooleanNode.TRUE);
+
+        assertThat(snapshot.secretTexts()).isEmpty();
+    }
+
+    @Test
+    void secretTextsLeavesOutUnreadableSecret() {
+        GlobalVariableSnapshot snapshot =
+                GlobalVariableSnapshot.of(List.of(Entry.ofUnreadableSecret("apiKey", 2, true, "no key is configured")));
+
+        assertThat(snapshot.secretTexts()).isEmpty();
+    }
+
+    private static GlobalVariableSnapshot aSnapshotOfSecret(JsonNode value) {
+        return GlobalVariableSnapshot.of(List.of(Entry.ofSecret("apiKey", 1, value, true)));
     }
 }

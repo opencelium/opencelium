@@ -46,15 +46,24 @@ public interface GlobalVariableService {
     boolean isNameAvailable(String name);
 
     /**
-     * Creates a variable owned by the user.
+     * Creates a variable owned by the user. The value of a secret is stored encrypted; the size
+     * limit applies to its plain JSON text.
      *
      * @throws com.becon.opencelium.backend.exception.GlobalVariableValidationException if the
      *         request is invalid
+     * @throws com.becon.opencelium.backend.exception.GeneralServiceException with status 500 if
+     *         a secret value is given and no key to encrypt it is configured
      */
     GlobalVariableDTO create(GlobalVariableRequestDTO request);
 
     /**
      * Changes a variable. Needs EDIT on it. A request that changes nothing saves nothing.
+     *
+     * <p>A secret keeps its value when the request leaves {@code value} out or sends JSON null,
+     * and a given value always replaces it, even an equal one, since the hidden value is never
+     * compared. A request without {@code secret} keeps the flag. Setting the flag hides the
+     * current or the given value and masks the values the change log holds; clearing it needs a
+     * new value in the same request.
      *
      * @throws com.becon.opencelium.backend.exception.GlobalVariableValidationException if the
      *         request is invalid
@@ -128,7 +137,7 @@ public interface GlobalVariableService {
      * RESTORE. Needs EDIT on it. Restoring the value the variable already has saves nothing.
      *
      * @throws com.becon.opencelium.backend.exception.GlobalVariableValidationException if the
-     *         version is missing or the entry holds no value to restore
+     *         version is missing, the entry holds no value to restore or the variable is a secret
      * @throws com.becon.opencelium.backend.exception.GlobalVariableConflictException if the
      *         variable changed after the version of the request was loaded
      */

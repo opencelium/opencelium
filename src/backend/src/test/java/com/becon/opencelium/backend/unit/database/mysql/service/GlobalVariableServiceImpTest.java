@@ -41,6 +41,7 @@ import com.becon.opencelium.backend.exception.GlobalVariableValidationException;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Violation;
 import com.becon.opencelium.backend.mapper.mysql.GlobalVariableMapper;
+import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableImpactDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariablePermissionsDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariablePermissionsDTO.GrantRequest;
@@ -49,11 +50,14 @@ import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableReques
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableRestoreRequestDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableUsageDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableValueDTO;
+import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity.Caller;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
+import com.becon.opencelium.backend.utility.crypto.GlobalVariableCipher;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,6 +85,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.env.MockEnvironment;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -107,6 +112,9 @@ class GlobalVariableServiceImpTest {
     private static final long NOTIFICATION_ID = 21L;
     private static final int MAX_VALUE_BYTES = 32;
     private static final Caller OWNER = new Caller(OWNER_ID, false);
+    // built once: deriving the key takes a while
+    private static final GlobalVariableCipher CIPHER = new GlobalVariableCipher(
+            new MockEnvironment().withProperty(GlobalVariableCipher.KEY_PROPERTY, GlobalVariableFixture.SECRET_KEY));
 
     @Mock
     GlobalVariableRepository repository;
@@ -150,7 +158,7 @@ class GlobalVariableServiceImpTest {
         service = new GlobalVariableServiceImp(repository, changeRepository, mapper, security,
                 userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
                 scopeResolver,
-                json, MAX_VALUE_BYTES);
+                json, CIPHER, MAX_VALUE_BYTES);
 
         // the caller is the owner and may do everything, unless a test says otherwise
         lenient().when(security.caller()).thenReturn(Optional.of(OWNER));
@@ -260,15 +268,16 @@ class GlobalVariableServiceImpTest {
     }
 
     @Test
-    @DisplayName("create — a secret is refused while values cannot be encrypted")
-    void createThrowsValidationExceptionWhenSecretIsRequested() {
+    @DisplayName("create — a secret is stored encrypted, not as its JSON text")
+    void createEncryptsValueWhenSecretIsRequested() {
         GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("apiKey", GlobalVariableKind.CONSTANT,
                 null, new TextNode("s3cr3t"), true, GlobalVariableFixture.aScopeOfAll(), null);
 
-        assertThat(violationsOf(() -> service.create(request)))
-                .extracting(Violation::field, Violation::code)
-                .containsExactly(tuple("secret", Code.SECRET_NOT_SUPPORTED));
-        verify(repository, never()).saveAndFlush(any());
+        service.create(request);
+
+        GlobalVariable saved = savedVariable();
+        assertThat(saved.isSecret()).isTrue();
+        assertThat(CIPHER.decrypt(saved.getValue())).isEqualTo("\"s3cr3t\"");
     }
 
     @Test
@@ -331,8 +340,7 @@ class GlobalVariableServiceImpTest {
 
         assertThat(violationsOf(() -> service.create(request)))
                 .extracting(Violation::code)
-                .containsExactlyInAnyOrder(Code.NAME_INVALID, Code.SECRET_NOT_SUPPORTED,
-                        Code.DESCRIPTION_TOO_LONG, Code.SCOPE_REQUIRED);
+                .containsExactlyInAnyOrder(Code.NAME_INVALID, Code.DESCRIPTION_TOO_LONG, Code.SCOPE_REQUIRED);
     }
 
     // ── update ────────────────────────────────────────────────────────────────
@@ -1490,7 +1498,313 @@ class GlobalVariableServiceImpTest {
         verifyNoInteractions(changeRepository);
     }
 
+    // ── secrets ───────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("create — a secret without a value stores no text, so hasValue can tell")
+    void createStoresNoValueWhenSecretHasNoValue() {
+        service.create(aSecretCreate(null));
+
+        GlobalVariable saved = savedVariable();
+        assertThat(saved.isSecret()).isTrue();
+        assertThat(saved.getValue()).isNull();
+    }
+
+    @Test
+    void createWritesMaskedCreateChangeWhenSecretIsRequested() {
+        service.create(aSecretCreate(new TextNode("s3cr3t")));
+
+        GlobalVariableChange change = savedChanges(1).get(0);
+        assertThat(change.getChangeType()).isEqualTo(GlobalVariableChange.Type.CREATE);
+        assertThat(change.getOldValue()).isNull();
+        assertThat(change.getNewValue()).isEqualTo(GlobalVariableChange.SECRET_MASK);
+    }
+
+    @Test
+    void createThrowsGeneralServiceExceptionWhenSecretKeyIsMissing() {
+        GlobalVariableServiceImp withoutKey = serviceWithoutKey();
+        GlobalVariableRequestDTO request = aSecretCreate(new TextNode("s3cr3t"));
+
+        GeneralServiceException missing =
+                catchThrowableOfType(() -> withoutKey.create(request), GeneralServiceException.class);
+
+        assertThat(missing.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(missing.getError()).isEqualTo(GlobalVariableCipher.KEY_MISSING);
+        verify(repository, never()).saveAndFlush(any());
+        verifyNoInteractions(changeRepository);
+    }
+
+    @Test
+    @DisplayName("create — the limit counts the plain JSON text of a secret, not its longer encrypted form")
+    void createAcceptsSecretWhenPlainValueEqualsLimit() {
+        TextNode value = new TextNode("a".repeat(MAX_VALUE_BYTES - 2));
+
+        service.create(aSecretCreate(value));
+
+        assertThat(CIPHER.decrypt(savedVariable().getValue())).hasSize(MAX_VALUE_BYTES);
+    }
+
+    @Test
+    void updateKeepsSecretWhenValueIsLeftOut() {
+        GlobalVariable variable = givenExistingSecret();
+        String stored = variable.getValue();
+
+        service.update(VARIABLE_ID, anUpdate("apiKey", null, true));
+
+        assertThat(variable.getValue()).isEqualTo(stored);
+        assertThat(variable.getVersion()).isEqualTo(VERSION);
+        verify(repository, never()).saveAndFlush(any());
+        verifyNoInteractions(changeRepository);
+    }
+
+    @Test
+    void updateKeepsSecretWhenValueIsJsonNull() {
+        GlobalVariable variable = givenExistingSecret();
+        String stored = variable.getValue();
+
+        service.update(VARIABLE_ID, anUpdate("apiKey", NullNode.getInstance(), true));
+
+        assertThat(variable.getValue()).isEqualTo(stored);
+        verify(repository, never()).saveAndFlush(any());
+        verifyNoInteractions(changeRepository);
+    }
+
+    @Test
+    void updateReplacesSecretWhenValueIsGiven() {
+        GlobalVariable variable = givenExistingSecret();
+
+        service.update(VARIABLE_ID, anUpdate("apiKey", new TextNode("new"), true));
+
+        assertThat(variable.isSecret()).isTrue();
+        assertThat(CIPHER.decrypt(variable.getValue())).isEqualTo("\"new\"");
+    }
+
+    @Test
+    @DisplayName("update — a secret is never compared, or the version would tell a guessed value")
+    void updateWritesValueChangeWhenSecretIsReplacedByEqualValue() {
+        givenExistingSecret();
+
+        service.update(VARIABLE_ID, anUpdate("apiKey", new TextNode("hidden"), true));
+
+        GlobalVariableChange change = savedChanges(1).get(0);
+        assertThat(change.getChangeType()).isEqualTo(GlobalVariableChange.Type.VALUE);
+        assertThat(change.getOldValue()).isEqualTo(GlobalVariableChange.SECRET_MASK);
+        assertThat(change.getNewValue()).isEqualTo(GlobalVariableChange.SECRET_MASK);
+        assertThat(change.getVersionTo()).isEqualTo(VERSION + 1);
+    }
+
+    @Test
+    @DisplayName("update — a form that leaves the flag out keeps a secret secret")
+    void updateKeepsFlagWhenSecretIsLeftOut() {
+        GlobalVariable variable = givenExistingSecret();
+
+        service.update(VARIABLE_ID, anUpdate("apiKey", null, null));
+
+        assertThat(variable.isSecret()).isTrue();
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void updateEncryptsCurrentValueWhenFlagIsTurnedOn() {
+        GlobalVariable variable = givenExistingVariable();
+
+        service.update(VARIABLE_ID, anUpdate("idoitUrl", null, true));
+
+        assertThat(variable.isSecret()).isTrue();
+        assertThat(CIPHER.decrypt(variable.getValue())).isEqualTo("\"old\"");
+    }
+
+    @Test
+    @DisplayName("update — setting the flag is a CONFIG change; the kept value writes no VALUE entry")
+    void updateWritesConfigChangeWhenFlagIsTurnedOn() throws Exception {
+        givenExistingVariable();
+
+        service.update(VARIABLE_ID, anUpdate("idoitUrl", null, true));
+
+        GlobalVariableChange change = savedChanges(1).get(0);
+        assertThat(change.getChangeType()).isEqualTo(GlobalVariableChange.Type.CONFIG);
+        assertThat(json.readTree(change.getOldValue())).isEqualTo(json.readTree("{\"secret\":false}"));
+        assertThat(json.readTree(change.getNewValue())).isEqualTo(json.readTree("{\"secret\":true}"));
+    }
+
+    @Test
+    @DisplayName("update — a value hidden from now on is masked on both sides of its VALUE entry")
+    void updateWritesMaskedValueChangeWhenFlagIsTurnedOnWithValue() {
+        givenExistingVariable();
+
+        service.update(VARIABLE_ID, anUpdate("idoitUrl", new TextNode("new"), true));
+
+        GlobalVariableChange change = savedChanges(2).get(0);
+        assertThat(change.getChangeType()).isEqualTo(GlobalVariableChange.Type.VALUE);
+        assertThat(change.getOldValue()).isEqualTo(GlobalVariableChange.SECRET_MASK);
+        assertThat(change.getNewValue()).isEqualTo(GlobalVariableChange.SECRET_MASK);
+    }
+
+    @Test
+    @DisplayName("update — the plain values the log kept are masked once the variable becomes a secret")
+    void updateMasksChangeLogWhenFlagIsTurnedOn() {
+        givenExistingVariable();
+
+        service.update(VARIABLE_ID, anUpdate("idoitUrl", null, true));
+
+        verify(changeRepository).maskValues(VARIABLE_ID, GlobalVariableChange.SECRET_MASK);
+    }
+
+    @Test
+    void updateLeavesChangeLogWhenSecretStaysSecret() {
+        givenExistingSecret();
+
+        service.update(VARIABLE_ID, anUpdate("apiKey", new TextNode("new"), true));
+
+        verify(changeRepository, never()).maskValues(anyLong(), anyString());
+    }
+
+    @Test
+    @DisplayName("update — a secret is made visible again only with a new value")
+    void updateThrowsValidationExceptionWhenFlagIsTurnedOffWithoutValue() {
+        GlobalVariable variable = givenExistingSecret();
+        GlobalVariableRequestDTO request = anUpdate("apiKey", null, false);
+
+        assertThat(violationsOf(() -> service.update(VARIABLE_ID, request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("value", Code.SECRET_REMOVAL_NEEDS_VALUE));
+        assertThat(variable.isSecret()).isTrue();
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void updateStoresPlainValueWhenFlagIsTurnedOffWithValue() {
+        GlobalVariable variable = givenExistingSecret();
+
+        service.update(VARIABLE_ID, anUpdate("apiKey", new TextNode("visible"), false));
+
+        assertThat(variable.isSecret()).isFalse();
+        assertThat(variable.getValue()).isEqualTo("\"visible\"");
+    }
+
+    @Test
+    @DisplayName("update — the hidden value stays masked in the entry that makes the variable plain again")
+    void updateMasksOldValueInValueChangeWhenFlagIsTurnedOff() {
+        givenExistingSecret();
+
+        service.update(VARIABLE_ID, anUpdate("apiKey", new TextNode("visible"), false));
+
+        GlobalVariableChange change = savedChanges(2).get(0);
+        assertThat(change.getChangeType()).isEqualTo(GlobalVariableChange.Type.VALUE);
+        assertThat(change.getOldValue()).isEqualTo(GlobalVariableChange.SECRET_MASK);
+        assertThat(change.getNewValue()).isEqualTo("\"visible\"");
+    }
+
+    @Test
+    void updateThrowsGeneralServiceExceptionWhenFlagIsTurnedOnWithoutKey() {
+        GlobalVariable variable = givenExistingVariable();
+        GlobalVariableServiceImp withoutKey = serviceWithoutKey();
+        GlobalVariableRequestDTO request = anUpdate("idoitUrl", null, true);
+
+        GeneralServiceException missing =
+                catchThrowableOfType(() -> withoutKey.update(VARIABLE_ID, request), GeneralServiceException.class);
+
+        assertThat(missing.getError()).isEqualTo(GlobalVariableCipher.KEY_MISSING);
+        assertThat(variable.isSecret()).isFalse();
+        assertThat(variable.getValue()).isEqualTo("\"old\"");
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void deleteWritesMaskedDeleteChangeWhenVariableIsSecret() {
+        givenExistingSecret();
+
+        service.delete(VARIABLE_ID);
+
+        GlobalVariableChange change = savedChanges(1).get(0);
+        assertThat(change.getChangeType()).isEqualTo(GlobalVariableChange.Type.DELETE);
+        assertThat(change.getOldValue()).isEqualTo(GlobalVariableChange.SECRET_MASK);
+    }
+
+    @Test
+    @DisplayName("getChanges — the entries of a secret are built masked, whatever they hold")
+    void getChangesMasksValuesWhenVariableIsSecret() {
+        GlobalVariable variable = givenExistingSecret();
+        GlobalVariableChange change = GlobalVariableChange.savedByUser(
+                variable, GlobalVariableChange.Type.VALUE, 1L, 2L, "\"before\"", "\"after\"", OWNER_ID);
+        when(changeRepository.findByVariableIdOrderByChangedAtDescIdDesc(eq(VARIABLE_ID), any()))
+                .thenReturn(new PageImpl<>(List.of(change)));
+        GlobalVariableChangeDTO masked = aMaskedChangeDto();
+        when(mapper.toChange(change, true)).thenReturn(masked);
+
+        PaginatedDto<GlobalVariableChange, GlobalVariableChangeDTO> changes = service.getChanges(VARIABLE_ID, 0, 20);
+
+        assertThat(changes.getContent()).containsExactly(masked);
+    }
+
+    @Test
+    void restoreThrowsValidationExceptionWhenVariableIsSecret() {
+        GlobalVariable variable = givenExistingSecret();
+        givenChange(variable, GlobalVariableChange.Type.VALUE, "\"earlier\"");
+        GlobalVariableRestoreRequestDTO request = new GlobalVariableRestoreRequestDTO(VERSION);
+
+        List<Violation> violations = violationsOf(() -> service.restore(VARIABLE_ID, CHANGE_ID, request));
+
+        assertThat(violations)
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("changeId", Code.NOT_RESTORABLE));
+        assertThat(violations.get(0).message()).contains("secret");
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("restore — an entry that holds the mask has no value to give back, even to a plain variable")
+    void restoreThrowsValidationExceptionWhenEntryHoldsMask() {
+        GlobalVariable variable = givenExistingVariable();
+        givenChange(variable, GlobalVariableChange.Type.VALUE, GlobalVariableChange.SECRET_MASK);
+        GlobalVariableRestoreRequestDTO request = new GlobalVariableRestoreRequestDTO(VERSION);
+
+        assertThat(violationsOf(() -> service.restore(VARIABLE_ID, CHANGE_ID, request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("changeId", Code.NOT_RESTORABLE));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    /** A saved secret "apiKey" whose hidden value is "hidden", at {@link #VERSION}, owned by the caller. */
+    private GlobalVariable givenExistingSecret() {
+        GlobalVariable variable =
+                GlobalVariableFixture.aConstant(VARIABLE_ID, "apiKey", CIPHER.encrypt("\"hidden\""));
+        variable.setSecret(true);
+        variable.setVersion(VERSION);
+        when(repository.findById(VARIABLE_ID)).thenReturn(Optional.of(variable));
+        return variable;
+    }
+
+    /** Request to create the secret "apiKey" with scope ALL; {@code value} may be {@code null}. */
+    private static GlobalVariableRequestDTO aSecretCreate(JsonNode value) {
+        return new GlobalVariableRequestDTO("apiKey", GlobalVariableKind.CONSTANT, null, value, true,
+                GlobalVariableFixture.aScopeOfAll(), null);
+    }
+
+    /**
+     * Request to update a variable at {@link #VERSION}, keeping scope ALL and no description.
+     *
+     * @param secret the flag to ask for, {@code null} to leave it out
+     */
+    private static GlobalVariableRequestDTO anUpdate(String name, JsonNode value, Boolean secret) {
+        return new GlobalVariableRequestDTO(name, GlobalVariableKind.CONSTANT, null, value, secret,
+                GlobalVariableFixture.aScopeOfAll(), VERSION);
+    }
+
+    /** The service as it runs when no key for secret values is configured. */
+    private GlobalVariableServiceImp serviceWithoutKey() {
+        return new GlobalVariableServiceImp(repository, changeRepository, mapper, security,
+                userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
+                scopeResolver, json, new GlobalVariableCipher(new MockEnvironment()), MAX_VALUE_BYTES);
+    }
+
+    private static GlobalVariableChangeDTO aMaskedChangeDto() {
+        TextNode mask = new TextNode(GlobalVariableChange.SECRET_MASK);
+        return new GlobalVariableChangeDTO(CHANGE_ID, GlobalVariableChange.Type.VALUE, 1L, 2L, mask, mask, null,
+                null, GlobalVariableChange.Result.SAVED, null, null, false);
+    }
 
     /** A saved constant "idoitUrl" with the value "old" at {@link #VERSION}, owned by the caller. */
     private GlobalVariable givenExistingVariable() {
