@@ -8,6 +8,7 @@ import de from '@entities/globalVariable/i18n/de.json'
 import { GLOBAL_VARIABLE_ENTITY as baseKey, GLOBAL_VARIABLE_PATH } from './globalVariable.constants'
 import {
     emptyScope,
+    isCodeMissing,
     isScopeIncomplete,
     isValueMissing,
     MAX_VALUE_BYTES,
@@ -16,6 +17,7 @@ import {
     type GlobalVariableFormValues,
 } from './model/form'
 import type { GlobalVariableListItem } from './model/types'
+import { emptyScript, MAX_SCRIPT_BYTES, parameterProblems, type ScriptFormValues } from './model/script'
 import { resolveGlobalVariableNames } from './command/resolvers/resolveGlobalVariableNames'
 import { resolveGlobalVariableIds } from './command/resolvers/resolveGlobalVariableIds'
 import { resolveGlobalVariableId } from './command/globalVariableCache'
@@ -71,6 +73,30 @@ export const globalVariableDefinition: EntityDefinition = {
             validate: (data) => !isValueMissing(data as Partial<GlobalVariableFormValues>),
             message: `${baseKey}.fields.value.errors.required`,
             path: 'value',
+        },
+        {
+            fields: ['script'],
+            validate: (data) => !isCodeMissing(data as Partial<GlobalVariableFormValues>),
+            message: `${baseKey}.script.errors.codeRequired`,
+            path: 'script.code',
+        },
+        {
+            fields: ['script'],
+            validate: (data) => {
+                const values = data as Partial<GlobalVariableFormValues>
+                return values.kind !== 'SCRIPT' || valueByteSize(values.script?.code ?? '') <= MAX_SCRIPT_BYTES
+            },
+            message: `${baseKey}.script.errors.tooLarge`,
+            path: 'script.code',
+        },
+        {
+            fields: ['script'],
+            validate: (data) => {
+                const values = data as Partial<GlobalVariableFormValues>
+                return values.kind !== 'SCRIPT' || parameterProblems(values.script?.parameters ?? []) === null
+            },
+            message: `${baseKey}.script.errors.parameters`,
+            path: 'script.parameters',
         },
     ],
 
@@ -141,7 +167,7 @@ export const globalVariableDefinition: EntityDefinition = {
             label: `${baseKey}.fields.value.label`,
             type: 'other',
             defaultValue: '',
-            ui: { component: 'input', overrideKey: 'globalVariableValueEditor' },
+            ui: { component: 'input', overrideKey: 'globalVariableContentEditor' },
             validation: {
                 custom: [
                     {
@@ -150,6 +176,12 @@ export const globalVariableDefinition: EntityDefinition = {
                     },
                 ],
             },
+        },
+        {
+            name: 'script',
+            type: 'other',
+            defaultValue: emptyScript() satisfies ScriptFormValues,
+            ui: { component: 'input' },
         },
         {
             name: 'valuePreview',
@@ -211,7 +243,7 @@ export const globalVariableDefinition: EntityDefinition = {
 
     sections: [
         { id: 'general', fields: ['kind', 'name', 'description'] },
-        { id: 'value', fields: ['secret', 'value'] },
+        { id: 'value', fields: ['value'] },
         { id: 'visibility', fields: ['scope'] },
     ],
 
@@ -248,7 +280,7 @@ export const globalVariableDefinition: EntityDefinition = {
                 header: `${baseKey}.wizard.steps.value.header`,
                 subheader: `${baseKey}.wizard.steps.value.subheader`,
                 sectionIds: ['value'],
-                validateFields: ['secret', 'value'],
+                validateFields: ['secret', 'value', 'script'],
             },
             {
                 id: 'visibility',

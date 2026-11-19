@@ -130,8 +130,8 @@
         "subheader": "Choose the kind and name the variable."
       },
       "value": {
-        "header": "Value",
-        "subheader": "Set the value workflows will read."
+        "header": "Value or code",
+        "subheader": "Set the value workflows read, or the code a script runs."
       },
       "visibility": {
         "header": "Visibility",
@@ -304,5 +304,71 @@
     "IMPORT_CYCLE": "Importing \"{{variable}}\" would create an import cycle.",
     "SCOPE_NOT_ALL": "Connectors can only use global variables visible to all workflows (\"{{variable}}\").",
     "more": "(+{{count}} more)"
+  },
+  "script": {
+    "language": "Language",
+    "languageLocked": "The language can't change after the script is created.",
+    "languages": {
+      "js": "JavaScript",
+      "python2": "Python 2",
+      "python3": "Python 3",
+      "ruby": "Ruby"
+    },
+    "code": "Code",
+    "codeHint": "Must return a value. Read workflow data with ref(\"…\") and a string literal; pass method data in as a parameter where you can.",
+    "parameters": {
+      "label": "Parameters",
+      "hint": "Every call fills exactly these parameters. An optional parameter left empty uses its default.",
+      "name": "Name",
+      "required": "Required",
+      "default": "Default",
+      "defaultPlaceholder": "No default (null)",
+      "add": "Add parameter",
+      "remove": "Remove parameter"
+    },
+    "imports": {
+      "label": "Imports",
+      "hint": "Other script variables of the same language, available as globals.<name>."
+    },
+    "refs": {
+      "title": "References found in the code",
+      "none": "No ref(\"…\") calls yet.",
+      "type": {
+        "WEBHOOK": "Webhook",
+        "REQUEST_DATA": "Request data",
+        "METHOD_RESPONSE": "Method response",
+        "PAGE": "Page",
+        "GLOBAL": "Global variable"
+      }
+    },
+    "warnings": {
+      "TIED_TO_CALLER_COLORS": "Reads a method by colour, so it only works in workflows that have this method before the call"
+    },
+    "errors": {
+      "codeRequired": "Enter the script code.",
+      "tooLarge": "The script is larger than 256 KB.",
+      "parameters": "Parameter names must be unique identifiers (letters, digits, _ or $, not starting with a digit).",
+      "SCRIPT_SYNTAX": "Syntax error",
+      "SCRIPT_RUNTIME": "Runtime error",
+      "SCRIPT_TIMEOUT": "The script took too long",
+      "NO_RETURN_VALUE": "The script returned no value",
+      "REF_NOT_LITERAL": "ref() needs a string literal",
+      "UNKNOWN_REF_TYPE": "Unknown reference type",
+      "UNKNOWN_IMPORT": "Unknown import",
+      "IMPORT_CYCLE": "Import cycle",
+      "IMPORT_LANGUAGE_MISMATCH": "Import in another language",
+      "VALIDATION_UNAVAILABLE": "Checking scripts in this language is not available yet"
+    },
+    "test": {
+      "title": "Test run",
+      "arguments": "Arguments",
+      "refs": "Reference values",
+      "requiredPlaceholder": "Required",
+      "valueHint": "Values are read like a constant: JSON when it parses, otherwise text. An empty reference is null, as at run time.",
+      "run": "Run test",
+      "notRun": "Run the script with test values to check it before saving.",
+      "atLine": "at line {{line}}",
+      "success": "Returned a {{type}} in {{ms}} ms"
+    }
   }
 }

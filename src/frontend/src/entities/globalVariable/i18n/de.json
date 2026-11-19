@@ -130,8 +130,8 @@
         "subheader": "Wählen Sie die Art und benennen Sie die Variable."
       },
       "value": {
-        "header": "Wert",
-        "subheader": "Legen Sie den Wert fest, den Workflows lesen."
+        "header": "Wert oder Code",
+        "subheader": "Legen Sie den Wert fest, den Workflows lesen, oder den Code, den ein Skript ausführt."
       },
       "visibility": {
         "header": "Sichtbarkeit",
@@ -304,5 +304,71 @@
     "IMPORT_CYCLE": "Der Import von \"{{variable}}\" würde einen Importzyklus erzeugen.",
     "SCOPE_NOT_ALL": "Konnektoren können nur globale Variablen verwenden, die für alle Workflows sichtbar sind (\"{{variable}}\").",
     "more": "(+{{count}} weitere)"
+  },
+  "script": {
+    "language": "Sprache",
+    "languageLocked": "Die Sprache kann nach dem Anlegen des Skripts nicht mehr geändert werden.",
+    "languages": {
+      "js": "JavaScript",
+      "python2": "Python 2",
+      "python3": "Python 3",
+      "ruby": "Ruby"
+    },
+    "code": "Code",
+    "codeHint": "Muss einen Wert zurückgeben. Lesen Sie Workflow-Daten mit ref(\"…\") und einem String-Literal; übergeben Sie Methodendaten möglichst als Parameter.",
+    "parameters": {
+      "label": "Parameter",
+      "hint": "Jeder Aufruf füllt genau diese Parameter. Ein leer gelassener optionaler Parameter verwendet seinen Standardwert.",
+      "name": "Name",
+      "required": "Pflicht",
+      "default": "Standardwert",
+      "defaultPlaceholder": "Kein Standardwert (null)",
+      "add": "Parameter hinzufügen",
+      "remove": "Parameter entfernen"
+    },
+    "imports": {
+      "label": "Importe",
+      "hint": "Andere Skriptvariablen derselben Sprache, verfügbar als globals.<name>."
+    },
+    "refs": {
+      "title": "Im Code gefundene Referenzen",
+      "none": "Noch keine ref(\"…\")-Aufrufe.",
+      "type": {
+        "WEBHOOK": "Webhook",
+        "REQUEST_DATA": "Request-Daten",
+        "METHOD_RESPONSE": "Methodenantwort",
+        "PAGE": "Seite",
+        "GLOBAL": "Globale Variable"
+      }
+    },
+    "warnings": {
+      "TIED_TO_CALLER_COLORS": "Liest eine Methode über ihre Farbe und funktioniert daher nur in Workflows, die diese Methode vor dem Aufruf haben"
+    },
+    "errors": {
+      "codeRequired": "Geben Sie den Skriptcode ein.",
+      "tooLarge": "Das Skript ist größer als 256 KB.",
+      "parameters": "Parameternamen müssen eindeutige Bezeichner sein (Buchstaben, Ziffern, _ oder $, nicht mit einer Ziffer beginnend).",
+      "SCRIPT_SYNTAX": "Syntaxfehler",
+      "SCRIPT_RUNTIME": "Laufzeitfehler",
+      "SCRIPT_TIMEOUT": "Das Skript hat zu lange gedauert",
+      "NO_RETURN_VALUE": "Das Skript hat keinen Wert zurückgegeben",
+      "REF_NOT_LITERAL": "ref() braucht ein String-Literal",
+      "UNKNOWN_REF_TYPE": "Unbekannter Referenztyp",
+      "UNKNOWN_IMPORT": "Unbekannter Import",
+      "IMPORT_CYCLE": "Importzyklus",
+      "IMPORT_LANGUAGE_MISMATCH": "Import in einer anderen Sprache",
+      "VALIDATION_UNAVAILABLE": "Die Prüfung von Skripten in dieser Sprache ist noch nicht verfügbar"
+    },
+    "test": {
+      "title": "Testlauf",
+      "arguments": "Argumente",
+      "refs": "Referenzwerte",
+      "requiredPlaceholder": "Pflicht",
+      "valueHint": "Werte werden wie bei einer Konstante gelesen: JSON, wenn es sich parsen lässt, sonst Text. Eine leere Referenz ist null, wie zur Laufzeit.",
+      "run": "Test starten",
+      "notRun": "Führen Sie das Skript mit Testwerten aus, um es vor dem Speichern zu prüfen.",
+      "atLine": "in Zeile {{line}}",
+      "success": "Hat {{type}} in {{ms}} ms zurückgegeben"
+    }
   }
 }

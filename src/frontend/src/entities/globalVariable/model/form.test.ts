@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { ConstantVariable } from './types'
+import type { ConstantVariable, ScriptVariable } from './types'
+import { emptyScript } from './script'
 import {
     isScopeIncomplete,
     isValueMissing,
@@ -20,7 +21,7 @@ const constant = (overrides: Partial<ConstantVariable> = {}): ConstantVariable =
 })
 
 const values = (overrides: Partial<GlobalVariableFormValues> = {}): GlobalVariableFormValues => ({
-    kind: 'CONSTANT', name: ' idoitUrl ', description: '', secret: false, value: 'https://cmdb',
+    kind: 'CONSTANT', name: ' idoitUrl ', description: '', secret: false, value: 'https://cmdb', script: emptyScript(),
     scope: { type: 'ALL', categoryIds: [9], workflowIds: [8] }, ...overrides,
 })
 
@@ -70,7 +71,7 @@ describe('form mapping', () => {
         const dto = toSaveDto(values({ secret: true, value: '', version: 5, hasValue: true }), 'update')
         expect(dto.version).toBe(5)
         expect('value' in dto).toBe(false)
-        expect(toSaveDto(values({ secret: true, value: 'new', version: 5 }), 'update').value).toBe('new')
+        expect(toSaveDto(values({ secret: true, value: 'new', version: 5 }), 'update')).toMatchObject({ value: 'new' })
     })
 
     it('requires a value unless a stored secret is kept', () => {
@@ -86,3 +87,48 @@ describe('form mapping', () => {
         expect(isScopeIncomplete({ type: 'ALL', categoryIds: [], workflowIds: [] })).toBe(false)
     })
 })
+
+describe('script form mapping', () => {
+    const script: ScriptVariable = {
+        id: 15, name: 'buildTitle', kind: 'SCRIPT', description: 'd',
+        script: {
+            language: 'js', code: 'return a;', imports: ['normalizeDate'], refs: [],
+            parameters: [{ name: 'a', required: true, default: null }, { name: 'p', required: false, default: 'low' }],
+        },
+        scope: { type: 'ALL', categories: [], workflows: [] }, ownerUser: { id: 1, name: 'admin' },
+        myPermissions: ['EDIT'], version: 3, createdAt: '', createdBy: { type: 'USER', id: 1, name: 'admin' },
+        updatedAt: '', updatedBy: { type: 'USER', id: 1, name: 'admin' },
+    }
+
+    it('loads parameters with their defaults as editable text', () => {
+        expect(toFormValues(script)?.script.parameters).toEqual([
+            { name: 'a', required: true, defaultText: '' },
+            { name: 'p', required: false, defaultText: 'low' },
+        ])
+    })
+
+    it('saves the script without a value and parses defaults back', () => {
+        const form = toFormValues(script)
+        expect(form).not.toBeNull()
+        const dto = toSaveDto({ ...form!, script: { ...form!.script, parameters: [
+            ...form!.script.parameters, { name: ' n ', required: false, defaultText: '5' },
+        ] } }, 'update')
+        expect(dto).toEqual({
+            kind: 'SCRIPT', name: 'buildTitle', description: 'd', version: 3,
+            scope: { type: 'ALL', categoryIds: [], workflowIds: [] },
+            script: {
+                language: 'js', code: 'return a;', imports: ['normalizeDate'],
+                parameters: [
+                    { name: 'a', required: true, default: null },
+                    { name: 'p', required: false, default: 'low' },
+                    { name: 'n', required: false, default: 5 },
+                ],
+            },
+        })
+    })
+
+    it('does not ask a script for a value', () => {
+        expect(isValueMissing({ kind: 'SCRIPT', value: '' })).toBe(false)
+    })
+})
+
