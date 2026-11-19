@@ -1,17 +1,22 @@
 import { useMemo } from 'react'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-javascript'
+import 'ace-builds/src-noconflict/mode-python'
+import 'ace-builds/src-noconflict/mode-ruby'
 import 'ace-builds/src-noconflict/theme-tomorrow'
 import 'ace-builds/src-noconflict/theme-tomorrow_night'
 import { FormControl } from '@shared/ui/form/FormControl'
 import { useTheme } from '@shared/theme/hooks/useTheme'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import type { DetectedRef, RefIssue } from '../../model/script'
-import type { ValidateScriptResponse } from '../../model/types'
+import type { ScriptLanguage, ValidateScriptResponse } from '../../model/types'
+
+const ACE_MODE: Record<ScriptLanguage, string> = { js: 'javascript', python2: 'python', python3: 'python', ruby: 'ruby' }
 
 const REF_MARKER_CLASS = 'oc-script-ref-marker'
 
 type Props = {
+    language: ScriptLanguage
     code: string
     onChange: (code: string) => void
     isReadOnly: boolean
@@ -21,7 +26,7 @@ type Props = {
     error?: string
 }
 
-export function ScriptCodeEditor({ code, onChange, isReadOnly, refs, nonLiteral, result, error }: Props) {
+export function ScriptCodeEditor({ language, code, onChange, isReadOnly, refs, nonLiteral, result, error }: Props) {
     const { t } = useI18n('entities')
     const { themeMode } = useTheme()
 
@@ -42,7 +47,7 @@ export function ScriptCodeEditor({ code, onChange, isReadOnly, refs, nonLiteral,
             <style>{`.${REF_MARKER_CLASS} { position: absolute; background: var(--color-status-info-bg); border-bottom: 1px solid var(--color-status-info-border); }`}</style>
             <div data-testid="global-variable-script-code" style={{ width: '100%', border: '1px solid var(--color-border-default)', borderRadius: 6 }}>
                 <AceEditor
-                    mode="javascript"
+                    mode={ACE_MODE[language]}
                     theme={themeMode === 'dark' ? 'tomorrow_night' : 'tomorrow'}
                     value={code}
                     onChange={onChange}
