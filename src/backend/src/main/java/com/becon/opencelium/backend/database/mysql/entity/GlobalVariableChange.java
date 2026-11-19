@@ -21,11 +21,17 @@ import java.util.Objects;
  * <p>The entry copies the id and the name of the variable instead of referencing it, so the
  * history survives the variable. For a {@link Type#CONFIG} or {@link Type#PERMISSIONS} change,
  * {@code oldValue} and {@code newValue} hold the changed fields as JSON; for the other types
- * they hold the value of the variable.
+ * they hold the value of the variable, or {@link #SECRET_MASK} in place of the value of a secret.
  */
 @Entity
 @Table(name = "global_variable_change")
 public class GlobalVariableChange {
+
+    /**
+     * Stored in place of the value of a secret, neither the plain nor the encrypted text. It is
+     * not valid JSON, so no value the API saves can be equal to it.
+     */
+    public static final String SECRET_MASK = "••••";
 
     /** What was changed. */
     public enum Type {

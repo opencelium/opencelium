@@ -41,6 +41,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -95,13 +96,18 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             jobDataMap.put("data", data);
         }
         int schedulerId = data.getScheduleId();
+        // the values of the secrets this run reads, which nothing that reports the run may show
+        Set<String> hiddenTexts = Set.of();
 
         try {
             ExecutionObj executionObj = executionObjectService.buildObj(data);
+            hiddenTexts = executionObj.getGlobalSnapshot().secretTexts();
 
             // setup execution logger:
             boolean loggingEnabled = debugMode || data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE;
             OcLogger<ExecutionLog> executionLogger = new OcLogger<>(loggingEnabled, new ExecutionLog(), connectionId, timestamp, execId);
+            // a request, a response or an error may hold the value of a secret this run reads
+            executionLogger.hide(hiddenTexts);
             ThreadLocalOcLogger.set(executionLogger);
 
             ConnectionExecutor executor = new ConnectionExecutor(executionObj, data.getRules());
@@ -128,6 +134,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
         } catch (ThreadDeath ignored) {
         } catch (Exception e) {
             ErrorResource message = new ErrorResource(e, HttpStatus.INTERNAL_SERVER_ERROR);
+            message.setMessage(OcLogger.hideIn(message.getMessage(), hiddenTexts));
             notificationService.send(connectionId, message);
 
             throw e;
@@ -138,8 +145,8 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
 
     /**
      * Records which version of each global variable the run reads, so a run can be explained
-     * after the variables changed. Values are not logged here: the request log shows them where
-     * they are used.
+     * after the variables changed. Values are not logged here, of a secret or of any other
+     * variable: the request log shows them where they are used, a secret hidden.
      */
     private static void logGlobalSnapshot(OcLogger<ExecutionLog> executionLogger, GlobalVariableSnapshot snapshot) {
         if (snapshot.isEmpty()) {

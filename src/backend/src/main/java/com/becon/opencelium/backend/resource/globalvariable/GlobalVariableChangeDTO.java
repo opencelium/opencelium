@@ -12,11 +12,13 @@ import java.util.List;
  * One entry of the change log of a global variable.
  *
  * @param oldValue      value before the change as real JSON; {@code null} for a CONFIG or
- *                      PERMISSIONS change
- * @param newValue      value after the change as real JSON; {@code null} for a CONFIG or
- *                      PERMISSIONS change
+ *                      PERMISSIONS change; the string {@code "••••"} for the value of a secret
+ *                      and for every value of a variable that is a secret now
+ * @param newValue      value after the change as real JSON, masked like {@code oldValue};
+ *                      {@code null} for a CONFIG or PERMISSIONS change
  * @param changedFields the fields a CONFIG or PERMISSIONS change touched; {@code null} otherwise
- * @param restorable    whether the variable can be set back to the value this entry saved
+ * @param restorable    whether the variable can be set back to the value this entry saved;
+ *                      never for a masked value
  */
 public record GlobalVariableChangeDTO(
         Long id,

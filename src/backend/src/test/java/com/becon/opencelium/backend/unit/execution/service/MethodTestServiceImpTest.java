@@ -59,6 +59,7 @@ import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -719,6 +720,88 @@ class MethodTestServiceImpTest {
                 .hasMessageContaining(PAGE_SIZE_REF);
     }
 
+    // ── secret global variables ───────────────────────────────────────────────
+
+    @Test
+    @DisplayName("test — the API receives the secret, the returned request shows it masked")
+    void testMasksSecretGlobalInSentRequestWhenMethodReferencesIt() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
+                Map.of("X-Api-Key", "{{global.apiKey}}"), null));
+        givenUsableVariables(WORKFLOW_ID, null, anApiKeyOf("s3cr3t-key"));
+
+        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), WORKFLOW_ID, null);
+
+        assertThat(api.requests()).extracting(RecordedRequest::uri).containsExactly("/orders?key=s3cr3t-key");
+        assertThat(result.request().url()).isEqualTo(api.baseUrl() + "/orders?key=****");
+        assertThat(result.request().headers().get("X-Api-Key")).containsExactly("****");
+    }
+
+    @Test
+    @DisplayName("test — a secret that a public connector field brings in is masked like a private field")
+    void testMasksSecretGlobalInSentRequestWhenConnectorFieldHoldsIt() {
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders?tenant={tenant}",
+                Map.of()));
+        Connector shop = aConnector(SHOP_ID, SHOP,
+                aStoredField("url", api.baseUrl(), PUBLIC),
+                aStoredField("tenant", "{{global.tenantKey}}", PUBLIC));
+        when(connectorService.getById(SHOP_ID)).thenReturn(shop);
+        when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
+        when(globalVariableSnapshotService.takeOpenToAll()).thenReturn(
+                aSnapshotOf(GlobalVariableSnapshot.Entry.ofSecret("tenantKey", 1, new TextNode("t3nant-key"), true)));
+        when(connectorExMapper.toMethodConnector(eq(shop), any())).thenAnswer(invocation -> {
+            // a field holds a reference, so the mapper asks for the variables, as the real one does
+            Supplier<GlobalVariableSnapshot> globals = invocation.getArgument(1);
+            globals.get();
+            return aResolvedConnector(SHOP_ID, Map.of("url", api.baseUrl(), "tenant", "t3nant-key"));
+        });
+
+        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(result.request().url()).isEqualTo(api.baseUrl() + "/orders?tenant=****");
+    }
+
+    @Test
+    void testKeepsNonSecretGlobalInSentRequest() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
+                Map.of(), null));
+        givenUsableVariables(WORKFLOW_ID, null,
+                new GlobalVariableSnapshot.Entry("apiKey", 1, new TextNode("visible-key"), false));
+
+        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), WORKFLOW_ID, null);
+
+        assertThat(result.request().url()).isEqualTo(api.baseUrl() + "/orders?key=visible-key");
+    }
+
+    @Test
+    @DisplayName("toCurl — the command must run, so it holds a secret in clear, like a private connector value")
+    void toCurlKeepsSecretGlobalValueWhenMethodReferencesIt() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
+                Map.of(), null));
+        givenUsableVariables(null, CATEGORY_ID, anApiKeyOf("s3cr3t-key"));
+
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, CATEGORY_ID);
+
+        assertThat(result.curl()).startsWith("curl '" + api.baseUrl() + "/orders?key=s3cr3t-key'");
+    }
+
+    @Test
+    @DisplayName("test — a secret that cannot be decrypted stops the request, and nothing is sent")
+    void testThrowsGeneralServiceExceptionWhenSecretCannotBeDecrypted() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
+                Map.of(), null));
+        List<GlobalVariable> usable = List.of(GlobalVariableFixture.aConstant(1L, "apiKey", "encrypted"));
+        when(globalVariableService.findUsable(WORKFLOW_ID, null)).thenReturn(usable);
+        when(globalVariableSnapshotService.takeOf(usable)).thenReturn(aSnapshotOf(
+                GlobalVariableSnapshot.Entry.ofUnreadableSecret("apiKey", 1, false, "no key is configured")));
+
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), WORKFLOW_ID, null))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_REQUEST_NOT_BUILT))
+                .hasMessageContaining("'apiKey'")
+                .hasMessageContaining("no key is configured");
+        assertThat(api.requests()).isEmpty();
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private MethodDTO givenMethodMappedTo(OperationDTO operation) {
@@ -757,6 +840,11 @@ class MethodTestServiceImpTest {
                 .toList();
         when(globalVariableService.findUsable(connectionId, categoryId)).thenReturn(usable);
         when(globalVariableSnapshotService.takeOf(usable)).thenReturn(aSnapshotOf(entries));
+    }
+
+    /** The secret {@code apiKey} of a workflow, a string. */
+    private static GlobalVariableSnapshot.Entry anApiKeyOf(String value) {
+        return GlobalVariableSnapshot.Entry.ofSecret("apiKey", 1, new TextNode(value), false);
     }
 
     /** The variable {@code pageSize} of a workflow, a number. */

@@ -91,6 +91,10 @@ import org.springframework.web.client.RestTemplate;
  * variable. A variable the test cannot read, and one whose path names the iterator of a loop,
  * which has no value outside a run, needs a static value like any other reference.
  *
+ * <p>The echoed request hides what the user may use but not see: the values of the connector
+ * fields that are not public, and the values of the secret global variables the test read, in
+ * the method or through a connector field. A cURL command hides nothing, as it must run.
+ *
  * <p>Not transactional on purpose: the connectors are read detached and their decrypted request
  * data must never be flushed back to the database.
  */
@@ -223,7 +227,7 @@ public class MethodTestServiceImp implements MethodTestService {
         Set<Integer> connectorIds = connectorsToRead(operation, unresolved, globals);
 
         Map<Integer, MethodConnectorEx> connectors = new HashMap<>();
-        Set<String> secrets = new HashSet<>();
+        Set<String> secrets = new HashSet<>(globals.secretTexts());
         List<ConnectorError> errors = new ArrayList<>();
 
         for (Integer connectorId : connectorIds) {
@@ -231,9 +235,12 @@ public class MethodTestServiceImp implements MethodTestService {
                 Connector connector = connectorService.getById(connectorId);
                 Set<String> hiddenFields = hiddenFieldsOf(connector);
                 // no workflow runs in a test: a connector field that holds a global variable
-                // gets the value the variable has now
-                MethodConnectorEx resolved = connectorExMapper.toMethodConnector(
-                        connector, globalVariableSnapshotService::takeOpenToAll);
+                // gets the value the variable has now, and a public field may hold a secret
+                MethodConnectorEx resolved = connectorExMapper.toMethodConnector(connector, () -> {
+                    GlobalVariableSnapshot openToAll = globalVariableSnapshotService.takeOpenToAll();
+                    secrets.addAll(openToAll.secretTexts());
+                    return openToAll;
+                });
 
                 connectors.put(connectorId, resolved);
                 hiddenFields.stream()
@@ -561,7 +568,8 @@ public class MethodTestServiceImp implements MethodTestService {
      *
      * @param request the built request; {@code null} when a connector could not be read
      * @param ownConnector the method's own connector; {@code null} for a pure HTTP request
-     * @param secrets the non-public values of the connectors that were read
+     * @param secrets the texts the echoed request hides: the non-public values of the connectors
+     *     that were read and the values of the secret global variables the test read
      * @param connectorErrors why connectors could not be read; empty when the request is built
      */
     private record PreparedRequest(

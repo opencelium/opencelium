@@ -36,6 +36,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -133,7 +134,15 @@ public class GlobalVariableMapper {
         return new GlobalVariablePermissionsDTO(toUserRef(variable.getOwnerUserId()), grants, variable.getVersion());
     }
 
-    public GlobalVariableChangeDTO toChange(GlobalVariableChange change) {
+    /**
+     * Builds one entry of the change log.
+     *
+     * @param secret whether the variable is a secret now: then every value of the log reads as
+     *               {@link GlobalVariableChange#SECRET_MASK} and none is restorable, whatever the
+     *               entry holds, so a value saved before the variable became a secret stays
+     *               hidden
+     */
+    public GlobalVariableChangeDTO toChange(GlobalVariableChange change, boolean secret) {
         boolean fields = change.getChangeType() == GlobalVariableChange.Type.CONFIG
                 || change.getChangeType() == GlobalVariableChange.Type.PERMISSIONS;
 
@@ -142,14 +151,14 @@ public class GlobalVariableMapper {
                 change.getChangeType(),
                 change.getVersionFrom(),
                 change.getVersionTo(),
-                fields || change.getOldValue() == null ? null : readJson(change.getOldValue()),
-                fields || change.getNewValue() == null ? null : readJson(change.getNewValue()),
+                fields ? null : loggedValue(change.getOldValue(), secret),
+                fields ? null : loggedValue(change.getNewValue(), secret),
                 fields ? toChangedFields(change) : null,
                 toActor(change.getUserId()),
                 change.getResult(),
                 change.getReason(),
                 toInstant(change.getChangedAt()),
-                isRestorable(change));
+                !secret && isRestorable(change));
     }
 
     public GlobalVariablePickerItemDTO toPickerItem(GlobalVariable variable) {
@@ -172,14 +181,16 @@ public class GlobalVariableMapper {
 
     /**
      * Tells whether a variable can be set back to what a change log entry saved: the entry
-     * saved a value, which a creation, a value change and an earlier restore do.
+     * saved a value, which a creation, a value change and an earlier restore do, and holds it,
+     * which an entry of a secret does not.
      */
     public static boolean isRestorable(GlobalVariableChange change) {
         boolean savedValue = change.getChangeType() == GlobalVariableChange.Type.CREATE
                 || change.getChangeType() == GlobalVariableChange.Type.VALUE
                 || change.getChangeType() == GlobalVariableChange.Type.RESTORE;
 
-        return savedValue && change.getResult() == GlobalVariableChange.Result.SAVED && change.getNewValue() != null;
+        return savedValue && change.getResult() == GlobalVariableChange.Result.SAVED && change.getNewValue() != null
+                && !GlobalVariableChange.SECRET_MASK.equals(change.getNewValue());
     }
 
     public GlobalVariableUsageDTO toUsage(GlobalVariableUsage usage) {
@@ -267,6 +278,20 @@ public class GlobalVariableMapper {
         return names.stream()
                 .map(name -> new ChangedField(name, before.get(name), after.get(name)))
                 .toList();
+    }
+
+    /**
+     * Returns a value of the change log as the API shows it: {@code null} for no value, the mask
+     * for the value of a secret, the JSON otherwise.
+     */
+    private JsonNode loggedValue(String text, boolean secret) {
+        if (text == null) {
+            return null;
+        }
+
+        return secret || GlobalVariableChange.SECRET_MASK.equals(text)
+                ? TextNode.valueOf(GlobalVariableChange.SECRET_MASK)
+                : readJson(text);
     }
 
     private UserRef toUserRef(Integer userId) {

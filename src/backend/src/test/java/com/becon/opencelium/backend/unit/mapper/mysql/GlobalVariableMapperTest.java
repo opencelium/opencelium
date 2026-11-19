@@ -32,6 +32,7 @@ import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableValueD
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -120,7 +121,7 @@ class GlobalVariableMapperTest {
         GlobalVariableChange change = GlobalVariableChange.savedByUser(variable, GlobalVariableChange.Type.CONFIG,
                 3L, 4L, "{\"description\":\"old text\"}", "{\"description\":\"new text\"}", null);
 
-        GlobalVariableChangeDTO dto = mapper.toChange(change);
+        GlobalVariableChangeDTO dto = mapper.toChange(change, false);
 
         assertThat(dto.changedFields())
                 .containsExactly(new ChangedField("description", new TextNode("old text"), new TextNode("new text")));
@@ -134,7 +135,7 @@ class GlobalVariableMapperTest {
         GlobalVariableChange change = GlobalVariableChange.savedByUser(variable, GlobalVariableChange.Type.VALUE,
                 3L, 4L, "\"old\"", "{\"host\":\"new\"}", null);
 
-        GlobalVariableChangeDTO dto = mapper.toChange(change);
+        GlobalVariableChangeDTO dto = mapper.toChange(change, false);
 
         assertThat(dto.oldValue()).isEqualTo(new TextNode("old"));
         assertThat(dto.newValue().get("host").asText()).isEqualTo("new");
@@ -338,6 +339,92 @@ class GlobalVariableMapperTest {
         boolean restorable = GlobalVariableMapper.isRestorable(change);
 
         assertThat(restorable).isFalse();
+    }
+
+    @Test
+    void isRestorableReturnsFalseWhenNewValueIsMask() {
+        GlobalVariableChange change = aChange(GlobalVariableChange.Type.VALUE, "\"old\"", GlobalVariableChange.SECRET_MASK);
+
+        boolean restorable = GlobalVariableMapper.isRestorable(change);
+
+        assertThat(restorable).isFalse();
+    }
+
+    // ── secrets ───────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toChange — a value saved before the variable became a secret reads as the mask")
+    void toChangeReturnsMaskWhenVariableIsSecret() {
+        GlobalVariableChange change = aChange(GlobalVariableChange.Type.VALUE, "\"old\"", "\"new\"");
+
+        GlobalVariableChangeDTO dto = mapper.toChange(change, true);
+
+        assertThat(dto.oldValue()).isEqualTo(new TextNode(GlobalVariableChange.SECRET_MASK));
+        assertThat(dto.newValue()).isEqualTo(new TextNode(GlobalVariableChange.SECRET_MASK));
+        assertThat(dto.restorable()).isFalse();
+    }
+
+    @Test
+    @DisplayName("toChange — a variable made plain again shows its hidden value as the mask, its new one as JSON")
+    void toChangeReturnsMaskWhenEntryHoldsMask() {
+        GlobalVariableChange change =
+                aChange(GlobalVariableChange.Type.VALUE, GlobalVariableChange.SECRET_MASK, "\"visible\"");
+
+        GlobalVariableChangeDTO dto = mapper.toChange(change, false);
+
+        assertThat(dto.oldValue()).isEqualTo(new TextNode(GlobalVariableChange.SECRET_MASK));
+        assertThat(dto.newValue()).isEqualTo(new TextNode("visible"));
+    }
+
+    @Test
+    void toChangeKeepsNullSideWhenSecretEntryHasNoValue() {
+        GlobalVariableChange change = aChange(GlobalVariableChange.Type.CREATE, null, "\"s3cr3t\"");
+
+        GlobalVariableChangeDTO dto = mapper.toChange(change, true);
+
+        assertThat(dto.oldValue()).isNull();
+        assertThat(dto.newValue()).isEqualTo(new TextNode(GlobalVariableChange.SECRET_MASK));
+    }
+
+    @Test
+    @DisplayName("toChange — the change of the flag itself stays readable on a secret")
+    void toChangeKeepsChangedFieldsWhenSecretHasConfigChange() {
+        GlobalVariableChange change =
+                aChange(GlobalVariableChange.Type.CONFIG, "{\"secret\":false}", "{\"secret\":true}");
+
+        GlobalVariableChangeDTO dto = mapper.toChange(change, true);
+
+        assertThat(dto.changedFields())
+                .containsExactly(new ChangedField("secret", BooleanNode.FALSE, BooleanNode.TRUE));
+        assertThat(dto.oldValue()).isNull();
+    }
+
+    @Test
+    void toDetailReturnsHasValueFalseWhenSecretStoresNoValue() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "apiKey", null);
+        variable.setSecret(true);
+
+        GlobalVariableDTO dto = mapper.toDetail(variable, EnumSet.of(GlobalVariablePermission.VIEW_USE));
+
+        assertThat(dto.value()).isNull();
+        assertThat(dto.hasValue()).isFalse();
+    }
+
+    @Test
+    void toListItemHidesPreviewWhenVariableIsSecret() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "apiKey", "encrypted-text");
+        variable.setSecret(true);
+
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0);
+
+        assertThat(item.secret()).isTrue();
+        assertThat(item.valuePreview()).isNull();
+    }
+
+    /** An entry of the change log of variable 5 with the given values. */
+    private static GlobalVariableChange aChange(GlobalVariableChange.Type type, String oldValue, String newValue) {
+        return GlobalVariableChange.savedByUser(GlobalVariableFixture.aConstant(5L, "idoitUrl", "1"), type,
+                3L, 4L, oldValue, newValue, null);
     }
 
     /** A saved entry of the change log of variable 5 with something as its new value; only the type differs. */

@@ -37,6 +37,7 @@ import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableValueD
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity.Caller;
+import com.becon.opencelium.backend.utility.crypto.GlobalVariableCipher;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,6 +91,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     private static final String REASON_OUT_OF_SCOPE = "OUT_OF_SCOPE";
     // the component permission that opens the picker, see GlobalVariableController
     private static final String READ_PERMISSION = "READ";
+    // the JSON text of a value that is left out; a secret stores no text for it
+    private static final String JSON_NULL = "null";
 
     private final GlobalVariableRepository repository;
     private final GlobalVariableChangeRepository changeRepository;
@@ -102,6 +105,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     private final GlobalVariableUsageService usageService;
     private final GlobalVariableScopeResolver scopeResolver;
     private final ObjectMapper objectMapper;
+    private final GlobalVariableCipher cipher;
     private final int maxValueBytes;
 
     public GlobalVariableServiceImp(
@@ -116,6 +120,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             GlobalVariableUsageService usageService,
             GlobalVariableScopeResolver scopeResolver,
             ObjectMapper objectMapper,
+            GlobalVariableCipher cipher,
             @Value("${opencelium.global-variable.max-value-bytes:65536}") int maxValueBytes) {
         this.repository = repository;
         this.changeRepository = changeRepository;
@@ -128,6 +133,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         this.usageService = usageService;
         this.scopeResolver = scopeResolver;
         this.objectMapper = objectMapper;
+        this.cipher = cipher;
         this.maxValueBytes = maxValueBytes;
     }
 
@@ -172,7 +178,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         List<Violation> violations = new ArrayList<>();
         String name = validateName(request.name(), null, violations);
         validateKindOnCreate(request.kind(), violations);
-        validateSecret(request.secret(), violations);
+        boolean secret = Boolean.TRUE.equals(request.secret());
         String description = validateDescription(request.description(), violations);
         String value = serializeValue(request.value(), violations);
         ScopeSpec scope = validateScope(request.scope(), violations);
@@ -182,7 +188,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         variable.setName(name);
         variable.setKind(request.kind());
         variable.setDescription(description);
-        variable.setValue(value);
+        variable.setSecret(secret);
+        variable.setValue(secret ? encryptSecret(value) : value);
         variable.setScopeType(scope.type());
         variable.setScopeTargets(new HashSet<>(scope.targets()));
         variable.setOwnerUserId(caller.userId());
@@ -195,7 +202,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         }
 
         changeRepository.save(GlobalVariableChange.savedByUser(variable, GlobalVariableChange.Type.CREATE,
-                null, variable.getVersion(), null, value, caller.userId()));
+                null, variable.getVersion(), null, secret ? GlobalVariableChange.SECRET_MASK : value,
+                caller.userId()));
 
         return mapper.toDetail(variable, security.permissionsOn(variable, caller));
     }
@@ -216,9 +224,17 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             violations.add(new Violation("kind", Code.KIND_CHANGE_NOT_ALLOWED,
                     "The kind of a global variable cannot change"));
         }
-        validateSecret(request.secret(), violations);
+        boolean wasSecret = variable.isSecret();
+        // a form that leaves the flag out keeps it, so no secret is revealed by omission
+        boolean secret = request.secret() == null ? wasSecret : request.secret();
         String description = validateDescription(request.description(), violations);
-        String value = serializeValue(request.value(), violations);
+        // a secret keeps its value unless the request gives one, and JSON null gives none
+        boolean valueGiven = request.value() != null && !request.value().isNull();
+        String value = secret && !valueGiven ? null : serializeValue(request.value(), violations);
+        if (wasSecret && !secret && !valueGiven) {
+            violations.add(new Violation("value", Code.SECRET_REMOVAL_NEEDS_VALUE,
+                    "Give a new value to make a secret visible again: its hidden value is never shown"));
+        }
         ScopeSpec scope = validateScope(request.scope(), violations);
         throwIfAny(violations);
 
@@ -227,6 +243,23 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
 
         long versionFrom = variable.getVersion();
         String oldValue = variable.getValue();
+        String newValue;
+        boolean valueChanged;
+        if (!secret) {
+            newValue = value;
+            // a hidden value is never compared: whether it equals the new one stays unknown
+            valueChanged = wasSecret || !Objects.equals(value, oldValue);
+        } else if (valueGiven) {
+            newValue = encryptSecret(value);
+            // nor is a secret compared with what replaces it: a version that stayed the same
+            // would tell that the given value is the hidden one
+            valueChanged = true;
+        } else {
+            // a secret that is kept as it is, or a value that is hidden from now on
+            newValue = wasSecret ? oldValue : encryptSecret(oldValue);
+            valueChanged = false;
+        }
+
         ObjectNode before = objectMapper.createObjectNode();
         ObjectNode after = objectMapper.createObjectNode();
 
@@ -246,9 +279,13 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             variable.setScopeType(scope.type());
             replace(variable.getScopeTargets(), scope.targets());
         }
-        boolean valueChanged = !Objects.equals(value, oldValue);
-        if (valueChanged) {
-            variable.setValue(value);
+        if (secret != wasSecret) {
+            before.put("secret", wasSecret);
+            after.put("secret", secret);
+            variable.setSecret(secret);
+        }
+        if (!Objects.equals(newValue, oldValue)) {
+            variable.setValue(newValue);
         }
 
         if (!valueChanged && before.isEmpty()) {
@@ -257,9 +294,16 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
 
         variable = saveChanged(variable, versionFrom);
         long versionTo = variable.getVersion();
+        if (secret && !wasSecret) {
+            // the plain values the log kept belong to a secret from now on
+            changeRepository.maskValues(variable.getId(), GlobalVariableChange.SECRET_MASK);
+        }
         if (valueChanged) {
             changeRepository.save(GlobalVariableChange.savedByUser(variable, GlobalVariableChange.Type.VALUE,
-                    versionFrom, versionTo, oldValue, value, caller.userId()));
+                    versionFrom, versionTo,
+                    wasSecret || secret ? GlobalVariableChange.SECRET_MASK : oldValue,
+                    secret ? GlobalVariableChange.SECRET_MASK : newValue,
+                    caller.userId()));
         }
         if (!before.isEmpty()) {
             changeRepository.save(GlobalVariableChange.savedByUser(variable, GlobalVariableChange.Type.CONFIG,
@@ -282,7 +326,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         }
 
         changeRepository.save(GlobalVariableChange.savedByUser(variable, GlobalVariableChange.Type.DELETE,
-                variable.getVersion(), null, variable.getValue(), null, caller.userId()));
+                variable.getVersion(), null,
+                variable.isSecret() ? GlobalVariableChange.SECRET_MASK : variable.getValue(), null, caller.userId()));
         repository.delete(variable);
     }
 
@@ -335,8 +380,9 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
 
         Page<GlobalVariableChange> changes = changeRepository.findByVariableIdOrderByChangedAtDescIdDesc(
                 id, PageRequest.of(Math.max(page, 0), pageSize(size)));
+        boolean secret = variable.isSecret();
 
-        return new PaginatedDto<>(changes, mapper::toChange);
+        return new PaginatedDto<>(changes, change -> mapper.toChange(change, secret));
     }
 
     // not read-only: usages of sources that no longer exist are removed before the list is read
@@ -459,6 +505,10 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
                 .filter(found -> Objects.equals(found.getVariableId(), variable.getId()))
                 .orElseThrow(() -> new GeneralServiceException(HttpStatus.NOT_FOUND, CHANGE_NOT_FOUND,
                         "Change %d of global variable %d does not exist".formatted(changeId, id)));
+        if (variable.isSecret()) {
+            throw invalid("changeId", Code.NOT_RESTORABLE,
+                    "A secret cannot be set back to an earlier value: the change log keeps none of its values");
+        }
         if (!GlobalVariableMapper.isRestorable(change)) {
             throw invalid("changeId", Code.NOT_RESTORABLE, "This change log entry holds no value to restore");
         }
@@ -751,13 +801,6 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         }
     }
 
-    private static void validateSecret(Boolean secret, List<Violation> violations) {
-        if (Boolean.TRUE.equals(secret)) {
-            violations.add(new Violation("secret", Code.SECRET_NOT_SUPPORTED,
-                    "Secret values are not available yet"));
-        }
-    }
-
     private static String validateDescription(String description, List<Violation> violations) {
         if (description != null && description.length() > DESCRIPTION_MAX_LENGTH) {
             violations.add(new Violation("description", Code.DESCRIPTION_TOO_LONG,
@@ -765,6 +808,14 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         }
 
         return description;
+    }
+
+    /**
+     * Returns what a secret stores for a value given as JSON text: the encrypted text, or
+     * {@code null} for no value, so {@code hasValue} can tell a secret without one.
+     */
+    private String encryptSecret(String jsonValue) {
+        return jsonValue == null || JSON_NULL.equals(jsonValue) ? null : cipher.encrypt(jsonValue);
     }
 
     /** Returns the value as JSON text; a value that is left out is JSON null. */
