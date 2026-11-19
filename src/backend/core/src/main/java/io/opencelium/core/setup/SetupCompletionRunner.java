@@ -81,13 +81,13 @@ class SetupCompletionRunner implements ApplicationRunner {
 		if (marker.isPresent()) {
 			makeAdminFromMarker(marker.get().adminUsername());
 		}
-		else if (!users.anyUserExists(TENANT)) {
+		else if (!users.anyUserExists()) {
 			makeDefaultAdmin();
 		}
 	}
 
 	private void makeAdminFromMarker(String username) {
-		if (!users.adminExists(TENANT)) {
+		if (!users.adminExists()) {
 			if (username == null || username.isBlank()) {
 				throw new IllegalStateException("The admin marker '" + TENANT + "' in the collection "
 						+ AdminMarkerDocument.COLLECTION + " has no " + AdminMarkerDocument.ADMIN_USERNAME + ". Set "
@@ -115,12 +115,12 @@ class SetupCompletionRunner implements ApplicationRunner {
 	 */
 	private boolean createAdmin(String username) {
 		try {
-			users.createAdmin(new CreateAdminCommand(TENANT, username,
-					SetupContext.FIRST_ADMIN_PASSWORD.toCharArray(), false, false));
+			users.createAdmin(
+					new CreateAdminCommand(username, SetupContext.FIRST_ADMIN_PASSWORD.toCharArray(), false, false));
 			return true;
 		}
 		catch (AdminAlreadyExistsException | DuplicateKeyException ex) {
-			if (!users.adminExists(TENANT)) {
+			if (!users.adminExists()) {
 				throw new IllegalStateException("Cannot make the admin '" + username + "': a user of the tenant '"
 						+ TENANT + "' that is not an admin has this username. Run the setup again with another admin"
 						+ " username.", ex);
