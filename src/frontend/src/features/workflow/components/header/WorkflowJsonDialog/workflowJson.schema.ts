@@ -62,10 +62,12 @@ const backendEnhancementSchema = z.strictObject({
 	enhancementId: z.number().optional(), name: z.string(), description: z.string(),
 	language: z.enum(['js', 'python3', 'ruby']), simpleCode: z.string().nullable(),
 	expertVar: z.string(), expertCode: z.string(),
+	imports: z.array(z.string()).optional(), globalScript: z.string().nullable().optional(),
 });
 const editorEnhancementSchema = z.strictObject({
 	enhanceId: z.string(), description: z.string().optional(),
 	language: z.enum(['js', 'python3', 'ruby']), script: z.string(), args: stringRecordSchema,
+	imports: z.array(z.string()).optional(),
 });
 const fieldBindingSchema = z.strictObject({
 	id: z.union([z.string(), z.number()]).optional(), from: z.array(referenceSchema).optional(),

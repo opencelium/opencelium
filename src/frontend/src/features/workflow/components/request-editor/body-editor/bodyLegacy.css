@@ -260,6 +260,19 @@
   margin-bottom: 10px;
 }
 
+.bodyLegacyEnhancementImports {
+  margin-bottom: 10px;
+}
+
+.bodyLegacyEnhancementImportsUsage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
 .bodyLegacyEnhancementScript {
   flex: 1;
   /* A floor rather than 0: `flex: 1` alone resolves to nothing when no ancestor

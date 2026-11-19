@@ -414,6 +414,7 @@
       "referenceEdited": "{{section}}-Referenz in {{name}} bearbeitet",
       "enhancement": "{{section}}-Transformation von {{name}} bearbeitet",
       "enhancementLanguage": "Sprache der Transformation von {{name}} aktualisiert",
+      "enhancementImports": "Importe globaler Variablen von {{name}} aktualisiert",
       "enhancementDescription": "Beschreibung der Transformation von {{name}} aktualisiert",
       "enhancementRemoved": "Transformation von {{name}} gelöscht",
       "conditionConfig": "Bedingung von {{name}} bearbeitet",
@@ -771,6 +772,7 @@
     "empty": "Leer"
   },
   "enhancement": {
+    "imports": {"label": "Importe (globale Variablen)", "placeholder": "Globale Variablen in diesem Skript verwenden"},
     "title": "Transformation",
     "language": "Sprache",
     "script": "Skript",
