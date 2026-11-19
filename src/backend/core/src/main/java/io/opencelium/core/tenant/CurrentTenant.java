@@ -13,11 +13,14 @@ import io.opencelium.common.tenant.TenantId;
 @Component
 public final class CurrentTenant {
 
+	/** Bound by the tenant runner only. */
+	static final ScopedValue<TenantId> BOUND = ScopedValue.newInstance();
+
 	/**
 	 * @throws NoCurrentTenantException when the work of this thread does not run through the tenant runner
 	 */
 	public TenantId get() {
-		throw new UnsupportedOperationException("not implemented yet");
+		return BOUND.orElseThrow(NoCurrentTenantException::new);
 	}
 
 }

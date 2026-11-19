@@ -35,7 +35,7 @@ public record TenantId(String value) {
 	 * customer of the cloud mode has such an ID.
 	 */
 	public boolean isReserved() {
-		throw new UnsupportedOperationException("not implemented yet");
+		return equals(SELF_HOST) || equals(SYSTEM);
 	}
 
 	@Override

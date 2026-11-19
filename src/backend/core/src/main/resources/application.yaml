@@ -15,3 +15,5 @@ server:
 #  deployment-mode: self-host        # self-host | cloud
 #  data-dir: ./data                 # Linux: /var/lib/opencelium when it exists and is writable
 #  master-key-file: /etc/opencelium/master.key   # default <data-dir>/master.key; never together with OC_MASTER_KEY
+
+#logging.pattern.correlation: "[%X{tenant:-self-host-tenant}] "   # default; cloud mode: "[%X{tenant:--}] "

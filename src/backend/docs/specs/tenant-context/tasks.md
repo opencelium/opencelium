@@ -11,7 +11,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Start `java -jar oc-app.jar` with `SPRING_MONGODB_URI=mongodb://localhost:27017/oc_hand`. 2. The log has the `(default)` line of `logging.pattern.correlation` with the value `[%X{tenant:-self-host-tenant}] `. 3. Each log line shows `[self-host-tenant]`. Stop core. 4. Run `mongosh oc_system` and insert 1 user: `db.users.insertOne({tenantId: "acme", username: "u1", roles: [], mustChangePassword: true, temporary: false, locked: false, passwordIssuedAt: ISODate("2020-01-01"), createdAt: ISODate("2020-01-01")})`. 5. Start core with `OPENCELIUM_DEPLOYMENTMODE=cloud`, `SPRING_MONGODB_URI=mongodb://localhost:27017/oc_system` and `OC_MASTER_KEY` from `openssl rand -base64 32`. 6. Each log line shows `[-]`, and no line says "Locked user". 7. In `mongosh`, the user `u1` has `locked: false`.
 - **Size:** approximately 200 lines
 - **Depends on:** nothing
-- **Status:** in work
+- **Status:** done
 
 ## Task 2: feat(core): limit the user repository to the current tenant
 - **Criteria:** TC-06, TC-07, TC-08
