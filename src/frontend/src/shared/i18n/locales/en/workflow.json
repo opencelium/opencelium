@@ -297,6 +297,7 @@
   },
   "headerMenu": {
     "assignCategory": "Assign Category",
+    "runSettings": "Workflow run settings",
     "assignCategoryDisabledHint": "Save the workflow first to assign it a category",
     "downloadAsTemplate": "Download as Template",
     "downloadAsTemplateDisabledHint": "Save the workflow first to download it as a template",
@@ -530,6 +531,12 @@
     "change": "Change"
   },
   "aggregatorDialog": {
+    "publish": {
+      "title": "Publish to global variables",
+      "hint": "After a successful run, write these outputs into mutable variables this workflow owns.",
+      "clear": "Clear",
+      "save": "Save publishing"
+    },
     "title": "Assign Data Aggregator",
     "selectPlaceholder": "Select a data aggregator",
     "createNewTooltip": "Create new data aggregator",
@@ -1337,6 +1344,22 @@
     "variable": "Variable (mutable variables this workflow may write)",
     "value": "Value",
     "hint": "Pick a method field, a webhook parameter or type a constant (JSON or text). Inside a loop each pass writes; the write policy combines them.",
+    "save": "Save"
+  },
+  "runSettings": {
+    "title": "Workflow run settings",
+    "intro": "These settings matter when this workflow writes global variables: then only one run of it may write at a time.",
+    "question": "When a run is already going",
+    "policy": {
+      "QUEUE": {
+        "label": "Queue the new run",
+        "hint": "It waits and starts when the running one ends (up to 10 waiting runs, 30 minutes each)."
+      },
+      "REJECT": {
+        "label": "Reject the new run",
+        "hint": "It does not start. A webhook call gets 409; a scheduled run is logged as skipped."
+      }
+    },
     "save": "Save"
   }
 }

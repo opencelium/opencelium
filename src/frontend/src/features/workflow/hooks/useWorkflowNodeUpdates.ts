@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { Connector } from '@entities/connector/model/types';
 import type { ConditionConfig } from '../components/condition-builder/conditionBuilder.types';
-import type { WorkflowNodeModel, WorkflowSetGlobalConfig } from '../types/workflow.types';
+import type { WorkflowNodeModel, WorkflowRunConflictPolicy, WorkflowSetGlobalConfig } from '../types/workflow.types';
+import { withRunConflictPolicy } from '../utils/runConflictPolicy';
 import type { WorkflowMethodConfig } from '../types/request-config.types';
 import { assignConnectorToNode } from '../components/template/templateConnectorMapping.utils';
 
@@ -44,9 +45,18 @@ export const useWorkflowNodeUpdates = (
 		} } : node));
 		closeConditionEditor();
 	},
+	onSetRunConflictPolicy: (policy: WorkflowRunConflictPolicy) => setNodes((nodes) => withRunConflictPolicy(nodes, policy)),
 	onSaveDataAggregator: (nodeId: string, dataAggregator: number | null) => {
 		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? { ...node, data: {
 			...node.data, dataAggregator, hasError: false, errorMessage: undefined,
+			// A mapping names the outputs of one aggregator; another one has other outputs.
+			...(node.data.dataAggregator !== dataAggregator ? { dataAggregatorPublish: undefined } : {}),
+		} } : node));
+		closeAggregatorEditor();
+	},
+	onSaveAggregatorPublish: (nodeId: string, dataAggregatorPublish: Record<string, string>) => {
+		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? { ...node, data: {
+			...node.data, dataAggregatorPublish: Object.keys(dataAggregatorPublish).length ? dataAggregatorPublish : undefined,
 		} } : node));
 		closeAggregatorEditor();
 	},

@@ -3,6 +3,7 @@ import type { WorkflowHeaderMenuItem } from '../types/workflow.types';
 
 type Params = {
 	openAssignCategory: () => void;
+	openRunSettings: () => void;
 	downloadTemplate: () => Promise<void> | void;
 	openSaveTemplate: () => void;
 	openLoadTemplate: () => Promise<void> | void;
@@ -16,7 +17,7 @@ type Params = {
 	refreshHistory: () => Promise<unknown> | void;
 };
 
-export const useWorkflowHeaderActions = ({ openAssignCategory, downloadTemplate,
+export const useWorkflowHeaderActions = ({ openAssignCategory, openRunSettings, downloadTemplate,
 	openSaveTemplate, openLoadTemplate, openJsonEditor, openShortcuts, openHistory, openChangeHistory,
 	closeChangeHistory, closeSchedules, closeCanvasPanels, refreshHistory }: Params) => {
 	const navigate = useNavigate();
@@ -24,6 +25,7 @@ export const useWorkflowHeaderActions = ({ openAssignCategory, downloadTemplate,
 	const selectMenuItem = (item: WorkflowHeaderMenuItem) => {
 		switch (item.id) {
 			case 'assign-category': openAssignCategory(); break;
+			case 'run-settings': openRunSettings(); break;
 			case 'download-template': void downloadTemplate(); break;
 			case 'save-template': openSaveTemplate(); break;
 			case 'load-template': void openLoadTemplate(); break;

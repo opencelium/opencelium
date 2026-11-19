@@ -1,3 +1,4 @@
+import { withRunConflictPolicy } from '../utils/runConflictPolicy';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import type { HistoryVersionItem } from '../types/history.types';
 import { initialEdges, initialNodes } from '../data/initialGraph';
@@ -95,7 +96,7 @@ export function mapConnectionToWorkflowState(
 	return {
 		title: connection.title,
 		description: connection.description ?? '',
-		nodes: nodesWithJumps,
+		nodes: withRunConflictPolicy(nodesWithJumps, connection.runConflictPolicy),
 		edges,
 		fieldBindings: Array.isArray(connection.fieldBinding)
 			? connection.fieldBinding

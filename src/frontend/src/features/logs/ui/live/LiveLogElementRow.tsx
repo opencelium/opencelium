@@ -34,6 +34,21 @@ const STATUS_PULSE_MS = 1000;
 // exist in the DOM until the operator is expanded, so a child that already
 // finished while collapsed only gets to announce itself once the user opens
 // the operator and it mounts for the first time.
+// A run the lock refused or timed out did nothing wrong itself, so it is not painted as a failure.
+const statusColor = (status: LiveLogNode["status"]) => {
+  switch (status) {
+    case "COMPLETE": return "var(--color-status-success-fg)";
+    case "SKIPPED":
+    case "QUEUE_TIMEOUT": return "var(--color-status-warning-fg)";
+    case "FAIL":
+    case "PENDING": return "var(--color-status-error-fg)";
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+};
+
 export function LiveStatusIndicator({ status }: { status: LiveLogNode["status"] }) {
   const previousStatusRef = useRef<LiveLogNode["status"] | null>(null);
   const [isChanged, setIsChanged] = useState(false);
@@ -47,7 +62,7 @@ export function LiveStatusIndicator({ status }: { status: LiveLogNode["status"] 
   }, [status]);
 
   if (status === "PENDING") return <Loading inline size="xs" />;
-  const color = status === "COMPLETE" ? "var(--color-status-success-fg)" : "var(--color-status-error-fg)";
+  const color = statusColor(status);
   const dotClassName = ["oc-log-status-dot", isChanged && "oc-log-status-dot--changed"]
     .filter(Boolean)
     .join(" ");

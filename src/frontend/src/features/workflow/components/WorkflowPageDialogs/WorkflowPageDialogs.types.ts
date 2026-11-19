@@ -4,6 +4,7 @@ import type { ShortcutsDialog } from '../header/ShortcutsDialog/ShortcutsDialog'
 import type { AssignCategoryDialog } from '../header/AssignCategoryDialog/AssignCategoryDialog';
 import type { PasteOperatorDialog } from '../header/PasteOperatorDialog/PasteOperatorDialog';
 import type { WorkflowJsonDialog } from '../header/WorkflowJsonDialog/WorkflowJsonDialog';
+import type { RunSettingsDialog } from '../header/RunSettingsDialog/RunSettingsDialog';
 
 export type WorkflowPageDialogsProps = {
 	templates: ComponentProps<typeof WorkflowTemplateDialogs>;
@@ -11,4 +12,5 @@ export type WorkflowPageDialogsProps = {
 	category: ComponentProps<typeof AssignCategoryDialog>;
 	pasteOperator: ComponentProps<typeof PasteOperatorDialog>;
 	jsonEditor: ComponentProps<typeof WorkflowJsonDialog>;
+	runSettings: ComponentProps<typeof RunSettingsDialog>;
 };
