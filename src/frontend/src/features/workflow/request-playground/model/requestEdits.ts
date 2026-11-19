@@ -26,7 +26,8 @@ export type RequestEdits = {
 
 const ARG_TOKEN_RE = /#\{%\s*[A-Za-z0-9_-]+\s*%}/;
 const WEBHOOK_RE = /\$\{[^}]+\}/;
-const CONNECTION_FIELD_RE = /(?<![$#])\{([A-Za-z_][\w.-]*)\}/g;
+// `{{global.x}}` is a global variable, not request data, so `{{` never opens a field.
+const CONNECTION_FIELD_RE = /(?<![$#{])\{([A-Za-z_][\w.-]*)\}/g;
 
 const isDynamicValue = (value: string) => ARG_TOKEN_RE.test(value) || WEBHOOK_RE.test(value)
 	|| new RegExp(PAYLOAD_REFERENCE_RE.source).test(value);
