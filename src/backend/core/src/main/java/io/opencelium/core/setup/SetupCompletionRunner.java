@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.config.OpenCeliumProperties;
+import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.user.AdminAlreadyExistsException;
 import io.opencelium.core.user.CreateAdminCommand;
 import io.opencelium.core.user.UserService;
@@ -50,11 +51,15 @@ class SetupCompletionRunner implements ApplicationRunner {
 
 	private final UserService users;
 
+	private final TenantRunner tenants;
+
 	private final DeploymentMode mode;
 
-	SetupCompletionRunner(AdminMarkerRepository markers, UserService users, OpenCeliumProperties properties) {
+	SetupCompletionRunner(AdminMarkerRepository markers, UserService users, TenantRunner tenants,
+			OpenCeliumProperties properties) {
 		this.markers = markers;
 		this.users = users;
+		this.tenants = tenants;
 		this.mode = properties.deploymentMode();
 	}
 

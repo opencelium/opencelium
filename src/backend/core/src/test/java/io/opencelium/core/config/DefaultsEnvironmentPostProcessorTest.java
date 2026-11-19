@@ -24,6 +24,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(OutputCaptureExtension.class)
 class DefaultsEnvironmentPostProcessorTest {
 
+	/** Spring owns the property; the log pattern of the console and of the log file contain its value. */
+	private static final String LOG_CORRELATION_PATTERN = "logging.pattern.correlation";
+
 	@TempDir
 	Path tmp;
 
@@ -75,10 +78,41 @@ class DefaultsEnvironmentPostProcessorTest {
 	}
 
 	@Test
+	void applyDefaultsGivesTheSelfHostLogPatternWhenTheModeIsSelfHost(CapturedOutput output) {
+		postProcess();
+
+		// A line without a bound tenant names the 1 tenant of the installation, also a line of the start.
+		assertThat(environment.getProperty(LOG_CORRELATION_PATTERN)).isEqualTo("[%X{tenant:-self-host-tenant}] ");
+		assertThat(output).containsOnlyOnce(LOG_CORRELATION_PATTERN + " = [%X{tenant:-self-host-tenant}]  (default)");
+	}
+
+	@Test
+	void applyDefaultsGivesTheCloudLogPatternWhenTheModeIsCloud(CapturedOutput output) {
+		environment.setProperty(DEPLOYMENT_MODE, "cloud");
+
+		postProcess();
+
+		// A line without a bound tenant names no tenant: the start and the threads of the engine run for none.
+		assertThat(environment.getProperty(LOG_CORRELATION_PATTERN)).isEqualTo("[%X{tenant:--}] ");
+		assertThat(output).containsOnlyOnce(LOG_CORRELATION_PATTERN + " = [%X{tenant:--}]  (default)");
+	}
+
+	@Test
+	void applyDefaultsKeepsTheLogPatternWhenTheOperatorSetsOne(CapturedOutput output) {
+		environment.setProperty(LOG_CORRELATION_PATTERN, "<%X{tenant}> ");
+
+		postProcess();
+
+		assertThat(environment.getProperty(LOG_CORRELATION_PATTERN)).isEqualTo("<%X{tenant}> ");
+		assertThat(output).doesNotContain(LOG_CORRELATION_PATTERN + " = ");
+	}
+
+	@Test
 	void explicitValuesAreNeitherOverriddenNorLogged(CapturedOutput output) {
 		environment.setProperty(DEPLOYMENT_MODE, "self-host");
 		environment.setProperty(DATA_DIR, "/srv/oc");
 		environment.setProperty(MONGODB_URI, "mongodb://db.example:27017/oc");
+		environment.setProperty(LOG_CORRELATION_PATTERN, "[%X{tenant}] ");
 
 		postProcess();
 
