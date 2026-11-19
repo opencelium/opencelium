@@ -34,7 +34,8 @@ export const useWorkflowCanvasActions = ({ setSidebarAction, setContextMenu,
 			setMethodEditor({ nodeId: node.id, mode: 'body' });
 			return;
 		}
-		if (node.type === 'if' || node.type === 'loop') {
+		// The Set step shares the operator editor slot; WorkflowNodeEditors picks its dialog by node type.
+		if (node.type === 'if' || node.type === 'loop' || node.type === 'setglobal') {
 			setMethodEditor(null);
 			setConditionEditor({ nodeId: node.id });
 		}

@@ -152,6 +152,7 @@ export function validateWorkflowJson(value: unknown,
 		if (entryIds.has(operator.id)) return { success: false,
 			errors: [{ key: 'json.errors.duplicateEntryId', path: idPath }] };
 		entryIds.add(operator.id);
+		if (operator.type === 'setglobal') continue;
 		if (operator.dataAggregator !== null && aggregatorIds
 			&& !aggregatorIds.has(operator.dataAggregator)) return { success: false, errors: [{
 				key: 'json.errors.unknownAggregator',

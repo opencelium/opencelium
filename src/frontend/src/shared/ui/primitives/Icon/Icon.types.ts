@@ -69,6 +69,7 @@ export type IconName =
     | 'circle'
     | 'git'
     | 'globe'
+    | 'variable'
     | 'portal'
     | 'drag-handle'
     | 'minus'

@@ -1,5 +1,7 @@
 import { ITERATOR_NAMES } from '../components/request-editor/body-editor/requestReferenceOptions';
-import type { WorkflowNodeModel } from '../types/workflow.types';
+import type { WorkflowNodeModel, WorkflowSetGlobalConfig } from '../types/workflow.types';
+import { textToValue } from '@entities/globalVariable/model/form';
+import { isSetGlobalReference } from '../utils/setGlobalValue';
 
 const nodeKind = (node: WorkflowNodeModel) =>
 	node.data.kind ?? node.type ?? 'connector';
@@ -21,12 +23,21 @@ const normalizeOperatorExpression = (expression: string, type: string) => {
 	return value.startsWith('(') && value.endsWith(')') ? value : `(${value})`;
 };
 
+// A reference travels as text; a literal is sent as the JSON value it spells.
+const toSetGlobalPayload = (config: WorkflowSetGlobalConfig | undefined) => {
+	const value = config?.value ?? '';
+	return { variable: config?.variable ?? '', value: isSetGlobalReference(value) ? value : textToValue(value) };
+};
+
 export const buildOperatorPayload = (
 	node: WorkflowNodeModel,
 	index: string,
 	iterator?: string,
 ) => {
 	const type = nodeKind(node);
+	if (type === 'setglobal') {
+		return { id: node.id, index, type, setGlobal: toSetGlobalPayload(node.data.setGlobal) };
+	}
 	return {
 		id: node.id,
 		index,

@@ -12,7 +12,7 @@ export type WorkflowProblem =
 	| { kind: 'unknown-path'; count: number }
 	/** References whose path would not compile as JsonPath (see countInvalidReferencePaths). */
 	| { kind: 'invalid-path'; count: number }
-	| { kind: 'operator-unconfigured'; operator: 'if' | 'loop' };
+	| { kind: 'operator-unconfigured'; operator: 'if' | 'loop' | 'setglobal' };
 
 export type WorkflowIssue = { nodeId: string; title: string; problems: WorkflowProblem[] };
 
@@ -115,6 +115,10 @@ const hasCondition = (expression: string | undefined) => !!expression?.replace(/
 
 const operatorProblem = (node: WorkflowNodeModel): WorkflowProblem | null => {
 	const { kind } = node.data;
+	if (kind === 'setglobal') {
+		const config = node.data.setGlobal;
+		return config?.variable && config.value.trim() ? null : { kind: 'operator-unconfigured', operator: kind };
+	}
 	if (kind !== 'if' && kind !== 'loop') return null;
 	return hasCondition(node.data.conditionConfig?.expression) ? null : { kind: 'operator-unconfigured', operator: kind };
 };

@@ -49,11 +49,16 @@ const operatorTypeSchema = z.preprocess(
 	(value) => typeof value === 'string' ? value.toLowerCase() : value,
 	z.enum(['if', 'loop']),
 );
-const operatorSchema = z.strictObject({
+const conditionOperatorSchema = z.strictObject({
 	id: z.string().min(1), index: z.string().min(1),
 	type: operatorTypeSchema, dataAggregator: optionalAggregatorSchema,
 	expression: z.string().trim().min(1), iterator: z.string().trim().min(1).optional(),
 });
+const setGlobalOperatorSchema = z.strictObject({
+	id: z.string().min(1), index: z.string().min(1), type: z.literal('setglobal'),
+	setGlobal: z.strictObject({ variable: z.string().min(1), value: z.unknown() }),
+});
+const operatorSchema = z.union([conditionOperatorSchema, setGlobalOperatorSchema]);
 
 const referenceSchema = z.strictObject({
 	color: hexColorSchema, type: z.enum(['request', 'response']), field: z.string().min(1),
@@ -121,14 +126,15 @@ const commentSchema = z.strictObject({
 });
 const nodeDataSchema = z.strictObject({
 	title: z.string(), subtitle: z.string().optional(),
-	kind: z.enum(['start', 'connector', 'system', 'trigger-connection', 'if', 'loop', 'comment']),
+	kind: z.enum(['start', 'connector', 'system', 'trigger-connection', 'if', 'loop', 'setglobal', 'comment']),
 	connector: uiConnectorSchema.optional(), methodConfig: uiMethodConfigSchema.optional(),
 	conditionConfig: conditionConfigSchema.optional(), comment: commentSchema.optional(),
+	setGlobal: z.strictObject({ variable: z.string(), value: z.string() }).optional(),
 	dataAggregator: optionalAggregatorSchema.optional(),
 });
 const nodeSchema = z.strictObject({
 	id: z.string().min(1),
-	type: z.enum(['start', 'connector', 'system', 'trigger-connection', 'if', 'loop', 'comment']),
+	type: z.enum(['start', 'connector', 'system', 'trigger-connection', 'if', 'loop', 'setglobal', 'comment']),
 	position: z.strictObject({ x: z.number(), y: z.number() }),
 	width: z.number().positive().optional(), height: z.number().positive().optional(),
 	index: z.string().optional(),

@@ -6,7 +6,7 @@ import type { ConnectorHealthStatus } from '@entities/connector/model/types';
 import type { JointRejectionReason } from '../utils/jumpValidator';
 import type { WorkflowIssueTone } from '../problems/workflowProblems';
 
-export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
+export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'setglobal' | 'comment';
 
 // What a LOOP node shows while running, set by WorkflowCanvas — a live count
 // ("i = 3"), refreshed on every iteration. Nothing is shown at all before
@@ -17,7 +17,10 @@ export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-conne
 export type WorkflowLoopIterationDisplay = { iterator: string; count: number; indexPath: string };
 
 export type WorkflowAddDirection = 'right' | 'bottom';
-export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
+export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'setglobal' | 'comment';
+
+/** A Set global variable step: writes `value` (a reference or a literal JSON text) into `variable`. */
+export type WorkflowSetGlobalConfig = { variable: string; value: string };
 export type WorkflowOperatorKind = 'if' | 'loop';
 
 /** A free-text annotation belonging to one node. Carried in the connection's
@@ -84,6 +87,7 @@ export type WorkflowNodeData = {
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;
+	setGlobal?: WorkflowSetGlobalConfig;
 	triggerConnection?: WorkflowTriggerConnectionRef;
 	/** Only on a 'comment' node — the note itself. */
 	comment?: WorkflowCommentData;
@@ -205,6 +209,7 @@ export type SystemWorkflowNode = Node<WorkflowNodeData, 'system'>;
 export type TriggerConnectionWorkflowNode = Node<WorkflowNodeData, 'trigger-connection'>;
 export type IfWorkflowNode = Node<WorkflowNodeData, 'if'>;
 export type LoopWorkflowNode = Node<WorkflowNodeData, 'loop'>;
+export type SetGlobalWorkflowNode = Node<WorkflowNodeData, 'setglobal'>;
 export type CommentWorkflowNode = Node<WorkflowNodeData, 'comment'>;
 
 export type WorkflowNodeModel =
@@ -214,6 +219,7 @@ export type WorkflowNodeModel =
 	| TriggerConnectionWorkflowNode
 	| IfWorkflowNode
 	| LoopWorkflowNode
+	| SetGlobalWorkflowNode
 	| CommentWorkflowNode;
 
 export type WorkflowEdgeModel = Edge<WorkflowEdgeData, 'workflow-edge'>;
