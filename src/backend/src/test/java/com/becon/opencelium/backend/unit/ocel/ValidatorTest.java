@@ -348,6 +348,9 @@ class ValidatorTest {
                 "#{%60b8d4c8f1d4a53d3c2f84d1%} = #{%60b8d4c8f1d4a53d3c2f84d1%}",
                 "#{%60b8d4c8f1d4a53d3c2f84d1%} != #{%60b8d4c8f1d4a53d3c2f84d1%}",
                 "#{%60b8d4c8f1d4a53d3c2f84d1%} = #{%60b8d4c8f1d4a53d3c2f84d1%} && 1 = 1",
+                "{{global.maxRetries}} = {{global.limits.maxPerPage}}",
+                "{{global.tenants[0].id}} != #{%60b8d4c8f1d4a53d3c2f84d1%}",
+                "{{global.maxRetries}}={{global.limits.maxPerPage}}",
         })
         void validateDoesNotThrowWhenBothOperandsAreReferences(String expression) {
             assertThatCode(() -> validator.validate(expression)).doesNotThrowAnyException();
@@ -361,6 +364,8 @@ class ValidatorTest {
                 "#{%60b8d4c8f1d4a53d3c2f84d1%} NotNull",
                 "#{%60b8d4c8f1d4a53d3c2f84d1%} IsEmpty",
                 "#{%60b8d4c8f1d4a53d3c2f84d1%} NotEmpty",
+                "{{global.lastSync}} NotNull",
+                "{{global.tenants}} IsEmpty",
         })
         void validateDoesNotThrowWhenReferenceIsUsedWithRightSidedUnaryOperator(String expression) {
             assertThatCode(() -> validator.validate(expression)).doesNotThrowAnyException();

@@ -8,11 +8,14 @@
 
 package com.becon.opencelium.backend.unit.database.mysql.service;
 
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.GlobalVariableUsageService;
 import com.becon.opencelium.backend.database.mysql.service.ExecutionArgumentService;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +29,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -51,18 +57,23 @@ class ConnectionServiceImpTest {
     @Mock
     private ConnectionMngServiceImp connectionMngService;
 
+    @Mock
+    private GlobalVariableUsageService globalVariableUsageService;
+
     private ConnectionServiceImp connectionService;
 
     @BeforeEach
     void setUp() {
         // The constructor calls entityVersionManager.getUpdater(...), so it cannot be left null;
         // construct with the collaborators these tests exercise and a mock version manager for the rest.
-        // deleteById strips execution_argument rows, so executionArgumentService cannot be null either.
+        // deleteById strips execution_argument rows, so executionArgumentService cannot be null either;
+        // it also clears the global variable usages of the connection, hence the last mock.
         EntityVersionManager entityVersionManager = mock(EntityVersionManager.class);
         ExecutionArgumentService executionArgumentService = mock(ExecutionArgumentService.class);
         connectionService = new ConnectionServiceImp(
                 connectionRepository, null, connectionMngService, null, null, null, null, null,
-                null, null, null, null, null, null, executionArgumentService, entityVersionManager, null, null);
+                null, null, null, null, null, null, executionArgumentService, entityVersionManager, null, null,
+                globalVariableUsageService);
     }
 
     // ── findAll(includeTest) ──────────────────────────────────────────────────
@@ -183,6 +194,67 @@ class ConnectionServiceImpTest {
         connectionService.deleteByIds(java.util.Collections.singletonList(null), Set.of());
 
         verifyNoInteractions(connectionRepository, connectionMngService);
+    }
+
+    // ── global variable usages ────────────────────────────────────────────────
+
+    @Test
+    void deleteByIdClearsUsagesWhenConnectionIsDeleted() {
+        when(connectionRepository.findById(1L)).thenReturn(Optional.of(entity(1L, NORMAL_TITLE)));
+
+        connectionService.deleteById(1L);
+
+        verify(globalVariableUsageService).deleteForWorkflow(1L);
+        verify(connectionRepository).deleteById(1L);
+    }
+
+    @Test
+    void updateCategoryChecksReferencesWhenWorkflowMoves() {
+        Connection connection = entity(1L, NORMAL_TITLE);
+        connection.setSnapshotId("snapshot-1");
+        connection.setCategoryId(3);
+        ConnectionMng content = new ConnectionMng();
+        when(connectionMngService.getById("snapshot-1")).thenReturn(content);
+        doThrow(new GlobalReferenceValidationException(List.of(new GlobalReferenceValidationException.Violation(
+                GlobalReferenceValidationException.Code.OUT_OF_SCOPE, "outside the scope", "idoitUrl",
+                "{{global.idoitUrl}}", "#ababab", "0_1", "endpoint"))))
+                .when(globalVariableUsageService).checkWorkflow(content, 1L, 4);
+
+        assertThatThrownBy(() -> connectionService.updateCategory(connection, 4))
+                .isInstanceOf(GlobalReferenceValidationException.class)
+                .hasMessageContaining("outside the scope");
+
+        assertThat(connection.getCategoryId()).isEqualTo(3);
+        verify(connectionRepository, never()).save(any());
+    }
+
+    @Test
+    void updateCategorySavesNewCategoryWhenReferencesStayValid() {
+        Connection connection = entity(1L, NORMAL_TITLE);
+        connection.setSnapshotId("snapshot-1");
+        ConnectionMng content = new ConnectionMng();
+        when(connectionMngService.getById("snapshot-1")).thenReturn(content);
+
+        connectionService.updateCategory(connection, 4);
+
+        assertThat(connection.getCategoryId()).isEqualTo(4);
+        verify(globalVariableUsageService).checkWorkflow(content, 1L, 4);
+        verify(connectionRepository).save(connection);
+    }
+
+    @Test
+    void switchVersionRebuildsUsagesWhenVersionChanges() {
+        Connection connection = entity(1L, NORMAL_TITLE);
+        connection.setSnapshotId("snapshot-1");
+        ConnectionMng otherVersion = new ConnectionMng();
+        otherVersion.setId("snapshot-2");
+        when(connectionRepository.findById(1L)).thenReturn(Optional.of(connection));
+        when(connectionMngService.getById("snapshot-2")).thenReturn(otherVersion);
+
+        connectionService.switchVersion(1L, "snapshot-2");
+
+        assertThat(connection.getSnapshotId()).isEqualTo("snapshot-2");
+        verify(globalVariableUsageService).rebuildForWorkflow(1L, otherVersion);
     }
 
     private static Connection entity(Long id, String title) {

@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.mapper.execution.ConnectionExMapper;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
@@ -24,17 +25,20 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
     private final SchedulerService schedulerService;
     private final ConnectionMngService connectionMngService;
     private final ConnectionService connectionService;
+    private final GlobalVariableSnapshotService globalVariableSnapshotService;
 
     public ExecutionObjectServiceImp(
             Environment environment,
             ConnectionExMapper connectionMapper,
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
-            @Qualifier("connectionServiceImp") ConnectionService connectionService) {
+            @Qualifier("connectionServiceImp") ConnectionService connectionService,
+            GlobalVariableSnapshotService globalVariableSnapshotService) {
         this.connectionMapper = connectionMapper;
         this.schedulerService = schedulerService;
         this.connectionMngService = connectionMngService;
         this.connectionService = connectionService;
+        this.globalVariableSnapshotService = globalVariableSnapshotService;
         this.env = environment;
     }
 
@@ -45,7 +49,15 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         ConnectionMng connectionMng = connectionMngService.getById(scheduler.getConnection().getSnapshotId());
 
         ExecutionObj executionObj = new ExecutionObj();
-        ConnectionEx connectionEx = connectionMapper.toEntity(connectionMng);
+
+        // taken once, before the first step: a variable changed while the run is going reaches
+        // the next run, not this one. Taken before the connectors are read, because a connector
+        // field may hold a global variable and gets its value from this same snapshot
+        GlobalVariableSnapshot globalSnapshot =
+                globalVariableSnapshotService.takeFor(scheduler.getConnection().getId());
+        executionObj.setGlobalSnapshot(globalSnapshot);
+
+        ConnectionEx connectionEx = connectionMapper.toEntity(connectionMng, globalSnapshot);
         connectionEx.setConnectionId(scheduler.getConnection().getId());
         connectionEx.setConnectionName(getConnectionName(scheduler.getConnection().getId()));
         executionObj.setConnection(connectionEx);

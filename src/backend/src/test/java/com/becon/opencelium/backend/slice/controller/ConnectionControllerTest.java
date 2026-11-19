@@ -18,6 +18,7 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
 import com.becon.opencelium.backend.execution.service.MethodTestService;
 import com.becon.opencelium.backend.execution.service.ReferenceValidationService;
 import com.becon.opencelium.backend.reference.enums.ReferenceType;
@@ -25,6 +26,7 @@ import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlReq
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlResultDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.ConnectorReference;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.GlobalVariableReference;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.StaticReference;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRequestDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO;
@@ -67,6 +69,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -225,12 +228,46 @@ class ConnectionControllerTest {
                 .andExpect(jsonPath("$.message").value(containsString("CONNECTOR, HTTP_REQUEST, WEBHOOK")));
     }
 
+    // ── POST /connection — rejected global variable references ────────────────
+
+    @Test
+    @DisplayName("POST /connection — a bad global reference yields 400 with one violation per reference")
+    void saveReturnsBadRequestWithViolationsWhenGlobalReferenceIsInvalid() throws Exception {
+        when(connectionService.save(any(), any())).thenThrow(new GlobalReferenceValidationException(List.of(
+                new GlobalReferenceValidationException.Violation(
+                        GlobalReferenceValidationException.Code.UNKNOWN_VARIABLE,
+                        "Global variable 'idoitUrl' does not exist", "idoitUrl", "{{global.idoitUrl}}",
+                        "#ababab", "0_1", "endpoint"),
+                new GlobalReferenceValidationException.Violation(
+                        GlobalReferenceValidationException.Code.OUT_OF_SCOPE,
+                        "This workflow is outside the scope of global variable 'limit'", "limit",
+                        "{{global.limit}}", null, "0_2", "expression"))));
+
+        mockMvc.perform(post("/connection")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"title\": \"demo connection\" }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("GLOBAL_REFERENCE_INVALID"))
+                .andExpect(jsonPath("$.message").value("Global variable 'idoitUrl' does not exist"))
+                .andExpect(jsonPath("$.path").value("/connection"))
+                .andExpect(jsonPath("$.violations.length()").value(2))
+                .andExpect(jsonPath("$.violations[0].code").value("UNKNOWN_VARIABLE"))
+                .andExpect(jsonPath("$.violations[0].variable").value("idoitUrl"))
+                .andExpect(jsonPath("$.violations[0].ref").value("{{global.idoitUrl}}"))
+                .andExpect(jsonPath("$.violations[0].color").value("#ababab"))
+                .andExpect(jsonPath("$.violations[0].index").value("0_1"))
+                .andExpect(jsonPath("$.violations[0].field").value("endpoint"))
+                .andExpect(jsonPath("$.violations[1].code").value("OUT_OF_SCOPE"))
+                .andExpect(jsonPath("$.violations[1].color").doesNotExist());
+    }
+
     // ── POST /connection/method/test ──────────────────────────────────────────
 
     @Test
     @DisplayName("POST /connection/method/test returns the request sent and the API's response")
     void testMethodReturnsResultWhenServiceSendsRequest() throws Exception {
-        when(methodTestService.test(any())).thenReturn(MethodTestResultDTO.sent(
+        when(methodTestService.test(any(), any(), any())).thenReturn(MethodTestResultDTO.sent(
                 new SentRequest("GET", "http://api.test/orders", Map.of(), null),
                 new ReceivedResponse(200, Map.of(), Map.of("id", 7)),
                 12));
@@ -250,7 +287,7 @@ class ConnectionControllerTest {
     @Test
     @DisplayName("POST /connection/method/test turns a rejected test into 400 with the error code")
     void testMethodReturnsBadRequestWhenServiceRejectsRequest() throws Exception {
-        when(methodTestService.test(any())).thenThrow(new GeneralServiceException(
+        when(methodTestService.test(any(), any(), any())).thenThrow(new GeneralServiceException(
                 HttpStatus.BAD_REQUEST,
                 ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING,
                 "Static values are missing for references: ${status}"));
@@ -268,7 +305,7 @@ class ConnectionControllerTest {
     @Test
     @DisplayName("POST /connection/method/test keeps a null static value and defaults confirmWrite to false")
     void testMethodPassesNullStaticValueWhenBodyContainsIt() throws Exception {
-        when(methodTestService.test(any())).thenReturn(MethodTestResultDTO.notSent(List.of()));
+        when(methodTestService.test(any(), any(), any())).thenReturn(MethodTestResultDTO.notSent(List.of()));
 
         mockMvc.perform(post("/connection/method/test")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -278,9 +315,25 @@ class ConnectionControllerTest {
                 .andExpect(status().isOk());
 
         ArgumentCaptor<MethodTestRequestDTO> captor = ArgumentCaptor.forClass(MethodTestRequestDTO.class);
-        verify(methodTestService).test(captor.capture());
+        verify(methodTestService).test(captor.capture(), any(), any());
         assertThat(captor.getValue().staticValues()).containsEntry("${status}", null);
         assertThat(captor.getValue().confirmWrite()).isFalse();
+    }
+
+    @Test
+    @DisplayName("POST /connection/method/test?connectionId= names the saved workflow whose global variables are read")
+    void testMethodPassesConnectionIdWhenQueryNamesSavedWorkflow() throws Exception {
+        when(methodTestService.test(any(), any(), any())).thenReturn(MethodTestResultDTO.notSent(List.of()));
+
+        mockMvc.perform(post("/connection/method/test")
+                        .param("connectionId", "42")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "method": { "request": { "method": "GET" } } }
+                                """))
+                .andExpect(status().isOk());
+
+        verify(methodTestService).test(any(), eq(42L), isNull());
     }
 
     // ── POST /connection/method/curl ──────────────────────────────────────────
@@ -288,7 +341,8 @@ class ConnectionControllerTest {
     @Test
     @DisplayName("POST /connection/method/curl passes method and static values on and returns the command")
     void getMethodCurlReturnsCommandWhenServiceBuildsIt() throws Exception {
-        when(methodTestService.toCurl(any())).thenReturn(MethodCurlResultDTO.built("curl 'http://api.test/orders'"));
+        when(methodTestService.toCurl(any(), any(), any()))
+                .thenReturn(MethodCurlResultDTO.built("curl 'http://api.test/orders'"));
 
         mockMvc.perform(post("/connection/method/curl")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -300,14 +354,14 @@ class ConnectionControllerTest {
                 .andExpect(jsonPath("$.connectorErrors").isEmpty());
 
         ArgumentCaptor<MethodCurlRequestDTO> captor = ArgumentCaptor.forClass(MethodCurlRequestDTO.class);
-        verify(methodTestService).toCurl(captor.capture());
+        verify(methodTestService).toCurl(captor.capture(), any(), any());
         assertThat(captor.getValue().staticValues()).containsEntry("${status}", "open");
     }
 
     @Test
     @DisplayName("POST /connection/method/curl turns a rejected method into 400 with the error code")
     void getMethodCurlReturnsBadRequestWhenServiceRejectsRequest() throws Exception {
-        when(methodTestService.toCurl(any())).thenThrow(new GeneralServiceException(
+        when(methodTestService.toCurl(any(), any(), any())).thenThrow(new GeneralServiceException(
                 HttpStatus.BAD_REQUEST,
                 ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING,
                 "Static values are missing for references: ${status}"));
@@ -321,14 +375,31 @@ class ConnectionControllerTest {
                 .andExpect(jsonPath("$.error").value(ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING));
     }
 
+    @Test
+    @DisplayName("POST /connection/method/curl without query names no workflow: only variables open to all are read")
+    void getMethodCurlPassesNoWorkflowWhenQueryIsEmpty() throws Exception {
+        when(methodTestService.toCurl(any(), any(), any()))
+                .thenReturn(MethodCurlResultDTO.built("curl 'http://api.test/orders'"));
+
+        mockMvc.perform(post("/connection/method/curl")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "method": { "request": { "method": "GET" } } }
+                                """))
+                .andExpect(status().isOk());
+
+        verify(methodTestService).toCurl(any(), isNull(), isNull());
+    }
+
     // ── POST /connection/method/test/refs ─────────────────────────────────────
 
     @Test
     @DisplayName("POST /connection/method/test/refs returns connector and static references")
     void getMethodTestReferencesReturnsReferencesWhenMethodIsValid() throws Exception {
-        when(methodTestService.findReferences(any())).thenReturn(new MethodTestReferencesDTO(
+        when(methodTestService.findReferences(any(), any(), any())).thenReturn(new MethodTestReferencesDTO(
                 List.of(new ConnectorReference("{token}", 3, "token", true)),
-                List.of(new StaticReference("${status}", ReferenceType.WEBHOOK))));
+                List.of(new StaticReference("${status}", ReferenceType.WEBHOOK)),
+                List.of()));
 
         mockMvc.perform(post("/connection/method/test/refs")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -340,6 +411,43 @@ class ConnectionControllerTest {
                 .andExpect(jsonPath("$.connectorReferences[0].connectorId").value(3))
                 .andExpect(jsonPath("$.connectorReferences[0].available").value(true))
                 .andExpect(jsonPath("$.staticReferences[0].type").value("WEBHOOK"));
+    }
+
+    @Test
+    @DisplayName("POST /connection/method/test/refs?categoryId= names the category of a workflow not saved yet")
+    void getMethodTestReferencesPassesCategoryIdWhenQueryNamesUnsavedWorkflow() throws Exception {
+        when(methodTestService.findReferences(any(), any(), any()))
+                .thenReturn(new MethodTestReferencesDTO(List.of(), List.of(), List.of()));
+
+        mockMvc.perform(post("/connection/method/test/refs")
+                        .param("categoryId", "7")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "request": { "method": "GET", "endpoint": "http://api.test/orders" } }
+                                """))
+                .andExpect(status().isOk());
+
+        verify(methodTestService).findReferences(any(), isNull(), eq(7));
+    }
+
+    @Test
+    @DisplayName("POST /connection/method/test/refs lists the global references with their name, never a value")
+    void getMethodTestReferencesReturnsGlobalReferencesWhenServiceListsThem() throws Exception {
+        when(methodTestService.findReferences(any(), any(), any())).thenReturn(new MethodTestReferencesDTO(
+                List.of(),
+                List.of(),
+                List.of(new GlobalVariableReference("{{global.pageSize}}", "pageSize"))));
+
+        mockMvc.perform(post("/connection/method/test/refs")
+                        .param("connectionId", "42")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "request": { "method": "GET", "endpoint": "/orders?limit={{global.pageSize}}" } }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.globalReferences[0].reference").value("{{global.pageSize}}"))
+                .andExpect(jsonPath("$.globalReferences[0].name").value("pageSize"))
+                .andExpect(jsonPath("$.globalReferences[0].value").doesNotExist());
     }
 
     // ── POST /connection/reference/validate ───────────────────────────────────

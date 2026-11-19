@@ -61,6 +61,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -105,6 +106,12 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/connection", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Connection", description = "Manages operations related to Connection management")
 public class ConnectionController {
+
+    private static final String METHOD_TEST_CONNECTION_ID = "The saved workflow the method belongs to: its "
+            + "global variables are read when the caller may use them. Not together with categoryId.";
+    private static final String METHOD_TEST_CATEGORY_ID = "The category of the workflow the method belongs to, "
+            + "when that workflow is not saved yet. Without connectionId and categoryId, only global variables "
+            + "open to all workflows are read.";
 
     private final Environment environment;
     private final ConnectionService connectionService;
@@ -481,14 +488,19 @@ public class ConnectionController {
         return ResponseEntity.ok(schedulerResource);
     }
 
-    @Operation(summary = "Lists the references of a single method: those read from connectors, and those "
-            + "that need a static value to test the method. Sends no request.")
+    @Operation(summary = "Lists the references of a single method: those read from connectors, the global "
+            + "variables the test reads by itself, and those that need a static value to test the method. "
+            + "Sends no request.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "References have been successfully listed",
                     content = @Content(schema = @Schema(implementation = MethodTestReferencesDTO.class))),
             @ApiResponse(responseCode = "400",
-                    description = "The method has no request with an HTTP method",
+                    description = "The method has no request with an HTTP method, or both connectionId and "
+                            + "categoryId are given",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "The method references a global variable and connectionId names no workflow",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
@@ -498,12 +510,16 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/method/test/refs", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MethodTestReferencesDTO> getMethodTestReferences(@RequestBody MethodDTO method) {
-        return ResponseEntity.ok(methodTestService.findReferences(method));
+    public ResponseEntity<MethodTestReferencesDTO> getMethodTestReferences(
+            @RequestBody MethodDTO method,
+            @Parameter(description = METHOD_TEST_CONNECTION_ID) @RequestParam(required = false) Long connectionId,
+            @Parameter(description = METHOD_TEST_CATEGORY_ID) @RequestParam(required = false) Integer categoryId) {
+        return ResponseEntity.ok(methodTestService.findReferences(method, connectionId, categoryId));
     }
 
     @Operation(summary = "Tests a single method against the real API. Connector data (credentials, tokens) "
-            + "is read from the connectors, every other reference takes the given static value. "
+            + "is read from the connectors, a global variable the caller may use in the method's workflow "
+            + "takes its current value, every other reference takes the given static value. "
             + "Methods other than GET, HEAD and OPTIONS are only sent with confirmWrite = true.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -511,8 +527,11 @@ public class ConnectionController {
                             + "(see connectorErrors)",
                     content = @Content(schema = @Schema(implementation = MethodTestResultDTO.class))),
             @ApiResponse(responseCode = "400",
-                    description = "Invalid method, write not confirmed, missing static values, or the request "
-                            + "could not be built",
+                    description = "Invalid method, both connectionId and categoryId given, write not confirmed, "
+                            + "missing static values, or the request could not be built",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "The method references a global variable and connectionId names no workflow",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
@@ -522,20 +541,28 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/method/test", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MethodTestResultDTO> testMethod(@RequestBody MethodTestRequestDTO request) {
-        return ResponseEntity.ok(methodTestService.test(request));
+    public ResponseEntity<MethodTestResultDTO> testMethod(
+            @RequestBody MethodTestRequestDTO request,
+            @Parameter(description = METHOD_TEST_CONNECTION_ID) @RequestParam(required = false) Long connectionId,
+            @Parameter(description = METHOD_TEST_CATEGORY_ID) @RequestParam(required = false) Integer categoryId) {
+        return ResponseEntity.ok(methodTestService.test(request, connectionId, categoryId));
     }
 
     @Operation(summary = "Returns the request of a single method as a cURL command, without sending it. "
-            + "Connector data (credentials, tokens) is read from the connectors and is not masked, every "
-            + "other reference takes the given static value.")
+            + "Connector data (credentials, tokens) is read from the connectors and is not masked, a global "
+            + "variable the caller may use in the method's workflow takes its current value, every other "
+            + "reference takes the given static value.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "The command has been built, or the data of a connector could not be read "
                             + "(see connectorErrors)",
                     content = @Content(schema = @Schema(implementation = MethodCurlResultDTO.class))),
             @ApiResponse(responseCode = "400",
-                    description = "Invalid method, missing static values, or the request could not be built",
+                    description = "Invalid method, both connectionId and categoryId given, missing static values, "
+                            + "or the request could not be built",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "The method references a global variable and connectionId names no workflow",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
@@ -545,8 +572,11 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/method/curl", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MethodCurlResultDTO> getMethodCurl(@RequestBody MethodCurlRequestDTO request) {
-        return ResponseEntity.ok(methodTestService.toCurl(request));
+    public ResponseEntity<MethodCurlResultDTO> getMethodCurl(
+            @RequestBody MethodCurlRequestDTO request,
+            @Parameter(description = METHOD_TEST_CONNECTION_ID) @RequestParam(required = false) Long connectionId,
+            @Parameter(description = METHOD_TEST_CATEGORY_ID) @RequestParam(required = false) Integer categoryId) {
+        return ResponseEntity.ok(methodTestService.toCurl(request, connectionId, categoryId));
     }
 
     @Operation(summary = "Validates a reference and its JSON path while the user writes it. Every problem "

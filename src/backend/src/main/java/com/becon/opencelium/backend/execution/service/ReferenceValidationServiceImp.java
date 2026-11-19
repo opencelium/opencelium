@@ -48,6 +48,7 @@ import com.becon.opencelium.backend.reference.ReferenceParser;
 import com.becon.opencelium.backend.reference.enums.ReferenceType;
 import com.becon.opencelium.backend.reference.model.DirectReference.Part;
 import com.becon.opencelium.backend.reference.model.EnhancementReference;
+import com.becon.opencelium.backend.reference.model.GlobalReference;
 import com.becon.opencelium.backend.reference.model.PageReference;
 import com.becon.opencelium.backend.reference.model.RequestDataReference;
 import com.becon.opencelium.backend.reference.utility.ReferenceUtility;
@@ -168,6 +169,10 @@ public class ReferenceValidationServiceImp implements ReferenceValidationService
                 validateWebhook();
             } else if (reference.startsWith("@{")) {
                 validateSimple(ReferenceType.PAGE, PageReference::parse, null);
+            } else if (reference.startsWith("{{global.")) {
+                validateSimple(ReferenceType.GLOBAL, GlobalReference::parse,
+                        "Write {{global.name}}, optionally with a path into the value, e.g. "
+                                + "{{global.limits.maxPerPage}} or {{global.tenants[0].id}}.");
             } else if (reference.startsWith("{")) {
                 validateSimple(ReferenceType.REQUEST_DATA, RequestDataReference::parse,
                         "Write {key} or {#connectorId.key}, e.g. {token} or {#12.token}.");

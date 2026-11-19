@@ -3,6 +3,10 @@ package com.becon.opencelium.backend.execution;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.exception.ReferenceNotFoundException;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalLoopSource;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalValueCaster;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalValueResolver;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.ThreadLocalOcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
@@ -11,7 +15,11 @@ import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
+import com.becon.opencelium.backend.reference.GlobalEscape;
+import com.becon.opencelium.backend.reference.ReferenceDetector;
+import com.becon.opencelium.backend.reference.ReferenceMatchers;
 import com.becon.opencelium.backend.reference.ReferenceScanner;
+import com.becon.opencelium.backend.reference.model.GlobalReference;
 import com.becon.opencelium.backend.resource.execution.EnhancementEx;
 import com.becon.opencelium.backend.resource.execution.FieldBindEx;
 import com.becon.opencelium.backend.scriptengine.LanguageType;
@@ -23,10 +31,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,6 +50,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<Integer, Map<String, String>> requestData;
     private final Map<Integer, RestTemplate> restTemplate;
     private final Map<Integer, Pagination> pagination;
+    private final GlobalVariableSnapshot globalSnapshot;
     private final Extractor refExtractor;
     private final List<Loop> loops = new ArrayList<>();
     private final List<FieldBindEx> fieldBind;
@@ -72,11 +83,29 @@ public class ExecutionManagerImpl implements ExecutionManager {
             Map<Integer, Pagination> pagination,
             Function<ExecutionManager, Extractor> extractorFactory
     ) {
+        this(webhookVars, fieldBind, requestData, restTemplate, pagination, GlobalVariableSnapshot.empty(),
+                extractorFactory);
+    }
+
+    /**
+     * Creates a manager that also resolves global variables, from the snapshot the run took when
+     * it started.
+     */
+    public ExecutionManagerImpl(
+            Map<String, Object> webhookVars,
+            List<FieldBindEx> fieldBind,
+            Map<Integer, Map<String, String>> requestData,
+            Map<Integer, RestTemplate> restTemplate,
+            Map<Integer, Pagination> pagination,
+            GlobalVariableSnapshot globalSnapshot,
+            Function<ExecutionManager, Extractor> extractorFactory
+    ) {
         this.webhookVars = webhookVars;
         this.fieldBind = fieldBind;
         this.requestData = requestData;
         this.restTemplate = restTemplate;
         this.pagination = pagination;
+        this.globalSnapshot = Objects.requireNonNull(globalSnapshot, "globalSnapshot");
 
         this.refExtractor = extractorFactory.apply(this);
     }
@@ -159,32 +188,101 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
     @Override
     public Object getValue(String value) {
-        // To trigger this method there should be at least one of 6 reference types in value:
-        // ['directRef', 'wrappedDirectRef', 'enhancement', 'webhook', 'pageRef', 'requestData'
+        // To trigger this method there should be at least one of 7 reference types in value:
+        // ['directRef', 'wrappedDirectRef', 'enhancement', 'webhook', 'pageRef', 'globalRef', 'requestData'
         if (value == null) {
             return null;
         }
 
-        // This method extracts 5 reference types:
-        // ['wrappedDirectRef', 'enhancement', 'webhook', 'pageRef', 'requestData'
+        // This method extracts 6 reference types:
+        // ['wrappedDirectRef', 'enhancement', 'webhook', 'pageRef', 'globalRef', 'requestData'
         List<String> references = ReferenceScanner.extract(value);
 
         // There are 3 cases to skip following if:
         // 1) value == 'directRef': references.isEmpty() == true - we directly call refExtractor.extractValue(value)
-        // 2) value is a complex reference (only 5 reference types): references.size() > 1
-        // 3) value is a complex reference (only 5 reference types): references.size() == 1 but value is not a reference, it contains a reference
+        // 2) value is a complex reference (only 6 reference types): references.size() > 1
+        // 3) value is a complex reference (only 6 reference types): references.size() == 1 but value is not a reference, it contains a reference
         if (!references.isEmpty() && (references.size() != 1 || !Objects.equals(value, references.get(0)))) {
-            for (String ref : references) {
-                Object val = extractOrEmpty(ref);
-                val = val == null ? "" : val.toString();
-                value = value.replace(ref, (String) val);
-            }
-
-            return value;
+            return resolveInText(value, references);
         }
 
-        // at this point we could have simple 'directRef' or other 5 reference types
+        // nothing to resolve, only escaped global tokens: literal text that loses its backslash
+        if (references.isEmpty() && GlobalEscape.isPresent(value) && !ReferenceDetector.containsReference(value)) {
+            return GlobalEscape.unescape(value);
+        }
+
+        // at this point we could have simple 'directRef' or other 6 reference types
         return extractOrEmpty(value);
+    }
+
+    /**
+     * Replaces every reference of a text that mixes text and references.
+     *
+     * <p>The value of a global variable is data and never a further reference. Its token is
+     * therefore swapped for a slot before anything else is resolved, so a value another reference
+     * brings in cannot name a global variable, and the slot is filled last, so no reference is
+     * looked for inside the value. The slot carries a random marker no value can guess. A global
+     * value is cast to text: a list or a map becomes compact JSON text. Every other reference is
+     * resolved one after the other and keeps its {@code toString()} form, as before.
+     *
+     * <p>An escaped token, {@code \{{global.name}}}, takes a slot too, before the references do:
+     * it stays untouched whatever is resolved around it and comes back without its backslash.
+     */
+    private String resolveInText(String text, List<String> references) {
+        // slot -> the text that takes its place in the end
+        Map<String, String> globalTexts = new LinkedHashMap<>();
+        // this runs for every text that mixes text and references, so the random marker is only
+        // made for a text that needs a slot
+        boolean needsSlots = GlobalEscape.isPresent(text) || references.stream().anyMatch(ReferenceMatchers::isGlobal);
+        String marker = needsSlots ? "\u0000" + UUID.randomUUID() + "#" : null;
+
+        for (String escaped : GlobalEscape.tokensIn(text)) {
+            String slot = marker + globalTexts.size() + "\u0000";
+            globalTexts.put(slot, escaped.substring(1));
+            text = text.replace(escaped, slot);
+        }
+
+        for (String ref : references) {
+            if (!ReferenceMatchers.isGlobal(ref) || !text.contains(ref)) {
+                continue;
+            }
+
+            String slot = marker + globalTexts.size() + "\u0000";
+            globalTexts.put(slot, GlobalValueCaster.toText(extractOrEmpty(ref)));
+            text = text.replace(ref, slot);
+        }
+
+        for (String ref : references) {
+            if (ReferenceMatchers.isGlobal(ref)) {
+                continue;
+            }
+
+            Object val = extractOrEmpty(ref);
+            text = text.replace(ref, val == null ? "" : val.toString());
+        }
+
+        for (Map.Entry<String, String> slot : globalTexts.entrySet()) {
+            text = text.replace(slot.getKey(), slot.getValue());
+        }
+
+        return text;
+    }
+
+    @Override
+    public Object getGlobalValue(GlobalReference reference) {
+        String path = reference.getPath().orElse(null);
+        if (path == null || loops.isEmpty()) {
+            return GlobalValueResolver.resolve(globalSnapshot, reference);
+        }
+
+        // inside a loop the path may name iterators: the token of a split, or an index or a key
+        Optional<String> token = GlobalLoopSource.splitToken(path, loops);
+        if (token.isPresent()) {
+            return token.get();
+        }
+
+        return GlobalValueResolver.resolve(globalSnapshot, reference.getName(),
+                GlobalLoopSource.withLoopValues(path, loops), reference.getRaw());
     }
 
     /**
