@@ -1,9 +1,18 @@
 {
   "notFound": "This global variable does not exist or you may not view it.",
   "kind": {
-    "CONSTANT": { "label": "Constant", "hint": "Only users change it. Workflows read it." },
-    "MUTABLE": { "label": "Mutable", "hint": "Its owner workflow changes it during runs. Other workflows read it." },
-    "SCRIPT": { "label": "Script", "hint": "A shared function that returns a value each time it is called." }
+    "CONSTANT": {
+      "label": "Constant",
+      "hint": "Only users change it. Workflows read it."
+    },
+    "MUTABLE": {
+      "label": "Mutable",
+      "hint": "Its owner workflow changes it during runs. Other workflows read it."
+    },
+    "SCRIPT": {
+      "label": "Script",
+      "hint": "A shared function that returns a value each time it is called."
+    }
   },
   "scope": {
     "ALL": "All workflows",
@@ -58,7 +67,9 @@
         "taken": "A global variable with this name already exists."
       }
     },
-    "description": { "label": "Description" },
+    "description": {
+      "label": "Description"
+    },
     "secret": {
       "label": "Secret",
       "hint": "A secret value is never shown again after saving and is masked in logs."
@@ -86,9 +97,15 @@
     }
   },
   "sections": {
-    "general": { "title": "General" },
-    "value": { "title": "Value" },
-    "visibility": { "title": "Visibility" }
+    "general": {
+      "title": "General"
+    },
+    "value": {
+      "title": "Value"
+    },
+    "visibility": {
+      "title": "Visibility"
+    }
   },
   "wizard": {
     "modes": {
@@ -108,9 +125,18 @@
       "create": "Create another global variable"
     },
     "steps": {
-      "general": { "header": "General", "subheader": "Choose the kind and name the variable." },
-      "value": { "header": "Value", "subheader": "Set the value workflows will read." },
-      "visibility": { "header": "Visibility", "subheader": "Choose which workflows may use the variable." }
+      "general": {
+        "header": "General",
+        "subheader": "Choose the kind and name the variable."
+      },
+      "value": {
+        "header": "Value",
+        "subheader": "Set the value workflows will read."
+      },
+      "visibility": {
+        "header": "Visibility",
+        "subheader": "Choose which workflows may use the variable."
+      }
     }
   },
   "save": {
@@ -119,7 +145,9 @@
     "failed": "The global variable could not be saved.",
     "kindNotEditableYet": "Variables of this kind can't be edited here yet.",
     "noEditPermission": "You may not edit this global variable.",
-    "warnings": { "title": "This change may affect these places" },
+    "warnings": {
+      "title": "This change may affect these places"
+    },
     "blocked": {
       "title": "This change would break these places",
       "IN_USE": "The variable is still in use",
@@ -237,8 +265,16 @@
       "REJECTED": "Rejected"
     },
     "filters": {
-      "result": { "ALL": "All results", "SAVED": "Saved", "REJECTED": "Rejected" },
-      "actor": { "ALL": "Users and workflows", "USER": "Users", "WORKFLOW": "Workflows" }
+      "result": {
+        "ALL": "All results",
+        "SAVED": "Saved",
+        "REJECTED": "Rejected"
+      },
+      "actor": {
+        "ALL": "Users and workflows",
+        "USER": "Users",
+        "WORKFLOW": "Workflows"
+      }
     }
   },
   "sharing": {
@@ -248,5 +284,24 @@
     "remove": "Remove access",
     "save": "Save sharing",
     "saved": "Sharing was saved"
+  },
+  "picker": {
+    "placeholder": "Choose a global variable",
+    "empty": "No global variables you may use here",
+    "scriptLater": "Script calls come with the field call editor",
+    "unknown": "Unknown global variable, or one you may not use"
+  },
+  "referenceErrors": {
+    "UNKNOWN_VARIABLE": "Global variable \"{{variable}}\" does not exist.",
+    "OUT_OF_SCOPE": "Global variable \"{{variable}}\" is not visible to this workflow.",
+    "NO_USE_PERMISSION": "You may not use global variable \"{{variable}}\".",
+    "SECOND_WRITER": "Global variable \"{{variable}}\" is already written by another workflow.",
+    "NOT_MUTABLE": "\"{{variable}}\" is not a mutable variable, so it can't be set.",
+    "ARGUMENTS_MISMATCH": "The call to \"{{variable}}\" doesn't match its parameters.",
+    "REF_UNRESOLVED": "\"{{variable}}\" reads {{ref}}, which this workflow can't provide.",
+    "IMPORT_LANGUAGE_MISMATCH": "\"{{variable}}\" is written in another language than this script.",
+    "IMPORT_CYCLE": "Importing \"{{variable}}\" would create an import cycle.",
+    "SCOPE_NOT_ALL": "Connectors can only use global variables visible to all workflows (\"{{variable}}\").",
+    "more": "(+{{count}} more)"
   }
 }

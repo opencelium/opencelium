@@ -143,6 +143,7 @@
     }
   },
   "messages": {
+    "focusElementNotFound": "The linked step no longer exists in this workflow.",
     "enterWorkflowName": "Please enter a workflow name",
     "workflowNameExists": "A workflow with this title already exists",
     "saveTemplateFailed": "Failed to save template",
@@ -686,7 +687,8 @@
     "source": {
       "constant": "Constant",
       "method": "Method",
-      "webhook": "Webhook"
+      "webhook": "Webhook",
+      "global": "Global variable"
     },
     "responseType": {
       "body": "Body",
@@ -863,6 +865,7 @@
     },
     "clearField": "Clear field",
     "addReference": "Add reference",
+    "globalVariable": "Global variable",
     "issueHint": "Hint:",
     "issues": {
       "REFERENCE_REQUIRED": "The reference is empty.",
