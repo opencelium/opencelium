@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { fetchGlobalVariablePicker, pickerQueryKey } from '../../api/pickerApi'
-import type { PickerItem, PickerQuery } from '../../model/types'
+import type { PickerItem, PickerQuery, PickerScope } from '../../model/types'
 
 // Which picker query the surrounding editor stands for: the saved workflow, an unsaved one's
 // category, a connector or a schedule's notification. Null = no global variables offered.
-export const GlobalPickerScopeContext = createContext<PickerQuery | null>(null)
+export const GlobalPickerScopeContext = createContext<PickerScope | null>(null)
 
 export const useGlobalPickerScope = () => useContext(GlobalPickerScopeContext)
 

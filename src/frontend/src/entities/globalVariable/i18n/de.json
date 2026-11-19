@@ -289,7 +289,8 @@
     "placeholder": "Globale Variable wählen",
     "empty": "Keine globalen Variablen, die Sie hier verwenden dürfen",
     "scriptLater": "Skriptaufrufe kommen mit dem Feldaufruf-Editor",
-    "unknown": "Unbekannte globale Variable oder eine, die Sie nicht verwenden dürfen"
+    "unknown": "Unbekannte globale Variable oder eine, die Sie nicht verwenden dürfen",
+    "insert": "Globale Variable einfügen"
   },
   "referenceErrors": {
     "UNKNOWN_VARIABLE": "Die globale Variable \"{{variable}}\" existiert nicht.",

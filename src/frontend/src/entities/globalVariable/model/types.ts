@@ -272,6 +272,10 @@ export type PickerQuery =
     | { connectorId: number }
     | { schedulerId: number }
 
+// Client-side only: places the contract gives no picker query for (a connector not saved yet,
+// a notification template) can only rely on variables visible to every workflow.
+export type PickerScope = PickerQuery | { allScope: true }
+
 export type ValidateScriptRequest = ScriptDefinition & {
     testArguments: Record<string, JsonValue>
     testRefs: Record<string, JsonValue>

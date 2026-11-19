@@ -289,7 +289,8 @@
     "placeholder": "Choose a global variable",
     "empty": "No global variables you may use here",
     "scriptLater": "Script calls come with the field call editor",
-    "unknown": "Unknown global variable, or one you may not use"
+    "unknown": "Unknown global variable, or one you may not use",
+    "insert": "Insert a global variable"
   },
   "referenceErrors": {
     "UNKNOWN_VARIABLE": "Global variable \"{{variable}}\" does not exist.",

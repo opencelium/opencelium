@@ -11,6 +11,7 @@ import {MasterPasswordDialog, useCheckMasterPasswordExistsQuery, useMasterPasswo
 import type {Mode} from "@/engine/entity/EntityDefinition.ts";
 import {useGetConnectorMutation} from "@entities/connector/api/connectorApi.ts";
 import {useParams} from "react-router-dom";
+import {GlobalVariableInsertButton} from "@entities/globalVariable/ui/picker/GlobalVariableInsertButton";
 interface CredentialEditorProps {
     name: string;
     mode: Mode;
@@ -70,7 +71,7 @@ export function formatLabel(value: string): string {
 }
 export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label, mode }) => {
     const { t: commonT } = useI18n('common');
-    const { watch, setValue } = useFormContext();
+    const { watch, setValue, getValues } = useFormContext();
     const {masterPassword} = useMasterPasswordStore();
     const { data: masterPasswordExists, isLoading: isCheckingMasterPasswordExists } = useCheckMasterPasswordExistsQuery();
     const { id: routeId } = useParams();
@@ -85,6 +86,9 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
     const invokerName: string = watch('invoker') || '';
     const connectorId = String(watch('connectorId') ?? routeId ?? '').trim();
     const isDuplicate = mode === 'create' && !!connectorId;
+    // A connector may only use variables visible to all workflows; a saved one can ask the backend directly.
+    const globalScope = mode === 'update' && Number(connectorId)
+        ? { connectorId: Number(connectorId) } : { allScope: true as const };
     const [requestData, setRequestData] = useState<Record<string, string>>(null);
     const { data = [] ,  isLoading = false } = useGetInvokersQuery();
     const allInvokers: Invoker[] = data ?? [];
@@ -160,6 +164,14 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
                                     label={formatLabel(fieldKey)}
                                     type={isPassword ? 'password' : 'text'}
                                     disabled={!hasAccess}
+                                    rightSlot={hasAccess && mode !== 'view' ? (
+                                        <GlobalVariableInsertButton
+                                            scope={globalScope}
+                                            testId={`connector-request-data-global-${fieldKey}`}
+                                            onInsert={(reference) => setValue(`requestData.${fieldKey}`,
+                                                `${getValues(`requestData.${fieldKey}`) ?? ''}${reference}`, {shouldDirty: true})}
+                                        />
+                                    ) : undefined}
                                 />
                             )
                         })}
