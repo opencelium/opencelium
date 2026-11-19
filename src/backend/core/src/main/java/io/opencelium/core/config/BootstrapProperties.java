@@ -10,12 +10,18 @@ import org.springframework.boot.mongodb.autoconfigure.MongoProperties;
 /**
  * Raw reads of bootstrap properties, and the names of the bootstrap properties that Spring owns: the
  * {@code spring.mongodb.*} properties shared by the defaults post-processor and the MongoDB connection resolver, so
- * both agree on what "configured" means, and the port.
+ * both agree on what "configured" means, the port, and the log pattern part with the tenant ID.
  */
 public final class BootstrapProperties {
 
 	/** The HTTP port of the web interface and the API. */
 	public static final String SERVER_PORT = "server.port";
+
+	/**
+	 * The part of each application log line between the thread and the logger; the default log patterns of the console
+	 * and of the log file contain it. It applies from the first log line, before a database is reachable.
+	 */
+	public static final String LOG_CORRELATION_PATTERN = "logging.pattern.correlation";
 
 	public static final String MONGODB_URI = "spring.mongodb.uri";
 

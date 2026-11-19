@@ -2,6 +2,7 @@ package io.opencelium.core.setup;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.DefaultApplicationArguments;
@@ -29,6 +31,8 @@ import ch.qos.logback.core.read.ListAppender;
 import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.config.OpenCeliumProperties;
+import io.opencelium.core.tenant.CurrentTenant;
+import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
 import io.opencelium.core.user.CreateAdminCommand;
@@ -81,6 +85,12 @@ class SetupCompletionRunnerTest {
 
 	@Autowired
 	AdminMarkerRepository markers;
+
+	@Autowired
+	TenantRunner tenantRunner;
+
+	@Autowired
+	CurrentTenant currentTenant;
 
 	@BeforeEach
 	void removeUsersAndMarkers() {
@@ -165,6 +175,35 @@ class SetupCompletionRunnerTest {
 
 		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(1);
 		assertAdminWithFixedPasswordAndNoMustChangeFlag("admin");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"", "root"})
+	void runMakesTheAdminForTheSelfHostTenantWhenTheModeIsSelfHost(String markerUsername) {
+		// The admin of the start is work of the 1 tenant of the installation, with and without the marker of the wizard.
+		String admin = markerUsername.isEmpty() ? "admin" : markerUsername;
+		if (!markerUsername.isEmpty()) {
+			storeMarker(markerUsername);
+		}
+		List<TenantId> currentTenants = new ArrayList<>();
+		UserService recording = mock(UserService.class);
+		when(recording.anyUserExists(TENANT)).thenAnswer(invocation -> {
+			currentTenants.add(currentTenant.get());
+			return userService.anyUserExists(TENANT);
+		});
+		when(recording.adminExists(TENANT)).thenAnswer(invocation -> {
+			currentTenants.add(currentTenant.get());
+			return userService.adminExists(TENANT);
+		});
+		when(recording.createAdmin(any())).thenAnswer(invocation -> {
+			currentTenants.add(currentTenant.get());
+			return userService.createAdmin(invocation.getArgument(0));
+		});
+
+		selfHostRunner(recording).run(new DefaultApplicationArguments());
+
+		assertThat(currentTenants).hasSize(2).containsOnly(TenantId.SELF_HOST);
+		assertThat(users.findByTenantIdAndUsername(TENANT.value(), admin)).isPresent();
 	}
 
 	@Test
@@ -288,12 +327,12 @@ class SetupCompletionRunnerTest {
 	}
 
 	private SetupCompletionRunner cloudRunner() {
-		return new SetupCompletionRunner(markers, userService,
+		return new SetupCompletionRunner(markers, userService, tenantRunner,
 				new OpenCeliumProperties(DeploymentMode.CLOUD, dataDir, Optional.empty()));
 	}
 
 	private SetupCompletionRunner selfHostRunner(UserService userService) {
-		return new SetupCompletionRunner(markers, userService,
+		return new SetupCompletionRunner(markers, userService, tenantRunner,
 				new OpenCeliumProperties(DeploymentMode.SELF_HOST, dataDir, Optional.empty()));
 	}
 

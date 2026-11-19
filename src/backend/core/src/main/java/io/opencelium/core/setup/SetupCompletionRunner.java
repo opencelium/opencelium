@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import io.opencelium.common.tenant.TenantId;
 import io.opencelium.core.config.DeploymentMode;
 import io.opencelium.core.config.OpenCeliumProperties;
+import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.user.AdminAlreadyExistsException;
 import io.opencelium.core.user.CreateAdminCommand;
 import io.opencelium.core.user.UserService;
@@ -34,8 +35,9 @@ import io.opencelium.core.user.UserService;
  * refuses the second one, and the start continues when the admin exists. A refusal without an admin means that the
  * username belongs to a user that is not an admin; then the start stops and keeps the marker. It runs last, after
  * every other runner. The password goes to the user service only; nothing here logs it, and the wizard process prints
- * the login box. In the cloud mode the Service Portal owns the users and the database of the configuration is the
- * system database, so the runner does nothing there.
+ * the login box. The work runs through the tenant runner for the self-host tenant. In the cloud mode the Service
+ * Portal owns the users and the database of the configuration is the system database, so the runner does nothing
+ * there.
  */
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
@@ -50,11 +52,15 @@ class SetupCompletionRunner implements ApplicationRunner {
 
 	private final UserService users;
 
+	private final TenantRunner tenants;
+
 	private final DeploymentMode mode;
 
-	SetupCompletionRunner(AdminMarkerRepository markers, UserService users, OpenCeliumProperties properties) {
+	SetupCompletionRunner(AdminMarkerRepository markers, UserService users, TenantRunner tenants,
+			OpenCeliumProperties properties) {
 		this.markers = markers;
 		this.users = users;
+		this.tenants = tenants;
 		this.mode = properties.deploymentMode();
 	}
 
@@ -67,6 +73,10 @@ class SetupCompletionRunner implements ApplicationRunner {
 		if (mode != DeploymentMode.SELF_HOST) {
 			return;
 		}
+		tenants.run(TENANT, this::makeTheFirstAdmin);
+	}
+
+	private void makeTheFirstAdmin() {
 		Optional<AdminMarkerDocument> marker = markers.findById(TENANT.value());
 		if (marker.isPresent()) {
 			makeAdminFromMarker(marker.get().adminUsername());
