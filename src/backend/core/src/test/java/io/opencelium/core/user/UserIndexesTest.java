@@ -38,9 +38,7 @@ class UserIndexesTest {
 		LocalMongo.register(registry, UserIndexesTest.class, () -> dataDir);
 	}
 
-	@Autowired
-	UserRepository users;
-
+	/** The plain template: the index applies to each write, with or without the tenant limit. */
 	@Autowired
 	MongoTemplate mongo;
 
@@ -60,18 +58,18 @@ class UserIndexesTest {
 
 	@Test
 	void insertFailsForASecondUserWithTheSameUsernameInOneTenant() {
-		users.insert(user(TENANT, ADMIN));
+		mongo.insert(user(TENANT, ADMIN));
 
-		assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(() -> users.insert(user(TENANT, ADMIN)));
+		assertThatExceptionOfType(DuplicateKeyException.class).isThrownBy(() -> mongo.insert(user(TENANT, ADMIN)));
 	}
 
 	@Test
 	void insertAllowsTheSameUsernameInAnotherTenant() {
-		users.insert(user(TENANT, ADMIN));
+		mongo.insert(user(TENANT, ADMIN));
 
-		users.insert(user("other", ADMIN));
+		mongo.insert(user("other", ADMIN));
 
-		assertThat(users.findByTenantIdAndUsername("other", ADMIN)).isPresent();
+		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(2);
 	}
 
 	private static UserDocument user(String tenant, String username) {

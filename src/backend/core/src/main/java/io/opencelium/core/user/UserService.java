@@ -83,6 +83,14 @@ public class UserService {
 		return users.existsByTenantIdAndRolesContaining(tenant.value(), ADMIN_ROLE);
 	}
 
+	public boolean adminExists() {
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean anyUserExists() {
+		throw new UnsupportedOperationException();
+	}
+
 	/** Whether the tenant has a user of any role. */
 	public boolean anyUserExists(TenantId tenant) {
 		return users.existsByTenantId(tenant.value());

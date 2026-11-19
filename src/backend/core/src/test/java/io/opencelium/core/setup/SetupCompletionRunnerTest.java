@@ -35,10 +35,10 @@ import io.opencelium.core.tenant.CurrentTenant;
 import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
+import io.opencelium.core.testsupport.TenantTasks;
 import io.opencelium.core.user.CreateAdminCommand;
 import io.opencelium.core.user.UserCreated;
 import io.opencelium.core.user.UserDocument;
-import io.opencelium.core.user.UserRepository;
 import io.opencelium.core.user.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,12 +48,14 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 /**
  * The second half of the setup, after Spring starts: the runner finds the admin marker of the wizard, makes the admin
  * with the admin password {@code 1234} and no must-change flag, and deletes the marker. Without a marker, it makes the
  * default admin on a database without an OpenCelium user. The marker is stored in the form that the wizard writes
- * with the plain driver. Each test empties the users and the markers, then runs the runner again.
+ * with the plain driver. Each test empties the users and the markers, then runs the runner again. The test reads and
+ * writes the OpenCelium users with the plain template, without the tenant limit of the user service.
  */
 @MongoIntegrationTest
 class SetupCompletionRunnerTest {
@@ -73,9 +75,6 @@ class SetupCompletionRunnerTest {
 
 	@Autowired
 	UserService userService;
-
-	@Autowired
-	UserRepository users;
 
 	@Autowired
 	PasswordEncoder passwordEncoder;
@@ -114,7 +113,7 @@ class SetupCompletionRunnerTest {
 		run();
 
 		assertThat(marker()).isNull();
-		assertThat(userService.adminExists(TENANT)).isTrue();
+		assertThat(adminExists()).isTrue();
 	}
 
 	@Test
@@ -137,8 +136,7 @@ class SetupCompletionRunnerTest {
 
 		run();
 
-		assertThat(users.findByTenantIdAndUsername(TENANT.value(), "root").orElseThrow().roles())
-				.containsExactly(UserService.ADMIN_ROLE);
+		assertThat(storedUser("root").orElseThrow().roles()).containsExactly(UserService.ADMIN_ROLE);
 		assertThat(marker()).isNull();
 	}
 
@@ -149,22 +147,22 @@ class SetupCompletionRunnerTest {
 		storeMarker("root");
 
 		assertThatIllegalStateException().isThrownBy(this::run).withMessageContaining("'root'");
-		assertThat(userService.adminExists(TENANT)).isFalse();
+		assertThat(adminExists()).isFalse();
 		assertThat(marker().getString("adminUsername")).isEqualTo("root");
 	}
 
 	@Test
 	void runOnlyDeletesTheMarkerWhenTheAdminExists() {
 		// A start that stops after the admin and before the delete leaves the admin and the marker.
-		UserCreated first = userService.createAdmin(
-				new CreateAdminCommand(TENANT, "root", "Changed-Password-7".toCharArray(), false, false));
-		String hash = users.findById(first.id()).orElseThrow().passwordHash();
+		UserCreated first = TenantTasks.call(tenantRunner, TENANT, () -> userService
+				.createAdmin(new CreateAdminCommand("root", "Changed-Password-7".toCharArray(), false, false)));
+		String hash = mongo.findById(first.id(), UserDocument.class).passwordHash();
 		storeMarker("root");
 
 		run();
 
 		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(1);
-		assertThat(users.findById(first.id()).orElseThrow().passwordHash()).isEqualTo(hash);
+		assertThat(mongo.findById(first.id(), UserDocument.class).passwordHash()).isEqualTo(hash);
 		assertThat(marker()).isNull();
 	}
 
@@ -174,6 +172,19 @@ class SetupCompletionRunnerTest {
 		run();
 
 		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(1);
+		assertAdminWithFixedPasswordAndNoMustChangeFlag("admin");
+	}
+
+	@Test
+	void runMakesTheDefaultAdminWhenOnlyAnotherTenantHasUsers() {
+		// The users of another tenant in the same database are not users of the self-host tenant.
+		Instant now = Instant.now();
+		mongo.insert(new UserDocument(null, "other", "alice", "{noop}x", Set.of("USER"), false, now, false, false,
+				now));
+
+		run();
+
+		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(2);
 		assertAdminWithFixedPasswordAndNoMustChangeFlag("admin");
 	}
 
@@ -187,13 +198,13 @@ class SetupCompletionRunnerTest {
 		}
 		List<TenantId> currentTenants = new ArrayList<>();
 		UserService recording = mock(UserService.class);
-		when(recording.anyUserExists(TENANT)).thenAnswer(invocation -> {
+		when(recording.anyUserExists()).thenAnswer(invocation -> {
 			currentTenants.add(currentTenant.get());
-			return userService.anyUserExists(TENANT);
+			return userService.anyUserExists();
 		});
-		when(recording.adminExists(TENANT)).thenAnswer(invocation -> {
+		when(recording.adminExists()).thenAnswer(invocation -> {
 			currentTenants.add(currentTenant.get());
-			return userService.adminExists(TENANT);
+			return userService.adminExists();
 		});
 		when(recording.createAdmin(any())).thenAnswer(invocation -> {
 			currentTenants.add(currentTenant.get());
@@ -203,7 +214,7 @@ class SetupCompletionRunnerTest {
 		selfHostRunner(recording).run(new DefaultApplicationArguments());
 
 		assertThat(currentTenants).hasSize(2).containsOnly(TenantId.SELF_HOST);
-		assertThat(users.findByTenantIdAndUsername(TENANT.value(), admin)).isPresent();
+		assertThat(storedUser(admin)).isPresent();
 	}
 
 	@Test
@@ -214,7 +225,7 @@ class SetupCompletionRunnerTest {
 		run();
 
 		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(1);
-		assertThat(userService.adminExists(TENANT)).isFalse();
+		assertThat(adminExists()).isFalse();
 	}
 
 	@Test
@@ -251,7 +262,7 @@ class SetupCompletionRunnerTest {
 
 		List<String> lines = loggedLinesOf(this::run);
 
-		String hash = users.findByTenantIdAndUsername(TENANT.value(), "root").orElseThrow().passwordHash();
+		String hash = storedUser("root").orElseThrow().passwordHash();
 		assertThat(lines).anySatisfy(line -> assertThat(line).contains("'root'"));
 		assertThat(String.join("\n", lines)).doesNotContain("1234").doesNotContain(hash);
 	}
@@ -261,7 +272,7 @@ class SetupCompletionRunnerTest {
 		// A container has no console for a box: the log tells the operator where to log in.
 		List<String> lines = loggedLinesOf(this::run);
 
-		String hash = users.findByTenantIdAndUsername(TENANT.value(), "admin").orElseThrow().passwordHash();
+		String hash = storedUser("admin").orElseThrow().passwordHash();
 		assertThat(lines).anySatisfy(line -> assertThat(line).contains("'admin'", "/login"));
 		assertThat(String.join("\n", lines)).doesNotContain("1234").doesNotContain(hash);
 	}
@@ -273,7 +284,7 @@ class SetupCompletionRunnerTest {
 
 		assertThatCode(() -> selfHostRunner(racing(refusal)).run(new DefaultApplicationArguments()))
 				.doesNotThrowAnyException();
-		assertThat(users.findByTenantIdAndUsername(TENANT.value(), "root")).isPresent();
+		assertThat(storedUser("root")).isPresent();
 		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(1);
 		assertThat(marker()).isNull();
 	}
@@ -284,7 +295,7 @@ class SetupCompletionRunnerTest {
 		// 2 processes start on an empty database at the same time, for example 2 containers.
 		assertThatCode(() -> selfHostRunner(racing(refusal)).run(new DefaultApplicationArguments()))
 				.doesNotThrowAnyException();
-		assertThat(users.findByTenantIdAndUsername(TENANT.value(), "admin")).isPresent();
+		assertThat(storedUser("admin")).isPresent();
 		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(1);
 	}
 
@@ -306,17 +317,16 @@ class SetupCompletionRunnerTest {
 	 */
 	private UserService racing(Refusal refusal) {
 		UserService racing = mock(UserService.class);
-		when(racing.anyUserExists(TENANT)).thenAnswer(invocation -> userService.anyUserExists(TENANT));
-		when(racing.adminExists(TENANT)).thenAnswer(invocation -> userService.adminExists(TENANT));
+		when(racing.anyUserExists()).thenAnswer(invocation -> userService.anyUserExists());
+		when(racing.adminExists()).thenAnswer(invocation -> userService.adminExists());
 		when(racing.createAdmin(any())).thenAnswer(invocation -> {
 			CreateAdminCommand command = invocation.getArgument(0);
-			userService.createAdmin(
-					new CreateAdminCommand(TENANT, command.username(), "1234".toCharArray(), false, false));
+			userService.createAdmin(new CreateAdminCommand(command.username(), "1234".toCharArray(), false, false));
 			if (refusal == Refusal.ADMIN_CHECK) {
 				return userService.createAdmin(command);
 			}
 			Instant now = Instant.now();
-			return users.insert(new UserDocument(null, TENANT.value(), command.username(), "{noop}x",
+			return mongo.insert(new UserDocument(null, TENANT.value(), command.username(), "{noop}x",
 					Set.of(UserService.ADMIN_ROLE), false, now, false, false, now));
 		});
 		return racing;
@@ -337,7 +347,7 @@ class SetupCompletionRunnerTest {
 	}
 
 	private void assertAdminWithFixedPasswordAndNoMustChangeFlag(String username) {
-		UserDocument admin = users.findByTenantIdAndUsername(TENANT.value(), username).orElseThrow();
+		UserDocument admin = storedUser(username).orElseThrow();
 		assertThat(admin.roles()).containsExactly(UserService.ADMIN_ROLE);
 		assertThat(passwordEncoder.matches("1234", admin.passwordHash())).isTrue();
 		// The record as a tester reads it in the database: no must-change flag and no lock.
@@ -369,8 +379,18 @@ class SetupCompletionRunnerTest {
 
 	private void storeNonAdminUser(String username) {
 		Instant now = Instant.now();
-		users.insert(new UserDocument(null, TENANT.value(), username, "{noop}x", Set.of("USER"), false, now, false,
+		mongo.insert(new UserDocument(null, TENANT.value(), username, "{noop}x", Set.of("USER"), false, now, false,
 				false, now));
+	}
+
+	private Optional<UserDocument> storedUser(String username) {
+		return Optional.ofNullable(mongo.findOne(new Query(where("tenantId").is(TENANT.value()).and("username")
+				.is(username)), UserDocument.class));
+	}
+
+	private boolean adminExists() {
+		return mongo.exists(new Query(where("tenantId").is(TENANT.value()).and("roles").is(UserService.ADMIN_ROLE)),
+				UserDocument.class);
 	}
 
 	/** The marker as the wizard writes it before Spring starts. */
