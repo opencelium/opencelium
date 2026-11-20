@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Violation;
+import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.quartz.SchedulingStrategy;
 import com.becon.opencelium.backend.resource.schedule.RunningJob;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
@@ -93,6 +94,9 @@ class SchedulerServiceImpTest {
     @Mock
     private GlobalVariableUsageService globalVariableUsageService;
 
+    @Mock
+    private WorkflowRunGate runGate;
+
     private SchedulerService schedulerService;
 
     @BeforeEach
@@ -103,7 +107,7 @@ class SchedulerServiceImpTest {
         schedulerService = new SchedulerServiceImp(
                 connectionService, null, null, messageService, recipientService, null, schedulerRepository,
                 notificationRepository, schedulerFactoryBean, executionService, executionArgumentService, null,
-                globalVariableUsageService);
+                globalVariableUsageService, runGate);
         ReflectionTestUtils.setField(schedulerService, "schedulingStrategy", schedulingStrategy);
     }
 
