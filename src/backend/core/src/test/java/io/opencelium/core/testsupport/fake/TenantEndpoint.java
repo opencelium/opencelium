@@ -1,6 +1,8 @@
 package io.opencelium.core.testsupport.fake;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -17,7 +19,9 @@ import io.opencelium.core.testsupport.fixture.TestDocument;
 /**
  * A test endpoint that answers with the current tenant of its request, and that writes 1 {@link TestDocument} for
  * the current tenant. A full-application test with MockMvc imports it with {@code @Import(TenantEndpoint.class)}. Its
- * security filter chain permits each request, so that a test gives the principal of a login, or none.
+ * security filter chain permits each request to its paths, so that a test gives the principal of a login, or none.
+ * The chain comes before the chains of core and matches the paths of this endpoint only: the main chain of core
+ * matches each other request.
  * <p>
  * The class has no stereotype annotation and the routes are functional, with no controller class: the starts of
  * {@code CoreStartup} scan the test classes too, have no web server, and must not find a filter chain or an endpoint
@@ -35,8 +39,10 @@ public final class TenantEndpoint {
 	public static final String NO_TENANT = "no current tenant";
 
 	@Bean
+	@Order(Ordered.HIGHEST_PRECEDENCE)
 	SecurityFilterChain tenantEndpointSecurity(HttpSecurity http) throws Exception {
-		return http.authorizeHttpRequests(requests -> requests.anyRequest().permitAll())
+		return http.securityMatcher(PATH, PATH + "/**")
+				.authorizeHttpRequests(requests -> requests.anyRequest().permitAll())
 				.csrf(AbstractHttpConfigurer::disable).build();
 	}
 

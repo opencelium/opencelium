@@ -38,7 +38,7 @@ The authentication configuration of `core.auth` puts the providers of the deploy
 
 The local login strategy is the password provider of Spring Security. It has a user lookup over the user service and the password encoder of `core.user`. The lookup follows rule 1 of AU-01. For a name that does not exist, the provider compares the password with a fixed hash, so the response takes approximately the same time (AU-02). The provider examines the lock after the password (AU-03). The default of Spring Security examines the lock first, and that order shows the lock to a wrong password.
 
-The provider gives the principal of `core.auth`. The principal holds the user ID, the tenant ID, the session ID and the roles. The roles come from the session JWT, so a change of the roles applies at the next refresh. The principal has no groups: the permissions are out of scope (decision 7). It implements the principal contract of `core.tenant`, so the request filter binds its tenant (decision 15).
+The provider gives the OpenCelium user of the login, with the user ID, the username, the tenant ID and the roles. Then the session service starts the session of that user. The 2 security filter chains give the principal of `core.auth` from a valid token. The principal holds the user ID, the tenant ID, the session ID and the roles. The roles come from the session JWT, so a change of the roles applies at the next refresh. The principal has no groups: the permissions are out of scope (decision 7). It implements the principal contract of `core.tenant`, so the request filter binds its tenant (decision 15).
 
 ### The session
 A session record is a tenant document in the collection `sessions` (plan decision 4). It holds these values:
