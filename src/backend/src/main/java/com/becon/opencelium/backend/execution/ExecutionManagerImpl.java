@@ -1,12 +1,15 @@
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.enums.RelationalOperator;
+import com.becon.opencelium.backend.exception.GlobalVariableNotFoundException;
 import com.becon.opencelium.backend.exception.ReferenceNotFoundException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalLoopSource;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalValueCaster;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalValueResolver;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.ThreadLocalOcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
@@ -26,6 +29,9 @@ import com.becon.opencelium.backend.scriptengine.LanguageType;
 import com.becon.opencelium.backend.scriptengine.ScriptEngine;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManagerProvider;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
@@ -38,9 +44,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ExecutionManagerImpl implements ExecutionManager {
+    // the target of a global variable write: global.name, without braces or path
+    private static final Pattern GLOBAL_TARGET = Pattern.compile(RegExpression.globalWriteTarget);
+    private static final ObjectMapper LITERAL_JSON = new ObjectMapper();
+
     private static final Logger log = LoggerFactory.getLogger(ExecutionManagerImpl.class);
 
     // substituted for a reference whose data has never been produced
@@ -50,7 +62,9 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<Integer, Map<String, String>> requestData;
     private final Map<Integer, RestTemplate> restTemplate;
     private final Map<Integer, Pagination> pagination;
-    private final GlobalVariableSnapshot globalSnapshot;
+    // the run's own copy of the values: a write by the run replaces it
+    private GlobalVariableSnapshot globalSnapshot;
+    private final GlobalVariableWriter.Run globalWriter;
     private final Extractor refExtractor;
     private final List<Loop> loops = new ArrayList<>();
     private final List<FieldBindEx> fieldBind;
@@ -89,7 +103,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
     /**
      * Creates a manager that also resolves global variables, from the snapshot the run took when
-     * it started.
+     * it started, and writes none.
      */
     public ExecutionManagerImpl(
             Map<String, Object> webhookVars,
@@ -100,6 +114,27 @@ public class ExecutionManagerImpl implements ExecutionManager {
             GlobalVariableSnapshot globalSnapshot,
             Function<ExecutionManager, Extractor> extractorFactory
     ) {
+        this(webhookVars, fieldBind, requestData, restTemplate, pagination, globalSnapshot, null, extractorFactory);
+    }
+
+    /**
+     * Creates a manager that resolves global variables from the snapshot the run took when it
+     * started and writes mutable variables through {@code globalWriter}.
+     *
+     * @param globalWriter writes the mutable variables of the run; {@code null} for a run that
+     *                     may write none
+     */
+    public ExecutionManagerImpl(
+            Map<String, Object> webhookVars,
+            List<FieldBindEx> fieldBind,
+            Map<Integer, Map<String, String>> requestData,
+            Map<Integer, RestTemplate> restTemplate,
+            Map<Integer, Pagination> pagination,
+            GlobalVariableSnapshot globalSnapshot,
+            GlobalVariableWriter.Run globalWriter,
+            Function<ExecutionManager, Extractor> extractorFactory
+    ) {
+        this.globalWriter = globalWriter;
         this.webhookVars = webhookVars;
         this.fieldBind = fieldBind;
         this.requestData = requestData;
@@ -189,6 +224,53 @@ public class ExecutionManagerImpl implements ExecutionManager {
         scriptEngine.validate(script.code());
 
         return scriptEngine.execute(script.code(), script.args(), this::getValue);
+    }
+
+    @Override
+    public void writeGlobal(String name, Object value) {
+        // like a read, a write reaches only the variables in the scope of the workflow
+        if (globalSnapshot.find(name).isEmpty()) {
+            throw new GlobalVariableNotFoundException(name);
+        }
+        if (globalWriter == null) {
+            throw new IllegalStateException("This run cannot write global variable '" + name + "'");
+        }
+
+        JsonNode written = globalWriter.write(name, value);
+        globalSnapshot = globalSnapshot.withValue(name, written);
+    }
+
+    @Override
+    public void applyGlobalWrites(Map<String, String> writes, String source) {
+        if (writes == null) {
+            return;
+        }
+
+        for (Map.Entry<String, String> write : writes.entrySet()) {
+            Matcher target = GLOBAL_TARGET.matcher(write.getKey() == null ? "" : write.getKey().strip());
+            if (!target.matches()) {
+                throw new IllegalStateException("'%s' writes to '%s', which is not global.name"
+                        .formatted(source, write.getKey()));
+            }
+
+            writeGlobal(target.group(1), valueToWrite(write.getValue()));
+        }
+    }
+
+    // a reference is resolved like any other value; anything else is JSON text, or plain text
+    private Object valueToWrite(String value) {
+        if (value == null) {
+            return null;
+        }
+        if (ReferenceDetector.containsReference(value)) {
+            return getValue(value);
+        }
+
+        try {
+            return LITERAL_JSON.readValue(value, Object.class);
+        } catch (JsonProcessingException e) {
+            return value;
+        }
     }
 
     @Override

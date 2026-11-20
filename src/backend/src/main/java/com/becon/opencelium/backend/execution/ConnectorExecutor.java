@@ -260,6 +260,9 @@ public class ConnectorExecutor {
 
         operation.addRequest(key, requestEntity);
         operation.addResponse(key, responseEntity);
+
+        // now that the response is recorded: a value may read it, and later steps read the new values
+        executionManager.applyGlobalWrites(dto.getGlobalWrites(), dto.getName());
     }
 
     private ResponseEntity<?> sendRequest(URI uri, RequestEntity<?> requestEntity, Class<?> responseType) {

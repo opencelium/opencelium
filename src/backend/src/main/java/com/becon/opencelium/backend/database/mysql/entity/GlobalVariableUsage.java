@@ -105,6 +105,19 @@ public class GlobalVariableUsage {
     }
 
     /**
+     * Creates the usage of a variable an element of a workflow writes: a target of a method's
+     * {@code globalWrites}. Takes the same arguments as {@link #readByWorkflow}.
+     */
+    public static GlobalVariableUsage writeByWorkflow(long variableId, long connectionId, ElementType elementType,
+            String index, String color, String label, String field) {
+        GlobalVariableUsage usage =
+                readByWorkflow(variableId, connectionId, elementType, index, color, label, field);
+        usage.access = Access.WRITE;
+
+        return usage;
+    }
+
+    /**
      * Creates the usage of a variable the request data of a connector reads.
      *
      * @param variableId  id of the variable

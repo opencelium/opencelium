@@ -20,6 +20,8 @@ import com.becon.opencelium.backend.enums.MethodType;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.Map;
+
 @Document(collection ="method")
 public class MethodMng {
     private String id;
@@ -38,6 +40,10 @@ public class MethodMng {
 
     @Field(name = "data_integrator")
     private Integer dataAggregator;
+
+    // mutable global variables this method writes once it has responded: the target as
+    // global.name -> the value, a reference such as #ababab.(response).body.$.id or JSON text
+    private Map<String, String> globalWrites;
 
     /**
      * User-defined jump target: the color (or index) of the regular method this method redirects
@@ -123,6 +129,14 @@ public class MethodMng {
 
     public void setResponse(ResponseMng response) {
         this.response = response;
+    }
+
+    public Map<String, String> getGlobalWrites() {
+        return globalWrites;
+    }
+
+    public void setGlobalWrites(Map<String, String> globalWrites) {
+        this.globalWrites = globalWrites;
     }
 
     public Integer getDataAggregator() {

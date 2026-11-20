@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Unit tests for {@link GlobalReferenceCollector}: which global variable references of a
@@ -204,6 +205,33 @@ class GlobalReferenceCollectorTest {
         workflow.setFieldBindings(Arrays.asList(new FieldBindingMng(), null));
 
         assertThat(GlobalReferenceCollector.collect(workflow)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("collect — a globalWrites target global.name is a write, its value is read like any text")
+    void collectReturnsWriteTargetAndReadValueWhenMethodWritesGlobal() {
+        MethodMng method = ConnectionMngFixture.aMethod("#ababab", "0_1", "createVm", "https://api.example.test");
+        method.setGlobalWrites(Map.of("global.lastSync", "{{global.prefix}}-#ababab.(response).body.$.at"));
+
+        List<Found> found = GlobalReferenceCollector.collect(ConnectionMngFixture.aWorkflowWith(method));
+
+        assertThat(found).containsExactly(
+                new Found(ElementType.METHOD, "#ababab", "0_1", "createVm", "globalWrites",
+                        "lastSync", "global.lastSync", true),
+                new Found(ElementType.METHOD, "#ababab", "0_1", "createVm", "globalWrites.global.lastSync",
+                        "prefix", "{{global.prefix}}", false));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"lastSync", "{{global.lastSync}}", "global.lastSync.at"})
+    void collectReportsWriteWithoutVariableWhenTargetIsNotGlobalName(String target) {
+        MethodMng method = ConnectionMngFixture.aMethod("#ababab", "0_1", "createVm", "https://api.example.test");
+        method.setGlobalWrites(Map.of(target, "1"));
+
+        List<Found> found = GlobalReferenceCollector.collect(ConnectionMngFixture.aWorkflowWith(method));
+
+        assertThat(found).filteredOn(Found::write).extracting(Found::variable, Found::reference)
+                .containsExactly(tuple(null, target));
     }
 
     // ── collectFromTexts ──────────────────────────────────────────────────────

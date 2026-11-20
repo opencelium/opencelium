@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalSnapshotLogLines;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.ThreadLocalOcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
@@ -56,6 +57,7 @@ import java.util.Set;
 @DisallowConcurrentExecution
 public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
+    private final GlobalVariableWriter globalVariableWriter;
     private final SubscriptionService subscriptionService;
     private final WebSocketNotificationService notificationService;
     private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
@@ -65,9 +67,11 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     public JobExecutor(
             @Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
-            WebSocketNotificationService notificationService
+            WebSocketNotificationService notificationService,
+            GlobalVariableWriter globalVariableWriter
     ) {
         this.executionObjectService = executionObjectService;
+        this.globalVariableWriter = globalVariableWriter;
         this.subscriptionService = subscriptionService;
         this.notificationService = notificationService;
     }
@@ -101,6 +105,8 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
 
         try {
             ExecutionObj executionObj = executionObjectService.buildObj(data);
+            // a test run writes only to its own copy of the values; see GlobalVariableWriter
+            executionObj.setGlobalWriter(globalVariableWriter.forRun(connectionId, execId));
             hiddenTexts = executionObj.getGlobalSnapshot().secretTexts();
 
             // setup execution logger:
