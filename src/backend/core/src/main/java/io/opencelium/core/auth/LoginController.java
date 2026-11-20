@@ -78,7 +78,7 @@ final class LoginController {
 			throw new IllegalStateException("A login stopped: the OpenCelium user of the name cannot be read.",
 					ex.getCause());
 		}
-		Jwt sessionJwt = sessions.start((LoginUser) login.getPrincipal());
+		Jwt sessionJwt = sessions.start((LoginUser) login.getPrincipal()).sessionJwt();
 		return ResponseEntity.ok(new LoginResponse(sessionJwt.getTokenValue(), sessionJwt.getExpiresAt()));
 	}
 

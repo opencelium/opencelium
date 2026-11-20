@@ -25,10 +25,30 @@ final class SessionService {
 		this.clock = clock;
 	}
 
-	/** @return the session JWT of the new session */
-	Jwt start(LoginUser user) {
+	/** @return the session JWT and the refresh token of the new session */
+	IssuedTokens start(LoginUser user) {
 		var principal = new UserPrincipal(user.userId(), user.tenantId(), UUID.randomUUID().toString(), user.roles());
-		return tokens.issueSessionJwt(principal, clock.instant().plus(SESSION_LIFETIME));
+		return new IssuedTokens(tokens.issueSessionJwt(principal, clock.instant().plus(SESSION_LIFETIME)), null);
+	}
+
+	/**
+	 * Gives 2 new tokens for the session of a valid refresh token, and the old refresh token stops.
+	 *
+	 * @param refreshToken a refresh token that the decoder of its type accepted
+	 * @throws SessionEndedException when the session does not exist or reached its end, when the refresh token is an
+	 *                               old one, or when the OpenCelium user is locked or deleted
+	 */
+	IssuedTokens refresh(Jwt refreshToken) {
+		throw new UnsupportedOperationException("Not implemented yet.");
+	}
+
+	/**
+	 * Ends the session of a valid refresh token. Its session JWT stays valid until it expires.
+	 *
+	 * @param refreshToken a refresh token that the decoder of its type accepted
+	 */
+	void end(Jwt refreshToken) {
+		throw new UnsupportedOperationException("Not implemented yet.");
 	}
 
 }
