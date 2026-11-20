@@ -90,3 +90,4 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
 2. Must core limit the failed attempts to log in? Assumption until the answer comes: core has no limit, and a proxy in front of core can limit the rate (assumption).
 3. Can 1 OpenCelium user have more than 1 session at the same time, for example in 2 browsers? Assumption until the answer comes: yes, core starts a new session each time, and when the OpenCelium user logs out, only that session ends (assumption).
 4. Must each OpenCelium user have an email? Assumption until the answer comes: no, the email is optional, and the default admin of the setup wizard has no email (assumption).
+5. Does the rule of AU-02 for the application log apply at each log level? Assumption until the answer comes: the rule applies at the default log level INFO. At the log level DEBUG, the libraries of core can write the name of a login or a value of a body that core does not accept (assumption).

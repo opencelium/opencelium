@@ -140,4 +140,14 @@ class LoginErrorsTest {
 		LoginRequests.assertProblem(login, HttpStatus.BAD_REQUEST, "bad-request");
 	}
 
+	@Test
+	void loginGivesBadRequestWhenTheBodyIsAForm() {
+		// The form of curl -d without a JSON header.
+		MvcTestResult login = mvc.post().uri(LoginRequests.LOGIN_PATH)
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.content("username=" + SetupContext.DEFAULT_ADMIN_USERNAME + "&password=" + PASSWORD).exchange();
+
+		LoginRequests.assertProblem(login, HttpStatus.BAD_REQUEST, "bad-request");
+	}
+
 }
