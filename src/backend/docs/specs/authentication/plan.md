@@ -76,6 +76,8 @@ The 2 chains give the principal of `core.auth`. The request filter of `core.tena
 ### The endpoints
 The endpoints are in `core.auth`. "Interfaces and contracts" lists them. An error response has the problem-details form (plan decision 7), and an exception handler of `core.auth` writes it for the endpoints of this feature. The shared part is only the convention of plan decision 7. A request without a valid token is the 1 exception: its response has no body (AU-06).
 
+A request for the current OpenCelium user whose user does not exist gets `session-ended` (AU-10). It writes 1 line to the application log with the IDs of the user and of the session, and without a token. The session record stays, and the next refresh deletes it (AU-08).
+
 ### The email of an OpenCelium user
 The user document gets the field `email`. Core keeps the email in lower case, and the login lookup compares the lower-case form of the name (plan decision 8). A partial unique index on the tenant ID and the email accepts each email 1 time in a tenant. A user without an email is outside the index. The user-management feature writes the email. This feature only reads it, so a hand test sets the email with `mongosh`.
 
@@ -155,7 +157,7 @@ Each test that touches MongoDB is a full-application test against the local Mong
 | AU-07 | A full-application test with 2 Spring contexts on 1 database: a session JWT of context 1 is valid in context 2. A restart of context 1 keeps the session JWT valid. The collection `signing_keys` holds 1 document. A full-application test with 2 threads on an empty database: the 2 loaders read the same signing key. |
 | AU-08 | A full-application test: a refresh gives 2 new tokens. A second use of the old refresh token gets `session-ended`, and then the new refresh token also gets it. A locked user and a deleted user get `session-ended`. After the end of the session the session service stops a refresh, and no token expires after the end. At the endpoint, the decoder does not accept the expired refresh token, so the request does not reach the session service. |
 | AU-09 | A full-application test: a logout gets 204, and a refresh after it gets `session-ended`. The session JWT stays valid on `/api/auth/me` until it expires. |
-| AU-10 | A full-application test: a login, then the OpenCelium user is deleted. `/api/auth/me` with the session JWT gets `session-ended`. |
+| AU-10 | A full-application test: a login, then the test deletes the OpenCelium user. `/api/auth/me` with the session JWT gets `session-ended`. |
 
 The unit tests also cover the decoders: a token with a wrong `typ`, a wrong `iss` or a wrong `kid` is not valid.
 

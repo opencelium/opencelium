@@ -24,12 +24,12 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 
 ## Task 2a: fix(core): give session-ended when the current user is deleted
 - **Criteria:** AU-10
-- **Function:** A request for the current OpenCelium user with the session JWT of a deleted user gets the error response of an ended session. The application log gets 1 line with the IDs of the user and of the session, and no token.
+- **Function:** A request for the current OpenCelium user with the session JWT of a deleted user gets the error response of an ended session and writes the log line of "The endpoints" in plan.md.
 - **Tests:** `CurrentUserEndpointTest` (full application): meGivesSessionEndedWhenTheUserIsDeleted
 - **Hand test:** 1. Start core as in task 2. Log in as `admin`, and copy `sessionJwt` into `T`. 2. Run `mongosh oc_hand --eval 'db.users.deleteOne({username: "admin"})'`. 3. Run `curl -i localhost:9090/api/auth/me -H "Authorization: Bearer $T"`: the status code is 401, with the code `session-ended`.
 - **Size:** approximately 30 lines
 - **Depends on:** 4
-- **Status:** in work
+- **Status:** done
 
 ## Task 3: feat(core): log in by email and give error codes for a failed login
 - **Criteria:** AU-01, AU-02, AU-03, AU-04, AU-05
