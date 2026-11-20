@@ -19,7 +19,8 @@ enum AuthError {
 
 	/**
 	 * A refresh of a session that does not exist any more: it reached its end, the user logged out, an old refresh
-	 * token came again, or the user is locked or deleted. The HTTP client logs in again.
+	 * token came again, or the user is locked or deleted. Also a request for the current user whose user is deleted.
+	 * The HTTP client logs in again.
 	 */
 	SESSION_ENDED("session-ended", HttpStatus.UNAUTHORIZED, "The session ended. Log in again."),
 
