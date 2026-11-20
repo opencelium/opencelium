@@ -14,6 +14,7 @@ import com.becon.opencelium.backend.controller.ConnectionController;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
@@ -76,6 +77,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -270,6 +272,65 @@ class ConnectionControllerTest {
                 .andExpect(jsonPath("$.violations[0].field").value("endpoint"))
                 .andExpect(jsonPath("$.violations[1].code").value("OUT_OF_SCOPE"))
                 .andExpect(jsonPath("$.violations[1].color").doesNotExist());
+    }
+
+    // ── POST /connection/execution/test ───────────────────────────────────────
+
+    @Test
+    @DisplayName("POST /connection/execution/test — the copy is saved as a copy of the workflow the editor sent")
+    void testPassesConnectionIdToSaveTestCopyWhenBodyHasConnectionId() throws Exception {
+        givenTestRunCanBeScheduled();
+
+        mockMvc.perform(post("/connection/execution/test")
+                        .param("channelId", "channel-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"connectionId\": 109, \"title\": \"demo connection\" }"))
+                .andExpect(status().isOk());
+
+        verify(connectionService).saveTestCopy(any(), any(), eq(109L));
+    }
+
+    @Test
+    @DisplayName("POST /connection/execution/test — a workflow that was never saved has no id to lend")
+    void testPassesNullOriginWhenBodyHasNoConnectionId() throws Exception {
+        givenTestRunCanBeScheduled();
+
+        mockMvc.perform(post("/connection/execution/test")
+                        .param("channelId", "channel-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"title\": \"demo connection\" }"))
+                .andExpect(status().isOk());
+
+        verify(connectionService).saveTestCopy(any(), any(), isNull());
+    }
+
+    @Test
+    void testReturnsBadRequestWhenCopyReferenceIsOutOfScope() throws Exception {
+        when(connectionService.saveTestCopy(any(), any(), any())).thenThrow(anOutOfScopeRejection());
+
+        mockMvc.perform(post("/connection/execution/test")
+                        .param("channelId", "channel-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"title\": \"demo connection\" }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("GLOBAL_REFERENCE_INVALID"))
+                .andExpect(jsonPath("$.violations[0].code").value("OUT_OF_SCOPE"))
+                .andExpect(jsonPath("$.violations[0].variable").value("gvWf"));
+    }
+
+    @Test
+    @DisplayName("POST /connection/execution/test — a refused copy is never scheduled or started")
+    void testCreatesNoSchedulerWhenCopyReferenceIsOutOfScope() throws Exception {
+        when(connectionService.saveTestCopy(any(), any(), any())).thenThrow(anOutOfScopeRejection());
+
+        mockMvc.perform(post("/connection/execution/test")
+                        .param("channelId", "channel-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"title\": \"demo connection\" }"))
+                .andExpect(status().isBadRequest());
+
+        verify(schedulerService, never()).save(any());
+        verify(schedulerService, never()).startNow(any(Scheduler.class), any(String.class));
     }
 
     // ── POST /connection/method/test ──────────────────────────────────────────
@@ -556,5 +617,19 @@ class ConnectionControllerTest {
                     .andExpect(jsonPath("$.data").exists());
         }
         return trustAllFlags;
+    }
+
+    /** Lets the test endpoint create and start the temporary scheduler of a test run. */
+    private void givenTestRunCanBeScheduled() {
+        Scheduler scheduler = new Scheduler();
+        scheduler.setId(100);
+        when(schedulerService.toEntity(any())).thenReturn(scheduler);
+    }
+
+    private static GlobalReferenceValidationException anOutOfScopeRejection() {
+        return new GlobalReferenceValidationException(List.of(new GlobalReferenceValidationException.Violation(
+                GlobalReferenceValidationException.Code.OUT_OF_SCOPE,
+                "This workflow is outside the scope of global variable 'gvWf'",
+                "gvWf", "{{global.gvWf}}", "#C77E7E", "0", "endpoint")));
     }
 }

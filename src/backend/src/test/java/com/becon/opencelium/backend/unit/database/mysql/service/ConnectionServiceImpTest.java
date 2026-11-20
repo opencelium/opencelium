@@ -17,6 +17,7 @@ import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServ
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.database.mysql.service.CategoryService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionHistoryService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableUsageService;
 import com.becon.opencelium.backend.database.mysql.service.ExecutionArgumentService;
@@ -66,6 +67,10 @@ class ConnectionServiceImpTest {
     private static final String TEST_TITLE = "!*test_connection_1700000000000_Demo";
     private static final String OTHER_TEST_TITLE = "!*test_connection_1700000000001_Other";
     private static final String NORMAL_TITLE = "Regular connection";
+    // a saved workflow, the test copy a run makes of it, and the copy of a second run
+    private static final long ORIGIN = 109L;
+    private static final long COPY = 110L;
+    private static final long OTHER_COPY = 112L;
     // the patch helper is mocked, so what the patch holds does not matter
     private static final JsonPatch A_PATCH = new JsonPatch(List.of());
 
@@ -99,6 +104,11 @@ class ConnectionServiceImpTest {
     @Mock
     private OpenceliumProps ocProps;
 
+    @Mock
+    private ConnectionHistoryService connectionHistoryService;
+
+    private TestRunOrigins testRunOrigins;
+
     private ConnectionServiceImp connectionService;
 
     @BeforeEach
@@ -108,13 +118,16 @@ class ConnectionServiceImpTest {
         // deleteById strips execution_argument rows, so executionArgumentService cannot be null either;
         // it also clears the global variable usages of the connection. A full update and a patch read the
         // category, the mappers, the patch helper, the update tracker and the version, hence the other mocks.
+        // Saving a workflow and deleteAndTrackIt write its history. The links of test copies are kept by a
+        // real TestRunOrigins, so the tests read them back instead of verifying calls.
         EntityVersionManager entityVersionManager = mock(EntityVersionManager.class);
         ExecutionArgumentService executionArgumentService = mock(ExecutionArgumentService.class);
+        testRunOrigins = new TestRunOrigins();
         connectionService = new ConnectionServiceImp(
-                connectionRepository, null, connectionMngService, fieldBindingMngService, categoryService, null,
-                null, null, patchHelper, null, connectionMngMapper, connectionMapper, updateTracker, null,
-                executionArgumentService, entityVersionManager, ocProps, null, globalVariableUsageService,
-                new TestRunOrigins());
+                connectionRepository, null, connectionMngService, fieldBindingMngService, categoryService,
+                connectionHistoryService, null, null, patchHelper, null, connectionMngMapper, connectionMapper,
+                updateTracker, null, executionArgumentService, entityVersionManager, ocProps, null,
+                globalVariableUsageService, testRunOrigins);
     }
 
     // ── findAll(includeTest) ──────────────────────────────────────────────────
@@ -391,6 +404,188 @@ class ConnectionServiceImpTest {
 
         verify(globalVariableUsageService, never()).checkWorkflowMove(any(), anyLong(), any());
         verify(connectionMngService).save(patchedContent);
+    }
+
+    // ── saveTestCopy ──────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("saveTestCopy — the copy's references are checked with the scope of the workflow it was made from")
+    void saveTestCopyChecksReferencesAsOriginWhenOriginExists() {
+        Connection copy = aWorkflow(TEST_TITLE, 3);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionRepository.existsById(ORIGIN)).thenReturn(true);
+        givenStoreAccepts(copy, content, COPY);
+
+        connectionService.saveTestCopy(copy, content, ORIGIN);
+
+        verify(globalVariableUsageService).checkWorkflow(content, ORIGIN, 3);
+    }
+
+    @Test
+    void saveTestCopyLinksCopyToOriginWhenOriginExists() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionRepository.existsById(ORIGIN)).thenReturn(true);
+        givenStoreAccepts(copy, content, COPY);
+
+        Long copyId = connectionService.saveTestCopy(copy, content, ORIGIN);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(copyId)).isEqualTo(ORIGIN);
+    }
+
+    @Test
+    @DisplayName("saveTestCopy — the copy of a workflow that was never saved is checked as a new workflow")
+    void saveTestCopyChecksAsNewWorkflowWhenOriginalIdIsNull() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        givenStoreAccepts(copy, content, COPY);
+
+        connectionService.saveTestCopy(copy, content, null);
+
+        verify(globalVariableUsageService).checkWorkflow(content, null, null);
+        verify(connectionRepository, never()).existsById(anyLong());
+    }
+
+    @Test
+    @DisplayName("saveTestCopy — an id that no workflow has lends no scope")
+    void saveTestCopyChecksAsNewWorkflowWhenOriginDoesNotExist() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionRepository.existsById(999L)).thenReturn(false);
+        givenStoreAccepts(copy, content, COPY);
+
+        connectionService.saveTestCopy(copy, content, 999L);
+
+        verify(globalVariableUsageService).checkWorkflow(content, null, null);
+    }
+
+    @Test
+    void saveTestCopyLinksNothingWhenOriginDoesNotExist() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionRepository.existsById(999L)).thenReturn(false);
+        givenStoreAccepts(copy, content, COPY);
+
+        Long copyId = connectionService.saveTestCopy(copy, content, 999L);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(copyId)).isEqualTo(COPY);
+    }
+
+    @Test
+    @DisplayName("saveTestCopy — a copy that lives for one run leaves no usages behind")
+    void saveTestCopyWritesNoUsagesWhenCopyIsSaved() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionRepository.existsById(ORIGIN)).thenReturn(true);
+        givenStoreAccepts(copy, content, COPY);
+
+        connectionService.saveTestCopy(copy, content, ORIGIN);
+
+        verify(globalVariableUsageService, never()).rebuildForWorkflow(anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("saveTestCopy — a refused reference stops the copy before Mongo or MariaDB are written")
+    void saveTestCopySavesNothingWhenReferenceIsOutOfScope() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        doThrow(anOutOfScopeRejection()).when(globalVariableUsageService).checkWorkflow(content, null, null);
+
+        assertThatThrownBy(() -> connectionService.saveTestCopy(copy, content, null))
+                .isInstanceOf(GlobalReferenceValidationException.class)
+                .hasMessageContaining("outside the scope of global variable 'gvWf'");
+
+        verify(connectionMngService, never()).create(any());
+        verify(connectionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("save — a workflow that is no test copy still records its usages")
+    void saveRebuildsUsagesWhenWorkflowIsSaved() {
+        Connection workflow = aWorkflow(NORMAL_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        ConnectionMng stored = givenStoreAccepts(workflow, content, ORIGIN);
+
+        connectionService.save(workflow, content);
+
+        verify(globalVariableUsageService).rebuildForWorkflow(ORIGIN, stored);
+    }
+
+    // ── deleting a test copy ──────────────────────────────────────────────────
+
+    @Test
+    void deleteByIdForgetsLinkWhenTestCopyIsDeleted() {
+        testRunOrigins.register(COPY, ORIGIN);
+        when(connectionRepository.findById(COPY)).thenReturn(Optional.of(entity(COPY, TEST_TITLE)));
+
+        connectionService.deleteById(COPY);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(COPY)).isEqualTo(COPY);
+    }
+
+    @Test
+    void deleteAndTrackItForgetsLinkWhenTestCopyIsDeleted() {
+        testRunOrigins.register(COPY, ORIGIN);
+        when(connectionRepository.findById(COPY)).thenReturn(Optional.of(entity(COPY, TEST_TITLE)));
+
+        connectionService.deleteAndTrackIt(COPY);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(COPY)).isEqualTo(COPY);
+    }
+
+    @Test
+    void deleteOnlyConnectionForgetsLinkWhenTestCopyIsDeleted() {
+        testRunOrigins.register(COPY, ORIGIN);
+        when(connectionRepository.findById(COPY)).thenReturn(Optional.of(entity(COPY, TEST_TITLE)));
+
+        connectionService.deleteOnlyConnection(COPY);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(COPY)).isEqualTo(COPY);
+    }
+
+    @Test
+    @DisplayName("deleteById — deleting one test copy keeps the link of another one")
+    void deleteByIdKeepsOtherLinksWhenTestCopyIsDeleted() {
+        testRunOrigins.register(COPY, ORIGIN);
+        testRunOrigins.register(OTHER_COPY, ORIGIN);
+        when(connectionRepository.findById(COPY)).thenReturn(Optional.of(entity(COPY, TEST_TITLE)));
+
+        connectionService.deleteById(COPY);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(OTHER_COPY)).isEqualTo(ORIGIN);
+    }
+
+    /** A workflow as the save paths receive it: no id yet, the default connector, the given category. */
+    private static Connection aWorkflow(String title, Integer categoryId) {
+        Connection workflow = new Connection();
+        workflow.setTitle(title);
+        workflow.setFromConnector(ConnectionConstants.DEFAULT_CONNECTOR_ID);
+        workflow.setCategoryId(categoryId);
+        return workflow;
+    }
+
+    /**
+     * Lets Mongo store {@code content} and MariaDB store {@code row} under {@code id}.
+     *
+     * @return the document Mongo hands back for the content
+     */
+    private ConnectionMng givenStoreAccepts(Connection row, ConnectionMng content, long id) {
+        ConnectionMng stored = new ConnectionMng();
+        stored.setId("snapshot-" + id);
+        when(connectionMngService.create(content)).thenReturn(stored);
+        when(connectionRepository.save(row)).thenAnswer(invocation -> {
+            Connection saved = invocation.getArgument(0);
+            saved.setId(id);
+            return saved;
+        });
+        return stored;
+    }
+
+    private static GlobalReferenceValidationException anOutOfScopeRejection() {
+        return new GlobalReferenceValidationException(List.of(new GlobalReferenceValidationException.Violation(
+                GlobalReferenceValidationException.Code.OUT_OF_SCOPE,
+                "This workflow is outside the scope of global variable 'gvWf'",
+                "gvWf", "{{global.gvWf}}", "#C77E7E", "0", "endpoint")));
     }
 
     private static Connection entity(Long id, String title) {
