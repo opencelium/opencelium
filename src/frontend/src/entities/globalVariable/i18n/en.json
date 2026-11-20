@@ -288,7 +288,6 @@
   "picker": {
     "placeholder": "Choose a global variable",
     "empty": "No global variables you may use here",
-    "scriptLater": "Script calls come with the field call editor",
     "unknown": "Unknown global variable, or one you may not use",
     "insert": "Insert a global variable"
   },

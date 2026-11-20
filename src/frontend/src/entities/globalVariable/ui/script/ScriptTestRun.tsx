@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { Alert } from '@shared/ui/primitives/Alert'
 import { Button } from '@shared/ui/primitives/Button'
-import { Card } from '@shared/ui/primitives/Card'
 import { Input } from '@shared/ui/primitives/Input'
 import { Typography } from '@shared/ui/primitives/Typography'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
@@ -28,37 +27,36 @@ export function ScriptTestRun({ parameters, refs, testRun }: Props) {
     const named = parameters.filter((parameter) => parameter.name.trim() !== '')
 
     return (
-        <Card bordered title={t('global-variable.script.test.title')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-testid="global-variable-script-test">
-                {named.length > 0 && <Typography variant="label" isSubtle>{t('global-variable.script.test.arguments')}</Typography>}
-                {named.map((parameter) => (
-                    <Field key={parameter.name} label={parameter.name}>
-                        <Input value={testRun.argumentTexts[parameter.name] ?? ''}
-                            placeholder={parameter.required ? t('global-variable.script.test.requiredPlaceholder') : parameter.defaultText}
-                            onChange={(event) => testRun.setArgument(parameter.name, event.target.value)}
-                            testId={`global-variable-script-test-arg-${parameter.name}`} />
-                    </Field>
-                ))}
-                {refs.length > 0 && <Typography variant="label" isSubtle>{t('global-variable.script.test.refs')}</Typography>}
-                {refs.map((ref) => (
-                    <Field key={ref.ref} label={ref.ref}>
-                        <Input value={testRun.refTexts[ref.ref] ?? ''} placeholder="null"
-                            onChange={(event) => testRun.setRef(ref.ref, event.target.value)}
-                            testId={`global-variable-script-test-ref-${ref.ref}`} />
-                    </Field>
-                ))}
-                <Typography variant="caption" isSubtle>{t('global-variable.script.test.valueHint')}</Typography>
-                <div>
-                    <Button type="primary" iconLeft="play" loading={testRun.isRunning} onClick={() => void testRun.run()}
-                        testId="global-variable-script-test-run">
-                        {t('global-variable.script.test.run')}
-                    </Button>
-                </div>
-                {testRun.result && <ScriptTestResult result={testRun.result} />}
-                {!testRun.result && !testRun.isRunning && (
-                    <Alert type="info" message={t('global-variable.script.test.notRun')} />
-                )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-testid="global-variable-script-test">
+            <Typography variant="title" as="h3">{t('global-variable.script.test.title')}</Typography>
+            {named.length > 0 && <Typography variant="label" isSubtle>{t('global-variable.script.test.arguments')}</Typography>}
+            {named.map((parameter) => (
+                <Field key={parameter.name} label={parameter.name}>
+                    <Input value={testRun.argumentTexts[parameter.name] ?? ''}
+                        placeholder={parameter.required ? t('global-variable.script.test.requiredPlaceholder') : parameter.defaultText}
+                        onChange={(event) => testRun.setArgument(parameter.name, event.target.value)}
+                        testId={`global-variable-script-test-arg-${parameter.name}`} />
+                </Field>
+            ))}
+            {refs.length > 0 && <Typography variant="label" isSubtle>{t('global-variable.script.test.refs')}</Typography>}
+            {refs.map((ref) => (
+                <Field key={ref.ref} label={ref.ref}>
+                    <Input value={testRun.refTexts[ref.ref] ?? ''} placeholder="null"
+                        onChange={(event) => testRun.setRef(ref.ref, event.target.value)}
+                        testId={`global-variable-script-test-ref-${ref.ref}`} />
+                </Field>
+            ))}
+            <Typography variant="caption" isSubtle>{t('global-variable.script.test.valueHint')}</Typography>
+            <div>
+                <Button type="primary" iconLeft="play" loading={testRun.isRunning} onClick={() => void testRun.run()}
+                    testId="global-variable-script-test-run">
+                    {t('global-variable.script.test.run')}
+                </Button>
             </div>
-        </Card>
+            {testRun.result && <ScriptTestResult result={testRun.result} />}
+            {!testRun.result && !testRun.isRunning && (
+                <Alert type="info" message={t('global-variable.script.test.notRun')} />
+            )}
+        </div>
     )
 }

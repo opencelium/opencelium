@@ -1,3 +1,4 @@
+import { GlobalVariableGlyph } from './custom/GlobalVariableGlyph';
 import React from 'react';
 import { LuScan, LuFlaskConical, LuPackage } from 'react-icons/lu';
 import {
@@ -134,6 +135,7 @@ const iconMap = {
     git: GithubOutlined,
     globe: GlobalOutlined,
     variable: TbVariable,
+    'global-variable': GlobalVariableGlyph,
     portal: AppstoreOutlined,
     'drag-handle': HolderOutlined,
     minus: MinusOutlined,

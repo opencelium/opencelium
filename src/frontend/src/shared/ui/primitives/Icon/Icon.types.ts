@@ -70,6 +70,7 @@ export type IconName =
     | 'git'
     | 'globe'
     | 'variable'
+    | 'global-variable'
     | 'portal'
     | 'drag-handle'
     | 'minus'

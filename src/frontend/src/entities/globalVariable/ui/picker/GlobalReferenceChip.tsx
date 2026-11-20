@@ -1,45 +1,30 @@
 import { Tag } from 'antd'
 import { Icon } from '@shared/ui/primitives/Icon'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
-import { useI18n } from '@shared/i18n/hooks/useI18n'
-import { parseGlobalReference } from '../../lib/globalReference'
-import { SECRET_MASK } from '../../model/display'
-import { useGlobalVariablePicker } from './globalPicker'
-
-const KIND_COLOR = { CONSTANT: 'default', MUTABLE: 'gold', SCRIPT: 'purple' } as const
-const KIND_ICON = { CONSTANT: 'lock', MUTABLE: 'refresh', SCRIPT: 'code' } as const
+import { useGlobalReferenceInfo } from './useGlobalReferenceInfo'
 
 type Props = {
     reference: string
-    onRemove?: () => void
+    /** Off where the host shows the details itself, e.g. in a hover menu the tooltip would cover. */
+    hasTooltip?: boolean
 }
 
-// A user without VIEW_USE gets no picker entry, so the chip falls back to the bare name (FR-61).
-export function GlobalReferenceChip({ reference, onRemove }: Props) {
-    const { t } = useI18n('entities')
-    const { items } = useGlobalVariablePicker()
-    const parsed = parseGlobalReference(reference)
-    if (!parsed) return null
-    const item = items.find((candidate) => candidate.name === parsed.name)
-    const value = !item || item.kind === 'SCRIPT' ? null : item.secret ? SECRET_MASK : item.valuePreview
-    const tooltip = item
-        ? `${t(`global-variable.kind.${item.kind}.label`)} · ${value ?? item.description}`
-        : t('global-variable.picker.unknown')
+// Display only — editing and removing come from the host's hover menu.
+// One look for every global reference — teal, like the global variable artwork — so it never reads as a
+// webhook (grey) or a method reference (colour box).
+export function GlobalReferenceChip({ reference, hasTooltip = true }: Props) {
+    const info = useGlobalReferenceInfo(reference)
+    if (!info) return null
 
-    return (
-        <Tooltip content={tooltip} placement="top" zIndex={30000}>
-            <Tag
-                color={item ? KIND_COLOR[item.kind] : 'default'}
-                icon={<Icon name={item ? KIND_ICON[item.kind] : 'warning'} size={12} />}
-                closable={!!onRemove}
-                onClose={(event) => { event.preventDefault(); onRemove?.() }}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginInlineEnd: 0, maxWidth: 260 }}
-                data-testid="global-reference-chip"
-            >
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {`${parsed.name}${parsed.path}`}
-                </span>
-            </Tag>
-        </Tooltip>
+    const chip = (
+        <Tag
+            color={info.isUnknown ? 'error' : 'cyan'}
+            icon={<Icon name={info.isUnknown ? 'warning' : 'global-variable'} size={12} color="inherit" />}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginInlineEnd: 0, maxWidth: 260, fontFamily: 'monospace' }}
+            data-testid="global-reference-chip"
+        >
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{info.label}</span>
+        </Tag>
     )
+    return hasTooltip ? <Tooltip content={info.detail} placement="top" zIndex={30000}>{chip}</Tooltip> : chip
 }

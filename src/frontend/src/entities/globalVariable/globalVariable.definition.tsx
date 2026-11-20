@@ -1,5 +1,5 @@
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import aggregatorWizardImage from '@assets/images/wizard/aggregator.svg'
+import globalVariableWizardImage from '@assets/images/wizard/global-variable.svg'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
 import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
@@ -260,7 +260,7 @@ export const globalVariableDefinition: EntityDefinition = {
     ],
 
     wizard: {
-        image: aggregatorWizardImage as string,
+        image: globalVariableWizardImage as string,
         modes: {
             create: {
                 header: `${baseKey}.wizard.modes.create.header`,

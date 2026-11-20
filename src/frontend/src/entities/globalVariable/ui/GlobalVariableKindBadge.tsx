@@ -22,14 +22,19 @@ export const GlobalVariableKindBadge: React.FC<Props> = ({ kind, isIconOnly = fa
     const { t } = useI18n('entities')
     const { icon, color } = KIND_LOOK[kind]
     const label = t(`global-variable.kind.${kind}.label`)
-    const tag = (
+    const testId = `global-variable-kind-${kind.toLowerCase()}`
+    const tag = isIconOnly ? (
+        <span style={{ display: 'inline-flex', alignItems: 'center' }} aria-label={label} data-testid={testId}>
+            <Icon name={icon} size={16} />
+        </span>
+    ) : (
         <Tag
             color={color}
             icon={<Icon name={icon} size={12} />}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginInlineEnd: 0 }}
-            data-testid={`global-variable-kind-${kind.toLowerCase()}`}
+            data-testid={testId}
         >
-            {isIconOnly ? null : label}
+            {label}
         </Tag>
     )
     return (

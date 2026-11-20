@@ -1,14 +1,16 @@
 import { useMemo, useState } from 'react';
 import { buildReferenceValue, getIteratorsForMethod, isExpandableReferencePath,
   type ResponseType } from '../requestReferenceOptions';
-import { webhookSnippet } from '../bodyWebhook';
+import { extractWebhookValue, webhookSnippet } from '../bodyWebhook';
 import type { LegacyBodyReferenceGeneratorProps } from './LegacyBodyReferenceGenerator.types';
 import { getReferenceMethods } from './legacyBodyReferenceGenerator.utils';
 import { parseEnhancementArg } from '../../utils/parseEnhancementArg';
 import { normalizeReferenceColor } from '../../../../utils/graph.referenceColors';
-import { buildGlobalReference } from '@entities/globalVariable/lib/globalReference';
+import { buildGlobalReference, parseGlobalReference } from '@entities/globalVariable/lib/globalReference';
 
 export type GeneratorReferenceType = 'direct' | 'webhook' | 'global';
+
+const isWebhookSnippet = (value: string) => value.startsWith('${') && value.endsWith('}');
 
 export function useLegacyBodyReferenceGenerator({
   connection, currentMethod, onApply, showWebhookOption = true, defaultMethodId, resetKey,
@@ -53,8 +55,16 @@ export function useLegacyBodyReferenceGenerator({
   const [appliedSeed, setAppliedSeed] = useState(`||${resetKey ?? 0}`);
   if (seed !== appliedSeed) {
     setAppliedSeed(seed);
-    if (edited && editedMethodId) {
+    const editedGlobal = value ? parseGlobalReference(value) : null;
+    if (editedGlobal) {
+      setReferenceType('global');
+      setGlobalName(editedGlobal.name);
+    } else if (value && isWebhookSnippet(value)) {
+      setReferenceType('webhook');
+      setWebhookValue(extractWebhookValue(value));
+    } else if (edited && editedMethodId) {
       // Showing an answer the host already holds: the controls are the answer.
+      setReferenceType('direct');
       setMethodId(editedMethodId);
       setResponseType(edited.messageProperty as ResponseType);
       setField(edited.messageProperty === 'status' ? 'status' : edited.path || '$');
