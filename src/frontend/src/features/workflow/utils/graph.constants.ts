@@ -11,7 +11,6 @@ export const TITLES: Record<WorkflowCreateKind, string> = {
   'trigger-connection': 'Trigger Workflow',
   if: 'If',
   loop: 'Loop',
-  setglobal: 'Set Variable',
 };
 
 export const SUBTITLES: Partial<Record<WorkflowCreateKind, string>> = {

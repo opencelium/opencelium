@@ -26,7 +26,7 @@ export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, conf
             width: 1000,
             top: 18,
             testId: buildTestId(entity.name, 'view-dialog'),
-            content: (
+            content: config.renderDialogContent?.({ value, row, close: () => dialog.closeById(id) }) ?? (
                 <EntityDialogContent
                     entityName={entity.name}
                     mode="view"

@@ -47,6 +47,7 @@ export const buildMethodPayload = (
 		methodType: resolveMethodType(node),
 		dataAggregator: node.data.dataAggregator ?? null,
 		...(node.data.dataAggregatorPublish ? { dataAggregatorPublish: node.data.dataAggregatorPublish } : {}),
+		...(node.data.globalWrites ? { globalWrites: node.data.globalWrites } : {}),
 		color: normalizePayloadColor(
 			resolvedColor ?? (node.data as any).color,
 			ALL_COLORS[order % ALL_COLORS.length],

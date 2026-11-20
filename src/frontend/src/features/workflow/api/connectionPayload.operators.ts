@@ -1,7 +1,5 @@
 import { ITERATOR_NAMES } from '../components/request-editor/body-editor/requestReferenceOptions';
-import type { WorkflowNodeModel, WorkflowSetGlobalConfig } from '../types/workflow.types';
-import { textToValue } from '@entities/globalVariable/model/form';
-import { isSetGlobalReference } from '../utils/setGlobalValue';
+import type { WorkflowNodeModel } from '../types/workflow.types';
 
 const nodeKind = (node: WorkflowNodeModel) =>
 	node.data.kind ?? node.type ?? 'connector';
@@ -23,22 +21,9 @@ const normalizeOperatorExpression = (expression: string, type: string) => {
 	return value.startsWith('(') && value.endsWith(')') ? value : `(${value})`;
 };
 
-// A reference travels as text; a literal is sent as the JSON value it spells.
-const toSetGlobalPayload = (config: WorkflowSetGlobalConfig | undefined) => {
-	const value = config?.value ?? '';
-	return { variable: config?.variable ?? '', value: isSetGlobalReference(value) ? value : textToValue(value) };
-};
-
-type ConditionOperatorPayload = {
+export type OperatorPayload = {
 	id: string; index: string; type: string; dataAggregator: number | null; expression: string; iterator?: string;
-	setGlobal?: never;
 };
-// The `?: never` fields keep reads such as `operator.expression` valid across both variants.
-type SetGlobalOperatorPayload = {
-	id: string; index: string; type: 'setglobal'; setGlobal: ReturnType<typeof toSetGlobalPayload>;
-	dataAggregator?: never; expression?: never; iterator?: never;
-};
-export type OperatorPayload = ConditionOperatorPayload | SetGlobalOperatorPayload;
 
 export const buildOperatorPayload = (
 	node: WorkflowNodeModel,
@@ -46,9 +31,6 @@ export const buildOperatorPayload = (
 	iterator?: string,
 ): OperatorPayload => {
 	const type = nodeKind(node);
-	if (type === 'setglobal') {
-		return { id: node.id, index, type, setGlobal: toSetGlobalPayload(node.data.setGlobal) };
-	}
 	return {
 		id: node.id,
 		index,

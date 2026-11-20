@@ -10,7 +10,6 @@ import { LoopOperatorNode } from '../../nodes/LoopOperatorNode/LoopOperatorNode'
 import { StartNode } from '../../nodes/StartNode/StartNode';
 import { SystemMethodNode } from '../../nodes/SystemMethodNode/SystemMethodNode';
 import { TriggerConnectionNode } from '../../nodes/TriggerConnectionNode/TriggerConnectionNode';
-import { SetGlobalNode } from '../../nodes/SetGlobalNode/SetGlobalNode';
 
 export const workflowNodeTypes = {
 	start: memo(StartNode),
@@ -19,7 +18,6 @@ export const workflowNodeTypes = {
 	'trigger-connection': memo(TriggerConnectionNode),
 	if: memo(IfOperatorNode),
 	loop: memo(LoopOperatorNode),
-	setglobal: memo(SetGlobalNode),
 	comment: memo(CommentNode),
 	// Every WorkflowNodeType must have a renderer here — an unmapped type makes
 	// @xyflow/react drop the node silently, so let the compiler catch it instead.

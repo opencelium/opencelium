@@ -11,5 +11,6 @@ export type NodeContextMenuProps = {
 	onShowResponse: (nodeId: string) => void;
 	onTryRequest: (nodeId: string) => void;
 	onOpenAggregatorEditor: (nodeId: string) => void;
+	onOpenGlobalWritesEditor: (nodeId: string) => void;
 	onOpenConnectorEditor: (nodeId: string, kind: ConnectorEditorKind) => void;
 };

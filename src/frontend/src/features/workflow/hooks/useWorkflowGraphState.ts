@@ -31,6 +31,7 @@ export const useWorkflowGraphState = () => {
 	const [responseNodeId, setResponseNodeId] = useState<string | null>(null);
 	const [conditionEditor, setConditionEditor] = useState<WorkflowConditionEditorState | null>(null);
 	const [aggregatorEditor, setAggregatorEditor] = useState<WorkflowAggregatorEditorState | null>(null);
+	const [globalWritesEditor, setGlobalWritesEditor] = useState<WorkflowAggregatorEditorState | null>(null);
 	const [connectorEditor, setConnectorEditor] = useState<WorkflowConnectorEditorState | null>(null);
 	const [restoredViewport, setRestoredViewport] = useState<Viewport | undefined>();
 	const [viewportRestoreVersion, setViewportRestoreVersion] = useState(0);
@@ -54,7 +55,7 @@ export const useWorkflowGraphState = () => {
 		sidebarAction, setSidebarAction, contextMenu, setContextMenu,
 		historyOpen, setHistoryOpen, methodEditor, setMethodEditor,
 		responseNodeId, setResponseNodeId, conditionEditor, setConditionEditor,
-		aggregatorEditor, setAggregatorEditor, connectorEditor, setConnectorEditor, restoredViewport, setRestoredViewport,
+		aggregatorEditor, setAggregatorEditor, globalWritesEditor, setGlobalWritesEditor, connectorEditor, setConnectorEditor, restoredViewport, setRestoredViewport,
 		viewportRestoreVersion, setViewportRestoreVersion,
 		bindingLensOpen, setBindingLensOpen, bindingLensExpanded, setBindingLensExpanded,
 		bindingLensPinnedNodeId, setBindingLensPinnedNodeId,

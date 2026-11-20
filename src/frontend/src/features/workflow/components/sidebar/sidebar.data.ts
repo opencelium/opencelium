@@ -28,11 +28,10 @@ export const sidebarItems: {
 ];
 
 export const operatorItems: {
-  key: Extract<WorkflowCreateKind, 'if' | 'loop' | 'setglobal'>;
+  key: Extract<WorkflowCreateKind, 'if' | 'loop'>;
   titleKey: string;
   textKey: string;
 }[] = [
   { key: 'if', titleKey: 'sidebar.operatorOption.if.title', textKey: 'sidebar.operatorOption.if.description' },
   { key: 'loop', titleKey: 'sidebar.operatorOption.loop.title', textKey: 'sidebar.operatorOption.loop.description' },
-  { key: 'setglobal', titleKey: 'sidebar.operatorOption.setglobal.title', textKey: 'sidebar.operatorOption.setglobal.description' },
 ];

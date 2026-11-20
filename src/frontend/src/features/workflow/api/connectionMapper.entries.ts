@@ -1,4 +1,3 @@
-import { setGlobalValueToText } from '../utils/setGlobalValue';
 import { MethodType } from '../types/connection';
 import type { WorkflowMethodConfig } from '../types/request-config.types';
 import type { WorkflowCreateKind } from '../types/workflow.types';
@@ -106,27 +105,15 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 			dataAggregator: method?.dataAggregator ?? undefined, methodConfig: methodConfig(method),
 			...(method?.dataAggregatorPublish && typeof method.dataAggregatorPublish === 'object'
 				? { dataAggregatorPublish: method.dataAggregatorPublish as Record<string, string> } : {}),
+			...(method?.globalWrites && typeof method.globalWrites === 'object' && Object.keys(method.globalWrites).length
+				? { globalWrites: method.globalWrites as Record<string, string> } : {}),
 		},
 	} };
 };
 
-const toSetGlobalEntry = (operator: any, index: number, entryIndex: string): IndexedWorkflowEntry => ({
-	index: entryIndex, path: parsePath(entryIndex), source: operator, node: {
-		id: operator?.id ?? operator?.uiId ?? `setglobal-${index}`, type: 'setglobal',
-		position: getPosition(parsePath(entryIndex)), data: {
-			title: 'Set Variable', kind: 'setglobal',
-			setGlobal: {
-				variable: String(operator?.setGlobal?.variable ?? ''),
-				value: setGlobalValueToText(operator?.setGlobal?.value),
-			},
-		},
-	},
-});
-
 const toOperatorEntry = (operator: any, index: number, fallback: number,
 	legacyOperators: LegacyConditionNode[]): IndexedWorkflowEntry => {
 	const entryIndex = normalizeIndex(operator?.index, fallback);
-	if (operator?.type === 'setglobal') return toSetGlobalEntry(operator, index, entryIndex);
 	const type = operator?.type === 'loop' ? 'loop' as const : 'if' as const;
 	const legacyTree = legacyOperators.find((tree) => tree.id === operator?.uiId);
 	return { index: entryIndex, path: parsePath(entryIndex), source: operator, node: {

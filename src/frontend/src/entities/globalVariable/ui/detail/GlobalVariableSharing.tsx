@@ -1,18 +1,16 @@
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { message } from 'antd'
 import { Button } from '@shared/ui/primitives/Button'
-import { Checkbox } from '@shared/ui/primitives/Checkbox'
 import { Select } from '@shared/ui/primitives/Select'
 import { Typography } from '@shared/ui/primitives/Typography'
-import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { Loading } from '@shared/ui/primitives/Loading/Loading'
-import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useGetUsersQuery } from '@entities/user/api/userApi'
 import type { User } from '@entities/user/model/types'
 import { useGetGlobalVariablePermissionsQuery, useUpdateGlobalVariablePermissionsMutation } from '../../api/globalVariableApi'
-import { GRANTABLE, toGrantDrafts, togglePermission, toPermissionsDto, type GrantDraft } from '../../model/sharing'
-import type { GlobalVariablePermissions } from '../../model/types'
+import { toGrantDrafts, togglePermission, toPermissionsDto, type GrantDraft } from '../../model/sharing'
+import type { GlobalVariablePermissions, VariablePermission } from '../../model/types'
+import { GlobalVariableSharingTable } from './GlobalVariableSharingTable'
 
 const userLabel = (user: User) =>
     [user.userDetail?.name, user.userDetail?.surname].filter(Boolean).join(' ') || user.username || user.email || `#${user.userId}`
@@ -37,8 +35,12 @@ const SharingEditor: React.FC<{ id: number; permissions: GlobalVariablePermissio
         [users, drafts, permissions],
     )
 
-    const updateDraft = (userId: number, change: (draft: GrantDraft) => GrantDraft) =>
-        setDrafts((current) => current.map((draft) => (draft.userId === userId ? change(draft) : draft)))
+    const toggle = useCallback((userId: number, permission: VariablePermission, isOn: boolean) =>
+        setDrafts((current) => current.map((draft) => (draft.userId === userId
+            ? { ...draft, permissions: togglePermission(draft.permissions, permission, isOn) }
+            : draft))), [])
+    const remove = useCallback((userId: number) =>
+        setDrafts((current) => current.filter((item) => item.userId !== userId)), [])
     const addUser = (userId: number) => {
         const label = addableUsers.find((option) => option.value === userId)?.label ?? `#${userId}`
         setDrafts((current) => [...current, { userId, name: label, permissions: ['VIEW_USE'] }])
@@ -51,35 +53,7 @@ const SharingEditor: React.FC<{ id: number; permissions: GlobalVariablePermissio
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-testid="global-variable-sharing">
             <Typography variant="body">{t('global-variable.sharing.owner', { name: permissions.ownerUser.name })}</Typography>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(3, max-content) max-content', gap: '8px 16px', alignItems: 'center' }}>
-                <Typography variant="label" isSubtle>{t('global-variable.sharing.user')}</Typography>
-                {GRANTABLE.map((permission) => (
-                    <Typography key={permission} variant="label" isSubtle>{t(`global-variable.permission.${permission}`)}</Typography>
-                ))}
-                <span />
-                {drafts.map((draft) => (
-                    <React.Fragment key={draft.userId}>
-                        <span>{draft.name}</span>
-                        {GRANTABLE.map((permission) => (
-                            <Checkbox
-                                key={permission}
-                                checked={draft.permissions.includes(permission)}
-                                onChange={(isOn: boolean) => updateDraft(draft.userId, (current) => ({
-                                    ...current,
-                                    permissions: togglePermission(current.permissions, permission, isOn),
-                                }))}
-                                testId={`global-variable-sharing-${draft.userId}-${permission.toLowerCase()}`}
-                            />
-                        ))}
-                        <Tooltip content={t('global-variable.sharing.remove')} placement="top">
-                            <DeleteIconButton
-                                onClick={() => setDrafts((current) => current.filter((item) => item.userId !== draft.userId))}
-                                testId={`global-variable-sharing-remove-${draft.userId}`}
-                            />
-                        </Tooltip>
-                    </React.Fragment>
-                ))}
-            </div>
+            <GlobalVariableSharingTable drafts={drafts} onToggle={toggle} onRemove={remove} />
             <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ minWidth: 260 }}>
                     <Select

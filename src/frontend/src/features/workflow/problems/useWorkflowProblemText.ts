@@ -28,8 +28,7 @@ export const useWorkflowProblemText = () => {
 			case 'invalid-path':
 				return t('minimap.problems.invalidPath', { count: problem.count });
 			case 'operator-unconfigured':
-				return t(`minimap.problems.${problem.operator === 'setglobal' ? 'setGlobalUnconfigured'
-					: problem.operator === 'if' ? 'ifUnconfigured' : 'loopUnconfigured'}`);
+				return t(`minimap.problems.${problem.operator === 'if' ? 'ifUnconfigured' : 'loopUnconfigured'}`);
 			default: {
 				const _exhaustive: never = problem;
 				return _exhaustive;

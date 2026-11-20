@@ -1,62 +1,96 @@
-import type { ReactNode } from 'react'
 import { Alert } from '@shared/ui/primitives/Alert'
 import { Button } from '@shared/ui/primitives/Button'
-import { Input } from '@shared/ui/primitives/Input'
-import { Typography } from '@shared/ui/primitives/Typography'
+import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
+import { PlaygroundHeader } from '@features/workflow/components/request-editor/enhancement/ScriptPlayground/PlaygroundHeader'
+import { PlaygroundInput } from '@features/workflow/components/request-editor/enhancement/ScriptPlayground/PlaygroundInput'
+import { PlaygroundOutput } from '@features/workflow/components/request-editor/enhancement/ScriptPlayground/PlaygroundOutput'
+import { PlaygroundRunStatus } from '@features/workflow/components/request-editor/enhancement/ScriptPlayground/PlaygroundRunStatus'
+import '@features/workflow/components/request-editor/enhancement/ScriptPlayground/ScriptPlayground.css'
 import type { DetectedRef, ScriptParameterDraft } from '../../model/script'
-import type { useScriptTestRun } from './useScriptTestRun'
-import { ScriptTestResult } from './ScriptTestResult'
+import { toRunResult, warningNotes } from './scriptTestMapping'
+import { MISSING_INPUT, type useScriptTestRun } from './useScriptTestRun'
 
 type Props = {
     parameters: ScriptParameterDraft[]
     refs: DetectedRef[]
     testRun: ReturnType<typeof useScriptTestRun>
+    onLocate: (line: number, column: number) => void
 }
 
-const Field = ({ label, children }: { label: ReactNode; children: ReactNode }) => (
-    <label style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 30%) 1fr', gap: 8, alignItems: 'center' }}>
-        <code style={{ overflowWrap: 'anywhere' }}>{label}</code>
-        {children}
-    </label>
-)
-
 // References can't be resolved outside a run, so the user supplies their test values (contract §8).
-export function ScriptTestRun({ parameters, refs, testRun }: Props) {
+export function ScriptTestRun({ parameters, refs, testRun, onLocate }: Props) {
     const { t } = useI18n('entities')
+    const { t: tWorkflow } = useI18n('workflow')
     const named = parameters.filter((parameter) => parameter.name.trim() !== '')
+    const { result } = testRun
+    const isUnavailable = result?.error?.code === 'VALIDATION_UNAVAILABLE'
+    const blockedReason = testRun.invalid.length > 0 ? tWorkflow('sandbox.invalidJson', { name: testRun.invalid[0] }) : undefined
+    const argumentHint = (parameter: ScriptParameterDraft) =>
+        parameter.required ? t('global-variable.script.test.requiredPlaceholder') : parameter.defaultText ? `= ${parameter.defaultText}` : ''
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-testid="global-variable-script-test">
-            <Typography variant="title" as="h3">{t('global-variable.script.test.title')}</Typography>
-            {named.length > 0 && <Typography variant="label" isSubtle>{t('global-variable.script.test.arguments')}</Typography>}
+        <section
+            className="scriptPlayground"
+            data-testid="global-variable-script-test"
+            onKeyDown={(event) => {
+                if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                    event.preventDefault()
+                    void testRun.run()
+                }
+            }}
+        >
+            <PlaygroundHeader hasDocsLink={false} />
+            {named.length > 0 && <h4>{t('global-variable.script.test.arguments')}</h4>}
             {named.map((parameter) => (
-                <Field key={parameter.name} label={parameter.name}>
-                    <Input value={testRun.argumentTexts[parameter.name] ?? ''}
-                        placeholder={parameter.required ? t('global-variable.script.test.requiredPlaceholder') : parameter.defaultText}
-                        onChange={(event) => testRun.setArgument(parameter.name, event.target.value)}
-                        testId={`global-variable-script-test-arg-${parameter.name}`} />
-                </Field>
+                <PlaygroundInput
+                    key={parameter.name}
+                    name={parameter.name}
+                    reference={argumentHint(parameter)}
+                    input={testRun.argumentInputs[parameter.name] ?? MISSING_INPUT}
+                    isInvalid={testRun.invalid.includes(parameter.name)}
+                    onChange={(input) => testRun.setArgument(parameter.name, input)}
+                    missingHint={t('global-variable.script.test.argumentMissing')}
+                />
             ))}
-            {refs.length > 0 && <Typography variant="label" isSubtle>{t('global-variable.script.test.refs')}</Typography>}
+            {refs.length > 0 && <h4>{t('global-variable.script.test.refs')}</h4>}
             {refs.map((ref) => (
-                <Field key={ref.ref} label={ref.ref}>
-                    <Input value={testRun.refTexts[ref.ref] ?? ''} placeholder="null"
-                        onChange={(event) => testRun.setRef(ref.ref, event.target.value)}
-                        testId={`global-variable-script-test-ref-${ref.ref}`} />
-                </Field>
+                <PlaygroundInput
+                    key={ref.ref}
+                    name={ref.ref}
+                    reference=""
+                    input={testRun.refInputs[ref.ref] ?? MISSING_INPUT}
+                    isInvalid={testRun.invalid.includes(ref.ref)}
+                    onChange={(input) => testRun.setRef(ref.ref, input)}
+                    missingHint={t('global-variable.script.test.refMissing')}
+                />
             ))}
-            <Typography variant="caption" isSubtle>{t('global-variable.script.test.valueHint')}</Typography>
-            <div>
-                <Button type="primary" iconLeft="play" loading={testRun.isRunning} onClick={() => void testRun.run()}
-                    testId="global-variable-script-test-run">
-                    {t('global-variable.script.test.run')}
-                </Button>
+            <div className="scriptPlaygroundRunRow">
+                <Tooltip content={blockedReason ?? tWorkflow('sandbox.shortcut')}>
+                    <Button type="primary" iconLeft="play" disabled={testRun.isRunning || !!blockedReason}
+                        onClick={() => void testRun.run()} testId="global-variable-script-test-run">
+                        {tWorkflow(testRun.isRunning ? 'sandbox.running' : 'sandbox.run')}
+                    </Button>
+                </Tooltip>
+                <PlaygroundRunStatus
+                    status={testRun.isRunning ? 'running' : testRun.completedAt ? 'done' : 'idle'}
+                    isStale={false}
+                    completedAt={testRun.completedAt}
+                    blockedReason={blockedReason}
+                />
             </div>
-            {testRun.result && <ScriptTestResult result={testRun.result} />}
-            {!testRun.result && !testRun.isRunning && (
-                <Alert type="info" message={t('global-variable.script.test.notRun')} />
-            )}
-        </div>
+            {isUnavailable && result?.error
+                ? <Alert type="info" showIcon message={t('global-variable.script.errors.VALIDATION_UNAVAILABLE')} description={result.error.message} />
+                : (
+                    <PlaygroundOutput
+                        result={result ? toRunResult(result, t) : null}
+                        issues={[]}
+                        isStale={false}
+                        onLocate={onLocate}
+                        hasConsole={false}
+                        notes={result ? warningNotes(result, t) : []}
+                    />
+                )}
+        </section>
     )
 }

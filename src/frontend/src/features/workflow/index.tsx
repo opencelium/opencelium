@@ -259,6 +259,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onShowResponse: workflow.onShowResponse,
           onTryRequest: playground.open,
           onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
+          onOpenGlobalWritesEditor: (nodeId) => workflow.setGlobalWritesEditor({ nodeId }),
           onOpenConnectorEditor: (nodeId, kind) => workflow.setConnectorEditor({ nodeId, kind }),
           onClose: () => workflow.setContextMenu(null) }} />
       <WorkflowNodeEditors
@@ -279,7 +280,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           nodes: hydratedNodes, edges: workflow.edges, connection: conditionConnection,
           onClose: () => workflow.setConditionEditor(null),
           onSave: workflow.onSaveConditionConfig }}
-        setGlobal={{ onSave: workflow.onSaveSetGlobal }}
+        globalWrites={{ open: !!workflow.globalWritesEditor,
+          node: hydratedNodes.find((node) => node.id === workflow.globalWritesEditor?.nodeId) ?? null,
+          nodes: hydratedNodes, edges: workflow.edges, connection: conditionConnection,
+          isReadOnly: readOnly || isTestRunLocked,
+          onClose: () => workflow.setGlobalWritesEditor(null),
+          onSave: workflow.onSaveGlobalWrites }}
         aggregator={{ open: !!workflow.aggregatorEditor, node: aggregatorNode,
           onClose: () => workflow.setAggregatorEditor(null),
           onSave: workflow.onSaveDataAggregator, onSavePublish: workflow.onSaveAggregatorPublish }}
