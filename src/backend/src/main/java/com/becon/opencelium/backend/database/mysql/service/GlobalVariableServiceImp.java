@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.exception.GlobalVariableConflictException.Bl
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Violation;
+import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.mapper.mysql.GlobalVariableMapper;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO;
@@ -108,6 +109,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     private final GlobalVariableScopeResolver scopeResolver;
     private final ObjectMapper objectMapper;
     private final GlobalVariableCipher cipher;
+    private final WorkflowRunGate runGate;
     private final int maxValueBytes;
 
     public GlobalVariableServiceImp(
@@ -123,6 +125,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             GlobalVariableScopeResolver scopeResolver,
             ObjectMapper objectMapper,
             GlobalVariableCipher cipher,
+            WorkflowRunGate runGate,
             @Value("${opencelium.global-variable.max-value-bytes:65536}") int maxValueBytes) {
         this.repository = repository;
         this.changeRepository = changeRepository;
@@ -136,6 +139,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         this.scopeResolver = scopeResolver;
         this.objectMapper = objectMapper;
         this.cipher = cipher;
+        this.runGate = runGate;
         this.maxValueBytes = maxValueBytes;
     }
 
@@ -154,7 +158,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
                 variables.getContent().stream().map(GlobalVariable::getId).toList());
 
         return new PaginatedDto<>(variables, variable -> mapper.toListItem(
-                variable, security.permissionsOn(variable, caller), usageCounts.getOrDefault(variable.getId(), 0L)));
+                variable, security.permissionsOn(variable, caller), usageCounts.getOrDefault(variable.getId(), 0L),
+                beingUpdatedBy(variable)));
     }
 
     @Override
@@ -485,8 +490,24 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
 
         return variables.stream()
                 .sorted(Comparator.comparing(GlobalVariable::getId))
-                .map(mapper::toValue)
+                .map(variable -> mapper.toValue(variable, beingUpdatedBy(variable)))
                 .toList();
+    }
+
+    /**
+     * Returns the run that updates a mutable variable now: a run of its owner workflow, the only
+     * one that writes it. A test run writes its own copy and does not count.
+     *
+     * @return the run, or {@code null} for another kind, a variable without an owner workflow or
+     *         an owner workflow that does not run
+     */
+    private GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy(GlobalVariable variable) {
+        if (variable.getKind() != GlobalVariableKind.MUTABLE || variable.getOwnerWorkflowId() == null) {
+            return null;
+        }
+        return runGate.holdOf(variable.getOwnerWorkflowId())
+                .map(hold -> new GlobalVariableDTO.BeingUpdatedBy(hold.workflowId(), hold.executionId(), hold.startedAt()))
+                .orElse(null);
     }
 
     // not read-only: usages of sources that no longer exist are removed before they are read

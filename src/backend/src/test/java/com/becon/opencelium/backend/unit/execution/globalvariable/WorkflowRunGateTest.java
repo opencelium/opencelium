@@ -141,6 +141,17 @@ class WorkflowRunGateTest {
     }
 
     @Test
+    void holdOfReturnsExecutionAndStartWhenRunHoldsWorkflow() {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.recordExecution(WORKFLOW, 900L);
+
+        assertThat(gate.holdOf(WORKFLOW))
+                .contains(new WorkflowRunGate.Hold(WORKFLOW, 900L, Instant.parse("2026-11-20T10:00:00Z")));
+        assertThat(gate.holdOf(OTHER_WORKFLOW)).isEmpty();
+    }
+
+    @Test
     void admitLetsDifferentWorkflowsRunAtTheSameTime() {
         usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
         usesMutable(OTHER_WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
@@ -194,7 +205,7 @@ class WorkflowRunGateTest {
 
         gate.release(WORKFLOW);
 
-        assertThat(gate.runningExecutionOf(WORKFLOW)).isEmpty();
+        assertThat(gate.holdOf(WORKFLOW)).isEmpty();
         assertThat(gate.admit(WORKFLOW, JOB_B, new JobDataMap())).isEqualTo(Admission.HOLDS);
         verify(quartzScheduler, never()).scheduleJob(any(Trigger.class));
     }

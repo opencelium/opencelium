@@ -16,6 +16,8 @@ import java.util.Set;
  * @param usageCount    number of places that use the variable; while it is above zero the
  *                      variable can be neither deleted nor renamed
  * @param myPermissions what the calling user may do with this variable
+ * @param beingUpdatedBy the run of the owner workflow while one goes, for a mutable variable
+ *                      only; {@code null} otherwise
  */
 public record GlobalVariableListItemDTO(
         Long id,
@@ -29,5 +31,6 @@ public record GlobalVariableListItemDTO(
         Set<GlobalVariablePermission> myPermissions,
         long version,
         @JsonFormat(shape = JsonFormat.Shape.STRING) Instant updatedAt,
-        GlobalVariableDTO.Actor updatedBy) {
+        GlobalVariableDTO.Actor updatedBy,
+        GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy) {
 }

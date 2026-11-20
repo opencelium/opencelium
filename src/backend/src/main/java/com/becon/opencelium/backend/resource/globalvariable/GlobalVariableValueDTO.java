@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
  *                 variable, the last saved value otherwise; always {@code null} for a secret
  * @param updatedAt when {@code value} was set
  * @param updatedBy the user who set {@code value}; {@code null} when a run wrote it
+ * @param beingUpdatedBy the run of the owner workflow while one goes, for a mutable variable
+ *                  only; {@code null} otherwise
  */
 public record GlobalVariableValueDTO(
         Long id,
@@ -28,16 +30,18 @@ public record GlobalVariableValueDTO(
         long revision,
         JsonNode value,
         @JsonFormat(shape = JsonFormat.Shape.STRING) Instant updatedAt,
-        GlobalVariableDTO.Actor updatedBy) {
+        GlobalVariableDTO.Actor updatedBy,
+        GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy) {
 
     /**
-     * Returns the entity tag of a list of values: it is built from the ids, the versions and the
-     * revisions, so it stays the same exactly as long as no listed variable changed, no current
-     * value was set and none joined or left the list.
+     * Returns the entity tag of a list of values: it is built from the ids, the versions, the
+     * revisions and the runs that update them, so it stays the same exactly as long as no listed
+     * variable changed, no current value was set, no run of an owner workflow started or ended and
+     * none joined or left the list.
      */
     public static String etagOf(List<GlobalVariableValueDTO> values) {
         String identity = values.stream()
-                .map(value -> value.id() + ":" + value.version() + ":" + value.revision())
+                .map(value -> value.id() + ":" + value.version() + ":" + value.revision() + ":" + runOf(value))
                 .collect(Collectors.joining(","));
 
         try {
@@ -46,5 +50,10 @@ public record GlobalVariableValueDTO(
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 is not available", e);
         }
+    }
+
+    private static String runOf(GlobalVariableValueDTO value) {
+        GlobalVariableDTO.BeingUpdatedBy run = value.beingUpdatedBy();
+        return run == null ? "-" : run.workflowId() + "@" + run.executionId() + "@" + run.startedAt();
     }
 }
