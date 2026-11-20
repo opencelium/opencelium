@@ -199,10 +199,6 @@
       "description": "Fügen Sie eine einfache HTTP-Anfrage an eine beliebige URL hinzu."
     },
     "operatorOption": {
-      "setglobal": {
-        "title": "Globale Variable setzen",
-        "description": "Einen Wert in eine veränderliche globale Variable schreiben, die diesem Workflow gehört."
-      },
       "if": {
         "title": "If",
         "description": "Verzweigt den Workflow in einen True- und einen False-Pfad."
@@ -503,7 +499,8 @@
     "request": "Anfrage",
     "showResponse": "Antwort anzeigen",
     "tryRequest": "Request ausprobieren…",
-    "newLabelPlaceholder": "Neue Bezeichnung"
+    "newLabelPlaceholder": "Neue Bezeichnung",
+    "writeGlobals": "In globale Variablen schreiben"
   },
   "comment": {
     "badge": "Kommentar",
@@ -1053,7 +1050,6 @@
       "binding_one": "{{count}} fehlerhafte Feldverknüpfung: {{reason}}",
       "ifUnconfigured": "Die IF-Bedingung ist nicht konfiguriert.",
       "loopUnconfigured": "Die Schleife ist nicht konfiguriert.",
-      "setGlobalUnconfigured": "Der Setzen-Schritt hat keine Variable oder keinen Wert.",
       "unknownPath": "{{count}} Feldverknüpfungen lesen ein Feld, das die Antwort der Methode nicht deklariert",
       "unknownPath_one": "{{count}} Feldverknüpfung liest ein Feld, das die Antwort der Methode nicht deklariert",
       "invalidPath": "{{count}} Referenzen haben einen Pfad, der kein gültiger JsonPath ist",
@@ -1336,16 +1332,6 @@
     },
     "consoleLog": "console gibt es auf der Server-Engine nicht (Nashorn · ES5.1). Verwenden Sie print(...) statt console.log; die Ausgabe erscheint im Tab „Ausgabe“."
   },
-  "setGlobal": {
-    "label": "Setze",
-    "nodeTooltip": "Setzt {{variable}} auf {{value}}",
-    "notConfigured": "Noch keine Variable oder kein Wert gewählt",
-    "dialogTitle": "Globale Variable setzen",
-    "variable": "Variable (veränderliche Variablen, die dieser Workflow schreiben darf)",
-    "value": "Wert",
-    "hint": "Wählen Sie ein Methodenfeld, einen Webhook-Parameter oder geben Sie eine Konstante ein (JSON oder Text). In einer Schleife schreibt jeder Durchlauf; die Schreibregel fasst sie zusammen.",
-    "save": "Speichern"
-  },
   "runSettings": {
     "title": "Ausführungseinstellungen des Workflows",
     "intro": "Diese Einstellungen gelten, wenn dieser Workflow globale Variablen schreibt: Dann darf immer nur eine Ausführung gleichzeitig schreiben.",
@@ -1361,5 +1347,15 @@
       }
     },
     "save": "Speichern"
+  },
+  "globalWrites": {
+    "dialogTitle": "In globale Variablen schreiben: {{method}}",
+    "hint": "Nachdem diese Methode geantwortet hat, schreibt jede Zeile ihren Wert in eine veränderliche globale Variable, die dieser Workflow schreiben darf. Wählen Sie ein Feld dieser oder einer früheren Methode, einen Webhook-Parameter oder geben Sie eine Konstante ein (JSON oder Text). In einer Schleife schreibt jeder Durchlauf; die Schreibregel der Variable fasst sie zusammen.",
+    "variable": "Variable",
+    "value": "Wert",
+    "add": "Schreibvorgang hinzufügen",
+    "remove": "Schreibvorgang entfernen",
+    "save": "Speichern",
+    "empty": "Diese Methode schreibt noch keine globalen Variablen."
   }
 }

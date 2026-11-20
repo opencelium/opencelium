@@ -19,7 +19,7 @@ import {
     valueByteSize,
     type GlobalVariableFormValues,
 } from './model/form'
-import type { GlobalVariableListItem } from './model/types'
+import type { GlobalVariable, GlobalVariableListItem } from './model/types'
 import { emptyScript, MAX_SCRIPT_BYTES, parameterProblems, type ScriptFormValues } from './model/script'
 import { resolveGlobalVariableNames } from './command/resolvers/resolveGlobalVariableNames'
 import { resolveGlobalVariableIds } from './command/resolvers/resolveGlobalVariableIds'
@@ -30,12 +30,19 @@ import { GlobalVariableDeleteAction } from './ui/delete/GlobalVariableDeleteActi
 import { GlobalVariableListPage } from './ui/pages/GlobalVariableListPage'
 import { GlobalVariableCreatePage, GlobalVariableUpdatePage } from './ui/pages/GlobalVariableFormPage'
 import { GlobalVariableDetailPage } from './ui/pages/GlobalVariableDetailPage'
+import { GlobalVariableDialogContent } from './ui/dialog/GlobalVariableDialogContent'
+import { GlobalVariableDetailsAction } from './ui/details/GlobalVariableDetailsAction'
+import { useModalStore } from '@app/layouts/AppLayout/GlobalModal/global-modal.store'
 
 const asRow = (row: unknown) => row as GlobalVariableListItem
 const viewUrl = (value: string) => `${GLOBAL_VARIABLE_PATH}/view/${encodeURIComponent(resolveGlobalVariableId(value))}`
 const updateUrl = (value: string) => `${GLOBAL_VARIABLE_PATH}/update/${encodeURIComponent(resolveGlobalVariableId(value))}`
 const fetchUrl = (value: string) => `${GLOBAL_VARIABLE_PATH}/${encodeURIComponent(resolveGlobalVariableId(value))}`
 const tEntities = () => i18n.getFixedT(i18n.language, 'entities')
+const paletteDialog = (record: unknown, mode: 'view' | 'update') => (
+    <GlobalVariableDialogContent id={(record as GlobalVariable).id} mode={mode}
+        close={() => useModalStore.getState().close()} />
+)
 
 export const globalVariableDefinition: EntityDefinition = {
     name: baseKey,
@@ -55,8 +62,21 @@ export const globalVariableDefinition: EntityDefinition = {
         fetchUrl: `${GLOBAL_VARIABLE_PATH}/all?page=0&size=1000&sort=name,asc`,
         defaultSort: { field: 'name', direction: 'asc' },
         actions: [
-            { type: 'view', buildNavigationUrl: (_entity, value) => viewUrl(value) },
-            { type: 'update', buildNavigationUrl: (_entity, value) => updateUrl(value) },
+            {
+                type: 'custom',
+                key: 'details',
+                render: ({ row, iconSize, tooltipPlacement }) => (
+                    <GlobalVariableDetailsAction id={asRow(row).id} iconSize={iconSize} tooltipPlacement={tooltipPlacement} />
+                ),
+            },
+            {
+                type: 'view',
+                renderDialogContent: ({ row, close }) => <GlobalVariableDialogContent id={asRow(row).id} mode="view" close={close} />,
+            },
+            {
+                type: 'update',
+                renderDialogContent: ({ row, close }) => <GlobalVariableDialogContent id={asRow(row).id} mode="update" close={close} />,
+            },
             {
                 type: 'custom',
                 key: 'delete',
@@ -306,7 +326,13 @@ export const globalVariableDefinition: EntityDefinition = {
 
     commands: (def) => createEntityCommands({
         def,
-        config: { exclude: ['delete'] },
+        config: {
+            exclude: ['delete'],
+            overrides: {
+                update: (_def, _ctx, record) => paletteDialog(record, 'update'),
+                view: (_def, _ctx, record) => paletteDialog(record, 'view'),
+            },
+        },
         dsl: {
             update: {
                 by: [

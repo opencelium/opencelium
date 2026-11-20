@@ -7,7 +7,6 @@ export function getNodeType(kind: WorkflowCreateKind): WorkflowNodeType {
     case 'trigger-connection': return 'trigger-connection';
     case 'loop': return 'loop';
     case 'if': return 'if';
-    case 'setglobal': return 'setglobal';
     case 'comment': return 'comment';
     default: {
       const _exhaustive: never = kind;

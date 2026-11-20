@@ -199,10 +199,6 @@
       "description": "Add a plain HTTP request to any URL."
     },
     "operatorOption": {
-      "setglobal": {
-        "title": "Set global variable",
-        "description": "Write a value into a mutable global variable this workflow owns."
-      },
       "if": {
         "title": "If",
         "description": "Branch the workflow into true and false paths."
@@ -503,7 +499,8 @@
     "request": "Request",
     "showResponse": "Show Response",
     "tryRequest": "Try Request…",
-    "newLabelPlaceholder": "New label"
+    "newLabelPlaceholder": "New label",
+    "writeGlobals": "Write to global variables"
   },
   "comment": {
     "badge": "Comment",
@@ -1053,7 +1050,6 @@
       "binding_one": "{{count}} broken field link: {{reason}}",
       "ifUnconfigured": "The IF condition is not configured.",
       "loopUnconfigured": "The loop is not configured.",
-      "setGlobalUnconfigured": "The Set step has no variable or value.",
       "unknownPath": "{{count}} field links read a field the method's response does not declare",
       "unknownPath_one": "{{count}} field link reads a field the method's response does not declare",
       "invalidPath": "{{count}} references have a path that is not valid JsonPath",
@@ -1336,16 +1332,6 @@
     },
     "consoleLog": "console does not exist on the server engine (Nashorn · ES5.1). Use print(...) instead of console.log; its text appears in the Output tab."
   },
-  "setGlobal": {
-    "label": "Set",
-    "nodeTooltip": "Sets {{variable}} to {{value}}",
-    "notConfigured": "No variable or value chosen yet",
-    "dialogTitle": "Set global variable",
-    "variable": "Variable (mutable variables this workflow may write)",
-    "value": "Value",
-    "hint": "Pick a method field, a webhook parameter or type a constant (JSON or text). Inside a loop each pass writes; the write policy combines them.",
-    "save": "Save"
-  },
   "runSettings": {
     "title": "Workflow run settings",
     "intro": "These settings matter when this workflow writes global variables: then only one run of it may write at a time.",
@@ -1361,5 +1347,15 @@
       }
     },
     "save": "Save"
+  },
+  "globalWrites": {
+    "dialogTitle": "Write to global variables: {{method}}",
+    "hint": "After this method has responded, each row writes its value into a mutable global variable this workflow may write. Pick a field of this or an earlier method, a webhook parameter, or type a constant (JSON or text). Inside a loop every pass writes; the variable's write policy combines them.",
+    "variable": "Variable",
+    "value": "Value",
+    "add": "Add write",
+    "remove": "Remove write",
+    "save": "Save",
+    "empty": "This method writes no global variables yet."
   }
 }

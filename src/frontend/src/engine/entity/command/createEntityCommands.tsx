@@ -35,7 +35,7 @@ export function createEntityCommands({def, config, dsl, commandName}: CreateEnti
                     createViewByCommand({
                         def,
                         name,
-                        config: {},
+                        config,
                         by
                     })
                 );
@@ -45,7 +45,7 @@ export function createEntityCommands({def, config, dsl, commandName}: CreateEnti
                 createViewByCommand({
                     def,
                     name,
-                    config: {},
+                    config,
                     by: {
                         field: def.api?.identifierField || 'id',
                         resolve: def.api?.resolveIdentifier

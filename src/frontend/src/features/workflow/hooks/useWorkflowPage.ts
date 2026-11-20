@@ -36,7 +36,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     isAnyNodeDragging, setIsAnyNodeDragging, sidebarAction, setSidebarAction,
     contextMenu, setContextMenu, historyOpen, setHistoryOpen, methodEditor,
     setMethodEditor, responseNodeId, setResponseNodeId, conditionEditor,
-    setConditionEditor, aggregatorEditor, setAggregatorEditor, connectorEditor,
+    setConditionEditor, aggregatorEditor, setAggregatorEditor, globalWritesEditor, setGlobalWritesEditor, connectorEditor,
     setConnectorEditor, restoredViewport,
     setRestoredViewport, viewportRestoreVersion, setViewportRestoreVersion,
     centerStartVersion, setCenterStartVersion, bindingLensOpen,
@@ -93,7 +93,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes,
     centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
-      aggregatorEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
+      aggregatorEditor !== null || globalWritesEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
   });
 
   const deleteNodes = useDeleteWorkflowNodes({ nodes, edges, options, setNodes, setEdges,
@@ -113,6 +113,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     responseNodeId,
     conditionEditor,
     aggregatorEditor,
+    globalWritesEditor,
     connectorEditor,
     restoredViewport,
     viewportRestoreVersion,
@@ -137,6 +138,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setMethodEditor,
     setConditionEditor,
     setAggregatorEditor,
+    setGlobalWritesEditor,
     setConnectorEditor,
     setWorkflowGraph: (
       nextNodes: WorkflowNodeModel[],
@@ -160,7 +162,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onNodeDragStop: handleNodeDragStop,
     onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
     onCloseResponse: () => setResponseNodeId(null),
-    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setConnectorEditor(null); },
+    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setGlobalWritesEditor(null); setConnectorEditor(null); },
     onStartJoint: (sourceNodeId: string) => {
       setSidebarAction(null);
       setContextMenu(null);

@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { Connector } from '@entities/connector/model/types';
 import type { ConditionConfig } from '../components/condition-builder/conditionBuilder.types';
-import type { WorkflowNodeModel, WorkflowRunConflictPolicy, WorkflowSetGlobalConfig } from '../types/workflow.types';
+import type { WorkflowNodeModel, WorkflowRunConflictPolicy, WorkflowGlobalWrites } from '../types/workflow.types';
 import { withRunConflictPolicy } from '../utils/runConflictPolicy';
 import type { WorkflowMethodConfig } from '../types/request-config.types';
 import { assignConnectorToNode } from '../components/template/templateConnectorMapping.utils';
@@ -39,12 +39,10 @@ export const useWorkflowNodeUpdates = (
 		} } : node));
 		closeConditionEditor();
 	},
-	onSaveSetGlobal: (nodeId: string, setGlobal: WorkflowSetGlobalConfig) => {
-		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? { ...node, data: {
-			...node.data, setGlobal, hasError: false, errorMessage: undefined,
-		} } : node));
-		closeConditionEditor();
-	},
+	onSaveGlobalWrites: (nodeId: string, globalWrites: WorkflowGlobalWrites) => setNodes((nodes) => nodes.map((node) =>
+		node.id === nodeId ? { ...node, data: {
+			...node.data, globalWrites: Object.keys(globalWrites).length ? globalWrites : undefined,
+		} } : node)),
 	onSetRunConflictPolicy: (policy: WorkflowRunConflictPolicy) => setNodes((nodes) => withRunConflictPolicy(nodes, policy)),
 	onSaveDataAggregator: (nodeId: string, dataAggregator: number | null) => {
 		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? { ...node, data: {

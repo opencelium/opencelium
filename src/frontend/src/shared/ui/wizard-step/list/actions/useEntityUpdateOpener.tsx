@@ -8,7 +8,7 @@ import {buildTestId} from '@shared/testing/testId';
 
 /**
  * Open the entity update flow for a row — a custom navigation URL when the
- * action defines one, otherwise the update dialog. Shared by the row-action
+ * action defines one, otherwise the update dialog (with the action's own content, if any). Shared by the row-action
  * button and the clickable-row handler so both behave identically.
  */
 export function useEntityUpdateOpener() {
@@ -28,7 +28,7 @@ export function useEntityUpdateOpener() {
                 width: 1000,
                 top: 18,
                 testId: buildTestId(entity.name, 'update-dialog'),
-                content: (
+                content: config.renderDialogContent?.({ value, row, close: () => dialog.closeById(id) }) ?? (
                     <EntityDialogContent
                         entityName={entity.name}
                         mode="update"

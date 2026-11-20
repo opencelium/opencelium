@@ -1,15 +1,15 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import type { Mode } from '@/engine/entity/EntityDefinition'
 import { FormControl } from '@shared/ui/form/FormControl'
 import { Select } from '@shared/ui/primitives/Select'
+import { Tabs } from '@shared/ui/primitives/Tabs'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { DEFAULT_CODE, detectRefs, emptyScript, SCRIPT_LANGUAGES, uniqueRefs, type ScriptFormValues } from '../../model/script'
 import type { ScriptLanguage } from '../../model/types'
 import { ScriptCodeEditor } from './ScriptCodeEditor'
 import { ScriptImportsSelect } from './ScriptImportsSelect'
 import { ScriptParametersEditor } from './ScriptParametersEditor'
-import { ScriptRefsList } from './ScriptRefsList'
 import { ScriptTestRun } from './ScriptTestRun'
 import { useScriptTestRun } from './useScriptTestRun'
 
@@ -22,14 +22,15 @@ export function ScriptVariableEditor({ mode }: { mode: Mode }) {
     const detected = useMemo(() => detectRefs(script.code, script.language), [script.code, script.language])
     const refs = useMemo(() => uniqueRefs(detected.refs), [detected])
     const testRun = useScriptTestRun(script, refs)
+    const [tab, setTab] = useState('define')
 
     const update = (patch: Partial<ScriptFormValues>) => {
         setValue('script', { ...script, ...patch }, { shouldDirty: true, shouldValidate: formState.isSubmitted })
         if (patch.code !== undefined || patch.parameters !== undefined) testRun.clearResult()
     }
 
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }} data-testid="global-variable-script-editor">
+    const definition = (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
             <FormControl label="global-variable.script.language"
                 hint={mode === 'create' ? undefined : 'global-variable.script.languageLocked'} style={{ width: '100%' }}>
                 <Select
@@ -53,8 +54,25 @@ export function ScriptVariableEditor({ mode }: { mode: Mode }) {
             <ScriptCodeEditor language={script.language} code={script.code} onChange={(code) => update({ code })} isReadOnly={isReadOnly}
                 refs={detected.refs} nonLiteral={detected.nonLiteral} result={testRun.result}
                 error={getFieldState('script.code', formState).error?.message} />
-            <ScriptRefsList refs={refs} />
-            {!isReadOnly && <ScriptTestRun parameters={script.parameters} refs={refs} testRun={testRun} />}
+        </div>
+    )
+
+    return (
+        <div style={{ width: '100%' }} data-testid="global-variable-script-editor">
+            {isReadOnly ? definition : (
+                <Tabs
+                    value={tab}
+                    onChange={setTab}
+                    items={[
+                        { key: 'define', label: t('global-variable.script.tabs.define'), content: definition },
+                        {
+                            key: 'test',
+                            label: t('global-variable.script.tabs.test'),
+                            content: <ScriptTestRun parameters={script.parameters} refs={refs} testRun={testRun} onLocate={() => setTab('define')} />,
+                        },
+                    ]}
+                />
+            )}
         </div>
     )
 }

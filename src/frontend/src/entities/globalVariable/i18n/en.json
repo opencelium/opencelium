@@ -209,26 +209,13 @@
     }
   },
   "detail": {
-    "edit": "Edit",
-    "delete": "Delete",
     "value": "Current value",
-    "script": "Script",
     "noSecretValue": "No value set",
-    "ownerWorkflow": "Owner workflow",
-    "unclaimed": "Not claimed yet: the first workflow that writes it becomes the owner",
-    "writePolicy": "Write policy",
-    "publishMode": "Saved",
     "ownerUser": "Owner",
     "version": "Version",
     "updated": "Last change",
     "created": "Created",
-    "updatedBy": "{{time}} by {{name}}",
-    "imports": "Imports: {{names}}",
-    "tabs": {
-      "usage": "Used by",
-      "changes": "Change log",
-      "sharing": "Sharing"
-    }
+    "updatedBy": "{{time}} by {{name}}"
   },
   "changes": {
     "empty": "No changes match these filters.",
@@ -278,6 +265,7 @@
     }
   },
   "sharing": {
+    "empty": "Not shared with anyone yet.",
     "owner": "Owner: {{name}}. The owner and admins can always use, edit and delete it.",
     "user": "User",
     "addUser": "Add a user",
@@ -318,7 +306,7 @@
     "parameters": {
       "label": "Parameters",
       "hint": "Every call fills exactly these parameters. An optional parameter left empty uses its default.",
-      "name": "Name",
+      "name": "Parameter name",
       "required": "Required",
       "default": "Default",
       "defaultPlaceholder": "No default (null)",
@@ -328,17 +316,6 @@
     "imports": {
       "label": "Imports",
       "hint": "Other script variables of the same language, available as globals.<name>."
-    },
-    "refs": {
-      "title": "References found in the code",
-      "none": "No ref(\"…\") calls yet.",
-      "type": {
-        "WEBHOOK": "Webhook",
-        "REQUEST_DATA": "Request data",
-        "METHOD_RESPONSE": "Method response",
-        "PAGE": "Page",
-        "GLOBAL": "Global variable"
-      }
     },
     "warnings": {
       "TIED_TO_CALLER_COLORS": "Reads a method by colour, so it only works in workflows that have this method before the call"
@@ -359,15 +336,16 @@
       "VALIDATION_UNAVAILABLE": "Checking scripts in this language is not available yet"
     },
     "test": {
-      "title": "Test run",
       "arguments": "Arguments",
       "refs": "Reference values",
       "requiredPlaceholder": "Required",
-      "valueHint": "Values are read like a constant: JSON when it parses, otherwise text. An empty reference is null, as at run time.",
-      "run": "Run test",
-      "notRun": "Run the script with test values to check it before saving.",
       "atLine": "at line {{line}}",
-      "success": "Returned a {{type}} in {{ms}} ms"
+      "argumentMissing": "Not passed: an optional parameter uses its default, a required one fails the run.",
+      "refMissing": "null, as for a reference with no data at run time"
+    },
+    "tabs": {
+      "define": "Define",
+      "test": "Test"
     }
   },
   "mutable": {
@@ -393,6 +371,31 @@
     },
     "errors": {
       "valueUnfitForPolicy": "This value can't be used with the write policy: increment needs a number, forward only a number or an ISO date."
+    }
+  },
+  "details": {
+    "tooltip": "Details",
+    "steps": {
+      "general": {
+        "header": "General",
+        "subheader": "Owner, version and the latest change",
+        "description": "Who owns the variable, its current version, and when it was created and last changed. For mutable and secret variables, the stored value too."
+      },
+      "usage": {
+        "header": "Used by",
+        "subheader": "Workflows, connectors and notifications that use it",
+        "description": "Every place that refers to this variable: workflow steps, connectors, notifications and other script variables. The access column shows whether it reads, writes, calls or imports the variable."
+      },
+      "changes": {
+        "header": "Change log",
+        "subheader": "Who changed what, and when",
+        "description": "Each saved or rejected change to the value, settings or sharing, with who made it. Restore an earlier value from its row."
+      },
+      "sharing": {
+        "header": "Sharing",
+        "subheader": "Users who may use, edit or delete it",
+        "description": "Give other users access to this variable. Use lets them reference it in their workflows; Edit and Delete add the matching rights. Changes apply once you save."
+      }
     }
   }
 }

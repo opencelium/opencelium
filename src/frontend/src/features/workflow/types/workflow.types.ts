@@ -6,7 +6,7 @@ import type { ConnectorHealthStatus } from '@entities/connector/model/types';
 import type { JointRejectionReason } from '../utils/jumpValidator';
 import type { WorkflowIssueTone } from '../problems/workflowProblems';
 
-export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'setglobal' | 'comment';
+export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
 
 // What a LOOP node shows while running, set by WorkflowCanvas — a live count
 // ("i = 3"), refreshed on every iteration. Nothing is shown at all before
@@ -17,10 +17,11 @@ export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-conne
 export type WorkflowLoopIterationDisplay = { iterator: string; count: number; indexPath: string };
 
 export type WorkflowAddDirection = 'right' | 'bottom';
-export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'setglobal' | 'comment';
+export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
 
 /** A Set global variable step: writes `value` (a reference or a literal JSON text) into `variable`. */
-export type WorkflowSetGlobalConfig = { variable: string; value: string };
+/** `global.<name>` → the value written once the method has responded: a reference, or JSON / plain text. */
+export type WorkflowGlobalWrites = Record<string, string>;
 
 /** What a run of a workflow that writes global variables does when another run holds its lock (FR-28). */
 export type WorkflowRunConflictPolicy = 'QUEUE' | 'REJECT';
@@ -90,7 +91,6 @@ export type WorkflowNodeData = {
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;
-	setGlobal?: WorkflowSetGlobalConfig;
 	/** Only on the Start node. */
 	runConflictPolicy?: WorkflowRunConflictPolicy;
 	triggerConnection?: WorkflowTriggerConnectionRef;
@@ -102,6 +102,8 @@ export type WorkflowNodeData = {
 	dataAggregator?: number | null;
 	/** Aggregator output name → mutable global variable it is published to (methods only). */
 	dataAggregatorPublish?: Record<string, string>;
+	/** Mutable global variables this method writes after it has responded (methods only). */
+	globalWrites?: WorkflowGlobalWrites;
 	labelEdited?: boolean;
 	isLeaf?: boolean;
 	rightLeaf?: boolean;
@@ -216,7 +218,6 @@ export type SystemWorkflowNode = Node<WorkflowNodeData, 'system'>;
 export type TriggerConnectionWorkflowNode = Node<WorkflowNodeData, 'trigger-connection'>;
 export type IfWorkflowNode = Node<WorkflowNodeData, 'if'>;
 export type LoopWorkflowNode = Node<WorkflowNodeData, 'loop'>;
-export type SetGlobalWorkflowNode = Node<WorkflowNodeData, 'setglobal'>;
 export type CommentWorkflowNode = Node<WorkflowNodeData, 'comment'>;
 
 export type WorkflowNodeModel =
@@ -226,7 +227,6 @@ export type WorkflowNodeModel =
 	| TriggerConnectionWorkflowNode
 	| IfWorkflowNode
 	| LoopWorkflowNode
-	| SetGlobalWorkflowNode
 	| CommentWorkflowNode;
 
 export type WorkflowEdgeModel = Edge<WorkflowEdgeData, 'workflow-edge'>;

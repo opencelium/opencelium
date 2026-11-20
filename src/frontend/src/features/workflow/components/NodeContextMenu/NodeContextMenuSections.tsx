@@ -6,12 +6,12 @@ import type { NodeContextMenuProps } from './NodeContextMenu.types';
 import { NodeContextMenuRow } from './NodeContextMenuRow';
 
 type Props = Pick<NodeContextMenuProps, 'menu' | 'node' | 'onClose' | 'onOpenRequestEditor'
-  | 'onOpenConditionEditor' | 'onShowResponse' | 'onTryRequest' | 'onOpenAggregatorEditor' | 'onOpenConnectorEditor'> & {
+  | 'onOpenConditionEditor' | 'onShowResponse' | 'onTryRequest' | 'onOpenAggregatorEditor' | 'onOpenConnectorEditor' | 'onOpenGlobalWritesEditor'> & {
   onEditLabel: () => void;
 };
 
 export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
-  onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor }: Props) {
+  onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor, onOpenGlobalWritesEditor }: Props) {
   const { normalizedUser } = useAuth();
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   if (!menu) return null;
@@ -32,6 +32,7 @@ export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
       case 'show-response': onShowResponse(menu.nodeId); break;
       case 'try-request': onTryRequest(menu.nodeId); break;
       case 'configure-aggregator': onOpenAggregatorEditor(menu.nodeId); break;
+      case 'write-globals': onOpenGlobalWritesEditor(menu.nodeId); break;
       case 'change-connector': onOpenConnectorEditor(menu.nodeId, 'switch'); break;
       case 'change-connector-image': onOpenConnectorEditor(menu.nodeId, 'image'); break;
       default: {

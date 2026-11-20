@@ -1,0 +1,29 @@
+/* Mirrors the data aggregator's argument rows (dataAggregatorArgsEditor.css), with the labels once on top. */
+.script-parameters {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.script-parameters__row {
+    display: grid;
+    grid-template-columns: 24px 1fr 1fr 32px;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 8px;
+}
+
+.script-parameters__header {
+    padding-top: 8px;
+    padding-bottom: 0;
+}
+
+.script-parameters__required {
+    display: flex;
+    justify-content: center;
+}
+
+.script-parameters__add {
+    padding: 8px;
+}

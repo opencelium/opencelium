@@ -209,26 +209,13 @@
     }
   },
   "detail": {
-    "edit": "Bearbeiten",
-    "delete": "Löschen",
     "value": "Aktueller Wert",
-    "script": "Skript",
     "noSecretValue": "Kein Wert gesetzt",
-    "ownerWorkflow": "Besitzer-Workflow",
-    "unclaimed": "Noch nicht beansprucht: Der erste Workflow, der sie schreibt, wird Besitzer",
-    "writePolicy": "Schreibregel",
-    "publishMode": "Gespeichert",
     "ownerUser": "Besitzer",
     "version": "Version",
     "updated": "Letzte Änderung",
     "created": "Angelegt",
-    "updatedBy": "{{time}} von {{name}}",
-    "imports": "Importe: {{names}}",
-    "tabs": {
-      "usage": "Verwendet von",
-      "changes": "Änderungsprotokoll",
-      "sharing": "Freigabe"
-    }
+    "updatedBy": "{{time}} von {{name}}"
   },
   "changes": {
     "empty": "Keine Änderungen für diese Filter.",
@@ -278,6 +265,7 @@
     }
   },
   "sharing": {
+    "empty": "Noch mit niemandem geteilt.",
     "owner": "Besitzer: {{name}}. Der Besitzer und Admins können sie immer verwenden, bearbeiten und löschen.",
     "user": "Benutzer",
     "addUser": "Benutzer hinzufügen",
@@ -318,7 +306,7 @@
     "parameters": {
       "label": "Parameter",
       "hint": "Jeder Aufruf füllt genau diese Parameter. Ein leer gelassener optionaler Parameter verwendet seinen Standardwert.",
-      "name": "Name",
+      "name": "Parametername",
       "required": "Pflicht",
       "default": "Standardwert",
       "defaultPlaceholder": "Kein Standardwert (null)",
@@ -328,17 +316,6 @@
     "imports": {
       "label": "Importe",
       "hint": "Andere Skriptvariablen derselben Sprache, verfügbar als globals.<name>."
-    },
-    "refs": {
-      "title": "Im Code gefundene Referenzen",
-      "none": "Noch keine ref(\"…\")-Aufrufe.",
-      "type": {
-        "WEBHOOK": "Webhook",
-        "REQUEST_DATA": "Request-Daten",
-        "METHOD_RESPONSE": "Methodenantwort",
-        "PAGE": "Seite",
-        "GLOBAL": "Globale Variable"
-      }
     },
     "warnings": {
       "TIED_TO_CALLER_COLORS": "Liest eine Methode über ihre Farbe und funktioniert daher nur in Workflows, die diese Methode vor dem Aufruf haben"
@@ -359,15 +336,16 @@
       "VALIDATION_UNAVAILABLE": "Die Prüfung von Skripten in dieser Sprache ist noch nicht verfügbar"
     },
     "test": {
-      "title": "Testlauf",
       "arguments": "Argumente",
       "refs": "Referenzwerte",
       "requiredPlaceholder": "Pflicht",
-      "valueHint": "Werte werden wie bei einer Konstante gelesen: JSON, wenn es sich parsen lässt, sonst Text. Eine leere Referenz ist null, wie zur Laufzeit.",
-      "run": "Test starten",
-      "notRun": "Führen Sie das Skript mit Testwerten aus, um es vor dem Speichern zu prüfen.",
       "atLine": "in Zeile {{line}}",
-      "success": "Hat {{type}} in {{ms}} ms zurückgegeben"
+      "argumentMissing": "Nicht übergeben: ein optionaler Parameter nutzt seinen Standardwert, ein Pflichtparameter lässt den Lauf scheitern.",
+      "refMissing": "null, wie bei einer Referenz ohne Daten zur Laufzeit"
+    },
+    "tabs": {
+      "define": "Definieren",
+      "test": "Testen"
     }
   },
   "mutable": {
@@ -393,6 +371,31 @@
     },
     "errors": {
       "valueUnfitForPolicy": "Dieser Wert passt nicht zur Schreibregel: Hochzählen braucht eine Zahl, Nur vorwärts eine Zahl oder ein ISO-Datum."
+    }
+  },
+  "details": {
+    "tooltip": "Details",
+    "steps": {
+      "general": {
+        "header": "Allgemein",
+        "subheader": "Besitzer, Version und die letzte Änderung",
+        "description": "Wem die Variable gehört, ihre aktuelle Version und wann sie angelegt und zuletzt geändert wurde. Bei veränderbaren und geheimen Variablen auch der gespeicherte Wert."
+      },
+      "usage": {
+        "header": "Verwendet von",
+        "subheader": "Workflows, Connectoren und Benachrichtigungen, die sie verwenden",
+        "description": "Alle Stellen, die auf diese Variable verweisen: Workflow-Schritte, Connectoren, Benachrichtigungen und andere Skriptvariablen. Die Spalte Zugriff zeigt, ob sie die Variable liest, schreibt, aufruft oder importiert."
+      },
+      "changes": {
+        "header": "Änderungsprotokoll",
+        "subheader": "Wer was wann geändert hat",
+        "description": "Jede gespeicherte oder abgelehnte Änderung an Wert, Einstellungen oder Freigabe, mit dem Urheber. Einen früheren Wert stellen Sie in seiner Zeile wieder her."
+      },
+      "sharing": {
+        "header": "Freigabe",
+        "subheader": "Benutzer, die sie verwenden, bearbeiten oder löschen dürfen",
+        "description": "Anderen Benutzern Zugriff auf diese Variable geben. Verwenden erlaubt, sie in eigenen Workflows zu referenzieren; Bearbeiten und Löschen ergänzen die entsprechenden Rechte. Änderungen gelten nach dem Speichern."
+      }
     }
   }
 }
