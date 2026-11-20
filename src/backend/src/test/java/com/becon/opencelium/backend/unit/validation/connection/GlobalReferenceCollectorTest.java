@@ -6,6 +6,9 @@ import static org.assertj.core.api.Assertions.tuple;
 import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.ConditionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.StatementMng;
@@ -13,6 +16,7 @@ import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.El
 import com.becon.opencelium.backend.testutil.fixture.ConnectionMngFixture;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceCollector;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceCollector.Found;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -165,6 +169,43 @@ class GlobalReferenceCollectorTest {
                         ConnectionMngFixture.aMethod("#ababab", "0_1", "plain", "{{global.1st}}/{{global.}}"))));
     }
 
+    @Test
+    @DisplayName("collect — an enhancement's args and its ref() calls are reported on the method the binding fills")
+    void collectReturnsEnhancementFieldsWhenFieldBindingHoldsReferences() {
+        MethodMng method = ConnectionMngFixture.aMethod("#ababab", "0_1", "createObject", "https://api.example.test");
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith(method);
+        workflow.setFieldBindings(List.of(aBinding("#ababab", "Tenant id",
+                "var VAR_0 = {{global.prefix}};",
+                "RESULT_VAR = VAR_0 + ref(\"{{global.tenants[0].id}}\");")));
+
+        List<Found> found = GlobalReferenceCollector.collect(workflow);
+
+        assertThat(found).containsExactly(
+                new Found(ElementType.ENHANCEMENT, "#ababab", "0_1", "Tenant id", "enhancement.args",
+                        "prefix", "{{global.prefix}}"),
+                new Found(ElementType.ENHANCEMENT, "#ababab", "0_1", "Tenant id", "enhancement.script",
+                        "tenants", "{{global.tenants[0].id}}"));
+    }
+
+    @Test
+    void collectReportsNoIndexWhenBindingTargetIsNoMethod() {
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith();
+        workflow.setFieldBindings(List.of(aBinding("#cdcdcd", null, null, "ref('{{global.a}}')")));
+
+        List<Found> found = GlobalReferenceCollector.collect(workflow);
+
+        assertThat(found).extracting(Found::color, Found::index, Found::variable)
+                .containsExactly(tuple("#cdcdcd", null, "a"));
+    }
+
+    @Test
+    void collectSkipsBindingWhenItHasNoEnhancement() {
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith();
+        workflow.setFieldBindings(Arrays.asList(new FieldBindingMng(), null));
+
+        assertThat(GlobalReferenceCollector.collect(workflow)).isEmpty();
+    }
+
     // ── collectFromTexts ──────────────────────────────────────────────────────
 
     @Test
@@ -216,5 +257,23 @@ class GlobalReferenceCollectorTest {
         return Stream.of(
                 Arguments.of("no texts", null),
                 Arguments.of("a text without a value", withoutValue));
+    }
+
+    /** Field binding into a field of the method with {@code targetColor}, with the given enhancement. */
+    private static FieldBindingMng aBinding(String targetColor, String title, String args, String script) {
+        LinkedFieldMng target = new LinkedFieldMng();
+        target.setColor(targetColor);
+        target.setType("request");
+        target.setField("body.tenant");
+        EnhancementMng enhancement = new EnhancementMng();
+        enhancement.setTitle(title);
+        enhancement.setArgs(args);
+        enhancement.setScript(script);
+        enhancement.setLanguage("js");
+        FieldBindingMng binding = new FieldBindingMng();
+        binding.setId("bind-1");
+        binding.setTo(List.of(target));
+        binding.setEnhancement(enhancement);
+        return binding;
     }
 }

@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.unit.scriptengine.engines;
 
+import com.becon.opencelium.backend.reference.ReferenceScanner;
 import com.becon.opencelium.backend.scriptengine.engines.NashornEngine;
 import com.becon.opencelium.backend.scriptengine.ex.InvalidScriptException;
 import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
@@ -290,5 +291,19 @@ class NashornEngineTest {
         Object sandboxed = engine.executeSandboxed(script, bindings, new StringWriter());
 
         assertThat(sandboxed).isEqualTo(engine.execute(script, bindings));
+    }
+
+    @Test
+    @DisplayName("execute — a ref() call bound as an arg reads the resolved value as a native JS object")
+    void executeReadsRefValueWhenRefCallIsBoundAsArg() {
+        ReferenceScanner.BoundScript bound = ReferenceScanner.bindScriptRefs(
+                "ref(\"{{global.tenants}}\")[1].id + '-' + ref('{{global.limit}}')", Map.of());
+        Map<String, Object> values = Map.of(
+                "{{global.tenants}}", List.of(Map.of("id", "acme"), Map.of("id", "globex")),
+                "{{global.limit}}", 50);
+
+        Object result = engine.execute(bound.code(), bound.args(), values::get);
+
+        assertThat(result).isEqualTo("globex-50");
     }
 }
