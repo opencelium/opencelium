@@ -945,3 +945,33 @@ CREATE TABLE IF NOT EXISTS `global_variable_usage` (
     KEY `idx_global_variable_usage_source` (`source_type`, `source_id`),
     CONSTRAINT `fk_global_variable_usage_variable` FOREIGN KEY (`variable_id`) REFERENCES `global_variable` (`id`) ON DELETE CASCADE
 );
+
+--changeset 5.2:9 stripComments:true splitStatements:true endDelimiter:;
+-- The global variable tables took the character set of the schema, which stores at most three
+-- bytes per character. A value, a description or the label of a workflow element that holds a
+-- four-byte character, an emoji for example, was refused by the database with error 1366. These
+-- tables hold text users type and text copied from workflows, which MongoDB stores in full, so
+-- they are converted to utf8mb4. The collation stays case-insensitive: the name of a variable is
+-- unique whatever its case.
+ALTER TABLE `global_variable` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+ALTER TABLE `global_variable_scope` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+ALTER TABLE `global_variable_permission` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+ALTER TABLE `global_variable_change` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+ALTER TABLE `global_variable_usage` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+--changeset 5.2:10 stripComments:true splitStatements:true endDelimiter:;
+--preconditions onFail:MARK_RAN onError:HALT
+--precondition-sql-check expectedResult:1 SELECT COUNT(*) > 0 FROM information_schema.COLLATION_CHARACTER_SET_APPLICABILITY WHERE CHARACTER_SET_NAME = 'utf8mb4' AND COLLATION_NAME IN ('utf8mb4_uca1400_ai_ci', 'uca1400_ai_ci')
+-- Recent MariaDB versions list the collation as uca1400_ai_ci, which applies to several character
+-- sets, and earlier ones as utf8mb4_uca1400_ai_ci; the check accepts both names.
+-- utf8mb4_general_ci gives every character outside the Basic Multilingual Plane the same weight,
+-- so any emoji equals any other: searching for one found every name or description holding a
+-- different one. utf8mb4_uca1400_ai_ci weighs each character on its own and is the collation the
+-- schema already uses for utf8mb3; it stays case-insensitive, so the name of a variable is still
+-- unique whatever its case. It exists from MariaDB 10.10 on; an older server, the one a
+-- distribution ships for example, keeps utf8mb4_general_ci and this changeset is marked as run.
+ALTER TABLE `global_variable` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
+ALTER TABLE `global_variable_scope` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
+ALTER TABLE `global_variable_permission` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
+ALTER TABLE `global_variable_change` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
+ALTER TABLE `global_variable_usage` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
