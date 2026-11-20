@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.quartz;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalSnapshotLogLines;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.ThreadLocalOcLogger;
@@ -42,7 +43,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Runs a connection for one schedule.
@@ -115,7 +115,9 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             long startTime = System.currentTimeMillis();
             try {
                 executionLogger.logAndSend("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d".formatted(execId, connectionId, schedulerId));
-                logGlobalSnapshot(executionLogger, executionObj.getGlobalSnapshot());
+                if (loggingEnabled) {
+                    logGlobalSnapshot(executionLogger, executionObj.getGlobalSnapshot());
+                }
                 executor.start();
             } finally {
                 executionLogger.logAndSend("phase=EXECUTION_END id=%d connectionId=%d schedulerId=%d".formatted(execId, connectionId, schedulerId));
@@ -144,19 +146,14 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     }
 
     /**
-     * Records which version of each global variable the run reads, so a run can be explained
-     * after the variables changed. Values are not logged here, of a secret or of any other
-     * variable: the request log shows them where they are used, a secret hidden.
+     * Records which version of each global variable the run reads, and the values of the
+     * variables that are not secrets within the limits of {@link GlobalSnapshotLogLines}, so a
+     * run can be explained after the variables changed. The lines follow EXECUTION_START, so they
+     * belong to the execution element of the log, which returns them as its global snapshot.
+     * Called only while logging is on: the lines serialize every value of the snapshot.
      */
     private static void logGlobalSnapshot(OcLogger<ExecutionLog> executionLogger, GlobalVariableSnapshot snapshot) {
-        if (snapshot.isEmpty()) {
-            return;
-        }
-
-        String versions = snapshot.entries().stream()
-                .map(entry -> entry.name() + "@" + entry.version())
-                .collect(Collectors.joining(", ", "[", "]"));
-        executionLogger.logAndSend("segment=GLOBAL_SNAPSHOT data=" + versions);
+        GlobalSnapshotLogLines.of(snapshot).forEach(executionLogger::logAndSend);
     }
 
     @Override

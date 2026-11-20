@@ -2,19 +2,28 @@ package com.becon.opencelium.backend.execution.logger.mapper;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
+import com.becon.opencelium.backend.database.mongodb.entity.LogGlobalSnapshotEntry;
 import com.becon.opencelium.backend.execution.logger.dto.ErrorInfoDTO;
+import com.becon.opencelium.backend.execution.logger.dto.GlobalSnapshotEntryDTO;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 public class LogDataMapper {
+    private static final ObjectMapper JSON = new ObjectMapper();
+
     /**
      * Map a LogData entity to its DTO.
      */
@@ -47,8 +56,47 @@ public class LogDataMapper {
         dto.setError(buildErrorInfo(src.getError()));
         dto.setProperties(baseProps);
         dto.setSegment(baseSegments);
+        dto.setGlobalSnapshot(toGlobalSnapshotDto(src.getGlobalSnapshot()));
         // Handle exception segment separately
         return dto;
+    }
+
+    /**
+     * Returns the global snapshot of an EXECUTION element, or {@code null} when the element has
+     * none: any other element, a run still going, or a run logged before the snapshot was part
+     * of the log.
+     */
+    private static List<GlobalSnapshotEntryDTO> toGlobalSnapshotDto(List<LogGlobalSnapshotEntry> entries) {
+        if (entries == null) {
+            return null;
+        }
+
+        return entries.stream()
+                .map(LogDataMapper::toGlobalSnapshotEntryDto)
+                .toList();
+    }
+
+    private static GlobalSnapshotEntryDTO toGlobalSnapshotEntryDto(LogGlobalSnapshotEntry entry) {
+        if (entry.getValue() == null) {
+            return GlobalSnapshotEntryDTO.withoutValue(entry.getName(), entry.getVersion(), entry.getSize());
+        }
+
+        return GlobalSnapshotEntryDTO.withValue(entry.getName(), entry.getVersion(), readJson(entry.getValue()));
+    }
+
+    /**
+     * Reads a value as the log holds it. The logger hides the texts of secrets in every line,
+     * which can leave a value that is no longer JSON; such a value is returned as the text it
+     * reads, so the response stays valid JSON.
+     */
+    private static JsonNode readJson(String text) {
+        try {
+            JsonNode value = JSON.readTree(text);
+            // blank text reads as a missing node, which has no JSON to write
+            return value == null || value.isMissingNode() ? TextNode.valueOf(text) : value;
+        } catch (JsonProcessingException e) {
+            return TextNode.valueOf(text);
+        }
     }
 
     /**
