@@ -124,6 +124,20 @@ class GlobalVariableUsageServiceImpTest {
     }
 
     @Test
+    void rebuildForWorkflowWritesWriteRowWhenMethodWritesVariable() {
+        MethodMng method = ConnectionMngFixture.aMethod("#ababab", "0_1", "createVm", "https://api.example.test");
+        method.setGlobalWrites(Map.of("global.lastSync", "#ababab.(response).body.$.at"));
+        when(globalVariableRepository.findByNameIn(Set.of("lastSync")))
+                .thenReturn(List.of(GlobalVariableFixture.aMutable(5L, "lastSync", "0", "0", WORKFLOW)));
+
+        service.rebuildForWorkflow(WORKFLOW, ConnectionMngFixture.aWorkflowWith(method));
+
+        assertThat(savedUsages())
+                .extracting(GlobalVariableUsage::getVariableId, GlobalVariableUsage::getField, GlobalVariableUsage::getAccess)
+                .containsExactly(tuple(5L, "globalWrites", Access.WRITE));
+    }
+
+    @Test
     void rebuildForWorkflowWritesOneRowWhenReferenceRepeatsInField() {
         ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith(ConnectionMngFixture.aMethod(
                 "#ababab", "0_1", "listObjects", "{{global.idoitUrl}}/api?next={{global.idoitUrl}}"));

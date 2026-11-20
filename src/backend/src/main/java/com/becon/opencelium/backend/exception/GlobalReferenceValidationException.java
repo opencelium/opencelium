@@ -19,7 +19,13 @@ public class GlobalReferenceValidationException extends RuntimeException {
         /** A connector references a variable that is not open to all workflows. */
         SCOPE_NOT_ALL,
         /** The saving user holds no VIEW_USE permission on the variable. */
-        NO_USE_PERMISSION
+        NO_USE_PERMISSION,
+        /** A write target of a method is not {@code global.name}: it is missing, has braces, a path or more text. */
+        INVALID_WRITE_TARGET,
+        /** A method writes a variable that is not mutable. */
+        NOT_MUTABLE,
+        /** A method writes a mutable variable whose owner is another workflow. */
+        NOT_OWNER
     }
 
     /**

@@ -96,6 +96,7 @@ public class OperationExMapper {
         operationDTO.setHttpMethod(HttpMethod.valueOf(method.getRequest().getMethod()));
         operationDTO.setName(method.getName());
         operationDTO.setAggregatorId(method.getDataAggregator());
+        operationDTO.setGlobalWrites(method.getGlobalWrites());
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
         operationDTO.setConnectorId(method.getConnector() != null ? method.getConnector().getConnectorId() : null);

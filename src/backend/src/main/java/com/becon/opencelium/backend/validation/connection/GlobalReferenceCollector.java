@@ -27,14 +27,18 @@ import java.util.stream.Stream;
  * workflow: the request data of a connector, the subject and body of a notification template.
  *
  * <p>In a workflow it looks where a run resolves references: the endpoint, the headers and the
- * body of every method, the expression and the condition of every operator, and the args and
+ * body of every method, the values a method writes to variables, the expression and the
+ * condition of every operator, and the args and
  * the code of every field binding's enhancement, where code reads a variable through {@code
  * ref("{{global.name}}")}. An escaped token, {@code \{{global.name}}}, is literal text and is not
- * reported.
+ * reported. The targets of a method's {@code globalWrites} are reported as writes.
  */
 public final class GlobalReferenceCollector {
 
     private static final Pattern GLOBAL_REFERENCE = Pattern.compile(RegExpression.globalRef);
+    private static final Pattern GLOBAL_WRITE_TARGET = Pattern.compile(RegExpression.globalWriteTarget);
+    // the field of a method that lists the variables it writes
+    private static final String GLOBAL_WRITES = "globalWrites";
 
     private GlobalReferenceCollector() {
     }
@@ -49,10 +53,19 @@ public final class GlobalReferenceCollector {
      * @param field       where the reference stands: in an element e.g. {@code
      *                    body.filter.since}, outside a workflow the name of the text
      * @param variable    name of the referenced variable
-     * @param reference   the reference as written, e.g. {@code {{global.limits.maxPerPage}}}
+     * @param reference   the reference as written, e.g. {@code {{global.limits.maxPerPage}}}; for
+     *                    a write the whole target as written
+     * @param write       whether the element writes the variable rather than reads it: a target
+     *                    of a method's {@code globalWrites}
      */
     public record Found(ElementType elementType, String color, String index, String label, String field,
-                        String variable, String reference) {
+                        String variable, String reference, boolean write) {
+
+        /** A reference that reads the variable. */
+        public Found(ElementType elementType, String color, String index, String label, String field,
+                String variable, String reference) {
+            this(elementType, color, index, label, field, variable, reference, false);
+        }
     }
 
     /** Returns the references of {@code connection} in the order its elements hold them. */
@@ -119,6 +132,13 @@ public final class GlobalReferenceCollector {
         BodyMng body = request.getBody();
         if (body != null && body.getFields() != null) {
             body.getFields().forEach((name, value) -> element.scanValue("body." + name, value));
+        }
+
+        if (method.getGlobalWrites() != null) {
+            method.getGlobalWrites().forEach((target, value) -> {
+                element.scanWriteTarget(target);
+                element.scan(GLOBAL_WRITES + "." + target, value);
+            });
         }
     }
 
@@ -210,6 +230,16 @@ public final class GlobalReferenceCollector {
                     scanValue(field + "[" + position++ + "]", item);
                 }
             }
+        }
+
+        /**
+         * Reports the variable a write target names: {@code global.name}. A target of any other
+         * form is reported with no variable, so the check on save can refuse it.
+         */
+        void scanWriteTarget(String target) {
+            Matcher matcher = GLOBAL_WRITE_TARGET.matcher(target == null ? "" : target.strip());
+            String variable = matcher.matches() ? matcher.group(1) : null;
+            found.add(new Found(type, color, index, label, GLOBAL_WRITES, variable, target, true));
         }
 
         void scan(String field, String text) {

@@ -414,6 +414,31 @@ class GlobalVariableRepositoryTest {
         assertThat(found.getCurrentRevision()).isZero();
     }
 
+    @Test
+    @DisplayName("writeCurrentValue — a run's value lands with its execution, the version stays")
+    void writeCurrentValueStoresValueWhenVariableIsMutable() {
+        Long id = em.persistAndFlush(aTransientMutable("lastSync", "\"live\"")).getId();
+        em.clear();
+
+        int updated = repository.writeCurrentValue(id, "\"2026-11-20\"", new Date(), 900L);
+
+        GlobalVariable found = repository.findById(id).orElseThrow();
+        assertThat(updated).isEqualTo(1);
+        assertThat(found.getCurrentValue()).isEqualTo("\"2026-11-20\"");
+        assertThat(found.getCurrentRevision()).isEqualTo(1L);
+        assertThat(found.getCurrentSetByExecution()).isEqualTo(900L);
+        assertThat(found.getCurrentSetByUser()).isNull();
+        assertThat(found.getVersion()).isEqualTo(1L);
+    }
+
+    @Test
+    void writeCurrentValueChangesNothingWhenVariableIsConstant() {
+        Long id = em.persistAndFlush(GlobalVariableFixture.aTransientConstant("idoitUrl", ALICE)).getId();
+        em.clear();
+
+        assertThat(repository.writeCurrentValue(id, "1", new Date(), 900L)).isZero();
+    }
+
     /** Unsaved mutable variable with the initial value "value", owned by Alice. */
     private static GlobalVariable aTransientMutable(String name, String currentJson) {
         GlobalVariable variable = GlobalVariableFixture.aTransientConstant(name, ALICE);

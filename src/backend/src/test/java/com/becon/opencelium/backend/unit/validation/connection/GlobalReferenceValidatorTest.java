@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.unit.validation.connection;
 
+import static org.mockito.Mockito.lenient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -28,6 +29,7 @@ import com.becon.opencelium.backend.testutil.fixture.ConnectionMngFixture;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceValidator;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceValidator.NotificationTarget;
+import org.junit.jupiter.params.provider.ValueSource;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -402,11 +404,70 @@ class GlobalReferenceValidatorTest {
         verify(scopeResolver, times(1)).categoryChainOf(3);
     }
 
+    // ── writes ────────────────────────────────────────────────────────────────
+
+    @Test
+    void validateAcceptsWriteWhenWorkflowOwnsMutableVariable() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(5L, "lastSync", "0", "0", WORKFLOW);
+        when(globalVariableRepository.findByNameIn(Set.of("lastSync"))).thenReturn(List.of(variable));
+
+        assertThatCode(() -> validator.validate(aWorkflowWriting("global.lastSync"), WORKFLOW, null))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void validateReportsNotMutableWhenMethodWritesConstant() {
+        when(globalVariableRepository.findByNameIn(Set.of("lastSync")))
+                .thenReturn(List.of(GlobalVariableFixture.aConstant(5L, "lastSync", "0")));
+
+        List<Violation> violations = violationsOf(aWorkflowWriting("global.lastSync"), WORKFLOW, null);
+
+        assertThat(violations).extracting(Violation::code, Violation::field)
+                .containsExactly(tuple(Code.NOT_MUTABLE, "globalWrites"));
+    }
+
+    @Test
+    void validateReportsNotOwnerWhenAnotherWorkflowOwnsVariable() {
+        when(globalVariableRepository.findByNameIn(Set.of("lastSync")))
+                .thenReturn(List.of(GlobalVariableFixture.aMutable(5L, "lastSync", "0", "0", 99L)));
+
+        List<Violation> violations = violationsOf(aWorkflowWriting("global.lastSync"), WORKFLOW, null);
+
+        assertThat(violations).extracting(Violation::code).containsExactly(Code.NOT_OWNER);
+    }
+
+    @Test
+    @DisplayName("validate — a workflow saved for the first time owns no variable yet")
+    void validateReportsNotOwnerWhenWorkflowIsNew() {
+        when(globalVariableRepository.findByNameIn(Set.of("lastSync")))
+                .thenReturn(List.of(GlobalVariableFixture.aMutable(5L, "lastSync", "0", "0", WORKFLOW)));
+
+        List<Violation> violations = violationsOf(aWorkflowWriting("global.lastSync"), null, null);
+
+        assertThat(violations).extracting(Violation::code).containsExactly(Code.NOT_OWNER);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"{{global.lastSync}}", "global.lastSync.at", "lastSync", "x global.lastSync"})
+    void validateReportsInvalidWriteTargetWhenTargetIsNoBareToken(String target) {
+        lenient().when(globalVariableRepository.findByNameIn(any())).thenReturn(List.of());
+
+        List<Violation> violations = violationsOf(aWorkflowWriting(target), WORKFLOW, null);
+
+        assertThat(violations).extracting(Violation::code).containsExactly(Code.INVALID_WRITE_TARGET);
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private static ConnectionMng aWorkflowUsingIdoitUrl() {
         return ConnectionMngFixture.aWorkflowWith(
                 ConnectionMngFixture.aMethod("#ababab", "0_1", "listObjects", "{{global.idoitUrl}}/api"));
+    }
+
+    private static ConnectionMng aWorkflowWriting(String target) {
+        MethodMng method = ConnectionMngFixture.aMethod("#ababab", "0_1", "createVm", "https://api.example.test");
+        method.setGlobalWrites(Map.of(target, "#ababab.(response).body.$.at"));
+        return ConnectionMngFixture.aWorkflowWith(method);
     }
 
     private static GlobalVariable aVariableScopedTo(GlobalVariableScopeType type, GlobalVariableScopeTarget target) {

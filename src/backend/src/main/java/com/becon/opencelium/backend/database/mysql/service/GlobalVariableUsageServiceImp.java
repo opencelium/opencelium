@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -72,8 +73,10 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
     public void rebuildForWorkflow(long connectionId, ConnectionMng connectionMng) {
         usageRepository.deleteBySource(SourceType.WORKFLOW, connectionId);
 
-        saveUsages(GlobalReferenceCollector.collect(connectionMng), (variableId, reference) ->
-                GlobalVariableUsage.readByWorkflow(variableId, connectionId, reference.elementType(),
+        saveUsages(GlobalReferenceCollector.collect(connectionMng), (variableId, reference) -> reference.write()
+                ? GlobalVariableUsage.writeByWorkflow(variableId, connectionId, reference.elementType(),
+                        reference.index(), reference.color(), reference.label(), reference.field())
+                : GlobalVariableUsage.readByWorkflow(variableId, connectionId, reference.elementType(),
                         reference.index(), reference.color(), reference.label(), reference.field()));
     }
 
@@ -396,7 +399,9 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
             return;
         }
 
-        Set<String> names = references.stream().map(Found::variable).collect(Collectors.toSet());
+        // a write target that names no variable has none
+        Set<String> names = references.stream().map(Found::variable).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
         Map<String, Long> idsByName = new HashMap<>();
         for (GlobalVariable variable : globalVariableRepository.findByNameIn(names)) {
             idsByName.put(variable.getName(), variable.getId());
