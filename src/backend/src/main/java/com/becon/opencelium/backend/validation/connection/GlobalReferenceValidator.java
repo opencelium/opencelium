@@ -212,7 +212,8 @@ public class GlobalReferenceValidator {
             // a write replaces the whole value, so its target is global.name, without a path
             if (reference.write() && reference.variable() == null) {
                 violations.add(violation(Code.INVALID_WRITE_TARGET, reference,
-                        "A method names the global variable it writes as global.name, without braces or path, not '%s'"
+                        "'%s' names no global variable to write: write global.name in globalWrites and "
+                                + "{{global.name}} in set(), without a path"
                                 .formatted(reference.reference())));
                 continue;
             }

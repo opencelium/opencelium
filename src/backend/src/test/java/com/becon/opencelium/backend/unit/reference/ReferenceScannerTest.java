@@ -114,4 +114,29 @@ class ReferenceScannerTest {
         assertThat(bound.code()).isNull();
         assertThat(bound.args()).isEmpty();
     }
+
+    // ── set("...", value) in script code ──────────────────────────────────────
+
+    @Test
+    void findScriptSetsReturnsQuotedTargetWhenCodeCallsSet() {
+        String code = "set(\"{{global.lastSync}}\", VAR_0); set ( '{{global.page}}' , 2);";
+
+        List<ScriptRef> sets = ReferenceScanner.findScriptSets(code);
+
+        assertThat(sets).extracting(ScriptRef::reference).containsExactly("{{global.lastSync}}", "{{global.page}}");
+        assertThat(code.substring(sets.get(0).start(), sets.get(0).end())).isEqualTo("\"{{global.lastSync}}\"");
+    }
+
+    @Test
+    void findScriptSetsSkipsCallWhenSetIsPartOfLongerName() {
+        assertThat(ReferenceScanner.findScriptSets("map.set('{{global.a}}', 1); reset('{{global.b}}', 2);")).isEmpty();
+    }
+
+    @Test
+    @DisplayName("callsScriptSet — any set(...) call counts, even one whose target is not quoted")
+    void callsScriptSetReturnsTrueWhenTargetIsNotQuoted() {
+        assertThat(ReferenceScanner.callsScriptSet("var t = '{{global.a}}'; set(t, 1);")).isTrue();
+        assertThat(ReferenceScanner.callsScriptSet("map.set('a', 1); RESULT_VAR = 1;")).isFalse();
+        assertThat(ReferenceScanner.callsScriptSet(null)).isFalse();
+    }
 }

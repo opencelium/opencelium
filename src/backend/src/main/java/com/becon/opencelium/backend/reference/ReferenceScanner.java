@@ -32,6 +32,13 @@ public final class ReferenceScanner {
     private static final Pattern SCRIPT_REF =
             Pattern.compile("(?<![\\w$.])ref\\s*\\(\\s*([\"'])((?:(?!\\1).)*)\\1\\s*\\)");
 
+    // set("...", value) as a call of its own: the quoted first argument is the target
+    private static final Pattern SCRIPT_SET =
+            Pattern.compile("(?<![\\w$.])set\\s*\\(\\s*([\"'])((?:(?!\\1).)*)\\1");
+
+    // any call of set(...), whatever its first argument
+    private static final Pattern SCRIPT_SET_CALL = Pattern.compile("(?<![\\w$.])set\\s*\\(");
+
     // name of the variable a ref(...) call is bound to; upper case like the VAR_n of enhancement
     // args, which every script engine already binds
     private static final String SCRIPT_REF_VARIABLE = "OC_REF_";
@@ -68,10 +75,13 @@ public final class ReferenceScanner {
     }
 
     /**
-     * A {@code ref("...")} call in the code of a script.
+     * A {@code ref("...")} call, or the target of a {@code set("...", value)} call, in the code
+     * of a script.
      *
-     * @param start     index of the {@code r} of {@code ref} in the code
-     * @param end       index just past the closing parenthesis
+     * @param start     where it starts in the code: the {@code r} of {@code ref}, or the opening
+     *                  quote of the target of {@code set}
+     * @param end       index just past the closing parenthesis of {@code ref}, or just past the
+     *                  closing quote of the target of {@code set}
      * @param reference the quoted argument, e.g. {@code {{global.tenants[0].id}}}
      */
     public record ScriptRef(int start, int end, String reference) {
@@ -149,5 +159,29 @@ public final class ReferenceScanner {
             name = SCRIPT_REF_VARIABLE + ++n;
         }
         return name;
+    }
+
+    /**
+     * Finds the {@code set("...", value)} calls of a script whose target is a quoted text, in the
+     * order they appear. Each is reported with the place of its quoted target, including the
+     * quotes, and the target as written, e.g. {@code {{global.lastSync}}}.
+     */
+    public static List<ScriptRef> findScriptSets(String code) {
+        if (code == null || code.indexOf("set") == -1) {
+            return List.of();
+        }
+
+        List<ScriptRef> found = new ArrayList<>();
+        Matcher matcher = SCRIPT_SET.matcher(code);
+        while (matcher.find()) {
+            found.add(new ScriptRef(matcher.start(1), matcher.end(), matcher.group(2).strip()));
+        }
+
+        return found;
+    }
+
+    /** Tells whether a script calls {@code set(...)}, whatever it passes as the target. */
+    public static boolean callsScriptSet(String code) {
+        return code != null && code.indexOf("set") != -1 && SCRIPT_SET_CALL.matcher(code).find();
     }
 }

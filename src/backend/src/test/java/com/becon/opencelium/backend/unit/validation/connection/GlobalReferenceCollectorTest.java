@@ -189,6 +189,22 @@ class GlobalReferenceCollectorTest {
     }
 
     @Test
+    @DisplayName("collect — a set() target is a write; a ref() of the same variable is still a read")
+    void collectReturnsWriteWhenEnhancementCallsSet() {
+        MethodMng method = ConnectionMngFixture.aMethod("#ababab", "0_1", "createObject", "https://api.example.test");
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith(method);
+        workflow.setFieldBindings(List.of(aBinding("#ababab", "Cursor", null,
+                "var last = ref('{{global.lastSync}}'); set(\"{{global.lastSync}}\", VAR_0); set('{{global.x.y}}', 1);")));
+
+        List<Found> found = GlobalReferenceCollector.collect(workflow);
+
+        assertThat(found).extracting(Found::variable, Found::reference, Found::write).containsExactly(
+                tuple("lastSync", "{{global.lastSync}}", true),
+                tuple(null, "{{global.x.y}}", true),
+                tuple("lastSync", "{{global.lastSync}}", false));
+    }
+
+    @Test
     void collectReportsNoIndexWhenBindingTargetIsNoMethod() {
         ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith();
         workflow.setFieldBindings(List.of(aBinding("#cdcdcd", null, null, "ref('{{global.a}}')")));
