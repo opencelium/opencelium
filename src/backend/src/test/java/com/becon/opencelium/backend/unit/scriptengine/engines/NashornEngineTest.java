@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
@@ -305,5 +306,47 @@ class NashornEngineTest {
         Object result = engine.execute(bound.code(), bound.args(), values::get);
 
         assertThat(result).isEqualTo("globex-50");
+    }
+
+    @Test
+    @DisplayName("execute — a wrapped script keeps its result and returns its set() calls in order")
+    void executeReturnsResultAndWritesWhenScriptIsWrappedForSet() {
+        String code = "var count = VAR_0.length;\n"
+                + "set(\"{{global.lastSync}}\", VAR_0[count - 1].at);\n"
+                + "set('{{global.seen}}', { count: count });\n"
+                + "RESULT_VAR = 'synced ' + count;";
+        Map<String, Object> values = Map.of("#ababab.(response).body.$.items",
+                List.of(Map.of("at", "2026-11-19"), Map.of("at", "2026-11-20")));
+
+        Object returned = engine.execute(GlobalVariableWriter.ScriptSets.wrap(code),
+                Map.of("VAR_0", "#ababab.(response).body.$.items"), values::get);
+        GlobalVariableWriter.ScriptSets.Outcome outcome = GlobalVariableWriter.ScriptSets.unwrap(returned);
+
+        assertThat(outcome.result()).isEqualTo("synced 2");
+        assertThat(outcome.writes()).containsExactly(
+                new GlobalVariableWriter.ScriptSets.Write("{{global.lastSync}}", "2026-11-20"),
+                new GlobalVariableWriter.ScriptSets.Write("{{global.seen}}", Map.of("count", 2)));
+    }
+
+    @Test
+    void executeReturnsNoWritesWhenWrappedScriptCallsNoSet() {
+        Object returned = engine.execute(GlobalVariableWriter.ScriptSets.wrap("var a = 1; a + 1"), Map.of());
+
+        GlobalVariableWriter.ScriptSets.Outcome outcome = GlobalVariableWriter.ScriptSets.unwrap(returned);
+
+        assertThat(outcome.result()).isEqualTo(2);
+        assertThat(outcome.writes()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("execute — a line separator that ends a comment survives the wrapping")
+    void executeRunsWrappedScriptWhenCodeHoldsLineSeparator() {
+        Object returned = engine.execute(
+                GlobalVariableWriter.ScriptSets.wrap("set('{{global.a}}', 1); // note\u2028'done'"), Map.of());
+
+        GlobalVariableWriter.ScriptSets.Outcome outcome = GlobalVariableWriter.ScriptSets.unwrap(returned);
+
+        assertThat(outcome.result()).isEqualTo("done");
+        assertThat(outcome.writes()).extracting(GlobalVariableWriter.ScriptSets.Write::value).containsExactly(1);
     }
 }

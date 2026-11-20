@@ -1,5 +1,9 @@
 package com.becon.opencelium.backend.unit.execution;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.when;
@@ -22,6 +26,13 @@ import com.becon.opencelium.backend.exception.GlobalVariableNotFoundException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
 import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
+import com.becon.opencelium.backend.resource.execution.EnhancementEx;
+import com.becon.opencelium.backend.resource.execution.FieldBindEx;
+import com.becon.opencelium.backend.scriptengine.ScriptEngineProvider;
+import com.becon.opencelium.backend.scriptengine.ScriptExecutionManagerProvider;
+import com.becon.opencelium.backend.scriptengine.engines.NashornEngine;
+import com.becon.opencelium.backend.scriptengine.engines.PolyglotEngine;
+import org.springframework.beans.factory.ObjectProvider;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -332,5 +343,88 @@ class ExecutionManagerImplTest {
 
     private static GlobalVariable aMutable(String name) {
         return GlobalVariableFixture.aMutable(5L, name, "0", "0", OWNER_WORKFLOW);
+    }
+
+    // ── set() in an enhancement ───────────────────────────────────────────────
+
+    @Test
+    @DisplayName("executeScript — set() writes once the script is done, and the run reads the new value")
+    void executeScriptWritesGlobalWhenJavaScriptCallsSet() {
+        givenScriptEngines();
+        ExecutionManager manager = aWritingManager(aSnapshot("lastSync", "\"old\""),
+                List.of(anEnhancement("b1", "js", "set('{{global.lastSync}}', 'new'); RESULT_VAR = 'ok';")),
+                aMutable("lastSync"));
+
+        Object result = manager.executeScript("b1");
+
+        assertThat(result).isEqualTo("ok");
+        assertThat(manager.getValue("{{global.lastSync}}")).isEqualTo("new");
+    }
+
+    @Test
+    void executeScriptThrowsWhenSetTargetHasPath() {
+        givenScriptEngines();
+        ExecutionManager manager = aWritingManager(aSnapshot("lastSync", "{}"),
+                List.of(anEnhancement("b1", "js", "set('{{global.lastSync.at}}', 1);")), aMutable("lastSync"));
+
+        assertThatThrownBy(() -> manager.executeScript("b1"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("{{global.lastSync.at}}");
+        assertThat(manager.getValue("{{global.lastSync}}")).isEqualTo(Map.of());
+    }
+
+    @Test
+    @DisplayName("executeScript — set() is JavaScript only; another language fails before it runs")
+    void executeScriptThrowsWhenNonJavaScriptCallsSet() {
+        PolyglotEngine python = mock(PolyglotEngine.class);
+        when(python.supports(any())).thenReturn(true);
+        when(python.isUp()).thenReturn(true);
+        givenScriptEngines(python);
+        ExecutionManager manager = aWritingManager(aSnapshot("lastSync", "0"),
+                List.of(anEnhancement("b1", "python3", "set('{{global.lastSync}}', 1)")), aMutable("lastSync"));
+
+        assertThatThrownBy(() -> manager.executeScript("b1"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("JavaScript only");
+        verify(python, never()).execute(anyString(), any(Map.class), any());
+    }
+
+    /** Registers the script engines executeScript finds: Nashorn, and the given polyglot engine. */
+    @SuppressWarnings("unchecked")
+    private static void givenScriptEngines(PolyglotEngine... polyglot) {
+        ObjectProvider<PolyglotEngine> polyglotProvider = mock(ObjectProvider.class);
+        PolyglotEngine none = mock(PolyglotEngine.class);
+        when(polyglotProvider.getObject()).thenReturn(polyglot.length > 0 ? polyglot[0] : none);
+        ObjectProvider<NashornEngine> nashornProvider = mock(ObjectProvider.class);
+        when(nashornProvider.getObject()).thenReturn(new NashornEngine());
+        new ScriptExecutionManagerProvider(new ScriptEngineProvider(polyglotProvider, nashornProvider));
+    }
+
+    private static FieldBindEx anEnhancement(String bindId, String language, String script) {
+        EnhancementEx enhancement = new EnhancementEx();
+        enhancement.setLang(language);
+        enhancement.setScript(script);
+        enhancement.setArgs(Map.of());
+        FieldBindEx binding = new FieldBindEx();
+        binding.setBindId(bindId);
+        binding.setEnhance(enhancement);
+        return binding;
+    }
+
+    /** A manager with field bindings whose run belongs to the owner workflow of {@code variables}. */
+    private static ExecutionManager aWritingManager(GlobalVariableSnapshot snapshot, List<FieldBindEx> bindings,
+            GlobalVariable... variables) {
+        GlobalVariableRepository repository = mock(GlobalVariableRepository.class);
+        for (GlobalVariable variable : variables) {
+            when(repository.findByNameIn(List.of(variable.getName()))).thenReturn(List.of(variable));
+        }
+        GlobalVariableWriter.Run run = new GlobalVariableWriter(repository, new TestRunOrigins(), 1024)
+                .forRun(OWNER_WORKFLOW, 900L);
+
+        ExecutionManager manager = new ExecutionManagerImpl(
+                Map.of(), bindings, Map.of(CONNECTOR_ID, Map.of()), Map.of(), Map.of(),
+                snapshot, run, ReferenceExtractor::new);
+        manager.setCurrentCtorId(CONNECTOR_ID);
+        return manager;
     }
 }

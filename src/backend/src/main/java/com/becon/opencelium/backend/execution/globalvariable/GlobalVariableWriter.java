@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.globalvariable;
 
+import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
@@ -11,9 +12,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Writes mutable global variables for running executions.
@@ -116,6 +122,82 @@ public class GlobalVariableWriter {
             } catch (JsonProcessingException e) {
                 throw new IllegalStateException("A JSON tree could not be written as text", e);
             }
+        }
+    }
+
+    /**
+     * Lets an enhancement in JavaScript write mutable variables with {@code
+     * set("{{global.name}}", value)}.
+     *
+     * <p>A script that calls {@code set} runs wrapped: a prelude defines {@code set}, which records
+     * each call in order and returns the value, and the script runs through global {@code eval},
+     * so it keeps its own result and its variables. The wrapped script returns both, and the
+     * recorded writes are made once the script has finished; a script that fails writes nothing.
+     * A script that defines its own {@code set} uses that one.
+     */
+    public static final class ScriptSets {
+
+        private static final Pattern TARGET = Pattern.compile(RegExpression.globalRef);
+        private static final String RESULT = "result";
+        private static final String SETS = "sets";
+
+        private ScriptSets() {
+        }
+
+        /** One {@code set} call: its target as passed, and its value. */
+        public record Write(String target, Object value) {
+        }
+
+        /** What a wrapped script returned: its own result, and its writes in order. */
+        public record Outcome(Object result, List<Write> writes) {
+        }
+
+        /** Returns JavaScript that runs {@code code} and records its {@code set} calls. */
+        public static String wrap(String code) {
+            String literal;
+            try {
+                literal = MAPPER.writeValueAsString(code);
+            } catch (JsonProcessingException e) {
+                throw new IllegalStateException("A script could not be quoted", e);
+            }
+            // a JSON string may hold these two, a JavaScript string literal may not
+            literal = literal.replace("\u2028", "\\u2028").replace("\u2029", "\\u2029");
+
+            return "var OC_SETS = [];\n"
+                    + "function set(target, value) { OC_SETS.push({ target: String(target), value: value }); return value; }\n"
+                    + "var OC_RESULT = (0, eval)(" + literal + ");\n"
+                    + "({ " + RESULT + ": OC_RESULT, " + SETS + ": OC_SETS });";
+        }
+
+        /**
+         * Reads what a script built by {@link #wrap} returned, after the engine turned it into
+         * Java values.
+         *
+         * @throws IllegalStateException if the result is not the shape {@link #wrap} returns
+         */
+        public static Outcome unwrap(Object returned) {
+            if (!(returned instanceof Map<?, ?> map) || !(map.get(SETS) instanceof List<?> sets)) {
+                throw new IllegalStateException("A script that calls set() returned no record of its writes");
+            }
+
+            List<Write> writes = new ArrayList<>();
+            for (Object set : sets) {
+                Map<?, ?> call = (Map<?, ?>) set;
+                writes.add(new Write(String.valueOf(call.get("target")), call.get("value")));
+            }
+
+            return new Outcome(map.get(RESULT), writes);
+        }
+
+        /**
+         * Returns the name of the variable a target names: {@code {{global.name}}}, without a
+         * path, because a write replaces the whole value. Empty for any other target.
+         */
+        public static Optional<String> nameOf(String target) {
+            Matcher matcher = TARGET.matcher(target == null ? "" : target.strip());
+            return matcher.matches() && matcher.group(2) == null
+                    ? Optional.of(matcher.group(1))
+                    : Optional.empty();
         }
     }
 }
