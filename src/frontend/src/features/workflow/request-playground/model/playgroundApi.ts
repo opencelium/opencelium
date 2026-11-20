@@ -16,8 +16,10 @@ export const playgroundApi = baseApi.injectEndpoints({
 			query: (body) => ({ url: METHOD_TEST_URL, method: 'POST', body, customOptions: { ignoreError: true } }),
 		}),
 		// A mutation, not a query: each call runs the connector's authentication.
-		getMethodCurl: b.mutation<MethodCurlResult, MethodCurlRequest>({
-			query: (body) => ({ url: '/connection/method/curl', method: 'POST', body, customOptions: { ignoreError: true } }),
+		getMethodCurl: b.mutation<MethodCurlResult, { body: MethodCurlRequest; masterPassword: string }>({
+			query: ({ body, masterPassword }) => ({ url: '/connection/method/curl', method: 'POST', body,
+				...(masterPassword ? { headers: { 'x-master-password': masterPassword } } : {}),
+				customOptions: { ignoreError: true } }),
 		}),
 	}),
 });

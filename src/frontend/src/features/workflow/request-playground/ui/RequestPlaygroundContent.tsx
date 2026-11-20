@@ -71,10 +71,7 @@ export function RequestPlaygroundContent({ session, execution, liveNode, isReadO
 		values.values);
 	const send = usePlaygroundSend({ session, values, missingKeys, onInvalidInputs: (keys) => selectInput(keys[0]) });
 	const curl = usePlaygroundCurl({ session, values });
-	const toggleCurl = () => {
-		if (!isCurlVisible) curl.generateIfIdle();
-		setIsCurlVisible(!isCurlVisible);
-	};
+	const toggleCurl = () => setIsCurlVisible(!isCurlVisible);
 	const previewArgs = { inputs: session.inputs, values: values.values,
 		connector: session.connector, requestData: values.requestData };
 	const preview = previewRequest({ draft: session.draft, ...previewArgs });

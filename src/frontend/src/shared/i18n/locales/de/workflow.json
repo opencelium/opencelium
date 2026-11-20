@@ -1084,6 +1084,7 @@
       "connectorError": "Die Daten des Konnektors {{connector}} konnten nicht gelesen werden",
       "invalidJson_one": "Ein Wert ist kein gültiges JSON. Korrigieren Sie ihn, um cURL zu erzeugen.",
       "invalidJson_other": "{{count}} Werte sind kein gültiges JSON. Korrigieren Sie sie, um cURL zu erzeugen.",
+      "masterPasswordTitle": "Der cURL-Befehl enthält echte Zugangsdaten. Geben Sie das Master-Passwort ein, um ihn zu erzeugen.",
       "credentialsNote": "Enthält echte Zugangsdaten und Tokens. Für eine POSIX-Shell (bash, zsh, Git Bash), nicht für Windows cmd oder PowerShell.",
       "generate": "Erzeugen",
       "idle": "Erzeugen Sie den Befehl, sobald die Testwerte ausgefüllt sind."
