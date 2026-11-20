@@ -35,7 +35,9 @@ public class GlobalVariableChange {
 
     /** What was changed. */
     public enum Type {
-        CREATE, VALUE, CONFIG, PERMISSIONS, RESTORE, DELETE
+        CREATE, VALUE, CONFIG, PERMISSIONS, RESTORE, DELETE,
+        /** The current value of a mutable variable was set back to its initial value. */
+        RESET
     }
 
     /** Who made the change. */

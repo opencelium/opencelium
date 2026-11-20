@@ -5,11 +5,13 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -77,4 +79,25 @@ public interface GlobalVariableRepository extends JpaRepository<GlobalVariable, 
                                 @Param("pattern") String pattern,
                                 @Param("userId") Integer userId,
                                 Pageable pageable);
+
+    /**
+     * Sets the current value of a mutable variable back to its initial value in one statement,
+     * so it cannot interleave with a write of a run. The version stays as it is: a reset changes
+     * no part of the definition.
+     *
+     * @param setAt  when the reset happened
+     * @param userId the user who reset the value
+     * @return 1 if the variable was reset, 0 if it does not exist or is not mutable
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+            UPDATE GlobalVariable v
+               SET v.currentValue = v.value,
+                   v.currentRevision = v.currentRevision + 1,
+                   v.currentSetAt = :setAt,
+                   v.currentSetByUser = :userId,
+                   v.currentSetByExecution = NULL
+             WHERE v.id = :id AND v.kind = com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind.MUTABLE
+            """)
+    int resetCurrentValue(@Param("id") long id, @Param("setAt") Date setAt, @Param("userId") Integer userId);
 }

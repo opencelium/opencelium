@@ -16,6 +16,7 @@ import com.becon.opencelium.backend.database.mysql.repository.ConnectionReposito
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
@@ -23,6 +24,7 @@ import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChange
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO.Actor;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO.CategoryRef;
+import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO.Mutable;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO.Scope;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO.UserRef;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO.WorkflowRef;
@@ -96,6 +98,7 @@ public class GlobalVariableMapper {
                 toScope(variable),
                 toUserRef(variable.getOwnerUserId()),
                 myPermissions,
+                toMutable(variable),
                 variable.getVersion(),
                 toInstant(variable.getCreatedAt()),
                 toActor(variable.getCreatedBy()),
@@ -111,7 +114,7 @@ public class GlobalVariableMapper {
                 variable.getKind(),
                 variable.getDescription(),
                 variable.isSecret(),
-                variable.isSecret() ? null : preview(variable.getValue()),
+                variable.isSecret() ? null : preview(variable.getReadableValue()),
                 variable.getScopeType(),
                 usageCount,
                 myPermissions,
@@ -167,16 +170,24 @@ public class GlobalVariableMapper {
                 variable.getKind(),
                 variable.getDescription(),
                 variable.isSecret(),
-                variable.isSecret() ? null : preview(variable.getValue()));
+                variable.isSecret() ? null : preview(variable.getReadableValue()));
     }
 
+    /**
+     * Builds the value a run reads now. For a mutable variable that is its current value, set by
+     * a reset or a run, so the time and the user are those of the current value, not of the
+     * definition.
+     */
     public GlobalVariableValueDTO toValue(GlobalVariable variable) {
+        boolean mutable = variable.getKind() == GlobalVariableKind.MUTABLE;
+
         return new GlobalVariableValueDTO(
                 variable.getId(),
                 variable.getVersion(),
-                variable.isSecret() ? null : readJson(variable.getValue()),
-                toInstant(variable.getUpdatedAt()),
-                toActor(variable.getUpdatedBy()));
+                variable.getCurrentRevision(),
+                variable.isSecret() ? null : readJson(variable.getReadableValue()),
+                toInstant(mutable ? variable.getCurrentSetAt() : variable.getUpdatedAt()),
+                toActor(mutable ? variable.getCurrentSetByUser() : variable.getUpdatedBy()));
     }
 
     /**
@@ -235,6 +246,22 @@ public class GlobalVariableMapper {
         }
 
         return userRepository.findById(userId).map(GlobalVariableMapper::displayName);
+    }
+
+    private Mutable toMutable(GlobalVariable variable) {
+        if (variable.getKind() != GlobalVariableKind.MUTABLE) {
+            return null;
+        }
+
+        Long ownerWorkflowId = variable.getOwnerWorkflowId();
+        return new Mutable(
+                readJson(variable.getCurrentValue()),
+                variable.getCurrentRevision(),
+                toInstant(variable.getCurrentSetAt()),
+                toActor(variable.getCurrentSetByUser()),
+                variable.getCurrentSetByExecution(),
+                variable.getBusyPolicy(),
+                ownerWorkflowId == null ? null : new WorkflowRef(ownerWorkflowId, workflowTitle(ownerWorkflowId)));
     }
 
     private Scope toScope(GlobalVariable variable) {

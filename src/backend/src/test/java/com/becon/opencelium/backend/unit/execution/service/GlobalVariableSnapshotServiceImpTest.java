@@ -291,6 +291,17 @@ class GlobalVariableSnapshotServiceImpTest {
     }
 
     @Test
+    @DisplayName("takeOf — a mutable variable gives its current value, not its initial one")
+    void takeOfReadsCurrentValueWhenVariableIsMutable() {
+        GlobalVariable mutable = GlobalVariableFixture.aMutable(2L, "counter", "0", "7", 12L);
+
+        GlobalVariableSnapshot snapshot = service.takeOf(List.of(mutable));
+
+        assertThat(snapshot.entries()).singleElement()
+                .satisfies(entry -> assertThat(entry.value().asInt()).isEqualTo(7));
+    }
+
+    @Test
     void takeOfReturnsEmptySnapshotWhenNoVariableIsGiven() {
         GlobalVariableSnapshot snapshot = service.takeOf(List.of());
 

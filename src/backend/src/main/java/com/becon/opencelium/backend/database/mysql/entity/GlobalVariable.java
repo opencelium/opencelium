@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.database.mysql.entity;
 
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
 import jakarta.persistence.CollectionTable;
@@ -31,7 +32,8 @@ import java.util.Set;
  * A named value that users define once and that workflows, connectors and notifications read
  * through {@code {{global.name}}}.
  *
- * <p>The {@code value} column holds JSON text of any JSON type. {@code version} starts at 1 and
+ * <p>The {@code value} column holds JSON text of any JSON type; for a mutable variable it is the
+ * initial value, and {@code currentValue} the value runs read and write. {@code version} starts at 1 and
  * goes up by one on every saved change, including a change of the scope targets or the grants:
  * it guards the edit form against lost updates and numbers the entries of the change log.
  */
@@ -75,6 +77,36 @@ public class GlobalVariable {
     // the creator; null once that user is deleted, which leaves the variable to the admins
     @Column(name = "owner_user_id")
     private Integer ownerUserId;
+
+    // ── mutable variables only; null (0 for the revision) for the other kinds ──
+
+    // the value runs read and write; 'value' holds the initial value it is reset to. Written on
+    // insert and afterwards only by the repository's update queries: a save of the entity leaves
+    // these columns alone, so an edit of the definition never overwrites what a run wrote in the
+    // meantime, and a new current value never moves 'version'
+    @Column(name = "current_value", columnDefinition = "LONGTEXT", updatable = false)
+    private String currentValue;
+
+    @Column(name = "current_revision", nullable = false, updatable = false)
+    private long currentRevision;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "current_set_at", updatable = false)
+    private Date currentSetAt;
+
+    @Column(name = "current_set_by_user", updatable = false)
+    private Integer currentSetByUser;
+
+    @Column(name = "current_set_by_execution", updatable = false)
+    private Long currentSetByExecution;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "busy_policy", length = 16)
+    private GlobalVariableBusyPolicy busyPolicy;
+
+    // the one workflow whose runs may write the variable; null once that workflow is deleted
+    @Column(name = "owner_workflow_id")
+    private Long ownerWorkflowId;
 
     // primitive and preset, so the first saved version is 1 and Spring Data still tells a new
     // variable by its missing id
@@ -205,6 +237,70 @@ public class GlobalVariable {
 
     public void setOwnerUserId(Integer ownerUserId) {
         this.ownerUserId = ownerUserId;
+    }
+
+    public String getCurrentValue() {
+        return currentValue;
+    }
+
+    public void setCurrentValue(String currentValue) {
+        this.currentValue = currentValue;
+    }
+
+    public long getCurrentRevision() {
+        return currentRevision;
+    }
+
+    public void setCurrentRevision(long currentRevision) {
+        this.currentRevision = currentRevision;
+    }
+
+    public Date getCurrentSetAt() {
+        return currentSetAt;
+    }
+
+    public void setCurrentSetAt(Date currentSetAt) {
+        this.currentSetAt = currentSetAt;
+    }
+
+    public Integer getCurrentSetByUser() {
+        return currentSetByUser;
+    }
+
+    public void setCurrentSetByUser(Integer currentSetByUser) {
+        this.currentSetByUser = currentSetByUser;
+    }
+
+    public Long getCurrentSetByExecution() {
+        return currentSetByExecution;
+    }
+
+    public void setCurrentSetByExecution(Long currentSetByExecution) {
+        this.currentSetByExecution = currentSetByExecution;
+    }
+
+    public GlobalVariableBusyPolicy getBusyPolicy() {
+        return busyPolicy;
+    }
+
+    public void setBusyPolicy(GlobalVariableBusyPolicy busyPolicy) {
+        this.busyPolicy = busyPolicy;
+    }
+
+    public Long getOwnerWorkflowId() {
+        return ownerWorkflowId;
+    }
+
+    public void setOwnerWorkflowId(Long ownerWorkflowId) {
+        this.ownerWorkflowId = ownerWorkflowId;
+    }
+
+    /**
+     * Returns the JSON text a reader gets now: the current value of a mutable variable, the
+     * stored value of the other kinds.
+     */
+    public String getReadableValue() {
+        return kind == GlobalVariableKind.MUTABLE ? currentValue : value;
     }
 
     public long getVersion() {

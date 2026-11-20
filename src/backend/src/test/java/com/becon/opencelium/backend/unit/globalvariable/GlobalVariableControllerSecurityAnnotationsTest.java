@@ -39,6 +39,7 @@ class GlobalVariableControllerSecurityAnnotationsTest {
             "update,            UPDATE",
             "updatePermissions, UPDATE",
             "restore,           UPDATE",
+            "reset,             UPDATE",
             "delete,            DELETE",
     })
     void endpointRequiresComponentPermissionWhenCalled(String methodName, String permission) {
