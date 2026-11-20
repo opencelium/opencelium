@@ -21,10 +21,11 @@ import java.util.TreeMap;
 /**
  * The global variables a run reads, as they were when the run started.
  *
- * <p>A run takes its snapshot once, before its first step, and never reads the store again: a
- * change saved while the run is going reaches the next run, not this one. The snapshot holds the
- * variables in the scope of the workflow only, so a reference to any other variable does not
- * resolve.
+ * <p>A run takes its snapshot once, before its first step, and reads constants from it only: a
+ * change saved while the run is going reaches the next run, not this one. A mutable variable is
+ * read live from the store at each read instead, and its entry here is the run's copy of the
+ * value it last saw. The snapshot holds the variables in the scope of the workflow only, so a
+ * reference to any other variable does not resolve.
  *
  * <p>The value of a secret is held decrypted, in memory only. Its entry says it is a secret, so
  * what logs or shows a request can hide it with {@link #secretTexts()}.
@@ -50,30 +51,40 @@ public final class GlobalVariableSnapshot {
      * @param openToAll        whether the scope of the variable is every workflow, which is what
      *                         a connector needs: it is shared by workflows of any category
      * @param secret           whether the variable is a secret, whose value logs must hide
+     * @param mutable          whether the variable is mutable, whose value a run reads live
+     *                         rather than from this snapshot
      * @param unreadableReason why the value of a secret could not be decrypted, {@code null}
      *                         when it could; never holds the stored text
      */
     public record Entry(String name, long version, JsonNode value, boolean openToAll, boolean secret,
-            String unreadableReason) {
+            boolean mutable, String unreadableReason) {
 
         public Entry {
             Objects.requireNonNull(name, "name");
             Objects.requireNonNull(value, "value");
         }
 
-        /** Creates the entry of a variable that is open to all workflows and is not a secret. */
+        /** Creates the entry of a constant that is open to all workflows and is not a secret. */
         public Entry(String name, long version, JsonNode value) {
             this(name, version, value, true);
         }
 
-        /** Creates the entry of a variable that is not a secret. */
+        /** Creates the entry of a constant that is not a secret. */
         public Entry(String name, long version, JsonNode value, boolean openToAll) {
-            this(name, version, value, openToAll, false, null);
+            this(name, version, value, openToAll, false, false, null);
+        }
+
+        /**
+         * Creates the entry of a mutable variable, with the current value it had when the snapshot
+         * was taken. A mutable variable is never a secret.
+         */
+        public static Entry ofMutable(String name, long version, JsonNode value, boolean openToAll) {
+            return new Entry(name, version, value, openToAll, false, true, null);
         }
 
         /** Creates the entry of a secret, with its decrypted value. */
         public static Entry ofSecret(String name, long version, JsonNode value, boolean openToAll) {
-            return new Entry(name, version, value, openToAll, true, null);
+            return new Entry(name, version, value, openToAll, true, false, null);
         }
 
         /**
@@ -83,7 +94,7 @@ public final class GlobalVariableSnapshot {
          * @param reason why it could not be decrypted, for the error
          */
         public static Entry ofUnreadableSecret(String name, long version, boolean openToAll, String reason) {
-            return new Entry(name, version, MissingNode.getInstance(), openToAll, true,
+            return new Entry(name, version, MissingNode.getInstance(), openToAll, true, false,
                     Objects.requireNonNull(reason, "reason"));
         }
 
@@ -110,8 +121,8 @@ public final class GlobalVariableSnapshot {
         // the value of a secret stays out of whatever prints an entry
         @Override
         public String toString() {
-            return "Entry[name=%s, version=%d, value=%s, openToAll=%b, secret=%b]"
-                    .formatted(name, version, secret ? MASK : value, openToAll, secret);
+            return "Entry[name=%s, version=%d, value=%s, openToAll=%b, secret=%b, mutable=%b]"
+                    .formatted(name, version, secret ? MASK : value, openToAll, secret, mutable);
         }
     }
 
@@ -144,8 +155,8 @@ public final class GlobalVariableSnapshot {
 
     /**
      * Returns a snapshot in which variable {@code name} holds {@code value}: the run's own copy
-     * after it wrote the variable. Everything else of the entry stays as it is, and this snapshot
-     * is not changed.
+     * after it wrote or read the variable. Everything else of the entry stays as it is, and this
+     * snapshot is not changed.
      *
      * @throws IllegalArgumentException if the snapshot does not hold the variable
      */
@@ -157,7 +168,7 @@ public final class GlobalVariableSnapshot {
 
         Map<String, Entry> changed = new TreeMap<>(entries);
         changed.put(name, new Entry(name, entry.version(), Objects.requireNonNull(value, "value"),
-                entry.openToAll(), entry.secret(), null));
+                entry.openToAll(), entry.secret(), entry.mutable(), null));
         return new GlobalVariableSnapshot(Collections.unmodifiableMap(changed));
     }
 

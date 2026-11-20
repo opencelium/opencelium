@@ -16,11 +16,15 @@ import com.becon.opencelium.backend.exception.GlobalVariableNotFoundException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
 import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,6 +48,7 @@ class GlobalVariableWriterTest {
     private static final long TEST_COPY = 77L;
     private static final long EXECUTION = 900L;
     private static final int MAX_VALUE_BYTES = 32;
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     @Mock
     GlobalVariableRepository repository;
@@ -140,6 +145,51 @@ class GlobalVariableWriterTest {
         GlobalVariableWriter.Run run = writer.forRun(OWNER_WORKFLOW, EXECUTION);
 
         assertThatThrownBy(() -> run.write("lastSync", "b")).isInstanceOf(GlobalVariableNotFoundException.class);
+    }
+
+    // ── reading the current value live ────────────────────────────────────────
+
+    @Test
+    @DisplayName("readCurrent — any run reads the value the store holds now, not only the owner's")
+    void readCurrentReturnsStoredValueWhenVariableIsMutable() throws JsonProcessingException {
+        givenVariables(GlobalVariableFixture.aMutable(5L, "lastSync", "\"a\"", "{\"page\":3}", OWNER_WORKFLOW));
+
+        Optional<JsonNode> current = writer.forRun(43L, EXECUTION).readCurrent("lastSync");
+
+        assertThat(current).contains(JSON.readTree("{\"page\":3}"));
+    }
+
+    @Test
+    void readCurrentReturnsNullNodeWhenCurrentValueIsNull() {
+        givenVariables(GlobalVariableFixture.aMutable(5L, "lastSync", "\"a\"", null, OWNER_WORKFLOW));
+
+        Optional<JsonNode> current = writer.forRun(OWNER_WORKFLOW, EXECUTION).readCurrent("lastSync");
+
+        assertThat(current).contains(NullNode.getInstance());
+    }
+
+    @Test
+    void readCurrentReturnsEmptyWhenVariableIsConstant() {
+        givenVariables(GlobalVariableFixture.aConstant(5L, "lastSync", "\"a\""));
+
+        assertThat(writer.forRun(OWNER_WORKFLOW, EXECUTION).readCurrent("lastSync")).isEmpty();
+    }
+
+    @Test
+    void readCurrentReturnsEmptyWhenVariableNoLongerExists() {
+        givenVariables();
+
+        assertThat(writer.forRun(OWNER_WORKFLOW, EXECUTION).readCurrent("lastSync")).isEmpty();
+    }
+
+    @Test
+    void readCurrentThrowsWhenStoredValueIsNotJson() {
+        givenVariables(GlobalVariableFixture.aMutable(5L, "lastSync", "\"a\"", "{broken", OWNER_WORKFLOW));
+        GlobalVariableWriter.Run run = writer.forRun(OWNER_WORKFLOW, EXECUTION);
+
+        assertThatThrownBy(() -> run.readCurrent("lastSync"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("lastSync");
     }
 
     private static GlobalVariable aLastSync() {

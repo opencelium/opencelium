@@ -302,6 +302,19 @@ class GlobalVariableSnapshotServiceImpTest {
     }
 
     @Test
+    @DisplayName("takeOf — only the entry of a mutable variable is marked mutable, so a run reads it live")
+    void takeOfMarksEntryMutableWhenVariableIsMutable() {
+        GlobalVariable mutable = GlobalVariableFixture.aMutable(2L, "counter", "0", "7", 12L);
+        GlobalVariable constant = GlobalVariableFixture.aConstant(3L, "limit", "5");
+
+        GlobalVariableSnapshot snapshot = service.takeOf(List.of(mutable, constant));
+
+        assertThat(snapshot.entries())
+                .extracting(GlobalVariableSnapshot.Entry::name, GlobalVariableSnapshot.Entry::mutable)
+                .containsExactly(tuple("counter", true), tuple("limit", false));
+    }
+
+    @Test
     void takeOfReturnsEmptySnapshotWhenNoVariableIsGiven() {
         GlobalVariableSnapshot snapshot = service.takeOf(List.of());
 

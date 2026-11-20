@@ -23,7 +23,8 @@ public interface ExecutionManager {
     Object getValue(String ref);
 
     /**
-     * Reads a global variable from the snapshot the run took when it started.
+     * Reads a global variable. A constant comes from the snapshot the run took when it started; a
+     * mutable variable is read live, so the run sees writes made since it started.
      *
      * @return the value in its JSON type: a string, a number, a boolean, {@code null}, a list or a
      *     map; {@code null} too when the path of the reference leads nowhere

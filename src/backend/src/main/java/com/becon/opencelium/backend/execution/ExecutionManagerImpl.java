@@ -37,11 +37,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -62,9 +64,11 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<Integer, Map<String, String>> requestData;
     private final Map<Integer, RestTemplate> restTemplate;
     private final Map<Integer, Pagination> pagination;
-    // the run's own copy of the values: a write by the run replaces it
+    // the run's own copy of the values: a write by the run, or a live read, replaces it
     private GlobalVariableSnapshot globalSnapshot;
     private final GlobalVariableWriter.Run globalWriter;
+    // the variables a test run wrote: the store never got their value, so the run's copy holds it
+    private final Set<String> writtenInCopyOnly = new HashSet<>();
     private final Extractor refExtractor;
     private final List<Loop> loops = new ArrayList<>();
     private final List<FieldBindEx> fieldBind;
@@ -118,11 +122,11 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     /**
-     * Creates a manager that resolves global variables from the snapshot the run took when it
-     * started and writes mutable variables through {@code globalWriter}.
+     * Creates a manager that resolves constants from the snapshot the run took when it started,
+     * and reads and writes mutable variables through {@code globalWriter}.
      *
-     * @param globalWriter writes the mutable variables of the run; {@code null} for a run that
-     *                     may write none
+     * @param globalWriter reads the mutable variables of the run live and writes them; {@code
+     *                     null} for a run that reads the snapshot only and may write none
      */
     public ExecutionManagerImpl(
             Map<String, Object> webhookVars,
@@ -257,6 +261,9 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
         JsonNode written = globalWriter.write(name, value);
         globalSnapshot = globalSnapshot.withValue(name, written);
+        if (globalWriter.isTestRun()) {
+            writtenInCopyOnly.add(name);
+        }
     }
 
     @Override
@@ -377,18 +384,41 @@ public class ExecutionManagerImpl implements ExecutionManager {
     @Override
     public Object getGlobalValue(GlobalReference reference) {
         String path = reference.getPath().orElse(null);
-        if (path == null || loops.isEmpty()) {
-            return GlobalValueResolver.resolve(globalSnapshot, reference);
-        }
+        boolean inLoop = path != null && !loops.isEmpty();
 
         // inside a loop the path may name iterators: the token of a split, or an index or a key
-        Optional<String> token = GlobalLoopSource.splitToken(path, loops);
-        if (token.isPresent()) {
-            return token.get();
+        if (inLoop) {
+            Optional<String> token = GlobalLoopSource.splitToken(path, loops);
+            if (token.isPresent()) {
+                return token.get();
+            }
+        }
+
+        readLive(reference.getName());
+        if (!inLoop) {
+            return GlobalValueResolver.resolve(globalSnapshot, reference);
         }
 
         return GlobalValueResolver.resolve(globalSnapshot, reference.getName(),
                 GlobalLoopSource.withLoopValues(path, loops), reference.getRaw());
+    }
+
+    /**
+     * Brings the run's copy of a mutable variable up to the value the store holds now, so the run
+     * sees what a run of the owner workflow, or a reset, wrote since it started. A constant stays
+     * as the snapshot took it. A test run keeps reading its own copy of a variable it wrote; a run
+     * without a writer, such as the single-method test, reads the snapshot only. A variable that
+     * is gone from the store keeps the value the run last saw.
+     */
+    private void readLive(String name) {
+        if (globalWriter == null || writtenInCopyOnly.contains(name)) {
+            return;
+        }
+
+        boolean mutable = globalSnapshot.find(name).map(GlobalVariableSnapshot.Entry::mutable).orElse(false);
+        if (mutable) {
+            globalWriter.readCurrent(name).ifPresent(value -> globalSnapshot = globalSnapshot.withValue(name, value));
+        }
     }
 
     /**

@@ -345,6 +345,108 @@ class ExecutionManagerImplTest {
         return GlobalVariableFixture.aMutable(5L, name, "0", "0", OWNER_WORKFLOW);
     }
 
+    // ── reading mutable global variables live ─────────────────────────────────
+
+    private static final long READING_WORKFLOW = 43L;
+    private static final long TEST_COPY = 77L;
+
+    @Test
+    @DisplayName("getValue — a mutable variable gives what its owner wrote after this run started")
+    void getValueReadsStoredValueWhenMutableChangedSinceStart() {
+        GlobalVariableRepository repository = aStoreWith(
+                GlobalVariableFixture.aMutable(5L, "lastSync", "\"a\"", "\"new\"", OWNER_WORKFLOW));
+        ExecutionManager manager = aReadingManager(aMutableSnapshot("lastSync", "\"old\""), repository,
+                new TestRunOrigins(), READING_WORKFLOW);
+
+        assertThat(manager.getValue("{{global.lastSync}}")).isEqualTo("new");
+    }
+
+    @Test
+    void getValueFollowsPathIntoStoredValueWhenVariableIsMutable() {
+        GlobalVariableRepository repository = aStoreWith(
+                GlobalVariableFixture.aMutable(5L, "state", "{}", "{\"page\":4}", OWNER_WORKFLOW));
+        ExecutionManager manager = aReadingManager(aMutableSnapshot("state", "{\"page\":1}"), repository,
+                new TestRunOrigins(), READING_WORKFLOW);
+
+        assertThat(manager.getValue("{{global.state.page}}")).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("getValue — a constant comes from the snapshot, the store is not asked")
+    void getValueReadsSnapshotOnlyWhenVariableIsConstant() {
+        GlobalVariableRepository repository = mock(GlobalVariableRepository.class);
+        ExecutionManager manager = aReadingManager(aSnapshot("limit", "5"), repository,
+                new TestRunOrigins(), READING_WORKFLOW);
+
+        assertThat(manager.getValue("{{global.limit}}")).isEqualTo(5);
+        verify(repository, never()).findByNameIn(any());
+    }
+
+    @Test
+    void getValueKeepsLastSeenValueWhenMutableIsGoneFromStore() {
+        GlobalVariableRepository repository = aStoreWith();
+        ExecutionManager manager = aReadingManager(aMutableSnapshot("lastSync", "\"old\""), repository,
+                new TestRunOrigins(), READING_WORKFLOW);
+
+        assertThat(manager.getValue("{{global.lastSync}}")).isEqualTo("old");
+    }
+
+    @Test
+    @DisplayName("getValue — a test run reads the store until it writes, then its own copy")
+    void getValueReadsOwnCopyWhenTestRunWroteMutable() {
+        GlobalVariableRepository repository = aStoreWith(
+                GlobalVariableFixture.aMutable(5L, "lastSync", "\"a\"", "\"stored\"", OWNER_WORKFLOW));
+        TestRunOrigins origins = new TestRunOrigins();
+        origins.register(TEST_COPY, OWNER_WORKFLOW);
+        ExecutionManager manager = aReadingManager(aMutableSnapshot("lastSync", "\"old\""), repository,
+                origins, TEST_COPY);
+
+        Object beforeWrite = manager.getValue("{{global.lastSync}}");
+        manager.writeGlobal("lastSync", "mine");
+
+        assertThat(beforeWrite).isEqualTo("stored");
+        assertThat(manager.getValue("{{global.lastSync}}")).isEqualTo("mine");
+    }
+
+    @Test
+    void getValueReadsSnapshotWhenRunHasNoWriter() {
+        ExecutionManager manager = aManagerWith(Map.of(), aMutableSnapshot("lastSync", "\"old\""));
+
+        assertThat(manager.getValue("{{global.lastSync}}")).isEqualTo("old");
+    }
+
+    /** A store that finds each of {@code variables} by its name, and nothing else. */
+    private static GlobalVariableRepository aStoreWith(GlobalVariable... variables) {
+        GlobalVariableRepository repository = mock(GlobalVariableRepository.class);
+        when(repository.findByNameIn(any())).thenReturn(List.of());
+        for (GlobalVariable variable : variables) {
+            when(repository.findByNameIn(List.of(variable.getName()))).thenReturn(List.of(variable));
+        }
+        return repository;
+    }
+
+    /** A manager whose run executes workflow {@code connectionId} against {@code repository}. */
+    private static ExecutionManager aReadingManager(GlobalVariableSnapshot snapshot,
+            GlobalVariableRepository repository, TestRunOrigins origins, long connectionId) {
+        GlobalVariableWriter.Run run = new GlobalVariableWriter(repository, origins, 1024)
+                .forRun(connectionId, 900L);
+
+        ExecutionManager manager = new ExecutionManagerImpl(
+                Map.of(), List.of(), Map.of(CONNECTOR_ID, Map.of()), Map.of(), Map.of(),
+                snapshot, run, ReferenceExtractor::new);
+        manager.setCurrentCtorId(CONNECTOR_ID);
+        return manager;
+    }
+
+    private static GlobalVariableSnapshot aMutableSnapshot(String name, String json) {
+        try {
+            return GlobalVariableSnapshot.of(List.of(
+                    GlobalVariableSnapshot.Entry.ofMutable(name, 1, JSON.readTree(json), true)));
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(json, e);
+        }
+    }
+
     // ── set() in an enhancement ───────────────────────────────────────────────
 
     @Test
