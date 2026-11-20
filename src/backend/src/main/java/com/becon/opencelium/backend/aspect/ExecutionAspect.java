@@ -45,6 +45,7 @@ import com.becon.opencelium.backend.execution.globalvariable.GlobalTextRenderer;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalValueCaster;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalValueResolver;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.execution.logger.pubsub.ExecutionEventPublisher;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionFinishedEvent;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionStartedEvent;
@@ -61,8 +62,10 @@ import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.openjdk.nashorn.api.scripting.JSObject;
@@ -113,6 +116,7 @@ public class ExecutionAspect {
     private final ConnectionService connectionService;
     private final LanguageService languageService;
     private final GlobalVariableSnapshotService globalVariableSnapshotService;
+    private final WorkflowRunGate runGate;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -128,7 +132,8 @@ public class ExecutionAspect {
             WebSocketNotificationService notificationService,
             ConnectionService connectionService,
             LanguageService languageService,
-            GlobalVariableSnapshotService globalVariableSnapshotService) {
+            GlobalVariableSnapshotService globalVariableSnapshotService,
+            WorkflowRunGate runGate) {
         this.schedulerService = schedulerService;
         this.userService = userService;
         this.incomingWebhookService = incomingWebhookService;
@@ -143,6 +148,40 @@ public class ExecutionAspect {
         this.connectionService = connectionService;
         this.languageService = languageService;
         this.globalVariableSnapshotService = globalVariableSnapshotService;
+        this.runGate = runGate;
+    }
+
+    /**
+     * Lets a workflow that uses a mutable global variable run one execution at a time; see
+     * {@link WorkflowRunGate}. Within this aspect an {@code @Around} advice wraps the
+     * {@code @Before} and {@code @After...} ones, so a start that waits or is refused creates no
+     * execution, sends no notification and publishes no event, and the workflow is freed only after
+     * the end of the run has been recorded.
+     */
+    @Around("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
+    public Object gateByMutableVariables(ProceedingJoinPoint joinPoint, JobExecutionContext context) throws Throwable {
+        JobDataMap jobDataMap = context.getMergedJobDataMap();
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        // a test run writes only its own copy of the values, so it never waits for a real run
+        if (data != null && data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
+            return joinPoint.proceed();
+        }
+
+        int schedulerId = data != null ? data.getScheduleId() : jobDataMap.getIntValue("schedulerId");
+        long connectionId = schedulerService.getById(schedulerId).getConnection().getId();
+        WorkflowRunGate.Admission admission = runGate.admit(
+                connectionId, context.getJobDetail().getKey(), context.getTrigger().getJobDataMap());
+        if (!admission.runs()) {
+            return null;
+        }
+        if (admission == WorkflowRunGate.Admission.UNGATED) {
+            return joinPoint.proceed();
+        }
+        try {
+            return joinPoint.proceed();
+        } finally {
+            runGate.release(connectionId);
+        }
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -160,6 +199,8 @@ public class ExecutionAspect {
         Scheduler scheduler = schedulerService.getById(schedulerId);
         long connectionId = scheduler.getConnection().getId();
         String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
+        // lets a start refused while this run goes name the execution that holds the workflow
+        runGate.recordExecution(connectionId, execId);
 
         // save required data on job execution context
         jobDataMap.put("execId", execId);

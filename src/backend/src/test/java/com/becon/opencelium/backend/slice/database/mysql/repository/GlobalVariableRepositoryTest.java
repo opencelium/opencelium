@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableGrant;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableScopeTarget;
+import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
@@ -157,6 +158,37 @@ class GlobalVariableRepositoryTest {
                 EnumSet.of(GlobalVariableKind.CONSTANT, GlobalVariableKind.MUTABLE));
 
         assertThat(variables).extracting(GlobalVariable::getName).containsExactlyInAnyOrder("idoitUrl", "lastSync");
+    }
+
+    // ── findMutableUsedByWorkflow ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("findMutableUsedByWorkflow — owned or referenced by the workflow, mutable only")
+    void findMutableUsedByWorkflowReturnsOwnedAndReferencedMutablesWhenWorkflowUsesThem() {
+        long workflow = 42L;
+        long otherWorkflow = 43L;
+        GlobalVariable owned = aTransientMutable("lastSync", "0");
+        owned.setOwnerWorkflowId(workflow);
+        em.persist(owned);
+        GlobalVariable referenced = aTransientMutable("cursor", "0");
+        referenced.setOwnerWorkflowId(otherWorkflow);
+        em.persist(referenced);
+        GlobalVariable usedElsewhere = aTransientMutable("pageToken", "0");
+        usedElsewhere.setOwnerWorkflowId(otherWorkflow);
+        em.persist(usedElsewhere);
+        GlobalVariable constant = GlobalVariableFixture.aTransientConstant("idoitUrl", ALICE);
+        em.persist(constant);
+        em.persist(GlobalVariableUsage.readByWorkflow(referenced.getId(), workflow,
+                GlobalVariableUsage.ElementType.METHOD, "0", "#FFCFB5", "GetItems", "body.cursor"));
+        em.persist(GlobalVariableUsage.readByWorkflow(constant.getId(), workflow,
+                GlobalVariableUsage.ElementType.METHOD, "0", "#FFCFB5", "GetItems", "endpoint"));
+        em.persist(GlobalVariableUsage.readByConnector(usedElsewhere.getId(), workflow, "token"));
+        em.flush();
+        em.clear();
+
+        List<GlobalVariable> variables = repository.findMutableUsedByWorkflow(workflow);
+
+        assertThat(variables).extracting(GlobalVariable::getName).containsExactly("cursor", "lastSync");
     }
 
     // ── findUsableWithScopeTargets ────────────────────────────────────────────

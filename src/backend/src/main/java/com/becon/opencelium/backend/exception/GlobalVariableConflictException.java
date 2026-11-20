@@ -16,7 +16,12 @@ public class GlobalVariableConflictException extends RuntimeException {
         /** The variable is used, so it cannot be deleted or renamed. */
         IN_USE,
         /** The new scope would leave out a workflow that uses the variable. */
-        SCOPE_NARROWING
+        SCOPE_NARROWING,
+        /**
+         * A workflow that uses the variable is already running and cannot start again now: the
+         * variable's busy policy is Refuse, or the queue of the workflow is full.
+         */
+        BUSY
     }
 
     /**
