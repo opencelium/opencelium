@@ -38,7 +38,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Start core as in task 2. 2. Run `curl -s -X POST localhost:9090/api/auth -H 'Content-Type: application/json' -d '{"username":"admin","password":"1234"}'`: the response holds a session JWT. 3. Send the same request to `/api/auth/login`: the status code is 401. 4. Ask for `/api/auth/me` with the session JWT of step 2: the status code is 200.
 - **Size:** approximately 10 lines of code, plus `plan.md` and `docs/security/README.md`
 - **Depends on:** 2
-- **Status:** in work
+- **Status:** done
 
 ## Task 3: feat(core): log in by email and give error codes for a failed login
 - **Criteria:** AU-01, AU-02, AU-03, AU-04, AU-05

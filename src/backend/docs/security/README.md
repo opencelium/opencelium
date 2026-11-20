@@ -19,7 +19,7 @@ sequenceDiagram
     Note over U,G: SELF-HOST DEPLOYMENT — Direct flow (no Service Portal)
 
     U->>FE: Click "Login with Google"
-    FE->>BE: GET /api/auth/login?provider=google
+    FE->>BE: GET /api/auth?provider=google
     BE-->>U: 302 Redirect to Google authorize URL (state + PKCE)
     U->>G: Login on accounts.google.com (user enters credentials at Google only)
     G-->>U: 302 Redirect to Backend callback (+ code)
@@ -47,7 +47,7 @@ sequenceDiagram
     Note over U,G: CLOUD DEPLOYMENT — Brokered flow (SP owns the user)
 
     U->>FE: Click "Login with Google"
-    FE->>BE: GET /api/auth/login?provider=google
+    FE->>BE: GET /api/auth?provider=google
     BE-->>U: 302 Redirect to SP authorize URL (+idp hint)
     U->>SP: GET /authorize
     SP-->>U: 302 Redirect to Google
@@ -81,7 +81,7 @@ sequenceDiagram
     Note over U,SP: CLOUD DEPLOYMENT — Credential flow (portal-native accounts only)
 
     U->>FE: Enter username + password in OC login form
-    FE->>BE: POST /api/auth/login (credentials)
+    FE->>BE: POST /api/auth (credentials)
     BE->>SP: Exchange credentials at SP auth API (server-to-server)
     Note over SP: Validate credentials<br/>Map → local user<br/>Resolve tenantID
     SP-->>BE: SP access token { sub, tenant_id, email }

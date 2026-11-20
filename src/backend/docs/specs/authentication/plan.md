@@ -112,7 +112,7 @@ The reviewer confirms each decision before task 1 starts.
 
 | Method | Path | Purpose | Permission |
 |---|---|---|---|
-| `POST` | `/api/auth/login` | Start a session (AU-01 to AU-04) | Open |
+| `POST` | `/api/auth` | Start a session (AU-01 to AU-04) | Open |
 | `POST` | `/api/auth/refresh` | Refresh a session (AU-08) | A valid refresh token as the bearer token |
 | `POST` | `/api/auth/logout` | End a session (AU-09). The response has the status code 204 and no body. | A valid refresh token as the bearer token |
 | `GET` | `/api/auth/me` | The data of the current OpenCelium user (AU-05) | A valid session JWT as the bearer token |

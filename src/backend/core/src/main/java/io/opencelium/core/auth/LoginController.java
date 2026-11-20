@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 final class LoginController {
 
-	static final String PATH = "/api/auth/login";
+	static final String PATH = "/api/auth";
 
 	/** The longest name and the longest password that a login takes: a bound for the query and for the hash. */
 	static final int MAX_LENGTH = 256;
