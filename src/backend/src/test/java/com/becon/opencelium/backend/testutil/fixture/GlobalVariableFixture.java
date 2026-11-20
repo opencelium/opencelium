@@ -32,6 +32,13 @@ public final class GlobalVariableFixture {
      */
     public static final String S3CR3T_ENCRYPTED = "AAECAwQFBgcICQoLDA0OD2u1WXnRxWMQvzSbWavf58w=";
 
+    /**
+     * The JSON value {@code "s3cr3t"} encrypted with the built-in default key of
+     * {@code GlobalVariableCipher} and the same fixed IV, for the same reason: with this one,
+     * {@link #SECRET_KEY} always fails.
+     */
+    public static final String S3CR3T_ENCRYPTED_WITH_DEFAULT_KEY = "AAECAwQFBgcICQoLDA0OD9piuAvszpM9SxSMscQ2g5M=";
+
     private GlobalVariableFixture() {}
 
     /**

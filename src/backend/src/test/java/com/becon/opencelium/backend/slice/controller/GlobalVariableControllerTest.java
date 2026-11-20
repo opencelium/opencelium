@@ -40,7 +40,6 @@ import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
-import com.becon.opencelium.backend.utility.crypto.GlobalVariableCipher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import java.time.Instant;
@@ -260,19 +259,6 @@ class GlobalVariableControllerTest {
                 .andExpect(jsonPath("$.error").value("GLOBAL_VARIABLE_INVALID"))
                 .andExpect(jsonPath("$.violations[0].field").value("value"))
                 .andExpect(jsonPath("$.violations[0].code").value("SECRET_REMOVAL_NEEDS_VALUE"));
-    }
-
-    @Test
-    void createReturnsInternalServerErrorWhenSecretKeyIsMissing() throws Exception {
-        when(service.create(any())).thenThrow(new GeneralServiceException(HttpStatus.INTERNAL_SERVER_ERROR,
-                GlobalVariableCipher.KEY_MISSING,
-                "Secret values cannot be saved: set " + GlobalVariableCipher.KEY_PROPERTY + " in application.yml"));
-
-        mockMvc.perform(post("/global-variable").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.error").value(GlobalVariableCipher.KEY_MISSING))
-                .andExpect(jsonPath("$.message").value(
-                        "Secret values cannot be saved: set opencelium.global-variable.secret-key in application.yml"));
     }
 
     // ── DELETE /global-variable/{id} ──────────────────────────────────────────

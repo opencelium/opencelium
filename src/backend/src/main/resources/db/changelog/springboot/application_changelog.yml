@@ -328,3 +328,11 @@ versions:
         operation: add
         value: TRANSACTION_READ_COMMITTED
         path: spring.datasource.hikari.transaction-isolation
+      # opencelium.global-variable.secret-key is deliberately not added: 'add' replaces an
+      # existing value, so it would erase an own key set before this change set runs; the
+      # built-in default would take over and every secret saved under the own key would become
+      # unreadable. The key ships empty (built-in default) in application_default.yml.
+      - changeset: 3
+        operation: add
+        value: 65536
+        path: opencelium.global-variable.max-value-bytes
