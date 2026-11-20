@@ -4,6 +4,7 @@
       "emitOn": ["EXECUTION_START", "EXECUTION_END"],
       "properties": ["id", "connectionId"],
       "segments": {
+        "GLOBAL_SNAPSHOT": ["name", "version", "size", "data"],
         "EXCEPTION": ["data"]
       }
     },
@@ -44,6 +45,7 @@
       "emitOn": ["EXECUTION_START", "EXECUTION_END"],
       "properties": ["id", "connectionId"],
       "segments": {
+        "GLOBAL_SNAPSHOT": ["name", "version", "size", "data"],
         "EXCEPTION": ["data"]
       }
     },

@@ -18,6 +18,7 @@ public class DefaultPhaseBuilderFactory implements PhaseBuilderFactory {
     }
 
     private void registerBuilders() {
+        builderMap.put(PhaseCategory.EXECUTION, new ExecutionLogDataBuilder());
         builderMap.put(PhaseCategory.OPERATION, new OperationLogDataBuilder());
         builderMap.put(PhaseCategory.IF, new IfLogDataBuilder());
         builderMap.put(PhaseCategory.LOOP, new LoopLogDataBuilder());
