@@ -109,6 +109,10 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
         if (variable.isSecret()) {
             return toSecretEntry(variable, openToAll);
         }
+        if (variable.getKind() == GlobalVariableKind.MUTABLE) {
+            return GlobalVariableSnapshot.Entry.ofMutable(
+                    variable.getName(), variable.getVersion(), parse(variable), openToAll);
+        }
 
         return new GlobalVariableSnapshot.Entry(variable.getName(), variable.getVersion(), parse(variable), openToAll);
     }
@@ -142,8 +146,8 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
         return GlobalVariableSnapshot.Entry.ofUnreadableSecret(name, version, openToAll, reason);
     }
 
-    // a mutable variable gives the current value it has as the run starts; reading it live at
-    // each step comes with the busy check, which keeps two runs of one workflow apart
+    // a mutable variable gives the current value it has as the run starts; a run then reads it
+    // live at each step, see ExecutionManagerImpl#getGlobalValue
     private JsonNode parse(GlobalVariable variable) {
         String text = variable.getReadableValue();
         if (text == null) {
