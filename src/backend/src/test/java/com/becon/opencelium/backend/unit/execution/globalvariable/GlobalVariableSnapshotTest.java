@@ -155,4 +155,27 @@ class GlobalVariableSnapshotTest {
     private static GlobalVariableSnapshot aSnapshotOfSecret(JsonNode value) {
         return GlobalVariableSnapshot.of(List.of(Entry.ofSecret("apiKey", 1, value, true)));
     }
+
+    @Test
+    @DisplayName("withValue — a new snapshot holds the written value; this one and the other entries stay")
+    void withValueReplacesOneValueWhenVariableIsInSnapshot() {
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(
+                new Entry("lastSync", 3, new TextNode("old"), false), new Entry("limit", 1, IntNode.valueOf(5))));
+
+        GlobalVariableSnapshot written = snapshot.withValue("lastSync", new TextNode("new"));
+
+        assertThat(written.find("lastSync")).get()
+                .extracting(Entry::value, Entry::version, Entry::openToAll)
+                .containsExactly(new TextNode("new"), 3L, false);
+        assertThat(written.find("limit")).get().extracting(Entry::value).isEqualTo(IntNode.valueOf(5));
+        assertThat(snapshot.find("lastSync")).get().extracting(Entry::value).isEqualTo(new TextNode("old"));
+    }
+
+    @Test
+    void withValueThrowsWhenVariableIsNotInSnapshot() {
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(new Entry("limit", 1, IntNode.valueOf(5))));
+
+        assertThatThrownBy(() -> snapshot.withValue("lastSync", new TextNode("new")))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

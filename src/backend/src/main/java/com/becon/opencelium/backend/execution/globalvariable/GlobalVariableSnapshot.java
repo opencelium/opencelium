@@ -142,6 +142,25 @@ public final class GlobalVariableSnapshot {
         return byName.isEmpty() ? EMPTY : new GlobalVariableSnapshot(Collections.unmodifiableMap(byName));
     }
 
+    /**
+     * Returns a snapshot in which variable {@code name} holds {@code value}: the run's own copy
+     * after it wrote the variable. Everything else of the entry stays as it is, and this snapshot
+     * is not changed.
+     *
+     * @throws IllegalArgumentException if the snapshot does not hold the variable
+     */
+    public GlobalVariableSnapshot withValue(String name, JsonNode value) {
+        Entry entry = entries.get(name);
+        if (entry == null) {
+            throw new IllegalArgumentException("The snapshot holds no global variable '" + name + "'");
+        }
+
+        Map<String, Entry> changed = new TreeMap<>(entries);
+        changed.put(name, new Entry(name, entry.version(), Objects.requireNonNull(value, "value"),
+                entry.openToAll(), entry.secret(), null));
+        return new GlobalVariableSnapshot(Collections.unmodifiableMap(changed));
+    }
+
     /** Finds a variable by its exact name. */
     public Optional<Entry> find(String name) {
         return Optional.ofNullable(entries.get(name));

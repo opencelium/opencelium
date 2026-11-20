@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.exception.JumpValidationException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
 import com.becon.opencelium.backend.execution.jump.ExecutionJumpGraphBuilder;
 import com.becon.opencelium.backend.execution.jump.JumpGraph;
 import com.becon.opencelium.backend.execution.jump.JumpNode;
@@ -41,6 +42,7 @@ public class ConnectionExecutor {
     private final MaskingService masking;
     private final ProxyEx proxy;
     private final GlobalVariableSnapshot globalSnapshot;
+    private final GlobalVariableWriter.Run globalWriter;
     private ExecutionManager executionManager;
 
     private static final Logger log = LoggerFactory.getLogger(ConnectionExecutor.class);
@@ -50,6 +52,7 @@ public class ConnectionExecutor {
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
         this.globalSnapshot = executionObj.getGlobalSnapshot();
+        this.globalWriter = executionObj.getGlobalWriter();
 
         this.masking = new MaskingServiceImp(rules);
     }
@@ -64,6 +67,7 @@ public class ConnectionExecutor {
                 getRestTemplate(),
                 getPagination(),
                 globalSnapshot,
+                globalWriter,
                 ReferenceExtractor::new
         );
 

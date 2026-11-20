@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Date;
@@ -100,4 +101,27 @@ public interface GlobalVariableRepository extends JpaRepository<GlobalVariable, 
              WHERE v.id = :id AND v.kind = com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind.MUTABLE
             """)
     int resetCurrentValue(@Param("id") long id, @Param("setAt") Date setAt, @Param("userId") Integer userId);
+
+    /**
+     * Gives a mutable variable a new current value in one statement, written by a run. The
+     * version stays as it is: a run changes no part of the definition.
+     *
+     * @param value       the new value as JSON text
+     * @param setAt       when the run wrote it
+     * @param executionId the execution that wrote it
+     * @return 1 if the value was written, 0 if the variable does not exist or is not mutable
+     */
+    @Transactional
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+            UPDATE GlobalVariable v
+               SET v.currentValue = :value,
+                   v.currentRevision = v.currentRevision + 1,
+                   v.currentSetAt = :setAt,
+                   v.currentSetByUser = NULL,
+                   v.currentSetByExecution = :executionId
+             WHERE v.id = :id AND v.kind = com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind.MUTABLE
+            """)
+    int writeCurrentValue(@Param("id") long id, @Param("value") String value, @Param("setAt") Date setAt,
+            @Param("executionId") long executionId);
 }

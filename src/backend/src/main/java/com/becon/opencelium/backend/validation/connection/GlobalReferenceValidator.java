@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableScopeResolver;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -97,10 +99,34 @@ public class GlobalReferenceValidator {
         long workflowId = connectionId == null ? NOT_SAVED_YET : connectionId;
         Set<Long> categoryIds = scopeResolver.categoryChainOf(categoryId);
 
-        validate(references, (variable, reference) -> variable.isInScopeOf(workflowId, categoryIds)
-                ? Optional.empty()
-                : Optional.of(violation(Code.OUT_OF_SCOPE, reference,
-                        "This workflow is outside the scope of global variable '%s'".formatted(reference.variable()))));
+        validate(references, (variable, reference) -> {
+            if (!variable.isInScopeOf(workflowId, categoryIds)) {
+                return Optional.of(violation(Code.OUT_OF_SCOPE, reference,
+                        "This workflow is outside the scope of global variable '%s'".formatted(reference.variable())));
+            }
+
+            return reference.write() ? checkWrite(variable, reference, workflowId) : Optional.empty();
+        });
+    }
+
+    /**
+     * Says why this workflow may not write a variable, or nothing if it may: only a mutable
+     * variable is written, and only by its owner workflow. A workflow saved for the first time
+     * owns nothing yet.
+     */
+    private static Optional<Violation> checkWrite(GlobalVariable variable, Found reference, long workflowId) {
+        if (variable.getKind() != GlobalVariableKind.MUTABLE) {
+            return Optional.of(violation(Code.NOT_MUTABLE, reference,
+                    "Global variable '%s' is a %s; a method can only write a mutable variable"
+                            .formatted(reference.variable(), variable.getKind())));
+        }
+        if (!Objects.equals(variable.getOwnerWorkflowId(), workflowId)) {
+            return Optional.of(violation(Code.NOT_OWNER, reference,
+                    "Only the owner workflow of global variable '%s' may write it, and this workflow is not its owner"
+                            .formatted(reference.variable())));
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -173,7 +199,8 @@ public class GlobalReferenceValidator {
      * where the reference stands, and the saving user may use it.
      */
     private void validate(List<Found> references, ScopeRule scopeRule) {
-        Set<String> names = references.stream().map(Found::variable).collect(Collectors.toSet());
+        Set<String> names = references.stream().map(Found::variable).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
         Map<String, GlobalVariable> variables = globalVariableRepository.findByNameIn(names).stream()
                 .collect(Collectors.toMap(GlobalVariable::getName, Function.identity(), (first, second) -> first));
 
@@ -182,6 +209,14 @@ public class GlobalReferenceValidator {
 
         List<Violation> violations = new ArrayList<>();
         for (Found reference : references) {
+            // a write replaces the whole value, so its target is global.name, without a path
+            if (reference.write() && reference.variable() == null) {
+                violations.add(violation(Code.INVALID_WRITE_TARGET, reference,
+                        "A method names the global variable it writes as global.name, without braces or path, not '%s'"
+                                .formatted(reference.reference())));
+                continue;
+            }
+
             // looked up by the exact name: a run resolves references the same way
             GlobalVariable variable = variables.get(reference.variable());
             if (variable == null) {
