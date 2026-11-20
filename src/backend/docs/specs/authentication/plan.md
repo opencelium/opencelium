@@ -153,7 +153,7 @@ Each test that touches MongoDB is a full-application test against the local Mong
 | AU-05 | A full-application test: a login, then `/api/auth/me` with the session JWT. The response holds the 5 items and no password hash. |
 | AU-06 | A full-application test of `/api/auth/me`: no token, an expired token, a token with a different key, and a refresh token. Each gets the status code 401. |
 | AU-07 | A full-application test with 2 Spring contexts on 1 database: a session JWT of context 1 is valid in context 2. A restart of context 1 keeps the session JWT valid. The collection `signing_keys` holds 1 document. A full-application test with 2 threads on an empty database: the 2 loaders read the same signing key. |
-| AU-08 | A full-application test: a refresh gives 2 new tokens. A second use of the old refresh token gets `session-ended`, and then the new refresh token also gets it. A locked user and a deleted user get `session-ended`. After the end of the session a refresh gets `session-ended`, and no token expires after the end. |
+| AU-08 | A full-application test: a refresh gives 2 new tokens. A second use of the old refresh token gets `session-ended`, and then the new refresh token also gets it. A locked user and a deleted user get `session-ended`. After the end of the session the session service stops a refresh, and no token expires after the end. At the endpoint, the decoder does not accept the expired refresh token, so the request does not reach the session service. |
 | AU-09 | A full-application test: a logout gets 204, and a refresh after it gets `session-ended`. The session JWT stays valid on `/api/auth/me` until it expires. |
 
 The unit tests also cover the decoders: a token with a wrong `typ`, a wrong `iss` or a wrong `kid` is not valid.

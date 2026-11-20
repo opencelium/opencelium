@@ -8,7 +8,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import io.opencelium.core.tenant.TenantDocument;
 
 /**
- * The state of 1 session, a tenant document of the tenant of its OpenCelium user.
+ * The state of 1 session, a tenant document of the tenant of its OpenCelium user. The token ID is not a secret: it
+ * gives no access without the signature of core. MongoDB removes a record after its end ({@link SessionIndexes}).
  *
  * @param id        the session ID, the claim {@code sid} of the 2 tokens of the session
  * @param userId    the ID of the OpenCelium user of the session
@@ -22,6 +23,10 @@ record SessionRecord(@Id String id, String tenantId, String userId, String token
 		Instant endsAt) implements TenantDocument {
 
 	static final String COLLECTION = "sessions";
+
+	static final String ID = "_id";
+
+	static final String TOKEN_ID = "tokenId";
 
 	static final String ENDS_AT = "endsAt";
 

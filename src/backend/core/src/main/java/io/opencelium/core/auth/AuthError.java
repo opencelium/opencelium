@@ -17,6 +17,12 @@ enum AuthError {
 	/** A locked OpenCelium user with the correct password. */
 	USER_LOCKED("user-locked", HttpStatus.FORBIDDEN, "The OpenCelium user is locked."),
 
+	/**
+	 * A refresh of a session that does not exist any more: it reached its end, the user logged out, an old refresh
+	 * token came again, or the user is locked or deleted. The HTTP client logs in again.
+	 */
+	SESSION_ENDED("session-ended", HttpStatus.UNAUTHORIZED, "The session ended. Log in again."),
+
 	/** A login body that is not JSON, that lacks a field, or that has a field that is too long. */
 	BAD_REQUEST("bad-request", HttpStatus.BAD_REQUEST,
 			"The body must be JSON with a username and a password of at most " + LoginController.MAX_LENGTH
