@@ -270,7 +270,7 @@ class GlobalVariableSnapshotServiceImpTest {
     }
 
     @Test
-    @DisplayName("takeFor — a secret without a value needs no key")
+    @DisplayName("takeFor — a secret without a value is not decrypted")
     void takeForReturnsNullValueWhenSecretHasNoValue() {
         when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
         givenVariables(aSecret("apiKey", null));
@@ -281,8 +281,9 @@ class GlobalVariableSnapshotServiceImpTest {
     }
 
     @Test
-    @DisplayName("takeFor — a secret that cannot be decrypted fails where it is read, not when the run starts")
-    void takeForReturnsUnreadableEntryWhenKeyIsMissing() {
+    @DisplayName("takeFor — a secret saved under an own key, read with the built-in default, fails where it is"
+            + " read, not when the run starts")
+    void takeForReturnsUnreadableEntryWhenDefaultKeyIsInUse() {
         when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
         givenVariables(aSecret("apiKey", GlobalVariableFixture.S3CR3T_ENCRYPTED));
 
@@ -292,7 +293,7 @@ class GlobalVariableSnapshotServiceImpTest {
         assertThatThrownBy(entry::value)
                 .isInstanceOf(WrongDecryptException.class)
                 .hasMessageContaining("'apiKey'")
-                .hasMessageContaining("no key is configured");
+                .hasMessageContaining("built-in default key");
     }
 
     @Test

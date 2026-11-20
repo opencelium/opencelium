@@ -1511,6 +1511,17 @@ class GlobalVariableServiceImpTest {
     }
 
     @Test
+    @DisplayName("create — without an own key a secret is still stored encrypted, with the built-in default")
+    void createStoresEncryptedSecretWhenNoKeyIsConfigured() {
+        GlobalVariableCipher defaultKey = new GlobalVariableCipher(new MockEnvironment());
+        GlobalVariableServiceImp withDefaultKey = serviceWith(defaultKey);
+
+        withDefaultKey.create(aSecretCreate(new TextNode("s3cr3t")));
+
+        assertThat(defaultKey.decrypt(savedVariable().getValue())).isEqualTo("\"s3cr3t\"");
+    }
+
+    @Test
     void createWritesMaskedCreateChangeWhenSecretIsRequested() {
         service.create(aSecretCreate(new TextNode("s3cr3t")));
 
@@ -1518,20 +1529,6 @@ class GlobalVariableServiceImpTest {
         assertThat(change.getChangeType()).isEqualTo(GlobalVariableChange.Type.CREATE);
         assertThat(change.getOldValue()).isNull();
         assertThat(change.getNewValue()).isEqualTo(GlobalVariableChange.SECRET_MASK);
-    }
-
-    @Test
-    void createThrowsGeneralServiceExceptionWhenSecretKeyIsMissing() {
-        GlobalVariableServiceImp withoutKey = serviceWithoutKey();
-        GlobalVariableRequestDTO request = aSecretCreate(new TextNode("s3cr3t"));
-
-        GeneralServiceException missing =
-                catchThrowableOfType(() -> withoutKey.create(request), GeneralServiceException.class);
-
-        assertThat(missing.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(missing.getError()).isEqualTo(GlobalVariableCipher.KEY_MISSING);
-        verify(repository, never()).saveAndFlush(any());
-        verifyNoInteractions(changeRepository);
     }
 
     @Test
@@ -1696,21 +1693,6 @@ class GlobalVariableServiceImpTest {
     }
 
     @Test
-    void updateThrowsGeneralServiceExceptionWhenFlagIsTurnedOnWithoutKey() {
-        GlobalVariable variable = givenExistingVariable();
-        GlobalVariableServiceImp withoutKey = serviceWithoutKey();
-        GlobalVariableRequestDTO request = anUpdate("idoitUrl", null, true);
-
-        GeneralServiceException missing =
-                catchThrowableOfType(() -> withoutKey.update(VARIABLE_ID, request), GeneralServiceException.class);
-
-        assertThat(missing.getError()).isEqualTo(GlobalVariableCipher.KEY_MISSING);
-        assertThat(variable.isSecret()).isFalse();
-        assertThat(variable.getValue()).isEqualTo("\"old\"");
-        verify(repository, never()).saveAndFlush(any());
-    }
-
-    @Test
     void deleteWritesMaskedDeleteChangeWhenVariableIsSecret() {
         givenExistingSecret();
 
@@ -1793,11 +1775,11 @@ class GlobalVariableServiceImpTest {
                 GlobalVariableFixture.aScopeOfAll(), VERSION);
     }
 
-    /** The service as it runs when no key for secret values is configured. */
-    private GlobalVariableServiceImp serviceWithoutKey() {
+    /** The service with the same collaborators as {@link #service}, but the given cipher. */
+    private GlobalVariableServiceImp serviceWith(GlobalVariableCipher cipher) {
         return new GlobalVariableServiceImp(repository, changeRepository, mapper, security,
                 userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
-                scopeResolver, json, new GlobalVariableCipher(new MockEnvironment()), MAX_VALUE_BYTES);
+                scopeResolver, json, cipher, MAX_VALUE_BYTES);
     }
 
     private static GlobalVariableChangeDTO aMaskedChangeDto() {
