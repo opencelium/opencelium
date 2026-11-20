@@ -314,6 +314,32 @@ opencelium:
     experation-time: 86400
   ###########################################################################
   #                                                                         #
+  #   Global variables                                                      #
+  #                                                                         #
+  #   secret-key      - key that encrypts the values of secret global       #
+  #                     variables in the database. Empty: a built-in        #
+  #                     default key is used. That default is the same for   #
+  #                     every installation and public in the source code,   #
+  #                     so it hides the values but does not protect them    #
+  #                     from anyone who has the database. For real          #
+  #                     protection set your own key, a long random string,  #
+  #                     and set it BEFORE the first secret is saved: a      #
+  #                     secret saved under one key cannot be read under     #
+  #                     another. There is no key rotation; after a key      #
+  #                     change every secret has to be entered again. Keep   #
+  #                     a copy of your key in a safe place, apart from the  #
+  #                     database backups.                                   #
+  #                     It can come from the environment variable           #
+  #                     OPENCELIUM_GLOBALVARIABLE_SECRETKEY instead, which  #
+  #                     takes precedence over this file.                    #
+  #   max-value-bytes - largest value of one global variable, in bytes      #
+  #                                                                         #
+  ###########################################################################
+  global-variable:
+    secret-key: ""
+    max-value-bytes: 65536
+  ###########################################################################
+  #                                                                         #
   #   Configuration for Notification                                        #
   #                                                                         #
   #   for handling several webhooks separate url "," and then webhook       #

@@ -85,7 +85,7 @@ Returns the entire `application.yml` as a node tree, plus an envelope-level `com
 }
 ```
 
-> The response may include secrets (`opencelium.token.secret`, `opencelium.connector.master-password`, `spring.datasource.password`, …) in full. Mask in the UI by default and never log the body.
+> The response may include secrets (`opencelium.token.secret`, `opencelium.connector.master-password`, `opencelium.global-variable.secret-key`, `spring.datasource.password`, …) in full. Mask in the UI by default and never log the body.
 
 ### Errors
 
@@ -253,6 +253,56 @@ environment:
 An explicit `--spring.config.location` still controls what Spring loads, but the migrator does not read it — keep both pointing at the same file, or use only the environment variable.
 | `opencelium.config.backup.directory` | `runtime/backup/application` | Where pre-write backups go. Created on first write. |
 | `opencelium.config.backup.keep` | `10` | Max backups retained per target file; older ones are pruned best-effort. |
+
+### Key for secret global variables
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `opencelium.global-variable.secret-key` | empty (built-in default) | Own key that encrypts the values of secret global variables in the database. Empty or blank: the built-in default key is used. |
+| `opencelium.global-variable.max-value-bytes` | `65536` | Largest value of one global variable, in bytes. |
+
+**The built-in default.** While no own key is set, secret values are encrypted with a built-in default key, so saving and reading secrets always works. That default is the same for every installation and can be read in the source code: it keeps the values from being stored in clear text, but it does **not** protect them from anyone who has the database or a backup of it. At startup the backend then logs, at WARN (never with a key value):
+
+```
+Secret global variables are encrypted with the built-in default key, which is the same for every installation and does not protect them from whoever has the database. Set your own key in opencelium.global-variable.secret-key in application.yml or in the environment variable OPENCELIUM_GLOBALVARIABLE_SECRETKEY before the first secret is saved: a secret saved under one key cannot be read under another
+```
+
+**Setting your own key.** For real protection set your own key, and set it **before the first secret is saved** (see below for what happens to secrets saved earlier). Use a long random string, for example the output of:
+
+```bash
+openssl rand -base64 48
+```
+
+Put it in `application.yml` under `opencelium.global-variable.secret-key`, or — preferred — set the environment variable `OPENCELIUM_GLOBALVARIABLE_SECRETKEY`. Spring's relaxed binding maps that variable onto the property, and it takes precedence over the file, so the empty default in `application.yml` does not get in the way. (The older form `OPENCELIUM_GLOBAL_VARIABLE_SECRET_KEY` is accepted too.) Restart the backend afterwards, as for every configuration change.
+
+```yaml
+# docker compose — the value comes from .env, which is not committed;
+# ':?' stops compose instead of passing an empty variable
+environment:
+  OPENCELIUM_GLOBALVARIABLE_SECRETKEY: ${OPENCELIUM_GLOBALVARIABLE_SECRETKEY:?set it in .env}
+```
+
+A variable that is set but empty still takes precedence over the file and means the built-in default — even when the file holds an own key.
+
+The key is read from the configuration only. It is never copied into the database (unlike `opencelium.connector.security.key`) and never logged.
+
+**Changing the key: no rotation, no fallback.** A stored secret can only be read with the key it was saved with. Nothing re-encrypts stored secrets, and a failed read does not retry with another key.
+
+| What happens | Secrets saved before |
+| --- | --- |
+| An own key is set while secrets were saved under the built-in default | cannot be read any more |
+| The own key is removed, blanked or lost (the built-in default takes over) | cannot be read any more |
+| The own key is replaced by another | cannot be read any more |
+
+Such a secret is still listed, and its name, scope and permissions can be edited; its value was never shown anyway. Wherever it is used — a connection run, a connector request, a method test — the use fails with an error that names the variable and the key in use, for example `The value of secret global variable 'apiKey' cannot be read: the key set in opencelium.global-variable.secret-key is not the one the value was saved with, or the stored value is damaged`. The only way back is the old key, or entering every secret value again: saving a new value encrypts it with the key in use. Saving without a value keeps the old, unreadable one.
+
+To keep secrets readable:
+
+- keep a copy of your key in a safe place, apart from the database backups: a restored database needs the same key, and a key stored next to the backup defeats the encryption;
+- every instance that uses the same database needs the same key;
+- the key is part of `application.yml` unless it comes from the environment, so `GET /application-config` returns it in full to an Admin like the other secrets, and the pre-write backups in `opencelium.config.backup.directory` contain it. Setting it through the environment variable keeps it out of both.
+
+**Upgrading.** The documented upgrade starts from a fresh copy of `application_default.yml`, which already holds the `global-variable` section. An installation that keeps its old `application.yml` gets `opencelium.global-variable.max-value-bytes` from the startup YAML migrator (change set `5.2:3`), but **not** the `secret-key` line: a migrator `add` replaces an existing value, so it would erase an own key set before the migration ran — the built-in default would take over and every secret saved under the own key would become unreadable. Such an installation runs on the built-in default until you add the key line yourself or set the environment variable.
 
 ---
 

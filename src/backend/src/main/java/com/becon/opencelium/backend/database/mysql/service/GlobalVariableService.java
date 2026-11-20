@@ -51,8 +51,6 @@ public interface GlobalVariableService {
      *
      * @throws com.becon.opencelium.backend.exception.GlobalVariableValidationException if the
      *         request is invalid
-     * @throws com.becon.opencelium.backend.exception.GeneralServiceException with status 500 if
-     *         a secret value is given and no key to encrypt it is configured
      */
     GlobalVariableDTO create(GlobalVariableRequestDTO request);
 
