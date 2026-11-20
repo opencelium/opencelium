@@ -5,6 +5,9 @@ import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.ConditionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
@@ -17,14 +20,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Finds every global variable reference a workflow holds, or a set of named texts outside a
  * workflow: the request data of a connector, the subject and body of a notification template.
  *
  * <p>In a workflow it looks where a run resolves references: the endpoint, the headers and the
- * body of every method, and the expression and the condition of every operator. An escaped
- * token, {@code \{{global.name}}}, is literal text and is not reported.
+ * body of every method, the expression and the condition of every operator, and the args and
+ * the code of every field binding's enhancement, where code reads a variable through {@code
+ * ref("{{global.name}}")}. An escaped token, {@code \{{global.name}}}, is literal text and is not
+ * reported.
  */
 public final class GlobalReferenceCollector {
 
@@ -58,6 +64,7 @@ public final class GlobalReferenceCollector {
 
         collect(connection.getFromConnector(), found);
         collect(connection.getToConnector(), found);
+        collectFieldBindings(connection, found);
 
         return found;
     }
@@ -125,6 +132,58 @@ public final class GlobalReferenceCollector {
             scan(element, "condition.left", condition.getLeftStatement());
             scan(element, "condition.right", condition.getRightStatement());
         }
+    }
+
+    /**
+     * Reports the references of each field binding's enhancement against the method the binding
+     * fills, so the usage list can open that method.
+     */
+    private static void collectFieldBindings(ConnectionMng connection, List<Found> found) {
+        if (connection.getFieldBindings() == null) {
+            return;
+        }
+
+        for (FieldBindingMng binding : connection.getFieldBindings()) {
+            EnhancementMng enhancement = binding == null ? null : binding.getEnhancement();
+            if (enhancement == null) {
+                continue;
+            }
+
+            String color = targetColor(binding);
+            String index = indexOfMethod(connection, color);
+            String label = enhancement.getTitle();
+            Element element = new Element(ElementType.ENHANCEMENT, color, index, label, found);
+
+            element.scan("enhancement.args", enhancement.getArgs());
+            element.scan("enhancement.script", enhancement.getScript());
+        }
+    }
+
+    // the color of the method the binding writes into; null for a binding without a target
+    private static String targetColor(FieldBindingMng binding) {
+        if (binding.getTo() == null) {
+            return null;
+        }
+
+        return binding.getTo().stream()
+                .filter(linked -> linked != null && linked.getColor() != null)
+                .map(LinkedFieldMng::getColor)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static String indexOfMethod(ConnectionMng connection, String color) {
+        if (color == null) {
+            return null;
+        }
+
+        return Stream.of(connection.getFromConnector(), connection.getToConnector())
+                .filter(connector -> connector != null && connector.getMethods() != null)
+                .flatMap(connector -> connector.getMethods().stream())
+                .filter(method -> method != null && color.equals(method.getColor()))
+                .map(MethodMng::getIndex)
+                .findFirst()
+                .orElse(null);
     }
 
     private static void scan(Element element, String field, StatementMng statement) {

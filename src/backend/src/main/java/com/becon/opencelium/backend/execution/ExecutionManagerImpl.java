@@ -181,9 +181,14 @@ public class ExecutionManagerImpl implements ExecutionManager {
             throw new RuntimeException("Currently, an engine is not up for '%s' language".formatted(enhancement.getLang()));
         }
 
-        scriptEngine.validate(enhancement.getScript());
+        // ref("{{global.x}}") in the code becomes a variable bound like the other args, so the
+        // engine resolves it through getValue and the script gets the value itself
+        ReferenceScanner.BoundScript script =
+                ReferenceScanner.bindScriptRefs(enhancement.getScript(), enhancement.getArgs());
 
-        return scriptEngine.execute(enhancement.getScript(), enhancement.getArgs(), this::getValue);
+        scriptEngine.validate(script.code());
+
+        return scriptEngine.execute(script.code(), script.args(), this::getValue);
     }
 
     @Override
