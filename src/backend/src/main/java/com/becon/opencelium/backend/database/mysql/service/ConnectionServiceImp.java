@@ -31,6 +31,7 @@ import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleReposit
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
@@ -88,6 +89,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final EntityUpdater<ConnectionMng> connectionMngStartupUpdater;
     private final OwnershipSecurity ownershipSecurity;
     private final GlobalVariableUsageService globalVariableUsageService;
+    private final TestRunOrigins testRunOrigins;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -108,7 +110,8 @@ public class ConnectionServiceImp implements ConnectionService {
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
             OwnershipSecurity ownershipSecurity,
-            GlobalVariableUsageService globalVariableUsageService
+            GlobalVariableUsageService globalVariableUsageService,
+            TestRunOrigins testRunOrigins
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -129,6 +132,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.connectionMngStartupUpdater = entityVersionManager.getUpdater(ConnectionMng.class, UpdaterVersion.VERSION_4_8);
         this.ownershipSecurity = ownershipSecurity;
         this.globalVariableUsageService = globalVariableUsageService;
+        this.testRunOrigins = testRunOrigins;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -137,6 +141,23 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     @Transactional
     public Long save(Connection connection, ConnectionMng connectionMng) {
+        return save(connection, connectionMng, false, null);
+    }
+
+    @Override
+    @Transactional
+    public Long saveTestCopy(Connection connection, ConnectionMng connectionMng, Long originalId) {
+        // only a workflow that exists can lend its scope to the copy
+        Long origin = originalId != null && connectionRepository.existsById(originalId) ? originalId : null;
+
+        return save(connection, connectionMng, true, origin);
+    }
+
+    /**
+     * @param testCopy whether this is the copy a test run executes
+     * @param origin   the workflow a test copy was made from, or {@code null}
+     */
+    private Long save(Connection connection, ConnectionMng connectionMng, boolean testCopy, Long origin) {
         if (existsByName(connection.getTitle())) {
             throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
         }
@@ -167,8 +188,9 @@ public class ConnectionServiceImp implements ConnectionService {
             categoryService.get(connection.getCategoryId());
         }
 
-        // a new workflow has no id yet, so no variable scoped to chosen workflows can list it
-        globalVariableUsageService.checkWorkflow(connectionMng, null, connection.getCategoryId());
+        // a new workflow has no id yet, so no variable scoped to chosen workflows can list it; a
+        // test copy is checked as the workflow it was made from
+        globalVariableUsageService.checkWorkflow(connectionMng, origin, connection.getCategoryId());
 
         ConnectionMng savedMng = connectionMngService.create(connectionMng);
 
@@ -180,7 +202,15 @@ public class ConnectionServiceImp implements ConnectionService {
         savedMng.setConnectionId(savedConnection.getId());
         savedMng.setVersion(version);
         connectionMngService.save(savedMng);
-        globalVariableUsageService.rebuildForWorkflow(savedConnection.getId(), savedMng);
+        if (testCopy) {
+            // a copy that lives for one run is no usage: it would stand in the way of changing
+            // a variable while a test is going, under a name nobody knows
+            if (origin != null) {
+                testRunOrigins.register(savedConnection.getId(), origin);
+            }
+        } else {
+            globalVariableUsageService.rebuildForWorkflow(savedConnection.getId(), savedMng);
+        }
 
         connectionHistoryService.makeHistoryAndSave(savedConnection, null, Action.CREATE);
         return savedConnection.getId();
@@ -293,6 +323,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
         deleteSchedules(connection);
         globalVariableUsageService.deleteForWorkflow(id);
+        testRunOrigins.forget(id);
 
         connectionRepository.deleteById(id);
 
@@ -318,6 +349,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
         deleteSchedules(connection);
         globalVariableUsageService.deleteForWorkflow(id);
+        testRunOrigins.forget(id);
 
         connectionRepository.deleteById(id);
 
@@ -336,6 +368,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
         deleteSchedules(connection);
         globalVariableUsageService.deleteForWorkflow(id);
+        testRunOrigins.forget(id);
         connectionRepository.deleteById(id);
     }
 
