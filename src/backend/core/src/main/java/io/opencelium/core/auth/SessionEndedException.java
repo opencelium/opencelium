@@ -6,7 +6,10 @@ package io.opencelium.core.auth;
  */
 final class SessionEndedException extends RuntimeException {
 
-	/** @param reason the reason, without a token and without a value of the request */
+	/**
+	 * @param reason the reason, with the IDs of the session and of its user when the refresh deleted the session
+	 *               record; never a token
+	 */
 	SessionEndedException(String reason) {
 		super(reason);
 	}

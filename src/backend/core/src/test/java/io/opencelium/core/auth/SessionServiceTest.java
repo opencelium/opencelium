@@ -123,10 +123,15 @@ class SessionServiceTest {
 		IssuedTokens issued = start(alice);
 		Instant later = START.plus(Duration.ofMinutes(10));
 		CLOCK.set(later);
+		// A change of the roles during the session: the new session JWT carries the roles that the user has now.
+		mongo.updateFirst(query(where("_id").is(alice.id())), new Update().set("roles", List.of("ADMIN")),
+				UserDocument.class);
 
 		IssuedTokens refreshed = refresh(issued.refreshToken());
 
 		assertThat(refreshed.sessionJwt().getSubject()).isEqualTo(alice.id());
+		assertThat(issued.sessionJwt().getClaimAsStringList("roles")).as("the roles at the login").isEmpty();
+		assertThat(refreshed.sessionJwt().getClaimAsStringList("roles")).containsExactly("ADMIN");
 		assertThat(sessionIdOf(refreshed.sessionJwt())).isEqualTo(sessionIdOf(issued.sessionJwt()));
 		assertThat(sessionIdOf(refreshed.refreshToken())).isEqualTo(sessionIdOf(issued.sessionJwt()));
 		assertThat(refreshed.refreshToken().getId()).isNotEqualTo(issued.refreshToken().getId());
