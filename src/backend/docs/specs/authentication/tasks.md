@@ -29,7 +29,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Start core as in task 2. 2. Run `mongosh oc_hand --eval 'db.users.updateOne({username: "admin"}, {$set: {email: "admin@example.com"}})'`. 3. Log in as in task 2 with the username `Admin@Example.com`: the response holds a session JWT. Ask for `/api/auth/me`: the response shows `admin@example.com`. 4. Log in with the password `wrong`: the status code is 401, with the code `invalid-credentials`. 5. Log in with the username `nobody`: the response is the same as in step 4. 6. In `mongosh`, set `locked: true` on the admin. 7. Log in with the password `1234`: the status code is 403, with the code `user-locked`. 8. Log in with the password `wrong`: the response is the same as in step 4. 9. Search the application log for `wrong` and for `nobody`: there is no match.
 - **Size:** approximately 200 lines
 - **Depends on:** 2
-- **Status:** open
+- **Status:** in work
 
 ## Task 4: feat(core): refresh and end a session with a refresh token
 - **Criteria:** AU-01, AU-06, AU-08, AU-09

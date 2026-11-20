@@ -207,8 +207,8 @@ class GeneratedPasswordLockJobTest {
 	/** An unlocked user with a generated password issued now, written with the plain template. */
 	private String storeGeneratedUser(String tenantId) {
 		Instant now = CLOCK.instant();
-		return mongo.insert(new UserDocument(null, tenantId, "admin", "{noop}x", Set.of(), true, now, false, false,
-				now)).id();
+		return mongo.insert(new UserDocument(null, tenantId, "admin", null, "{noop}x", Set.of(), true, now, false,
+				false, now)).id();
 	}
 
 	/** Reads with the plain template, without the tenant limit. */

@@ -62,7 +62,7 @@ public class UserService {
 			}
 			String hash = passwordEncoder.encode(CharBuffer.wrap(command.password()));
 			Instant now = clock.instant();
-			UserDocument user = users.insert(new UserDocument(null, tenant.value(), command.username(), hash,
+			UserDocument user = users.insert(new UserDocument(null, tenant.value(), command.username(), null, hash,
 					Set.of(ADMIN_ROLE), command.generated(), now, command.temporary(), false, now));
 			return new UserCreated(user.id(), user.username());
 		}

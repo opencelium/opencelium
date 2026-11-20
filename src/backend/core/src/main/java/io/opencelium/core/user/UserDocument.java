@@ -12,6 +12,7 @@ import io.opencelium.core.tenant.TenantDocument;
  * A user of one tenant, a tenant document; the username is unique per tenant ({@link UserIndexes}). Holds the
  * password hash in Spring Security's {@code {algorithm}hash} format, never the password.
  *
+ * @param email              the email of the user, or {@code null} when the user has none
  * @param mustChangePassword the password was generated for the user and must be replaced at the next login
  * @param passwordIssuedAt   when the current password was set; a generated one is locked 24 h later
  * @param temporary          an account that the caller marks as temporary; the application stores the flag
@@ -19,9 +20,9 @@ import io.opencelium.core.tenant.TenantDocument;
  * @param locked             login refused, for example because a generated password expired
  */
 @Document(UserDocument.COLLECTION)
-public record UserDocument(@Id String id, String tenantId, String username, String passwordHash, Set<String> roles,
-		boolean mustChangePassword, Instant passwordIssuedAt, boolean temporary, boolean locked, Instant createdAt)
-		implements TenantDocument {
+public record UserDocument(@Id String id, String tenantId, String username, String email, String passwordHash,
+		Set<String> roles, boolean mustChangePassword, Instant passwordIssuedAt, boolean temporary, boolean locked,
+		Instant createdAt) implements TenantDocument {
 
 	/** The collection; {@link AdminLookup} reads it with the plain driver, and {@link UserRepository} queries it. */
 	static final String COLLECTION = "users";
