@@ -50,6 +50,8 @@ import org.springframework.mock.env.MockEnvironment;
 class GlobalVariableSnapshotServiceImpTest {
 
     private static final long WORKFLOW = 11L;
+    // the copy a test run saves of a workflow
+    private static final long COPY = 20L;
     // built once each: deriving a key takes a while
     private static final GlobalVariableCipher CIPHER = cipherWithKey(GlobalVariableFixture.SECRET_KEY);
     private static final GlobalVariableCipher OTHER_KEY = cipherWithKey("another-key");
@@ -63,14 +65,17 @@ class GlobalVariableSnapshotServiceImpTest {
     @Mock
     CategoryRepository categoryRepository;
 
+    private TestRunOrigins testRunOrigins;
+
     private GlobalVariableSnapshotServiceImp service;
 
     @BeforeEach
     void setUp() {
+        testRunOrigins = new TestRunOrigins();
         service = new GlobalVariableSnapshotServiceImp(
                 globalVariableRepository, connectionRepository,
                 new GlobalVariableScopeResolver(categoryRepository), new ObjectMapper(),
-                new GlobalVariableCipher(new MockEnvironment()), new TestRunOrigins());
+                new GlobalVariableCipher(new MockEnvironment()), testRunOrigins);
     }
 
     @Test
@@ -182,6 +187,62 @@ class GlobalVariableSnapshotServiceImpTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("'broken'")
                 .hasMessageContaining("not valid JSON");
+    }
+
+    // ── test copies ───────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("takeFor — the copy of a test run reads the variables scoped to the workflow it was made from")
+    void takeForIncludesOriginWorkflowVariableWhenConnectionIsTestCopy() {
+        testRunOrigins.register(COPY, WORKFLOW);
+        givenTestCopyWithoutCategory();
+        givenVariables(
+                aVariable("ofOrigin", GlobalVariableScopeType.WORKFLOWS, GlobalVariableScopeTarget.workflow(WORKFLOW)),
+                aVariable("ofOther", GlobalVariableScopeType.WORKFLOWS, GlobalVariableScopeTarget.workflow(12)));
+
+        GlobalVariableSnapshot snapshot = service.takeFor(COPY);
+
+        assertThat(snapshot.entries()).extracting(Entry::name).containsExactly("ofOrigin");
+    }
+
+    @Test
+    @DisplayName("takeFor — the copy of a workflow that was never saved has only its own scope")
+    void takeForExcludesOriginWorkflowVariableWhenCopyHasNoOrigin() {
+        givenTestCopyWithoutCategory();
+        givenVariables(
+                aVariable("openToAll", GlobalVariableScopeType.ALL),
+                aVariable("ofOrigin", GlobalVariableScopeType.WORKFLOWS, GlobalVariableScopeTarget.workflow(WORKFLOW)));
+
+        GlobalVariableSnapshot snapshot = service.takeFor(COPY);
+
+        assertThat(snapshot.entries()).extracting(Entry::name).containsExactly("openToAll");
+    }
+
+    @Test
+    @DisplayName("takeFor — the category of a test copy is the one the editor sent, read from the copy")
+    void takeForReadsCategoryOfCopyWhenConnectionIsTestCopy() {
+        testRunOrigins.register(COPY, WORKFLOW);
+        givenTestCopyInCategory(aCategory(3, null));
+        givenVariables(
+                aVariable("ofCopyCategory", GlobalVariableScopeType.CATEGORIES, GlobalVariableScopeTarget.category(3)));
+
+        GlobalVariableSnapshot snapshot = service.takeFor(COPY);
+
+        assertThat(snapshot.entries()).extracting(Entry::name).containsExactly("ofCopyCategory");
+    }
+
+    @Test
+    @DisplayName("takeFor — the workflow a copy was made from replaces the copy's id in the scope check")
+    void takeForUsesOnlyOriginScopeWhenConnectionIsTestCopy() {
+        testRunOrigins.register(COPY, WORKFLOW);
+        givenTestCopyWithoutCategory();
+        givenVariables(
+                aVariable("openToAll", GlobalVariableScopeType.ALL),
+                aVariable("ofCopyItself", GlobalVariableScopeType.WORKFLOWS, GlobalVariableScopeTarget.workflow(COPY)));
+
+        GlobalVariableSnapshot snapshot = service.takeFor(COPY);
+
+        assertThat(snapshot.entries()).extracting(Entry::name).containsExactly("openToAll");
     }
 
     // ── takeOpenToAll ─────────────────────────────────────────────────────────
@@ -377,6 +438,20 @@ class GlobalVariableSnapshotServiceImpTest {
         workflow.setId(WORKFLOW);
         workflow.setCategoryId(category.getId());
         when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.of(workflow));
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+    }
+
+    private void givenTestCopyWithoutCategory() {
+        Connection copy = new Connection();
+        copy.setId(COPY);
+        when(connectionRepository.findById(COPY)).thenReturn(Optional.of(copy));
+    }
+
+    private void givenTestCopyInCategory(Category category) {
+        Connection copy = new Connection();
+        copy.setId(COPY);
+        copy.setCategoryId(category.getId());
+        when(connectionRepository.findById(COPY)).thenReturn(Optional.of(copy));
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
     }
 
