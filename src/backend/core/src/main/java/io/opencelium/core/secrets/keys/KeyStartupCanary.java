@@ -25,6 +25,8 @@ final class KeyStartupCanary implements SmartInitializingSingleton {
 
 	private final RootKey rootKey;
 
+	private boolean passed;
+
 	KeyStartupCanary(WrappedDekRepository repository, DekWrapper wrapper, RootKey rootKey) {
 		this.repository = repository;
 		this.wrapper = wrapper;
@@ -33,6 +35,21 @@ final class KeyStartupCanary implements SmartInitializingSingleton {
 
 	@Override
 	public void afterSingletonsInstantiated() {
+		check();
+	}
+
+	/**
+	 * The canary unwrap, 1 time: a later call does nothing. The signing-key loader calls it before it stores a new
+	 * system data key, so the order of the 2 start callbacks does not matter.
+	 */
+	synchronized void check() {
+		if (!passed) {
+			unwrapOldest();
+			passed = true;
+		}
+	}
+
+	private void unwrapOldest() {
 		Optional<WrappedDek> canary;
 		try {
 			canary = repository.findFirstByOrderByCreatedAtAsc();
