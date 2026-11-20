@@ -47,4 +47,4 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Read section 7 of `docs/architecture.md`: the records of the signing key, of the session and of the error form exist. 2. Read the list of the open decisions: the entry "REST API contract style" exists. 3. Read sections 3.4, 4.1, 6.5 and 6.7: each item of the definition of done is there. 4. Search `docs/security/README.md` and the architecture document for an endpoint path without `/api`: nothing. 5. Read section 8 of CONTRIBUTING.md: it points to the record of the error form. 6. Search the architecture document for a status marker, a date or a ticket number: nothing.
 - **Size:** approximately 130 lines
 - **Depends on:** 4
-- **Status:** open
+- **Status:** done

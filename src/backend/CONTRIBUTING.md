@@ -232,6 +232,7 @@ Why the backend is shaped this way — modules, deployment shapes, recorded desi
 - If a class fits two modules, put it in the lower one: the lower position keeps more options open.
 - A new feature becomes a package in one of the four modules. It never adds a module and never changes the dependency direction.
 - A repository is in the package of its feature (decision 16).
+- A REST endpoint has a path under `/api`. Its error response has the problem-details form of RFC 9457 with the field `code`. The plan of the feature lists its error codes ([architecture.md, decision 19](docs/architecture.md#7-architecture-decisions)).
 - Both deployment shapes must keep working: monolith (`oc-app.jar`, in-process `local` transport) and distributed (`oc-app.jar` + `oc-worker.jar`, broker transport via the SPI).
 - Until the ArchUnit rules land, reviewers check the 5 build rules of [architecture.md section 6.9](docs/architecture.md#69-build-checks) by hand:
   - no `@Value`
