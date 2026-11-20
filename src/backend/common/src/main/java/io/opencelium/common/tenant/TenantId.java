@@ -30,6 +30,10 @@ public record TenantId(String value) {
 		return new TenantId(value);
 	}
 
+	public static TenantId fromOutside(String value) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
 	/**
 	 * Whether this is {@link #SELF_HOST} or {@link #SYSTEM}: IDs that only core gives, never the Service Portal. No
 	 * customer of the cloud mode has such an ID.
