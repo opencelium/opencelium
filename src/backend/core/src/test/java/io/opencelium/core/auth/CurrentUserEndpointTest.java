@@ -103,6 +103,16 @@ class CurrentUserEndpointTest {
 	}
 
 	@Test
+	void resourceMetadataGivesStatus401WhenTheRequestHasNoToken() {
+		// Spring Security can open this endpoint by itself; no feature of core declares it open.
+		MvcTestResult metadata = mvc.get().uri("/.well-known/oauth-protected-resource").exchange();
+
+		assertThat(metadata).hasStatus(HttpStatus.UNAUTHORIZED).headers()
+				.hasValue(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
+		assertThat(metadata).bodyText().isEmpty();
+	}
+
+	@Test
 	void meGivesStatus401WhenTheSessionJwtIsExpired() {
 		String sessionJwt = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
 

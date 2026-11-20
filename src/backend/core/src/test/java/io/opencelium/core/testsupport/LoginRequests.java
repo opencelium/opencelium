@@ -27,8 +27,13 @@ public final class LoginRequests {
 
 	/** A login with the name and the password, as the HTTP client sends it. */
 	public static MvcTestResult logIn(MockMvcTester mvc, String username, String password) {
-		return mvc.post().uri(LOGIN_PATH).contentType(MediaType.APPLICATION_JSON)
-				.content("{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}").exchange();
+		return mvc.post().uri(LOGIN_PATH).contentType(MediaType.APPLICATION_JSON).content(loginBody(username, password))
+				.exchange();
+	}
+
+	/** The JSON body of a login; the values must need no JSON escape. */
+	public static String loginBody(String username, String password) {
+		return "{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}";
 	}
 
 	/** The session JWT of a login of the default admin, with the admin password {@code 1234}. */
