@@ -1,9 +1,11 @@
 package com.becon.opencelium.backend.unit.database.mysql.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -19,10 +21,15 @@ import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.Access;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.ElementType;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.SourceType;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableUsageRepository;
+import com.becon.opencelium.backend.database.mysql.repository.MessageRepository;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableUsageServiceImp;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Code;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Violation;
 import com.becon.opencelium.backend.testutil.fixture.ConnectionMngFixture;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceValidator;
@@ -37,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
@@ -69,6 +77,9 @@ class GlobalVariableUsageServiceImpTest {
 
     @Mock
     NotificationRepository notificationRepository;
+
+    @Mock
+    MessageRepository messageRepository;
 
     @Mock
     GlobalReferenceValidator referenceValidator;
@@ -481,7 +492,244 @@ class GlobalVariableUsageServiceImpTest {
         verify(referenceValidator).validate(workflow, WORKFLOW, 3);
     }
 
+    // ── checkWorkflowMove ─────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("checkWorkflowMove — schedules that send no template cost the one query that finds the templates")
+    void checkWorkflowMoveReadsNoNotificationWhenNoTemplateIsSent() {
+        when(messageRepository.findSentByWorkflow(WORKFLOW)).thenReturn(List.of());
+
+        service.checkWorkflowMove(ConnectionMngFixture.aWorkflowWith(), WORKFLOW, 4);
+
+        verifyNoInteractions(notificationRepository);
+        verify(referenceValidator, never()).validateNotifications(any(), any());
+    }
+
+    @Test
+    @DisplayName("checkWorkflowMove — templates without global references cost no read of the notifications")
+    void checkWorkflowMoveReadsNoNotificationWhenTemplatesHoldNoReference() {
+        when(messageRepository.findSentByWorkflow(WORKFLOW)).thenReturn(List.of(
+                GlobalVariableFixture.aTemplate(TEMPLATE, "Failure template",
+                        GlobalVariableFixture.aTemplateContent("en", "Sync failed", "Have a look"))));
+
+        service.checkWorkflowMove(ConnectionMngFixture.aWorkflowWith(), WORKFLOW, 4);
+
+        verifyNoInteractions(notificationRepository);
+        verify(referenceValidator, never()).validateNotifications(any(), any());
+    }
+
+    @Test
+    @DisplayName("checkWorkflowMove — a notification is checked against the workflow in its new category")
+    void checkWorkflowMoveChecksNotificationsAgainstNewCategoryWhenTemplateHoldsReference() {
+        when(messageRepository.findSentByWorkflow(WORKFLOW)).thenReturn(List.of(aTemplateUsingSupportUrl(TEMPLATE)));
+        when(notificationRepository.findByWorkflow(WORKFLOW)).thenReturn(List.of(
+                GlobalVariableFixture.aWorkflowNotification(NOTIFICATION, "Failure mail", TEMPLATE, 5, "Nightly")));
+
+        service.checkWorkflowMove(null, WORKFLOW, 4);
+
+        verify(referenceValidator).validateNotifications(checkedTexts.capture(), checkedNotifications.capture());
+        assertThat(checkedTexts.getValue()).containsExactly(entry("en.body", "See {{global.supportUrl}}"));
+        assertThat(checkedNotifications.getValue())
+                .containsExactly(new NotificationTarget("Failure mail", "'Nightly'", WORKFLOW, 4));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = "  ")
+    @DisplayName("checkWorkflowMove — a schedule without a title is named by its id")
+    void checkWorkflowMoveNamesScheduleByIdWhenTitleIsBlank(String title) {
+        when(messageRepository.findSentByWorkflow(WORKFLOW)).thenReturn(List.of(aTemplateUsingSupportUrl(TEMPLATE)));
+        when(notificationRepository.findByWorkflow(WORKFLOW)).thenReturn(List.of(
+                GlobalVariableFixture.aWorkflowNotification(NOTIFICATION, "Failure mail", TEMPLATE, 5, title)));
+
+        service.checkWorkflowMove(null, WORKFLOW, 4);
+
+        verify(referenceValidator).validateNotifications(any(), checkedNotifications.capture());
+        assertThat(checkedNotifications.getValue()).extracting(NotificationTarget::schedule).containsExactly("#5");
+    }
+
+    @Test
+    @DisplayName("checkWorkflowMove — each template is checked against the notifications that send it, and only those")
+    void checkWorkflowMoveChecksEachTemplateWithItsNotificationsWhenSeveralAreSent() {
+        EventMessage failure = aTemplateUsingSupportUrl(3);
+        EventMessage success = GlobalVariableFixture.aTemplate(4, "Success template",
+                GlobalVariableFixture.aTemplateContent("en", null, "Done, see {{global.dashboardUrl}}"));
+        EventMessage plain = GlobalVariableFixture.aTemplate(5, "Plain template",
+                GlobalVariableFixture.aTemplateContent("en", null, "Have a look"));
+        when(messageRepository.findSentByWorkflow(WORKFLOW)).thenReturn(List.of(plain, success, failure));
+        when(notificationRepository.findByWorkflow(WORKFLOW)).thenReturn(List.of(
+                GlobalVariableFixture.aWorkflowNotification(21, "Nightly failure", 3, 5, "Nightly"),
+                GlobalVariableFixture.aWorkflowNotification(22, "Weekly failure", 3, 6, "Weekly"),
+                GlobalVariableFixture.aWorkflowNotification(23, "Nightly success", 4, 5, "Nightly"),
+                GlobalVariableFixture.aWorkflowNotification(24, "Nightly plain", 5, 5, "Nightly"),
+                GlobalVariableFixture.aWorkflowNotification(25, "Without template", null, 5, "Nightly")));
+
+        service.checkWorkflowMove(null, WORKFLOW, 4);
+
+        verify(referenceValidator, times(2))
+                .validateNotifications(checkedTexts.capture(), checkedNotifications.capture());
+        assertThat(checkedTexts.getAllValues()).containsExactly(
+                Map.of("en.body", "See {{global.supportUrl}}"),
+                Map.of("en.body", "Done, see {{global.dashboardUrl}}"));
+        assertThat(checkedNotifications.getAllValues())
+                .map(targets -> targets.stream().map(NotificationTarget::name).toList())
+                .containsExactly(List.of("Nightly failure", "Weekly failure"), List.of("Nightly success"));
+    }
+
+    @Test
+    @DisplayName("checkWorkflowMove — the violations of the workflow and of its notifications come in one rejection")
+    void checkWorkflowMoveReportsWorkflowAndNotificationViolationsTogetherWhenBothFail() {
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith();
+        Violation ofWorkflow = new Violation(Code.OUT_OF_SCOPE,
+                "This workflow is outside the scope of global variable 'idoitUrl'",
+                "idoitUrl", "{{global.idoitUrl}}", "#ababab", "0_1", "endpoint");
+        Violation ofNotification = new Violation(Code.OUT_OF_SCOPE,
+                "The workflow of notification 'Failure mail' (schedule 'Nightly') is outside the scope of global"
+                        + " variable 'supportUrl'",
+                "supportUrl", "{{global.supportUrl}}", null, null, "en.body");
+        doThrow(new GlobalReferenceValidationException(List.of(ofWorkflow)))
+                .when(referenceValidator).validate(workflow, WORKFLOW, 4);
+        when(messageRepository.findSentByWorkflow(WORKFLOW)).thenReturn(List.of(aTemplateUsingSupportUrl(TEMPLATE)));
+        when(notificationRepository.findByWorkflow(WORKFLOW)).thenReturn(List.of(
+                GlobalVariableFixture.aWorkflowNotification(NOTIFICATION, "Failure mail", TEMPLATE, 5, "Nightly")));
+        doThrow(new GlobalReferenceValidationException(List.of(ofNotification)))
+                .when(referenceValidator).validateNotifications(any(), any());
+
+        GlobalReferenceValidationException rejection = catchThrowableOfType(
+                () -> service.checkWorkflowMove(workflow, WORKFLOW, 4), GlobalReferenceValidationException.class);
+
+        assertThat(rejection).hasMessage(ofWorkflow.message());
+        assertThat(rejection.getViolations()).containsExactly(ofWorkflow, ofNotification);
+    }
+
+    @Test
+    @DisplayName("checkWorkflowMove — a workflow without content still has its notifications checked")
+    void checkWorkflowMoveChecksOnlyNotificationsWhenWorkflowHasNoContent() {
+        when(messageRepository.findSentByWorkflow(WORKFLOW)).thenReturn(List.of(aTemplateUsingSupportUrl(TEMPLATE)));
+        when(notificationRepository.findByWorkflow(WORKFLOW)).thenReturn(List.of(
+                GlobalVariableFixture.aWorkflowNotification(NOTIFICATION, "Failure mail", TEMPLATE, 5, "Nightly")));
+
+        service.checkWorkflowMove(null, WORKFLOW, 4);
+
+        verify(referenceValidator, never()).validate(any(), any(), any());
+        verify(referenceValidator).validateNotifications(any(), any());
+    }
+
+    // ── checkScheduleWorkflowChange ───────────────────────────────────────────
+
+    @Test
+    @DisplayName("checkScheduleWorkflowChange — the notifications are checked against the new workflow and its category")
+    void checkScheduleWorkflowChangeChecksNotificationsAgainstNewWorkflowWhenTemplateHoldsReference() {
+        Scheduler schedule = aNightlyScheduleSending(
+                GlobalVariableFixture.aNotification(NOTIFICATION, "Failure mail", aTemplateUsingSupportUrl(TEMPLATE), null));
+
+        service.checkScheduleWorkflowChange(schedule, GlobalVariableFixture.aWorkflow(12L, 4));
+
+        verify(referenceValidator).validateNotifications(checkedTexts.capture(), checkedNotifications.capture());
+        assertThat(checkedTexts.getValue()).containsExactly(entry("en.body", "See {{global.supportUrl}}"));
+        assertThat(checkedNotifications.getValue())
+                .containsExactly(new NotificationTarget("Failure mail", "'Nightly'", 12L, 4));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void checkScheduleWorkflowChangeChecksNothingWhenScheduleHasNoNotification(List<EventNotification> notifications) {
+        Scheduler schedule = aNightlyScheduleSending();
+        schedule.setEventNotifications(notifications);
+
+        service.checkScheduleWorkflowChange(schedule, GlobalVariableFixture.aWorkflow(12L, 4));
+
+        verifyNoInteractions(referenceValidator);
+    }
+
+    @Test
+    void checkScheduleWorkflowChangeChecksNothingWhenTemplatesHoldNoReference() {
+        Scheduler schedule = aNightlyScheduleSending(GlobalVariableFixture.aNotification(NOTIFICATION, "Failure mail",
+                GlobalVariableFixture.aTemplate(TEMPLATE, "Failure template",
+                        GlobalVariableFixture.aTemplateContent("en", "Sync failed", "Have a look")),
+                null));
+
+        service.checkScheduleWorkflowChange(schedule, GlobalVariableFixture.aWorkflow(12L, 4));
+
+        verifyNoInteractions(referenceValidator);
+    }
+
+    @Test
+    @DisplayName("checkScheduleWorkflowChange — a template two notifications send is checked once, for both")
+    void checkScheduleWorkflowChangeChecksTemplateOnceWhenSeveralNotificationsSendIt() {
+        EventMessage template = aTemplateUsingSupportUrl(TEMPLATE);
+        Scheduler schedule = aNightlyScheduleSending(
+                GlobalVariableFixture.aNotification(21, "Failure mail", template, null),
+                GlobalVariableFixture.aNotification(22, "Failure chat", template, null));
+
+        service.checkScheduleWorkflowChange(schedule, GlobalVariableFixture.aWorkflow(12L, 4));
+
+        verify(referenceValidator).validateNotifications(any(), checkedNotifications.capture());
+        assertThat(checkedNotifications.getValue()).extracting(NotificationTarget::name)
+                .containsExactly("Failure mail", "Failure chat");
+    }
+
+    @Test
+    @DisplayName("checkScheduleWorkflowChange — the violations of every template come in one rejection")
+    void checkScheduleWorkflowChangeReportsViolationsOfEveryTemplateWhenSeveralFail() {
+        Scheduler schedule = aNightlyScheduleSending(
+                GlobalVariableFixture.aNotification(21, "Failure mail", aTemplateUsingSupportUrl(3), null),
+                GlobalVariableFixture.aNotification(22, "Success mail", GlobalVariableFixture.aTemplate(4,
+                        "Success template", GlobalVariableFixture.aTemplateContent("en", null, "{{global.done}}")),
+                        null));
+        Violation ofFailureMail = new Violation(Code.OUT_OF_SCOPE, "out of scope: supportUrl",
+                "supportUrl", "{{global.supportUrl}}", null, null, "en.body");
+        Violation ofSuccessMail = new Violation(Code.NO_USE_PERMISSION, "no permission: done",
+                "done", "{{global.done}}", null, null, "en.body");
+        doThrow(new GlobalReferenceValidationException(List.of(ofFailureMail)))
+                .doThrow(new GlobalReferenceValidationException(List.of(ofSuccessMail)))
+                .when(referenceValidator).validateNotifications(any(), any());
+
+        GlobalReferenceValidationException rejection = catchThrowableOfType(
+                () -> service.checkScheduleWorkflowChange(schedule, GlobalVariableFixture.aWorkflow(12L, 4)),
+                GlobalReferenceValidationException.class);
+
+        assertThat(rejection.getViolations()).containsExactly(ofFailureMail, ofSuccessMail);
+    }
+
+    @Test
+    @DisplayName("checkScheduleWorkflowChange — without a workflow there is no scope to be checked against")
+    void checkScheduleWorkflowChangeChecksNothingWhenWorkflowIsNull() {
+        Scheduler schedule = aNightlyScheduleSending(
+                GlobalVariableFixture.aNotification(NOTIFICATION, "Failure mail", aTemplateUsingSupportUrl(TEMPLATE), null));
+
+        service.checkScheduleWorkflowChange(schedule, null);
+
+        verifyNoInteractions(referenceValidator);
+    }
+
+    @Test
+    @DisplayName("checkScheduleWorkflowChange — the notifications and templates come with the schedule, nothing is read")
+    void checkScheduleWorkflowChangeReadsNoRepositoryWhenNotificationsComeWithSchedule() {
+        Scheduler schedule = aNightlyScheduleSending(
+                GlobalVariableFixture.aNotification(NOTIFICATION, "Failure mail", aTemplateUsingSupportUrl(TEMPLATE), null));
+
+        service.checkScheduleWorkflowChange(schedule, GlobalVariableFixture.aWorkflow(12L, 4));
+
+        verifyNoInteractions(messageRepository, notificationRepository, globalVariableRepository, usageRepository);
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    /** A template whose body references {@code supportUrl}. */
+    private static EventMessage aTemplateUsingSupportUrl(int id) {
+        return GlobalVariableFixture.aTemplate(id, "Failure template",
+                GlobalVariableFixture.aTemplateContent("en", null, "See {{global.supportUrl}}"));
+    }
+
+    /** Schedule 5, titled "Nightly", of workflow {@value #WORKFLOW} in category 3. */
+    private static Scheduler aNightlyScheduleSending(EventNotification... notifications) {
+        Scheduler schedule = GlobalVariableFixture.aScheduleOf(WORKFLOW, 3);
+        schedule.setId(5);
+        schedule.setTitle("Nightly");
+        schedule.setEventNotifications(List.of(notifications));
+        return schedule;
+    }
 
     @SuppressWarnings("unchecked")
     private List<GlobalVariableUsage> savedUsages() {

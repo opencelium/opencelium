@@ -1,9 +1,11 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.EventMessage;
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 
 import java.util.Collection;
 import java.util.List;
@@ -30,6 +32,25 @@ public interface GlobalVariableUsageService {
      *         reference cannot be used in this workflow
      */
     void checkWorkflow(ConnectionMng connectionMng, Long connectionId, Integer categoryId);
+
+    /**
+     * Checks a workflow that moves to another category. Its own references are checked as
+     * {@link #checkWorkflow} does, and so are the notifications of every schedule that runs it:
+     * the texts they send must be in the scope of the workflow in its new category. Every
+     * violation of the workflow and of its notifications is reported in one exception.
+     *
+     * <p>A workflow without schedules, schedules without notifications and templates without a
+     * global variable reference cost the one query that finds the templates.
+     *
+     * @param connectionMng the content of the workflow as it will be saved, or {@code null} if
+     *                      it has none, and then only its notifications are checked
+     * @param connectionId  id of the workflow
+     * @param categoryId    category the workflow moves to, or {@code null} for none
+     * @throws com.becon.opencelium.backend.exception.GlobalReferenceValidationException if a
+     *         reference of the workflow or of one of its notifications cannot be used after
+     *         the move
+     */
+    void checkWorkflowMove(ConnectionMng connectionMng, long connectionId, Integer categoryId);
 
     /**
      * Replaces the usages of a workflow with the references its content holds now. A reference
@@ -80,6 +101,19 @@ public interface GlobalVariableUsageService {
      *         reference cannot be used in this notification
      */
     void checkNotification(EventNotification notification);
+
+    /**
+     * Checks the notifications of a schedule that is about to run another workflow: the texts
+     * they send must be in the scope of that workflow, and the saving user may use each
+     * variable. Every violation is reported in one exception. Nothing is read: the notifications
+     * and their templates come with the schedule.
+     *
+     * @param schedule the schedule as it is stored, with its notifications
+     * @param workflow the workflow it will run; {@code null} has no scope, and nothing is checked
+     * @throws com.becon.opencelium.backend.exception.GlobalReferenceValidationException if a
+     *         reference of one of the notifications cannot be used with that workflow
+     */
+    void checkScheduleWorkflowChange(Scheduler schedule, Connection workflow);
 
     /** Replaces the usages of a saved notification with the references its template holds now. */
     void rebuildForNotification(EventNotification notification);
