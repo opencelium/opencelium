@@ -44,7 +44,7 @@ STE permits technical names and technical verbs that are standard in the industr
 - Documentation: building block, cross-cutting concept, runtime view.
 - Protocols: WebSocket, JWT, OIDC, LDAP, HTTP(S), AMQP, broker, queue, TCP, DNS.
 - Data: database, collection, document, client, connection pool, cluster, credential, secret, setting, property, environment variable, yml file.
-- Cryptography: root key, master key, DEK (data-encryption key), envelope encryption, AES-256-GCM, IV (initialization vector), plaintext, ciphertext, crypto-shredding, signature, signing key, HS256, associated data, key canary, key material, random (bytes).
+- Cryptography: root key, master key, DEK (data-encryption key), envelope encryption, AES-256-GCM, IV (initialization vector), plaintext, ciphertext, crypto-shredding, signature, signing key, HS256, associated data, key canary, key material, random (bytes), cryptography.
 - Access control: user, group, role, ACL (access-control list), RBAC (role-based access control), token, session, claim, claim mapping, 2FA/TOTP, provisioning, onboarding, offboarding.
 - Products and tools: Spring Boot, Gradle, MongoDB, RabbitMQ, Kafka, SQS, Quartz, ArchUnit, Testcontainers, Mockito, n8n.
 - Technical verbs (1): execute, deploy, dispatch, encrypt, decrypt, wrap, unwrap, authenticate, authorize, log in, publish, subscribe, schedule, configure.

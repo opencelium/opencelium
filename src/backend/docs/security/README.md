@@ -2,7 +2,7 @@
 
 The 3 login flows of the backend, as sequence diagrams. The rules behind them are in [architecture.md, section 6.7](../architecture.md#67-authentication-and-authorization) and in decision 10.
 
-Common to all flows: authentication produces a verified principal (identity, tenant ID, groups). Core always issues its own session JWT, which carries the tenant ID. IdP and portal tokens do not reach the frontend.
+Common to all flows: authentication produces a verified principal (identity, tenant ID, groups). Core always issues its own session JWT and refresh token, which carry the tenant ID. IdP and portal tokens do not reach the frontend.
 
 ## Self-hosted: direct flow
 
@@ -27,7 +27,7 @@ sequenceDiagram
     BE->>G: Exchange code for token (server-to-server)
     G-->>BE: Google ID token (sub, email)
     Note over BE: Validate signature via Google JWKS<br/>Map (google, sub) → user in LOCAL DB<br/>Resolve/assign tenantID locally<br/>(account linking, invites live here)
-    BE-->>FE: Session JWT + refresh token (each contains tenant_id)
+    BE-->>FE: Session JWT + refresh token (each holds the tenant ID)
     FE-->>U: Logged in, tenant context set
 ```
 
@@ -62,7 +62,7 @@ sequenceDiagram
     BE->>SP: Exchange code for token (server-to-server)
     SP-->>BE: SP ID/access token { sub, tenant_id, email }
     Note over BE: Validate signature via SP JWKS<br/>Trust ONLY SP issuer<br/>Shadow user row (non-authoritative)
-    BE-->>FE: Session JWT + refresh token (each contains tenant_id)
+    BE-->>FE: Session JWT + refresh token (each holds the tenant ID)
     FE-->>U: Logged in, tenant context set
 ```
 
@@ -86,7 +86,7 @@ sequenceDiagram
     Note over SP: Validate credentials<br/>Map → local user<br/>Resolve tenantID
     SP-->>BE: SP access token { sub, tenant_id, email }
     Note over BE: Password forwarded only, never stored or logged<br/>Validate signature via SP JWKS<br/>Trust ONLY SP issuer<br/>Shadow user row (non-authoritative)
-    BE-->>FE: Session JWT + refresh token (each contains tenant_id)
+    BE-->>FE: Session JWT + refresh token (each holds the tenant ID)
     FE-->>U: Logged in, tenant context set
 
     Note over U,SP: Brokered-IdP users (Google/Apple) have no portal password —<br/>they use the redirect flow instead
