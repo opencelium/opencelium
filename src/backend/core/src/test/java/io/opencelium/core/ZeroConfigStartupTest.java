@@ -37,6 +37,8 @@ class ZeroConfigStartupTest {
 	void requiresTheDefaultServer() {
 		assumeTrue(LocalMongo.isDefaultServer(), "ZeroConfigStartupTest needs the documented default server "
 				+ LocalMongo.DEFAULT_SERVER + "; unset " + LocalMongo.SERVER_VARIABLE + " to run it");
+		// Each test starts with a master key of its own, so it starts as a new installation.
+		LocalMongo.dropKeyCollections(ZeroConfigStartupTest.class);
 	}
 
 	@Test

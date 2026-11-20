@@ -3,6 +3,7 @@ package io.opencelium.core.testsupport;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -12,6 +13,7 @@ import java.util.function.Supplier;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -19,6 +21,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 
 import io.opencelium.core.config.BootstrapProperties;
 import io.opencelium.core.config.OpenCeliumProperties;
+import io.opencelium.core.secrets.keys.EncryptedSigningKey;
+import io.opencelium.core.secrets.keys.WrappedDek;
 
 /**
  * Integration tests run against a real MongoDB: {@code OC_TEST_MONGO_URI}, default {@code mongodb://localhost:27017}.
@@ -104,11 +108,31 @@ public final class LocalMongo {
 		if (database == null) {
 			return;
 		}
-		var settings = MongoClientSettings.builder().applyConnectionString(new ConnectionString(uri(database)))
-				.applyToClusterSettings(cluster -> cluster.serverSelectionTimeout(5, TimeUnit.SECONDS)).build();
-		try (var client = MongoClients.create(settings)) {
+		try (var client = client(database)) {
 			client.getDatabase(database).drop();
 		}
+	}
+
+	/**
+	 * Drops the stored data keys and the stored signing key from the database of {@code testClass}. The next start of
+	 * core is then the first start of a new installation: it can generate a master key, and it stores a new system
+	 * data key and a new signing key. A class whose starts use different master keys on its 1 database calls it
+	 * before each test.
+	 */
+	public static void dropKeyCollections(Class<?> testClass) {
+		String database = databaseFor(testClass);
+		try (var client = client(database)) {
+			for (String collection : List.of(WrappedDek.COLLECTION, EncryptedSigningKey.COLLECTION)) {
+				client.getDatabase(database).getCollection(collection).drop();
+			}
+		}
+	}
+
+	/** Gives up after 5 s when the server is gone, not the driver's 30 s. */
+	private static MongoClient client(String database) {
+		var settings = MongoClientSettings.builder().applyConnectionString(new ConnectionString(uri(database)))
+				.applyToClusterSettings(cluster -> cluster.serverSelectionTimeout(5, TimeUnit.SECONDS)).build();
+		return MongoClients.create(settings);
 	}
 
 	/** Drops the database of the test class after its last test. {@link MongoIntegrationTest} registers it. */

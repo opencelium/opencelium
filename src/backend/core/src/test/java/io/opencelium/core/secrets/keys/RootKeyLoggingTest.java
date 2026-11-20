@@ -6,6 +6,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -23,6 +24,12 @@ class RootKeyLoggingTest {
 
 	@TempDir
 	Path dataDir;
+
+	/** Each test starts with a master key of its own, so it starts as a new installation. */
+	@BeforeEach
+	void startAsANewInstallation() {
+		LocalMongo.dropKeyCollections(RootKeyLoggingTest.class);
+	}
 
 	@Test
 	void startupOutputShowsTheBackupWarningButNeverTheGeneratedKey(CapturedOutput output) throws Exception {

@@ -2,8 +2,8 @@ package io.opencelium.core.secrets.keys;
 
 /**
  * The stored secrets cannot be decrypted at this start: no root key was found for them, the resolved key is not the
- * one that encrypted them, or a stored data key is damaged. Stops startup; {@link KeyStartupFailureAnalyzer} prints
- * the message and the action.
+ * one that encrypted them, a stored data key is damaged, or the stored signing key does not decrypt. Stops startup;
+ * {@link KeyStartupFailureAnalyzer} prints the message and the action.
  */
 public final class KeyStartupException extends RuntimeException {
 
@@ -29,6 +29,13 @@ public final class KeyStartupException extends RuntimeException {
 	static KeyStartupException damaged(String reason) {
 		return new KeyStartupException(reason, "Restore the 'keys' collection from a database backup, or run an"
 				+ " explicit secrets reset.");
+	}
+
+	/** The stored signing key does not decrypt or is damaged. */
+	static KeyStartupException signingKey(String reason) {
+		return new KeyStartupException(reason, "Restore the collections '" + WrappedDek.COLLECTION + "' and '"
+				+ EncryptedSigningKey.COLLECTION + "' from 1 database backup, or run an explicit secrets reset, which"
+				+ " also deletes the signing key.");
 	}
 
 	public String action() {

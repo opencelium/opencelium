@@ -57,7 +57,7 @@ class KeyStartupCanaryTest {
 
 	@BeforeEach
 	void removeDataKeys() {
-		mongo.dropCollection(WrappedDek.class);
+		LocalMongo.dropKeyCollections(KeyStartupCanaryTest.class);
 	}
 
 	@Test
