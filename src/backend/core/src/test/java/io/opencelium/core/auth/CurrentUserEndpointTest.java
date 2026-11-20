@@ -7,8 +7,11 @@ import java.time.Instant;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpHeaders;
@@ -36,7 +39,8 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 
 /**
  * A valid session JWT opens the endpoint of the current OpenCelium user; a request without one gets the status code
- * 401 and no body. The session JWTs come from a login of the default admin of the setup.
+ * 401 and no body, and the session JWT of a deleted user gets the error response of an ended session. The session
+ * JWTs come from a login of the default admin of the setup, or of a user that a test stores.
  */
 @MongoIntegrationTest
 @AutoConfigureMockMvc
@@ -152,6 +156,25 @@ class CurrentUserEndpointTest {
 
 		assertThat(LoginRequests.me(mvc, sessionJwt)).hasStatusOk();
 		assertThat(LoginRequests.me(mvc, forged)).hasStatus(HttpStatus.UNAUTHORIZED);
+	}
+
+	@Test
+	@ExtendWith(OutputCaptureExtension.class)
+	void meGivesSessionEndedWhenTheUserIsDeleted(CapturedOutput output) {
+		UserDocument mallory = UserFixture.aUser("mallory", "Mallory-Password-1").storeIn(tenantRunner, documents);
+		MvcTestResult login = LoginRequests.logIn(mvc, "mallory", "Mallory-Password-1");
+		assertThat(login).as("the login before the delete").hasStatusOk();
+		String sessionJwt = LoginRequests.sessionJwtOf(login);
+		SessionRecord session = mongo.findOne(query(where("userId").is(mallory.id())), SessionRecord.class);
+		assertThat(session).as("the session record of the login").isNotNull();
+		mongo.remove(query(where("_id").is(mallory.id())), UserDocument.class);
+
+		MvcTestResult me = LoginRequests.me(mvc, sessionJwt);
+
+		LoginRequests.assertProblem(me, HttpStatus.UNAUTHORIZED, "session-ended");
+		assertThat(output.getOut().lines()).as("the log lines of the code").filteredOn(line -> line.contains(
+				"session-ended")).singleElement().asString().contains(mallory.id()).contains(session.id())
+				.doesNotContain(sessionJwt);
 	}
 
 	private UserDocument theDefaultAdmin() {
