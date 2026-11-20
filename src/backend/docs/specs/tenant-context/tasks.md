@@ -38,4 +38,4 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Run `./gradlew :core:test --tests "*.TenantRequestFilter*" --tests "*.TenantTask*"`: the tests pass. 2. Start core as in task 1: the start has no error, and each log line shows `[self-host-tenant]`.
 - **Size:** approximately 170 lines
 - **Depends on:** 2
-- **Status:** in work
+- **Status:** done
