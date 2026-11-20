@@ -38,7 +38,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Start core as in task 2. Log in as `admin`, and copy `refreshToken` into the shell variable `R`. 2. Run `curl -s -X POST localhost:9090/api/auth/refresh -H "Authorization: Bearer $R"`: the response holds 2 new tokens. 3. Do step 2 again with the old `R`: the status code is 401, with the code `session-ended`. 4. Refresh with the new refresh token of step 2: the response is the same as in step 3. 5. Log in again, and copy `sessionJwt` into `T` and `refreshToken` into `R`. 6. Run `curl -i -X POST localhost:9090/api/auth/logout -H "Authorization: Bearer $R"`: the status code is 204. 7. Refresh with `R`: the response is the same as in step 3. 8. Ask for `/api/auth/me` with `T`: the status code is 200. 9. `mongosh oc_hand --eval 'db.sessions.countDocuments()'` prints 0.
 - **Size:** approximately 320 lines
 - **Depends on:** 2
-- **Status:** open
+- **Status:** done
 
 ## Task 5: docs: record the authentication decisions in the architecture document
 - **Criteria:** none

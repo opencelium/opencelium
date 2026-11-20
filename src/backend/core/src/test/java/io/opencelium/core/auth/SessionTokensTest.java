@@ -28,7 +28,7 @@ class SessionTokensTest {
 	private final JwtEncoder unsigned = parameters -> Jwt.withTokenValue("unsigned").header("alg", "none")
 			.claims(claims -> claims.putAll(parameters.getClaims().getClaims())).build();
 
-	private final SessionTokens tokens = new SessionTokens(unsigned, Clock.fixed(NOW, ZoneOffset.UTC));
+	private final SessionTokens tokens = new SessionTokens(unsigned, unsigned, Clock.fixed(NOW, ZoneOffset.UTC));
 
 	@Test
 	void issueSessionJwtNamesTheUserTheTenantAndTheSessionWhenAUserLogsIn() {
