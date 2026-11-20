@@ -148,6 +148,7 @@ public class WorkflowRunGate {
                 lane.running = true;
                 lane.reservation = null;
                 lane.executionId = null;
+                lane.startedAt = clock.instant();
                 return Admission.HOLDS;
             }
 
@@ -200,6 +201,7 @@ public class WorkflowRunGate {
             }
             lane.running = false;
             lane.executionId = null;
+            lane.startedAt = null;
         }
         startNext(connectionId);
     }
@@ -231,15 +233,28 @@ public class WorkflowRunGate {
     }
 
     /**
-     * Returns the execution that holds a workflow.
+     * The run that holds a workflow.
+     *
+     * @param workflowId  id of the workflow
+     * @param executionId id of the running execution; {@code null} for the moment between the
+     *                    start and the creation of its execution
+     * @param startedAt   when the run took the workflow
+     */
+    public record Hold(long workflowId, Long executionId, Instant startedAt) {
+    }
+
+    /**
+     * Returns the run that holds a workflow. A workflow that writes a mutable variable is held for
+     * as long as one of its runs goes, so this tells whether the variable is being updated.
      *
      * @param connectionId id of the workflow
-     * @return the id of the running execution; empty if the workflow is free or its execution has
-     *         no id yet
+     * @return the hold; empty if no run holds the workflow
      */
-    public synchronized Optional<Long> runningExecutionOf(long connectionId) {
+    public synchronized Optional<Hold> holdOf(long connectionId) {
         Lane lane = lanes.get(connectionId);
-        return lane == null || !lane.running ? Optional.empty() : Optional.ofNullable(lane.executionId);
+        return lane == null || !lane.running
+                ? Optional.empty()
+                : Optional.of(new Hold(connectionId, lane.executionId, lane.startedAt));
     }
 
     /**
@@ -376,6 +391,7 @@ public class WorkflowRunGate {
     private static final class Lane {
         private boolean running;
         private Long executionId;
+        private Instant startedAt;
         private Reservation reservation;
         private final Deque<Waiting> waiting = new ArrayDeque<>();
     }

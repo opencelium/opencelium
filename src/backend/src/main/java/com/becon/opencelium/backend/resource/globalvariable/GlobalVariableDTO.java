@@ -78,6 +78,18 @@ public record GlobalVariableDTO(
         }
     }
 
+    /**
+     * The run that is updating a mutable variable: a run of its owner workflow, which may write
+     * it at any moment until it ends.
+     *
+     * @param workflowId  the owner workflow
+     * @param executionId the running execution; {@code null} for the moment before it is created
+     * @param startedAt   when the run started
+     */
+    public record BeingUpdatedBy(
+            long workflowId, Long executionId, @JsonFormat(shape = JsonFormat.Shape.STRING) Instant startedAt) {
+    }
+
     /** Which workflows may use the variable, with the names the UI shows. */
     public record Scope(GlobalVariableScopeType type, List<CategoryRef> categories, List<WorkflowRef> workflows) {
     }

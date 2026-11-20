@@ -106,8 +106,13 @@ public class GlobalVariableMapper {
                 toActor(variable.getUpdatedBy()));
     }
 
-    public GlobalVariableListItemDTO toListItem(
-            GlobalVariable variable, Set<GlobalVariablePermission> myPermissions, long usageCount) {
+    /**
+     * Builds one row of the list.
+     *
+     * @param beingUpdatedBy the run that updates the variable now, or {@code null}
+     */
+    public GlobalVariableListItemDTO toListItem(GlobalVariable variable, Set<GlobalVariablePermission> myPermissions,
+            long usageCount, GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy) {
         return new GlobalVariableListItemDTO(
                 variable.getId(),
                 variable.getName(),
@@ -120,7 +125,8 @@ public class GlobalVariableMapper {
                 myPermissions,
                 variable.getVersion(),
                 toInstant(variable.getUpdatedAt()),
-                toActor(variable.getUpdatedBy()));
+                toActor(variable.getUpdatedBy()),
+                beingUpdatedBy);
     }
 
     public GlobalVariablePermissionsDTO toPermissions(GlobalVariable variable) {
@@ -177,8 +183,10 @@ public class GlobalVariableMapper {
      * Builds the value a run reads now. For a mutable variable that is its current value, set by
      * a reset or a run, so the time and the user are those of the current value, not of the
      * definition.
+     *
+     * @param beingUpdatedBy the run that updates the variable now, or {@code null}
      */
-    public GlobalVariableValueDTO toValue(GlobalVariable variable) {
+    public GlobalVariableValueDTO toValue(GlobalVariable variable, GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy) {
         boolean mutable = variable.getKind() == GlobalVariableKind.MUTABLE;
 
         return new GlobalVariableValueDTO(
@@ -187,7 +195,8 @@ public class GlobalVariableMapper {
                 variable.getCurrentRevision(),
                 variable.isSecret() ? null : readJson(variable.getReadableValue()),
                 toInstant(mutable ? variable.getCurrentSetAt() : variable.getUpdatedAt()),
-                toActor(mutable ? variable.getCurrentSetByUser() : variable.getUpdatedBy()));
+                toActor(mutable ? variable.getCurrentSetByUser() : variable.getUpdatedBy()),
+                beingUpdatedBy);
     }
 
     /**

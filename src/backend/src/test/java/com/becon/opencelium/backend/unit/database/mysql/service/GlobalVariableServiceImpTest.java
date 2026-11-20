@@ -41,8 +41,10 @@ import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Violation;
+import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.mapper.mysql.GlobalVariableMapper;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
+import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableImpactDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariablePermissionsDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariablePermissionsDTO.GrantRequest;
@@ -60,6 +62,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -149,6 +152,9 @@ class GlobalVariableServiceImpTest {
     @Mock
     GlobalVariableScopeResolver scopeResolver;
 
+    @Mock
+    WorkflowRunGate runGate;
+
     @Captor
     ArgumentCaptor<Collection<Long>> askedIds;
 
@@ -161,7 +167,7 @@ class GlobalVariableServiceImpTest {
         service = new GlobalVariableServiceImp(repository, changeRepository, mapper, security,
                 userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
                 scopeResolver,
-                json, CIPHER, MAX_VALUE_BYTES);
+                json, CIPHER, runGate, MAX_VALUE_BYTES);
 
         // the caller is the owner and may do everything, unless a test says otherwise
         lenient().when(security.caller()).thenReturn(Optional.of(OWNER));
@@ -752,8 +758,8 @@ class GlobalVariableServiceImpTest {
 
         service.findAll(null, null, 0, 20, "name,asc");
 
-        verify(mapper).toListItem(eq(used), any(), eq(3L));
-        verify(mapper).toListItem(eq(unused), any(), eq(0L));
+        verify(mapper).toListItem(eq(used), any(), eq(3L), any());
+        verify(mapper).toListItem(eq(unused), any(), eq(0L), any());
     }
 
     @Test
@@ -1125,6 +1131,30 @@ class GlobalVariableServiceImpTest {
         assertThat(values).extracting(GlobalVariableValueDTO::id).containsExactly(7L, 12L);
     }
 
+    @Test
+    void getValuesSaysWhichRunUpdatesMutableWhenOwnerWorkflowRuns() {
+        Instant started = Instant.parse("2026-11-20T10:00:00Z");
+        when(runGate.holdOf(42L)).thenReturn(Optional.of(new WorkflowRunGate.Hold(42L, 511L, started)));
+        givenViewableVariables(
+                GlobalVariableFixture.aMutable(12L, "lastSync", "0", "1", 42L),
+                GlobalVariableFixture.aConstant(7L, "idoitUrl", "1"));
+
+        List<GlobalVariableValueDTO> values = service.getValues(List.of(12L, 7L));
+
+        assertThat(values).extracting(GlobalVariableValueDTO::beingUpdatedBy).containsExactly(
+                null, new GlobalVariableDTO.BeingUpdatedBy(42L, 511L, started));
+    }
+
+    @Test
+    void getValuesLeavesBeingUpdatedByOutWhenOwnerWorkflowIsIdle() {
+        when(runGate.holdOf(42L)).thenReturn(Optional.empty());
+        givenViewableVariables(GlobalVariableFixture.aMutable(12L, "lastSync", "0", "1", 42L));
+
+        List<GlobalVariableValueDTO> values = service.getValues(List.of(12L));
+
+        assertThat(values).extracting(GlobalVariableValueDTO::beingUpdatedBy).containsOnlyNulls();
+    }
+
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("noIds")
     void getValuesThrowsValidationExceptionWhenNoIdIsGiven(String given, List<Long> ids) {
@@ -1178,7 +1208,7 @@ class GlobalVariableServiceImpTest {
                 .extracting(Violation::field, Violation::code)
                 .containsExactly(tuple("ids", Code.SCRIPT_HAS_NO_VALUE));
         assertThat(violations.get(0).message()).contains("buildTitle");
-        verify(mapper, never()).toValue(any());
+        verify(mapper, never()).toValue(any(), any());
     }
 
     @Test
@@ -2052,7 +2082,7 @@ class GlobalVariableServiceImpTest {
     private GlobalVariableServiceImp serviceWith(GlobalVariableCipher cipher) {
         return new GlobalVariableServiceImp(repository, changeRepository, mapper, security,
                 userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
-                scopeResolver, json, cipher, MAX_VALUE_BYTES);
+                scopeResolver, json, cipher, runGate, MAX_VALUE_BYTES);
     }
 
     private static GlobalVariableChangeDTO aMaskedChangeDto() {
@@ -2162,9 +2192,10 @@ class GlobalVariableServiceImpTest {
     /** The caller may view these variables; the mapper makes a value with the id and version of each. */
     private void givenViewableVariables(GlobalVariable... variables) {
         when(repository.findViewableByIds(any(), eq(OWNER_ID))).thenReturn(List.of(variables));
-        lenient().when(mapper.toValue(any())).thenAnswer(invocation -> {
+        lenient().when(mapper.toValue(any(), any())).thenAnswer(invocation -> {
             GlobalVariable variable = invocation.getArgument(0);
-            return new GlobalVariableValueDTO(variable.getId(), variable.getVersion(), 0L, null, null, null);
+            return new GlobalVariableValueDTO(variable.getId(), variable.getVersion(), 0L, null, null, null,
+                    invocation.getArgument(1));
         });
     }
 
