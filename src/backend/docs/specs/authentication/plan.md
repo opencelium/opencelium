@@ -38,7 +38,7 @@ The authentication configuration of `core.auth` puts the providers of the deploy
 
 The local login strategy is the password provider of Spring Security. It has a user lookup over the user service and the password encoder of `core.user`. The lookup follows rule 1 of AU-01. For a name that does not exist, the provider compares the password with a fixed hash, so the response takes approximately the same time (AU-02). The provider examines the lock after the password (AU-03). The default of Spring Security examines the lock first, and that order shows the lock to a wrong password.
 
-The provider gives the principal of `core.auth`. The principal holds the user ID, the tenant ID, the session ID and the roles. The roles come from the session JWT, so a change of the roles applies at the next refresh. The principal has no groups: the permissions are out of scope (decision 7). It implements the principal contract of `core.tenant`, so the request filter binds its tenant (decision 15).
+The provider gives the OpenCelium user of the login, with the user ID, the username, the tenant ID and the roles. Then the session service starts the session of that user. The 2 security filter chains give the principal of `core.auth` from a valid token. The principal holds the user ID, the tenant ID, the session ID and the roles. The roles come from the session JWT, so a change of the roles applies at the next refresh. The principal has no groups: the permissions are out of scope (decision 7). It implements the principal contract of `core.tenant`, so the request filter binds its tenant (decision 15).
 
 ### The session
 A session record is a tenant document in the collection `sessions` (plan decision 4). It holds these values:
@@ -68,6 +68,8 @@ A user who must change a generated password and is not locked gets a session (AU
 
 1. **The refresh chain** matches the refresh endpoint and the logout endpoint. It authenticates the bearer token with the decoder of the refresh token.
 2. **The main chain** matches each other request. It permits the login endpoint and the error page of Spring without a token. It authenticates each other request with the decoder of the session JWT. A request without a valid session JWT gets the status code 401 from the entry point of the bearer-token filter (AU-06).
+
+The login endpoint ignores a bearer token, so an old session JWT does not stop a new login. The 2 chains add the bearer-token filter of Spring Security themselves. The configurer of the resource server also opens an endpoint for the metadata of the resource, and core opens only the endpoints that a feature declares.
 
 The 2 chains give the principal of `core.auth`. The request filter of `core.tenant` runs after the chains and binds the tenant of the principal (decision 15). Thus a refresh in the cloud mode has a current tenant before it reads its session record. In the self-host mode the request filter binds `self-host-tenant` for each request, so the login endpoint can read the OpenCelium users.
 
@@ -113,7 +115,7 @@ The reviewer confirms each decision before task 1 starts.
 | `POST` | `/api/auth/logout` | End a session (AU-09). The response has the status code 204 and no body. | A valid refresh token as the bearer token |
 | `GET` | `/api/auth/me` | The data of the current OpenCelium user (AU-05) | A valid session JWT as the bearer token |
 
-- The body of a login has the fields `username` and `password`. The field `username` takes a username or an email (AU-01).
+- The body of a login has the fields `username` and `password`. The field `username` takes a username or an email (AU-01). Each field has at most 256 characters.
 - The response of a login and of a refresh has the fields `sessionJwt`, `sessionJwtExpiresAt`, `refreshToken` and `refreshTokenExpiresAt`. A time is an ISO 8601 instant in UTC.
 - The response of `/api/auth/me` has the fields `id`, `username`, `email`, `tenantId` and `roles`. It has no field for the password hash (AU-05).
 - No endpoint needs a role or an ACL entry. The permissions are out of scope (decision 7).
@@ -125,7 +127,7 @@ The reviewer confirms each decision before task 1 starts.
 | `invalid-credentials` | 401 | A wrong username, a wrong email or a wrong password (AU-02). Each attempt in the cloud mode (AU-04). A locked user with a wrong password (AU-03). |
 | `user-locked` | 403 | A locked user with the correct password (AU-03) |
 | `session-ended` | 401 | A refresh after one of the rules 1 to 3 of "The session" (AU-08) |
-| `bad-request` | 400 | A login body without a `username` or without a `password` |
+| `bad-request` | 400 | A login body that is not JSON, without a `username` or without a `password`, or with a field of more than 256 characters |
 
 A request without a valid session JWT or refresh token gets the status code 401 from the entry point of the bearer-token filter (AU-06). The response has the header `WWW-Authenticate` and no body.
 

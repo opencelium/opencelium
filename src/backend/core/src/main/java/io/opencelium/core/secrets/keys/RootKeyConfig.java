@@ -11,8 +11,8 @@ import io.opencelium.core.config.DataDirectory;
 import io.opencelium.core.config.OpenCeliumProperties;
 
 /**
- * The root key and its startup checks, and the signing key of the installation. The 2 keys are loaded once, when the
- * context starts, and closed (zeroed) on shutdown.
+ * The root key and its startup checks, the signing key of the installation, and the signature of the tokens of core
+ * with that key. The 2 keys are loaded once, when the context starts, and closed (zeroed) on shutdown.
  */
 @Configuration(proxyBeanMethods = false)
 public final class RootKeyConfig {
@@ -45,6 +45,11 @@ public final class RootKeyConfig {
 	SigningKeyLoader signingKeyLoader(MongoTemplate mongo, DekWrapper wrapper, RootKey rootKey,
 			KeyStartupCanary canary, Clock clock) {
 		return new SigningKeyLoader(mongo, wrapper, new SigningKeyCipher(), rootKey, canary, clock);
+	}
+
+	@Bean
+	TokenSignature tokenSignature(SigningKeyLoader loader, Clock clock) {
+		return new TokenSignature(loader::signingKey, clock);
 	}
 
 }

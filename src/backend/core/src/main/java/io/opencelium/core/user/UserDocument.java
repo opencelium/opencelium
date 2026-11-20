@@ -28,6 +28,8 @@ public record UserDocument(@Id String id, String tenantId, String username, Stri
 
 	static final String ID = "_id";
 
+	static final String USERNAME = "username";
+
 	static final String ROLES = "roles";
 
 	static final String PASSWORD_HASH = "passwordHash";
