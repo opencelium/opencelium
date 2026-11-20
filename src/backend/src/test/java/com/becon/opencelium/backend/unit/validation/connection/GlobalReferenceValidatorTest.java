@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -366,6 +367,39 @@ class GlobalReferenceValidatorTest {
 
         assertThatCode(() -> validator.validateNotifications(TEMPLATE_TEXTS, notifications))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("validateNotifications — a notification that comes with its schedule is named with it")
+    void validateNotificationsNamesScheduleWhenTargetCarriesIt() {
+        GlobalVariable variable =
+                aVariableScopedTo(GlobalVariableScopeType.WORKFLOWS, GlobalVariableScopeTarget.workflow(99));
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        List<NotificationTarget> notifications =
+                List.of(new NotificationTarget("Failure mail", "'Nightly'", WORKFLOW, null));
+
+        GlobalReferenceValidationException rejection =
+                rejectionOf(() -> validator.validateNotifications(TEMPLATE_TEXTS, notifications));
+
+        assertThat(rejection).hasMessage("The workflow of notification 'Failure mail' (schedule 'Nightly') is"
+                + " outside the scope of global variable 'idoitUrl'");
+    }
+
+    @Test
+    @DisplayName("validateNotifications — the notifications of one category share one read of its chain")
+    void validateNotificationsReadsCategoryChainOnceWhenNotificationsShareCategory() {
+        GlobalVariable variable =
+                aVariableScopedTo(GlobalVariableScopeType.CATEGORIES, GlobalVariableScopeTarget.category(1));
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(scopeResolver.categoryChainOf(3)).thenReturn(Set.of(3L, 1L));
+        List<NotificationTarget> notifications = List.of(
+                new NotificationTarget("Failure mail", "'Nightly'", WORKFLOW, 3),
+                new NotificationTarget("Failure chat", "'Nightly'", WORKFLOW, 3),
+                new NotificationTarget("Weekly mail", "'Weekly'", WORKFLOW, 3));
+
+        validator.validateNotifications(TEMPLATE_TEXTS, notifications);
+
+        verify(scopeResolver, times(1)).categoryChainOf(3);
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

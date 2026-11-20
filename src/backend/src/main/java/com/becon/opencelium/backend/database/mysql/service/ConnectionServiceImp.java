@@ -224,7 +224,12 @@ public class ConnectionServiceImp implements ConnectionService {
             categoryService.get(connection.getCategoryId());
         }
 
-        globalVariableUsageService.checkWorkflow(connectionMng, connection.getId(), connection.getCategoryId());
+        // a workflow that changes category takes the notifications of its schedules along
+        if (Objects.equals(connection.getCategoryId(), sCon.getCategoryId())) {
+            globalVariableUsageService.checkWorkflow(connectionMng, connection.getId(), connection.getCategoryId());
+        } else {
+            globalVariableUsageService.checkWorkflowMove(connectionMng, connection.getId(), connection.getCategoryId());
+        }
 
         connectionMng.setId(null);
         connectionMng.setConnectionId(connection.getId());
@@ -479,9 +484,15 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public void updateCategory(Connection connection, Integer newCategory) {
-        // a move can take the workflow out of the scope of a variable it uses
-        if (connection.getSnapshotId() != null) {
-            ConnectionMng connectionMng = connectionMngService.getById(connection.getSnapshotId());
+        ConnectionMng connectionMng = connection.getSnapshotId() == null
+                ? null
+                : connectionMngService.getById(connection.getSnapshotId());
+
+        // a move can take the workflow, or a notification of one of its schedules, out of the
+        // scope of a variable it uses
+        if (!Objects.equals(connection.getCategoryId(), newCategory)) {
+            globalVariableUsageService.checkWorkflowMove(connectionMng, connection.getId(), newCategory);
+        } else if (connectionMng != null) {
             globalVariableUsageService.checkWorkflow(connectionMng, connection.getId(), newCategory);
         }
 
@@ -855,11 +866,17 @@ public class ConnectionServiceImp implements ConnectionService {
         doWithConnectorsAfterPatch(patched);
 
         Connection connection = connectionMapper.toEntity(patched);
-        connectionRepository.save(connection);
-
         ConnectionMng connectionMng = connectionMngMapper.toEntity(patched);
+
+        // a patch is saved without the checks of a full save, but a patch that moves the workflow
+        // to another category is checked like every move, before anything is written
+        if (!Objects.equals(connectionDTO.getCategoryId(), patched.getCategoryId())) {
+            globalVariableUsageService.checkWorkflowMove(connectionMng, connection.getId(), connection.getCategoryId());
+        }
+
+        connectionRepository.save(connection);
         connectionMngService.save(connectionMng);
-        // a patch is saved without the checks of a full save, but "used by" still follows the content
+        // "used by" follows the content, checked or not
         globalVariableUsageService.rebuildForWorkflow(connection.getId(), connectionMng);
         return patched;
     }

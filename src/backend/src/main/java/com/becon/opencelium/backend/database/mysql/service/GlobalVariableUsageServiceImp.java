@@ -8,9 +8,14 @@ import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.SourceType;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableUsageRepository;
+import com.becon.opencelium.backend.database.mysql.repository.MessageRepository;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
+import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository.WorkflowNotification;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Violation;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceCollector;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceCollector.Found;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceValidator;
@@ -39,16 +44,19 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
     private final GlobalVariableUsageRepository usageRepository;
     private final GlobalVariableRepository globalVariableRepository;
     private final NotificationRepository notificationRepository;
+    private final MessageRepository messageRepository;
     private final GlobalReferenceValidator referenceValidator;
 
     public GlobalVariableUsageServiceImp(
             GlobalVariableUsageRepository usageRepository,
             GlobalVariableRepository globalVariableRepository,
             NotificationRepository notificationRepository,
+            MessageRepository messageRepository,
             GlobalReferenceValidator referenceValidator) {
         this.usageRepository = usageRepository;
         this.globalVariableRepository = globalVariableRepository;
         this.notificationRepository = notificationRepository;
+        this.messageRepository = messageRepository;
         this.referenceValidator = referenceValidator;
     }
 
@@ -237,6 +245,119 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
         if (text != null) {
             texts.merge(name, text, (first, second) -> first + "\n" + second);
         }
+    }
+
+    // ------------------------------------------------------------------ moves
+
+    @Override
+    @Transactional(readOnly = true)
+    public void checkWorkflowMove(ConnectionMng connectionMng, long connectionId, Integer categoryId) {
+        List<Violation> violations = new ArrayList<>();
+        if (connectionMng != null) {
+            collectViolations(violations, () -> referenceValidator.validate(connectionMng, connectionId, categoryId));
+        }
+
+        // the templates are read first: when none of them holds a reference, no notification is read
+        Map<Integer, Map<String, String>> textsByTemplate =
+                textsWithReferences(messageRepository.findSentByWorkflow(connectionId));
+        if (!textsByTemplate.isEmpty()) {
+            Map<Integer, List<NotificationTarget>> notificationsByTemplate = new LinkedHashMap<>();
+            for (WorkflowNotification notification : notificationRepository.findByWorkflow(connectionId)) {
+                Integer templateId = notification.getTemplateId();
+                if (templateId != null && textsByTemplate.containsKey(templateId)) {
+                    notificationsByTemplate.computeIfAbsent(templateId, id -> new ArrayList<>())
+                            .add(new NotificationTarget(notification.getName(),
+                                    scheduleName(notification.getScheduleId(), notification.getScheduleTitle()),
+                                    connectionId, categoryId));
+                }
+            }
+
+            checkSentTexts(textsByTemplate, notificationsByTemplate, violations);
+        }
+
+        throwIfAny(violations);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void checkScheduleWorkflowChange(Scheduler schedule, Connection workflow) {
+        List<EventNotification> notifications = schedule.getEventNotifications();
+        if (workflow == null || workflow.getId() == null || notifications == null || notifications.isEmpty()) {
+            return;
+        }
+
+        // a template that several notifications send is looked at once
+        Map<Integer, EventMessage> templates = new LinkedHashMap<>();
+        for (EventNotification notification : notifications) {
+            EventMessage template = notification.getEventMessage();
+            if (template != null) {
+                templates.putIfAbsent(template.getId(), template);
+            }
+        }
+
+        Map<Integer, Map<String, String>> textsByTemplate = textsWithReferences(templates.values());
+        if (textsByTemplate.isEmpty()) {
+            return;
+        }
+
+        String scheduleName = scheduleName(schedule.getId(), schedule.getTitle());
+        Map<Integer, List<NotificationTarget>> notificationsByTemplate = new LinkedHashMap<>();
+        for (EventNotification notification : notifications) {
+            EventMessage template = notification.getEventMessage();
+            if (template != null && textsByTemplate.containsKey(template.getId())) {
+                notificationsByTemplate.computeIfAbsent(template.getId(), id -> new ArrayList<>())
+                        .add(new NotificationTarget(notification.getName(), scheduleName,
+                                workflow.getId(), workflow.getCategoryId()));
+            }
+        }
+
+        List<Violation> violations = new ArrayList<>();
+        checkSentTexts(textsByTemplate, notificationsByTemplate, violations);
+        throwIfAny(violations);
+    }
+
+    /** Keeps the texts of the templates that hold a global variable reference, by template id. */
+    private static Map<Integer, Map<String, String>> textsWithReferences(Collection<EventMessage> templates) {
+        Map<Integer, Map<String, String>> textsByTemplate = new HashMap<>();
+        for (EventMessage template : templates) {
+            Map<String, String> texts = textsOf(template);
+            if (!GlobalReferenceCollector.collectFromTexts(texts).isEmpty()) {
+                textsByTemplate.put(template.getId(), texts);
+            }
+        }
+
+        return textsByTemplate;
+    }
+
+    /** Checks the texts of each template against the notifications that send them. */
+    private void checkSentTexts(Map<Integer, Map<String, String>> textsByTemplate,
+            Map<Integer, List<NotificationTarget>> notificationsByTemplate, List<Violation> violations) {
+        notificationsByTemplate.forEach((templateId, notifications) -> collectViolations(violations,
+                () -> referenceValidator.validateNotifications(textsByTemplate.get(templateId), notifications)));
+    }
+
+    /**
+     * Runs a check and keeps its violations, so that everything a move breaks is reported at
+     * once. A check that fails has marked the transaction for rollback, which is right: a move
+     * with a violation is always refused.
+     */
+    private static void collectViolations(List<Violation> violations, Runnable check) {
+        try {
+            check.run();
+        } catch (GlobalReferenceValidationException e) {
+            violations.addAll(e.getViolations());
+        }
+    }
+
+    private static void throwIfAny(List<Violation> violations) {
+        if (!violations.isEmpty()) {
+            throw new GlobalReferenceValidationException(violations);
+        }
+    }
+
+    /** Names a schedule in a message: by its title, or by its id when it has none. */
+    private static String scheduleName(Integer scheduleId, String title) {
+        return title == null || title.isBlank() ? "#" + scheduleId : "'" + title + "'";
     }
 
     // ------------------------------------------------------------------ reading

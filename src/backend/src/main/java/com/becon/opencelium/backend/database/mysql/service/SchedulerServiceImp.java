@@ -107,6 +107,13 @@ public class SchedulerServiceImp implements SchedulerService {
 //        if (existsByTitle(scheduler.getTitle())) {
 //            throw new RuntimeException("TITLE_ALREADY_EXISTS");
 //        }
+        // a schedule sent with the id of a stored one is written over it, and the notifications of
+        // that one then belong to the workflow sent here; a new schedule has none
+        if (scheduler.getId() != 0) {
+            schedulerRepository.findById(scheduler.getId())
+                    .ifPresent(stored -> checkNotificationsIfWorkflowChanges(stored, scheduler.getConnection()));
+        }
+
         Scheduler saved = schedulerRepository.save(scheduler);
         schedulingStrategy.addJob(saved);
     }
@@ -120,6 +127,9 @@ public class SchedulerServiceImp implements SchedulerService {
         if (!Objects.equals(entity.getTitle(), scheduler.getTitle()) && existsByTitle(scheduler.getTitle())) {
             throw new RuntimeException("TITLE_ALREADY_EXISTS");
         }
+
+        // checked before the schedule is written or its job moved, so a refusal leaves both as they are
+        checkNotificationsIfWorkflowChanges(entity, scheduler.getConnection());
 
         schedulerRepository.save(scheduler);
         schedulingStrategy.rescheduleJob(scheduler, oldCon);
@@ -394,6 +404,23 @@ public class SchedulerServiceImp implements SchedulerService {
         globalVariableUsageService.deleteForNotification(id);
     }
 
+
+    /**
+     * Checks the stored notifications of a schedule against the workflow it is given, when that
+     * is another one than it runs now: a notification belongs to the workflow of its schedule, so
+     * its texts must be in the scope of the new one. The notifications sent with the schedule are
+     * not stored with it, so they are not the ones checked.
+     *
+     * @param stored   the schedule as it is stored, with its notifications
+     * @param workflow the workflow it is given
+     */
+    private void checkNotificationsIfWorkflowChanges(Scheduler stored, Connection workflow) {
+        Long current = stored.getConnection() == null ? null : stored.getConnection().getId();
+        Long next = workflow == null ? null : workflow.getId();
+        if (!Objects.equals(current, next)) {
+            globalVariableUsageService.checkScheduleWorkflowChange(stored, workflow);
+        }
+    }
 
     private RunningJobsResource toRunningJobResource(RunningJob runningJob) {
         long connectionId = runningJob.connectionId();
