@@ -1,7 +1,5 @@
 package io.opencelium.core.auth;
 
-import java.time.Instant;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,7 +16,6 @@ import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,8 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The login of an OpenCelium user with a name and a password; the name is a username or an email. The login strategies
- * of the deployment mode compare them; a correct pair starts a session, and the response holds its session JWT. A
- * refused login gets an error response with a code ({@link AuthError}):
+ * of the deployment mode compare them; a correct pair starts a session, and the response holds its session JWT and its
+ * refresh token. A refused login gets an error response with a code ({@link AuthError}):
  * <ul>
  * <li>A wrong name and a wrong password get the same response, so that it does not show which names exist.</li>
  * <li>A locked user gets a response of its own only with the correct password.</li>
@@ -66,7 +63,7 @@ final class LoginController {
 	 *                                 does not answer
 	 */
 	@PostMapping(PATH)
-	ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+	ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
 		Authentication login;
 		try {
 			login = loginStrategies.authenticate(
@@ -78,8 +75,7 @@ final class LoginController {
 			throw new IllegalStateException("A login stopped: the OpenCelium user of the name cannot be read.",
 					ex.getCause());
 		}
-		Jwt sessionJwt = sessions.start((LoginUser) login.getPrincipal());
-		return ResponseEntity.ok(new LoginResponse(sessionJwt.getTokenValue(), sessionJwt.getExpiresAt()));
+		return ResponseEntity.ok(TokenResponse.of(sessions.start((LoginUser) login.getPrincipal())));
 	}
 
 	/** A login that the login strategies refused: the response of a locked user, or of a wrong name or password. */
@@ -130,17 +126,6 @@ final class LoginController {
 		@Override
 		public String toString() {
 			return "LoginRequest[username=****, password=****]";
-		}
-
-	}
-
-	/** @param sessionJwtExpiresAt the claim {@code exp} of the session JWT, in UTC */
-	record LoginResponse(String sessionJwt, Instant sessionJwtExpiresAt) {
-
-		/** Without the token. */
-		@Override
-		public String toString() {
-			return "LoginResponse[sessionJwt=****, sessionJwtExpiresAt=" + sessionJwtExpiresAt + "]";
 		}
 
 	}
