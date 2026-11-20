@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.exception.GlobalVariableNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +23,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Writes mutable global variables for running executions.
+ * Writes mutable global variables for running executions, and reads their current value live.
  *
  * <p>Only a run of a variable's owner workflow may write it. A write replaces the whole current
  * value in one statement and records when and by which execution it was written. A test run, which
  * runs a copy of the workflow, is checked as its origin but stores nothing: its writes reach only
  * the run's own copy of the values, so testing never moves a value a production run relies on.
+ *
+ * <p>Any run may read the current value as the store holds it at that moment, so a run sees what
+ * a run of the owner workflow wrote after it started.
  */
 @Component
 public class GlobalVariableWriter {
@@ -87,10 +91,7 @@ public class GlobalVariableWriter {
          *                                         large
          */
         public JsonNode write(String name, Object value) {
-            GlobalVariable variable = repository.findByNameIn(List.of(name)).stream()
-                    .filter(found -> found.getName().equals(name))
-                    .findFirst()
-                    .orElseThrow(() -> new GlobalVariableNotFoundException(name));
+            GlobalVariable variable = find(name).orElseThrow(() -> new GlobalVariableNotFoundException(name));
 
             if (variable.getKind() != GlobalVariableKind.MUTABLE) {
                 throw new IllegalStateException("Global variable '%s' is a %s and cannot be written by a run"
@@ -114,6 +115,42 @@ public class GlobalVariableWriter {
             }
 
             return json;
+        }
+
+        /**
+         * Reads the current value of a mutable variable as the store holds it now. This does not
+         * know what a test run wrote, which stays in the run's own copy.
+         *
+         * @param name name of the variable
+         * @return the current value as a JSON tree, or empty if no mutable variable has that name
+         *         any more
+         * @throws IllegalStateException if the stored value is not valid JSON
+         */
+        public Optional<JsonNode> readCurrent(String name) {
+            return find(name)
+                    .filter(variable -> variable.getKind() == GlobalVariableKind.MUTABLE)
+                    .map(variable -> parse(name, variable.getCurrentValue()));
+        }
+
+        // names are matched exactly, as a reference spells them, whatever the column's collation
+        private Optional<GlobalVariable> find(String name) {
+            return repository.findByNameIn(List.of(name)).stream()
+                    .filter(found -> found.getName().equals(name))
+                    .findFirst();
+        }
+
+        private JsonNode parse(String name, String text) {
+            if (text == null) {
+                return NullNode.getInstance();
+            }
+
+            try {
+                return MAPPER.readTree(text);
+            } catch (JsonProcessingException e) {
+                // writes only ever store serialized JSON, so the row was changed outside the API
+                throw new IllegalStateException(
+                        "The current value of global variable '%s' is not valid JSON".formatted(name), e);
+            }
         }
 
         private String toText(JsonNode json) {

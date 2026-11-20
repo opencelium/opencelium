@@ -172,6 +172,24 @@ class GlobalVariableSnapshotTest {
     }
 
     @Test
+    @DisplayName("withValue — a mutable variable stays mutable, so the run keeps reading it live")
+    void withValueKeepsMutableFlagWhenVariableIsMutable() {
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(
+                List.of(Entry.ofMutable("lastSync", 3, new TextNode("old"), true)));
+
+        GlobalVariableSnapshot written = snapshot.withValue("lastSync", new TextNode("new"));
+
+        assertThat(written.find("lastSync")).get()
+                .extracting(Entry::value, Entry::mutable, Entry::secret)
+                .containsExactly(new TextNode("new"), true, false);
+    }
+
+    @Test
+    void entryIsNotMutableWhenCreatedAsConstant() {
+        assertThat(new Entry("limit", 1, IntNode.valueOf(5)).mutable()).isFalse();
+    }
+
+    @Test
     void withValueThrowsWhenVariableIsNotInSnapshot() {
         GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(new Entry("limit", 1, IntNode.valueOf(5))));
 
