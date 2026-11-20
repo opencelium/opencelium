@@ -300,7 +300,9 @@ The procedure to add a new value is in [CONTRIBUTING.md, section 8.1](../CONTRIB
 
 ### 6.5 Secrets and keys
 
-Secrets use envelope encryption with 2 key layers (decision 14). One **root key** for each installation encrypts only DEKs. Its self-hosted name is the master key. One **DEK** for each tenant encrypts the secrets of that tenant (AES-256-GCM, a new IV for each secret). The root key is outside each database. Core finds it at the start, from the environment, from a key file, or from the data directory. A DEK is kept wrapped in the database of its tenant. Each installation has 1 **system DEK** from the first start, in the 2 deployment modes. The system DEK is kept wrapped in the database that the yml file names. This is the system database in the cloud mode and the 1 database in the self-host mode. The system DEK encrypts the **signing key** of the tokens of core (decision 17). The rules and the guards are in decisions 14 and 17.
+Secrets use envelope encryption with 2 key layers (decision 14). One **root key** for each installation encrypts only DEKs. Its self-hosted name is the master key. One **DEK** for each tenant encrypts the secrets of that tenant (AES-256-GCM, a new IV for each secret). The root key is outside each database. Core finds it at the start, from the environment, from a key file, or from the data directory. A DEK is kept wrapped in the database of its tenant.
+
+Each installation has 1 **system DEK** from the first start, in the 2 deployment modes. The system DEK is kept wrapped in the database that the yml file names. This is the system database in the cloud mode and the 1 database in the self-host mode. The system DEK encrypts the **signing key** of the tokens of core (decision 17). The rules and the guards are in decisions 14 and 17.
 
 ```mermaid
 flowchart LR
@@ -517,7 +519,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - Self-hosted is the same code path with exactly one tenant.
     - The root key does not leave core: not to the workers, not to the broker, and not to a job message.
 
-    *(The worker-side key material for encrypted job payloads is on the [open decisions](#open-decisions) list.)*
+    *(The generation of the system DEK and the signing key is in decision 17. The worker-side key material for encrypted job payloads is on the [open decisions](#open-decisions) list.)*
 
 15. **One current tenant for each request and for each background task. Only the tenant runner binds it, in a scoped value.** *(Extends decision 11.)*
 
@@ -538,7 +540,7 @@ The decisions are recorded so that they are not discussed again without a reason
     - Each operation of such a repository goes through the tenant-document access of `core.tenant` (decision 15). A repository has no query without the tenant limit. The build rule of [6.9](#69-build-checks) enforces this.
     - The repositories of the admin marker and of the wrapped DEKs are also in their feature packages. The 3 operations of the start that are outside the tenant-document access are in [6.9](#69-build-checks).
 
-17. **Core signs its tokens with 1 signing key for each installation. The system DEK encrypts the signing key, and the key has its own collection.** *(Extends decisions 10 and 14. Changes the generation clause of decision 14 for the system DEK.)*
+17. **Core signs its tokens with 1 signing key for each installation. The system DEK encrypts the signing key, and the key has its own collection.** *(Extends decisions 10 and 14. Changes the clause of decision 14 on the generation of a DEK, for the system DEK.)*
 
     *Why:* A session JWT from 1 core instance must be valid on each other core instance and after a restart. Thus a key in the memory of 1 instance, or a new key at each start, is not possible. A key in the yml file makes the bootstrap list of decision 13 larger, and the root key encrypts only DEKs (decision 14). Core examines a token before it knows the tenant, so the key belongs to the installation and not to a tenant. Each request uses the key, so core holds it in memory and does not decrypt it for each request. The start checks read each document of the `keys` collection as a wrapped DEK, so the signing key has its own collection.
 
@@ -555,7 +557,7 @@ The decisions are recorded so that they are not discussed again without a reason
     *Why:* Core accepts a session JWT without a database read, so a logout cannot end it and it must expire after a short time. A refresh token and a session record give the session a longer life, and a logout deletes the record. A refresh arrives without a session JWT, so in the cloud mode only the refresh token can give the tenant. A tenant ID without a signature is against decision 15, and a session record in the system database adds 1 more exception to [6.9](#69-build-checks). Thus the refresh token is a signed JWT with the tenant ID, and a security filter chain authenticates it before the tenant bind. With bearer tokens, core has no server session and no CSRF token, and the refresh rules limit the damage of a copied token.
 
     - **The 2 tokens.** Core signs the session JWT and the refresh token with the signing key (decision 17). The JWT header field `typ` gives the type of a token. Core does not accept a refresh token as a session JWT, and it does not accept a session JWT as a refresh token.
-    - **The claims.** The session JWT holds the ID of the OpenCelium user, the tenant ID, the session ID, and the roles. Core reads no database to accept a session JWT, and a change of the roles applies at the next refresh. The refresh token holds the tenant ID, the session ID, and a token ID. Thus in the cloud mode the principal of a refresh token gives the tenant of a refresh and of a logout (decision 15).
+    - **The claims.** The session JWT holds the ID of the OpenCelium user, the tenant ID, the session ID, and the roles. Core reads no database to accept a session JWT, and a change of the roles applies at the next refresh. The refresh token holds the ID of the OpenCelium user, the tenant ID, the session ID, and a token ID. Thus in the cloud mode the principal of a refresh token gives the tenant of a refresh and of a logout (decision 15).
     - **Bearer tokens.** Core gives the 2 tokens in the body of the response to a login and to a refresh. The HTTP client sends each token as a bearer token in the header `Authorization`. Core keeps no server session, sets no cookie, and uses no CSRF token.
     - **The 2 security filter chains.** The refresh chain applies to the refresh endpoint and to the logout endpoint, and it accepts only a refresh token. The main chain applies to each other request, and it accepts only a session JWT. Only the feature of an endpoint can open that endpoint to a request without a session JWT.
     - **The session record.** Core keeps 1 session record for each session in the `sessions` collection, as a tenant document (decision 16). The record holds the token ID of the newest refresh token of the session. It holds no token and no hash of a token, because a token ID gives no access without the signature of core. A TTL index on the end of the session deletes an old record.
@@ -606,7 +608,7 @@ These decisions are open on purpose. The first feature that needs one closes it:
 | **OCEL** | The OpenCelium Expression Language. Users write OCEL expressions in node parameters, for example to map data from one node to another node. |
 | **Global Params** | Variables that a workflow can read and write during an execution. Core keeps them between executions. |
 | **Secret** | A value that gives access to something, for example a password, an API token, or a private key. |
-| **Key material** | A key that core finds or generates for its own cryptography: the root key, a DEK, or the signing key. It is not a secret (decisions 14, 17). |
+| **Key material** | A key that core finds or generates for its own cryptography: the root key, a DEK, or the signing key. The secret rules of decision 13 do not apply to it (decisions 14, 17). |
 | **Runtime setting** | A configuration value in the database. An administrator can change it through the API, without a restart. |
 | **Job message** | The self-contained message that core sends to a worker: a workflow snapshot, the credentials, and the parameters. |
 | **Event** | A message that a worker sends back to core. Examples: a result, a log line, a state change, a variable update, a heartbeat, an audit record. |
