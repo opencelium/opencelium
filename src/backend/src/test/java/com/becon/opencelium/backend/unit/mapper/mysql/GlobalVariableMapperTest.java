@@ -102,7 +102,7 @@ class GlobalVariableMapperTest {
         String value = "\"" + "a".repeat(150) + "\"";
         GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "longText", value);
 
-        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0);
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0, null);
 
         assertThat(item.valuePreview()).isEqualTo(value.substring(0, 100));
     }
@@ -112,7 +112,7 @@ class GlobalVariableMapperTest {
         String value = "\"" + "a".repeat(98) + "\"";
         GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "text", value);
 
-        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0);
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0, null);
 
         assertThat(item.valuePreview()).isEqualTo(value);
     }
@@ -304,7 +304,7 @@ class GlobalVariableMapperTest {
         GlobalVariable variable = GlobalVariableFixture.aConstant(7L, "idoit", "{\"host\":\"cmdb.example\"}");
         variable.setVersion(4L);
 
-        GlobalVariableValueDTO value = mapper.toValue(variable);
+        GlobalVariableValueDTO value = mapper.toValue(variable, null);
 
         assertThat(value.id()).isEqualTo(7L);
         assertThat(value.version()).isEqualTo(4L);
@@ -317,7 +317,7 @@ class GlobalVariableMapperTest {
         GlobalVariable variable = GlobalVariableFixture.aConstant(7L, "apiKey", "\"s3cr3t\"");
         variable.setSecret(true);
 
-        GlobalVariableValueDTO value = mapper.toValue(variable);
+        GlobalVariableValueDTO value = mapper.toValue(variable, null);
 
         assertThat(value.id()).isEqualTo(7L);
         assertThat(value.value()).isNull();
@@ -334,7 +334,7 @@ class GlobalVariableMapperTest {
         variable.setUpdatedAt(Date.from(Instant.parse("2026-11-01T08:00:00Z")));
         variable.setUpdatedBy(1);
 
-        GlobalVariableValueDTO value = mapper.toValue(variable);
+        GlobalVariableValueDTO value = mapper.toValue(variable, null);
 
         assertThat(value.version()).isEqualTo(4L);
         assertThat(value.revision()).isEqualTo(6L);
@@ -349,7 +349,7 @@ class GlobalVariableMapperTest {
         variable.setCurrentSetByExecution(900L);
         variable.setUpdatedBy(1);
 
-        GlobalVariableValueDTO value = mapper.toValue(variable);
+        GlobalVariableValueDTO value = mapper.toValue(variable, null);
 
         assertThat(value.updatedBy()).isNull();
     }
@@ -395,7 +395,7 @@ class GlobalVariableMapperTest {
     void toListItemPreviewsCurrentValueWhenVariableIsMutable() {
         GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 12L);
 
-        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.allOf(GlobalVariablePermission.class), 0);
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.allOf(GlobalVariablePermission.class), 0, null);
 
         assertThat(item.valuePreview()).isEqualTo("\"live\"");
     }
@@ -495,7 +495,7 @@ class GlobalVariableMapperTest {
         GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "apiKey", "encrypted-text");
         variable.setSecret(true);
 
-        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0);
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.noneOf(GlobalVariablePermission.class), 0, null);
 
         assertThat(item.secret()).isTrue();
         assertThat(item.valuePreview()).isNull();

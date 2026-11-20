@@ -470,7 +470,7 @@ class GlobalVariableControllerTest {
 
     private GlobalVariableValueDTO aValueDto() throws Exception {
         return new GlobalVariableValueDTO(7L, 4L, 0L, json.readTree("[{\"id\":\"acme\"}]"),
-                Instant.parse("2026-11-16T09:12:00Z"), GlobalVariableDTO.Actor.user(1, "admin"));
+                Instant.parse("2026-11-16T09:12:00Z"), GlobalVariableDTO.Actor.user(1, "admin"), null);
     }
 
     private GlobalVariableDTO aDetailDto() throws Exception {

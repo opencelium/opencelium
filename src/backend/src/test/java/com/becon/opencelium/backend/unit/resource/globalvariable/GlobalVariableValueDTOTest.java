@@ -35,6 +35,19 @@ class GlobalVariableValueDTOTest {
     }
 
     @Test
+    @DisplayName("etagOf — a run of the owner workflow that starts or ends changes the tag")
+    void etagOfChangesWhenBeingUpdatedByChanges() {
+        GlobalVariableValueDTO idle = aValue(7L, 4L, 2L);
+        GlobalVariableValueDTO busy = new GlobalVariableValueDTO(7L, 4L, 2L, idle.value(), idle.updatedAt(),
+                idle.updatedBy(), new GlobalVariableDTO.BeingUpdatedBy(42L, 511L, Instant.parse("2026-11-20T10:00:00Z")));
+
+        String before = GlobalVariableValueDTO.etagOf(List.of(idle));
+        String after = GlobalVariableValueDTO.etagOf(List.of(busy));
+
+        assertThat(after).isNotEqualTo(before);
+    }
+
+    @Test
     void etagOfChangesWhenVersionChanges() {
         String before = GlobalVariableValueDTO.etagOf(List.of(aValue(7L, 4L), aValue(12L, 1L)));
 
@@ -68,11 +81,11 @@ class GlobalVariableValueDTOTest {
 
     private static GlobalVariableValueDTO aValue(long id, long version, long revision) {
         return new GlobalVariableValueDTO(id, version, revision, new TextNode("value"),
-                Instant.parse("2026-11-16T09:12:00Z"), GlobalVariableDTO.Actor.user(1, "admin"));
+                Instant.parse("2026-11-16T09:12:00Z"), GlobalVariableDTO.Actor.user(1, "admin"), null);
     }
 
     private static GlobalVariableValueDTO aValue(long id, long version, String value, String updatedAt) {
         return new GlobalVariableValueDTO(id, version, 0L, new TextNode(value), Instant.parse(updatedAt),
-                GlobalVariableDTO.Actor.user(1, "admin"));
+                GlobalVariableDTO.Actor.user(1, "admin"), null);
     }
 }
