@@ -16,8 +16,6 @@ import io.opencelium.core.testsupport.CloudStart;
 import io.opencelium.core.testsupport.LoginRequests;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * In the cloud mode a login through the endpoint of core starts no session: only the Service Portal authenticates a
  * person. That the cloud mode has no local login strategy is the subject of {@link LoginStrategiesTest}; a user in
@@ -39,11 +37,10 @@ class LoginCloudTest {
 	MockMvcTester mvc;
 
 	@Test
-	void loginGivesStatus401WhenTheModeIsCloud() {
+	void loginGivesInvalidCredentialsWhenTheModeIsCloud() {
 		MvcTestResult login = LoginRequests.logIn(mvc, "alice", "Alice-Password-1");
 
-		assertThat(login).hasStatus(HttpStatus.UNAUTHORIZED);
-		assertThat(login).bodyText().doesNotContain("sessionJwt");
+		LoginRequests.assertProblem(login, HttpStatus.UNAUTHORIZED, "invalid-credentials");
 	}
 
 }

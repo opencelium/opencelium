@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
@@ -51,6 +52,17 @@ public final class LoginRequests {
 	/** The body of the response as UTF-8 text, the encoding of a JSON response. */
 	public static String bodyOf(MvcTestResult result) {
 		return new String(result.getResponse().getContentAsByteArray(), StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * The response is an error in the problem-details form, with the status code in the status line and in the body,
+	 * the error code in the field {@code code}, and no session JWT.
+	 */
+	public static void assertProblem(MvcTestResult response, HttpStatus status, String code) {
+		assertThat(response).hasStatus(status).hasContentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON);
+		assertThat(response).bodyJson().extractingPath("$.status").isEqualTo(status.value());
+		assertThat(response).bodyJson().extractingPath("$.code").isEqualTo(code);
+		assertThat(response).bodyJson().doesNotHavePath("$.sessionJwt");
 	}
 
 	/** A request for the current OpenCelium user, with the token as the bearer token. */

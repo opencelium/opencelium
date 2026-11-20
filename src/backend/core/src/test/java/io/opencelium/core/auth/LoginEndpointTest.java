@@ -28,10 +28,13 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import io.opencelium.core.setup.SetupContext;
+import io.opencelium.core.tenant.TenantDocuments;
+import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.LoginRequests;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
 import io.opencelium.core.testsupport.fixture.TokenFixture;
+import io.opencelium.core.testsupport.fixture.UserFixture;
 import io.opencelium.core.user.UserDocument;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,8 +42,8 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 /**
- * In the self-host mode an OpenCelium user logs in with the username and the password and gets a session JWT. The
- * default admin of the setup logs in with the admin password {@code 1234}.
+ * In the self-host mode an OpenCelium user logs in with the username or the email and the password and gets a session
+ * JWT. The default admin of the setup logs in with the admin password {@code 1234}.
  */
 @MongoIntegrationTest
 @AutoConfigureMockMvc
@@ -62,6 +65,12 @@ class LoginEndpointTest {
 	@Autowired
 	MongoTemplate mongo;
 
+	@Autowired
+	TenantRunner tenantRunner;
+
+	@Autowired
+	TenantDocuments documents;
+
 	@Test
 	void loginGivesASessionJwtWhenTheUsernameAndThePasswordAreCorrect() throws ParseException {
 		MvcTestResult login = LoginRequests.logIn(mvc, SetupContext.DEFAULT_ADMIN_USERNAME,
@@ -80,6 +89,18 @@ class LoginEndpointTest {
 		assertThat(Duration.between(claims.getIssueTime().toInstant(), expiresAt)).isEqualTo(Duration.ofMinutes(15));
 		String expiresAtField = JsonPath.read(LoginRequests.bodyOf(login), "$.sessionJwtExpiresAt");
 		assertThat(Instant.parse(expiresAtField)).isEqualTo(expiresAt);
+	}
+
+	@Test
+	void loginGivesASessionJwtWhenTheNameIsTheEmailWithUpperCaseLetters() throws ParseException {
+		UserDocument kim = UserFixture.aUser("kim", "Kim-Password-1").withEmail("kim@example.com")
+				.storeIn(tenantRunner, documents);
+
+		MvcTestResult login = LoginRequests.logIn(mvc, "Kim@Example.COM", "Kim-Password-1");
+
+		assertThat(login).hasStatusOk();
+		assertThat(SignedJWT.parse(LoginRequests.sessionJwtOf(login)).getJWTClaimsSet().getSubject())
+				.isEqualTo(kim.id());
 	}
 
 	@Test

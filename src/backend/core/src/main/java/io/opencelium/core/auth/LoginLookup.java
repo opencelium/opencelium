@@ -1,5 +1,7 @@
 package io.opencelium.core.auth;
 
+import java.util.Optional;
+
 import org.springframework.core.convert.ConversionException;
 import org.springframework.data.mapping.MappingException;
 import org.springframework.data.mapping.model.MappingInstantiationException;
@@ -7,12 +9,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import io.opencelium.core.user.UserDocument;
 import io.opencelium.core.user.UserService;
 
 /**
- * Finds the OpenCelium user of the name of a login, in the current tenant. The name is compared with the username
- * exactly. The error of a name that no user has does not repeat the name: a person can type a password into the
- * field of the name.
+ * Finds the OpenCelium user of the name of a login, in the current tenant. The name is a username or an email. The
+ * lookup first reads the user with that username, compared exactly, and then the user with that email, compared
+ * without a difference between upper case and lower case. Thus a username that is also the email of another user
+ * gives the user of the username. The lookup reads both for each name: a read that runs only when the username does
+ * not exist would show in the time of the answer which usernames exist. The error of a name that no user has does not
+ * repeat the name: a person can type a password into the field of the name.
  */
 final class LoginLookup implements UserDetailsService {
 
@@ -30,7 +36,9 @@ final class LoginLookup implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String name) {
 		try {
-			return users.findByUsername(name).map(LoginUser::of)
+			Optional<UserDocument> byUsername = users.findByUsername(name);
+			Optional<UserDocument> byEmail = users.findByEmail(name);
+			return byUsername.or(() -> byEmail).map(LoginUser::of)
 					.orElseThrow(() -> new UsernameNotFoundException("No OpenCelium user has this name."));
 		}
 		catch (MappingInstantiationException | MappingException | ConversionException ex) {

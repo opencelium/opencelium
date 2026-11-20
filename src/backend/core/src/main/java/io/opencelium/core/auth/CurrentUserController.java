@@ -30,12 +30,13 @@ final class CurrentUserController {
 	@GetMapping(PATH)
 	ResponseEntity<CurrentUser> me(@AuthenticationPrincipal UserPrincipal principal) {
 		return users.findById(principal.userId())
-				.map(user -> ResponseEntity.ok(new CurrentUser(user.id(), user.username(),
+				.map(user -> ResponseEntity.ok(new CurrentUser(user.id(), user.username(), user.email(),
 						principal.tenantId().value(), List.copyOf(new TreeSet<>(principal.roles())))))
 				.orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
 	}
 
-	record CurrentUser(String id, String username, String tenantId, List<String> roles) {
+	/** @param email the email in lower case, or {@code null} when the user has none */
+	record CurrentUser(String id, String username, String email, String tenantId, List<String> roles) {
 
 		CurrentUser {
 			roles = List.copyOf(roles);
