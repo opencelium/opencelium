@@ -141,6 +141,16 @@ public interface GlobalVariableService {
      */
     GlobalVariableDTO restore(long id, long changeId, GlobalVariableRestoreRequestDTO request);
 
+    /**
+     * Sets the current value of a mutable variable back to its initial value, as a change of
+     * type RESET. Needs EDIT on it. The version stays as it is, so an open edit form stays
+     * valid; the revision goes up.
+     *
+     * @throws com.becon.opencelium.backend.exception.GlobalVariableValidationException if the
+     *         variable is not mutable
+     */
+    GlobalVariableDTO reset(long id);
+
     /** Returns the grants of a variable. Only its owner user and admins may read them. */
     GlobalVariablePermissionsDTO getPermissions(long id);
 

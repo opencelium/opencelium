@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository.WorkflowNotification;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
@@ -70,13 +71,44 @@ public final class GlobalVariableFixture {
     }
 
     /**
+     * Saved mutable variable with scope ALL and busy policy QUEUE, owned by user 1, whose current
+     * value was set once since creation (revision 1).
+     *
+     * @param initialJson     the initial value as JSON text
+     * @param currentJson     the current value as JSON text
+     * @param ownerWorkflowId the workflow whose runs may write it, {@code null} once it is deleted
+     */
+    public static GlobalVariable aMutable(
+            long id, String name, String initialJson, String currentJson, Long ownerWorkflowId) {
+        GlobalVariable variable = aConstant(id, name, initialJson);
+        variable.setKind(GlobalVariableKind.MUTABLE);
+        variable.setCurrentValue(currentJson);
+        variable.setCurrentRevision(1);
+        variable.setBusyPolicy(GlobalVariableBusyPolicy.QUEUE);
+        variable.setOwnerWorkflowId(ownerWorkflowId);
+        return variable;
+    }
+
+    /**
+     * Request for a mutable variable with scope ALL, no description and no busy policy.
+     *
+     * @param ownerWorkflowId the workflow whose runs may write it, {@code null} to leave it out
+     * @param version         the version the form loaded; {@code null} for a create
+     */
+    public static GlobalVariableRequestDTO aMutableRequest(
+            String name, JsonNode value, Long ownerWorkflowId, Long version) {
+        return new GlobalVariableRequestDTO(name, GlobalVariableKind.MUTABLE, null, value, null, aScopeOfAll(),
+                null, ownerWorkflowId, version);
+    }
+
+    /**
      * Request for a constant with scope ALL and no description.
      *
      * @param version the version the form loaded; {@code null} for a create
      */
     public static GlobalVariableRequestDTO aRequest(String name, JsonNode value, Long version) {
         return new GlobalVariableRequestDTO(
-                name, GlobalVariableKind.CONSTANT, null, value, false, aScopeOfAll(), version);
+                name, GlobalVariableKind.CONSTANT, null, value, false, aScopeOfAll(), null, null, version);
     }
 
     /** Scope that lets every workflow use the variable. */

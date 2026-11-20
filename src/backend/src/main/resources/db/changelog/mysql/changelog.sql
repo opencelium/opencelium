@@ -975,3 +975,25 @@ ALTER TABLE `global_variable_scope` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf
 ALTER TABLE `global_variable_permission` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
 ALTER TABLE `global_variable_change` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
 ALTER TABLE `global_variable_usage` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
+
+--changeset 5.2:11 stripComments:true splitStatements:true endDelimiter:;
+-- Mutable global variables. 'value' stays what a user saves: for a mutable variable it is the
+-- initial value. 'current_value' is the value runs read and write, set to the initial value on
+-- creation and on a reset; it is NULL for the other kinds. 'current_revision' goes up by one on
+-- every new current value, so a poll can tell a change without the edit form's 'version' moving.
+-- 'current_set_at' tells when the current value was set, 'current_set_by_user' the user who reset
+-- it and 'current_set_by_execution' the execution that wrote it; at most one of the two is set.
+-- Like 'created_by' they are plain audit columns, deliberately not foreign keys. 'busy_policy'
+-- (QUEUE or REFUSE) decides what a second start of a workflow using the variable does.
+-- 'owner_workflow_id' is the one workflow whose runs may write the variable; it is set to NULL
+-- when that workflow is deleted, which leaves the variable without a writer until a user with
+-- edit permission picks another one.
+ALTER TABLE `global_variable`
+    ADD COLUMN IF NOT EXISTS `current_value`            LONGTEXT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `current_revision`         BIGINT NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS `current_set_at`           TIMESTAMP NULL DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `current_set_by_user`      INT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `current_set_by_execution` BIGINT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `busy_policy`              VARCHAR(16) DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `owner_workflow_id`        INT DEFAULT NULL;
+ALTER TABLE `global_variable` ADD CONSTRAINT `fk_global_variable_owner_workflow` FOREIGN KEY (`owner_workflow_id`) REFERENCES `connection` (`id`) ON DELETE SET NULL;

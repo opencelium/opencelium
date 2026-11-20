@@ -142,13 +142,16 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
         return GlobalVariableSnapshot.Entry.ofUnreadableSecret(name, version, openToAll, reason);
     }
 
+    // a mutable variable gives the current value it has as the run starts; reading it live at
+    // each step comes with the busy check, which keeps two runs of one workflow apart
     private JsonNode parse(GlobalVariable variable) {
-        if (variable.getValue() == null) {
+        String text = variable.getReadableValue();
+        if (text == null) {
             return NullNode.getInstance();
         }
 
         try {
-            return objectMapper.readTree(variable.getValue());
+            return objectMapper.readTree(text);
         } catch (JsonProcessingException e) {
             // writes only ever store serialized JSON, so the row was changed outside the API
             throw new IllegalStateException(

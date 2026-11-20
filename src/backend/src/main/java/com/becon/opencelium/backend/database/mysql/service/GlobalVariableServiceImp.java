@@ -13,6 +13,7 @@ import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableChan
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
@@ -58,6 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -179,9 +181,13 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         String name = validateName(request.name(), null, violations);
         validateKindOnCreate(request.kind(), violations);
         boolean secret = Boolean.TRUE.equals(request.secret());
+        validateSecret(request.kind(), secret, violations);
         String description = validateDescription(request.description(), violations);
         String value = serializeValue(request.value(), violations);
+        int violationsBeforeScope = violations.size();
         ScopeSpec scope = validateScope(request.scope(), violations);
+        MutableSpec mutable = validateMutable(request.kind(), request, null, scope,
+                violations.size() == violationsBeforeScope, violations);
         throwIfAny(violations);
 
         GlobalVariable variable = new GlobalVariable();
@@ -193,6 +199,14 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         variable.setScopeType(scope.type());
         variable.setScopeTargets(new HashSet<>(scope.targets()));
         variable.setOwnerUserId(caller.userId());
+        if (mutable != null) {
+            // the current value starts as the initial value, set by the creator
+            variable.setCurrentValue(value);
+            variable.setCurrentSetAt(new Date());
+            variable.setCurrentSetByUser(caller.userId());
+            variable.setBusyPolicy(mutable.busyPolicy());
+            variable.setOwnerWorkflowId(mutable.ownerWorkflowId());
+        }
 
         try {
             variable = repository.saveAndFlush(variable);
@@ -227,6 +241,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         boolean wasSecret = variable.isSecret();
         // a form that leaves the flag out keeps it, so no secret is revealed by omission
         boolean secret = request.secret() == null ? wasSecret : request.secret();
+        validateSecret(variable.getKind(), secret, violations);
         String description = validateDescription(request.description(), violations);
         // a secret keeps its value unless the request gives one, and JSON null gives none
         boolean valueGiven = request.value() != null && !request.value().isNull();
@@ -235,7 +250,10 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             violations.add(new Violation("value", Code.SECRET_REMOVAL_NEEDS_VALUE,
                     "Give a new value to make a secret visible again: its hidden value is never shown"));
         }
+        int violationsBeforeScope = violations.size();
         ScopeSpec scope = validateScope(request.scope(), violations);
+        MutableSpec mutable = validateMutable(variable.getKind(), request, variable, scope,
+                violations.size() == violationsBeforeScope, violations);
         throwIfAny(violations);
 
         ScopeSpec oldScope = new ScopeSpec(variable.getScopeType(), Set.copyOf(variable.getScopeTargets()));
@@ -283,6 +301,16 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             before.put("secret", wasSecret);
             after.put("secret", secret);
             variable.setSecret(secret);
+        }
+        if (mutable != null && mutable.busyPolicy() != variable.getBusyPolicy()) {
+            before.put("busyPolicy", variable.getBusyPolicy() == null ? null : variable.getBusyPolicy().name());
+            after.put("busyPolicy", mutable.busyPolicy().name());
+            variable.setBusyPolicy(mutable.busyPolicy());
+        }
+        if (mutable != null && !mutable.ownerWorkflowId().equals(variable.getOwnerWorkflowId())) {
+            before.put("ownerWorkflowId", variable.getOwnerWorkflowId());
+            after.put("ownerWorkflowId", mutable.ownerWorkflowId());
+            variable.setOwnerWorkflowId(mutable.ownerWorkflowId());
         }
         if (!Objects.equals(newValue, oldValue)) {
             variable.setValue(newValue);
@@ -526,6 +554,28 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
                 versionFrom, saved.getVersion(), oldValue, restored, caller.userId()));
 
         return mapper.toDetail(saved, permissions);
+    }
+
+    @Override
+    @Transactional
+    public GlobalVariableDTO reset(long id) {
+        Caller caller = requireCaller();
+        GlobalVariable variable = load(id);
+        Set<GlobalVariablePermission> permissions = require(variable, caller, GlobalVariablePermission.EDIT);
+        if (variable.getKind() != GlobalVariableKind.MUTABLE) {
+            throw invalid("id", Code.NOT_MUTABLE, "Global variable '%s' is a %s and has no current value to reset"
+                    .formatted(variable.getName(), variable.getKind()));
+        }
+
+        String oldValue = variable.getCurrentValue();
+        // one statement, so a run that writes at the same time comes either before or after it
+        repository.resetCurrentValue(id, new Date(), caller.userId());
+        GlobalVariable reset = load(id);
+
+        changeRepository.save(GlobalVariableChange.savedByUser(reset, GlobalVariableChange.Type.RESET,
+                reset.getVersion(), reset.getVersion(), oldValue, reset.getCurrentValue(), caller.userId()));
+
+        return mapper.toDetail(reset, permissions);
     }
 
     /**
@@ -795,10 +845,63 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     private static void validateKindOnCreate(GlobalVariableKind kind, List<Violation> violations) {
         if (kind == null) {
             violations.add(new Violation("kind", Code.KIND_REQUIRED, "The kind is required"));
-        } else if (kind != GlobalVariableKind.CONSTANT) {
+        } else if (kind == GlobalVariableKind.SCRIPT) {
             violations.add(new Violation("kind", Code.KIND_NOT_SUPPORTED,
-                    "Kind " + kind + " is not available yet, only CONSTANT is"));
+                    "Kind " + kind + " is not available yet, only CONSTANT and MUTABLE are"));
         }
+    }
+
+    private static void validateSecret(GlobalVariableKind kind, boolean secret, List<Violation> violations) {
+        if (secret && kind == GlobalVariableKind.MUTABLE) {
+            violations.add(new Violation("secret", Code.SECRET_NOT_ALLOWED,
+                    "A mutable variable cannot be a secret: runs write its value"));
+        }
+    }
+
+    /**
+     * Checks the fields only a mutable variable has, and works out what they become.
+     *
+     * @param kind       kind of the variable
+     * @param current    the saved variable on an update, whose fields a request that leaves
+     *                   them out keeps; {@code null} on a create
+     * @param scope      the scope the request asks for, which must hold the owner workflow
+     * @param scopeValid whether {@code scope} passed its checks; if not, whether it holds the
+     *                   owner workflow is not judged
+     * @return the busy policy and the owner workflow; {@code null} for the other kinds
+     */
+    private MutableSpec validateMutable(GlobalVariableKind kind, GlobalVariableRequestDTO request,
+            GlobalVariable current, ScopeSpec scope, boolean scopeValid, List<Violation> violations) {
+        if (kind != GlobalVariableKind.MUTABLE) {
+            if (request.busyPolicy() != null) {
+                violations.add(new Violation("busyPolicy", Code.MUTABLE_ONLY,
+                        "Only a mutable variable has a busy policy"));
+            }
+            if (request.ownerWorkflowId() != null) {
+                violations.add(new Violation("ownerWorkflowId", Code.MUTABLE_ONLY,
+                        "Only a mutable variable has an owner workflow"));
+            }
+            return null;
+        }
+
+        GlobalVariableBusyPolicy busyPolicy = request.busyPolicy() != null ? request.busyPolicy()
+                : current == null || current.getBusyPolicy() == null ? GlobalVariableBusyPolicy.QUEUE
+                : current.getBusyPolicy();
+        // the saved owner is null once its workflow is deleted, and then a new one is needed
+        Long ownerWorkflowId = request.ownerWorkflowId() != null ? request.ownerWorkflowId()
+                : current == null ? null : current.getOwnerWorkflowId();
+
+        if (ownerWorkflowId == null) {
+            violations.add(new Violation("ownerWorkflowId", Code.OWNER_WORKFLOW_REQUIRED,
+                    "Choose the workflow whose runs may write the variable"));
+        } else if (!connectionRepository.existsById(ownerWorkflowId)) {
+            violations.add(new Violation("ownerWorkflowId", Code.OWNER_WORKFLOW_INVALID,
+                    "Workflow " + ownerWorkflowId + " does not exist"));
+        } else if (scopeValid && !covers(scope, ownerWorkflowId)) {
+            violations.add(new Violation("ownerWorkflowId", Code.OWNER_WORKFLOW_INVALID,
+                    "Workflow " + ownerWorkflowId + " is outside the scope of the variable"));
+        }
+
+        return new MutableSpec(busyPolicy, ownerWorkflowId);
     }
 
     private static String validateDescription(String description, List<Violation> violations) {
@@ -925,6 +1028,10 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     }
 
     // ------------------------------------------------------------------ helpers
+
+    /** What a mutable variable is saved with: the busy policy and the owner workflow. */
+    private record MutableSpec(GlobalVariableBusyPolicy busyPolicy, Long ownerWorkflowId) {
+    }
 
     /** Scope of a variable as one comparable value. */
     private record ScopeSpec(GlobalVariableScopeType type, Set<GlobalVariableScopeTarget> targets) {

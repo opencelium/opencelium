@@ -6,11 +6,13 @@ import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableGrant;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableScopeTarget;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
 import com.becon.opencelium.backend.testutil.annotation.SliceTest;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import org.hibernate.Hibernate;
@@ -33,7 +35,9 @@ import org.springframework.data.domain.Sort;
  *   · a mistake in the visibility clause of {@code search}, {@code findUsableWithScopeTargets}
  *     or {@code findViewableByIds}, which would show a user the variables of others or list a
  *     variable once per grant or scope target;
- *   · the escape character of the LIKE pattern, which only a SQL engine applies.
+ *   · the escape character of the LIKE pattern, which only a SQL engine applies;
+ *   · a save of the definition that writes the current value of a mutable variable back, which
+ *     would undo what a run wrote meanwhile, or a reset that moves the version.
  *
  * Run with: ./gradlew test --tests "*.GlobalVariableRepositoryTest"
  */
@@ -355,5 +359,68 @@ class GlobalVariableRepositoryTest {
         Page<GlobalVariable> page = repository.search(null, "%last!_sync%", null, BY_NAME);
 
         assertThat(page.getContent()).extracting(GlobalVariable::getName).containsExactly("last_sync");
+    }
+
+    // ── current value of a mutable variable ───────────────────────────────────
+
+    @Test
+    @DisplayName("resetCurrentValue — the initial value comes back, the revision goes up, the version stays")
+    void resetCurrentValueSetsInitialValueWhenVariableIsMutable() {
+        Long id = em.persistAndFlush(aTransientMutable("lastSync", "\"live\"")).getId();
+        em.clear();
+        Date resetAt = new Date();
+
+        int updated = repository.resetCurrentValue(id, resetAt, BOB);
+
+        GlobalVariable found = repository.findById(id).orElseThrow();
+        assertThat(updated).isEqualTo(1);
+        assertThat(found.getCurrentValue()).isEqualTo("\"value\"");
+        assertThat(found.getCurrentRevision()).isEqualTo(1L);
+        assertThat(found.getCurrentSetByUser()).isEqualTo(BOB);
+        assertThat(found.getCurrentSetByExecution()).isNull();
+        assertThat(found.getCurrentSetAt()).isNotNull();
+        assertThat(found.getVersion()).isEqualTo(1L);
+    }
+
+    @Test
+    void resetCurrentValueChangesNothingWhenVariableIsConstant() {
+        Long id = em.persistAndFlush(GlobalVariableFixture.aTransientConstant("idoitUrl", ALICE)).getId();
+        em.clear();
+
+        int updated = repository.resetCurrentValue(id, new Date(), BOB);
+
+        GlobalVariable found = repository.findById(id).orElseThrow();
+        assertThat(updated).isZero();
+        assertThat(found.getCurrentValue()).isNull();
+        assertThat(found.getCurrentRevision()).isZero();
+    }
+
+    @Test
+    @DisplayName("save — an edit of the definition leaves the current value as the database has it")
+    void saveLeavesCurrentValueAloneWhenDefinitionChanges() {
+        Long id = em.persistAndFlush(aTransientMutable("lastSync", "\"live\"")).getId();
+        em.clear();
+
+        GlobalVariable variable = repository.findById(id).orElseThrow();
+        variable.setDescription("Time of the last sync");
+        variable.setCurrentValue("\"stale\"");
+        variable.setCurrentRevision(9);
+        repository.saveAndFlush(variable);
+        em.clear();
+
+        GlobalVariable found = repository.findById(id).orElseThrow();
+        assertThat(found.getDescription()).isEqualTo("Time of the last sync");
+        assertThat(found.getCurrentValue()).isEqualTo("\"live\"");
+        assertThat(found.getCurrentRevision()).isZero();
+    }
+
+    /** Unsaved mutable variable with the initial value "value", owned by Alice. */
+    private static GlobalVariable aTransientMutable(String name, String currentJson) {
+        GlobalVariable variable = GlobalVariableFixture.aTransientConstant(name, ALICE);
+        variable.setKind(GlobalVariableKind.MUTABLE);
+        variable.setCurrentValue(currentJson);
+        variable.setBusyPolicy(GlobalVariableBusyPolicy.QUEUE);
+        variable.setOwnerWorkflowId(12L);
+        return variable;
     }
 }
