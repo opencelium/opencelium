@@ -26,7 +26,9 @@ import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
+import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
+import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.factory.SchedulerFactory;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.quartz.SchedulingStrategy;
@@ -68,6 +70,7 @@ public class SchedulerServiceImp implements SchedulerService {
     private final ExecutionArgumentService executionArgumentService;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final GlobalVariableUsageService globalVariableUsageService;
+    private final WorkflowRunGate runGate;
 
 
     public SchedulerServiceImp(
@@ -83,7 +86,8 @@ public class SchedulerServiceImp implements SchedulerService {
             ExecutionService executionService,
             ExecutionArgumentService executionArgumentService,
             Mapper<Connection, ConnectionDTO> connectionMapper,
-            GlobalVariableUsageService globalVariableUsageService
+            GlobalVariableUsageService globalVariableUsageService,
+            WorkflowRunGate runGate
     ) {
         this.connectionService = connectionService;
         this.webhookService = webhookService;
@@ -98,6 +102,7 @@ public class SchedulerServiceImp implements SchedulerService {
         this.connectionMapper = connectionMapper;
         this.connectorService = connectorService;
         this.globalVariableUsageService = globalVariableUsageService;
+        this.runGate = runGate;
     }
 
     @Override
@@ -279,6 +284,7 @@ public class SchedulerServiceImp implements SchedulerService {
     public synchronized void startNow(Scheduler scheduler) {
         // Schedules and webhooks must be able to trigger multiple executions.
 //        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
+        throwIfRefusedByGlobalVariables(scheduler);
         schedulingStrategy.runJob(scheduler);
     }
 
@@ -291,7 +297,18 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public void startNow(Scheduler scheduler, Map<String, Object> webhook) {
         throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
+        throwIfRefusedByGlobalVariables(scheduler);
         schedulingStrategy.runJob(scheduler, webhook);
+    }
+
+    /**
+     * Answers a start that a busy workflow would refuse at once, instead of only in the log of a
+     * run that never begins. A start that would wait in the queue goes on to Quartz.
+     *
+     * @throws GlobalVariableConflictException with code BUSY
+     */
+    private void throwIfRefusedByGlobalVariables(Scheduler scheduler) {
+        runGate.checkCanStart(scheduler.getConnection().getId());
     }
 
     @Override

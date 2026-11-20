@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.database.mysql.repository;
 
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
+import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,6 +50,28 @@ public interface GlobalVariableRepository extends JpaRepository<GlobalVariable, 
      */
     @Query("SELECT DISTINCT v FROM GlobalVariable v LEFT JOIN FETCH v.scopeTargets WHERE v.kind IN :kinds")
     List<GlobalVariable> findAllWithScopeTargets(@Param("kinds") Collection<GlobalVariableKind> kinds);
+
+    /**
+     * Finds the mutable variables a workflow uses: the ones it owns, which its runs write, and
+     * the ones an element of the workflow references, as the where-used index records them.
+     * Such a workflow runs one execution at a time.
+     *
+     * @param connectionId id of the workflow
+     */
+    default List<GlobalVariable> findMutableUsedByWorkflow(long connectionId) {
+        return findMutableUsedBySource(connectionId, GlobalVariableUsage.SourceType.WORKFLOW);
+    }
+
+    @Query("""
+            SELECT v FROM GlobalVariable v
+             WHERE v.kind = com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind.MUTABLE
+               AND (v.ownerWorkflowId = :connectionId
+                    OR v.id IN (SELECT u.variableId FROM GlobalVariableUsage u
+                                 WHERE u.sourceType = :workflow AND u.sourceId = :connectionId))
+             ORDER BY v.name
+            """)
+    List<GlobalVariable> findMutableUsedBySource(@Param("connectionId") long connectionId,
+            @Param("workflow") GlobalVariableUsage.SourceType workflow);
 
     /**
      * Finds the variables a user may view, filtered by kind and by a text in the name or the
