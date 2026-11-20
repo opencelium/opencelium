@@ -179,8 +179,8 @@ class SetupCompletionRunnerTest {
 	void runMakesTheDefaultAdminWhenOnlyAnotherTenantHasUsers() {
 		// The users of another tenant in the same database are not users of the self-host tenant.
 		Instant now = Instant.now();
-		mongo.insert(new UserDocument(null, "other", "alice", "{noop}x", Set.of("USER"), false, now, false, false,
-				now));
+		mongo.insert(new UserDocument(null, "other", "alice", null, "{noop}x", Set.of("USER"), false, now, false,
+				false, now));
 
 		run();
 
@@ -326,7 +326,7 @@ class SetupCompletionRunnerTest {
 				return userService.createAdmin(command);
 			}
 			Instant now = Instant.now();
-			return mongo.insert(new UserDocument(null, TENANT.value(), command.username(), "{noop}x",
+			return mongo.insert(new UserDocument(null, TENANT.value(), command.username(), null, "{noop}x",
 					Set.of(UserService.ADMIN_ROLE), false, now, false, false, now));
 		});
 		return racing;
@@ -379,8 +379,8 @@ class SetupCompletionRunnerTest {
 
 	private void storeNonAdminUser(String username) {
 		Instant now = Instant.now();
-		mongo.insert(new UserDocument(null, TENANT.value(), username, "{noop}x", Set.of("USER"), false, now, false,
-				false, now));
+		mongo.insert(new UserDocument(null, TENANT.value(), username, null, "{noop}x", Set.of("USER"), false, now,
+				false, false, now));
 	}
 
 	private Optional<UserDocument> storedUser(String username) {

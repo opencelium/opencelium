@@ -40,6 +40,11 @@ class UserRepository {
 		return documents.findOne(UserDocument.class, where(UserDocument.USERNAME).is(username));
 	}
 
+	/** The user with this email; the caller gives the email in the form of {@link UserDocument#lowerCaseEmail}. */
+	Optional<UserDocument> findByEmail(String email) {
+		return documents.findOne(UserDocument.class, where(UserDocument.EMAIL).is(email));
+	}
+
 	Optional<UserDocument> findById(String id) {
 		return documents.findOne(UserDocument.class, where(UserDocument.ID).is(id));
 	}

@@ -72,9 +72,40 @@ class UserIndexesTest {
 		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(2);
 	}
 
+	@Test
+	void insertStopsWhenTwoUsersOfOneTenantHaveTheSameEmail() {
+		mongo.insert(user(TENANT, "alice", "shared@example.com"));
+
+		assertThatExceptionOfType(DuplicateKeyException.class)
+				.isThrownBy(() -> mongo.insert(user(TENANT, "bob", "shared@example.com")));
+	}
+
+	@Test
+	void insertStoresTwoUsersWithoutAnEmailWhenTheyAreOfOneTenant() {
+		// The email is optional: users without one must not collide in the index of the email.
+		mongo.insert(user(TENANT, "alice", null));
+
+		mongo.insert(user(TENANT, "bob", null));
+
+		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(2);
+	}
+
+	@Test
+	void insertStoresTheSameEmailWhenTheUsersAreOfTwoTenants() {
+		mongo.insert(user(TENANT, "alice", "shared@example.com"));
+
+		mongo.insert(user("other", "alice", "shared@example.com"));
+
+		assertThat(mongo.count(new Query(), UserDocument.class)).isEqualTo(2);
+	}
+
 	private static UserDocument user(String tenant, String username) {
+		return user(tenant, username, null);
+	}
+
+	private static UserDocument user(String tenant, String username, String email) {
 		Instant now = Instant.now();
-		return new UserDocument(null, tenant, username, "{bcrypt}x", Set.of(), false, now, false, false, now);
+		return new UserDocument(null, tenant, username, email, "{bcrypt}x", Set.of(), false, now, false, false, now);
 	}
 
 }

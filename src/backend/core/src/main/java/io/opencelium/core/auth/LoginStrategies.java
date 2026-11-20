@@ -2,10 +2,11 @@ package io.opencelium.core.auth;
 
 import java.util.List;
 
+import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,13 +19,15 @@ import io.opencelium.core.config.DeploymentMode;
  * because only the Service Portal authenticates a person there; a login then fails for each name and each password.
  * <p>
  * The local login strategy is the password provider of Spring Security. For a name that no user has, it compares the
- * password with a fixed hash, so that the time of the answer does not show which names exist.
+ * password with a fixed hash, so that the time of the answer does not show which names exist. It examines the lock of
+ * the user after the password, so that only the correct password learns that the user is locked. A user who must
+ * change a generated password and is not locked logs in.
  */
 final class LoginStrategies {
 
 	/** The authentication of a deployment mode without a login strategy: each attempt fails. */
 	private static final AuthenticationManager NO_LOGIN_STRATEGY = attempt -> {
-		throw new BadCredentialsException("No login strategy of this deployment mode accepts a password.");
+		throw new ProviderNotFoundException("No login strategy of this deployment mode accepts a password.");
 	};
 
 	private final DeploymentMode mode;
@@ -60,6 +63,10 @@ final class LoginStrategies {
 	private AuthenticationProvider localLoginStrategy() {
 		var provider = new DaoAuthenticationProvider(userLookup);
 		provider.setPasswordEncoder(passwordEncoder);
+		// The default examines the account before the password and keeps that error for a wrong password too.
+		provider.setPreAuthenticationChecks(user -> {
+		});
+		provider.setPostAuthenticationChecks(new AccountStatusUserDetailsChecker());
 		return provider;
 	}
 

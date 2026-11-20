@@ -20,11 +20,14 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 import io.opencelium.core.setup.SetupContext;
+import io.opencelium.core.tenant.TenantDocuments;
+import io.opencelium.core.tenant.TenantRunner;
 import io.opencelium.core.testsupport.LocalMongo;
 import io.opencelium.core.testsupport.LoginRequests;
 import io.opencelium.core.testsupport.MongoIntegrationTest;
 import io.opencelium.core.testsupport.MutableClock;
 import io.opencelium.core.testsupport.fixture.TokenFixture;
+import io.opencelium.core.testsupport.fixture.UserFixture;
 import io.opencelium.core.user.UserDocument;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,6 +69,12 @@ class CurrentUserEndpointTest {
 	@Autowired
 	MongoTemplate mongo;
 
+	@Autowired
+	TenantRunner tenantRunner;
+
+	@Autowired
+	TenantDocuments documents;
+
 	@BeforeEach
 	void resetTheClock() {
 		CLOCK.set(START);
@@ -82,6 +91,19 @@ class CurrentUserEndpointTest {
 		assertThat(me).bodyJson().extractingPath("$.username").isEqualTo(SetupContext.DEFAULT_ADMIN_USERNAME);
 		assertThat(me).bodyJson().extractingPath("$.tenantId").isEqualTo("self-host-tenant");
 		assertThat(me).bodyJson().extractingPath("$.roles").asArray().containsExactly("ADMIN");
+	}
+
+	@Test
+	void meGivesTheEmailWhenTheUserHasOne() {
+		UserFixture.aUser("judy", "Judy-Password-1").withEmail("judy@example.com").storeIn(tenantRunner, documents);
+		MvcTestResult login = LoginRequests.logIn(mvc, "judy", "Judy-Password-1");
+		assertThat(login).as("the login of the user with an email").hasStatusOk();
+
+		MvcTestResult me = LoginRequests.me(mvc, LoginRequests.sessionJwtOf(login));
+
+		assertThat(me).hasStatusOk();
+		assertThat(me).bodyJson().extractingPath("$.username").isEqualTo("judy");
+		assertThat(me).bodyJson().extractingPath("$.email").isEqualTo("judy@example.com");
 	}
 
 	@Test

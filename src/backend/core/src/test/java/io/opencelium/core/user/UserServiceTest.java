@@ -288,8 +288,8 @@ class UserServiceTest {
 	/** Writes with the plain template: in the self-host mode no work runs for another tenant. */
 	private UserDocument storeUserOfAnotherTenant(String username, Set<String> roles, boolean generated,
 			Instant passwordIssuedAt) {
-		return mongo.insert(new UserDocument(null, OTHER, username, "{noop}x", roles, generated, passwordIssuedAt,
-				false, false, passwordIssuedAt));
+		return mongo.insert(new UserDocument(null, OTHER, username, null, "{noop}x", roles, generated,
+				passwordIssuedAt, false, false, passwordIssuedAt));
 	}
 
 }
