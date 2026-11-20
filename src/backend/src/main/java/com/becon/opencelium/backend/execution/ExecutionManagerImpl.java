@@ -223,7 +223,26 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
         scriptEngine.validate(script.code());
 
-        return scriptEngine.execute(script.code(), script.args(), this::getValue);
+        if (!ReferenceScanner.callsScriptSet(script.code())) {
+            return scriptEngine.execute(script.code(), script.args(), this::getValue);
+        }
+
+        // set("{{global.x}}", value) records a write that is made once the script has finished
+        if (LanguageType.getByCode(enhancement.getLang()) != LanguageType.JS) {
+            throw new IllegalStateException("set() writes a global variable from JavaScript only, not from '%s'"
+                    .formatted(enhancement.getLang()));
+        }
+
+        GlobalVariableWriter.ScriptSets.Outcome outcome = GlobalVariableWriter.ScriptSets.unwrap(
+                scriptEngine.execute(GlobalVariableWriter.ScriptSets.wrap(script.code()), script.args(), this::getValue));
+        for (GlobalVariableWriter.ScriptSets.Write write : outcome.writes()) {
+            String name = GlobalVariableWriter.ScriptSets.nameOf(write.target())
+                    .orElseThrow(() -> new IllegalStateException(
+                            "set() writes to '%s', which is not {{global.name}}".formatted(write.target())));
+            writeGlobal(name, write.value());
+        }
+
+        return outcome.result();
     }
 
     @Override

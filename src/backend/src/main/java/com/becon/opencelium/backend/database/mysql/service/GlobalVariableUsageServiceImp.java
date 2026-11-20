@@ -413,7 +413,7 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
         for (Found reference : references) {
             // by the exact name, as a run resolves it; an unknown variable has nothing to guard
             Long variableId = idsByName.get(reference.variable());
-            if (variableId == null || !places.add(new Place(variableId, reference.index(), reference.field()))) {
+            if (variableId == null || !places.add(new Place(variableId, reference.index(), reference.field(), reference.write()))) {
                 continue;
             }
 
@@ -423,7 +423,10 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
         usageRepository.saveAll(usages);
     }
 
-    /** Where in a source a variable is used; a connector and a notification have no index. */
-    private record Place(long variableId, String index, String field) {
+    /**
+     * Where in a source a variable is used and whether it is written there; a connector and a
+     * notification have no index.
+     */
+    private record Place(long variableId, String index, String field, boolean write) {
     }
 }

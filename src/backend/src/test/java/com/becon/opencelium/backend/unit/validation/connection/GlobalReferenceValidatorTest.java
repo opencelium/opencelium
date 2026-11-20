@@ -13,6 +13,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableScopeTarget;
@@ -447,6 +450,20 @@ class GlobalReferenceValidatorTest {
         assertThat(violations).extracting(Violation::code).containsExactly(Code.NOT_OWNER);
     }
 
+    @Test
+    void validateReportsNotOwnerWhenEnhancementSetsVariableOfAnotherWorkflow() {
+        when(globalVariableRepository.findByNameIn(Set.of("lastSync")))
+                .thenReturn(List.of(GlobalVariableFixture.aMutable(5L, "lastSync", "0", "0", 99L)));
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith(
+                ConnectionMngFixture.aMethod("#ababab", "0_1", "createVm", "https://api.example.test"));
+        workflow.setFieldBindings(List.of(aBindingWithScript("set('{{global.lastSync}}', VAR_0);")));
+
+        List<Violation> violations = violationsOf(workflow, WORKFLOW, null);
+
+        assertThat(violations).extracting(Violation::code, Violation::field)
+                .containsExactly(tuple(Code.NOT_OWNER, "enhancement.script"));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"{{global.lastSync}}", "global.lastSync.at", "lastSync", "x global.lastSync"})
     void validateReportsInvalidWriteTargetWhenTargetIsNoBareToken(String target) {
@@ -468,6 +485,18 @@ class GlobalReferenceValidatorTest {
         MethodMng method = ConnectionMngFixture.aMethod("#ababab", "0_1", "createVm", "https://api.example.test");
         method.setGlobalWrites(Map.of(target, "#ababab.(response).body.$.at"));
         return ConnectionMngFixture.aWorkflowWith(method);
+    }
+
+    private static FieldBindingMng aBindingWithScript(String script) {
+        LinkedFieldMng target = new LinkedFieldMng();
+        target.setColor("#ababab");
+        EnhancementMng enhancement = new EnhancementMng();
+        enhancement.setScript(script);
+        enhancement.setLanguage("js");
+        FieldBindingMng binding = new FieldBindingMng();
+        binding.setTo(List.of(target));
+        binding.setEnhancement(enhancement);
+        return binding;
     }
 
     private static GlobalVariable aVariableScopedTo(GlobalVariableScopeType type, GlobalVariableScopeTarget target) {

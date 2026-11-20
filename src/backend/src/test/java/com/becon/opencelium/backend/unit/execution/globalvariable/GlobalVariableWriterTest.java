@@ -25,6 +25,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -146,5 +148,23 @@ class GlobalVariableWriterTest {
 
     private void givenVariables(GlobalVariable... variables) {
         when(repository.findByNameIn(List.of("lastSync"))).thenReturn(List.of(variables));
+    }
+
+    @Test
+    void nameOfReturnsNameWhenTargetIsBracedToken() {
+        assertThat(GlobalVariableWriter.ScriptSets.nameOf(" {{global.lastSync}} ")).contains("lastSync");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"global.lastSync", "{{global.lastSync.at}}",
+            "x{{global.lastSync}}", ""})
+    void nameOfReturnsEmptyWhenTargetIsNotBracedToken(String target) {
+        assertThat(GlobalVariableWriter.ScriptSets.nameOf(target)).isEmpty();
+    }
+
+    @Test
+    void unwrapThrowsWhenResultHoldsNoWrites() {
+        assertThatThrownBy(() -> GlobalVariableWriter.ScriptSets.unwrap("plain"))
+                .isInstanceOf(IllegalStateException.class);
     }
 }

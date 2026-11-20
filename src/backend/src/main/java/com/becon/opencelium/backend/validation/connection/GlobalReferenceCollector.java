@@ -13,8 +13,11 @@ import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.RequestMng;
 import com.becon.opencelium.backend.database.mongodb.entity.StatementMng;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.ElementType;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
+import com.becon.opencelium.backend.reference.ReferenceScanner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +34,8 @@ import java.util.stream.Stream;
  * condition of every operator, and the args and
  * the code of every field binding's enhancement, where code reads a variable through {@code
  * ref("{{global.name}}")}. An escaped token, {@code \{{global.name}}}, is literal text and is not
- * reported. The targets of a method's {@code globalWrites} are reported as writes.
+ * reported. The targets of a method's {@code globalWrites} and of {@code set("...", value)} in
+ * enhancement code are reported as writes.
  */
 public final class GlobalReferenceCollector {
 
@@ -175,7 +179,7 @@ public final class GlobalReferenceCollector {
             Element element = new Element(ElementType.ENHANCEMENT, color, index, label, found);
 
             element.scan("enhancement.args", enhancement.getArgs());
-            element.scan("enhancement.script", enhancement.getScript());
+            element.scanScript("enhancement.script", enhancement.getScript());
         }
     }
 
@@ -240,6 +244,28 @@ public final class GlobalReferenceCollector {
             Matcher matcher = GLOBAL_WRITE_TARGET.matcher(target == null ? "" : target.strip());
             String variable = matcher.matches() ? matcher.group(1) : null;
             found.add(new Found(type, color, index, label, GLOBAL_WRITES, variable, target, true));
+        }
+
+        /**
+         * Scans the code of a script: the target of each {@code set("{{global.name}}", value)}
+         * is reported as a write, and every other reference, {@code ref("...")} included, as a
+         * read. A target with a path or any other text is reported with no variable, so the
+         * check on save can refuse it.
+         */
+        void scanScript(String field, String code) {
+            if (code == null) {
+                return;
+            }
+
+            char[] readable = code.toCharArray();
+            for (ReferenceScanner.ScriptRef set : ReferenceScanner.findScriptSets(code)) {
+                String variable = GlobalVariableWriter.ScriptSets.nameOf(set.reference()).orElse(null);
+                found.add(new Found(type, color, index, label, field, variable, set.reference(), true));
+                // the target is written, not read
+                Arrays.fill(readable, set.start(), set.end(), ' ');
+            }
+
+            scan(field, new String(readable));
         }
 
         void scan(String field, String text) {
