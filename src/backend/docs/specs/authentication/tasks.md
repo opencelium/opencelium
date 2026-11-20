@@ -31,6 +31,15 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Depends on:** 4
 - **Status:** done
 
+## Task 2b: feat(core): move the login endpoint to /api/auth
+- **Criteria:** AU-01
+- **Function:** An OpenCelium user logs in with `POST /api/auth`. `/api/auth/login` is not an open endpoint: a request to it without a valid session JWT gets the status code 401. The paths of the refresh, the logout and the current user stay the same.
+- **Tests:** the login tests run on `/api/auth` through the shared login path of `testsupport`; `LoginEndpointTest` (full application): postGivesStatus401WhenThePathIsBelowTheLoginPath
+- **Hand test:** 1. Start core as in task 2. 2. Run `curl -s -X POST localhost:9090/api/auth -H 'Content-Type: application/json' -d '{"username":"admin","password":"1234"}'`: the response holds a session JWT. 3. Send the same request to `/api/auth/login`: the status code is 401. 4. Ask for `/api/auth/me` with the session JWT of step 2: the status code is 200.
+- **Size:** approximately 10 lines of code, plus `plan.md` and `docs/security/README.md`
+- **Depends on:** 2
+- **Status:** in work
+
 ## Task 3: feat(core): log in by email and give error codes for a failed login
 - **Criteria:** AU-01, AU-02, AU-03, AU-04, AU-05
 - **Function:** An OpenCelium user logs in with the email as well as with the username, and the data of the current OpenCelium user shows the email. A failed login gives an error response with a code, and a locked user gets no session. The application log of a failed login shows no name and no password.

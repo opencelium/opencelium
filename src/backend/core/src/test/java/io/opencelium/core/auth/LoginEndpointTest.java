@@ -112,6 +112,18 @@ class LoginEndpointTest {
 	}
 
 	@Test
+	void postGivesStatus401WhenThePathIsBelowTheLoginPath() {
+		// A correct login body without a token: the login endpoint opens its own path only, not a path below it.
+		MvcTestResult post = mvc.post().uri(LoginRequests.LOGIN_PATH + "/login").contentType(MediaType.APPLICATION_JSON)
+				.content(LoginRequests.loginBody(SetupContext.DEFAULT_ADMIN_USERNAME, SetupContext.FIRST_ADMIN_PASSWORD))
+				.exchange();
+
+		assertThat(post).hasStatus(HttpStatus.UNAUTHORIZED).headers().hasHeaderSatisfying(HttpHeaders.WWW_AUTHENTICATE,
+				values -> assertThat(values).singleElement().asString().startsWith("Bearer"));
+		assertThat(post).bodyText().isEmpty();
+	}
+
+	@Test
 	void loginGivesASessionJwtWhenTheRequestCarriesAnInvalidBearerToken() {
 		String oldSessionJwt = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
 		String invalid = TokenFixture.resignedWithANewKey(oldSessionJwt);

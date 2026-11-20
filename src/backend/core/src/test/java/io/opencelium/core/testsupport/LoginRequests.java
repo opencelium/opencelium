@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public final class LoginRequests {
 
-	public static final String LOGIN_PATH = "/api/auth/login";
+	public static final String LOGIN_PATH = "/api/auth";
 
 	public static final String ME_PATH = "/api/auth/me";
 
