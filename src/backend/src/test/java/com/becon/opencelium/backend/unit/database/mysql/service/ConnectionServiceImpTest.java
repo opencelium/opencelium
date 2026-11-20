@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableUsageService;
 import com.becon.opencelium.backend.database.mysql.service.ExecutionArgumentService;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
+import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.testutil.fixture.ConnectionMngFixture;
@@ -112,7 +113,8 @@ class ConnectionServiceImpTest {
         connectionService = new ConnectionServiceImp(
                 connectionRepository, null, connectionMngService, fieldBindingMngService, categoryService, null,
                 null, null, patchHelper, null, connectionMngMapper, connectionMapper, updateTracker, null,
-                executionArgumentService, entityVersionManager, ocProps, null, globalVariableUsageService);
+                executionArgumentService, entityVersionManager, ocProps, null, globalVariableUsageService,
+                new TestRunOrigins());
     }
 
     // ── findAll(includeTest) ──────────────────────────────────────────────────

@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType
 import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot.Entry;
+import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
 import com.becon.opencelium.backend.execution.service.GlobalVariableSnapshotServiceImp;
 import com.becon.opencelium.backend.testutil.fixture.CategoryFixture;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
@@ -69,7 +70,7 @@ class GlobalVariableSnapshotServiceImpTest {
         service = new GlobalVariableSnapshotServiceImp(
                 globalVariableRepository, connectionRepository,
                 new GlobalVariableScopeResolver(categoryRepository), new ObjectMapper(),
-                new GlobalVariableCipher(new MockEnvironment()));
+                new GlobalVariableCipher(new MockEnvironment()), new TestRunOrigins());
     }
 
     @Test
@@ -352,7 +353,8 @@ class GlobalVariableSnapshotServiceImpTest {
     private GlobalVariableSnapshotServiceImp serviceWith(GlobalVariableCipher cipher) {
         return new GlobalVariableSnapshotServiceImp(
                 globalVariableRepository, connectionRepository,
-                new GlobalVariableScopeResolver(categoryRepository), new ObjectMapper(), cipher);
+                new GlobalVariableScopeResolver(categoryRepository), new ObjectMapper(), cipher,
+                new TestRunOrigins());
     }
 
     private static GlobalVariableCipher cipherWithKey(String key) {

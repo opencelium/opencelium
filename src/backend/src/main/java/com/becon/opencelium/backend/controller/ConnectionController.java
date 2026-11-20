@@ -465,7 +465,10 @@ public class ConnectionController {
         ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
-        Long connectionId = connectionService.save(connection, connectionMng);
+        // the run executes a copy under a new id; the id the editor sent is the workflow it tests,
+        // whose scope decides which global variables the copy may use
+        Long connectionId = connectionService.saveTestCopy(
+                connection, connectionMng, connectionOldDTO.getConnectionId());
 
         // create temporary scheduler for above connection, will be deleted after execution finished
         SchedulerRequestResource resource = new SchedulerRequestResource();
