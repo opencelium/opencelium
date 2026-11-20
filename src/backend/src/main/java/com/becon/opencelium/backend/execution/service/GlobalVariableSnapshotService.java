@@ -15,7 +15,8 @@ public interface GlobalVariableSnapshotService {
     /**
      * Reads the current value and version of every constant and mutable variable in the scope of
      * a workflow: the variables open to all workflows, the ones scoped to the category of the
-     * workflow or to a category above it, and the ones scoped to the workflow itself.
+     * workflow or to a category above it, and the ones scoped to the workflow itself. For the
+     * copy a test run executes, "the workflow itself" is the workflow the copy was made from.
      *
      * @param connectionId id of the workflow
      * @return the snapshot; empty when no variable is in scope

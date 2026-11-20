@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
 import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
 import com.becon.opencelium.backend.utility.crypto.GlobalVariableCipher;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -46,18 +47,21 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
     private final GlobalVariableScopeResolver scopeResolver;
     private final ObjectMapper objectMapper;
     private final GlobalVariableCipher cipher;
+    private final TestRunOrigins testRunOrigins;
 
     public GlobalVariableSnapshotServiceImp(
             GlobalVariableRepository globalVariableRepository,
             ConnectionRepository connectionRepository,
             GlobalVariableScopeResolver scopeResolver,
             ObjectMapper objectMapper,
-            GlobalVariableCipher cipher) {
+            GlobalVariableCipher cipher,
+            TestRunOrigins testRunOrigins) {
         this.globalVariableRepository = globalVariableRepository;
         this.connectionRepository = connectionRepository;
         this.scopeResolver = scopeResolver;
         this.objectMapper = objectMapper;
         this.cipher = cipher;
+        this.testRunOrigins = testRunOrigins;
     }
 
     @Override
@@ -73,9 +77,12 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
                 .map(Connection::getCategoryId)
                 .orElse(null);
         Set<Long> categoryIds = scopeResolver.categoryChainOf(categoryId);
+        // the copy of a test run reads what the workflow it was made from may read: a variable
+        // scoped to chosen workflows lists that workflow, not the copy
+        long scopeWorkflowId = testRunOrigins.scopeWorkflowOf(connectionId);
 
         return GlobalVariableSnapshot.of(variables.stream()
-                .filter(variable -> variable.isInScopeOf(connectionId, categoryIds))
+                .filter(variable -> variable.isInScopeOf(scopeWorkflowId, categoryIds))
                 .map(this::toEntry)
                 .toList());
     }
