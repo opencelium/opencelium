@@ -20,4 +20,11 @@ public record EncryptedSigningKey(@Id String id, int version, byte[] iv, byte[] 
 	/** The collection of the signing keys, in the database that the yml file names. */
 	public static final String COLLECTION = "signing_keys";
 
+	static final String VERSION = "version";
+
+	@Override
+	public String toString() {
+		return "EncryptedSigningKey[id=" + id + ", version=" + version + "]";
+	}
+
 }
