@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.database.mysql.entity.EventMessage;
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository.WorkflowNotification;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
@@ -138,13 +139,33 @@ public final class GlobalVariableFixture {
      * @param categoryId category of the workflow, or {@code null} for a workflow without one
      */
     public static Scheduler aScheduleOf(long workflowId, Integer categoryId) {
+        Scheduler schedule = new Scheduler();
+        schedule.setConnection(aWorkflow(workflowId, categoryId));
+        return schedule;
+    }
+
+    /**
+     * Saved workflow, as far as the scope of a global variable sees it.
+     *
+     * @param categoryId category of the workflow, or {@code null} for a workflow without one
+     */
+    public static Connection aWorkflow(long workflowId, Integer categoryId) {
         Connection workflow = new Connection();
         workflow.setId(workflowId);
         workflow.setCategoryId(categoryId);
+        return workflow;
+    }
 
-        Scheduler schedule = new Scheduler();
-        schedule.setConnection(workflow);
-        return schedule;
+    /**
+     * A notification of a schedule that runs a workflow, as such notifications are read when the
+     * workflow moves to another category.
+     *
+     * @param templateId    the template it sends, or {@code null} for none
+     * @param scheduleTitle title of its schedule, or {@code null} for an untitled one
+     */
+    public static WorkflowNotification aWorkflowNotification(
+            int id, String name, Integer templateId, int scheduleId, String scheduleTitle) {
+        return new WorkflowNotificationRow(id, name, templateId, scheduleId, scheduleTitle);
     }
 
     /**
@@ -160,5 +181,35 @@ public final class GlobalVariableFixture {
         notification.setEventMessage(template);
         notification.setScheduler(schedule);
         return notification;
+    }
+
+    /** A row of {@code NotificationRepository.findByWorkflow}, with equality for assertions. */
+    private record WorkflowNotificationRow(Integer id, String name, Integer templateId, Integer scheduleId,
+                                           String scheduleTitle) implements WorkflowNotification {
+
+        @Override
+        public Integer getId() {
+            return id;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public Integer getTemplateId() {
+            return templateId;
+        }
+
+        @Override
+        public Integer getScheduleId() {
+            return scheduleId;
+        }
+
+        @Override
+        public String getScheduleTitle() {
+            return scheduleTitle;
+        }
     }
 }

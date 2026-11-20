@@ -58,7 +58,8 @@ import static org.mockito.Mockito.when;
  * Unit tests for the test-connection helpers on {@link SchedulerServiceImp}:
  * {@code getRunningConnectionIds}, {@code filterByTestFlag} and {@code filterEntitiesByTestFlag},
  * and for what it does about the global variable references of notifications: a save checks
- * them and records them as usages, a delete removes the usages.
+ * them and records them as usages, a delete removes the usages, and a schedule pointed at another
+ * workflow has its stored notifications checked against that workflow.
  *
  * Run with: ./gradlew test --tests "*.SchedulerServiceImpTest"
  */
@@ -197,6 +198,112 @@ class SchedulerServiceImpTest {
         verify(schedulerRepository).delete(schedule);
         verify(globalVariableUsageService).deleteForNotification(21L);
         verify(globalVariableUsageService).deleteForNotification(22L);
+    }
+
+    // ── a schedule pointed at another workflow ────────────────────────────────
+
+    @Test
+    @DisplayName("update — the stored notifications are checked against the workflow the schedule is given")
+    void updateChecksStoredNotificationsWhenWorkflowChanges() {
+        Scheduler stored = aStoredScheduleOf(42L);
+        when(schedulerRepository.findById(5)).thenReturn(Optional.of(stored));
+        Scheduler request = aScheduleRequestFor(43L);
+
+        schedulerService.update(request);
+
+        verify(globalVariableUsageService).checkScheduleWorkflowChange(stored, request.getConnection());
+    }
+
+    @Test
+    void updateChecksNothingWhenWorkflowStaysSame() {
+        when(schedulerRepository.findById(5)).thenReturn(Optional.of(aStoredScheduleOf(42L)));
+
+        schedulerService.update(aScheduleRequestFor(42L));
+
+        verify(globalVariableUsageService, never()).checkScheduleWorkflowChange(any(), any());
+    }
+
+    @Test
+    @DisplayName("update — a refused workflow change neither writes the schedule nor moves its job")
+    void updateWritesNothingWhenNotificationReferenceIsRejected() {
+        Scheduler stored = aStoredScheduleOf(42L);
+        when(schedulerRepository.findById(5)).thenReturn(Optional.of(stored));
+        Scheduler request = aScheduleRequestFor(43L);
+        GlobalReferenceValidationException rejection = aNotificationRejection();
+        doThrow(rejection).when(globalVariableUsageService).checkScheduleWorkflowChange(stored, request.getConnection());
+
+        GlobalReferenceValidationException thrown = catchThrowableOfType(
+                () -> schedulerService.update(request), GlobalReferenceValidationException.class);
+
+        assertThat(thrown).isSameAs(rejection);
+        verify(schedulerRepository, never()).save(any());
+        verifyNoInteractions(schedulingStrategy);
+    }
+
+    @Test
+    @DisplayName("save — a schedule sent with the id of a stored one brings that one's notifications to its workflow")
+    void saveChecksStoredNotificationsWhenIdOfStoredScheduleIsSent() {
+        Scheduler stored = aStoredScheduleOf(42L);
+        when(schedulerRepository.findById(5)).thenReturn(Optional.of(stored));
+        Scheduler request = aScheduleRequestFor(43L);
+        when(schedulerRepository.save(request)).thenReturn(request);
+
+        schedulerService.save(request);
+
+        verify(globalVariableUsageService).checkScheduleWorkflowChange(stored, request.getConnection());
+    }
+
+    @Test
+    @DisplayName("save — a new schedule has no notifications yet, so no stored schedule is read")
+    void saveReadsNoScheduleWhenScheduleIsNew() {
+        Scheduler request = aScheduleRequestFor(43L);
+        request.setId(0);
+        when(schedulerRepository.save(request)).thenReturn(request);
+
+        schedulerService.save(request);
+
+        verify(schedulerRepository, never()).findById(any());
+        verifyNoInteractions(globalVariableUsageService);
+    }
+
+    @Test
+    void saveWritesNothingWhenNotificationReferenceIsRejected() {
+        Scheduler stored = aStoredScheduleOf(42L);
+        when(schedulerRepository.findById(5)).thenReturn(Optional.of(stored));
+        Scheduler request = aScheduleRequestFor(43L);
+        GlobalReferenceValidationException rejection = aNotificationRejection();
+        doThrow(rejection).when(globalVariableUsageService).checkScheduleWorkflowChange(stored, request.getConnection());
+
+        GlobalReferenceValidationException thrown = catchThrowableOfType(
+                () -> schedulerService.save(request), GlobalReferenceValidationException.class);
+
+        assertThat(thrown).isSameAs(rejection);
+        verify(schedulerRepository, never()).save(any());
+        verifyNoInteractions(schedulingStrategy);
+    }
+
+    /** Schedule 5, titled "Nightly", as it is stored: it runs the given workflow and has one notification. */
+    private static Scheduler aStoredScheduleOf(long workflowId) {
+        Scheduler schedule = GlobalVariableFixture.aScheduleOf(workflowId, 3);
+        schedule.setId(5);
+        schedule.setTitle("Nightly");
+        schedule.setEventNotifications(List.of(aNotificationSendingTemplate(21)));
+        return schedule;
+    }
+
+    /** Schedule 5, titled "Nightly", as a request sends it: it is to run the given workflow. */
+    private static Scheduler aScheduleRequestFor(long workflowId) {
+        Scheduler schedule = GlobalVariableFixture.aScheduleOf(workflowId, 4);
+        schedule.setId(5);
+        schedule.setTitle("Nightly");
+        return schedule;
+    }
+
+    private static GlobalReferenceValidationException aNotificationRejection() {
+        return new GlobalReferenceValidationException(List.of(new Violation(Code.OUT_OF_SCOPE,
+                "The workflow of notification 'Failure mail' (schedule 'Nightly') is outside the scope of global"
+                        + " variable 'supportUrl'",
+                "supportUrl", "{{global.supportUrl}}", null, null, "en.body")));
     }
 
     /** A notification without recipients that sends a template with a global variable reference. */

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -54,10 +55,21 @@ public class GlobalReferenceValidator {
      * workflow its schedule runs.
      *
      * @param name       name of the notification, for the message
+     * @param schedule   how its schedule is named in the message, e.g. {@code 'Nightly'} or
+     *                   {@code #12}, or {@code null} to name the notification alone
      * @param workflowId id of the workflow its schedule runs
      * @param categoryId category of that workflow, or {@code null} for none
      */
-    public record NotificationTarget(String name, long workflowId, Integer categoryId) {
+    public record NotificationTarget(String name, String schedule, long workflowId, Integer categoryId) {
+
+        /** A notification that the message names without its schedule. */
+        public NotificationTarget(String name, long workflowId, Integer categoryId) {
+            this(name, null, workflowId, categoryId);
+        }
+
+        private String describe() {
+            return schedule == null ? "'" + name + "'" : "'" + name + "' (schedule " + schedule + ")";
+        }
     }
 
     /** Says why a variable may not be used where a reference stands, or nothing if it may. */
@@ -130,15 +142,18 @@ public class GlobalReferenceValidator {
             return;
         }
 
-        // the category chain is read once per notification, not once per reference
+        // the category chain is read once per category, not once per notification or reference:
+        // the notifications of one workflow share it
+        Map<Integer, Set<Long>> chains = new HashMap<>();
         List<Reach> reaches = notifications.stream()
-                .map(target -> new Reach(target, scopeResolver.categoryChainOf(target.categoryId())))
+                .map(target -> new Reach(target,
+                        chains.computeIfAbsent(target.categoryId(), scopeResolver::categoryChainOf)))
                 .toList();
 
         validate(references, (variable, reference) -> {
             List<String> leftOut = reaches.stream()
                     .filter(reach -> !variable.isInScopeOf(reach.target().workflowId(), reach.categoryIds()))
-                    .map(reach -> "'" + reach.target().name() + "'")
+                    .map(reach -> reach.target().describe())
                     .toList();
 
             return leftOut.isEmpty()
