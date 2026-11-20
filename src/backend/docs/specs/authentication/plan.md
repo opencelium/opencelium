@@ -126,7 +126,7 @@ The reviewer confirms each decision before task 1 starts.
 |---|---|---|
 | `invalid-credentials` | 401 | A wrong username, a wrong email or a wrong password (AU-02). Each attempt in the cloud mode (AU-04). A locked user with a wrong password (AU-03). |
 | `user-locked` | 403 | A locked user with the correct password (AU-03) |
-| `session-ended` | 401 | A refresh after one of the rules 1 to 3 of "The session" (AU-08) |
+| `session-ended` | 401 | A refresh after one of the rules 1 to 3 of "The session" (AU-08). A request for the current OpenCelium user whose user does not exist (AU-10). |
 | `bad-request` | 400 | A login body that is not JSON, without a `username` or without a `password`, or with a field of more than 256 characters |
 
 A request without a valid session JWT or refresh token gets the status code 401 from the entry point of the bearer-token filter (AU-06). The response has the header `WWW-Authenticate` and no body.
@@ -155,6 +155,7 @@ Each test that touches MongoDB is a full-application test against the local Mong
 | AU-07 | A full-application test with 2 Spring contexts on 1 database: a session JWT of context 1 is valid in context 2. A restart of context 1 keeps the session JWT valid. The collection `signing_keys` holds 1 document. A full-application test with 2 threads on an empty database: the 2 loaders read the same signing key. |
 | AU-08 | A full-application test: a refresh gives 2 new tokens. A second use of the old refresh token gets `session-ended`, and then the new refresh token also gets it. A locked user and a deleted user get `session-ended`. After the end of the session the session service stops a refresh, and no token expires after the end. At the endpoint, the decoder does not accept the expired refresh token, so the request does not reach the session service. |
 | AU-09 | A full-application test: a logout gets 204, and a refresh after it gets `session-ended`. The session JWT stays valid on `/api/auth/me` until it expires. |
+| AU-10 | A full-application test: a login, then the OpenCelium user is deleted. `/api/auth/me` with the session JWT gets `session-ended`. |
 
 The unit tests also cover the decoders: a token with a wrong `typ`, a wrong `iss` or a wrong `kid` is not valid.
 

@@ -53,6 +53,7 @@ Each criterion has an ID and the form "Given ..., when ..., then ...".
   The data never holds the password hash.
 - **AU-06** Given no valid session JWT, when a request reaches a protected endpoint, then core must give the status code 401. A session JWT is not valid when it is expired or when its signature is not correct.
 - **AU-07** Given a session JWT from 1 core instance, when another core instance gets it, then that instance must accept it. A restart of core also does not stop a valid session JWT.
+- **AU-10** Given a deleted OpenCelium user, when a request asks for its data, then core must give the status code 401. The request carries a valid session JWT of that user. The response is the same as the response to a refresh of an ended session (AU-08). Thus the HTTP client logs in again.
 
 ### The refresh token
 
