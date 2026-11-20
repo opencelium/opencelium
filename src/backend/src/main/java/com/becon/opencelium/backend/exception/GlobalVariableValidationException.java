@@ -28,7 +28,17 @@ public class GlobalVariableValidationException extends RuntimeException {
         TOO_MANY_IDS,
         SCRIPT_HAS_NO_VALUE,
         PICKER_TARGET_AMBIGUOUS,
-        NOT_RESTORABLE
+        NOT_RESTORABLE,
+        // a mutable variable names the workflow whose runs may write it
+        OWNER_WORKFLOW_REQUIRED,
+        // the owner workflow does not exist or is outside the scope of the variable
+        OWNER_WORKFLOW_INVALID,
+        // a field that only a mutable variable has was given for another kind
+        MUTABLE_ONLY,
+        // runs write a mutable variable, so it cannot be a secret
+        SECRET_NOT_ALLOWED,
+        // only a mutable variable has a current value to reset
+        NOT_MUTABLE
     }
 
     /**

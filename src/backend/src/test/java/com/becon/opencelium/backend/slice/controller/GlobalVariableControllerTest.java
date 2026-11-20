@@ -191,7 +191,7 @@ class GlobalVariableControllerTest {
 
         verify(service).create(new GlobalVariableRequestDTO("tenants", GlobalVariableKind.CONSTANT, null,
                 json.readTree("[{\"id\":\"acme\"}]"), false,
-                new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.ALL, List.of(), List.of()), 4L));
+                new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.ALL, List.of(), List.of()), null, null, 4L));
     }
 
     @Test
@@ -443,10 +443,33 @@ class GlobalVariableControllerTest {
         verify(service).restore(7L, 31L, new GlobalVariableRestoreRequestDTO(4L));
     }
 
+    // ── POST /global-variable/{id}/reset ──────────────────────────────────────
+
+    @Test
+    void resetReturnsVariableWhenCurrentValueIsReset() throws Exception {
+        when(service.reset(7L)).thenReturn(aDetailDto());
+
+        mockMvc.perform(post("/global-variable/{id}/reset", 7))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(7))
+                .andExpect(jsonPath("$.version").value(4));
+
+        verify(service).reset(7L);
+    }
+
+    @Test
+    void resetReturnsBadRequestWhenVariableIsNotMutable() throws Exception {
+        when(service.reset(7L)).thenThrow(new GlobalVariableValidationException(List.of(
+                new Violation("id", Code.NOT_MUTABLE, "Global variable 'tenants' is a CONSTANT"))));
+
+        mockMvc.perform(post("/global-variable/{id}/reset", 7))
+                .andExpect(status().isBadRequest());
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private GlobalVariableValueDTO aValueDto() throws Exception {
-        return new GlobalVariableValueDTO(7L, 4L, json.readTree("[{\"id\":\"acme\"}]"),
+        return new GlobalVariableValueDTO(7L, 4L, 0L, json.readTree("[{\"id\":\"acme\"}]"),
                 Instant.parse("2026-11-16T09:12:00Z"), GlobalVariableDTO.Actor.user(1, "admin"));
     }
 
@@ -462,6 +485,7 @@ class GlobalVariableControllerTest {
                 new GlobalVariableDTO.Scope(GlobalVariableScopeType.ALL, List.of(), List.of()),
                 new GlobalVariableDTO.UserRef(1, "admin"),
                 EnumSet.of(GlobalVariablePermission.VIEW_USE),
+                null,
                 4L,
                 Instant.parse("2026-11-02T09:00:00Z"),
                 GlobalVariableDTO.Actor.user(1, "admin"),

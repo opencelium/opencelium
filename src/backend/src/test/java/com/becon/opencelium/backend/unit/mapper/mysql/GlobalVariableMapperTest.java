@@ -18,6 +18,7 @@ import com.becon.opencelium.backend.database.mysql.repository.ConnectionReposito
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
 import com.becon.opencelium.backend.mapper.mysql.GlobalVariableMapper;
@@ -34,6 +35,8 @@ import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import java.time.Instant;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -318,6 +321,83 @@ class GlobalVariableMapperTest {
 
         assertThat(value.id()).isEqualTo(7L);
         assertThat(value.value()).isNull();
+    }
+
+    @Test
+    @DisplayName("toValue — a mutable variable gives its current value, with the time and user that set it")
+    void toValueReturnsCurrentValueWhenVariableIsMutable() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 12L);
+        variable.setVersion(4L);
+        variable.setCurrentRevision(6L);
+        variable.setCurrentSetAt(Date.from(Instant.parse("2026-11-20T08:00:00Z")));
+        variable.setCurrentSetByUser(3);
+        variable.setUpdatedAt(Date.from(Instant.parse("2026-11-01T08:00:00Z")));
+        variable.setUpdatedBy(1);
+
+        GlobalVariableValueDTO value = mapper.toValue(variable);
+
+        assertThat(value.version()).isEqualTo(4L);
+        assertThat(value.revision()).isEqualTo(6L);
+        assertThat(value.value()).isEqualTo(new TextNode("live"));
+        assertThat(value.updatedAt()).isEqualTo(Instant.parse("2026-11-20T08:00:00Z"));
+        assertThat(value.updatedBy().id()).isEqualTo(3);
+    }
+
+    @Test
+    void toValueReturnsNoUserWhenRunWroteCurrentValue() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 12L);
+        variable.setCurrentSetByExecution(900L);
+        variable.setUpdatedBy(1);
+
+        GlobalVariableValueDTO value = mapper.toValue(variable);
+
+        assertThat(value.updatedBy()).isNull();
+    }
+
+    @Test
+    void toDetailReturnsMutablePartWhenVariableIsMutable() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 12L);
+        variable.setCurrentSetByExecution(900L);
+        Connection workflow = new Connection();
+        workflow.setTitle("Sync tenants");
+        when(connectionRepository.findById(12L)).thenReturn(Optional.of(workflow));
+
+        GlobalVariableDTO detail = mapper.toDetail(variable, EnumSet.allOf(GlobalVariablePermission.class));
+
+        assertThat(detail.value()).isEqualTo(new TextNode("start"));
+        assertThat(detail.mutable().currentValue()).isEqualTo(new TextNode("live"));
+        assertThat(detail.mutable().revision()).isEqualTo(1L);
+        assertThat(detail.mutable().setBy()).isNull();
+        assertThat(detail.mutable().setByExecutionId()).isEqualTo(900L);
+        assertThat(detail.mutable().busyPolicy()).isEqualTo(GlobalVariableBusyPolicy.QUEUE);
+        assertThat(detail.mutable().ownerWorkflow()).isEqualTo(new GlobalVariableDTO.WorkflowRef(12L, "Sync tenants"));
+    }
+
+    @Test
+    void toDetailReturnsNoOwnerWorkflowWhenItWasDeleted() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", null);
+
+        GlobalVariableDTO detail = mapper.toDetail(variable, EnumSet.allOf(GlobalVariablePermission.class));
+
+        assertThat(detail.mutable().ownerWorkflow()).isNull();
+    }
+
+    @Test
+    void toDetailReturnsNoMutablePartWhenVariableIsConstant() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(7L, "idoit", "\"x\"");
+
+        GlobalVariableDTO detail = mapper.toDetail(variable, EnumSet.allOf(GlobalVariablePermission.class));
+
+        assertThat(detail.mutable()).isNull();
+    }
+
+    @Test
+    void toListItemPreviewsCurrentValueWhenVariableIsMutable() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 12L);
+
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.allOf(GlobalVariablePermission.class), 0);
+
+        assertThat(item.valuePreview()).isEqualTo("\"live\"");
     }
 
     @ParameterizedTest

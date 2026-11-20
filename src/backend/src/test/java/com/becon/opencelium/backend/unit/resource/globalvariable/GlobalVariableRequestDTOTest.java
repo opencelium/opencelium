@@ -42,6 +42,6 @@ class GlobalVariableRequestDTOTest {
 
     private static GlobalVariableRequestDTO aRequest(Boolean secret) {
         return new GlobalVariableRequestDTO("apiKey", GlobalVariableKind.CONSTANT, null, new TextNode("s3cr3t"),
-                secret, GlobalVariableFixture.aScopeOfAll(), 3L);
+                secret, GlobalVariableFixture.aScopeOfAll(), null, null, 3L);
     }
 }

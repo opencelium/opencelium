@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 class GlobalVariableValueDTOTest {
 
     @Test
-    @DisplayName("etagOf — only the ids and the versions count, not what else a value carries")
+    @DisplayName("etagOf — only the ids, the versions and the revisions count, not what else a value carries")
     void etagOfReturnsSameTagWhenIdsAndVersionsAreEqual() {
         List<GlobalVariableValueDTO> first = List.of(
                 aValue(7L, 4L, "https://cmdb.example", "2026-11-16T09:12:00Z"),
@@ -44,6 +44,16 @@ class GlobalVariableValueDTOTest {
     }
 
     @Test
+    @DisplayName("etagOf — a new current value of a mutable variable changes the tag, though the version stays")
+    void etagOfChangesWhenRevisionChanges() {
+        String before = GlobalVariableValueDTO.etagOf(List.of(aValue(7L, 4L, 2L)));
+
+        String after = GlobalVariableValueDTO.etagOf(List.of(aValue(7L, 4L, 3L)));
+
+        assertThat(after).isNotEqualTo(before);
+    }
+
+    @Test
     void etagOfChangesWhenVariableLeavesList() {
         String before = GlobalVariableValueDTO.etagOf(List.of(aValue(7L, 4L), aValue(12L, 1L)));
 
@@ -56,8 +66,13 @@ class GlobalVariableValueDTOTest {
         return aValue(id, version, "value", "2026-11-16T09:12:00Z");
     }
 
+    private static GlobalVariableValueDTO aValue(long id, long version, long revision) {
+        return new GlobalVariableValueDTO(id, version, revision, new TextNode("value"),
+                Instant.parse("2026-11-16T09:12:00Z"), GlobalVariableDTO.Actor.user(1, "admin"));
+    }
+
     private static GlobalVariableValueDTO aValue(long id, long version, String value, String updatedAt) {
-        return new GlobalVariableValueDTO(id, version, new TextNode(value), Instant.parse(updatedAt),
+        return new GlobalVariableValueDTO(id, version, 0L, new TextNode(value), Instant.parse(updatedAt),
                 GlobalVariableDTO.Actor.user(1, "admin"));
     }
 }

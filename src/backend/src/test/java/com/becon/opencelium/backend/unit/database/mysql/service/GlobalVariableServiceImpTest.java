@@ -32,6 +32,7 @@ import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableScopeResolver;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableUsageService;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
@@ -62,6 +63,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
@@ -110,6 +112,7 @@ class GlobalVariableServiceImpTest {
     private static final long CHANGE_ID = 31L;
     private static final long CONNECTOR_ID = 7L;
     private static final long NOTIFICATION_ID = 21L;
+    private static final long OWNER_WORKFLOW_ID = 12L;
     private static final int MAX_VALUE_BYTES = 32;
     private static final Caller OWNER = new Caller(OWNER_ID, false);
     // built once: deriving the key takes a while
@@ -256,10 +259,10 @@ class GlobalVariableServiceImpTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = GlobalVariableKind.class, names = {"MUTABLE", "SCRIPT"})
-    void createThrowsValidationExceptionWhenKindIsNotConstant(GlobalVariableKind kind) {
+    @EnumSource(value = GlobalVariableKind.class, names = {"SCRIPT"})
+    void createThrowsValidationExceptionWhenKindIsScript(GlobalVariableKind kind) {
         GlobalVariableRequestDTO request = new GlobalVariableRequestDTO(
-                "lastSync", kind, null, new TextNode("x"), false, GlobalVariableFixture.aScopeOfAll(), null);
+                "lastSync", kind, null, new TextNode("x"), false, GlobalVariableFixture.aScopeOfAll(), null, null, null);
 
         assertThat(violationsOf(() -> service.create(request)))
                 .extracting(Violation::field, Violation::code)
@@ -271,7 +274,7 @@ class GlobalVariableServiceImpTest {
     @DisplayName("create — a secret is stored encrypted, not as its JSON text")
     void createEncryptsValueWhenSecretIsRequested() {
         GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("apiKey", GlobalVariableKind.CONSTANT,
-                null, new TextNode("s3cr3t"), true, GlobalVariableFixture.aScopeOfAll(), null);
+                null, new TextNode("s3cr3t"), true, GlobalVariableFixture.aScopeOfAll(), null, null, null);
 
         service.create(request);
 
@@ -307,7 +310,7 @@ class GlobalVariableServiceImpTest {
         when(categoryRepository.existsById(4)).thenReturn(false);
         GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("tenants", GlobalVariableKind.CONSTANT,
                 null, new TextNode("x"), false,
-                new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.CATEGORIES, List.of(3L, 4L), null), null);
+                new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.CATEGORIES, List.of(3L, 4L), null), null, null, null);
 
         List<Violation> violations = violationsOf(() -> service.create(request));
 
@@ -323,7 +326,7 @@ class GlobalVariableServiceImpTest {
         when(categoryRepository.existsById(3)).thenReturn(true);
         GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("tenants", GlobalVariableKind.CONSTANT,
                 null, new TextNode("x"), false,
-                new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.CATEGORIES, List.of(3L), List.of(9L)), null);
+                new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.CATEGORIES, List.of(3L), List.of(9L)), null, null, null);
 
         service.create(request);
 
@@ -336,7 +339,7 @@ class GlobalVariableServiceImpTest {
     @DisplayName("create — every invalid field is reported in one answer")
     void createReportsEveryViolationWhenSeveralFieldsAreInvalid() {
         GlobalVariableRequestDTO request = new GlobalVariableRequestDTO(
-                "1bad", GlobalVariableKind.CONSTANT, "d".repeat(513), new TextNode("x"), true, null, null);
+                "1bad", GlobalVariableKind.CONSTANT, "d".repeat(513), new TextNode("x"), true, null, null, null, null);
 
         assertThat(violationsOf(() -> service.create(request)))
                 .extracting(Violation::code)
@@ -375,7 +378,7 @@ class GlobalVariableServiceImpTest {
     void updateThrowsValidationExceptionWhenKindChanges() {
         givenExistingVariable();
         GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("idoitUrl", GlobalVariableKind.SCRIPT,
-                null, new TextNode("old"), false, GlobalVariableFixture.aScopeOfAll(), VERSION);
+                null, new TextNode("old"), false, GlobalVariableFixture.aScopeOfAll(), null, null, VERSION);
 
         assertThat(violationsOf(() -> service.update(VARIABLE_ID, request)))
                 .extracting(Violation::field, Violation::code)
@@ -404,7 +407,7 @@ class GlobalVariableServiceImpTest {
         when(connectionRepository.existsById(9L)).thenReturn(true);
         GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("idoitUrl", GlobalVariableKind.CONSTANT,
                 null, new TextNode("old"), false,
-                new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.WORKFLOWS, null, List.of(9L)), VERSION);
+                new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.WORKFLOWS, null, List.of(9L)), null, null, VERSION);
 
         service.update(VARIABLE_ID, request);
 
@@ -424,7 +427,7 @@ class GlobalVariableServiceImpTest {
     void updateWritesTwoChangesWhenValueAndDescriptionChange() {
         givenExistingVariable();
         GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("idoitUrl", GlobalVariableKind.CONSTANT,
-                "i-doit endpoint", new TextNode("new"), false, GlobalVariableFixture.aScopeOfAll(), VERSION);
+                "i-doit endpoint", new TextNode("new"), false, GlobalVariableFixture.aScopeOfAll(), null, null, VERSION);
 
         service.update(VARIABLE_ID, request);
 
@@ -1747,7 +1750,277 @@ class GlobalVariableServiceImpTest {
         verify(repository, never()).saveAndFlush(any());
     }
 
+    // ── mutable variables ─────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("create — the current value starts as the initial value, set by the creator")
+    void createSavesMutableWithCurrentValueEqualToInitialValueWhenRequestIsValid() {
+        when(connectionRepository.existsById(OWNER_WORKFLOW_ID)).thenReturn(true);
+
+        service.create(GlobalVariableFixture.aMutableRequest(
+                "lastSync", new TextNode("2026-01-01"), OWNER_WORKFLOW_ID, null));
+
+        GlobalVariable saved = savedVariable();
+        assertThat(saved.getKind()).isEqualTo(GlobalVariableKind.MUTABLE);
+        assertThat(saved.getValue()).isEqualTo("\"2026-01-01\"");
+        assertThat(saved.getCurrentValue()).isEqualTo("\"2026-01-01\"");
+        assertThat(saved.getCurrentRevision()).isZero();
+        assertThat(saved.getCurrentSetAt()).isNotNull();
+        assertThat(saved.getCurrentSetByUser()).isEqualTo(OWNER_ID);
+        assertThat(saved.getCurrentSetByExecution()).isNull();
+        assertThat(saved.getBusyPolicy()).isEqualTo(GlobalVariableBusyPolicy.QUEUE);
+        assertThat(saved.getOwnerWorkflowId()).isEqualTo(OWNER_WORKFLOW_ID);
+    }
+
+    @Test
+    void createKeepsGivenBusyPolicyWhenRequestNamesRefuse() {
+        when(connectionRepository.existsById(OWNER_WORKFLOW_ID)).thenReturn(true);
+
+        service.create(aMutableRequest(GlobalVariableBusyPolicy.REFUSE, OWNER_WORKFLOW_ID,
+                GlobalVariableFixture.aScopeOfAll(), null));
+
+        assertThat(savedVariable().getBusyPolicy()).isEqualTo(GlobalVariableBusyPolicy.REFUSE);
+    }
+
+    @Test
+    void createLeavesMutableFieldsEmptyWhenVariableIsConstant() {
+        service.create(GlobalVariableFixture.aRequest("idoitUrl", new TextNode("https://cmdb.example"), null));
+
+        GlobalVariable saved = savedVariable();
+        assertThat(saved.getCurrentValue()).isNull();
+        assertThat(saved.getCurrentSetAt()).isNull();
+        assertThat(saved.getBusyPolicy()).isNull();
+        assertThat(saved.getOwnerWorkflowId()).isNull();
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenMutableNamesNoOwnerWorkflow() {
+        GlobalVariableRequestDTO request =
+                GlobalVariableFixture.aMutableRequest("lastSync", new TextNode("x"), null, null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("ownerWorkflowId", Code.OWNER_WORKFLOW_REQUIRED));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenOwnerWorkflowDoesNotExist() {
+        GlobalVariableRequestDTO request =
+                GlobalVariableFixture.aMutableRequest("lastSync", new TextNode("x"), OWNER_WORKFLOW_ID, null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("ownerWorkflowId", Code.OWNER_WORKFLOW_INVALID));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenOwnerWorkflowIsOutsideScope() {
+        when(connectionRepository.existsById(9L)).thenReturn(true);
+        when(connectionRepository.existsById(OWNER_WORKFLOW_ID)).thenReturn(true);
+        GlobalVariableRequestDTO request = aMutableRequest(null, OWNER_WORKFLOW_ID, aScopeOfWorkflow(9L), null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("ownerWorkflowId", Code.OWNER_WORKFLOW_INVALID));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("create — whether an invalid scope holds the owner workflow is not judged")
+    void createReportsOnlyScopeWhenScopeIsInvalid() {
+        when(connectionRepository.existsById(OWNER_WORKFLOW_ID)).thenReturn(true);
+        GlobalVariableRequestDTO request = aMutableRequest(null, OWNER_WORKFLOW_ID,
+                new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.WORKFLOWS, null, List.of()), null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("scope", Code.SCOPE_INVALID));
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenMutableIsSecret() {
+        when(connectionRepository.existsById(OWNER_WORKFLOW_ID)).thenReturn(true);
+        GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("lastSync", GlobalVariableKind.MUTABLE,
+                null, new TextNode("x"), true, GlobalVariableFixture.aScopeOfAll(), null, OWNER_WORKFLOW_ID, null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("secret", Code.SECRET_NOT_ALLOWED));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenConstantHasBusyPolicyOrOwnerWorkflow() {
+        GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("idoitUrl", GlobalVariableKind.CONSTANT,
+                null, new TextNode("x"), false, GlobalVariableFixture.aScopeOfAll(),
+                GlobalVariableBusyPolicy.QUEUE, OWNER_WORKFLOW_ID, null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("busyPolicy", Code.MUTABLE_ONLY), tuple("ownerWorkflowId", Code.MUTABLE_ONLY));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("update — a new value is the initial value; the current one stays until a reset")
+    void updateKeepsCurrentValueWhenInitialValueChanges() {
+        GlobalVariable variable = givenExistingMutable();
+        when(connectionRepository.existsById(OWNER_WORKFLOW_ID)).thenReturn(true);
+
+        service.update(VARIABLE_ID,
+                GlobalVariableFixture.aMutableRequest("lastSync", new TextNode("next"), null, VERSION));
+
+        assertThat(variable.getValue()).isEqualTo("\"next\"");
+        assertThat(variable.getCurrentValue()).isEqualTo("\"live\"");
+        assertThat(variable.getCurrentRevision()).isEqualTo(1L);
+        assertThat(savedChanges(1).get(0).getChangeType()).isEqualTo(GlobalVariableChange.Type.VALUE);
+    }
+
+    @Test
+    void updateKeepsBusyPolicyAndOwnerWorkflowWhenRequestLeavesThemOut() {
+        GlobalVariable variable = givenExistingMutable();
+        variable.setBusyPolicy(GlobalVariableBusyPolicy.REFUSE);
+        when(connectionRepository.existsById(OWNER_WORKFLOW_ID)).thenReturn(true);
+
+        service.update(VARIABLE_ID, aMutableRequest(null, null, GlobalVariableFixture.aScopeOfAll(), VERSION));
+
+        assertThat(variable.getBusyPolicy()).isEqualTo(GlobalVariableBusyPolicy.REFUSE);
+        assertThat(variable.getOwnerWorkflowId()).isEqualTo(OWNER_WORKFLOW_ID);
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void updateWritesConfigChangeWhenBusyPolicyAndOwnerWorkflowChange() throws Exception {
+        GlobalVariable variable = givenExistingMutable();
+        when(connectionRepository.existsById(9L)).thenReturn(true);
+
+        service.update(VARIABLE_ID,
+                aMutableRequest(GlobalVariableBusyPolicy.REFUSE, 9L, GlobalVariableFixture.aScopeOfAll(), VERSION));
+
+        assertThat(variable.getBusyPolicy()).isEqualTo(GlobalVariableBusyPolicy.REFUSE);
+        assertThat(variable.getOwnerWorkflowId()).isEqualTo(9L);
+        GlobalVariableChange change = savedChanges(1).get(0);
+        assertThat(change.getChangeType()).isEqualTo(GlobalVariableChange.Type.CONFIG);
+        assertThat(json.readTree(change.getOldValue()))
+                .isEqualTo(json.readTree("{\"busyPolicy\":\"QUEUE\",\"ownerWorkflowId\":12}"));
+        assertThat(json.readTree(change.getNewValue()))
+                .isEqualTo(json.readTree("{\"busyPolicy\":\"REFUSE\",\"ownerWorkflowId\":9}"));
+    }
+
+    @Test
+    void updateThrowsValidationExceptionWhenNewScopeLeavesOutOwnerWorkflow() {
+        givenExistingMutable();
+        when(connectionRepository.existsById(9L)).thenReturn(true);
+        when(connectionRepository.existsById(OWNER_WORKFLOW_ID)).thenReturn(true);
+        GlobalVariableRequestDTO request = aMutableRequest(null, null, aScopeOfWorkflow(9L), VERSION);
+
+        assertThat(violationsOf(() -> service.update(VARIABLE_ID, request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("ownerWorkflowId", Code.OWNER_WORKFLOW_INVALID));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("update — once the owner workflow is deleted, a save needs a new one")
+    void updateThrowsValidationExceptionWhenOwnerWorkflowWasDeletedAndRequestNamesNone() {
+        GlobalVariable variable = givenExistingMutable();
+        variable.setOwnerWorkflowId(null);
+        GlobalVariableRequestDTO request =
+                aMutableRequest(null, null, GlobalVariableFixture.aScopeOfAll(), VERSION);
+
+        assertThat(violationsOf(() -> service.update(VARIABLE_ID, request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("ownerWorkflowId", Code.OWNER_WORKFLOW_REQUIRED));
+    }
+
+    @Test
+    void updateThrowsValidationExceptionWhenMutableIsMadeSecret() {
+        givenExistingMutable();
+        when(connectionRepository.existsById(OWNER_WORKFLOW_ID)).thenReturn(true);
+        GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("lastSync", GlobalVariableKind.MUTABLE,
+                null, new TextNode("start"), true, GlobalVariableFixture.aScopeOfAll(), null, null, VERSION);
+
+        assertThat(violationsOf(() -> service.update(VARIABLE_ID, request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("secret", Code.SECRET_NOT_ALLOWED));
+    }
+
+    @Test
+    void resetSetsCurrentValueBackAndWritesResetChangeWhenVariableIsMutable() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(
+                VARIABLE_ID, "lastSync", "\"start\"", "\"live\"", OWNER_WORKFLOW_ID);
+        variable.setVersion(VERSION);
+        GlobalVariable reset = GlobalVariableFixture.aMutable(
+                VARIABLE_ID, "lastSync", "\"start\"", "\"start\"", OWNER_WORKFLOW_ID);
+        reset.setVersion(VERSION);
+        when(repository.findById(VARIABLE_ID)).thenReturn(Optional.of(variable), Optional.of(reset));
+
+        service.reset(VARIABLE_ID);
+
+        verify(repository).resetCurrentValue(eq(VARIABLE_ID), any(Date.class), eq(OWNER_ID));
+        GlobalVariableChange change = savedChanges(1).get(0);
+        assertThat(change.getChangeType()).isEqualTo(GlobalVariableChange.Type.RESET);
+        assertThat(change.getOldValue()).isEqualTo("\"live\"");
+        assertThat(change.getNewValue()).isEqualTo("\"start\"");
+        assertThat(change.getVersionFrom()).isEqualTo(VERSION);
+        assertThat(change.getVersionTo()).isEqualTo(VERSION);
+        assertThat(change.getUserId()).isEqualTo(OWNER_ID);
+        verify(mapper).toDetail(eq(reset), any());
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void resetThrowsValidationExceptionWhenVariableIsConstant() {
+        givenExistingVariable();
+
+        assertThat(violationsOf(() -> service.reset(VARIABLE_ID)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("id", Code.NOT_MUTABLE));
+        verify(repository, never()).resetCurrentValue(anyLong(), any(), any());
+        verifyNoInteractions(changeRepository);
+    }
+
+    @Test
+    void resetThrowsGeneralServiceExceptionWhenCallerLacksEdit() {
+        givenExistingMutable();
+        when(security.permissionsOn(any(), any())).thenReturn(EnumSet.of(GlobalVariablePermission.VIEW_USE));
+
+        GeneralServiceException forbidden =
+                catchThrowableOfType(() -> service.reset(VARIABLE_ID), GeneralServiceException.class);
+
+        assertThat(forbidden.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
+        verify(repository, never()).resetCurrentValue(anyLong(), any(), any());
+        verifyNoInteractions(changeRepository);
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * A saved mutable variable "lastSync" with the initial value "start", the current value
+     * "live" and busy policy QUEUE at {@link #VERSION}, written by {@link #OWNER_WORKFLOW_ID}.
+     */
+    private GlobalVariable givenExistingMutable() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(
+                VARIABLE_ID, "lastSync", "\"start\"", "\"live\"", OWNER_WORKFLOW_ID);
+        variable.setVersion(VERSION);
+        when(repository.findById(VARIABLE_ID)).thenReturn(Optional.of(variable));
+        return variable;
+    }
+
+    /**
+     * Request for the mutable variable "lastSync" with the value "start".
+     *
+     * @param busyPolicy      {@code null} to leave it out
+     * @param ownerWorkflowId {@code null} to leave it out
+     * @param version         {@code null} for a create
+     */
+    private static GlobalVariableRequestDTO aMutableRequest(GlobalVariableBusyPolicy busyPolicy,
+            Long ownerWorkflowId, GlobalVariableRequestDTO.Scope scope, Long version) {
+        return new GlobalVariableRequestDTO("lastSync", GlobalVariableKind.MUTABLE, null, new TextNode("start"),
+                null, scope, busyPolicy, ownerWorkflowId, version);
+    }
 
     /** A saved secret "apiKey" whose hidden value is "hidden", at {@link #VERSION}, owned by the caller. */
     private GlobalVariable givenExistingSecret() {
@@ -1762,7 +2035,7 @@ class GlobalVariableServiceImpTest {
     /** Request to create the secret "apiKey" with scope ALL; {@code value} may be {@code null}. */
     private static GlobalVariableRequestDTO aSecretCreate(JsonNode value) {
         return new GlobalVariableRequestDTO("apiKey", GlobalVariableKind.CONSTANT, null, value, true,
-                GlobalVariableFixture.aScopeOfAll(), null);
+                GlobalVariableFixture.aScopeOfAll(), null, null, null);
     }
 
     /**
@@ -1772,7 +2045,7 @@ class GlobalVariableServiceImpTest {
      */
     private static GlobalVariableRequestDTO anUpdate(String name, JsonNode value, Boolean secret) {
         return new GlobalVariableRequestDTO(name, GlobalVariableKind.CONSTANT, null, value, secret,
-                GlobalVariableFixture.aScopeOfAll(), VERSION);
+                GlobalVariableFixture.aScopeOfAll(), null, null, VERSION);
     }
 
     /** The service with the same collaborators as {@link #service}, but the given cipher. */
@@ -1846,7 +2119,7 @@ class GlobalVariableServiceImpTest {
 
     private static GlobalVariableRequestDTO aRequestScopedToWorkflow(long workflowId) {
         return new GlobalVariableRequestDTO("idoitUrl", GlobalVariableKind.CONSTANT, null, new TextNode("old"),
-                false, aScopeOfWorkflow(workflowId), VERSION);
+                false, aScopeOfWorkflow(workflowId), null, null, VERSION);
     }
 
     private static GlobalVariableRequestDTO.Scope aScopeOfWorkflow(long workflowId) {
@@ -1891,7 +2164,7 @@ class GlobalVariableServiceImpTest {
         when(repository.findViewableByIds(any(), eq(OWNER_ID))).thenReturn(List.of(variables));
         lenient().when(mapper.toValue(any())).thenAnswer(invocation -> {
             GlobalVariable variable = invocation.getArgument(0);
-            return new GlobalVariableValueDTO(variable.getId(), variable.getVersion(), null, null, null);
+            return new GlobalVariableValueDTO(variable.getId(), variable.getVersion(), 0L, null, null, null);
         });
     }
 

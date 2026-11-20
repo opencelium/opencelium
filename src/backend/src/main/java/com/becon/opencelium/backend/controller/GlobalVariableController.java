@@ -242,6 +242,23 @@ public class GlobalVariableController {
         return ResponseEntity.ok(globalVariableService.restore(id, changeId, request));
     }
 
+    @Operation(summary = "Sets the current value of a mutable global variable back to its initial value")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The variable with its reset current value.",
+                    content = @Content(schema = @Schema(implementation = GlobalVariableDTO.class))),
+            @ApiResponse(responseCode = "400", description = "The variable is not mutable.",
+                    content = @Content(schema = @Schema(implementation = GlobalVariableErrorResource.class))),
+            @ApiResponse(responseCode = "403", description = "The caller has no EDIT permission on it.",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "404", description = "The variable does not exist.",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PreAuthorize("@globalVariableSecurity.can('UPDATE')")
+    @PostMapping("/{id}/reset")
+    public ResponseEntity<GlobalVariableDTO> reset(@PathVariable("id") long id) {
+        return ResponseEntity.ok(globalVariableService.reset(id));
+    }
+
     @Operation(summary = "Lists where a global variable is used")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The usages; empty when nothing uses the variable."),
