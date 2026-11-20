@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -20,8 +21,8 @@ import io.opencelium.core.tenant.NoCurrentTenantException;
 /**
  * Creates users and changes their passwords. Each operation works on the users of the current tenant and stops with
  * {@link NoCurrentTenantException} without one; no operation takes a tenant as a parameter. Passwords arrive as
- * {@code char[]} and are zeroed once hashed, also when the call fails; they are never logged or returned. Login is
- * not part of this service.
+ * {@code char[]} and are zeroed once hashed, also when the call fails; they are never logged or returned. The login
+ * is not part of this service: it reads a user with {@link #findByUsername} and compares the password itself.
  */
 @Service
 public class UserService {
@@ -85,6 +86,19 @@ public class UserService {
 		finally {
 			Arrays.fill(newPassword, '\0');
 		}
+	}
+
+	/**
+	 * The user of the current tenant with exactly this username: {@code Admin} does not find the user {@code admin}.
+	 * The user holds the password hash, for the comparison of a login.
+	 */
+	public Optional<UserDocument> findByUsername(String username) {
+		return users.findByUsername(username);
+	}
+
+	/** The user of the current tenant with this ID. */
+	public Optional<UserDocument> findById(String id) {
+		return users.findById(id);
 	}
 
 	/** Whether the current tenant has an admin. */

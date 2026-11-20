@@ -18,6 +18,7 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server'
 	implementation 'org.springframework.boot:spring-boot-starter-ldap'
 	implementation 'org.springframework.boot:spring-boot-starter-mongodb'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'

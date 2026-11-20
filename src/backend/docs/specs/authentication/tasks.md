@@ -20,7 +20,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Build the jar, drop `oc_hand`, and start core as in task 1. 2. Run `curl -s -X POST localhost:9090/api/auth/login -H 'Content-Type: application/json' -d '{"username":"admin","password":"1234"}'`. 3. Copy the value of `sessionJwt` into the shell variable `T`. 4. Run `curl -s localhost:9090/api/auth/me -H "Authorization: Bearer $T"`. 5. The response shows `admin`, `self-host-tenant` and the role `ADMIN`, and no password hash. 6. Run `curl -i localhost:9090/api/auth/me` without the header: the status code is 401. 7. Restart core and do step 4 again: the response of step 5 comes again.
 - **Size:** approximately 380 lines. The task adds the dependency of plan decision 2.
 - **Depends on:** 1
-- **Status:** open
+- **Status:** done
 
 ## Task 3: feat(core): log in by email and give error codes for a failed login
 - **Criteria:** AU-01, AU-02, AU-03, AU-04, AU-05

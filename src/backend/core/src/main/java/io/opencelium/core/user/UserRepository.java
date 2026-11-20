@@ -2,6 +2,7 @@ package io.opencelium.core.user;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Update;
@@ -32,6 +33,15 @@ class UserRepository {
 	 */
 	UserDocument insert(UserDocument user) {
 		return documents.insert(user);
+	}
+
+	/** The user with exactly this username: the comparison respects upper case and lower case. */
+	Optional<UserDocument> findByUsername(String username) {
+		return documents.findOne(UserDocument.class, where(UserDocument.USERNAME).is(username));
+	}
+
+	Optional<UserDocument> findById(String id) {
+		return documents.findOne(UserDocument.class, where(UserDocument.ID).is(id));
 	}
 
 	boolean existsWithRole(String role) {
