@@ -58,7 +58,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
                 <Radio
                   checked={state.referenceType === 'global'}
                   onChange={() => state.setReferenceType('global')}
-                  label={<span className='bodyLegacyRadioIcon'><Icon name='globe' size={14} /></span>}
+                  label={<span className='bodyLegacyRadioIcon'><Icon name='globe' size={12} /></span>}
                 />
               </span>
             </Tooltip>
@@ -128,7 +128,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
       ) : state.referenceType === 'global' ? (
         <>
           <GlobalVariableSelect value={state.globalName} onChange={state.setGlobalName}
-            popupZIndex={popupZIndex} className='bodyLegacyWebhookSelect' testId='workflow-reference-global-select' />
+            popupZIndex={popupZIndex} className='bodyLegacyWebhookSelect' size='large' testId='workflow-reference-global-select' />
           <Tooltip content={t('references.addReference')} zIndex={tooltipZIndex}>
             <Button
               type='text'

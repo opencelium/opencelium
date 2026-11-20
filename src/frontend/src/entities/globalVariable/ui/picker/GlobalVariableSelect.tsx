@@ -6,12 +6,13 @@ import { SECRET_MASK } from '../../model/display'
 import { GlobalVariableKindBadge } from '../GlobalVariableKindBadge'
 import { useGlobalVariablePicker } from './globalPicker'
 
-const KIND_ORDER: GlobalVariableKind[] = ['CONSTANT', 'MUTABLE', 'SCRIPT']
+// Scripts are left out until the field call editor exists: a script can't be referenced like a
+// value, it must be called with its parameters.
+const KIND_ORDER = ['CONSTANT', 'MUTABLE'] as const satisfies readonly GlobalVariableKind[]
 
-const previewOf = (item: PickerItem) => {
-    if (item.kind === 'SCRIPT') return `${item.language}(${item.parameters.map((parameter) => parameter.name).join(', ')})`
-    return item.secret ? SECRET_MASK : item.valuePreview ?? ''
-}
+type ValueItem = Extract<PickerItem, { kind: (typeof KIND_ORDER)[number] }>
+
+const previewOf = (item: ValueItem) => (item.secret ? SECRET_MASK : item.valuePreview ?? '')
 
 type Props = {
     value?: string
@@ -20,29 +21,27 @@ type Props = {
     disabled?: boolean
     className?: string
     testId?: string
+    size?: 'middle' | 'large'
     /** Narrows the offered variables, e.g. to the mutable ones a Set step may write. */
     filter?: (item: PickerItem) => boolean
 }
 
-// Scripts are listed but not pickable until the field call editor exists (phase 2): a script
-// can't be referenced like a value, it must be called with its parameters.
-export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, className, testId, filter }: Props) {
+export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, className, testId, size, filter }: Props) {
     const { t } = useI18n('entities')
     const { items, isLoading } = useGlobalVariablePicker()
 
     const options = useMemo(() => KIND_ORDER
         .map((kind) => ({
             label: t(`global-variable.kind.${kind}.label`),
-            options: items.filter((item) => item.kind === kind && (!filter || filter(item))).map((item) => ({
+            options: items.filter((item): item is ValueItem => item.kind === kind && (!filter || filter(item))).map((item) => ({
                 value: item.name,
                 searchText: `${item.name} ${item.description}`,
-                disabled: item.kind === 'SCRIPT',
                 label: (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 0 }} title={item.description}>
                         <GlobalVariableKindBadge kind={item.kind} isIconOnly />
                         <code>{item.name}</code>
                         <span style={{ opacity: 0.65, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {item.kind === 'SCRIPT' ? t('global-variable.picker.scriptLater') : previewOf(item)}
+                            {previewOf(item)}
                         </span>
                     </span>
                 ),
@@ -62,6 +61,7 @@ export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, c
             placeholder={t('global-variable.picker.placeholder')}
             notFoundContent={isLoading ? null : t('global-variable.picker.empty')}
             className={className}
+            size={size}
             style={{ minWidth: 220 }}
             popupMatchSelectWidth={false}
             getPopupContainer={() => document.body}

@@ -7,7 +7,8 @@ import {FaRegFileCode} from "react-icons/fa";
 import {ImInsertTemplate} from "react-icons/im";
 import {BiCategory} from "react-icons/bi";
 import {LuFileQuestion, LuFileCog} from "react-icons/lu";
-import {TbLicense, TbVariable} from "react-icons/tb";
+import {TbLicense} from "react-icons/tb";
+import {GlobalVariableGlyph} from "@shared/ui/primitives/Icon/custom/GlobalVariableGlyph";
 import {BsLayoutTextWindowReverse} from "react-icons/bs";
 import {useMemo, type ReactNode} from "react";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
@@ -96,7 +97,10 @@ export const useAdminMenu = (): any[] => {
                 leaf('/invoker', <FaRegFileCode/>, t('menu.invokers')),
                 leaf('/workflow-template', <ImInsertTemplate/>, t('menu.connectionTemplates')),
                 leaf('/data-aggregator', <GrAggregate/>, t('menu.dataAggregator')),
-                leaf('/global-variable', <TbVariable/>, t('menu.globalVariables')),
+                {
+                    ...leaf('/global-variable', <GlobalVariableGlyph/>, t('menu.globalVariables')),
+                    label: link('/global-variable', <NewFeature id='global-variables' variant='pill' placement='right'>{t('menu.globalVariables')}</NewFeature>),
+                },
                 leaf('/notification-template', <MdNotificationAdd/>, t('menu.notificationTemplates')),
                 leaf('/category', <BiCategory/>, t('menu.categories')),
                 leaf('/support-file', <LuFileQuestion/>, t('menu.supportFiles')),

@@ -12,6 +12,7 @@ import { connectionHandlers } from '@/mock/connection/handler.ts'
 import { subscriptionHandlers } from '@/mock/subscription/handler.ts'
 import { systemConfigHandlers } from '@/mock/systemConfig/handler.ts'
 import { globalVariableHandlers } from '@/mock/globalVariable/handler.ts'
+import { workflowEditorHandlers } from '@/mock/workflowEditor/handler.ts'
 
 export const worker = setupWorker(
     ...authHandlers,
@@ -27,4 +28,5 @@ export const worker = setupWorker(
     ...subscriptionHandlers,
     ...systemConfigHandlers,
     ...globalVariableHandlers,
+    ...workflowEditorHandlers,
 )
