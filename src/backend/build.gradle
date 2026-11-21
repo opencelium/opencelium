@@ -15,10 +15,10 @@
  */
 
 plugins {
-	id 'org.springframework.boot' version '3.0.0'
-	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'org.springframework.boot' version '3.5.16'
+	id 'io.spring.dependency-management' version '1.1.7'
 	id 'java'
-	id 'com.google.protobuf' version '0.9.4'
+	id 'com.google.protobuf' version '0.10.1'
 }
 
 group = 'com.becon'
@@ -39,27 +39,27 @@ repositories {
 
 ext {
 	// gRPC / Protobuf
-	grpcVersion      = '1.66.0'
-	protobufVersion  = '3.25.1'
+	grpcVersion      = '1.85.1'
+	protobufVersion  = '3.25.9'
 
 	// Test infrastructure
-	testcontainersVersion = '1.19.8'
-	awaitilityVersion     = '4.2.1'
+	testcontainersVersion = '1.21.4'
+	awaitilityVersion     = '4.3.0'
 
 	// Application dependencies with explicit versions
-	mariadbVersion     = '3.1.2'
-	nashornVersion     = '15.4'
-	nimbusJwtVersion   = '9.30.2'
-	jgitVersion        = '6.5.0.202303070854-r'
-	springdocVersion   = '2.1.0'
-	httpclient5Version = '5.2.1'
+	mariadbVersion     = '3.5.11'
+	nashornVersion     = '15.7'
+	nimbusJwtVersion   = '9.48'
+	jgitVersion        = '6.10.1.202505221210-r'
+	springdocVersion   = '2.10.0'
+	httpclient5Version = '5.6.5'
 	jsonPatchVersion   = '1.13'
 	javaxJsonVersion   = '1.1.4'
-	jsoupVersion       = '1.13.1'
-	zxingVersion       = '3.4.1'
-	googleAuthVersion  = '1.4.0'
-	jacksonJsr310Ver   = '2.14.1'
-	mapstructVersion   = '1.5.5.Final'
+	jsoupVersion       = '1.24.1'
+	zxingVersion       = '3.5.4'
+	googleAuthVersion  = '1.5.0'
+	jacksonJsr310Ver   = '2.23.0'
+	mapstructVersion   = '1.6.3'
 	tomcatAnnotVer     = '6.0.53'
 	mockitoInlineVer   = '5.2.0'
 }
@@ -116,7 +116,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
-	implementation "org.springframework.boot:spring-boot-starter-validation:3.0.4"
+	implementation "org.springframework.boot:spring-boot-starter-validation:3.5.16"
 	implementation 'org.springframework.session:spring-session-core'
 	implementation 'org.springframework.security:spring-security-ldap'
 
@@ -149,7 +149,7 @@ dependencies {
 
 	// Comment-aware YAML parser used by the application-config endpoints to
 	// round-trip application.yml without losing comments.
-	implementation 'org.snakeyaml:snakeyaml-engine:2.7'
+	implementation 'org.snakeyaml:snakeyaml-engine:2.10'
 
 	// ── Scripting & tooling ───────────────────────────────────────────────────
 	implementation "org.openjdk.nashorn:nashorn-core:${nashornVersion}"
