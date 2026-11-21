@@ -43,7 +43,7 @@
     "i18next": "^25.8.0",
     "lucide-react": "^1.7.0",
     "react": "19.2.0",
-    "react-ace": "^14.0.1",
+    "react-ace": "^14.1.0",
     "react-dom": "19.2.0",
     "react-hook-form": "^7.71.1",
     "react-i18next": "^16.5.3",
