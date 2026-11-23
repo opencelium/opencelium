@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.error.GlobalVariableErrorResource;
+import com.becon.opencelium.backend.resource.globalvariable.GlobalScriptTestDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableImpactDTO;
@@ -257,6 +258,19 @@ public class GlobalVariableController {
     @PostMapping("/{id}/reset")
     public ResponseEntity<GlobalVariableDTO> reset(@PathVariable("id") long id) {
         return ResponseEntity.ok(globalVariableService.reset(id));
+    }
+
+    @Operation(summary = "Checks a script as saving does and calls it once with test arguments, without saving")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The result of the call, or why the script is not valid.",
+                    content = @Content(schema = @Schema(implementation = GlobalScriptTestDTO.class))),
+            @ApiResponse(responseCode = "403", description = "The caller may neither create nor edit variables.",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PreAuthorize("@globalVariableSecurity.can('CREATE') or @globalVariableSecurity.can('UPDATE')")
+    @PostMapping(value = "/validate-script", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GlobalScriptTestDTO> validateScript(@RequestBody GlobalScriptTestDTO.Request request) {
+        return ResponseEntity.ok(globalVariableService.testScript(request));
     }
 
     @Operation(summary = "Lists where a global variable is used")
