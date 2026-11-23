@@ -2,7 +2,9 @@ package com.becon.opencelium.backend.validation.connection;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
+import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.SourceType;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
+import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableUsageRepository;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableScopeResolver;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
@@ -28,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -49,12 +52,15 @@ public class GlobalReferenceValidator {
     private final GlobalVariableRepository globalVariableRepository;
     private final GlobalVariableSecurity security;
     private final GlobalVariableScopeResolver scopeResolver;
+    private final GlobalVariableUsageRepository usageRepository;
 
     public GlobalReferenceValidator(GlobalVariableRepository globalVariableRepository,
-            GlobalVariableSecurity security, GlobalVariableScopeResolver scopeResolver) {
+            GlobalVariableSecurity security, GlobalVariableScopeResolver scopeResolver,
+            GlobalVariableUsageRepository usageRepository) {
         this.globalVariableRepository = globalVariableRepository;
         this.security = security;
         this.scopeResolver = scopeResolver;
+        this.usageRepository = usageRepository;
     }
 
     /**
@@ -66,12 +72,19 @@ public class GlobalReferenceValidator {
      *                   {@code #12}, or {@code null} to name the notification alone
      * @param workflowId id of the workflow its schedule runs
      * @param categoryId category of that workflow, or {@code null} for none
+     * @param id         id of the notification, or {@code null} if it is saved for the first time
      */
-    public record NotificationTarget(String name, String schedule, long workflowId, Integer categoryId) {
+    public record NotificationTarget(String name, String schedule, long workflowId, Integer categoryId,
+            Long id) {
 
-        /** A notification that the message names without its schedule. */
+        /** A notification that is not saved yet. */
+        public NotificationTarget(String name, String schedule, long workflowId, Integer categoryId) {
+            this(name, schedule, workflowId, categoryId, null);
+        }
+
+        /** A notification that the message names without its schedule, and that is not saved yet. */
         public NotificationTarget(String name, long workflowId, Integer categoryId) {
-            this(name, null, workflowId, categoryId);
+            this(name, null, workflowId, categoryId, null);
         }
 
         private String describe() {
@@ -89,8 +102,13 @@ public class GlobalReferenceValidator {
      * Validates the references of {@code connectionMng}. A workflow without global variable
      * references is accepted without reading anything.
      *
+     * <p>A user who may not use a variable keeps the references the stored workflow already has
+     * to it, as its usages record them, but cannot add the variable to a workflow that does not
+     * use it yet. Scope and the write rules hold for every reference.
+     *
      * @param connectionMng the workflow as it will be saved
-     * @param connectionId  id of the workflow, or {@code null} if it is saved for the first time
+     * @param connectionId  id of the workflow, or {@code null} if it is saved for the first time;
+     *                      for a test copy, the workflow it was made from
      * @param categoryId    category the workflow will be in, or {@code null} for none
      * @throws GlobalReferenceValidationException if a reference cannot be used in this workflow
      */
@@ -103,8 +121,12 @@ public class GlobalReferenceValidator {
 
         long workflowId = connectionId == null ? NOT_SAVED_YET : connectionId;
         Set<Long> categoryIds = scopeResolver.categoryChainOf(categoryId);
+        // a workflow saved for the first time has no references to keep
+        Supplier<Set<Long>> keptVariableIds = connectionId == null
+                ? Set::of
+                : () -> usageRepository.findVariableIdsBySources(SourceType.WORKFLOW, List.of(connectionId));
 
-        validate(references, (variable, reference) -> {
+        validate(references, keptVariableIds, (variable, reference) -> {
             if (!variable.isInScopeOf(workflowId, categoryIds)) {
                 return Optional.of(violation(Code.OUT_OF_SCOPE, reference,
                         "This workflow is outside the scope of global variable '%s'".formatted(reference.variable())));
@@ -182,28 +204,41 @@ public class GlobalReferenceValidator {
      * Validates the references in the request data of a connector. A connector is shared by the
      * workflows of every category, so it may only use variables that are open to all workflows.
      *
+     * <p>A user who may not use a variable keeps the references the stored connector already has
+     * to it, as its usages record them, but cannot add new ones.
+     *
+     * @param connectorId id of the connector, or {@code null} if it is saved for the first time
      * @param requestData the values of the request data by the name of their field, as the user
      *                    wrote them
      * @throws GlobalReferenceValidationException if a reference cannot be used in a connector
      */
     @Transactional(readOnly = true)
-    public void validateConnector(Map<String, String> requestData) {
+    public void validateConnector(Long connectorId, Map<String, String> requestData) {
         List<Found> references = GlobalReferenceCollector.collectFromTexts(requestData);
         if (references.isEmpty()) {
             return;
         }
 
-        validate(references, (variable, reference) -> variable.getScopeType() == GlobalVariableScopeType.ALL
-                ? Optional.empty()
-                : Optional.of(violation(Code.SCOPE_NOT_ALL, reference,
-                        "A connector may only use global variables that are open to all workflows, and '%s' is not"
-                                .formatted(reference.variable()))));
+        // a connector saved for the first time has no references to keep
+        Supplier<Set<Long>> keptVariableIds = connectorId == null
+                ? Set::of
+                : () -> usageRepository.findVariableIdsBySources(SourceType.CONNECTOR, List.of(connectorId));
+
+        validate(references, keptVariableIds, (variable, reference) ->
+                variable.getScopeType() == GlobalVariableScopeType.ALL
+                        ? Optional.empty()
+                        : Optional.of(violation(Code.SCOPE_NOT_ALL, reference,
+                                "A connector may only use global variables that are open to all workflows, "
+                                        + "and '%s' is not".formatted(reference.variable()))));
     }
 
     /**
      * Validates the references in the texts of a notification template. A notification belongs
      * to a schedule of one workflow, so every notification that sends these texts must have its
      * workflow in the scope of each variable.
+     *
+     * <p>A user who may not use a variable keeps the references the saved notifications already
+     * send, as their usages record them. A template that no saved notification sends keeps none.
      *
      * @param texts         the texts of the template by name, e.g. {@code en.body}
      * @param notifications the notifications that send these texts; none if the template is not
@@ -224,8 +259,17 @@ public class GlobalReferenceValidator {
                 .map(target -> new Reach(target,
                         chains.computeIfAbsent(target.categoryId(), scopeResolver::categoryChainOf)))
                 .toList();
+        List<Long> savedNotificationIds = notifications.stream()
+                .map(NotificationTarget::id)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        Supplier<Set<Long>> keptVariableIds = savedNotificationIds.isEmpty()
+                ? Set::of
+                : () -> usageRepository.findVariableIdsBySources(
+                        SourceType.NOTIFICATION, savedNotificationIds);
 
-        validate(references, (variable, reference) -> {
+        validate(references, keptVariableIds, (variable, reference) -> {
             List<String> leftOut = reaches.stream()
                     .filter(reach -> !variable.isInScopeOf(reach.target().workflowId(), reach.categoryIds()))
                     .map(reach -> reach.target().describe())
@@ -245,9 +289,13 @@ public class GlobalReferenceValidator {
 
     /**
      * Checks each reference in turn: the variable exists, {@code scopeRule} lets it be used
-     * where the reference stands, and the saving user may use it.
+     * where the reference stands, and the saving user may use it or the source already uses it.
+     *
+     * @param keptVariableIds the variables the stored source uses, which a user keeps without
+     *                        permission; read only when a reference lacks permission, and once
      */
-    private void validate(List<Found> references, ScopeRule scopeRule) {
+    private void validate(List<Found> references, Supplier<Set<Long>> keptVariableIds,
+            ScopeRule scopeRule) {
         Set<String> names = references.stream().map(Found::variable).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         Map<String, GlobalVariable> variables = globalVariableRepository.findByNameIn(names).stream()
@@ -257,6 +305,7 @@ public class GlobalReferenceValidator {
         Optional<Caller> caller = security.caller();
 
         List<Violation> violations = new ArrayList<>();
+        Set<Long> kept = null;
         for (Found reference : references) {
             // a write replaces the whole value, so its target is global.name, without a path
             if (reference.write() && reference.variable() == null) {
@@ -284,7 +333,15 @@ public class GlobalReferenceValidator {
             Optional<Violation> outOfReach = scopeRule.check(variable, reference);
             if (outOfReach.isPresent()) {
                 violations.add(outOfReach.get());
-            } else if (caller.isPresent() && !mayUse(variable, caller.get())) {
+                continue;
+            }
+            if (caller.isEmpty() || mayUse(variable, caller.get())) {
+                continue;
+            }
+            if (kept == null) {
+                kept = keptVariableIds.get();
+            }
+            if (!kept.contains(variable.getId())) {
                 violations.add(violation(Code.NO_USE_PERMISSION, reference,
                         "You have no permission to use global variable '%s'".formatted(reference.variable())));
             }

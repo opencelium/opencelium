@@ -67,12 +67,13 @@ public interface GlobalVariableUsageService {
      * Checks the global variable references in the request data of a connector that is about to
      * be saved: the variable exists, it is open to all workflows and the saving user may use it.
      *
+     * @param connectorId id of the connector, or 0 if it is saved for the first time
      * @param requestData the values by the name of their field, as the user wrote them, that is
      *                    before they are encrypted
      * @throws com.becon.opencelium.backend.exception.GlobalReferenceValidationException if a
      *         reference cannot be used in a connector
      */
-    void checkConnector(Map<String, String> requestData);
+    void checkConnector(int connectorId, Map<String, String> requestData);
 
     /**
      * Replaces the usages of a connector with the references its request data holds now.

@@ -3,10 +3,14 @@ package com.becon.opencelium.backend.unit.validation.connection;
 import static org.mockito.Mockito.lenient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -22,8 +26,12 @@ import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.StatementMng;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
+import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableGrant;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableScopeTarget;
+import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.SourceType;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
+import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableUsageRepository;
+import com.becon.opencelium.backend.database.mysql.repository.RoleHasPermissionRepository;
 import com.becon.opencelium.backend.database.mysql.service.GlobalVariableScopeResolver;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
@@ -69,6 +77,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class GlobalReferenceValidatorTest {
 
     private static final long WORKFLOW = 11L;
+    private static final long CONNECTOR = 4L;
     private static final Caller CALLER = new Caller(7, false);
     private static final Map<String, String> REQUEST_DATA = Map.of("url", "{{global.idoitUrl}}/api");
     private static final Map<String, String> TEMPLATE_TEXTS =
@@ -82,6 +91,9 @@ class GlobalReferenceValidatorTest {
 
     @Mock
     GlobalVariableScopeResolver scopeResolver;
+
+    @Mock
+    GlobalVariableUsageRepository usageRepository;
 
     @InjectMocks
     GlobalReferenceValidator validator;
@@ -186,6 +198,155 @@ class GlobalReferenceValidatorTest {
         verify(security, never()).permissionsOn(any(), any());
     }
 
+    // ── references the workflow already had ───────────────────────────────────
+
+    @Test
+    @DisplayName("validate — a user without Use keeps a variable the stored workflow already uses")
+    void validateAcceptsReferenceWhenCallerLacksUseButWorkflowAlreadyUsesVariable() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(security.caller()).thenReturn(Optional.of(CALLER));
+        when(security.permissionsOn(variable, CALLER)).thenReturn(EnumSet.noneOf(GlobalVariablePermission.class));
+        when(usageRepository.findVariableIdsBySources(SourceType.WORKFLOW, List.of(WORKFLOW))).thenReturn(Set.of(5L));
+
+        assertThatCode(() -> validator.validate(aWorkflowUsingIdoitUrl(), WORKFLOW, null)).doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("validate — a variable the stored workflow does not use yet is a new reference and needs Use")
+    void validateReportsNoUsePermissionWhenCallerAddsVariableWorkflowDidNotUse() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(security.caller()).thenReturn(Optional.of(CALLER));
+        when(security.permissionsOn(variable, CALLER)).thenReturn(EnumSet.noneOf(GlobalVariablePermission.class));
+        when(usageRepository.findVariableIdsBySources(SourceType.WORKFLOW, List.of(WORKFLOW))).thenReturn(Set.of(6L));
+
+        List<Violation> violations = violationsOf(aWorkflowUsingIdoitUrl(), WORKFLOW, null);
+
+        assertThat(violations).extracting(Violation::code).containsExactly(Code.NO_USE_PERMISSION);
+    }
+
+    @Test
+    @DisplayName("validate — a workflow saved for the first time keeps nothing, so no usage is read")
+    void validateReportsNoUsePermissionWhenNewWorkflowUsesVariableCallerMayNotUse() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(security.caller()).thenReturn(Optional.of(CALLER));
+        when(security.permissionsOn(variable, CALLER)).thenReturn(EnumSet.noneOf(GlobalVariablePermission.class));
+
+        List<Violation> violations = violationsOf(aWorkflowUsingIdoitUrl(), null, null);
+
+        assertThat(violations).extracting(Violation::code).containsExactly(Code.NO_USE_PERMISSION);
+        verifyNoInteractions(usageRepository);
+    }
+
+    @Test
+    @DisplayName("validate — keeping a reference does not lift the scope: a kept variable that left the scope is refused")
+    void validateReportsOutOfScopeWhenKeptVariableNoLongerCoversWorkflow() {
+        GlobalVariable variable = aVariableScopedTo(GlobalVariableScopeType.CATEGORIES, GlobalVariableScopeTarget.category(9));
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(scopeResolver.categoryChainOf(3)).thenReturn(Set.of(3L));
+        when(security.caller()).thenReturn(Optional.of(CALLER));
+
+        List<Violation> violations = violationsOf(aWorkflowUsingIdoitUrl(), WORKFLOW, 3);
+
+        assertThat(violations).extracting(Violation::code).containsExactly(Code.OUT_OF_SCOPE);
+        verifyNoInteractions(usageRepository);
+    }
+
+    @Test
+    @DisplayName("validate — the stored usages are read only when the caller may not use a referenced variable")
+    void validateReadsNoUsagesWhenCallerMayUseEveryVariable() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(security.caller()).thenReturn(Optional.of(CALLER));
+        when(security.permissionsOn(variable, CALLER)).thenReturn(EnumSet.of(GlobalVariablePermission.VIEW_USE));
+
+        validator.validate(aWorkflowUsingIdoitUrl(), WORKFLOW, null);
+
+        verifyNoInteractions(usageRepository);
+    }
+
+    @Test
+    @DisplayName("validate — the stored usages are read once, however many references lack permission")
+    void validateReadsUsagesOnceWhenSeveralReferencesLackPermission() {
+        MethodMng method = ConnectionMngFixture.aMethod("#ababab", "0_1", "listObjects", "{{global.idoitUrl}}/api");
+        method.getRequest().setHeader(Map.of("X-Tenant", "{{global.tenant}}"));
+        GlobalVariable idoitUrl = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        GlobalVariable tenant = GlobalVariableFixture.aConstant(6L, "tenant", "1");
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl", "tenant"))).thenReturn(List.of(idoitUrl, tenant));
+        when(security.caller()).thenReturn(Optional.of(CALLER));
+        when(security.permissionsOn(any(), any())).thenReturn(EnumSet.noneOf(GlobalVariablePermission.class));
+        when(usageRepository.findVariableIdsBySources(SourceType.WORKFLOW, List.of(WORKFLOW))).thenReturn(Set.of(5L));
+
+        List<Violation> violations = violationsOf(ConnectionMngFixture.aWorkflowWith(method), WORKFLOW, null);
+
+        assertThat(violations).extracting(Violation::code, Violation::variable)
+                .containsExactly(tuple(Code.NO_USE_PERMISSION, "tenant"));
+        verify(usageRepository, times(1)).findVariableIdsBySources(SourceType.WORKFLOW, List.of(WORKFLOW));
+    }
+
+    @Test
+    @DisplayName("validateConnector — a user without Use keeps a variable the stored connector already uses")
+    void validateConnectorAcceptsReferenceWhenCallerLacksUseButConnectorAlreadyUsesVariable() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(security.caller()).thenReturn(Optional.of(CALLER));
+        when(security.permissionsOn(variable, CALLER)).thenReturn(EnumSet.noneOf(GlobalVariablePermission.class));
+        when(usageRepository.findVariableIdsBySources(SourceType.CONNECTOR, List.of(CONNECTOR))).thenReturn(Set.of(5L));
+
+        assertThatCode(() -> validator.validateConnector(CONNECTOR, REQUEST_DATA)).doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("validateConnector — a connector saved for the first time keeps nothing, so no usage is read")
+    void validateConnectorReportsNoUsePermissionWhenNewConnectorUsesVariableCallerMayNotUse() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(security.caller()).thenReturn(Optional.of(CALLER));
+        when(security.permissionsOn(variable, CALLER)).thenReturn(EnumSet.noneOf(GlobalVariablePermission.class));
+
+        GlobalReferenceValidationException rejection =
+                rejectionOf(() -> validator.validateConnector(null, REQUEST_DATA));
+
+        assertThat(rejection.getViolations()).extracting(Violation::code).containsExactly(Code.NO_USE_PERMISSION);
+        verifyNoInteractions(usageRepository);
+    }
+
+    @Test
+    @DisplayName("validateNotifications — a user without Use keeps a variable the saved notifications already send")
+    void validateNotificationsAcceptsReferenceWhenCallerLacksUseButNotificationsAlreadyUseVariable() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(scopeResolver.categoryChainOf(3)).thenReturn(Set.of(3L));
+        when(security.caller()).thenReturn(Optional.of(CALLER));
+        when(security.permissionsOn(variable, CALLER)).thenReturn(EnumSet.noneOf(GlobalVariablePermission.class));
+        when(usageRepository.findVariableIdsBySources(SourceType.NOTIFICATION, List.of(21L, 22L)))
+                .thenReturn(Set.of(5L));
+        List<NotificationTarget> notifications = List.of(
+                new NotificationTarget("Failure mail", null, WORKFLOW, 3, 21L),
+                new NotificationTarget("New mail", null, WORKFLOW, 3, null),
+                new NotificationTarget("Daily mail", null, WORKFLOW, 3, 22L));
+
+        assertThatCode(() -> validator.validateNotifications(TEMPLATE_TEXTS, notifications))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("validateNotifications — a template no saved notification sends keeps nothing, so no usage is read")
+    void validateNotificationsReportsNoUsePermissionWhenNoSavedNotificationSendsTemplate() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(security.caller()).thenReturn(Optional.of(CALLER));
+        when(security.permissionsOn(variable, CALLER)).thenReturn(EnumSet.noneOf(GlobalVariablePermission.class));
+
+        GlobalReferenceValidationException rejection =
+                rejectionOf(() -> validator.validateNotifications(TEMPLATE_TEXTS, List.of()));
+
+        assertThat(rejection.getViolations()).extracting(Violation::code).containsExactly(Code.NO_USE_PERMISSION);
+        verifyNoInteractions(usageRepository);
+    }
+
     @Test
     @DisplayName("validate — every bad reference is reported in one answer, each with its own place")
     void validateReportsEveryViolationWhenSeveralReferencesAreInvalid() {
@@ -222,7 +383,7 @@ class GlobalReferenceValidatorTest {
         when(security.caller()).thenReturn(Optional.of(CALLER));
         when(security.permissionsOn(variable, CALLER)).thenReturn(EnumSet.of(GlobalVariablePermission.VIEW_USE));
 
-        assertThatCode(() -> validator.validateConnector(REQUEST_DATA)).doesNotThrowAnyException();
+        assertThatCode(() -> validator.validateConnector(CONNECTOR, REQUEST_DATA)).doesNotThrowAnyException();
     }
 
     @ParameterizedTest
@@ -233,7 +394,7 @@ class GlobalReferenceValidatorTest {
         variable.setScopeType(scopeType);
         when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
 
-        GlobalReferenceValidationException rejection = rejectionOf(() -> validator.validateConnector(REQUEST_DATA));
+        GlobalReferenceValidationException rejection = rejectionOf(() -> validator.validateConnector(CONNECTOR, REQUEST_DATA));
 
         assertThat(rejection).hasMessageContaining("open to all workflows").hasMessageContaining("'idoitUrl'");
         assertThat(rejection.getViolations()).extracting(Violation::code).containsExactly(Code.SCOPE_NOT_ALL);
@@ -243,7 +404,7 @@ class GlobalReferenceValidatorTest {
     void validateConnectorThrowsUnknownVariableWhenVariableDoesNotExist() {
         when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of());
 
-        GlobalReferenceValidationException rejection = rejectionOf(() -> validator.validateConnector(REQUEST_DATA));
+        GlobalReferenceValidationException rejection = rejectionOf(() -> validator.validateConnector(CONNECTOR, REQUEST_DATA));
 
         assertThat(rejection).hasMessage("Global variable 'idoitUrl' does not exist");
         assertThat(rejection.getViolations()).extracting(Violation::code).containsExactly(Code.UNKNOWN_VARIABLE);
@@ -256,7 +417,7 @@ class GlobalReferenceValidatorTest {
         when(security.caller()).thenReturn(Optional.of(CALLER));
         when(security.permissionsOn(variable, CALLER)).thenReturn(EnumSet.noneOf(GlobalVariablePermission.class));
 
-        GlobalReferenceValidationException rejection = rejectionOf(() -> validator.validateConnector(REQUEST_DATA));
+        GlobalReferenceValidationException rejection = rejectionOf(() -> validator.validateConnector(CONNECTOR, REQUEST_DATA));
 
         assertThat(rejection).hasMessage("You have no permission to use global variable 'idoitUrl'");
         assertThat(rejection.getViolations()).extracting(Violation::code).containsExactly(Code.NO_USE_PERMISSION);
@@ -269,7 +430,7 @@ class GlobalReferenceValidatorTest {
                 aVariableScopedTo(GlobalVariableScopeType.CATEGORIES, GlobalVariableScopeTarget.category(3));
         when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
 
-        List<Violation> violations = rejectionOf(() -> validator.validateConnector(REQUEST_DATA)).getViolations();
+        List<Violation> violations = rejectionOf(() -> validator.validateConnector(CONNECTOR, REQUEST_DATA)).getViolations();
 
         assertThat(violations).containsExactly(new Violation(
                 Code.SCOPE_NOT_ALL,
@@ -280,7 +441,7 @@ class GlobalReferenceValidatorTest {
     @Test
     @DisplayName("validateConnector — request data without global references costs no read at all")
     void validateConnectorReadsNothingWhenRequestDataHoldsNoReference() {
-        validator.validateConnector(Map.of("url", "https://cmdb.example/api", "token", "{token}"));
+        validator.validateConnector(CONNECTOR, Map.of("url", "https://cmdb.example/api", "token", "{token}"));
 
         verifyNoInteractions(globalVariableRepository, security, scopeResolver);
     }
@@ -656,7 +817,7 @@ class GlobalReferenceValidatorTest {
         givenFormatDateScript();
 
         GlobalReferenceValidationException rejection =
-                rejectionOf(() -> validator.validateConnector(Map.of("since", "{{global.formatDate}}")));
+                rejectionOf(() -> validator.validateConnector(CONNECTOR, Map.of("since", "{{global.formatDate}}")));
 
         assertThat(rejection.getViolations()).extracting(Violation::code, Violation::field, Violation::color)
                 .containsExactly(tuple(Code.SCRIPT_NOT_CALLABLE, "since", null));
@@ -757,6 +918,89 @@ class GlobalReferenceValidatorTest {
         binding.getEnhancement().setArgs(args);
         binding.getEnhancement().setLanguage(language);
         return binding;
+    }
+
+    // ── scope × permission matrix ─────────────────────────────────────────────
+
+    /**
+     * Every scope against every kind of caller, for a workflow {@code WORKFLOW} in category 3,
+     * whose parent is category 1. The permissions come from the real {@link
+     * GlobalVariableSecurity}, the variable belongs to user 1 and the caller is user 7.
+     */
+    @ParameterizedTest(name = "[{index}] {0} × {1}")
+    @MethodSource("scopeAndCallerMatrix")
+    @DisplayName("validate — scope is checked first, then whether the caller may use the variable")
+    void validateDecidesByScopeThenPermissionWhenWorkflowIsSaved(ScopeCase scope, CallerCase caller) {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        variable.setScopeType(scope.type());
+        scope.target().ifPresent(variable.getScopeTargets()::add);
+        caller.grant().ifPresent(permission ->
+                variable.getGrants().add(new GlobalVariableGrant(caller.granteeId(), permission)));
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+        when(scopeResolver.categoryChainOf(3)).thenReturn(Set.of(3L, 1L));
+        GlobalVariableSecurity realSecurity = spy(new GlobalVariableSecurity(mock(RoleHasPermissionRepository.class)));
+        doReturn(caller.caller()).when(realSecurity).caller();
+        GlobalReferenceValidator matrixValidator =
+                new GlobalReferenceValidator(globalVariableRepository, realSecurity, scopeResolver, usageRepository);
+
+        Throwable thrown = catchThrowable(() -> matrixValidator.validate(aWorkflowUsingIdoitUrl(), WORKFLOW, 3));
+
+        if (!scope.covers()) {
+            assertThat(thrown).isInstanceOfSatisfying(GlobalReferenceValidationException.class, e ->
+                    assertThat(e.getViolations()).extracting(Violation::code).containsExactly(Code.OUT_OF_SCOPE));
+        } else if (!caller.mayUse()) {
+            assertThat(thrown).isInstanceOfSatisfying(GlobalReferenceValidationException.class, e ->
+                    assertThat(e.getViolations()).extracting(Violation::code).containsExactly(Code.NO_USE_PERMISSION));
+        } else {
+            assertThat(thrown).isNull();
+        }
+    }
+
+    static Stream<Arguments> scopeAndCallerMatrix() {
+        List<ScopeCase> scopes = List.of(
+                new ScopeCase("all workflows", GlobalVariableScopeType.ALL, Optional.empty(), true),
+                new ScopeCase("own category", GlobalVariableScopeType.CATEGORIES,
+                        Optional.of(GlobalVariableScopeTarget.category(3)), true),
+                new ScopeCase("parent category", GlobalVariableScopeType.CATEGORIES,
+                        Optional.of(GlobalVariableScopeTarget.category(1)), true),
+                new ScopeCase("other category", GlobalVariableScopeType.CATEGORIES,
+                        Optional.of(GlobalVariableScopeTarget.category(9)), false),
+                new ScopeCase("this workflow listed", GlobalVariableScopeType.WORKFLOWS,
+                        Optional.of(GlobalVariableScopeTarget.workflow(WORKFLOW)), true),
+                new ScopeCase("other workflow listed", GlobalVariableScopeType.WORKFLOWS,
+                        Optional.of(GlobalVariableScopeTarget.workflow(12)), false));
+        List<CallerCase> callers = List.of(
+                new CallerCase("owner", Optional.of(new Caller(1, false)), 1, Optional.empty(), true),
+                new CallerCase("admin", Optional.of(new Caller(7, true)), 7, Optional.empty(), true),
+                new CallerCase("Use grant", Optional.of(CALLER), 7, Optional.of(GlobalVariablePermission.VIEW_USE), true),
+                new CallerCase("Edit grant", Optional.of(CALLER), 7, Optional.of(GlobalVariablePermission.EDIT), true),
+                new CallerCase("Delete grant", Optional.of(CALLER), 7, Optional.of(GlobalVariablePermission.DELETE), true),
+                new CallerCase("grant of another user", Optional.of(CALLER), 99,
+                        Optional.of(GlobalVariablePermission.EDIT), false),
+                new CallerCase("no grant", Optional.of(CALLER), 7, Optional.empty(), false),
+                new CallerCase("system save", Optional.empty(), 7, Optional.empty(), true));
+
+        return scopes.stream().flatMap(scope -> callers.stream().map(caller -> Arguments.of(scope, caller)));
+    }
+
+    /** A scope of the variable, and whether it covers workflow {@code WORKFLOW} in category 3 under 1. */
+    record ScopeCase(String label, GlobalVariableScopeType type, Optional<GlobalVariableScopeTarget> target,
+            boolean covers) {
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+
+    /** Who saves, what user {@code granteeId} was granted, and whether the caller may use the variable. */
+    record CallerCase(String label, Optional<Caller> caller, int granteeId,
+            Optional<GlobalVariablePermission> grant, boolean mayUse) {
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 
     private static ConnectionMng aWorkflowUsingIdoitUrl() {

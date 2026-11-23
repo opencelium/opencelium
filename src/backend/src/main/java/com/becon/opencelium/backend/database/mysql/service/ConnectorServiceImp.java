@@ -128,7 +128,7 @@ public class ConnectorServiceImp implements ConnectorService {
     public Connector save(Connector connector) {
         // read before the values are encrypted: a reference cannot be found in a cipher text
         Map<String, String> writtenValues = writtenValuesOf(connector);
-        globalVariableUsageService.checkConnector(writtenValues);
+        globalVariableUsageService.checkConnector(connector.getId(), writtenValues);
 
         Connector saved = persist(connector);
         globalVariableUsageService.rebuildForConnector(saved.getId(), writtenValues);
@@ -405,7 +405,7 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public void updateRequestData(Integer connectorId, Map<String, String> newRequestDataMap) {
         // checked as written: the values are encrypted below
-        globalVariableUsageService.checkConnector(newRequestDataMap);
+        globalVariableUsageService.checkConnector(connectorId, newRequestDataMap);
 
         // Read the connector WITHOUT decrypting
         Connector connector = getByIdRaw(connectorId);
