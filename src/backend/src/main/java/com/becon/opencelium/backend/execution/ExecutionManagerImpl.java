@@ -301,7 +301,9 @@ public class ExecutionManagerImpl implements ExecutionManager {
                 throw new IllegalStateException("Script variable '%s' is JavaScript and cannot be imported into a '%s' enhancement"
                         .formatted(name, language.getCode()));
             }
-            functions.append(GlobalScript.fromJson(script.get().value().toString()).functionSource(arg.getKey(), name));
+            // parsed once, when the snapshot was taken, not at each call of the enhancement
+            GlobalScript definition = globalSnapshot.script(name).orElseThrow();
+            functions.append(definition.functionSource(arg.getKey(), name));
         }
 
         return new ImportedScripts(functions.toString(), valueArgs);

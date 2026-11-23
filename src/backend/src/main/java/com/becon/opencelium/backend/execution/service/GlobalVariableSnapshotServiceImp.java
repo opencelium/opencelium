@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.database.mysql.service.GlobalVariableScopeRe
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
 import com.becon.opencelium.backend.exception.WrongDecryptException;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
 import com.becon.opencelium.backend.utility.crypto.GlobalVariableCipher;
@@ -20,9 +21,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -32,6 +38,11 @@ import java.util.Set;
  * encrypted text, so nothing decrypted is ever written back. A secret that cannot be decrypted
  * still gets its entry, which fails where the run reads it, so a run that does not use it goes
  * on.
+ *
+ * <p>The definition of a script variable is parsed once per id and version and kept for the
+ * runs after: a saved change gives the script a new version, and a variable made again under an
+ * old name a new id, so a kept definition is never stale. The oldest unused ones are dropped
+ * beyond {@value #MAX_PARSED_SCRIPTS}.
  */
 @Service
 public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotService {
@@ -41,12 +52,34 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
 
     private static final Logger log = LoggerFactory.getLogger(GlobalVariableSnapshotServiceImp.class);
 
+    // how many parsed script definitions are kept; each holds the code of a script, at most
+    // opencelium.global-variable.max-script-bytes
+    static final int MAX_PARSED_SCRIPTS = 256;
+
     private final GlobalVariableRepository globalVariableRepository;
     private final ConnectionRepository connectionRepository;
     private final GlobalVariableScopeResolver scopeResolver;
     private final ObjectMapper objectMapper;
     private final GlobalVariableCipher cipher;
     private final TestRunOrigins testRunOrigins;
+    private final Map<ScriptVersion, ParsedScript> parsedScripts = Collections.synchronizedMap(
+            new LinkedHashMap<>(16, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<ScriptVersion, ParsedScript> eldest) {
+                    return size() > MAX_PARSED_SCRIPTS;
+                }
+            });
+
+    /** A version of a script variable. */
+    private record ScriptVersion(long id, long version) {
+    }
+
+    /**
+     * A script definition as a snapshot holds it: the JSON tree of its entry, treated as
+     * read-only by every run that shares it, and the definition parsed from it.
+     */
+    private record ParsedScript(JsonNode tree, GlobalScript definition) {
+    }
 
     public GlobalVariableSnapshotServiceImp(
             GlobalVariableRepository globalVariableRepository,
@@ -80,26 +113,61 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
         // scoped to chosen workflows lists that workflow, not the copy
         long scopeWorkflowId = testRunOrigins.scopeWorkflowOf(connectionId);
 
-        return GlobalVariableSnapshot.of(variables.stream()
+        return snapshotOf(variables.stream()
                 .filter(variable -> variable.isInScopeOf(scopeWorkflowId, categoryIds))
-                .map(this::toEntry)
                 .toList());
     }
 
     @Override
     @Transactional(readOnly = true)
     public GlobalVariableSnapshot takeOpenToAll() {
-        return GlobalVariableSnapshot.of(globalVariableRepository.findAllWithScopeTargets(ALL_KINDS).stream()
+        return snapshotOf(globalVariableRepository.findAllWithScopeTargets(ALL_KINDS).stream()
                 .filter(variable -> variable.getScopeType() == GlobalVariableScopeType.ALL)
-                .map(this::toEntry)
                 .toList());
     }
 
     @Override
     public GlobalVariableSnapshot takeOf(Collection<GlobalVariable> variables) {
-        return GlobalVariableSnapshot.of(variables.stream()
-                .map(this::toEntry)
-                .toList());
+        return snapshotOf(variables);
+    }
+
+    /** Takes the given variables, each script with its parsed definition. */
+    private GlobalVariableSnapshot snapshotOf(Collection<GlobalVariable> variables) {
+        List<GlobalVariableSnapshot.Entry> entries = new ArrayList<>(variables.size());
+        Map<String, GlobalScript> scripts = new HashMap<>();
+        for (GlobalVariable variable : variables) {
+            // a script is never a secret, so a secret is taken as one whatever its kind says
+            if (variable.getKind() == GlobalVariableKind.SCRIPT && !variable.isSecret()) {
+                ParsedScript parsed = parsedScript(variable);
+                entries.add(GlobalVariableSnapshot.Entry.ofScript(variable.getName(), variable.getVersion(),
+                        parsed.tree(), variable.getScopeType() == GlobalVariableScopeType.ALL));
+                scripts.put(variable.getName(), parsed.definition());
+            } else {
+                entries.add(toEntry(variable));
+            }
+        }
+
+        return GlobalVariableSnapshot.of(entries, scripts);
+    }
+
+    /**
+     * Returns the parsed definition of a script variable, parsing it only if this version of it
+     * was not parsed before.
+     *
+     * @throws IllegalStateException if the stored definition is not valid
+     */
+    private ParsedScript parsedScript(GlobalVariable variable) {
+        if (variable.getId() == null) {
+            // a variable that is not saved has no version to keep its definition under
+            return parseScript(variable);
+        }
+
+        return parsedScripts.computeIfAbsent(new ScriptVersion(variable.getId(), variable.getVersion()),
+                key -> parseScript(variable));
+    }
+
+    private ParsedScript parseScript(GlobalVariable variable) {
+        return new ParsedScript(parse(variable), GlobalScript.fromJson(variable.getValue()));
     }
 
     private GlobalVariableSnapshot.Entry toEntry(GlobalVariable variable) {
@@ -111,11 +179,6 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
             return GlobalVariableSnapshot.Entry.ofMutable(
                     variable.getName(), variable.getVersion(), parse(variable), openToAll);
         }
-        if (variable.getKind() == GlobalVariableKind.SCRIPT) {
-            return GlobalVariableSnapshot.Entry.ofScript(
-                    variable.getName(), variable.getVersion(), parse(variable), openToAll);
-        }
-
         return new GlobalVariableSnapshot.Entry(variable.getName(), variable.getVersion(), parse(variable), openToAll);
     }
 

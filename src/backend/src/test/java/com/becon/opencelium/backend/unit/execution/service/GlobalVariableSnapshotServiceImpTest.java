@@ -297,6 +297,62 @@ class GlobalVariableSnapshotServiceImpTest {
     }
 
     @Test
+    @DisplayName("takeOf — a script is parsed once per id and version, and every later run gets that definition")
+    void takeOfReusesDefinitionWhenSameVersionIsTakenAgain() {
+        GlobalVariable first = aScript(3L, "nextId", 4L, "return 1;");
+        GlobalVariable again = aScript(3L, "nextId", 4L, "return 1;");
+
+        GlobalScript parsed = service.takeOf(List.of(first)).script("nextId").orElseThrow();
+
+        assertThat(service.takeOf(List.of(again)).script("nextId")).containsSame(parsed);
+    }
+
+    @Test
+    @DisplayName("takeOf — a saved change gives the script a new version, which is parsed anew")
+    void takeOfParsesDefinitionAgainWhenVersionChanges() {
+        service.takeOf(List.of(aScript(3L, "nextId", 4L, "return 1;")));
+
+        GlobalVariableSnapshot snapshot = service.takeOf(List.of(aScript(3L, "nextId", 5L, "return 2;")));
+
+        assertThat(snapshot.script("nextId")).get().extracting(GlobalScript::code).isEqualTo("return 2;");
+        assertThat(snapshot.find("nextId")).get()
+                .extracting(entry -> GlobalScript.fromJson(entry.value().toString()).code())
+                .isEqualTo("return 2;");
+    }
+
+    @Test
+    @DisplayName("takeOf — a script made again under an old name and version is another variable")
+    void takeOfParsesDefinitionAgainWhenVariableIsMadeAgain() {
+        service.takeOf(List.of(aScript(3L, "nextId", 0L, "return 1;")));
+
+        GlobalVariableSnapshot snapshot = service.takeOf(List.of(aScript(9L, "nextId", 0L, "return 2;")));
+
+        assertThat(snapshot.script("nextId")).get().extracting(GlobalScript::code).isEqualTo("return 2;");
+    }
+
+    @Test
+    @DisplayName("takeOf — beyond 256 parsed scripts the one unused longest is dropped")
+    void takeOfParsesDefinitionAgainWhenItWasDroppedFromCache() {
+        GlobalScript parsed = service.takeOf(List.of(aScript(1L, "script1", 1L, "return 1;")))
+                .script("script1").orElseThrow();
+        for (long id = 2; id <= 257; id++) {
+            service.takeOf(List.of(aScript(id, "script" + id, 1L, "return 1;")));
+        }
+
+        GlobalScript taken = service.takeOf(List.of(aScript(1L, "script1", 1L, "return 1;")))
+                .script("script1").orElseThrow();
+
+        assertThat(taken).isNotSameAs(parsed).isEqualTo(parsed);
+    }
+
+    @Test
+    void takeOfThrowsIllegalStateExceptionWhenScriptDefinitionIsNotValid() {
+        GlobalVariable broken = GlobalVariableFixture.aScriptVariable(3L, "nextId", "{\"code\": 1, \"parameters\": 2}");
+
+        assertThatThrownBy(() -> service.takeOf(List.of(broken))).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void takeForAsksForEveryKindWhenWorkflowRuns() {
         when(globalVariableRepository.findAllWithScopeTargets(any())).thenReturn(List.of());
 
@@ -505,6 +561,14 @@ class GlobalVariableSnapshotServiceImpTest {
         GlobalVariable variable = GlobalVariableFixture.aConstant(1L, name, "1");
         variable.setScopeType(scopeType);
         variable.getScopeTargets().addAll(List.of(targets));
+        return variable;
+    }
+
+    /** A saved script variable at the given version whose code is {@code code}, without parameters. */
+    private static GlobalVariable aScript(long id, String name, long version, String code) {
+        GlobalVariable variable =
+                GlobalVariableFixture.aScriptVariable(id, name, new GlobalScript("js", code, List.of()).toJson());
+        variable.setVersion(version);
         return variable;
     }
 }
