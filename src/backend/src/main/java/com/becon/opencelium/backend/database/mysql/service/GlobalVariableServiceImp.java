@@ -26,6 +26,7 @@ import com.becon.opencelium.backend.exception.GlobalVariableValidationException.
 import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.mapper.mysql.GlobalVariableMapper;
+import com.becon.opencelium.backend.resource.globalvariable.GlobalScriptTestDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableImpactDTO;
@@ -38,6 +39,10 @@ import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableRestor
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableUsageDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableValueDTO;
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
+import com.becon.opencelium.backend.scriptengine.LanguageType;
+import com.becon.opencelium.backend.scriptengine.engines.NashornEngine;
+import com.becon.opencelium.backend.scriptengine.ex.InvalidScriptException;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity.Caller;
 import com.becon.opencelium.backend.utility.crypto.GlobalVariableCipher;
@@ -59,6 +64,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -97,6 +103,12 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     private static final String READ_PERMISSION = "READ";
     // the JSON text of a value that is left out; a secret stores no text for it
     private static final String JSON_NULL = "null";
+    // languages script variables will support, which cannot be checked or run yet
+    private static final Set<String> UNTESTABLE_LANGUAGES = Set.of(LanguageType.PYTHON_2.getCode(),
+            LanguageType.PYTHON_3.getCode(), LanguageType.RUBY.getCode());
+    // globals of the test call; the script's own names live inside its function and cannot clash
+    private static final String TESTED_FUNCTION = "OC_TESTED";
+    private static final String TEST_ARGUMENTS = "OC_TEST_ARGUMENTS";
 
     private final GlobalVariableRepository repository;
     private final GlobalVariableChangeRepository changeRepository;
@@ -113,6 +125,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     private final WorkflowRunGate runGate;
     private final int maxValueBytes;
     private final int maxScriptBytes;
+    private final NashornEngine nashornEngine;
+    private final Duration scriptTimeLimit;
 
     public GlobalVariableServiceImp(
             GlobalVariableRepository repository,
@@ -129,7 +143,9 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             GlobalVariableCipher cipher,
             WorkflowRunGate runGate,
             @Value("${opencelium.global-variable.max-value-bytes:65536}") int maxValueBytes,
-            @Value("${opencelium.global-variable.max-script-bytes:262144}") int maxScriptBytes) {
+            @Value("${opencelium.global-variable.max-script-bytes:262144}") int maxScriptBytes,
+            NashornEngine nashornEngine,
+            @Value("${opencelium.global-variable.script-timeout-ms:5000}") long scriptTimeoutMs) {
         this.repository = repository;
         this.changeRepository = changeRepository;
         this.mapper = mapper;
@@ -145,6 +161,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         this.runGate = runGate;
         this.maxValueBytes = maxValueBytes;
         this.maxScriptBytes = maxScriptBytes;
+        this.nashornEngine = nashornEngine;
+        this.scriptTimeLimit = Duration.ofMillis(scriptTimeoutMs);
     }
 
     @Override
@@ -613,6 +631,69 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         return mapper.toDetail(reset, permissions);
     }
 
+    @Override
+    public GlobalScriptTestDTO testScript(GlobalScriptTestDTO.Request request) {
+        requireCaller();
+
+        String language = request.language();
+        if (UNTESTABLE_LANGUAGES.contains(language)) {
+            return GlobalScriptTestDTO.failed(new GlobalScriptTestDTO.Problem("VALIDATION_UNAVAILABLE",
+                    "Scripts in '%s' cannot be checked or tested yet".formatted(language), null, null), null);
+        }
+
+        List<Violation> violations = new ArrayList<>();
+        GlobalScript script = new GlobalScript(language, request.code(), toParameters(request.parameters(), violations));
+        violations.addAll(script.check());
+        if (!violations.isEmpty()) {
+            Violation first = violations.get(0);
+            GlobalScript.SyntaxError syntax = first.code() == Code.SCRIPT_SYNTAX
+                    ? script.syntaxError().orElse(null)
+                    : null;
+            return GlobalScriptTestDTO.failed(syntax == null
+                    ? new GlobalScriptTestDTO.Problem(first.code().name(), first.message(), null, null)
+                    : new GlobalScriptTestDTO.Problem(first.code().name(), syntax.message(), syntax.line(),
+                            syntax.column()), null);
+        }
+
+        List<JsonNode> arguments = request.testArguments() == null ? List.of() : request.testArguments();
+        for (int i = arguments.size(); i < script.parameters().size(); i++) {
+            GlobalScript.Parameter parameter = script.parameters().get(i);
+            if (parameter.required()) {
+                return GlobalScriptTestDTO.failed(new GlobalScriptTestDTO.Problem("MISSING_ARGUMENT",
+                        "Parameter '%s' is required: give it a test argument".formatted(parameter.name()),
+                        null, null), null);
+            }
+        }
+
+        return callScript(script, request.name() == null ? "script" : request.name(), arguments);
+    }
+
+    /** Calls a checked script once, the way an enhancement that imports it calls it. */
+    private GlobalScriptTestDTO callScript(GlobalScript script, String name, List<JsonNode> arguments) {
+        List<Object> values = arguments.stream()
+                .map(argument -> argument == null ? null : objectMapper.convertValue(argument, Object.class))
+                .collect(Collectors.toCollection(ArrayList::new));
+        String code = script.functionSource(TESTED_FUNCTION, name)
+                + TESTED_FUNCTION + ".apply(null, " + TEST_ARGUMENTS + ");";
+
+        long start = System.nanoTime();
+        try {
+            Object result = GlobalScript.runWithin(scriptTimeLimit, "The script",
+                    () -> nashornEngine.execute(code, Map.of(TEST_ARGUMENTS, values)));
+            return GlobalScriptTestDTO.passed(objectMapper.valueToTree(result), elapsedMs(start));
+        } catch (GlobalScript.TimeLimitExceeded e) {
+            return GlobalScriptTestDTO.failed(
+                    new GlobalScriptTestDTO.Problem("SCRIPT_TIMEOUT", e.getMessage(), null, null), elapsedMs(start));
+        } catch (ScriptExecutionException | InvalidScriptException e) {
+            return GlobalScriptTestDTO.failed(
+                    new GlobalScriptTestDTO.Problem("SCRIPT_RUNTIME", e.getMessage(), null, null), elapsedMs(start));
+        }
+    }
+
+    private static long elapsedMs(long startNanos) {
+        return Duration.ofNanos(System.nanoTime() - startNanos).toMillis();
+    }
+
     /**
      * What the picker is opened for, as the scope rule sees it.
      *
@@ -917,14 +998,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             return null;
         }
 
-        List<GlobalScript.Parameter> parameters = new ArrayList<>();
-        List<GlobalVariableRequestDTO.Parameter> requestedParameters =
-                requested.parameters() == null ? List.of() : requested.parameters();
-        for (int i = 0; i < requestedParameters.size(); i++) {
-            parameters.add(toParameter(requestedParameters.get(i), "script.parameters[" + i + "]", violations));
-        }
-
-        GlobalScript script = new GlobalScript(requested.language(), requested.code(), parameters);
+        GlobalScript script = new GlobalScript(
+                requested.language(), requested.code(), toParameters(requested.parameters(), violations));
         violations.addAll(script.check());
 
         String text = script.toJson();
@@ -934,6 +1009,17 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         }
 
         return text;
+    }
+
+    private static List<GlobalScript.Parameter> toParameters(
+            List<GlobalVariableRequestDTO.Parameter> requested, List<Violation> violations) {
+        List<GlobalScript.Parameter> parameters = new ArrayList<>();
+        List<GlobalVariableRequestDTO.Parameter> entries = requested == null ? List.of() : requested;
+        for (int i = 0; i < entries.size(); i++) {
+            parameters.add(toParameter(entries.get(i), "script.parameters[" + i + "]", violations));
+        }
+
+        return parameters;
     }
 
     /**

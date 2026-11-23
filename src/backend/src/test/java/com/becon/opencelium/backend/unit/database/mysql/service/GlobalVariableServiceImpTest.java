@@ -44,6 +44,7 @@ import com.becon.opencelium.backend.exception.GlobalVariableValidationException.
 import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.mapper.mysql.GlobalVariableMapper;
+import com.becon.opencelium.backend.resource.globalvariable.GlobalScriptTestDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableImpactDTO;
@@ -55,6 +56,7 @@ import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableRestor
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableUsageDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableValueDTO;
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
+import com.becon.opencelium.backend.scriptengine.engines.NashornEngine;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity.Caller;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
@@ -84,6 +86,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -119,6 +122,7 @@ class GlobalVariableServiceImpTest {
     private static final long OWNER_WORKFLOW_ID = 12L;
     private static final int MAX_VALUE_BYTES = 32;
     private static final int MAX_SCRIPT_BYTES = 1024;
+    private static final long SCRIPT_TIMEOUT_MS = 500;
     private static final Caller OWNER = new Caller(OWNER_ID, false);
     // built once: deriving the key takes a while
     private static final GlobalVariableCipher CIPHER = new GlobalVariableCipher(
@@ -169,7 +173,8 @@ class GlobalVariableServiceImpTest {
         service = new GlobalVariableServiceImp(repository, changeRepository, mapper, security,
                 userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
                 scopeResolver,
-                json, CIPHER, runGate, MAX_VALUE_BYTES, MAX_SCRIPT_BYTES);
+                json, CIPHER, runGate, MAX_VALUE_BYTES, MAX_SCRIPT_BYTES,
+                new NashornEngine(), SCRIPT_TIMEOUT_MS);
 
         // the caller is the owner and may do everything, unless a test says otherwise
         lenient().when(security.caller()).thenReturn(Optional.of(OWNER));
@@ -457,6 +462,104 @@ class GlobalVariableServiceImpTest {
         assertThat(violationsOf(() -> service.create(request)))
                 .extracting(Violation::code)
                 .containsExactlyInAnyOrder(Code.NAME_INVALID, Code.DESCRIPTION_TOO_LONG, Code.SCOPE_REQUIRED);
+    }
+
+    // ── script test run ───────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("testScript — a valid script is called once with the test arguments, nothing is saved")
+    void testScriptReturnsResultWhenScriptRuns() {
+        GlobalScriptTestDTO answer = service.testScript(aFormatDateTest(List.of(
+                new TextNode("2026-11-17T22:00:00Z"), new TextNode("dd.MM"))));
+
+        assertThat(answer.valid()).isTrue();
+        assertThat(answer.result()).isEqualTo(new TextNode("17.11"));
+        assertThat(answer.resultJsonType()).isEqualTo("string");
+        assertThat(answer.durationMs()).isNotNull();
+        assertThat(answer.error()).isNull();
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void testScriptUsesDefaultWhenTestArgumentIsLeftOut() {
+        GlobalScriptTestDTO answer = service.testScript(aFormatDateTest(List.of(new TextNode("2026-11-17T22:00:00Z"))));
+
+        assertThat(answer.result()).isEqualTo(new TextNode("17.11.2026"));
+    }
+
+    @Test
+    void testScriptReturnsObjectTypeWhenScriptReturnsMap() {
+        GlobalScriptTestDTO answer = service.testScript(
+                new GlobalScriptTestDTO.Request(null, "js", "return {ids: [1, 2]};", List.of(), List.of()));
+
+        assertThat(answer.resultJsonType()).isEqualTo("object");
+        assertThat(answer.result().get("ids")).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("testScript — a syntax error comes with its line in the code, and nothing is called")
+    void testScriptReturnsSyntaxErrorWithPositionWhenCodeDoesNotParse() {
+        GlobalScriptTestDTO answer = service.testScript(
+                new GlobalScriptTestDTO.Request(null, "js", "var a = 1;\nvar b = ;\nreturn a;", List.of(), List.of()));
+
+        assertThat(answer.valid()).isFalse();
+        assertThat(answer.error().code()).isEqualTo("SCRIPT_SYNTAX");
+        assertThat(answer.error().line()).isEqualTo(2L);
+        assertThat(answer.error().column()).isNotNull();
+        assertThat(answer.durationMs()).isNull();
+    }
+
+    @Test
+    void testScriptReturnsSaveCheckCodeWhenScriptCallsRef() {
+        GlobalScriptTestDTO answer = service.testScript(new GlobalScriptTestDTO.Request(
+                null, "js", "return ref('{{global.limit}}');", List.of(), List.of()));
+
+        assertThat(answer.error().code()).isEqualTo("SCRIPT_NOT_PURE");
+    }
+
+    @Test
+    void testScriptReturnsMissingArgumentWhenRequiredParameterHasNoTestArgument() {
+        GlobalScriptTestDTO answer = service.testScript(aFormatDateTest(List.of()));
+
+        assertThat(answer.error().code()).isEqualTo("MISSING_ARGUMENT");
+        assertThat(answer.error().message()).contains("'date'");
+    }
+
+    @Test
+    void testScriptReturnsRuntimeErrorWhenScriptThrows() {
+        GlobalScriptTestDTO answer = service.testScript(new GlobalScriptTestDTO.Request(
+                "failing", "js", "throw new Error('boom');\nreturn 1;", List.of(), List.of()));
+
+        assertThat(answer.valid()).isFalse();
+        assertThat(answer.error().code()).isEqualTo("SCRIPT_RUNTIME");
+        assertThat(answer.error().message()).contains("Script variable 'failing'").contains("boom");
+        assertThat(answer.durationMs()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("testScript — a script that runs on is stopped at the limit of a run")
+    void testScriptReturnsTimeoutWhenScriptRunsTooLong() {
+        GlobalScriptTestDTO answer = service.testScript(new GlobalScriptTestDTO.Request(
+                null, "js", "while (true) {}\nreturn 1;", List.of(), List.of()));
+
+        assertThat(answer.error().code()).isEqualTo("SCRIPT_TIMEOUT");
+        assertThat(answer.error().message()).contains(SCRIPT_TIMEOUT_MS + " ms");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"python3", "python2", "ruby"})
+    void testScriptReturnsValidationUnavailableWhenLanguageIsNotJavaScript(String language) {
+        GlobalScriptTestDTO answer = service.testScript(
+                new GlobalScriptTestDTO.Request(null, language, "return 1", List.of(), List.of()));
+
+        assertThat(answer.error().code()).isEqualTo("VALIDATION_UNAVAILABLE");
+    }
+
+    /** A test run of formatDate: date required, pattern with the default "dd.MM.yyyy". */
+    private static GlobalScriptTestDTO.Request aFormatDateTest(List<JsonNode> testArguments) {
+        GlobalVariableRequestDTO.Script script = GlobalVariableFixture.aFormatDateScript();
+        return new GlobalScriptTestDTO.Request("formatDate", script.language(), script.code(), script.parameters(),
+                testArguments);
     }
 
     // ── update ────────────────────────────────────────────────────────────────
@@ -2189,7 +2292,8 @@ class GlobalVariableServiceImpTest {
     private GlobalVariableServiceImp serviceWith(GlobalVariableCipher cipher) {
         return new GlobalVariableServiceImp(repository, changeRepository, mapper, security,
                 userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
-                scopeResolver, json, cipher, runGate, MAX_VALUE_BYTES, MAX_SCRIPT_BYTES);
+                scopeResolver, json, cipher, runGate, MAX_VALUE_BYTES, MAX_SCRIPT_BYTES,
+                new NashornEngine(), SCRIPT_TIMEOUT_MS);
     }
 
     private static GlobalVariableChangeDTO aMaskedChangeDto() {

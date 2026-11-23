@@ -28,6 +28,7 @@ import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Violation;
+import com.becon.opencelium.backend.resource.globalvariable.GlobalScriptTestDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableImpactDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableListItemDTO;
@@ -44,6 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -213,6 +215,26 @@ class GlobalVariableControllerTest {
                 new GlobalVariableRequestDTO.Script("js", "return date;", List.of(
                         new GlobalVariableRequestDTO.Parameter("date", null, true, null),
                         new GlobalVariableRequestDTO.Parameter("pattern", null, null, TextNode.valueOf("dd.MM.yyyy"))))));
+    }
+
+    @Test
+    @DisplayName("validateScript — the body reaches the service and its answer comes back as 200, valid or not")
+    void validateScriptReturnsServiceAnswerWhenBodyIsScript() throws Exception {
+        when(service.testScript(any())).thenReturn(GlobalScriptTestDTO.failed(
+                new GlobalScriptTestDTO.Problem("SCRIPT_SYNTAX", "Expected ; but found b", 2L, 9L), null));
+        String body = """
+                {"language": "js", "code": "var a = 1\\nvar b = ;",
+                 "parameters": [{"name": "date"}], "testArguments": ["2026-11-17", null]}""";
+
+        mockMvc.perform(post("/global-variable/validate-script").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valid").value(false))
+                .andExpect(jsonPath("$.error.code").value("SCRIPT_SYNTAX"))
+                .andExpect(jsonPath("$.error.line").value(2));
+
+        verify(service).testScript(new GlobalScriptTestDTO.Request(null, "js", "var a = 1\nvar b = ;",
+                List.of(new GlobalVariableRequestDTO.Parameter("date", null, null, null)),
+                Arrays.asList(TextNode.valueOf("2026-11-17"), NullNode.getInstance())));
     }
 
     @Test

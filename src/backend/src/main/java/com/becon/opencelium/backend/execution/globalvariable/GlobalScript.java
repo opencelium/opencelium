@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -177,26 +178,14 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     }
 
     private void checkCode(List<Violation> violations) {
-        List<Diagnostic> errors = new ArrayList<>();
-        CompilationUnitTree unit = Parser.create().parse(FUNCTION_NAME, functionSource(), diagnostic -> {
-            if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
-                errors.add(diagnostic);
-            }
-        });
-
-        if (!errors.isEmpty() || unit == null) {
-            violations.add(new Violation("script.code", Code.SCRIPT_SYNTAX, syntaxMessage(errors)));
-            return;
-        }
-        // code such as "return 1; } other(); function x() {" parses, but closes the function
-        if (unit.getSourceElements().size() != 1) {
-            violations.add(new Violation("script.code", Code.SCRIPT_SYNTAX,
-                    "The code closes its function early: it has more '}' than '{'"));
+        Parsed parsed = parse();
+        if (parsed.error() != null) {
+            violations.add(new Violation("script.code", Code.SCRIPT_SYNTAX, parsed.error().describe()));
             return;
         }
 
         ShapeFinder shape = new ShapeFinder();
-        unit.getSourceElements().get(0).accept(shape, 0);
+        parsed.unit().getSourceElements().get(0).accept(shape, 0);
         if (!shape.impureCalls.isEmpty()) {
             violations.add(new Violation("script.code", Code.SCRIPT_NOT_PURE,
                     "A script uses only its parameters, so it cannot call " + String.join(" or ", shape.impureCalls)));
@@ -264,8 +253,9 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
      * the termination of a run, stops the work too.
      *
      * @param what names the work in the error, e.g. the enhancement
-     * @throws ScriptExecutionException if the work takes longer than {@code limit} or is
-     *                                  interrupted; whatever the work throws is thrown as it is
+     * @throws TimeLimitExceeded       if the work takes longer than {@code limit}
+     * @throws ScriptExecutionException if the calling thread is interrupted; whatever the work
+     *                                  throws is thrown as it is
      */
     public static <T> T runWithin(Duration limit, String what, Supplier<T> work) {
         FutureTask<T> task = new FutureTask<>(work::get);
@@ -277,8 +267,7 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
             return task.get(limit.toMillis(), TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             stop(worker);
-            throw new ScriptExecutionException(
-                    "%s ran longer than %d ms and was stopped".formatted(what, limit.toMillis()));
+            throw new TimeLimitExceeded("%s ran longer than %d ms and was stopped".formatted(what, limit.toMillis()));
         } catch (InterruptedException e) {
             stop(worker);
             Thread.currentThread().interrupt();
@@ -292,6 +281,14 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
                 throw error;
             }
             throw new ScriptExecutionException(cause.getMessage(), cause);
+        }
+    }
+
+    /** Thrown when code that calls a script variable runs longer than its limit. */
+    public static final class TimeLimitExceeded extends ScriptExecutionException {
+
+        public TimeLimitExceeded(String message) {
+            super(message);
         }
     }
 
@@ -325,9 +322,56 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
         return "function " + FUNCTION_NAME + "(" + names + ") {\n" + code + "\n}";
     }
 
-    private static String syntaxMessage(List<Diagnostic> errors) {
+    /**
+     * A syntax error of the code.
+     *
+     * @param line    its line in the code, from 1; {@code null} when it has no single position
+     * @param column  its column; {@code null} when it has no single position
+     * @param message what is wrong, without the position
+     */
+    public record SyntaxError(Long line, Long column, String message) {
+
+        /** Returns the error as one text, its position first. */
+        public String describe() {
+            return line == null ? message : "Line %d, column %d: %s".formatted(line, column, message);
+        }
+    }
+
+    /**
+     * Returns the first syntax error of the code. Only meaningful for a definition whose
+     * parameters {@link #check} accepts, since they are part of what is parsed.
+     */
+    public Optional<SyntaxError> syntaxError() {
+        return Optional.ofNullable(parse().error());
+    }
+
+    /** The parsed function, or why it does not parse. */
+    private record Parsed(CompilationUnitTree unit, SyntaxError error) {
+    }
+
+    private Parsed parse() {
+        List<Diagnostic> errors = new ArrayList<>();
+        CompilationUnitTree unit = Parser.create().parse(FUNCTION_NAME, functionSource(), diagnostic -> {
+            if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+                errors.add(diagnostic);
+            }
+        });
+
+        if (!errors.isEmpty() || unit == null) {
+            return new Parsed(null, toSyntaxError(errors));
+        }
+        // code such as "return 1; } other(); function x() {" parses, but closes the function
+        if (unit.getSourceElements().size() != 1) {
+            return new Parsed(null, new SyntaxError(null, null,
+                    "The code closes its function early: it has more '}' than '{'"));
+        }
+
+        return new Parsed(unit, null);
+    }
+
+    private static SyntaxError toSyntaxError(List<Diagnostic> errors) {
         if (errors.isEmpty()) {
-            return "The code does not parse";
+            return new SyntaxError(null, null, "The code does not parse");
         }
 
         Diagnostic first = errors.get(0);
@@ -335,7 +379,8 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
         String message = Objects.requireNonNullElse(first.getMessage(), "").lines().findFirst().orElse("")
                 .replaceFirst("^" + FUNCTION_NAME + ":\\d+:\\d+ ", "");
 
-        return "Line %d, column %d: %s".formatted(first.getLineNumber() - 1, first.getColumnNumber(), message);
+        // the code starts on line 2 of the function around it
+        return new SyntaxError(first.getLineNumber() - 1, first.getColumnNumber(), message);
     }
 
     /**

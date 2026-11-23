@@ -60,6 +60,16 @@ class GlobalVariableControllerSecurityAnnotationsTest {
     }
 
     @Test
+    @DisplayName("validateScript — the script editor serves both a new and an existing variable")
+    void validateScriptRequiresCreateOrUpdatePermissionWhenCalled() {
+        PreAuthorize preAuthorize = endpoint("validateScript").getAnnotation(PreAuthorize.class);
+
+        assertThat(preAuthorize).isNotNull();
+        assertThat(preAuthorize.value())
+                .isEqualTo("@globalVariableSecurity.can('CREATE') or @globalVariableSecurity.can('UPDATE')");
+    }
+
+    @Test
     @DisplayName("every public endpoint carries a @PreAuthorize rule, so a new one cannot be left open")
     void everyEndpointIsProtectedWhenControllerIsScanned() {
         List<Method> unprotected = Arrays.stream(GlobalVariableController.class.getDeclaredMethods())

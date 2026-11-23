@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableChange;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
+import com.becon.opencelium.backend.resource.globalvariable.GlobalScriptTestDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableImpactDTO;
@@ -150,6 +151,13 @@ public interface GlobalVariableService {
      *         variable is not mutable
      */
     GlobalVariableDTO reset(long id);
+
+    /**
+     * Checks a script as saving a script variable checks it and, if it passes, calls it once with
+     * the test arguments, under the time limit of a run. Nothing is saved. A script that is not
+     * valid is an answer, not an error.
+     */
+    GlobalScriptTestDTO testScript(GlobalScriptTestDTO.Request request);
 
     /** Returns the grants of a variable. Only its owner user and admins may read them. */
     GlobalVariablePermissionsDTO getPermissions(long id);
