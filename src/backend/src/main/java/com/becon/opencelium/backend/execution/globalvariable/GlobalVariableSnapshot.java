@@ -40,7 +40,7 @@ public final class GlobalVariableSnapshot {
      */
     public static final int MIN_HIDDEN_LENGTH = 4;
 
-    private static final GlobalVariableSnapshot EMPTY = new GlobalVariableSnapshot(Map.of());
+    private static final GlobalVariableSnapshot EMPTY = new GlobalVariableSnapshot(Map.of(), Map.of());
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String MASK = "****";
 
@@ -149,9 +149,12 @@ public final class GlobalVariableSnapshot {
     }
 
     private final Map<String, Entry> entries;
+    // the parsed definitions of the script entries that came with them, by name
+    private final Map<String, GlobalScript> scripts;
 
-    private GlobalVariableSnapshot(Map<String, Entry> entries) {
+    private GlobalVariableSnapshot(Map<String, Entry> entries, Map<String, GlobalScript> scripts) {
         this.entries = entries;
+        this.scripts = scripts;
     }
 
     /** Returns the snapshot of a run that reads no global variable. */
@@ -165,14 +168,35 @@ public final class GlobalVariableSnapshot {
      * @throws IllegalArgumentException if two entries have the same name
      */
     public static GlobalVariableSnapshot of(Collection<Entry> entries) {
+        return of(entries, Map.of());
+    }
+
+    /**
+     * Creates a snapshot of the given variables, with the parsed definitions of its scripts, so
+     * an enhancement that imports a script does not parse it again at each call.
+     *
+     * @param scripts the definition of each script entry by its name, each the one its entry
+     *                holds as JSON; a script left out is parsed from its entry when it is called
+     * @throws IllegalArgumentException if two entries have the same name, or a definition is
+     *                                  given for a name that is no script entry
+     */
+    public static GlobalVariableSnapshot of(Collection<Entry> entries, Map<String, GlobalScript> scripts) {
         Map<String, Entry> byName = new TreeMap<>();
         for (Entry entry : entries) {
             if (byName.put(entry.name(), entry) != null) {
                 throw new IllegalArgumentException("Global variable '" + entry.name() + "' is in the snapshot twice");
             }
         }
+        for (String name : scripts.keySet()) {
+            Entry entry = byName.get(name);
+            if (entry == null || !entry.script()) {
+                throw new IllegalArgumentException("Global variable '" + name + "' is no script of the snapshot");
+            }
+        }
 
-        return byName.isEmpty() ? EMPTY : new GlobalVariableSnapshot(Collections.unmodifiableMap(byName));
+        return byName.isEmpty()
+                ? EMPTY
+                : new GlobalVariableSnapshot(Collections.unmodifiableMap(byName), Map.copyOf(scripts));
     }
 
     /**
@@ -191,7 +215,24 @@ public final class GlobalVariableSnapshot {
         Map<String, Entry> changed = new TreeMap<>(entries);
         changed.put(name, new Entry(name, entry.version(), Objects.requireNonNull(value, "value"),
                 entry.openToAll(), entry.secret(), entry.kind(), null));
-        return new GlobalVariableSnapshot(Collections.unmodifiableMap(changed));
+        return new GlobalVariableSnapshot(Collections.unmodifiableMap(changed), scripts);
+    }
+
+    /**
+     * Returns the definition of script variable {@code name}: the parsed one the snapshot was
+     * taken with, or else the one its entry holds, parsed now.
+     *
+     * @return nothing if the snapshot holds no script of that name
+     * @throws IllegalStateException if the entry holds no valid definition
+     */
+    public Optional<GlobalScript> script(String name) {
+        Entry entry = entries.get(name);
+        if (entry == null || !entry.script()) {
+            return Optional.empty();
+        }
+
+        GlobalScript parsed = scripts.get(name);
+        return Optional.of(parsed != null ? parsed : GlobalScript.fromJson(entry.value().toString()));
     }
 
     /** Finds a variable by its exact name. */

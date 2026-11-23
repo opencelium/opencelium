@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.becon.opencelium.backend.exception.WrongDecryptException;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot.Entry;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("GlobalVariableSnapshot — unit")
 class GlobalVariableSnapshotTest {
+
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     @Test
     void findReturnsEntryWhenNameMatchesExactly() {
@@ -75,6 +78,59 @@ class GlobalVariableSnapshotTest {
         GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(new Entry("idoitUrl", 4, new TextNode("x"))));
 
         assertThat(snapshot.isEmpty()).isFalse();
+    }
+
+    // ── script definitions ────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("script — a definition parsed when the snapshot was taken is handed out as it is")
+    void scriptReturnsGivenDefinitionWhenSnapshotIsTakenWithIt() throws Exception {
+        GlobalScript definition = new GlobalScript("js", "return 1;", List.of());
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(
+                List.of(Entry.ofScript("nextId", 2, JSON.readTree(definition.toJson()), true)),
+                Map.of("nextId", definition));
+
+        assertThat(snapshot.script("nextId")).containsSame(definition);
+    }
+
+    @Test
+    void scriptParsesEntryWhenNoDefinitionIsGiven() throws Exception {
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(Entry.ofScript("nextId", 2,
+                JSON.readTree(new GlobalScript("js", "return 1;", List.of()).toJson()), true)));
+
+        assertThat(snapshot.script("nextId")).get().extracting(GlobalScript::code).isEqualTo("return 1;");
+    }
+
+    @Test
+    void scriptReturnsEmptyWhenVariableIsNoScript() {
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(new Entry("limit", 1, IntNode.valueOf(5))));
+
+        assertThat(snapshot.script("limit")).isEmpty();
+        assertThat(snapshot.script("missing")).isEmpty();
+    }
+
+    @Test
+    void ofThrowsIllegalArgumentExceptionWhenDefinitionNamesNoScript() {
+        List<Entry> entries = List.of(new Entry("limit", 1, IntNode.valueOf(5)));
+        Map<String, GlobalScript> scripts = Map.of("limit", new GlobalScript("js", "return 1;", List.of()));
+
+        assertThatThrownBy(() -> GlobalVariableSnapshot.of(entries, scripts))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("'limit'");
+    }
+
+    @Test
+    @DisplayName("withValue — the run's copy of a mutable keeps the parsed scripts of the snapshot")
+    void withValueKeepsDefinitionsWhenMutableIsWritten() throws Exception {
+        GlobalScript definition = new GlobalScript("js", "return 1;", List.of());
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(
+                        Entry.ofScript("nextId", 2, JSON.readTree(definition.toJson()), true),
+                        Entry.ofMutable("lastSync", 1, new TextNode("old"), true)),
+                Map.of("nextId", definition));
+
+        GlobalVariableSnapshot written = snapshot.withValue("lastSync", new TextNode("new"));
+
+        assertThat(written.script("nextId")).containsSame(definition);
     }
 
     // ── secrets ───────────────────────────────────────────────────────────────
