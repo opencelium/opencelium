@@ -135,7 +135,8 @@ public class GlobalVariableController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
             @ApiResponse(responseCode = "409",
                     description = "The variable changed after the form loaded it, or it is used and the change"
-                            + " would rename it or leave a workflow out of its scope.",
+                            + " would rename it, leave a workflow out of its scope or change script parameters"
+                            + " in a way the calls no longer fit.",
                     content = @Content(schema = @Schema(implementation = GlobalVariableErrorResource.class))),
     })
     @PreAuthorize("@globalVariableSecurity.can('UPDATE')")
@@ -232,7 +233,8 @@ public class GlobalVariableController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
             @ApiResponse(responseCode = "404", description = "The variable or the entry does not exist.",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "409", description = "The variable changed after the page loaded it.",
+            @ApiResponse(responseCode = "409", description = "The variable changed after the page loaded it, or"
+                    + " it is a used script whose earlier parameters the calls made to it no longer fit.",
                     content = @Content(schema = @Schema(implementation = GlobalVariableErrorResource.class))),
     })
     @PreAuthorize("@globalVariableSecurity.can('UPDATE')")

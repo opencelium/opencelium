@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.exception;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -17,6 +19,8 @@ public class GlobalVariableConflictException extends RuntimeException {
         IN_USE,
         /** The new scope would leave out a workflow that uses the variable. */
         SCOPE_NARROWING,
+        /** The new parameters of a used script variable would break the calls made to it. */
+        PARAMETER_BREAKING,
         /**
          * A workflow that uses the variable is already running and cannot start again now: the
          * variable's busy policy is Refuse, or the queue of the workflow is full.
@@ -39,9 +43,18 @@ public class GlobalVariableConflictException extends RuntimeException {
      * @param field        where the reference stands: in an element, or the request data field
      *                     of a connector, or the text of a notification template
      * @param reason       why this usage blocks, the same word as the conflict code
+     * @param parameter    for {@code PARAMETER_BREAKING}, the script parameter whose change breaks
+     *                     the calls; otherwise {@code null} and left out of the JSON
      */
     public record Blocking(String sourceType, Long sourceId, String sourceTitle, String elementType,
-                           String elementLabel, String color, String index, String field, String reason) {
+                           String elementLabel, String color, String index, String field, String reason,
+                           @JsonInclude(JsonInclude.Include.NON_NULL) String parameter) {
+
+        /** A usage that blocks for a reason about no parameter. */
+        public Blocking(String sourceType, Long sourceId, String sourceTitle, String elementType,
+                String elementLabel, String color, String index, String field, String reason) {
+            this(sourceType, sourceId, sourceTitle, elementType, elementLabel, color, index, field, reason, null);
+        }
     }
 
     private final Code code;

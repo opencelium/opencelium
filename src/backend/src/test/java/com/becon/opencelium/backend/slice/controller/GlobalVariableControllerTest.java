@@ -346,7 +346,8 @@ class GlobalVariableControllerTest {
                 .andExpect(jsonPath("$.blocking[0].sourceTitle").value("VMware to i-doit"))
                 .andExpect(jsonPath("$.blocking[0].color").value("#ababab"))
                 .andExpect(jsonPath("$.blocking[0].index").value("0_1"))
-                .andExpect(jsonPath("$.blocking[0].reason").value("IN_USE"));
+                .andExpect(jsonPath("$.blocking[0].reason").value("IN_USE"))
+                .andExpect(jsonPath("$.blocking[0].parameter").doesNotExist());
     }
 
     // ── GET /global-variable/{id}/usage ───────────────────────────────────────
@@ -467,6 +468,30 @@ class GlobalVariableControllerTest {
 
         verify(service).impact(7L, new GlobalVariableImpactDTO.Request(null, "tenants",
                 new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.ALL, List.of(), List.of())));
+    }
+
+    @Test
+    @DisplayName("impact — reads the form's script and names the breaking parameter on each blocking usage")
+    void impactReturnsParameterWhenScriptChangeBreaksCalls() throws Exception {
+        when(service.impact(eq(7L), any())).thenReturn(new GlobalVariableImpactDTO(
+                List.of(new GlobalVariableConflictException.Blocking("WORKFLOW", 42L, "VMware to i-doit",
+                        "ENHANCEMENT", "Build title", "#ababab", "0_1", "enhancement.args", "PARAMETER_BREAKING",
+                        "pattern")),
+                List.of()));
+
+        mockMvc.perform(post("/global-variable/{id}/impact", 7)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name": "formatDate",
+                                 "script": {"language": "js", "code": "return date;",
+                                            "parameters": [{"name": "date"}]}}"""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.blocking[0].reason").value("PARAMETER_BREAKING"))
+                .andExpect(jsonPath("$.blocking[0].parameter").value("pattern"));
+
+        verify(service).impact(7L, new GlobalVariableImpactDTO.Request(null, "formatDate", null,
+                new GlobalVariableRequestDTO.Script("js", "return date;",
+                        List.of(new GlobalVariableRequestDTO.Parameter("date", null, null, null)))));
     }
 
     // ── POST /global-variable/{id}/restore/{changeId} ─────────────────────────

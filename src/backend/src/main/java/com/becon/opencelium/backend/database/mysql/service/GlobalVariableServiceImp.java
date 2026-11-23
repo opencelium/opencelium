@@ -76,6 +76,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -99,6 +100,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     private static final long NO_WORKFLOW = -1L;
     private static final String REASON_IN_USE = "IN_USE";
     private static final String REASON_OUT_OF_SCOPE = "OUT_OF_SCOPE";
+    private static final String REASON_PARAMETER_BREAKING = "PARAMETER_BREAKING";
+    private static final String WARNING_CALLS_NOT_CHECKED = "CALLS_IN_CODE_NOT_CHECKED";
     // the component permission that opens the picker, see GlobalVariableController
     private static final String READ_PERMISSION = "READ";
     // the JSON text of a value that is left out; a secret stores no text for it
@@ -294,7 +297,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         throwIfAny(violations);
 
         ScopeSpec oldScope = new ScopeSpec(variable.getScopeType(), Set.copyOf(variable.getScopeTargets()));
-        requireChangeKeepsUsages(variable, !name.equals(variable.getName()), scope.equals(oldScope) ? null : scope);
+        requireChangeKeepsUsages(variable, !name.equals(variable.getName()), scope.equals(oldScope) ? null : scope,
+                variable.getKind() == GlobalVariableKind.SCRIPT ? GlobalScript.fromJson(value) : null);
 
         long versionFrom = variable.getVersion();
         String oldValue = variable.getValue();
@@ -385,7 +389,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         GlobalVariable variable = load(id);
         require(variable, caller, GlobalVariablePermission.DELETE);
 
-        UsageImpact impact = usageImpact(variable, true, null);
+        UsageImpact impact = usageImpact(variable, true, null, null);
         if (!impact.inUse().isEmpty()) {
             throw inUse(variable, impact.inUse(), "it cannot be deleted");
         }
@@ -552,7 +556,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         require(variable, caller, delete ? GlobalVariablePermission.DELETE : GlobalVariablePermission.EDIT);
 
         if (delete) {
-            return new GlobalVariableImpactDTO(usageImpact(variable, true, null).all(), List.of());
+            return new GlobalVariableImpactDTO(usageImpact(variable, true, null, null).all(), List.of());
         }
 
         boolean renamed = request.name() != null && !request.name().equals(variable.getName());
@@ -566,7 +570,23 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             newScope = asked.equals(current) ? null : asked;
         }
 
-        return new GlobalVariableImpactDTO(usageImpact(variable, renamed, newScope).all(), List.of());
+        UsageImpact impact = usageImpact(variable, renamed, newScope, askedScript(variable, request.script()));
+        return new GlobalVariableImpactDTO(impact.all(), impact.warnings());
+    }
+
+    /**
+     * The script an impact preview asks about: the form's parameters in the saved language and
+     * code, for only the parameters can break a caller. {@code null} for another kind or a form
+     * that sends no script. A parameter the save would refuse is taken as given; the save itself
+     * reports it.
+     */
+    private static GlobalScript askedScript(GlobalVariable variable, GlobalVariableRequestDTO.Script asked) {
+        if (variable.getKind() != GlobalVariableKind.SCRIPT || asked == null) {
+            return null;
+        }
+
+        GlobalScript saved = GlobalScript.fromJson(variable.getValue());
+        return new GlobalScript(saved.language(), saved.code(), toParameters(asked.parameters(), new ArrayList<>()));
     }
 
     @Override
@@ -598,6 +618,10 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         String restored = change.getNewValue();
         if (Objects.equals(restored, oldValue)) {
             return mapper.toDetail(variable, permissions);
+        }
+        if (variable.getKind() == GlobalVariableKind.SCRIPT) {
+            // an earlier definition may have declared parameters today's callers do not fit
+            requireChangeKeepsUsages(variable, false, null, GlobalScript.fromJson(restored));
         }
 
         long versionFrom = variable.getVersion();
@@ -744,15 +768,19 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     // ------------------------------------------------------------------ usages
 
     /**
-     * Refuses a rename or a new scope that would break what uses the variable. A reference holds
-     * the name, so a used variable keeps its name; and a workflow, a connector or a notification
-     * that uses the variable stays in its scope.
+     * Refuses a rename, a new scope or new script parameters that would break what uses the
+     * variable. A reference holds the name, so a used variable keeps its name; a workflow, a
+     * connector or a notification that uses the variable stays in its scope; and the calls made
+     * to a used script keep fitting its parameters.
      *
-     * @param renamed  whether the request changes the name
-     * @param newScope the scope the request asks for, or {@code null} if it keeps the scope
+     * @param renamed   whether the request changes the name
+     * @param newScope  the scope the request asks for, or {@code null} if it keeps the scope
+     * @param newScript the script definition the request asks for, or {@code null} for a
+     *                  variable that is no script
      */
-    private void requireChangeKeepsUsages(GlobalVariable variable, boolean renamed, ScopeSpec newScope) {
-        UsageImpact impact = usageImpact(variable, renamed, newScope);
+    private void requireChangeKeepsUsages(GlobalVariable variable, boolean renamed, ScopeSpec newScope,
+            GlobalScript newScript) {
+        UsageImpact impact = usageImpact(variable, renamed, newScope, newScript);
 
         if (!impact.inUse().isEmpty()) {
             throw inUse(variable, impact.inUse(), "it cannot be renamed");
@@ -764,19 +792,32 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
                             .formatted(variable.getName()),
                     variable.getVersion(), impact.outOfScope());
         }
+
+        if (!impact.parameterBreaking().isEmpty()) {
+            throw new GlobalVariableConflictException(GlobalVariableConflictException.Code.PARAMETER_BREAKING,
+                    "Global variable '%s' is called by enhancements, and %s; calls pass arguments by position, so "
+                            .formatted(variable.getName(), impact.breakingChange())
+                            + "a used script keeps its parameters in order and a new one needs a default",
+                    variable.getVersion(), impact.parameterBreaking());
+        }
     }
 
     /**
-     * What stands in the way of a change: the usages that need the name of the variable, and the
-     * usages a new scope leaves out.
+     * What stands in the way of a change: the usages that need the name of the variable, the
+     * usages a new scope leaves out, and the callers of a script whose new parameters break
+     * their calls; and the callers the change reaches without blocking it.
+     *
+     * @param breakingChange what breaks the calls, as a clause; {@code null} when nothing does
      */
-    private record UsageImpact(List<Blocking> inUse, List<Blocking> outOfScope) {
+    private record UsageImpact(List<Blocking> inUse, List<Blocking> outOfScope, List<Blocking> parameterBreaking,
+                               String breakingChange, List<Blocking> warnings) {
 
-        static final UsageImpact NONE = new UsageImpact(List.of(), List.of());
+        static final UsageImpact NONE = new UsageImpact(List.of(), List.of(), List.of(), null, List.of());
 
         List<Blocking> all() {
             List<Blocking> all = new ArrayList<>(inUse);
             all.addAll(outOfScope);
+            all.addAll(parameterBreaking);
             return all;
         }
     }
@@ -786,9 +827,16 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
      *
      * @param losesName whether the change takes the name away: a rename or a delete
      * @param newScope  the scope the change asks for, or {@code null} if it keeps the scope
+     * @param newScript the script definition the change asks for, or {@code null} if it keeps
+     *                  the script or the variable is no script
      */
-    private UsageImpact usageImpact(GlobalVariable variable, boolean losesName, ScopeSpec newScope) {
-        if (!losesName && newScope == null) {
+    private UsageImpact usageImpact(GlobalVariable variable, boolean losesName, ScopeSpec newScope,
+            GlobalScript newScript) {
+        GlobalScript oldScript = newScript == null ? null : GlobalScript.fromJson(variable.getValue());
+        Optional<GlobalScript.BreakingChange> breaking =
+                newScript == null ? Optional.empty() : oldScript.breakingChangeTo(newScript);
+        boolean signatureChanged = newScript != null && oldScript.changesSignature(newScript);
+        if (!losesName && newScope == null && !signatureChanged) {
             return UsageImpact.NONE;
         }
 
@@ -809,7 +857,16 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
                     .toList(), REASON_OUT_OF_SCOPE);
         }
 
-        return new UsageImpact(inUse, outOfScope);
+        // every usage of a script is a caller: a script is used only by importing it
+        List<Blocking> parameterBreaking = breaking
+                .map(change -> toBlocking(usages, REASON_PARAMETER_BREAKING, change.parameter()))
+                .orElse(List.of());
+        List<Blocking> warnings = signatureChanged && breaking.isEmpty()
+                ? toBlocking(usages, WARNING_CALLS_NOT_CHECKED)
+                : List.of();
+
+        return new UsageImpact(inUse, outOfScope, parameterBreaking,
+                breaking.map(GlobalScript.BreakingChange::change).orElse(null), warnings);
     }
 
     /** What holds usages: a workflow, a connector or a notification, by its id. */
@@ -850,17 +907,27 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     }
 
     /**
-     * Describes usages as what blocks a change.
+     * Describes usages as what blocks a change, or as what it reaches without blocking it.
      *
-     * @param reason why each of them blocks, as the impact preview names it: IN_USE or OUT_OF_SCOPE
+     * @param reason why each of them blocks, as the impact preview names it: IN_USE or
+     *               OUT_OF_SCOPE; or the warning, CALLS_IN_CODE_NOT_CHECKED
      */
     private List<Blocking> toBlocking(List<GlobalVariableUsage> usages, String reason) {
+        return toBlocking(usages, reason, null);
+    }
+
+    /**
+     * Describes usages as what blocks a change of a script parameter.
+     *
+     * @param parameter the parameter whose change breaks the calls, {@code null} for another reason
+     */
+    private List<Blocking> toBlocking(List<GlobalVariableUsage> usages, String reason, String parameter) {
         return usages.stream()
                 .map(mapper::toUsage)
                 .map(usage -> new Blocking(
                         usage.sourceType().name(), usage.sourceId(), usage.sourceTitle(),
                         usage.elementType() == null ? null : usage.elementType().name(), usage.elementLabel(),
-                        usage.color(), usage.index(), usage.field(), reason))
+                        usage.color(), usage.index(), usage.field(), reason, parameter))
                 .toList();
     }
 

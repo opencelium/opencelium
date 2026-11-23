@@ -123,6 +123,10 @@ class GlobalVariableServiceImpTest {
     private static final int MAX_VALUE_BYTES = 32;
     private static final int MAX_SCRIPT_BYTES = 1024;
     private static final long SCRIPT_TIMEOUT_MS = 500;
+    private static final GlobalVariableRequestDTO.Parameter DATE_PARAMETER =
+            new GlobalVariableRequestDTO.Parameter("date", null, null, null);
+    private static final GlobalVariableRequestDTO.Parameter PATTERN_PARAMETER =
+            new GlobalVariableRequestDTO.Parameter("pattern", null, null, TextNode.valueOf("dd.MM.yyyy"));
     private static final Caller OWNER = new Caller(OWNER_ID, false);
     // built once: deriving the key takes a while
     private static final GlobalVariableCipher CIPHER = new GlobalVariableCipher(
@@ -1625,6 +1629,139 @@ class GlobalVariableServiceImpTest {
                         GlobalVariablePermission.EDIT));
     }
 
+    // ── script parameters ─────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("update — a used script keeps its parameters, so calls by position still fit")
+    void updateThrowsConflictExceptionWhenUsedScriptLosesParameter() {
+        givenExistingFormatDate();
+        givenUsageBy(42L);
+        GlobalVariableRequestDTO request = GlobalVariableFixture.aScriptRequest("formatDate",
+                GlobalVariableFixture.aScript(GlobalVariableFixture.FORMAT_DATE_CODE, DATE_PARAMETER), VERSION);
+
+        GlobalVariableConflictException conflict =
+                catchThrowableOfType(() -> service.update(VARIABLE_ID, request), GlobalVariableConflictException.class);
+
+        assertThat(conflict.getCode()).isEqualTo(GlobalVariableConflictException.Code.PARAMETER_BREAKING);
+        assertThat(conflict).hasMessageContaining("'formatDate'").hasMessageContaining("parameter 'pattern' is removed");
+        assertThat(conflict.getBlocking())
+                .extracting(GlobalVariableConflictException.Blocking::sourceId,
+                        GlobalVariableConflictException.Blocking::reason,
+                        GlobalVariableConflictException.Blocking::parameter)
+                .containsExactly(tuple(42L, "PARAMETER_BREAKING", "pattern"));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("update — a new parameter with a default fits every call made so far")
+    void updateAcceptsNewOptionalParameterWhenScriptIsUsed() {
+        GlobalVariable variable = givenExistingFormatDate();
+        givenUsageBy(42L);
+        GlobalVariableRequestDTO request = GlobalVariableFixture.aScriptRequest("formatDate",
+                GlobalVariableFixture.aScript(GlobalVariableFixture.FORMAT_DATE_CODE, DATE_PARAMETER, PATTERN_PARAMETER,
+                        new GlobalVariableRequestDTO.Parameter("locale", null, null, TextNode.valueOf("de"))),
+                VERSION);
+
+        service.update(VARIABLE_ID, request);
+
+        assertThat(GlobalScript.fromJson(variable.getValue()).parameters())
+                .extracting(GlobalScript.Parameter::name)
+                .containsExactly("date", "pattern", "locale");
+    }
+
+    @Test
+    @DisplayName("update — a script nothing calls may change its parameters freely")
+    void updateAcceptsRemovedParameterWhenScriptIsUnused() {
+        GlobalVariable variable = givenExistingFormatDate();
+        when(usageService.findByVariable(VARIABLE_ID)).thenReturn(List.of());
+        GlobalVariableRequestDTO request = GlobalVariableFixture.aScriptRequest("formatDate",
+                GlobalVariableFixture.aScript(GlobalVariableFixture.FORMAT_DATE_CODE, DATE_PARAMETER), VERSION);
+
+        service.update(VARIABLE_ID, request);
+
+        assertThat(GlobalScript.fromJson(variable.getValue()).parameters())
+                .extracting(GlobalScript.Parameter::name)
+                .containsExactly("date");
+    }
+
+    @Test
+    @DisplayName("update — new code with the same parameters reads no usages")
+    void updateReadsNoUsagesWhenScriptKeepsParameters() {
+        givenExistingFormatDate();
+        GlobalVariableRequestDTO request = GlobalVariableFixture.aScriptRequest("formatDate",
+                GlobalVariableFixture.aScript("return pattern;", DATE_PARAMETER, PATTERN_PARAMETER), VERSION);
+
+        service.update(VARIABLE_ID, request);
+
+        verify(usageService, never()).findByVariable(anyLong());
+    }
+
+    @Test
+    void impactReturnsParameterBreakingWhenFormRequiresNewParameter() {
+        givenExistingFormatDate();
+        givenUsageBy(42L);
+        GlobalVariableRequestDTO.Script asked = GlobalVariableFixture.aScript(GlobalVariableFixture.FORMAT_DATE_CODE,
+                DATE_PARAMETER, PATTERN_PARAMETER, new GlobalVariableRequestDTO.Parameter("locale", null, true, null));
+
+        GlobalVariableImpactDTO impact = service.impact(VARIABLE_ID,
+                new GlobalVariableImpactDTO.Request(null, "formatDate", null, asked));
+
+        assertThat(impact.blocking())
+                .extracting(GlobalVariableConflictException.Blocking::reason,
+                        GlobalVariableConflictException.Blocking::parameter)
+                .containsExactly(tuple("PARAMETER_BREAKING", "locale"));
+        assertThat(impact.warnings()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("impact — a change that keeps calls working warns that the calls in code are not checked")
+    void impactReturnsCallsNotCheckedWarningWhenFormChangesDefault() {
+        givenExistingFormatDate();
+        givenUsageBy(42L);
+        GlobalVariableRequestDTO.Script asked = GlobalVariableFixture.aScript(GlobalVariableFixture.FORMAT_DATE_CODE,
+                DATE_PARAMETER, new GlobalVariableRequestDTO.Parameter("pattern", null, null, TextNode.valueOf("dd")));
+
+        GlobalVariableImpactDTO impact = service.impact(VARIABLE_ID,
+                new GlobalVariableImpactDTO.Request(null, "formatDate", null, asked));
+
+        assertThat(impact.blocking()).isEmpty();
+        assertThat(impact.warnings())
+                .extracting(GlobalVariableConflictException.Blocking::sourceId,
+                        GlobalVariableConflictException.Blocking::reason,
+                        GlobalVariableConflictException.Blocking::parameter)
+                .containsExactly(tuple(42L, "CALLS_IN_CODE_NOT_CHECKED", null));
+    }
+
+    @Test
+    @DisplayName("impact — a script sent for a constant is not read")
+    void impactIgnoresScriptWhenVariableIsNoScript() {
+        givenExistingVariable();
+
+        GlobalVariableImpactDTO impact = service.impact(VARIABLE_ID, new GlobalVariableImpactDTO.Request(
+                null, "idoitUrl", null, GlobalVariableFixture.aScript("return 1;")));
+
+        assertThat(impact.blocking()).isEmpty();
+        verify(usageService, never()).findByVariable(anyLong());
+    }
+
+    @Test
+    @DisplayName("restore — an earlier script must fit the calls made to the script today")
+    void restoreThrowsConflictExceptionWhenEarlierScriptBreaksCallers() {
+        GlobalVariable variable = givenExistingFormatDate();
+        givenUsageBy(42L);
+        givenChange(variable, GlobalVariableChange.Type.VALUE, new GlobalScript("js", "return date;",
+                List.of(new GlobalScript.Parameter("date", null, true, null))).toJson());
+
+        GlobalVariableConflictException conflict = catchThrowableOfType(
+                () -> service.restore(VARIABLE_ID, CHANGE_ID, new GlobalVariableRestoreRequestDTO(VERSION)),
+                GlobalVariableConflictException.class);
+
+        assertThat(conflict.getCode()).isEqualTo(GlobalVariableConflictException.Code.PARAMETER_BREAKING);
+        assertThat(conflict.getBlocking()).extracting(GlobalVariableConflictException.Blocking::parameter)
+                .containsExactly("pattern");
+        verify(repository, never()).saveAndFlush(any());
+    }
+
     // ── restore ───────────────────────────────────────────────────────────────
 
     @Test
@@ -2300,6 +2437,20 @@ class GlobalVariableServiceImpTest {
         TextNode mask = new TextNode(GlobalVariableChange.SECRET_MASK);
         return new GlobalVariableChangeDTO(CHANGE_ID, GlobalVariableChange.Type.VALUE, 1L, 2L, mask, mask, null,
                 null, GlobalVariableChange.Result.SAVED, null, null, false);
+    }
+
+    /**
+     * A saved script variable "formatDate" at {@link #VERSION} with the parameters {@code date}
+     * (required) and {@code pattern} (default "dd.MM.yyyy").
+     */
+    private GlobalVariable givenExistingFormatDate() {
+        GlobalVariable variable = GlobalVariableFixture.aScriptVariable(VARIABLE_ID, "formatDate",
+                new GlobalScript("js", GlobalVariableFixture.FORMAT_DATE_CODE, List.of(
+                        new GlobalScript.Parameter("date", null, true, null),
+                        new GlobalScript.Parameter("pattern", null, false, TextNode.valueOf("dd.MM.yyyy")))).toJson());
+        variable.setVersion(VERSION);
+        when(repository.findById(VARIABLE_ID)).thenReturn(Optional.of(variable));
+        return variable;
     }
 
     /** A saved constant "idoitUrl" with the value "old" at {@link #VERSION}, owned by the caller. */
