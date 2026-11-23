@@ -40,12 +40,15 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.exception.ExecutionTerminatedException;
+import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
 import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalTextRenderer;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalValueCaster;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalValueResolver;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.pubsub.ExecutionEventPublisher;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionFinishedEvent;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionStartedEvent;
@@ -62,6 +65,7 @@ import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -154,9 +158,9 @@ public class ExecutionAspect {
     /**
      * Lets a workflow that uses a mutable global variable run one execution at a time; see
      * {@link WorkflowRunGate}. Within this aspect an {@code @Around} advice wraps the
-     * {@code @Before} and {@code @After...} ones, so a start that waits or is refused creates no
-     * execution, sends no notification and publishes no event, and the workflow is freed only after
-     * the end of the run has been recorded.
+     * {@code @Before} and {@code @After...} ones, so a start that waits or is refused never reaches
+     * them: it sends no notification, and the workflow is freed only after the end of the run has
+     * been recorded. A refused start is recorded apart, by {@link #recordRefusedStart}.
      */
     @Around("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public Object gateByMutableVariables(ProceedingJoinPoint joinPoint, JobExecutionContext context) throws Throwable {
@@ -271,6 +275,45 @@ public class ExecutionAspect {
         ExecutionEventPublisher.publish(
                 new ExecutionFinishedEvent(execId, data.getExecType(), result)
         );
+    }
+
+    @PostConstruct
+    void listenToRefusedStarts() {
+        runGate.onRefusal(this::recordRefusedStart);
+    }
+
+    /**
+     * Records a start that {@link WorkflowRunGate} refused, or dropped from its queue, as a failed
+     * execution of its schedule that starts and ends at once, so it shows in the history and as
+     * the last failure. With debug mode on, or for a support file, its log holds the reason. No
+     * notification is sent and no aggregator runs: nothing of the workflow ran, and the refusal
+     * already went to the workflow's websocket channel.
+     */
+    private void recordRefusedStart(QuartzJobScheduler.ScheduleData data, long connectionId,
+            GlobalVariableConflictException refusal) {
+        int schedulerId = data.getScheduleId();
+        Scheduler scheduler = schedulerService.getById(schedulerId);
+        long execId = initExecutionObj(schedulerId);
+        String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
+        ExecutionEventPublisher.publish(new ExecutionStartedEvent(execId, connectionId, schedulerId, timestamp));
+
+        boolean loggingEnabled = scheduler.getDebugMode()
+                || data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE;
+        OcLogger<ExecutionLog> executionLogger =
+                new OcLogger<>(loggingEnabled, new ExecutionLog(), connectionId, timestamp, execId);
+        try {
+            executionLogger.logAndSend("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d"
+                    .formatted(execId, connectionId, schedulerId));
+            // the reason alone: a stack trace of the gate would tell the reader nothing
+            executionLogger.logAndSend("segment=EXCEPTION data=" + refusal);
+            executionLogger.logAndSend("phase=EXECUTION_END id=%d connectionId=%d schedulerId=%d"
+                    .formatted(execId, connectionId, schedulerId));
+        } finally {
+            executionLogger.clear();
+        }
+
+        updateExecutionObj(execId, false);
+        ExecutionEventPublisher.publish(new ExecutionFinishedEvent(execId, data.getExecType(), FAIL));
     }
 
     private long initExecutionObj(int schedulerId) {

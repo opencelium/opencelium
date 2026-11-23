@@ -4,9 +4,12 @@ import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
+import com.becon.opencelium.backend.quartz.QuartzJobScheduler.ScheduleData;
+import com.becon.opencelium.backend.quartz.QuartzJobScheduler.TriggerType;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -47,6 +50,10 @@ import java.util.UUID;
  * comes in between cannot overtake it. A queued start is checked and snapshotted when it leaves the
  * queue, because it only then reaches the execution.
  *
+ * <p>A refused start, and a waiting one that is dropped, is logged, sent to the workflow's
+ * websocket channel and handed to the {@link RefusalListener}, which records it as a failed
+ * execution of its schedule.
+ *
  * <p>The state is kept in memory. A crash or restart frees every workflow, and the starts that were
  * waiting are lost; a schedule fires again at its next time.
  */
@@ -75,6 +82,8 @@ public class WorkflowRunGate {
     // guarded by this; a workflow has an entry only while it runs, is reserved or has waiting starts
     private final Map<Long, Lane> lanes = new HashMap<>();
 
+    private volatile RefusalListener refusalListener = (schedule, connectionId, refusal) -> { };
+
     @Autowired
     public WorkflowRunGate(
             GlobalVariableRepository repository,
@@ -102,6 +111,28 @@ public class WorkflowRunGate {
         this.clock = Objects.requireNonNull(clock, "clock");
     }
 
+    /** Hears of each start the gate refused or dropped from its queue. */
+    @FunctionalInterface
+    public interface RefusalListener {
+
+        /**
+         * Called after the refusal was logged and sent to the websocket channel.
+         *
+         * @param schedule     the schedule the start belongs to, with how it was started
+         * @param connectionId id of the workflow
+         * @param refusal      why the start did not run, with code BUSY
+         */
+        void refused(ScheduleData schedule, long connectionId, GlobalVariableConflictException refusal);
+    }
+
+    /**
+     * Sets who hears of refused starts, replacing the one set before. A start whose schedule
+     * cannot be found is only logged and sent to the websocket channel.
+     */
+    public void onRefusal(RefusalListener listener) {
+        this.refusalListener = Objects.requireNonNull(listener, "listener");
+    }
+
     /** What the gate decided about a start. */
     public enum Admission {
         /** The workflow uses no mutable variable: run, and do not call {@link #release}. */
@@ -121,7 +152,7 @@ public class WorkflowRunGate {
 
     /**
      * Decides whether a start of a workflow runs now, waits or is refused. A refused start is
-     * logged and sent to the workflow's websocket channel.
+     * logged, sent to the workflow's websocket channel and handed to the {@link RefusalListener}.
      *
      * @param connectionId id of the workflow
      * @param jobKey       the Quartz job the start belongs to, used to fire it again from the queue
@@ -166,7 +197,7 @@ public class WorkflowRunGate {
         if (admission == Admission.QUEUED) {
             log.info("Workflow {} is busy: the start of job {} waits in its queue", connectionId, jobKey);
         } else {
-            refuse(connectionId, refusal);
+            refuse(connectionId, jobKey, triggerData, refusal);
         }
         if (wakeQueue) {
             startNext(connectionId);
@@ -287,10 +318,12 @@ public class WorkflowRunGate {
             }
 
             for (Waiting waiting : expired) {
-                refuse(connectionId, new GlobalVariableConflictException(GlobalVariableConflictException.Code.BUSY,
+                GlobalVariableConflictException dropped = new GlobalVariableConflictException(
+                        GlobalVariableConflictException.Code.BUSY,
                         "The start of job %s waited longer than %d minutes for the running execution and was dropped"
                                 .formatted(waiting.jobKey(), maxWait.toMinutes()),
-                        0));
+                        0);
+                refuse(connectionId, waiting.jobKey(), waiting.triggerData(), dropped);
             }
             if (next == null) {
                 return;
@@ -301,9 +334,11 @@ public class WorkflowRunGate {
                 return;
             } catch (SchedulerException | RuntimeException e) {
                 log.error("Workflow {}: the waiting start of job {} could not be fired", connectionId, next.jobKey(), e);
-                refuse(connectionId, new GlobalVariableConflictException(GlobalVariableConflictException.Code.BUSY,
+                GlobalVariableConflictException unfired = new GlobalVariableConflictException(
+                        GlobalVariableConflictException.Code.BUSY,
                         "The waiting start of job %s could not be fired: %s".formatted(next.jobKey(), e.getMessage()),
-                        0));
+                        0);
+                refuse(connectionId, next.jobKey(), next.triggerData(), unfired);
                 synchronized (this) {
                     Lane lane = lanes.get(connectionId);
                     if (lane != null && lane.reservation != null && lane.reservation.ticket().equals(ticket)) {
@@ -373,12 +408,51 @@ public class WorkflowRunGate {
         return null;
     }
 
-    private void refuse(long connectionId, GlobalVariableConflictException refusal) {
+    private void refuse(long connectionId, JobKey jobKey, JobDataMap triggerData,
+            GlobalVariableConflictException refusal) {
         log.warn("Workflow {}: a start was refused. {}", connectionId, refusal.getMessage());
         try {
             notifications.send(connectionId, new ErrorResource(refusal, HttpStatus.CONFLICT));
         } catch (RuntimeException e) {
             log.warn("Workflow {}: the refusal could not be sent to the websocket channel", connectionId, e);
+        }
+
+        Optional<ScheduleData> schedule = scheduleOf(jobKey, triggerData);
+        if (schedule.isEmpty()) {
+            log.warn("Workflow {}: the refused start of job {} names no schedule, so no execution records it",
+                    connectionId, jobKey);
+            return;
+        }
+        try {
+            refusalListener.refused(schedule.get(), connectionId, refusal);
+        } catch (RuntimeException e) {
+            log.warn("Workflow {}: the refused start of job {} could not be recorded", connectionId, jobKey, e);
+        }
+    }
+
+    /**
+     * Finds the schedule a start belongs to the way {@code JobExecutor} does: the data of the
+     * trigger that fired, else the data of its job, else the bare schedule id of an old job.
+     */
+    private Optional<ScheduleData> scheduleOf(JobKey jobKey, JobDataMap triggerData) {
+        if (triggerData != null && triggerData.get("data") instanceof ScheduleData data) {
+            return Optional.of(data);
+        }
+        try {
+            JobDetail job = quartzScheduler.getJobDetail(jobKey);
+            if (job == null) {
+                return Optional.empty();
+            }
+            JobDataMap jobData = job.getJobDataMap();
+            if (jobData.get("data") instanceof ScheduleData data) {
+                return Optional.of(data);
+            }
+            return jobData.containsKey("schedulerId")
+                    ? Optional.of(new ScheduleData(jobData.getIntValue("schedulerId"), TriggerType.SCHEDULER))
+                    : Optional.empty();
+        } catch (SchedulerException e) {
+            log.warn("The job {} of a refused start could not be read", jobKey, e);
+            return Optional.empty();
         }
     }
 

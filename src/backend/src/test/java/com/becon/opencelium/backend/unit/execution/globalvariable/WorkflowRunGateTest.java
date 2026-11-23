@@ -3,10 +3,12 @@ package com.becon.opencelium.backend.unit.execution.globalvariable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,6 +20,8 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolic
 import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate.Admission;
+import com.becon.opencelium.backend.quartz.QuartzJobScheduler.ScheduleData;
+import com.becon.opencelium.backend.quartz.QuartzJobScheduler.TriggerType;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
 import java.time.Clock;
@@ -25,6 +29,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +39,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -259,6 +265,91 @@ class WorkflowRunGateTest {
         assertThat(fired.getAllValues().get(1).getJobKey()).isEqualTo(JOB_C);
     }
 
+    // ── refusal listener ─────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("admit — a refused start is handed on with the schedule of the trigger that fired")
+    void admitHandsRefusalToListenerWithTriggerScheduleWhenStartIsRefused() {
+        List<Refused> refused = listenToRefusals();
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.REFUSE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.recordExecution(WORKFLOW, 900L);
+        JobDataMap webhookStart = new JobDataMap();
+        webhookStart.put("data", new ScheduleData(7, TriggerType.WEBHOOK));
+
+        gate.admit(WORKFLOW, JOB_B, webhookStart);
+
+        assertThat(refused).singleElement().satisfies(start -> {
+            assertThat(start.schedule().getScheduleId()).isEqualTo(7);
+            assertThat(start.schedule().getExecType()).isEqualTo(TriggerType.WEBHOOK);
+            assertThat(start.connectionId()).isEqualTo(WORKFLOW);
+            assertThat(start.refusal().getCode()).isEqualTo(GlobalVariableConflictException.Code.BUSY);
+            assertThat(start.refusal().getMessage()).contains("'counter'").contains("execution 900");
+        });
+    }
+
+    @Test
+    @DisplayName("admit — without schedule data on the trigger, the schedule is read from the job")
+    void admitHandsRefusalToListenerWithJobScheduleWhenTriggerCarriesNone() throws SchedulerException {
+        List<Refused> refused = listenToRefusals();
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.REFUSE);
+        givenJobOfSchedule(JOB_B, 8);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+
+        gate.admit(WORKFLOW, JOB_B, new JobDataMap());
+
+        assertThat(refused).extracting(start -> start.schedule().getScheduleId(), start -> start.schedule().getExecType())
+                .containsExactly(tuple(8, TriggerType.SCHEDULER));
+    }
+
+    @Test
+    @DisplayName("release — a start dropped after waiting too long is handed on like a refused one")
+    void releaseHandsDroppedStartToListenerWhenItWaitedTooLong() throws SchedulerException {
+        List<Refused> refused = listenToRefusals();
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        givenJobOfSchedule(JOB_B, 8);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.admit(WORKFLOW, JOB_B, new JobDataMap());
+        clock.advance(MAX_WAIT.plusMinutes(1));
+
+        gate.release(WORKFLOW);
+
+        assertThat(refused).singleElement().satisfies(start -> {
+            assertThat(start.schedule().getScheduleId()).isEqualTo(8);
+            assertThat(start.refusal().getMessage()).contains("waited longer than 60 minutes");
+        });
+    }
+
+    @Test
+    @DisplayName("admit — a start whose job is gone is still refused and reported, only not recorded")
+    void admitSkipsListenerWhenRefusedStartNamesNoSchedule() {
+        List<Refused> refused = listenToRefusals();
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.REFUSE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+
+        Admission second = gate.admit(WORKFLOW, JOB_B, new JobDataMap());
+
+        assertThat(second).isEqualTo(Admission.REFUSED);
+        assertThat(refused).isEmpty();
+        verify(notifications).send(eq(WORKFLOW), any());
+    }
+
+    @Test
+    @DisplayName("admit — a listener that fails does not change the decision")
+    void admitRefusesStartWhenListenerThrows() {
+        gate.onRefusal((schedule, connectionId, refusal) -> {
+            throw new IllegalStateException("database is down");
+        });
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.REFUSE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        JobDataMap start = new JobDataMap();
+        start.put("data", new ScheduleData(7, TriggerType.SCHEDULER));
+
+        Admission second = gate.admit(WORKFLOW, JOB_B, start);
+
+        assertThat(second).isEqualTo(Admission.REFUSED);
+    }
+
     // ── checkCanStart ────────────────────────────────────────────────────────
 
     @Test
@@ -295,6 +386,23 @@ class WorkflowRunGateTest {
         GlobalVariable variable = GlobalVariableFixture.aMutable(1L, "counter", "0", "0", workflowId);
         variable.setBusyPolicy(policy);
         when(repository.findMutableUsedByWorkflow(workflowId)).thenReturn(List.of(variable));
+    }
+
+    private List<Refused> listenToRefusals() {
+        List<Refused> refused = new ArrayList<>();
+        gate.onRefusal((schedule, connectionId, refusal) -> refused.add(new Refused(schedule, connectionId, refusal)));
+        return refused;
+    }
+
+    private void givenJobOfSchedule(JobKey jobKey, int scheduleId) throws SchedulerException {
+        JobDataMap jobData = new JobDataMap();
+        jobData.put("data", new ScheduleData(scheduleId, TriggerType.SCHEDULER));
+        JobDetail job = mock(JobDetail.class);
+        when(job.getJobDataMap()).thenReturn(jobData);
+        when(quartzScheduler.getJobDetail(jobKey)).thenReturn(job);
+    }
+
+    private record Refused(ScheduleData schedule, long connectionId, GlobalVariableConflictException refusal) {
     }
 
     private Trigger firedTrigger() throws SchedulerException {
