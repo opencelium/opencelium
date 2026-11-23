@@ -14,6 +14,8 @@ import com.becon.opencelium.backend.resource.error.GlobalReferenceErrorResource;
 import com.becon.opencelium.backend.resource.error.GlobalVariableErrorResource;
 import com.becon.opencelium.backend.resource.error.JumpValidationErrorResource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -24,6 +26,16 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import java.time.Instant;
 import java.util.Date;
 
+/**
+ * Turns the application's own exceptions into their error responses.
+ *
+ * <p>Spring asks the {@code @ControllerAdvice} classes one after another and takes the first one
+ * that has any handler for the exception. {@link ResponseExceptionHandler} handles
+ * {@link Exception}, which matches everything, so this class has to be asked first; otherwise
+ * every exception would answer 500. Without {@link Order} the two would be asked in the order
+ * their classes were found on the classpath, which differs between a build directory and a jar.
+ */
+@Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(value = NoHandlerFoundException.class)
