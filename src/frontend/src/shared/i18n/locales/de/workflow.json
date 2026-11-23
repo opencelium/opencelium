@@ -1326,7 +1326,8 @@
       "unauthorized": "Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an, um das Skript auszuführen.",
       "failed": "Der Testlauf konnte nicht gestartet werden."
     },
-    "consoleLog": "console gibt es auf der Server-Engine nicht (Nashorn · ES5.1). Verwenden Sie print(...) statt console.log; die Ausgabe erscheint im Tab „Ausgabe“."
+    "consoleLog": "console gibt es auf der Server-Engine nicht (Nashorn · ES5.1). Verwenden Sie print(...) statt console.log; die Ausgabe erscheint im Tab „Ausgabe“.",
+    "globalUnavailable": "Die importierten globalen Variablen {{names}} konnten nicht geladen werden: Sie wurden eventuell umbenannt, gelöscht oder sind für Sie nicht sichtbar."
   },
   "globalWrites": {
     "dialogTitle": "In globale Variablen schreiben: {{method}}",

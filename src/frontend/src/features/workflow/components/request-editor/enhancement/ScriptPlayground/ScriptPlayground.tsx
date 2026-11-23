@@ -4,17 +4,21 @@ import { Button } from '@shared/ui/primitives/Button';
 import { Empty } from '@shared/ui/primitives/Empty';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { Typography } from '@shared/ui/primitives/Typography';
 import type { Enhancement } from '@features/workflow/types/connection';
 import type { CompatibilityIssue } from '@features/workflow/script-sandbox/sandbox.types';
 import { useScriptRun } from '@features/workflow/script-sandbox/useScriptRun';
 import { useEnhancementArgs } from '../EnhancementArgs/useEnhancementArgs';
 import {
 	emptyInput,
-	parseInput,
 	readInputs,
 	saveInputs,
+	type InputValue,
 	type InputValues,
 } from './playgroundInputs';
+import { withScriptImports } from './playgroundGlobals';
+import { usePlaygroundArgs } from './usePlaygroundArgs';
+import { usePlaygroundGlobals } from './usePlaygroundGlobals';
 import { PlaygroundHeader } from './PlaygroundHeader';
 import { PlaygroundInput } from './PlaygroundInput';
 import { PlaygroundOutput } from './PlaygroundOutput';
@@ -42,24 +46,23 @@ export function ScriptPlayground({
 	const [lastRun, setLastRun] = useState<string>();
 	const sandbox = useScriptRun();
 	const { entries: argEntries } = useEnhancementArgs(enhancement);
-	const args: Record<string, unknown> = {};
-	const invalid: string[] = [];
-	const names = Object.keys(enhancement.args).filter((name) => /^VAR_\d+$/.test(name));
-	names.forEach((name) => {
-		try {
-			args[name] = parseInput(inputs[name] ?? emptyInput);
-		} catch {
-			invalid.push(name);
-		}
-	});
+	const { globals, isLoading: isLoadingGlobals } = usePlaygroundGlobals(enhancement.imports ?? []);
+	const { names, globalRows, args, invalid, unavailable } = usePlaygroundArgs(enhancement, inputs, globals);
+	const runScript = withScriptImports(script, globals);
+	const changeInput = (name: string, input: InputValue) => {
+		const next = { ...inputs, [name]: input };
+		setInputs(next);
+		saveInputs(enhancement.enhanceId, next);
+	};
 
 	const hasSyntaxError = issues.some((issue) => issue.kind === 'syntax');
 	const isDisabled =
 		enhancement.language !== 'js' ||
 		sandbox.status === 'running' ||
 		hasSyntaxError ||
+		isLoadingGlobals ||
 		invalid.length > 0;
-	const signature = JSON.stringify([script, inputs, enhancement.args, enhancement.language]);
+	const signature = JSON.stringify([runScript, inputs, enhancement.args, enhancement.language]);
 	const isStale = lastRun !== signature;
 	useEffect(() => {
 		const result = sandbox.result;
@@ -75,7 +78,7 @@ export function ScriptPlayground({
 	const run = () => {
 		if (isDisabled) return;
 		setLastRun(signature);
-		void sandbox.run({ language: 'js', script, variables: args });
+		void sandbox.run({ language: 'js', script: runScript, variables: args });
 	};
 	if (enhancement.language !== 'js')
 		return (
@@ -116,13 +119,22 @@ export function ScriptPlayground({
 					entry={argEntries.find((entry) => entry.key === name)}
 					input={inputs[name] ?? emptyInput}
 					isInvalid={invalid.includes(name)}
-					onChange={(input) => {
-						const next = { ...inputs, [name]: input };
-						setInputs(next);
-						saveInputs(enhancement.enhanceId, next);
-					}}
+					onChange={(input) => changeInput(name, input)}
 				/>
 			))}
+			{globalRows.map((row) => (
+				<PlaygroundInput
+					key={row.name}
+					name={row.name}
+					reference={`{{global.${row.name}}}`}
+					input={row.input}
+					isInvalid={invalid.includes(row.name)}
+					onChange={(input) => changeInput(row.name, input)}
+				/>
+			))}
+			{unavailable.length > 0 && (
+				<Typography variant="caption" isDanger>{t('sandbox.globalUnavailable', { names: unavailable.join(', ') })}</Typography>
+			)}
 			<div className="scriptPlaygroundRunRow">
 				<Tooltip
 					content={

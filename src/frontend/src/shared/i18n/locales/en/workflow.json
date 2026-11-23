@@ -1326,7 +1326,8 @@
       "unauthorized": "Your session has expired. Sign in again to run the script.",
       "failed": "The test run could not be started."
     },
-    "consoleLog": "console does not exist on the server engine (Nashorn · ES5.1). Use print(...) instead of console.log; its text appears in the Output tab."
+    "consoleLog": "console does not exist on the server engine (Nashorn · ES5.1). Use print(...) instead of console.log; its text appears in the Output tab.",
+    "globalUnavailable": "Could not load the imported global variables {{names}}: they may have been renamed, deleted or not be visible to you."
   },
   "globalWrites": {
     "dialogTitle": "Write to global variables: {{method}}",
