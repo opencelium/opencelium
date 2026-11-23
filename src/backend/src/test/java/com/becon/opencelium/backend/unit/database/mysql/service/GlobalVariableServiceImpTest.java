@@ -5,7 +5,9 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
@@ -56,7 +58,11 @@ import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableRestor
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableUsageDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableValueDTO;
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
+import com.becon.opencelium.backend.scriptengine.LanguageType;
+import com.becon.opencelium.backend.scriptengine.ScriptEngine;
+import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
 import com.becon.opencelium.backend.scriptengine.engines.NashornEngine;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity.Caller;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
@@ -165,6 +171,12 @@ class GlobalVariableServiceImpTest {
     @Mock
     WorkflowRunGate runGate;
 
+    @Mock
+    ScriptExecutionManager scriptExecutionManager;
+
+    @Mock
+    ScriptEngine pythonEngine;
+
     @Captor
     ArgumentCaptor<Collection<Long>> askedIds;
 
@@ -178,7 +190,7 @@ class GlobalVariableServiceImpTest {
                 userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
                 scopeResolver,
                 json, CIPHER, runGate, MAX_VALUE_BYTES, MAX_SCRIPT_BYTES,
-                new NashornEngine(), SCRIPT_TIMEOUT_MS);
+                new NashornEngine(), scriptExecutionManager, SCRIPT_TIMEOUT_MS);
 
         // the caller is the owner and may do everything, unless a test says otherwise
         lenient().when(security.caller()).thenReturn(Optional.of(OWNER));
@@ -292,6 +304,57 @@ class GlobalVariableServiceImpTest {
                         GlobalScript.Parameter::defaultValue)
                 .containsExactly(tuple("date", true, null), tuple("pattern", false, new TextNode("dd.MM.yyyy")));
         assertThat(savedChanges(1).get(0).getNewValue()).isEqualTo(saved.getValue());
+    }
+
+    @Test
+    @DisplayName("create — a Python script is saved once the polyglot service accepts its code")
+    void createSavesPythonScriptWhenPolyglotServiceAcceptsCode() {
+        givenPythonEngineAnswering(Map.of("ok", true));
+        GlobalVariableRequestDTO.Script script = aPythonScript("return date[:10]");
+
+        service.create(GlobalVariableFixture.aScriptRequest("isoDay", script, null));
+
+        assertThat(GlobalScript.fromJson(savedVariable().getValue()).language()).isEqualTo("python3");
+        verify(pythonEngine).execute(contains("_oc_check"),
+                eq(Map.of(GlobalScript.PYTHON_CHECK_CODE, "return date[:10]")));
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenPythonCodeDoesNotParse() {
+        givenPythonEngineAnswering(Map.of("ok", false, "line", 2.0, "column", 5.0, "message", "invalid syntax"));
+        GlobalVariableRequestDTO request =
+                GlobalVariableFixture.aScriptRequest("isoDay", aPythonScript("x = 1\nreturn x +"), null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code, Violation::message)
+                .containsExactly(tuple("script.code", Code.SCRIPT_SYNTAX, "Line 2, column 5: invalid syntax"));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("create — a Python script is not saved unchecked while the polyglot service is down")
+    void createThrowsValidationExceptionWhenPolyglotServiceIsDown() {
+        when(scriptExecutionManager.resolveEngine(LanguageType.PYTHON_3)).thenReturn(Optional.of(pythonEngine));
+        when(pythonEngine.isUp()).thenReturn(false);
+        GlobalVariableRequestDTO request =
+                GlobalVariableFixture.aScriptRequest("isoDay", aPythonScript("return date"), null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("script.code", Code.SCRIPT_ENGINE_UNAVAILABLE));
+        verify(pythonEngine, never()).execute(anyString(), anyMap());
+    }
+
+    @Test
+    void createAsksNoServiceWhenPythonScriptFailsBackendCheck() {
+        GlobalVariableRequestDTO request = GlobalVariableFixture.aScriptRequest("isoDay",
+                new GlobalVariableRequestDTO.Script("python3", "return 1",
+                        List.of(new GlobalVariableRequestDTO.Parameter("lambda", null, null, null))), null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::code)
+                .containsExactly(Code.PARAMETER_INVALID);
+        verifyNoInteractions(scriptExecutionManager);
     }
 
     @Test
@@ -550,13 +613,81 @@ class GlobalVariableServiceImpTest {
         assertThat(answer.error().message()).contains(SCRIPT_TIMEOUT_MS + " ms");
     }
 
+    @Test
+    @DisplayName("testScript — a Python script is checked, then called on the polyglot service with JSON in and out")
+    void testScriptReturnsResultWhenPythonScriptRuns() throws Exception {
+        givenPythonEngineAnswering(Map.of("ok", true), "{\"day\": \"2026-11-17\", \"count\": 2}");
+
+        GlobalScriptTestDTO answer = service.testScript(new GlobalScriptTestDTO.Request("isoDay", "python3",
+                "return {'day': date[:10], 'count': 2}", aPythonScript("").parameters(),
+                List.of(new TextNode("2026-11-17T22:00:00Z"))));
+
+        assertThat(answer.valid()).isTrue();
+        // 2 stays an integer: the result comes back as JSON text, not as the service's doubles
+        assertThat(answer.result()).isEqualTo(json.readTree("{\"day\": \"2026-11-17\", \"count\": 2}"));
+        assertThat(answer.result().get("count").isInt()).isTrue();
+        verify(pythonEngine).execute(contains("OC_TESTED(*json.loads(OC_TEST_ARGUMENTS))"),
+                eq(Map.of("OC_TEST_ARGUMENTS", "[\"2026-11-17T22:00:00Z\"]")));
+    }
+
+    @Test
+    void testScriptReturnsSyntaxErrorWithPositionWhenPythonCodeDoesNotParse() {
+        givenPythonEngineAnswering(Map.of("ok", false, "line", 1.0, "column", 8.0, "message", "invalid syntax"));
+
+        GlobalScriptTestDTO answer = service.testScript(
+                new GlobalScriptTestDTO.Request(null, "python3", "return +", List.of(), List.of()));
+
+        assertThat(answer.error())
+                .isEqualTo(new GlobalScriptTestDTO.Problem("SCRIPT_SYNTAX", "invalid syntax", 1L, 8L));
+        verify(pythonEngine, times(1)).execute(anyString(), anyMap());
+    }
+
+    @Test
+    void testScriptReturnsRuntimeErrorWhenPythonScriptRaises() {
+        givenPythonEngineAnswering(Map.of("ok", true));
+        when(pythonEngine.execute(contains("OC_TESTED"), anyMap()))
+                .thenThrow(new ScriptExecutionException("Exception: Script variable 'isoDay': KeyError: 'x'"));
+
+        GlobalScriptTestDTO answer = service.testScript(
+                new GlobalScriptTestDTO.Request("isoDay", "python3", "return {}['x']", List.of(), List.of()));
+
+        assertThat(answer.error().code()).isEqualTo("SCRIPT_RUNTIME");
+        assertThat(answer.error().message()).contains("KeyError");
+    }
+
+    @Test
+    void testScriptReturnsEngineUnavailableWhenPolyglotServiceIsOff() {
+        when(scriptExecutionManager.resolveEngine(LanguageType.PYTHON_3)).thenReturn(Optional.empty());
+
+        GlobalScriptTestDTO answer = service.testScript(
+                new GlobalScriptTestDTO.Request(null, "python3", "return 1", List.of(), List.of()));
+
+        assertThat(answer.error().code()).isEqualTo("SCRIPT_ENGINE_UNAVAILABLE");
+    }
+
     @ParameterizedTest
-    @ValueSource(strings = {"python3", "python2", "ruby"})
-    void testScriptReturnsValidationUnavailableWhenLanguageIsNotJavaScript(String language) {
+    @ValueSource(strings = {"python2", "ruby"})
+    void testScriptReturnsValidationUnavailableWhenLanguageIsNeitherJsNorPython3(String language) {
         GlobalScriptTestDTO answer = service.testScript(
                 new GlobalScriptTestDTO.Request(null, language, "return 1", List.of(), List.of()));
 
         assertThat(answer.error().code()).isEqualTo("VALIDATION_UNAVAILABLE");
+    }
+
+    /**
+     * The polyglot service is up and answers the syntax check with {@code checkAnswer}, then each
+     * further call with the next of {@code callAnswers}.
+     */
+    private void givenPythonEngineAnswering(Object checkAnswer, Object... callAnswers) {
+        when(scriptExecutionManager.resolveEngine(LanguageType.PYTHON_3)).thenReturn(Optional.of(pythonEngine));
+        when(pythonEngine.isUp()).thenReturn(true);
+        when(pythonEngine.execute(anyString(), anyMap())).thenReturn(checkAnswer, callAnswers);
+    }
+
+    /** A Python script with the required parameter date. */
+    private static GlobalVariableRequestDTO.Script aPythonScript(String code) {
+        return new GlobalVariableRequestDTO.Script("python3", code,
+                List.of(new GlobalVariableRequestDTO.Parameter("date", null, null, null)));
     }
 
     /** A test run of formatDate: date required, pattern with the default "dd.MM.yyyy". */
@@ -2504,7 +2635,7 @@ class GlobalVariableServiceImpTest {
         return new GlobalVariableServiceImp(repository, changeRepository, mapper, security,
                 userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
                 scopeResolver, json, cipher, runGate, MAX_VALUE_BYTES, MAX_SCRIPT_BYTES,
-                new NashornEngine(), SCRIPT_TIMEOUT_MS);
+                new NashornEngine(), scriptExecutionManager, SCRIPT_TIMEOUT_MS);
     }
 
     private static GlobalVariableChangeDTO aMaskedChangeDto() {

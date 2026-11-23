@@ -40,6 +40,8 @@ import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableUsageD
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableValueDTO;
 import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import com.becon.opencelium.backend.scriptengine.LanguageType;
+import com.becon.opencelium.backend.scriptengine.ScriptEngine;
+import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
 import com.becon.opencelium.backend.scriptengine.engines.NashornEngine;
 import com.becon.opencelium.backend.scriptengine.ex.InvalidScriptException;
 import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
@@ -107,8 +109,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     // the JSON text of a value that is left out; a secret stores no text for it
     private static final String JSON_NULL = "null";
     // languages script variables will support, which cannot be checked or run yet
-    private static final Set<String> UNTESTABLE_LANGUAGES = Set.of(LanguageType.PYTHON_2.getCode(),
-            LanguageType.PYTHON_3.getCode(), LanguageType.RUBY.getCode());
+    private static final Set<String> UNTESTABLE_LANGUAGES =
+            Set.of(LanguageType.PYTHON_2.getCode(), LanguageType.RUBY.getCode());
     // globals of the test call; the script's own names live inside its function and cannot clash
     private static final String TESTED_FUNCTION = "OC_TESTED";
     private static final String TEST_ARGUMENTS = "OC_TEST_ARGUMENTS";
@@ -129,6 +131,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     private final int maxValueBytes;
     private final int maxScriptBytes;
     private final NashornEngine nashornEngine;
+    private final ScriptExecutionManager scriptExecutionManager;
     private final Duration scriptTimeLimit;
 
     public GlobalVariableServiceImp(
@@ -148,6 +151,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             @Value("${opencelium.global-variable.max-value-bytes:65536}") int maxValueBytes,
             @Value("${opencelium.global-variable.max-script-bytes:262144}") int maxScriptBytes,
             NashornEngine nashornEngine,
+            ScriptExecutionManager scriptExecutionManager,
             @Value("${opencelium.global-variable.script-timeout-ms:5000}") long scriptTimeoutMs) {
         this.repository = repository;
         this.changeRepository = changeRepository;
@@ -165,6 +169,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         this.maxValueBytes = maxValueBytes;
         this.maxScriptBytes = maxScriptBytes;
         this.nashornEngine = nashornEngine;
+        this.scriptExecutionManager = scriptExecutionManager;
         this.scriptTimeLimit = Duration.ofMillis(scriptTimeoutMs);
     }
 
@@ -700,6 +705,17 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
                     : new GlobalScriptTestDTO.Problem(first.code().name(), syntax.message(), syntax.line(),
                             syntax.column()), null);
         }
+        if (script.isPython()) {
+            try {
+                Optional<GlobalScript.SyntaxError> syntax = checkPythonCode(script);
+                if (syntax.isPresent()) {
+                    return GlobalScriptTestDTO.failed(new GlobalScriptTestDTO.Problem(Code.SCRIPT_SYNTAX.name(),
+                            syntax.get().message(), syntax.get().line(), syntax.get().column()), null);
+                }
+            } catch (ScriptEngineUnavailable e) {
+                return GlobalScriptTestDTO.failed(unavailable(e), null);
+            }
+        }
 
         List<JsonNode> arguments = request.testArguments() == null ? List.of() : request.testArguments();
         for (int i = arguments.size(); i < script.parameters().size(); i++) {
@@ -716,6 +732,10 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
 
     /** Calls a checked script once, the way an enhancement that imports it calls it. */
     private GlobalScriptTestDTO callScript(GlobalScript script, String name, List<JsonNode> arguments) {
+        if (script.isPython()) {
+            return callPythonScript(script, name, arguments);
+        }
+
         List<Object> values = arguments.stream()
                 .map(argument -> argument == null ? null : objectMapper.convertValue(argument, Object.class))
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -733,6 +753,84 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         } catch (ScriptExecutionException | InvalidScriptException e) {
             return GlobalScriptTestDTO.failed(
                     new GlobalScriptTestDTO.Problem("SCRIPT_RUNTIME", e.getMessage(), null, null), elapsedMs(start));
+        }
+    }
+
+    /**
+     * Calls a checked Python script once on the polyglot service, the way an enhancement that
+     * imports it calls it. The arguments and the result travel as JSON text: the service passes
+     * every number inside a structure as a float, and JSON keeps 1 apart from 1.0.
+     */
+    private GlobalScriptTestDTO callPythonScript(GlobalScript script, String name, List<JsonNode> arguments) {
+        String code = script.functionSource(TESTED_FUNCTION, name)
+                + "import json\n"
+                + "RESULT_VAR = json.dumps(" + TESTED_FUNCTION + "(*json.loads(" + TEST_ARGUMENTS + ")), "
+                + "allow_nan=False)\n"
+                + "RESULT_VAR\n";
+
+        long start = System.nanoTime();
+        try {
+            ScriptEngine engine = pythonEngine();
+            String argumentsJson = objectMapper.writeValueAsString(arguments);
+            Object result = GlobalScript.runWithin(scriptTimeLimit, "The script",
+                    () -> engine.execute(code, Map.of(TEST_ARGUMENTS, argumentsJson)));
+            if (!(result instanceof String json)) {
+                throw new ScriptExecutionException("The script gave a result the test cannot read: " + result);
+            }
+            return GlobalScriptTestDTO.passed(objectMapper.readTree(json), elapsedMs(start));
+        } catch (ScriptEngineUnavailable e) {
+            return GlobalScriptTestDTO.failed(unavailable(e), elapsedMs(start));
+        } catch (GlobalScript.TimeLimitExceeded e) {
+            return GlobalScriptTestDTO.failed(
+                    new GlobalScriptTestDTO.Problem("SCRIPT_TIMEOUT", e.getMessage(), null, null), elapsedMs(start));
+        } catch (ScriptExecutionException | InvalidScriptException | JsonProcessingException e) {
+            return GlobalScriptTestDTO.failed(
+                    new GlobalScriptTestDTO.Problem("SCRIPT_RUNTIME", e.getMessage(), null, null), elapsedMs(start));
+        } catch (RuntimeException e) {
+            // the client gives up on a service it cannot reach with a plain runtime exception
+            return GlobalScriptTestDTO.failed(
+                    unavailable(new ScriptEngineUnavailable("The polyglot service could not be reached: "
+                            + e.getMessage())), elapsedMs(start));
+        }
+    }
+
+    /**
+     * Checks the code of a Python script on the polyglot service, by building its function as an
+     * import does, without calling it.
+     *
+     * @return the syntax error of the code, or nothing when it can be saved
+     * @throws ScriptEngineUnavailable if the service is off or down, or gives no answer in time
+     */
+    private Optional<GlobalScript.SyntaxError> checkPythonCode(GlobalScript script) {
+        ScriptEngine engine = pythonEngine();
+        try {
+            Object answer = GlobalScript.runWithin(scriptTimeLimit, "The syntax check of the script",
+                    () -> engine.execute(script.pythonCheckSource(),
+                            Map.of(GlobalScript.PYTHON_CHECK_CODE, script.code())));
+            return GlobalScript.pythonCheckResult(answer);
+        } catch (RuntimeException e) {
+            throw new ScriptEngineUnavailable(
+                    "The polyglot service could not check the Python script: " + e.getMessage());
+        }
+    }
+
+    /** Returns the engine of Python scripts: the polyglot service, if it is on and up. */
+    private ScriptEngine pythonEngine() {
+        return scriptExecutionManager.resolveEngine(LanguageType.PYTHON_3)
+                .filter(ScriptEngine::isUp)
+                .orElseThrow(() -> new ScriptEngineUnavailable(
+                        "Python scripts run on the polyglot service, which is not available"));
+    }
+
+    private static GlobalScriptTestDTO.Problem unavailable(ScriptEngineUnavailable e) {
+        return new GlobalScriptTestDTO.Problem(Code.SCRIPT_ENGINE_UNAVAILABLE.name(), e.getMessage(), null, null);
+    }
+
+    /** Thrown when the polyglot service cannot check or run a Python script. */
+    private static final class ScriptEngineUnavailable extends RuntimeException {
+
+        ScriptEngineUnavailable(String message) {
+            super(message);
         }
     }
 
@@ -1087,9 +1185,19 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             return null;
         }
 
+        int before = violations.size();
         GlobalScript script = new GlobalScript(
                 requested.language(), requested.code(), toParameters(requested.parameters(), violations));
         violations.addAll(script.check());
+        // Python is parsed on the polyglot service, once everything the backend checks is right
+        if (script.isPython() && violations.size() == before) {
+            try {
+                checkPythonCode(script).ifPresent(syntax ->
+                        violations.add(new Violation("script.code", Code.SCRIPT_SYNTAX, syntax.describe())));
+            } catch (ScriptEngineUnavailable e) {
+                violations.add(new Violation("script.code", Code.SCRIPT_ENGINE_UNAVAILABLE, e.getMessage()));
+            }
+        }
 
         String text = script.toJson();
         if (text.getBytes(StandardCharsets.UTF_8).length > maxScriptBytes) {

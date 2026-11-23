@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.exception.GlobalVariableValidationException.
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Violation;
 import com.becon.opencelium.backend.scriptengine.LanguageType;
 import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,6 +27,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -37,20 +39,25 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The definition of a script variable: a function body in a language, with declared parameters.
  *
  * <p>An enhancement imports the script as one of its args, {@code //var VAR_1 =
  * {{global.formatDate}};}, and its code calls it as a function, {@code VAR_1(VAR_0, 'dd.MM')}.
- * The script is meant as a pure function: it uses only its parameters, so its code may not call
- * {@code ref()} or {@code set()}, which reach the workflow and its variables.
+ * The script is meant as a pure function: it uses only its parameters, so its JavaScript code may
+ * not call {@code ref()} or {@code set()}, which reach the workflow and its variables.
+ *
+ * <p>A script is written in JavaScript, which runs on Nashorn in the core, or in Python 3, which
+ * runs on the polyglot service. The backend cannot parse Python, so the code of a Python script is
+ * checked on that service, by running {@link #pythonCheckSource} there.
  *
  * <p>The definition is stored as JSON in the {@code value} column of the variable, the form
  * {@link #toJson} writes, so the change log and restore treat a script like any value.
  *
- * @param language   code of the language, as {@link LanguageType} names it; only {@code js}
- *                   for now
+ * @param language   code of the language, as {@link LanguageType} names it: {@code js} or
+ *                   {@code python3}
  * @param code       the body of the function, which returns the result
  * @param parameters the declared parameters, in the order a call passes them
  */
@@ -62,6 +69,7 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     private static final Logger log = LoggerFactory.getLogger(GlobalScript.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String FUNCTION_NAME = "OC_SCRIPT";
+    private static final Set<String> LANGUAGES = Set.of(LanguageType.JS.getCode(), LanguageType.PYTHON_3.getCode());
     private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_$][A-Za-z0-9_$]*");
     private static final int DESCRIPTION_MAX_LENGTH = 512;
     // calls that reach the workflow or its variables, which a pure function does not do
@@ -73,6 +81,19 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
             "typeof", "var", "void", "while", "with", "class", "const", "enum", "export", "extends", "import",
             "super", "implements", "interface", "let", "package", "private", "protected", "public", "static",
             "yield", "null", "true", "false", "arguments", "eval", "undefined", "NaN", "Infinity");
+
+    /** The binding that carries the code to {@link #pythonCheckSource}, as a text. */
+    public static final String PYTHON_CHECK_CODE = "OC_CHECK_CODE";
+
+    private static final Pattern PYTHON_IDENTIFIER = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
+    // the parameter of a Python script that takes the arguments past the declared ones
+    private static final String PYTHON_EXTRA = "extra";
+    private static final Set<String> PYTHON_KEYWORDS = Set.of(
+            "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class", "continue",
+            "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in",
+            "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield");
+    // co_flags bit of a Python function whose body uses 'yield' and so returns a generator
+    private static final int PYTHON_GENERATOR_FLAG = 0x20;
 
     /**
      * One declared parameter.
@@ -127,8 +148,11 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
 
     /**
      * Checks the definition as saving it requires: a language that is available, valid
-     * parameters, and code that parses as the body of the function, returns a value and calls
-     * neither {@code ref()} nor {@code set()}.
+     * parameters, and code. JavaScript code must parse as the body of the function, return a
+     * value and call neither {@code ref()} nor {@code set()}. Python code is only checked for
+     * being there: its syntax is checked on the polyglot service, with {@link
+     * #pythonCheckSource}, and a Python script that ends without {@code return} returns
+     * {@code None}, which is null.
      *
      * @return what is wrong, each on its request field ({@code script.code}, {@code
      *         script.parameters[1].name}, ...); empty when the definition can be saved
@@ -136,19 +160,26 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     public List<Violation> check() {
         List<Violation> violations = new ArrayList<>();
 
-        if (!LanguageType.JS.getCode().equals(language)) {
+        if (!LANGUAGES.contains(language)) {
             violations.add(new Violation("script.language", Code.LANGUAGE_NOT_SUPPORTED,
-                    "Script variables are written in JavaScript (js) for now, not in '%s'".formatted(language)));
+                    "Script variables are written in JavaScript (js) or Python 3 (python3), not in '%s'"
+                            .formatted(language)));
         }
         boolean parametersValid = checkParameters(violations);
         if (code == null || code.isBlank()) {
             violations.add(new Violation("script.code", Code.SCRIPT_REQUIRED, "The code of the script is required"));
-        } else if (parametersValid && violations.isEmpty()) {
+        } else if (parametersValid && violations.isEmpty() && !isPython()) {
             // the code is parsed only once the function around it can be built
             checkCode(violations);
         }
 
         return violations;
+    }
+
+    /** Tells whether the script is written in Python 3, which runs on the polyglot service. */
+    @JsonIgnore // not part of the stored definition
+    public boolean isPython() {
+        return LanguageType.PYTHON_3.getCode().equals(language);
     }
 
     private boolean checkParameters(List<Violation> violations) {
@@ -159,12 +190,17 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
             Parameter parameter = parameters.get(i);
             String field = "script.parameters[" + i + "]";
 
-            if (parameter == null || parameter.name() == null || !IDENTIFIER.matcher(parameter.name()).matches()) {
+            if (parameter == null || parameter.name() == null || !isIdentifier(parameter.name())) {
+                violations.add(new Violation(field + ".name", Code.PARAMETER_INVALID, isPython()
+                        ? "A parameter name has letters, digits or '_' and does not start with a digit"
+                        : "A parameter name has letters, digits, '_' or '$' and does not start with a digit"));
+            } else if (isPython() && PYTHON_EXTRA.equals(parameter.name())) {
                 violations.add(new Violation(field + ".name", Code.PARAMETER_INVALID,
-                        "A parameter name has letters, digits, '_' or '$' and does not start with a digit"));
-            } else if (RESERVED.contains(parameter.name())) {
+                        "'%s' takes the extra arguments of a Python script".formatted(PYTHON_EXTRA)));
+            } else if (isReserved(parameter.name())) {
                 violations.add(new Violation(field + ".name", Code.PARAMETER_INVALID,
-                        "'%s' is a reserved word in JavaScript".formatted(parameter.name())));
+                        "'%s' is a reserved word in %s"
+                                .formatted(parameter.name(), isPython() ? "Python" : "JavaScript")));
             } else if (!seen.add(parameter.name())) {
                 violations.add(new Violation(field + ".name", Code.PARAMETER_INVALID,
                         "Parameter '%s' is declared twice".formatted(parameter.name())));
@@ -175,6 +211,14 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
         }
 
         return violations.size() == before;
+    }
+
+    private boolean isIdentifier(String name) {
+        return (isPython() ? PYTHON_IDENTIFIER : IDENTIFIER).matcher(name).matches();
+    }
+
+    private boolean isReserved(String name) {
+        return (isPython() ? PYTHON_KEYWORDS : RESERVED).contains(name);
     }
 
     private void checkCode(List<Violation> violations) {
@@ -259,6 +303,22 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     }
 
     /**
+     * Returns code in the language of the script that defines {@code variable} as a function an
+     * enhancement calls: JavaScript as {@link #jsFunctionSource} writes it, Python as {@link
+     * #pythonFunctionSource} writes it.
+     *
+     * @param variable   name of the enhancement arg that imports the script, e.g. {@code VAR_1}
+     * @param scriptName name of the script variable, for the errors
+     * @throws IllegalArgumentException if {@code variable} is not an identifier of the language
+     */
+    public String functionSource(String variable, String scriptName) {
+        if (variable == null || !isIdentifier(variable) || isReserved(variable)) {
+            throw new IllegalArgumentException("'%s' cannot name an imported script".formatted(variable));
+        }
+        return isPython() ? pythonFunctionSource(variable, scriptName) : jsFunctionSource(variable, scriptName);
+    }
+
+    /**
      * Returns JavaScript that defines {@code variable} as a function an enhancement calls: {@code
      * var VAR_1 = ...;}. The function takes the declared parameters in order and extra arguments
      * after them. It fails when a required parameter is missing, fills in the default of an
@@ -266,15 +326,8 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
      * throws, and fails when the code returns {@code undefined}. The code sees its parameters and
      * {@code arguments}; nothing keeps it from reading the enhancement's globals, which is
      * documented, not enforced.
-     *
-     * @param variable   name of the enhancement arg that imports the script, e.g. {@code VAR_1}
-     * @param scriptName name of the script variable, for the errors
-     * @throws IllegalArgumentException if {@code variable} is not a JavaScript identifier
      */
-    public String functionSource(String variable, String scriptName) {
-        if (variable == null || !IDENTIFIER.matcher(variable).matches() || RESERVED.contains(variable)) {
-            throw new IllegalArgumentException("'%s' cannot name an imported script".formatted(variable));
-        }
+    private String jsFunctionSource(String variable, String scriptName) {
         String label = jsString("Script variable '" + scriptName + "'");
 
         StringBuilder js = new StringBuilder()
@@ -304,6 +357,120 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
                 .append("};\n")
                 .append("})();\n")
                 .toString();
+    }
+
+    /**
+     * Returns Python that defines {@code variable} as a function an enhancement calls: {@code
+     * VAR_1 = ...}. The code is parsed with {@code ast} and becomes the body of {@code def
+     * OC_SCRIPT(<parameters>, *extra)}, so it keeps its own lines and needs no indenting; it runs
+     * with only the builtins as its globals, so it cannot read the enhancement's args. The
+     * function fails when a required parameter is left out, fills in the default of an optional
+     * one that is left out, and names the script in an error the code raises. A {@code None}
+     * passed for a parameter stays {@code None}, as {@code null} does in JavaScript. Code that
+     * ends without {@code return} returns {@code None}, which is null. Only the defined
+     * function is left behind in the enhancement's globals.
+     */
+    private String pythonFunctionSource(String variable, String scriptName) {
+        String factory = "_oc_import_" + variable;
+        String label = jsString("Script variable '" + scriptName + "'");
+
+        StringBuilder py = new StringBuilder()
+                .append("def ").append(factory).append("():\n")
+                .append("    import json\n")
+                .append(pythonBuild("    ", jsString(code), jsString("<script variable " + scriptName + ">")))
+                .append("    def call(*args):\n")
+                .append("        args = list(args)\n");
+        for (int i = 0; i < parameters.size(); i++) {
+            Parameter parameter = parameters.get(i);
+            py.append("        if len(args) <= ").append(i).append(":\n");
+            if (parameter.required()) {
+                py.append("            raise Exception(").append(label).append(" + ")
+                        .append(jsString(": parameter '" + parameter.name() + "' is missing")).append(")\n");
+            } else {
+                // read per call, so a call that changes a default object changes only its own
+                py.append("            args.append(json.loads(").append(jsString(jsLiteral(parameter.defaultValue())))
+                        .append("))\n");
+            }
+        }
+
+        return py.append("        try:\n")
+                .append("            return script(*args)\n")
+                .append("        except Exception as e:\n")
+                .append("            raise Exception(").append(label)
+                .append(" + ': ' + type(e).__name__ + ': ' + str(e))\n")
+                .append("    return call\n")
+                .append(variable).append(" = ").append(factory).append("()\n")
+                .append("del ").append(factory).append('\n')
+                .toString();
+    }
+
+    /**
+     * Returns Python that checks the code of this script, given as the text binding {@link
+     * #PYTHON_CHECK_CODE}, by building its function as an import does, without calling it. It
+     * evaluates to a dict: {@code {"ok": True}}, or {@code {"ok": False, "line": ..., "column":
+     * ..., "message": ...}} with the line in the code, from 1, when the code does not parse or
+     * uses {@code yield}, which would make the function return a generator instead of a value.
+     * {@link #pythonCheckResult} reads the answer.
+     */
+    public String pythonCheckSource() {
+        return "def _oc_check():\n"
+                + "    try:\n"
+                + pythonBuild("        ", PYTHON_CHECK_CODE, jsString("<script>"))
+                + "    except (SyntaxError, ValueError) as e:\n"
+                + "        return {'ok': False, 'line': getattr(e, 'lineno', None), "
+                + "'column': getattr(e, 'offset', None), 'message': getattr(e, 'msg', str(e))}\n"
+                + "    if script.__code__.co_flags & " + PYTHON_GENERATOR_FLAG + ":\n"
+                + "        return {'ok': False, 'line': None, 'column': None, "
+                + "'message': \"The script returns a value, so it cannot use 'yield'\"}\n"
+                + "    return {'ok': True}\n"
+                // the polyglot service answers with RESULT_VAR or with the last expression
+                + "RESULT_VAR = _oc_check()\n"
+                + "RESULT_VAR\n";
+    }
+
+    /**
+     * Reads what {@link #pythonCheckSource} evaluated to on the polyglot service.
+     *
+     * @return the syntax error of the code, or nothing when the code can be saved
+     * @throws IllegalStateException if the answer is not the one the check gives
+     */
+    public static Optional<SyntaxError> pythonCheckResult(Object answer) {
+        if (!(answer instanceof Map<?, ?> fields) || !(fields.get("ok") instanceof Boolean ok)) {
+            throw new IllegalStateException("The polyglot service gave no answer to the syntax check: " + answer);
+        }
+        if (ok) {
+            return Optional.empty();
+        }
+
+        Long line = fields.get("line") instanceof Number number ? number.longValue() : null;
+        Long column = line != null && fields.get("column") instanceof Number number ? number.longValue() : null;
+        return Optional.of(new SyntaxError(line, column, String.valueOf(fields.get("message"))));
+    }
+
+    /**
+     * Returns Python lines, each starting with {@code indent}, that set {@code script} to the
+     * function of the declared parameters whose body is the code {@code codeExpression}
+     * evaluates to. The code keeps its own line numbers; a syntax error is raised as {@code
+     * SyntaxError} with the line in the code.
+     */
+    private String pythonBuild(String indent, String codeExpression, String fileExpression) {
+        String header = parameters.stream().map(Parameter::name)
+                .collect(Collectors.joining(", ", "def " + FUNCTION_NAME + "(", ""))
+                + (parameters.isEmpty() ? "" : ", ") + "*" + PYTHON_EXTRA + "): pass";
+
+        return Stream.of(
+                        "import ast",
+                        "tree = ast.parse(" + codeExpression + ", " + fileExpression + ", 'exec')",
+                        "function = ast.parse(" + jsString(header) + ").body[0]",
+                        // code of comments alone has no statement, and a function needs one
+                        "function.body = tree.body or [ast.Pass()]",
+                        "module = ast.Module(body=[function], type_ignores=[])",
+                        "ast.fix_missing_locations(module)",
+                        "namespace = {}",
+                        "exec(compile(module, " + fileExpression + ", 'exec'), namespace)",
+                        "script = namespace[" + jsString(FUNCTION_NAME) + "]")
+                .map(line -> indent + line + "\n")
+                .collect(Collectors.joining());
     }
 
     /**
@@ -363,6 +530,7 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
         }
     }
 
+    // a JavaScript string literal written from JSON is a Python string literal too
     private static String jsString(String text) {
         return jsLiteral(TextNode.valueOf(text));
     }
@@ -395,7 +563,12 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
 
         /** Returns the error as one text, its position first. */
         public String describe() {
-            return line == null ? message : "Line %d, column %d: %s".formatted(line, column, message);
+            if (line == null) {
+                return message;
+            }
+            return column == null
+                    ? "Line %d: %s".formatted(line, message)
+                    : "Line %d, column %d: %s".formatted(line, column, message);
         }
     }
 

@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.exception.GlobalVariableValidationException.
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Violation;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalScript.Parameter;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript.SyntaxError;
 import com.becon.opencelium.backend.scriptengine.engines.NashornEngine;
 import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -121,8 +123,8 @@ class GlobalScriptTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"python3", "ruby", "JS"})
-    void checkReportsLanguageNotSupportedWhenLanguageIsNotJs(String language) {
+    @ValueSource(strings = {"python2", "ruby", "JS", "Python3"})
+    void checkReportsLanguageNotSupportedWhenLanguageIsNeitherJsNorPython3(String language) {
         assertThat(new GlobalScript(language, "return 1;", List.of()).check())
                 .extracting(Violation::field, Violation::code)
                 .containsExactly(tuple("script.language", Code.LANGUAGE_NOT_SUPPORTED));
@@ -134,6 +136,110 @@ class GlobalScriptTest {
         assertThat(aScript(code).check())
                 .extracting(Violation::field, Violation::code)
                 .containsExactly(tuple("script.code", Code.SCRIPT_REQUIRED));
+    }
+
+    // ── Python ────────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("check — Python code is not parsed here, and code without return is accepted: it returns None")
+    void checkReturnsNoViolationWhenPythonCodeHasNoReturn() {
+        GlobalScript script = new GlobalScript("python3", "x = date\nif x:\n    return x", List.of(DATE, PATTERN));
+
+        assertThat(script.check()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"$date", "lambda", "None", "extra"})
+    void checkReportsParameterInvalidWhenNameIsNoUsablePythonIdentifier(String name) {
+        GlobalScript script = new GlobalScript("python3", "return 1", List.of(new Parameter(name, null, true, null)));
+
+        assertThat(script.check()).extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("script.parameters[0].name", Code.PARAMETER_INVALID));
+    }
+
+    @Test
+    void checkAcceptsJavaScriptKeywordWhenItNamesPythonParameter() {
+        GlobalScript script = new GlobalScript("python3", "return function",
+                List.of(new Parameter("function", null, true, null)));
+
+        assertThat(script.check()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("functionSource — a Python script becomes OC_SCRIPT(<parameters>, *extra), built by ast")
+    void functionSourceDefinesPythonFunctionWhenScriptIsPython() {
+        GlobalScript script = new GlobalScript("python3", "return date[:5]", List.of(DATE, PATTERN));
+
+        String source = script.functionSource("VAR_1", "formatDate");
+
+        assertThat(source)
+                .startsWith("def _oc_import_VAR_1():\n")
+                .contains("tree = ast.parse(\"return date[:5]\", \"<script variable formatDate>\", 'exec')")
+                .contains("ast.parse(\"def OC_SCRIPT(date, pattern, *extra): pass\")")
+                .contains("raise Exception(\"Script variable 'formatDate'\" + \": parameter 'date' is missing\")")
+                .contains("args.append(json.loads(\"\\\"dd.MM.yyyy\\\"\"))")
+                .endsWith("VAR_1 = _oc_import_VAR_1()\ndel _oc_import_VAR_1\n");
+    }
+
+    @Test
+    void functionSourceTakesOnlyExtraArgumentsWhenPythonScriptHasNoParameters() {
+        assertThat(new GlobalScript("python3", "return len(extra)", List.of()).functionSource("VAR_1", "count"))
+                .contains("ast.parse(\"def OC_SCRIPT(*extra): pass\")")
+                .doesNotContain("len(args) <=");
+    }
+
+    @Test
+    void functionSourceThrowsWhenVariableIsPythonKeyword() {
+        GlobalScript script = new GlobalScript("python3", "return 1", List.of());
+
+        assertThatThrownBy(() -> script.functionSource("None", "answer")).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void pythonCheckSourceReadsCodeFromBindingWhenBuildingFunction() {
+        String source = new GlobalScript("python3", "return 1", List.of(DATE)).pythonCheckSource();
+
+        assertThat(source)
+                .contains("tree = ast.parse(" + GlobalScript.PYTHON_CHECK_CODE + ", ")
+                .contains("ast.parse(\"def OC_SCRIPT(date, *extra): pass\")")
+                .doesNotContain("return 1")
+                .endsWith("RESULT_VAR = _oc_check()\nRESULT_VAR\n");
+    }
+
+    @Test
+    void pythonCheckResultReturnsNothingWhenCodeIsAccepted() {
+        assertThat(GlobalScript.pythonCheckResult(Map.of("ok", true))).isEmpty();
+    }
+
+    @Test
+    @DisplayName("pythonCheckResult — the service gives numbers as doubles, the position is read as whole numbers")
+    void pythonCheckResultReturnsPositionWhenCodeDoesNotParse() {
+        Map<String, Object> answer = Map.of("ok", false, "line", 2.0, "column", 11.0, "message", "invalid syntax");
+
+        assertThat(GlobalScript.pythonCheckResult(answer)).contains(new SyntaxError(2L, 11L, "invalid syntax"));
+    }
+
+    @Test
+    void pythonCheckResultReturnsMessageOnlyWhenErrorHasNoPosition() {
+        Map<String, Object> answer = new HashMap<>(Map.of("ok", false, "message", "uses 'yield'"));
+        answer.put("line", null);
+
+        assertThat(GlobalScript.pythonCheckResult(answer)).map(SyntaxError::describe).contains("uses 'yield'");
+    }
+
+    @ParameterizedTest
+    @MethodSource("unreadableCheckAnswers")
+    void pythonCheckResultThrowsIllegalStateExceptionWhenAnswerIsNotTheCheck(Object answer) {
+        assertThatThrownBy(() -> GlobalScript.pythonCheckResult(answer)).isInstanceOf(IllegalStateException.class);
+    }
+
+    static Stream<Arguments> unreadableCheckAnswers() {
+        return Stream.of(Arguments.of((Object) null), Arguments.of("ok"), Arguments.of(Map.of("ok", "yes")));
+    }
+
+    @Test
+    void describeLeavesColumnOutWhenOnlyLineIsKnown() {
+        assertThat(new SyntaxError(3L, null, "unexpected indent").describe()).isEqualTo("Line 3: unexpected indent");
     }
 
     // ── the function an enhancement calls ─────────────────────────────────────
