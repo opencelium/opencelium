@@ -30,13 +30,36 @@ public interface UserService {
 
     Optional<User> findByUsername(String username);
 
+    /**
+     * Returns the OC account that a login identifier names, or empty when the identifier does not
+     * belong to one.
+     *
+     * <p>The identifier is matched against the email first and then against the username. An
+     * account only counts as local when it is a {@link
+     * com.becon.opencelium.backend.enums.AuthMethod#BASIC} user that has a password: LDAP users
+     * authenticate against the directory, and BASIC rows without a password are LDAP users created
+     * before the {@code auth_method} column existed. Login uses this to decide where a password is
+     * checked, so a local account's password is never sent to the directory.
+     */
+    Optional<User> findLocalAccount(String identifier);
+
     Optional<User> findById(int id);
+
+    /**
+     * Plain lookup without the pessimistic write lock that {@link #findById(int)} takes. For
+     * per-request reads such as bearer token authentication, where locking the row would
+     * serialize that user's requests and contend with the login path.
+     */
+    Optional<User> findByIdNoLock(int id);
 
     User getById(Integer userId);
 
     User save(User user);
 
     boolean existsByEmail(String email);
+
+    /** Whether any user, OC or LDAP, already owns {@code username}; the comparison is case-insensitive. */
+    boolean existsByUsername(String username);
 
     boolean existsById(int id);
 

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ExecutionManagerImpl implements ExecutionManager {
@@ -43,8 +44,6 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final List<Loop> loops = new ArrayList<>();
     private final List<FieldBindEx> fieldBind;
     private final List<Operation> operations = new ArrayList<>();
-    private final ScriptExecutionManager scriptExecutionManager;
-    private final OcLogger<ExecutionLog> logger;
     private Integer currentConnectorId;
     private Pagination currentPagination;
 
@@ -55,15 +54,31 @@ public class ExecutionManagerImpl implements ExecutionManager {
             Map<Integer, RestTemplate> restTemplate,
             Map<Integer, Pagination> pagination
     ) {
+        this(webhookVars, fieldBind, requestData, restTemplate, pagination, ReferenceExtractor::new);
+    }
+
+    /**
+     * Creates a manager that resolves references with the extractor {@code extractorFactory} builds
+     * for it, instead of the default {@link ReferenceExtractor}.
+     *
+     * <p>Used by the single-method test to put static values in place of the references that point
+     * to data the test does not produce.
+     */
+    public ExecutionManagerImpl(
+            Map<String, Object> webhookVars,
+            List<FieldBindEx> fieldBind,
+            Map<Integer, Map<String, String>> requestData,
+            Map<Integer, RestTemplate> restTemplate,
+            Map<Integer, Pagination> pagination,
+            Function<ExecutionManager, Extractor> extractorFactory
+    ) {
         this.webhookVars = webhookVars;
         this.fieldBind = fieldBind;
         this.requestData = requestData;
         this.restTemplate = restTemplate;
         this.pagination = pagination;
 
-        this.refExtractor = new ReferenceExtractor(this);
-        this.scriptExecutionManager = ScriptExecutionManagerProvider.get();
-        this.logger = ThreadLocalOcLogger.get();
+        this.refExtractor = extractorFactory.apply(this);
     }
 
     @Override
@@ -129,6 +144,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
                 .map(FieldBindEx::getEnhance).findFirst()
                 .orElseThrow(() -> new RuntimeException("Non existing fieldBind id 'bindId' = " + bindId));
 
+        ScriptExecutionManager scriptExecutionManager = ScriptExecutionManagerProvider.get();
         ScriptEngine scriptEngine = scriptExecutionManager.resolveEngine(LanguageType.getByCode(enhancement.getLang()))
                 .orElseThrow(() -> new RuntimeException("No engine is available for '%s' language".formatted(enhancement.getLang())));
 
@@ -195,6 +211,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
                 .formatted(cause.getMessage());
 
         log.warn("Reference '{}' is not resolved. {}", reference, message);
+        OcLogger<ExecutionLog> logger = ThreadLocalOcLogger.get();
         logger.logAndSend("segment=REF_NOT_FOUND ref=(%s) data=%s".formatted(reference, message));
     }
 

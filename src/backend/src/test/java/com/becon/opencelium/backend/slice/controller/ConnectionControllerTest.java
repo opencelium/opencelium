@@ -16,6 +16,25 @@ import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.execution.service.MethodTestService;
+import com.becon.opencelium.backend.execution.service.ReferenceValidationService;
+import com.becon.opencelium.backend.reference.enums.ReferenceType;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlRequestDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlResultDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.ConnectorReference;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.StaticReference;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRequestDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO.ReceivedResponse;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO.SentRequest;
+import com.becon.opencelium.backend.reference.model.DirectReference;
+import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationRequestDTO;
+import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationResultDTO;
+import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationResultDTO.Issue;
+import com.becon.opencelium.backend.resource.connection.referencevalidation.ReferenceValidationResultDTO.IssueCode;
 import com.becon.opencelium.backend.websocket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
@@ -33,12 +52,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,6 +68,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -110,6 +132,12 @@ class ConnectionControllerTest {
 
     @MockBean
     private MasterPasswordInterceptor masterPasswordInterceptor;
+
+    @MockBean
+    private MethodTestService methodTestService;
+
+    @MockBean
+    private ReferenceValidationService referenceValidationService;
 
     // ── GET /connection/all ───────────────────────────────────────────────────
 
@@ -195,5 +223,165 @@ class ConnectionControllerTest {
                 .andExpect(jsonPath("$.message").value(containsString("fromConnector.methods[0].methodType")))
                 .andExpect(jsonPath("$.message").value(containsString("Unknown method type 'WEBHOK'")))
                 .andExpect(jsonPath("$.message").value(containsString("CONNECTOR, HTTP_REQUEST, WEBHOOK")));
+    }
+
+    // ── POST /connection/method/test ──────────────────────────────────────────
+
+    @Test
+    @DisplayName("POST /connection/method/test returns the request sent and the API's response")
+    void testMethodReturnsResultWhenServiceSendsRequest() throws Exception {
+        when(methodTestService.test(any())).thenReturn(MethodTestResultDTO.sent(
+                new SentRequest("GET", "http://api.test/orders", Map.of(), null),
+                new ReceivedResponse(200, Map.of(), Map.of("id", 7)),
+                12));
+
+        mockMvc.perform(post("/connection/method/test")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "method": { "request": { "method": "GET" } }, "staticValues": {} }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.response.status").value(200))
+                .andExpect(jsonPath("$.response.body.id").value(7))
+                .andExpect(jsonPath("$.durationMs").value(12))
+                .andExpect(jsonPath("$.connectorErrors").isEmpty());
+    }
+
+    @Test
+    @DisplayName("POST /connection/method/test turns a rejected test into 400 with the error code")
+    void testMethodReturnsBadRequestWhenServiceRejectsRequest() throws Exception {
+        when(methodTestService.test(any())).thenThrow(new GeneralServiceException(
+                HttpStatus.BAD_REQUEST,
+                ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING,
+                "Static values are missing for references: ${status}"));
+
+        mockMvc.perform(post("/connection/method/test")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "method": { "request": { "method": "GET" } } }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING))
+                .andExpect(jsonPath("$.message").value(containsString("${status}")));
+    }
+
+    @Test
+    @DisplayName("POST /connection/method/test keeps a null static value and defaults confirmWrite to false")
+    void testMethodPassesNullStaticValueWhenBodyContainsIt() throws Exception {
+        when(methodTestService.test(any())).thenReturn(MethodTestResultDTO.notSent(List.of()));
+
+        mockMvc.perform(post("/connection/method/test")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "method": { "request": { "method": "GET" } }, "staticValues": { "${status}": null } }
+                                """))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<MethodTestRequestDTO> captor = ArgumentCaptor.forClass(MethodTestRequestDTO.class);
+        verify(methodTestService).test(captor.capture());
+        assertThat(captor.getValue().staticValues()).containsEntry("${status}", null);
+        assertThat(captor.getValue().confirmWrite()).isFalse();
+    }
+
+    // ── POST /connection/method/curl ──────────────────────────────────────────
+
+    @Test
+    @DisplayName("POST /connection/method/curl passes method and static values on and returns the command")
+    void getMethodCurlReturnsCommandWhenServiceBuildsIt() throws Exception {
+        when(methodTestService.toCurl(any())).thenReturn(MethodCurlResultDTO.built("curl 'http://api.test/orders'"));
+
+        mockMvc.perform(post("/connection/method/curl")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "method": { "request": { "method": "GET" } }, "staticValues": { "${status}": "open" } }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.curl").value("curl 'http://api.test/orders'"))
+                .andExpect(jsonPath("$.connectorErrors").isEmpty());
+
+        ArgumentCaptor<MethodCurlRequestDTO> captor = ArgumentCaptor.forClass(MethodCurlRequestDTO.class);
+        verify(methodTestService).toCurl(captor.capture());
+        assertThat(captor.getValue().staticValues()).containsEntry("${status}", "open");
+    }
+
+    @Test
+    @DisplayName("POST /connection/method/curl turns a rejected method into 400 with the error code")
+    void getMethodCurlReturnsBadRequestWhenServiceRejectsRequest() throws Exception {
+        when(methodTestService.toCurl(any())).thenThrow(new GeneralServiceException(
+                HttpStatus.BAD_REQUEST,
+                ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING,
+                "Static values are missing for references: ${status}"));
+
+        mockMvc.perform(post("/connection/method/curl")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "method": { "request": { "method": "GET" } } }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING));
+    }
+
+    // ── POST /connection/method/test/refs ─────────────────────────────────────
+
+    @Test
+    @DisplayName("POST /connection/method/test/refs returns connector and static references")
+    void getMethodTestReferencesReturnsReferencesWhenMethodIsValid() throws Exception {
+        when(methodTestService.findReferences(any())).thenReturn(new MethodTestReferencesDTO(
+                List.of(new ConnectorReference("{token}", 3, "token", true)),
+                List.of(new StaticReference("${status}", ReferenceType.WEBHOOK))));
+
+        mockMvc.perform(post("/connection/method/test/refs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "request": { "method": "GET", "endpoint": "{url}/orders?status=${status}" } }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.connectorReferences[0].reference").value("{token}"))
+                .andExpect(jsonPath("$.connectorReferences[0].connectorId").value(3))
+                .andExpect(jsonPath("$.connectorReferences[0].available").value(true))
+                .andExpect(jsonPath("$.staticReferences[0].type").value("WEBHOOK"));
+    }
+
+    // ── POST /connection/reference/validate ───────────────────────────────────
+
+    @Test
+    @DisplayName("POST /connection/reference/validate passes the request on and returns the issues")
+    void validateReferenceReturnsResultWhenBodyIsValid() throws Exception {
+        when(referenceValidationService.validate(any())).thenReturn(new ReferenceValidationResultDTO(
+                false, "#ababab.(response).body.data", ReferenceType.DIRECT, DirectReference.Part.BODY,
+                null, null,
+                List.of(new Issue(IssueCode.MISSING_ROOT, "The path must start with '$.'.",
+                        "Write body.$.data.", 24, "data")),
+                List.of()));
+        ArgumentCaptor<ReferenceValidationRequestDTO> captor =
+                ArgumentCaptor.forClass(ReferenceValidationRequestDTO.class);
+
+        mockMvc.perform(post("/connection/reference/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "reference": "#ababab.(response).body.data",
+                                  "iterators": ["i"],
+                                  "sample": { "data": [1] } }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valid").value(false))
+                .andExpect(jsonPath("$.part").value("BODY"))
+                .andExpect(jsonPath("$.errors[0].code").value("MISSING_ROOT"))
+                .andExpect(jsonPath("$.errors[0].position").value(24))
+                .andExpect(jsonPath("$.errors[0].hint").value("Write body.$.data."));
+
+        verify(referenceValidationService).validate(captor.capture());
+        assertThat(captor.getValue().reference()).isEqualTo("#ababab.(response).body.data");
+        assertThat(captor.getValue().iterators()).containsExactly("i");
+        assertThat(captor.getValue().sample()).isEqualTo(Map.of("data", List.of(1)));
+    }
+
+    @Test
+    void validateReferenceReturnsBadRequestWhenBodyIsMissing() throws Exception {
+        mockMvc.perform(post("/connection/reference/validate")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(referenceValidationService);
     }
 }

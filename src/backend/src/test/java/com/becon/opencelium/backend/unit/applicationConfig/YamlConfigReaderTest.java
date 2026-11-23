@@ -348,6 +348,54 @@ class YamlConfigReaderTest {
     }
 
     @Test
+    void readReturnsUniquePathsWhenCommentedOutKeysAreRepeated() {
+        // Commented-out alternatives for the same key must not surface as
+        // sibling nodes sharing a path — the UI keys its tree rows by path.
+        String yaml = """
+                server:
+                  port: 9090
+                #  ssl:
+                #    key-store-type: PKCS12
+                #    key-store: src/main/resources/keystore.p12
+                #    key-store: src/main/resources/foo.p12
+                #    key-store-password: first
+                #    key-store-password: second
+                #    key-alias: tomcat
+                """;
+
+        YamlConfigReader.ReadResult result = reader.read(yaml);
+
+        List<ConfigNode> ssl = children(find(result.fields(), "server.ssl"));
+        assertThat(ssl).extracting(ConfigNode::path).containsExactly(
+                "server.ssl.key-store-type",
+                "server.ssl.key-store",
+                "server.ssl.key-store-password",
+                "server.ssl.key-alias");
+        assertThat(scalar(find(result.fields(), "server.ssl.key-store")).asText())
+                .isEqualTo("src/main/resources/keystore.p12");
+        assertThat(scalar(find(result.fields(), "server.ssl.key-store-password")).asText())
+                .isEqualTo("first");
+    }
+
+    @Test
+    void readKeepsActiveNodeWhenCommentedOutDuplicateKeyPrecedesIt() {
+        String yaml = """
+                server:
+                #  port: 8080
+                  port: 9090
+                  address: 127.0.0.1
+                """;
+
+        YamlConfigReader.ReadResult result = reader.read(yaml);
+
+        List<ConfigNode> server = children(find(result.fields(), "server"));
+        assertThat(server).extracting(ConfigNode::path).containsExactly("server.port", "server.address");
+        ConfigNode port = find(result.fields(), "server.port");
+        assertThat(port.status()).isEqualTo(ConfigNode.ACTIVE);
+        assertThat(scalar(port).asInt()).isEqualTo(9090);
+    }
+
+    @Test
     void readReturnsEmptyTreeWhenYamlIsEmpty() {
         YamlConfigReader.ReadResult result = reader.read("");
 
@@ -427,6 +475,13 @@ class YamlConfigReaderTest {
             }
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<ConfigNode> children(ConfigNode node) {
+        assertThat(node).isNotNull();
+        assertThat(node.value()).isInstanceOf(List.class);
+        return (List<ConfigNode>) node.value();
     }
 
     private JsonNode scalar(ConfigNode node) {

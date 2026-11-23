@@ -39,7 +39,7 @@ repositories {
 
 ext {
 	// gRPC / Protobuf
-	grpcVersion      = '1.66.0'
+	grpcVersion      = '1.76.0'
 	protobufVersion  = '3.25.1'
 
 	// Test infrastructure
