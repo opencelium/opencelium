@@ -7,7 +7,6 @@ import { EntityWizard } from '@/engine/entity/runtime/EntityWizard';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import type { WorkflowNodeModel } from '../../types/workflow.types';
 import { useAggregatorConfigDialog } from './useAggregatorConfigDialog';
-import { AggregatorPublishEditor } from './AggregatorPublishEditor';
 import '../dialogHeader.css';
 import './aggregator-config-dialog.css';
 
@@ -16,12 +15,9 @@ type Props = {
   node: WorkflowNodeModel | null;
   onClose: () => void;
   onSave: (nodeId: string, dataAggregator: number | null) => void;
-  onSavePublish: (nodeId: string, publish: Record<string, string>) => void;
 };
 
-const METHOD_KINDS = new Set(['connector', 'system', 'trigger-connection']);
-
-export function AggregatorConfigDialog({ open, node, onClose, onSave, onSavePublish }: Props) {
+export function AggregatorConfigDialog({ open, node, onClose, onSave }: Props) {
   const { t } = useI18n('workflow');
   const confirm = useConfirm();
   const assignedId = node?.data.dataAggregator ?? null;
@@ -109,10 +105,6 @@ export function AggregatorConfigDialog({ open, node, onClose, onSave, onSavePubl
           </Button>
         )}
       </div>
-      {!isCreating && selectedAggregator && selectedAggregator.id === assignedId && METHOD_KINDS.has(node.type) && (
-        <AggregatorPublishEditor key={`${node.id}-${assignedId}`} aggregator={selectedAggregator}
-          value={node.data.dataAggregatorPublish ?? {}} onSave={(publish) => onSavePublish(node.id, publish)} />
-      )}
       {isCreating ? (
         <EntityWizard
           entityName="data-aggregator"

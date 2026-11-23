@@ -4,14 +4,13 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.typ
 export type ReferenceViolationCode =
 	| 'UNKNOWN_VARIABLE'
 	| 'OUT_OF_SCOPE'
+	| 'SCOPE_NOT_ALL'
 	| 'NO_USE_PERMISSION'
-	| 'SECOND_WRITER'
+	| 'INVALID_WRITE_TARGET'
 	| 'NOT_MUTABLE'
-	| 'ARGUMENTS_MISMATCH'
-	| 'REF_UNRESOLVED'
-	| 'IMPORT_LANGUAGE_MISMATCH'
-	| 'IMPORT_CYCLE'
-	| 'SCOPE_NOT_ALL';
+	| 'NOT_OWNER'
+	| 'SCRIPT_NOT_CALLABLE'
+	| 'IMPORT_LANGUAGE_MISMATCH';
 
 export type ReferenceViolation = {
 	code: string;

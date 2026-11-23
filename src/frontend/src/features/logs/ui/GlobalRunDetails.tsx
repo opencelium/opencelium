@@ -52,7 +52,9 @@ export function GlobalRunDetails({ log }: { log: GlobalRunLog }) {
             <div key={entry.name} className="oc-log-globals-row">
               <code>{entry.name}</code>
               <Typography variant="caption" isSubtle>{`v${entry.version}`}</Typography>
-              <code>{compact(entry.value)}</code>
+              {entry.valueOmitted
+                ? <Typography variant="caption" isSubtle>{t("globals.valueOmitted", { bytes: entry.valueBytes ?? 0 })}</Typography>
+                : <code>{compact(entry.value)}</code>}
             </div>
           ))}
         </details>

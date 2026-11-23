@@ -115,6 +115,15 @@ export const globalVariableApi = baseApi
                 ],
             }),
 
+            resetGlobalVariable: b.mutation<GlobalVariable, number>({
+                query: (id) => ({ url: `${BASE}/${id}/reset`, method: 'POST', customOptions: { ignoreError: true } }),
+                invalidatesTags: (_result, _error, id) => [
+                    ENTITY_TAG,
+                    { type: GLOBAL_VARIABLE_TAG, id },
+                    { type: GLOBAL_VARIABLE_TAG, id: `changes-${id}` },
+                ],
+            }),
+
             validateGlobalScript: b.mutation<ValidateScriptResponse, ValidateScriptRequest>({
                 query: (body) => ({ url: `${BASE}/validate-script`, method: 'POST', body }),
             }),
@@ -145,6 +154,7 @@ export const {
     useDeleteGlobalVariableMutation,
     usePreviewGlobalVariableImpactMutation,
     useRestoreGlobalVariableChangeMutation,
+    useResetGlobalVariableMutation,
     useValidateGlobalScriptMutation,
     useGetGlobalVariablePermissionsQuery,
     useUpdateGlobalVariablePermissionsMutation,

@@ -45,7 +45,7 @@ export function ScriptParametersEditor({ parameters, onChange, isReadOnly, error
                 ))}
                 {!isReadOnly && (
                     <div className="script-parameters__add">
-                        <Button onClick={() => onChange([...parameters, { name: '', required: true, defaultText: '' }])}
+                        <Button onClick={() => onChange([...parameters, { name: '', description: '', required: true, defaultText: '' }])}
                             testId="global-variable-script-parameter-add">
                             {t('global-variable.script.parameters.add')}
                         </Button>

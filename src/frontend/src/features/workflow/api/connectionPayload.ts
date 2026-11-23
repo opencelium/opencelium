@@ -1,4 +1,3 @@
-import { readRunConflictPolicy } from '../utils/runConflictPolicy';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { buildLegacyConnection } from '../components/request-editor/legacyAdapter';
 import { sanitizeWorkflowUiNode as sanitizeUiNode } from './connectionPayload.uiSanitizer';
@@ -80,7 +79,6 @@ export function buildConnectionPayload({
 		fieldBinding: serializeFieldBindings(fieldBindings ?? connection.fieldBindings),
 		fromConnector: buildFromConnectorPayload(nodes, edges),
 		toConnector: null,
-		...(readRunConflictPolicy(nodes) ? { runConflictPolicy: readRunConflictPolicy(nodes) } : {}),
 		ui: buildUiPayload(nodes, edges, viewport),
 	};
 }

@@ -15,8 +15,8 @@ type Props = {
 };
 
 const usageOf = (item: PickerItem) => (item.kind === 'SCRIPT'
-	? `globals.${item.name}(${item.parameters.map((parameter) => (parameter.required ? parameter.name : `${parameter.name}?`)).join(', ')})`
-	: `globals.${item.name}`);
+	? `${item.name}(${item.parameters.map((parameter) => (parameter.required ? parameter.name : `${parameter.name}?`)).join(', ')})`
+	: item.name);
 
 export function EnhancementImports({ language, value, readOnly, onChange }: Props) {
 	const { t } = useI18n('workflow');

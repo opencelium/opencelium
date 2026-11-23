@@ -57,6 +57,7 @@
       "REJECTED": "Abgelehnt"
     },
     "writeCount": "{{count}} Schreibvorgänge zusammengefasst",
-    "snapshot": "Beim Start gelesene Werte ({{count}})"
+    "snapshot": "Beim Start gelesene Werte ({{count}})",
+    "valueOmitted": "Wert nicht protokolliert ({{bytes}} Bytes)"
   }
 }

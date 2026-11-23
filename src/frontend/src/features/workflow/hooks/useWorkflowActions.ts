@@ -37,7 +37,6 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const { connection, workflow, connectors, invokers, view, changes } = page;
 	const { headerState, fieldBindings, categoryId } = connection;
 	const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
-	const [isRunSettingsOpen, setIsRunSettingsOpen] = useState(false);
 	const [schedulesOpen, setSchedulesOpen] = useState(false);
 	const [changeHistoryOpen, setChangeHistoryOpen] = useState(false);
 	const [problemsOpen, setProblemsOpen] = useState(false);
@@ -117,7 +116,6 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		cancelJoint: workflow.onCancelJoint });
 	const header = useWorkflowHeaderActions({
 		openAssignCategory: () => category.setOpen(true),
-		openRunSettings: () => setIsRunSettingsOpen(true),
 		downloadTemplate: templates.downloadConnectionTemplate,
 		openSaveTemplate: templates.openSaveTemplateDialog,
 		openLoadTemplate: templates.openLoadTemplateDialog,
@@ -162,7 +160,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	const isEditorDialogOpen = !!(workflow.methodEditor || workflow.conditionEditor ||
 		workflow.aggregatorEditor || workflow.globalWritesEditor || workflow.connectorEditor || workflow.historyOpen || templates.templateDialogOpen ||
 		templates.loadTemplateDialogOpen || templates.connectorMappingDialogOpen ||
-		isShortcutsOpen || isRunSettingsOpen || jsonEditorOpen || pasteOperatorTarget);
+		isShortcutsOpen || jsonEditorOpen || pasteOperatorTarget);
 
 	useDeleteSelectedNode({ readOnly: isEditLocked, nodes: workflow.nodes,
 		onDeleteNodes: workflow.onDeleteNodes, disabled: isEditorDialogOpen });
@@ -234,7 +232,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		closePanel: () => setProblemsOpen(false) };
 
 	return { validation, saveWorkflow, confirmBeforeSave, problems, category, templates, history, canvas, header,
-		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen, isRunSettingsOpen, setIsRunSettingsOpen,
+		buildTestPayload, isShortcutsOpen, setIsShortcutsOpen,
 		jsonEditorOpen, setJsonEditorOpen, jsonEditorValue,
 		schedulesOpen, setSchedulesOpen, changeHistoryOpen, setChangeHistoryOpen,
 		copiedNodeIds, pasteOperatorTarget,

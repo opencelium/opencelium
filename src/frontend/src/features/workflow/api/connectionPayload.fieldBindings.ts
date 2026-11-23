@@ -1,5 +1,6 @@
 import { DEFAULT_ENHANCEMENT_SCRIPT } from '../components/request-editor/body-editor/bodyReference';
 import { describeBinding, logFieldBinding } from '../utils/fieldBindingDebug';
+import { parseImportArgs, toImportArgLines } from './enhancementGlobalImports';
 
 const parseBindingReference = (reference: unknown) => {
 	const match = String(reference ?? '')
@@ -26,6 +27,7 @@ const serializeFieldBinding = (binding: any) => {
 		`//var RESULT_VAR = ${args.RESULT_VAR};`,
 		...from.map((item: any, index) =>
 			`//var VAR_${index} = ${item.color}.(${item.type}).${item.field};`),
+		...toImportArgLines(binding?.enhancement?.imports ?? []),
 	].join('\n');
 	return {
 		...(binding?.id ? { id: binding.id } : {}),
@@ -39,8 +41,6 @@ const serializeFieldBinding = (binding: any) => {
 			description: binding?.enhancement?.description ?? '',
 			language: binding?.enhancement?.language ?? 'js',
 			simpleCode: binding?.enhancement?.simpleCode ?? null,
-			imports: binding?.enhancement?.imports ?? [],
-			globalScript: null,
 			expertVar,
 			expertCode: binding?.enhancement?.script?.endsWith(';')
 				? binding.enhancement.script
@@ -72,6 +72,11 @@ const stableBindingId = (value: string) => {
 	return `enh_${hash.toString(16)}`;
 };
 
+const importsOf = (enhancement: { imports?: string[]; expertVar?: unknown }) => {
+	const imports = enhancement.imports ?? parseImportArgs(enhancement.expertVar);
+	return imports.length > 0 ? { imports } : {};
+};
+
 const normalizeFieldBinding = (binding: any) => {
 	const enhancement = binding?.enhancement;
 	logFieldBinding('1. loaded from the server', describeBinding(binding));
@@ -88,6 +93,7 @@ const normalizeFieldBinding = (binding: any) => {
 				enhanceId: String(enhancement.enhanceId),
 				script: enhancement.script ?? enhancement.expertCode
 					?? `${DEFAULT_ENHANCEMENT_SCRIPT};`,
+				...importsOf(enhancement),
 			},
 		};
 	}
@@ -107,6 +113,7 @@ const normalizeFieldBinding = (binding: any) => {
 			enhanceId: String(enhancement.enhancementId ?? enhancement.enhanceId
 				?? binding.id ?? stableBindingId(resultVar ?? JSON.stringify(binding))),
 			script: enhancement.script ?? enhancement.expertCode ?? `${DEFAULT_ENHANCEMENT_SCRIPT};`,
+			...importsOf(enhancement),
 			args: resultVar ? { RESULT_VAR: resultVar, ...fromArgs } : enhancement.args ?? {},
 		},
 	};

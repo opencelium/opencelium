@@ -11,8 +11,6 @@ export const sourceLink = (sourceType: UsageSourceType, sourceId: number): strin
             return `/workflow/update/${sourceId}`
         case 'CONNECTOR':
             return `/connector/view/${sourceId}`
-        case 'SCRIPT_VARIABLE':
-            return `/global-variable/view/${sourceId}`
         case 'NOTIFICATION':
             return null
         default: {

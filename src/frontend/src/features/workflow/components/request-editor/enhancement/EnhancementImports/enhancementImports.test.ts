@@ -3,7 +3,7 @@ import { isImportable } from './enhancementImports.utils';
 import type { PickerItem } from '@entities/globalVariable/model/types';
 
 const script = (language: 'js' | 'python3'): PickerItem => ({
-	kind: 'SCRIPT', name: 's', description: '', language, parameters: [], refs: [],
+	kind: 'SCRIPT', name: 's', description: '', language, parameters: [],
 });
 
 describe('enhancement imports', () => {

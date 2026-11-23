@@ -7,15 +7,15 @@ import en from '@entities/globalVariable/i18n/en.json'
 import de from '@entities/globalVariable/i18n/de.json'
 import { GLOBAL_VARIABLE_ENTITY as baseKey, GLOBAL_VARIABLE_PATH } from './globalVariable.constants'
 import {
-    DEFAULT_PUBLISH_MODE,
-    DEFAULT_WRITE_POLICY,
+    DEFAULT_BUSY_POLICY,
     emptyScope,
     isCodeMissing,
-    isValueUnfitForPolicy,
+    isOwnerMissing,
     isScopeIncomplete,
     isValueMissing,
     MAX_VALUE_BYTES,
     NAME_PATTERN,
+    toSaveDto,
     valueByteSize,
     type GlobalVariableFormValues,
 } from './model/form'
@@ -47,6 +47,7 @@ const paletteDialog = (record: unknown, mode: 'view' | 'update') => (
 export const globalVariableDefinition: EntityDefinition = {
     name: baseKey,
     plural: 'global-variables',
+    permissionComponent: 'GLOBAL_VARIABLE',
 
     routes: [
         { type: 'list', element: <GlobalVariableListPage /> },
@@ -98,10 +99,10 @@ export const globalVariableDefinition: EntityDefinition = {
             path: 'value',
         },
         {
-            fields: ['value', 'writePolicy'],
-            validate: (data) => !isValueUnfitForPolicy(data as Partial<GlobalVariableFormValues>),
-            message: `${baseKey}.mutable.errors.valueUnfitForPolicy`,
-            path: 'value',
+            fields: ['ownerWorkflowId'],
+            validate: (data) => !isOwnerMissing(data as Partial<GlobalVariableFormValues>),
+            message: `${baseKey}.mutable.errors.ownerRequired`,
+            path: 'ownerWorkflowId',
         },
         {
             fields: ['script'],
@@ -134,6 +135,9 @@ export const globalVariableDefinition: EntityDefinition = {
         identifierField: 'name',
         primaryKey: 'id',
         resolveIdentifier: resolveGlobalVariableNames,
+        // The list's Create dialog and the command palette save through the generic wizard;
+        // the flat form holds every kind's fields, and the backend refuses those of another kind.
+        mapToApi: ({ mode, data }) => toSaveDto(data as GlobalVariableFormValues, mode),
     },
 
     fields: [
@@ -212,8 +216,7 @@ export const globalVariableDefinition: EntityDefinition = {
             defaultValue: emptyScript() satisfies ScriptFormValues,
             ui: { component: 'input' },
         },
-        { name: 'writePolicy', type: 'string', defaultValue: DEFAULT_WRITE_POLICY, ui: { component: 'input' } },
-        { name: 'publishMode', type: 'string', defaultValue: DEFAULT_PUBLISH_MODE, ui: { component: 'input' } },
+        { name: 'busyPolicy', type: 'string', defaultValue: DEFAULT_BUSY_POLICY, ui: { component: 'input' } },
         { name: 'ownerWorkflowId', type: 'other', defaultValue: null, ui: { component: 'input' } },
         {
             name: 'valuePreview',
@@ -260,11 +263,12 @@ export const globalVariableDefinition: EntityDefinition = {
                 labelKey: `${baseKey}.list.columns.updated`,
                 render: (row) => {
                     const { updatedAt, updatedBy } = asRow(row)
+                    if (!updatedAt) return null
                     return (
                         <TruncatedTextCell
                             value={tEntities()(`${baseKey}.detail.updatedBy`, {
                                 time: new Date(updatedAt).toLocaleString(i18n.language),
-                                name: updatedBy.name,
+                                name: updatedBy?.name ?? '—',
                             })}
                         />
                     )
@@ -312,7 +316,7 @@ export const globalVariableDefinition: EntityDefinition = {
                 header: `${baseKey}.wizard.steps.value.header`,
                 subheader: `${baseKey}.wizard.steps.value.subheader`,
                 sectionIds: ['value'],
-                validateFields: ['secret', 'value', 'script', 'writePolicy', 'publishMode', 'ownerWorkflowId'],
+                validateFields: ['secret', 'value', 'script', 'busyPolicy', 'ownerWorkflowId'],
             },
             {
                 id: 'visibility',

@@ -57,6 +57,7 @@
       "REJECTED": "Rejected"
     },
     "writeCount": "{{count}} writes combined",
-    "snapshot": "Values read at start ({{count}})"
+    "snapshot": "Values read at start ({{count}})",
+    "valueOmitted": "value not logged ({{bytes}} bytes)"
   }
 }

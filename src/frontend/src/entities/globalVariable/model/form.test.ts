@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { ConstantVariable, ScriptVariable } from './types'
+import type { ConstantVariable, MutableVariable, ScriptVariable } from './types'
 import { emptyScript } from './script'
 import {
-    isValueUnfitForPolicy,
+    isOwnerMissing,
     isScopeIncomplete,
     isValueMissing,
     jsonTypeOf,
@@ -23,7 +23,7 @@ const constant = (overrides: Partial<ConstantVariable> = {}): ConstantVariable =
 
 const values = (overrides: Partial<GlobalVariableFormValues> = {}): GlobalVariableFormValues => ({
     kind: 'CONSTANT', name: ' idoitUrl ', description: '', secret: false, value: 'https://cmdb', script: emptyScript(),
-    writePolicy: 'REPLACE', publishMode: 'ON_SUCCESS', ownerWorkflowId: null,
+    busyPolicy: 'QUEUE', ownerWorkflowId: null,
     scope: { type: 'ALL', categoryIds: [9], workflowIds: [8] }, ...overrides,
 })
 
@@ -94,7 +94,7 @@ describe('script form mapping', () => {
     const script: ScriptVariable = {
         id: 15, name: 'buildTitle', kind: 'SCRIPT', description: 'd',
         script: {
-            language: 'js', code: 'return a;', imports: ['normalizeDate'], refs: [],
+            language: 'js', code: 'return a;',
             parameters: [{ name: 'a', required: true, default: null }, { name: 'p', required: false, default: 'low' }],
         },
         scope: { type: 'ALL', categories: [], workflows: [] }, ownerUser: { id: 1, name: 'admin' },
@@ -104,8 +104,8 @@ describe('script form mapping', () => {
 
     it('loads parameters with their defaults as editable text', () => {
         expect(toFormValues(script)?.script.parameters).toEqual([
-            { name: 'a', required: true, defaultText: '' },
-            { name: 'p', required: false, defaultText: 'low' },
+            { name: 'a', description: '', required: true, defaultText: '' },
+            { name: 'p', description: '', required: false, defaultText: 'low' },
         ])
     })
 
@@ -113,17 +113,17 @@ describe('script form mapping', () => {
         const form = toFormValues(script)
         expect(form).not.toBeNull()
         const dto = toSaveDto({ ...form!, script: { ...form!.script, parameters: [
-            ...form!.script.parameters, { name: ' n ', required: false, defaultText: '5' },
+            ...form!.script.parameters, { name: ' n ', description: ' Count ', required: false, defaultText: '5' },
         ] } }, 'update')
         expect(dto).toEqual({
             kind: 'SCRIPT', name: 'buildTitle', description: 'd', version: 3,
             scope: { type: 'ALL', categoryIds: [], workflowIds: [] },
             script: {
-                language: 'js', code: 'return a;', imports: ['normalizeDate'],
+                language: 'js', code: 'return a;',
                 parameters: [
                     { name: 'a', required: true, default: null },
                     { name: 'p', required: false, default: 'low' },
-                    { name: 'n', required: false, default: 5 },
+                    { name: 'n', description: 'Count', required: false, default: 5 },
                 ],
             },
         })
@@ -135,21 +135,33 @@ describe('script form mapping', () => {
 })
 
 describe('mutable form mapping', () => {
-    it('saves the write settings with the value and no secret flag', () => {
-        expect(toSaveDto(values({ kind: 'MUTABLE', value: '2026-11-01T00:00:00Z', writePolicy: 'FORWARD_ONLY', ownerWorkflowId: 42 }), 'create'))
+    const mutable: MutableVariable = {
+        id: 9, name: 'lastSync', kind: 'MUTABLE', description: '', value: null,
+        mutable: {
+            currentValue: '2026-11-20T00:00:00Z', revision: 12, setAt: null, setBy: null, setByExecutionId: null,
+            busyPolicy: 'REFUSE', ownerWorkflow: { id: 42, title: 'VMware → i-doit' },
+        },
+        scope: { type: 'ALL', categories: [], workflows: [] }, ownerUser: { id: 1, name: 'admin' },
+        myPermissions: ['EDIT'], version: 2, createdAt: '', createdBy: { type: 'USER', id: 1, name: 'admin' },
+        updatedAt: '', updatedBy: { type: 'USER', id: 1, name: 'admin' },
+    }
+
+    it('loads the busy policy and owner from the mutable part, and the initial value', () => {
+        expect(toFormValues(mutable)).toMatchObject({ kind: 'MUTABLE', value: 'null', busyPolicy: 'REFUSE', ownerWorkflowId: 42 })
+    })
+
+    it('saves the busy policy and owner with the value and no secret flag', () => {
+        expect(toSaveDto(values({ kind: 'MUTABLE', value: '0', busyPolicy: 'REFUSE', ownerWorkflowId: 42 }), 'create'))
             .toEqual({
-                kind: 'MUTABLE', name: 'idoitUrl', description: '', value: '2026-11-01T00:00:00Z',
-                writePolicy: 'FORWARD_ONLY', publishMode: 'ON_SUCCESS', ownerWorkflowId: 42,
+                kind: 'MUTABLE', name: 'idoitUrl', description: '', value: 0,
+                busyPolicy: 'REFUSE', ownerWorkflowId: 42,
                 scope: { type: 'ALL', categoryIds: [], workflowIds: [] },
             })
     })
 
-    it('checks the value fits the write policy', () => {
-        expect(isValueUnfitForPolicy({ kind: 'MUTABLE', value: '"abc"', writePolicy: 'INCREMENT' })).toBe(true)
-        expect(isValueUnfitForPolicy({ kind: 'MUTABLE', value: '10', writePolicy: 'INCREMENT' })).toBe(false)
-        expect(isValueUnfitForPolicy({ kind: 'MUTABLE', value: '2026-11-01T00:00:00Z', writePolicy: 'FORWARD_ONLY' })).toBe(false)
-        expect(isValueUnfitForPolicy({ kind: 'MUTABLE', value: 'yesterday', writePolicy: 'FORWARD_ONLY' })).toBe(true)
-        expect(isValueUnfitForPolicy({ kind: 'MUTABLE', value: 'anything', writePolicy: 'REPLACE' })).toBe(false)
+    it('requires an owner workflow', () => {
+        expect(isOwnerMissing({ kind: 'MUTABLE', ownerWorkflowId: null })).toBe(true)
+        expect(isOwnerMissing({ kind: 'MUTABLE', ownerWorkflowId: 42 })).toBe(false)
+        expect(isOwnerMissing({ kind: 'CONSTANT', ownerWorkflowId: null })).toBe(false)
     })
 })
-

@@ -24,7 +24,7 @@ export const ImpactList: React.FC<Props> = ({ entries }) => {
                         {entry.elementLabel && <> · {entry.elementLabel}</>}
                         <div>
                             <Typography variant="caption">
-                                {t(`global-variable.impact.reason.${entry.reason}`, { ref: entry.ref ?? '' })}
+                                {t(`global-variable.impact.reason.${entry.reason}`, { parameter: entry.parameter ?? '' })}
                             </Typography>
                         </div>
                     </li>

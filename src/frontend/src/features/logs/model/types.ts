@@ -157,7 +157,8 @@ export type ExecutionSocketLog = LogIdentifier & {
 };
 
 // Global-variable activity a run records (contract §10). Secrets arrive already masked as "••••".
-export type GlobalSnapshotEntry = { name: string; version: number; value: unknown };
+// A value too large for the log comes with `valueOmitted` and its size instead.
+export type GlobalSnapshotEntry = { name: string; version: number; value?: unknown; valueOmitted?: boolean; valueBytes?: number };
 
 export type GlobalCallLog = {
   color?: string;

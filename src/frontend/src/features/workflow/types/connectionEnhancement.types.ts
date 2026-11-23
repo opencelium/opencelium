@@ -10,7 +10,7 @@ export interface Enhancement {
 	language: Language;
 	script: string;
 	args: Record<string, string>;
-	/** Global variables defined under `globals` before the script runs (FR-43). */
+	/** Global variables the script sees under their own name; saved as enhancement args. */
 	imports?: string[];
 }
 

@@ -17,7 +17,9 @@ export const BeingUpdatedBadge: React.FC<Props> = ({ beingUpdatedBy }) => {
         <Tooltip content={t('global-variable.live.beingUpdatedHint', { startedAt })} placement="top">
             <Tag color="processing" icon={<Icon name="refresh" size={12} />} data-testid="global-variable-being-updated">
                 <Link to={`/workflow/update/${beingUpdatedBy.workflowId}`} data-row-click-ignore>
-                    {t('global-variable.live.beingUpdated', { executionId: beingUpdatedBy.executionId })}
+                    {beingUpdatedBy.executionId === null
+                        ? t('global-variable.live.beingUpdatedStarting')
+                        : t('global-variable.live.beingUpdated', { executionId: beingUpdatedBy.executionId })}
                 </Link>
             </Tag>
         </Tooltip>

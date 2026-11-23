@@ -24,14 +24,9 @@
     "EDIT": "Edit",
     "DELETE": "Delete"
   },
-  "writePolicy": {
-    "REPLACE": "Replace",
-    "FORWARD_ONLY": "Forward only",
-    "INCREMENT": "Increment"
-  },
-  "publishMode": {
-    "ON_SUCCESS": "When the run succeeds",
-    "EACH_WRITE": "On each write"
+  "busyPolicy": {
+    "QUEUE": "Queue",
+    "REFUSE": "Refuse"
   },
   "jsonType": {
     "string": "text",
@@ -52,7 +47,8 @@
   },
   "live": {
     "beingUpdated": "Being updated by run #{{executionId}}",
-    "beingUpdatedHint": "The owner workflow is writing this variable (started {{startedAt}}). The value shown is the last saved one."
+    "beingUpdatedHint": "The owner workflow is writing this variable (started {{startedAt}}). The value shown is the last saved one.",
+    "beingUpdatedStarting": "Being updated by a starting run"
   },
   "fields": {
     "kind": {
@@ -153,8 +149,8 @@
       "IN_USE": "The variable is still in use",
       "SCOPE_NARROWING": "The new visibility excludes workflows that use the variable",
       "PARAMETER_BREAKING": "The parameter change breaks these callers",
-      "REF_UNRESOLVED": "A caller can't resolve a new reference",
-      "VERSION_CONFLICT": "Someone else saved first"
+      "VERSION_CONFLICT": "Someone else saved first",
+      "BUSY": "A workflow that uses the variable is running; try again when it has finished"
     },
     "versionConflict": {
       "title": "Someone else saved first",
@@ -167,9 +163,7 @@
       "OUT_OF_SCOPE": "Would no longer be allowed to use the variable",
       "IN_USE": "Uses the variable",
       "PARAMETER_BREAKING": "Calls the script with parameters that would no longer fit",
-      "REF_UNRESOLVED": "Can't resolve the reference {{ref}}",
-      "CALLS_IN_CODE_NOT_CHECKED": "Calls inside its code can't be checked automatically",
-      "IMPORTED_BY_SCRIPT": "Imports this script"
+      "CALLS_IN_CODE_NOT_CHECKED": "Calls inside its code can't be checked automatically"
     }
   },
   "delete": {
@@ -197,15 +191,12 @@
     "sourceType": {
       "WORKFLOW": "Workflow",
       "CONNECTOR": "Connector",
-      "NOTIFICATION": "Notification",
-      "SCRIPT_VARIABLE": "Script variable"
+      "NOTIFICATION": "Notification"
     },
     "access": {
       "READ": "Reads",
       "WRITE": "Writes",
-      "CALL": "Calls",
-      "IMPORT": "Imports",
-      "REF": "References"
+      "IMPORT": "Imports"
     }
   },
   "detail": {
@@ -215,19 +206,23 @@
     "version": "Version",
     "updated": "Last change",
     "created": "Created",
-    "updatedBy": "{{time}} by {{name}}"
+    "updatedBy": "{{time}} by {{name}}",
+    "initialValue": "Initial value (after a reset)",
+    "setBy": "Set {{time}} by {{name}}",
+    "setByRun": "Set {{time}} by a run"
   },
   "changes": {
-    "empty": "No changes match these filters.",
+    "empty": "No changes yet.",
     "restore": "Restore",
     "restored": "The earlier version was restored",
     "restoreFailed": "The earlier version could not be restored.",
     "restoreConfirm": {
       "title": "Restore this version?",
-      "message": "The value from version {{version}} becomes the current value. This is logged as a new change."
+      "message": "The value from version {{version}} becomes the current value. This is logged as a new change.",
+      "messageMutable": "The value from version {{version}} becomes the initial value. Reset afterwards to make it the current value. This is logged as a new change."
     },
     "changedFields": "Changed: {{fields}}",
-    "writeCount": "{{count}} writes combined",
+    "writeCount": "{{count}} writes in this run",
     "columns": {
       "changedAt": "When",
       "changeType": "Change",
@@ -241,27 +236,18 @@
       "CONFIG": "Settings",
       "PERMISSIONS": "Sharing",
       "RESTORE": "Restored",
-      "DELETE": "Deleted"
+      "DELETE": "Deleted",
+      "RESET": "Reset",
+      "RUN_WRITE": "Written by a run"
     },
     "actor": {
       "user": "{{name}}",
-      "execution": "run #{{id}}"
+      "execution": "run #{{id}}",
+      "deletedWorkflow": "Deleted workflow"
     },
     "result": {
       "SAVED": "Saved",
       "REJECTED": "Rejected"
-    },
-    "filters": {
-      "result": {
-        "ALL": "All results",
-        "SAVED": "Saved",
-        "REJECTED": "Rejected"
-      },
-      "actor": {
-        "ALL": "Users and workflows",
-        "USER": "Users",
-        "WORKFLOW": "Workflows"
-      }
     }
   },
   "sharing": {
@@ -282,14 +268,13 @@
   "referenceErrors": {
     "UNKNOWN_VARIABLE": "Global variable \"{{variable}}\" does not exist.",
     "OUT_OF_SCOPE": "Global variable \"{{variable}}\" is not visible to this workflow.",
-    "NO_USE_PERMISSION": "You may not use global variable \"{{variable}}\".",
-    "SECOND_WRITER": "Global variable \"{{variable}}\" is already written by another workflow.",
-    "NOT_MUTABLE": "\"{{variable}}\" is not a mutable variable, so it can't be set.",
-    "ARGUMENTS_MISMATCH": "The call to \"{{variable}}\" doesn't match its parameters.",
-    "REF_UNRESOLVED": "\"{{variable}}\" reads {{ref}}, which this workflow can't provide.",
-    "IMPORT_LANGUAGE_MISMATCH": "\"{{variable}}\" is written in another language than this script.",
-    "IMPORT_CYCLE": "Importing \"{{variable}}\" would create an import cycle.",
     "SCOPE_NOT_ALL": "Connectors can only use global variables visible to all workflows (\"{{variable}}\").",
+    "NO_USE_PERMISSION": "You may not use global variable \"{{variable}}\".",
+    "INVALID_WRITE_TARGET": "A write target must be exactly global.<name> (\"{{field}}\").",
+    "NOT_MUTABLE": "\"{{variable}}\" is not a mutable variable, so it can't be written.",
+    "NOT_OWNER": "Global variable \"{{variable}}\" belongs to another workflow; only its owner workflow may write it.",
+    "SCRIPT_NOT_CALLABLE": "\"{{variable}}\" is a script: import it in a transformation of its language and call it there.",
+    "IMPORT_LANGUAGE_MISMATCH": "\"{{variable}}\" is written in another language than this transformation.",
     "more": "(+{{count}} more)"
   },
   "script": {
@@ -297,12 +282,11 @@
     "languageLocked": "The language can't change after the script is created.",
     "languages": {
       "js": "JavaScript",
-      "python2": "Python 2",
       "python3": "Python 3",
       "ruby": "Ruby"
     },
     "code": "Code",
-    "codeHint": "Must return a value. Read workflow data with ref(\"…\") and a string literal; pass method data in as a parameter where you can.",
+    "codeHint": "Must return a value. A script uses only its parameters: it cannot read or write workflow data with ref() or set().",
     "parameters": {
       "label": "Parameters",
       "hint": "Every call fills exactly these parameters. An optional parameter left empty uses its default.",
@@ -313,13 +297,6 @@
       "add": "Add parameter",
       "remove": "Remove parameter"
     },
-    "imports": {
-      "label": "Imports",
-      "hint": "Other script variables of the same language, available as globals.<name>."
-    },
-    "warnings": {
-      "TIED_TO_CALLER_COLORS": "Reads a method by colour, so it only works in workflows that have this method before the call"
-    },
     "errors": {
       "codeRequired": "Enter the script code.",
       "tooLarge": "The script is larger than 256 KB.",
@@ -328,20 +305,17 @@
       "SCRIPT_RUNTIME": "Runtime error",
       "SCRIPT_TIMEOUT": "The script took too long",
       "NO_RETURN_VALUE": "The script returned no value",
-      "REF_NOT_LITERAL": "ref() needs a string literal",
-      "UNKNOWN_REF_TYPE": "Unknown reference type",
-      "UNKNOWN_IMPORT": "Unknown import",
-      "IMPORT_CYCLE": "Import cycle",
-      "IMPORT_LANGUAGE_MISMATCH": "Import in another language",
+      "SCRIPT_NOT_PURE": "A script uses only its parameters, so it cannot call ref() or set()",
+      "PARAMETER_INVALID": "Invalid parameter",
+      "LANGUAGE_NOT_SUPPORTED": "Scripts are written in JavaScript, Python 3 or Ruby",
+      "MISSING_ARGUMENT": "A required parameter has no test argument",
+      "SCRIPT_ENGINE_UNAVAILABLE": "The script engine for this language is not reachable",
       "VALIDATION_UNAVAILABLE": "Checking scripts in this language is not available yet"
     },
     "test": {
       "arguments": "Arguments",
-      "refs": "Reference values",
       "requiredPlaceholder": "Required",
-      "atLine": "at line {{line}}",
-      "argumentMissing": "Not passed: an optional parameter uses its default, a required one fails the run.",
-      "refMissing": "null, as for a reference with no data at run time"
+      "argumentMissing": "Not passed: an optional parameter uses its default, a required one fails the run."
     },
     "tabs": {
       "define": "Define",
@@ -349,28 +323,20 @@
     }
   },
   "mutable": {
-    "writePolicy": {
-      "label": "Write policy",
+    "busyPolicy": {
+      "label": "When a run of a workflow that uses it is still going",
       "hints": {
-        "REPLACE": "The run's value replaces the stored one, unless someone changed it during the run.",
-        "FORWARD_ONLY": "Saved only if it is greater than the stored value (numbers or ISO dates). For cursors.",
-        "INCREMENT": "Adds the run's number to the stored value. For counters."
-      }
-    },
-    "publishMode": {
-      "label": "When writes are saved",
-      "hints": {
-        "ON_SUCCESS": "All writes of a run are saved together once it succeeds; a failed run saves nothing.",
-        "EACH_WRITE": "Saved during the run (at most every 500 ms) and once more at the end, also when the run fails."
+        "QUEUE": "The next run waits and starts when the running one ends.",
+        "REFUSE": "The next run does not start and is logged as failed."
       }
     },
     "owner": {
       "label": "Owner workflow",
-      "hint": "The only workflow that may write this variable. Left empty, the first workflow saved with a write claims it.",
-      "unclaimed": "Claimed by the first workflow that writes it"
+      "hint": "The only workflow whose runs may write this variable. It must be inside the scope.",
+      "placeholder": "Choose the workflow"
     },
     "errors": {
-      "valueUnfitForPolicy": "This value can't be used with the write policy: increment needs a number, forward only a number or an ISO date."
+      "ownerRequired": "Choose the workflow whose runs may write this variable."
     }
   },
   "details": {
@@ -384,7 +350,7 @@
       "usage": {
         "header": "Used by",
         "subheader": "Workflows, connectors and notifications that use it",
-        "description": "Every place that refers to this variable: workflow steps, connectors, notifications and other script variables. The access column shows whether it reads, writes, calls or imports the variable."
+        "description": "Every place that refers to this variable: workflow steps, connectors and notifications. The access column shows whether it reads or writes the variable, or imports a script into a transformation."
       },
       "changes": {
         "header": "Change log",
@@ -397,5 +363,14 @@
         "description": "Give other users access to this variable. Use lets them reference it in their workflows; Edit and Delete add the matching rights. Changes apply once you save."
       }
     }
+  },
+  "reset": {
+    "action": "Reset to initial value",
+    "confirm": {
+      "title": "Reset the current value?",
+      "message": "The current value is replaced by the initial value {{value}}. Runs that start afterwards read it. This is logged as a reset."
+    },
+    "done": "The current value was reset",
+    "failed": "The current value could not be reset."
   }
 }

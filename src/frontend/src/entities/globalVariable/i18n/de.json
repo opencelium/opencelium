@@ -24,14 +24,9 @@
     "EDIT": "Bearbeiten",
     "DELETE": "Löschen"
   },
-  "writePolicy": {
-    "REPLACE": "Ersetzen",
-    "FORWARD_ONLY": "Nur vorwärts",
-    "INCREMENT": "Hochzählen"
-  },
-  "publishMode": {
-    "ON_SUCCESS": "Wenn die Ausführung erfolgreich ist",
-    "EACH_WRITE": "Bei jedem Schreiben"
+  "busyPolicy": {
+    "QUEUE": "Warteschlange",
+    "REFUSE": "Ablehnen"
   },
   "jsonType": {
     "string": "Text",
@@ -52,7 +47,8 @@
   },
   "live": {
     "beingUpdated": "Wird von Ausführung #{{executionId}} aktualisiert",
-    "beingUpdatedHint": "Der Besitzer-Workflow schreibt diese Variable (gestartet {{startedAt}}). Angezeigt wird der zuletzt gespeicherte Wert."
+    "beingUpdatedHint": "Der Besitzer-Workflow schreibt diese Variable (gestartet {{startedAt}}). Angezeigt wird der zuletzt gespeicherte Wert.",
+    "beingUpdatedStarting": "Wird von einer startenden Ausführung aktualisiert"
   },
   "fields": {
     "kind": {
@@ -153,8 +149,8 @@
       "IN_USE": "Die Variable wird noch verwendet",
       "SCOPE_NARROWING": "Die neue Sichtbarkeit schließt Workflows aus, die die Variable verwenden",
       "PARAMETER_BREAKING": "Die Parameteränderung beschädigt diese Aufrufer",
-      "REF_UNRESOLVED": "Ein Aufrufer kann eine neue Referenz nicht auflösen",
-      "VERSION_CONFLICT": "Jemand anderes hat zuerst gespeichert"
+      "VERSION_CONFLICT": "Jemand anderes hat zuerst gespeichert",
+      "BUSY": "Ein Workflow, der die Variable verwendet, läuft gerade; versuchen Sie es erneut, wenn er beendet ist"
     },
     "versionConflict": {
       "title": "Jemand anderes hat zuerst gespeichert",
@@ -167,9 +163,7 @@
       "OUT_OF_SCOPE": "Dürfte die Variable nicht mehr verwenden",
       "IN_USE": "Verwendet die Variable",
       "PARAMETER_BREAKING": "Ruft das Skript mit Parametern auf, die nicht mehr passen würden",
-      "REF_UNRESOLVED": "Kann die Referenz {{ref}} nicht auflösen",
-      "CALLS_IN_CODE_NOT_CHECKED": "Aufrufe im Code können nicht automatisch geprüft werden",
-      "IMPORTED_BY_SCRIPT": "Importiert dieses Skript"
+      "CALLS_IN_CODE_NOT_CHECKED": "Aufrufe im Code können nicht automatisch geprüft werden"
     }
   },
   "delete": {
@@ -197,15 +191,12 @@
     "sourceType": {
       "WORKFLOW": "Workflow",
       "CONNECTOR": "Konnektor",
-      "NOTIFICATION": "Benachrichtigung",
-      "SCRIPT_VARIABLE": "Skriptvariable"
+      "NOTIFICATION": "Benachrichtigung"
     },
     "access": {
       "READ": "Liest",
       "WRITE": "Schreibt",
-      "CALL": "Ruft auf",
-      "IMPORT": "Importiert",
-      "REF": "Referenziert"
+      "IMPORT": "Importiert"
     }
   },
   "detail": {
@@ -215,19 +206,23 @@
     "version": "Version",
     "updated": "Letzte Änderung",
     "created": "Angelegt",
-    "updatedBy": "{{time}} von {{name}}"
+    "updatedBy": "{{time}} von {{name}}",
+    "initialValue": "Anfangswert (nach dem Zurücksetzen)",
+    "setBy": "Gesetzt {{time}} von {{name}}",
+    "setByRun": "Gesetzt {{time}} von einer Ausführung"
   },
   "changes": {
-    "empty": "Keine Änderungen für diese Filter.",
+    "empty": "Noch keine Änderungen.",
     "restore": "Wiederherstellen",
     "restored": "Die frühere Version wurde wiederhergestellt",
     "restoreFailed": "Die frühere Version konnte nicht wiederhergestellt werden.",
     "restoreConfirm": {
       "title": "Diese Version wiederherstellen?",
-      "message": "Der Wert aus Version {{version}} wird zum aktuellen Wert. Dies wird als neue Änderung protokolliert."
+      "message": "Der Wert aus Version {{version}} wird zum aktuellen Wert. Dies wird als neue Änderung protokolliert.",
+      "messageMutable": "Der Wert aus Version {{version}} wird zum Anfangswert. Setzen Sie danach zurück, um ihn zum aktuellen Wert zu machen. Dies wird als neue Änderung protokolliert."
     },
     "changedFields": "Geändert: {{fields}}",
-    "writeCount": "{{count}} Schreibvorgänge zusammengefasst",
+    "writeCount": "{{count}} Schreibvorgänge in dieser Ausführung",
     "columns": {
       "changedAt": "Wann",
       "changeType": "Änderung",
@@ -241,27 +236,18 @@
       "CONFIG": "Einstellungen",
       "PERMISSIONS": "Freigabe",
       "RESTORE": "Wiederhergestellt",
-      "DELETE": "Gelöscht"
+      "DELETE": "Gelöscht",
+      "RESET": "Zurückgesetzt",
+      "RUN_WRITE": "Von einer Ausführung geschrieben"
     },
     "actor": {
       "user": "{{name}}",
-      "execution": "Ausführung #{{id}}"
+      "execution": "Ausführung #{{id}}",
+      "deletedWorkflow": "Gelöschter Workflow"
     },
     "result": {
       "SAVED": "Gespeichert",
       "REJECTED": "Abgelehnt"
-    },
-    "filters": {
-      "result": {
-        "ALL": "Alle Ergebnisse",
-        "SAVED": "Gespeichert",
-        "REJECTED": "Abgelehnt"
-      },
-      "actor": {
-        "ALL": "Benutzer und Workflows",
-        "USER": "Benutzer",
-        "WORKFLOW": "Workflows"
-      }
     }
   },
   "sharing": {
@@ -282,14 +268,13 @@
   "referenceErrors": {
     "UNKNOWN_VARIABLE": "Die globale Variable \"{{variable}}\" existiert nicht.",
     "OUT_OF_SCOPE": "Die globale Variable \"{{variable}}\" ist für diesen Workflow nicht sichtbar.",
-    "NO_USE_PERMISSION": "Sie dürfen die globale Variable \"{{variable}}\" nicht verwenden.",
-    "SECOND_WRITER": "Die globale Variable \"{{variable}}\" wird bereits von einem anderen Workflow geschrieben.",
-    "NOT_MUTABLE": "\"{{variable}}\" ist keine veränderliche Variable und kann daher nicht gesetzt werden.",
-    "ARGUMENTS_MISMATCH": "Der Aufruf von \"{{variable}}\" passt nicht zu ihren Parametern.",
-    "REF_UNRESOLVED": "\"{{variable}}\" liest {{ref}}, das dieser Workflow nicht liefern kann.",
-    "IMPORT_LANGUAGE_MISMATCH": "\"{{variable}}\" ist in einer anderen Sprache als dieses Skript geschrieben.",
-    "IMPORT_CYCLE": "Der Import von \"{{variable}}\" würde einen Importzyklus erzeugen.",
     "SCOPE_NOT_ALL": "Konnektoren können nur globale Variablen verwenden, die für alle Workflows sichtbar sind (\"{{variable}}\").",
+    "NO_USE_PERMISSION": "Sie dürfen die globale Variable \"{{variable}}\" nicht verwenden.",
+    "INVALID_WRITE_TARGET": "Ein Schreibziel muss genau global.<name> sein (\"{{field}}\").",
+    "NOT_MUTABLE": "\"{{variable}}\" ist keine veränderliche Variable und kann daher nicht geschrieben werden.",
+    "NOT_OWNER": "Die globale Variable \"{{variable}}\" gehört zu einem anderen Workflow; nur ihr Besitzer-Workflow darf sie schreiben.",
+    "SCRIPT_NOT_CALLABLE": "\"{{variable}}\" ist ein Skript: Importieren Sie es in eine Transformation derselben Sprache und rufen Sie es dort auf.",
+    "IMPORT_LANGUAGE_MISMATCH": "\"{{variable}}\" ist in einer anderen Sprache geschrieben als diese Transformation.",
     "more": "(+{{count}} weitere)"
   },
   "script": {
@@ -297,12 +282,11 @@
     "languageLocked": "Die Sprache kann nach dem Anlegen des Skripts nicht mehr geändert werden.",
     "languages": {
       "js": "JavaScript",
-      "python2": "Python 2",
       "python3": "Python 3",
       "ruby": "Ruby"
     },
     "code": "Code",
-    "codeHint": "Muss einen Wert zurückgeben. Lesen Sie Workflow-Daten mit ref(\"…\") und einem String-Literal; übergeben Sie Methodendaten möglichst als Parameter.",
+    "codeHint": "Muss einen Wert zurückgeben. Ein Skript nutzt nur seine Parameter: Es kann Workflow-Daten nicht mit ref() oder set() lesen oder schreiben.",
     "parameters": {
       "label": "Parameter",
       "hint": "Jeder Aufruf füllt genau diese Parameter. Ein leer gelassener optionaler Parameter verwendet seinen Standardwert.",
@@ -313,13 +297,6 @@
       "add": "Parameter hinzufügen",
       "remove": "Parameter entfernen"
     },
-    "imports": {
-      "label": "Importe",
-      "hint": "Andere Skriptvariablen derselben Sprache, verfügbar als globals.<name>."
-    },
-    "warnings": {
-      "TIED_TO_CALLER_COLORS": "Liest eine Methode über ihre Farbe und funktioniert daher nur in Workflows, die diese Methode vor dem Aufruf haben"
-    },
     "errors": {
       "codeRequired": "Geben Sie den Skriptcode ein.",
       "tooLarge": "Das Skript ist größer als 256 KB.",
@@ -328,20 +305,17 @@
       "SCRIPT_RUNTIME": "Laufzeitfehler",
       "SCRIPT_TIMEOUT": "Das Skript hat zu lange gedauert",
       "NO_RETURN_VALUE": "Das Skript hat keinen Wert zurückgegeben",
-      "REF_NOT_LITERAL": "ref() braucht ein String-Literal",
-      "UNKNOWN_REF_TYPE": "Unbekannter Referenztyp",
-      "UNKNOWN_IMPORT": "Unbekannter Import",
-      "IMPORT_CYCLE": "Importzyklus",
-      "IMPORT_LANGUAGE_MISMATCH": "Import in einer anderen Sprache",
+      "SCRIPT_NOT_PURE": "Ein Skript nutzt nur seine Parameter und kann daher ref() oder set() nicht aufrufen",
+      "PARAMETER_INVALID": "Ungültiger Parameter",
+      "LANGUAGE_NOT_SUPPORTED": "Skripte werden in JavaScript, Python 3 oder Ruby geschrieben",
+      "MISSING_ARGUMENT": "Ein Pflichtparameter hat kein Testargument",
+      "SCRIPT_ENGINE_UNAVAILABLE": "Die Skript-Engine für diese Sprache ist nicht erreichbar",
       "VALIDATION_UNAVAILABLE": "Die Prüfung von Skripten in dieser Sprache ist noch nicht verfügbar"
     },
     "test": {
       "arguments": "Argumente",
-      "refs": "Referenzwerte",
       "requiredPlaceholder": "Pflicht",
-      "atLine": "in Zeile {{line}}",
-      "argumentMissing": "Nicht übergeben: ein optionaler Parameter nutzt seinen Standardwert, ein Pflichtparameter lässt den Lauf scheitern.",
-      "refMissing": "null, wie bei einer Referenz ohne Daten zur Laufzeit"
+      "argumentMissing": "Nicht übergeben: ein optionaler Parameter nutzt seinen Standardwert, ein Pflichtparameter lässt den Lauf scheitern."
     },
     "tabs": {
       "define": "Definieren",
@@ -349,28 +323,20 @@
     }
   },
   "mutable": {
-    "writePolicy": {
-      "label": "Schreibregel",
+    "busyPolicy": {
+      "label": "Wenn eine Ausführung eines Workflows, der sie nutzt, noch läuft",
       "hints": {
-        "REPLACE": "Der Wert der Ausführung ersetzt den gespeicherten, außer jemand hat ihn während der Ausführung geändert.",
-        "FORWARD_ONLY": "Wird nur gespeichert, wenn er größer als der gespeicherte Wert ist (Zahlen oder ISO-Datumswerte). Für Cursor.",
-        "INCREMENT": "Addiert die Zahl der Ausführung zum gespeicherten Wert. Für Zähler."
-      }
-    },
-    "publishMode": {
-      "label": "Wann Schreibvorgänge gespeichert werden",
-      "hints": {
-        "ON_SUCCESS": "Alle Schreibvorgänge einer Ausführung werden gemeinsam gespeichert, sobald sie erfolgreich ist; eine fehlgeschlagene Ausführung speichert nichts.",
-        "EACH_WRITE": "Wird während der Ausführung (höchstens alle 500 ms) und am Ende noch einmal gespeichert, auch wenn die Ausführung fehlschlägt."
+        "QUEUE": "Die nächste Ausführung wartet und startet, sobald die laufende endet.",
+        "REFUSE": "Die nächste Ausführung startet nicht und wird als fehlgeschlagen protokolliert."
       }
     },
     "owner": {
       "label": "Besitzer-Workflow",
-      "hint": "Der einzige Workflow, der diese Variable schreiben darf. Leer gelassen, beansprucht sie der erste Workflow, der mit einem Schreibvorgang gespeichert wird.",
-      "unclaimed": "Wird vom ersten schreibenden Workflow beansprucht"
+      "hint": "Der einzige Workflow, dessen Ausführungen diese Variable schreiben dürfen. Er muss im Gültigkeitsbereich liegen.",
+      "placeholder": "Workflow auswählen"
     },
     "errors": {
-      "valueUnfitForPolicy": "Dieser Wert passt nicht zur Schreibregel: Hochzählen braucht eine Zahl, Nur vorwärts eine Zahl oder ein ISO-Datum."
+      "ownerRequired": "Wählen Sie den Workflow, dessen Ausführungen diese Variable schreiben dürfen."
     }
   },
   "details": {
@@ -384,7 +350,7 @@
       "usage": {
         "header": "Verwendet von",
         "subheader": "Workflows, Connectoren und Benachrichtigungen, die sie verwenden",
-        "description": "Alle Stellen, die auf diese Variable verweisen: Workflow-Schritte, Connectoren, Benachrichtigungen und andere Skriptvariablen. Die Spalte Zugriff zeigt, ob sie die Variable liest, schreibt, aufruft oder importiert."
+        "description": "Alle Stellen, die auf diese Variable verweisen: Workflow-Schritte, Connectoren und Benachrichtigungen. Die Spalte Zugriff zeigt, ob sie die Variable liest oder schreibt oder ein Skript in eine Transformation importiert."
       },
       "changes": {
         "header": "Änderungsprotokoll",
@@ -397,5 +363,14 @@
         "description": "Anderen Benutzern Zugriff auf diese Variable geben. Verwenden erlaubt, sie in eigenen Workflows zu referenzieren; Bearbeiten und Löschen ergänzen die entsprechenden Rechte. Änderungen gelten nach dem Speichern."
       }
     }
+  },
+  "reset": {
+    "action": "Auf Anfangswert zurücksetzen",
+    "confirm": {
+      "title": "Aktuellen Wert zurücksetzen?",
+      "message": "Der aktuelle Wert wird durch den Anfangswert {{value}} ersetzt. Ausführungen, die danach starten, lesen ihn. Dies wird als Zurücksetzen protokolliert."
+    },
+    "done": "Der aktuelle Wert wurde zurückgesetzt",
+    "failed": "Der aktuelle Wert konnte nicht zurückgesetzt werden."
   }
 }

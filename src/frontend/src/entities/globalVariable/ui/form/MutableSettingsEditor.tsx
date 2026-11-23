@@ -6,12 +6,10 @@ import { Radio } from '@shared/ui/primitives/Radio'
 import { Typography } from '@shared/ui/primitives/Typography'
 import { useFetchEntitiesQuery } from '@shared/api/genericApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import { useIsAdmin } from '@features/auth/useIsAdmin'
 import type { ConnectionMeta } from '@entities/connection/command/connectionCache'
-import type { PublishMode, WritePolicy } from '../../model/types'
+import type { BusyPolicy } from '../../model/types'
 
-const WRITE_POLICIES: WritePolicy[] = ['REPLACE', 'FORWARD_ONLY', 'INCREMENT']
-const PUBLISH_MODES: PublishMode[] = ['ON_SUCCESS', 'EACH_WRITE']
+const BUSY_POLICIES: BusyPolicy[] = ['QUEUE', 'REFUSE']
 
 function ChoiceGroup<T extends string>({ name, values, labelKey, isReadOnly }: {
     name: string; values: T[]; labelKey: string; isReadOnly: boolean
@@ -35,25 +33,24 @@ function ChoiceGroup<T extends string>({ name, values, labelKey, isReadOnly }: {
     )
 }
 
-// Only admins choose the owner (FR-19); otherwise the first workflow that writes the variable claims it.
 function OwnerWorkflowSelect({ isReadOnly }: { isReadOnly: boolean }) {
     const { t } = useI18n('entities')
-    const isAdmin = useIsAdmin()
-    const { control } = useFormContext()
+    const { control, getFieldState, formState } = useFormContext()
     const { field } = useController({ name: 'ownerWorkflowId', control })
+    const error = getFieldState('ownerWorkflowId', formState).error?.message
     const { data } = useFetchEntitiesQuery('/connection/all/meta')
     const options = ((data ?? []) as ConnectionMeta[]).map((workflow) => ({ value: workflow.id, label: workflow.title }))
     return (
-        <FormControl label="global-variable.mutable.owner.label" hint="global-variable.mutable.owner.hint" style={{ width: '100%' }}>
+        <FormControl label="global-variable.mutable.owner.label" hint="global-variable.mutable.owner.hint" error={error} style={{ width: '100%' }}>
             <Select
-                allowClear
                 showSearch
                 optionFilterProp="label"
                 value={field.value ?? undefined}
-                onChange={(value: number | undefined) => field.onChange(value ?? null)}
+                onChange={(value: number) => field.onChange(value)}
                 options={options}
-                disabled={isReadOnly || !isAdmin}
-                placeholder={t('global-variable.mutable.owner.unclaimed')}
+                disabled={isReadOnly}
+                status={error ? 'error' : undefined}
+                placeholder={t('global-variable.mutable.owner.placeholder')}
                 style={{ width: '100%' }}
                 data-testid="global-variable-field-owner-workflow"
             />
@@ -65,9 +62,8 @@ export function MutableSettingsEditor({ mode }: { mode: Mode }) {
     const isReadOnly = mode === 'view'
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
-            <ChoiceGroup name="writePolicy" values={WRITE_POLICIES} labelKey="writePolicy" isReadOnly={isReadOnly} />
-            <ChoiceGroup name="publishMode" values={PUBLISH_MODES} labelKey="publishMode" isReadOnly={isReadOnly} />
             <OwnerWorkflowSelect isReadOnly={isReadOnly} />
+            <ChoiceGroup name="busyPolicy" values={BUSY_POLICIES} labelKey="busyPolicy" isReadOnly={isReadOnly} />
         </div>
     )
 }

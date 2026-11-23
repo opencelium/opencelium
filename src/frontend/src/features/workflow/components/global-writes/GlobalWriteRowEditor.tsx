@@ -17,7 +17,7 @@ type Props = Pick<ConditionValueInputProps, 'methods' | 'allMethods' | 'iterator
 
 export function GlobalWriteRowEditor({ row, takenVariables, isReadOnly, methods, allMethods, iterators, onChange, onRemove }: Props) {
 	const { t } = useI18n('workflow');
-	// Only a mutable variable this workflow owns or may claim can be written, each at most once per method.
+	// Only a mutable variable this workflow owns can be written, each at most once per method.
 	const isOffered = (item: PickerItem) => item.kind === 'MUTABLE' && item.writable
 		&& (item.name === row.variable || !takenVariables.includes(item.name));
 

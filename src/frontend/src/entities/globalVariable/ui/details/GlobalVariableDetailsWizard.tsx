@@ -40,7 +40,7 @@ export const GlobalVariableDetailsWizard: React.FC<{ id: number }> = ({ id }) =>
     if (isLoading) return <Loading size="md" />
     if (isError || !variable) return <Alert type="error" message={t('global-variable.notFound')} showIcon />
 
-    const canShare = isAdmin || user?.userId === variable.ownerUser.id
+    const canShare = isAdmin || user?.userId === variable.ownerUser?.id
     const step = (key: string, render: () => React.ReactNode): StepDefinition => ({
         header: stepKey(key, 'header'),
         subheader: stepKey(key, 'subheader'),

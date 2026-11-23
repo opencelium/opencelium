@@ -23,8 +23,6 @@ export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' |
 /** `global.<name>` → the value written once the method has responded: a reference, or JSON / plain text. */
 export type WorkflowGlobalWrites = Record<string, string>;
 
-/** What a run of a workflow that writes global variables does when another run holds its lock (FR-28). */
-export type WorkflowRunConflictPolicy = 'QUEUE' | 'REJECT';
 export type WorkflowOperatorKind = 'if' | 'loop';
 
 /** A free-text annotation belonging to one node. Carried in the connection's
@@ -91,8 +89,6 @@ export type WorkflowNodeData = {
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;
-	/** Only on the Start node. */
-	runConflictPolicy?: WorkflowRunConflictPolicy;
 	triggerConnection?: WorkflowTriggerConnectionRef;
 	/** Only on a 'comment' node — the note itself. */
 	comment?: WorkflowCommentData;
@@ -100,8 +96,6 @@ export type WorkflowNodeData = {
 	 * can render its show/hide badge. The note itself lives on the comment node. */
 	anchoredComment?: { nodeId: string; collapsed: boolean };
 	dataAggregator?: number | null;
-	/** Aggregator output name → mutable global variable it is published to (methods only). */
-	dataAggregatorPublish?: Record<string, string>;
 	/** Mutable global variables this method writes after it has responded (methods only). */
 	globalWrites?: WorkflowGlobalWrites;
 	labelEdited?: boolean;

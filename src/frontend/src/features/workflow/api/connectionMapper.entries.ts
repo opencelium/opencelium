@@ -103,8 +103,6 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 				invokerName: method?.connector?.invokerName ?? method?.invokerName ?? null,
 			} } : {}),
 			dataAggregator: method?.dataAggregator ?? undefined, methodConfig: methodConfig(method),
-			...(method?.dataAggregatorPublish && typeof method.dataAggregatorPublish === 'object'
-				? { dataAggregatorPublish: method.dataAggregatorPublish as Record<string, string> } : {}),
 			...(method?.globalWrites && typeof method.globalWrites === 'object' && Object.keys(method.globalWrites).length
 				? { globalWrites: method.globalWrites as Record<string, string> } : {}),
 		},

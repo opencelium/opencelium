@@ -4,7 +4,7 @@ import {
     parseInput,
     type InputValues,
 } from '@features/workflow/components/request-editor/enhancement/ScriptPlayground/playgroundInputs'
-import type { JsonValue, ScriptErrorCode, ValidateScriptResponse } from '../../model/types'
+import type { JsonValue, ScriptErrorCode, ScriptParameter, ValidateScriptResponse } from '../../model/types'
 
 type Translate = (key: string, options?: Record<string, unknown>) => string
 
@@ -18,13 +18,13 @@ const ERROR_TYPES: Partial<Record<ScriptErrorCode, ScriptErrorType>> = {
 export function toRunResult(response: ValidateScriptResponse, t: Translate): ScriptRunResult | null {
     const { error } = response
     if (!error) {
-        return { kind: 'value', value: response.result, resultType: response.resultJsonType, output: '', durationMs: response.durationMs }
+        return { kind: 'value', value: response.result, resultType: response.resultJsonType ?? 'null', output: '', durationMs: response.durationMs ?? 0 }
     }
     if (error.code === 'VALIDATION_UNAVAILABLE') return null
     return {
         kind: 'error',
         output: '',
-        durationMs: response.durationMs,
+        durationMs: response.durationMs ?? 0,
         error: {
             type: ERROR_TYPES[error.code] ?? 'RESULT',
             name: null,
@@ -37,25 +37,29 @@ export function toRunResult(response: ValidateScriptResponse, t: Translate): Scr
     }
 }
 
-export function warningNotes(response: ValidateScriptResponse, t: Translate): string[] {
-    return response.warnings.map((warning) => {
-        const where = warning.line ? `, ${t('global-variable.script.test.atLine', { line: warning.line })}` : ''
-        return `${t(`global-variable.script.warnings.${warning.code}`)} (${warning.ref}${where})`
-    })
-}
-
-/** Missing inputs are left out, so the run applies its own rule (default value, or null for a reference). */
-export function toTestValues(inputs: InputValues, keys: string[]): { values: Record<string, JsonValue>; invalid: string[] } {
-    const values: Record<string, JsonValue> = {}
+/**
+ * The backend takes the test arguments by position. Trailing missing ones are left out so the
+ * script applies its defaults; a missing one before a given one gets its default (or null) in its place.
+ */
+export function toTestArguments(inputs: InputValues, parameters: ScriptParameter[]): { values: JsonValue[]; invalid: string[] } {
+    const values: (JsonValue | undefined)[] = []
     const invalid: string[] = []
-    keys.forEach((key) => {
-        const input = inputs[key]
-        if (!input || input.mode === 'missing') return
+    parameters.forEach((parameter) => {
+        const input = inputs[parameter.name]
+        if (!input || input.mode === 'missing') {
+            values.push(undefined)
+            return
+        }
         try {
-            values[key] = parseInput(input) as JsonValue
+            values.push(parseInput(input) as JsonValue)
         } catch {
-            invalid.push(key)
+            invalid.push(parameter.name)
+            values.push(undefined)
         }
     })
-    return { values, invalid }
+    while (values.length > 0 && values[values.length - 1] === undefined) values.pop()
+    return {
+        values: values.map((value, index) => (value === undefined ? parameters[index].default ?? null : value)),
+        invalid,
+    }
 }

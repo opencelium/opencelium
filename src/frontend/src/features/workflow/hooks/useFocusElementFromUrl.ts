@@ -14,7 +14,7 @@ type Params = {
 	selectNode: (id: string) => void;
 };
 
-/** Selects the element a "used by" link points at (`?focus=<index>&focusColor=<hex>`), once. */
+/** Selects the element a "used by" link points at (`?element=<index>&focusColor=<hex>`), once. */
 export function useFocusElementFromUrl({ isLoading, nodes, edges, selectNode }: Params) {
 	const route = useLocation();
 	const navigate = useNavigate();

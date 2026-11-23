@@ -293,7 +293,6 @@
   },
   "headerMenu": {
     "assignCategory": "Kategorie zuweisen",
-    "runSettings": "Ausführungseinstellungen",
     "assignCategoryDisabledHint": "Speichern Sie den Workflow zuerst, um ihm eine Kategorie zuzuweisen",
     "downloadAsTemplate": "Als Vorlage herunterladen",
     "downloadAsTemplateDisabledHint": "Speichern Sie den Workflow zuerst, um ihn als Vorlage herunterzuladen",
@@ -528,12 +527,6 @@
     "change": "Ändern"
   },
   "aggregatorDialog": {
-    "publish": {
-      "title": "In globalen Variablen veröffentlichen",
-      "hint": "Nach einer erfolgreichen Ausführung diese Ausgaben in veränderliche Variablen schreiben, die diesem Workflow gehören.",
-      "clear": "Leeren",
-      "save": "Veröffentlichung speichern"
-    },
     "title": "Datenaggregator zuweisen",
     "selectPlaceholder": "Datenaggregator auswählen",
     "createNewTooltip": "Neuen Datenaggregator erstellen",
@@ -780,7 +773,10 @@
     "empty": "Leer"
   },
   "enhancement": {
-    "imports": {"label": "Importe (globale Variablen)", "placeholder": "Globale Variablen in diesem Skript verwenden"},
+    "imports": {
+      "label": "Importe (globale Variablen)",
+      "placeholder": "Globale Variablen in diesem Skript verwenden"
+    },
     "title": "Transformation",
     "language": "Sprache",
     "script": "Skript",
@@ -1332,25 +1328,9 @@
     },
     "consoleLog": "console gibt es auf der Server-Engine nicht (Nashorn · ES5.1). Verwenden Sie print(...) statt console.log; die Ausgabe erscheint im Tab „Ausgabe“."
   },
-  "runSettings": {
-    "title": "Ausführungseinstellungen des Workflows",
-    "intro": "Diese Einstellungen gelten, wenn dieser Workflow globale Variablen schreibt: Dann darf immer nur eine Ausführung gleichzeitig schreiben.",
-    "question": "Wenn bereits eine Ausführung läuft",
-    "policy": {
-      "QUEUE": {
-        "label": "Neue Ausführung einreihen",
-        "hint": "Sie wartet und startet, wenn die laufende endet (bis zu 10 wartende Ausführungen, je 30 Minuten)."
-      },
-      "REJECT": {
-        "label": "Neue Ausführung ablehnen",
-        "hint": "Sie startet nicht. Ein Webhook-Aufruf erhält 409; eine geplante Ausführung wird als übersprungen protokolliert."
-      }
-    },
-    "save": "Speichern"
-  },
   "globalWrites": {
     "dialogTitle": "In globale Variablen schreiben: {{method}}",
-    "hint": "Nachdem diese Methode geantwortet hat, schreibt jede Zeile ihren Wert in eine veränderliche globale Variable, die dieser Workflow schreiben darf. Wählen Sie ein Feld dieser oder einer früheren Methode, einen Webhook-Parameter oder geben Sie eine Konstante ein (JSON oder Text). In einer Schleife schreibt jeder Durchlauf; die Schreibregel der Variable fasst sie zusammen.",
+    "hint": "Nachdem diese Methode geantwortet hat, schreibt jede Zeile ihren Wert in eine veränderliche globale Variable. Nur der Besitzer-Workflow der Variable darf sie schreiben; beim Speichern werden die anderen abgelehnt. Wählen Sie ein Feld dieser oder einer früheren Methode, einen Webhook-Parameter oder geben Sie eine Konstante ein (JSON oder Text). In einer Schleife schreibt jeder Durchlauf erneut.",
     "variable": "Variable",
     "value": "Wert",
     "add": "Schreibvorgang hinzufügen",

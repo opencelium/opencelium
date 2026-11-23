@@ -43,7 +43,6 @@ const methodSchema = z.strictObject({
 	methodType: z.enum(['CONNECTOR', 'HTTP_REQUEST', 'WEBHOOK']),
 	dataAggregator: optionalAggregatorSchema, color: hexColorSchema,
 	jump: z.string().min(1).optional(),
-	dataAggregatorPublish: z.record(z.string(), z.string()).optional(),
 	globalWrites: z.record(z.string().regex(/^global\.[A-Za-z][A-Za-z0-9_]*$/), z.string()).optional(),
 	connector: connectorSchema.nullable(), request: requestSchema, response: responseSchema,
 });
@@ -65,7 +64,6 @@ const backendEnhancementSchema = z.strictObject({
 	enhancementId: z.number().optional(), name: z.string(), description: z.string(),
 	language: z.enum(['js', 'python3', 'ruby']), simpleCode: z.string().nullable(),
 	expertVar: z.string(), expertCode: z.string(),
-	imports: z.array(z.string()).optional(), globalScript: z.string().nullable().optional(),
 });
 const editorEnhancementSchema = z.strictObject({
 	enhanceId: z.string(), description: z.string().optional(),
@@ -127,9 +125,7 @@ const nodeDataSchema = z.strictObject({
 	kind: z.enum(['start', 'connector', 'system', 'trigger-connection', 'if', 'loop', 'comment']),
 	connector: uiConnectorSchema.optional(), methodConfig: uiMethodConfigSchema.optional(),
 	conditionConfig: conditionConfigSchema.optional(), comment: commentSchema.optional(),
-	runConflictPolicy: z.enum(['QUEUE', 'REJECT']).optional(),
 	dataAggregator: optionalAggregatorSchema.optional(),
-	dataAggregatorPublish: z.record(z.string(), z.string()).optional(),
 	globalWrites: z.record(z.string(), z.string()).optional(),
 });
 const nodeSchema = z.strictObject({
@@ -170,7 +166,6 @@ export const workflowJsonSchema = z.strictObject({
 	connectionId: positiveIdSchema.optional(), title: z.string().min(1),
 	name: z.string().min(1).optional(),
 	description: z.string(), categoryId: positiveIdSchema.nullable(),
-	runConflictPolicy: z.enum(['QUEUE', 'REJECT']).optional(),
 	fieldBinding: z.array(fieldBindingSchema),
 	fromConnector: z.strictObject({
 		connectorId: z.number(), title: z.string().min(1),

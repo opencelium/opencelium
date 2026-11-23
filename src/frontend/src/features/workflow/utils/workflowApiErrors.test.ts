@@ -160,7 +160,7 @@ describe('global variable reference errors', () => {
 			? { ...node, data: { ...node.data, color: '#FFCF00' } } : node) as WorkflowNodeModel[];
 		const resolution = resolveWorkflowApiError(referenceError([
 			{ code: 'OUT_OF_SCOPE', message: 'not in scope', variable: 'tenants', index: '1' },
-			{ code: 'REF_UNRESOLVED', message: 'no tenant', variable: 'buildTitle', ref: '{tenant}', color: '#ffcf00' },
+			{ code: 'NOT_OWNER', message: 'not the owner', variable: 'lastSync', ref: '{{global.lastSync}}', color: '#ffcf00' },
 			{ code: 'NEW_CODE', message: 'something new' },
 		]), coloredNodes, edges);
 		expect(resolution).toEqual({
@@ -168,8 +168,8 @@ describe('global variable reference errors', () => {
 			problems: [
 				{ nodeId: 'loop-1', messageKey: 'global-variable.referenceErrors.OUT_OF_SCOPE',
 					messageParams: { variable: 'tenants', ref: '', field: '' }, fallback: 'not in scope' },
-				{ nodeId: 'method-1', messageKey: 'global-variable.referenceErrors.REF_UNRESOLVED',
-					messageParams: { variable: 'buildTitle', ref: '{tenant}', field: '' }, fallback: 'no tenant' },
+				{ nodeId: 'method-1', messageKey: 'global-variable.referenceErrors.NOT_OWNER',
+					messageParams: { variable: 'lastSync', ref: '{{global.lastSync}}', field: '' }, fallback: 'not the owner' },
 				{ nodeId: undefined, messageKey: 'global-variable.referenceErrors.NEW_CODE',
 					messageParams: { variable: '', ref: '', field: '' }, fallback: 'something new' },
 			],

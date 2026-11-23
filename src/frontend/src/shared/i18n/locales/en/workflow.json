@@ -293,7 +293,6 @@
   },
   "headerMenu": {
     "assignCategory": "Assign Category",
-    "runSettings": "Workflow run settings",
     "assignCategoryDisabledHint": "Save the workflow first to assign it a category",
     "downloadAsTemplate": "Download as Template",
     "downloadAsTemplateDisabledHint": "Save the workflow first to download it as a template",
@@ -528,12 +527,6 @@
     "change": "Change"
   },
   "aggregatorDialog": {
-    "publish": {
-      "title": "Publish to global variables",
-      "hint": "After a successful run, write these outputs into mutable variables this workflow owns.",
-      "clear": "Clear",
-      "save": "Save publishing"
-    },
     "title": "Assign Data Aggregator",
     "selectPlaceholder": "Select a data aggregator",
     "createNewTooltip": "Create new data aggregator",
@@ -780,7 +773,10 @@
     "empty": "Empty"
   },
   "enhancement": {
-    "imports": {"label": "Imports (global variables)", "placeholder": "Use global variables in this script"},
+    "imports": {
+      "label": "Imports (global variables)",
+      "placeholder": "Use global variables in this script"
+    },
     "title": "Transformation",
     "language": "Language",
     "script": "Script",
@@ -1332,25 +1328,9 @@
     },
     "consoleLog": "console does not exist on the server engine (Nashorn · ES5.1). Use print(...) instead of console.log; its text appears in the Output tab."
   },
-  "runSettings": {
-    "title": "Workflow run settings",
-    "intro": "These settings matter when this workflow writes global variables: then only one run of it may write at a time.",
-    "question": "When a run is already going",
-    "policy": {
-      "QUEUE": {
-        "label": "Queue the new run",
-        "hint": "It waits and starts when the running one ends (up to 10 waiting runs, 30 minutes each)."
-      },
-      "REJECT": {
-        "label": "Reject the new run",
-        "hint": "It does not start. A webhook call gets 409; a scheduled run is logged as skipped."
-      }
-    },
-    "save": "Save"
-  },
   "globalWrites": {
     "dialogTitle": "Write to global variables: {{method}}",
-    "hint": "After this method has responded, each row writes its value into a mutable global variable this workflow may write. Pick a field of this or an earlier method, a webhook parameter, or type a constant (JSON or text). Inside a loop every pass writes; the variable's write policy combines them.",
+    "hint": "After this method has responded, each row writes its value into a mutable global variable. Only the variable's owner workflow may write it; saving refuses the others. Pick a field of this or an earlier method, a webhook parameter, or type a constant (JSON or text). Inside a loop every pass writes again.",
     "variable": "Variable",
     "value": "Value",
     "add": "Add write",

@@ -26,7 +26,6 @@ import { applyProblemFocus } from './problems/applyProblemFocus';
 import { GlobalPickerScopeProvider } from '@entities/globalVariable/ui/picker/GlobalPickerScopeProvider';
 import { workflowPickerScope } from '@entities/globalVariable/ui/picker/globalPicker';
 import { useFocusElementFromUrl } from './hooks/useFocusElementFromUrl';
-import { readRunConflictPolicy } from './utils/runConflictPolicy';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -173,10 +172,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onPasteInScope: pasteOperatorInScope, onPasteAfter: pasteOperatorAfter }}
         category={{ open: assignCategoryOpen, currentCategoryId: categoryId,
           loading: isAssigningCategory, onClose: () => setAssignCategoryOpen(false),
-          onAssign: handleAssignCategory }}
-        runSettings={{ open: actions.isRunSettingsOpen, value: readRunConflictPolicy(workflow.nodes),
-          readOnly: readOnly || isTestRunLocked, onClose: () => actions.setIsRunSettingsOpen(false),
-          onSave: (policy) => { workflow.onSetRunConflictPolicy(policy); actions.setIsRunSettingsOpen(false); } }} />
+          onAssign: handleAssignCategory }} />
       <LogPlaygroundOpenContext.Provider value={playground.openFromLogs}>
       <WorkflowMain loading={isLoading} canvas={{ nodes: canvasNodes,
         edges: workflow.edges, isAnyNodeDragging: workflow.isAnyNodeDragging,
@@ -288,7 +284,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onSave: workflow.onSaveGlobalWrites }}
         aggregator={{ open: !!workflow.aggregatorEditor, node: aggregatorNode,
           onClose: () => workflow.setAggregatorEditor(null),
-          onSave: workflow.onSaveDataAggregator, onSavePublish: workflow.onSaveAggregatorPublish }}
+          onSave: workflow.onSaveDataAggregator }}
         connector={{ open: workflow.connectorEditor?.kind === 'switch', connectors,
           node: connectorEditorNode, onClose: () => workflow.setConnectorEditor(null),
           onChange: workflow.onChangeNodeConnector }}

@@ -29,6 +29,7 @@ const MENU_ITEM_COMPONENT: Partial<Record<string, PermissionComponent>> = {
     '/user': 'USER',
     '/role': 'USERGROUP',
     '/invoker': 'INVOKER',
+    '/global-variable': 'GLOBAL_VARIABLE',
     '/system-config': 'APP',
 };
 

@@ -7,19 +7,17 @@ import { PlaygroundInput } from '@features/workflow/components/request-editor/en
 import { PlaygroundOutput } from '@features/workflow/components/request-editor/enhancement/ScriptPlayground/PlaygroundOutput'
 import { PlaygroundRunStatus } from '@features/workflow/components/request-editor/enhancement/ScriptPlayground/PlaygroundRunStatus'
 import '@features/workflow/components/request-editor/enhancement/ScriptPlayground/ScriptPlayground.css'
-import type { DetectedRef, ScriptParameterDraft } from '../../model/script'
-import { toRunResult, warningNotes } from './scriptTestMapping'
+import type { ScriptParameterDraft } from '../../model/script'
+import { toRunResult } from './scriptTestMapping'
 import { MISSING_INPUT, type useScriptTestRun } from './useScriptTestRun'
 
 type Props = {
     parameters: ScriptParameterDraft[]
-    refs: DetectedRef[]
     testRun: ReturnType<typeof useScriptTestRun>
     onLocate: (line: number, column: number) => void
 }
 
-// References can't be resolved outside a run, so the user supplies their test values (contract §8).
-export function ScriptTestRun({ parameters, refs, testRun, onLocate }: Props) {
+export function ScriptTestRun({ parameters, testRun, onLocate }: Props) {
     const { t } = useI18n('entities')
     const { t: tWorkflow } = useI18n('workflow')
     const named = parameters.filter((parameter) => parameter.name.trim() !== '')
@@ -53,18 +51,6 @@ export function ScriptTestRun({ parameters, refs, testRun, onLocate }: Props) {
                     missingHint={t('global-variable.script.test.argumentMissing')}
                 />
             ))}
-            {refs.length > 0 && <h4>{t('global-variable.script.test.refs')}</h4>}
-            {refs.map((ref) => (
-                <PlaygroundInput
-                    key={ref.ref}
-                    name={ref.ref}
-                    reference=""
-                    input={testRun.refInputs[ref.ref] ?? MISSING_INPUT}
-                    isInvalid={testRun.invalid.includes(ref.ref)}
-                    onChange={(input) => testRun.setRef(ref.ref, input)}
-                    missingHint={t('global-variable.script.test.refMissing')}
-                />
-            ))}
             <div className="scriptPlaygroundRunRow">
                 <Tooltip content={blockedReason ?? tWorkflow('sandbox.shortcut')}>
                     <Button type="primary" iconLeft="play" disabled={testRun.isRunning || !!blockedReason}
@@ -88,7 +74,7 @@ export function ScriptTestRun({ parameters, refs, testRun, onLocate }: Props) {
                         isStale={false}
                         onLocate={onLocate}
                         hasConsole={false}
-                        notes={result ? warningNotes(result, t) : []}
+                        notes={[]}
                     />
                 )}
         </section>

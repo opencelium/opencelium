@@ -1,13 +1,12 @@
 import type { Mode } from '@/engine/entity/EntityDefinition'
 import type {
+    BusyPolicy,
     GlobalVariable,
     GlobalVariableKind,
     GlobalVariableSaveDto,
     GlobalVariableScopeDto,
     JsonValue,
-    PublishMode,
     ScriptParameter,
-    WritePolicy,
 } from './types'
 import { emptyScript, type ScriptFormValues, type ScriptParameterDraft } from './script'
 
@@ -32,15 +31,13 @@ export type GlobalVariableFormValues = {
     secret: boolean
     value: string
     script: ScriptFormValues
-    writePolicy: WritePolicy
-    publishMode: PublishMode
+    busyPolicy: BusyPolicy
     ownerWorkflowId: number | null
     scope: GlobalVariableScopeDto
 }
 
-export const DEFAULT_WRITE_POLICY: WritePolicy = 'REPLACE'
-export const DEFAULT_PUBLISH_MODE: PublishMode = 'ON_SUCCESS'
-const mutableDefaults = { writePolicy: DEFAULT_WRITE_POLICY, publishMode: DEFAULT_PUBLISH_MODE, ownerWorkflowId: null }
+export const DEFAULT_BUSY_POLICY: BusyPolicy = 'QUEUE'
+const mutableDefaults = { busyPolicy: DEFAULT_BUSY_POLICY, ownerWorkflowId: null }
 
 export type ValueJsonType = 'string' | 'number' | 'boolean' | 'null' | 'array' | 'object'
 
@@ -84,6 +81,7 @@ export const emptyScope = (): GlobalVariableScopeDto => ({ type: 'ALL', category
 
 const toParameterDraft = (parameter: ScriptParameter): ScriptParameterDraft => ({
     name: parameter.name,
+    description: parameter.description ?? '',
     required: parameter.required,
     defaultText: parameter.required || parameter.default === undefined || parameter.default === null
         ? '' : valueToText(parameter.default),
@@ -91,6 +89,7 @@ const toParameterDraft = (parameter: ScriptParameter): ScriptParameterDraft => (
 
 export const toParameter = (draft: ScriptParameterDraft): ScriptParameter => ({
     name: draft.name.trim(),
+    ...(draft.description.trim() === '' ? {} : { description: draft.description.trim() }),
     required: draft.required,
     default: draft.required || draft.defaultText.trim() === '' ? null : textToValue(draft.defaultText),
 })
@@ -125,9 +124,8 @@ export function toFormValues(variable: GlobalVariable): GlobalVariableFormValues
                 secret: false,
                 value: valueToText(variable.value),
                 script: emptyScript(),
-                writePolicy: variable.writePolicy,
-                publishMode: variable.publishMode,
-                ownerWorkflowId: variable.ownerWorkflow?.id ?? null,
+                busyPolicy: variable.mutable.busyPolicy,
+                ownerWorkflowId: variable.mutable.ownerWorkflow?.id ?? null,
             }
         case 'SCRIPT':
             return {
@@ -139,7 +137,6 @@ export function toFormValues(variable: GlobalVariable): GlobalVariableFormValues
                     language: variable.script.language,
                     code: variable.script.code,
                     parameters: variable.script.parameters.map(toParameterDraft),
-                    imports: variable.script.imports,
                 },
                 ...mutableDefaults,
             }
@@ -177,9 +174,9 @@ export function toSaveDto(values: GlobalVariableFormValues, mode: Mode): GlobalV
                 ...base,
                 kind: 'MUTABLE',
                 value: textToValue(values.value),
-                writePolicy: values.writePolicy,
-                publishMode: values.publishMode,
-                ownerWorkflowId: values.ownerWorkflowId,
+                busyPolicy: values.busyPolicy,
+                // isOwnerMissing blocks the submit before this runs without one
+                ownerWorkflowId: values.ownerWorkflowId ?? 0,
             }
         case 'SCRIPT':
             return {
@@ -189,7 +186,6 @@ export function toSaveDto(values: GlobalVariableFormValues, mode: Mode): GlobalV
                     language: values.script.language,
                     code: values.script.code,
                     parameters: values.script.parameters.map(toParameter),
-                    imports: values.script.imports,
                 },
             }
         default: {
@@ -211,18 +207,6 @@ export const isScopeIncomplete = (scope: GlobalVariableScopeDto | undefined) =>
     && ((scope.type === 'CATEGORIES' && scope.categoryIds.length === 0)
         || (scope.type === 'WORKFLOWS' && scope.workflowIds.length === 0))
 
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}(T[\d:.]+(Z|[+-]\d{2}:?\d{2})?)?$/
-
-// FORWARD_ONLY compares numbers or ISO dates, INCREMENT adds numbers (FR-22); anything else can never be written.
-export function isValueUnfitForPolicy(values: Partial<GlobalVariableFormValues>): boolean {
-    if (values.kind !== 'MUTABLE' || (values.value ?? '').trim() === '') return false
-    const value = textToValue(values.value ?? '')
-    switch (values.writePolicy) {
-        case 'INCREMENT':
-            return typeof value !== 'number'
-        case 'FORWARD_ONLY':
-            return typeof value !== 'number' && !(typeof value === 'string' && ISO_DATE.test(value))
-        default:
-            return false
-    }
-}
+// The backend refuses a mutable variable without the workflow whose runs may write it.
+export const isOwnerMissing = (values: Partial<GlobalVariableFormValues>) =>
+    values.kind === 'MUTABLE' && (values.ownerWorkflowId === null || values.ownerWorkflowId === undefined)

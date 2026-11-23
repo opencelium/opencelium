@@ -5,10 +5,9 @@ import { FormControl } from '@shared/ui/form/FormControl'
 import { Select } from '@shared/ui/primitives/Select'
 import { Tabs } from '@shared/ui/primitives/Tabs'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import { DEFAULT_CODE, detectRefs, emptyScript, SCRIPT_LANGUAGES, uniqueRefs, type ScriptFormValues } from '../../model/script'
+import { DEFAULT_CODE, detectImpureCalls, emptyScript, SCRIPT_LANGUAGES, type ScriptFormValues } from '../../model/script'
 import type { ScriptLanguage } from '../../model/types'
 import { ScriptCodeEditor } from './ScriptCodeEditor'
-import { ScriptImportsSelect } from './ScriptImportsSelect'
 import { ScriptParametersEditor } from './ScriptParametersEditor'
 import { ScriptTestRun } from './ScriptTestRun'
 import { useScriptTestRun } from './useScriptTestRun'
@@ -17,11 +16,9 @@ export function ScriptVariableEditor({ mode }: { mode: Mode }) {
     const { t } = useI18n('entities')
     const { control, setValue, getFieldState, formState } = useFormContext()
     const script = (useWatch({ control, name: 'script' }) as ScriptFormValues | undefined) ?? emptyScript()
-    const ownName = String(useWatch({ control, name: 'name' }) ?? '')
     const isReadOnly = mode === 'view'
-    const detected = useMemo(() => detectRefs(script.code, script.language), [script.code, script.language])
-    const refs = useMemo(() => uniqueRefs(detected.refs), [detected])
-    const testRun = useScriptTestRun(script, refs)
+    const impureCalls = useMemo(() => detectImpureCalls(script.code, script.language), [script.code, script.language])
+    const testRun = useScriptTestRun(script)
     const [tab, setTab] = useState('define')
 
     const update = (patch: Partial<ScriptFormValues>) => {
@@ -38,7 +35,6 @@ export function ScriptVariableEditor({ mode }: { mode: Mode }) {
                     options={SCRIPT_LANGUAGES.map((language) => ({ value: language, label: t(`global-variable.script.languages.${language}`) }))}
                     onChange={(language) => update({
                         language: language as ScriptLanguage,
-                        imports: [],
                         // Untouched starter code follows the language; anything typed is kept.
                         ...(script.code === DEFAULT_CODE[script.language] ? { code: DEFAULT_CODE[language as ScriptLanguage] } : {}),
                     })}
@@ -49,10 +45,8 @@ export function ScriptVariableEditor({ mode }: { mode: Mode }) {
             <ScriptParametersEditor parameters={script.parameters} isReadOnly={isReadOnly}
                 onChange={(parameters) => update({ parameters })}
                 error={getFieldState('script.parameters', formState).error?.message} />
-            <ScriptImportsSelect value={script.imports} language={script.language} ownName={ownName}
-                isReadOnly={isReadOnly} onChange={(imports) => update({ imports })} />
             <ScriptCodeEditor language={script.language} code={script.code} onChange={(code) => update({ code })} isReadOnly={isReadOnly}
-                refs={detected.refs} nonLiteral={detected.nonLiteral} result={testRun.result}
+                impureCalls={impureCalls} result={testRun.result}
                 error={getFieldState('script.code', formState).error?.message} />
         </div>
     )
@@ -68,7 +62,7 @@ export function ScriptVariableEditor({ mode }: { mode: Mode }) {
                         {
                             key: 'test',
                             label: t('global-variable.script.tabs.test'),
-                            content: <ScriptTestRun parameters={script.parameters} refs={refs} testRun={testRun} onLocate={() => setTab('define')} />,
+                            content: <ScriptTestRun parameters={script.parameters} testRun={testRun} onLocate={() => setTab('define')} />,
                         },
                     ]}
                 />

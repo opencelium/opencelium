@@ -17,7 +17,10 @@ export function useRestoreChange(variable: GlobalVariable) {
         async (change: GlobalVariableChange) => {
             const isConfirmed = await confirm({
                 title: t('global-variable.changes.restoreConfirm.title'),
-                message: t('global-variable.changes.restoreConfirm.message', { version: change.versionFrom ?? change.versionTo }),
+                // A mutable variable's restore sets its initial value; a reset then makes that the current one.
+                message: t(variable.kind === 'MUTABLE'
+                    ? 'global-variable.changes.restoreConfirm.messageMutable'
+                    : 'global-variable.changes.restoreConfirm.message', { version: change.versionFrom ?? change.versionTo }),
             })
             if (!isConfirmed) return
             setRestoringId(change.id)
@@ -30,7 +33,7 @@ export function useRestoreChange(variable: GlobalVariable) {
             }
             message.success(t('global-variable.changes.restored'))
         },
-        [confirm, restoreChange, t, variable.id, variable.version],
+        [confirm, restoreChange, t, variable.id, variable.kind, variable.version],
     )
 
     return { restore, restoringId }

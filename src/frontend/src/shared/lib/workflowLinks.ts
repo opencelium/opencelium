@@ -1,6 +1,6 @@
-// Opens the workflow editor on one element. `focus` is the element's tree-path index;
-// `focusColor` names a method by its colour, as a fallback when the index moved.
-export const WORKFLOW_FOCUS_INDEX_PARAM = 'focus'
+// Opens the workflow editor on one element. `element` is the element's tree-path index (the
+// backend's "Used by" contract); `focusColor` names a method by its colour, as a fallback when the index moved.
+export const WORKFLOW_FOCUS_INDEX_PARAM = 'element'
 export const WORKFLOW_FOCUS_COLOR_PARAM = 'focusColor'
 
 export type WorkflowFocus = { index?: string; color?: string }

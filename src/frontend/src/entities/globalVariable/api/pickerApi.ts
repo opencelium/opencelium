@@ -21,11 +21,11 @@ const isPagedList = (value: unknown): value is PagedResponse<GlobalVariableListI
 // Scripts are left out: the list has no parameter detail, and a script needs the field call editor anyway.
 const toAllScopeItems = (page: PagedResponse<GlobalVariableListItem>): PickerItem[] => page.content
     .filter((item) => item.scopeType === 'ALL' && item.kind !== 'SCRIPT')
-    .map((item): PickerItem => (item.kind === 'MUTABLE'
-        ? { kind: 'MUTABLE', name: item.name, description: item.description, secret: item.secret,
-            valuePreview: item.valuePreview, ownerWorkflow: item.ownerWorkflow, writable: false }
-        : { kind: 'CONSTANT', name: item.name, description: item.description, secret: item.secret,
-            valuePreview: item.valuePreview }))
+    .map((item): PickerItem => {
+        const base = { name: item.name, description: item.description, secret: item.secret, valuePreview: item.valuePreview }
+        // Nothing here names a saved workflow, so none of these can be written (the backend says the same).
+        return item.kind === 'MUTABLE' ? { ...base, kind: 'MUTABLE', ownerWorkflow: null, writable: false } : { ...base, kind: 'CONSTANT' }
+    })
 
 function request(scope: PickerScope): Promise<PickerItem[] | null> {
     const options = { ignoreError: true, skipEntityInvalidation: true }
