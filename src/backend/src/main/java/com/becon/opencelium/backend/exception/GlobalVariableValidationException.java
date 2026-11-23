@@ -26,6 +26,8 @@ public class GlobalVariableValidationException extends RuntimeException {
         IDS_REQUIRED,
         TOO_MANY_IDS,
         SCRIPT_HAS_NO_VALUE,
+        // the values are asked for by ids and by a workflow at once
+        VALUES_TARGET_AMBIGUOUS,
         PICKER_TARGET_AMBIGUOUS,
         NOT_RESTORABLE,
         // a mutable variable names the workflow whose runs may write it

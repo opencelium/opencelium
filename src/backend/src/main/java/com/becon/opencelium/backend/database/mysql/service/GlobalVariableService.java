@@ -115,15 +115,20 @@ public interface GlobalVariableService {
     List<GlobalVariable> findUsable(Long connectionId, Integer categoryId);
 
     /**
-     * Returns the last saved value and the version of the given variables, for polling. Unknown
-     * ids and variables the user may not view are left out.
+     * Returns the last saved value and the version of variables, for polling: either the given
+     * ones, or every constant and mutable variable in scope of a workflow. Unknown ids and
+     * variables the user may not view are left out, and so are script variables in scope of the
+     * workflow, which have no stored value.
      *
-     * @param ids one to a hundred ids
+     * @param ids        one to a hundred ids, or {@code null} when {@code workflowId} is given
+     * @param workflowId id of a saved workflow, or {@code null} when {@code ids} are given
      * @return the values ordered by id
-     * @throws com.becon.opencelium.backend.exception.GlobalVariableValidationException if no id
-     *         or too many are given, or one of them is a script variable
+     * @throws com.becon.opencelium.backend.exception.GlobalVariableValidationException if neither
+     *         or both are given, too many ids are given, or one of the ids is a script variable
+     * @throws com.becon.opencelium.backend.exception.GeneralServiceException with status 404 if
+     *         the workflow does not exist
      */
-    List<GlobalVariableValueDTO> getValues(List<Long> ids);
+    List<GlobalVariableValueDTO> getValues(List<Long> ids, Long workflowId);
 
     /**
      * Tells what a change would do to the usages of a variable, without making it. Needs DELETE

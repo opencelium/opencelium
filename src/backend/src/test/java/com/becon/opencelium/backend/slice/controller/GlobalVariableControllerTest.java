@@ -397,7 +397,7 @@ class GlobalVariableControllerTest {
     @DisplayName("getValues — the answer carries an ETag of ids and versions and is revalidated on every poll")
     void getValuesReturnsValuesWithEtagWhenRequestIsFirst() throws Exception {
         List<GlobalVariableValueDTO> values = List.of(aValueDto());
-        when(service.getValues(List.of(7L))).thenReturn(values);
+        when(service.getValues(List.of(7L), null)).thenReturn(values);
 
         mockMvc.perform(get("/global-variable/values").param("ids", "7").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -414,7 +414,7 @@ class GlobalVariableControllerTest {
     @Test
     @DisplayName("getValues — a poll that carries the tag of the last answer gets 304 and no body")
     void getValuesReturnsNotModifiedWhenEtagMatches() throws Exception {
-        when(service.getValues(List.of(7L))).thenReturn(List.of(aValueDto()));
+        when(service.getValues(List.of(7L), null)).thenReturn(List.of(aValueDto()));
         String etag = mockMvc.perform(get("/global-variable/values").param("ids", "7"))
                 .andReturn()
                 .getResponse()
@@ -428,7 +428,7 @@ class GlobalVariableControllerTest {
 
     @Test
     void getValuesReturnsValuesWhenEtagIsStale() throws Exception {
-        when(service.getValues(List.of(7L))).thenReturn(List.of(aValueDto()));
+        when(service.getValues(List.of(7L), null)).thenReturn(List.of(aValueDto()));
 
         mockMvc.perform(get("/global-variable/values").param("ids", "7")
                         .header(HttpHeaders.IF_NONE_MATCH, "\"0123456789abcdef0123456789abcdef\""))
@@ -442,7 +442,18 @@ class GlobalVariableControllerTest {
         mockMvc.perform(get("/global-variable/values").param("ids", "7,12").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        verify(service).getValues(List.of(7L, 12L));
+        verify(service).getValues(List.of(7L, 12L), null);
+    }
+
+    @Test
+    void getValuesPassesWorkflowIdWhenItIsGiven() throws Exception {
+        List<GlobalVariableValueDTO> values = List.of(aValueDto());
+        when(service.getValues(null, 42L)).thenReturn(values);
+
+        mockMvc.perform(get("/global-variable/values").param("workflowId", "42").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ETAG, "\"" + GlobalVariableValueDTO.etagOf(values) + "\""))
+                .andExpect(jsonPath("$[0].id").value(7));
     }
 
     // ── POST /global-variable/{id}/impact ─────────────────────────────────────
