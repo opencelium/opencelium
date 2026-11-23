@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
+import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableChangeRepository;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
@@ -649,7 +650,8 @@ class WorkflowRunGateTest {
             return 1;
         });
         OwnerRuns runs = new OwnerRuns(aGateWithRoomFor(RACERS),
-                new GlobalVariableWriter(repository, new TestRunOrigins(), 1024));
+                new GlobalVariableWriter(repository, mock(GlobalVariableChangeRepository.class),
+                        new TestRunOrigins(), 1024));
         // a start fired from the queue comes back through Quartz, which here runs it on the pool
         doAnswer(invocation -> {
             Trigger trigger = invocation.getArgument(0);

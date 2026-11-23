@@ -997,3 +997,15 @@ ALTER TABLE `global_variable`
     ADD COLUMN IF NOT EXISTS `busy_policy`              VARCHAR(16) DEFAULT NULL,
     ADD COLUMN IF NOT EXISTS `owner_workflow_id`        INT DEFAULT NULL;
 ALTER TABLE `global_variable` ADD CONSTRAINT `fk_global_variable_owner_workflow` FOREIGN KEY (`owner_workflow_id`) REFERENCES `connection` (`id`) ON DELETE SET NULL;
+
+--changeset 5.2:12 stripComments:true splitStatements:true endDelimiter:;
+-- What runs write to a mutable global variable, in the change log. A RUN_WRITE entry sums up one
+-- run: 'old_value' is the current value before the run's first write, 'new_value' the value of
+-- its last write and 'write_count' the number of its writes. 'workflow_id' is the owner workflow
+-- and 'execution_id' the execution that wrote. The three columns are NULL for a change a user
+-- made. Like 'user_id' they are plain audit columns, deliberately not foreign keys, so the
+-- history survives the workflow and its executions.
+ALTER TABLE `global_variable_change`
+    ADD COLUMN IF NOT EXISTS `workflow_id`  BIGINT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `execution_id` BIGINT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `write_count`  INT DEFAULT NULL;

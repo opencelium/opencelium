@@ -17,8 +17,14 @@ import java.util.List;
  * @param newValue      value after the change as real JSON, masked like {@code oldValue};
  *                      {@code null} for a CONFIG or PERMISSIONS change
  * @param changedFields the fields a CONFIG or PERMISSIONS change touched; {@code null} otherwise
+ * @param actor         the user who made the change; for a RUN_WRITE entry the workflow whose
+ *                      run wrote, with type {@code WORKFLOW}
+ * @param executionId   the execution that wrote, for a RUN_WRITE entry; {@code null} otherwise
+ * @param writeCount    how many times that run wrote the variable: the entry sums them up, with
+ *                      {@code oldValue} from before the first write and {@code newValue} from
+ *                      the last; {@code null} for any other entry
  * @param restorable    whether the variable can be set back to the value this entry saved;
- *                      never for a masked value
+ *                      never for a masked value or a RUN_WRITE entry
  */
 public record GlobalVariableChangeDTO(
         Long id,
@@ -29,6 +35,8 @@ public record GlobalVariableChangeDTO(
         JsonNode newValue,
         List<ChangedField> changedFields,
         GlobalVariableDTO.Actor actor,
+        Long executionId,
+        Integer writeCount,
         GlobalVariableChange.Result result,
         String reason,
         @JsonFormat(shape = JsonFormat.Shape.STRING) Instant changedAt,

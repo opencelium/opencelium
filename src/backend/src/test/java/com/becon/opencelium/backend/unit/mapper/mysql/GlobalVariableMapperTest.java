@@ -479,6 +479,47 @@ class GlobalVariableMapperTest {
         assertThat(restorable).isFalse();
     }
 
+    // ── run writes ────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toChange — a run's entry names the workflow as actor, with the execution and its number of writes")
+    void toChangeReturnsWorkflowActorWhenEntryIsRunWrite() {
+        Connection workflow = new Connection();
+        workflow.setId(42L);
+        workflow.setTitle("VMware to i-doit");
+        when(connectionRepository.findById(42L)).thenReturn(Optional.of(workflow));
+
+        GlobalVariableChangeDTO dto = mapper.toChange(aRunWrite(), false);
+
+        assertThat(dto.changeType()).isEqualTo(GlobalVariableChange.Type.RUN_WRITE);
+        assertThat(dto.actor()).isEqualTo(GlobalVariableDTO.Actor.workflow(42, "VMware to i-doit"));
+        assertThat(dto.executionId()).isEqualTo(900L);
+        assertThat(dto.writeCount()).isEqualTo(3);
+        assertThat(dto.oldValue()).isEqualTo(new TextNode("a"));
+        assertThat(dto.newValue()).isEqualTo(new TextNode("d"));
+        assertThat(dto.restorable()).isFalse();
+    }
+
+    @Test
+    void toChangeReturnsActorWithoutNameWhenWorkflowWasDeleted() {
+        when(connectionRepository.findById(42L)).thenReturn(Optional.empty());
+
+        GlobalVariableChangeDTO dto = mapper.toChange(aRunWrite(), false);
+
+        assertThat(dto.actor()).isEqualTo(GlobalVariableDTO.Actor.workflow(42, null));
+    }
+
+    @Test
+    @DisplayName("toChange — the entry of a user's change carries no execution and no number of writes")
+    void toChangeReturnsNullExecutionWhenUserChanged() {
+        GlobalVariableChange change = aChange(GlobalVariableChange.Type.VALUE, "\"old\"", "\"new\"");
+
+        GlobalVariableChangeDTO dto = mapper.toChange(change, false);
+
+        assertThat(dto.executionId()).isNull();
+        assertThat(dto.writeCount()).isNull();
+    }
+
     // ── secrets ───────────────────────────────────────────────────────────────
 
     @Test
@@ -560,6 +601,13 @@ class GlobalVariableMapperTest {
     private static GlobalVariableChange aSavedChange(GlobalVariableChange.Type type) {
         return GlobalVariableChange.savedByUser(GlobalVariableFixture.aConstant(5L, "idoitUrl", "1"), type,
                 3L, 4L, "\"old\"", "\"earlier\"", null);
+    }
+
+    /** What execution 900 of workflow 42 wrote to variable 5 in three writes, from "a" to "d". */
+    private static GlobalVariableChange aRunWrite() {
+        return GlobalVariableChange.writtenByRun(
+                GlobalVariableFixture.aMutable(5L, "lastSync", "\"a\"", "\"a\"", 42L),
+                "\"a\"", "\"d\"", 42L, 900L, 3, new Date());
     }
 
     private static User aUser(String email) {

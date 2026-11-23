@@ -130,6 +130,8 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 ThreadLocalOcLogger.clear();
 
                 context.put("operationsEx", executor.getOperations());
+                // what the run wrote to mutable variables stays written however it ended
+                executionObj.getGlobalWriter().logWrites();
             }
 
             // increments current_usage in subscription and saves entity in current_usage_history.
