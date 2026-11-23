@@ -2717,7 +2717,7 @@ class GlobalVariableServiceImpTest {
     private static GlobalVariableChangeDTO aMaskedChangeDto() {
         TextNode mask = new TextNode(GlobalVariableChange.SECRET_MASK);
         return new GlobalVariableChangeDTO(CHANGE_ID, GlobalVariableChange.Type.VALUE, 1L, 2L, mask, mask, null,
-                null, GlobalVariableChange.Result.SAVED, null, null, false);
+                null, null, null, GlobalVariableChange.Result.SAVED, null, null, false);
     }
 
     /**

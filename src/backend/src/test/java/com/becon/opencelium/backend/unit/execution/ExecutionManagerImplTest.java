@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
+import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableChangeRepository;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.exception.GlobalVariableNotFoundException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
@@ -338,7 +339,8 @@ class ExecutionManagerImplTest {
         for (GlobalVariable variable : variables) {
             when(repository.findByNameIn(List.of(variable.getName()))).thenReturn(List.of(variable));
         }
-        GlobalVariableWriter.Run run = new GlobalVariableWriter(repository, new TestRunOrigins(), 1024)
+        GlobalVariableWriter.Run run = new GlobalVariableWriter(repository, mock(GlobalVariableChangeRepository.class),
+                new TestRunOrigins(), 1024)
                 .forRun(OWNER_WORKFLOW, 900L);
 
         ExecutionManager manager = new ExecutionManagerImpl(
@@ -435,7 +437,7 @@ class ExecutionManagerImplTest {
     /** A manager whose run executes workflow {@code connectionId} against {@code repository}. */
     private static ExecutionManager aReadingManager(GlobalVariableSnapshot snapshot,
             GlobalVariableRepository repository, TestRunOrigins origins, long connectionId) {
-        GlobalVariableWriter.Run run = new GlobalVariableWriter(repository, origins, 1024)
+        GlobalVariableWriter.Run run = new GlobalVariableWriter(repository, mock(GlobalVariableChangeRepository.class), origins, 1024)
                 .forRun(connectionId, 900L);
 
         ExecutionManager manager = new ExecutionManagerImpl(
@@ -527,7 +529,8 @@ class ExecutionManagerImplTest {
         for (GlobalVariable variable : variables) {
             when(repository.findByNameIn(List.of(variable.getName()))).thenReturn(List.of(variable));
         }
-        GlobalVariableWriter.Run run = new GlobalVariableWriter(repository, new TestRunOrigins(), 1024)
+        GlobalVariableWriter.Run run = new GlobalVariableWriter(repository, mock(GlobalVariableChangeRepository.class),
+                new TestRunOrigins(), 1024)
                 .forRun(OWNER_WORKFLOW, 900L);
 
         ExecutionManager manager = new ExecutionManagerImpl(
@@ -728,7 +731,8 @@ class ExecutionManagerImplTest {
     /** A manager with one field binding, whose run gives an importing enhancement {@code limit}. */
     private static ExecutionManager aScriptManager(GlobalVariableSnapshot snapshot, FieldBindEx binding, Duration limit) {
         GlobalVariableWriter.Run run = new GlobalVariableWriter(mock(GlobalVariableRepository.class),
-                new TestRunOrigins(), 1024, limit.toMillis()).forRun(OWNER_WORKFLOW, 900L);
+                mock(GlobalVariableChangeRepository.class), new TestRunOrigins(), 1024, limit.toMillis(),
+                GlobalVariableWriter.DEFAULT_MAX_RUN_ENTRIES).forRun(OWNER_WORKFLOW, 900L);
 
         ExecutionManager manager = new ExecutionManagerImpl(
                 Map.of(), List.of(binding), Map.of(CONNECTOR_ID, Map.of()), Map.of(), Map.of(),

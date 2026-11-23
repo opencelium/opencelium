@@ -8,12 +8,37 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Repository
 public interface GlobalVariableChangeRepository extends JpaRepository<GlobalVariableChange, Long> {
 
     /** Returns the change log of a variable, newest entry first. */
     Page<GlobalVariableChange> findByVariableIdOrderByChangedAtDescIdDesc(Long variableId, Pageable pageable);
+
+    /**
+     * Returns the entries of one type for a variable, the one saved last first. A page of one
+     * entry at page index {@code n} is the newest entry that lies past the first {@code n}.
+     */
+    List<GlobalVariableChange> findByVariableIdAndChangeTypeOrderByIdDesc(
+            Long variableId, GlobalVariableChange.Type changeType, Pageable pageable);
+
+    /**
+     * Deletes the entries of one type for a variable that were saved up to an entry, that entry
+     * included. This is how the oldest RUN_WRITE entries leave the log.
+     *
+     * @return the number of entries that were deleted
+     */
+    @Transactional
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+            DELETE FROM GlobalVariableChange c
+             WHERE c.variableId = :variableId AND c.changeType = :changeType AND c.id <= :lastId
+            """)
+    int deleteByTypeUpTo(@Param("variableId") long variableId,
+            @Param("changeType") GlobalVariableChange.Type changeType, @Param("lastId") long lastId);
 
     /**
      * Overwrites the values the change log holds for a variable with {@code mask}: every value of

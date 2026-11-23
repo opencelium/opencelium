@@ -22,6 +22,9 @@ import java.util.Objects;
  * history survives the variable. For a {@link Type#CONFIG} or {@link Type#PERMISSIONS} change,
  * {@code oldValue} and {@code newValue} hold the changed fields as JSON; for the other types
  * they hold the value of the variable, or {@link #SECRET_MASK} in place of the value of a secret.
+ *
+ * <p>A {@link Type#RUN_WRITE} entry is the exception to the first sentence: a run stores each
+ * value at once, and when the run ends, one entry sums up everything it wrote to the variable.
  */
 @Entity
 @Table(name = "global_variable_change")
@@ -37,10 +40,12 @@ public class GlobalVariableChange {
     public enum Type {
         CREATE, VALUE, CONFIG, PERMISSIONS, RESTORE, DELETE,
         /** The current value of a mutable variable was set back to its initial value. */
-        RESET
+        RESET,
+        /** A run of the owner workflow wrote the current value of a mutable variable. */
+        RUN_WRITE
     }
 
-    /** Who made the change. */
+    /** Who made the change: a user, or for {@link Type#RUN_WRITE} a run of a workflow. */
     public enum ActorType {
         USER, WORKFLOW
     }
@@ -82,6 +87,15 @@ public class GlobalVariableChange {
 
     @Column(name = "user_id", updatable = false)
     private Integer userId;
+
+    @Column(name = "workflow_id", updatable = false)
+    private Long workflowId;
+
+    @Column(name = "execution_id", updatable = false)
+    private Long executionId;
+
+    @Column(name = "write_count", updatable = false)
+    private Integer writeCount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "result", length = 16, nullable = false, updatable = false)
@@ -126,6 +140,42 @@ public class GlobalVariableChange {
         return change;
     }
 
+    /**
+     * Creates the entry of everything one run wrote to a mutable variable. The version stays as
+     * it is: a run changes no part of the definition.
+     *
+     * @param variable    the written variable; its id, name and version are copied
+     * @param oldValue    the current value before the first write of the run, may be {@code null}
+     * @param newValue    the value of the last write of the run
+     * @param workflowId  the owner workflow, a run of which wrote
+     * @param executionId the execution that wrote
+     * @param writeCount  how many times the run wrote the variable, at least once
+     * @param writtenAt   when the run wrote last
+     */
+    public static GlobalVariableChange writtenByRun(GlobalVariable variable, String oldValue, String newValue,
+            long workflowId, long executionId, int writeCount, Date writtenAt) {
+        if (writeCount < 1) {
+            throw new IllegalArgumentException("A run that is logged wrote at least once, not " + writeCount + " times");
+        }
+
+        GlobalVariableChange change = new GlobalVariableChange();
+        change.variableId = Objects.requireNonNull(variable.getId(), "variable id");
+        change.variableName = variable.getName();
+        change.changeType = Type.RUN_WRITE;
+        change.versionFrom = variable.getVersion();
+        change.versionTo = variable.getVersion();
+        change.oldValue = oldValue;
+        change.newValue = newValue;
+        change.actorType = ActorType.WORKFLOW;
+        change.workflowId = workflowId;
+        change.executionId = executionId;
+        change.writeCount = writeCount;
+        change.result = Result.SAVED;
+        change.changedAt = new Date(Objects.requireNonNull(writtenAt, "writtenAt").getTime());
+
+        return change;
+    }
+
     public Long getId() {
         return id;
     }
@@ -164,6 +214,21 @@ public class GlobalVariableChange {
 
     public Integer getUserId() {
         return userId;
+    }
+
+    /** The workflow whose run wrote; {@code null} for a change a user made. */
+    public Long getWorkflowId() {
+        return workflowId;
+    }
+
+    /** The execution that wrote; {@code null} for a change a user made. */
+    public Long getExecutionId() {
+        return executionId;
+    }
+
+    /** How many times the run wrote the variable; {@code null} for a change a user made. */
+    public Integer getWriteCount() {
+        return writeCount;
     }
 
     public Result getResult() {

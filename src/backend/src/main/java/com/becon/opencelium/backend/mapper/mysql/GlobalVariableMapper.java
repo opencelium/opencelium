@@ -170,7 +170,9 @@ public class GlobalVariableMapper {
                 fields ? null : loggedValue(change.getOldValue(), secret),
                 fields ? null : loggedValue(change.getNewValue(), secret),
                 fields ? toChangedFields(change) : null,
-                toActor(change.getUserId()),
+                toActor(change),
+                change.getExecutionId(),
+                change.getWriteCount(),
                 change.getResult(),
                 change.getReason(),
                 toInstant(change.getChangedAt()),
@@ -361,6 +363,17 @@ public class GlobalVariableMapper {
 
     private Actor toActor(Integer userId) {
         return userId == null ? null : Actor.user(userId, userName(userId).orElse(null));
+    }
+
+    /** Returns who made a change: the workflow whose run wrote, or else the user who saved. */
+    private Actor toActor(GlobalVariableChange change) {
+        Long workflowId = change.getWorkflowId();
+        if (change.getActorType() == GlobalVariableChange.ActorType.WORKFLOW && workflowId != null) {
+            // a workflow id is an INT column, as the owner workflow of a variable is
+            return Actor.workflow(Math.toIntExact(workflowId), workflowTitle(workflowId));
+        }
+
+        return toActor(change.getUserId());
     }
 
     private JsonNode readJson(String text) {

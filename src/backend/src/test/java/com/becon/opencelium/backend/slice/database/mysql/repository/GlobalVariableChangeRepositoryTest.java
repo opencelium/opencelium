@@ -15,12 +15,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.Date;
 import java.util.List;
 
 /**
  * JPA slice test for {@link GlobalVariableChangeRepository}: the derived query that pages the
- * change log of one variable, newest entry first, and the native update that masks the values
- * of a variable that became a secret.
+ * change log of one variable, newest entry first, the native update that masks the values
+ * of a variable that became a secret, and the two queries that let the oldest entries of run
+ * writes leave the log.
  *
  * Run with: ./gradlew test --tests "*.GlobalVariableChangeRepositoryTest"
  */
@@ -147,6 +149,66 @@ class GlobalVariableChangeRepositoryTest {
                 .containsExactly(tuple("\"old\"", "\"new\""));
     }
 
+    // ── run writes ────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("find by type — a page of one entry at index n is the newest entry past the first n")
+    void findByVariableIdAndChangeTypeOrderByIdDescReturnsEntryPastLimitWhenMoreAreStored() {
+        GlobalVariable variable = em.persistAndFlush(GlobalVariableFixture.aTransientConstant("lastSync", 1));
+        em.persist(aRunWrite(variable, 901L));
+        em.persist(aValueChange(variable, GlobalVariableChange.Type.VALUE, "\"old\"", "\"new\""));
+        em.persist(aRunWrite(variable, 902L));
+        em.persist(aRunWrite(variable, 903L));
+        em.flush();
+        em.clear();
+
+        List<GlobalVariableChange> pastLimit = repository.findByVariableIdAndChangeTypeOrderByIdDesc(
+                variable.getId(), GlobalVariableChange.Type.RUN_WRITE, PageRequest.of(2, 1));
+
+        assertThat(pastLimit).extracting(GlobalVariableChange::getExecutionId).containsExactly(901L);
+    }
+
+    @Test
+    void findByVariableIdAndChangeTypeOrderByIdDescReturnsNothingWhenLimitIsNotReached() {
+        GlobalVariable variable = em.persistAndFlush(GlobalVariableFixture.aTransientConstant("lastSync", 1));
+        em.persist(aValueChange(variable, GlobalVariableChange.Type.VALUE, "\"old\"", "\"new\""));
+        em.persist(aRunWrite(variable, 901L));
+        em.persist(aRunWrite(variable, 902L));
+        em.flush();
+        em.clear();
+
+        List<GlobalVariableChange> pastLimit = repository.findByVariableIdAndChangeTypeOrderByIdDesc(
+                variable.getId(), GlobalVariableChange.Type.RUN_WRITE, PageRequest.of(2, 1));
+
+        assertThat(pastLimit).isEmpty();
+    }
+
+    @Test
+    @DisplayName("deleteByTypeUpTo — newer run writes, entries of other types and other variables stay")
+    void deleteByTypeUpToDeletesOnlyOlderRunWritesOfVariable() {
+        GlobalVariable variable = em.persistAndFlush(GlobalVariableFixture.aTransientConstant("lastSync", 1));
+        GlobalVariable other = em.persistAndFlush(GlobalVariableFixture.aTransientConstant("cursor", 1));
+        em.persist(aValueChange(variable, GlobalVariableChange.Type.VALUE, "\"old\"", "\"new\""));
+        em.persist(aRunWrite(other, 900L));
+        em.persist(aRunWrite(variable, 901L));
+        GlobalVariableChange lastToGo = em.persist(aRunWrite(variable, 902L));
+        em.persist(aRunWrite(variable, 903L));
+        em.flush();
+        em.clear();
+
+        int deleted = repository.deleteByTypeUpTo(
+                variable.getId(), GlobalVariableChange.Type.RUN_WRITE, lastToGo.getId());
+        em.clear();
+
+        assertThat(deleted).isEqualTo(2);
+        assertThat(changesOf(variable))
+                .extracting(GlobalVariableChange::getChangeType, GlobalVariableChange::getExecutionId)
+                .containsExactlyInAnyOrder(
+                        tuple(GlobalVariableChange.Type.VALUE, null),
+                        tuple(GlobalVariableChange.Type.RUN_WRITE, 903L));
+        assertThat(changesOf(other)).extracting(GlobalVariableChange::getExecutionId).containsExactly(900L);
+    }
+
     private List<GlobalVariableChange> changesOf(GlobalVariable variable) {
         return repository.findByVariableIdOrderByChangedAtDescIdDesc(variable.getId(), PageRequest.of(0, 20))
                 .getContent();
@@ -160,5 +222,10 @@ class GlobalVariableChangeRepositoryTest {
     private static GlobalVariableChange aValueChange(
             GlobalVariable variable, GlobalVariableChange.Type type, String oldValue, String newValue) {
         return GlobalVariableChange.savedByUser(variable, type, 1L, 2L, oldValue, newValue, 1);
+    }
+
+    /** What an execution of workflow 42 wrote to the variable in one write. */
+    private static GlobalVariableChange aRunWrite(GlobalVariable variable, long executionId) {
+        return GlobalVariableChange.writtenByRun(variable, "\"old\"", "\"new\"", 42L, executionId, 1, new Date());
     }
 }

@@ -73,13 +73,22 @@ public record GlobalVariableDTO(
     public record UserRef(Integer id, String name) {
     }
 
-    /** Who created or changed something: for now always a user. */
+    /**
+     * Who created or changed something: a user, or in the change log a workflow whose run wrote a
+     * mutable variable. {@code id} and {@code name} are the user's, or the workflow's id and
+     * title; {@code name} is {@code null} if that user or workflow no longer exists.
+     */
     public record Actor(String type, Integer id, String name) {
 
         public static final String USER = "USER";
+        public static final String WORKFLOW = "WORKFLOW";
 
         public static Actor user(Integer id, String name) {
             return new Actor(USER, id, name);
+        }
+
+        public static Actor workflow(Integer id, String title) {
+            return new Actor(WORKFLOW, id, title);
         }
     }
 

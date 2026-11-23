@@ -2,6 +2,8 @@ package com.becon.opencelium.backend.execution.globalvariable;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
+import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableChange;
+import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableChangeRepository;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.exception.GlobalVariableNotFoundException;
@@ -9,14 +11,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,33 +40,54 @@ import java.util.regex.Pattern;
  *
  * <p>Any run may read the current value as the store holds it at that moment, so a run sees what
  * a run of the owner workflow wrote after it started.
+ *
+ * <p>The change log gets one entry per run and variable, however often the run wrote: see {@link
+ * Run#logWrites()}.
  */
 @Component
 public class GlobalVariableWriter {
 
+    /** How many RUN_WRITE entries the change log keeps per variable unless configured. */
+    public static final int DEFAULT_MAX_RUN_ENTRIES = 200;
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalVariableWriter.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final GlobalVariableRepository repository;
+    private final GlobalVariableChangeRepository changeRepository;
     private final TestRunOrigins testRunOrigins;
     private final int maxValueBytes;
     private final Duration scriptTimeLimit;
+    private final int maxRunEntries;
 
     /**
      * @param scriptTimeoutMs how long an enhancement that imports a script variable may run
+     * @param maxRunEntries   how many RUN_WRITE entries the change log keeps per variable, at
+     *                        least one
      */
     @Autowired
-    public GlobalVariableWriter(GlobalVariableRepository repository, TestRunOrigins testRunOrigins,
+    public GlobalVariableWriter(GlobalVariableRepository repository, GlobalVariableChangeRepository changeRepository,
+            TestRunOrigins testRunOrigins,
             @Value("${opencelium.global-variable.max-value-bytes:65536}") int maxValueBytes,
-            @Value("${opencelium.global-variable.script-timeout-ms:5000}") long scriptTimeoutMs) {
+            @Value("${opencelium.global-variable.script-timeout-ms:5000}") long scriptTimeoutMs,
+            @Value("${opencelium.global-variable.change-log.max-run-entries:" + DEFAULT_MAX_RUN_ENTRIES + "}")
+            int maxRunEntries) {
         this.repository = repository;
+        this.changeRepository = changeRepository;
         this.testRunOrigins = testRunOrigins;
         this.maxValueBytes = maxValueBytes;
         this.scriptTimeLimit = Duration.ofMillis(scriptTimeoutMs);
+        this.maxRunEntries = Math.max(maxRunEntries, 1);
     }
 
-    /** Creates a writer whose runs give scripts {@link GlobalScript#DEFAULT_TIME_LIMIT}. */
-    public GlobalVariableWriter(GlobalVariableRepository repository, TestRunOrigins testRunOrigins, int maxValueBytes) {
-        this(repository, testRunOrigins, maxValueBytes, GlobalScript.DEFAULT_TIME_LIMIT.toMillis());
+    /**
+     * Creates a writer whose runs give scripts {@link GlobalScript#DEFAULT_TIME_LIMIT} and whose
+     * change log keeps {@link #DEFAULT_MAX_RUN_ENTRIES} entries of run writes per variable.
+     */
+    public GlobalVariableWriter(GlobalVariableRepository repository, GlobalVariableChangeRepository changeRepository,
+            TestRunOrigins testRunOrigins, int maxValueBytes) {
+        this(repository, changeRepository, testRunOrigins, maxValueBytes,
+                GlobalScript.DEFAULT_TIME_LIMIT.toMillis(), DEFAULT_MAX_RUN_ENTRIES);
     }
 
     /**
@@ -80,6 +107,8 @@ public class GlobalVariableWriter {
         private final long workflowId;
         private final boolean testRun;
         private final long executionId;
+        // what this run stored and has not logged yet, by variable id; guarded by itself
+        private final Map<Long, Written> written = new LinkedHashMap<>();
 
         private Run(long workflowId, boolean testRun, long executionId) {
             this.workflowId = workflowId;
@@ -130,10 +159,61 @@ public class GlobalVariableWriter {
             }
 
             if (!testRun) {
-                repository.writeCurrentValue(variable.getId(), text, new Date(), executionId);
+                Date writtenAt = new Date();
+                repository.writeCurrentValue(variable.getId(), text, writtenAt, executionId);
+                noteWrite(variable, text, writtenAt);
             }
 
             return json;
+        }
+
+        /**
+         * Logs what this run wrote: one change log entry per variable, with the value before the
+         * run's first write, the value of its last write and the number of its writes. After
+         * that, the oldest entries of run writes past the limit of the variable are deleted.
+         *
+         * <p>Called when the run ends, in whatever way: what a run stored stays stored if the run
+         * fails later. A test run, and a run that wrote nothing, logs nothing, and a second call
+         * logs only what was written since the first. An entry that cannot be saved is skipped
+         * with a warning, because the values themselves are already stored and the run must not
+         * fail for its log.
+         */
+        public void logWrites() {
+            List<Written> entries;
+            synchronized (written) {
+                entries = List.copyOf(written.values());
+                written.clear();
+            }
+
+            for (Written entry : entries) {
+                GlobalVariable variable = entry.variable();
+                try {
+                    changeRepository.save(GlobalVariableChange.writtenByRun(variable, entry.oldValue(),
+                            entry.newValue(), workflowId, executionId, entry.count(), entry.lastWrittenAt()));
+                    dropOldestRunEntries(variable.getId());
+                } catch (RuntimeException e) {
+                    log.warn("Execution {}: its {} writes to global variable '{}' could not be logged",
+                            executionId, entry.count(), variable.getName(), e);
+                }
+            }
+        }
+
+        // the value read just before the first write is the one the run replaced
+        private void noteWrite(GlobalVariable variable, String text, Date writtenAt) {
+            Written first = new Written(variable, variable.getCurrentValue(), text, 1, writtenAt);
+            synchronized (written) {
+                written.merge(variable.getId(), first, (earlier, latest) -> new Written(earlier.variable(),
+                        earlier.oldValue(), latest.newValue(), earlier.count() + 1, latest.lastWrittenAt()));
+            }
+        }
+
+        private void dropOldestRunEntries(long variableId) {
+            List<GlobalVariableChange> pastLimit = changeRepository.findByVariableIdAndChangeTypeOrderByIdDesc(
+                    variableId, GlobalVariableChange.Type.RUN_WRITE, PageRequest.of(maxRunEntries, 1));
+            if (!pastLimit.isEmpty()) {
+                changeRepository.deleteByTypeUpTo(variableId, GlobalVariableChange.Type.RUN_WRITE,
+                        pastLimit.get(0).getId());
+            }
         }
 
         /**
@@ -179,6 +259,18 @@ public class GlobalVariableWriter {
                 throw new IllegalStateException("A JSON tree could not be written as text", e);
             }
         }
+    }
+
+    /**
+     * What one run wrote to one variable so far.
+     *
+     * @param variable      the variable as it was read before the run's first write
+     * @param oldValue      its current value at that moment, as JSON text
+     * @param newValue      the value of the run's last write, as JSON text
+     * @param count         how many times the run wrote it
+     * @param lastWrittenAt when the run wrote it last
+     */
+    private record Written(GlobalVariable variable, String oldValue, String newValue, int count, Date lastWrittenAt) {
     }
 
     /**
