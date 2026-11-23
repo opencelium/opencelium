@@ -10,6 +10,8 @@ export const DEFAULT_CODE: Record<ScriptLanguage, string> = {
 
 export const PARAMETER_NAME_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/
 export const MAX_SCRIPT_BYTES = 256 * 1024
+// The backend refuses a longer one with PARAMETER_INVALID.
+export const PARAMETER_DESCRIPTION_MAX_LENGTH = 512
 
 export type ScriptParameterDraft = { name: string; description: string; required: boolean; defaultText: string }
 

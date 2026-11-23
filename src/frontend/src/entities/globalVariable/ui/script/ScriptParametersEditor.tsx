@@ -6,7 +6,7 @@ import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton'
 import { FormControl } from '@shared/ui/form/FormControl'
 import { FieldContainer } from '@shared/ui/primitives/FieldContainer'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import type { ScriptParameterDraft } from '../../model/script'
+import { PARAMETER_DESCRIPTION_MAX_LENGTH, type ScriptParameterDraft } from '../../model/script'
 import './scriptParametersEditor.css'
 
 type Props = {
@@ -34,6 +34,7 @@ export function ScriptParametersEditor({ parameters, onChange, isReadOnly, error
                             <label className="form-control__label script-parameters__required">*</label>
                         </Tooltip>
                         <label className="form-control__label">{t('global-variable.script.parameters.name')}</label>
+                        <label className="form-control__label">{t('global-variable.script.parameters.description')}</label>
                         <label className="form-control__label">{t('global-variable.script.parameters.default')}</label>
                         <span />
                     </div>
@@ -79,6 +80,10 @@ function ParameterRow({ index, parameter, isReadOnly, onChange, onRemove }: RowP
             <Input value={parameter.name} readOnly={isReadOnly} placeholder="created"
                 onChange={(event) => onChange({ name: event.target.value })}
                 testId={`global-variable-script-parameter-name-${index}`} />
+            <Input value={parameter.description} readOnly={isReadOnly} maxLength={PARAMETER_DESCRIPTION_MAX_LENGTH}
+                placeholder={isReadOnly ? '' : t('global-variable.script.parameters.descriptionPlaceholder')}
+                onChange={(event) => onChange({ description: event.target.value })}
+                testId={`global-variable-script-parameter-description-${index}`} />
             <Input value={parameter.defaultText} readOnly={isReadOnly} disabled={parameter.required}
                 placeholder={parameter.required ? '' : t('global-variable.script.parameters.defaultPlaceholder')}
                 onChange={(event) => onChange({ defaultText: event.target.value })}

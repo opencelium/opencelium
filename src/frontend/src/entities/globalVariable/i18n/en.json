@@ -291,6 +291,8 @@
       "label": "Parameters",
       "hint": "Every call fills exactly these parameters. An optional parameter left empty uses its default.",
       "name": "Parameter name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional: what to pass",
       "required": "Required",
       "default": "Default",
       "defaultPlaceholder": "No default (null)",

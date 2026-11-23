@@ -24,8 +24,10 @@ export function ScriptTestRun({ parameters, testRun, onLocate }: Props) {
     const { result } = testRun
     const isUnavailable = result?.error?.code === 'VALIDATION_UNAVAILABLE'
     const blockedReason = testRun.invalid.length > 0 ? tWorkflow('sandbox.invalidJson', { name: testRun.invalid[0] }) : undefined
-    const argumentHint = (parameter: ScriptParameterDraft) =>
-        parameter.required ? t('global-variable.script.test.requiredPlaceholder') : parameter.defaultText ? `= ${parameter.defaultText}` : ''
+    const argumentHint = (parameter: ScriptParameterDraft) => [
+        parameter.required ? t('global-variable.script.test.requiredPlaceholder') : parameter.defaultText ? `= ${parameter.defaultText}` : '',
+        parameter.description.trim(),
+    ].filter(Boolean).join(' · ')
 
     return (
         <section

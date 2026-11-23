@@ -291,6 +291,8 @@
       "label": "Parameter",
       "hint": "Jeder Aufruf füllt genau diese Parameter. Ein leer gelassener optionaler Parameter verwendet seinen Standardwert.",
       "name": "Parametername",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Optional: was übergeben wird",
       "required": "Pflicht",
       "default": "Standardwert",
       "defaultPlaceholder": "Kein Standardwert (null)",

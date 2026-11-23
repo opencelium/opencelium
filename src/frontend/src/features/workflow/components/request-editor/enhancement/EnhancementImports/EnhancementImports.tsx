@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Select } from 'antd';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { GlobalVariableKindBadge } from '@entities/globalVariable/ui/GlobalVariableKindBadge';
 import { useGlobalPickerScope, useGlobalVariablePicker } from '@entities/globalVariable/ui/picker/globalPicker';
 import type { PickerItem } from '@entities/globalVariable/model/types';
@@ -17,6 +18,11 @@ type Props = {
 const usageOf = (item: PickerItem) => (item.kind === 'SCRIPT'
 	? `${item.name}(${item.parameters.map((parameter) => (parameter.required ? parameter.name : `${parameter.name}?`)).join(', ')})`
 	: item.name);
+
+// A script's parameter descriptions, one per line, for the hover on its call hint.
+const parameterNotes = (item: PickerItem) => (item.kind === 'SCRIPT'
+	? item.parameters.filter((parameter) => parameter.description).map((parameter) => `${parameter.name}: ${parameter.description}`)
+	: []);
 
 export function EnhancementImports({ language, value, readOnly, onChange }: Props) {
 	const { t } = useI18n('workflow');
@@ -53,7 +59,13 @@ export function EnhancementImports({ language, value, readOnly, onChange }: Prop
 			/>
 			{selected.length > 0 && (
 				<div className="bodyLegacyEnhancementImportsUsage">
-					{selected.map((item) => <code key={item.name}>{usageOf(item)}</code>)}
+					{selected.map((item) => {
+						const notes = parameterNotes(item);
+						const usage = <code key={item.name}>{usageOf(item)}</code>;
+						return notes.length > 0
+							? <Tooltip key={item.name} content={<div style={{ whiteSpace: 'pre-line' }}>{notes.join('\n')}</div>} placement="top">{usage}</Tooltip>
+							: usage;
+					})}
 				</div>
 			)}
 		</div>
