@@ -1,4 +1,6 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { runWithoutUnsavedChangesGuard } from './hooks/unsavedChangesGuard';
+import { listLocation } from '@shared/navigation/listLocation';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { message } from 'antd';
 import { WorkflowLoadError } from './components/WorkflowLoadError/WorkflowLoadError';
@@ -30,6 +32,12 @@ type WorkflowProps = {
 
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const listSearch = state?.workflowListSearch;
+  const openedFromList = typeof listSearch === 'string' && (listSearch === '' || listSearch.startsWith('?'));
+  const returnUrl = openedFromList
+    ? '/workflow' + listSearch
+    : listLocation('/workflow');
   const { connectionId } = useParams<{ connectionId: string }>();
   const { t } = useI18n('workflow');
   useDuplicatedWorkflowHint();
@@ -98,7 +106,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     connectorMappingDialogOpen, connectorMappingGroups, applySelectedTemplate,
     handleConfirmConnectorMapping, handleCancelConnectorMapping } = templateActions;
 
-  if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate('/workflow')} />;
+  if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate(returnUrl)} />;
 
   return (
     <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title}
@@ -120,7 +128,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           initialDescription: headerState.description, onChange: setHeaderState,
           onMenuItemSelect: handleHeaderMenuSelect,
           menuLoadingItemId: isDownloadingTemplate ? 'download-template' : null,
-          validateTitle, onSave: handleSave, confirmBeforeSave,
+          validateTitle, onSave: async (values) => {
+            await handleSave(values);
+            if (openedFromList) {
+              runWithoutUnsavedChangesGuard(() => navigate(returnUrl, { replace: true }));
+            }
+          }, confirmBeforeSave,
           problemsSlot: <WorkflowProblemsBadge issues={problems.issues} onOpen={problems.openPanel} />,
           saveDisabled: isLoading || !hasConnectionChanges,
           onOpenHistory: handleOpenHistory,
@@ -129,7 +142,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           hasSavedConnection: !!activeConnectionId }} />
       <TemplateConnectorMappingDialog open={connection.mappingGroups.length > 0}
         purpose="repair" groups={connection.mappingGroups} connectors={connectors} invokers={invokers}
-        onConfirm={connection.confirmRepair} onCancel={() => navigate('/workflow')} />
+        onConfirm={connection.confirmRepair} onCancel={() => navigate(returnUrl)} />
       <WorkflowPageDialogs
         templates={{
           save: { open: templateDialogOpen, name: templateName,

@@ -76,6 +76,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             restore: string
         }
         list: {
+            backToList: string
             searchPlaceholder: string
             empty: string
             actions: string
