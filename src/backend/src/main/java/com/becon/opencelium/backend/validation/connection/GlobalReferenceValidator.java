@@ -10,6 +10,7 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Violation;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.scriptengine.LanguageType;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity.Caller;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
 
 /**
  * Checks the global variable references of a workflow, a connector or a notification that is
- * about to be saved.
+ * about to be saved, and of a workflow that is about to run.
  *
  * <p>Every reference must name a variable that exists, that may be used where the reference
  * stands and that the saving user may use. A script variable is only imported, by the whole
@@ -109,6 +110,50 @@ public class GlobalReferenceValidator {
 
             return reference.write() ? checkWrite(variable, reference, workflowId) : Optional.empty();
         });
+    }
+
+    /**
+     * Checks, before a run takes its first step, that every global variable reference of the
+     * workflow names a variable the run can read: one that still exists and still has the
+     * workflow in its scope. The save checked this, but a variable may have been deleted or
+     * scoped away since; without this check the run would stop only at the step that reads it,
+     * after the steps before it had run.
+     *
+     * <p>A run executes as the system, so no permission is checked, and the write rules were
+     * checked on save. A workflow whose references are all in the snapshot costs no read.
+     *
+     * @param connectionMng the workflow as the run executes it
+     * @param snapshot      the variables the run may read, taken for this workflow
+     * @throws GlobalReferenceValidationException if a reference names a variable the run cannot
+     *         read; every such reference is reported
+     */
+    @Transactional(readOnly = true)
+    public void validateRun(ConnectionMng connectionMng, GlobalVariableSnapshot snapshot) {
+        // a write target that names no variable was refused on save, so there is nothing to look up
+        List<Found> unreadable = GlobalReferenceCollector.collect(connectionMng).stream()
+                .filter(reference -> reference.variable() != null)
+                .filter(reference -> snapshot.find(reference.variable()).isEmpty())
+                .toList();
+        if (unreadable.isEmpty()) {
+            return;
+        }
+
+        // read only to tell a variable that is gone from one that left the workflow out of its
+        // scope; names are matched exactly, as the snapshot matches them
+        Set<String> names = unreadable.stream().map(Found::variable).collect(Collectors.toSet());
+        Set<String> existing = globalVariableRepository.findByNameIn(names).stream()
+                .map(GlobalVariable::getName)
+                .collect(Collectors.toSet());
+
+        List<Violation> violations = unreadable.stream()
+                .map(reference -> existing.contains(reference.variable())
+                        ? violation(Code.OUT_OF_SCOPE, reference,
+                                "This workflow is outside the scope of global variable '%s'"
+                                        .formatted(reference.variable()))
+                        : violation(Code.UNKNOWN_VARIABLE, reference,
+                                "Global variable '%s' does not exist".formatted(reference.variable())))
+                .toList();
+        throw new GlobalReferenceValidationException(violations);
     }
 
     /**
