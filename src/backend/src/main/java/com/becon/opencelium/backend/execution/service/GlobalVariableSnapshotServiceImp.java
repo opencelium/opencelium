@@ -36,9 +36,8 @@ import java.util.Set;
 @Service
 public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotService {
 
-    // a script variable holds code, not a value, so it is no part of the value snapshot
-    private static final Set<GlobalVariableKind> KINDS_WITH_VALUE =
-            EnumSet.of(GlobalVariableKind.CONSTANT, GlobalVariableKind.MUTABLE);
+    // a script variable is taken as its definition, which a run calls and never reads as a value
+    private static final Set<GlobalVariableKind> ALL_KINDS = EnumSet.allOf(GlobalVariableKind.class);
 
     private static final Logger log = LoggerFactory.getLogger(GlobalVariableSnapshotServiceImp.class);
 
@@ -68,7 +67,7 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
     @Transactional(readOnly = true)
     public GlobalVariableSnapshot takeFor(long connectionId) {
         // one query for every variable, however many of them the workflow references
-        List<GlobalVariable> variables = globalVariableRepository.findAllWithScopeTargets(KINDS_WITH_VALUE);
+        List<GlobalVariable> variables = globalVariableRepository.findAllWithScopeTargets(ALL_KINDS);
         if (variables.isEmpty()) {
             return GlobalVariableSnapshot.empty();
         }
@@ -90,7 +89,7 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
     @Override
     @Transactional(readOnly = true)
     public GlobalVariableSnapshot takeOpenToAll() {
-        return GlobalVariableSnapshot.of(globalVariableRepository.findAllWithScopeTargets(KINDS_WITH_VALUE).stream()
+        return GlobalVariableSnapshot.of(globalVariableRepository.findAllWithScopeTargets(ALL_KINDS).stream()
                 .filter(variable -> variable.getScopeType() == GlobalVariableScopeType.ALL)
                 .map(this::toEntry)
                 .toList());
@@ -99,7 +98,6 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
     @Override
     public GlobalVariableSnapshot takeOf(Collection<GlobalVariable> variables) {
         return GlobalVariableSnapshot.of(variables.stream()
-                .filter(variable -> KINDS_WITH_VALUE.contains(variable.getKind()))
                 .map(this::toEntry)
                 .toList());
     }
@@ -111,6 +109,10 @@ public class GlobalVariableSnapshotServiceImp implements GlobalVariableSnapshotS
         }
         if (variable.getKind() == GlobalVariableKind.MUTABLE) {
             return GlobalVariableSnapshot.Entry.ofMutable(
+                    variable.getName(), variable.getVersion(), parse(variable), openToAll);
+        }
+        if (variable.getKind() == GlobalVariableKind.SCRIPT) {
+            return GlobalVariableSnapshot.Entry.ofScript(
                     variable.getName(), variable.getVersion(), parse(variable), openToAll);
         }
 

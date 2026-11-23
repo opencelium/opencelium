@@ -222,4 +222,21 @@ class GlobalValueResolverTest {
             throw new IllegalArgumentException(json, e);
         }
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    @DisplayName("resolve — a script has no value, read by a workflow or by a connector")
+    void resolveThrowsWhenVariableIsScript(boolean connector) throws JsonProcessingException {
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(GlobalVariableSnapshot.Entry.ofScript(
+                "formatDate", 1, new ObjectMapper().readTree("{\"language\":\"js\",\"code\":\"return 1;\"}"), true)));
+        GlobalReference reference = GlobalReference.parse("{{global.formatDate}}");
+
+        assertThatThrownBy(() -> {
+            if (connector) {
+                GlobalValueResolver.resolveForConnector(snapshot, reference);
+            } else {
+                GlobalValueResolver.resolve(snapshot, reference);
+            }
+        }).isInstanceOf(IllegalStateException.class).hasMessageContaining("'formatDate' is a script");
+    }
 }

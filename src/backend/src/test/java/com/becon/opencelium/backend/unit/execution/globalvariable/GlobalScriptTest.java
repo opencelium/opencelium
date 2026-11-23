@@ -3,15 +3,21 @@ package com.becon.opencelium.backend.unit.execution.globalvariable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Violation;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalScript.Parameter;
+import com.becon.opencelium.backend.scriptengine.engines.NashornEngine;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -125,6 +131,102 @@ class GlobalScriptTest {
         assertThat(aScript(code).check())
                 .extracting(Violation::field, Violation::code)
                 .containsExactly(tuple("script.code", Code.SCRIPT_REQUIRED));
+    }
+
+    // ── the function an enhancement calls ─────────────────────────────────────
+
+    private static final GlobalScript FORMAT_DATE =
+            new GlobalScript("js", GlobalVariableFixture.FORMAT_DATE_CODE, List.of(DATE, PATTERN));
+
+    @Test
+    void functionSourceReturnsResultWhenCallPassesEveryParameter() {
+        assertThat(call(FORMAT_DATE, "VAR_1('2026-11-17T22:00:00Z', 'dd.MM')")).isEqualTo("17.11");
+    }
+
+    @Test
+    @DisplayName("functionSource — a parameter left out, or passed as undefined, takes its default")
+    void functionSourceFillsDefaultWhenOptionalParameterIsLeftOut() {
+        assertThat(call(FORMAT_DATE, "VAR_1('2026-11-17T22:00:00Z')")).isEqualTo("17.11.2026");
+        assertThat(call(FORMAT_DATE, "VAR_1('2026-11-17T22:00:00Z', undefined)")).isEqualTo("17.11.2026");
+    }
+
+    @Test
+    void functionSourceThrowsWhenRequiredParameterIsLeftOut() {
+        assertThatThrownBy(() -> call(FORMAT_DATE, "VAR_1()"))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("Script variable 'formatDate': parameter 'date' is missing");
+    }
+
+    @Test
+    void functionSourcePassesExtraArgumentsWhenCallHasMoreThanDeclared() {
+        GlobalScript count = new GlobalScript("js", "return arguments.length;", List.of());
+
+        assertThat(call(count, "VAR_1(1, 2, 3)")).isEqualTo(3);
+    }
+
+    @Test
+    void functionSourceNamesScriptWhenCodeThrows() {
+        GlobalScript failing = new GlobalScript("js", "throw new Error('boom'); return 1;", List.of());
+
+        assertThatThrownBy(() -> call(failing, "VAR_1()"))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("Script variable 'formatDate': Error: boom");
+    }
+
+    @Test
+    void functionSourceThrowsWhenCodeReturnsUndefined() {
+        GlobalScript nothing = new GlobalScript("js", "return undefined;", List.of());
+
+        assertThatThrownBy(() -> call(nothing, "VAR_1()"))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("Script variable 'formatDate' returned nothing");
+    }
+
+    @Test
+    @DisplayName("functionSource — a default object is new on every call, so a call cannot change the next one's")
+    void functionSourceGivesFreshDefaultWhenCallChangesIt() {
+        GlobalScript push = new GlobalScript("js", "list.push(1); return list.length;",
+                List.of(new Parameter("list", null, false, new ObjectMapper().createArrayNode())));
+
+        assertThat(call(push, "VAR_1() + ',' + VAR_1()")).isEqualTo("1,1");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"1st", "VAR 1", "default"})
+    void functionSourceThrowsWhenVariableIsNoIdentifier(String variable) {
+        assertThatThrownBy(() -> FORMAT_DATE.functionSource(variable, "formatDate"))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    /** Defines the script as {@code VAR_1} the way an enhancement imports it, then runs {@code call}. */
+    private static Object call(GlobalScript script, String call) {
+        return new NashornEngine().execute(script.functionSource("VAR_1", "formatDate") + call, Map.of());
+    }
+
+    // ── time limit ────────────────────────────────────────────────────────────
+
+    @Test
+    void runWithinReturnsResultWhenWorkEndsInTime() {
+        assertThat(GlobalScript.runWithin(Duration.ofSeconds(5), "work", () -> 42)).isEqualTo(42);
+    }
+
+    @Test
+    void runWithinRethrowsExceptionWhenWorkFails() {
+        assertThatThrownBy(() -> GlobalScript.runWithin(Duration.ofSeconds(5), "work", () -> {
+            throw new IllegalStateException("broken");
+        })).isInstanceOf(IllegalStateException.class).hasMessage("broken");
+    }
+
+    @Test
+    @DisplayName("runWithin — a script that loops forever is stopped, and its thread ends")
+    void runWithinStopsWorkWhenLimitPasses() {
+        assertThatThrownBy(() -> GlobalScript.runWithin(Duration.ofMillis(300), "The enhancement",
+                () -> new NashornEngine().execute("while (true) {}", Map.of())))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessage("The enhancement ran longer than 300 ms and was stopped");
+
+        await().atMost(Duration.ofSeconds(5)).until(() -> Thread.getAllStackTraces().keySet().stream()
+                .noneMatch(thread -> thread.getName().equals("oc-global-script") && thread.isAlive()));
     }
 
     // ── JSON form ─────────────────────────────────────────────────────────────

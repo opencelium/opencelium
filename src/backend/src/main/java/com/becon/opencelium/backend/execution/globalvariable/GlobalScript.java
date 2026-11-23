@@ -3,11 +3,13 @@ package com.becon.opencelium.backend.execution.globalvariable;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Violation;
 import com.becon.opencelium.backend.scriptengine.LanguageType;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.openjdk.nashorn.api.tree.CompilationUnitTree;
 import org.openjdk.nashorn.api.tree.Diagnostic;
 import org.openjdk.nashorn.api.tree.FunctionCallTree;
@@ -17,13 +19,21 @@ import org.openjdk.nashorn.api.tree.IdentifierTree;
 import org.openjdk.nashorn.api.tree.Parser;
 import org.openjdk.nashorn.api.tree.ReturnTree;
 import org.openjdk.nashorn.api.tree.SimpleTreeVisitorES5_1;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -45,6 +55,10 @@ import java.util.stream.Collectors;
  */
 public record GlobalScript(String language, String code, List<Parameter> parameters) {
 
+    /** How long an enhancement that imports a script may run, unless configured otherwise. */
+    public static final Duration DEFAULT_TIME_LIMIT = Duration.ofSeconds(5);
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalScript.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String FUNCTION_NAME = "OC_SCRIPT";
     private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_$][A-Za-z0-9_$]*");
@@ -190,6 +204,116 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
         if (!shape.returnsValue) {
             violations.add(new Violation("script.code", Code.NO_RETURN_VALUE,
                     "The script must return a value with 'return <value>;'"));
+        }
+    }
+
+    /**
+     * Returns JavaScript that defines {@code variable} as a function an enhancement calls: {@code
+     * var VAR_1 = ...;}. The function takes the declared parameters in order and extra arguments
+     * after them. It fails when a required parameter is missing, fills in the default of an
+     * optional one that is left out or {@code undefined}, names the script in an error the code
+     * throws, and fails when the code returns {@code undefined}. The code sees its parameters and
+     * {@code arguments}; nothing keeps it from reading the enhancement's globals, which is
+     * documented, not enforced.
+     *
+     * @param variable   name of the enhancement arg that imports the script, e.g. {@code VAR_1}
+     * @param scriptName name of the script variable, for the errors
+     * @throws IllegalArgumentException if {@code variable} is not a JavaScript identifier
+     */
+    public String functionSource(String variable, String scriptName) {
+        if (variable == null || !IDENTIFIER.matcher(variable).matches() || RESERVED.contains(variable)) {
+            throw new IllegalArgumentException("'%s' cannot name an imported script".formatted(variable));
+        }
+        String label = jsString("Script variable '" + scriptName + "'");
+
+        StringBuilder js = new StringBuilder()
+                .append("var ").append(variable).append(" = (function () {\n")
+                .append(functionSource()).append('\n')
+                .append("return function () {\n")
+                .append("var OC_ARGS = Array.prototype.slice.call(arguments);\n");
+        for (int i = 0; i < parameters.size(); i++) {
+            Parameter parameter = parameters.get(i);
+            js.append("if (OC_ARGS[").append(i).append("] === undefined) { ");
+            if (parameter.required()) {
+                js.append("throw new Error(").append(label).append(" + ")
+                        .append(jsString(": parameter '" + parameter.name() + "' is missing")).append(");");
+            } else {
+                // written out per call, so a call that changes a default object changes only its own
+                js.append("OC_ARGS[").append(i).append("] = ").append(jsLiteral(parameter.defaultValue())).append(';');
+            }
+            js.append(" }\n");
+        }
+
+        return js.append("var OC_RESULT;\n")
+                .append("try { OC_RESULT = ").append(FUNCTION_NAME).append(".apply(null, OC_ARGS); }\n")
+                .append("catch (e) { throw new Error(").append(label).append(" + ': ' + e); }\n")
+                .append("if (OC_RESULT === undefined) { throw new Error(").append(label)
+                .append(" + ' returned nothing'); }\n")
+                .append("return OC_RESULT;\n")
+                .append("};\n")
+                .append("})();\n")
+                .toString();
+    }
+
+    /**
+     * Runs {@code work} on a thread of its own and stops that thread once {@code limit} has
+     * passed. Nashorn cannot be interrupted inside a loop, so a script that runs on is stopped
+     * with {@link Thread#stop()}: it shares nothing with the run but the values it was given,
+     * which it cannot corrupt. On Java 20 and later, where that is gone, the thread is left to
+     * end by itself and the run goes on all the same. An interrupt of the calling thread, such as
+     * the termination of a run, stops the work too.
+     *
+     * @param what names the work in the error, e.g. the enhancement
+     * @throws ScriptExecutionException if the work takes longer than {@code limit} or is
+     *                                  interrupted; whatever the work throws is thrown as it is
+     */
+    public static <T> T runWithin(Duration limit, String what, Supplier<T> work) {
+        FutureTask<T> task = new FutureTask<>(work::get);
+        Thread worker = new Thread(task, "oc-global-script");
+        worker.setDaemon(true);
+        worker.start();
+
+        try {
+            return task.get(limit.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            stop(worker);
+            throw new ScriptExecutionException(
+                    "%s ran longer than %d ms and was stopped".formatted(what, limit.toMillis()));
+        } catch (InterruptedException e) {
+            stop(worker);
+            Thread.currentThread().interrupt();
+            throw new ScriptExecutionException(what + " was interrupted", e);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException runtime) {
+                throw runtime;
+            }
+            if (cause instanceof Error error) {
+                throw error;
+            }
+            throw new ScriptExecutionException(cause.getMessage(), cause);
+        }
+    }
+
+    @SuppressWarnings({"deprecation", "removal"})
+    private static void stop(Thread worker) {
+        try {
+            worker.stop();
+        } catch (UnsupportedOperationException e) {
+            log.warn("Thread {} cannot be stopped on this Java version and runs on until it ends", worker.getName());
+        }
+    }
+
+    private static String jsString(String text) {
+        return jsLiteral(TextNode.valueOf(text));
+    }
+
+    /** Returns JSON as a JavaScript literal: JSON is one, except for two line separators. */
+    private static String jsLiteral(JsonNode json) {
+        try {
+            return MAPPER.writeValueAsString(json).replace("\u2028", "\\u2028").replace("\u2029", "\\u2029");
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("A JSON value could not be written as JavaScript", e);
         }
     }
 

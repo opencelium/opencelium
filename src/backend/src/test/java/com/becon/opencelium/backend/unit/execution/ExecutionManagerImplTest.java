@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.execution.ExecutionManagerImpl;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.logger.ThreadLocalOcLogger;
 import com.becon.opencelium.backend.execution.oc721.Loop;
@@ -32,6 +33,9 @@ import com.becon.opencelium.backend.scriptengine.ScriptEngineProvider;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManagerProvider;
 import com.becon.opencelium.backend.scriptengine.engines.NashornEngine;
 import com.becon.opencelium.backend.scriptengine.engines.PolyglotEngine;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
+import com.fasterxml.jackson.databind.node.TextNode;
+import java.time.Duration;
 import org.springframework.beans.factory.ObjectProvider;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -525,6 +529,109 @@ class ExecutionManagerImplTest {
 
         ExecutionManager manager = new ExecutionManagerImpl(
                 Map.of(), bindings, Map.of(CONNECTOR_ID, Map.of()), Map.of(), Map.of(),
+                snapshot, run, ReferenceExtractor::new);
+        manager.setCurrentCtorId(CONNECTOR_ID);
+        return manager;
+    }
+
+    // ── script variables imported by an enhancement ───────────────────────────
+
+    private static final String FORMAT_DATE_DEFINITION = new GlobalScript("js", GlobalVariableFixture.FORMAT_DATE_CODE,
+            List.of(new GlobalScript.Parameter("date", null, true, null),
+                    new GlobalScript.Parameter("pattern", null, false, new TextNode("dd.MM.yyyy")))).toJson();
+
+    @Test
+    @DisplayName("executeScript — //var VAR_1 = {{global.formatDate}}; makes VAR_1 a function the code calls")
+    void executeScriptCallsImportedScriptWhenArgNamesScriptVariable() throws Exception {
+        givenScriptEngines();
+        Map<String, String> args = Map.of("VAR_0", "{{global.tenantPrefix}}", "VAR_1", " {{global.formatDate}} ");
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(FORMAT_DATE_DEFINITION),
+                anEnhancementWithArgs("js", "RESULT_VAR = VAR_0 + '-' + VAR_1('2026-11-17T22:00:00Z', 'dd.MM');", args),
+                Duration.ofSeconds(5));
+
+        assertThat(manager.executeScript("b1")).isEqualTo("ACME-17.11");
+    }
+
+    @Test
+    void executeScriptWritesGlobalWhenCodeCallsImportedScriptAndSet() throws Exception {
+        givenScriptEngines();
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(anEntry("lastSync", "\"old\""),
+                GlobalVariableSnapshot.Entry.ofScript("formatDate", 1, JSON.readTree(FORMAT_DATE_DEFINITION), true)));
+        FieldBindEx binding = anEnhancementWithArgs("js",
+                "set('{{global.lastSync}}', VAR_1('2026-11-17T22:00:00Z')); RESULT_VAR = 'ok';",
+                Map.of("VAR_1", "{{global.formatDate}}"));
+        ExecutionManager manager = aWritingManager(snapshot, List.of(binding), aMutable("lastSync"));
+
+        assertThat(manager.executeScript("b1")).isEqualTo("ok");
+        assertThat(manager.getValue("{{global.lastSync}}")).isEqualTo("17.11.2026");
+    }
+
+    @Test
+    void executeScriptThrowsWhenScriptIsImportedIntoAnotherLanguage() throws Exception {
+        PolyglotEngine python = mock(PolyglotEngine.class);
+        when(python.supports(any())).thenReturn(true);
+        when(python.isUp()).thenReturn(true);
+        givenScriptEngines(python);
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(FORMAT_DATE_DEFINITION),
+                anEnhancementWithArgs("python3", "RESULT_VAR = VAR_1('x')", Map.of("VAR_1", "{{global.formatDate}}")),
+                Duration.ofSeconds(5));
+
+        assertThatThrownBy(() -> manager.executeScript("b1"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("'formatDate' is JavaScript");
+        verify(python, never()).execute(anyString(), any(Map.class));
+    }
+
+    @Test
+    @DisplayName("executeScript — an enhancement that imports a script is stopped once its time limit passes")
+    void executeScriptThrowsWhenImportingEnhancementRunsTooLong() {
+        givenScriptEngines();
+        String looping = new GlobalScript("js", "while (true) {}\nreturn 1;", List.of()).toJson();
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(looping),
+                anEnhancementWithArgs("js", "RESULT_VAR = VAR_1();", Map.of("VAR_1", "{{global.formatDate}}")),
+                Duration.ofMillis(300));
+
+        assertThatThrownBy(() -> manager.executeScript("b1"))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("field binding b1 ran longer than 300 ms");
+    }
+
+    @Test
+    @DisplayName("getValue — a script has no value: {{global.formatDate}} outside enhancement args fails")
+    void getValueThrowsWhenReferenceNamesScriptVariable() {
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(FORMAT_DATE_DEFINITION),
+                anEnhancementWithArgs("js", "", Map.of()), Duration.ofSeconds(5));
+
+        // the reference extractor wraps the resolver's error, keeping its message
+        assertThatThrownBy(() -> manager.getValue("{{global.formatDate}}"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("'formatDate' is a script and has no value to read");
+    }
+
+    /** A snapshot with the constant tenantPrefix = "ACME" and the script variable formatDate. */
+    private static GlobalVariableSnapshot aScriptSnapshot(String definition) {
+        try {
+            return GlobalVariableSnapshot.of(List.of(anEntry("tenantPrefix", "\"ACME\""),
+                    GlobalVariableSnapshot.Entry.ofScript("formatDate", 1, JSON.readTree(definition), true)));
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(definition, e);
+        }
+    }
+
+    /** Field binding b1 with an enhancement in {@code language} and the given args. */
+    private static FieldBindEx anEnhancementWithArgs(String language, String script, Map<String, String> args) {
+        FieldBindEx binding = anEnhancement("b1", language, script);
+        binding.getEnhance().setArgs(args);
+        return binding;
+    }
+
+    /** A manager with one field binding, whose run gives an importing enhancement {@code limit}. */
+    private static ExecutionManager aScriptManager(GlobalVariableSnapshot snapshot, FieldBindEx binding, Duration limit) {
+        GlobalVariableWriter.Run run = new GlobalVariableWriter(mock(GlobalVariableRepository.class),
+                new TestRunOrigins(), 1024, limit.toMillis()).forRun(OWNER_WORKFLOW, 900L);
+
+        ExecutionManager manager = new ExecutionManagerImpl(
+                Map.of(), List.of(binding), Map.of(CONNECTOR_ID, Map.of()), Map.of(), Map.of(),
                 snapshot, run, ReferenceExtractor::new);
         manager.setCurrentCtorId(CONNECTOR_ID);
         return manager;
