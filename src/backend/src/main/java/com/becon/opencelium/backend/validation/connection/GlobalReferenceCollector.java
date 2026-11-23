@@ -19,8 +19,10 @@ import com.becon.opencelium.backend.reference.ReferenceScanner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -35,7 +37,9 @@ import java.util.stream.Stream;
  * the code of every field binding's enhancement, where code reads a variable through {@code
  * ref("{{global.name}}")}. An escaped token, {@code \{{global.name}}}, is literal text and is not
  * reported. The targets of a method's {@code globalWrites} and of {@code set("...", value)} in
- * enhancement code are reported as writes.
+ * enhancement code are reported as writes. An enhancement arg whose whole value is a reference
+ * without a path, {@code //var VAR_1 = {{global.name}};}, is reported with the language of the
+ * enhancement: a run imports a script variable named so as a function.
  */
 public final class GlobalReferenceCollector {
 
@@ -43,6 +47,13 @@ public final class GlobalReferenceCollector {
     private static final Pattern GLOBAL_WRITE_TARGET = Pattern.compile(RegExpression.globalWriteTarget);
     // the field of a method that lists the variables it writes
     private static final String GLOBAL_WRITES = "globalWrites";
+    // one arg of an enhancement, [//]var NAME = {{global.name}}, whose whole value is a reference
+    // without a path; group 1 is the name of the arg, group 2 the reference
+    private static final Pattern WHOLE_ARG_REFERENCE = Pattern.compile(
+            "(?:^|;)\\s*(?://)?\\s*[A-Za-z]+\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*"
+                    + "(\\{\\{global\\.[A-Za-z][A-Za-z0-9_]*\\}\\})\\s*(?=;|$)");
+    // the arg that holds the result of an enhancement; a run binds it to no value
+    private static final String RESULT_VAR = "RESULT_VAR";
 
     private GlobalReferenceCollector() {
     }
@@ -61,14 +72,28 @@ public final class GlobalReferenceCollector {
      *                    a write the whole target as written
      * @param write       whether the element writes the variable rather than reads it: a target
      *                    of a method's {@code globalWrites}
+     * @param importInto  for the whole value of an enhancement arg, which imports the variable if
+     *                    it is a script, the language of the enhancement, empty if it has none;
+     *                    {@code null} for any other reference
      */
     public record Found(ElementType elementType, String color, String index, String label, String field,
-                        String variable, String reference, boolean write) {
+                        String variable, String reference, boolean write, String importInto) {
 
         /** A reference that reads the variable. */
         public Found(ElementType elementType, String color, String index, String label, String field,
                 String variable, String reference) {
             this(elementType, color, index, label, field, variable, reference, false);
+        }
+
+        /** A reference that is no enhancement arg of its own. */
+        public Found(ElementType elementType, String color, String index, String label, String field,
+                String variable, String reference, boolean write) {
+            this(elementType, color, index, label, field, variable, reference, write, null);
+        }
+
+        /** Whether the reference is the whole value of an enhancement arg, which imports a script. */
+        public boolean importing() {
+            return importInto != null;
         }
     }
 
@@ -178,7 +203,7 @@ public final class GlobalReferenceCollector {
             String label = enhancement.getTitle();
             Element element = new Element(ElementType.ENHANCEMENT, color, index, label, found);
 
-            element.scan("enhancement.args", enhancement.getArgs());
+            element.scanArgs("enhancement.args", enhancement.getArgs(), enhancement.getLanguage());
             element.scanScript("enhancement.script", enhancement.getScript());
         }
     }
@@ -244,6 +269,32 @@ public final class GlobalReferenceCollector {
             Matcher matcher = GLOBAL_WRITE_TARGET.matcher(target == null ? "" : target.strip());
             String variable = matcher.matches() ? matcher.group(1) : null;
             found.add(new Found(type, color, index, label, GLOBAL_WRITES, variable, target, true));
+        }
+
+        /**
+         * Scans the args of an enhancement. A reference that is the whole value of an arg, as a
+         * run splits the args, is reported with {@code language}, for a script variable is
+         * imported that way; every other reference, one with a path included, as a plain read.
+         */
+        void scanArgs(String field, String args, String language) {
+            if (args == null || args.indexOf('{') == -1) {
+                return;
+            }
+
+            Set<Integer> wholeArgs = new HashSet<>();
+            Matcher arg = WHOLE_ARG_REFERENCE.matcher(args);
+            while (arg.find()) {
+                if (!RESULT_VAR.equals(arg.group(1))) {
+                    wholeArgs.add(arg.start(2));
+                }
+            }
+
+            String importInto = language == null ? "" : language;
+            Matcher matcher = GLOBAL_REFERENCE.matcher(args);
+            while (matcher.find()) {
+                found.add(new Found(type, color, index, label, field, matcher.group(1), matcher.group(), false,
+                        wholeArgs.contains(matcher.start()) ? importInto : null));
+            }
         }
 
         /**

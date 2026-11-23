@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.database.mysql.entity.EventMessage;
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage;
+import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.Access;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableUsage.SourceType;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
@@ -14,6 +15,7 @@ import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableUsag
 import com.becon.opencelium.backend.database.mysql.repository.MessageRepository;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository.WorkflowNotification;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Violation;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceCollector;
@@ -73,11 +75,26 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
     public void rebuildForWorkflow(long connectionId, ConnectionMng connectionMng) {
         usageRepository.deleteBySource(SourceType.WORKFLOW, connectionId);
 
-        saveUsages(GlobalReferenceCollector.collect(connectionMng), (variableId, reference) -> reference.write()
-                ? GlobalVariableUsage.writeByWorkflow(variableId, connectionId, reference.elementType(),
-                        reference.index(), reference.color(), reference.label(), reference.field())
-                : GlobalVariableUsage.readByWorkflow(variableId, connectionId, reference.elementType(),
-                        reference.index(), reference.color(), reference.label(), reference.field()));
+        saveUsages(GlobalReferenceCollector.collect(connectionMng),
+                (variable, reference) -> workflowUsage(variable, connectionId, reference));
+    }
+
+    /**
+     * The usage of a variable by a reference in a workflow: a write, an import of a script into
+     * an enhancement, or a read.
+     */
+    private static GlobalVariableUsage workflowUsage(GlobalVariable variable, long connectionId, Found reference) {
+        if (reference.write()) {
+            return GlobalVariableUsage.writeByWorkflow(variable.getId(), connectionId, reference.elementType(),
+                    reference.index(), reference.color(), reference.label(), reference.field());
+        }
+        if (reference.importing() && variable.getKind() == GlobalVariableKind.SCRIPT) {
+            return GlobalVariableUsage.importByWorkflow(variable.getId(), connectionId, reference.elementType(),
+                    reference.index(), reference.color(), reference.label(), reference.field());
+        }
+
+        return GlobalVariableUsage.readByWorkflow(variable.getId(), connectionId, reference.elementType(),
+                reference.index(), reference.color(), reference.label(), reference.field());
     }
 
     @Override
@@ -120,8 +137,8 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
     }
 
     private void saveConnectorUsages(long connectorId, Map<String, String> requestData) {
-        saveUsages(GlobalReferenceCollector.collectFromTexts(requestData), (variableId, reference) ->
-                GlobalVariableUsage.readByConnector(variableId, connectorId, reference.field()));
+        saveUsages(GlobalReferenceCollector.collectFromTexts(requestData), (variable, reference) ->
+                GlobalVariableUsage.readByConnector(variable.getId(), connectorId, reference.field()));
     }
 
     // ------------------------------------------------------------------ notifications
@@ -195,8 +212,8 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
         usageRepository.deleteBySource(SourceType.NOTIFICATION, notificationId);
 
         String templateName = template == null ? null : template.getName();
-        saveUsages(references, (variableId, reference) ->
-                GlobalVariableUsage.readByNotification(variableId, notificationId, templateName, reference.field()));
+        saveUsages(references, (variable, reference) -> GlobalVariableUsage.readByNotification(
+                variable.getId(), notificationId, templateName, reference.field()));
     }
 
     private List<EventNotification> notificationsOf(int templateId) {
@@ -389,12 +406,12 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
     }
 
     /**
-     * Writes one usage per variable and place for the references of a source. A reference to a
-     * variable that does not exist leaves no usage.
+     * Writes one usage per variable, place and access for the references of a source. A
+     * reference to a variable that does not exist leaves no usage.
      *
-     * @param toUsage builds the usage of a variable, by its id, for a reference
+     * @param toUsage builds the usage of a variable for a reference
      */
-    private void saveUsages(List<Found> references, BiFunction<Long, Found, GlobalVariableUsage> toUsage) {
+    private void saveUsages(List<Found> references, BiFunction<GlobalVariable, Found, GlobalVariableUsage> toUsage) {
         if (references.isEmpty()) {
             return;
         }
@@ -402,9 +419,9 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
         // a write target that names no variable has none
         Set<String> names = references.stream().map(Found::variable).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-        Map<String, Long> idsByName = new HashMap<>();
+        Map<String, GlobalVariable> variablesByName = new HashMap<>();
         for (GlobalVariable variable : globalVariableRepository.findByNameIn(names)) {
-            idsByName.put(variable.getName(), variable.getId());
+            variablesByName.put(variable.getName(), variable);
         }
 
         // one row per variable and place: the same reference written twice in a field counts once
@@ -412,21 +429,23 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
         List<GlobalVariableUsage> usages = new ArrayList<>();
         for (Found reference : references) {
             // by the exact name, as a run resolves it; an unknown variable has nothing to guard
-            Long variableId = idsByName.get(reference.variable());
-            if (variableId == null || !places.add(new Place(variableId, reference.index(), reference.field(), reference.write()))) {
+            GlobalVariable variable = variablesByName.get(reference.variable());
+            if (variable == null) {
                 continue;
             }
 
-            usages.add(toUsage.apply(variableId, reference));
+            GlobalVariableUsage usage = toUsage.apply(variable, reference);
+            if (places.add(new Place(variable.getId(), reference.index(), reference.field(), usage.getAccess()))) {
+                usages.add(usage);
+            }
         }
 
         usageRepository.saveAll(usages);
     }
 
     /**
-     * Where in a source a variable is used and whether it is written there; a connector and a
-     * notification have no index.
+     * Where in a source a variable is used and how; a connector and a notification have no index.
      */
-    private record Place(long variableId, String index, String field, boolean write) {
+    private record Place(long variableId, String index, String field, Access access) {
     }
 }

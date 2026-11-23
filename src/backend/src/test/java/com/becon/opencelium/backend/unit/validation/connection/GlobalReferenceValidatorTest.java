@@ -12,11 +12,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConditionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
+import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.StatementMng;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.entity.GlobalVariableScopeTarget;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
@@ -38,12 +42,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -474,7 +481,179 @@ class GlobalReferenceValidatorTest {
         assertThat(violations).extracting(Violation::code).containsExactly(Code.INVALID_WRITE_TARGET);
     }
 
+    // ── script variables ──────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("validate — a script imported by the whole value of an arg of a js enhancement is accepted")
+    void validateAcceptsScriptWhenImportedIntoJsEnhancement() {
+        givenFormatDateScript();
+        ConnectionMng workflow = aWorkflowWithBinding(
+                aBinding("//var VAR_1 = {{global.formatDate}};", "RESULT_VAR = VAR_1(VAR_0, 'dd.MM');", "js"));
+
+        assertThatCode(() -> validator.validate(workflow, WORKFLOW, null)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void validateReportsScriptNotCallableWhenEndpointReferencesScript() {
+        givenFormatDateScript();
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith(
+                ConnectionMngFixture.aMethod("#ababab", "0_1", "listObjects", "https://api.example.test/{{global.formatDate}}"));
+
+        List<Violation> violations = violationsOf(workflow, WORKFLOW, null);
+
+        assertThat(violations).containsExactly(new Violation(Code.SCRIPT_NOT_CALLABLE,
+                "Global variable 'formatDate' is a script and has no value to read; import it in the args of a "
+                        + "JavaScript enhancement as //var VAR_n = {{global.formatDate}}; without a path",
+                "formatDate", "{{global.formatDate}}", "#ababab", "0_1", "endpoint"));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("workflowsReadingScript")
+    @DisplayName("validate — a script anywhere but the whole value of an arg is refused")
+    void validateReportsScriptNotCallableWhenScriptIsReadOutsideImport(String place, ConnectionMng workflow,
+            String field) {
+        when(globalVariableRepository.findByNameIn(any())).thenReturn(List.of(
+                GlobalVariableFixture.aScriptVariable(8L, "formatDate", "{}"),
+                GlobalVariableFixture.aMutable(5L, "lastSync", "0", "0", WORKFLOW)));
+
+        List<Violation> violations = violationsOf(workflow, WORKFLOW, null);
+
+        assertThat(violations).extracting(Violation::code, Violation::field)
+                .containsExactly(tuple(Code.SCRIPT_NOT_CALLABLE, field));
+    }
+
+    static Stream<Arguments> workflowsReadingScript() {
+        MethodMng withHeader = ConnectionMngFixture.aMethod("#ababab", "0_1", "listObjects", "https://api.example.test");
+        withHeader.getRequest().setHeader(Map.of("X-Date", "{{global.formatDate}}"));
+
+        MethodMng withBody = ConnectionMngFixture.aMethod("#ababab", "0_1", "createObject", "https://api.example.test");
+        BodyMng body = new BodyMng();
+        body.setFields(Map.of("title", "{{global.formatDate}}"));
+        withBody.getRequest().setBody(body);
+
+        MethodMng withWriteValue = ConnectionMngFixture.aMethod("#ababab", "0_1", "createVm", "https://api.example.test");
+        withWriteValue.setGlobalWrites(Map.of("global.lastSync", "{{global.formatDate}}"));
+
+        ConnectionMng withLoopSource = ConnectionMngFixture.aWorkflowWith();
+        withLoopSource.getFromConnector().getOperators()
+                .add(ConnectionMngFixture.anOperator("0_2", "forin", "{{global.formatDate}}"));
+
+        StatementMng left = new StatementMng();
+        left.setField("{{global.formatDate}}");
+        ConditionMng condition = new ConditionMng();
+        condition.setLeftStatement(left);
+        OperatorMng ifOperator = ConnectionMngFixture.anOperator("0_2", "if", null);
+        ifOperator.setCondition(condition);
+        ConnectionMng withCondition = ConnectionMngFixture.aWorkflowWith();
+        withCondition.getFromConnector().getOperators().add(ifOperator);
+
+        return Stream.of(
+                Arguments.of("a header", ConnectionMngFixture.aWorkflowWith(withHeader), "header.X-Date"),
+                Arguments.of("a body", ConnectionMngFixture.aWorkflowWith(withBody), "body.title"),
+                Arguments.of("a value written to a variable", ConnectionMngFixture.aWorkflowWith(withWriteValue),
+                        "globalWrites.global.lastSync"),
+                Arguments.of("a loop source", withLoopSource, "expression"),
+                Arguments.of("an operator condition", withCondition, "condition.left.field"),
+                Arguments.of("ref() in enhancement code",
+                        aWorkflowWithBinding(aBinding(null, "RESULT_VAR = ref('{{global.formatDate}}');", "js")),
+                        "enhancement.script"),
+                Arguments.of("an arg with a path",
+                        aWorkflowWithBinding(aBinding("var VAR_0 = {{global.formatDate.code}};", "", "js")),
+                        "enhancement.args"),
+                Arguments.of("a part of an arg",
+                        aWorkflowWithBinding(aBinding("var VAR_0 = 'on {{global.formatDate}}';", "", "js")),
+                        "enhancement.args"));
+    }
+
+    @Test
+    @DisplayName("validate — a write to a script is refused as not mutable, not as not callable")
+    void validateReportsNotMutableWhenMethodWritesScript() {
+        when(globalVariableRepository.findByNameIn(Set.of("formatDate"))).thenReturn(
+                List.of(GlobalVariableFixture.aScriptVariable(8L, "formatDate", "{}")));
+
+        List<Violation> violations = violationsOf(aWorkflowWriting("global.formatDate"), WORKFLOW, null);
+
+        assertThat(violations).extracting(Violation::code).containsExactly(Code.NOT_MUTABLE);
+    }
+
+    @Test
+    void validateReportsImportLanguageMismatchWhenEnhancementIsNotJs() {
+        givenFormatDateScript();
+        ConnectionMng workflow = aWorkflowWithBinding(
+                aBinding("//var VAR_1 = {{global.formatDate}};", "RESULT_VAR = VAR_1(VAR_0)", "python3"));
+
+        List<Violation> violations = violationsOf(workflow, WORKFLOW, null);
+
+        assertThat(violations).containsExactly(new Violation(Code.IMPORT_LANGUAGE_MISMATCH,
+                "Script variable 'formatDate' is JavaScript and cannot be imported into a 'python3' enhancement",
+                "formatDate", "{{global.formatDate}}", "#ababab", "0_1", "enhancement.args"));
+    }
+
+    @Test
+    void validateReportsImportLanguageMismatchWhenEnhancementHasNoLanguage() {
+        givenFormatDateScript();
+        ConnectionMng workflow = aWorkflowWithBinding(aBinding("var VAR_1 = {{global.formatDate}};", "", null));
+
+        List<Violation> violations = violationsOf(workflow, WORKFLOW, null);
+
+        assertThat(violations).extracting(Violation::code, Violation::message).containsExactly(tuple(
+                Code.IMPORT_LANGUAGE_MISMATCH,
+                "Script variable 'formatDate' is JavaScript and cannot be imported into an enhancement without a language"));
+    }
+
+    @Test
+    @DisplayName("validate — a constant passed as the whole value of an arg of any language is a plain read")
+    void validateAcceptsConstantWhenWholeArgOfNonJsEnhancement() {
+        when(globalVariableRepository.findByNameIn(Set.of("formatDate")))
+                .thenReturn(List.of(GlobalVariableFixture.aConstant(8L, "formatDate", "\"dd.MM\"")));
+        ConnectionMng workflow = aWorkflowWithBinding(aBinding("var VAR_1 = {{global.formatDate}};", "", "python3"));
+
+        assertThatCode(() -> validator.validate(workflow, WORKFLOW, null)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void validateConnectorThrowsScriptNotCallableWhenRequestDataReferencesScript() {
+        givenFormatDateScript();
+
+        GlobalReferenceValidationException rejection =
+                rejectionOf(() -> validator.validateConnector(Map.of("since", "{{global.formatDate}}")));
+
+        assertThat(rejection.getViolations()).extracting(Violation::code, Violation::field, Violation::color)
+                .containsExactly(tuple(Code.SCRIPT_NOT_CALLABLE, "since", null));
+    }
+
+    @Test
+    void validateNotificationsThrowsScriptNotCallableWhenTemplateReferencesScript() {
+        givenFormatDateScript();
+        List<NotificationTarget> notifications = List.of(new NotificationTarget("Failure mail", WORKFLOW, null));
+
+        GlobalReferenceValidationException rejection = rejectionOf(() -> validator.validateNotifications(
+                Map.of("en.subject", "Failed on {{global.formatDate}}"), notifications));
+
+        assertThat(rejection.getViolations()).extracting(Violation::code, Violation::field)
+                .containsExactly(tuple(Code.SCRIPT_NOT_CALLABLE, "en.subject"));
+    }
+
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    private void givenFormatDateScript() {
+        when(globalVariableRepository.findByNameIn(Set.of("formatDate"))).thenReturn(
+                List.of(GlobalVariableFixture.aScriptVariable(8L, "formatDate", "{}")));
+    }
+
+    private static ConnectionMng aWorkflowWithBinding(FieldBindingMng binding) {
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith(
+                ConnectionMngFixture.aMethod("#ababab", "0_1", "createVm", "https://api.example.test"));
+        workflow.setFieldBindings(List.of(binding));
+        return workflow;
+    }
+
+    private static FieldBindingMng aBinding(String args, String script, String language) {
+        FieldBindingMng binding = aBindingWithScript(script);
+        binding.getEnhancement().setArgs(args);
+        binding.getEnhancement().setLanguage(language);
+        return binding;
+    }
 
     private static ConnectionMng aWorkflowUsingIdoitUrl() {
         return ConnectionMngFixture.aWorkflowWith(

@@ -118,6 +118,19 @@ public class GlobalVariableUsage {
     }
 
     /**
+     * Creates the usage of a script variable an enhancement imports: an arg whose whole value is
+     * {@code {{global.name}}}. Takes the same arguments as {@link #readByWorkflow}.
+     */
+    public static GlobalVariableUsage importByWorkflow(long variableId, long connectionId, ElementType elementType,
+            String index, String color, String label, String field) {
+        GlobalVariableUsage usage =
+                readByWorkflow(variableId, connectionId, elementType, index, color, label, field);
+        usage.access = Access.IMPORT;
+
+        return usage;
+    }
+
+    /**
      * Creates the usage of a variable the request data of a connector reads.
      *
      * @param variableId  id of the variable
