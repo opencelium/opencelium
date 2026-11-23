@@ -19,6 +19,7 @@ import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO.ChangedField;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableDTO;
@@ -86,15 +87,17 @@ public class GlobalVariableMapper {
 
     public GlobalVariableDTO toDetail(GlobalVariable variable, Set<GlobalVariablePermission> myPermissions) {
         boolean secret = variable.isSecret();
+        GlobalScript script = scriptOf(variable);
 
         return new GlobalVariableDTO(
                 variable.getId(),
                 variable.getName(),
                 variable.getKind(),
                 variable.getDescription(),
-                secret ? null : readJson(variable.getValue()),
+                secret || script != null ? null : readJson(variable.getValue()),
                 secret,
-                variable.getValue() != null,
+                script == null && variable.getValue() != null,
+                script,
                 toScope(variable),
                 toUserRef(variable.getOwnerUserId()),
                 myPermissions,
@@ -113,13 +116,17 @@ public class GlobalVariableMapper {
      */
     public GlobalVariableListItemDTO toListItem(GlobalVariable variable, Set<GlobalVariablePermission> myPermissions,
             long usageCount, GlobalVariableDTO.BeingUpdatedBy beingUpdatedBy) {
+        GlobalScript script = scriptOf(variable);
+
         return new GlobalVariableListItemDTO(
                 variable.getId(),
                 variable.getName(),
                 variable.getKind(),
                 variable.getDescription(),
                 variable.isSecret(),
-                variable.isSecret() ? null : preview(variable.getReadableValue()),
+                variable.isSecret() || script != null ? null : preview(variable.getReadableValue()),
+                script == null ? null : script.language(),
+                script == null ? null : script.parameters().size(),
                 variable.getScopeType(),
                 usageCount,
                 myPermissions,
@@ -171,12 +178,30 @@ public class GlobalVariableMapper {
     }
 
     public GlobalVariablePickerItemDTO toPickerItem(GlobalVariable variable) {
+        GlobalScript script = scriptOf(variable);
+
         return new GlobalVariablePickerItemDTO(
                 variable.getName(),
                 variable.getKind(),
                 variable.getDescription(),
                 variable.isSecret(),
-                variable.isSecret() ? null : preview(variable.getReadableValue()));
+                variable.isSecret() || script != null ? null : preview(variable.getReadableValue()),
+                script == null ? null : script.language(),
+                script == null ? null : script.parameters());
+    }
+
+    /** Returns the script of a script variable, which its value column holds; {@code null} otherwise. */
+    private static GlobalScript scriptOf(GlobalVariable variable) {
+        if (variable.getKind() != GlobalVariableKind.SCRIPT || variable.getValue() == null) {
+            return null;
+        }
+
+        try {
+            return GlobalScript.fromJson(variable.getValue());
+        } catch (IllegalStateException e) {
+            throw new GeneralServiceException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "CORRUPT_GLOBAL_VARIABLE_VALUE", "A stored script variable is not a valid script definition");
+        }
     }
 
     /**

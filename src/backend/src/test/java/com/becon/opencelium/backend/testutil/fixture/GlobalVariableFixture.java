@@ -111,6 +111,49 @@ public final class GlobalVariableFixture {
                 name, GlobalVariableKind.CONSTANT, null, value, false, aScopeOfAll(), null, null, version);
     }
 
+    /** The code of {@code formatDate}: turns an ISO date into {@code pattern}, e.g. {@code dd.MM}. */
+    public static final String FORMAT_DATE_CODE = """
+            var d = new Date(date);
+            var dd = ("0" + d.getUTCDate()).slice(-2);
+            var mm = ("0" + (d.getUTCMonth() + 1)).slice(-2);
+            return pattern.replace("dd", dd).replace("MM", mm).replace("yyyy", String(d.getUTCFullYear()));""";
+
+    /**
+     * The script of {@code formatDate} in JavaScript, with the parameter {@code date} (required)
+     * and {@code pattern} (default {@code "dd.MM.yyyy"}).
+     */
+    public static GlobalVariableRequestDTO.Script aFormatDateScript() {
+        return aScript(FORMAT_DATE_CODE,
+                new GlobalVariableRequestDTO.Parameter("date", "ISO date text", null, null),
+                new GlobalVariableRequestDTO.Parameter("pattern", null, null, TextNode.valueOf("dd.MM.yyyy")));
+    }
+
+    /** A JavaScript script with the given code and parameters. */
+    public static GlobalVariableRequestDTO.Script aScript(String code, GlobalVariableRequestDTO.Parameter... parameters) {
+        return new GlobalVariableRequestDTO.Script("js", code, List.of(parameters));
+    }
+
+    /**
+     * Request for a script variable with scope ALL, no description and no value.
+     *
+     * @param version the version the form loaded; {@code null} for a create
+     */
+    public static GlobalVariableRequestDTO aScriptRequest(String name, GlobalVariableRequestDTO.Script script, Long version) {
+        return new GlobalVariableRequestDTO(name, GlobalVariableKind.SCRIPT, null, null, null, aScopeOfAll(),
+                null, null, version, script);
+    }
+
+    /**
+     * Saved script variable with scope ALL, owned by user 1.
+     *
+     * @param definitionJson the stored definition, as {@code GlobalScript#toJson} writes it
+     */
+    public static GlobalVariable aScriptVariable(long id, String name, String definitionJson) {
+        GlobalVariable variable = aConstant(id, name, definitionJson);
+        variable.setKind(GlobalVariableKind.SCRIPT);
+        return variable;
+    }
+
     /** Scope that lets every workflow use the variable. */
     public static GlobalVariableRequestDTO.Scope aScopeOfAll() {
         return new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.ALL, List.of(), List.of());

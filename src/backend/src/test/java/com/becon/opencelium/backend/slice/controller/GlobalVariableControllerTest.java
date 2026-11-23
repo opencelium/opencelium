@@ -42,6 +42,7 @@ import com.becon.opencelium.backend.security.AuthorizationFilter;
 import com.becon.opencelium.backend.security.TotpAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
@@ -192,6 +193,26 @@ class GlobalVariableControllerTest {
         verify(service).create(new GlobalVariableRequestDTO("tenants", GlobalVariableKind.CONSTANT, null,
                 json.readTree("[{\"id\":\"acme\"}]"), false,
                 new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.ALL, List.of(), List.of()), null, null, 4L));
+    }
+
+    @Test
+    @DisplayName("create — a script body reaches the service with its parameters and their defaults")
+    void createPassesScriptToServiceWhenBodyHasScript() throws Exception {
+        when(service.create(any())).thenReturn(aDetailDto());
+        String body = """
+                {"name": "formatDate", "kind": "SCRIPT", "scope": {"type": "ALL"},
+                 "script": {"language": "js", "code": "return date;",
+                            "parameters": [{"name": "date", "required": true},
+                                           {"name": "pattern", "default": "dd.MM.yyyy"}]}}""";
+
+        mockMvc.perform(post("/global-variable").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk());
+
+        verify(service).create(new GlobalVariableRequestDTO("formatDate", GlobalVariableKind.SCRIPT, null, null, null,
+                new GlobalVariableRequestDTO.Scope(GlobalVariableScopeType.ALL, null, null), null, null, null,
+                new GlobalVariableRequestDTO.Script("js", "return date;", List.of(
+                        new GlobalVariableRequestDTO.Parameter("date", null, true, null),
+                        new GlobalVariableRequestDTO.Parameter("pattern", null, null, TextNode.valueOf("dd.MM.yyyy"))))));
     }
 
     @Test
@@ -482,6 +503,7 @@ class GlobalVariableControllerTest {
                 json.readTree("[{\"id\":\"acme\"}]"),
                 false,
                 true,
+                null,
                 new GlobalVariableDTO.Scope(GlobalVariableScopeType.ALL, List.of(), List.of()),
                 new GlobalVariableDTO.UserRef(1, "admin"),
                 EnumSet.of(GlobalVariablePermission.VIEW_USE),

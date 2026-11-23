@@ -41,6 +41,7 @@ import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Violation;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.mapper.mysql.GlobalVariableMapper;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
@@ -117,6 +118,7 @@ class GlobalVariableServiceImpTest {
     private static final long NOTIFICATION_ID = 21L;
     private static final long OWNER_WORKFLOW_ID = 12L;
     private static final int MAX_VALUE_BYTES = 32;
+    private static final int MAX_SCRIPT_BYTES = 1024;
     private static final Caller OWNER = new Caller(OWNER_ID, false);
     // built once: deriving the key takes a while
     private static final GlobalVariableCipher CIPHER = new GlobalVariableCipher(
@@ -167,7 +169,7 @@ class GlobalVariableServiceImpTest {
         service = new GlobalVariableServiceImp(repository, changeRepository, mapper, security,
                 userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
                 scopeResolver,
-                json, CIPHER, runGate, MAX_VALUE_BYTES);
+                json, CIPHER, runGate, MAX_VALUE_BYTES, MAX_SCRIPT_BYTES);
 
         // the caller is the owner and may do everything, unless a test says otherwise
         lenient().when(security.caller()).thenReturn(Optional.of(OWNER));
@@ -264,15 +266,120 @@ class GlobalVariableServiceImpTest {
         verify(repository, never()).saveAndFlush(any());
     }
 
-    @ParameterizedTest
-    @EnumSource(value = GlobalVariableKind.class, names = {"SCRIPT"})
-    void createThrowsValidationExceptionWhenKindIsScript(GlobalVariableKind kind) {
-        GlobalVariableRequestDTO request = new GlobalVariableRequestDTO(
-                "lastSync", kind, null, new TextNode("x"), false, GlobalVariableFixture.aScopeOfAll(), null, null, null);
+    // ── script variables ──────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("create — a script variable stores its definition where the other kinds store their value")
+    void createSavesDefinitionAsValueWhenScriptIsValid() {
+        service.create(GlobalVariableFixture.aScriptRequest("formatDate", GlobalVariableFixture.aFormatDateScript(), null));
+
+        GlobalVariable saved = savedVariable();
+        assertThat(saved.getKind()).isEqualTo(GlobalVariableKind.SCRIPT);
+        GlobalScript script = GlobalScript.fromJson(saved.getValue());
+        assertThat(script.language()).isEqualTo("js");
+        assertThat(script.code()).isEqualTo(GlobalVariableFixture.FORMAT_DATE_CODE);
+        assertThat(script.parameters())
+                .extracting(GlobalScript.Parameter::name, GlobalScript.Parameter::required,
+                        GlobalScript.Parameter::defaultValue)
+                .containsExactly(tuple("date", true, null), tuple("pattern", false, new TextNode("dd.MM.yyyy")));
+        assertThat(savedChanges(1).get(0).getNewValue()).isEqualTo(saved.getValue());
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenScriptIsLeftOut() {
+        GlobalVariableRequestDTO request = GlobalVariableFixture.aScriptRequest("formatDate", null, null);
 
         assertThat(violationsOf(() -> service.create(request)))
                 .extracting(Violation::field, Violation::code)
-                .containsExactly(tuple("kind", Code.KIND_NOT_SUPPORTED));
+                .containsExactly(tuple("script", Code.SCRIPT_REQUIRED));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenScriptVariableHasValueOrIsSecret() {
+        GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("formatDate", GlobalVariableKind.SCRIPT, null,
+                new TextNode("x"), true, GlobalVariableFixture.aScopeOfAll(), null, null, null,
+                GlobalVariableFixture.aFormatDateScript());
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactlyInAnyOrder(tuple("value", Code.SCRIPT_HAS_NO_VALUE),
+                        tuple("secret", Code.SECRET_NOT_ALLOWED));
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenConstantHasScript() {
+        GlobalVariableRequestDTO request = new GlobalVariableRequestDTO("idoitUrl", GlobalVariableKind.CONSTANT, null,
+                new TextNode("x"), false, GlobalVariableFixture.aScopeOfAll(), null, null, null,
+                GlobalVariableFixture.aFormatDateScript());
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("script", Code.SCRIPT_ONLY));
+    }
+
+    @Test
+    @DisplayName("create — the code is checked as the body of a function: here it returns nothing")
+    void createThrowsValidationExceptionWhenScriptReturnsNothing() {
+        GlobalVariableRequestDTO request =
+                GlobalVariableFixture.aScriptRequest("noop", GlobalVariableFixture.aScript("var a = 1;"), null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("script.code", Code.NO_RETURN_VALUE));
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenRequiredParameterHasDefault() {
+        GlobalVariableRequestDTO request = GlobalVariableFixture.aScriptRequest("formatDate",
+                GlobalVariableFixture.aScript("return date;",
+                        new GlobalVariableRequestDTO.Parameter("date", null, true, new TextNode("today"))), null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("script.parameters[0].default", Code.PARAMETER_INVALID));
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenScriptExceedsLimit() {
+        String code = "return '" + "a".repeat(MAX_SCRIPT_BYTES) + "';";
+        GlobalVariableRequestDTO request =
+                GlobalVariableFixture.aScriptRequest("big", GlobalVariableFixture.aScript(code), null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("script.code", Code.VALUE_TOO_LARGE));
+    }
+
+    @Test
+    @DisplayName("update — new code is a VALUE change, so the change log can restore the old script")
+    void updateWritesValueChangeWhenScriptCodeChanges() {
+        String oldDefinition = new GlobalScript("js", "return 1;", List.of()).toJson();
+        GlobalVariable variable = GlobalVariableFixture.aScriptVariable(VARIABLE_ID, "answer", oldDefinition);
+        variable.setVersion(VERSION);
+        when(repository.findById(VARIABLE_ID)).thenReturn(Optional.of(variable));
+
+        service.update(VARIABLE_ID,
+                GlobalVariableFixture.aScriptRequest("answer", GlobalVariableFixture.aScript("return 42;"), VERSION));
+
+        GlobalVariableChange change = savedChanges(1).get(0);
+        assertThat(change.getChangeType()).isEqualTo(GlobalVariableChange.Type.VALUE);
+        assertThat(change.getOldValue()).isEqualTo(oldDefinition);
+        assertThat(GlobalScript.fromJson(change.getNewValue()).code()).isEqualTo("return 42;");
+    }
+
+    @Test
+    void updateThrowsValidationExceptionWhenScriptLanguageChanges() {
+        GlobalVariable variable = GlobalVariableFixture.aScriptVariable(VARIABLE_ID, "answer",
+                new GlobalScript("js", "return 1;", List.of()).toJson());
+        variable.setVersion(VERSION);
+        when(repository.findById(VARIABLE_ID)).thenReturn(Optional.of(variable));
+        GlobalVariableRequestDTO request = GlobalVariableFixture.aScriptRequest("answer",
+                new GlobalVariableRequestDTO.Script("python3", "return 1", List.of()), VERSION);
+
+        assertThat(violationsOf(() -> service.update(VARIABLE_ID, request)))
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("script.language", Code.LANGUAGE_CHANGE_NOT_ALLOWED));
         verify(repository, never()).saveAndFlush(any());
     }
 
@@ -2082,7 +2189,7 @@ class GlobalVariableServiceImpTest {
     private GlobalVariableServiceImp serviceWith(GlobalVariableCipher cipher) {
         return new GlobalVariableServiceImp(repository, changeRepository, mapper, security,
                 userRepository, categoryRepository, connectionRepository, schedulerRepository, usageService,
-                scopeResolver, json, cipher, runGate, MAX_VALUE_BYTES);
+                scopeResolver, json, cipher, runGate, MAX_VALUE_BYTES, MAX_SCRIPT_BYTES);
     }
 
     private static GlobalVariableChangeDTO aMaskedChangeDto() {

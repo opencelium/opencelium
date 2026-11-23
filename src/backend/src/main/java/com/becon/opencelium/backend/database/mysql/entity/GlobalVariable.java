@@ -33,7 +33,9 @@ import java.util.Set;
  * through {@code {{global.name}}}.
  *
  * <p>The {@code value} column holds JSON text of any JSON type; for a mutable variable it is the
- * initial value, and {@code currentValue} the value runs read and write. {@code version} starts at 1 and
+ * initial value, and {@code currentValue} the value runs read and write. A script variable has no
+ * value: the column holds its definition, see {@link
+ * com.becon.opencelium.backend.execution.globalvariable.GlobalScript}. {@code version} starts at 1 and
  * goes up by one on every saved change, including a change of the scope targets or the grants:
  * it guards the edit form against lost updates and numbers the entries of the change log.
  */

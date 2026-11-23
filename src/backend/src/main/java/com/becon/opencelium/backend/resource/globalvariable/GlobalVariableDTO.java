@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolic
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -14,9 +15,12 @@ import java.util.Set;
 /**
  * One global variable with everything the detail page and the edit form show.
  *
- * @param value         the value as real JSON; always {@code null} for a secret. The initial
- *                      value of a mutable variable
- * @param hasValue      whether a value is stored, which a secret does not show otherwise
+ * @param value         the value as real JSON; always {@code null} for a secret and a script.
+ *                      The initial value of a mutable variable
+ * @param hasValue      whether a value is stored, which a secret does not show otherwise; always
+ *                      {@code false} for a script
+ * @param script        the language, code and parameters of a script variable; {@code null} for
+ *                      the other kinds
  * @param ownerUser     the creator, or {@code null} once that user is deleted
  * @param myPermissions what the calling user may do with this variable
  * @param mutable       what only a mutable variable has; {@code null} for the other kinds
@@ -31,6 +35,7 @@ public record GlobalVariableDTO(
         JsonNode value,
         boolean secret,
         boolean hasValue,
+        GlobalScript script,
         Scope scope,
         UserRef ownerUser,
         Set<GlobalVariablePermission> myPermissions,
