@@ -615,6 +615,30 @@ class ExecutionManagerImplTest {
     }
 
     @Test
+    @DisplayName("executeScript — a Ruby script is defined as a method before the code of a ruby enhancement")
+    @SuppressWarnings("unchecked")
+    void executeScriptDefinesRubyMethodWhenRubyEnhancementImportsIt() throws Exception {
+        PolyglotEngine ruby = mock(PolyglotEngine.class);
+        when(ruby.supports(any())).thenReturn(true);
+        when(ruby.isUp()).thenReturn(true);
+        when(ruby.execute(anyString(), any(Map.class), any())).thenReturn("ACME");
+        givenScriptEngines(ruby);
+        String definition = new GlobalScript("ruby", "prefix", List.of(new GlobalScript.Parameter("prefix", null, true,
+                null))).toJson();
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(definition),
+                anEnhancementWithArgs("ruby", "RESULT_VAR = VAR_1(VAR_0)",
+                        Map.of("VAR_0", "{{global.tenantPrefix}}", "VAR_1", "{{global.formatDate}}")),
+                Duration.ofSeconds(5));
+
+        assertThat(manager.executeScript("b1")).isEqualTo("ACME");
+
+        ArgumentCaptor<String> code = ArgumentCaptor.forClass(String.class);
+        verify(ruby).execute(code.capture(), any(Map.class), any());
+        assertThat(code.getValue()).contains("Object.send(:define_method, :VAR_1)")
+                .endsWith("end.call\nRESULT_VAR = VAR_1(VAR_0)");
+    }
+
+    @Test
     @DisplayName("executeScript — an enhancement that imports a script is stopped once its time limit passes")
     void executeScriptThrowsWhenImportingEnhancementRunsTooLong() {
         givenScriptEngines();

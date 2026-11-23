@@ -109,8 +109,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     // the JSON text of a value that is left out; a secret stores no text for it
     private static final String JSON_NULL = "null";
     // languages script variables will support, which cannot be checked or run yet
-    private static final Set<String> UNTESTABLE_LANGUAGES =
-            Set.of(LanguageType.PYTHON_2.getCode(), LanguageType.RUBY.getCode());
+    private static final Set<String> UNTESTABLE_LANGUAGES = Set.of(LanguageType.PYTHON_2.getCode());
     // globals of the test call; the script's own names live inside its function and cannot clash
     private static final String TESTED_FUNCTION = "OC_TESTED";
     private static final String TEST_ARGUMENTS = "OC_TEST_ARGUMENTS";
@@ -705,9 +704,9 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
                     : new GlobalScriptTestDTO.Problem(first.code().name(), syntax.message(), syntax.line(),
                             syntax.column()), null);
         }
-        if (script.isPython()) {
+        if (script.runsOnPolyglotService()) {
             try {
-                Optional<GlobalScript.SyntaxError> syntax = checkPythonCode(script);
+                Optional<GlobalScript.SyntaxError> syntax = checkOnPolyglotService(script);
                 if (syntax.isPresent()) {
                     return GlobalScriptTestDTO.failed(new GlobalScriptTestDTO.Problem(Code.SCRIPT_SYNTAX.name(),
                             syntax.get().message(), syntax.get().line(), syntax.get().column()), null);
@@ -732,8 +731,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
 
     /** Calls a checked script once, the way an enhancement that imports it calls it. */
     private GlobalScriptTestDTO callScript(GlobalScript script, String name, List<JsonNode> arguments) {
-        if (script.isPython()) {
-            return callPythonScript(script, name, arguments);
+        if (script.runsOnPolyglotService()) {
+            return callOnPolyglotService(script, name, arguments);
         }
 
         List<Object> values = arguments.stream()
@@ -757,20 +756,16 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     }
 
     /**
-     * Calls a checked Python script once on the polyglot service, the way an enhancement that
-     * imports it calls it. The arguments and the result travel as JSON text: the service passes
-     * every number inside a structure as a float, and JSON keeps 1 apart from 1.0.
+     * Calls a checked Python or Ruby script once on the polyglot service, the way an enhancement
+     * that imports it calls it. The arguments and the result travel as JSON text.
      */
-    private GlobalScriptTestDTO callPythonScript(GlobalScript script, String name, List<JsonNode> arguments) {
+    private GlobalScriptTestDTO callOnPolyglotService(GlobalScript script, String name, List<JsonNode> arguments) {
         String code = script.functionSource(TESTED_FUNCTION, name)
-                + "import json\n"
-                + "RESULT_VAR = json.dumps(" + TESTED_FUNCTION + "(*json.loads(" + TEST_ARGUMENTS + ")), "
-                + "allow_nan=False)\n"
-                + "RESULT_VAR\n";
+                + script.testCallSource(TESTED_FUNCTION, TEST_ARGUMENTS);
 
         long start = System.nanoTime();
         try {
-            ScriptEngine engine = pythonEngine();
+            ScriptEngine engine = polyglotEngine(script);
             String argumentsJson = objectMapper.writeValueAsString(arguments);
             Object result = GlobalScript.runWithin(scriptTimeLimit, "The script",
                     () -> engine.execute(code, Map.of(TEST_ARGUMENTS, argumentsJson)));
@@ -795,38 +790,39 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     }
 
     /**
-     * Checks the code of a Python script on the polyglot service, by building its function as an
-     * import does, without calling it.
+     * Checks the code of a Python or Ruby script on the polyglot service, by building its
+     * function as an import does, without calling it.
      *
      * @return the syntax error of the code, or nothing when it can be saved
      * @throws ScriptEngineUnavailable if the service is off or down, or gives no answer in time
      */
-    private Optional<GlobalScript.SyntaxError> checkPythonCode(GlobalScript script) {
-        ScriptEngine engine = pythonEngine();
+    private Optional<GlobalScript.SyntaxError> checkOnPolyglotService(GlobalScript script) {
+        ScriptEngine engine = polyglotEngine(script);
         try {
             Object answer = GlobalScript.runWithin(scriptTimeLimit, "The syntax check of the script",
-                    () -> engine.execute(script.pythonCheckSource(),
-                            Map.of(GlobalScript.PYTHON_CHECK_CODE, script.code())));
-            return GlobalScript.pythonCheckResult(answer);
+                    () -> engine.execute(script.checkSource(), Map.of(GlobalScript.CHECK_CODE, script.code())));
+            return GlobalScript.checkResult(answer);
         } catch (RuntimeException e) {
             throw new ScriptEngineUnavailable(
-                    "The polyglot service could not check the Python script: " + e.getMessage());
+                    "The polyglot service could not check the script: " + e.getMessage());
         }
     }
 
-    /** Returns the engine of Python scripts: the polyglot service, if it is on and up. */
-    private ScriptEngine pythonEngine() {
-        return scriptExecutionManager.resolveEngine(LanguageType.PYTHON_3)
+    /** Returns the engine of the script's language: the polyglot service, if it is on and up. */
+    private ScriptEngine polyglotEngine(GlobalScript script) {
+        LanguageType language = LanguageType.getByCode(script.language());
+        return scriptExecutionManager.resolveEngine(language)
                 .filter(ScriptEngine::isUp)
                 .orElseThrow(() -> new ScriptEngineUnavailable(
-                        "Python scripts run on the polyglot service, which is not available"));
+                        "%s scripts run on the polyglot service, which is not available"
+                                .formatted(language.getName())));
     }
 
     private static GlobalScriptTestDTO.Problem unavailable(ScriptEngineUnavailable e) {
         return new GlobalScriptTestDTO.Problem(Code.SCRIPT_ENGINE_UNAVAILABLE.name(), e.getMessage(), null, null);
     }
 
-    /** Thrown when the polyglot service cannot check or run a Python script. */
+    /** Thrown when the polyglot service cannot check or run a Python or Ruby script. */
     private static final class ScriptEngineUnavailable extends RuntimeException {
 
         ScriptEngineUnavailable(String message) {
@@ -1189,10 +1185,10 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         GlobalScript script = new GlobalScript(
                 requested.language(), requested.code(), toParameters(requested.parameters(), violations));
         violations.addAll(script.check());
-        // Python is parsed on the polyglot service, once everything the backend checks is right
-        if (script.isPython() && violations.size() == before) {
+        // Python and Ruby are parsed on the polyglot service, once everything the backend checks is right
+        if (script.runsOnPolyglotService() && violations.size() == before) {
             try {
-                checkPythonCode(script).ifPresent(syntax ->
+                checkOnPolyglotService(script).ifPresent(syntax ->
                         violations.add(new Violation("script.code", Code.SCRIPT_SYNTAX, syntax.describe())));
             } catch (ScriptEngineUnavailable e) {
                 violations.add(new Violation("script.code", Code.SCRIPT_ENGINE_UNAVAILABLE, e.getMessage()));

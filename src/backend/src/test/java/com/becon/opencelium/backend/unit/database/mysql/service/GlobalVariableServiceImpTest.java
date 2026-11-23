@@ -316,7 +316,7 @@ class GlobalVariableServiceImpTest {
 
         assertThat(GlobalScript.fromJson(savedVariable().getValue()).language()).isEqualTo("python3");
         verify(pythonEngine).execute(contains("_oc_check"),
-                eq(Map.of(GlobalScript.PYTHON_CHECK_CODE, "return date[:10]")));
+                eq(Map.of(GlobalScript.CHECK_CODE, "return date[:10]")));
     }
 
     @Test
@@ -656,6 +656,33 @@ class GlobalVariableServiceImpTest {
     }
 
     @Test
+    @DisplayName("testScript — a Ruby script is checked and called on the polyglot service, answering JSON text")
+    void testScriptReturnsResultWhenRubyScriptRuns() {
+        givenPolyglotEngineAnswering(LanguageType.RUBY, "{\"ok\":true}", "[1,2.5]");
+
+        GlobalScriptTestDTO answer = service.testScript(
+                new GlobalScriptTestDTO.Request("pair", "ruby", "[1, 2.5]", List.of(), List.of()));
+
+        assertThat(answer.valid()).isTrue();
+        assertThat(answer.result().get(0).isInt()).isTrue();
+        verify(pythonEngine).execute(contains("JSON.generate(OC_TESTED(*JSON.parse(OC_TEST_ARGUMENTS)))"),
+                eq(Map.of("OC_TEST_ARGUMENTS", "[]")));
+    }
+
+    @Test
+    void createThrowsValidationExceptionWhenRubyCodeDoesNotParse() {
+        givenPolyglotEngineAnswering(LanguageType.RUBY,
+                "{\"ok\":false,\"line\":2,\"column\":null,\"message\":\"syntax error, unexpected end\"}");
+        GlobalVariableRequestDTO request = GlobalVariableFixture.aScriptRequest("pair",
+                new GlobalVariableRequestDTO.Script("ruby", "x = (\n1", List.of()), null);
+
+        assertThat(violationsOf(() -> service.create(request)))
+                .extracting(Violation::field, Violation::code, Violation::message)
+                .containsExactly(tuple("script.code", Code.SCRIPT_SYNTAX, "Line 2: syntax error, unexpected end"));
+        verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
     void testScriptReturnsEngineUnavailableWhenPolyglotServiceIsOff() {
         when(scriptExecutionManager.resolveEngine(LanguageType.PYTHON_3)).thenReturn(Optional.empty());
 
@@ -665,11 +692,10 @@ class GlobalVariableServiceImpTest {
         assertThat(answer.error().code()).isEqualTo("SCRIPT_ENGINE_UNAVAILABLE");
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"python2", "ruby"})
-    void testScriptReturnsValidationUnavailableWhenLanguageIsNeitherJsNorPython3(String language) {
+    @Test
+    void testScriptReturnsValidationUnavailableWhenLanguageIsPython2() {
         GlobalScriptTestDTO answer = service.testScript(
-                new GlobalScriptTestDTO.Request(null, language, "return 1", List.of(), List.of()));
+                new GlobalScriptTestDTO.Request(null, "python2", "return 1", List.of(), List.of()));
 
         assertThat(answer.error().code()).isEqualTo("VALIDATION_UNAVAILABLE");
     }
@@ -679,7 +705,12 @@ class GlobalVariableServiceImpTest {
      * further call with the next of {@code callAnswers}.
      */
     private void givenPythonEngineAnswering(Object checkAnswer, Object... callAnswers) {
-        when(scriptExecutionManager.resolveEngine(LanguageType.PYTHON_3)).thenReturn(Optional.of(pythonEngine));
+        givenPolyglotEngineAnswering(LanguageType.PYTHON_3, checkAnswer, callAnswers);
+    }
+
+    /** Like {@link #givenPythonEngineAnswering}, for scripts in {@code language}. */
+    private void givenPolyglotEngineAnswering(LanguageType language, Object checkAnswer, Object... callAnswers) {
+        when(scriptExecutionManager.resolveEngine(language)).thenReturn(Optional.of(pythonEngine));
         when(pythonEngine.isUp()).thenReturn(true);
         when(pythonEngine.execute(anyString(), anyMap())).thenReturn(checkAnswer, callAnswers);
     }

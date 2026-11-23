@@ -123,8 +123,8 @@ class GlobalScriptTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"python2", "ruby", "JS", "Python3"})
-    void checkReportsLanguageNotSupportedWhenLanguageIsNeitherJsNorPython3(String language) {
+    @ValueSource(strings = {"python2", "JS", "Python3", "Ruby"})
+    void checkReportsLanguageNotSupportedWhenLanguageIsNotJsPython3OrRuby(String language) {
         assertThat(new GlobalScript(language, "return 1;", List.of()).check())
                 .extracting(Violation::field, Violation::code)
                 .containsExactly(tuple("script.language", Code.LANGUAGE_NOT_SUPPORTED));
@@ -196,45 +196,125 @@ class GlobalScriptTest {
     }
 
     @Test
-    void pythonCheckSourceReadsCodeFromBindingWhenBuildingFunction() {
-        String source = new GlobalScript("python3", "return 1", List.of(DATE)).pythonCheckSource();
+    void checkSourceReadsCodeFromBindingWhenBuildingFunction() {
+        String source = new GlobalScript("python3", "return 1", List.of(DATE)).checkSource();
 
         assertThat(source)
-                .contains("tree = ast.parse(" + GlobalScript.PYTHON_CHECK_CODE + ", ")
+                .contains("tree = ast.parse(" + GlobalScript.CHECK_CODE + ", ")
                 .contains("ast.parse(\"def OC_SCRIPT(date, *extra): pass\")")
                 .doesNotContain("return 1")
                 .endsWith("RESULT_VAR = _oc_check()\nRESULT_VAR\n");
     }
 
     @Test
-    void pythonCheckResultReturnsNothingWhenCodeIsAccepted() {
-        assertThat(GlobalScript.pythonCheckResult(Map.of("ok", true))).isEmpty();
+    void checkResultReturnsNothingWhenCodeIsAccepted() {
+        assertThat(GlobalScript.checkResult(Map.of("ok", true))).isEmpty();
     }
 
     @Test
-    @DisplayName("pythonCheckResult — the service gives numbers as doubles, the position is read as whole numbers")
-    void pythonCheckResultReturnsPositionWhenCodeDoesNotParse() {
+    @DisplayName("checkResult — the service gives numbers as doubles, the position is read as whole numbers")
+    void checkResultReturnsPositionWhenCodeDoesNotParse() {
         Map<String, Object> answer = Map.of("ok", false, "line", 2.0, "column", 11.0, "message", "invalid syntax");
 
-        assertThat(GlobalScript.pythonCheckResult(answer)).contains(new SyntaxError(2L, 11L, "invalid syntax"));
+        assertThat(GlobalScript.checkResult(answer)).contains(new SyntaxError(2L, 11L, "invalid syntax"));
     }
 
     @Test
-    void pythonCheckResultReturnsMessageOnlyWhenErrorHasNoPosition() {
+    void checkResultReturnsMessageOnlyWhenErrorHasNoPosition() {
         Map<String, Object> answer = new HashMap<>(Map.of("ok", false, "message", "uses 'yield'"));
         answer.put("line", null);
 
-        assertThat(GlobalScript.pythonCheckResult(answer)).map(SyntaxError::describe).contains("uses 'yield'");
+        assertThat(GlobalScript.checkResult(answer)).map(SyntaxError::describe).contains("uses 'yield'");
     }
 
     @ParameterizedTest
     @MethodSource("unreadableCheckAnswers")
-    void pythonCheckResultThrowsIllegalStateExceptionWhenAnswerIsNotTheCheck(Object answer) {
-        assertThatThrownBy(() -> GlobalScript.pythonCheckResult(answer)).isInstanceOf(IllegalStateException.class);
+    void checkResultThrowsIllegalStateExceptionWhenAnswerIsNotTheCheck(Object answer) {
+        assertThatThrownBy(() -> GlobalScript.checkResult(answer)).isInstanceOf(IllegalStateException.class);
     }
 
     static Stream<Arguments> unreadableCheckAnswers() {
-        return Stream.of(Arguments.of((Object) null), Arguments.of("ok"), Arguments.of(Map.of("ok", "yes")));
+        return Stream.of(Arguments.of((Object) null), Arguments.of("ok"), Arguments.of(Map.of("ok", "yes")),
+                Arguments.of("{\"ok\": \"yes\"}"));
+    }
+
+    @Test
+    @DisplayName("checkResult — the Ruby check answers with JSON text, which is read like a map")
+    void checkResultReadsJsonTextWhenAnswerIsText() {
+        String answer = "{\"ok\":false,\"line\":2,\"column\":null,\"message\":\"syntax error, unexpected end\"}";
+
+        assertThat(GlobalScript.checkResult(answer))
+                .contains(new SyntaxError(2L, null, "syntax error, unexpected end"));
+    }
+
+    @Test
+    void checkSourceThrowsIllegalStateExceptionWhenScriptIsJavaScript() {
+        assertThatThrownBy(() -> aScript("return 1;").checkSource()).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void testCallSourceSetsResultAsJsonTextWhenScriptRunsOnPolyglotService() {
+        assertThat(new GlobalScript("python3", "return 1", List.of()).testCallSource("F", "ARGS"))
+                .contains("RESULT_VAR = json.dumps(F(*json.loads(ARGS)), allow_nan=False)");
+        assertThat(new GlobalScript("ruby", "1", List.of()).testCallSource("F", "ARGS"))
+                .contains("RESULT_VAR = JSON.generate(F(*JSON.parse(ARGS)))");
+        assertThatThrownBy(() -> aScript("return 1;").testCallSource("F", "ARGS"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    // ── Ruby ──────────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("check — Ruby code is not parsed here; a Ruby script returns its last expression")
+    void checkReturnsNoViolationWhenRubyCodeHasNoReturn() {
+        assertThat(new GlobalScript("ruby", "date[0, 10]", List.of(DATE, PATTERN)).check()).isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Date", "$date", "end", "extra"})
+    void checkReportsParameterInvalidWhenNameIsNoUsableRubyParameter(String name) {
+        GlobalScript script = new GlobalScript("ruby", "1", List.of(new Parameter(name, null, true, null)));
+
+        assertThat(script.check()).extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("script.parameters[0].name", Code.PARAMETER_INVALID));
+    }
+
+    @Test
+    @DisplayName("functionSource — a Ruby script becomes the method VAR_1, calling a lambda built from its code")
+    void functionSourceDefinesRubyMethodWhenScriptIsRuby() {
+        GlobalScript script = new GlobalScript("ruby", "date[0, 10]", List.of(DATE, PATTERN));
+
+        assertThat(script.functionSource("VAR_1", "formatDate"))
+                .startsWith("require 'json'\nlambda do\n")
+                .contains("script = eval('lambda do |date, pattern, *extra|\ndate[0, 10]\nend', "
+                        + "Object.new.instance_eval { binding }, '<script variable formatDate>', 0)")
+                .contains("Object.send(:define_method, :VAR_1) do |*args|")
+                .contains("raise 'Script variable \\'formatDate\\'' + ': parameter \\'date\\' is missing' "
+                        + "if args.length <= 0")
+                .contains("args << JSON.parse('\"dd.MM.yyyy\"') if args.length <= 1")
+                .endsWith("end.call\n");
+    }
+
+    @Test
+    void functionSourceEscapesQuoteAndBackslashWhenRubyCodeHasThem() {
+        GlobalScript script = new GlobalScript("ruby", "'a\\b'", List.of());
+
+        assertThat(script.functionSource("VAR_1", "quoted")).contains("|*extra|\n\\'a\\\\b\\'\nend'");
+    }
+
+    @Test
+    void functionSourceThrowsWhenVariableIsRubyKeyword() {
+        GlobalScript script = new GlobalScript("ruby", "1", List.of());
+
+        assertThatThrownBy(() -> script.functionSource("end", "answer")).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void checkSourceReadsRubyCodeFromBindingWhenBuildingLambda() {
+        assertThat(new GlobalScript("ruby", "1", List.of(DATE)).checkSource())
+                .contains("eval('lambda do |date, *extra|\n' + " + GlobalScript.CHECK_CODE + " + '\nend'")
+                .contains("rescue SyntaxError => e")
+                .doesNotContain("define_method");
     }
 
     @Test
