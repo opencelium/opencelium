@@ -189,7 +189,8 @@ public class GlobalVariableController {
             + "mutable variable in scope of a workflow, for polling")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "The values, with an ETag built from the ids and the versions."),
+                    description = "The values, with an ETag built from the ids, versions, revisions and "
+                            + "running owner workflows."),
             @ApiResponse(responseCode = "304", description = "Nothing changed since the ETag sent in If-None-Match."),
             @ApiResponse(responseCode = "400",
                     description = "Neither or both of ids and workflowId, more than 100 ids, or a script variable.",
