@@ -294,9 +294,15 @@ public class SchedulerServiceImp implements SchedulerService {
         schedulingStrategy.runJob(scheduler, channelId);
     }
 
+    /**
+     * Starts a schedule for a webhook that carries data. Like a webhook without data, it does not
+     * wait for other runs of the workflow; only the busy policy of a mutable global variable
+     * can refuse it.
+     *
+     * @throws GlobalVariableConflictException with code BUSY
+     */
     @Override
     public void startNow(Scheduler scheduler, Map<String, Object> webhook) {
-        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
         throwIfRefusedByGlobalVariables(scheduler);
         schedulingStrategy.runJob(scheduler, webhook);
     }

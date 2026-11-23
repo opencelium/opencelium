@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Violation;
+import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.quartz.SchedulingStrategy;
 import com.becon.opencelium.backend.resource.schedule.RunningJob;
@@ -40,6 +41,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -60,7 +62,8 @@ import static org.mockito.Mockito.when;
  * {@code getRunningConnectionIds}, {@code filterByTestFlag} and {@code filterEntitiesByTestFlag},
  * and for what it does about the global variable references of notifications: a save checks
  * them and records them as usages, a delete removes the usages, and a schedule pointed at another
- * workflow has its stored notifications checked against that workflow.
+ * workflow has its stored notifications checked against that workflow. Also covers what
+ * {@code startNow} asks of the global variable run gate before it hands a start to Quartz.
  *
  * Run with: ./gradlew test --tests "*.SchedulerServiceImpTest"
  */
@@ -284,6 +287,56 @@ class SchedulerServiceImpTest {
         assertThat(thrown).isSameAs(rejection);
         verify(schedulerRepository, never()).save(any());
         verifyNoInteractions(schedulingStrategy);
+    }
+
+    // ── startNow ──────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("startNow with webhook data — only the run gate decides; other runs of the workflow are not looked at")
+    void startNowWithWebhookDataStartsJobWithoutCheckingRunningJobs() {
+        Scheduler schedule = aStoredScheduleOf(42L);
+        Map<String, Object> data = Map.of("orderId", "A-17");
+
+        schedulerService.startNow(schedule, data);
+
+        InOrder order = inOrder(runGate, schedulingStrategy);
+        order.verify(runGate).checkCanStart(42L);
+        order.verify(schedulingStrategy).runJob(schedule, data);
+        verify(schedulingStrategy, never()).getRunningJobs();
+    }
+
+    @Test
+    void startNowWithWebhookDataStartsNothingWhenRunGateRefuses() {
+        Scheduler schedule = aStoredScheduleOf(42L);
+        GlobalVariableConflictException busy = aBusyRefusal();
+        doThrow(busy).when(runGate).checkCanStart(42L);
+
+        GlobalVariableConflictException thrown = catchThrowableOfType(
+                () -> schedulerService.startNow(schedule, Map.<String, Object>of("orderId", "A-17")),
+                GlobalVariableConflictException.class);
+
+        assertThat(thrown).isSameAs(busy);
+        verifyNoInteractions(schedulingStrategy);
+    }
+
+    @Test
+    void startNowStartsNothingWhenRunGateRefuses() {
+        Scheduler schedule = aStoredScheduleOf(42L);
+        GlobalVariableConflictException busy = aBusyRefusal();
+        doThrow(busy).when(runGate).checkCanStart(42L);
+
+        GlobalVariableConflictException thrown = catchThrowableOfType(
+                () -> schedulerService.startNow(schedule), GlobalVariableConflictException.class);
+
+        assertThat(thrown).isSameAs(busy);
+        verifyNoInteractions(schedulingStrategy);
+    }
+
+    private static GlobalVariableConflictException aBusyRefusal() {
+        return new GlobalVariableConflictException(GlobalVariableConflictException.Code.BUSY,
+                "Global variable 'lastSync' is busy: execution 7 of the workflow is running and its busy policy"
+                        + " is REFUSE",
+                3);
     }
 
     /** Schedule 5, titled "Nightly", as it is stored: it runs the given workflow and has one notification. */
