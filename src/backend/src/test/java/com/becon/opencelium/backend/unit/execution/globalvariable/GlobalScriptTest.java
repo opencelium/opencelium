@@ -20,6 +20,10 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -416,6 +420,78 @@ class GlobalScriptTest {
 
         await().atMost(Duration.ofSeconds(5)).until(() -> Thread.getAllStackTraces().keySet().stream()
                 .noneMatch(thread -> thread.getName().equals("oc-global-script") && thread.isAlive()));
+    }
+
+    @Test
+    @DisplayName("runWithin — a timeout is its own error type, so callers can report it apart from a failure")
+    void runWithinThrowsTimeLimitExceededWhenLimitPasses() {
+        CountDownLatch never = new CountDownLatch(1);
+        try {
+            assertThatThrownBy(() -> GlobalScript.runWithin(Duration.ofMillis(100), "The script", () -> {
+                awaitUninterruptibly(never);
+                return 1;
+            })).isInstanceOf(GlobalScript.TimeLimitExceeded.class)
+                    .hasMessage("The script ran longer than 100 ms and was stopped");
+        } finally {
+            never.countDown();
+        }
+    }
+
+    @Test
+    void runWithinRethrowsErrorWhenWorkFailsWithError() {
+        assertThatThrownBy(() -> GlobalScript.runWithin(Duration.ofSeconds(5), "work", () -> {
+            throw new StackOverflowError("too deep");
+        })).isInstanceOf(StackOverflowError.class).hasMessage("too deep");
+    }
+
+    @Test
+    @DisplayName("runWithin — terminating the run interrupts its thread: the script is given up and the interrupt kept")
+    void runWithinThrowsAndKeepsInterruptWhenCallingThreadIsInterrupted() throws Exception {
+        CountDownLatch working = new CountDownLatch(1);
+        CountDownLatch never = new CountDownLatch(1);
+        AtomicReference<Throwable> thrown = new AtomicReference<>();
+        AtomicBoolean keptInterrupt = new AtomicBoolean();
+        Thread run = new Thread(() -> {
+            try {
+                GlobalScript.runWithin(Duration.ofMinutes(1), "The enhancement", () -> {
+                    working.countDown();
+                    awaitUninterruptibly(never);
+                    return 1;
+                });
+            } catch (Throwable e) {
+                thrown.set(e);
+                keptInterrupt.set(Thread.currentThread().isInterrupted());
+            }
+        }, "oc-test-run");
+        run.start();
+        try {
+            assertThat(working.await(5, TimeUnit.SECONDS)).isTrue();
+
+            run.interrupt();
+
+            await().atMost(Duration.ofSeconds(5)).until(() -> !run.isAlive());
+            assertThat(thrown.get()).isInstanceOf(ScriptExecutionException.class)
+                    .isNotInstanceOf(GlobalScript.TimeLimitExceeded.class)
+                    .hasMessage("The enhancement was interrupted");
+            assertThat(keptInterrupt).isTrue();
+        } finally {
+            never.countDown();
+        }
+    }
+
+    /** Waits for {@code latch} the way a script runs: deaf to interrupts. */
+    private static void awaitUninterruptibly(CountDownLatch latch) {
+        boolean interrupted = false;
+        while (latch.getCount() > 0) {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                interrupted = true;
+            }
+        }
+        if (interrupted) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     // ── parameter changes ─────────────────────────────────────────────────────

@@ -40,6 +40,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -650,6 +651,49 @@ class ExecutionManagerImplTest {
         assertThatThrownBy(() -> manager.executeScript("b1"))
                 .isInstanceOf(ScriptExecutionException.class)
                 .hasMessageContaining("field binding b1 ran longer than 300 ms");
+    }
+
+    @Test
+    @DisplayName("executeScript — the limit covers the whole enhancement, so its own code is stopped after a quick script call")
+    void executeScriptThrowsWhenImportingEnhancementRunsTooLongAfterScriptReturns() {
+        givenScriptEngines();
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(FORMAT_DATE_DEFINITION),
+                anEnhancementWithArgs("js", "var day = VAR_1('2026-11-17T22:00:00Z');\nwhile (true) {}",
+                        Map.of("VAR_1", "{{global.formatDate}}")),
+                Duration.ofMillis(300));
+
+        assertThatThrownBy(() -> manager.executeScript("b1"))
+                .isInstanceOf(GlobalScript.TimeLimitExceeded.class)
+                .hasMessage("The enhancement of field binding b1 ran longer than 300 ms and was stopped");
+    }
+
+    @Test
+    @DisplayName("executeScript — a python3 enhancement that imports a script is stopped at the limit too")
+    @SuppressWarnings("unchecked")
+    void executeScriptThrowsWhenPolyglotEnhancementImportingScriptRunsTooLong() {
+        CountDownLatch never = new CountDownLatch(1);
+        PolyglotEngine python = mock(PolyglotEngine.class);
+        when(python.supports(any())).thenReturn(true);
+        when(python.isUp()).thenReturn(true);
+        when(python.execute(anyString(), any(Map.class), any())).thenAnswer(invocation -> {
+            never.await();
+            return "late";
+        });
+        givenScriptEngines(python);
+        String definition = new GlobalScript("python3", "return prefix",
+                List.of(new GlobalScript.Parameter("prefix", null, true, null))).toJson();
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(definition),
+                anEnhancementWithArgs("python3", "RESULT_VAR = VAR_1(VAR_0)",
+                        Map.of("VAR_0", "{{global.tenantPrefix}}", "VAR_1", "{{global.formatDate}}")),
+                Duration.ofMillis(300));
+
+        try {
+            assertThatThrownBy(() -> manager.executeScript("b1"))
+                    .isInstanceOf(GlobalScript.TimeLimitExceeded.class)
+                    .hasMessage("The enhancement of field binding b1 ran longer than 300 ms and was stopped");
+        } finally {
+            never.countDown();
+        }
     }
 
     @Test
