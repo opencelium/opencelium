@@ -11,7 +11,6 @@ import { buildWorkflowChangeSnapshot, EMPTY_NAME_LABEL,
 import type { WorkflowChangeSource } from './useWorkflowChangeTracking';
 import { useDirectReferenceOptimization } from './useDirectReferenceOptimization';
 import { notifyError } from '@shared/ui/feedback/notifyError';
-import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 
 type SaveParams = {
 	title: string;
@@ -30,7 +29,6 @@ type Params = {
 	clearNodeErrors: () => void;
 	resolveError: (error: unknown) => string | null;
 	validateEnhancementScripts: (fieldBindings?: readonly unknown[]) => string | null;
-	validateReferencePaths: (fieldBindings?: unknown[]) => string | null;
 	validateSaveProblems: (fieldBindings?: readonly unknown[]) => string | null;
 	setFieldBindings: (bindings: any[] | undefined) => void;
 	setHeaderState: (state: { title: string; description: string }) => void;
@@ -46,13 +44,12 @@ type Params = {
 
 export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 	fieldBindings, getViewport, clearNodeErrors, resolveError, validateEnhancementScripts,
-	validateSaveProblems, validateReferencePaths, setFieldBindings,
+	validateSaveProblems, setFieldBindings,
 	setHeaderState, setPersistedTitle, setCategoryId, setBaselineSnapshot,
 	setChangeSource, setHistoryPreviewSnapshot, setHistoryVersions,
 	setSelectedHistoryVersionId, setCreatedConnectionId }: Params) => {
 	const { t } = useI18n('workflow');
 	const { t: tEntities } = useI18n('entities');
-	const confirm = useConfirm();
 	const optimizeDirectReferences = useDirectReferenceOptimization({
 		fieldBindings, setFieldBindings,
 	});
@@ -83,12 +80,6 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 		if (blockingProblemMessage) {
 			notifyError(blockingProblemMessage);
 			throw new Error('Workflow has problems that block saving');
-		}
-		// A warning, not a refusal: the check approximates the backend's Jayway dialect.
-		const invalidPathMessage = validateReferencePaths(fieldBindings);
-		if (invalidPathMessage && !await confirm({ title: t('messages.invalidReferencePathsTitle'),
-			message: invalidPathMessage, confirmText: t('messages.saveAnyway') })) {
-			throw new Error('Save cancelled because of invalid reference paths');
 		}
 		const normalizedDescription = toPayloadDescription(description);
 		const nextCategoryId = categoryOverride !== undefined ? categoryOverride : categoryId;
@@ -137,8 +128,8 @@ export const useSaveWorkflow = ({ connectionId, categoryId, nodes, edges,
 			window.history.replaceState(window.history.state, '', `/workflow/update/${id}`);
 		}
 	}, [connectionId, categoryId, nodes, edges, fieldBindings, getViewport,
-		clearNodeErrors, resolveError, validateEnhancementScripts, validateSaveProblems, validateReferencePaths,
-		confirm, setFieldBindings, setHeaderState,
+		clearNodeErrors, resolveError, validateEnhancementScripts, validateSaveProblems,
+		setFieldBindings, setHeaderState,
 		setPersistedTitle, setCategoryId, setBaselineSnapshot, setChangeSource,
 		setHistoryPreviewSnapshot, setHistoryVersions, setSelectedHistoryVersionId,
 		setCreatedConnectionId, optimizeDirectReferences, t, tEntities]);

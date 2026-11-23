@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { MethodWithId } from '../../../types/connection';
-import { buildReferenceValue, getReferenceOptions, groupReferenceOptions, matchesReferenceOptionSyntax, isExpandableReferencePath,
+import { buildReferenceValue, getDeclaredBodySample, getReferenceOptions, groupReferenceOptions, matchesReferenceOptionSyntax, isExpandableReferencePath,
 	isListReferencePath, isUnknownReferencePath, readLiveValueAtPath } from './requestReferenceOptions';
 
 const body = {
@@ -277,5 +277,31 @@ describe('matchesReferenceOptionSyntax', () => {
 	it('never matches fields or an empty term', () => {
 		expect(matching('servers[0]', 'na')).toEqual([]);
 		expect(matching('servers', '')).toEqual([]);
+	});
+});
+
+describe('getDeclaredBodySample', () => {
+	const declared = (type: string, fields: unknown) =>
+		({ response: { success: { body: { type, fields } } } }) as unknown as MethodWithId;
+
+	it('turns the declaration into plain JSON', () => {
+		const method = declared('object', { data: { type: 'array', fields: { id: '', tags: [{ name: '' }] } } });
+		expect(getDeclaredBodySample(method, 'data[0].id')).toEqual({ data: [{ id: '', tags: [{ name: '' }] }] });
+	});
+
+	it('wraps a root array declaration', () => {
+		expect(getDeclaredBodySample(declared('array', { id: '' }), '[0].id')).toEqual([{ id: '' }]);
+	});
+
+	it('sends no sample for a path through a field declared without children', () => {
+		const method = declared('object', { meta: {}, list: { type: 'array', fields: {} } });
+		expect(getDeclaredBodySample(method, 'meta.anything')).toBeUndefined();
+		expect(getDeclaredBodySample(method, 'list[0].x')).toBeUndefined();
+		expect(getDeclaredBodySample(method, 'missing')).toEqual({ meta: {}, list: [{}] });
+	});
+
+	it('sends no sample when nothing is declared', () => {
+		expect(getDeclaredBodySample(undefined, 'a')).toBeUndefined();
+		expect(getDeclaredBodySample(declared('object', undefined), 'a')).toBeUndefined();
 	});
 });

@@ -17,6 +17,8 @@ export type LogError = {
 
 export type LogIdentifier = {
   executionId: string;
+  connectionId?: number;
+  startOffset?: number | null;
   flowId: string;
   indexPath: string;
 };
@@ -26,7 +28,7 @@ export type FlowchartProperty = {
   DIRECTION: "source" | "target";
 };
 
-export type MethodProperty = { name: string; label?: string };
+export type MethodProperty = { name: string; label?: string; connectorId?: string; operationId?: string };
 export type LoopProperty = {
   expression: string;
   size: number;

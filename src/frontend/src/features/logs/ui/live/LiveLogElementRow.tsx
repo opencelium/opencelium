@@ -5,6 +5,7 @@ import { appendLoopIndex, type LiveLogNode, type LiveLogTree } from "../../model
 import { LogRow, Meta, OperatorLabel, StatusBadge, TraceDot, Url } from "../logRowUi";
 import { LoopPager } from "../LoopPager";
 import { ElementChildren } from "../LogElementRow";
+import { LogPlaygroundAction } from "../LogPlaygroundAction";
 import { MethodLogDetails } from "../MethodLogDetails";
 import { ErrorDetail } from "../ErrorDetail";
 import { CopyButton } from "@shared/ui/actions/CopyButton";
@@ -254,6 +255,7 @@ export function LiveLogElementRow({
       // Otherwise details are fetched by the persisted element id — without one
       // (no socket line carried it) there is nothing to request.
       const expandable = node.id !== "" || hasError;
+      const action = <LogPlaygroundAction elementId={node.id} indexPath={node.indexPath} loopIndex={node.loopIndex} />;
       const displayText = methodDisplayText(mode, {
         url: request?.url,
         label: node.properties.label ?? resolveMethodLabel(node.indexPath),
@@ -300,9 +302,10 @@ export function LiveLogElementRow({
                 code={node.error!.code}
                 stackTrace={node.error!.stackTrace}
                 depth={depth + 1}
+                action={action}
               />
             ) : (
-              <MethodLogDetails id={node.id} depth={depth + 1} path={node.key} />
+              <MethodLogDetails id={node.id} depth={depth + 1} path={node.key} action={action} />
             )
           ) : null}
         </>

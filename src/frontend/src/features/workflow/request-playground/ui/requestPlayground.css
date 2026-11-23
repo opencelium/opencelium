@@ -203,6 +203,38 @@
 	font-size: 12px;
 }
 
+.rpCurlActions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.rpCurlOutdated {
+	color: var(--color-status-warning-fg);
+	font-style: italic;
+}
+
+.rpCurlStatus {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 12px;
+	color: var(--color-text-secondary);
+	font-size: 12px;
+}
+
+.rpCurl .rpResponseAlerts,
+.rpCurl > .ant-alert,
+.rpCurl > .MuiAlert-root {
+	margin: 8px;
+}
+
+.rpCurlNote {
+	padding: 4px 12px 8px;
+	color: var(--color-text-secondary);
+	font-size: 11px;
+}
+
 .rpCurlCode,
 .rpRaw {
 	margin: 0;

@@ -161,16 +161,6 @@
     "enhancementScriptBrokenIn": "“{{method}}” has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
     "enhancementScriptBroken": "{{count}} steps have a transformation whose script still uses {{marker}} — the references they read were removed with the steps they pointed at. Fix the scripts before saving.",
     "enhancementScriptBroken_one": "{{count}} step has a transformation whose script still uses {{marker}} — the reference it read was removed with the step it pointed at. Fix the script before saving.",
-    "invalidReferencePathsTitle": "Invalid reference paths",
-    "invalidReferencePathIn": "“{{step}}” reads “{{path}}” from the {{part}} of “{{source}}”, but this is not a valid JsonPath. The run fails when it reaches it.",
-    "invalidReferencePathNoSource": "“{{step}}” reads “{{path}}”, but this is not a valid JsonPath. The run fails when it reaches it.",
-    "referencePart": {
-      "responseBody": "response body",
-      "requestBody": "request body"
-    },
-    "invalidReferencePaths": "{{count}} steps use references whose path is not valid JsonPath. The run fails when it reaches them.",
-    "invalidReferencePaths_one": "{{count}} step uses a reference whose path is not valid JsonPath. The run fails when it reaches it.",
-    "saveAnyway": "Save anyway",
     "saveBlockedIn": "Cannot save: “{{step}}” — {{problem}}",
     "saveBlocked": "Cannot save: {{count}} steps have problems that must be fixed first. They are marked on the canvas.",
     "saveBlocked_one": "Cannot save: {{count}} step has a problem that must be fixed first. It is marked on the canvas.",
@@ -856,9 +846,6 @@
     "allKeyNamesHint": "The names of all properties of this object, as a list, not their values.",
     "iteratorLoop": "({{iterator}} loop)",
     "iteratorLoopHint": "The element of the current iteration of the {{iterator}} loop. Use it inside a loop that runs over this array.",
-    "unknownPath": "This field is not in the response structure of the selected method. The run fails if it is missing from the real response.",
-    "invalidSyntax": "Invalid path syntax at character {{position}} (“{{character}}”). The run fails on this reference.",
-    "incompleteSyntax": "The path is incomplete — it ends where more is expected. The run fails on this reference.",
     "listResult": "list",
     "listResultHint": "Returns a list of all matches, even when only one matches.",
     "operationsGroup": "Operations",
@@ -875,7 +862,52 @@
       "copySuccess": "Value copied to clipboard"
     },
     "clearField": "Clear field",
-    "addReference": "Add reference"
+    "addReference": "Add reference",
+    "issueHint": "Hint:",
+    "issues": {
+      "REFERENCE_REQUIRED": "The reference is empty.",
+      "SURROUNDING_WHITESPACE": "The reference starts or ends with a space.",
+      "UNKNOWN_REFERENCE": "This is not a reference.",
+      "INVALID_REFERENCE": "The reference cannot be read.",
+      "UNCLOSED_WRAPPER": "The reference is not closed.",
+      "INVALID_COLOR": "The method colour in the reference is not valid.",
+      "INVALID_EXCHANGE_TYPE": "The reference must read the response or the request.",
+      "PART_REQUIRED": "The reference does not say which part to read: status, header or body.",
+      "INVALID_PART": "The reference reads an unknown part. Use status, header or body.",
+      "STATUS_HAS_PATH": "The status has no fields to read.",
+      "MISSING_ROOT": "The path must start with $.",
+      "MISSING_DOT_AFTER_ROOT": "A dot is missing after $.",
+      "PATH_REQUIRED": "The path is empty.",
+      "TRAILING_DOT": "The path ends with a dot.",
+      "UNCLOSED_BRACKET": "A bracket is not closed.",
+      "UNEXPECTED_CLOSING_BRACKET": "There is a closing bracket without an opening one.",
+      "UNCLOSED_QUOTE": "A quote is not closed.",
+      "QUOTE_OUTSIDE_BRACKETS": "A quoted field name must be inside brackets.",
+      "EMPTY_FIELD_NAME": "A field name between quotes is empty.",
+      "INVALID_BRACKET_CONTENT": "The brackets contain something that is not an index, [*], a loop iterator or a quoted name.",
+      "INVALID_FILTER": "The filter is not valid.",
+      "UNKNOWN_ITERATOR": "This loop iterator is not available here: the reference is not inside that loop.",
+      "MISSING_DOT": "A dot is missing between ] and the next field.",
+      "INVALID_TILDE": "~ can only follow a for-in key or a split-string iterator.",
+      "TILDE_NOT_LAST": "~ must be the last part of the path.",
+      "INVALID_JSON_PATH": "The path is not valid JsonPath.",
+      "HEADER_NAME_REQUIRED": "The header name is missing.",
+      "INVALID_HEADER_NAME": "The header name contains characters that are not allowed.",
+      "INVALID_HEADER_SELECTOR": "This header selector is not valid.",
+      "UNKNOWN_DATA_TYPE": "The data type is not known.",
+      "DEEP_SCAN": "“..” searches the whole response — usually a typo for a single dot.",
+      "DUPLICATE_ROOT": "$ in the middle of the path is read as a field named $.",
+      "EMPTY_BRACKETS": "Empty brackets are read as [*], all items.",
+      "FIELD_WHITESPACE": "A field name contains a space, which is part of the name.",
+      "UNEXPECTED_PATH_AFTER_ALL": "After [*] only status, header or body can follow.",
+      "PATH_NOT_IN_SAMPLE": "This field is not in the method's example response. The run fails if it is missing from the real response.",
+      "FIELD_ON_ARRAY": "This reads a field directly from a list. Pick the items first.",
+      "NOT_AN_ARRAY": "This value is not a list in the method's example response, so it has no index.",
+      "INDEX_OUT_OF_RANGE": "The method's example response has fewer items than this index.",
+      "EMPTY_ARRAY_IN_SAMPLE": "The rest of the path could not be checked: the list is empty in the method's example response.",
+      "NO_MATCH_IN_SAMPLE": "The filter matches nothing in the method's example response.",
+      "INVALID_SAMPLE": "The method's example response could not be read, so the path was not checked against it."
+    }
   },
   "refGenerator": {
     "connector": "Connector",
@@ -1006,12 +1038,19 @@
       "ifUnconfigured": "The IF condition is not configured.",
       "loopUnconfigured": "The loop is not configured.",
       "unknownPath": "{{count}} field links read a field the method's response does not declare",
-      "unknownPath_one": "{{count}} field link reads a field the method's response does not declare"
+      "unknownPath_one": "{{count}} field link reads a field the method's response does not declare",
+      "invalidPath": "{{count}} references have a path that is not valid JsonPath",
+      "invalidPath_one": "{{count}} reference has a path that is not valid JsonPath"
     },
     "showDetails": "Show error details",
     "hideDetails": "Hide error details"
   },
   "requestPlayground": {
+    "execution": {
+      "stepMismatch": "This step no longer matches the logged run",
+      "loadError": "Could not load the logged execution",
+      "valuesUnavailable": "Enter the values that could not be recovered before sending."
+    },
     "title": "Request Playground",
     "breadcrumb": {
       "inside": "inside {{path}}",
@@ -1019,18 +1058,14 @@
       "loopWithIterator": "Loop ({{iterator}})",
       "if": "If"
     },
-    "preview": {
-      "badge": "In development",
-      "badgeHint": "Coming soon: the backend for testing a method is not available yet."
-    },
     "toolbar": {
       "prefill": "Prefill values from"
     },
     "prefill": {
+      "execution": "Execution #{{id}}",
       "testRun": "Paused test run",
       "lastTest": "Your last test of this method",
       "sample": "Sample responses",
-      "upstream": "Run upstream steps first (fresh data)",
       "manual": "Manual input only",
       "testRunUnavailable": "Pause a test run on this step to use its values."
     },
@@ -1038,18 +1073,27 @@
       "method": "HTTP method",
       "curl": "cURL",
       "curlHint": "Show the request as a cURL command",
-      "send": "Send",
-      "sendUpstream": "Run upstream + Send"
+      "send": "Send"
     },
     "curl": {
-      "title": "Generated cURL (secrets masked)"
+      "title": "cURL (built by the server)",
+      "generating": "Generating cURL…",
+      "regenerate": "Regenerate",
+      "outdated": "Request changed – regenerate",
+      "failed": "The cURL command could not be generated",
+      "connectorError": "Could not read the data of connector {{connector}}",
+      "invalidJson_one": "A value is not valid JSON. Fix it to generate cURL.",
+      "invalidJson_other": "{{count}} values are not valid JSON. Fix them to generate cURL.",
+      "masterPasswordTitle": "The cURL command contains real credentials. Enter the master password to generate it.",
+      "credentialsNote": "Contains real credentials and tokens. For a POSIX shell (bash, zsh, Git Bash), not Windows cmd or PowerShell.",
+      "generate": "Generate",
+      "idle": "Generate the command once the test values are filled in."
     },
     "tabs": {
       "values": "Test values",
       "params": "Params",
       "headers": "Headers",
-      "body": "Body",
-      "settings": "Settings"
+      "body": "Body"
     },
     "table": {
       "on": "On",
@@ -1065,13 +1109,11 @@
       "resetAll": "Reset all",
       "reset": "Reset to prefilled value",
       "placeholder": "Enter test value",
-      "upstreamPlaceholder": "Filled by the upstream run",
       "connectionPlaceholder": "Filled in from the connector",
       "empty": "This request has no dynamic values. It is sent exactly as configured.",
       "pathSegment": "path",
       "fromMethod": "From {{method}} · used in {{target}}",
       "fromWebhook": "Webhook parameter ({{type}}) · used in {{target}}",
-      "fromConnection": "Connector field · used in {{target}}",
       "unknownMethod": "unknown method",
       "groups": {
         "url": "URL",
@@ -1086,27 +1128,44 @@
       },
       "invalidJson": "Not valid JSON. Fix it or switch the value to text.",
       "invalidJsonSend_one": "A value is not valid JSON. Fix it before sending.",
-      "invalidJsonSend_other": "{{count}} values are not valid JSON. Fix them before sending."
+      "invalidJsonSend_other": "{{count}} values are not valid JSON. Fix them before sending.",
+      "secretPlaceholder": "Filled in from the connector (hidden) – type to override",
+      "refsFailed": "Could not determine the values this request needs",
+      "fromConnector": "Filled in from connector {{connector}}",
+      "connectorFieldMissing": "Connector {{connector}} has no field \"{{field}}\" – sent as written",
+      "staticType": {
+        "DIRECT": "Response or request of another step",
+        "WRAPPED_DIRECT": "Response or request of another step, inside text",
+        "WEBHOOK": "Webhook variable",
+        "ENHANCEMENT": "Result of a field-binding script",
+        "PAGE": "Pagination parameter",
+        "REQUEST_DATA": "Placeholder without a connector to fill it",
+        "unknown": "Looks like a reference – enter the value to send"
+      }
     },
     "source": {
+      "execution": "Execution",
+      "notExecuted": "Not executed in this run",
       "testRun": "Test run",
       "lastTest": "Last test",
       "sample": "Sample",
-      "upstream": "Upstream",
       "edited": "Manual",
       "empty": "Required",
       "connection": "Connector",
-      "secret": "Secret"
+      "secret": "Secret",
+      "unavailable": "Missing"
     },
     "sourceHint": {
+      "execution": "Value recorded in this execution.",
+      "notExecuted": "The referenced method did not run in this iteration.",
       "testRun": "Read from the paused test run: the source step has already run, so this is its real value.",
       "lastTest": "The value you used the last time you tested this step in this browser session.",
       "sample": "Read from the saved sample response of the source step.",
-      "upstream": "The steps before this one run first; their response provides this value.",
       "edited": "Changed for this test.",
       "empty": "No value yet – enter one before sending.",
-      "connection": "Taken from the selected connector. A change applies to this test only.",
-      "secret": "Taken from the selected connector and never shown."
+      "connection": "Filled in from the connector by the backend. Type a value to override it for this test only.",
+      "secret": "Filled in from the connector by the backend and never shown. Type a value to override it for this test only.",
+      "unavailable": "The connector does not define this field, so the placeholder is sent as written. Type a value to use one for this test."
     },
     "origin": {
       "fixed": "Fixed",
@@ -1148,40 +1207,12 @@
         "urlencoded": "x-www-form-urlencoded"
       }
     },
-    "settings": {
-      "timeout": "Timeout (seconds)",
-      "retries": "Retries on failure",
-      "proxy": "Proxy",
-      "proxyUrl": "Proxy URL",
-      "proxyMode": {
-        "system": "Use system setting",
-        "none": "No proxy",
-        "custom": "Custom…"
-      },
-      "followRedirects": {
-        "label": "Follow redirects",
-        "hint": "Follow HTTP 3xx responses automatically."
-      },
-      "verifySsl": {
-        "label": "Verify SSL certificate",
-        "hint": "Turn off only for internal systems with self-signed certificates."
-      },
-      "saveResponseAsSample": {
-        "label": "Save every response as sample",
-        "hint": "Makes the fields available for mapping in the next steps."
-      },
-      "logToHistory": {
-        "label": "Log test runs in execution history",
-        "hint": "Off by default so tests don't mix with real runs."
-      }
-    },
     "response": {
       "title": "Response",
       "emptyTitle": "Nothing sent yet",
       "emptyHint": "Check the prefilled values, adjust what you need and press <b>Send</b>. The request is executed only once – the workflow itself does not run.",
       "sending": "Sending request to {{connection}}…",
       "sendingDirect": "Sending request…",
-      "sendingUpstream": "Running {{methods}}, then sending the request…",
       "duration": "{{ms}} ms",
       "run": "Run #{{run}}",
       "runOn": "Run #{{run}} · {{connection}}",
@@ -1189,7 +1220,7 @@
       "tabs": {
         "body": "Body",
         "headers": "Headers ({{count}})",
-        "timeline": "Timeline"
+        "request": "Request"
       },
       "pretty": "Pretty",
       "raw": "Raw",
@@ -1199,27 +1230,22 @@
       "noHeaders": "The response has no headers.",
       "noBody": "The response has no body.",
       "noResponse": "No response was received.",
-      "timeline": {
-        "dns": "DNS lookup",
-        "connect": "TCP connect",
-        "tls": "TLS handshake",
-        "firstByte": "Waiting (TTFB)",
-        "download": "Content download",
-        "total": "Total",
-        "unavailable": "Timing details are not available for this response."
-      },
-      "stage": {
-        "upstream": "An upstream step failed",
-        "resolve": "Could not fill in the values",
-        "enhancement": "A transformation script failed",
-        "connect": "Could not reach the system"
-      }
+      "failed": "The test could not be run",
+      "connectorError": "Could not read the data of connector {{connector}} – nothing was sent",
+      "sentHint": "The request as it was sent. Hidden connector values (passwords, secrets, tokens) are shown as ****.",
+      "binary": "Binary response ({{type}})",
+      "download": "Download",
+      "downloadFailed": "The response could not be downloaded."
     },
     "footer": {
-      "hint": "Test runs are not written to the workflow's execution history unless you turn it on in Settings. Changes stay local until you apply them.",
+      "hint": "Send calls the real API with the connector's credentials. Nothing is saved or logged; changes to the request stay local until you apply them.",
       "apply": "Apply to method",
       "applied": "Changes applied to {{name}}",
       "close": "Close"
+    },
+    "confirmWrite": {
+      "title": "Send a real {{method}} request?",
+      "message": "This sends a real {{method}} request to the API with the connector's credentials and can change data there. Continue?"
     }
   },
   "sandbox": {
@@ -1229,7 +1255,7 @@
     },
     "setValueHint": "Set value",
     "title": "Playground",
-    "banner": "Simulated in your browser using the server’s rules (Nashorn · ES5.1). This is not a server execution.",
+    "banner": "Runs your script on the server with the same engine as a connection run (Nashorn · ES5.1). Nothing is saved; Java classes and load() are not available here.",
     "inputs": "Test values",
     "text": "Text",
     "missing": "Missing",
@@ -1239,35 +1265,24 @@
     "jsonHint": "Paste or type a JSON value",
     "textHint": "string · no quotes needed",
     "invalidJson": "{{name}} is not valid JSON",
-    "fixSyntax": "Fix the ES5.1 syntax error before running",
+    "fixSyntax": "Fix the syntax error before running",
     "shortcut": "Run: Ctrl/Cmd+Enter",
     "run": "Run",
     "running": "Running…",
     "result": "Result",
-    "console": "Console",
+    "console": "Output",
     "warnings": "Warnings",
     "empty": "Enter test values and press Run",
-    "timeout": "Stopped after 2 seconds. The script may contain an endless loop.",
     "previous": "From the previous run",
-    "simulatedResult": "Simulated result",
-    "unreliable": "Server-only feature: this result is not reliable.",
+    "unreliable": "This script uses features that are not available in a test run.",
     "location": "Line {{line}}, column {{column}}",
-    "syntax": "Syntax is incompatible with Nashorn (ES5.1). Use ES5 syntax.",
     "builtin": "{{name}} is not available on the server engine (Nashorn · ES5.1).",
-    "serverOnly": "{{name}} is a server-only feature and cannot be simulated.",
-    "nashornSyntax": "Nashorn-specific syntax cannot be checked or simulated in the browser.",
-    "timezone": "Date may behave differently because the server uses its own time zone.",
-    "onlyJs": "The playground can only simulate JavaScript.",
-    "serverLanguages": "Python and Ruby scripts run only on the server.",
-    "compatibilityOnlyJs": "Compatibility check runs for JavaScript only",
-    "compatible": "No compatibility issues · Nashorn · ES5.1",
-    "csp": "The Content Security Policy blocks eval in the worker. Browser simulation is unavailable.",
-    "invalidResult": "The result cannot be converted to a server String, Number, Boolean, Null, Map or List.",
-    "workerError": "The sandbox worker could not start. Check the Content Security Policy.",
-    "invalidArgument": "Invalid sandbox variable name.",
-    "numberTypes": "Browser numbers cannot reproduce Java Long input types: typeof returns \"number\" here but \"object\" for a Java Long on Nashorn.",
+    "serverOnly": "{{name}} works when the connection runs, but not in a test run.",
+    "onlyJs": "Only JavaScript scripts can be test-run.",
+    "serverLanguages": "Python and Ruby scripts run only when the connection runs.",
+    "compatibilityOnlyJs": "Syntax check runs for JavaScript only",
+    "compatible": "No issues · Nashorn · ES5.1",
     "copy": "Copy result",
-    "simulation": "Simulation",
     "nashornDocs": "Nashorn · ES5.1 docs",
     "characters": "{{count}} characters",
     "variables": "Variables",
@@ -1280,18 +1295,29 @@
     "stale": "Not run since your last edit",
     "lastRun": "Last run {{time}}",
     "runtimeError": "Runtime error at this line",
-    "arrowSyntax": "Arrow functions are not supported in Nashorn (ES5.1). Use function(x) { return …; }.",
-    "templateSyntax": "Template literals are not supported. Use string concatenation.",
-    "declarationSyntax": "let and const are not supported in Nashorn (ES5.1). Use var.",
-    "classSyntax": "Classes are not supported in Nashorn (ES5.1). Use functions and prototypes.",
-    "spreadSyntax": "Spread and rest syntax are not supported in Nashorn (ES5.1).",
-    "destructuringSyntax": "Destructuring is not supported. Read properties explicitly.",
-    "regexSyntax": "Regular expression flags u, y and s are not supported in Nashorn (ES5.1).",
     "enhancement": "Transformation",
     "descriptionPlaceholder": "What does this script do?",
     "errors": "{{count}} errors",
     "errors_one": "{{count}} error",
     "warningCount": "{{count}} warnings",
-    "warningCount_one": "{{count}} warning"
+    "warningCount_one": "{{count}} warning",
+    "checking": "Checking…",
+    "serverRun": "Server",
+    "serverResult": "Result",
+    "duration": "{{ms}} ms",
+    "line": "Line {{line}}",
+    "rejected": {
+      "SCRIPT_IS_EMPTY": "The script is empty.",
+      "SCRIPT_TOO_LARGE": "The script is longer than 100,000 characters.",
+      "UNSUPPORTED_LANGUAGE": "Only JavaScript scripts can be test-run.",
+      "INVALID_VARIABLE_NAME": "A variable name is not a valid JavaScript identifier.",
+      "VARIABLES_TOO_LARGE": "The test values are larger than 1 MB.",
+      "TOO_MANY_SCRIPT_RUNS": "The server is busy running other scripts. Try again in a moment.",
+      "SCRIPT_ENGINE_UNAVAILABLE": "The server could not run the script. Try again later.",
+      "SCRIPT_RUN_INTERRUPTED": "The run was interrupted on the server. Try again.",
+      "unauthorized": "Your session has expired. Sign in again to run the script.",
+      "failed": "The test run could not be started."
+    },
+    "consoleLog": "console does not exist on the server engine (Nashorn · ES5.1). Use print(...) instead of console.log; its text appears in the Output tab."
   }
 }

@@ -1,4 +1,6 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { runWithoutUnsavedChangesGuard } from './hooks/unsavedChangesGuard';
+import { listLocation } from '@shared/navigation/listLocation';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { message } from 'antd';
 import { WorkflowLoadError } from './components/WorkflowLoadError/WorkflowLoadError';
@@ -13,6 +15,8 @@ import { WorkflowPageDialogs } from './components/WorkflowPageDialogs/WorkflowPa
 import { TestRunProvider } from './test-run/TestRunProvider';
 import { TestRunEditLockSync } from './test-run/TestRunEditLockSync';
 import { useWorkflowPageState } from './hooks/useWorkflowPageState';
+import { LogPlaygroundOpenContext } from '@features/logs';
+import { useOpenExecutionPlayground } from './request-playground/hooks/useOpenExecutionPlayground';
 import { useWorkflowActions } from './hooks/useWorkflowActions';
 import { useDuplicatedWorkflowHint } from './hooks/useDuplicatedWorkflowHint';
 import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
@@ -28,13 +32,18 @@ type WorkflowProps = {
 
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const listSearch = state?.workflowListSearch;
+  const openedFromList = typeof listSearch === 'string' && (listSearch === '' || listSearch.startsWith('?'));
+  const returnUrl = openedFromList
+    ? '/workflow' + listSearch
+    : listLocation('/workflow');
   const { connectionId } = useParams<{ connectionId: string }>();
   const { t } = useI18n('workflow');
   useDuplicatedWorkflowHint();
   // Mirrored up from inside TestRunProvider by TestRunEditLockSync — see there
   // for why paused does not count as locked.
   const [isTestRunLocked, setIsTestRunLocked] = useState(false);
-  const [playgroundNodeId, setPlaygroundNodeId] = useState<string | null>(null);
   const { connection, workflow, connectors, invokers, view, changes, derived,
     isLoading, retryLoad } = useWorkflowPageState({ connectionId, readOnly,
       leaveConfirmMessage: t('messages.unsavedLeaveConfirm') });
@@ -62,6 +71,16 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     [hydratedNodes, workflow.edges],
   );
 
+  const playground = useOpenExecutionPlayground({
+    connectionId: activeConnectionId ?? undefined, readOnly, isLoading,
+    nodes: hydratedNodes, indexById: nodeIndexById,
+    selectNode: (id) => {
+      workflow.onNodesChange(workflow.nodes.filter((node) => !!node.selected !== (node.id === id))
+        .map((node) => ({ id: node.id, type: 'select', selected: node.id === id })));
+      workflow.centerOnNode(id);
+    },
+  });
+  const playgroundNodeId = playground.dialog?.nodeId;
   const actions = useWorkflowActions({ connectionId, readOnly, isTestRunLocked,
     page: { connection, workflow, connectors, invokers, view, changes, derived,
       isLoading, retryLoad } });
@@ -87,7 +106,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     connectorMappingDialogOpen, connectorMappingGroups, applySelectedTemplate,
     handleConfirmConnectorMapping, handleCancelConnectorMapping } = templateActions;
 
-  if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate('/workflow')} />;
+  if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate(returnUrl)} />;
 
   return (
     <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title}
@@ -109,7 +128,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           initialDescription: headerState.description, onChange: setHeaderState,
           onMenuItemSelect: handleHeaderMenuSelect,
           menuLoadingItemId: isDownloadingTemplate ? 'download-template' : null,
-          validateTitle, onSave: handleSave, confirmBeforeSave,
+          validateTitle, onSave: async (values) => {
+            await handleSave(values);
+            if (openedFromList) {
+              runWithoutUnsavedChangesGuard(() => navigate(returnUrl, { replace: true }));
+            }
+          }, confirmBeforeSave,
           problemsSlot: <WorkflowProblemsBadge issues={problems.issues} onOpen={problems.openPanel} />,
           saveDisabled: isLoading || !hasConnectionChanges,
           onOpenHistory: handleOpenHistory,
@@ -118,7 +142,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           hasSavedConnection: !!activeConnectionId }} />
       <TemplateConnectorMappingDialog open={connection.mappingGroups.length > 0}
         purpose="repair" groups={connection.mappingGroups} connectors={connectors} invokers={invokers}
-        onConfirm={connection.confirmRepair} onCancel={() => navigate('/workflow')} />
+        onConfirm={connection.confirmRepair} onCancel={() => navigate(returnUrl)} />
       <WorkflowPageDialogs
         templates={{
           save: { open: templateDialogOpen, name: templateName,
@@ -157,6 +181,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         category={{ open: assignCategoryOpen, currentCategoryId: categoryId,
           loading: isAssigningCategory, onClose: () => setAssignCategoryOpen(false),
           onAssign: handleAssignCategory }} />
+      <LogPlaygroundOpenContext.Provider value={playground.openFromLogs}>
       <WorkflowMain loading={isLoading} canvas={{ nodes: canvasNodes,
         edges: workflow.edges, isAnyNodeDragging: workflow.isAnyNodeDragging,
         restoredViewport: workflow.restoredViewport,
@@ -185,6 +210,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           closeCanvasPanels();
           problems.clearFocus();
         } }} />
+      </LogPlaygroundOpenContext.Provider>
       <WorkflowPanels
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
           connectionId: activeConnectionId, onClose: () => workflow.setSidebarAction(null),
@@ -235,7 +261,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onOpenRequestEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }),
           onOpenConditionEditor: (nodeId) => workflow.setConditionEditor({ nodeId }),
           onShowResponse: workflow.onShowResponse,
-          onTryRequest: setPlaygroundNodeId,
+          onTryRequest: playground.open,
           onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
           onOpenConnectorEditor: (nodeId, kind) => workflow.setConnectorEditor({ nodeId, kind }),
           onClose: () => workflow.setContextMenu(null) }} />
@@ -265,13 +291,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onChange: workflow.onChangeNodeConnector }}
         connectorImage={{ open: workflow.connectorEditor?.kind === 'image', connectors,
           node: connectorEditorNode, onClose: () => workflow.setConnectorEditor(null) }}
-        requestPlayground={{ open: !!playgroundNodeId,
+        requestPlayground={{ open: !!playgroundNodeId, execution: playground.dialog?.execution,
           node: hydratedNodes.find((node) => node.id === playgroundNodeId) ?? null,
           nodes: hydratedNodes, edges: workflow.edges, fieldBindings: loadedFieldBindings,
           connectionId: Number(activeConnectionId) || null,
           connectors, isReadOnly: readOnly || isTestRunLocked,
           onApplyConfig: workflow.onSaveMethodConfig,
-          onClose: () => setPlaygroundNodeId(null) }} />
+          onClose: () => playground.open(null) }} />
     </div>
     </TestRunProvider>
   );

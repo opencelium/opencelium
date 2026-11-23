@@ -1,3 +1,7 @@
+import type { EntityDefinition } from '@/engine/entity/EntityDefinition';
+import type { DeleteByConfig, GeneralCommandType } from '../types';
+import type { CommandExecutionContext } from '@shared/command/types';
+import { listLocation } from '@shared/navigation/listLocation';
 import {genericApi} from "@shared/api/genericApi.ts";
 import {store} from "@app/store/store.ts";
 import {i18n} from "@shared/i18n/config/i18n.ts";
@@ -7,7 +11,7 @@ import {message} from "antd";
 // exact record being deleted — that page's own query would otherwise refetch
 // (mutations broadly invalidate the 'Entity' tag) and 404 against a record
 // that no longer exists.
-const isViewingRecord = (def, resolvedId: string): boolean => {
+const isViewingRecord = (def: EntityDefinition, resolvedId: string): boolean => {
     const routeName = def.routes?.find((r) => r.entityRouteName)?.entityRouteName ?? def.name;
     const currentPath = window.location.pathname;
     return (
@@ -16,8 +20,8 @@ const isViewingRecord = (def, resolvedId: string): boolean => {
     );
 };
 
-export const createDeleteExecute = ({ def, name, config, by }) => {
-    return async (args, ctx) => {
+export const createDeleteExecute = ({ def, name, config, by }: GeneralCommandType & { by: DeleteByConfig }) => {
+    return async (args: { identifier: string }, ctx: CommandExecutionContext) => {
 
         // The command palette's literal token for this entity — normally def.name,
         // but overridable via commandName (createEntityCommands) when the
@@ -33,7 +37,8 @@ export const createDeleteExecute = ({ def, name, config, by }) => {
             return config.overrides.delete(def, ctx);
         }
 
-        const value = args.identifier as string;
+        if (!def.api) return;
+        const value = args.identifier;
 
         const confirmMessage =
             by.confirmMessage?.(value, def) ??
@@ -71,8 +76,8 @@ export const createDeleteExecute = ({ def, name, config, by }) => {
             }
 
             if (wasViewingRecord) {
-                const routeName = def.routes?.find((r) => r.entityRouteName)?.entityRouteName ?? def.name;
-                ctx.navigate(`/${routeName}`);
+                const listRoute = def.routes?.find(route => route.type === 'list');
+                ctx.navigate(listLocation(listRoute?.path ?? `/${listRoute?.entityRouteName ?? def.name}`));
             } else {
                 ctx.setInputValue?.(
                     `delete ${commandWord} by ${by.field} `

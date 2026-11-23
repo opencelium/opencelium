@@ -1,10 +1,10 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ReferencePathFeedback } from './referencePathSyntax';
+import type { ReferencePathFeedback } from './referenceValidation.utils';
 import { useReferenceFeedbackTooltip } from './useReferenceFeedbackTooltip';
 
-const error: ReferencePathFeedback = { severity: 'error', message: 'broken' };
-const warning: ReferencePathFeedback = { severity: 'warning', message: 'unknown' };
+const error: ReferencePathFeedback = { severity: 'error', message: 'broken', hint: null };
+const warning: ReferencePathFeedback = { severity: 'warning', message: 'unknown', hint: null };
 
 const render = (initial: ReferencePathFeedback | null) => renderHook(
 	({ feedback }: { feedback: ReferencePathFeedback | null }) => useReferenceFeedbackTooltip(feedback),

@@ -1,3 +1,4 @@
+import { listLocation } from '@shared/navigation/listLocation';
 import { useNavigate } from 'react-router-dom';
 import type { WorkflowHeaderMenuItem } from '../types/workflow.types';
 
@@ -30,7 +31,7 @@ export const useWorkflowHeaderActions = ({ openAssignCategory, downloadTemplate,
 			case 'edit-json': openJsonEditor(); break;
 			case 'change-history': openChangeHistory(); break;
 			case 'shortcuts': openShortcuts(); break;
-			case 'exit': navigate('/workflow'); break;
+			case 'exit': navigate(listLocation('/workflow')); break;
 		}
 	};
 

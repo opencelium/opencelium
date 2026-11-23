@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Loading } from "@shared/ui/primitives/Loading/Loading";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
@@ -11,9 +12,10 @@ type Props = {
   // Stable per-row path so view state (open tab / heights) is scoped to this
   // method and not shared with sibling rows.
   path: string;
+  action?: ReactNode;
 };
 
-export function MethodLogDetails({ id, depth, path }: Props) {
+export function MethodLogDetails({ id, depth, path, action }: Props) {
   const { t } = useI18n("logs");
   // A method's own detail never changes once logged — skip baseApi's default
   // refetch-on-mount so a warm cache entry (from a previous expand, or from
@@ -61,6 +63,7 @@ export function MethodLogDetails({ id, depth, path }: Props) {
         message={data.error.message}
         stackTrace={data.error.stack_trace}
         depth={depth}
+        action={action}
       />
     );
   }
@@ -73,6 +76,7 @@ export function MethodLogDetails({ id, depth, path }: Props) {
 
   return (
     <div style={wrapStyle}>
+      <div className="oc-log-method-actions">{action}</div>
       <RequestResponseTabs
         path={path}
         requestHeader={request?.header ?? ""}

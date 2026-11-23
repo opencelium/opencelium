@@ -60,7 +60,6 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors,
 		resolveError: validation.resolveAndHighlightError,
 		validateEnhancementScripts: validation.validateEnhancementScripts,
-		validateReferencePaths: validation.validateReferencePaths,
 		validateSaveProblems: saveProblems.validateSaveProblems,
 		setFieldBindings: connection.setFieldBindings,
 		setHeaderState: connection.setHeaderState,
@@ -154,7 +153,6 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		nodes: view.hydratedNodes, edges: workflow.edges, fieldBindings,
 		getViewport: workflow.getViewport, clearNodeErrors: workflow.onClearNodeErrors,
 		validateEnhancementScripts: validation.validateEnhancementScripts,
-		validateReferencePaths: validation.validateReferencePaths,
 		validateTestRunProblems: saveProblems.validateTestRunProblems });
 
 	// Anything hosting its own editing surface: canvas-level keyboard shortcuts

@@ -1,16 +1,21 @@
-import type { ServerType } from './simulateBindings';
+import type {
+	ScriptExecutionError,
+	ScriptRequestFailure,
+	ScriptResultType,
+} from './langCode.types';
 
-export type SandboxRequest = { script: string; args: Record<string, unknown> };
-export type SandboxResult =
-	| { kind: 'value'; value: unknown; serverType: ServerType; console: string[] }
-	| {
-			kind: 'error';
-			message: string;
-			line?: number;
-			column?: number;
-			console: string[];
-	  }
-	| { kind: 'timeout' };
+type IssuePosition = { line: number; column: number };
+
+/** Columns are 0-based (Ace), lines 1-based. */
+export type CompatibilityIssue =
+	| ({ kind: 'syntax'; hint: string; message: string } & IssuePosition)
+	| ({ kind: 'unsupportedBuiltin' | 'serverOnly'; name: string } & IssuePosition)
+	| ({ kind: 'console' } & IssuePosition);
+
+export type ScriptRunResult =
+	| { kind: 'value'; value: unknown; resultType: ScriptResultType; output: string; durationMs: number }
+	| { kind: 'error'; error: ScriptExecutionError; output: string; durationMs: number }
+	| { kind: 'rejected'; failure: ScriptRequestFailure };
 
 export function assertNever(value: never): never {
 	throw new Error(`Unexpected kind: ${String(value)}`);

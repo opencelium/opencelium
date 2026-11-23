@@ -195,9 +195,7 @@ export type CrossFieldValidation = {
 }
 export type RouteType = 'create' | 'list' | 'view' | 'edit';
 
-export type EntityRoute =
-    | { type: RouteType }
-    | {
+export type EntityRoute = {
     type: RouteType;
     entityRouteName?: string;
     path?: string;      // override
@@ -366,6 +364,13 @@ export type ListAction =
     | CustomActionConfig
 
 export type ListDefinition = {
+    alternateView?: {
+        labelKey: string
+        listLabelKey: string
+        render: (rows: unknown[], showList: () => void, mode?: string) => React.ReactNode
+        renderListSwitch?: (showAlternate: (mode: string) => void) => React.ReactNode
+    }
+
     /** i18n key (entities namespace) for the page title; falls back to entity.plural / `${name}s`. */
     titleKey?: string
     /** i18n key (entities namespace) for the page subtitle. */

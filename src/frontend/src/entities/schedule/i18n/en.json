@@ -201,5 +201,37 @@
       "byConnectionTitle": "Delete schedule for workflow \"{{connectionTitle}}\"?",
       "byId": "Delete schedule #{{id}}?"
     }
+  },
+  "preview": {
+    "title": "Schedule Preview",
+    "zone": "Times in {{zone}}",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "nextRuns": "Next 5 runs",
+    "alsoRuns": "Also runs",
+    "invalid": "Invalid or unsupported cron expression",
+    "empty": "No upcoming runs"
+  },
+  "calendar": {
+    "three": "Three Day",
+    "work": "Working Week",
+    "prev_three": "Previous 3 days",
+    "next_three": "Next 3 days",
+    "view": "Calendar view",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "today": "Today",
+    "prev_day": "Previous day",
+    "next_day": "Next day",
+    "prev_month": "Previous month",
+    "next_month": "Next month",
+    "title": "Calendar",
+    "list": "List",
+    "prev": "Previous week",
+    "next": "Next week",
+    "hour": "Hour",
+    "every": "Every {{count}} min",
+    "more": "More runs"
   }
 }

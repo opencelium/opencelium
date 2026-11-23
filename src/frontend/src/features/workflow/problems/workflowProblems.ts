@@ -10,6 +10,8 @@ export type WorkflowProblem =
 	| { kind: 'binding'; reason: LensInvalidReason; count: number }
 	/** References into a response-body field the provider does not declare. */
 	| { kind: 'unknown-path'; count: number }
+	/** References whose path would not compile as JsonPath (see countInvalidReferencePaths). */
+	| { kind: 'invalid-path'; count: number }
 	| { kind: 'operator-unconfigured'; operator: 'if' | 'loop' };
 
 export type WorkflowIssue = { nodeId: string; title: string; problems: WorkflowProblem[] };
@@ -33,6 +35,8 @@ export const getProblemSeverity = (problem: WorkflowProblem): WorkflowProblemSev
 		// The declared response is a sample, not a contract — the real one may
 		// well carry the field.
 		case 'unknown-path': return 'warning';
+		// The local check only approximates the backend's Jayway dialect, so it asks rather than refuses.
+		case 'invalid-path': return 'warning';
 		// Leftovers of an earlier save or run; recomputed on the next attempt.
 		case 'validation':
 		case 'test-run':
@@ -85,6 +89,8 @@ type Params = {
 	bindingGraph: LensBindingGraph;
 	/** Per consumer node, see countUnknownReferencePaths. */
 	unknownPaths: ReadonlyMap<string, number>;
+	/** Per consumer node, see countInvalidReferencePaths. */
+	invalidPaths: ReadonlyMap<string, number>;
 	/** Live health from the connector status socket, which outranks what the node was loaded with. */
 	liveHealth: readonly ConnectorMetaDTO[] | undefined;
 };
@@ -140,7 +146,10 @@ const issueTitle = (node: WorkflowNodeModel) => {
 const byPosition = (a: WorkflowNodeModel, b: WorkflowNodeModel) =>
 	a.position.x - b.position.x || a.position.y - b.position.y;
 
-export const collectWorkflowIssues = ({ nodes, bindingGraph, unknownPaths, liveHealth }: Params): WorkflowIssue[] => {
+const countProblem = (kind: 'unknown-path' | 'invalid-path', count: number | undefined): WorkflowProblem[] =>
+	count ? [{ kind, count }] : [];
+
+export const collectWorkflowIssues = ({ nodes, bindingGraph, unknownPaths, invalidPaths, liveHealth }: Params): WorkflowIssue[] => {
 	const bindingProblems = bindingProblemsByNode(bindingGraph);
 	return [...nodes]
 		.filter((node) => node.data.kind !== 'comment' && !node.data.dropPlaceholder)
@@ -153,7 +162,8 @@ export const collectWorkflowIssues = ({ nodes, bindingGraph, unknownPaths, liveH
 					? [{ kind: 'test-run', message: node.data.testRunFailedMessage ?? null } as const] : []),
 				...[connectorProblem(node, liveHealth), operatorProblem(node)].filter((p) => p !== null),
 				...(bindingProblems.get(node.id) ?? []),
-				...(unknownPaths.get(node.id) ? [{ kind: 'unknown-path', count: unknownPaths.get(node.id) ?? 0 } as const] : []),
+				...countProblem('invalid-path', invalidPaths.get(node.id)),
+				...countProblem('unknown-path', unknownPaths.get(node.id)),
 			];
 			return problems.length ? [{ nodeId: node.id, title: issueTitle(node), problems }] : [];
 		});

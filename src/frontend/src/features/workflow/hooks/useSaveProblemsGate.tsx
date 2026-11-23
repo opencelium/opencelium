@@ -4,6 +4,7 @@ import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { SaveWarningsList } from '../problems/SaveWarningsList';
 import { useWorkflowProblemText } from '../problems/useWorkflowProblemText';
 import { buildWorkflowIssues } from '../problems/buildWorkflowIssues';
+import { useJsonPathEnvironment } from '../components/request-editor/body-editor/jsonPathEnvironment';
 import { filterIssuesBySeverity, type WorkflowProblemSeverity } from '../problems/workflowProblems';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 
@@ -30,10 +31,12 @@ export const useSaveProblemsGate = ({ nodes, edges, setNodeError, centerOnNode }
 	const { t } = useI18n('workflow');
 	const confirm = useConfirm();
 	const describe = useWorkflowProblemText();
+	const jsonPathEnvironment = useJsonPathEnvironment();
 
 	const issuesOf = useCallback((severity: WorkflowProblemSeverity, fieldBindings?: readonly unknown[]) =>
-		filterIssuesBySeverity(buildWorkflowIssues(nodes, edges, fieldBindings, undefined, describe), severity),
-	[nodes, edges, describe]);
+		filterIssuesBySeverity(buildWorkflowIssues({ nodes, edges, fieldBindings, liveHealth: undefined, describe,
+			jsonPathEnvironment }), severity),
+	[nodes, edges, describe, jsonPathEnvironment]);
 
 	const validateBlockingProblems = useCallback((action: BlockedAction,
 		fieldBindings?: readonly unknown[]): string | null => {

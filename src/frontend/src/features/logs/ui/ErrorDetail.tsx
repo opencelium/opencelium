@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Typography } from "@shared/ui/primitives/Typography";
 
 const INDENT_STEP = 22;
@@ -11,11 +12,13 @@ export function ErrorDetail({
   code,
   stackTrace,
   depth,
+  action,
 }: {
   message: string;
   code?: string | null;
   stackTrace?: string | string[] | null;
   depth: number;
+  action?: ReactNode;
 }) {
   const stack = Array.isArray(stackTrace)
     ? stackTrace.join("\n")
@@ -29,9 +32,12 @@ export function ErrorDetail({
         background: "var(--color-status-error-bg)",
       }}
     >
-      <Typography variant="label" isBold isDanger>
-        {code ? `[${code}] ${message}` : message}
-      </Typography>
+      <div className="oc-log-method-error-heading">
+        <Typography variant="label" isBold isDanger>
+          {code ? `[${code}] ${message}` : message}
+        </Typography>
+        {action}
+      </div>
       {stack ? (
         <pre
           style={{

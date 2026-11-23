@@ -1,6 +1,6 @@
+import { listLocation } from '@shared/navigation/listLocation';
 import type {GeneralCommandType} from "@/engine/entity/command/types.ts";
-import {CommandNode} from "@shared/command/types.ts";
-import React from "react";
+import type {CommandNode} from "@shared/command/types.ts";
 import {GenericEntityList} from "@/engine/entity/runtime/genererics/GenericEntityList.tsx";
 import {GenericCreateWizard} from "@/engine/entity/runtime/genererics/GenericCreateWizard.tsx";
 import {useCommandPaletteUIStore} from "@widgets/CommandPalette/command-palette.store.ts";
@@ -24,14 +24,15 @@ export const getListCommand = ({def, config, name}: GeneralCommandType): Command
             // command — access must live on this entity-specific child node.
             access: def.permissionComponent ? buildActionAccess(def.permissionComponent, 'READ') : undefined,
             execute: (_, ctx) => {
-                const url = `/${def.name}`;
+                const listRoute = def.routes?.find(route => route.type === 'list');
+                const url = listLocation(listRoute?.path ?? `/${listRoute?.entityRouteName ?? def.name}`);
                 const mode = useCommandPaletteUIStore.getState().resolveMode();
 
                 if (mode === 'route') return ctx.navigate(url);
                 if (mode === 'new-tab') return ctx.openNewTab(url);
 
                 if (mode === 'modal') {
-                    if (config?.overrides?.list) return ctx.openModal(config?.overrides.list(def, ctx));
+                    if (config?.overrides?.list) return config.overrides.list(def, ctx);
                     return ctx.openModal(<GenericEntityList entityName={def.name} />);
                 }
                 if (config?.overrides?.list) return config?.overrides.list(def, ctx);
@@ -71,7 +72,7 @@ export const getCreateCommand = ({ def, config, name }: GeneralCommandType): Com
                 }
 
                 if (mode === 'modal') {
-                    if (config?.overrides?.create) return ctx.openModal(config.overrides.create(def, ctx));
+                    if (config?.overrides?.create) return config.overrides.create(def, ctx);
                     return ctx.openModal(<GenericCreateWizard entityName={def.name} hideRecommendations={ctx.hideRecommendations} />);
                 }
                 // If a specific create flow is needed — use the override

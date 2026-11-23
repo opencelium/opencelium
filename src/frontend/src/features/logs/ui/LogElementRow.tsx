@@ -6,6 +6,7 @@ import { useGetElementChildrenQuery } from "../api/logsApi";
 import { appendLoopIndex } from "../model/liveLogTree";
 import type { FlowchartChildLog } from "../model/types";
 import { LogRow, Meta, OperatorLabel, StatusBadge, TraceDot, Url } from "./logRowUi";
+import { LogPlaygroundAction } from "./LogPlaygroundAction";
 import { MethodLogDetails } from "./MethodLogDetails";
 import { LoopPager } from "./LoopPager";
 import { CopyButton } from "@shared/ui/actions/CopyButton";
@@ -255,7 +256,8 @@ export function LogElementRow({
             }
           />
           {expanded ? (
-            <MethodLogDetails id={log.id} depth={depth + 1} path={path} />
+            <MethodLogDetails id={log.id} depth={depth + 1} path={path}
+              action={<LogPlaygroundAction elementId={log.id} indexPath={log.indexPath} loopIndex={loopIndexPath} />} />
           ) : null}
         </>
       );

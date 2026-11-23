@@ -292,3 +292,32 @@
 	border-top: 1px solid var(--color-border-subtle);
 	font-weight: 600;
 }
+
+/* Response: connector errors and the request as sent */
+.rpResponseAlerts {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.rpSentUrl {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 6px 10px;
+	border: 1px solid var(--color-border-default);
+	border-radius: var(--radius-md);
+	background: var(--color-background-input);
+	font-size: 12px;
+}
+
+.rpSentMethod {
+	font-weight: 700;
+}
+
+.rpSentLabel {
+	color: var(--color-text-secondary);
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+}

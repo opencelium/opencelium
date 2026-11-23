@@ -1,5 +1,4 @@
-import type { CompatibilityIssue } from './checkNashornCompatibility';
-import { assertNever } from './sandbox.types';
+import { assertNever, type CompatibilityIssue } from './sandbox.types';
 
 export function issueMessage(
 	issue: CompatibilityIssue,
@@ -7,16 +6,14 @@ export function issueMessage(
 ) {
 	switch (issue.kind) {
 		case 'syntax':
-			return t(`sandbox.${issue.message}`);
+			return issue.hint;
 		case 'unsupportedBuiltin':
-			return t('sandbox.builtin', { name: issue.message });
+			return t('sandbox.builtin', { name: issue.name });
+		case 'console':
+			return t('sandbox.consoleLog');
 		case 'serverOnly':
-			return t(issue.message === 'nashornSyntax' ? 'sandbox.nashornSyntax' : 'sandbox.serverOnly', {
-				name: issue.message,
-			});
-		case 'timezone':
-			return t('sandbox.timezone');
+			return t('sandbox.serverOnly', { name: issue.name });
 		default:
-			return assertNever(issue.kind);
+			return assertNever(issue);
 	}
 }

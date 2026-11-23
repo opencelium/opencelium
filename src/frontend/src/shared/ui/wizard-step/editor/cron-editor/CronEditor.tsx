@@ -3,8 +3,10 @@ import {useFormContext, useWatch} from 'react-hook-form';
 import {Cron, converter} from 'react-js-cron';
 import type {Mode} from '@/engine/entity/EntityDefinition.ts';
 import 'react-js-cron/styles.css';
+import './CronEditor.css';
 import {FormInput} from '@shared/ui/form/FormInput';
 import {quartzToPickerCron} from '@shared/lib/cron/quartzCron';
+import {CronPreview} from './CronPreview';
 import {toQuartzDayRule} from './cron-editor.utils';
 
 interface CronEditorProps {
@@ -23,6 +25,8 @@ export const CronEditor: React.FC<CronEditorProps> = ({name, label, mode, autoFo
         if (candidate) converter.parseCronString(candidate);
         pickerValue = candidate;
     } catch {
+        // Expressions the visual picker can't represent stay editable as text only.
+        pickerValue = '';
     }
 
     return (
@@ -36,7 +40,7 @@ export const CronEditor: React.FC<CronEditorProps> = ({name, label, mode, autoFo
                 name={name}
             />
             {mode !== 'view' && (
-                <div style={{display: 'flex', justifyContent: 'right'}}>
+                <div style={{display: 'flex', justifyContent: 'right', marginTop: 6}}>
                     <Cron
                         allowEmpty="always"
                         clearButtonAction="empty"
@@ -60,6 +64,7 @@ export const CronEditor: React.FC<CronEditorProps> = ({name, label, mode, autoFo
                     />
                 </div>
             )}
+            <CronPreview cron={fullCron} />
         </div>
     );
 };
