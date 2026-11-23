@@ -73,8 +73,10 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.openjdk.nashorn.api.scripting.JSObject;
+import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -160,7 +162,9 @@ public class ExecutionAspect {
      * {@link WorkflowRunGate}. Within this aspect an {@code @Around} advice wraps the
      * {@code @Before} and {@code @After...} ones, so a start that waits or is refused never reaches
      * them: it sends no notification, and the workflow is freed only after the end of the run has
-     * been recorded. A refused start is recorded apart, by {@link #recordRefusedStart}.
+     * been recorded. A refused start is recorded apart, by {@link #recordRefusedStart}. A start
+     * that its schedule's cron trigger fired is handed to the gate as such, so a schedule keeps
+     * at most one of them waiting.
      */
     @Around("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
     public Object gateByMutableVariables(ProceedingJoinPoint joinPoint, JobExecutionContext context) throws Throwable {
@@ -173,8 +177,13 @@ public class ExecutionAspect {
 
         int schedulerId = data != null ? data.getScheduleId() : jobDataMap.getIntValue("schedulerId");
         long connectionId = schedulerService.getById(schedulerId).getConnection().getId();
-        WorkflowRunGate.Admission admission = runGate.admit(
-                connectionId, context.getJobDetail().getKey(), context.getTrigger().getJobDataMap());
+        JobKey jobKey = context.getJobDetail().getKey();
+        JobDataMap triggerData = context.getTrigger().getJobDataMap();
+        // only a schedule's own trigger is a cron trigger; a manual, webhook or support-file start,
+        // and a start fired again from the queue, come by a trigger that fires once
+        WorkflowRunGate.Admission admission = context.getTrigger() instanceof CronTrigger
+                ? runGate.admitCronFire(connectionId, schedulerId, jobKey, triggerData)
+                : runGate.admit(connectionId, jobKey, triggerData);
         if (!admission.runs()) {
             return null;
         }
@@ -286,9 +295,10 @@ public class ExecutionAspect {
      * Records a start that {@link WorkflowRunGate} refused, or dropped from its queue, as a failed
      * execution of its schedule that starts and ends at once, so it shows in the history and as
      * the last failure. The webhook starts of a schedule that were refused on the call while a
-     * run went come as one refusal, so they are one such execution. With debug mode on, or for a
-     * support file, its log holds the reason. No notification is sent and no aggregator runs:
-     * nothing of the workflow ran, and the refusal already went to the workflow's websocket
+     * run went come as one refusal, so they are one such execution, and so do the cron fires of a
+     * schedule that were skipped because an earlier one already waited. With debug mode on, or
+     * for a support file, its log holds the reason. No notification is sent and no aggregator
+     * runs: nothing of the workflow ran, and the refusal already went to the workflow's websocket
      * channel.
      */
     private void recordRefusedStart(QuartzJobScheduler.ScheduleData data, long connectionId,

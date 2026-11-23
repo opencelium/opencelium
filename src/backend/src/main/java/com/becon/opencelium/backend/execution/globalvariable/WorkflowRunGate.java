@@ -57,6 +57,12 @@ import java.util.UUID;
  * only counted then, because a busy workflow may be called many times: when the run ends, the
  * refused webhook starts of each schedule are reported once, with their number.
  *
+ * <p>A schedule keeps at most one start that its cron trigger fired waiting. A further fire of it
+ * is skipped: the waiting fire keeps its place and takes the time of the newer one, so the wait
+ * limit counts from the schedule's latest fire, and the skipped fire is counted and reported like
+ * a refused webhook start. Every other start that may wait is kept, as each webhook start carries
+ * its own data and a user or a support file asked for the run.
+ *
  * <p>The state is kept in memory. A crash or restart frees every workflow, and the starts that were
  * waiting are lost; a schedule fires again at its next time.
  */
@@ -144,6 +150,11 @@ public class WorkflowRunGate {
         HOLDS,
         /** The start waits in the queue and will be fired again: do not run it now. */
         QUEUED,
+        /**
+         * A cron fire whose schedule already has a cron fire waiting: do not run it. It is counted
+         * and reported when the run that holds the workflow ends.
+         */
+        SKIPPED,
         /** The start was refused and reported: do not run it. */
         REFUSED;
 
@@ -156,6 +167,8 @@ public class WorkflowRunGate {
     /**
      * Decides whether a start of a workflow runs now, waits or is refused. A refused start is
      * logged, sent to the workflow's websocket channel and handed to the {@link RefusalListener}.
+     * A start that may wait is always kept; a start that a schedule's cron trigger fired goes to
+     * {@link #admitCronFire} instead.
      *
      * @param connectionId id of the workflow
      * @param jobKey       the Quartz job the start belongs to, used to fire it again from the queue
@@ -163,6 +176,27 @@ public class WorkflowRunGate {
      * @return the decision
      */
     public Admission admit(long connectionId, JobKey jobKey, JobDataMap triggerData) {
+        return admit(connectionId, jobKey, triggerData, null);
+    }
+
+    /**
+     * Decides about a start that the cron trigger of a schedule fired, like {@link #admit}, but
+     * keeps at most one such start of the schedule waiting. While one waits, a further fire is
+     * skipped: the waiting fire keeps its place in the queue and takes the time of the newer one,
+     * and the skipped fire is counted for the schedule and reported once when the run that holds
+     * the workflow ends. This comes before the queue's limit, so a full queue never refuses it.
+     *
+     * @param connectionId id of the workflow
+     * @param scheduleId   id of the schedule whose cron trigger fired
+     * @param jobKey       the Quartz job of the schedule
+     * @param triggerData  the data of the cron trigger
+     * @return the decision; {@link Admission#SKIPPED} for a fire that was skipped
+     */
+    public Admission admitCronFire(long connectionId, int scheduleId, JobKey jobKey, JobDataMap triggerData) {
+        return admit(connectionId, jobKey, triggerData, scheduleId);
+    }
+
+    private Admission admit(long connectionId, JobKey jobKey, JobDataMap triggerData, Integer cronScheduleId) {
         String ticket = triggerData == null ? null : triggerData.getString(TICKET_KEY);
         List<GlobalVariable> mutables = repository.findMutableUsedByWorkflow(connectionId);
         // a ticket is honoured even when the variables are gone, so its reservation is released
@@ -186,12 +220,27 @@ public class WorkflowRunGate {
                 return Admission.HOLDS;
             }
 
-            refusal = refusalOf(mutables, lane);
-            if (refusal == null) {
-                lane.waiting.addLast(new Waiting(jobKey, withoutTicket(triggerData), clock.instant()));
-                admission = Admission.QUEUED;
+            Optional<Waiting> earlierFire = cronScheduleId == null
+                    ? Optional.empty()
+                    : waitingCronFireOf(lane, cronScheduleId);
+            if (earlierFire.isPresent()) {
+                // the wait limit counts from the schedule's latest fire
+                replace(lane.waiting, earlierFire.get(), earlierFire.get().at(clock.instant()));
+                count(lane, new Tally(cronScheduleId, Unrun.SKIPPED_CRON_FIRE),
+                        new GlobalVariableConflictException(GlobalVariableConflictException.Code.BUSY,
+                                "A cron fire of schedule %d already waits in the workflow's queue"
+                                        .formatted(cronScheduleId),
+                                0));
+                admission = Admission.SKIPPED;
             } else {
-                admission = Admission.REFUSED;
+                refusal = refusalOf(mutables, lane);
+                if (refusal == null) {
+                    lane.waiting.addLast(
+                            new Waiting(jobKey, withoutTicket(triggerData), cronScheduleId, clock.instant()));
+                    admission = Admission.QUEUED;
+                } else {
+                    admission = Admission.REFUSED;
+                }
             }
             // nothing runs and nothing is reserved: the queue has to be started from here
             wakeQueue = wakeQueue || (!isBusy(lane) && !lane.waiting.isEmpty());
@@ -199,6 +248,9 @@ public class WorkflowRunGate {
 
         if (admission == Admission.QUEUED) {
             log.info("Workflow {} is busy: the start of job {} waits in its queue", connectionId, jobKey);
+        } else if (admission == Admission.SKIPPED) {
+            log.info("Workflow {} is busy: a cron fire of schedule {} already waits in its queue, so this fire"
+                    + " of job {} is skipped", connectionId, cronScheduleId, jobKey);
         } else {
             refuse(connectionId, jobKey, triggerData, refusal);
         }
@@ -229,21 +281,21 @@ public class WorkflowRunGate {
      */
     public void release(long connectionId) {
         Long executionId;
-        Map<Integer, RefusedWebhooks> refusedWebhooks;
+        Map<Tally, Counted> unreported;
         synchronized (this) {
             Lane lane = lanes.get(connectionId);
             if (lane == null) {
                 return;
             }
             executionId = lane.executionId;
-            refusedWebhooks = drainRefusedWebhooks(lane);
+            unreported = drainUnreported(lane);
             lane.running = false;
             lane.executionId = null;
             lane.startedAt = null;
         }
         // the queue moves on first: it does not wait for the report to be recorded
         startNext(connectionId);
-        reportRefusedWebhooks(connectionId, executionId, refusedWebhooks);
+        reportUnreported(connectionId, executionId, unreported);
     }
 
     /**
@@ -288,8 +340,7 @@ public class WorkflowRunGate {
             }
             refusal = refusalOf(mutables, lane);
             if (refusal != null && webhookScheduleId != null) {
-                RefusedWebhooks first = new RefusedWebhooks(refusal, 1);
-                lane.refusedWebhooks.merge(webhookScheduleId, first, (counted, one) -> counted.andOneMore());
+                count(lane, new Tally(webhookScheduleId, Unrun.REFUSED_WEBHOOK), refusal);
             }
         }
         if (refusal != null) {
@@ -335,7 +386,7 @@ public class WorkflowRunGate {
     private void startNext(long connectionId) {
         while (true) {
             List<Waiting> expired = new ArrayList<>();
-            Map<Integer, RefusedWebhooks> unreported = Map.of();
+            Map<Tally, Counted> unreported = Map.of();
             Waiting next;
             String ticket = null;
             synchronized (this) {
@@ -346,7 +397,7 @@ public class WorkflowRunGate {
                 next = pollUnexpired(lane, expired);
                 if (next == null) {
                     // counted while the workflow was reserved for a start that never arrived
-                    unreported = drainRefusedWebhooks(lane);
+                    unreported = drainUnreported(lane);
                     lanes.remove(connectionId);
                 } else {
                     ticket = UUID.randomUUID().toString();
@@ -354,7 +405,7 @@ public class WorkflowRunGate {
                 }
             }
 
-            reportRefusedWebhooks(connectionId, null, unreported);
+            reportUnreported(connectionId, null, unreported);
             for (Waiting waiting : expired) {
                 GlobalVariableConflictException dropped = new GlobalVariableConflictException(
                         GlobalVariableConflictException.Code.BUSY,
@@ -460,23 +511,26 @@ public class WorkflowRunGate {
     }
 
     /**
-     * Reports the webhook starts that were refused on the call: for each schedule one refusal,
-     * which names how many starts there were and why the first of them was refused.
+     * Reports the starts that were counted instead of reported one by one, the webhook starts
+     * refused on the call and the cron fires skipped: for each schedule and kind one refusal,
+     * which names how many starts there were and why the first of them did not run.
      *
      * @param executionId the execution that held the workflow; {@code null} if it is not known
      */
-    private void reportRefusedWebhooks(long connectionId, Long executionId, Map<Integer, RefusedWebhooks> refused) {
+    private void reportUnreported(long connectionId, Long executionId, Map<Tally, Counted> unreported) {
         String busyWhile = executionId == null
                 ? "the workflow was busy"
                 : "execution " + executionId + " of the workflow ran";
-        refused.forEach((scheduleId, webhooks) -> {
+        unreported.forEach((tally, starts) -> {
+            Unrun kind = tally.kind();
             GlobalVariableConflictException summary = new GlobalVariableConflictException(
                     GlobalVariableConflictException.Code.BUSY,
-                    "Webhook starts of schedule %d refused while %s: %d. The first one was refused with: %s"
-                            .formatted(scheduleId, busyWhile, webhooks.count(), webhooks.first().getMessage()),
-                    webhooks.first().getCurrentVersion());
+                    "%s of schedule %d %s while %s: %d. The first one was %s with: %s".formatted(
+                            kind.starts, tally.scheduleId(), kind.outcome, busyWhile, starts.count(),
+                            kind.outcome, starts.first().getMessage()),
+                    starts.first().getCurrentVersion());
             report(connectionId, summary);
-            handToListener(connectionId, new ScheduleData(scheduleId, TriggerType.WEBHOOK), summary);
+            handToListener(connectionId, new ScheduleData(tally.scheduleId(), kind.triggerType), summary);
         });
     }
 
@@ -500,14 +554,33 @@ public class WorkflowRunGate {
         }
     }
 
-    /** Takes the webhook starts counted for a workflow, leaving none behind. */
-    private static Map<Integer, RefusedWebhooks> drainRefusedWebhooks(Lane lane) {
-        if (lane.refusedWebhooks.isEmpty()) {
+    /** Counts a start that does not run, to be reported when the run that holds the workflow ends. */
+    private static void count(Lane lane, Tally tally, GlobalVariableConflictException reason) {
+        lane.unreported.merge(tally, new Counted(reason, 1), (counted, one) -> counted.andOneMore());
+    }
+
+    /** Takes the starts counted for a workflow, leaving none behind. */
+    private static Map<Tally, Counted> drainUnreported(Lane lane) {
+        if (lane.unreported.isEmpty()) {
             return Map.of();
         }
-        Map<Integer, RefusedWebhooks> drained = new LinkedHashMap<>(lane.refusedWebhooks);
-        lane.refusedWebhooks.clear();
+        Map<Tally, Counted> drained = new LinkedHashMap<>(lane.unreported);
+        lane.unreported.clear();
         return drained;
+    }
+
+    /** Returns the start that the cron trigger of a schedule fired and that waits, if one does. */
+    private static Optional<Waiting> waitingCronFireOf(Lane lane, int scheduleId) {
+        return lane.waiting.stream().filter(waiting -> waiting.isCronFireOf(scheduleId)).findFirst();
+    }
+
+    /** Puts {@code updated} in the place of {@code old}, leaving the order of the queue as it was. */
+    private static void replace(Deque<Waiting> queue, Waiting old, Waiting updated) {
+        // a deque cannot set an element: turn it once around, swapping the one on the way
+        for (int left = queue.size(); left > 0; left--) {
+            Waiting next = queue.pollFirst();
+            queue.addLast(next == old ? updated : next);
+        }
     }
 
     /**
@@ -548,23 +621,66 @@ public class WorkflowRunGate {
         private Instant startedAt;
         private Reservation reservation;
         private final Deque<Waiting> waiting = new ArrayDeque<>();
-        // webhook starts refused on the call and not reported yet, by schedule id
-        private final Map<Integer, RefusedWebhooks> refusedWebhooks = new LinkedHashMap<>();
-    }
-
-    private record Waiting(JobKey jobKey, JobDataMap triggerData, Instant since) {
+        // starts that did not run and are not reported yet, by schedule and kind
+        private final Map<Tally, Counted> unreported = new LinkedHashMap<>();
     }
 
     /**
-     * The webhook starts of one schedule that were refused on the call.
+     * A start that waits in the queue.
      *
-     * @param first the refusal the first of them got
+     * @param cronScheduleId the schedule whose cron trigger fired the start; {@code null} for a
+     *                       start that is kept however often it comes
+     * @param since          when the start began to wait, or for a cron fire, when its schedule
+     *                       last fired
+     */
+    private record Waiting(JobKey jobKey, JobDataMap triggerData, Integer cronScheduleId, Instant since) {
+
+        boolean isCronFireOf(int scheduleId) {
+            return cronScheduleId != null && cronScheduleId == scheduleId;
+        }
+
+        Waiting at(Instant firedAt) {
+            return new Waiting(jobKey, triggerData, cronScheduleId, firedAt);
+        }
+    }
+
+    /**
+     * The starts of one schedule that did not run for the same reason and are reported together.
+     *
+     * @param scheduleId id of the schedule
+     * @param kind       why they did not run
+     */
+    private record Tally(int scheduleId, Unrun kind) {
+    }
+
+    /** Why counted starts did not run, and how their report names them. */
+    private enum Unrun {
+        /** Webhook starts refused on the call. */
+        REFUSED_WEBHOOK(TriggerType.WEBHOOK, "Webhook starts", "refused"),
+        /** Cron fires skipped because an earlier fire of their schedule waited. */
+        SKIPPED_CRON_FIRE(TriggerType.SCHEDULER, "Cron fires", "skipped");
+
+        private final TriggerType triggerType;
+        private final String starts;
+        private final String outcome;
+
+        Unrun(TriggerType triggerType, String starts, String outcome) {
+            this.triggerType = triggerType;
+            this.starts = starts;
+            this.outcome = outcome;
+        }
+    }
+
+    /**
+     * The starts counted under one {@link Tally}.
+     *
+     * @param first why the first of them did not run
      * @param count how many there were
      */
-    private record RefusedWebhooks(GlobalVariableConflictException first, int count) {
+    private record Counted(GlobalVariableConflictException first, int count) {
 
-        RefusedWebhooks andOneMore() {
-            return new RefusedWebhooks(first, count + 1);
+        Counted andOneMore() {
+            return new Counted(first, count + 1);
         }
     }
 
