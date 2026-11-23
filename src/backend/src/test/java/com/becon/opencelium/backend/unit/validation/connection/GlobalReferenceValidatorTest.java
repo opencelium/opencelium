@@ -620,6 +620,15 @@ class GlobalReferenceValidatorTest {
     }
 
     @Test
+    void validateAcceptsScriptWhenRubyScriptIsImportedIntoRubyEnhancement() {
+        givenScript("ruby");
+        ConnectionMng workflow = aWorkflowWithBinding(
+                aBinding("//var VAR_1 = {{global.formatDate}};", "RESULT_VAR = VAR_1(VAR_0)", "ruby"));
+
+        assertThatCode(() -> validator.validate(workflow, WORKFLOW, null)).doesNotThrowAnyException();
+    }
+
+    @Test
     void validateReportsImportLanguageMismatchWhenPythonScriptIsImportedIntoJsEnhancement() {
         givenScript("python3");
         ConnectionMng workflow = aWorkflowWithBinding(

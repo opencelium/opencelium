@@ -49,15 +49,15 @@ import java.util.stream.Stream;
  * The script is meant as a pure function: it uses only its parameters, so its JavaScript code may
  * not call {@code ref()} or {@code set()}, which reach the workflow and its variables.
  *
- * <p>A script is written in JavaScript, which runs on Nashorn in the core, or in Python 3, which
- * runs on the polyglot service. The backend cannot parse Python, so the code of a Python script is
- * checked on that service, by running {@link #pythonCheckSource} there.
+ * <p>A script is written in JavaScript, which runs on Nashorn in the core, or in Python 3 or Ruby,
+ * which run on the polyglot service. The backend cannot parse those two, so their code is checked
+ * on that service, by running {@link #checkSource} there.
  *
  * <p>The definition is stored as JSON in the {@code value} column of the variable, the form
  * {@link #toJson} writes, so the change log and restore treat a script like any value.
  *
- * @param language   code of the language, as {@link LanguageType} names it: {@code js} or
- *                   {@code python3}
+ * @param language   code of the language, as {@link LanguageType} names it: {@code js},
+ *                   {@code python3} or {@code ruby}
  * @param code       the body of the function, which returns the result
  * @param parameters the declared parameters, in the order a call passes them
  */
@@ -69,7 +69,8 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     private static final Logger log = LoggerFactory.getLogger(GlobalScript.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String FUNCTION_NAME = "OC_SCRIPT";
-    private static final Set<String> LANGUAGES = Set.of(LanguageType.JS.getCode(), LanguageType.PYTHON_3.getCode());
+    private static final Set<String> LANGUAGES =
+            Set.of(LanguageType.JS.getCode(), LanguageType.PYTHON_3.getCode(), LanguageType.RUBY.getCode());
     private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_$][A-Za-z0-9_$]*");
     private static final int DESCRIPTION_MAX_LENGTH = 512;
     // calls that reach the workflow or its variables, which a pure function does not do
@@ -82,18 +83,28 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
             "super", "implements", "interface", "let", "package", "private", "protected", "public", "static",
             "yield", "null", "true", "false", "arguments", "eval", "undefined", "NaN", "Infinity");
 
-    /** The binding that carries the code to {@link #pythonCheckSource}, as a text. */
-    public static final String PYTHON_CHECK_CODE = "OC_CHECK_CODE";
+    /** The binding that carries the code to {@link #checkSource}, as a text. */
+    public static final String CHECK_CODE = "OC_CHECK_CODE";
+
+    // the parameter of a Python or Ruby script that takes the arguments past the declared ones
+    private static final String EXTRA = "extra";
 
     private static final Pattern PYTHON_IDENTIFIER = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
-    // the parameter of a Python script that takes the arguments past the declared ones
-    private static final String PYTHON_EXTRA = "extra";
     private static final Set<String> PYTHON_KEYWORDS = Set.of(
             "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class", "continue",
             "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in",
             "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield");
     // co_flags bit of a Python function whose body uses 'yield' and so returns a generator
     private static final int PYTHON_GENERATOR_FLAG = 0x20;
+
+    // a Ruby parameter is a local variable, which starts in lower case; a method may start in upper
+    private static final Pattern RUBY_PARAMETER = Pattern.compile("[a-z_][A-Za-z0-9_]*");
+    private static final Pattern RUBY_METHOD = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
+    private static final Set<String> RUBY_KEYWORDS = Set.of(
+            "__ENCODING__", "__LINE__", "__FILE__", "BEGIN", "END", "alias", "and", "begin", "break", "case",
+            "class", "def", "defined?", "do", "else", "elsif", "end", "ensure", "false", "for", "if", "in",
+            "module", "next", "nil", "not", "or", "redo", "rescue", "retry", "return", "self", "super", "then",
+            "true", "undef", "unless", "until", "when", "while", "yield");
 
     /**
      * One declared parameter.
@@ -149,10 +160,11 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     /**
      * Checks the definition as saving it requires: a language that is available, valid
      * parameters, and code. JavaScript code must parse as the body of the function, return a
-     * value and call neither {@code ref()} nor {@code set()}. Python code is only checked for
-     * being there: its syntax is checked on the polyglot service, with {@link
-     * #pythonCheckSource}, and a Python script that ends without {@code return} returns
-     * {@code None}, which is null.
+     * value and call neither {@code ref()} nor {@code set()}. Python and Ruby code is only
+     * checked for being there: its syntax is checked on the polyglot service, with {@link
+     * #checkSource}. A Python script that ends without {@code return} returns {@code None}, and a
+     * Ruby script returns its last expression, as a Ruby method does; {@code None} and {@code
+     * nil} are null.
      *
      * @return what is wrong, each on its request field ({@code script.code}, {@code
      *         script.parameters[1].name}, ...); empty when the definition can be saved
@@ -162,13 +174,13 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
 
         if (!LANGUAGES.contains(language)) {
             violations.add(new Violation("script.language", Code.LANGUAGE_NOT_SUPPORTED,
-                    "Script variables are written in JavaScript (js) or Python 3 (python3), not in '%s'"
+                    "Script variables are written in JavaScript (js), Python 3 (python3) or Ruby (ruby), not in '%s'"
                             .formatted(language)));
         }
         boolean parametersValid = checkParameters(violations);
         if (code == null || code.isBlank()) {
             violations.add(new Violation("script.code", Code.SCRIPT_REQUIRED, "The code of the script is required"));
-        } else if (parametersValid && violations.isEmpty() && !isPython()) {
+        } else if (parametersValid && violations.isEmpty() && !runsOnPolyglotService()) {
             // the code is parsed only once the function around it can be built
             checkCode(violations);
         }
@@ -182,6 +194,25 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
         return LanguageType.PYTHON_3.getCode().equals(language);
     }
 
+    /** Tells whether the script is written in Ruby, which runs on the polyglot service. */
+    @JsonIgnore // not part of the stored definition
+    public boolean isRuby() {
+        return LanguageType.RUBY.getCode().equals(language);
+    }
+
+    /**
+     * Tells whether the script runs on the polyglot service, as Python and Ruby do, and so is
+     * checked there too.
+     */
+    @JsonIgnore // not part of the stored definition
+    public boolean runsOnPolyglotService() {
+        return isPython() || isRuby();
+    }
+
+    private String languageName() {
+        return isPython() ? "Python" : isRuby() ? "Ruby" : "JavaScript";
+    }
+
     private boolean checkParameters(List<Violation> violations) {
         int before = violations.size();
         Set<String> seen = new HashSet<>();
@@ -191,16 +222,13 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
             String field = "script.parameters[" + i + "]";
 
             if (parameter == null || parameter.name() == null || !isIdentifier(parameter.name())) {
-                violations.add(new Violation(field + ".name", Code.PARAMETER_INVALID, isPython()
-                        ? "A parameter name has letters, digits or '_' and does not start with a digit"
-                        : "A parameter name has letters, digits, '_' or '$' and does not start with a digit"));
-            } else if (isPython() && PYTHON_EXTRA.equals(parameter.name())) {
+                violations.add(new Violation(field + ".name", Code.PARAMETER_INVALID, parameterNameRule()));
+            } else if (runsOnPolyglotService() && EXTRA.equals(parameter.name())) {
                 violations.add(new Violation(field + ".name", Code.PARAMETER_INVALID,
-                        "'%s' takes the extra arguments of a Python script".formatted(PYTHON_EXTRA)));
+                        "'%s' takes the extra arguments of a %s script".formatted(EXTRA, languageName())));
             } else if (isReserved(parameter.name())) {
                 violations.add(new Violation(field + ".name", Code.PARAMETER_INVALID,
-                        "'%s' is a reserved word in %s"
-                                .formatted(parameter.name(), isPython() ? "Python" : "JavaScript")));
+                        "'%s' is a reserved word in %s".formatted(parameter.name(), languageName())));
             } else if (!seen.add(parameter.name())) {
                 violations.add(new Violation(field + ".name", Code.PARAMETER_INVALID,
                         "Parameter '%s' is declared twice".formatted(parameter.name())));
@@ -213,12 +241,23 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
         return violations.size() == before;
     }
 
+    private String parameterNameRule() {
+        if (isPython()) {
+            return "A parameter name has letters, digits or '_' and does not start with a digit";
+        }
+        if (isRuby()) {
+            return "A parameter name has letters, digits or '_' and starts with a lowercase letter or '_'";
+        }
+        return "A parameter name has letters, digits, '_' or '$' and does not start with a digit";
+    }
+
     private boolean isIdentifier(String name) {
-        return (isPython() ? PYTHON_IDENTIFIER : IDENTIFIER).matcher(name).matches();
+        Pattern pattern = isPython() ? PYTHON_IDENTIFIER : isRuby() ? RUBY_PARAMETER : IDENTIFIER;
+        return pattern.matcher(name).matches();
     }
 
     private boolean isReserved(String name) {
-        return (isPython() ? PYTHON_KEYWORDS : RESERVED).contains(name);
+        return (isPython() ? PYTHON_KEYWORDS : isRuby() ? RUBY_KEYWORDS : RESERVED).contains(name);
     }
 
     private void checkCode(List<Violation> violations) {
@@ -305,17 +344,24 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     /**
      * Returns code in the language of the script that defines {@code variable} as a function an
      * enhancement calls: JavaScript as {@link #jsFunctionSource} writes it, Python as {@link
-     * #pythonFunctionSource} writes it.
+     * #pythonFunctionSource} writes it, Ruby as {@link #rubyFunctionSource} writes it.
      *
      * @param variable   name of the enhancement arg that imports the script, e.g. {@code VAR_1}
      * @param scriptName name of the script variable, for the errors
      * @throws IllegalArgumentException if {@code variable} is not an identifier of the language
      */
     public String functionSource(String variable, String scriptName) {
-        if (variable == null || !isIdentifier(variable) || isReserved(variable)) {
+        // in Ruby the import is a method, whose name, unlike a parameter's, may start in upper case
+        boolean named = variable != null && (isRuby()
+                ? RUBY_METHOD.matcher(variable).matches() && !RUBY_KEYWORDS.contains(variable)
+                : isIdentifier(variable) && !isReserved(variable));
+        if (!named) {
             throw new IllegalArgumentException("'%s' cannot name an imported script".formatted(variable));
         }
-        return isPython() ? pythonFunctionSource(variable, scriptName) : jsFunctionSource(variable, scriptName);
+        if (isPython()) {
+            return pythonFunctionSource(variable, scriptName);
+        }
+        return isRuby() ? rubyFunctionSource(variable, scriptName) : jsFunctionSource(variable, scriptName);
     }
 
     /**
@@ -405,17 +451,55 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     }
 
     /**
-     * Returns Python that checks the code of this script, given as the text binding {@link
-     * #PYTHON_CHECK_CODE}, by building its function as an import does, without calling it. It
-     * evaluates to a dict: {@code {"ok": True}}, or {@code {"ok": False, "line": ..., "column":
-     * ..., "message": ...}} with the line in the code, from 1, when the code does not parse or
-     * uses {@code yield}, which would make the function return a generator instead of a value.
-     * {@link #pythonCheckResult} reads the answer.
+     * Returns code that checks the code of this script on the polyglot service, given as the text
+     * binding {@link #CHECK_CODE}, by building its function as an import does, without calling it.
+     * Its answer, which {@link #checkResult} reads, says the code is fine, or gives what is wrong
+     * with the line in the code, from 1.
+     *
+     * @throws IllegalStateException for a JavaScript script, which the backend checks itself
      */
-    public String pythonCheckSource() {
+    public String checkSource() {
+        if (isPython()) {
+            return pythonCheckSource();
+        }
+        if (isRuby()) {
+            return rubyCheckSource();
+        }
+        throw new IllegalStateException("A JavaScript script is checked in the backend, not on the polyglot service");
+    }
+
+    /**
+     * Returns code that calls {@code function}, an import of this script, with the arguments
+     * that the text binding {@code argumentsBinding} holds as a JSON array, and sets {@code
+     * RESULT_VAR} to the result as JSON text. The polyglot service passes every number inside a
+     * structure as a float; JSON text keeps 1 apart from 1.0, both ways.
+     *
+     * @throws IllegalStateException for a JavaScript script, which runs in the backend
+     */
+    public String testCallSource(String function, String argumentsBinding) {
+        if (isPython()) {
+            return "import json\n"
+                    + "RESULT_VAR = json.dumps(" + function + "(*json.loads(" + argumentsBinding + ")), "
+                    + "allow_nan=False)\n"
+                    + "RESULT_VAR\n";
+        }
+        if (isRuby()) {
+            return "require 'json'\n"
+                    + "RESULT_VAR = JSON.generate(" + function + "(*JSON.parse(" + argumentsBinding + ")))\n";
+        }
+        throw new IllegalStateException("A JavaScript script runs in the backend, not on the polyglot service");
+    }
+
+    /**
+     * Returns Python that checks the code of this script. It evaluates to a dict: {@code {"ok":
+     * True}}, or {@code {"ok": False, "line": ..., "column": ..., "message": ...}} when the code
+     * does not parse or uses {@code yield}, which would make the function return a generator
+     * instead of a value.
+     */
+    private String pythonCheckSource() {
         return "def _oc_check():\n"
                 + "    try:\n"
-                + pythonBuild("        ", PYTHON_CHECK_CODE, jsString("<script>"))
+                + pythonBuild("        ", CHECK_CODE, jsString("<script>"))
                 + "    except (SyntaxError, ValueError) as e:\n"
                 + "        return {'ok': False, 'line': getattr(e, 'lineno', None), "
                 + "'column': getattr(e, 'offset', None), 'message': getattr(e, 'msg', str(e))}\n"
@@ -429,13 +513,46 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     }
 
     /**
-     * Reads what {@link #pythonCheckSource} evaluated to on the polyglot service.
+     * Returns Ruby that checks the code of this script: it builds the lambda an import builds,
+     * which parses the code but runs none of it. It sets {@code RESULT_VAR} to JSON text: {@code
+     * {"ok": true}}, or {@code {"ok": false, "line": ..., "column": null, "message": ...}} when
+     * the code does not parse; Ruby gives the line of a syntax error, not its column.
+     */
+    private String rubyCheckSource() {
+        return "require 'json'\n"
+                + "RESULT_VAR = lambda do\n"
+                + "  begin\n"
+                + "    eval(" + rubyString(rubyLambdaHeader() + "\n") + " + " + CHECK_CODE + " + "
+                + rubyString("\nend") + ", Object.new.instance_eval { binding }, '<script>', 0)\n"
+                + "    JSON.generate('ok' => true)\n"
+                + "  rescue SyntaxError => e\n"
+                + "    line = e.message[/<script>:(\\d+)/, 1]\n"
+                // an error at the end of the code is found at the 'end' that closes the lambda
+                + "    line = [line.to_i, " + CHECK_CODE + ".lines.count].min if line\n"
+                + "    message = e.message.sub(/\\A[\\s\\S]*?<script>:\\d+:\\s*/, '').lines.first.to_s.strip\n"
+                + "    JSON.generate('ok' => false, 'line' => line && line.to_i, 'column' => nil, "
+                + "'message' => message)\n"
+                + "  end\n"
+                + "end.call\n";
+    }
+
+    /**
+     * Reads what {@link #checkSource} answered on the polyglot service: a map, or JSON text of
+     * one.
      *
      * @return the syntax error of the code, or nothing when the code can be saved
      * @throws IllegalStateException if the answer is not the one the check gives
      */
-    public static Optional<SyntaxError> pythonCheckResult(Object answer) {
-        if (!(answer instanceof Map<?, ?> fields) || !(fields.get("ok") instanceof Boolean ok)) {
+    public static Optional<SyntaxError> checkResult(Object answer) {
+        Object read = answer;
+        if (answer instanceof String text) {
+            try {
+                read = MAPPER.readValue(text, Map.class);
+            } catch (JsonProcessingException e) {
+                read = null;
+            }
+        }
+        if (!(read instanceof Map<?, ?> fields) || !(fields.get("ok") instanceof Boolean ok)) {
             throw new IllegalStateException("The polyglot service gave no answer to the syntax check: " + answer);
         }
         if (ok) {
@@ -456,7 +573,7 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     private String pythonBuild(String indent, String codeExpression, String fileExpression) {
         String header = parameters.stream().map(Parameter::name)
                 .collect(Collectors.joining(", ", "def " + FUNCTION_NAME + "(", ""))
-                + (parameters.isEmpty() ? "" : ", ") + "*" + PYTHON_EXTRA + "): pass";
+                + (parameters.isEmpty() ? "" : ", ") + "*" + EXTRA + "): pass";
 
         return Stream.of(
                         "import ast",
@@ -471,6 +588,62 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
                         "script = namespace[" + jsString(FUNCTION_NAME) + "]")
                 .map(line -> indent + line + "\n")
                 .collect(Collectors.joining());
+    }
+
+    /**
+     * Returns Ruby that defines {@code variable} as a method an enhancement calls: {@code
+     * VAR_1(...)}. The code becomes the body of {@code lambda do |<parameters>, *extra| ... end},
+     * built with {@code eval} in a binding of its own, so it keeps its own lines and cannot read
+     * the enhancement's args, and {@code return} in it returns from the script. The method fails
+     * when a required parameter is left out, fills in the default of an optional one that is left
+     * out, and names the script in an error the code raises. A {@code nil} passed for a parameter
+     * stays {@code nil}. The script returns what its last expression gives, as a Ruby method
+     * does; {@code nil} is null. The polyglot service runs each enhancement in a Ruby runtime of
+     * its own, so the method lives only as long as the enhancement.
+     */
+    private String rubyFunctionSource(String variable, String scriptName) {
+        String label = rubyString("Script variable '" + scriptName + "'");
+
+        StringBuilder rb = new StringBuilder()
+                .append("require 'json'\n")
+                .append("lambda do\n")
+                .append("  script = eval(").append(rubyString(rubyLambdaHeader() + "\n" + code + "\nend"))
+                .append(", Object.new.instance_eval { binding }, ")
+                .append(rubyString("<script variable " + scriptName + ">")).append(", 0)\n")
+                .append("  Object.send(:define_method, :").append(variable).append(") do |*args|\n");
+        for (int i = 0; i < parameters.size(); i++) {
+            Parameter parameter = parameters.get(i);
+            if (parameter.required()) {
+                rb.append("    raise ").append(label).append(" + ")
+                        .append(rubyString(": parameter '" + parameter.name() + "' is missing"));
+            } else {
+                // parsed per call, so a call that changes a default object changes only its own
+                rb.append("    args << JSON.parse(").append(rubyString(jsLiteral(parameter.defaultValue())))
+                        .append(')');
+            }
+            rb.append(" if args.length <= ").append(i).append('\n');
+        }
+
+        return rb.append("    begin\n")
+                .append("      script.call(*args)\n")
+                .append("    rescue StandardError => e\n")
+                .append("      raise ").append(label).append(" + ': ' + e.class.name + ': ' + e.message\n")
+                .append("    end\n")
+                .append("  end\n")
+                .append("end.call\n")
+                .toString();
+    }
+
+    /** Returns the head of the Ruby lambda of the script: {@code lambda do |a, b, *extra|}. */
+    private String rubyLambdaHeader() {
+        return parameters.stream().map(Parameter::name)
+                .collect(Collectors.joining(", ", "lambda do |", ""))
+                + (parameters.isEmpty() ? "" : ", ") + "*" + EXTRA + "|";
+    }
+
+    /** Returns a single-quoted Ruby string literal, in which only a quote and a backslash are escaped. */
+    private static String rubyString(String text) {
+        return "'" + text.replace("\\", "\\\\").replace("'", "\\'") + "'";
     }
 
     /**
