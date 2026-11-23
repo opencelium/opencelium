@@ -478,7 +478,10 @@ class GlobalReferenceValidatorTest {
 
         List<Violation> violations = violationsOf(aWorkflowWriting(target), WORKFLOW, null);
 
-        assertThat(violations).extracting(Violation::code).containsExactly(Code.INVALID_WRITE_TARGET);
+        assertThat(violations).extracting(Violation::code, Violation::message).containsExactly(tuple(
+                Code.INVALID_WRITE_TARGET,
+                "'" + target + "' names no global variable to write: write global.name in globalWrites and "
+                        + "{{global.name}} in set(), without a path"));
     }
 
     // ── script variables ──────────────────────────────────────────────────────
