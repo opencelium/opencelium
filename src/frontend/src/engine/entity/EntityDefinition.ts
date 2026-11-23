@@ -195,9 +195,7 @@ export type CrossFieldValidation = {
 }
 export type RouteType = 'create' | 'list' | 'view' | 'edit';
 
-export type EntityRoute =
-    | { type: RouteType }
-    | {
+export type EntityRoute = {
     type: RouteType;
     entityRouteName?: string;
     path?: string;      // override

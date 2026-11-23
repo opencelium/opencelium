@@ -1,5 +1,5 @@
 import React, {useCallback} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import {useDialog} from '@shared/ui/dialog/useDialog';
 import {EntityDialogContent} from '@/engine/entity/runtime/genererics/EntityDialogContent';
 import type {EntityDefinition, UpdateActionConfig} from '@/engine/entity/EntityDefinition';
@@ -14,13 +14,18 @@ import {buildTestId} from '@shared/testing/testId';
 export function useEntityUpdateOpener() {
     const dialog = useDialog();
     const navigate = useNavigate();
+    const { pathname, search } = useLocation();
 
     return useCallback(
         (entity: EntityDefinition, config: UpdateActionConfig, row: unknown, rowId: string) => {
             const value = resolveActionValue(row, config.field, rowId);
 
             if (config.buildNavigationUrl) {
-                navigate(config.buildNavigationUrl(entity, value, row));
+                const url = config.buildNavigationUrl(entity, value, row);
+                const state = pathname === '/workflow' && url.startsWith('/workflow/update/')
+                    ? { workflowListSearch: search }
+                    : undefined;
+                navigate(url, { state });
                 return;
             }
 
@@ -38,6 +43,6 @@ export function useEntityUpdateOpener() {
                 ),
             });
         },
-        [dialog, navigate],
+        [dialog, navigate, pathname, search],
     );
 }

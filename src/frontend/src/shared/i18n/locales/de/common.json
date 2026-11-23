@@ -221,6 +221,7 @@
     "restore": "Wiederherstellen"
   },
   "list": {
+    "backToList": "Zurück zur Liste",
     "searchPlaceholder": "Suchen...",
     "empty": "Keine Daten",
     "actions": "Aktionen",
