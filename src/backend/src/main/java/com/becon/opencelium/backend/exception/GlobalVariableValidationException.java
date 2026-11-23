@@ -14,7 +14,6 @@ public class GlobalVariableValidationException extends RuntimeException {
         NAME_INVALID,
         NAME_TAKEN,
         KIND_REQUIRED,
-        KIND_NOT_SUPPORTED,
         KIND_CHANGE_NOT_ALLOWED,
         DESCRIPTION_TOO_LONG,
         VALUE_TOO_LARGE,
@@ -38,7 +37,23 @@ public class GlobalVariableValidationException extends RuntimeException {
         // runs write a mutable variable, so it cannot be a secret
         SECRET_NOT_ALLOWED,
         // only a mutable variable has a current value to reset
-        NOT_MUTABLE
+        NOT_MUTABLE,
+        // a script variable is saved with its script: language, code and parameters
+        SCRIPT_REQUIRED,
+        // a script was given for a variable that is not a script
+        SCRIPT_ONLY,
+        // the script is written in a language script variables do not support yet
+        LANGUAGE_NOT_SUPPORTED,
+        // the language of a script variable never changes
+        LANGUAGE_CHANGE_NOT_ALLOWED,
+        // the code does not parse as the body of a function
+        SCRIPT_SYNTAX,
+        // the code has no 'return' with a value
+        NO_RETURN_VALUE,
+        // the code calls ref() or set(), which a script, using only its parameters, does not
+        SCRIPT_NOT_PURE,
+        // a parameter name is not an identifier, is reserved or is declared twice
+        PARAMETER_INVALID
     }
 
     /**

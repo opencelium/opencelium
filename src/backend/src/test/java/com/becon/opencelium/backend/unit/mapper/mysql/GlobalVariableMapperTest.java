@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.mapper.mysql.GlobalVariableMapper;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO.ChangedField;
@@ -38,6 +39,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import java.time.Instant;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -398,6 +400,53 @@ class GlobalVariableMapperTest {
         GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.allOf(GlobalVariablePermission.class), 0, null);
 
         assertThat(item.valuePreview()).isEqualTo("\"live\"");
+    }
+
+    // ── script variables ──────────────────────────────────────────────────────
+
+    private static final GlobalScript FORMAT_DATE = new GlobalScript("js", "return date;", List.of(
+            new GlobalScript.Parameter("date", null, true, null),
+            new GlobalScript.Parameter("pattern", null, false, TextNode.valueOf("dd.MM.yyyy"))));
+
+    @Test
+    @DisplayName("toDetail — a script shows its script, and neither a value nor hasValue")
+    void toDetailReturnsScriptWhenVariableIsScript() {
+        GlobalVariable variable = GlobalVariableFixture.aScriptVariable(7L, "formatDate", FORMAT_DATE.toJson());
+
+        GlobalVariableDTO detail = mapper.toDetail(variable, EnumSet.allOf(GlobalVariablePermission.class));
+
+        assertThat(detail.script()).isEqualTo(FORMAT_DATE);
+        assertThat(detail.value()).isNull();
+        assertThat(detail.hasValue()).isFalse();
+    }
+
+    @Test
+    void toDetailReturnsNoScriptWhenVariableIsConstant() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(7L, "idoit", "\"x\"");
+
+        assertThat(mapper.toDetail(variable, EnumSet.allOf(GlobalVariablePermission.class)).script()).isNull();
+    }
+
+    @Test
+    void toListItemReturnsLanguageAndParameterCountWhenVariableIsScript() {
+        GlobalVariable variable = GlobalVariableFixture.aScriptVariable(7L, "formatDate", FORMAT_DATE.toJson());
+
+        GlobalVariableListItemDTO item = mapper.toListItem(variable, EnumSet.allOf(GlobalVariablePermission.class), 0, null);
+
+        assertThat(item.valuePreview()).isNull();
+        assertThat(item.language()).isEqualTo("js");
+        assertThat(item.parameterCount()).isEqualTo(2);
+    }
+
+    @Test
+    void toPickerItemReturnsParametersWhenVariableIsScript() {
+        GlobalVariable variable = GlobalVariableFixture.aScriptVariable(7L, "formatDate", FORMAT_DATE.toJson());
+
+        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable);
+
+        assertThat(item.valuePreview()).isNull();
+        assertThat(item.language()).isEqualTo("js");
+        assertThat(item.parameters()).isEqualTo(FORMAT_DATE.parameters());
     }
 
     @ParameterizedTest

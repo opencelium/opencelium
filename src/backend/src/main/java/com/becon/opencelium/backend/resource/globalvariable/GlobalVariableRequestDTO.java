@@ -3,6 +3,8 @@ package com.becon.opencelium.backend.resource.globalvariable;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -27,6 +29,9 @@ import java.util.List;
  * @param ownerWorkflowId mutable variables only: the workflow whose runs may write it, which
  *                    must be in the scope; required on create, left out on update keeps it
  * @param version     the version the edit form loaded; required on update, ignored on create
+ * @param script      script variables only, required on create and update: the language, which
+ *                    cannot change, the code and the parameters. A script variable leaves
+ *                    {@code value} out
  */
 public record GlobalVariableRequestDTO(
         String name,
@@ -37,7 +42,19 @@ public record GlobalVariableRequestDTO(
         Scope scope,
         GlobalVariableBusyPolicy busyPolicy,
         Long ownerWorkflowId,
-        Long version) {
+        Long version,
+        Script script) {
+
+    // Jackson 2.14 takes this one, not the shorter constructor below, for a request body
+    @JsonCreator
+    public GlobalVariableRequestDTO {
+    }
+
+    /** Creates the request of a constant or a mutable variable, which has no script. */
+    public GlobalVariableRequestDTO(String name, GlobalVariableKind kind, String description, JsonNode value,
+            Boolean secret, Scope scope, GlobalVariableBusyPolicy busyPolicy, Long ownerWorkflowId, Long version) {
+        this(name, kind, description, value, secret, scope, busyPolicy, ownerWorkflowId, version, null);
+    }
 
     // a request body is logged through this, e.g. by Spring MVC at DEBUG: a value that may be a
     // secret, which an update that leaves the flag out may be, stays out
@@ -46,8 +63,34 @@ public record GlobalVariableRequestDTO(
         Object shownValue = Boolean.FALSE.equals(secret) ? value : "****";
 
         return ("GlobalVariableRequestDTO[name=%s, kind=%s, description=%s, value=%s, secret=%s, scope=%s, "
-                + "busyPolicy=%s, ownerWorkflowId=%s, version=%s]")
-                .formatted(name, kind, description, shownValue, secret, scope, busyPolicy, ownerWorkflowId, version);
+                + "busyPolicy=%s, ownerWorkflowId=%s, version=%s, script=%s]")
+                .formatted(name, kind, description, shownValue, secret, scope, busyPolicy, ownerWorkflowId, version,
+                        script);
+    }
+
+    /**
+     * The script of a script variable.
+     *
+     * @param language   {@code js}; Python and Ruby come later
+     * @param code       the body of the function; it returns the result with {@code return}
+     * @param parameters the declared parameters, in the order a call passes them
+     */
+    public record Script(String language, String code, List<Parameter> parameters) {
+    }
+
+    /**
+     * One declared parameter.
+     *
+     * @param required     whether a call must pass it; left out, a parameter is required unless
+     *                     it has a default
+     * @param defaultValue what a call that leaves it out gets, any JSON; only for a parameter
+     *                     that is not required
+     */
+    public record Parameter(
+            String name,
+            String description,
+            Boolean required,
+            @JsonProperty("default") JsonNode defaultValue) {
     }
 
     /**

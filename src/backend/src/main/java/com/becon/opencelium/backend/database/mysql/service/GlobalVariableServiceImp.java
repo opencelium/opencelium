@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.exception.GlobalVariableConflictException.Bl
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalVariableValidationException.Violation;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.mapper.mysql.GlobalVariableMapper;
 import com.becon.opencelium.backend.resource.globalvariable.GlobalVariableChangeDTO;
@@ -111,6 +112,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     private final GlobalVariableCipher cipher;
     private final WorkflowRunGate runGate;
     private final int maxValueBytes;
+    private final int maxScriptBytes;
 
     public GlobalVariableServiceImp(
             GlobalVariableRepository repository,
@@ -126,7 +128,8 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             ObjectMapper objectMapper,
             GlobalVariableCipher cipher,
             WorkflowRunGate runGate,
-            @Value("${opencelium.global-variable.max-value-bytes:65536}") int maxValueBytes) {
+            @Value("${opencelium.global-variable.max-value-bytes:65536}") int maxValueBytes,
+            @Value("${opencelium.global-variable.max-script-bytes:262144}") int maxScriptBytes) {
         this.repository = repository;
         this.changeRepository = changeRepository;
         this.mapper = mapper;
@@ -141,6 +144,7 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         this.cipher = cipher;
         this.runGate = runGate;
         this.maxValueBytes = maxValueBytes;
+        this.maxScriptBytes = maxScriptBytes;
     }
 
     @Override
@@ -188,7 +192,11 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         boolean secret = Boolean.TRUE.equals(request.secret());
         validateSecret(request.kind(), secret, violations);
         String description = validateDescription(request.description(), violations);
-        String value = serializeValue(request.value(), violations);
+        // a script variable stores its script where the other kinds store their value
+        String value = request.kind() == GlobalVariableKind.SCRIPT
+                ? validateScript(request, null, violations)
+                : serializeValue(request.value(), violations);
+        validateScriptOnly(request.kind(), request, violations);
         int violationsBeforeScope = violations.size();
         ScopeSpec scope = validateScope(request.scope(), violations);
         MutableSpec mutable = validateMutable(request.kind(), request, null, scope,
@@ -250,7 +258,13 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         String description = validateDescription(request.description(), violations);
         // a secret keeps its value unless the request gives one, and JSON null gives none
         boolean valueGiven = request.value() != null && !request.value().isNull();
-        String value = secret && !valueGiven ? null : serializeValue(request.value(), violations);
+        String value;
+        if (variable.getKind() == GlobalVariableKind.SCRIPT) {
+            value = validateScript(request, GlobalScript.fromJson(variable.getValue()).language(), violations);
+        } else {
+            value = secret && !valueGiven ? null : serializeValue(request.value(), violations);
+        }
+        validateScriptOnly(variable.getKind(), request, violations);
         if (wasSecret && !secret && !valueGiven) {
             violations.add(new Violation("value", Code.SECRET_REMOVAL_NEEDS_VALUE,
                     "Give a new value to make a secret visible again: its hidden value is never shown"));
@@ -866,9 +880,6 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
     private static void validateKindOnCreate(GlobalVariableKind kind, List<Violation> violations) {
         if (kind == null) {
             violations.add(new Violation("kind", Code.KIND_REQUIRED, "The kind is required"));
-        } else if (kind == GlobalVariableKind.SCRIPT) {
-            violations.add(new Violation("kind", Code.KIND_NOT_SUPPORTED,
-                    "Kind " + kind + " is not available yet, only CONSTANT and MUTABLE are"));
         }
     }
 
@@ -876,6 +887,81 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         if (secret && kind == GlobalVariableKind.MUTABLE) {
             violations.add(new Violation("secret", Code.SECRET_NOT_ALLOWED,
                     "A mutable variable cannot be a secret: runs write its value"));
+        } else if (secret && kind == GlobalVariableKind.SCRIPT) {
+            violations.add(new Violation("secret", Code.SECRET_NOT_ALLOWED,
+                    "A script variable cannot be a secret: it holds code, not a value"));
+        }
+    }
+
+    /**
+     * Checks the script of a script variable and returns the JSON text it is stored as.
+     *
+     * @param savedLanguage the language of the saved script on an update, which cannot change;
+     *                      {@code null} on a create
+     * @return the definition as JSON text, or {@code null} if the request has no script
+     */
+    private String validateScript(GlobalVariableRequestDTO request, String savedLanguage, List<Violation> violations) {
+        if (request.value() != null && !request.value().isNull()) {
+            violations.add(new Violation("value", Code.SCRIPT_HAS_NO_VALUE,
+                    "A script variable has no value: send its script instead"));
+        }
+        GlobalVariableRequestDTO.Script requested = request.script();
+        if (requested == null) {
+            violations.add(new Violation("script", Code.SCRIPT_REQUIRED,
+                    "A script variable is saved with its script: language, code and parameters"));
+            return null;
+        }
+        if (savedLanguage != null && !savedLanguage.equals(requested.language())) {
+            violations.add(new Violation("script.language", Code.LANGUAGE_CHANGE_NOT_ALLOWED,
+                    "The language of a script variable cannot change"));
+            return null;
+        }
+
+        List<GlobalScript.Parameter> parameters = new ArrayList<>();
+        List<GlobalVariableRequestDTO.Parameter> requestedParameters =
+                requested.parameters() == null ? List.of() : requested.parameters();
+        for (int i = 0; i < requestedParameters.size(); i++) {
+            parameters.add(toParameter(requestedParameters.get(i), "script.parameters[" + i + "]", violations));
+        }
+
+        GlobalScript script = new GlobalScript(requested.language(), requested.code(), parameters);
+        violations.addAll(script.check());
+
+        String text = script.toJson();
+        if (text.getBytes(StandardCharsets.UTF_8).length > maxScriptBytes) {
+            violations.add(new Violation("script.code", Code.VALUE_TOO_LARGE,
+                    "A script has at most " + maxScriptBytes + " bytes"));
+        }
+
+        return text;
+    }
+
+    /**
+     * Works out one declared parameter. A parameter that does not say whether it is required is
+     * required unless it has a default; a required one cannot have a default.
+     */
+    private static GlobalScript.Parameter toParameter(
+            GlobalVariableRequestDTO.Parameter requested, String field, List<Violation> violations) {
+        if (requested == null) {
+            // the script's own check reports the missing name
+            return new GlobalScript.Parameter(null, null, true, null);
+        }
+
+        JsonNode defaultValue = requested.defaultValue();
+        boolean hasDefault = defaultValue != null && !defaultValue.isNull();
+        boolean required = requested.required() != null ? requested.required() : defaultValue == null;
+        if (required && hasDefault) {
+            violations.add(new Violation(field + ".default", Code.PARAMETER_INVALID,
+                    "A required parameter has no default: a call always passes it"));
+        }
+
+        return new GlobalScript.Parameter(requested.name(), requested.description(), required, defaultValue);
+    }
+
+    private static void validateScriptOnly(
+            GlobalVariableKind kind, GlobalVariableRequestDTO request, List<Violation> violations) {
+        if (kind != GlobalVariableKind.SCRIPT && request.script() != null) {
+            violations.add(new Violation("script", Code.SCRIPT_ONLY, "Only a script variable has a script"));
         }
     }
 
