@@ -277,8 +277,6 @@ public class GlobalVariableMapper {
             case NOTIFICATION -> notificationRepository.findById(Math.toIntExact(id))
                     .map(EventNotification::getName)
                     .orElse(null);
-            // script variables hold no usages yet
-            case SCRIPT_VARIABLE -> null;
         };
     }
 

@@ -23,19 +23,22 @@ import java.util.Objects;
 @Table(name = "global_variable_usage")
 public class GlobalVariableUsage {
 
-    /** What holds the reference. */
+    /** What holds the reference. A script variable holds none: its code reads only its parameters. */
     public enum SourceType {
-        WORKFLOW, CONNECTOR, NOTIFICATION, SCRIPT_VARIABLE
+        WORKFLOW, CONNECTOR, NOTIFICATION
     }
 
     /** The element of a workflow that holds the reference; a connector and a notification have none. */
     public enum ElementType {
-        METHOD, OPERATOR, ENHANCEMENT, AGGREGATOR, SET_STEP
+        METHOD, OPERATOR, ENHANCEMENT
     }
 
-    /** What the element does with the variable. */
+    /**
+     * What the element does with the variable: reads it, writes it through {@code globalWrites}
+     * or {@code set()}, or imports a script variable into an enhancement to call it.
+     */
     public enum Access {
-        READ, WRITE, CALL, IMPORT, REF
+        READ, WRITE, IMPORT
     }
 
     @Id

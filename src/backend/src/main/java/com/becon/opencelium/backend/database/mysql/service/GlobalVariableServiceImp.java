@@ -1004,8 +1004,6 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             case NOTIFICATION -> usageService.workflowOfNotification(source.id())
                     .map(workflowId -> covers(scope, workflowId))
                     .orElse(true);
-            // a script variable is not bound to a workflow
-            case SCRIPT_VARIABLE -> true;
         };
     }
 
