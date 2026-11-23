@@ -63,7 +63,8 @@ import org.quartz.Trigger;
 
 /**
  * Unit tests for {@link WorkflowRunGate}: one execution at a time for a workflow that uses a
- * mutable global variable, the queue and its limits, and the Refuse policy.
+ * mutable global variable, the queue and its limits, the Refuse policy, and the webhook starts
+ * refused on the call, which are reported once when the run that held the workflow ends.
  *
  * <p>Run with: ./gradlew test --tests "*.WorkflowRunGateTest"
  */
@@ -397,6 +398,128 @@ class WorkflowRunGateTest {
         assertThatCode(() -> gate.checkCanStart(WORKFLOW)).doesNotThrowAnyException();
     }
 
+    // ── checkWebhookCanStart ─────────────────────────────────────────────────
+
+    @Test
+    void checkWebhookCanStartThrowsBusyWhenRunningWorkflowRefuses() {
+        givenRunHoldsRefusingWorkflow();
+
+        assertThatThrownBy(() -> gate.checkWebhookCanStart(WORKFLOW, 7))
+                .isInstanceOfSatisfying(GlobalVariableConflictException.class, e -> {
+                    assertThat(e.getCode()).isEqualTo(GlobalVariableConflictException.Code.BUSY);
+                    assertThat(e.getMessage()).contains("'counter'").contains("execution 900");
+                });
+    }
+
+    @Test
+    @DisplayName("checkWebhookCanStart — a start that would only wait is let through and not counted")
+    void checkWebhookCanStartPassesWhenStartWouldOnlyWait() {
+        List<Refused> refused = listenToRefusals();
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+
+        gate.checkWebhookCanStart(WORKFLOW, 7);
+        gate.release(WORKFLOW);
+
+        assertThat(refused).isEmpty();
+        verify(notifications, never()).send(anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("checkWebhookCanStart — with a full queue, a start cannot wait either")
+    void checkWebhookCanStartThrowsBusyWhenQueueIsFull() {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.admit(WORKFLOW, JOB_B, new JobDataMap());
+        gate.admit(WORKFLOW, JOB_C, new JobDataMap());
+
+        assertThatThrownBy(() -> gate.checkWebhookCanStart(WORKFLOW, 7))
+                .isInstanceOfSatisfying(GlobalVariableConflictException.class, e -> {
+                    assertThat(e.getCode()).isEqualTo(GlobalVariableConflictException.Code.BUSY);
+                    assertThat(e.getMessage()).contains(MAX_WAITING + " starts already wait");
+                });
+    }
+
+    // ── webhook starts refused on the call ───────────────────────────────────
+
+    @Test
+    @DisplayName("release — the webhook starts refused while the run went are handed on as one refusal")
+    void releaseReportsRefusedWebhooksOnceWhenRunEnds() {
+        List<Refused> refused = listenToRefusals();
+        givenRunHoldsRefusingWorkflow();
+        refuseWebhookStarts(7, 3);
+
+        gate.release(WORKFLOW);
+
+        assertThat(refused).singleElement().satisfies(start -> {
+            assertThat(start.schedule().getScheduleId()).isEqualTo(7);
+            assertThat(start.schedule().getExecType()).isEqualTo(TriggerType.WEBHOOK);
+            assertThat(start.connectionId()).isEqualTo(WORKFLOW);
+            assertThat(start.refusal().getCode()).isEqualTo(GlobalVariableConflictException.Code.BUSY);
+            assertThat(start.refusal().getMessage())
+                    .contains("schedule 7")
+                    .contains("execution 900 of the workflow ran: 3.")
+                    .contains("'counter'");
+        });
+        verify(notifications).send(eq(WORKFLOW), any());
+    }
+
+    @Test
+    void releaseReportsEachScheduleWhenTwoSchedulesWereRefused() {
+        List<Refused> refused = listenToRefusals();
+        givenRunHoldsRefusingWorkflow();
+        refuseWebhookStarts(7, 2);
+        refuseWebhookStarts(8, 1);
+
+        gate.release(WORKFLOW);
+
+        assertThat(refused).extracting(start -> start.schedule().getScheduleId()).containsExactly(7, 8);
+        assertThat(refused.get(0).refusal().getMessage()).contains("schedule 7").contains("ran: 2.");
+        assertThat(refused.get(1).refusal().getMessage()).contains("schedule 8").contains("ran: 1.");
+    }
+
+    @Test
+    @DisplayName("release — a refused manual start is not counted: the user saw the answer")
+    void releaseReportsNothingWhenOnlyManualStartsWereRefused() {
+        List<Refused> refused = listenToRefusals();
+        givenRunHoldsRefusingWorkflow();
+        assertThatThrownBy(() -> gate.checkCanStart(WORKFLOW)).isInstanceOf(GlobalVariableConflictException.class);
+
+        gate.release(WORKFLOW);
+
+        assertThat(refused).isEmpty();
+        verify(notifications, never()).send(anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("release — what one run's end reported is not reported again when the next run ends")
+    void releaseReportsNothingWhenRefusalsWereAlreadyReported() {
+        List<Refused> refused = listenToRefusals();
+        givenRunHoldsRefusingWorkflow();
+        refuseWebhookStarts(7, 2);
+        gate.release(WORKFLOW);
+        gate.admit(WORKFLOW, JOB_B, new JobDataMap());
+
+        gate.release(WORKFLOW);
+
+        assertThat(refused).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("release — a listener that fails on the webhook report does not keep the workflow busy")
+    void releaseFreesWorkflowWhenListenerThrows() {
+        gate.onRefusal((schedule, connectionId, refusal) -> {
+            throw new IllegalStateException("database is down");
+        });
+        givenRunHoldsRefusingWorkflow();
+        refuseWebhookStarts(7, 1);
+
+        gate.release(WORKFLOW);
+
+        assertThat(gate.holdOf(WORKFLOW)).isEmpty();
+        assertThat(gate.admit(WORKFLOW, JOB_B, new JobDataMap())).isEqualTo(Admission.HOLDS);
+    }
+
     // ── queue order ──────────────────────────────────────────────────────────
 
     @Test
@@ -614,6 +737,21 @@ class WorkflowRunGateTest {
         GlobalVariable variable = GlobalVariableFixture.aMutable(1L, "counter", "0", "0", workflowId);
         variable.setBusyPolicy(policy);
         when(repository.findMutableUsedByWorkflow(workflowId)).thenReturn(List.of(variable));
+    }
+
+    /** Execution 900 holds the workflow, whose mutable variable refuses a second start. */
+    private void givenRunHoldsRefusingWorkflow() {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.REFUSE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.recordExecution(WORKFLOW, 900L);
+    }
+
+    /** Lets a webhook of a schedule ask the busy workflow for a start, which is refused each time. */
+    private void refuseWebhookStarts(int scheduleId, int times) {
+        for (int call = 0; call < times; call++) {
+            assertThatThrownBy(() -> gate.checkWebhookCanStart(WORKFLOW, scheduleId))
+                    .isInstanceOf(GlobalVariableConflictException.class);
+        }
     }
 
     private List<Refused> listenToRefusals() {

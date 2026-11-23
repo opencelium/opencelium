@@ -95,7 +95,7 @@ public class WebhookController {
 
         // not wrapped, so a refusal reaches the caller as 409 BUSY
         if (queryParam.isEmpty()) {
-            schedulerService.startNow(scheduler);
+            schedulerService.startNowByWebhook(scheduler);
         } else {
             schedulerService.startNow(scheduler, webhookService.convertToArrayList(queryParam));
         }
@@ -141,7 +141,7 @@ public class WebhookController {
 
         // not wrapped, so a refusal reaches the caller as 409 BUSY
         if (payload.isEmpty()) {
-            schedulerService.startNow(scheduler);
+            schedulerService.startNowByWebhook(scheduler);
         } else {
             schedulerService.startNow(scheduler, webhookService.mergeParams(payload, queryParam));
         }

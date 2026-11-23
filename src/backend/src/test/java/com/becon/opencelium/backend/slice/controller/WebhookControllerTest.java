@@ -108,7 +108,7 @@ class WebhookControllerTest {
         mockMvc.perform(get("/webhook/execute/{token}", TOKEN))
                 .andExpect(status().isOk());
 
-        verify(schedulerService).startNow(schedule);
+        verify(schedulerService).startNowByWebhook(schedule);
         verify(schedulerService, never()).startNow(any(Scheduler.class), anyMap());
     }
 
@@ -121,7 +121,7 @@ class WebhookControllerTest {
                 .andExpect(status().isOk());
 
         verify(schedulerService).startNow(schedule, converted);
-        verify(schedulerService, never()).startNow(schedule);
+        verify(schedulerService, never()).startNowByWebhook(schedule);
     }
 
     @Test
@@ -167,7 +167,7 @@ class WebhookControllerTest {
                 .andExpect(status().isOk());
 
         verify(schedulerService).startNow(schedule, merged);
-        verify(schedulerService, never()).startNow(schedule);
+        verify(schedulerService, never()).startNowByWebhook(schedule);
     }
 
     @Test
@@ -177,14 +177,14 @@ class WebhookControllerTest {
                         .content("{}"))
                 .andExpect(status().isOk());
 
-        verify(schedulerService).startNow(schedule);
+        verify(schedulerService).startNowByWebhook(schedule);
         verify(schedulerService, never()).startNow(any(Scheduler.class), anyMap());
     }
 
     @Test
     @DisplayName("POST without data — a start the run gate refuses answers 409 BUSY, not 500")
     void executeConnReturnsConflictWhenStartWithoutDataIsRefused() throws Exception {
-        doThrow(aBusyRefusal()).when(schedulerService).startNow(schedule);
+        doThrow(aBusyRefusal()).when(schedulerService).startNowByWebhook(schedule);
 
         mockMvc.perform(post("/webhook/execute/{token}", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)

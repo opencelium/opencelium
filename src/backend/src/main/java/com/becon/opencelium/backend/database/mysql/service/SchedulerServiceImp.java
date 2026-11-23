@@ -295,15 +295,28 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     /**
+     * Starts a schedule for a webhook that carries no data. The run is the one a manual start
+     * gives; only a refusal differs: the run gate counts it for the schedule, because the calling
+     * system alone sees the answer.
+     *
+     * @throws GlobalVariableConflictException with code BUSY
+     */
+    @Override
+    public synchronized void startNowByWebhook(Scheduler scheduler) {
+        throwIfWebhookRefusedByGlobalVariables(scheduler);
+        schedulingStrategy.runJob(scheduler);
+    }
+
+    /**
      * Starts a schedule for a webhook that carries data. Like a webhook without data, it does not
      * wait for other runs of the workflow; only the busy policy of a mutable global variable
-     * can refuse it.
+     * can refuse it, and the run gate counts that refusal for the schedule.
      *
      * @throws GlobalVariableConflictException with code BUSY
      */
     @Override
     public void startNow(Scheduler scheduler, Map<String, Object> webhook) {
-        throwIfRefusedByGlobalVariables(scheduler);
+        throwIfWebhookRefusedByGlobalVariables(scheduler);
         schedulingStrategy.runJob(scheduler, webhook);
     }
 
@@ -315,6 +328,16 @@ public class SchedulerServiceImp implements SchedulerService {
      */
     private void throwIfRefusedByGlobalVariables(Scheduler scheduler) {
         runGate.checkCanStart(scheduler.getConnection().getId());
+    }
+
+    /**
+     * Answers a webhook start like {@link #throwIfRefusedByGlobalVariables}, and lets the run gate
+     * count the refusal, which it reports once when the run that holds the workflow ends.
+     *
+     * @throws GlobalVariableConflictException with code BUSY
+     */
+    private void throwIfWebhookRefusedByGlobalVariables(Scheduler scheduler) {
+        runGate.checkWebhookCanStart(scheduler.getConnection().getId(), scheduler.getId());
     }
 
     @Override
