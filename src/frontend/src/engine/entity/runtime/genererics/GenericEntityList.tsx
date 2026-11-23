@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useListUrlState } from './useListUrlState';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { message } from 'antd';
 import {
@@ -45,7 +46,6 @@ import type {
     BulkDeleteConfig,
     EntityDefinition,
     ListAction,
-    ListFilterState,
     ListFilterValue,
     UpdateActionConfig,
 } from '@/engine/entity/EntityDefinition';
@@ -61,6 +61,7 @@ import {
 } from './ListFilters';
 
 interface Props {
+    syncUrl?: boolean;
     entityName: string;
 }
 
@@ -99,7 +100,7 @@ const emptyRowDecoration = () => EMPTY_ROW_DECORATION;
 const IDENTITY_SUB_ROWS = (rows: EntityRow[]) => rows;
 const noRowSubRows = () => IDENTITY_SUB_ROWS;
 
-export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
+export const GenericEntityList: React.FC<Props> = ({ entityName, syncUrl = false }) => {
     const entity = entityRegistry.get(entityName);
     const dialog = useDialog();
     const openUpdate = useEntityUpdateOpener();
@@ -178,18 +179,19 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
         ? [{ id: entity.list.defaultSort.field, desc: entity.list.defaultSort.direction === 'desc' }]
         : [];
 
-    const [sorting, setSorting] = useState<SortingState>(initialSorting);
-    const [globalFilter, setGlobalFilter] = useState('');
+    const [{ sorting, globalFilter, filterState, pagination }, updateList] = useListUrlState({
+        sorting: initialSorting,
+        filters: buildInitialFilterState(filters),
+        sortFields: columns.flatMap(column => column.enableSorting && column.id ? [column.id] : []),
+        pageSize: entity.list?.pageSize ?? 10,
+    }, syncUrl);
+    const setPagination: OnChangeFn<PaginationState> = updater => updateList(state => ({
+        ...state,
+        pagination: typeof updater === 'function' ? updater(state.pagination) : updater,
+    }));
     const [alternateMode, setAlternateMode] = useState<string>();
     const [isAlternate, setIsAlternate] = useState(false);
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-    // Controlled (not left to tanstack's uncontrolled default) — see the
-    // `autoResetPageIndex: false` note below for why this alone isn't enough
-    // to keep the page put across a row-action refetch.
-    const [pagination, setPagination] = useState<PaginationState>({
-        pageIndex: 0,
-        pageSize: entity.list?.pageSize ?? 10,
-    });
     const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
     const [columnSizing, setColumnSizing] = useState<ColumnSizingState>(() => loadColumnSizing(entityName));
     const handleColumnSizingChange: OnChangeFn<ColumnSizingState> = (updater) => {
@@ -199,9 +201,6 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
             return next;
         });
     };
-    const [filterState, setFilterState] = useState<ListFilterState>(() =>
-        buildInitialFilterState(filters),
-    );
     const [areFiltersOpen, setAreFiltersOpen] = useState(false);
 
     const filteredRows = useMemo(
@@ -216,32 +215,19 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
         [attachSubRows, filteredRows],
     );
 
-    const resetToFirstPage = () => setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    const changeList = (change: Parameters<typeof updateList>[0]) => updateList(state => ({
+        ...change(state),
+        pagination: { ...state.pagination, pageIndex: 0 },
+    }));
 
-    // With autoResetPageIndex disabled (below), deleting the last row(s) on the
-    // current page would otherwise leave the user stranded on a now-empty page —
-    // clamp back to the new last valid page instead.
-    useEffect(() => {
-        const lastPageIndex = Math.max(0, Math.ceil(filteredRows.length / pagination.pageSize) - 1);
-        if (pagination.pageIndex > lastPageIndex) {
-            setPagination((prev) => ({ ...prev, pageIndex: lastPageIndex }));
-        }
-    }, [filteredRows.length, pagination.pageIndex, pagination.pageSize]);
+    const handleFilterChange = (key: string, value: ListFilterValue) =>
+        changeList(state => ({ ...state, filterState: { ...state.filterState, [key]: value } }));
 
-    const handleFilterChange = (key: string, value: ListFilterValue) => {
-        setFilterState((prev) => ({ ...prev, [key]: value }));
-        resetToFirstPage();
-    };
+    const handleGlobalFilterChange: OnChangeFn<string> = updater =>
+        changeList(state => ({ ...state, globalFilter: typeof updater === 'function' ? updater(state.globalFilter) : updater }));
 
-    const handleGlobalFilterChange = (value: string) => {
-        setGlobalFilter(value);
-        resetToFirstPage();
-    };
-
-    const handleSortingChange: typeof setSorting = (updater) => {
-        setSorting(updater);
-        resetToFirstPage();
-    };
+    const handleSortingChange: OnChangeFn<SortingState> = updater =>
+        changeList(state => ({ ...state, sorting: typeof updater === 'function' ? updater(state.sorting) : updater }));
 
     const table = useReactTable({
         data: tableRows,
@@ -295,6 +281,20 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
               }
             : {}),
     });
+
+    const lastPageIndex = Math.max(0, table.getPageCount() - 1);
+    const lastValidPagination = useRef<PaginationState | undefined>(undefined);
+    useEffect(() => {
+        if (isLoading || (entity.api && data === undefined)) return;
+        if (pagination.pageIndex <= lastPageIndex) {
+            lastValidPagination.current = pagination;
+            return;
+        }
+
+        const previous = lastValidPagination.current;
+        const wasValid = previous?.pageIndex === pagination.pageIndex && previous.pageSize === pagination.pageSize;
+        setPagination({ ...pagination, pageIndex: wasValid ? lastPageIndex : 0 });
+    }, [data, entity.api, isLoading, lastPageIndex, pagination.pageIndex, pagination.pageSize]);
 
     const selectedRows = selectable ? table.getSelectedRowModel().rows : [];
     const selectedIds = selectedRows
