@@ -197,6 +197,68 @@ public record GlobalScript(String language, String code, List<Parameter> paramet
     }
 
     /**
+     * A change of the declared parameters that breaks calls made to the script before it.
+     *
+     * @param parameter the parameter the change is about: an old one for a removal, a move or a
+     *                  parameter made required; a new one for a required parameter added
+     * @param change    what happens to it, as a clause of a sentence, e.g. {@code parameter
+     *                  'pattern' is removed}
+     */
+    public record BreakingChange(String parameter, String change) {
+    }
+
+    /**
+     * Tells whether {@code changed} breaks calls made to this script. A call passes its
+     * arguments by position, so every parameter keeps its name and position, an optional one
+     * stays optional, and a parameter added after them has a default. Renaming a parameter in
+     * place counts as removing it: whether its meaning stayed cannot be told.
+     *
+     * @return the first change that breaks calls, or nothing if every call still fits
+     */
+    public Optional<BreakingChange> breakingChangeTo(GlobalScript changed) {
+        List<Parameter> next = changed.parameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            Parameter old = parameters.get(i);
+            if (i >= next.size()) {
+                return Optional.of(new BreakingChange(old.name(),
+                        "parameter '%s' is removed".formatted(old.name())));
+            }
+            Parameter now = next.get(i);
+            if (!Objects.equals(old.name(), now.name())) {
+                return Optional.of(new BreakingChange(old.name(),
+                        "parameter '%s' is no longer parameter %d".formatted(old.name(), i + 1)));
+            }
+            if (now.required() && !old.required()) {
+                return Optional.of(new BreakingChange(old.name(),
+                        "parameter '%s' becomes required".formatted(old.name())));
+            }
+        }
+        for (int i = parameters.size(); i < next.size(); i++) {
+            Parameter added = next.get(i);
+            if (added.required()) {
+                return Optional.of(new BreakingChange(added.name(),
+                        "new parameter '%s' has no default".formatted(added.name())));
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Tells whether {@code changed} declares the parameters a call sees differently: their
+     * names, order, whether they are required and their defaults. Descriptions do not count.
+     */
+    public boolean changesSignature(GlobalScript changed) {
+        return !signatureOf(parameters).equals(signatureOf(changed.parameters()));
+    }
+
+    private static List<Parameter> signatureOf(List<Parameter> parameters) {
+        return parameters.stream()
+                .map(parameter -> new Parameter(parameter.name(), null, parameter.required(), parameter.defaultValue()))
+                .toList();
+    }
+
+    /**
      * Returns JavaScript that defines {@code variable} as a function an enhancement calls: {@code
      * var VAR_1 = ...;}. The function takes the declared parameters in order and extra arguments
      * after them. It fails when a required parameter is missing, fills in the default of an

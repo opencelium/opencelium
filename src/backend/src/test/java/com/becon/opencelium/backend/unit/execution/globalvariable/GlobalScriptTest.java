@@ -18,9 +18,12 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
@@ -229,6 +232,66 @@ class GlobalScriptTest {
                 .noneMatch(thread -> thread.getName().equals("oc-global-script") && thread.isAlive()));
     }
 
+    // ── parameter changes ─────────────────────────────────────────────────────
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("breakingChanges")
+    @DisplayName("breakingChangeTo — a change that a positional call no longer fits is named")
+    void breakingChangeToReturnsChangeWhenCallsNoLongerFit(String reason, List<Parameter> parameters,
+            String parameter, String change) {
+        GlobalScript saved = aScriptWith(DATE, PATTERN);
+
+        assertThat(saved.breakingChangeTo(new GlobalScript("js", "return 1;", parameters)))
+                .contains(new GlobalScript.BreakingChange(parameter, change));
+    }
+
+    static Stream<Arguments> breakingChanges() {
+        Parameter locale = new Parameter("locale", null, true, null);
+        return Stream.of(
+                Arguments.of("removed", List.of(DATE), "pattern", "parameter 'pattern' is removed"),
+                Arguments.of("reordered", List.of(PATTERN, DATE), "date", "parameter 'date' is no longer parameter 1"),
+                Arguments.of("renamed", List.of(DATE, new Parameter("format", null, false, TextNode.valueOf("dd"))),
+                        "pattern", "parameter 'pattern' is no longer parameter 2"),
+                Arguments.of("made required", List.of(DATE, new Parameter("pattern", null, true, null)),
+                        "pattern", "parameter 'pattern' becomes required"),
+                Arguments.of("required one added", List.of(DATE, PATTERN, locale),
+                        "locale", "new parameter 'locale' has no default"));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("fittingChanges")
+    void breakingChangeToReturnsNothingWhenCallsStillFit(String reason, List<Parameter> parameters) {
+        GlobalScript saved = aScriptWith(DATE, PATTERN);
+
+        assertThat(saved.breakingChangeTo(new GlobalScript("js", "return 1;", parameters))).isEmpty();
+    }
+
+    static Stream<Arguments> fittingChanges() {
+        return Stream.of(
+                Arguments.of("the same parameters", List.of(DATE, PATTERN)),
+                Arguments.of("an optional one added", List.of(DATE, PATTERN, new Parameter("locale", null, false, null))),
+                Arguments.of("a required one made optional",
+                        List.of(new Parameter("date", null, false, TextNode.valueOf("now")), PATTERN)),
+                Arguments.of("a new default", List.of(DATE, new Parameter("pattern", null, false, TextNode.valueOf("dd")))));
+    }
+
+    @Test
+    @DisplayName("changesSignature — a new description is no change a call could notice")
+    void changesSignatureReturnsFalseWhenOnlyDescriptionChanges() {
+        GlobalScript saved = aScriptWith(DATE, PATTERN);
+        Parameter described = new Parameter("pattern", "Output pattern", false, TextNode.valueOf("dd.MM.yyyy"));
+
+        assertThat(saved.changesSignature(aScriptWith(DATE, described))).isFalse();
+    }
+
+    @Test
+    void changesSignatureReturnsTrueWhenDefaultChanges() {
+        GlobalScript saved = aScriptWith(DATE, PATTERN);
+
+        assertThat(saved.changesSignature(
+                aScriptWith(DATE, new Parameter("pattern", null, false, TextNode.valueOf("dd"))))).isTrue();
+    }
+
     // ── JSON form ─────────────────────────────────────────────────────────────
 
     @Test
@@ -257,5 +320,9 @@ class GlobalScriptTest {
 
     private static GlobalScript aScript(String code) {
         return new GlobalScript("js", code, List.of());
+    }
+
+    private static GlobalScript aScriptWith(Parameter... parameters) {
+        return new GlobalScript("js", GlobalVariableFixture.FORMAT_DATE_CODE, List.of(parameters));
     }
 }
