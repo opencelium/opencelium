@@ -76,9 +76,9 @@ export function MethodLogDetails({ id, depth, path, action }: Props) {
 
   return (
     <div style={wrapStyle}>
-      <div className="oc-log-method-actions">{action}</div>
       <RequestResponseTabs
         path={path}
+        tabBarExtra={action}
         requestHeader={request?.header ?? ""}
         requestPayload={request?.payload ?? ""}
         response={{ kind: "payload", header: response?.header ?? "", payload: response?.payload ?? "" }}
