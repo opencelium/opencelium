@@ -394,7 +394,7 @@ class GlobalVariableControllerTest {
     // ── GET /global-variable/values ───────────────────────────────────────────
 
     @Test
-    @DisplayName("getValues — the answer carries an ETag of ids and versions and is revalidated on every poll")
+    @DisplayName("getValues — the answer carries an ETag of ids, versions, revisions and runs and is revalidated on every poll")
     void getValuesReturnsValuesWithEtagWhenRequestIsFirst() throws Exception {
         List<GlobalVariableValueDTO> values = List.of(aValueDto());
         when(service.getValues(List.of(7L), null)).thenReturn(values);
