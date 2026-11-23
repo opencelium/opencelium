@@ -38,6 +38,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CyclicBarrier;
@@ -64,8 +65,9 @@ import org.quartz.Trigger;
 
 /**
  * Unit tests for {@link WorkflowRunGate}: one execution at a time for a workflow that uses a
- * mutable global variable, the queue and its limits, the Refuse policy, and the webhook starts
- * refused on the call, which are reported once when the run that held the workflow ends.
+ * mutable global variable, the queue and its limits, the Refuse policy, one waiting cron fire per
+ * schedule, and the webhook starts refused on the call and cron fires skipped, which are reported
+ * once when the run that held the workflow ends.
  *
  * <p>Run with: ./gradlew test --tests "*.WorkflowRunGateTest"
  */
@@ -78,6 +80,8 @@ class WorkflowRunGateTest {
     private static final JobKey JOB_A = new JobKey("schedule-1", "connection");
     private static final JobKey JOB_B = new JobKey("schedule-2", "connection");
     private static final JobKey JOB_C = new JobKey("schedule-3", "connection");
+    private static final int SCHEDULE_B = 2;
+    private static final int SCHEDULE_C = 3;
     private static final int MAX_WAITING = 2;
     private static final Duration MAX_WAIT = Duration.ofMinutes(60);
     private static final int RACERS = 8;
@@ -521,6 +525,151 @@ class WorkflowRunGateTest {
         assertThat(gate.admit(WORKFLOW, JOB_B, new JobDataMap())).isEqualTo(Admission.HOLDS);
     }
 
+    // ── one waiting cron fire per schedule ───────────────────────────────────
+
+    @Test
+    @DisplayName("admitCronFire — a fire of a schedule whose cron fire already waits is skipped, not queued or refused")
+    void admitCronFireSkipsFireWhenFireOfSameScheduleWaits() {
+        List<Refused> refused = listenToRefusals();
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap());
+
+        Admission second = gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap());
+
+        assertThat(second).isEqualTo(Admission.SKIPPED);
+        assertThat(second.runs()).isFalse();
+        assertThat(gate.waitingCount(WORKFLOW)).isEqualTo(1);
+        assertThat(refused).isEmpty();
+        verify(notifications, never()).send(anyLong(), any());
+    }
+
+    @Test
+    void admitCronFireQueuesOneFireEachWhenTwoSchedulesFire() {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+
+        List<Admission> admissions = List.of(
+                gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap()),
+                gate.admitCronFire(WORKFLOW, SCHEDULE_C, JOB_C, new JobDataMap()),
+                gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap()),
+                gate.admitCronFire(WORKFLOW, SCHEDULE_C, JOB_C, new JobDataMap()));
+
+        assertThat(admissions).containsExactly(
+                Admission.QUEUED, Admission.QUEUED, Admission.SKIPPED, Admission.SKIPPED);
+        assertThat(gate.waitingCount(WORKFLOW)).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("admitCronFire — a full queue skips the extra fire instead of refusing it")
+    void admitCronFireSkipsFireWhenQueueIsFull() {
+        List<Refused> refused = listenToRefusals();
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap());
+        gate.admit(WORKFLOW, JOB_C, new JobDataMap());
+
+        Admission extra = gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap());
+
+        assertThat(extra).isEqualTo(Admission.SKIPPED);
+        assertThat(gate.waitingCount(WORKFLOW)).isEqualTo(MAX_WAITING);
+        assertThat(refused).isEmpty();
+    }
+
+    @Test
+    @DisplayName("release — the skipped fires of a schedule are handed on as one refusal when the run ends")
+    void releaseReportsSkippedCronFiresOnceWhenRunEnds() {
+        List<Refused> refused = listenToRefusals();
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.recordExecution(WORKFLOW, 900L);
+        for (int fire = 0; fire < 4; fire++) {
+            gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap());
+        }
+
+        gate.release(WORKFLOW);
+
+        assertThat(refused).singleElement().satisfies(start -> {
+            assertThat(start.schedule().getScheduleId()).isEqualTo(SCHEDULE_B);
+            assertThat(start.schedule().getExecType()).isEqualTo(TriggerType.SCHEDULER);
+            assertThat(start.connectionId()).isEqualTo(WORKFLOW);
+            assertThat(start.refusal().getCode()).isEqualTo(GlobalVariableConflictException.Code.BUSY);
+            assertThat(start.refusal().getMessage())
+                    .contains("Cron fires of schedule 2 skipped")
+                    .contains("execution 900 of the workflow ran: 3.")
+                    .contains("already waits in the workflow's queue");
+        });
+        verify(notifications).send(eq(WORKFLOW), any());
+    }
+
+    @Test
+    @DisplayName("admit — a manual start of a schedule whose cron fire waits is kept")
+    void admitQueuesManualStartWhenCronFireOfSameScheduleWaits() {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap());
+
+        Admission manual = gate.admit(WORKFLOW, JOB_B, new JobDataMap());
+
+        assertThat(manual).isEqualTo(Admission.QUEUED);
+        assertThat(gate.waitingCount(WORKFLOW)).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("release — a waiting fire whose schedule fired again counts its wait from the latest fire")
+    void releaseFiresWaitingCronFireWhenItsScheduleFiredAgainWithinMaxWait() throws SchedulerException {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap());
+        clock.advance(MAX_WAIT.minusMinutes(10));
+        gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap());
+        clock.advance(Duration.ofMinutes(20));
+
+        gate.release(WORKFLOW);
+
+        assertThat(firedTrigger().getJobKey()).isEqualTo(JOB_B);
+        assertThat(gate.waitingCount(WORKFLOW)).isZero();
+    }
+
+    @Test
+    @DisplayName("admit — the webhook starts of one schedule are all kept, in order, up to the queue's limit")
+    void admitQueuesEveryWebhookStartInOrderUpToLimit() throws SchedulerException {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+
+        List<Admission> admissions = List.of(
+                gate.admit(WORKFLOW, JOB_B, aWebhookStart("first")),
+                gate.admit(WORKFLOW, JOB_B, aWebhookStart("second")),
+                gate.admit(WORKFLOW, JOB_B, aWebhookStart("third")));
+
+        assertThat(admissions).containsExactly(Admission.QUEUED, Admission.QUEUED, Admission.REFUSED);
+        List<Object> ranInOrder = new ArrayList<>();
+        ArgumentCaptor<Trigger> fired = ArgumentCaptor.forClass(Trigger.class);
+        for (int ended = 1; ended <= MAX_WAITING; ended++) {
+            gate.release(WORKFLOW);
+            verify(quartzScheduler, times(ended)).scheduleJob(fired.capture());
+            Trigger next = fired.getValue();
+            assertThat(gate.admit(WORKFLOW, next.getJobKey(), next.getJobDataMap())).isEqualTo(Admission.HOLDS);
+            ranInOrder.add(((ScheduleData) next.getJobDataMap().get("data")).getQueryParams().get("call"));
+        }
+        assertThat(ranInOrder).containsExactly("first", "second");
+    }
+
+    @Test
+    @DisplayName("release — the waiting fire starts in its place, ahead of the starts that came after it")
+    void releaseFiresWaitingCronFireInItsPlaceWhenLaterFiresWereSkipped() throws SchedulerException {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap());
+        gate.admit(WORKFLOW, JOB_C, new JobDataMap());
+        gate.admitCronFire(WORKFLOW, SCHEDULE_B, JOB_B, new JobDataMap());
+
+        gate.release(WORKFLOW);
+
+        assertThat(firedTrigger().getJobKey()).isEqualTo(JOB_B);
+        assertThat(gate.waitingCount(WORKFLOW)).isEqualTo(1);
+    }
+
     // ── queue order ──────────────────────────────────────────────────────────
 
     @Test
@@ -754,6 +903,13 @@ class WorkflowRunGateTest {
             assertThatThrownBy(() -> gate.checkWebhookCanStart(WORKFLOW, scheduleId))
                     .isInstanceOf(GlobalVariableConflictException.class);
         }
+    }
+
+    /** The trigger data of a webhook start of schedule B that carries {@code call} as its data. */
+    private static JobDataMap aWebhookStart(String call) {
+        JobDataMap triggerData = new JobDataMap();
+        triggerData.put("data", new ScheduleData(SCHEDULE_B, TriggerType.WEBHOOK, Map.of("call", call)));
+        return triggerData;
     }
 
     private List<Refused> listenToRefusals() {

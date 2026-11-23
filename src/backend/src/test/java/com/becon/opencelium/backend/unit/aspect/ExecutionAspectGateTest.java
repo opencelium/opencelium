@@ -45,12 +45,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.springframework.core.env.Environment;
 
@@ -187,6 +189,37 @@ class ExecutionAspectGateTest {
         assertThat(gate.waitingCount(WORKFLOW)).isZero();
     }
 
+    // ── one waiting cron fire per schedule ───────────────────────────────────
+
+    @Test
+    @DisplayName("gateByMutableVariables — a cron fire reaches the gate as one: a second fire of its schedule does not wait")
+    void gateByMutableVariablesSkipsCronFireWhenCronFireOfSameScheduleWaits() throws Throwable {
+        usesMutable(GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        ProceedingJoinPoint firstFire = mock(ProceedingJoinPoint.class);
+        ProceedingJoinPoint secondFire = mock(ProceedingJoinPoint.class);
+
+        aspect.gateByMutableVariables(firstFire, aStartBy(JOB_B, mock(CronTrigger.class)));
+        Object result = aspect.gateByMutableVariables(secondFire, aStartBy(JOB_B, mock(CronTrigger.class)));
+
+        assertThat(result).isNull();
+        verify(firstFire, never()).proceed();
+        verify(secondFire, never()).proceed();
+        assertThat(gate.waitingCount(WORKFLOW)).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("gateByMutableVariables — a start by a trigger that fires once, manual or webhook, is kept each time")
+    void gateByMutableVariablesQueuesEveryOneShotStartWhenFiredTwice() throws Throwable {
+        usesMutable(GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+
+        aspect.gateByMutableVariables(mock(ProceedingJoinPoint.class), aStartBy(JOB_B, mock(SimpleTrigger.class)));
+        aspect.gateByMutableVariables(mock(ProceedingJoinPoint.class), aStartBy(JOB_B, mock(SimpleTrigger.class)));
+
+        assertThat(gate.waitingCount(WORKFLOW)).isEqualTo(2);
+    }
+
     // ── starts the gate leaves alone ─────────────────────────────────────────
 
     @Test
@@ -245,6 +278,24 @@ class ExecutionAspectGateTest {
         lenient().when(trigger.getJobDataMap()).thenReturn(triggerData);
         lenient().when(context.getJobDetail()).thenReturn(detail);
         lenient().when(context.getTrigger()).thenReturn(trigger);
+        return context;
+    }
+
+    /**
+     * A start of schedule {@code SCHEDULE} by its job as {@code trigger} fires it without data of
+     * its own, the way the schedule's cron trigger or a manual start does: the schedule is named
+     * by the job.
+     */
+    private static JobExecutionContext aStartBy(JobKey job, Trigger trigger) {
+        JobDataMap jobData = new JobDataMap();
+        jobData.put("data", new ScheduleData(SCHEDULE, TriggerType.SCHEDULER));
+        JobExecutionContext context = mock(JobExecutionContext.class);
+        when(context.getMergedJobDataMap()).thenReturn(jobData);
+        JobDetail detail = mock(JobDetail.class);
+        when(detail.getKey()).thenReturn(job);
+        when(trigger.getJobDataMap()).thenReturn(new JobDataMap());
+        when(context.getJobDetail()).thenReturn(detail);
+        when(context.getTrigger()).thenReturn(trigger);
         return context;
     }
 }
