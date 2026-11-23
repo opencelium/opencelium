@@ -82,6 +82,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -680,6 +681,50 @@ class GlobalVariableServiceImpTest {
                 .extracting(Violation::field, Violation::code, Violation::message)
                 .containsExactly(tuple("script.code", Code.SCRIPT_SYNTAX, "Line 2: syntax error, unexpected end"));
         verify(repository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("testScript — a Python script that runs on is stopped at the limit of a run and reported as a timeout")
+    void testScriptReturnsTimeoutWhenPythonScriptRunsTooLong() throws Exception {
+        CountDownLatch never = new CountDownLatch(1);
+        givenPythonEngineAnswering(Map.of("ok", true));
+        when(pythonEngine.execute(contains("OC_TESTED"), anyMap())).thenAnswer(invocation -> {
+            never.await();
+            return "1";
+        });
+        try {
+            GlobalScriptTestDTO answer = service.testScript(
+                    new GlobalScriptTestDTO.Request("slow", "python3", "return 1", List.of(), List.of()));
+
+            assertThat(answer.valid()).isFalse();
+            assertThat(answer.error().code()).isEqualTo("SCRIPT_TIMEOUT");
+            assertThat(answer.error().message()).contains(SCRIPT_TIMEOUT_MS + " ms");
+            assertThat(answer.durationMs()).isGreaterThanOrEqualTo(SCRIPT_TIMEOUT_MS);
+        } finally {
+            never.countDown();
+        }
+    }
+
+    @Test
+    @DisplayName("testScript — a polyglot service that gives no answer to the syntax check in time counts as unavailable")
+    void testScriptReturnsEngineUnavailableWhenPythonSyntaxCheckRunsTooLong() throws Exception {
+        CountDownLatch never = new CountDownLatch(1);
+        when(scriptExecutionManager.resolveEngine(LanguageType.PYTHON_3)).thenReturn(Optional.of(pythonEngine));
+        when(pythonEngine.isUp()).thenReturn(true);
+        when(pythonEngine.execute(anyString(), anyMap())).thenAnswer(invocation -> {
+            never.await();
+            return Map.of("ok", true);
+        });
+        try {
+            GlobalScriptTestDTO answer = service.testScript(
+                    new GlobalScriptTestDTO.Request("slow", "python3", "return 1", List.of(), List.of()));
+
+            assertThat(answer.error().code()).isEqualTo("SCRIPT_ENGINE_UNAVAILABLE");
+            assertThat(answer.error().message()).contains("ran longer than " + SCRIPT_TIMEOUT_MS + " ms");
+            verify(pythonEngine, times(1)).execute(anyString(), anyMap());
+        } finally {
+            never.countDown();
+        }
     }
 
     @Test

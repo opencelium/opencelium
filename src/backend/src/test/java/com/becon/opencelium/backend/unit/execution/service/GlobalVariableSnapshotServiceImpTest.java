@@ -29,6 +29,7 @@ import com.becon.opencelium.backend.testutil.fixture.CategoryFixture;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import com.becon.opencelium.backend.utility.crypto.GlobalVariableCipher;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Duration;
 import java.util.EnumSet;
 import java.util.List;
@@ -190,6 +191,63 @@ class GlobalVariableSnapshotServiceImpTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("'broken'")
                 .hasMessageContaining("not valid JSON");
+    }
+
+    // ── changes during a run ──────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("takeFor — a running execution keeps the constant it started with; the next start gets the new one")
+    void takeForKeepsConstantTakenAtStartWhenItChangesDuringRun() {
+        GlobalVariable limits = GlobalVariableFixture.aConstant(7L, "limits", "{\"maxPerPage\":50}");
+        limits.setVersion(1);
+        when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
+        givenVariables(limits);
+        GlobalVariableSnapshot running = service.takeFor(WORKFLOW);
+
+        // a user saves a new value while the run goes on: the stored variable now holds it
+        limits.setValue("{\"maxPerPage\":10}");
+        limits.setVersion(2);
+        GlobalVariableSnapshot nextStart = service.takeFor(WORKFLOW);
+
+        assertThat(running.find("limits")).get()
+                .extracting(entry -> entry.value().get("maxPerPage").asInt(), Entry::version)
+                .containsExactly(50, 1L);
+        assertThat(nextStart.find("limits")).get()
+                .extracting(entry -> entry.value().get("maxPerPage").asInt(), Entry::version)
+                .containsExactly(10, 2L);
+    }
+
+    @Test
+    @DisplayName("takeFor — a running execution keeps the script code it started with; the next start gets the edit")
+    void takeForKeepsScriptTakenAtStartWhenScriptIsEditedDuringRun() {
+        when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
+        when(globalVariableRepository.findAllWithScopeTargets(any())).thenReturn(
+                List.of(aScript(3L, "nextId", 4L, "return 1;")),
+                List.of(aScript(3L, "nextId", 5L, "return 2;")));
+        GlobalVariableSnapshot running = service.takeFor(WORKFLOW);
+
+        GlobalVariableSnapshot nextStart = service.takeFor(WORKFLOW);
+
+        assertThat(running.script("nextId")).get().extracting(GlobalScript::code).isEqualTo("return 1;");
+        assertThat(running.find("nextId")).get()
+                .extracting(entry -> GlobalScript.fromJson(entry.value().toString()).code())
+                .isEqualTo("return 1;");
+        assertThat(nextStart.script("nextId")).get().extracting(GlobalScript::code).isEqualTo("return 2;");
+    }
+
+    @Test
+    @DisplayName("takeFor — a run that changes the value tree it was given leaves the next start's snapshot alone")
+    void takeForGivesEachStartItsOwnValueWhenEarlierRunChangesItsTree() {
+        when(connectionRepository.findById(WORKFLOW)).thenReturn(Optional.empty());
+        givenVariables(GlobalVariableFixture.aConstant(7L, "limits", "{\"maxPerPage\":50}"));
+        GlobalVariableSnapshot running = service.takeFor(WORKFLOW);
+
+        ((ObjectNode) running.find("limits").orElseThrow().value()).put("maxPerPage", 1);
+        GlobalVariableSnapshot nextStart = service.takeFor(WORKFLOW);
+
+        assertThat(nextStart.find("limits")).get()
+                .extracting(entry -> entry.value().get("maxPerPage").asInt())
+                .isEqualTo(50);
     }
 
     // ── test copies ───────────────────────────────────────────────────────────

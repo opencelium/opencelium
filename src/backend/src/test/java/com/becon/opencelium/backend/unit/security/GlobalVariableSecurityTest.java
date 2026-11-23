@@ -1,5 +1,8 @@
 package com.becon.opencelium.backend.unit.security;
 
+import static com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission.DELETE;
+import static com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission.EDIT;
+import static com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission.VIEW_USE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -17,10 +20,15 @@ import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import com.becon.opencelium.backend.testutil.fixture.UserRoleFixture;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -114,6 +122,42 @@ class GlobalVariableSecurityTest {
         boolean result = security.canManageGrants(variable, new Caller(OWNER_ID, false));
 
         assertThat(result).isTrue();
+    }
+
+    // ── grant matrix ──────────────────────────────────────────────────────────
+
+    @ParameterizedTest(name = "[{index}] granted {0} → {1}, manages grants: {2}")
+    @MethodSource("grantMatrix")
+    @DisplayName("permissionsOn — each set of grants gives itself plus Use; only owner and admin manage grants")
+    void permissionsOnGivesGrantedAndIncludedWhenCallerIsNeitherOwnerNorAdmin(
+            Set<GlobalVariablePermission> granted, Set<GlobalVariablePermission> expected, boolean managesGrants) {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        granted.forEach(permission -> variable.getGrants().add(new GlobalVariableGrant(OTHER_ID, permission)));
+        Caller caller = new Caller(OTHER_ID, false);
+
+        assertThat(security.permissionsOn(variable, caller)).containsExactlyInAnyOrderElementsOf(expected);
+        assertThat(security.canManageGrants(variable, caller)).isEqualTo(managesGrants);
+    }
+
+    static Stream<Arguments> grantMatrix() {
+        return Stream.of(
+                Arguments.of(Set.of(), Set.of(), false),
+                Arguments.of(Set.of(VIEW_USE), Set.of(VIEW_USE), false),
+                Arguments.of(Set.of(EDIT), Set.of(VIEW_USE, EDIT), false),
+                Arguments.of(Set.of(DELETE), Set.of(VIEW_USE, DELETE), false),
+                Arguments.of(Set.of(EDIT, DELETE), Set.of(VIEW_USE, EDIT, DELETE), false),
+                Arguments.of(Set.of(VIEW_USE, EDIT, DELETE), Set.of(VIEW_USE, EDIT, DELETE), false));
+    }
+
+    @ParameterizedTest(name = "[{index}] admin {0}")
+    @ValueSource(booleans = {true, false})
+    @DisplayName("permissionsOn — the owner and an admin may do everything and manage grants, with no grant at all")
+    void permissionsOnReturnsAllAndManagesGrantsWhenCallerIsOwnerOrAdmin(boolean admin) {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "1");
+        Caller caller = admin ? new Caller(OTHER_ID, true) : new Caller(OWNER_ID, false);
+
+        assertThat(security.permissionsOn(variable, caller)).containsExactlyInAnyOrder(VIEW_USE, EDIT, DELETE);
+        assertThat(security.canManageGrants(variable, caller)).isTrue();
     }
 
     // ── can ───────────────────────────────────────────────────────────────────

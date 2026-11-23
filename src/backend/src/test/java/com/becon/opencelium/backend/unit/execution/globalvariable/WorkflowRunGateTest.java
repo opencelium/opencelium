@@ -4,9 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -18,6 +21,8 @@ import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableRepository;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
 import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
+import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate.Admission;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler.ScheduleData;
@@ -30,7 +35,18 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,6 +78,7 @@ class WorkflowRunGateTest {
     private static final JobKey JOB_C = new JobKey("schedule-3", "connection");
     private static final int MAX_WAITING = 2;
     private static final Duration MAX_WAIT = Duration.ofMinutes(60);
+    private static final int RACERS = 8;
 
     @Mock
     GlobalVariableRepository repository;
@@ -380,7 +397,218 @@ class WorkflowRunGateTest {
         assertThatCode(() -> gate.checkCanStart(WORKFLOW)).doesNotThrowAnyException();
     }
 
+    // ── queue order ──────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("release — the queued starts run one after the other, in the order they came in")
+    void releaseRunsQueuedStartsInArrivalOrderWhenEachRunEnds() throws SchedulerException {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        JobKey jobD = new JobKey("schedule-4", "connection");
+        WorkflowRunGate roomyGate = aGateWithRoomFor(5);
+        roomyGate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        for (JobKey job : List.of(JOB_B, JOB_C, jobD)) {
+            roomyGate.admit(WORKFLOW, job, new JobDataMap());
+        }
+
+        List<JobKey> ranInOrder = new ArrayList<>();
+        ArgumentCaptor<Trigger> fired = ArgumentCaptor.forClass(Trigger.class);
+        for (int ended = 1; ended <= 3; ended++) {
+            roomyGate.release(WORKFLOW);
+            verify(quartzScheduler, times(ended)).scheduleJob(fired.capture());
+            Trigger next = fired.getValue();
+            assertThat(roomyGate.admit(WORKFLOW, next.getJobKey(), next.getJobDataMap()))
+                    .isEqualTo(Admission.HOLDS);
+            ranInOrder.add(next.getJobKey());
+        }
+        roomyGate.release(WORKFLOW);
+
+        assertThat(ranInOrder).containsExactly(JOB_B, JOB_C, jobD);
+        assertThat(roomyGate.holdOf(WORKFLOW)).isEmpty();
+        assertThat(roomyGate.waitingCount(WORKFLOW)).isZero();
+        verify(quartzScheduler, times(3)).scheduleJob(any(Trigger.class));
+    }
+
+    // ── release after a crash ────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("restart — a workflow held by a run that died with the server is free again on startup")
+    void admitHoldsWorkflowWhenGateRestartsAfterCrashOfHoldingRun() {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.recordExecution(WORKFLOW, 900L);
+        gate.admit(WORKFLOW, JOB_B, new JobDataMap());
+
+        // the server crashes: run 900 never releases the workflow, and startup builds a new gate
+        WorkflowRunGate restarted = aGateWithRoomFor(MAX_WAITING);
+
+        assertThat(restarted.holdOf(WORKFLOW)).isEmpty();
+        assertThat(restarted.waitingCount(WORKFLOW)).isZero();
+        assertThat(restarted.admit(WORKFLOW, JOB_C, new JobDataMap())).isEqualTo(Admission.HOLDS);
+    }
+
+    @Test
+    @DisplayName("restart — a Refuse workflow that was held when the server crashed accepts a manual start again")
+    void checkCanStartPassesWhenGateRestartsAfterCrashOfHoldingRun() {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.REFUSE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.recordExecution(WORKFLOW, 900L);
+        assertThatThrownBy(() -> gate.checkCanStart(WORKFLOW)).isInstanceOf(GlobalVariableConflictException.class);
+
+        WorkflowRunGate restarted = aGateWithRoomFor(MAX_WAITING);
+
+        assertThatCode(() -> restarted.checkCanStart(WORKFLOW)).doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("restart — a start fired from the old queue holds no reservation and waits behind the new run")
+    void admitQueuesStartWithTicketFromBeforeRestartWhenWorkflowIsBusy() throws SchedulerException {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        gate.admit(WORKFLOW, JOB_A, new JobDataMap());
+        gate.admit(WORKFLOW, JOB_B, new JobDataMap());
+        gate.release(WORKFLOW);
+        JobDataMap ticketedBeforeCrash = firedTrigger().getJobDataMap();
+        String oldTicket = ticketedBeforeCrash.getString(WorkflowRunGate.TICKET_KEY);
+        WorkflowRunGate restarted = aGateWithRoomFor(MAX_WAITING);
+        restarted.admit(WORKFLOW, JOB_C, new JobDataMap());
+
+        Admission late = restarted.admit(WORKFLOW, JOB_B, ticketedBeforeCrash);
+        restarted.release(WORKFLOW);
+
+        assertThat(late).isEqualTo(Admission.QUEUED);
+        ArgumentCaptor<Trigger> fired = ArgumentCaptor.forClass(Trigger.class);
+        verify(quartzScheduler, times(2)).scheduleJob(fired.capture());
+        Trigger refired = fired.getValue();
+        assertThat(refired.getJobKey()).isEqualTo(JOB_B);
+        assertThat(refired.getJobDataMap().getString(WorkflowRunGate.TICKET_KEY)).isNotBlank().isNotEqualTo(oldTicket);
+    }
+
+    // ── concurrent starts and writes ─────────────────────────────────────────
+
+    @Test
+    @DisplayName("admit — of starts that race for a free workflow, exactly one holds it and the others wait")
+    void admitLetsExactlyOneStartHoldWhenStartsRaceForFreeWorkflow() throws Exception {
+        usesMutable(WORKFLOW, GlobalVariableBusyPolicy.QUEUE);
+        WorkflowRunGate roomyGate = aGateWithRoomFor(RACERS);
+        CyclicBarrier together = new CyclicBarrier(RACERS);
+        ExecutorService pool = Executors.newFixedThreadPool(RACERS);
+        try {
+            List<Future<Admission>> pending = new ArrayList<>();
+            for (int i = 0; i < RACERS; i++) {
+                JobKey job = new JobKey("racer-" + i, "connection");
+                pending.add(pool.submit(() -> {
+                    together.await(5, TimeUnit.SECONDS);
+                    return roomyGate.admit(WORKFLOW, job, new JobDataMap());
+                }));
+            }
+            List<Admission> admissions = new ArrayList<>();
+            for (Future<Admission> admission : pending) {
+                admissions.add(admission.get(5, TimeUnit.SECONDS));
+            }
+
+            assertThat(admissions).filteredOn(admission -> admission == Admission.HOLDS).hasSize(1);
+            assertThat(admissions).filteredOn(admission -> admission == Admission.QUEUED).hasSize(RACERS - 1);
+            assertThat(roomyGate.waitingCount(WORKFLOW)).isEqualTo(RACERS - 1);
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
+    @DisplayName("admit — racing runs of the owner workflow each read and raise a counter, and no write is lost")
+    void admitSerializesOwnerRunsSoNoWriteIsLostWhenStartsRace() throws Exception {
+        GlobalVariable counter = GlobalVariableFixture.aMutable(1L, "counter", "0", "0", WORKFLOW);
+        when(repository.findMutableUsedByWorkflow(WORKFLOW)).thenReturn(List.of(counter));
+        AtomicReference<String> stored = new AtomicReference<>("0");
+        when(repository.findByNameIn(List.of("counter"))).thenAnswer(invocation ->
+                List.of(GlobalVariableFixture.aMutable(1L, "counter", "0", stored.get(), WORKFLOW)));
+        when(repository.writeCurrentValue(eq(1L), anyString(), any(Date.class), anyLong())).thenAnswer(invocation -> {
+            stored.set(invocation.getArgument(1));
+            return 1;
+        });
+        OwnerRuns runs = new OwnerRuns(aGateWithRoomFor(RACERS),
+                new GlobalVariableWriter(repository, new TestRunOrigins(), 1024));
+        // a start fired from the queue comes back through Quartz, which here runs it on the pool
+        doAnswer(invocation -> {
+            Trigger trigger = invocation.getArgument(0);
+            runs.submit(trigger.getJobKey(), trigger.getJobDataMap());
+            return new Date();
+        }).when(quartzScheduler).scheduleJob(any(Trigger.class));
+
+        try {
+            CyclicBarrier together = new CyclicBarrier(RACERS);
+            for (int i = 0; i < RACERS; i++) {
+                JobKey job = new JobKey("racer-" + i, "connection");
+                runs.pool.submit(() -> {
+                    together.await(5, TimeUnit.SECONDS);
+                    runs.start(job, new JobDataMap());
+                    return null;
+                });
+            }
+
+            await().atMost(Duration.ofSeconds(10)).untilAsserted(() ->
+                    assertThat(runs.finished.get() + runs.failures.size()).isEqualTo(RACERS));
+            assertThat(runs.failures).isEmpty();
+            assertThat(stored.get()).isEqualTo(String.valueOf(RACERS));
+            assertThat(runs.mostAtOnce.get()).isEqualTo(1);
+            assertThat(runs.gate.holdOf(WORKFLOW)).isEmpty();
+            assertThat(runs.gate.waitingCount(WORKFLOW)).isZero();
+        } finally {
+            runs.pool.shutdownNow();
+        }
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
+
+    private WorkflowRunGate aGateWithRoomFor(int maxWaiting) {
+        return new WorkflowRunGate(repository, quartzScheduler, notifications, maxWaiting, MAX_WAIT, clock);
+    }
+
+    /**
+     * Runs of the owner workflow of {@code counter} that go through the gate the way {@code
+     * ExecutionAspect} lets them: a run that holds the workflow reads the counter, raises it by
+     * one with a separate write and releases the workflow when it ends.
+     */
+    private static final class OwnerRuns {
+        private final WorkflowRunGate gate;
+        private final GlobalVariableWriter writer;
+        private final ExecutorService pool = Executors.newCachedThreadPool();
+        private final AtomicLong executionIds = new AtomicLong(900L);
+        private final AtomicInteger running = new AtomicInteger();
+        private final AtomicInteger mostAtOnce = new AtomicInteger();
+        private final AtomicInteger finished = new AtomicInteger();
+        private final Queue<Throwable> failures = new ConcurrentLinkedQueue<>();
+
+        OwnerRuns(WorkflowRunGate gate, GlobalVariableWriter writer) {
+            this.gate = gate;
+            this.writer = writer;
+        }
+
+        void submit(JobKey job, JobDataMap triggerData) {
+            pool.submit(() -> start(job, triggerData));
+        }
+
+        void start(JobKey job, JobDataMap triggerData) {
+            try {
+                if (gate.admit(WORKFLOW, job, triggerData) != Admission.HOLDS) {
+                    return;
+                }
+                try {
+                    mostAtOnce.accumulateAndGet(running.incrementAndGet(), Math::max);
+                    GlobalVariableWriter.Run run = writer.forRun(WORKFLOW, executionIds.incrementAndGet());
+                    int read = run.readCurrent("counter").orElseThrow().asInt();
+                    // gives a racing run the chance to read the same value, which would lose a write
+                    Thread.yield();
+                    run.write("counter", read + 1);
+                    running.decrementAndGet();
+                } finally {
+                    gate.release(WORKFLOW);
+                }
+                finished.incrementAndGet();
+            } catch (Throwable e) {
+                failures.add(e);
+            }
+        }
+    }
 
     private void usesMutable(long workflowId, GlobalVariableBusyPolicy policy) {
         GlobalVariable variable = GlobalVariableFixture.aMutable(1L, "counter", "0", "0", workflowId);
