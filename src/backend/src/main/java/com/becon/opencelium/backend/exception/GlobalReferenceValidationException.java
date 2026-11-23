@@ -25,7 +25,14 @@ public class GlobalReferenceValidationException extends RuntimeException {
         /** A method writes a variable that is not mutable. */
         NOT_MUTABLE,
         /** A method writes a mutable variable whose owner is another workflow. */
-        NOT_OWNER
+        NOT_OWNER,
+        /**
+         * A script variable is referenced other than as the whole value of an enhancement arg,
+         * {@code //var VAR_n = {{global.name}};}, or with a path.
+         */
+        SCRIPT_NOT_CALLABLE,
+        /** A script variable is imported into an enhancement whose language is not JavaScript. */
+        IMPORT_LANGUAGE_MISMATCH
     }
 
     /**

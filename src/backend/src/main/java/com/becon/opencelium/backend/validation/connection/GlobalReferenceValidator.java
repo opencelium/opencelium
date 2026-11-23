@@ -10,6 +10,7 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Violation;
+import com.becon.opencelium.backend.scriptengine.LanguageType;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity.Caller;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceCollector.Found;
@@ -31,7 +32,8 @@ import java.util.stream.Collectors;
  * about to be saved.
  *
  * <p>Every reference must name a variable that exists, that may be used where the reference
- * stands and that the saving user may use. The user is checked here and not when a workflow
+ * stands and that the saving user may use. A script variable is only imported, by the whole
+ * value of an arg of a JavaScript enhancement. The user is checked here and not when a workflow
  * runs, because runs execute as the system: a reference someone else added earlier is checked
  * against the user who saves now.
  */
@@ -226,6 +228,12 @@ public class GlobalReferenceValidator {
                 continue;
             }
 
+            Optional<Violation> misplaced = checkScriptUse(variable, reference);
+            if (misplaced.isPresent()) {
+                violations.add(misplaced.get());
+                continue;
+            }
+
             Optional<Violation> outOfReach = scopeRule.check(variable, reference);
             if (outOfReach.isPresent()) {
                 violations.add(outOfReach.get());
@@ -238,6 +246,34 @@ public class GlobalReferenceValidator {
         if (!violations.isEmpty()) {
             throw new GlobalReferenceValidationException(violations);
         }
+    }
+
+    /**
+     * Says why a script variable may not be read where a reference stands, or nothing if it may:
+     * a script has no value, so it is only imported as a function into a JavaScript enhancement,
+     * by an arg whose whole value is {@code {{global.name}}}. A write to a script is refused
+     * where writes are checked.
+     */
+    private static Optional<Violation> checkScriptUse(GlobalVariable variable, Found reference) {
+        if (variable.getKind() != GlobalVariableKind.SCRIPT || reference.write()) {
+            return Optional.empty();
+        }
+        if (!reference.importing()) {
+            return Optional.of(violation(Code.SCRIPT_NOT_CALLABLE, reference,
+                    ("Global variable '%s' is a script and has no value to read; import it in the args of a "
+                            + "JavaScript enhancement as //var VAR_n = {{global.%s}}; without a path")
+                            .formatted(reference.variable(), reference.variable())));
+        }
+        if (!LanguageType.JS.getCode().equals(reference.importInto())) {
+            String language = reference.importInto().isEmpty()
+                    ? "an enhancement without a language"
+                    : "a '%s' enhancement".formatted(reference.importInto());
+            return Optional.of(violation(Code.IMPORT_LANGUAGE_MISMATCH, reference,
+                    "Script variable '%s' is JavaScript and cannot be imported into %s"
+                            .formatted(reference.variable(), language)));
+        }
+
+        return Optional.empty();
     }
 
     private boolean mayUse(GlobalVariable variable, Caller caller) {

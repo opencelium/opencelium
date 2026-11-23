@@ -183,7 +183,7 @@ class GlobalReferenceCollectorTest {
 
         assertThat(found).containsExactly(
                 new Found(ElementType.ENHANCEMENT, "#ababab", "0_1", "Tenant id", "enhancement.args",
-                        "prefix", "{{global.prefix}}"),
+                        "prefix", "{{global.prefix}}", false, "js"),
                 new Found(ElementType.ENHANCEMENT, "#ababab", "0_1", "Tenant id", "enhancement.script",
                         "tenants", "{{global.tenants[0].id}}"));
     }
@@ -202,6 +202,63 @@ class GlobalReferenceCollectorTest {
                 tuple("lastSync", "{{global.lastSync}}", true),
                 tuple(null, "{{global.x.y}}", true),
                 tuple("lastSync", "{{global.lastSync}}", false));
+    }
+
+    @Test
+    @DisplayName("collect — the whole value of an arg is reported with the enhancement's language, as an import")
+    void collectReturnsImportLanguageWhenArgIsWholeReference() {
+        FieldBindingMng binding = aBinding("#ababab", "Build title",
+                "//var VAR_0 = #ababab.(response).body.$.date;\n//var VAR_1 = {{global.formatDate}};",
+                "RESULT_VAR = VAR_1(VAR_0, 'dd.MM');");
+        binding.getEnhancement().setLanguage("python3");
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith();
+        workflow.setFieldBindings(List.of(binding));
+
+        List<Found> found = GlobalReferenceCollector.collect(workflow);
+
+        assertThat(found).extracting(Found::field, Found::variable, Found::importInto, Found::importing)
+                .containsExactly(tuple("enhancement.args", "formatDate", "python3", true));
+    }
+
+    @Test
+    void collectReturnsEmptyImportLanguageWhenEnhancementHasNoLanguage() {
+        FieldBindingMng binding = aBinding("#ababab", "Build title", "var VAR_0 = {{global.formatDate}};", "");
+        binding.getEnhancement().setLanguage(null);
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith();
+        workflow.setFieldBindings(List.of(binding));
+
+        List<Found> found = GlobalReferenceCollector.collect(workflow);
+
+        assertThat(found).extracting(Found::importInto).containsExactly("");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "var VAR_0 = {{global.formatDate.pattern}};",
+            "var VAR_0 = {{global.formatDate}} + 1;",
+            "var VAR_0 = 'x{{global.formatDate}}';",
+            "var RESULT_VAR = {{global.formatDate}};"})
+    @DisplayName("collect — a reference that is not the whole value of an arg imports nothing")
+    void collectReturnsNoImportWhenReferenceIsNotWholeArg(String args) {
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith();
+        workflow.setFieldBindings(List.of(aBinding("#ababab", "Build title", args, "")));
+
+        List<Found> found = GlobalReferenceCollector.collect(workflow);
+
+        assertThat(found).extracting(Found::variable, Found::importInto).containsExactly(tuple("formatDate", null));
+    }
+
+    @Test
+    @DisplayName("collect — ref() in the code is a read, even of the whole token")
+    void collectReturnsNoImportWhenCodeRefsVariable() {
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith();
+        workflow.setFieldBindings(List.of(aBinding("#ababab", "Build title", null,
+                "RESULT_VAR = ref('{{global.formatDate}}');")));
+
+        List<Found> found = GlobalReferenceCollector.collect(workflow);
+
+        assertThat(found).extracting(Found::field, Found::importing)
+                .containsExactly(tuple("enhancement.script", false));
     }
 
     @Test

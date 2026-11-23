@@ -14,6 +14,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mysql.entity.EventMessage;
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
@@ -135,6 +138,36 @@ class GlobalVariableUsageServiceImpTest {
         assertThat(savedUsages())
                 .extracting(GlobalVariableUsage::getVariableId, GlobalVariableUsage::getField, GlobalVariableUsage::getAccess)
                 .containsExactly(tuple(5L, "globalWrites", Access.WRITE));
+    }
+
+    @Test
+    @DisplayName("rebuild — a script imported by an arg is an import; a constant in the same shape is a read")
+    void rebuildForWorkflowWritesImportRowWhenEnhancementImportsScript() {
+        EnhancementMng enhancement = new EnhancementMng();
+        enhancement.setTitle("Build title");
+        enhancement.setLanguage("js");
+        enhancement.setArgs("//var VAR_0 = {{global.pattern}};\n//var VAR_1 = {{global.formatDate}};");
+        enhancement.setScript("RESULT_VAR = VAR_1(new Date(), VAR_0);");
+        LinkedFieldMng target = new LinkedFieldMng();
+        target.setColor("#ababab");
+        FieldBindingMng binding = new FieldBindingMng();
+        binding.setTo(List.of(target));
+        binding.setEnhancement(enhancement);
+        ConnectionMng workflow = ConnectionMngFixture.aWorkflowWith(
+                ConnectionMngFixture.aMethod("#ababab", "0_1", "createObject", "https://api.example.test"));
+        workflow.setFieldBindings(List.of(binding));
+        when(globalVariableRepository.findByNameIn(Set.of("pattern", "formatDate"))).thenReturn(List.of(
+                GlobalVariableFixture.aConstant(5L, "pattern", "\"dd.MM\""),
+                GlobalVariableFixture.aScriptVariable(8L, "formatDate", "{}")));
+
+        service.rebuildForWorkflow(WORKFLOW, workflow);
+
+        assertThat(savedUsages())
+                .extracting(GlobalVariableUsage::getVariableId, GlobalVariableUsage::getElementType,
+                        GlobalVariableUsage::getField, GlobalVariableUsage::getAccess)
+                .containsExactly(
+                        tuple(5L, ElementType.ENHANCEMENT, "enhancement.args", Access.READ),
+                        tuple(8L, ElementType.ENHANCEMENT, "enhancement.args", Access.IMPORT));
     }
 
     @Test
