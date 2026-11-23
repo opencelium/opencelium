@@ -14,6 +14,7 @@ import com.becon.opencelium.backend.database.mysql.repository.GlobalVariableUsag
 import com.becon.opencelium.backend.testutil.annotation.SliceTest;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -196,6 +197,25 @@ class GlobalVariableUsageRepositoryTest {
 
         assertThat(usages).extracting(GlobalVariableUsage::getSourceId, GlobalVariableUsage::getElementRef)
                 .containsExactly(tuple(11L, "0_1"), tuple(11L, "0_2"), tuple(12L, "0_1"));
+    }
+
+    @Test
+    @DisplayName("findVariableIdsBySources — each variable of the given sources once, none of other sources or types")
+    void findVariableIdsBySourcesReturnsEachVariableOnceWhenSourcesUseItSeveralTimes() {
+        Long used = persistedVariable("idoitUrl");
+        Long usedTwice = persistedVariable("tenant");
+        Long elsewhere = persistedVariable("other");
+        em.persist(aUsage(used, 11L, "0_1"));
+        em.persist(aUsage(usedTwice, 11L, "0_2"));
+        em.persist(aUsage(usedTwice, 13L, "0_1"));
+        em.persist(aUsage(elsewhere, 12L, "0_1"));
+        em.persist(aUsageOutsideWorkflow(elsewhere, SourceType.CONNECTOR, 11L));
+        em.flush();
+        em.clear();
+
+        Set<Long> variableIds = repository.findVariableIdsBySources(SourceType.WORKFLOW, List.of(11L, 13L));
+
+        assertThat(variableIds).containsExactlyInAnyOrder(used, usedTwice);
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

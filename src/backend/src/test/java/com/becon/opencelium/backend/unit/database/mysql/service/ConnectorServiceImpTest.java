@@ -7,8 +7,10 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -133,15 +135,27 @@ class ConnectorServiceImpTest {
 
         service.save(aNewConnector());
 
-        verify(globalVariableUsageService).checkConnector(checkedValues.capture());
+        verify(globalVariableUsageService).checkConnector(eq(0), checkedValues.capture());
         assertThat(checkedValues.getValue()).containsExactly(entry("url", URL), entry("token", TOKEN));
+    }
+
+    @Test
+    @DisplayName("save — a stored connector is checked by its id, so its references to variables are kept")
+    void saveChecksConnectorByItsIdWhenConnectorIsStored() {
+        givenConnectorIsStoredAs(CONNECTOR_ID);
+        Connector connector = ConnectorFixture.aConnector(CONNECTOR_ID, INVOKER,
+                ConnectorFixture.aStoredField("url", URL, ConnectorFixture.PUBLIC));
+
+        service.save(connector);
+
+        verify(globalVariableUsageService).checkConnector(CONNECTOR_ID, Map.of("url", URL));
     }
 
     @Test
     void saveStoresNothingWhenReferenceIsRejected() {
         Connector connector = aNewConnector();
         GlobalReferenceValidationException rejection = aRejection();
-        doThrow(rejection).when(globalVariableUsageService).checkConnector(any());
+        doThrow(rejection).when(globalVariableUsageService).checkConnector(anyInt(), any());
 
         GlobalReferenceValidationException thrown =
                 catchThrowableOfType(() -> service.save(connector), GlobalReferenceValidationException.class);
@@ -173,7 +187,7 @@ class ConnectorServiceImpTest {
     void updateRequestDataStoresNothingWhenReferenceIsRejected() {
         Map<String, String> changed = Map.of("url", URL);
         GlobalReferenceValidationException rejection = aRejection();
-        doThrow(rejection).when(globalVariableUsageService).checkConnector(changed);
+        doThrow(rejection).when(globalVariableUsageService).checkConnector(CONNECTOR_ID, changed);
 
         GlobalReferenceValidationException thrown = catchThrowableOfType(
                 () -> service.updateRequestData(CONNECTOR_ID, changed), GlobalReferenceValidationException.class);

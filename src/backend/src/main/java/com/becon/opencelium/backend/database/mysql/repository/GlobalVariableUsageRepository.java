@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface GlobalVariableUsageRepository extends JpaRepository<GlobalVariableUsage, Long> {
@@ -17,6 +18,17 @@ public interface GlobalVariableUsageRepository extends JpaRepository<GlobalVaria
     List<GlobalVariableUsage> findByVariableIdOrderBySourceTypeAscSourceIdAscElementRefAscIdAsc(Long variableId);
 
     boolean existsByVariableId(Long variableId);
+
+    /**
+     * Returns the variables some sources of one type use as they are stored, each once.
+     *
+     * @param sourceIds the sources; not empty
+     * @return the ids of the variables; empty if the sources use none or do not exist
+     */
+    @Query("SELECT DISTINCT u.variableId FROM GlobalVariableUsage u"
+            + " WHERE u.sourceType = :sourceType AND u.sourceId IN :sourceIds")
+    Set<Long> findVariableIdsBySources(@Param("sourceType") GlobalVariableUsage.SourceType sourceType,
+                                       @Param("sourceIds") Collection<Long> sourceIds);
 
     /**
      * Counts the usages of several variables at once.

@@ -106,8 +106,8 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
     // ------------------------------------------------------------------ connectors
 
     @Override
-    public void checkConnector(Map<String, String> requestData) {
-        referenceValidator.validateConnector(requestData);
+    public void checkConnector(int connectorId, Map<String, String> requestData) {
+        referenceValidator.validateConnector(savedIdOf(connectorId), requestData);
     }
 
     @Override
@@ -232,7 +232,13 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
 
         Connection workflow = notification.getScheduler().getConnection();
 
-        return Optional.of(new NotificationTarget(notification.getName(), workflow.getId(), workflow.getCategoryId()));
+        return Optional.of(new NotificationTarget(notification.getName(), null, workflow.getId(),
+                workflow.getCategoryId(), savedIdOf(notification.getId())));
+    }
+
+    /** Returns the id of a connector or a notification, or {@code null} for one not saved yet. */
+    private static Long savedIdOf(Integer id) {
+        return id == null || id == NOT_SAVED_YET ? null : id.longValue();
     }
 
     /**
@@ -288,7 +294,7 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
                     notificationsByTemplate.computeIfAbsent(templateId, id -> new ArrayList<>())
                             .add(new NotificationTarget(notification.getName(),
                                     scheduleName(notification.getScheduleId(), notification.getScheduleTitle()),
-                                    connectionId, categoryId));
+                                    connectionId, categoryId, savedIdOf(notification.getId())));
                 }
             }
 
@@ -327,7 +333,7 @@ public class GlobalVariableUsageServiceImp implements GlobalVariableUsageService
             if (template != null && textsByTemplate.containsKey(template.getId())) {
                 notificationsByTemplate.computeIfAbsent(template.getId(), id -> new ArrayList<>())
                         .add(new NotificationTarget(notification.getName(), scheduleName,
-                                workflow.getId(), workflow.getCategoryId()));
+                                workflow.getId(), workflow.getCategoryId(), savedIdOf(notification.getId())));
             }
         }
 

@@ -220,6 +220,40 @@ class GlobalVariableUsageServiceImpTest {
     // ── connectors ────────────────────────────────────────────────────────────
 
     @Test
+    @DisplayName("checkConnector — a stored connector is checked by its id, so its references to variables are kept")
+    void checkConnectorPassesIdWhenConnectorIsStored() {
+        Map<String, String> requestData = Map.of("url", "{{global.idoitUrl}}/api");
+
+        service.checkConnector((int) CONNECTOR, requestData);
+
+        verify(referenceValidator).validateConnector(CONNECTOR, requestData);
+    }
+
+    @Test
+    @DisplayName("checkConnector — a connector saved for the first time has id 0 and keeps nothing")
+    void checkConnectorPassesNoIdWhenConnectorIsNew() {
+        Map<String, String> requestData = Map.of("url", "{{global.idoitUrl}}/api");
+
+        service.checkConnector(0, requestData);
+
+        verify(referenceValidator).validateConnector(null, requestData);
+    }
+
+    @Test
+    @DisplayName("checkNotification — a notification saved for the first time has id 0 and keeps nothing")
+    void checkNotificationPassesNoIdWhenNotificationIsNew() {
+        EventMessage template = GlobalVariableFixture.aTemplate(TEMPLATE, "Failure template",
+                GlobalVariableFixture.aTemplateContent("en", null, "See {{global.supportUrl}}"));
+        EventNotification notification = GlobalVariableFixture.aNotification(
+                0, "Failure mail", template, GlobalVariableFixture.aScheduleOf(WORKFLOW, 3));
+
+        service.checkNotification(notification);
+
+        verify(referenceValidator).validateNotifications(any(), checkedNotifications.capture());
+        assertThat(checkedNotifications.getValue()).extracting(NotificationTarget::id).containsExactly((Long) null);
+    }
+
+    @Test
     @DisplayName("rebuildForConnector — a usage of a connector names its request data field and no element")
     void rebuildForConnectorReplacesUsagesWhenRequestDataHoldsReferences() {
         Map<String, String> requestData = new LinkedHashMap<>();
@@ -303,7 +337,7 @@ class GlobalVariableUsageServiceImpTest {
                 entry("en.subject", "{{global.product}} failed"),
                 entry("en.body", "See {{global.supportUrl}}"));
         assertThat(checkedNotifications.getValue())
-                .containsExactly(new NotificationTarget("Failure mail", WORKFLOW, 3));
+                .containsExactly(new NotificationTarget("Failure mail", null, WORKFLOW, 3, (long) NOTIFICATION));
     }
 
     @Test
@@ -406,8 +440,8 @@ class GlobalVariableUsageServiceImpTest {
         verify(referenceValidator).validateNotifications(checkedTexts.capture(), checkedNotifications.capture());
         assertThat(checkedTexts.getValue()).containsExactly(entry("en.body", "See {{global.supportUrl}}"));
         assertThat(checkedNotifications.getValue()).containsExactly(
-                new NotificationTarget("Nightly", 11L, 3),
-                new NotificationTarget("Weekly", 12L, null));
+                new NotificationTarget("Nightly", null, 11L, 3, 21L),
+                new NotificationTarget("Weekly", null, 12L, null, 22L));
     }
 
     @Test
@@ -577,7 +611,7 @@ class GlobalVariableUsageServiceImpTest {
         verify(referenceValidator).validateNotifications(checkedTexts.capture(), checkedNotifications.capture());
         assertThat(checkedTexts.getValue()).containsExactly(entry("en.body", "See {{global.supportUrl}}"));
         assertThat(checkedNotifications.getValue())
-                .containsExactly(new NotificationTarget("Failure mail", "'Nightly'", WORKFLOW, 4));
+                .containsExactly(new NotificationTarget("Failure mail", "'Nightly'", WORKFLOW, 4, (long) NOTIFICATION));
     }
 
     @ParameterizedTest
@@ -675,7 +709,7 @@ class GlobalVariableUsageServiceImpTest {
         verify(referenceValidator).validateNotifications(checkedTexts.capture(), checkedNotifications.capture());
         assertThat(checkedTexts.getValue()).containsExactly(entry("en.body", "See {{global.supportUrl}}"));
         assertThat(checkedNotifications.getValue())
-                .containsExactly(new NotificationTarget("Failure mail", "'Nightly'", 12L, 4));
+                .containsExactly(new NotificationTarget("Failure mail", "'Nightly'", 12L, 4, (long) NOTIFICATION));
     }
 
     @ParameterizedTest
