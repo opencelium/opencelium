@@ -334,10 +334,34 @@ opencelium:
   #                     takes precedence over this file.                    #
   #   max-value-bytes - largest value of one global variable, in bytes      #
   #                                                                         #
+  #   max-script-bytes  - largest code of one script variable, in bytes     #
+  #   script-timeout-ms - how long, in milliseconds, an enhancement that    #
+  #                       imports a script variable may run in a workflow,  #
+  #                       and how long a test run of a script may take      #
+  #                                                                         #
+  #   queue - a workflow that uses a mutable global variable runs one       #
+  #           execution at a time; with busy policy Queue a further start   #
+  #           waits for the running one                                     #
+  #     max-waiting      - how many starts may wait per workflow; one more  #
+  #                        is refused                                       #
+  #     max-wait-minutes - how long a start may wait before it is dropped   #
+  #                                                                         #
+  #   change-log - the change history of every global variable              #
+  #     max-run-entries - how many entries of run writes it keeps per       #
+  #                       variable; a run adds one entry per variable it    #
+  #                       wrote, and past the limit the oldest go first     #
+  #                                                                         #
   ###########################################################################
   global-variable:
     secret-key: ""
     max-value-bytes: 65536
+    max-script-bytes: 262144
+    script-timeout-ms: 5000
+    queue:
+      max-waiting: 100
+      max-wait-minutes: 60
+    change-log:
+      max-run-entries: 200
   ###########################################################################
   #                                                                         #
   #   Configuration for Notification                                        #
