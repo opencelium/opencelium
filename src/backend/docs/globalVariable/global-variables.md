@@ -56,7 +56,8 @@ usages first.
 A value is stored as JSON and keeps its type: text, number, boolean, null, list or map, nested
 to any depth. There is no separate type field; the type is whatever you entered.
 
-- Whole numbers and decimals keep their precision.
+- Whole numbers keep all their digits. A decimal is kept as a double-precision number, about
+  15 significant digits; send one that needs more as text.
 - Dates are ISO-8601 text, for example `"2026-11-17T22:00:00Z"`. Binary data is not supported.
 - One value may take up to 64 KB as JSON text. An administrator can change the limit, see
   [Limits and settings](#11-limits-and-settings).
@@ -100,8 +101,9 @@ Scope is checked at three moments:
 
 1. **When you save** a workflow, connector, notification or notification template. The save is
    refused and every offending reference is listed with its place.
-2. **When a run starts**, because a scope can change after the save. The run stops before its
-   first step and the reason is written to the execution log.
+2. **When a run starts**, because a scope can change after the save. The run fails before its
+   first step. The reason goes to the workflow's live channel (websocket) and to the alert
+   notifications of the schedule, not to the execution log.
 3. **When you change the variable** in a way that would leave out something that uses it. The
    change is refused with the list of usages, see
    [Changing a variable that is in use](#9-changing-a-variable-that-is-in-use).
@@ -120,7 +122,7 @@ CREATE, UPDATE and DELETE for the matching actions.
 | Permission | Allows |
 |------------|--------|
 | Use | See the variable and its value, and reference it in workflows, connectors and notifications |
-| Edit | Use, plus change the name, description, value, script, parameters and scope |
+| Edit | Use, plus change the name, description, value, script, parameters, scope and settings, and reset or restore the value |
 | Delete | Use, plus delete the variable |
 | Owner | Everything, plus manage the permissions of other users |
 
@@ -157,7 +159,7 @@ To send the characters `{{global.name}}` as literal text, put a backslash in fro
 
 | Place | Read a constant or mutable variable | Call a script variable | Write a mutable variable |
 |-------|-------------------------------------|------------------------|--------------------------|
-| Method: endpoint, headers, body | Yes | No | Yes, see [Writing](#72-writing-the-value) |
+| Method: endpoint, headers, body | Yes | No | Yes, in its `globalWrites`, see [Writing](#72-writing-the-value) |
 | Operator: condition, loop source | Yes | No | No |
 | Enhancement of a field binding | Yes, in its args or with `ref("{{global.name}}")` in its code | Yes, see [Script variables](#8-script-variables) | Yes, with `set()` in JavaScript |
 | Connector: its request data fields | Yes, scope *All workflows* only | No | No |
@@ -213,6 +215,11 @@ shared by all runs and survives a restart of OpenCelium.
 Only runs of the **owner workflow** write the variable. Every other workflow in scope can read
 it, and reads the live value.
 
+The reference picker shows, for each mutable variable, its owner workflow, and the globalWrites
+editor and `set()` offer only the variables the workflow being edited owns. A workflow that is
+not saved yet owns nothing: save it first, make it the owner workflow of the variable, then add
+the writes.
+
 A write always replaces the whole value. There is no write to a path inside it. The size limit
 of a value applies to a written value too.
 
@@ -221,7 +228,7 @@ written `global.name`, without braces and without a path:
 
 ```json
 "globalWrites": {
-  "global.lastSync": "#00A3FF.(response).body.serverTime",
+  "global.lastSync": "#00A3FF.(response).body.$.serverTime",
   "global.syncState": "{\"status\": \"ok\", \"page\": 1}"
 }
 ```
@@ -250,7 +257,7 @@ Good to know:
 ### 7.3 One run at a time
 
 A workflow that uses a mutable variable, even one that only reads it, runs one execution at a
-time. While it runs, a second start of the *same* workflow follows the busy policy of the
+time. So does the owner workflow of a mutable variable. While it runs, a second start of the *same* workflow follows the busy policy of the
 variable:
 
 | Busy policy | What happens to the second start |
@@ -266,16 +273,26 @@ variable:
 - Workflows that use only constants and scripts are not affected. They run in parallel as before.
 
 **Queue limits.** At most 100 starts wait per workflow, and a start waits at most 60 minutes.
-Past either limit the start is refused or dropped.
+Past either limit the start is refused or dropped. A second start of the *schedule* that is
+running waits outside the queue until that run ends, so the limits do not count it meanwhile;
+then it is handled like any other start.
 
 **Scheduled starts.** A schedule keeps at most one waiting start fired by its timer. Further
 timer fires of that schedule are skipped while one waits. Manual starts and webhook starts are
 all kept, because each was asked for or carries its own data.
 
-**What you see when a start is refused.** It is recorded as a failed execution of its schedule,
-with the reason. A manual start and a webhook call also get the answer directly: HTTP 409 with
-code `BUSY`. Webhook starts refused while a run is going, and skipped timer fires, are counted
-and reported once per schedule when the run ends, not once per call.
+**What you see when a start is refused.**
+
+| Start | Refused | What you see |
+|-------|---------|--------------|
+| Manual start | On the call | HTTP 409 with code `BUSY`. Nothing is recorded. |
+| Webhook call | On the call | HTTP 409 with code `BUSY`. The refused calls are counted, and when the run ends each schedule gets one failed execution that names how many there were. |
+| Timer fire | Skipped while an earlier fire of its schedule waits | Counted and recorded like refused webhook calls. |
+| Any start | Later: when it was about to run, or it waited too long | A failed execution of its schedule. |
+
+A failed execution of a refused start starts and ends at once. Its execution log holds the
+reason only with debug mode on, and no notification is sent. Every recorded refusal also goes to
+the workflow's live channel (websocket).
 
 **After a restart.** Every workflow is free again. Starts that were waiting are lost; a schedule
 fires again at its next time.
@@ -297,7 +314,7 @@ and enhancement code calls it.
 | Part | Rules |
 |------|-------|
 | Language | JavaScript (`js`), Python 3 (`python3`) or Ruby (`ruby`). Cannot change after creation. |
-| Code | The *body* of the function. You do not write the function header. At most 256 KB. |
+| Code | The *body* of the function. You do not write the function header. At most 256 KB, together with the parameters. |
 | Parameters | In the order a call passes them. Each has a name, a description, and either is required or has a default value. |
 
 Language rules:
@@ -323,7 +340,7 @@ it as one of its args and its code calls it as a function:
 
 ```json
 "enhancement": {
-  "args":   "//var RESULT_VAR = #FFCF00.(request).body.title; //var VAR_0 = #00A3FF.(response).body.created; //var VAR_1 = {{global.formatDate}}; //var VAR_2 = {{global.tenantPrefix}};",
+  "args":   "//var RESULT_VAR = #FFCF00.(request).body.$.title; //var VAR_0 = #00A3FF.(response).body.$.created; //var VAR_1 = {{global.formatDate}}; //var VAR_2 = {{global.tenantPrefix}};",
   "script": "RESULT_VAR = VAR_2 + '-' + VAR_1(VAR_0, 'dd.MM');"
 }
 ```
@@ -387,7 +404,9 @@ save is refused with `VERSION_CONFLICT`. Reload and repeat your change.
 
 Every variable keeps a change log, newest entry first: creation, value changes, changes of
 scope and other settings, permission changes, resets, restores and deletion. A user with Edit
-permission can **restore** the value an entry saved.
+permission can **restore** the value that a creation, a value change or an earlier restore
+saved. For a mutable variable that is the initial value; use **Reset** afterwards to make it the
+current value too. For a script it is the whole script.
 
 Writes by runs are logged too, as one entry per run and variable: the value before the run's
 first write, the value of its last write and how often it wrote. The log keeps the newest 200
@@ -397,20 +416,21 @@ of these entries per variable.
 
 ## 10. What a run does
 
-1. It collects the variables in scope of the workflow and takes a **snapshot** of them before
-   its first step.
-2. If the workflow uses a mutable variable and is already running, the start waits or is
+1. If the workflow uses a mutable variable and is already running, the start waits or is
    refused, see [One run at a time](#73-one-run-at-a-time).
-3. It checks that every referenced variable exists and is in scope. If not, the run stops
+2. It collects the variables in scope of the workflow and takes a **snapshot** of them before
+   its first step. A start that waited takes it when it leaves the queue.
+3. It checks that every referenced variable exists and is in scope. If not, the run fails
    before its first step.
 4. During the run it reads constants from the snapshot, reads mutable variables live, and runs
    scripts in the version from the snapshot.
 5. It stores each write to a mutable variable at once.
 6. When it ends, it frees the workflow and the next waiting start begins.
 
-The execution log lists the snapshot: the name and version of each variable and, within limits,
-its value. A value over 4 KB, or values past 32 KB in total for one run, are listed with their
-size instead. Secrets are masked.
+With debug mode on, the execution log lists the snapshot: the name and version of every variable
+in scope of the workflow, used or not, and, within limits, its value. A value over 4 KB, or
+values past 32 KB in total for one run, are listed with their size instead. Secrets are masked.
+A script is listed with its definition as its value.
 
 ---
 
@@ -447,7 +467,7 @@ reference, each with its message, the variable and the place.
 | `NOT_MUTABLE` | A write targets a constant or a script |
 | `NOT_OWNER` | A workflow writes a mutable variable whose owner is another workflow |
 | `SCRIPT_NOT_CALLABLE` | A script variable is used other than as the whole value of an enhancement arg |
-| `IMPORT_LANGUAGE_MISMATCH` | A script is imported into an enhancement of another language |
+| `IMPORT_LANGUAGE_MISMATCH` | A script is imported into an enhancement of another language, or of none |
 
 ### Saving a variable
 
@@ -463,18 +483,20 @@ The most common codes:
 | `SECRET_NOT_ALLOWED` | A mutable or script variable was marked as a secret |
 | `SECRET_REMOVAL_NEEDS_VALUE` | A secret was made visible without a new value |
 | `SCRIPT_SYNTAX`, `NO_RETURN_VALUE`, `SCRIPT_NOT_PURE` | The code does not parse, a JavaScript script returns nothing, or it calls `ref()` or `set()` |
-| `PARAMETER_INVALID` | A parameter name is not valid, is reserved or is declared twice, or a required parameter has a default |
+| `PARAMETER_INVALID` | A parameter name is not valid, is reserved or is declared twice, its description is over 512 characters, or a required parameter has a default |
+| `SCRIPT_HAS_NO_VALUE` | A script variable was saved with a value, or its value was asked for |
 | `SCRIPT_ENGINE_UNAVAILABLE` | The polyglot service that checks Python and Ruby code did not answer |
 | `NOT_RESTORABLE` | The change log entry holds no value to restore, or the variable is a secret |
 
 A conflict answers HTTP 409 with error `GLOBAL_VARIABLE_CONFLICT` and one of `VERSION_CONFLICT`,
-`IN_USE`, `SCOPE_NARROWING`, `PARAMETER_BREAKING` or `BUSY`. Except for a version conflict it
-lists the usages that block the change.
+`IN_USE`, `SCOPE_NARROWING`, `PARAMETER_BREAKING` or `BUSY`. For `IN_USE`, `SCOPE_NARROWING` and
+`PARAMETER_BREAKING` it lists the usages that block the change; for the other two the list is
+empty.
 
 ### During a run
 
 A reference that cannot be resolved, a write that is not allowed and a failing script fail the
-step. The message names the variable and is written to the execution log.
+step. The message names the variable and, with debug mode on, is written to the execution log.
 
 ---
 
@@ -482,10 +504,15 @@ step. The message names the variable and is written to the execution log.
 
 For integrations and scripts. All paths are under `/global-variable`.
 
+"Needs" names a role permission (upper case) or a permission on the variable. A permission on
+the variable also needs the role permission: READ to read, UPDATE to change, restore or reset,
+DELETE to delete, and UPDATE or DELETE for the impact preview. Reading or replacing the grants
+needs READ or UPDATE besides being the owner or an administrator.
+
 | Method and path | Purpose | Needs |
 |-----------------|---------|-------|
 | `POST /global-variable` | Create a variable | Role permission CREATE |
-| `GET /global-variable/all` | List, paged. Filters: `search`, `kind` | Use |
+| `GET /global-variable/all` | List, paged. Filters: `search`, `kind`. Shows only the variables you may use | Role permission READ |
 | `GET /global-variable/{id}` | Read one variable | Use |
 | `GET /global-variable/unique/{name}` | Check that a name is free | Role permission READ |
 | `PUT /global-variable/{id}` | Change. The body carries the version that was loaded | Edit |
@@ -497,9 +524,9 @@ For integrations and scripts. All paths are under `/global-variable`.
 | `GET /global-variable/{id}/changes` | Change log, newest first, paged | Use |
 | `POST /global-variable/{id}/restore/{changeId}` | Restore the value a change log entry saved | Edit |
 | `POST /global-variable/{id}/reset` | Set a mutable variable back to its initial value | Edit |
-| `GET /global-variable/picker` | Variables usable in one place: `connectionId`, `categoryId`, `connectorId` or `schedulerId` | Use |
+| `GET /global-variable/picker` | Variables usable in one place: `connectionId`, `categoryId`, `connectorId` or `schedulerId`. For a mutable variable it names the owner workflow and tells whether the `connectionId` workflow may write it | Role permission READ; lists only variables you may use |
 | `POST /global-variable/validate-script` | Check and test-run a script without saving | Role permission CREATE or UPDATE |
-| `GET /global-variable/values` | Current values of constants and mutable variables | Use |
+| `GET /global-variable/values` | Current values of constants and mutable variables | Role permission READ; returns only variables you may use |
 
 ### Current values
 

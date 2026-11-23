@@ -236,7 +236,8 @@ public class GlobalVariableController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The variable with the restored value.",
                     content = @Content(schema = @Schema(implementation = GlobalVariableDTO.class))),
-            @ApiResponse(responseCode = "400", description = "The version is missing or the entry holds no value.",
+            @ApiResponse(responseCode = "400",
+                    description = "The version is missing, the entry holds no value, or the variable is a secret.",
                     content = @Content(schema = @Schema(implementation = GlobalVariableErrorResource.class))),
             @ApiResponse(responseCode = "403", description = "The caller has no EDIT permission on it.",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),

@@ -25,6 +25,7 @@ public class GlobalVariableValidationException extends RuntimeException {
         GRANT_INVALID,
         IDS_REQUIRED,
         TOO_MANY_IDS,
+        // a script variable has no value: its value is asked for, or a save sends one
         SCRIPT_HAS_NO_VALUE,
         // the values are asked for by ids and by a workflow at once
         VALUES_TARGET_AMBIGUOUS,
@@ -36,7 +37,7 @@ public class GlobalVariableValidationException extends RuntimeException {
         OWNER_WORKFLOW_INVALID,
         // a field that only a mutable variable has was given for another kind
         MUTABLE_ONLY,
-        // runs write a mutable variable, so it cannot be a secret
+        // only a constant can be a secret: runs write a mutable variable, and a script holds code
         SECRET_NOT_ALLOWED,
         // only a mutable variable has a current value to reset
         NOT_MUTABLE,
@@ -50,11 +51,12 @@ public class GlobalVariableValidationException extends RuntimeException {
         LANGUAGE_CHANGE_NOT_ALLOWED,
         // the code does not parse as the body of a function
         SCRIPT_SYNTAX,
-        // the code has no 'return' with a value
+        // JavaScript code has no 'return' with a value; Python and Ruby code needs none
         NO_RETURN_VALUE,
         // the code calls ref() or set(), which a script, using only its parameters, does not
         SCRIPT_NOT_PURE,
-        // a parameter name is not an identifier, is reserved or is declared twice
+        // a parameter name is not an identifier, is reserved or is declared twice, its description
+        // is too long, or a required parameter has a default
         PARAMETER_INVALID,
         // the polyglot service, which checks the code of a Python 3 or Ruby script, is off, down or did not answer
         SCRIPT_ENGINE_UNAVAILABLE

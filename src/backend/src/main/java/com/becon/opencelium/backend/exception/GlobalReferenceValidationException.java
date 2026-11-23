@@ -20,18 +20,27 @@ public class GlobalReferenceValidationException extends RuntimeException {
         SCOPE_NOT_ALL,
         /** The saving user holds no VIEW_USE permission on the variable. */
         NO_USE_PERMISSION,
-        /** A write target of a method is not {@code global.name}: it is missing, has braces, a path or more text. */
+        /**
+         * A write target is not {@code global.name} in a method's {@code globalWrites}, or not
+         * {@code {{global.name}}} in {@code set()}: it is missing, has a path or more text.
+         */
         INVALID_WRITE_TARGET,
-        /** A method writes a variable that is not mutable. */
+        /** A method or {@code set()} writes a variable that is not mutable. */
         NOT_MUTABLE,
-        /** A method writes a mutable variable whose owner is another workflow. */
+        /**
+         * A method or {@code set()} writes a mutable variable whose owner is another workflow, or
+         * the workflow is saved for the first time and owns nothing yet.
+         */
         NOT_OWNER,
         /**
          * A script variable is referenced other than as the whole value of an enhancement arg,
          * {@code //var VAR_n = {{global.name}};}, or with a path.
          */
         SCRIPT_NOT_CALLABLE,
-        /** A script variable is imported into an enhancement whose language is not JavaScript. */
+        /**
+         * A script variable is imported into an enhancement written in another language than the
+         * script, or in none.
+         */
         IMPORT_LANGUAGE_MISMATCH
     }
 

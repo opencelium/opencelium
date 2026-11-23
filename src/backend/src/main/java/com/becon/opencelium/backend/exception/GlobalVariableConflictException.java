@@ -31,7 +31,7 @@ public class GlobalVariableConflictException extends RuntimeException {
     /**
      * One usage that stands in the way of the change.
      *
-     * @param sourceType   WORKFLOW, CONNECTOR, NOTIFICATION or SCRIPT_VARIABLE
+     * @param sourceType   WORKFLOW, CONNECTOR or NOTIFICATION
      * @param sourceId     id of the source
      * @param sourceTitle  title of the source, {@code null} if it no longer exists
      * @param elementType  kind of the workflow element that holds the reference, {@code null}
@@ -42,7 +42,9 @@ public class GlobalVariableConflictException extends RuntimeException {
      * @param index        index path of the element, {@code null} outside a workflow
      * @param field        where the reference stands: in an element, or the request data field
      *                     of a connector, or the text of a notification template
-     * @param reason       why this usage blocks, the same word as the conflict code
+     * @param reason       why this usage blocks: IN_USE, OUT_OF_SCOPE for a SCOPE_NARROWING
+     *                     conflict, or PARAMETER_BREAKING; CALLS_IN_CODE_NOT_CHECKED for a
+     *                     warning of the impact preview
      * @param parameter    for {@code PARAMETER_BREAKING}, the script parameter whose change breaks
      *                     the calls; otherwise {@code null} and left out of the JSON
      */
