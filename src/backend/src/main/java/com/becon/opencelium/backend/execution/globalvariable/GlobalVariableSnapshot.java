@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.globalvariable;
 
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.exception.WrongDecryptException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,8 +25,9 @@ import java.util.TreeMap;
  * <p>A run takes its snapshot once, before its first step, and reads constants from it only: a
  * change saved while the run is going reaches the next run, not this one. A mutable variable is
  * read live from the store at each read instead, and its entry here is the run's copy of the
- * value it last saw. The snapshot holds the variables in the scope of the workflow only, so a
- * reference to any other variable does not resolve.
+ * value it last saw. A script variable is held as its definition, which an enhancement that
+ * imports it runs; it has no value to read. The snapshot holds the variables in the scope of the
+ * workflow only, so a reference to any other variable does not resolve.
  *
  * <p>The value of a secret is held decrypted, in memory only. Its entry says it is a secret, so
  * what logs or shows a request can hide it with {@link #secretTexts()}.
@@ -47,21 +49,23 @@ public final class GlobalVariableSnapshot {
      *
      * @param name             name of the variable
      * @param version          version of the variable when the snapshot was taken
-     * @param value            the value as a JSON tree; treat it as read-only
+     * @param value            the value as a JSON tree; treat it as read-only. The definition
+     *                         of a script, as {@link GlobalScript#toJson} writes it
      * @param openToAll        whether the scope of the variable is every workflow, which is what
      *                         a connector needs: it is shared by workflows of any category
      * @param secret           whether the variable is a secret, whose value logs must hide
-     * @param mutable          whether the variable is mutable, whose value a run reads live
-     *                         rather than from this snapshot
+     * @param kind             kind of the variable: a mutable one is read live rather than from
+     *                         this snapshot, a script is called rather than read
      * @param unreadableReason why the value of a secret could not be decrypted, {@code null}
      *                         when it could; never holds the stored text
      */
     public record Entry(String name, long version, JsonNode value, boolean openToAll, boolean secret,
-            boolean mutable, String unreadableReason) {
+            GlobalVariableKind kind, String unreadableReason) {
 
         public Entry {
             Objects.requireNonNull(name, "name");
             Objects.requireNonNull(value, "value");
+            Objects.requireNonNull(kind, "kind");
         }
 
         /** Creates the entry of a constant that is open to all workflows and is not a secret. */
@@ -71,7 +75,7 @@ public final class GlobalVariableSnapshot {
 
         /** Creates the entry of a constant that is not a secret. */
         public Entry(String name, long version, JsonNode value, boolean openToAll) {
-            this(name, version, value, openToAll, false, false, null);
+            this(name, version, value, openToAll, false, GlobalVariableKind.CONSTANT, null);
         }
 
         /**
@@ -79,12 +83,20 @@ public final class GlobalVariableSnapshot {
          * was taken. A mutable variable is never a secret.
          */
         public static Entry ofMutable(String name, long version, JsonNode value, boolean openToAll) {
-            return new Entry(name, version, value, openToAll, false, true, null);
+            return new Entry(name, version, value, openToAll, false, GlobalVariableKind.MUTABLE, null);
+        }
+
+        /**
+         * Creates the entry of a script variable, with its definition as {@link GlobalScript#toJson}
+         * writes it. A script is never a secret.
+         */
+        public static Entry ofScript(String name, long version, JsonNode definition, boolean openToAll) {
+            return new Entry(name, version, definition, openToAll, false, GlobalVariableKind.SCRIPT, null);
         }
 
         /** Creates the entry of a secret, with its decrypted value. */
         public static Entry ofSecret(String name, long version, JsonNode value, boolean openToAll) {
-            return new Entry(name, version, value, openToAll, true, false, null);
+            return new Entry(name, version, value, openToAll, true, GlobalVariableKind.CONSTANT, null);
         }
 
         /**
@@ -94,8 +106,18 @@ public final class GlobalVariableSnapshot {
          * @param reason why it could not be decrypted, for the error
          */
         public static Entry ofUnreadableSecret(String name, long version, boolean openToAll, String reason) {
-            return new Entry(name, version, MissingNode.getInstance(), openToAll, true, false,
+            return new Entry(name, version, MissingNode.getInstance(), openToAll, true, GlobalVariableKind.CONSTANT,
                     Objects.requireNonNull(reason, "reason"));
+        }
+
+        /** Tells whether the variable is mutable, whose value a run reads live. */
+        public boolean mutable() {
+            return kind == GlobalVariableKind.MUTABLE;
+        }
+
+        /** Tells whether the variable is a script, which an enhancement imports and calls. */
+        public boolean script() {
+            return kind == GlobalVariableKind.SCRIPT;
         }
 
         /**
@@ -121,8 +143,8 @@ public final class GlobalVariableSnapshot {
         // the value of a secret stays out of whatever prints an entry
         @Override
         public String toString() {
-            return "Entry[name=%s, version=%d, value=%s, openToAll=%b, secret=%b, mutable=%b]"
-                    .formatted(name, version, secret ? MASK : value, openToAll, secret, mutable);
+            return "Entry[name=%s, version=%d, value=%s, openToAll=%b, secret=%b, kind=%s]"
+                    .formatted(name, version, secret ? MASK : value, openToAll, secret, kind);
         }
     }
 
@@ -168,7 +190,7 @@ public final class GlobalVariableSnapshot {
 
         Map<String, Entry> changed = new TreeMap<>(entries);
         changed.put(name, new Entry(name, entry.version(), Objects.requireNonNull(value, "value"),
-                entry.openToAll(), entry.secret(), entry.mutable(), null));
+                entry.openToAll(), entry.secret(), entry.kind(), null));
         return new GlobalVariableSnapshot(Collections.unmodifiableMap(changed));
     }
 

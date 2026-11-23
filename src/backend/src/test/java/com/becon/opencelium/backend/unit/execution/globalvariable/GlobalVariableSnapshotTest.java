@@ -190,6 +190,15 @@ class GlobalVariableSnapshotTest {
     }
 
     @Test
+    void entryIsScriptAndNotMutableWhenCreatedAsScript() {
+        Entry entry = Entry.ofScript("formatDate", 2, new TextNode("definition"), true);
+
+        assertThat(entry.script()).isTrue();
+        assertThat(entry.mutable()).isFalse();
+        assertThat(entry.secret()).isFalse();
+    }
+
+    @Test
     void withValueThrowsWhenVariableIsNotInSnapshot() {
         GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(new Entry("limit", 1, IntNode.valueOf(5))));
 

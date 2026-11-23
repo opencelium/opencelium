@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +20,7 @@ import com.becon.opencelium.backend.database.mysql.service.GlobalVariableScopeRe
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
 import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
 import com.becon.opencelium.backend.exception.WrongDecryptException;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot.Entry;
 import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
@@ -28,6 +30,7 @@ import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import com.becon.opencelium.backend.utility.crypto.GlobalVariableCipher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -277,17 +280,29 @@ class GlobalVariableSnapshotServiceImpTest {
     // ── takeOf ────────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("takeOf — a script variable holds code, not a value, so it is left out")
-    void takeOfLeavesOutScriptVariablesWhenKindsAreMixed() {
+    @DisplayName("takeOf — a script variable is taken as its definition, marked as a script")
+    void takeOfTakesDefinitionWhenVariableIsScript() {
         GlobalVariable constant = GlobalVariableFixture.aConstant(1L, "limits", "{\"maxPerPage\":50}");
-        GlobalVariable mutable = GlobalVariableFixture.aConstant(2L, "counter", "7");
-        mutable.setKind(GlobalVariableKind.MUTABLE);
-        GlobalVariable script = GlobalVariableFixture.aConstant(3L, "nextId", "return counter + 1;");
-        script.setKind(GlobalVariableKind.SCRIPT);
+        String definition = new GlobalScript("js", "return 1;", List.of()).toJson();
+        GlobalVariable script = GlobalVariableFixture.aScriptVariable(3L, "nextId", definition);
 
-        GlobalVariableSnapshot snapshot = service.takeOf(List.of(constant, mutable, script));
+        GlobalVariableSnapshot snapshot = service.takeOf(List.of(constant, script));
 
-        assertThat(snapshot.entries()).extracting(Entry::name).containsExactly("counter", "limits");
+        assertThat(snapshot.entries())
+                .extracting(Entry::name, Entry::script)
+                .containsExactly(tuple("limits", false), tuple("nextId", true));
+        assertThat(snapshot.find("nextId")).get()
+                .extracting(entry -> GlobalScript.fromJson(entry.value().toString()).code())
+                .isEqualTo("return 1;");
+    }
+
+    @Test
+    void takeForAsksForEveryKindWhenWorkflowRuns() {
+        when(globalVariableRepository.findAllWithScopeTargets(any())).thenReturn(List.of());
+
+        service.takeFor(42L);
+
+        verify(globalVariableRepository).findAllWithScopeTargets(EnumSet.allOf(GlobalVariableKind.class));
     }
 
     @Test

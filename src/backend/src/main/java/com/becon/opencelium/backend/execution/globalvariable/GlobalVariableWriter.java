@@ -9,10 +9,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,12 +43,24 @@ public class GlobalVariableWriter {
     private final GlobalVariableRepository repository;
     private final TestRunOrigins testRunOrigins;
     private final int maxValueBytes;
+    private final Duration scriptTimeLimit;
 
+    /**
+     * @param scriptTimeoutMs how long an enhancement that imports a script variable may run
+     */
+    @Autowired
     public GlobalVariableWriter(GlobalVariableRepository repository, TestRunOrigins testRunOrigins,
-            @Value("${opencelium.global-variable.max-value-bytes:65536}") int maxValueBytes) {
+            @Value("${opencelium.global-variable.max-value-bytes:65536}") int maxValueBytes,
+            @Value("${opencelium.global-variable.script-timeout-ms:5000}") long scriptTimeoutMs) {
         this.repository = repository;
         this.testRunOrigins = testRunOrigins;
         this.maxValueBytes = maxValueBytes;
+        this.scriptTimeLimit = Duration.ofMillis(scriptTimeoutMs);
+    }
+
+    /** Creates a writer whose runs give scripts {@link GlobalScript#DEFAULT_TIME_LIMIT}. */
+    public GlobalVariableWriter(GlobalVariableRepository repository, TestRunOrigins testRunOrigins, int maxValueBytes) {
+        this(repository, testRunOrigins, maxValueBytes, GlobalScript.DEFAULT_TIME_LIMIT.toMillis());
     }
 
     /**
@@ -76,6 +90,11 @@ public class GlobalVariableWriter {
         /** Tells whether this run only keeps its writes in memory: a test run of a copy. */
         public boolean isTestRun() {
             return testRun;
+        }
+
+        /** Returns how long an enhancement of this run that imports a script variable may run. */
+        public Duration scriptTimeLimit() {
+            return scriptTimeLimit;
         }
 
         /**

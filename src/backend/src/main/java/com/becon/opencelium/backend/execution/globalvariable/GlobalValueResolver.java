@@ -27,6 +27,7 @@ public final class GlobalValueResolver {
      *
      * @throws GlobalVariableNotFoundException if the snapshot does not hold the variable
      * @throws IllegalArgumentException        if the path of the reference is malformed
+     * @throws IllegalStateException           if the variable is a script, which has no value
      */
     public static Object resolve(GlobalVariableSnapshot snapshot, GlobalReference reference) {
         return resolve(snapshot, reference.getName(), reference.getPath().orElse(null), reference.getRaw());
@@ -67,6 +68,12 @@ public final class GlobalValueResolver {
     }
 
     private static Object read(GlobalVariableSnapshot.Entry entry, String path, String raw) {
+        if (entry.script()) {
+            throw new IllegalStateException(("Global variable '%s' is a script and has no value to read: an enhancement "
+                    + "imports it in its args, //var VAR_n = {{global.%s}};, and calls VAR_n(...)")
+                    .formatted(entry.name(), entry.name()));
+        }
+
         JsonNode node = entry.value();
         if (path != null) {
             node = navigate(node, path, raw);

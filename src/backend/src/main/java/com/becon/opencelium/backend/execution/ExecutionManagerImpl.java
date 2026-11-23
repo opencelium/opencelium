@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.exception.GlobalVariableNotFoundException;
 import com.becon.opencelium.backend.exception.ReferenceNotFoundException;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalLoopSource;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalValueCaster;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalValueResolver;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
@@ -29,6 +30,7 @@ import com.becon.opencelium.backend.scriptengine.LanguageType;
 import com.becon.opencelium.backend.scriptengine.ScriptEngine;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManagerProvider;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -227,18 +231,36 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
         scriptEngine.validate(script.code());
 
-        if (!ReferenceScanner.callsScriptSet(script.code())) {
-            return scriptEngine.execute(script.code(), script.args(), this::getValue);
-        }
-
+        LanguageType language = LanguageType.getByCode(enhancement.getLang());
+        boolean callsSet = ReferenceScanner.callsScriptSet(script.code());
         // set("{{global.x}}", value) records a write that is made once the script has finished
-        if (LanguageType.getByCode(enhancement.getLang()) != LanguageType.JS) {
+        if (callsSet && language != LanguageType.JS) {
             throw new IllegalStateException("set() writes a global variable from JavaScript only, not from '%s'"
                     .formatted(enhancement.getLang()));
         }
 
-        GlobalVariableWriter.ScriptSets.Outcome outcome = GlobalVariableWriter.ScriptSets.unwrap(
-                scriptEngine.execute(GlobalVariableWriter.ScriptSets.wrap(script.code()), script.args(), this::getValue));
+        // //var VAR_1 = {{global.formatDate}}; imports a script variable as a function
+        ImportedScripts imported = importScripts(script.args(), language);
+        String code = imported.functions() + script.code();
+        if (callsSet) {
+            code = GlobalVariableWriter.ScriptSets.wrap(code);
+        }
+
+        Object result;
+        if (imported.functions().isEmpty()) {
+            result = scriptEngine.execute(code, script.args(), this::getValue);
+        } else {
+            // the args are resolved here, on the run's thread, which holds the run's logger
+            Map<String, Object> values = resolveArgs(imported.valueArgs());
+            String importingCode = code;
+            result = GlobalScript.runWithin(scriptTimeLimit(), "The enhancement of field binding " + bindId,
+                    () -> scriptEngine.execute(importingCode, values));
+        }
+        if (!callsSet) {
+            return result;
+        }
+
+        GlobalVariableWriter.ScriptSets.Outcome outcome = GlobalVariableWriter.ScriptSets.unwrap(result);
         for (GlobalVariableWriter.ScriptSets.Write write : outcome.writes()) {
             String name = GlobalVariableWriter.ScriptSets.nameOf(write.target())
                     .orElseThrow(() -> new IllegalStateException(
@@ -247,6 +269,78 @@ public class ExecutionManagerImpl implements ExecutionManager {
         }
 
         return outcome.result();
+    }
+
+    /**
+     * The script variables an enhancement imports, as JavaScript that defines one function per
+     * import, and its other args, which are values.
+     */
+    private record ImportedScripts(String functions, Map<String, String> valueArgs) {
+    }
+
+    /**
+     * Takes the script variables out of an enhancement's args: an arg that is exactly {@code
+     * {{global.name}}} and names a script in the run's snapshot. The script's code is the one
+     * the run started with.
+     *
+     * @throws IllegalStateException if a script is imported into an enhancement of another language
+     */
+    private ImportedScripts importScripts(Map<String, String> args, LanguageType language) {
+        StringBuilder functions = new StringBuilder();
+        Map<String, String> valueArgs = new LinkedHashMap<>();
+
+        for (Map.Entry<String, String> arg : args.entrySet()) {
+            Optional<GlobalVariableSnapshot.Entry> script = importedScript(arg.getValue());
+            if (script.isEmpty()) {
+                valueArgs.put(arg.getKey(), arg.getValue());
+                continue;
+            }
+
+            String name = script.get().name();
+            if (language != LanguageType.JS) {
+                throw new IllegalStateException("Script variable '%s' is JavaScript and cannot be imported into a '%s' enhancement"
+                        .formatted(name, language.getCode()));
+            }
+            functions.append(GlobalScript.fromJson(script.get().value().toString()).functionSource(arg.getKey(), name));
+        }
+
+        return new ImportedScripts(functions.toString(), valueArgs);
+    }
+
+    /** Returns the script an arg imports: {@code {{global.name}}} alone, naming a script. */
+    private Optional<GlobalVariableSnapshot.Entry> importedScript(String arg) {
+        if (arg == null) {
+            return Optional.empty();
+        }
+
+        GlobalReference reference;
+        try {
+            reference = GlobalReference.parse(arg.strip());
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+
+        return reference.getPath().isPresent()
+                ? Optional.empty()
+                : globalSnapshot.find(reference.getName()).filter(GlobalVariableSnapshot.Entry::script);
+    }
+
+    /** Resolves the args of an enhancement as the script engine would, failing the same way. */
+    private Map<String, Object> resolveArgs(Map<String, String> args) {
+        Map<String, Object> values = new HashMap<>(args.size());
+        for (Map.Entry<String, String> arg : args.entrySet()) {
+            try {
+                values.put(arg.getKey(), getValue(arg.getValue()));
+            } catch (Exception e) {
+                throw new ScriptExecutionException(e.getMessage(), e);
+            }
+        }
+
+        return values;
+    }
+
+    private Duration scriptTimeLimit() {
+        return globalWriter != null ? globalWriter.scriptTimeLimit() : GlobalScript.DEFAULT_TIME_LIMIT;
     }
 
     @Override
