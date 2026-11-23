@@ -1,6 +1,6 @@
 import { baseApi } from '@/shared/api/baseApi'
 import {INVOKER_TAG} from "@entities/invoker/api/invoker.tags.ts";
-import type {Invoker, InvokerRepositoryDownload} from "@entities/invoker/model/types.ts";
+import type {Invoker, InvokerPortalSyncResponse, InvokerRepositoryDownload} from "@entities/invoker/model/types.ts";
 
 export const invokerApi = baseApi.injectEndpoints({
     endpoints: (b) => ({
@@ -37,10 +37,25 @@ export const invokerApi = baseApi.injectEndpoints({
                 { type: 'Entity', id: '/invoker/all' },
             ] as never,
         }),
+        // 204 with no body on success; a disabled install answers 200 with `{ result }`.
+        // A 500 can leave earlier files synced, and array-form tags are invalidated on
+        // rejection as well, so the list refetches either way.
+        syncInvokersFromServicePortal: b.mutation<InvokerPortalSyncResponse, void>({
+            query: () => ({
+                url: '/invoker/sync',
+                method: 'PUT',
+                customOptions: { ignoreError: true },
+            }),
+            invalidatesTags: [
+                { type: INVOKER_TAG, id: 'LIST' },
+                { type: 'Entity', id: '/invoker/all' },
+            ] as never,
+        }),
     }),
 })
 
 export const {
     useGetInvokersQuery,
     useDownloadInvokersFromRepositoryMutation,
+    useSyncInvokersFromServicePortalMutation,
 } = invokerApi

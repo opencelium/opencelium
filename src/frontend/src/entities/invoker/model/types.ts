@@ -60,3 +60,6 @@ export type InvokerRepositoryDownload = {
     installed: InvokerMeta[]
     failed: InvokerRepositoryFailure[]
 }
+
+/** `PUT /invoker/sync`: no body (`null`) once synced, `{ result }` when online services are off. */
+export type InvokerPortalSyncResponse = { result: string } | null
