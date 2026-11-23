@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Violation;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity.Caller;
@@ -507,8 +508,8 @@ class GlobalReferenceValidatorTest {
         List<Violation> violations = violationsOf(workflow, WORKFLOW, null);
 
         assertThat(violations).containsExactly(new Violation(Code.SCRIPT_NOT_CALLABLE,
-                "Global variable 'formatDate' is a script and has no value to read; import it in the args of a "
-                        + "JavaScript enhancement as //var VAR_n = {{global.formatDate}}; without a path",
+                "Global variable 'formatDate' is a script and has no value to read; import it in the args of an "
+                        + "enhancement in its language as //var VAR_n = {{global.formatDate}}; without a path",
                 "formatDate", "{{global.formatDate}}", "#ababab", "0_1", "endpoint"));
     }
 
@@ -590,7 +591,8 @@ class GlobalReferenceValidatorTest {
         List<Violation> violations = violationsOf(workflow, WORKFLOW, null);
 
         assertThat(violations).containsExactly(new Violation(Code.IMPORT_LANGUAGE_MISMATCH,
-                "Script variable 'formatDate' is JavaScript and cannot be imported into a 'python3' enhancement",
+                "Script variable 'formatDate' is written in JavaScript and cannot be imported into a 'python3' "
+                        + "enhancement",
                 "formatDate", "{{global.formatDate}}", "#ababab", "0_1", "enhancement.args"));
     }
 
@@ -603,7 +605,31 @@ class GlobalReferenceValidatorTest {
 
         assertThat(violations).extracting(Violation::code, Violation::message).containsExactly(tuple(
                 Code.IMPORT_LANGUAGE_MISMATCH,
-                "Script variable 'formatDate' is JavaScript and cannot be imported into an enhancement without a language"));
+                "Script variable 'formatDate' is written in JavaScript and cannot be imported into an enhancement "
+                        + "without a language"));
+    }
+
+    @Test
+    @DisplayName("validate — a Python script imported by the whole value of a python3 enhancement's arg is accepted")
+    void validateAcceptsScriptWhenPythonScriptIsImportedIntoPythonEnhancement() {
+        givenScript("python3");
+        ConnectionMng workflow = aWorkflowWithBinding(
+                aBinding("//var VAR_1 = {{global.formatDate}};", "RESULT_VAR = VAR_1(VAR_0)", "python3"));
+
+        assertThatCode(() -> validator.validate(workflow, WORKFLOW, null)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void validateReportsImportLanguageMismatchWhenPythonScriptIsImportedIntoJsEnhancement() {
+        givenScript("python3");
+        ConnectionMng workflow = aWorkflowWithBinding(
+                aBinding("//var VAR_1 = {{global.formatDate}};", "RESULT_VAR = VAR_1(VAR_0);", "js"));
+
+        List<Violation> violations = violationsOf(workflow, WORKFLOW, null);
+
+        assertThat(violations).extracting(Violation::code, Violation::message).containsExactly(tuple(
+                Code.IMPORT_LANGUAGE_MISMATCH,
+                "Script variable 'formatDate' is written in Python 3 and cannot be imported into a 'js' enhancement"));
     }
 
     @Test
@@ -701,8 +727,13 @@ class GlobalReferenceValidatorTest {
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private void givenFormatDateScript() {
-        when(globalVariableRepository.findByNameIn(Set.of("formatDate"))).thenReturn(
-                List.of(GlobalVariableFixture.aScriptVariable(8L, "formatDate", "{}")));
+        givenScript("js");
+    }
+
+    /** Script variable formatDate, written in {@code language}. */
+    private void givenScript(String language) {
+        when(globalVariableRepository.findByNameIn(Set.of("formatDate"))).thenReturn(List.of(GlobalVariableFixture
+                .aScriptVariable(8L, "formatDate", new GlobalScript(language, "return 1", List.of()).toJson())));
     }
 
     private static ConnectionMng aWorkflowWithBinding(FieldBindingMng binding) {

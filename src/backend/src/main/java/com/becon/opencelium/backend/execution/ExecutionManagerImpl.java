@@ -253,8 +253,18 @@ public class ExecutionManagerImpl implements ExecutionManager {
             // the args are resolved here, on the run's thread, which holds the run's logger
             Map<String, Object> values = resolveArgs(imported.valueArgs());
             String importingCode = code;
-            result = GlobalScript.runWithin(scriptTimeLimit(), "The enhancement of field binding " + bindId,
-                    () -> scriptEngine.execute(importingCode, values));
+            String what = "The enhancement of field binding " + bindId;
+            if (language == LanguageType.JS) {
+                result = GlobalScript.runWithin(scriptTimeLimit(), what,
+                        () -> scriptEngine.execute(importingCode, values));
+            } else {
+                // each arg names itself, so the polyglot engine converts the resolved values as it
+                // does for an enhancement without imports
+                Map<String, String> names = new LinkedHashMap<>();
+                values.keySet().forEach(name -> names.put(name, name));
+                result = GlobalScript.runWithin(scriptTimeLimit(), what,
+                        () -> scriptEngine.execute(importingCode, names, values::get));
+            }
         }
         if (!callsSet) {
             return result;
@@ -272,8 +282,8 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     /**
-     * The script variables an enhancement imports, as JavaScript that defines one function per
-     * import, and its other args, which are values.
+     * The script variables an enhancement imports, as code in the enhancement's language that
+     * defines one function per import, and its other args, which are values.
      */
     private record ImportedScripts(String functions, Map<String, String> valueArgs) {
     }
@@ -297,12 +307,13 @@ public class ExecutionManagerImpl implements ExecutionManager {
             }
 
             String name = script.get().name();
-            if (language != LanguageType.JS) {
-                throw new IllegalStateException("Script variable '%s' is JavaScript and cannot be imported into a '%s' enhancement"
-                        .formatted(name, language.getCode()));
-            }
             // parsed once, when the snapshot was taken, not at each call of the enhancement
             GlobalScript definition = globalSnapshot.script(name).orElseThrow();
+            if (!language.getCode().equals(definition.language())) {
+                throw new IllegalStateException(
+                        "Script variable '%s' is written in '%s' and cannot be imported into a '%s' enhancement"
+                                .formatted(name, definition.language(), language.getCode()));
+            }
             functions.append(definition.functionSource(arg.getKey(), name));
         }
 

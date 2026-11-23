@@ -40,11 +40,13 @@ import org.springframework.beans.factory.ObjectProvider;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.mockito.ArgumentCaptor;
 
 /**
  * Unit tests for how {@link ExecutionManagerImpl} is created and which extractor it resolves
@@ -578,8 +580,38 @@ class ExecutionManagerImplTest {
 
         assertThatThrownBy(() -> manager.executeScript("b1"))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("'formatDate' is JavaScript");
+                .hasMessageContaining("'formatDate' is written in 'js'");
         verify(python, never()).execute(anyString(), any(Map.class));
+    }
+
+    @Test
+    @DisplayName("executeScript — a Python script is defined before the code of a python3 enhancement, "
+            + "whose other args the polyglot engine converts as usual")
+    @SuppressWarnings("unchecked")
+    void executeScriptDefinesPythonScriptWhenPythonEnhancementImportsIt() throws Exception {
+        PolyglotEngine python = mock(PolyglotEngine.class);
+        when(python.supports(any())).thenReturn(true);
+        when(python.isUp()).thenReturn(true);
+        when(python.execute(anyString(), any(Map.class), any())).thenReturn("ACME-1");
+        givenScriptEngines(python);
+        String definition = new GlobalScript("python3", "return prefix + '-' + str(len(extra))",
+                List.of(new GlobalScript.Parameter("prefix", null, true, null))).toJson();
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(definition),
+                anEnhancementWithArgs("python3", "RESULT_VAR = VAR_1(VAR_0, 1)",
+                        Map.of("VAR_0", "{{global.tenantPrefix}}", "VAR_1", "{{global.formatDate}}")),
+                Duration.ofSeconds(5));
+
+        assertThat(manager.executeScript("b1")).isEqualTo("ACME-1");
+
+        ArgumentCaptor<String> code = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Map<String, String>> names = ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<Function<String, Object>> values = ArgumentCaptor.forClass(Function.class);
+        verify(python).execute(code.capture(), names.capture(), values.capture());
+        assertThat(code.getValue()).startsWith("def _oc_import_VAR_1():")
+                .contains("VAR_1 = _oc_import_VAR_1()")
+                .endsWith("RESULT_VAR = VAR_1(VAR_0, 1)");
+        assertThat(names.getValue()).containsExactly(Map.entry("VAR_0", "VAR_0"));
+        assertThat(values.getValue().apply("VAR_0")).isEqualTo("ACME");
     }
 
     @Test
