@@ -502,14 +502,20 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<GlobalVariableValueDTO> getValues(List<Long> ids) {
+    public List<GlobalVariableValueDTO> getValues(List<Long> ids, Long workflowId) {
         Caller caller = requireCaller();
 
         Set<Long> wanted = ids == null
                 ? Set.of()
                 : ids.stream().filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new));
+        if (workflowId != null) {
+            if (!wanted.isEmpty()) {
+                throw invalid("workflowId", Code.VALUES_TARGET_AMBIGUOUS, "Give either ids or a workflowId, not both");
+            }
+            return valuesInScopeOf(workflowId, caller);
+        }
         if (wanted.isEmpty()) {
-            throw invalid("ids", Code.IDS_REQUIRED, "Give the ids of the variables to read");
+            throw invalid("ids", Code.IDS_REQUIRED, "Give the ids of the variables to read, or a workflowId");
         }
         if (wanted.size() > MAX_VALUE_IDS) {
             throw invalid("ids", Code.TOO_MANY_IDS, "At most " + MAX_VALUE_IDS + " ids can be read in one call");
@@ -524,7 +530,23 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
             }
         }
 
-        return variables.stream()
+        return toValues(variables.stream());
+    }
+
+    /**
+     * Returns the values of the constants and mutable variables in scope of a workflow that the
+     * caller may use, as the picker of that workflow lists them. Script variables have no stored
+     * value and are left out.
+     */
+    private List<GlobalVariableValueDTO> valuesInScopeOf(long workflowId, Caller caller) {
+        PickerTarget target = pickerTarget(workflowId, null, null, null);
+
+        return toValues(usableIn(target, caller).stream()
+                .filter(variable -> variable.getKind() != GlobalVariableKind.SCRIPT));
+    }
+
+    private List<GlobalVariableValueDTO> toValues(Stream<GlobalVariable> variables) {
+        return variables
                 .sorted(Comparator.comparing(GlobalVariable::getId))
                 .map(variable -> mapper.toValue(variable, beingUpdatedBy(variable)))
                 .toList();

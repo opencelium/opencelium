@@ -1340,7 +1340,7 @@ class GlobalVariableServiceImpTest {
                 GlobalVariableFixture.aConstant(12L, "tenant", "1"),
                 GlobalVariableFixture.aConstant(7L, "idoitUrl", "1"));
 
-        List<GlobalVariableValueDTO> values = service.getValues(List.of(12L, 7L));
+        List<GlobalVariableValueDTO> values = service.getValues(List.of(12L, 7L), null);
 
         assertThat(values).extracting(GlobalVariableValueDTO::id).containsExactly(7L, 12L);
     }
@@ -1353,7 +1353,7 @@ class GlobalVariableServiceImpTest {
                 GlobalVariableFixture.aMutable(12L, "lastSync", "0", "1", 42L),
                 GlobalVariableFixture.aConstant(7L, "idoitUrl", "1"));
 
-        List<GlobalVariableValueDTO> values = service.getValues(List.of(12L, 7L));
+        List<GlobalVariableValueDTO> values = service.getValues(List.of(12L, 7L), null);
 
         assertThat(values).extracting(GlobalVariableValueDTO::beingUpdatedBy).containsExactly(
                 null, new GlobalVariableDTO.BeingUpdatedBy(42L, 511L, started));
@@ -1364,7 +1364,7 @@ class GlobalVariableServiceImpTest {
         when(runGate.holdOf(42L)).thenReturn(Optional.empty());
         givenViewableVariables(GlobalVariableFixture.aMutable(12L, "lastSync", "0", "1", 42L));
 
-        List<GlobalVariableValueDTO> values = service.getValues(List.of(12L));
+        List<GlobalVariableValueDTO> values = service.getValues(List.of(12L), null);
 
         assertThat(values).extracting(GlobalVariableValueDTO::beingUpdatedBy).containsOnlyNulls();
     }
@@ -1372,7 +1372,7 @@ class GlobalVariableServiceImpTest {
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("noIds")
     void getValuesThrowsValidationExceptionWhenNoIdIsGiven(String given, List<Long> ids) {
-        assertThat(violationsOf(() -> service.getValues(ids)))
+        assertThat(violationsOf(() -> service.getValues(ids, null)))
                 .extracting(Violation::field, Violation::code)
                 .containsExactly(tuple("ids", Code.IDS_REQUIRED));
         verify(repository, never()).findViewableByIds(any(), any());
@@ -1389,7 +1389,7 @@ class GlobalVariableServiceImpTest {
     void getValuesThrowsValidationExceptionWhenMoreThan100IdsAreGiven() {
         List<Long> ids = LongStream.rangeClosed(1, 101).boxed().toList();
 
-        List<Violation> violations = violationsOf(() -> service.getValues(ids));
+        List<Violation> violations = violationsOf(() -> service.getValues(ids, null));
 
         assertThat(violations)
                 .extracting(Violation::field, Violation::code)
@@ -1403,7 +1403,7 @@ class GlobalVariableServiceImpTest {
         givenViewableVariables(GlobalVariableFixture.aConstant(100L, "idoitUrl", "1"));
         List<Long> ids = LongStream.rangeClosed(1, 100).boxed().toList();
 
-        List<GlobalVariableValueDTO> values = service.getValues(ids);
+        List<GlobalVariableValueDTO> values = service.getValues(ids, null);
 
         assertThat(values).extracting(GlobalVariableValueDTO::id).containsExactly(100L);
         verify(repository).findViewableByIds(askedIds.capture(), any());
@@ -1416,7 +1416,7 @@ class GlobalVariableServiceImpTest {
         script.setKind(GlobalVariableKind.SCRIPT);
         givenViewableVariables(GlobalVariableFixture.aConstant(5L, "idoitUrl", "1"), script);
 
-        List<Violation> violations = violationsOf(() -> service.getValues(List.of(5L, 7L)));
+        List<Violation> violations = violationsOf(() -> service.getValues(List.of(5L, 7L), null));
 
         assertThat(violations)
                 .extracting(Violation::field, Violation::code)
@@ -1428,7 +1428,7 @@ class GlobalVariableServiceImpTest {
     @Test
     @DisplayName("getValues — an id that is given several times is looked up once")
     void getValuesAsksOnceWhenIdIsGivenTwice() {
-        service.getValues(List.of(7L, 12L, 7L));
+        service.getValues(List.of(7L, 12L, 7L), null);
 
         verify(repository).findViewableByIds(askedIds.capture(), any());
         assertThat(askedIds.getValue()).containsExactlyInAnyOrder(7L, 12L);
@@ -1439,10 +1439,84 @@ class GlobalVariableServiceImpTest {
     void getValuesRestrictsToCallerWhenCallerIsNotAdmin() {
         givenViewableVariables(GlobalVariableFixture.aConstant(7L, "idoitUrl", "1"));
 
-        List<GlobalVariableValueDTO> values = service.getValues(List.of(7L));
+        List<GlobalVariableValueDTO> values = service.getValues(List.of(7L), null);
 
         assertThat(values).extracting(GlobalVariableValueDTO::id).containsExactly(7L);
         verify(repository).findViewableByIds(any(), eq(OWNER_ID));
+    }
+
+    @Test
+    @DisplayName("getValues — a workflow gets the constants and mutable variables in its scope, without scripts")
+    void getValuesReturnsConstantsAndMutablesInScopeWhenWorkflowIsGiven() {
+        givenWorkflow(42L, 3);
+        when(scopeResolver.categoryChainOf(3)).thenReturn(Set.of(3L, 1L));
+        GlobalVariable script = GlobalVariableFixture.aConstant(5L, "buildTitle", null);
+        script.setKind(GlobalVariableKind.SCRIPT);
+        GlobalVariable forOtherWorkflow = aConstantScopedTo("forOtherWorkflow", GlobalVariableScopeTarget.workflow(43));
+        forOtherWorkflow.setId(9L);
+        GlobalVariable forParentCategory = aConstantScopedTo("forParentCategory", GlobalVariableScopeTarget.category(1));
+        forParentCategory.setId(3L);
+        givenUsableVariables(
+                GlobalVariableFixture.aMutable(12L, "lastSync", "0", "1", 42L),
+                script,
+                forOtherWorkflow,
+                GlobalVariableFixture.aConstant(7L, "idoitUrl", "1"),
+                forParentCategory);
+        givenValueMapping();
+
+        List<GlobalVariableValueDTO> values = service.getValues(null, 42L);
+
+        assertThat(values).extracting(GlobalVariableValueDTO::id).containsExactly(3L, 7L, 12L);
+        verify(repository, never()).findViewableByIds(any(), any());
+    }
+
+    @Test
+    void getValuesSaysWhichRunUpdatesMutableWhenWorkflowIsGivenAndOwnerWorkflowRuns() {
+        Instant started = Instant.parse("2026-11-20T10:00:00Z");
+        when(runGate.holdOf(42L)).thenReturn(Optional.of(new WorkflowRunGate.Hold(42L, 511L, started)));
+        givenWorkflow(42L, null);
+        givenUsableVariables(GlobalVariableFixture.aMutable(12L, "lastSync", "0", "1", 42L));
+        givenValueMapping();
+
+        List<GlobalVariableValueDTO> values = service.getValues(null, 42L);
+
+        assertThat(values).extracting(GlobalVariableValueDTO::beingUpdatedBy)
+                .containsExactly(new GlobalVariableDTO.BeingUpdatedBy(42L, 511L, started));
+    }
+
+    @Test
+    void getValuesThrowsValidationExceptionWhenIdsAndWorkflowAreGiven() {
+        List<Violation> violations = violationsOf(() -> service.getValues(List.of(7L), 42L));
+
+        assertThat(violations)
+                .extracting(Violation::field, Violation::code)
+                .containsExactly(tuple("workflowId", Code.VALUES_TARGET_AMBIGUOUS));
+        verify(repository, never()).findViewableByIds(any(), any());
+        verify(repository, never()).findUsableWithScopeTargets(any());
+    }
+
+    @Test
+    @DisplayName("getValues — ids that are all null count as no ids, so the workflow alone is used")
+    void getValuesUsesWorkflowWhenIdsAreOnlyNulls() {
+        givenWorkflow(42L, null);
+        givenUsableVariables(GlobalVariableFixture.aConstant(7L, "idoitUrl", "1"));
+        givenValueMapping();
+
+        List<GlobalVariableValueDTO> values = service.getValues(Arrays.asList(null, null), 42L);
+
+        assertThat(values).extracting(GlobalVariableValueDTO::id).containsExactly(7L);
+    }
+
+    @Test
+    void getValuesThrowsGeneralServiceExceptionWhenWorkflowDoesNotExist() {
+        when(connectionRepository.findById(99L)).thenReturn(Optional.empty());
+
+        GeneralServiceException notFound = catchThrowableOfType(
+                () -> service.getValues(null, 99L), GeneralServiceException.class);
+
+        assertThat(notFound.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(notFound.getError()).isEqualTo("CONNECTION_NOT_FOUND");
+        verify(repository, never()).findUsableWithScopeTargets(any());
     }
 
     // ── impact ────────────────────────────────────────────────────────────────
@@ -2554,6 +2628,11 @@ class GlobalVariableServiceImpTest {
     /** The caller may view these variables; the mapper makes a value with the id and version of each. */
     private void givenViewableVariables(GlobalVariable... variables) {
         when(repository.findViewableByIds(any(), eq(OWNER_ID))).thenReturn(List.of(variables));
+        givenValueMapping();
+    }
+
+    /** The mapper makes a value with the id and version of each variable. */
+    private void givenValueMapping() {
         lenient().when(mapper.toValue(any(), any())).thenAnswer(invocation -> {
             GlobalVariable variable = invocation.getArgument(0);
             return new GlobalVariableValueDTO(variable.getId(), variable.getVersion(), 0L, null, null, null,

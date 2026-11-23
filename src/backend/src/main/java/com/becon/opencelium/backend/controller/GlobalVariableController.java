@@ -185,19 +185,26 @@ public class GlobalVariableController {
         return ResponseEntity.ok(globalVariableService.pick(connectionId, categoryId, connectorId, schedulerId));
     }
 
-    @Operation(summary = "Returns the current value and version of up to 100 variables, for polling")
+    @Operation(summary = "Returns the current value and version of up to 100 variables, or of every constant and "
+            + "mutable variable in scope of a workflow, for polling")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "The values, with an ETag built from the ids and the versions."),
             @ApiResponse(responseCode = "304", description = "Nothing changed since the ETag sent in If-None-Match."),
-            @ApiResponse(responseCode = "400", description = "No id, more than 100 ids, or a script variable.",
+            @ApiResponse(responseCode = "400",
+                    description = "Neither or both of ids and workflowId, more than 100 ids, or a script variable.",
                     content = @Content(schema = @Schema(implementation = GlobalVariableErrorResource.class))),
+            @ApiResponse(responseCode = "404", description = "The workflow does not exist.",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PreAuthorize("@globalVariableSecurity.can('READ')")
     @GetMapping("/values")
     public ResponseEntity<List<GlobalVariableValueDTO>> getValues(
-            @Parameter(description = "Ids of the variables, comma separated") @RequestParam("ids") List<Long> ids) {
-        List<GlobalVariableValueDTO> values = globalVariableService.getValues(ids);
+            @Parameter(description = "Ids of the variables, comma separated")
+            @RequestParam(required = false) List<Long> ids,
+            @Parameter(description = "A saved workflow: the constants and mutable variables in its scope")
+            @RequestParam(required = false) Long workflowId) {
+        List<GlobalVariableValueDTO> values = globalVariableService.getValues(ids, workflowId);
 
         // with a matching If-None-Match Spring answers 304 without a body; no-cache makes the
         // browser ask every time instead of showing a value it kept
