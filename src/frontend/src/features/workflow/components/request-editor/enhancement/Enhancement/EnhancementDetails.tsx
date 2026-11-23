@@ -11,6 +11,8 @@ import EnhancementDescription from '../EnhancementDescription/EnhancementDescrip
 import ScriptLanguage from '../ScriptLanguage/ScriptLanguage';
 import EnhancementScript from '../EnhancementScript/EnhancementScript';
 import { EnhancementImports } from '../EnhancementImports/EnhancementImports';
+import { argNamesOf } from '../EnhancementImports/enhancementImports.utils';
+import { insertCall } from '../EnhancementImports/insertCall';
 import type { Enhancement } from '../../../../types/connection';
 import type { useEnhancementState } from './useEnhancementState';
 
@@ -91,7 +93,8 @@ export function EnhancementDetails({
 						/>
 					</div>
 					<EnhancementImports language={enhancement.language} value={enhancement.imports ?? []}
-						readOnly={readOnly} onChange={onChangeImports} />
+						readOnly={readOnly} onChange={onChangeImports} argNames={argNamesOf(enhancement.args)}
+						onInsert={(call) => insertCall(editor.current, call)} />
 				</>
 			)}
 			<div className="bodyLegacyEnhancementScript">

@@ -4,27 +4,23 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { GlobalVariableKindBadge } from '@entities/globalVariable/ui/GlobalVariableKindBadge';
 import { useGlobalPickerScope, useGlobalVariablePicker } from '@entities/globalVariable/ui/picker/globalPicker';
-import type { PickerItem } from '@entities/globalVariable/model/types';
 import type { Language } from '../../../../types/connection';
-import { isImportable } from './enhancementImports.utils';
+import { isImportable, type ImportCall } from './enhancementImports.utils';
+import { ImportUsageChips } from './ImportUsageChips';
+import { Icon } from '@shared/ui/primitives/Icon';
 
 type Props = {
 	language: Language;
 	value: string[];
 	readOnly?: boolean;
 	onChange: (imports: string[]) => void;
+	// The transformation's own args, which a script call passes on.
+	argNames: string[];
+	// Inserts the call at the script editor's cursor.
+	onInsert?: (call: ImportCall) => void;
 };
 
-const usageOf = (item: PickerItem) => (item.kind === 'SCRIPT'
-	? `${item.name}(${item.parameters.map((parameter) => (parameter.required ? parameter.name : `${parameter.name}?`)).join(', ')})`
-	: item.name);
-
-// A script's parameter descriptions, one per line, for the hover on its call hint.
-const parameterNotes = (item: PickerItem) => (item.kind === 'SCRIPT'
-	? item.parameters.filter((parameter) => parameter.description).map((parameter) => `${parameter.name}: ${parameter.description}`)
-	: []);
-
-export function EnhancementImports({ language, value, readOnly, onChange }: Props) {
+export function EnhancementImports({ language, value, readOnly, argNames, onChange, onInsert }: Props) {
 	const { t } = useI18n('workflow');
 	const hasScope = useGlobalPickerScope() !== null;
 	const { items, isLoading } = useGlobalVariablePicker();
@@ -34,7 +30,14 @@ export function EnhancementImports({ language, value, readOnly, onChange }: Prop
 	if (!hasScope) return null;
 	return (
 		<div className="bodyLegacyEnhancementImports" data-testid="workflow-enhancement-imports">
-			<div className="bodyLegacyEnhancementLabel">{t('enhancement.imports.label')}</div>
+			<div className="bodyLegacyEnhancementLabel bodyLegacyEnhancementImportsLabel">
+				{t('enhancement.imports.label')}
+				<Tooltip content={<div style={{ whiteSpace: 'pre-line' }}>{t('enhancement.imports.info')}</div>} placement="top" maxWidth={420}>
+					<span data-testid="workflow-enhancement-imports-info" style={{ display: 'inline-flex' }}>
+						<Icon name="info" size={14} color="secondary" isSubtle />
+					</span>
+				</Tooltip>
+			</div>
 			<Select
 				mode="multiple"
 				value={value}
@@ -57,17 +60,9 @@ export function EnhancementImports({ language, value, readOnly, onChange }: Prop
 				}))}
 				data-testid="workflow-enhancement-imports-select"
 			/>
-			{selected.length > 0 && (
-				<div className="bodyLegacyEnhancementImportsUsage">
-					{selected.map((item) => {
-						const notes = parameterNotes(item);
-						const usage = <code key={item.name}>{usageOf(item)}</code>;
-						return notes.length > 0
-							? <Tooltip key={item.name} content={<div style={{ whiteSpace: 'pre-line' }}>{notes.join('\n')}</div>} placement="top">{usage}</Tooltip>
-							: usage;
-					})}
-				</div>
-			)}
+			{selected.length > 0
+				? <ImportUsageChips selected={selected} argNames={argNames} onInsert={readOnly ? undefined : onInsert} />
+				: <div className="bodyLegacyEnhancementImportsUsage">{t('enhancement.imports.emptyHint')}</div>}
 		</div>
 	);
 }

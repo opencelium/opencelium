@@ -264,10 +264,17 @@
   margin-bottom: 10px;
 }
 
+.bodyLegacyEnhancementImportsLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .bodyLegacyEnhancementImportsUsage {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 12px;
+  align-items: center;
+  gap: 4px 8px;
   margin-top: 6px;
   font-size: 12px;
   color: var(--color-text-secondary);

@@ -775,7 +775,18 @@
   "enhancement": {
     "imports": {
       "label": "Importe (globale Variablen)",
-      "placeholder": "Globale Variablen in diesem Skript verwenden"
+      "placeholder": "Globale Variablen für dieses Skript auswählen",
+      "info": "Importierte globale Variablen stehen im Code unter ihrem eigenen Namen zur Verfügung:\n• eine Konstante oder veränderliche Variable ist ein Wert: RESULT_VAR = url + VAR_0;\n• eine Skriptvariable ist eine Funktion: RESULT_VAR = formatDate(VAR_0, \"dd.MM\");\nNur Skripte in der Sprache dieser Transformation können importiert werden. Ein Wert wird gelesen, wenn die Transformation läuft: Eine Konstante bleibt gleich, eine veränderliche Variable liefert ihren aktuellen Wert.",
+      "emptyHint": "Wählen Sie oben eine globale Variable und verwenden Sie sie dann im Code über ihren Namen.",
+      "usage": "Im Code verwenden:",
+      "usageInsert": "Zum Einfügen in den Code klicken:",
+      "valueTooltip": "{{name}} enthält den Wert der globalen Variable, wenn diese Transformation läuft.",
+      "scriptTooltip": "{{name}} ist eine Skriptvariable. Rufen Sie sie mit den zu übergebenden Werten auf, zum Beispiel {{call}}.",
+      "clickToInsert": "Klicken, um an der Cursorposition einzufügen.",
+      "optionalParameter": "{{name}} (optional, Standard {{value}})",
+      "parametersHeading": "Ihre Parameter in Reihenfolge (die Namen, die sie in ihrem eigenen Code verwendet):",
+      "requiredParameter": "{{name}} (Pflicht)",
+      "clickToInsertCall": "Klicken, um den Aufruf an der Cursorposition einzufügen; ersetzen Sie dann das markierte Argument durch den zu übergebenden Wert."
     },
     "title": "Transformation",
     "language": "Sprache",
