@@ -27,7 +27,7 @@ public record GlobalScriptTestDTO(
      *
      * @param code    SCRIPT_SYNTAX, NO_RETURN_VALUE, SCRIPT_NOT_PURE, PARAMETER_INVALID,
      *                SCRIPT_REQUIRED, LANGUAGE_NOT_SUPPORTED, MISSING_ARGUMENT, SCRIPT_RUNTIME,
-     *                SCRIPT_TIMEOUT or VALIDATION_UNAVAILABLE
+     *                SCRIPT_TIMEOUT, VALIDATION_UNAVAILABLE or SCRIPT_ENGINE_UNAVAILABLE
      * @param message text for the user
      * @param line    for a syntax error, its line in the code, from 1; {@code null} otherwise
      * @param column  for a syntax error, its column; {@code null} otherwise
@@ -40,7 +40,9 @@ public record GlobalScriptTestDTO(
      * it, and the arguments to call it with.
      *
      * @param name          the name of the variable, for messages; may be left out
-     * @param language      {@code js}; Python and Ruby cannot be tested yet
+     * @param language      {@code js}, {@code python3} or {@code ruby}; Python 3 and Ruby are
+     *                      checked and called on the polyglot service. {@code python2} gets
+     *                      VALIDATION_UNAVAILABLE
      * @param code          the body of the function
      * @param parameters    the declared parameters, as the save request has them
      * @param testArguments the arguments of the test call, in the order of the parameters, any

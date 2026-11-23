@@ -56,7 +56,7 @@ public class GlobalVariableValidationException extends RuntimeException {
         SCRIPT_NOT_PURE,
         // a parameter name is not an identifier, is reserved or is declared twice
         PARAMETER_INVALID,
-        // the polyglot service, which checks the code of a Python script, is off, down or did not answer
+        // the polyglot service, which checks the code of a Python 3 or Ruby script, is off, down or did not answer
         SCRIPT_ENGINE_UNAVAILABLE
     }
 

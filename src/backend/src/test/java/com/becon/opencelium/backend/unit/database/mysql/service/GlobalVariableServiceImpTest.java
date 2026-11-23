@@ -1371,6 +1371,32 @@ class GlobalVariableServiceImpTest {
     }
 
     @Test
+    @DisplayName("pick — the saved workflow is the one whose writes the entries are checked for")
+    void pickChecksWritesOfWorkflowWhenWorkflowIsGiven() {
+        givenWorkflow(42L, null);
+        GlobalVariable lastSync = GlobalVariableFixture.aMutable(5L, "lastSync", "\"a\"", "\"b\"", 42L);
+        givenUsableVariables(lastSync);
+
+        service.pick(42L, null, null, null);
+
+        verify(mapper).toPickerItem(lastSync, 42L);
+    }
+
+    @Test
+    @DisplayName("pick — a notification reads its schedule's workflow but writes nothing")
+    void pickChecksNoWritesWhenSchedulerIsGiven() {
+        Scheduler schedule = new Scheduler();
+        schedule.setConnection(givenWorkflow(42L, null));
+        when(schedulerRepository.findById(11)).thenReturn(Optional.of(schedule));
+        GlobalVariable lastSync = GlobalVariableFixture.aMutable(5L, "lastSync", "\"a\"", "\"b\"", 42L);
+        givenUsableVariables(lastSync);
+
+        service.pick(null, null, null, 11);
+
+        verify(mapper).toPickerItem(lastSync, null);
+    }
+
+    @Test
     void pickReturnsVariablesByNameWhenSeveralMatch() {
         givenUsableVariables(
                 GlobalVariableFixture.aConstant(1L, "tenant", "1"),
@@ -2816,7 +2842,7 @@ class GlobalVariableServiceImpTest {
     /** The caller may use these variables; the mapper makes a picker item with the name of each. */
     private void givenUsableVariables(GlobalVariable... variables) {
         when(repository.findUsableWithScopeTargets(OWNER_ID)).thenReturn(List.of(variables));
-        lenient().when(mapper.toPickerItem(any())).thenAnswer(invocation -> {
+        lenient().when(mapper.toPickerItem(any(), any())).thenAnswer(invocation -> {
             GlobalVariable variable = invocation.getArgument(0);
             return new GlobalVariablePickerItemDTO(variable.getName(), variable.getKind(), null, false, null);
         });

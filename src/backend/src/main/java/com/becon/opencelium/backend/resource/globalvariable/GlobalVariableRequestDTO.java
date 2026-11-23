@@ -71,8 +71,10 @@ public record GlobalVariableRequestDTO(
     /**
      * The script of a script variable.
      *
-     * @param language   {@code js}; Python and Ruby come later
-     * @param code       the body of the function; it returns the result with {@code return}
+     * @param language   {@code js}, {@code python3} or {@code ruby}; it cannot change after
+     *                   creation
+     * @param code       the body of the function; it returns the result with {@code return}, or
+     *                   in Ruby with its last expression
      * @param parameters the declared parameters, in the order a call passes them
      */
     public record Script(String language, String code, List<Parameter> parameters) {

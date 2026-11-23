@@ -179,8 +179,16 @@ public class GlobalVariableMapper {
                 !secret && isRestorable(change));
     }
 
-    public GlobalVariablePickerItemDTO toPickerItem(GlobalVariable variable) {
+    /**
+     * Returns the picker entry of a variable.
+     *
+     * @param workflowId the saved workflow the picker is opened for, whose runs would write the
+     *                   variable; {@code null} when it is opened for anything that never writes:
+     *                   a workflow that is not saved yet, a connector, a notification or nothing
+     */
+    public GlobalVariablePickerItemDTO toPickerItem(GlobalVariable variable, Long workflowId) {
         GlobalScript script = scriptOf(variable);
+        WorkflowRef ownerWorkflow = ownerWorkflowOf(variable);
 
         return new GlobalVariablePickerItemDTO(
                 variable.getName(),
@@ -189,7 +197,9 @@ public class GlobalVariableMapper {
                 variable.isSecret(),
                 variable.isSecret() || script != null ? null : preview(variable.getReadableValue()),
                 script == null ? null : script.language(),
-                script == null ? null : script.parameters());
+                script == null ? null : script.parameters(),
+                ownerWorkflow,
+                ownerWorkflow != null && ownerWorkflow.id().equals(workflowId));
     }
 
     /** Returns the script of a script variable, which its value column holds; {@code null} otherwise. */
@@ -289,7 +299,6 @@ public class GlobalVariableMapper {
             return null;
         }
 
-        Long ownerWorkflowId = variable.getOwnerWorkflowId();
         return new Mutable(
                 readJson(variable.getCurrentValue()),
                 variable.getCurrentRevision(),
@@ -297,7 +306,20 @@ public class GlobalVariableMapper {
                 toActor(variable.getCurrentSetByUser()),
                 variable.getCurrentSetByExecution(),
                 variable.getBusyPolicy(),
-                ownerWorkflowId == null ? null : new WorkflowRef(ownerWorkflowId, workflowTitle(ownerWorkflowId)));
+                ownerWorkflowOf(variable));
+    }
+
+    /**
+     * Returns the owner workflow of a mutable variable with its title; {@code null} for the other
+     * kinds and once the owner workflow is deleted.
+     */
+    private WorkflowRef ownerWorkflowOf(GlobalVariable variable) {
+        Long ownerWorkflowId = variable.getOwnerWorkflowId();
+        if (variable.getKind() != GlobalVariableKind.MUTABLE || ownerWorkflowId == null) {
+            return null;
+        }
+
+        return new WorkflowRef(ownerWorkflowId, workflowTitle(ownerWorkflowId));
     }
 
     private Scope toScope(GlobalVariable variable) {

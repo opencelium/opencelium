@@ -87,6 +87,8 @@ public interface GlobalVariableService {
     /**
      * Lists the variables the user may use in one place, for the reference picker. At most one
      * of the parameters is given; with none, only variables open to all workflows are listed.
+     * Each mutable variable names its owner workflow, and is writable when that is the workflow
+     * of {@code connectionId}.
      *
      * @param connectionId a saved workflow: the variables in its scope
      * @param categoryId   a workflow that is not saved yet: the variables its category reaches

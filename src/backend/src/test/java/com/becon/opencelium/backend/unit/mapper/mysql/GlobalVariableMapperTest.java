@@ -283,7 +283,7 @@ class GlobalVariableMapperTest {
         GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "\"https://cmdb.example\"");
         variable.setDescription("Base URL of i-doit");
 
-        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable);
+        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, null);
 
         assertThat(item).isEqualTo(new GlobalVariablePickerItemDTO(
                 "idoitUrl", GlobalVariableKind.CONSTANT, "Base URL of i-doit", false, "\"https://cmdb.example\""));
@@ -294,10 +294,65 @@ class GlobalVariableMapperTest {
         GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "apiKey", "\"s3cr3t\"");
         variable.setSecret(true);
 
-        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable);
+        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, null);
 
         assertThat(item.secret()).isTrue();
         assertThat(item.valuePreview()).isNull();
+    }
+
+    @Test
+    void toPickerItemReturnsWritableWhenWorkflowOwnsMutableVariable() {
+        givenWorkflowTitled(42L, "VMware to i-doit");
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 42L);
+
+        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, 42L);
+
+        assertThat(item.ownerWorkflow()).isEqualTo(new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"));
+        assertThat(item.writable()).isTrue();
+        assertThat(item.valuePreview()).isEqualTo("\"live\"");
+    }
+
+    @Test
+    void toPickerItemReturnsNotWritableWhenAnotherWorkflowOwnsVariable() {
+        givenWorkflowTitled(43L, "Ivanti to Slack");
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 43L);
+
+        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, 42L);
+
+        assertThat(item.ownerWorkflow()).isEqualTo(new GlobalVariableDTO.WorkflowRef(43L, "Ivanti to Slack"));
+        assertThat(item.writable()).isFalse();
+    }
+
+    @Test
+    @DisplayName("toPickerItem — a workflow that is not saved yet, a connector or a notification never writes")
+    void toPickerItemReturnsNotWritableWhenPickerIsNotOpenedForSavedWorkflow() {
+        givenWorkflowTitled(42L, "VMware to i-doit");
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", 42L);
+
+        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, null);
+
+        assertThat(item.ownerWorkflow()).isEqualTo(new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"));
+        assertThat(item.writable()).isFalse();
+    }
+
+    @Test
+    void toPickerItemReturnsNoOwnerWhenOwnerWorkflowIsDeleted() {
+        GlobalVariable variable = GlobalVariableFixture.aMutable(7L, "lastSync", "\"start\"", "\"live\"", null);
+
+        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, 42L);
+
+        assertThat(item.ownerWorkflow()).isNull();
+        assertThat(item.writable()).isFalse();
+    }
+
+    @Test
+    void toPickerItemReturnsNoOwnerWhenVariableIsConstant() {
+        GlobalVariable variable = GlobalVariableFixture.aConstant(5L, "idoitUrl", "\"https://cmdb.example\"");
+
+        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, 42L);
+
+        assertThat(item.ownerWorkflow()).isNull();
+        assertThat(item.writable()).isFalse();
     }
 
     @Test
@@ -442,7 +497,7 @@ class GlobalVariableMapperTest {
     void toPickerItemReturnsParametersWhenVariableIsScript() {
         GlobalVariable variable = GlobalVariableFixture.aScriptVariable(7L, "formatDate", FORMAT_DATE.toJson());
 
-        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable);
+        GlobalVariablePickerItemDTO item = mapper.toPickerItem(variable, null);
 
         assertThat(item.valuePreview()).isNull();
         assertThat(item.language()).isEqualTo("js");
@@ -608,6 +663,13 @@ class GlobalVariableMapperTest {
         return GlobalVariableChange.writtenByRun(
                 GlobalVariableFixture.aMutable(5L, "lastSync", "\"a\"", "\"a\"", 42L),
                 "\"a\"", "\"d\"", 42L, 900L, 3, new Date());
+    }
+
+    /** The workflow with this id exists under this title. */
+    private void givenWorkflowTitled(long id, String title) {
+        Connection workflow = GlobalVariableFixture.aWorkflow(id, null);
+        workflow.setTitle(title);
+        when(connectionRepository.findById(id)).thenReturn(Optional.of(workflow));
     }
 
     private static User aUser(String email) {

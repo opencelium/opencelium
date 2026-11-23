@@ -386,9 +386,26 @@ class GlobalVariableControllerTest {
                 .andExpect(jsonPath("$[0].name").value("idoitUrl"))
                 .andExpect(jsonPath("$[0].kind").value("CONSTANT"))
                 .andExpect(jsonPath("$[0].secret").value(false))
-                .andExpect(jsonPath("$[0].valuePreview").value("\"https://cmdb.example\""));
+                .andExpect(jsonPath("$[0].valuePreview").value("\"https://cmdb.example\""))
+                .andExpect(jsonPath("$[0].ownerWorkflow").isEmpty())
+                .andExpect(jsonPath("$[0].writable").value(false));
 
         verify(service).pick(42L, null, null, null);
+    }
+
+    @Test
+    void pickReturnsOwnerWorkflowAndWritableWhenVariableIsMutable() throws Exception {
+        when(service.pick(42L, null, null, null)).thenReturn(List.of(new GlobalVariablePickerItemDTO(
+                "lastSync", GlobalVariableKind.MUTABLE, "Cursor for the VMware sync", false,
+                "\"2026-11-17T22:00:00Z\"", null, null, new GlobalVariableDTO.WorkflowRef(42L, "VMware to i-doit"),
+                true)));
+
+        mockMvc.perform(get("/global-variable/picker").param("connectionId", "42").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].kind").value("MUTABLE"))
+                .andExpect(jsonPath("$[0].ownerWorkflow.id").value(42))
+                .andExpect(jsonPath("$[0].ownerWorkflow.title").value("VMware to i-doit"))
+                .andExpect(jsonPath("$[0].writable").value(true));
     }
 
     // ── GET /global-variable/values ───────────────────────────────────────────

@@ -476,9 +476,11 @@ public class GlobalVariableServiceImp implements GlobalVariableService {
         Caller caller = requireCaller();
         PickerTarget target = pickerTarget(connectionId, categoryId, connectorId, schedulerId);
 
+        // only a saved workflow writes; the workflow of a schedule is not one for its
+        // notification, which reads alone, and a workflow that is not saved yet owns nothing
         return usableIn(target, caller).stream()
                 .sorted(Comparator.comparing(GlobalVariable::getName))
-                .map(mapper::toPickerItem)
+                .map(variable -> mapper.toPickerItem(variable, connectionId))
                 .toList();
     }
 
