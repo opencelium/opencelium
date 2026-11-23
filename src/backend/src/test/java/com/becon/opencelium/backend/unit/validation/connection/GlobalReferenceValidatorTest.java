@@ -30,12 +30,14 @@ import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Code;
 import com.becon.opencelium.backend.exception.GlobalReferenceValidationException.Violation;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity;
 import com.becon.opencelium.backend.security.GlobalVariableSecurity.Caller;
 import com.becon.opencelium.backend.testutil.fixture.ConnectionMngFixture;
 import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceValidator;
 import com.becon.opencelium.backend.validation.connection.GlobalReferenceValidator.NotificationTarget;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.junit.jupiter.params.provider.ValueSource;
 import java.util.EnumSet;
 import java.util.List;
@@ -635,6 +637,65 @@ class GlobalReferenceValidatorTest {
 
         assertThat(rejection.getViolations()).extracting(Violation::code, Violation::field)
                 .containsExactly(tuple(Code.SCRIPT_NOT_CALLABLE, "en.subject"));
+    }
+
+    @Test
+    @DisplayName("validateRun — a run whose references are all in its snapshot costs no read")
+    void validateRunReadsNothingWhenEveryReferenceIsInSnapshot() {
+        GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(
+                new GlobalVariableSnapshot.Entry("idoitUrl", 4, new TextNode("https://cmdb.example.test"))));
+
+        assertThatCode(() -> validator.validateRun(aWorkflowUsingIdoitUrl(), snapshot)).doesNotThrowAnyException();
+        verifyNoInteractions(globalVariableRepository, security, scopeResolver);
+    }
+
+    @Test
+    @DisplayName("validateRun — a variable deleted since the save stops the run, and no user is asked about")
+    void validateRunReportsUnknownVariableWhenVariableNoLongerExists() {
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of());
+
+        GlobalReferenceValidationException rejection = rejectionOf(
+                () -> validator.validateRun(aWorkflowUsingIdoitUrl(), GlobalVariableSnapshot.empty()));
+
+        assertThat(rejection.getViolations()).containsExactly(new Violation(
+                Code.UNKNOWN_VARIABLE, "Global variable 'idoitUrl' does not exist",
+                "idoitUrl", "{{global.idoitUrl}}", "#ababab", "0_1", "endpoint"));
+        verifyNoInteractions(security);
+    }
+
+    @Test
+    @DisplayName("validateRun — a variable that still exists but is missing from the snapshot left the workflow "
+            + "out of its scope")
+    void validateRunReportsOutOfScopeWhenVariableExistsButIsNotInSnapshot() {
+        GlobalVariable variable = aVariableScopedTo(GlobalVariableScopeType.CATEGORIES, GlobalVariableScopeTarget.category(9));
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(variable));
+
+        GlobalReferenceValidationException rejection = rejectionOf(
+                () -> validator.validateRun(aWorkflowUsingIdoitUrl(), GlobalVariableSnapshot.empty()));
+
+        assertThat(rejection.getViolations()).extracting(Violation::code, Violation::variable, Violation::index)
+                .containsExactly(tuple(Code.OUT_OF_SCOPE, "idoitUrl", "0_1"));
+        assertThat(rejection.getMessage()).contains("outside the scope").contains("'idoitUrl'");
+    }
+
+    @Test
+    @DisplayName("validateRun — names are matched exactly, as the snapshot matches them")
+    void validateRunReportsUnknownVariableWhenOnlyCaseDiffers() {
+        GlobalVariable otherCase = GlobalVariableFixture.aConstant(5L, "IdoitURL", "1");
+        when(globalVariableRepository.findByNameIn(Set.of("idoitUrl"))).thenReturn(List.of(otherCase));
+
+        GlobalReferenceValidationException rejection = rejectionOf(
+                () -> validator.validateRun(aWorkflowUsingIdoitUrl(), GlobalVariableSnapshot.empty()));
+
+        assertThat(rejection.getViolations()).extracting(Violation::code).containsExactly(Code.UNKNOWN_VARIABLE);
+    }
+
+    @Test
+    @DisplayName("validateRun — a write target that names no variable was refused on save and is not looked up")
+    void validateRunIgnoresWriteTargetWhenItNamesNoVariable() {
+        assertThatCode(() -> validator.validateRun(aWorkflowWriting("{{global.counter}}"), GlobalVariableSnapshot.empty()))
+                .doesNotThrowAnyException();
+        verifyNoInteractions(globalVariableRepository);
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

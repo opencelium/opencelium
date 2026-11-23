@@ -13,6 +13,7 @@ import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
+import com.becon.opencelium.backend.validation.connection.GlobalReferenceValidator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
     private final ConnectionMngService connectionMngService;
     private final ConnectionService connectionService;
     private final GlobalVariableSnapshotService globalVariableSnapshotService;
+    private final GlobalReferenceValidator globalReferenceValidator;
 
     public ExecutionObjectServiceImp(
             Environment environment,
@@ -33,12 +35,14 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
-            GlobalVariableSnapshotService globalVariableSnapshotService) {
+            GlobalVariableSnapshotService globalVariableSnapshotService,
+            GlobalReferenceValidator globalReferenceValidator) {
         this.connectionMapper = connectionMapper;
         this.schedulerService = schedulerService;
         this.connectionMngService = connectionMngService;
         this.connectionService = connectionService;
         this.globalVariableSnapshotService = globalVariableSnapshotService;
+        this.globalReferenceValidator = globalReferenceValidator;
         this.env = environment;
     }
 
@@ -56,6 +60,10 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         GlobalVariableSnapshot globalSnapshot =
                 globalVariableSnapshotService.takeFor(scheduler.getConnection().getId());
         executionObj.setGlobalSnapshot(globalSnapshot);
+
+        // a variable deleted or scoped away since the workflow was saved stops the run here,
+        // before its first step, and not at the step that reads it
+        globalReferenceValidator.validateRun(connectionMng, globalSnapshot);
 
         ConnectionEx connectionEx = connectionMapper.toEntity(connectionMng, globalSnapshot);
         connectionEx.setConnectionId(scheduler.getConnection().getId());
