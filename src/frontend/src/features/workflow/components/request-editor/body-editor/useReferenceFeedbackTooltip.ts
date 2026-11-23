@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { ReferencePathFeedback } from './referencePathSyntax';
+import type { ReferencePathFeedback } from './referenceValidation.utils';
 
 // antd places a tooltip once, when it opens. An error present on the first
 // render of a dialog would open while the dialog still zooms in (~0.3s) and stay

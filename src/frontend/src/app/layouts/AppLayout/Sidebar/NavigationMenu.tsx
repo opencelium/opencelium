@@ -1,3 +1,4 @@
+import { listLocation } from '@shared/navigation/listLocation';
 import { ConfigProvider, Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useRef } from 'react';
@@ -138,7 +139,7 @@ export const NavigationMenu = () => {
                             // letting the browser open the route in a new tab.
                             if (domEvent.metaKey || domEvent.ctrlKey || domEvent.shiftKey) return;
                             domEvent.preventDefault();
-                            navigate(key);
+                            navigate(listLocation(key));
                         }}
                         items={items}
                         selectedKeys={selectedKey ? [selectedKey] : []}

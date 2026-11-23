@@ -381,8 +381,7 @@ export const AntTable = ({
                         showSizeChanger
                         pageSizeOptions={PAGE_SIZE_OPTIONS}
                         onChange={(page, nextSize) => {
-                            if (nextSize !== pageSize) tableInstance.setPageSize(nextSize);
-                            tableInstance.setPageIndex(page - 1);
+                            tableInstance.setPagination({ pageIndex: page - 1, pageSize: nextSize });
                         }}
                     />
                 </div>

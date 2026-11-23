@@ -2,7 +2,7 @@ export function debouncePromise<T extends (...args: unknown[]) => Promise<unknow
     fn: T,
     delay: number
 ): T {
-    let timeout: NodeJS.Timeout | null = null;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
 
     return ((...args: unknown[]) => {
         return new Promise((resolve) => {

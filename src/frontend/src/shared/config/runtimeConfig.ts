@@ -14,11 +14,23 @@ export type OcServerSettings = {
 export type OcRuntimeConfig = {
     server?: OcServerSettings
     socket?: OcServerSettings
+    /** IANA zone the backend's Quartz scheduler runs in (the JVM default zone). */
+    serverTimeZone?: string
 }
 
 export const runtimeConfig = {
     apiUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? '',
     socketUrl: import.meta.env.VITE_SOCKET_URL as string | undefined,
+    serverTimeZone: undefined as string | undefined,
+}
+
+const isValidTimeZone = (zone: string) => {
+    try {
+        new Intl.DateTimeFormat('en', { timeZone: zone })
+        return true
+    } catch {
+        return false
+    }
 }
 
 const buildOrigin = (settings: OcServerSettings | undefined) => {
@@ -39,6 +51,10 @@ export async function loadRuntimeConfig(): Promise<void> {
 
         const socketPrefix = settings.socket?.prefix?.trim() || ''
         runtimeConfig.socketUrl = `${buildOrigin(settings.socket)}${socketPrefix}`
+
+        const zone = settings.serverTimeZone?.trim()
+        if (zone && isValidTimeZone(zone)) runtimeConfig.serverTimeZone = zone
+        else if (zone) console.warn(`config.json: unknown serverTimeZone "${zone}", using the browser time zone`)
     } catch {
         // config.json missing/unreachable — keep the VITE_* dev fallback above.
     }

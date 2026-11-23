@@ -201,5 +201,37 @@
       "byConnectionTitle": "Zeitplan für Workflow „{{connectionTitle}}“ löschen?",
       "byId": "Zeitplan #{{id}} löschen?"
     }
+  },
+  "preview": {
+    "title": "Zeitplanvorschau",
+    "zone": "Zeiten in {{zone}}",
+    "previousMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "nextRuns": "Nächste 5 Ausführungen",
+    "alsoRuns": "Weitere Ausführungstage",
+    "invalid": "Ungültiger oder nicht unterstützter Cron-Ausdruck",
+    "empty": "Keine bevorstehenden Ausführungen"
+  },
+  "calendar": {
+    "three": "Drei Tage",
+    "work": "Arbeitswoche",
+    "prev_three": "Vorherige 3 Tage",
+    "next_three": "Nächste 3 Tage",
+    "view": "Kalenderansicht",
+    "day": "Tag",
+    "week": "Woche",
+    "month": "Monat",
+    "today": "Heute",
+    "prev_day": "Vorheriger Tag",
+    "next_day": "Nächster Tag",
+    "prev_month": "Vorheriger Monat",
+    "next_month": "Nächster Monat",
+    "title": "Kalender",
+    "list": "Liste",
+    "prev": "Vorherige Woche",
+    "next": "Nächste Woche",
+    "hour": "Stunde",
+    "every": "Alle {{count}} Min.",
+    "more": "Weitere Ausführungen"
   }
 }

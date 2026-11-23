@@ -1,11 +1,11 @@
 import { baseApi } from "./baseApi";
 
-export const genericApi = baseApi.injectEndpoints({
+export const genericApi = baseApi.enhanceEndpoints({ addTagTypes: ['Entity'] }).injectEndpoints({
     endpoints: (build) => ({
-        fetchEntities: build.query<any, string>({
+        fetchEntities: build.query<any, string | { url: string; customOptions?: { ignoreError?: boolean } }>({
             query: (url) => url,
             extraOptions: { ignoreError: false },
-            providesTags: (result, error, url) => [{ type: 'Entity' as any, id: url }],
+            providesTags: (_result, _error, url) => [{ type: 'Entity', id: typeof url === 'string' ? url : url.url }],
         }),
         // 🟢 Generic create
         createEntity: build.mutation<any, { url: string; body: any; headers?: Record<string, string> }>({

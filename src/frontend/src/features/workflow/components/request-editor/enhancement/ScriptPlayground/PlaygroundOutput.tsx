@@ -3,12 +3,12 @@ import { Alert } from '@shared/ui/primitives/Alert';
 import { Button } from '@shared/ui/primitives/Button';
 import { Tabs } from '@shared/ui/primitives/Tabs';
 import { issueMessage } from '@features/workflow/script-sandbox/issueMessage';
-import type { CompatibilityIssue } from '@features/workflow/script-sandbox/checkNashornCompatibility';
-import type { SandboxResult } from '@features/workflow/script-sandbox/sandbox.types';
+import type { CompatibilityIssue } from '@features/workflow/script-sandbox/sandbox.types';
+import type { ScriptRunResult } from '@features/workflow/script-sandbox/sandbox.types';
 import { PlaygroundResult } from './PlaygroundResult';
 
 type Props = {
-	result: SandboxResult | null;
+	result: ScriptRunResult | null;
 	issues: CompatibilityIssue[];
 	isStale: boolean;
 	missingNames?: string[];
@@ -17,7 +17,8 @@ type Props = {
 
 export function PlaygroundOutput({ result, issues, isStale, missingNames = [], onLocate }: Props) {
 	const { t } = useI18n('workflow');
-	const consoleLines = result && result.kind !== 'timeout' ? result.console : [];
+	const output = result && result.kind !== 'rejected' ? result.output : '';
+	const consoleLines = output ? output.replace(/\n$/, '').split('\n') : [];
 	const tabLabel = (name: 'result' | 'console' | 'warnings', count = 0) => (
 		<span data-testid={`script-playground-tab-${name}`}>
 			{t(`sandbox.${name}`)}

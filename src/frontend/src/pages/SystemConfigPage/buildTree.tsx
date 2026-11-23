@@ -111,20 +111,36 @@ function buildNodeTitle(node: ConfigNode, args: BuildTreeArgs): React.ReactNode 
     )
 }
 
-function buildNodes(nodes: ConfigNode[], args: BuildTreeArgs): TreeNode[] {
+// application.yml may hold the same key more than once (e.g. commented-out alternatives),
+// so several nodes share a path. rc-tree needs unique keys — duplicate keys make its
+// virtual list re-append rows on every scroll — so repeats get an occurrence suffix.
+const DUPLICATE_KEY_SEPARATOR = '::dup'
+
+function uniqueTreeKey(path: string, seen: Map<string, number>): string {
+    const count = seen.get(path) ?? 0
+    seen.set(path, count + 1)
+    return count === 0 ? path : `${path}${DUPLICATE_KEY_SEPARATOR}${count}`
+}
+
+function treeKeyToPath(key: string): string {
+    const index = key.indexOf(DUPLICATE_KEY_SEPARATOR)
+    return index >= 0 ? key.slice(0, index) : key
+}
+
+function buildNodes(nodes: ConfigNode[], args: BuildTreeArgs, seen: Map<string, number>): TreeNode[] {
     return nodes.map((node) => {
         const container = isContainerNode(node)
         return {
-            key: node.path,
+            key: uniqueTreeKey(node.path, seen),
             isLeaf: !container,
             title: buildNodeTitle(node, args),
-            children: container ? buildNodes(node.value as ConfigNode[], args) : undefined,
+            children: container ? buildNodes(node.value as ConfigNode[], args, seen) : undefined,
         }
     })
 }
 
 export function buildTree(args: BuildTreeArgs): TreeNode[] {
-    return buildNodes(args.fields, args)
+    return buildNodes(args.fields, args, new Map())
 }
 
 export function hasAnyNodeComment(nodes: ConfigNode[]): boolean {
@@ -145,7 +161,7 @@ export function filterTree(nodes: TreeNode[], query: string): TreeNode[] {
     if (!q) return nodes
     const out: TreeNode[] = []
     for (const node of nodes) {
-        if (nodeLabel(node.key).toLowerCase().includes(q)) {
+        if (nodeLabel(treeKeyToPath(node.key)).toLowerCase().includes(q)) {
             out.push(node)
             continue
         }

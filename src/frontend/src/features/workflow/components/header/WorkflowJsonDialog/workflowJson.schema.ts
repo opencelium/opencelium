@@ -75,7 +75,7 @@ const fieldBindingSchema = z.strictObject({
 
 const queryParamSchema = z.strictObject({
 	id: z.string().min(1), key: z.string(), value: z.string(), enabled: z.boolean(),
-	autoEncode: z.boolean().optional(), argId: z.string().optional(),
+	autoEncode: z.boolean().optional(), isFlag: z.boolean().optional(), argId: z.string().optional(),
 });
 const uiConnectorSchema = z.strictObject({
 	connectorId: positiveIdSchema, title: z.string(), icon: z.string().nullable().optional(),

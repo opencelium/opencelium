@@ -2,6 +2,8 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import type { MethodWithId } from '../../../../types/connection';
+import type { ReferencePathFeedback } from '../referenceValidation.utils';
+import { useReferenceValidation } from '../useReferenceValidation';
 import { LegacyResponseFieldSelect } from './LegacyResponseFieldSelect';
 
 vi.mock('@shared/i18n/hooks/useI18n', () => ({
@@ -13,6 +15,11 @@ vi.mock('@shared/ui/primitives/Tooltip', () => ({
 	),
 }));
 vi.mock('@shared/ui/actions/CopyButton', () => ({ CopyButton: () => null }));
+vi.mock('../useReferenceValidation', () => ({ useReferenceValidation: vi.fn(() => null) }));
+
+const validation = vi.mocked(useReferenceValidation);
+const giveFeedback = (feedback: ReferencePathFeedback | null) =>
+	validation.mockImplementation(({ isPaused }) => (isPaused ? null : feedback));
 
 // jsdom has no ResizeObserver; antd's virtual option list needs one to mount.
 beforeAll(() => {
@@ -44,21 +51,39 @@ describe('LegacyResponseFieldSelect', () => {
 		expect(screen.getByText('object1')).toBeInTheDocument();
 	});
 
-	it('warns on a path the response structure does not have', () => {
-		renderSelect('node.titel');
-		expect(document.querySelector('.ant-select-status-warning')).not.toBeNull();
-		expect(fieldTooltip()).toHaveAttribute('data-tooltip', 'references.unknownPath');
+	it('validates the path with the iterators it was given', () => {
+		giveFeedback(null);
+		render(<LegacyResponseFieldSelect method={method} type='body' value='node.name' iterators={['i']}
+			onChange={vi.fn()} />);
+		expect(validation).toHaveBeenLastCalledWith(expect.objectContaining({
+			method, type: 'body', path: 'node.name', iterators: ['i'], isPaused: false }));
 	});
 
-	it('does not warn on a known path', () => {
+	it('marks the field with the severity the backend reported', () => {
+		giveFeedback({ severity: 'warning', message: 'not in sample', hint: "Did you mean 'title'?" });
+		renderSelect('node.titel');
+		expect(document.querySelector('.ant-select-status-warning')).not.toBeNull();
+		expect(fieldTooltip()).not.toHaveAttribute('data-tooltip', '');
+	});
+
+	it('marks an error red', () => {
+		giveFeedback({ severity: 'error', message: 'unclosed bracket', hint: 'add ]' });
+		renderSelect('node[0');
+		expect(document.querySelector('.ant-select-status-error')).not.toBeNull();
+	});
+
+	it('does not mark a valid path', () => {
+		giveFeedback(null);
 		renderSelect('node.object1.title');
-		expect(document.querySelector('.ant-select-status-warning')).toBeNull();
+		expect(document.querySelector('.ant-select-status-warning, .ant-select-status-error')).toBeNull();
 		expect(fieldTooltip()).toHaveAttribute('data-tooltip', '');
 	});
 
-	it('hides the warning while the user is typing', () => {
+	it('pauses the check while the user is typing', () => {
+		giveFeedback({ severity: 'warning', message: 'not in sample', hint: null });
 		renderSelect('node.titel');
 		openDropdown();
+		expect(validation).toHaveBeenLastCalledWith(expect.objectContaining({ isPaused: true }));
 		expect(document.querySelector('.ant-select-status-warning')).toBeNull();
 	});
 

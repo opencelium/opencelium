@@ -302,21 +302,43 @@ const stepDeclaredNodes = (nodes: unknown[], part: string, iterators: string[]) 
 
 // True only when the method's declared response body positively contradicts
 // the path; the backend fails the run on a missing property, so it's worth a warning.
+const walkDeclaredPath = (method: MethodWithId, path: string, iterators: string[]): 'known' | 'unknown' | 'undescribed' => {
+  const parts = normalizePath(path.trim().replace(PATH_TAIL_OPERATOR_RE, '')).match(PATH_RE) || [];
+  let nodes: unknown[] = [getSource(method, 'body')];
+  for (const part of parts) {
+    if (nodes.some(isUndescribedNode)) return 'undescribed';
+    nodes = stepDeclaredNodes(nodes, part, iterators);
+    if (nodes.length === 0) return 'unknown';
+  }
+  return 'known';
+};
+
 export const isUnknownReferencePath = (
   method: MethodWithId | undefined,
   type: ResponseType,
   path: string,
   iterators: string[] = [],
-) => {
-  if (type !== 'body' || !method) return false;
-  const parts = normalizePath(path.trim().replace(PATH_TAIL_OPERATOR_RE, '')).match(PATH_RE) || [];
-  let nodes: unknown[] = [getSource(method, type)];
-  for (const part of parts) {
-    if (nodes.some(isUndescribedNode)) return false;
-    nodes = stepDeclaredNodes(nodes, part, iterators);
-    if (nodes.length === 0) return true;
+) => type === 'body' && !!method && walkDeclaredPath(method, path, iterators) === 'unknown';
+
+// The declaration nests arrays as `{ type: 'array', fields }`; a sample is plain JSON.
+const toSampleJson = (node: unknown): unknown => {
+  if (isArrayNode(node)) {
+    const item = getArrayItem(node);
+    return item === undefined ? [] : [toSampleJson(item)];
   }
-  return false;
+  if (isRecord(node)) return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, toSampleJson(value)]));
+  return node;
+};
+
+/**
+ * The method's declared response body as a JSON sample for the backend's path
+ * check, or undefined when it should not be checked against one: a path through
+ * a field declared without children would only collect false "not in sample" warnings.
+ */
+export const getDeclaredBodySample = (method: MethodWithId | undefined, path: string, iterators: string[] = []) => {
+  if (!method?.response?.success?.body?.fields) return undefined;
+  if (walkDeclaredPath(method, path, iterators) === 'undescribed') return undefined;
+  return toSampleJson(getSource(method, 'body'));
 };
 
 const parseIndexPath = (value: unknown) =>

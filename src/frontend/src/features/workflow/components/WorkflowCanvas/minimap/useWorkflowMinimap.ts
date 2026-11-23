@@ -6,6 +6,7 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../../types/workfl
 import { buildMinimapModel } from './minimap.model';
 import { buildWorkflowIssues } from '../../../problems/buildWorkflowIssues';
 import { useWorkflowProblemText } from '../../../problems/useWorkflowProblemText';
+import { useJsonPathEnvironment } from '../../request-editor/body-editor/jsonPathEnvironment';
 
 /**
  * Read from the flow store rather than the page's graph state: the store holds the
@@ -18,6 +19,7 @@ export const useWorkflowMinimap = (fieldBindings: readonly unknown[] | undefined
 	const flowEdges = useEdges();
 	const { data: liveHealth } = useGetConnectorsMetaQuery();
 	const describe = useWorkflowProblemText();
+	const jsonPathEnvironment = useJsonPathEnvironment();
 
 	const nodes = useMemo(() => flowNodes.filter((node) => !isLensElementId(node.id)) as WorkflowNodeModel[],
 		[flowNodes]);
@@ -25,8 +27,8 @@ export const useWorkflowMinimap = (fieldBindings: readonly unknown[] | undefined
 		[flowEdges]);
 
 	const model = useMemo(() => buildMinimapModel(nodes, edges), [nodes, edges]);
-	const issues = useMemo(() => buildWorkflowIssues(nodes, edges, fieldBindings, liveHealth, describe),
-		[nodes, edges, fieldBindings, liveHealth, describe]);
+	const issues = useMemo(() => buildWorkflowIssues({ nodes, edges, fieldBindings, liveHealth, describe,
+		jsonPathEnvironment }), [nodes, edges, fieldBindings, liveHealth, describe, jsonPathEnvironment]);
 
 	return { model, issues };
 };

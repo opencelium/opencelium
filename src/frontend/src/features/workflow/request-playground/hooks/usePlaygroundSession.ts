@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { skipToken } from '@reduxjs/toolkit/query/react';
 import type { Connector } from '@entities/connector/model/types';
+import { readServerMessage } from '../model/readServerMessage';
 import { buildFromConnectorPayload } from '../../api/connectionPayload';
 import { buildMethodPayload } from '../../api/connectionPayload.methods';
 import { buildEditorConnection } from '../../components/request-editor/editorConnection';
@@ -7,6 +9,8 @@ import type { WorkflowMethodConfig } from '../../types/request-config.types';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import { ensureMethodConfig } from '../../utils/requestConfig';
 import { collectPlaygroundInputs } from '../model/collectPlaygroundInputs';
+import { useGetMethodTestRefsQuery } from '../model/playgroundApi';
+import type { PlaygroundDraft } from '../model/playground.types';
 import { connectorsOfInvoker, readConnectionFieldNames } from '../model/playgroundConnection';
 import { buildInputStorageKey } from '../model/playgroundStorage';
 import { applyRequestEdits, hasRequestEdits, type RequestEdits } from '../model/requestEdits';
@@ -45,6 +49,26 @@ function snapshotSession({ node, nodes, edges, fieldBindings, connectionId }: Ar
 	};
 }
 
+const REFS_DEBOUNCE_MS = 400;
+
+// /refs is re-read while the user edits the request; debounced so typing in the URL
+// does not fire a request per keystroke.
+function useMethodTestRefs(draft: PlaygroundDraft | null) {
+	const [settledDraft, setSettledDraft] = useState(draft);
+	useEffect(() => {
+		const timer = setTimeout(() => setSettledDraft(draft), REFS_DEBOUNCE_MS);
+		return () => clearTimeout(timer);
+	}, [draft]);
+	const query = useGetMethodTestRefsQuery(settledDraft ?? skipToken);
+	const isStale = settledDraft !== draft;
+	return {
+		refs: query.data,
+		isLoading: isStale || query.isFetching,
+		error: query.isError && !query.isFetching ? readServerMessage(query.error) : null,
+		refetch: () => { if (settledDraft) void query.refetch(); },
+	};
+}
+
 export function usePlaygroundSession(args: Args) {
 	const [snapshot] = useState(() => snapshotSession(args));
 	const [edits, setEdits] = useState<RequestEdits>({});
@@ -67,6 +91,8 @@ export function usePlaygroundSession(args: Args) {
 		&& collectPlaygroundInputs(draft, snapshot.connection, connectionFieldNames),
 	[snapshot, draft, connectionFieldNames]);
 
+	const refs = useMethodTestRefs(draft);
+
 	if (!snapshot || !config || !draft || !inputs) return null;
 	const fixedHeaders = connector?.invoker?.operations?.find((operation) => operation.name === config.name)
 		?.request?.header ?? {};
@@ -80,6 +106,8 @@ export function usePlaygroundSession(args: Args) {
 		hasEdits: hasRequestEdits(edits),
 		connector,
 		connectorId,
+		allConnectors: args.connectors,
+		refs,
 		connectionFieldNames,
 		fixedHeaders,
 	};
