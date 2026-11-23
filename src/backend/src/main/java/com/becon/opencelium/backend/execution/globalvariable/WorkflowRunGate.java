@@ -29,6 +29,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,7 +53,9 @@ import java.util.UUID;
  *
  * <p>A refused start, and a waiting one that is dropped, is logged, sent to the workflow's
  * websocket channel and handed to the {@link RefusalListener}, which records it as a failed
- * execution of its schedule.
+ * execution of its schedule. A start that a webhook asks for and that is refused on the call is
+ * only counted then, because a busy workflow may be called many times: when the run ends, the
+ * refused webhook starts of each schedule are reported once, with their number.
  *
  * <p>The state is kept in memory. A crash or restart frees every workflow, and the starts that were
  * waiting are lost; a schedule fires again at its next time.
@@ -225,27 +228,54 @@ public class WorkflowRunGate {
      * @param connectionId id of the workflow
      */
     public void release(long connectionId) {
+        Long executionId;
+        Map<Integer, RefusedWebhooks> refusedWebhooks;
         synchronized (this) {
             Lane lane = lanes.get(connectionId);
             if (lane == null) {
                 return;
             }
+            executionId = lane.executionId;
+            refusedWebhooks = drainRefusedWebhooks(lane);
             lane.running = false;
             lane.executionId = null;
             lane.startedAt = null;
         }
+        // the queue moves on first: it does not wait for the report to be recorded
         startNext(connectionId);
+        reportRefusedWebhooks(connectionId, executionId, refusedWebhooks);
     }
 
     /**
-     * Refuses a start that is asked for by a user or a webhook before it reaches Quartz, so the
-     * caller gets the answer in the response. A start that would only wait is let through.
+     * Refuses a start that is asked for by a user before it reaches Quartz, so the caller gets the
+     * answer in the response. A start that would only wait is let through. The refusal is not
+     * recorded: the user sees it.
      *
      * @param connectionId id of the workflow
      * @throws GlobalVariableConflictException with code BUSY if the workflow runs and the start
      *         would be refused
      */
     public void checkCanStart(long connectionId) {
+        throwIfRefusedOnCall(connectionId, null);
+    }
+
+    /**
+     * Refuses a start that is asked for by a webhook before it reaches Quartz, like {@link
+     * #checkCanStart}, and counts the refusal for the webhook's schedule. Only the calling system
+     * sees the answer, so when the run that holds the workflow ends, the refused webhook starts of
+     * each schedule are sent to the workflow's websocket channel and handed to the {@link
+     * RefusalListener} as one refusal that names how many there were.
+     *
+     * @param connectionId id of the workflow
+     * @param scheduleId   id of the schedule the webhook belongs to
+     * @throws GlobalVariableConflictException with code BUSY if the workflow runs and the start
+     *         would be refused
+     */
+    public void checkWebhookCanStart(long connectionId, int scheduleId) {
+        throwIfRefusedOnCall(connectionId, scheduleId);
+    }
+
+    private void throwIfRefusedOnCall(long connectionId, Integer webhookScheduleId) {
         List<GlobalVariable> mutables = repository.findMutableUsedByWorkflow(connectionId);
         if (mutables.isEmpty()) {
             return;
@@ -257,6 +287,10 @@ public class WorkflowRunGate {
                 return;
             }
             refusal = refusalOf(mutables, lane);
+            if (refusal != null && webhookScheduleId != null) {
+                RefusedWebhooks first = new RefusedWebhooks(refusal, 1);
+                lane.refusedWebhooks.merge(webhookScheduleId, first, (counted, one) -> counted.andOneMore());
+            }
         }
         if (refusal != null) {
             throw refusal;
@@ -301,6 +335,7 @@ public class WorkflowRunGate {
     private void startNext(long connectionId) {
         while (true) {
             List<Waiting> expired = new ArrayList<>();
+            Map<Integer, RefusedWebhooks> unreported = Map.of();
             Waiting next;
             String ticket = null;
             synchronized (this) {
@@ -310,6 +345,8 @@ public class WorkflowRunGate {
                 }
                 next = pollUnexpired(lane, expired);
                 if (next == null) {
+                    // counted while the workflow was reserved for a start that never arrived
+                    unreported = drainRefusedWebhooks(lane);
                     lanes.remove(connectionId);
                 } else {
                     ticket = UUID.randomUUID().toString();
@@ -317,6 +354,7 @@ public class WorkflowRunGate {
                 }
             }
 
+            reportRefusedWebhooks(connectionId, null, unreported);
             for (Waiting waiting : expired) {
                 GlobalVariableConflictException dropped = new GlobalVariableConflictException(
                         GlobalVariableConflictException.Code.BUSY,
@@ -410,12 +448,7 @@ public class WorkflowRunGate {
 
     private void refuse(long connectionId, JobKey jobKey, JobDataMap triggerData,
             GlobalVariableConflictException refusal) {
-        log.warn("Workflow {}: a start was refused. {}", connectionId, refusal.getMessage());
-        try {
-            notifications.send(connectionId, new ErrorResource(refusal, HttpStatus.CONFLICT));
-        } catch (RuntimeException e) {
-            log.warn("Workflow {}: the refusal could not be sent to the websocket channel", connectionId, e);
-        }
+        report(connectionId, refusal);
 
         Optional<ScheduleData> schedule = scheduleOf(jobKey, triggerData);
         if (schedule.isEmpty()) {
@@ -423,11 +456,58 @@ public class WorkflowRunGate {
                     connectionId, jobKey);
             return;
         }
+        handToListener(connectionId, schedule.get(), refusal);
+    }
+
+    /**
+     * Reports the webhook starts that were refused on the call: for each schedule one refusal,
+     * which names how many starts there were and why the first of them was refused.
+     *
+     * @param executionId the execution that held the workflow; {@code null} if it is not known
+     */
+    private void reportRefusedWebhooks(long connectionId, Long executionId, Map<Integer, RefusedWebhooks> refused) {
+        String busyWhile = executionId == null
+                ? "the workflow was busy"
+                : "execution " + executionId + " of the workflow ran";
+        refused.forEach((scheduleId, webhooks) -> {
+            GlobalVariableConflictException summary = new GlobalVariableConflictException(
+                    GlobalVariableConflictException.Code.BUSY,
+                    "Webhook starts of schedule %d refused while %s: %d. The first one was refused with: %s"
+                            .formatted(scheduleId, busyWhile, webhooks.count(), webhooks.first().getMessage()),
+                    webhooks.first().getCurrentVersion());
+            report(connectionId, summary);
+            handToListener(connectionId, new ScheduleData(scheduleId, TriggerType.WEBHOOK), summary);
+        });
+    }
+
+    /** Logs a refusal and sends it to the workflow's websocket channel. */
+    private void report(long connectionId, GlobalVariableConflictException refusal) {
+        log.warn("Workflow {}: a start was refused. {}", connectionId, refusal.getMessage());
         try {
-            refusalListener.refused(schedule.get(), connectionId, refusal);
+            notifications.send(connectionId, new ErrorResource(refusal, HttpStatus.CONFLICT));
         } catch (RuntimeException e) {
-            log.warn("Workflow {}: the refused start of job {} could not be recorded", connectionId, jobKey, e);
+            log.warn("Workflow {}: the refusal could not be sent to the websocket channel", connectionId, e);
         }
+    }
+
+    /** Hands a refusal to the listener; a listener that fails changes nothing for the caller. */
+    private void handToListener(long connectionId, ScheduleData schedule, GlobalVariableConflictException refusal) {
+        try {
+            refusalListener.refused(schedule, connectionId, refusal);
+        } catch (RuntimeException e) {
+            log.warn("Workflow {}: the refused start of schedule {} could not be recorded",
+                    connectionId, schedule.getScheduleId(), e);
+        }
+    }
+
+    /** Takes the webhook starts counted for a workflow, leaving none behind. */
+    private static Map<Integer, RefusedWebhooks> drainRefusedWebhooks(Lane lane) {
+        if (lane.refusedWebhooks.isEmpty()) {
+            return Map.of();
+        }
+        Map<Integer, RefusedWebhooks> drained = new LinkedHashMap<>(lane.refusedWebhooks);
+        lane.refusedWebhooks.clear();
+        return drained;
     }
 
     /**
@@ -468,9 +548,24 @@ public class WorkflowRunGate {
         private Instant startedAt;
         private Reservation reservation;
         private final Deque<Waiting> waiting = new ArrayDeque<>();
+        // webhook starts refused on the call and not reported yet, by schedule id
+        private final Map<Integer, RefusedWebhooks> refusedWebhooks = new LinkedHashMap<>();
     }
 
     private record Waiting(JobKey jobKey, JobDataMap triggerData, Instant since) {
+    }
+
+    /**
+     * The webhook starts of one schedule that were refused on the call.
+     *
+     * @param first the refusal the first of them got
+     * @param count how many there were
+     */
+    private record RefusedWebhooks(GlobalVariableConflictException first, int count) {
+
+        RefusedWebhooks andOneMore() {
+            return new RefusedWebhooks(first, count + 1);
+        }
     }
 
     private record Reservation(String ticket, Instant since) {

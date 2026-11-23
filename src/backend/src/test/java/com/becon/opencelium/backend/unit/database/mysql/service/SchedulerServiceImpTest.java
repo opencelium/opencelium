@@ -49,6 +49,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -63,7 +65,8 @@ import static org.mockito.Mockito.when;
  * and for what it does about the global variable references of notifications: a save checks
  * them and records them as usages, a delete removes the usages, and a schedule pointed at another
  * workflow has its stored notifications checked against that workflow. Also covers what
- * {@code startNow} asks of the global variable run gate before it hands a start to Quartz.
+ * {@code startNow} and {@code startNowByWebhook} ask of the global variable run gate before they
+ * hand a start to Quartz.
  *
  * Run with: ./gradlew test --tests "*.SchedulerServiceImpTest"
  */
@@ -300,7 +303,7 @@ class SchedulerServiceImpTest {
         schedulerService.startNow(schedule, data);
 
         InOrder order = inOrder(runGate, schedulingStrategy);
-        order.verify(runGate).checkCanStart(42L);
+        order.verify(runGate).checkWebhookCanStart(42L, schedule.getId());
         order.verify(schedulingStrategy).runJob(schedule, data);
         verify(schedulingStrategy, never()).getRunningJobs();
     }
@@ -309,7 +312,7 @@ class SchedulerServiceImpTest {
     void startNowWithWebhookDataStartsNothingWhenRunGateRefuses() {
         Scheduler schedule = aStoredScheduleOf(42L);
         GlobalVariableConflictException busy = aBusyRefusal();
-        doThrow(busy).when(runGate).checkCanStart(42L);
+        doThrow(busy).when(runGate).checkWebhookCanStart(42L, schedule.getId());
 
         GlobalVariableConflictException thrown = catchThrowableOfType(
                 () -> schedulerService.startNow(schedule, Map.<String, Object>of("orderId", "A-17")),
@@ -327,6 +330,46 @@ class SchedulerServiceImpTest {
 
         GlobalVariableConflictException thrown = catchThrowableOfType(
                 () -> schedulerService.startNow(schedule), GlobalVariableConflictException.class);
+
+        assertThat(thrown).isSameAs(busy);
+        verifyNoInteractions(schedulingStrategy);
+    }
+
+    @Test
+    @DisplayName("startNow — a user's start is checked as a manual one, so a refusal is never counted as a webhook's")
+    void startNowChecksAsManualStartWhenUserStarts() {
+        Scheduler schedule = aStoredScheduleOf(42L);
+
+        schedulerService.startNow(schedule);
+
+        verify(runGate).checkCanStart(42L);
+        verify(runGate, never()).checkWebhookCanStart(anyLong(), anyInt());
+        verify(schedulingStrategy).runJob(schedule);
+    }
+
+    // ── startNowByWebhook ─────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("startNowByWebhook — the run gate is asked for the webhook's schedule, then the job starts")
+    void startNowByWebhookStartsJobWhenRunGateAllows() {
+        Scheduler schedule = aStoredScheduleOf(42L);
+
+        schedulerService.startNowByWebhook(schedule);
+
+        InOrder order = inOrder(runGate, schedulingStrategy);
+        order.verify(runGate).checkWebhookCanStart(42L, 5);
+        order.verify(schedulingStrategy).runJob(schedule);
+        verify(runGate, never()).checkCanStart(anyLong());
+    }
+
+    @Test
+    void startNowByWebhookStartsNothingWhenRunGateRefuses() {
+        Scheduler schedule = aStoredScheduleOf(42L);
+        GlobalVariableConflictException busy = aBusyRefusal();
+        doThrow(busy).when(runGate).checkWebhookCanStart(42L, 5);
+
+        GlobalVariableConflictException thrown = catchThrowableOfType(
+                () -> schedulerService.startNowByWebhook(schedule), GlobalVariableConflictException.class);
 
         assertThat(thrown).isSameAs(busy);
         verifyNoInteractions(schedulingStrategy);

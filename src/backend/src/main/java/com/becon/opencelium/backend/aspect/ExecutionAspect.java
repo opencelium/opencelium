@@ -285,9 +285,11 @@ public class ExecutionAspect {
     /**
      * Records a start that {@link WorkflowRunGate} refused, or dropped from its queue, as a failed
      * execution of its schedule that starts and ends at once, so it shows in the history and as
-     * the last failure. With debug mode on, or for a support file, its log holds the reason. No
-     * notification is sent and no aggregator runs: nothing of the workflow ran, and the refusal
-     * already went to the workflow's websocket channel.
+     * the last failure. The webhook starts of a schedule that were refused on the call while a
+     * run went come as one refusal, so they are one such execution. With debug mode on, or for a
+     * support file, its log holds the reason. No notification is sent and no aggregator runs:
+     * nothing of the workflow ran, and the refusal already went to the workflow's websocket
+     * channel.
      */
     private void recordRefusedStart(QuartzJobScheduler.ScheduleData data, long connectionId,
             GlobalVariableConflictException refusal) {
