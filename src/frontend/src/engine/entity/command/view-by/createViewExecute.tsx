@@ -56,7 +56,7 @@ export const createViewExecute = ({ def, config, by }) => {
                 }
                 return ctx.openModal(wizard);
             }
-            ctx.render(wizard);
+            ctx.render(config?.overrides?.view ? config.overrides.view(def, ctx, result) : wizard);
 
             if (by.afterOpen) {
                 await by.afterOpen(value, ctx);

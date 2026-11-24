@@ -11,7 +11,7 @@ writes them to another, on a schedule.
 
 You will need a running OpenCelium (:doc:`install`) and credentials for two APIs.
 If you only want to try the mechanics, any two HTTP endpoints will do — you can
-use *Simple HTTP request* steps and skip the invoker work entirely.
+use *Simple HTTP request* steps and skip the API definition work entirely.
 
 .. note::
    Signed in for the first time? The default account is
@@ -20,17 +20,17 @@ use *Simple HTTP request* steps and skip the invoker work entirely.
 1. Make the systems known
 =========================
 
-Each system needs an **invoker** (how to talk to that kind of API) and a
+Each system needs an **API definition** (how to talk to that kind of API) and a
 **connector** (one instance of it, with credentials).
 
-Check **Configurations → Invokers** first: if an invoker for your product already
+Check **Configurations → API definitions** first: if an API definition for your product already
 exists — shipped, uploaded, or synchronised from the Service Portal — you are
 done with this part. If not, create one, or take the shortcut in step 3.
 
 Then create a connector per system under **Connectors → Create**:
 
-#. **General Data** — a title, the invoker, and optionally a timeout and icon.
-#. **Credentials** — the fields the invoker's authentication type requires.
+#. **General Data** — a title, the API definition, and optionally a timeout and icon.
+#. **Credentials** — the fields the API definition's authentication type requires.
 
 Use **Test connection** before submitting. If it fails, OpenCelium asks you to
 confirm explicitly rather than silently storing a broken connector — fix the
@@ -55,14 +55,14 @@ Hover the Start node and click the **+** handle. The step drawer opens with
 
 * **Use Connector** — pick your source connector, then the operation that reads
   the records. This is the normal path.
-* **Add HTTP Request** — if you skipped the invoker: pick the HTTP method and
+* **Add HTTP Request** — if you skipped the API definition: pick the HTTP method and
   enter the URL yourself.
 
 The step appears on the canvas showing the connector icon and the method name.
 Note its status dot: green means the connector's test passed.
 
 Double-click the step to inspect its request. For a connector method the HTTP
-method is fixed by the invoker; the URL, headers and body are editable.
+method is fixed by the API definition; the URL, headers and body are editable.
 
 4. Loop over the results
 ========================
@@ -99,7 +99,7 @@ Repeat per field. A field holding only a reference is a **direct reference**: a
 straight copy, and the fastest option.
 
 When a value needs transforming — uppercase, a date reformat, concatenating two
-fields — use **Create enhancement** on the reference. You get a script seeded with
+fields — use **Create transformation** on the reference. You get a script seeded with
 ``RESULT_VAR = VAR_0``, where ``VAR_0`` is your reference and ``RESULT_VAR`` is
 the field's value:
 

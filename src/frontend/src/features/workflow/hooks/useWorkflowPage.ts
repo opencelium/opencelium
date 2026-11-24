@@ -21,6 +21,7 @@ import { useWorkflowDragMove } from './useWorkflowDragMove';
 import { useWorkflowDragStop } from './useWorkflowDragStop';
 import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
 import { evaluateJointTargets } from '../utils/jumpValidator';
+import { useJointDeadEndNodeId } from './useJointDeadEndNodeId';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
 import { copyWorkflowNodeGroup, moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
 import { useDeleteWorkflowNodes } from './useDeleteWorkflowNodes';
@@ -35,7 +36,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     isAnyNodeDragging, setIsAnyNodeDragging, sidebarAction, setSidebarAction,
     contextMenu, setContextMenu, historyOpen, setHistoryOpen, methodEditor,
     setMethodEditor, responseNodeId, setResponseNodeId, conditionEditor,
-    setConditionEditor, aggregatorEditor, setAggregatorEditor, connectorEditor,
+    setConditionEditor, aggregatorEditor, setAggregatorEditor, globalWritesEditor, setGlobalWritesEditor, connectorEditor,
     setConnectorEditor, restoredViewport,
     setRestoredViewport, viewportRestoreVersion, setViewportRestoreVersion,
     centerStartVersion, setCenterStartVersion, bindingLensOpen,
@@ -80,6 +81,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       : undefined),
     [jointSourceId, nodes, edges, options.fieldBindings],
   );
+  const jointDeadEndNodeId = useJointDeadEndNodeId(nodes, edges, options.fieldBindings);
 
   // Stable: the instance is read from the ref at call time, so every consumer
   // (command bridge, save-error highlighting) can hold on to one identity.
@@ -91,7 +93,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes,
     centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
-      aggregatorEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
+      aggregatorEditor !== null || globalWritesEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
   });
 
   const deleteNodes = useDeleteWorkflowNodes({ nodes, edges, options, setNodes, setEdges,
@@ -104,12 +106,14 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     sidebarAction,
     jointSourceId,
     jointVerdicts,
+    jointDeadEndNodeId,
     contextMenu,
     historyOpen,
     methodEditor,
     responseNodeId,
     conditionEditor,
     aggregatorEditor,
+    globalWritesEditor,
     connectorEditor,
     restoredViewport,
     viewportRestoreVersion,
@@ -134,6 +138,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setMethodEditor,
     setConditionEditor,
     setAggregatorEditor,
+    setGlobalWritesEditor,
     setConnectorEditor,
     setWorkflowGraph: (
       nextNodes: WorkflowNodeModel[],
@@ -157,7 +162,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onNodeDragStop: handleNodeDragStop,
     onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
     onCloseResponse: () => setResponseNodeId(null),
-    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setConnectorEditor(null); },
+    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setGlobalWritesEditor(null); setConnectorEditor(null); },
     onStartJoint: (sourceNodeId: string) => {
       setSidebarAction(null);
       setContextMenu(null);

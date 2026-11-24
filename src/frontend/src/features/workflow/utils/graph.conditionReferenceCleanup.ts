@@ -5,10 +5,19 @@ import type { ConditionChild,
 	ConditionGroup } from '../components/condition-builder/conditionBuilder.types';
 import type { ReferenceMatcher } from './graph.referenceColors';
 
+// A conjunction joins two or more items; the condition dialog rejects one left on a
+// group that the cleanup shrank to a single item.
+const withoutLoneConjunction = (group: ConditionGroup): ConditionGroup => {
+	if ((group.items ?? []).length > 1 || group.properties?.conjunction === undefined) return group;
+	const properties = { ...group.properties };
+	delete properties.conjunction;
+	return { ...group, properties };
+};
+
 const removeMatchingRules = (
 	group: ConditionGroup,
 	matches: ReferenceMatcher,
-): ConditionGroup => ({
+): ConditionGroup => withoutLoneConjunction({
 	...group,
 	items: (group.items ?? []).flatMap<ConditionChild>((item) => {
 		if (item.type === 'rule') {

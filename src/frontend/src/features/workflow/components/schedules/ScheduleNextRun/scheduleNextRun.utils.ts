@@ -1,14 +1,10 @@
-import { CronExpressionParser } from 'cron-parser'
+import {getScheduleTimeZone, upcomingRuns} from '@shared/lib/cron/upcomingRuns'
+
+export const getNextTriggerTimes = upcomingRuns
 
 export function getNextTriggerMs(cronExp: string, fromMs: number): number | null {
-    try {
-        const interval = CronExpressionParser.parse(cronExp.trim(), {
-            currentDate: new Date(fromMs),
-        })
-        return interval.next().getTime()
-    } catch {
-        return null
-    }
+    const zone = getScheduleTimeZone()
+    return getNextTriggerTimes(cronExp, fromMs, 1, zone)?.[0] ?? null
 }
 
 export function formatScheduleRemaining(ms: number): string {

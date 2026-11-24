@@ -65,14 +65,14 @@ export const dynamicTokenGraphQlStrategy: GraphQlAuthStrategy = {
             method: 'POST',
             header: { 'Content-Type': 'application/json' },
             body: { query: fields.query, variables },
-            sslOn: connector.sslCert,
+            trustAnyCertificate: connector.sslCert,
         })
 
         if (!result.ok) return { ok: false, error: result.error }
         return { ok: true, accessToken: extractTokenAtPath(result.data, parsed.pathToToken) }
     },
 
-    async query({ url, accessToken, sslOn, query, variables, operationName }: GraphQlQueryParams): Promise<GraphQlQueryOutcome> {
+    async query({ url, accessToken, trustAnyCertificate, query, variables, operationName }: GraphQlQueryParams): Promise<GraphQlQueryOutcome> {
         const result = await remoteApiRequest<GraphQlQueryResult>({
             url,
             method: 'POST',
@@ -81,7 +81,7 @@ export const dynamicTokenGraphQlStrategy: GraphQlAuthStrategy = {
                 Authorization: `Bearer ${accessToken}`,
             },
             body: { query, variables, operationName },
-            sslOn,
+            trustAnyCertificate,
         })
 
         return result.ok ? { ok: true, result: result.data } : { ok: false, error: result.error }

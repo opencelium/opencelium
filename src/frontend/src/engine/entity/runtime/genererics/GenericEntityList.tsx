@@ -28,6 +28,7 @@ import { buildTestId } from '@shared/testing/testId';
 import { useAuth } from '@features/auth/useAuth';
 import { hasComponentPermission, type CrudAction } from '@/engine/policy';
 import NoAccess from '@shared/ui/feedback/NoAccess';
+import { ListViewSwitch } from './ListViewSwitch';
 
 import { Table } from '@shared/ui/primitives/Table';
 import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils';
@@ -179,6 +180,8 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
 
     const [sorting, setSorting] = useState<SortingState>(initialSorting);
     const [globalFilter, setGlobalFilter] = useState('');
+    const [alternateMode, setAlternateMode] = useState<string>();
+    const [isAlternate, setIsAlternate] = useState(false);
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
     // Controlled (not left to tanstack's uncontrolled default) — see the
     // `autoResetPageIndex: false` note below for why this alone isn't enough
@@ -357,11 +360,12 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     return (
         <div data-testid={buildTestId(entity.name, 'list')} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <header style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                     <h1 style={{ margin: 0 }}>
                         <Typography variant="headline" as="span">{titleText}</Typography>
                     </h1>
-                    <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
+                    {/* Wraps under the title (and onto more lines itself) instead of running off a narrow page. */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8, alignSelf: 'flex-start', marginLeft: 'auto' }}>
                         {bulkActions.map((action) => {
                             const field = action.field ?? rowKey;
                             const ids = selectedRows
@@ -446,7 +450,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                             <Tooltip content={tCommon('list.filtersTooltip')}>
                                 <IconButton
                                     type={areFiltersOpen ? 'primary' : 'default'}
-                                    iconProps={{ name: 'filter', color: areFiltersOpen ? 'inherit' : 'secondary' }}
+                                    iconProps={{ name: 'filter', color: areFiltersOpen ? 'inherit' : 'primary' }}
                                     onClick={() => setAreFiltersOpen((v) => !v)}
                                     testId={buildTestId(entity.name, 'filters-toggle')}
                                 />
@@ -463,7 +467,19 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                 </div>
             )}
 
-            <Table
+            {entity.list?.alternateView?.renderListSwitch
+                ? !isAlternate && entity.list.alternateView.renderListSwitch(mode => { setAlternateMode(mode); setIsAlternate(true); })
+                : entity.list?.alternateView && (
+                <ListViewSwitch
+                    entityName={entity.name}
+                    alternateView={entity.list.alternateView}
+                    isAlternate={isAlternate}
+                    onChange={setIsAlternate}
+                />
+            )}
+            {isAlternate && entity.list?.alternateView
+                ? entity.list.alternateView.render(table.getFilteredRowModel().rows.map(row => row.original), () => setIsAlternate(false), alternateMode)
+                : <Table
                 data={tableRows}
                 columns={columns}
                 tableInstance={table}
@@ -472,7 +488,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                 disabledRowIds={pendingDeleteIds}
                 rowClassName={rowClassName}
                 onRowClick={handleRowClick}
-            />
+            />}
         </div>
     );
 };

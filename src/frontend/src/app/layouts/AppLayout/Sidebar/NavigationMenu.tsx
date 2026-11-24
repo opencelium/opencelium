@@ -2,7 +2,8 @@ import { ConfigProvider, Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useRef } from 'react';
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
-import {useAdminMenu, useMainMenu} from "@app/layouts/AppLayout/Sidebar/menues.tsx";
+import {BACK_TO_MAIN_MENU_KEY, useAdminMenu, useMainMenu} from "@app/layouts/AppLayout/Sidebar/menues.tsx";
+import {switchMenu} from "@app/layouts/AppLayout/Sidebar/useMenuSwitch";
 import {useTheme} from "@shared/theme/hooks/useTheme.tsx";
 import {AnimatePresence, motion} from "framer-motion";
 
@@ -33,6 +34,10 @@ const findAncestorKeys = (items: MenuItem[], targetKey: string): string[] | null
     }
     return null;
 };
+
+const RESTORABLE_ROUTE = /^\/workflow\/(create|update\/[^/]+)$/;
+
+const isRestorableRoute = (pathname: string) => RESTORABLE_ROUTE.test(pathname);
 
 export const NavigationMenu = () => {
     const navigate = useNavigate();
@@ -67,11 +72,13 @@ export const NavigationMenu = () => {
     // Remember the active leaf of whichever menu owns the current route, so the
     // menu switcher can restore it when the user toggles back. The leaf key (not
     // the raw pathname) is recorded so the restored target is always a valid
-    // menu destination rather than a stale deep route like '/invoker/5/edit'.
+    // menu destination rather than a stale deep route like '/invoker/5/edit' —
+    // except for the workflow editor, which is a workspace the user means to
+    // return to rather than a form they passed through.
     useEffect(() => {
-        if (mainKey) setLastPath('main', mainKey);
+        if (mainKey) setLastPath('main', isRestorableRoute(pathname) ? pathname : mainKey);
         else if (adminKey) setLastPath('admin', adminKey);
-    }, [mainKey, adminKey, setLastPath]);
+    }, [mainKey, adminKey, pathname, setLastPath]);
 
     // Open the group(s) holding the active route only when the route actually
     // changes — guarded by the selected-key *value*, not the effect deps,
@@ -123,6 +130,10 @@ export const NavigationMenu = () => {
                         mode="inline"
                         style={{ background: 'transparent', borderInlineEnd: 'none' }}
                         onClick={({ key, domEvent }) => {
+                            if (key === BACK_TO_MAIN_MENU_KEY) {
+                                switchMenu(navigate, 'main');
+                                return;
+                            }
                             // Modifier-held clicks fall through to the label's <a href>,
                             // letting the browser open the route in a new tab.
                             if (domEvent.metaKey || domEvent.ctrlKey || domEvent.shiftKey) return;

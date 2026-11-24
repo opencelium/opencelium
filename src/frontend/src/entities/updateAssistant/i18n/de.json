@@ -1,6 +1,6 @@
 {
   "installationCheck": {
-    "unavailable": "Update Assistant ist für den Installationstyp \"{{type}}\" nicht verfügbar. Bitte überprüfen Sie die Datei application.yml auf dem Server."
+    "unavailable": "Der Update-Assistent ist für den Installationstyp „{{type}}“ nicht verfügbar. Bitte überprüfen Sie die Datei application.yml auf dem Server."
   },
   "fields": {
     "systemHealth": {
@@ -44,7 +44,7 @@
         "header": "Update anwenden",
         "subheader": "System-Update durchführen",
         "actions": {
-          "runUpdate": "OC aktualisieren"
+          "runUpdate": "OpenCelium aktualisieren"
         }
       }
     },
@@ -73,24 +73,70 @@
       "mongoDB": "MongoDB",
       "opencelium": "OpenCelium",
       "os": "Betriebssystem",
-      "polyglot": "Polyglot"
+      "polyglot": "Skript-Engine (Polyglot)"
     },
-    "hint": "Bitte, do not forget to create a backup of the system, before you start the update (see <1>docs</1>)."
+    "hint": "Bitte vergessen Sie nicht, vor dem Update <1>eine Sicherung des Systems zu erstellen</1>."
   },
   "validation": {
     "requiredComponentsDown": "Eine oder mehrere erforderliche Komponenten sind nicht betriebsbereit. Alle erforderlichen Dienste müssen laufen, bevor Sie mit dem Update fortfahren können.",
     "versionNotSelected": "Bitte wählen Sie eine Version aus, um mit dem Update fortzufahren."
   },
+  "availableUpdates": {
+    "title": "Verfügbare Updates",
+    "installed": "Installiert:",
+    "guideLink": "So führen Sie ein Update durch",
+    "onlineVersionsTitle": "Verfügbare Versionen",
+    "selectableHint": "Nur Versionen neuer als {{version}} können ausgewählt werden",
+    "modes": {
+      "online": {
+        "title": "Online",
+        "description": "Versionen vom Update-Server abrufen. Erfordert Internetzugang."
+      },
+      "offline": {
+        "title": "Offline",
+        "description": "Ein Paket (.zip) für isolierte oder eingeschränkte Systeme hochladen."
+      }
+    },
+    "offline": {
+      "download": {
+        "title": "Offline-Paket herunterladen",
+        "description": "Laden Sie die .zip für Ihre Zielversion von packagecloud herunter.",
+        "action": "packagecloud öffnen"
+      },
+      "upload": {
+        "title": "Hier hochladen",
+        "description": "Jedes Paket wird geprüft, bevor seine Version ausgewählt werden kann.",
+        "dropLabel": "Paket hierher ziehen und ablegen",
+        "or": "oder",
+        "browse": "Dateien auswählen",
+        "accepted": "Akzeptiertes Format: .zip · jeweils ein Paket",
+        "more": "Weitere Pakete hochladen",
+        "moreDrop": "— oder eine .zip-Datei hier ablegen"
+      },
+      "packages": {
+        "title": "Hochgeladene Pakete"
+      }
+    },
+    "status": {
+      "selectVersion": "Wählen Sie eine Version aus, um fortzufahren.",
+      "uploadPackage": "Laden Sie ein Paket hoch, um fortzufahren.",
+      "selectPackage": "Wählen Sie ein Paket aus, um fortzufahren.",
+      "ready": "Bereit zur Installation von Version {{version}}.",
+      "switchToOffline": "Wechseln Sie zu Offline, um fortzufahren."
+    }
+  },
   "versions": {
     "columns": {
+      "select": "Auswahl",
       "name": "Version",
       "status": "Status",
-      "changelog": "Änderungsprotokoll"
+      "changelog": "Änderungsprotokoll",
+      "action": "Aktion"
     },
     "status": {
       "old": "Veraltet",
       "current": "Aktuell",
-      "new": "Verfügbar"
+      "available": "Verfügbar"
     },
     "empty": "Keine Updates verfügbar",
     "actions": {
@@ -127,10 +173,11 @@
     "successTitle": "Update gestartet",
     "success": "Das Update von OpenCelium auf Version {{version}} wurde erfolgreich gestartet.",
     "successLogoutNotice": "Damit das Update wirksam wird, werden Sie in {{count}} Sekunden automatisch abgemeldet.",
-    "successLogoutNotice_one": "Damit das Update wirksam wird, werden Sie in {{count}} Sekunde automatisch abgemeldet."
+    "successLogoutNotice_one": "Damit das Update wirksam wird, werden Sie in {{count}} Sekunde automatisch abgemeldet.",
+    "hint": "Leeren Sie nach dem Update den Browser-Cache."
   },
   "changelog": {
-    "title": "Changelog von {{version}}",
+    "title": "Änderungsprotokoll von {{version}}",
     "close": "Schließen",
     "error": "Fehler beim Laden des Änderungsprotokolls"
   }

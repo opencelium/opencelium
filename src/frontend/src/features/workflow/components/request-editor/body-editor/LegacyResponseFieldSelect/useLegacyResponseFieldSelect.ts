@@ -1,7 +1,9 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { getReferenceOptions, isExpandableReferencePath } from '../requestReferenceOptions';
+import { getReferenceOptions, isExpandableReferencePath,
+  matchesReferenceOptionSyntax } from '../requestReferenceOptions';
+import { useReferenceValidation } from '../useReferenceValidation';
 import type { LegacyResponseFieldSelectProps } from './LegacyResponseFieldSelect.types';
 import { getReferenceFilterTerm } from '../../reference-generator/referenceGenerator.utils';
 
@@ -18,6 +20,8 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
   const [filterTerm, setFilterTerm] = useState('');
   const [open, setOpen] = useState(false);
   const displayPath = path === '$' ? t('references.rootObject') : path;
+  // Only once the user stops typing — a half-typed path is always invalid.
+  const pathFeedback = useReferenceValidation({ method, type, path, iterators: props.iterators, isPaused: open });
 
   useEffect(() => {
     const nextPath = normalizePath(value);
@@ -27,13 +31,13 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
   }, [iterators, method, type, value]);
 
   const options = useMemo(() => getReferenceOptions(method, type, optionsBase, iterators, t)
-    .filter(({ label }) => !filterTerm || label.toLowerCase().startsWith(filterTerm))
-    .map(({ label, value: optionValue }) => ({ label, value: optionValue })),
+    .filter((option) => !filterTerm || option.label.toLowerCase().startsWith(filterTerm)
+      || matchesReferenceOptionSyntax(option, filterTerm)),
   [filterTerm, iterators, method, optionsBase, type, t]);
 
   const focusInputToEnd = () => requestAnimationFrame(() => {
-    const input = wrapperRef.current?.querySelector('input');
-    if (!(input instanceof HTMLInputElement)) return;
+    const input = wrapperRef.current?.querySelector('textarea');
+    if (!input) return;
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
   });
@@ -52,9 +56,12 @@ export function useLegacyResponseFieldSelect(props: LegacyResponseFieldSelectPro
     searchValue: type === 'status' ? 'status' : displayPath,
     isDisabled: disabled || type === 'status',
     open: disabled || type === 'status' ? false : open,
+    pathFeedback,
     notFoundContent: undefined,
-    onSearch: (nextValue: string) => {
+    onSearch: (typedValue: string) => {
       if (!userInteractionRef.current) return;
+      // The field is a wrapping textarea; a pasted line break is never part of a path.
+      const nextValue = typedValue.replace(/[\r\n]+/g, '');
       if (selectingRef.current) {
         selectingRef.current = false;
         if (!nextValue) return;

@@ -2,6 +2,7 @@ import type {
     DetailedMethodLog,
     ExecutionSocketLog,
     FlowchartChildLog,
+    FlowchartLog,
     LogStatus,
 } from '@features/logs'
 import { appendLoopIndex } from '@features/logs'
@@ -25,6 +26,8 @@ import { isKnownCustomer, TUTORIAL_ITERATIONS, tutorialDuration, tutorialExchang
 
 const EXECUTION_ID = 'tutorial-execution'
 const CONNECTOR_NAME = 'Tutorial CRM'
+const CONNECTOR_LOG_ID = 'tut-connector'
+const CONNECTOR_PROPERTIES = { CONNECTOR_ID: '-9001', DIRECTION: 'source' } as const
 
 /** What this module reads out of the save-shaped payload; the rest is not its business. */
 type PayloadMethod = {
@@ -158,6 +161,12 @@ export type TutorialRunScript = {
     logs: ExecutionSocketLog[]
     /** Canned answers for the REST calls the log tree makes on expand. */
     overrides: Record<string, unknown>
+    /**
+     * The connector row a stored execution opens on. The live tree builds its own from
+     * the socket lines; this is for the schedules' logs dialog, which reads a finished
+     * run over REST — see tutorialScheduleRuns.
+     */
+    connector: FlowchartLog
 }
 
 /**
@@ -295,20 +304,30 @@ export function buildTutorialRunScript(payload: unknown): TutorialRunScript {
 
     logs.push({
         executionId: EXECUTION_ID, flowId: 'tutorial-flow', indexPath: '',
-        id: 'tut-connector', status: 'PENDING', type: 'FLOWCHART', connectorName: CONNECTOR_NAME,
-        properties: { CONNECTOR_ID: '-9001', DIRECTION: 'source' }, segment: {}, error: null,
+        id: CONNECTOR_LOG_ID, status: 'PENDING', type: 'FLOWCHART', connectorName: CONNECTOR_NAME,
+        properties: CONNECTOR_PROPERTIES, segment: {}, error: null,
     })
     walk(roots, '')
     logs.push({
         executionId: EXECUTION_ID, flowId: 'tutorial-flow', indexPath: '',
-        id: 'tut-connector', status: 'COMPLETE', type: 'FLOWCHART', connectorName: CONNECTOR_NAME,
-        properties: { CONNECTOR_ID: '-9001', DIRECTION: 'source' }, segment: {}, error: null,
+        id: CONNECTOR_LOG_ID, status: 'COMPLETE', type: 'FLOWCHART', connectorName: CONNECTOR_NAME,
+        properties: CONNECTOR_PROPERTIES, segment: {}, error: null,
     })
     logs.push({
         executionId: EXECUTION_ID, flowId: 'tutorial-flow', indexPath: '',
         id: 'tut-execution', status: 'COMPLETE', type: 'EXECUTION', connectorName: null,
         properties: {}, segment: {}, error: null,
     })
+    // The connector's own children, which only a stored execution asks for: unlike an
+    // operator's, the request carries no loopIndex.
+    overrides[`/execution/log/element/${CONNECTOR_LOG_ID}/children`] =
+        roots.map((root) => childLog(root, ''))
 
-    return { logs, overrides }
+    const connector: FlowchartLog = {
+        executionId: EXECUTION_ID, flowId: 'tutorial-flow', indexPath: '',
+        id: CONNECTOR_LOG_ID, status: 'COMPLETE', type: 'FLOWCHART', connectorName: CONNECTOR_NAME,
+        properties: { ...CONNECTOR_PROPERTIES }, segment: {}, error: null,
+    }
+
+    return { logs, overrides, connector }
 }

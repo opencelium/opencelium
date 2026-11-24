@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { ResponseType } from '../body-editor/requestReferenceOptions';
+import type { ReferencePathOption, ResponseType } from '../body-editor/requestReferenceOptions';
 import type { ReferenceOption } from './ReferenceGenerator.types';
 
 export const useReferenceGeneratorSelection = (defaultResponseType: ResponseType) => {
@@ -8,7 +8,7 @@ export const useReferenceGeneratorSelection = (defaultResponseType: ResponseType
 	const [selectedMethodId, setSelectedMethodId] = useState('');
 	const [searchValue, setSearchValue] = useState('');
 	const [selectedOption, setSelectedOption] = useState<ReferenceOption | null>(null);
-	const [filteredOptions, setFilteredOptions] = useState<ReferenceOption[]>([]);
+	const [filteredOptions, setFilteredOptions] = useState<ReferencePathOption[]>([]);
 	const [responseType, setResponseType] = useState<ResponseType>(defaultResponseType);
 	const resetField = () => {
 		setSearchValue('');

@@ -5,7 +5,11 @@ import { errorBus } from '@shared/errors/api/errorBus.ts'
 import { selectAccessToken } from '@entities/auth/model/authSelectors'
 import type { RootState } from '@app/store/types'
 import { runtimeConfig } from '@shared/config/runtimeConfig'
-import { findRequestOverride } from '@shared/api/requestOverrides'
+import {
+    findRequestOverride,
+    OVERRIDE_UNAVAILABLE,
+    OVERRIDE_UNAVAILABLE_ERROR,
+} from '@shared/api/requestOverrides'
 
 // No `baseUrl` here — it's resolved per-request below via runtimeConfig.apiUrl, since
 // that value isn't known yet at module-eval time (it's fetched async in main.tsx,
@@ -43,9 +47,10 @@ const rawBaseQuery = fetchBaseQuery({
     },
 })
 
-type CustomFetchArgs = FetchArgs & {
+export type CustomFetchArgs = FetchArgs & {
     customOptions?: {
         ignoreError?: boolean
+        headers?: Record<string, string>
     }
 }
 type ExtraOptions = {
@@ -71,6 +76,9 @@ export const baseQuery: BaseQueryFn<
     const requestMethod = typeof args === 'string' ? 'GET' : args.method
     const requestBody = typeof args === 'string' ? undefined : args.body
     const override = findRequestOverride(requestUrl, requestMethod, requestBody)
+    if (override === OVERRIDE_UNAVAILABLE) {
+        return { error: { status: 'CUSTOM_ERROR', error: OVERRIDE_UNAVAILABLE_ERROR } }
+    }
     if (override !== undefined) return { data: override }
 
     const result = await rawBaseQuery(

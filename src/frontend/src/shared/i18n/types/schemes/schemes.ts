@@ -7,6 +7,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         welcome: string,
         items: string,
         simple: string,
+        importantLabel: string,
         actions: {
             prev: string
             submit: string
@@ -59,6 +60,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             subtitle: string
             goBack: string
             goHome: string
+            entity: string
         }
         onlineFeature: {
             offline: string
@@ -104,6 +106,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             invokers: string
             connectionTemplates: string
             dataAggregator: string
+            globalVariables: string
             notificationTemplates: string
             categories: string
             supportFiles: string
@@ -113,9 +116,11 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             systemCheck: string
             config: string
             ui: string
+            backToMain: string
         }
         commandPalette: {
             placeholder: string
+            placeholderShort: string
             noResults: string
             groups: {
                 workflow: string
@@ -149,6 +154,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 onboarding: string
                 workflowTutorial: string
                 dashboardTour: string
+                changelog: string
             }
             footer: {
                 select: string
@@ -200,9 +206,69 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             startOnboardingTour: string
             startDashboardTour: string
             servicePortal: string
+            account: string
+            adminMenu: string
+            mainMenu: string
+            startWorkflowTutorial: string
+            changelog: string
+        }
+        newFeature: {
+            label: string
+            gotIt: string
+            workflowTemplateJsonEdit: {
+                description: string
+            }
+            enhancementScriptSandbox: {
+                description: string
+            }
+            workflowReferenceOperations: {
+                description: string
+            }
+            workflowConnectorHttpMethod: {
+                title: string
+                description: string
+            }
+            workflowHeaderUserActions: {
+                description: string
+            }
+            workflowTestMethod: {
+                title: string
+                description: string
+            }
+            workflowProblems: {
+                title: string
+                description: string
+            }
+            sidebarBackToMainMenu: {
+                title: string
+                description: string
+            }
+            changelog: {
+                title: string
+                description: string
+            }
+            globalVariables: {
+                title: string
+                description: string
+            }
         }
         user: {
             unknown: string
+        }
+        jsonEditor: {
+            reset: string
+            cancel: string
+            apply: string
+            forceApply: string
+            syntaxError: string
+            discard: {
+                title: string
+                message: string
+            }
+            mode: {
+                tree: string
+                raw: string
+            }
         }
     },
 }

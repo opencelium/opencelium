@@ -13,12 +13,20 @@ things are.
 Layout
 ======
 
-* **Sidebar** (left) — navigation, collapsible to icons, with **Sign Out** at the
+* **Sidebar** (left) — navigation, collapsible to icons, with **Sign out** at the
   bottom.
 * **Top bar** — Create Workflow, the command palette, the language toggle
-  (EN/DE), the menu switcher, and the profile icon.
+  (EN/DE), the **Help** menu *(5.2)*, the menu switcher, and the profile icon —
+  showing your profile picture once you have one.
 * **Content**, with a subscription alert strip above it when the license needs
   attention.
+* **Footer** — copyright and version, and icon links to the documentation,
+  GitHub, the OpenCelium website and the Service Portal *(5.2)*.
+
+The **Help** menu starts the onboarding and dashboard tours (administrators) and
+opens the documentation and the Service Portal; see :doc:`../start/guided-tours`.
+For administrators a **Setup** checklist pill sits in the bottom-right corner
+until it is dismissed.
 
 There are **two menus**, switched with the menu switcher or ``Alt+M``; the last
 page you visited in each is restored. Entries you cannot read are hidden entirely.
@@ -52,12 +60,12 @@ Admin menu
    * - Group
      - Entries
    * - **Users & Access**
-     - Users, Groups, LDAP Check
+     - Users, Roles, LDAP Check
    * - **Configurations**
-     - Invokers, Workflow Templates, Data Aggregator, Notification Templates,
+     - API Definitions, Workflow Templates, Data Aggregators, Notification Templates,
        Categories, Support Files
    * - **License & System**
-     - License Management, Update Assistant, System Check, Configurations
+     - License Management, Update Assistant, System Check, System Configuration
    * - *(top level)*
      - UI
 
@@ -93,11 +101,12 @@ Its own header replaces the application header. See
 :ref:`ref-shortcuts` for the canvas shortcuts.
 
 Header menu entries: Assign Category, Version History, **Change History**,
-Download as Template, Save as Template, Load Template, Shortcuts, Exit.
+Download as Template, Save as Template, Load Template, **Edit as JSON** *(5.2)*,
+Shortcuts, Exit.
 
 .. image:: ../img/workflow/OC5_workflow-header-menu.png
    :align: center
-   :width: 500
+   :width: 260
 
 Panels and overlays, and what opens each:
 
@@ -117,14 +126,25 @@ Panels and overlays, and what opens each:
      - Header menu → Change History. *(5.1)*
    * - **Schedules** (right)
      - The schedules pill in the header.
+   * - **Minimap** (bottom right)
+     - Always shown; collapsible. Hidden while the field links lens is on.
+       *(5.2)*
+   * - **Field links lens** (on canvas)
+     - *Show field links* in the canvas controls. *(5.2)*
+   * - **Field links** list (right)
+     - *Show the list of field links* in the canvas controls. *(5.2)*
+   * - **Field link** drawer (right)
+     - Clicking an arc or a row of the field links list. *(5.2)*
+   * - **Edit workflow as JSON** (dialog)
+     - Header menu → Edit as JSON. *(5.2)*
    * - **Node toolbar**
-     - Selecting a node. Carries *add joint*, *remove joint*, *add comment* and
-       *delete*. *(5.1)*
+     - Selecting a single node. Carries *add jump*, *remove jump*, *add comment*
+       and *delete*. *(5.1)*
    * - **Debug controls** (on canvas)
      - A test run in debug mode: pause, step forward, speed. *(5.1)*
 
 .. note::
-   **New in 5.1.** The canvas gained two things that are not steps: **joints**,
+   **New in 5.1.** The canvas gained two things that are not steps: **jumps**,
    drawn in green between two method nodes
    (:doc:`../guides/skip-steps-with-joints`), and **comment boxes**, anchored
    notes that minimise to a badge on their step
@@ -147,6 +167,50 @@ Profile
 =======
 
 Three sections: **User Details**, **Update Password** (which logs you out), and
-**Permissions**.
+**Permissions**. The profile picture can be uploaded, replaced, cropped and
+deleted right there; the change applies at once, without a Save. *(5.2)*
+
+.. _ref-upload-limits:
+
+Upload limits
+=============
+
+From 5.2 every upload checks the file type and size before anything is sent to the
+server, and says which rule a file broke.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 30 30
+
+   * - Upload
+     - Types
+     - Maximum size
+   * - Workflow templates
+     - ``.json``, ``.zip``
+     - 1 GB
+   * - API definitions
+     - ``.xml``, ``.zip``
+     - 1 GB
+   * - Connector icon, user picture, role icon
+     - ``.png``, ``.jpg``, ``.jpeg``
+     - 10 MB
+   * - Application logo (UI settings)
+     - ``.png``, ``.jpg``, ``.jpeg``
+     - 10 MB
+   * - License import / extra operations
+     - ``.txt``
+     - 10 MB
+   * - Offline update package
+     - ``.zip``
+     - 1 GB
+
+Pictures go through a crop dialog first. Connector icons, user pictures and role
+icons are cropped to a circle; the application logo keeps its proportions. SVG is
+not accepted for pictures.
+
+.. note::
+   The nginx example in :ref:`ref-configuration` limits request bodies to
+   ``client_max_body_size 200M``. Raise it on the proxy if you upload larger
+   files.
 
 A themed **404** page is shown for unknown routes inside the app shell.

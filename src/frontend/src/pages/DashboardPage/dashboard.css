@@ -1,0 +1,8 @@
+.dashboard-calendar-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.dashboard-calendar-row .schedule-calendar-scroll {
+    max-height: min(360px, 65vh);
+}

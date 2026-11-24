@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, type ClipboardEvent, type KeyboardEvent
 import { buildInlineHtml, computeRawInsertAtFromVisualCaret, getInlineVisualLength,
 	parseHtmlToRaw, sanitizePlainTextPaste, sanitizeUrlInputValue,
 	shouldBlockUrlKeyInput } from '../urlEditor.utils';
-import { getCaretPositionOfDivEditable,
+import { getCaretPositionOfDivEditable, getRawCaretPositionOfDivEditable,
 	setFocusByCaretPositionInDivEditable } from '../utils/contentEditable';
 import type { UrlInlineValueEditorProps } from './UrlInlineValueEditor.types';
 import { getContentRightEdge, INLINE_REFERENCE_CLASS } from './urlInlineValueEditor.utils';
@@ -14,14 +14,16 @@ export function useUrlInlineValueEditor({ value, endpointArgs, readOnly,
 	const lastRendered = useRef('');
 	const lastCaret = useRef(0);
 	const typing = useRef(false);
-	const reportCaret = (raw: string, caret: number) => onCaretChange?.(
-		computeRawInsertAtFromVisualCaret(raw, caret, endpointArgs));
+	const reportCaret = (raw: string, caret: number) => {
+		const position = rootRef.current ? getRawCaretPositionOfDivEditable(rootRef.current) : -1;
+		onCaretChange?.(position >= 0 ? position : computeRawInsertAtFromVisualCaret(raw, caret, endpointArgs));
+	};
 
 	const render = useCallback((raw: string) => {
 		const root = rootRef.current;
 		if (!root) return;
 		lastRendered.current = raw;
-		root.innerHTML = buildInlineHtml(raw, endpointArgs);
+		root.innerHTML = buildInlineHtml(raw, endpointArgs, { cursorPointer: true });
 		const end = getInlineVisualLength(raw, endpointArgs);
 		lastCaret.current = Math.max(0, Math.min(lastCaret.current, end));
 		if (!readOnly && document.activeElement === root) {

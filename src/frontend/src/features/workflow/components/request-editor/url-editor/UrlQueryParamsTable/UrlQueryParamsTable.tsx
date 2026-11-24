@@ -7,7 +7,7 @@ import { UrlQueryParamTextInput } from './UrlQueryParamTextInput';
 import type { UrlQueryParamsTableProps } from './UrlQueryParamsTable.types';
 
 export function UrlQueryParamsTable({ readOnly, rows, endpointArgs, connection, currentMethod,
-	onToggleEnabled, onChangeParam, onRemoveParamRow, onCaretChange }: UrlQueryParamsTableProps) {
+	onToggleEnabled, onChangeParam, onRemoveParamRow, onInsertReference, activeReferenceRowId, onCaretChange }: UrlQueryParamsTableProps) {
 	const columns: ColumnsType<QueryParam> = [
 		{
 			title: 'On', dataIndex: 'enabled', width: 64,
@@ -30,9 +30,11 @@ export function UrlQueryParamsTable({ readOnly, rows, endpointArgs, connection, 
 				onChangeParam={onChangeParam} onCaretChange={onCaretChange} />,
 		},
 		{
-			title: 'Actions', key: 'actions', width: 112, align: 'right',
+			title: 'Actions', key: 'actions', width: 144, align: 'right',
 			render: (_, row) => <UrlQueryParamActions row={row} readOnly={readOnly}
-				onChangeParam={onChangeParam} onRemoveParamRow={onRemoveParamRow} />,
+				onChangeParam={onChangeParam} onRemoveParamRow={onRemoveParamRow}
+				onInsertReference={onInsertReference}
+				hasActiveReference={row.id === activeReferenceRowId} />,
 		},
 	];
 

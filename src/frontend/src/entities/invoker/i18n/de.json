@@ -1,29 +1,29 @@
 {
   "list": {
-    "title": "Invoker",
-    "subTitle": "Der Bereich Invoker enthält alle in OpenCelium konfigurierten Integrationen für externe Systeme. Ein Invoker stellt eine Verbindungsschnittstelle zu einer externen API oder einem externen Dienst dar. Er definiert, wie OpenCelium mit externen Systemen kommuniziert.\n\nWeitere Informationen finden Sie in der Dokumentation.",
+    "title": "API-Definitionen",
+    "subTitle": "Der Bereich API-Definitionen enthält alle in OpenCelium konfigurierten Integrationen für externe Systeme. Eine API-Definition stellt eine Verbindungsschnittstelle zu einer externen API oder einem externen Dienst dar. Sie definiert, wie OpenCelium mit externen Systemen kommuniziert.\n\nWeitere Informationen finden Sie in der Dokumentation.",
     "upload": {
       "button": "Hochladen",
       "confirmReplace": {
-        "title": "Vorhandenen Invoker ersetzen?",
-        "message": "Ein Invoker mit diesem Dateinamen existiert bereits. Er wird ersetzt. Sind Sie sicher?"
+        "title": "Vorhandene API-Definition ersetzen?",
+        "message": "Eine API-Definition mit diesem Dateinamen existiert bereits. Möchten Sie sie ersetzen?"
       },
-      "success": "Invoker erfolgreich hochgeladen: {{name}}",
-      "successArchive": "Aus {{name}} hochgeladene Invoker: {{count}}",
-      "emptyArchive": "Das Archiv enthält keine Invoker.",
-      "error": "Hochladen der Invoker-Datei fehlgeschlagen.",
-      "invalidType": "Invoker-Dateien müssen das .xml- oder .zip-Format verwenden.",
-      "tooLarge": "Die Invoker-Datei darf 1 GB nicht überschreiten.",
-      "archiveTooLarge": "Das Invoker-Archiv darf 1 GB nicht überschreiten."
+      "success": "API-Definition erfolgreich hochgeladen: {{name}}",
+      "successArchive": "Aus {{name}} hochgeladene API-Definitionen: {{count}}",
+      "emptyArchive": "Das Archiv enthält keine API-Definitionen.",
+      "error": "Hochladen der API-Definitionsdatei fehlgeschlagen.",
+      "invalidType": "API-Definitionsdateien müssen das .xml- oder .zip-Format verwenden.",
+      "tooLarge": "Die API-Definitionsdatei darf 1 GB nicht überschreiten.",
+      "archiveTooLarge": "Das API-Definitionsarchiv darf 1 GB nicht überschreiten."
     },
     "download": {
-      "success": "Invoker heruntergeladen: {{name}}",
-      "error": "Herunterladen der Invoker-Datei fehlgeschlagen."
+      "success": "API-Definition heruntergeladen: {{name}}",
+      "error": "Herunterladen der API-Definitionsdatei fehlgeschlagen."
     },
     "repository": {
-      "success_one": "{{count}} Invoker aus dem Online-Repository installiert",
-      "success_other": "{{count}} Invoker aus dem Online-Repository installiert",
-      "empty": "Das Online-Repository enthielt keine Invoker zur Installation.",
+      "success_one": "{{count}} API-Definition aus dem Online-Repository installiert",
+      "success_other": "{{count}} API-Definitionen aus dem Online-Repository installiert",
+      "empty": "Das Online-Repository enthielt keine API-Definitionen zur Installation.",
       "failed_one": "{{count}} Datei konnte nicht installiert werden",
       "failed_other": "{{count}} Dateien konnten nicht installiert werden"
     }
@@ -32,7 +32,7 @@
     "name": {
       "label": "Name",
       "errors": {
-        "name_already_exists": "Ein Invoker mit diesem Namen existiert bereits",
+        "name_already_exists": "Eine API-Definition mit diesem Namen existiert bereits",
         "invalid_characters": "Nur Buchstaben, Ziffern, Leerzeichen, Bindestriche, Unterstriche, Klammern und Punkte verwenden",
         "invalid_period": "Ein Punkt darf nicht am Anfang oder Ende stehen; aufeinanderfolgende Punkte sind nicht erlaubt",
         "max_length": "Der Name darf höchstens 200 Zeichen lang sein",
@@ -49,7 +49,7 @@
       "label": "Authentifizierungstyp",
       "options": {
         "apikey": "API-Schlüssel",
-        "basic": "Einfach",
+        "basic": "Basic Auth (Benutzername/Passwort)",
         "endpointAuth": "Endpunkt-Authentifizierung",
         "token": "Token"
       }
@@ -79,7 +79,7 @@
         "name": "Operationsname",
         "endpoint": "Endpunkt",
         "method": "Methode",
-        "testConnection": "Verbindungstest",
+        "testConnection": "Für Verbindungstest verwenden",
         "request": "Anfrage",
         "responseSuccess": "Antwort (Erfolg)",
         "responseFail": "Antwort (Fehler)",
@@ -88,7 +88,7 @@
         "data": "Daten",
         "format": "Format",
         "type": "Typ",
-        "body": "Inhalt"
+        "body": "Body"
       },
       "add": "Operation hinzufügen",
       "empty": "Keine Operationen definiert.",
@@ -98,8 +98,8 @@
         "endpointRequired": "Endpunkt ist erforderlich",
         "incompleteOperations": "Alle Operationen müssen einen Namen und einen Endpunkt haben",
         "meaningfulValues": "Operationsnamen und Endpunkte müssen mindestens einen Buchstaben oder eine Ziffer enthalten",
-        "bodyTypeMismatch": "Der JSON-Inhalt muss dem ausgewählten Typ (Objekt oder Array) entsprechen",
-        "noTestOperation": "Mindestens eine Operation muss den Verbindungstest aktiviert haben",
+        "bodyTypeMismatch": "Der JSON-Body muss dem ausgewählten Typ (Objekt oder Array) entsprechen",
+        "noTestOperation": "Markieren Sie mindestens eine Operation als „Für Verbindungstest verwenden“.",
         "invalidJson": "Ungültiges JSON"
       }
     }
@@ -118,28 +118,28 @@
   "wizard": {
     "modes": {
       "create": {
-        "header": "Invoker erstellen",
-        "subheader": "Ein Invoker definiert die HTTP-Operationen und Authentifizierungskonfiguration für die Kommunikation mit einem externen System.",
-        "successMessage": "Invoker erfolgreich erstellt"
+        "header": "API-Definition erstellen",
+        "subheader": "Eine API-Definition legt die HTTP-Operationen und die Authentifizierungskonfiguration für die Kommunikation mit einem externen System fest.",
+        "successMessage": "API-Definition „{{name}}“ wurde erfolgreich erstellt"
       },
       "view": {
-        "header": "Invoker-Details",
-        "subheader": "Invoker-Konfiguration anzeigen."
+        "header": "Details der API-Definition",
+        "subheader": "Konfiguration der API-Definition anzeigen."
       },
       "update": {
-        "header": "Invoker bearbeiten",
-        "subheader": "Invoker-Konfiguration aktualisieren.",
-        "successMessage": "Invoker erfolgreich aktualisiert."
+        "header": "API-Definition bearbeiten",
+        "subheader": "Konfiguration der API-Definition aktualisieren.",
+        "successMessage": "API-Definition erfolgreich aktualisiert."
       }
     },
     "recommendations": {
-      "1": "Weiteren Invoker erstellen",
-      "2": "Connector erstellen"
+      "1": "Weitere API-Definition erstellen",
+      "2": "Konnektor erstellen"
     },
     "steps": {
       "general-data": {
         "header": "Allgemeine Daten",
-        "subheader": "Grundlegende Informationen für diesen Invoker definieren."
+        "subheader": "Grundlegende Informationen für diese API-Definition festlegen."
       },
       "authentication": {
         "header": "Authentifizierung",
@@ -147,15 +147,15 @@
       },
       "operations": {
         "header": "Operationen",
-        "subheader": "HTTP-Operationen definieren, die dieser Invoker bereitstellt."
+        "subheader": "HTTP-Operationen festlegen, die diese API-Definition bereitstellt."
       }
     }
   },
   "confirmation": {
     "delete": {
-      "byName": "Warnung: Der Invoker \"{{name}}\" wird möglicherweise von einem oder mehreren Konnektoren verwendet. Das Löschen kann diese Konnektoren beeinträchtigen.\n\nMöchten Sie fortfahren?",
-      "bulkMessage": "Warnung: Die {{count}} ausgewählten Invoker werden möglicherweise von einem oder mehreren Konnektoren verwendet. Das Löschen kann diese Konnektoren beeinträchtigen.\n\nMöchten Sie fortfahren?",
-      "bulkMessage_one": "Warnung: Der ausgewählte Invoker wird möglicherweise von einem oder mehreren Konnektoren verwendet. Das Löschen kann diese Konnektoren beeinträchtigen.\n\nMöchten Sie fortfahren?"
+      "byName": "Warnung: Die API-Definition „{{name}}“ wird möglicherweise von einem oder mehreren Konnektoren verwendet. Das Löschen kann diese Konnektoren beeinträchtigen.\n\nMöchten Sie fortfahren?",
+      "bulkMessage": "Warnung: Die {{count}} ausgewählten API-Definitionen werden möglicherweise von einem oder mehreren Konnektoren verwendet. Das Löschen kann diese Konnektoren beeinträchtigen.\n\nMöchten Sie fortfahren?",
+      "bulkMessage_one": "Warnung: Die ausgewählte API-Definition wird möglicherweise von einem oder mehreren Konnektoren verwendet. Das Löschen kann diese Konnektoren beeinträchtigen.\n\nMöchten Sie fortfahren?"
     }
   }
 }

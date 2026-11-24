@@ -32,7 +32,7 @@ shipped ``conf/nginx_default.conf`` gets this right.
 5.0 reads ``config.json`` at runtime; ``settings.json`` is ignored. See
 :ref:`ref-configuration`.
 
-**Python or Ruby enhancements behave as if they were JavaScript.**
+**Python or Ruby transformations behave as if they were JavaScript.**
 Either the polyglot engine is unreachable — check the Polyglot row in System
 Check — or the configuration block is at the top level of ``application.yml``
 instead of under ``opencelium:``, in which case it binds nothing and fails
@@ -55,7 +55,7 @@ A step references a connector that has been deleted. Open the step and pick a
 current connector.
 
 **A template will not load, or loads with unresolved connectors.**
-Templates carry invoker names rather than connector IDs. The *Map template
+Templates carry API definition names rather than connector IDs. The *Map template
 connectors* dialog asks which local connector each one should use — see
 :doc:`../guides/reuse-with-templates`.
 
@@ -71,7 +71,7 @@ Getting help
 ============
 
 Generate a **support bundle** from the schedule list: it packages a run's logs and
-the invoker files as a ZIP, with a masking level you choose so payloads do not
+the API definition files as a ZIP, with a masking level you choose so payloads do not
 leave your system unredacted. See :doc:`../guides/debug-a-workflow`.
 
 Then contact support@opencelium.io, or use the ticket system in the Service

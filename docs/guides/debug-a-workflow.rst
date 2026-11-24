@@ -93,6 +93,14 @@ as long as the run is alive.
    :align: center
    :width: 720
 
+While paused you can also open a step's body: next to the **Transformation**
+header an eye button (*Show value* / *Hide value*) reveals the value the script
+computed in this run. From 5.2 the button is offered only while a debug run is
+paused, since there is no computed value to show otherwise.
+
+On the canvas, the :ref:`minimap <guide-minimap>` marks the step where a test run
+failed with a red ring, and its pager jumps straight to it.
+
 Stepping through a loop
 -----------------------
 
@@ -180,7 +188,7 @@ is outlined in red:
 Field type mismatches during binding are reported as readable messages rather than
 a stack trace.
 
-Joints are validated at the same point. The editor normally prevents an illegal
+Jumps are validated at the same point. The editor normally prevents an illegal
 one from being drawn at all, so these codes mostly surface when a workflow is
 built through the API:
 
@@ -191,9 +199,9 @@ built through the API:
    * - Code
      - Cause
    * - ``JUMP_SOURCE_IS_OPERATOR``
-     - An ``If`` or ``Loop`` cannot start a joint.
+     - An ``If`` or ``Loop`` cannot start a jump.
    * - ``JUMP_TARGET_IS_OPERATOR``
-     - An ``If`` or ``Loop`` cannot be the target of a joint.
+     - An ``If`` or ``Loop`` cannot be the target of a jump.
    * - ``JUMP_TARGET_INSIDE_OPERATOR``
      - The target sits inside an operator body the source is not part of.
    * - ``JUMP_ESCAPES_LOOP``
@@ -213,7 +221,7 @@ Support bundles
 
 When you need support to look at a run, generate a **support bundle** from the
 schedule's **Support logs** action. It runs the workflow, collects the logs, and
-stores them with the invoker files as a ZIP.
+stores them with the API definition files as a ZIP.
 
 Because logs contain real payloads, you choose what leaves your system:
 
@@ -263,7 +271,7 @@ same thing: ``/ws`` is not proxied correctly. See
 Where to go next
 ================
 
-* :doc:`skip-steps-with-joints` — a joint is only visible on the canvas during a
+* :doc:`skip-steps-with-joints` — a jump is only visible on the canvas during a
   run, which makes debug mode the way to confirm one fires.
 * :doc:`undo-and-history` — take back the change the run just proved wrong.
 * :doc:`schedule-and-notify` — run it regularly once it works.

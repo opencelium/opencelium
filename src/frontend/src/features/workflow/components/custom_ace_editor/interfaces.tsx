@@ -1,7 +1,10 @@
 import type { CSSProperties } from 'react';
+import type { IAceEditorProps } from 'react-ace';
 
 export interface LimitedAceEditorProps {
 	maxLength?: number;
+	annotations?: IAceEditorProps['annotations'];
+	onLoad?: IAceEditorProps['onLoad'];
 	mode?: string;
 	editorTheme?: any;
 	theme?: any;
@@ -25,6 +28,7 @@ export interface LimitedAceEditorProps {
 	onBlur?: () => void;
 	cursorStart?: any;
 	focus?: boolean;
+	hideCounter?: boolean;
 	counterStyles?: {
 		top?: string;
 		right?: string;

@@ -1,6 +1,7 @@
 {
-  "title": "Lauf-Logs",
-  "subtitle": "Wählen Sie eine Ausführung, um deren Konnektor-, Methoden- und Operator-Logs einzusehen.",
+  "openInPlayground": "Im Playground öffnen",
+  "title": "Ausführungs-Logs",
+  "subtitle": "Wählen Sie eine Ausführung, um deren Konnektor-, Methoden- und Logikblock-Logs einzusehen.",
   "selectLabel": "Ausführung",
   "selectPlaceholder": "Ausführung auswählen",
   "selectHint": "Wählen Sie eine Ausführung, um deren Logs anzuzeigen.",
@@ -13,10 +14,12 @@
     "tooBig": "Das Log ist zu groß zum Herunterladen. Sie finden es auf dem Server unter {{path}}."
   },
   "tabs": {
-    "requestHeader": "Anfrage-Header",
     "requestBody": "Anfrage-Body",
-    "responseHeader": "Antwort-Header",
-    "responseBody": "Antwort-Body"
+    "responseBody": "Antwort-Body",
+    "sentReceived": "Gesendet / Empfangen",
+    "headers": "Header",
+    "request": "Anfrage",
+    "response": "Antwort"
   },
   "methodView": {
     "tooltip": "URL / Name umschalten"
@@ -24,7 +27,7 @@
   "testRunDetails": "TESTLAUFDETAILS",
   "logsLabel": "LOGS",
   "live": {
-    "title": "Lauf-Logs",
+    "title": "Ausführungs-Logs",
     "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",
     "running": "Läuft…",
     "stopping": "Test wird gestoppt…",
@@ -33,7 +36,7 @@
     "speedTooltip": "Passt an, wie schnell die Testlauf-Animation abläuft. Hat keinen Einfluss auf die tatsächliche Ausführungsgeschwindigkeit.",
     "pauseTooltip": "Pausieren",
     "resumeTooltip": "Fortsetzen",
-    "stepForwardTooltip": "Vorwärts springen",
+    "stepForwardTooltip": "Einzelschritt",
     "liveToggleLabel": "Live",
     "liveToggleTooltip": "An: Logs live anzeigen, ohne Animation. Aus: Canvas-Animation und Logs zur besseren Übersicht verlangsamen.",
     "finished": "TEST BEENDET in {{time}}",
@@ -43,5 +46,18 @@
     "collapse": "Log-Panel einklappen",
     "clear": "Logs löschen",
     "orphaned": "Dieser Test wurde gestartet, bevor die Seite erneut geöffnet wurde. Daher sind die Live-Logs nicht mehr verfügbar. Bitte stoppen Sie den Test und führen Sie ihn erneut aus, um die Logs zu sehen."
+  },
+  "globals": {
+    "title": "Globale Variablen",
+    "lockWait": "{{ms}} ms auf die Ausführungssperre gewartet",
+    "callSummary": "{{variable}}: {{total}} Aufrufe, {{failed}} fehlgeschlagen",
+    "duration": "{{ms}} ms · Version {{version}}",
+    "result": {
+      "SAVED": "Gespeichert",
+      "REJECTED": "Abgelehnt"
+    },
+    "writeCount": "{{count}} Schreibvorgänge zusammengefasst",
+    "snapshot": "Beim Start gelesene Werte ({{count}})",
+    "valueOmitted": "Wert nicht protokolliert ({{bytes}} Bytes)"
   }
 }

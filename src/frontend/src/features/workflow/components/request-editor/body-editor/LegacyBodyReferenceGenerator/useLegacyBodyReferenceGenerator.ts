@@ -1,21 +1,27 @@
 import { useMemo, useState } from 'react';
 import { buildReferenceValue, getIteratorsForMethod, isExpandableReferencePath,
   type ResponseType } from '../requestReferenceOptions';
-import { webhookSnippet } from '../bodyWebhook';
+import { extractWebhookValue, webhookSnippet } from '../bodyWebhook';
 import type { LegacyBodyReferenceGeneratorProps } from './LegacyBodyReferenceGenerator.types';
 import { getReferenceMethods } from './legacyBodyReferenceGenerator.utils';
 import { parseEnhancementArg } from '../../utils/parseEnhancementArg';
 import { normalizeReferenceColor } from '../../../../utils/graph.referenceColors';
+import { buildGlobalReference, parseGlobalReference } from '@entities/globalVariable/lib/globalReference';
+
+export type GeneratorReferenceType = 'direct' | 'webhook' | 'global';
+
+const isWebhookSnippet = (value: string) => value.startsWith('${') && value.endsWith('}');
 
 export function useLegacyBodyReferenceGenerator({
   connection, currentMethod, onApply, showWebhookOption = true, defaultMethodId, resetKey,
   applyOnSelect, value, showMethod = true, readOnly,
 }: LegacyBodyReferenceGeneratorProps) {
-  const [referenceType, setReferenceType] = useState<'direct' | 'webhook'>('direct');
+  const [referenceType, setReferenceType] = useState<GeneratorReferenceType>('direct');
   const [responseType, setResponseType] = useState<ResponseType>('body');
   const [methodId, setMethodId] = useState<string>();
   const [field, setField] = useState<string>();
   const [webhookValue, setWebhookValue] = useState<string>();
+  const [globalName, setGlobalName] = useState<string>();
   // Eligibility answers "what may this method read", which is a question about
   // a choice. A read-only generator is not offering one — it is displaying a
   // reference that already exists, and the method it names may well be one the
@@ -49,8 +55,16 @@ export function useLegacyBodyReferenceGenerator({
   const [appliedSeed, setAppliedSeed] = useState(`||${resetKey ?? 0}`);
   if (seed !== appliedSeed) {
     setAppliedSeed(seed);
-    if (edited && editedMethodId) {
+    const editedGlobal = value ? parseGlobalReference(value) : null;
+    if (editedGlobal) {
+      setReferenceType('global');
+      setGlobalName(editedGlobal.name);
+    } else if (value && isWebhookSnippet(value)) {
+      setReferenceType('webhook');
+      setWebhookValue(extractWebhookValue(value));
+    } else if (edited && editedMethodId) {
       // Showing an answer the host already holds: the controls are the answer.
+      setReferenceType('direct');
       setMethodId(editedMethodId);
       setResponseType(edited.messageProperty as ResponseType);
       setField(edited.messageProperty === 'status' ? 'status' : edited.path || '$');
@@ -65,7 +79,7 @@ export function useLegacyBodyReferenceGenerator({
   const iterators = useMemo(() => getIteratorsForMethod(connection, currentMethod),
     [connection, currentMethod]);
   const shellClassName = ['bodyLegacyGeneratorShell',
-    referenceType === 'webhook' ? 'bodyLegacyGeneratorShellWebhook' : '',
+    referenceType !== 'direct' ? 'bodyLegacyGeneratorShellWebhook' : '',
     !showWebhookOption ? 'bodyLegacyGeneratorShellNoToggle' : '',
     !showMethod ? 'bodyLegacyGeneratorShellNoMethod' : '',
   ].filter(Boolean).join(' ');
@@ -107,13 +121,18 @@ export function useLegacyBodyReferenceGenerator({
     onApply(webhookSnippet(webhookValue));
     setWebhookValue(undefined);
   };
+  const applyGlobal = () => {
+    if (!globalName) return;
+    onApply(buildGlobalReference(globalName));
+    setGlobalName(undefined);
+  };
 
   return {
     /** Changes once per reset — what the controls are keyed on, so each reset
      *  replaces them instead of asking them to clear themselves. */
     resetSeed: appliedSeed,
     referenceType, setReferenceType, responseType, methodId, field, setField: chooseField,
-    webhookValue, setWebhookValue, methods, selectedMethod,
+    webhookValue, setWebhookValue, globalName, setGlobalName, applyGlobal, methods, selectedMethod,
     iterators, shellClassName, selectMethod, selectResponseType, applyDirect, applyWebhook,
   };
 }

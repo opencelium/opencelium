@@ -1,9 +1,9 @@
 {
   "list": {
     "title": "Support Files",
-    "subTitle": "Diagnostic bundles produced by connection runs. Download a bundle to share it with support, or remove ones you no longer need.",
-    "searchPlaceholder": "Search by connection",
-    "deletedConnection": "DELETED CONNECTION",
+    "subTitle": "Diagnostic bundles produced by workflow executions. Download a bundle to share it with support, or remove ones you no longer need.",
+    "searchPlaceholder": "Search by workflow",
+    "deletedConnection": "DELETED WORKFLOW",
     "columns": {
       "status": "Status",
       "connection": "Workflow",
@@ -16,7 +16,7 @@
       "error": "Failed to download support file"
     },
     "confirmDelete": {
-      "message": "Are you sure you want to delete support-file \"{{filePath}}\"?"
+      "message": "Delete the support file \"{{filePath}}\"? This can't be undone."
     }
   },
   "events": {

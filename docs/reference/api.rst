@@ -71,20 +71,20 @@ document and hardcoded on the UI side.
    * - Value
      - Meaning
    * - ``CONNECTOR``
-     - Calls an operation defined in the invoker of a connector.
+     - Calls an operation defined in the API definition of a connector.
    * - ``HTTP_REQUEST``
-     - A free-form REST call with its own URL, headers and body — no invoker.
+     - A free-form REST call with its own URL, headers and body — no API definition.
    * - ``WEBHOOK``
      - Triggers the schedule of another workflow through its webhook,
        asynchronously.
    * - ``null``
-     - Legacy data. Keeps the pre-type behaviour: the invoker is inferred from
+     - Legacy data. Keeps the pre-type behaviour: the API definition is inferred from
        the enclosing or own connector, falling back to a plain HTTP request.
 
-Joints (5.1)
+Jumps (5.1)
 ------------
 
-A method may carry a **joint**: after it runs, execution continues at another
+A method may carry a **jump**: after it runs, execution continues at another
 method instead of at the next one.
 
 .. list-table::
@@ -96,10 +96,10 @@ method instead of at the next one.
      - Description
    * - ``jump``
      - string
-     - The ``index`` of the target method. Absent when the method has no joint.
+     - The ``index`` of the target method. Absent when the method has no jump.
        A method carries at most one.
 
-The server validates every joint on save and again before execution, rejecting
+The server validates every jump on save and again before execution, rejecting
 it with one of the ``JUMP_*`` codes listed in
 :doc:`../guides/debug-a-workflow`. The rules — methods only, forward only, same
 loop scope, may leave an ``If`` but not enter one — are described in
