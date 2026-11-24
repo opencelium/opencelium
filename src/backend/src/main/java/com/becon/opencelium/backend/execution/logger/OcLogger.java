@@ -13,14 +13,21 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class OcLogger<T extends LogMessage> {
     /** What takes the place of a hidden text in a line. */
     public static final String HIDDEN_MASK = "****";
+
+    /** A {@code Basic} credential: group 1 is the scheme with its space, group 2 the Base64. */
+    private static final Pattern BASIC_CREDENTIALS =
+            Pattern.compile("(Basic\\s+)([A-Za-z0-9+/]+={0,2})");
 
     private final T logEntity;
     private final boolean enabled; // debug is ON || SUPPORT_FILE is enabled
@@ -126,12 +133,48 @@ public class OcLogger<T extends LogMessage> {
     }
 
     private static String replaceAll(String message, List<String> texts) {
-        String result = message;
+        if (texts.isEmpty()) {
+            return message;
+        }
+
+        String result = hideInBasicCredentials(message, texts);
         for (String text : texts) {
             result = result.replace(text, HIDDEN_MASK);
         }
 
         return result;
+    }
+
+    /**
+     * Masks the Base64 part of each {@code Basic} credential whose decoded {@code user:password}
+     * holds one of {@code texts}. A connector field holding a secret global variable reaches the
+     * request only encoded like this, so replacing the plain text alone would not hide it.
+     */
+    private static String hideInBasicCredentials(String message, List<String> texts) {
+        Matcher matcher = BASIC_CREDENTIALS.matcher(message);
+        StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            String replacement = holdsAny(decode(matcher.group(2)), texts)
+                    ? matcher.group(1) + HIDDEN_MASK
+                    : matcher.group();
+            matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(result);
+
+        return result.toString();
+    }
+
+    private static String decode(String base64) {
+        try {
+            return new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            // not Base64 after all: nothing in it to hide
+            return "";
+        }
+    }
+
+    private static boolean holdsAny(String decoded, List<String> texts) {
+        return texts.stream().anyMatch(decoded::contains);
     }
 
     private String getStackTraceAsString(Throwable e) {
