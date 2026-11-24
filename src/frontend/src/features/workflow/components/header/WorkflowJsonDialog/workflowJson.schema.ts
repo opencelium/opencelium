@@ -43,17 +43,19 @@ const methodSchema = z.strictObject({
 	methodType: z.enum(['CONNECTOR', 'HTTP_REQUEST', 'WEBHOOK']),
 	dataAggregator: optionalAggregatorSchema, color: hexColorSchema,
 	jump: z.string().min(1).optional(),
+	globalWrites: z.record(z.string().regex(/^global\.[A-Za-z][A-Za-z0-9_]*$/), z.string()).optional(),
 	connector: connectorSchema.nullable(), request: requestSchema, response: responseSchema,
 });
 const operatorTypeSchema = z.preprocess(
 	(value) => typeof value === 'string' ? value.toLowerCase() : value,
 	z.enum(['if', 'loop']),
 );
-const operatorSchema = z.strictObject({
+const conditionOperatorSchema = z.strictObject({
 	id: z.string().min(1), index: z.string().min(1),
 	type: operatorTypeSchema, dataAggregator: optionalAggregatorSchema,
 	expression: z.string().trim().min(1), iterator: z.string().trim().min(1).optional(),
 });
+const operatorSchema = conditionOperatorSchema;
 
 const referenceSchema = z.strictObject({
 	color: hexColorSchema, type: z.enum(['request', 'response']), field: z.string().min(1),
@@ -123,6 +125,7 @@ const nodeDataSchema = z.strictObject({
 	connector: uiConnectorSchema.optional(), methodConfig: uiMethodConfigSchema.optional(),
 	conditionConfig: conditionConfigSchema.optional(), comment: commentSchema.optional(),
 	dataAggregator: optionalAggregatorSchema.optional(),
+	globalWrites: z.record(z.string(), z.string()).optional(),
 });
 const nodeSchema = z.strictObject({
 	id: z.string().min(1),

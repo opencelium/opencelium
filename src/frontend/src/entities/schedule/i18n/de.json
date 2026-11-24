@@ -36,7 +36,8 @@
     "success": "Zeitplan-Ausführung gestartet",
     "error": {
       "concurrentForbidden": "Ein anderer Zeitplan für diesen Workflow läuft bereits. Warten Sie, bis er abgeschlossen ist, bevor Sie diesen starten.",
-      "failed": "Zeitplan-Ausführung konnte nicht gestartet werden"
+      "failed": "Zeitplan-Ausführung konnte nicht gestartet werden",
+      "busy": "Der Workflow läuft noch und startet jetzt nicht erneut. {{detail}}"
     }
   },
   "terminate": {

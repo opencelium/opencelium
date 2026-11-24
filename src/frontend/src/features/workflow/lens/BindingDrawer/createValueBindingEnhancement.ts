@@ -1,7 +1,7 @@
 import { createShortId } from '@shared/lib/createId';
 import {
 	buildBodyEnhancement,
-	getParsedReferences,
+	getBindingArguments,
 	parseReference,
 	type ParsedReference,
 } from '../../components/request-editor/body-editor/bodyReference';
@@ -35,7 +35,7 @@ export const createValueBindingEnhancement = (
 	const target = collectValueReferences(node?.data.methodConfig).targets
 		.find((item) => `value:${nodeId}:${item.path}:${item.reference}` === binding.key);
 	if (!target) return null;
-	const references = getParsedReferences(target.value);
+	const references = getBindingArguments(target.value);
 	if (references.length === 0) return null;
 
 	// The method's colour as the editors spell it, not the lens's lowercased one:
@@ -47,7 +47,8 @@ export const createValueBindingEnhancement = (
 		references);
 	const clicked = parseReference(target.reference);
 	const index = clicked
-		? references.findIndex((item) => formatReference(item) === formatReference(clicked))
+		? references.findIndex((item) => item.kind === 'method'
+			&& formatReference(item.reference) === formatReference(clicked))
 		: -1;
 	return {
 		fieldBindings: [...(fieldBindings ?? []), { enhancement }],

@@ -1,5 +1,5 @@
 import type { OnSelectProps } from 'react-json-view';
-import { hasOnlyReferences } from './bodyReference';
+import { getParsedReferences, isReferenceList } from './bodyReference';
 
 export type BodySelection = {
   namespace: string[];
@@ -53,6 +53,9 @@ export const getBodySelectionValue = (
 
 export const mergeReferenceValue = (current: unknown, reference: string) => {
   if (typeof current !== 'string' || !current.trim()) return reference;
-  if (!hasOnlyReferences(current)) return reference;
-  return current.split(';').map((item) => item.trim()).includes(reference) ? current : `${current};${reference}`;
+  if (!isReferenceList(current)) return reference;
+  if (current.split(';').map((item) => item.trim()).includes(reference)) return current;
+  const merged = `${current};${reference}`;
+  // Globals alone would be sent as text joined by ';', so a second global replaces the first.
+  return getParsedReferences(merged).length > 0 ? merged : reference;
 };

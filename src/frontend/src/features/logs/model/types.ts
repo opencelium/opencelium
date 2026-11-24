@@ -5,7 +5,8 @@ export type LogType =
   | "LOOP"
   | "IF"
   | "UNKNOWN";
-export type LogStatus = "PENDING" | "COMPLETE" | "FAIL";
+// SKIPPED: refused by the workflow's run lock; QUEUE_TIMEOUT: waited too long for it (global variables, FR-28).
+export type LogStatus = "PENDING" | "COMPLETE" | "FAIL" | "SKIPPED" | "QUEUE_TIMEOUT";
 
 // Whether a stored log file is from a successful ('s') or failed ('f') run.
 export type LogFileStatus = "s" | "f";
@@ -105,7 +106,7 @@ export type FlowchartChildLog = LogIdentifier &
   );
 
 // Full method detail returned by /execution/log/element/{id}/details.
-export type DetailedMethodLog = LogIdentifier & {
+export type DetailedMethodLog = LogIdentifier & GlobalRunLog & {
   id: string;
   status: LogStatus;
   type: "OPERATION";
@@ -153,4 +154,46 @@ export type ExecutionSocketLog = LogIdentifier & {
   segment: SocketLogSegment | null;
   error: SocketLogError;
   message?: string;
+};
+
+// Global-variable activity a run records (contract §10). Secrets arrive already masked as "••••".
+// A value too large for the log comes with `valueOmitted` and its size instead.
+export type GlobalSnapshotEntry = { name: string; version: number; value?: unknown; valueOmitted?: boolean; valueBytes?: number };
+
+export type GlobalCallLog = {
+  color?: string;
+  index: string;
+  variable: string;
+  version: number;
+  arguments: Record<string, unknown>;
+  refs: Record<string, unknown>;
+  result: unknown;
+  durationMs: number;
+  warnings: { code: string; ref?: string }[];
+  error: { code: string; message: string } | null;
+};
+
+export type GlobalCallSummary = {
+  index: string;
+  variable: string;
+  totalCalls: number;
+  failedCalls: number;
+  firstError: string | null;
+};
+
+export type GlobalWriteLog = {
+  variable: string;
+  oldValue: unknown;
+  newValue: unknown;
+  writeCount: number;
+  result: "SAVED" | "REJECTED";
+  reason: string | null;
+};
+
+export type GlobalRunLog = {
+  globalSnapshot?: GlobalSnapshotEntry[];
+  globalCalls?: GlobalCallLog[];
+  globalCallSummary?: GlobalCallSummary[];
+  globalWrites?: GlobalWriteLog[];
+  lockWaitMs?: number;
 };

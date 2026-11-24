@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import type { Ace } from 'ace-builds'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-text'
 import 'ace-builds/src-noconflict/theme-tomorrow'
@@ -15,6 +16,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useTheme } from '@shared/theme/hooks/useTheme'
 import type { Mode } from '@/engine/entity/EntityDefinition'
 import { FormControl } from '@shared/ui/form/FormControl'
+import { GlobalVariableInsertButton } from '@entities/globalVariable/ui/picker/GlobalVariableInsertButton'
 
 interface TemplateBodyEditorProps {
     name: string
@@ -68,13 +70,29 @@ export function TemplateBodyEditor({ name, label, mode }: TemplateBodyEditorProp
     [field.value])
 
     const readOnly = mode === 'view'
+    const editorRef = useRef<Ace.Editor | null>(null)
     const translatedLabel = label ? t(label, { defaultValue: label }) : undefined
 
     return (
         <>
             <style>{`.oc-arg-not-exist-marker { position: absolute; background: rgba(255,77,79,0.35); }`}</style>
             <FormControl label={translatedLabel} error={error} name={name}>
+                <div style={{ width: '100%' }}>
+                {!readOnly && (
+                    // Templates belong to no workflow, so only variables visible to all workflows are offered.
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <GlobalVariableInsertButton
+                            scope={{ allScope: true }}
+                            testId="notification-template-body-global"
+                            onInsert={(reference) => {
+                                editorRef.current?.insert(reference)
+                                editorRef.current?.focus()
+                            }}
+                        />
+                    </div>
+                )}
                 <AceEditor
+                    onLoad={(editor) => { editorRef.current = editor }}
                     mode="text"
                     theme={aceTheme}
                     onChange={field.onChange}
@@ -87,6 +105,7 @@ export function TemplateBodyEditor({ name, label, mode }: TemplateBodyEditorProp
                     setOptions={{ useWorker: false, showPrintMargin: false }}
                     readOnly={readOnly}
                 />
+                </div>
             </FormControl>
         </>
     )

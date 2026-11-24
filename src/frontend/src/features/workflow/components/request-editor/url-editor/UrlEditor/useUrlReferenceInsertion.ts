@@ -9,6 +9,7 @@ import {
 } from '../urlEditor.utils';
 import { setFocusByCaretPositionInDivEditable } from '../utils/contentEditable';
 import { extractTokenIds } from './urlEditor.data';
+import { isGlobalReference } from '@entities/globalVariable/lib/globalReference';
 import type { useActiveUrlReference } from './useActiveUrlReference';
 import type { QueryCaretTarget } from './UrlEditor.types';
 
@@ -54,6 +55,8 @@ export function useUrlReferenceInsertion(params: Params) {
 	} = params;
 	return useCallback(
 		(reference: string) => {
+			// A global reference stays plain text in the URL; only method references become endpoint args.
+			const tokenFor = (ids: string[]) => (isGlobalReference(reference) ? { token: reference } : createArgToken(reference, ids));
 			const active = getActive();
 			const target = active
 				? active.rowId && active.field
@@ -86,7 +89,7 @@ export function useUrlReferenceInsertion(params: Params) {
 			const row = target && queryParams.find((item) => item.id === target.rowId);
 			if (target && row) {
 				const current = String(row[target.field] ?? '');
-				const { token } = createArgToken(reference, extractTokenIds(current));
+				const { token } = tokenFor(extractTokenIds(current));
 				const insertAt = Math.max(0, Math.min(target.caret, current.length));
 				const nextValue = `${current.slice(0, insertAt)}${token}${current.slice(active && current.slice(active.start, active.end) === active.token ? active.end : insertAt)}`;
 				const rows = ensureTemplateRow(
@@ -108,7 +111,7 @@ export function useUrlReferenceInsertion(params: Params) {
 			}
 
 			const current = rawRef.current || endpointRaw || '';
-			const { token } = createArgToken(reference, extractTokenIds(current));
+			const { token } = tokenFor(extractTokenIds(current));
 			const insertAt = Math.max(
 				0,
 				Math.min(active?.start ?? lastRawCaretRef.current, current.length),

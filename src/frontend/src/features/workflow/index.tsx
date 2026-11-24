@@ -25,6 +25,9 @@ import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJson
 import { useSchedulesConnectionId } from './components/schedules/simulatedSchedulesConnection';
 import { WorkflowProblemsBadge } from './problems/WorkflowProblemsBadge';
 import { applyProblemFocus } from './problems/applyProblemFocus';
+import { GlobalPickerScopeProvider } from '@entities/globalVariable/ui/picker/GlobalPickerScopeProvider';
+import { workflowPickerScope } from '@entities/globalVariable/ui/picker/globalPicker';
+import { useFocusElementFromUrl } from './hooks/useFocusElementFromUrl';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -71,15 +74,16 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     [hydratedNodes, workflow.edges],
   );
 
+  const selectAndCenterNode = (id: string) => {
+    workflow.onNodesChange(workflow.nodes.filter((node) => !!node.selected !== (node.id === id))
+      .map((node) => ({ id: node.id, type: 'select', selected: node.id === id })));
+    workflow.centerOnNode(id);
+  };
   const playground = useOpenExecutionPlayground({
     connectionId: activeConnectionId ?? undefined, readOnly, isLoading,
-    nodes: hydratedNodes, indexById: nodeIndexById,
-    selectNode: (id) => {
-      workflow.onNodesChange(workflow.nodes.filter((node) => !!node.selected !== (node.id === id))
-        .map((node) => ({ id: node.id, type: 'select', selected: node.id === id })));
-      workflow.centerOnNode(id);
-    },
+    nodes: hydratedNodes, indexById: nodeIndexById, selectNode: selectAndCenterNode,
   });
+  useFocusElementFromUrl({ isLoading, nodes: hydratedNodes, edges: workflow.edges, selectNode: selectAndCenterNode });
   const playgroundNodeId = playground.dialog?.nodeId;
   const actions = useWorkflowActions({ connectionId, readOnly, isTestRunLocked,
     page: { connection, workflow, connectors, invokers, view, changes, derived,
@@ -109,6 +113,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate(returnUrl)} />;
 
   return (
+    <GlobalPickerScopeProvider scope={workflowPickerScope(Number(activeConnectionId) || null, categoryId)}>
     <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title}
       buildTestPayload={buildTestPayload}
       onResolveStartError={resolveAndHighlightWorkflowError}
@@ -265,6 +270,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onShowResponse: workflow.onShowResponse,
           onTryRequest: playground.open,
           onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
+          onOpenGlobalWritesEditor: (nodeId) => workflow.setGlobalWritesEditor({ nodeId }),
           onOpenConnectorEditor: (nodeId, kind) => workflow.setConnectorEditor({ nodeId, kind }),
           onClose: () => workflow.setContextMenu(null) }} />
       <WorkflowNodeEditors
@@ -285,6 +291,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           nodes: hydratedNodes, edges: workflow.edges, connection: conditionConnection,
           onClose: () => workflow.setConditionEditor(null),
           onSave: workflow.onSaveConditionConfig }}
+        globalWrites={{ open: !!workflow.globalWritesEditor,
+          node: hydratedNodes.find((node) => node.id === workflow.globalWritesEditor?.nodeId) ?? null,
+          nodes: hydratedNodes, edges: workflow.edges, connection: conditionConnection,
+          isReadOnly: readOnly || isTestRunLocked,
+          onClose: () => workflow.setGlobalWritesEditor(null),
+          onSave: workflow.onSaveGlobalWrites }}
         aggregator={{ open: !!workflow.aggregatorEditor, node: aggregatorNode,
           onClose: () => workflow.setAggregatorEditor(null),
           onSave: workflow.onSaveDataAggregator }}
@@ -302,5 +314,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onClose: () => playground.open(null) }} />
     </div>
     </TestRunProvider>
+    </GlobalPickerScopeProvider>
   );
 }

@@ -5,9 +5,11 @@ import type { BodyPointerProps } from './BodyPointer.types';
 type Props = Pick<BodyPointerProps, 'connection' | 'currentMethod'> & {
   position: { left: number; top: number } | null;
   onApply: (reference: string) => void;
+  /** The reference being edited, so the generator opens on it. */
+  value?: string;
 };
 
-export function BodyPointerEditorPopup({ connection, currentMethod, position, onApply }: Props) {
+export function BodyPointerEditorPopup({ connection, currentMethod, position, onApply, value }: Props) {
   if (!position || !connection || !currentMethod) return null;
 
   return createPortal(
@@ -17,7 +19,7 @@ export function BodyPointerEditorPopup({ connection, currentMethod, position, on
         maxWidth: 'calc(100vw - 48px)', pointerEvents: 'auto',
       }}>
         <LegacyBodyReferenceGenerator connection={connection} currentMethod={currentMethod}
-          onApply={onApply} />
+          onApply={onApply} value={value} canPickScripts />
       </div>
     </div>,
     document.body,
