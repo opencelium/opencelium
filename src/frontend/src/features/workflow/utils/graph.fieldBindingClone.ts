@@ -3,9 +3,9 @@ import { buildWorkflowIndexes } from '../api/connectionPayload';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { collectReferenceColors, normalizeReferenceColor } from './graph.referenceColors';
 import { collectWorkflowJumpLinks, compareWorkflowIndexes, isWorkflowReferenceVisible } from './graph.referenceVisibility';
+import { isMethodNodeType } from './methodNodeTypes';
 
-const isMethodNode = (node: WorkflowNodeModel) =>
-  node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection';
+const isMethodNode = (node: WorkflowNodeModel) => isMethodNodeType(node.type);
 
 const cloneValue = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
 

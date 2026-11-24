@@ -39,7 +39,7 @@ const withoutDerivedUiConfig = (payload: WorkflowJsonPayload): unknown => {
 			const data: Record<string, unknown> = { ...node.data };
 			['title', 'subtitle', 'kind', 'connector', 'methodConfig', 'conditionConfig']
 				.forEach((key) => delete data[key]);
-			return { ...node, type: entryType, data };
+			return { ...node, type: node.type === 'notification' && entryType === 'system' ? node.type : entryType, data };
 		}),
 	} };
 };
@@ -233,7 +233,7 @@ export function validateWorkflowJson(value: unknown,
 				index < methods.length ? index : index - methods.length}.id`,
 		}] };
 	}
-	const executableNodeTypes = new Set(['connector', 'system', 'trigger-connection', 'if', 'loop']);
+	const executableNodeTypes = new Set(['connector', 'system', 'trigger-connection', 'notification', 'if', 'loop']);
 	for (const [index, node] of nodes.entries()) {
 		if (executableNodeTypes.has(node.type) && !entryIds.has(node.id)) return {
 			success: false, errors: [{ key: 'json.errors.orphanEntryNode',

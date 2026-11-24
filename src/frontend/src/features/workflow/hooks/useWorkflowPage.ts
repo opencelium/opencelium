@@ -40,7 +40,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     contextMenu, setContextMenu, historyOpen, setHistoryOpen, methodEditor,
     setMethodEditor, responseNodeId, setResponseNodeId, conditionEditor,
     setConditionEditor, aggregatorEditor, setAggregatorEditor, globalWritesEditor, setGlobalWritesEditor, connectorEditor,
-    setConnectorEditor, restoredViewport,
+    setConnectorEditor, notificationEditor, setNotificationEditor, restoredViewport,
     setRestoredViewport, viewportRestoreVersion, setViewportRestoreVersion,
     centerStartVersion, setCenterStartVersion, bindingLensOpen,
     setBindingLensOpen, bindingLensExpanded, setBindingLensExpanded,
@@ -75,7 +75,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes, setEdges, onFieldBindingsChange: options.onFieldBindingsChange });
   const nodeUpdates = useWorkflowNodeUpdates(setNodes,
     () => setMethodEditor(null), () => setConditionEditor(null),
-    () => setAggregatorEditor(null), () => setConnectorEditor(null));
+    () => setAggregatorEditor(null), () => setConnectorEditor(null),
+    () => setNotificationEditor(null));
 
   const [jointSourceId, setJointSourceId] = useState<string | null>(null);
   const jointVerdicts = useMemo(
@@ -96,8 +97,16 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes,
     centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
-      aggregatorEditor !== null || globalWritesEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
+      aggregatorEditor !== null || globalWritesEditor !== null || connectorEditor !== null || notificationEditor !== null
+      || responseNodeId !== null || historyOpen,
   });
+
+  // Stable: only state setters inside, so the notification opener built on it stays stable too.
+  const closeNodeEditors = useCallback(() => {
+    setSidebarAction(null); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null);
+    setConditionEditor(null); setAggregatorEditor(null); setConnectorEditor(null);
+  }, [setSidebarAction, setContextMenu, setHistoryOpen, setMethodEditor, setConditionEditor,
+    setAggregatorEditor, setConnectorEditor]);
 
   const deleteNodes = useDeleteWorkflowNodes({ nodes, edges, options, setNodes, setEdges,
     onDeleted: () => setContextMenu(null) });
@@ -118,6 +127,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     aggregatorEditor,
     globalWritesEditor,
     connectorEditor,
+    notificationEditor,
     restoredViewport,
     viewportRestoreVersion,
     centerStartVersion,
@@ -143,6 +153,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setAggregatorEditor,
     setGlobalWritesEditor,
     setConnectorEditor,
+    setNotificationEditor,
+    closeNodeEditors,
     setWorkflowGraph: (
       nextNodes: WorkflowNodeModel[],
       nextEdges: WorkflowEdgeModel[],
@@ -165,7 +177,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onNodeDragStop: handleNodeDragStop,
     onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
     onCloseResponse: () => setResponseNodeId(null),
-    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setGlobalWritesEditor(null); setConnectorEditor(null); },
+    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setGlobalWritesEditor(null); setConnectorEditor(null); setNotificationEditor(null); },
     onStartJoint: (sourceNodeId: string) => {
       setSidebarAction(null);
       setContextMenu(null);
@@ -214,6 +226,9 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       setNodes(result.nodes);
       setEdges(result.edges);
       setSidebarAction(null);
+      // A new notification step is unusable until a tool is picked, so its guided dialog opens right away.
+      const created = kind === 'notification' ? result.nodes.find((node) => !nodes.some((item) => item.id === node.id)) : undefined;
+      if (created) setNotificationEditor({ nodeId: created.id, target: { kind: 'step', step: 1 } });
     },
     // A note is an annotation, not a step: it belongs to the node it is added
     // from, gets no edge, and never enters the executed graph — which is why it

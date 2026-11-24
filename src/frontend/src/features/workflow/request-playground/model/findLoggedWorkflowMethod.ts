@@ -1,5 +1,6 @@
 import type { LoggedExecution } from '@features/logs';
 import type { WorkflowNodeModel } from '../../types/workflow.types';
+import { isMethodNodeType } from '../../utils/methodNodeTypes';
 
 type SavedMethod = { color?: string; index?: string | number };
 type SavedFlowchart = { methods?: SavedMethod[]; method?: SavedMethod[] };
@@ -30,7 +31,7 @@ export function findLoggedWorkflowMethod(execution: LoggedExecution, nodes: Work
 		}
 		return direction === 'source' && indexById.get(id) === indexPath;
 	});
-	if (!node || !['connector', 'system', 'trigger-connection'].includes(node.type ?? '')) return null;
+	if (!node || !isMethodNodeType(node.type)) return null;
 	const { properties, segment } = execution.method;
 	const config = node.data.methodConfig;
 	if (!properties.name || (config?.name ?? node.data.subtitle) !== properties.name) return null;

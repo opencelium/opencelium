@@ -6,13 +6,14 @@ import {
 	getUpstreamNodeIds,
 } from '../../utils/referenceMethodVisibility';
 import type { ConditionGroup } from './conditionBuilder.types';
+import { isHttpRequestNodeType, isMethodNodeType } from '../../utils/methodNodeTypes';
 
 export const buildNodeBackedMethods = (
 	methods: MethodWithId[],
 	nodes: WorkflowNodeModel[],
 ) => {
 	const methodsById = new Map(methods.map((method) => [method.id, method]));
-	return nodes.filter((node) => ['connector', 'system', 'trigger-connection'].includes(node.type))
+	return nodes.filter((node) => isMethodNodeType(node.type))
 		.map((node) => {
 			const method = methodsById.get(node.id);
 			const label = node.data.subtitle || node.data.title ||
@@ -20,7 +21,7 @@ export const buildNodeBackedMethods = (
 			return {
 				...(method ?? {
 					id: node.id, index: '', name: label, label,
-					connector: node.type === 'system' || node.type === 'trigger-connection'
+					connector: isHttpRequestNodeType(node.type)
 						? null : node.data.connector ?? null,
 					request: {}, response: {},
 				}),
@@ -68,7 +69,7 @@ export const getSourceMethods = (
 	const nodeIndex = nodes.findIndex((item) => item.id === node.id);
 	if (nodeIndex < 0) return methods;
 	const allowedIds = new Set(nodes.slice(0, nodeIndex)
-		.filter((item) => ['connector', 'system', 'trigger-connection'].includes(item.type))
+		.filter((item) => isMethodNodeType(item.type))
 		.map((item) => item.id));
 	return methods.filter((method) => allowedIds.has(method.id));
 };

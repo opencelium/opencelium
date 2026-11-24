@@ -71,7 +71,7 @@ export const withRestoredCommentNodes = (
 	const presentIds = new Set(nodes.map((node) => node.id));
 
 	return [
-		...nodes.flatMap((node) => {
+		...nodes.flatMap<WorkflowNodeModel>((node) => {
 			if (node.type !== 'comment') return [node];
 			const restored = restoredById.get(node.id);
 			return restored ? [restored] : [];

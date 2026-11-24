@@ -8,6 +8,8 @@ import type { ConnectorImageDialog } from '../connector-image/ConnectorImageDial
 import type { RequestPlaygroundDialogProps } from '../../request-playground/ui/RequestPlaygroundDialog';
 import type { GlobalWritesDialog } from '../global-writes/GlobalWritesDialog';
 
+import type { NotificationDialogProps } from '../../notification/ui/dialog/NotificationDialog';
+
 export type WorkflowNodeEditorsProps = {
 	response: ComponentProps<typeof ResponseDialog>;
 	method: ComponentProps<typeof MethodConfigDialog>;
@@ -17,4 +19,5 @@ export type WorkflowNodeEditorsProps = {
 	connector: ComponentProps<typeof ChangeConnectorDialog>;
 	connectorImage: ComponentProps<typeof ConnectorImageDialog>;
 	requestPlayground: RequestPlaygroundDialogProps;
+	notification: NotificationDialogProps;
 };

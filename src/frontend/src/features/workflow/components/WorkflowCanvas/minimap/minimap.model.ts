@@ -71,6 +71,7 @@ const toDot = (node: WorkflowNodeModel): MinimapDot => {
 		}
 		case 'system': return { id: node.id, x, y, shape: 'circle', groupKey: 'system' };
 		case 'trigger-connection': return { id: node.id, x, y, shape: 'circle', groupKey: 'trigger' };
+		case 'notification': return { id: node.id, x, y, shape: 'circle', groupKey: 'system' };
 		case 'if':
 		case 'loop': return { id: node.id, x, y, shape: 'diamond', groupKey: 'operator' };
 		case 'comment': return { id: node.id, x, y, shape: 'circle', groupKey: null };

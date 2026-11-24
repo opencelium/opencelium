@@ -1,5 +1,6 @@
 export type LoopExample = {
   methodLabel?: string;
+  methodColor?: string;
   connectorIcon?: string | null;
   hasMethod: boolean;
   responseType: 'body' | 'header' | 'status';
