@@ -96,7 +96,7 @@ The feature adds no module.
 | `core.auth` | The authorities from the roles of a session JWT, and the access-denied handler of the main chain | The security filter chains are in this package (section 3.4). |
 | Each module (tests) | The ArchUnit tests of the build rules: rules 1 and 2 in `common`, `execution` and `worker`, the 5 rules in `core` | A test is in the module of the code that it tests (decision 5). |
 
-The package `core.settings` depends on `common.secret`, `core.authz` and the yml template of `core.config.mongo`. The package `core.secrets` depends on `common.secret` and `core.secrets.keys`. No package of this feature depends on `core.settings`.
+The package `core.settings` depends on `common.secret`, `core.authz`, the yml template of `core.config.mongo`, and the control-character rule of `core.config` that the start of core and the setup wizard also use. The package `core.secrets` depends on `common.secret` and `core.secrets.keys`. No package of this feature depends on `core.settings`.
 
 The broker definitions are in `core.settings`, because no feature reads them yet. The AMQP transport feature reads them through the settings service. Where the transport implementations go is an open decision of section 7, and that feature closes it.
 
@@ -163,7 +163,7 @@ Each test that touches MongoDB is a full-application test against the local Mong
 |---|---|
 | SS-01 | A full-application test: the default admin reads the settings of a new installation. Each setting has its default and the mark for the default, and the collection `settings` is empty. A unit test of the registry: a duplicate setting key stops the registry. |
 | SS-02 | A full-application test: a change, then a read gives the new value. A change to the default removes the field. A full-application test with 2 Spring contexts on 1 database: a change through context 1, then a read through context 2 gives the new value. |
-| SS-03 | A full-application test: an unknown setting key, and a change with 1 valid value and 1 incorrect value. Each gets `invalid-settings` with each incorrect key, and the document does not change. Unit tests of the rules of each type: a port of 0, of 65536 and the string `"5672"`, a host name with a label of 64 characters, and an IPv6 address. |
+| SS-03 | A full-application test: an unknown setting key, and a change with 1 valid value and 1 incorrect value. Each gets `invalid-settings` with each incorrect key, and the document does not change. Unit tests of the rules of each type: a port of 0, of 65536 and the string `"5672"`, a host name with a label of 64 characters, an IPv6 address, and a text with a control character. A full-application test: a username with a line feed gets `invalid-settings`. |
 | SS-04 | A full-application test: a reset with `null` removes the field, and the next read gives the default. The reset of the broker password also deletes its document in `secrets`. |
 | SS-05 | A full-application test: an OpenCelium user without a role reads and changes the settings. Each request gets `access-denied`. A request without a token gets 401 and no body. |
 | SS-06 | A full-application test in the cloud mode with `CloudStart`: a session JWT of a tenant user with the role `ADMIN` gets `access-denied`. |

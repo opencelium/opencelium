@@ -29,7 +29,7 @@ A task that changes the behaviour of a criterion changes spec.md in the same PR.
 - **Hand test:** 1. Start core and log in as in task 1, with the session JWT in `T`. 2. Send `PATCH /api/settings` with `{"broker.username": "oc\nadmin"}`. 3. The status code is 400, with `invalid-settings` and `broker.username` in `errors`. 4. Send `PATCH` with `{"broker.username": "oc-admin"}`: the status code is 200.
 - **Size:** approximately 10 lines, plus spec.md
 - **Depends on:** 2
-- **Status:** in work
+- **Status:** done
 
 ## Task 3: feat(core): keep the broker password as an encrypted secret
 - **Criteria:** SS-02, SS-04, SS-07, SS-08

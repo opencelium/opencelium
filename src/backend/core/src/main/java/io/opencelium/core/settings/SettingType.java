@@ -3,6 +3,8 @@ package io.opencelium.core.settings;
 import java.net.InetAddress;
 import java.util.regex.Pattern;
 
+import io.opencelium.core.config.TerminalText;
+
 /**
  * The type of a runtime setting: it gives the JSON form of the value in the settings API, and the rule for a valid
  * value with the bounds of the setting definition. A value of another JSON type is not valid, for example the JSON
@@ -10,7 +12,12 @@ import java.util.regex.Pattern;
  */
 public enum SettingType {
 
-	/** A JSON string with a number of characters inside the bounds. */
+	/**
+	 * A JSON string with a number of characters inside the bounds and without a control character: the rule of
+	 * {@link TerminalText}, which the start of core and the setup wizard share. A later feature sends such a value to
+	 * another system or shows it in a log line, where a line feed, a NUL or a bidi control can forge a line or change
+	 * the meaning of the text.
+	 */
 	TEXT,
 
 	/** A JSON number without a fraction, inside the bounds. */
@@ -42,7 +49,8 @@ public enum SettingType {
 	 */
 	boolean validate(Object value, int min, int max) {
 		return switch (this) {
-			case TEXT -> value instanceof String text && inside(text.length(), min, max);
+			case TEXT -> value instanceof String text && inside(text.length(), min, max)
+					&& TerminalText.firstControl(text).isEmpty();
 			case INTEGER -> isWholeNumber(value) && inside(((Number) value).longValue(), min, max);
 			case HOST -> value instanceof String host && inside(host.length(), min, max)
 					&& (isHostName(host) || isIpv6Address(host));

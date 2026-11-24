@@ -6,9 +6,9 @@ import java.util.OptionalInt;
  * Text for a terminal, with each control character as {@code ?}: the characters U+0000 to U+001F (the line feed
  * too), U+007F, U+0080 to U+009F, and the bidi controls U+202A to U+202E and U+2066 to U+2069. A text from outside
  * OpenCelium, for example the error message of a server or a value of the setup file, then cannot move the cursor,
- * clear the screen, change the colors or show a line in reverse order. The start of the application and the setup
- * wizard share this one rule. A caller that prints a text with line breaks of its own splits it at the line feeds
- * first.
+ * clear the screen, change the colors or show a line in reverse order. The start of the application, the setup
+ * wizard and the rule for the text settings share this one rule. A caller that prints a text with line breaks of its
+ * own splits it at the line feeds first.
  */
 public final class TerminalText {
 

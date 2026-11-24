@@ -25,6 +25,7 @@ These terms apply in this specification:
 - A **secret setting** is a setting key that refers to a secret (section 6.4). The settings service keeps a secret reference for it, and the secret storage keeps the ciphertext.
 - The **settings API** is the endpoint `GET/PATCH /api/settings` (decision 19). A **settings request** is a request to this endpoint.
 - A **core instance** is 1 process of `oc-app.jar`.
+- A **control character** is a character from U+0000 to U+001F, a character from U+007F to U+009F, or a bidi control: U+202A to U+202E and U+2066 to U+2069. The start of core and the setup wizard use the same list.
 
 The feature declares the settings of the broker connection. They have no effect on the transport in this feature:
 
@@ -32,9 +33,9 @@ The feature declares the settings of the broker connection. They have no effect 
 |---|---|---|---|
 | `broker.host` | The host name or the IP address of the AMQP broker | No value | A host name or an IP address |
 | `broker.port` | The port of the AMQP broker | `5672` | A number from 1 to 65535 |
-| `broker.virtual-host` | The virtual host of the AMQP broker | `/` | 1 to 255 characters |
-| `broker.username` | The username of core on the AMQP broker | No value | 1 to 255 characters |
-| `broker.password` | The password of core on the AMQP broker, a secret setting | No value | 1 to 255 characters |
+| `broker.virtual-host` | The virtual host of the AMQP broker | `/` | 1 to 255 characters without a control character |
+| `broker.username` | The username of core on the AMQP broker | No value | 1 to 255 characters without a control character |
+| `broker.password` | The password of core on the AMQP broker, a secret setting | No value | 1 to 255 characters without a control character |
 
 ## Acceptance criteria
 Each criterion has an ID and the form "Given ..., when ..., then ...".
