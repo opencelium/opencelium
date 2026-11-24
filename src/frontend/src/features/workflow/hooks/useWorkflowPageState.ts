@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { selectAuthUser } from '@entities/auth/model/authSelectors';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
 import { useGetInvokersQuery } from '@entities/invoker/api/invokerApi';
@@ -23,10 +23,11 @@ export const useWorkflowPageState = ({ connectionId, readOnly,
 	const confirm = useConfirm();
 	const { t } = useI18n('workflow');
 	const authUser = useAppSelector(selectAuthUser);
-	const { data: connectors = [], isLoading: isConnectorsLoading } =
-		useGetConnectorsQuery({ page: 0, limit: 1000 });
+	const { data: connectorData, isLoading: isConnectorsLoading, isFetching: isConnectorsFetching, isError: connectorsLoadFailed, refetch: refetchConnectors } =
+		useGetConnectorsQuery({ page: 0, limit: 1000 }, { refetchOnMountOrArgChange: true });
 	const { data: invokers = [] } = useGetInvokersQuery();
-	const connection = useWorkflowConnectionState(connectionId);
+	const connectors = connectorData ?? [];
+	const connection = useWorkflowConnectionState(connectionId, connectorData, connectorsLoadFailed, isConnectorsFetching);
 	const workflow = useWorkflowPage({
 		fieldBindings: connection.fieldBindings,
 		onFieldBindingsChange: connection.setFieldBindings,
@@ -39,9 +40,13 @@ export const useWorkflowPageState = ({ connectionId, readOnly,
 			confirmVariant: 'danger',
 		}),
 	});
-	connection.applyConnectionRef.current = (state) => workflow.setWorkflowGraph(
-		state.nodes, state.edges, state.viewport, { centerStart: true },
-	);
+	const { applyConnectionRef, repairAppliedRef } = connection;
+	const { setWorkflowGraph } = workflow;
+	useLayoutEffect(() => {
+		applyConnectionRef.current = (state) => setWorkflowGraph(
+			state.nodes, state.edges, state.viewport, { centerStart: true },
+		);
+	}, [applyConnectionRef, setWorkflowGraph]);
 	useSimulatedWorkflowGraph(!connectionId, (graph) => {
 		workflow.setWorkflowGraph(graph.nodes, graph.edges, undefined, { centerStart: true });
 		connection.setFieldBindings(graph.fieldBindings);
@@ -58,13 +63,27 @@ export const useWorkflowPageState = ({ connectionId, readOnly,
 		historyVersions: connection.historyVersions,
 		authUser,
 	});
-	const isLoading = connection.isLoading || isConnectorsLoading;
+	// The connector list must be fresh before the first graph is shown (deleted-connector
+	// detection), but later refetches — e.g. the sidebar mounting its own subscription
+	// under the global refetchOnMountOrArgChange — must not blank the open editor.
+	const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+	const isConnectorsBlocking = isConnectorsLoading || (isConnectorsFetching && !hasInitiallyLoaded);
+	const isLoading = connection.isLoading || isConnectorsBlocking || connection.loadFailed;
+	if (!isLoading && !hasInitiallyLoaded) setHasInitiallyLoaded(true);
+	const retryLoad = () => {
+		connection.retryLoad();
+		void refetchConnectors();
+	};
 	const changes = useWorkflowChangeTracking({
 		currentSnapshot: view.currentSnapshot,
 		isLoading,
 		readOnly,
 		leaveConfirmMessage,
 	});
+	const { markDirty } = changes;
+	useLayoutEffect(() => {
+		repairAppliedRef.current = markDirty;
+	}, [repairAppliedRef, markDirty]);
 	const derived = useWorkflowDerivedData({
 		nodes: view.hydratedNodes,
 		edges: workflow.edges,
@@ -76,12 +95,13 @@ export const useWorkflowPageState = ({ connectionId, readOnly,
 		aggregatorNodeId: workflow.aggregatorEditor?.nodeId,
 	});
 
+	const { setBaselineSnapshot, setChangeSource, setHistoryPreviewSnapshot } = changes;
 	useEffect(() => {
-		changes.setBaselineSnapshot(null);
-		changes.setChangeSource('clean');
-		changes.setHistoryPreviewSnapshot(null);
-	}, [connectionId]);
+		setBaselineSnapshot(null);
+		setChangeSource('clean');
+		setHistoryPreviewSnapshot(null);
+	}, [connectionId, setBaselineSnapshot, setChangeSource, setHistoryPreviewSnapshot]);
 
 	return { connection, workflow, connectors, invokers, view, changes, derived,
-		isLoading };
+		isLoading, retryLoad };
 };

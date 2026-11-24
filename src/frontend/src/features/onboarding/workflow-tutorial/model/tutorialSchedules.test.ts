@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import type { Schedule } from '@entities/schedule/model/types'
+import type { Schedule, ScheduleWebhook } from '@entities/schedule/model/types'
+import { OVERRIDE_UNAVAILABLE } from '@shared/api/requestOverrides'
 import {
     resetTutorialSchedules,
     TUTORIAL_CONNECTION_ID,
@@ -62,8 +63,59 @@ describe('tutorial schedules', () => {
         expect(tutorialScheduleRequest({ path: '/connection/all', method: 'GET' })).toBeUndefined()
         expect(tutorialScheduleRequest({ path: '/scheduler/all', method: 'DELETE' })).toBeUndefined()
         expect(tutorialScheduleRequest({ path: '/scheduler', method: 'GET' })).toBeUndefined()
-        // an update is not part of what the tutorial teaches, so it is not faked either
-        expect(tutorialScheduleRequest({ path: '/scheduler/-8001', method: 'PUT' })).toBeUndefined()
+        // a real, positive id is the server's business even while the tutorial runs
+        expect(tutorialScheduleRequest({ path: '/scheduler/12', method: 'PUT' })).toBeUndefined()
+        expect(tutorialScheduleRequest({ path: '/webhook/url/3/12', method: 'GET' })).toBeUndefined()
+    })
+
+    // The debug switch and the cron editor both PUT the whole schedule back.
+    it('updates a schedule in place, so the switch and the cron edit stick', () => {
+        const created = add({ title: 'x', cronExp: '0 0 * * * ?', debugMode: false })
+        const path = `/scheduler/${created.schedulerId}`
+
+        tutorialScheduleRequest({ path, method: 'PUT',
+            body: { ...created, cronExp: '0 30 2 * * ?', debugMode: true } })
+
+        expect(tutorialScheduleRequest({ path, method: 'GET' })).toMatchObject({
+            schedulerId: created.schedulerId, cronExp: '0 30 2 * * ?', debugMode: true })
+        expect(list()[0].debugMode).toBe(true)
+    })
+
+    // What came back from a GET is frozen in the RTK Query cache; a write must not touch it.
+    it('replaces rather than mutates what it already returned', () => {
+        const created = Object.freeze(add({ title: 'x', debugMode: false }))
+        expect(() => tutorialScheduleRequest({ path: `/scheduler/${created.schedulerId}`,
+            method: 'PUT', body: { debugMode: true } })).not.toThrow()
+        expect(created.debugMode).toBe(false)
+    })
+
+    it('creates and deletes a webhook on the schedule', () => {
+        const created = add({ title: 'x' })
+        const webhook = tutorialScheduleRequest({
+            path: `/webhook/url/7/${created.schedulerId}`, method: 'GET' }) as ScheduleWebhook
+
+        expect(webhook.webhookId).toBeLessThan(0)
+        expect(webhook.url).toMatch(/^\.\/webhook\//)
+        expect(list()[0].webhook).toEqual(webhook)
+
+        tutorialScheduleRequest({ path: `/webhook/${webhook.webhookId}`, method: 'DELETE' })
+        expect(list()[0].webhook).toBeUndefined()
+    })
+
+    it('opens the notifications dialog on an empty list', () => {
+        const created = add({ title: 'x' })
+        expect(tutorialScheduleRequest({
+            path: `/scheduler/${created.schedulerId}/notification/all`, method: 'GET' })).toEqual([])
+    })
+
+    // The backend cannot know a tutorial id, so letting these through only gets a 404.
+    it('fails locally what it cannot fake but owns the id of', () => {
+        const created = add({ title: 'x' })
+        expect(tutorialScheduleRequest({ path: `/scheduler/${created.schedulerId}/notification`,
+            method: 'POST', body: {} })).toBe(OVERRIDE_UNAVAILABLE)
+        expect(tutorialScheduleRequest({
+            path: `/connection/execute/${TUTORIAL_CONNECTION_ID}/support-file`, method: 'POST',
+        })).toBe(OVERRIDE_UNAVAILABLE)
     })
 
     it('forgets everything on reset, so a second run opens on an empty panel', () => {

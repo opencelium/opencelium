@@ -1,22 +1,23 @@
 {
   "question": {
     "confirmation": {
-      "delete": "Sind Sie sicher, dass Sie {{entityName}} nach {{field}} {{value}} löschen möchten?"
+      "delete": "Möchten Sie „{{value}}“ wirklich löschen?"
     }
   },
   "menu": {
     "dashboard": "Dashboard",
     "connectors": "Konnektoren",
     "connections": "Workflows",
-    "schedules": "Laufpläne",
+    "schedules": "Zeitpläne",
     "usersAccess": "Benutzer & Zugriff",
     "users": "Benutzer",
-    "groups": "Gruppen",
+    "groups": "Rollen",
     "ldapCheck": "LDAP-Prüfung",
     "configurations": "Konfigurationen",
-    "invokers": "Invoker",
-    "connectionTemplates": "Workflow Templates",
-    "dataAggregator": "Datensammler",
+    "invokers": "API-Definitionen",
+    "connectionTemplates": "Workflow-Vorlagen",
+    "dataAggregator": "Datenaggregatoren",
+    "globalVariables": "Globale Variablen",
     "notificationTemplates": "Benachrichtigungsvorlagen",
     "categories": "Kategorien",
     "supportFiles": "Support-Dateien",
@@ -24,11 +25,13 @@
     "licenseManagement": "Lizenzverwaltung",
     "updateAssistant": "Update-Assistent",
     "systemCheck": "Systemprüfung",
-    "config": "Konfiguration",
-    "ui": "UI"
+    "config": "Systemkonfiguration",
+    "ui": "UI",
+    "backToMain": "Zurück"
   },
   "commandPalette": {
     "placeholder": "Befehl eingeben...",
+    "placeholderShort": "Befehl...",
     "noResults": "Keine Ergebnisse gefunden",
     "groups": {
       "workflow": "Workflow",
@@ -52,16 +55,17 @@
       "changeTheme": "Anwendungsdesign wechseln",
       "uploadTemplate": "Workflow-Vorlagendatei hochladen",
       "downloadTemplate": "Workflow-Vorlagendatei herunterladen",
-      "uploadInvoker": "Invoker-Datei hochladen",
-      "installOnlineInvokers": "Invoker aus dem OpenCelium-Online-Repository installieren",
-      "downloadInvoker": "Invoker-Datei herunterladen",
+      "uploadInvoker": "API-Definitionsdatei hochladen",
+      "installOnlineInvokers": "API-Definitionen aus dem OpenCelium-Online-Repository installieren",
+      "downloadInvoker": "API-Definitionsdatei herunterladen",
       "systemCheck": "Systemprüfungsseite öffnen",
       "ldapCheck": "LDAP-Verbindungsprüfungsseite öffnen",
       "workflow": "Den aktuellen Workflow durchsuchen",
       "help": "Alle Befehle anzeigen",
       "onboarding": "Einrichtungstour neu starten",
       "workflowTutorial": "Workflow-Tutorial erneut ansehen",
-      "dashboardTour": "Dashboard-Tour erneut ansehen"
+      "dashboardTour": "Dashboard-Tour erneut ansehen",
+      "changelog": "Änderungsprotokoll öffnen"
     },
     "footer": {
       "select": "Auswählen",
@@ -75,7 +79,7 @@
       "keyboardTitle": "Tastatur",
       "empty": "Keine Befehle verfügbar",
       "searchPlaceholder": "Befehle suchen...",
-      "noResults": "Keine Befehle entsprechen \"{{query}}\"",
+      "noResults": "Keine Befehle entsprechen „{{query}}“",
       "shortcuts": {
         "open": "Befehlspalette öffnen",
         "clearScope": "Gesperrten Bereich verlassen (leere Eingabe)"
@@ -96,7 +100,7 @@
     "copyrightMobile": "© {{year}} | Version {{version}}",
     "docsLink": "Dokumentation",
     "gitLink": "GitHub",
-    "landingPageLink": "OpenCelium Webseite",
+    "landingPageLink": "OpenCelium-Website",
     "servicePortalLink": "Service-Portal"
   },
   "topbar": {
@@ -112,7 +116,52 @@
     "help": "Hilfe",
     "startOnboardingTour": "Onboarding-Tour starten",
     "startDashboardTour": "Dashboard-Tour starten",
-    "servicePortal": "Service-Portal"
+    "servicePortal": "Service-Portal",
+    "account": "Konto und Einstellungen",
+    "adminMenu": "Zum Admin-Menü wechseln",
+    "mainMenu": "Zum Hauptmenü wechseln",
+    "startWorkflowTutorial": "Workflow-Tutorial starten",
+    "changelog": "Änderungsprotokoll"
+  },
+  "newFeature": {
+    "label": "Neu",
+    "gotIt": "Verstanden",
+    "workflowTemplateJsonEdit": {
+      "description": "Workflow-Vorlagen lassen sich jetzt direkt in der Vorlagenliste als JSON bearbeiten."
+    },
+    "enhancementScriptSandbox": {
+      "description": "Führen Sie ein Erweiterungsskript vor dem Speichern im Browser mit Beispieleingaben aus."
+    },
+    "workflowReferenceOperations": {
+      "description": "Referenzen können jetzt Operationen auf die Antwort anwenden: beliebige Eigenschaft (*), alle Schlüsselnamen, das letzte Array-Element und die Anzahl der Elemente. Tippen Sie die Syntax einer Operation, um direkt zu ihr zu springen."
+    },
+    "workflowConnectorHttpMethod": {
+      "title": "HTTP-Methode ändern",
+      "description": "Die HTTP-Methode lässt sich jetzt auch für Konnektor-Methoden ändern, nicht nur für HTTP-Request- und Webhook-Schritte."
+    },
+    "workflowHeaderUserActions": {
+      "description": "Sprache, Hilfe zum Workflow-Tutorial, Menüwechsel und Ihr Profil sind jetzt direkt in der Kopfzeile des Editors verfügbar."
+    },
+    "workflowTestMethod": {
+      "title": "Request ausprobieren",
+      "description": "Senden Sie diese Methode einzeln – mit Werten für ihre Referenzen auf vorherige Methoden –, ohne den ganzen Workflow auszuführen. Dabei wird die echte API mit den Zugangsdaten des Konnektors aufgerufen; nichts wird gespeichert."
+    },
+    "workflowProblems": {
+      "title": "Automatische Workflow-Prüfung",
+      "description": "Der Workflow wird jetzt beim Bearbeiten geprüft. Fehler und Warnungen werden hier gezählt; per Klick sehen Sie alle Probleme und springen zum betroffenen Schritt."
+    },
+    "sidebarBackToMainMenu": {
+      "title": "Zurück zum Hauptmenü",
+      "description": "„Zurück“ bringt Sie ins Hauptmenü, auf die Seite, die Sie dort zuletzt geöffnet hatten. Mit Alt+M wechseln Sie ebenfalls zwischen den beiden Menüs."
+    },
+    "changelog": {
+      "title": "Änderungsprotokoll",
+      "description": "Sehen Sie, was sich in jeder OpenCelium-Version geändert hat: die aktuelle Version zuerst, ältere darunter. Sie finden es im Hilfemenü."
+    },
+    "globalVariables": {
+      "title": "Globale Variablen",
+      "description": "Legen Sie einen Wert einmal an und verweisen Sie in jedem Workflow, Konnektor oder jeder Benachrichtigung darauf: Konstanten, Werte, die Workflows aktualisieren, und wiederverwendbare Skripte."
+    }
   },
   "user": {
     "unknown": "Unbekannter Benutzer"
@@ -143,6 +192,7 @@
     "masterPasswordNotConfigured": "Sie können auch ohne Master-Passwort speichern – es werden dann nur die allgemeinen Daten aktualisiert. Um die erforderlichen Anmeldedaten zu ändern, bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten."
   },
   "hintLabel": "Hinweis",
+  "importantLabel": "Wichtig",
   "errorBoundary": {
     "retry": "Erneut versuchen",
     "reload": "Seite neu laden",
@@ -164,7 +214,8 @@
     "title": "Seite nicht gefunden",
     "subtitle": "Die gesuchte Seite existiert nicht oder wurde möglicherweise verschoben.",
     "goBack": "Zurück",
-    "goHome": "Zum Dashboard"
+    "goHome": "Zum Dashboard",
+    "entity": "Dieser Eintrag wurde nicht gefunden. Möglicherweise wurde er gelöscht."
   },
   "accessDenied": {
     "title": "Zugriff verweigert",
@@ -183,11 +234,11 @@
     "deleteSelectedSuccess": "{{count}} Einträge erfolgreich gelöscht",
     "deleteSelectedSuccess_one": "{{count}} Eintrag erfolgreich gelöscht",
     "filtersTooltip": "Filter",
-    "expandRow": "Läufe anzeigen",
-    "collapseRow": "Läufe ausblenden",
+    "expandRow": "Ausführungen anzeigen",
+    "collapseRow": "Ausführungen ausblenden",
     "confirmDelete": {
       "title": "Löschen",
-      "message": "Möchten Sie dieses {{name}} wirklich löschen?",
+      "message": "Möchten Sie diesen Eintrag ({{name}}) wirklich löschen?",
       "bulkMessage": "{{count}} ausgewählte Einträge löschen?",
       "bulkMessage_one": "{{count}} ausgewählten Eintrag löschen?"
     }
@@ -195,6 +246,21 @@
   "onlineFeature": {
     "offline": "Keine Internetverbindung. Stellen Sie die Verbindung wieder her, um Online-Dienste zu nutzen.",
     "syncDisabled": "Online-Dienste sind in der Systemkonfiguration deaktiviert.",
-    "portalUnreachable": "Das Service Portal ist von diesem Server aus nicht erreichbar. Prüfen Sie die Portal-Einstellungen und das Zugriffstoken."
+    "portalUnreachable": "Das Service-Portal ist von diesem Server aus nicht erreichbar. Prüfen Sie die Portal-Einstellungen und das Zugriffstoken."
+  },
+  "jsonEditor": {
+    "reset": "Zurücksetzen",
+    "cancel": "Abbrechen",
+    "apply": "Übernehmen",
+    "forceApply": "Erzwungen anwenden",
+    "syntaxError": "Ungültiges JSON: {{reason}}",
+    "discard": {
+      "title": "JSON-Änderungen verwerfen?",
+      "message": "Ihre nicht gespeicherten JSON-Änderungen gehen verloren."
+    },
+    "mode": {
+      "tree": "Baum",
+      "raw": "Rohtext"
+    }
   }
 }

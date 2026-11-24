@@ -14,6 +14,7 @@ import {InvokerRequiredDataEditor} from "@shared/ui/wizard-step/editor/invoker-r
 import {InvokerOperationsEditor} from "@shared/ui/wizard-step/editor/invoker-operations-editor/InvokerOperationsEditor.tsx";
 import {UpdateAssistantHealthViewer} from "@shared/ui/wizard-step/editor/update-assistant-health-viewer/UpdateAssistantHealthViewer.tsx";
 import {UpdateAssistantVersionsTable} from "@shared/ui/wizard-step/editor/update-assistant-versions-table/UpdateAssistantVersionsTable.tsx";
+import {AvailableUpdatesSection} from "@shared/ui/wizard-step/editor/update-assistant-versions-table/AvailableUpdatesSection.tsx";
 import {UpdateAssistantRunButton} from "@shared/ui/wizard-step/editor/update-assistant-run-button/UpdateAssistantRunButton.tsx";
 import {CustomThemeSection} from "@entities/ui/ui/CustomThemeSection";
 import {SystemLogoSection} from "@entities/ui/ui/SystemLogoSection";
@@ -22,6 +23,9 @@ import {NotificationTemplateField} from "@entities/schedule/notification/overrid
 import {NotificationRecipientsEmailsField} from "@entities/schedule/notification/overrides/NotificationRecipientsEmailsField";
 import {NotificationRecipientsWebhookField} from "@entities/schedule/notification/overrides/NotificationRecipientsWebhookField";
 import {UserEmailField} from "@entities/user/ui/UserEmailField";
+import {GlobalVariableKindPicker} from "@entities/globalVariable/ui/form/GlobalVariableKindPicker";
+import {GlobalVariableContentEditor} from "@entities/globalVariable/ui/form/GlobalVariableContentEditor";
+import {GlobalVariableScopeEditor} from "@entities/globalVariable/ui/form/GlobalVariableScopeEditor";
 
 export function setupLocalOverrides() {
     overrideRegistry.registerField('permissionEditor', ({ field, mode }) => (
@@ -63,6 +67,7 @@ export function setupLocalOverrides() {
     overrideRegistry.registerField('updateAssistantHealthViewer', ({ field }) => (
         <UpdateAssistantHealthViewer name={field.name} label={field.label} />
     ));
+    overrideRegistry.registerSection('updateAssistantAvailableUpdates', AvailableUpdatesSection);
     overrideRegistry.registerField('updateAssistantVersionsTable', ({ field, mode }) => (
         <UpdateAssistantVersionsTable name={field.name} label={field.label} mode={mode} />
     ));
@@ -85,4 +90,7 @@ export function setupLocalOverrides() {
     overrideRegistry.registerField('scheduleNotificationRecipientsEmails', NotificationRecipientsEmailsField);
     overrideRegistry.registerField('scheduleNotificationRecipientsWebhook', NotificationRecipientsWebhookField);
     overrideRegistry.registerField('userEmailGravatar', UserEmailField);
+    overrideRegistry.registerField('globalVariableKindPicker', GlobalVariableKindPicker);
+    overrideRegistry.registerField('globalVariableContentEditor', GlobalVariableContentEditor);
+    overrideRegistry.registerField('globalVariableScopeEditor', GlobalVariableScopeEditor);
 }

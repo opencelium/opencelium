@@ -6,6 +6,11 @@ export default [
         "userGroup": {
             "groupId": 1,
             "name": "Admin",
+            "description": null,
+            "icon": null,
+            // Every component with full rights, so a fully mocked session can open every page.
+            "components": ['CONNECTION', 'CONNECTOR', 'SCHEDULE', 'USER', 'USERGROUP', 'MYPROFILE', 'DASHBOARD', 'APP', 'INVOKER', 'GLOBAL_VARIABLE']
+                .map((name, index) => ({ componentId: index + 1, name, permissions: ['READ', 'CREATE', 'UPDATE', 'DELETE'] })),
         },
         "userDetail": {
             "name": "Admin",

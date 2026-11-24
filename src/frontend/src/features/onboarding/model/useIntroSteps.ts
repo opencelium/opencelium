@@ -80,7 +80,7 @@ export function useIntroSteps({ isAdmin, canCreateInvoker, canCreateConnector, p
         else goToIndex(stepIndex + 1)
     }, [complete, goToIndex, isLastStep, stepIndex])
 
-    const userName = user?.userDetail?.name || user?.username || t('content.welcome.anonymous')
+    const userName = user?.userDetail?.name || user?.username || undefined
 
     const steps: Step[] = useMemo(() => buildIntroJoyrideSteps({
         t,

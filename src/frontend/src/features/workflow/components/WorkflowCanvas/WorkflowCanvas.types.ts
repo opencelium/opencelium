@@ -27,6 +27,8 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	/** Verdict per node while a joint is being drawn from `jointSourceId` — legal
 	 * targets light up, the rest carry the reason they cannot be picked. */
 	jointVerdicts?: Map<string, JointTargetVerdict>;
+	/** The selected method whose Add joint would find no legal target. */
+	jointDeadEndNodeId?: string | null;
 	onConfirmJoint?: (targetNodeId: string) => void;
 	onCancelJoint?: () => void;
 	onAddJoint?: (nodeId: string) => void;
@@ -46,6 +48,8 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	onToggleComment: (commentNodeId: string) => void;
 	onAddComment: (nodeId: string) => void;
 	onPaneClick?: () => void;
+	/** The step the minimap's issue pager moved to, for the page to ring it. */
+	onFocusProblemNode?: (nodeId: string) => void;
 	/** Clears the red rings a rejected save or test run left behind — Escape. */
 	onClearNodeErrors?: () => void;
 	fieldBindings?: readonly unknown[];

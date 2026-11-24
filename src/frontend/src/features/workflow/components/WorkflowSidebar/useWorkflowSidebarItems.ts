@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import { operatorItems, sidebarItems } from '../sidebar/sidebar.data';
 import { matchesSidebarTitle, normalizeSidebarQuery } from '../sidebar/sidebar.helpers';
 import type { SecondarySidebarMode } from '../sidebar/sidebarSecondary';
+import { toSidebarMethodInfo } from '../sidebar/SidebarMethodSummary/sidebarMethodInfo';
 
 export const getMethodKey = (operation: InvokerOperation, index: number) => `${index}:${operation.name}`;
 
@@ -83,15 +84,16 @@ export function useWorkflowSidebarItems(params: Params) {
 		() => methodOperations.map((operation, index) => ({
 			key: getMethodKey(operation, index),
 			title: operation.name,
-			text: t('sidebar.methodItemText'),
+			methodInfo: toSidebarMethodInfo(operation),
 		})),
-		[methodOperations, t],
+		[methodOperations],
 	);
 	const allMethodItems = useMemo(
 		() => connectors.flatMap((connector) => (connector.invoker?.operations ?? []).map((operation, index) => ({
 			key: `${connector.connectorId}:${index}:${operation.name}`,
 			title: operation.name,
 			text: connector.title,
+			methodInfo: toSidebarMethodInfo(operation),
 			connectorArtwork: { icon: resolveConnectorIcon(connector) },
 			connectorId: connector.connectorId,
 			connectorIcon: resolveConnectorIcon(connector),

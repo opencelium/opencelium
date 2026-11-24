@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Button } from 'antd';
 import {
 	buildReferenceValue,
@@ -6,6 +6,7 @@ import {
 	getReferenceOptions,
 	type ResponseType,
 } from '../body-editor/requestReferenceOptions';
+import { useReferenceValidation } from '../body-editor/useReferenceValidation';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../body-editor/bodyLegacy.css';
 import type { ReferenceGeneratorProps } from './ReferenceGenerator.types';
@@ -59,6 +60,9 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	const fieldActions = useReferenceFieldActions({ selectedMethod, responseType,
 		iterators: currentMethodIterators, dropdowns, setResponseType, setSearchValue,
 		setSelectedOption, setFilteredOptions });
+	const [isFieldFocused, setIsFieldFocused] = useState(false);
+	const fieldFeedback = useReferenceValidation({ method: selectedMethod, type: responseType,
+		path: searchValue, iterators: currentMethodIterators, isPaused: !open || isFieldFocused });
 	if (!open) return null;
 	const handleApply = () => {
 		if (!selectedMethod) return;
@@ -67,7 +71,8 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		const reference = buildReferenceValue(selectedMethod.color, responseType, finalPath);
 		onApply(reference);
 	};
-	const canInsert = !!selectedMethod && !!(selectedOption || searchValue.trim());
+	// Warnings only advise; an error means the run fails on this reference.
+	const canInsert = !!selectedMethod && !!(selectedOption || searchValue.trim()) && fieldFeedback?.severity !== 'error';
 
 	const methodPlaceholder = methods.length
 		? t('placeholders.selectMethod')
@@ -77,6 +82,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	const fieldPlaceholder = !selectedMethod ? t('placeholders.selectMethodFirst')
 		: responseType === 'status' ? t('references.responseStatus') : t('placeholders.selectField');
 	const handleFieldFocus = () => {
+		setIsFieldFocused(true);
 		if (!selectedMethod || responseType === 'status') return;
 		setFilteredOptions(getReferenceOptions(selectedMethod, responseType,
 			searchValue.trim(), currentMethodIterators, t));
@@ -102,8 +108,9 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 						responseType={responseType} onResponseTypeChange={fieldActions.changeResponseType}
 						searchValue={searchValue} onSearchChange={fieldActions.changeSearch}
 						onFieldFocus={handleFieldFocus} onFieldBlur={() => {
-							setFilteredOptions([]); dropdowns.setFieldPosition(null);
+							setIsFieldFocused(false); setFilteredOptions([]); dropdowns.setFieldPosition(null);
 						}} fieldPlaceholder={fieldPlaceholder}
+						fieldFeedback={fieldFeedback}
 						fieldDisabled={!selectedMethod || responseType === 'status'} />
 				</div>
 				<div className='referenceGeneratorActions'>

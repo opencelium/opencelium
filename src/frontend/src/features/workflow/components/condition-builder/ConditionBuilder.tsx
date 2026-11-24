@@ -58,6 +58,10 @@ import { ConditionReorderProvider } from './ConditionReorder/ConditionReorderPro
 import { Radio } from '@shared/ui/primitives/Radio';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
+import { Icon } from '@shared/ui/primitives/Icon';
+import { GlobalVariableSelect } from '@entities/globalVariable/ui/picker/GlobalVariableSelect';
+import { useGlobalPickerScope } from '@entities/globalVariable/ui/picker/globalPicker';
+import { buildGlobalReference, parseGlobalReference } from '@entities/globalVariable/lib/globalReference';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
@@ -89,6 +93,7 @@ const SOURCE_OPTIONS: { value: ConditionValueSource; titleKey: string; icon: Rea
 	{ value: 'constant', titleKey: 'conditionBuilder.source.constant', icon: <NumberOutlined /> },
 	{ value: 'direct', titleKey: 'conditionBuilder.source.method', icon: <ApiOutlined /> },
 	{ value: 'webhook', titleKey: 'conditionBuilder.source.webhook', icon: <LinkOutlined /> },
+	{ value: 'global', titleKey: 'conditionBuilder.source.global', icon: <Icon name="globe" size={14} /> },
 ];
 
 const RESPONSE_TYPE_OPTIONS: { value: ResponseType; label: string; titleKey: string }[] = [
@@ -267,9 +272,10 @@ function SourceSwitcher({
 	onChange: (value: ConditionValueSource) => void;
 }) {
 	const { t } = useI18n('workflow');
+	const hasGlobalSource = useGlobalPickerScope() !== null;
 	return (
 		<div className="conditionSourceSwitcher compactRadioGroup">
-			{SOURCE_OPTIONS.map((option) => (
+			{SOURCE_OPTIONS.filter((option) => option.value !== 'global' || hasGlobalSource).map((option) => (
 				<Radio
 					key={option.value}
 					checked={value === option.value}
@@ -455,6 +461,20 @@ function ConditionValueInput({
 		);
 	}
 
+	if (source === 'global') {
+		return (
+			<div className="conditionValueInput conditionValueInputWebhook">
+				<SourceSwitcher value={source} onChange={setSource} />
+				<GlobalVariableSelect
+					value={parseGlobalReference(fieldValue)?.name}
+					popupZIndex={popupZIndex}
+					testId={`workflow-condition-global-${side}`}
+					onChange={(name) => onChange({ [fieldKey]: buildGlobalReference(name) })}
+				/>
+			</div>
+		);
+	}
+
 	if (source === 'webhook') {
 		return (
 			<div className="conditionValueInput conditionValueInputWebhook">
@@ -619,7 +639,7 @@ function RuleRow({
 	const resolveOperand = (field: string | undefined, live: typeof leftLive): OperandInput => {
 		const source = getSourceFromField(field);
 		if (source === 'constant') return { known: true, value: field ?? '' };
-		if (source === 'webhook') return { known: false, value: undefined };
+		if (source === 'webhook' || source === 'global') return { known: false, value: undefined };
 		return { known: live.hasValue, value: live.value };
 	};
 	const comparisonEvaluation = !isLoop && operator
@@ -634,6 +654,7 @@ function RuleRow({
 	return (
 		<div
 			className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''} ${reorderItem?.className ?? ''}`}
+			data-testid="workflow-condition-rule"
 			{...reorderItem?.itemProps}
 		>
 			{reorderItem?.handle}

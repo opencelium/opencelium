@@ -6,12 +6,14 @@ import type { ChangeHistoryPanel } from '../header/ChangeHistoryPanel/ChangeHist
 import type { NodeContextMenu } from '../NodeContextMenu/NodeContextMenu';
 import type { BindingDrawer } from '../../lens/BindingDrawer/BindingDrawer';
 import type { BindingTablePanel } from '../../lens/BindingTable/BindingTablePanel';
+import type { WorkflowProblemsPanel } from '../../problems/WorkflowProblemsPanel';
 
 export type WorkflowPanelsProps = {
 	sidebar: ComponentProps<typeof WorkflowSidebar>;
 	schedules: ComponentProps<typeof WorkflowSchedulesPanel>;
 	history: ComponentProps<typeof HistoryPanel>;
 	changeHistory: ComponentProps<typeof ChangeHistoryPanel>;
+	problems: ComponentProps<typeof WorkflowProblemsPanel>;
 	contextMenu: ComponentProps<typeof NodeContextMenu>;
 	bindingDrawer: ComponentProps<typeof BindingDrawer>;
 	bindingTable: ComponentProps<typeof BindingTablePanel>;

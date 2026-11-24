@@ -3,10 +3,11 @@ import type { Invoker } from '@entities/invoker/model/types';
 import type { ConnectorMappingGroup } from '../templateConnectorMapping.utils';
 
 export type TemplateConnectorMappingDialogProps = {
+  purpose?: 'template' | 'repair';
   open: boolean;
   groups: ConnectorMappingGroup[];
   connectors: Connector[];
   invokers: Invoker[];
-  onConfirm: (mapping: Record<number, number>) => void;
+  onConfirm: (mapping: Record<number, number>, createdConnectors?: Connector[]) => void;
   onCancel: () => void;
 };

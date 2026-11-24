@@ -5,42 +5,36 @@ import { updateConnection } from '../../../../store/connection/connectionSlice';
 import { updateEnhancementInConnection } from '../../../../store/connection/utils';
 import type { RootState } from '../../../../store';
 import type { Enhancement, Language } from '../../../../types/connection';
-import { isSameMaximizedGeometry, maximizedScriptStyle, resolveMaximizedScriptTargets }
-	from './maximizedScriptStyle';
+import {
+	findFixedContainingBlock,
+	isSameMaximizedGeometry,
+	maximizedStyle,
+} from './maximizedStyle';
 
 export function useEnhancementState(enhancement?: Enhancement) {
 	const dispatch = useDispatch();
 	const connection = useSelector((state: RootState) => state.connection.connection);
-	const [isScriptMaximized, setIsScriptMaximized] = useState(false);
-	const [maximizedStyle, setMaximizedStyle] = useState<CSSProperties>();
-	const scriptBoxRef = useRef<HTMLDivElement>(null);
+	const [isMaximized, setIsMaximized] = useState(false);
+	const [maximizedGeometry, setMaximizedGeometry] = useState<CSSProperties>();
+	const containerRef = useRef<HTMLDivElement>(null);
 
-	const toggleScriptMaximized = () => setIsScriptMaximized((current) => !current);
+	const toggleMaximized = () => setIsMaximized((current) => !current);
 
-	// Whichever surface the enhancement is hosted in: the method dialog's modal
-	// body, or the field-binding drawer, which is not a modal at all and whose own
-	// transform decides where a `position: fixed` box lands. Measured in a layout
-	// effect so the first painted frame is already positioned, and re-measured
-	// from the surface itself rather than from a window resize: collapsing the
-	// app's main menu changes the page's width with no resize event to hear.
+	// Measured in a layout effect so the first painted frame is already in place.
+	// Only a window resize can move things afterwards: the maximized box covers the
+	// controls that would shift the drawer or collapse the main menu.
 	useLayoutEffect(() => {
-		if (!isScriptMaximized) return;
-		const targets = resolveMaximizedScriptTargets(scriptBoxRef.current);
-		if (!targets) return;
-		const remeasure = () => setMaximizedStyle((current) => {
-			const next = maximizedScriptStyle(targets);
-			return isSameMaximizedGeometry(current, next) ? current : next;
-		});
+		if (!isMaximized) return;
+		const base = findFixedContainingBlock(containerRef.current);
+		const remeasure = () =>
+			setMaximizedGeometry((current) => {
+				const next = maximizedStyle(base);
+				return isSameMaximizedGeometry(current, next) ? current : next;
+			});
 		remeasure();
-		if (typeof ResizeObserver === 'undefined') {
-			window.addEventListener('resize', remeasure);
-			return () => window.removeEventListener('resize', remeasure);
-		}
-		const observer = new ResizeObserver(remeasure);
-		observer.observe(targets.surface);
-		if (targets.base) observer.observe(targets.base);
-		return () => observer.disconnect();
-	}, [isScriptMaximized]);
+		window.addEventListener('resize', remeasure);
+		return () => window.removeEventListener('resize', remeasure);
+	}, [isMaximized]);
 
 	const updateEnhancement = (nextEnhancement: Enhancement) => {
 		if (!connection) return;
@@ -58,7 +52,13 @@ export function useEnhancementState(enhancement?: Enhancement) {
 	};
 
 	return {
-		connection, isScriptMaximized, maximizedStyle, scriptBoxRef,
-		toggleScriptMaximized, onChangeLanguage, onChangeDescription, onChangeScript,
+		connection,
+		isMaximized,
+		maximizedStyle: maximizedGeometry,
+		containerRef,
+		toggleMaximized,
+		onChangeLanguage,
+		onChangeDescription,
+		onChangeScript,
 	};
 }

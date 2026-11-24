@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Loading } from "@shared/ui/primitives/Loading/Loading";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { appendLoopIndex, type LiveLogNode, type LiveLogTree } from "../../model/liveLogTree";
-import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, TraceDot, Url } from "../logRowUi";
+import { LogRow, Meta, OperatorLabel, StatusBadge, TraceDot, Url } from "../logRowUi";
 import { LoopPager } from "../LoopPager";
 import { ElementChildren } from "../LogElementRow";
+import { LogPlaygroundAction } from "../LogPlaygroundAction";
 import { MethodLogDetails } from "../MethodLogDetails";
 import { ErrorDetail } from "../ErrorDetail";
 import { CopyButton } from "@shared/ui/actions/CopyButton";
+import { HttpMethodBadge } from "@shared/ui/http-method/HttpMethodBadge";
 import { serializeLogElement } from "../serializeLogElement";
 import { useMethodViewMode } from "../methodViewMode";
 import { methodDisplayText } from "../methodView";
@@ -32,6 +34,21 @@ const STATUS_PULSE_MS = 1000;
 // exist in the DOM until the operator is expanded, so a child that already
 // finished while collapsed only gets to announce itself once the user opens
 // the operator and it mounts for the first time.
+// A run the lock refused or timed out did nothing wrong itself, so it is not painted as a failure.
+const statusColor = (status: LiveLogNode["status"]) => {
+  switch (status) {
+    case "COMPLETE": return "var(--color-status-success-fg)";
+    case "SKIPPED":
+    case "QUEUE_TIMEOUT": return "var(--color-status-warning-fg)";
+    case "FAIL":
+    case "PENDING": return "var(--color-status-error-fg)";
+    default: {
+      const _exhaustive: never = status;
+      return _exhaustive;
+    }
+  }
+};
+
 export function LiveStatusIndicator({ status }: { status: LiveLogNode["status"] }) {
   const previousStatusRef = useRef<LiveLogNode["status"] | null>(null);
   const [isChanged, setIsChanged] = useState(false);
@@ -45,7 +62,7 @@ export function LiveStatusIndicator({ status }: { status: LiveLogNode["status"] 
   }, [status]);
 
   if (status === "PENDING") return <Loading inline size="xs" />;
-  const color = status === "COMPLETE" ? "var(--color-status-success-fg)" : "var(--color-status-error-fg)";
+  const color = statusColor(status);
   const dotClassName = ["oc-log-status-dot", isChanged && "oc-log-status-dot--changed"]
     .filter(Boolean)
     .join(" ");
@@ -253,6 +270,7 @@ export function LiveLogElementRow({
       // Otherwise details are fetched by the persisted element id — without one
       // (no socket line carried it) there is nothing to request.
       const expandable = node.id !== "" || hasError;
+      const action = <LogPlaygroundAction elementId={node.id} indexPath={node.indexPath} loopIndex={node.loopIndex} />;
       const displayText = methodDisplayText(mode, {
         url: request?.url,
         label: node.properties.label ?? resolveMethodLabel(node.indexPath),
@@ -271,7 +289,7 @@ export function LiveLogElementRow({
             left={
               <>
                 {request?.http_method ? (
-                  <MethodBadge method={request.http_method} />
+                  <HttpMethodBadge method={request.http_method} />
                 ) : null}
                 <Url isError={hasError || target}>{displayText}</Url>
                 {displayText ? (
@@ -299,9 +317,10 @@ export function LiveLogElementRow({
                 code={node.error!.code}
                 stackTrace={node.error!.stackTrace}
                 depth={depth + 1}
+                action={action}
               />
             ) : (
-              <MethodLogDetails id={node.id} depth={depth + 1} path={node.key} />
+              <MethodLogDetails id={node.id} depth={depth + 1} path={node.key} action={action} />
             )
           ) : null}
         </>

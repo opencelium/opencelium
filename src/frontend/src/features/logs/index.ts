@@ -1,6 +1,8 @@
 export { LogsDialogContent } from "./ui/LogsDialogContent";
 export { LiveExecutionLogTree } from "./ui/live/LiveExecutionLogTree";
 export { MethodLogDetails } from "./ui/MethodLogDetails";
+export { RequestResponseTabs } from "./ui/RequestResponseTabs";
+export { LogRow, Meta, StatusBadge, Url } from "./ui/logRowUi";
 export { MethodDetailViewStateProvider } from "./ui/methodDetailViewState";
 export { MethodViewModeProvider, MethodViewSwitcher, useMethodViewMode } from "./ui/methodViewMode";
 export { MethodLabelProvider } from "./ui/methodLabels";
@@ -19,4 +21,9 @@ export type {
   SocketLogSegment,
   DetailedMethodLog,
   FlowchartChildLog,
+  FlowchartLog,
 } from "./model/types";
+export { LogPlaygroundOpenContext } from "./ui/logPlaygroundContext";
+export { registerEditorPlaygroundOpener } from "./model/editorPlaygroundOpener";
+export { executionPlaygroundSearch, loadLoggedExecution, readExecutionPlaygroundSearch, withoutExecutionPlaygroundSearch } from "./model/executionPlayground";
+export type { ExecutionPlaygroundLocation, LoggedExecution } from "./model/executionPlayground";

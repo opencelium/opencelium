@@ -16,10 +16,10 @@ Save one
 
 In the editor, **Save as Template** from the header menu, then give it a name.
 Everything is stored: steps with their connectors, operators, references and
-enhancements.
+transformations.
 
-Since 5.0 each method also carries the **name of its invoker**. That is what makes
-a template portable: connector IDs mean nothing in another environment, invoker
+Since 5.0 each method also carries the **name of its API definition**. That is what makes
+a template portable: connector IDs mean nothing in another environment, API definition
 names do.
 
 Apply one
@@ -42,7 +42,7 @@ Mapping connectors between environments
 
 When a template's connectors cannot be resolved locally, the **Map template
 connectors** dialog opens and asks which local connector each one should use. For
-each entry it shows the invoker hint and which methods use it, and it lets you
+each entry it shows the API definition hint and which methods use it, and it lets you
 create a missing connector on the spot.
 
 This is the normal path when moving a template from staging to production.

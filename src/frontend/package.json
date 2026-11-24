@@ -4,15 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/patch-react-json-view.cjs && vite",
-    "build": "node scripts/patch-react-json-view.cjs && node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build && node scripts/write-production-config.cjs",
+    "dev": "node scripts/patch-react-json-view.cjs && node scripts/generate-changelog.cjs && vite",
+    "build": "node scripts/patch-react-json-view.cjs && node scripts/generate-changelog.cjs && node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build && node scripts/write-production-config.cjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write src",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
-    "gen-server": "node scripts/generate-server.cjs"
+    "gen-server": "node scripts/generate-server.cjs",
+    "gen-changelog": "node scripts/generate-changelog.cjs"
   },
   "dependencies": {
     "@ant-design/colors": "^8.0.1",
@@ -33,6 +34,8 @@
     "@stomp/stompjs": "^7.3.0",
     "@tanstack/react-table": "^8.21.3",
     "@xyflow/react": "^12.10.2",
+    "acorn": "8.18.0",
+    "acorn-walk": "8.3.4",
     "antd": "^6.2.3",
     "cmdk": "^1.1.1",
     "cron-parser": "^5.5.0",
@@ -41,6 +44,7 @@
     "graphiql": "^5.2.4",
     "graphql": "16.11.0",
     "i18next": "^25.8.0",
+    "json-p3": "2.2.2",
     "lucide-react": "^1.7.0",
     "react": "19.2.0",
     "react-ace": "^14.0.1",

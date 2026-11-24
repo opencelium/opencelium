@@ -1,7 +1,7 @@
 {
   "question": {
     "confirmation": {
-      "delete": "Are you sure you want to delete {{entityName}} by {{field}} {{value}}?"
+      "delete": "Are you sure you want to delete \"{{value}}\"?"
     }
   },
   "menu": {
@@ -11,12 +11,13 @@
     "schedules": "Schedules",
     "usersAccess": "Users & Access",
     "users": "Users",
-    "groups": "Groups",
+    "groups": "Roles",
     "ldapCheck": "LDAP Check",
     "configurations": "Configurations",
-    "invokers": "Invokers",
+    "invokers": "API Definitions",
     "connectionTemplates": "Workflow Templates",
-    "dataAggregator": "Data Aggregator",
+    "dataAggregator": "Data Aggregators",
+    "globalVariables": "Global Variables",
     "notificationTemplates": "Notification Templates",
     "categories": "Categories",
     "supportFiles": "Support Files",
@@ -24,11 +25,13 @@
     "licenseManagement": "License Management",
     "updateAssistant": "Update Assistant",
     "systemCheck": "System Check",
-    "config": "Configurations",
-    "ui": "UI"
+    "config": "System Configuration",
+    "ui": "UI",
+    "backToMain": "Back"
   },
   "commandPalette": {
     "placeholder": "Type a command...",
+    "placeholderShort": "Command...",
     "noResults": "No results found",
     "groups": {
       "workflow": "Workflow",
@@ -52,16 +55,17 @@
       "changeTheme": "Change the application theme",
       "uploadTemplate": "Upload a workflow template file",
       "downloadTemplate": "Download a workflow template file",
-      "uploadInvoker": "Upload an invoker file",
-      "installOnlineInvokers": "Install invokers from the OpenCelium online repository",
-      "downloadInvoker": "Download an invoker file",
+      "uploadInvoker": "Upload an API definition file",
+      "installOnlineInvokers": "Install API definitions from the OpenCelium online repository",
+      "downloadInvoker": "Download an API definition file",
       "systemCheck": "Open the system check page",
       "ldapCheck": "Open the LDAP connectivity check page",
       "workflow": "Search the current workflow",
       "help": "View all commands",
       "onboarding": "Restart the setup tour",
       "workflowTutorial": "Replay the workflow tutorial",
-      "dashboardTour": "Replay the dashboard tour"
+      "dashboardTour": "Replay the dashboard tour",
+      "changelog": "Open the changelog"
     },
     "footer": {
       "select": "Select",
@@ -85,7 +89,7 @@
   "sidebar": {
     "expand": "Expand sidebar",
     "collapse": "Collapse sidebar",
-    "logout": "Sign Out",
+    "logout": "Sign out",
     "confirmLogout": {
       "title": "Sign out",
       "message": "Are you sure you want to sign out?"
@@ -112,7 +116,52 @@
     "help": "Help",
     "startOnboardingTour": "Start onboarding tour",
     "startDashboardTour": "Start dashboard tour",
-    "servicePortal": "Service Portal"
+    "servicePortal": "Service Portal",
+    "account": "Account and settings",
+    "adminMenu": "Switch to admin menu",
+    "mainMenu": "Switch to main menu",
+    "startWorkflowTutorial": "Start workflow tutorial",
+    "changelog": "Changelog"
+  },
+  "newFeature": {
+    "label": "New",
+    "gotIt": "Got it",
+    "workflowTemplateJsonEdit": {
+      "description": "Workflow templates can now be edited directly as JSON from the template list."
+    },
+    "enhancementScriptSandbox": {
+      "description": "Run an enhancement script in the browser against sample input before saving it."
+    },
+    "workflowReferenceOperations": {
+      "description": "References can now use operations on the response: any property (*), all key names, the last array element and the number of elements. Type an operation's syntax to jump to it."
+    },
+    "workflowConnectorHttpMethod": {
+      "title": "Change HTTP method",
+      "description": "The HTTP method can now be changed for connector methods too, not only for HTTP request and webhook steps."
+    },
+    "workflowHeaderUserActions": {
+      "description": "Language, help with the workflow tutorial, the menu switch and your profile are now available right in the editor header."
+    },
+    "workflowTestMethod": {
+      "title": "Try Request",
+      "description": "Send this method on its own, with values for its references to previous methods, without running the whole workflow. It calls the real API with the connector's credentials; nothing is saved."
+    },
+    "workflowProblems": {
+      "title": "Automatic Workflow Check",
+      "description": "The workflow is now checked as you edit. Errors and warnings are counted here; click to see every problem and jump to the step it is on."
+    },
+    "sidebarBackToMainMenu": {
+      "title": "Back to main menu",
+      "description": "Back returns you to the main menu, on the page you last had open there. Alt+M switches between the two menus as well."
+    },
+    "changelog": {
+      "title": "Changelog",
+      "description": "See what changed in each OpenCelium release: the current version first, earlier ones below. Open it from the help menu."
+    },
+    "globalVariables": {
+      "title": "Global variables",
+      "description": "Define a value once and reference it in any workflow, connector or notification: constants, values that workflows update, and reusable scripts."
+    }
   },
   "user": {
     "unknown": "Unknown User"
@@ -143,6 +192,7 @@
     "masterPasswordNotConfigured": "You can save without a master password — only the general data will be updated. To change the required credentials, ask an administrator to set opencelium.connector.master-password in /backend/src/main/resources/application.yml and restart the backend."
   },
   "hintLabel": "Hint",
+  "importantLabel": "Important",
   "errorBoundary": {
     "retry": "Try again",
     "reload": "Reload page",
@@ -164,7 +214,8 @@
     "title": "Page not found",
     "subtitle": "The page you're looking for doesn't exist or may have been moved.",
     "goBack": "Go back",
-    "goHome": "Go to Dashboard"
+    "goHome": "Go to Dashboard",
+    "entity": "This item was not found. It may have been deleted."
   },
   "accessDenied": {
     "title": "Access denied",
@@ -196,5 +247,20 @@
     "offline": "No internet connection. Reconnect to use online services.",
     "syncDisabled": "Online services are disabled in the system configuration.",
     "portalUnreachable": "The Service Portal cannot be reached from this server. Check the portal settings and its access token."
+  },
+  "jsonEditor": {
+    "reset": "Reset",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "forceApply": "Force Apply",
+    "syntaxError": "Invalid JSON: {{reason}}",
+    "discard": {
+      "title": "Discard JSON changes?",
+      "message": "Your unsaved JSON changes will be lost."
+    },
+    "mode": {
+      "tree": "Tree",
+      "raw": "Raw"
+    }
   }
 }

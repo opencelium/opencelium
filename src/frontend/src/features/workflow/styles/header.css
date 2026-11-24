@@ -85,6 +85,12 @@
   position: relative;
 }
 
+.headerActionsDivider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border-subtle);
+}
+
 .headerPrimaryButton {
   display: inline-flex;
   align-items: center;

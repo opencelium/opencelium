@@ -44,6 +44,8 @@ export interface QueryParam {
 	value: string;
 	enabled: boolean;
 	autoEncode?: boolean;
+	// A query part written without `=` (`?pretty`); see urlQueryParams.utils.
+	isFlag?: boolean;
 	argId?: string;
 }
 

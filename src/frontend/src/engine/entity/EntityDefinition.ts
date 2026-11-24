@@ -305,12 +305,17 @@ export type ViewActionConfig = BaseListActionConfig & {
     type: 'view'
     /** Override the navigation URL. Receives the entity, the resolved value, and the row. */
     buildNavigationUrl?: (entity: EntityDefinition, value: string, row: unknown) => string
+    renderDialogContent?: RenderActionDialogContent
 }
 
 export type UpdateActionConfig = BaseListActionConfig & {
     type: 'update'
     buildNavigationUrl?: (entity: EntityDefinition, value: string, row: unknown) => string
+    renderDialogContent?: RenderActionDialogContent
 }
+
+/** Replaces the generic wizard inside the row action's dialog, for entities with their own form or detail screen. */
+export type RenderActionDialogContent = (args: { value: string; row: unknown; close: () => void }) => React.ReactNode
 
 export type DeleteActionConfig = BaseListActionConfig & {
     type: 'delete'
@@ -355,6 +360,8 @@ export type CustomActionContext = {
     tooltipPlacement?: TooltipPlacement
     /** Stable e2e selector for the rendered button, keyed by the action's `key`. */
     testId?: string
+    /** Top row as currently shown (after sorting, filtering and paging) — for a hint that should appear once, not on every row. */
+    isFirstRow: boolean
 }
 
 export type ListAction =
@@ -364,6 +371,13 @@ export type ListAction =
     | CustomActionConfig
 
 export type ListDefinition = {
+    alternateView?: {
+        labelKey: string
+        listLabelKey: string
+        render: (rows: unknown[], showList: () => void, mode?: string) => React.ReactNode
+        renderListSwitch?: (showAlternate: (mode: string) => void) => React.ReactNode
+    }
+
     /** i18n key (entities namespace) for the page title; falls back to entity.plural / `${name}s`. */
     titleKey?: string
     /** i18n key (entities namespace) for the page subtitle. */

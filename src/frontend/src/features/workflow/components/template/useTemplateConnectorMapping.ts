@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Connector } from '@entities/connector/model/types';
 import type { Invoker } from '@entities/invoker/model/types';
 import { useWizardSubmit } from '@/engine/entity/runtime/genererics/useWizardSubmit';
@@ -19,22 +19,29 @@ const connectorsForInvoker = (connectors: Connector[], invoker: Invoker) =>
   connectors.filter((connector) => connector.invoker?.name?.toLowerCase() === invoker.name.toLowerCase());
 
 export function useTemplateConnectorMapping({ open, groups, connectors, invokers }: Args) {
+  const [createdConnectors, setCreatedConnectors] = useState<Connector[]>([]);
   const [mapping, setMapping] = useState<Record<number, number | undefined>>({});
 
-  const suggestedConnectors = (group: ConnectorMappingGroup): Connector[] => {
+  const suggestedConnectors = useCallback((group: ConnectorMappingGroup): Connector[] => {
+    const available = [...connectors, ...createdConnectors.filter((created) => !connectors.some((connector) => connector.connectorId === created.connectorId))];
     const invoker = findInvoker(invokers, group.invokerName);
-    return invoker ? connectorsForInvoker(connectors, invoker) : [];
-  };
+    return invoker ? connectorsForInvoker(available, invoker) : available.filter((connector) => !group.invokerName || connector.invoker?.name?.toLowerCase() === group.invokerName.toLowerCase());
+  }, [connectors, createdConnectors, invokers]);
 
   useEffect(() => {
-    if (!open) return;
-    setMapping(() => {
+    if (!open) {
+      setMapping({});
+      if (createdConnectors.length) setCreatedConnectors([]);
+      return;
+    }
+    setMapping((previous) => {
       const next: Record<number, number | undefined> = {};
       groups.forEach((group) => {
-        // Only ever preselect from the suggested set — an old connectorId that happens to
-        // collide with a real one here but doesn't match the invoker is a coincidence, not a
-        // signal, so an empty suggestion list means no preselection at all.
         const suggested = suggestedConnectors(group);
+        if (suggested.some((connector) => connector.connectorId === previous[group.oldConnectorId])) {
+          next[group.oldConnectorId] = previous[group.oldConnectorId];
+          return;
+        }
         if (suggested.length === 0) {
           next[group.oldConnectorId] = undefined;
           return;
@@ -48,8 +55,7 @@ export function useTemplateConnectorMapping({ open, groups, connectors, invokers
       });
       return next;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, groups, connectors, invokers]);
+  }, [open, groups, suggestedConnectors, createdConnectors]);
 
   const selectConnector = (oldConnectorId: number, connectorId: number) => {
     setMapping((prev) => ({ ...prev, [oldConnectorId]: connectorId }));
@@ -59,13 +65,15 @@ export function useTemplateConnectorMapping({ open, groups, connectors, invokers
 
   const createConnectorForGroup = async (oldConnectorId: number, data: unknown) => {
     const created = (await createSubmit(data)) as Connector;
+    setCreatedConnectors((previous) => [...previous, created]);
     selectConnector(oldConnectorId, created.connectorId);
     return created;
   };
 
-  const isComplete = groups.length > 0 && groups.every((group) => mapping[group.oldConnectorId] != null);
+  const isComplete = groups.length > 0 && groups.every((group) => suggestedConnectors(group).some((connector) => connector.connectorId === mapping[group.oldConnectorId]));
 
   return {
+    createdConnectors,
     mapping,
     selectConnector,
     suggestedConnectors,

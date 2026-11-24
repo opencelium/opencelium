@@ -1,0 +1,10 @@
+.oc-endpoint-ref.urlReferenceActive {
+ outline: 2px solid var(--color-action-primary, #1677ff);
+ outline-offset: 2px;
+ box-shadow: 0 0 0 4px var(--color-background-surface, #fff);
+}
+
+/* The picker sits inline in the URL dialog, not floating over content, so it needs no shadow. */
+.urlReferenceGenerator .bodyLegacyGeneratorShell {
+ box-shadow: none;
+}

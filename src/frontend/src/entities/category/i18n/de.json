@@ -1,17 +1,21 @@
 {
   "list": {
     "title": "Kategorien",
-    "subTitle": "Kategorien werden verwendet, um Workflows und Laufpläne zu organisieren und für eine bessere Struktur und Navigation zu gruppieren.",
+    "subTitle": "Kategorien werden verwendet, um Workflows und Zeitpläne zu organisieren und für eine bessere Struktur und Navigation zu gruppieren.",
     "confirmDelete": {
-      "message": "Sind Sie sicher, dass Sie die Kategorie mit dem Namen \"{{name}}\" löschen möchten?"
+      "message": "Möchten Sie die Kategorie „{{name}}“ wirklich löschen? Dies kann nicht rückgängig gemacht werden."
     }
   },
   "fields": {
     "name": {
-      "label": "Name"
+      "label": "Name",
+      "errors": {
+        "name_already_exists": "Eine Kategorie mit diesem Namen existiert bereits."
+      }
     },
     "parentCategory": {
-      "label": "Übergeordnete Kategorie"
+      "label": "Übergeordnete Kategorie",
+      "placeholder": "Übergeordnete Kategorie auswählen"
     }
   },
   "sections": {
@@ -23,17 +27,17 @@
     "modes": {
       "create": {
         "header": "Kategorie erstellen",
-        "subheader": "Erstellen Sie eine neue Kategorie zur Organisation Ihrer Ressourcen.",
-        "successMessage": "Kategorie \"{{name}}\" wurde erfolgreich erstellt"
+        "subheader": "Erstellen Sie eine Kategorie, um Workflows und Zeitpläne zu gruppieren.",
+        "successMessage": "Kategorie „{{name}}“ wurde erfolgreich erstellt"
       },
       "update": {
         "header": "Kategorie aktualisieren",
-        "subheader": "Kategorieinformationen bearbeiten und Änderungen speichern.",
-        "successMessage": "Kategorie \"{{name}}\" wurde erfolgreich aktualisiert"
+        "subheader": "Kategorie bearbeiten.",
+        "successMessage": "Kategorie „{{name}}“ wurde erfolgreich aktualisiert"
       },
       "view": {
         "header": "Kategoriedetails",
-        "subheader": "Kategorieinformationen anzeigen."
+        "subheader": "Kategorie anzeigen."
       }
     },
     "recommendations": {
@@ -49,8 +53,8 @@
   },
   "confirmation": {
     "delete": {
-      "byName": "Kategorie mit dem Namen \"{{name}}\" löschen?",
-      "byId": "Kategorie mit der ID \"{{id}}\" löschen?"
+      "byName": "Kategorie „{{name}}“ löschen?",
+      "byId": "Kategorie #{{id}} löschen?"
     }
   }
 }
