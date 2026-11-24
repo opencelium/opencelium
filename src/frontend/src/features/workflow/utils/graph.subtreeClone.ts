@@ -9,9 +9,9 @@ import {
   isWorkflowReferenceVisible,
 } from './graph.referenceVisibility';
 import { getOperatorBottomBranch } from './graph.traversal';
+import { isMethodNodeType } from './methodNodeTypes';
 
-const isMethodNode = (node: WorkflowNodeModel) =>
-  node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection';
+const isMethodNode = (node: WorkflowNodeModel) => isMethodNodeType(node.type);
 
 const cloneValue = <T,>(value: T): T =>
   value === undefined ? value : JSON.parse(JSON.stringify(value));

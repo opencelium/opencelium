@@ -6,6 +6,7 @@ import {
   deserializeBackendReferenceTokens,
   unwrapBackendReferences,
 } from './url-editor/urlEditor.utils';
+import { isHttpRequestNodeType } from '../../utils/methodNodeTypes';
 
 export const buildLegacyPayload = (
   fields: any,
@@ -26,7 +27,7 @@ export const buildLegacyMethodResponse = (
   if (response) return response;
   const emptyBody = buildLegacyPayload({});
 
-  if (node.type === 'system' || node.type === 'trigger-connection') {
+  if (isHttpRequestNodeType(node.type)) {
     return type === 'success'
       ? { status: '200', header: {}, body: emptyBody }
       : { status: '500', header: {}, body: emptyBody };

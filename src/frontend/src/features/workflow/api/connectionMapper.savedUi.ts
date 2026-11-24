@@ -41,6 +41,7 @@ const SOURCE_HANDLES: Partial<Record<NonNullable<SavedUiNode['type']>, string[]>
 	connector: ['bottom'],
 	system: ['bottom'],
 	'trigger-connection': ['bottom'],
+	notification: ['bottom'],
 };
 
 type RawSavedEdge = { sourceHandle?: unknown; data?: { branch?: unknown } | null };

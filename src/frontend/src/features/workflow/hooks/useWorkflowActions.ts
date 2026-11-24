@@ -137,6 +137,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 		setContextMenu: workflow.setContextMenu, setHistoryOpen: workflow.setHistoryOpen,
 		setMethodEditor: workflow.setMethodEditor,
 		setConditionEditor: workflow.setConditionEditor,
+		setNotificationEditor: workflow.setNotificationEditor,
 		cancelJoint: workflow.onCancelJoint });
 	const header = useWorkflowHeaderActions({
 		openAssignCategory: () => category.setOpen(true),
@@ -182,7 +183,7 @@ export const useWorkflowActions = ({ connectionId, readOnly,
 	// Anything hosting its own editing surface: canvas-level keyboard shortcuts
 	// must not reach past it into the graph underneath.
 	const isEditorDialogOpen = !!(workflow.methodEditor || workflow.conditionEditor ||
-		workflow.aggregatorEditor || workflow.globalWritesEditor || workflow.connectorEditor || workflow.historyOpen || templates.templateDialogOpen ||
+		workflow.aggregatorEditor || workflow.globalWritesEditor || workflow.connectorEditor || workflow.notificationEditor || workflow.historyOpen || templates.templateDialogOpen ||
 		templates.loadTemplateDialogOpen || templates.connectorMappingDialogOpen ||
 		isShortcutsOpen || jsonEditorOpen || pasteOperatorTarget || externalPaste.checking);
 

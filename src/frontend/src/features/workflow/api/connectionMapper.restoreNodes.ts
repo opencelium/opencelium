@@ -1,6 +1,6 @@
 import { initialNodes } from '../data/initialGraph';
 import type { WorkflowNodeModel } from '../types/workflow.types';
-import { findEntryForSavedNode, mergeSavedNodeData } from './connectionMapper.savedNodeMatching';
+import { findEntryForSavedNode, mergeSavedNodeData, resolveRestoredNodeType } from './connectionMapper.savedNodeMatching';
 import type { IndexedWorkflowEntry, SavedUiNode } from './connectionMapper.types';
 
 export const restoreNodesFromUi = (
@@ -31,13 +31,15 @@ export const restoreNodesFromUi = (
 			} as WorkflowNodeModel;
 		}
 		usedEntryIds.add(entry.node.id);
+		const type = resolveRestoredNodeType(savedNode.type, entry.node.type);
 		return {
 			...entry.node,
+			type,
 			id: savedNode.id,
 			position: savedNode.position,
 			data: {
 				...mergeSavedNodeData(entry.node.data, savedNode.data),
-				kind: entry.node.data.kind,
+				kind: type,
 				...(entry.node.type === 'system' ? { connector: undefined } : {}),
 			},
 			draggable: savedNode.draggable ?? entry.node.draggable,

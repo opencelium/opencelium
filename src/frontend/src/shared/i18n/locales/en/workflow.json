@@ -211,6 +211,10 @@
       "title": "Add HTTP Request",
       "description": "Add a plain HTTP request to any URL."
     },
+    "addNotification": {
+      "title": "Send Notification",
+      "description": "Post a message to Slack, Microsoft Teams or any other incoming webhook."
+    },
     "operatorOption": {
       "if": {
         "title": "If",
@@ -403,7 +407,8 @@
       "httpRequest": "HTTP Request",
       "webhook": "Webhook",
       "if": "IF",
-      "loop": "LOOP"
+      "loop": "LOOP",
+      "notification": "Notification"
     },
     "section": {
       "header": "Header",
@@ -1363,5 +1368,271 @@
     "remove": "Remove write",
     "save": "Save",
     "empty": "This method writes no global variables yet."
+  },
+  "notification": {
+    "node": {
+      "chooseTool": "Choose tool",
+      "ariaLabel": "Notification {{label}}",
+      "ready": "Ready: tool and webhook URL are set",
+      "incomplete": "Incomplete: choose a tool and set the webhook URL"
+    },
+    "toolbar": {
+      "open": "Open notification"
+    },
+    "contextMenu": {
+      "open": "Open notification",
+      "tool": "Change messaging tool",
+      "webhook": "Incoming webhook",
+      "message": "Edit message"
+    },
+    "dialog": {
+      "kind": "Notification",
+      "labelPlaceholder": "Step label",
+      "back": "Back",
+      "next": "Next"
+    },
+    "steps": {
+      "ariaLabel": "Notification setup steps",
+      "tool": "Messaging tool",
+      "toolMissing": "not selected",
+      "webhook": "Incoming webhook",
+      "webhookSet": "set",
+      "webhookMissing": "missing",
+      "message": "Message",
+      "messageEditor": "Editor",
+      "messageJson": "JSON",
+      "messageOverridden": "JSON edited",
+      "request": "Request & Response"
+    },
+    "tool": {
+      "title": "Which tool should deliver the message?",
+      "lead": "Each tool has its own message editor. You can switch later — what you entered is kept per tool."
+    },
+    "howItWorks": {
+      "eyebrow": "How it works",
+      "title": "Incoming webhook",
+      "text": "An incoming webhook is a secret URL that the chat tool creates for a channel. OpenCelium sends a JSON body to it with <code>POST</code>, and the tool posts the message.",
+      "facts": {
+        "request": {
+          "label": "Request",
+          "value": "POST, <code>Content-Type: application/json</code>"
+        },
+        "references": {
+          "label": "References",
+          "value": "in the webhook URL and in every text field of the message"
+        },
+        "response": {
+          "label": "Response",
+          "value": "available to later steps, just like an HTTP step"
+        }
+      },
+      "secretWarning": "The webhook URL is a secret. Anyone who knows it can post to the channel."
+    },
+    "webhook": {
+      "title": "Incoming webhook for {{tool}}",
+      "lead": "Paste the webhook URL, or build it from references to earlier steps — for example to post to a different channel per team.",
+      "urlLabel": "Webhook URL",
+      "guideEyebrow": "Guide · {{tool}}",
+      "docsLink": "Open official documentation",
+      "validation": {
+        "empty": "No URL yet. The guide on the right shows where to find it.",
+        "reference": "Built from references at run time",
+        "match": "Format matches {{tool}}",
+        "mismatch": "This does not look like a {{tool}} webhook URL. Expected: {{example}}"
+      }
+    },
+    "guideFacts": {
+      "urlFormat": "URL format",
+      "response": "Response",
+      "errors": "Errors",
+      "limit": "Limit",
+      "payload": "Payload",
+      "method": "Method"
+    },
+    "message": {
+      "modeLabel": "Editing mode",
+      "modeEditor": "Editor",
+      "modeJson": "JSON",
+      "jsonOnlyHint": "A generic webhook is configured as JSON only.",
+      "editorHint": "Fields for {{tool}}. The JSON is generated automatically.",
+      "jsonHint": "This exact body is sent. References are allowed in every string.",
+      "jsonReferenceHint": "Insert a reference at the cursor.",
+      "validJson_one": "Valid JSON · {{count}} reference",
+      "validJson_other": "Valid JSON · {{count}} references",
+      "invalidJson": "Invalid JSON: {{error}}",
+      "invalidJsonOnApply": "The message body is not valid JSON. Fix it before applying.",
+      "lockedBanner": "The JSON was edited by hand and takes precedence. The editor is locked.",
+      "discardOverride": "Discard JSON and use editor",
+      "overriddenBanner": "Edited by hand. Changes in the editor take effect only after a reset.",
+      "regenerate": "Regenerate from editor"
+    },
+    "facts": {
+      "labelPlaceholder": "Label",
+      "valuePlaceholder": "Value",
+      "valueAria": "Value {{index}}",
+      "remove": "Remove row",
+      "add": "Add row"
+    },
+    "fields": {
+      "title": "Title",
+      "buttonText": "Button text",
+      "buttonUrl": "Button link"
+    },
+    "preview": {
+      "eyebrow": "Preview · {{tool}}",
+      "invalid": "No preview while the JSON is invalid.",
+      "empty": "No content yet.",
+      "disclaimer": "Simplified rendering. The actual look is decided by {{tool}}."
+    },
+    "request": {
+      "tab": "Request",
+      "url": "URL",
+      "noUrl": "No webhook URL set",
+      "headers": "Headers",
+      "headerName": "Name",
+      "headerValue": "Value",
+      "headerActions": "Actions",
+      "fixed": "fixed",
+      "addHeader": "Add header",
+      "removeHeader": "Remove header",
+      "body": "Body",
+      "bodyGenerated": "generated from editor",
+      "bodyOverridden": "edited by hand",
+      "editBody": "Edit in \"Message\"",
+      "errorPolicy": "On error status (≥ 400)",
+      "errorPolicies": {
+        "stop": "Abort the workflow",
+        "continue": "Log the error and continue",
+        "retry": "Retry 3 times, then abort"
+      },
+      "rateLimits": "Rate limits",
+      "retryOn429": "On 429, wait for \"Retry-After\" and send again"
+    },
+    "response": {
+      "tab": "Response",
+      "expectedStatus": "Expected status",
+      "sampleBody": "Sample body",
+      "emptyBody": "(empty)",
+      "parameters": "Response parameters for later steps",
+      "parametersHint": "These references are available to the following steps, just like for an HTTP method.",
+      "parameter": "Parameter",
+      "reference": "Reference",
+      "example": "Example",
+      "copy": "Copy",
+      "copied": "Reference copied",
+      "copyFailed": "Could not copy the reference",
+      "sentJson": "sent JSON",
+      "params": {
+        "status": "HTTP status",
+        "text": "Response text",
+        "body": "Body (raw/JSON)",
+        "requestBody": "Request body"
+      }
+    },
+    "tools": {
+      "slack": {
+        "description": "Block Kit; the channel is bound to the webhook",
+        "tag": "Block Kit",
+        "fields": {
+          "text": "Notification text",
+          "textHelp": "Shown in push notifications and as a fallback.",
+          "header": "Heading (header block)",
+          "body": "Section (mrkdwn)",
+          "bodyHelp": "*bold*, _italic_, <URL|link text>, :emoji:",
+          "facts": "Fields (two columns)",
+          "unfurl": "Enable link previews (unfurl_links)"
+        },
+        "guide": {
+          "title": "Create an incoming webhook in Slack",
+          "steps": {
+            "1": "Open <code>api.slack.com/apps</code> and choose <b>Create New App → From scratch</b>. Select the workspace.",
+            "2": "In the <b>Incoming Webhooks</b> menu, turn on <b>Activate Incoming Webhooks</b>.",
+            "3": "Click <b>Add New Webhook to Workspace</b>, pick the target channel and confirm with <b>Allow</b>.",
+            "4": "Copy the webhook URL shown and paste it here."
+          },
+          "facts": {
+            "urlFormat": "<code>https://hooks.slack.com/services/T…/B…/…</code>",
+            "response": "<code>200</code> with the text <code>ok</code>",
+            "errors": "<code>400 invalid_payload</code>, <code>403 action_prohibited</code>, <code>404 channel_not_found</code>, <code>410 channel_is_archived</code>",
+            "limit": "about 1 message per second per webhook"
+          },
+          "notes": {
+            "1": "The channel is fixed to the webhook. For another channel you need another webhook — or take the URL from an earlier step with a reference."
+          }
+        }
+      },
+      "teams": {
+        "description": "Adaptive Card via the Workflows app",
+        "tag": "Adaptive Card",
+        "fields": {
+          "style": "Title colour",
+          "text": "Text (Markdown)",
+          "textHelp": "**bold**, _italic_, [link](url), lists with \"- \"",
+          "facts": "Facts (FactSet)",
+          "buttonText": "Button text (Action.OpenUrl)",
+          "mention": "Mention (UPN/email, optional)",
+          "mentionPlaceholder": "e.g. jane.doe@example.com",
+          "fullWidth": "Show the card at full width"
+        },
+        "styles": {
+          "default": "Default",
+          "accent": "Accent",
+          "good": "Success (green)",
+          "warning": "Warning (yellow)",
+          "attention": "Critical (red)"
+        },
+        "guide": {
+          "title": "Create a webhook in Teams with Workflows",
+          "steps": {
+            "1": "In the target channel, click <b>⋯ → Workflows</b>.",
+            "2": "Choose the template <b>\"Post to a channel when a webhook request is received\"</b>.",
+            "3": "Name the workflow, confirm team and channel and click <b>Add workflow</b>.",
+            "4": "Copy the HTTP POST URL shown and paste it here."
+          },
+          "facts": {
+            "urlFormat": "<code>https://…logic.azure.com:443/workflows/…/triggers/manual/paths/invoke?…&sig=…</code>",
+            "response": "<code>202 Accepted</code>, empty body",
+            "payload": "Message with an Adaptive Card in <code>attachments</code>"
+          },
+          "notes": {
+            "1": "Microsoft is retiring the classic Office 365 connectors (\"Incoming Webhook\" connector). Create new webhooks with the Workflows app.",
+            "2": "202 only means \"accepted\". Whether the card was posted is shown in the workflow's run history."
+          }
+        }
+      },
+      "generic": {
+        "name": "Generic webhook",
+        "description": "Any service, JSON defined freely",
+        "tag": "JSON only",
+        "guide": {
+          "title": "Use any webhook",
+          "steps": {
+            "1": "Copy the webhook URL from the target system (e.g. Zammad, Jira Automation, PagerDuty Events, Zapier, n8n).",
+            "2": "In the \"Message\" step, build the JSON as the target system documents it. References are allowed in every string.",
+            "3": "Add extra headers such as <code>Authorization</code> in the \"Request & Response\" step."
+          },
+          "facts": {
+            "method": "POST",
+            "response": "depends on the target system"
+          },
+          "notes": {
+            "1": "For systems with their own schema (e.g. PagerDuty), a dedicated preset may pay off later."
+          }
+        }
+      }
+    },
+    "test": {
+      "button": "Send test message",
+      "hint": "Sends the current message once. References to earlier steps are filled with placeholders like [customer.name].",
+      "noUrl": "Set the webhook URL first.",
+      "invalidJson": "Fix the message JSON first.",
+      "sent": "Test message sent ({{status}})",
+      "failed": "The test message could not be sent.",
+      "result": "HTTP {{status}} · {{duration}} ms"
+    },
+    "references": {
+      "webhook": "Webhook",
+      "global": "Global"
+    }
   }
 }

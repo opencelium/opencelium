@@ -68,6 +68,7 @@ import { LiveReferenceValuePreview } from '../request-editor/utils/LiveReference
 import { LiveInspectHint } from '../request-editor/utils/LiveInspectHint';
 import { useTestRun } from '../../test-run/useTestRun';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { isHttpRequestNodeType, isMethodNodeType } from '../../utils/methodNodeTypes';
 import '../request-editor/body-editor/bodyLegacy.css';
 import '../dialogHeader.css';
 import './conditionBuilder.css';
@@ -105,7 +106,7 @@ const buildNodeBackedMethods = (
 ) => {
 	const methodsById = new Map(methods.map((method) => [method.id, method]));
 	return nodes
-		.filter((node) => node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection')
+		.filter((node) => isMethodNodeType(node.type))
 		.map((node) => {
 			const method = methodsById.get(node.id);
 			const label = node.data.subtitle || node.data.title || method?.label || method?.name || node.id;
@@ -115,7 +116,7 @@ const buildNodeBackedMethods = (
 					index: '',
 					name: label,
 					label,
-					connector: node.type === 'system' || node.type === 'trigger-connection' ? null : node.data.connector ?? null,
+					connector: isHttpRequestNodeType(node.type) ? null : node.data.connector ?? null,
 					request: {},
 					response: {},
 				}),
@@ -181,7 +182,7 @@ const getSourceMethods = (
 	const allowedIds = new Set(
 		nodes
 			.slice(0, nodeIndex)
-			.filter((item) => item.type === 'connector' || item.type === 'system' || item.type === 'trigger-connection')
+			.filter((item) => isMethodNodeType(item.type))
 			.map((item) => item.id),
 	);
 	return methods.filter((method) => allowedIds.has(method.id));

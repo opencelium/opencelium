@@ -7,6 +7,9 @@ import { collectDescendantNodeIds } from './graph.traversal';
 import { createMethodConfigFromOperation, createMethodConfigFromWebhookUrl } from './requestConfig';
 import { createShortId } from '@shared/lib/createId';
 import { ALL_COLORS } from '../constants/colors';
+import { isMethodNodeType } from './methodNodeTypes';
+import { createNotificationConfig } from '../notification/model/notificationConfig';
+import { buildNotificationMethodConfig } from '../notification/model/notificationMethodConfig';
 
 function findOutgoingEdgeForAction(sourceNodeId: string, action: CreateNodeFromActionArgs['action'], edges: WorkflowEdgeModel[]) {
   return edges.find(
@@ -18,7 +21,7 @@ function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeMo
   const nodeType = getNodeType(args.action.kind!);
   const nextId = createShortId(args.action.kind);
   const usedColors = new Set(args.nodes.map((node) => node.data.color?.toLowerCase()).filter(Boolean));
-  const nextColor = nodeType === 'connector' || nodeType === 'system' || nodeType === 'trigger-connection'
+  const nextColor = isMethodNodeType(nodeType)
     ? ALL_COLORS.find((color) => !usedColors.has(color.toLowerCase()))
     : undefined;
   const baseX = sourceNode.type === 'if' || sourceNode.type === 'loop'
@@ -46,8 +49,11 @@ function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeMo
       connector: args.action.connector,
       triggerConnection: args.action.triggerConnection,
       color: nextColor,
+      ...(nodeType === 'notification' ? { notification: createNotificationConfig() } : {}),
       methodConfig: nodeType === 'trigger-connection'
         ? createMethodConfigFromWebhookUrl(args.action.triggerConnection?.webhookUrl ?? '')
+        : nodeType === 'notification'
+        ? buildNotificationMethodConfig(nextId, createNotificationConfig())
         : nodeType === 'connector' || nodeType === 'system'
         ? createMethodConfigFromOperation(args.action.methodOperation)
         : undefined,

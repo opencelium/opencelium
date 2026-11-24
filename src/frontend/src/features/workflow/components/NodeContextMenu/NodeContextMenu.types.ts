@@ -1,5 +1,6 @@
 import type { WorkflowContextMenu, WorkflowNodeModel } from '../../types/workflow.types';
 import type { ConnectorEditorKind } from '../../types/request-config.types';
+import type { OpenNotificationEditor } from '../../notification/ui/NotificationEditorContext';
 
 export type NodeContextMenuProps = {
 	menu: WorkflowContextMenu | null;
@@ -16,4 +17,5 @@ export type NodeContextMenuProps = {
 	onOpenAggregatorEditor: (nodeId: string) => void;
 	onOpenGlobalWritesEditor: (nodeId: string) => void;
 	onOpenConnectorEditor: (nodeId: string, kind: ConnectorEditorKind) => void;
+	onOpenNotificationEditor: OpenNotificationEditor;
 };

@@ -14,6 +14,7 @@ export type IconName =
     | 'main-menu'
     | 'command'
     | 'notification'
+    | 'bell'
     | 'profile'
     | 'content-copy'
     | 'content-paste'

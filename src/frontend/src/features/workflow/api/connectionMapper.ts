@@ -9,6 +9,7 @@ import { getInvalidSavedEdgeReason, getSavedUiEdges, getSavedUiNodes } from './c
 import {
 	findSavedNode,
 	mergeSavedNodeData,
+	resolveRestoredNodeType,
 } from './connectionMapper.savedNodeMatching';
 import { restoreNodesFromUi } from './connectionMapper.restoreNodes';
 import { withRestoredCommentNodes } from './connectionMapper.comments';
@@ -58,13 +59,15 @@ export function mapConnectionToWorkflowState(
 		const savedNode = findSavedNode(node, entryByNodeId.get(node.id), savedUiNodes, usedSavedNodeIds);
 		if (!savedNode) return node;
 		usedSavedNodeIds.add(savedNode.id);
+		const type = resolveRestoredNodeType(savedNode.type, node.type);
 
 		return {
 			...node,
+			type,
 			id: node.type === 'start' || hasUnmatchedEntries || hasInvalidRestoredEdges
 				? node.id : savedNode.id,
 			position: savedNode.position,
-			data: mergeSavedNodeData(node.data, savedNode.data),
+			data: { ...mergeSavedNodeData(node.data, savedNode.data), kind: type },
 			draggable: savedNode.draggable ?? node.draggable,
 			deletable: savedNode.deletable ?? node.deletable,
 		};
