@@ -20,6 +20,16 @@ public interface ExecutionManager {
     Map<String, String> getRequestData(Integer ctorId);
     Optional<Operation> findOperationByColor(String color);
     Object executeScript(String bindId);
+
+    /**
+     * Describes the enhancement of field binding {@code bindId} for an error message, by the
+     * field it fills, e.g. {@code the enhancement that fills #6477AB.(request).body.$.name}. The
+     * id of the binding means nothing to the user, so it is never shown.
+     */
+    default String describeEnhancement(String bindId) {
+        return "an enhancement";
+    }
+
     Object getValue(String ref);
 
     /**

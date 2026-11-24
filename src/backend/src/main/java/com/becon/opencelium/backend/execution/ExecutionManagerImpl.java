@@ -57,6 +57,9 @@ import java.util.stream.Collectors;
 public class ExecutionManagerImpl implements ExecutionManager {
     // the target of a global variable write: global.name, without braces or path
     private static final Pattern GLOBAL_TARGET = Pattern.compile(RegExpression.globalWriteTarget);
+    // where the script engine says an error happened, e.g. " in <eval> at line number 7 at column number 32"
+    private static final Pattern ENGINE_LOCATION =
+            Pattern.compile("\\s+in <eval> at line number \\d+(?: at column number \\d+)?");
     private static final ObjectMapper LITERAL_JSON = new ObjectMapper();
 
     private static final Logger log = LoggerFactory.getLogger(ExecutionManagerImpl.class);
@@ -253,17 +256,26 @@ public class ExecutionManagerImpl implements ExecutionManager {
             // the args are resolved here, on the run's thread, which holds the run's logger
             Map<String, Object> values = resolveArgs(imported.valueArgs());
             String importingCode = code;
-            String what = "The enhancement of field binding " + bindId;
-            if (language == LanguageType.JS) {
-                result = GlobalScript.runWithin(scriptTimeLimit(), what,
-                        () -> scriptEngine.execute(importingCode, values));
-            } else {
-                // each arg names itself, so the polyglot engine converts the resolved values as it
-                // does for an enhancement without imports
-                Map<String, String> names = new LinkedHashMap<>();
-                values.keySet().forEach(name -> names.put(name, name));
-                result = GlobalScript.runWithin(scriptTimeLimit(), what,
-                        () -> scriptEngine.execute(importingCode, names, values::get));
+            String what = capitalize(describeEnhancement(bindId));
+            try {
+                if (language == LanguageType.JS) {
+                    result = GlobalScript.runWithin(scriptTimeLimit(), what,
+                            () -> scriptEngine.execute(importingCode, values));
+                } else {
+                    // each arg names itself, so the polyglot engine converts the resolved values as
+                    // it does for an enhancement without imports
+                    Map<String, String> names = new LinkedHashMap<>();
+                    values.keySet().forEach(name -> names.put(name, name));
+                    result = GlobalScript.runWithin(scriptTimeLimit(), what,
+                            () -> scriptEngine.execute(importingCode, names, values::get));
+                }
+            } catch (ScriptExecutionException e) {
+                // the imported functions stand before the code, so the engine's line numbers point
+                // into generated code and would mislead
+                if (e.getMessage() == null || !ENGINE_LOCATION.matcher(e.getMessage()).find()) {
+                    throw e;
+                }
+                throw new ScriptExecutionException(withoutEngineLocation(e.getMessage()), e);
             }
         }
         if (!callsSet) {
@@ -279,6 +291,26 @@ public class ExecutionManagerImpl implements ExecutionManager {
         }
 
         return outcome.result();
+    }
+
+    @Override
+    public String describeEnhancement(String bindId) {
+        return fieldBind.stream()
+                .filter(fb -> Objects.equals(bindId, fb.getBindId()))
+                .map(FieldBindEx::getEnhance)
+                .filter(enhancement -> enhancement != null && enhancement.getResultRef() != null)
+                .findFirst()
+                .map(enhancement -> "the enhancement that fills " + enhancement.getResultRef())
+                .orElse("an enhancement");
+    }
+
+    private static String capitalize(String text) {
+        return Character.toUpperCase(text.charAt(0)) + text.substring(1);
+    }
+
+    /** Returns {@code message} without the script engine's {@code in <eval> at line number ...}. */
+    private static String withoutEngineLocation(String message) {
+        return message == null ? null : ENGINE_LOCATION.matcher(message).replaceAll("");
     }
 
     /**

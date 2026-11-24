@@ -559,6 +559,31 @@ class ExecutionManagerImplTest {
     }
 
     @Test
+    @DisplayName("executeScript — an imported script's error names the variable, without generated line numbers")
+    void executeScriptThrowsScriptExecutionExceptionWithoutEngineLocationWhenImportedScriptFails() {
+        givenScriptEngines();
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(FORMAT_DATE_DEFINITION),
+                anEnhancementWithArgs("js", "RESULT_VAR = VAR_1();", Map.of("VAR_1", "{{global.formatDate}}")),
+                Duration.ofSeconds(5));
+
+        assertThatThrownBy(() -> manager.executeScript("b1"))
+                .isInstanceOf(ScriptExecutionException.class)
+                .hasMessageContaining("Script variable 'formatDate': parameter 'date' is missing")
+                .hasMessageNotContaining("<eval>")
+                .hasMessageNotContaining("line number");
+    }
+
+    @Test
+    void describeEnhancementNamesFieldItFillsWhenResultVarIsKnown() {
+        FieldBindEx binding = anEnhancement("b1", "js", "RESULT_VAR = 1;");
+        binding.getEnhance().setResultRef("#6477AB.(request).body.$.name");
+        ExecutionManager manager = aScriptManager(aScriptSnapshot(FORMAT_DATE_DEFINITION), binding, Duration.ofSeconds(5));
+
+        assertThat(manager.describeEnhancement("b1")).isEqualTo("the enhancement that fills #6477AB.(request).body.$.name");
+        assertThat(manager.describeEnhancement("unknown")).isEqualTo("an enhancement");
+    }
+
+    @Test
     void executeScriptWritesGlobalWhenCodeCallsImportedScriptAndSet() throws Exception {
         givenScriptEngines();
         GlobalVariableSnapshot snapshot = GlobalVariableSnapshot.of(List.of(anEntry("lastSync", "\"old\""),
@@ -653,7 +678,7 @@ class ExecutionManagerImplTest {
 
         assertThatThrownBy(() -> manager.executeScript("b1"))
                 .isInstanceOf(ScriptExecutionException.class)
-                .hasMessageContaining("field binding b1 ran longer than 300 ms");
+                .hasMessageContaining("An enhancement ran longer than 300 ms");
     }
 
     @Test
@@ -667,7 +692,7 @@ class ExecutionManagerImplTest {
 
         assertThatThrownBy(() -> manager.executeScript("b1"))
                 .isInstanceOf(GlobalScript.TimeLimitExceeded.class)
-                .hasMessage("The enhancement of field binding b1 ran longer than 300 ms and was stopped");
+                .hasMessage("An enhancement ran longer than 300 ms and was stopped");
     }
 
     @Test
@@ -693,7 +718,7 @@ class ExecutionManagerImplTest {
         try {
             assertThatThrownBy(() -> manager.executeScript("b1"))
                     .isInstanceOf(GlobalScript.TimeLimitExceeded.class)
-                    .hasMessage("The enhancement of field binding b1 ran longer than 300 ms and was stopped");
+                    .hasMessage("An enhancement ran longer than 300 ms and was stopped");
         } finally {
             never.countDown();
         }

@@ -43,10 +43,16 @@ public class FieldBindExMapper {
 
             Map<String, String> args = new HashMap<>();
             vars.forEach(v -> {
+                // whitespace after the last ';', or ';;', leaves an empty part that declares nothing
+                if (v.isBlank()) {
+                    return;
+                }
                 List<String> split = PathAndReferenceUtility.splitByDelimiter(v, '=');
                 String key = split.get(0).trim().split("\\s")[1];
                 String value = split.get(1).trim();
-                if (!key.equals("RESULT_VAR")) {
+                if (key.equals("RESULT_VAR")) {
+                    enhancementEx.setResultRef(value);
+                } else {
                     args.put(key, value);
                 }
             });
