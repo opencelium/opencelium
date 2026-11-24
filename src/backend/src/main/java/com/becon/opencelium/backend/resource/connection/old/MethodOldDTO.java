@@ -20,7 +20,9 @@ import com.becon.opencelium.backend.enums.MethodType;
 import com.becon.opencelium.backend.resource.connection.MethodConnectorDTO;
 import com.becon.opencelium.backend.resource.connector.RequestDTO;
 import com.becon.opencelium.backend.resource.connector.ResponseDTO;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
+import java.util.Map;
 
 @Resource
 public class MethodOldDTO {
@@ -32,6 +34,11 @@ public class MethodOldDTO {
     private String label;
     private MethodType methodType;
     private Integer dataAggregator;
+    // mutable global variables this method writes once it has responded: the target as
+    // global.name -> the value. Left out of the JSON when empty, so a method that writes nothing
+    // reads, saves and exports as before.
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private Map<String, String> globalWrites;
     /**
      * optional field
      */
@@ -110,6 +117,14 @@ public class MethodOldDTO {
 
     public void setDataAggregator(Integer dataAggregator) {
         this.dataAggregator = dataAggregator;
+    }
+
+    public Map<String, String> getGlobalWrites() {
+        return globalWrites;
+    }
+
+    public void setGlobalWrites(Map<String, String> globalWrites) {
+        this.globalWrites = globalWrites;
     }
 
     @Override

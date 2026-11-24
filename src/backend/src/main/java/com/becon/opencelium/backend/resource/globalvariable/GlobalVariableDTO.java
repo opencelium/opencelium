@@ -1,0 +1,118 @@
+package com.becon.opencelium.backend.resource.globalvariable;
+
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableBusyPolicy;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableKind;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariablePermission;
+import com.becon.opencelium.backend.enums.globalvariable.GlobalVariableScopeType;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalScript;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * One global variable with everything the detail page and the edit form show.
+ *
+ * @param value         the value as real JSON; always {@code null} for a secret and a script.
+ *                      The initial value of a mutable variable
+ * @param hasValue      whether a value is stored, which a secret does not show otherwise; always
+ *                      {@code false} for a script
+ * @param script        the language, code and parameters of a script variable; {@code null} for
+ *                      the other kinds
+ * @param ownerUser     the creator, or {@code null} once that user is deleted
+ * @param myPermissions what the calling user may do with this variable
+ * @param mutable       what only a mutable variable has; {@code null} for the other kinds
+ * @param version       goes up by one on every saved change; send it back on update. A new
+ *                      current value of a mutable variable does not change it
+ */
+public record GlobalVariableDTO(
+        Long id,
+        String name,
+        GlobalVariableKind kind,
+        String description,
+        JsonNode value,
+        boolean secret,
+        boolean hasValue,
+        GlobalScript script,
+        Scope scope,
+        UserRef ownerUser,
+        Set<GlobalVariablePermission> myPermissions,
+        Mutable mutable,
+        long version,
+        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant createdAt,
+        Actor createdBy,
+        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant updatedAt,
+        Actor updatedBy) {
+
+    /**
+     * The part of a mutable variable that the other kinds lack.
+     *
+     * @param currentValue          the value runs read and write, as real JSON
+     * @param revision              goes up by one on every new current value, from 0 at creation
+     * @param setAt                 when the current value was set
+     * @param setBy                 the user who set it, by creating the variable or by a
+     *                              reset; {@code null} when a run wrote it
+     * @param setByExecutionId      the execution that wrote it; {@code null} otherwise
+     * @param busyPolicy            what a second start of a workflow that uses it does
+     * @param ownerWorkflow         the workflow whose runs may write it; {@code null} once that
+     *                              workflow is deleted, until another one is chosen
+     */
+    public record Mutable(
+            JsonNode currentValue,
+            long revision,
+            @JsonFormat(shape = JsonFormat.Shape.STRING) Instant setAt,
+            Actor setBy,
+            Long setByExecutionId,
+            GlobalVariableBusyPolicy busyPolicy,
+            WorkflowRef ownerWorkflow) {
+    }
+
+    /** A user by id and display name. */
+    public record UserRef(Integer id, String name) {
+    }
+
+    /**
+     * Who created or changed something: a user, or in the change log a workflow whose run wrote a
+     * mutable variable. {@code id} and {@code name} are the user's, or the workflow's id and
+     * title; {@code name} is {@code null} if that user or workflow no longer exists.
+     */
+    public record Actor(String type, Integer id, String name) {
+
+        public static final String USER = "USER";
+        public static final String WORKFLOW = "WORKFLOW";
+
+        public static Actor user(Integer id, String name) {
+            return new Actor(USER, id, name);
+        }
+
+        public static Actor workflow(Integer id, String title) {
+            return new Actor(WORKFLOW, id, title);
+        }
+    }
+
+    /**
+     * The run that is updating a mutable variable: a run of its owner workflow, which may write
+     * it at any moment until it ends.
+     *
+     * @param workflowId  the owner workflow
+     * @param executionId the running execution; {@code null} for the moment before it is created
+     * @param startedAt   when the run started
+     */
+    public record BeingUpdatedBy(
+            long workflowId, Long executionId, @JsonFormat(shape = JsonFormat.Shape.STRING) Instant startedAt) {
+    }
+
+    /** Which workflows may use the variable, with the names the UI shows. */
+    public record Scope(GlobalVariableScopeType type, List<CategoryRef> categories, List<WorkflowRef> workflows) {
+    }
+
+    /** A category in scope; {@code name} is {@code null} if the category no longer exists. */
+    public record CategoryRef(Long id, String name) {
+    }
+
+    /** A workflow in scope; {@code title} is {@code null} if the workflow no longer exists. */
+    public record WorkflowRef(Long id, String title) {
+    }
+}

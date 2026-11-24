@@ -21,6 +21,8 @@ import com.becon.opencelium.backend.resource.connector.RequestDTO;
 import com.becon.opencelium.backend.resource.connector.ResponseDTO;
 import jakarta.annotation.Resource;
 
+import java.util.Map;
+
 @Resource
 public class MethodDTO {
 
@@ -31,6 +33,10 @@ public class MethodDTO {
     private String label;
     private MethodType methodType;
     private Integer dataAggregator;
+
+    // mutable global variables this method writes once it has responded: the target as
+    // global.name -> the value, a reference such as #ababab.(response).body.$.id or JSON text
+    private Map<String, String> globalWrites;
     private RequestDTO request;
     private ResponseDTO response;
     private MethodConnectorDTO connector;
@@ -98,6 +104,14 @@ public class MethodDTO {
 
     public void setResponse(ResponseDTO response) {
         this.response = response;
+    }
+
+    public Map<String, String> getGlobalWrites() {
+        return globalWrites;
+    }
+
+    public void setGlobalWrites(Map<String, String> globalWrites) {
+        this.globalWrites = globalWrites;
     }
 
     public Integer getDataAggregator() {

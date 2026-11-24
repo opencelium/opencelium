@@ -328,3 +328,36 @@ versions:
         operation: add
         value: TRANSACTION_READ_COMMITTED
         path: spring.datasource.hikari.transaction-isolation
+      # opencelium.global-variable.secret-key is deliberately not added: 'add' replaces an
+      # existing value, so it would erase an own key set before this change set runs; the
+      # built-in default would take over and every secret saved under the own key would become
+      # unreadable. The key ships empty (built-in default) in application_default.yml.
+      - changeset: 3
+        operation: add
+        value: 65536
+        path: opencelium.global-variable.max-value-bytes
+  - version: 5.3
+    changes:
+      # opencelium.version is not set to 5.3 here: the build is still 5.2. Add it as the next
+      # change set when 5.3 is released, after the ones below: a change set numbered below the
+      # last applied one never runs.
+      - changeset: 1
+        operation: add
+        value: 262144
+        path: opencelium.global-variable.max-script-bytes
+      - changeset: 2
+        operation: add
+        value: 5000
+        path: opencelium.global-variable.script-timeout-ms
+      - changeset: 3
+        operation: add
+        value: 100
+        path: opencelium.global-variable.queue.max-waiting
+      - changeset: 4
+        operation: add
+        value: 60
+        path: opencelium.global-variable.queue.max-wait-minutes
+      - changeset: 5
+        operation: add
+        value: 200
+        path: opencelium.global-variable.change-log.max-run-entries
