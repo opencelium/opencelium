@@ -4,7 +4,7 @@ import { useNotificationReferences } from './notificationReferenceContextValue';
 import { NotificationReferencePicker } from './NotificationReferencePicker';
 import { ReferenceInsertButton } from './ReferenceInsertButton';
 import { hasReference } from '../../model/notificationBody';
-import { insertChipAt, isChipRemoveButton, paintReferenceValue, readReferenceValue } from './referenceFieldDom';
+import { CHIP_CLASS, insertChipAt, isChipRemoveButton, paintReferenceValue, readReferenceValue } from './referenceFieldDom';
 
 type Props = {
 	id: string;
@@ -63,7 +63,7 @@ export function ReferenceTextField({ id, value, onChange, isMultiline, placehold
 	const onMouseDown = (event: MouseEvent<HTMLDivElement>) => {
 		if (!isChipRemoveButton(event.target)) return;
 		event.preventDefault();
-		event.target.closest('.notificationRefChip')?.remove();
+		event.target.closest(`.${CHIP_CLASS}`)?.remove();
 		emit();
 	};
 	// A token typed or pasted by hand becomes a chip once the field is left.

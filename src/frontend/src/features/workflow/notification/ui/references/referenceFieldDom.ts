@@ -1,8 +1,10 @@
 import { ANY_REFERENCE_TOKEN_RE } from '../../model/notificationBody';
 import type { ReferenceDescription } from './referenceDescription';
+import '../../../components/reference-chip/referenceChip.css';
 
-const CHIP_CLASS = 'notificationRefChip';
-const REMOVE_CLASS = 'notificationRefChipRemove';
+// The shared reference chip (components/reference-chip): one look for references everywhere.
+export const CHIP_CLASS = 'wfReferenceChip';
+const REMOVE_CLASS = 'wfReferenceChipRemove';
 
 export const isChipRemoveButton = (target: EventTarget | null): target is HTMLElement =>
 	target instanceof HTMLElement && target.classList.contains(REMOVE_CLASS);
@@ -14,17 +16,18 @@ const createChip = (token: string, describe: (token: string) => ReferenceDescrip
 	chip.contentEditable = 'false';
 	chip.dataset.token = token;
 	chip.title = info.token;
-	const dot = document.createElement('i');
-	dot.style.background = info.color;
+	chip.dataset.source = info.source;
+	chip.style.setProperty('--wf-ref-color', info.color);
 	const text = document.createElement('span');
-	text.textContent = `${info.source} · ${info.path}`;
+	text.className = 'wfReferenceChipText';
+	text.textContent = info.path;
 	const remove = document.createElement('button');
 	remove.type = 'button';
 	remove.className = REMOVE_CLASS;
 	remove.tabIndex = -1;
 	remove.setAttribute('aria-label', removeLabel);
 	remove.textContent = '×';
-	chip.append(dot, text, remove);
+	chip.append(text, remove);
 	return chip;
 };
 

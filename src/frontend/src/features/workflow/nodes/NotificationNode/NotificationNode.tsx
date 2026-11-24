@@ -6,16 +6,15 @@ import type { NotificationWorkflowNode } from '../../types/workflow.types';
 import { useOpenNotificationEditor } from '../../notification/ui/NotificationEditorContext';
 import { getNotificationTool } from '../../notification/tools/notificationTools';
 import { getActiveDraft } from '../../notification/model/notificationConfig';
-import { useNotificationToolName } from '../../notification/ui/useNotificationToolName';
 import { AggregatorBadge } from '../AggregatorBadge/AggregatorBadge';
 import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 import { NotificationNodeBadges } from './NotificationNodeBadges';
+import { NotificationToolMark } from '../../notification/ui/NotificationToolMark';
 
 export function NotificationNode({ id, data, selected, dragging }: NodeProps<NotificationWorkflowNode>) {
 	const { t } = useI18n('workflow');
 	const openEditor = useOpenNotificationEditor();
-	const toolName = useNotificationToolName();
 	const suppressTooltip = dragging || data.isAnyNodeDragging;
 	const config = data.notification;
 	const tool = config?.tool ? getNotificationTool(config.tool) : null;
@@ -41,12 +40,7 @@ export function NotificationNode({ id, data, selected, dragging }: NodeProps<Not
 			data={data}
 			selected={selected}
 			testId={`workflow-notification-node-${id}`}
-			bottomLabel={
-				<span className={`notificationNodeLabel ${tool ? '' : 'notificationNodeLabel--empty'}`}>
-					<span>{label}</span>
-					<small>{tool ? toolName(tool) : t('notification.node.chooseTool')}</small>
-				</span>
-			}
+			bottomLabel={label}
 			rightAdd={{
 				action: { sourceNodeId: id, direction: 'right' },
 				showAlways: !!data.isLeaf && !data.jump,
@@ -56,7 +50,9 @@ export function NotificationNode({ id, data, selected, dragging }: NodeProps<Not
 			<div className='circleNode notificationNode' tabIndex={0} role='button'
 				aria-label={t('notification.node.ariaLabel', { label })} onKeyDown={onKeyDown}
 				data-testid={`workflow-notification-node-body-${id}`}>
-				<Icon name='bell' size={24} />
+				{!tool ? <Icon name='bell' size={24} />
+					: tool.logo ? <img className='circleNodeImage' src={tool.logo} alt='' draggable={false} />
+					: <NotificationToolMark tool={tool} className='notificationNodeToolMark' />}
 				<NotificationNodeBadges nodeId={id} tool={tool} isReady={isReady} suppressTooltip={suppressTooltip} />
 				<AggregatorBadge
 					dataAggregator={data.dataAggregator}

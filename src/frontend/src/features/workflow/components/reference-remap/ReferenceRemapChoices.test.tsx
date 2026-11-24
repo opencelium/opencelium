@@ -9,6 +9,8 @@ import { emptyChoice } from './referenceRemapChoice';
 
 // Identity translator, the pattern the other component tests use: this pins the
 // wiring, not the copy, which lives in the locale files.
+// The condition editor's reference chips confirm before deleting; these tests never delete one.
+vi.mock('@shared/ui/confirm/ConfirmDialogContext', () => ({ useConfirm: () => vi.fn() }));
 vi.mock('@shared/i18n/hooks/useI18n', () => ({
 	useI18n: () => ({ t: (key: string) => key, lang: 'en' }),
 }));

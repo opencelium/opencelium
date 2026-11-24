@@ -939,6 +939,10 @@
       "EMPTY_ARRAY_IN_SAMPLE": "The rest of the path could not be checked: the list is empty in the method's example response.",
       "NO_MATCH_IN_SAMPLE": "The filter matches nothing in the method's example response.",
       "INVALID_SAMPLE": "The method's example response could not be read, so the path was not checked against it."
+    },
+    "chipSource": {
+      "webhook": "Webhook",
+      "global": "Global"
     }
   },
   "refGenerator": {

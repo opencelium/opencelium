@@ -10,6 +10,9 @@ import { LegacyBodyReferenceGenerator } from '../LegacyBodyReferenceGenerator/Le
 import { useTestRun } from '../../../../test-run/useTestRun';
 import { LiveReferenceValuePreview } from '../../utils/LiveReferenceValuePreview';
 import type { BodyPointerProps } from './BodyPointer.types';
+import { ReferenceChip } from '../../../reference-chip/ReferenceChip';
+import { formatStepReferencePath } from '../../../reference-chip/referenceChip.utils';
+import { useReferenceSourceLabels } from '../../../reference-chip/ReferenceSourceContext';
 import './BodyPointer.css';
 import {
     formatLiveReferenceValue,
@@ -32,15 +35,13 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
   const color = parsed?.color || 'var(--color-text-disabled)';
   const staticTitle = parsed ? formatParsedArgPath(parsed) : pointer;
   const canEdit = !!onEdit && !!connection && !!currentMethod;
-  const swatchStyle = { width: 20, height: 10, background: color,
-    ...(isWarning ? { boxShadow: '0 0 0 2px var(--color-status-warning-fg)' } : {}),
-    ...(isSelected ? { outline: '2px solid var(--color-action-primary)', outlineOffset: 3 } : {}) };
+  const { methodLabel } = useReferenceSourceLabels();
 
   // While paused and the referenced method has already run this test, show
   // what it actually resolved to instead of just the structural path — see
   // useLiveReferenceValue.ts. Resolution only fires once the chip is
   // actually hovered (`enabled: hovered` below), so opening a node with many
-  // reference chips doesn't fire a request per chip. The rectangle carries
+  // reference chips doesn't fire a request per chip. The chip carries
   // the inspectable ring (canInspect, resolved with no request) so the hover
   // is discoverable, but never shows the value itself — the loading/resolved
   // state only ever shows in the hover tooltip, kept separate from the
@@ -50,6 +51,11 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
     connection,
     currentMethod,
     hovered,
+  );
+  const chip = (
+    <ReferenceChip color={color} source={parsed ? methodLabel(color) : undefined} path={formatStepReferencePath(pointer)}
+      title={isPaused ? undefined : staticTitle} tone={isWarning ? 'warning' : 'default'} isSelected={isSelected} isClickable
+      testId='body-reference-chip' />
   );
   const liveValueText = hasLiveValue ? formatLiveReferenceValue(liveValue) : null;
   const tooltipContent = (
@@ -94,7 +100,7 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
     setEditorPos({ left, top });
   };
 
-  const showMenu = (event: MouseEvent<HTMLDivElement>) => {
+  const showMenu = (event: MouseEvent<HTMLSpanElement>) => {
     const pointerRect = event.currentTarget.getBoundingClientRect();
     const scrollContainer = event.currentTarget.closest('.bodyLegacyJsonWrap');
     const containerTop = scrollContainer?.getBoundingClientRect().top ?? 0;
@@ -103,32 +109,20 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
   };
 
   return (
-    <div
+    <span
+      className='bodyPointerHost'
       onClick={onClick}
       onMouseEnter={showMenu}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        position: 'relative',
-        float: 'left',
-        margin: '7px 2px',
-        width: 20,
-        height: 10,
-        cursor: 'pointer',
-      }}
     >
       {isPaused ? (
         <Tooltip content={tooltipContent} maxWidth={320}>
-          <div
-            className={canInspect ? LIVE_INSPECTABLE_CLASS : undefined}
-            style={swatchStyle}
-          />
+          <span className={canInspect ? LIVE_INSPECTABLE_CLASS : undefined}>{chip}</span>
         </Tooltip>
-      ) : (
-        <div style={swatchStyle} />
-      )}
+      ) : chip}
       {hovered && !isPaused && (canEdit || onRemove) ? (
-        <div className={`bodyPointerMenu ${menuBelow ? 'bodyPointerMenu--below' : ''}`}>
-          <div className='bodyPointerMenuList'>
+        <span className={`bodyPointerMenu ${menuBelow ? 'bodyPointerMenu--below' : ''}`}>
+          <span className='bodyPointerMenuList'>
             {canEdit && (
               <button type='button' className='bodyPointerMenuItem' onClick={openEditor}>
                 <EditOutlined style={{ fontSize: 12 }} />
@@ -139,8 +133,8 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
               <DeleteOutlined style={{ fontSize: 12 }} />
               {tWorkflow('actions.delete')}
             </button>
-          </div>
-        </div>
+          </span>
+        </span>
       ) : null}
       {editorPos && connection && currentMethod
         ? createPortal(
@@ -171,6 +165,6 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
             document.body,
           )
         : null}
-    </div>
+    </span>
   );
 }

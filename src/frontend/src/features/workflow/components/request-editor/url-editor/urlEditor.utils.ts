@@ -1,5 +1,4 @@
 import type { EndpointArg } from '../../../types/connection';
-import { getReferenceDisplayLabel } from '../shared/referenceDisplay';
 import { createId as createStableId } from '@shared/lib/createId';
 import { buildInlineHtml as buildInlineHtmlWithClass } from './urlInlineTokens';
 
@@ -31,8 +30,7 @@ export const isSelectionInside = (root: HTMLElement) => {
 export const extractColorFromSourceRef = (ref?: string) =>
 	ref?.match(/^#([0-9a-f]{6})\./i)?.[1] ? `#${ref.match(/^#([0-9a-f]{6})\./i)![1]}` : null;
 
-export const visibleFromSourceRef = (ref?: string) =>
-	getReferenceDisplayLabel(ref || '');
+export { visibleFromSourceRef } from './urlInlineTokens';
 
 const referenceTokenId = (source: string) => {
 	let hash = 0;
@@ -95,7 +93,7 @@ export {
 export function buildInlineHtml(
 	raw: string,
 	endpointArgs?: Record<string, EndpointArg>,
-	opts?: { className?: string; cursorPointer?: boolean }
+	opts?: Parameters<typeof buildInlineHtmlWithClass>[2]
 ): string {
 	return buildInlineHtmlWithClass(raw, endpointArgs, { ...opts, className: opts?.className || ENDPOINT_REF_CLASS });
 }

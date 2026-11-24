@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { ANY_REFERENCE_TOKEN_RE } from '../../../model/notificationBody';
 import type { ReferenceDescription } from '../../references/referenceDescription';
+import { ReferenceChip } from '../../../../components/reference-chip/ReferenceChip';
 
 type Markup = 'slack' | 'markdown';
 
@@ -50,9 +51,7 @@ export const renderPreviewMarkup = (
 		nodes.push(...formatText(value.slice(lastIndex, match.index), markup, `t${lastIndex}`));
 		const info = describe(match[0]);
 		nodes.push(
-			<span key={`r${match.index}`} className='notificationRefChip notificationRefChip--static' title={info.token}>
-				<i style={{ background: info.color }} />{info.source} · {info.path}
-			</span>,
+			<ReferenceChip key={`r${match.index}`} color={info.color} source={info.source} path={info.path} title={info.token} />,
 		);
 		lastIndex = match.index + match[0].length;
 	}

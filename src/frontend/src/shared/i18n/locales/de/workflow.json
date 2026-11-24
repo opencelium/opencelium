@@ -939,6 +939,10 @@
       "EMPTY_ARRAY_IN_SAMPLE": "Der Rest des Pfads konnte nicht geprüft werden: Die Liste ist in der Beispielantwort der Methode leer.",
       "NO_MATCH_IN_SAMPLE": "Der Filter findet nichts in der Beispielantwort der Methode.",
       "INVALID_SAMPLE": "Die Beispielantwort der Methode konnte nicht gelesen werden, daher wurde der Pfad nicht damit geprüft."
+    },
+    "chipSource": {
+      "webhook": "Webhook",
+      "global": "Global"
     }
   },
   "refGenerator": {
