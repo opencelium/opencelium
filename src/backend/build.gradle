@@ -26,6 +26,11 @@ subprojects {
 		}
 	}
 
+	dependencies {
+		// The build rules of each module; the BOM of Spring Boot does not set its version.
+		testImplementation 'com.tngtech.archunit:archunit-junit5:1.5.1'
+	}
+
 	tasks.named('test') {
 		useJUnitPlatform()
 	}
