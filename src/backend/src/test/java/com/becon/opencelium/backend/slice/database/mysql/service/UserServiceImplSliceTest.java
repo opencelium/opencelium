@@ -15,6 +15,7 @@ import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.WidgetSettingServiceImp;
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
+import com.becon.opencelium.backend.security.UserPrincipals;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.testutil.annotation.SliceTest;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
@@ -30,7 +31,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
@@ -90,10 +90,14 @@ class UserServiceImplSliceTest {
         em.persistAndFlush(persisted);
         int userId = persisted.getId();
 
-        UserDetails principal = new org.springframework.security.core.userdetails.User(
-                "alice@example.com", "irrelevant", List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        // The filter hands the service a user loaded outside its transaction; only the id must match,
+        // getCurrentUser re-reads the row so that dirty checking applies to a managed entity.
+        User detached = UserFixture.anEmptyUser();
+        detached.setId(userId);
+        UserPrincipals principal = new UserPrincipals(detached);
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(principal, "irrelevant", principal.getAuthorities()));
+                new UsernamePasswordAuthenticationToken(
+                        principal, null, List.of(new SimpleGrantedAuthority("ROLE_USER"))));
 
         userService.changePassword(new ChangePasswordDTO("oldPass", "newPass", "newPass"));
 

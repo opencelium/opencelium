@@ -123,6 +123,23 @@ public class UserController {
         return ResponseEntity.ok(ResultDTO.of(userService.existsByEmail(email)));
     }
 
+    @Operation(summary = "Checks whether a user with the given username exists in the system")
+    @ApiResponses(value = {
+        @ApiResponse( responseCode = "200",
+                description = "Returns true if the username is taken by any OC or LDAP user, false otherwise",
+                content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/check/username/{username}")
+    public ResponseEntity<ResultDTO<Boolean>> usernameExists(@PathVariable("username") String username) {
+        return ResponseEntity.ok(ResultDTO.of(userService.existsByUsername(username)));
+    }
+
     @Operation(summary = "Retrieves a list of all users in the application")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",

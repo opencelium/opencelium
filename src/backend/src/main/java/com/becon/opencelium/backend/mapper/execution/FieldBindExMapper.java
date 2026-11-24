@@ -21,6 +21,8 @@ public class FieldBindExMapper {
 
         enhancementEx.setEnhanceId(dto.getEnhancementId());
         enhancementEx.setLang(dto.getEnhancement().getLanguage());
+        // an enhancement without args runs its script all the same
+        enhancementEx.setScript(enhancement.getScript());
 
         if (enhancement.getArgs() == null) {
             enhancementEx.setArgs(new HashMap<>());
@@ -49,7 +51,6 @@ public class FieldBindExMapper {
                 }
             });
 
-            enhancementEx.setScript(enhancement.getScript());
             enhancementEx.setArgs(args);
         }
 

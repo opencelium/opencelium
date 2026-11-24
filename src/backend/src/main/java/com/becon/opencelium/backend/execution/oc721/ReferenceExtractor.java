@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.reference.ReferenceParser;
 import com.becon.opencelium.backend.reference.enums.ExchangeType;
 import com.becon.opencelium.backend.reference.model.DirectReference;
 import com.becon.opencelium.backend.reference.model.EnhancementReference;
+import com.becon.opencelium.backend.reference.model.GlobalReference;
 import com.becon.opencelium.backend.reference.model.PageReference;
 import com.becon.opencelium.backend.reference.model.Reference;
 import com.becon.opencelium.backend.reference.model.RequestDataReference;
@@ -113,8 +114,12 @@ public class ReferenceExtractor implements Extractor {
                     ((PageReference) reference).getPageParam()
             );
 
+            case GLOBAL -> executionManager.getGlobalValue((GlobalReference) reference);
+
             case REQUEST_DATA -> {
                 RequestDataReference rdr = (RequestDataReference) reference;
+                // a connector field that held global variables got their values when the
+                // connector was read, so what is here is a value and is not resolved again
                 yield executionManager
                         .getRequestData(rdr.getCtorId())
                         .getOrDefault(rdr.getKey(), rdr.getRaw());

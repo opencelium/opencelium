@@ -8,13 +8,29 @@
 
 package com.becon.opencelium.backend.unit.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.ConnectionConstants;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
+import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
+import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
+import com.becon.opencelium.backend.database.mysql.service.CategoryService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionHistoryService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.GlobalVariableUsageService;
 import com.becon.opencelium.backend.database.mysql.service.ExecutionArgumentService;
+import com.becon.opencelium.backend.exception.GlobalReferenceValidationException;
+import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
+import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.testutil.fixture.ConnectionMngFixture;
+import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
+import com.github.fge.jsonpatch.JsonPatch;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,6 +42,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -34,7 +55,9 @@ import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the test-connection helpers on {@link ConnectionServiceImp}:
- * {@code filterTestConnections}, {@code filterTestConnectionEntities} and {@code deleteByIds}.
+ * {@code filterTestConnections}, {@code filterTestConnectionEntities} and {@code deleteByIds},
+ * and for what it does about global variable references when a workflow is deleted, switched to
+ * another version or moved to another category by a full update, a patch or {@code updateCategory}.
  *
  * Run with: ./gradlew test --tests "*.ConnectionServiceImpTest"
  */
@@ -44,6 +67,12 @@ class ConnectionServiceImpTest {
     private static final String TEST_TITLE = "!*test_connection_1700000000000_Demo";
     private static final String OTHER_TEST_TITLE = "!*test_connection_1700000000001_Other";
     private static final String NORMAL_TITLE = "Regular connection";
+    // a saved workflow, the test copy a run makes of it, and the copy of a second run
+    private static final long ORIGIN = 109L;
+    private static final long COPY = 110L;
+    private static final long OTHER_COPY = 112L;
+    // the patch helper is mocked, so what the patch holds does not matter
+    private static final JsonPatch A_PATCH = new JsonPatch(List.of());
 
     @Mock
     private ConnectionRepository connectionRepository;
@@ -51,18 +80,54 @@ class ConnectionServiceImpTest {
     @Mock
     private ConnectionMngServiceImp connectionMngService;
 
+    @Mock
+    private GlobalVariableUsageService globalVariableUsageService;
+
+    @Mock
+    private CategoryService categoryService;
+
+    @Mock
+    private FieldBindingMngService fieldBindingMngService;
+
+    @Mock
+    private PatchHelper patchHelper;
+
+    @Mock
+    private Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
+
+    @Mock
+    private Mapper<Connection, ConnectionDTO> connectionMapper;
+
+    @Mock
+    private ConnectionUpdateTracker updateTracker;
+
+    @Mock
+    private OpenceliumProps ocProps;
+
+    @Mock
+    private ConnectionHistoryService connectionHistoryService;
+
+    private TestRunOrigins testRunOrigins;
+
     private ConnectionServiceImp connectionService;
 
     @BeforeEach
     void setUp() {
         // The constructor calls entityVersionManager.getUpdater(...), so it cannot be left null;
         // construct with the collaborators these tests exercise and a mock version manager for the rest.
-        // deleteById strips execution_argument rows, so executionArgumentService cannot be null either.
+        // deleteById strips execution_argument rows, so executionArgumentService cannot be null either;
+        // it also clears the global variable usages of the connection. A full update and a patch read the
+        // category, the mappers, the patch helper, the update tracker and the version, hence the other mocks.
+        // Saving a workflow and deleteAndTrackIt write its history. The links of test copies are kept by a
+        // real TestRunOrigins, so the tests read them back instead of verifying calls.
         EntityVersionManager entityVersionManager = mock(EntityVersionManager.class);
         ExecutionArgumentService executionArgumentService = mock(ExecutionArgumentService.class);
+        testRunOrigins = new TestRunOrigins();
         connectionService = new ConnectionServiceImp(
-                connectionRepository, null, connectionMngService, null, null, null, null, null,
-                null, null, null, null, null, null, executionArgumentService, entityVersionManager, null, null);
+                connectionRepository, null, connectionMngService, fieldBindingMngService, categoryService,
+                connectionHistoryService, null, null, patchHelper, null, connectionMngMapper, connectionMapper,
+                updateTracker, null, executionArgumentService, entityVersionManager, ocProps, null,
+                globalVariableUsageService, testRunOrigins);
     }
 
     // ── findAll(includeTest) ──────────────────────────────────────────────────
@@ -185,10 +250,408 @@ class ConnectionServiceImpTest {
         verifyNoInteractions(connectionRepository, connectionMngService);
     }
 
+    // ── global variable usages ────────────────────────────────────────────────
+
+    @Test
+    void deleteByIdClearsUsagesWhenConnectionIsDeleted() {
+        when(connectionRepository.findById(1L)).thenReturn(Optional.of(entity(1L, NORMAL_TITLE)));
+
+        connectionService.deleteById(1L);
+
+        verify(globalVariableUsageService).deleteForWorkflow(1L);
+        verify(connectionRepository).deleteById(1L);
+    }
+
+    @Test
+    void updateCategoryChecksReferencesWhenWorkflowMoves() {
+        Connection connection = entity(1L, NORMAL_TITLE);
+        connection.setSnapshotId("snapshot-1");
+        connection.setCategoryId(3);
+        ConnectionMng content = new ConnectionMng();
+        when(connectionMngService.getById("snapshot-1")).thenReturn(content);
+        doThrow(new GlobalReferenceValidationException(List.of(new GlobalReferenceValidationException.Violation(
+                GlobalReferenceValidationException.Code.OUT_OF_SCOPE, "outside the scope", "idoitUrl",
+                "{{global.idoitUrl}}", "#ababab", "0_1", "endpoint"))))
+                .when(globalVariableUsageService).checkWorkflowMove(content, 1L, 4);
+
+        assertThatThrownBy(() -> connectionService.updateCategory(connection, 4))
+                .isInstanceOf(GlobalReferenceValidationException.class)
+                .hasMessageContaining("outside the scope");
+
+        assertThat(connection.getCategoryId()).isEqualTo(3);
+        verify(connectionRepository, never()).save(any());
+    }
+
+    @Test
+    void updateCategorySavesNewCategoryWhenReferencesStayValid() {
+        Connection connection = entity(1L, NORMAL_TITLE);
+        connection.setSnapshotId("snapshot-1");
+        ConnectionMng content = new ConnectionMng();
+        when(connectionMngService.getById("snapshot-1")).thenReturn(content);
+
+        connectionService.updateCategory(connection, 4);
+
+        assertThat(connection.getCategoryId()).isEqualTo(4);
+        verify(globalVariableUsageService).checkWorkflowMove(content, 1L, 4);
+        verify(connectionRepository).save(connection);
+    }
+
+    @Test
+    void switchVersionRebuildsUsagesWhenVersionChanges() {
+        Connection connection = entity(1L, NORMAL_TITLE);
+        connection.setSnapshotId("snapshot-1");
+        ConnectionMng otherVersion = new ConnectionMng();
+        otherVersion.setId("snapshot-2");
+        when(connectionRepository.findById(1L)).thenReturn(Optional.of(connection));
+        when(connectionMngService.getById("snapshot-2")).thenReturn(otherVersion);
+
+        connectionService.switchVersion(1L, "snapshot-2");
+
+        assertThat(connection.getSnapshotId()).isEqualTo("snapshot-2");
+        verify(globalVariableUsageService).rebuildForWorkflow(1L, otherVersion);
+    }
+
+    // ── moving a workflow to another category ─────────────────────────────────
+
+    @Test
+    @DisplayName("update — a workflow that changes category has the notifications of its schedules checked with it")
+    void updateChecksMoveWhenCategoryChanges() {
+        givenStoredWorkflowInCategory(3);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionMngService.create(content)).thenReturn(new ConnectionMng());
+
+        connectionService.update(aWorkflowUpdate(4), content);
+
+        verify(globalVariableUsageService).checkWorkflowMove(content, 1L, 4);
+        verify(globalVariableUsageService, never()).checkWorkflow(any(), any(), any());
+    }
+
+    @Test
+    void updateChecksWorkflowOnlyWhenCategoryStaysSame() {
+        givenStoredWorkflowInCategory(3);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionMngService.create(content)).thenReturn(new ConnectionMng());
+
+        connectionService.update(aWorkflowUpdate(3), content);
+
+        verify(globalVariableUsageService).checkWorkflow(content, 1L, 3);
+        verify(globalVariableUsageService, never()).checkWorkflowMove(any(), anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("update — a refused move writes neither the new version to Mongo nor the workflow to MariaDB")
+    void updateWritesNothingWhenMoveIsRefused() {
+        givenStoredWorkflowInCategory(3);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        doThrow(aNotificationRejection()).when(globalVariableUsageService).checkWorkflowMove(content, 1L, 4);
+
+        assertThatThrownBy(() -> connectionService.update(aWorkflowUpdate(4), content))
+                .isInstanceOf(GlobalReferenceValidationException.class)
+                .hasMessageContaining("notification 'Failure mail' (schedule 'Nightly')");
+
+        verify(connectionMngService, never()).create(any());
+        verify(connectionMngService, never()).save(any());
+        verify(connectionRepository, never()).save(any());
+    }
+
+    @Test
+    void updateCategoryChecksWorkflowOnlyWhenCategoryStaysSame() {
+        Connection connection = entity(1L, NORMAL_TITLE);
+        connection.setSnapshotId("snapshot-1");
+        connection.setCategoryId(3);
+        ConnectionMng content = new ConnectionMng();
+        when(connectionMngService.getById("snapshot-1")).thenReturn(content);
+
+        connectionService.updateCategory(connection, 3);
+
+        verify(globalVariableUsageService).checkWorkflow(content, 1L, 3);
+        verify(globalVariableUsageService, never()).checkWorkflowMove(any(), anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("updateCategory — a workflow without content still has the notifications of its schedules checked")
+    void updateCategoryChecksNotificationsWhenWorkflowHasNoSnapshot() {
+        Connection connection = entity(1L, NORMAL_TITLE);
+        connection.setCategoryId(3);
+
+        connectionService.updateCategory(connection, 4);
+
+        verify(globalVariableUsageService).checkWorkflowMove(null, 1L, 4);
+        verifyNoInteractions(connectionMngService);
+    }
+
+    @Test
+    @DisplayName("patchUpdate — a patch that moves the workflow is refused before anything is written")
+    void patchUpdateWritesNothingWhenCategoryMoveIsRefused() {
+        ConnectionMng patchedContent = givenPatchMovingWorkflow(3, 4);
+        doThrow(aNotificationRejection()).when(globalVariableUsageService).checkWorkflowMove(patchedContent, 1L, 4);
+
+        assertThatThrownBy(() -> connectionService.patchUpdate(1L, A_PATCH, null))
+                .isInstanceOf(GlobalReferenceValidationException.class)
+                .hasMessageContaining("notification 'Failure mail' (schedule 'Nightly')");
+
+        verify(connectionRepository, never()).save(any());
+        verify(connectionMngService, never()).save(any());
+        verifyNoInteractions(updateTracker);
+    }
+
+    @Test
+    @DisplayName("patchUpdate — a patch that keeps the category is saved without the checks of a move")
+    void patchUpdateSkipsMoveCheckWhenCategoryStaysSame() {
+        ConnectionMng patchedContent = givenPatchMovingWorkflow(3, 3);
+
+        connectionService.patchUpdate(1L, A_PATCH, null);
+
+        verify(globalVariableUsageService, never()).checkWorkflowMove(any(), anyLong(), any());
+        verify(connectionMngService).save(patchedContent);
+    }
+
+    // ── saveTestCopy ──────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("saveTestCopy — the copy's references are checked with the scope of the workflow it was made from")
+    void saveTestCopyChecksReferencesAsOriginWhenOriginExists() {
+        Connection copy = aWorkflow(TEST_TITLE, 3);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionRepository.existsById(ORIGIN)).thenReturn(true);
+        givenStoreAccepts(copy, content, COPY);
+
+        connectionService.saveTestCopy(copy, content, ORIGIN);
+
+        verify(globalVariableUsageService).checkWorkflow(content, ORIGIN, 3);
+    }
+
+    @Test
+    void saveTestCopyLinksCopyToOriginWhenOriginExists() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionRepository.existsById(ORIGIN)).thenReturn(true);
+        givenStoreAccepts(copy, content, COPY);
+
+        Long copyId = connectionService.saveTestCopy(copy, content, ORIGIN);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(copyId)).isEqualTo(ORIGIN);
+    }
+
+    @Test
+    @DisplayName("saveTestCopy — the copy of a workflow that was never saved is checked as a new workflow")
+    void saveTestCopyChecksAsNewWorkflowWhenOriginalIdIsNull() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        givenStoreAccepts(copy, content, COPY);
+
+        connectionService.saveTestCopy(copy, content, null);
+
+        verify(globalVariableUsageService).checkWorkflow(content, null, null);
+        verify(connectionRepository, never()).existsById(anyLong());
+    }
+
+    @Test
+    @DisplayName("saveTestCopy — an id that no workflow has lends no scope")
+    void saveTestCopyChecksAsNewWorkflowWhenOriginDoesNotExist() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionRepository.existsById(999L)).thenReturn(false);
+        givenStoreAccepts(copy, content, COPY);
+
+        connectionService.saveTestCopy(copy, content, 999L);
+
+        verify(globalVariableUsageService).checkWorkflow(content, null, null);
+    }
+
+    @Test
+    void saveTestCopyLinksNothingWhenOriginDoesNotExist() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionRepository.existsById(999L)).thenReturn(false);
+        givenStoreAccepts(copy, content, COPY);
+
+        Long copyId = connectionService.saveTestCopy(copy, content, 999L);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(copyId)).isEqualTo(COPY);
+    }
+
+    @Test
+    @DisplayName("saveTestCopy — a copy that lives for one run leaves no usages behind")
+    void saveTestCopyWritesNoUsagesWhenCopyIsSaved() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        when(connectionRepository.existsById(ORIGIN)).thenReturn(true);
+        givenStoreAccepts(copy, content, COPY);
+
+        connectionService.saveTestCopy(copy, content, ORIGIN);
+
+        verify(globalVariableUsageService, never()).rebuildForWorkflow(anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("saveTestCopy — a refused reference stops the copy before Mongo or MariaDB are written")
+    void saveTestCopySavesNothingWhenReferenceIsOutOfScope() {
+        Connection copy = aWorkflow(TEST_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        doThrow(anOutOfScopeRejection()).when(globalVariableUsageService).checkWorkflow(content, null, null);
+
+        assertThatThrownBy(() -> connectionService.saveTestCopy(copy, content, null))
+                .isInstanceOf(GlobalReferenceValidationException.class)
+                .hasMessageContaining("outside the scope of global variable 'gvWf'");
+
+        verify(connectionMngService, never()).create(any());
+        verify(connectionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("save — a workflow that is no test copy still records its usages")
+    void saveRebuildsUsagesWhenWorkflowIsSaved() {
+        Connection workflow = aWorkflow(NORMAL_TITLE, null);
+        ConnectionMng content = ConnectionMngFixture.aWorkflowWith();
+        ConnectionMng stored = givenStoreAccepts(workflow, content, ORIGIN);
+
+        connectionService.save(workflow, content);
+
+        verify(globalVariableUsageService).rebuildForWorkflow(ORIGIN, stored);
+    }
+
+    // ── deleting a test copy ──────────────────────────────────────────────────
+
+    @Test
+    void deleteByIdForgetsLinkWhenTestCopyIsDeleted() {
+        testRunOrigins.register(COPY, ORIGIN);
+        when(connectionRepository.findById(COPY)).thenReturn(Optional.of(entity(COPY, TEST_TITLE)));
+
+        connectionService.deleteById(COPY);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(COPY)).isEqualTo(COPY);
+    }
+
+    @Test
+    void deleteAndTrackItForgetsLinkWhenTestCopyIsDeleted() {
+        testRunOrigins.register(COPY, ORIGIN);
+        when(connectionRepository.findById(COPY)).thenReturn(Optional.of(entity(COPY, TEST_TITLE)));
+
+        connectionService.deleteAndTrackIt(COPY);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(COPY)).isEqualTo(COPY);
+    }
+
+    @Test
+    void deleteOnlyConnectionForgetsLinkWhenTestCopyIsDeleted() {
+        testRunOrigins.register(COPY, ORIGIN);
+        when(connectionRepository.findById(COPY)).thenReturn(Optional.of(entity(COPY, TEST_TITLE)));
+
+        connectionService.deleteOnlyConnection(COPY);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(COPY)).isEqualTo(COPY);
+    }
+
+    @Test
+    @DisplayName("deleteById — deleting one test copy keeps the link of another one")
+    void deleteByIdKeepsOtherLinksWhenTestCopyIsDeleted() {
+        testRunOrigins.register(COPY, ORIGIN);
+        testRunOrigins.register(OTHER_COPY, ORIGIN);
+        when(connectionRepository.findById(COPY)).thenReturn(Optional.of(entity(COPY, TEST_TITLE)));
+
+        connectionService.deleteById(COPY);
+
+        assertThat(testRunOrigins.scopeWorkflowOf(OTHER_COPY)).isEqualTo(ORIGIN);
+    }
+
+    /** A workflow as the save paths receive it: no id yet, the default connector, the given category. */
+    private static Connection aWorkflow(String title, Integer categoryId) {
+        Connection workflow = new Connection();
+        workflow.setTitle(title);
+        workflow.setFromConnector(ConnectionConstants.DEFAULT_CONNECTOR_ID);
+        workflow.setCategoryId(categoryId);
+        return workflow;
+    }
+
+    /**
+     * Lets Mongo store {@code content} and MariaDB store {@code row} under {@code id}.
+     *
+     * @return the document Mongo hands back for the content
+     */
+    private ConnectionMng givenStoreAccepts(Connection row, ConnectionMng content, long id) {
+        ConnectionMng stored = new ConnectionMng();
+        stored.setId("snapshot-" + id);
+        when(connectionMngService.create(content)).thenReturn(stored);
+        when(connectionRepository.save(row)).thenAnswer(invocation -> {
+            Connection saved = invocation.getArgument(0);
+            saved.setId(id);
+            return saved;
+        });
+        return stored;
+    }
+
+    private static GlobalReferenceValidationException anOutOfScopeRejection() {
+        return new GlobalReferenceValidationException(List.of(new GlobalReferenceValidationException.Violation(
+                GlobalReferenceValidationException.Code.OUT_OF_SCOPE,
+                "This workflow is outside the scope of global variable 'gvWf'",
+                "gvWf", "{{global.gvWf}}", "#C77E7E", "0", "endpoint")));
+    }
+
     private static Connection entity(Long id, String title) {
         Connection connection = new Connection();
         connection.setId(id);
         connection.setTitle(title);
         return connection;
+    }
+
+    /** Stores workflow 1 with snapshot "snapshot-1" in the given category. */
+    private void givenStoredWorkflowInCategory(Integer categoryId) {
+        Connection stored = entity(1L, NORMAL_TITLE);
+        stored.setSnapshotId("snapshot-1");
+        stored.setCategoryId(categoryId);
+        when(connectionRepository.findById(1L)).thenReturn(Optional.of(stored));
+        when(connectionMngService.getById("snapshot-1")).thenReturn(ConnectionMngFixture.aWorkflowWith());
+    }
+
+    /** Workflow 1 as a full update sends it: same title, default connector, the given category. */
+    private static Connection aWorkflowUpdate(Integer categoryId) {
+        Connection connection = entity(1L, NORMAL_TITLE);
+        connection.setFromConnector(ConnectionConstants.DEFAULT_CONNECTOR_ID);
+        connection.setCategoryId(categoryId);
+        return connection;
+    }
+
+    /**
+     * Stores workflow 1 in category {@code from} and lets {@link #A_PATCH} put it in category
+     * {@code to}.
+     *
+     * @return the content the patch saves to Mongo
+     */
+    private ConnectionMng givenPatchMovingWorkflow(Integer from, Integer to) {
+        Connection stored = entity(1L, NORMAL_TITLE);
+        stored.setSnapshotId("snapshot-1");
+        stored.setCategoryId(from);
+        ConnectionMng storedContent = new ConnectionMng();
+        storedContent.setConnectionId(1L);
+        when(connectionRepository.findById(1L)).thenReturn(Optional.of(stored));
+        when(connectionMngService.getById("snapshot-1")).thenReturn(storedContent);
+        when(connectionMngMapper.toDTO(storedContent)).thenReturn(new ConnectionDTO());
+        when(connectionMapper.toDTO(stored)).thenReturn(aWorkflowDto(from));
+
+        ConnectionDTO patched = aWorkflowDto(to);
+        Connection patchedRow = entity(1L, NORMAL_TITLE);
+        patchedRow.setCategoryId(to);
+        ConnectionMng patchedContent = new ConnectionMng();
+        when(patchHelper.patch(eq(A_PATCH), any(ConnectionDTO.class), eq(ConnectionDTO.class))).thenReturn(patched);
+        when(connectionMapper.toEntity(patched)).thenReturn(patchedRow);
+        when(connectionMngMapper.toEntity(patched)).thenReturn(patchedContent);
+        return patchedContent;
+    }
+
+    private static ConnectionDTO aWorkflowDto(Integer categoryId) {
+        ConnectionDTO dto = new ConnectionDTO();
+        dto.setConnectionId(1L);
+        dto.setTitle(NORMAL_TITLE);
+        dto.setCategoryId(categoryId);
+        return dto;
+    }
+
+    private static GlobalReferenceValidationException aNotificationRejection() {
+        return new GlobalReferenceValidationException(List.of(new GlobalReferenceValidationException.Violation(
+                GlobalReferenceValidationException.Code.OUT_OF_SCOPE,
+                "The workflow of notification 'Failure mail' (schedule 'Nightly') is outside the scope of global"
+                        + " variable 'supportUrl'",
+                "supportUrl", "{{global.supportUrl}}", null, null, "en.body")));
     }
 }

@@ -25,6 +25,7 @@ public class ReferenceUtils {
     public static boolean isReference(String token) {
         return token.matches(RegExpression.wrappedDirectRef)
                 || token.matches(RegExpression.enhancement)
+                || token.matches(RegExpression.globalRef)
                 || token.matches(RegExpression.requestData)
                 || token.matches(RegExpression.webhook);
     }
