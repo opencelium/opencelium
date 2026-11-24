@@ -501,12 +501,12 @@
 
 .bodyLegacyGeneratorShell {
   display: grid;
-  grid-template-columns: 40px 214px auto 214px 22px;
+  grid-template-columns: 64px minmax(160px, 214px) auto minmax(160px, 1fr) 22px;
   gap: 0;
   align-items: center;
-  /* One line of the field path textarea (41px) plus padding and border, so the
-     webhook and global modes, which have no such field, keep the same height. */
-  min-height: 55px;
+  /* One 32px control row plus padding and border, so the webhook and global
+     modes, which have no field path, keep the same height. */
+  min-height: 46px;
   padding: 6px 10px;
   background: var(--color-background-elevated);
   border: 1px solid var(--color-border-default);
@@ -515,22 +515,8 @@
 }
 
 .bodyLegacyGeneratorShellWebhook {
-  grid-template-columns: 40px 1fr 26px;
-  min-width: 452px;
-}
-
-/* Up to three sources (method, webhook, global) and the B/H/S switch share one row height so neither stack sets the shell height; the global source sits inside its tooltip's span. */
-.bodyLegacyGeneratorSwitch {
-  gap: 0;
-  align-self: center;
-}
-
-.bodyLegacyGeneratorSwitch > *,
-.bodyLegacyGeneratorSwitch .ant-radio-wrapper,
-.bodyLegacyGeneratorResponse .ant-radio-wrapper {
-  display: flex;
-  align-items: center;
-  height: 13px;
+  grid-template-columns: 64px 1fr 26px;
+  min-width: 476px;
 }
 
 .compactRadioGroup .ant-radio-wrapper::after {
@@ -559,9 +545,37 @@
   grid-template-columns: auto minmax(160px, 1fr);
 }
 
-.bodyLegacyGeneratorResponse {
-  margin-left: 9px;
-  width: 40px;
+/* Every control in the generator row has the operator dialog's size: antd's default
+   32px height and 8px corners. The field path textarea is large elsewhere, so it is
+   shrunk here; autoSize measures its computed padding, so it still grows while wrapping. */
+.bodyLegacyGeneratorShell .referenceSourceSelect.ant-select,
+.bodyLegacyGeneratorShell .referenceResponseTypeSelect.ant-select,
+.bodyLegacyGeneratorShell .bodyLegacyGeneratorSelect.ant-select:not(.referenceFieldPathSelect),
+.bodyLegacyGeneratorShell .bodyLegacyWebhookSelect.ant-select {
+  height: 32px;
+  border-radius: 8px !important;
+}
+
+.bodyLegacyGeneratorShell .referenceFieldPathSelect.ant-select.ant-select {
+  height: auto;
+  min-height: 32px;
+  border-radius: 8px !important;
+}
+
+.bodyLegacyGeneratorShell .referenceFieldPathSelect .referenceFieldPathInput {
+  min-height: 32px;
+  padding-block: 4px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.bodyLegacyGeneratorShell .referenceSourceSelect.ant-select {
+  margin-inline-end: 8px;
+}
+
+.bodyLegacyGeneratorShell .referenceResponseTypeSelect.ant-select {
+  margin-inline: 8px;
 }
 
 /* The response part where it is read rather than chosen: the switch's own
@@ -571,10 +585,6 @@
 .bodyLegacyGeneratorResponseText {
   margin-inline: 9px 0;
   color: var(--color-text-secondary);
-}
-
-.bodyLegacyGeneratorResponse .ant-radio-wrapper > span:last-child {
-  padding-inline-end: 0;
 }
 
 .compactRadioGroup {

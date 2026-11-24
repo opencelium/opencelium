@@ -706,6 +706,12 @@
       "webhook": "Webhook",
       "global": "Global variable"
     },
+    "sourceHint": {
+      "constant": "A fixed value you type in",
+      "method": "A field from a method's response",
+      "webhook": "A parameter the webhook was called with",
+      "global": "The value of a global variable"
+    },
     "responseType": {
       "body": "Body",
       "header": "Header",
