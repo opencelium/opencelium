@@ -1009,3 +1009,12 @@ ALTER TABLE `global_variable_change`
     ADD COLUMN IF NOT EXISTS `workflow_id`  BIGINT DEFAULT NULL,
     ADD COLUMN IF NOT EXISTS `execution_id` BIGINT DEFAULT NULL,
     ADD COLUMN IF NOT EXISTS `write_count`  INT DEFAULT NULL;
+
+--changeset 5.2:13 stripComments:true splitStatements:true endDelimiter:;
+-- OC (BASIC) users no longer need an email: one without it signs in with its username, and
+-- UserServiceImpl.save requires one of the two. A missing email must be NULL, because the unique
+-- key on user.email tolerates any number of NULLs but only one ''. UserServiceImpl.save stores a
+-- blank email as NULL for every write; this brings rows written outside the application in line.
+-- Surrounding whitespace of other emails is deliberately left alone: trimming could make two rows
+-- collide on the unique key and halt the migration.
+UPDATE `user` SET `email` = NULL WHERE TRIM(`email`) = '';
