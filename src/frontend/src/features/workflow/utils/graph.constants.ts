@@ -9,6 +9,7 @@ export const TITLES: Record<WorkflowCreateKind, string> = {
   connector: 'Connector',
   system: 'HTTP Request',
   'trigger-connection': 'Trigger Workflow',
+  notification: 'Notification',
   if: 'If',
   loop: 'Loop',
 };

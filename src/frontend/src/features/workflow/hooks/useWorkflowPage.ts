@@ -40,7 +40,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     contextMenu, setContextMenu, historyOpen, setHistoryOpen, methodEditor,
     setMethodEditor, responseNodeId, setResponseNodeId, conditionEditor,
     setConditionEditor, aggregatorEditor, setAggregatorEditor, connectorEditor,
-    setConnectorEditor, restoredViewport,
+    setConnectorEditor, notificationEditor, setNotificationEditor, restoredViewport,
     setRestoredViewport, viewportRestoreVersion, setViewportRestoreVersion,
     centerStartVersion, setCenterStartVersion, bindingLensOpen,
     setBindingLensOpen, bindingLensExpanded, setBindingLensExpanded,
@@ -75,7 +75,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes, setEdges, onFieldBindingsChange: options.onFieldBindingsChange });
   const nodeUpdates = useWorkflowNodeUpdates(setNodes,
     () => setMethodEditor(null), () => setConditionEditor(null),
-    () => setAggregatorEditor(null), () => setConnectorEditor(null));
+    () => setAggregatorEditor(null), () => setConnectorEditor(null),
+    () => setNotificationEditor(null));
 
   const [jointSourceId, setJointSourceId] = useState<string | null>(null);
   const jointVerdicts = useMemo(
@@ -96,8 +97,16 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes,
     centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
-      aggregatorEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
+      aggregatorEditor !== null || connectorEditor !== null || notificationEditor !== null
+      || responseNodeId !== null || historyOpen,
   });
+
+  // Stable: only state setters inside, so the notification opener built on it stays stable too.
+  const closeNodeEditors = useCallback(() => {
+    setSidebarAction(null); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null);
+    setConditionEditor(null); setAggregatorEditor(null); setConnectorEditor(null);
+  }, [setSidebarAction, setContextMenu, setHistoryOpen, setMethodEditor, setConditionEditor,
+    setAggregatorEditor, setConnectorEditor]);
 
   const deleteNodes = useDeleteWorkflowNodes({ nodes, edges, options, setNodes, setEdges,
     onDeleted: () => setContextMenu(null) });
@@ -117,6 +126,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     conditionEditor,
     aggregatorEditor,
     connectorEditor,
+    notificationEditor,
     restoredViewport,
     viewportRestoreVersion,
     centerStartVersion,
@@ -141,6 +151,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setConditionEditor,
     setAggregatorEditor,
     setConnectorEditor,
+    setNotificationEditor,
+    closeNodeEditors,
     setWorkflowGraph: (
       nextNodes: WorkflowNodeModel[],
       nextEdges: WorkflowEdgeModel[],
@@ -163,7 +175,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onNodeDragStop: handleNodeDragStop,
     onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
     onCloseResponse: () => setResponseNodeId(null),
-    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setConnectorEditor(null); },
+    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setConnectorEditor(null); setNotificationEditor(null); },
     onStartJoint: (sourceNodeId: string) => {
       setSidebarAction(null);
       setContextMenu(null);

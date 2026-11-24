@@ -25,6 +25,8 @@ import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJson
 import { useSchedulesConnectionId } from './components/schedules/simulatedSchedulesConnection';
 import { WorkflowProblemsBadge } from './problems/WorkflowProblemsBadge';
 import { applyProblemFocus } from './problems/applyProblemFocus';
+import { NotificationEditorContext } from './notification/ui/NotificationEditorContext';
+import { useNotificationEditorOpener } from './notification/ui/useNotificationEditorOpener';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -81,6 +83,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     },
   });
   const playgroundNodeId = playground.dialog?.nodeId;
+  const openNotificationEditor = useNotificationEditorOpener({ setNotificationEditor: workflow.setNotificationEditor,
+    closeOtherEditors: workflow.closeNodeEditors });
+  const isGraphLocked = readOnly || isTestRunLocked;
   const actions = useWorkflowActions({ connectionId, readOnly, isTestRunLocked,
     page: { connection, workflow, connectors, invokers, view, changes, derived,
       isLoading, retryLoad } });
@@ -182,6 +187,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           loading: isAssigningCategory, onClose: () => setAssignCategoryOpen(false),
           onAssign: handleAssignCategory }} />
       <LogPlaygroundOpenContext.Provider value={playground.openFromLogs}>
+      <NotificationEditorContext.Provider value={isGraphLocked ? null : openNotificationEditor}>
       <WorkflowMain loading={isLoading} canvas={{ nodes: canvasNodes,
         edges: workflow.edges, isAnyNodeDragging: workflow.isAnyNodeDragging,
         restoredViewport: workflow.restoredViewport,
@@ -210,6 +216,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           closeCanvasPanels();
           problems.clearFocus();
         } }} />
+      </NotificationEditorContext.Provider>
       </LogPlaygroundOpenContext.Provider>
       <WorkflowPanels
         sidebar={{ action: isTestRunLocked ? null : workflow.sidebarAction, selectedNode,
@@ -266,6 +273,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onTryRequest: playground.open,
           onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
           onOpenConnectorEditor: (nodeId, kind) => workflow.setConnectorEditor({ nodeId, kind }),
+          onOpenNotificationEditor: openNotificationEditor,
           onClose: () => workflow.setContextMenu(null) }} />
       <WorkflowNodeEditors
         response={{ open: !!workflow.responseNodeId,
@@ -299,7 +307,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           connectionId: Number(activeConnectionId) || null,
           connectors, isReadOnly: readOnly || isTestRunLocked,
           onApplyConfig: workflow.onSaveMethodConfig,
-          onClose: () => playground.open(null) }} />
+          onClose: () => playground.open(null) }}
+        notification={{ editor: workflow.notificationEditor, nodes: hydratedNodes, edges: workflow.edges,
+          node: hydratedNodes.find((node) => node.id === workflow.notificationEditor?.nodeId) ?? null,
+          fieldBindings: loadedFieldBindings, isReadOnly: isGraphLocked,
+          onClose: () => workflow.setNotificationEditor(null), onSave: workflow.onSaveNotification }} />
     </div>
     </TestRunProvider>
   );

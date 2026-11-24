@@ -4,16 +4,17 @@ import { useAuth } from '@features/auth/useAuth';
 import { filterMenuSections, menuByType, type NodeMenuActionId } from '../context-menu/contextMenuData';
 import type { NodeContextMenuProps } from './NodeContextMenu.types';
 import { NodeContextMenuRow } from './NodeContextMenuRow';
+import { NOTIFICATION_MENU_TARGETS } from '../../notification/model/notificationMenuTargets';
 
 type Props = Pick<NodeContextMenuProps, 'menu' | 'node' | 'onClose' | 'onOpenRequestEditor'
   | 'onOpenConditionEditor' | 'onShowResponse' | 'onTryRequest' | 'onOpenAggregatorEditor' | 'onOpenConnectorEditor'
-  | 'onCopyNodes' | 'onPasteNodes' | 'canPasteNodes'> & {
+  | 'onCopyNodes' | 'onPasteNodes' | 'canPasteNodes' | 'onOpenNotificationEditor'> & {
   onEditLabel: () => void;
 };
 
 export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
   onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onTryRequest, onOpenAggregatorEditor, onOpenConnectorEditor,
-  onCopyNodes, onPasteNodes, canPasteNodes }: Props) {
+  onCopyNodes, onPasteNodes, canPasteNodes, onOpenNotificationEditor }: Props) {
   const { normalizedUser } = useAuth();
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   if (!menu) return null;
@@ -38,6 +39,16 @@ export function NodeContextMenuSections({ menu, node, onClose, onEditLabel,
       case 'change-connector-image': onOpenConnectorEditor(menu.nodeId, 'image'); break;
       case 'copy': onCopyNodes(menu.nodeId); break;
       case 'paste': onPasteNodes(menu.nodeId); break;
+      case 'notification-open':
+      case 'notification-tool':
+      case 'notification-webhook':
+      case 'notification-message':
+      case 'notification-request-url':
+      case 'notification-request-headers':
+      case 'notification-request-body':
+      case 'notification-response':
+      case 'notification-rename':
+        onOpenNotificationEditor(menu.nodeId, NOTIFICATION_MENU_TARGETS[id]); break;
       default: {
         const _exhaustive: never = id;
         return _exhaustive;

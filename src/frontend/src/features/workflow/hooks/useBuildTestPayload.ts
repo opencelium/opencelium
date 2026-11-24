@@ -4,6 +4,7 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.typ
 import { buildConnectionPayload, buildFromConnectorPayload } from '../api/connectionPayload';
 import { toPayloadDescription } from '../utils/workflowPage.utils';
 import { notifyError } from '@shared/ui/feedback/notifyError';
+import { isMethodNodeType } from '../utils/methodNodeTypes';
 
 type Params = {
 	connectionId?: string;
@@ -24,8 +25,7 @@ export const useBuildTestPayload = ({ connectionId, title, description, nodes,
 	const { t } = useI18n('entities');
 	return useCallback(() => {
 		clearNodeErrors();
-		const hasMethod = nodes.some((node) => node.type === 'connector' ||
-			node.type === 'system' || node.type === 'trigger-connection');
+		const hasMethod = nodes.some((node) => isMethodNodeType(node.type));
 		if (!hasMethod) {
 			notifyError(t('connection.test.noMethods'));
 			return null;

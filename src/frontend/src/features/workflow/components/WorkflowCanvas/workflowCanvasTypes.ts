@@ -10,12 +10,14 @@ import { LoopOperatorNode } from '../../nodes/LoopOperatorNode/LoopOperatorNode'
 import { StartNode } from '../../nodes/StartNode/StartNode';
 import { SystemMethodNode } from '../../nodes/SystemMethodNode/SystemMethodNode';
 import { TriggerConnectionNode } from '../../nodes/TriggerConnectionNode/TriggerConnectionNode';
+import { NotificationNode } from '../../nodes/NotificationNode/NotificationNode';
 
 export const workflowNodeTypes = {
 	start: memo(StartNode),
 	connector: memo(ConnectorMethodNode),
 	system: memo(SystemMethodNode),
 	'trigger-connection': memo(TriggerConnectionNode),
+	notification: memo(NotificationNode),
 	if: memo(IfOperatorNode),
 	loop: memo(LoopOperatorNode),
 	comment: memo(CommentNode),

@@ -2,6 +2,7 @@ import type { Connection, MethodWithId } from '../../types/connection';
 import { MethodType } from '../../types/connection';
 import type { WorkflowNodeModel } from '../../types/workflow.types';
 import { ALL_COLORS } from '../../constants/colors';
+import { isHttpRequestNodeType, isMethodNodeType } from '../../utils/methodNodeTypes';
 import { ensureMethodConfig } from '../../utils/requestConfig';
 import { collectLegacyFieldBindings } from './legacyFieldBindings';
 import {
@@ -28,8 +29,7 @@ const resolveMethodColor = (
 // lens) must not pay for deserializing every method's request config.
 export type MethodIdentity = { id: string; color: string; name: string };
 
-const isMethodNode = (node: WorkflowNodeModel) =>
-  node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection';
+const isMethodNode = (node: WorkflowNodeModel) => isMethodNodeType(node.type);
 
 export const resolveMethodIdentities = (nodes: WorkflowNodeModel[]): MethodIdentity[] => {
   const methodNodes = nodes.filter(isMethodNode);
@@ -52,8 +52,8 @@ const buildLegacyMethod = (
 ): MethodWithId => {
   const config = deserializeMethodConfigReferences(ensureMethodConfig(node.data.methodConfig));
   const { name, color } = identity;
-  const isHttpRequest = node.type === 'system' || node.type === 'trigger-connection';
-  const methodType = node.type === 'system'
+  const isHttpRequest = isHttpRequestNodeType(node.type);
+  const methodType = node.type === 'system' || node.type === 'notification'
     ? MethodType.HttpRequest
     : node.type === 'trigger-connection' ? MethodType.Webhook : MethodType.Connector;
 

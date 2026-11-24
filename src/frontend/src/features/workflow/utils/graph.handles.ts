@@ -1,10 +1,12 @@
 import type { WorkflowCreateKind, WorkflowNodeType } from '../types/workflow.types';
+import { isMethodNodeType } from './methodNodeTypes';
 
 export function getNodeType(kind: WorkflowCreateKind): WorkflowNodeType {
   switch (kind) {
     case 'connector': return 'connector';
     case 'system': return 'system';
     case 'trigger-connection': return 'trigger-connection';
+    case 'notification': return 'notification';
     case 'loop': return 'loop';
     case 'if': return 'if';
     case 'comment': return 'comment';
@@ -19,7 +21,7 @@ export function getDefaultSourceHandle(
   nodeType: WorkflowNodeType,
   direction: 'right' | 'bottom',
 ): string | undefined {
-  if (direction === 'bottom' && (nodeType === 'connector' || nodeType === 'system' || nodeType === 'trigger-connection')) {
+  if (direction === 'bottom' && isMethodNodeType(nodeType)) {
     return 'bottom';
   }
   if (nodeType === 'if') return direction === 'bottom' ? 'true' : 'false';

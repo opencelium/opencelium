@@ -3,7 +3,11 @@ import type { IconName } from '@shared/ui/primitives/Icon/Icon.types';
 
 export type NodeMenuActionId = 'change-label' | 'change-connector' | 'change-connector-image'
   | 'configure-aggregator' | 'open-config' | 'edit-url' | 'edit-headers' | 'edit-body'
-  | 'try-request' | 'show-response' | 'copy' | 'paste';
+  | 'try-request' | 'show-response' | 'copy' | 'paste' | NotificationMenuActionId;
+
+export type NotificationMenuActionId = 'notification-open' | 'notification-tool' | 'notification-webhook'
+  | 'notification-message' | 'notification-request-url' | 'notification-request-headers'
+  | 'notification-request-body' | 'notification-response' | 'notification-rename';
 
 export type NodeMenuAction = { id: NodeMenuActionId; labelKey: string; icon: IconName; newFeatureId?: NewFeatureId };
 
@@ -66,6 +70,24 @@ const triggerConnectionMenu: NodeMenuSection[] = [
   clipboardSection,
 ];
 
+// The notification step has its own guided dialog: every entry opens it on the matching step or section.
+const notificationMenu: NodeMenuSection[] = [
+  { id: 'notification', rows: [
+    action({ id: 'notification-open', labelKey: 'notification.contextMenu.open', icon: 'notification' }),
+    action({ id: 'notification-tool', labelKey: 'notification.contextMenu.tool', icon: 'arrow-switch' }),
+    action({ id: 'notification-webhook', labelKey: 'notification.contextMenu.webhook', icon: 'webhook' }),
+    action({ id: 'notification-message', labelKey: 'notification.contextMenu.message', icon: 'edit' }),
+  ] },
+  { id: 'request', rows: [{ kind: 'inline', id: 'notification-request', labelKey: 'contextMenu.request', icon: 'http-request', actions: [
+    { id: 'notification-request-url', labelKey: 'contextMenu.url', icon: 'link' },
+    { id: 'notification-request-headers', labelKey: 'contextMenu.header', icon: 'list' },
+    { id: 'notification-request-body', labelKey: 'contextMenu.body', icon: 'code' },
+  ] }] },
+  { id: 'response', rows: [action({ id: 'notification-response', labelKey: 'contextMenu.showResponse', icon: 'eye' })] },
+  { id: 'main', rows: [action({ id: 'notification-rename', labelKey: 'contextMenu.changeLabel', icon: 'edit' }), configureAggregator] },
+  clipboardSection,
+];
+
 // The start step can't be copied, but steps can be pasted after it.
 const startMenu: NodeMenuSection[] = [{ id: 'clipboard', rows: [pasteAction] }];
 
@@ -74,6 +96,7 @@ export const menuByType: Record<string, NodeMenuSection[]> = {
   connector: connectorMenu,
   system: systemMenu,
   'trigger-connection': triggerConnectionMenu,
+  notification: notificationMenu,
   if: operatorMenu,
   loop: operatorMenu,
 };

@@ -119,14 +119,16 @@ const commentSchema = z.strictObject({
 });
 const nodeDataSchema = z.strictObject({
 	title: z.string(), subtitle: z.string().optional(),
-	kind: z.enum(['start', 'connector', 'system', 'trigger-connection', 'if', 'loop', 'comment']),
+	kind: z.enum(['start', 'connector', 'system', 'trigger-connection', 'notification', 'if', 'loop', 'comment']),
 	connector: uiConnectorSchema.optional(), methodConfig: uiMethodConfigSchema.optional(),
 	conditionConfig: conditionConfigSchema.optional(), comment: commentSchema.optional(),
+	// Shape owned by the notification feature; validated there when the dialog opens.
+	notification: z.record(z.string(), z.unknown()).optional(),
 	dataAggregator: optionalAggregatorSchema.optional(),
 });
 const nodeSchema = z.strictObject({
 	id: z.string().min(1),
-	type: z.enum(['start', 'connector', 'system', 'trigger-connection', 'if', 'loop', 'comment']),
+	type: z.enum(['start', 'connector', 'system', 'trigger-connection', 'notification', 'if', 'loop', 'comment']),
 	position: z.strictObject({ x: z.number(), y: z.number() }),
 	width: z.number().positive().optional(), height: z.number().positive().optional(),
 	index: z.string().optional(),

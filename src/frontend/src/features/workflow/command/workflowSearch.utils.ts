@@ -1,11 +1,11 @@
 import Fuse from 'fuse.js';
 import type { Node } from '@xyflow/react';
 import type { WorkflowNodeData, WorkflowNodeType } from '../types/workflow.types';
+import { isMethodNodeType } from '../utils/methodNodeTypes';
 
-const METHOD_NODE_KINDS: WorkflowNodeType[] = ['connector', 'system', 'trigger-connection'];
 const OPERATOR_NODE_KINDS: WorkflowNodeType[] = ['if', 'loop'];
 
-const isMethodNode = (node: Node<WorkflowNodeData>): boolean => METHOD_NODE_KINDS.includes(node.data.kind);
+const isMethodNode = (node: Node<WorkflowNodeData>): boolean => isMethodNodeType(node.data.kind);
 const isOperatorNode = (node: Node<WorkflowNodeData>): boolean => OPERATOR_NODE_KINDS.includes(node.data.kind);
 
 type WorkflowSearchRecord = {

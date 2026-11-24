@@ -4,6 +4,7 @@ import type { WorkflowAction, WorkflowContextMenu,
 	WorkflowNodeModel } from '../types/workflow.types';
 import type { WorkflowConditionEditorState,
 	WorkflowMethodEditorState } from '../types/request-config.types';
+import type { NotificationEditorState } from '../notification/model/notification.types';
 
 type Params = {
 	setSidebarAction: Dispatch<SetStateAction<WorkflowAction | null>>;
@@ -11,11 +12,12 @@ type Params = {
 	setHistoryOpen: Dispatch<SetStateAction<boolean>>;
 	setMethodEditor: Dispatch<SetStateAction<WorkflowMethodEditorState | null>>;
 	setConditionEditor: Dispatch<SetStateAction<WorkflowConditionEditorState | null>>;
+	setNotificationEditor: Dispatch<SetStateAction<NotificationEditorState | null>>;
 	cancelJoint: () => void;
 };
 
 export const useWorkflowCanvasActions = ({ setSidebarAction, setContextMenu,
-	setHistoryOpen, setMethodEditor, setConditionEditor, cancelJoint }: Params) => {
+	setHistoryOpen, setMethodEditor, setConditionEditor, setNotificationEditor, cancelJoint }: Params) => {
 	const closeCanvasPanels = () => {
 		setSidebarAction(null);
 		setContextMenu(null);
@@ -28,6 +30,12 @@ export const useWorkflowCanvasActions = ({ setSidebarAction, setContextMenu,
 		setSidebarAction(null);
 		setContextMenu(null);
 		setHistoryOpen(false);
+		if (node.type === 'notification') {
+			setMethodEditor(null);
+			setConditionEditor(null);
+			setNotificationEditor({ nodeId: node.id, target: { kind: 'default' } });
+			return;
+		}
 		if (node.type === 'connector' || node.type === 'system' ||
 			node.type === 'trigger-connection') {
 			setConditionEditor(null);
