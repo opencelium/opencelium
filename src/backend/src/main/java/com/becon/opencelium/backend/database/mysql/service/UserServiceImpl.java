@@ -116,22 +116,59 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
     }
 
+    /**
+     * Persists {@code user} after normalizing and checking its login identifiers.
+     *
+     * <p>An OC ({@link AuthMethod#BASIC}) user signs in with its email or its username, so it needs
+     * at least one of the two; an LDAP user always carries the username the directory gave it. Both
+     * identifiers are stored trimmed, {@code null} when blank, and are unique across all users.
+     *
+     * @throws IllegalArgumentException if a non-blank email is not a valid address
+     * @throws GeneralServiceException with {@link ExceptionConstant#USERNAME_INVALID},
+     *     {@link ExceptionConstant#USERNAME_ALREADY_EXIST},
+     *     {@link ExceptionConstant#EMAIL_OR_USERNAME_REQUIRED} or
+     *     {@link ExceptionConstant#EMAIL_ALREADY_EXIST}
+     */
     @Override
     @Transactional
     public User save(User user) {
+        user.setEmail(normalizeEmail(user.getEmail()));
+        user.setUsername(normalizeUsername(user));
         String email = user.getEmail();
 
-        if (email != null && !EmailUtility.isValid(email)) {
+        if (user.getAuthMethod() == AuthMethod.BASIC && email == null && user.getUsername() == null) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.EMAIL_OR_USERNAME_REQUIRED,
+                    "Email or username is required");
+        }
+
+        if (email != null && userRepository.existsByEmailAndIdNot(email, user.getId())) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.EMAIL_ALREADY_EXIST,
+                    "Email is already taken");
+        }
+
+        return userRepository.save(user);
+    }
+
+    /**
+     * Returns the email to persist: trimmed and {@code null} when blank.
+     *
+     * <p>Blank must become {@code null} because the unique key on {@code user.email} tolerates any
+     * number of {@code NULL}s but only one empty string, and the user wizard sends an empty string
+     * for every user without an email.
+     *
+     * @throws IllegalArgumentException if a non-blank email is not a valid address
+     */
+    private static String normalizeEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return null;
+        }
+        String trimmed = email.trim();
+
+        if (!EmailUtility.isValid(trimmed)) {
             throw new IllegalArgumentException("Invalid email is supplied");
         }
 
-        if (user.getAuthMethod() == AuthMethod.BASIC && email == null) {
-            throw new IllegalArgumentException("Email is required for BASIC users");
-        }
-
-        user.setUsername(normalizeUsername(user));
-
-        return userRepository.save(user);
+        return trimmed;
     }
 
     /**
