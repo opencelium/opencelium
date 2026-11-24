@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import io.opencelium.common.secret.SecretProvider;
+
 /**
  * The runtime settings: the registry of the setting definitions that the features declare as beans, the repository
  * of their database values, and the service that reads them.
@@ -25,8 +27,8 @@ class SettingsConfig {
 	}
 
 	@Bean
-	SettingsService settingsService(SettingRegistry registry, SettingsRepository repository) {
-		return new SettingsService(registry, repository);
+	SettingsService settingsService(SettingRegistry registry, SettingsRepository repository, SecretProvider secrets) {
+		return new SettingsService(registry, repository, secrets);
 	}
 
 }

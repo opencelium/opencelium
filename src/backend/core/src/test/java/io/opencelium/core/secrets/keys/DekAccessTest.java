@@ -1,6 +1,7 @@
 package io.opencelium.core.secrets.keys;
 
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
@@ -74,6 +75,19 @@ class DekAccessTest {
 		})).isInstanceOf(IllegalArgumentException.class);
 
 		assertThat(given.get()).as("the DEK after the failed operation").isEqualTo(new byte[32]);
+	}
+
+	@Test
+	void useStopsWhenTheOwnerIsNotTheInstallation() {
+		byte[] tenantDek = new byte[32];
+		WrappedDek wrapped = mongo.insert(wrapper.wrap(rootKey, TenantId.of("tenant-a"), 1, tenantDek, Instant.now()));
+		try {
+			assertThatThrownBy(() -> dekAccess.use(TenantId.of("tenant-a"), (dekVersion, dek) -> dekVersion))
+					.isInstanceOf(IllegalStateException.class).hasMessageContaining("tenant-a");
+		}
+		finally {
+			mongo.remove(wrapped);
+		}
 	}
 
 	@Test

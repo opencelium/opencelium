@@ -48,8 +48,8 @@ public final class RootKeyConfig {
 
 	@Bean
 	SigningKeyLoader signingKeyLoader(MongoTemplate mongo, DekWrapper wrapper, RootKey rootKey,
-			KeyStartupCanary canary, Clock clock) {
-		return new SigningKeyLoader(mongo, wrapper, new SigningKeyCipher(), rootKey, canary, clock);
+			KeyStartupCanary canary, DekAccess dekAccess, Clock clock) {
+		return new SigningKeyLoader(mongo, wrapper, new SigningKeyCipher(), rootKey, canary, dekAccess, clock);
 	}
 
 	@Bean

@@ -16,8 +16,6 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import io.opencelium.common.tenant.TenantId;
 
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-
 /**
  * Puts the signing key of the installation into memory at the start, after the key canary. On a new installation it
  * generates the system data key and the signing key and stores them in the database that the yml file names; at each
@@ -49,6 +47,8 @@ final class SigningKeyLoader implements SmartInitializingSingleton, AutoCloseabl
 
 	private final KeyStartupCanary canary;
 
+	private final DekAccess dekAccess;
+
 	private final Clock clock;
 
 	private final SecureRandom random = new SecureRandom();
@@ -57,12 +57,13 @@ final class SigningKeyLoader implements SmartInitializingSingleton, AutoCloseabl
 
 	/** @param mongo the template of the database that the yml file names */
 	SigningKeyLoader(MongoTemplate mongo, DekWrapper wrapper, SigningKeyCipher cipher, RootKey rootKey,
-			KeyStartupCanary canary, Clock clock) {
+			KeyStartupCanary canary, DekAccess dekAccess, Clock clock) {
 		this.mongo = mongo;
 		this.wrapper = wrapper;
 		this.cipher = cipher;
 		this.rootKey = rootKey;
 		this.canary = canary;
+		this.dekAccess = dekAccess;
 		this.clock = clock;
 	}
 
@@ -94,13 +95,20 @@ final class SigningKeyLoader implements SmartInitializingSingleton, AutoCloseabl
 	 */
 	SigningKey load() {
 		createIndexes();
-		byte[] systemDek = unwrap(readOrInsert(this::storedSystemDek, this::newSystemDek));
+		readOrInsert(() -> dekAccess.newestWrapped(TenantId.SYSTEM), this::newSystemDek);
 		try {
-			EncryptedSigningKey stored = readOrInsert(this::storedSigningKey, () -> newSigningKey(systemDek));
-			return new SigningKey(stored.version(), decrypt(systemDek, stored));
+			return dekAccess.use(TenantId.SYSTEM, (version, systemDek) -> {
+				EncryptedSigningKey stored = readOrInsert(this::storedSigningKey, () -> newSigningKey(systemDek));
+				return new SigningKey(stored.version(), decrypt(systemDek, stored));
+			});
 		}
-		finally {
-			Arrays.fill(systemDek, (byte) 0);
+		catch (WrongKeyException ex) {
+			throw KeyStartupException.restoreOrReset("The master key from " + rootKey.source().description()
+					+ " (key id " + rootKey.id() + ") cannot decrypt the stored data key of tenant '"
+					+ TenantId.SYSTEM.value() + "'.");
+		}
+		catch (IllegalArgumentException ex) {
+			throw KeyStartupException.damaged(ex.getMessage());
 		}
 	}
 
@@ -137,11 +145,6 @@ final class SigningKeyLoader implements SmartInitializingSingleton, AutoCloseabl
 		}
 	}
 
-	private WrappedDek storedSystemDek() {
-		return mongo.findOne(Query.query(where(TENANT_ID).is(TenantId.SYSTEM.value()))
-				.with(Sort.by(Sort.Direction.DESC, DEK_VERSION)).limit(1), WrappedDek.class);
-	}
-
 	private WrappedDek newSystemDek() {
 		byte[] dek = randomKey();
 		try {
@@ -169,20 +172,6 @@ final class SigningKeyLoader implements SmartInitializingSingleton, AutoCloseabl
 		}
 		finally {
 			Arrays.fill(key, (byte) 0);
-		}
-	}
-
-	private byte[] unwrap(WrappedDek stored) {
-		try {
-			return wrapper.unwrap(rootKey, stored);
-		}
-		catch (WrongKeyException ex) {
-			throw KeyStartupException.restoreOrReset("The master key from " + rootKey.source().description()
-					+ " (key id " + rootKey.id() + ") cannot decrypt the stored data key of tenant '"
-					+ stored.tenantId() + "'.");
-		}
-		catch (IllegalArgumentException ex) {
-			throw KeyStartupException.damaged(ex.getMessage());
 		}
 	}
 

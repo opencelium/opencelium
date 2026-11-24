@@ -39,6 +39,12 @@ class SecretCipherTest {
 	}
 
 	@Test
+	void encryptStopsWhenTheDekIsNot32Bytes() {
+		assertThatThrownBy(() -> cipher.encrypt(new byte[16], TenantId.SYSTEM, "secret-1", 1, PLAINTEXT, NOW))
+				.isInstanceOf(IllegalArgumentException.class).hasMessageContaining("32");
+	}
+
+	@Test
 	void decryptGivesThePlaintextWhenTheOwnerTheIdAndTheVersionAreTheSame() {
 		SecretDocument stored = cipher.encrypt(DEK, TenantId.SYSTEM, "secret-1", 1, PLAINTEXT, NOW);
 

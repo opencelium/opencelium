@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.bson.Document;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -40,21 +41,18 @@ final class SettingsRepository {
 	 *
 	 * @param values the setting keys and their new database values
 	 * @param resets the setting keys whose database value the update removes
+	 * @return the document as it was before the update, or empty when there was none or nothing changed
 	 */
-	void change(Map<String, Object> values, Collection<String> resets) {
+	Optional<Document> change(Map<String, Object> values, Collection<String> resets) {
 		if (values.isEmpty() && resets.isEmpty()) {
-			return;
+			return Optional.empty();
 		}
 		Update update = new Update();
 		values.forEach(update::set);
 		resets.forEach(update::unset);
 		Query installation = Query.query(Criteria.where("_id").is(INSTALLATION_ID));
-		if (values.isEmpty()) {
-			mongo.updateFirst(installation, update, COLLECTION);
-		}
-		else {
-			mongo.upsert(installation, update, COLLECTION);
-		}
+		FindAndModifyOptions before = FindAndModifyOptions.options().returnNew(false).upsert(!values.isEmpty());
+		return Optional.ofNullable(mongo.findAndModify(installation, update, before, Document.class, COLLECTION));
 	}
 
 }

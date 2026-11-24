@@ -126,6 +126,12 @@ class SettingTypeTest {
 	}
 
 	@Test
+	void validateRefusesASecretWhenItIsTheMask() {
+		assertThat(SettingType.SECRET.validate("****", 1, 255)).isFalse();
+		assertThat(SettingType.TEXT.validate("****", 1, 255)).as("a text setting has no mask").isTrue();
+	}
+
+	@Test
 	void validateAcceptsASecretWhenItHasPrintableCharacters() {
 		assertThat(SettingType.SECRET.validate("s3cret-Pässword! with spaces", 1, 255)).isTrue();
 	}

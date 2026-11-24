@@ -19,6 +19,9 @@ class BrokerSettings {
 
 	static final SettingDefinition USERNAME = new SettingDefinition("broker.username", SettingType.TEXT, null, 1, 255);
 
+	static final SettingDefinition PASSWORD = new SettingDefinition("broker.password", SettingType.SECRET, null, 1,
+			255);
+
 	@Bean
 	SettingDefinition brokerHostSetting() {
 		return HOST;
@@ -37,6 +40,11 @@ class BrokerSettings {
 	@Bean
 	SettingDefinition brokerUsernameSetting() {
 		return USERNAME;
+	}
+
+	@Bean
+	SettingDefinition brokerPasswordSetting() {
+		return PASSWORD;
 	}
 
 }

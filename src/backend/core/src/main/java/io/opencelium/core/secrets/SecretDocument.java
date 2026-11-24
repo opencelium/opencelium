@@ -22,4 +22,10 @@ record SecretDocument(@Id String id, String tenantId, int dekVersion, byte[] iv,
 	/** The collection of the secrets. */
 	static final String COLLECTION = "secrets";
 
+	/** The ID, the owner and the DEK version; never the ciphertext. */
+	@Override
+	public String toString() {
+		return "SecretDocument[id=" + id + ", tenant=" + tenantId + ", dekVersion=" + dekVersion + "]";
+	}
+
 }

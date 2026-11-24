@@ -332,6 +332,22 @@ class SettingsEndpointTest {
 	}
 
 	@Test
+	void patchGivesInvalidSettingsWhenThePasswordIsTheMask() {
+		String admin = LoginRequests.sessionJwtOfTheDefaultAdmin(mvc);
+		assertThat(SettingsRequests.change(mvc, admin, passwordBody(PASSWORD))).as("the change of the password")
+				.hasStatusOk();
+		String secretId = mongo.getCollection("secrets").find().first().getString("_id");
+
+		MvcTestResult change = SettingsRequests.change(mvc, admin, passwordBody("****"));
+
+		LoginRequests.assertProblem(change, HttpStatus.BAD_REQUEST, "invalid-settings");
+		assertThat(change).bodyJson().extractingPath("$.errors[0].key").isEqualTo("broker.password");
+		assertThat(change).bodyJson().extractingPath("$.errors[0].problem").isEqualTo("invalid-value");
+		assertThat(mongo.getCollection("secrets").find().first().getString("_id")).as("the kept secret")
+				.isEqualTo(secretId);
+	}
+
+	@Test
 	void getGivesStatus401WithoutABodyWhenTheRequestHasNoToken() {
 		MvcTestResult read = mvc.get().uri(SettingsRequests.PATH).exchange();
 
