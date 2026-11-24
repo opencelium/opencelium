@@ -7,8 +7,8 @@ import { describeBinding, logFieldBinding } from '../../utils/fieldBindingDebug'
 /**
  * The connection shape the per-modal legacy store is seeded with: the editors'
  * own `buildLegacyConnection` shape, but with the *tree-path* method indices and
- * the operator list from the save payload (the two connection shapes are not
- * interchangeable). Reference scope (which method can read which) is decided from
+ * the operator list from the save payload — see the two-connection-shapes note
+ * in CLAUDE.md. Reference scope (which method can read which) is decided from
  * those indices, so an editor seeded without them silently offers the wrong
  * references.
  */

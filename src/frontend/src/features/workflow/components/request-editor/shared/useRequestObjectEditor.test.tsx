@@ -11,7 +11,7 @@ describe('deleteReferenceAtPath', () => {
     const consumerMethod = method({ index: '2', name: 'Consumer', color: '#DDEEFF', id: 'm2' });
     const referenceToken = buildReferenceValue(providerMethod.color, 'body', 'someKey');
     const resultVar = `${consumerMethod.color}.(request).${buildRequestResultField('body', [], 'myField')}`;
-    const enhancement = buildBodyEnhancement('enh-1', resultVar, [{ kind: 'method', reference: parseReference(referenceToken)! }]);
+    const enhancement = buildBodyEnhancement('enh-1', resultVar, [parseReference(referenceToken)!]);
     const connection: Connection = {
       connectionId: 1,
       name: 'c',
@@ -39,7 +39,7 @@ describe('deleteReferenceAtPath', () => {
     const tokenA = buildReferenceValue(providerMethod.color, 'body', 'someKey');
     const tokenB = buildReferenceValue(otherProviderMethod.color, 'header', 'otherKey');
     const resultVar = `${consumerMethod.color}.(request).${buildRequestResultField('body', [], 'myField')}`;
-    const enhancement = buildBodyEnhancement('enh-1', resultVar, [{ kind: 'method', reference: parseReference(tokenA)! }, { kind: 'method', reference: parseReference(tokenB)! }]);
+    const enhancement = buildBodyEnhancement('enh-1', resultVar, [parseReference(tokenA)!, parseReference(tokenB)!]);
     const connection: Connection = {
       connectionId: 1,
       name: 'c',
@@ -75,7 +75,7 @@ describe('deleteReferenceAtPath', () => {
     const consumerMethod = method({ index: '2', name: 'Consumer', color: '#DDEEFF', id: 'm2' });
     const referenceToken = buildReferenceValue(providerMethod.color, 'body', 'someKey');
     const resultVar = `${consumerMethod.color}.(request).${buildRequestResultField('body', [], '@odata.id')}`;
-    const enhancement = buildBodyEnhancement('enh-1', resultVar, [{ kind: 'method', reference: parseReference(referenceToken)! }]);
+    const enhancement = buildBodyEnhancement('enh-1', resultVar, [parseReference(referenceToken)!]);
     const connection: Connection = {
       connectionId: 1,
       name: 'c',

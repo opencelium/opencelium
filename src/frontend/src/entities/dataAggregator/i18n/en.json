@@ -13,7 +13,7 @@
         "name_already_exists": "A data aggregator with this name already exists"
       }
     },
-    "args": { "label": "Arguments", "name": "Argument Name", "description": "Description" },
+    "args": { "label": "Arguments" },
     "script": { "label": "Script" },
     "archived": { "label": "Archived" }
   },

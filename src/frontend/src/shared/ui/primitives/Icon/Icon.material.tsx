@@ -1,5 +1,3 @@
-import { GlobalVariableGlyph } from './custom/GlobalVariableGlyph';
-import { TbVariable } from 'react-icons/tb';
 import React from 'react';
 import {
     Check,
@@ -41,6 +39,7 @@ import {
     Fullscreen,
     FullscreenExit,
     ContentCopy,
+    ContentPaste,
     AccountTree,
     Hub,
     Refresh,
@@ -125,6 +124,7 @@ const iconMap = {
     minimize: FullscreenExit,
     'arrow-switch': SwapHoriz,
     'content-copy': ContentCopy,
+    'content-paste': ContentPaste,
     workflow: AccountTree,
     bindings: Hub,
     refresh: Refresh,
@@ -147,8 +147,6 @@ const iconMap = {
     circle: RadioButtonUnchecked,
     git: GitHub,
     globe: Public,
-    variable: TbVariable,
-    'global-variable': GlobalVariableGlyph,
     portal: Apps,
     'drag-handle': DragIndicator,
     minus: Remove,

@@ -57,11 +57,6 @@ export const NEW_FEATURES = {
         descriptionKey: 'newFeature.changelog.description',
         titleKey: 'newFeature.changelog.title',
     },
-    'global-variables': {
-        since: '5.4',
-        descriptionKey: 'newFeature.globalVariables.description',
-        titleKey: 'newFeature.globalVariables.title',
-    },
 } as const satisfies Record<string, NewFeatureEntry>
 
 export type NewFeatureId = keyof typeof NEW_FEATURES

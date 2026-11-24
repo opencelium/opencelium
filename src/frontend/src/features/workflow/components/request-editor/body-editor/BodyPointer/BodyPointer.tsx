@@ -160,7 +160,6 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
                   connection={connection}
                   currentMethod={currentMethod}
                   value={pointer}
-                  canPickScripts
                   onApply={(reference) => {
                     onEdit?.(pointer, pointers, reference);
                     setEditorPos(null);

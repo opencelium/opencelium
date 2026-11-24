@@ -1,4 +1,3 @@
-import { isGlobalReference } from '@entities/globalVariable/lib/globalReference';
 import { type Enhancement, Language } from '../../../types/connection';
 export {
   buildRequestResultField,
@@ -35,58 +34,26 @@ export const getParsedReferences = (value = '') =>
     .map((item) => parseReference(item))
     .filter((item): item is ParsedReference => !!item);
 
-export type BindingArgument =
-  | { kind: 'method'; reference: ParsedReference }
-  | { kind: 'global'; reference: string };
-
-const toBindingArgument = (item: string): BindingArgument | null => {
-  const parsed = parseReference(item);
-  if (parsed) return { kind: 'method', reference: parsed };
-  return isGlobalReference(item) ? { kind: 'global', reference: item.trim() } : null;
-};
-
-// A global only becomes an enhancement arg next to a method reference. A field holding just
-// `{{global.x}}` stays a plain value that the backend renders by itself.
-export const getBindingArguments = (value = ''): BindingArgument[] => {
-  const items = splitReferences(value).map(toBindingArgument);
-  if (!items.some((item) => item?.kind === 'method')) return [];
-  return items.filter((item): item is BindingArgument => item !== null);
-};
-
-export const formatBindingArgument = (argument: BindingArgument): string => {
-  switch (argument.kind) {
-    case 'method': {
-      const { color, type, field } = argument.reference;
-      return `${color}.(${type}).${field}`;
-    }
-    case 'global':
-      return argument.reference;
-    default: {
-      const _exhaustive: never = argument;
-      return _exhaustive;
-    }
-  }
-};
-
-export const isReferenceList = (value: unknown): value is string => {
+export const hasOnlyReferences = (value: unknown) => {
   if (typeof value !== 'string') return false;
-  const items = splitReferences(value);
-  return items.length > 0 && items.every((item) => toBindingArgument(item) !== null);
+  if (!value.includes('#')) return false;
+  const refs = splitReferences(value);
+  return refs.length > 0 && refs.length === getParsedReferences(value).length;
 };
 
-export const hasOnlyReferences = (value: unknown) =>
-  isReferenceList(value) && value.includes('#') && getParsedReferences(value).length > 0;
-
-export const hasMixedReferenceValue = (value: unknown) =>
-  typeof value === 'string' && value.includes('#') && splitReferences(value).length > 0
-    && !isReferenceList(value);
+export const hasMixedReferenceValue = (value: unknown) => {
+  if (typeof value !== 'string') return false;
+  if (!value.includes('#')) return false;
+  const refs = splitReferences(value);
+  return refs.length > 0 && refs.length !== getParsedReferences(value).length;
+};
 
 export const DEFAULT_ENHANCEMENT_SCRIPT = 'RESULT_VAR = VAR_0';
 
 export const buildBodyEnhancement = (
   enhanceId: string,
   resultVar: string,
-  references: BindingArgument[],
+  references: ParsedReference[],
 ): Enhancement => {
   const enhancement: Enhancement = {
     enhanceId,
@@ -95,7 +62,7 @@ export const buildBodyEnhancement = (
     args: { RESULT_VAR: resultVar },
   };
   references.forEach((reference, index) => {
-    enhancement.args[`VAR_${index}`] = formatBindingArgument(reference);
+    enhancement.args[`VAR_${index}`] = `${reference.color}.(${reference.type}).${reference.field}`;
   });
   return enhancement;
 };

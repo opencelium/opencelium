@@ -9,7 +9,6 @@ const isMethodNode = (node: WorkflowNodeModel) => {
 	const kind = nodeKind(node);
 	return kind === 'connector' || kind === 'system' || kind === 'trigger-connection';
 };
-// The Set step travels in the operator list (contract §10), though it has no branches.
 const isOperatorNode = (node: WorkflowNodeModel) => ['if', 'loop'].includes(nodeKind(node));
 const parseIndex = (value: unknown) => String(value ?? '')
 	.split('_')

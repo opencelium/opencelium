@@ -3,6 +3,7 @@ import { parseEnhancementArg } from '../components/request-editor/utils/parseEnh
 import type { WorkflowNodeModel } from '../types/workflow.types';
 import { collectParsedReferences } from './graph.referenceOccurrences';
 import { normalizeReferenceColor } from './graph.referenceColors';
+import { serializeReferenceString } from '../api/connectionPayload.references';
 
 /**
  * Where a reference sits in the step that holds it.
@@ -15,7 +16,7 @@ import { normalizeReferenceColor } from './graph.referenceColors';
  */
 export type ReferenceLocation =
 	| { kind: 'reference'; value: string }
-	| { kind: 'label'; value: string }
+	| { kind: 'label'; value: string; url?: { nodeId: string; part: 'endpoint' | 'query'; name?: string } }
 	/** An operator's condition, which can hold the same reference in any number
 	 *  of its rules — so it carries the node, and the rules are read from it
 	 *  where the dialog can show which ones. */
@@ -56,7 +57,7 @@ const walkLeaves = (value: unknown, segments: string[] = []): { segments: string
 
 const methodOccurrences = (node: WorkflowNodeModel): ReferenceOccurrence[] => {
 	const color = normalizeReferenceColor(node.data.color);
-	const config = node.data.methodConfig as Record<string, unknown> | undefined;
+	const config = node.data.methodConfig;
 	if (!config) return [];
 	const addressable = [
 		...walkLeaves(config.body).map((leaf) => ({ ...leaf, part: 'body' })),
@@ -71,11 +72,16 @@ const methodOccurrences = (node: WorkflowNodeModel): ReferenceOccurrence[] => {
 
 	// The URL and its arguments are spliced into a string, so there is no field
 	// to name — only the part of the request the value ends up in.
-	const inUrl = [config.url, config.queryParams, config.endpointArgs]
-		.flatMap((value) => collectParsedReferences(value))
-		.map((parsed) => ({
-			parsed, consumerNodeId: node.id, location: { kind: 'label' as const, value: 'url' },
-		}));
+	const urlValues = [
+		{value: config.url, url: {nodeId: node.id, part: 'endpoint' as const}},
+		...(config.queryParams ?? []).map((param) => ({value: param.value,
+			url: {nodeId: node.id, part: 'query' as const, name: param.key}})),
+	];
+	const inUrl = urlValues.flatMap(({value, url}) => {
+		const resolved = serializeReferenceString(typeof value === 'string' ? value : '', config.endpointArgs);
+		return collectParsedReferences(resolved).map((parsed) => ({parsed, consumerNodeId: node.id,
+			location: {kind: 'label' as const, value: resolved, url}}));
+	});
 
 	return [...addressable, ...inUrl];
 };

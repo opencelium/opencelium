@@ -1,7 +1,6 @@
 import { ApiFetchError } from '@shared/api/apiFetch';
 import { buildOperatorIndexes } from '../api/connectionPayload';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
-import { readReferenceViolations, toReferenceProblems, type ReferenceProblem } from './workflowReferenceErrors';
 
 type WorkflowErrorBody = { status?: number; error?: string; message?: string };
 
@@ -21,11 +20,6 @@ export type WorkflowApiErrorResolution =
 		messageParams?: Record<string, string>;
 		/** The operator the message points at, when the error named one. */
 		nodeId?: string;
-	}
-	| {
-		/** Global variable references the backend refused, one problem per element. */
-		source: 'references';
-		problems: ReferenceProblem[];
 	}
 	| {
 		/** Anything else the backend bothered to explain. Untranslated, but its
@@ -80,9 +74,6 @@ export const resolveWorkflowApiError = (
 	const body = error instanceof ApiFetchError ? (error.body as WorkflowErrorBody | undefined) : undefined;
 
 	const message = body?.message?.trim();
-
-	const violations = error instanceof ApiFetchError ? readReferenceViolations(error.body) : null;
-	if (violations?.length) return { source: 'references', problems: toReferenceProblems(violations, nodes, edges) };
 
 	// A refusal to act on someone else's workflow. Its own message, so the user is not
 	// told the save failed for a reason that sounds like their fault.

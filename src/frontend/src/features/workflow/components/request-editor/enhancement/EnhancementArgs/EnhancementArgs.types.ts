@@ -12,12 +12,3 @@ export type ParsedArgEntry = {
 	direction: 'request' | 'response';
 	messageProperty: string;
 };
-
-export type GlobalArgEntry = {
-	key: string;
-	reference: string;
-};
-
-export type ArgRow =
-	| { kind: 'method'; entry: ParsedArgEntry }
-	| { kind: 'global'; entry: GlobalArgEntry };

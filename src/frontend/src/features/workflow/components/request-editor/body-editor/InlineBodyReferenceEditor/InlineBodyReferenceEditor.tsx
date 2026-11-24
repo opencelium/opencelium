@@ -30,7 +30,6 @@ export function InlineBodyReferenceEditor({ referenceId, connection, currentMeth
           <LegacyBodyReferenceGenerator
             connection={connection}
             currentMethod={currentMethod}
-            canPickScripts
             onApply={(reference) => {
               const element = document.getElementById(referenceId);
               if (!element) return;

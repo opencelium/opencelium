@@ -10,7 +10,6 @@ export type PermissionComponent =
     | 'DASHBOARD'
     | 'APP'
     | 'INVOKER'
-    | 'GLOBAL_VARIABLE'
 
 export type CrudAction = 'CREATE' | 'READ' | 'UPDATE' | 'DELETE'
 

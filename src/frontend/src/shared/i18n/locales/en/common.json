@@ -17,7 +17,6 @@
     "invokers": "API Definitions",
     "connectionTemplates": "Workflow Templates",
     "dataAggregator": "Data Aggregators",
-    "globalVariables": "Global Variables",
     "notificationTemplates": "Notification Templates",
     "categories": "Categories",
     "supportFiles": "Support Files",
@@ -157,10 +156,6 @@
     "changelog": {
       "title": "Changelog",
       "description": "See what changed in each OpenCelium release: the current version first, earlier ones below. Open it from the help menu."
-    },
-    "globalVariables": {
-      "title": "Global variables",
-      "description": "Define a value once and reference it in any workflow, connector or notification: constants, values that workflows update, and reusable scripts."
     }
   },
   "user": {
@@ -226,6 +221,7 @@
     "restore": "Restore"
   },
   "list": {
+    "backToList": "Back to list",
     "searchPlaceholder": "Search...",
     "empty": "No data",
     "actions": "Actions",

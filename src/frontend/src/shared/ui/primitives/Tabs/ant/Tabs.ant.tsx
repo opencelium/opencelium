@@ -8,12 +8,14 @@ export const AntTabs: TabsComponent = ({
     defaultValue,
     onChange,
     isFullHeight,
+    extraContent,
 }) => {
     return (
         <AntTabsBase
             activeKey={value}
             defaultActiveKey={defaultValue ?? items[0]?.key}
             onChange={onChange}
+            tabBarExtraContent={extraContent}
             className={isFullHeight ? 'oc-tabs-full-height' : undefined}
             items={items.map(item => ({
                 key: item.key,

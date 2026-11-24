@@ -6,13 +6,11 @@ import type { AggregatorConfigDialog } from '../aggregator/AggregatorConfigDialo
 import type { ChangeConnectorDialog } from '../change-connector/ChangeConnectorDialog';
 import type { ConnectorImageDialog } from '../connector-image/ConnectorImageDialog';
 import type { RequestPlaygroundDialogProps } from '../../request-playground/ui/RequestPlaygroundDialog';
-import type { GlobalWritesDialog } from '../global-writes/GlobalWritesDialog';
 
 export type WorkflowNodeEditorsProps = {
 	response: ComponentProps<typeof ResponseDialog>;
 	method: ComponentProps<typeof MethodConfigDialog>;
 	condition: ComponentProps<typeof ConditionBuilderDialog>;
-	globalWrites: ComponentProps<typeof GlobalWritesDialog>;
 	aggregator: ComponentProps<typeof AggregatorConfigDialog>;
 	connector: ComponentProps<typeof ChangeConnectorDialog>;
 	connectorImage: ComponentProps<typeof ConnectorImageDialog>;

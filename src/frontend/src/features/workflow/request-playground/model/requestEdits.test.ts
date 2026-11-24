@@ -32,10 +32,6 @@ describe('readRowOrigin', () => {
 		expect(readRowOrigin({ key: 'Host', value: '{url}' }, fields)).toBe('connection');
 		expect(readRowOrigin({ key: 'Authorization', value: 'Bearer {token}' }, fields)).toBe('secret');
 	});
-
-	it('does not read a global variable as request data', () => {
-		expect(readRowOrigin({ key: 'Host', value: '{{global.url}}' }, fields)).toBe('editable');
-	});
 });
 
 describe('applyRequestEdits', () => {

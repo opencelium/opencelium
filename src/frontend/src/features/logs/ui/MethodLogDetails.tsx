@@ -5,7 +5,6 @@ import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { useGetMethodDetailsQuery } from "../api/logsApi";
 import { RequestResponseTabs } from "./RequestResponseTabs";
 import { ErrorDetail } from "./ErrorDetail";
-import { GlobalRunDetails } from "./GlobalRunDetails";
 
 type Props = {
   id: string;
@@ -77,14 +76,13 @@ export function MethodLogDetails({ id, depth, path, action }: Props) {
 
   return (
     <div style={wrapStyle}>
-      <div className="oc-log-method-actions">{action}</div>
       <RequestResponseTabs
         path={path}
+        tabBarExtra={action}
         requestHeader={request?.header ?? ""}
         requestPayload={request?.payload ?? ""}
         response={{ kind: "payload", header: response?.header ?? "", payload: response?.payload ?? "" }}
       />
-      <GlobalRunDetails log={data} />
     </div>
   );
 }

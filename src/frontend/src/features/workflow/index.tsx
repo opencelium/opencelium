@@ -1,4 +1,6 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { runWithoutUnsavedChangesGuard } from './hooks/unsavedChangesGuard';
+import { listLocation } from '@shared/navigation/listLocation';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { message } from 'antd';
 import { WorkflowLoadError } from './components/WorkflowLoadError/WorkflowLoadError';
@@ -23,9 +25,6 @@ import { mapWorkflowJsonToWorkflowState } from './components/header/WorkflowJson
 import { useSchedulesConnectionId } from './components/schedules/simulatedSchedulesConnection';
 import { WorkflowProblemsBadge } from './problems/WorkflowProblemsBadge';
 import { applyProblemFocus } from './problems/applyProblemFocus';
-import { GlobalPickerScopeProvider } from '@entities/globalVariable/ui/picker/GlobalPickerScopeProvider';
-import { workflowPickerScope } from '@entities/globalVariable/ui/picker/globalPicker';
-import { useFocusElementFromUrl } from './hooks/useFocusElementFromUrl';
 
 type WorkflowProps = {
   readOnly?: boolean;
@@ -33,6 +32,12 @@ type WorkflowProps = {
 
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const listSearch = state?.workflowListSearch;
+  const openedFromList = typeof listSearch === 'string' && (listSearch === '' || listSearch.startsWith('?'));
+  const returnUrl = openedFromList
+    ? '/workflow' + listSearch
+    : listLocation('/workflow');
   const { connectionId } = useParams<{ connectionId: string }>();
   const { t } = useI18n('workflow');
   useDuplicatedWorkflowHint();
@@ -66,16 +71,15 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     [hydratedNodes, workflow.edges],
   );
 
-  const selectAndCenterNode = (id: string) => {
-    workflow.onNodesChange(workflow.nodes.filter((node) => !!node.selected !== (node.id === id))
-      .map((node) => ({ id: node.id, type: 'select', selected: node.id === id })));
-    workflow.centerOnNode(id);
-  };
   const playground = useOpenExecutionPlayground({
     connectionId: activeConnectionId ?? undefined, readOnly, isLoading,
-    nodes: hydratedNodes, indexById: nodeIndexById, selectNode: selectAndCenterNode,
+    nodes: hydratedNodes, indexById: nodeIndexById,
+    selectNode: (id) => {
+      workflow.onNodesChange(workflow.nodes.filter((node) => !!node.selected !== (node.id === id))
+        .map((node) => ({ id: node.id, type: 'select', selected: node.id === id })));
+      workflow.centerOnNode(id);
+    },
   });
-  useFocusElementFromUrl({ isLoading, nodes: hydratedNodes, edges: workflow.edges, selectNode: selectAndCenterNode });
   const playgroundNodeId = playground.dialog?.nodeId;
   const actions = useWorkflowActions({ connectionId, readOnly, isTestRunLocked,
     page: { connection, workflow, connectors, invokers, view, changes, derived,
@@ -102,10 +106,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     connectorMappingDialogOpen, connectorMappingGroups, applySelectedTemplate,
     handleConfirmConnectorMapping, handleCancelConnectorMapping } = templateActions;
 
-  if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate('/workflow')} />;
+  if (connection.loadFailed) return <WorkflowLoadError onRetry={retryLoad} onCancel={() => navigate(returnUrl)} />;
 
   return (
-    <GlobalPickerScopeProvider scope={workflowPickerScope(Number(activeConnectionId) || null, categoryId)}>
     <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title}
       buildTestPayload={buildTestPayload}
       onResolveStartError={resolveAndHighlightWorkflowError}
@@ -125,7 +128,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           initialDescription: headerState.description, onChange: setHeaderState,
           onMenuItemSelect: handleHeaderMenuSelect,
           menuLoadingItemId: isDownloadingTemplate ? 'download-template' : null,
-          validateTitle, onSave: handleSave, confirmBeforeSave,
+          validateTitle, onSave: async (values) => {
+            await handleSave(values);
+            if (openedFromList) {
+              runWithoutUnsavedChangesGuard(() => navigate(returnUrl, { replace: true }));
+            }
+          }, confirmBeforeSave,
           problemsSlot: <WorkflowProblemsBadge issues={problems.issues} onOpen={problems.openPanel} />,
           saveDisabled: isLoading || !hasConnectionChanges,
           onOpenHistory: handleOpenHistory,
@@ -134,7 +142,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           hasSavedConnection: !!activeConnectionId }} />
       <TemplateConnectorMappingDialog open={connection.mappingGroups.length > 0}
         purpose="repair" groups={connection.mappingGroups} connectors={connectors} invokers={invokers}
-        onConfirm={connection.confirmRepair} onCancel={() => navigate('/workflow')} />
+        onConfirm={connection.confirmRepair} onCancel={() => navigate(returnUrl)} />
       <WorkflowPageDialogs
         templates={{
           save: { open: templateDialogOpen, name: templateName,
@@ -249,13 +257,14 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onSelectBinding: workflow.bindingLens.onSelectBinding,
           onOpenMethodEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }) }}
         contextMenu={{ menu: workflow.contextMenu, node: contextMenuNode,
+          onCopyNodes: actions.copyNodeFromMenu, onPasteNodes: actions.pasteAtNode,
+          canPasteNodes: actions.canPasteNodes,
           onChangeLabel: workflow.onChangeNodeLabel,
           onOpenRequestEditor: (nodeId, mode) => workflow.setMethodEditor({ nodeId, mode }),
           onOpenConditionEditor: (nodeId) => workflow.setConditionEditor({ nodeId }),
           onShowResponse: workflow.onShowResponse,
           onTryRequest: playground.open,
           onOpenAggregatorEditor: (nodeId) => workflow.setAggregatorEditor({ nodeId }),
-          onOpenGlobalWritesEditor: (nodeId) => workflow.setGlobalWritesEditor({ nodeId }),
           onOpenConnectorEditor: (nodeId, kind) => workflow.setConnectorEditor({ nodeId, kind }),
           onClose: () => workflow.setContextMenu(null) }} />
       <WorkflowNodeEditors
@@ -276,12 +285,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           nodes: hydratedNodes, edges: workflow.edges, connection: conditionConnection,
           onClose: () => workflow.setConditionEditor(null),
           onSave: workflow.onSaveConditionConfig }}
-        globalWrites={{ open: !!workflow.globalWritesEditor,
-          node: hydratedNodes.find((node) => node.id === workflow.globalWritesEditor?.nodeId) ?? null,
-          nodes: hydratedNodes, edges: workflow.edges, connection: conditionConnection,
-          isReadOnly: readOnly || isTestRunLocked,
-          onClose: () => workflow.setGlobalWritesEditor(null),
-          onSave: workflow.onSaveGlobalWrites }}
         aggregator={{ open: !!workflow.aggregatorEditor, node: aggregatorNode,
           onClose: () => workflow.setAggregatorEditor(null),
           onSave: workflow.onSaveDataAggregator }}
@@ -299,6 +302,5 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           onClose: () => playground.open(null) }} />
     </div>
     </TestRunProvider>
-    </GlobalPickerScopeProvider>
   );
 }

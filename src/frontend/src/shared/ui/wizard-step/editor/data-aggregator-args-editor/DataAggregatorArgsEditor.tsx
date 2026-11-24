@@ -32,7 +32,11 @@ function ArgNameInput({ fieldName, readOnly }: { fieldName: string; readOnly: bo
         : undefined
 
     return (
-        <FormControl error={errorMsg} name={fieldName}>
+        <FormControl
+            label={t('data-aggregator.fields.args.name', { defaultValue: 'Argument Name' })}
+            error={errorMsg}
+            name={fieldName}
+        >
             <Input
                 value={value}
                 onChange={field.onChange}
@@ -91,8 +95,6 @@ export function DataAggregatorArgsEditor({ name, label, mode }: DataAggregatorAr
 
     const readOnly = mode === 'view'
     const translatedLabel = label ? t(label, { defaultValue: label }) : undefined
-    const nameLabel = t('data-aggregator.fields.args.name')
-    const descriptionLabel = t('data-aggregator.fields.args.description')
 
     return (
         <div className="data-aggregator-args">
@@ -111,33 +113,25 @@ export function DataAggregatorArgsEditor({ name, label, mode }: DataAggregatorAr
                         value.length > 0 || t('data-aggregator.fields.args.required', { defaultValue: 'At least one argument is required' }),
                 }}
                 renderItem={({ index, remove }) => (
-                    <>
-                        {/* Column labels once, above the first argument; a narrow editor stacks the
-                            fields and labels each one in its row instead (see the CSS). */}
-                        {index === 0 && (
-                            <div className="data-aggregator-args__row data-aggregator-args__header">
-                                <label className="form-control__label data-aggregator-args__name">{nameLabel}</label>
-                                <label className="form-control__label data-aggregator-args__description">{descriptionLabel}</label>
+                    <div className="data-aggregator-args__row">
+                        <div className="data-aggregator-args__name">
+                            <ArgNameInput fieldName={`${name}.${index}.name`} readOnly={readOnly} />
+                        </div>
+                        <div className="data-aggregator-args__description">
+                            <FormInput
+                                name={`${name}.${index}.description`}
+                                label={t('data-aggregator.fields.args.description', { defaultValue: 'Description' })}
+                                readOnly={readOnly}
+                            />
+                        </div>
+                        {!readOnly && (
+                            <div className="data-aggregator-args__remove">
+                                <Tooltip content={tCommon('actions.delete')}>
+                                    <DeleteIconButton onClick={() => remove(index)} />
+                                </Tooltip>
                             </div>
                         )}
-                        <div className="data-aggregator-args__row">
-                            <div className="data-aggregator-args__name">
-                                <label className="form-control__label data-aggregator-args__row-label">{nameLabel}</label>
-                                <ArgNameInput fieldName={`${name}.${index}.name`} readOnly={readOnly} />
-                            </div>
-                            <div className="data-aggregator-args__description">
-                                <label className="form-control__label data-aggregator-args__row-label">{descriptionLabel}</label>
-                                <FormInput name={`${name}.${index}.description`} readOnly={readOnly} />
-                            </div>
-                            {!readOnly && (
-                                <div className="data-aggregator-args__remove">
-                                    <Tooltip content={tCommon('actions.delete')}>
-                                        <DeleteIconButton onClick={() => remove(index)} />
-                                    </Tooltip>
-                                </div>
-                            )}
-                        </div>
-                    </>
+                    </div>
                 )}
             />
         </div>

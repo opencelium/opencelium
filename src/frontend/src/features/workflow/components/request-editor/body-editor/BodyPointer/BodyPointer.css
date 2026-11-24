@@ -50,23 +50,3 @@
 .bodyPointerMenuItem--danger {
   color: var(--color-status-error-fg);
 }
-
-/* BodyReferenceMenu wraps an inline chip; the menu anchors to it like to the swatch. */
-.bodyReferenceMenuHost {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  vertical-align: middle;
-}
-
-.bodyPointerMenuTitle {
-  max-width: 280px;
-  padding: 4px 8px 6px;
-  margin-bottom: 2px;
-  border-bottom: 1px solid var(--color-border-subtle);
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}

@@ -23,6 +23,9 @@ import { useWorkflowNodeUpdates } from './useWorkflowNodeUpdates';
 import { evaluateJointTargets } from '../utils/jumpValidator';
 import { useJointDeadEndNodeId } from './useJointDeadEndNodeId';
 import { useWorkflowUndoHistory } from './useWorkflowUndoHistory';
+import { prepareClipboardPaste } from '../clipboard/clipboardGraph';
+import type { WorkflowClipboard } from '../clipboard/workflowClipboard';
+import { cleanInvalidWorkflowReferences } from '../utils/graph.invalidReferenceCleanup';
 import { copyWorkflowNodeGroup, moveOrCopyWorkflowNodes } from '../utils/graph.dragDrop';
 import { useDeleteWorkflowNodes } from './useDeleteWorkflowNodes';
 import { useBindingLensState } from '../lens/useBindingLensState';
@@ -36,7 +39,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     isAnyNodeDragging, setIsAnyNodeDragging, sidebarAction, setSidebarAction,
     contextMenu, setContextMenu, historyOpen, setHistoryOpen, methodEditor,
     setMethodEditor, responseNodeId, setResponseNodeId, conditionEditor,
-    setConditionEditor, aggregatorEditor, setAggregatorEditor, globalWritesEditor, setGlobalWritesEditor, connectorEditor,
+    setConditionEditor, aggregatorEditor, setAggregatorEditor, connectorEditor,
     setConnectorEditor, restoredViewport,
     setRestoredViewport, viewportRestoreVersion, setViewportRestoreVersion,
     centerStartVersion, setCenterStartVersion, bindingLensOpen,
@@ -93,7 +96,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes,
     centerOnNode,
     hasOpenDialog: methodEditor !== null || conditionEditor !== null ||
-      aggregatorEditor !== null || globalWritesEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
+      aggregatorEditor !== null || connectorEditor !== null || responseNodeId !== null || historyOpen,
   });
 
   const deleteNodes = useDeleteWorkflowNodes({ nodes, edges, options, setNodes, setEdges,
@@ -113,7 +116,6 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     responseNodeId,
     conditionEditor,
     aggregatorEditor,
-    globalWritesEditor,
     connectorEditor,
     restoredViewport,
     viewportRestoreVersion,
@@ -138,7 +140,6 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setMethodEditor,
     setConditionEditor,
     setAggregatorEditor,
-    setGlobalWritesEditor,
     setConnectorEditor,
     setWorkflowGraph: (
       nextNodes: WorkflowNodeModel[],
@@ -162,7 +163,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onNodeDragStop: handleNodeDragStop,
     onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
     onCloseResponse: () => setResponseNodeId(null),
-    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setGlobalWritesEditor(null); setConnectorEditor(null); },
+    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); setConnectorEditor(null); },
     onStartJoint: (sourceNodeId: string) => {
       setSidebarAction(null);
       setContextMenu(null);
@@ -255,8 +256,13 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       options.onFieldBindingsChange?.(result.fieldBindings);
       return true;
     },
+    onApplyPastedGraph: (nextNodes: WorkflowNodeModel[], nextEdges: WorkflowEdgeModel[], bindings: unknown[]) => {
+      setNodes(nextNodes);
+      setEdges(nextEdges);
+      options.onFieldBindingsChange?.(bindings);
+    },
     onPasteNodes: async (sourceNodeIds: string[], targetNodeId: string,
-      direction: 'right' | 'bottom') => {
+      direction: 'right' | 'bottom', snapshot?: WorkflowClipboard) => {
       const target = nodes.find((node) => node.id === targetNodeId);
       if (sourceNodeIds.length === 0 || !target || target.type === 'comment') return false;
       const args = {
@@ -266,11 +272,15 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         edges,
         fieldBindings: options.fieldBindings,
       };
-      let result = copyWorkflowNodeGroup(args);
+      let result = snapshot ? prepareClipboardPaste(snapshot, nodes, edges, options.fieldBindings,
+        args.target, new Map(), new Set(), false) : copyWorkflowNodeGroup(args);
       if (result.invalidReferences.length > 0) {
         const accepted = await options.confirmDependencyDrop?.(result.invalidReferences);
         if (!accepted) return false;
-        result = copyWorkflowNodeGroup({ ...args, cleanInvalid: true });
+        if (snapshot) {
+          const cleaned = cleanInvalidWorkflowReferences(result.nodes, result.invalidReferences, result.fieldBindings);
+          result = {...result, ...cleaned, invalidReferences: []};
+        } else result = copyWorkflowNodeGroup({ ...args, cleanInvalid: true });
       }
       const pastedIds = new Set(result.idMap?.values());
       setNodes(result.nodes.map((node) => ({ ...node, selected: pastedIds.has(node.id) })));

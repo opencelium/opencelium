@@ -1,7 +1,9 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import ResettableRoute from "@app/router/wrappers/ResettableRoute.tsx";
 
-const PageWrapper = ({children}) => {
+const PageWrapper = ({ children, resetOnNavigation = true }: { children: ReactNode; resetOnNavigation?: boolean }) => {
+    if (!resetOnNavigation) return <>{children}</>;
+
     return (
         <ResettableRoute>
             {children}

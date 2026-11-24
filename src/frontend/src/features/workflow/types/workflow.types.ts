@@ -18,11 +18,6 @@ export type WorkflowLoopIterationDisplay = { iterator: string; count: number; in
 
 export type WorkflowAddDirection = 'right' | 'bottom';
 export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop' | 'comment';
-
-/** A Set global variable step: writes `value` (a reference or a literal JSON text) into `variable`. */
-/** `global.<name>` → the value written once the method has responded: a reference, or JSON / plain text. */
-export type WorkflowGlobalWrites = Record<string, string>;
-
 export type WorkflowOperatorKind = 'if' | 'loop';
 
 /** A free-text annotation belonging to one node. Carried in the connection's
@@ -96,8 +91,6 @@ export type WorkflowNodeData = {
 	 * can render its show/hide badge. The note itself lives on the comment node. */
 	anchoredComment?: { nodeId: string; collapsed: boolean };
 	dataAggregator?: number | null;
-	/** Mutable global variables this method writes after it has responded (methods only). */
-	globalWrites?: WorkflowGlobalWrites;
 	labelEdited?: boolean;
 	isLeaf?: boolean;
 	rightLeaf?: boolean;

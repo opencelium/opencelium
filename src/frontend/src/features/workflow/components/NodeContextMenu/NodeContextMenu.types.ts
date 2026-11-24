@@ -5,12 +5,14 @@ export type NodeContextMenuProps = {
 	menu: WorkflowContextMenu | null;
 	node: WorkflowNodeModel | null;
 	onClose: () => void;
+	onCopyNodes: (nodeId: string) => void;
+	onPasteNodes: (nodeId: string) => void;
+	canPasteNodes: boolean;
 	onChangeLabel: (nodeId: string, label: string) => void;
 	onOpenRequestEditor: (nodeId: string, mode: 'url' | 'body' | 'header') => void;
 	onOpenConditionEditor: (nodeId: string) => void;
 	onShowResponse: (nodeId: string) => void;
 	onTryRequest: (nodeId: string) => void;
 	onOpenAggregatorEditor: (nodeId: string) => void;
-	onOpenGlobalWritesEditor: (nodeId: string) => void;
 	onOpenConnectorEditor: (nodeId: string, kind: ConnectorEditorKind) => void;
 };
