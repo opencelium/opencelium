@@ -1,14 +1,15 @@
-import { CloseOutlined } from '@ant-design/icons';
-import { Button, Tag } from 'antd';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { getParsedReferences, splitReferences } from '../../bodyReference';
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
+import { splitReferences } from '../../bodyReference';
+import { describeWorkflowReference } from '../../../../reference-chip/describeWorkflowReference';
+import { useReferenceSourceLabels } from '../../../../reference-chip/ReferenceSourceContext';
 import type { XmlReferenceTokensProps } from './XmlReferenceTokens.types';
-import { getXmlReferenceLabel } from './xmlReferenceTokens.utils';
 
 export function XmlReferenceTokens({ value, onChange, onClick, readOnly }: XmlReferenceTokensProps) {
   const confirm = useConfirm();
   const { t } = useI18n('workflow');
+  const labels = useReferenceSourceLabels();
   const references = splitReferences(value);
   if (!references.length) return null;
 
@@ -20,18 +21,15 @@ export function XmlReferenceTokens({ value, onChange, onClick, readOnly }: XmlRe
     if (confirmed) onChange(references.filter((_, current) => current !== index).join('; '));
   };
 
-  return <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-    {references.map((reference, index) => <Tag key={`${reference}-${index}`}
-      color={getParsedReferences(reference)[0]?.color || 'blue'}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 4,
-        cursor: onClick ? 'pointer' : 'default', marginInlineEnd: 0 }} onClick={onClick}>
-      <span>{getXmlReferenceLabel(reference)}</span>
-      {!readOnly && <Button type="text" size="small" icon={<CloseOutlined />}
+  return <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }} onClick={onClick}>
+    {references.map((reference, index) => <ReferenceChip key={`${reference}-${index}`}
+      {...describeWorkflowReference(reference, labels)} title={reference} isClickable={!!onClick}
+      testId='xml-reference-chip'>
+      {!readOnly && <button type='button' className='wfReferenceChipRemove' aria-label={t('actions.deleteReference')}
         onClick={(event) => {
           event.stopPropagation();
           void remove(index);
-        }}
-        style={{ width: 16, height: 16, minWidth: 16, padding: 0, color: 'inherit' }} />}
-    </Tag>)}
+        }}>×</button>}
+    </ReferenceChip>)}
   </div>;
 }

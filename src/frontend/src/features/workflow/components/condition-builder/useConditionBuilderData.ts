@@ -45,6 +45,7 @@ export const useConditionBuilderData = (
 		if (!method) return undefined;
 		return {
 			methodLabel: method.label || method.name,
+			methodColor: method.color,
 			connectorIcon: getMethodConnectorIcon(method),
 			hasMethod: true,
 			responseType: parseResponseTypeFromReference(collectionReference) || 'body',

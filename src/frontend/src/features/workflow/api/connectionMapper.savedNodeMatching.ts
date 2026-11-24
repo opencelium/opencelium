@@ -7,7 +7,7 @@ export const mergeSavedNodeData = (
 ): WorkflowNodeModel['data'] => {
 	if (!savedData) return builtData;
 	const {
-		title, subtitle, kind, connector, methodConfig, conditionConfig, comment,
+		title, subtitle, kind, connector, methodConfig, conditionConfig, comment, notification,
 		isLeaf, rightLeaf, bottomLeaf, highlighted,
 		suppressHoverAddControls, lockVisibleAddControls,
 	} = savedData;
@@ -20,6 +20,7 @@ export const mergeSavedNodeData = (
 		...(methodConfig !== undefined ? { methodConfig } : {}),
 		...(conditionConfig !== undefined ? { conditionConfig } : {}),
 		...(comment !== undefined ? { comment } : {}),
+		...(notification !== undefined ? { notification } : {}),
 		...(isLeaf !== undefined ? { isLeaf } : {}),
 		...(rightLeaf !== undefined ? { rightLeaf } : {}),
 		...(bottomLeaf !== undefined ? { bottomLeaf } : {}),
@@ -42,7 +43,14 @@ const typeMatches = (
 	savedType: WorkflowNodeModel['type'] | undefined,
 	entryType: WorkflowNodeModel['type'],
 ) => !savedType || savedType === entryType
-	|| (savedType === 'connector' && entryType === 'system');
+	|| (savedType === 'connector' && entryType === 'system')
+	// A notification step is saved as a plain HTTP request; only the UI blob knows it is one.
+	|| (savedType === 'notification' && entryType === 'system');
+
+export const resolveRestoredNodeType = (
+	savedType: WorkflowNodeModel['type'] | undefined,
+	entryType: WorkflowNodeModel['type'],
+): WorkflowNodeModel['type'] => savedType === 'notification' && entryType === 'system' ? 'notification' : entryType;
 
 export const findSavedNode = (
 	node: WorkflowNodeModel,

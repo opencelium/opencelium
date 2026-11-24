@@ -6,10 +6,11 @@ import { ChangeConnectorDialog } from '../change-connector/ChangeConnectorDialog
 import { ConnectorImageDialog } from '../connector-image/ConnectorImageDialog';
 import { RequestPlaygroundDialog } from '../../request-playground/ui/RequestPlaygroundDialog';
 import { GlobalWritesDialog } from '../global-writes/GlobalWritesDialog';
+import { NotificationDialog } from '../../notification/ui/dialog/NotificationDialog';
 import type { WorkflowNodeEditorsProps } from './WorkflowNodeEditors.types';
 
 export const WorkflowNodeEditors = ({ response, method, condition, globalWrites,
-	aggregator, connector, connectorImage, requestPlayground }: WorkflowNodeEditorsProps) => <>
+	aggregator, connector, connectorImage, requestPlayground, notification }: WorkflowNodeEditorsProps) => <>
 	<ResponseDialog {...response} />
 	<MethodConfigDialog {...method} />
 	<ConditionBuilderDialog {...condition} />
@@ -18,4 +19,5 @@ export const WorkflowNodeEditors = ({ response, method, condition, globalWrites,
 	<ChangeConnectorDialog {...connector} />
 	<ConnectorImageDialog {...connectorImage} />
 	<RequestPlaygroundDialog {...requestPlayground} />
+	<NotificationDialog {...notification} />
 </>;

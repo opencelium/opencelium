@@ -4,10 +4,11 @@ import type { SecondarySidebarMode } from '../sidebar/sidebarSecondary';
 type Params = {
 	open: boolean;
 	onClose: () => void;
-	onSelectSystem: () => void;
+	/** Steps created straight from the main list, with no secondary panel to pick from. */
+	onSelectDirect: (kind: 'system' | 'notification') => void;
 };
 
-export function useWorkflowSidebarState({ open, onClose, onSelectSystem }: Params) {
+export function useWorkflowSidebarState({ open, onClose, onSelectDirect }: Params) {
 	const [activeSecondaryPanel, setActiveSecondaryPanel] = useState<SecondarySidebarMode | null>(null);
 	const [selectedConnectorKey, setSelectedConnectorKey] = useState<string | null>(null);
 	const [mainSearch, setMainSearch] = useState('');
@@ -38,9 +39,9 @@ export function useWorkflowSidebarState({ open, onClose, onSelectSystem }: Param
 		setMethodSearch('');
 		setSelectedConnectorKey(null);
 		if (key === 'operator') return setActiveSecondaryPanel('operator');
-		if (key === 'system') {
+		if (key === 'system' || key === 'notification') {
 			resetSidebar();
-			return onSelectSystem();
+			return onSelectDirect(key);
 		}
 		if (key === 'trigger-connection') return openTriggerConnection();
 		setActiveSecondaryPanel('connector');

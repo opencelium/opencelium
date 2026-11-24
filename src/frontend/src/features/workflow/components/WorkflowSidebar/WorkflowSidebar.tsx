@@ -17,7 +17,7 @@ import { useConnectorUpdateAction } from './useConnectorUpdateAction';
 export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, onSelect }: WorkflowSidebarProps) {
   const { t } = useI18n('workflow');
   const sidebar = useWorkflowSidebarState({ open: !!action, onClose,
-    onSelectSystem: () => onSelect('system') });
+    onSelectDirect: (kind) => onSelect(kind) });
   const { activeSecondaryPanel, selectedConnectorKey, mainSearch, secondarySearch, methodSearch, resetSidebar } = sidebar;
 
   const {

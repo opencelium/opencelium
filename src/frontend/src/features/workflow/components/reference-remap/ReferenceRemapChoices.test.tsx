@@ -9,6 +9,8 @@ import { emptyChoice } from './referenceRemapChoice';
 
 // Identity translator, the pattern the other component tests use: this pins the
 // wiring, not the copy, which lives in the locale files.
+// The condition editor's reference chips confirm before deleting; these tests never delete one.
+vi.mock('@shared/ui/confirm/ConfirmDialogContext', () => ({ useConfirm: () => vi.fn() }));
 vi.mock('@shared/i18n/hooks/useI18n', () => ({
 	useI18n: () => ({ t: (key: string) => key, lang: 'en' }),
 }));
@@ -143,18 +145,10 @@ const openAndPick = (combobox: HTMLElement, label: string) => {
 const comboboxes = () => screen.getAllByRole('combobox')
 	.filter((box) => !box.hasAttribute('disabled'));
 
-/** Same for the response-part radios: the read-only column has a set too. */
-const radios = () => screen.getAllByRole('radio')
-	.filter((radio) => !radio.hasAttribute('disabled'));
-
-/** Clicks a label inside the editable half of a field row, so a click cannot
- *  land on the read-only copy of the same control. */
-const clickInEditable = (label: string, index = 0) => {
-	const cell = document.querySelectorAll('.referenceRemapSourceValue')[index];
-	const target = [...cell.querySelectorAll('*')]
-		.find((node) => node.textContent === label && node.children.length === 0);
-	fireEvent.click(target as HTMLElement);
-};
+/** The response-part select of the first field row's generator: after its method select. */
+const responsePart = () => comboboxes()[2];
+const shownResponsePart = () => responsePart().closest('.ant-select')?.textContent;
+const RESPONSE_PART_KEY = { B: 'body', H: 'header', S: 'status' } as const;
 
 /** Drive the shared generator: a method, and then either a response part that
  *  is an answer on its own (status) or a field. There is no apply button here —
@@ -164,7 +158,7 @@ const pickPath = (...steps: string[]) => steps.forEach((step) =>
 
 const generateReference = (methodLabel: string, path: string[], part?: 'B' | 'H' | 'S') => {
 	openAndPick(comboboxes()[1], methodLabel);
-	if (part) clickInEditable(part);
+	if (part) openAndPick(responsePart(), `conditionBuilder.responseType.${RESPONSE_PART_KEY[part]}`);
 	pickPath(...path);
 };
 
@@ -401,13 +395,13 @@ describe('ReferenceRemapChoices', () => {
 
 		// Half-made: a header was chosen, and no field under it yet.
 		openAndPick(comboboxes()[1], 'm1');
-		clickInEditable('H');
-		expect((radios()[1] as HTMLInputElement).checked).toBe(true);
+		openAndPick(responsePart(), 'conditionBuilder.responseType.header');
+		expect(shownResponsePart()).toBe('H');
 
 		openAndPick(comboboxes()[0], 'm1');
 
 		// Back to a fresh generator: body selected, no answer recorded.
-		expect((radios()[0] as HTMLInputElement).checked).toBe(true);
+		expect(shownResponsePart()).toBe('B');
 		expect((comboboxes().at(-1) as HTMLInputElement).value).toBe('');
 	});
 
@@ -443,14 +437,14 @@ describe('ReferenceRemapChoices', () => {
 		renderChoices([target()]);
 
 		openAndPick(comboboxes()[0], 'm1');
-		const [, methodBefore, fieldBefore] = comboboxes();
+		const [, methodBefore, , fieldBefore] = comboboxes();
 		openAndPick(comboboxes().at(-1) as HTMLElement, 'user');
 
 		openAndPick(comboboxes()[0], 'm1');
 
 		// Different DOM nodes: the controls were replaced, so nothing antd was
 		// holding on to survived to be displayed.
-		const [, methodAfter, fieldAfter] = comboboxes();
+		const [, methodAfter, , fieldAfter] = comboboxes();
 		expect(methodAfter).not.toBe(methodBefore);
 		expect(fieldAfter).not.toBe(fieldBefore);
 	});
@@ -546,8 +540,8 @@ describe('ReferenceRemapChoices', () => {
 		openAndPick(comboboxes()[1], 'm1');
 		pickPath('token');
 
-		// Still a method select and a field select, now holding the answer.
-		expect(comboboxes()).toHaveLength(3);
+		// Still a method, response-part and field select, now holding the answer.
+		expect(comboboxes()).toHaveLength(4);
 		expect((comboboxes().at(-1) as HTMLInputElement).value).toBe('token');
 		// And a way to take the answer back.
 		expect(screen.getByTestId(

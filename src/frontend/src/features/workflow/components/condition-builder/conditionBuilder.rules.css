@@ -78,33 +78,13 @@
 	display: flex;
 	flex: 0 1 auto;
 	align-items: center;
-	gap: 0;
+	gap: 6px;
 	min-width: 0;
 }
 
-.conditionSourceSwitcher,
-.conditionResponseTypeSwitcher {
-	flex: 0 0 auto;
-	justify-content: center;
-}
-
-.conditionResponseTypeSwitcher {
-	margin-left: 8px;
-}
-
-.conditionRadioIcon {
-	display: inline-flex;
-	width: 14px;
-	height: 14px;
-	align-items: center;
-	justify-content: center;
-	color: var(--color-text-primary);
-	font-size: 12px;
-}
-
-.conditionResponseTypeIcon {
-	font-size: 11px;
-	font-weight: 600;
+/* A chosen reference: one chip in the space the selects took, same row height. */
+.conditionValueChip {
+	min-height: 32px;
 }
 
 .conditionMethodSelect {
@@ -118,6 +98,28 @@
 .conditionFieldSelect > div,
 .conditionFieldSelect .bodyLegacyGeneratorSelect {
 	width: 100%;
+}
+
+/* Every control in an operand row shares antd's default 32px height and corner radius.
+   The field path is a large, square-cornered textarea elsewhere (body editor), so it is
+   shrunk only here; autoSize measures the textarea's computed padding, so rows still fit. */
+.conditionValueInput .ant-select.ant-select,
+.conditionRule .ant-select.ant-select {
+	height: 32px;
+	border-radius: 8px !important;
+}
+
+.conditionFieldSelect .referenceFieldPathSelect.ant-select.ant-select {
+	height: auto;
+	min-height: 32px;
+}
+
+.conditionFieldSelect .referenceFieldPathSelect .referenceFieldPathInput {
+	min-height: 32px;
+	padding-block: 4px;
+	border-radius: 8px;
+	font-size: 14px;
+	line-height: 22px;
 }
 
 .conditionOperatorSelect {

@@ -4,6 +4,7 @@ import type { WorkflowNodeModel } from '../types/workflow.types';
 import { collectParsedReferences } from './graph.referenceOccurrences';
 import { normalizeReferenceColor } from './graph.referenceColors';
 import { serializeReferenceString } from '../api/connectionPayload.references';
+import { isMethodNodeType } from './methodNodeTypes';
 
 /**
  * Where a reference sits in the step that holds it.
@@ -29,8 +30,7 @@ export type ReferenceOccurrence = {
 	location: ReferenceLocation;
 };
 
-const isMethodNode = (node: WorkflowNodeModel) =>
-	node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection';
+const isMethodNode = (node: WorkflowNodeModel) => isMethodNodeType(node.type);
 
 /** `body.$.items[0].name` from the walk that found the value. */
 const joinPath = (segments: string[]) => segments.reduce((path, segment) =>

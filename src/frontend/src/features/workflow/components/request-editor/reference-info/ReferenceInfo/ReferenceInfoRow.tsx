@@ -4,6 +4,8 @@ import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip';
+import { formatStepReferencePath } from '../../../reference-chip/referenceChip.utils';
 
 type Props = {
 	field: string;
@@ -42,15 +44,10 @@ export function ReferenceInfoRow({ field, refs, messageProperty, paramKey, readO
 					const key = `${reference.enhanceId}-${index}`;
 					return (
 					<div key={`${reference.enhanceId}-${index}`} className='referenceInfoBinding'>
-						<span className='referenceInfoMethod'
-							style={{ backgroundColor: reference.method?.color || reference.color }}>
-							{reference.method?.name || 'UnknownMethod'}
-						</span>
-						<span> bound with </span>
-						<span className='referenceInfoSource' style={{ color: reference.color }}>
-							{withSegmentBreaks(formatSourceField(reference.sourceMessageProperty, reference.target))}
-						</span>
-						<span>{index === refs.length - 1 ? ' field.' : ' field; '}</span>
+						<ReferenceChip color={reference.method?.color || reference.color} source={reference.method?.name}
+							path={formatStepReferencePath(buildReferenceToken(reference))}
+							title={formatSourceField(reference.sourceMessageProperty, reference.target)} />
+						<span>{index === refs.length - 1 ? '' : ';'}</span>
 						{!readOnly && <span className='referenceInfoDelete' onClick={async (event) => {
 							event.stopPropagation();
 							const ok = await confirm({ title: t('referenceInfo.confirmDelete.title'),

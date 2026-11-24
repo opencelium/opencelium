@@ -38,10 +38,12 @@ type Props = {
      * run binds as a function: a script can't stand in a text field such as the URL or a condition.
      */
     canPickScripts?: boolean
+    /** Fills its container, e.g. the insert popover; elsewhere the host sizes it. */
+    isFullWidth?: boolean
 }
 
 export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, className, testId, size, filter,
-    canPickScripts = false }: Props) {
+    canPickScripts = false, isFullWidth = false }: Props) {
     const { t } = useI18n('entities')
     const { items, isLoading } = useGlobalVariablePicker()
 
@@ -77,7 +79,7 @@ export function GlobalVariableSelect({ value, onChange, popupZIndex, disabled, c
             notFoundContent={isLoading ? null : t('global-variable.picker.empty')}
             className={className}
             size={size}
-            style={{ minWidth: 220 }}
+            style={{ minWidth: 220, ...(isFullWidth ? { width: '100%' } : {}) }}
             popupMatchSelectWidth={false}
             getPopupContainer={() => document.body}
             styles={{ popup: { root: { zIndex: popupZIndex ?? 13010 } } }}

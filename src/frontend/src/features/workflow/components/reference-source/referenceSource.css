@@ -1,0 +1,38 @@
+.referenceSourceSelect.ant-select,
+.referenceResponseTypeSelect.ant-select {
+	flex: 0 0 auto;
+	width: 56px;
+}
+
+.referenceSwitcherLabel {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 14px;
+	font-weight: 600;
+}
+
+.referenceSourceOption {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+.referenceSourceOptionIcon {
+	display: inline-flex;
+	flex: 0 0 auto;
+	padding-top: 3px;
+	color: var(--color-text-secondary);
+}
+
+.referenceSourceOptionText {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.referenceSourceOptionHint {
+	color: var(--color-text-secondary);
+	font-size: 12px;
+	white-space: normal;
+}

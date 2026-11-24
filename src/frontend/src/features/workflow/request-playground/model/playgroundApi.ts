@@ -24,4 +24,5 @@ export const playgroundApi = baseApi.injectEndpoints({
 	}),
 });
 
-export const { useGetMethodTestRefsQuery, useTestMethodMutation, useGetMethodCurlMutation } = playgroundApi;
+export const { useGetMethodTestRefsQuery, useLazyGetMethodTestRefsQuery, useTestMethodMutation,
+	useGetMethodCurlMutation } = playgroundApi;

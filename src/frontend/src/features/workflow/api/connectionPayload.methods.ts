@@ -1,5 +1,6 @@
 import { ALL_COLORS } from '../constants/colors';
 import { MethodType } from '../types/connection';
+import { isHttpRequestNodeType } from '../utils/methodNodeTypes';
 import type { WorkflowNodeModel } from '../types/workflow.types';
 import {
 	buildPayloadData,
@@ -15,6 +16,8 @@ const resolveMethodType = (node: WorkflowNodeModel): MethodType => {
 	switch (nodeKind(node)) {
 		case 'system': return MethodType.HttpRequest;
 		case 'trigger-connection': return MethodType.Webhook;
+		// Sent as a plain HTTP POST until the backend has a dedicated notification method type.
+		case 'notification': return MethodType.HttpRequest;
 		default: return MethodType.Connector;
 	}
 };
@@ -29,8 +32,12 @@ export const buildMethodPayload = (
 	const config = node.data.methodConfig as any;
 	const endpointArgs = config?.endpointArgs ?? {};
 	const kind = nodeKind(node);
-	const isHttpRequest = kind === 'system' || kind === 'trigger-connection';
+	const isHttpRequest = isHttpRequestNodeType(kind);
 	const connectorData = isHttpRequest ? null : node.data.connector;
+	// Notification text embeds references mid-sentence ("Order {%…%} shipped"). The backend
+	// finds those only in their wrapped form; unwrapped, it reads the whole string as one
+	// reference. So unlike other methods, header values and body keep the `{%…%}` wrapper.
+	const keepsWrappedReferences = kind === 'notification';
 	const response = config?.response ?? (isHttpRequest
 		? {
 			responseId: `response-${node.id}`,
@@ -68,8 +75,10 @@ export const buildMethodPayload = (
 		request: {
 			endpoint: serializeReferenceString(config?.url ?? '', endpointArgs),
 			method: config?.method ?? 'GET',
-			header: serializeHeaderReferences(config?.headers ?? {}, endpointArgs),
-			body: serializePayloadData(config?.body, endpointArgs, config?.bodyFormat, config?.bodyData),
+			header: keepsWrappedReferences ? config?.headers ?? {}
+				: serializeHeaderReferences(config?.headers ?? {}, endpointArgs),
+			body: keepsWrappedReferences ? buildPayloadData(config?.body ?? {}, 'json', 'raw')
+				: serializePayloadData(config?.body, endpointArgs, config?.bodyFormat, config?.bodyData),
 		},
 		...(response ? { response } : {}),
 	};

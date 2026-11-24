@@ -12,7 +12,7 @@ export type NodeShellProps = PropsWithChildren<{
 	data: WorkflowNodeData;
 	selected?: boolean;
 	topLabel?: string;
-	bottomLabel?: string;
+	bottomLabel?: ReactNode;
 	bottomExtra?: ReactNode;
 	rightAdd?: NodeShellAddConfig;
 	bottomAdd?: NodeShellAddConfig;

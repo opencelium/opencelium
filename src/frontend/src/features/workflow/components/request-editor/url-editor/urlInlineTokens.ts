@@ -1,5 +1,6 @@
 import type { EndpointArg } from '../../../types/connection';
-import { getReferenceDisplayLabel } from '../shared/referenceDisplay';
+import { formatStepReferencePath, GLOBAL_CHIP_COLOR } from '../../reference-chip/referenceChip.utils';
+import type { ReferenceSourceLabels } from '../../reference-chip/ReferenceSourceContext';
 import { createId as createStableId } from '@shared/lib/createId';
 import { GLOBAL_REFERENCE_TOKEN } from '@entities/globalVariable/lib/globalReference';
 
@@ -21,8 +22,9 @@ export const isSelectionInside = (root: HTMLElement) => {
 export const extractColorFromSourceRef = (reference?: string) =>
 	reference?.match(/^#([0-9a-f]{6})\./i)?.[1]
 		? `#${reference.match(/^#([0-9a-f]{6})\./i)![1]}` : null;
+/** The chip's text: just the path. The source name and dot are CSS (see referenceChip.css), so caret maths counts this alone. */
 export const visibleFromSourceRef = (reference?: string) =>
-	getReferenceDisplayLabel(reference || '');
+	formatStepReferencePath(reference || '');
 
 export type InlinePart = { value: string; kind: 'text' | 'arg' | 'global'; argId?: string };
 export function buildInlineParts(raw: string): InlinePart[] {
@@ -63,26 +65,32 @@ export function getInlineVisualLength(raw: string, endpointArgs?: Record<string,
 	return buildInlineParts(raw || '').reduce((length, part) => length + partVisualLength(part, endpointArgs), 0);
 }
 
-const buildGlobalSpanHtml = (raw: string) => `<span class="oc-global-ref" ${GLOBAL_REF_ATTRIBUTE} data-main="${escapeHtml(raw)}" contenteditable="false" title="${escapeHtml(raw)}" style="display:inline-block;margin:0 2px;padding:0 6px;border-radius:4px;border:1px solid var(--color-status-info-border);background:var(--color-status-info-bg);color:var(--color-status-info-fg);font-size:12px;line-height:1.5;vertical-align:middle;user-select:none;">${escapeHtml(globalLabel(raw))}</span>`;
+const sourceAttribute = (source?: string) => source ? ` data-source="${escapeHtml(source)}"` : '';
+
+const buildGlobalSpanHtml = (raw: string, source?: string) => `<span class="oc-global-ref wfReferenceChip" ${GLOBAL_REF_ATTRIBUTE} data-main="${escapeHtml(raw)}"${sourceAttribute(source)} contenteditable="false" title="${escapeHtml(raw)}" style="--wf-ref-color:${GLOBAL_CHIP_COLOR}">${escapeHtml(globalLabel(raw))}</span>`;
 
 export function buildTokenSpanHtml(options: { className: string; dataMain: string;
-	refIndex: number; color: string; label: string; cursorPointer?: boolean }) {
-	const { className, dataMain, refIndex, color, label, cursorPointer } = options;
-	return `<span class="${className}" data-main="${escapeHtml(dataMain)}" data-ref-index="${refIndex}" contenteditable="false" style="display:inline-block;margin:0 2px;padding:0 6px;border-radius:4px;background:${color};color:var(--color-text-on-action);font-size:12px;line-height:1.6;vertical-align:middle;user-select:none;${cursorPointer ? 'cursor:pointer;' : ''}">${escapeHtml(label)}</span>`;
+	refIndex: number; color: string; label: string; source?: string; cursorPointer?: boolean }) {
+	const { className, dataMain, refIndex, color, label, source, cursorPointer } = options;
+	return `<span class="${className} wfReferenceChip${cursorPointer ? ' wfReferenceChip--clickable' : ''}" data-main="${escapeHtml(dataMain)}" data-ref-index="${refIndex}"${sourceAttribute(source)} contenteditable="false" style="--wf-ref-color:${color}">${escapeHtml(label)}</span>`;
 }
 
 export function buildInlineHtml(raw: string, endpointArgs?: Record<string, EndpointArg>,
-	options?: { className?: string; cursorPointer?: boolean }) {
+	options?: { className?: string; cursorPointer?: boolean; sources?: ReferenceSourceLabels }) {
 	if (!raw) return '';
 	let referenceIndex = 0;
 	return buildInlineParts(raw).map((part) => {
 		if (part.kind === 'text') return escapeHtml(part.value);
-		if (part.kind === 'global') return `${CARET_BOUNDARY}${buildGlobalSpanHtml(part.value)}${CARET_BOUNDARY}`;
+		if (part.kind === 'global') {
+			return `${CARET_BOUNDARY}${buildGlobalSpanHtml(part.value, options?.sources?.global)}${CARET_BOUNDARY}`;
+		}
 		const source = endpointArgs?.[part.argId || '']?.source;
+		const color = extractColorFromSourceRef(source);
 		const token = buildTokenSpanHtml({ className: options?.className || 'oc-endpoint-ref',
 			dataMain: part.value, refIndex: referenceIndex++,
-			color: extractColorFromSourceRef(source) ?? 'var(--color-action-primary)',
+			color: color ?? 'var(--color-action-primary)',
 			label: source ? visibleFromSourceRef(source) : part.argId || '',
+			source: color ? options?.sources?.methodLabel(color) : undefined,
 			cursorPointer: !!options?.cursorPointer });
 		return `${CARET_BOUNDARY}${token}${CARET_BOUNDARY}`;
 	}).join('');

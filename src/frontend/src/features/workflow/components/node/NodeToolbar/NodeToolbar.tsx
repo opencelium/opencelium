@@ -4,17 +4,28 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { NodeToolbarProps } from './NodeToolbar.types';
 
-export function NodeToolbar({ canDelete, canComment, canAddJoint, canRemoveJoint, isAddJointDisabled,
-	onDelete, onComment, onAddJoint, onRemoveJoint }: NodeToolbarProps) {
+export function NodeToolbar({ canOpen, canDelete, canComment, canAddJoint, canRemoveJoint, isAddJointDisabled,
+	onOpen, onDelete, onComment, onAddJoint, onRemoveJoint }: NodeToolbarProps) {
 	const { t } = useI18n('workflow');
-	if (!canDelete && !canComment && !canAddJoint && !canRemoveJoint) return null;
+	if (!canOpen && !canDelete && !canComment && !canAddJoint && !canRemoveJoint) return null;
 
 	// Delete is the one destructive action here, so it is kept a beat away from the
 	// ones next to it — but only when there is actually something to separate it from.
-	const hasEditActions = canAddJoint || canRemoveJoint || canComment;
+	const hasEditActions = canOpen || canAddJoint || canRemoveJoint || canComment;
 
 	return (
 		<div className='nodeToolbar' onDoubleClick={(event) => event.stopPropagation()}>
+			{canOpen && (
+				<Tooltip content={t('notification.toolbar.open')}>
+					<IconButton
+						type='text'
+						size='xs'
+						iconProps={{ name: 'settings', size: 14 }}
+						onClick={onOpen}
+						testId='workflow-node-open'
+					/>
+				</Tooltip>
+			)}
 			{canAddJoint && (
 				<Tooltip content={isAddJointDisabled ? t('joint.noTargets') : t('actions.addJoint')}>
 					<IconButton

@@ -1,4 +1,6 @@
-export type ConditionValueSource = 'constant' | 'direct' | 'webhook' | 'global';
+import type { ReferenceSource } from '../reference-source/referenceSource.types';
+
+export type ConditionValueSource = ReferenceSource;
 
 export const Conjunction = {
 	AND: '&&',

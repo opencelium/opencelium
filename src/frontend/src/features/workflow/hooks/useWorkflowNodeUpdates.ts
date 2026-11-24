@@ -4,6 +4,8 @@ import type { ConditionConfig } from '../components/condition-builder/conditionB
 import type { WorkflowNodeModel, WorkflowGlobalWrites } from '../types/workflow.types';
 import type { WorkflowMethodConfig } from '../types/request-config.types';
 import { assignConnectorToNode } from '../components/template/templateConnectorMapping.utils';
+import type { NotificationConfig } from '../notification/model/notification.types';
+import { buildNotificationMethodConfig } from '../notification/model/notificationMethodConfig';
 
 export const useWorkflowNodeUpdates = (
 	setNodes: Dispatch<SetStateAction<WorkflowNodeModel[]>>,
@@ -11,6 +13,7 @@ export const useWorkflowNodeUpdates = (
 	closeConditionEditor: () => void,
 	closeAggregatorEditor: () => void,
 	closeConnectorEditor: () => void,
+	closeNotificationEditor: () => void,
 ) => ({
 	onChangeNodeLabel: (nodeId: string, label: string) => setNodes((nodes) =>
 		nodes.map((node) => node.id === nodeId ? { ...node, data: {
@@ -42,6 +45,16 @@ export const useWorkflowNodeUpdates = (
 		node.id === nodeId ? { ...node, data: {
 			...node.data, globalWrites: Object.keys(globalWrites).length ? globalWrites : undefined,
 		} } : node)),
+	onSaveNotification: (nodeId: string, label: string, notification: NotificationConfig) => {
+		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? { ...node, data: {
+			...node.data,
+			notification,
+			methodConfig: buildNotificationMethodConfig(nodeId, notification, node.data.methodConfig),
+			...(label && label !== (node.data.subtitle || node.data.title) ? { subtitle: label, labelEdited: true } : {}),
+			hasError: false, errorMessage: undefined,
+		} } : node));
+		closeNotificationEditor();
+	},
 	onSaveDataAggregator: (nodeId: string, dataAggregator: number | null) => {
 		setNodes((nodes) => nodes.map((node) => node.id === nodeId ? { ...node, data: {
 			...node.data, dataAggregator, hasError: false, errorMessage: undefined,

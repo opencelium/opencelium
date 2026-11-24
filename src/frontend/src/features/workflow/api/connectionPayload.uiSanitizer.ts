@@ -62,6 +62,7 @@ const sanitizeNodeData = (data: WorkflowNodeData) => Object.fromEntries(Object.e
 	methodConfig: sanitizeMethodConfig(data.methodConfig),
 	conditionConfig: stripEnhancementObjects(data.conditionConfig),
 	comment: data.comment,
+	notification: data.notification,
 	dataAggregator: data.dataAggregator,
 }).filter(([, value]) => value !== undefined));
 

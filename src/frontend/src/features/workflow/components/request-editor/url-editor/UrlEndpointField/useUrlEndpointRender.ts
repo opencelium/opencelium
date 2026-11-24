@@ -4,11 +4,14 @@ import { buildInlineHtml, computeRawInsertAtFromVisualCaret, getInlineVisualLeng
 import { setFocusByCaretPositionInDivEditable } from '../utils/contentEditable';
 import type { UrlEndpointFieldProps } from './UrlEndpointField.types';
 import { ENDPOINT_REFERENCE_CLASS } from './urlEndpointField.utils';
+import { useReferenceSourceLabels } from '../../../reference-chip/ReferenceSourceContext';
+import '@shared/ui/reference-chip/referenceChip.css';
 
 export function useUrlEndpointRender(props: UrlEndpointFieldProps,
 	lastRendered: RefObject<string>, typing: RefObject<boolean>) {
 	const { readOnly, value, endpointArgs, endpointArgsRef, divRef, lastCaretRef,
 		lastRawCaretRef, selectedTokenIndexRef } = props;
+	const sources = useReferenceSourceLabels();
 
 	useEffect(() => { endpointArgsRef.current = endpointArgs; }, [endpointArgs, endpointArgsRef]);
 
@@ -17,7 +20,7 @@ export function useUrlEndpointRender(props: UrlEndpointFieldProps,
 		if (!root) return;
 		lastRendered.current = raw;
 		root.innerHTML = buildInlineHtml(raw, endpointArgsRef.current,
-			{ className: ENDPOINT_REFERENCE_CLASS, cursorPointer: true });
+			{ className: ENDPOINT_REFERENCE_CLASS, cursorPointer: true, sources });
 		const end = getInlineVisualLength(raw, endpointArgsRef.current);
 		const caret = typeof caretOverride === 'number' && caretOverride >= 0
 			? caretOverride : Number.isFinite(lastCaretRef.current) ? lastCaretRef.current : end;
@@ -26,7 +29,7 @@ export function useUrlEndpointRender(props: UrlEndpointFieldProps,
 		if (!readOnly && document.activeElement === root) {
 			try { setFocusByCaretPositionInDivEditable(root, caret); } catch {}
 		}
-	}, [divRef, endpointArgsRef, lastCaretRef, lastRawCaretRef, lastRendered, readOnly]);
+	}, [divRef, endpointArgsRef, lastCaretRef, lastRawCaretRef, lastRendered, readOnly, sources]);
 
 	useEffect(() => {
 		const root = divRef.current;

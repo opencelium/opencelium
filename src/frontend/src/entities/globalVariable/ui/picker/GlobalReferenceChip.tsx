@@ -1,6 +1,6 @@
-import { Tag } from 'antd'
-import { Icon } from '@shared/ui/primitives/Icon'
+import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
+import { ReferenceChip } from '@shared/ui/reference-chip/ReferenceChip'
 import { useGlobalReferenceInfo } from './useGlobalReferenceInfo'
 
 type Props = {
@@ -11,24 +11,21 @@ type Props = {
     showsConstantValue?: boolean
 }
 
-// Display only — editing and removing come from the host's hover menu.
-// One look for every global reference — teal, like the global variable artwork — so it never reads as a
-// webhook (grey) or a method reference (colour box).
+// Same accent as global references in the workflow editor's chips.
+const GLOBAL_CHIP_COLOR = 'var(--color-action-primary)'
+
+// Display only — editing and removing come from the host. Uses the shared reference chip, so a global
+// reads the same here as in the workflow editor.
 export function GlobalReferenceChip({ reference, hasTooltip = true, showsConstantValue = false }: Props) {
+    const { t } = useI18n('entities')
     const info = useGlobalReferenceInfo(reference)
     if (!info) return null
     const shownValue = showsConstantValue ? info.constantValue : null
 
     const chip = (
-        <Tag
-            color={info.isUnknown ? 'error' : 'cyan'}
-            icon={<Icon name={info.isUnknown ? 'warning' : 'global-variable'} size={12} color="inherit" />}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginInlineEnd: 0, maxWidth: 260, fontFamily: 'monospace' }}
-            data-testid="global-reference-chip"
-        >
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{shownValue ?? info.label}</span>
-        </Tag>
+        <ReferenceChip color={GLOBAL_CHIP_COLOR} source={t('global-variable.picker.chipSource')}
+            path={shownValue ?? info.label} tone={info.isUnknown ? 'error' : 'default'} testId="global-reference-chip" />
     )
     const tooltip = shownValue === null ? info.detail : `${info.label} · ${info.detail}`
-    return hasTooltip ? <Tooltip content={tooltip} placement="top" zIndex={30000}>{chip}</Tooltip> : chip
+    return hasTooltip ? <Tooltip content={tooltip} placement="top" zIndex={30000}><span>{chip}</span></Tooltip> : chip
 }
