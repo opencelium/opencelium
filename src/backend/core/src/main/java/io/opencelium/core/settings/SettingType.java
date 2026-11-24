@@ -33,7 +33,10 @@ public enum SettingType {
 	 * <li>An IPv6 address has no brackets and no zone.</li>
 	 * </ul>
 	 */
-	HOST;
+	HOST,
+
+	/** A JSON string with the rule of {@link #TEXT}. The secret storage keeps the value, and a read shows a mask. */
+	SECRET;
 
 	private static final Pattern HOST_NAME_LABEL = Pattern.compile("[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?");
 
@@ -54,6 +57,7 @@ public enum SettingType {
 			case INTEGER -> isWholeNumber(value) && inside(((Number) value).longValue(), min, max);
 			case HOST -> value instanceof String host && inside(host.length(), min, max)
 					&& (isHostName(host) || isIpv6Address(host));
+			case SECRET -> throw new UnsupportedOperationException("not implemented yet");
 		};
 	}
 

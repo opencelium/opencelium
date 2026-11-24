@@ -37,6 +37,11 @@ public final class RootKeyConfig {
 	}
 
 	@Bean
+	DekAccess dekAccess(MongoTemplate mongo, DekWrapper wrapper, RootKey rootKey) {
+		return new DekAccess(mongo, wrapper, rootKey);
+	}
+
+	@Bean
 	KeyStartupCanary keyStartupCanary(WrappedDekRepository repository, DekWrapper wrapper, RootKey rootKey) {
 		return new KeyStartupCanary(repository, wrapper, rootKey);
 	}

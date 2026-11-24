@@ -119,6 +119,24 @@ class SettingTypeTest {
 	}
 
 	@Test
+	void validateRefusesASecretWhenItHasAControlCharacter() {
+		assertThat(SettingType.SECRET.validate("pa\u0000ss", 1, 255)).isFalse();
+		assertThat(SettingType.SECRET.validate("pa\nss", 1, 255)).isFalse();
+		assertThat(SettingType.SECRET.validate("pa\u202Ess", 1, 255)).isFalse();
+	}
+
+	@Test
+	void validateAcceptsASecretWhenItHasPrintableCharacters() {
+		assertThat(SettingType.SECRET.validate("s3cret-Pässword! with spaces", 1, 255)).isTrue();
+	}
+
+	@Test
+	void validateRefusesASecretWhenItIsEmptyOrLongerThan255Characters() {
+		assertThat(SettingType.SECRET.validate("", 1, 255)).isFalse();
+		assertThat(SettingType.SECRET.validate("p".repeat(256), 1, 255)).isFalse();
+	}
+
+	@Test
 	void validateRefusesATextWhenItIsEmptyOrNotAString() {
 		assertThat(SettingType.TEXT.validate("", 1, 255)).isFalse();
 		assertThat(SettingType.TEXT.validate(15, 1, 255)).isFalse();
