@@ -361,3 +361,7 @@ versions:
         operation: add
         value: 200
         path: opencelium.global-variable.change-log.max-run-entries
+      - changeset: 6
+        operation: add
+        value: 5.3
+        path: opencelium.version
