@@ -1,12 +1,9 @@
 import {
-	ApiOutlined,
 	CopyOutlined,
 	DownOutlined,
-	LinkOutlined,
-	NumberOutlined,
 } from '@ant-design/icons';
 import { Button, Input, Modal, Select } from 'antd';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { Connection, MethodWithId } from '../../types/connection';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import { LegacyResponseFieldSelect } from '../request-editor/body-editor/LegacyResponseFieldSelect/LegacyResponseFieldSelect';
@@ -55,12 +52,12 @@ import { evaluateIfComparison, type ComparisonEvaluation, type OperandInput } fr
 import { LoopInfoPanel } from './LoopInfoPanel/LoopInfoPanel';
 import { useConditionDragItem } from './ConditionReorder/useConditionDragItem';
 import { ConditionReorderProvider } from './ConditionReorder/ConditionReorderProvider';
-import { Radio } from '@shared/ui/primitives/Radio';
+import { ReferenceSourceSelect } from '../reference-source/ReferenceSourceSelect';
+import { ResponseTypeSelect } from '../reference-source/ResponseTypeSelect';
+import { useGlobalPickerScope } from '@entities/globalVariable/ui/picker/globalPicker';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
-import { Icon } from '@shared/ui/primitives/Icon';
 import { GlobalVariableSelect } from '@entities/globalVariable/ui/picker/GlobalVariableSelect';
-import { useGlobalPickerScope } from '@entities/globalVariable/ui/picker/globalPicker';
 import { buildGlobalReference, parseGlobalReference } from '@entities/globalVariable/lib/globalReference';
 import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
@@ -88,19 +85,6 @@ type Props = {
 	onClose: () => void;
 	onSave: (nodeId: string, config: ConditionConfig) => void;
 };
-
-const SOURCE_OPTIONS: { value: ConditionValueSource; titleKey: string; icon: ReactNode }[] = [
-	{ value: 'constant', titleKey: 'conditionBuilder.source.constant', icon: <NumberOutlined /> },
-	{ value: 'direct', titleKey: 'conditionBuilder.source.method', icon: <ApiOutlined /> },
-	{ value: 'webhook', titleKey: 'conditionBuilder.source.webhook', icon: <LinkOutlined /> },
-	{ value: 'global', titleKey: 'conditionBuilder.source.global', icon: <Icon name="globe" size={14} /> },
-];
-
-const RESPONSE_TYPE_OPTIONS: { value: ResponseType; label: string; titleKey: string }[] = [
-	{ value: 'body', label: 'B', titleKey: 'conditionBuilder.responseType.body' },
-	{ value: 'header', label: 'H', titleKey: 'conditionBuilder.responseType.header' },
-	{ value: 'status', label: 'S', titleKey: 'conditionBuilder.responseType.status' },
-];
 
 const IF_OPERATOR_OPTIONS = Object.values(IfOperatorName).map((value) => ({
 	value,
@@ -264,51 +248,6 @@ const getFirstRuleOperator = (group: ConditionGroup): string | undefined => {
 	return undefined;
 };
 
-function SourceSwitcher({
-	value,
-	onChange,
-}: {
-	value: ConditionValueSource;
-	onChange: (value: ConditionValueSource) => void;
-}) {
-	const { t } = useI18n('workflow');
-	const hasGlobalSource = useGlobalPickerScope() !== null;
-	return (
-		<div className="conditionSourceSwitcher compactRadioGroup">
-			{SOURCE_OPTIONS.filter((option) => option.value !== 'global' || hasGlobalSource).map((option) => (
-				<Radio
-					key={option.value}
-					checked={value === option.value}
-					onChange={() => onChange(option.value)}
-					label={<span className="conditionRadioIcon" title={t(option.titleKey)}>{option.icon}</span>}
-				/>
-			))}
-		</div>
-	);
-}
-
-function ResponseTypeSwitcher({
-	value,
-	onChange,
-}: {
-	value: ResponseType;
-	onChange: (value: ResponseType) => void;
-}) {
-	const { t } = useI18n('workflow');
-	return (
-		<div className="conditionResponseTypeSwitcher compactRadioGroup">
-			{RESPONSE_TYPE_OPTIONS.map((option) => (
-				<Radio
-					key={option.value}
-					checked={value === option.value}
-					onChange={() => onChange(option.value)}
-					label={<span className="conditionRadioIcon conditionResponseTypeIcon" title={t(option.titleKey)}>{option.label}</span>}
-				/>
-			))}
-		</div>
-	);
-}
-
 function MethodSelect({
 	methods,
 	selectedMethod,
@@ -416,6 +355,10 @@ function ConditionValueInput({
 	const methodId = fieldValue ? parsedMethod?.id : draftMethodId;
 	const responseType = normalizeResponseType(draftResponseType);
 	const selectedMethod = allMethods.find((method) => method.id === methodId);
+	const hasGlobalSource = useGlobalPickerScope() !== null;
+	const sources: ConditionValueSource[] = hasGlobalSource
+		? ['constant', 'direct', 'webhook', 'global']
+		: ['constant', 'direct', 'webhook'];
 
 	// Hover-driven live value — same pattern as BodyPointer/RequestReferenceTokens:
 	// resolution only fires once the field-select itself is hovered, no eager
@@ -450,7 +393,7 @@ function ConditionValueInput({
 	if (source === 'constant') {
 		return (
 			<div className="conditionValueInput">
-				<SourceSwitcher value={source} onChange={setSource} />
+				<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
 				<Input
 					placeholder={t('placeholders.constant')}
 					value={fieldValue}
@@ -464,7 +407,7 @@ function ConditionValueInput({
 	if (source === 'global') {
 		return (
 			<div className="conditionValueInput conditionValueInputWebhook">
-				<SourceSwitcher value={source} onChange={setSource} />
+				<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
 				<GlobalVariableSelect
 					value={parseGlobalReference(fieldValue)?.name}
 					popupZIndex={popupZIndex}
@@ -478,7 +421,7 @@ function ConditionValueInput({
 	if (source === 'webhook') {
 		return (
 			<div className="conditionValueInput conditionValueInputWebhook">
-				<SourceSwitcher value={source} onChange={setSource} />
+				<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
 				<LegacyWebhookReferenceSelect
 					value={extractWebhookValue(fieldValue) || undefined}
 					popupZIndex={popupZIndex}
@@ -490,7 +433,7 @@ function ConditionValueInput({
 
 	return (
 		<div className="conditionValueInput">
-			<SourceSwitcher value={source} onChange={setSource} />
+			<ReferenceSourceSelect value={source} sources={sources} popupZIndex={popupZIndex ?? 13010} testId={`workflow-condition-source-${side}`} onChange={setSource} />
 			<MethodSelect
 				methods={methods}
 				selectedMethod={selectedMethod}
@@ -501,8 +444,10 @@ function ConditionValueInput({
 					onChange({ [fieldKey]: undefined });
 				}}
 			/>
-			<ResponseTypeSwitcher
+			<ResponseTypeSelect
 				value={responseType}
+				popupZIndex={popupZIndex ?? 13010}
+				testId={`workflow-condition-response-type-${side}`}
 				onChange={(value) => {
 					setDraftResponseType(value);
 					onChange({

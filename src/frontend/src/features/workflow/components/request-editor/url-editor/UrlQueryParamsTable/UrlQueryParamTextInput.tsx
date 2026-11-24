@@ -8,7 +8,7 @@ import type {
 import { UrlInlineValueEditor } from '../UrlInlineValueEditor/UrlInlineValueEditor';
 import type { QueryParamField, UrlQueryParamsTableProps } from './UrlQueryParamsTable.types';
 import {
-	hasArgToken,
+	hasInlineReference,
 	preventInvalidQueryParamKey,
 	queryParamInputStyle,
 	sanitizePastedQueryParam,
@@ -41,7 +41,7 @@ export function UrlQueryParamTextInput({
 			caret: input?.selectionStart ?? 0,
 		});
 
-	if (hasArgToken(value)) {
+	if (hasInlineReference(value)) {
 		return (
 			<div data-url-row-id={row.id} data-url-field={field}>
 				<UrlInlineValueEditor
