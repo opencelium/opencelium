@@ -26,9 +26,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
-import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
-import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
 import com.becon.opencelium.backend.factory.SchedulerFactory;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.quartz.SchedulingStrategy;
@@ -69,8 +67,6 @@ public class SchedulerServiceImp implements SchedulerService {
     private final ExecutionService executionService;
     private final ExecutionArgumentService executionArgumentService;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
-    private final GlobalVariableUsageService globalVariableUsageService;
-    private final WorkflowRunGate runGate;
 
 
     public SchedulerServiceImp(
@@ -85,9 +81,7 @@ public class SchedulerServiceImp implements SchedulerService {
             SchedulerFactoryBean schedulerFactoryBean,
             ExecutionService executionService,
             ExecutionArgumentService executionArgumentService,
-            Mapper<Connection, ConnectionDTO> connectionMapper,
-            GlobalVariableUsageService globalVariableUsageService,
-            WorkflowRunGate runGate
+            Mapper<Connection, ConnectionDTO> connectionMapper
     ) {
         this.connectionService = connectionService;
         this.webhookService = webhookService;
@@ -101,8 +95,6 @@ public class SchedulerServiceImp implements SchedulerService {
         this.executionArgumentService = executionArgumentService;
         this.connectionMapper = connectionMapper;
         this.connectorService = connectorService;
-        this.globalVariableUsageService = globalVariableUsageService;
-        this.runGate = runGate;
     }
 
     @Override
@@ -112,13 +104,6 @@ public class SchedulerServiceImp implements SchedulerService {
 //        if (existsByTitle(scheduler.getTitle())) {
 //            throw new RuntimeException("TITLE_ALREADY_EXISTS");
 //        }
-        // a schedule sent with the id of a stored one is written over it, and the notifications of
-        // that one then belong to the workflow sent here; a new schedule has none
-        if (scheduler.getId() != 0) {
-            schedulerRepository.findById(scheduler.getId())
-                    .ifPresent(stored -> checkNotificationsIfWorkflowChanges(stored, scheduler.getConnection()));
-        }
-
         Scheduler saved = schedulerRepository.save(scheduler);
         schedulingStrategy.addJob(saved);
     }
@@ -132,9 +117,6 @@ public class SchedulerServiceImp implements SchedulerService {
         if (!Objects.equals(entity.getTitle(), scheduler.getTitle()) && existsByTitle(scheduler.getTitle())) {
             throw new RuntimeException("TITLE_ALREADY_EXISTS");
         }
-
-        // checked before the schedule is written or its job moved, so a refusal leaves both as they are
-        checkNotificationsIfWorkflowChanges(entity, scheduler.getConnection());
 
         schedulerRepository.save(scheduler);
         schedulingStrategy.rescheduleJob(scheduler, oldCon);
@@ -155,13 +137,7 @@ public class SchedulerServiceImp implements SchedulerService {
         // ON DELETE NO ACTION, and entity-level cascade misses rows written concurrently.
         executionArgumentService.deleteBySchedulerId(id);
         executionService.deleteBySchedulerId(id);
-        // the notifications of a schedule are deleted with it, and so are their usages
-        List<EventNotification> notifications = scheduler.getEventNotifications();
         schedulerRepository.delete(scheduler);
-        if (notifications != null) {
-            notifications.forEach(notification ->
-                    globalVariableUsageService.deleteForNotification(notification.getId()));
-        }
     }
 
     @Override
@@ -284,7 +260,6 @@ public class SchedulerServiceImp implements SchedulerService {
     public synchronized void startNow(Scheduler scheduler) {
         // Schedules and webhooks must be able to trigger multiple executions.
 //        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
-        throwIfRefusedByGlobalVariables(scheduler);
         schedulingStrategy.runJob(scheduler);
     }
 
@@ -294,50 +269,10 @@ public class SchedulerServiceImp implements SchedulerService {
         schedulingStrategy.runJob(scheduler, channelId);
     }
 
-    /**
-     * Starts a schedule for a webhook that carries no data. The run is the one a manual start
-     * gives; only a refusal differs: the run gate counts it for the schedule, because the calling
-     * system alone sees the answer.
-     *
-     * @throws GlobalVariableConflictException with code BUSY
-     */
-    @Override
-    public synchronized void startNowByWebhook(Scheduler scheduler) {
-        throwIfWebhookRefusedByGlobalVariables(scheduler);
-        schedulingStrategy.runJob(scheduler);
-    }
-
-    /**
-     * Starts a schedule for a webhook that carries data. Like a webhook without data, it does not
-     * wait for other runs of the workflow; only the busy policy of a mutable global variable
-     * can refuse it, and the run gate counts that refusal for the schedule.
-     *
-     * @throws GlobalVariableConflictException with code BUSY
-     */
     @Override
     public void startNow(Scheduler scheduler, Map<String, Object> webhook) {
-        throwIfWebhookRefusedByGlobalVariables(scheduler);
+        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
         schedulingStrategy.runJob(scheduler, webhook);
-    }
-
-    /**
-     * Answers a start that a busy workflow would refuse at once, instead of only in the log of a
-     * run that never begins. A start that would wait in the queue goes on to Quartz.
-     *
-     * @throws GlobalVariableConflictException with code BUSY
-     */
-    private void throwIfRefusedByGlobalVariables(Scheduler scheduler) {
-        runGate.checkCanStart(scheduler.getConnection().getId());
-    }
-
-    /**
-     * Answers a webhook start like {@link #throwIfRefusedByGlobalVariables}, and lets the run gate
-     * count the refusal, which it reports once when the run that holds the workflow ends.
-     *
-     * @throws GlobalVariableConflictException with code BUSY
-     */
-    private void throwIfWebhookRefusedByGlobalVariables(Scheduler scheduler) {
-        runGate.checkWebhookCanStart(scheduler.getConnection().getId(), scheduler.getId());
     }
 
     @Override
@@ -434,39 +369,16 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void saveNotification(EventNotification eventNotification) {
-        // the texts a notification sends are those of its template: checked against the workflow
-        // of its schedule before anything is stored
-        globalVariableUsageService.checkNotification(eventNotification);
-
         notificationRepository.save(eventNotification);
         eventNotification.getEventRecipients().forEach(recipientService::save);
         messageService.save(eventNotification.getEventMessage());
-        globalVariableUsageService.rebuildForNotification(eventNotification);
     }
 
     @Override
     public void deleteNotificationById(int id) {
         notificationRepository.deleteById(id);
-        globalVariableUsageService.deleteForNotification(id);
     }
 
-
-    /**
-     * Checks the stored notifications of a schedule against the workflow it is given, when that
-     * is another one than it runs now: a notification belongs to the workflow of its schedule, so
-     * its texts must be in the scope of the new one. The notifications sent with the schedule are
-     * not stored with it, so they are not the ones checked.
-     *
-     * @param stored   the schedule as it is stored, with its notifications
-     * @param workflow the workflow it is given
-     */
-    private void checkNotificationsIfWorkflowChanges(Scheduler stored, Connection workflow) {
-        Long current = stored.getConnection() == null ? null : stored.getConnection().getId();
-        Long next = workflow == null ? null : workflow.getId();
-        if (!Objects.equals(current, next)) {
-            globalVariableUsageService.checkScheduleWorkflowChange(stored, workflow);
-        }
-    }
 
     private RunningJobsResource toRunningJobResource(RunningJob runningJob) {
         long connectionId = runningJob.connectionId();

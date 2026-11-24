@@ -20,9 +20,6 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private ContentServiceImpl contentService;
 
-    @Autowired
-    private GlobalVariableUsageService globalVariableUsageService;
-
     @Override
     public void save(EventMessage eventMessage) {
         messageRepository.save(eventMessage);
@@ -32,9 +29,6 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void deleteById(int id) {
         findById(id).orElseThrow(()->new RuntimeException("TEMPLATE_NOT_FOUND"));
-        // the notifications that send a template are deleted with it: their usages go first,
-        // while the notifications can still be found
-        globalVariableUsageService.deleteForTemplate(id);
         messageRepository.deleteById(id);
     }
 

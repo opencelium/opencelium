@@ -6,7 +6,6 @@ import jakarta.annotation.Resource;
 import org.springframework.http.HttpMethod;
 
 import java.util.List;
-import java.util.Map;
 
 @Resource
 public class OperationDTO {
@@ -18,8 +17,6 @@ public class OperationDTO {
     private String execOrder;
     private String jump;
     private Integer aggregatorId;
-    // global.name -> the value to write once the operation has responded
-    private Map<String, String> globalWrites = Map.of();
     private List<ParameterDTO> parameters;
     private RequestBodyDTO requestBody;
     private List<ResponseDTO> responses;
@@ -146,13 +143,5 @@ public class OperationDTO {
 
     public void setConnectorId(Integer connectorId) {
         this.connectorId = connectorId;
-    }
-
-    public Map<String, String> getGlobalWrites() {
-        return globalWrites;
-    }
-
-    public void setGlobalWrites(Map<String, String> globalWrites) {
-        this.globalWrites = globalWrites == null ? Map.of() : globalWrites;
     }
 }

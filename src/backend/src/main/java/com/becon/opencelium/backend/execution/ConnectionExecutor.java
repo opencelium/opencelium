@@ -3,8 +3,6 @@ package com.becon.opencelium.backend.execution;
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.exception.JumpValidationException;
-import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
-import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableWriter;
 import com.becon.opencelium.backend.execution.jump.ExecutionJumpGraphBuilder;
 import com.becon.opencelium.backend.execution.jump.JumpGraph;
 import com.becon.opencelium.backend.execution.jump.JumpNode;
@@ -13,7 +11,6 @@ import com.becon.opencelium.backend.execution.jump.JumpViolation;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.masking.MaskingServiceImp;
 import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
@@ -41,8 +38,6 @@ public class ConnectionExecutor {
     private final ConnectionEx connection;
     private final MaskingService masking;
     private final ProxyEx proxy;
-    private final GlobalVariableSnapshot globalSnapshot;
-    private final GlobalVariableWriter.Run globalWriter;
     private ExecutionManager executionManager;
 
     private static final Logger log = LoggerFactory.getLogger(ConnectionExecutor.class);
@@ -51,8 +46,6 @@ public class ConnectionExecutor {
         this.webhookVars = executionObj.getWebhookVars();
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
-        this.globalSnapshot = executionObj.getGlobalSnapshot();
-        this.globalWriter = executionObj.getGlobalWriter();
 
         this.masking = new MaskingServiceImp(rules);
     }
@@ -65,10 +58,7 @@ public class ConnectionExecutor {
                 connection.getFieldBind(),
                 getRequestData(),
                 getRestTemplate(),
-                getPagination(),
-                globalSnapshot,
-                globalWriter,
-                ReferenceExtractor::new
+                getPagination()
         );
 
         if (connection.getSource() != null) {

@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.mapper.execution;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import org.springframework.stereotype.Component;
 
@@ -14,21 +13,15 @@ public class ConnectionExMapper {
         this.fieldBindExMapper = fieldBindExMapper;
     }
 
-    /**
-     * Builds what a run executes from the stored workflow.
-     *
-     * @param globals the global variables of the run; a connector field that holds a reference
-     *                gets its value from them
-     */
-    public ConnectionEx toEntity(ConnectionMng dto, GlobalVariableSnapshot globals) {
+    public ConnectionEx toEntity(ConnectionMng dto){
         ConnectionEx connectionEx = new ConnectionEx();
 
-        connectionEx.setSource(connectorExMapper.toEntity(dto.getFromConnector(), globals));
+        connectionEx.setSource(connectorExMapper.toEntity(dto.getFromConnector()));
 
         if (dto.getToConnector() != null) {
-            connectionEx.setTarget(connectorExMapper.toEntity(dto.getToConnector(), globals));
+            connectionEx.setTarget(connectorExMapper.toEntity(dto.getToConnector()));
         } else {
-            connectionEx.setConnectors(connectorExMapper.toMethodConnectorMap(dto.getFromConnector(), globals));
+            connectionEx.setConnectors(connectorExMapper.toMethodConnectorMap(dto.getFromConnector()));
         }
 
         connectionEx.setFieldBind(fieldBindExMapper.toEntityAll(dto.getFieldBindings()));

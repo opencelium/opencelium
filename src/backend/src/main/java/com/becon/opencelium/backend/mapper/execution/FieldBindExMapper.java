@@ -21,8 +21,6 @@ public class FieldBindExMapper {
 
         enhancementEx.setEnhanceId(dto.getEnhancementId());
         enhancementEx.setLang(dto.getEnhancement().getLanguage());
-        // an enhancement without args runs its script all the same
-        enhancementEx.setScript(enhancement.getScript());
 
         if (enhancement.getArgs() == null) {
             enhancementEx.setArgs(new HashMap<>());
@@ -43,20 +41,15 @@ public class FieldBindExMapper {
 
             Map<String, String> args = new HashMap<>();
             vars.forEach(v -> {
-                // whitespace after the last ';', or ';;', leaves an empty part that declares nothing
-                if (v.isBlank()) {
-                    return;
-                }
                 List<String> split = PathAndReferenceUtility.splitByDelimiter(v, '=');
                 String key = split.get(0).trim().split("\\s")[1];
                 String value = split.get(1).trim();
-                if (key.equals("RESULT_VAR")) {
-                    enhancementEx.setResultRef(value);
-                } else {
+                if (!key.equals("RESULT_VAR")) {
                     args.put(key, value);
                 }
             });
 
+            enhancementEx.setScript(enhancement.getScript());
             enhancementEx.setArgs(args);
         }
 

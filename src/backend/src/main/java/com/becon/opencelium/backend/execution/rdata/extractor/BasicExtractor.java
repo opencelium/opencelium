@@ -3,7 +3,6 @@ package com.becon.opencelium.backend.execution.rdata.extractor;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -45,8 +44,7 @@ public class BasicExtractor implements Extractor {
                 .filter(d -> d.getField().equals(credentials[1]))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException(credentials[1] + "property not found in request_data")).getValue();
-        String authCode = "Basic " + Base64.getEncoder()
-                .encodeToString((username + ":" + password).getBytes(StandardCharsets.UTF_8));
+        String authCode = "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
         return Optional.of(authCode);
     }
 }

@@ -12,7 +12,6 @@ public enum SegmentType implements LogLineStage {
     IF_RESULT,
     LOOP_REF,
     REF_NOT_FOUND, // a reference whose data was never produced; execution continues
-    GLOBAL_SNAPSHOT, // one global variable the run reads: its name, version and, within limits, its value
     EXCEPTION;
 
 

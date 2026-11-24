@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.resource.execution;
 
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
@@ -134,7 +133,7 @@ public class SchemaDTOUtil {
 
             // loop through each property and convert it to JSON string recursively
             String object = properties.entrySet().stream()
-                    .map(entry -> quoteJson(entry.getKey()) + ": " + SchemaDTOUtil.toJSON(entry.getValue()))
+                    .map(entry -> "\"" + entry.getKey() + "\": " + SchemaDTOUtil.toJSON(entry.getValue()))
                     .collect(Collectors.joining(", "));
 
             return "{" + object + "}";
@@ -164,34 +163,8 @@ public class SchemaDTOUtil {
             return null;
         }
 
-        // a STRING primitive is quoted, and its quotes, backslashes and control characters are
-        // escaped: a value from a reference or a global variable may hold any of them
-        return type == DataType.STRING ? quoteJson(value) : value;
-    }
-
-    /** Returns {@code text} as a JSON string literal, quoted and escaped. */
-    private static String quoteJson(String text) {
-        return "\"" + new String(JsonStringEncoder.getInstance().quoteAsString(text)) + "\"";
-    }
-
-    /**
-     * Escapes {@code text} for XML character data, or for an attribute value in double quotes
-     * when {@code attribute} is true. A value from a reference or a global variable is data, so
-     * a {@code &} or a {@code <} in it must not be read as markup.
-     */
-    private static String escapeXml(String text, boolean attribute) {
-        StringBuilder result = new StringBuilder(text.length());
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            switch (c) {
-                case '&' -> result.append("&amp;");
-                case '<' -> result.append("&lt;");
-                case '>' -> result.append("&gt;");
-                case '"' -> result.append(attribute ? "&quot;" : "\"");
-                default -> result.append(c);
-            }
-        }
-        return result.toString();
+        // for STRING primitive we need to add double quote
+        return type == DataType.STRING ? "\"" + value + "\"" : value;
     }
 
     public static String toText(SchemaDTO schema) {
@@ -277,7 +250,7 @@ public class SchemaDTOUtil {
         if (xml != null && xml.getNamespace() != null) {
             String prefix = xml.getPrefix() == null ? "" : ":" + xml.getPrefix();
 
-            attributes.add("xmlns" + prefix + "=\"" + escapeXml(xml.getNamespace(), true) + "\"");
+            attributes.add("xmlns" + prefix + "=\"" + xml.getNamespace() + "\"");
         }
 
         if (schema.getProperties() != null) {
@@ -288,8 +261,7 @@ public class SchemaDTOUtil {
                 if (value.getXml() != null && value.getXml().isAttribute()) {
                     String attributeName = getName(name, value);
 
-                    String attributeValue = value.getValue() == null ? "" : escapeXml(value.getValue(), true);
-                    attributes.add(prefix + attributeName + "=\"" + attributeValue + "\"");
+                    attributes.add(prefix + attributeName + "=\"" + value.getValue() + "\"");
                 }
             });
 
@@ -306,7 +278,7 @@ public class SchemaDTOUtil {
         DataType type = value.getType();
 
         if (type.isPrimitive()) {
-            return value.getValue() == null ? "" : escapeXml(value.getValue(), false);
+            return value.getValue() == null ? "" : value.getValue();
         }
 
         if (type == DataType.ARRAY) {

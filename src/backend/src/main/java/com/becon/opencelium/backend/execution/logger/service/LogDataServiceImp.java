@@ -180,9 +180,6 @@ public class LogDataServiceImp implements LogDataService {
         collected.setLogLineType(entity.getLogLineType());
         collected.setType(entity.getType());
         collected.setError(entity.getError());
-        // the global snapshot of an EXECUTION element is complete only in the stored element:
-        // the lines read above stop at the first element they can build
-        collected.setGlobalSnapshot(entity.getGlobalSnapshot());
 
         return logDataMapper.toDto(collected);
     }
@@ -569,10 +566,6 @@ public class LogDataServiceImp implements LogDataService {
         existing.setEndOffset(incoming.getEndOffset());
         existing.setStatus(incoming.getStatus());
         existing.setProperties(incoming.getProperties());
-        // the snapshot of an EXECUTION block is built only once the block closes or fails
-        if (incoming.getGlobalSnapshot() != null) {
-            existing.setGlobalSnapshot(incoming.getGlobalSnapshot());
-        }
         existing.setCreatedAt(Instant.now());
 
         return existing;

@@ -20,7 +20,6 @@ import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.WidgetSettingServiceImp;
 import com.becon.opencelium.backend.enums.AuthMethod;
-import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.UserNotFoundException;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserDetailResource;
@@ -30,7 +29,6 @@ import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.testutil.fixture.UserFixture;
 import com.becon.opencelium.backend.testutil.fixture.UserRoleFixture;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -129,91 +127,6 @@ class UserServiceImplTest {
         verifyNoMoreInteractions(userRepository);
     }
 
-    // ── findLocalAccount ──────────────────────────────────────────────────────
-
-    @Test
-    void findLocalAccountReturnsUserWhenEmailBelongsToBasicUserWithPassword() {
-        User user = aLocalAccount("alice@example.com", "alice");
-        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(user));
-
-        Optional<User> result = userService.findLocalAccount("alice@example.com");
-
-        assertThat(result).containsSame(user);
-        verify(userRepository, never()).findByUsername(any());
-    }
-
-    @Test
-    void findLocalAccountReturnsUserWhenUsernameBelongsToBasicUser() {
-        User user = aLocalAccount("alice@example.com", "alice");
-        when(userRepository.findByEmail("alice")).thenReturn(Optional.empty());
-        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
-
-        Optional<User> result = userService.findLocalAccount("alice");
-
-        assertThat(result).containsSame(user);
-    }
-
-    @Test
-    void findLocalAccountTrimsIdentifierWhenItHasSurroundingWhitespace() {
-        User user = aLocalAccount("alice@example.com", "alice");
-        when(userRepository.findByEmail("alice")).thenReturn(Optional.empty());
-        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
-
-        Optional<User> result = userService.findLocalAccount("  alice  ");
-
-        assertThat(result).containsSame(user);
-    }
-
-    @Test
-    void findLocalAccountReturnsEmptyWhenAccountIsLdap() {
-        User user = aLocalAccount(null, "ldap-user");
-        user.setAuthMethod(AuthMethod.LDAP);
-        when(userRepository.findByEmail("ldap-user")).thenReturn(Optional.empty());
-        when(userRepository.findByUsername("ldap-user")).thenReturn(Optional.of(user));
-
-        Optional<User> result = userService.findLocalAccount("ldap-user");
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    @DisplayName("findLocalAccount — a BASIC row without password is an LDAP user from before auth_method existed")
-    void findLocalAccountReturnsEmptyWhenBasicUserHasNoPassword() {
-        User user = aLocalAccount("legacy@example.com", null);
-        user.setPassword(null);
-        when(userRepository.findByEmail("legacy@example.com")).thenReturn(Optional.of(user));
-
-        Optional<User> result = userService.findLocalAccount("legacy@example.com");
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    void findLocalAccountReturnsEmptyWhenIdentifierIsUnknown() {
-        when(userRepository.findByEmail("nobody")).thenReturn(Optional.empty());
-        when(userRepository.findByUsername("nobody")).thenReturn(Optional.empty());
-
-        Optional<User> result = userService.findLocalAccount("nobody");
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    void findLocalAccountReturnsEmptyWhenIdentifierIsBlank() {
-        Optional<User> result = userService.findLocalAccount("   ");
-
-        assertThat(result).isEmpty();
-        verifyNoInteractions(userRepository);
-    }
-
-    @Test
-    void findLocalAccountReturnsEmptyWhenIdentifierIsNull() {
-        Optional<User> result = userService.findLocalAccount(null);
-
-        assertThat(result).isEmpty();
-        verifyNoInteractions(userRepository);
-    }
-
     @Test
     void findByIdReturnsUserWhenExists() {
         User user = UserFixture.anEmptyUser();
@@ -236,20 +149,6 @@ class UserServiceImplTest {
 
         assertThat(result).isEmpty();
         verify(userRepository).findOneById(999);
-        verifyNoMoreInteractions(userRepository);
-    }
-
-    @Test
-    void findByIdNoLockReturnsUserWithoutLockingWhenExists() {
-        User user = UserFixture.anEmptyUser();
-        user.setId(7);
-        when(userRepository.findById(7)).thenReturn(Optional.of(user));
-
-        Optional<User> result = userService.findByIdNoLock(7);
-
-        assertThat(result).isPresent();
-        assertThat(result.get().getId()).isEqualTo(7);
-        verify(userRepository).findById(7);
         verifyNoMoreInteractions(userRepository);
     }
 
@@ -335,7 +234,6 @@ class UserServiceImplTest {
         saved.setUsername("ldap-user@example.com");
         saved.setEmail("ldap-user@example.com");
 
-        when(userRepository.existsByUsernameAndIdNot("ldap-user@example.com", 0)).thenReturn(false);
         when(userRepository.save(input)).thenReturn(saved);
 
         User result = userService.save(input);
@@ -343,7 +241,6 @@ class UserServiceImplTest {
         assertThat(result.getId()).isEqualTo(17);
         assertThat(result.getUsername()).isEqualTo("ldap-user@example.com");
         assertThat(result.getEmail()).isEqualTo("ldap-user@example.com");
-        verify(userRepository).existsByUsernameAndIdNot("ldap-user@example.com", 0);
         verify(userRepository).save(input);
         verifyNoMoreInteractions(userRepository);
     }
@@ -359,7 +256,6 @@ class UserServiceImplTest {
         saved.setId(17);
         saved.setUsername("ldap-user");
 
-        when(userRepository.existsByUsernameAndIdNot("ldap-user", 0)).thenReturn(false);
         when(userRepository.save(input)).thenReturn(saved);
 
         User result = userService.save(input);
@@ -367,7 +263,6 @@ class UserServiceImplTest {
         assertThat(result.getId()).isEqualTo(17);
         assertThat(result.getUsername()).isEqualTo("ldap-user");
         assertThat(result.getEmail()).isNull();
-        verify(userRepository).existsByUsernameAndIdNot("ldap-user", 0);
         verify(userRepository).save(input);
         verifyNoMoreInteractions(userRepository);
     }
@@ -385,73 +280,7 @@ class UserServiceImplTest {
         verifyNoInteractions(userRepository);
     }
 
-    @Test
-    void saveTrimsUsernameWhenItHasSurroundingWhitespace() {
-        User input = UserFixture.anEmptyUser();
-        input.setAuthMethod(AuthMethod.BASIC);
-        input.setEmail("bob@example.com");
-        input.setUsername("  bob  ");
-
-        when(userRepository.existsByUsernameAndIdNot("bob", 0)).thenReturn(false);
-        when(userRepository.save(input)).thenReturn(input);
-
-        User result = userService.save(input);
-
-        assertThat(result.getUsername()).isEqualTo("bob");
-        verify(userRepository).existsByUsernameAndIdNot("bob", 0);
-        verify(userRepository).save(input);
-        verifyNoMoreInteractions(userRepository);
-    }
-
-    @Test
-    void saveStoresNullUsernameWhenItIsBlank() {
-        User input = UserFixture.anEmptyUser();
-        input.setAuthMethod(AuthMethod.BASIC);
-        input.setEmail("bob@example.com");
-        input.setUsername("   ");
-
-        when(userRepository.save(input)).thenReturn(input);
-
-        User result = userService.save(input);
-
-        assertThat(result.getUsername()).isNull();
-        verify(userRepository).save(input);
-        verifyNoMoreInteractions(userRepository);
-    }
-
-    @Test
-    void saveThrowsWhenBasicUserUsernameContainsAtSign() {
-        User input = UserFixture.anEmptyUser();
-        input.setAuthMethod(AuthMethod.BASIC);
-        input.setEmail("bob@example.com");
-        input.setUsername("bob@example.com");
-
-        assertThatThrownBy(() -> userService.save(input))
-                .isInstanceOf(GeneralServiceException.class)
-                .hasFieldOrPropertyWithValue("error", ExceptionConstant.USERNAME_INVALID);
-
-        verifyNoInteractions(userRepository);
-    }
-
-    @Test
-    void saveThrowsWhenUsernameIsTakenByAnotherUser() {
-        User input = UserFixture.anEmptyUser();
-        input.setId(7);
-        input.setAuthMethod(AuthMethod.BASIC);
-        input.setEmail("bob@example.com");
-        input.setUsername("bob");
-
-        when(userRepository.existsByUsernameAndIdNot("bob", 7)).thenReturn(true);
-
-        assertThatThrownBy(() -> userService.save(input))
-                .isInstanceOf(GeneralServiceException.class)
-                .hasFieldOrPropertyWithValue("error", ExceptionConstant.USERNAME_ALREADY_EXIST);
-
-        verify(userRepository).existsByUsernameAndIdNot("bob", 7);
-        verify(userRepository, never()).save(any());
-    }
-
-    // ── existsByEmail / existsByUsername / existsById / deleteById / findAll ──
+    // ── existsByEmail / existsById / deleteById / findAll ─────────────────────
 
     @Test
     void existsByEmailReturnsTrueWhenRepositoryReportsExists() {
@@ -461,17 +290,6 @@ class UserServiceImplTest {
 
         assertThat(result).isTrue();
         verify(userRepository).existsByEmail("a@b.com");
-        verifyNoMoreInteractions(userRepository);
-    }
-
-    @Test
-    void existsByUsernameReturnsTrueWhenRepositoryReportsExists() {
-        when(userRepository.existsByUsername("bob")).thenReturn(true);
-
-        boolean result = userService.existsByUsername("bob");
-
-        assertThat(result).isTrue();
-        verify(userRepository).existsByUsername("bob");
         verifyNoMoreInteractions(userRepository);
     }
 
@@ -618,7 +436,7 @@ class UserServiceImplTest {
         UserDetail mappedDetail = new UserDetail();
         UserRole role = UserRoleFixture.aStandardUserRole();
 
-        when(userRepository.findById(5)).thenReturn(Optional.of(userDb));
+        when(userRepository.findOneById(5)).thenReturn(Optional.of(userDb));
         when(userRoleRepository.findById(7)).thenReturn(Optional.of(role));
         when(bCryptPasswordEncoder.encode("newPw")).thenReturn("$2a$new");
         when(detailService.toEntity(any(UserDetailResource.class))).thenReturn(mappedDetail);
@@ -651,7 +469,7 @@ class UserServiceImplTest {
         UserRole role = UserRoleFixture.aStandardUserRole();
         UserDetail mappedDetail = new UserDetail();
 
-        when(userRepository.findById(5)).thenReturn(Optional.of(userDb));
+        when(userRepository.findOneById(5)).thenReturn(Optional.of(userDb));
         when(userRoleRepository.findById(7)).thenReturn(Optional.of(role));
         when(detailService.toEntity(any(UserDetailResource.class))).thenReturn(mappedDetail);
         when(sessionService.findByUserId(5)).thenReturn(Optional.empty());
@@ -749,14 +567,5 @@ class UserServiceImplTest {
         r.setUserGroup(userGroup);
         r.setUserDetail(new UserDetailResource());
         return r;
-    }
-
-    private static User aLocalAccount(String email, String username) {
-        User user = UserFixture.anEmptyUser();
-        user.setEmail(email);
-        user.setUsername(username);
-        user.setAuthMethod(AuthMethod.BASIC);
-        user.setPassword("$2a$hash");
-        return user;
     }
 }

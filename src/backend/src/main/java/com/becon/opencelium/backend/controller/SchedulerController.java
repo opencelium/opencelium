@@ -24,7 +24,6 @@ import com.becon.opencelium.backend.websocket.constant.SocketConstant;
 import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.resource.error.GlobalVariableErrorResource;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
@@ -239,9 +238,6 @@ public class SchedulerController {
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "409",
-                description = "A workflow is busy and a global variable it uses refuses a second start (code BUSY)",
-                content = @Content(schema = @Schema(implementation = GlobalVariableErrorResource.class))),
         @ApiResponse( responseCode = "500",
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -249,8 +245,13 @@ public class SchedulerController {
     @PutMapping(value = "/startAll", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> startAll(@RequestBody IdentifiersDTO<Integer> ids) throws Exception {
         List<Scheduler> schedulers = schedulerService.findAllById(ids.getIdentifiers());
-        // not wrapped, so a refusal reaches the client as 409 BUSY
-        schedulers.parallelStream().forEach(schedulerService::startNow);
+        schedulers.parallelStream().forEach(scheduler -> {
+            try {
+                schedulerService.startNow(scheduler);
+            } catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        });
         return ResponseEntity.ok().build();
     }
 
@@ -383,19 +384,22 @@ public class SchedulerController {
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "409",
-                description = "The workflow is busy and a global variable it uses refuses a second start (code BUSY)",
-                content = @Content(schema = @Schema(implementation = GlobalVariableErrorResource.class))),
         @ApiResponse( responseCode = "500",
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/execute/{schedulerId}")
     public ResponseEntity<?> execute(@PathVariable int schedulerId){
-        Scheduler scheduler = schedulerService.findById(schedulerId)
-                .orElseThrow(() -> new RuntimeException("SCHEDULER_NOT_FOUND"));
-        // not wrapped, so a refusal reaches the client as 409 BUSY
-        schedulerService.startNow(scheduler);
+        try {
+            Scheduler scheduler = schedulerService.findById(schedulerId).orElse(null);
+            if (scheduler == null){
+                throw new RuntimeException("SCHEDULER_NOT_FOUND");
+            }
+            schedulerService.startNow(scheduler);
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
         return ResponseEntity.ok().build();
     }
 

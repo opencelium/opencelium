@@ -92,21 +92,8 @@ public class User {
         this.widgetSettings = widgetSettings;
     }
 
-    /**
-     * Returns the identifier this user is known by at runtime (JWT subject, websocket user
-     * destination, TOTP label): the email when present, otherwise the username, or {@code null}
-     * when neither is set. Blank values count as absent, so an empty email never shadows a
-     * username.
-     */
     public String getPrincipal() {
-        if (hasText(email)) {
-            return email;
-        }
-        return hasText(username) ? username : null;
-    }
-
-    private static boolean hasText(String value) {
-        return value != null && !value.isBlank();
+        return email != null ? email : username;
     }
 
     public int getId() {

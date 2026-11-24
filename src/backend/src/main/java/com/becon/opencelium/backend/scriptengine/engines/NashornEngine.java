@@ -7,15 +7,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openjdk.nashorn.api.scripting.JSObject;
-import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.springframework.stereotype.Component;
 
 import javax.script.Compilable;
-import javax.script.ScriptContext;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import java.io.Writer;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
@@ -32,27 +29,10 @@ public class NashornEngine implements ScriptEngine {
 
     private static final Pattern arrayPattern = Pattern.compile("\\[(.*?)]", Pattern.MULTILINE);
 
-    /**
-     * Engine options for sandboxed runs: no access to Java packages or classes.
-     */
-    private static final String[] SANDBOX_OPTIONS = {"--no-java"};
-
-    /**
-     * Removes the globals that reach outside a sandboxed script: loading local or remote code
-     * and terminating the JVM.
-     */
-    private static final String SANDBOX_CLEANUP =
-            "delete this.load; delete this.loadWithNewGlobal; delete this.quit; delete this.exit;";
-
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * Used for creating sandboxed engine instances
-     */
-    private final NashornScriptEngineFactory sandboxFactory = new NashornScriptEngineFactory();
-
-    /**
-     * Used only for creating the compiling engine; scripts are executed in sandboxed engines
+     * Used for creating engine instances
      */
     private final ScriptEngineManager engineManager = new ScriptEngineManager();
 
@@ -86,27 +66,17 @@ public class NashornEngine implements ScriptEngine {
     }
 
     /**
-     * Executes a script with optional bindings in the same sandbox as
-     * {@link #executeSandboxed(String, Map, Writer)}, discarding what the script prints.
+     * Executes a script with optional bindings.
      * Handles primitives, Strings, and JSON-serializable Maps/Lists.
      */
     @Override
     public Object execute(String script, Map<String, Object> bindings) throws ScriptExecutionException, InvalidScriptException {
-        return executeSandboxed(script, bindings, Writer.nullWriter());
-    }
-
-    /**
-     * Resolves each binding through {@code referenceExtractor} and executes the script in the same
-     * sandbox as {@link #executeSandboxed(String, Map, Writer)}, discarding what the script prints.
-     */
-    @Override
-    public Object execute(String script, Map<String, String> bindings, Function<String, Object> referenceExtractor) throws ScriptExecutionException, InvalidScriptException {
         try {
 
             // Creates new engine for each execution
-            javax.script.ScriptEngine engine = createSandboxEngine(Writer.nullWriter());
+            javax.script.ScriptEngine engine = engineManager.getEngineByName("nashorn");
 
-            bindArgs(engine, bindings, referenceExtractor);
+            bindArgs(engine, bindings);
 
             Object result = evaluate(engine, script);
 
@@ -118,23 +88,14 @@ public class NashornEngine implements ScriptEngine {
         }
     }
 
-    /**
-     * Executes a script in a sandbox: the script cannot reach Java classes, load other code or
-     * terminate the JVM. Bindings and the result are converted exactly as in
-     * {@link #execute(String, Map)}, so a script yields the same result here as in an execution.
-     *
-     * @param script the script to execute
-     * @param bindings variable names and values to inject; may be {@code null}
-     * @param output receives what the script writes with {@code print}
-     * @return the result of the script
-     * @throws ScriptExecutionException if the script fails or its result cannot be converted
-     */
-    public Object executeSandboxed(String script, Map<String, Object> bindings, Writer output)
-            throws ScriptExecutionException, InvalidScriptException {
+    @Override
+    public Object execute(String script, Map<String, String> bindings, Function<String, Object> referenceExtractor) throws ScriptExecutionException, InvalidScriptException {
         try {
-            javax.script.ScriptEngine engine = createSandboxEngine(output);
 
-            bindArgs(engine, bindings);
+            // Creates new engine for each execution
+            javax.script.ScriptEngine engine = engineManager.getEngineByName("nashorn");
+
+            bindArgs(engine, bindings, referenceExtractor);
 
             Object result = evaluate(engine, script);
 
@@ -265,17 +226,6 @@ public class NashornEngine implements ScriptEngine {
         } catch (JsonProcessingException e) {
             throw new ScriptExecutionException("Cannot read a result of nashorn: " + stringifiedResult, e);
         }
-    }
-
-    private javax.script.ScriptEngine createSandboxEngine(Writer output) throws ScriptException {
-        javax.script.ScriptEngine engine = sandboxFactory.getScriptEngine(
-                SANDBOX_OPTIONS, NashornEngine.class.getClassLoader(), className -> false);
-        engine.eval(SANDBOX_CLEANUP);
-
-        ScriptContext context = engine.getContext();
-        context.setWriter(output);
-        context.setErrorWriter(output);
-        return engine;
     }
 
     private Compilable initCompilatorEngine() {

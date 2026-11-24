@@ -45,9 +45,6 @@ public class MessageController {
     @Autowired
     private LanguageService languageService;
 
-    @Autowired
-    private GlobalVariableUsageService globalVariableUsageService;
-
     @Operation(summary = "Retrieves all event messages from database")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
@@ -105,7 +102,6 @@ public class MessageController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createMessage(@Valid @RequestBody MessageResource messageResource) throws Exception{
         EventMessage eventMessage = messageService.toEntity(messageResource);
-        globalVariableUsageService.checkTemplate(eventMessage);
         messageService.save(eventMessage);
 
         List<EventContent> eventContents = eventMessage.getEventContents();
@@ -171,8 +167,6 @@ public class MessageController {
         messageResource.setTemplateId(id);
         EventMessage eventMessage = messageService.toEntity(messageResource);
         eventMessage.setId(id);
-        // the new texts are sent by every notification that uses this template
-        globalVariableUsageService.checkTemplate(eventMessage);
         messageService.save(eventMessage);
 
         List<EventContent> eventContents = eventMessage.getEventContents();
@@ -180,7 +174,6 @@ public class MessageController {
         for (int i = 0; i < eventContents.size(); i++) {
             contentService.save(eventContents.get(i));
         }
-        globalVariableUsageService.rebuildForTemplate(eventMessage);
 
         final EntityModel<MessageResource> resource = EntityModel.of(messageService.toResource(eventMessage));
         return ResponseEntity.ok(resource);

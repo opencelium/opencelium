@@ -5,12 +5,10 @@ import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.exception.ReferenceNotFoundException;
 import com.becon.opencelium.backend.execution.ExecutionManager;
-import com.becon.opencelium.backend.reference.ReferenceMatchers;
 import com.becon.opencelium.backend.reference.ReferenceParser;
 import com.becon.opencelium.backend.reference.enums.ExchangeType;
 import com.becon.opencelium.backend.reference.model.DirectReference;
 import com.becon.opencelium.backend.reference.model.EnhancementReference;
-import com.becon.opencelium.backend.reference.model.GlobalReference;
 import com.becon.opencelium.backend.reference.model.PageReference;
 import com.becon.opencelium.backend.reference.model.Reference;
 import com.becon.opencelium.backend.reference.model.RequestDataReference;
@@ -89,22 +87,8 @@ public class ReferenceExtractor implements Extractor {
             // recoverable: the caller reports it and substitutes an empty value
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException(failureMessage(rawReference, e), e);
+            throw new RuntimeException("Failed to resolve reference = %s. Reason = %s".formatted(rawReference, e.getMessage()), e);
         }
-    }
-
-    /**
-     * Names what failed. An enhancement is named by the field it fills, as the id of its field
-     * binding in the reference, {@code #{%...%}}, means nothing to the user.
-     */
-    private String failureMessage(String rawReference, Exception e) {
-        if (ReferenceMatchers.isEnhancement(rawReference)) {
-            String bindId = rawReference.substring(3, rawReference.length() - 2);
-
-            return "Failed to run %s. Reason = %s".formatted(executionManager.describeEnhancement(bindId), e.getMessage());
-        }
-
-        return "Failed to resolve reference = %s. Reason = %s".formatted(rawReference, e.getMessage());
     }
 
 
@@ -129,12 +113,8 @@ public class ReferenceExtractor implements Extractor {
                     ((PageReference) reference).getPageParam()
             );
 
-            case GLOBAL -> executionManager.getGlobalValue((GlobalReference) reference);
-
             case REQUEST_DATA -> {
                 RequestDataReference rdr = (RequestDataReference) reference;
-                // a connector field that held global variables got their values when the
-                // connector was read, so what is here is a value and is not resolved again
                 yield executionManager
                         .getRequestData(rdr.getCtorId())
                         .getOrDefault(rdr.getKey(), rdr.getRaw());

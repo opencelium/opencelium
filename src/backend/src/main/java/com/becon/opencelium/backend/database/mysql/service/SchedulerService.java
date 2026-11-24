@@ -56,7 +56,6 @@ public interface SchedulerService {
     SchedulerResource toResource(Scheduler entity, Boolean includeConnection);
 
     void startNow(Scheduler scheduler);
-    void startNowByWebhook(Scheduler scheduler);
     void startNow(Scheduler scheduler, String channelId);
     void startNow(Scheduler scheduler, Map<String, Object> queryMap);
     void startNow(Scheduler scheduler, List<MaskingRule> rules);

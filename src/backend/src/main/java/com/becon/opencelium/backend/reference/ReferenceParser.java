@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.reference;
 
 import com.becon.opencelium.backend.reference.model.DirectReference;
 import com.becon.opencelium.backend.reference.model.EnhancementReference;
-import com.becon.opencelium.backend.reference.model.GlobalReference;
 import com.becon.opencelium.backend.reference.model.PageReference;
 import com.becon.opencelium.backend.reference.model.Reference;
 import com.becon.opencelium.backend.reference.model.RequestDataReference;
@@ -33,11 +32,6 @@ public class ReferenceParser {
 
         if (ReferenceMatchers.isPage(ref)) {
             return PageReference.parse(ref);
-        }
-
-        // before request data: '{{global.x}}' also starts and ends with a brace
-        if (ReferenceMatchers.isGlobal(ref)) {
-            return GlobalReference.parse(ref);
         }
 
         if (ReferenceMatchers.isRequestData(ref)) {

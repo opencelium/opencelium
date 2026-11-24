@@ -2,11 +2,7 @@ package com.becon.opencelium.backend.execution.logger.dto;
 
 import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.List;
 import java.util.Map;
 
 public class LogDataDTO {
@@ -20,12 +16,6 @@ public class LogDataDTO {
     private Map<String, Object> properties;
     private Map<String, Object> segment;
     private ErrorInfoDTO error;
-
-    // EXECUTION only: left out for every other element, while the run is going and for a run
-    // logged before the snapshot was part of the log; empty when the run read no global variable
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @ArraySchema(arraySchema = @Schema(description = "Global variables the run read, EXECUTION element only"))
-    private List<GlobalSnapshotEntryDTO> globalSnapshot;
 
     public String getId() {
         return id;
@@ -105,13 +95,5 @@ public class LogDataDTO {
 
     public void setError(ErrorInfoDTO error) {
         this.error = error;
-    }
-
-    public List<GlobalSnapshotEntryDTO> getGlobalSnapshot() {
-        return globalSnapshot;
-    }
-
-    public void setGlobalSnapshot(List<GlobalSnapshotEntryDTO> globalSnapshot) {
-        this.globalSnapshot = globalSnapshot;
     }
 }

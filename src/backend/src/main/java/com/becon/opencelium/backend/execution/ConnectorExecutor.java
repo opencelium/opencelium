@@ -11,10 +11,8 @@ import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
-import com.becon.opencelium.backend.execution.globalvariable.GlobalLoopSource;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.reference.ReferenceMatchers;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.ocel.ExpressionProcessor;
 import com.becon.opencelium.backend.ocel.ExpressionProcessorFactory;
@@ -22,10 +20,18 @@ import com.becon.opencelium.backend.ocel.ProcessorType;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
+import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import com.becon.opencelium.backend.utility.Comparators;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,6 +46,9 @@ import java.util.Stack;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.becon.opencelium.backend.utility.MediaTypeUtility.isBinaryCompatible;
+import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompatible;
 
 public class ConnectorExecutor {
     private final ExpressionProcessor expressionProcessor;
@@ -198,7 +207,7 @@ public class ConnectorExecutor {
         long duration = 0;
         RequestEntity<?> requestEntity;
         ResponseEntity<?> responseEntity;
-        Class<?> responseType = OperationExchange.responseTypeOf(dto);
+        Class<?> responseType = getResponseType(dto);
         do {
             checkInterrupted();
 
@@ -260,13 +269,65 @@ public class ConnectorExecutor {
 
         operation.addRequest(key, requestEntity);
         operation.addResponse(key, responseEntity);
-
-        // now that the response is recorded: a value may read it, and later steps read the new values
-        executionManager.applyGlobalWrites(dto.getGlobalWrites(), dto.getName());
     }
 
     private ResponseEntity<?> sendRequest(URI uri, RequestEntity<?> requestEntity, Class<?> responseType) {
-        return OperationExchange.exchange(executionManager.resolveRestTemplate(), uri, requestEntity, responseType);
+        HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
+
+        try {
+            return executionManager.resolveRestTemplate().exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
+        } catch (Exception e) {
+            return convertException(e);
+        }
+    }
+
+    private ResponseEntity<?> convertException(Exception e) {
+        if (e instanceof RestClientResponseException rre) { // 4xx - 5xx
+            HttpHeaders headers = rre.getResponseHeaders() != null ? rre.getResponseHeaders() : new HttpHeaders();
+
+            return ResponseEntity
+                    .status(rre.getStatusCode())
+                    .headers(headers)
+                    .body(rre.getResponseBodyAsString());
+        }
+
+        if (e instanceof ResourceAccessException rae) {
+            Throwable root = rae.getMostSpecificCause();
+
+            return ResponseEntity
+                    .status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("Connection error: " + (root != null ? root.getMessage() : rae.getMessage()));
+        }
+
+        if (e instanceof RestClientException rce) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("Client error: " + rce.getMessage());
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body("Unexpected error: " + e.getMessage());
+    }
+
+    private Class<?> getResponseType(OperationDTO dto) {
+        MediaType mediaType = MediaType.APPLICATION_JSON;
+        for (ResponseDTO response : dto.getResponses()) {
+            if ("success".equals(response.getStatus())) {
+                mediaType = response.getContent();
+            }
+        }
+
+        if (isJsonCompatible(mediaType)) {
+            return Object.class;
+        } else if (isBinaryCompatible(mediaType)) {
+            return byte[].class;
+        } else {
+            return String.class;
+        }
     }
 
     private int getTailPointer(int headPointer) {
@@ -343,11 +404,6 @@ public class ConnectorExecutor {
         Object referencedList = executionManager.getValue(loop.getRef());
         if (ObjectUtils.isEmpty(referencedList)) {
             return Collections.emptyList();
-        }
-
-        // a global variable holds any JSON type, so what the loop can walk is checked, not assumed
-        if (ReferenceMatchers.isGlobal(loop.getRef())) {
-            return GlobalLoopSource.valuesOf(loop, referencedList);
         }
 
         return switch (loop.getOperator()) {

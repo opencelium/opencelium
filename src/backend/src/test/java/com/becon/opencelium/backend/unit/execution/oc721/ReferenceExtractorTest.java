@@ -1,18 +1,14 @@
 package com.becon.opencelium.backend.unit.execution.oc721;
 
-import com.becon.opencelium.backend.exception.GlobalVariableNotFoundException;
-import com.becon.opencelium.backend.exception.ReferenceNotFoundException;
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
-import com.becon.opencelium.backend.reference.model.GlobalReference;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.testutil.fixture.OperationFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,9 +23,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -52,24 +45,6 @@ public class ReferenceExtractorTest {
      */
     private Object extractValue(String rawReference) {
         return extractor.extractValue(rawReference);
-    }
-
-    //-----------------------------------------------------------
-    //                    ENHANCEMENT_REFERENCE
-    //-----------------------------------------------------------
-
-    @Test
-    @DisplayName("extractValue — a failing enhancement is named by the field it fills, not by its binding id")
-    void extractValueNamesTargetFieldWhenEnhancementFails() {
-        String bindId = "6b053f677e52075a4b71c82d";
-        when(executionManager.executeScript(bindId)).thenThrow(new IllegalStateException("boom"));
-        when(executionManager.describeEnhancement(bindId))
-                .thenReturn("the enhancement that fills #ABCDEF.(request).body.$.x");
-
-        assertThatThrownBy(() -> extractValue("#{%" + bindId + "%}"))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Failed to run the enhancement that fills #ABCDEF.(request).body.$.x. Reason = boom")
-                .hasCauseInstanceOf(IllegalStateException.class);
     }
 
 
@@ -906,74 +881,6 @@ public class ReferenceExtractorTest {
         Object val3 = extractValue("#ababab.(response).body.$.items[i]['j'][*]~"); // loop3.getRef()
         assertInstanceOf(List.class, val3);
         assertEquals(List.of("x", "y", "z"), val3);
-    }
-
-
-    //-----------------------------------------------------------
-    //                    REQUEST_DATA
-    //-----------------------------------------------------------
-
-    @Test
-    void extractValueReturnsConnectorFieldWhenReferenceIsRequestData() {
-        // GIVEN
-        when(executionManager.getRequestData(null))
-                .thenReturn(Map.of("token", "abc123"));
-
-        // WHEN
-        Object result = extractValue("{token}");
-
-        // THEN
-        assertEquals("abc123", result);
-    }
-
-    //-----------------------------------------------------------
-    //                    GLOBAL_VARIABLE
-    //-----------------------------------------------------------
-
-    @Test
-    @DisplayName("extractValue — a global variable is read from the snapshot of the run")
-    void extractValueReturnsSnapshotValueWhenReferenceIsGlobalVariable() {
-        // GIVEN
-        when(executionManager.getGlobalValue(any(GlobalReference.class))).thenReturn(50);
-
-        // WHEN
-        Object result = extractValue("{{global.limits.maxPerPage}}");
-
-        // THEN
-        assertEquals(50, result);
-        ArgumentCaptor<GlobalReference> reference = ArgumentCaptor.forClass(GlobalReference.class);
-        verify(executionManager).getGlobalValue(reference.capture());
-        assertEquals("limits", reference.getValue().getName());
-        assertEquals(Optional.of("maxPerPage"), reference.getValue().getPath());
-    }
-
-    @Test
-    @DisplayName("extractValue — an unknown global variable fails the run instead of resolving to nothing")
-    void extractValueThrowsRuntimeExceptionWhenGlobalVariableIsUnknown() {
-        // GIVEN
-        when(executionManager.getGlobalValue(any(GlobalReference.class)))
-                .thenThrow(new GlobalVariableNotFoundException("idoitUrl"));
-
-        // WHEN - THEN
-        assertThatThrownBy(() -> extractValue("{{global.idoitUrl}}"))
-                .isInstanceOf(RuntimeException.class)
-                .isNotInstanceOf(ReferenceNotFoundException.class)
-                .hasMessageContaining("{{global.idoitUrl}}")
-                .hasMessageContaining("does not exist or this workflow is outside its scope");
-    }
-
-    @Test
-    @DisplayName("extractValue — a global variable is never looked up as request data")
-    void extractValueSkipsRequestDataWhenReferenceIsGlobalVariable() {
-        // GIVEN
-        when(executionManager.getGlobalValue(any(GlobalReference.class))).thenReturn("from-snapshot");
-
-        // WHEN
-        Object result = extractValue("{{global.token}}");
-
-        // THEN
-        assertEquals("from-snapshot", result);
-        verify(executionManager, never()).getRequestData(any());
     }
 
 

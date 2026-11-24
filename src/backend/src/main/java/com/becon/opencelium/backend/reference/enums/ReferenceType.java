@@ -6,6 +6,5 @@ public enum ReferenceType {
     ENHANCEMENT,
     WEBHOOK,
     PAGE,
-    GLOBAL,
     REQUEST_DATA
 }

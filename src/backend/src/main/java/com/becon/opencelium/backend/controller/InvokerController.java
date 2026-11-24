@@ -432,28 +432,6 @@ public class InvokerController {
         return ResponseEntity.ok(invokerDTOS);
     }
 
-    @Operation(summary = "Syncs all invoker files with Service Portal. "
-            + "Manually modified invoker files are skipped; use 'sync-force' to overwrite them.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204",
-                    description = "Invoker files have been successfully synced with Service Portal",
-                    content = @Content),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PutMapping("/sync")
-    public ResponseEntity<?> syncAll() {
-        if (!onlineServicesProps.isServiceActive()) {
-            return ResponseEntity.ok(ResultDTO.of(OnlineServicesProps.DISABLED_MESSAGE));
-        }
-        invokerSyncService.syncInvokers();
-        return ResponseEntity.noContent().build();
-    }
-
     @Operation(summary = "Syncs one invoker file with Service Portal by invoker 'name'")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",

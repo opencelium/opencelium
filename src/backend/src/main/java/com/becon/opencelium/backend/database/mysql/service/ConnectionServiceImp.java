@@ -31,7 +31,6 @@ import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleReposit
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
-import com.becon.opencelium.backend.execution.globalvariable.TestRunOrigins;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
@@ -53,7 +52,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -89,8 +87,6 @@ public class ConnectionServiceImp implements ConnectionService {
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngStartupUpdater;
     private final OwnershipSecurity ownershipSecurity;
-    private final GlobalVariableUsageService globalVariableUsageService;
-    private final TestRunOrigins testRunOrigins;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -110,9 +106,7 @@ public class ConnectionServiceImp implements ConnectionService {
             ExecutionArgumentService executionArgumentService,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
-            OwnershipSecurity ownershipSecurity,
-            GlobalVariableUsageService globalVariableUsageService,
-            TestRunOrigins testRunOrigins
+            OwnershipSecurity ownershipSecurity
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -132,8 +126,6 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ocProps = ocProps;
         this.connectionMngStartupUpdater = entityVersionManager.getUpdater(ConnectionMng.class, UpdaterVersion.VERSION_4_8);
         this.ownershipSecurity = ownershipSecurity;
-        this.globalVariableUsageService = globalVariableUsageService;
-        this.testRunOrigins = testRunOrigins;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -142,26 +134,8 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     @Transactional
     public Long save(Connection connection, ConnectionMng connectionMng) {
-        return save(connection, connectionMng, false, null);
-    }
-
-    @Override
-    @Transactional
-    public Long saveTestCopy(Connection connection, ConnectionMng connectionMng, Long originalId) {
-        // only a workflow that exists can lend its scope to the copy
-        Long origin = originalId != null && connectionRepository.existsById(originalId) ? originalId : null;
-
-        return save(connection, connectionMng, true, origin);
-    }
-
-    /**
-     * @param testCopy whether this is the copy a test run executes
-     * @param origin   the workflow a test copy was made from, or {@code null}
-     */
-    private Long save(Connection connection, ConnectionMng connectionMng, boolean testCopy, Long origin) {
         if (existsByName(connection.getTitle())) {
-            throw new GeneralServiceException(
-                    HttpStatus.CONFLICT, ExceptionConstant.TITLE_HAS_ALREADY_TAKEN, ExceptionConstant.TITLE_HAS_ALREADY_TAKEN);
+            throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
         }
 
         if (connection.getFromConnector() == null) {
@@ -190,10 +164,6 @@ public class ConnectionServiceImp implements ConnectionService {
             categoryService.get(connection.getCategoryId());
         }
 
-        // a new workflow has no id yet, so no variable scoped to chosen workflows can list it; a
-        // test copy is checked as the workflow it was made from
-        globalVariableUsageService.checkWorkflow(connectionMng, origin, connection.getCategoryId());
-
         ConnectionMng savedMng = connectionMngService.create(connectionMng);
 
         String version = resolveVersion(connection);
@@ -204,15 +174,6 @@ public class ConnectionServiceImp implements ConnectionService {
         savedMng.setConnectionId(savedConnection.getId());
         savedMng.setVersion(version);
         connectionMngService.save(savedMng);
-        if (testCopy) {
-            // a copy that lives for one run is no usage: it would stand in the way of changing
-            // a variable while a test is going, under a name nobody knows
-            if (origin != null) {
-                testRunOrigins.register(savedConnection.getId(), origin);
-            }
-        } else {
-            globalVariableUsageService.rebuildForWorkflow(savedConnection.getId(), savedMng);
-        }
 
         connectionHistoryService.makeHistoryAndSave(savedConnection, null, Action.CREATE);
         return savedConnection.getId();
@@ -225,8 +186,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
         if (!Objects.equals(sCon.getTitle(), connection.getTitle())) {
             if (existsByName(connection.getTitle())) {
-                throw new GeneralServiceException(
-                        HttpStatus.CONFLICT, ExceptionConstant.TITLE_HAS_ALREADY_TAKEN, ExceptionConstant.TITLE_HAS_ALREADY_TAKEN);
+                throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
             }
         }
 
@@ -257,13 +217,6 @@ public class ConnectionServiceImp implements ConnectionService {
             categoryService.get(connection.getCategoryId());
         }
 
-        // a workflow that changes category takes the notifications of its schedules along
-        if (Objects.equals(connection.getCategoryId(), sCon.getCategoryId())) {
-            globalVariableUsageService.checkWorkflow(connectionMng, connection.getId(), connection.getCategoryId());
-        } else {
-            globalVariableUsageService.checkWorkflowMove(connectionMng, connection.getId(), connection.getCategoryId());
-        }
-
         connectionMng.setId(null);
         connectionMng.setConnectionId(connection.getId());
         ConnectionMng savedMng = connectionMngService.create(connectionMng);
@@ -276,7 +229,6 @@ public class ConnectionServiceImp implements ConnectionService {
         connection.setSnapshotId(savedMng.getId());
         connection.setRevision(sCon.getRevision());
         connectionRepository.save(connection);
-        globalVariableUsageService.rebuildForWorkflow(connection.getId(), savedMng);
     }
 
     @Override
@@ -325,8 +277,6 @@ public class ConnectionServiceImp implements ConnectionService {
         executionArgumentService.deleteByConnectionId(id);
 
         deleteSchedules(connection);
-        globalVariableUsageService.deleteForWorkflow(id);
-        testRunOrigins.forget(id);
 
         connectionRepository.deleteById(id);
 
@@ -351,8 +301,6 @@ public class ConnectionServiceImp implements ConnectionService {
         executionArgumentService.deleteByConnectionId(id);
 
         deleteSchedules(connection);
-        globalVariableUsageService.deleteForWorkflow(id);
-        testRunOrigins.forget(id);
 
         connectionRepository.deleteById(id);
 
@@ -370,8 +318,6 @@ public class ConnectionServiceImp implements ConnectionService {
         executionArgumentService.deleteByConnectionId(id);
 
         deleteSchedules(connection);
-        globalVariableUsageService.deleteForWorkflow(id);
-        testRunOrigins.forget(id);
         connectionRepository.deleteById(id);
     }
 
@@ -520,18 +466,6 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public void updateCategory(Connection connection, Integer newCategory) {
-        ConnectionMng connectionMng = connection.getSnapshotId() == null
-                ? null
-                : connectionMngService.getById(connection.getSnapshotId());
-
-        // a move can take the workflow, or a notification of one of its schedules, out of the
-        // scope of a variable it uses
-        if (!Objects.equals(connection.getCategoryId(), newCategory)) {
-            globalVariableUsageService.checkWorkflowMove(connectionMng, connection.getId(), newCategory);
-        } else if (connectionMng != null) {
-            globalVariableUsageService.checkWorkflow(connectionMng, connection.getId(), newCategory);
-        }
-
         connection.setCategoryId(newCategory);
         connectionRepository.save(connection);
     }
@@ -644,7 +578,7 @@ public class ConnectionServiceImp implements ConnectionService {
                         connectionMngService.save(connectionMng);
                     }
 
-                    log.info("Connection[id={}, name={}, version={}] successfully updated to current version", connection.getId(), connection.getTitle(), connection.getOcVersion());
+                    log.info("Connection[id={}, name={}, version={}] successfully updated to {} version", connection.getId(), connection.getTitle(), connection.getOcVersion(), targetVersion);
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}, version={}]", connection.getId(), connection.getTitle(), connection.getOcVersion(), e);
                     continue;
@@ -761,7 +695,6 @@ public class ConnectionServiceImp implements ConnectionService {
         connection.setSnapshotId(connectionMng.getId());
 
         connectionRepository.save(connection);
-        globalVariableUsageService.rebuildForWorkflow(connectionId, connectionMng);
     }
 
     /**
@@ -902,18 +835,10 @@ public class ConnectionServiceImp implements ConnectionService {
         doWithConnectorsAfterPatch(patched);
 
         Connection connection = connectionMapper.toEntity(patched);
-        ConnectionMng connectionMng = connectionMngMapper.toEntity(patched);
-
-        // a patch is saved without the checks of a full save, but a patch that moves the workflow
-        // to another category is checked like every move, before anything is written
-        if (!Objects.equals(connectionDTO.getCategoryId(), patched.getCategoryId())) {
-            globalVariableUsageService.checkWorkflowMove(connectionMng, connection.getId(), connection.getCategoryId());
-        }
-
         connectionRepository.save(connection);
+
+        ConnectionMng connectionMng = connectionMngMapper.toEntity(patched);
         connectionMngService.save(connectionMng);
-        // "used by" follows the content, checked or not
-        globalVariableUsageService.rebuildForWorkflow(connection.getId(), connectionMng);
         return patched;
     }
 

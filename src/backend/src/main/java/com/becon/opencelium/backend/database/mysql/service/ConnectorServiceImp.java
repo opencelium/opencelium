@@ -29,10 +29,8 @@ import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.WrongDecryptException;
-import com.becon.opencelium.backend.execution.globalvariable.GlobalConnectorValues;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
-import com.becon.opencelium.backend.execution.service.GlobalVariableSnapshotService;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
@@ -72,8 +70,6 @@ public class ConnectorServiceImp implements ConnectorService {
     private final ConnectorHealthService connectorHealthService;
     private final SecurityAuditorAware securityAuditorAware;
     private final EntityManager entityManager;
-    private final GlobalVariableUsageService globalVariableUsageService;
-    private final GlobalVariableSnapshotService globalVariableSnapshotService;
 
     public ConnectorServiceImp(
             ConnectorProps connectorProps, ConnectorRepository connectorRepository,
@@ -85,9 +81,7 @@ public class ConnectorServiceImp implements ConnectorService {
             // @Lazy breaks the constructor cycle: the health service itself depends on this service.
             @Lazy ConnectorHealthService connectorHealthService,
             SecurityAuditorAware securityAuditorAware,
-            EntityManager entityManager,
-            GlobalVariableUsageService globalVariableUsageService,
-            GlobalVariableSnapshotService globalVariableSnapshotService
+            EntityManager entityManager
     ) {
         this.connectorProps = connectorProps;
         this.connectorRepository = connectorRepository;
@@ -99,8 +93,6 @@ public class ConnectorServiceImp implements ConnectorService {
         this.connectorHealthService = connectorHealthService;
         this.securityAuditorAware = securityAuditorAware;
         this.entityManager = entityManager;
-        this.globalVariableUsageService = globalVariableUsageService;
-        this.globalVariableSnapshotService = globalVariableSnapshotService;
     }
 
     @Override
@@ -126,22 +118,6 @@ public class ConnectorServiceImp implements ConnectorService {
 
     @Override
     public Connector save(Connector connector) {
-        // read before the values are encrypted: a reference cannot be found in a cipher text
-        Map<String, String> writtenValues = writtenValuesOf(connector);
-        globalVariableUsageService.checkConnector(connector.getId(), writtenValues);
-
-        Connector saved = persist(connector);
-        globalVariableUsageService.rebuildForConnector(saved.getId(), writtenValues);
-
-        return saved;
-    }
-
-    /**
-     * Stores a connector with its request data, encrypted. The global variable references of the
-     * request data are neither checked nor indexed: that is for {@link #save(Connector)}, which
-     * a user's save goes through.
-     */
-    private Connector persist(Connector connector) {
         encrypt(connector);
         List<RequestData> requestData = connector.getRequestData();
         connector.setRequestData(null);
@@ -168,17 +144,13 @@ public class ConnectorServiceImp implements ConnectorService {
     public void deleteById(int id) {
         connectorRepository.deleteById(id);
         connectorHealthService.evict(id);
-        globalVariableUsageService.deleteForConnector(id);
     }
 
     @Override
     public void deleteByInvoker(String invokerName) {
         List<Connector> deleted = connectorRepository.findAllByInvoker(invokerName);
         connectorRepository.deleteByInvoker(invokerName);
-        deleted.forEach(connector -> {
-            connectorHealthService.evict(connector.getId());
-            globalVariableUsageService.deleteForConnector(connector.getId());
-        });
+        deleted.forEach(connector -> connectorHealthService.evict(connector.getId()));
     }
 
     @Override
@@ -319,10 +291,6 @@ public class ConnectorServiceImp implements ConnectorService {
         List<RequestData> requestData = connector.getRequestData();
         requiredData.forEach(rqd -> addFieldIfNotExists(requestData, rqd));
 
-        // global variables first: no workflow runs here, so their current values are read; what
-        // follows must see values, not references
-        GlobalConnectorValues.resolve(requestData, globalVariableSnapshotService::takeOpenToAll);
-
         // looping through request data nad looking for values that contains references
         // rqsd - requestData object
         RequiredDataService requiredDataService = new RequiredDataServiceImp(connector, requestData, invoker.getOperations());
@@ -361,7 +329,7 @@ public class ConnectorServiceImp implements ConnectorService {
 
     @Override
     public Connector storeIcon(int connectorId, MultipartFile file) {
-        // findById decrypts the connector; the paired persist() re-encrypts it.
+        // findById decrypts the connector; the paired save() re-encrypts it.
         Connector connector = findById(connectorId)
                 .orElseThrow(() -> new ConnectorNotFoundException(connectorId));
 
@@ -383,13 +351,12 @@ public class ConnectorServiceImp implements ConnectorService {
         storageService.store(file, newFilename);
         connector.setIcon(newFilename);
 
-        // the request data is unchanged, so its references are not checked again
-        return persist(connector);
+        return save(connector);
     }
 
     @Override
     public void deleteIcon(int connectorId) {
-        // findById decrypts the connector; the paired persist() re-encrypts it.
+        // findById decrypts the connector; the paired save() re-encrypts it.
         Connector connector = findById(connectorId)
                 .orElseThrow(() -> new ConnectorNotFoundException(connectorId));
 
@@ -398,14 +365,11 @@ public class ConnectorServiceImp implements ConnectorService {
             storageService.delete(StringUtility.findImageFromUrl(icon));
         }
         connector.setIcon(null);
-        // the request data is unchanged, so its references are not checked again
-        persist(connector);
+        save(connector);
     }
 
     @Override
     public void updateRequestData(Integer connectorId, Map<String, String> newRequestDataMap) {
-        // checked as written: the values are encrypted below
-        globalVariableUsageService.checkConnector(connectorId, newRequestDataMap);
 
         // Read the connector WITHOUT decrypting
         Connector connector = getByIdRaw(connectorId);
@@ -443,8 +407,6 @@ public class ConnectorServiceImp implements ConnectorService {
         }
 
         requestDataService.saveAll(toSave);
-        // only the given fields changed: the usages of the other fields stay as they are
-        globalVariableUsageService.rebuildForConnectorFields(connectorId, newRequestDataMap);
 
         // Editing request data only dirties child rows, so the connector entity itself stays
         // clean and JPA auditing never fires — stamp the audit columns explicitly.
@@ -481,18 +443,6 @@ public class ConnectorServiceImp implements ConnectorService {
         if (requestData.stream().noneMatch(rqsd -> rqsd.getField().equals(rqd.getName()))) {
             requestData.add(new RequestData(rqd));
         }
-    }
-
-    /** Returns the request data values of a connector by field, as they are written in it now. */
-    private static Map<String, String> writtenValuesOf(Connector connector) {
-        Map<String, String> values = new LinkedHashMap<>();
-        if (connector.getRequestData() != null) {
-            connector.getRequestData().stream()
-                    .filter(entry -> entry != null && entry.getField() != null)
-                    .forEach(entry -> values.put(entry.getField(), entry.getValue()));
-        }
-
-        return values;
     }
 
     private void encrypt(Connector connector) {

@@ -40,22 +40,13 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.exception.ExecutionTerminatedException;
-import com.becon.opencelium.backend.exception.GlobalVariableConflictException;
 import com.becon.opencelium.backend.execution.JSHttpObject;
-import com.becon.opencelium.backend.execution.globalvariable.GlobalTextRenderer;
-import com.becon.opencelium.backend.execution.globalvariable.GlobalValueCaster;
-import com.becon.opencelium.backend.execution.globalvariable.GlobalValueResolver;
-import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
-import com.becon.opencelium.backend.execution.globalvariable.WorkflowRunGate;
-import com.becon.opencelium.backend.execution.logger.OcLogger;
-import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.pubsub.ExecutionEventPublisher;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionFinishedEvent;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionStartedEvent;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.execution.service.GlobalVariableSnapshotService;
 import com.becon.opencelium.backend.utility.EmailUtility;
 import com.becon.opencelium.backend.websocket.constant.SocketConstant;
 import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
@@ -64,18 +55,13 @@ import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.openjdk.nashorn.api.scripting.JSObject;
-import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -119,8 +105,6 @@ public class ExecutionAspect {
     private final WebSocketNotificationService notificationService;
     private final ConnectionService connectionService;
     private final LanguageService languageService;
-    private final GlobalVariableSnapshotService globalVariableSnapshotService;
-    private final WorkflowRunGate runGate;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -134,9 +118,7 @@ public class ExecutionAspect {
             Environment env,
             WebSocketNotificationService notificationService,
             ConnectionService connectionService,
-            LanguageService languageService,
-            GlobalVariableSnapshotService globalVariableSnapshotService,
-            WorkflowRunGate runGate) {
+            LanguageService languageService) {
         this.schedulerService = schedulerService;
         this.userService = userService;
         this.incomingWebhookService = incomingWebhookService;
@@ -149,48 +131,6 @@ public class ExecutionAspect {
         this.notificationService = notificationService;
         this.connectionService = connectionService;
         this.languageService = languageService;
-        this.globalVariableSnapshotService = globalVariableSnapshotService;
-        this.runGate = runGate;
-    }
-
-    /**
-     * Lets a workflow that uses a mutable global variable run one execution at a time; see
-     * {@link WorkflowRunGate}. Within this aspect an {@code @Around} advice wraps the
-     * {@code @Before} and {@code @After...} ones, so a start that waits or is refused never reaches
-     * them: it sends no notification, and the workflow is freed only after the end of the run has
-     * been recorded. A refused start is recorded apart, by {@link #recordRefusedStart}. A start
-     * that its schedule's cron trigger fired is handed to the gate as such, so a schedule keeps
-     * at most one of them waiting.
-     */
-    @Around("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
-    public Object gateByMutableVariables(ProceedingJoinPoint joinPoint, JobExecutionContext context) throws Throwable {
-        JobDataMap jobDataMap = context.getMergedJobDataMap();
-        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
-        // a test run writes only its own copy of the values, so it never waits for a real run
-        if (data != null && data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
-            return joinPoint.proceed();
-        }
-
-        int schedulerId = data != null ? data.getScheduleId() : jobDataMap.getIntValue("schedulerId");
-        long connectionId = schedulerService.getById(schedulerId).getConnection().getId();
-        JobKey jobKey = context.getJobDetail().getKey();
-        JobDataMap triggerData = context.getTrigger().getJobDataMap();
-        // only a schedule's own trigger is a cron trigger; a manual, webhook or support-file start,
-        // and a start fired again from the queue, come by a trigger that fires once
-        WorkflowRunGate.Admission admission = context.getTrigger() instanceof CronTrigger
-                ? runGate.admitCronFire(connectionId, schedulerId, jobKey, triggerData)
-                : runGate.admit(connectionId, jobKey, triggerData);
-        if (!admission.runs()) {
-            return null;
-        }
-        if (admission == WorkflowRunGate.Admission.UNGATED) {
-            return joinPoint.proceed();
-        }
-        try {
-            return joinPoint.proceed();
-        } finally {
-            runGate.release(connectionId);
-        }
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -208,8 +148,6 @@ public class ExecutionAspect {
         Scheduler scheduler = schedulerService.getById(schedulerId);
         long connectionId = scheduler.getConnection().getId();
         String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
-        // lets a start refused while this run goes name the execution that holds the workflow
-        runGate.recordExecution(connectionId, execId);
 
         // save required data on job execution context
         jobDataMap.put("execId", execId);
@@ -280,49 +218,6 @@ public class ExecutionAspect {
         );
     }
 
-    @PostConstruct
-    void listenToRefusedStarts() {
-        runGate.onRefusal(this::recordRefusedStart);
-    }
-
-    /**
-     * Records a start that {@link WorkflowRunGate} refused, or dropped from its queue, as a failed
-     * execution of its schedule that starts and ends at once, so it shows in the history and as
-     * the last failure. The webhook starts of a schedule that were refused on the call while a
-     * run went come as one refusal, so they are one such execution, and so do the cron fires of a
-     * schedule that were skipped because an earlier one already waited. With debug mode on, or
-     * for a support file, its log holds the reason. No notification is sent and no aggregator
-     * runs: nothing of the workflow ran, and the refusal already went to the workflow's websocket
-     * channel.
-     */
-    private void recordRefusedStart(QuartzJobScheduler.ScheduleData data, long connectionId,
-            GlobalVariableConflictException refusal) {
-        int schedulerId = data.getScheduleId();
-        Scheduler scheduler = schedulerService.getById(schedulerId);
-        long execId = initExecutionObj(schedulerId);
-        String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
-        ExecutionEventPublisher.publish(new ExecutionStartedEvent(execId, connectionId, schedulerId, timestamp));
-
-        boolean loggingEnabled = scheduler.getDebugMode()
-                || data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE;
-        OcLogger<ExecutionLog> executionLogger =
-                new OcLogger<>(loggingEnabled, new ExecutionLog(), connectionId, timestamp, execId);
-        try {
-            executionLogger.logAndSend("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d"
-                    .formatted(execId, connectionId, schedulerId));
-            // the reason alone: a stack trace of the gate would tell the reader nothing
-            executionLogger.logAndSend("segment=EXCEPTION data=" + refusal);
-            executionLogger.logAndSend("phase=EXECUTION_END id=%d connectionId=%d schedulerId=%d"
-                    .formatted(execId, connectionId, schedulerId));
-        } finally {
-            executionLogger.clear();
-        }
-
-        updateExecutionObj(execId, false);
-        ExecutionEventPublisher.publish(
-                new ExecutionFinishedEvent(execId, schedulerId, data.getExecType(), FAIL));
-    }
-
     private long initExecutionObj(int schedulerId) {
         Execution execution = new Execution();
         Scheduler scheduler = new Scheduler();
@@ -368,8 +263,6 @@ public class ExecutionAspect {
 
     private void triggerNotifications(int schedulerId, String eventType, Exception ex) {
         List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
-        // the global variables of the workflow, read once and only if a template uses one
-        GlobalVariableSnapshot globals = null;
 
         for (EventNotification en : eventNotifications) {
             Set<EventRecipient> recipients = en.getEventRecipients();
@@ -401,20 +294,8 @@ public class ExecutionAspect {
                             .orElseThrow(() -> new RuntimeException("Default language(" + defaultLang + ") of content not found"));
                 }
 
-                String body = content.getBody();
-                String title = content.getSubject();
-                if (GlobalTextRenderer.hasTokens(body) || GlobalTextRenderer.hasTokens(title)) {
-                    if (globals == null) {
-                        globals = takeGlobalSnapshot(schedulerId);
-                    }
-                    // globals first: what a value brings in is then at most a notification
-                    // constant, never another global variable
-                    body = renderGlobals(body, globals);
-                    title = renderGlobals(title, globals);
-                }
-
-                String message = replaceConstants(body, user, ex, en);
-                String subject = replaceConstants(title, user, ex, en);
+                String message = replaceConstants(content.getBody(), user, ex, en);
+                String subject = replaceConstants(content.getSubject(), user, ex, en);
                 String to = er.getDestination();
                 String type = en.getEventMessage().getType();// email, incoming_webhook
                 try {
@@ -426,41 +307,6 @@ public class ExecutionAspect {
                     logger.warn("Failed to send notification", e);
                 }
             }
-        }
-    }
-
-    /**
-     * Reads the global variables a notification of this schedule may use: the ones in the scope
-     * of its workflow, as they are now, which is after the run saved what it wrote.
-     */
-    private GlobalVariableSnapshot takeGlobalSnapshot(int schedulerId) {
-        try {
-            Scheduler scheduler = schedulerService.getById(schedulerId);
-            return globalVariableSnapshotService.takeFor(scheduler.getConnection().getId());
-        } catch (RuntimeException e) {
-            logger.warn("Global variables could not be read for the notifications of schedulerId = {}", schedulerId, e);
-            return GlobalVariableSnapshot.empty();
-        }
-    }
-
-    /**
-     * Replaces the global variable references of a notification text. A notification is sent
-     * even if a reference cannot be resolved: that reference stays as it is written, so the
-     * reader sees what is missing, and the reason is logged.
-     */
-    private String renderGlobals(String text, GlobalVariableSnapshot globals) {
-        try {
-            return GlobalTextRenderer.render(text, reference -> {
-                try {
-                    return GlobalValueCaster.toText(GlobalValueResolver.resolve(globals, reference));
-                } catch (RuntimeException e) {
-                    logger.warn("Notification keeps {} as written: {}", reference.getRaw(), e.getMessage());
-                    return reference.getRaw();
-                }
-            });
-        } catch (RuntimeException e) {
-            logger.warn("Global variables of a notification text could not be resolved: {}", e.getMessage());
-            return text;
         }
     }
 
@@ -654,7 +500,7 @@ public class ExecutionAspect {
             JSObject objRes = (JSObject)engine.eval("JSON.parse(dataModel)");
             engine.put(AggrConst.RESPONSES, objRes);
 
-            String stringifiedRequests = new ObjectMapper().writeValueAsString(requests);
+            String stringifiedRequests = new ObjectMapper().writeValueAsString(responses);
             engine.put("dataModel", stringifiedRequests);
             JSObject objReq = (JSObject)engine.eval("JSON.parse(dataModel)");
             engine.put(AggrConst.REQUESTS, objReq);

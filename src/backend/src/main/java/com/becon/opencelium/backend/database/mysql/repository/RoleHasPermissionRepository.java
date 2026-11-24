@@ -13,14 +13,4 @@ public interface RoleHasPermissionRepository extends JpaRepository<RoleHasPermis
     @Modifying
     @Query("DELETE FROM RoleHasPermission r WHERE r.id.roleId = :roleId")
     void deleteByUserRoleId(@Param("roleId") int roleId);
-
-    /**
-     * Tells whether a role holds a permission (CREATE, UPDATE, DELETE or READ) on a component,
-     * both given by name.
-     */
-    @Query("SELECT COUNT(r) > 0 FROM RoleHasPermission r WHERE r.id.roleId = :roleId"
-            + " AND r.component.name = :component AND r.permission.name = :permission")
-    boolean existsByRoleAndNames(@Param("roleId") int roleId,
-                                 @Param("component") String component,
-                                 @Param("permission") String permission);
 }

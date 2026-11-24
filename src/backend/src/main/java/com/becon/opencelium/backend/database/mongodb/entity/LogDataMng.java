@@ -8,7 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Document(collection = "log_data")
@@ -32,10 +31,6 @@ public class LogDataMng {
     private Map<String, Object> properties = new HashMap<>();
     private Map<String, Object> segments = new HashMap<>();
     private LogDataError error;
-
-    // EXECUTION only, once the execution phase has closed or failed; null for every other
-    // element and for a run logged before the snapshot was part of the log
-    private List<LogGlobalSnapshotEntry> globalSnapshot;
 
     private Instant createdAt;
 
@@ -165,13 +160,5 @@ public class LogDataMng {
 
     public LogDataError getError() {
         return error;
-    }
-
-    public List<LogGlobalSnapshotEntry> getGlobalSnapshot() {
-        return globalSnapshot;
-    }
-
-    public void setGlobalSnapshot(List<LogGlobalSnapshotEntry> globalSnapshot) {
-        this.globalSnapshot = globalSnapshot;
     }
 }

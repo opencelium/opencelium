@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.utility.migrate;
 
-import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -50,11 +49,9 @@ public class YAMLMigrator {
         PATCH_HELPER = new PatchHelper(OBJECT_MAPPER);
 
         Path root = Paths.get(new File("").toURI());
-        Path appYml = PathConstant.appYmlPath();
-        APP_YML_FILE = appYml.toFile();
+        APP_YML_FILE = new File(root.resolve("src/main/resources/application.yml").toString());
         CHANGELOG_FILE = new File(root.resolve("src/main/resources/db/changelog/springboot/application_changelog.yml").toString());
-        // next to the target file, so the rollback copy lives on the same (writable) volume
-        BACKUP_YML_FILE = appYml.resolveSibling("application_copy.yml").toFile();
+        BACKUP_YML_FILE = new File(root.resolve("src/main/resources/application_copy.yml").toString());
     }
 
     public static List<ChangeSet> getChangeSetsToSave() {
@@ -66,17 +63,14 @@ public class YAMLMigrator {
     public static void run() {
         // checking the existence of changelog file
         if (!CHANGELOG_FILE.exists()) {
-            log.warn("YAML migration skipped: changelog '{}' does not exist", CHANGELOG_FILE);
             return;
         }
 
         // checking the existence of application.yml file
         if (!APP_YML_FILE.exists()) {
-            log.warn("YAML migration skipped: '{}' does not exist. Set {} to the location of application.yml",
-                    APP_YML_FILE, PathConstant.APP_YML_ENV);
+            log.warn("A file 'application.yml' does not exist");
             return;
         }
-        log.info("Migrating '{}'", APP_YML_FILE);
 
         // preparing a file before read
         if (!prepare()) return;

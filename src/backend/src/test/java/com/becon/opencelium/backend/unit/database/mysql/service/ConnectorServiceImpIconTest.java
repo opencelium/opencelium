@@ -2,19 +2,15 @@ package com.becon.opencelium.backend.unit.database.mysql.service;
 
 import com.becon.opencelium.backend.constant.props.ConnectorProps;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
-import com.becon.opencelium.backend.database.mysql.service.GlobalVariableUsageService;
 import com.becon.opencelium.backend.database.mysql.service.RequestDataServiceImp;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.execution.service.GlobalVariableSnapshotService;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.security.SecurityAuditorAware;
 import com.becon.opencelium.backend.storage.StorageService;
-import com.becon.opencelium.backend.testutil.fixture.ConnectorFixture;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -62,8 +58,6 @@ class ConnectorServiceImpIconTest {
     @Mock private ConnectorHealthService connectorHealthService;
     @Mock private SecurityAuditorAware securityAuditorAware;
     @Mock private EntityManager entityManager;
-    @Mock private GlobalVariableUsageService globalVariableUsageService;
-    @Mock private GlobalVariableSnapshotService globalVariableSnapshotService;
 
     private ConnectorServiceImp service;
 
@@ -71,8 +65,7 @@ class ConnectorServiceImpIconTest {
         return new ConnectorServiceImp(
                 connectorProps, connectorRepository, invokerService,
                 requestDataService, encoder, env, storageService, connectorHealthService,
-                securityAuditorAware, entityManager, globalVariableUsageService,
-                globalVariableSnapshotService);
+                securityAuditorAware, entityManager);
     }
 
     private Connector aConnector(int id, String icon) {
@@ -84,20 +77,6 @@ class ConnectorServiceImpIconTest {
 
     private MultipartFile anImage(String filename, byte[] content) {
         return new MockMultipartFile("file", filename, "image/png", content);
-    }
-
-    /** A connector whose request data holds a global variable reference, unlike the empty default. */
-    private Connector aConnectorReadingGlobalVariable(int id, String icon) {
-        Connector connector = ConnectorFixture.aConnector(id, "idoit",
-                ConnectorFixture.aStoredField("url", "{{global.idoitUrl}}/api", ConnectorFixture.PUBLIC));
-        connector.setIcon(icon);
-        return connector;
-    }
-
-    /** The encoder returns a value as it is, so the reference stays readable through the round-trip. */
-    private void givenEncoderKeepsValues() {
-        given(encoder.decrypt(any())).willAnswer(inv -> inv.getArgument(0));
-        given(encoder.encrypt(any())).willAnswer(inv -> inv.getArgument(0));
     }
 
     // ── storeIcon ─────────────────────────────────────────────────────────────
@@ -173,41 +152,7 @@ class ConnectorServiceImpIconTest {
         verifyNoInteractions(storageService);
     }
 
-    @Test
-    @DisplayName("storeIcon — the request data is unchanged, so its global references are not checked again")
-    void storeIconLeavesReferencesUncheckedWhenIconChanges() {
-        service = newService();
-        Connector connector = aConnectorReadingGlobalVariable(1, null);
-        given(connectorRepository.findById(1)).willReturn(Optional.of(connector));
-        given(connectorRepository.save(any(Connector.class))).willAnswer(inv -> inv.getArgument(0));
-        given(requestDataService.saveAll(any())).willAnswer(inv -> inv.getArgument(0));
-        givenEncoderKeepsValues();
-
-        Connector result = service.storeIcon(1, anImage("logo.png", new byte[]{1}));
-
-        assertThat(result.getRequestData()).extracting(RequestData::getValue)
-                .containsExactly("{{global.idoitUrl}}/api");
-        verifyNoInteractions(globalVariableUsageService);
-    }
-
     // ── deleteIcon ────────────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("deleteIcon — the request data is unchanged, so its global references are not checked again")
-    void deleteIconLeavesReferencesUncheckedWhenIconIsRemoved() {
-        service = newService();
-        Connector connector = aConnectorReadingGlobalVariable(1, "/storage/files/old.png");
-        given(connectorRepository.findById(1)).willReturn(Optional.of(connector));
-        given(connectorRepository.save(any(Connector.class))).willAnswer(inv -> inv.getArgument(0));
-        given(requestDataService.saveAll(any())).willAnswer(inv -> inv.getArgument(0));
-        givenEncoderKeepsValues();
-
-        service.deleteIcon(1);
-
-        assertThat(connector.getRequestData()).extracting(RequestData::getValue)
-                .containsExactly("{{global.idoitUrl}}/api");
-        verifyNoInteractions(globalVariableUsageService);
-    }
 
     @Test
     void deleteIconRemovesStoredFileAndClearsIconWhenIconIsSet() {

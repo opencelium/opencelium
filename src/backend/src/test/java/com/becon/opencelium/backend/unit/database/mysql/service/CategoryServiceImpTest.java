@@ -13,7 +13,6 @@ import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.repository.CategoryRepository;
 import com.becon.opencelium.backend.database.mysql.service.CategoryServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
-import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.resource.CategoryDTO;
 import com.becon.opencelium.backend.testutil.fixture.CategoryFixture;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -99,8 +97,7 @@ class CategoryServiceImpTest {
         when(repository.existsByNameEqualsIgnoreCase("Sales")).thenReturn(true);
 
         assertThatThrownBy(() -> service.add(dto))
-                .isInstanceOfSatisfying(GeneralServiceException.class,
-                        e -> assertThat(e.getStatus()).isEqualTo(HttpStatus.CONFLICT))
+                .isInstanceOf(RuntimeException.class)
                 .hasMessage("TITLE_HAS_ALREADY_TAKEN");
 
         verify(repository, never()).save(any());

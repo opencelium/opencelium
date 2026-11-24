@@ -11,10 +11,6 @@ public class ApiDataResource {
     private String method;
     private Map<String, String> header;
     private Map<String, Object> body;
-    /**
-     * Despite its name, {@code true} skips TLS certificate validation, like a connector's
-     * {@code sslCert}. Absent or {@code false}, the certificate is validated.
-     */
     private boolean sslOn;
 
     public ApiDataResource() {

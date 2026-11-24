@@ -22,7 +22,6 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.WebhookServiceImp;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
-import com.becon.opencelium.backend.resource.error.GlobalVariableErrorResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,9 +64,6 @@ public class WebhookController {
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "409",
-                    description = "The workflow is busy and a global variable it uses refuses a second start (code BUSY)",
-                    content = @Content(schema = @Schema(implementation = GlobalVariableErrorResource.class))),
             @ApiResponse( responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -93,11 +89,15 @@ public class WebhookController {
             throw new RuntimeException("SCHEDULER_NOT_FOUND");
         }
 
-        // not wrapped, so a refusal reaches the caller as 409 BUSY
-        if (queryParam.isEmpty()) {
-            schedulerService.startNowByWebhook(scheduler);
-        } else {
-            schedulerService.startNow(scheduler, webhookService.convertToArrayList(queryParam));
+        try {
+            if (queryParam.isEmpty()) {
+                schedulerService.startNow(scheduler);
+            } else {
+                schedulerService.startNow(scheduler, webhookService.convertToArrayList(queryParam));
+            }
+        }
+        catch (Exception e){
+            throw new RuntimeException(e);
         }
 
         return  ResponseEntity.ok().build();
@@ -111,9 +111,6 @@ public class WebhookController {
             @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "409",
-                    description = "The workflow is busy and a global variable it uses refuses a second start (code BUSY)",
-                    content = @Content(schema = @Schema(implementation = GlobalVariableErrorResource.class))),
             @ApiResponse( responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -139,11 +136,15 @@ public class WebhookController {
             throw new RuntimeException("SCHEDULER_NOT_FOUND");
         }
 
-        // not wrapped, so a refusal reaches the caller as 409 BUSY
-        if (payload.isEmpty()) {
-            schedulerService.startNowByWebhook(scheduler);
-        } else {
-            schedulerService.startNow(scheduler, webhookService.mergeParams(payload, queryParam));
+        try {
+            if (payload.isEmpty()) {
+                schedulerService.startNow(scheduler);
+            } else {
+                schedulerService.startNow(scheduler, webhookService.mergeParams(payload, queryParam));
+            }
+        }
+        catch (Exception e){
+            throw new RuntimeException(e);
         }
 
         return  ResponseEntity.ok().build();
