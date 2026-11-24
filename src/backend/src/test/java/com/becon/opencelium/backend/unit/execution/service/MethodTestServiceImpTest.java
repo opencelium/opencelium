@@ -773,15 +773,30 @@ class MethodTestServiceImpTest {
     }
 
     @Test
-    @DisplayName("toCurl — the command must run, so it holds a secret in clear, like a private connector value")
-    void toCurlKeepsSecretGlobalValueWhenMethodReferencesIt() {
+    @DisplayName("toCurl — nobody may read a secret back, so the command shows it masked, like the echoed request")
+    void toCurlMasksSecretGlobalValueWhenMethodReferencesIt() {
         MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
-                Map.of(), null));
+                Map.of("X-Api-Key", "Bearer {{global.apiKey}}"), null));
         givenUsableVariables(null, CATEGORY_ID, anApiKeyOf("s3cr3t-key"));
 
         MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, CATEGORY_ID);
 
-        assertThat(result.curl()).startsWith("curl '" + api.baseUrl() + "/orders?key=s3cr3t-key'");
+        assertThat(result.curl())
+                .startsWith("curl '" + api.baseUrl() + "/orders?key=****'")
+                .contains("-H 'X-Api-Key: Bearer ****'")
+                .doesNotContain("s3cr3t-key");
+    }
+
+    @Test
+    void toCurlKeepsNonSecretGlobalValueWhenMethodReferencesIt() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
+                Map.of(), null));
+        givenUsableVariables(null, CATEGORY_ID,
+                new GlobalVariableSnapshot.Entry("apiKey", 1, new TextNode("visible-key"), false));
+
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, CATEGORY_ID);
+
+        assertThat(result.curl()).startsWith("curl '" + api.baseUrl() + "/orders?key=visible-key'");
     }
 
     @Test

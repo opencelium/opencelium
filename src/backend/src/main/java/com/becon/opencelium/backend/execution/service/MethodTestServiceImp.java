@@ -17,6 +17,7 @@ import com.becon.opencelium.backend.execution.OperationExchange;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalLoopSource;
 import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.execution.oc721.StaticValueExtractor;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
@@ -44,10 +45,10 @@ import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRes
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO.SentRequest;
 import com.becon.opencelium.backend.resource.execution.MethodConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -63,11 +64,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
@@ -93,7 +96,9 @@ import org.springframework.web.client.RestTemplate;
  *
  * <p>The echoed request hides what the user may use but not see: the values of the connector
  * fields that are not public, and the values of the secret global variables the test read, in
- * the method or through a connector field. A cURL command hides nothing, as it must run.
+ * the method or through a connector field. A cURL command keeps the connector data, as it must
+ * run, but hides the values of the secret global variables too: nobody may read a secret back,
+ * not even its owner, so the user puts it into the command.
  *
  * <p>Not transactional on purpose: the connectors are read detached and their decrypted request
  * data must never be flushed back to the database.
@@ -104,7 +109,6 @@ public class MethodTestServiceImp implements MethodTestService {
     private static final Set<HttpMethod> READ_ONLY_METHODS =
             Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
     private static final String PUBLIC_VISIBILITY = "public";
-    private static final String MASK = "****";
 
     private final Environment environment;
     private final MethodMngMapper methodMngMapper;
@@ -203,7 +207,7 @@ public class MethodTestServiceImp implements MethodTestService {
         }
 
         MethodConnectorEx ownConnector = prepared.ownConnector();
-        String curl = CurlCommandBuilder.forRequest(prepared.request())
+        String curl = CurlCommandBuilder.forRequest(withHidden(prepared.request(), prepared.globalSecrets()))
                 .insecure(ownConnector != null && ownConnector.isSslCert())
                 .connectTimeoutMillis(ownConnector != null ? ownConnector.getTimeout() : 0)
                 .build();
@@ -227,7 +231,8 @@ public class MethodTestServiceImp implements MethodTestService {
         Set<Integer> connectorIds = connectorsToRead(operation, unresolved, globals);
 
         Map<Integer, MethodConnectorEx> connectors = new HashMap<>();
-        Set<String> secrets = new HashSet<>(globals.secretTexts());
+        Set<String> globalSecrets = new HashSet<>(globals.secretTexts());
+        Set<String> secrets = new HashSet<>(globalSecrets);
         List<ConnectorError> errors = new ArrayList<>();
 
         for (Integer connectorId : connectorIds) {
@@ -238,6 +243,7 @@ public class MethodTestServiceImp implements MethodTestService {
                 // gets the value the variable has now, and a public field may hold a secret
                 MethodConnectorEx resolved = connectorExMapper.toMethodConnector(connector, () -> {
                     GlobalVariableSnapshot openToAll = globalVariableSnapshotService.takeOpenToAll();
+                    globalSecrets.addAll(openToAll.secretTexts());
                     secrets.addAll(openToAll.secretTexts());
                     return openToAll;
                 });
@@ -260,6 +266,7 @@ public class MethodTestServiceImp implements MethodTestService {
                 buildRequest(operation, staticValues, connectors, globals),
                 connectors.get(operation.getConnectorId()),
                 secrets,
+                globalSecrets,
                 List.of());
     }
 
@@ -507,12 +514,37 @@ public class MethodTestServiceImp implements MethodTestService {
         return new RestTemplateBuilder(customizer).build();
     }
 
+    /**
+     * Returns {@code request} with {@code texts} hidden in its URL, headers and text or form body.
+     * Hidden before the cURL command is built, because the command encodes and quotes the values.
+     */
+    private static RequestEntity<Object> withHidden(RequestEntity<?> request, Set<String> texts) {
+        if (texts.isEmpty()) {
+            return new RequestEntity<>(request.getBody(), request.getHeaders(), request.getMethod(), request.getUrl());
+        }
+
+        UnaryOperator<String> mask = text -> OcLogger.hideIn(text, texts);
+
+        HttpHeaders headers = new HttpHeaders();
+        request.getHeaders().forEach((name, values) -> headers.put(name, values.stream().map(mask).toList()));
+
+        Object body = request.getBody();
+        if (body instanceof MultiValueMap<?, ?> form) {
+            MultiValueMap<String, Object> hiddenForm = new LinkedMultiValueMap<>();
+            form.forEach((name, values) -> values.forEach(value -> hiddenForm.add(
+                    String.valueOf(name), value == null ? null : mask.apply(String.valueOf(value)))));
+            body = hiddenForm;
+        } else if (body instanceof String text) {
+            body = mask.apply(text);
+        }
+
+        return new RequestEntity<>(
+                body, headers, request.getMethod(), URI.create(mask.apply(request.getUrl().toString())));
+    }
+
     private static SentRequest toSentRequest(RequestEntity<?> request, Set<String> secrets) {
-        // longest first, so a secret containing another one is masked as a whole
-        List<String> ordered = secrets.stream()
-                .sorted(Comparator.comparingInt(String::length).reversed())
-                .toList();
-        UnaryOperator<String> mask = text -> mask(text, ordered);
+        // the rule a run log follows: longest first, and inside Basic credentials too
+        UnaryOperator<String> mask = text -> OcLogger.hideIn(text, secrets);
 
         Map<String, List<String>> headers = new LinkedHashMap<>();
         request.getHeaders().forEach((name, values) -> headers.put(name, values.stream().map(mask).toList()));
@@ -541,15 +573,6 @@ public class MethodTestServiceImp implements MethodTestService {
         return mask.apply(body.toString());
     }
 
-    private static String mask(String text, List<String> secrets) {
-        String masked = text;
-        for (String secret : secrets) {
-            masked = masked.replace(secret, MASK);
-        }
-
-        return masked;
-    }
-
     private static ReceivedResponse toReceivedResponse(ResponseEntity<?> response) {
         Map<String, List<String>> headers = new LinkedHashMap<>();
         response.getHeaders().forEach((name, values) -> headers.put(name, List.copyOf(values)));
@@ -572,14 +595,22 @@ public class MethodTestServiceImp implements MethodTestService {
      *     that were read and the values of the secret global variables the test read
      * @param connectorErrors why connectors could not be read; empty when the request is built
      */
+    /**
+     * A built request and what showing it must hide.
+     *
+     * @param secrets       the texts the echoed request hides: secret global variables and the
+     *                      connector fields that are not public
+     * @param globalSecrets the texts a cURL command hides: secret global variables only
+     */
     private record PreparedRequest(
             RequestEntity<?> request,
             MethodConnectorEx ownConnector,
             Set<String> secrets,
+            Set<String> globalSecrets,
             List<ConnectorError> connectorErrors) {
 
         static PreparedRequest failed(List<ConnectorError> connectorErrors) {
-            return new PreparedRequest(null, null, Set.of(), List.copyOf(connectorErrors));
+            return new PreparedRequest(null, null, Set.of(), Set.of(), List.copyOf(connectorErrors));
         }
     }
 }
