@@ -31,19 +31,29 @@ public class Loop {
         Loop loop = new Loop();
 
         String wrappedDirectRef = ReferenceUtility.extractReference(expression, RegExpression.wrappedDirectRef);
+        // without a method reference the source may be a global variable: for {{global.tenants}}
+        String globalRef = wrappedDirectRef == null
+                ? ReferenceUtility.extractReference(expression, RegExpression.globalRef)
+                : null;
 
         if (expression.startsWith(FOR_IN.getName())) {
-            configureForInLoop(loop, expression, wrappedDirectRef);
+            if (globalRef != null) {
+                // the keys of a map or the indexes of an array are read from the value itself
+                loop.setOperator(FOR_IN);
+                loop.setRef(globalRef);
+            } else {
+                configureForInLoop(loop, expression, wrappedDirectRef);
+            }
             return loop;
         }
 
         if (expression.startsWith(FOR.getName())) {
             loop.setOperator(FOR);
-            loop.setRef(wrappedDirectRef);
+            loop.setRef(wrappedDirectRef != null ? wrappedDirectRef : globalRef);
             return loop;
         }
 
-        configureSplitStringLoop(loop, expression, wrappedDirectRef);
+        configureSplitStringLoop(loop, expression, wrappedDirectRef != null ? wrappedDirectRef : globalRef);
         return loop;
     }
 
@@ -123,17 +133,17 @@ public class Loop {
         return webhookRef.substring(0, colonIndex) + "['*']~" + webhookRef.substring(colonIndex);
     }
 
-    private static void configureSplitStringLoop(Loop loop, String expression, String wrappedDirectRef) {
-        if (wrappedDirectRef == null) {
+    private static void configureSplitStringLoop(Loop loop, String expression, String source) {
+        if (source == null) {
             throw new IllegalArgumentException(
                     ReferenceUtility.getContainedReferenceAndType(expression) + " is not supported for SPLIT_STRING"
             );
         }
 
         loop.setOperator(SPLIT_STRING);
-        loop.setRef(wrappedDirectRef);
+        loop.setRef(source);
 
-        String delimiter = expression.replace(wrappedDirectRef, "")
+        String delimiter = expression.replace(source, "")
                 .replace(SPLIT_STRING.getName(), "")
                 .replace("'", "")
                 .trim();

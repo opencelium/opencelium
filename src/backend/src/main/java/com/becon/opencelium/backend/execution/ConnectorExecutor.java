@@ -11,8 +11,10 @@ import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalLoopSource;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.reference.ReferenceMatchers;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.ocel.ExpressionProcessor;
 import com.becon.opencelium.backend.ocel.ExpressionProcessorFactory;
@@ -258,6 +260,9 @@ public class ConnectorExecutor {
 
         operation.addRequest(key, requestEntity);
         operation.addResponse(key, responseEntity);
+
+        // now that the response is recorded: a value may read it, and later steps read the new values
+        executionManager.applyGlobalWrites(dto.getGlobalWrites(), dto.getName());
     }
 
     private ResponseEntity<?> sendRequest(URI uri, RequestEntity<?> requestEntity, Class<?> responseType) {
@@ -338,6 +343,11 @@ public class ConnectorExecutor {
         Object referencedList = executionManager.getValue(loop.getRef());
         if (ObjectUtils.isEmpty(referencedList)) {
             return Collections.emptyList();
+        }
+
+        // a global variable holds any JSON type, so what the loop can walk is checked, not assumed
+        if (ReferenceMatchers.isGlobal(loop.getRef())) {
+            return GlobalLoopSource.valuesOf(loop, referencedList);
         }
 
         return switch (loop.getOperator()) {

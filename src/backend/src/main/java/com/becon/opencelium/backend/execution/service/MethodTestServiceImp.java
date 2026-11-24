@@ -8,12 +8,16 @@ import com.becon.opencelium.backend.database.mongodb.entity.MethodConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.database.mysql.service.GlobalVariableService;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.execution.CurlCommandBuilder;
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.execution.ExecutionManagerImpl;
 import com.becon.opencelium.backend.execution.OperationExchange;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalLoopSource;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.execution.oc721.StaticValueExtractor;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
@@ -25,12 +29,14 @@ import com.becon.opencelium.backend.reference.OperationReferenceCollector;
 import com.becon.opencelium.backend.reference.ReferenceMatchers;
 import com.becon.opencelium.backend.reference.ReferenceParser;
 import com.becon.opencelium.backend.reference.enums.ReferenceType;
+import com.becon.opencelium.backend.reference.model.GlobalReference;
 import com.becon.opencelium.backend.reference.model.RequestDataReference;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlRequestDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlResultDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.ConnectorReference;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.GlobalVariableReference;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.StaticReference;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRequestDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO;
@@ -39,9 +45,10 @@ import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRes
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO.SentRequest;
 import com.becon.opencelium.backend.resource.execution.MethodConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -57,11 +64,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
@@ -70,8 +79,26 @@ import org.springframework.web.client.RestTemplate;
  *
  * <p>The method is built the way a connection execution builds it, so the request is the one the
  * execution would send. Its references are resolved by a {@link StaticValueExtractor}: request
- * data references are read from the connectors, every other reference takes the static value the
- * user gave for it. The same request can be returned as a cURL command instead of being sent.
+ * data references are read from the connectors, global variable references from a snapshot of the
+ * variables the user may use, every other reference takes the static value the user gave for it.
+ * A static value always wins. The same request can be returned as a cURL command instead of being
+ * sent.
+ *
+ * <p>A connector field that holds a global variable is read with the value the variable has now,
+ * like wherever a connector is used outside a run: only variables open to all workflows.
+ *
+ * <p>A global variable the method itself references is read with its current value, cast the way
+ * a run casts it, when the authenticated user may use it in the workflow of the method: the user
+ * owns it, was granted it or is an admin, and the workflow is in its scope, the rule of the
+ * reference picker. The sent request is shown to the user, so the test never reads any other
+ * variable. A variable the test cannot read, and one whose path names the iterator of a loop,
+ * which has no value outside a run, needs a static value like any other reference.
+ *
+ * <p>The echoed request hides what the user may use but not see: the values of the connector
+ * fields that are not public, and the values of the secret global variables the test read, in
+ * the method or through a connector field. A cURL command keeps the connector data, as it must
+ * run, but hides the values of the secret global variables too: nobody may read a secret back,
+ * not even its owner, so the user puts it into the command.
  *
  * <p>Not transactional on purpose: the connectors are read detached and their decrypted request
  * data must never be flushed back to the database.
@@ -82,7 +109,6 @@ public class MethodTestServiceImp implements MethodTestService {
     private static final Set<HttpMethod> READ_ONLY_METHODS =
             Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
     private static final String PUBLIC_VISIBILITY = "public";
-    private static final String MASK = "****";
 
     private final Environment environment;
     private final MethodMngMapper methodMngMapper;
@@ -90,6 +116,8 @@ public class MethodTestServiceImp implements MethodTestService {
     private final ConnectorExMapper connectorExMapper;
     private final ConnectorService connectorService;
     private final InvokerService invokerService;
+    private final GlobalVariableSnapshotService globalVariableSnapshotService;
+    private final GlobalVariableService globalVariableService;
 
     public MethodTestServiceImp(
             Environment environment,
@@ -97,25 +125,34 @@ public class MethodTestServiceImp implements MethodTestService {
             OperationExMapper operationExMapper,
             ConnectorExMapper connectorExMapper,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
-            @Qualifier("invokerServiceImp") InvokerService invokerService) {
+            @Qualifier("invokerServiceImp") InvokerService invokerService,
+            GlobalVariableSnapshotService globalVariableSnapshotService,
+            GlobalVariableService globalVariableService) {
         this.environment = environment;
         this.methodMngMapper = methodMngMapper;
         this.operationExMapper = operationExMapper;
         this.connectorExMapper = connectorExMapper;
         this.connectorService = connectorService;
         this.invokerService = invokerService;
+        this.globalVariableSnapshotService = globalVariableSnapshotService;
+        this.globalVariableService = globalVariableService;
     }
 
     @Override
-    public MethodTestReferencesDTO findReferences(MethodDTO method) {
+    public MethodTestReferencesDTO findReferences(MethodDTO method, Long connectionId, Integer categoryId) {
+        requireOneWorkflow(connectionId, categoryId);
         OperationDTO operation = toOperation(method);
+        Set<String> references = OperationReferenceCollector.collect(operation);
+        GlobalVariableSnapshot globals = usableGlobals(references, connectionId, categoryId);
 
         Map<Integer, Set<String>> fieldsByConnector = new HashMap<>();
         List<ConnectorReference> connectorReferences = new ArrayList<>();
         List<StaticReference> staticReferences = new ArrayList<>();
+        List<GlobalVariableReference> globalReferences = new ArrayList<>();
 
-        for (String reference : OperationReferenceCollector.collect(operation)) {
+        for (String reference : references) {
             Optional<ConnectorField> field = connectorFieldOf(reference, operation.getConnectorId());
+            Optional<GlobalReference> global = providedGlobal(reference, globals);
 
             if (field.isPresent()) {
                 int connectorId = field.get().connectorId();
@@ -125,20 +162,23 @@ public class MethodTestServiceImp implements MethodTestService {
                         .contains(key);
 
                 connectorReferences.add(new ConnectorReference(reference, connectorId, key, available));
+            } else if (global.isPresent()) {
+                globalReferences.add(new GlobalVariableReference(reference, global.get().getName()));
             } else {
                 staticReferences.add(new StaticReference(reference, typeOf(reference)));
             }
         }
 
-        return new MethodTestReferencesDTO(connectorReferences, staticReferences);
+        return new MethodTestReferencesDTO(connectorReferences, staticReferences, globalReferences);
     }
 
     @Override
-    public MethodTestResultDTO test(MethodTestRequestDTO request) {
+    public MethodTestResultDTO test(MethodTestRequestDTO request, Long connectionId, Integer categoryId) {
+        requireOneWorkflow(connectionId, categoryId);
         OperationDTO operation = toOperation(request.method());
         requireWriteConfirmed(operation, request.confirmWrite());
 
-        PreparedRequest prepared = prepare(operation, request.staticValues());
+        PreparedRequest prepared = prepare(operation, request.staticValues(), connectionId, categoryId);
         if (!prepared.connectorErrors().isEmpty()) {
             return MethodTestResultDTO.notSent(prepared.connectorErrors());
         }
@@ -157,16 +197,17 @@ public class MethodTestServiceImp implements MethodTestService {
     }
 
     @Override
-    public MethodCurlResultDTO toCurl(MethodCurlRequestDTO request) {
+    public MethodCurlResultDTO toCurl(MethodCurlRequestDTO request, Long connectionId, Integer categoryId) {
+        requireOneWorkflow(connectionId, categoryId);
         OperationDTO operation = toOperation(request.method());
 
-        PreparedRequest prepared = prepare(operation, request.staticValues());
+        PreparedRequest prepared = prepare(operation, request.staticValues(), connectionId, categoryId);
         if (!prepared.connectorErrors().isEmpty()) {
             return MethodCurlResultDTO.notBuilt(prepared.connectorErrors());
         }
 
         MethodConnectorEx ownConnector = prepared.ownConnector();
-        String curl = CurlCommandBuilder.forRequest(prepared.request())
+        String curl = CurlCommandBuilder.forRequest(withHidden(prepared.request(), prepared.globalSecrets()))
                 .insecure(ownConnector != null && ownConnector.isSslCert())
                 .connectTimeoutMillis(ownConnector != null ? ownConnector.getTimeout() : 0)
                 .build();
@@ -175,24 +216,37 @@ public class MethodTestServiceImp implements MethodTestService {
     }
 
     /**
-     * Reads the connectors the request of {@code operation} needs and builds the request, the way
-     * a connection execution would build it. Sends no request of its own, but reading connector
-     * data can, e.g. to obtain a token.
+     * Reads the connectors and the global variables the request of {@code operation} needs and
+     * builds the request, the way a connection execution would build it. Sends no request of its
+     * own, but reading connector data can, e.g. to obtain a token.
      *
      * @return the built request, or only the connector errors when a connector cannot be read
      */
-    private PreparedRequest prepare(OperationDTO operation, Map<String, Object> staticValues) {
-        Set<Integer> connectorIds = connectorsToRead(operation, staticValues);
+    private PreparedRequest prepare(
+            OperationDTO operation, Map<String, Object> staticValues, Long connectionId, Integer categoryId) {
+        List<String> unresolved = OperationReferenceCollector.collect(operation).stream()
+                .filter(reference -> !staticValues.containsKey(reference))
+                .toList();
+        GlobalVariableSnapshot globals = usableGlobals(unresolved, connectionId, categoryId);
+        Set<Integer> connectorIds = connectorsToRead(operation, unresolved, globals);
 
         Map<Integer, MethodConnectorEx> connectors = new HashMap<>();
-        Set<String> secrets = new HashSet<>();
+        Set<String> globalSecrets = new HashSet<>(globals.secretTexts());
+        Set<String> secrets = new HashSet<>(globalSecrets);
         List<ConnectorError> errors = new ArrayList<>();
 
         for (Integer connectorId : connectorIds) {
             try {
                 Connector connector = connectorService.getById(connectorId);
                 Set<String> hiddenFields = hiddenFieldsOf(connector);
-                MethodConnectorEx resolved = connectorExMapper.toMethodConnector(connector);
+                // no workflow runs in a test: a connector field that holds a global variable
+                // gets the value the variable has now, and a public field may hold a secret
+                MethodConnectorEx resolved = connectorExMapper.toMethodConnector(connector, () -> {
+                    GlobalVariableSnapshot openToAll = globalVariableSnapshotService.takeOpenToAll();
+                    globalSecrets.addAll(openToAll.secretTexts());
+                    secrets.addAll(openToAll.secretTexts());
+                    return openToAll;
+                });
 
                 connectors.put(connectorId, resolved);
                 hiddenFields.stream()
@@ -209,9 +263,10 @@ public class MethodTestServiceImp implements MethodTestService {
         }
 
         return new PreparedRequest(
-                buildRequest(operation, staticValues, connectors),
+                buildRequest(operation, staticValues, connectors, globals),
                 connectors.get(operation.getConnectorId()),
                 secrets,
+                globalSecrets,
                 List.of());
     }
 
@@ -243,6 +298,17 @@ public class MethodTestServiceImp implements MethodTestService {
         return connectorId != null && !ConnectionConstants.DEFAULT_CONNECTOR_ID.equals(connectorId);
     }
 
+    private static void requireOneWorkflow(Long connectionId, Integer categoryId) {
+        if (connectionId == null || categoryId == null) {
+            return;
+        }
+
+        throw new GeneralServiceException(
+                HttpStatus.BAD_REQUEST,
+                ExceptionConstant.METHOD_TEST_WORKFLOW_AMBIGUOUS,
+                "Give connectionId for a saved workflow or categoryId for one that is not saved yet, not both.");
+    }
+
     private static void requireWriteConfirmed(OperationDTO operation, boolean confirmWrite) {
         if (confirmWrite || READ_ONLY_METHODS.contains(operation.getHttpMethod())) {
             return;
@@ -259,24 +325,27 @@ public class MethodTestServiceImp implements MethodTestService {
      * Returns the connectors whose data the request needs: the method's own connector, and every
      * connector referenced by a request data reference without a static value.
      *
-     * @throws GeneralServiceException when a reference that is not connector data has no static
-     *     value
+     * @param unresolved the references of the method that have no static value
+     * @param globals the global variables the test may read
+     * @throws GeneralServiceException when a reference without a static value is neither connector
+     *     data nor a global variable the test provides
      */
-    private static Set<Integer> connectorsToRead(OperationDTO operation, Map<String, Object> staticValues) {
+    private static Set<Integer> connectorsToRead(
+            OperationDTO operation, List<String> unresolved, GlobalVariableSnapshot globals) {
         Set<Integer> connectorIds = new LinkedHashSet<>();
         if (operation.getConnectorId() != null) {
             connectorIds.add(operation.getConnectorId());
         }
 
         List<String> missing = new ArrayList<>();
-        for (String reference : OperationReferenceCollector.collect(operation)) {
-            if (staticValues.containsKey(reference)) {
-                continue;
-            }
+        for (String reference : unresolved) {
+            Optional<ConnectorField> field = connectorFieldOf(reference, operation.getConnectorId());
 
-            connectorFieldOf(reference, operation.getConnectorId()).ifPresentOrElse(
-                    field -> connectorIds.add(field.connectorId()),
-                    () -> missing.add(reference));
+            if (field.isPresent()) {
+                connectorIds.add(field.get().connectorId());
+            } else if (providedGlobal(reference, globals).isEmpty()) {
+                missing.add(reference);
+            }
         }
 
         if (!missing.isEmpty()) {
@@ -310,6 +379,52 @@ public class MethodTestServiceImp implements MethodTestService {
         return connectorId == null
                 ? Optional.empty()
                 : Optional.of(new ConnectorField(connectorId, parsed.getKey()));
+    }
+
+    /**
+     * Takes the snapshot of the variables the user may use in the workflow of the method, but only
+     * when one of {@code references} is a global variable reference a test can resolve; otherwise
+     * reads nothing.
+     */
+    private GlobalVariableSnapshot usableGlobals(
+            Collection<String> references, Long connectionId, Integer categoryId) {
+        boolean readsGlobals = references.stream()
+                .map(MethodTestServiceImp::resolvableGlobal)
+                .anyMatch(Optional::isPresent);
+        if (!readsGlobals) {
+            return GlobalVariableSnapshot.empty();
+        }
+
+        return globalVariableSnapshotService.takeOf(globalVariableService.findUsable(connectionId, categoryId));
+    }
+
+    /**
+     * Returns the global variable reference {@code reference} is, when the test provides its value:
+     * a test can resolve it and {@code globals} holds its variable.
+     */
+    private static Optional<GlobalReference> providedGlobal(String reference, GlobalVariableSnapshot globals) {
+        return resolvableGlobal(reference).filter(global -> globals.find(global.getName()).isPresent());
+    }
+
+    /**
+     * Parses {@code reference} when it is a global variable reference a test can resolve at all.
+     * No loop runs in a test, so a path that names the iterator of a loop has no value.
+     */
+    private static Optional<GlobalReference> resolvableGlobal(String reference) {
+        if (!ReferenceMatchers.isGlobal(reference)) {
+            return Optional.empty();
+        }
+
+        GlobalReference global;
+        try {
+            global = GlobalReference.parse(reference);
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+
+        boolean namesLoopIterator = global.getPath().filter(GlobalLoopSource::namesIterator).isPresent();
+
+        return namesLoopIterator ? Optional.empty() : Optional.of(global);
     }
 
     private static ReferenceType typeOf(String reference) {
@@ -361,12 +476,13 @@ public class MethodTestServiceImp implements MethodTestService {
     private static RequestEntity<?> buildRequest(
             OperationDTO operation,
             Map<String, Object> staticValues,
-            Map<Integer, MethodConnectorEx> connectors) {
+            Map<Integer, MethodConnectorEx> connectors,
+            GlobalVariableSnapshot globals) {
         Map<Integer, Map<String, String>> requestData = new HashMap<>();
         connectors.forEach((id, connector) -> requestData.put(id, connector.getRequiredData()));
 
         ExecutionManager executionManager = new ExecutionManagerImpl(
-                Map.of(), List.of(), requestData, Map.of(), Map.of(),
+                Map.of(), List.of(), requestData, Map.of(), Map.of(), globals,
                 manager -> new StaticValueExtractor(staticValues, new ReferenceExtractor(manager)));
         executionManager.setCurrentCtorId(operation.getConnectorId());
 
@@ -398,12 +514,37 @@ public class MethodTestServiceImp implements MethodTestService {
         return new RestTemplateBuilder(customizer).build();
     }
 
+    /**
+     * Returns {@code request} with {@code texts} hidden in its URL, headers and text or form body.
+     * Hidden before the cURL command is built, because the command encodes and quotes the values.
+     */
+    private static RequestEntity<Object> withHidden(RequestEntity<?> request, Set<String> texts) {
+        if (texts.isEmpty()) {
+            return new RequestEntity<>(request.getBody(), request.getHeaders(), request.getMethod(), request.getUrl());
+        }
+
+        UnaryOperator<String> mask = text -> OcLogger.hideIn(text, texts);
+
+        HttpHeaders headers = new HttpHeaders();
+        request.getHeaders().forEach((name, values) -> headers.put(name, values.stream().map(mask).toList()));
+
+        Object body = request.getBody();
+        if (body instanceof MultiValueMap<?, ?> form) {
+            MultiValueMap<String, Object> hiddenForm = new LinkedMultiValueMap<>();
+            form.forEach((name, values) -> values.forEach(value -> hiddenForm.add(
+                    String.valueOf(name), value == null ? null : mask.apply(String.valueOf(value)))));
+            body = hiddenForm;
+        } else if (body instanceof String text) {
+            body = mask.apply(text);
+        }
+
+        return new RequestEntity<>(
+                body, headers, request.getMethod(), URI.create(mask.apply(request.getUrl().toString())));
+    }
+
     private static SentRequest toSentRequest(RequestEntity<?> request, Set<String> secrets) {
-        // longest first, so a secret containing another one is masked as a whole
-        List<String> ordered = secrets.stream()
-                .sorted(Comparator.comparingInt(String::length).reversed())
-                .toList();
-        UnaryOperator<String> mask = text -> mask(text, ordered);
+        // the rule a run log follows: longest first, and inside Basic credentials too
+        UnaryOperator<String> mask = text -> OcLogger.hideIn(text, secrets);
 
         Map<String, List<String>> headers = new LinkedHashMap<>();
         request.getHeaders().forEach((name, values) -> headers.put(name, values.stream().map(mask).toList()));
@@ -432,15 +573,6 @@ public class MethodTestServiceImp implements MethodTestService {
         return mask.apply(body.toString());
     }
 
-    private static String mask(String text, List<String> secrets) {
-        String masked = text;
-        for (String secret : secrets) {
-            masked = masked.replace(secret, MASK);
-        }
-
-        return masked;
-    }
-
     private static ReceivedResponse toReceivedResponse(ResponseEntity<?> response) {
         Map<String, List<String>> headers = new LinkedHashMap<>();
         response.getHeaders().forEach((name, values) -> headers.put(name, List.copyOf(values)));
@@ -459,17 +591,26 @@ public class MethodTestServiceImp implements MethodTestService {
      *
      * @param request the built request; {@code null} when a connector could not be read
      * @param ownConnector the method's own connector; {@code null} for a pure HTTP request
-     * @param secrets the non-public values of the connectors that were read
+     * @param secrets the texts the echoed request hides: the non-public values of the connectors
+     *     that were read and the values of the secret global variables the test read
      * @param connectorErrors why connectors could not be read; empty when the request is built
+     */
+    /**
+     * A built request and what showing it must hide.
+     *
+     * @param secrets       the texts the echoed request hides: secret global variables and the
+     *                      connector fields that are not public
+     * @param globalSecrets the texts a cURL command hides: secret global variables only
      */
     private record PreparedRequest(
             RequestEntity<?> request,
             MethodConnectorEx ownConnector,
             Set<String> secrets,
+            Set<String> globalSecrets,
             List<ConnectorError> connectorErrors) {
 
         static PreparedRequest failed(List<ConnectorError> connectorErrors) {
-            return new PreparedRequest(null, null, Set.of(), List.copyOf(connectorErrors));
+            return new PreparedRequest(null, null, Set.of(), Set.of(), List.copyOf(connectorErrors));
         }
     }
 }

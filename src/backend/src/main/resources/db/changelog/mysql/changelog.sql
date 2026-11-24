@@ -838,3 +838,174 @@ UPDATE `user` `dup`
    AND `keep`.`id` < `dup`.`id`
    SET `dup`.`username` = NULL;
 ALTER TABLE `user` ADD UNIQUE KEY IF NOT EXISTS `uk_user_username` (`username`);
+
+--changeset 5.2:3 stripComments:true splitStatements:true endDelimiter:;
+-- Global variables: named JSON values that workflows, connectors and notifications read through
+-- {{global.name}}. 'kind' is CONSTANT, MUTABLE or SCRIPT and never changes. 'value' holds JSON
+-- text. 'version' starts at 1 and goes up by one on every saved change: it is the optimistic lock
+-- of the edit form (JPA @Version) and the version range of a change log entry. 'owner_user_id' is
+-- the creator, who decides who else may use, edit or delete the variable. It is set to NULL when
+-- that user is deleted, which leaves the variable to the admins instead of blocking the delete.
+-- 'created_by' and 'updated_by' are plain audit columns, deliberately not foreign keys.
+CREATE TABLE IF NOT EXISTS `global_variable` (
+    `id`            BIGINT NOT NULL AUTO_INCREMENT,
+    `name`          VARCHAR(64) NOT NULL,
+    `kind`          VARCHAR(16) NOT NULL,
+    `value`         LONGTEXT DEFAULT NULL,
+    `description`   VARCHAR(512) DEFAULT NULL,
+    `secret`        TINYINT(1) NOT NULL DEFAULT 0,
+    `scope_type`    VARCHAR(16) NOT NULL,
+    `owner_user_id` INT DEFAULT NULL,
+    `version`       BIGINT NOT NULL DEFAULT 1,
+    `created_at`    TIMESTAMP NULL DEFAULT NULL,
+    `created_by`    INT DEFAULT NULL,
+    `updated_at`    TIMESTAMP NULL DEFAULT NULL,
+    `updated_by`    INT DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_global_variable_name` (`name`),
+    CONSTRAINT `fk_global_variable_owner_user` FOREIGN KEY (`owner_user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
+);
+
+--changeset 5.2:4 stripComments:true splitStatements:true endDelimiter:;
+-- The workflows that may use a variable whose scope_type is CATEGORIES or WORKFLOWS. 'target_id'
+-- is a category id or a connection id according to 'target_type', so it carries no foreign key.
+CREATE TABLE IF NOT EXISTS `global_variable_scope` (
+    `variable_id` BIGINT NOT NULL,
+    `target_type` VARCHAR(16) NOT NULL,
+    `target_id`   BIGINT NOT NULL,
+    PRIMARY KEY (`variable_id`, `target_type`, `target_id`),
+    CONSTRAINT `fk_global_variable_scope_variable` FOREIGN KEY (`variable_id`) REFERENCES `global_variable` (`id`) ON DELETE CASCADE
+);
+
+--changeset 5.2:5 stripComments:true splitStatements:true endDelimiter:;
+-- What the owner of a variable grants to other users: VIEW_USE, EDIT or DELETE, one row each.
+CREATE TABLE IF NOT EXISTS `global_variable_permission` (
+    `variable_id` BIGINT NOT NULL,
+    `user_id`     INT NOT NULL,
+    `permission`  VARCHAR(16) NOT NULL,
+    PRIMARY KEY (`variable_id`, `user_id`, `permission`),
+    CONSTRAINT `fk_global_variable_permission_variable` FOREIGN KEY (`variable_id`) REFERENCES `global_variable` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_global_variable_permission_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+);
+
+--changeset 5.2:6 stripComments:true splitStatements:true endDelimiter:;
+-- Change log of global variables, written in the transaction of the change itself. 'variable_id'
+-- has no foreign key and 'variable_name' is a copy, so the history survives the variable. For a
+-- CONFIG or PERMISSIONS change 'old_value' and 'new_value' hold the changed fields as JSON.
+CREATE TABLE IF NOT EXISTS `global_variable_change` (
+    `id`            BIGINT NOT NULL AUTO_INCREMENT,
+    `variable_id`   BIGINT NOT NULL,
+    `variable_name` VARCHAR(64) NOT NULL,
+    `change_type`   VARCHAR(16) NOT NULL,
+    `version_from`  BIGINT DEFAULT NULL,
+    `version_to`    BIGINT DEFAULT NULL,
+    `old_value`     LONGTEXT DEFAULT NULL,
+    `new_value`     LONGTEXT DEFAULT NULL,
+    `actor_type`    VARCHAR(16) NOT NULL,
+    `user_id`       INT DEFAULT NULL,
+    `result`        VARCHAR(16) NOT NULL,
+    `reason`        VARCHAR(512) DEFAULT NULL,
+    `changed_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_global_variable_change_variable` (`variable_id`, `changed_at`)
+);
+
+--changeset 5.2:7 stripComments:true splitStatements:true endDelimiter:;
+-- The GLOBAL_VARIABLE component opens the global variables page and allows creating variables.
+-- The admin role gets every permission on it; what a user may do with a single variable is
+-- decided by global_variable_permission.
+INSERT IGNORE INTO `component` (`name`, `description`) VALUES ('GLOBAL_VARIABLE', 'Global variable description');
+INSERT IGNORE INTO `role_has_permission` (`role_id`, `component_id`, `permission_id`)
+SELECT `r`.`id`, `c`.`id`, `p`.`id`
+  FROM `role` `r`
+  JOIN `component` `c` ON `c`.`name` = 'GLOBAL_VARIABLE'
+  JOIN `permission` `p`
+ WHERE `r`.`name` = 'Admin';
+
+--changeset 5.2:8 stripComments:true splitStatements:true endDelimiter:;
+-- Where global variables are used: one row per reference found in a workflow, connector or
+-- notification. It is rebuilt whenever the source is saved and answers "used by", which is what
+-- blocks deleting or renaming a variable and narrowing its scope. 'source_id' is the id of the
+-- workflow, connector or notification according to 'source_type', so it carries no foreign key.
+-- 'element_ref' is the index path of the element and 'element_color' the color of a method, so
+-- the UI can open the workflow on that element.
+CREATE TABLE IF NOT EXISTS `global_variable_usage` (
+    `id`            BIGINT NOT NULL AUTO_INCREMENT,
+    `variable_id`   BIGINT NOT NULL,
+    `source_type`   VARCHAR(16) NOT NULL,
+    `source_id`     BIGINT NOT NULL,
+    `element_type`  VARCHAR(16) DEFAULT NULL,
+    `element_ref`   VARCHAR(255) DEFAULT NULL,
+    `element_color` VARCHAR(16) DEFAULT NULL,
+    `element_label` VARCHAR(255) DEFAULT NULL,
+    `field`         VARCHAR(512) DEFAULT NULL,
+    `access`        VARCHAR(16) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_global_variable_usage_variable` (`variable_id`),
+    KEY `idx_global_variable_usage_source` (`source_type`, `source_id`),
+    CONSTRAINT `fk_global_variable_usage_variable` FOREIGN KEY (`variable_id`) REFERENCES `global_variable` (`id`) ON DELETE CASCADE
+);
+
+--changeset 5.2:9 stripComments:true splitStatements:true endDelimiter:;
+-- The global variable tables took the character set of the schema, which stores at most three
+-- bytes per character. A value, a description or the label of a workflow element that holds a
+-- four-byte character, an emoji for example, was refused by the database with error 1366. These
+-- tables hold text users type and text copied from workflows, which MongoDB stores in full, so
+-- they are converted to utf8mb4. The collation stays case-insensitive: the name of a variable is
+-- unique whatever its case.
+ALTER TABLE `global_variable` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+ALTER TABLE `global_variable_scope` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+ALTER TABLE `global_variable_permission` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+ALTER TABLE `global_variable_change` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+ALTER TABLE `global_variable_usage` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+--changeset 5.2:10 stripComments:true splitStatements:true endDelimiter:;
+--preconditions onFail:MARK_RAN onError:HALT
+--precondition-sql-check expectedResult:1 SELECT COUNT(*) > 0 FROM information_schema.COLLATION_CHARACTER_SET_APPLICABILITY WHERE CHARACTER_SET_NAME = 'utf8mb4' AND COLLATION_NAME IN ('utf8mb4_uca1400_ai_ci', 'uca1400_ai_ci')
+-- Recent MariaDB versions list the collation as uca1400_ai_ci, which applies to several character
+-- sets, and earlier ones as utf8mb4_uca1400_ai_ci; the check accepts both names.
+-- utf8mb4_general_ci gives every character outside the Basic Multilingual Plane the same weight,
+-- so any emoji equals any other: searching for one found every name or description holding a
+-- different one. utf8mb4_uca1400_ai_ci weighs each character on its own and is the collation the
+-- schema already uses for utf8mb3; it stays case-insensitive, so the name of a variable is still
+-- unique whatever its case. It exists from MariaDB 10.10 on; an older server, the one a
+-- distribution ships for example, keeps utf8mb4_general_ci and this changeset is marked as run.
+ALTER TABLE `global_variable` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
+ALTER TABLE `global_variable_scope` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
+ALTER TABLE `global_variable_permission` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
+ALTER TABLE `global_variable_change` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
+ALTER TABLE `global_variable_usage` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci;
+
+--changeset 5.2:11 stripComments:true splitStatements:true endDelimiter:;
+-- Mutable global variables. 'value' stays what a user saves: for a mutable variable it is the
+-- initial value. 'current_value' is the value runs read and write, set to the initial value on
+-- creation and on a reset; it is NULL for the other kinds. 'current_revision' goes up by one on
+-- every new current value, so a poll can tell a change without the edit form's 'version' moving.
+-- 'current_set_at' tells when the current value was set, 'current_set_by_user' the user who reset
+-- it and 'current_set_by_execution' the execution that wrote it; at most one of the two is set.
+-- Like 'created_by' they are plain audit columns, deliberately not foreign keys. 'busy_policy'
+-- (QUEUE or REFUSE) decides what a second start of a workflow using the variable does.
+-- 'owner_workflow_id' is the one workflow whose runs may write the variable; it is set to NULL
+-- when that workflow is deleted, which leaves the variable without a writer until a user with
+-- edit permission picks another one.
+ALTER TABLE `global_variable`
+    ADD COLUMN IF NOT EXISTS `current_value`            LONGTEXT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `current_revision`         BIGINT NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS `current_set_at`           TIMESTAMP NULL DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `current_set_by_user`      INT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `current_set_by_execution` BIGINT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `busy_policy`              VARCHAR(16) DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `owner_workflow_id`        INT DEFAULT NULL;
+ALTER TABLE `global_variable` ADD CONSTRAINT `fk_global_variable_owner_workflow` FOREIGN KEY (`owner_workflow_id`) REFERENCES `connection` (`id`) ON DELETE SET NULL;
+
+--changeset 5.2:12 stripComments:true splitStatements:true endDelimiter:;
+-- What runs write to a mutable global variable, in the change log. A RUN_WRITE entry sums up one
+-- run: 'old_value' is the current value before the run's first write, 'new_value' the value of
+-- its last write and 'write_count' the number of its writes. 'workflow_id' is the owner workflow
+-- and 'execution_id' the execution that wrote. The three columns are NULL for a change a user
+-- made. Like 'user_id' they are plain audit columns, deliberately not foreign keys, so the
+-- history survives the workflow and its executions.
+ALTER TABLE `global_variable_change`
+    ADD COLUMN IF NOT EXISTS `workflow_id`  BIGINT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `execution_id` BIGINT DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS `write_count`  INT DEFAULT NULL;

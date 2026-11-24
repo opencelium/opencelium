@@ -191,6 +191,9 @@ Always declare `@ActiveProfiles("test")` on every slice test. Without it Spring
 will not find `application-test.yml` and may attempt to connect to a real
 database or fail to resolve required properties.
 
+See [`RoleControllerTest.java`][slice-example] for a working example covering
+`GET /role/{id}` (200 and 404) and `POST /role` (409 conflict).
+
 #### `integration/` (inside `src/test/`)
 
 Lightweight integration tests that load a partial Spring context and wire real
@@ -204,6 +207,9 @@ interact correctly — but the overhead of a real database is not justified.
 - Always declare `@ActiveProfiles("test")` so `application-test.yml` is loaded
 - If the test needs real database behaviour that H2 cannot reproduce, move it
   to `src/integrationTest/` instead
+
+See [`UserRoleServiceIntegrationTest.java`][integration-light-example] for a
+working example.
 
 #### `testutil/`
 
@@ -226,8 +232,12 @@ no assertions.
 See the following files for working examples:
 
 - [`UserRoleFixture.java`][fixture-example] — entity and resource builders
-- [`SliceTest.java`][slice-annotation] — apply one annotation instead of
-  repeating the three-annotation combination on every test class
+- [`UserRoleAssertions.java`][assertion-example] — custom AssertJ assertions for `UserRole`
+- [`InMemoryUserRoleRepository.java`][fake-example] — use when a test needs
+  realistic save/find/delete behaviour without a mock
+- [`SliceTest.java`][slice-annotation] and [`IntegrationTest.java`][it-annotation]
+  — apply one annotation instead of repeating the three-annotation combination
+  on every test class
 ---
 
 ### 5.2 `src/integrationTest` — full-stack integration tests
@@ -245,9 +255,13 @@ Every class in this package must:
   `@SpringBootTest`, `@Testcontainers`, and `@ActiveProfiles("integration")`
 - Declare a `@Container` field for every database the test touches
 - Override datasource URLs at runtime with `@DynamicPropertySource` —
-  never hard-code ports or credentials
+  never hard-code ports or credentials. See [`UserRoleControllerIT.java`][it-example]
+  for a documented example of how and where to declare it.
 - Use the `*IT` naming suffix so Gradle routes them to `integrationTest`
   and not to the default `test` task
+
+See [`UserRoleControllerIT.java`][it-example] for a working example covering
+role creation end-to-end and deletion against a real MariaDB container.
 
 ---
 
@@ -538,6 +552,8 @@ Closes OC-
 - [ ] WIP commits squashed
 ```
 
+See [`pull_request_template_example.md`][pr-example] for a fully filled-in example.
+
 ---
 
 ### 10.5 Commit message format
@@ -713,11 +729,18 @@ Renames are in scope **only for the test class you are already migrating** in th
 ### Common pitfalls
 
 - **`*IT` classes left in `src/test/`** — Gradle's `test` task picks them up, Docker is not available in the unit-test phase, and the test fails with a `ContainerLaunchException`. Always check the source root after renaming.
-- **Missing `@DynamicPropertySource` after moving to `src/integrationTest/`** — hardcoded ports collide when Testcontainers assigns a random one.
+- **Missing `@DynamicPropertySource` after moving to `src/integrationTest/`** — hardcoded ports collide when Testcontainers assigns a random one. Follow the pattern in [`UserRoleControllerIT.java`][it-example].
 - **H2 compatibility gaps** — some MariaDB-specific SQL (e.g. `JSON` columns, `FULLTEXT` indexes) does not work in H2. If the test fails with an H2 syntax error after migration, move it to `src/integrationTest/` instead of hacking the schema.
 
 ---
 
 [unit-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/unit/database/mysql/service/UserRoleServiceImplTest.java
+[slice-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/slice/controller/RoleControllerTest.java
+[integration-light-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/integration/service/UserRoleServiceIntegrationTest.java
+[it-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/integrationTest/java/com/becon/opencelium/backend/integration/controller/UserRoleControllerIT.java
 [fixture-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/fixture/UserRoleFixture.java
+[assertion-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/assertion/UserRoleAssertions.java
+[fake-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/fake/InMemoryUserRoleRepository.java
 [slice-annotation]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/annotation/SliceTest.java
+[it-annotation]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/annotation/IntegrationTest.java
+[pr-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/docs/pull_request_template_example.md

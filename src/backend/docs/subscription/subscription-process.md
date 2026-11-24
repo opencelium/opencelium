@@ -400,7 +400,8 @@ These are current-state observations, not part of the intended design:
 - **ExtraOps overflow carry bug** — `ExtraOpsServiceImp.updateExtraOpsForSubscription`
   computes the remainder with an inverted sign (`availableOps - opsUsage`), so
   overflow does not cascade to the next pack. (§6.3)
-- **Code style drift from `CLAUDE.md`** — DTOs are mutable getter/setter classes
+- **Code style drift from the project code style (Google Java Style /
+  Effective Java)** — DTOs are mutable getter/setter classes
   rather than records; `QuartzCronUpdater` / `OperationUsageReportJob` use
   `System.out.println` / `printStackTrace` / `@Autowired` instead of constructor
   injection + SLF4J. Several commented-out dead-code blocks remain.

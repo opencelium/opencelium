@@ -7,12 +7,16 @@ import static com.becon.opencelium.backend.testutil.fixture.ConnectorFixture.aRe
 import static com.becon.opencelium.backend.testutil.fixture.ConnectorFixture.aResolvedConnector;
 import static com.becon.opencelium.backend.testutil.fixture.ConnectorFixture.aStoredField;
 import static com.becon.opencelium.backend.testutil.fixture.ConnectorFixture.anInvokerRequiring;
+import static com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture.aSnapshotOf;
+import static com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture.anOpenEntry;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.aConnectorOperation;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.aMethodDto;
 import static com.becon.opencelium.backend.testutil.fixture.OperationDTOFixture.anHttpOperation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -23,13 +27,18 @@ import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.entity.GlobalVariable;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.database.mysql.service.GlobalVariableService;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.execution.globalvariable.GlobalVariableSnapshot;
+import com.becon.opencelium.backend.execution.service.GlobalVariableSnapshotService;
 import com.becon.opencelium.backend.execution.service.MethodTestServiceImp;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.execution.ConnectorExMapper;
 import com.becon.opencelium.backend.mapper.execution.OperationExMapper;
+import com.becon.opencelium.backend.mapper.execution.OperatorExMapper;
 import com.becon.opencelium.backend.mapper.mongo.MethodMngMapper;
 import com.becon.opencelium.backend.reference.enums.ReferenceType;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
@@ -37,6 +46,7 @@ import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlReq
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodCurlResultDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.ConnectorReference;
+import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.GlobalVariableReference;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestReferencesDTO.StaticReference;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestRequestDTO;
 import com.becon.opencelium.backend.resource.connection.methodtest.MethodTestResultDTO;
@@ -45,14 +55,23 @@ import com.becon.opencelium.backend.resource.execution.MethodConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.testutil.fake.FakeHttpServer;
 import com.becon.opencelium.backend.testutil.fake.FakeHttpServer.RecordedRequest;
+import com.becon.opencelium.backend.testutil.fixture.GlobalVariableFixture;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -62,7 +81,8 @@ import org.springframework.mock.env.MockEnvironment;
  * Unit tests for {@link MethodTestServiceImp}.
  *
  * <p>Mappers and services are mocked; the external API is a {@link FakeHttpServer}, so the
- * request really goes over HTTP the way a test from the editor does.
+ * request really goes over HTTP the way a test from the editor does. One test reads the connector
+ * with the real {@link ConnectorExMapper}, to see an unknown global variable found in its field.
  */
 @DisplayName("MethodTestServiceImp — unit")
 @ExtendWith(MockitoExtension.class)
@@ -74,6 +94,10 @@ class MethodTestServiceImpTest {
     private static final String CRM = "Crm";
     private static final String TOKEN = "s3cr3t-token";
     private static final Map<String, String> BEARER = Map.of("Authorization", "Bearer {token}");
+    private static final long WORKFLOW_ID = 42L;
+    private static final int CATEGORY_ID = 7;
+    private static final String PAGE_SIZE_REF = "{{global.pageSize}}";
+    private static final String TENANT_IN_LOOP_REF = "{{global.tenants[i].id}}";
 
     @Mock
     MethodMngMapper methodMngMapper;
@@ -90,6 +114,18 @@ class MethodTestServiceImpTest {
     @Mock
     InvokerService invokerService;
 
+    @Mock
+    GlobalVariableSnapshotService globalVariableSnapshotService;
+
+    @Mock
+    GlobalVariableService globalVariableService;
+
+    @Mock
+    OperatorExMapper operatorExMapper;
+
+    @Captor
+    ArgumentCaptor<Supplier<GlobalVariableSnapshot>> globalsGivenToMapper;
+
     private FakeHttpServer api;
     private MethodTestServiceImp service;
 
@@ -98,7 +134,7 @@ class MethodTestServiceImpTest {
         api = FakeHttpServer.start();
         service = new MethodTestServiceImp(
                 new MockEnvironment(), methodMngMapper, operationExMapper, connectorExMapper,
-                connectorService, invokerService);
+                connectorService, invokerService, globalVariableSnapshotService, globalVariableService);
     }
 
     @AfterEach
@@ -115,7 +151,7 @@ class MethodTestServiceImpTest {
         when(invokerService.existsByName(SHOP)).thenReturn(true);
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
 
-        MethodTestReferencesDTO references = service.findReferences(method);
+        MethodTestReferencesDTO references = service.findReferences(method, null, null);
 
         assertThat(references.connectorReferences())
                 .extracting(ConnectorReference::reference, ConnectorReference::connectorId, ConnectorReference::available)
@@ -133,7 +169,7 @@ class MethodTestServiceImpTest {
                 .thenReturn(Optional.of(aConnector(CRM_ID, CRM, aStoredField("apiKey", "k", PRIVATE))));
         when(invokerService.existsByName(CRM)).thenReturn(false);
 
-        MethodTestReferencesDTO references = service.findReferences(method);
+        MethodTestReferencesDTO references = service.findReferences(method, null, null);
 
         assertThat(references.connectorReferences())
                 .containsExactly(new ConnectorReference("{#12.apiKey}", CRM_ID, "apiKey", true));
@@ -147,7 +183,7 @@ class MethodTestServiceImpTest {
         when(invokerService.existsByName(SHOP)).thenReturn(true);
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
 
-        MethodTestReferencesDTO references = service.findReferences(method);
+        MethodTestReferencesDTO references = service.findReferences(method, null, null);
 
         assertThat(references.connectorReferences())
                 .containsExactly(new ConnectorReference("{region}", SHOP_ID, "region", false));
@@ -159,7 +195,7 @@ class MethodTestServiceImpTest {
                 aConnectorOperation(SHOP_ID, "GET", "http://api.test/contacts", Map.of("X-Key", "{#12.apiKey}")));
         when(connectorService.findById(CRM_ID)).thenReturn(Optional.empty());
 
-        MethodTestReferencesDTO references = service.findReferences(method);
+        MethodTestReferencesDTO references = service.findReferences(method, null, null);
 
         assertThat(references.connectorReferences())
                 .containsExactly(new ConnectorReference("{#12.apiKey}", CRM_ID, "apiKey", false));
@@ -170,7 +206,7 @@ class MethodTestServiceImpTest {
     void findReferencesTreatsRequestDataAsStaticWhenMethodHasNoConnector() {
         MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", "http://api.test/orders", BEARER, null));
 
-        MethodTestReferencesDTO references = service.findReferences(method);
+        MethodTestReferencesDTO references = service.findReferences(method, null, null);
 
         assertThat(references.connectorReferences()).isEmpty();
         assertThat(references.staticReferences())
@@ -180,7 +216,7 @@ class MethodTestServiceImpTest {
 
     @Test
     void findReferencesThrowsGeneralServiceExceptionWhenMethodHasNoRequest() {
-        assertThatThrownBy(() -> service.findReferences(new MethodDTO()))
+        assertThatThrownBy(() -> service.findReferences(new MethodDTO(), null, null))
                 .isInstanceOfSatisfying(GeneralServiceException.class, e -> {
                     assertThat(e.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
                     assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_METHOD_INVALID);
@@ -189,13 +225,95 @@ class MethodTestServiceImpTest {
         verifyNoInteractions(methodMngMapper);
     }
 
+    // ── findReferences: global variables of the method ────────────────────────
+
+    @Test
+    @DisplayName("findReferences — a variable the user may use in the workflow needs no static value")
+    void findReferencesListsGlobalReferenceWhenUserMayUseVariable() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", "http://api.test/orders?limit=" + PAGE_SIZE_REF,
+                Map.of(), null));
+        givenUsableVariables(WORKFLOW_ID, null, aPageSizeOf(50));
+
+        MethodTestReferencesDTO references = service.findReferences(method, WORKFLOW_ID, null);
+
+        assertThat(references.globalReferences())
+                .containsExactly(new GlobalVariableReference(PAGE_SIZE_REF, "pageSize"));
+        assertThat(references.staticReferences()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("findReferences — a variable unknown, out of scope or not usable by the user needs a static value")
+    void findReferencesKeepsGlobalStaticWhenVariableIsNotUsable() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", "http://api.test/orders?limit=" + PAGE_SIZE_REF,
+                Map.of(), null));
+        givenUsableVariables(WORKFLOW_ID, null);
+
+        MethodTestReferencesDTO references = service.findReferences(method, WORKFLOW_ID, null);
+
+        assertThat(references.staticReferences())
+                .containsExactly(new StaticReference(PAGE_SIZE_REF, ReferenceType.GLOBAL));
+        assertThat(references.globalReferences()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("findReferences — no loop runs in a test, so a loop iterator in the path needs a static value")
+    void findReferencesKeepsGlobalStaticWhenPathNamesLoopIterator() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation(
+                "GET", "http://api.test/tenants?id=" + TENANT_IN_LOOP_REF + "&limit=" + PAGE_SIZE_REF, Map.of(), null));
+        givenUsableVariables(WORKFLOW_ID, null, aPageSizeOf(50), someTenants());
+
+        MethodTestReferencesDTO references = service.findReferences(method, WORKFLOW_ID, null);
+
+        assertThat(references.staticReferences())
+                .containsExactly(new StaticReference(TENANT_IN_LOOP_REF, ReferenceType.GLOBAL));
+    }
+
+    @Test
+    @DisplayName("findReferences — a method without global variables reads none, so no store and no user is needed")
+    void findReferencesReadsNoVariableWhenMethodHasNoGlobalReference() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", "http://api.test/orders?status=${status}",
+                Map.of(), null));
+
+        MethodTestReferencesDTO references = service.findReferences(method, WORKFLOW_ID, null);
+
+        assertThat(references.globalReferences()).isEmpty();
+        verifyNoInteractions(globalVariableService, globalVariableSnapshotService);
+    }
+
+    @Test
+    @DisplayName("findReferences — a workflow that is not saved yet reads the variables its category reaches")
+    void findReferencesLooksUpVariablesOfCategoryWhenWorkflowIsNotSaved() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", "http://api.test/orders?limit=" + PAGE_SIZE_REF,
+                Map.of(), null));
+        givenUsableVariables(null, CATEGORY_ID, aPageSizeOf(50));
+
+        MethodTestReferencesDTO references = service.findReferences(method, null, CATEGORY_ID);
+
+        assertThat(references.globalReferences())
+                .extracting(GlobalVariableReference::name)
+                .containsExactly("pageSize");
+    }
+
+    @Test
+    void findReferencesThrowsGeneralServiceExceptionWhenWorkflowIsAmbiguous() {
+        MethodDTO method = aMethodDto("GET");
+
+        assertThatThrownBy(() -> service.findReferences(method, WORKFLOW_ID, CATEGORY_ID))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e -> {
+                    assertThat(e.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_WORKFLOW_AMBIGUOUS);
+                })
+                .hasMessageContaining("not both");
+        verifyNoInteractions(globalVariableService);
+    }
+
     // ── test: rejected before anything is sent ────────────────────────────────
 
     @Test
     void testThrowsGeneralServiceExceptionWhenMethodHasNoHttpMethod() {
         MethodTestRequestDTO request = new MethodTestRequestDTO(aMethodDto(" "), Map.of(), false);
 
-        assertThatThrownBy(() -> service.test(request))
+        assertThatThrownBy(() -> service.test(request, null, null))
                 .isInstanceOfSatisfying(GeneralServiceException.class, e ->
                         assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_METHOD_INVALID))
                 .hasMessageContaining("HTTP method");
@@ -206,7 +324,7 @@ class MethodTestServiceImpTest {
     void testThrowsGeneralServiceExceptionWhenWriteIsNotConfirmed() {
         MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "POST", "{url}/orders", BEARER));
 
-        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false)))
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null))
                 .isInstanceOfSatisfying(GeneralServiceException.class, e -> {
                     assertThat(e.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
                     assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_WRITE_NOT_CONFIRMED);
@@ -220,7 +338,7 @@ class MethodTestServiceImpTest {
     void testThrowsGeneralServiceExceptionWhenStaticValueIsMissing() {
         MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
 
-        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false)))
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null))
                 .isInstanceOfSatisfying(GeneralServiceException.class, e ->
                         assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING))
                 .hasMessageContaining("${status}")
@@ -233,7 +351,7 @@ class MethodTestServiceImpTest {
         // a blank endpoint cannot be built; text such as a space is encoded, so it no longer fails
         MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", " ", Map.of(), null));
 
-        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false)))
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null))
                 .isInstanceOfSatisfying(GeneralServiceException.class, e ->
                         assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_REQUEST_NOT_BUILT))
                 .hasMessageContaining("could not be built");
@@ -247,10 +365,10 @@ class MethodTestServiceImpTest {
         Connector shop = aConnector(SHOP_ID, SHOP);
         when(connectorService.getById(SHOP_ID)).thenReturn(shop);
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
-        when(connectorExMapper.toMethodConnector(shop))
+        when(connectorExMapper.toMethodConnector(eq(shop), any()))
                 .thenThrow(new IllegalStateException("Path $.access_token not found"));
 
-        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false));
+        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
 
         assertThat(result.connectorErrors())
                 .containsExactly(new ConnectorError(SHOP_ID, "Path $.access_token not found"));
@@ -265,7 +383,7 @@ class MethodTestServiceImpTest {
                 aConnectorOperation(SHOP_ID, "GET", "{url}/contacts", Map.of("X-Key", "{#12.apiKey}")));
         givenShopConnector();
 
-        service.test(new MethodTestRequestDTO(method, Map.of("{#12.apiKey}", "static-key"), false));
+        service.test(new MethodTestRequestDTO(method, Map.of("{#12.apiKey}", "static-key"), false), null, null);
 
         verify(connectorService, never()).getById(CRM_ID);
         assertThat(api.requests()).extracting(sent -> sent.header("X-Key")).containsExactly("static-key");
@@ -281,10 +399,135 @@ class MethodTestServiceImpTest {
         MethodDTO method = givenMethodMappedTo(
                 anHttpOperation("GET", api.baseUrl() + "/orders", Map.of(), null), methodMng);
 
-        service.test(new MethodTestRequestDTO(method, Map.of(), false));
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
 
         assertThat(methodMng.getConnector()).isNull();
         verifyNoInteractions(connectorService);
+    }
+
+    // ── test: global variables in connector fields ────────────────────────────
+
+    @Test
+    @DisplayName("test — no workflow runs in a test, so a connector is read with the variables open to all "
+            + "workflows as they are now")
+    void testReadsConnectorWithOpenVariablesWhenConnectorIsRead() {
+        MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
+        givenShopConnector();
+        GlobalVariableSnapshot openVariables = aSnapshotOf(anOpenEntry("shopUrl", api.baseUrl()));
+        when(globalVariableSnapshotService.takeOpenToAll()).thenReturn(openVariables);
+
+        service.test(new MethodTestRequestDTO(method, Map.of("${status}", "open"), false), null, null);
+
+        verify(connectorExMapper).toMethodConnector(any(Connector.class), globalsGivenToMapper.capture());
+        assertThat(globalsGivenToMapper.getValue().get()).isSameAs(openVariables);
+    }
+
+    @Test
+    @DisplayName("test — an unknown variable in a connector field is the error of that connector and nothing is "
+            + "sent; the connector is read by the real mapper here")
+    void testReturnsConnectorErrorWhenConnectorFieldUsesUnknownVariable() {
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders", BEARER));
+        Connector shop = aConnector(SHOP_ID, SHOP,
+                aStoredField("url", "{{global.shopUrl}}", PUBLIC),
+                aStoredField("token", TOKEN, PRIVATE));
+        when(connectorService.getById(SHOP_ID)).thenReturn(shop);
+        when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
+        when(globalVariableSnapshotService.takeOpenToAll()).thenReturn(GlobalVariableSnapshot.empty());
+        MethodTestServiceImp serviceReadingConnectors = new MethodTestServiceImp(
+                new MockEnvironment(), methodMngMapper, operationExMapper,
+                new ConnectorExMapper(connectorService, operationExMapper, operatorExMapper, invokerService),
+                connectorService, invokerService, globalVariableSnapshotService, globalVariableService);
+
+        MethodTestResultDTO result =
+                serviceReadingConnectors.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(result.connectorErrors()).singleElement().satisfies(error -> {
+            assertThat(error.connectorId()).isEqualTo(SHOP_ID);
+            assertThat(error.message()).contains("'shopUrl'");
+        });
+        assertThat(api.requests()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("test — a connector field reads the variables open to all, whatever workflow the method belongs to")
+    void testReadsConnectorWithOpenVariablesWhenWorkflowIsGiven() {
+        MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
+        givenShopConnector();
+        GlobalVariableSnapshot openVariables = aSnapshotOf(anOpenEntry("shopUrl", api.baseUrl()));
+        when(globalVariableSnapshotService.takeOpenToAll()).thenReturn(openVariables);
+
+        service.test(new MethodTestRequestDTO(method, Map.of("${status}", "open"), false), WORKFLOW_ID, null);
+
+        verify(connectorExMapper).toMethodConnector(any(Connector.class), globalsGivenToMapper.capture());
+        assertThat(globalsGivenToMapper.getValue().get()).isSameAs(openVariables);
+    }
+
+    // ── test: global variables of the method ──────────────────────────────────
+
+    @Test
+    @DisplayName("test — a variable the user may use is sent with its current value")
+    void testSendsCurrentGlobalValueWhenVariableIsUsable() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?limit=" + PAGE_SIZE_REF,
+                Map.of(), null));
+        givenUsableVariables(WORKFLOW_ID, null, aPageSizeOf(50));
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), false), WORKFLOW_ID, null);
+
+        assertThat(api.requests()).extracting(RecordedRequest::uri).containsExactly("/orders?limit=50");
+    }
+
+    @Test
+    @DisplayName("test — a body field that holds only the reference keeps the JSON type, as in a run")
+    void testKeepsGlobalJsonTypeWhenBodyFieldIsOnlyReference() throws Exception {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("POST", api.baseUrl() + "/orders", Map.of(),
+                Map.of("limits", "{{global.limits}}")));
+        givenUsableVariables(WORKFLOW_ID, null, someLimits());
+
+        service.test(new MethodTestRequestDTO(method, Map.of(), true), WORKFLOW_ID, null);
+
+        assertThat(new ObjectMapper().readTree(api.requests().get(0).body()))
+                .isEqualTo(new ObjectMapper().readTree("{\"limits\":{\"maxPerPage\":50}}"));
+    }
+
+    @Test
+    @DisplayName("test — a static value given for a variable wins, and then no variable is read")
+    void testSendsStaticValueWhenGlobalReferenceHasOne() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?limit=" + PAGE_SIZE_REF,
+                Map.of(), null));
+
+        service.test(new MethodTestRequestDTO(method, Map.of(PAGE_SIZE_REF, 10), false), WORKFLOW_ID, null);
+
+        assertThat(api.requests()).extracting(RecordedRequest::uri).containsExactly("/orders?limit=10");
+        verifyNoInteractions(globalVariableService);
+    }
+
+    @Test
+    @DisplayName("test — a variable the user may not use is never sent, empty or as written: it needs a static value")
+    void testThrowsGeneralServiceExceptionWhenGlobalIsNotUsable() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?limit=" + PAGE_SIZE_REF,
+                Map.of(), null));
+        givenUsableVariables(WORKFLOW_ID, null);
+
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), WORKFLOW_ID, null))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING))
+                .hasMessageContaining(PAGE_SIZE_REF);
+        assertThat(api.requests()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("test — a loop iterator in the path needs a static value, even when the variable is usable")
+    void testThrowsGeneralServiceExceptionWhenGlobalPathNamesLoopIterator() {
+        String endpoint = api.baseUrl() + "/tenants?id=" + TENANT_IN_LOOP_REF + "&limit=" + PAGE_SIZE_REF;
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", endpoint, Map.of(), null));
+        givenUsableVariables(WORKFLOW_ID, null, aPageSizeOf(50), someTenants());
+
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), WORKFLOW_ID, null))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING))
+                .hasMessageContaining(TENANT_IN_LOOP_REF)
+                .hasMessageNotContaining(PAGE_SIZE_REF);
+        assertThat(api.requests()).isEmpty();
     }
 
     // ── test: sending ─────────────────────────────────────────────────────────
@@ -295,7 +538,7 @@ class MethodTestServiceImpTest {
         MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
         givenShopConnector();
 
-        service.test(new MethodTestRequestDTO(method, Map.of("${status}", "open"), false));
+        service.test(new MethodTestRequestDTO(method, Map.of("${status}", "open"), false), null, null);
 
         assertThat(api.requests())
                 .extracting(RecordedRequest::uri, sent -> sent.header("Authorization"))
@@ -308,7 +551,8 @@ class MethodTestServiceImpTest {
         MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
         givenShopConnector();
 
-        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of("${status}", "open"), false));
+        MethodTestResultDTO result =
+                service.test(new MethodTestRequestDTO(method, Map.of("${status}", "open"), false), null, null);
 
         assertThat(result.response().status()).isEqualTo(201);
         assertThat(result.response().body()).isEqualTo(Map.of("id", 7));
@@ -321,7 +565,8 @@ class MethodTestServiceImpTest {
         MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
         givenShopConnector();
 
-        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of("${status}", "open"), false));
+        MethodTestResultDTO result =
+                service.test(new MethodTestRequestDTO(method, Map.of("${status}", "open"), false), null, null);
 
         assertThat(result.request().headers().get("Authorization")).containsExactly("Bearer ****");
         assertThat(result.request().url()).isEqualTo(api.baseUrl() + "/orders?status=open");
@@ -332,7 +577,7 @@ class MethodTestServiceImpTest {
         MethodDTO method = givenMethodMappedTo(
                 anHttpOperation("POST", api.baseUrl() + "/orders", Map.of(), Map.of("name", "box")));
 
-        service.test(new MethodTestRequestDTO(method, Map.of(), true));
+        service.test(new MethodTestRequestDTO(method, Map.of(), true), null, null);
 
         assertThat(api.requests()).extracting(RecordedRequest::method).containsExactly("POST");
     }
@@ -343,7 +588,7 @@ class MethodTestServiceImpTest {
         api.respondWith(500, "text/plain", "down");
         MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders", Map.of(), null));
 
-        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false));
+        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
 
         assertThat(result.response().status()).isEqualTo(500);
         assertThat(result.response().body()).isEqualTo("down");
@@ -355,7 +600,7 @@ class MethodTestServiceImpTest {
         MethodDTO method = givenMethodMappedTo(anHttpOperation(
                 "GET", api.baseUrl() + "/files/1", Map.of("Content-Type", "application/octet-stream"), null));
 
-        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false));
+        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
 
         assertThat(result.response().body()).isEqualTo("AQID");
     }
@@ -368,7 +613,8 @@ class MethodTestServiceImpTest {
         MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
         givenShopConnector();
 
-        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of("${status}", "open")));
+        MethodCurlResultDTO result =
+                service.toCurl(new MethodCurlRequestDTO(method, Map.of("${status}", "open")), null, null);
 
         assertThat(result.curl())
                 .startsWith("curl '" + api.baseUrl() + "/orders?status=open'")
@@ -382,7 +628,7 @@ class MethodTestServiceImpTest {
         MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
         givenShopConnector();
 
-        service.toCurl(new MethodCurlRequestDTO(method, Map.of("${status}", "open")));
+        service.toCurl(new MethodCurlRequestDTO(method, Map.of("${status}", "open")), null, null);
 
         assertThat(api.requests()).isEmpty();
     }
@@ -393,7 +639,7 @@ class MethodTestServiceImpTest {
         MethodDTO method = givenMethodMappedTo(
                 anHttpOperation("DELETE", api.baseUrl() + "/orders/7", Map.of(), null));
 
-        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()));
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, null);
 
         assertThat(result.curl()).startsWith("curl -X DELETE '" + api.baseUrl() + "/orders/7'");
         verifyNoInteractions(connectorService);
@@ -408,9 +654,9 @@ class MethodTestServiceImpTest {
         resolved.setTimeout(2500);
         when(connectorService.getById(SHOP_ID)).thenReturn(shop);
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
-        when(connectorExMapper.toMethodConnector(shop)).thenReturn(resolved);
+        when(connectorExMapper.toMethodConnector(eq(shop), any())).thenReturn(resolved);
 
-        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()));
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, null);
 
         assertThat(result.curl()).contains("--insecure", "--connect-timeout 2.5");
     }
@@ -421,10 +667,10 @@ class MethodTestServiceImpTest {
         Connector shop = aConnector(SHOP_ID, SHOP);
         when(connectorService.getById(SHOP_ID)).thenReturn(shop);
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
-        when(connectorExMapper.toMethodConnector(shop))
+        when(connectorExMapper.toMethodConnector(eq(shop), any()))
                 .thenThrow(new IllegalStateException("Path $.access_token not found"));
 
-        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()));
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, null);
 
         assertThat(result.curl()).isNull();
         assertThat(result.connectorErrors())
@@ -435,7 +681,7 @@ class MethodTestServiceImpTest {
     void toCurlThrowsGeneralServiceExceptionWhenStaticValueIsMissing() {
         MethodDTO method = givenMethodMappedTo(aShopOrdersGet());
 
-        assertThatThrownBy(() -> service.toCurl(new MethodCurlRequestDTO(method, Map.of())))
+        assertThatThrownBy(() -> service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, null))
                 .isInstanceOfSatisfying(GeneralServiceException.class, e ->
                         assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING))
                 .hasMessageContaining("${status}");
@@ -444,9 +690,131 @@ class MethodTestServiceImpTest {
 
     @Test
     void toCurlThrowsGeneralServiceExceptionWhenMethodHasNoHttpMethod() {
-        assertThatThrownBy(() -> service.toCurl(new MethodCurlRequestDTO(aMethodDto(" "), Map.of())))
+        assertThatThrownBy(() -> service.toCurl(new MethodCurlRequestDTO(aMethodDto(" "), Map.of()), null, null))
                 .isInstanceOfSatisfying(GeneralServiceException.class, e ->
                         assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_METHOD_INVALID));
+    }
+
+    // ── toCurl: global variables of the method ────────────────────────────────
+
+    @Test
+    void toCurlContainsCurrentGlobalValueWhenVariableIsUsable() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?limit=" + PAGE_SIZE_REF,
+                Map.of(), null));
+        givenUsableVariables(null, CATEGORY_ID, aPageSizeOf(50));
+
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, CATEGORY_ID);
+
+        assertThat(result.curl()).startsWith("curl '" + api.baseUrl() + "/orders?limit=50'");
+    }
+
+    @Test
+    void toCurlThrowsGeneralServiceExceptionWhenGlobalIsNotUsable() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?limit=" + PAGE_SIZE_REF,
+                Map.of(), null));
+        givenUsableVariables(null, CATEGORY_ID);
+
+        assertThatThrownBy(() -> service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, CATEGORY_ID))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_STATIC_VALUES_MISSING))
+                .hasMessageContaining(PAGE_SIZE_REF);
+    }
+
+    // ── secret global variables ───────────────────────────────────────────────
+
+    @Test
+    @DisplayName("test — the API receives the secret, the returned request shows it masked")
+    void testMasksSecretGlobalInSentRequestWhenMethodReferencesIt() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
+                Map.of("X-Api-Key", "{{global.apiKey}}"), null));
+        givenUsableVariables(WORKFLOW_ID, null, anApiKeyOf("s3cr3t-key"));
+
+        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), WORKFLOW_ID, null);
+
+        assertThat(api.requests()).extracting(RecordedRequest::uri).containsExactly("/orders?key=s3cr3t-key");
+        assertThat(result.request().url()).isEqualTo(api.baseUrl() + "/orders?key=****");
+        assertThat(result.request().headers().get("X-Api-Key")).containsExactly("****");
+    }
+
+    @Test
+    @DisplayName("test — a secret that a public connector field brings in is masked like a private field")
+    void testMasksSecretGlobalInSentRequestWhenConnectorFieldHoldsIt() {
+        MethodDTO method = givenMethodMappedTo(aConnectorOperation(SHOP_ID, "GET", "{url}/orders?tenant={tenant}",
+                Map.of()));
+        Connector shop = aConnector(SHOP_ID, SHOP,
+                aStoredField("url", api.baseUrl(), PUBLIC),
+                aStoredField("tenant", "{{global.tenantKey}}", PUBLIC));
+        when(connectorService.getById(SHOP_ID)).thenReturn(shop);
+        when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
+        when(globalVariableSnapshotService.takeOpenToAll()).thenReturn(
+                aSnapshotOf(GlobalVariableSnapshot.Entry.ofSecret("tenantKey", 1, new TextNode("t3nant-key"), true)));
+        when(connectorExMapper.toMethodConnector(eq(shop), any())).thenAnswer(invocation -> {
+            // a field holds a reference, so the mapper asks for the variables, as the real one does
+            Supplier<GlobalVariableSnapshot> globals = invocation.getArgument(1);
+            globals.get();
+            return aResolvedConnector(SHOP_ID, Map.of("url", api.baseUrl(), "tenant", "t3nant-key"));
+        });
+
+        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), null, null);
+
+        assertThat(result.request().url()).isEqualTo(api.baseUrl() + "/orders?tenant=****");
+    }
+
+    @Test
+    void testKeepsNonSecretGlobalInSentRequest() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
+                Map.of(), null));
+        givenUsableVariables(WORKFLOW_ID, null,
+                new GlobalVariableSnapshot.Entry("apiKey", 1, new TextNode("visible-key"), false));
+
+        MethodTestResultDTO result = service.test(new MethodTestRequestDTO(method, Map.of(), false), WORKFLOW_ID, null);
+
+        assertThat(result.request().url()).isEqualTo(api.baseUrl() + "/orders?key=visible-key");
+    }
+
+    @Test
+    @DisplayName("toCurl — nobody may read a secret back, so the command shows it masked, like the echoed request")
+    void toCurlMasksSecretGlobalValueWhenMethodReferencesIt() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
+                Map.of("X-Api-Key", "Bearer {{global.apiKey}}"), null));
+        givenUsableVariables(null, CATEGORY_ID, anApiKeyOf("s3cr3t-key"));
+
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, CATEGORY_ID);
+
+        assertThat(result.curl())
+                .startsWith("curl '" + api.baseUrl() + "/orders?key=****'")
+                .contains("-H 'X-Api-Key: Bearer ****'")
+                .doesNotContain("s3cr3t-key");
+    }
+
+    @Test
+    void toCurlKeepsNonSecretGlobalValueWhenMethodReferencesIt() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
+                Map.of(), null));
+        givenUsableVariables(null, CATEGORY_ID,
+                new GlobalVariableSnapshot.Entry("apiKey", 1, new TextNode("visible-key"), false));
+
+        MethodCurlResultDTO result = service.toCurl(new MethodCurlRequestDTO(method, Map.of()), null, CATEGORY_ID);
+
+        assertThat(result.curl()).startsWith("curl '" + api.baseUrl() + "/orders?key=visible-key'");
+    }
+
+    @Test
+    @DisplayName("test — a secret that cannot be decrypted stops the request, and nothing is sent")
+    void testThrowsGeneralServiceExceptionWhenSecretCannotBeDecrypted() {
+        MethodDTO method = givenMethodMappedTo(anHttpOperation("GET", api.baseUrl() + "/orders?key={{global.apiKey}}",
+                Map.of(), null));
+        List<GlobalVariable> usable = List.of(GlobalVariableFixture.aConstant(1L, "apiKey", "encrypted"));
+        when(globalVariableService.findUsable(WORKFLOW_ID, null)).thenReturn(usable);
+        when(globalVariableSnapshotService.takeOf(usable)).thenReturn(aSnapshotOf(
+                GlobalVariableSnapshot.Entry.ofUnreadableSecret("apiKey", 1, false, "no key is configured")));
+
+        assertThatThrownBy(() -> service.test(new MethodTestRequestDTO(method, Map.of(), false), WORKFLOW_ID, null))
+                .isInstanceOfSatisfying(GeneralServiceException.class, e ->
+                        assertThat(e.getError()).isEqualTo(ExceptionConstant.METHOD_TEST_REQUEST_NOT_BUILT))
+                .hasMessageContaining("'apiKey'")
+                .hasMessageContaining("no key is configured");
+        assertThat(api.requests()).isEmpty();
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
@@ -473,8 +841,43 @@ class MethodTestServiceImpTest {
         Connector shop = aConnector(SHOP_ID, SHOP, aStoredField("url", api.baseUrl(), PUBLIC));
         when(connectorService.getById(SHOP_ID)).thenReturn(shop);
         when(invokerService.findByName(SHOP)).thenReturn(shopInvoker());
-        when(connectorExMapper.toMethodConnector(shop))
+        when(connectorExMapper.toMethodConnector(eq(shop), any()))
                 .thenReturn(aResolvedConnector(SHOP_ID, Map.of("url", api.baseUrl(), "token", TOKEN)));
+    }
+
+    /**
+     * The caller may use the variables of {@code entries} in the given workflow, and no other one:
+     * the snapshot of the test holds exactly these.
+     */
+    private void givenUsableVariables(Long connectionId, Integer categoryId, GlobalVariableSnapshot.Entry... entries) {
+        List<GlobalVariable> usable = Stream.of(entries)
+                .map(entry -> GlobalVariableFixture.aConstant(1L, entry.name(), entry.value().toString()))
+                .toList();
+        when(globalVariableService.findUsable(connectionId, categoryId)).thenReturn(usable);
+        when(globalVariableSnapshotService.takeOf(usable)).thenReturn(aSnapshotOf(entries));
+    }
+
+    /** The secret {@code apiKey} of a workflow, a string. */
+    private static GlobalVariableSnapshot.Entry anApiKeyOf(String value) {
+        return GlobalVariableSnapshot.Entry.ofSecret("apiKey", 1, new TextNode(value), false);
+    }
+
+    /** The variable {@code pageSize} of a workflow, a number. */
+    private static GlobalVariableSnapshot.Entry aPageSizeOf(int value) {
+        return new GlobalVariableSnapshot.Entry("pageSize", 1, IntNode.valueOf(value), false);
+    }
+
+    /** The variable {@code limits} of a workflow, a map: {@code {"maxPerPage":50}}. */
+    private static GlobalVariableSnapshot.Entry someLimits() {
+        return new GlobalVariableSnapshot.Entry(
+                "limits", 1, JsonNodeFactory.instance.objectNode().put("maxPerPage", 50), false);
+    }
+
+    /** The variable {@code tenants} of a workflow, an array a loop can walk. */
+    private static GlobalVariableSnapshot.Entry someTenants() {
+        return new GlobalVariableSnapshot.Entry("tenants", 1,
+                JsonNodeFactory.instance.arrayNode().add(JsonNodeFactory.instance.objectNode().put("id", "acme")),
+                false);
     }
 
     private static Invoker shopInvoker() {

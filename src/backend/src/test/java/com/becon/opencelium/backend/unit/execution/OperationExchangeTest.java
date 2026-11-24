@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.unit.execution;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -103,6 +104,46 @@ class OperationExchangeTest {
         verify(restTemplate).exchange(eq(ORDERS), eq(HttpMethod.POST), sent.capture(), eq(Object.class));
         assertThat(sent.getValue().getBody()).isEqualTo("{\"name\":\"box\"}");
         assertThat(sent.getValue().getHeaders().getFirst("X-Trace")).isEqualTo("abc");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void exchangeDeclaresUtf8WhenTextBodyHasContentTypeWithoutCharset() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_XML);
+        headers.add("X-Trace", "abc");
+        RequestEntity<String> request = new RequestEntity<>("<v>é</v>", headers, HttpMethod.POST, ORDERS);
+        when(restTemplate.exchange(eq(ORDERS), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class)))
+                .thenReturn(ResponseEntity.ok().build());
+
+        OperationExchange.exchange(restTemplate, ORDERS, request, String.class);
+
+        ArgumentCaptor<HttpEntity<Object>> sent = ArgumentCaptor.forClass(HttpEntity.class);
+        verify(restTemplate).exchange(eq(ORDERS), eq(HttpMethod.POST), sent.capture(), eq(String.class));
+        assertThat(sent.getValue().getHeaders().getContentType())
+                .isEqualTo(new MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8));
+        assertThat(sent.getValue().getHeaders().getFirst("X-Trace")).isEqualTo("abc");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void exchangeKeepsContentTypeWhenBodyIsJsonOrCharsetIsGiven() {
+        HttpHeaders json = new HttpHeaders();
+        json.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders latin1 = new HttpHeaders();
+        latin1.setContentType(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.ISO_8859_1));
+        when(restTemplate.exchange(eq(ORDERS), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class)))
+                .thenReturn(ResponseEntity.ok().build());
+
+        OperationExchange.exchange(restTemplate, ORDERS, new RequestEntity<>("{}", json, HttpMethod.POST, ORDERS), String.class);
+        OperationExchange.exchange(restTemplate, ORDERS, new RequestEntity<>("é", latin1, HttpMethod.POST, ORDERS), String.class);
+
+        ArgumentCaptor<HttpEntity<Object>> sent = ArgumentCaptor.forClass(HttpEntity.class);
+        verify(restTemplate, times(2))
+                .exchange(eq(ORDERS), eq(HttpMethod.POST), sent.capture(), eq(String.class));
+        assertThat(sent.getAllValues().get(0).getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+        assertThat(sent.getAllValues().get(1).getHeaders().getContentType())
+                .isEqualTo(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.ISO_8859_1));
     }
 
     @Test

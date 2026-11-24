@@ -55,6 +55,12 @@ public enum LogLineKey {
      */
     ITERATOR("iterator"),
 
+    /**
+     * Key definitions for GLOBAL_SNAPSHOT segment lines; they also use {@link #NAME}, {@link #DATA}
+     * and {@link #SIZE}.
+     */
+    VERSION("version"), // version of a global variable when the run took its snapshot
+
     EXCEPTION("exception");
 
     private final String srcName;

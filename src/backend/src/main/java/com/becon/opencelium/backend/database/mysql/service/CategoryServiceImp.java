@@ -1,13 +1,16 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Category;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.repository.CategoryRepository;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.resource.CategoryDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -245,7 +248,8 @@ public class CategoryServiceImp implements CategoryService {
         }
 
         if (repository.existsByNameEqualsIgnoreCase(name)) {
-            throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
+            throw new GeneralServiceException(
+                    HttpStatus.CONFLICT, ExceptionConstant.TITLE_HAS_ALREADY_TAKEN, ExceptionConstant.TITLE_HAS_ALREADY_TAKEN);
         }
     }
 

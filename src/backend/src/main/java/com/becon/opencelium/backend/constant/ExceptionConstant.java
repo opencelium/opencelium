@@ -57,12 +57,15 @@ public interface ExceptionConstant {
     String CONNECTION_NOT_FOUND = "CONNECTION_NOT_FOUND";
     String CONCURRENT_TEST_IS_FORBIDDEN = "CONCURRENT_TEST_IS_FORBIDDEN";
     String OPERATOR_EXPRESSION_IS_EMPTY = "OPERATOR_EXPRESSION_IS_EMPTY";
+    // a workflow or category title in use; also the message, which older clients match on
+    String TITLE_HAS_ALREADY_TAKEN = "TITLE_HAS_ALREADY_TAKEN";
 
     // ----------------------------------------- Method test ----------------------------------------------- //
     String METHOD_TEST_METHOD_INVALID = "METHOD_TEST_METHOD_INVALID";
     String METHOD_TEST_WRITE_NOT_CONFIRMED = "METHOD_TEST_WRITE_NOT_CONFIRMED";
     String METHOD_TEST_STATIC_VALUES_MISSING = "METHOD_TEST_STATIC_VALUES_MISSING";
     String METHOD_TEST_REQUEST_NOT_BUILT = "METHOD_TEST_REQUEST_NOT_BUILT";
+    String METHOD_TEST_WORKFLOW_AMBIGUOUS = "METHOD_TEST_WORKFLOW_AMBIGUOUS";
 
     // ----------------------------------------- Enhancement ----------------------------------------------- //
     String ENHANCEMENT_NOT_FOUND = "ENHANCEMENT_NOT_FOUND";

@@ -201,7 +201,7 @@ management:
           UP: 200
 
 opencelium:
-  version: 5.2
+  version: 5.3
   ###########################################################################
   #                                                                         #
   #   Interface languages                                                   #
@@ -249,7 +249,7 @@ opencelium:
   #                                                                         #
   ###########################################################################
   config:
-    file-path: src/main/resources/application.yml
+    file-path: ./application.yml
     backup:
       directory: runtime/backup/application
       keep: 10
@@ -312,6 +312,56 @@ opencelium:
     secret: 84bbce3d33de467b47b7e76c2563769!3f9aff968def8ef2674856f67ae8a93f
     activity-time: 18000
     experation-time: 86400
+  ###########################################################################
+  #                                                                         #
+  #   Global variables                                                      #
+  #                                                                         #
+  #   secret-key      - key that encrypts the values of secret global       #
+  #                     variables in the database. Empty: a built-in        #
+  #                     default key is used. That default is the same for   #
+  #                     every installation and public in the source code,   #
+  #                     so it hides the values but does not protect them    #
+  #                     from anyone who has the database. For real          #
+  #                     protection set your own key, a long random string,  #
+  #                     and set it BEFORE the first secret is saved: a      #
+  #                     secret saved under one key cannot be read under     #
+  #                     another. There is no key rotation; after a key      #
+  #                     change every secret has to be entered again. Keep   #
+  #                     a copy of your key in a safe place, apart from the  #
+  #                     database backups.                                   #
+  #                     It can come from the environment variable           #
+  #                     OPENCELIUM_GLOBALVARIABLE_SECRETKEY instead, which  #
+  #                     takes precedence over this file.                    #
+  #   max-value-bytes - largest value of one global variable, in bytes      #
+  #                                                                         #
+  #   max-script-bytes  - largest code of one script variable, in bytes     #
+  #   script-timeout-ms - how long, in milliseconds, an enhancement that    #
+  #                       imports a script variable may run in a workflow,  #
+  #                       and how long a test run of a script may take      #
+  #                                                                         #
+  #   queue - a workflow that uses a mutable global variable runs one       #
+  #           execution at a time; with busy policy Queue a further start   #
+  #           waits for the running one                                     #
+  #     max-waiting      - how many starts may wait per workflow; one more  #
+  #                        is refused                                       #
+  #     max-wait-minutes - how long a start may wait before it is dropped   #
+  #                                                                         #
+  #   change-log - the change history of every global variable              #
+  #     max-run-entries - how many entries of run writes it keeps per       #
+  #                       variable; a run adds one entry per variable it    #
+  #                       wrote, and past the limit the oldest go first     #
+  #                                                                         #
+  ###########################################################################
+  global-variable:
+    secret-key: ""
+    max-value-bytes: 65536
+    max-script-bytes: 262144
+    script-timeout-ms: 5000
+    queue:
+      max-waiting: 100
+      max-wait-minutes: 60
+    change-log:
+      max-run-entries: 200
   ###########################################################################
   #                                                                         #
   #   Configuration for Notification                                        #

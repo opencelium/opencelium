@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.unit.resource.execution;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
+import com.becon.opencelium.backend.resource.execution.XmlObjectDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -519,6 +520,89 @@ class SchemaDTOUtilTest {
                 SchemaDTOUtil.fromObject(input),
                 expected
         );
+    }
+
+    // ── toJSON ────────────────────────────────────────────────────────────────
+
+    @Test
+    void toJsonEscapesQuotesBackslashesAndControlCharactersInStringValues() throws Exception {
+        // GIVEN
+        String text = "a \"quoted\" \\path\\ line1\nline2\ttab";
+        SchemaDTO schema = object("v", string(text));
+
+        // WHEN
+        String json = SchemaDTOUtil.toJSON(schema);
+
+        // THEN
+        assertThat(OBJECT_MAPPER.readTree(json).get("v").asText())
+                .isEqualTo(text);
+    }
+
+    @Test
+    void toJsonKeepsCompactJsonTextAsStringWhenMapIsPartOfText() throws Exception {
+        // GIVEN
+        SchemaDTO schema = object("cfg", string("cfg={\"limits\":{\"maxPerPage\":50}}"));
+
+        // WHEN
+        String json = SchemaDTOUtil.toJSON(schema);
+
+        // THEN
+        assertThat(OBJECT_MAPPER.readTree(json).get("cfg").asText())
+                .isEqualTo("cfg={\"limits\":{\"maxPerPage\":50}}");
+    }
+
+    @Test
+    void toJsonEscapesPropertyNames() throws Exception {
+        // GIVEN
+        SchemaDTO schema = object("say \"hi\"", string("x"));
+
+        // WHEN
+        String json = SchemaDTOUtil.toJSON(schema);
+
+        // THEN
+        assertThat(OBJECT_MAPPER.readTree(json).has("say \"hi\""))
+                .isTrue();
+    }
+
+    @Test
+    void toJsonLeavesNonStringPrimitivesAndNonAsciiTextUnchanged() {
+        // GIVEN
+        SchemaDTO schema = object(
+                "n", integer("42"),
+                "d", number("3.5"),
+                "b", bool("true"),
+                "s", string("é<t>&")
+        );
+
+        // WHEN-THEN
+        assertThat(SchemaDTOUtil.toJSON(schema))
+                .isEqualTo("{\"n\": 42, \"d\": 3.5, \"b\": true, \"s\": \"é<t>&\"}");
+    }
+
+    // ── toXML ─────────────────────────────────────────────────────────────────
+
+    @Test
+    void toXmlEscapesMarkupCharactersInElementText() {
+        // GIVEN
+        SchemaDTO schema = object("root", object("v", string("a&b <t> \"q\" 'x'")));
+
+        // WHEN-THEN
+        assertThat(SchemaDTOUtil.toXML(schema))
+                .isEqualTo("<root><v>a&amp;b &lt;t&gt; \"q\" 'x'</v></root>");
+    }
+
+    @Test
+    void toXmlEscapesQuotesAndMarkupCharactersInAttributeValues() {
+        // GIVEN
+        SchemaDTO attribute = string("say \"hi\" & <bye>");
+        XmlObjectDTO xml = new XmlObjectDTO();
+        xml.setAttribute(true);
+        attribute.setXml(xml);
+        SchemaDTO schema = object("root", object("note", object("title", attribute, "v", string("x"))));
+
+        // WHEN-THEN
+        assertThat(SchemaDTOUtil.toXML(schema))
+                .isEqualTo("<root><note title=\"say &quot;hi&quot; &amp; &lt;bye&gt;\"><v>x</v></note></root>");
     }
 
 

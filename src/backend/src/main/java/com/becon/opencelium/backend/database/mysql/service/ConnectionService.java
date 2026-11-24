@@ -37,6 +37,20 @@ public interface ConnectionService {
 
     Long save(Connection connection, ConnectionMng connectionMng);
 
+    /**
+     * Saves the copy of a workflow that a test run executes and deletes afterwards.
+     *
+     * <p>The copy gets an id of its own, but its global variable references are checked, and its
+     * run reads the variables, with the scope of the workflow it was made from: a variable scoped
+     * to chosen workflows lists that workflow, never the copy. The copy leaves no usages, because
+     * it is not a place the workflow's author keeps.
+     *
+     * @param originalId id of the workflow the copy was made from, or {@code null} if that
+     *                   workflow was never saved; an id that no workflow has counts as none
+     * @return the id of the copy
+     */
+    Long saveTestCopy(Connection connection, ConnectionMng connectionMng, Long originalId);
+
     void deleteById(Long id);
 
     void deleteAll(List<Connection> connections);

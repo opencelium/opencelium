@@ -99,6 +99,14 @@ class ReferenceValidationServiceImpTest {
         }
 
         @Test
+        void validateReturnsGlobalTypeWhenReferenceIsGlobalVariable() {
+            ReferenceValidationResultDTO result = validate("{{global.limits.maxPerPage}}");
+
+            assertThat(result.valid()).isTrue();
+            assertThat(result.type()).isEqualTo(ReferenceType.GLOBAL);
+        }
+
+        @Test
         @DisplayName("validate — a sample given as a JSON object is matched by the path")
         void validateMarksSampleMatchedWhenPathExistsInSample() {
             Map<String, Object> sample = Map.of("data", List.of(Map.of("id", 1)));
@@ -296,6 +304,32 @@ class ReferenceValidationServiceImpTest {
 
             assertSingleError(result, IssueCode.INVALID_REFERENCE, null, null);
             assertThat(result.errors().get(0).message()).contains("Unknown pagination param");
+        }
+
+        @Test
+        @DisplayName("validate — {{name}} without 'global.' is pointed to {{global.name}}")
+        void validateSuggestsGlobalPrefixWhenGlobalIsWrittenWithoutIt() {
+            ReferenceValidationResultDTO result = validate("{{TEST_VAR}}");
+
+            assertSingleError(result, IssueCode.INVALID_REFERENCE, 0, "{{TEST_VAR}}");
+            assertThat(result.type()).isEqualTo(ReferenceType.GLOBAL);
+            assertThat(result.errors().get(0).hint()).isEqualTo("Did you mean {{global.TEST_VAR}}?");
+        }
+
+        @Test
+        void validateSuggestsGlobalPrefixWhenGlobalWithPathIsWrittenWithoutIt() {
+            ReferenceValidationResultDTO result = validate("{{tenants[0].id}}");
+
+            assertThat(result.errors().get(0).hint()).isEqualTo("Did you mean {{global.tenants[0].id}}?");
+        }
+
+        @Test
+        void validateReportsInvalidReferenceWhenGlobalPathIsEmpty() {
+            ReferenceValidationResultDTO result = validate("{{global.limits.}}");
+
+            assertSingleError(result, IssueCode.INVALID_REFERENCE, null, null);
+            assertThat(result.type()).isEqualTo(ReferenceType.GLOBAL);
+            assertThat(result.errors().get(0).message()).contains("Empty path");
         }
 
         @Test

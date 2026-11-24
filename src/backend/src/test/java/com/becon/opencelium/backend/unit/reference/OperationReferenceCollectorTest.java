@@ -52,6 +52,51 @@ class OperationReferenceCollectorTest {
     }
 
     @Test
+    @DisplayName("collect — a global variable is one reference, not request data inside braces")
+    void collectReturnsWholeTokenWhenValueIsGlobalVariableReference() {
+        OperationDTO operation = anOperationWith(
+                aParameter(ParamLocation.HEADER, string("{{global.apiKey}}")));
+
+        Set<String> references = OperationReferenceCollector.collect(operation);
+
+        assertThat(references).containsExactly("{{global.apiKey}}");
+    }
+
+    @Test
+    @DisplayName("collect — a global variable keeps its path and stays apart from request data")
+    void collectReturnsGlobalAndRequestDataReferencesWhenValueMixesThem() {
+        OperationDTO operation = anOperationWith(
+                aParameter(ParamLocation.PATH, string("{{global.idoitUrl}}/{{global.tenants[0].id}}/{tenant}")));
+
+        Set<String> references = OperationReferenceCollector.collect(operation);
+
+        assertThat(references)
+                .containsExactly("{{global.idoitUrl}}", "{{global.tenants[0].id}}", "{tenant}");
+    }
+
+    @Test
+    @DisplayName("collect — double braces without the global prefix are not a global variable")
+    void collectReturnsInnerRequestDataWhenDoubleBracesHoldNoGlobalVariable() {
+        OperationDTO operation = anOperationWith(
+                aParameter(ParamLocation.HEADER, string("{{token}}")));
+
+        Set<String> references = OperationReferenceCollector.collect(operation);
+
+        assertThat(references).containsExactly("{token}");
+    }
+
+    @Test
+    @DisplayName("collect — an escaped global token is literal text, not a reference")
+    void collectReturnsNothingWhenValueHoldsOnlyEscapedToken() {
+        OperationDTO operation = anOperationWith(
+                aParameter(ParamLocation.HEADER, string("\\{{global.apiKey}}")));
+
+        Set<String> references = OperationReferenceCollector.collect(operation);
+
+        assertThat(references).isEmpty();
+    }
+
+    @Test
     @DisplayName("collect — reads path, query, header and cookie parameters")
     void collectReturnsReferencesWhenTheyAreInParameters() {
         OperationDTO operation = anOperationWith(
